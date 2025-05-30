@@ -461,16 +461,13 @@ proc get_func_info { name {options {debug}} } {
 #
 # proc DW_TAG_mumble {{attrs {}} {children {}}} { ... }
 #
-# ATTRS is an optional list of attributes.
-# It is run through 'subst' in the caller's context before processing.
+# ATTRS holds optional attributes.  It is just Tcl code and is
+# evaluated in the caller's context.  Each attribute is a proc of the
+# form:
 #
-# Each attribute in the list has one of two forms:
-#   1. { NAME VALUE }
-#   2. { NAME VALUE FORM }
+# proc DW_AT_mumble {value {form {}}} { ... }
 #
-# In each case, NAME is the attribute's name.
-# This can either be the full name, like 'DW_AT_name', or a shortened
-# name, like 'name'.  These are fully equivalent.
+# Only the full name can be used here.
 #
 # Besides DWARF standard attributes, assembler supports 'macro' attribute
 # which will be substituted by one or more standard or macro attributes.
@@ -522,8 +519,6 @@ namespace eval Dwarf {
 
     # Constants from dwarf2.h.
     variable _constants
-    # DW_AT short names.
-    variable _AT
     # DW_FORM short names.
     variable _FORM
     # DW_OP short names.
@@ -594,7 +589,6 @@ namespace eval Dwarf {
 
     proc _process_one_constant {name value} {
 	variable _constants
-	variable _AT
 	variable _FORM
 	variable _OP
 
@@ -633,7 +627,8 @@ namespace eval Dwarf {
 	    }
 
 	    AT {
-		set _AT($name2) $name
+		proc $name {value {form {}}} \
+		    "_handle_DW_AT $name \$value \$form"
 	    }
 
 	    FORM {
@@ -917,10 +912,26 @@ namespace eval Dwarf {
 	return $name
     }
 
-    proc _handle_attribute { attr_name attr_value attr_form } {
+    # Implementation of all the DW_AT_* procs.
+    proc _handle_DW_AT {attr_name attr_value attr_form} {
 	variable _abbrev_section
 	variable _constants
 	variable _cu_version
+
+	if {$attr_form == ""} {
+	    set attr_form [_guess_form $attr_value attr_value]
+	    if { $attr_form eq "" } {
+		set attr_form [_default_form $attr_name]
+	    }
+	    if { $attr_form eq "" } {
+		error "No form for $attr_name $attr_value"
+	    }
+	} elseif { [string index $attr_value 0] == ":" } {
+	    # It is a label, get its value.
+	    _guess_form $attr_value attr_value
+	}
+
+	set attr_form [_map_name $attr_form _FORM]
 
 	_handle_DW_FORM $attr_form $attr_value
 
@@ -942,9 +953,8 @@ namespace eval Dwarf {
 	}
     }
 
-    # Handle macro attribute MACRO_AT_range.
-
-    proc _handle_macro_at_range { attr_value } {
+    # Handle extension attribute MACRO_AT_range.
+    proc MACRO_AT_range { attr_value } {
 	variable _cu_is_fission
 
 	if {[llength $attr_value] != 1} {
@@ -961,19 +971,17 @@ namespace eval Dwarf {
 	    set form DW_FORM_GNU_addr_index
 	}
 
-	_handle_attribute DW_AT_low_pc [lindex $result 0] $form
-	_handle_attribute DW_AT_high_pc \
-	    "[lindex $result 0] + [lindex $result 1]" $form
+	DW_AT_low_pc [lindex $result 0] $form
+	DW_AT_high_pc "[lindex $result 0] + [lindex $result 1]" $form
     }
 
-    # Handle macro attribute MACRO_AT_func.
-
-    proc _handle_macro_at_func { attr_value } {
+    # Handle extension attribute MACRO_AT_func.
+    proc MACRO_AT_func { attr_value } {
 	if {[llength $attr_value] != 1} {
 	    error "usage: MACRO_AT_func { func file }"
 	}
-	_handle_attribute DW_AT_name [lindex $attr_value 0] DW_FORM_string
-	_handle_macro_at_range $attr_value
+	DW_AT_name [lindex $attr_value 0] DW_FORM_string
+	MACRO_AT_range $attr_value
     }
 
     # Return the next available abbrev number in the current CU's abbrev
@@ -1003,47 +1011,7 @@ namespace eval Dwarf {
 
 	_op .uleb128 $my_abbrev "Abbrev ($tag_name)"
 
-	foreach attr $attrs {
-	    set attr_name [_map_name [lindex $attr 0] _AT]
-
-	    # When the length of ATTR is greater than 2, the last
-	    # element of the list must be a form.  The second through
-	    # the penultimate elements are joined together and
-	    # evaluated using subst.  This allows constructs such as
-	    # [gdb_target_symbol foo] to be used.
-
-	    if {[llength $attr] > 2} {
-	        set attr_value [uplevel 2 [list subst [join [lrange $attr 1 end-1]]]]
-	    } else {
-	        set attr_value [uplevel 2 [list subst [lindex $attr 1]]]
-	    }
-
-	    if { [string equal "MACRO_AT_func" $attr_name] } {
-		_handle_macro_at_func $attr_value
-	    } elseif { [string equal "MACRO_AT_range" $attr_name] } {
-		_handle_macro_at_range $attr_value
-	    } else {
-		if {[llength $attr] > 2} {
-		    set attr_form [uplevel 2 [list subst [lindex $attr end]]]
-
-		    if { [string index $attr_value 0] == ":" } {
-			# It is a label, get its value.
-			_guess_form $attr_value attr_value
-		    }
-		} else {
-		    set attr_form [_guess_form $attr_value attr_value]
-		    if { $attr_form eq "" } {
-			set attr_form [_default_form $attr_name]
-		    }
-		    if { $attr_form eq "" } {
-			error "No form for $attr_name $attr_value"
-		    }
-		}
-		set attr_form [_map_name $attr_form _FORM]
-
-		_handle_attribute $attr_name $attr_value $attr_form
-	    }
-	}
+	uplevel 2 $attrs
 
 	_defer_output $_abbrev_section {
 	    # Terminator.

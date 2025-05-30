@@ -70,49 +70,49 @@ proc do_test {suffix} {
 
 	cu {} {
 	    compile_unit {
-		{language @DW_LANG_C}
-		{name dw-ranges-func2.c}
-		{stmt_list $L DW_FORM_sec_offset}
-		{low_pc 0 addr}
-		{ranges ${cu_ranges_label} DW_FORM_sec_offset}
+		DW_AT_language @DW_LANG_C
+		DW_AT_name dw-ranges-func2.c
+		DW_AT_stmt_list $L DW_FORM_sec_offset
+		DW_AT_low_pc 0 addr
+		DW_AT_ranges ${cu_ranges_label} DW_FORM_sec_offset
 	    } {
 		integer_label: DW_TAG_base_type {
-		    {DW_AT_byte_size $int_size DW_FORM_sdata}
-		    {DW_AT_encoding  @DW_ATE_signed}
-		    {DW_AT_name      integer}
+		    DW_AT_byte_size $int_size DW_FORM_sdata
+		    DW_AT_encoding  @DW_ATE_signed
+		    DW_AT_name      integer
 		}
 		volatile_label: DW_TAG_volatile_type {
-		    {type :$integer_label}
+		    DW_AT_type :$integer_label
 		}
 		DW_TAG_variable {
-		    {name e}
-		    {external 1 flag}
-		    {type :$volatile_label}
-		    {location {addr $e_var} SPECIAL_expr}
+		    DW_AT_name e
+		    DW_AT_external 1 flag
+		    DW_AT_type :$volatile_label
+		    DW_AT_location [subst {addr $e_var}] SPECIAL_expr
 		}
 		subprogram {
-		    {external 1 flag}
-		    {name main}
-		    {DW_AT_type :$integer_label}
-		    {low_pc $main_start addr}
-		    {high_pc $main_len DW_FORM_data4}
+		    DW_AT_external 1 flag
+		    DW_AT_name main
+		    DW_AT_type :$integer_label
+		    DW_AT_low_pc $main_start addr
+		    DW_AT_high_pc $main_len DW_FORM_data4
 		}
 		subprogram {
-		    {external 1 flag}
-		    {name foo}
-		    {ranges ${func_ranges_label} DW_FORM_sec_offset}
+		    DW_AT_external 1 flag
+		    DW_AT_name foo
+		    DW_AT_ranges ${func_ranges_label} DW_FORM_sec_offset
 		}
 		subprogram {
-		    {external 1 flag}
-		    {name bar}
-		    {low_pc $bar_start addr}
-		    {high_pc $bar_len DW_FORM_data4}
+		    DW_AT_external 1 flag
+		    DW_AT_name bar
+		    DW_AT_low_pc $bar_start addr
+		    DW_AT_high_pc $bar_len DW_FORM_data4
 		}
 		subprogram {
-		    {external 1 flag}
-		    {name baz}
-		    {low_pc $baz_start addr}
-		    {high_pc $baz_len DW_FORM_data4}
+		    DW_AT_external 1 flag
+		    DW_AT_name baz
+		    DW_AT_low_pc $baz_start addr
+		    DW_AT_high_pc $baz_len DW_FORM_data4
 		}
 	    }
 	}

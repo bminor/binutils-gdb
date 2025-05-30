@@ -90,61 +90,63 @@ Dwarf::assemble $asm_file {
     set bar_length [lindex $bar_result 1]
 
     cu {} {
-	compile_unit {{language @DW_LANG_C}} {
+	compile_unit {
+	    DW_AT_language @DW_LANG_C
+	} {
 	    int_label: base_type {
-		{name int}
-		{encoding @DW_ATE_signed}
-		{byte_size 4 DW_FORM_sdata}
+		DW_AT_name int
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_byte_size 4 DW_FORM_sdata
 	    }
 
 	    foo_label: subprogram {
-		{decl_file 0 udata}
-		{MACRO_AT_func { foo }}
+		DW_AT_decl_file 0 udata
+		MACRO_AT_func { foo }
 	    } {
 		formal_parameter {
-		    {type :$int_label}
-		    {name i}
-		    {location {DW_OP_reg0} SPECIAL_expr}
+		    DW_AT_type :$int_label
+		    DW_AT_name i
+		    DW_AT_location {DW_OP_reg0} SPECIAL_expr
 		}
 		formal_parameter {
-		    {type :$int_label}
-		    {name j}
-		    {location {DW_OP_reg1} SPECIAL_expr}
+		    DW_AT_type :$int_label
+		    DW_AT_name j
+		    DW_AT_location {DW_OP_reg1} SPECIAL_expr
 		}
 	    }
 
 	    subprogram {
-		{name bar}
-		{decl_file 0 udata}
-		{low_pc $bar_start addr}
-		{high_pc "$bar_start + $bar_length" addr}
-		{GNU_all_call_sites 1 sdata}
+		DW_AT_name bar
+		DW_AT_decl_file 0 udata
+		DW_AT_low_pc $bar_start addr
+		DW_AT_high_pc "$bar_start + $bar_length" addr
+		DW_AT_GNU_all_call_sites 1 sdata
 	    } {
 		formal_parameter {
-		    {type :$int_label}
-		    {name i}
+		    DW_AT_type :$int_label
+		    DW_AT_name i
 		}
 
 		GNU_call_site {
-		    {low_pc "$bar_start + $returned_from_foo" addr}
-		    {abstract_origin :$foo_label}
+		    DW_AT_low_pc "$bar_start + $returned_from_foo" addr
+		    DW_AT_abstract_origin :$foo_label
 		} {
 		    # Faked entry values are reference to variables 'global1'
 		    # and 'global2' and faked locations are register 0 and
 		    # register 1.
 		    GNU_call_site_parameter {
-			{location {DW_OP_reg0} SPECIAL_expr}
-			{GNU_call_site_value {
+			DW_AT_location {DW_OP_reg0} SPECIAL_expr
+			DW_AT_GNU_call_site_value {
 			    addr global1
 			    deref_size 4
-			} SPECIAL_expr}
+			} SPECIAL_expr
 		    }
 		    GNU_call_site_parameter {
-			{location {DW_OP_reg1} SPECIAL_expr}
-			{GNU_call_site_value {
+			DW_AT_location {DW_OP_reg1} SPECIAL_expr
+			DW_AT_GNU_call_site_value {
 			    addr global2
 			    deref_size 4
-			} SPECIAL_expr}
+			} SPECIAL_expr
 		    }
 		}
 	    }

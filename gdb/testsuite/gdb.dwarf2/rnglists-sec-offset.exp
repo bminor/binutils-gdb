@@ -43,11 +43,11 @@ foreach_with_prefix is_64 {false true} {
 	    is_64 $is_64
 	} {
 	    DW_TAG_compile_unit {
-		{DW_AT_ranges $cu1_range_list DW_FORM_sec_offset}
+		DW_AT_ranges $cu1_range_list DW_FORM_sec_offset
 	    } {
 		DW_TAG_subprogram {
-		    {DW_AT_name "foo"}
-		    {DW_AT_ranges $foo_range_list DW_FORM_sec_offset}
+		    DW_AT_name "foo"
+		    DW_AT_ranges $foo_range_list DW_FORM_sec_offset
 		}
 	    }
 	}
@@ -61,12 +61,12 @@ foreach_with_prefix is_64 {false true} {
 	    is_64 $is_64
 	} {
 	    DW_TAG_compile_unit {
-		{DW_AT_ranges $cu2_range_list DW_FORM_sec_offset}
-		{DW_AT_rnglists_base cu2_table DW_FORM_sec_offset}
+		DW_AT_ranges $cu2_range_list DW_FORM_sec_offset
+		DW_AT_rnglists_base cu2_table DW_FORM_sec_offset
 	    } {
 		DW_TAG_subprogram {
-		    {DW_AT_name "bar"}
-		    {DW_AT_ranges $bar_range_list DW_FORM_sec_offset}
+		    DW_AT_name "bar"
+		    DW_AT_ranges $bar_range_list DW_FORM_sec_offset
 		}
 	    }
 	}
@@ -79,11 +79,11 @@ foreach_with_prefix is_64 {false true} {
 	    is_64 $is_64
 	} {
 	    DW_TAG_compile_unit {
-		{DW_AT_ranges $cu3_range_list DW_FORM_sec_offset}
+		DW_AT_ranges $cu3_range_list DW_FORM_sec_offset
 	    } {
 		DW_TAG_subprogram {
-		    {DW_AT_name "baz"}
-		    {DW_AT_ranges $baz_range_list DW_FORM_sec_offset}
+		    DW_AT_name "baz"
+		    DW_AT_ranges $baz_range_list DW_FORM_sec_offset
 		}
 	    }
 	}

@@ -42,26 +42,26 @@ set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
     cu {} {
 	compile_unit {
-	    {language @DW_LANG_C}
-	    {name "calling-convention"}
+	    DW_AT_language @DW_LANG_C
+	    DW_AT_name "calling-convention"
 	} {
 	    declare_labels int_label
 
 	    int_label: base_type {
-		{byte_size [get_sizeof "int" 4] sdata}
-		{encoding @DW_ATE_signed}
-		{name "int"}
+		DW_AT_byte_size [get_sizeof "int" 4] sdata
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_name "int"
 	    }
 
 	    subprogram {
-		{MACRO_AT_func { foo }}
-		{type :$int_label}
-		{calling_convention @DW_CC_nocall}
+		MACRO_AT_func { foo }
+		DW_AT_type :$int_label
+		DW_AT_calling_convention @DW_CC_nocall
 	    }
 
 	    subprogram {
-		{MACRO_AT_func { main }}
-		{type :$int_label}
+		MACRO_AT_func { main }
+		DW_AT_type :$int_label
 	    }
 	}
     }

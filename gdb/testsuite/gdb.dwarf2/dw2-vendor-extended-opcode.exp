@@ -34,13 +34,13 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	compile_unit {
-	    {language @DW_LANG_C}
-	    {name dw2-vendor-extended-opcode.c}
-	    {stmt_list $Llines DW_FORM_sec_offset}
+	    DW_AT_language @DW_LANG_C
+	    DW_AT_name dw2-vendor-extended-opcode.c
+	    DW_AT_stmt_list $Llines DW_FORM_sec_offset
 	} {
 	    subprogram {
-		{external 1 flag}
-		{MACRO_AT_func {main}}
+		DW_AT_external 1 flag
+		MACRO_AT_func {main}
 	    }
 	}
     }

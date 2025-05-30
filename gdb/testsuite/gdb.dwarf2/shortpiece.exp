@@ -30,90 +30,90 @@ Dwarf::assemble $asm_file {
 	    declare_labels int_label ushort_label struct_label struct_label_2
 
 	    int_label: DW_TAG_base_type {
-		{DW_AT_byte_size 4 DW_FORM_udata}
-		{DW_AT_encoding @DW_ATE_unsigned}
-		{DW_AT_name "myint"}
+		DW_AT_byte_size 4 DW_FORM_udata
+		DW_AT_encoding @DW_ATE_unsigned
+		DW_AT_name "myint"
 	    }
 	    ushort_label: DW_TAG_base_type {
-		{DW_AT_byte_size 2 DW_FORM_udata}
-		{DW_AT_encoding @DW_ATE_unsigned}
-		{DW_AT_name "myushort"}
+		DW_AT_byte_size 2 DW_FORM_udata
+		DW_AT_encoding @DW_ATE_unsigned
+		DW_AT_name "myushort"
 	    }
 
 	    struct_label: DW_TAG_structure_type {
-		{DW_AT_name "S"}
-		{DW_AT_byte_size 8 DW_FORM_udata}
+		DW_AT_name "S"
+		DW_AT_byte_size 8 DW_FORM_udata
 	    } {
 		DW_TAG_member {
-		    {DW_AT_name "a"}
-		    {DW_AT_type :${int_label}}
-		    {DW_AT_data_member_location 0 DW_FORM_udata}
+		    DW_AT_name "a"
+		    DW_AT_type :${int_label}
+		    DW_AT_data_member_location 0 DW_FORM_udata
 		}
 
 		DW_TAG_member {
-		    {DW_AT_name "b"}
-		    {DW_AT_type :${ushort_label}}
-		    {DW_AT_data_member_location 4 DW_FORM_udata}
+		    DW_AT_name "b"
+		    DW_AT_type :${ushort_label}
+		    DW_AT_data_member_location 4 DW_FORM_udata
 		}
 	    }
 
 	    struct_label_2: DW_TAG_structure_type {
-		{DW_AT_name "S_2"}
-		{DW_AT_byte_size 6 DW_FORM_udata}
+		DW_AT_name "S_2"
+		DW_AT_byte_size 6 DW_FORM_udata
 	    } {
 		DW_TAG_member {
-		    {DW_AT_name "a"}
-		    {DW_AT_type :${int_label}}
-		    {DW_AT_data_member_location 0 DW_FORM_udata}
+		    DW_AT_name "a"
+		    DW_AT_type :${int_label}
+		    DW_AT_data_member_location 0 DW_FORM_udata
 		}
 
 		DW_TAG_member {
-		    {DW_AT_name "b"}
-		    {DW_AT_type :${ushort_label}}
-		    {DW_AT_data_member_location 4 DW_FORM_udata}
+		    DW_AT_name "b"
+		    DW_AT_type :${ushort_label}
+		    DW_AT_data_member_location 4 DW_FORM_udata
 		}
 	    }
 
 	    DW_TAG_variable {
-		{DW_AT_name "s1"}
-		{DW_AT_type :${struct_label}}
-		{DW_AT_external 1 DW_FORM_flag}
-		{DW_AT_location {
+		DW_AT_name "s1"
+		DW_AT_type :${struct_label}
+		DW_AT_external 1 DW_FORM_flag
+		DW_AT_location {
 		    DW_OP_constu 1
 		    DW_OP_stack_value
 		    DW_OP_piece 4
 		    DW_OP_constu 0
 		    DW_OP_stack_value
 		    DW_OP_piece 2
-		} SPECIAL_expr}
+		} SPECIAL_expr
 	    }
 
 	    DW_TAG_variable {
-		{DW_AT_name "s2"}
-		{DW_AT_type :${struct_label}}
-		{DW_AT_external 1 DW_FORM_flag}
-		{DW_AT_location {
+		DW_AT_name "s2"
+		DW_AT_type :${struct_label}
+		DW_AT_external 1 DW_FORM_flag
+		DW_AT_location {
 		    DW_OP_constu 1
 		    DW_OP_stack_value
 		    DW_OP_piece 4
 		    DW_OP_constu 0
 		    DW_OP_stack_value
 		    DW_OP_piece 8
-		} SPECIAL_expr}
+		} SPECIAL_expr
 	    }
 
 	    DW_TAG_variable {
-		{DW_AT_name "s3"}
-		{DW_AT_type :${struct_label_2}}
-		{DW_AT_external 1 DW_FORM_flag}
-		{DW_AT_location {
+		DW_AT_name "s3"
+		DW_AT_type :${struct_label_2}
+		DW_AT_external 1 DW_FORM_flag
+		DW_AT_location {
 		    DW_OP_constu 0
 		    DW_OP_stack_value
 		    DW_OP_piece 4
 		    DW_OP_constu 1
 		    DW_OP_stack_value
 		    DW_OP_piece 2
-		} SPECIAL_expr}
+		} SPECIAL_expr
 	    }
 	}
     }

@@ -35,19 +35,19 @@ Dwarf::assemble $asm_file {
 
     cu { label cu_start } {
 	DW_TAG_compile_unit {
-	    {DW_AT_language @DW_LANG_C_plus_plus}
+	    DW_AT_language @DW_LANG_C_plus_plus
         } {
 	    declare_labels templated_subprogram int
 
 	    int: DW_TAG_base_type {
-		{DW_AT_name "int"}
-		{DW_AT_byte_size 4 DW_FORM_data1}
-		{DW_AT_encoding @DW_ATE_signed}
+		DW_AT_name "int"
+		DW_AT_byte_size 4 DW_FORM_data1
+		DW_AT_encoding @DW_ATE_signed
 	    }
 
 	    # The templated subprogram.
 	    templated_subprogram: DW_TAG_subprogram {
-		{DW_AT_name "apply"}
+		DW_AT_name "apply"
 	    }
 
 	    # The template specialization.
@@ -55,12 +55,12 @@ Dwarf::assemble $asm_file {
 	    # The low and high PC are phony: we just need an address range that
 	    # is valid in the program, so we use the main function's range.
 	    DW_TAG_subprogram {
-		{DW_AT_specification :$templated_subprogram}
-		{MACRO_AT_range main}
+		DW_AT_specification :$templated_subprogram
+		MACRO_AT_range main
 	    } {
 		DW_TAG_template_type_param {
-		  {DW_AT_name "T"}
-		  {DW_AT_type :$int DW_FORM_ref4}
+		  DW_AT_name "T"
+		  DW_AT_type :$int DW_FORM_ref4
 		}
 	    }
 	}

@@ -159,20 +159,20 @@ proc_with_prefix use_low_high_bounds_without_entry_pc { dwarf_vesion } {
 
 	cu { version $::dwarf_version } {
 	    compile_unit {
-		{producer "gcc"}
-		{language @DW_LANG_C}
-		{name ${srcfile}}
-		{comp_dir /tmp}
-		{stmt_list $lines_table DW_FORM_sec_offset}
+		DW_AT_producer "gcc"
+		DW_AT_language @DW_LANG_C
+		DW_AT_name ${srcfile}
+		DW_AT_comp_dir /tmp
+		DW_AT_stmt_list $lines_table DW_FORM_sec_offset
 	    } {
 		subprogram {
-		    {name foo}
-		    {decl_file 1 data1}
-		    {decl_line $::foo_decl_line data1}
-		    {decl_column 1 data1}
-		    {low_pc $::foo_start addr}
-		    {high_pc $::foo_len $::ptr_type}
-		    {external 1 flag}
+		    DW_AT_name foo
+		    DW_AT_decl_file 1 data1
+		    DW_AT_decl_line $::foo_decl_line data1
+		    DW_AT_decl_column 1 data1
+		    DW_AT_low_pc $::foo_start addr
+		    DW_AT_high_pc $::foo_len $::ptr_type
+		    DW_AT_external 1 flag
 		}
 	    }
 	}
@@ -202,21 +202,21 @@ proc_with_prefix use_low_high_bounds_with_entry_pc { dwarf_version } {
 
 	cu { version $::dwarf_version } {
 	    compile_unit {
-		{producer "gcc"}
-		{language @DW_LANG_C}
-		{name ${srcfile}}
-		{comp_dir /tmp}
-		{stmt_list $lines_table DW_FORM_sec_offset}
+		DW_AT_producer "gcc"
+		DW_AT_language @DW_LANG_C
+		DW_AT_name ${srcfile}
+		DW_AT_comp_dir /tmp
+		DW_AT_stmt_list $lines_table DW_FORM_sec_offset
 	    } {
 		subprogram {
-		    {name foo}
-		    {decl_file 1 data1}
-		    {decl_line $::foo_decl_line data1}
-		    {decl_column 1 data1}
-		    {low_pc $::foo_start addr}
-		    {high_pc $::foo_len $::ptr_type}
-		    {external 1 flag}
-		    {entry_pc foo_middle addr}
+		    DW_AT_name foo
+		    DW_AT_decl_file 1 data1
+		    DW_AT_decl_line $::foo_decl_line data1
+		    DW_AT_decl_column 1 data1
+		    DW_AT_low_pc $::foo_start addr
+		    DW_AT_high_pc $::foo_len $::ptr_type
+		    DW_AT_external 1 flag
+		    DW_AT_entry_pc foo_middle addr
 		}
 	    }
 	}
@@ -248,21 +248,21 @@ proc_with_prefix use_low_high_bounds_with_entry_offset { dwarf_version } {
 
 	cu { version $::dwarf_version } {
 	    compile_unit {
-		{producer "gcc"}
-		{language @DW_LANG_C}
-		{name ${srcfile}}
-		{comp_dir /tmp}
-		{stmt_list $lines_table DW_FORM_sec_offset}
+		DW_AT_producer "gcc"
+		DW_AT_language @DW_LANG_C
+		DW_AT_name ${srcfile}
+		DW_AT_comp_dir /tmp
+		DW_AT_stmt_list $lines_table DW_FORM_sec_offset
 	    } {
 		subprogram {
-		    {name foo}
-		    {decl_file 1 data1}
-		    {decl_line $::foo_decl_line data1}
-		    {decl_column 1 data1}
-		    {low_pc $::foo_start addr}
-		    {high_pc $::foo_len $::ptr_type}
-		    {external 1 flag}
-		    {entry_pc $foo_offset data4}
+		    DW_AT_name foo
+		    DW_AT_decl_file 1 data1
+		    DW_AT_decl_line $::foo_decl_line data1
+		    DW_AT_decl_column 1 data1
+		    DW_AT_low_pc $::foo_start addr
+		    DW_AT_high_pc $::foo_len $::ptr_type
+		    DW_AT_external 1 flag
+		    DW_AT_entry_pc $foo_offset data4
 		}
 	    }
 	}
@@ -293,20 +293,20 @@ proc_with_prefix use_ranges_without_entry_pc { dwarf_version } {
 
 	cu { version $::dwarf_version } {
 	    compile_unit {
-		{producer "gcc"}
-		{language @DW_LANG_C}
-		{name ${srcfile}}
-		{comp_dir /tmp}
-		{stmt_list $lines_table DW_FORM_sec_offset}
-		{low_pc 0 addr}
+		DW_AT_producer "gcc"
+		DW_AT_language @DW_LANG_C
+		DW_AT_name ${srcfile}
+		DW_AT_comp_dir /tmp
+		DW_AT_stmt_list $lines_table DW_FORM_sec_offset
+		DW_AT_low_pc 0 addr
 	    } {
 		subprogram {
-		    {name foo}
-		    {decl_file 1 data1}
-		    {decl_line $::foo_decl_line data1}
-		    {decl_column 1 data1}
-		    {external 1 flag}
-		    {ranges ${ranges_label} DW_FORM_sec_offset}
+		    DW_AT_name foo
+		    DW_AT_decl_file 1 data1
+		    DW_AT_decl_line $::foo_decl_line data1
+		    DW_AT_decl_column 1 data1
+		    DW_AT_external 1 flag
+		    DW_AT_ranges ${ranges_label} DW_FORM_sec_offset
 		}
 	    }
 	}
@@ -357,21 +357,21 @@ proc_with_prefix use_ranges_with_entry_pc { dwarf_version } {
 
 	cu { version $::dwarf_version } {
 	    compile_unit {
-		{producer "gcc"}
-		{language @DW_LANG_C}
-		{name ${srcfile}}
-		{comp_dir /tmp}
-		{stmt_list $lines_table DW_FORM_sec_offset}
-		{low_pc 0 addr}
+		DW_AT_producer "gcc"
+		DW_AT_language @DW_LANG_C
+		DW_AT_name ${srcfile}
+		DW_AT_comp_dir /tmp
+		DW_AT_stmt_list $lines_table DW_FORM_sec_offset
+		DW_AT_low_pc 0 addr
 	    } {
 		subprogram {
-		    {name foo}
-		    {decl_file 1 data1}
-		    {decl_line $::foo_decl_line data1}
-		    {decl_column 1 data1}
-		    {external 1 flag}
-		    {ranges ${ranges_label} DW_FORM_sec_offset}
-		    {entry_pc foo_middle addr}
+		    DW_AT_name foo
+		    DW_AT_decl_file 1 data1
+		    DW_AT_decl_line $::foo_decl_line data1
+		    DW_AT_decl_column 1 data1
+		    DW_AT_external 1 flag
+		    DW_AT_ranges ${ranges_label} DW_FORM_sec_offset
+		    DW_AT_entry_pc foo_middle addr
 		}
 	    }
 	}
@@ -424,21 +424,21 @@ proc_with_prefix use_ranges_with_entry_offset { dwarf_version } {
 
 	cu { version $::dwarf_version } {
 	    compile_unit {
-		{producer "gcc"}
-		{language @DW_LANG_C}
-		{name ${srcfile}}
-		{comp_dir /tmp}
-		{stmt_list $lines_table DW_FORM_sec_offset}
-		{low_pc 0 addr}
+		DW_AT_producer "gcc"
+		DW_AT_language @DW_LANG_C
+		DW_AT_name ${srcfile}
+		DW_AT_comp_dir /tmp
+		DW_AT_stmt_list $lines_table DW_FORM_sec_offset
+		DW_AT_low_pc 0 addr
 	    } {
 		subprogram {
-		    {name foo}
-		    {decl_file 1 data1}
-		    {decl_line $::foo_decl_line data1}
-		    {decl_column 1 data1}
-		    {external 1 flag}
-		    {ranges ${ranges_label} DW_FORM_sec_offset}
-		    {entry_pc $foo_offset data4}
+		    DW_AT_name foo
+		    DW_AT_decl_file 1 data1
+		    DW_AT_decl_line $::foo_decl_line data1
+		    DW_AT_decl_column 1 data1
+		    DW_AT_external 1 flag
+		    DW_AT_ranges ${ranges_label} DW_FORM_sec_offset
+		    DW_AT_entry_pc $foo_offset data4
 		}
 	    }
 	}

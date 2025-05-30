@@ -33,7 +33,7 @@ Dwarf::assemble $main_asm_file {
 	dwo_id 0xF00D
     } {
 	compile_unit {
-	    {DW_AT_dwo_name ${::gdb_test_file_name}.dwo DW_FORM_strp}
+	    DW_AT_dwo_name ${::gdb_test_file_name}.dwo DW_FORM_strp
 	} {}
     }
 }
@@ -46,9 +46,9 @@ Dwarf::assemble $dwo_asm_file {
     } 0xCAFE "the_type" {
 	type_unit {} {
 	    the_type: base_type {
-		{DW_AT_byte_size 4 DW_FORM_sdata}
-		{DW_AT_encoding  @DW_ATE_signed}
-		{DW_AT_name      int}
+		DW_AT_byte_size 4 DW_FORM_sdata
+		DW_AT_encoding  @DW_ATE_signed
+		DW_AT_name      int
 	    }
 	}
     }
@@ -62,18 +62,18 @@ Dwarf::assemble $dwo_asm_file {
 	    declare_labels int4_type
 
 	    int4_type: DW_TAG_base_type {
-		{DW_AT_byte_size 4 DW_FORM_sdata}
-		{DW_AT_encoding  @DW_ATE_signed}
-		{DW_AT_name      int}
+		DW_AT_byte_size 4 DW_FORM_sdata
+		DW_AT_encoding  @DW_ATE_signed
+		DW_AT_name      int
 	    }
 
 	    DW_TAG_variable {
-		{DW_AT_name global_var}
-		{DW_AT_type :$int4_type}
-		{DW_AT_location {
+		DW_AT_name global_var
+		DW_AT_type :$int4_type
+		DW_AT_location {
 		    DW_OP_const1u 12
 		    DW_OP_stack_value
-		} SPECIAL_expr}
+		} SPECIAL_expr
 	    }
 	}
     }

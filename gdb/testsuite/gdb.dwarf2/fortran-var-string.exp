@@ -40,92 +40,92 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	DW_TAG_compile_unit {
-                {DW_AT_language @DW_LANG_Fortran90}
-                {DW_AT_name     fortran-var-string.f90}
-                {DW_AT_comp_dir /tmp}
-        } {
+		DW_AT_language @DW_LANG_Fortran90
+		DW_AT_name     fortran-var-string.f90
+		DW_AT_comp_dir /tmp
+	} {
 	    declare_labels integer_label string_label array_lb_label \
 		array_ub_label
 
 	    DW_TAG_subprogram {
-		{name main}
-		{low_pc $main_helper_start addr}
-		{high_pc $main_helper_len data8}
-		{DW_AT_type :$integer_label}
-		{DW_AT_decl_file 1 data1}
-		{DW_AT_decl_line 1 data1}
+		DW_AT_name main
+		DW_AT_low_pc $main_helper_start addr
+		DW_AT_high_pc $main_helper_len data8
+		DW_AT_type :$integer_label
+		DW_AT_decl_file 1 data1
+		DW_AT_decl_line 1 data1
 	    }
 
 	    DW_TAG_subprogram {
-		{name test_1_func}
-		{low_pc $main_start addr}
-		{high_pc $main_len data8}
-		{DW_AT_type :$integer_label}
-		{DW_AT_decl_file 1 data1}
-		{DW_AT_decl_line 2 data1}
+		DW_AT_name test_1_func
+		DW_AT_low_pc $main_start addr
+		DW_AT_high_pc $main_len data8
+		DW_AT_type :$integer_label
+		DW_AT_decl_file 1 data1
+		DW_AT_decl_line 2 data1
 	    } {
 		formal_parameter {
-		    {name arg1}
-		    {type :$string_label}
+		    DW_AT_name arg1
+		    DW_AT_type :$string_label
 		}
 	    }
 
 	    DW_TAG_subprogram {
-		{name test_2_func}
-		{low_pc $main_start addr}
-		{high_pc $main_len data8}
-		{DW_AT_type :$integer_label}
-		{DW_AT_decl_file 1 data1}
-		{DW_AT_decl_line 3 data1}
+		DW_AT_name test_2_func
+		DW_AT_low_pc $main_start addr
+		DW_AT_high_pc $main_len data8
+		DW_AT_type :$integer_label
+		DW_AT_decl_file 1 data1
+		DW_AT_decl_line 3 data1
 	    } {
 		formal_parameter {
-		    {name arg1}
-		    {type :$array_ub_label}
+		    DW_AT_name arg1
+		    DW_AT_type :$array_ub_label
 		}
 	    }
 
 	    DW_TAG_subprogram {
-		{name test_3_func}
-		{low_pc $main_start addr}
-		{high_pc $main_len data8}
-		{DW_AT_type :$integer_label}
-		{DW_AT_decl_file 1 data1}
-		{DW_AT_decl_line 4 data1}
+		DW_AT_name test_3_func
+		DW_AT_low_pc $main_start addr
+		DW_AT_high_pc $main_len data8
+		DW_AT_type :$integer_label
+		DW_AT_decl_file 1 data1
+		DW_AT_decl_line 4 data1
 	    } {
 		formal_parameter {
-		    {name arg1}
-		    {type :$array_lb_label}
+		    DW_AT_name arg1
+		    DW_AT_type :$array_lb_label
 		}
 	    }
 
 	    integer_label: DW_TAG_base_type {
-		{DW_AT_byte_size $int_size DW_FORM_sdata}
-		{DW_AT_encoding  @DW_ATE_signed}
-		{DW_AT_name      integer}
+		DW_AT_byte_size $int_size DW_FORM_sdata
+		DW_AT_encoding	@DW_ATE_signed
+		DW_AT_name	integer
 	    }
 
 	    string_label: DW_TAG_string_type {
-		{DW_AT_byte_size $int_size DW_FORM_sdata}
-		{DW_AT_name      .str.arg}
-		{DW_AT_string_length {} DW_FORM_block1}
+		DW_AT_byte_size $int_size DW_FORM_sdata
+		DW_AT_name	.str.arg
+		DW_AT_string_length {} DW_FORM_block1
 	    }
 
 	    array_lb_label: DW_TAG_array_type {
-		{DW_AT_ordering 1 data1}
-		{DW_AT_type :$integer_label}
+		DW_AT_ordering 1 data1
+		DW_AT_type :$integer_label
 	    } {
 		DW_TAG_subrange_type {
-		    {DW_AT_lower_bound {} DW_FORM_block1}
-		    {DW_AT_upper_bound 10 DW_FORM_data1}
+		    DW_AT_lower_bound {} DW_FORM_block1
+		    DW_AT_upper_bound 10 DW_FORM_data1
 		}
 	    }
 
 	    array_ub_label: DW_TAG_array_type {
-		{DW_AT_ordering 1 data1}
-		{DW_AT_type :$integer_label}
+		DW_AT_ordering 1 data1
+		DW_AT_type :$integer_label
 	    } {
 		DW_TAG_subrange_type {
-		    {DW_AT_upper_bound {} DW_FORM_block1}
+		    DW_AT_upper_bound {} DW_FORM_block1
 		}
 	    }
 	}

@@ -44,17 +44,17 @@ Dwarf::assemble $asm_file {
 
     cu { version 5 } {
 	compile_unit {
-	    {language @DW_LANG_Mips_Assembler}
-	    {name $srcfile}
-	    {comp_dir $objdir}
-	    {stmt_list $Llines DW_FORM_sec_offset}
-	    {producer "GNU AS 2.35.2"}
+	    DW_AT_language @DW_LANG_Mips_Assembler
+	    DW_AT_name $srcfile
+	    DW_AT_comp_dir $objdir
+	    DW_AT_stmt_list $Llines DW_FORM_sec_offset
+	    DW_AT_producer "GNU AS 2.35.2"
 	} {
 	    subprogram {
-		{external 1 flag}
-		{name bar}
-		{low_pc $bar_start addr}
-		{high_pc "$bar_start + $bar_len" addr}
+		DW_AT_external 1 flag
+		DW_AT_name bar
+		DW_AT_low_pc $bar_start addr
+		DW_AT_high_pc "$bar_start + $bar_len" addr
 	    }
 	}
     }

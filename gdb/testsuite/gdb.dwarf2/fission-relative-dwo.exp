@@ -37,53 +37,53 @@ Dwarf::assemble $asm_file {
 	set debug_addr_base [debug_addr_label]
 
 	compile_unit {
-            {language @DW_LANG_C}
-            {name ${srcfile}}
-	    {DW_AT_comp_dir .}
-	    {DW_AT_GNU_dwo_id 0x1234 DW_FORM_data8}
-        } {
+	    DW_AT_language @DW_LANG_C
+	    DW_AT_name ${srcfile}
+	    DW_AT_comp_dir .
+	    DW_AT_GNU_dwo_id 0x1234 DW_FORM_data8
+	} {
 	    declare_labels int4_type struct_type
 
 	    int4_type: DW_TAG_base_type {
-		{DW_AT_byte_size 4 DW_FORM_sdata}
-		{DW_AT_encoding  @DW_ATE_signed}
-		{DW_AT_name      integer}
+		DW_AT_byte_size 4 DW_FORM_sdata
+		DW_AT_encoding	@DW_ATE_signed
+		DW_AT_name	integer
 	    }
 
 	    struct_type: DW_TAG_structure_type {
-		{DW_AT_name "foo_t"}
-		{DW_AT_byte_size 12 DW_FORM_sdata}
+		DW_AT_name "foo_t"
+		DW_AT_byte_size 12 DW_FORM_sdata
 	    } {
 		member {
-		    {name "aa"}
-		    {type :$int4_type}
-		    {data_member_location 0 data1}
+		    DW_AT_name "aa"
+		    DW_AT_type :$int4_type
+		    DW_AT_data_member_location 0 data1
 		}
 		member {
-		    {name "bb"}
-		    {type :$int4_type}
-		    {data_member_location 4 data1}
+		    DW_AT_name "bb"
+		    DW_AT_type :$int4_type
+		    DW_AT_data_member_location 4 data1
 		}
 		member {
-		    {name "cc"}
-		    {type :$int4_type}
-		    {data_member_location 8 data1}
+		    DW_AT_name "cc"
+		    DW_AT_type :$int4_type
+		    DW_AT_data_member_location 8 data1
 		}
 	    }
 
 	    DW_TAG_variable {
-		{DW_AT_name global_var}
-		{DW_AT_type :$struct_type}
-		{DW_AT_location {
+		DW_AT_name global_var
+		DW_AT_type :$struct_type
+		DW_AT_location [subst {
 		    DW_OP_GNU_addr_index [gdb_target_symbol global_var]
-		} SPECIAL_expr}
-		{external 1 flag}
+		}] SPECIAL_expr
+		DW_AT_external 1 flag
 	    }
 
 	    subprogram {
-		{external 1 flag}
-		{DW_AT_name main DW_FORM_string}
-		{MACRO_AT_func {main}}
+		DW_AT_external 1 flag
+		DW_AT_name main DW_FORM_string
+		MACRO_AT_func {main}
 	    }
 	}
     }
@@ -91,11 +91,11 @@ Dwarf::assemble $asm_file {
     # The information that will remain in the .o file.
     cu {} {
 	compile_unit {
-            {DW_AT_GNU_dwo_name ${gdb_test_file_name}.dwo DW_FORM_strp}
-	    {DW_AT_comp_dir .}
-	    {DW_AT_GNU_dwo_id 0x1234 DW_FORM_data8}
-	    {DW_AT_GNU_addr_base $debug_addr_base}
-        } {
+	    DW_AT_GNU_dwo_name ${gdb_test_file_name}.dwo DW_FORM_strp
+	    DW_AT_comp_dir .
+	    DW_AT_GNU_dwo_id 0x1234 DW_FORM_data8
+	    DW_AT_GNU_addr_base $debug_addr_base
+	} {
 	    # Nothing.
 	}
     }

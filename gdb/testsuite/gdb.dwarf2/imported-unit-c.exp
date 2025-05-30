@@ -22,52 +22,52 @@ Dwarf::assemble $asm_file {
     # imported CU 1: inty unsigned
     cu {} {
 	cu_label: compile_unit {
-	    {language @DW_LANG_C}
-	    {name "<artificial>"}
+	    DW_AT_language @DW_LANG_C
+	    DW_AT_name "<artificial>"
 	} {
 	    int_label: base_type {
-		{byte_size $int_size sdata}
-		{encoding @DW_ATE_unsigned}
-		{name {unsigned int}}
+		DW_AT_byte_size $int_size sdata
+		DW_AT_encoding @DW_ATE_unsigned
+		DW_AT_name {unsigned int}
 	    }
-            DW_TAG_typedef {
-                {DW_AT_name inty}
-                {DW_AT_type :$int_label}
-            }
+	    DW_TAG_typedef {
+		DW_AT_name inty
+		DW_AT_type :$int_label
+	    }
 	}
     }
 
     # imported CU 2: inty signed
     cu {} {
 	cu2_label: compile_unit {
-	    {language @DW_LANG_C}
-	    {name "<artificial>"}
+	    DW_AT_language @DW_LANG_C
+	    DW_AT_name "<artificial>"
 	} {
 	    int2_label: base_type {
-		{byte_size $int_size sdata}
-		{encoding @DW_ATE_signed}
-		{name {int}}
+		DW_AT_byte_size $int_size sdata
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_name {int}
 	    }
-            DW_TAG_typedef {
-                {DW_AT_name inty}
-                {DW_AT_type :$int2_label}
-            }
+	    DW_TAG_typedef {
+		DW_AT_name inty
+		DW_AT_type :$int2_label
+	    }
 	}
     }
 
     # main CU
     cu {} {
 	compile_unit {
-	    {language @DW_LANG_C}
-	    {name "<artificial>"}
+	    DW_AT_language @DW_LANG_C
+	    DW_AT_name "<artificial>"
 	} {
 	    imported_unit {
-		{import %$cu2_label}
+		DW_AT_import %$cu2_label
 	    }
 
 	    subprogram {
-		{MACRO_AT_func {main}}
-		{external 1 flag}
+		MACRO_AT_func {main}
+		DW_AT_external 1 flag
 	    }
 	}
     }
@@ -75,16 +75,16 @@ Dwarf::assemble $asm_file {
     # foo CU
     cu {} {
 	compile_unit {
-	    {language @DW_LANG_C}
-	    {name "<artificial>"}
+	    DW_AT_language @DW_LANG_C
+	    DW_AT_name "<artificial>"
 	} {
 	    imported_unit {
-		{import %$cu_label}
+		DW_AT_import %$cu_label
 	    }
 
 	    subprogram {
-		{MACRO_AT_func {foo}}
-		{external 1 flag}
+		MACRO_AT_func {foo}
+		DW_AT_external 1 flag
 	    }
 	}
     }

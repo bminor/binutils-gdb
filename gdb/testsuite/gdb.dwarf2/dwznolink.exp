@@ -30,11 +30,13 @@ set asm_file [standard_output_file $srcfile2]
 # one point, this caused gdb crashes.
 Dwarf::assemble $asm_file {
     cu {} {
-	compile_unit {{language @DW_LANG_C}} {
+	compile_unit {
+	    DW_AT_language @DW_LANG_C
+	} {
 	    constant {
-		{name 0 DW_FORM_GNU_strp_alt}
-		{type 97 DW_FORM_GNU_ref_alt}
-		{const_value 99 data1}
+		DW_AT_name 0 DW_FORM_GNU_strp_alt
+		DW_AT_type 97 DW_FORM_GNU_ref_alt
+		DW_AT_const_value 99 data1
 	    }
 	}
     }

@@ -56,111 +56,113 @@ standard_testfile .cc nsalias-dw.S
 set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
     cu {} {
-	compile_unit {{language @DW_LANG_C_plus_plus}} {
+	compile_unit {
+	    DW_AT_language @DW_LANG_C_plus_plus
+	} {
 	    declare_labels int_label outer_label inner_label innermost_label
 	    declare_labels im_foo_label i_foo_label o_foo_label
 	    declare_labels OuterInner_label oi1_label oi2_label
 
 	    int_label: base_type {
-		{name int}
-		{encoding @DW_ATE_signed}
-		{byte_size 4 DW_FORM_sdata}
+		DW_AT_name int
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_byte_size 4 DW_FORM_sdata
 	    }
 
 	    outer_label: DW_TAG_namespace {
-		{name outer}
+		DW_AT_name outer
 	    } {
 		inner_label: DW_TAG_namespace {
-		    {name inner}
+		    DW_AT_name inner
 		} {
 		    innermost_label: DW_TAG_namespace {
-			{name innermost}
+			DW_AT_name innermost
 		    } {
 			DW_TAG_variable {
-			    {name x}
-			    {type :$int_label}
-			    {const_value 2 DW_FORM_data1}
+			    DW_AT_name x
+			    DW_AT_type :$int_label
+			    DW_AT_const_value 2 DW_FORM_data1
 			}
 
 			im_foo_label: DW_TAG_subprogram {
-			    {name foo}
-			    {external 1 flag_present}
-			    {declaration 1 flag_present}
+			    DW_AT_name foo
+			    DW_AT_external 1 flag_present
+			    DW_AT_declaration 1 flag_present
 			}
 		    }
 
 		    imported_declaration {
-			{name Innermost}
-			{import :$innermost_label}
+			DW_AT_name Innermost
+			DW_AT_import :$innermost_label
 		    }
 
 		    DW_TAG_variable {
-			{name x}
-			{type :$int_label}
-			{const_value 1 DW_FORM_data1}
+			DW_AT_name x
+			DW_AT_type :$int_label
+			DW_AT_const_value 1 DW_FORM_data1
 		    }
 
 		    i_foo_label: subprogram {
-			{name foo}
-			{external 1 flag_present}
-			{declaration 1 flag_present}
+			DW_AT_name foo
+			DW_AT_external 1 flag_present
+			DW_AT_declaration 1 flag_present
 		    }
 		}
 
 		OuterInner_label: imported_declaration {
-		    {name Inner}
-		    {import :$inner_label}
+		    DW_AT_name Inner
+		    DW_AT_import :$inner_label
 		}
 
 		DW_TAG_variable {
-		    {name x}
-		    {type :$int_label}
-		    {const_value 0 DW_FORM_data1}
+		    DW_AT_name x
+		    DW_AT_type :$int_label
+		    DW_AT_const_value 0 DW_FORM_data1
 		}
 
 		o_foo_label: subprogram {
-		    {name foo}
-		    {external 1 flag_present}
-		    {declaration 1 flag_present}
+		    DW_AT_name foo
+		    DW_AT_external 1 flag_present
+		    DW_AT_declaration 1 flag_present
 		}
 	    }
 
 	    imported_declaration {
-		{name Outer}
-		{import :$outer_label}
+		DW_AT_name Outer
+		DW_AT_import :$outer_label
 	    }
 
 	    oi1_label: imported_declaration {
-		{name oi1}
-		{import :$OuterInner_label}
+		DW_AT_name oi1
+		DW_AT_import :$OuterInner_label
 	    }
 
 	    oi2_label: imported_declaration {
-		{name oi2}
-		{import :$oi1_label}
+		DW_AT_name oi2
+		DW_AT_import :$oi1_label
 	    }
 
 	    imported_declaration {
-		{name oi3}
-		{import :$oi2_label}
+		DW_AT_name oi3
+		DW_AT_import :$oi2_label
 	    }
 
 	    subprogram {
-		{specification :$im_foo_label}
-		{low_pc 0x4 DW_FORM_addr}
-		{high_pc 0x7 DW_FORM_addr}
+		DW_AT_specification :$im_foo_label
+		DW_AT_low_pc 0x4 DW_FORM_addr
+		DW_AT_high_pc 0x7 DW_FORM_addr
 	    }
 
 	    subprogram {
-		{specification :$i_foo_label}
-		{low_pc 0x8 DW_FORM_addr}
-		{high_pc 0xb DW_FORM_addr}
+		DW_AT_specification :$i_foo_label
+		DW_AT_low_pc 0x8 DW_FORM_addr
+		DW_AT_high_pc 0xb DW_FORM_addr
 	    }
 
 	    subprogram {
-		{specification :$o_foo_label}
-		{low_pc 0xc DW_FORM_addr}
-		{high_pc 0xf DW_FORM_addr}
+		DW_AT_specification :$o_foo_label
+		DW_AT_low_pc 0xc DW_FORM_addr
+		DW_AT_high_pc 0xf DW_FORM_addr
 	    }
 	}
     }
@@ -253,19 +255,19 @@ set imports {
     declare_labels n0_label
 
     n0_label: DW_TAG_namespace {
-	{name n0}
+	DW_AT_name n0
     } {
 	DW_TAG_variable {
-	    {name x}
-	    {type :$int_label}
-	    {const_value 3 DW_FORM_data1}
+	    DW_AT_name x
+	    DW_AT_type :$int_label
+	    DW_AT_const_value 3 DW_FORM_data1
 	}
     }
 
     declare_labels n0_import
     n0_import: imported_declaration {
-	{name N0}
-	{import :$n0_label}
+	DW_AT_name N0
+	DW_AT_import :$n0_label
     }
 }
 
@@ -273,8 +275,8 @@ for {set i 1} {$i <= 100} {incr i} {
     append imports [format "
 	declare_labels n%d_import
 	n%d_import: imported_declaration {
-	    {name N%d}
-	    {import :\$n%d_import}
+	    DW_AT_name N%d
+	    DW_AT_import :\$n%d_import
 	}" $i $i $i [expr {$i - 1}]]
 }
 
@@ -283,13 +285,15 @@ standard_testfile .cc nsalias-r-dw.S
 set asm_file [standard_output_file $srcfile2]
 set the_dwarf [format {
     cu {} {
-	compile_unit {{language @DW_LANG_C_plus_plus}} {
+	compile_unit {
+	    DW_AT_language @DW_LANG_C_plus_plus
+	} {
 	    declare_labels int_label n0_label
 
 	    int_label: base_type {
-		{name int}
-		{encoding @DW_ATE_signed}
-		{byte_size 4 DW_FORM_sdata}
+		DW_AT_name int
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_byte_size 4 DW_FORM_sdata
 	    }
 
 %s

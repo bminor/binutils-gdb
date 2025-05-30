@@ -31,8 +31,8 @@ Dwarf::assemble $asm_file {
 	# We should have either one of DW_TAG_compile_unit,
 	# DW_TAG_partial_unit, or DW_TAG_type_unit here.
 	subprogram {
-	    {external 1 flag}
-	    {MACRO_AT_func {main}}
+	    DW_AT_external 1 flag
+	    MACRO_AT_func {main}
 	}
     }
 }

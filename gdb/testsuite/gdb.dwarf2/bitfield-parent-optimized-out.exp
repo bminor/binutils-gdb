@@ -32,37 +32,37 @@ Dwarf::assemble $asm_file {
 	    declare_labels struct_label var_label int_label
 
 	    int_label: base_type {
-		{byte_size 4 sdata}
-		{encoding @DW_ATE_signed}
-		{name int}
+		DW_AT_byte_size 4 sdata
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_name int
 	    }
 
 	    struct_label: structure_type {
-		{name S}
-		{byte_size 8 DW_FORM_sdata}
+		DW_AT_name S
+		DW_AT_byte_size 8 DW_FORM_sdata
 	    } {
 		member {
-		    {name bitfield}
-		    {type :$int_label}
-		    {bit_size 12 DW_FORM_sdata}
-		    {bit_offset 20 DW_FORM_sdata}
+		    DW_AT_name bitfield
+		    DW_AT_type :$int_label
+		    DW_AT_bit_size 12 DW_FORM_sdata
+		    DW_AT_bit_offset 20 DW_FORM_sdata
 		}
 		member {
-		    {name intfield}
-		    {type :$int_label}
-		    {data_member_location 4 DW_FORM_sdata}
+		    DW_AT_name intfield
+		    DW_AT_type :$int_label
+		    DW_AT_data_member_location 4 DW_FORM_sdata
 		}
 	    }
 
 	    subprogram {
-		{MACRO_AT_func { main }}
-		{type :$int_label}
-		{external 1 flag}
+		MACRO_AT_func { main }
+		DW_AT_type :$int_label
+		DW_AT_external 1 flag
 	    } {
 		var_label: DW_TAG_variable {
-		    {name var}
-		    {location {} DW_FORM_block1}
-		    {type :$struct_label}
+		    DW_AT_name var
+		    DW_AT_location {} DW_FORM_block1
+		    DW_AT_type :$struct_label
 		}
 	    }
 	}

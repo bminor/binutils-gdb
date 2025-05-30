@@ -33,30 +33,30 @@ Dwarf::assemble $asm_file {
 
     cu { label cu_start } {
 	compile_unit {
-	    {language @DW_LANG_D}
+	    DW_AT_language @DW_LANG_D
 	} {
 	    declare_labels watch_module_label watch_struct_label
 
 	    watch_module_label: module {
-		{name watch}
+		DW_AT_name watch
 	    } {
 		watch_struct_label: structure_type {
-		    {name tstruct}
-		    {byte_size 1 data1}
+		    DW_AT_name tstruct
+		    DW_AT_byte_size 1 data1
 		}
 
 		tag_variable {
-		    {name my_data}
-		    {type :$watch_struct_label}
-		    {location {
+		    DW_AT_name my_data
+		    DW_AT_type :$watch_struct_label
+		    DW_AT_location [subst {
 			addr [gdb_target_symbol my_data]
-		    } SPECIAL_expr}
-		    {external 1 flag}
+		    }] SPECIAL_expr
+		    DW_AT_external 1 flag
 		}
 
 		subprogram {
-		    {MACRO_AT_func { "_Dmain" }}
-		    {external 1 flag_present}
+		    MACRO_AT_func { "_Dmain" }
+		    DW_AT_external 1 flag_present
 		}
 	    }
 	}

@@ -52,14 +52,14 @@ Dwarf::assemble $asm_file {
 	    declare_labels int_type
 
 	    int_type: DW_TAG_base_type {
-		{DW_AT_byte_size $::int_size DW_FORM_sdata}
-		{DW_AT_encoding	 @DW_ATE_signed}
-		{DW_AT_name int}
+		DW_AT_byte_size $::int_size DW_FORM_sdata
+		DW_AT_encoding	 @DW_ATE_signed
+		DW_AT_name int
 	    }
 
 	    DW_TAG_subprogram {
-		{MACRO_AT_func {main}}
-		{type :$int_type}
+		MACRO_AT_func {main}
+		DW_AT_type :$int_type
 	    }
 
 	    # GCC complex float.
@@ -67,36 +67,36 @@ Dwarf::assemble $asm_file {
 	    declare_labels cf_type cd_type cld_type
 
 	    cf_type: DW_TAG_base_type {
-		{DW_AT_byte_size [expr 2 * $::float_size] DW_FORM_sdata}
-		{DW_AT_encoding	 @DW_ATE_complex_float}
-		{DW_AT_name	 "complex float"}
+		DW_AT_byte_size [expr 2 * $::float_size] DW_FORM_sdata
+		DW_AT_encoding	 @DW_ATE_complex_float
+		DW_AT_name	 "complex float"
 	    }
 
 	    cd_type: DW_TAG_base_type {
-		{DW_AT_byte_size [expr 2 * $::double_size] DW_FORM_sdata}
-		{DW_AT_encoding	 @DW_ATE_complex_float}
-		{DW_AT_name	 "complex double"}
+		DW_AT_byte_size [expr 2 * $::double_size] DW_FORM_sdata
+		DW_AT_encoding	 @DW_ATE_complex_float
+		DW_AT_name	 "complex double"
 	    }
 
 	    cld_type: DW_TAG_base_type {
-		{DW_AT_byte_size [expr 2 * $::long_double_size] DW_FORM_sdata}
-		{DW_AT_encoding	 @DW_ATE_complex_float}
-		{DW_AT_name	 "complex long double"}
+		DW_AT_byte_size [expr 2 * $::long_double_size] DW_FORM_sdata
+		DW_AT_encoding	 @DW_ATE_complex_float
+		DW_AT_name	 "complex long double"
 	    }
 
 	    DW_TAG_variable {
-		{name var_complex_float}
-		{DW_AT_type :$cf_type}
+		DW_AT_name var_complex_float
+		DW_AT_type :$cf_type
 	    }
 
 	    DW_TAG_variable {
-		{name var_complex_double}
-		{DW_AT_type :$cd_type}
+		DW_AT_name var_complex_double
+		DW_AT_type :$cd_type
 	    }
 
 	    DW_TAG_variable {
-		{name var_complex_long_double}
-		{DW_AT_type :$cld_type}
+		DW_AT_name var_complex_long_double
+		DW_AT_type :$cld_type
 	    }
 
 	    # GCC complex int.
@@ -105,14 +105,14 @@ Dwarf::assemble $asm_file {
 	    declare_labels ci_type
 
 	    ci_type: DW_TAG_base_type {
-		{DW_AT_byte_size [expr 2 * $::int_size] DW_FORM_sdata}
-		{DW_AT_encoding	 @DW_ATE_lo_user}
-		{DW_AT_name	 "complex int"}
+		DW_AT_byte_size [expr 2 * $::int_size] DW_FORM_sdata
+		DW_AT_encoding	 @DW_ATE_lo_user
+		DW_AT_name	 "complex int"
 	    }
 
 	    DW_TAG_variable {
-		{name var_complex_int}
-		{DW_AT_type :$ci_type}
+		DW_AT_name var_complex_int
+		DW_AT_type :$ci_type
 	    }
 
 	    # Clang complex float.
@@ -122,36 +122,36 @@ Dwarf::assemble $asm_file {
 	    declare_labels clang_cf_type clang_cd_type clang_cld_type
 
 	    clang_cf_type: DW_TAG_base_type {
-		{DW_AT_byte_size [expr 2 * $::float_size] DW_FORM_sdata}
-		{DW_AT_encoding	 @DW_ATE_complex_float}
-		{DW_AT_name	 "complex"}
+		DW_AT_byte_size [expr 2 * $::float_size] DW_FORM_sdata
+		DW_AT_encoding	 @DW_ATE_complex_float
+		DW_AT_name	 "complex"
 	    }
 
 	    DW_TAG_variable {
-		{name var_complex_clang_float}
-		{DW_AT_type :$clang_cf_type}
+		DW_AT_name var_complex_clang_float
+		DW_AT_type :$clang_cf_type
 	    }
 
 	    clang_cd_type: DW_TAG_base_type {
-		{DW_AT_byte_size [expr 2 * $::double_size] DW_FORM_sdata}
-		{DW_AT_encoding	 @DW_ATE_complex_float}
-		{DW_AT_name	 "complex"}
+		DW_AT_byte_size [expr 2 * $::double_size] DW_FORM_sdata
+		DW_AT_encoding	 @DW_ATE_complex_float
+		DW_AT_name	 "complex"
 	    }
 
 	    DW_TAG_variable {
-		{name var_complex_clang_double}
-		{DW_AT_type :$clang_cd_type}
+		DW_AT_name var_complex_clang_double
+		DW_AT_type :$clang_cd_type
 	    }
 
 	    clang_cld_type: DW_TAG_base_type {
-		{DW_AT_byte_size [expr 2 * $::long_double_size] DW_FORM_sdata}
-		{DW_AT_encoding	 @DW_ATE_complex_float}
-		{DW_AT_name	 "complex"}
+		DW_AT_byte_size [expr 2 * $::long_double_size] DW_FORM_sdata
+		DW_AT_encoding	 @DW_ATE_complex_float
+		DW_AT_name	 "complex"
 	    }
 
 	    DW_TAG_variable {
-		{name var_complex_clang_long_double}
-		{DW_AT_type :$clang_cld_type}
+		DW_AT_name var_complex_clang_long_double
+		DW_AT_type :$clang_cld_type
 	    }
 	}
     }

@@ -25,7 +25,9 @@ set asm_file [standard_output_file $srcfile2]
 
 Dwarf::assemble $asm_file {
     cu { label cu_start } {
-	compile_unit {{language @DW_LANG_C}} {
+	compile_unit {
+	    DW_AT_language @DW_LANG_C
+	} {
 	}
     }
     aranges { addr_zero true } cu_start {

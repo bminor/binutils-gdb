@@ -38,21 +38,21 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	Db: compile_unit {
-	    {language @DW_LANG_C99}
-	    {name "<artificial>"}
+	    DW_AT_language @DW_LANG_C99
+	    DW_AT_name "<artificial>"
 	} {
 	    D72f8: subprogram {
-		{abstract_origin %$D272519}
-		{low_pc 0xb9e20 addr}
-		{high_pc 0x1f5 data4}
+		DW_AT_abstract_origin %$D272519
+		DW_AT_low_pc 0xb9e20 addr
+		DW_AT_high_pc 0x1f5 data4
 	    } {
 		D736e: inlined_subroutine {
-		    {abstract_origin %$D26b227}
-		    {low_pc 0xb9efc addr}
-		    {high_pc 0xc data4}
+		    DW_AT_abstract_origin %$D26b227
+		    DW_AT_low_pc 0xb9efc addr
+		    DW_AT_high_pc 0xc data4
 		} {
 		    formal_parameter {
-			{abstract_origin %$D274c42}
+			DW_AT_abstract_origin %$D274c42
 		    }
 		}
 	    }
@@ -61,53 +61,53 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	D266465: compile_unit {
-	    {language @DW_LANG_C99}
+	    DW_AT_language @DW_LANG_C99
 	} {
 	    D266477: typedef {
-		{name "size_t"}
-		{type :$D266483}
+		DW_AT_name "size_t"
+		DW_AT_type :$D266483
 	    }
 
 	    D266483: base_type {
-		{byte_size 8 sdata}
-		{encoding @DW_ATE_unsigned}
+		DW_AT_byte_size 8 sdata
+		DW_AT_encoding @DW_ATE_unsigned
 	    }
 
 	    D266496: pointer_type {
-		{byte_size 8 sdata}
+		DW_AT_byte_size 8 sdata
 	    }
 
 	    D266498: restrict_type {
-		{type :$D266496}
+		DW_AT_type :$D266496
 	    }
 
 	    D266ad3: pointer_type {
-		{byte_size 8 sdata}
-		{type :$D266ade}
+		DW_AT_byte_size 8 sdata
+		DW_AT_type :$D266ade
 	    }
 
 	    D266ad9: restrict_type {
-		{type :$D266ad3}
+		DW_AT_type :$D266ad3
 	    }
 
 	    D266ade: const_type {}
 
 	    D26b227: subprogram {
-		{external 1 flag}
-		{name "memcpy"}
-		{type :$D266496}
+		DW_AT_external 1 flag
+		DW_AT_name "memcpy"
+		DW_AT_type :$D266496
 	    } {
 		D26b237: formal_parameter {
-		    {name "__dest"}
-		    {type :$D266498}
+		    DW_AT_name "__dest"
+		    DW_AT_type :$D266498
 		}
 		formal_parameter {
-		    {name "__src"}
-		    {type :$D266ad9}
+		    DW_AT_name "__src"
+		    DW_AT_type :$D266ad9
 		}
 		formal_parameter {
-		    {name "__len"}
-		    {type :$D266477}
+		    DW_AT_name "__len"
+		    DW_AT_type :$D266477
 		}
 	    }
 	}
@@ -115,85 +115,85 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	D26d8b1: compile_unit {
-	    {language @DW_LANG_C99}
+	    DW_AT_language @DW_LANG_C99
 	} {
 	    D26d8c3: typedef {
-		{name "size_t"}
-		{type :$D26d8cf}
+		DW_AT_name "size_t"
+		DW_AT_type :$D26d8cf
 	    }
 
 	    D26d8cf: base_type {
-		{byte_size 8 sdata}
-		{encoding @DW_ATE_unsigned}
-		{name "long unsigned int"}
+		DW_AT_byte_size 8 sdata
+		DW_AT_encoding @DW_ATE_unsigned
+		DW_AT_name "long unsigned int"
 	    }
 
 	    D26d944: pointer_type {
-		{byte_size 8 sdata}
+		DW_AT_byte_size 8 sdata
 	    }
 
 	    D26d946: restrict_type {
-		{type :$D26d944}
+		DW_AT_type :$D26d944
 	    }
 
 	    D26e103: structure_type {
-		{name "__object"}
-		{byte_size 12 sdata}
+		DW_AT_name "__object"
+		DW_AT_byte_size 12 sdata
 	    } {
 		member {
-		    {name "__ob_next"}
-		    {type :$D26e145}
-		    {data_member_location 0 sdata}
+		    DW_AT_name "__ob_next"
+		    DW_AT_type :$D26e145
+		    DW_AT_data_member_location 0 sdata
 		}
 	    }
 
 	    D26e145: pointer_type {
-		{byte_size 8 sdata}
-		{type :$D26e103}
+		DW_AT_byte_size 8 sdata
+		DW_AT_type :$D26e103
 	    }
 
 	    D26e415: typedef {
-		{name "PyObject"}
-		{type :$D26e103}
+		DW_AT_name "PyObject"
+		DW_AT_type :$D26e103
 	    }
 
 	    D26e48c: pointer_type {
-		{byte_size 8 sdata}
-		{type :$D26e415}
+		DW_AT_byte_size 8 sdata
+		DW_AT_type :$D26e415
 	    }
 
 	    D26df00: pointer_type {
-		{byte_size 8 sdata}
-		{type :$D26df0b}
+		DW_AT_byte_size 8 sdata
+		DW_AT_type :$D26df0b
 	    }
 
 	    D26df06: restrict_type {
-		{type :$D26df00}
+		DW_AT_type :$D26df00
 	    }
 
 	    D26df0b: const_type {}
 
 	    D272519: subprogram {
-		{name "bytes_repeat"}
-		{type :$D26e48c}
+		DW_AT_name "bytes_repeat"
+		DW_AT_type :$D26e48c
 	    }
 
 	    D274c1a: subprogram {
-		{external 1 flag}
-		{name "memcpy"}
-		{type :$D26d944}
+		DW_AT_external 1 flag
+		DW_AT_name "memcpy"
+		DW_AT_type :$D26d944
 	    } {
 		formal_parameter {
-		    {name "__dest"}
-		    {type :$D26d946}
+		    DW_AT_name "__dest"
+		    DW_AT_type :$D26d946
 		}
 		formal_parameter {
-		    {name "__src"}
-		    {type :$D26df06}
+		    DW_AT_name "__src"
+		    DW_AT_type :$D26df06
 		}
 		D274c42: formal_parameter {
-		    {name "__len"}
-		    {type :$D26d8c3}
+		    DW_AT_name "__len"
+		    DW_AT_type :$D26d8c3
 		}
 	    }
 	}

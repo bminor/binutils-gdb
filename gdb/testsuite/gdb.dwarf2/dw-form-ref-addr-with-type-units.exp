@@ -42,8 +42,8 @@ Dwarf::assemble $asm_file {
 	compile_unit {
 	} {
 	    subprogram {
-		{MACRO_AT_func {main}}
-		{type %$int_type}
+		MACRO_AT_func {main}
+		DW_AT_type %$int_type
 	    }
 	}
     }
@@ -61,9 +61,9 @@ Dwarf::assemble $asm_file {
 	compile_unit {
 	} {
 	    int_type: DW_TAG_base_type {
-		{DW_AT_byte_size 4 DW_FORM_sdata}
-		{DW_AT_encoding  @DW_ATE_signed}
-		{DW_AT_name      int}
+		DW_AT_byte_size 4 DW_FORM_sdata
+		DW_AT_encoding  @DW_ATE_signed
+		DW_AT_name int
 	    }
 	}
     }
@@ -79,19 +79,19 @@ Dwarf::assemble $asm_file {
 		declare_labels dummy_int_type
 
 		the_type_i: structure_type {
-			{name s}
-			{byte_size 4 sdata}
+		    DW_AT_name s
+		    DW_AT_byte_size 4 sdata
 		} {
-			member {
-			{name i}
-			{type :$dummy_int_type}
-			}
+		    member {
+			DW_AT_name i
+			DW_AT_type :$dummy_int_type
+		    }
 		}
 
 		dummy_int_type: base_type {
-			{name int}
-			{encoding @DW_ATE_signed}
-			{byte_size 4 sdata}
+		    DW_AT_name int
+		    DW_AT_encoding @DW_ATE_signed
+		    DW_AT_byte_size 4 sdata
 		}
 	    }
 	}

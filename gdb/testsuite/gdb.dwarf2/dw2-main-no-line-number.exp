@@ -33,12 +33,12 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	compile_unit {
-	    {language @DW_LANG_C}
-	    {name $srcfile}
+	    DW_AT_language @DW_LANG_C
+	    DW_AT_name $srcfile
 	} {
 	    subprogram {
-		{external 1 flag}
-		{MACRO_AT_func {main}}
+		DW_AT_external 1 flag
+		MACRO_AT_func {main}
 	    }
 	}
     }

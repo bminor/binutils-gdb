@@ -154,38 +154,38 @@ Dwarf::assemble ${asm_file} {
 
     cu { label cu_label } {
 	DW_TAG_compile_unit {
-	    {DW_AT_language @DW_LANG_C_plus_plus}
-	    {name ${::srcfile}}
-	    {stmt_list $L DW_FORM_sec_offset}
+	    DW_AT_language @DW_LANG_C_plus_plus
+	    DW_AT_name ${::srcfile}
+	    DW_AT_stmt_list $L DW_FORM_sec_offset
         } {
 	    declare_labels int_label class_A_label class_B_label \
 	                   B_ptr_label
 
 	    int_label: DW_TAG_base_type {
-		{DW_AT_byte_size ${::long_size} DW_FORM_udata}
-		{DW_AT_encoding @DW_ATE_signed}
-		{DW_AT_name "int"}
+		DW_AT_byte_size ${::long_size} DW_FORM_udata
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_name "int"
 	    }
 
 	    class_A_label: DW_TAG_class_type {
-		{DW_AT_name "A"}
-		{DW_AT_byte_size ${::struct_A_size} DW_FORM_sdata}
+		DW_AT_name "A"
+		DW_AT_byte_size ${::struct_A_size} DW_FORM_sdata
 	    } {
 		DW_TAG_member {
-		    {DW_AT_name "a"}
-		    {DW_AT_type :$int_label}
-		    {DW_AT_data_member_location ${::A_a} DW_FORM_udata}
+		    DW_AT_name "a"
+		    DW_AT_type :$int_label
+		    DW_AT_data_member_location ${::A_a} DW_FORM_udata
 		}
 		DW_TAG_member {
-		    {DW_AT_name "x"}
-		    {DW_AT_type :$int_label}
-		    {DW_AT_data_member_location ${::A_x} DW_FORM_udata}
+		    DW_AT_name "x"
+		    DW_AT_type :$int_label
+		    DW_AT_data_member_location ${::A_x} DW_FORM_udata
 		}
 	    }
 
 	    class_B_label: DW_TAG_class_type {
-		{DW_AT_name "B"}
-		{DW_AT_byte_size ${::struct_B_size} DW_FORM_sdata}
+		DW_AT_name "B"
+		DW_AT_byte_size ${::struct_B_size} DW_FORM_sdata
 	    } {
 		# While there are easier / better ways to specify an
 		# offset used by DW_AT_data_member_location than that
@@ -201,45 +201,47 @@ Dwarf::assemble ${asm_file} {
 		# by decode_locdesc(); this is why those opcodes were
 		# chosen.
 		DW_TAG_inheritance {
-		    {DW_AT_type :$class_A_label}
-		    {DW_AT_data_member_location {
+		    DW_AT_type :$class_A_label
+		    DW_AT_data_member_location [subst {
 			DW_OP_constu ${::B_a}
 			DW_OP_plus
 			DW_OP_pick 0
-			DW_OP_drop} SPECIAL_expr}
-		    {DW_AT_accessibility 1 DW_FORM_data1}
+			DW_OP_drop}] SPECIAL_expr
+		    DW_AT_accessibility 1 DW_FORM_data1
 		}
 		DW_TAG_member {
-		    {DW_AT_name "b"}
-		    {DW_AT_type :$int_label}
-		    {DW_AT_data_member_location ${::B_b} DW_FORM_udata}
+		    DW_AT_name "b"
+		    DW_AT_type :$int_label
+		    DW_AT_data_member_location ${::B_b} DW_FORM_udata
 		}
 		DW_TAG_member {
-		    {DW_AT_name "x2"}
-		    {DW_AT_type :$int_label}
-		    {DW_AT_data_member_location ${::B_x2} DW_FORM_udata}
+		    DW_AT_name "x2"
+		    DW_AT_type :$int_label
+		    DW_AT_data_member_location ${::B_x2} DW_FORM_udata
 		}
 	    }
 
 	    B_ptr_label: DW_TAG_pointer_type {
-		{DW_AT_type :$class_B_label}
-		{DW_AT_byte_size ${::addr_size} DW_FORM_sdata}
+		DW_AT_type :$class_B_label
+		DW_AT_byte_size ${::addr_size} DW_FORM_sdata
 	    }
 
 	    DW_TAG_variable {
-		{DW_AT_name "g_A"}
-		{DW_AT_type :$class_A_label}
-		{DW_AT_external 1 flag}
-		{DW_AT_location {DW_OP_addr [gdb_target_symbol "g_A"]} \
-		                 SPECIAL_expr}
+		DW_AT_name "g_A"
+		DW_AT_type :$class_A_label
+		DW_AT_external 1 flag
+		DW_AT_location [subst {
+		    DW_OP_addr [gdb_target_symbol "g_A"]
+		}] SPECIAL_expr
 	    }
 
 	    DW_TAG_variable {
-		{DW_AT_name "g_B"}
-		{DW_AT_type :$class_B_label}
-		{DW_AT_external 1 flag}
-		{DW_AT_location {DW_OP_addr [gdb_target_symbol "g_B"]} \
-		                 SPECIAL_expr}
+		DW_AT_name "g_B"
+		DW_AT_type :$class_B_label
+		DW_AT_external 1 flag
+		DW_AT_location [subst {
+		    DW_OP_addr [gdb_target_symbol "g_B"]
+		}] SPECIAL_expr
 	    }
 
 	    # We can't use MACRO_AT for the definitions of foo and bar
@@ -247,23 +249,23 @@ Dwarf::assemble ${asm_file} {
 	    # flags.  Therefore, we list the name, low_pc, and high_pc
 	    # explicitly.
 	    DW_TAG_subprogram {
-		{DW_AT_name foo}
-		{DW_AT_low_pc $foo_start DW_FORM_addr}
-		{DW_AT_high_pc $foo_end DW_FORM_addr}
-		{DW_AT_type :${B_ptr_label}}
-		{DW_AT_external 1 flag}
+		DW_AT_name foo
+		DW_AT_low_pc $foo_start DW_FORM_addr
+		DW_AT_high_pc $foo_end DW_FORM_addr
+		DW_AT_type :${B_ptr_label}
+		DW_AT_external 1 flag
 	    }
 
 	    DW_TAG_subprogram {
-		{DW_AT_name bar}
-		{DW_AT_low_pc $bar_start DW_FORM_addr}
-		{DW_AT_high_pc $bar_end DW_FORM_addr}
-		{DW_AT_type :${B_ptr_label}}
-		{DW_AT_external 1 flag}
+		DW_AT_name bar
+		DW_AT_low_pc $bar_start DW_FORM_addr
+		DW_AT_high_pc $bar_end DW_FORM_addr
+		DW_AT_type :${B_ptr_label}
+		DW_AT_external 1 flag
 	    } {
 		DW_TAG_formal_parameter {
-		    {DW_AT_name v}
-		    {DW_AT_type :${B_ptr_label}}
+		    DW_AT_name v
+		    DW_AT_type :${B_ptr_label}
 		}
 	    }
 	}

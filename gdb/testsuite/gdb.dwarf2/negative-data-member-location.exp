@@ -31,33 +31,35 @@ set asm_file [standard_output_file ${srcfile2}]
 Dwarf::assemble ${asm_file} {
     cu {} {
 	DW_TAG_compile_unit {
-	    {DW_AT_language @DW_LANG_C99}
-	    {DW_AT_producer "GNU C++17 11.1.0 -mtune=generic -march=x86-64 -g3 -O0"}
-	    {name ${::srcfile}}
+	    DW_AT_language @DW_LANG_C99
+	    DW_AT_producer "GNU C++17 11.1.0 -mtune=generic -march=x86-64 -g3 -O0"
+	    DW_AT_name ${::srcfile}
 	} {
 	    declare_labels int_label struct_label
 
 	    int_label: DW_TAG_base_type {
-		{DW_AT_byte_size 4 DW_FORM_udata}
-		{DW_AT_encoding @DW_ATE_signed}
-		{DW_AT_name "int"}
+		DW_AT_byte_size 4 DW_FORM_udata
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_name "int"
 	    }
 
 	    struct_label: DW_TAG_structure_type {
-		{DW_AT_name "the_struct"}
-		{DW_AT_byte_size 4 DW_FORM_udata}
+		DW_AT_name "the_struct"
+		DW_AT_byte_size 4 DW_FORM_udata
 	    } {
 		DW_TAG_member {
-		    {DW_AT_name "field"}
-		    {DW_AT_type :$int_label}
-		    {DW_AT_data_member_location -1 DW_FORM_sdata}
+		    DW_AT_name "field"
+		    DW_AT_type :$int_label
+		    DW_AT_data_member_location -1 DW_FORM_sdata
 		}
 	    }
 
 	    DW_TAG_variable {
-		{DW_AT_name "s"}
-		{DW_AT_type :$struct_label}
-		{DW_AT_location {DW_OP_addr [gdb_target_symbol "s"]} SPECIAL_expr}
+		DW_AT_name "s"
+		DW_AT_type :$struct_label
+		DW_AT_location [subst {
+		    DW_OP_addr [gdb_target_symbol "s"]
+		}] SPECIAL_expr
 	    }
 	}
     }

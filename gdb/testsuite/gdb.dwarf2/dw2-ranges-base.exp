@@ -45,22 +45,22 @@ Dwarf::assemble $asm_file {
     # .debug_ranges data then the test achieves its objective.
     cu { label cu_label } {
 	compile_unit {
-	    {language @DW_LANG_C}
-	    {name dw-ranges-base.c}
-	    {stmt_list $L DW_FORM_sec_offset}
-	    {ranges ${ranges_label} DW_FORM_sec_offset}
+	    DW_AT_language @DW_LANG_C
+	    DW_AT_name dw-ranges-base.c
+	    DW_AT_stmt_list $L DW_FORM_sec_offset
+	    DW_AT_ranges ${ranges_label} DW_FORM_sec_offset
 	} {
 	    subprogram {
-		{external 1 flag}
-		{name main}
+		DW_AT_external 1 flag
+		DW_AT_name main
 	    }
 	    subprogram {
-		{external 1 flag}
-		{name frame2}
+		DW_AT_external 1 flag
+		DW_AT_name frame2
 	    }
 	    subprogram {
-		{external 1 flag}
-		{name frame3}
+		DW_AT_external 1 flag
+		DW_AT_name frame3
 	    }
 	}
     }

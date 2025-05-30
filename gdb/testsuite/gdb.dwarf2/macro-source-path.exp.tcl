@@ -64,24 +64,24 @@ proc do_test { test_name lines_version DW_AT_name main_file_idx directories
 
 		cu {} {
 		    DW_TAG_compile_unit {
-			    {DW_AT_producer "My C Compiler"}
-			    {DW_AT_language @DW_LANG_C11}
-			    {DW_AT_name $::DW_AT_name}
-			    {DW_AT_comp_dir $comp_dir}
-			    {DW_AT_stmt_list $Llines DW_FORM_sec_offset}
-			    {DW_AT_macros $cu_macros DW_FORM_sec_offset}
+			    DW_AT_producer "My C Compiler"
+			    DW_AT_language @DW_LANG_C11
+			    DW_AT_name $::DW_AT_name
+			    DW_AT_comp_dir $comp_dir
+			    DW_AT_stmt_list $Llines DW_FORM_sec_offset
+			    DW_AT_macros $cu_macros DW_FORM_sec_offset
 		    } {
 			declare_labels int_type
 
 			int_type: DW_TAG_base_type {
-			    {DW_AT_byte_size 4 DW_FORM_sdata}
-			    {DW_AT_encoding  @DW_ATE_signed}
-			    {DW_AT_name int}
+			    DW_AT_byte_size 4 DW_FORM_sdata
+			    DW_AT_encoding  @DW_ATE_signed
+			    DW_AT_name int
 			}
 
 			DW_TAG_subprogram {
-			    {MACRO_AT_func {main}}
-			    {type :$int_type}
+			    MACRO_AT_func {main}
+			    DW_AT_type :$int_type
 			}
 		    }
 		}

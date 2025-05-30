@@ -53,27 +53,27 @@ foreach_with_prefix is_64 {false true} {
 	    DW_TAG_compile_unit {
 	    } {
 		int_type1: DW_TAG_base_type {
-		    {DW_AT_byte_size 4 DW_FORM_data1}
-		    {DW_AT_encoding @DW_ATE_signed}
-		    {DW_AT_name "int"}
+		    DW_AT_byte_size 4 DW_FORM_data1
+		    DW_AT_encoding @DW_ATE_signed
+		    DW_AT_name "int"
 		}
 
 		DW_TAG_variable {
-		    {DW_AT_name "foo"}
-		    {DW_AT_location $foo_location_list DW_FORM_sec_offset}
-		    {DW_AT_type :$int_type1}
+		    DW_AT_name "foo"
+		    DW_AT_location $foo_location_list DW_FORM_sec_offset
+		    DW_AT_type :$int_type1
 		}
 
 		DW_TAG_subprogram {
-		    {DW_AT_name "func1"}
-		    {DW_AT_low_pc $func1_addr}
-		    {DW_AT_high_pc $func1_len DW_FORM_udata}
+		    DW_AT_name "func1"
+		    DW_AT_low_pc $func1_addr
+		    DW_AT_high_pc $func1_len DW_FORM_udata
 		}
 
 		DW_TAG_subprogram {
-		    {DW_AT_name "func2"}
-		    {DW_AT_low_pc $func2_addr}
-		    {DW_AT_high_pc $func2_len DW_FORM_udata}
+		    DW_AT_name "func2"
+		    DW_AT_low_pc $func2_addr
+		    DW_AT_high_pc $func2_len DW_FORM_udata
 		}
 	    }
 	}

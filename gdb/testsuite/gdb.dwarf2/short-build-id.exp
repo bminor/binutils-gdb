@@ -50,17 +50,19 @@ proc run_test { buildid } {
 	build_id $buildid
 
 	cu { label cu_start } {
-	    compile_unit {{language @DW_LANG_C}} {
+	    compile_unit {
+		DW_AT_language @DW_LANG_C
+	    } {
 		int_label2: base_type {
-		    {name int}
-		    {byte_size 4 sdata}
-		    {encoding @DW_ATE_signed}
+		    DW_AT_name int
+		    DW_AT_byte_size 4 sdata
+		    DW_AT_encoding @DW_ATE_signed
 		}
 
 		constant {
-		    {name the_int}
-		    {type :$int_label2}
-		    {const_value 99 data1}
+		    DW_AT_name the_int
+		    DW_AT_type :$int_label2
+		    DW_AT_const_value 99 data1
 		}
 	    }
 	}

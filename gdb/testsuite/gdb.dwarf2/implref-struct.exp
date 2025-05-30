@@ -47,7 +47,7 @@ if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug c++}] 
 Dwarf::assemble ${asm_file} {
     cu {} {
 	DW_TAG_compile_unit {
-	    {DW_AT_language @DW_LANG_C_plus_plus}
+	    DW_AT_language @DW_LANG_C_plus_plus
 	} {
 	    declare_labels int_label struct_label variable_label ref_label
 	    set int_size [get_sizeof "int" -1]
@@ -61,62 +61,68 @@ Dwarf::assemble ${asm_file} {
 	    set c_offset 8
 
 	    int_label: DW_TAG_base_type {
-		{DW_AT_byte_size ${int_size} DW_FORM_udata}
-		{DW_AT_encoding @DW_ATE_signed}
-		{DW_AT_name "int"}
+		DW_AT_byte_size ${int_size} DW_FORM_udata
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_name "int"
 	    }
 
 	    struct_label: DW_TAG_structure_type {
-		{DW_AT_name "S"}
-		{DW_AT_byte_size ${S_size} DW_FORM_udata}
+		DW_AT_name "S"
+		DW_AT_byte_size ${S_size} DW_FORM_udata
 	    } {
 		DW_TAG_member {
-		    {DW_AT_name "a"}
-		    {DW_AT_type :${int_label}}
-		    {DW_AT_data_member_location 0 DW_FORM_udata}
+		    DW_AT_name "a"
+		    DW_AT_type :${int_label}
+		    DW_AT_data_member_location 0 DW_FORM_udata
 		}
 
 		DW_TAG_member {
-		    {DW_AT_name "b"}
-		    {DW_AT_type :${int_label}}
-		    {DW_AT_data_member_location ${b_offset} DW_FORM_udata}
+		    DW_AT_name "b"
+		    DW_AT_type :${int_label}
+		    DW_AT_data_member_location ${b_offset} DW_FORM_udata
 		}
 
 		DW_TAG_member {
-		    {DW_AT_name "c"}
-		    {DW_AT_type :${int_label}}
-		    {DW_AT_data_member_location ${c_offset} DW_FORM_udata}
+		    DW_AT_name "c"
+		    DW_AT_type :${int_label}
+		    DW_AT_data_member_location ${c_offset} DW_FORM_udata
 		}
 	    }
 
 	    ref_label: DW_TAG_reference_type {
-		{DW_AT_byte_size ${addr_size} DW_FORM_udata}
-		{DW_AT_type :${struct_label}}
+		DW_AT_byte_size ${addr_size} DW_FORM_udata
+		DW_AT_type :${struct_label}
 	    }
 
 	    variable_label: DW_TAG_variable {
-		{DW_AT_name "s1"}
-		{DW_AT_type :${struct_label}}
-		{DW_AT_external 1 DW_FORM_flag}
-		{DW_AT_location {DW_OP_addr [gdb_target_symbol "s1"]} SPECIAL_expr}
+		DW_AT_name "s1"
+		DW_AT_type :${struct_label}
+		DW_AT_external 1 DW_FORM_flag
+		DW_AT_location [subst {
+		    DW_OP_addr [gdb_target_symbol "s1"]
+		}] SPECIAL_expr
 	    }
 
 	    DW_TAG_variable {
-		{DW_AT_name "s2"}
-		{DW_AT_type :${struct_label}}
-		{DW_AT_external 1 DW_FORM_flag}
-		{DW_AT_location {DW_OP_addr [gdb_target_symbol "s2"]} SPECIAL_expr}
+		DW_AT_name "s2"
+		DW_AT_type :${struct_label}
+		DW_AT_external 1 DW_FORM_flag
+		DW_AT_location [subst {
+		    DW_OP_addr [gdb_target_symbol "s2"]
+		}] SPECIAL_expr
 	    }
 
 	    DW_TAG_subprogram {
-		{MACRO_AT_func { "main" }}
-		{DW_AT_type :${int_label}}
-		{DW_AT_external 1 DW_FORM_flag}
+		MACRO_AT_func { "main" }
+		DW_AT_type :${int_label}
+		DW_AT_external 1 DW_FORM_flag
 	    } {
 	        DW_TAG_variable {
-		    {DW_AT_name "ref"}
-		    {DW_AT_type :${ref_label}}
-		    {DW_AT_location {DW_OP_GNU_implicit_pointer ${variable_label} 0} SPECIAL_expr}
+		    DW_AT_name "ref"
+		    DW_AT_type :${ref_label}
+		    DW_AT_location [subst {
+			DW_OP_GNU_implicit_pointer ${variable_label} 0
+		    }] SPECIAL_expr
 		}
 	    }
 	}

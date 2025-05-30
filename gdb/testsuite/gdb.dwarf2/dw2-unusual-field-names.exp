@@ -59,49 +59,49 @@ proc run_test { field_name } {
 
 	cu {} {
 	    DW_TAG_compile_unit {
-                {DW_AT_language @DW_LANG_C}
-                {DW_AT_name     $srcfile}
-                {DW_AT_comp_dir /tmp}
+		DW_AT_language @DW_LANG_C
+		DW_AT_name     $srcfile
+		DW_AT_comp_dir /tmp
 	    } {
 		declare_labels itype ptype stype
 
 		itype: DW_TAG_base_type {
-		    {DW_AT_byte_size $int_size DW_FORM_sdata}
-		    {DW_AT_encoding  @DW_ATE_signed}
-		    {DW_AT_name int}
+		    DW_AT_byte_size $int_size DW_FORM_sdata
+		    DW_AT_encoding  @DW_ATE_signed
+		    DW_AT_name int
 		}
 
 		stype: DW_TAG_structure_type {
-		    {DW_AT_name "foo"}
-		    {DW_AT_byte_size $int_size DW_FORM_sdata}
+		    DW_AT_name "foo"
+		    DW_AT_byte_size $int_size DW_FORM_sdata
 		} {
 		    member {
-			{name $field_name}
-			{type :$itype}
-			{data_member_location 0 data1}
+			DW_AT_name $field_name
+			DW_AT_type :$itype
+			DW_AT_data_member_location 0 data1
 		    }
 		}
 
 		ptype: DW_TAG_pointer_type {
-		    {DW_AT_type :$stype}
+		    DW_AT_type :$stype
 		}
 
 		DW_TAG_variable {
-		    {DW_AT_name obj}
-		    {DW_AT_type :$stype}
-		    {DW_AT_location {
+		    DW_AT_name obj
+		    DW_AT_type :$stype
+		    DW_AT_location [subst {
 			DW_OP_addr [gdb_target_symbol obj]
-		    } SPECIAL_expr}
-		    {external 1 flag}
+		    }] SPECIAL_expr
+		    DW_AT_external 1 flag
 		}
 
 		DW_TAG_variable {
-		    {DW_AT_name ptr}
-		    {DW_AT_type :$ptype}
-		    {DW_AT_location {
+		    DW_AT_name ptr
+		    DW_AT_type :$ptype
+		    DW_AT_location [subst {
 			DW_OP_addr [gdb_target_symbol ptr]
-		    } SPECIAL_expr}
-		    {external 1 flag}
+		    }] SPECIAL_expr
+		    DW_AT_external 1 flag
 		}
 	    }
 	}

@@ -51,69 +51,69 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	compile_unit {
-	    {language @DW_LANG_Fortran90}
-	    {name dw2-entry-points.f90}
-	    {comp_dir /tmp}
+	    DW_AT_language @DW_LANG_Fortran90
+	    DW_AT_name dw2-entry-points.f90
+	    DW_AT_comp_dir /tmp
 	} {
 	    int_label: base_type {
-		{name "int"}
-		{byte_size $int_size sdata}
-		{encoding @DW_ATE_signed}
+		DW_AT_name "int"
+		DW_AT_byte_size $int_size sdata
+		DW_AT_encoding @DW_ATE_signed
 	    }
 	    subprogram {
-		{name prog}
-		{decl_file 1 data1}
-		{decl_line $prog_line data1}
-		{low_pc $main_start addr}
-		{high_pc "$main_start + $main_len" addr}
-		{external 1 flag}
-		{main_subprogram 1 flag}
+		DW_AT_name prog
+		DW_AT_decl_file 1 data1
+		DW_AT_decl_line $prog_line data1
+		DW_AT_low_pc $main_start addr
+		DW_AT_high_pc "$main_start + $main_len" addr
+		DW_AT_external 1 flag
+		DW_AT_main_subprogram 1 flag
 	    }
 	    subprogram {
-		{name bar}
-		{decl_file 1 data1}
-		{decl_line $bar_line data1}
-		{external 1 flag}
-		{low_pc $bar_helper_start addr}
-		{high_pc "$bar_helper_start + $bar_helper_len" addr}
+		DW_AT_name bar
+		DW_AT_decl_file 1 data1
+		DW_AT_decl_line $bar_line data1
+		DW_AT_external 1 flag
+		DW_AT_low_pc $bar_helper_start addr
+		DW_AT_high_pc "$bar_helper_start + $bar_helper_len" addr
 	    } {
 		formal_parameter {
-		    {name I}
-		    {type :$int_label}
-		    {location {addr $global_I} SPECIAL_expr}
+		    DW_AT_name I
+		    DW_AT_type :$int_label
+		    DW_AT_location [subst {addr $global_I}] SPECIAL_expr
 		}
 		formal_parameter {
-		    {name J}
-		    {type :$int_label}
-		    {location {addr $global_J} SPECIAL_expr}
+		    DW_AT_name J
+		    DW_AT_type :$int_label
+		    DW_AT_location [subst {addr $global_J}] SPECIAL_expr
 		}
 		entry_point {
-		    {name foo}
-		    {decl_file 1 data1}
-		    {decl_line $foo_line data1}
-		    {low_pc foo_entry_label addr}
+		    DW_AT_name foo
+		    DW_AT_decl_file 1 data1
+		    DW_AT_decl_line $foo_line data1
+		    DW_AT_low_pc foo_entry_label addr
 		} {
 		    formal_parameter {
-			{name J}
-			{type :$int_label}
-			{location {addr $global_J} SPECIAL_expr}
+			DW_AT_name J
+			DW_AT_type :$int_label
+			DW_AT_location [subst {addr $global_J}] SPECIAL_expr
 		    }
 		    formal_parameter {
-			{name K}
-			{type :$int_label}
-			{location {addr $global_K} SPECIAL_expr}
+			DW_AT_name K
+			DW_AT_type :$int_label
+			DW_AT_location [subst {addr $global_K}] SPECIAL_expr
 		    }
 		}
 		entry_point {
-			{name foobar}
-			{decl_file 1 data1}
-			{decl_line $foobar_line data1}
-			{low_pc foobar_entry_label addr}
+			DW_AT_name foobar
+			DW_AT_decl_file 1 data1
+			DW_AT_decl_line $foobar_line data1
+			DW_AT_low_pc foobar_entry_label addr
 		    } {
 		    formal_parameter {
-			{name J}
-			{type :$int_label}
-			{location {addr $global_J} SPECIAL_expr}
+			DW_AT_name J
+			DW_AT_type :$int_label
+			DW_AT_location [subst {addr $global_J}] SPECIAL_expr
 		    }
 		}
 	    }
@@ -122,48 +122,48 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	compile_unit {
-	    {language @DW_LANG_Fortran90}
-	    {name dw2-entry-points-2.f90}
-	    {comp_dir /tmp}
+	    DW_AT_language @DW_LANG_Fortran90
+	    DW_AT_name dw2-entry-points-2.f90
+	    DW_AT_comp_dir /tmp
 	} {
 	    int2_label: base_type {
-		{name "int"}
-		{byte_size $int_size sdata}
-		{encoding @DW_ATE_signed}
+		DW_AT_name "int"
+		DW_AT_byte_size $int_size sdata
+		DW_AT_encoding @DW_ATE_signed
 	    }
 	    subprogram {
-		{name barso}
-		{decl_file 1 data1}
-		{decl_line $bar_line data1}
-		{external 1 flag}
-		{low_pc $barso_helper_start addr}
-		{high_pc "$barso_helper_start + $barso_helper_len" addr}
+		DW_AT_name barso
+		DW_AT_decl_file 1 data1
+		DW_AT_decl_line $bar_line data1
+		DW_AT_external 1 flag
+		DW_AT_low_pc $barso_helper_start addr
+		DW_AT_high_pc "$barso_helper_start + $barso_helper_len" addr
 	    } {
 		formal_parameter {
-		    {name I}
-		    {type :$int2_label}
-		    {location {addr $global_I} SPECIAL_expr}
+		    DW_AT_name I
+		    DW_AT_type :$int2_label
+		    DW_AT_location [subst {addr $global_I}] SPECIAL_expr
 		}
 		formal_parameter {
-		    {name J}
-		    {type :$int2_label}
-		    {location {addr $global_J} SPECIAL_expr}
+		    DW_AT_name J
+		    DW_AT_type :$int2_label
+		    DW_AT_location [subst {addr $global_J}] SPECIAL_expr
 		}
 		entry_point {
-		    {name fooso}
-		    {decl_file 1 data1}
-		    {decl_line $foo_line data1}
-		    {low_pc fooso_entry_label addr}
+		    DW_AT_name fooso
+		    DW_AT_decl_file 1 data1
+		    DW_AT_decl_line $foo_line data1
+		    DW_AT_low_pc fooso_entry_label addr
 		} {
 		    formal_parameter {
-			{name J}
-			{type :$int2_label}
-			{location {addr $global_J} SPECIAL_expr}
+			DW_AT_name J
+			DW_AT_type :$int2_label
+			DW_AT_location [subst {addr $global_J}] SPECIAL_expr
 		    }
 		    formal_parameter {
-			{name K}
-			{type :$int2_label}
-			{location {addr $global_K} SPECIAL_expr}
+			DW_AT_name K
+			DW_AT_type :$int2_label
+			DW_AT_location [subst {addr $global_K}] SPECIAL_expr
 		    }
 		}
 	    }

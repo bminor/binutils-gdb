@@ -26,41 +26,41 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	DW_TAG_compile_unit {
-                {DW_AT_language @DW_LANG_C}
-                {DW_AT_name     $srcfile}
-                {DW_AT_comp_dir /tmp}
-        } {
+		DW_AT_language @DW_LANG_C
+		DW_AT_name     $srcfile
+		DW_AT_comp_dir /tmp
+	} {
 	    declare_labels integer_label uinteger_label
 
-            integer_label: DW_TAG_base_type {
-                {DW_AT_byte_size 4 DW_FORM_sdata}
-                {DW_AT_encoding  @DW_ATE_signed}
-                {DW_AT_name      int}
-            }
+	    integer_label: DW_TAG_base_type {
+		DW_AT_byte_size 4 DW_FORM_sdata
+		DW_AT_encoding	@DW_ATE_signed
+		DW_AT_name	int
+	    }
 
-            uinteger_label: DW_TAG_base_type {
-                {DW_AT_byte_size 4 DW_FORM_sdata}
-                {DW_AT_encoding  @DW_ATE_unsigned}
-		{DW_AT_name      {unsigned int}}
-            }
+	    uinteger_label: DW_TAG_base_type {
+		DW_AT_byte_size 4 DW_FORM_sdata
+		DW_AT_encoding	@DW_ATE_unsigned
+		DW_AT_name	{unsigned int}
+	    }
 
 	    DW_TAG_enumeration_type {
-		{DW_AT_name E}
-		{DW_AT_type :$integer_label}
+		DW_AT_name E
+		DW_AT_type :$integer_label
 	    } {
 		DW_TAG_enumerator {
-		    {DW_AT_name ONE}
-		    {DW_AT_const_value 1 DW_FORM_sdata}
+		    DW_AT_name ONE
+		    DW_AT_const_value 1 DW_FORM_sdata
 		}
 	    }
 
 	    DW_TAG_enumeration_type {
-		{DW_AT_name EU}
-		{DW_AT_type :$uinteger_label}
+		DW_AT_name EU
+		DW_AT_type :$uinteger_label
 	    } {
 		DW_TAG_enumerator {
-		    {DW_AT_name TWO}
-		    {DW_AT_const_value 2 DW_FORM_sdata}
+		    DW_AT_name TWO
+		    DW_AT_const_value 2 DW_FORM_sdata
 		}
 	    }
 	}
@@ -68,34 +68,34 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	DW_TAG_compile_unit {
-		{DW_AT_language @DW_LANG_C_plus_plus}
-		{DW_AT_name	tmp.c}
-		{DW_AT_comp_dir /tmp}
+		DW_AT_language @DW_LANG_C_plus_plus
+		DW_AT_name	tmp.c
+		DW_AT_comp_dir /tmp
 	} {
 	    declare_labels integer_label forward
 
 	    integer_label: DW_TAG_base_type {
-		{DW_AT_byte_size 4 DW_FORM_sdata}
-		{DW_AT_encoding	 @DW_ATE_signed}
-		{DW_AT_name	 int}
+		DW_AT_byte_size 4 DW_FORM_sdata
+		DW_AT_encoding	 @DW_ATE_signed
+		DW_AT_name	 int
 	    }
 
 	    DW_TAG_enumeration_type {
-		{DW_AT_specification :$forward}
+		DW_AT_specification :$forward
 	    } {
 		DW_TAG_enumerator {
-		    {DW_AT_name val1}
-		    {DW_AT_const_value 1 DW_FORM_sdata}
+		    DW_AT_name val1
+		    DW_AT_const_value 1 DW_FORM_sdata
 		}
 	    }
 
 	    DW_TAG_namespace {
-		{DW_AT_name ns}
+		DW_AT_name ns
 	    } {
 		forward: DW_TAG_enumeration_type {
-		    {DW_AT_name e}
-		    {DW_AT_type :$integer_label}
-		    {DW_AT_declaration 1 flag}
+		    DW_AT_name e
+		    DW_AT_type :$integer_label
+		    DW_AT_declaration 1 flag
 		}
 	    }
 	}

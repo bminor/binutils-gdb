@@ -36,48 +36,48 @@ Dwarf::assemble $asm_file {
 	    declare_labels var_label
 
 	    struct_label: structure_type {
-		{name S}
-		{byte_size 4 DW_FORM_sdata}
+		DW_AT_name S
+		DW_AT_byte_size 4 DW_FORM_sdata
 	    } {
 		member {
-		    {name a}
-		    {type :$short_type_label}
-		    {data_member_location 0 DW_FORM_sdata}
+		    DW_AT_name a
+		    DW_AT_type :$short_type_label
+		    DW_AT_data_member_location 0 DW_FORM_sdata
 		}
 		member {
-		    {name b}
-		    {type :$char_type_label}
-		    {data_member_location 2 DW_FORM_sdata}
+		    DW_AT_name b
+		    DW_AT_type :$char_type_label
+		    DW_AT_data_member_location 2 DW_FORM_sdata
 		}
 		member {
-		    {name c}
-		    {type :$char_type_label}
-		    {data_member_location 3 DW_FORM_sdata}
+		    DW_AT_name c
+		    DW_AT_type :$char_type_label
+		    DW_AT_data_member_location 3 DW_FORM_sdata
 		}
 	    }
 
 	    short_type_label: base_type {
-		{name "short int"}
-		{encoding @DW_ATE_signed}
-		{byte_size 2 DW_FORM_sdata}
+		DW_AT_name "short int"
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_byte_size 2 DW_FORM_sdata
 	    }
 
 	    char_type_label: base_type {
-		{name "signed char"}
-		{encoding @DW_ATE_signed}
-		{byte_size 1 DW_FORM_sdata}
+		DW_AT_name "signed char"
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_byte_size 1 DW_FORM_sdata
 	    }
 
 	    # See comment above to understand the pointer size.
 	    ptr_label: pointer_type {
-		{byte_size 2 DW_FORM_sdata}
-		{type :$char_type_label}
+		DW_AT_byte_size 2 DW_FORM_sdata
+		DW_AT_type :$char_type_label
 	    }
 
 	    var_label: DW_TAG_variable {
-		{name s}
-		{type :$struct_label}
-		{location {
+		DW_AT_name s
+		DW_AT_type :$struct_label
+		DW_AT_location {
 		    const2u 0x5678
 		    stack_value
 		    piece 2
@@ -87,15 +87,15 @@ Dwarf::assemble $asm_file {
 		    const1u 3
 		    stack_value
 		    piece 1
-		} SPECIAL_expr}
+		} SPECIAL_expr
 	    }
 
 	    DW_TAG_variable {
-		{name p}
-		{type :$ptr_label}
-		{location {
+		DW_AT_name p
+		DW_AT_type :$ptr_label
+		DW_AT_location [subst {
 		    GNU_implicit_pointer $var_label 2
-		} SPECIAL_expr}
+		}] SPECIAL_expr
 	    }
 	}
     }

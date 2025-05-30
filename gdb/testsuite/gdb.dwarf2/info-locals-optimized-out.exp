@@ -32,31 +32,31 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	DW_TAG_compile_unit {
-		{DW_AT_name $srcfile}
-		{DW_AT_comp_dir /tmp}
+		DW_AT_name $srcfile
+		DW_AT_comp_dir /tmp
 	} {
 	    declare_labels int_type_label
 
 	    # int
 	    int_type_label: base_type {
-		{name "int"}
-		{encoding @DW_ATE_signed}
-		{byte_size 4 DW_FORM_sdata}
+		DW_AT_name "int"
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_byte_size 4 DW_FORM_sdata
 	    }
 
 	    DW_TAG_subprogram {
-		{MACRO_AT_func { main }}
-		{DW_AT_external 1 flag}
+		MACRO_AT_func { main }
+		DW_AT_external 1 flag
 	    } {
 		# A variable completely optimized out.
 		DW_TAG_variable {
-		    {name "opt_out"}
-		    {type :$int_type_label}
+		    DW_AT_name "opt_out"
+		    DW_AT_type :$int_type_label
 		}
 		DW_TAG_variable {
-		    {name const_bytes}
-		    {type :$int_type_label}
-		    {const_value "\x01\x01\x01\x01" DW_FORM_block1}
+		    DW_AT_name const_bytes
+		    DW_AT_type :$int_type_label
+		    DW_AT_const_value "\x01\x01\x01\x01" DW_FORM_block1
 		}
 	    }
 	}

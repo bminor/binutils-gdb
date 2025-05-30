@@ -59,21 +59,21 @@ proc test_1 { _cv _cdw64 _lv _ldw64 {_string_form ""}} {
 
 	cu { version $cv is_64 $cdw64 } {
 	    compile_unit {
-		{language @DW_LANG_C}
-		{name $srcfile}
-		{stmt_list $Llines DW_FORM_sec_offset}
+		DW_AT_language @DW_LANG_C
+		DW_AT_name $srcfile
+		DW_AT_stmt_list $Llines DW_FORM_sec_offset
 	    } {
 		subprogram {
-		    {external 1 flag}
-		    {name main}
-		    {low_pc $main_start addr}
-		    {high_pc "$main_start + $main_len" addr}
+		    DW_AT_external 1 flag
+		    DW_AT_name main
+		    DW_AT_low_pc $main_start addr
+		    DW_AT_high_pc "$main_start + $main_len" addr
 		}
 		subprogram {
-		    {external 1 flag}
-		    {name bar}
-		    {low_pc $bar_start addr}
-		    {high_pc "$bar_start + $bar_len" addr}
+		    DW_AT_external 1 flag
+		    DW_AT_name bar
+		    DW_AT_low_pc $bar_start addr
+		    DW_AT_high_pc "$bar_start + $bar_len" addr
 		}
 	    }
 	}

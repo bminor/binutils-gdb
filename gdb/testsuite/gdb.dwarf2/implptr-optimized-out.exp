@@ -25,51 +25,51 @@ set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
     cu { version 3 addr_size 4 } {
 	compile_unit {
-	    {producer "GNU C 4.4.3"}
-	    {language @DW_LANG_C89}
-	    {name 1.c}
+	    DW_AT_producer "GNU C 4.4.3"
+	    DW_AT_language @DW_LANG_C89
+	    DW_AT_name 1.c
 	} {
 	    declare_labels int_label struct_label pointer_label variable_label
 
 	    int_label: base_type {
-		{byte_size 4 sdata}
-		{encoding @DW_ATE_signed}
-		{name int}
+		DW_AT_byte_size 4 sdata
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_name int
 	    }
 
 	    struct_label: structure_type {
-		{name s}
-		{byte_size 4 sdata}
+		DW_AT_name s
+		DW_AT_byte_size 4 sdata
 	    } {
 		member {
-		    {name f}
-		    {type :$int_label}
-		    {data_member_location 0 data1}
+		    DW_AT_name f
+		    DW_AT_type :$int_label
+		    DW_AT_data_member_location 0 data1
 		}
 	    }
 
 	    subprogram {
-		{MACRO_AT_func { main }}
-		{type :$int_label}
-		{external 1 flag}
+		MACRO_AT_func { main }
+		DW_AT_type :$int_label
+		DW_AT_external 1 flag
 	    } {
 		pointer_label: pointer_type {
-		    {byte_size 4 sdata}
-		    {type :$struct_label}
+		    DW_AT_byte_size 4 sdata
+		    DW_AT_type :$struct_label
 		}
 
 		variable_label: DW_TAG_variable {
-		    {name v}
-		    {location {} DW_FORM_block1}
-		    {type :$struct_label}
+		    DW_AT_name v
+		    DW_AT_location {} DW_FORM_block1
+		    DW_AT_type :$struct_label
 		}
 
 		DW_TAG_variable {
-		    {name p}
-		    {location {
+		    DW_AT_name p
+		    DW_AT_location [subst {
 			GNU_implicit_pointer $variable_label 0
-		    } SPECIAL_expr}
-		    {type :$pointer_label}
+		    }] SPECIAL_expr
+		    DW_AT_type :$pointer_label
 		}
 	    }
 	}

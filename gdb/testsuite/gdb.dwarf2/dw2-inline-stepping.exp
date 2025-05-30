@@ -49,34 +49,34 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	compile_unit {
-	    {language @DW_LANG_C}
-	    {name dw2-inline-stepping.c}
-	    {low_pc 0 addr}
-	    {stmt_list ${lines_label} DW_FORM_sec_offset}
-	    {ranges ${ranges_label} DW_FORM_sec_offset}
+	    DW_AT_language @DW_LANG_C
+	    DW_AT_name dw2-inline-stepping.c
+	    DW_AT_low_pc 0 addr
+	    DW_AT_stmt_list ${lines_label} DW_FORM_sec_offset
+	    DW_AT_ranges ${ranges_label} DW_FORM_sec_offset
 	} {
 	    subprogram {
-		{external 1 flag}
-		{name bar}
-		{low_pc $bar_start addr}
-		{high_pc "$bar_start + $bar_len" addr}
+		DW_AT_external 1 flag
+		DW_AT_name bar
+		DW_AT_low_pc $bar_start addr
+		DW_AT_high_pc "$bar_start + $bar_len" addr
 	    }
 	    foo_prog: subprogram {
-		{name foo}
-		{inline 3 data1}
+		DW_AT_name foo
+		DW_AT_inline 3 data1
 	    }
 	    subprogram {
-		{external 1 flag}
-		{name main}
-		{low_pc $main_start addr}
-		{high_pc "$main_start + $main_len" addr}
+		DW_AT_external 1 flag
+		DW_AT_name main
+		DW_AT_low_pc $main_start addr
+		DW_AT_high_pc "$main_start + $main_len" addr
 	    } {
 		inlined_subroutine {
-		    {abstract_origin %$foo_prog}
-		    {low_pc main_label2 addr}
-		    {high_pc main_label3 addr}
-		    {call_file 1 data1}
-		    {call_line $call_line data1}
+		    DW_AT_abstract_origin %$foo_prog
+		    DW_AT_low_pc main_label2 addr
+		    DW_AT_high_pc main_label3 addr
+		    DW_AT_call_file 1 data1
+		    DW_AT_call_line $call_line data1
 		}
 	    }
 	}

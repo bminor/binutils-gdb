@@ -46,74 +46,74 @@ proc build_test_program {} {
 	cu { addr_size 4 } {
     
 	    DW_TAG_compile_unit {
-		{DW_AT_language @DW_LANG_C99}
-		{DW_AT_name     $srcfile}
-		{DW_AT_comp_dir /tmp}
+		DW_AT_language @DW_LANG_C99
+		DW_AT_name     $srcfile
+		DW_AT_comp_dir /tmp
 	    } {
 		declare_labels int_label struct_label pointer_label \
 			       array_label
 
 		int_label: DW_TAG_base_type {
-		    {DW_AT_byte_size 4 DW_FORM_sdata}
-		    {DW_AT_encoding  @DW_ATE_signed}
-		    {DW_AT_name      integer}
+		    DW_AT_byte_size 4 DW_FORM_sdata
+		    DW_AT_encoding  @DW_ATE_signed
+		    DW_AT_name      integer
 		}
     
 		array_label: DW_TAG_array_type {
-		    {DW_AT_name foo__array_type}
-		    {DW_AT_type :$int_label}
+		    DW_AT_name foo__array_type
+		    DW_AT_type :$int_label
 		} {
 		    DW_TAG_subrange_type {
-			{DW_AT_type	   :$int_label}
-			{DW_AT_lower_bound 0   DW_FORM_data1}
-			{DW_AT_upper_bound 127 DW_FORM_data1}
+			DW_AT_type	   :$int_label
+			DW_AT_lower_bound 0   DW_FORM_data1
+			DW_AT_upper_bound 127 DW_FORM_data1
 		    }   
 		}
     
 		struct_label: DW_TAG_structure_type {
-		    {DW_AT_name "foo"}
-		    {DW_AT_byte_size 12 DW_FORM_sdata}
+		    DW_AT_name "foo"
+		    DW_AT_byte_size 12 DW_FORM_sdata
 		} {
 		    member {
-			{name a}
-			{type :$int_label}
-			{data_member_location 0 data1}
+			DW_AT_name a
+			DW_AT_type :$int_label
+			DW_AT_data_member_location 0 data1
 		    }
 		    member {
-			{name x}
-			{type :$array_label}
-			{data_member_location 4 data1}
+			DW_AT_name x
+			DW_AT_type :$array_label
+			DW_AT_data_member_location 4 data1
 		    }
 		    member {
-			{name y}
-			{type :$pointer_label}
-			{data_member_location 8 data1}
+			DW_AT_name y
+			DW_AT_type :$pointer_label
+			DW_AT_data_member_location 8 data1
 		    }
 		}
     
 		pointer_label: DW_TAG_pointer_type {
-		    {DW_AT_byte_size 4 DW_FORM_sdata}
-		    {DW_AT_type  :$struct_label}
+		    DW_AT_byte_size 4 DW_FORM_sdata
+		    DW_AT_type  :$struct_label
 		}
     
 		DW_TAG_subprogram {
-		    {DW_AT_name func01}
-		    {DW_AT_type :$int_label}
-		    {external   1 flag}
-		    {MACRO_AT_func {func01}}
+		    DW_AT_name func01
+		    DW_AT_type :$int_label
+		    DW_AT_external   1 flag
+		    MACRO_AT_func {func01}
 		} {
 		    DW_TAG_variable {
-			{DW_AT_name ptr}
-			{DW_AT_type :$pointer_label}
-			{DW_AT_location {} DW_FORM_block1}
+			DW_AT_name ptr
+			DW_AT_type :$pointer_label
+			DW_AT_location {} DW_FORM_block1
 		    }
 		}
     
 		DW_TAG_subprogram {
-		    {DW_AT_name main}
-		    {DW_AT_type :$int_label}
-		    {external   1 flag}
-		    {MACRO_AT_func {main}}
+		    DW_AT_name main
+		    DW_AT_type :$int_label
+		    DW_AT_external   1 flag
+		    MACRO_AT_func {main}
 		} {
 		}
 	    }

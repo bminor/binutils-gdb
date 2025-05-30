@@ -30,8 +30,8 @@ Dwarf::assemble $asm_file {
 
 	    # This signature is intentionally wrong.
 	    typedef_label: typedef {
-		{name foo}
-		{type 0xee22334455667788 ref_sig8 }
+		DW_AT_name foo
+		DW_AT_type 0xee22334455667788 ref_sig8
 	    }
 	}
     }
@@ -39,9 +39,9 @@ Dwarf::assemble $asm_file {
     tu {} 0x1122334455667788 the_type {
 	type_unit {} {
 	    the_type: base_type {
-		{name int}
-		{encoding @DW_ATE_signed}
-		{byte_size 4 sdata}
+		DW_AT_name int
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_byte_size 4 sdata
 	    }
 	}
     }

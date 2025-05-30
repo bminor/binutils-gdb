@@ -29,10 +29,12 @@ Dwarf::assemble $asm_file {
     declare_labels label1
 
     cu {} {
-	compile_unit {{language @DW_LANG_C}} {
+	compile_unit {
+	    DW_AT_language @DW_LANG_C
+	} {
 	    subprogram {
-		{MACRO_AT_range { main }}
-		{DW_AT_specification %$label1}
+		MACRO_AT_range { main }
+		DW_AT_specification %$label1
 	    }
 	}
     }

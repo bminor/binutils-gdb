@@ -30,21 +30,21 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	compile_unit {
-	    {language @DW_LANG_C}
-	    {name dw2-prologue-end.c}
-	    {stmt_list ${lines_label} DW_FORM_sec_offset}
+	    DW_AT_language @DW_LANG_C
+	    DW_AT_name dw2-prologue-end.c
+	    DW_AT_stmt_list ${lines_label} DW_FORM_sec_offset
 	} {
 	    subprogram {
-		{external 1 flag}
-		{name foo}
-		{low_pc foo_label addr}
-		{high_pc foo_end addr}
+		DW_AT_external 1 flag
+		DW_AT_name foo
+		DW_AT_low_pc foo_label addr
+		DW_AT_high_pc foo_end addr
 	    }
 	    subprogram {
-		{external 1 flag}
-		{name bar}
-		{low_pc bar_label addr}
-		{high_pc bar_end addr}
+		DW_AT_external 1 flag
+		DW_AT_name bar
+		DW_AT_low_pc bar_label addr
+		DW_AT_high_pc bar_end addr
 	    }
 	}
     }

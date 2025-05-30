@@ -44,13 +44,13 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	compile_unit {
-	    {language @DW_LANG_C_plus_plus}
-	    {name $srcfile}
-	    {ranges ${ranges_label} DW_FORM_sec_offset}
+	    DW_AT_language @DW_LANG_C_plus_plus
+	    DW_AT_name $srcfile
+	    DW_AT_ranges ${ranges_label} DW_FORM_sec_offset
 	} {
 	    subprogram {
-		{external 1 flag}
-		{name quux}
+		DW_AT_external 1 flag
+		DW_AT_name quux
 	    }
 	}
     }

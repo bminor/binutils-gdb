@@ -49,14 +49,14 @@ foreach_with_prefix is_64 {false true} {
 	    is_64 $is_64
 	} {
 	    DW_TAG_compile_unit {
-		{DW_AT_ranges 1 DW_FORM_rnglistx}
-		{DW_AT_rnglists_base cu_table DW_FORM_sec_offset}
+		DW_AT_ranges 1 DW_FORM_rnglistx
+		DW_AT_rnglists_base cu_table DW_FORM_sec_offset
 	    } {
 		# This tests a DW_AT_ranges attribute of form DW_FORM_rnglistx on a
 		# function, which was buggy at some point.
 		DW_TAG_subprogram {
-		    {DW_AT_name "foo"}
-		    {DW_AT_ranges 2 DW_FORM_rnglistx}
+		    DW_AT_name "foo"
+		    DW_AT_ranges 2 DW_FORM_rnglistx
 		}
 	    }
 	}

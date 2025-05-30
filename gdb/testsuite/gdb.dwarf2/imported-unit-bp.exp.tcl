@@ -38,34 +38,34 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	compile_unit {
-	    {language @$lang}
-	    {name "<artificial>"}
+	    DW_AT_language @$lang
+	    DW_AT_name "<artificial>"
 	} {
 	    imported_unit {
-		{import %$cu_label}
+		DW_AT_import %$cu_label
 	    }
 	}
     }
 
     cu {} {
 	cu_label: compile_unit {
-	    {producer "gcc"}
-	    {language @$lang}
-	    {name ${srcfile}}
-	    {comp_dir "/tmp"}
-	    {low_pc 0 addr}
-	    {stmt_list ${lines_label} DW_FORM_sec_offset}
+	    DW_AT_producer "gcc"
+	    DW_AT_language @$lang
+	    DW_AT_name ${srcfile}
+	    DW_AT_comp_dir "/tmp"
+	    DW_AT_low_pc 0 addr
+	    DW_AT_stmt_list ${lines_label} DW_FORM_sec_offset
 	} {
 	    callee_subprog_label: subprogram {
-		{external 1 flag}
-		{name callee}
-		{inline 3 data1}
+		DW_AT_external 1 flag
+		DW_AT_name callee
+		DW_AT_inline 3 data1
 	    }
 	    subprogram {
-		{external 1 flag}
-		{name func}
-		{low_pc $func_start addr}
-		{high_pc "$func_start + $func_len" addr}
+		DW_AT_external 1 flag
+		DW_AT_name func
+		DW_AT_low_pc $func_start addr
+		DW_AT_high_pc "$func_start + $func_len" addr
 	    } {
 	    }
 	}

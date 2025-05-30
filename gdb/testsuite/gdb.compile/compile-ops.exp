@@ -375,36 +375,36 @@ Dwarf::assemble $asm_file {
 	declare_labels int_label
 
 	compile_unit {
-	    {name file1.txt}
-	    {language @DW_LANG_C}
-	    {low_pc $func_start addr}
-	    {high_pc $func_end addr}
+	    DW_AT_name file1.txt
+	    DW_AT_language @DW_LANG_C
+	    DW_AT_low_pc $func_start addr
+	    DW_AT_high_pc $func_end addr
 	} {
 	    global program
 
 	    int_label: base_type {
-		{name int}
-		{byte_size 4 sdata}
-		{encoding @DW_ATE_signed}
+		DW_AT_name int
+		DW_AT_byte_size 4 sdata
+		DW_AT_encoding @DW_ATE_signed
 	    }
 
 	    subprogram {
-		{external 1 flag}
-		{name func}
-		{low_pc $func_start addr}
-		{high_pc $func_end addr}
+		DW_AT_external 1 flag
+		DW_AT_name func
+		DW_AT_low_pc $func_start addr
+		DW_AT_high_pc $func_end addr
 	    } {
 		formal_parameter {
-		    {name param}
-		    {variable_parameter 1 flag}
-		    {type :$int_label}
-		    {location $program SPECIAL_expr}
+		    DW_AT_name param
+		    DW_AT_variable_parameter 1 flag
+		    DW_AT_type :$int_label
+		    DW_AT_location $program SPECIAL_expr
 		}
 
 		formal_parameter {
-		    {name optimized_out}
-		    {variable_parameter 1 flag}
-		    {type :$int_label}
+		    DW_AT_name optimized_out
+		    DW_AT_variable_parameter 1 flag
+		    DW_AT_type :$int_label
 		}
 	    }
 	}

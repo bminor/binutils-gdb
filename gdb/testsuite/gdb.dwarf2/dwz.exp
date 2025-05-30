@@ -28,49 +28,53 @@ Dwarf::assemble $asm_file {
     cu {} {
 	partial_label: partial_unit {} {
 	    subprogram {
-		{MACRO_AT_func { main }}
+		MACRO_AT_func { main }
 	    }
 	}
     }
 
     cu {} {
-	compile_unit {{language @DW_LANG_C}} {
+	compile_unit {
+	    DW_AT_language @DW_LANG_C
+	} {
 	    int_label2: base_type {
-		{name int}
-		{byte_size 4 sdata}
-		{encoding @DW_ATE_signed}
+		DW_AT_name int
+		DW_AT_byte_size 4 sdata
+		DW_AT_encoding @DW_ATE_signed
 	    }
 
 	    constant {
-		{name the_int}
-		{type :$int_label2}
-		{const_value 99 data1}
+		DW_AT_name the_int
+		DW_AT_type :$int_label2
+		DW_AT_const_value 99 data1
 	    }
 
 	    constant {
-		{name other_int}
-		{type :$int_label2}
-		{const_value 99 data1}
+		DW_AT_name other_int
+		DW_AT_type :$int_label2
+		DW_AT_const_value 99 data1
 	    }
 	}
     }
 
     cu {} {
-	compile_unit {{language @DW_LANG_C}} {
+	compile_unit {
+	    DW_AT_language @DW_LANG_C
+	} {
 	    imported_unit {
-		{import $partial_label ref_addr}
+		DW_AT_import $partial_label ref_addr
 	    }
 
 	    int_label: base_type {
-		{name int}
-		{byte_size 4 sdata}
-		{encoding @DW_ATE_signed}
+		DW_AT_name int
+		DW_AT_byte_size 4 sdata
+		DW_AT_encoding @DW_ATE_signed
 	    }
 
 	    constant {
-		{name the_int}
-		{type :$int_label}
-		{const_value 23 data1}
+		DW_AT_name the_int
+		DW_AT_type :$int_label
+		DW_AT_const_value 23 data1
 	    }
 	}
     }

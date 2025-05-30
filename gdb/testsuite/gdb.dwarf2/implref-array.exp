@@ -51,7 +51,7 @@ Dwarf::assemble ${asm_file} {
 
     cu {} {
 	DW_TAG_compile_unit {
-	    {DW_AT_language @DW_LANG_C_plus_plus}
+	    DW_AT_language @DW_LANG_C_plus_plus
 	} {
 	    declare_labels int_label sizetype_label array_label variable_label ref_label
 	    set int_size [get_sizeof "int" -1]
@@ -61,48 +61,52 @@ Dwarf::assemble ${asm_file} {
 	    set addr_size [get_sizeof "void *" -1]
 
 	    int_label: DW_TAG_base_type {
-		{DW_AT_byte_size ${int_size} DW_FORM_udata}
-		{DW_AT_encoding @DW_ATE_signed}
-		{DW_AT_name "int"}
+		DW_AT_byte_size ${int_size} DW_FORM_udata
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_name "int"
 	    }
 
 	    sizetype_label: DW_TAG_base_type {
-		{DW_AT_byte_size ${int_size} DW_FORM_udata}
-		{DW_AT_encoding @DW_ATE_unsigned}
-		{DW_AT_name "sizetype"}
+		DW_AT_byte_size ${int_size} DW_FORM_udata
+		DW_AT_encoding @DW_ATE_unsigned
+		DW_AT_name "sizetype"
 	    }
 
 	    array_label: DW_TAG_array_type {
-		    {DW_AT_type :${int_label}}
+		    DW_AT_type :${int_label}
 	    } {
 		DW_TAG_subrange_type {
-		    {DW_AT_type :${sizetype_label}}
-		    {DW_AT_lower_bound 0 DW_FORM_udata}
-		    {DW_AT_upper_bound ${upper_bound} DW_FORM_udata}
+		    DW_AT_type :${sizetype_label}
+		    DW_AT_lower_bound 0 DW_FORM_udata
+		    DW_AT_upper_bound ${upper_bound} DW_FORM_udata
 		}
 	    }
 
 	    ref_label: DW_TAG_reference_type {
-		{DW_AT_byte_size ${addr_size} DW_FORM_udata}
-		{DW_AT_type :${array_label}}
+		DW_AT_byte_size ${addr_size} DW_FORM_udata
+		DW_AT_type :${array_label}
 	    }
 
 	    variable_label: DW_TAG_variable {
-		{DW_AT_name "array"}
-		{DW_AT_type :${array_label}}
-		{DW_AT_external 1 DW_FORM_flag}
-		{DW_AT_location {DW_OP_addr [gdb_target_symbol "array"]} SPECIAL_expr}
+		DW_AT_name "array"
+		DW_AT_type :${array_label}
+		DW_AT_external 1 DW_FORM_flag
+		DW_AT_location [subst {
+		    DW_OP_addr [gdb_target_symbol "array"]
+		}] SPECIAL_expr
 	    }
 
 	    DW_TAG_subprogram {
-		{MACRO_AT_func { "main" }}
-		{DW_AT_type :${int_label}}
-		{DW_AT_external 1 DW_FORM_flag}
+		MACRO_AT_func { "main" }
+		DW_AT_type :${int_label}
+		DW_AT_external 1 DW_FORM_flag
 	    } {
 		DW_TAG_variable {
-		    {DW_AT_name "ref"}
-		    {DW_AT_type :${ref_label}}
-		    {DW_AT_location {DW_OP_GNU_implicit_pointer ${variable_label} 0} SPECIAL_expr}
+		    DW_AT_name "ref"
+		    DW_AT_type :${ref_label}
+		    DW_AT_location [subst {
+			DW_OP_GNU_implicit_pointer ${variable_label} 0
+		    }] SPECIAL_expr
 		}
 	    }
 	}

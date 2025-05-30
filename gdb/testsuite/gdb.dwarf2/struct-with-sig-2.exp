@@ -34,18 +34,18 @@ Dwarf::assemble $asm_file {
 	    declare_labels int_type
 
 	    the_type_i: structure_type {
-		{name s}
-		{byte_size 4 sdata}
+		DW_AT_name s
+		DW_AT_byte_size 4 sdata
 	    } {
 		member {
-		    {name i}
-		    {type :$int_type}
+		    DW_AT_name i
+		    DW_AT_type :$int_type
 		}
 	    }
 	    int_type: base_type {
-		{name int}
-		{encoding @DW_ATE_signed}
-		{byte_size 4 sdata}
+		DW_AT_name int
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_byte_size 4 sdata
 	    }
 	}
     }
@@ -55,18 +55,18 @@ Dwarf::assemble $asm_file {
 	    declare_labels int_type
 
 	    the_type_j: structure_type {
-		{name s}
-		{byte_size 4 sdata}
+		DW_AT_name s
+		DW_AT_byte_size 4 sdata
 	    } {
 		member {
-		    {name j}
-		    {type :$int_type}
+		    DW_AT_name j
+		    DW_AT_type :$int_type
 		}
 	    }
 	    int_type: base_type {
-		{name int}
-		{encoding @DW_ATE_signed}
-		{byte_size 4 sdata}
+		DW_AT_name int
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_byte_size 4 sdata
 	    }
 	}
     }
@@ -88,32 +88,32 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	compile_unit {
-	    {DW_AT_language @DW_LANG_C}
-	    {DW_AT_name main.c}
+	    DW_AT_language @DW_LANG_C
+	    DW_AT_name main.c
 	} {
 	    structure_type {
-		{name s}
-		{signature 0x0000000000000001 ref_sig8}
-		{declaration 1 flag}
+		DW_AT_name s
+		DW_AT_signature 0x0000000000000001 ref_sig8
+		DW_AT_declaration 1 flag
 	    }
 	    DW_TAG_subprogram {
-		{MACRO_AT_func {main}}
+		MACRO_AT_func {main}
 	    }
 	}
     }
 
     cu {} {
 	compile_unit {
-	    {DW_AT_language @DW_LANG_C}
-	    {DW_AT_name     foo.c}
+	    DW_AT_language @DW_LANG_C
+	    DW_AT_name     foo.c
 	} {
 	    structure_type {
-		{name s}
-		{signature 0x0000000000000002 ref_sig8}
-		{declaration 1 flag}
+		DW_AT_name s
+		DW_AT_signature 0x0000000000000002 ref_sig8
+		DW_AT_declaration 1 flag
 	    }
 	    DW_TAG_subprogram {
-		{MACRO_AT_func {foo}}
+		MACRO_AT_func {foo}
 	    }
 	}
     }

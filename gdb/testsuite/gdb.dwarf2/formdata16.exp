@@ -50,33 +50,33 @@ Dwarf::assemble $asm_file {
 	    declare_labels int_label sint_label
 
 	    int_label: DW_TAG_base_type {
-		{DW_AT_byte_size 16 DW_FORM_udata}
-		{DW_AT_encoding @DW_ATE_unsigned}
-		{DW_AT_name "__uint128"}
+		DW_AT_byte_size 16 DW_FORM_udata
+		DW_AT_encoding @DW_ATE_unsigned
+		DW_AT_name "__uint128"
 	    }
 
 	    sint_label: DW_TAG_base_type {
-		{DW_AT_byte_size 16 DW_FORM_udata}
-		{DW_AT_encoding @DW_ATE_signed}
-		{DW_AT_name "__int128"}
+		DW_AT_byte_size 16 DW_FORM_udata
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_name "__int128"
 	    }
 
 	    DW_TAG_variable {
-		{name xxx}
-		{type :$int_label}
-		{const_value $pair DW_FORM_data16}
+		DW_AT_name xxx
+		DW_AT_type :$int_label
+		DW_AT_const_value $pair DW_FORM_data16
 	    }
 
 	    DW_TAG_variable {
-		{name yyy}
-		{type :$int_label}
-		{const_value $pair2 DW_FORM_data16}
+		DW_AT_name yyy
+		DW_AT_type :$int_label
+		DW_AT_const_value $pair2 DW_FORM_data16
 	    }
 
 	    DW_TAG_variable {
-		{name sss}
-		{type :$sint_label}
-		{const_value $negative DW_FORM_data16}
+		DW_AT_name sss
+		DW_AT_type :$sint_label
+		DW_AT_const_value $negative DW_FORM_data16
 	    }
 	}
     }

@@ -57,29 +57,29 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	compile_unit {
-	    {producer "gcc" }
-	    {language @DW_LANG_C}
-	    {name ${srcfile3}}
-	    {low_pc 0 addr}
-	    {stmt_list ${lines_label} DW_FORM_sec_offset}
+	    DW_AT_producer "gcc"
+	    DW_AT_language @DW_LANG_C
+	    DW_AT_name ${srcfile3}
+	    DW_AT_low_pc 0 addr
+	    DW_AT_stmt_list ${lines_label} DW_FORM_sec_offset
 	} {
 	    callee_subprog_label: subprogram {
-		{external 1 flag}
-		{name callee}
-		{inline 3 data1}
+		DW_AT_external 1 flag
+		DW_AT_name callee
+		DW_AT_inline 3 data1
 	    }
 	    subprogram {
-		{external 1 flag}
-		{name main}
-		{low_pc $main_start addr}
-		{high_pc "$main_start + $main_len" addr}
+		DW_AT_external 1 flag
+		DW_AT_name main
+		DW_AT_low_pc $main_start addr
+		DW_AT_high_pc "$main_start + $main_len" addr
 	    } {
 		inlined_subroutine {
-		    {abstract_origin %$callee_subprog_label}
-		    {low_pc line_label_3 addr}
-		    {high_pc line_label_5 addr}
-		    {call_file 1 data1}
-		    {call_line 18 data1}
+		    DW_AT_abstract_origin %$callee_subprog_label
+		    DW_AT_low_pc line_label_3 addr
+		    DW_AT_high_pc line_label_5 addr
+		    DW_AT_call_file 1 data1
+		    DW_AT_call_line 18 data1
 		}
 	    }
 	}

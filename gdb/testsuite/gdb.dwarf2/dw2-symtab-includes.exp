@@ -38,11 +38,11 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	compile_unit {
-	    {language @DW_LANG_C}
-	    {stmt_list ${lines_label} DW_FORM_sec_offset}
+	    DW_AT_language @DW_LANG_C
+	    DW_AT_stmt_list ${lines_label} DW_FORM_sec_offset
 	} {
 	    imported_unit {
-		{import $partial_label ref_addr}
+		DW_AT_import $partial_label ref_addr
 	    }
 	}
     }

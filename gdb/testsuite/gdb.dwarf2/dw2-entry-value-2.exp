@@ -45,47 +45,47 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	DW_TAG_compile_unit {
-		{DW_AT_name $srcfile}
+	    DW_AT_name $srcfile
 	} {
 	    declare_labels integer
 
 	    integer: DW_TAG_base_type {
-		{DW_AT_byte_size 8 DW_FORM_sdata}
-		{DW_AT_encoding @DW_ATE_signed}
-		{DW_AT_name integer}
+		DW_AT_byte_size 8 DW_FORM_sdata
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_name integer
 	    }
 
 	    DW_TAG_subprogram {
-		{ DW_AT_name main }
-		{ DW_AT_low_pc $main_start DW_FORM_addr }
-		{ DW_AT_high_pc $main_end DW_FORM_addr }
+		 DW_AT_name main
+		 DW_AT_low_pc $main_start DW_FORM_addr
+		 DW_AT_high_pc $main_end DW_FORM_addr
 	    } {
 		DW_TAG_variable {
-		    { DW_AT_name argc }
-		    { DW_AT_type :$integer }
-		    { DW_AT_location {
+		     DW_AT_name argc
+		     DW_AT_type :$integer
+		     DW_AT_location [subst {
 			DW_OP_entry_value {
 			    DW_OP_regx $::dwarf_regnum
 			}
-		    } SPECIAL_expr }
+		    }] SPECIAL_expr
 		}
 	    }
 
 	    DW_TAG_subprogram {
-		{ DW_AT_name bar }
-		{ DW_AT_low_pc $bar_start DW_FORM_addr }
-		{ DW_AT_high_pc $bar_end DW_FORM_addr }
+		 DW_AT_name bar
+		 DW_AT_low_pc $bar_start DW_FORM_addr
+		 DW_AT_high_pc $bar_end DW_FORM_addr
 	    } {
 		DW_TAG_variable {
-		    { DW_AT_name foo }
-		    { DW_AT_type :$integer }
-		    { DW_AT_location {
+		     DW_AT_name foo
+		     DW_AT_type :$integer
+		     DW_AT_location [subst {
 			DW_OP_entry_value {
 			    DW_OP_bregx $::dwarf_regnum 0
 			    DW_OP_deref_size 4
 			}
 			DW_OP_stack_value
-		    } SPECIAL_expr }
+		    }] SPECIAL_expr
 		}
 	    }
 	}

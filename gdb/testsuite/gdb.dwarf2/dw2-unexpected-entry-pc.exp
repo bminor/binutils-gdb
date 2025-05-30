@@ -102,32 +102,32 @@ proc run_test { entry_label dwarf_version with_line_table } {
 
 	cu { version $dwarf_version } {
 	    compile_unit {
-		{producer "gcc"}
-		{language @DW_LANG_C}
-		{name $::srcfile}
-		{comp_dir /tmp}
-		{stmt_list $lines_table DW_FORM_sec_offset}
-		{low_pc 0 addr}
+		DW_AT_producer "gcc"
+		DW_AT_language @DW_LANG_C
+		DW_AT_name $::srcfile
+		DW_AT_comp_dir /tmp
+		DW_AT_stmt_list $lines_table DW_FORM_sec_offset
+		DW_AT_low_pc 0 addr
 	    } {
 		inline_func: subprogram {
-		    {name bar}
-		    {inline @DW_INL_declared_inlined}
+		    DW_AT_name bar
+		    DW_AT_inline @DW_INL_declared_inlined
 		}
 		subprogram {
-		    {name foo}
-		    {decl_file 1 data1}
-		    {decl_line $::foo_decl_line data1}
-		    {decl_column 1 data1}
-		    {low_pc $::foo_start addr}
-		    {high_pc $::foo_len $::ptr_type}
-		    {external 1 flag}
+		    DW_AT_name foo
+		    DW_AT_decl_file 1 data1
+		    DW_AT_decl_line $::foo_decl_line data1
+		    DW_AT_decl_column 1 data1
+		    DW_AT_low_pc $::foo_start addr
+		    DW_AT_high_pc $::foo_len $::ptr_type
+		    DW_AT_external 1 flag
 		} {
 		    inlined_subroutine {
-			{abstract_origin %$inline_func}
-			{call_file 1 data1}
-			{call_line $::bar_call_line data1}
-			{entry_pc $entry_label addr}
-			{ranges ${ranges_label} DW_FORM_sec_offset}
+			DW_AT_abstract_origin %$inline_func
+			DW_AT_call_file 1 data1
+			DW_AT_call_line $::bar_call_line data1
+			DW_AT_entry_pc $entry_label addr
+			DW_AT_ranges ${ranges_label} DW_FORM_sec_offset
 		    }
 		}
 	    }

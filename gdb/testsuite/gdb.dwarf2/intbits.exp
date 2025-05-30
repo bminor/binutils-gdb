@@ -33,153 +33,162 @@ if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] {
 Dwarf::assemble ${asm_file} {
     cu {} {
 	DW_TAG_compile_unit {
-	    {DW_AT_language @DW_LANG_C_plus_plus}
+	    DW_AT_language @DW_LANG_C_plus_plus
 	} {
 	    declare_labels i7_type u1_type u17_type u31_type \
 		u31_1_type u32_0_type u0_0_type be30_1_type just_bit_type
 
 	    i7_type: DW_TAG_base_type {
-		{DW_AT_encoding @DW_ATE_signed}
-		{DW_AT_endianity @DW_END_little}
-		{DW_AT_name "i7"}
-		{DW_AT_byte_size 2 DW_FORM_udata}
-		{DW_AT_bit_size 7 DW_FORM_implicit_const}
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_endianity @DW_END_little
+		DW_AT_name "i7"
+		DW_AT_byte_size 2 DW_FORM_udata
+		DW_AT_bit_size 7 DW_FORM_implicit_const
 	    }
 
 	    DW_TAG_variable {
-		{DW_AT_name "v_i16_m1"}
-		{DW_AT_type :${i7_type}}
-		{DW_AT_external 1 DW_FORM_flag}
-		{DW_AT_location {DW_OP_addr [gdb_target_symbol "i16_m1"]}
-		    SPECIAL_expr}
+		DW_AT_name "v_i16_m1"
+		DW_AT_type :${i7_type}
+		DW_AT_external 1 DW_FORM_flag
+		DW_AT_location [subst {
+		    DW_OP_addr [gdb_target_symbol "i16_m1"]
+		}] SPECIAL_expr
 	    }
 
 	    u1_type: DW_TAG_base_type {
-		{DW_AT_encoding @DW_ATE_boolean}
-		{DW_AT_endianity @DW_END_little}
-		{DW_AT_name "u1"}
-		{DW_AT_byte_size 2 DW_FORM_udata}
-		{DW_AT_bit_size 1 DW_FORM_udata}
-		{DW_AT_data_bit_offset 2 DW_FORM_udata}
+		DW_AT_encoding @DW_ATE_boolean
+		DW_AT_endianity @DW_END_little
+		DW_AT_name "u1"
+		DW_AT_byte_size 2 DW_FORM_udata
+		DW_AT_bit_size 1 DW_FORM_udata
+		DW_AT_data_bit_offset 2 DW_FORM_udata
 	    }
 
 	    DW_TAG_variable {
-		{DW_AT_name "v_u16_1"}
-		{DW_AT_type :${u1_type}}
-		{DW_AT_external 1 DW_FORM_flag}
-		{DW_AT_location {DW_OP_addr [gdb_target_symbol "u16_1"]}
-		    SPECIAL_expr}
+		DW_AT_name "v_u16_1"
+		DW_AT_type :${u1_type}
+		DW_AT_external 1 DW_FORM_flag
+		DW_AT_location [subst {
+		    DW_OP_addr [gdb_target_symbol "u16_1"]
+		}] SPECIAL_expr
 	    }
 
 	    u17_type: DW_TAG_base_type {
-		{DW_AT_encoding @DW_ATE_signed}
-		{DW_AT_endianity @DW_END_little}
-		{DW_AT_name "u17"}
-		{DW_AT_byte_size 4 DW_FORM_udata}
-		{DW_AT_bit_size 17 DW_FORM_udata}
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_endianity @DW_END_little
+		DW_AT_name "u17"
+		DW_AT_byte_size 4 DW_FORM_udata
+		DW_AT_bit_size 17 DW_FORM_udata
 	    }
 
 	    DW_TAG_variable {
-		{DW_AT_name "v_u32_m2"}
-		{DW_AT_type :${u17_type}}
-		{DW_AT_external 1 DW_FORM_flag}
-		{DW_AT_location {DW_OP_addr [gdb_target_symbol "u32_m2"]}
-		    SPECIAL_expr}
+		DW_AT_name "v_u32_m2"
+		DW_AT_type :${u17_type}
+		DW_AT_external 1 DW_FORM_flag
+		DW_AT_location [subst {
+		    DW_OP_addr [gdb_target_symbol "u32_m2"]
+		}] SPECIAL_expr
 	    }
 
 	    u31_type: DW_TAG_base_type {
-		{DW_AT_encoding @DW_ATE_unsigned}
-		{DW_AT_endianity @DW_END_little}
-		{DW_AT_name "u31"}
-		{DW_AT_byte_size 4 DW_FORM_udata}
-		{DW_AT_bit_size 31 DW_FORM_udata}
+		DW_AT_encoding @DW_ATE_unsigned
+		DW_AT_endianity @DW_END_little
+		DW_AT_name "u31"
+		DW_AT_byte_size 4 DW_FORM_udata
+		DW_AT_bit_size 31 DW_FORM_udata
 	    }
 
 	    DW_TAG_variable {
-		{DW_AT_name "v_u32_1"}
-		{DW_AT_type :${u31_type}}
-		{DW_AT_external 1 DW_FORM_flag}
-		{DW_AT_location {DW_OP_addr [gdb_target_symbol "u32_1"]}
-		    SPECIAL_expr}
+		DW_AT_name "v_u32_1"
+		DW_AT_type :${u31_type}
+		DW_AT_external 1 DW_FORM_flag
+		DW_AT_location [subst {
+		    DW_OP_addr [gdb_target_symbol "u32_1"]
+		}] SPECIAL_expr
 	    }
 
 	    u31_1_type: DW_TAG_base_type {
-		{DW_AT_encoding @DW_ATE_unsigned}
-		{DW_AT_endianity @DW_END_little}
-		{DW_AT_name "u31_1"}
-		{DW_AT_byte_size 4 DW_FORM_udata}
-		{DW_AT_bit_size 31 DW_FORM_udata}
-		{DW_AT_data_bit_offset 1 DW_FORM_udata}
+		DW_AT_encoding @DW_ATE_unsigned
+		DW_AT_endianity @DW_END_little
+		DW_AT_name "u31_1"
+		DW_AT_byte_size 4 DW_FORM_udata
+		DW_AT_bit_size 31 DW_FORM_udata
+		DW_AT_data_bit_offset 1 DW_FORM_udata
 	    }
 
 	    DW_TAG_variable {
-		{DW_AT_name "v_u32_1_off"}
-		{DW_AT_type :${u31_1_type}}
-		{DW_AT_external 1 DW_FORM_flag}
-		{DW_AT_location {DW_OP_addr [gdb_target_symbol "u32_1_off"]}
-		    SPECIAL_expr}
+		DW_AT_name "v_u32_1_off"
+		DW_AT_type :${u31_1_type}
+		DW_AT_external 1 DW_FORM_flag
+		DW_AT_location [subst {
+		    DW_OP_addr [gdb_target_symbol "u32_1_off"]
+		}] SPECIAL_expr
 	    }
 
 	    be30_1_type: DW_TAG_base_type {
-		{DW_AT_encoding @DW_ATE_unsigned}
-		{DW_AT_endianity @DW_END_big}
-		{DW_AT_name "be30_1"}
-		{DW_AT_byte_size 4 DW_FORM_udata}
-		{DW_AT_bit_size 30 DW_FORM_udata}
-		{DW_AT_data_bit_offset 1 DW_FORM_udata}
+		DW_AT_encoding @DW_ATE_unsigned
+		DW_AT_endianity @DW_END_big
+		DW_AT_name "be30_1"
+		DW_AT_byte_size 4 DW_FORM_udata
+		DW_AT_bit_size 30 DW_FORM_udata
+		DW_AT_data_bit_offset 1 DW_FORM_udata
 	    }
 
 	    DW_TAG_variable {
-		{DW_AT_name "v_be30_1_off"}
-		{DW_AT_type :${be30_1_type}}
-		{DW_AT_external 1 DW_FORM_flag}
-		{DW_AT_location {DW_OP_addr [gdb_target_symbol "be30_1_off"]}
-		    SPECIAL_expr}
+		DW_AT_name "v_be30_1_off"
+		DW_AT_type :${be30_1_type}
+		DW_AT_external 1 DW_FORM_flag
+		DW_AT_location [subst {
+		    DW_OP_addr [gdb_target_symbol "be30_1_off"]
+		}] SPECIAL_expr
 	    }
 
 	    u32_0_type: DW_TAG_base_type {
-		{DW_AT_encoding @DW_ATE_unsigned}
-		{DW_AT_endianity @DW_END_little}
-		{DW_AT_name "u32_0"}
-		{DW_AT_byte_size 4 DW_FORM_udata}
-		{DW_AT_bit_size 0 DW_FORM_udata}
+		DW_AT_encoding @DW_ATE_unsigned
+		DW_AT_endianity @DW_END_little
+		DW_AT_name "u32_0"
+		DW_AT_byte_size 4 DW_FORM_udata
+		DW_AT_bit_size 0 DW_FORM_udata
 	    }
 
 	    DW_TAG_variable {
-		{DW_AT_name "v_u32_0"}
-		{DW_AT_type :${u32_0_type}}
-		{DW_AT_external 1 DW_FORM_flag}
-		{DW_AT_location {DW_OP_addr [gdb_target_symbol "u32_0"]}
-		    SPECIAL_expr}
+		DW_AT_name "v_u32_0"
+		DW_AT_type :${u32_0_type}
+		DW_AT_external 1 DW_FORM_flag
+		DW_AT_location [subst {
+		    DW_OP_addr [gdb_target_symbol "u32_0"]
+		}] SPECIAL_expr
 	    }
 
 	    u0_0_type: DW_TAG_base_type {
-		{DW_AT_encoding @DW_ATE_unsigned}
-		{DW_AT_endianity @DW_END_little}
-		{DW_AT_name "u0_0"}
-		{DW_AT_byte_size 0 DW_FORM_udata}
+		DW_AT_encoding @DW_ATE_unsigned
+		DW_AT_endianity @DW_END_little
+		DW_AT_name "u0_0"
+		DW_AT_byte_size 0 DW_FORM_udata
 	    }
 
 	    DW_TAG_variable {
-		{DW_AT_name "v_u0_0"}
-		{DW_AT_type :${u0_0_type}}
-		{DW_AT_external 1 DW_FORM_flag}
-		{DW_AT_location {DW_OP_addr [gdb_target_symbol "u32_0"]}
-		    SPECIAL_expr}
+		DW_AT_name "v_u0_0"
+		DW_AT_type :${u0_0_type}
+		DW_AT_external 1 DW_FORM_flag
+		DW_AT_location [subst {
+		    DW_OP_addr [gdb_target_symbol "u32_0"]
+		}] SPECIAL_expr
 	    }
 
 	    just_bit_type: DW_TAG_base_type {
-		{DW_AT_encoding @DW_ATE_unsigned}
-		{DW_AT_name "just_bit_type"}
-		{DW_AT_bit_size 3 DW_FORM_udata}
+		DW_AT_encoding @DW_ATE_unsigned
+		DW_AT_name "just_bit_type"
+		DW_AT_bit_size 3 DW_FORM_udata
 	    }
 
 	    DW_TAG_variable {
-		{DW_AT_name "v_just_bit"}
-		{DW_AT_type :${just_bit_type}}
-		{DW_AT_external 1 DW_FORM_flag}
-		{DW_AT_location {DW_OP_addr [gdb_target_symbol "just_bit_0"]}
-		    SPECIAL_expr}
+		DW_AT_name "v_just_bit"
+		DW_AT_type :${just_bit_type}
+		DW_AT_external 1 DW_FORM_flag
+		DW_AT_location [subst {
+		    DW_OP_addr [gdb_target_symbol "just_bit_0"]
+		}] SPECIAL_expr
 	    }
 	}
     }

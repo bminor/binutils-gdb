@@ -56,42 +56,42 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	compile_unit {
-	    {language @DW_LANG_C}
-	    {name dw2-prologue-end.c}
-	    {stmt_list ${lines_label} DW_FORM_sec_offset}
-	    {producer "clang version 17.0.1"}
+	    DW_AT_language @DW_LANG_C
+	    DW_AT_name dw2-prologue-end.c
+	    DW_AT_stmt_list ${lines_label} DW_FORM_sec_offset
+	    DW_AT_producer "clang version 17.0.1"
 	} {
 	    declare_labels char_label
 
 	    char_label: base_type {
-		{name char}
-		{encoding @DW_ATE_signed}
-		{byte_size 1 DW_FORM_sdata}
+		DW_AT_name char
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_byte_size 1 DW_FORM_sdata
 	    }
 
 	    subprogram {
-		{external 1 flag}
-		{name trivial}
-		{low_pc $trivial_start addr}
-		{high_pc "$trivial_start + $trivial_len" addr}
+		DW_AT_external 1 flag
+		DW_AT_name trivial
+		DW_AT_low_pc $trivial_start addr
+		DW_AT_high_pc "$trivial_start + $trivial_len" addr
 	    }
 	    subprogram {
-		{external 1 flag}
-		{name watch}
-		{low_pc $watch_start addr}
-		{high_pc "$watch_start + $watch_len" addr}
+		DW_AT_external 1 flag
+		DW_AT_name watch
+		DW_AT_low_pc $watch_start addr
+		DW_AT_high_pc "$watch_start + $watch_len" addr
 	    } {
 		DW_TAG_variable {
-		    {name local}
-		    {type :$char_label}
-		    {DW_AT_location {DW_OP_reg0} SPECIAL_expr}
+		    DW_AT_name local
+		    DW_AT_type :$char_label
+		    DW_AT_location {DW_OP_reg0} SPECIAL_expr
 		}
 	    }
 	    subprogram {
-		{external 1 flag}
-		{name main}
-		{low_pc $main_start addr}
-		{high_pc "$main_start + $main_len" addr}
+		DW_AT_external 1 flag
+		DW_AT_name main
+		DW_AT_low_pc $main_start addr
+		DW_AT_high_pc "$main_start + $main_len" addr
 	    }
 	}
     }

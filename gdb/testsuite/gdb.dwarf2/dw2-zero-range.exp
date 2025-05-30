@@ -96,13 +96,13 @@ foreach_with_prefix ranges_sect {ranges rnglists} {
 
 	    cu {} {
 		compile_unit {
-		    {language @DW_LANG_C}
-		    {name $srcfile2}
-		    {ranges ${ranges_label} DW_FORM_sec_offset}
+		    DW_AT_language @DW_LANG_C
+		    DW_AT_name $srcfile2
+		    DW_AT_ranges ${ranges_label} DW_FORM_sec_offset
 		} {
 		    subprogram {
-			{external 1 flag}
-			{name foo}
+			DW_AT_external 1 flag
+			DW_AT_name foo
 		    }
 		}
 	    }
@@ -123,13 +123,13 @@ foreach_with_prefix ranges_sect {ranges rnglists} {
 		version 5
 	    } {
 		compile_unit {
-		    {language @DW_LANG_C}
-		    {name $srcfile2}
-		    {ranges ${rnglists_label} DW_FORM_sec_offset}
+		    DW_AT_language @DW_LANG_C
+		    DW_AT_name $srcfile2
+		    DW_AT_ranges ${rnglists_label} DW_FORM_sec_offset
 		} {
 		    subprogram {
-			{external 1 flag}
-			{name foo}
+			DW_AT_external 1 flag
+			DW_AT_name foo
 		    }
 		}
 	    }

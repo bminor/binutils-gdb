@@ -93,75 +93,75 @@ proc run_test { dwarf_version } {
 
 	cu { version $dwarf_version } {
 	    compile_unit {
-		{producer "GNU C 14.1.0"}
-		{language @DW_LANG_C}
-		{name $::srcfile}
-		{comp_dir /tmp}
-		{stmt_list $lines_table DW_FORM_sec_offset}
-		{low_pc 0 addr}
+		DW_AT_producer "GNU C 14.1.0"
+		DW_AT_language @DW_LANG_C
+		DW_AT_name $::srcfile
+		DW_AT_comp_dir /tmp
+		DW_AT_stmt_list $lines_table DW_FORM_sec_offset
+		DW_AT_low_pc 0 addr
 	    } {
 		int_label: base_type {
-		    {name "int"}
-		    {byte_size 4 sdata}
-		    {encoding @DW_ATE_signed}
+		    DW_AT_name "int"
+		    DW_AT_byte_size 4 sdata
+		    DW_AT_encoding @DW_ATE_signed
 		}
 		foo_func: subprogram {
-		    {name foo}
-		    {inline @DW_INL_declared_inlined}
-		    {decl_file 1 data1}
-		    {decl_line $::func_a_decl_line data1}
+		    DW_AT_name foo
+		    DW_AT_inline @DW_INL_declared_inlined
+		    DW_AT_decl_file 1 data1
+		    DW_AT_decl_line $::func_a_decl_line data1
 		} {
 		    foo_block: lexical_block {
 		    } {
 			value_label: DW_TAG_variable {
-			    {name value}
-			    {type :$int_label}
+			    DW_AT_name value
+			    DW_AT_type :$int_label
 			}
 		    }
 		}
 		subprogram {
-		    {abstract_origin %$foo_func}
-		    {low_pc func_a_0 addr}
-		    {high_pc func_a_6 addr}
-		    {external 1 flag}
+		    DW_AT_abstract_origin %$foo_func
+		    DW_AT_low_pc func_a_0 addr
+		    DW_AT_high_pc func_a_6 addr
+		    DW_AT_external 1 flag
 		} {
 		    bad_block: lexical_block {
-			{abstract_origin %$foo_block}
-			{ranges $block_ranges DW_FORM_sec_offset}
+			DW_AT_abstract_origin %$foo_block
+			DW_AT_ranges $block_ranges DW_FORM_sec_offset
 		    } {
 			DW_TAG_variable {
-			    {abstract_origin %$value_label}
-			    {DW_AT_location {
+			    DW_AT_abstract_origin %$value_label
+			    DW_AT_location {
 				DW_OP_const1u 23
 				DW_OP_stack_value
-			    } SPECIAL_expr}
+			    } SPECIAL_expr
 			}
 		    }
 		}
 		subprogram {
-		    {name baz}
-		    {low_pc func_b_0 addr}
-		    {high_pc func_b_5 addr}
-		    {external 1 flag}
+		    DW_AT_name baz
+		    DW_AT_low_pc func_b_0 addr
+		    DW_AT_high_pc func_b_5 addr
+		    DW_AT_external 1 flag
 		} {
 		    inlined_subroutine {
-			{abstract_origin %$foo_func}
-			{call_file 1 data1}
-			{call_line $::call_line data1}
-			{low_pc func_b_1 addr}
-			{high_pc func_b_4 addr}
+			DW_AT_abstract_origin %$foo_func
+			DW_AT_call_file 1 data1
+			DW_AT_call_line $::call_line data1
+			DW_AT_low_pc func_b_1 addr
+			DW_AT_high_pc func_b_4 addr
 		    } {
 			lexical_block {
-			    {abstract_origin %$bad_block}
-			    {low_pc func_b_2 addr}
-			    {high_pc func_b_3 addr}
+			    DW_AT_abstract_origin %$bad_block
+			    DW_AT_low_pc func_b_2 addr
+			    DW_AT_high_pc func_b_3 addr
 			} {
 			    DW_TAG_variable {
-				{abstract_origin %$value_label}
-				{DW_AT_location {
+				DW_AT_abstract_origin %$value_label
+				DW_AT_location {
 				    DW_OP_const1u 99
 				    DW_OP_stack_value
-				} SPECIAL_expr}
+				} SPECIAL_expr
 			    }
 			}
 		    }

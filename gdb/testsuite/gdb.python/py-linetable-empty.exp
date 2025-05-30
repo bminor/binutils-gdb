@@ -27,11 +27,11 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	compile_unit {
-	    {language @DW_LANG_C}
-	    {name py-linetable-empty.c}
+	    DW_AT_language @DW_LANG_C
+	    DW_AT_name py-linetable-empty.c
 	} {
 	    subprogram {
-			{MACRO_AT_func {main}}
+		MACRO_AT_func {main}
 	    }
 	}
     }

@@ -58,116 +58,116 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	compile_unit {
-	    {language @DW_LANG_C}
-	    {name dw2-inline-stepping.c}
-	    {low_pc 0 addr}
-	    {stmt_list ${lines_label} DW_FORM_sec_offset}
-	    {ranges ${ranges_label} DW_FORM_sec_offset}
+	    DW_AT_language @DW_LANG_C
+	    DW_AT_name dw2-inline-stepping.c
+	    DW_AT_low_pc 0 addr
+	    DW_AT_stmt_list ${lines_label} DW_FORM_sec_offset
+	    DW_AT_ranges ${ranges_label} DW_FORM_sec_offset
 	} {
 	    subprogram {
-		{external 1 flag}
-		{name ddd}
-		{low_pc $ddd_start addr}
-		{high_pc "$ddd_start + $ddd_len" addr}
+		DW_AT_external 1 flag
+		DW_AT_name ddd
+		DW_AT_low_pc $ddd_start addr
+		DW_AT_high_pc "$ddd_start + $ddd_len" addr
 	    }
 	    subprogram {
-		{external 1 flag}
-		{name eee}
-		{low_pc $eee_start addr}
-		{high_pc "$eee_start + $eee_len" addr}
+		DW_AT_external 1 flag
+		DW_AT_name eee
+		DW_AT_low_pc $eee_start addr
+		DW_AT_high_pc "$eee_start + $eee_len" addr
 	    }
 	    subprogram {
-		{external 1 flag}
-		{name jjj}
-		{low_pc $jjj_start addr}
-		{high_pc "$jjj_start + $jjj_len" addr}
+		DW_AT_external 1 flag
+		DW_AT_name jjj
+		DW_AT_low_pc $jjj_start addr
+		DW_AT_high_pc "$jjj_start + $jjj_len" addr
 	    }
 	    subprogram {
-		{external 1 flag}
-		{name kkk}
-		{low_pc $kkk_start addr}
-		{high_pc "$kkk_start + $kkk_len" addr}
+		DW_AT_external 1 flag
+		DW_AT_name kkk
+		DW_AT_low_pc $kkk_start addr
+		DW_AT_high_pc "$kkk_start + $kkk_len" addr
 	    }
 	    aaa_label: subprogram {
-		{name aaa}
-		{inline 3 data1}
+		DW_AT_name aaa
+		DW_AT_inline 3 data1
 	    }
 	    bbb_label: subprogram {
-		{name bbb}
-		{inline 3 data1}
+		DW_AT_name bbb
+		DW_AT_inline 3 data1
 	    }
 	    ccc_label: subprogram {
-		{name ccc}
-		{inline 3 data1}
+		DW_AT_name ccc
+		DW_AT_inline 3 data1
 	    }
 	    ggg_label: subprogram {
-		{name ggg}
-		{inline 3 data1}
+		DW_AT_name ggg
+		DW_AT_inline 3 data1
 	    }
 	    hhh_label: subprogram {
-		{name hhh}
-		{inline 3 data1}
+		DW_AT_name hhh
+		DW_AT_inline 3 data1
 	    }
 	    iii_label: subprogram {
-		{name iii}
-		{inline 3 data1}
+		DW_AT_name iii
+		DW_AT_inline 3 data1
 	    }
 	    subprogram {
-		{external 1 flag}
-		{name main}
-		{low_pc $main_start addr}
-		{high_pc "$main_start + $main_len" addr}
+		DW_AT_external 1 flag
+		DW_AT_name main
+		DW_AT_low_pc $main_start addr
+		DW_AT_high_pc "$main_start + $main_len" addr
 	    } {
 		inlined_subroutine {
-		    {abstract_origin %$aaa_label}
-		    {low_pc main_label2 addr}
-		    {high_pc main_label3 addr}
-		    {call_file 1 data1}
-		    {call_line $call_in_main data1}
+		    DW_AT_abstract_origin %$aaa_label
+		    DW_AT_low_pc main_label2 addr
+		    DW_AT_high_pc main_label3 addr
+		    DW_AT_call_file 1 data1
+		    DW_AT_call_line $call_in_main data1
 		} {
 		    inlined_subroutine {
-			{abstract_origin %$bbb_label}
-			{low_pc main_label2 addr}
-			{high_pc main_label3 addr}
-			{call_file 1 data1}
-			{call_line $call_in_aaa data1}
+			DW_AT_abstract_origin %$bbb_label
+			DW_AT_low_pc main_label2 addr
+			DW_AT_high_pc main_label3 addr
+			DW_AT_call_file 1 data1
+			DW_AT_call_line $call_in_aaa data1
 		    }  {
 			inlined_subroutine {
-			    {abstract_origin %$ccc_label}
-			    {low_pc main_label2 addr}
-			    {high_pc main_label3 addr}
-			    {call_file 1 data1}
-			    {call_line $call_in_bbb data1}
+			    DW_AT_abstract_origin %$ccc_label
+			    DW_AT_low_pc main_label2 addr
+			    DW_AT_high_pc main_label3 addr
+			    DW_AT_call_file 1 data1
+			    DW_AT_call_line $call_in_bbb data1
 			}
 		    }
 		}
 	    }
 	    subprogram {
-		{external 1 flag}
-		{name fff}
-		{low_pc $fff_start addr}
-		{high_pc "$fff_start + $fff_len" addr}
+		DW_AT_external 1 flag
+		DW_AT_name fff
+		DW_AT_low_pc $fff_start addr
+		DW_AT_high_pc "$fff_start + $fff_len" addr
 	    }  {
 		inlined_subroutine {
-		    {abstract_origin %$ggg_label}
-		    {low_pc fff_label addr}
-		    {high_pc main_label2 addr}
-		    {call_file 1 data1}
-		    {call_line $call_in_fff data1}
+		    DW_AT_abstract_origin %$ggg_label
+		    DW_AT_low_pc fff_label addr
+		    DW_AT_high_pc main_label2 addr
+		    DW_AT_call_file 1 data1
+		    DW_AT_call_line $call_in_fff data1
 		} {
 		    inlined_subroutine {
-			{abstract_origin %$hhh_label}
-			{low_pc fff_label addr}
-			{high_pc fff_label2 addr}
-			{call_file 1 data1}
-			{call_line $call_in_ggg data1}
+			DW_AT_abstract_origin %$hhh_label
+			DW_AT_low_pc fff_label addr
+			DW_AT_high_pc fff_label2 addr
+			DW_AT_call_file 1 data1
+			DW_AT_call_line $call_in_ggg data1
 		    }  {
 			inlined_subroutine {
-			    {abstract_origin %$iii_label}
-			    {low_pc fff_label addr}
-			    {high_pc fff_label2 addr}
-			    {call_file 1 data1}
-			    {call_line $call_in_hhh data1}
+			    DW_AT_abstract_origin %$iii_label
+			    DW_AT_low_pc fff_label addr
+			    DW_AT_high_pc fff_label2 addr
+			    DW_AT_call_file 1 data1
+			    DW_AT_call_line $call_in_hhh data1
 			}
 		    }
 		}

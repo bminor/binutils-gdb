@@ -26,12 +26,14 @@ standard_testfile main.c .S
 set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
     cu {} {
-	compile_unit {{language @DW_LANG_C_plus_plus}} {
+	compile_unit {
+	    DW_AT_language @DW_LANG_C_plus_plus
+	} {
 	    # Check handling of self-referencing DIE.
 	    declare_labels c1
 	    c1: class_type {
-		{name class1}
-		{specification :$c1}
+		DW_AT_name class1
+		DW_AT_specification :$c1
 	    }
 
 	    # Check handling of self-referencing child DIE.  Regression test
@@ -39,11 +41,11 @@ Dwarf::assemble $asm_file {
 	    declare_labels f1 abstract_f1 f1_l
 	    abstract_f1: subprogram {}
 	    f1: subprogram {
-		{MACRO_AT_func {main}}
-		{abstract_origin :$abstract_f1}
+		MACRO_AT_func {main}
+		DW_AT_abstract_origin :$abstract_f1
 	    } {
 		f1_l: label {
-		    {abstract_origin :$f1_l}
+		    DW_AT_abstract_origin :$f1_l
 		}
 	    }
 	}

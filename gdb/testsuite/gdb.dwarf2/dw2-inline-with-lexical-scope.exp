@@ -43,59 +43,59 @@ Dwarf::assemble $asm_file {
 
     cu {} {
 	compile_unit {
-	    {language @DW_LANG_C99}
-	    {name $srcfile}
-	    {low_pc $main_start addr}
-	    {high_pc "$main_start + $main_len" addr}
-	    {stmt_list ${lines_label} DW_FORM_sec_offset}
+	    DW_AT_language @DW_LANG_C99
+	    DW_AT_name $srcfile
+	    DW_AT_low_pc $main_start addr
+	    DW_AT_high_pc "$main_start + $main_len" addr
+	    DW_AT_stmt_list ${lines_label} DW_FORM_sec_offset
 	} {
 	    int_label: base_type {
-		{name "int"}
-		{byte_size 4 sdata}
-		{encoding @DW_ATE_signed}
+		DW_AT_name "int"
+		DW_AT_byte_size 4 sdata
+		DW_AT_encoding @DW_ATE_signed
 	    }
 
 	    func_label: subprogram {
-		{name func}
-		{inline @DW_INL_declared_inlined}
+		DW_AT_name func
+		DW_AT_inline @DW_INL_declared_inlined
 	    } {
 		num_label: DW_TAG_variable {
-		    {name num}
-		    {type :$int_label}
+		    DW_AT_name num
+		    DW_AT_type :$int_label
 		}
 		lexical_block {
 		} {
 		    value_label: DW_TAG_variable {
-			{name value}
-			{type :$int_label}
+			DW_AT_name value
+			DW_AT_type :$int_label
 		    }
 		}
 	    }
 
 	    subprogram {
-		{name main}
-		{external 1 flag}
-		{low_pc $main_start addr}
-		{high_pc "$main_start + $main_len" addr}
+		DW_AT_name main
+		DW_AT_external 1 flag
+		DW_AT_low_pc $main_start addr
+		DW_AT_high_pc "$main_start + $main_len" addr
 	    } {
 		inlined_subroutine {
-		    {abstract_origin %$func_label}
-		    {low_pc main_label addr}
-		    {high_pc main_label2 addr}
-		    {call_file 1 data1}
-		    {call_line $func_call data1}
+		    DW_AT_abstract_origin %$func_label
+		    DW_AT_low_pc main_label addr
+		    DW_AT_high_pc main_label2 addr
+		    DW_AT_call_file 1 data1
+		    DW_AT_call_line $func_call data1
 		} {
 		    DW_TAG_variable {
-			{abstract_origin %$num_label}
-			{location {addr $global_num_addr} SPECIAL_expr}
+			DW_AT_abstract_origin %$num_label
+			DW_AT_location [subst {addr $global_num_addr}] SPECIAL_expr
 		    }
 		    lexical_block {
-			{low_pc scope_label1 addr}
-			{high_pc scope_label2 addr}
+			DW_AT_low_pc scope_label1 addr
+			DW_AT_high_pc scope_label2 addr
 		    } {
 			DW_TAG_variable {
-			    {abstract_origin %$value_label}
-			    {location {addr $global_value_addr} SPECIAL_expr}
+			    DW_AT_abstract_origin %$value_label
+			    DW_AT_location [subst {addr $global_value_addr}] SPECIAL_expr
 			}
 		    }
 		}

@@ -35,11 +35,13 @@ Dwarf::assemble {
     }
 
     cu { label cu_label } {
-	compile_unit {{language @DW_LANG_C}} {
+	compile_unit {
+	    DW_AT_language @DW_LANG_C
+	} {
 	    subprogram {
-		{DW_AT_name _start}
-		{DW_AT_low_pc $_start_start DW_FORM_addr}
-		{DW_AT_high_pc $_start_end DW_FORM_addr}
+		DW_AT_name _start
+		DW_AT_low_pc $_start_start DW_FORM_addr
+		DW_AT_high_pc $_start_end DW_FORM_addr
 	    }
 	}
     }
@@ -49,18 +51,18 @@ Dwarf::assemble {
 	    declare_labels int_type
 
 	    structure_type {
-		{name struct_with_int_member}
-		{byte_size 4 sdata}
+		DW_AT_name struct_with_int_member
+		DW_AT_byte_size 4 sdata
 	    } {
 		member {
-		    {name member}
-		    {type :$int_type}
+		    DW_AT_name member
+		    DW_AT_type :$int_type
 		}
 	    }
 	    int_type: base_type {
-		{name int}
-		{encoding @DW_ATE_signed}
-		{byte_size 4 sdata}
+		DW_AT_name int
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_byte_size 4 sdata
 	    }
 	}
     }

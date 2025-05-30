@@ -71,34 +71,34 @@ Dwarf::assemble $asm_file {
 
     cu { version 4 } {
 	compile_unit {
-	    {producer "gcc"}
-	    {language @DW_LANG_C}
-	    {name ${srcfile}}
-	    {comp_dir /tmp}
-	    {stmt_list $lines_table DW_FORM_sec_offset}
-	    {low_pc 0 addr}
+	    DW_AT_producer "gcc"
+	    DW_AT_language @DW_LANG_C
+	    DW_AT_name ${srcfile}
+	    DW_AT_comp_dir /tmp
+	    DW_AT_stmt_list $lines_table DW_FORM_sec_offset
+	    DW_AT_low_pc 0 addr
 	} {
 	    bar_label: subprogram {
-		{external 1 flag}
-		{name bar}
-		{decl_file 1 data1}
-		{decl_line $bar_decl_line data1}
-		{decl_column 1 data1}
-		{inline 3 data1}
+		DW_AT_external 1 flag
+		DW_AT_name bar
+		DW_AT_decl_file 1 data1
+		DW_AT_decl_line $bar_decl_line data1
+		DW_AT_decl_column 1 data1
+		DW_AT_inline 3 data1
 	    }
 	    subprogram {
-		{name foo}
-		{decl_file 1 data1}
-		{decl_line $foo_decl_line data1}
-		{decl_column 1 data1}
-		{ranges ${ranges_label_foo} DW_FORM_sec_offset}
-		{external 1 flag}
+		DW_AT_name foo
+		DW_AT_decl_file 1 data1
+		DW_AT_decl_line $foo_decl_line data1
+		DW_AT_decl_column 1 data1
+		DW_AT_ranges ${ranges_label_foo} DW_FORM_sec_offset
+		DW_AT_external 1 flag
 	    } {
 		inlined_subroutine {
-		    {abstract_origin %$bar_label}
-		    {call_file 1 data1}
-		    {call_line $foo_src_3 data1}
-		    {ranges ${ranges_label_bar} DW_FORM_sec_offset}
+		    DW_AT_abstract_origin %$bar_label
+		    DW_AT_call_file 1 data1
+		    DW_AT_call_line $foo_src_3 data1
+		    DW_AT_ranges ${ranges_label_bar} DW_FORM_sec_offset
 		}
 	    }
 	}
