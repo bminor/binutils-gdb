@@ -3335,18 +3335,36 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 
   name = ctf_strraw (real_input, suffix->ctt_name);
 
-  /* Hide conflicting types, if we were asked to: also hide if a type with this
-     name already exists and is not a forward.  */
-  if (cu_mapped && is_conflicting)
-    {
-      mark_type_conflicting = 1;
-      isroot = 0;
-    }
-  else if (name
-	   && (maybe_dup = ctf_lookup_by_rawname (target, kind, name)) != 0)
+  /* Hide conflicting types, if this type is conflicting and a type with this
+     name already exists in the target and is not a forward.  We don't want to
+     hide them if they are the only type of that name in a per-CU child, as is
+     usually the case, but in cu-mapped links and in the final phase after
+     cu-mapping distinct conflicting types from different CUs can end up in the
+     same cu-mapped target.  Hide all but one in this case: it doesn't matter
+     which, all the conflicting types necessarily lost the popularity contest
+     anyway.
+
+     cu_mapped links get absolutely *everything* marked non-root, named or not.
+     cu-mapped links, when we are merging multiple child CUs into one, are the
+     only point at which we can ever put conflicting and nonconflicting
+     instances of the same type into the same dict, and which one comes first is
+     arbitrary.  Rather than having to figure out when we insert a type whether
+     another one is coming that might conflict with it without being so marked,
+     just mark everything as non-root: we'll disregard it in the next phase of
+     cu-mapped linking anyway.
+
+     Note that enums also get their enumerands checked, below.  */
+
+  if (cu_mapped)
+    isroot = 0;
+  else if (is_conflicting && name
+	   && ((maybe_dup = ctf_lookup_by_rawname (target, kind, name)) != 0))
     {
       if (ctf_type_kind (target, maybe_dup) != CTF_K_FORWARD)
-	isroot = 0;
+	{
+	  isroot = 0;
+	  mark_type_conflicting = 1;
+	}
     }
 
   ctf_dprintf ("%i: Emitting type with hash %s (%s), into target %i/%p\n",
@@ -3401,6 +3419,22 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	int64_t val;
 	ctf_encoding_t en;
 	errtype = _("enum");
+
+	/* Check enumerands for duplication: this is an extension of the isroot
+	   check above.  */
+
+	if (isroot)
+	  {
+	    const char *enumerand;
+	    while ((enumerand = ctf_enum_next (input, type, &i, &val)) != NULL)
+	      {
+		if (is_conflicting && name
+		    && ctf_dynhash_lookup (target->ctf_names, enumerand) != NULL)
+		  isroot = 0;
+	      }
+	    if (ctf_errno (input) != ECTF_NEXT_END)
+	      goto err_input;
+	  }
 
 	if (ctf_type_encoding (input, type, &en) < 0)
 	  goto err_input;
