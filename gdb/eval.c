@@ -2558,12 +2558,10 @@ unop_extract_operation::evaluate (struct type *expect_type,
 
 }
 
-
 /* Helper for evaluate_subexp_for_address.  */
 
 static value *
-evaluate_subexp_for_address_base (struct expression *exp, enum noside noside,
-				  value *x)
+evaluate_subexp_for_address_base (enum noside noside, value *x)
 {
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
@@ -2571,14 +2569,13 @@ evaluate_subexp_for_address_base (struct expression *exp, enum noside noside,
 
       if (TYPE_IS_REFERENCE (type))
 	return value::zero (lookup_pointer_type (type->target_type ()),
-			   not_lval);
+			    not_lval);
       else if (x->lval () == lval_memory || value_must_coerce_to_target (x))
-	return value::zero (lookup_pointer_type (x->type ()),
-			   not_lval);
+	return value::zero (lookup_pointer_type (x->type ()), not_lval);
       else
-	error (_("Attempt to take address of "
-		 "value not located in memory."));
+	error (_("Attempt to take address of value not located in memory."));
     }
+
   return value_addr (x);
 }
 
@@ -2598,7 +2595,7 @@ value *
 operation::evaluate_for_address (struct expression *exp, enum noside noside)
 {
   value *val = evaluate (nullptr, exp, noside);
-  return evaluate_subexp_for_address_base (exp, noside, val);
+  return evaluate_subexp_for_address_base (noside, val);
 }
 
 value *
@@ -2625,7 +2622,7 @@ unop_ind_base_operation::evaluate_for_address (struct expression *exp,
   if (unop_user_defined_p (UNOP_IND, x))
     {
       x = value_x_unop (x, UNOP_IND, noside);
-      return evaluate_subexp_for_address_base (exp, noside, x);
+      return evaluate_subexp_for_address_base (noside, x);
     }
 
   return coerce_array (x);
