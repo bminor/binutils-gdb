@@ -719,6 +719,12 @@ EXTERNAL
 #define EXIT_FAILURE 1
 #endif
 
+/* Configure will leave this undefined, but it's unconditionally used
+   in a definition later.  */
+#ifndef TLS
+#define TLS
+#endif
+
 
 /* provide storage for subsystem, stack and heap data which may have been
    passed in on the command line.  Ld puts this data into a bfd_link_info
