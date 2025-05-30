@@ -2566,11 +2566,13 @@ evaluate_subexp_for_address_base (enum noside noside, value *x)
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
       struct type *type = check_typedef (x->type ());
+      enum type_code typecode = type->code ();
 
       if (TYPE_IS_REFERENCE (type))
 	return value::zero (lookup_pointer_type (type->target_type ()),
 			    not_lval);
-      else if (x->lval () == lval_memory || value_must_coerce_to_target (x))
+      else if (x->lval () == lval_memory || value_must_coerce_to_target (x)
+	       || typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION)
 	return value::zero (lookup_pointer_type (x->type ()), not_lval);
       else
 	error (_("Attempt to take address of value not located in memory."));
