@@ -2639,7 +2639,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
   int input_num = CTF_DEDUP_GID_TO_INPUT (id);
   int output_num = (uint32_t) -1;		/* 'shared' */
   int cu_mapped = *(int *)arg;
-  int isroot;
+  int isroot = 1;
   int is_conflicting;
 
   ctf_next_t *i = NULL;
@@ -2708,11 +2708,9 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
     }
 
   name = ctf_strraw (real_input, tp->ctt_name);
-  isroot = LCTF_INFO_ISROOT (real_input, tp->ctt_info);
 
   /* Hide conflicting types, if we were asked to: also hide if a type with this
-     name already exists and is not a forward, or if this type is hidden on the
-     input.  */
+     name already exists and is not a forward.  */
   if (cu_mapped && is_conflicting)
     isroot = 0;
   else if (name
