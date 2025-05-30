@@ -3469,7 +3469,7 @@ _bfd_elf_init_reloc_shdr (bfd *abfd,
 			  struct bfd_elf_section_reloc_data *reldata,
 			  const char *sec_name,
 			  bool use_rela_p,
-			  bool delay_st_name_p)
+			  bool delay_sh_name_p)
 {
   Elf_Internal_Shdr *rel_hdr;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
@@ -3480,7 +3480,7 @@ _bfd_elf_init_reloc_shdr (bfd *abfd,
     return false;
   reldata->hdr = rel_hdr;
 
-  if (delay_st_name_p)
+  if (delay_sh_name_p)
     rel_hdr->sh_name = (unsigned int) -1;
   else if (!_bfd_elf_set_reloc_sh_name (abfd, rel_hdr, sec_name,
 					use_rela_p))
@@ -3526,7 +3526,7 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
   Elf_Internal_Shdr *this_hdr;
   unsigned int sh_type;
   const char *name = asect->name;
-  bool delay_st_name_p = false;
+  bool delay_sh_name_p = false;
   bfd_vma mask;
 
   if (arg->failed)
@@ -3543,16 +3543,17 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
       && (abfd->flags & BFD_COMPRESS) != 0
       && (asect->flags & SEC_DEBUGGING) != 0
       && (asect->flags & SEC_ALLOC) == 0
+      && (asect->flags & SEC_HAS_CONTENTS) != 0
       && name[1] == 'd'
       && name[6] == '_')
     {
       /* If this section will be compressed, delay adding section
 	 name to section name section after it is compressed in
 	 _bfd_elf_assign_file_positions_for_non_load.  */
-      delay_st_name_p = true;
+      delay_sh_name_p = true;
     }
 
-  if (delay_st_name_p)
+  if (delay_sh_name_p)
     this_hdr->sh_name = (unsigned int) -1;
   else
     {
@@ -3751,14 +3752,14 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
 	{
 	  if (esd->rel.count && esd->rel.hdr == NULL
 	      && !_bfd_elf_init_reloc_shdr (abfd, &esd->rel, name,
-					    false, delay_st_name_p))
+					    false, delay_sh_name_p))
 	    {
 	      arg->failed = true;
 	      return;
 	    }
 	  if (esd->rela.count && esd->rela.hdr == NULL
 	      && !_bfd_elf_init_reloc_shdr (abfd, &esd->rela, name,
-					    true, delay_st_name_p))
+					    true, delay_sh_name_p))
 	    {
 	      arg->failed = true;
 	      return;
@@ -3769,7 +3770,7 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
 					   ? &esd->rela : &esd->rel),
 					  name,
 					  asect->use_rela_p,
-					  delay_st_name_p))
+					  delay_sh_name_p))
 	{
 	  arg->failed = true;
 	  return;
