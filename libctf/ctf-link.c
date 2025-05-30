@@ -1385,6 +1385,7 @@ ctf_link_deduplicating (ctf_dict_t *fp)
   ssize_t ninputs;
   uint32_t noutputs;
   uint32_t *parents;
+  int cu_phase = 0;
 
   if (ctf_dedup_atoms_init (fp) < 0)
     {
@@ -1392,9 +1393,20 @@ ctf_link_deduplicating (ctf_dict_t *fp)
       return;					/* Errno is set for us.  */
     }
 
-  if (fp->ctf_link_out_cu_mapping
-      && (ctf_link_deduplicating_per_cu (fp) < 0))
-    return;					/* Errno is set for us.  */
+  /* Trigger a CU-mapped link if need be: one pass of dedups squashing inputs into
+     single child dicts corresponding to each CU mapping, and one pass that
+     treats those as if they are ordinary inputs and links them together.
+
+     This latter pass does need to act very slightly differently from normal, so we
+     keep track of the "CU phase", with 0 being a normal link, 1 being the
+     squash-together phase, and 2 being the final act-as-if-it-were-normal pass.  */
+
+  if (fp->ctf_link_out_cu_mapping)
+    {
+      if (ctf_link_deduplicating_per_cu (fp) < 0)
+	return;					/* Errno is set for us.  */
+      cu_phase = 2;
+    }
 
   if ((ninputs = ctf_link_deduplicating_count_inputs (fp, NULL, NULL)) < 0)
     return;					/* Errno is set for us.  */
@@ -1406,7 +1418,7 @@ ctf_link_deduplicating (ctf_dict_t *fp)
   if (ninputs == 1 && ctf_cuname (inputs[0]) != NULL)
     ctf_cuname_set (fp, ctf_cuname (inputs[0]));
 
-  if (ctf_dedup (fp, inputs, ninputs, 0) < 0)
+  if (ctf_dedup (fp, inputs, ninputs, cu_phase) < 0)
     {
       ctf_err_warn (fp, 0, 0, _("deduplication failed for %s"),
 		    ctf_link_input_name (fp));
@@ -1414,7 +1426,7 @@ ctf_link_deduplicating (ctf_dict_t *fp)
     }
 
   if ((outputs = ctf_dedup_emit (fp, inputs, ninputs, parents, &noutputs,
-				 0)) == NULL)
+				 cu_phase)) == NULL)
     {
       ctf_err_warn (fp, 0, 0, _("deduplicating link type emission failed "
 				"for %s"), ctf_link_input_name (fp));
