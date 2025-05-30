@@ -399,7 +399,7 @@ start_event_loop ()
 
       try
 	{
-	  result = gdb_do_one_event ();
+	  result = current_interpreter ()->do_one_event ();
 	}
       catch (const gdb_exception_forced_quit &ex)
 	{

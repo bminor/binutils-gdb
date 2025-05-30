@@ -23,6 +23,7 @@
 #define GDB_INTERPS_H
 
 #include "gdbsupport/intrusive_list.h"
+#include "gdbsupport/event-loop.h"
 
 struct bpstat;
 struct ui_out;
@@ -77,6 +78,13 @@ public:
      chance to e.g., print a prompt.  */
   virtual void pre_command_loop ()
   {}
+
+  /* Service one event.
+     This gives the interpreter a chance to handle its own private
+     events that cannot be fed into the gdb event mechanism.
+     In all cases, this should call gdb_do_one_event at some point.  */
+  virtual int do_one_event (int mstimeout = -1)
+  { return gdb_do_one_event (mstimeout); }
 
   /* Returns true if this interpreter supports using the readline
      library; false if it uses GDB's own simplified readline

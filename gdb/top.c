@@ -415,7 +415,7 @@ wait_sync_command_done (void)
      point.  */
   scoped_enable_commit_resumed enable ("sync wait");
 
-  while (gdb_do_one_event () >= 0)
+  while (current_interpreter ()->do_one_event () >= 0)
     if (ui->prompt_state != PROMPT_BLOCKED)
       break;
 }
@@ -1031,7 +1031,7 @@ gdb_readline_wrapper (const char *prompt)
     (*after_char_processing_hook) ();
   gdb_assert (after_char_processing_hook == NULL);
 
-  while (gdb_do_one_event () >= 0)
+  while (current_interpreter ()->do_one_event () >= 0)
     if (gdb_readline_wrapper_done)
       break;
 
