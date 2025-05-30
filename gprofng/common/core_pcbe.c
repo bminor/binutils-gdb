@@ -2759,7 +2759,7 @@ core_pcbe_init (void)
       return -1;
     }
 
-#if defined(__i386__) || defined(__x86_64)
+#if defined(__i386__) || defined(__x86_64__)
   /* No Architectural Performance Monitoring Leaf returned by CPUID */
   if (get_cpuid_info ()->cpi_maxeax < 0xa)
     return (-1);
@@ -2918,7 +2918,7 @@ core_pcbe_cpuref (void)
 {
 #if defined(__aarch64__) || defined(__riscv)
   return "";
-#elif defined(__i386__) || defined(__x86_64)
+#elif defined(__i386__) || defined(__x86_64__)
   switch (cpuid_getmodel ())
     {
     case 60: /* Haswell */

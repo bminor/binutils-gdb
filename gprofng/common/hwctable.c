@@ -243,7 +243,7 @@ static Hwcentry papi_generic_list[] = {
   {NULL, NULL, 0, NULL, 0, 0, 0, 0, ABST_NONE}
 };
 
-#if defined(__i386__) || defined(__x86_64)
+#if defined(__i386__) || defined(__x86_64__)
 /* Kernel profiling pseudo-chip, OBSOLETE (To support 12.3 and earlier, TBR) */
 static Hwcentry kproflist[] = {
   {"kcycles", "kcycles", 0, STXT ("KCPU Cycles"), PRELOADS_5, 1, ABST_NONE},
@@ -1216,7 +1216,7 @@ static Hwcentry amd_15h[] = {
   {"insts1", "EX_retired_instr_w_excp_intr", 1, NULL, PRELOADS_8, 0, ABST_NONE},
   {NULL, NULL, 0, NULL, 0, 0, 0, 0, ABST_NONE}
 };
-#endif  /* __i386__ or __x86_64 */
+#endif  /* __i386__ or __x86_64__ */
 
 #define INIT_HWC(nm, mtr, cfg, ty) .name = (nm), .metric = (mtr), \
     .config = (cfg), .type = ty, .use_perf_event_type = 1, \
@@ -1303,7 +1303,7 @@ static Hwcentry	generic_list[] = {
   {NULL, NULL, 0, NULL, 0, 0, 0, 0, ABST_NONE}
 };
 
-#if defined(__i386__) || defined(__x86_64)
+#if defined(__i386__) || defined(__x86_64__)
  #include "hwc_amd_zen3.h"
  #include "hwc_amd_zen4.h"
  #include "hwc_intel_icelake.h"
@@ -1332,7 +1332,7 @@ typedef struct
  *  If the string is not formatted that way, -h hi and -h lo will fail
  */
 static cpu_list_t cputabs[] = {
-#if defined(__i386__) || defined(__x86_64)
+#if defined(__i386__) || defined(__x86_64__)
   {CPC_PENTIUM_PRO_MMX, pentiumIIlist, {"insts", 0}},
   {CPC_PENTIUM_PRO, pentiumIIIlist, {"insts", 0}},
   {CPC_PENTIUM_4, pentium4, {"insts", 0}},

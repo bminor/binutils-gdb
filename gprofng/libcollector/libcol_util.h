@@ -183,7 +183,7 @@ static __attribute__ ((always_inline)) inline void *
 __collector_getpc ()
 {
   void *r;
-#if defined(__x86_64)
+#if defined(__x86_64__)
   __asm__ __volatile__("lea (%%rip), %0" : "=r" (r));
 #else
   __asm__ __volatile__("call  1f \n"

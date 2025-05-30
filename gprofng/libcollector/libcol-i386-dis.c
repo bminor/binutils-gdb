@@ -18,7 +18,7 @@
    Foundation, 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-#if defined(__i386__) || defined(__x86_64)
+#if defined(__i386__) || defined(__x86_64__)
 #include "opcodes/i386-dis.c"
 
 #undef _

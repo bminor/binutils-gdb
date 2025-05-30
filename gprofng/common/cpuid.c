@@ -18,7 +18,7 @@
    Foundation, 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-#if defined(__i386__) || defined(__x86_64)
+#if defined(__i386__) || defined(__x86_64__)
 #include <cpuid.h>  /* GCC-provided */
 #elif defined(__aarch64__)
 #if !defined(ATTRIBUTE_UNUSED)
@@ -91,7 +91,7 @@ typedef struct
 } cpuid_info_t;
 
 
-#if defined(__i386__) || defined(__x86_64)
+#if defined(__i386__) || defined(__x86_64__)
 static uint_t
 cpuid_vendorstr_to_vendorcode (char *vendorstr)
 {
@@ -151,7 +151,7 @@ get_cpuid_info ()
   Tprintf (DBG_LT0, "cpuid.c:%d read_cpuid_id() MIDR_EL1==0x%016x cpi_vendor=%d cpi_model=%d\n",
 	   __LINE__, (unsigned int) reg, cpi->cpi_vendor, cpi->cpi_model);
 
-#elif defined(__i386__) || defined(__x86_64)
+#elif defined(__i386__) || defined(__x86_64__)
   cpuid_regs_t regs;
   my_cpuid (0, &regs);
   cpi->cpi_maxeax = regs.eax;

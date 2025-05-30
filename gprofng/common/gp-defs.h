@@ -42,7 +42,7 @@
 
 #if defined(sparc) || defined(__sparcv9)
 #define ARCH_SPARC          1
-#elif defined(__i386__) || defined(__x86_64)
+#elif defined(__i386__) || defined(__x86_64__)
 #define ARCH_Intel          1
 #elif defined(__aarch64__)
 #define ARCH_Aarch64        1
@@ -52,7 +52,7 @@
 #error "Undefined platform"
 #endif
 
-#if defined(__sparcv9) || defined(__x86_64) || defined(__aarch64__) || defined(__riscv)
+#if defined(__sparcv9) || defined(__x86_64__) || defined(__aarch64__) || defined(__riscv)
 #define WSIZE_64            1
 #else
 #define WSIZE_32            1
