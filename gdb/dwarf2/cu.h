@@ -369,7 +369,7 @@ public:
      right place.  And since the DW_TAG_compile_unit DIE in the split-unit can't
      have a DW_AT_ranges attribute, we can use the
 
-       die->tag != DW_AT_compile_unit
+       die->tag != DW_TAG_compile_unit
 
      to determine whether the base should be added or not.  */
   ULONGEST gnu_ranges_base = 0;
