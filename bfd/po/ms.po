@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: bfd 2.43.90\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
 "POT-Creation-Date: 2025-01-19 12:19+0000\n"
-"PO-Revision-Date: 2025-02-25 23:26+0800\n"
+"PO-Revision-Date: 2025-05-26 00:22+0800\n"
 "Last-Translator: Sharuzzaman Ahmat Raslan <sharuzzaman@gmail.com>\n"
 "Language-Team: Malay <translation-team-ms@lists.sourceforge.net>\n"
 "Language: ms\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Bugs: Report translation errors to the Language-Team address.\n"
-"X-Generator: Poedit 3.5\n"
+"X-Generator: Poedit 3.6\n"
 
 #: aout-cris.c:196
 #, c-format
@@ -35,9 +35,9 @@ msgid "%pB: bad relocation record imported: %d"
 msgstr ""
 
 #: aoutx.h:444 pdp11.c:481
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: %#<PRIx64> overflows header %s field"
-msgstr ""
+msgstr "Badan mesej adalah kosong tetapi tanda tangan dalam medan pengepala ialah \"(%s)\""
 
 #: aoutx.h:1269 aoutx.h:1598 pdp11.c:1246 pdp11.c:1495
 #, c-format
@@ -70,9 +70,9 @@ msgid "%pB: attempt to write out unknown reloc type"
 msgstr ""
 
 #: aoutx.h:4047 pdp11.c:3409
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: unsupported relocation type"
-msgstr ""
+msgstr "Jenis _MIME tidak disokong %s"
 
 #. Unknown relocation.
 #: aoutx.h:4367 coff-alpha.c:601 coff-mips.c:356 coff-rs6000.c:3037
@@ -105,14 +105,14 @@ msgstr ""
 #: elfxx-ia64.c:324 elfxx-loongarch.c:1897 elfxx-riscv.c:1062 elfxx-sparc.c:589
 #: elfxx-sparc.c:639 elfxx-tilegx.c:907 elfxx-tilegx.c:947 elfnn-aarch64.c:2215
 #: elfnn-aarch64.c:2313 elfnn-ia64.c:214 elfnn-ia64.c:3821 elfnn-kvx.c:259
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: unsupported relocation type %#x"
-msgstr ""
+msgstr "TYPE(x)"
 
 #: aoutx.h:5387 pdp11.c:3825
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: relocatable link from %s to %s not supported"
-msgstr ""
+msgstr "Pertukaran dari set aksara \"%s\" ke \"UTF-8\" tidak disokong"
 
 #: arc-got.h:69
 #, c-format
@@ -133,32 +133,38 @@ msgid "%pB: plugin needed to handle lto object"
 msgstr ""
 
 #: archive.c:2644
+#, fuzzy
 msgid "Reading archive file mod timestamp"
-msgstr ""
+msgstr "Setem masa penciptaan fail imej tidak ditetapkan dalam fail"
 
 #: archive.c:2675
+#, fuzzy
 msgid "Writing updated armap timestamp"
-msgstr ""
+msgstr "Dikemaskini"
 
 #: bfd.c:777
 msgid "no error"
 msgstr "tiada ralat"
 
 #: bfd.c:778
+#, fuzzy
 msgid "system call error"
-msgstr ""
+msgstr "panggilan sistem fork() gagal"
 
 #: bfd.c:779
+#, fuzzy
 msgid "invalid bfd target"
-msgstr ""
+msgstr "Nilai sasaran tak sah."
 
 #: bfd.c:780
+#, fuzzy
 msgid "file in wrong format"
-msgstr ""
+msgstr "Format fail:"
 
 #: bfd.c:781
+#, fuzzy
 msgid "archive object file in wrong format"
-msgstr ""
+msgstr "Cipta arkib dengan objek terpilih"
 
 #: bfd.c:782
 #, fuzzy
@@ -166,9 +172,8 @@ msgid "invalid operation"
 msgstr "Operasi tidak sah %d\n"
 
 #: bfd.c:783
-#, fuzzy
 msgid "memory exhausted"
-msgstr "memori keletihan"
+msgstr "kehabisan memori"
 
 #: bfd.c:784
 #, fuzzy
@@ -180,32 +185,39 @@ msgid "archive has no index; run ranlib to add one"
 msgstr ""
 
 #: bfd.c:786
+#, fuzzy
 msgid "no more archived files"
-msgstr ""
+msgstr "Diarkib"
 
 #: bfd.c:787
+#, fuzzy
 msgid "malformed archive"
-msgstr ""
+msgstr "Respon cacat"
 
 #: bfd.c:788
+#, fuzzy
 msgid "DSO missing from command line"
-msgstr ""
+msgstr "Alatan KDE untuk pembukaan URL daripada baris arahan"
 
 #: bfd.c:789
+#, fuzzy
 msgid "file format not recognized"
-msgstr ""
+msgstr "PNM: Format fail tidak dikenal."
 
 #: bfd.c:790
+#, fuzzy
 msgid "file format is ambiguous"
-msgstr ""
+msgstr "Format Fail"
 
 #: bfd.c:791
+#, fuzzy
 msgid "section has no contents"
-msgstr ""
+msgstr "Kand_ungan"
 
 #: bfd.c:792
+#, fuzzy
 msgid "nonrepresentable section on output"
-msgstr ""
+msgstr "&Seksyen:"
 
 #: bfd.c:793
 msgid "symbol needs debug section which does not exist"
@@ -217,8 +229,9 @@ msgid "bad value"
 msgstr "nilai salah untuk maklumat keadaan ikon terlabuh %s"
 
 #: bfd.c:795
+#, fuzzy
 msgid "file truncated"
-msgstr ""
+msgstr "PNM: Fail seperti dipotong."
 
 #: bfd.c:796
 #, fuzzy
@@ -226,8 +239,9 @@ msgid "file too big"
 msgstr "Fail terlalu besar."
 
 #: bfd.c:797
+#, fuzzy
 msgid "sorry, cannot handle this file"
-msgstr ""
+msgstr "pluma tidak dapat mengendali lokasi ini."
 
 #: bfd.c:798
 #, fuzzy, c-format
@@ -235,23 +249,24 @@ msgid "error reading %s: %s"
 msgstr "Ralat membaca %s: %s"
 
 #: bfd.c:799
+#, fuzzy
 msgid "#<invalid error code>"
-msgstr ""
+msgstr "kod kesalahan"
 
 #: bfd.c:2242
-#, c-format
+#, fuzzy, c-format
 msgid "BFD %s assertion fail %s:%d"
-msgstr ""
+msgstr "Gagal sebelum mengembalikan media kepada pengguna: %s"
 
 #: bfd.c:2255
-#, c-format
+#, fuzzy, c-format
 msgid "%s: BFD %s internal error, aborting at %s:%d in %s\n"
-msgstr ""
+msgstr "RALAT DALAMAN pada %s:%d: regex hilang atau tidak sah"
 
 #: bfd.c:2259
-#, c-format
+#, fuzzy, c-format
 msgid "%s: BFD %s internal error, aborting at %s:%d\n"
-msgstr ""
+msgstr "RALAT DALAMAN pada %s:%d: regex hilang atau tidak sah"
 
 #: bfd.c:2262
 #, fuzzy, c-format
@@ -264,9 +279,9 @@ msgid "warning: writing section `%pA' at huge (ie negative) file offset"
 msgstr ""
 
 #: cache.c:290
-#, c-format
+#, fuzzy, c-format
 msgid "reopening %pB: %s"
-msgstr ""
+msgstr "PB"
 
 #: coff-alpha.c:450
 #, c-format
@@ -295,8 +310,9 @@ msgid "%X%P: %pB(%pA): relocation \"%pR\" returns an unrecognized value %x\n"
 msgstr ""
 
 #: coff-alpha.c:1489
+#, fuzzy
 msgid "using multiple gp values"
-msgstr ""
+msgstr "Muat P_GP"
 
 #: coff-alpha.c:1987
 #, c-format
@@ -334,9 +350,9 @@ msgid "%pB: TOC reloc at %#<PRIx64> to symbol `%s' with no TOC entry"
 msgstr ""
 
 #: coff-rs6000.c:3251 coff64-rs6000.c:848
-#, c-format
+#, fuzzy, c-format
 msgid "Unable to find the stub entry targeting %s"
-msgstr ""
+msgstr "Tak dapat hantar kemasukan senaraimain \"%s\""
 
 #: coff-rs6000.c:3366
 #, c-format
@@ -389,9 +405,9 @@ msgid "%pB: %#<PRIx64>: warning: could not find expected COUNT reloc"
 msgstr ""
 
 #: coff-sh.c:983 elf32-sh.c:738
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: %#<PRIx64>: warning: bad count"
-msgstr ""
+msgstr "Amaran: Tandatangan rosak."
 
 #: coff-sh.c:1349 coff-sh.c:2636 elf32-sh.c:1138 elf32-sh.c:1506
 #, c-format
@@ -415,8 +431,9 @@ msgid "%pB: warning: illegal symbol index %ld in relocs"
 msgstr ""
 
 #: coff-x86_64.c:147
+#, fuzzy
 msgid "R_AMD64_IMAGEBASE with __ImageBase undefined"
-msgstr ""
+msgstr "Tidak ditakrif"
 
 #: coff64-rs6000.c:447 coff64-rs6000.c:554
 #, c-format
@@ -439,9 +456,9 @@ msgid "%pB: unable to load COMDAT section name"
 msgstr ""
 
 #: coffcode.h:976
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: warning: no symbol for section '%s' found"
-msgstr ""
+msgstr "simbol tidak dijumpai di dalam pengeluaran: %.*s"
 
 #: coffcode.h:1148
 #, c-format
@@ -487,9 +504,9 @@ msgid "%pB: reloc against a non-existent symbol index: %ld"
 msgstr ""
 
 #: coffcode.h:3162
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: too many sections (%d)"
-msgstr ""
+msgstr "Terlalu banyak titik henti. Maksimum ialah %d."
 
 #: coffcode.h:3690
 #, c-format
@@ -537,14 +554,14 @@ msgid "%pB: illegal relocation type %d at address %#<PRIx64>"
 msgstr ""
 
 #: coffgen.c:255 elf.c:1033
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: unable to compress section %s"
-msgstr ""
+msgstr "%pB: gagal membaca bahagian data nyahpepijat"
 
 #: coffgen.c:265 elf.c:1043
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: unable to decompress section %s"
-msgstr ""
+msgstr "Sumber pada \"%s\" gagal dinyahmampatkan"
 
 #: coffgen.c:1778
 #, c-format
@@ -558,9 +575,9 @@ msgid "<corrupt>"
 msgstr "Fail rosak?"
 
 #: coffgen.c:2191
-#, c-format
+#, fuzzy, c-format
 msgid "<corrupt info> %s"
-msgstr ""
+msgstr "PNG imej kenit rosak: '%s'"
 
 #: coffgen.c:2797 elflink.c:15435 linker.c:3011
 msgid "%F%P: already_linked_table: %E\n"
@@ -572,8 +589,12 @@ msgid "removing unused section '%pA' in file '%pB'"
 msgstr ""
 
 #: coffgen.c:3216 elflink.c:14606
+#, fuzzy
 msgid "warning: gc-sections option ignored"
 msgstr ""
+"Amaran mengenai %(cleaner)s - %(option)s:\n"
+"\n"
+"%(warning)s"
 
 #: cofflink.c:398
 #, c-format
@@ -631,20 +652,20 @@ msgid "warning: unable to update contents of %s section in %pB"
 msgstr ""
 
 #: dwarf2.c:702
-#, c-format
+#, fuzzy, c-format
 msgid "DWARF error: can't find %s section."
-msgstr ""
+msgstr "%s: tidak dapat mencari seksyen .text dalam %s\n"
 
 #: dwarf2.c:710
-#, c-format
+#, fuzzy, c-format
 msgid "DWARF error: section %s has no contents"
-msgstr ""
+msgstr "Ralat menyenaraikan kandungan folder '%s': %s"
 
 #. PR 26946
 #: dwarf2.c:719
-#, c-format
+#, fuzzy, c-format
 msgid "DWARF error: section %s is too big"
-msgstr ""
+msgstr "Ralat: Saiz mesej %d terlalu besar\n"
 
 #: dwarf2.c:754
 #, c-format
@@ -665,8 +686,9 @@ msgid "DWARF error: mangled line number section (bad file number)"
 msgstr ""
 
 #: dwarf2.c:2614
+#, fuzzy
 msgid "DWARF error: zero format count"
-msgstr ""
+msgstr "Sembunyi kiraan bila kosong:"
 
 #: dwarf2.c:2624
 #, c-format
@@ -762,58 +784,58 @@ msgid "%pB: warning: isymMax (%ld) is greater than ifdMax (%ld)"
 msgstr ""
 
 #: ecoff.c:1313
-#, c-format
+#, fuzzy, c-format
 msgid "unknown basic type %d"
-msgstr ""
+msgstr "Jenis anak panah %d tak diketahui\n"
 
 #: ecoff.c:1571
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "      End+1 symbol: %ld"
-msgstr ""
+msgstr "Tetapkan alamat &akhir simbol"
 
 #: ecoff.c:1578 ecoff.c:1581
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "      First symbol: %ld"
-msgstr ""
+msgstr "Memadam fail %ld drpd %ld"
 
 #: ecoff.c:1596
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "      End+1 symbol: %-7ld   Type:  %s"
-msgstr ""
+msgstr "jenis <%s> digunakan, tetapi tidak dihubungkan ke sebarang simbol"
 
 #: ecoff.c:1604
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "      Local symbol: %ld"
-msgstr ""
+msgstr "Memadam fail %ld drpd %ld"
 
 #: ecoff.c:1612
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "      struct; End+1 symbol: %ld"
-msgstr ""
+msgstr "Lumpuhkan simbol _akhir baris"
 
 #: ecoff.c:1617
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "      union; End+1 symbol: %ld"
-msgstr ""
+msgstr "Lumpuhkan simbol _akhir baris"
 
 #: ecoff.c:1622
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "      enum; End+1 symbol: %ld"
-msgstr ""
+msgstr "Lumpuhkan simbol _akhir baris"
 
 #: ecoff.c:1630
 #, fuzzy, c-format
@@ -823,8 +845,9 @@ msgid ""
 msgstr "Indeks tidak sah untuk jenis %s untuk jenis asa %s"
 
 #: elf-attrs.c:417 elf-attrs.c:447 elf-attrs.c:623
+#, fuzzy
 msgid "error adding attribute"
-msgstr ""
+msgstr "Ralat ketika menambah hubungan"
 
 #: elf-attrs.c:503
 #, c-format
@@ -866,9 +889,9 @@ msgid "further warnings about FDE encoding preventing .eh_frame_hdr generation d
 msgstr ""
 
 #: elf-eh-frame.c:1872
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: %pA not in order"
-msgstr ""
+msgstr "PA="
 
 #: elf-eh-frame.c:1886
 #, c-format
@@ -890,13 +913,14 @@ msgid "invalid output section for .eh_frame_entry: %pA"
 msgstr ""
 
 #: elf-eh-frame.c:2340
-#, c-format
+#, fuzzy, c-format
 msgid "invalid contents in %pA section"
-msgstr ""
+msgstr "PA="
 
 #: elf-eh-frame.c:2496
+#, fuzzy
 msgid ".eh_frame_hdr entry overflow"
-msgstr ""
+msgstr "Lukis bingkai disekeliling masukan"
 
 #: elf-eh-frame.c:2498
 msgid ".eh_frame_hdr refers to overlapping FDEs"
@@ -917,8 +941,9 @@ msgstr ""
 #: elf32-or1k.c:1895 elf32-score.c:2724 elf32-score7.c:2535 elf32-spu.c:5081
 #: elf32-tilepro.c:3369 elf32-v850.c:2297 elf32-visium.c:680
 #: elf32-xstormy16.c:930 elf64-bpf.c:339 elf64-mmix.c:1537 elfxx-tilegx.c:3742
+#, fuzzy
 msgid "internal error: out of range error"
-msgstr ""
+msgstr "Ralat dalaman: Ralat tidak diketahui"
 
 #: elf-m10200.c:438 elf-m10300.c:2150 elf32-bfin.c:3136 elf32-cr16.c:1433
 #: elf32-cris.c:2037 elf32-crx.c:926 elf32-d10v.c:514 elf32-fr30.c:598
@@ -929,15 +954,17 @@ msgstr ""
 #: elf32-score7.c:2539 elf32-spu.c:5085 elf32-tilepro.c:3373 elf32-v850.c:2301
 #: elf32-visium.c:684 elf32-xstormy16.c:934 elf64-mmix.c:1541
 #: elfxx-mips.c:10642 elfxx-tilegx.c:3746
+#, fuzzy
 msgid "internal error: unsupported relocation error"
-msgstr ""
+msgstr "Ralat dalaman: Ralat tidak diketahui"
 
 #: elf-m10200.c:442 elf32-cr16.c:1437 elf32-crx.c:930 elf32-d10v.c:518
 #: elf32-h8300.c:531 elf32-lm32.c:1077 elf32-m32r.c:2845 elf32-m68hc1x.c:1278
 #: elf32-microblaze.c:1685 elf32-nds32.c:6100 elf32-score.c:2732
 #: elf32-score7.c:2543 elf32-spu.c:5089
+#, fuzzy
 msgid "internal error: dangerous error"
-msgstr ""
+msgstr "Ralat dalaman: Ralat tidak diketahui"
 
 #: elf-m10200.c:446 elf-m10300.c:2167 elf32-bfin.c:3144 elf32-cr16.c:1441
 #: elf32-cris.c:2045 elf32-crx.c:934 elf32-d10v.c:522 elf32-epiphany.c:578
@@ -1062,18 +1089,19 @@ msgid "%F%P: failed to create GNU property section\n"
 msgstr ""
 
 #: elf-properties.c:644 elfxx-aarch64.c:752 elfxx-x86.c:4353
-#, c-format
+#, fuzzy, c-format
 msgid "%F%pA: failed to align section\n"
-msgstr ""
+msgstr "%pB: gagal membaca bahagian data nyahpepijat"
 
 #. Merge .note.gnu.property sections.
 #: elf-properties.c:749 elf-properties.c:751
 msgid "\n"
-msgstr ""
+msgstr "\n"
 
 #: elf-properties.c:750
+#, fuzzy
 msgid "Merging program properties\n"
-msgstr ""
+msgstr "Tiada Penggabungan"
 
 #: elf-sframe.c:239
 #, c-format
@@ -1089,9 +1117,9 @@ msgid "input SFrame sections with different format versions prevent .sframe gene
 msgstr ""
 
 #: elf.c:299
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: string table [%u] is corrupt"
-msgstr ""
+msgstr "Fail nampaknya rosak. Melangkau jadual. "
 
 #. PR 17512: file: f057ec89.
 #: elf.c:328
@@ -1111,9 +1139,9 @@ msgid "%pB symbol number %lu references nonexistent SHT_SYMTAB_SHNDX section"
 msgstr ""
 
 #: elf.c:614
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: could not read contents of group [%u]"
-msgstr ""
+msgstr "Tidak dapat membaca kandungan %s"
 
 #: elf.c:645
 #, c-format
@@ -1146,52 +1174,52 @@ msgid "%pB: invalid sh_link field (%d) in section number %d"
 msgstr ""
 
 #: elf.c:1253
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: failed to find link section for section %d"
-msgstr ""
+msgstr "%pB: gagal membaca bahagian data nyahpepijat"
 
 #: elf.c:1280
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: failed to find info section for section %d"
-msgstr ""
+msgstr "%pB: gagal membaca bahagian data nyahpepijat"
 
 #: elf.c:1457
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "Program Header:\n"
-msgstr ""
+msgstr "Program"
 
 #: elf.c:1499
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "Dynamic Section:\n"
-msgstr ""
+msgstr "dinamik"
 
 #: elf.c:1638
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "Version definitions:\n"
-msgstr ""
+msgstr "Sedang mentakrifkan item..."
 
 #: elf.c:1663
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "Version References:\n"
-msgstr ""
+msgstr "Rujukan:"
 
 #: elf.c:1668
-#, c-format
+#, fuzzy, c-format
 msgid "  required from %s:\n"
-msgstr ""
+msgstr "diperlukan=%s"
 
 #: elf.c:1917
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: DT_STRTAB table is corrupt"
-msgstr ""
+msgstr "Fail nampaknya rosak. Melangkau jadual. "
 
 #: elf.c:2426
 #, c-format
@@ -1219,9 +1247,9 @@ msgid "%pB: warning: secondary relocation section '%s' for section %pA found - i
 msgstr ""
 
 #: elf.c:2879 elf.c:2893 elf.c:2904 elf.c:2917
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: unknown type [%#x] section `%s'"
-msgstr ""
+msgstr "Seksyen tidak diketahui: %s"
 
 #: elf.c:3586
 #, c-format
@@ -1234,9 +1262,9 @@ msgid "warning: section `%pA' type changed to PROGBITS"
 msgstr ""
 
 #: elf.c:4130
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: too many sections: %u"
-msgstr ""
+msgstr "Terlalu banyak klien. Sambungan daripada %s:%u ditolak."
 
 #: elf.c:4216
 #, c-format
@@ -1258,19 +1286,19 @@ msgid "%F%P: failed to size relative relocations\n"
 msgstr ""
 
 #: elf.c:5440
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: TLS sections are not adjacent:"
-msgstr ""
+msgstr "PB"
 
 #: elf.c:5447
 #, c-format
 msgid "\t    TLS: %pA"
-msgstr ""
+msgstr "\t    TLS: %pA"
 
 #: elf.c:5451
-#, c-format
+#, fuzzy, c-format
 msgid "\tnon-TLS: %pA"
-msgstr ""
+msgstr "PA="
 
 #: elf.c:6075
 #, c-format
@@ -1316,14 +1344,14 @@ msgid "%pB: error: non-load segment %d includes file header and/or program heade
 msgstr ""
 
 #: elf.c:6862
-#, c-format
+#, fuzzy, c-format
 msgid "error: %pB has a TLS segment with execute permission"
-msgstr ""
+msgstr "Proses mempunyai keizinan untuk melakukan arahan yang terkandung di dalam segmen ingatan."
 
 #: elf.c:6868
-#, c-format
+#, fuzzy, c-format
 msgid "warning: %pB has a TLS segment with execute permission"
-msgstr ""
+msgstr "Proses mempunyai keizinan untuk melakukan arahan yang terkandung di dalam segmen ingatan."
 
 #: elf.c:6883
 #, c-format
@@ -1336,9 +1364,9 @@ msgid "warning: %pB has a LOAD segment with RWX permissions"
 msgstr ""
 
 #: elf.c:7284
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: symbol `%s' required but not present"
-msgstr ""
+msgstr "Satu unsur (%s) diperlukan tidak hadir."
 
 #: elf.c:7661
 #, c-format
@@ -1361,14 +1389,14 @@ msgid "unable to find equivalent output section for symbol '%s' from section '%s
 msgstr ""
 
 #: elf.c:9300
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: .gnu.version_r invalid entry"
-msgstr ""
+msgstr "Masukan rangkaian tidak sah."
 
 #: elf.c:9478
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: .gnu.version_d invalid entry"
-msgstr ""
+msgstr "%d masukan"
 
 #: elf.c:9981
 #, c-format
@@ -1382,9 +1410,9 @@ msgstr ""
 
 #: elf.c:10108 elf32-mcore.c:100 elf32-mcore.c:455 elf32-ppc.c:7675
 #: elf32-ppc.c:8863 elf64-ppc.c:16860
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: %s unsupported"
-msgstr ""
+msgstr "PB"
 
 #: elf.c:10923
 #, c-format
@@ -1484,9 +1512,9 @@ msgstr ""
 #: elf32-arc.c:454 elf32-arm.c:15194 elf32-frv.c:6612 elf32-iq2000.c:868
 #: elf32-m32c.c:914 elf32-mt.c:560 elf32-rl78.c:1275 elf32-rx.c:3218
 #: elf32-visium.c:844 elf64-ppc.c:5531 elfnn-aarch64.c:7573
-#, c-format
+#, fuzzy, c-format
 msgid "private flags = 0x%lx:"
-msgstr ""
+msgstr "[find_call] %s: 0x%lx ke 0x%lx\n"
 
 #: elf32-arc.c:641
 #, c-format
@@ -1514,14 +1542,14 @@ msgid "error: %pB: cannot mix rf16 with full register set %pB"
 msgstr ""
 
 #: elf32-arc.c:789
-#, c-format
+#, fuzzy, c-format
 msgid "error: %pB: conflicting attributes %s: %s with %s"
-msgstr ""
+msgstr "keluaran berkonflik kepada fail %s"
 
 #: elf32-arc.c:816
-#, c-format
+#, fuzzy, c-format
 msgid "error: %pB: conflicting attributes %s"
-msgstr ""
+msgstr "Konflik tindakan untuk %s"
 
 #: elf32-arc.c:921
 #, c-format
@@ -1535,8 +1563,9 @@ msgid "%pB: uses different e_flags (%#x) fields than previous modules (%#x)"
 msgstr ""
 
 #: elf32-arc.c:1026
+#, fuzzy
 msgid "error: the ARC4 architecture is no longer supported"
-msgstr ""
+msgstr "%s: -c tidak disokong pada rekabentuk %s\n"
 
 #: elf32-arc.c:1032
 msgid "warning: unset or old architecture flags; use default machine"
@@ -1562,9 +1591,9 @@ msgid "%pB(%pA): warning: unaligned access to symbol '%s' in the small data area
 msgstr ""
 
 #: elf32-arc.c:1926 elf32-rx.c:1491
-#, c-format
+#, fuzzy, c-format
 msgid "%pB(%pA): internal error: out of range error"
-msgstr ""
+msgstr "Ralat kaji hurai: Nombor terkeluar dari Julat (mesti kecil daripada  %1)"
 
 #: elf32-arc.c:1931 elf32-rx.c:1496
 #, c-format
@@ -1577,9 +1606,9 @@ msgid "%pB(%pA): internal error: dangerous relocation"
 msgstr ""
 
 #: elf32-arc.c:1941 elf32-rx.c:1506
-#, c-format
+#, fuzzy, c-format
 msgid "%pB(%pA): internal error: unknown error"
-msgstr ""
+msgstr "Ralat dalaman: Ralat tidak diketahui"
 
 #: elf32-arc.c:2035 elf32-arc.c:2103 elf32-arm.c:15637 elf32-metag.c:2250
 #: elf32-nds32.c:5542 elfnn-aarch64.c:7980 elfnn-riscv.c:722
@@ -1620,9 +1649,9 @@ msgstr ""
 #: elf32-arm.c:4854 elf32-arm.c:7003 elf32-csky.c:3385 elf32-hppa.c:581
 #: elf32-m68hc1x.c:163 elf32-metag.c:1179 elf64-ppc.c:3902 elf64-ppc.c:14175
 #: elfnn-aarch64.c:3188 elfnn-kvx.c:894
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: cannot create stub entry %s"
-msgstr ""
+msgstr "%s: Tak dapat mencipta symlink ke %s"
 
 #: elf32-arm.c:5075 elf32-csky.c:3727 elf32-hppa.c:731 elf32-hppa.c:760
 #: elf32-hppa.c:841 elf32-m68hc11.c:422 elf32-m68hc12.c:542 elf32-metag.c:3344
@@ -1646,9 +1675,9 @@ msgid "%pB: invalid standard symbol `%s'; it must be a global or weak function s
 msgstr ""
 
 #: elf32-arm.c:6100
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: absent standard symbol `%s'"
-msgstr ""
+msgstr "%s: tiada simbol sedemikian"
 
 #: elf32-arm.c:6112
 #, c-format
@@ -1656,14 +1685,14 @@ msgid "%pB: `%s' and its special symbol are in different sections"
 msgstr ""
 
 #: elf32-arm.c:6124
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: entry function `%s' not output"
-msgstr ""
+msgstr "Gagal mencari fungsi titik masukan \"%s\" dalam \"%s\": %s"
 
 #: elf32-arm.c:6131
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: entry function `%s' is empty"
-msgstr ""
+msgstr "Fungsi kosong"
 
 #: elf32-arm.c:6260
 #, c-format
@@ -1681,19 +1710,19 @@ msgid "entry function `%s' disappeared from secure code"
 msgstr ""
 
 #: elf32-arm.c:6355
-#, c-format
+#, fuzzy, c-format
 msgid "`%s' refers to a non entry function"
-msgstr ""
+msgstr "Tuju atau hubungan merujuk pada anak yang tidak wujud"
 
 #: elf32-arm.c:6370
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: visibility of symbol `%s' has changed"
-msgstr ""
+msgstr "Format mel setempat Evolution telah berubah."
 
 #: elf32-arm.c:6379
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: incorrect size for symbol `%s'"
-msgstr ""
+msgstr "Tetapkan &saiz simbol"
 
 #: elf32-arm.c:6398
 #, c-format
@@ -1710,9 +1739,9 @@ msgid "start address of `%s' is different from previous link"
 msgstr ""
 
 #: elf32-arm.c:7137 elf32-arm.c:7175
-#, c-format
+#, fuzzy, c-format
 msgid "unable to find %s glue '%s' for '%s'"
-msgstr ""
+msgstr "Tak menjumpai fail include: \"%s\""
 
 #: elf32-arm.c:7886
 #, c-format
@@ -1731,9 +1760,9 @@ msgid "%pB: warning: selected STM32L4XX erratum workaround is not necessary for 
 msgstr ""
 
 #: elf32-arm.c:8677 elf32-arm.c:8697 elf32-arm.c:8764 elf32-arm.c:8783
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: unable to find %s veneer `%s'"
-msgstr ""
+msgstr "Tidak dapat mencari \"%s\""
 
 #: elf32-arm.c:8990
 #, c-format
@@ -1741,9 +1770,9 @@ msgid "%pB(%pA+%#x): error: multiple load detected in non-last IT block instruct
 msgstr ""
 
 #: elf32-arm.c:9088
-#, c-format
+#, fuzzy, c-format
 msgid "invalid TARGET2 relocation type '%s'"
-msgstr ""
+msgstr "Indeks tidak sah untuk jenis %s untuk jenis asa %s"
 
 #. FIXME: We ought to be able to generate thumb-1 PLT
 #. instructions...
@@ -1778,12 +1807,14 @@ msgid "(%s): Unknown destination type (ARM/Thumb) in %pB"
 msgstr ""
 
 #: elf32-arm.c:10615
+#, fuzzy
 msgid "shared object"
-msgstr ""
+msgstr "objek memori terkongsi"
 
 #: elf32-arm.c:10618
+#, fuzzy
 msgid "PIE executable"
-msgstr ""
+msgstr "Pai"
 
 #: elf32-arm.c:10621
 #, c-format
@@ -1826,20 +1857,24 @@ msgid "%pB(%pA+%#<PRIx64>): overflow whilst splitting %#<PRIx64> for group reloc
 msgstr ""
 
 #: elf32-arm.c:12704 elf32-arm.c:12863
+#, fuzzy
 msgid "local symbol index too big"
-msgstr ""
+msgstr "Tiada simbol untuk indeks"
 
 #: elf32-arm.c:12714 elf32-arm.c:12748
+#, fuzzy
 msgid "no dynamic index information available"
-msgstr ""
+msgstr "Tidak tersedia bila menggunakan senarai main dinamik"
 
 #: elf32-arm.c:12756
+#, fuzzy
 msgid "invalid dynamic index"
-msgstr ""
+msgstr "ICO: Indeks ikon tidak sah."
 
 #: elf32-arm.c:12873
+#, fuzzy
 msgid "dynamic index information not available"
-msgstr ""
+msgstr "Tidak tersedia bila menggunakan senarai main dinamik"
 
 #: elf32-arm.c:13304 elf32-sh.c:3566
 #, c-format
@@ -1865,8 +1900,9 @@ msgstr "Diluar Julat"
 
 #: elf32-arm.c:13506 elf32-pru.c:936 elf32-tic6x.c:2645 elfnn-aarch64.c:7411
 #: elfnn-kvx.c:2801
+#, fuzzy
 msgid "unsupported relocation"
-msgstr ""
+msgstr " (tidak disokong)"
 
 #: elf32-arm.c:13514 elf32-pru.c:946 elf32-tic6x.c:2653 elfnn-aarch64.c:7419
 #: elfnn-kvx.c:2809
@@ -1899,9 +1935,9 @@ msgid "warning: %pB: unknown EABI object attribute %d"
 msgstr ""
 
 #: elf32-arm.c:14470
-#, c-format
+#, fuzzy, c-format
 msgid "error: %pB: unknown CPU architecture"
-msgstr ""
+msgstr "Ralat tidak diketahui"
 
 #: elf32-arm.c:14508
 #, c-format
@@ -1929,14 +1965,14 @@ msgid "error: %pB: conflicting architecture profiles %c/%c"
 msgstr ""
 
 #: elf32-arm.c:14977
-#, c-format
+#, fuzzy, c-format
 msgid "warning: %pB: conflicting platform configuration"
-msgstr ""
+msgstr "Kunci berkonflik dari Conflict1 yang sepatutnya beri satu amaran"
 
 #: elf32-arm.c:14986
-#, c-format
+#, fuzzy, c-format
 msgid "error: %pB: conflicting use of R9"
-msgstr ""
+msgstr "Kunci berkonflik dengan julat 0~5 yang sepatutnya berikan satu ralat"
 
 #: elf32-arm.c:14998
 #, c-format
@@ -1969,44 +2005,44 @@ msgid "%pB has both the current and legacy Tag_MPextension_use attributes"
 msgstr ""
 
 #: elf32-arm.c:15203
-#, c-format
+#, fuzzy, c-format
 msgid " [interworking enabled]"
-msgstr ""
+msgstr "tidak dihidupkan"
 
 #: elf32-arm.c:15211
-#, c-format
+#, fuzzy, c-format
 msgid " [VFP float format]"
-msgstr ""
+msgstr "apung"
 
 #: elf32-arm.c:15213
-#, c-format
+#, fuzzy, c-format
 msgid " [FPA float format]"
-msgstr ""
+msgstr "apung"
 
 #: elf32-arm.c:15216
-#, c-format
+#, fuzzy, c-format
 msgid " [floats passed in float registers]"
-msgstr ""
+msgstr "&Daftar"
 
 #: elf32-arm.c:15219 elf32-arm.c:15304
-#, c-format
+#, fuzzy, c-format
 msgid " [position independent]"
-msgstr ""
+msgstr "Dokumen bebas"
 
 #: elf32-arm.c:15222
-#, c-format
+#, fuzzy, c-format
 msgid " [new ABI]"
-msgstr ""
+msgstr "Baharu"
 
 #: elf32-arm.c:15225
-#, c-format
+#, fuzzy, c-format
 msgid " [old ABI]"
-msgstr ""
+msgstr " tua "
 
 #: elf32-arm.c:15228
-#, c-format
+#, fuzzy, c-format
 msgid " [software FP]"
-msgstr ""
+msgstr "Segerak FP dibenarkan"
 
 #: elf32-arm.c:15236
 #, c-format
@@ -2014,14 +2050,14 @@ msgid " [Version1 EABI]"
 msgstr ""
 
 #: elf32-arm.c:15239 elf32-arm.c:15250
-#, c-format
+#, fuzzy, c-format
 msgid " [sorted symbol table]"
-msgstr ""
+msgstr "Simbol"
 
 #: elf32-arm.c:15241 elf32-arm.c:15252
-#, c-format
+#, fuzzy, c-format
 msgid " [unsorted symbol table]"
-msgstr ""
+msgstr "Tidak Diisih"
 
 #: elf32-arm.c:15247
 #, c-format
@@ -2029,14 +2065,14 @@ msgid " [Version2 EABI]"
 msgstr ""
 
 #: elf32-arm.c:15255
-#, c-format
+#, fuzzy, c-format
 msgid " [dynamic symbols use segment index]"
-msgstr ""
+msgstr "Guna kodek bab ditemui dalam segmen."
 
 #: elf32-arm.c:15258
-#, c-format
+#, fuzzy, c-format
 msgid " [mapping symbols precede others]"
-msgstr ""
+msgstr "Simbol"
 
 #: elf32-arm.c:15265
 #, c-format
@@ -2054,53 +2090,55 @@ msgid " [Version5 EABI]"
 msgstr ""
 
 #: elf32-arm.c:15276
-#, c-format
+#, fuzzy, c-format
 msgid " [soft-float ABI]"
-msgstr ""
+msgstr "Soft"
 
 #: elf32-arm.c:15279
-#, c-format
+#, fuzzy, c-format
 msgid " [hard-float ABI]"
-msgstr ""
+msgstr "Sukar"
 
 #: elf32-arm.c:15285
 #, c-format
 msgid " [BE8]"
-msgstr ""
+msgstr " [BE8]"
 
 #: elf32-arm.c:15288
 #, c-format
 msgid " [LE8]"
-msgstr ""
+msgstr " [LE8]"
 
 #: elf32-arm.c:15294
-#, c-format
+#, fuzzy, c-format
 msgid " <EABI version unrecognised>"
 msgstr ""
+"perintah tidak dikenali: %s\n"
+"\n"
 
 #: elf32-arm.c:15301
-#, c-format
+#, fuzzy, c-format
 msgid " [relocatable executable]"
-msgstr ""
+msgstr "Skema boleh letak semula"
 
 #: elf32-arm.c:15307
-#, c-format
+#, fuzzy, c-format
 msgid " [FDPIC ABI supplement]"
-msgstr ""
+msgstr "Latin-1 Tambahan"
 
 #: elf32-arm.c:15312 elfnn-aarch64.c:7576
-#, c-format
+#, fuzzy, c-format
 msgid " <Unrecognised flag bits set>"
-msgstr ""
+msgstr "Alamat mempunyai set bit melangkaui panjang awalan"
 
 #: elf32-arm.c:15420 elf32-arm.c:15554 elf32-i386.c:1545 elf32-s390.c:921
 #: elf32-tic6x.c:2716 elf32-tilepro.c:1433 elf32-xtensa.c:1088 elf64-s390.c:843
 #: elf64-x86-64.c:2173 elfxx-sparc.c:1385 elfxx-tilegx.c:1661 elfxx-x86.c:971
 #: elfnn-aarch64.c:7847 elfnn-kvx.c:3247 elfnn-loongarch.c:952
 #: elfnn-riscv.c:766
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: bad symbol index: %d"
-msgstr ""
+msgstr "Tiada simbol untuk indeks"
 
 #: elf32-arm.c:15810
 #, c-format
@@ -2108,14 +2146,14 @@ msgid "FDPIC does not yet support %s relocation to become dynamic for executable
 msgstr ""
 
 #: elf32-arm.c:17072
-#, c-format
+#, fuzzy, c-format
 msgid "errors encountered processing file %pB"
-msgstr ""
+msgstr "end-of-file tak matang berlaku"
 
 #: elf32-arm.c:17442 elflink.c:13533 elflink.c:13580
-#, c-format
+#, fuzzy, c-format
 msgid "could not find section %s"
-msgstr ""
+msgstr "Gagal mencipta sesi sftp: %s"
 
 #: elf32-arm.c:18397
 #, c-format
@@ -2135,9 +2173,9 @@ msgid "%pB: error: Cortex-A8 erratum stub out of range (input file too large)"
 msgstr ""
 
 #: elf32-arm.c:19509 elf32-arm.c:19531
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: error: VFP11 veneer out of range"
-msgstr ""
+msgstr "Ralat kaji hurai: Nombor terkeluar dari Julat (mesti kecil daripada  %1)"
 
 #: elf32-arm.c:19582
 #, c-format
@@ -2145,9 +2183,9 @@ msgid "%pB(%#<PRIx64>): error: cannot create STM32L4XX veneer; jump out of range
 msgstr ""
 
 #: elf32-arm.c:19621
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: error: cannot create STM32L4XX veneer"
-msgstr ""
+msgstr "Ralat: Tidak dapat cipta fail sementara: %s\n"
 
 #: elf32-arm.c:20704
 #, c-format
@@ -2212,13 +2250,14 @@ msgid "%X%H: %s against `%s': internal error: unexpected relocation result %d\n"
 msgstr ""
 
 #: elf32-avr.c:3335 elfnn-aarch64.c:3219
-#, c-format
+#, fuzzy, c-format
 msgid "cannot create stub entry %s"
-msgstr ""
+msgstr "%s: Tak dapat mencipta symlink ke %s"
 
 #: elf32-bfin.c:107 elf32-bfin.c:364
+#, fuzzy
 msgid "relocation should be even number"
-msgstr ""
+msgstr "Jumlah aksara genap diperlukan"
 
 #: elf32-bfin.c:1589
 #, c-format
@@ -2237,16 +2276,18 @@ msgid "%pB: relocation at `%pA+%#<PRIx64>' references symbol `%s' with nonzero a
 msgstr ""
 
 #: elf32-bfin.c:2663
+#, fuzzy
 msgid "relocation references symbol not defined in the module"
-msgstr ""
+msgstr "simbol %s digunakan, tetapi tidak ditakrifkan sebagai token atau mempunyai hukum"
 
 #: elf32-bfin.c:2761
 msgid "R_BFIN_FUNCDESC references dynamic symbol with nonzero addend"
 msgstr ""
 
 #: elf32-bfin.c:2801 elf32-bfin.c:2922
+#, fuzzy
 msgid "cannot emit fixups in read-only section"
-msgstr ""
+msgstr "Peristiwa tidak boleh disunting, kerana kalendar terpilih adalah baca sahaja"
 
 #: elf32-bfin.c:2831 elf32-bfin.c:2959 elf32-lm32.c:1006 elf32-sh.c:4384
 msgid "cannot emit dynamic relocations in read-only section"
@@ -2257,8 +2298,9 @@ msgid "R_BFIN_FUNCDESC_VALUE references dynamic symbol with nonzero addend"
 msgstr ""
 
 #: elf32-bfin.c:3044
+#, fuzzy
 msgid "relocations between different segments are not supported"
-msgstr ""
+msgstr "Operasi tidak disokong, fail berada pada lekap berbeza"
 
 #: elf32-bfin.c:3045
 msgid "warning: relocation references a different segment"
@@ -2270,16 +2312,17 @@ msgstr ""
 #: elf32-msp430.c:1514 elf32-mt.c:406 elf32-or1k.c:1903 elf32-tilepro.c:3377
 #: elf32-v850.c:2305 elf32-visium.c:688 elf32-xstormy16.c:938 elf64-bpf.c:348
 #: elf64-mmix.c:1545 elfxx-tilegx.c:3750
+#, fuzzy
 msgid "internal error: dangerous relocation"
-msgstr ""
+msgstr "Ralat dalaman: Ralat tidak diketahui"
 
 #. Ignore init flag - it may not be set, despite the flags field containing valid data.
 #: elf32-bfin.c:4728 elf32-cris.c:3860 elf32-m68hc1x.c:1414 elf32-m68k.c:1264
 #: elf32-score.c:3984 elf32-score7.c:3791 elf32-vax.c:534 elf32-xgate.c:494
 #: elfxx-mips.c:16366
-#, c-format
+#, fuzzy, c-format
 msgid "private flags = %lx:"
-msgstr ""
+msgstr "Persendirian"
 
 #: elf32-bfin.c:4779 elf32-frv.c:6585
 #, c-format
@@ -2292,17 +2335,18 @@ msgid "%pB: cannot link fdpic object file into non-fdpic executable"
 msgstr ""
 
 #: elf32-bfin.c:4919
-#, c-format
+#, fuzzy, c-format
 msgid "*** check this relocation %s"
-msgstr ""
+msgstr "Tidak dapat memeriksa folder: %s: %s"
 
 #: elf32-bfin.c:5034
 msgid "the bfin target does not currently support the generation of copy relocations"
 msgstr ""
 
 #: elf32-bfin.c:5329 elf32-cr16.c:2720 elf32-m68k.c:4420
+#, fuzzy
 msgid "unsupported relocation type"
-msgstr ""
+msgstr "Jenis Python tidak disokong: %s"
 
 #: elf32-cris.c:1119
 #, c-format
@@ -2321,8 +2365,9 @@ msgstr ""
 
 #: elf32-cris.c:1193 elf32-cris.c:1326 elf32-cris.c:1591 elf32-cris.c:1674
 #: elf32-cris.c:1827 elf32-tic6x.c:2552
+#, fuzzy
 msgid "[whose name is lost]"
-msgstr ""
+msgstr "Nama '%s' hilang dalam dbus mesej."
 
 #: elf32-cris.c:1311 elf32-tic6x.c:2536
 #, c-format
@@ -2391,13 +2436,14 @@ msgid "%pB, section `%pA', to symbol `%s': relocation %s should not be used in a
 msgstr ""
 
 #: elf32-cris.c:3811
+#, fuzzy
 msgid "unexpected machine number"
-msgstr ""
+msgstr "Nombor pemacu %1 tak dijangka."
 
 #: elf32-cris.c:3863
-#, c-format
+#, fuzzy, c-format
 msgid " [symbols have a _ prefix]"
-msgstr ""
+msgstr "Pengenalpasti pulsar mempunyai awalan 'PSR'"
 
 #: elf32-cris.c:3866
 #, c-format
@@ -2407,7 +2453,7 @@ msgstr ""
 #: elf32-cris.c:3869
 #, c-format
 msgid " [v32]"
-msgstr ""
+msgstr " [v32]"
 
 #: elf32-cris.c:3913
 #, c-format
@@ -2430,8 +2476,9 @@ msgid "%pB contains non-CRIS-v32 code, incompatible with previous objects"
 msgstr ""
 
 #: elf32-csky.c:2016
+#, fuzzy
 msgid "GOT table size out of range"
-msgstr ""
+msgstr "Diluar Julat"
 
 #: elf32-csky.c:2826
 #, c-format
@@ -2439,9 +2486,9 @@ msgid "warning: unrecognized arch eflag '%#lx'"
 msgstr ""
 
 #: elf32-csky.c:2849
-#, c-format
+#, fuzzy, c-format
 msgid "warning: unrecognised arch name '%#x'"
-msgstr ""
+msgstr "nama (x,y)"
 
 #: elf32-csky.c:2914 elf32-csky.c:3074
 #, c-format
@@ -2475,9 +2522,9 @@ msgstr ""
 
 #. The r_type is error, not support it.
 #: elf32-csky.c:4327 elf32-i386.c:344
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: unsupported relocation type: %#x"
-msgstr ""
+msgstr "TYPE(x)"
 
 #: elf32-dlx.c:141
 #, c-format
@@ -2495,8 +2542,9 @@ msgid "unsupported relocation between data/insn address spaces"
 msgstr ""
 
 #: elf32-frv.c:1452 elf32-frv.c:1603
+#, fuzzy
 msgid "relocation requires zero addend"
-msgstr ""
+msgstr "Sifar"
 
 #: elf32-frv.c:2832
 #, c-format
@@ -2573,9 +2621,9 @@ msgid "%H: reloc against `%s' references a different segment\n"
 msgstr ""
 
 #: elf32-frv.c:4068
-#, c-format
+#, fuzzy, c-format
 msgid "%H: reloc against `%s': %s\n"
-msgstr ""
+msgstr "%s j %s"
 
 #: elf32-frv.c:6496
 #, c-format
@@ -2583,9 +2631,9 @@ msgid "%pB: compiled with %s and linked with modules that use non-pic relocation
 msgstr ""
 
 #: elf32-frv.c:6550 elf32-iq2000.c:830 elf32-m32c.c:876
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: compiled with %s and linked with modules compiled with %s"
-msgstr ""
+msgstr "Dia Versi %s dikompil %s, %s\n"
 
 #: elf32-frv.c:6563
 #, c-format
@@ -2608,9 +2656,9 @@ msgid "%pB: relocation %s can not be used when making a shared object; recompile
 msgstr ""
 
 #: elf32-hppa.c:2579
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: duplicate export stub %s"
-msgstr ""
+msgstr "%s Pb"
 
 #: elf32-hppa.c:3235
 #, c-format
@@ -2638,9 +2686,9 @@ msgid "%pB:%s has both normal and TLS relocs"
 msgstr ""
 
 #: elf32-hppa.c:4166
-#, c-format
+#, fuzzy, c-format
 msgid "%pB(%pA+%#<PRIx64>): cannot handle %s for %s"
-msgstr ""
+msgstr "Caja tidak dapat mengendali lokasi \"%s\"."
 
 #: elf32-hppa.c:4470
 msgid ".got section not immediately after .plt section"
@@ -2676,9 +2724,9 @@ msgstr ""
 #: elf32-i386.c:2452 elf32-i386.c:3752 elf32-i386.c:3900 elf64-x86-64.c:3107
 #: elf64-x86-64.c:4790 elf64-x86-64.c:4958 elfnn-riscv.c:2406
 #: elfnn-riscv.c:3318 elfnn-riscv.c:3392
-#, c-format
+#, fuzzy, c-format
 msgid "Local IFUNC function `%s' in %pB\n"
-msgstr ""
+msgstr "%s Pb"
 
 #: elf32-i386.c:2630
 #, c-format
@@ -2686,16 +2734,19 @@ msgid "%pB: direct GOT relocation %s against `%s' without base register can not 
 msgstr ""
 
 #: elf32-i386.c:2665 elf64-x86-64.c:3324
+#, fuzzy
 msgid "hidden symbol"
-msgstr ""
+msgstr "Tersembunyi"
 
 #: elf32-i386.c:2668 elf64-x86-64.c:3327
+#, fuzzy
 msgid "internal symbol"
-msgstr ""
+msgstr "Dalaman"
 
 #: elf32-i386.c:2671 elf64-x86-64.c:3330
+#, fuzzy
 msgid "protected symbol"
-msgstr ""
+msgstr "Dilindungi"
 
 #: elf32-i386.c:2674 elf64-x86-64.c:3333
 #, fuzzy
@@ -2743,9 +2794,9 @@ msgid "global pointer relative address out of range"
 msgstr ""
 
 #: elf32-lm32.c:959
-#, c-format
+#, fuzzy, c-format
 msgid "internal error: addend should be zero for %s"
-msgstr ""
+msgstr "Ralat Dalaman, kiraan bukan-sifar"
 
 #: elf32-m32r.c:1461
 msgid "SDA relocation when _SDA_BASE_ not defined"
@@ -2762,24 +2813,24 @@ msgid "%pB: instruction set mismatch with previous modules"
 msgstr ""
 
 #: elf32-m32r.c:3298 elf32-nds32.c:6899
-#, c-format
+#, fuzzy, c-format
 msgid "private flags = %lx"
-msgstr ""
+msgstr "Persendirian"
 
 #: elf32-m32r.c:3303
-#, c-format
+#, fuzzy, c-format
 msgid ": m32r instructions"
-msgstr ""
+msgstr "Arahan"
 
 #: elf32-m32r.c:3304
-#, c-format
+#, fuzzy, c-format
 msgid ": m32rx instructions"
-msgstr ""
+msgstr "Arahan"
 
 #: elf32-m32r.c:3305
-#, c-format
+#, fuzzy, c-format
 msgid ": m32r2 instructions"
-msgstr ""
+msgstr "Arahan"
 
 #: elf32-m68hc1x.c:1134
 #, c-format
@@ -2822,54 +2873,54 @@ msgid "%pB: linking files compiled for HCS12 with others compiled for HC12"
 msgstr ""
 
 #: elf32-m68hc1x.c:1417 elf32-xgate.c:497
-#, c-format
+#, fuzzy, c-format
 msgid "[abi=32-bit int, "
-msgstr ""
+msgstr "32-bit"
 
 #: elf32-m68hc1x.c:1419 elf32-xgate.c:499
-#, c-format
+#, fuzzy, c-format
 msgid "[abi=16-bit int, "
-msgstr ""
+msgstr "16-bit"
 
 #: elf32-m68hc1x.c:1422 elf32-xgate.c:502
-#, c-format
+#, fuzzy, c-format
 msgid "64-bit double, "
-msgstr ""
+msgstr "64-bit"
 
 #: elf32-m68hc1x.c:1424 elf32-xgate.c:504
-#, c-format
+#, fuzzy, c-format
 msgid "32-bit double, "
-msgstr ""
+msgstr "32-bit"
 
 #: elf32-m68hc1x.c:1427
 #, c-format
 msgid "cpu=HC11]"
-msgstr ""
+msgstr "cpu=HC11]"
 
 #: elf32-m68hc1x.c:1429
 #, c-format
 msgid "cpu=HCS12]"
-msgstr ""
+msgstr "cpu=HCS12]"
 
 #: elf32-m68hc1x.c:1431
 #, c-format
 msgid "cpu=HC12]"
-msgstr ""
+msgstr "cpu=HC12]"
 
 #: elf32-m68hc1x.c:1434
-#, c-format
+#, fuzzy, c-format
 msgid " [memory=bank-model]"
-msgstr ""
+msgstr "Bank"
 
 #: elf32-m68hc1x.c:1436
-#, c-format
+#, fuzzy, c-format
 msgid " [memory=flat]"
-msgstr ""
+msgstr "Rata."
 
 #: elf32-m68hc1x.c:1439
-#, c-format
+#, fuzzy, c-format
 msgid " [XGATE RAM offsetting]"
-msgstr ""
+msgstr "Kayu pelantak."
 
 #: elf32-m68k.c:1156 elf32-m68k.c:1164 elf32-ppc.c:3570 elf32-ppc.c:3578
 #, c-format
@@ -2877,7 +2928,6 @@ msgid "%pB uses hard float, %pB uses soft float"
 msgstr ""
 
 #: elf32-m68k.c:1279 elf32-m68k.c:1280 vms-alpha.c:8089 vms-alpha.c:8105
-#, fuzzy
 msgid "unknown"
 msgstr "tidak diketahui"
 
@@ -2893,29 +2943,32 @@ msgstr ""
 
 #. Pacify gcc -Wall.
 #: elf32-mep.c:139
-#, c-format
+#, fuzzy, c-format
 msgid "mep: no reloc for code %d"
-msgstr ""
+msgstr "%d kod kemunculan"
 
 #: elf32-mep.c:146
-#, c-format
+#, fuzzy, c-format
 msgid "MeP: howto %d has type %d"
-msgstr ""
+msgstr "$$ untuk hukum pertengahan pada $%d bagi %s tidak mempunyai jenis yang diisytiharkan"
 
 #: elf32-mep.c:618
-#, c-format
+#, fuzzy, c-format
 msgid "%pB and %pB are for different cores"
-msgstr ""
+msgstr "%1 PB"
 
 #: elf32-mep.c:637
-#, c-format
+#, fuzzy, c-format
 msgid "%pB and %pB are for different configurations"
-msgstr ""
+msgstr "%1 PB"
 
 #: elf32-mep.c:675
-#, c-format
+#, fuzzy, c-format
 msgid "private flags = 0x%lx"
 msgstr ""
+"\n"
+"Terdapat direktori nyahpepijat dalam %s pada 0x%lx\n"
+"\n"
 
 #: elf32-metag.c:1856
 #, c-format
@@ -2929,13 +2982,14 @@ msgstr ""
 
 #: elf32-microblaze.c:1590 elf32-tilepro.c:3018 elfxx-sparc.c:3442
 #: elfxx-tilegx.c:3415
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: probably compiled without -fPIC?"
-msgstr ""
+msgstr "Boxes telah dikompil tanpa sokongan RDP"
 
 #: elf32-mips.c:1776 elf64-mips.c:3515 elfn32-mips.c:3334
+#, fuzzy
 msgid "literal relocation occurs for an external symbol"
-msgstr ""
+msgstr "rentetan literal %s tidak dikepilkan pada simbol"
 
 #: elf32-mips.c:1827 elf32-score.c:563 elf32-score7.c:465 elf64-mips.c:3558
 #: elfn32-mips.c:3376
@@ -2996,9 +3050,9 @@ msgid "error: %pB can use the upper region for data, but %pB assumes data is exc
 msgstr ""
 
 #: elf32-nds32.c:3673
-#, c-format
+#, fuzzy, c-format
 msgid "error: can't find symbol: %s"
-msgstr ""
+msgstr "Kami tidak menemui simbol \"%s\""
 
 #: elf32-nds32.c:5572
 #, c-format
@@ -3051,14 +3105,14 @@ msgid "%pB: warning: incompatible elf-versions %s and %s"
 msgstr ""
 
 #: elf32-nds32.c:6905
-#, c-format
+#, fuzzy, c-format
 msgid ": n1 instructions"
-msgstr ""
+msgstr "Arahan"
 
 #: elf32-nds32.c:6908
-#, c-format
+#, fuzzy, c-format
 msgid ": n1h instructions"
-msgstr ""
+msgstr "Arahan"
 
 #: elf32-nds32.c:9357
 #, c-format
@@ -3086,9 +3140,9 @@ msgid "%pB: Cannot handle relocation value size of %d"
 msgstr ""
 
 #: elf32-or1k.c:1375
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: unknown relocation type %d"
-msgstr ""
+msgstr "Jenis objek tak diketahui %d\n"
 
 #: elf32-or1k.c:1429
 #, c-format
@@ -3116,9 +3170,9 @@ msgid "%pB: non-pic relocation against symbol %s"
 msgstr ""
 
 #: elf32-or1k.c:1686
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: support for local dynamic not implemented"
-msgstr ""
+msgstr "Fail yang mengandungi berkas sokongan akan dimuat turun ke sistem domestik."
 
 #: elf32-or1k.c:1865
 #, c-format
@@ -3126,9 +3180,9 @@ msgid "%pB: will not resolve runtime TLS relocation"
 msgstr ""
 
 #: elf32-or1k.c:2199
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: bad relocation section name `%s'"
-msgstr ""
+msgstr "Nama petimel teruk untuk tapisan: %s"
 
 #: elf32-or1k.c:3312
 #, c-format
@@ -3136,19 +3190,19 @@ msgid "%pB: %s flag mismatch with previous modules"
 msgstr ""
 
 #: elf32-ppc.c:990 elf64-ppc.c:1753
-#, c-format
+#, fuzzy, c-format
 msgid "generic linker can't handle %s"
-msgstr ""
+msgstr "Tidak boleh mengendalikan lokasi \"%s:\"."
 
 #: elf32-ppc.c:1627
-#, c-format
+#, fuzzy, c-format
 msgid "corrupt %s section in %pB"
-msgstr ""
+msgstr "%pB: gagal membaca bahagian data nyahpepijat"
 
 #: elf32-ppc.c:1646
-#, c-format
+#, fuzzy, c-format
 msgid "unable to read in %s section from %pB"
-msgstr ""
+msgstr "Tidak boleh baca dari: %s"
 
 #: elf32-ppc.c:1688
 #, c-format
@@ -3160,12 +3214,14 @@ msgid "failed to allocate space for new APUinfo section"
 msgstr ""
 
 #: elf32-ppc.c:1756
+#, fuzzy
 msgid "failed to compute new APUinfo section"
-msgstr ""
+msgstr "Anda tidak boleh menambah direktori baru pada seksyen ini."
 
 #: elf32-ppc.c:1759
+#, fuzzy
 msgid "failed to install new APUinfo section"
-msgstr ""
+msgstr "Gagal memasang: pengesahihan tidak sah"
 
 #: elf32-ppc.c:2867
 #, c-format
@@ -3223,8 +3279,9 @@ msgid "bss-plt forced due to %pB"
 msgstr ""
 
 #: elf32-ppc.c:4028
+#, fuzzy
 msgid "bss-plt forced by profiling"
-msgstr ""
+msgstr "Paksa Dihidupkan"
 
 #: elf32-ppc.c:4606 elf64-ppc.c:8516
 msgid "%H: warning: %s unexpected insn %#x.\n"
@@ -3254,8 +3311,9 @@ msgid "%P: %H: error: %s with unexpected instruction %x\n"
 msgstr ""
 
 #: elf32-ppc.c:7501
+#, fuzzy
 msgid "%H: fixup branch overflow\n"
-msgstr ""
+msgstr "Rekod melimpah"
 
 #: elf32-ppc.c:7541 elf32-ppc.c:7579
 #, c-format
@@ -3268,9 +3326,9 @@ msgid "%X%H: unsupported bss-plt -fPIC ifunc %s\n"
 msgstr ""
 
 #: elf32-ppc.c:7679
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: reloc %#x unsupported"
-msgstr ""
+msgstr "%1 PB"
 
 #: elf32-ppc.c:7962
 #, c-format
@@ -3305,9 +3363,9 @@ msgid "%X%P: %H: %s relocation unsupported for bss-plt\n"
 msgstr ""
 
 #: elf32-ppc.c:9025
-#, c-format
+#, fuzzy, c-format
 msgid "%H: error: %s against `%s' not a multiple of %u\n"
-msgstr ""
+msgstr "Kod ralat %u ketika menyisip satu masukan: %s"
 
 #: elf32-ppc.c:9054
 #, c-format
@@ -3315,9 +3373,11 @@ msgid "%H: unresolvable %s relocation against symbol `%s'\n"
 msgstr ""
 
 #: elf32-ppc.c:9136
-#, c-format
+#, fuzzy, c-format
 msgid "%H: %s reloc against `%s': error %d\n"
 msgstr ""
+"\n"
+"%02d h %02d j %02d min pada: %s"
 
 #: elf32-ppc.c:10018
 msgid "%X%P: text relocations and GNU indirect functions will result in a segfault at runtime\n"
@@ -3328,9 +3388,9 @@ msgid "%P: warning: text relocations and GNU indirect functions may result in a 
 msgstr ""
 
 #: elf32-ppc.c:10067
-#, c-format
+#, fuzzy, c-format
 msgid "%s not defined in linker created %pA"
-msgstr ""
+msgstr "Port %s/%s tidak dinyatakan"
 
 #: elf32-pru.c:582 elf32-pru.c:1477
 #, c-format
@@ -3338,32 +3398,39 @@ msgid "error: %pB: old incompatible object file detected"
 msgstr ""
 
 #: elf32-pru.c:931
+#, fuzzy
 msgid "relocation out of range"
-msgstr ""
+msgstr "Diluar Julat"
 
 #: elf32-pru.c:941 elf32-tic6x.c:2649
+#, fuzzy
 msgid "dangerous relocation"
-msgstr ""
+msgstr "Cuba Sekat _Tapak Sesawang Merbahaya"
 
 #: elf32-rl78.c:551
+#, fuzzy
 msgid "RL78 reloc stack overflow/underflow"
-msgstr ""
+msgstr "tindanan melimpah"
 
 #: elf32-rl78.c:555
+#, fuzzy
 msgid "RL78 reloc divide by zero"
-msgstr ""
+msgstr "Bahagi [/]"
 
 #: elf32-rl78.c:1069
+#, fuzzy
 msgid "warning: RL78_SYM reloc with an unknown symbol"
-msgstr ""
+msgstr "Jenis amaran tidak diketahui"
 
 #: elf32-rl78.c:1115
+#, fuzzy
 msgid "%H: %s out of range\n"
-msgstr ""
+msgstr "integer diluar julat: %s"
 
 #: elf32-rl78.c:1122
+#, fuzzy
 msgid "%H: relocation type %u is not supported\n"
-msgstr ""
+msgstr "%U pada %h"
 
 #: elf32-rl78.c:1134
 msgid "%H: relocation %s returns an unrecognized value %x\n"
@@ -3384,14 +3451,14 @@ msgid "RL78 merge conflict: cannot link 32-bit and 64-bit objects together"
 msgstr ""
 
 #: elf32-rl78.c:1250 elf32-rl78.c:1254
-#, c-format
+#, fuzzy, c-format
 msgid "- %pB is 64-bit, %pB is not"
-msgstr ""
+msgstr "%1 PB"
 
 #: elf32-rl78.c:1281
-#, c-format
+#, fuzzy, c-format
 msgid " [64-bit doubles]"
-msgstr ""
+msgstr "64-bit"
 
 #: elf32-rx.c:618
 #, c-format
@@ -3432,14 +3499,14 @@ msgid "there is a conflict merging the ELF header flags from %pB"
 msgstr ""
 
 #: elf32-rx.c:3188
-#, c-format
+#, fuzzy, c-format
 msgid "  the input  file's flags: %s"
-msgstr ""
+msgstr "%s: fail input adalah fail output"
 
 #: elf32-rx.c:3190
-#, c-format
+#, fuzzy, c-format
 msgid "  the output file's flags: %s"
-msgstr ""
+msgstr "%s: fail input adalah fail output"
 
 #: elf32-rx.c:3797
 #, c-format
@@ -3461,8 +3528,9 @@ msgid "not enough GOT space for local GOT entries"
 msgstr ""
 
 #: elf32-score.c:2737
+#, fuzzy
 msgid "address not word aligned"
-msgstr ""
+msgstr "_Biar Dijajar"
 
 #: elf32-score.c:2818 elf32-score7.c:2625
 #, c-format
@@ -3485,9 +3553,9 @@ msgid " [pic]"
 msgstr ""
 
 #: elf32-score.c:3991 elf32-score7.c:3798
-#, c-format
+#, fuzzy, c-format
 msgid " [fix dep]"
-msgstr ""
+msgstr "A-DEP"
 
 #: elf32-score.c:4038 elf32-score7.c:3845
 #, c-format
@@ -3688,37 +3756,39 @@ msgid "%pA:0x%v lrlive .brinfo (%u) differs from analysis (%u)\n"
 msgstr ""
 
 #: elf32-spu.c:1908
-#, c-format
+#, fuzzy, c-format
 msgid "%pB is not allowed to define %s"
-msgstr ""
+msgstr "PB"
 
 #: elf32-spu.c:1916
-#, c-format
+#, fuzzy, c-format
 msgid "you are not allowed to define %s in a script"
-msgstr ""
+msgstr "pembolehubah %%define %s ditakrif semula"
 
 #: elf32-spu.c:1950
-#, c-format
+#, fuzzy, c-format
 msgid "%s in overlay section"
-msgstr ""
+msgstr "Tiada seksyen sebegitu: %s"
 
 #: elf32-spu.c:1979
+#, fuzzy
 msgid "overlay stub relocation overflow"
-msgstr ""
+msgstr "Stab"
 
 #: elf32-spu.c:1988 elf64-ppc.c:15362
+#, fuzzy
 msgid "stubs don't match calculated size"
-msgstr ""
+msgstr "Jika pola diatas tidak sepadan:"
 
 #: elf32-spu.c:2571
-#, c-format
+#, fuzzy, c-format
 msgid "warning: %s overlaps %s\n"
-msgstr ""
+msgstr "%s: Amaran: Tak dapat %s"
 
 #: elf32-spu.c:2587
-#, c-format
+#, fuzzy, c-format
 msgid "warning: %s exceeds section size\n"
-msgstr ""
+msgstr "Bahagian"
 
 #: elf32-spu.c:2619
 #, c-format
@@ -3741,14 +3811,14 @@ msgid "  calls:\n"
 msgstr "Tiada panggilan"
 
 #: elf32-spu.c:4338
-#, c-format
+#, fuzzy, c-format
 msgid "%s duplicated in %s\n"
-msgstr ""
+msgstr "\"%s\" diduplikasi"
 
 #: elf32-spu.c:4342
-#, c-format
+#, fuzzy, c-format
 msgid "%s duplicated\n"
-msgstr ""
+msgstr "Satu unsur tunggal (%s) mempunyai pendua."
 
 #: elf32-spu.c:4349
 msgid "sorry, no support for duplicate object files in auto-overlay script\n"
@@ -3791,8 +3861,9 @@ msgid "%F%P: can not build overlay stubs: %E\n"
 msgstr ""
 
 #: elf32-spu.c:4811
+#, fuzzy
 msgid "fatal error while creating .fixup"
-msgstr ""
+msgstr "Ralat ketika mencipta pautan ke %s."
 
 #: elf32-spu.c:5047
 #, c-format
@@ -3855,9 +3926,9 @@ msgstr ""
 #: elf32-tilepro.c:3624 elfxx-tilegx.c:4017 elfxx-x86.c:2773
 #: elfnn-aarch64.c:10343 elfnn-kvx.c:4628 elfnn-loongarch.c:6062
 #: elfnn-riscv.c:3615
-#, c-format
+#, fuzzy, c-format
 msgid "discarded output section: `%pA'"
-msgstr ""
+msgstr "Bahagian"
 
 #: elf32-v850.c:152
 #, c-format
@@ -3885,8 +3956,9 @@ msgid "variable `%s' cannot be in both zero and tiny data regions simultaneously
 msgstr ""
 
 #: elf32-v850.c:466
+#, fuzzy
 msgid "failed to find previous HI16 reloc"
-msgstr ""
+msgstr "Cari terdahulu"
 
 #: elf32-v850.c:2309
 msgid "could not locate special linker symbol __gp"
@@ -3916,9 +3988,9 @@ msgid "error: %pB uses FPU-3.0 but %pB only supports FPU-2.0"
 msgstr ""
 
 #: elf32-v850.c:2601
-#, c-format
+#, fuzzy, c-format
 msgid " alignment of 8-byte entities: "
-msgstr ""
+msgstr "Salin semula entiti sedia ada"
 
 #: elf32-v850.c:2604
 #, c-format
@@ -3937,9 +4009,9 @@ msgstr "tidak ditetapkan"
 
 #: elf32-v850.c:2607 elf32-v850.c:2619 elf32-v850.c:2631 elf32-v850.c:2642
 #: elf32-v850.c:2653 elf32-v850.c:2664
-#, c-format
+#, fuzzy, c-format
 msgid "unknown: %x"
-msgstr ""
+msgstr "(Kod mekanisma GSSAPI tidak diketahui: %x)"
 
 #: elf32-v850.c:2613
 #, c-format
@@ -3957,9 +4029,9 @@ msgid "8-bytes"
 msgstr ""
 
 #: elf32-v850.c:2625
-#, c-format
+#, fuzzy, c-format
 msgid " FPU support required: "
-msgstr ""
+msgstr "Periksa sama ada alatan sokongan yang diperlukan tersedia"
 
 #: elf32-v850.c:2628
 #, c-format
@@ -3977,9 +4049,9 @@ msgid "none"
 msgstr "tiada"
 
 #: elf32-v850.c:2637
-#, c-format
+#, fuzzy, c-format
 msgid "SIMD use: "
-msgstr ""
+msgstr "_Guna sebagaimana ia"
 
 #: elf32-v850.c:2640 elf32-v850.c:2651 elf32-v850.c:2662
 #, c-format
@@ -3992,14 +4064,16 @@ msgid "no"
 msgstr ""
 
 #: elf32-v850.c:2648
-#, c-format
+#, fuzzy, c-format
 msgid "CACHE use: "
 msgstr ""
+"Tiada fail indeks tema dalam \"%s\".\n"
+"Jika anda pasti mahu mencipta satu cache ikon di sini, guna -ignore-theme-index.\n"
 
 #: elf32-v850.c:2659
-#, c-format
+#, fuzzy, c-format
 msgid "MMU use: "
-msgstr ""
+msgstr "Benarkan MMU"
 
 #: elf32-v850.c:2826 elf32-v850.c:2882
 #, c-format
@@ -4008,49 +4082,49 @@ msgstr ""
 
 #. xgettext:c-format.
 #: elf32-v850.c:2900
-#, c-format
+#, fuzzy, c-format
 msgid "private flags = %lx: "
-msgstr ""
+msgstr "Persendirian"
 
 #: elf32-v850.c:2905
-#, c-format
+#, fuzzy, c-format
 msgid "unknown v850 architecture"
-msgstr ""
+msgstr "S_eni Bina"
 
 #: elf32-v850.c:2907
-#, c-format
+#, fuzzy, c-format
 msgid "v850 E3 architecture"
-msgstr ""
+msgstr "S_eni Bina"
 
 #: elf32-v850.c:2909 elf32-v850.c:2916
-#, c-format
+#, fuzzy, c-format
 msgid "v850 architecture"
-msgstr ""
+msgstr "S_eni Bina"
 
 #: elf32-v850.c:2917
-#, c-format
+#, fuzzy, c-format
 msgid "v850e architecture"
-msgstr ""
+msgstr "S_eni Bina"
 
 #: elf32-v850.c:2918
-#, c-format
+#, fuzzy, c-format
 msgid "v850e1 architecture"
-msgstr ""
+msgstr "S_eni Bina"
 
 #: elf32-v850.c:2919
-#, c-format
+#, fuzzy, c-format
 msgid "v850e2 architecture"
-msgstr ""
+msgstr "S_eni Bina"
 
 #: elf32-v850.c:2920
-#, c-format
+#, fuzzy, c-format
 msgid "v850e2v3 architecture"
-msgstr ""
+msgstr "S_eni Bina"
 
 #: elf32-v850.c:2921
-#, c-format
+#, fuzzy, c-format
 msgid "v850e3v5 architecture"
-msgstr ""
+msgstr "S_eni Bina"
 
 #: elf32-v850.c:3595 elf32-v850.c:3834
 #, c-format
@@ -4078,14 +4152,14 @@ msgid " [nonpic]"
 msgstr ""
 
 #: elf32-vax.c:540
-#, c-format
+#, fuzzy, c-format
 msgid " [d-float]"
-msgstr ""
+msgstr "apung"
 
 #: elf32-vax.c:543
-#, c-format
+#, fuzzy, c-format
 msgid " [g-float]"
-msgstr ""
+msgstr "apung"
 
 #: elf32-vax.c:629
 #, c-format
@@ -4113,9 +4187,9 @@ msgid "%pB: compiled %s -mtune=%s and linked with modules compiled %s -mtune=%s"
 msgstr ""
 
 #: elf32-xgate.c:506
-#, c-format
+#, fuzzy, c-format
 msgid "cpu=XGATE]"
-msgstr ""
+msgstr "% CPU"
 
 #: elf32-xgate.c:508
 #, c-format
@@ -4123,13 +4197,14 @@ msgid "error reading cpu type from elf private data"
 msgstr ""
 
 #: elf32-xstormy16.c:457 elf64-ia64-vms.c:2076 elfnn-ia64.c:2345
+#, fuzzy
 msgid "non-zero addend in @fptr reloc"
-msgstr ""
+msgstr "Ralat Dalaman, kiraan bukan-sifar"
 
 #: elf32-xtensa.c:996
-#, c-format
+#, fuzzy, c-format
 msgid "%pB(%pA): invalid property table"
-msgstr ""
+msgstr "Jadual pemampasan paparan tidak sah"
 
 #: elf32-xtensa.c:2730
 #, c-format
@@ -4137,8 +4212,9 @@ msgid "%pB(%pA+%#<PRIx64>): relocation offset out of range (size=%#<PRIx64>)"
 msgstr ""
 
 #: elf32-xtensa.c:2813 elf32-xtensa.c:2936
+#, fuzzy
 msgid "dynamic relocation in read-only section"
-msgstr ""
+msgstr "%pB: gagal membaca bahagian data nyahpepijat"
 
 #: elf32-xtensa.c:2913
 msgid "TLS relocation invalid without dynamic sections"
@@ -4154,8 +4230,9 @@ msgid "%pB: incompatible machine type; output is 0x%x; input is 0x%x"
 msgstr ""
 
 #: elf32-xtensa.c:4731 elf32-xtensa.c:4739
+#, fuzzy
 msgid "attempt to convert L32R/CALLX to CALL failed"
-msgstr ""
+msgstr "Percubaan dailan telah gagal"
 
 #: elf32-xtensa.c:6567 elf32-xtensa.c:6646 elf32-xtensa.c:8072
 #, c-format
@@ -4168,12 +4245,14 @@ msgid "%pB(%pA+%#<PRIx64>): could not decode instruction for XTENSA_ASM_SIMPLIFY
 msgstr ""
 
 #: elf32-xtensa.c:9671
+#, fuzzy
 msgid "invalid relocation address"
-msgstr ""
+msgstr "Alamat IP tidak sah"
 
 #: elf32-xtensa.c:9762
+#, fuzzy
 msgid "overflow after relaxation"
-msgstr ""
+msgstr "nombor baris melimpah"
 
 #: elf32-xtensa.c:10908
 #, c-format
@@ -4186,14 +4265,14 @@ msgid "%pB: unsupported bfd mach %#lx"
 msgstr ""
 
 #: elf32-z80.c:518
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: unsupported mach %#x"
-msgstr ""
+msgstr "%1 PB"
 
 #: elf32-z80.c:546
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: unsupported arch %#x"
-msgstr ""
+msgstr "PB"
 
 #: elf64-alpha.c:472
 msgid "GPDISP relocation did not find ldah and lda instructions"
@@ -4225,13 +4304,12 @@ msgid "%pB: gp-relative relocation against dynamic symbol %s"
 msgstr ""
 
 #: elf64-alpha.c:4438
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: change in gp: BRSGP %s"
-msgstr ""
+msgstr "%s Pb"
 
 #: elf64-alpha.c:4463 mach-o.c:625 elfnn-loongarch.c:908 elfnn-riscv.c:724
 #: elfnn-riscv.c:929 elfnn-riscv.c:971
-#, fuzzy
 msgid "<unknown>"
 msgstr "<tidak diketahui>"
 
@@ -4262,8 +4340,9 @@ msgstr ""
 
 #. Only if it's not an unresolved symbol.
 #: elf64-bpf.c:344
+#, fuzzy
 msgid "internal error: relocation not supported"
-msgstr ""
+msgstr "Ralat dalaman: Ralat tidak diketahui"
 
 #: elf64-gen.c:71
 #, c-format
@@ -4315,14 +4394,14 @@ msgid "%pB: linking non-pic code in a position independent executable"
 msgstr ""
 
 #: elf64-ia64-vms.c:3783 elfnn-ia64.c:4223
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: @internal branch to dynamic symbol %s"
-msgstr ""
+msgstr "Gagal menemui simbol '%s' dalam pustaka dinamik"
 
 #: elf64-ia64-vms.c:3786 elfnn-ia64.c:4226
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: speculation fixup to dynamic symbol %s"
-msgstr ""
+msgstr "Gagal menemui simbol '%s' dalam pustaka dinamik"
 
 #: elf64-ia64-vms.c:3789 elfnn-ia64.c:4229
 #, c-format
@@ -4330,8 +4409,9 @@ msgid "%pB: @pcrel relocation against dynamic symbol %s"
 msgstr ""
 
 #: elf64-ia64-vms.c:3913 elfnn-ia64.c:4426
+#, fuzzy
 msgid "unsupported reloc"
-msgstr ""
+msgstr " (tidak disokong)"
 
 #: elf64-ia64-vms.c:3950 elfnn-ia64.c:4464
 #, c-format
@@ -4439,8 +4519,9 @@ msgid "%pB: error: multiple definition of `%s'; start of %s is set in a earlier 
 msgstr ""
 
 #: elf64-mmix.c:2208
+#, fuzzy
 msgid "register section has contents\n"
-msgstr ""
+msgstr "Bahagian"
 
 #: elf64-mmix.c:2398
 #, c-format
@@ -4448,9 +4529,9 @@ msgid "internal inconsistency: remaining %lu != max %lu; please report this bug"
 msgstr ""
 
 #: elf64-ppc.c:1361
-#, c-format
+#, fuzzy, c-format
 msgid "warning: %s should be used rather than %s"
-msgstr ""
+msgstr "Baca jalur %s berbanding %s!"
 
 #: elf64-ppc.c:4302
 #, c-format
@@ -4468,8 +4549,9 @@ msgid "%H: %s reloc unsupported in shared libraries and PIEs\n"
 msgstr ""
 
 #: elf64-ppc.c:5277
+#, fuzzy
 msgid "%H: %s reloc unsupported here\n"
-msgstr ""
+msgstr "%s berada di sini"
 
 #: elf64-ppc.c:5500
 #, c-format
@@ -4482,23 +4564,23 @@ msgid "%pB: ABI version %ld is not compatible with ABI version %ld output"
 msgstr ""
 
 #: elf64-ppc.c:5535
-#, c-format
+#, fuzzy, c-format
 msgid " [abiv%ld]"
-msgstr ""
+msgstr "%ld:%02ld"
 
 #: elf64-ppc.c:6844
 msgid "%P: copy reloc against `%pT' requires lazy plt linking; avoid setting LD_BIND_NOW=1 or upgrade gcc\n"
 msgstr ""
 
 #: elf64-ppc.c:7111
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: undefined symbol on R_PPC64_TOCSAVE relocation"
-msgstr ""
+msgstr "simbol permulaan %s tidak ditakrifkan"
 
 #: elf64-ppc.c:7362
-#, c-format
+#, fuzzy, c-format
 msgid "dynreloc miscount for %pB, section %pA"
-msgstr ""
+msgstr "%pB: gagal membaca bahagian data nyahpepijat"
 
 #: elf64-ppc.c:7453
 #, c-format
@@ -4535,9 +4617,9 @@ msgid "%H __tls_get_addr lost arg, TLS optimization disabled\n"
 msgstr ""
 
 #: elf64-ppc.c:8745 elf64-ppc.c:9461
-#, c-format
+#, fuzzy, c-format
 msgid "%s defined on removed toc entry"
-msgstr ""
+msgstr "Sistem mungkin tidak berfungsi dengan baik jika masukan ini diubah suai atau dibuang."
 
 #: elf64-ppc.c:9418
 #, c-format
@@ -4550,9 +4632,9 @@ msgid "%H: got/toc optimization is not supported for %s instruction\n"
 msgstr ""
 
 #: elf64-ppc.c:10534
-#, c-format
+#, fuzzy, c-format
 msgid "warning: discarding dynamic section %s"
-msgstr ""
+msgstr "Bahagian"
 
 #: elf64-ppc.c:11687
 msgid "%P: cannot find opd entry toc for `%pT'\n"
@@ -4564,9 +4646,9 @@ msgid "long branch stub `%s' offset overflow"
 msgstr ""
 
 #: elf64-ppc.c:11864
-#, c-format
+#, fuzzy, c-format
 msgid "can't find branch stub `%s'"
-msgstr ""
+msgstr "Gagal mencari posisi semasa dalam fail '%s'"
 
 #: elf64-ppc.c:11925 elf64-ppc.c:12177 elf64-ppc.c:14742
 #, c-format
@@ -4574,9 +4656,9 @@ msgid "%P: linkage table error against `%pT'\n"
 msgstr ""
 
 #: elf64-ppc.c:12376
-#, c-format
+#, fuzzy, c-format
 msgid "can't build branch stub `%s'"
-msgstr ""
+msgstr "Gabung %s ke dalam cabang %s"
 
 #: elf64-ppc.c:13407
 #, c-format
@@ -4593,10 +4675,10 @@ msgid "%s offset too large for .eh_frame sdata4 encoding"
 msgstr ""
 
 #: elf64-ppc.c:15370
-#, c-format
+#, fuzzy, c-format
 msgid "linker stubs in %u group"
 msgid_plural "linker stubs in %u groups"
-msgstr[0] ""
+msgstr[0] "Pemaut"
 
 #: elf64-ppc.c:15377
 #, c-format
@@ -4609,9 +4691,9 @@ msgid ""
 msgstr ""
 
 #: elf64-ppc.c:15759
-#, c-format
+#, fuzzy, c-format
 msgid "%H: %s used with TLS symbol `%pT'\n"
-msgstr ""
+msgstr "simbol %s digunakan lebih dari sekali sebagai rentetan perkataan"
 
 #: elf64-ppc.c:15761
 #, c-format
@@ -4629,9 +4711,9 @@ msgid "%H: call to `%pT' lacks nop, can't restore toc; (toc save/adjust stub)\n"
 msgstr ""
 
 #: elf64-ppc.c:17202
-#, c-format
+#, fuzzy, c-format
 msgid "%H: %s against %pT is not supported\n"
-msgstr ""
+msgstr "%s pt"
 
 #: elf64-ppc.c:17478
 #, c-format
@@ -4644,24 +4726,26 @@ msgid "%X%P: %pB: %s against %pT is not supported by glibc as a dynamic relocati
 msgstr ""
 
 #: elf64-ppc.c:17620
-#, c-format
+#, fuzzy, c-format
 msgid "%P: %pB: %s is not supported for `%pT'\n"
-msgstr ""
+msgstr "%s Pb"
 
 #: elf64-ppc.c:17889
-#, c-format
+#, fuzzy, c-format
 msgid "%H: error: %s not a multiple of %u\n"
-msgstr ""
+msgstr "Kod ralat %u ketika mengesahihkan: %s"
 
 #: elf64-ppc.c:17912
-#, c-format
+#, fuzzy, c-format
 msgid "%H: unresolvable %s against `%pT'\n"
-msgstr ""
+msgstr "%s pt"
 
 #: elf64-ppc.c:18057
-#, c-format
+#, fuzzy, c-format
 msgid "%H: %s against `%pT': error %d\n"
 msgstr ""
+"\n"
+"%02d h %02d j %02d min pada: %s"
 
 #: elf64-s390.c:2490
 #, c-format
@@ -4704,16 +4788,19 @@ msgid "%pB: linking UltraSPARC specific with HAL specific code"
 msgstr ""
 
 #: elf64-x86-64.c:1660
+#, fuzzy
 msgid "hidden symbol "
-msgstr ""
+msgstr "Tersembunyi"
 
 #: elf64-x86-64.c:1663
+#, fuzzy
 msgid "internal symbol "
-msgstr ""
+msgstr "Dalaman"
 
 #: elf64-x86-64.c:1666 elf64-x86-64.c:1670
+#, fuzzy
 msgid "protected symbol "
-msgstr ""
+msgstr "Dilindungi"
 
 #: elf64-x86-64.c:1672
 #, fuzzy
@@ -4726,20 +4813,23 @@ msgid "undefined "
 msgstr "Tidak ditakrif"
 
 #: elf64-x86-64.c:1688 elfnn-loongarch.c:892
+#, fuzzy
 msgid "a shared object"
-msgstr ""
+msgstr "objek memori terkongsi"
 
 #: elf64-x86-64.c:1690
 msgid "; recompile with -fPIC"
 msgstr ""
 
 #: elf64-x86-64.c:1695 elfnn-loongarch.c:898
+#, fuzzy
 msgid "a PIE object"
-msgstr ""
+msgstr "Pai"
 
 #: elf64-x86-64.c:1697 elfnn-loongarch.c:900
+#, fuzzy
 msgid "a PDE object"
-msgstr ""
+msgstr "Tiada objek sebegitu"
 
 #: elf64-x86-64.c:1699
 msgid "; recompile with -fPIE"
@@ -4865,9 +4955,9 @@ msgid "%pB: unexpected redefinition of indirect versioned symbol `%s'"
 msgstr ""
 
 #: elflink.c:2681
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: version node not found for symbol %s"
-msgstr ""
+msgstr "simbol tidak dijumpai di dalam pengeluaran: %.*s"
 
 #: elflink.c:2780
 #, c-format
@@ -4917,9 +5007,9 @@ msgid "%pB: %s local symbol at index %lu (>= sh_info of %lu)"
 msgstr ""
 
 #: elflink.c:5137
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: not enough version information"
-msgstr ""
+msgstr "Maklumat versi"
 
 #: elflink.c:5175
 #, c-format
@@ -4927,9 +5017,9 @@ msgid "%pB: %s: invalid version %u (max %d)"
 msgstr ""
 
 #: elflink.c:5212
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: %s: invalid needed version %d"
-msgstr ""
+msgstr "keperluan versi tidak sah: %s"
 
 #: elflink.c:5498
 #, c-format
@@ -4945,24 +5035,24 @@ msgid "warning: NOTE: size discrepancies can cause real problems.  Investigation
 msgstr ""
 
 #: elflink.c:5670
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: undefined reference to symbol '%s'"
-msgstr ""
+msgstr "simbol permulaan %s tidak ditakrifkan"
 
 #: elflink.c:6759
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: stack size specified and %s set"
-msgstr ""
+msgstr "Fail %s tidak wujud dan tiada saiz dinyatakan.\n"
 
 #: elflink.c:6763
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: %s not absolute"
-msgstr ""
+msgstr "PB"
 
 #: elflink.c:6975
-#, c-format
+#, fuzzy, c-format
 msgid "%s: undefined version: %s"
-msgstr ""
+msgstr "%s: pembolehubah %s %%define tidak ditakrifkan"
 
 #: elflink.c:7364
 msgid "error: creating an executable stack because of -z execstack command line option"
@@ -5002,18 +5092,18 @@ msgid "%pB: .preinit_array section is not allowed in DSO"
 msgstr ""
 
 #: elflink.c:9218
-#, c-format
+#, fuzzy, c-format
 msgid "undefined %s reference in complex symbol: %s"
-msgstr ""
+msgstr "simbol permulaan %s tidak ditakrifkan"
 
 #: elflink.c:9381 elflink.c:9389
 msgid "division by zero"
 msgstr "dibahagi dengan sifar"
 
 #: elflink.c:9403
-#, c-format
+#, fuzzy, c-format
 msgid "unknown operator '%c' in complex symbol"
-msgstr ""
+msgstr "Pilihan tidak diketahui '-%c'\n"
 
 #. PR 21524: Let the user know if a symbol was removed by garbage collection.
 #: elflink.c:9739
@@ -5039,13 +5129,14 @@ msgid "%pB: unable to sort relocs - they are of an unknown size"
 msgstr ""
 
 #: elflink.c:10136
+#, fuzzy
 msgid "not enough memory to sort relocations"
-msgstr ""
+msgstr "GIF: memori tidak mencukupi."
 
 #: elflink.c:10470
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: too many sections: %d (>= %d)"
-msgstr ""
+msgstr "Terlalu banyak titik henti. Maksimum ialah %d."
 
 #: elflink.c:10746
 #, c-format
@@ -5068,19 +5159,19 @@ msgid "%pB: could not find output section %pA for input section %pA"
 msgstr ""
 
 #: elflink.c:11003
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: protected symbol `%s' isn't defined"
-msgstr ""
+msgstr "simbol %s digunakan, tetapi tidak ditakrifkan sebagai token atau mempunyai hukum"
 
 #: elflink.c:11006
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: internal symbol `%s' isn't defined"
-msgstr ""
+msgstr "simbol %s digunakan, tetapi tidak ditakrifkan sebagai token atau mempunyai hukum"
 
 #: elflink.c:11009
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: hidden symbol `%s' isn't defined"
-msgstr ""
+msgstr "simbol %s digunakan, tetapi tidak ditakrifkan sebagai token atau mempunyai hukum"
 
 #: elflink.c:11041
 #, c-format
@@ -5098,28 +5189,28 @@ msgid "error: %pB: size of section %pA is not multiple of address size"
 msgstr ""
 
 #: elflink.c:12473
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: no symbol found for import library"
-msgstr ""
+msgstr "Pustaka \"%1\" tidak dijumpai"
 
 #: elflink.c:13078
 msgid "%F%P: %pB: failed to finish relative relocations\n"
 msgstr ""
 
 #: elflink.c:13155
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: file class %s incompatible with %s"
-msgstr ""
+msgstr "%s: tidak sepadan dengan fail gmon pertama\n"
 
 #: elflink.c:13377
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: failed to generate import library"
-msgstr ""
+msgstr "Pustaka yang digunakan untuk menjana lakaran kenit"
 
 #: elflink.c:13538
-#, c-format
+#, fuzzy, c-format
 msgid "warning: %s section has zero size"
-msgstr ""
+msgstr "Imej GIF yang terhasil bersaiz sifar"
 
 #: elflink.c:13586
 #, c-format
@@ -5161,9 +5252,9 @@ msgid "%pB: section '%pA': corrupt VTENTRY entry"
 msgstr ""
 
 #: elflink.c:14922
-#, c-format
+#, fuzzy, c-format
 msgid "unrecognized INPUT_SECTION_FLAG %s\n"
-msgstr ""
+msgstr "%s: pilihan '--%s' tidak dikenali\n"
 
 #: elflink.c:15703
 #, c-format
@@ -5245,9 +5336,9 @@ msgid "%X%pB: error: GCS is required by -z gcs, but this input object file lacks
 msgstr ""
 
 #: elfxx-loongarch.c:1911
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: unsupported relocation type %s"
-msgstr ""
+msgstr "%s Pb"
 
 #: elfxx-loongarch.c:1939
 #, c-format
@@ -5260,13 +5351,14 @@ msgid "%pB: relocation %s right shift %d error 0x%lx"
 msgstr ""
 
 #: elfxx-loongarch.c:2032
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: relocation %s overflow 0x%lx"
-msgstr ""
+msgstr "[find_call] %s: 0x%lx ke 0x%lx\n"
 
 #: elfxx-mips.c:1534
+#, fuzzy
 msgid "static procedure (no name)"
-msgstr ""
+msgstr "nama prosedur tiada"
 
 #: elfxx-mips.c:5849
 msgid "MIPS16 and microMIPS functions cannot call each other"
@@ -5299,9 +5391,12 @@ msgid "%pB: warning: bad `%s' option size %u smaller than its header"
 msgstr ""
 
 #: elfxx-mips.c:7635
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: warning: truncated `%s' option"
 msgstr ""
+"Amaran mengenai %(cleaner)s - %(option)s:\n"
+"\n"
+"%(warning)s"
 
 #: elfxx-mips.c:8453 elfxx-mips.c:8579
 #, c-format
@@ -5334,14 +5429,14 @@ msgid "IFUNC symbol %s in dynamic symbol table - IFUNCS are not supported"
 msgstr ""
 
 #: elfxx-mips.c:9383
-#, c-format
+#, fuzzy, c-format
 msgid "non-dynamic symbol %s in dynamic symbol table"
-msgstr ""
+msgstr "Gagal menemui simbol '%s' dalam pustaka dinamik"
 
 #: elfxx-mips.c:9603
-#, c-format
+#, fuzzy, c-format
 msgid "non-dynamic relocations refer to dynamic symbol %s"
-msgstr ""
+msgstr "Gagal menemui simbol '%s' dalam pustaka dinamik"
 
 #: elfxx-mips.c:10523
 #, c-format
@@ -5397,14 +5492,14 @@ msgid "%X%P: %pB(%pA): error: relocation for offset %V has no value\n"
 msgstr ""
 
 #: elfxx-mips.c:14729
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: unknown architecture %s"
-msgstr ""
+msgstr "%s: -c tidak disokong pada rekabentuk %s\n"
 
 #: elfxx-mips.c:15257
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: illegal section name `%pA'"
-msgstr ""
+msgstr "%pB: gagal membaca bahagian data nyahpepijat"
 
 #: elfxx-mips.c:15534
 #, c-format
@@ -5467,14 +5562,14 @@ msgid "warning: %pB uses unknown MSA ABI %d (set by %pB), %pB uses unknown MSA A
 msgstr ""
 
 #: elfxx-mips.c:15894
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: endianness incompatible with that of the selected emulation"
-msgstr ""
+msgstr "Kekunci DSA yang diberikan tidak serasi dengan protokol TLS yang dipilih."
 
 #: elfxx-mips.c:15908
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: ABI is incompatible with that of the selected emulation"
-msgstr ""
+msgstr "Kekunci DSA yang diberikan tidak serasi dengan protokol TLS yang dipilih."
 
 #: elfxx-mips.c:15961
 #, c-format
@@ -5506,34 +5601,32 @@ msgid "-mips32r2 -mfp64 (12 callee-saved)"
 msgstr ""
 
 #: elfxx-mips.c:16234 elfxx-mips.c:16245
-#, fuzzy
 msgid "None"
 msgstr "Tiada"
 
 #: elfxx-mips.c:16236 elfxx-mips.c:16305
-#, fuzzy
 msgid "Unknown"
 msgstr "Tidak Diketahui"
 
 #: elfxx-mips.c:16316
-#, c-format
+#, fuzzy, c-format
 msgid "Hard or soft float\n"
-msgstr ""
+msgstr "apung"
 
 #: elfxx-mips.c:16319
-#, c-format
+#, fuzzy, c-format
 msgid "Hard float (double precision)\n"
-msgstr ""
+msgstr "Kepersisan"
 
 #: elfxx-mips.c:16322
-#, c-format
+#, fuzzy, c-format
 msgid "Hard float (single precision)\n"
-msgstr ""
+msgstr "Volum audio jitu tunggal"
 
 #: elfxx-mips.c:16325
-#, c-format
+#, fuzzy, c-format
 msgid "Soft float\n"
-msgstr ""
+msgstr "Soft"
 
 #: elfxx-mips.c:16328
 #, c-format
@@ -5576,9 +5669,9 @@ msgid " [abi=EABI64]"
 msgstr ""
 
 #: elfxx-mips.c:16377
-#, c-format
+#, fuzzy, c-format
 msgid " [abi unknown]"
-msgstr ""
+msgstr "Tidak diketahui "
 
 #: elfxx-mips.c:16379
 #, c-format
@@ -5588,17 +5681,17 @@ msgstr ""
 #: elfxx-mips.c:16381
 #, c-format
 msgid " [abi=64]"
-msgstr ""
+msgstr " [abi=64]"
 
 #: elfxx-mips.c:16383
-#, c-format
+#, fuzzy, c-format
 msgid " [no abi set]"
-msgstr ""
+msgstr "tidak ditetapkan"
 
 #: elfxx-mips.c:16408
-#, c-format
+#, fuzzy, c-format
 msgid " [unknown ISA]"
-msgstr ""
+msgstr "Tidak diketahui "
 
 #: elfxx-mips.c:16428
 #, c-format
@@ -5631,9 +5724,9 @@ msgid "%s: invalid prefixed ISA extension `%s' ends with <number>p"
 msgstr ""
 
 #: elfxx-riscv.c:2023
-#, c-format
+#, fuzzy, c-format
 msgid "%s: unknown prefixed ISA extension `%s'"
-msgstr ""
+msgstr "%s\t\tSambungan tidak diketahui %s (%s):\n"
 
 #: elfxx-riscv.c:2047
 #, c-format
@@ -5641,31 +5734,32 @@ msgid "%s: prefixed ISA extension must separate with _"
 msgstr ""
 
 #: elfxx-riscv.c:2087
-#, c-format
+#, fuzzy, c-format
 msgid "rv%de does not support the `h' extension"
-msgstr ""
+msgstr "Sambungan tidak menyokong versi shell"
 
 #: elfxx-riscv.c:2095
-#, c-format
+#, fuzzy, c-format
 msgid "rv%d does not support the `q' extension"
-msgstr ""
+msgstr "Sambungan tidak menyokong versi shell"
 
 #: elfxx-riscv.c:2102
 msgid "zcmp' is incompatible with `d/zcd' extension"
 msgstr ""
 
 #: elfxx-riscv.c:2109
-#, c-format
+#, fuzzy, c-format
 msgid "rv%d does not support the `zcf' extension"
-msgstr ""
+msgstr "Sambungan tidak menyokong versi shell"
 
 #: elfxx-riscv.c:2116
 msgid "`zfinx' is conflict with the `f/d/q/zfh/zfhmin' extension"
 msgstr ""
 
 #: elfxx-riscv.c:2123
+#, fuzzy
 msgid "`xtheadvector' is conflict with the `v' extension"
-msgstr ""
+msgstr "V"
 
 #: elfxx-riscv.c:2144
 msgid "zvl*b extensions need to enable either `v' or `zve' extension"
@@ -5692,62 +5786,73 @@ msgid "%sinvalid ISA extension ends with <number>p in %s `%s'"
 msgstr ""
 
 #: elfxx-riscv.c:2494
-#, c-format
+#, fuzzy, c-format
 msgid "%sunknown ISA extension `%s' in %s `%s'"
-msgstr ""
+msgstr "%s\t\tSambungan tidak diketahui %s (%s):\n"
 
 #: elfxx-riscv.c:2506
-#, c-format
+#, fuzzy, c-format
 msgid "%scannot + or - base extension `%s' in %s `%s'"
-msgstr ""
+msgstr "%s\t\tSambungan tidak diketahui %s (%s):\n"
 
 #: elfxx-riscv.c:2817 elfxx-riscv.c:3112
+#, fuzzy
 msgid "internal: unreachable INSN_CLASS_*"
-msgstr ""
+msgstr "KELAS"
 
 #: elfxx-riscv.c:2851
 msgid "zicfiss' and `zcmop"
 msgstr ""
 
 #: elfxx-riscv.c:2865
+#, fuzzy
 msgid "zihintntl' and `c', or `zihintntl' and `zca"
-msgstr ""
+msgstr "_C/C++"
 
 #: elfxx-riscv.c:2870 elfxx-riscv.c:2896
+#, fuzzy
 msgid "c' or `zca"
-msgstr ""
+msgstr "_C/C++"
 
 #: elfxx-riscv.c:2878
+#, fuzzy
 msgid "m' or `zmmul"
-msgstr ""
+msgstr "%a dari %m"
 
 #: elfxx-riscv.c:2902
+#, fuzzy
 msgid "f' and `c', or `f' and `zcf"
-msgstr ""
+msgstr "F"
 
 #: elfxx-riscv.c:2907
+#, fuzzy
 msgid "c' or `zcf"
-msgstr ""
+msgstr "_C/C++"
 
 #: elfxx-riscv.c:2913
+#, fuzzy
 msgid "d' and `c', or `d' and `zcd"
-msgstr ""
+msgstr "Volum %d%c (disenyapkan)"
 
 #: elfxx-riscv.c:2918
+#, fuzzy
 msgid "c' or `zcd"
-msgstr ""
+msgstr "_C/C++"
 
 #: elfxx-riscv.c:2920
+#, fuzzy
 msgid "f' or `zfinx"
-msgstr ""
+msgstr "%.f%%"
 
 #: elfxx-riscv.c:2922
+#, fuzzy
 msgid "d' or `zdinx"
-msgstr ""
+msgstr "%d × %d"
 
 #: elfxx-riscv.c:2924
+#, fuzzy
 msgid "q' or `zqinx"
-msgstr ""
+msgstr "\t\tQ: "
 
 #: elfxx-riscv.c:2926
 msgid "zfh' or `zhinx"
@@ -5758,20 +5863,24 @@ msgid "zfhmin' or `zhinxmin"
 msgstr ""
 
 #: elfxx-riscv.c:2941
+#, fuzzy
 msgid "zfhmin' and `d', or `zhinxmin' and `zdinx"
-msgstr ""
+msgstr "%d × %d"
 
 #: elfxx-riscv.c:2952
+#, fuzzy
 msgid "zfhmin' and `q', or `zhinxmin' and `zqinx"
-msgstr ""
+msgstr " q, Q, Esc              Keluar"
 
 #: elfxx-riscv.c:2960
+#, fuzzy
 msgid "d' and `zfa"
-msgstr ""
+msgstr "%d × %d"
 
 #: elfxx-riscv.c:2968
+#, fuzzy
 msgid "q' and `zfa"
-msgstr ""
+msgstr "\t\tQ: "
 
 #: elfxx-riscv.c:2976
 msgid "zfh' and `zfa"
@@ -5798,12 +5907,14 @@ msgid "zknd' or `zkne"
 msgstr ""
 
 #: elfxx-riscv.c:3023
+#, fuzzy
 msgid "v' or `zve64x' or `zve32x"
-msgstr ""
+msgstr "Ctrl+V"
 
 #: elfxx-riscv.c:3025
+#, fuzzy
 msgid "v' or `zve64d' or `zve64f' or `zve32f"
-msgstr ""
+msgstr "Ctrl+V"
 
 #: elfxx-riscv.c:3027
 msgid "zvbb"
@@ -5846,15 +5957,15 @@ msgid "zcb' and `zbb"
 msgstr ""
 
 #: elfxx-riscv.c:3053
+#, fuzzy
 msgid "zcb' and `zmmul', or `zcb' and `m"
-msgstr ""
+msgstr "Mod:"
 
 #: elfxx-riscv.c:3061
 msgid "smctr' or `ssctr"
 msgstr ""
 
 #: elfxx-riscv.c:3065
-#, fuzzy
 msgid "h"
 msgstr "h"
 
@@ -5864,9 +5975,9 @@ msgid "%pB: relocation %s against STT_GNU_IFUNC symbol `%s' isn't handled by %s"
 msgstr ""
 
 #: elfxx-tilegx.c:4126
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: cannot link together %s and %s objects"
-msgstr ""
+msgstr "%s: Tak dapat memaut keras ke %s"
 
 #: elfxx-x86.c:534 elfxx-x86.c:3597
 #, c-format
@@ -5956,47 +6067,54 @@ msgid "error: %pB: <corrupt x86 property (0x%x) size: 0x%x>"
 msgstr ""
 
 #: elfxx-x86.c:4189
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: x86 ISA needed: "
-msgstr ""
+msgstr "Sistem x86 32-bit"
 
 #: elfxx-x86.c:4191
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: x86 ISA used: "
-msgstr ""
+msgstr "Sistem x86 32-bit"
 
 #: elfxx-x86.c:4213
-#, c-format
+#, fuzzy, c-format
 msgid "<unknown: %x>"
-msgstr ""
+msgstr "(Kod mekanisma GSSAPI tidak diketahui: %x)"
 
 #: elfxx-x86.c:4368
+#, fuzzy
 msgid "%P: %pB: warning: missing %s\n"
-msgstr ""
+msgstr "%s Pb"
 
 #: elfxx-x86.c:4369
+#, fuzzy
 msgid "%X%P: %pB: error: missing %s\n"
-msgstr ""
+msgstr "Ralat dalam alamat \"%s\"— atribut hos hilang atau cacat"
 
 #: elfxx-x86.c:4475
+#, fuzzy
 msgid "IBT and SHSTK properties"
-msgstr ""
+msgstr "&Sifat…"
 
 #: elfxx-x86.c:4477
+#, fuzzy
 msgid "IBT property"
-msgstr ""
+msgstr "Si_fat:"
 
 #: elfxx-x86.c:4479
+#, fuzzy
 msgid "SHSTK property"
-msgstr ""
+msgstr "Si_fat:"
 
 #: elfxx-x86.c:4484
+#, fuzzy
 msgid "LAM_U48 property"
-msgstr ""
+msgstr "Si_fat:"
 
 #: elfxx-x86.c:4489
+#, fuzzy
 msgid "LAM_U57 property"
-msgstr ""
+msgstr "Si_fat:"
 
 #: elfxx-x86.c:4667
 msgid "%F%P: failed to create VxWorks dynamic sections\n"
@@ -6082,14 +6200,14 @@ msgid "%pB:%u: unrecognized ihex type %u in Intel Hex file"
 msgstr ""
 
 #: ihex.c:580
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: internal error in ihex_read_section"
-msgstr ""
+msgstr "%pB: gagal membaca bahagian data nyahpepijat"
 
 #: ihex.c:613
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: bad section length in ihex_read_section"
-msgstr ""
+msgstr "%pB: gagal membaca bahagian data nyahpepijat"
 
 #: ihex.c:784
 #, c-format
@@ -6126,9 +6244,9 @@ msgid "attempt to do relocatable link with %s input and %s output"
 msgstr ""
 
 #: linker.c:2896
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: ignoring duplicate section `%pA'\n"
-msgstr ""
+msgstr "%pB: gagal membaca bahagian data nyahpepijat"
 
 #: linker.c:2906 linker.c:2916
 #, c-format
@@ -6136,9 +6254,9 @@ msgid "%pB: duplicate section `%pA' has different size\n"
 msgstr ""
 
 #: linker.c:2930 linker.c:2938
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: could not read contents of section `%pA'\n"
-msgstr ""
+msgstr "%pB: gagal membaca bahagian data nyahpepijat"
 
 #: linker.c:2947
 #, c-format
@@ -6190,9 +6308,9 @@ msgid "malformed mach-o ARM reloc: unknown reloc type: %d"
 msgstr ""
 
 #: mach-o.c:640
-#, c-format
+#, fuzzy, c-format
 msgid "<unknown mask flags>"
-msgstr ""
+msgstr "Bendera"
 
 #: mach-o.c:695
 #, fuzzy
@@ -6200,49 +6318,61 @@ msgid " (<unknown>)"
 msgstr "Tidak diketahui "
 
 #: mach-o.c:707
-#, c-format
+#, fuzzy, c-format
 msgid " MACH-O header:\n"
-msgstr ""
+msgstr "Output:"
 
 #: mach-o.c:708
-#, c-format
+#, fuzzy, c-format
 msgid "   magic:      %#lx\n"
-msgstr ""
+msgstr "Ajaib"
 
 #: mach-o.c:709
-#, c-format
+#, fuzzy, c-format
 msgid "   cputype:    %#lx (%s)\n"
 msgstr ""
+"\n"
+"Terdapat direktori nyahpepijat dalam %s pada 0x%lx\n"
+"\n"
 
 #: mach-o.c:711
-#, c-format
+#, fuzzy, c-format
 msgid "   cpusubtype: %#lx%s\n"
 msgstr ""
+"\n"
+"Terdapat direktori nyahpepijat dalam %s pada 0x%lx\n"
+"\n"
 
 #: mach-o.c:713
-#, c-format
+#, fuzzy, c-format
 msgid "   filetype:   %#lx\n"
-msgstr ""
+msgstr "Tiada jenis fail"
 
 #: mach-o.c:714
-#, c-format
+#, fuzzy, c-format
 msgid "   ncmds:      %#lx\n"
 msgstr ""
+"\n"
+"Terdapat direktori nyahpepijat dalam %s pada 0x%lx\n"
+"\n"
 
 #: mach-o.c:715
-#, c-format
+#, fuzzy, c-format
 msgid "   sizeocmds:  %#lx\n"
 msgstr ""
+"\n"
+"Terdapat direktori nyahpepijat dalam %s pada 0x%lx\n"
+"\n"
 
 #: mach-o.c:716
-#, c-format
+#, fuzzy, c-format
 msgid "   flags:      %#lx\n"
-msgstr ""
+msgstr "Bendera"
 
 #: mach-o.c:717
-#, c-format
+#, fuzzy, c-format
 msgid "   version:    %x\n"
-msgstr ""
+msgstr "Versi"
 
 #. Urg - what has happened ?
 #: mach-o.c:752
@@ -6268,9 +6398,9 @@ msgid "mach-o: there are too many sections (%u) maximum is 255,\n"
 msgstr ""
 
 #: mach-o.c:2695
-#, c-format
+#, fuzzy, c-format
 msgid "unable to allocate data for load command %#x"
-msgstr ""
+msgstr "Tidak boleh muatkan data imej"
 
 #: mach-o.c:2800
 #, c-format
@@ -6318,9 +6448,9 @@ msgid "bfd_mach_o_read_symtab_symbol: symbol \"%s\" specified invalid type field
 msgstr ""
 
 #: mach-o.c:5066
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: unknown load command %#x"
-msgstr ""
+msgstr "Arahan tak diketahui '%1'"
 
 #: mach-o.c:5264
 #, c-format
@@ -6485,25 +6615,25 @@ msgstr ""
 #: pei-x86_64.c:174 pei-x86_64.c:228 pei-x86_64.c:238 pei-x86_64.c:263
 #: pei-x86_64.c:275 pei-x86_64.c:289 pei-x86_64.c:307 pei-x86_64.c:319
 #: pei-x86_64.c:331
-#, c-format
+#, fuzzy, c-format
 msgid "warning: corrupt unwind data\n"
-msgstr ""
+msgstr "Data piksel imej rosak"
 
 #. PR 17512: file: 2245-7442-0.004.
 #: pei-x86_64.c:352
-#, c-format
+#, fuzzy, c-format
 msgid "Unknown: %x"
-msgstr ""
+msgstr "(Kod mekanisma GSSAPI tidak diketahui: %x)"
 
 #: pei-x86_64.c:403 pei-x86_64.c:413 pei-x86_64.c:422
-#, c-format
+#, fuzzy, c-format
 msgid "warning: xdata section corrupt\n"
-msgstr ""
+msgstr "AMARAN"
 
 #: pei-x86_64.c:477
-#, c-format
+#, fuzzy, c-format
 msgid "Too many unwind codes (%ld)\n"
-msgstr ""
+msgstr "Terlalu banyak rujukan dalam jadual"
 
 #: pei-x86_64.c:563
 #, c-format
@@ -6511,9 +6641,11 @@ msgid "Warning: %s section size (%ld) is not a multiple of %d\n"
 msgstr ""
 
 #: pei-x86_64.c:570
-#, c-format
+#, fuzzy, c-format
 msgid "Warning: %s section size is zero\n"
 msgstr ""
+"Terima Sifar\n"
+"Saiz"
 
 #: pei-x86_64.c:585
 #, c-format
@@ -6533,16 +6665,16 @@ msgid "vma:\t\t\tBeginAddress\t EndAddress\t  UnwindData\n"
 msgstr ""
 
 #: pei-x86_64.c:722
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "Dump of %s\n"
-msgstr ""
+msgstr "Longgok Ingatan..."
 
 #: peicode.h:823
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: unrecognized import type; %x"
-msgstr ""
+msgstr "Tidak boleh menyalin jenis widget yang tidak dikenali."
 
 #: peicode.h:840
 #, c-format
@@ -6580,19 +6712,19 @@ msgid "%pB: error: debug data ends beyond end of debug directory"
 msgstr ""
 
 #: peicode.h:1598
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: adjusting invalid SectionAlignment"
-msgstr ""
+msgstr "Pelarasan"
 
 #: peicode.h:1608
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: adjusting invalid FileAlignment"
-msgstr ""
+msgstr "Pelarasan"
 
 #: peicode.h:1616
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: invalid NumberOfRvaAndSizes"
-msgstr ""
+msgstr "%1 PB"
 
 #: plugin.c:197
 #, c-format
@@ -6624,31 +6756,31 @@ msgid "plugin framework: out of file descriptors. Try using fewer objects/archiv
 msgstr ""
 
 #: ppcboot.c:392
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "ppcboot header:\n"
-msgstr ""
+msgstr "_Pengepala"
 
 #: ppcboot.c:393
-#, c-format
+#, fuzzy, c-format
 msgid "Entry offset        = 0x%.8lx (%ld)\n"
-msgstr ""
+msgstr "offset fail zip kepada masukan rosak"
 
 #: ppcboot.c:395
-#, c-format
+#, fuzzy, c-format
 msgid "Length              = 0x%.8lx (%ld)\n"
-msgstr ""
+msgstr "Memadam fail %ld drpd %ld"
 
 #: ppcboot.c:399
-#, c-format
+#, fuzzy, c-format
 msgid "Flag field          = 0x%.2x\n"
-msgstr ""
+msgstr "2x"
 
 #: ppcboot.c:405
-#, c-format
+#, fuzzy, c-format
 msgid "Partition name      = \"%s\"\n"
-msgstr ""
+msgstr "Ralat menetapkan nama sekatan"
 
 #: ppcboot.c:425
 #, c-format
@@ -6673,8 +6805,9 @@ msgid "Partition[%d] length = 0x%.8lx (%ld)\n"
 msgstr ""
 
 #: reloc.c:8417
+#, fuzzy
 msgid "INPUT_SECTION_FLAGS are not supported"
-msgstr ""
+msgstr "Bendera terima tidak disokong"
 
 #: reloc.c:8683
 #, c-format
@@ -6683,14 +6816,14 @@ msgstr ""
 
 #. PR 21803: Suggest the most likely cause of this error.
 #: reloc.c:8687
-#, c-format
+#, fuzzy, c-format
 msgid "is this version of the linker - %s - out of date ?"
-msgstr ""
+msgstr "Pralihat sudah ketinggalan zaman"
 
 #: rs6000-core.c:471
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: warning core file truncated"
-msgstr ""
+msgstr "Abai dan tinggalkan fail core"
 
 #: som.c:3002
 #, c-format
@@ -6709,15 +6842,16 @@ msgid "%pB[%pA]: no output section for space %pA"
 msgstr ""
 
 #: som.c:5449
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "Exec Auxiliary Header\n"
-msgstr ""
+msgstr "Jalankan"
 
 #: som.c:5758
+#, fuzzy
 msgid "som_sizeof_headers unimplemented"
-msgstr ""
+msgstr "Tak diimplementasi"
 
 #: srec.c:260
 #, c-format
@@ -6725,14 +6859,14 @@ msgid "%pB:%d: unexpected character `%s' in S-record file"
 msgstr ""
 
 #: srec.c:488
-#, c-format
+#, fuzzy, c-format
 msgid "%pB:%d: byte count %d too small"
-msgstr ""
+msgstr "Saiz atom QTIF terlalu besar (%d bait)"
 
 #: srec.c:580 srec.c:614
-#, c-format
+#, fuzzy, c-format
 msgid "%pB:%d: bad checksum in S-record file"
-msgstr ""
+msgstr "%s: %s: tag buruk %d dijumpai (fail rosak?)\n"
 
 #: stabs.c:308
 #, c-format
@@ -6740,12 +6874,14 @@ msgid "%pB(%pA+%#lx): stabs entry has invalid string index"
 msgstr ""
 
 #: syms.c:1120
+#, fuzzy
 msgid "unsupported .stab relocation"
-msgstr ""
+msgstr " (tidak disokong)"
 
 #: vms-alpha.c:479
+#, fuzzy
 msgid "corrupt EIHD record - size is too small"
-msgstr ""
+msgstr "Gagal menentukan saiz lightmap. Saiz lightmap maksimum terlalu kecil?"
 
 #: vms-alpha.c:665
 #, c-format
@@ -6777,9 +6913,9 @@ msgid "corrupt EGSD record: its psindx field is too big (%#lx)"
 msgstr ""
 
 #: vms-alpha.c:1441
-#, c-format
+#, fuzzy, c-format
 msgid "unknown EGSD subtype %d"
-msgstr ""
+msgstr "Subjenis polyline tak diketahui: %d\n"
 
 #: vms-alpha.c:1474
 #, c-format
@@ -6787,37 +6923,40 @@ msgid "stack overflow (%d) in _bfd_vms_push"
 msgstr ""
 
 #: vms-alpha.c:1488
+#, fuzzy
 msgid "stack underflow in _bfd_vms_pop"
-msgstr ""
+msgstr "tindanan bawah aliran\n"
 
 #: vms-alpha.c:1562
-#, c-format
+#, fuzzy, c-format
 msgid "dst_define_location %u too large"
-msgstr ""
+msgstr "Mesej terlalu besar untuk sambungan DTLS; maksimum ialah %u bait"
 
 #. These names have not yet been added to this switch statement.
 #: vms-alpha.c:1765
-#, c-format
+#, fuzzy, c-format
 msgid "unknown ETIR command %d"
-msgstr ""
+msgstr "tidak diketahui-%d"
 
 #: vms-alpha.c:1796
+#, fuzzy
 msgid "corrupt vms value"
-msgstr ""
+msgstr "Takat rosak"
 
 #: vms-alpha.c:1927
+#, fuzzy
 msgid "corrupt ETIR record encountered"
-msgstr ""
+msgstr "Fail rosak?"
 
 #: vms-alpha.c:1989
-#, c-format
+#, fuzzy, c-format
 msgid "bad section index in %s"
-msgstr ""
+msgstr "Tiada seksyen sebegitu: %s"
 
 #: vms-alpha.c:2003
-#, c-format
+#, fuzzy, c-format
 msgid "unsupported STA cmd %s"
-msgstr ""
+msgstr "Tema tidak disokong '%s'."
 
 #. Insert field.
 #. Unsigned shift.
@@ -6842,27 +6981,29 @@ msgstr "%s tidak sah - %s"
 #. Divide by zero is supposed to give a result of zero,
 #. and a non-fatal warning message.
 #: vms-alpha.c:2457
-#, c-format
+#, fuzzy, c-format
 msgid "%s divide by zero"
-msgstr ""
+msgstr "Bahagi [/]"
 
 #: vms-alpha.c:2523
-#, c-format
+#, fuzzy, c-format
 msgid "invalid use of %s with contexts"
-msgstr ""
+msgstr "Tidak dapat menyenaraikan konteks fail"
 
 #: vms-alpha.c:2581
-#, c-format
+#, fuzzy, c-format
 msgid "reserved cmd %d"
-msgstr ""
+msgstr "Simpanan"
 
 #: vms-alpha.c:2665
+#, fuzzy
 msgid "corrupt EEOM record - size is too small"
-msgstr ""
+msgstr "Gagal menentukan saiz lightmap. Saiz lightmap maksimum terlalu kecil?"
 
 #: vms-alpha.c:2674
+#, fuzzy
 msgid "object module not error-free !"
-msgstr ""
+msgstr "Ralat: Laluan objek tidak dinyatakan\n"
 
 #: vms-alpha.c:4006
 #, c-format
@@ -6870,23 +7011,23 @@ msgid "SEC_RELOC with no relocs in section %pA"
 msgstr ""
 
 #: vms-alpha.c:4058 vms-alpha.c:4286
-#, c-format
+#, fuzzy, c-format
 msgid "size error in section %pA"
-msgstr ""
+msgstr "Ralat sintaks dalam pengepala seksyen profil"
 
 #: vms-alpha.c:4229
 msgid "spurious ALPHA_R_BSR reloc"
 msgstr ""
 
 #: vms-alpha.c:4272
-#, c-format
+#, fuzzy, c-format
 msgid "unhandled relocation %s"
-msgstr ""
+msgstr "Pengecualian tidak dikendalikan berlaku: %s"
 
 #: vms-alpha.c:4637
-#, c-format
+#, fuzzy, c-format
 msgid "unknown source command %d"
-msgstr ""
+msgstr "tidak diketahui-%d"
 
 #: vms-alpha.c:4789 vms-alpha.c:4794 vms-alpha.c:4799 vms-alpha.c:4804
 #: vms-alpha.c:4809 vms-alpha.c:4832 vms-alpha.c:4837 vms-alpha.c:4842
@@ -6896,122 +7037,125 @@ msgid "%s not implemented"
 msgstr "%s tidak dilaksanakan"
 
 #: vms-alpha.c:4883
-#, c-format
+#, fuzzy, c-format
 msgid "unknown line command %d"
-msgstr ""
+msgstr "Nilai data tridak diketahui \"%s\" pada baris %d. Diabaikan."
 
 #: vms-alpha.c:5322
+#, fuzzy
 msgid "corrupt reloc record"
-msgstr ""
+msgstr "Fail rosak?"
 
 #: vms-alpha.c:5352 vms-alpha.c:5370 vms-alpha.c:5387 vms-alpha.c:5405
 #: vms-alpha.c:5418 vms-alpha.c:5430 vms-alpha.c:5443
-#, c-format
+#, fuzzy, c-format
 msgid "unknown reloc %s + %s"
-msgstr ""
+msgstr "\t\tSambungan tidak diketahui %s (%s):\n"
 
 #: vms-alpha.c:5502
-#, c-format
+#, fuzzy, c-format
 msgid "unknown reloc %s"
-msgstr ""
+msgstr "\t\tSambungan tidak diketahui %s (%s):\n"
 
 #: vms-alpha.c:5516
+#, fuzzy
 msgid "invalid section index in ETIR"
-msgstr ""
+msgstr "Objek profile_section tidak sah"
 
 #: vms-alpha.c:5525
+#, fuzzy
 msgid "relocation for non-REL psect"
-msgstr ""
+msgstr "Direktori-direktori untuk diindeks secara bukan-rekursif"
 
 #: vms-alpha.c:5578
-#, c-format
+#, fuzzy, c-format
 msgid "unknown symbol in command %s"
-msgstr ""
+msgstr "arahan tidak diketahui: '%1$s'"
 
 #: vms-alpha.c:5996
-#, c-format
+#, fuzzy, c-format
 msgid "reloc (%d) is *UNKNOWN*"
-msgstr ""
+msgstr "Mod piksel tidak diketahui: %d\n"
 
 #: vms-alpha.c:6113
-#, c-format
+#, fuzzy, c-format
 msgid "  EMH %d (len=%u): "
-msgstr ""
+msgstr "Ralat membaca dari klien, len = %d\n"
 
 #: vms-alpha.c:6118 vms-alpha.c:6137 vms-alpha.c:6216
-#, c-format
+#, fuzzy, c-format
 msgid "   Error: %s min length is %u\n"
-msgstr ""
+msgstr "Jarak Fokus Min"
 
 #: vms-alpha.c:6141
-#, c-format
+#, fuzzy, c-format
 msgid "Module header\n"
-msgstr ""
+msgstr "Modul"
 
 #: vms-alpha.c:6142
-#, c-format
+#, fuzzy, c-format
 msgid "   structure level: %u\n"
-msgstr ""
+msgstr "Struktur"
 
 #: vms-alpha.c:6143
-#, c-format
+#, fuzzy, c-format
 msgid "   max record size: %u\n"
-msgstr ""
+msgstr "Nilai tidak sah bagi record_size"
 
 #: vms-alpha.c:6149
-#, c-format
+#, fuzzy, c-format
 msgid "   Error: The module name is missing\n"
-msgstr ""
+msgstr "Nama tidak ditulis"
 
 #: vms-alpha.c:6155
-#, c-format
+#, fuzzy, c-format
 msgid "   Error: The module name is too long\n"
-msgstr ""
+msgstr "Nama arkib terlalu panjang."
 
 #: vms-alpha.c:6158
-#, c-format
+#, fuzzy, c-format
 msgid "   module name    : %.*s\n"
-msgstr ""
+msgstr "Nama Modul Teratas"
 
 #: vms-alpha.c:6162
-#, c-format
+#, fuzzy, c-format
 msgid "   Error: The module version is missing\n"
-msgstr ""
+msgstr "Ralat kaji hurai: Ruang Putih Hilang"
 
 #: vms-alpha.c:6168
-#, c-format
+#, fuzzy, c-format
 msgid "   Error: The module version is too long\n"
-msgstr ""
+msgstr "Menunggu sistem fail terlalu lama"
 
 #: vms-alpha.c:6171
-#, c-format
+#, fuzzy, c-format
 msgid "   module version : %.*s\n"
-msgstr ""
+msgstr "versi modul tidak sepadan dalam `%s'"
 
 #: vms-alpha.c:6174
-#, c-format
+#, fuzzy, c-format
 msgid "   Error: The compile date is truncated\n"
-msgstr ""
+msgstr "Kompil ke…"
 
 #: vms-alpha.c:6176
-#, c-format
+#, fuzzy, c-format
 msgid "   compile date   : %.17s\n"
-msgstr ""
+msgstr "Kompil ke…"
 
 #: vms-alpha.c:6181
-#, c-format
+#, fuzzy, c-format
 msgid "Language Processor Name\n"
-msgstr ""
+msgstr "Bahasa Melayu"
 
 #: vms-alpha.c:6182
-#, c-format
+#, fuzzy, c-format
 msgid "   language name: %.*s\n"
-msgstr ""
+msgstr "Bahasa: %s"
 
 #: vms-alpha.c:6186
-#, c-format
+#, fuzzy, c-format
 msgid "Source Files Header\n"
-msgstr ""
+msgstr "Jana pengepala sumber"
 
 #: vms-alpha.c:6187
 #, fuzzy, c-format
@@ -7019,9 +7163,9 @@ msgid "   file: %.*s\n"
 msgstr "Tiada fail %s sebegitu"
 
 #: vms-alpha.c:6191
-#, c-format
+#, fuzzy, c-format
 msgid "Title Text Header\n"
-msgstr ""
+msgstr "Pengepala Tetingkap - Tajuk"
 
 #: vms-alpha.c:6192
 #, fuzzy, c-format
@@ -7037,9 +7181,9 @@ msgstr ""
 "  under lay    = %s\n"
 
 #: vms-alpha.c:6196
-#, c-format
+#, fuzzy, c-format
 msgid "Copyright Header\n"
-msgstr ""
+msgstr "Hakcipta"
 
 #: vms-alpha.c:6197
 #, fuzzy, c-format
@@ -7047,39 +7191,39 @@ msgid "   copyright: %.*s\n"
 msgstr "Hakcipta %s."
 
 #: vms-alpha.c:6201
-#, c-format
+#, fuzzy, c-format
 msgid "unhandled emh subtype %u\n"
-msgstr ""
+msgstr "Subjenis"
 
 #: vms-alpha.c:6211
-#, c-format
+#, fuzzy, c-format
 msgid "  EEOM (len=%u):\n"
-msgstr ""
+msgstr "LEN(\"hello\") mengembalikan 5"
 
 #: vms-alpha.c:6221
-#, c-format
+#, fuzzy, c-format
 msgid "   number of cond linkage pairs: %u\n"
-msgstr ""
+msgstr "bilangan pasangan asas per giliran heliks"
 
 #: vms-alpha.c:6223
-#, c-format
+#, fuzzy, c-format
 msgid "   completion code: %u\n"
-msgstr ""
+msgstr "Kod ralat %u ketika mengesahihkan: %s"
 
 #: vms-alpha.c:6228
-#, c-format
+#, fuzzy, c-format
 msgid "   transfer addr flags: 0x%02x\n"
-msgstr ""
+msgstr "DVDRead tidak dapa membaca blok %d/%d pada 0x%02x."
 
 #: vms-alpha.c:6229
-#, c-format
+#, fuzzy, c-format
 msgid "   transfer addr psect: %u\n"
-msgstr ""
+msgstr "%u pemindahan selesai"
 
 #: vms-alpha.c:6231
-#, c-format
+#, fuzzy, c-format
 msgid "   transfer address   : 0x%08x\n"
-msgstr ""
+msgstr "Pindah"
 
 #: vms-alpha.c:6240
 #, fuzzy
@@ -7087,9 +7231,8 @@ msgid " WEAK"
 msgstr "Lemah"
 
 #: vms-alpha.c:6242
-#, fuzzy
 msgid " DEF"
-msgstr "DEF"
+msgstr " DEF"
 
 #: vms-alpha.c:6244
 #, fuzzy
@@ -7173,9 +7316,9 @@ msgid " 64B"
 msgstr ""
 
 #: vms-alpha.c:6294
-#, c-format
+#, fuzzy, c-format
 msgid "  EGSD (len=%u):\n"
-msgstr ""
+msgstr "LEN(\"hello\") mengembalikan 5"
 
 #: vms-alpha.c:6309
 #, c-format
@@ -7183,24 +7326,24 @@ msgid "  EGSD entry %2u (type: %u, len: %u): "
 msgstr ""
 
 #: vms-alpha.c:6315 vms-alpha.c:6610
-#, c-format
+#, fuzzy, c-format
 msgid "   Erroneous length\n"
-msgstr ""
+msgstr "Jangka masa"
 
 #: vms-alpha.c:6328
-#, c-format
+#, fuzzy, c-format
 msgid "PSC - Program section definition\n"
-msgstr ""
+msgstr "program tidak dibenarkan dalam seksyen ini"
 
 #: vms-alpha.c:6329 vms-alpha.c:6349
-#, c-format
+#, fuzzy, c-format
 msgid "   alignment  : 2**%u\n"
-msgstr ""
+msgstr "J&ajaran"
 
 #: vms-alpha.c:6330 vms-alpha.c:6350
-#, c-format
+#, fuzzy, c-format
 msgid "   flags      : 0x%04x"
-msgstr ""
+msgstr "(0x%04x, '%s'): "
 
 #: vms-alpha.c:6334
 #, c-format
@@ -7210,7 +7353,7 @@ msgstr ""
 #: vms-alpha.c:6336 vms-alpha.c:6402 vms-alpha.c:6470
 #, fuzzy, c-format
 msgid "   name       : %.*s\n"
-msgstr "Nama: %s, EntitiID: %s"
+msgstr "    nama: %.*s\n"
 
 #: vms-alpha.c:6348
 #, c-format
@@ -7223,79 +7366,79 @@ msgid "   alloc (len)   : %u (0x%08x)\n"
 msgstr ""
 
 #: vms-alpha.c:6355
-#, c-format
+#, fuzzy, c-format
 msgid "   image offset  : 0x%08x\n"
-msgstr ""
+msgstr "Ofset kawasan imej"
 
 #: vms-alpha.c:6357
-#, c-format
+#, fuzzy, c-format
 msgid "   symvec offset : 0x%08x\n"
-msgstr ""
+msgstr "ofset"
 
 #: vms-alpha.c:6360
 #, fuzzy, c-format
 msgid "   name          : %.*s\n"
-msgstr "Nama: %s, EntitiID: %s"
+msgstr "    nama: %.*s\n"
 
 #: vms-alpha.c:6376
-#, c-format
+#, fuzzy, c-format
 msgid "SYM - Global symbol definition\n"
-msgstr ""
+msgstr "Lompat ke takrifan simbol"
 
 #: vms-alpha.c:6377 vms-alpha.c:6458 vms-alpha.c:6482 vms-alpha.c:6505
-#, c-format
+#, fuzzy, c-format
 msgid "   flags: 0x%04x"
-msgstr ""
+msgstr "(0x%04x, '%s'): "
 
 #: vms-alpha.c:6380
-#, c-format
+#, fuzzy, c-format
 msgid "   psect offset: 0x%08x\n"
-msgstr ""
+msgstr "ofset"
 
 #: vms-alpha.c:6384
-#, c-format
+#, fuzzy, c-format
 msgid "   code address: 0x%08x\n"
-msgstr ""
+msgstr "ralat tidak diketahui (kod ralat %08x)."
 
 #: vms-alpha.c:6386
-#, c-format
+#, fuzzy, c-format
 msgid "   psect index for entry point : %u\n"
-msgstr ""
+msgstr "Masukan palet %u"
 
 #: vms-alpha.c:6389 vms-alpha.c:6489 vms-alpha.c:6512
-#, c-format
+#, fuzzy, c-format
 msgid "   psect index : %u\n"
-msgstr ""
+msgstr "%U"
 
 #: vms-alpha.c:6392 vms-alpha.c:6492 vms-alpha.c:6515
 #, fuzzy, c-format
 msgid "   name        : %.*s\n"
-msgstr "Nama: %s, EntitiID: %s"
+msgstr "    nama: %.*s\n"
 
 #: vms-alpha.c:6400
-#, c-format
+#, fuzzy, c-format
 msgid "SYM - Global symbol reference\n"
-msgstr ""
+msgstr "Simbol"
 
 #: vms-alpha.c:6415
-#, c-format
+#, fuzzy, c-format
 msgid "IDC - Ident Consistency check\n"
-msgstr ""
+msgstr "IDENT: socket() gagal"
 
 #: vms-alpha.c:6416
-#, c-format
+#, fuzzy, c-format
 msgid "   flags         : 0x%08x"
-msgstr ""
+msgstr "Ralat DDE %08x tidak diketahui"
 
 #: vms-alpha.c:6420
-#, c-format
+#, fuzzy, c-format
 msgid "   id match      : %x\n"
-msgstr ""
+msgstr "Tiada padanan"
 
 #: vms-alpha.c:6422
-#, c-format
+#, fuzzy, c-format
 msgid "   error severity: %x\n"
-msgstr ""
+msgstr "ralat dalaman X: %s\n"
 
 #: vms-alpha.c:6426
 #, fuzzy, c-format
@@ -7303,24 +7446,24 @@ msgid "   entity name   : %.*s\n"
 msgstr "Nama entiti \"%-.*s\" tidak diketahui"
 
 #: vms-alpha.c:6432
-#, c-format
+#, fuzzy, c-format
 msgid "   object name   : %.*s\n"
-msgstr ""
+msgstr "Nama Objek"
 
 #: vms-alpha.c:6441
-#, c-format
+#, fuzzy, c-format
 msgid "   binary ident  : 0x%08x\n"
-msgstr ""
+msgstr "binari"
 
 #: vms-alpha.c:6445
-#, c-format
+#, fuzzy, c-format
 msgid "   ascii ident   : %.*s\n"
-msgstr ""
+msgstr "IDENT: disambungkan kepada %s:%u"
 
 #: vms-alpha.c:6457
-#, c-format
+#, fuzzy, c-format
 msgid "SYMG - Universal symbol definition\n"
-msgstr ""
+msgstr "Lompat ke takrifan simbol"
 
 #: vms-alpha.c:6461
 #, c-format
@@ -7328,49 +7471,49 @@ msgid "   symbol vector offset: 0x%08x\n"
 msgstr ""
 
 #: vms-alpha.c:6463
-#, c-format
+#, fuzzy, c-format
 msgid "   entry point: 0x%08x\n"
-msgstr ""
+msgstr "Ralat DDE %08x tidak diketahui"
 
 #: vms-alpha.c:6465
-#, c-format
+#, fuzzy, c-format
 msgid "   proc descr : 0x%08x\n"
-msgstr ""
+msgstr "Ralat DDE %08x tidak diketahui"
 
 #: vms-alpha.c:6467
-#, c-format
+#, fuzzy, c-format
 msgid "   psect index: %u\n"
-msgstr ""
+msgstr "%U"
 
 #: vms-alpha.c:6481
-#, c-format
+#, fuzzy, c-format
 msgid "SYMV - Vectored symbol definition\n"
-msgstr ""
+msgstr "Lompat ke takrifan simbol"
 
 #: vms-alpha.c:6485
-#, c-format
+#, fuzzy, c-format
 msgid "   vector      : 0x%08x\n"
-msgstr ""
+msgstr "Ralat DDE %08x tidak diketahui"
 
 #: vms-alpha.c:6487 vms-alpha.c:6510
-#, c-format
+#, fuzzy, c-format
 msgid "   psect offset: %u\n"
-msgstr ""
+msgstr "ofset"
 
 #: vms-alpha.c:6504
-#, c-format
+#, fuzzy, c-format
 msgid "SYMM - Global symbol definition with version\n"
-msgstr ""
+msgstr "Lompat ke takrifan simbol"
 
 #: vms-alpha.c:6508
-#, c-format
+#, fuzzy, c-format
 msgid "   version mask: 0x%08x\n"
-msgstr ""
+msgstr "Ralat DDE %08x tidak diketahui"
 
 #: vms-alpha.c:6521
-#, c-format
+#, fuzzy, c-format
 msgid "unhandled egsd entry type %u\n"
-msgstr ""
+msgstr "Xmpdatum %1 tidak dikendali bagi jenis %2"
 
 #: vms-alpha.c:6560
 #, c-format
@@ -7393,34 +7536,34 @@ msgid "    psect idx 3: %u, offset 3: 0x%08x %08x\n"
 msgstr ""
 
 #: vms-alpha.c:6580
-#, c-format
+#, fuzzy, c-format
 msgid "    global name: %.*s\n"
-msgstr ""
+msgstr "Tidak boleh bertembung dengan nama pemalar global yang telah wujud."
 
 #: vms-alpha.c:6592
-#, c-format
+#, fuzzy, c-format
 msgid "  %s (len=%u):\n"
-msgstr ""
+msgstr "Len Tower"
 
 #: vms-alpha.c:6615
-#, c-format
+#, fuzzy, c-format
 msgid "   (type: %3u, size: %3u): "
-msgstr ""
+msgstr "jenis saiz tidak sah `%c'"
 
 #: vms-alpha.c:6621
-#, c-format
+#, fuzzy, c-format
 msgid "STA_GBL (stack global) %.*s\n"
-msgstr ""
+msgstr "Batalkan perincian sejagat untuk repositori \"%s\":"
 
 #: vms-alpha.c:6625
-#, c-format
+#, fuzzy, c-format
 msgid "STA_LW (stack longword)"
-msgstr ""
+msgstr "Tarikh m_ula:"
 
 #: vms-alpha.c:6631
-#, c-format
+#, fuzzy, c-format
 msgid "STA_QW (stack quadword)"
-msgstr ""
+msgstr "Tarikh m_ula:"
 
 #: vms-alpha.c:6638
 #, c-format
@@ -7433,14 +7576,14 @@ msgid "    psect: %u, offset: 0x%08x %08x\n"
 msgstr ""
 
 #: vms-alpha.c:6647
-#, c-format
+#, fuzzy, c-format
 msgid "STA_LI (stack literal)\n"
-msgstr ""
+msgstr "Tarikh m_ula:"
 
 #: vms-alpha.c:6650
-#, c-format
+#, fuzzy, c-format
 msgid "STA_MOD (stack module)\n"
-msgstr ""
+msgstr "Modul %(mod)r tidak dipasang"
 
 #: vms-alpha.c:6653
 #, c-format
@@ -7448,24 +7591,24 @@ msgid "STA_CKARG (compare procedure argument)\n"
 msgstr ""
 
 #: vms-alpha.c:6657
-#, c-format
+#, fuzzy, c-format
 msgid "STO_B (store byte)\n"
-msgstr ""
+msgstr "bait,bait,B"
 
 #: vms-alpha.c:6660
-#, c-format
+#, fuzzy, c-format
 msgid "STO_W (store word)\n"
-msgstr ""
+msgstr "  -W, --word-mode            banding perkataan dan bukannya baris\n"
 
 #: vms-alpha.c:6663
-#, c-format
+#, fuzzy, c-format
 msgid "STO_LW (store longword)\n"
-msgstr ""
+msgstr "&Simpan"
 
 #: vms-alpha.c:6666
-#, c-format
+#, fuzzy, c-format
 msgid "STO_QW (store quadword)\n"
-msgstr ""
+msgstr "&Simpan"
 
 #: vms-alpha.c:6673
 #, c-format
@@ -7473,9 +7616,9 @@ msgid "STO_IMMR (store immediate repeat) %u bytes\n"
 msgstr ""
 
 #: vms-alpha.c:6682
-#, c-format
+#, fuzzy, c-format
 msgid "STO_GBL (store global) %.*s\n"
-msgstr ""
+msgstr "Batalkan perincian sejagat untuk repositori \"%s\":"
 
 #: vms-alpha.c:6687
 #, c-format
@@ -7488,9 +7631,9 @@ msgid "STO_RB (store relative branch)\n"
 msgstr ""
 
 #: vms-alpha.c:6694
-#, c-format
+#, fuzzy, c-format
 msgid "STO_AB (store absolute branch)\n"
-msgstr ""
+msgstr "Punca simpanan %s bukan laluan mutlak"
 
 #: vms-alpha.c:6697
 #, c-format
@@ -7523,79 +7666,79 @@ msgid "STO_BR_PS (store branch psect + offset) *todo*\n"
 msgstr ""
 
 #: vms-alpha.c:6727
-#, c-format
+#, fuzzy, c-format
 msgid "OPR_NOP (no-operation)\n"
-msgstr ""
+msgstr "Sisip &nop"
 
 #: vms-alpha.c:6730
-#, c-format
+#, fuzzy, c-format
 msgid "OPR_ADD (add)\n"
-msgstr ""
+msgstr "Tambah"
 
 #: vms-alpha.c:6733
-#, c-format
+#, fuzzy, c-format
 msgid "OPR_SUB (subtract)\n"
-msgstr ""
+msgstr "Tolak [-]"
 
 #: vms-alpha.c:6736
-#, c-format
+#, fuzzy, c-format
 msgid "OPR_MUL (multiply)\n"
-msgstr ""
+msgstr "Darab [*]"
 
 #: vms-alpha.c:6739
-#, c-format
+#, fuzzy, c-format
 msgid "OPR_DIV (divide)\n"
-msgstr ""
+msgstr "Bahagi [/]"
 
 #: vms-alpha.c:6742
-#, c-format
+#, fuzzy, c-format
 msgid "OPR_AND (logical and)\n"
-msgstr ""
+msgstr "logikal not"
 
 #: vms-alpha.c:6745
-#, c-format
+#, fuzzy, c-format
 msgid "OPR_IOR (logical inclusive or)\n"
-msgstr ""
+msgstr "logikal not"
 
 #: vms-alpha.c:6748
-#, c-format
+#, fuzzy, c-format
 msgid "OPR_EOR (logical exclusive or)\n"
-msgstr ""
+msgstr "Boolean Exclusive OR"
 
 #: vms-alpha.c:6751
-#, c-format
+#, fuzzy, c-format
 msgid "OPR_NEG (negate)\n"
-msgstr ""
+msgstr "Sangkal"
 
 #: vms-alpha.c:6754
-#, c-format
+#, fuzzy, c-format
 msgid "OPR_COM (complement)\n"
-msgstr ""
+msgstr "pelengkap"
 
 #: vms-alpha.c:6757
-#, c-format
+#, fuzzy, c-format
 msgid "OPR_INSV (insert field)\n"
-msgstr ""
+msgstr "Selitkan Ke Dalam Medan Edit"
 
 #: vms-alpha.c:6760
-#, c-format
+#, fuzzy, c-format
 msgid "OPR_ASH (arithmetic shift)\n"
-msgstr ""
+msgstr "Abu Gunung Berapi"
 
 #: vms-alpha.c:6763
-#, c-format
+#, fuzzy, c-format
 msgid "OPR_USH (unsigned shift)\n"
-msgstr ""
+msgstr "K_osongkan Peti Keluar"
 
 #: vms-alpha.c:6766
-#, c-format
+#, fuzzy, c-format
 msgid "OPR_ROT (rotate)\n"
-msgstr ""
+msgstr "&Putar..."
 
 #: vms-alpha.c:6769
-#, c-format
+#, fuzzy, c-format
 msgid "OPR_SEL (select)\n"
-msgstr ""
+msgstr "%(sel)s daripada %(cnt)s dipilih"
 
 #: vms-alpha.c:6772
 #, c-format
@@ -7603,9 +7746,9 @@ msgid "OPR_REDEF (redefine symbol to curr location)\n"
 msgstr ""
 
 #: vms-alpha.c:6775
-#, c-format
+#, fuzzy, c-format
 msgid "OPR_REDEF (define a literal)\n"
-msgstr ""
+msgstr "Bidang perlu menjadi perkataan literal."
 
 #: vms-alpha.c:6779
 #, c-format
@@ -7618,9 +7761,9 @@ msgid "STC_LP_PSB (store cond linkage pair + signature)\n"
 msgstr ""
 
 #: vms-alpha.c:6787
-#, c-format
+#, fuzzy, c-format
 msgid "   linkage index: %u, procedure: %.*s\n"
-msgstr ""
+msgstr "%s bukan objek prosedur"
 
 #: vms-alpha.c:6794
 #, fuzzy, c-format
@@ -7633,9 +7776,9 @@ msgid "STC_GBL (store cond global)\n"
 msgstr ""
 
 #: vms-alpha.c:6803
-#, c-format
+#, fuzzy, c-format
 msgid "   linkage index: %u, global: %.*s\n"
-msgstr ""
+msgstr "Batalkan perincian sejagat untuk repositori \"%s\":"
 
 #: vms-alpha.c:6808
 #, c-format
@@ -7643,9 +7786,9 @@ msgid "STC_GCA (store cond code address)\n"
 msgstr ""
 
 #: vms-alpha.c:6811
-#, c-format
+#, fuzzy, c-format
 msgid "   linkage index: %u, procedure name: %.*s\n"
-msgstr ""
+msgstr "gagal mendapatkan nama untuk platform %u (%s)"
 
 #: vms-alpha.c:6816
 #, c-format
@@ -7718,19 +7861,19 @@ msgid "CTL_AUGRB (augment relocation base) %u\n"
 msgstr ""
 
 #: vms-alpha.c:6879
-#, c-format
+#, fuzzy, c-format
 msgid "CTL_DFLOC (define location)\n"
-msgstr ""
+msgstr "Lokasi:"
 
 #: vms-alpha.c:6882
-#, c-format
+#, fuzzy, c-format
 msgid "CTL_STLOC (set location)\n"
-msgstr ""
+msgstr "Arahan log keluar belum ditetapkan"
 
 #: vms-alpha.c:6885
-#, c-format
+#, fuzzy, c-format
 msgid "CTL_STKDL (stack defined location)\n"
-msgstr ""
+msgstr "Laluan ke direktori pembayang. Jika tiada laluan ditakrifkan, lokasi lalai akan digunakan."
 
 #: vms-alpha.c:6888 vms-alpha.c:7316 vms-alpha.c:7477
 #, fuzzy, c-format
@@ -7738,9 +7881,9 @@ msgid "*unhandled*\n"
 msgstr "Ralat tidak boleh kendali"
 
 #: vms-alpha.c:6913
-#, c-format
+#, fuzzy, c-format
 msgid "cannot read GST record header\n"
-msgstr ""
+msgstr "Gagal membaca pengepala QTIF"
 
 #. Ill-formed.
 #: vms-alpha.c:6936
@@ -7749,19 +7892,19 @@ msgid "cannot find EMH in first GST record\n"
 msgstr ""
 
 #: vms-alpha.c:6960
-#, c-format
+#, fuzzy, c-format
 msgid "corrupted GST\n"
-msgstr ""
+msgstr "profil-gst"
 
 #: vms-alpha.c:6973
-#, c-format
+#, fuzzy, c-format
 msgid "cannot read GST record\n"
-msgstr ""
+msgstr "profil-gst"
 
 #: vms-alpha.c:7000
-#, c-format
+#, fuzzy, c-format
 msgid " unhandled EOBJ record type %u\n"
-msgstr ""
+msgstr "Xmpdatum %1 tidak dikendali bagi jenis %2"
 
 #: vms-alpha.c:7025
 #, c-format
@@ -7774,14 +7917,14 @@ msgid "   bitmap: 0x%08x (count: %u):\n"
 msgstr ""
 
 #: vms-alpha.c:7046
-#, fuzzy, c-format
+#, c-format
 msgid " %08x"
-msgstr "ralat tidak diketahui (kod ralat %08x)."
+msgstr " %08x"
 
 #: vms-alpha.c:7073
-#, c-format
+#, fuzzy, c-format
 msgid "  image %u (%u entries)\n"
-msgstr ""
+msgstr "Menyimpan imej “%s” (%u/%u)"
 
 #: vms-alpha.c:7079
 #, c-format
@@ -7789,20 +7932,20 @@ msgid "   offset: 0x%08x, val: 0x%08x\n"
 msgstr ""
 
 #: vms-alpha.c:7102
-#, c-format
+#, fuzzy, c-format
 msgid "  image %u (%u entries), offsets:\n"
-msgstr ""
+msgstr "Menyimpan imej “%s” (%u/%u)"
 
 #: vms-alpha.c:7109
 #, c-format
 msgid " 0x%08x"
-msgstr ""
+msgstr " 0x%08x"
 
 #. 64 bits.
 #: vms-alpha.c:7235
-#, c-format
+#, fuzzy, c-format
 msgid "64 bits *unhandled*\n"
-msgstr ""
+msgstr "64 bit"
 
 #: vms-alpha.c:7240
 #, c-format
@@ -7810,9 +7953,9 @@ msgid "class: %u, dtype: %u, length: %u, pointer: 0x%08x\n"
 msgstr ""
 
 #: vms-alpha.c:7251
-#, c-format
+#, fuzzy, c-format
 msgid "non-contiguous array of %s\n"
-msgstr ""
+msgstr "data berterusan"
 
 #: vms-alpha.c:7258
 #, c-format
@@ -7835,24 +7978,24 @@ msgid "Bounds:\n"
 msgstr "Batas Kiri"
 
 #: vms-alpha.c:7288
-#, c-format
+#, fuzzy, c-format
 msgid "[%u]: Lower: %u, upper: %u\n"
-msgstr ""
+msgstr "%u × %u"
 
 #: vms-alpha.c:7302
-#, c-format
+#, fuzzy, c-format
 msgid "unaligned bit-string of %s\n"
-msgstr ""
+msgstr "Tidak boleh membaca petikan bit: %s\n"
 
 #: vms-alpha.c:7309
-#, c-format
+#, fuzzy, c-format
 msgid "base: %u, pos: %u\n"
-msgstr ""
+msgstr "%u × %u"
 
 #: vms-alpha.c:7335
-#, c-format
+#, fuzzy, c-format
 msgid "vflags: 0x%02x, value: 0x%08x "
-msgstr ""
+msgstr "DVDRead tidak dapa membaca blok %d/%d pada 0x%02x."
 
 #: vms-alpha.c:7342
 #, fuzzy, c-format
@@ -7875,19 +8018,19 @@ msgid "(descriptor)\n"
 msgstr "Penerang salin"
 
 #: vms-alpha.c:7356
-#, c-format
+#, fuzzy, c-format
 msgid "(trailing value)\n"
-msgstr ""
+msgstr "Slash dibelakang"
 
 #: vms-alpha.c:7359
-#, c-format
+#, fuzzy, c-format
 msgid "(value spec follows)\n"
-msgstr ""
+msgstr "spec RPM"
 
 #: vms-alpha.c:7362
-#, c-format
+#, fuzzy, c-format
 msgid "(at bit offset %u)\n"
-msgstr ""
+msgstr "%u bit"
 
 #: vms-alpha.c:7366
 #, c-format
@@ -7914,14 +8057,14 @@ msgid "reg"
 msgstr "Reg "
 
 #: vms-alpha.c:7403
-#, c-format
+#, fuzzy, c-format
 msgid "len: %2u, kind: %2u "
-msgstr ""
+msgstr "Len Tower"
 
 #: vms-alpha.c:7411
-#, c-format
+#, fuzzy, c-format
 msgid "atomic, type=0x%02x %s\n"
-msgstr ""
+msgstr "DVDRead tidak dapa membaca blok %d/%d pada 0x%02x."
 
 #: vms-alpha.c:7416
 #, c-format
@@ -7929,44 +8072,44 @@ msgid "indirect, defined at 0x%08x\n"
 msgstr ""
 
 #: vms-alpha.c:7420
-#, c-format
+#, fuzzy, c-format
 msgid "typed pointer\n"
-msgstr ""
+msgstr "hukum kosong untuk bukan terminal ditaip, dan tiada tindakan"
 
 #: vms-alpha.c:7424
-#, fuzzy, c-format
+#, c-format
 msgid "pointer\n"
-msgstr "Penuding: %p"
+msgstr "penunjuk\n"
 
 #: vms-alpha.c:7435
-#, c-format
+#, fuzzy, c-format
 msgid "array, dim: %u, bitmap: "
-msgstr ""
+msgstr "Tatasusunan"
 
 #: vms-alpha.c:7450
-#, c-format
+#, fuzzy, c-format
 msgid "array descriptor:\n"
-msgstr ""
+msgstr "Penerang salin"
 
 #: vms-alpha.c:7461
-#, c-format
+#, fuzzy, c-format
 msgid "type spec for element:\n"
-msgstr ""
+msgstr "Jenis tidak dikenali \"%s\" pada unsur <%s>"
 
 #: vms-alpha.c:7463
-#, c-format
+#, fuzzy, c-format
 msgid "type spec for subscript %u:\n"
-msgstr ""
+msgstr "spec RPM"
 
 #: vms-alpha.c:7488
-#, c-format
+#, fuzzy, c-format
 msgid "Debug symbol table:\n"
-msgstr ""
+msgstr "nyahpepijat"
 
 #: vms-alpha.c:7499
-#, c-format
+#, fuzzy, c-format
 msgid "cannot read DST header\n"
-msgstr ""
+msgstr "Gagal membaca pengepala QTIF"
 
 #: vms-alpha.c:7505
 #, c-format
@@ -7974,19 +8117,19 @@ msgid " type: %3u, len: %3u (at 0x%08x): "
 msgstr ""
 
 #: vms-alpha.c:7524
-#, c-format
+#, fuzzy, c-format
 msgid "cannot read DST symbol\n"
-msgstr ""
+msgstr "Tak dalat membaca CD: %s"
 
 #: vms-alpha.c:7568
-#, c-format
+#, fuzzy, c-format
 msgid "standard data: %s\n"
-msgstr ""
+msgstr "Hantar data sebagai &input standard"
 
 #: vms-alpha.c:7572 vms-alpha.c:7696
-#, fuzzy, c-format
+#, c-format
 msgid "    name: %.*s\n"
-msgstr "Nama: %s, EntitiID: %s"
+msgstr "    nama: %.*s\n"
 
 #: vms-alpha.c:7580
 #, c-format
@@ -7999,14 +8142,14 @@ msgid "   flags: %d, language: %u, major: %u, minor: %u\n"
 msgstr ""
 
 #: vms-alpha.c:7594 vms-alpha.c:7963
-#, c-format
+#, fuzzy, c-format
 msgid "   module name: %.*s\n"
-msgstr ""
+msgstr "Nama Modul Teratas"
 
 #: vms-alpha.c:7601
-#, fuzzy, c-format
+#, c-format
 msgid "   compiler   : %.*s\n"
-msgstr "Pengkompil: %s\n"
+msgstr "   pembina    : %.*s\n"
 
 #: vms-alpha.c:7608
 #, c-format
@@ -8023,14 +8166,14 @@ msgid "    flags: %u, address: 0x%08x, pd-address: 0x%08x\n"
 msgstr ""
 
 #: vms-alpha.c:7628
-#, c-format
+#, fuzzy, c-format
 msgid "    routine name: %.*s\n"
-msgstr ""
+msgstr "Nama: %s, EntitiID: %s"
 
 #: vms-alpha.c:7639
-#, c-format
+#, fuzzy, c-format
 msgid "rtnend: size 0x%08x\n"
-msgstr ""
+msgstr "Ralat DDE %08x tidak diketahui"
 
 #: vms-alpha.c:7649
 #, c-format
@@ -8038,39 +8181,39 @@ msgid "prolog: bkpt address 0x%08x\n"
 msgstr ""
 
 #: vms-alpha.c:7659
-#, c-format
+#, fuzzy, c-format
 msgid "epilog: flags: %u, count: %u\n"
-msgstr ""
+msgstr "%u × %u"
 
 #: vms-alpha.c:7674
-#, c-format
+#, fuzzy, c-format
 msgid "blkbeg: address: 0x%08x, name: %.*s\n"
-msgstr ""
+msgstr "%s: nama hos adalah sah tetatpi tidak mempunyai alamat IP."
 
 #: vms-alpha.c:7686
-#, c-format
+#, fuzzy, c-format
 msgid "blkend: size: 0x%08x\n"
-msgstr ""
+msgstr "Ralat DDE %08x tidak diketahui"
 
 #: vms-alpha.c:7692
-#, c-format
+#, fuzzy, c-format
 msgid "typspec (len: %u)\n"
-msgstr ""
+msgstr "LEN(\"hello\") mengembalikan 5"
 
 #: vms-alpha.c:7708
-#, c-format
+#, fuzzy, c-format
 msgid "septyp, name: %.*s\n"
-msgstr ""
+msgstr "Nama: %s, EntitiID: %s"
 
 #: vms-alpha.c:7725
-#, c-format
+#, fuzzy, c-format
 msgid "recbeg: name: %.*s\n"
-msgstr ""
+msgstr "Nama: %s, EntitiID: %s"
 
 #: vms-alpha.c:7731
-#, c-format
+#, fuzzy, c-format
 msgid "    len: %u bits\n"
-msgstr ""
+msgstr "%u bit"
 
 #: vms-alpha.c:7737
 #, c-format
@@ -8078,14 +8221,14 @@ msgid "recend\n"
 msgstr ""
 
 #: vms-alpha.c:7742
-#, c-format
+#, fuzzy, c-format
 msgid "enumbeg, len: %u, name: %.*s\n"
-msgstr ""
+msgstr "gagal mendapatkan nama untuk platform %u (%s)"
 
 #: vms-alpha.c:7748
-#, c-format
+#, fuzzy, c-format
 msgid "enumelt, name: %.*s\n"
-msgstr ""
+msgstr "Nama: %s, EntitiID: %s"
 
 #: vms-alpha.c:7754
 #, c-format
@@ -8093,69 +8236,69 @@ msgid "enumend\n"
 msgstr ""
 
 #: vms-alpha.c:7761
-#, c-format
+#, fuzzy, c-format
 msgid "label, name: %.*s\n"
-msgstr ""
+msgstr "%s kehilangan nama atau label"
 
 #: vms-alpha.c:7764
-#, c-format
+#, fuzzy, c-format
 msgid "    address: 0x%08x\n"
-msgstr ""
+msgstr "Ralat DDE %08x tidak diketahui"
 
 #: vms-alpha.c:7776
-#, c-format
+#, fuzzy, c-format
 msgid "discontiguous range (nbr: %u)\n"
-msgstr ""
+msgstr "Blok buruk %u diluar julat; diabaikan.\n"
 
 #: vms-alpha.c:7783
-#, c-format
+#, fuzzy, c-format
 msgid "    address: 0x%08x, size: %u\n"
-msgstr ""
+msgstr "%s: saiz alamat mempunyai nilai %u tidak dijangka\n"
 
 #: vms-alpha.c:7794
-#, c-format
+#, fuzzy, c-format
 msgid "line num  (len: %u)\n"
-msgstr ""
+msgstr "%u aksara setiap baris"
 
 #: vms-alpha.c:7813
-#, c-format
+#, fuzzy, c-format
 msgid "delta_pc_w %u\n"
-msgstr ""
+msgstr "PC"
 
 #: vms-alpha.c:7822
-#, c-format
+#, fuzzy, c-format
 msgid "incr_linum(b): +%u\n"
-msgstr ""
+msgstr "%U"
 
 #: vms-alpha.c:7830
-#, c-format
+#, fuzzy, c-format
 msgid "incr_linum_w: +%u\n"
-msgstr ""
+msgstr "%U"
 
 #: vms-alpha.c:7838
-#, c-format
+#, fuzzy, c-format
 msgid "incr_linum_l: +%u\n"
-msgstr ""
+msgstr "Had Laju Muat Naik"
 
 #: vms-alpha.c:7846
-#, c-format
+#, fuzzy, c-format
 msgid "set_line_num(w) %u\n"
-msgstr ""
+msgstr "%u aksara setiap baris"
 
 #: vms-alpha.c:7853
-#, c-format
+#, fuzzy, c-format
 msgid "set_line_num_b %u\n"
-msgstr ""
+msgstr "%u aksara setiap baris"
 
 #: vms-alpha.c:7860
-#, c-format
+#, fuzzy, c-format
 msgid "set_line_num_l %u\n"
-msgstr ""
+msgstr "Kedua-dua L dan U dinyatakan.\n"
 
 #: vms-alpha.c:7867
-#, c-format
+#, fuzzy, c-format
 msgid "set_abs_pc: 0x%08x\n"
-msgstr ""
+msgstr "PC set 1"
 
 #: vms-alpha.c:7873
 #, c-format
@@ -8170,22 +8313,22 @@ msgstr ""
 #: vms-alpha.c:7882
 #, c-format
 msgid "        pc: 0x%08x\n"
-msgstr ""
+msgstr "        pc: 0x%08x\n"
 
 #: vms-alpha.c:7889
-#, c-format
+#, fuzzy, c-format
 msgid "term_w: 0x%04x"
-msgstr ""
+msgstr "(0x%04x, '%s'): "
 
 #: vms-alpha.c:7891
 #, c-format
 msgid "    pc: 0x%08x\n"
-msgstr ""
+msgstr "    pc: 0x%08x\n"
 
 #: vms-alpha.c:7897
-#, c-format
+#, fuzzy, c-format
 msgid "delta pc +%-4d"
-msgstr ""
+msgstr "PC"
 
 #: vms-alpha.c:7901
 #, c-format
@@ -8193,14 +8336,14 @@ msgid "    pc: 0x%08x line: %5u\n"
 msgstr ""
 
 #: vms-alpha.c:7906
-#, c-format
+#, fuzzy, c-format
 msgid "    *unhandled* cmd %u\n"
-msgstr ""
+msgstr "Ralat tidak boleh kendali"
 
 #: vms-alpha.c:7921
-#, c-format
+#, fuzzy, c-format
 msgid "source (len: %u)\n"
-msgstr ""
+msgstr "LEN(\"hello\") mengembalikan 5"
 
 #: vms-alpha.c:7940
 #, c-format
@@ -8213,29 +8356,29 @@ msgid "   rms: cdt: 0x%08x %08x, ebk: 0x%08x, ffb: 0x%04x, rfo: %u\n"
 msgstr ""
 
 #: vms-alpha.c:7957
-#, fuzzy, c-format
+#, c-format
 msgid "   filename   : %.*s\n"
-msgstr "Nama fail \"%s\" tidak sah"
+msgstr "   nama fail   : %.*s\n"
 
 #: vms-alpha.c:7973
-#, c-format
+#, fuzzy, c-format
 msgid "   setfile %u\n"
-msgstr ""
+msgstr "%u × %u"
 
 #: vms-alpha.c:7980 vms-alpha.c:7987
-#, c-format
+#, fuzzy, c-format
 msgid "   setrec %u\n"
-msgstr ""
+msgstr "%u × %u"
 
 #: vms-alpha.c:7994 vms-alpha.c:8001
-#, c-format
+#, fuzzy, c-format
 msgid "   setlnum %u\n"
-msgstr ""
+msgstr "%u × %u"
 
 #: vms-alpha.c:8008 vms-alpha.c:8015
-#, c-format
+#, fuzzy, c-format
 msgid "   deflines %u\n"
-msgstr ""
+msgstr "%u × %u"
 
 #: vms-alpha.c:8019
 #, c-format
@@ -8243,43 +8386,42 @@ msgid "   formfeed\n"
 msgstr ""
 
 #: vms-alpha.c:8023
-#, c-format
+#, fuzzy, c-format
 msgid "   *unhandled* cmd %u\n"
-msgstr ""
+msgstr "Ralat tidak boleh kendali"
 
 #: vms-alpha.c:8035
-#, c-format
+#, fuzzy, c-format
 msgid "*unhandled* dst type %u\n"
-msgstr ""
+msgstr "Xmpdatum %1 tidak dikendali bagi jenis %2"
 
 #: vms-alpha.c:8067
-#, c-format
+#, fuzzy, c-format
 msgid "cannot read EIHD\n"
-msgstr ""
+msgstr "Tidak Dapat Baca"
 
 #: vms-alpha.c:8071
-#, c-format
+#, fuzzy, c-format
 msgid "EIHD: (size: %u, nbr blocks: %u)\n"
-msgstr ""
+msgstr "Blok buruk: %u"
 
 #: vms-alpha.c:8075
-#, c-format
+#, fuzzy, c-format
 msgid " majorid: %u, minorid: %u\n"
-msgstr ""
+msgstr "%u × %u"
 
 #: vms-alpha.c:8083
-#, fuzzy
 msgid "executable"
-msgstr "Boleh Laku"
+msgstr "boleh laksana"
 
 #: vms-alpha.c:8086
 msgid "linkable image"
 msgstr ""
 
 #: vms-alpha.c:8093
-#, c-format
+#, fuzzy, c-format
 msgid " image type: %u (%s)"
-msgstr ""
+msgstr "Menyimpan imej “%s” (%u/%u)"
 
 #: vms-alpha.c:8099
 msgid "native"
@@ -8290,9 +8432,9 @@ msgid "CLI"
 msgstr "CLI"
 
 #: vms-alpha.c:8109
-#, c-format
+#, fuzzy, c-format
 msgid ", subtype: %u (%s)\n"
-msgstr ""
+msgstr "Gagal untuk menambah sub jenis '%s': %s\n"
 
 #: vms-alpha.c:8116
 #, c-format
@@ -8300,21 +8442,21 @@ msgid " offsets: isd: %u, activ: %u, symdbg: %u, imgid: %u, patch: %u\n"
 msgstr ""
 
 #: vms-alpha.c:8120
-#, c-format
+#, fuzzy, c-format
 msgid " fixup info rva: "
-msgstr ""
+msgstr "Jenis               Saiz     Rva      Offset\n"
 
 #: vms-alpha.c:8122
-#, c-format
+#, fuzzy, c-format
 msgid ", symbol vector rva: "
-msgstr ""
+msgstr "Grafik Vektor"
 
 #: vms-alpha.c:8125
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 " version array off: %u\n"
-msgstr ""
+msgstr "Menggunakan VTE versi %u.%u.%u"
 
 #: vms-alpha.c:8130
 #, c-format
@@ -8322,9 +8464,9 @@ msgid " img I/O count: %u, nbr channels: %u, req pri: %08x%08x\n"
 msgstr ""
 
 #: vms-alpha.c:8136
-#, c-format
+#, fuzzy, c-format
 msgid " linker flags: %08x:"
-msgstr ""
+msgstr "Pemaut"
 
 #: vms-alpha.c:8167
 #, c-format
@@ -8332,9 +8474,9 @@ msgid " ident: 0x%08x, sysver: 0x%08x, match ctrl: %u, symvect_size: %u\n"
 msgstr ""
 
 #: vms-alpha.c:8173
-#, c-format
+#, fuzzy, c-format
 msgid " BPAGE: %u"
-msgstr ""
+msgstr "%u × %u"
 
 #: vms-alpha.c:8180
 #, c-format
@@ -8342,24 +8484,24 @@ msgid ", ext fixup offset: %u, no_opt psect off: %u"
 msgstr ""
 
 #: vms-alpha.c:8183
-#, c-format
+#, fuzzy, c-format
 msgid ", alias: %u\n"
-msgstr ""
+msgstr "Alias"
 
 #: vms-alpha.c:8191
-#, c-format
+#, fuzzy, c-format
 msgid "system version array information:\n"
-msgstr ""
+msgstr "sistem, maklumat, terperinci, grafik, bunyi, kernel, versi"
 
 #: vms-alpha.c:8195
-#, c-format
+#, fuzzy, c-format
 msgid "cannot read EIHVN header\n"
-msgstr ""
+msgstr "Gagal membaca pengepala QTIF"
 
 #: vms-alpha.c:8205
-#, c-format
+#, fuzzy, c-format
 msgid "cannot read EIHVN version\n"
-msgstr ""
+msgstr "Versi Baca Jenis Doc"
 
 #: vms-alpha.c:8208
 #, c-format
@@ -8379,32 +8521,37 @@ msgid "IO               "
 msgstr "IO               "
 
 #: vms-alpha.c:8221
+#, fuzzy
 msgid "FILES_VOLUMES    "
-msgstr ""
+msgstr "_Volum"
 
 #: vms-alpha.c:8224
+#, fuzzy
 msgid "PROCESS_SCHED    "
-msgstr ""
+msgstr "(dalam proses)"
 
 #: vms-alpha.c:8227
 msgid "SYSGEN           "
 msgstr ""
 
 #: vms-alpha.c:8230
+#, fuzzy
 msgid "CLUSTERS_LOCKMGR "
-msgstr ""
+msgstr "kelompok"
 
 #: vms-alpha.c:8233
+#, fuzzy
 msgid "LOGICAL_NAMES    "
-msgstr ""
+msgstr "logikal not"
 
 #: vms-alpha.c:8236
 msgid "SECURITY         "
 msgstr "KESELAMATAN      "
 
 #: vms-alpha.c:8239
+#, fuzzy
 msgid "IMAGE_ACTIVATOR  "
-msgstr ""
+msgstr "Bukan imej"
 
 #: vms-alpha.c:8242
 msgid "NETWORKS         "
@@ -8439,8 +8586,9 @@ msgid "POSIX            "
 msgstr "POSIX            "
 
 #: vms-alpha.c:8266
+#, fuzzy
 msgid "MULTI_PROCESSING "
-msgstr ""
+msgstr "pelbagai"
 
 #: vms-alpha.c:8269
 msgid "GALAXY           "
@@ -8451,14 +8599,14 @@ msgid "*unknown*        "
 msgstr "*tidak diketahui* "
 
 #: vms-alpha.c:8288 vms-alpha.c:8575
-#, c-format
+#, fuzzy, c-format
 msgid "cannot read EIHA\n"
-msgstr ""
+msgstr "Tidak Dapat Baca"
 
 #: vms-alpha.c:8291
-#, c-format
+#, fuzzy, c-format
 msgid "Image activation:  (size=%u)\n"
-msgstr ""
+msgstr "Saiz blok=%u (log=%u)\n"
 
 #: vms-alpha.c:8294
 #, c-format
@@ -8486,44 +8634,44 @@ msgid " Shared image  : 0x%08x 0x%08x\n"
 msgstr ""
 
 #: vms-alpha.c:8321
-#, c-format
+#, fuzzy, c-format
 msgid "cannot read EIHI\n"
-msgstr ""
+msgstr "Tidak Dapat Baca"
 
 #: vms-alpha.c:8325
-#, c-format
+#, fuzzy, c-format
 msgid "Image identification: (major: %u, minor: %u)\n"
-msgstr ""
+msgstr "Menyimpan imej “%s” (%u/%u)"
 
 #: vms-alpha.c:8331
-#, c-format
+#, fuzzy, c-format
 msgid " image name       : %.*s\n"
-msgstr ""
+msgstr "Nama peta imej"
 
 #: vms-alpha.c:8332
-#, c-format
+#, fuzzy, c-format
 msgid " link time        : %s\n"
-msgstr ""
+msgstr "Pautan %s terpilih %s"
 
 #: vms-alpha.c:8337
-#, c-format
+#, fuzzy, c-format
 msgid " image ident      : %.*s\n"
-msgstr ""
+msgstr "IDENT: disambungkan kepada %s:%u"
 
 #: vms-alpha.c:8341
-#, c-format
+#, fuzzy, c-format
 msgid " linker ident     : %.*s\n"
-msgstr ""
+msgstr "IDENT: disambungkan kepada %s:%u"
 
 #: vms-alpha.c:8345
-#, c-format
+#, fuzzy, c-format
 msgid " image build ident: %.*s\n"
-msgstr ""
+msgstr "IDENT: disambungkan kepada %s:%u"
 
 #: vms-alpha.c:8354
-#, c-format
+#, fuzzy, c-format
 msgid "cannot read EIHS\n"
-msgstr ""
+msgstr "Tidak Dapat Baca"
 
 #: vms-alpha.c:8358
 #, c-format
@@ -8546,9 +8694,9 @@ msgid " debug module table : vbn: %u, size: %u\n"
 msgstr ""
 
 #: vms-alpha.c:8387
-#, c-format
+#, fuzzy, c-format
 msgid "cannot read EISD\n"
-msgstr ""
+msgstr "Tidak Dapat Baca"
 
 #: vms-alpha.c:8398
 #, c-format
@@ -8561,14 +8709,14 @@ msgid " section: base: 0x%08x%08x size: 0x%08x\n"
 msgstr ""
 
 #: vms-alpha.c:8411
-#, c-format
+#, fuzzy, c-format
 msgid " flags: 0x%04x"
-msgstr ""
+msgstr "(0x%04x, '%s'): "
 
 #: vms-alpha.c:8449
-#, c-format
+#, fuzzy, c-format
 msgid " vbn: %u, pfc: %u, matchctl: %u type: %u ("
-msgstr ""
+msgstr "Satu integer biasa tidak bertanda tangan, jenis 'u'"
 
 #: vms-alpha.c:8455
 msgid "NORMAL"
@@ -8599,24 +8747,24 @@ msgid ")\n"
 msgstr ""
 
 #: vms-alpha.c:8483
-#, c-format
+#, fuzzy, c-format
 msgid " ident: 0x%08x, name: %.*s\n"
-msgstr ""
+msgstr "IDENT: recvline() gagal: %s."
 
 #: vms-alpha.c:8494
-#, c-format
+#, fuzzy, c-format
 msgid "cannot read DMT\n"
-msgstr ""
+msgstr "Tidak Dapat Baca"
 
 #: vms-alpha.c:8498
-#, c-format
+#, fuzzy, c-format
 msgid "Debug module table:\n"
-msgstr ""
+msgstr "Ruang jadual"
 
 #: vms-alpha.c:8507
-#, c-format
+#, fuzzy, c-format
 msgid "cannot read DMT header\n"
-msgstr ""
+msgstr "Gagal membaca pengepala QTIF"
 
 #: vms-alpha.c:8513
 #, c-format
@@ -8624,9 +8772,9 @@ msgid " module offset: 0x%08x, size: 0x%08x, (%u psects)\n"
 msgstr ""
 
 #: vms-alpha.c:8523
-#, c-format
+#, fuzzy, c-format
 msgid "cannot read DMT psect\n"
-msgstr ""
+msgstr "Tak dalat membaca CD: %s"
 
 #: vms-alpha.c:8527
 #, c-format
@@ -8634,19 +8782,19 @@ msgid "  psect start: 0x%08x, length: %u\n"
 msgstr ""
 
 #: vms-alpha.c:8540
-#, c-format
+#, fuzzy, c-format
 msgid "cannot read DST\n"
-msgstr ""
+msgstr "Tidak Dapat Baca"
 
 #: vms-alpha.c:8550
-#, c-format
+#, fuzzy, c-format
 msgid "cannot read GST\n"
-msgstr ""
+msgstr "profil-gst"
 
 #: vms-alpha.c:8554
-#, c-format
+#, fuzzy, c-format
 msgid "Global symbol table:\n"
-msgstr ""
+msgstr "Simbol"
 
 #: vms-alpha.c:8581
 #, c-format
@@ -8654,14 +8802,14 @@ msgid "Image activator fixup: (major: %u, minor: %u)\n"
 msgstr ""
 
 #: vms-alpha.c:8585
-#, c-format
+#, fuzzy, c-format
 msgid "  iaflink : 0x%08x %08x\n"
-msgstr ""
+msgstr "Ralat DDE %08x tidak diketahui"
 
 #: vms-alpha.c:8589
-#, c-format
+#, fuzzy, c-format
 msgid "  fixuplnk: 0x%08x %08x\n"
-msgstr ""
+msgstr "Ralat DDE %08x tidak diketahui"
 
 #: vms-alpha.c:8592
 #, c-format
@@ -8669,9 +8817,9 @@ msgid "  size : %u\n"
 msgstr "  saiz : %u\n"
 
 #: vms-alpha.c:8594
-#, c-format
+#, fuzzy, c-format
 msgid "  flags: 0x%08x\n"
-msgstr ""
+msgstr "Ralat DDE %08x tidak diketahui"
 
 #: vms-alpha.c:8599
 #, c-format
@@ -8704,9 +8852,9 @@ msgid "  shlextra  : %5u, permctx   : %5u\n"
 msgstr ""
 
 #: vms-alpha.c:8622
-#, c-format
+#, fuzzy, c-format
 msgid "  base_va : 0x%08x\n"
-msgstr ""
+msgstr "Penyahkod video VA-API"
 
 #: vms-alpha.c:8624
 #, c-format
@@ -8714,9 +8862,9 @@ msgid "  lppsbfixoff: %5u\n"
 msgstr ""
 
 #: vms-alpha.c:8631
-#, c-format
+#, fuzzy, c-format
 msgid " Shareable images:\n"
-msgstr ""
+msgstr "Senarai  Main Boleh Kongsi (%s)"
 
 #: vms-alpha.c:8642
 #, c-format
@@ -8724,14 +8872,14 @@ msgid "  %u: size: %u, flags: 0x%02x, name: %.*s\n"
 msgstr ""
 
 #: vms-alpha.c:8649
-#, c-format
+#, fuzzy, c-format
 msgid " quad-word relocation fixups:\n"
-msgstr ""
+msgstr "Anak Panah Quad"
 
 #: vms-alpha.c:8655
-#, c-format
+#, fuzzy, c-format
 msgid " long-word relocation fixups:\n"
-msgstr ""
+msgstr "perkataan"
 
 #: vms-alpha.c:8661
 #, c-format
@@ -8739,24 +8887,24 @@ msgid " quad-word .address reference fixups:\n"
 msgstr ""
 
 #: vms-alpha.c:8666
-#, c-format
+#, fuzzy, c-format
 msgid " long-word .address reference fixups:\n"
-msgstr ""
+msgstr "Panjang %u terlalu panjang untuk alamat"
 
 #: vms-alpha.c:8671
-#, c-format
+#, fuzzy, c-format
 msgid " Code Address Reference Fixups:\n"
-msgstr ""
+msgstr "Rujukan(en)"
 
 #: vms-alpha.c:8676
-#, c-format
+#, fuzzy, c-format
 msgid " Linkage Pairs Reference Fixups:\n"
-msgstr ""
+msgstr "Pasangan AT"
 
 #: vms-alpha.c:8684
-#, c-format
+#, fuzzy, c-format
 msgid " Change Protection (%u entries):\n"
-msgstr ""
+msgstr "Sebuah penyimpan buku catatan yang berguna, menyimpan %u masukan."
 
 #: vms-alpha.c:8693
 #, c-format
@@ -8766,8 +8914,9 @@ msgstr ""
 #. FIXME: we do not yet support relocatable link.  It is not obvious
 #. how to do it for debug infos.
 #: vms-alpha.c:9570
+#, fuzzy
 msgid "%P: relocatable link is not supported\n"
-msgstr ""
+msgstr "Skema boleh letak semula"
 
 #: vms-alpha.c:9641
 #, c-format
@@ -8775,9 +8924,9 @@ msgid "%P: multiple entry points: in modules %pB and %pB\n"
 msgstr ""
 
 #: vms-lib.c:1530
-#, c-format
+#, fuzzy, c-format
 msgid "could not open shared image '%s' from '%s'"
-msgstr ""
+msgstr "Tidak dapat membuka penukar dari \"%s\" ke \"%s\""
 
 #: vms-misc.c:374
 msgid "_bfd_vms_output_counted called with zero bytes"
@@ -8798,9 +8947,9 @@ msgid "%pB: XCOFF shared object when not producing XCOFF output"
 msgstr ""
 
 #: xcofflink.c:902
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: dynamic object with no .loader section"
-msgstr ""
+msgstr "%pB: gagal membaca bahagian data nyahpepijat"
 
 #: xcofflink.c:1484
 #, c-format
@@ -8833,19 +8982,19 @@ msgid "%pB: TOC entry `%s' has a R_TLSMLrelocation not targeting itself"
 msgstr ""
 
 #: xcofflink.c:1776
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: csect `%s' not in enclosing section"
-msgstr ""
+msgstr "%pB: gagal membaca bahagian data nyahpepijat"
 
 #: xcofflink.c:1885
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: misplaced XTY_LD `%s'"
-msgstr ""
+msgstr "%s Pb"
 
 #: xcofflink.c:2228
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: reloc %s:%<PRId64> not in csect"
-msgstr ""
+msgstr "%s Pb"
 
 #: xcofflink.c:3337
 #, c-format
@@ -8858,13 +9007,14 @@ msgid "%s: no such symbol"
 msgstr "%s: tiada simbol sedemikian"
 
 #: xcofflink.c:3494
-#, c-format
+#, fuzzy, c-format
 msgid "warning: attempt to export undefined symbol `%s'"
-msgstr ""
+msgstr "amaran: pembolehubah tidak dinyatakan `%.*s'"
 
 #: xcofflink.c:3842
+#, fuzzy
 msgid "error: undefined symbol __rtinit"
-msgstr ""
+msgstr "simbol permulaan %s tidak ditakrifkan"
 
 #: xcofflink.c:4855
 #, c-format
@@ -8872,9 +9022,9 @@ msgid "%pB: Unable to find a stub csect in rangeof relocation at %#<PRIx64> targ
 msgstr ""
 
 #: xcofflink.c:4884
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: Cannot create stub entry '%s'"
-msgstr ""
+msgstr "%s: Tak dapat mencipta symlink ke %s"
 
 #: xcofflink.c:5004
 msgid "TOC overflow during stub generation; try -mminimal-toc when compiling"
@@ -8886,9 +9036,9 @@ msgid "%pB: loader reloc in unrecognized section `%s'"
 msgstr ""
 
 #: xcofflink.c:5084
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: `%s' in loader reloc but not loader sym"
-msgstr ""
+msgstr "Ralat dalaman pada pemuat GIF (%s)"
 
 #: xcofflink.c:5101
 #, c-format
@@ -8901,34 +9051,35 @@ msgid "TOC overflow: %#<PRIx64> > 0x10000; try -mminimal-toc when compiling"
 msgstr ""
 
 #: xcofflink.c:7296
-#, c-format
+#, fuzzy, c-format
 msgid "Unable to link input file: %s"
-msgstr ""
+msgstr "menutup fail input %s"
 
 #: xtensa-dynconfig.c:60
+#, fuzzy
 msgid "Unable to load DLL."
-msgstr ""
+msgstr "Tidak boleh muatkan lokasi"
 
 #: xtensa-dynconfig.c:86
-#, c-format
+#, fuzzy, c-format
 msgid "%s is defined but could not be loaded: %s"
-msgstr ""
+msgstr "Fail '%s' tidak dapat dimuatkan."
 
 #: xtensa-dynconfig.c:102
-#, c-format
+#, fuzzy, c-format
 msgid "%s is loaded but symbol \"%s\" is not found: %s"
-msgstr ""
+msgstr "simbol tidak dijumpai di dalam pengeluaran: %.*s"
 
 #: xtensa-dynconfig.c:115
-#, c-format
+#, fuzzy, c-format
 msgid "%s is defined but plugin support is disabled"
-msgstr ""
+msgstr "Gagal memulakan perkhidmatan Penjejak: %s. Pemalam dilumpuhkan."
 
 #. Not fatal, this callback cannot fail.
 #: elfnn-aarch64.c:2878 elfnn-riscv.c:5739
-#, c-format
+#, fuzzy, c-format
 msgid "unknown attribute for symbol `%s': 0x%02x"
-msgstr ""
+msgstr "Vendor GPU anda tidak diketahui: %s (0x%X)"
 
 #: elfnn-aarch64.c:5468
 #, c-format
@@ -8993,61 +9144,61 @@ msgid "%pB(%pA+%#<PRIx64>): unresolvable %s relocation in section `%s'"
 msgstr ""
 
 #: elfnn-kvx.c:2850
-#, c-format
+#, fuzzy, c-format
 msgid "%s: Bad ELF id: `%d'"
-msgstr ""
+msgstr "%s: ofset teruk pada halaman %d\n"
 
 #: elfnn-kvx.c:2905
-#, c-format
+#, fuzzy, c-format
 msgid "%s: compiled as 32-bit object and %s is 64-bit"
-msgstr ""
+msgstr "Dikompil oleh %s pada %s (%s)\n"
 
 #: elfnn-kvx.c:2908
-#, c-format
+#, fuzzy, c-format
 msgid "%s: compiled as 64-bit object and %s is 32-bit"
-msgstr ""
+msgstr "Dikompil oleh %s pada %s (%s)\n"
 
 #: elfnn-kvx.c:2910
-#, c-format
+#, fuzzy, c-format
 msgid "%s: object size does not match that of target %s"
-msgstr ""
+msgstr "Direktori sasaran \"%s\" tidak wujud"
 
 #. Ignore init flag - it may not be set, despite the flags field
 #. containing valid data.
 #: elfnn-kvx.c:2998
-#, c-format
+#, fuzzy, c-format
 msgid "Private flags = 0x%lx : "
-msgstr ""
+msgstr "[find_call] %s: 0x%lx ke 0x%lx\n"
 
 #: elfnn-kvx.c:3002
-#, c-format
+#, fuzzy, c-format
 msgid "Coolidge (kv3) V1 64 bits"
-msgstr ""
+msgstr "64 bit"
 
 #: elfnn-kvx.c:3004
-#, c-format
+#, fuzzy, c-format
 msgid "Coolidge (kv3) V2 64 bits"
-msgstr ""
+msgstr "64 bit"
 
 #: elfnn-kvx.c:3006
-#, c-format
+#, fuzzy, c-format
 msgid "Coolidge (kv4) V1 64 bits"
-msgstr ""
+msgstr "64 bit"
 
 #: elfnn-kvx.c:3011
-#, c-format
+#, fuzzy, c-format
 msgid "Coolidge (kv3) V1 32 bits"
-msgstr ""
+msgstr "Himpun data dengan 32 bit"
 
 #: elfnn-kvx.c:3013
-#, c-format
+#, fuzzy, c-format
 msgid "Coolidge (kv3) V2 32 bits"
-msgstr ""
+msgstr "Himpun data dengan 32 bit"
 
 #: elfnn-kvx.c:3015
-#, c-format
+#, fuzzy, c-format
 msgid "Coolidge (kv4) V1 32 bits"
-msgstr ""
+msgstr "Himpun data dengan 32 bit"
 
 #: elfnn-kvx.c:3847
 #, c-format
@@ -9072,8 +9223,9 @@ msgid "%pB: can't link different ABI object."
 msgstr ""
 
 #: elfnn-loongarch.c:726
+#, fuzzy
 msgid "Internal error: unreachable."
-msgstr ""
+msgstr "Ralat dalaman: Ralat tidak diketahui"
 
 #: elfnn-loongarch.c:906
 #, c-format
@@ -9081,8 +9233,9 @@ msgid "%pB:(%pA+%#lx): relocation %s against `%s` can not be used when making %s
 msgstr ""
 
 #: elfnn-loongarch.c:910
+#, fuzzy
 msgid " and check the symbol visibility"
-msgstr ""
+msgstr "Simbol"
 
 #: elfnn-loongarch.c:1036
 #, c-format
@@ -9149,9 +9302,9 @@ msgid "%%pcrel_lo overflow with an addend, the value of %%pcrel_hi is 0x%<PRIx64
 msgstr ""
 
 #: elfnn-riscv.c:2156
-#, c-format
+#, fuzzy, c-format
 msgid "%pcrel_lo overflow with an addend"
-msgstr ""
+msgstr "Rekod melimpah"
 
 #: elfnn-riscv.c:2639
 #, c-format
@@ -9187,9 +9340,9 @@ msgid "%pcrel_lo section symbol with an addend"
 msgstr ""
 
 #: elfnn-riscv.c:2923
-#, c-format
+#, fuzzy, c-format
 msgid "%tlsdesc_lo with addend"
-msgstr ""
+msgstr "Tambah _Lokasi...:"
 
 #: elfnn-riscv.c:3156
 #, c-format
@@ -9197,20 +9350,24 @@ msgid "%%X%%P: unresolvable %s relocation against symbol `%s'\n"
 msgstr ""
 
 #: elfnn-riscv.c:3191
+#, fuzzy
 msgid "%X%P: internal error: out of range error\n"
-msgstr ""
+msgstr "ralat dalaman X: %s\n"
 
 #: elfnn-riscv.c:3196
+#, fuzzy
 msgid "%X%P: internal error: unsupported relocation error\n"
-msgstr ""
+msgstr "ralat dalaman X: %s\n"
 
 #: elfnn-riscv.c:3202
+#, fuzzy
 msgid "dangerous relocation error"
-msgstr ""
+msgstr "Fail berpontensi bahaya"
 
 #: elfnn-riscv.c:3208
+#, fuzzy
 msgid "%X%P: internal error: unknown error\n"
-msgstr ""
+msgstr "Ralat dalaman: Ralat tidak diketahui"
 
 #: elfnn-riscv.c:3785
 #, c-format
@@ -9247,9 +9404,9 @@ msgid "error: %pB use %u-byte stack aligned but the output use %u-byte stack ali
 msgstr ""
 
 #: elfnn-riscv.c:4238
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: can't link %s modules with %s modules"
-msgstr ""
+msgstr "Tidak dapat awalkan modul berdaftar PKCS#11: %s"
 
 #: elfnn-riscv.c:4248
 #, c-format
@@ -9267,9 +9424,9 @@ msgid "%pB: relocation %s against non-absolute symbol `%s' can not be used in RV
 msgstr ""
 
 #: peXXigen.c:161
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: unable to find name for empty section"
-msgstr ""
+msgstr "Pemasangan: Tidak jumpa nama folder yang sesuai untuk $1"
 
 #: peXXigen.c:188
 #, c-format
@@ -9287,9 +9444,9 @@ msgid "%pB:%.8s: section below image base"
 msgstr ""
 
 #: peXXigen.c:929
-#, c-format
+#, fuzzy, c-format
 msgid "%pB:%.8s: RVA truncated"
-msgstr ""
+msgstr "DIPANGKAS"
 
 #: peXXigen.c:1061
 #, c-format
@@ -9301,60 +9458,74 @@ msgid "Export Directory [.edata (or where ever we found it)]"
 msgstr ""
 
 #: peXXigen.c:1228
+#, fuzzy
 msgid "Import Directory [parts of .idata]"
-msgstr ""
+msgstr "bahagian"
 
 #: peXXigen.c:1229
+#, fuzzy
 msgid "Resource Directory [.rsrc]"
-msgstr ""
+msgstr "Sumber pada \"%s\" bukan satu direktori"
 
 #: peXXigen.c:1230
+#, fuzzy
 msgid "Exception Directory [.pdata]"
-msgstr ""
+msgstr "Maklumat pengecualian:"
 
 #: peXXigen.c:1231
+#, fuzzy
 msgid "Security Directory"
-msgstr ""
+msgstr "KESELAMATAN      "
 
 #: peXXigen.c:1232
+#, fuzzy
 msgid "Base Relocation Directory [.reloc]"
-msgstr ""
+msgstr "_Pangkalan Direktori:"
 
 #: peXXigen.c:1233
+#, fuzzy
 msgid "Debug Directory"
-msgstr ""
+msgstr "gagal mengemaskini offset fail dalam direktori nyahpijat"
 
 #: peXXigen.c:1234
+#, fuzzy
 msgid "Description Directory"
-msgstr ""
+msgstr "Keterangan"
 
 #: peXXigen.c:1235
+#, fuzzy
 msgid "Special Directory"
-msgstr ""
+msgstr "SPECIAL"
 
 #: peXXigen.c:1236
+#, fuzzy
 msgid "Thread Storage Directory [.tls]"
-msgstr ""
+msgstr "Gagal memulakan benang: ralat menulis TLS."
 
 #: peXXigen.c:1237
+#, fuzzy
 msgid "Load Configuration Directory"
-msgstr ""
+msgstr "Muatkan item tambahan konfigurasi"
 
 #: peXXigen.c:1238
+#, fuzzy
 msgid "Bound Import Directory"
-msgstr ""
+msgstr "Import direktori"
 
 #: peXXigen.c:1239
+#, fuzzy
 msgid "Import Address Table Directory"
-msgstr ""
+msgstr "Import direktori"
 
 #: peXXigen.c:1240
+#, fuzzy
 msgid "Delay Import Directory"
-msgstr ""
+msgstr "Import direktori"
 
 #: peXXigen.c:1241
+#, fuzzy
 msgid "CLR Runtime Header"
-msgstr ""
+msgstr "Masa Jalan"
 
 #: peXXigen.c:1242
 msgid "Reserved"
@@ -9368,18 +9539,18 @@ msgid ""
 msgstr ""
 
 #: peXXigen.c:1313
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "There is an import table in %s, but that section has no contents\n"
-msgstr ""
+msgstr "Jadual %s telah dipindahkan ke %s."
 
 #: peXXigen.c:1320
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "There is an import table in %s at 0x%lx\n"
-msgstr ""
+msgstr "[find_call] %s: 0x%lx ke 0x%lx\n"
 
 #: peXXigen.c:1326
 #, c-format
@@ -9396,11 +9567,11 @@ msgid ""
 msgstr ""
 
 #: peXXigen.c:1378
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "\tDLL Name: %.*s\n"
-msgstr ""
+msgstr "Nama: %s, EntitiID: %s"
 
 #: peXXigen.c:1394
 #, c-format
@@ -9415,9 +9586,9 @@ msgid ""
 msgstr ""
 
 #: peXXigen.c:1469 peXXigen.c:1514
-#, c-format
+#, fuzzy, c-format
 msgid "\t<corrupt: 0x%08lx>"
-msgstr ""
+msgstr "Eksponen: 0x"
 
 #: peXXigen.c:1608
 #, c-format
@@ -9434,18 +9605,18 @@ msgid ""
 msgstr ""
 
 #: peXXigen.c:1629
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "There is an export table in %s, but contents cannot be read\n"
-msgstr ""
+msgstr "Tidak dapat menyediakan kandungan sebagai \"%s\""
 
 #: peXXigen.c:1635
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "There is an export table in %s at 0x%lx\n"
-msgstr ""
+msgstr "[find_call] %s: 0x%lx ke 0x%lx\n"
 
 #: peXXigen.c:1666
 #, c-format
@@ -9456,19 +9627,19 @@ msgid ""
 msgstr ""
 
 #: peXXigen.c:1670
-#, c-format
+#, fuzzy, c-format
 msgid "Export Flags \t\t\t%lx\n"
-msgstr ""
+msgstr "Eksport"
 
 #: peXXigen.c:1673
-#, c-format
+#, fuzzy, c-format
 msgid "Time/Date stamp \t\t%lx\n"
-msgstr ""
+msgstr "Setem Tarikh GPS"
 
 #: peXXigen.c:1677
-#, c-format
+#, fuzzy, c-format
 msgid "Major/Minor \t\t\t%d/%d\n"
-msgstr ""
+msgstr "Penggunaan: %s [OPSYEN]... NAMA JENIS [MAJOR MINOR]\n"
 
 #: peXXigen.c:1680
 #, c-format
@@ -9476,9 +9647,9 @@ msgid "Name \t\t\t\t"
 msgstr "Nama \t\t\t\t"
 
 #: peXXigen.c:1691
-#, c-format
+#, fuzzy, c-format
 msgid "Ordinal Base \t\t\t%ld\n"
-msgstr ""
+msgstr "ordinal"
 
 #: peXXigen.c:1694
 #, c-format
@@ -9486,34 +9657,34 @@ msgid "Number in:\n"
 msgstr "Nombor dalam:\n"
 
 #: peXXigen.c:1697
-#, c-format
+#, fuzzy, c-format
 msgid "\tExport Address Table \t\t%08lx\n"
-msgstr ""
+msgstr "Eksport"
 
 #: peXXigen.c:1701
-#, c-format
+#, fuzzy, c-format
 msgid "\t[Name Pointer/Ordinal] Table\t%08lx\n"
-msgstr ""
+msgstr "Nama jadual adalah kosong!"
 
 #: peXXigen.c:1704
-#, c-format
+#, fuzzy, c-format
 msgid "Table Addresses\n"
-msgstr ""
+msgstr "Alamat:"
 
 #: peXXigen.c:1707
-#, c-format
+#, fuzzy, c-format
 msgid "\tExport Address Table \t\t"
-msgstr ""
+msgstr "Eksport"
 
 #: peXXigen.c:1712
-#, c-format
+#, fuzzy, c-format
 msgid "\tName Pointer Table \t\t"
-msgstr ""
+msgstr "Nama jadual adalah kosong!"
 
 #: peXXigen.c:1717
-#, c-format
+#, fuzzy, c-format
 msgid "\tOrdinal Table \t\t\t"
-msgstr ""
+msgstr "ordinal"
 
 #: peXXigen.c:1731
 #, c-format
@@ -9528,12 +9699,14 @@ msgid "\tInvalid Export Address Table rva (0x%lx) or entry count (0x%lx)\n"
 msgstr ""
 
 #: peXXigen.c:1760
+#, fuzzy
 msgid "Forwarder RVA"
-msgstr ""
+msgstr "Jenis               Saiz     Rva      Offset\n"
 
 #: peXXigen.c:1772
+#, fuzzy
 msgid "Export RVA"
-msgstr ""
+msgstr "Jenis               Saiz     Rva      Offset\n"
 
 #: peXXigen.c:1779
 #, c-format
@@ -9614,34 +9787,34 @@ msgid "\treloc %4d offset %4x [%4lx] %s"
 msgstr ""
 
 #: peXXigen.c:2276
-#, c-format
+#, fuzzy, c-format
 msgid "%03x %*.s Entry: "
-msgstr ""
+msgstr "Masukan EXIF '%s' "
 
 #: peXXigen.c:2300
-#, c-format
+#, fuzzy, c-format
 msgid "name: [val: %08lx len %d]: "
-msgstr ""
+msgstr "Ralat membaca dari klien, len = %d\n"
 
 #: peXXigen.c:2320
-#, c-format
+#, fuzzy, c-format
 msgid "<corrupt string length: %#x>\n"
-msgstr ""
+msgstr "-X <rentetan>"
 
 #: peXXigen.c:2330
-#, c-format
+#, fuzzy, c-format
 msgid "<corrupt string offset: %#lx>\n"
-msgstr ""
+msgstr "ofset"
 
 #: peXXigen.c:2335
 #, c-format
 msgid "ID: %#08lx"
-msgstr ""
+msgstr "ID: %#08lx"
 
 #: peXXigen.c:2338
-#, c-format
+#, fuzzy, c-format
 msgid ", Value: %#08lx\n"
-msgstr ""
+msgstr "nilai"
 
 #: peXXigen.c:2360
 #, c-format
@@ -9649,9 +9822,9 @@ msgid "%03x %*.s  Leaf: Addr: %#08lx, Size: %#08lx, Codepage: %d\n"
 msgstr ""
 
 #: peXXigen.c:2402
-#, c-format
+#, fuzzy, c-format
 msgid "<unknown directory type: %d>\n"
-msgstr ""
+msgstr "Jenis objek tak diketahui %d\n"
 
 #: peXXigen.c:2410
 #, c-format
@@ -9659,9 +9832,9 @@ msgid " Table: Char: %d, Time: %08lx, Ver: %d/%d, Num Names: %d, IDs: %d\n"
 msgstr ""
 
 #: peXXigen.c:2498
-#, c-format
+#, fuzzy, c-format
 msgid "Corrupt .rsrc section detected!\n"
-msgstr ""
+msgstr "Fail rosak?"
 
 #: peXXigen.c:2522
 #, c-format
@@ -9676,9 +9849,9 @@ msgid " String table starts at offset: %#03x\n"
 msgstr ""
 
 #: peXXigen.c:2531
-#, c-format
+#, fuzzy, c-format
 msgid " Resources start at offset: %#03x\n"
-msgstr ""
+msgstr "Mulakan Offset"
 
 #: peXXigen.c:2588
 #, c-format
@@ -9688,11 +9861,11 @@ msgid ""
 msgstr ""
 
 #: peXXigen.c:2594
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "There is a debug directory in %s, but that section has no contents\n"
-msgstr ""
+msgstr "Gagal memproses laporan nyahpijat, meninggalkan fail dalam direktori \"%s\"."
 
 #: peXXigen.c:2601
 #, c-format
@@ -9708,6 +9881,9 @@ msgid ""
 "There is a debug directory in %s at 0x%lx\n"
 "\n"
 msgstr ""
+"\n"
+"Terdapat direktori nyahpepijat dalam %s pada 0x%lx\n"
+"\n"
 
 #: peXXigen.c:2613
 #, c-format
@@ -9717,7 +9893,7 @@ msgstr ""
 #: peXXigen.c:2618
 #, c-format
 msgid "Type                Size     Rva      Offset\n"
-msgstr ""
+msgstr "Jenis               Saiz     Rva      Offset\n"
 
 #: peXXigen.c:2666
 #, c-format
@@ -9738,6 +9914,8 @@ msgid ""
 "\n"
 "Characteristics 0x%x\n"
 msgstr ""
+"\n"
+"Ciri-ciri 0x%x\n"
 
 #: peXXigen.c:3047
 #, c-format
@@ -9746,12 +9924,12 @@ msgstr ""
 
 #: peXXigen.c:3088
 msgid "failed to update file offsets in debug directory"
-msgstr ""
+msgstr "gagal mengemaskini offset fail dalam direktori nyahpijat"
 
 #: peXXigen.c:3097
 #, c-format
 msgid "%pB: failed to read debug data section"
-msgstr ""
+msgstr "%pB: gagal membaca bahagian data nyahpepijat"
 
 #: peXXigen.c:3900
 #, c-format
