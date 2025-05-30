@@ -7161,9 +7161,12 @@ _bfd_elf_write_object_contents (bfd *abfd)
     {
       /* Don't set the sh_name field without section header.  */
       if ((abfd->flags & BFD_NO_SECTION_HEADER) == 0)
-	i_shdrp[count]->sh_name
-	  = _bfd_elf_strtab_offset (elf_shstrtab (abfd),
-				    i_shdrp[count]->sh_name);
+	{
+	  i_shdrp[count]->sh_name
+	    = _bfd_elf_strtab_offset (elf_shstrtab (abfd),
+				      i_shdrp[count]->sh_name);
+	  /* FIXME: If we could not set the section name, should we tell the user ?  */
+	}
       if (bed->elf_backend_section_processing)
 	if (!(*bed->elf_backend_section_processing) (abfd, i_shdrp[count]))
 	  return false;
