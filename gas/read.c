@@ -3306,6 +3306,7 @@ assign_symbol (char *name, int mode)
 	 retain the value of the symbol at the point of use.  */
       else if (S_IS_VOLATILE (symbolP))
 	symbolP = symbol_clone (symbolP, 1);
+      S_CLEAR_WEAKREFR (symbolP);
     }
 
   if (mode == 0)
