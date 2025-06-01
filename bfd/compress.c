@@ -521,8 +521,10 @@ decompress_contents (bool is_zstd, bfd_byte *compressed_buffer,
      buffers concatenated together, so we uncompress in a loop.  */
   do
     {
-      uLongf dst_len = uncompressed_size;
-      uLong src_len = compressed_size;
+      uLongf dst_len = (uncompressed_size > ULONG_MAX ? ULONG_MAX
+			: uncompressed_size);
+      uLong src_len = (compressed_size > ULONG_MAX ? ULONG_MAX
+		       : compressed_size);
       int rc = uncompress2 ((Bytef *) uncompressed_buffer, &dst_len,
 			    (Bytef *) compressed_buffer, &src_len);
       if (rc != Z_OK)
