@@ -719,10 +719,10 @@ EXTERNAL
 #define EXIT_FAILURE 1
 #endif
 
-/* Configure will leave this undefined, but it's unconditionally used
-   in a definition later.  */
-#ifndef TLS
-#define TLS
+#ifdef TLS
+#define THREAD_LOCAL TLS
+#else
+#define THREAD_LOCAL
 #endif
 
 
@@ -815,8 +815,8 @@ const char *const bfd_errmsgs[] =
   N_("#<invalid error code>")
 };
 
-static TLS bfd_error_type bfd_error;
-static TLS char *_bfd_error_buf;
+static THREAD_LOCAL bfd_error_type bfd_error;
+static THREAD_LOCAL char *_bfd_error_buf;
 
 /* Free any data associated with the BFD error.  */
 
@@ -1695,7 +1695,7 @@ _bfd_per_xvec_warn (struct per_xvec_messages *messages, size_t alloc)
    error_handler_sprintf; when NULL, _bfd_error_internal will be used
    instead.  */
 
-static TLS struct per_xvec_messages *error_handler_messages;
+static THREAD_LOCAL struct per_xvec_messages *error_handler_messages;
 
 /* A special value for error_handler_messages that indicates that the
    error should simply be ignored.  */
@@ -2028,18 +2028,20 @@ DESCRIPTION
 	Initialize BFD threading.  The functions passed in will be
 	used to lock and unlock global data structures.  This may only
 	be called a single time in a given process.  Returns true on
-	success and false on error.  DATA is passed verbatim to the
-	lock and unlock functions.  The lock and unlock functions
-	should return true on success, or set the BFD error and return
-	false on failure.  Note also that the lock must be a recursive
-	lock: BFD may attempt to acquire the lock when it is already
-	held by the current thread.
+	success and false on error.  On error, the caller should
+	assume that BFD cannot be used by multiple threads.  DATA is
+	passed verbatim to the lock and unlock functions.  The lock
+	and unlock functions should return true on success, or set the
+	BFD error and return false on failure.  Note also that the
+	lock must be a recursive lock: BFD may attempt to acquire the
+	lock when it is already held by the current thread.
 */
 
 bool
 bfd_thread_init (bfd_lock_unlock_fn_type lock, bfd_lock_unlock_fn_type unlock,
 		 void *data)
 {
+#ifdef TLS
   /* Both functions must be set, and this cannot have been called
      before.  */
   if (lock == NULL || unlock == NULL || unlock_fn != NULL)
@@ -2052,6 +2054,12 @@ bfd_thread_init (bfd_lock_unlock_fn_type lock, bfd_lock_unlock_fn_type unlock,
   unlock_fn = unlock;
   lock_data = data;
   return true;
+#else /* TLS */
+  /* If thread-local storage wasn't found by configure, we disallow
+     threaded operation.  */
+  bfd_set_error (bfd_error_invalid_operation);
+  return false;
+#endif /* TLS */
 }
 
 /*
