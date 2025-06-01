@@ -1100,6 +1100,38 @@ or1k32bf_h_sys_esr15_set (SIM_CPU *current_cpu, USI newval)
   SET_H_SYS_ESR15 (newval);
 }
 
+/* Get the value of h-sys-coreid.  */
+
+USI
+or1k32bf_h_sys_coreid_get (SIM_CPU *current_cpu)
+{
+  return GET_H_SYS_COREID ();
+}
+
+/* Set a value for h-sys-coreid.  */
+
+void
+or1k32bf_h_sys_coreid_set (SIM_CPU *current_cpu, USI newval)
+{
+  SET_H_SYS_COREID (newval);
+}
+
+/* Get the value of h-sys-numcores.  */
+
+USI
+or1k32bf_h_sys_numcores_get (SIM_CPU *current_cpu)
+{
+  return GET_H_SYS_NUMCORES ();
+}
+
+/* Set a value for h-sys-numcores.  */
+
+void
+or1k32bf_h_sys_numcores_set (SIM_CPU *current_cpu, USI newval)
+{
+  SET_H_SYS_NUMCORES (newval);
+}
+
 /* Get the value of h-sys-gpr0.  */
 
 USI

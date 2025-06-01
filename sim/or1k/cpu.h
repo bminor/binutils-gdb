@@ -408,6 +408,16 @@ SET_H_SPR (ORSI (SLLSI (SPR_GROUP_SYS, 11), SPR_INDEX_SYS_ESR14), (x));\
 do { \
 SET_H_SPR (ORSI (SLLSI (SPR_GROUP_SYS, 11), SPR_INDEX_SYS_ESR15), (x));\
 ;} while (0)
+#define GET_H_SYS_COREID() GET_H_SPR (ORSI (SLLSI (SPR_GROUP_SYS, 11), SPR_INDEX_SYS_COREID))
+#define SET_H_SYS_COREID(x) \
+do { \
+SET_H_SPR (ORSI (SLLSI (SPR_GROUP_SYS, 11), SPR_INDEX_SYS_COREID), (x));\
+;} while (0)
+#define GET_H_SYS_NUMCORES() GET_H_SPR (ORSI (SLLSI (SPR_GROUP_SYS, 11), SPR_INDEX_SYS_NUMCORES))
+#define SET_H_SYS_NUMCORES(x) \
+do { \
+SET_H_SPR (ORSI (SLLSI (SPR_GROUP_SYS, 11), SPR_INDEX_SYS_NUMCORES), (x));\
+;} while (0)
 #define GET_H_SYS_GPR0() GET_H_SPR (ORSI (SLLSI (SPR_GROUP_SYS, 11), SPR_INDEX_SYS_GPR0))
 #define SET_H_SYS_GPR0(x) \
 do { \
@@ -3379,6 +3389,10 @@ USI or1k32bf_h_sys_esr14_get (SIM_CPU *);
 void or1k32bf_h_sys_esr14_set (SIM_CPU *, USI);
 USI or1k32bf_h_sys_esr15_get (SIM_CPU *);
 void or1k32bf_h_sys_esr15_set (SIM_CPU *, USI);
+USI or1k32bf_h_sys_coreid_get (SIM_CPU *);
+void or1k32bf_h_sys_coreid_set (SIM_CPU *, USI);
+USI or1k32bf_h_sys_numcores_get (SIM_CPU *);
+void or1k32bf_h_sys_numcores_set (SIM_CPU *, USI);
 USI or1k32bf_h_sys_gpr0_get (SIM_CPU *);
 void or1k32bf_h_sys_gpr0_set (SIM_CPU *, USI);
 USI or1k32bf_h_sys_gpr1_get (SIM_CPU *);
