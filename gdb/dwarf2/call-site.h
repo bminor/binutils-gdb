@@ -198,7 +198,7 @@ struct call_site
   struct call_site *tail_call_next = nullptr;
 
   /* * Describe DW_AT_call_target.  Missing attribute uses
-     FIELD_LOC_KIND_DWARF_BLOCK with FIELD_DWARF_BLOCK == NULL.  */
+     m_loc_kind == DWARF_BLOCK with m_loc.dwarf_block == nullptr.  */
 
   struct call_site_target target {};
 
