@@ -414,7 +414,7 @@ proc run_quoting_and_escaping_tests { root } {
     # focuses on completion of the final filename.  There is also some
     # testing of the shell command above, this tests completion within
     # the line.
-    foreach_with_prefix shell_cmd { "shell " "!" } {
+    foreach_with_prefix shell_cmd { "shell " "!" "pipe print 1 | " } {
 	foreach suffix { "aaa/aa bb" "bb2/dir 1/unique file" } {
 	    set dir $root/$suffix
 

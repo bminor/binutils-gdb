@@ -1193,8 +1193,32 @@ pipe_command_completer (struct cmd_list_element *ignore,
       return;
     }
 
-  /* We're past the delimiter.  What follows is a shell command, which
-     we don't know how to complete.  */
+  /* We're past the delimiter now, or at least, DELIM points to the
+     delimiter string.  Update TEXT to point to the start of whatever
+     appears after the delimiter.  */
+  text = skip_spaces (delim + strlen (delimiter));
+
+  /* We really are past the delimiter now, so offer completions.  This is
+     like GDB's "shell" command, currently we only offer filename
+     completion, but in the future this could be improved by offering
+     completion of command names from $PATH.
+
+     What we don't do here is offer completions for the empty string.  It
+     is assumed that the first word after the delimiter is going to be a
+     command name from $PATH, not a filename, so if the user has typed
+     nothing (yet) and tries to complete, there's no point offering a list
+     of files from the current directory.
+
+     Once the user has started to type something though, then we do start
+     offering filename completions.  */
+  if (*text == '\0')
+    return;
+
+  tracker.set_use_custom_word_point (true);
+  tracker.advance_custom_word_point_by (text - org_text);
+  const char *word
+    = advance_to_filename_maybe_quoted_complete_word_point (tracker, text);
+  filename_maybe_quoted_completer (ignore, tracker, text, word);
 }
 
 /* Helper for the list_command function.  Prints the lines around (and
