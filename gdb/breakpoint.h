@@ -425,7 +425,9 @@ public:
      simplicity is more important than memory usage for breakpoints.  */
 
   /* Architecture associated with this location's address.  May be
-     different from the breakpoint architecture.  */
+     different from the breakpoint architecture.  Not every location has
+     an address (e.g. see add_dummy_location), so not every location has
+     an associated gdbarch -- this can be NULL for a valid location.  */
   struct gdbarch *gdbarch = NULL;
 
   /* The program space associated with this breakpoint location

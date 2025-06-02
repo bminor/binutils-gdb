@@ -254,14 +254,22 @@ DIAGNOSTIC_POP
 static std::string
 breakpoint_location_address_str (const bp_location *bl)
 {
-  std::string str = string_printf ("Breakpoint %d (%s) at address %s",
+  std::string str = string_printf ("Breakpoint %d (%s) ",
 				   bl->owner->number,
-				   host_address_to_string (bl),
-				   paddress (bl->gdbarch, bl->address));
+				   host_address_to_string (bl));
 
-  std::string loc_string = bl->to_string ();
-  if (!loc_string.empty ())
-    str += string_printf (" %s", loc_string.c_str ());
+  if (bl_address_is_meaningful (bl))
+    {
+      gdb_assert (bl->gdbarch != nullptr);
+      str += string_printf ("at address %s",
+			    paddress (bl->gdbarch, bl->address));
+
+      std::string loc_string = bl->to_string ();
+      if (!loc_string.empty ())
+	str += string_printf (" %s", loc_string.c_str ());
+    }
+  else
+    str += "with dummy location";
 
   return str;
 }
