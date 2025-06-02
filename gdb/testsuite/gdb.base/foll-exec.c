@@ -19,7 +19,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-
+#include <libgen.h>
+#include <assert.h>
 #include <limits.h>
 
 int global_i = 100;
@@ -29,15 +30,23 @@ int main (int argc, char ** argv)
   int local_j = global_i + 1;
   int local_k = local_j + 1;
   char prog[PATH_MAX];
-  int len;
+  size_t len = PATH_MAX - 1;
 
-  printf ("foll-exec is about to execlp(execd-prog)...\n");
+  printf ("foll-exec is about to execlp(%s)...\n", EXECD_PROG);
 
-  strcpy (prog, argv[0]);
-  len = strlen (prog);
-  /* Replace "foll-exec" with "execd-prog".  */
-  memcpy (prog + len - 9, "execd-prog", 10);
-  prog[len + 1] = 0;
+  prog [len] = '\0';
+
+  strncpy (prog, dirname (argv[0]), len);
+  len -= strlen (prog);
+  assert (len > 0);
+
+  strncat (prog, "/", len);
+  len -= 1;
+  assert (len > 0);
+
+  strncat (prog, EXECD_PROG, len);
+  len -= strlen (EXECD_PROG);
+  assert (len > 0);
 
   /* In the following function call, maximum line length exceed the limit 80.
      This is intentional and required for clang compiler such that complete
@@ -45,7 +54,7 @@ int main (int argc, char ** argv)
      multi-line.  */
   execlp (prog, /* tbreak-execlp */ prog, "execlp arg1 from foll-exec", (char *) 0);
 
-  printf ("foll-exec is about to execl(execd-prog)...\n");
+  printf ("foll-exec is about to execl(%s)...\n", EXECD_PROG);
 
   /* In the following function call, maximum line length exceed the limit 80.
      This is intentional and required for clang compiler such that complete
@@ -61,7 +70,7 @@ int main (int argc, char ** argv)
 
     argv[0] = prog;
 
-    printf ("foll-exec is about to execv(execd-prog)...\n");
+    printf ("foll-exec is about to execv(%s)...\n", EXECD_PROG);
 
     execv (prog, argv); /* tbreak-execv */
   }

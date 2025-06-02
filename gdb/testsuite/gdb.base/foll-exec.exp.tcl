@@ -22,33 +22,55 @@ require {istarget "*-linux*"}
 
 standard_testfile foll-exec.c
 
-set testfile2 "execd-prog"
-set srcfile2 ${testfile2}.c
-set binfile2 [standard_output_file ${testfile2}]
-
-set compile_options debug
-
-# build the first test case
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" executable $compile_options] != "" } {
-     untested "failed to compile"
-     return -1
-}
-
-if { [is_remote target] } {
-    gdb_remote_download target $binfile2
-}
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $compile_options] != "" } {
-     untested "failed to compile"
-     return -1
-}
-
-proc do_exec_tests {} {
-   global binfile srcfile srcfile2 testfile testfile2
+# Compile a program that performs an exec as EXECER_LANG, and a
+# program that will be exec'd as EXECEE_LANG.  Either language can be
+# 'c' or 'c++'.  Then run various test associated with 'catch exec'
+# using the compiled programs.
+proc do_exec_tests { execer_lang execee_lang } {
+   global srcfile testfile
    global gdb_prompt
 
+   # First compile the program to be exec'd, the execee.
+   set execee_base_filename "execd-prog"
+   set srcfile2 ${execee_base_filename}.c
+   set execee_testfile "execd-prog-${execee_lang}"
+   set execee_testfile_re [string_to_regexp $execee_testfile]
+   set execee_binfile [standard_output_file $execee_testfile]
+
+   set execee_flags debug
+   if { $execee_lang == "c++" } {
+       lappend execee_flags "c++"
+   }
+
+   if { [build_executable "failed to build $execee_testfile" $execee_testfile \
+	     $srcfile2 $execee_flags] == -1 } {
+       return
+   }
+
+   if { [is_remote target] } {
+       gdb_remote_download target $execee_binfile
+   }
+
+
+   # Now compile the program to do the exec, the execer.
+   set execer_testfile "$testfile-${execee_lang}"
+   set execer_binfile [standard_output_file $execer_testfile]
+
+   set execer_flags debug
+   if { $execer_lang == "c++" } {
+       lappend execer_flags "c++"
+   }
+   lappend execer_flags "additional_flags=-DEXECD_PROG=\"${execee_testfile}\""
+
+   if { [build_executable "failed to build $execer_testfile" $execer_testfile \
+	     $srcfile $execer_flags] == -1 } {
+       return
+   }
+
+   # Now we can start running the tests.
+   clean_restart $execer_binfile
+
    # Start the program running, and stop at main.
-   #
    if {![runto_main]} {
      return
    }
@@ -71,7 +93,7 @@ proc do_exec_tests {} {
      return
    }
 
-   clean_restart $binfile
+   clean_restart $execer_binfile
 
    # Start the program running, and stop at main.
    #
@@ -120,7 +142,7 @@ proc do_exec_tests {} {
    set execd_line [gdb_get_line_number "after-exec" $srcfile2]
    send_gdb "next\n"
    gdb_expect {
-     -re ".*xecuting new program: .*${testfile2}.*${srcfile2}:${execd_line}.*int  local_j = argc;.*$gdb_prompt $"\
+     -re ".*xecuting new program: .*${execee_testfile_re}.*${srcfile2}:${execd_line}.*int  local_j = argc;.*$gdb_prompt $"\
                      {pass "step through execlp call"}
      -re "$gdb_prompt $" {fail "step through execlp call"}
      timeout         {fail "(timeout) step through execlp call"}
@@ -160,7 +182,7 @@ proc do_exec_tests {} {
 
    # Explicitly kill this program, or a subsequent rerun actually runs
    # the exec'd program, not the original program...
-   clean_restart $binfile
+   clean_restart $execer_binfile
 
    # Start the program running, and stop at main.
    #
@@ -193,7 +215,7 @@ proc do_exec_tests {} {
 
    send_gdb "continue\n"
    gdb_expect {
-     -re ".*xecuting new program:.*${testfile2}.*Catchpoint .*(exec\'d .*${testfile2}).*$gdb_prompt $"\
+     -re ".*xecuting new program:.*${execee_testfile_re}.*Catchpoint .*(exec\'d .*${execee_testfile_re}).*$gdb_prompt $"\
                      {pass "hit catch exec"}
      -re "$gdb_prompt $" {fail "hit catch exec"}
      timeout         {fail "(timeout) hit catch exec"}
@@ -210,7 +232,7 @@ proc do_exec_tests {} {
    #
    set msg "info shows catchpoint exec pathname"
    gdb_test_multiple "info breakpoints" $msg {
-       -re ".*catchpoint.*keep y.*exec, program \".*${testfile2}\".*$gdb_prompt $" {
+       -re ".*catchpoint.*keep y.*exec, program \".*${execee_testfile_re}\".*$gdb_prompt $" {
            pass $msg
        }
    }
@@ -228,7 +250,7 @@ proc do_exec_tests {} {
 
    # Explicitly kill this program, or a subsequent rerun actually runs
    # the exec'd program, not the original program...
-   clean_restart $binfile
+   clean_restart $execer_binfile
 
    # Start the program running, and stop at main.
    #
@@ -269,7 +291,7 @@ proc do_exec_tests {} {
    #
    send_gdb "next 2\n"
    gdb_expect {
-     -re ".*xecuting new program: .*${testfile2}.*${srcfile2}:${execd_line}.*int  local_j = argc;.*$gdb_prompt $"\
+     -re ".*xecuting new program: .*${execee_testfile_re}.*${srcfile2}:${execd_line}.*int  local_j = argc;.*$gdb_prompt $"\
                      {pass "step through execl call"}
      -re "$gdb_prompt $" {fail "step through execl call"}
      timeout         {fail "(timeout) step through execl call"}
@@ -295,7 +317,7 @@ proc do_exec_tests {} {
 
    # Explicitly kill this program, or a subsequent rerun actually runs
    # the exec'd program, not the original program...
-   clean_restart $binfile
+   clean_restart $execer_binfile
 
    # Start the program running, and stop at main.
    #
@@ -330,7 +352,7 @@ proc do_exec_tests {} {
    }
    send_gdb "next\n"
    gdb_expect {
-     -re ".*xecuting new program: .*${testfile2}.*${srcfile2}:${execd_line}.*int  local_j = argc;.*$gdb_prompt $"\
+     -re ".*xecuting new program: .*${execee_testfile_re}.*${srcfile2}:${execd_line}.*int  local_j = argc;.*$gdb_prompt $"\
                      {pass "step through execv call"}
      -re "$gdb_prompt $" {fail "step through execv call"}
      timeout         {fail "(timeout) step through execv call"}
@@ -356,7 +378,7 @@ proc do_exec_tests {} {
 
    # Explicitly kill this program, or a subsequent rerun actually runs
    # the exec'd program, not the original program...
-   clean_restart $binfile
+   clean_restart $execer_binfile
 
    # Start the program running, and stop at main.
    #
@@ -370,13 +392,13 @@ proc do_exec_tests {} {
    #
    send_gdb "continue\n"
    gdb_expect {
-     -re ".*xecuting new program: .*${testfile2}.*${srcfile2}:${execd_line}.*int  local_j = argc;.*$gdb_prompt $"\
+     -re ".*xecuting new program: .*${execee_testfile_re}.*${srcfile2}:${execd_line}.*int  local_j = argc;.*$gdb_prompt $"\
                      {pass "continue through exec"}
      -re "$gdb_prompt $" {fail "continue through exec"}
      timeout         {fail "(timeout) continue through exec"}
    }
 }
 
-clean_restart $binfile
-
-do_exec_tests
+foreach_with_prefix execee_lang { c c++ } {
+    do_exec_tests $lang $execee_lang
+}
