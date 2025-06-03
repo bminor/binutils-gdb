@@ -2773,6 +2773,34 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
       output_num = input_num;
     }
 
+  if (!target->ctf_dedup.cd_output_emission_hashes)
+    if ((target->ctf_dedup.cd_output_emission_hashes
+	 = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
+			      NULL, NULL)) == NULL)
+      goto oom_hash;
+
+  if (!target->ctf_dedup.cd_output_emission_conflicted_forwards)
+    if ((target->ctf_dedup.cd_output_emission_conflicted_forwards
+	 = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
+			      NULL, NULL)) == NULL)
+      goto oom_hash;
+
+  /* When cu-mapping mode is turned on, we merge types derived from multiple CUs
+     into one target dict: in phase 1, by merging them according to the mapping;
+     in phase 2, as a consequence of taking the merged results from phase 1.
+     Any given type appears only once in the type mapping, but in
+     ctf_dedup_rwalk_output_mapping we loop inserting conflicting types into a
+     child dict corresponding to every input dict they came from.  This means
+     that if those dicts are mapped together, in phase 1 we can attempt to
+     insert them *multiple times* into the same dict, which then causes them to
+     be duplicated in phase 2 as well.  Avoid this by making sure this hval
+     isn't already present in the emission hash in phase 1: if it is, we in
+     effect already visited this type, and can return as we did above.  */
+
+  if (cu_mapping_phase == 1
+      && ctf_dynhash_lookup (target->ctf_dedup.cd_output_emission_hashes, hval))
+    return 0;
+
   real_input = input;
   if ((tp = ctf_lookup_by_id (&real_input, type)) == NULL)
     {
@@ -2840,18 +2868,6 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 
   ctf_dprintf ("%i: Emitting type with hash %s (%s), into target %i/%p\n",
 	       depth, hval, name ? name : "", input_num, (void *) target);
-
-  if (!target->ctf_dedup.cd_output_emission_hashes)
-    if ((target->ctf_dedup.cd_output_emission_hashes
-	 = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
-			      NULL, NULL)) == NULL)
-      goto oom_hash;
-
-  if (!target->ctf_dedup.cd_output_emission_conflicted_forwards)
-    if ((target->ctf_dedup.cd_output_emission_conflicted_forwards
-	 = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
-			      NULL, NULL)) == NULL)
-      goto oom_hash;
 
   switch (kind)
     {
