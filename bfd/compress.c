@@ -521,10 +521,8 @@ decompress_contents (bool is_zstd, bfd_byte *compressed_buffer,
      buffers concatenated together, so we uncompress in a loop.  */
   do
     {
-      uLongf dst_len = (uncompressed_size > ULONG_MAX ? ULONG_MAX
-			: uncompressed_size);
-      uLong src_len = (compressed_size > ULONG_MAX ? ULONG_MAX
-		       : compressed_size);
+      uLongf dst_len = uncompressed_size;
+      uLong src_len = compressed_size;
       int rc = uncompress2 ((Bytef *) uncompressed_buffer, &dst_len,
 			    (Bytef *) compressed_buffer, &src_len);
       if (rc != Z_OK)
@@ -1006,6 +1004,16 @@ bfd_init_section_decompress_status (bfd *abfd, sec_ptr sec)
 					  &uncompressed_alignment_power))
     {
       bfd_set_error (bfd_error_wrong_format);
+      return false;
+    }
+
+  /* PR28530, reject sizes unsupported by decompress_contents. zlib
+     supports only up to 4 GiB input on machines whose long is 32 bits. */
+  if (ch_type == ch_compress_zlib
+      && (sec->size != (uLong) sec->size
+	  || uncompressed_size != (uLongf) uncompressed_size))
+    {
+      bfd_set_error (bfd_error_nonrepresentable_section);
       return false;
     }
 
