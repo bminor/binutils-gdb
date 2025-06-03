@@ -504,17 +504,44 @@ bfd_elf_get_elf_syms (bfd *ibfd,
 	   shndx = extshndx_buf;
        isym < isymend;
        esym += extsym_size, isym++, shndx = shndx != NULL ? shndx + 1 : NULL)
-    if (!(*bed->s->swap_symbol_in) (ibfd, esym, shndx, isym))
-      {
-	symoffset += (esym - (bfd_byte *) extsym_buf) / extsym_size;
-	/* xgettext:c-format */
-	_bfd_error_handler (_("%pB symbol number %lu references"
-			      " nonexistent SHT_SYMTAB_SHNDX section"),
-			    ibfd, (unsigned long) symoffset);
-	free (alloc_intsym);
-	intsym_buf = NULL;
-	goto out1;
-      }
+    {
+      if (!(*bed->s->swap_symbol_in) (ibfd, esym, shndx, isym))
+	{
+	  symoffset += (esym - (bfd_byte *) extsym_buf) / extsym_size;
+	  /* xgettext:c-format */
+	  _bfd_error_handler (_("%pB symbol number %lu references"
+				" nonexistent SHT_SYMTAB_SHNDX section"),
+			      ibfd, (unsigned long) symoffset);
+	  free (alloc_intsym);
+	  intsym_buf = NULL;
+	  goto out1;
+	}
+
+      /* PR 33019: Do not accept unsupported binding values - they will
+	 likely cause problems later on.  */
+      int bind = ELF_ST_BIND (isym->st_info);
+      if (bind > STB_WEAK && bind < STB_LOOS)
+	{	
+	  /* xgettext:c-format */
+	  _bfd_error_handler (_("%pB symbol number %lu uses unsupported binding of %u"),
+			      ibfd, (unsigned long) (isym - intsym_buf), bind);
+	  free (alloc_intsym);
+	  intsym_buf = NULL;
+	  goto out1;
+	}
+
+      /* Paranoia: Also refuse to accept the only undefined symbol type: 7.  */
+      int t = ELF_ST_TYPE (isym->st_info);
+      if (t == 7)
+	{
+	  /* xgettext:c-format */
+	  _bfd_error_handler (_("%pB symbol number %lu uses unsupported type of %u"),
+			      ibfd, (unsigned long) (isym - intsym_buf), t);
+	  free (alloc_intsym);
+	  intsym_buf = NULL;
+	  goto out1;
+	}
+    }
 
  out1:
   _bfd_munmap_temporary (alloc_extshndx, alloc_extshndx_size);
