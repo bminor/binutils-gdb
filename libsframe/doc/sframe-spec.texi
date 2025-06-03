@@ -21,6 +21,8 @@ License''.
 @titlepage
 @title The SFrame Format
 @subtitle Version 2
+@sp 15
+@center @today{}
 @author Indu Bhagat
 
 @page
