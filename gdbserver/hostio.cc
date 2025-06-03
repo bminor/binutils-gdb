@@ -89,11 +89,17 @@ require_filename (char **pp, char *filename)
   return 0;
 }
 
+template <typename T>
 static int
-require_int (char **pp, int *value)
+require_int (char **pp, T *value)
 {
+  constexpr bool is_signed = std::is_signed<T>::value;
+
   char *p;
   int count, firstdigit;
+
+  /* Max count of hexadecimal digits in T (1 hex digit is 4 bits).  */
+  int max_count = sizeof (T) * CHAR_BIT / 4;
 
   p = *pp;
   *value = 0;
@@ -111,7 +117,8 @@ require_int (char **pp, int *value)
 	firstdigit = nib;
 
       /* Don't allow overflow.  */
-      if (count >= 8 || (count == 7 && firstdigit >= 0x8))
+      if (count >= max_count
+	  || (is_signed && count == (max_count - 1) && firstdigit >= 0x8))
 	return -1;
 
       *value = *value * 16 + nib;
@@ -343,7 +350,8 @@ handle_open (char *own_buf)
 static void
 handle_pread (char *own_buf, int *new_packet_len)
 {
-  int fd, ret, len, offset, bytes_sent;
+  int fd, ret, len, bytes_sent;
+  off_t offset;
   char *p, *data;
   static int max_reply_size = -1;
 
@@ -410,7 +418,8 @@ handle_pread (char *own_buf, int *new_packet_len)
 static void
 handle_pwrite (char *own_buf, int packet_len)
 {
-  int fd, ret, len, offset;
+  int fd, ret, len;
+  off_t offset;
   char *p, *data;
 
   p = own_buf + strlen ("vFile:pwrite:");
