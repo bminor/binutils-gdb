@@ -117,7 +117,7 @@ if ![runto_main] {
 # the hole is there in the symbol table, but not the partial symbol table,
 # we run into:
 # (gdb) bt
-# warning: (Internal error: pc 0x555555554619 in read in psymtab, \
+# warning: (Internal error: pc 0x555555554619 in read in psymtab,
 #    but not in symtab.)
 # ...
 # (gdb) 
