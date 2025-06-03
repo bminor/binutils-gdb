@@ -104,7 +104,8 @@ cooked_index::set_contents ()
       const parent_map_map *parent_maps = m_state->get_parent_map_map ();
       finalizers.add_task ([=] ()
 	{
-	  scoped_time_it time_it ("DWARF finalize worker");
+	  scoped_time_it time_it ("DWARF finalize worker",
+				  m_state->m_per_command_time);
 	  this_shard->finalize (parent_maps);
 	});
     }

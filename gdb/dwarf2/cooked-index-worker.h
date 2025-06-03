@@ -25,6 +25,8 @@
 #include "dwarf2/cooked-index-shard.h"
 #include "dwarf2/types.h"
 #include "dwarf2/read.h"
+#include "maint.h"
+#include "run-on-main-thread.h"
 
 #if CXX_STD_THREAD
 #include <mutex>
@@ -216,8 +218,12 @@ public:
 
   explicit cooked_index_worker (dwarf2_per_objfile *per_objfile)
     : m_per_objfile (per_objfile),
-      m_cache_store (global_index_cache, per_objfile->per_bfd)
-  { }
+      m_cache_store (global_index_cache, per_objfile->per_bfd),
+      m_per_command_time (per_command_time)
+  {
+    /* Make sure we capture per_command_time from the main thread.  */
+    gdb_assert (is_main_thread ());
+  }
   virtual ~cooked_index_worker ()
   { }
   DISABLE_COPY_AND_ASSIGN (cooked_index_worker);
@@ -307,6 +313,9 @@ protected:
   std::optional<gdb_exception> m_failed;
   /* An object used to write to the index cache.  */
   index_cache_store_context m_cache_store;
+
+  /* Captured value of per_command_time.  */
+  bool m_per_command_time;
 };
 
 using cooked_index_worker_up = std::unique_ptr<cooked_index_worker>;

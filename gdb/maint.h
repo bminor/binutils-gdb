@@ -70,13 +70,17 @@ class scoped_command_stats
   int m_start_nr_blocks;
 };
 
+/* If true, display time usage both at startup and for each command.  */
+
+extern bool per_command_time;
+
 /* RAII structure used to measure the time spent by the current thread in a
    given scope.  */
 
 struct scoped_time_it
 {
   /* WHAT is the prefix to show when the summary line is printed.  */
-  scoped_time_it (const char *what);
+  scoped_time_it (const char *what, bool enabled = per_command_time);
 
   DISABLE_COPY_AND_ASSIGN (scoped_time_it);
   ~scoped_time_it ();

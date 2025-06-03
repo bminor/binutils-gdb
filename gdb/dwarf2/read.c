@@ -3464,7 +3464,7 @@ void
 cooked_index_worker_debug_info::process_skeletonless_type_units
   (dwarf2_per_objfile *per_objfile, cooked_index_worker_result *storage)
 {
-  scoped_time_it time_it ("DWARF skeletonless type units");
+  scoped_time_it time_it ("DWARF skeletonless type units", m_per_command_time);
 
   /* Skeletonless TUs in DWP files without .gdb_index is not supported yet.  */
   if (per_objfile->per_bfd->dwp_file == nullptr)
@@ -3573,7 +3573,7 @@ cooked_index_worker_debug_info::do_reading ()
       gdb_assert (iter != last);
       workers.add_task ([this, task_count, iter, last] ()
 	{
-	  scoped_time_it time_it ("DWARF indexing worker");
+	  scoped_time_it time_it ("DWARF indexing worker", m_per_command_time);
 	  process_units (task_count, iter, last);
 	});
 

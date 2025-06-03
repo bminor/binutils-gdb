@@ -246,7 +246,7 @@ void
 cooked_index_worker::done_reading ()
 {
   {
-    scoped_time_it time_it ("DWARF add parent map");
+    scoped_time_it time_it ("DWARF add parent map", m_per_command_time);
 
     for (auto &one_result : m_results)
       m_all_parents_map.add_map (*one_result.get_parent_map ());

@@ -920,9 +920,9 @@ maintenance_show_worker_threads (struct ui_file *file, int from_tty,
 }
 
 
-/* If true, display time usage both at startup and for each command.  */
+/* See maint.h.  */
 
-static bool per_command_time;
+bool per_command_time;
 
 /* If true, display space usage both at startup and for each command.  */
 
@@ -1175,8 +1175,8 @@ per-thread run time information not available on this platform"));
 
 /* See maint.h.  */
 
-scoped_time_it::scoped_time_it (const char *what)
-  : m_enabled (per_command_time),
+scoped_time_it::scoped_time_it (const char *what, bool enabled)
+  : m_enabled (enabled),
     m_what (what),
     m_start_wall (m_enabled
 		  ? std::chrono::steady_clock::now ()
