@@ -334,10 +334,12 @@ cmdpy_completer (struct cmd_list_element *command,
    name of the new command.  All earlier words must be existing prefix
    commands.
 
-   *BASE_LIST is set to the final prefix command's list of
-   *sub-commands.
+   *BASE_LIST is set to the final prefix command's list of sub-commands.
 
    START_LIST is the list in which the search starts.
+
+   When PREFIX_CMD is not NULL then *PREFIX_CMD is set to the prefix
+   command itself, or NULL, if there is no prefix command.
 
    This function returns the name of the new command.  On error sets the Python
    error and returns NULL.  */
@@ -345,12 +347,16 @@ cmdpy_completer (struct cmd_list_element *command,
 gdb::unique_xmalloc_ptr<char>
 gdbpy_parse_command_name (const char *name,
 			  struct cmd_list_element ***base_list,
-			  struct cmd_list_element **start_list)
+			  struct cmd_list_element **start_list,
+			  struct cmd_list_element **prefix_cmd)
 {
   struct cmd_list_element *elt;
   int len = strlen (name);
   int i, lastchar;
   const char *prefix_text2;
+
+  if (prefix_cmd != nullptr)
+    *prefix_cmd = nullptr;
 
   /* Skip trailing whitespace.  */
   for (i = len - 1; i >= 0 && (name[i] == ' ' || name[i] == '\t'); --i)
@@ -393,6 +399,8 @@ gdbpy_parse_command_name (const char *name,
   if (elt->is_prefix ())
     {
       *base_list = elt->subcommands;
+      if (prefix_cmd != nullptr)
+	*prefix_cmd = elt;
       return result;
     }
 
@@ -467,8 +475,9 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
       return -1;
     }
 
+  cmd_list_element *prefix_cmd = nullptr;
   gdb::unique_xmalloc_ptr<char> cmd_name
-    = gdbpy_parse_command_name (name, &cmd_list, &cmdlist);
+    = gdbpy_parse_command_name (name, &cmd_list, &cmdlist, &prefix_cmd);
   if (cmd_name == nullptr)
     return -1;
 
@@ -525,11 +534,14 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 		 'set prefix' the user will get the help text listing all
 		 of the sub-commands, and for 'show prefix', the user will
 		 see all of the sub-command values.  */
-	      cmd_list_element *first = *cmd_list;
-	      while (first->prefix != nullptr)
-		first = first->prefix;
+	      if (prefix_cmd != nullptr)
+		{
+		  while (prefix_cmd->prefix != nullptr)
+		    prefix_cmd = prefix_cmd->prefix;
+		}
 
-	      bool is_show = first->subcommands == &showlist;
+	      bool is_show = (prefix_cmd != nullptr
+			      && prefix_cmd->subcommands == &showlist);
 
 	      if (is_show)
 		cmd = add_show_prefix_cmd (cmd_name.get (),

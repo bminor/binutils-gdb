@@ -428,6 +428,16 @@ gdb_test_multiline "create set/show foo1 prefix commands" \
     "   #:prefix? #t))" "" \
     "end"
 
+gdb_test_multiline "create set/show foo1 baz1 prefix commands" \
+    "guile" "" \
+    "(register-command! (make-command \"set foo1 baz1\"" "" \
+    "   #:command-class COMMAND_OBSCURE" "" \
+    "   #:prefix? #t))" "" \
+    "(register-command! (make-command \"show foo1 baz1\"" "" \
+    "   #:command-class COMMAND_OBSCURE" "" \
+    "   #:prefix? #t))" "" \
+    "end"
+
 gdb_test_multiline "create 'foo bar' parameter" \
     "guile" "" \
     "(register-parameter! (make-parameter \"foo bar\"" "" \

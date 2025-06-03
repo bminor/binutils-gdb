@@ -330,7 +330,53 @@ proc_with_prefix test_dont_repeat {} {
 	"repeat show prefix-12 xxx yyy"
 }
 
+# Create a parameter prefixm, and immediately add another prefix under
+# the first.  The important thing here is that the second prefix is
+# created into an otherwise empty prefix as this triggered a bug at
+# one point.
+proc_with_prefix test_nested {} {
+    gdb_test_multiline "Create nested parameter prefixes" \
+	"python" "" \
+	"gdb.ParameterPrefix('prefix-13', gdb.COMMAND_NONE)" "" \
+	"gdb.ParameterPrefix('prefix-13 prefix-14', gdb.COMMAND_NONE)" "" \
+	"gdb.Parameter('prefix-13 param-1', gdb.COMMAND_NONE, gdb.PARAM_BOOLEAN)" "" \
+	"gdb.Parameter('prefix-13 param-2', gdb.COMMAND_NONE, gdb.PARAM_BOOLEAN)" "" \
+	"gdb.Parameter('prefix-13 prefix-14 param-3', gdb.COMMAND_NONE, gdb.PARAM_BOOLEAN)" "" \
+	"gdb.Parameter('prefix-13 prefix-14 param-4', gdb.COMMAND_NONE, gdb.PARAM_BOOLEAN)" "" \
+	"end" ""
+
+    gdb_test "show prefix-13 prefix-14" \
+	[multi_line \
+	     "^prefix-13 prefix-14 param-3:  The current value of 'prefix-13 prefix-14 param-3' is \"off\"\\." \
+	     "prefix-13 prefix-14 param-4:  The current value of 'prefix-13 prefix-14 param-4' is \"off\"\\."]
+
+    gdb_test "show prefix-13" \
+	[multi_line \
+	     "^prefix-13 param-1:  The current value of 'prefix-13 param-1' is \"off\"\\." \
+	     "prefix-13 param-2:  The current value of 'prefix-13 param-2' is \"off\"\\." \
+	     "prefix-13 prefix-14 param-3:  The current value of 'prefix-13 prefix-14 param-3' is \"off\"\\." \
+	     "prefix-13 prefix-14 param-4:  The current value of 'prefix-13 prefix-14 param-4' is \"off\"\\."]
+
+    gdb_test "set prefix-13 prefix-14" \
+	[multi_line \
+	     "" \
+	     "set prefix-13 prefix-14 param-3 -- Set the current value of 'prefix-13 prefix-14 param-3'\\." \
+	     "set prefix-13 prefix-14 param-4 -- Set the current value of 'prefix-13 prefix-14 param-4'\\." \
+	     "" \
+	     ".*"]
+
+    gdb_test "set prefix-13" \
+	[multi_line \
+	     "" \
+	     "set prefix-13 param-1 -- Set the current value of 'prefix-13 param-1'\\." \
+	     "set prefix-13 param-2 -- Set the current value of 'prefix-13 param-2'\\." \
+	     "set prefix-13 prefix-14 -- This command is not documented\\." \
+	     "" \
+	     ".*"]
+}
+
 test_basic_usage
 test_simple_sub_class
 test_prefix_with_invoke
 test_dont_repeat
+test_nested

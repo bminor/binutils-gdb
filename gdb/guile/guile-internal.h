@@ -449,10 +449,11 @@ extern const struct block *bkscm_scm_to_block
 
 /* scm-cmd.c */
 
-extern char *gdbscm_parse_command_name (const char *name,
-					const char *func_name, int arg_pos,
-					struct cmd_list_element ***base_list,
-					struct cmd_list_element **start_list);
+extern char *gdbscm_parse_command_name
+  (const char *name, const char *func_name, int arg_pos,
+   struct cmd_list_element ***base_list,
+   struct cmd_list_element **start_list,
+   struct cmd_list_element **prefix_cmd = nullptr);
 
 extern int gdbscm_valid_command_class_p (int command_class);
 
