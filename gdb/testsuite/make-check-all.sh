@@ -192,7 +192,7 @@ do_tests ()
 
     # Run make check.
     make $maketarget \
-	 RUNTESTFLAGS="${rtf[*]} ${tests[*]}" \
+	 RUNTESTFLAGS="${rtf[*]}" TESTS="${tests[*]}" \
 	 2>&1 \
 	| summary
 
@@ -216,7 +216,7 @@ do_tests ()
 	cp gdb.sum gdb.log "$dir"
 
 	# Record the 'make check' command to enable easy re-running.
-	echo "make $maketarget RUNTESTFLAGS=\"${rtf[*]} ${tests[*]}\"" \
+	echo "make $maketarget RUNTESTFLAGS=\"${rtf[*]}\" TESTS=\"${tests[*]}\"" \
 	     > "$dir/make-check.sh"
     fi
 }
