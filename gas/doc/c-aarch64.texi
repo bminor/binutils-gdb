@@ -299,6 +299,8 @@ automatically cause those extensions to be disabled.
  @tab Enable SME2.
 @item @code{sme2p1} @tab @code{sme2}
  @tab Enable SME2.1.
+@item @code{sme2p2} @tab @code{sme2p1}
+ @tab Enable SME2.2.
 @item @code{ssbs} @tab
  @tab Enable Speculative Store Bypassing Safe state read and write.
 @item @code{ssve-fp8dot2} @tab @code{sme2}, @code{fp8}
@@ -327,6 +329,8 @@ automatically cause those extensions to be disabled.
  @tab Enable the SVE2 SM4 Extension.
 @item @code{sve2p1} @tab @code{sve2}
  @tab Enable SVE2.1.
+@item @code{sve2p2} @tab @code{sve2p1}
+ @tab Enable SVE2.2.
 @item @code{the} @tab
  @tab Enable the Translation Hardening Extension.
 @item @code{tme} @tab

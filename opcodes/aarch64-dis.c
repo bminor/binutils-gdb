@@ -3603,8 +3603,23 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
       variant = extract_field (FLD_SVE_sz2, inst->value, 0);
       break;
 
+    case sve_size_sd3:
+      variant = extract_field (FLD_SVE_sz3, inst->value, 0);
+      break;
+
+    case sve_size_sd4:
+      variant = extract_field (FLD_SVE_sz4, inst->value, 0);
+      break;
+
     case sve_size_hsd2:
       i = extract_field (FLD_SVE_size, inst->value, 0);
+      if (i < 1)
+	return false;
+      variant = i - 1;
+      break;
+
+    case sve_size_hsd3:
+      i = extract_field (FLD_len, inst->value, 0);
       if (i < 1)
 	return false;
       variant = i - 1;

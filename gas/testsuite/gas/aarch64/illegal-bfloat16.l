@@ -10,15 +10,11 @@
 [^ :]+:[0-9]+: Error: operand mismatch -- `bfmmla z0\.s,z1\.h,z2\.s'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	bfmmla z0\.s, z1\.h, z2\.h
-[^ :]+:[0-9]+: Error: operand mismatch -- `bfcvt z0\.h,p1/z,z2\.s'
-[^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	bfcvt z0\.h, p1/m, z2\.s
+[^ :]+:[0-9]+: Error: selected processor does not support `bfcvt z0\.h,p1/z,z2\.s'
 [^ :]+:[0-9]+: Error: operand mismatch -- `bfcvt z0\.h,p1/m,z2\.h'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	bfcvt z0\.h, p1/m, z2\.s
-[^ :]+:[0-9]+: Error: operand mismatch -- `bfcvtnt z0\.h,p1/z,z2\.s'
-[^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	bfcvtnt z0\.h, p1/m, z2\.s
+[^ :]+:[0-9]+: Error: selected processor does not support `bfcvtnt z0\.h,p1/z,z2\.s'
 [^ :]+:[0-9]+: Error: operand mismatch -- `bfcvtnt z0\.h,p1/m,z2\.h'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	bfcvtnt z0\.h, p1/m, z2\.s

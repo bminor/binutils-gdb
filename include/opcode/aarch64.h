@@ -282,6 +282,10 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SVE_B16B16,
   /* SME non-widening BFloat16 instructions.  */
   AARCH64_FEATURE_SME_B16B16,
+  /* SVE2.2.  */
+  AARCH64_FEATURE_SVE2p2,
+  /* SME2.2.  */
+  AARCH64_FEATURE_SME2p2,
   /* Armv9.1-A processors.  */
   AARCH64_FEATURE_V9_1A,
   /* Armv9.2-A processors.  */
@@ -307,6 +311,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_FP8DOT2_SVE,
   /* +sme-f16f16 or +sme-f8f16  */
   AARCH64_FEATURE_SME_F16F16_F8F16,
+  /* +sve or +sme2p2 */
+  AARCH64_FEATURE_SVE_SME2p2,
   /* +sve2 or +sme2 */
   AARCH64_FEATURE_SVE2_SME2,
   /* +sve2p1 or +sme */
@@ -315,6 +321,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SVE2p1_SME2,
   /* +sve2p1 or +sme2p1 */
   AARCH64_FEATURE_SVE2p1_SME2p1,
+  /* +sve2p2 or +sme2p2 */
+  AARCH64_FEATURE_SVE2p2_SME2p2,
   AARCH64_NUM_FEATURES
 };
 
@@ -1192,13 +1200,16 @@ enum aarch64_insn_class
   sve_pred_zm,
   sve_shift_pred,
   sve_shift_unpred,
+  sve_size_bh,
   sve_size_bhs,
   sve_size_bhsd,
   sve_size_hsd,
   sve_size_hsd2,
+  sve_size_hsd3,
   sve_size_sd,
-  sve_size_bh,
   sve_size_sd2,
+  sve_size_sd3,
+  sve_size_sd4,
   sve_size_13,
   sve_shift_tsz_hsd,
   sve_shift_tsz_bhsd,

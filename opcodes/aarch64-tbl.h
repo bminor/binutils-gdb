@@ -1732,6 +1732,14 @@
 {                                                       \
   QLF3(S_D,P_Z,S_D),                                    \
 }
+#define OP_SVE_DZH                                      \
+{                                                       \
+  QLF3(S_D,P_Z,S_H),                                    \
+}
+#define OP_SVE_DZS                                      \
+{                                                       \
+  QLF3(S_D,P_Z,S_S),                                    \
+}
 #define OP_SVE_DZU                                      \
 {                                                       \
   QLF3(S_D,P_Z,NIL),                                    \
@@ -1792,6 +1800,18 @@
 {                                                       \
   QLF3(S_H,NIL,NIL),                                    \
 }
+#define OP_SVE_HZD                                      \
+{                                                       \
+  QLF3(S_H,P_Z,S_D),                                    \
+}
+#define OP_SVE_HZH                                      \
+{                                                       \
+  QLF3(S_H,P_Z,S_H),                                    \
+}
+#define OP_SVE_HZS                                      \
+{                                                       \
+  QLF3(S_H,P_Z,S_S),                                    \
+}
 #define OP_SVE_HZU                                      \
 {                                                       \
   QLF3(S_H,P_Z,NIL),                                    \
@@ -1811,6 +1831,10 @@
 #define OP_SVE_QUU                                      \
 {                                                       \
   QLF3(S_Q,NIL,NIL),                                    \
+}
+#define OP_SVE_QZQ                                      \
+{                                                       \
+  QLF3(S_Q,P_Z,S_Q),                                    \
 }
 #define OP_SVE_QZU                                      \
 {                                                       \
@@ -1898,6 +1922,14 @@
 #define OP_SVE_SUU                                      \
 {                                                       \
   QLF3(S_S,NIL,NIL),                                    \
+}
+#define OP_SVE_SZD                                      \
+{                                                       \
+  QLF3(S_S,P_Z,S_D),                                    \
+}
+#define OP_SVE_SZH                                      \
+{                                                       \
+  QLF3(S_S,P_Z,S_H),                                    \
 }
 #define OP_SVE_SZS                                      \
 {                                                       \
@@ -2171,6 +2203,11 @@
   QLF4(S_S,NIL,S_S,S_S),                                \
   QLF4(S_D,NIL,S_D,S_D),                                \
 }
+#define OP_SVE_VUV_BH                                   \
+{                                                       \
+  QLF3(S_B,NIL,S_B),                                    \
+  QLF3(S_H,NIL,S_H),                                    \
+}
 #define OP_SVE_VUV_BHSD                                 \
 {                                                       \
   QLF3(S_B,NIL,S_B),                                    \
@@ -2403,6 +2440,13 @@
   QLF4(S_H,X,X,NIL),                                    \
   QLF4(S_S,X,X,NIL),                                    \
   QLF4(S_D,X,X,NIL),                                    \
+}
+#define OP_SVE_VZV_BHSD                                 \
+{                                                       \
+  QLF3(S_B,P_Z,S_B),                                    \
+  QLF3(S_H,P_Z,S_H),                                    \
+  QLF3(S_S,P_Z,S_S),                                    \
+  QLF3(S_D,P_Z,S_D),                                    \
 }
 #define OP_SVE_VZVD_BHS                                 \
 {                                                       \
@@ -2942,6 +2986,12 @@ static const aarch64_feature_set aarch64_feature_sve2p1_sme2 =
   AARCH64_FEATURES (2, SVE2p1_SME2, SVE);
 static const aarch64_feature_set aarch64_feature_sve2p1_sme2p1 =
   AARCH64_FEATURES (2, SVE2p1_SME2p1, SVE);
+static const aarch64_feature_set aarch64_feature_sme2p2 =
+  AARCH64_FEATURES (2, SME2p2, SME);
+static const aarch64_feature_set aarch64_feature_sve_sme2p2 =
+  AARCH64_FEATURES (2, SVE_SME2p2, SVE);
+static const aarch64_feature_set aarch64_feature_sve2p2_sme2p2 =
+  AARCH64_FEATURES (2, SVE2p2_SME2p2, SVE);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -3046,6 +3096,9 @@ static const aarch64_feature_set aarch64_feature_sve2p1_sme2p1 =
 #define SVE2p1_SME	&aarch64_feature_sve2p1_sme
 #define SVE2p1_SME2	&aarch64_feature_sve2p1_sme2
 #define SVE2p1_SME2p1	&aarch64_feature_sve2p1_sme2p1
+#define SME2p2		&aarch64_feature_sme2p2
+#define SVE_SME2p2	&aarch64_feature_sve_sme2p2
+#define SVE2p2_SME2p2	&aarch64_feature_sve2p2_sme2p2
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -3320,6 +3373,15 @@ static const aarch64_feature_set aarch64_feature_sve2p1_sme2p1 =
 #define SVE2p1_SME2p1_INSNC(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,CONSTRAINTS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SVE2p1_SME2p1, OPS, QUALS, \
     F_STRICT | FLAGS, CONSTRAINTS, TIED, NULL }
+#define SVE_SME2p2_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, OP, SVE_SME2p2, OPS, QUALS, \
+    FLAGS | F_STRICT, 0, TIED, NULL }
+#define SVE2p2_SME2p2_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS,CONSTRAINTS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, 0, SVE2p2_SME2p2, OPS, QUALS, \
+    F_STRICT | FLAGS, CONSTRAINTS, TIED, NULL }
+#define SME2p2_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, 0, SME2p2, OPS, QUALS, \
+    F_STRICT | FLAGS, 0, TIED, NULL }
 
 #define MOPS_CPY_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS) \
   MOPS_INSN (NAME, OPCODE, MASK, 0, \
@@ -4940,7 +5002,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   _SVE_INSN ("cnth", 0x0460e000, 0xfff0fc00, sve_misc, 0, OP2 (Rd, SVE_PATTERN_SCALED), OP_SVE_XU, F_OPD1_OPT | F_DEFAULT(31), 0),
   _SVE_INSN ("cntp", 0x25208000, 0xff3fc200, sve_size_bhsd, 0, OP3 (Rd, SVE_Pg4_10, SVE_Pn), OP_SVE_XUV_BHSD, 0, 0),
   _SVE_INSN ("cntw", 0x04a0e000, 0xfff0fc00, sve_misc, 0, OP2 (Rd, SVE_PATTERN_SCALED), OP_SVE_XU, F_OPD1_OPT | F_DEFAULT(31), 0),
-  _SVE_INSN ("compact", 0x05a18000, 0xffbfe000, sve_size_sd, 0, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VUV_SD, 0, 0),
+  SVE_SME2p2_INSN ("compact", 0x05a18000, 0xffbfe000, sve_size_sd, 0, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VUV_SD, 0, 0),
   _SVE_INSNC ("cpy", 0x05208000, 0xff3fe000, sve_size_bhsd, 0, OP3 (SVE_Zd, SVE_Pg3, SVE_Vn), OP_SVE_VMV_BHSD, F_HAS_ALIAS, C_SCAN_MOVPRFX, 0),
   _SVE_INSNC ("cpy", 0x0528a000, 0xff3fe000, sve_size_bhsd, 0, OP3 (SVE_Zd, SVE_Pg3, Rn_SP), OP_SVE_VMR_BHSD, F_HAS_ALIAS, C_SCAN_MOVPRFX, 0),
   _SVE_INSNC ("cpy", 0x05100000, 0xff308000, sve_cpy, 0, OP3 (SVE_Zd, SVE_Pg4_16, SVE_ASIMM), OP_SVE_VPU_BHSD, F_HAS_ALIAS, C_SCAN_MOVPRFX, 0),
@@ -7232,6 +7294,102 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME_F8F16_INSNC ("fvdot", 0xc1d01020, 0xfff09030, sme_misc, OP3 (SME_ZA_array_off3_0, SME_Znx2, SME_Zm_INDEX3_3), OP_SVE_VVV_H_B, F_OD (2), 0),
   SME_F8F32_INSNC ("fvdotb", 0xc1d00800, 0xfff09830, sme_misc, OP3 (SME_ZA_array_off3_0, SME_Znx2, SME_Zm_INDEX2_3), OP_SVE_VVV_S_B, F_OD (4) | F_VG_REQ, 0),
   SME_F8F32_INSNC ("fvdott", 0xc1d00810, 0xfff09830, sme_misc, OP3 (SME_ZA_array_off3_0, SME_Znx2, SME_Zm_INDEX2_3), OP_SVE_VVV_S_B, F_OD (4) | F_VG_REQ, 0),
+
+  /* SVE2p2 / SME2p2 instructions.  */
+  SVE2p2_SME2p2_INSN ("abs", 0x0406a000, 0xff3fe000, sve_size_bhsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_BHSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("bfcvt", 0x649ac000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_HZS, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("bfcvtnt", 0x6482a000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_HZS, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("cls", 0x0408a000, 0xff3fe000, sve_size_bhsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_BHSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("clz", 0x0409a000, 0xff3fe000, sve_size_bhsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_BHSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("cnot", 0x040ba000, 0xff3fe000, sve_size_bhsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_BHSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("cnt", 0x040aa000, 0xff3fe000, sve_size_bhsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_BHSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("compact", 0x05218000, 0xffbfe000, sve_size_bh, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VUV_BH, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("expand", 0x05318000, 0xff3fe000, sve_size_bhsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VUV_BHSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fabs", 0x040ca000, 0xff3fe000, sve_size_hsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_HSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvt", 0x649aa000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_SZH, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvt", 0x64daa000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_DZH, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvt", 0x649a8000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_HZS, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvt", 0x64dae000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_DZS, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvt", 0x64da8000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_HZD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvt", 0x64dac000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_SZD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvtlt", 0x6481a000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_SZH, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvtlt", 0x64c3a000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_DZS, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvtnt", 0x6480a000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_HZS, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvtnt", 0x64c2a000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_SZD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvtx", 0x641ac000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_SZD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvtxnt", 0x6402a000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_SZD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvtzs", 0x645ec000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_HZH, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvtzs", 0x645f8000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_SZH, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvtzs", 0x645fc000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_DZH, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvtzs", 0x649f8000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_SZS, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvtzs", 0x64df8000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_DZS, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvtzs", 0x64de8000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_SZD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvtzs", 0x64dfc000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_DZD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvtzu", 0x645ee000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_HZH, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvtzu", 0x645fa000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_SZH, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvtzu", 0x645fe000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_DZH, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvtzu", 0x649fa000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_SZS, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvtzu", 0x64dfa000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_DZS, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvtzu", 0x64dea000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_SZD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fcvtzu", 0x64dfe000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_DZD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("firstp", 0x25218000, 0xff3fc200, sve_size_bhsd, OP3 (Rd, SVE_Pg4_10, SVE_Pn), OP_SVE_XUV_BHSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("flogb", 0x641e8000, 0xffff8000, sve_size_hsd3, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_HSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fneg", 0x040da000, 0xff3fe000, sve_size_hsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_HSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("frecpx", 0x641b8000, 0xff3fe000, sve_size_hsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_HSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("frint32x", 0x6511a000, 0xfffde000, sve_size_sd3, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VMV_SD, 0, C_SCAN_MOVPRFX, 0),
+  SVE2p2_SME2p2_INSN ("frint32x", 0x641ca000, 0xffffa000, sve_size_sd4, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_SD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("frint32z", 0x6510a000, 0xfffde000, sve_size_sd3, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VMV_SD, 0, C_SCAN_MOVPRFX, 0),
+  SVE2p2_SME2p2_INSN ("frint32z", 0x641c8000, 0xffffa000, sve_size_sd4, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_SD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("frint64x", 0x6515a000, 0xfffde000, sve_size_sd3, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VMV_SD, 0, C_SCAN_MOVPRFX, 0),
+  SVE2p2_SME2p2_INSN ("frint64x", 0x641da000, 0xffffa000, sve_size_sd4, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_SD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("frint64z", 0x6514a000, 0xfffde000, sve_size_sd3, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VMV_SD, 0, C_SCAN_MOVPRFX, 0),
+  SVE2p2_SME2p2_INSN ("frint64z", 0x641d8000, 0xffffa000, sve_size_sd4, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_SD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("frintx", 0x6419c000, 0xff3fe000, sve_size_hsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_HSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("frinti", 0x6419e000, 0xff3fe000, sve_size_hsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_HSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("frinta", 0x64198000, 0xff3fe000, sve_size_hsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_HSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("frintn", 0x64188000, 0xff3fe000, sve_size_hsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_HSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("frintz", 0x6418e000, 0xff3fe000, sve_size_hsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_HSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("frintm", 0x6418c000, 0xff3fe000, sve_size_hsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_HSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("frintp", 0x6418a000, 0xff3fe000, sve_size_hsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_HSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("fsqrt", 0x641ba000, 0xff3fe000, sve_size_hsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_HSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("lastp", 0x25228000, 0xff3fc200, sve_size_bhsd, OP3 (Rd, SVE_Pg4_10, SVE_Pn), OP_SVE_XUV_BHSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("neg", 0x0407a000, 0xff3fe000, sve_size_bhsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_BHSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("not", 0x040ea000, 0xff3fe000, sve_size_bhsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_BHSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("rbit", 0x0527a000, 0xff3fe000, sve_size_bhsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_BHSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("revb", 0x0524a000, 0xff3fe000, sve_size_hsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_HSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("revh", 0x05a5a000, 0xffbfe000, sve_size_sd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_SD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("revw", 0x05e6a000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_DZD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("revd", 0x052ea000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_QZQ, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("scvtf", 0x645cc000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_HZH, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("scvtf", 0x645d8000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_HZS, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("scvtf", 0x649d8000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_SZS, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("scvtf", 0x64dc8000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_DZS, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("scvtf", 0x645dc000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_HZD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("scvtf", 0x64dd8000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_SZD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("scvtf", 0x64ddc000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_DZD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("sqabs", 0x440aa000, 0xff3fe000, sve_size_bhsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_BHSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("sqneg", 0x440ba000, 0xff3fe000, sve_size_bhsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_BHSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("sxtb", 0x0400a000, 0xff3fe000, sve_size_hsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_HSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("sxth", 0x0482a000, 0xffbfe000, sve_size_sd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_SD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("sxtw", 0x04c4a000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_DZD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("ucvtf", 0x645ce000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_HZH, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("ucvtf", 0x645da000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_HZS, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("ucvtf", 0x649da000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_SZS, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("ucvtf", 0x64dca000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_DZS, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("ucvtf", 0x645de000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_HZD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("ucvtf", 0x64dda000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_SZD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("ucvtf", 0x64dde000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_DZD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("urecpe", 0x4482a000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_SZS, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("ursqrte", 0x4483a000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_SZS, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("uxtb", 0x0401a000, 0xff3fe000, sve_size_hsd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_HSD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("uxth", 0x0483a000, 0xffbfe000, sve_size_sd, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_VZV_SD, 0, 0, 0),
+  SVE2p2_SME2p2_INSN ("uxtw", 0x04c5a000, 0xffffe000, sve_misc, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_DZD, 0, 0, 0),
+
+  /* SME2p2 instructions.  */
+  SME2p2_INSN ("fmul", 0xc120e800, 0xff21fc21, sme_size_22_hsd, OP3 (SME_Zdnx2, SME_Znx2, SME_Zm_17), OP_SVE_VVV_HSD, 0, 0),
+  SME2p2_INSN ("fmul", 0xc121e800, 0xff21fc63, sme_size_22_hsd, OP3 (SME_Zdnx4, SME_Znx4, SME_Zm_17), OP_SVE_VVV_HSD, 0, 0),
+  SME2p2_INSN ("fmul", 0xc120e400, 0xff21fc21, sme_size_22_hsd, OP3 (SME_Zdnx2, SME_Znx2, SME_Zmx2), OP_SVE_VVV_HSD, 0, 0),
+  SME2p2_INSN ("fmul", 0xc121e400, 0xff21fc63, sme_size_22_hsd, OP3 (SME_Zdnx4, SME_Znx4, SME_Zmx4), OP_SVE_VVV_HSD, 0, 0),
 
   {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, 0, NULL},
 };

@@ -280,18 +280,14 @@
 [^ :]+:[0-9]+: Error: operand mismatch -- `fcvtlt z0\.s,p0/m,z0\.s'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	fcvtlt z0\.d, p0/m, z0\.s
-[^ :]+:[0-9]+: Error: operand mismatch -- `fcvtlt z0\.s,p0/z,z0\.h'
-[^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	fcvtlt z0\.s, p0/m, z0\.h
+[^ :]+:[0-9]+: Error: selected processor does not support `fcvtlt z0\.s,p0/z,z0\.h'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `fcvtlt z32\.d,p0/m,z0\.s'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `fcvtlt z0\.d,p8/m,z0\.s'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `fcvtlt z0\.d,p0/m,z32\.s'
 [^ :]+:[0-9]+: Error: operand mismatch -- `fcvtlt z0\.d,p0/m,z0\.d'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	fcvtlt z0\.d, p0/m, z0\.s
-[^ :]+:[0-9]+: Error: operand mismatch -- `fcvtlt z0\.d,p0/z,z0\.s'
-[^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	fcvtlt z0\.d, p0/m, z0\.s
+[^ :]+:[0-9]+: Error: selected processor does not support `fcvtlt z0\.d,p0/z,z0\.s'
 [^ :]+:[0-9]+: Warning: SVE `movprfx' compatible instruction expected -- `fcvtnt z0\.h,p0/m,z0\.s'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `fcvtnt z32\.h,p0/m,z0\.s'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `fcvtnt z0\.h,p8/m,z0\.s'
@@ -299,27 +295,21 @@
 [^ :]+:[0-9]+: Error: operand mismatch -- `fcvtnt z0\.h,p0/m,z0\.h'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	fcvtnt z0\.h, p0/m, z0\.s
-[^ :]+:[0-9]+: Error: operand mismatch -- `fcvtnt z0\.h,p0/z,z0\.s'
-[^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	fcvtnt z0\.h, p0/m, z0\.s
+[^ :]+:[0-9]+: Error: selected processor does not support `fcvtnt z0\.h,p0/z,z0\.s'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `fcvtnt z32\.s,p0/m,z0\.d'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `fcvtnt z0\.s,p8/m,z0\.d'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `fcvtnt z0\.s,p0/m,z32\.d'
 [^ :]+:[0-9]+: Error: operand mismatch -- `fcvtnt z0\.s,p0/m,z0\.s'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	fcvtnt z0\.s, p0/m, z0\.d
-[^ :]+:[0-9]+: Error: operand mismatch -- `fcvtnt z0\.s,p0/z,z0\.d'
-[^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	fcvtnt z0\.s, p0/m, z0\.d
+[^ :]+:[0-9]+: Error: selected processor does not support `fcvtnt z0\.s,p0/z,z0\.d'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `fcvtx z32\.s,p0/m,z0\.d'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `fcvtx z0\.s,p8/m,z0\.d'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `fcvtx z0\.s,p0/m,z32\.d'
 [^ :]+:[0-9]+: Error: operand mismatch -- `fcvtx z0\.s,p0/m,z0\.s'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	fcvtx z0\.s, p0/m, z0\.d
-[^ :]+:[0-9]+: Error: operand mismatch -- `fcvtx z0\.s,p0/z,z0\.d'
-[^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	fcvtx z0\.s, p0/m, z0\.d
+[^ :]+:[0-9]+: Error: selected processor does not support `fcvtx z0\.s,p0/z,z0\.d'
 [^ :]+:[0-9]+: Warning: register size not compatible with previous `movprfx' at operand 1 -- `fcvtx z0\.s,p0/m,z2\.d'
 [^ :]+:[0-9]+: Warning: SVE `movprfx' compatible instruction expected -- `fcvtxnt z0\.s,p0/m,z0\.d'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `fcvtxnt z32\.s,p0/m,z0\.d'
@@ -328,9 +318,7 @@
 [^ :]+:[0-9]+: Error: operand mismatch -- `fcvtxnt z0\.s,p0/m,z0\.s'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	fcvtxnt z0\.s, p0/m, z0\.d
-[^ :]+:[0-9]+: Error: operand mismatch -- `fcvtxnt z0\.s,p0/z,z0\.d'
-[^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	fcvtxnt z0\.s, p0/m, z0\.d
+[^ :]+:[0-9]+: Error: selected processor does not support `fcvtxnt z0\.s,p0/z,z0\.d'
 [^ :]+:[0-9]+: Error: operand mismatch -- `flogb z0\.b,p0/m,z0\.b'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	flogb z0\.h, p0/m, z0\.h
@@ -343,12 +331,7 @@
 [^ :]+:[0-9]+: Info:    other valid variant\(s\):
 [^ :]+:[0-9]+: Info:    	flogb z0\.s, p0/m, z0\.s
 [^ :]+:[0-9]+: Info:    	flogb z0\.d, p0/m, z0\.d
-[^ :]+:[0-9]+: Error: operand mismatch -- `flogb z0\.h,p0/z,z0\.h'
-[^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	flogb z0\.h, p0/m, z0\.h
-[^ :]+:[0-9]+: Info:    other valid variant\(s\):
-[^ :]+:[0-9]+: Info:    	flogb z0\.s, p0/m, z0\.s
-[^ :]+:[0-9]+: Info:    	flogb z0\.d, p0/m, z0\.d
+[^ :]+:[0-9]+: Error: selected processor does not support `flogb z0\.h,p0/z,z0\.h'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `flogb z32\.h,p0/m,z0\.h'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `flogb z0\.h,p8/m,z0\.h'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `flogb z0\.h,p0/m,z32\.h'
@@ -1302,13 +1285,7 @@
 [^ :]+:[0-9]+: Info:    	sqabs z0\.h, p0/m, z0\.h
 [^ :]+:[0-9]+: Info:    	sqabs z0\.s, p0/m, z0\.s
 [^ :]+:[0-9]+: Info:    	sqabs z0\.d, p0/m, z0\.d
-[^ :]+:[0-9]+: Error: operand mismatch -- `sqabs z0\.b,p0/z,z0\.b'
-[^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqabs z0\.b, p0/m, z0\.b
-[^ :]+:[0-9]+: Info:    other valid variant\(s\):
-[^ :]+:[0-9]+: Info:    	sqabs z0\.h, p0/m, z0\.h
-[^ :]+:[0-9]+: Info:    	sqabs z0\.s, p0/m, z0\.s
-[^ :]+:[0-9]+: Info:    	sqabs z0\.d, p0/m, z0\.d
+[^ :]+:[0-9]+: Error: selected processor does not support `sqabs z0\.b,p0/z,z0\.b'
 [^ :]+:[0-9]+: Error: expected a register at operand 1 -- `sqadd z32\.b,p0/m,z0\.b,z0\.b'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `sqadd z0\.b,p0/m,z32\.b,z0\.b'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 4 -- `sqadd z0\.b,p0/m,z0\.b,z32\.b'
@@ -1555,13 +1532,7 @@
 [^ :]+:[0-9]+: Info:    	sqneg z0\.h, p0/m, z0\.h
 [^ :]+:[0-9]+: Info:    	sqneg z0\.s, p0/m, z0\.s
 [^ :]+:[0-9]+: Info:    	sqneg z0\.d, p0/m, z0\.d
-[^ :]+:[0-9]+: Error: operand mismatch -- `sqneg z0\.b,p0/z,z0\.b'
-[^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	sqneg z0\.b, p0/m, z0\.b
-[^ :]+:[0-9]+: Info:    other valid variant\(s\):
-[^ :]+:[0-9]+: Info:    	sqneg z0\.h, p0/m, z0\.h
-[^ :]+:[0-9]+: Info:    	sqneg z0\.s, p0/m, z0\.s
-[^ :]+:[0-9]+: Info:    	sqneg z0\.d, p0/m, z0\.d
+[^ :]+:[0-9]+: Error: selected processor does not support `sqneg z0\.b,p0/z,z0\.b'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `sqrdcmlah z32\.h,z0\.h,z0\.h\[0\],#0'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `sqrdcmlah z0\.h,z32\.h,z0\.h\[0\],#0'
 [^ :]+:[0-9]+: Error: z0-z7 expected at operand 3 -- `sqrdcmlah z0\.h,z0\.h,z8\.h\[0\],#0'
