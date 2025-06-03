@@ -66,8 +66,13 @@ extern "C"
    macros glibc may introduce, which have names of the pattern
    __attribute_blah__.  */
 
+#if defined (__clang__)
 #define _libctf_printflike_(string_index,first_to_check) \
     __attribute__ ((__format__ (__printf__, (string_index), (first_to_check))))
+#else
+#define _libctf_printflike_(string_index,first_to_check) \
+    __attribute__ ((__format__ (__gnu_printf__, (string_index), (first_to_check))))
+#endif
 #define _libctf_unlikely_(x) __builtin_expect ((x), 0)
 #define _libctf_unused_ __attribute__ ((__unused__))
 #define _libctf_malloc_ __attribute__((__malloc__))
