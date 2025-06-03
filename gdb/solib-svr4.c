@@ -368,7 +368,7 @@ struct svr4_info
   CORE_ADDR debug_loader_offset = 0;
 
   /* Name of the dynamic linker, valid if debug_loader_offset_p.  */
-  char *debug_loader_name = nullptr;
+  std::string debug_loader_name;
 
   /* Load map address for the main executable in default namespace.  */
   CORE_ADDR main_lm_addr = 0;
@@ -2681,7 +2681,7 @@ enable_break (struct svr4_info *info, int from_tty)
 
       if (!loader_found_in_list)
 	{
-	  info->debug_loader_name = xstrdup (interp_name);
+	  info->debug_loader_name = interp_name;
 	  info->debug_loader_offset_p = 1;
 	  info->debug_loader_offset = load_addr;
 	  solib_add (NULL, from_tty, auto_solib_add);
@@ -3341,8 +3341,7 @@ svr4_clear_solib (program_space *pspace)
   info->debug_base = 0;
   info->debug_loader_offset_p = 0;
   info->debug_loader_offset = 0;
-  xfree (info->debug_loader_name);
-  info->debug_loader_name = NULL;
+  info->debug_loader_name.clear ();
 }
 
 /* Clear any bits of ADDR that wouldn't fit in a target-format
