@@ -1044,7 +1044,7 @@ sframe_get_funcdesc_with_addr_internal (sframe_decoder_ctx *ctx, int32_t addr,
   /* Do the binary search.  */
   fdp = (sframe_func_desc_entry *) ctx->sfd_funcdesc;
   low = 0;
-  high = dhp->sfh_num_fdes;
+  high = dhp->sfh_num_fdes - 1;
   while (low <= high)
     {
       int mid = low + (high - low) / 2;
