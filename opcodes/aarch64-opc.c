@@ -381,6 +381,7 @@ const aarch64_field fields[] =
     { 15,  7 },	/* imm7: in load/store pair pre/post index instructions.  */
     { 13,  8 },	/* imm8: in floating-point scalar move immediate inst.  */
     { 12,  9 },	/* imm9: in load/store pre/post index instructions.  */
+    {  5,  9 },	/* imm9_5: in CB<cc> (immediate).  */
     { 10, 12 },	/* imm12: in ld/st unsigned imm or add/sub shifted inst.  */
     {  5, 14 },	/* imm14: in test bit and branch instructions.  */
     {  0, 16 },	/* imm16_0: in udf instruction. */
@@ -2418,6 +2419,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    }
 	  break;
 
+	case AARCH64_OPND_ADDR_PCREL9:
 	case AARCH64_OPND_ADDR_PCREL14:
 	case AARCH64_OPND_ADDR_PCREL19:
 	case AARCH64_OPND_ADDR_PCREL21:
@@ -4787,6 +4789,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       snprintf (buf, size, "%s", style_addr (styler, "#0x%" PRIx64 , addr));
       break;
 
+    case AARCH64_OPND_ADDR_PCREL9:
     case AARCH64_OPND_ADDR_PCREL14:
     case AARCH64_OPND_ADDR_PCREL19:
     case AARCH64_OPND_ADDR_PCREL21:

@@ -167,6 +167,8 @@ automatically cause those extensions to be disabled.
  @tab Enable the Branch Record Buffer extension.
 @item @code{chk} @tab
  @tab Enable the Check Feature Status Extension.
+@item @code{cmpbr} @tab
+ @tab Enable Compare and Branch instructions.
 @item @code{compnum} @tab @code{simd}
  @tab Enable the complex number SIMD extensions.  An alias of @code{fcma}.
 @item @code{cpa} @tab

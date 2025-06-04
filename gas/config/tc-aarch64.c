@@ -5175,6 +5175,13 @@ encode_branch_ofs_26 (uint32_t ofs)
   return ofs & ((1 << 26) - 1);
 }
 
+/* encode the 9-bit offset of FEAT_CMPBR compare and branch */
+static inline uint32_t
+encode_cond_branch_ofs_9 (uint32_t ofs)
+{
+  return (ofs & ((1 << 9) - 1)) << 5;
+}
+
 /* encode the 19-bit offset of conditional branch and compare & branch */
 static inline uint32_t
 encode_cond_branch_ofs_19 (uint32_t ofs)
@@ -6385,6 +6392,8 @@ process_omitted_operand (enum aarch64_opnd type, const aarch64_opcode *opcode,
     case AARCH64_OPND_UIMM3_OP2:
     case AARCH64_OPND_IMM:
     case AARCH64_OPND_IMM_2:
+    case AARCH64_OPND_IMMP1_2:
+    case AARCH64_OPND_IMMS1_2:
     case AARCH64_OPND_WIDTH:
     case AARCH64_OPND_UIMM7:
     case AARCH64_OPND_NZCV:
@@ -7152,6 +7161,16 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  info->imm.value = val;
 	  break;
 
+	case AARCH64_OPND_IMMP1_2:
+	  po_imm_or_fail (1, 64);
+	  info->imm.value = val - 1;
+	  break;
+
+	case AARCH64_OPND_IMMS1_2:
+	  po_imm_or_fail (-1, 62);
+	  info->imm.value = val + 1;
+	  break;
+
 	case AARCH64_OPND_SVE_AIMM:
 	case AARCH64_OPND_SVE_ASIMM:
 	  po_imm_nc_or_fail ();
@@ -7448,6 +7467,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  info->imm.value = 0;
 	  break;
 
+	case AARCH64_OPND_ADDR_PCREL9:
 	case AARCH64_OPND_ADDR_PCREL14:
 	case AARCH64_OPND_ADDR_PCREL19:
 	case AARCH64_OPND_ADDR_PCREL21:
@@ -7485,8 +7505,11 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 		  case compbranch:
 		  case condbranch:
 		    /* e.g. CBZ or B.COND  */
-		    gas_assert (operands[i] == AARCH64_OPND_ADDR_PCREL19);
-		    inst.reloc.type = BFD_RELOC_AARCH64_BRANCH19;
+		    gas_assert (operands[i] == AARCH64_OPND_ADDR_PCREL9
+				|| operands[i] == AARCH64_OPND_ADDR_PCREL19);
+		    inst.reloc.type = (operands[i] == AARCH64_OPND_ADDR_PCREL9)
+				       ? BFD_RELOC_AARCH64_BRANCH9
+				       : BFD_RELOC_AARCH64_BRANCH19;
 		    break;
 		  case testbranch:
 		    /* e.g. TBZ  */
@@ -9688,6 +9711,20 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
 	}
       break;
 
+    case BFD_RELOC_AARCH64_BRANCH9:
+      if (fixP->fx_done || !seg->use_rela_p)
+	{
+	  if (value & 3)
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("conditional branch target not word aligned"));
+	  if (signed_overflow (value, 11))
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("conditional branch out of range"));
+	  insn = get_aarch64_insn (buf);
+	  insn |= encode_cond_branch_ofs_9 (value >> 2);
+	  put_aarch64_insn (buf, insn);
+	}
+      break;
     case BFD_RELOC_AARCH64_BRANCH19:
       if (fixP->fx_done || !seg->use_rela_p)
 	{
@@ -10692,6 +10729,7 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"ssbs",		AARCH64_FEATURE (SSBS), AARCH64_NO_FEATURES},
   {"memtag",		AARCH64_FEATURE (MEMTAG), AARCH64_NO_FEATURES},
   {"occmo",		AARCH64_FEATURE (OCCMO), AARCH64_NO_FEATURES},
+  {"cmpbr",		AARCH64_FEATURE (CMPBR), AARCH64_NO_FEATURES},
   {"sve2",		AARCH64_FEATURE (SVE2), AARCH64_FEATURE (SVE)},
   {"sve2-sm4",		AARCH64_FEATURE (SVE2_SM4),
 			AARCH64_FEATURES (2, SVE2, SM4)},

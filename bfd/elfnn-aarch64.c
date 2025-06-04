@@ -2268,6 +2268,9 @@ elfNN_aarch64_howto_from_bfd_reloc (bfd_reloc_code_real_type code)
   if (code == BFD_RELOC_AARCH64_NONE)
     return &elfNN_aarch64_howto_none;
 
+  if (code == BFD_RELOC_AARCH64_BRANCH9)
+    return &elfNN_aarch64_howto_none;
+
   return NULL;
 }
 

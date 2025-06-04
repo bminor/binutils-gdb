@@ -135,6 +135,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_ID_PFR2,
   /* SSBS mechanism enabled.  */
   AARCH64_FEATURE_SSBS,
+  /* Compare and branch instructions.  */
+  AARCH64_FEATURE_CMPBR,
   /* Memory Tagging Extension.  */
   AARCH64_FEATURE_MEMTAG,
   /* Outer Cacheable Cache Maintenance Operation.  */
@@ -690,6 +692,8 @@ enum aarch64_opnd
   AARCH64_OPND_WIDTH,	/* Immediate #<width> in e.g. BFI.  */
   AARCH64_OPND_IMM,	/* Immediate.  */
   AARCH64_OPND_IMM_2,	/* Immediate.  */
+  AARCH64_OPND_IMMP1_2,	/* Immediate plus 1.  */
+  AARCH64_OPND_IMMS1_2,	/* Immediate minus 1.  */
   AARCH64_OPND_UIMM3_OP1,/* Unsigned 3-bit immediate in the op1 field.  */
   AARCH64_OPND_UIMM3_OP2,/* Unsigned 3-bit immediate in the op2 field.  */
   AARCH64_OPND_UIMM4,	/* Unsigned 4-bit immediate in the CRm field.  */
@@ -717,6 +721,7 @@ enum aarch64_opnd
   AARCH64_OPND_COND1,	/* Same as the above, but excluding AL and NV.  */
 
   AARCH64_OPND_ADDR_ADRP,	/* Memory address for ADRP */
+  AARCH64_OPND_ADDR_PCREL9,	/* 9-bit PC-relative address for e.g. CB<cc>.  */
   AARCH64_OPND_ADDR_PCREL14,	/* 14-bit PC-relative address for e.g. TBZ.  */
   AARCH64_OPND_ADDR_PCREL19,	/* 19-bit PC-relative address for e.g. LDR.  */
   AARCH64_OPND_ADDR_PCREL21,	/* 21-bit PC-relative address for e.g. ADR.  */

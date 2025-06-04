@@ -7025,6 +7025,11 @@ enum bfd_reloc_code_real
      assembler and not (currently) written to any object files.  */
   BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC,
 
+  /* AArch64 9 bit pc-relative conditional branch and compare & branch.
+     The lowest two bits must be zero and are not stored in the
+     instruction, giving an 11 bit signed byte offset.  */
+  BFD_RELOC_AARCH64_BRANCH9,
+
   /* Tilera TILEPro Relocations.  */
   BFD_RELOC_TILEPRO_COPY,
   BFD_RELOC_TILEPRO_GLOB_DAT,

@@ -136,6 +136,19 @@
   QLF2(X,NIL),			\
 }
 
+/* e.g. CBBGT <Wt>, <Wm>, <label>.  */
+#define QL_W2NIL		\
+{				\
+  QLF3(W,W,NIL),		\
+}
+
+/* e.g. CBGT <Wt>, #<imm6>, <label>.  */
+#define QL_R_IMM_NIL		\
+{				\
+  QLF3(W,imm_0_63,NIL),		\
+  QLF3(X,imm_0_63,NIL),		\
+}
+
 /* e.g. LDR <Dt>, <label>.  */
 #define QL_FP_PCREL		\
 {				\
@@ -2757,6 +2770,8 @@ static const aarch64_feature_set aarch64_feature_predres =
   AARCH64_FEATURE (PREDRES);
 static const aarch64_feature_set aarch64_feature_predres2 =
   AARCH64_FEATURES (2, PREDRES, PREDRES2);
+static const aarch64_feature_set aarch64_feature_cmpbr =
+  AARCH64_FEATURE (CMPBR);
 static const aarch64_feature_set aarch64_feature_memtag =
   AARCH64_FEATURE (MEMTAG);
 static const aarch64_feature_set aarch64_feature_bfloat16 =
@@ -2922,6 +2937,7 @@ static const aarch64_feature_set aarch64_feature_sve2p1_sme2p1 =
 #define SB		&aarch64_feature_sb
 #define PREDRES		&aarch64_feature_predres
 #define PREDRES2	&aarch64_feature_predres2
+#define CMPBR		&aarch64_feature_cmpbr
 #define MEMTAG		&aarch64_feature_memtag
 #define TME		&aarch64_feature_tme
 #define SVE2		&aarch64_feature_sve2
@@ -3051,6 +3067,8 @@ static const aarch64_feature_set aarch64_feature_sve2p1_sme2p1 =
   { NAME, OPCODE, MASK, CLASS, 0, SB, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define PREDRES_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, PREDRES, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define CMPBR_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, CMPBR, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define MEMTAG_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, MEMTAG, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define _TME_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
@@ -3998,6 +4016,50 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("cbnz", 0x35000000, 0x7f000000, compbranch, 0, OP2 (Rt, ADDR_PCREL19), QL_R_PCREL, F_SF),
   /* Conditional branch (immediate).  */
   CORE_INSN ("b.c", 0x54000000, 0xff000010, condbranch, 0, OP1 (ADDR_PCREL19), QL_PCREL_NIL, F_COND),
+  /* Compare registers and branch. */
+  CMPBR_INSN ("cbgt", 0x74000000, 0x7fe0c000, compbranch, OP3 (Rt, Rm, ADDR_PCREL9), QL_R2NIL, F_SF | F_HAS_ALIAS),
+  CMPBR_INSN ("cblt", 0x74000000, 0x7fe0c000, compbranch, OP3 (Rm, Rt, ADDR_PCREL9), QL_R2NIL, F_SF | F_ALIAS | F_PSEUDO),
+  CMPBR_INSN ("cbge", 0x74200000, 0x7fe0c000, compbranch, OP3 (Rt, Rm, ADDR_PCREL9), QL_R2NIL, F_SF | F_HAS_ALIAS),
+  CMPBR_INSN ("cble", 0x74200000, 0x7fe0c000, compbranch, OP3 (Rm, Rt, ADDR_PCREL9), QL_R2NIL, F_SF | F_ALIAS | F_PSEUDO),
+  CMPBR_INSN ("cbhi", 0x74400000, 0x7fe0c000, compbranch, OP3 (Rt, Rm, ADDR_PCREL9), QL_R2NIL, F_SF | F_HAS_ALIAS),
+  CMPBR_INSN ("cblo", 0x74400000, 0x7fe0c000, compbranch, OP3 (Rm, Rt, ADDR_PCREL9), QL_R2NIL, F_SF | F_ALIAS | F_PSEUDO),
+  CMPBR_INSN ("cbhs", 0x74600000, 0x7fe0c000, compbranch, OP3 (Rt, Rm, ADDR_PCREL9), QL_R2NIL, F_SF | F_HAS_ALIAS),
+  CMPBR_INSN ("cbls", 0x74600000, 0x7fe0c000, compbranch, OP3 (Rm, Rt, ADDR_PCREL9), QL_R2NIL, F_SF | F_ALIAS | F_PSEUDO),
+  CMPBR_INSN ("cbeq", 0x74c00000, 0x7fe0c000, compbranch, OP3 (Rt, Rm, ADDR_PCREL9), QL_R2NIL, F_SF),
+  CMPBR_INSN ("cbne", 0x74e00000, 0x7fe0c000, compbranch, OP3 (Rt, Rm, ADDR_PCREL9), QL_R2NIL, F_SF),
+  /* Compare register with immediate and branch.  */
+  CMPBR_INSN ("cbgt", 0x75000000, 0x7fe04000, compbranch, OP3 (Rt, IMM_2, ADDR_PCREL9), QL_R_IMM_NIL, F_SF | F_HAS_ALIAS),
+  CMPBR_INSN ("cbge", 0x75000000, 0x7fe04000, compbranch, OP3 (Rt, IMMP1_2, ADDR_PCREL9), QL_R_IMM_NIL, F_SF | F_ALIAS | F_PSEUDO),
+  CMPBR_INSN ("cblt", 0x75200000, 0x7fe04000, compbranch, OP3 (Rt, IMM_2, ADDR_PCREL9), QL_R_IMM_NIL, F_SF | F_HAS_ALIAS),
+  CMPBR_INSN ("cble", 0x75200000, 0x7fe04000, compbranch, OP3 (Rt, IMMS1_2, ADDR_PCREL9), QL_R_IMM_NIL, F_SF | F_ALIAS | F_PSEUDO),
+  CMPBR_INSN ("cbhi", 0x75400000, 0x7fe04000, compbranch, OP3 (Rt, IMM_2, ADDR_PCREL9), QL_R_IMM_NIL, F_SF | F_HAS_ALIAS),
+  CMPBR_INSN ("cbhs", 0x75400000, 0x7fe04000, compbranch, OP3 (Rt, IMMP1_2, ADDR_PCREL9), QL_R_IMM_NIL, F_SF | F_ALIAS | F_PSEUDO),
+  CMPBR_INSN ("cblo", 0x75600000, 0x7fe04000, compbranch, OP3 (Rt, IMM_2, ADDR_PCREL9), QL_R_IMM_NIL, F_SF | F_HAS_ALIAS),
+  CMPBR_INSN ("cbls", 0x75600000, 0x7fe04000, compbranch, OP3 (Rt, IMMS1_2, ADDR_PCREL9), QL_R_IMM_NIL, F_SF | F_ALIAS | F_PSEUDO),
+  CMPBR_INSN ("cbeq", 0x75c00000, 0x7fe04000, compbranch, OP3 (Rt, IMM_2, ADDR_PCREL9), QL_R_IMM_NIL, F_SF),
+  CMPBR_INSN ("cbne", 0x75e00000, 0x7fe04000, compbranch, OP3 (Rt, IMM_2, ADDR_PCREL9), QL_R_IMM_NIL, F_SF),
+  /* Compare bytes and branch.  */
+  CMPBR_INSN ("cbbgt", 0x74008000, 0xffe0c000, compbranch, OP3 (Rt, Rm, ADDR_PCREL9), QL_W2NIL, F_HAS_ALIAS),
+  CMPBR_INSN ("cbblt", 0x74008000, 0xffe0c000, compbranch, OP3 (Rm, Rt, ADDR_PCREL9), QL_W2NIL, F_ALIAS | F_PSEUDO),
+  CMPBR_INSN ("cbbge", 0x74208000, 0xffe0c000, compbranch, OP3 (Rt, Rm, ADDR_PCREL9), QL_W2NIL, F_HAS_ALIAS),
+  CMPBR_INSN ("cbble", 0x74208000, 0xffe0c000, compbranch, OP3 (Rm, Rt, ADDR_PCREL9), QL_W2NIL, F_ALIAS | F_PSEUDO),
+  CMPBR_INSN ("cbbhi", 0x74408000, 0xffe0c000, compbranch, OP3 (Rt, Rm, ADDR_PCREL9), QL_W2NIL, F_HAS_ALIAS),
+  CMPBR_INSN ("cbblo", 0x74408000, 0xffe0c000, compbranch, OP3 (Rm, Rt, ADDR_PCREL9), QL_W2NIL, F_ALIAS | F_PSEUDO),
+  CMPBR_INSN ("cbbhs", 0x74608000, 0xffe0c000, compbranch, OP3 (Rt, Rm, ADDR_PCREL9), QL_W2NIL, F_HAS_ALIAS),
+  CMPBR_INSN ("cbbls", 0x74608000, 0xffe0c000, compbranch, OP3 (Rm, Rt, ADDR_PCREL9), QL_W2NIL, F_ALIAS | F_PSEUDO),
+  CMPBR_INSN ("cbbeq", 0x74c08000, 0xffe0c000, compbranch, OP3 (Rt, Rm, ADDR_PCREL9), QL_W2NIL, 0),
+  CMPBR_INSN ("cbbne", 0x74e08000, 0xffe0c000, compbranch, OP3 (Rt, Rm, ADDR_PCREL9), QL_W2NIL, 0),
+  /* Compare halfwords and branch.  */
+  CMPBR_INSN ("cbhgt", 0x7400c000, 0xffe0c000, compbranch, OP3 (Rt, Rm, ADDR_PCREL9), QL_W2NIL, F_HAS_ALIAS),
+  CMPBR_INSN ("cbhlt", 0x7400c000, 0xffe0c000, compbranch, OP3 (Rm, Rt, ADDR_PCREL9), QL_W2NIL, F_ALIAS | F_PSEUDO),
+  CMPBR_INSN ("cbhge", 0x7420c000, 0xffe0c000, compbranch, OP3 (Rt, Rm, ADDR_PCREL9), QL_W2NIL, F_HAS_ALIAS),
+  CMPBR_INSN ("cbhle", 0x7420c000, 0xffe0c000, compbranch, OP3 (Rm, Rt, ADDR_PCREL9), QL_W2NIL, F_ALIAS | F_PSEUDO),
+  CMPBR_INSN ("cbhhi", 0x7440c000, 0xffe0c000, compbranch, OP3 (Rt, Rm, ADDR_PCREL9), QL_W2NIL, F_HAS_ALIAS),
+  CMPBR_INSN ("cbhlo", 0x7440c000, 0xffe0c000, compbranch, OP3 (Rm, Rt, ADDR_PCREL9), QL_W2NIL, F_ALIAS | F_PSEUDO),
+  CMPBR_INSN ("cbhhs", 0x7460c000, 0xffe0c000, compbranch, OP3 (Rt, Rm, ADDR_PCREL9), QL_W2NIL, F_HAS_ALIAS),
+  CMPBR_INSN ("cbhls", 0x7460c000, 0xffe0c000, compbranch, OP3 (Rm, Rt, ADDR_PCREL9), QL_W2NIL, F_ALIAS | F_PSEUDO),
+  CMPBR_INSN ("cbheq", 0x74c0c000, 0xffe0c000, compbranch, OP3 (Rt, Rm, ADDR_PCREL9), QL_W2NIL, 0),
+  CMPBR_INSN ("cbhne", 0x74e0c000, 0xffe0c000, compbranch, OP3 (Rt, Rm, ADDR_PCREL9), QL_W2NIL, 0),
   /* Conditional compare (immediate).  */
   CORE_INSN ("ccmn", 0x3a400800, 0x7fe00c10, condcmp_imm, 0, OP4 (Rn, CCMP_IMM, NZCV, COND), QL_CCMP_IMM, F_SF),
   CORE_INSN ("ccmp", 0x7a400800, 0x7fe00c10, condcmp_imm, 0, OP4 (Rn, CCMP_IMM, NZCV, COND), QL_CCMP_IMM, F_SF),
@@ -7154,6 +7216,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "the width of the bit-field")					\
     Y(IMMEDIATE, imm, "IMM", 0, F(FLD_imm6_10), "an immediate")         \
     Y(IMMEDIATE, imm, "IMM_2", 0, F(FLD_imm6_15), "an immediate")       \
+    Y(IMMEDIATE, imm, "IMMP1_2", 0, F(FLD_imm6_15), "an immediate plus 1")       \
+    Y(IMMEDIATE, imm, "IMMS1_2", 0, F(FLD_imm6_15), "an immediate minus 1")       \
     Y(IMMEDIATE, imm, "UIMM3_OP1", 0, F(FLD_op1),			\
       "a 3-bit unsigned immediate")					\
     Y(IMMEDIATE, imm, "UIMM3_OP2", 0, F(FLD_op2),			\
@@ -7198,6 +7262,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "one of the standard conditions, excluding AL and NV.")		\
     X(ADDRESS, 0, ext_imm, "ADDR_ADRP", OPD_F_SEXT, F(FLD_immhi, FLD_immlo),\
       "21-bit PC-relative address of a 4KB page")			\
+    Y(ADDRESS, imm, "ADDR_PCREL9", OPD_F_SEXT | OPD_F_SHIFT_BY_2,	\
+      F(FLD_imm9_5), "9-bit PC-relative address")			\
     Y(ADDRESS, imm, "ADDR_PCREL14", OPD_F_SEXT | OPD_F_SHIFT_BY_2,	\
       F(FLD_imm14), "14-bit PC-relative address")			\
     Y(ADDRESS, imm, "ADDR_PCREL19", OPD_F_SEXT | OPD_F_SHIFT_BY_2,	\
