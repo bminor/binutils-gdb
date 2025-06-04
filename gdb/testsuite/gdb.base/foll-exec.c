@@ -25,6 +25,10 @@
 
 int global_i = 100;
 
+#ifndef EXECD_PROG
+#define EXECD_PROG "execd-prog"
+#endif
+
 int main (int argc, char ** argv)
 {
   int local_j = global_i + 1;
