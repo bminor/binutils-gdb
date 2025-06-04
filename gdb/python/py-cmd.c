@@ -372,9 +372,8 @@ gdbpy_parse_command_name (const char *name,
   for (; i > 0 && valid_cmd_char_p (name[i - 1]); --i)
     ;
 
-  gdb::unique_xmalloc_ptr<char> result ((char *) xmalloc (lastchar - i + 2));
-  memcpy (result.get (), &name[i], lastchar - i + 1);
-  result.get ()[lastchar - i + 1] = '\0';
+  gdb::unique_xmalloc_ptr<char> result
+    = make_unique_xstrndup (&name[i], lastchar - i + 1);
 
   /* Skip whitespace again.  */
   for (--i; i >= 0 && (name[i] == ' ' || name[i] == '\t'); --i)
