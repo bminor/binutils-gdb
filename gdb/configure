@@ -29006,33 +29006,26 @@ else
 fi
 
 
-case ${enable_gdb_compile}-${enable_gdb_dwarf_support} in
-    yes-no)
-      as_fn_error $? "enabling gdb compile requires dwarf support" "$LINENO" 5
-      ;;
-    default-no)
-      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Defaulting compile support to 'no'" >&5
-$as_echo "$as_me: WARNING: Defaulting compile support to 'no'" >&2;}
-      # Fallthrough.
-      ;&
-    no-*)
+if test "${enable_gdb_compile}" = "default"; then
+    enable_gdb_compile=${enable_gdb_dwarf_support}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Defaulting compile support to '${enable_gdb_dwarf_support}'" >&5
+$as_echo "$as_me: WARNING: Defaulting compile support to '${enable_gdb_dwarf_support}'" >&2;}
+fi
+
+if test "${enable_gdb_compile}" = "yes"; then
+    if test "${enable_gdb_dwarf_support}" = "no"; then
+	as_fn_error $? "enabling gdb compile requires dwarf support" "$LINENO" 5
+    fi
+
+$as_echo "#define HAVE_COMPILE 1" >>confdefs.h
+
+    CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_GCC_COMPILE_OBS)"
+else
     # Even if compile support is not enabled, we need this file to define
     # the "compile" command.
     CONFIG_OBS="$CONFIG_OBS compile/compile.o"
     CONFIG_SRCS="$CONFIG_SRCS compile/compile.c"
-      ;;
-    default-yes)
-      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Defaulting compile support to 'yes'" >&5
-$as_echo "$as_me: WARNING: Defaulting compile support to 'yes'" >&2;}
-      # Fallthrough.
-      ;&
-    yes-*)
-
-$as_echo "#define HAVE_COMPILE 1" >>confdefs.h
-
-      CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_GCC_COMPILE_OBS)"
-      ;;
-esac
+fi
 
 # ---------------------------- #
 # Check for source highlight.  #

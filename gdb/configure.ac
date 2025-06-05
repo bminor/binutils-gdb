@@ -1250,29 +1250,23 @@ AC_ARG_ENABLE([gdb-compile],
 	      [GDB_CHECK_YES_NO_VAL([$enableval], [--enable-gdb-compile])],
 	      [enable_gdb_compile=default])
 
-case ${enable_gdb_compile}-${enable_gdb_dwarf_support} in
-    yes-no)
-      AC_MSG_ERROR([enabling gdb compile requires dwarf support])
-      ;;
-    default-no)
-      AC_MSG_WARN([Defaulting compile support to 'no'])
-      # Fallthrough.
-      ;&
-    no-*)
+if test "${enable_gdb_compile}" = "default"; then
+    enable_gdb_compile=${enable_gdb_dwarf_support}
+    AC_MSG_WARN([Defaulting compile support to '${enable_gdb_dwarf_support}'])
+fi
+
+if test "${enable_gdb_compile}" = "yes"; then
+    if test "${enable_gdb_dwarf_support}" = "no"; then
+	AC_MSG_ERROR([enabling gdb compile requires dwarf support])
+    fi
+    AC_DEFINE(HAVE_COMPILE, 1, [Define if compiling support to gdb compile.])
+    CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_GCC_COMPILE_OBS)"
+else
     # Even if compile support is not enabled, we need this file to define
     # the "compile" command.
     CONFIG_OBS="$CONFIG_OBS compile/compile.o"
     CONFIG_SRCS="$CONFIG_SRCS compile/compile.c"
-      ;;
-    default-yes)
-      AC_MSG_WARN([Defaulting compile support to 'yes'])
-      # Fallthrough.
-      ;&
-    yes-*)
-      AC_DEFINE(HAVE_COMPILE, 1, [Define if compiling support to gdb compile.])
-      CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_GCC_COMPILE_OBS)"
-      ;;
-esac
+fi
 
 # ---------------------------- #
 # Check for source highlight.  #
