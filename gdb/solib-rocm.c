@@ -703,6 +703,9 @@ rocm_update_solib_list ()
       return;
     }
 
+  gdb::unique_xmalloc_ptr<amd_dbgapi_code_object_id_t> code_object_list_holder
+    (code_object_list);
+
   for (size_t i = 0; i < count; ++i)
     {
       CORE_ADDR l_addr;
@@ -733,8 +736,6 @@ rocm_update_solib_list ()
 
       sos.emplace_back (uri_bytes, std::move (unique_name), std::move (li));
     }
-
-  xfree (code_object_list);
 
   if (rocm_solib_ops.current_sos == NULL)
     {
