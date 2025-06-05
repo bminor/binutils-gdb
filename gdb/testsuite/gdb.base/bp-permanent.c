@@ -101,7 +101,7 @@ test_signal_no_handler (void)
 }
 
 static void
-test_signal_nested_handler ()
+test_signal_nested_handler (int sig)
 {
   test ();
 }
