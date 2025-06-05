@@ -520,6 +520,10 @@ gdbscm_parse_command_name (const char *name,
 			prefix_text.get ()).release ();
       scm_dynwind_begin ((scm_t_dynwind_flags) 0);
       gdbscm_dynwind_xfree (msg);
+      /* Release memory now as the destructors will not be run when the
+	 guile exception is thrown.  */
+      result = nullptr;
+      prefix_text = nullptr;
       gdbscm_out_of_range_error (func_name, arg_pos,
 				 gdbscm_scm_from_c_string (name), msg);
     }
@@ -536,6 +540,10 @@ gdbscm_parse_command_name (const char *name,
 		    prefix_text.get ()).release ();
   scm_dynwind_begin ((scm_t_dynwind_flags) 0);
   gdbscm_dynwind_xfree (msg);
+  /* Release memory now as the destructors will not be run when the guile
+     exception is thrown.  */
+  result = nullptr;
+  prefix_text = nullptr;
   gdbscm_out_of_range_error (func_name, arg_pos,
 			     gdbscm_scm_from_c_string (name), msg);
   /* NOTREACHED */
