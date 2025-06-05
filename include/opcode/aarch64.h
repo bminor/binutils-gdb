@@ -137,6 +137,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SSBS,
   /* Memory Tagging Extension.  */
   AARCH64_FEATURE_MEMTAG,
+  /* Outer Cacheable Cache Maintenance Operation.  */
+  AARCH64_FEATURE_OCCMO,
   /* Transactional Memory Extension.  */
   AARCH64_FEATURE_TME,
   /* XS memory attribute.  */

@@ -10691,6 +10691,7 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"rng",		AARCH64_FEATURE (RNG), AARCH64_NO_FEATURES},
   {"ssbs",		AARCH64_FEATURE (SSBS), AARCH64_NO_FEATURES},
   {"memtag",		AARCH64_FEATURE (MEMTAG), AARCH64_NO_FEATURES},
+  {"occmo",		AARCH64_FEATURE (OCCMO), AARCH64_NO_FEATURES},
   {"sve2",		AARCH64_FEATURE (SVE2), AARCH64_FEATURE (SVE)},
   {"sve2-sm4",		AARCH64_FEATURE (SVE2_SM4),
 			AARCH64_FEATURES (2, SVE2, SM4)},
