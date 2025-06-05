@@ -1860,12 +1860,13 @@ amd_dbgapi_target::update_thread_list ()
       if (changed == AMD_DBGAPI_CHANGED_NO)
 	continue;
 
+      gdb::unique_xmalloc_ptr<amd_dbgapi_wave_id_t> wave_list_holder
+	(wave_list);
+
       /* Create a set and free the wave list.  */
       std::set<ptid_t::tid_type> threads;
       for (size_t i = 0; i < count; ++i)
 	threads.emplace (wave_list[i].handle);
-
-      xfree (wave_list);
 
       /* Prune the wave_ids that already have a thread_info.  Any thread_info
 	 which does not have a corresponding wave_id represents a wave which
