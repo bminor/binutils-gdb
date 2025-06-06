@@ -295,7 +295,8 @@ typedef uint64_t aarch64_feature_word;
 
 #define AA64_REPLICATE(SEP, BODY, ...)	\
   BODY (0, __VA_ARGS__) SEP		\
-  BODY (1, __VA_ARGS__)
+  BODY (1, __VA_ARGS__) SEP		\
+  BODY (2, __VA_ARGS__)
 
 /* Some useful SEP operators for use with replication.  */
 #define REP_COMMA ,
