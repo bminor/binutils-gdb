@@ -13106,15 +13106,15 @@ environment variable.
 
 @vindex $_active_linker_namespaces@r{, convenience variable}
 @item $_active_linker_namespaces
-Number of active linkage namespaces in the inferior.  In systems with no
-support for linkage namespaces, this variable will always be set to @samp{1}.
+Number of active linker namespaces in the inferior (@pxref{Files}).  In systems
+with no support for linker namespaces, this variable will always be set to
+@samp{1}.
 
 @vindex $_linker_namespace@r{, convenience variable}
 @item $_linker_namespace
-The namespace which contains the current location in the inferior.  This
-returns @value{GDBN}'s internal numbering for the namespace.  In systems with no
-support for linker namespaces, this variable will always be set to
-@samp{0}.
+The namespace which contains the current location in the inferior.  This returns
+@value{GDBN}'s internal numbering for the namespace.  In systems with no support
+for linker namespaces, this variable will always be set to @samp{0}.
 
 @end table
 
@@ -22242,10 +22242,17 @@ be determined then the address range for the @code{.text} section from
 the library will be listed.  If the @code{.text} section cannot be
 found then no addresses will be listed.
 
-On systems that support linkage namespaces, the output includes an
+On systems that support linker namespaces, the output includes an
 additional column @code{NS} if the inferior has more than one active
-namespace when the command is used.  This column the linkage namespace
+namespace when the command is used.  This column the linker namespace
 that the shared library was loaded into.
+
+@cindex linker namespaces
+@dfn{Linker namespaces} are a feature of some standard libraries, that allow
+shared objects to be loaded in isolated environment, eliminating the
+possibility that those objects may cross-talk.  Each set of isolated
+shared objects is said to belong to a ``namespace'', and linker related
+actions such as relocations do not cross namespace boundaries.
 
 @kindex info dll
 @item info dll @var{regex}
