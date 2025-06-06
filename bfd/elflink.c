@@ -12232,9 +12232,9 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	  break;
 	case SEC_INFO_TYPE_SFRAME:
 	    {
-	      /* Merge .sframe sections into the ctf frame encoder
-		 context of the output_bfd's section.  The final .sframe
-		 output section will be written out later.  */
+	      /* Merge SFrame section into the SFrame encoder context of the
+		 output_bfd's section.  The final .sframe output section will
+		 be written out later.  */
 	      if (!_bfd_elf_merge_section_sframe (output_bfd, flinfo->info,
 						  o, contents))
 		return false;
