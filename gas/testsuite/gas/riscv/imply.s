@@ -102,6 +102,7 @@ imply smaia
 imply smcdeleg
 imply smcsrind
 imply smcntrpmf
+imply smrnmi
 imply smstateen
 imply smepmp
 imply smdbltrp
