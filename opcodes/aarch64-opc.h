@@ -326,7 +326,7 @@ verify_constraints (const struct aarch64_inst *, const aarch64_insn, bfd_vma,
 #define F_REG_ALIAS	(1 << 6)  /* Register name aliases another.  */
 
 #undef F_REG_128
-#define F_REG_128	(1 << 7) /* System regsister implementable as 128-bit wide.  */
+#define F_REG_128	(1 << 7) /* System register implementable as 128-bit wide.  */
 
 
 /* PSTATE field name for the MSR instruction this is encoded in "op1:op2:CRm".
@@ -602,7 +602,7 @@ select_operand_for_scalar_size_field_coding (const aarch64_opcode *opcode)
     src_size = aarch64_get_qualifier_esize (opcode->qualifiers_list[0][1]);
   if (src_size == dst_size && src_size == 0)
     { assert (0); abort (); }
-  /* When the result is not a sisd register or it is a long operantion.  */
+  /* When the result is not a sisd register or it is a long operation.  */
   if (dst_size == 0 || dst_size == src_size << 1)
     return 1;
   else

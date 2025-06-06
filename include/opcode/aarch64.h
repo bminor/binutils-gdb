@@ -210,7 +210,7 @@ enum aarch64_feature_bit {
   /* Instrumentation Extension.  */
   AARCH64_FEATURE_ITE,
   /* 128-bit page table descriptor, system registers
-     and isntructions.  */
+     and instructions.  */
   AARCH64_FEATURE_D128,
   /* Armv8.9-A/Armv9.4-A architecture Debug extension.  */
   AARCH64_FEATURE_DEBUGv8p9,
@@ -1395,7 +1395,7 @@ extern const aarch64_opcode aarch64_opcode_table[];
 #define F_OPD_PAIR_OPT (1ULL << 32)
 /* This instruction does not allow the full range of values that the
    width of fields in the assembler instruction would theoretically
-   allow.  This impacts the constraintts on assembly but yelds no
+   allow.  This impacts the constraints on assembly but yields no
    impact on disassembly.  */
 #define F_OPD_NARROW (1ULL << 33)
 /* For the instruction with size[22:23] field.  */
@@ -1761,7 +1761,7 @@ struct aarch64_inst
   /* Corresponding opcode entry.  */
   const aarch64_opcode *opcode;
 
-  /* Condition for a truly conditional-executed instrutions, e.g. b.cond.  */
+  /* Condition for a truly conditional-executed instruction, e.g. b.cond.  */
   const aarch64_cond *cond;
 
   /* Operands information.  */
@@ -1861,7 +1861,7 @@ struct aarch64_inst
      yet still accept a wider range of registers.
 
    AARCH64_OPDE_RECOVERABLE, AARCH64_OPDE_SYNTAX_ERROR and
-   AARCH64_OPDE_FATAL_SYNTAX_ERROR are only deteced by GAS while the
+   AARCH64_OPDE_FATAL_SYNTAX_ERROR are only detected by GAS while the
    AARCH64_OPDE_INVALID_VARIANT error can only be spotted by libopcodes as
    only libopcodes has the information about the valid variants of each
    instruction.
