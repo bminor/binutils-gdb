@@ -1820,7 +1820,7 @@ default_find_solib_addr (solib &so)
 
 /* Implementation of the linker_namespace convenience variable.
    This returns the GDB internal identifier of the linker namespace,
-   for the current frame, as an integer.  If the inferior doesn't support
+   for the selected frame, as an integer.  If the inferior doesn't support
    linker namespaces, this always returns 0.  */
 
 static value *
@@ -1831,7 +1831,7 @@ linker_namespace_make_value (gdbarch *gdbarch, internalvar *var,
   int nsid = 0;
   if (ops->find_solib_ns != nullptr)
     {
-      CORE_ADDR curr_pc = get_frame_pc (get_current_frame ());
+      CORE_ADDR curr_pc = get_frame_pc (get_selected_frame ());
       for (const solib &so : current_program_space->solibs ())
 	if (solib_contains_address_p (so, curr_pc))
 	  {

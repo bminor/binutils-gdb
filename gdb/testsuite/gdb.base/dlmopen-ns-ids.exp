@@ -134,6 +134,12 @@ proc_with_prefix test_conv_vars {} {
 	    "Verify we're in namespace $dl"
     }
 
+    # Check that we display the namespace of the selected
+    # frame, not the lowermost one.
+    gdb_test "up" "\#1.*in main.*"
+    gdb_test "print \$_linker_namespace" ".* = 0" \
+	"print namespace of selected frame"
+
     gdb_continue_to_breakpoint "first dlclose"
     gdb_test "print \$_active_linker_namespaces" "4" "all SOs loaded"
 
