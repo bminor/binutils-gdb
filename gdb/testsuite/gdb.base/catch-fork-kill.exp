@@ -32,6 +32,8 @@
 
 standard_testfile
 
+require allow_fork_tests
+
 # Build two programs -- one for fork, and another for vfork.
 set testfile_fork "${testfile}-fork"
 set testfile_vfork "${testfile}-vfork"

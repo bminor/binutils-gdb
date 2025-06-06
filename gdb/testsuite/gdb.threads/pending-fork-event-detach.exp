@@ -34,6 +34,8 @@
 # event, and erroneously create a new inferior for it.  Once fixed, the child
 # process' thread is hidden by whoever holds the pending fork event.
 
+require allow_fork_tests
+
 standard_testfile .c -touch-file.c
 
 set touch_file_bin $binfile-touch-file

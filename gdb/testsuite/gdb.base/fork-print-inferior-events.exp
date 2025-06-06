@@ -19,6 +19,8 @@
 # inferior-events [on,off]', 'set follow-fork-mode [child,parent]' and
 # 'set detach-on-fork [on,off]' are the correct ones.
 
+require allow_fork_tests
+
 # This test relies on "run", so it cannot run on target remote stubs.
 require !use_gdb_stub
 
