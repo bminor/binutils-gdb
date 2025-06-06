@@ -432,7 +432,12 @@ wait_for_single (HANDLE handle, DWORD howlong)
 {
   while (true)
     {
-      DWORD r = WaitForSingleObject (handle, howlong);
+      /* Using an INFINITE argument to WaitForSingleObject may cause a system
+	 deadlock.  Avoid it by waiting for a bit in a loop instead.  */
+      DWORD milliseconds = howlong == INFINITE ? 100 : howlong;
+      DWORD r = WaitForSingleObject (handle, milliseconds);
+      if (howlong == INFINITE && r == WAIT_TIMEOUT)
+	continue;
       if (r == WAIT_OBJECT_0)
 	return;
       if (r == WAIT_FAILED)
