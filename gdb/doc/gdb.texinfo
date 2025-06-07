@@ -26638,8 +26638,9 @@ Show whether AArch64 debugging messages are displayed.
 
 @end table
 
-@subsubsection AArch64 SVE.
-@cindex AArch64 SVE.
+@subsubsection AArch64 Scalable Vector Extension
+@cindex Scalable Vector Extension, AArch64
+@cindex SVE, AArch64
 
 When @value{GDBN} is debugging the AArch64 architecture, if the Scalable Vector
 Extension (SVE) is present, then @value{GDBN} will provide the vector registers
@@ -26678,11 +26679,10 @@ internally by @value{GDBN} and the Linux Kernel.
 
 @end itemize
 
-@subsubsection AArch64 SME.
+@subsubsection AArch64 Scalable Matrix Extension
 @anchor{AArch64 SME}
-@cindex SME
-@cindex AArch64 SME
-@cindex Scalable Matrix Extension
+@cindex Scalable Matrix Extension, AArch64
+@cindex SME, AArch64
 
 The Scalable Matrix Extension (@url{https://community.arm.com/arm-community-blogs/b/architectures-and-processors-blog/posts/scalable-matrix-extension-armv9-a-architecture, @acronym{SME}})
 is an AArch64 architecture extension that expands on the concept of the
@@ -26874,11 +26874,10 @@ incorrect values for SVE registers (when in streaming mode).
 This is the same limitation we have for the @acronym{SVE} registers, and there
 are plans to address this limitation going forward.
 
-@subsubsection AArch64 SME2.
+@subsubsection AArch64 Scalable Matrix Extension 2
 @anchor{AArch64 SME2}
-@cindex SME2
-@cindex AArch64 SME2
-@cindex Scalable Matrix Extension 2
+@cindex Scalable Matrix Extension 2, AArch64
+@cindex SME2, AArch64
 
 The Scalable Matrix Extension 2 is an AArch64 architecture extension that
 further expands the @acronym{SME} extension with the following:
@@ -26918,8 +26917,9 @@ For more information about @acronym{SME2}, please refer to the
 official @url{https://developer.arm.com/documentation/ddi0487/latest,
 architecture documentation}.
 
-@subsubsection AArch64 Pointer Authentication.
-@cindex AArch64 Pointer Authentication.
+@subsubsection AArch64 Pointer Authentication
+@cindex Pointer Authentication, AArch64
+@cindex PAC, AArch64
 @anchor{AArch64 PAC}
 
 When @value{GDBN} is debugging the AArch64 architecture, and the program is
@@ -26929,8 +26929,9 @@ When GDB prints a backtrace, any addresses that required unmasking will be
 postfixed with the marker [PAC].  When using the MI, this is printed as part
 of the @code{addr_flags} field.
 
-@subsubsection AArch64 Memory Tagging Extension.
-@cindex AArch64 Memory Tagging Extension.
+@subsubsection AArch64 Memory Tagging Extension
+@cindex Memory Tagging Extension, AArch64
+@cindex MTE, AArch64
 
 When @value{GDBN} is debugging the AArch64 architecture, the program is
 using the v8.5-A feature Memory Tagging Extension (MTE) and there is support
