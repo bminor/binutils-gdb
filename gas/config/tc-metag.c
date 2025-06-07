@@ -4380,11 +4380,10 @@ parse_dsp_addr (const char *line, metag_addr *addr, unsigned int size,
 
   l = parse_dsp_regs_list (l, regs, 1, &regs_read, true, true, load, false);
 
-  if (l == NULL)
+  if (l == NULL || regs_read == 0)
     return NULL;
 
-  if (!is_addr_unit (regs[0]->unit) &&
-      !is_dspram_reg (regs[0]))
+  if (!is_addr_unit (regs[0]->unit) && !is_dspram_reg (regs[0]))
     {
       as_bad (_("invalid register for memory access"));
       return NULL;
@@ -4434,7 +4433,7 @@ parse_dsp_addr (const char *line, metag_addr *addr, unsigned int size,
 
   l = parse_dsp_regs_list (l, regs, 1, &regs_read, true, true, load, false);
 
-  if (l == NULL)
+  if (l == NULL || regs_read == 0)
     return NULL;
 
   if (regs[0]->unit != addr->base_reg->unit)
@@ -4522,7 +4521,7 @@ parse_dget_set (const char *line, metag_insn *insn,
 			       false, false);
     }
 
-  if (l == NULL)
+  if (l == NULL || regs_read == 0)
     return NULL;
 
   /* The first register dictates the unit.  */
