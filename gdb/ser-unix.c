@@ -587,7 +587,7 @@ hardwire_setbaudrate (struct serial *scb, int rate)
 #else
       /* An error should already have been thrown by rate_to_code().
 	 Add an additional error in case execution somehow reaches this line.  */
-      gdb_assert_not_reached (_("Serial baud rate was not found in B_codes"));
+      gdb_assert_not_reached ("Serial baud rate was not found in B_codes");
 #endif
     }
   else
