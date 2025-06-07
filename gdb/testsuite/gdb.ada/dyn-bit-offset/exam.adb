@@ -36,7 +36,7 @@ procedure Exam is
    pragma No_Component_Reordering (Some_Packed_Record);
 
    SPR : Some_Packed_Record := (Discr => 3,
-                                Field => -4,
+                                Field => -5,
                                 Another_Field => -6,
                                 Array_Field => (-5, -6, -7));
 

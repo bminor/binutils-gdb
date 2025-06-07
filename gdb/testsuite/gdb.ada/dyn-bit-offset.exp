@@ -28,19 +28,52 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable $flags] != ""} {
     return -1
 }
 
+# GCC needs to have fixes:
+# - 809b46d2ccc ("Partially lift restriction from loc_list_from_tree_1")
+# - d7f24e37d4b ("Fix oversight about big-endian targets in latest change")
+set have_xfail [gnat_version_compare <= {16 1}]
+
 clean_restart ${testfile}
 
 set bp_location [gdb_get_line_number "STOP" ${testdir}/exam.adb]
 runto "exam.adb:$bp_location"
 
+set re_pass \
+    [string_to_regexp \
+	 " = (discr => 3, array_field => (-5, -6, -7), field => -5, another_field => -6)"]
+set re_xfail_le \
+    [string_to_regexp \
+	 " = (discr => 3, array_field => (-5, -6, -7), field => -4, another_field => -4)"]
+set re_xfail_be \
+    [string_to_regexp \
+	 " = (discr => 3, array_field => (-5, -6, -7), field => -6, another_field => -6)"]
+
 gdb_test_multiple "print spr" "" {
-    -re -wrap " = \\(discr => 3, array_field => \\(-5, -6, -7\\), field => -4, another_field => -6\\)" {
+    -re -wrap $re_pass {
 	pass $gdb_test_name
     }
-    -re -wrap " = \\(discr => 3, array_field => \\(-5, -6, -7\\), field => -4, another_field => -4\\)" {
-	# A known GCC bug.
-	xfail $gdb_test_name
+    -re -wrap $re_xfail_le|$re_xfail_be {
+	if { $have_xfail } {
+	    xfail $gdb_test_name
+	} else {
+	    fail $gdb_test_name
+	}
     }
 }
 
-gdb_test "print spr.field" " = -4"
+set re_pass " = -5"
+set re_xfail_le " = -4"
+set re_xfail_be " = -6"
+
+gdb_test_multiple "print spr.field" "" {
+    -re -wrap $re_pass {
+	pass $gdb_test_name
+    }
+    -re -wrap $re_xfail_le|$re_xfail_be {
+	if { $have_xfail } {
+	    xfail $gdb_test_name
+	} else {
+	    fail $gdb_test_name
+	}
+    }
+}
