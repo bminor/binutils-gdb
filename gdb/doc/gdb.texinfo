@@ -26630,8 +26630,9 @@ Show whether AArch64 debugging messages are displayed.
 
 @end table
 
-@subsubsection AArch64 SVE.
-@cindex AArch64 SVE.
+@subsubsection Scalable Vector Extension
+@cindex AArch64 SVE
+@cindex AArch64 Scalable Vector Extension
 
 When @value{GDBN} is debugging the AArch64 architecture, if the Scalable Vector
 Extension (SVE) is present, then @value{GDBN} will provide the vector registers
@@ -26670,7 +26671,7 @@ internally by @value{GDBN} and the Linux Kernel.
 
 @end itemize
 
-@subsubsection AArch64 SME.
+@subsubsection Scalable Matrix Extension
 @anchor{AArch64 SME}
 @cindex SME
 @cindex AArch64 SME
@@ -26866,7 +26867,7 @@ incorrect values for SVE registers (when in streaming mode).
 This is the same limitation we have for the @acronym{SVE} registers, and there
 are plans to address this limitation going forward.
 
-@subsubsection AArch64 SME2.
+@subsubsection Scalable Matrix Extension 2
 @anchor{AArch64 SME2}
 @cindex SME2
 @cindex AArch64 SME2
@@ -26910,8 +26911,9 @@ For more information about @acronym{SME2}, please refer to the
 official @url{https://developer.arm.com/documentation/ddi0487/latest,
 architecture documentation}.
 
-@subsubsection AArch64 Pointer Authentication.
-@cindex AArch64 Pointer Authentication.
+@subsubsection Pointer Authentication
+@cindex AArch64 PAC
+@cindex AArch64 Pointer Authentication
 @anchor{AArch64 PAC}
 
 When @value{GDBN} is debugging the AArch64 architecture, and the program is
@@ -26921,8 +26923,9 @@ When GDB prints a backtrace, any addresses that required unmasking will be
 postfixed with the marker [PAC].  When using the MI, this is printed as part
 of the @code{addr_flags} field.
 
-@subsubsection AArch64 Memory Tagging Extension.
-@cindex AArch64 Memory Tagging Extension.
+@subsubsection Memory Tagging Extension
+@cindex AArch64 MTE
+@cindex AArch64 Memory Tagging Extension
 
 When @value{GDBN} is debugging the AArch64 architecture, the program is
 using the v8.5-A feature Memory Tagging Extension (MTE) and there is support
@@ -49330,7 +49333,7 @@ registers using the capitalization used in the description.
 @subsection AArch64 Features
 @cindex target descriptions, AArch64 features
 
-@subsubsection AArch64 core registers feature
+@subsubsection Core registers
 
 The @samp{org.gnu.gdb.aarch64.core} feature is required for AArch64
 targets.  It must contain the following:
@@ -49358,7 +49361,7 @@ aarch64-core.xml file.
 Extra registers are allowed in this feature, but they will not affect
 @value{GDBN}.
 
-@subsubsection AArch64 floating-point registers feature
+@subsubsection Floating-point registers
 
 The @samp{org.gnu.gdb.aarch64.fpu} feature is optional.  If present,
 it must contain the following registers:
@@ -49384,7 +49387,7 @@ be found in the aarch64-fpu.xml file.
 Extra registers are allowed in this feature, but they will not affect
 @value{GDBN}.
 
-@subsubsection AArch64 SVE registers feature
+@subsubsection SVE registers
 
 The @samp{org.gnu.gdb.aarch64.sve} feature is optional.  If present,
 it means the target supports the Scalable Vector Extension and must contain
@@ -49438,7 +49441,7 @@ aarch64-sve.c file, and should match what is described in aarch64-fpu.xml.
 Extra registers are allowed in this feature, but they will not affect
 @value{GDBN}.
 
-@subsubsection AArch64 Pointer Authentication registers feature
+@subsubsection Pointer Authentication registers
 
 The @samp{org.gnu.gdb.aarch64.pauth} optional feature was introduced so
 @value{GDBN} could detect support for the Pointer Authentication
@@ -49505,7 +49508,7 @@ Authentication support via the @samp{org.gnu.gdb.aarch64.pauth} feature string
 and also report additional registers the older @value{GDBN} does not know
 about, potentially leading to a crash.
 
-@subsubsection AArch64 TLS registers feature
+@subsubsection TLS registers
 
 The @samp{org.gnu.gdb.aarch64.tls} optional feature was introduced to expose
 the TLS registers to @value{GDBN}.  If present, it must contain either one
@@ -49541,7 +49544,7 @@ determined dynamically at runtime.
 Extra registers are allowed in this feature, but they will not affect
 @value{GDBN}.
 
-@subsubsection AArch64 MTE registers feature
+@subsubsection MTE registers
 
 The @samp{org.gnu.gdb.aarch64.mte} optional feature was introduced so
 @value{GDBN} could detect support for the Memory Tagging Extension and
@@ -49562,7 +49565,7 @@ This restriction may be lifted in the future.
 Extra registers are allowed in this feature, but they will not affect
 @value{GDBN}.
 
-@subsubsection AArch64 SME registers feature
+@subsubsection SME registers
 
 The @samp{org.gnu.gdb.aarch64.sme} feature is optional.  If present,
 it should contain registers @code{ZA}, @code{SVG} and @code{SVCR}.
@@ -49596,7 +49599,7 @@ Extra registers are allowed in this feature, but they will not affect
 The @samp{org.gnu.gdb.aarch64.sme} feature is required when the target also
 reports support for the @samp{org.gnu.gdb.aarch64.sme2} feature.
 
-@subsubsection AArch64 SME2 registers feature
+@subsubsection SME2 registers
 
 The @samp{org.gnu.gdb.aarch64.sme2} feature is optional.  If present,
 then the @samp{org.gnu.gdb.aarch64.sme} feature must also be present.  The
@@ -49724,7 +49727,7 @@ configurations that are meaningful to M-profiles.
 Extra registers are allowed in this feature, but they will not affect
 @value{GDBN}.
 
-@subsubsection FPA registers feature (obsolete)
+@subsubsection FPA registers (obsolete)
 
 The @samp{org.gnu.gdb.arm.fpa} feature is obsolete and should not be
 advertised by debugging stubs anymore.  It used to advertise registers for
@@ -49779,7 +49782,7 @@ contents.
 Extra registers are allowed in this feature, but they will not affect
 @value{GDBN}.
 
-@subsubsection XScale iwMMXt feature
+@subsubsection XScale iwMMXt
 
 The XScale @samp{org.gnu.gdb.xscale.iwmmxt} feature is optional.  If present,
 it must contain the following:
@@ -49813,7 +49816,7 @@ This feature should only be reported if the target is XScale.
 Extra registers are allowed in this feature, but they will not affect
 @value{GDBN}.
 
-@subsubsection Vector Floating-Point (VFP) feature
+@subsubsection Vector Floating-Point (VFP)
 
 The @samp{org.gnu.gdb.arm.vfp} feature is optional.  If present, it
 should contain one of two possible sets of values depending on whether
@@ -49848,7 +49851,7 @@ registers as pseudo-registers.
 Extra registers are allowed in this feature, but they will not affect
 @value{GDBN}.
 
-@subsubsection NEON architecture feature
+@subsubsection NEON architecture
 
 The @samp{org.gnu.gdb.arm.neon} feature is optional.  It does not
 need to contain registers; it instructs @value{GDBN} to display the
@@ -49860,7 +49863,7 @@ be present and include 32 double-precision registers.
 Extra registers are allowed in this feature, but they will not affect
 @value{GDBN}.
 
-@subsubsection M-profile Pointer Authentication and Branch Target Identification feature
+@subsubsection M-profile Pointer Authentication and Branch Target Identification
 
 The @samp{org.gnu.gdb.arm.m-profile-pacbti} feature is optional, and
 acknowledges support for the ARMv8.1-m PACBTI extensions.
@@ -49877,7 +49880,7 @@ AArch64's PAC extension.
 Extra registers are allowed in this feature, but they will not affect
 @value{GDBN}.
 
-@subsubsection M-profile system registers feature
+@subsubsection M-profile system registers
 
 The @samp{org.gnu.gdb.arm.m-system} optional feature was introduced as a way to
 inform @value{GDBN} about additional system registers.
@@ -49900,7 +49903,7 @@ sees this feature, it will attempt to track the values of @samp{msp} and
 Extra registers are allowed in this feature, but they will not affect
 @value{GDBN}.
 
-@subsubsection M-profile Security Extensions feature
+@subsubsection M-profile Security Extensions
 
 The @samp{org.gnu.gdb.arm.secext} optional feature was introduced so
 @value{GDBN} could better support the switching of stack pointers and
@@ -49930,7 +49933,7 @@ unwinding when applications switch between security states.
 Extra registers are allowed in this feature, but they will not affect
 @value{GDBN}.
 
-@subsubsection TLS registers feature
+@subsubsection TLS registers
 
 The optional @samp{org.gnu.gdb.arm.tls} feature contains TLS registers.
 
