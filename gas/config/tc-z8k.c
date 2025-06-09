@@ -1407,7 +1407,7 @@ md_section_align (segT seg, valueT size)
 void
 md_apply_fix (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
 {
-  long val = * (long *) valP;
+  offsetT val = *valP;
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
 
   switch (fixP->fx_r_type)

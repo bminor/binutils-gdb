@@ -1966,7 +1966,7 @@ md_fix_pcrel_adjust (fixS *fixP)
 void
 md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
 {
-  long val = * (long *) valP;
+  long val = *valP;
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
 
   if (fix_bit_fixP (fixP))

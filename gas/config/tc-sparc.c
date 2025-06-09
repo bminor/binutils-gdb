@@ -3460,7 +3460,7 @@ void
 md_apply_fix (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
-  offsetT val = * (offsetT *) valP;
+  offsetT val = *valP;
   long insn;
 
   gas_assert (fixP->fx_r_type < BFD_RELOC_UNUSED);
