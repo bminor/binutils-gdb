@@ -726,3 +726,94 @@ if {[record_full_function "vaddsubps"] == true} {
 }
 gdb_test "finish" "Run till exit from.*vaddsubps_test.*" \
     "leaving vaddsubps"
+
+# Preparation and testing shifting instructions.
+gdb_test_no_output \
+    "set \$ymm0.v2_int128 = {0, 0}" "set ymm0 for shift"
+gdb_test_no_output \
+    "set \$ymm1.v16_int16 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}" \
+    "set ymm1 for shift"
+gdb_test_no_output "set \$xmm2.uint128 = 1" "set ymm2 for shift"
+gdb_test_no_output "set \$ymm15.v2_int128 = {0,0}" "set ymm15 for shift"
+
+if {[record_full_function "shift"] == true} {
+    test_one_register "vpsrldq" "ymm15" \
+	"0x80007000600050004000300, 0x0" \
+	"High ymm register: "
+    test_one_register "vpsrldq" "ymm15" \
+	"0x60005000400030002000100000000, 0xe000d000c000b000a000900000000" \
+	"High xmm register: "
+    test_one_register "vpsrldq" "ymm0" \
+	"0x800070006000500040003000200, 0x0" \
+	"Low ymm register: "
+    test_one_register "vpsrldq" "ymm0" \
+	"0x70006000500040003000200010000, 0xf000e000d000c000b000a00090000" \
+	"Low xmm register: "
+
+    test_one_register "vpslldq" "ymm15" \
+	"0x7000600050004000300020001000000, 0x0" \
+	"High ymm register: "
+    test_one_register "vpslldq" "ymm15" \
+	"0x40003800300020002000180010000, 0x80007800700060006000580050004" \
+	"High xmm register: "
+    test_one_register "vpslldq" "ymm0" \
+	"0x8000700060005000400030002000100, 0x0" \
+	"Low ymm register: "
+    test_one_register "vpslldq" "ymm0" \
+	"0x40003000300020002000100010000, 0x80007000700060006000500050004" \
+	"Low xmm register: "
+
+    test_one_register "vpsrlq" "ymm15" \
+	"0x4000380030000000200018001000, 0x0" \
+	"from register: "
+    test_one_register "vpsrlq" "ymm15" \
+	"0x40003000300020002000100010000, 0x0" \
+	"from constant: "
+    test_one_register "vpsrld" "ymm15" \
+	"0x100000000c0000000800000004000, 0x200010001c0010001800100014001" \
+	"from register: "
+    test_one_register "vpsrld" "ymm15" \
+	"0x40003000300020002000100010000, 0x0" \
+	"from constant: "
+    test_one_register "vpsrlw" "ymm0" \
+	"0x40003000300020002000100010000, 0x0" \
+	"from register: "
+    test_one_register "vpsrlw" "ymm0" \
+	"0x40003000300020002000100010000, 0x80007000700060006000500050004" \
+	"from constant: "
+
+    test_one_register "vpsrad" "ymm15" \
+	"0x100000000c0000000800000004000, 0x200010001c0010001800100014001" \
+	"from register: "
+    test_one_register "vpsrad" "ymm15" \
+	"0x10000e000c000a0008000600040002, 0x20001e001c001a0018001600140012" \
+	"from constant: "
+    test_one_register "vpsraw" "ymm0" \
+	"0x40003000300020002000100010000, 0x0" \
+	"from register: "
+    test_one_register "vpsraw" "ymm0" \
+	"0x10000e000c000a0008000600040002, 0x20001e001c001a0018001600140012" \
+	"from constant: "
+
+    test_one_register "vpsllq" "ymm15" \
+	"0x10000e000c000a00080006000400020, 0x0" \
+	"from register: "
+    test_one_register "vpsllq" "ymm15" \
+	"0x10000e000c000a0008000600040002, 0x0" \
+	"from constant: "
+    test_one_register "vpslld" "ymm15" \
+	"0x400038003000280020001800100008, 0x800078007000680060005800500048" \
+	"from register: "
+    test_one_register "vpslld" "ymm15" "0x0, 0x0" "from constant: "
+    test_one_register "vpsllw" "ymm0" \
+	"0x10000e000c000a0008000600040002, 0x0" \
+	"from register: "
+    test_one_register "vpsllw" "ymm0" "0x0, 0x0" "from constant: "
+
+    gdb_test "record stop" "Process record is stopped.*" \
+	"delete history for shift_test"
+} else {
+    untested "couldn't run shift tests"
+}
+gdb_test "finish" "Run till exit from.*shift_test.*" \
+    "leaving shift"

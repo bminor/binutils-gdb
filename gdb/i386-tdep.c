@@ -5021,6 +5021,15 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
       }
       break;
 
+    case 0x71:	/* VPS[LL|RA|RL]W with constant shift.  */
+    case 0x72:	/* VPS[LL|RA|RL]D with constant shift.  */
+    case 0x73:	/* VPS[LL|RL][Q|DQ] with constant shift.  */
+      {
+	record_full_arch_list_add_reg (ir->regcache,
+				       tdep->ymm0_regnum + ir->vvvv);
+	break;
+      }
+
     case 0x40:	/* VPMULLD  */
     case 0x57:	/* VXORP[S|D]  */
     case 0x58:	/* VPBROADCASTD and VADD[P|S][S|D]  */
@@ -5031,12 +5040,20 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
     case 0x5f:	/* VMAX[P|S][S|D]  */
     case 0x78:	/* VPBROADCASTB  */
     case 0x79:	/* VPBROADCASTW  */
+    case 0xd1:	/* VPSRLW, dynamic shift.  */
+    case 0xd2:	/* VPSRLD, dynamic shift.  */
+    case 0xd3:	/* VPSRLQ, dynamic shift.  */
     case 0xd4:	/* VPADDQ  */
     case 0xd5:	/* VPMULLW  */
     case 0xdb:	/* VPAND  */
     case 0xdf:	/* VPANDN  */
+    case 0xe1:	/* VPSRAW, dynamic shift.  */
+    case 0xe2:	/* VPSRAD, dynamic shift.  */
     case 0xe5:	/* VPMULHW  */
     case 0xe4:	/* VPMULHUW  */
+    case 0xf1:	/* VPSLLW, dynamic shift.  */
+    case 0xf2:	/* VPSLLD, dynamic shift.  */
+    case 0xf3:	/* VPSLLQ, dynamic shift.  */
     case 0xf4:	/* VPMULUDQ  */
     case 0xfc:	/* VPADDB  */
     case 0xfd:	/* VPADDW  */

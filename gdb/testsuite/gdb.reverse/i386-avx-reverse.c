@@ -468,6 +468,52 @@ vaddsubps_test ()
 }
 
 
+/* Test record shifting instructions.  */
+int
+shift_test ()
+{
+  /* start shift_test.  */
+  /* Using GDB, load these values onto registers for testing.
+     ymm0.v2_int128 = {0, 0}
+     ymm1.v16_int16 = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16}
+     xmm2.uint128 = 1
+     ymm15.v2_int128 = {0x0, 0x0}
+     this way it's easy to confirm we're undoing things correctly.  */
+
+  asm volatile ("vpsllw $1, %xmm1, %xmm0");
+  asm volatile ("vpsllw %xmm2, %ymm1, %ymm0");
+  asm volatile ("vpslld $3, %ymm1, %ymm15");
+  asm volatile ("vpslld %xmm2, %xmm1, %xmm15");
+  asm volatile ("vpsllq $5, %xmm1, %xmm15");
+  asm volatile ("vpsllq %xmm2, %ymm1, %ymm15");
+
+  asm volatile ("vpsraw $1, %xmm1, %xmm0");
+  asm volatile ("vpsraw %xmm2, %ymm1, %ymm0");
+  asm volatile ("vpsrad $3, %ymm1, %ymm15");
+  asm volatile ("vpsrad %xmm2, %xmm1, %xmm15");
+
+  asm volatile ("vpsrlw $1, %xmm1, %xmm0");
+  asm volatile ("vpsrlw %xmm2, %ymm1, %ymm0");
+  asm volatile ("vpsrld $3, %ymm1, %ymm15");
+  asm volatile ("vpsrld %xmm2, %xmm1, %xmm15");
+  asm volatile ("vpsrlq $5, %xmm1, %xmm15");
+  asm volatile ("vpsrlq %xmm2, %ymm1, %ymm15");
+
+  /* The dq version is treated separately in the manual, so
+     we test it separately just to be sure.  */
+  asm volatile ("vpslldq $1, %xmm1, %xmm0");
+  asm volatile ("vpslldq $2, %ymm1, %ymm0");
+  asm volatile ("vpslldq $3, %xmm1, %xmm15");
+  asm volatile ("vpslldq $4, %ymm1, %ymm15");
+
+  asm volatile ("vpsrldq $1, %xmm1, %xmm0");
+  asm volatile ("vpsrldq $2, %ymm1, %ymm0");
+  asm volatile ("vpsrldq $3, %xmm1, %xmm15");
+  asm volatile ("vpsrldq $4, %ymm1, %ymm15");
+
+  return 0; /* end shift_test  */
+}
+
 /* This include is used to allocate the dynamic buffer and have
    the pointers aligned to a 32-bit boundary, so we can test instructions
    that require aligned memory.  */
@@ -500,5 +546,6 @@ main ()
   arith_test ();
   vaddsubpd_test ();
   vaddsubps_test ();
+  shift_test ();
   return 0;	/* end of main */
 }
