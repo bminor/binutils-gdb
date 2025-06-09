@@ -443,6 +443,32 @@ async_event_handler_mark ()
   mark_async_event_handler (amd_dbgapi_async_event_handler);
 }
 
+/* Set forward progress requirement to REQUIRE for inferior INFO.  */
+
+static void
+require_forward_progress (amd_dbgapi_inferior_info &info, bool require)
+{
+  /* If we try to disable forward progress requirement but the target expects
+     resumed threads to be committed to the target, we could wait for events
+     that will never arrive.  */
+  if (!require)
+    gdb_assert (!info.inf->process_target ()->commit_resumed_state);
+
+  gdb_assert (info.process_id != AMD_DBGAPI_PROCESS_NONE);
+
+  /* Don't do unnecessary calls to amd-dbgapi to avoid polluting the logs.  */
+  if (info.forward_progress_required == require)
+    return;
+
+  const auto progress
+    = require ? AMD_DBGAPI_PROGRESS_NORMAL : AMD_DBGAPI_PROGRESS_NO_FORWARD;
+  const auto status
+    = amd_dbgapi_process_set_progress (info.process_id, progress);
+  gdb_assert (status == AMD_DBGAPI_STATUS_SUCCESS);
+
+  info.forward_progress_required = require;
+}
+
 /* Set forward progress requirement to REQUIRE for all processes of PROC_TARGET
    matching PTID.  */
 
@@ -450,12 +476,6 @@ static void
 require_forward_progress (ptid_t ptid, process_stratum_target *proc_target,
 			  bool require)
 {
-  /* If we try to disable forward progress requirement but the target expects
-     resumed threads to be committed to the target, we could wait for events
-     that will never arrive.  */
-  if (!require)
-    gdb_assert (!proc_target->commit_resumed_state);
-
   for (inferior *inf : all_inferiors (proc_target))
     {
       if (ptid != minus_one_ptid && inf->pid != ptid.pid ())
@@ -463,21 +483,8 @@ require_forward_progress (ptid_t ptid, process_stratum_target *proc_target,
 
       amd_dbgapi_inferior_info *info = get_amd_dbgapi_inferior_info (inf);
 
-      if (info->process_id == AMD_DBGAPI_PROCESS_NONE)
-	continue;
-
-      /* Don't do unnecessary calls to amd-dbgapi to avoid polluting the logs.  */
-      if (info->forward_progress_required == require)
-	continue;
-
-      amd_dbgapi_status_t status
-	= amd_dbgapi_process_set_progress
-	    (info->process_id, (require
-				? AMD_DBGAPI_PROGRESS_NORMAL
-				: AMD_DBGAPI_PROGRESS_NO_FORWARD));
-      gdb_assert (status == AMD_DBGAPI_STATUS_SUCCESS);
-
-      info->forward_progress_required = require;
+      if (info->process_id != AMD_DBGAPI_PROCESS_NONE)
+	require_forward_progress (*info, require);
 
       /* If ptid targets a single inferior and we have found it, no need to
 	 continue.  */
