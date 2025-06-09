@@ -492,13 +492,6 @@ get_section_by_match (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
 	  && match_section (sec, match));
 }
 
-static void
-free_section_idx (void *ent)
-{
-  string_tuple_t *tuple = ent;
-  free ((char *) tuple->value);
-}
-
 /* Go look in section lists kept per group for SEC_NAME with
    properties given by MATCH.  If info for the group named by
    MATCH->GROUP_NAME has been initialised, set GROUP_IDX.  */
@@ -506,24 +499,24 @@ free_section_idx (void *ent)
 static asection *
 group_section_find (const struct elf_section_match *match,
 		    const char *sec_name,
-		    unsigned int **group_idx)
+		    unsigned int *group_idx)
 {
   if (!groups.indexes)
     {
       groups.num_group = 0;
       groups.head = NULL;
       groups.indexes = htab_create_alloc (16, hash_string_tuple, eq_string_tuple,
-					  free_section_idx, notes_calloc, NULL);
-      *group_idx = NULL;
+					  NULL, notes_calloc, NULL);
+      *group_idx = ~0u;
       return NULL;
     }
 
-  *group_idx = str_hash_find (groups.indexes, match->group_name);
-  if (*group_idx == NULL)
+  *group_idx = str_hash_find_int (groups.indexes, match->group_name);
+  if (*group_idx == ~0u)
     return NULL;
 
   asection *s;
-  for (s = groups.head[**group_idx]; s != NULL; s = elf_next_in_group (s))
+  for (s = groups.head[*group_idx]; s != NULL; s = elf_next_in_group (s))
     if ((s->name == sec_name
 	 || strcmp (s->name, sec_name) == 0)
 	&& match_section (s, match))
@@ -537,12 +530,12 @@ group_section_find (const struct elf_section_match *match,
 static void
 group_section_insert (const struct elf_section_match *match,
 		      asection *sec,
-		      unsigned int **group_idx)
+		      unsigned int *group_idx)
 {
-  if (*group_idx != NULL)
+  if (*group_idx != ~0u)
     {
-      elf_next_in_group (sec) = groups.head[**group_idx];
-      groups.head[**group_idx] = sec;
+      elf_next_in_group (sec) = groups.head[*group_idx];
+      groups.head[*group_idx] = sec;
       return;
     }
 
@@ -553,14 +546,8 @@ group_section_insert (const struct elf_section_match *match,
   groups.num_group += 1;
 
   /* We keep the index into groups.head rather than the entry address
-     because groups.head may be realloc'd, and because str_hash values
-     are a void* we make a copy of the index.  Strictly speaking there
-     is no guarantee that void* can represent any int value, so doing
-     without the indirection by casting an int or even uintptr_t may
-     for example lose lsbs of the value.  */
-  unsigned int *idx_ptr = XNEW (unsigned int);
-  *idx_ptr = i;
-  str_hash_insert (groups.indexes, match->group_name, idx_ptr, 0);
+     because groups.head may be realloc'd.  */
+  str_hash_insert_int (groups.indexes, match->group_name, i, 0);
 }
 
 /* Handle the .section pseudo-op.  This code supports two different
@@ -622,7 +609,7 @@ change_section (const char *name,
 
   obj_elf_section_change_hook ();
 
-  unsigned int *group_idx = NULL;
+  unsigned int group_idx = ~0u;
   if (match_p->group_name)
     old_sec = group_section_find (match_p, name, &group_idx);
   else
@@ -1151,7 +1138,7 @@ elf_set_group_name (asection *sec, const char *gname)
 		    & SEC_ASSEMBLER_SHF_MASK);
   match.flags = bfd_section_flags (sec) & SEC_ASSEMBLER_SECTION_ID;
 
-  unsigned int *group_idx;
+  unsigned int group_idx;
   if (!group_section_find (&match, sec->name, &group_idx))
     group_section_insert (&match, sec, &group_idx);
 }

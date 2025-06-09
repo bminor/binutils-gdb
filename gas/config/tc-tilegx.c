@@ -275,7 +275,7 @@ md_begin (void)
   /* Initialize special operator hash table.  */
   special_operator_hash = str_htab_create ();
 #define INSERT_SPECIAL_OP(name)					\
-  str_hash_insert (special_operator_hash, #name, (void *) O_##name, 0)
+  str_hash_insert_int (special_operator_hash, #name, O_##name, 0)
 
   INSERT_SPECIAL_OP (hw0);
   INSERT_SPECIAL_OP (hw1);
@@ -285,7 +285,7 @@ md_begin (void)
   INSERT_SPECIAL_OP (hw1_last);
   INSERT_SPECIAL_OP (hw2_last);
   /* hw3_last is a convenience alias for the equivalent hw3.  */
-  str_hash_insert (special_operator_hash, "hw3_last", (void *) O_hw3, 0);
+  str_hash_insert_int (special_operator_hash, "hw3_last", O_hw3, 0);
   INSERT_SPECIAL_OP (hw0_got);
   INSERT_SPECIAL_OP (hw0_last_got);
   INSERT_SPECIAL_OP (hw1_last_got);
@@ -329,14 +329,14 @@ md_begin (void)
     {
       char buf[64];
 
-      str_hash_insert (main_reg_hash, tilegx_register_names[i],
-		       (void *) (long) (i | CANONICAL_REG_NAME_FLAG), 0);
+      str_hash_insert_int (main_reg_hash, tilegx_register_names[i],
+			   i | CANONICAL_REG_NAME_FLAG, 0);
 
       /* See if we should insert a noncanonical alias, like r63.  */
       sprintf (buf, "r%d", i);
       if (strcmp (buf, tilegx_register_names[i]) != 0)
-	str_hash_insert (main_reg_hash, xstrdup (buf),
-			 (void *) (long) (i | NONCANONICAL_REG_NAME_FLAG), 0);
+	str_hash_insert_int (main_reg_hash, xstrdup (buf),
+			     i | NONCANONICAL_REG_NAME_FLAG, 0);
     }
 }
 
@@ -1027,10 +1027,10 @@ tilegx_parse_name (char *name, expressionS *e, char *nextcharP)
   else
     {
       /* Look up the operator in our table.  */
-      void* val = str_hash_find (special_operator_hash, name);
-      if (val == 0)
+      int opint = str_hash_find_int (special_operator_hash, name);
+      if (opint < 0)
 	return 0;
-      op = (operatorT)(long)val;
+      op = opint;
     }
 
   /* Restore old '(' and skip it.  */
@@ -1083,23 +1083,17 @@ tilegx_parse_name (char *name, expressionS *e, char *nextcharP)
 static void
 parse_reg_expression (expressionS* expression)
 {
-  char *regname;
-  char terminating_char;
-  void *pval;
-  int regno_and_flags;
-  int regno;
-
   /* Zero everything to make sure we don't miss any flags.  */
   memset (expression, 0, sizeof *expression);
 
-  terminating_char = get_symbol_name (&regname);
+  char *regname;
+  char terminating_char = get_symbol_name (&regname);
 
-  pval = str_hash_find (main_reg_hash, regname);
-  if (pval == NULL)
+  int regno_and_flags = str_hash_find_int (main_reg_hash, regname);
+  if (regno_and_flags < 0)
     as_bad (_("Expected register, got '%s'."), regname);
 
-  regno_and_flags = (int)(size_t)pval;
-  regno = EXTRACT_REGNO(regno_and_flags);
+  int regno = EXTRACT_REGNO(regno_and_flags);
 
   if ((regno_and_flags & NONCANONICAL_REG_NAME_FLAG)
       && require_canonical_reg_names)

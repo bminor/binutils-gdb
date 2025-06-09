@@ -841,8 +841,7 @@ md_begin (void)
   for (i = 0; i < ARRAY_SIZE (avr_no_sreg); ++i)
     {
       gas_assert (str_hash_find (avr_hash, avr_no_sreg[i]));
-      str_hash_insert (avr_no_sreg_hash, avr_no_sreg[i],
-		       (void *) 4 /* dummy */, 0);
+      str_hash_insert_int (avr_no_sreg_hash, avr_no_sreg[i], 0 /* dummy */, 0);
     }
 
   avr_gccisr_opcode = (struct avr_opcodes_s*) str_hash_find (avr_hash,
@@ -2464,7 +2463,7 @@ avr_update_gccisr (struct avr_opcodes_s *opcode, int reg1, int reg2)
   /* SREG: Look up instructions that don't clobber SREG.  */
 
   if (!avr_isr.need_sreg
-      && !str_hash_find (avr_no_sreg_hash, opcode->name))
+      && str_hash_find_int (avr_no_sreg_hash, opcode->name) < 0)
     {
       avr_isr.need_sreg = 1;
     }

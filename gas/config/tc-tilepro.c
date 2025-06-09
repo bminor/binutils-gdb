@@ -218,7 +218,7 @@ md_begin (void)
   /* Initialize special operator hash table.  */
   special_operator_hash = str_htab_create ();
 #define INSERT_SPECIAL_OP(name)					\
-  str_hash_insert (special_operator_hash, #name, (void *) O_##name, 0)
+  str_hash_insert_int (special_operator_hash, #name, O_##name, 0)
 
   INSERT_SPECIAL_OP(lo16);
   INSERT_SPECIAL_OP(hi16);
@@ -265,29 +265,29 @@ md_begin (void)
     {
       char buf[64];
 
-      str_hash_insert (main_reg_hash, tilepro_register_names[i],
-		       (void *) (long) (i | CANONICAL_REG_NAME_FLAG), 0);
+      str_hash_insert_int (main_reg_hash, tilepro_register_names[i],
+			   i | CANONICAL_REG_NAME_FLAG, 0);
 
       /* See if we should insert a noncanonical alias, like r63.  */
       sprintf (buf, "r%d", i);
       if (strcmp (buf, tilepro_register_names[i]) != 0)
-	str_hash_insert (main_reg_hash, xstrdup (buf),
-			 (void *) (long) (i | NONCANONICAL_REG_NAME_FLAG), 0);
+	str_hash_insert_int (main_reg_hash, xstrdup (buf),
+			     i | NONCANONICAL_REG_NAME_FLAG, 0);
     }
 
   /* Insert obsolete backwards-compatibility register names.  */
-  str_hash_insert (main_reg_hash, "io0",
-		   (void *) (long) (TREG_IDN0 | CANONICAL_REG_NAME_FLAG), 0);
-  str_hash_insert (main_reg_hash, "io1",
-		   (void *) (long) (TREG_IDN1 | CANONICAL_REG_NAME_FLAG), 0);
-  str_hash_insert (main_reg_hash, "us0",
-		   (void *) (long) (TREG_UDN0 | CANONICAL_REG_NAME_FLAG), 0);
-  str_hash_insert (main_reg_hash, "us1",
-		   (void *) (long) (TREG_UDN1 | CANONICAL_REG_NAME_FLAG), 0);
-  str_hash_insert (main_reg_hash, "us2",
-		   (void *) (long) (TREG_UDN2 | CANONICAL_REG_NAME_FLAG), 0);
-  str_hash_insert (main_reg_hash, "us3",
-		   (void *) (long) (TREG_UDN3 | CANONICAL_REG_NAME_FLAG), 0);
+  str_hash_insert_int (main_reg_hash, "io0",
+		       TREG_IDN0 | CANONICAL_REG_NAME_FLAG, 0);
+  str_hash_insert_int (main_reg_hash, "io1",
+		       TREG_IDN1 | CANONICAL_REG_NAME_FLAG, 0);
+  str_hash_insert_int (main_reg_hash, "us0",
+		       TREG_UDN0 | CANONICAL_REG_NAME_FLAG, 0);
+  str_hash_insert_int (main_reg_hash, "us1",
+		       TREG_UDN1 | CANONICAL_REG_NAME_FLAG, 0);
+  str_hash_insert_int (main_reg_hash, "us2",
+		       TREG_UDN2 | CANONICAL_REG_NAME_FLAG, 0);
+  str_hash_insert_int (main_reg_hash, "us3",
+		       TREG_UDN3 | CANONICAL_REG_NAME_FLAG, 0);
 
 }
 
@@ -915,10 +915,10 @@ tilepro_parse_name (char *name, expressionS *e, char *nextcharP)
   else
     {
       /* Look up the operator in our table.  */
-      void *val = str_hash_find (special_operator_hash, name);
-      if (val == 0)
+      int opint = str_hash_find_int (special_operator_hash, name);
+      if (opint < 0)
 	return 0;
-      op = (operatorT)(long)val;
+      op = opint;
     }
 
   /* Restore old '(' and skip it.  */
@@ -977,12 +977,10 @@ parse_reg_expression (expressionS* expression)
   char *regname;
   char terminating_char = get_symbol_name (&regname);
 
-  void* pval = str_hash_find (main_reg_hash, regname);
-
-  if (pval == NULL)
+  int regno_and_flags = str_hash_find_int (main_reg_hash, regname);
+  if (regno_and_flags < 0)
     as_bad (_("Expected register, got '%s'."), regname);
 
-  int regno_and_flags = (int)(size_t)pval;
   int regno = EXTRACT_REGNO(regno_and_flags);
 
   if ((regno_and_flags & NONCANONICAL_REG_NAME_FLAG)

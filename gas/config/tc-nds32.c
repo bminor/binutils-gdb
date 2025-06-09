@@ -6265,7 +6265,7 @@ static int
 nds32_elf_append_relax_relocs_traverse (void **slot, void *arg ATTRIBUTE_UNUSED)
 {
   string_tuple_t *tuple = *((string_tuple_t **) slot);
-  nds32_elf_append_relax_relocs (tuple->key, tuple->value);
+  nds32_elf_append_relax_relocs (tuple->key, (void *) tuple->value);
   return 1;
 }
 
