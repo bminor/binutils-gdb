@@ -53,6 +53,20 @@ proc do_test { displaced with_bp } {
 		    continue
 		}
 
+		gdb_breakpoint "child_function"
+
+		# Don't assume the testcase's child thread has GDB
+		# thread id 2.  On some systems, like e.g.,
+		# Cygwin/Windows the OS/runtime spawns helper threads
+		# before the child thread is spawned.
+		set thr_child "unknown"
+		gdb_test_multiple "c" "run to child thread" {
+		    -re -wrap "Thread ($::decimal) .*hit Breakpoint .*, child_function.*" {
+			set thr_child $expect_out(1,string)
+			pass $gdb_test_name
+		    }
+		}
+
 		gdb_test_no_output "set displaced-stepping $displaced"
 
 		set line [gdb_get_line_number "set wait-thread breakpoint here"]
@@ -60,15 +74,15 @@ proc do_test { displaced with_bp } {
 		    return
 		}
 		gdb_continue_to_breakpoint "run to wait-thread breakpoint"
-		gdb_test "info threads" "\\\* 1 .*  2 .*" "info threads shows all threads"
+		gdb_test "info threads" "\\\* 1 .*  $thr_child .*" "info threads shows all threads"
 
 		gdb_test_no_output "set scheduler-locking on"
 
 		delete_breakpoints
 
 		gdb_breakpoint [gdb_get_line_number "set breakpoint child here"]
-		gdb_test "thread 2" "Switching to .*"
-		gdb_continue_to_breakpoint "run to breakpoint in thread 2"
+		gdb_test "thread $thr_child" "Switching to .*" "switch to child thread"
+		gdb_continue_to_breakpoint "run to breakpoint in child thread"
 
 		set address_triggers_watch "<invalid>"
 		set after_address_triggers_watch "<invalid>"
