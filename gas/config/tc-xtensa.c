@@ -7660,6 +7660,12 @@ static size_t xg_find_chain_entry (struct trampoline_chain *tc,
   return a;
 }
 
+static valueT
+vma_abs (offsetT v)
+{
+  return v < 0 ? -(valueT) v : (valueT) v;
+}
+
 /* Find the best jump target for the source in the given trampoline chain.
    The best jump target is the one that results in the shortest path to the
    final target, it's the location of the jump closest to the final target,
@@ -7686,7 +7692,7 @@ xg_get_best_chain_entry (struct trampoline_chain *tc, addressT source)
       chained_target = S_GET_VALUE(next->sym) + next->offset;
       off = source - chained_target;
 
-      if (labs (off) >= J_RANGE - J_MARGIN)
+      if (vma_abs (off) >= J_RANGE - J_MARGIN)
 	break;
 
       i += step;
@@ -7696,8 +7702,8 @@ xg_get_best_chain_entry (struct trampoline_chain *tc, addressT source)
   chained_target = S_GET_VALUE(e->sym) + e->offset;
   off = source - chained_target;
 
-  if (labs (off) < J_MARGIN ||
-      labs (off) >= J_RANGE - J_MARGIN)
+  if (vma_abs (off) < J_MARGIN
+      || vma_abs (off) >= J_RANGE - J_MARGIN)
     return &tc->target;
   return tc->entry + i;
 }
@@ -9359,7 +9365,7 @@ static addressT xg_get_fulcrum (addressT source, addressT target)
   offsetT delta = target - source;
   int n;
 
-  n = (labs (delta) + J_RANGE - J_MARGIN - 1) / (J_RANGE - J_MARGIN);
+  n = (vma_abs (delta) + J_RANGE - J_MARGIN - 1) / (J_RANGE - J_MARGIN);
   return source + delta / n;
 }
 
@@ -9410,11 +9416,11 @@ static size_t xg_find_best_trampoline (struct trampoline_index *idx,
 	    /* Stop if some trampoline is found and the search is more than
 	       J_RANGE / 4 from the projected fulcrum.  A trampoline w/o jump
 	       around is nice, but it shouldn't have much overhead.  */
-	    if (best < idx->n_entries && labs (off) > J_RANGE / 4)
+	    if (best < idx->n_entries && vma_abs (off) > J_RANGE / 4)
 	      return best;
 
 	    off = trampoline_frag->fr_address - source;
-	    if (labs (off) < J_RANGE - J_MARGIN)
+	    if (vma_abs (off) < J_RANGE - J_MARGIN)
 	      {
 		++checked;
 		/* Stop if a trampoline w/o jump around is found or initialized
@@ -9480,7 +9486,7 @@ static bool xg_is_relaxable_fixup (fixS *fixP)
   target = S_GET_VALUE (s) + fixP->fx_offset;
   delta = target - addr;
 
-  if (labs (delta) < J_RANGE - J_MARGIN)
+  if (vma_abs (delta) < J_RANGE - J_MARGIN)
     return false;
 
   xtensa_insnbuf_from_chars (isa, trampoline_buf,
