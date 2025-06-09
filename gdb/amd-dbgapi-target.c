@@ -450,6 +450,12 @@ static void
 require_forward_progress (ptid_t ptid, process_stratum_target *proc_target,
 			  bool require)
 {
+  /* If we try to disable forward progress requirement but the target expects
+     resumed threads to be committed to the target, we could wait for events
+     that will never arrive.  */
+  if (!require)
+    gdb_assert (!proc_target->commit_resumed_state);
+
   for (inferior *inf : all_inferiors (proc_target))
     {
       if (ptid != minus_one_ptid && inf->pid != ptid.pid ())
