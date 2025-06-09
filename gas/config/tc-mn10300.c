@@ -1247,7 +1247,7 @@ md_assemble (char *str)
     *s++ = '\0';
 
   /* Find the first opcode with the proper name.  */
-  opcode = (struct mn10300_opcode *) str_hash_find (mn10300_hash, str);
+  opcode = str_hash_find (mn10300_hash, str);
   if (opcode == NULL)
     {
       as_bad (_("Unrecognized opcode: `%s'"), str);

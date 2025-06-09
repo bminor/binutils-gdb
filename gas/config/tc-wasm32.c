@@ -746,7 +746,7 @@ md_assemble (char *str)
   if (!op[0])
     as_bad (_("can't find opcode "));
 
-  opcode = (struct wasm32_opcode_s *) str_hash_find (wasm32_hash, op);
+  opcode = str_hash_find (wasm32_hash, op);
 
   if (opcode == NULL)
     {

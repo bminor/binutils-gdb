@@ -9031,7 +9031,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
   r[1] = BFD_RELOC_UNUSED;
   r[2] = BFD_RELOC_UNUSED;
   hash = mips_opts.micromips ? micromips_op_hash : op_hash;
-  amo = (struct mips_opcode *) str_hash_find (hash, name);
+  amo = str_hash_find (hash, name);
   gas_assert (amo);
   gas_assert (strcmp (name, amo->name) == 0);
 
@@ -9189,7 +9189,7 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
   bfd_reloc_code_real_type r[3]
     = {BFD_RELOC_UNUSED, BFD_RELOC_UNUSED, BFD_RELOC_UNUSED};
 
-  mo = (struct mips_opcode *) str_hash_find (mips16_op_hash, name);
+  mo = str_hash_find (mips16_op_hash, name);
   gas_assert (mo);
   gas_assert (strcmp (name, mo->name) == 0);
 
@@ -14266,7 +14266,7 @@ mips_lookup_insn (htab_t hash, const char *start,
   name = xstrndup (start, length);
 
   /* Look up the instruction as-is.  */
-  insn = (struct mips_opcode *) str_hash_find (hash, name);
+  insn = str_hash_find (hash, name);
   if (insn)
     goto end;
 
@@ -14278,7 +14278,7 @@ mips_lookup_insn (htab_t hash, const char *start,
       if (*p == 0 && mask != 0)
 	{
 	  *dot = 0;
-	  insn = (struct mips_opcode *) str_hash_find (hash, name);
+	  insn = str_hash_find (hash, name);
 	  *dot = '.';
 	  if (insn && (insn->pinfo2 & INSN2_VU0_CHANNEL_SUFFIX) != 0)
 	    {
@@ -14304,7 +14304,7 @@ mips_lookup_insn (htab_t hash, const char *start,
       if (suffix)
 	{
 	  memmove (name + opend - 2, name + opend, length - opend + 1);
-	  insn = (struct mips_opcode *) str_hash_find (hash, name);
+	  insn = str_hash_find (hash, name);
 	  if (insn)
 	    {
 	      forced_insn_length = suffix;
@@ -14418,7 +14418,7 @@ mips16_ip (char *str, struct mips_cl_insn *insn)
   forced_insn_length = l;
 
   *end = 0;
-  first = (struct mips_opcode *) str_hash_find (mips16_op_hash, str);
+  first = str_hash_find (mips16_op_hash, str);
   *end = c;
 
   if (!first)

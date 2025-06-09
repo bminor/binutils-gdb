@@ -710,7 +710,7 @@ md_assemble (char *instruction_string)
 
   c = *p;
   *p = '\0';
-  op = (struct pdp11_opcode *)str_hash_find (insn_hash, str);
+  op = str_hash_find (insn_hash, str);
   *p = c;
   if (op == 0)
     {

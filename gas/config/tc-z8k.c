@@ -1236,7 +1236,7 @@ md_assemble (char *str)
 
   *op_end = 0;  /* Zero-terminate op code string for str_hash_find() call.  */
 
-  opcode = (opcode_entry_type *) str_hash_find (opcode_hash_control, op_start);
+  opcode = str_hash_find (opcode_hash_control, op_start);
 
   if (opcode == NULL)
     {

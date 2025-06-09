@@ -2180,7 +2180,7 @@ find_cooked_opcode (char **str_p)
   if (nlen == 0)
     as_bad (_("can't find opcode "));
 
-  return (sh_opcode_info *) str_hash_find (opcode_hash_control, name);
+  return str_hash_find (opcode_hash_control, name);
 }
 
 /* Assemble a parallel processing insn.  */

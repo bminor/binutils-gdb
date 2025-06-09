@@ -882,7 +882,7 @@ md_assemble (char * str)
       return;
     }
 
-  opcode = (mcore_opcode_info *) str_hash_find (opcode_hash_control, name);
+  opcode = str_hash_find (opcode_hash_control, name);
   if (opcode == NULL)
     {
       as_bad (_("unknown opcode \"%s\""), name);

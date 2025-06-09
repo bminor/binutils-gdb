@@ -1040,7 +1040,7 @@ s3_score_reg_parse (char **ccp, htab_t htab)
     c = *p++;
 
   *--p = 0;
-  reg = (struct s3_reg_entry *) str_hash_find (htab, start);
+  reg = str_hash_find (htab, start);
   *p = c;
 
   if (reg)
@@ -2199,8 +2199,7 @@ s3_dependency_type_from_insn (char *insn_name)
   const struct s3_insn_to_dependency *tmp;
 
   strcpy (name, insn_name);
-  tmp = (const struct s3_insn_to_dependency *)
-    str_hash_find (s3_dependency_insn_hsh, name);
+  tmp = str_hash_find (s3_dependency_insn_hsh, name);
 
   if (tmp)
     return tmp->type;
@@ -2659,8 +2658,7 @@ s3_parse_16_32_inst (char *insnstr, bool gen_frag_p)
   c = *p;
   *p = '\0';
 
-  opcode = (const struct s3_asm_opcode *) str_hash_find (s3_score_ops_hsh,
-							 operator);
+  opcode = str_hash_find (s3_score_ops_hsh, operator);
   *p = c;
 
   memset (&s3_inst, '\0', sizeof (s3_inst));
@@ -2706,8 +2704,7 @@ s3_parse_48_inst (char *insnstr, bool gen_frag_p)
   c = *p;
   *p = '\0';
 
-  opcode = (const struct s3_asm_opcode *) str_hash_find (s3_score_ops_hsh,
-							 operator);
+  opcode = str_hash_find (s3_score_ops_hsh, operator);
   *p = c;
 
   memset (&s3_inst, '\0', sizeof (s3_inst));

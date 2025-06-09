@@ -10646,7 +10646,7 @@ md_assemble (char *str)
 
   ch = get_symbol_name (&temp);
   mnemonic = temp;
-  pdesc = (struct pseudo_opcode *) str_hash_find (md.pseudo_hash, mnemonic);
+  pdesc = str_hash_find (md.pseudo_hash, mnemonic);
   if (pdesc)
     {
       (void) restore_line_pointer (ch);
@@ -11779,7 +11779,7 @@ dot_alias (int section)
 
   /* Check if alias has been used before.  */
 
-  h = (struct alias *) str_hash_find (ahash, alias);
+  h = str_hash_find (ahash, alias);
   if (h)
     {
       if (strcmp (h->name, name))
@@ -11790,7 +11790,7 @@ dot_alias (int section)
     }
 
   /* Check if name already has an alias.  */
-  a = (const char *) str_hash_find (nhash, name);
+  a = str_hash_find (nhash, name);
   if (a)
     {
       if (strcmp (a, alias))

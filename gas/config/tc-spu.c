@@ -273,7 +273,7 @@ md_assemble (char *op)
 
   /* try to find the instruction in the hash table */
 
-  if ((format = (struct spu_opcode *) str_hash_find (op_hash, op)) == NULL)
+  if ((format = str_hash_find (op_hash, op)) == NULL)
     {
       as_bad (_("Invalid mnemonic '%s'"), op);
       return;

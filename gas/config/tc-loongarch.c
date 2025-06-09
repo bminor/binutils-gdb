@@ -1056,8 +1056,7 @@ get_loongarch_opcode (struct loongarch_cl_insn *insn)
 	      if ((!it->include || (it->include && *it->include))
 		  && (!it->exclude || (it->exclude && !(*it->exclude)))
 		  && !(it->pinfo & INSN_DIS_ALIAS))
-		str_hash_insert (ase->name_hash_entry, it->name,
-				 (void *) it, 0);
+		str_hash_insert (ase->name_hash_entry, it->name, it, 0);
 	    }
 	}
 

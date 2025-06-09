@@ -516,7 +516,7 @@ tic30_operand (char *token)
 	  return NULL;
 	}
 
-      ind_addr_op = (ind_addr_type *) str_hash_find (ind_hash, ind_buffer);
+      ind_addr_op = str_hash_find (ind_hash, ind_buffer);
       if (ind_addr_op)
 	{
 	  debug ("Found indirect reference: %s\n", ind_addr_op->syntax);
@@ -555,7 +555,7 @@ tic30_operand (char *token)
     }
   else
     {
-      reg *regop = (reg *) str_hash_find (reg_hash, token);
+      reg *regop = str_hash_find (reg_hash, token);
 
       if (regop)
 	{
@@ -652,7 +652,7 @@ tic30_parallel_insn (char *token)
     /* Find instruction.  */
     save_char = *current_posn;
     *current_posn = '\0';
-    p_opcode = (partemplate *) str_hash_find (parop_hash, token);
+    p_opcode = str_hash_find (parop_hash, token);
     if (p_opcode)
       {
 	debug ("Found instruction %s\n", p_opcode->name);
@@ -697,7 +697,7 @@ tic30_parallel_insn (char *token)
 	debug ("first_opcode = %s\n", first_opcode);
 	debug ("second_opcode = %s\n", second_opcode);
 	sprintf (token, "q_%s_%s", second_opcode, first_opcode);
-	p_opcode = (partemplate *) str_hash_find (parop_hash, token);
+	p_opcode = str_hash_find (parop_hash, token);
 
 	if (p_opcode)
 	  {
@@ -1443,7 +1443,7 @@ md_assemble (char *line)
     /* Find instruction.  */
     save_char = *current_posn;
     *current_posn = '\0';
-    op = (insn_template *) str_hash_find (op_hash, token_start);
+    op = str_hash_find (op_hash, token_start);
     if (op)
       {
 	debug ("Found instruction %s\n", op->name);

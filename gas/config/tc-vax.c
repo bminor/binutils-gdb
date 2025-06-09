@@ -1882,7 +1882,7 @@ vip (struct vit *vitP,		/* We build an exploded instruction here.  */
       /* Here with instring pointing to what better be an op-name, and p
          pointing to character just past that.
          We trust instring points to an op-name, with no whitespace.  */
-      vwP = (struct vot_wot *) str_hash_find (op_hash, instring);
+      vwP = str_hash_find (op_hash, instring);
       /* Restore char after op-code.  */
       *p = c;
       if (vwP == 0)

@@ -979,9 +979,9 @@ md_begin (void)
     {
       const struct sparc_opcode *insn;
       const char *name = ((sparc_arch_size == 32)
-		    ? native_op_table[i].name32
-		    : native_op_table[i].name64);
-      insn = (struct sparc_opcode *) str_hash_find (op_hash, name);
+			  ? native_op_table[i].name32
+			  : native_op_table[i].name64);
+      insn = str_hash_find (op_hash, name);
       if (insn == NULL)
 	{
 	  as_bad (_("Internal error: can't find opcode `%s' for `%s'\n"),
@@ -1756,7 +1756,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
       *pinsn = NULL;
       return special_case;
     }
-  insn = (struct sparc_opcode *) str_hash_find (op_hash, str);
+  insn = str_hash_find (op_hash, str);
   *pinsn = insn;
   if (insn == NULL)
     {

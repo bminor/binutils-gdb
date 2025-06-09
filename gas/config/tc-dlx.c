@@ -683,7 +683,7 @@ machine_ip (char *str)
     }
 
   /* Hash the opcode, insn will have the string from opcode table.  */
-  if ((insn = (struct machine_opcode *) str_hash_find (op_hash, str)) == NULL)
+  if ((insn = str_hash_find (op_hash, str)) == NULL)
     {
       /* Handle the ret and return macro here.  */
       if ((strcmp (str, "ret") == 0) || (strcmp (str, "return") == 0))

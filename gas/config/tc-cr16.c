@@ -329,7 +329,7 @@ get_register (char *reg_name)
 {
   const reg_entry *rreg;
 
-  rreg = (const reg_entry *) str_hash_find (reg_hash, reg_name);
+  rreg = str_hash_find (reg_hash, reg_name);
 
   if (rreg != NULL)
     return rreg->value.reg_val;
@@ -350,10 +350,10 @@ get_register_pair (char *reg_name)
       tmp_rp[0] = '(';
       strcat (tmp_rp, reg_name);
       strcat (tmp_rp,")");
-      rreg = (const reg_entry *) str_hash_find (regp_hash, tmp_rp);
+      rreg = str_hash_find (regp_hash, tmp_rp);
     }
   else
-    rreg = (const reg_entry *) str_hash_find (regp_hash, reg_name);
+    rreg = str_hash_find (regp_hash, reg_name);
 
   if (rreg != NULL)
     return rreg->value.reg_val;
@@ -368,7 +368,7 @@ get_index_register (char *reg_name)
 {
   const reg_entry *rreg;
 
-  rreg = (const reg_entry *) str_hash_find (reg_hash, reg_name);
+  rreg = str_hash_find (reg_hash, reg_name);
 
   if ((rreg != NULL)
       && ((rreg->value.reg_val == 12) || (rreg->value.reg_val == 13)))
@@ -383,7 +383,7 @@ get_index_register_pair (char *reg_name)
 {
   const reg_entry *rreg;
 
-  rreg = (const reg_entry *) str_hash_find (regp_hash, reg_name);
+  rreg = str_hash_find (regp_hash, reg_name);
 
   if (rreg != NULL)
     {
@@ -404,7 +404,7 @@ get_pregister (char *preg_name)
 {
   const reg_entry *prreg;
 
-  prreg = (const reg_entry *) str_hash_find (preg_hash, preg_name);
+  prreg = str_hash_find (preg_hash, preg_name);
 
   if (prreg != NULL)
     return prreg->value.preg_val;
@@ -419,7 +419,7 @@ get_pregisterp (char *preg_name)
 {
   const reg_entry *prreg;
 
-  prreg = (const reg_entry *) str_hash_find (pregp_hash, preg_name);
+  prreg = str_hash_find (pregp_hash, preg_name);
 
   if (prreg != NULL)
     return prreg->value.preg_val;
@@ -2469,7 +2469,7 @@ cr16_assemble (const char *op, char *param)
   ins cr16_ins;
 
   /* Find the instruction.  */
-  instruction = (const inst *) str_hash_find (cr16_inst_hash, op);
+  instruction = str_hash_find (cr16_inst_hash, op);
   if (instruction == NULL)
     {
       as_bad (_("Unknown opcode: `%s'"), op);
@@ -2539,7 +2539,7 @@ md_assemble (char *op)
     {
       strcpy (param1, param);
       /* Find the instruction.  */
-      instruction = (const inst *) str_hash_find (cr16_inst_hash, op);
+      instruction = str_hash_find (cr16_inst_hash, op);
       parse_operands (&cr16_ins, param1);
       if (((&cr16_ins)->arg[0].type == arg_ic)
 	  && ((&cr16_ins)->arg[0].constant >= 0))

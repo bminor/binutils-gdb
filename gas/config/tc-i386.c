@@ -10839,8 +10839,7 @@ process_operands (void)
 	     and 3 sources.  */
 	  for (j = i.operands; j > 0; j--)
 	    copy_operand (j, j - 1);
-	  i.op[0].regs
-	    = (const reg_entry *) str_hash_find (reg_hash, "xmm0");
+	  i.op[0].regs = str_hash_find (reg_hash, "xmm0");
 	  i.types[0] = regxmm;
 	  i.tm.operand_types[0] = regxmm;
 
@@ -15107,9 +15106,8 @@ i386_index_check (const char *operand_string)
 	      || ((!i.mem_operands != !intel_syntax)
 		  && t->operand_types[1].bitfield.baseindex))
 	    op = 1;
-	  expected_reg
-	    = (const reg_entry *) str_hash_find (reg_hash,
-						 di_si[addr_mode][op == es_op]);
+	  expected_reg = str_hash_find (reg_hash,
+					di_si[addr_mode][op == es_op]);
 	}
       else
 	{
@@ -16831,7 +16829,7 @@ parse_real_register (const char *reg_string, char **end_op)
 
   *end_op = (char *) s;
 
-  r = (const reg_entry *) str_hash_find (reg_hash, reg_name_given);
+  r = str_hash_find (reg_hash, reg_name_given);
 
   /* Handle floating point regs, allowing spaces in the (i) part.  */
   if (r == reg_st0)

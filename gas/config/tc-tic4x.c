@@ -2450,8 +2450,7 @@ md_assemble (char *str)
 
   if (insn->in_use)
     {
-      if ((insn->inst = (struct tic4x_inst *)
-	   str_hash_find (tic4x_op_hash, insn->name)) == NULL)
+      if ((insn->inst = str_hash_find (tic4x_op_hash, insn->name)) == NULL)
 	{
 	  as_bad (_("Unknown opcode `%s'."), insn->name);
 	  insn->parallel = 0;

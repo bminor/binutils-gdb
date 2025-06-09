@@ -801,7 +801,7 @@ tic54x_tag (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
   int c = get_symbol_name (&name);
-  struct stag *stag = (struct stag *) str_hash_find (stag_hash, name);
+  struct stag *stag = str_hash_find (stag_hash, name);
 
   if (!stag)
     {
@@ -2733,7 +2733,7 @@ subsym_isreg (char *a, char *ignore ATTRIBUTE_UNUSED)
 static int
 subsym_structsz (char *name, char *ignore ATTRIBUTE_UNUSED)
 {
-  struct stag *stag = (struct stag *) str_hash_find (stag_hash, name);
+  struct stag *stag = str_hash_find (stag_hash, name);
 
   if (stag)
     return stag->size;
@@ -3667,7 +3667,7 @@ encode_integer (tic54x_insn *insn,
 static int
 encode_condition (tic54x_insn *insn, struct opstruct *operand)
 {
-  tic54x_symbol *cc = (tic54x_symbol *) str_hash_find (cc_hash, operand->buf);
+  tic54x_symbol *cc = str_hash_find (cc_hash, operand->buf);
   if (!cc)
     {
       as_bad (_("Unrecognized condition code \"%s\""), operand->buf);
@@ -3727,7 +3727,7 @@ encode_condition (tic54x_insn *insn, struct opstruct *operand)
 static int
 encode_cc3 (tic54x_insn *insn, struct opstruct *operand)
 {
-  tic54x_symbol *cc3 = (tic54x_symbol *) str_hash_find (cc3_hash, operand->buf);
+  tic54x_symbol *cc3 = str_hash_find (cc3_hash, operand->buf);
   int value = cc3 ? cc3->value : operand->exp.X_add_number << 8;
 
   if ((value & 0x0300) != value)
@@ -3756,7 +3756,7 @@ encode_arx (tic54x_insn *insn, struct opstruct *operand)
 static int
 encode_cc2 (tic54x_insn *insn, struct opstruct *operand)
 {
-  tic54x_symbol *cc2 = (tic54x_symbol *) str_hash_find (cc2_hash, operand->buf);
+  tic54x_symbol *cc2 = str_hash_find (cc2_hash, operand->buf);
 
   if (!cc2)
     {
@@ -3915,8 +3915,7 @@ encode_operand (tic54x_insn *insn, enum optype type, struct opstruct *operand)
 			     0, 65535, 0xFFFF);
     case OP_SBIT:
       {
-	tic54x_symbol *sbit = (tic54x_symbol *)
-	  str_hash_find (sbit_hash, operand->buf);
+	tic54x_symbol *sbit = str_hash_find (sbit_hash, operand->buf);
 	int value = is_absolute (operand) ?
 	  operand->exp.X_add_number : (sbit ? sbit->value : -1);
 	int reg = 0;
@@ -4170,7 +4169,7 @@ optimize_insn (tic54x_insn *insn)
 static int
 tic54x_parse_insn (tic54x_insn *insn, char *line)
 {
-  insn->tm = (insn_template *) str_hash_find (op_hash, insn->mnemonic);
+  insn->tm = str_hash_find (op_hash, insn->mnemonic);
   if (!insn->tm)
     {
       as_bad (_("Unrecognized instruction \"%s\""), insn->mnemonic);
@@ -4193,8 +4192,7 @@ tic54x_parse_insn (tic54x_insn *insn, char *line)
 	  /* SUCCESS! now try some optimizations.  */
 	  if (optimize_insn (insn))
 	    {
-	      insn->tm = (insn_template *) str_hash_find (op_hash,
-							  insn->mnemonic);
+	      insn->tm = str_hash_find (op_hash, insn->mnemonic);
 	      continue;
 	    }
 
@@ -4229,7 +4227,7 @@ next_line_shows_parallel (char *next_line)
 static int
 tic54x_parse_parallel_insn_firstline (tic54x_insn *insn, char *line)
 {
-  insn->tm = (insn_template *) str_hash_find (parop_hash, insn->mnemonic);
+  insn->tm = str_hash_find (parop_hash, insn->mnemonic);
   if (!insn->tm)
     {
       as_bad (_("Unrecognized parallel instruction \"%s\""),
@@ -5054,13 +5052,13 @@ tic54x_undefined_symbol (char *name)
   tic54x_symbol *sym;
 
   /* Not sure how to handle predefined symbols.  */
-  if ((sym = (tic54x_symbol *) str_hash_find (cc_hash, name)) != NULL
-      || (sym = (tic54x_symbol *) str_hash_find (cc2_hash, name)) != NULL
-      || (sym = (tic54x_symbol *) str_hash_find (cc3_hash, name)) != NULL
+  if ((sym = str_hash_find (cc_hash, name)) != NULL
+      || (sym = str_hash_find (cc2_hash, name)) != NULL
+      || (sym = str_hash_find (cc3_hash, name)) != NULL
       || str_hash_find (misc_symbol_hash, name) != NULL
-      || (sym = (tic54x_symbol *) str_hash_find (sbit_hash, name)) != NULL
-      || (sym = (tic54x_symbol *) str_hash_find (reg_hash, name)) != NULL
-      || (sym = (tic54x_symbol *) str_hash_find (mmreg_hash, name)) != NULL
+      || (sym = str_hash_find (sbit_hash, name)) != NULL
+      || (sym = str_hash_find (reg_hash, name)) != NULL
+      || (sym = str_hash_find (mmreg_hash, name)) != NULL
       || !strcasecmp (name, "a")
       || !strcasecmp (name, "b"))
     {

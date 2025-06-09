@@ -184,7 +184,7 @@ get_register (char *reg_name)
 {
   const reg_entry *rreg;
 
-  rreg = (const reg_entry *) str_hash_find (reg_hash, reg_name);
+  rreg = str_hash_find (reg_hash, reg_name);
 
   if (rreg != NULL)
     return rreg->value.reg_val;
@@ -199,7 +199,7 @@ get_copregister (char *copreg_name)
 {
   const reg_entry *coreg;
 
-  coreg = (const reg_entry *) str_hash_find (copreg_hash, copreg_name);
+  coreg = str_hash_find (copreg_hash, copreg_name);
 
   if (coreg != NULL)
     return coreg->value.copreg_val;
@@ -1933,7 +1933,7 @@ md_assemble (char *op)
   *param++ = '\0';
 
   /* Find the instruction.  */
-  instruction = (const inst *) str_hash_find (crx_inst_hash, op);
+  instruction = str_hash_find (crx_inst_hash, op);
   if (instruction == NULL)
     {
       as_bad (_("Unknown opcode: `%s'"), op);

@@ -844,8 +844,7 @@ md_begin (void)
       str_hash_insert_int (avr_no_sreg_hash, avr_no_sreg[i], 0 /* dummy */, 0);
     }
 
-  avr_gccisr_opcode = (struct avr_opcodes_s*) str_hash_find (avr_hash,
-							     "__gcc_isr");
+  avr_gccisr_opcode = str_hash_find (avr_hash, "__gcc_isr");
   gas_assert (avr_gccisr_opcode);
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, avr_mcu->mach);
@@ -1884,7 +1883,7 @@ md_assemble (char *str)
   if (!op[0])
     as_bad (_("can't find opcode "));
 
-  opcode = (struct avr_opcodes_s *) str_hash_find (avr_hash, op);
+  opcode = str_hash_find (avr_hash, op);
 
   if (opcode && !avr_opt.all_opcodes)
     {
@@ -2506,8 +2505,7 @@ avr_emit_insn (const char *insn, int reg, char **pwhere)
 {
   const int sreg = 0x3f;
   unsigned bin = 0;
-  const struct avr_opcodes_s *op
-    = (struct avr_opcodes_s*) str_hash_find (avr_hash, insn);
+  const struct avr_opcodes_s *op = str_hash_find (avr_hash, insn);
 
   /* We only have to deal with: IN, OUT, PUSH, POP, CLR, LDI 0, MOV R1.
      All of these deal with at least one Reg and are 1-word instructions.  */

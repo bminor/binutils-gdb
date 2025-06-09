@@ -121,7 +121,7 @@ seh_hash_insert (const char *name, struct seh_seg_list *item)
 static struct seh_seg_list *
 seh_hash_find (char *name)
 {
-  return (struct seh_seg_list *) str_hash_find (seh_hash, name);
+  return str_hash_find (seh_hash, name);
 }
 
 static struct seh_seg_list *

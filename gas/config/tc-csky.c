@@ -3386,10 +3386,8 @@ parse_opcode (char *str)
   csky_insn.number = csky_count_operands (opcode_end);
 
   /* Find hash by name in csky_macros_hash and csky_opcodes_hash.  */
-  csky_insn.macro = (struct csky_macro_info *) str_hash_find (csky_macros_hash,
-							      macro_name);
-  csky_insn.opcode = (struct csky_opcode *) str_hash_find (csky_opcodes_hash,
-							   name);
+  csky_insn.macro = str_hash_find (csky_macros_hash, macro_name);
+  csky_insn.opcode = str_hash_find (csky_opcodes_hash, name);
 
   if (csky_insn.macro == NULL && csky_insn.opcode == NULL)
     return false;
@@ -3614,8 +3612,7 @@ get_operand_value (struct csky_opcode_info *op,
 	  if (val <= 6)
 	    {
 	      const char *name = "movi";
-	      csky_insn.opcode = (struct csky_opcode *)
-		str_hash_find (csky_opcodes_hash, name);
+	      csky_insn.opcode = str_hash_find (csky_opcodes_hash, name);
 	      csky_insn.val[csky_insn.idx - 1] = 1 << val;
 	    }
 	  return true;
@@ -3648,8 +3645,7 @@ get_operand_value (struct csky_opcode_info *op,
 	    if (log <= 6)
 	      {
 		const char *name = "movi";
-		csky_insn.opcode = (struct csky_opcode *)
-		  str_hash_find (csky_opcodes_hash, name);
+		csky_insn.opcode = str_hash_find (csky_opcodes_hash, name);
 		as_warn (_("translating mgeni to movi"));
 	      }
 	    else
@@ -3686,8 +3682,7 @@ get_operand_value (struct csky_opcode_info *op,
 	  if (mask_val > 0 && mask_val < 8)
 	    {
 	      const char *op_movi = "movi";
-	      csky_insn.opcode = (struct csky_opcode *)
-		str_hash_find (csky_opcodes_hash, op_movi);
+	      csky_insn.opcode = str_hash_find (csky_opcodes_hash, op_movi);
 	      if (csky_insn.opcode == NULL)
 		return false;
 	      csky_insn.val[csky_insn.idx - 1] = (1 << mask_val) - 1;
@@ -3747,8 +3742,7 @@ get_operand_value (struct csky_opcode_info *op,
 	  if (mask_val > 0 && mask_val < 16)
 	    {
 	      const char *op_movi = "movi";
-	      csky_insn.opcode = (struct csky_opcode *)
-		str_hash_find (csky_opcodes_hash, op_movi);
+	      csky_insn.opcode = str_hash_find (csky_opcodes_hash, op_movi);
 	      if (csky_insn.opcode == NULL)
 		return false;
 	      csky_insn.val[csky_insn.idx - 1] = (1 << (mask_val + 1)) - 1;
@@ -6475,8 +6469,7 @@ v1_work_jbsr (void)
     {
       /* Using jsri instruction.  */
       const char *name = "jsri";
-      csky_insn.opcode = (struct csky_opcode *)
-	str_hash_find (csky_opcodes_hash, name);
+      csky_insn.opcode = str_hash_find (csky_opcodes_hash, name);
       csky_insn.opcode_idx = 0;
       csky_insn.isize = 2;
 
@@ -6823,8 +6816,7 @@ bool
 v2_work_rotlc (void)
 {
   const char *name = "addc";
-  csky_insn.opcode
-    = (struct csky_opcode *) str_hash_find (csky_opcodes_hash, name);
+  csky_insn.opcode = str_hash_find (csky_opcodes_hash, name);
   csky_insn.opcode_idx = 0;
   if (csky_insn.isize == 2)
     {
@@ -6861,8 +6853,7 @@ v2_work_bgeni (void)
       name = "movih";
       val >>= 16;
     }
-  csky_insn.opcode
-    = (struct csky_opcode *) str_hash_find (csky_opcodes_hash, name);
+  csky_insn.opcode = str_hash_find (csky_opcodes_hash, name);
   csky_insn.opcode_idx = 0;
   csky_insn.val[1] = val;
 
@@ -6879,8 +6870,7 @@ bool
 v2_work_not (void)
 {
   const char *name = "nor";
-  csky_insn.opcode
-    = (struct csky_opcode *) str_hash_find (csky_opcodes_hash, name);
+  csky_insn.opcode = str_hash_find (csky_opcodes_hash, name);
   csky_insn.opcode_idx = 0;
   if (csky_insn.number == 1)
     {

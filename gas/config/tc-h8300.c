@@ -1937,8 +1937,7 @@ md_assemble (char *str)
     while (*++slash)
       *slash = TOLOWER (*slash);
 
-  instruction = (const struct h8_instruction *)
-    str_hash_find (opcode_hash_control, op_start);
+  instruction = str_hash_find (opcode_hash_control, op_start);
 
   if (instruction == NULL)
     {

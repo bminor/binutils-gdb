@@ -1931,8 +1931,8 @@ md_assemble (char *str)
     *s++ = '\0';
 
   /* Look up the opcode in the hash table.  */
-  opcode = (struct s390_opcode *) str_hash_find (s390_opcode_hash, str);
-  if (opcode == (const struct s390_opcode *) NULL)
+  opcode = str_hash_find (s390_opcode_hash, str);
+  if (opcode == NULL)
     {
       as_bad (_("Unrecognized opcode: `%s'"), str);
       return;
@@ -1988,9 +1988,8 @@ s390_insn (int ignore ATTRIBUTE_UNUSED)
   *s++ = '\0';
 
   /* Look up the opcode in the hash table.  */
-  opformat = (struct s390_opcode *)
-    str_hash_find (s390_opformat_hash, input_line_pointer);
-  if (opformat == (const struct s390_opcode *) NULL)
+  opformat = str_hash_find (s390_opformat_hash, input_line_pointer);
+  if (opformat == NULL)
     {
       as_bad (_("Unrecognized opcode format: `%s'"), input_line_pointer);
       return;

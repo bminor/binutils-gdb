@@ -179,9 +179,8 @@ ginsnS *
 label_ginsn_map_find (const symbolS *label)
 {
   const char *name = S_GET_NAME (label);
-  ginsnS *ginsn
-    = (ginsnS *) str_hash_find (frchain_now->frch_ginsn_data->label_ginsn_map,
-				name);
+  ginsnS *ginsn = str_hash_find (frchain_now->frch_ginsn_data->label_ginsn_map,
+				 name);
   return ginsn;
 }
 

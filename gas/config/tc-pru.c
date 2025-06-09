@@ -134,12 +134,12 @@ typedef struct pru_insn_info
 /* Opcode hash table.  */
 static htab_t pru_opcode_hash = NULL;
 #define pru_opcode_lookup(NAME) \
-  ((struct pru_opcode *) str_hash_find (pru_opcode_hash, (NAME)))
+  (str_hash_find (pru_opcode_hash, (NAME)))
 
 /* Register hash table.  */
 static htab_t pru_reg_hash = NULL;
 #define pru_reg_lookup(NAME) \
-  ((struct pru_reg *) str_hash_find (pru_reg_hash, (NAME)))
+  (str_hash_find (pru_reg_hash, (NAME)))
 
 /* The known current alignment of the current section.  */
 static int pru_current_align;

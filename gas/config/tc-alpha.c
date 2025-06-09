@@ -589,7 +589,7 @@ get_alpha_reloc_tag (long sequence)
 
   sprintf (buffer, "!%ld", sequence);
 
-  info = (struct alpha_reloc_tag *) str_hash_find (alpha_literal_hash, buffer);
+  info = str_hash_find (alpha_literal_hash, buffer);
   if (! info)
     {
       size_t len = strlen (buffer);
@@ -1170,8 +1170,7 @@ assemble_tokens_to_insn (const char *opname,
   const struct alpha_opcode *opcode;
 
   /* Search opcodes.  */
-  opcode = (const struct alpha_opcode *) str_hash_find (alpha_opcode_hash,
-							opname);
+  opcode = str_hash_find (alpha_opcode_hash, opname);
   if (opcode)
     {
       int cpumatch;
@@ -3318,8 +3317,7 @@ assemble_tokens (const char *opname,
 #endif
   if (local_macros_on)
     {
-      macro = (const struct alpha_macro *) str_hash_find (alpha_macro_hash,
-							  opname);
+      macro = str_hash_find (alpha_macro_hash, opname);
       if (macro)
 	{
 	  found_something = 1;
@@ -3333,8 +3331,7 @@ assemble_tokens (const char *opname,
     }
 
   /* Search opcodes.  */
-  opcode = (const struct alpha_opcode *) str_hash_find (alpha_opcode_hash,
-							opname);
+  opcode = str_hash_find (alpha_opcode_hash, opname);
   if (opcode)
     {
       found_something = 1;

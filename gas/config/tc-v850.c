@@ -2312,7 +2312,7 @@ md_assemble (char *str)
     *s++ = '\0';
 
   /* Find the first opcode with the proper name.  */
-  opcode = (struct v850_opcode *) str_hash_find (v850_hash, str);
+  opcode = str_hash_find (v850_hash, str);
   if (opcode == NULL)
     {
       /* xgettext:c-format  */

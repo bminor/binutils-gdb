@@ -1428,7 +1428,7 @@ do_assemble (char *str, struct d10v_opcode **opcode)
     return -1;
 
   /* Find the first opcode with the proper name.  */
-  *opcode = (struct d10v_opcode *) str_hash_find (d10v_hash, name);
+  *opcode = str_hash_find (d10v_hash, name);
   if (*opcode == NULL)
     return -1;
 
@@ -1556,8 +1556,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	{
 	  struct d10v_opcode *rep, *repi;
 
-	  rep = (struct d10v_opcode *) str_hash_find (d10v_hash, "rep");
-	  repi = (struct d10v_opcode *) str_hash_find (d10v_hash, "repi");
+	  rep = str_hash_find (d10v_hash, "rep");
+	  repi = str_hash_find (d10v_hash, "repi");
 	  if ((insn & FM11) == FM11
 	      && ((repi != NULL
 		   && (insn & repi->mask) == (unsigned) repi->opcode)

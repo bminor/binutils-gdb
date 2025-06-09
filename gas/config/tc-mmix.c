@@ -835,7 +835,7 @@ md_assemble (char *str)
       *operands++ = '\0';
     }
 
-  instruction = (struct mmix_opcode *) str_hash_find (mmix_opcode_hash, str);
+  instruction = str_hash_find (mmix_opcode_hash, str);
   if (instruction == NULL)
     {
       as_bad (_("unknown opcode: `%s'"), str);

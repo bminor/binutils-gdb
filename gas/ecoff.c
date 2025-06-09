@@ -1559,8 +1559,8 @@ add_string (varray_t *vp,			/* string obstack */
   if (len >= PAGE_USIZE)
     as_fatal (_("string too big (%lu bytes)"), len);
 
-  hash_ptr = (shash_t *) str_hash_find (hash_tbl, str);
-  if (hash_ptr == (shash_t *) NULL)
+  hash_ptr = str_hash_find (hash_tbl, str);
+  if (hash_ptr == NULL)
     {
       if (vp->objects_last_page + len >= PAGE_USIZE)
 	{
@@ -2010,7 +2010,7 @@ get_tag (const char *tag,	/* tag name */
   if (cur_file_ptr == (efdr_t *) NULL)
     as_fatal (_("no current file pointer"));
 
-  hash_ptr = (shash_t *) str_hash_find (tag_hash, tag);
+  hash_ptr = str_hash_find (tag_hash, tag);
 
   if (hash_ptr != (shash_t *) NULL
       && hash_ptr->tag_ptr != (tag_t *) NULL)

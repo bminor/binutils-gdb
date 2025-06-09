@@ -1008,7 +1008,7 @@ print_insn_format (char *name)
   struct m68hc11_opcode *opcode;
   char buf[128];
 
-  opc = (struct m68hc11_opcode_def *) str_hash_find (m68hc11_hash, name);
+  opc = str_hash_find (m68hc11_hash, name);
   if (opc == NULL)
     {
       as_bad (_("Instruction `%s' is not recognized."), name);
@@ -2848,7 +2848,7 @@ md_assemble (char *str)
   if (current_architecture == cpuxgate)
     {
       /* Find the opcode definition given its name.  */
-      opc = (struct m68hc11_opcode_def *) str_hash_find (m68hc11_hash, name);
+      opc = str_hash_find (m68hc11_hash, name);
       if (opc == NULL)
         {
           as_bad (_("Opcode `%s' is not recognized."), name);
@@ -3469,7 +3469,7 @@ md_assemble (char *str)
     }
 
   /* Find the opcode definition given its name.  */
-  opc = (struct m68hc11_opcode_def *) str_hash_find (m68hc11_hash, name);
+  opc = str_hash_find (m68hc11_hash, name);
 
   /* If it's not recognized, look for 'jbsr' and 'jbxx'.  These are
      pseudo insns for relative branch.  For these branches, we always
@@ -3477,8 +3477,7 @@ md_assemble (char *str)
      is given.  */
   if (opc == NULL && name[0] == 'j' && name[1] == 'b')
     {
-      opc = (struct m68hc11_opcode_def *) str_hash_find (m68hc11_hash,
-							 &name[1]);
+      opc = str_hash_find (m68hc11_hash, &name[1]);
       if (opc
 	  && (!(opc->format & M6811_OP_JUMP_REL)
 	      || (opc->format & M6811_OP_BITMASK)))
@@ -3509,8 +3508,7 @@ md_assemble (char *str)
 	    {
 	      name[nlen++] = TOLOWER (*op_end++);
 	      name[nlen] = 0;
-	      opc = (struct m68hc11_opcode_def *) str_hash_find (m68hc11_hash,
-								 name);
+	      opc = str_hash_find (m68hc11_hash, name);
 	    }
 	}
     }

@@ -491,8 +491,7 @@ md_assemble (char *input_line)
   if (!op_name[0])
     as_bad (_("opcode missing or not found on input line"));
 
-  opcode_handle = (struct xgate_opcode_handle *) str_hash_find (xgate_hash,
-								op_name);
+  opcode_handle = str_hash_find (xgate_hash, op_name);
   if (!opcode_handle)
     as_bad (_("opcode %s not found in opcode hash table"), op_name);
   else
@@ -541,9 +540,7 @@ md_assemble (char *input_line)
 	      input_line = macro_inline; /* Rewind.  */
 	      p = extract_word (p, op_name, 10);
 
-	      opcode_handle
-		= (struct xgate_opcode_handle *) str_hash_find (xgate_hash,
-								op_name);
+	      opcode_handle = str_hash_find (xgate_hash, op_name);
 	      if (!opcode_handle)
 		{
 		  as_bad (_(": processing macro, real opcode handle"

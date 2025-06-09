@@ -4360,7 +4360,7 @@ md_assemble (char * str)
       return;
     }
 
-  opcode = (struct msp430_opcode_s *) str_hash_find (msp430_hash, cmd);
+  opcode = str_hash_find (msp430_hash, cmd);
 
   if (opcode == NULL)
     {

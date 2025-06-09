@@ -133,7 +133,7 @@ tag_insert (const char *name, symbolS *symbolP)
 static symbolS *
 tag_find (char *name)
 {
-  return (symbolS *) str_hash_find (tag_hash, name);
+  return str_hash_find (tag_hash, name);
 }
 
 static symbolS *

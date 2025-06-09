@@ -2524,8 +2524,7 @@ kvx_handle_align (fragS *fragP)
   static unsigned int nop_single = 0;
   if (!nop_single)
     {
-      const struct kvxopc *opcode =
-	(struct kvxopc *) str_hash_find (env.opcode_hash, "nop");
+      const struct kvxopc *opcode = str_hash_find (env.opcode_hash, "nop");
 
       if (opcode == NULL)
 	as_fatal

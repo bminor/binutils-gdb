@@ -1552,7 +1552,7 @@ cris_process_instruction (char *insn_text, struct cris_instruction *out_insnp,
     }
 
   /* Find the instruction.  */
-  instruction = (struct cris_opcode *) str_hash_find (op_hash, insn_text);
+  instruction = str_hash_find (op_hash, insn_text);
   if (instruction == NULL)
     {
       as_bad (_("Unknown opcode: `%s'"), insn_text);

@@ -1357,7 +1357,7 @@ m68k_ip (char *instring)
 
   c = *p;
   *p = '\0';
-  opcode = (const struct m68k_incant *) str_hash_find (op_hash, instring);
+  opcode = str_hash_find (op_hash, instring);
   *p = c;
 
   if (pdot != NULL)
@@ -4560,7 +4560,7 @@ md_begin (void)
     {
       const char *name = m68k_opcode_aliases[i].primary;
       const char *alias = m68k_opcode_aliases[i].alias;
-      void *val = (void *) str_hash_find (op_hash, name);
+      void *val = str_hash_find (op_hash, name);
 
       if (!val)
 	as_fatal (_("Internal Error: Can't find %s in hash table"), name);
@@ -4598,7 +4598,7 @@ md_begin (void)
 	{
 	  const char *name = mri_aliases[i].primary;
 	  const char *alias = mri_aliases[i].alias;
-	  void *val = (void *) str_hash_find (op_hash, name);
+	  void *val = str_hash_find (op_hash, name);
 
 	  if (!val)
 	    as_fatal (_("Internal Error: Can't find %s in hash table"), name);

@@ -1105,7 +1105,7 @@ parse (const char *line, int recursive_level)
       c = *lineptr;
       *(char *) lineptr = '\0';
 
-      desc = (struct ns32k_opcode *) str_hash_find (inst_hash_handle, line);
+      desc = str_hash_find (inst_hash_handle, line);
       if (!desc)
 	as_fatal (_("No such opcode"));
 

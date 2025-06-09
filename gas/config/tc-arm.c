@@ -1377,7 +1377,7 @@ arm_reg_parse_multi (char **ccp)
     p++;
   while (ISALPHA (*p) || ISDIGIT (*p) || *p == '_');
 
-  reg = (struct reg_entry *) str_hash_find_n (arm_reg_hsh, start, p - start);
+  reg = str_hash_find_n (arm_reg_hsh, start, p - start);
 
   if (!reg)
     return NULL;
@@ -2505,8 +2505,7 @@ parse_reloc (char **str)
   if (*q != ')')
     return -1;
 
-  if ((r = (struct reloc_entry *)
-       str_hash_find_n (arm_reloc_hsh, p, q - p)) == NULL)
+  if ((r = str_hash_find_n (arm_reloc_hsh, p, q - p)) == NULL)
     return -1;
 
   *str = q + 1;
@@ -2521,7 +2520,7 @@ insert_reg_alias (char *str, unsigned number, int type)
   struct reg_entry *new_reg;
   const char *name;
 
-  if ((new_reg = (struct reg_entry *) str_hash_find (arm_reg_hsh, str)) != 0)
+  if ((new_reg = str_hash_find (arm_reg_hsh, str)) != 0)
     {
       if (new_reg->builtin)
 	as_warn (_("ignoring attempt to redefine built-in register '%s'"), str);
@@ -2591,7 +2590,7 @@ create_register_alias (char * newname, char *p)
   if (*oldname == '\0')
     return false;
 
-  old = (struct reg_entry *) str_hash_find (arm_reg_hsh, oldname);
+  old = str_hash_find (arm_reg_hsh, oldname);
   if (!old)
     {
       as_warn (_("unknown register '%s' -- .req ignored"), oldname);
@@ -2838,8 +2837,7 @@ s_unreq (int a ATTRIBUTE_UNUSED)
     as_bad (_("invalid syntax for .unreq directive"));
   else
     {
-      struct reg_entry *reg
-	= (struct reg_entry *) str_hash_find (arm_reg_hsh, name);
+      struct reg_entry *reg = str_hash_find (arm_reg_hsh, name);
 
       if (!reg)
 	as_bad (_("unknown register alias '%s'"), name);
@@ -2863,7 +2861,7 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 	  nbuf = strdup (name);
 	  for (p = nbuf; *p; p++)
 	    *p = TOUPPER (*p);
-	  reg = (struct reg_entry *) str_hash_find (arm_reg_hsh, nbuf);
+	  reg = str_hash_find (arm_reg_hsh, nbuf);
 	  if (reg)
 	    {
 	      str_hash_delete (arm_reg_hsh, nbuf);
@@ -2874,7 +2872,7 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 
 	  for (p = nbuf; *p; p++)
 	    *p = TOLOWER (*p);
-	  reg = (struct reg_entry *) str_hash_find (arm_reg_hsh, nbuf);
+	  reg = str_hash_find (arm_reg_hsh, nbuf);
 	  if (reg)
 	    {
 	      str_hash_delete (arm_reg_hsh, nbuf);
@@ -5450,9 +5448,7 @@ parse_shift (char **str, int i, enum parse_shift_mode mode)
       return FAIL;
     }
 
-  shift_name
-    = (const struct asm_shift_name *) str_hash_find_n (arm_shift_hsh, *str,
-						       p - *str);
+  shift_name = str_hash_find_n (arm_shift_hsh, *str, p - *str);
 
   if (shift_name == NULL)
     {
@@ -6260,8 +6256,7 @@ parse_psr (char **str, bool lhs)
 	  || strncasecmp (start, "psr", 3) == 0)
 	p = start + strcspn (start, "rR") + 1;
 
-      psr = (const struct asm_psr *) str_hash_find_n (arm_v7m_psr_hsh, start,
-						      p - start);
+      psr = str_hash_find_n (arm_v7m_psr_hsh, start, p - start);
 
       if (!psr)
 	return FAIL;
@@ -6363,8 +6358,7 @@ parse_psr (char **str, bool lhs)
 	}
       else
 	{
-	  psr = (const struct asm_psr *) str_hash_find_n (arm_psr_hsh, start,
-							  p - start);
+	  psr = str_hash_find_n (arm_psr_hsh, start, p - start);
 	  if (!psr)
 	    goto error;
 
@@ -6561,7 +6555,7 @@ parse_cond (char **str)
       n++;
     }
 
-  c = (const struct asm_cond *) str_hash_find_n (arm_cond_hsh, cond, n);
+  c = str_hash_find_n (arm_cond_hsh, cond, n);
   if (!c)
     {
       inst.error = _("condition required");
@@ -6584,8 +6578,7 @@ parse_barrier (char **str)
   while (ISALPHA (*q))
     q++;
 
-  o = (const struct asm_barrier_opt *) str_hash_find_n (arm_barrier_opt_hsh, p,
-							q - p);
+  o = str_hash_find_n (arm_barrier_opt_hsh, p, q - p);
   if (!o)
     return FAIL;
 
@@ -15431,7 +15424,7 @@ do_vfp_nsyn_opcode (const char *opname)
 {
   const struct asm_opcode *opcode;
 
-  opcode = (const struct asm_opcode *) str_hash_find (arm_ops_hsh, opname);
+  opcode = str_hash_find (arm_ops_hsh, opname);
 
   if (!opcode)
     abort ();
@@ -22485,8 +22478,7 @@ opcode_lookup (char **str)
     *str = end;
 
   /* Look for unaffixed or special-case affixed mnemonic.  */
-  opcode = (const struct asm_opcode *) str_hash_find_n (arm_ops_hsh, base,
-							end - base);
+  opcode = str_hash_find_n (arm_ops_hsh, base, end - base);
   cond = NULL;
   if (opcode)
     {
@@ -22500,7 +22492,7 @@ opcode_lookup (char **str)
       if (warn_on_deprecated && unified_syntax)
 	as_tsktsk (_("conditional infixes are deprecated in unified syntax"));
       affix = base + (opcode->tag - OT_odd_infix_0);
-      cond = (const struct asm_cond *) str_hash_find_n (arm_cond_hsh, affix, 2);
+      cond = str_hash_find_n (arm_cond_hsh, affix, 2);
       gas_assert (cond);
 
       inst.cond = cond->value;
@@ -22513,9 +22505,8 @@ opcode_lookup (char **str)
     if (end - base < 2)
       return NULL;
      affix = end - 1;
-     cond = (const struct asm_cond *) str_hash_find_n (arm_vcond_hsh, affix, 1);
-     opcode = (const struct asm_opcode *) str_hash_find_n (arm_ops_hsh, base,
-							   affix - base);
+     cond = str_hash_find_n (arm_vcond_hsh, affix, 1);
+     opcode = str_hash_find_n (arm_ops_hsh, base, affix - base);
 
      /* A known edge case is a conflict between an 'e' as a suffix for an
 	Else of a VPT predication block and an 'ne' suffix for an IT block.
@@ -22547,9 +22538,8 @@ opcode_lookup (char **str)
 
       /* Look for suffixed mnemonic.  */
       affix = end - 2;
-      cond = (const struct asm_cond *) str_hash_find_n (arm_cond_hsh, affix, 2);
-      opcode = (const struct asm_opcode *) str_hash_find_n (arm_ops_hsh, base,
-							    affix - base);
+      cond = str_hash_find_n (arm_cond_hsh, affix, 2);
+      opcode = str_hash_find_n (arm_ops_hsh, base, affix - base);
     }
 
   if (opcode && cond)
@@ -22598,14 +22588,13 @@ opcode_lookup (char **str)
 
   /* Look for infixed mnemonic in the usual position.  */
   affix = base + 3;
-  cond = (const struct asm_cond *) str_hash_find_n (arm_cond_hsh, affix, 2);
+  cond = str_hash_find_n (arm_cond_hsh, affix, 2);
   if (!cond)
     return NULL;
 
   memcpy (save, affix, 2);
   memmove (affix, affix + 2, (end - affix) - 2);
-  opcode = (const struct asm_opcode *) str_hash_find_n (arm_ops_hsh, base,
-							(end - base) - 2);
+  opcode = str_hash_find_n (arm_ops_hsh, base, (end - base) - 2);
   memmove (affix + 2, affix, (end - affix) - 2);
   memcpy (affix, save, 2);
 

@@ -933,7 +933,7 @@ opcode_name_lookup (char **s)
   save_c = *e;
   *e = '\0';
 
-  o = (struct opcode_name_t *) str_hash_find (opcode_names_hash, *s);
+  o = str_hash_find (opcode_names_hash, *s);
 
   /* Advance to next token if one was recognized.  */
   if (o)
@@ -995,7 +995,7 @@ riscv_init_csr_hash (const char *name,
   bool need_enrty = true;
 
   pre_entry = NULL;
-  entry = (struct riscv_csr_extra *) str_hash_find (csr_extra_hash, name);
+  entry = str_hash_find (csr_extra_hash, name);
   while (need_enrty && entry != NULL)
     {
       if (entry->csr_class == class
@@ -1210,8 +1210,7 @@ riscv_csr_address (const char *csr_name,
 static unsigned int
 reg_csr_lookup_internal (const char *s)
 {
-  struct riscv_csr_extra *r =
-    (struct riscv_csr_extra *) str_hash_find (csr_extra_hash, s);
+  struct riscv_csr_extra *r = str_hash_find (csr_extra_hash, s);
 
   if (r == NULL)
     return -1U;
@@ -2048,7 +2047,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
   va_start (args, fmt);
 
   r = BFD_RELOC_UNUSED;
-  mo = (struct riscv_opcode *) str_hash_find (op_hash, name);
+  mo = str_hash_find (op_hash, name);
   gas_assert (mo);
 
   /* Find a non-RVC variant of the instruction.  append_insn will compress
@@ -2864,7 +2863,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	break;
       }
 
-  insn = (struct riscv_opcode *) str_hash_find (hash, str);
+  insn = str_hash_find (hash, str);
 
   probing_insn_operands = true;
 

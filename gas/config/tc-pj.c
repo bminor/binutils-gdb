@@ -252,7 +252,7 @@ md_assemble (char *str)
   if (nlen == 0)
     as_bad (_("can't find opcode "));
 
-  opcode = (pj_opc_info_t *) str_hash_find (opcode_hash_control, op_start);
+  opcode = str_hash_find (opcode_hash_control, op_start);
   *op_end = pend;
 
   if (opcode == NULL)

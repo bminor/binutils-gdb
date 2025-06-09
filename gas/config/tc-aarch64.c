@@ -907,7 +907,7 @@ parse_reg (char **ccp)
     p++;
   while (ISALPHA (*p) || ISDIGIT (*p) || *p == '_');
 
-  reg = (reg_entry *) str_hash_find_n (aarch64_reg_hsh, start, p - start);
+  reg = str_hash_find_n (aarch64_reg_hsh, start, p - start);
 
   if (!reg)
     return NULL;
@@ -6254,10 +6254,7 @@ typedef struct templates templates;
 static templates *
 lookup_mnemonic (const char *start, int len)
 {
-  templates *templ = NULL;
-
-  templ = str_hash_find_n (aarch64_ops_hsh, start, len);
-  return templ;
+  return str_hash_find_n (aarch64_ops_hsh, start, len);
 }
 
 /* Subroutine of md_assemble, responsible for looking up the primary
@@ -10241,13 +10238,13 @@ aarch64_adjust_symtab (void)
 }
 
 static void
-checked_hash_insert (htab_t table, const char *key, void *value)
+checked_hash_insert (htab_t table, const char *key, const void *value)
 {
   str_hash_insert (table, key, value, 0);
 }
 
 static void
-sysreg_hash_insert (htab_t table, const char *key, void *value)
+sysreg_hash_insert (htab_t table, const char *key, const void *value)
 {
   gas_assert (strlen (key) < AARCH64_MAX_SYSREG_NAME_LEN);
   checked_hash_insert (table, key, value);
@@ -10268,7 +10265,7 @@ fill_instruction_hash_table (void)
       new_templ->next = NULL;
 
       if (!templ)
-	checked_hash_insert (aarch64_ops_hsh, opcode->name, (void *) new_templ);
+	checked_hash_insert (aarch64_ops_hsh, opcode->name, new_templ);
       else
 	{
 	  new_templ->next = templ->next;
@@ -10327,54 +10324,54 @@ md_begin (void)
 
   for (i = 0; aarch64_sys_regs[i].name != NULL; ++i)
     sysreg_hash_insert (aarch64_sys_regs_hsh, aarch64_sys_regs[i].name,
-			 (void *) (aarch64_sys_regs + i));
+			aarch64_sys_regs + i);
 
   for (i = 0; aarch64_pstatefields[i].name != NULL; ++i)
     sysreg_hash_insert (aarch64_pstatefield_hsh,
-			 aarch64_pstatefields[i].name,
-			 (void *) (aarch64_pstatefields + i));
+			aarch64_pstatefields[i].name,
+			aarch64_pstatefields + i);
 
   for (i = 0; aarch64_sys_regs_ic[i].name != NULL; i++)
     sysreg_hash_insert (aarch64_sys_regs_ic_hsh,
-			 aarch64_sys_regs_ic[i].name,
-			 (void *) (aarch64_sys_regs_ic + i));
+			aarch64_sys_regs_ic[i].name,
+			aarch64_sys_regs_ic + i);
 
   for (i = 0; aarch64_sys_regs_dc[i].name != NULL; i++)
     sysreg_hash_insert (aarch64_sys_regs_dc_hsh,
-			 aarch64_sys_regs_dc[i].name,
-			 (void *) (aarch64_sys_regs_dc + i));
+			aarch64_sys_regs_dc[i].name,
+			aarch64_sys_regs_dc + i);
 
   for (i = 0; aarch64_sys_regs_at[i].name != NULL; i++)
     sysreg_hash_insert (aarch64_sys_regs_at_hsh,
-			 aarch64_sys_regs_at[i].name,
-			 (void *) (aarch64_sys_regs_at + i));
+			aarch64_sys_regs_at[i].name,
+			aarch64_sys_regs_at + i);
 
   for (i = 0; aarch64_sys_regs_tlbi[i].name != NULL; i++)
     sysreg_hash_insert (aarch64_sys_regs_tlbi_hsh,
-			 aarch64_sys_regs_tlbi[i].name,
-			 (void *) (aarch64_sys_regs_tlbi + i));
+			aarch64_sys_regs_tlbi[i].name,
+			aarch64_sys_regs_tlbi + i);
 
   for (i = 0; aarch64_sys_regs_sr[i].name != NULL; i++)
     sysreg_hash_insert (aarch64_sys_regs_sr_hsh,
-			 aarch64_sys_regs_sr[i].name,
-			 (void *) (aarch64_sys_regs_sr + i));
+			aarch64_sys_regs_sr[i].name,
+			aarch64_sys_regs_sr + i);
 
   for (i = 0; i < ARRAY_SIZE (reg_names); i++)
     checked_hash_insert (aarch64_reg_hsh, reg_names[i].name,
-			 (void *) (reg_names + i));
+			 reg_names + i);
 
   for (i = 0; i < ARRAY_SIZE (nzcv_names); i++)
     checked_hash_insert (aarch64_nzcv_hsh, nzcv_names[i].template,
-			 (void *) (nzcv_names + i));
+			 nzcv_names + i);
 
   for (i = 0; aarch64_operand_modifiers[i].name != NULL; i++)
     {
       const char *name = aarch64_operand_modifiers[i].name;
       checked_hash_insert (aarch64_shift_hsh, name,
-			   (void *) (aarch64_operand_modifiers + i));
+			   aarch64_operand_modifiers + i);
       /* Also hash the name in the upper case.  */
       checked_hash_insert (aarch64_shift_hsh, get_upper_str (name),
-			   (void *) (aarch64_operand_modifiers + i));
+			   aarch64_operand_modifiers + i);
     }
 
   for (i = 0; i < ARRAY_SIZE (aarch64_conds); i++)
@@ -10388,10 +10385,10 @@ md_begin (void)
 	  if (name == NULL)
 	    break;
 	  checked_hash_insert (aarch64_cond_hsh, name,
-			       (void *) (aarch64_conds + i));
+			       aarch64_conds + i);
 	  /* Also hash the name in the upper case.  */
 	  checked_hash_insert (aarch64_cond_hsh, get_upper_str (name),
-			       (void *) (aarch64_conds + i));
+			       aarch64_conds + i);
 	}
     }
 
@@ -10402,20 +10399,20 @@ md_begin (void)
       if ((i & 0x3) == 0)
 	continue;
       checked_hash_insert (aarch64_barrier_opt_hsh, name,
-			   (void *) (aarch64_barrier_options + i));
+			   aarch64_barrier_options + i);
       /* Also hash the name in the upper case.  */
       checked_hash_insert (aarch64_barrier_opt_hsh, get_upper_str (name),
-			   (void *) (aarch64_barrier_options + i));
+			   aarch64_barrier_options + i);
     }
 
   for (i = 0; i < ARRAY_SIZE (aarch64_barrier_dsb_nxs_options); i++)
     {
       const char *name = aarch64_barrier_dsb_nxs_options[i].name;
       checked_hash_insert (aarch64_barrier_opt_hsh, name,
-			   (void *) (aarch64_barrier_dsb_nxs_options + i));
+			   aarch64_barrier_dsb_nxs_options + i);
       /* Also hash the name in the upper case.  */
       checked_hash_insert (aarch64_barrier_opt_hsh, get_upper_str (name),
-			   (void *) (aarch64_barrier_dsb_nxs_options + i));
+			   aarch64_barrier_dsb_nxs_options + i);
     }
 
   for (i = 0; i < ARRAY_SIZE (aarch64_prfops); i++)
@@ -10425,10 +10422,10 @@ md_begin (void)
       if (name == NULL)
 	continue;
       checked_hash_insert (aarch64_pldop_hsh, name,
-			   (void *) (aarch64_prfops + i));
+			   aarch64_prfops + i);
       /* Also hash the name in the upper case.  */
       checked_hash_insert (aarch64_pldop_hsh, get_upper_str (name),
-			   (void *) (aarch64_prfops + i));
+			   aarch64_prfops + i);
     }
 
   for (i = 0; aarch64_hint_options[i].name != NULL; i++)
@@ -10437,12 +10434,12 @@ md_begin (void)
       const char* upper_name = get_upper_str(name);
 
       checked_hash_insert (aarch64_hint_opt_hsh, name,
-			   (void *) (aarch64_hint_options + i));
+			   aarch64_hint_options + i);
 
       /* Also hash the name in the upper case if not the same.  */
       if (strcmp (name, upper_name) != 0)
 	checked_hash_insert (aarch64_hint_opt_hsh, upper_name,
-			     (void *) (aarch64_hint_options + i));
+			     aarch64_hint_options + i);
     }
 
   /* Set the cpu variant based on the command-line options.  */

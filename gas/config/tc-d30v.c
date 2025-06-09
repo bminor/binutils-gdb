@@ -1387,7 +1387,7 @@ do_assemble (char *str,
     }
 
   /* Find the first opcode with the proper name.  */
-  opcode->op = (struct d30v_opcode *) str_hash_find (d30v_hash, name);
+  opcode->op = str_hash_find (d30v_hash, name);
   if (opcode->op == NULL)
     {
       as_bad (_("unknown opcode: %s"), name);
