@@ -1143,32 +1143,14 @@ add_gpu_thread (inferior *inf, ptid_t wave_ptid)
 /* Process an event that was just pulled out of the amd-dbgapi library.  */
 
 static void
-process_one_event (amd_dbgapi_event_id_t event_id,
+process_one_event (amd_dbgapi_inferior_info &info,
+		   amd_dbgapi_event_id_t event_id,
 		   amd_dbgapi_event_kind_t event_kind)
 {
   /* Automatically mark this event processed when going out of scope.  */
   scoped_amd_dbgapi_event_processed mark_event_processed (event_id);
 
-  amd_dbgapi_process_id_t process_id;
-  amd_dbgapi_status_t status
-    = amd_dbgapi_event_get_info (event_id, AMD_DBGAPI_EVENT_INFO_PROCESS,
-				 sizeof (process_id), &process_id);
-  if (status != AMD_DBGAPI_STATUS_SUCCESS)
-    error (_("event_get_info for event_%ld failed (%s)"), event_id.handle,
-	   get_status_string (status));
-
-  amd_dbgapi_os_process_id_t pid;
-  status = amd_dbgapi_process_get_info (process_id,
-					AMD_DBGAPI_PROCESS_INFO_OS_ID,
-					sizeof (pid), &pid);
-  if (status != AMD_DBGAPI_STATUS_SUCCESS)
-    error (_("process_get_info for process_%ld failed (%s)"),
-	   process_id.handle, get_status_string (status));
-
-  auto *proc_target = current_inferior ()->process_target ();
-  inferior *inf = find_inferior_pid (proc_target, pid);
-  gdb_assert (inf != nullptr);
-  amd_dbgapi_inferior_info *info = get_amd_dbgapi_inferior_info (inf);
+  gdb_assert (info.inf != nullptr);
 
   switch (event_kind)
     {
@@ -1176,14 +1158,14 @@ process_one_event (amd_dbgapi_event_id_t event_id,
     case AMD_DBGAPI_EVENT_KIND_WAVE_STOP:
       {
 	amd_dbgapi_wave_id_t wave_id;
-	status
+	amd_dbgapi_status_t status
 	  = amd_dbgapi_event_get_info (event_id, AMD_DBGAPI_EVENT_INFO_WAVE,
 				       sizeof (wave_id), &wave_id);
 	if (status != AMD_DBGAPI_STATUS_SUCCESS)
 	  error (_("event_get_info for event_%ld failed (%s)"),
 		 event_id.handle, get_status_string (status));
 
-	ptid_t event_ptid = make_gpu_ptid (pid, wave_id);
+	ptid_t event_ptid = make_gpu_ptid (info.inf->pid, wave_id);
 	target_waitstatus ws;
 
 	amd_dbgapi_wave_stop_reasons_t stop_reason;
@@ -1224,9 +1206,10 @@ process_one_event (amd_dbgapi_event_id_t event_id,
 	    else
 	      ws.set_stopped (GDB_SIGNAL_0);
 
-	    thread_info *thread = proc_target->find_thread (event_ptid);
+	    thread_info *thread
+	      = info.inf->process_target ()->find_thread (event_ptid);
 	    if (thread == nullptr)
-	      thread = add_gpu_thread (inf, event_ptid);
+	      thread = add_gpu_thread (info.inf, event_ptid);
 
 	    /* If the wave is stopped because of a software breakpoint, the
 	       program counter needs to be adjusted so that it points to the
@@ -1248,7 +1231,7 @@ process_one_event (amd_dbgapi_event_id_t event_id,
 	  error (_("wave_get_info for wave_%ld failed (%s)"),
 		 wave_id.handle, get_status_string (status));
 
-	info->wave_events.emplace_back (event_ptid, ws);
+	info.wave_events.emplace_back (event_ptid, ws);
 	break;
       }
 
@@ -1266,7 +1249,7 @@ process_one_event (amd_dbgapi_event_id_t event_id,
 	 When amd_dbgapi_target_breakpoint::check_status is called, the current
 	 inferior is the inferior that hit the breakpoint, which should still be
 	 the case now.  */
-      gdb_assert (inf == current_inferior ());
+      gdb_assert (info.inf == current_inferior ());
       handle_solib_event ();
       break;
 
@@ -1280,22 +1263,22 @@ process_one_event (amd_dbgapi_event_id_t event_id,
       {
 	amd_dbgapi_runtime_state_t runtime_state;
 
-	status = amd_dbgapi_event_get_info (event_id,
-					    AMD_DBGAPI_EVENT_INFO_RUNTIME_STATE,
-					    sizeof (runtime_state),
-					    &runtime_state);
+	amd_dbgapi_status_t status
+	  = amd_dbgapi_event_get_info (event_id,
+				       AMD_DBGAPI_EVENT_INFO_RUNTIME_STATE,
+				       sizeof (runtime_state), &runtime_state);
 	if (status != AMD_DBGAPI_STATUS_SUCCESS)
 	  error (_("event_get_info for event_%ld failed (%s)"),
 		 event_id.handle, get_status_string (status));
 
 	gdb_assert (runtime_state == AMD_DBGAPI_RUNTIME_STATE_UNLOADED);
 	gdb_assert
-	  (info->runtime_state == AMD_DBGAPI_RUNTIME_STATE_LOADED_SUCCESS);
+	  (info.runtime_state == AMD_DBGAPI_RUNTIME_STATE_LOADED_SUCCESS);
 
-	info->runtime_state = runtime_state;
+	info.runtime_state = runtime_state;
 
-	gdb_assert (inf->target_is_pushed (&the_amd_dbgapi_target));
-	inf->unpush_target (&the_amd_dbgapi_target);
+	gdb_assert (info.inf->target_is_pushed (&the_amd_dbgapi_target));
+	info.inf->unpush_target (&the_amd_dbgapi_target);
       }
       break;
 
@@ -1367,7 +1350,7 @@ process_event_queue (amd_dbgapi_inferior_info &info,
       if (event_id == AMD_DBGAPI_EVENT_NONE || event_kind == until_event_kind)
 	return event_id;
 
-      process_one_event (event_id, event_kind);
+      process_one_event (info, event_id, event_kind);
     }
 }
 
