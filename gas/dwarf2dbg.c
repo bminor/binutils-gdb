@@ -171,10 +171,18 @@ struct line_entry
   struct dwarf2_line_info loc;
 };
 
-/* Don't change the offset of next in line_entry.  set_or_check_view
-   calls in dwarf2_gen_line_info_1 depend on it.  */
-static char unused[offsetof(struct line_entry, next) ? -1 : 1]
-ATTRIBUTE_UNUSED;
+/* Given line_entry list HEAD and PTAIL pointers, return a pointer to
+   the last line_entry on the list.  */
+static inline struct line_entry *
+line_entry_at_tail (void *head, struct line_entry **ptail)
+{
+  /* If the list is empty ptail points at head.  */
+  if (head == NULL)
+    return NULL;
+  /* Otherwise ptail points to line_entry.next of the last entry.  */
+  void *p = (char *) ptail - offsetof (struct line_entry, next);
+  return p;
+}
 
 struct line_subseg
 {
@@ -528,7 +536,8 @@ dwarf2_gen_line_info_1 (symbolS *label, struct dwarf2_line_info *loc)
   /* Subseg heads are chained to previous subsegs in
      dwarf2_finish.  */
   if (loc->filenum != -1u && loc->u.view && lss->head)
-    set_or_check_view (e, (struct line_entry *) lss->ptail, lss->head);
+    set_or_check_view (e, line_entry_at_tail (lss->head, lss->ptail),
+		       lss->head);
 
   *lss->ptail = e;
   lss->ptail = &e->next;
@@ -3194,8 +3203,7 @@ dwarf2_finish (void)
 	  /* Link the first view of subsequent subsections to the
 	     previous view.  */
 	  if (lss->head && lss->head->loc.u.view)
-	    set_or_check_view (lss->head,
-			       !s->head ? NULL : (struct line_entry *)ptail,
+	    set_or_check_view (lss->head, line_entry_at_tail (s->head, ptail),
 			       s->head ? s->head->head : NULL);
 	  *ptail = lss->head;
 	  lss->head = NULL;
