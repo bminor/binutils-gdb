@@ -514,6 +514,35 @@ shift_test ()
   return 0; /* end shift_test  */
 }
 
+int
+shuffle_test ()
+{
+  /* start shuffle_test.  */
+  /* Using GDB, load these values onto registers for testing.
+     ymm0.v2_int128 = {0, 0}
+     ymm1.v16_int16 = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16}
+     ymm2.v16_int15 = {17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32}
+     ymm15.v2_int128 = {0x0, 0x0}
+     this way it's easy to confirm we're undoing things correctly.  */
+
+  asm volatile ("vpshufb %xmm1, %xmm2, %xmm0");
+  asm volatile ("vpshufb %ymm1, %ymm2, %ymm15");
+  asm volatile ("vpshufd $1, %ymm2, %ymm0");
+  asm volatile ("vpshufd $2, %xmm2, %xmm15");
+
+  asm volatile ("vpshufhw $3, %xmm2, %xmm0");
+  asm volatile ("vpshufhw $4, %ymm2, %ymm15");
+  asm volatile ("vpshuflw $5, %ymm2, %ymm0");
+  asm volatile ("vpshuflw $6, %xmm2, %xmm15");
+
+  asm volatile ("vshufps $1, %xmm1, %xmm2, %xmm0");
+  asm volatile ("vshufps $2, %ymm1, %ymm2, %ymm15");
+  asm volatile ("vshufpd $4, %ymm1, %ymm2, %ymm0");
+  asm volatile ("vshufpd $8, %xmm1, %xmm2, %xmm15");
+
+  return 0; /* end shuffle_test  */
+}
+
 /* This include is used to allocate the dynamic buffer and have
    the pointers aligned to a 32-bit boundary, so we can test instructions
    that require aligned memory.  */
@@ -547,5 +576,6 @@ main ()
   vaddsubpd_test ();
   vaddsubps_test ();
   shift_test ();
+  shuffle_test ();
   return 0;	/* end of main */
 }

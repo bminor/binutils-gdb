@@ -5030,6 +5030,7 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
 	break;
       }
 
+    case 0x00:	/* VSHUFB.  */
     case 0x40:	/* VPMULLD  */
     case 0x57:	/* VXORP[S|D]  */
     case 0x58:	/* VPBROADCASTD and VADD[P|S][S|D]  */
@@ -5038,8 +5039,10 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
     case 0x5d:	/* VMIN[P|S][S|D]  */
     case 0x5e:	/* VDIV[P|S][S|D]  */
     case 0x5f:	/* VMAX[P|S][S|D]  */
+    case 0x70:	/* VPSHUF[B|D|HW|LW].  */
     case 0x78:	/* VPBROADCASTB  */
     case 0x79:	/* VPBROADCASTW  */
+    case 0xc6:	/* VSHUFP[S|D].  */
     case 0xd1:	/* VPSRLW, dynamic shift.  */
     case 0xd2:	/* VPSRLD, dynamic shift.  */
     case 0xd3:	/* VPSRLQ, dynamic shift.  */

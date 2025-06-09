@@ -817,3 +817,57 @@ if {[record_full_function "shift"] == true} {
 }
 gdb_test "finish" "Run till exit from.*shift_test.*" \
     "leaving shift"
+
+# Preparation and testing shuffling instructions.
+gdb_test_no_output \
+    "set \$ymm0.v2_int128 = {0, 0}" "set ymm0 for shuffle"
+gdb_test_no_output \
+    "set \$ymm1.v16_int16 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}" \
+    "set ymm1 for shuffle"
+gdb_test_no_output "set \$ymm2.v16_int16 = {17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32}" \
+    "set ymm2 for shuffle"
+gdb_test_no_output "set \$ymm15.v2_int128 = {0,0}" "set ymm15 for shuffle"
+
+if {[record_full_function "shuffle"] == true} {
+    test_one_register "vshufpd" "ymm15" \
+	"0x20001000200010012001100160015, 0xa0009000a0009001a0019001e001d" \
+	"high register: "
+    test_one_register "vshufpd" "ymm0" \
+	"0x20001000200010012001100140013, 0x0" \
+	"low register: "
+    test_one_register "vshufps" "ymm15" \
+	"0x180017001600150011001100120013, 0x0" \
+	"high register: "
+    test_one_register "vshufps" "ymm0" \
+	"0x180017001600150011001100120012, 0x20001f001e001d00190019001a001a" \
+	"low register: "
+
+    test_one_register "vpshuflw" "ymm15" \
+	"0x150015001600150014001300120011, 0x1d001d001e001d001c001b001a0019" \
+	"high register: "
+    test_one_register "vpshuflw" "ymm0" \
+	"0x150015001500180014001300120011, 0x0" \
+	"low register: "
+    test_one_register "vpshufhw" "ymm15" \
+	"0x120011001200110012001100160015, 0x0" \
+	"high register: "
+    test_one_register "vpshufhw" "ymm0" \
+	"0x120011001200110012001100140013, 0x1a0019001a0019001a0019001c001b" \
+	"low register: "
+
+    test_one_register "vpshufd" "ymm15" \
+	"0x11151100111411001113110011121100, 0x1919190019201900191f1900191e1900" \
+	"high register: "
+    test_one_register "vpshufd" "ymm0" \
+	"0x11151100111411001113110011121100, 0x0" \
+	"low register: "
+    test_one_register "vpshufb" "ymm15" "0x0, 0x0" "high register: "
+    test_one_register "vpshufb" "ymm0" "0x0, 0x0" "low register: "
+
+    gdb_test "record stop" "Process record is stopped.*" \
+	"delete history for shuffle_test"
+} else {
+    untested "couldn't run shuffle tests"
+}
+gdb_test "finish" "Run till exit from.*shuffle_test.*" \
+    "leaving shuffle"
