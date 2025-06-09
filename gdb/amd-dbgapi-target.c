@@ -1473,7 +1473,7 @@ amd_dbgapi_target::wait (ptid_t ptid, struct target_waitstatus *ws,
       /* Drain the events for the current inferior from the amd_dbgapi and
 	 preserve the ordering.  */
       auto info = get_amd_dbgapi_inferior_info (current_inferior ());
-      process_event_queue (info->process_id, AMD_DBGAPI_EVENT_KIND_NONE);
+      process_event_queue (info->process_id);
 
       std::tie (event_ptid, gpu_waitstatus) = consume_one_event (ptid.pid ());
       if (event_ptid == minus_one_ptid)
