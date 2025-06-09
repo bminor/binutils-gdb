@@ -7029,7 +7029,7 @@ void
 md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
-  int value = (int)*valP;
+  int value = *valP;
 
   switch (fixP->fx_r_type)
     {

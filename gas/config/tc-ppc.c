@@ -6964,7 +6964,7 @@ ppc_handle_align (segT sec, struct frag *fragP)
 void
 md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 {
-  valueT value = * valP;
+  valueT value = *valP;
   offsetT fieldval;
   const struct powerpc_operand *operand;
 

@@ -239,12 +239,12 @@ md_number_to_chars (char con[], valueT value, int nbytes)
 
 void
 md_apply_fix (fixS *fixP,
-	       valueT * valP,
-	       segT seg ATTRIBUTE_UNUSED)
+	      valueT *valP,
+	      segT seg ATTRIBUTE_UNUSED)
 {
   valueT code;
   valueT mask;
-  valueT val = * valP;
+  valueT val = *valP;
   char *buf;
   int shift;
   int size;

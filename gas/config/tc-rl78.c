@@ -1420,7 +1420,7 @@ md_apply_fix (struct fix * f ATTRIBUTE_UNUSED,
     return;
 
   op = f->fx_frag->fr_literal + f->fx_where;
-  val = (unsigned long) * t;
+  val = *t;
 
   if (f->fx_addsy == NULL)
     f->fx_done = 1;

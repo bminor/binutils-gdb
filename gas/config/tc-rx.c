@@ -2256,9 +2256,9 @@ rx_cons_fix_new (fragS *	frag,
 }
 
 void
-md_apply_fix (struct fix * f ATTRIBUTE_UNUSED,
-	      valueT *     t ATTRIBUTE_UNUSED,
-	      segT         s ATTRIBUTE_UNUSED)
+md_apply_fix (struct fix *f,
+	      valueT *t,
+	      segT s ATTRIBUTE_UNUSED)
 {
   /* Instruction bytes are always little endian.  */
   char * op;
@@ -2274,7 +2274,7 @@ md_apply_fix (struct fix * f ATTRIBUTE_UNUSED,
 #define OP4(x) op[target_big_endian ? 3-x : x]
 
   op = f->fx_frag->fr_literal + f->fx_where;
-  val = (unsigned long) * t;
+  val = *t;
 
   /* Opcode words are always the same endian.  Data words are either
      big or little endian.  */

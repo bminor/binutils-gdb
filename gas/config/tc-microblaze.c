@@ -2042,7 +2042,7 @@ md_apply_fix (fixS *   fixP,
   const char *       file = fixP->fx_file ? fixP->fx_file : _("unknown");
   const char * symname;
   /* Note: use offsetT because it is signed, valueT is unsigned.  */
-  offsetT      val  = (offsetT) * valp;
+  offsetT      val  = *valp;
   int          i;
   struct op_code_struct * opcode1;
   unsigned long inst1;

@@ -3396,7 +3396,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   int lowbyte = target_big_endian ? 1 : 0;
   int highbyte = target_big_endian ? 0 : 1;
-  long val = (long) *valP;
+  long val = *valP;
   long max, min;
   int shift;
 
