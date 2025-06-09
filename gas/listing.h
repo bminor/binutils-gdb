@@ -70,10 +70,10 @@ void listing_width (unsigned int x);
 #define listing_source_line(line) ((void)(line))
 #endif
 
-extern int listing_lhs_width;
-extern int listing_lhs_width_second;
-extern int listing_lhs_cont_lines;
-extern int listing_rhs_width;
+extern unsigned int listing_lhs_width;
+extern unsigned int listing_lhs_width_second;
+extern unsigned int listing_lhs_cont_lines;
+extern unsigned int listing_rhs_width;
 
 extern struct list_info_struct *listing_tail;
 

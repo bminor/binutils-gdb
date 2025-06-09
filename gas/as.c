@@ -930,7 +930,7 @@ This program has absolutely no warranty.\n"));
 	  break;
 	case OPTION_LISTING_LHS_WIDTH2:
 	  {
-	    int tmp = atoi (optarg);
+	    unsigned int tmp = atoi (optarg);
 
 	    if (tmp > listing_lhs_width)
 	      listing_lhs_width_second = tmp;

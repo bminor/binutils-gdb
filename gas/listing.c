@@ -190,10 +190,10 @@ struct list_info_struct
 
 typedef struct list_info_struct list_info_type;
 
-int listing_lhs_width        = LISTING_LHS_WIDTH;
-int listing_lhs_width_second = LISTING_LHS_WIDTH_SECOND;
-int listing_lhs_cont_lines   = LISTING_LHS_CONT_LINES;
-int listing_rhs_width        = LISTING_RHS_WIDTH;
+unsigned int listing_lhs_width        = LISTING_LHS_WIDTH;
+unsigned int listing_lhs_width_second = LISTING_LHS_WIDTH_SECOND;
+unsigned int listing_lhs_cont_lines   = LISTING_LHS_CONT_LINES;
+unsigned int listing_rhs_width        = LISTING_RHS_WIDTH;
 
 struct list_info_struct *        listing_tail;
 
@@ -201,8 +201,8 @@ static file_info_type *          file_info_head;
 static file_info_type *          last_open_file_info;
 static FILE *                    last_open_file;
 static struct list_info_struct * head;
-static int                       paper_width = 200;
-static int                       paper_height = 60;
+static unsigned int              paper_width = 200;
+static unsigned int              paper_height = 60;
 
 extern int                       listing;
 
@@ -735,7 +735,7 @@ listing_page (list_info_type *list)
 {
   /* Grope around, see if we can see a title or subtitle edict coming up
      soon.  (we look down 10 lines of the page and see if it's there)  */
-  if ((eject || (on_page >= (unsigned int) paper_height))
+  if ((eject || (on_page >= paper_height))
       && paper_height != 0)
     {
       unsigned int c = 10;
@@ -793,7 +793,7 @@ emit_line (list_info_type * list, const char * format, ...)
 static unsigned int
 calc_hex (list_info_type *list)
 {
-  int data_buffer_size;
+  size_t data_buffer_size;
   list_info_type *first = list;
   unsigned int address = ~(unsigned int) 0;
   fragS *frag;
@@ -920,7 +920,7 @@ print_lines (list_info_type *list, unsigned int lineno,
     emit_line (list, "****  %s\n", msg->message);
 
   for (lines = 0;
-       lines < (unsigned int) listing_lhs_cont_lines
+       lines < listing_lhs_cont_lines
 	 && src[cur];
        lines++)
     {
@@ -1356,7 +1356,7 @@ print_timestamp (void)
 static void
 print_single_option (char * opt, int *pos)
 {
-  int opt_len = strlen (opt);
+  size_t opt_len = strlen (opt);
 
    if ((*pos + opt_len) < paper_width)
      {
@@ -1525,7 +1525,7 @@ listing_psize (int width_only)
     {
       paper_height = get_absolute_expression ();
 
-      if (paper_height < 0 || paper_height > 1000)
+      if (paper_height > 1000)
 	{
 	  paper_height = 0;
 	  as_warn (_("strange paper height, set to no form"));
