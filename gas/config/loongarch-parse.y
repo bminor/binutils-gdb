@@ -42,7 +42,7 @@ is_const (struct reloc_info *info)
 }
 
 int
-loongarch_parse_expr (const char *expr,
+loongarch_parse_expr (const char *exp,
 		      struct reloc_info *reloc_stack_top,
 		      size_t max_reloc_num,
 		      size_t *reloc_num,
@@ -52,7 +52,7 @@ loongarch_parse_expr (const char *expr,
   struct yy_buffer_state *buffstate;
   top = reloc_stack_top;
   end = top + max_reloc_num;
-  buffstate = yy_scan_string (expr);
+  buffstate = yy_scan_string (exp);
   ret = yyparse ();
 
   if (ret == 0)

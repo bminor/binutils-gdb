@@ -1398,7 +1398,8 @@ loongarch_assemble_INSNs (char *str, unsigned int expand_from_macro)
       if (*str == '\0')
 	break;
 
-      struct loongarch_cl_insn the_one = { 0 };
+      struct loongarch_cl_insn the_one;
+      memset (&the_one, 0, sizeof (the_one));
       the_one.name = str;
       the_one.expand_from_macro = expand_from_macro;
 
@@ -1497,6 +1498,29 @@ loongarch_force_relocation (struct fix *fixp)
 	break;
     }
   return generic_force_reloc (fixp);
+}
+
+/* If subsy of BFD_RELOC32/64 and PC in same segment, and without relax
+   or PC at start of subsy or with relax but sub_symbol_segment not in
+   SEC_CODE, we generate 32/64_PCREL.  */
+bool
+loongarch_force_relocation_sub_local (fixS *fixp, segT sec ATTRIBUTE_UNUSED)
+{
+  return !(LARCH_opts.thin_add_sub
+	   && (fixp->fx_r_type == BFD_RELOC_32
+	       || fixp->fx_r_type == BFD_RELOC_64)
+	   && (!LARCH_opts.relax
+	       || (S_GET_VALUE (fixp->fx_subsy)
+		   == fixp->fx_frag->fr_address + fixp->fx_where)
+	       || (S_GET_SEGMENT (fixp->fx_subsy)->flags & SEC_CODE) == 0));
+}
+
+/* Postpone text-section label subtraction calculation until linking, since
+   linker relaxations might change the deltas.  */
+bool
+loongarch_force_relocation_sub_same(fixS *fixp ATTRIBUTE_UNUSED, segT sec)
+{
+  return LARCH_opts.relax && (sec->flags & SEC_CODE) != 0;
 }
 
 static void fix_reloc_insn (fixS *fixP, bfd_vma reloc_val, char *buf)

@@ -21,8 +21,6 @@
 #ifndef TC_LOONGARCH
 #define TC_LOONGARCH
 
-#include "opcode/loongarch.h"
-
 #define TARGET_BYTES_BIG_ENDIAN 0
 #define TARGET_ARCH bfd_arch_loongarch
 
@@ -80,26 +78,19 @@ extern int loongarch_force_relocation (struct fix *);
 /* If subsy of BFD_RELOC32/64 and PC in same segment, and without relax
    or PC at start of subsy or with relax but sub_symbol_segment not in
    SEC_CODE, we generate 32/64_PCREL.  */
-#define TC_FORCE_RELOCATION_SUB_LOCAL(FIX, SEG) \
-  (!(LARCH_opts.thin_add_sub \
-     && ((FIX)->fx_r_type == BFD_RELOC_32 \
-	 ||(FIX)->fx_r_type == BFD_RELOC_64) \
-     && (!LARCH_opts.relax \
-	|| S_GET_VALUE (FIX->fx_subsy) \
-	   == FIX->fx_frag->fr_address + FIX->fx_where \
-	|| (LARCH_opts.relax \
-	   && ((S_GET_SEGMENT (FIX->fx_subsy)->flags & SEC_CODE) == 0)))))
+extern bool loongarch_force_relocation_sub_local (struct fix *, asection *);
+#define TC_FORCE_RELOCATION_SUB_LOCAL(FIX, SEC) \
+  loongarch_force_relocation_sub_local (FIX, SEC)
 
 #define TC_VALIDATE_FIX_SUB(FIX, SEG) 1
 #define DIFF_EXPR_OK 1
 
 /* Postpone text-section label subtraction calculation until linking, since
    linker relaxations might change the deltas.  */
+extern bool loongarch_force_relocation_sub_same(struct fix *, asection *);
 #define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEC)	\
-  (LARCH_opts.relax ?  \
-    (GENERIC_FORCE_RELOCATION_SUB_SAME (FIX, SEC)	\
-      || ((SEC)->flags & SEC_CODE) != 0)		\
-    : (GENERIC_FORCE_RELOCATION_SUB_SAME (FIX, SEC))) \
+  (loongarch_force_relocation_sub_same (FIX, SEC) \
+   || GENERIC_FORCE_RELOCATION_SUB_SAME (FIX, SEC))
 
 #define TC_LINKRELAX_FIXUP(seg) ((seg->flags & SEC_CODE)  \
 				    || (seg->flags & SEC_DEBUGGING))
