@@ -213,7 +213,7 @@ opt_name2: ID { $$ = $1; }
 	  }
 	;
 opt_name: opt_name2 { $$ =$1; }
-	|		{ $$=""; }
+	|		{ $$ = xstrdup (""); }
 	;
 
 opt_ordinal:
