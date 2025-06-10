@@ -5365,7 +5365,7 @@ alpha_handle_align (fragS *fragp)
     0x00, 0x00, 0xfe, 0x2f
   };
 
-  int bytes, fix;
+  size_t bytes, fix;
   char *p;
 
   if (fragp->fr_type != rs_align_code)
@@ -5373,16 +5373,14 @@ alpha_handle_align (fragS *fragp)
 
   bytes = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
   p = fragp->fr_literal + fragp->fr_fix;
-  fix = 0;
 
-  if (bytes & 3)
+  fix = bytes & 3;
+  if (fix)
     {
-      fix = bytes & 3;
       memset (p, 0, fix);
       p += fix;
       bytes -= fix;
     }
-
   if (bytes & 4)
     {
       memcpy (p, unop, 4);
@@ -5390,11 +5388,13 @@ alpha_handle_align (fragS *fragp)
       bytes -= 4;
       fix += 4;
     }
-
-  memcpy (p, nopunop, 8);
-
   fragp->fr_fix += fix;
-  fragp->fr_var = 8;
+
+  if (bytes)
+    {
+      memcpy (p, nopunop, 8);
+      fragp->fr_var = 8;
+    }
 }
 
 /* Public interface functions.  */
