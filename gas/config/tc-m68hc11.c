@@ -189,7 +189,6 @@ struct m9s12xg_opcode_def
 /* Local functions.  */
 static register_id reg_name_search (char *);
 static register_id register_name (void);
-static int cmp_opcode (struct m68hc11_opcode *, struct m68hc11_opcode *);
 static char *print_opcode_format (struct m68hc11_opcode *, int);
 static char *skip_whites (char *);
 static int check_range (long, int);
@@ -588,8 +587,10 @@ md_section_align (asection *seg, valueT addr)
 }
 
 static int
-cmp_opcode (struct m68hc11_opcode *op1, struct m68hc11_opcode *op2)
+cmp_opcode (const void *p1, const void *p2)
 {
+  const struct m68hc11_opcode *op1 = p1;
+  const struct m68hc11_opcode *op2 = p2;
   return strcmp (op1->name, op2->name);
 }
 
@@ -639,8 +640,7 @@ md_begin (void)
 	      }
 	}
     }
-  qsort (opcodes, num_opcodes, sizeof (struct m68hc11_opcode),
-         (int (*) (const void*, const void*)) cmp_opcode);
+  qsort (opcodes, num_opcodes, sizeof (struct m68hc11_opcode), cmp_opcode);
 
   opc = XNEWVEC (struct m68hc11_opcode_def, num_opcodes);
   m68hc11_opcode_defs = opc;
