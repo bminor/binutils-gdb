@@ -509,7 +509,7 @@ insert_operand (struct kvxinsn *insn, struct kvx_operand *opdef,
       {
 	char *ilp_save = input_line_pointer;
 	input_line_pointer = tok->tok;
-	expressionS exp = { 0 };
+	expressionS exp;
 	expression (&exp);
 	input_line_pointer = ilp_save;
 

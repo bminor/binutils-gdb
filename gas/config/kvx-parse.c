@@ -409,7 +409,7 @@ promote_token (struct token_s tok)
 	  : tok.class_id;
       case CAT_IMMEDIATE:
 	{
-	  expressionS exp = { 0 };
+	  expressionS exp;
 	  char *ilp_save = input_line_pointer;
 	  input_line_pointer = tok.insn + tok.begin;
 	  expression (&exp);
@@ -462,7 +462,7 @@ get_token_class (struct token_s *token, struct token_classes *classes, int insn_
   int found = 0;
   int tok_sz = token->end - token->begin;
   char *tok = token->insn + token->begin;
-  expressionS exp = {0};
+  expressionS exp;
 
   token->val = 0;
   int token_val_p = 0;

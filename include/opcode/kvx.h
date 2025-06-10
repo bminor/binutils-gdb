@@ -140,13 +140,13 @@ struct kvx_pseudo_relocs
   struct kvx_reloc *kreloc;
 };
 
-typedef struct symbol symbolS;
+struct symbol;
 
 struct pseudo_func
 {
   const char *name;
 
-  symbolS *sym;
+  struct symbol *sym;
   struct kvx_pseudo_relocs pseudo_relocs;
 };
 
