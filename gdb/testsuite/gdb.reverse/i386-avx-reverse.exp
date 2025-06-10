@@ -959,3 +959,58 @@ if {[record_full_function "permute"] == true} {
 }
 gdb_test "finish" "Run till exit from.*permute_test.*" \
     "leaving permute"
+
+# Preparation and testing extract_insert instructions.
+gdb_test_no_output \
+    "set \$ymm0.v2_int128 = {0, 0}" "set ymm0 for extract_insert"
+gdb_test_no_output \
+    "set \$ymm1.v16_int16 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}" \
+    "set ymm1 for extract_insert"
+gdb_test_no_output "set \$xmm2.uint128 = 0xcafe" \
+    "set ymm2 for extract_insert"
+gdb_test_no_output "set \$ymm15.v2_int128 = {0,0}" "set ymm15 for extract_insert"
+gdb_test_no_output "set \$rax = 0" "set eax for extract_insert"
+
+if {[record_full_function "extract_insert"] == true} {
+    test_one_memory "vpextrw" "global_buf1" \
+	"\\\{0x1, 0x0, 0x2, 0x0, 0x3, 0x0, 0x4, 0x0, 0x18"
+    test_one_general_register "vpextrw" "rax" "0x8000700060005"
+
+    test_one_register "vpinsrq" "ymm15" \
+	"0x50000cafe, 0x0"
+    test_one_register "vpinsrd" "ymm0" \
+	"0x500cafe, 0x0"
+    test_one_register "vpinsrw" "ymm15" \
+	"0x80007000600050004000300020001, 0x0"
+    test_one_register "vpinsrb" "ymm0" \
+	"0x80007000600050000cafe00020001, 0x0"
+
+    test_one_memory "vpextrq" "global_buf1" \
+	"\\\{0x5, 0x0, 0x6, 0x0, 0x0, 0x0, 0x0, 0x0, 0x18"
+    test_one_general_register "vpextrq" "rax" "0x80007"
+    test_one_memory "vpextrd" "global_buf1" \
+	"\\\{0x3, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x18"
+    test_one_general_register "vpextrd" "rax" "0x0"
+    test_one_memory "vpextrb" "global_buf1" \
+	"\\\{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x18"
+    test_one_general_register "vpextrb" "rax" "0xcafe"
+
+    test_one_general_register "vextractps" "eax" "0x0"
+    test_one_register "vinsertps" "ymm0" \
+	"0x10000f000e000d000c000b000a0009, 0x0"
+    test_one_register "vextractf128" "ymm15" \
+	"0xcafe, 0x10000f000e000d000c000b000a0009"
+    test_one_register "vextracti128" "ymm0" \
+	"0x80007000600050004000300020001, 0xcafe"
+    test_one_register "vinsertf128" "ymm15" \
+	"0x0, 0x0"
+    test_one_register "vinserti128" "ymm0" \
+	"0x0, 0x0"
+
+    gdb_test "record stop" "Process record is stopped.*" \
+	"delete history for extract_insert_test"
+} else {
+    untested "couldn't run extract_insert tests"
+}
+gdb_test "finish" "Run till exit from.*extract_insert_test.*" \
+    "leaving extract_insert"

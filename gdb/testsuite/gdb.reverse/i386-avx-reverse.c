@@ -589,6 +589,45 @@ permute_test ()
   return 0; /* end permute_test  */
 }
 
+int
+extract_insert_test ()
+{
+  /* start extract_insert_test.  */
+  /* Using GDB, load these values onto registers for testing.
+     ymm0.v2_int128 = {0, 0}
+     ymm1.v16_int16 = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16}
+     xmm2.uint128 = 0xcafe
+     ymm15.v2_int128 = {0x0, 0x0}
+     eax = 0
+     this way it's easy to confirm we're undoing things correctly.  */
+
+  asm volatile ("vinserti128 $1, %xmm2, %ymm1, %ymm0");
+  asm volatile ("vinsertf128 $0, %xmm2, %ymm1, %ymm15");
+  asm volatile ("vextracti128 $1, %ymm1, %xmm0");
+  asm volatile ("vextractf128 $0, %ymm1, %xmm15");
+  asm volatile ("vinsertps $16, %xmm2, %xmm1, %xmm0");
+  asm volatile ("vextractps $0, %xmm2, %rax");
+
+  asm volatile ("vpextrb $5, %xmm1, %rax");
+  asm volatile ("vpextrb $4, %%xmm1, %0" : "=m" (global_buf1));
+  asm volatile ("vpextrd $3, %xmm1, %eax");
+  asm volatile ("vpextrd $2, %%xmm1, %0" : "=m" (global_buf1));
+  asm volatile ("vpextrq $1, %xmm1, %rax");
+  asm volatile ("vpextrq $0, %%xmm1, %0" : "=m" (global_buf1));
+
+  asm volatile ("vpinsrb $3, %rax, %xmm2, %xmm0");
+  asm volatile ("vpinsrw $2, %eax, %xmm2, %xmm15");
+  asm volatile ("vpinsrd $1, %eax, %xmm2, %xmm0");
+  asm volatile ("vpinsrq $0, %rax, %xmm2, %xmm15");
+
+  /* vpextrw has completely different mechanics to other vpextr
+     instructions, so separate them for ease of testing later.  */
+  asm volatile ("vpextrw $1, %xmm1, %eax");
+  asm volatile ("vpextrw $1, %%xmm1, %0" : "=m" (global_buf1));
+
+  return 0; /* end extract_insert_test  */
+}
+
 /* This include is used to allocate the dynamic buffer and have
    the pointers aligned to a 32-bit boundary, so we can test instructions
    that require aligned memory.  */
@@ -624,5 +663,6 @@ main ()
   shift_test ();
   shuffle_test ();
   permute_test ();
+  extract_insert_test ();
   return 0;	/* end of main */
 }

@@ -4859,12 +4859,6 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
 	  i386_record_lea_modrm (ir);
 	}
       break;
-    case 0x14: /* VUNPCKL[PS|PD].  */
-    case 0x15: /* VUNPCKH [PS|PD].  */
-      i386_record_modrm (ir);
-      record_full_arch_list_add_reg (ir->regcache,
-				     tdep->ymm0_regnum + ir->reg + vex_r * 8);
-      break;
     case 0x6e:	/* VMOVD XMM, reg/mem  */
       /* This is moving from a regular register or memory region into an
 	 XMM register. */
@@ -4994,14 +4988,34 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
 	}
       break;
 
-    case 0x19:	/* VBROADCASTSD.  */
+    case 0x17:	/* VEXTRACTPS.  */
       i386_record_modrm (ir);
       record_full_arch_list_add_reg (ir->regcache,
-				     tdep->ymm0_regnum + ir->reg
-				     + 8 * vex_r);
+				     ir->regmap[X86_RECORD_REAX_REGNUM
+						+ ir->rm]);
       break;
 
-    case 0x18:	/* VBROADCASTSS.  */
+    case 0x19:	/* VBROADCASTSD and VEXTRACTF128.  */
+    case 0x39:	/* VEXTRACTI128.  */
+      i386_record_modrm (ir);
+      /* vextract instructions use ModRM.R/M and VEX.B to address the
+	 output register, while vbroadcast use ModRM.Reg and VEX.R.
+	 They are differentiated through map_select.  */
+      if (ir->map_select == 2)
+	record_full_arch_list_add_reg (ir->regcache,
+				       tdep->ymm0_regnum + ir->reg
+				       + 8 * vex_r);
+      else
+	record_full_arch_list_add_reg (ir->regcache,
+				       tdep->ymm0_regnum + ir->rm
+				       + 8 * ir->rex_b);
+      break;
+
+    case 0x18:	/* VBROADCASTSS and VINSERTI128.  */
+    case 0x20:	/* VPINSRB.  */
+    case 0x21:	/* VINSERTPS.  */
+    case 0x22:	/* VINSR[D|Q].  */
+    case 0x38:	/* VINSERTF128.  */
     case 0x60:	/* VPUNPCKLBW  */
     case 0x61:	/* VPUNPCKLWD  */
     case 0x62:	/* VPUNPCKLDQ  */
@@ -5010,12 +5024,68 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
     case 0x69:	/* VPUNPCKHWD  */
     case 0x6a:	/* VPUNPCKHDQ  */
     case 0x6d:	/* VPUNPCKHQDQ */
+    case 0xc4:	/* VPINSRW.  */
       {
 	i386_record_modrm (ir);
 	int reg_offset = ir->reg + vex_r * 8;
 	record_full_arch_list_add_reg (ir->regcache,
 				       tdep->ymm0_regnum + reg_offset);
       }
+      break;
+
+    case 0x14:	/* VPEXTRB and VUNPCKL[PS|PD].  */
+    case 0x15:	/* VPEXTRW (to memory) and VUNPCKH [PS|PD].  */
+    case 0x16:	/* VPEXTR[D|Q] and VPERMPS.  */
+      {
+	i386_record_modrm (ir);
+	/* All vpextr instructions in this case use map_select == 3,
+	   while vpermps and vunpck have map_select equal to 2 and 1,
+	   respectively.  The opcode 0xc5 is for vpextr, but uses
+	   map_select == 1, but due to other inconsistencies with
+	   the other vpextr instructions, it is in a separate case to
+	   avoid making this even more of a mess.  */
+	if (ir->map_select == 3)
+	  {
+	    if (ir->mod == 3)
+	      {
+		/* ModRM.Mod being equal to 3 means this ModRM encodes
+		   a register.  */
+		record_full_arch_list_add_reg (ir->regcache,
+					  ir->regmap[X86_RECORD_REAX_REGNUM
+						     + ir->rm]);
+	      }
+	    else
+	      {
+		/* Even though the test only generated ModRM.Mod == 0,
+		   in theory all values != 3 are viable to encode a memory
+		   address, so all of them are passed along.  */
+		/* Size is mostly based on the opcode, except for
+		   double/quadword difference.  */
+		ir->ot = opcode - 0x14;
+		if (opcode == 0x16 && vex_w == 1)
+		  ir->ot ++;
+		/* I'm not sure if this is the original use, but in here
+		   rip_offset is used to indicate that the RIP pointer will
+		   be 1 byte away from where the instruction expects it to
+		   be, because the immediate will not have been read by the
+		   time the address changed is calculated.  */
+		ir->rip_offset = 1;
+		i386_record_lea_modrm (ir);
+	      }
+	  }
+	else
+	  {
+	    record_full_arch_list_add_reg (ir->regcache,
+					   tdep->ymm0_regnum + ir->reg
+					   + vex_r * 8);
+	  }
+	break;
+      }
+    case 0xc5:	/* VPEXTRW to register.  */
+      i386_record_modrm (ir);
+      record_full_arch_list_add_reg (ir->regcache,
+				ir->regmap[X86_RECORD_REAX_REGNUM
+					   + ir->reg]);
       break;
 
     case 0x74:	/* VPCMPEQB  */
@@ -5045,7 +5115,6 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
     case 0x06:	/* VMPERM2F128.  */
     case 0x0c:	/* VPERMILPS with register.  */
     case 0x0d:	/* VPERMILPD with register.  */
-    case 0x16:	/* VPERMPS.  */
     case 0x1a:	/* VBROADCASTF128.  */
     case 0x36:	/* VPERMD.  */
     case 0x40:	/* VPMULLD  */
