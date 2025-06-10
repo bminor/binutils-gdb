@@ -4915,6 +4915,16 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
 	  return -1;
 	}
       break;
+    case 0xd0:    /* VADDSUBPD XMM1, XMM2, reg/mem */
+		  /* VADDSUBPS XMM1, XMM2, reg/mem */
+      i386_record_modrm (ir);
+      /* The most significant bit of the register offset
+	 is vex_r. */
+      record_full_arch_list_add_reg (ir->regcache,
+				     tdep->ymm0_regnum
+				     + ir->reg + vex_r * 8);
+      break;
+
     case 0xd6: /* VMOVQ reg/mem XMM  */
       i386_record_modrm (ir);
       /* This is the vmovq version that stores into a regular register

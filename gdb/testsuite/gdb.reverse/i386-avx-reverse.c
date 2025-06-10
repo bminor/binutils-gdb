@@ -419,6 +419,37 @@ arith_test ()
   return 0; /* end arith_test  */
 }
 
+int
+vaddsubpd_test ()
+{
+  /* start vaddsubpd_test */
+  /* YMM test.  */
+  asm volatile ("vaddsubpd %ymm15,%ymm1,%ymm0");
+  asm volatile ("vaddsubpd %ymm0,%ymm1,%ymm15");
+  asm volatile ("vaddsubpd %ymm2,%ymm3,%ymm4");
+
+  /* XMM test.  */
+  asm volatile ("vaddsubpd %xmm15,%xmm1,%xmm2");
+  asm volatile ("vaddsubpd %xmm0,%xmm1,%xmm10");
+  return 0; /* end vaddsubpd_test */
+}
+
+int
+vaddsubps_test ()
+{
+  /* start vaddsubps_test */
+  /* YMM test.  */
+  asm volatile ("vaddsubps %ymm15,%ymm1,%ymm2");
+  asm volatile ("vaddsubps %ymm0,%ymm1,%ymm10");
+  asm volatile ("vaddsubps %ymm2,%ymm3,%ymm4");
+
+  /* XMM test.  */
+  asm volatile ("vaddsubps %xmm0,%xmm1,%xmm15");
+  asm volatile ("vaddsubps %xmm15,%xmm1,%xmm0");
+  return 0; /* end vaddsubps_test */
+}
+
+
 /* This include is used to allocate the dynamic buffer and have
    the pointers aligned to a 32-bit boundary, so we can test instructions
    that require aligned memory.  */
@@ -449,5 +480,7 @@ main ()
   vpcmpeq_test ();
   vpmovmskb_test ();
   arith_test ();
+  vaddsubpd_test ();
+  vaddsubps_test ();
   return 0;	/* end of main */
 }

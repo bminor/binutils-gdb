@@ -626,3 +626,73 @@ if {[record_full_function "arith"] == true} {
 }
 gdb_test "finish" "Run till exit from.*arith_test.*" \
     "leaving arith"
+
+# Preparation and testing vaddsubpd instructions
+
+gdb_test_no_output "set \$ymm15.v2_int128 = {0xcafeface, 0xcafeface}" \
+    "set ymm15 for vaddsubpd"
+gdb_test_no_output "set \$ymm0.v2_int128 = {0xcafeface, 0xcafeface}" \
+    "set ymm0 for vaddsubpd"
+gdb_test_no_output "set \$xmm2.uint128 = 0xbeef" \
+    "set xmm2 for vaddsubpd"
+gdb_test_no_output "set \$xmm10.uint128 = 0xbeef" \
+    "set xmm10 for vaddsubpd"
+gdb_test_no_output "set \$ymm3.v2_int128 = {0xcafeface, 0xcafeface}" \
+    "set ymm3 for vaddsubpd"
+gdb_test_no_output "set \$ymm4.v2_int128 = {0xcafeface, 0xcafeface}" \
+    "set ymm4 for vaddsubpd"
+
+if {[record_full_function "vaddsubpd"] == true} {
+   test_one_register "vaddsubpd" "xmm10" \
+       "0xbeef" "xmm10:"
+   test_one_register "vaddsubpd" "xmm2" \
+       "0xbeef" "xmm2:"
+    test_one_register "vaddsubpd" "ymm4" \
+       "0xcafeface, 0xcafeface" "ymm4: "
+    test_one_register "vaddsubpd" "ymm15" \
+       "0xcafeface, 0xcafeface" "ymm15: "
+    test_one_register "vaddsubpd" "ymm0" \
+       "0xcafeface, 0xcafeface" "ymm0: "
+
+    gdb_test "record stop" "Process record is stopped.*" \
+       "delete history for vaddsubpd_test"
+} else {
+    untested "couldn't run vaddsubpd tests"
+}
+gdb_test "finish" "Run till exit from.*vaddsubpd_test.*" \
+    "leaving vaddsubpd"
+
+# Preparation and testing vaddsubps instruction
+
+gdb_test_no_output "set \$ymm10.v2_int128 = {0xcafeface, 0xcafeface}" \
+    "set ymm10 for vaddsubps"
+gdb_test_no_output "set \$ymm2.v2_int128 = {0xcafeface, 0xcafeface}" \
+    "set ymm2 for vaddsubps"
+gdb_test_no_output "set \$xmm15.uint128 = 0xbeef" \
+    "set xmm15 for vaddsubps"
+gdb_test_no_output "set \$xmm0.uint128 = 0xbeef" \
+    "set xmm0 for vaddsubps"
+gdb_test_no_output "set \$ymm3.v2_int128 = {0xcafeface, 0xcafeface}" \
+    "set ymm3 for vaddsubps"
+gdb_test_no_output "set \$ymm4.v2_int128 = {0xcafeface, 0xcafeface}" \
+    "set ymm4 for vaddsubps"
+
+if {[record_full_function "vaddsubps"] == true} {
+    test_one_register "vaddsubps" "xmm0" \
+       "0xbeef" "xmm0: "
+    test_one_register "vaddsubps" "xmm15" \
+       "0xbeef" "xmm15: "
+    test_one_register "vaddsubps" "ymm4" \
+       "0xcafeface, 0xcafeface" "ymm4: "
+    test_one_register "vaddsubps" "ymm10" \
+       "0xcafeface, 0xcafeface" "ymm10: "
+    test_one_register "vaddsubps" "ymm2" \
+       "0xcafeface, 0xcafeface" "ymm2: "
+
+    gdb_test "record stop" "Process record is stopped.*" \
+       "delete history for vaddsubps_test"
+} else {
+    untested "couldn't run vaddsubps tests"
+}
+gdb_test "finish" "Run till exit from.*vaddsubps_test.*" \
+    "leaving vaddsubps"
