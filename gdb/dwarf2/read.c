@@ -7635,11 +7635,6 @@ cutu_reader::open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
 
   this->locate_dwo_sections (per_objfile->objfile, *dwo_file);
 
-  /* There is normally just one .debug_info.dwo section in a DWO file.  But when
-     building with -fdebug-types-section, gcc produces multiple .debug_info.dwo
-     sections.  One for each produced type unit and one for the compile unit.
-     This is not expected, but we can easily enough deal with what gcc
-     produces.  This behavior has been observed with gcc 14.2.1.  */
   for (dwarf2_section_info &section : dwo_file->sections.infos)
     create_dwo_unit_hash_tables (*dwo_file, *cu, section, ruh_kind::COMPILE);
 
