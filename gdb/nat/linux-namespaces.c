@@ -265,62 +265,65 @@ enum mnsh_msg_type
     MNSH_RET_INTSTR,
   };
 
-/* Print a string representation of a message using debug_printf.
-   This function is not async-signal-safe so should never be
-   called from the helper.  */
+/* Return a string representation of a message.  This function is not
+   async-signal-safe so should never be called from the helper.  */
 
-static void
+static std::string
 mnsh_debug_print_message (enum mnsh_msg_type type,
 			  int fd, int int1, int int2,
 			  const void *buf, int bufsiz)
 {
+  std::string res;
+
   gdb_byte *c = (gdb_byte *) buf;
   gdb_byte *cl = c + bufsiz;
 
   switch (type)
     {
     case MNSH_MSG_ERROR:
-      debug_printf ("ERROR");
+      res += "ERROR";
       break;
 
     case MNSH_REQ_SETNS:
-      debug_printf ("SETNS");
+      res += "SETNS";
       break;
 
     case MNSH_REQ_OPEN:
-      debug_printf ("OPEN");
+      res += "OPEN";
       break;
 
     case MNSH_REQ_UNLINK:
-      debug_printf ("UNLINK");
+      res += "UNLINK";
       break;
 
     case MNSH_REQ_READLINK:
-      debug_printf ("READLINK");
+      res += "READLINK";
       break;
 
     case MNSH_RET_INT:
-      debug_printf ("INT");
+      res += "INT";
       break;
 
     case MNSH_RET_FD:
-      debug_printf ("FD");
+      res += "FD";
       break;
 
     case MNSH_RET_INTSTR:
-      debug_printf ("INTSTR");
+      res += "INTSTR";
       break;
 
     default:
-      debug_printf ("unknown-packet-%d", type);
+      res += string_printf ("unknown-packet-%d", type);
     }
 
-  debug_printf (" %d %d %d \"", fd, int1, int2);
+  res += string_printf (" %d %d %d \"", fd, int1, int2);
 
   for (; c < cl; c++)
-    debug_printf (*c >= ' ' && *c <= '~' ? "%c" : "\\%o", *c);
+    res += string_printf (*c >= ' ' && *c <= '~' ? "%c" : "\\%o", *c);
 
-  debug_printf ("\"");
+  res += "\"";
+
+  return res;
 }
 
 /* Forward declaration.  */
@@ -390,12 +393,10 @@ mnsh_send_message (int sock, enum mnsh_msg_type type,
   if (size < 0)
     mnsh_maybe_mourn_peer ();
 
-  if (debug_linux_namespaces)
-    {
-      debug_printf ("mnsh: send: ");
-      mnsh_debug_print_message (type, fd, int1, int2, buf, bufsiz);
-      debug_printf (" -> %s\n", pulongest (size));
-    }
+  linux_namespaces_debug_printf
+    ("send: %s -> %s",
+     mnsh_debug_print_message (type, fd, int1, int2, buf, bufsiz).c_str (),
+     pulongest (size));
 
   return size;
 }
@@ -445,9 +446,8 @@ mnsh_recv_message (int sock, enum mnsh_msg_type *type,
   size = recvmsg (sock, &msg, MSG_CMSG_CLOEXEC);
   if (size < 0)
     {
-      if (debug_linux_namespaces)
-	debug_printf ("namespace-helper: recv failed (%s)\n",
-		      pulongest (size));
+      linux_namespaces_debug_printf
+	("namespace-helper: recv failed (%s)", pulongest (size));
 
       mnsh_maybe_mourn_peer ();
 
@@ -457,9 +457,9 @@ mnsh_recv_message (int sock, enum mnsh_msg_type *type,
   /* Check for truncation.  */
   if (size < fixed_size || (msg.msg_flags & (MSG_TRUNC | MSG_CTRUNC)))
     {
-      if (debug_linux_namespaces)
-	debug_printf ("namespace-helper: recv truncated (%s 0x%x)\n",
-		      pulongest (size), msg.msg_flags);
+      linux_namespaces_debug_printf
+	("namespace-helper: recv truncated (%s 0x%x)",
+	 pulongest (size), msg.msg_flags);
 
       mnsh_maybe_mourn_peer ();
 
@@ -477,13 +477,10 @@ mnsh_recv_message (int sock, enum mnsh_msg_type *type,
   else
     *fd = -1;
 
-  if (debug_linux_namespaces)
-    {
-      debug_printf ("mnsh: recv: ");
-      mnsh_debug_print_message (*type, *fd, *int1, *int2, buf,
-				size - fixed_size);
-      debug_printf ("\n");
-    }
+  linux_namespaces_debug_printf
+    ("recv: %s",
+     mnsh_debug_print_message (*type, *fd, *int1, *int2, buf,
+			       size - fixed_size).c_str ());
 
   /* Return the number of bytes of data in BUF.  */
   return size - fixed_size;
@@ -673,7 +670,7 @@ linux_mntns_get_helper (void)
 	  mnsh_creator_pid = helper_creator;
 
 	  /* Debug printing isn't async-signal-safe.  */
-	  debug_linux_namespaces = 0;
+	  debug_linux_namespaces = false;
 
 	  mnsh_main (sv[1]);
 	}
@@ -685,9 +682,8 @@ linux_mntns_get_helper (void)
       helper->sock = sv[0];
       helper->nsid = ns->id;
 
-      if (debug_linux_namespaces)
-	debug_printf ("Started mount namespace helper process %d\n",
-		      helper->pid);
+      linux_namespaces_debug_printf
+	("Started mount namespace helper process %d", helper->pid);
     }
 
   return helper;

@@ -24,6 +24,12 @@
 
 extern bool debug_linux_namespaces;
 
+/* Print a "linux-namespaces" debug statement.  */
+
+#define linux_namespaces_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (debug_linux_namespaces, "linux-namespaces", \
+			      fmt, ##__VA_ARGS__)
+
 /* Enumeration of Linux namespace types.  */
 
 enum linux_ns_type
