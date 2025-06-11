@@ -543,6 +543,44 @@ shuffle_test ()
   return 0; /* end shuffle_test  */
 }
 
+int
+permute_test ()
+{
+  /* start permute_test.  */
+  /* Using GDB, load these values onto registers for testing.
+     ymm0.v2_int128 = {0, 0}
+     ymm1.v16_int16 = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16}
+     ymm2.v16_int16 = {17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32}
+     ymm15.v2_int128 = {0x0, 0x0}
+     eax = 0
+     this way it's easy to confirm we're undoing things correctly.  */
+  asm volatile ("vperm2f128 $1, %ymm1, %ymm2, %ymm0");
+  asm volatile ("vperm2f128 $0, %ymm1, %ymm2, %ymm15");
+  asm volatile ("vperm2i128 $1, %ymm2, %ymm1, %ymm0");
+  asm volatile ("vperm2i128 $0, %ymm2, %ymm1, %ymm15");
+
+  asm volatile ("vpermd %ymm1, %ymm2, %ymm0");
+  asm volatile ("vpermd %ymm1, %ymm2, %ymm15");
+  asm volatile ("vpermq $1, %ymm1, %ymm0");
+  asm volatile ("vpermq $0, %ymm2, %ymm15");
+
+  asm volatile ("vpermilpd %ymm1, %ymm2, %ymm0");
+  asm volatile ("vpermilpd %xmm1, %xmm2, %xmm15");
+  asm volatile ("vpermilpd $1, %ymm2, %ymm15");
+  asm volatile ("vpermilpd $0, %xmm2, %xmm0");
+  asm volatile ("vpermilps %ymm1, %ymm2, %ymm0");
+  asm volatile ("vpermilps %xmm1, %xmm2, %xmm15");
+  asm volatile ("vpermilps $1, %ymm2, %ymm15");
+  asm volatile ("vpermilps $0, %xmm2, %xmm0");
+
+  asm volatile ("vpermpd $0, %ymm1, %ymm15");
+  asm volatile ("vpermpd $0, %ymm2, %ymm0");
+  asm volatile ("vpermps %ymm1, %ymm2, %ymm0");
+  asm volatile ("vpermps %ymm1, %ymm2, %ymm15");
+
+  return 0; /* end permute_test  */
+}
+
 /* This include is used to allocate the dynamic buffer and have
    the pointers aligned to a 32-bit boundary, so we can test instructions
    that require aligned memory.  */
@@ -577,5 +615,6 @@ main ()
   vaddsubps_test ();
   shift_test ();
   shuffle_test ();
+  permute_test ();
   return 0;	/* end of main */
 }
