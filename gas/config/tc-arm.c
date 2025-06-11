@@ -32744,8 +32744,12 @@ s_arm_arch_extension (int ignored ATTRIBUTE_UNUSED)
 
 	if (i == nb_allowed_archs)
 	  {
-	    as_bad (_("architectural extension `%s' is not allowed for the "
-		      "current base architecture"), name);
+	    if (adding_value)
+	      as_bad (_("architectural extension `%s' is not allowed for the "
+			"current base architecture"), name);
+	    else
+	      as_tsktsk (_("disabling feature `%s' has no effect on the "
+			   "current base architecture"), name);
 	    break;
 	  }
 
