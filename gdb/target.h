@@ -1016,8 +1016,8 @@ struct target_ops
        filesystem seen by the debugger (GDB or, for remote targets, the
        remote stub).  Return 0 on success, or -1 if an error occurs (and
        set *TARGET_ERRNO).  */
-    virtual int fileio_stat (struct inferior *inf, const char *filename,
-			     struct stat *sb, fileio_error *target_errno);
+    virtual int fileio_lstat (struct inferior *inf, const char *filename,
+			      struct stat *sb, fileio_error *target_errno);
 
     /* Close FD on the target.  Return 0, or -1 if an error occurs
        (and set *TARGET_ERRNO).  */
@@ -2256,8 +2256,8 @@ extern int target_fileio_fstat (int fd, struct stat *sb,
    filesystem seen by the debugger (GDB or, for remote targets, the remote
    stub).  Return 0 on success, or -1 if an error occurs (and set
    *TARGET_ERRNO).  */
-extern int target_fileio_stat (struct inferior *inf, const char *filename,
-			       struct stat *sb, fileio_error *target_errno);
+extern int target_fileio_lstat (struct inferior *inf, const char *filename,
+				struct stat *sb, fileio_error *target_errno);
 
 /* Close FD on the target.  Return 0, or -1 if an error occurs
    (and set *TARGET_ERRNO).  */

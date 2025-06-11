@@ -1023,8 +1023,8 @@ public:
 
   int fileio_fstat (int fd, struct stat *sb, fileio_error *target_errno) override;
 
-  int fileio_stat (struct inferior *inf, const char *filename,
-		   struct stat *sb, fileio_error *target_errno) override;
+  int fileio_lstat (struct inferior *inf, const char *filename,
+		    struct stat *sb, fileio_error *target_errno) override;
 
   int fileio_close (int fd, fileio_error *target_errno) override;
 
@@ -13149,7 +13149,7 @@ remote_target::fileio_readlink (struct inferior *inf, const char *filename,
   return ret;
 }
 
-/* Helper function to handle ::fileio_fstat and ::fileio_stat result
+/* Helper function to handle ::fileio_fstat and ::fileio_lstat result
    processing.  When this function is called the remote syscall has been
    performed and we know we didn't get an error back.
 
@@ -13160,10 +13160,10 @@ remote_target::fileio_readlink (struct inferior *inf, const char *filename,
    data) is to be placed in ST.  */
 
 static int
-fileio_process_fstat_and_stat_reply (const char *attachment,
-				     int attachment_len,
-				     int expected_len,
-				     struct stat *st)
+fileio_process_fstat_and_lstat_reply (const char *attachment,
+				      int attachment_len,
+				      int expected_len,
+				      struct stat *st)
 {
   struct fio_stat fst;
 
@@ -13225,15 +13225,15 @@ remote_target::fileio_fstat (int fd, struct stat *st, fileio_error *remote_errno
       return 0;
     }
 
-  return fileio_process_fstat_and_stat_reply (attachment, attachment_len,
-					      ret, st);
+  return fileio_process_fstat_and_lstat_reply (attachment, attachment_len,
+					       ret, st);
 }
 
-/* Implementation of to_fileio_stat.  */
+/* Implementation of to_fileio_lstat.  */
 
 int
-remote_target::fileio_stat (struct inferior *inf, const char *filename,
-			    struct stat *st, fileio_error *remote_errno)
+remote_target::fileio_lstat (struct inferior *inf, const char *filename,
+			     struct stat *st, fileio_error *remote_errno)
 {
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf.data ();
@@ -13258,8 +13258,8 @@ remote_target::fileio_stat (struct inferior *inf, const char *filename,
   if (ret < 0)
     return ret;
 
-  return fileio_process_fstat_and_stat_reply (attachment, attachment_len,
-					      ret, st);
+  return fileio_process_fstat_and_lstat_reply (attachment, attachment_len,
+					       ret, st);
 }
 
 /* Implementation of to_filesystem_is_local.  */

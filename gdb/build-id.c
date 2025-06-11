@@ -128,8 +128,8 @@ build_id_to_debug_bfd_1 (const std::string &original_link,
 	  if (supports_target_stat != TRIBOOL_FALSE)
 	    {
 	      struct stat sb;
-	      int res = target_fileio_stat (nullptr, link_on_target, &sb,
-					    &target_errno);
+	      int res = target_fileio_lstat (nullptr, link_on_target, &sb,
+					     &target_errno);
 
 	      if (res != 0 && target_errno != FILEIO_ENOSYS)
 		{
