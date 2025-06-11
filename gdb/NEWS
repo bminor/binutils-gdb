@@ -182,6 +182,11 @@ binary-upload in qSupported reply
   stub doesn't report this feature supported, then GDB will not use
   the 'x' packet.
 
+vFile:lstat
+  Return information about files on the remote system.  Like
+  vFile:stat but if the filename is a symbolic link, return
+  information about the link itself, the file the link refers to.
+
 * Changed remote packets
 
 qXfer:threads:read

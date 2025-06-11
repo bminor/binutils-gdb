@@ -24782,6 +24782,10 @@ future connections is shown.  The available settings are:
 @tab @code{vFile:stat}
 @tab Host I/O
 
+@item @code{hostio-lstat-packet}
+@tab @code{vFile:lstat}
+@tab Host I/O
+
 @item @code{hostio-setfs-packet}
 @tab @code{vFile:setfs}
 @tab Host I/O
@@ -46731,6 +46735,17 @@ On success the information is returned as a binary attachment
 and the return value is the size of this attachment in bytes.
 If an error occurs the return value is -1.  The format of the
 returned binary attachment is as described in @ref{struct stat}.
+
+@item vFile:lstat: @var{filename}
+Get information about the file @var{filename} on the target as if from
+an @samp{lstat} call.  On success the information is returned as a
+binary attachment and the return value is the size of this attachment
+in bytes.  If an error occurs the return value is -1.  The format of
+the returned binary attachment is as described in @ref{struct stat}.
+
+If @var{filename} is a symbolic link, then this packet returns
+information about the link itself, not the file that the link refers
+to, this is inline with the @samp{lstat} library call.
 
 @item vFile:unlink: @var{filename}
 Delete the file at @var{filename} on the target.  Return 0,

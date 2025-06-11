@@ -251,6 +251,7 @@ enum {
   PACKET_vFile_readlink,
   PACKET_vFile_fstat,
   PACKET_vFile_stat,
+  PACKET_vFile_lstat,
   PACKET_qXfer_auxv,
   PACKET_qXfer_features,
   PACKET_qXfer_exec_file,
@@ -13242,14 +13243,14 @@ remote_target::fileio_lstat (struct inferior *inf, const char *filename,
   if (remote_hostio_set_filesystem (inf, remote_errno) != 0)
     return {};
 
-  remote_buffer_add_string (&p, &left, "vFile:stat:");
+  remote_buffer_add_string (&p, &left, "vFile:lstat:");
 
   remote_buffer_add_bytes (&p, &left, (const gdb_byte *) filename,
 			   strlen (filename));
 
   int attachment_len;
   const char *attachment;
-  int ret = remote_hostio_send_command (p - rs->buf.data (), PACKET_vFile_stat,
+  int ret = remote_hostio_send_command (p - rs->buf.data (), PACKET_vFile_lstat,
 					remote_errno, &attachment,
 					&attachment_len);
 
@@ -16421,6 +16422,8 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
   add_packet_config_cmd (PACKET_vFile_fstat, "vFile:fstat", "hostio-fstat", 0);
 
   add_packet_config_cmd (PACKET_vFile_stat, "vFile:stat", "hostio-stat", 0);
+
+  add_packet_config_cmd (PACKET_vFile_lstat, "vFile:lstat", "hostio-lstat", 0);
 
   add_packet_config_cmd (PACKET_vAttach, "vAttach", "attach", 0);
 
