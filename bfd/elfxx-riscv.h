@@ -27,6 +27,11 @@
 
 #define RISCV_UNKNOWN_VERSION -1
 
+typedef enum
+{
+    PLT_NORMAL    = 0x0,  /* Normal plts.  */
+} riscv_plt_type;
+
 struct riscv_elf_params
 {
   /* Whether to relax code sequences to GP-relative addressing.  */
