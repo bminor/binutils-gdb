@@ -1620,10 +1620,11 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 		  printf ("rel: %s\n", sym->name);
 		}
 	      if (!relocs[i]->howto->pc_relative
-		  && relocs[i]->howto->type != pe_details->imagebase_reloc
-		  && (relocs[i]->howto->type < pe_details->secrel_reloc_lo
-		      || relocs[i]->howto->type > pe_details->secrel_reloc_hi)
-		  && relocs[i]->howto->type != pe_details->section_reloc)
+		  && (bfd_get_flavour (b) != bfd_target_coff_flavour
+		      || (relocs[i]->howto->type != pe_details->imagebase_reloc
+			  && (relocs[i]->howto->type < pe_details->secrel_reloc_lo
+			      || relocs[i]->howto->type > pe_details->secrel_reloc_hi)
+			  && relocs[i]->howto->type != pe_details->section_reloc)))
 		{
 		  struct bfd_symbol *sym = *relocs[i]->sym_ptr_ptr;
 		  const struct bfd_link_hash_entry *blhe
