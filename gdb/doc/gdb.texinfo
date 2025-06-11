@@ -46730,11 +46730,15 @@ If an error occurs the return value is -1.  The format of the
 returned binary attachment is as described in @ref{struct stat}.
 
 @item vFile:stat: @var{filename}
-Get information about the file @var{filename} on the target.
-On success the information is returned as a binary attachment
-and the return value is the size of this attachment in bytes.
-If an error occurs the return value is -1.  The format of the
+Get information about the file @var{filename} on the target as if from
+a @samp{stat} call.  On success the information is returned as a binary
+attachment and the return value is the size of this attachment in
+bytes.  If an error occurs the return value is -1.  The format of the
 returned binary attachment is as described in @ref{struct stat}.
+
+If @var{filename} is a symbolic link, then the information returned is
+about the file the link refers to, this is inline with the @samp{stat}
+library call.
 
 @item vFile:lstat: @var{filename}
 Get information about the file @var{filename} on the target as if from
@@ -46743,7 +46747,8 @@ binary attachment and the return value is the size of this attachment
 in bytes.  If an error occurs the return value is -1.  The format of
 the returned binary attachment is as described in @ref{struct stat}.
 
-If @var{filename} is a symbolic link, then this packet returns
+This packet is identical to @samp{vFile:stat}, except if
+@var{filename} is a symbolic link, then this packet returns
 information about the link itself, not the file that the link refers
 to, this is inline with the @samp{lstat} library call.
 

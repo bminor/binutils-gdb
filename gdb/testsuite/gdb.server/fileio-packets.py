@@ -114,6 +114,20 @@ def remote_lstat(filename):
     return stat
 
 
+# Perform a stat of remote file FILENAME, and create a dictionary of
+# the results, the keys are the fields of the stat structure.
+def remote_stat(filename):
+    conn = gdb.selected_inferior().connection
+    if not isinstance(conn, gdb.RemoteTargetConnection):
+        raise gdb.GdbError("connection is the wrong type")
+
+    filename_hex = hex_encode(filename)
+    reply = conn.send_packet("vFile:stat:%s" % filename_hex)
+
+    stat = decode_stat_reply(reply)
+    return stat
+
+
 # Convert a stat_result object to a dictionary that should match the
 # dictionary built from the remote protocol reply.
 def stat_result_to_dict(res):
@@ -154,6 +168,13 @@ def local_lstat(filename):
     return stat_result_to_dict(res)
 
 
+# Perform an lstat of local file FILENAME, and create a dictionary of
+# the results, the keys are the fields of the stat structure.
+def local_stat(filename):
+    res = os.stat(filename)
+    return stat_result_to_dict(res)
+
+
 # Perform a remote lstat using GDB, and a local lstat using os.lstat.
 # Compare the results to check they are the same.
 #
@@ -163,8 +184,24 @@ def check_lstat(filename):
     s1 = remote_lstat(filename)
     s2 = local_lstat(filename)
 
-    print(f"s1 = {s1}")
-    print(f"s2 = {s2}")
+    print(f"remote = {s1}")
+    print(f"local  = {s2}")
+
+    assert s1 == s2
+    print("PASS")
+
+
+# Perform a remote stat using GDB, and a local stat using os.stat.
+# Compare the results to check they are the same.
+#
+# For this test to work correctly, gdbserver, and GDB (where this
+# Python script is running), must see the same filesystem.
+def check_stat(filename):
+    s1 = remote_stat(filename)
+    s2 = local_stat(filename)
+
+    print(f"remote = {s1}")
+    print(f"local  = {s2}")
 
     assert s1 == s2
     print("PASS")

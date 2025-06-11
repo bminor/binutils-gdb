@@ -504,7 +504,7 @@ handle_stat (char *own_buf, int *new_packet_len)
       return;
     }
 
-  if (lstat (filename, &st) == -1)
+  if (stat (filename, &st) == -1)
     {
       hostio_error (own_buf);
       return;

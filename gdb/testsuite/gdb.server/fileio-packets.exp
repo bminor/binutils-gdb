@@ -58,3 +58,9 @@ gdb_test "python check_lstat(\"$test_file_1\")" "PASS" \
 
 gdb_test "python check_lstat(\"$test_file_2\")" "PASS" \
     "check remote lstat works on a symbolic link"
+
+gdb_test "python check_stat(\"$test_file_1\")" "PASS" \
+    "check remote stat works on a normal file"
+
+gdb_test "python check_stat(\"$test_file_2\")" "PASS" \
+    "check remote stat works on a symbolic link"

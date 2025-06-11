@@ -195,6 +195,11 @@ qXfer:threads:read
   should print as the target ID of the thread, for example in the
   "info threads" command or when switching to the thread.
 
+vFile:stat
+  Previously, gdbserver incorrectly implemented this packet using
+  lstat rather than stat.  This has now been corrected.  The
+  documentation has also been clarified.
+
 * MI changes
 
 ** The =library-unloaded event now includes the 'ranges' field, which
