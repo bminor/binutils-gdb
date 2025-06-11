@@ -421,6 +421,7 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 
 /* ABI names for selected x-registers.  */
 
+#define X_ZERO 0
 #define X_RA 1
 #define X_SP 2
 #define X_GP 3
