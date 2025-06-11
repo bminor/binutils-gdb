@@ -441,6 +441,12 @@ public:
   virtual int multifs_open (int pid, const char *filename,
 			    int flags, mode_t mode);
 
+  /* Multiple-filesystem-aware lstat.  Like lstat(2), but operating in
+     the filesystem as it appears to process PID.  Systems where all
+     processes share a common filesystem should not override this.
+     The default behavior is to use lstat(2).  */
+  virtual int multifs_lstat (int pid, const char *filename, struct stat *sb);
+
   /* Multiple-filesystem-aware unlink.  Like unlink(2), but operates
      in the filesystem as it appears to process PID.  Systems where
      all processes share a common filesystem should not override this.

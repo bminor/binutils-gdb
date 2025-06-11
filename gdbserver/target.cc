@@ -773,6 +773,13 @@ process_stratum_target::multifs_open (int pid, const char *filename,
 }
 
 int
+process_stratum_target::multifs_lstat (int pid, const char *filename,
+				       struct stat *sb)
+{
+  return lstat (filename, sb);
+}
+
+int
 process_stratum_target::multifs_unlink (int pid, const char *filename)
 {
   return unlink (filename);

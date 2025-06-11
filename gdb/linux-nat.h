@@ -108,6 +108,9 @@ public:
 		     const char *filename,
 		     fileio_error *target_errno) override;
 
+  int fileio_lstat (struct inferior *inf, const char *filename,
+		   struct stat *sb, fileio_error *target_errno) override;
+
   int fileio_unlink (struct inferior *inf,
 		     const char *filename,
 		     fileio_error *target_errno) override;

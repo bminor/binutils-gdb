@@ -304,6 +304,8 @@ public:
   int multifs_open (int pid, const char *filename, int flags,
 		    mode_t mode) override;
 
+  int multifs_lstat (int pid, const char *filename, struct stat *st) override;
+
   int multifs_unlink (int pid, const char *filename) override;
 
   ssize_t multifs_readlink (int pid, const char *filename, char *buf,

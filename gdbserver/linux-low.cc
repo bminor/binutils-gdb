@@ -6050,6 +6050,12 @@ linux_process_target::multifs_open (int pid, const char *filename,
 }
 
 int
+linux_process_target::multifs_lstat (int pid, const char *filename, struct stat *sb)
+{
+  return linux_mntns_lstat (pid, filename, sb);
+}
+
+int
 linux_process_target::multifs_unlink (int pid, const char *filename)
 {
   return linux_mntns_unlink (pid, filename);

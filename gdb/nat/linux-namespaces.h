@@ -64,6 +64,11 @@ enum linux_ns_type
 
 extern int linux_ns_same (pid_t pid, enum linux_ns_type type);
 
+/* Like lstat(2), but in the mount namespace of process PID.  */
+
+extern int linux_mntns_lstat (pid_t pid, const char *filename,
+			      struct stat *sb);
+
 /* Like gdb_open_cloexec, but in the mount namespace of process
    PID.  */
 

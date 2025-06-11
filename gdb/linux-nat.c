@@ -4585,6 +4585,20 @@ linux_nat_target::fileio_open (struct inferior *inf, const char *filename,
   return fd;
 }
 
+/* Implementation of to_fileio_lstat.  */
+
+int
+linux_nat_target::fileio_lstat (struct inferior *inf, const char *filename,
+				struct stat *sb, fileio_error *target_errno)
+{
+  int r = linux_mntns_lstat (linux_nat_fileio_pid_of (inf), filename, sb);
+
+  if (r == -1)
+    *target_errno = host_to_fileio_error (errno);
+
+  return r;
+}
+
 /* Implementation of to_fileio_readlink.  */
 
 std::optional<std::string>

@@ -525,7 +525,7 @@ handle_stat (char *own_buf, int *new_packet_len)
 static void
 handle_lstat (char *own_buf, int *new_packet_len)
 {
-  int bytes_sent;
+  int ret, bytes_sent;
   char *p;
   struct stat st;
   struct fio_stat fst;
@@ -540,7 +540,12 @@ handle_lstat (char *own_buf, int *new_packet_len)
       return;
     }
 
-  if (lstat (filename, &st) == -1)
+  if (hostio_fs_pid != 0)
+    ret = the_target->multifs_lstat (hostio_fs_pid, filename, &st);
+  else
+    ret = lstat (filename, &st);
+
+  if (ret == -1)
     {
       hostio_error (own_buf);
       return;
