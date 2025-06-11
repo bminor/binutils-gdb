@@ -177,6 +177,8 @@ struct _bfd_riscv_elf_obj_tdata
   /* tls_type for each local got entry.  */
   char *local_got_tls_type;
 
+  /* All GNU_PROPERTY_RISCV_FEATURE_1_AND properties. */
+  uint32_t gnu_and_prop;
   /* PLT type.  */
   riscv_plt_type plt_type;
 };
@@ -5809,6 +5811,36 @@ riscv_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
     h->other |= STO_RISCV_VARIANT_CC;
 }
 
+/* Implement elf_backend_setup_gnu_properties for RISC-V.  It serves as a
+   wrapper function for _bfd_riscv_elf_link_setup_gnu_properties to account
+   for the effect of GNU properties of the output_bfd.  */
+
+static bfd *
+elfNN_riscv_link_setup_gnu_properties (struct bfd_link_info *info)
+{
+  uint32_t and_prop = _bfd_riscv_elf_tdata (info->output_bfd)->gnu_and_prop;
+
+  bfd *pbfd = _bfd_riscv_elf_link_setup_gnu_properties (info, &and_prop);
+
+  _bfd_riscv_elf_tdata (info->output_bfd)->gnu_and_prop = and_prop;
+  return pbfd;
+}
+
+/* Implement elf_backend_merge_gnu_properties for RISC-V.  It serves as a
+   wrapper function for _bfd_riscv_elf_merge_gnu_properties to account
+   for the effect of GNU properties of the output_bfd.  */
+
+static bool
+elfNN_riscv_merge_gnu_properties (struct bfd_link_info *info, bfd *abfd,
+				  bfd *bbfd ATTRIBUTE_UNUSED,
+				  elf_property *aprop, elf_property *bprop)
+{
+  uint32_t and_prop = _bfd_riscv_elf_tdata (info->output_bfd)->gnu_and_prop;
+
+  return _bfd_riscv_elf_merge_gnu_properties (info, abfd, aprop, bprop,
+					      and_prop);
+}
+
 #define TARGET_LITTLE_SYM			riscv_elfNN_vec
 #define TARGET_LITTLE_NAME			"elfNN-littleriscv"
 #define TARGET_BIG_SYM				riscv_elfNN_be_vec
@@ -5847,6 +5879,9 @@ riscv_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
 #define elf_backend_merge_symbol_attribute	riscv_elf_merge_symbol_attribute
 
 #define elf_backend_init_index_section		_bfd_elf_init_1_index_section
+
+#define elf_backend_setup_gnu_properties	elfNN_riscv_link_setup_gnu_properties
+#define elf_backend_merge_gnu_properties	elfNN_riscv_merge_gnu_properties
 
 #define elf_backend_can_gc_sections		1
 #define elf_backend_can_refcount		1

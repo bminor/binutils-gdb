@@ -133,3 +133,16 @@ extern void
 bfd_elf32_riscv_set_data_segment_info (struct bfd_link_info *, int *);
 extern void
 bfd_elf64_riscv_set_data_segment_info (struct bfd_link_info *, int *);
+
+extern bfd *
+_bfd_riscv_elf_link_setup_gnu_properties (struct bfd_link_info *, uint32_t *);
+
+extern enum elf_property_kind
+_bfd_riscv_elf_parse_gnu_properties (bfd *, unsigned int, bfd_byte *,
+				     unsigned int);
+
+extern bool
+_bfd_riscv_elf_merge_gnu_properties (struct bfd_link_info *, bfd *,
+				     elf_property *, elf_property *, uint32_t);
+
+#define elf_backend_parse_gnu_properties _bfd_riscv_elf_parse_gnu_properties
