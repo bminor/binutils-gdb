@@ -4994,6 +4994,14 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
 	}
       break;
 
+    case 0x19:	/* VBROADCASTSD.  */
+      i386_record_modrm (ir);
+      record_full_arch_list_add_reg (ir->regcache,
+				     tdep->ymm0_regnum + ir->reg
+				     + 8 * vex_r);
+      break;
+
+    case 0x18:	/* VBROADCASTSS.  */
     case 0x60:	/* VPUNPCKLBW  */
     case 0x61:	/* VPUNPCKLWD  */
     case 0x62:	/* VPUNPCKLDQ  */
@@ -5038,6 +5046,7 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
     case 0x0c:	/* VPERMILPS with register.  */
     case 0x0d:	/* VPERMILPD with register.  */
     case 0x16:	/* VPERMPS.  */
+    case 0x1a:	/* VBROADCASTF128.  */
     case 0x36:	/* VPERMD.  */
     case 0x40:	/* VPMULLD  */
     case 0x46:	/* VPERM2I128.  */
