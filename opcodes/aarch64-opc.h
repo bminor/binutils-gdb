@@ -551,6 +551,11 @@ static inline int
 select_operand_for_sf_field_coding (const aarch64_opcode *opcode)
 {
   int idx = -1;
+  if (opcode->iclass == fprcvtfloat2int)
+    return 0;
+  else if (opcode->iclass == fprcvtint2float)
+    return 1;
+
   if (aarch64_get_operand_class (opcode->operands[0])
       == AARCH64_OPND_CLASS_INT_REG)
     /* normal case.  */
@@ -572,6 +577,11 @@ static inline int
 select_operand_for_fptype_field_coding (const aarch64_opcode *opcode)
 {
   int idx;
+  if (opcode->iclass == fprcvtfloat2int)
+    return 1;
+  else if (opcode->iclass == fprcvtint2float)
+    return 0;
+
   if (aarch64_get_operand_class (opcode->operands[1])
       == AARCH64_OPND_CLASS_FP_REG)
     /* normal case.  */

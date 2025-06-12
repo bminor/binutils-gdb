@@ -2746,7 +2746,16 @@ do_special_decoding (aarch64_inst *inst)
     {
       idx = select_operand_for_sf_field_coding (inst->opcode);
       value = extract_field (FLD_sf, inst->value, 0);
-      inst->operands[idx].qualifier = get_greg_qualifier_from_value (value);
+      if (inst->opcode->iclass == fprcvtfloat2int
+	  || inst->opcode->iclass == fprcvtint2float)
+	{
+	  if (value == 0)
+	    inst->operands[idx].qualifier = AARCH64_OPND_QLF_S_S;
+	  else
+	    inst->operands[idx].qualifier = AARCH64_OPND_QLF_S_D;
+	}
+      else
+	inst->operands[idx].qualifier = get_greg_qualifier_from_value (value);
       if (inst->operands[idx].qualifier == AARCH64_OPND_QLF_ERR)
 	return 0;
       if ((inst->opcode->flags & F_N)

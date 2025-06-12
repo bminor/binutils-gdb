@@ -359,6 +359,15 @@
   QLF2 (S_H, X),			\
 }
 
+/* e.g. FCVTAS <Xd>, <Dn>.  */
+#define QL_INT2FP_FPRCVT	\
+{				\
+  QLF2(S_H,S_S),		\
+  QLF2(S_H,S_D),		\
+  QLF2(S_S,S_D),		\
+  QLF2(S_D,S_S),		\
+}
+
 /* e.g. FCVTNS <Xd>, <Dn>.  */
 #define QL_FP2INT		\
 {				\
@@ -366,6 +375,15 @@
   QLF2(W,S_S),			\
   QLF2(X,S_D),			\
   QLF2(X,S_S),			\
+}
+
+/* e.g. FCVTAS <Sd>, <Dn>.  */
+#define QL_FP2INT_FPRCVT	\
+{				\
+  QLF2(S_D,S_S),		\
+  QLF2(S_S,S_D),		\
+  QLF2(S_D,S_H),		\
+  QLF2(S_S,S_H),		\
 }
 
 /* e.g. FMOV <Xd>, <Dn>.  */
@@ -2703,6 +2721,8 @@ static const aarch64_feature_set aarch64_feature_fp_f16 =
   AARCH64_FEATURES (2, F16, FP);
 static const aarch64_feature_set aarch64_feature_simd_f16 =
   AARCH64_FEATURES (2, F16, SIMD);
+static const aarch64_feature_set aarch64_feature_fprcvt =
+  AARCH64_FEATURE (FPRCVT);
 static const aarch64_feature_set aarch64_feature_sve =
   AARCH64_FEATURE (SVE);
 static const aarch64_feature_set aarch64_feature_pauth =
@@ -2880,6 +2900,7 @@ static const aarch64_feature_set aarch64_feature_sve2p1_sme2p1 =
 #define RDMA		&aarch64_feature_rdma
 #define FP_F16		&aarch64_feature_fp_f16
 #define SIMD_F16	&aarch64_feature_simd_f16
+#define FPRCVT		&aarch64_feature_fprcvt
 #define SVE		&aarch64_feature_sve
 #define PAUTH		&aarch64_feature_pauth
 #define COMPNUM		&aarch64_feature_compnum
@@ -2986,6 +3007,8 @@ static const aarch64_feature_set aarch64_feature_sve2p1_sme2p1 =
   { NAME, OPCODE, MASK, CLASS, 0, FP_F16, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define SF16_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS)		\
   { NAME, OPCODE, MASK, CLASS, 0, SIMD_F16, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define FPRCVT_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS)		\
+  { NAME, OPCODE, MASK, CLASS, 0, FPRCVT, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define _SVE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SVE, OPS, QUALS, \
     FLAGS | F_STRICT, 0, TIED, NULL }
@@ -4091,32 +4114,44 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   /* Floating-point<->integer conversions.  */
   __FP_INSN ("fcvtns",0x1e200000, 0x7f3ffc00, float2int, 0, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF),
   FF16_INSN ("fcvtns",0x1ee00000, 0x7f3ffc00, float2int, OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF),
+  FPRCVT_INSN ("fcvtns",0x1e2a0000, 0x7f3ffc00, fprcvtfloat2int, OP2 (Fd, Fn), QL_FP2INT_FPRCVT, F_FPTYPE | F_SF),
   __FP_INSN ("fcvtnu",0x1e210000, 0x7f3ffc00, float2int, 0, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF),
   FF16_INSN ("fcvtnu",0x1ee10000, 0x7f3ffc00, float2int, OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF),
+  FPRCVT_INSN ("fcvtnu",0x1e2b0000, 0x7f3ffc00, fprcvtfloat2int, OP2 (Fd, Fn), QL_FP2INT_FPRCVT, F_FPTYPE | F_SF),
   __FP_INSN ("scvtf", 0x1e220000, 0x7f3ffc00, float2int, 0, OP2 (Fd, Rn), QL_INT2FP, F_FPTYPE | F_SF),
   FF16_INSN ("scvtf", 0x1ee20000, 0x7f3ffc00, float2int, OP2 (Fd, Rn), QL_INT2FP_H, F_FPTYPE | F_SF),
+  FPRCVT_INSN ("scvtf",0x1e3c0000, 0x7f3ffc00, fprcvtint2float, OP2 (Fd, Fn), QL_INT2FP_FPRCVT, F_FPTYPE | F_SF),
   __FP_INSN ("ucvtf", 0x1e230000, 0x7f3ffc00, float2int, 0, OP2 (Fd, Rn), QL_INT2FP, F_FPTYPE | F_SF),
   FF16_INSN ("ucvtf", 0x1ee30000, 0x7f3ffc00, float2int, OP2 (Fd, Rn), QL_INT2FP_H, F_FPTYPE | F_SF),
+  FPRCVT_INSN ("ucvtf",0x1e3d0000, 0x7f3ffc00, fprcvtint2float, OP2 (Fd, Fn), QL_INT2FP_FPRCVT, F_FPTYPE | F_SF),
   __FP_INSN ("fcvtas",0x1e240000, 0x7f3ffc00, float2int, 0, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF),
   FF16_INSN ("fcvtas",0x1ee40000, 0x7f3ffc00, float2int, OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF),
+  FPRCVT_INSN ("fcvtas",0x1e3a0000, 0x7f3ffc00, fprcvtfloat2int, OP2 (Fd, Fn), QL_FP2INT_FPRCVT, F_FPTYPE | F_SF),
   __FP_INSN ("fcvtau",0x1e250000, 0x7f3ffc00, float2int, 0, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF),
   FF16_INSN ("fcvtau",0x1ee50000, 0x7f3ffc00, float2int, OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF),
+  FPRCVT_INSN ("fcvtau",0x1e3b0000, 0x7f3ffc00, fprcvtfloat2int, OP2 (Fd, Fn), QL_FP2INT_FPRCVT, F_FPTYPE | F_SF),
   __FP_INSN ("fmov",  0x1e260000, 0x7f3ffc00, float2int, 0, OP2 (Rd, Fn), QL_FP2INT_FMOV, F_FPTYPE | F_SF),
   FF16_INSN ("fmov",  0x1ee60000, 0x7f3ffc00, float2int, OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF),
   __FP_INSN ("fmov",  0x1e270000, 0x7f3ffc00, float2int, 0, OP2 (Fd, Rn), QL_INT2FP_FMOV, F_FPTYPE | F_SF),
   FF16_INSN ("fmov",  0x1ee70000, 0x7f3ffc00, float2int, OP2 (Fd, Rn), QL_INT2FP_H, F_FPTYPE | F_SF),
   __FP_INSN ("fcvtps",0x1e280000, 0x7f3ffc00, float2int, 0, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF),
   FF16_INSN ("fcvtps",0x1ee80000, 0x7f3ffc00, float2int, OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF),
+  FPRCVT_INSN ("fcvtps",0x1e320000, 0x7f3ffc00, fprcvtfloat2int, OP2 (Fd, Fn), QL_FP2INT_FPRCVT, F_FPTYPE | F_SF),
   __FP_INSN ("fcvtpu",0x1e290000, 0x7f3ffc00, float2int, 0, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF),
   FF16_INSN ("fcvtpu",0x1ee90000, 0x7f3ffc00, float2int, OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF),
+  FPRCVT_INSN ("fcvtpu",0x1e330000, 0x7f3ffc00, fprcvtfloat2int, OP2 (Fd, Fn), QL_FP2INT_FPRCVT, F_FPTYPE | F_SF),
   __FP_INSN ("fcvtms",0x1e300000, 0x7f3ffc00, float2int, 0, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF),
   FF16_INSN ("fcvtms",0x1ef00000, 0x7f3ffc00, float2int, OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF),
+  FPRCVT_INSN ("fcvtms",0x1e340000, 0x7f3ffc00, fprcvtfloat2int, OP2 (Fd, Fn), QL_FP2INT_FPRCVT, F_FPTYPE | F_SF),
   __FP_INSN ("fcvtmu",0x1e310000, 0x7f3ffc00, float2int, 0, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF),
   FF16_INSN ("fcvtmu",0x1ef10000, 0x7f3ffc00, float2int, OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF),
+  FPRCVT_INSN ("fcvtmu",0x1e350000, 0x7f3ffc00, fprcvtfloat2int, OP2 (Fd, Fn), QL_FP2INT_FPRCVT, F_FPTYPE | F_SF),
   __FP_INSN ("fcvtzs",0x1e380000, 0x7f3ffc00, float2int, 0, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF),
   FF16_INSN ("fcvtzs",0x1ef80000, 0x7f3ffc00, float2int, OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF),
+  FPRCVT_INSN ("fcvtzs",0x1e360000, 0x7f3ffc00, fprcvtfloat2int, OP2 (Fd, Fn), QL_FP2INT_FPRCVT, F_FPTYPE | F_SF),
   __FP_INSN ("fcvtzu",0x1e390000, 0x7f3ffc00, float2int, 0, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF),
   FF16_INSN ("fcvtzu",0x1ef90000, 0x7f3ffc00, float2int, OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF),
+  FPRCVT_INSN ("fcvtzu",0x1e370000, 0x7f3ffc00, fprcvtfloat2int, OP2 (Fd, Fn), QL_FP2INT_FPRCVT, F_FPTYPE | F_SF),
   __FP_INSN ("fmov",  0x9eae0000, 0xfffffc00, float2int, 0, OP2 (Rd, VnD1), QL_XVD1, 0),
   __FP_INSN ("fmov",  0x9eaf0000, 0xfffffc00, float2int, 0, OP2 (VdD1, Rn), QL_VD1X, 0),
   JSCVT_INSN ("fjcvtzs", 0x1e7e0000, 0xfffffc00, float2int, OP2 (Rd, Fn), QL_FP2INT_W_D, 0),

@@ -278,6 +278,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_V9_4A,
   /* Armv9.5-A processors.  */
   AARCH64_FEATURE_V9_5A,
+  /* FPRCVT instructions.  */
+  AARCH64_FEATURE_FPRCVT,
 
   /* Virtual features.  These are used to gate instructions that are enabled
      by either of two (or more) sets of command line flags.  */
@@ -1119,6 +1121,8 @@ enum aarch64_insn_class
   floatdp3,
   floatimm,
   floatsel,
+  fprcvtfloat2int,
+  fprcvtint2float,
   ldst_immpost,
   ldst_immpre,
   ldst_imm9,	/* immpost or immpre */
