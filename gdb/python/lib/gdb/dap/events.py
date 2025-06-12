@@ -22,7 +22,7 @@ from .startup import exec_and_log, in_gdb_thread, log
 
 # True when the inferior is thought to be running, False otherwise.
 # This may be accessed from any thread, which can be racy.  However,
-# this unimportant because this global is only used for the
+# this is unimportant because this global is only used for the
 # 'notStopped' response, which itself is inherently racy.
 inferior_running = False
 
