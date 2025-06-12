@@ -28023,6 +28023,7 @@ then it will be used.
 @item show style sources
 Show the current state of source code styling.
 
+@anchor{warning-prefix}
 @item set style warning-prefix
 @itemx show style warning-prefix
 @itemx set style error-prefix

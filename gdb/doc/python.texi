@@ -509,6 +509,17 @@ Flushing @code{sys.stdout} or @code{sys.stderr} will automatically
 call this function for the relevant stream.
 @end defun
 
+@defun gdb.warning (text)
+Print a warning message to @value{GDBN}'s standard output stream.  The
+warning message is the warning prefix (@pxref{warning-prefix}), the
+string @w{@samp{warning: }}, and then @var{text}, which must be a
+non-empty string.
+
+Due to the warning prefix, @var{text} should not begin with a capital
+letter (except for proper nouns), and @var{text} should end with a
+period.
+@end defun
+
 @defun gdb.target_charset ()
 Return the name of the current target character set (@pxref{Character
 Sets}).  This differs from @code{gdb.parameter('target-charset')} in

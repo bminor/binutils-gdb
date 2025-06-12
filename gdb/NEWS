@@ -156,6 +156,9 @@ info threads [-gid] [-stopped] [-running] [ID]...
      text for all sub-commands, unless the prefix command is a 'show'
      command, in which case the value of all sub-commands is printed.
 
+  ** New gdb.warning() function that takes a string and prints it as a
+     warning, with GDB's standard 'warning' prefix.
+
 * Guile API
 
   ** New type <gdb:color> for dealing with colors.

@@ -1630,6 +1630,40 @@ gdbpy_flush (PyObject *self, PyObject *args, PyObject *kw)
   Py_RETURN_NONE;
 }
 
+/* Implement gdb.warning().  Takes a single text string argument and emit a
+   warning using GDB's 'warning' function.  The input text string must not
+   be empty.  */
+
+static PyObject *
+gdbpy_warning (PyObject *self, PyObject *args, PyObject *kw)
+{
+  const char *text;
+  static const char *keywords[] = { "text", nullptr };
+
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "s", keywords, &text))
+    return nullptr;
+
+  if (strlen (text) == 0)
+    {
+      PyErr_SetString (PyExc_ValueError,
+		       _("Empty text string passed to gdb.warning"));
+      return nullptr;
+    }
+
+  try
+    {
+      warning ("%s", text);
+    }
+  catch (const gdb_exception &ex)
+    {
+      /* The warning() call probably cannot throw an exception.  But just
+	 in case it ever does.  */
+      return gdbpy_handle_gdb_exception (nullptr, ex);
+    }
+
+  Py_RETURN_NONE;
+}
+
 /* Return non-zero if print-stack is not "none".  */
 
 int
@@ -3124,6 +3158,12 @@ Return the current print options." },
     METH_VARARGS | METH_KEYWORDS,
     "notify_mi (name, data) -> None\n\
 Output async record to MI channels if any." },
+
+  { "warning", (PyCFunction) gdbpy_warning,
+    METH_VARARGS | METH_KEYWORDS,
+    "warning (text) -> None\n\
+Print a warning." },
+
   {NULL, NULL, 0, NULL}
 };
 
