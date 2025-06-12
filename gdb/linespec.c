@@ -1074,6 +1074,12 @@ add_sal_to_sals (struct linespec_state *self,
 		 struct symtab_and_line *sal,
 		 const char *symname, bool literal_canonical)
 {
+  /* We don't want two SALs with the same PC from the
+     same program space.  */
+  for (const auto &s : *sals)
+    if (sal->pc == s.pc && sal->pspace == s.pspace)
+     return;
+
   sals->push_back (*sal);
 
   if (self->canonical)
