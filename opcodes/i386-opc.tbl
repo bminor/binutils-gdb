@@ -979,15 +979,18 @@ fxrstor, 0xfae/1, FXSR, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|IntelSuffix, { Uns
 fxrstor64, 0xfae/1, FXSR&x64, Modrm|NoSuf|Size64, { Unspecified|BaseIndex }
 rdpmc, 0xf33, i686, NoSuf, {}
 // official undefined instr.
-ud2, 0xf0b, i186, NoSuf, {}
+ud2, 0xf0b, i286, NoSuf, {}
 // alias for ud2
-ud2a, 0xf0b, i186, NoSuf, {}
-// 2nd. official undefined instr.
-ud1, 0xfb9, i186, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+ud2a, 0xf0b, i286, NoSuf, {}
+// 2nd official undefined instr (older AMD CPUs don't take a ModR/M byte)
+ud1, 0xfb9, i286, /*Amd|*/NoSuf, {}
+ud1, 0xfb9, i286, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 // alias for ud1
-ud2b, 0xfb9, i186, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+ud2b, 0xfb9, i286, /*Amd|*/NoSuf, {}
+ud2b, 0xfb9, i286, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 // 3rd official undefined instr (older CPUs don't take a ModR/M byte)
-ud0, 0xfff, i186, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+ud0, 0xfff, i286, NoSuf, {}
+ud0, 0xfff, i286, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 // C (commutative) isn't quite correct here on its own; the condition also
 // needs inverting when source operands are swapped in order to convert to
