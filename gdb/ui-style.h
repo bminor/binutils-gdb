@@ -354,11 +354,35 @@ private:
   bool m_reverse = false;
 };
 
+/* Possible results for checking an ANSI escape sequence.  */
+enum class ansi_escape_result
+{
+  /* The escape sequence is definitely not recognizable.  */
+  NO_MATCH,
+
+  /* The escape sequence might be recognizable with more input.  */
+  INCOMPLETE,
+
+  /* The escape sequence is definitely recognizable.  */
+  MATCHED,
+};
+
+/* Examine an ANSI escape sequence in BUF.  BUF must begin with an ESC
+   character.  Return a value indicating whether the sequence was
+   recognizable.  If MATCHED is returned, then N_READ is updated to
+   reflect the number of chars read from BUF.  */
+
+extern ansi_escape_result examine_ansi_escape (const char *buf, int *n_read);
+
 /* Skip an ANSI escape sequence in BUF.  BUF must begin with an ESC
    character.  Return true if an escape sequence was successfully
    skipped; false otherwise.  If an escape sequence was skipped,
    N_READ is updated to reflect the number of chars read from BUF.  */
 
-extern bool skip_ansi_escape (const char *buf, int *n_read);
+static inline bool
+skip_ansi_escape (const char *buf, int *n_read)
+{
+  return examine_ansi_escape (buf, n_read) == ansi_escape_result::MATCHED;
+}
 
 #endif /* GDB_UI_STYLE_H */

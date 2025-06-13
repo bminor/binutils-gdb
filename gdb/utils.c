@@ -1809,7 +1809,7 @@ void
 pager_file::write (const char *buf, long length_buf)
 {
   /* We have to make a string here because the pager uses
-     skip_ansi_escape, which requires NUL-termination.  */
+     examine_ansi_escape, which requires NUL-termination.  */
   std::string str (buf, length_buf);
   this->puts (str.c_str ());
 }

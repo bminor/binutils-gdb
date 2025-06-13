@@ -408,7 +408,7 @@ tee_file::can_emit_style_escape ()
 /* See ui-file.h.  */
 
 void
-no_terminal_escape_file::write (const char *buf, long length_buf)
+escape_buffering_file::write (const char *buf, long length_buf)
 {
   std::string copy (buf, length_buf);
   this->puts (copy.c_str ());
@@ -417,7 +417,60 @@ no_terminal_escape_file::write (const char *buf, long length_buf)
 /* See ui-file.h.  */
 
 void
-no_terminal_escape_file::puts (const char *buf)
+escape_buffering_file::puts (const char *buf)
+{
+  std::string local_buffer;
+  if (!m_buffer.empty ())
+    {
+      gdb_assert (m_buffer[0] == '\033');
+      m_buffer += buf;
+      /* If we need to keep buffering, we'll handle that below.  */
+      local_buffer = std::move (m_buffer);
+      buf = local_buffer.c_str ();
+    }
+
+  while (*buf != '\0')
+    {
+      const char *esc = strchr (buf, '\033');
+      if (esc == nullptr)
+	break;
+
+      /* First, write out any prefix.  */
+      if (esc > buf)
+	{
+	  do_write (buf, esc - buf);
+	  buf = esc;
+	}
+
+      int n_read = 0;
+      ansi_escape_result seen = examine_ansi_escape (esc, &n_read);
+      if (seen == ansi_escape_result::INCOMPLETE)
+	{
+	  /* Start buffering.  */
+	  m_buffer = buf;
+	  return;
+	}
+      else if (seen == ansi_escape_result::NO_MATCH)
+	{
+	  /* Just emit the ESC . */
+	  n_read = 1;
+	}
+      else
+	gdb_assert (seen == ansi_escape_result::MATCHED);
+
+      do_write (esc, n_read);
+      buf += n_read;
+    }
+
+  /* If there is any data remaining in BUF, we can flush it now.  */
+  if (*buf != '\0')
+    do_puts (buf);
+}
+
+/* See ui-file.h.  */
+
+void
+no_terminal_escape_file::do_puts (const char *buf)
 {
   while (*buf != '\0')
     {
@@ -435,6 +488,13 @@ no_terminal_escape_file::puts (const char *buf)
 
   if (*buf != '\0')
     this->stdio_file::write (buf, strlen (buf));
+}
+
+void
+no_terminal_escape_file::do_write (const char *buf, long len)
+{
+  std::string copy (buf, len);
+  do_puts (copy.c_str ());
 }
 
 void

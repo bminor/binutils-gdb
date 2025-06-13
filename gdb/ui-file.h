@@ -362,24 +362,58 @@ private:
   ui_file *m_two;
 };
 
+/* A ui_file implementation that buffers terminal escape sequences.
+   Note that this does not buffer in general -- it only buffers when
+   an incomplete but potentially recognizable escape sequence is
+   started.  */
+
+class escape_buffering_file : public stdio_file
+{
+public:
+  using stdio_file::stdio_file;
+
+  /* Like the stdio_file methods but these forward to do_write and
+     do_puts, respectively.  */
+  void write (const char *buf, long length_buf) override final;
+  void puts (const char *linebuffer) override final;
+
+  /* This class does not override 'flush'.  While it does have an
+     internal buffer, it does not really make sense to flush the
+     buffer until an escape sequence has been fully processed.  */
+
+protected:
+
+  /* Called to output some text.  If the text contains a recognizable
+     terminal escape sequence, then it is guaranteed to be complete.
+     "Recognizable" here means that examine_ansi_escape did not return
+     INCOMPLETE.  */
+  virtual void do_puts (const char *buf) = 0;
+  virtual void do_write (const char *buf, long len) = 0;
+
+private:
+
+  /* Buffer used only for incomplete escape sequences.  */
+  std::string m_buffer;
+};
+
 /* A ui_file implementation that filters out terminal escape
    sequences.  */
 
-class no_terminal_escape_file : public stdio_file
+class no_terminal_escape_file : public escape_buffering_file
 {
 public:
   no_terminal_escape_file ()
   {
   }
 
-  /* Like the stdio_file methods, but these filter out terminal escape
-     sequences.  */
-  void write (const char *buf, long length_buf) override;
-  void puts (const char *linebuffer) override;
-
   void emit_style_escape (const ui_file_style &style) override
   {
   }
+
+protected:
+
+  void do_puts (const char *linebuffer) override;
+  void do_write (const char *buf, long len) override;
 };
 
 /* A base class for ui_file types that wrap another ui_file.  */
