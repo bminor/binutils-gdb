@@ -146,6 +146,11 @@ SECTIONS
     ${RELOCATING+__rt_psrelocs_start = .;}
     ${RELOCATING+KEEP(*(.rdata_runtime_pseudo_reloc))}
     ${RELOCATING+__rt_psrelocs_end = .;}
+    /* read-only parts of .didat */
+    /* This cannot currently be handled with grouped sections.
+	See pe.em:sort_sections.  */
+    ${R_DIDAT234}
+    ${R_DIDAT67}
 
     /* .ctors & .dtors */
     ${CONSTRUCTING+
@@ -263,9 +268,7 @@ SECTIONS
   {
     /* This cannot currently be handled with grouped sections.
 	See pe.em:sort_sections.  */
-    ${R_DIDAT234}
     ${R_DIDAT5}
-    ${R_DIDAT67}
   }
 
   /* Windows TLS expects .tls\$AAA to be at the start and .tls\$ZZZ to be

@@ -2798,7 +2798,7 @@ make_delay_head (void)
 
   /* Output the delay import descriptor */
   fprintf (f, "\n%s DELAY_IMPORT_DESCRIPTOR\n", ASM_C);
-  fprintf (f, ".section\t.text$2\n");
+  fprintf (f, ".section\t.didat$2\n");
   fprintf (f, "%s __DELAY_IMPORT_DESCRIPTOR_%s\n", ASM_GLOBAL,imp_name_lab);
   fprintf (f, "__DELAY_IMPORT_DESCRIPTOR_%s:\n", imp_name_lab);
   fprintf (f, "\t%s 1\t%s grAttrs\n", ASM_LONG, ASM_C);
@@ -2841,11 +2841,8 @@ make_delay_head (void)
       fprintf (f, "\t%s\t0\n", ASM_LONG);
       if (create_for_pep)
 	fprintf (f, "\t%s\t0\n", ASM_LONG);
-      fprintf (f, "\t.section\t.didat$4\n");
       fprintf (f, "__INT_%s:\n", imp_name_lab);
     }
-
-  fprintf (f, "\t.section\t.didat$2\n");
 
   fclose (f);
 
