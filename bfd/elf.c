@@ -4502,7 +4502,11 @@ elf_map_symbols (bfd *abfd, unsigned int *pnum_locals)
 	  asection *sec = sym->section;
 
 	  if (sec->owner != abfd)
-	    sec = sec->output_section;
+	    {
+	      sec = sec->output_section;
+	      if (sec == NULL)
+		return false;
+	    }
 
 	  sect_syms[sec->index] = syms[idx];
 	}
