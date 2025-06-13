@@ -549,6 +549,10 @@ gdb_test_no_output "set \$ymm2.v2_int128 = {0,0}"
 gdb_test_no_output "set \$ymm15.v2_int128 = {0,0}"
 
 if {[record_full_function "arith"] == true} {
+    test_one_register "vpsadbw" "ymm15" \
+	"0x20000000200000004000003f000000, 0x100000001000000010000000100000"
+    test_one_register "vpsadbw" "ymm2" \
+	"0x20000000200000004000003f000000, 0x100000001000000010000000100000"
     test_one_register "vpandn" "ymm15" \
 	"0x40400000400000003f80000000000000, 0x0"
     test_one_register "vpand" "ymm15" \
@@ -1113,3 +1117,54 @@ if {[record_full_function "pack"] == true} {
 }
 gdb_test "finish" "Run till exit from.*pack_test.*" \
     "leaving pack"
+
+# Preparation and testing converting instructions.
+gdb_test_no_output \
+    "set \$ymm0.v2_int128 = {0,0}" \
+    "set ymm0 for convert test"
+gdb_test_no_output \
+    "set \$ymm1.v8_float = {0, 1, 2.5, 10, -1, -2.5, 0}" \
+    "set ymm1 for convert test"
+gdb_test_no_output "set \$ymm15.v2_int128 = {0,0}" \
+    "set ymm15 for convert test"
+gdb_test_no_output "set \$ecx = -1" "set ecx for convert test"
+gdb_test_no_output "set \$ebx = 1" "set ebx for convert test"
+
+if {[record_full_function "convert"] == true} {
+    gdb_test "maint print record-instruction" ".*"
+    test_one_general_register "vcvttss2si" "ecx" "0xffffffff"
+    test_one_general_register "vcvttsd2si" "ebx" "0x0"
+    test_one_register "vcvttps2dq" "ymm15" \
+	"0x41200000402000003f8000004f800000, 0x0"
+    test_one_register "vcvttpd2dq" "ymm0" \
+	"0x412000004020000041f0000000000000, 0x0"
+    test_one_general_register "vcvtss2si" "ebx" "0x0"
+
+    test_one_register "vcvtss2sd" "ymm0" \
+	"0x412000004020000041efffffffe00000, 0x0"
+    test_one_register "vcvtsi2ss" "ymm15" \
+	"0x41200000402000003f80000000000000, 0x0"
+    test_one_register "vcvtsi2sd" "ymm0" \
+	"0x8000000000000, 0x0"
+    test_one_register "vcvtsd2ss" "ymm15" \
+	"0x490000023c000000, 0x0"
+    test_one_general_register "vcvtsd2si" "ebx" "0x1"
+
+    test_one_register "vcvtpd2dq" "ymm0" \
+	"0x3ff00000000000000000000000000000, 0x0"
+    test_one_register "vcvtpd2ps" "ymm15" \
+	"0xa000000020000000100000000, 0x0"
+    test_one_register "vcvtps2pd" "ymm0" \
+	"0x4e8240004e8040004e7e000000000000, 0x0"
+    test_one_register "vcvtps2dq" "ymm15" \
+	"0x41cfc000000000000000000000000000, 0x0"
+    test_one_register "vcvtdq2pd" "ymm15" "0x0, 0x0"
+    test_one_register "vcvtdq2ps" "ymm0" "0x0, 0x0"
+
+    gdb_test "record stop" "Process record is stopped.*" \
+	"delete history for convert_test"
+} else {
+    untested "couldn't run convert tests"
+}
+gdb_test "finish" "Run till exit from.*convert_test.*" \
+    "leaving convert"

@@ -442,6 +442,9 @@ arith_test ()
   asm volatile ("vpand %xmm0, %xmm1, %xmm15");
   asm volatile ("vpandn %ymm0, %ymm1, %ymm15");
 
+  asm volatile ("vpsadbw %xmm0, %xmm1, %xmm2");
+  asm volatile ("vpsadbw %ymm0, %ymm1, %ymm15");
+
   return 0; /* end arith_test  */
 }
 
@@ -699,6 +702,41 @@ pack_test ()
   return 0; /* end pack_test  */
 }
 
+int
+convert_test ()
+{
+  /* start convert_test.  */
+  /* Using GDB, load these values onto registers for testing.
+     xmm0.v2_int128 = {0, 0}
+     xmm1.v4_float = {0, 1, 2.5, 10}
+     xmm15.v2_int128 = {0, 0}
+     ecx = -1
+     ebx = 0
+     this way it's easy to confirm we're undoing things correctly.  */
+
+  asm volatile ("vcvtdq2ps %xmm1, %xmm0");
+  asm volatile ("vcvtdq2pd %xmm1, %xmm15");
+
+  asm volatile ("vcvtps2dq %xmm1, %xmm15");
+  asm volatile ("vcvtps2pd %xmm1, %xmm0");
+  asm volatile ("vcvtpd2ps %xmm1, %xmm15");
+  asm volatile ("vcvtpd2dq %xmm1, %xmm0");
+
+  asm volatile ("vcvtsd2si %xmm1, %rbx");
+  asm volatile ("vcvtsd2ss %xmm0, %xmm1, %xmm15");
+  asm volatile ("vcvtsi2sd %rcx, %xmm1, %xmm0");
+  asm volatile ("vcvtsi2ss %rcx, %xmm1, %xmm15");
+  asm volatile ("vcvtss2sd %xmm15, %xmm1, %xmm0");
+  asm volatile ("vcvtss2si %xmm1, %rbx");
+
+  asm volatile ("vcvttpd2dq %xmm1, %xmm0");
+  asm volatile ("vcvttps2dq %xmm1, %xmm15");
+  asm volatile ("vcvttsd2si %xmm0, %rbx");
+  asm volatile ("vcvttss2si %xmm1, %ecx");
+
+  return 0; /* end convert_test  */
+}
+
 /* This include is used to allocate the dynamic buffer and have
    the pointers aligned to a 32-bit boundary, so we can test instructions
    that require aligned memory.  */
@@ -738,5 +776,6 @@ main ()
   blend_test ();
   compare_test ();
   pack_test ();
+  convert_test ();
   return 0;	/* end of main */
 }

@@ -5108,6 +5108,14 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
 	break;
       }
 
+    case 0x2c:	/* VCVTTSD2SI and VCVTTSS2SI.  */
+    case 0x2d:	/* VCVTSD2SI and VCVTSS2SI.  */
+      i386_record_modrm (ir);
+      record_full_arch_list_add_reg (ir->regcache,
+				     ir->regmap[X86_RECORD_REAX_REGNUM
+						+ ir->reg]);
+      break;
+
     case 0x00:	/* VSHUFB and VPERMQ.  */
     case 0x01:	/* VPERMPD.  */
     case 0x02:	/* VPBLENDD.  */
@@ -5118,6 +5126,7 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
     case 0x0d:	/* VPERMILPD with register and VBLENDPD.  */
     case 0x0e:	/* VPBLENDW.  */
     case 0x1a:	/* VBROADCASTF128.  */
+    case 0x2a:	/* VCVTSI2SS.  */
     case 0x2b:	/* VPACKUSDW.  */
     case 0x36:	/* VPERMD.  */
     case 0x40:	/* VPMULLD  */
@@ -5128,6 +5137,8 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
     case 0x57:	/* VXORP[S|D]  */
     case 0x58:	/* VPBROADCASTD and VADD[P|S][S|D]  */
     case 0x59:	/* VPBROADCASTQ and VMUL[P|S][S|D]  */
+    case 0x5a:	/* VCVTPS2PD, VCVTSD2SS, VCVTSS2SD and VCVTPD2PS.  */
+    case 0x5b:	/* VCVTDQ2PS, VCVTTPS2PD and VCVTPS2DQ.  */
     case 0x5c:	/* VSUB[P|S][S|D]  */
     case 0x5d:	/* VMIN[P|S][S|D]  */
     case 0x5e:	/* VDIV[P|S][S|D]  */
@@ -5148,12 +5159,14 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
     case 0xdf:	/* VPANDN  */
     case 0xe1:	/* VPSRAW, dynamic shift.  */
     case 0xe2:	/* VPSRAD, dynamic shift.  */
-    case 0xe5:	/* VPMULHW  */
     case 0xe4:	/* VPMULHUW  */
+    case 0xe5:	/* VPMULHW  */
+    case 0xe6:	/* VCVTDQ2PD, VCVTTPD2DQ and VCVTPD2DQ.  */
     case 0xf1:	/* VPSLLW, dynamic shift.  */
     case 0xf2:	/* VPSLLD, dynamic shift.  */
     case 0xf3:	/* VPSLLQ, dynamic shift.  */
     case 0xf4:	/* VPMULUDQ  */
+    case 0xf6:	/* VPSADBW.  */
     case 0xfc:	/* VPADDB  */
     case 0xfd:	/* VPADDW  */
     case 0xfe:	/* VPADDD  */
