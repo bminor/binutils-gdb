@@ -3770,7 +3770,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 
 #if BFD_SUPPORTS_PLUGINS
       /* Copy LTO IR file as unknown object.  */
-      if (bfd_plugin_target_p (ibfd->xvec))
+      if (bfd_plugin_target_p (this_element->xvec))
 	ok_object = false;
       else
 #endif
