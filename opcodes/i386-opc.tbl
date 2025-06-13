@@ -275,7 +275,9 @@ in, 0xe4, 0, W|No_sSuf|No_qSuf, { Imm8, Acc|Byte|Word|Dword }
 in, 0xec, 0, W|No_sSuf|No_qSuf, { InOutPortReg, Acc|Byte|Word|Dword }
 in, 0xe4, 0, W|No_sSuf|No_qSuf|IntelSuffix, { Imm8 }
 in, 0xec, 0, W|No_sSuf|No_qSuf|IntelSuffix, { InOutPortReg }
-out, 0xe6, 0, W|No_sSuf|No_qSuf, { Acc|Byte|Word|Dword, Imm8 }
+// Immediates want to be first; md_assemble() takes care of swapping operands
+// accordingly.
+out, 0xe6, 0, W|No_sSuf|No_qSuf, { Imm8, Acc|Byte|Word|Dword }
 out, 0xee, 0, W|No_sSuf|No_qSuf, { Acc|Byte|Word|Dword, InOutPortReg }
 out, 0xe6, 0, W|No_sSuf|No_qSuf|IntelSuffix, { Imm8 }
 out, 0xee, 0, W|No_sSuf|No_qSuf|IntelSuffix, { InOutPortReg }

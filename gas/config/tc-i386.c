@@ -2589,22 +2589,23 @@ operand_size_match (const insn_template *t)
       && t->opcode_modifier.jump != JUMP_ABSOLUTE)
     return match;
 
-  /* Check memory and accumulator operand size.  */
-  for (j = 0; j < i.operands; j++)
-    {
-      /* Instruction templates with only sign-extended 8-bit immediate
-	 operand also have a second template with full-operand-size
-	 immediate operand under a different opcode.  Don't match the
-	 first template if sign-extended 8-bit immediate operand should
-	 be excluded.  */
-      if (pp.no_imm8s
-	  && !t->operand_types[j].bitfield.imm8
-	  && t->operand_types[j].bitfield.imm8s)
-	{
-	  match = 0;
-	  break;
-	}
+  for (j = 0; j < i.imm_operands; j++)
+    /* Instruction templates with only sign-extended 8-bit immediate
+       operand also have a second template with full-operand-size
+       immediate operand under a different opcode.  Don't match the
+       first template if sign-extended 8-bit immediate operand should
+       be excluded.  */
+    if (pp.no_imm8s
+        && !t->operand_types[j].bitfield.imm8
+        && t->operand_types[j].bitfield.imm8s)
+      {
+	gas_assert (!t->opcode_modifier.d);
+	return 0;
+      }
 
+  /* Check memory and accumulator operand size.  */
+  for (; j < i.operands; j++)
+    {
       if (i.types[j].bitfield.class == Reg
 	  && (t->operand_types[j].bitfield.class == Reg
 	      || (t->operand_types[j].bitfield.instance == Accum
@@ -2655,7 +2656,7 @@ operand_size_match (const insn_template *t)
   /* Check reverse.  */
   gas_assert (i.operands >= 2);
 
-  for (j = 0; j < i.operands; j++)
+  for (j = i.imm_operands; j < i.operands; j++)
     {
       unsigned int given = i.operands - j - 1;
 
@@ -7129,12 +7130,14 @@ i386_assemble (char *line)
     swap_operands ();
 
   /* The order of the immediates should be reversed for 2-immediates EXTRQ
-     and INSERTQ instructions.  Also UWRMSR wants its immediate to be in the
-     "canonical" place (first), despite it appearing last (in AT&T syntax, or
-     because of the swapping above) in the incoming set of operands.  */
+     and INSERTQ instructions.  Also OUT, UWRMSR, and WRMSRNS want their
+     immediate to be in the "canonical" place (first), despite it appearing
+     last (in AT&T syntax, or because of the swapping above) in the incoming
+     set of operands.  */
   if ((i.imm_operands == 2
        && (t->mnem_off == MN_extrq || t->mnem_off == MN_insertq))
-      || ((t->mnem_off == MN_uwrmsr || t->mnem_off == MN_wrmsrns)
+      || ((t->mnem_off == MN_out || t->mnem_off == MN_uwrmsr
+	   || t->mnem_off == MN_wrmsrns)
 	  && i.imm_operands && i.operands > i.imm_operands))
       swap_2_operands (0, 1);
 
@@ -7149,11 +7152,8 @@ i386_assemble (char *line)
 	  || t->mnem_off == MN_rdmsr
 	  || t->mnem_off == MN_wrmsrns)
 	{
-	  for (j = 0; j < i.operands; j++)
-	    {
-	      if (operand_type_check(i.types[j], imm))
-		i.types[j] = smallest_imm_type (i.op[j].imms->X_add_number);
-	    }
+	  for (j = 0; j < i.imm_operands; j++)
+	    i.types[j] = smallest_imm_type (i.op[j].imms->X_add_number);
 	}
       else
 	optimize_imm ();
@@ -8467,7 +8467,7 @@ optimize_disp (const insn_template *t)
       && (!t->opcode_modifier.jump
 	  || i.jumpabsolute || i.types[0].bitfield.baseindex))
     {
-      for (op = 0; op < i.operands; ++op)
+      for (op = i.imm_operands; op < i.operands; ++op)
 	{
 	  const expressionS *exp = i.op[op].disps;
 
@@ -8808,7 +8808,7 @@ check_VecOperands (const insn_template *t)
 	  unsigned int j;
 
 	  type.bitfield.baseindex = 1;
-	  for (j = 0; j < i.operands; ++j)
+	  for (j = i.imm_operands; j < i.operands; ++j)
 	    {
 	      if (j != op
 		  && !operand_type_register_match(i.types[j],
@@ -8824,7 +8824,7 @@ check_VecOperands (const insn_template *t)
   else if (t->opcode_modifier.broadcast && i.mem_operands)
     {
       /* Find memory operand.  */
-      for (op = 0; op < i.operands; op++)
+      for (op = i.imm_operands; op < i.operands; op++)
 	if (i.flags[op] & Operand_Mem)
 	  break;
       gas_assert (op < i.operands);
@@ -8933,7 +8933,7 @@ check_VecOperands (const insn_template *t)
 	  const i386_operand_type *type = NULL, *fallback = NULL;
 
 	  i.memshift = 0;
-	  for (op = 0; op < i.operands; op++)
+	  for (op = i.imm_operands; op < i.operands; op++)
 	    if (i.flags[op] & Operand_Mem)
 	      {
 		if (t->opcode_modifier.evex == EVEXLIG)
@@ -8975,7 +8975,7 @@ check_VecOperands (const insn_template *t)
 	    i.memshift = -1;
 	}
 
-      for (op = 0; op < i.operands; op++)
+      for (op = i.imm_operands; op < i.operands; op++)
 	if (operand_type_check (i.types[op], disp)
 	    && i.op[op].disps->X_op == O_constant)
 	  {
@@ -9069,7 +9069,7 @@ check_EgprOperands (const insn_template *t)
   if (!t->opcode_modifier.noegpr)
     return false;
 
-  for (unsigned int op = 0; op < i.operands; op++)
+  for (unsigned int op = i.imm_operands; op < i.operands; op++)
     {
       if (i.types[op].bitfield.class != Reg)
 	continue;
@@ -9131,7 +9131,7 @@ check_APX_operands (const insn_template *t)
 static bool
 check_Rex_required (void)
 {
-  for (unsigned int op = 0; op < i.operands; op++)
+  for (unsigned int op = i.imm_operands; op < i.operands; op++)
     {
       if (i.types[op].bitfield.class != Reg)
 	continue;
@@ -10444,7 +10444,7 @@ process_suffix (const insn_template *t)
 	  else
 	    need = flag_code == CODE_64BIT ? need_qword : need_word;
 
-	  for (op = 0; op < i.operands; op++)
+	  for (op = i.imm_operands; op < i.operands; op++)
 	    {
 	      if (i.types[op].bitfield.class != Reg)
 		continue;
@@ -10776,7 +10776,7 @@ process_operands (void)
      unnecessary segment overrides.  */
   const reg_entry *default_seg = NULL;
 
-  for (unsigned int j = 0; j < i.operands; j++)
+  for (unsigned int j = i.imm_operands; j < i.operands; j++)
     if (i.types[j].bitfield.instance != InstanceNone)
       i.reg_operands--;
 
