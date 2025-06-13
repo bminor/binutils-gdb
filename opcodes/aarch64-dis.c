@@ -2840,6 +2840,23 @@ do_special_decoding (aarch64_inst *inst)
 	}
     }
 
+  if (inst->opcode->flags & F_LSFE_SZ)
+    {
+      value = extract_field (FLD_ldst_size, inst->value, 0);
+
+      if (value > 0x3)
+	return 0;
+
+      for (int i = 0;
+	   aarch64_operands[inst->operands[i].type].op_class != AARCH64_OPND_CLASS_ADDRESS;
+	   i++)
+	{
+	  inst->operands[i].qualifier = get_sreg_qualifier_from_value (value);
+	  if (inst->operands[i].qualifier == AARCH64_OPND_QLF_ERR)
+	    return 0;
+	}
+    }
+
   if (inst->opcode->flags & F_T)
     {
       /* Num of consecutive '0's on the right side of imm5<3:0>.  */

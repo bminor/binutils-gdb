@@ -2064,6 +2064,13 @@ do_special_encoding (struct aarch64_inst *inst)
       insert_field (FLD_rcpc3_size, &inst->value, value, 0);
     }
 
+  if (inst->opcode->flags & F_LSFE_SZ)
+    {
+      value = aarch64_get_qualifier_standard_value (inst->operands[0].qualifier);
+      insert_field (FLD_ldst_size, &inst->value, value, 0);
+      return;
+    }
+
   if (inst->opcode->flags & F_SIZEQ)
     encode_sizeq (inst);
   if (inst->opcode->flags & F_FPTYPE)

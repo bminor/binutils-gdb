@@ -79,6 +79,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_CRC,
   /* LSE instructions.  */
   AARCH64_FEATURE_LSE,
+  /* LSFE instructions.  */
+  AARCH64_FEATURE_LSFE,
   /* PAN instructions.  */
   AARCH64_FEATURE_PAN,
   /* LOR instructions.  */
@@ -1511,7 +1513,10 @@ extern const aarch64_opcode aarch64_opcode_table[];
 #define F_DP_TAG_ONLY (1ULL << 37)
 
 #define F_SUBCLASS_OTHER (F_SUBCLASS)
-/* Next bit is 41.  */
+
+/* For LSFE instructions with size[30:31] field.  */
+#define F_LSFE_SZ (1ULL << 41)
+/* Next bit is 42.  */
 
 /* Instruction constraints.  */
 /* This instruction has a predication constraint on the instruction at PC+4.  */
@@ -1595,7 +1600,7 @@ opcode_has_special_coder (const aarch64_opcode *opcode)
 {
   return (opcode->flags & (F_SF | F_LSE_SZ | F_SIZEQ | F_FPTYPE | F_SSIZE | F_T
 	  | F_GPRSIZE_IN_Q | F_LDS_SIZE | F_MISC | F_N | F_COND
-	  | F_OPD_SIZE | F_RCPC3_SIZE)) != 0;
+	  | F_OPD_SIZE | F_RCPC3_SIZE | F_LSFE_SZ )) != 0;
 }
 
 struct aarch64_name_value_pair

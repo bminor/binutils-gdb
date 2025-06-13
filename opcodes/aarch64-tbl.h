@@ -1242,6 +1242,20 @@
   QLF3(X, X, NIL),		\
 }
 
+/* e.g. LDBFADD <Fs>, <Ft>, [<Xn|SP>{,#0}].  */
+#define QL_FP2_H_0		\
+{				\
+  QLF3(S_H, S_H, NIL),		\
+}
+
+/* e.g. LDFADD <Fs>, <Ft>, [<Xn|SP>{,#0}].  */
+#define QL_FP2_HSD_0		\
+{				\
+  QLF3(S_H, S_H, NIL),		\
+  QLF3(S_S, S_S, NIL),		\
+  QLF3(S_D, S_D, NIL),		\
+}
+
 /* e.g. CASP <Xt1>, <Xt1+1>, <Xt2>, <Xt2+1>, [<Xn|SP>{,#0}].  */
 #define QL_R4NIL		\
 {				\
@@ -1379,6 +1393,14 @@
 #define QL_SIMD_LDSTONE		\
 {				\
   QLF2(S_B, NIL),		\
+  QLF2(S_H, NIL),		\
+  QLF2(S_S, NIL),		\
+  QLF2(S_D, NIL),		\
+}
+
+/* e.g. STFADD <Fs>, [<Xn|SP>].  */
+#define QL_FP_HSD_0		\
+{				\
   QLF2(S_H, NIL),		\
   QLF2(S_S, NIL),		\
   QLF2(S_D, NIL),		\
@@ -2724,6 +2746,8 @@ static const aarch64_feature_set aarch64_feature_crc =
   AARCH64_FEATURE (CRC);
 static const aarch64_feature_set aarch64_feature_lse =
   AARCH64_FEATURE (LSE);
+static const aarch64_feature_set aarch64_feature_lsfe =
+  AARCH64_FEATURE (LSFE);
 static const aarch64_feature_set aarch64_feature_lse128 =
   AARCH64_FEATURES (2, LSE, LSE128);
 static const aarch64_feature_set aarch64_feature_lor =
@@ -2924,6 +2948,7 @@ static const aarch64_feature_set aarch64_feature_sve2p1_sme2p1 =
 #define SIMD		&aarch64_feature_simd
 #define CRC		&aarch64_feature_crc
 #define LSE		&aarch64_feature_lse
+#define LSFE		&aarch64_feature_lsfe
 #define LSE128		&aarch64_feature_lse128
 #define LOR		&aarch64_feature_lor
 #define RDMA		&aarch64_feature_rdma
@@ -3034,6 +3059,8 @@ static const aarch64_feature_set aarch64_feature_sve2p1_sme2p1 =
   { NAME, OPCODE, MASK, CLASS, 0, CRC, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define _LSE_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, LSE, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define _LSFE_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS, FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, LSFE, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define _LSE128_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, LSE128, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define _LOR_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
@@ -6564,6 +6591,87 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   RCPC2_INSN ("ldapursw", 0x99800000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
   RCPC2_INSN ("stlur",    0xd9000000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
   RCPC2_INSN ("ldapur",   0xd9400000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLX, 0),
+
+  /* Floating-point atomic add in memory. */
+  _LSFE_INSN ("ldfadd", 0x3c200000, 0x3fe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_HSD_0, F_LSFE_SZ),
+  _LSFE_INSN ("ldfadda", 0x3ca00000, 0x3fe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_HSD_0, F_LSFE_SZ),
+  _LSFE_INSN ("ldfaddal", 0x3ce00000, 0x3fe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_HSD_0, F_LSFE_SZ),
+  _LSFE_INSN ("ldfaddl", 0x3c600000, 0x3fe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_HSD_0, F_LSFE_SZ),
+  /* Floating-point atomic maximum in memory. */
+  _LSFE_INSN ("ldfmax", 0x3c204000, 0x3fe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_HSD_0, F_LSFE_SZ),
+  _LSFE_INSN ("ldfmaxa", 0x3ca04000, 0x3fe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_HSD_0, F_LSFE_SZ),
+  _LSFE_INSN ("ldfmaxal", 0x3ce04000, 0x3fe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_HSD_0, F_LSFE_SZ),
+  _LSFE_INSN ("ldfmaxl", 0x3c604000, 0x3fe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_HSD_0, F_LSFE_SZ),
+  /* Floating-point atomic maximum number in memory. */
+  _LSFE_INSN ("ldfmaxnm", 0x3c206000, 0x3fe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_HSD_0, F_LSFE_SZ),
+  _LSFE_INSN ("ldfmaxnma", 0x3ca06000, 0x3fe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_HSD_0, F_LSFE_SZ),
+  _LSFE_INSN ("ldfmaxnmal", 0x3ce06000, 0x3fe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_HSD_0, F_LSFE_SZ),
+  _LSFE_INSN ("ldfmaxnml", 0x3c606000, 0x3fe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_HSD_0, F_LSFE_SZ),
+  /* Floating-point atomic minimum in memory. */
+  _LSFE_INSN ("ldfmin", 0x3c205000, 0x3fe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_HSD_0, F_LSFE_SZ),
+  _LSFE_INSN ("ldfmina", 0x3ca05000, 0x3fe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_HSD_0, F_LSFE_SZ),
+  _LSFE_INSN ("ldfminal", 0x3ce05000, 0x3fe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_HSD_0, F_LSFE_SZ),
+  _LSFE_INSN ("ldfminl", 0x3c605000, 0x3fe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_HSD_0, F_LSFE_SZ),
+  /* Floating-point atomic minimum number in memory. */
+  _LSFE_INSN ("ldfminnm", 0x3c207000, 0x3fe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_HSD_0, F_LSFE_SZ),
+  _LSFE_INSN ("ldfminnma", 0x3ca07000, 0x3fe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_HSD_0, F_LSFE_SZ),
+  _LSFE_INSN ("ldfminnmal", 0x3ce07000, 0x3fe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_HSD_0, F_LSFE_SZ),
+  _LSFE_INSN ("ldfminnml", 0x3c607000, 0x3fe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_HSD_0, F_LSFE_SZ),
+  /* BFloat16 floating-point add in memory. */
+  _LSFE_INSN ("ldbfadd", 0x3c200000, 0xffe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_H_0, 0),
+  _LSFE_INSN ("ldbfadda", 0x3ca00000, 0xffe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_H_0, 0),
+  _LSFE_INSN ("ldbfaddal", 0x3ce00000, 0xffe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_H_0, 0),
+  _LSFE_INSN ("ldbfaddl", 0x3c600000, 0xffe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_H_0, 0),
+  /* BFloat16 floating-point maximum in memory. */
+  _LSFE_INSN ("ldbfmax", 0x3c204000, 0xffe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_H_0, 0),
+  _LSFE_INSN ("ldbfmaxa", 0x3ca04000, 0xffe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_H_0, 0),
+  _LSFE_INSN ("ldbfmaxal", 0x3ce04000, 0xffe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_H_0, 0),
+  _LSFE_INSN ("ldbfmaxl", 0x3c604000, 0xffe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_H_0, 0),
+  /* BFloat16 floating-point maximum number in memory. */
+  _LSFE_INSN ("ldbfmaxnm", 0x3c206000, 0xffe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_H_0, 0),
+  _LSFE_INSN ("ldbfmaxnma", 0x3ca06000, 0xffe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_H_0, 0),
+  _LSFE_INSN ("ldbfmaxnmal", 0x3ce06000, 0xffe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_H_0, 0),
+  _LSFE_INSN ("ldbfmaxnml", 0x3c606000, 0xffe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_H_0, 0),
+  /* BFloat16 floating-point minimum in memory. */
+  _LSFE_INSN ("ldbfmin", 0x3c205000, 0xffe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_H_0, 0),
+  _LSFE_INSN ("ldbfmina", 0x3ca05000, 0xffe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_H_0, 0),
+  _LSFE_INSN ("ldbfminal", 0x3ce05000, 0xffe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_H_0, 0),
+  _LSFE_INSN ("ldbfminl", 0x3c605000, 0xffe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_H_0, 0),
+  /* BFloat16 floating-point minimum number in memory. */
+  _LSFE_INSN ("ldbfminnm", 0x3c207000, 0xffe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_H_0, 0),
+  _LSFE_INSN ("ldbfminnma", 0x3ca07000, 0xffe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_H_0, 0),
+  _LSFE_INSN ("ldbfminnmal", 0x3ce07000, 0xffe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_H_0, 0),
+  _LSFE_INSN ("ldbfminnml", 0x3c607000, 0xffe0fc00, lse_atomic, OP3 (Fm, Fd, ADDR_SIMPLE), QL_FP2_H_0, 0),
+  /* Floating-point atomic add in memory, without return. */
+  _LSFE_INSN ("stfadd", 0x3c20801f, 0x3fe0fc1f, lse_atomic, OP2 (Fm, ADDR_SIMPLE), QL_FP_HSD_0, F_LSFE_SZ),
+  _LSFE_INSN ("stfaddl", 0x3c60801f, 0x3fe0fc1f, lse_atomic, OP2 (Fm, ADDR_SIMPLE), QL_FP_HSD_0, F_LSFE_SZ),
+  /* Floating-point atomic maximum in memory, without return. */
+  _LSFE_INSN ("stfmax", 0x3c20c01f, 0x3fe0fc1f, lse_atomic, OP2 (Fm, ADDR_SIMPLE), QL_FP_HSD_0, F_LSFE_SZ),
+  _LSFE_INSN ("stfmaxl", 0x3c60c01f, 0x3fe0fc1f, lse_atomic, OP2 (Fm, ADDR_SIMPLE), QL_FP_HSD_0, F_LSFE_SZ),
+  /* Floating-point atomic maximum number in memory, without return. */
+  _LSFE_INSN ("stfmaxnm", 0x3c20e01f, 0x3fe0fc1f, lse_atomic, OP2 (Fm, ADDR_SIMPLE), QL_FP_HSD_0, F_LSFE_SZ),
+  _LSFE_INSN ("stfmaxnml", 0x3c60e01f, 0x3fe0fc1f, lse_atomic, OP2 (Fm, ADDR_SIMPLE), QL_FP_HSD_0, F_LSFE_SZ),
+  /* Floating-point atomic minimum in memory, without return. */
+  _LSFE_INSN ("stfmin", 0x3c20d01f, 0x3fe0fc1f, lse_atomic, OP2 (Fm, ADDR_SIMPLE), QL_FP_HSD_0, F_LSFE_SZ),
+  _LSFE_INSN ("stfminl", 0x3c60d01f, 0x3fe0fc1f, lse_atomic, OP2 (Fm, ADDR_SIMPLE), QL_FP_HSD_0, F_LSFE_SZ),
+  /* Floating-point atomic minimum number in memory, without return. */
+  _LSFE_INSN ("stfminnm", 0x3c20f01f, 0x3fe0fc1f, lse_atomic, OP2 (Fm, ADDR_SIMPLE), QL_FP_HSD_0, F_LSFE_SZ),
+  _LSFE_INSN ("stfminnml", 0x3c60f01f, 0x3fe0fc1f, lse_atomic, OP2 (Fm, ADDR_SIMPLE), QL_FP_HSD_0, F_LSFE_SZ),
+  /* BFloat16 floating-point atomic add in memory, without return. */
+  _LSFE_INSN ("stbfadd", 0x3c20801f, 0xffe0fc1f, lse_atomic, OP2 (Fm, ADDR_SIMPLE), QL_DST_H, 0),
+  _LSFE_INSN ("stbfaddl", 0x3c60801f, 0xffe0fc1f, lse_atomic, OP2 (Fm, ADDR_SIMPLE), QL_DST_H, 0),
+  /* BFloat16 floating-point atomic maximum in memory, without return. */
+  _LSFE_INSN ("stbfmax", 0x3c20c01f, 0xffe0fc1f, lse_atomic, OP2 (Fm, ADDR_SIMPLE), QL_DST_H, 0),
+  _LSFE_INSN ("stbfmaxl", 0x3c60c01f, 0xffe0fc1f, lse_atomic, OP2 (Fm, ADDR_SIMPLE), QL_DST_H, 0),
+  /* BFloat16 floating-point atomic maximum number in memory, without return. */
+  _LSFE_INSN ("stbfmaxnm", 0x3c20e01f, 0xffe0fc1f, lse_atomic, OP2 (Fm, ADDR_SIMPLE), QL_DST_H, 0),
+  _LSFE_INSN ("stbfmaxnml", 0x3c60e01f, 0xffe0fc1f, lse_atomic, OP2 (Fm, ADDR_SIMPLE), QL_DST_H, 0),
+  /* BFloat16 floating-point atomic minumum in memory, without return. */
+  _LSFE_INSN ("stbfmin", 0x3c20d01f, 0xffe0fc1f, lse_atomic, OP2 (Fm, ADDR_SIMPLE), QL_DST_H, 0),
+  _LSFE_INSN ("stbfminl", 0x3c60d01f, 0xffe0fc1f, lse_atomic, OP2 (Fm, ADDR_SIMPLE), QL_DST_H, 0),
+  /* BFloat16 floating-point atomic minumum number in memory, without return. */
+  _LSFE_INSN ("stbfminnm", 0x3c20f01f, 0xffe0fc1f, lse_atomic, OP2 (Fm, ADDR_SIMPLE), QL_DST_H, 0),
+  _LSFE_INSN ("stbfminnml", 0x3c60f01f, 0xffe0fc1f, lse_atomic, OP2 (Fm, ADDR_SIMPLE), QL_DST_H, 0),
 
   /* Matrix Multiply instructions.  */
   INT8MATMUL_SVE_INSNC ("smmla",  0x45009800, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SBB, 0, C_SCAN_MOVPRFX, 0),

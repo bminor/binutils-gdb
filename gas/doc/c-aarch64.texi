@@ -233,6 +233,8 @@ automatically cause those extensions to be disabled.
  @tab Enable Large System extensions.
 @item @code{lse128} @tab @code{lse}
  @tab Enable the 128-bit Atomic Instructions extension.
+@item @code{lsfe} @tab @code{fp}
+ @tab Enable Large System Float Extension.
 @item @code{lut} @tab
  @tab Enable the Lookup Table (LUT) extension.
 @item @code{memtag} @tab
