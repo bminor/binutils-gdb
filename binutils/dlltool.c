@@ -2250,7 +2250,7 @@ typedef struct
 #define DATA_SEC_FLAGS   (SEC_ALLOC | SEC_LOAD | SEC_DATA)
 #define BSS_SEC_FLAGS     SEC_ALLOC
 
-static sinfo secdata[NSECS] =
+static sinfo secdata_plain[NSECS] =
 {
   INIT_SEC_DATA (TEXT,   ".text",    TEXT_SEC_FLAGS,   2),
   INIT_SEC_DATA (DATA,   ".data",    DATA_SEC_FLAGS,   2),
@@ -2259,6 +2259,17 @@ static sinfo secdata[NSECS] =
   INIT_SEC_DATA (IDATA5, ".idata$5", SEC_HAS_CONTENTS, 2),
   INIT_SEC_DATA (IDATA4, ".idata$4", SEC_HAS_CONTENTS, 2),
   INIT_SEC_DATA (IDATA6, ".idata$6", SEC_HAS_CONTENTS, 1)
+};
+
+static sinfo secdata_delay[NSECS] =
+{
+  INIT_SEC_DATA (TEXT,   ".text",    TEXT_SEC_FLAGS,   2),
+  INIT_SEC_DATA (DATA,   ".data",    DATA_SEC_FLAGS,   2),
+  INIT_SEC_DATA (BSS,    ".bss",     BSS_SEC_FLAGS,    2),
+  INIT_SEC_DATA (IDATA7, ".didat$7", SEC_HAS_CONTENTS, 2),
+  INIT_SEC_DATA (IDATA5, ".didat$5", SEC_HAS_CONTENTS, 2),
+  INIT_SEC_DATA (IDATA4, ".didat$4", SEC_HAS_CONTENTS, 2),
+  INIT_SEC_DATA (IDATA6, ".didat$6", SEC_HAS_CONTENTS, 1)
 };
 
 /* This is what we're trying to make.  We generate the imp symbols with
@@ -2323,6 +2334,7 @@ make_imp_label (bfd *abfd, const char *prefix, const char *name)
 static bfd *
 make_one_lib_file (export_type *exp, int i, int delay)
 {
+  sinfo *const secdata = delay ? secdata_delay : secdata_plain;
   char *outname = TMP_STUB;
   size_t name_len = strlen (outname);
   sprintf (outname + name_len - 7, "%05d.o", i);
@@ -2814,7 +2826,7 @@ make_delay_head (void)
 
   if (!no_idata5)
     {
-      fprintf (f, "\t.section\t.idata$5\n");
+      fprintf (f, "\t.section\t.didat$5\n");
       /* NULL terminating list.  */
       if (create_for_pep)
 	fprintf (f, "\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG);
@@ -2825,15 +2837,15 @@ make_delay_head (void)
 
   if (!no_idata4)
     {
-      fprintf (f, "\t.section\t.idata$4\n");
+      fprintf (f, "\t.section\t.didat$4\n");
       fprintf (f, "\t%s\t0\n", ASM_LONG);
       if (create_for_pep)
 	fprintf (f, "\t%s\t0\n", ASM_LONG);
-      fprintf (f, "\t.section\t.idata$4\n");
+      fprintf (f, "\t.section\t.didat$4\n");
       fprintf (f, "__INT_%s:\n", imp_name_lab);
     }
 
-  fprintf (f, "\t.section\t.idata$2\n");
+  fprintf (f, "\t.section\t.didat$2\n");
 
   fclose (f);
 
@@ -2900,6 +2912,57 @@ make_tail (void)
   return abfd;
 }
 
+static bfd *
+make_delay_tail (void)
+{
+  FILE *f = fopen (TMP_TAIL_S, FOPEN_WT);
+  bfd *abfd;
+
+  if (f == NULL)
+    {
+      fatal (_("failed to open temporary tail file: %s"), TMP_TAIL_S);
+      return NULL;
+    }
+
+  temp_file_to_remove[TEMP_TAIL_FILE] = TMP_TAIL_S;
+
+  if (!no_idata4)
+    {
+      fprintf (f, "\t.section\t.didat$4\n");
+      if (create_for_pep)
+	fprintf (f, "\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG);
+      else
+	fprintf (f, "\t%s\t0\n", ASM_LONG); /* NULL terminating list.  */
+    }
+
+  if (!no_idata5)
+    {
+      fprintf (f, "\t.section\t.didat$5\n");
+      if (create_for_pep)
+	fprintf (f, "\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG);
+      else
+	fprintf (f, "\t%s\t0\n", ASM_LONG); /* NULL terminating list.  */
+    }
+
+  fprintf (f, "\t.section\t.didat$7\n");
+  fprintf (f, "\t%s\t__%s_iname\n", ASM_GLOBAL, imp_name_lab);
+  fprintf (f, "__%s_iname:\t%s\t\"%s\"\n",
+	   imp_name_lab, ASM_TEXT, dll_name);
+
+  fclose (f);
+
+  assemble_file (TMP_TAIL_S, TMP_TAIL_O);
+
+  abfd = bfd_openr (TMP_TAIL_O, HOW_BFD_READ_TARGET);
+  if (abfd == NULL)
+    /* xgettext:c-format */
+    fatal (_("failed to open temporary tail file: %s: %s"),
+	   TMP_TAIL_O, bfd_get_errmsg ());
+
+  temp_file_to_remove[TEMP_TAIL_O_FILE] = TMP_TAIL_O;
+  return abfd;
+}
+
 static void
 gen_lib_file (int delay)
 {
@@ -2935,12 +2998,13 @@ gen_lib_file (int delay)
   if (delay)
     {
       ar_head = make_delay_head ();
+      ar_tail = make_delay_tail();
     }
   else
     {
       ar_head = make_head ();
+      ar_tail = make_tail();
     }
-  ar_tail = make_tail();
 
   if (ar_head == NULL || ar_tail == NULL)
     return;

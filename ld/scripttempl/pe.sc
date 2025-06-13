@@ -14,7 +14,7 @@ fi
 # substitution, so we do this instead.
 # Sorting of the .foo$* sections is required by the definition of
 # grouped sections in PE.
-# Sorting of the file names in R_IDATA is required by the
+# Sorting of the file names in R_IDATA and R_DIDAT is required by the
 # current implementation of dlltool (this could probably be changed to
 # use grouped sections instead).
 if test "${RELOCATING}"; then
@@ -39,6 +39,18 @@ if test "${RELOCATING}"; then
   R_IDATA67='
     KEEP (SORT(*)(.idata$6))
     KEEP (SORT(*)(.idata$7))'
+  R_DIDAT234='
+    __DELAY_IMPORT_DIRECTORY_start__ = .;
+    KEEP (SORT(*)(.didat$2))
+    KEEP (SORT(*)(.didat$3))
+    __DELAY_IMPORT_DIRECTORY_end__ = .;
+    /* These zeroes mark the end of the import list.  */
+    . += (__DELAY_IMPORT_DIRECTORY_end__ - __DELAY_IMPORT_DIRECTORY_start__) ? 8*4 : 0;
+    KEEP (SORT(*)(.didat$4))'
+  R_DIDAT5='KEEP (SORT(*)(.didat$5))'
+  R_DIDAT67='
+    KEEP (SORT(*)(.didat$6))
+    KEEP (SORT(*)(.didat$7))'
   R_CRT_XC='KEEP (*(SORT(.CRT$XC*)))  /* C initialization */'
   R_CRT_XI='KEEP (*(SORT(.CRT$XI*)))  /* C++ initialization */'
   R_CRT_XL='KEEP (*(SORT(.CRT$XL*)))  /* TLS callbacks */'
@@ -61,6 +73,9 @@ else
   R_IDATA234=
   R_IDATA5=
   R_IDATA67=
+  R_DIDAT234=
+  R_DIDAT5=
+  R_DIDAT67=
   R_CRT_XC=
   R_CRT_XI=
   R_CRT_XL=
@@ -242,6 +257,15 @@ SECTIONS
     ${R_IDATA5}
     ${RELOCATING+__IAT_end__ = .;}
     ${R_IDATA67}
+  }
+
+  .didat ${RELOCATING+BLOCK(__section_alignment__)} :
+  {
+    /* This cannot currently be handled with grouped sections.
+	See pe.em:sort_sections.  */
+    ${R_DIDAT234}
+    ${R_DIDAT5}
+    ${R_DIDAT67}
   }
 
   /* Windows TLS expects .tls\$AAA to be at the start and .tls\$ZZZ to be

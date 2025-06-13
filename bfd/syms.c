@@ -594,6 +594,7 @@ struct section_to_type
    adding entries.  Since it is so short, a linear search is used.  */
 static const struct section_to_type stt[] =
 {
+  {".didat", 'i'},		/* MSVC's .didat (delay import) section */
   {".drectve", 'i'},		/* MSVC's .drective section */
   {".edata", 'e'},		/* MSVC's .edata (export) section */
   {".idata", 'i'},		/* MSVC's .idata (import) section */

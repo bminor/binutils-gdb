@@ -44,6 +44,7 @@
 #include "libcoff.h"
 #include "elf-bfd.h"
 #include "hashtab.h"
+#include "safe-ctype.h"
 
 /* Extract a long section name at STRINDEX and copy it to the bfd objstack.
    Return NULL in case of error.  */
@@ -3120,6 +3121,19 @@ coff_gc_sweep_symbol (struct coff_link_hash_entry *h,
 typedef bool (*gc_sweep_hook_fn)
   (bfd *, struct bfd_link_info *, asection *, const struct internal_reloc *);
 
+static inline bool
+is_subsection (const char *str, const char *prefix)
+{
+  size_t n = strlen (prefix);
+  if (strncmp (str, prefix, n) != 0)
+    return false;
+  if (str[n] == 0)
+    return true;
+  else if (str[n] != '$')
+    return false;
+  return ISDIGIT (str[n + 1]) && str[n + 2] == 0;
+}
+
 static bool
 coff_gc_sweep (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 {
@@ -3141,6 +3155,7 @@ coff_gc_sweep (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 	  else if (startswith (o->name, ".idata")
 		   || startswith (o->name, ".pdata")
 		   || startswith (o->name, ".xdata")
+		   || is_subsection (o->name, ".didat")
 		   || startswith (o->name, ".rsrc"))
 	    o->gc_mark = 1;
 
