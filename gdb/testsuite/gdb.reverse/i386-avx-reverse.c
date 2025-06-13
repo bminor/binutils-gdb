@@ -676,6 +676,29 @@ compare_test ()
   return 0; /* end compare_test  */
 }
 
+int
+pack_test ()
+{
+  /* start pack_test.  */
+  /* Using GDB, load these values onto registers for testing.
+     xmm0.v4_float = {0, 1.5, 2, 0}
+     xmm1.v4_float = {0, 1, 2.5, -1}
+     xmm2.v4_float = {0, 1, 2.5, -1}
+     xmm15.v4_float = {-1, -2, 10, 100}
+     this way it's easy to confirm we're undoing things correctly.  */
+
+  asm volatile ("vpacksswb %xmm1, %xmm2, %xmm0");
+  asm volatile ("vpacksswb %ymm1, %ymm2, %ymm15");
+  asm volatile ("vpackssdw %xmm1, %xmm2, %xmm15");
+  asm volatile ("vpackssdw %ymm1, %ymm2, %ymm0");
+  asm volatile ("vpackuswb %xmm1, %xmm2, %xmm0");
+  asm volatile ("vpackuswb %ymm1, %ymm2, %ymm15");
+  asm volatile ("vpackusdw %xmm1, %xmm2, %xmm15");
+  asm volatile ("vpackusdw %ymm1, %ymm2, %ymm0");
+
+  return 0; /* end pack_test  */
+}
+
 /* This include is used to allocate the dynamic buffer and have
    the pointers aligned to a 32-bit boundary, so we can test instructions
    that require aligned memory.  */
@@ -714,5 +737,6 @@ main ()
   extract_insert_test ();
   blend_test ();
   compare_test ();
+  pack_test ();
   return 0;	/* end of main */
 }

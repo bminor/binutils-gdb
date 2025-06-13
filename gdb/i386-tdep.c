@@ -5118,6 +5118,7 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
     case 0x0d:	/* VPERMILPD with register and VBLENDPD.  */
     case 0x0e:	/* VPBLENDW.  */
     case 0x1a:	/* VBROADCASTF128.  */
+    case 0x2b:	/* VPACKUSDW.  */
     case 0x36:	/* VPERMD.  */
     case 0x40:	/* VPMULLD  */
     case 0x46:	/* VPERM2I128.  */
@@ -5131,6 +5132,9 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
     case 0x5d:	/* VMIN[P|S][S|D]  */
     case 0x5e:	/* VDIV[P|S][S|D]  */
     case 0x5f:	/* VMAX[P|S][S|D]  */
+    case 0x63:	/* VPACKSSWB.  */
+    case 0X67:	/* VPACKUSWB.  */
+    case 0x6b:	/* VPACKSSDW.  */
     case 0x70:	/* VPSHUF[B|D|HW|LW].  */
     case 0x78:	/* VPBROADCASTB  */
     case 0x79:	/* VPBROADCASTW  */

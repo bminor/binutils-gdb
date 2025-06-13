@@ -1077,3 +1077,39 @@ if {[record_full_function "compare"] == true} {
 }
 gdb_test "finish" "Run till exit from.*compare_test.*" \
     "leaving compare"
+
+# Preparation and testing pack instructions.
+gdb_test_no_output \
+    "set \$ymm0.v2_int128 = {0, 0}" "set ymm0 for pack"
+gdb_test_no_output \
+    "set \$ymm1.v16_int16 = {0x1020, 0x1121, 0x1222, 0x1323, 0x1424, 0x1525, 0x1626, 0x1727, 0x1828, 0x1929, 0x1a2a, 0x1b2b, 0x1c2c, 0x1d2d, 0x1e2e, 0x1f2f}" \
+    "set ymm1 for pack"
+gdb_test_no_output \
+    "set \$ymm2.v16_int16 = {0x3040, 0x3141, 0x3242, 0x3343, 0x3444, 0x3545, 0x3646, 0x3747, 0x3848, 0x3949, 0x3a4a, 0x3b4b, 0x3c4c, 0x3d4d, 0x3e4e, 0x3f4f}" \
+    "set ymm2 for pack"
+gdb_test_no_output \
+    "set \$ymm15.v2_int128 = {0, 0}" "set ymm15 for pack"
+
+if {[record_full_function "pack"] == true} {
+    test_one_register "vpackusdw" "ymm0" \
+	"0xffffffffffffffffffffffffffffffff, 0x0"
+    test_one_register "vpackusdw" "ymm15" \
+	"0xffffffffffffffffffffffffffffffff, 0xffffffffffffffffffffffffffffffff"
+    test_one_register "vpackuswb" "ymm15" \
+	"0x7fff7fff7fff7fff7fff7fff7fff7fff, 0x0"
+    test_one_register "vpackuswb" "ymm0" \
+	"0x7fff7fff7fff7fff7fff7fff7fff7fff, 0x7fff7fff7fff7fff7fff7fff7fff7fff"
+    test_one_register "vpackssdw" "ymm0" \
+	"0x7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f, 0x0"
+    test_one_register "vpackssdw" "ymm15" \
+	"0x7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f, 0x7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f"
+    test_one_register "vpacksswb" "ymm15" "0x0, 0x0"
+    test_one_register "vpacksswb" "ymm0" "0x0, 0x0"
+
+    gdb_test "record stop" "Process record is stopped.*" \
+	"delete history for pack_test"
+} else {
+    untested "couldn't run pack tests"
+}
+gdb_test "finish" "Run till exit from.*pack_test.*" \
+    "leaving pack"
