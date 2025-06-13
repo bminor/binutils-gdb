@@ -2827,20 +2827,25 @@ make_delay_head (void)
   if (!no_idata5)
     {
       fprintf (f, "\t.section\t.didat$5\n");
-      /* NULL terminating list.  */
-      if (create_for_pep)
-	fprintf (f, "\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG);
-      else
-	fprintf (f, "\t%s\t0\n", ASM_LONG);
+      if (use_nul_prefixed_import_tables)
+	{
+	  if (create_for_pep)
+	    fprintf (f, "\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG);
+	  else
+	    fprintf (f, "\t%s\t0\n", ASM_LONG);
+	}
       fprintf (f, "__IAT_%s:\n", imp_name_lab);
     }
 
   if (!no_idata4)
     {
       fprintf (f, "\t.section\t.didat$4\n");
-      fprintf (f, "\t%s\t0\n", ASM_LONG);
-      if (create_for_pep)
-	fprintf (f, "\t%s\t0\n", ASM_LONG);
+      if (use_nul_prefixed_import_tables)
+	{
+	  fprintf (f, "\t%s\t0\n", ASM_LONG);
+	  if (create_for_pep)
+	    fprintf (f, "\t%s\t0\n", ASM_LONG);
+	}
       fprintf (f, "__INT_%s:\n", imp_name_lab);
     }
 
