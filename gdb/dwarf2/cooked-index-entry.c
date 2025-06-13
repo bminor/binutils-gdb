@@ -33,6 +33,7 @@ to_string (cooked_index_flag flags)
     MAP_ENUM_FLAG (IS_LINKAGE),
     MAP_ENUM_FLAG (IS_TYPE_DECLARATION),
     MAP_ENUM_FLAG (IS_PARENT_DEFERRED),
+    MAP_ENUM_FLAG (IS_SYNTHESIZED),
   };
 
   return flags.to_string (mapping);
