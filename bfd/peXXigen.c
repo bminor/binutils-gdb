@@ -593,7 +593,7 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
   struct internal_extra_pe_aouthdr *extra = &pe->pe_opthdr;
   PEAOUTHDR *aouthdr_out = (PEAOUTHDR *) out;
   bfd_vma sa, fa, ib;
-  IMAGE_DATA_DIRECTORY idata2, idata5, tls, loadcfg;
+  IMAGE_DATA_DIRECTORY idata2, idata5, didat2, tls, loadcfg;
 
   sa = extra->SectionAlignment;
   fa = extra->FileAlignment;
@@ -601,6 +601,7 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
 
   idata2 = pe->pe_opthdr.DataDirectory[PE_IMPORT_TABLE];
   idata5 = pe->pe_opthdr.DataDirectory[PE_IMPORT_ADDRESS_TABLE];
+  didat2 = pe->pe_opthdr.DataDirectory[PE_DELAY_IMPORT_DESCRIPTOR];
   tls = pe->pe_opthdr.DataDirectory[PE_TLS_TABLE];
   loadcfg = pe->pe_opthdr.DataDirectory[PE_LOAD_CONFIG_TABLE];
 
@@ -651,6 +652,7 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
      a final link is going to be performed, it can overwrite them.  */
   extra->DataDirectory[PE_IMPORT_TABLE]  = idata2;
   extra->DataDirectory[PE_IMPORT_ADDRESS_TABLE] = idata5;
+  extra->DataDirectory[PE_DELAY_IMPORT_DESCRIPTOR] = didat2;
   extra->DataDirectory[PE_TLS_TABLE] = tls;
   extra->DataDirectory[PE_LOAD_CONFIG_TABLE] = loadcfg;
 
@@ -4541,6 +4543,52 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 		 abfd, PE_IMPORT_ADDRESS_TABLE, "__IAT_end__");
 	      result = false;
 	    }
+	}
+    }
+
+  /* The delay import directory.  This is .didat$2 */
+  h1 = coff_link_hash_lookup (coff_hash_table (info),
+			      "__DELAY_IMPORT_DIRECTORY_start__", false, false,
+			      true);
+  if (h1 != NULL
+      && (h1->root.type == bfd_link_hash_defined
+       || h1->root.type == bfd_link_hash_defweak)
+      && h1->root.u.def.section != NULL
+      && h1->root.u.def.section->output_section != NULL)
+    {
+      bfd_vma delay_va;
+
+      delay_va =
+	(h1->root.u.def.value
+	 + h1->root.u.def.section->output_section->vma
+	 + h1->root.u.def.section->output_offset);
+
+      h1 = coff_link_hash_lookup (coff_hash_table (info),
+				  "__DELAY_IMPORT_DIRECTORY_end__", false,
+				  false, true);
+      if (h1 != NULL
+	  && (h1->root.type == bfd_link_hash_defined
+	   || h1->root.type == bfd_link_hash_defweak)
+	  && h1->root.u.def.section != NULL
+	  && h1->root.u.def.section->output_section != NULL)
+	{
+	  pe_data (abfd)->pe_opthdr.DataDirectory[PE_DELAY_IMPORT_DESCRIPTOR].Size =
+	    ((h1->root.u.def.value
+	      + h1->root.u.def.section->output_section->vma
+	      + h1->root.u.def.section->output_offset)
+	     - delay_va);
+	  if (pe_data (abfd)->pe_opthdr.DataDirectory[PE_DELAY_IMPORT_DESCRIPTOR].Size
+	      != 0)
+	    pe_data (abfd)->pe_opthdr.DataDirectory[PE_DELAY_IMPORT_DESCRIPTOR].VirtualAddress =
+	      delay_va - pe_data (abfd)->pe_opthdr.ImageBase;
+	}
+      else
+	{
+	  _bfd_error_handler
+	    (_("%pB: unable to fill in DataDirectory[%d]: %s not defined correctly"),
+	     abfd, PE_DELAY_IMPORT_DESCRIPTOR,
+	     "__DELAY_IMPORT_DIRECTORY_end__");
+	  result = false;
 	}
     }
 
