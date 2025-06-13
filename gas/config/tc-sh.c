@@ -544,6 +544,7 @@ sh_optimize_expr (expressionS *l, operatorT op, expressionS *r)
       add_to_result (l, symval_diff, symval_diff < 0);
       l->X_op = O_constant;
       l->X_add_symbol = 0;
+      l->X_unsigned = 0;
       return 1;
     }
   return 0;

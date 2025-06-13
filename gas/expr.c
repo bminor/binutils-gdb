@@ -632,6 +632,7 @@ integer_constant (int radix, expressionS *expressionP)
       /* Not a small number.  */
       expressionP->X_op = O_big;
       expressionP->X_add_number = number;	/* Number of littlenums.  */
+      expressionP->X_unsigned = 1;
       input_line_pointer--;	/* -> char following number.  */
     }
 }
@@ -707,6 +708,7 @@ mri_char_constant (expressionS *expressionP)
     {
       expressionP->X_op = O_big;
       expressionP->X_add_number = i;
+      expressionP->X_unsigned = 1;
     }
   else
     {
@@ -1164,6 +1166,8 @@ operand (expressionS *expressionP, enum expr_mode mode)
 		      if (generic_bignum[i])
 			break;
 		    }
+
+		expressionP->X_unsigned = 0;
 	      }
 	    else if (op == O_logical_not)
 	      {

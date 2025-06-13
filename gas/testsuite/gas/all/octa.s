@@ -9,3 +9,13 @@
  .octa ~0xffffffff
  .octa 0 - 0x80000000
  .octa 0 - 0xffffffff
+
+ .octa ~0xfffffffffffffff
+ .octa -~0xfffffffffffffff
+ .octa ~-~0xfffffffffffffff
+ .octa -~-~0xfffffffffffffff
+
+ .octa -0xfffffffffffffff
+ .octa ~-0xfffffffffffffff
+ .octa -~-0xfffffffffffffff
+ .octa ~-~-0xfffffffffffffff

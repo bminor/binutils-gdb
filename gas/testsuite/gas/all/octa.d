@@ -14,3 +14,11 @@ Contents of section .data:
  [^ ]* (00000000 ffffffff ffffffff ffffffff|ffffffff ffffffff ffffffff 00000000) .*
  [^ ]* (00000080 ffffffff ffffffff ffffffff|ffffffff ffffffff ffffffff 80000000) .*
  [^ ]* (01000000 ffffffff ffffffff ffffffff|ffffffff ffffffff ffffffff 00000001) .*
+ [^ ]* (00000000 000000f0 ffffffff ffffffff|ffffffff ffffffff f0000000 00000000) .*
+ [^ ]* (00000000 00000010 00000000 00000000|00000000 00000000 10000000 00000000) .*
+ [^ ]* (ffffffff ffffffef ffffffff ffffffff|ffffffff ffffffff efffffff ffffffff) .*
+ [^ ]* (01000000 00000010 00000000 00000000|00000000 00000000 10000000 00000001) .*
+ [^ ]* (01000000 000000f0 ffffffff ffffffff|ffffffff ffffffff f0000000 00000001) .*
+ [^ ]* (feffffff ffffff0f 00000000 00000000|00000000 00000000 0fffffff fffffffe) .*
+ [^ ]* (02000000 000000f0 ffffffff ffffffff|ffffffff ffffffff f0000000 00000002) .*
+ [^ ]* (fdffffff ffffff0f 00000000 00000000|00000000 00000000 0fffffff fffffffd) .*
