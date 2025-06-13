@@ -30,8 +30,8 @@ ah, Class=Reg|Byte, 0, 4, Dw2Inval, Dw2Inval
 ch, Class=Reg|Byte, 0, 5, Dw2Inval, Dw2Inval
 dh, Class=Reg|Byte, 0, 6, Dw2Inval, Dw2Inval
 bh, Class=Reg|Byte, 0, 7, Dw2Inval, Dw2Inval
-axl, Class=Reg|Byte, RegRex64, 0, Dw2Inval, Dw2Inval
-cxl, Class=Reg|Byte, RegRex64, 1, Dw2Inval, Dw2Inval
+axl, Class=Reg|Instance=Accum|Byte, RegRex64, 0, Dw2Inval, Dw2Inval
+cxl, Class=Reg|Instance=RegC|Byte, RegRex64, 1, Dw2Inval, Dw2Inval
 dxl, Class=Reg|Byte, RegRex64, 2, Dw2Inval, Dw2Inval
 bxl, Class=Reg|Byte, RegRex64, 3, Dw2Inval, Dw2Inval
 spl, Class=Reg|Byte, RegRex64, 4, Dw2Inval, Dw2Inval
