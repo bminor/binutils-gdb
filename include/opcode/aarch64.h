@@ -234,6 +234,12 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SME2p1,
   /* SVE2.1 instructions.  */
   AARCH64_FEATURE_SVE2p1,
+  /* SVE_F16F32MM instructions.  */
+  AARCH64_FEATURE_SVE_F16F32MM,
+  /* F8F32MM instructions.  */
+  AARCH64_FEATURE_F8F32MM,
+  /* F8F16MM instructions.  */
+  AARCH64_FEATURE_F8F16MM,
   /* RCPC3 instructions.  */
   AARCH64_FEATURE_RCPC3,
   /* Enhanced Software Step Extension. */

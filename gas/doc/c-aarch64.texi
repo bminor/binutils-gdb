@@ -187,6 +187,10 @@ automatically cause those extensions to be disabled.
  @tab Enable the F32 Matrix Multiply extension
 @item @code{f64mm} @tab @code{sve}
  @tab Enable the F64 Matrix Multiply extension.
+@item @code{f8f16mm} @tab @code{simd} @code{fp8}
+ @tab Enable 8-bit floating-point matrix multiply-accumulate to half-precision instructions.
+@item @code{f8f32mm} @tab @code{simd} @code{fp}
+ @tab Enable 8-bit floating-point matrix multiply-accumulate to single-precision instructions.
 @item @code{fcma} @tab @code{fp16}, @code{simd}
  @tab Enable the complex number SIMD extensions.
 @item @code{flagm} @tab
@@ -305,6 +309,8 @@ automatically cause those extensions to be disabled.
 @tab Enable the SVE B16B16 extension.  These instructions also require either @code{+sve2} or @code{+sme2}.
 @item @code{sve-bfscale} @tab
 @tab Enable the SVE BFSCALE extension. These instructions also require either @code{+sve2} or @code{+sme2}.
+@item @code{sve-f16f32mm} @tab @code{sve}
+@tab Enable the SVE_F16F32MM extension.
 @item @code{sve2} @tab @code{sve}
  @tab Enable SVE2.
 @item @code{sve2-aes} @tab @code{sve2}, @code{aes}

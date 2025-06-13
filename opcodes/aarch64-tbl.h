@@ -2850,6 +2850,16 @@ static const aarch64_feature_set aarch64_feature_sme2p1 =
   AARCH64_FEATURE (SME2p1);
 static const aarch64_feature_set aarch64_feature_sve2p1 =
   AARCH64_FEATURE (SVE2p1);
+static const aarch64_feature_set aarch64_feature_sve_f16f32mm =
+  AARCH64_FEATURE (SVE_F16F32MM);
+static const aarch64_feature_set aarch64_feature_f8f32mm =
+  AARCH64_FEATURE (F8F32MM);
+static const aarch64_feature_set aarch64_feature_f8f32mm_sve2 =
+  AARCH64_FEATURES (2, SVE2, F8F32MM);
+static const aarch64_feature_set aarch64_feature_f8f16mm =
+  AARCH64_FEATURE (F8F16MM);
+static const aarch64_feature_set aarch64_feature_f8f16mm_sve2 =
+  AARCH64_FEATURES (2, SVE2, F8F16MM);
 static const aarch64_feature_set aarch64_feature_rcpc3 =
   AARCH64_FEATURE (RCPC3);
 static const aarch64_feature_set aarch64_feature_cpa =
@@ -2977,6 +2987,11 @@ static const aarch64_feature_set aarch64_feature_sve2p1_sme2p1 =
 #define SME_B16B16  &aarch64_feature_sme_b16b16
 #define SME2p1  &aarch64_feature_sme2p1
 #define SVE2p1  &aarch64_feature_sve2p1
+#define SVE_F16F32MM &aarch64_feature_sve_f16f32mm
+#define F8F32MM  &aarch64_feature_f8f32mm
+#define F8F32MM_SVE2  &aarch64_feature_f8f32mm_sve2
+#define F8F16MM  &aarch64_feature_f8f16mm
+#define F8F16MM_SVE2  &aarch64_feature_f8f16mm_sve2
 #define RCPC3	  &aarch64_feature_rcpc3
 #define CPA	  &aarch64_feature_cpa
 #define CPA_SVE   &aarch64_feature_cpa_sve
@@ -3079,6 +3094,16 @@ static const aarch64_feature_set aarch64_feature_sve2p1_sme2p1 =
 #define SME2p1_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SME2p1, OPS, QUALS, \
     FLAGS | F_STRICT, 0, TIED, NULL }
+#define SVE_F16F32MM_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, OP, SVE_F16F32MM, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define F8F32MM_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, OP, F8F32MM, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define F8F32MM_SVE2_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, OP, F8F32MM_SVE2, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define F8F16MM_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, OP, F8F16MM, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define F8F16MM_SVE2_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, OP, F8F16MM_SVE2, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define SVE2_INSNC(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,CONSTRAINTS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SVE2, OPS, QUALS, \
     FLAGS | F_STRICT, CONSTRAINTS, TIED, NULL }
@@ -6593,6 +6618,15 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   BFLOAT16_INSN ("bfmlalb", 0x2ec0fc00, 0xffe0fc00, bfloat16, OP3 (Vd, Vn, Vm), QL_BFMMLA, 0),
   BFLOAT16_INSN ("bfmlalt", 0x4fc0f000, 0xffc0f400, bfloat16, OP3 (Vd, Vn, Em16), QL_V3BFML4S, 0),
   BFLOAT16_INSN ("bfmlalb", 0x0fc0f000, 0xffc0f400, bfloat16, OP3 (Vd, Vn, Em16), QL_V3BFML4S, 0),
+
+  /* SVE_F16F32 Matrix Multiply-Accumulate. */
+  SVE_F16F32MM_INSN ("fmmla", 0x6420e400, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SHH, 0),
+  /* F8F32 Matrix Multiply-Accumulate. */
+  F8F32MM_INSN ("fmmla", 0x6e80ec00, 0xffe0fc00, asimdmisc, 0, OP3 (Vd, Vn, Vm), QL_V3FMLL4S, 0),
+  F8F32MM_SVE2_INSN ("fmmla", 0x6420e000, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_SBB, 0),
+  /* F8F16 Matrix Multiply-Accumulate. */
+  F8F16MM_INSN ("fmmla", 0x6e00ec00, 0xffe0fc00, asimdmisc, 0, OP3 (Vd, Vn, Vm), QL_V3FML8H, 0),
+  F8F16MM_SVE2_INSN ("fmmla", 0x6460e000, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_H_B, 0),
 
   /* cpyfp cpyfprn cpyfpwn cpyfpn
      cpyfm cpyfmrn cpyfmwn cpyfmn

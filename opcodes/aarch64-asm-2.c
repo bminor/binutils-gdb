@@ -490,7 +490,7 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
     case 1270:	/* movz */
       value = 1270;	/* --> movz.  */
       break;
-    case 3251:	/* clrbhb */
+    case 3256:	/* clrbhb */
     case 1351:	/* autibsp */
     case 1350:	/* autibz */
     case 1349:	/* autiasp */
@@ -530,7 +530,7 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
     case 1306:	/* dsb */
       value = 1306;	/* --> dsb.  */
       break;
-    case 3252:	/* trcit */
+    case 3257:	/* trcit */
     case 1337:	/* brb */
     case 1336:	/* cosp */
     case 1335:	/* cpp */
