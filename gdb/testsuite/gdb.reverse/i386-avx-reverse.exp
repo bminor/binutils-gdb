@@ -1054,3 +1054,26 @@ if {[record_full_function "blend"] == true} {
 }
 gdb_test "finish" "Run till exit from.*blend_test.*" \
     "leaving blend"
+
+# Preparation and testing compare instructions.
+gdb_test_no_output \
+    "set \$xmm0.v4_float = {0, 1.5, 2, 0}" "set ymm0 for compare"
+gdb_test_no_output \
+    "set \$xmm1.v4_float = {0, 1, 2.5, -1}" "set ymm1 for compare"
+gdb_test_no_output \
+    "set \$xmm15.v4_float = {-1, -2, 10, 100}" "set ymm15 for compare"
+gdb_test_no_output "set \$eflags = 2"
+
+if {[record_full_function "compare"] == true} {
+    test_one_general_register "vucomisd" "eflags" "0x203"
+    test_one_general_register "vucomiss" "eflags" "0x202"
+    test_one_general_register "vcomiss" "eflags" "0x203"
+    test_one_general_register "vcomisd" "eflags" "0x202"
+
+    gdb_test "record stop" "Process record is stopped.*" \
+	"delete history for compare_test"
+} else {
+    untested "couldn't run compare tests"
+}
+gdb_test "finish" "Run till exit from.*compare_test.*" \
+    "leaving compare"

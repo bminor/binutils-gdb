@@ -5164,6 +5164,17 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
       }
       break;
 
+    case 0x2e: /* VUCOMIS[S|D].  */
+    case 0x2f: /* VCOMIS[S|D].  */
+      {
+	/* Despite what the manual implies, saying that the first register
+	   will be written to, actual testing shows that the only register
+	   changed is EFLAGS.  */
+	record_full_arch_list_add_reg (ir->regcache,
+				       ir->regmap[X86_RECORD_EFLAGS_REGNUM]);
+	break;
+      }
+
     case 0x77:/* VZEROUPPER  */
       {
 	int num_regs = tdep->num_ymm_regs;

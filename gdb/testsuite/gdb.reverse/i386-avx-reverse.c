@@ -654,6 +654,28 @@ blend_test ()
   return 0; /* end blend_test  */
 }
 
+int
+compare_test ()
+{
+  /* start compare_test.  */
+  /* Using GDB, load these values onto registers for testing.
+     xmm0.v4_float = {0, 1.5, 2, 0}
+     xmm1.v4_float = {0, 1, 2.5, -1}
+     xmm15.v4_float = {-1, -2, 10, 100}
+     eflags = 2
+     eflags can't be set to some values, if we set it to 0, it'll
+     be reset to 2, so set it to that directly to make results less
+     confusing.
+     this way it's easy to confirm we're undoing things correctly.  */
+
+  asm volatile ("vcomisd %xmm0, %xmm1");
+  asm volatile ("vcomiss %xmm15, %xmm1");
+  asm volatile ("vucomiss %xmm1, %xmm15");
+  asm volatile ("vucomisd %xmm15, %xmm0");
+
+  return 0; /* end compare_test  */
+}
+
 /* This include is used to allocate the dynamic buffer and have
    the pointers aligned to a 32-bit boundary, so we can test instructions
    that require aligned memory.  */
@@ -691,5 +713,6 @@ main ()
   permute_test ();
   extract_insert_test ();
   blend_test ();
+  compare_test ();
   return 0;	/* end of main */
 }
