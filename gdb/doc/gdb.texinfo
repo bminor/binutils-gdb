@@ -26996,6 +26996,32 @@ information automatically from the core file, and will show one of the above
 messages depending on whether the synchronous or asynchronous mode is selected.
 @xref{Memory Tagging}. @xref{Memory}.
 
+@subsubsection AArch64 Guarded Control Stack
+@cindex Guarded Control Stack, AArch64
+@cindex GCS, AArch64
+
+When @value{GDBN} is debugging the AArch64 architecture, the program is
+using the feature Guarded Control Stack (GCS), the operating system kernel
+is Linux and it supports GCS, @value{GDBN} will make a couple of special
+registers --- @code{gcs_features_enabled} and @code{gcs_features_locked}
+--- available through the @code{org.gnu.gdb.aarch64.gcs.linux} feature.
+These registers expose some options that can be controlled at runtime and
+emulate the @code{prctl} option @code{PR_SET_SHADOW_STACK_STATUS}.  For
+further information, see the
+@uref{https://www.kernel.org/doc/html/latest/arch/arm64/gcs.html,ignored,
+documentation} in the Linux kernel.
+
+Naturally the Guarded Control Stack pointer at @code{EL0} is also
+available, as the @code{gcspr} register.
+
+To aid debugging, @value{GDBN} will note when SIGSEGV signals are generated
+as a result of a Guarded Control Stack error:
+
+@smallexample
+Program received signal SIGSEGV, Segmentation fault
+Guarded Control Stack error.
+@end smallexample
+
 @node x86
 @subsection x86
 
@@ -49602,6 +49628,63 @@ of bytes.
 @end itemize
 
 Extra registers are allowed in this feature, but they will not affect
+@value{GDBN}.
+
+@subsubsection AArch64 GCS registers feature
+
+The @samp{org.gnu.gdb.aarch64.gcs} feature is optional.  If present, it
+means the target supports Guarded Control Stacks and must contain the
+following register:
+
+@itemize @minus
+
+@item
+@code{gcspr}, which points to the thread's Guarded Control Stack.  It is 64
+bits in size and has a type of @samp{data_ptr}.
+
+@end itemize
+
+The @samp{org.gnu.gdb.aarch64.gcs.linux} feature is optional.  If present,
+then the @samp{org.gnu.gdb.aarch64.gcs} feature must also be present.  The
+@samp{org.gnu.gdb.aarch64.gcs.linux} feature represents facilities provided
+by the Linux kernel for GCS support and should contain the following:
+
+@itemize @minus
+
+@item
+@code{gcs_features_enabled} shows the features currently enabled via the
+prctl or ptrace system calls.  It is represented as if it were a 64-bit
+register with a custom flags type.
+
+@item
+@code{gcs_features_locked} shows the features currently locked via the
+prctl or ptrace system calls.  It is represented as if it were a 64-bit
+register with a custom flags type.
+
+@end itemize
+
+The custom flags type allows @value{GDBN} to print a human-friendly
+representation of the contents of @code{gcs_features_enabled} and
+@code{gcs_features_locked} and should contain:
+
+@itemize @minus
+
+@item
+@code{PR_SHADOW_STACK_ENABLE}
+
+@item
+@code{PR_SHADOW_STACK_WRITE}
+
+@item
+@code{PR_SHADOW_STACK_PUSH}
+
+@end itemize
+
+For further information, see the
+@uref{https://www.kernel.org/doc/html/latest/arch/arm64/gcs.html,ignored,
+documentation} in the Linux kernel.
+
+Extra registers are allowed in these features, but they will not affect
 @value{GDBN}.
 
 @node Alpha Features
