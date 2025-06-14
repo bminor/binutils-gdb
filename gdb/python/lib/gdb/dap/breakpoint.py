@@ -326,7 +326,7 @@ def _rewrite_fn_breakpoint(
     }
 
 
-@request("setFunctionBreakpoints")
+@request("setFunctionBreakpoints", expect_stopped=False)
 @capability("supportsFunctionBreakpoints")
 def set_fn_breakpoint(*, breakpoints: Sequence, **args):
     specs = [_rewrite_fn_breakpoint(**bp) for bp in breakpoints]
@@ -359,7 +359,7 @@ def _rewrite_insn_breakpoint(
     }
 
 
-@request("setInstructionBreakpoints")
+@request("setInstructionBreakpoints", expect_stopped=False)
 @capability("supportsInstructionBreakpoints")
 def set_insn_breakpoints(
     *, breakpoints: Sequence, offset: Optional[int] = None, **args
@@ -410,7 +410,7 @@ def _rewrite_exception_breakpoint(
     }
 
 
-@request("setExceptionBreakpoints")
+@request("setExceptionBreakpoints", expect_stopped=False)
 @capability("supportsExceptionFilterOptions")
 @capability(
     "exceptionBreakpointFilters",
