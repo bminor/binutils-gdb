@@ -35,7 +35,7 @@ extern "C" {
 #undef  CGEN_DIS_HASH_SIZE
 #define CGEN_DIS_HASH_SIZE 256
 #undef  CGEN_DIS_HASH
-#define CGEN_DIS_HASH(buffer, value) (((unsigned char *) (buffer))[0] >> 2)
+#define CGEN_DIS_HASH(buffer, value) ((value >> 26) & 0xff)
 
 /* Check applicability of instructions against machines.  */
 #define CGEN_VALIDATE_INSN_SUPPORTED
