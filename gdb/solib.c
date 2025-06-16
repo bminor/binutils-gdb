@@ -1163,8 +1163,8 @@ info_linker_namespace_command (const char *pattern, int from_tty)
   /* This command only really makes sense for inferiors that support
      linker namespaces, so we can leave early.  */
   if (ops->num_active_namespaces == nullptr)
-    error (_("Current inferior does not support linker namespaces." \
-	     "Use \"info sharedlibrary\" instead"));
+    error (_("Current inferior does not support linker namespaces.  "
+	     "Use \"info sharedlibrary\" instead."));
 
   struct ui_out *uiout = current_uiout;
   std::vector<std::pair<int, std::vector<const solib *>>> all_solibs_to_print;
