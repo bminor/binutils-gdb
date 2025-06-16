@@ -367,7 +367,7 @@ frv_current_sos ()
 	      break;
 	    }
 
-	  auto &sop = sos.emplace_back ();
+	  auto &sop = sos.emplace_back (frv_so_ops);
 	  auto li = std::make_unique<lm_info_frv> ();
 	  li->map = loadmap;
 	  li->got_value = got_addr;

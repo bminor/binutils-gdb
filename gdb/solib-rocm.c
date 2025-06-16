@@ -210,7 +210,7 @@ solibs_from_rocm_sos (const std::vector<rocm_so> &sos)
 
   for (const rocm_so &so : sos)
     {
-      auto &newobj = dst.emplace_back ();
+      auto &newobj = dst.emplace_back (rocm_solib_ops);
 
       newobj.lm_info = std::make_unique<lm_info_svr4> (*so.lm_info);
       newobj.name = so.name;

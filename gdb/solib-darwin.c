@@ -250,7 +250,7 @@ darwin_current_sos ()
 	break;
 
       /* Create and fill the new struct solib element.  */
-      auto &newobj = sos.emplace_back ();
+      auto &newobj = sos.emplace_back (darwin_so_ops);
 
       auto li = std::make_unique<lm_info_darwin> ();
 

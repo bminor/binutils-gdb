@@ -584,7 +584,7 @@ dsbt_current_sos (void)
 	      break;
 	    }
 
-	  auto &sop = sos.emplace_back ();
+	  auto &sop = sos.emplace_back (dsbt_so_ops);
 	  auto li = std::make_unique<lm_info_dsbt> ();
 	  li->map = loadmap;
 	  /* Fetch the name.  */

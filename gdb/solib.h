@@ -54,8 +54,19 @@ struct lm_info
 
 using lm_info_up = std::unique_ptr<lm_info>;
 
+struct solib_ops;
+
 struct solib : intrusive_list_node<solib>
 {
+  /* Constructor
+
+     OPS is the solib_ops implementation providing this solib.  */
+  explicit solib (const solib_ops &ops) : m_ops (&ops) {}
+
+  /* Return the solib_ops implementation providing this solib.  */
+  const solib_ops &ops () const
+  { return *m_ops; }
+
   /* Free symbol-file related contents of SO and reset for possible reloading
      of SO.  If we have opened a BFD for SO, close it.  If we have placed SO's
      sections in some target's section table, the caller is responsible for
@@ -111,6 +122,10 @@ struct solib : intrusive_list_node<solib>
      that supports outputting multiple segments once the related code
      supports them.  */
   CORE_ADDR addr_low = 0, addr_high = 0;
+
+private:
+  /* The solib_ops responsible for this solib.  */
+  const solib_ops *m_ops;
 };
 
 /* A unique pointer to an solib.  */

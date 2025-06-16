@@ -245,7 +245,7 @@ solib_target_current_sos (void)
   /* Build a struct solib for each entry on the list.  */
   for (lm_info_target_up &info : library_list)
     {
-      auto &new_solib = sos.emplace_back ();
+      auto &new_solib = sos.emplace_back (solib_target_so_ops);
 
       /* We don't need a copy of the name in INFO anymore.  */
       new_solib.name = std::move (info->name);
