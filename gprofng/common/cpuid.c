@@ -48,7 +48,9 @@ __get_cpuid (unsigned int op ATTRIBUTE_UNUSED, unsigned int *eax,
 #include <sched.h>
 #include <sys/syscall.h>
 #include <unistd.h>
+#ifdef HAVE_ASM_HWPROBE_H
 #include <asm/hwprobe.h>
+#endif
 #endif
 
 /*
@@ -188,7 +190,7 @@ get_cpuid_info ()
       break;
     }
 #elif defined(__riscv)
-  #ifndef __riscv_hwprobe
+  #if !defined(__riscv_hwprobe) || !defined(HAVE_ASM_HWPROBE_H)
 	  cpi->cpi_vendor = 0;
 	  cpi->cpi_family = 0;
 	  cpi->cpi_model = 0;
@@ -208,7 +210,7 @@ get_cpuid_info ()
 	cpi->cpi_vendor = res.value;
 	cpi->cpi_family = 0;
 	cpi->cpi_model = 0;
-	#endif
+  #endif
 #endif
   return cpi;
 }

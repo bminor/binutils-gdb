@@ -9,6 +9,9 @@
 /* Enable java profiling */
 #undef GPROFNG_JAVA_PROFILING
 
+/* Define to 1 if you have the <asm/hwprobe.h> header file. */
+#undef HAVE_ASM_HWPROBE_H
+
 /* Define to 1 if you have the `clock_gettime' function. */
 #undef HAVE_CLOCK_GETTIME
 

@@ -17165,6 +17165,21 @@ fi
 done
 
 
+# For riscv builds inside incomplete environments such as during intermediate
+# steps of cross toolchain building, or with outdated Linux headers.
+for ac_header in asm/hwprobe.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "asm/hwprobe.h" "ac_cv_header_asm_hwprobe_h" "$ac_includes_default"
+if test "x$ac_cv_header_asm_hwprobe_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_ASM_HWPROBE_H 1
+_ACEOF
+
+fi
+
+done
+
+
 clock_gettime_link=
 # At least for glibc, clock_gettime is in librt.  But don't
 # pull that in if it still doesn't give us the function we want.  This
