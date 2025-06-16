@@ -479,7 +479,7 @@ call this function and will automatically direct the output to the
 relevant stream.
 @end defun
 
-@defun gdb.flush (@r{[}, stream@r{]})
+@defun gdb.flush (@r{[}stream@r{]})
 Flush the buffer of a @value{GDBN} paginated stream so that the
 contents are displayed immediately.  @value{GDBN} will flush the
 contents of a stream automatically when it encounters a newline in the
