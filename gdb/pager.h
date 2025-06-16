@@ -82,6 +82,12 @@ private:
   /* The style applied at the time that wrap_here was called.  */
   ui_file_style m_wrap_style;
 
+  /* The style currently applied to m_stream.  While m_applied_style is the
+     style that is applied to new content added to m_wrap_buffer, the
+     m_stream_style reflects changes that have been flushed to the managed
+     stream.  */
+  ui_file_style m_stream_style;
+
   /* This is temporarily set when paging.  This will cause some
      methods to change their behavior to ignore the wrap buffer.  */
   bool m_paging = false;
