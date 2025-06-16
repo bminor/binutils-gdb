@@ -482,10 +482,8 @@ solib_bfd_open (const char *pathname)
 static int
 solib_map_sections (solib &so)
 {
-  const solib_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
-
   gdb::unique_xmalloc_ptr<char> filename (tilde_expand (so.name.c_str ()));
-  gdb_bfd_ref_ptr abfd (ops->bfd_open (filename.get ()));
+  gdb_bfd_ref_ptr abfd (so.ops ().bfd_open (filename.get ()));
 
   /* If we have a core target then the core target might have some helpful
      information (i.e. build-ids) about the shared libraries we are trying
@@ -495,7 +493,7 @@ solib_map_sections (solib &so)
      If we don't have a core target then this will return an empty struct
      with no hint information, we then lookup the shared library based on
      its filename.  */
-  std::optional<CORE_ADDR> solib_addr = ops->find_solib_addr (so);
+  std::optional<CORE_ADDR> solib_addr = so.ops ().find_solib_addr (so);
   std::optional <const core_target_mapped_file_info> mapped_file_info
     = core_target_find_mapped_file (so.name.c_str (), solib_addr);
 
@@ -519,7 +517,7 @@ solib_map_sections (solib &so)
 	     However, if it was good enough during the mapped file
 	     processing, we assume it's good enough now.  */
 	  if (!mapped_file_info->filename ().empty ())
-	    abfd = ops->bfd_open (mapped_file_info->filename ().c_str ());
+	    abfd = so.ops ().bfd_open (mapped_file_info->filename ().c_str ());
 	  else
 	    abfd = nullptr;
 
@@ -559,7 +557,7 @@ solib_map_sections (solib &so)
       /* Relocate the section binding addresses as recorded in the shared
 	 object's file by the base address to which the object was actually
 	 mapped.  */
-      ops->relocate_section_addresses (so, &p);
+      so.ops ().relocate_section_addresses (so, &p);
 
       /* If the target didn't provide information about the address
 	 range of the shared object, assume we want the location of
@@ -586,8 +584,6 @@ solib_map_sections (solib &so)
 void
 solib::clear ()
 {
-  const solib_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
-
   this->sections.clear ();
   this->abfd = nullptr;
 
@@ -602,8 +598,8 @@ solib::clear ()
   this->name = this->original_name;
 
   /* Do the same for target-specific data.  */
-  if (ops->clear_so != NULL)
-    ops->clear_so (*this);
+  if (this->ops ().clear_so != NULL)
+    this->ops ().clear_so (*this);
 }
 
 lm_info::~lm_info () = default;
@@ -1827,19 +1823,17 @@ static value *
 linker_namespace_make_value (gdbarch *gdbarch, internalvar *var,
 				     void *ignore)
 {
-  const solib_ops *ops = gdbarch_so_ops (gdbarch);
   int nsid = 0;
-  if (ops->find_solib_ns != nullptr)
-    {
-      CORE_ADDR curr_pc = get_frame_pc (get_selected_frame ());
-      for (const solib &so : current_program_space->solibs ())
-	if (solib_contains_address_p (so, curr_pc))
-	  {
-	    nsid = ops->find_solib_ns (so);
-	    break;
-	  }
-    }
+  CORE_ADDR curr_pc = get_frame_pc (get_selected_frame ());
 
+  for (const solib &so : current_program_space->solibs ())
+    if (solib_contains_address_p (so, curr_pc))
+      {
+	if (so.ops ().find_solib_ns != nullptr)
+	  nsid = so.ops ().find_solib_ns (so);
+
+	break;
+      }
 
   /* If the PC is not in an SO, or the solib_ops doesn't support
      linker namespaces, the inferior is in the default namespace.  */
