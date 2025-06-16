@@ -14058,7 +14058,7 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
   h = get_ext_sym_hash_from_cookie (cookie, r_symndx);
   if (h == NULL)
     {
-      /* A corrup tinput file can lead to a situation where the index
+      /* A corrupt input file can lead to a situation where the index
 	 does not reference either a local or an external symbol.  */
       if (r_symndx >= cookie->locsymcount)
 	return NULL;
