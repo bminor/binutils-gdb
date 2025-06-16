@@ -32,7 +32,9 @@ if { [build_executable "failed to build" $testfile $srcfile $opts] == -1 } {
     return
 }
 
-clean_restart
+with_ansi_styling_terminal {
+    clean_restart
+}
 
 gdb_test_no_output "maint set gnu-source-highlight enabled off"
 
@@ -40,16 +42,14 @@ gdb_load $binfile
 
 require {gdb_py_module_available pygments}
 
-with_ansi_styling_terminal {
-    gdb_test_no_output "set style enabled on"
+gdb_test_no_output "set style enabled on"
 
-    gdb_test_multiple "list $line_number" "Styling of c++ keyword try" {
-	-re -wrap "  try\r\n.*" {
-	    # Unstyled.
-	    fail $gdb_test_name
-	}
-	-re -wrap "" {
-	    pass $gdb_test_name
-	}
+gdb_test_multiple "list $line_number" "Styling of c++ keyword try" {
+    -re -wrap "  try\r\n.*" {
+	# Unstyled.
+	fail $gdb_test_name
+    }
+    -re -wrap "" {
+	pass $gdb_test_name
     }
 }
