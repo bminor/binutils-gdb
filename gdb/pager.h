@@ -68,6 +68,16 @@ private:
   /* Flush the wrap buffer to STREAM, if necessary.  */
   void flush_wrap_buffer ();
 
+  /* Set the style of m_stream to STYLE.  */
+  void set_stream_style (const ui_file_style &style)
+  {
+    if (m_stream->can_emit_style_escape () && m_stream_style != style)
+      {
+	m_stream->puts (style.to_ansi ().c_str ());
+	m_stream_style = style;
+      }
+  }
+
   /* Contains characters which are waiting to be output (they have
      already been counted in chars_printed).  */
   std::string m_wrap_buffer;
