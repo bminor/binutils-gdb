@@ -2591,6 +2591,9 @@ amd64_analyze_prologue (gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR current_pc,
   else
     pc = amd64_analyze_stack_align (pc, current_pc, cache);
 
+  if (current_pc <= pc)
+    return current_pc;
+
   return amd64_analyze_frame_setup (gdbarch, pc, current_pc, cache);
 }
 
