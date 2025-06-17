@@ -2581,14 +2581,15 @@ amd64_analyze_prologue (gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR current_pc,
   if (current_pc <= pc)
     return current_pc;
 
+  /* If generated, 'endbr64' will be placed before stack alignment too.  */
+  pc = amd64_skip_endbr (gdbarch, pc);
+  if (current_pc <= pc)
+    return current_pc;
+
   if (gdbarch_ptr_bit (gdbarch) == 32)
     pc = amd64_x32_analyze_stack_align (pc, current_pc, cache);
   else
     pc = amd64_analyze_stack_align (pc, current_pc, cache);
-
-  pc = amd64_skip_endbr (gdbarch, pc);
-  if (current_pc <= pc)
-    return current_pc;
 
   return amd64_analyze_frame_setup (gdbarch, pc, current_pc, cache);
 }
