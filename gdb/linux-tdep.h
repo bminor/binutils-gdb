@@ -117,4 +117,11 @@ extern CORE_ADDR linux_get_hwcap2 ();
 extern struct link_map_offsets *linux_ilp32_fetch_link_map_offsets ();
 extern struct link_map_offsets *linux_lp64_fetch_link_map_offsets ();
 
+/* Returns true if ADDR belongs to a shadow stack memory range.  If this
+   is the case, assign the shadow stack memory range to RANGE
+   [start_address, end_address).  */
+
+extern bool linux_address_in_shadow_stack_mem_range
+  (CORE_ADDR addr, std::pair<CORE_ADDR, CORE_ADDR> *range);
+
 #endif /* GDB_LINUX_TDEP_H */
