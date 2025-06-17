@@ -2585,6 +2585,17 @@ proc default_gdb_start { } {
 	    # Output with -q, and bracketed paste mode enabled, see above.
 	    verbose "GDB initialized."
 	}
+	-re "^\033\\\[6n$gdb_prompt $" {
+	    # With MSYS2 and TERM={xterm,ansi}, I get:
+	    #
+	    #   builtin_spawn gdb -q ...
+	    #   ^[[6n(gdb)
+	    #
+	    # We set TERM to dumb by default to avoid this, but some
+	    # test-cases set TERM to xterm or ansi, in which case we get this
+	    # output.
+	    verbose "GDB initialized."
+	}
 	-re "$gdb_prompt $"	{
 	    perror "GDB never initialized."
 	    unset gdb_spawn_id
@@ -7530,6 +7541,22 @@ proc default_gdb_init { test_file_name } {
     setenv LC_ALL C
     setenv LC_CTYPE C
     setenv LANG C
+
+    # With MSYS2 and TERM={xterm,ansi}, I get:
+    #
+    #   builtin_spawn gdb -q ...
+    #   ^[[6n(gdb)
+    #
+    # While we're addressing this in default_gdb_start, this is not specific
+    # to gdb, other tools produce the same CSI sequence, and consequently we
+    # run into trouble in other places (like get_compiler_info).
+    #
+    # Set TERM to dumb to prevent the '^[[6n' from occurring.
+    #
+    # We could do this only for ishost *-*-mingw*, but that introduces
+    # inconsistency between platforms, with test-cases passing on one platform
+    # but failing on the other.  So, we do this for all platforms.
+    setenv TERM dumb
 
     # Don't let a .inputrc file or an existing setting of INPUTRC mess
     # up the test results.  Certain tests (style tests and TUI tests)
