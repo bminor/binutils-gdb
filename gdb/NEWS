@@ -80,6 +80,9 @@ qExecAndArgs
      Use gdb.StyleParameterSet(NAME) to create 'set style NAME ...'
      and 'show style NAME ...' parameters.
 
+  ** The gdb.write() function now takes an additional, optional,
+     'style' argument, which can be used to style the output.
+
 *** Changes in GDB 17
 
 * Debugging Linux programs that use x86-64 or x86-64 with 32-bit pointer

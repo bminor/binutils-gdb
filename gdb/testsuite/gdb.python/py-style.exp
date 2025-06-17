@@ -340,3 +340,32 @@ gdb_test_no_output "python input_text = \"a totally different string that is als
 gdb_test "python print(output_text)" \
     "^this is a unique string that is unlikely to appear elsewhere 12345" \
     "check the output_text is still valid"
+
+# Test gdb.write passing in a style.  Define a helper function to
+# ensure all output is flushed before we return to the prompt.
+gdb_test_multiline "create function to call gdb.write then flush" \
+    "python" "" \
+    "def write_and_flush(*args, **kwargs):" "" \
+    "  gdb.write(*args, **kwargs)" "" \
+    "  gdb.write(\"\\n\")" "" \
+    "  gdb.flush(gdb.STDOUT)" "" \
+    "end" ""
+
+gdb_test "python write_and_flush(\"some text\")" \
+    "^some text" "unstyled text, no style passed"
+
+gdb_test "python write_and_flush(\"some text\", style=None)" \
+    "^some text" "unstyled text, pass style as None"
+
+gdb_test "python write_and_flush(\"some text\", style=filename_style)" \
+    "^\033\\\[34;41;2;23;24;27msome text\033\\\[m" \
+    "styled output, pass style by keyword"
+
+gdb_test "python write_and_flush(\"some text\", gdb.STDOUT, filename_style)" \
+    "^\033\\\[34;41;2;23;24;27msome text\033\\\[m" \
+    "styled output, pass style by position"
+
+gdb_test "python write_and_flush(\"some text\", style='filename')" \
+    [multi_line \
+	 "Python Exception <class 'TypeError'>: 'style' argument must be gdb\\.Style or None, not str\\." \
+	 "Error occurred in Python: 'style' argument must be gdb\\.Style or None, not str\\."]

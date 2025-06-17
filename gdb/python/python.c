@@ -1567,12 +1567,22 @@ static PyObject *
 gdbpy_write (PyObject *self, PyObject *args, PyObject *kw)
 {
   const char *arg;
-  static const char *keywords[] = { "text", "stream", NULL };
+  static const char *keywords[] = { "text", "stream", "style", nullptr };
   int stream_type = 0;
+  PyObject *style_obj = Py_None;
 
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "s|i", keywords, &arg,
-					&stream_type))
-    return NULL;
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "s|iO", keywords, &arg,
+					&stream_type, &style_obj))
+    return nullptr;
+
+  if (style_obj != Py_None && !gdbpy_is_style (style_obj))
+    {
+      PyErr_Format
+	(PyExc_TypeError,
+	 _("'style' argument must be gdb.Style or None, not %s."),
+	 Py_TYPE (style_obj)->tp_name);
+      return nullptr;
+    }
 
   try
     {
@@ -1590,7 +1600,17 @@ gdbpy_write (PyObject *self, PyObject *args, PyObject *kw)
 	  break;
 	}
 
-      gdb_puts (arg, stream);
+      if (style_obj == Py_None)
+	gdb_puts (arg, stream);
+      else
+	{
+	  std::optional<ui_file_style> style
+	    = gdbpy_style_object_to_ui_file_style (style_obj);
+	  if (!style.has_value ())
+	    return nullptr;
+
+	  fputs_styled (arg, style.value (), stream);
+	}
     }
   catch (const gdb_exception &except)
     {

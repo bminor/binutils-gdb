@@ -570,6 +570,20 @@ struct symtab_and_line *sal_object_to_symtab_and_line (PyObject *obj);
 frame_info_ptr frame_object_to_frame_info (PyObject *frame_obj);
 struct gdbarch *arch_object_to_gdbarch (PyObject *obj);
 
+/* Return true if OBJ is a gdb.Style object.  OBJ must not be NULL.  */
+
+extern bool gdbpy_is_style (PyObject *obj);
+
+/* Return the ui_file_style from OBJ, a gdb.Style object.  OBJ must not be
+   NULL.
+
+   It is possible that OBJ is a gdb.Style object, but the underlying style
+   cannot be fetched for some reason.  If this happens then a Python error
+   is set and an empty optional is returned.  */
+
+extern std::optional<ui_file_style>
+  gdbpy_style_object_to_ui_file_style (PyObject *obj);
+
 extern PyObject *gdbpy_execute_mi_command (PyObject *self, PyObject *args,
 					   PyObject *kw);
 

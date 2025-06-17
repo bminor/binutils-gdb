@@ -131,8 +131,64 @@ proc test_pagination { type mode } {
     }
 }
 
+# Run the command 'style-fill-v2' which fills the screen with output and
+# triggers the pagination prompt.  Check that styling is applied correctly
+# to the output.  This v2 command is exercising passing a style to
+# gdb.write() rather than passing the escape sequence for the style.
+proc test_pagination_v2 { } {
+    set saw_bad_color_handling false
+    set expected_restore_color ""
+    set last_color ""
+    gdb_test_multiple "style-fill-v2" "" {
+	-re "^style-fill-v2\r\n" {
+	    exp_continue
+	}
+
+	-re "^(${::any_color}\033\\\[m)(${::any_color})$::str\033\\\[m" {
+	    # After a continuation prompt GDB will restore the previous
+	    # color, and then we immediately switch to a new color.
+	    set restored_color $expect_out(1,string)
+	    if { $restored_color ne $expected_restore_color } {
+		set saw_bad_color_handling true
+	    }
+	    set last_color $expect_out(2,string)
+	    exp_continue
+	}
+
+	-re "^(${::any_color})$::str\033\\\[m" {
+	    # This pattern matches printing STR in all cases that are not
+	    # immediately after a pagination prompt.  In this case there is
+	    # a single escape sequence to set the color.
+	    set last_color $expect_out(1,string)
+	    exp_continue
+	}
+
+	-re "^$::pagination_prompt$" {
+	    # After a pagination prompt we expect GDB to restore the last
+	    # color, but this will then be disabled due to a styled
+	    # gdb.write emitting a return to default style escape sequence.
+	    set expected_restore_color "$last_color\033\[m"
+
+	    # Send '\n' to view more output.
+	    send_gdb "\n"
+	    exp_continue
+	}
+
+	-re "^\r\n" {
+	    # The matches the newline sent to the continuation prompt.
+	    exp_continue
+	}
+
+	-re "^$::gdb_prompt $" {
+	    gdb_assert { !$saw_bad_color_handling } $gdb_test_name
+	}
+    }
+}
+
 foreach_with_prefix type { color style } {
     foreach_with_prefix mode { write print } {
 	test_pagination $type $mode
     }
 }
+
+test_pagination_v2

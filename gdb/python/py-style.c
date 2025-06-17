@@ -353,6 +353,15 @@ stylepy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 
 
 
+/* See python-internal.h.   */
+
+bool
+gdbpy_is_style (PyObject *obj)
+{
+  gdb_assert (obj != nullptr);
+  return PyObject_TypeCheck (obj, &style_object_type);
+}
+
 /* Return the ui_file_style for STYLEPY.  If the style cannot be found,
    then return an empty optional, and set a Python error.  */
 
@@ -367,6 +376,18 @@ stylepy_to_style (style_object *stylepy)
     style.emplace (stylepy->style);
 
   return style;
+}
+
+/* See python-internal.h.   */
+
+std::optional<ui_file_style>
+gdbpy_style_object_to_ui_file_style (PyObject *obj)
+{
+  gdb_assert (obj != nullptr);
+  gdb_assert (gdbpy_is_style (obj));
+
+  style_object *style_obj = (style_object *) obj;
+  return stylepy_to_style (style_obj);
 }
 
 /* Implementation of gdb.Style.escape_sequence().  Return the escape
