@@ -263,6 +263,7 @@ struct gdbarch
   gdbarch_use_target_description_from_corefile_notes_ftype *use_target_description_from_corefile_notes = default_use_target_description_from_corefile_notes;
   gdbarch_core_parse_exec_context_ftype *core_parse_exec_context = default_core_parse_exec_context;
   gdbarch_shadow_stack_push_ftype *shadow_stack_push = nullptr;
+  gdbarch_get_shadow_stack_pointer_ftype *get_shadow_stack_pointer = default_get_shadow_stack_pointer;
 };
 
 /* Create a new ``struct gdbarch'' based on information provided by
@@ -537,6 +538,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of use_target_description_from_corefile_notes, invalid_p == 0.  */
   /* Skip verify of core_parse_exec_context, invalid_p == 0.  */
   /* Skip verify of shadow_stack_push, has predicate.  */
+  /* Skip verify of get_shadow_stack_pointer, invalid_p == 0.  */
   if (!log.empty ())
     internal_error (_("verify_gdbarch: the following are invalid ...%s"),
 		    log.c_str ());
@@ -1414,6 +1416,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   gdb_printf (file,
 	      "gdbarch_dump: shadow_stack_push = <%s>\n",
 	      host_address_to_string (gdbarch->shadow_stack_push));
+  gdb_printf (file,
+	      "gdbarch_dump: get_shadow_stack_pointer = <%s>\n",
+	      host_address_to_string (gdbarch->get_shadow_stack_pointer));
   if (gdbarch->dump_tdep != NULL)
     gdbarch->dump_tdep (gdbarch, file);
 }
@@ -5582,4 +5587,21 @@ set_gdbarch_shadow_stack_push (struct gdbarch *gdbarch,
 			       gdbarch_shadow_stack_push_ftype shadow_stack_push)
 {
   gdbarch->shadow_stack_push = shadow_stack_push;
+}
+
+std::optional<CORE_ADDR>
+gdbarch_get_shadow_stack_pointer (struct gdbarch *gdbarch, regcache *regcache, bool &shadow_stack_enabled)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->get_shadow_stack_pointer != NULL);
+  if (gdbarch_debug >= 2)
+    gdb_printf (gdb_stdlog, "gdbarch_get_shadow_stack_pointer called\n");
+  return gdbarch->get_shadow_stack_pointer (gdbarch, regcache, shadow_stack_enabled);
+}
+
+void
+set_gdbarch_get_shadow_stack_pointer (struct gdbarch *gdbarch,
+				      gdbarch_get_shadow_stack_pointer_ftype get_shadow_stack_pointer)
+{
+  gdbarch->get_shadow_stack_pointer = get_shadow_stack_pointer;
 }
