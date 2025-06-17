@@ -515,8 +515,8 @@ struct dwarf2_per_bfd
   const char *filename () const
   { return bfd_get_filename (this->obfd); }
 
-  /* Return the CU given its index.  */
-  dwarf2_per_cu *get_cu (int index) const
+  /* Return the unit given its index.  */
+  dwarf2_per_cu *get_unit (int index) const
   {
     return this->all_units[index].get ();
   }
@@ -525,7 +525,7 @@ struct dwarf2_per_bfd
   dwarf2_per_cu *get_index_cu (int index) const
   {
     if (this->all_comp_units_index_cus.empty ())
-      return get_cu (index);
+      return get_unit (index);
 
     return this->all_comp_units_index_cus[index];
   }
@@ -710,7 +710,7 @@ public:
 
   dwarf2_per_cu *operator* () const
   {
-    return m_per_bfd->get_cu (m_index);
+    return m_per_bfd->get_unit (m_index);
   }
 
   bool operator== (const all_units_iterator &other) const

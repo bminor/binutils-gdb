@@ -1901,7 +1901,7 @@ dwarf2_base_index_functions::print_stats (struct objfile *objfile,
 
   for (int i = 0; i < total; ++i)
     {
-      dwarf2_per_cu *per_cu = per_objfile->per_bfd->get_cu (i);
+      dwarf2_per_cu *per_cu = per_objfile->per_bfd->get_unit (i);
 
       if (!per_objfile->symtab_set_p (per_cu))
 	++count;

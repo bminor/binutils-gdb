@@ -241,7 +241,7 @@ mapped_debug_names_reader::scan_one_entry (const char *name,
 		continue;
 	      }
 	  }
-	  per_cu = per_objfile->per_bfd->get_cu (ull);
+	  per_cu = per_objfile->per_bfd->get_unit (ull);
 	  break;
 	case DW_IDX_type_unit:
 	  /* Don't crash on bad data.  */
@@ -255,7 +255,7 @@ mapped_debug_names_reader::scan_one_entry (const char *name,
 	    }
 	  {
 	    int nr_cus = per_objfile->per_bfd->all_comp_units.size ();
-	    per_cu = per_objfile->per_bfd->get_cu (nr_cus + ull);
+	    per_cu = per_objfile->per_bfd->get_unit (nr_cus + ull);
 	  }
 	  break;
 	case DW_IDX_die_offset:
@@ -263,7 +263,7 @@ mapped_debug_names_reader::scan_one_entry (const char *name,
 	  /* In a per-CU index (as opposed to a per-module index), index
 	     entries without CU attribute implicitly refer to the single CU.  */
 	  if (per_cu == NULL)
-	    per_cu = per_objfile->per_bfd->get_cu (0);
+	    per_cu = per_objfile->per_bfd->get_unit (0);
 	  break;
 	case DW_IDX_parent:
 	  parent = ull;
@@ -466,7 +466,7 @@ check_signatured_type_table_from_debug_names
 
       bool found = false;
       for (; j < nr_cus_tus; j++)
-	if (per_bfd->get_cu (j)->sect_off == sect_off)
+	if (per_bfd->get_unit (j)->sect_off == sect_off)
 	  {
 	    found = true;
 	    break;
@@ -477,7 +477,7 @@ check_signatured_type_table_from_debug_names
 		     " ignoring .debug_names."));
 	  return false;
 	}
-      per_bfd->all_comp_units_index_tus.push_back (per_bfd->get_cu (j));
+      per_bfd->all_comp_units_index_tus.push_back (per_bfd->get_unit (j));
     }
   return true;
 }
@@ -719,7 +719,7 @@ check_cus_from_debug_names_list (dwarf2_per_bfd *per_bfd,
 			      map.dwarf5_byte_order));
 	  bool found = false;
 	  for (; j < nr_cus; j++)
-	    if (per_bfd->get_cu (j)->sect_off == sect_off)
+	    if (per_bfd->get_unit (j)->sect_off == sect_off)
 	      {
 		found = true;
 		break;
@@ -730,7 +730,7 @@ check_cus_from_debug_names_list (dwarf2_per_bfd *per_bfd,
 			 " ignoring .debug_names."));
 	      return false;
 	    }
-	  per_bfd->all_comp_units_index_cus.push_back (per_bfd->get_cu (j));
+	  per_bfd->all_comp_units_index_cus.push_back (per_bfd->get_unit (j));
 	}
       return true;
     }
@@ -749,7 +749,7 @@ check_cus_from_debug_names_list (dwarf2_per_bfd *per_bfd,
 			 (map.cu_table_reordered + i * map.offset_size,
 			  map.offset_size,
 			  map.dwarf5_byte_order));
-      if (sect_off != per_bfd->get_cu (i)->sect_off)
+      if (sect_off != per_bfd->get_unit (i)->sect_off)
 	{
 	  warning (_("Section .debug_names has incorrect entry in CU table,"
 		     " ignoring .debug_names."));
