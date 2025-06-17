@@ -269,6 +269,9 @@ if ![info exists INTERNAL_GDBFLAGS] {
     }
 
     set INTERNAL_GDBFLAGS [append_gdb_data_directory_option $INTERNAL_GDBFLAGS]
+
+    # Handle the case that "interactive-mode auto" reports off.
+    append INTERNAL_GDBFLAGS { -iex "set interactive-mode on"}
 }
 
 # The variable gdb_prompt is a regexp which matches the gdb prompt.
