@@ -32,6 +32,7 @@
 #include "symtab.h"
 #include "tramp-frame.h"
 #include "trad-frame.h"
+#include "dwarf2/frame.h"
 #include "target.h"
 #include "target/target.h"
 #include "expop.h"
@@ -2561,6 +2562,54 @@ aarch64_linux_get_shadow_stack_pointer (gdbarch *gdbarch, regcache *regcache,
   return gcspr;
 }
 
+/* Implement Guarded Control Stack Pointer Register unwinding.  For each
+   previous GCS pointer check if its address is still in the GCS memory
+   range.  If it's outside the range set the returned value to unavailable,
+   otherwise return a value containing the new GCS pointer.  */
+
+static value *
+aarch64_linux_dwarf2_prev_gcspr (const frame_info_ptr &this_frame,
+				 void **this_cache, int regnum)
+{
+  value *v = frame_unwind_got_register (this_frame, regnum, regnum);
+  gdb_assert (v != nullptr);
+
+  gdbarch *gdbarch = get_frame_arch (this_frame);
+
+  if (v->entirely_available () && !v->optimized_out ())
+    {
+      int size = register_size (gdbarch, regnum);
+      bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+      CORE_ADDR gcspr = extract_unsigned_integer (v->contents_all ().data (),
+						  size, byte_order);
+
+      /* Starting with v6.13, the Linux kernel supports Guarded Control
+	 Stack.  Using /proc/PID/smaps we can only check if the current
+	 GCSPR points to GCS memory.  Only if this is the case a valid
+	 previous GCS pointer can be calculated.  */
+      std::pair<CORE_ADDR, CORE_ADDR> range;
+      if (linux_address_in_shadow_stack_mem_range (gcspr, &range))
+	{
+	  /* The GCS grows downwards.  To compute the previous GCS pointer,
+	     we need to increment the GCSPR.  */
+	  CORE_ADDR new_gcspr = gcspr + 8;
+
+	  /* If NEW_GCSPR still points within the current GCS memory range
+	     we consider it to be valid.  */
+	  if (new_gcspr < range.second)
+	    return frame_unwind_got_address (this_frame, regnum, new_gcspr);
+	}
+    }
+
+  /* Return a value which is marked as unavailable in case we could not
+     calculate a valid previous GCS pointer.  */
+  value *retval
+    = value::allocate_register (get_next_frame_sentinel_okay (this_frame),
+				regnum, register_type (gdbarch, regnum));
+  retval->mark_bytes_unavailable (0, retval->type ()->length ());
+  return retval;
+}
+
 /* AArch64 Linux implementation of the report_signal_info gdbarch
    hook.  Displays information about possible memory tag violations.  */
 
@@ -3138,8 +3187,11 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 			    aarch64_use_target_description_from_corefile_notes);
 
   if (tdep->has_gcs_linux ())
-    set_gdbarch_get_shadow_stack_pointer (gdbarch,
+    {
+      set_gdbarch_get_shadow_stack_pointer (gdbarch,
 					aarch64_linux_get_shadow_stack_pointer);
+      tdep->fn_prev_gcspr = aarch64_linux_dwarf2_prev_gcspr;
+    }
 }
 
 #if GDB_SELF_TEST

@@ -1408,6 +1408,12 @@ aarch64_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 	  return;
 	}
     }
+  if (tdep->has_gcs () && tdep->fn_prev_gcspr != nullptr
+      && regnum == tdep->gcs_reg_base)
+    {
+      reg->how = DWARF2_FRAME_REG_FN;
+      reg->loc.fn = tdep->fn_prev_gcspr;
+    }
 }
 
 /* Implement the execute_dwarf_cfa_vendor_op method.  */
