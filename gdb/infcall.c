@@ -1448,10 +1448,16 @@ call_function_by_hand_dummy (struct value *function,
   /* Create the dummy stack frame.  Pass in the call dummy address as,
      presumably, the ABI code knows where, in the call dummy, the
      return address should be pointed.  */
-  sp = gdbarch_push_dummy_call (gdbarch, function,
-				get_thread_regcache (inferior_thread ()),
-				bp_addr, args.size (), args.data (),
-				sp, return_method, struct_addr);
+  regcache *regcache = get_thread_regcache (inferior_thread ());
+  sp = gdbarch_push_dummy_call (gdbarch, function, regcache, bp_addr,
+				args.size (), args.data (), sp,
+				return_method, struct_addr);
+
+  /* Push the return address of the inferior (bp_addr) on the shadow stack
+     and update the shadow stack pointer.  As we don't execute a call
+     instruction to start the inferior we need to handle this manually.  */
+  if (gdbarch_shadow_stack_push_p (gdbarch))
+    gdbarch_shadow_stack_push (gdbarch, bp_addr, regcache);
 
   /* Set up a frame ID for the dummy frame so we can pass it to
      set_momentary_breakpoint.  We need to give the breakpoint a frame
