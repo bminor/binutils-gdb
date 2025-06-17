@@ -4988,13 +4988,6 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
 	}
       break;
 
-    case 0x17:	/* VEXTRACTPS.  */
-      i386_record_modrm (ir);
-      record_full_arch_list_add_reg (ir->regcache,
-				     ir->regmap[X86_RECORD_REAX_REGNUM
-						+ ir->rm]);
-      break;
-
     case 0x19:	/* VBROADCASTSD and VEXTRACTF128.  */
     case 0x39:	/* VEXTRACTI128.  */
       i386_record_modrm (ir);
@@ -5035,13 +5028,13 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
 
     case 0x14:	/* VPEXTRB and VUNPCKL[PS|PD].  */
     case 0x15:	/* VPEXTRW (to memory) and VUNPCKH [PS|PD].  */
-    case 0x16:	/* VPEXTR[D|Q] and VPERMPS.  */
+    case 0x16:	/* VPEXTR[D|Q], VPERMPS, VMOVLHPS and VMOVHP[S|D] to reg.  */
       {
 	i386_record_modrm (ir);
 	/* All vpextr instructions in this case use map_select == 3,
-	   while vpermps and vunpck have map_select equal to 2 and 1,
-	   respectively.  The opcode 0xc5 is for vpextr, but uses
-	   map_select == 1, but due to other inconsistencies with
+	   while vpermps has map_select == 2 and the other instructions
+	   have map_select == 1.  The opcode 0xc5 is for vpextr, but also
+	   uses map_select == 1, but due to other inconsistencies with
 	   the other vpextr instructions, it is in a separate case to
 	   avoid making this even more of a mess.  */
 	if (ir->map_select == 3)
@@ -5116,6 +5109,20 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
 						+ ir->reg]);
       break;
 
+    case 0x17:	/* VEXTRACTPS and VMOVHP[S|D] to memory.  */
+    case 0x13:	/* VMOVLPD to memory.  */
+      i386_record_modrm (ir);
+      if (ir->map_select == 1) /* This is the VMOV family.  */
+	{
+	  ir->ot = 3;
+	  i386_record_lea_modrm (ir);
+	}
+      else
+	record_full_arch_list_add_reg (ir->regcache,
+				       ir->regmap[X86_RECORD_REAX_REGNUM
+						  + ir->rm]);
+      break;
+
     case 0x00:	/* VSHUFB and VPERMQ.  */
     case 0x01:	/* VPERMPD.  */
     case 0x02:	/* VPBLENDD.  */
@@ -5125,6 +5132,7 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
     case 0x0c:	/* VPERMILPS with register and VBLENDPS.  */
     case 0x0d:	/* VPERMILPD with register and VBLENDPD.  */
     case 0x0e:	/* VPBLENDW.  */
+    case 0x12:	/* VMOVDDUP, VMOVHLPS and VMOVLPD to register.  */
     case 0x1a:	/* VBROADCASTF128.  */
     case 0x2a:	/* VCVTSI2SS.  */
     case 0x2b:	/* VPACKUSDW.  */
@@ -5171,8 +5179,9 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
     case 0xfd:	/* VPADDW  */
     case 0xfe:	/* VPADDD  */
       {
-	/* vpbroadcast and arithmetic operations are differentiated
-	   by map_select, but it doesn't change the recording mechanics.  */
+	/* This set of instructions all share the same exact way to encode
+	   the destination register, so there's no reason to try and
+	   differentiate them.  */
 	i386_record_modrm (ir);
 	int reg_offset = ir->reg + vex_r * 8;
 	gdb_assert (tdep->num_ymm_regs > reg_offset);

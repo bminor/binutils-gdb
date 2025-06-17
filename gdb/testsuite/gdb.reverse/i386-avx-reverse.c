@@ -30,6 +30,18 @@ char global_buf1[] = {0, 0, 0, 0, 0, 0, 0, 0,
 char *dyn_buf0;
 char *dyn_buf1;
 
+  /* Zero memory regions again, so that future tests can update them
+     without worry.  */
+void
+reset_buffers ()
+{
+  for (int i = 0; i < 32; i++)
+    {
+      global_buf1[i] = 0;
+      dyn_buf1[i] = 0;
+    }
+}
+
 int
 vmov_test ()
 {
@@ -167,6 +179,22 @@ vmov_test ()
   asm volatile ("vmovapd %0, %%ymm15" : : "m"(*dyn_buf1));
   asm volatile ("vmovapd %%xmm0, %0"  : : "m"(*dyn_buf1));
   asm volatile ("vmovaps %%ymm15, %0" : : "m"(*dyn_buf1));
+
+  /* Testing vmov[hl|lh]ps and vmov[h|l]pd.  */
+  asm volatile ("vmovhlps %xmm1, %xmm8, %xmm0");
+  asm volatile ("vmovhlps %xmm1, %xmm2, %xmm15");
+  asm volatile ("vmovlhps %xmm1, %xmm8, %xmm0");
+  asm volatile ("vmovlhps %xmm1, %xmm2, %xmm15");
+
+  asm volatile ("vmovhps %0, %%xmm1, %%xmm0" : : "m"(buf0));
+  asm volatile ("vmovhps %%xmm0, %0" : "=m" (buf1));
+  asm volatile ("vmovhpd %0, %%xmm1, %%xmm15" : : "m"(global_buf0));
+  asm volatile ("vmovhpd %%xmm15, %0" : "=m" (global_buf1));
+  asm volatile ("vmovlpd %0, %%xmm1, %%xmm15" : : "m"(*dyn_buf0));
+  asm volatile ("vmovlpd %%xmm15, %0" : "=m" (*dyn_buf1));
+
+  asm volatile ("vmovddup %xmm1, %xmm15");
+  asm volatile ("vmovddup %ymm2, %ymm0");
 
   /* We have a return statement to deal with
      epilogue in different compilers.  */
@@ -760,6 +788,7 @@ main ()
   asm volatile ("vmovq %0, %%xmm15": : "m" (global_buf1));
 
   vmov_test ();
+  reset_buffers ();
   vpunpck_test ();
   vpbroadcast_test ();
   vzeroupper_test ();

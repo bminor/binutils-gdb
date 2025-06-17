@@ -149,6 +149,33 @@ global decimal
 if {[record_full_function "vmov"] == true} {
     # Now execute backwards, checking all instructions.
 
+    test_one_register "vmovddup" "ymm0" \
+	"0x3736353433323130c004000000000000, 0x0"
+    test_one_register "vmovddup" "ymm15" \
+	"0x2726252423222120, 0x0"
+    test_one_memory "vmovlpd" "dyn_buf1" \
+	"\\\{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x28" \
+	true
+    test_one_register "vmovlpd" "ymm15" \
+	"0x1716151413121110c004000000000000, 0x0"
+    test_one_memory "vmovhpd" "global_buf1" \
+	"\\\{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x18"
+    test_one_register "vmovhpd" "ymm15" \
+	"0xc004000000000000c004000000000000, 0x0"
+    test_one_memory "vmovhps" "buf1" \
+	"\\\{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x38"
+    test_one_register "vmovhps" "ymm0" \
+	"0xc004000000000000c004000000000000, 0x0"
+
+    test_one_register "vmovlhps" "ymm15" \
+	"0x0, 0x0"
+    test_one_register "vmovlhps" "ymm0" \
+	"0x0, 0x0"
+    test_one_register "vmovhlps" "ymm15" \
+	"0x2f2e2d2c2b2a29280000000000000000, 0x2f2e2d2c2b2a29282726252423222120"
+    test_one_register "vmovhlps" "ymm0" \
+	"0x2f2e2d2c2b2a29282726252423222120, 0x0"
+
     # Explicitly test for the start of the array, since the value repeats.
     test_one_memory "vmovaps" "dyn_buf1" \
 	"\\\{0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28" true
@@ -977,7 +1004,7 @@ gdb_test_no_output "set \$rax = 0" "set eax for extract_insert"
 
 if {[record_full_function "extract_insert"] == true} {
     test_one_memory "vpextrw" "global_buf1" \
-	"\\\{0x1, 0x0, 0x2, 0x0, 0x3, 0x0, 0x4, 0x0, 0x18"
+	"\\\{0x1, 0x0, 0x2, 0x0, 0x3, 0x0, 0x4, 0x0 <repeats 25 times>"
     test_one_general_register "vpextrw" "rax" "0x8000700060005"
 
     test_one_register "vpinsrq" "ymm15" \
@@ -990,13 +1017,13 @@ if {[record_full_function "extract_insert"] == true} {
 	"0x80007000600050000cafe00020001, 0x0"
 
     test_one_memory "vpextrq" "global_buf1" \
-	"\\\{0x5, 0x0, 0x6, 0x0, 0x0, 0x0, 0x0, 0x0, 0x18"
+	"\\\{0x5, 0x0, 0x6, 0x0 <repeats 29 times>"
     test_one_general_register "vpextrq" "rax" "0x80007"
     test_one_memory "vpextrd" "global_buf1" \
-	"\\\{0x3, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x18"
+	"\\\{0x3, 0x0 <repeats 31 times>"
     test_one_general_register "vpextrd" "rax" "0x0"
     test_one_memory "vpextrb" "global_buf1" \
-	"\\\{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x18"
+	"\\\{0x0 <repeats 32 times>"
     test_one_general_register "vpextrb" "rax" "0xcafe"
 
     test_one_general_register "vextractps" "eax" "0x0"
