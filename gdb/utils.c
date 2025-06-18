@@ -1702,10 +1702,25 @@ pager_file::puts (const char *linebuffer)
 	  else if (*linebuffer == '\033'
 		   && skip_ansi_escape (linebuffer, &skip_bytes))
 	    {
-	      m_wrap_buffer.append (linebuffer, skip_bytes);
-	      /* Note that we don't consider this a character, so we
+	      /* We don't consider escape sequences as characters, so we
 		 don't increment chars_printed here.  */
-	      linebuffer += skip_bytes;
+
+	      size_t style_len;
+	      ui_file_style style;
+	      if (style.parse (linebuffer, &style_len)
+		  && style_len <= skip_bytes)
+		{
+		  this->emit_style_escape (style);
+
+		  linebuffer += style_len;
+		  skip_bytes -= style_len;
+		}
+
+	      if (skip_bytes > 0)
+		{
+		  m_wrap_buffer.append (linebuffer, skip_bytes);
+		  linebuffer += skip_bytes;
+		}
 	    }
 	  else if (*linebuffer == '\r')
 	    {

@@ -1570,21 +1570,21 @@ gdbpy_write (PyObject *self, PyObject *args, PyObject *kw)
 
   try
     {
+      ui_file *stream;
       switch (stream_type)
 	{
 	case 1:
-	  {
-	    gdb_printf (gdb_stderr, "%s", arg);
-	    break;
-	  }
+	  stream = gdb_stderr;
+	  break;
 	case 2:
-	  {
-	    gdb_printf (gdb_stdlog, "%s", arg);
-	    break;
-	  }
+	  stream = gdb_stdlog;
+	  break;
 	default:
-	  gdb_printf (gdb_stdout, "%s", arg);
+	  stream = gdb_stdout;
+	  break;
 	}
+
+      gdb_puts (arg, stream);
     }
   catch (const gdb_exception &except)
     {
