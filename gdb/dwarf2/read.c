@@ -1906,8 +1906,8 @@ dwarf2_base_index_functions::print_stats (struct objfile *objfile,
       if (!per_objfile->symtab_set_p (per_cu))
 	++count;
     }
-  gdb_printf (_("  Number of read CUs: %d\n"), total - count);
-  gdb_printf (_("  Number of unread CUs: %d\n"), count);
+  gdb_printf (_("  Number of read units: %d\n"), total - count);
+  gdb_printf (_("  Number of unread units: %d\n"), count);
 }
 
 void
