@@ -299,6 +299,8 @@ automatically cause those extensions to be disabled.
  @tab Enable the Scalable Vector Extension.
 @item @code{sve-b16b16} @tab
 @tab Enable the SVE B16B16 extension.  These instructions also require either @code{+sve2} or @code{+sme2}.
+@item @code{sve-bfscale} @tab
+@tab Enable the SVE BFSCALE extension. These instructions also require either @code{+sve2} or @code{+sme2}.
 @item @code{sve2} @tab @code{sve}
  @tab Enable SVE2.
 @item @code{sve2-aes} @tab @code{sve2}, @code{aes}

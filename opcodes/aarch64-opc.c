@@ -1960,6 +1960,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  break;
 
 	case AARCH64_OPND_SME_Zm:
+	case AARCH64_OPND_SME_Zm_17:
 	  if (opnd->reg.regno > 15)
 	    {
 	      set_invalid_regno_error (mismatch_detail, idx, "z", 0, 15);
@@ -4331,6 +4332,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_Zn:
     case AARCH64_OPND_SVE_Zt:
     case AARCH64_OPND_SME_Zm:
+    case AARCH64_OPND_SME_Zm_17:
       if (opnd->qualifier == AARCH64_OPND_QLF_NIL)
        snprintf (buf, size, "%s", style_reg (styler, "z%d", opnd->reg.regno));
       else

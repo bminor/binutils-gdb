@@ -6820,6 +6820,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_Zn:
 	case AARCH64_OPND_SVE_Zt:
 	case AARCH64_OPND_SME_Zm:
+	case AARCH64_OPND_SME_Zm_17:
 	  reg_type = REG_TYPE_Z;
 	  goto vector_reg;
 
@@ -10726,6 +10727,7 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"ite",		AARCH64_FEATURE (ITE), AARCH64_NO_FEATURES},
   {"d128",		AARCH64_FEATURE (D128), D128_FEATURE_DEPS},
   {"sve-b16b16",	AARCH64_FEATURE (SVE_B16B16), AARCH64_NO_FEATURES},
+  {"sve-bfscale",	AARCH64_FEATURE (SVE_BFSCALE), AARCH64_NO_FEATURES},
   {"sme2p1",		AARCH64_FEATURE (SME2p1), AARCH64_FEATURE (SME2)},
   {"sve2p1",		AARCH64_FEATURE (SVE2p1), AARCH64_FEATURE (SVE2)},
   {"rcpc3",		AARCH64_FEATURE (RCPC3), AARCH64_FEATURE (RCPC2)},
@@ -10775,6 +10777,8 @@ static const struct aarch64_virtual_dependency_table aarch64_dependencies[] = {
 					       SVE2p1_SME2p1)},
   {AARCH64_FEATURE (SME), AARCH64_FEATURE (SVE2p1_SME)},
   {AARCH64_FEATURE (SME2), AARCH64_FEATURE (SVE2p1_SME2)},
+  {AARCH64_FEATURE (SVE2), AARCH64_FEATURE (SVE2_SME2)},
+  {AARCH64_FEATURE (SME2), AARCH64_FEATURE (SVE2_SME2)},
   {AARCH64_FEATURE (SME2p1), AARCH64_FEATURE (SVE2p1_SME2p1)},
 };
 

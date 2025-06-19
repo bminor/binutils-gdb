@@ -2853,6 +2853,10 @@ static const aarch64_feature_set aarch64_feature_fp8_sve2 =
   AARCH64_FEATURES (2, FP8, SVE2);
 static const aarch64_feature_set aarch64_feature_fp8_sme2 =
   AARCH64_FEATURES (2, FP8, SME2);
+static const aarch64_feature_set aarch64_feature_sve_bfscale =
+  AARCH64_FEATURES (2, SVE_BFSCALE, SVE2_SME2);
+static const aarch64_feature_set aarch64_feature_sve_bfscale_sme2 =
+  AARCH64_FEATURES (2, SVE_BFSCALE, SME2);
 static const aarch64_feature_set aarch64_feature_lut =
   AARCH64_FEATURE (LUT);
 static const aarch64_feature_set aarch64_feature_lut_sve2 =
@@ -2966,6 +2970,8 @@ static const aarch64_feature_set aarch64_feature_sve2p1_sme2p1 =
 #define FP8	  &aarch64_feature_fp8
 #define FP8_SVE2   &aarch64_feature_fp8_sve2
 #define FP8_SME2   &aarch64_feature_fp8_sme2
+#define SVE_BFSCALE   &aarch64_feature_sve_bfscale
+#define SVE_BFSCALE_SME2   &aarch64_feature_sve_bfscale_sme2
 #define LUT &aarch64_feature_lut
 #define LUT_SVE2 &aarch64_feature_lut_sve2
 #define BRBE		&aarch64_feature_brbe
@@ -3118,6 +3124,10 @@ static const aarch64_feature_set aarch64_feature_sve2p1_sme2p1 =
 #define SVE2BITPERM_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SVE2_BITPERM, OPS, QUALS, \
     FLAGS | F_STRICT, 0, TIED, NULL }
+#define SVE_BFSCALE_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, 0, SVE_BFSCALE, OPS, QUALS, FLAGS, 0, TIED, NULL }
+#define SVE_BFSCALE_SME2_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, 0, SVE_BFSCALE_SME2, OPS, QUALS, FLAGS, 0, TIED, NULL }
 #define BFLOAT16_SVE_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, BFLOAT16_SVE, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define BFLOAT16_SVE_INSNC(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS, CONSTRAINTS, TIED) \
@@ -6392,6 +6402,17 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2_F64F64_INSN ("fmls", 0xc1d00010, 0xfff09838, sme_misc, 0, OP3 (SME_ZA_array_off3_0, SME_Znx2, SME_Zm_INDEX1), OP_SVE_DDD, F_OD (2), 0),
   SME2_F64F64_INSN ("fmls", 0xc1d08010, 0xfff09878, sme_misc, 0, OP3 (SME_ZA_array_off3_0, SME_Znx4, SME_Zm_INDEX1), OP_SVE_DDD, F_OD (4), 0),
 
+  /* SVE_BFSCALE instructions. */
+  SVE_BFSCALE_INSN ("bfscale", 0x65098000, 0xffffe000, sve_misc, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_HMHH, 0, 2),
+  SVE_BFSCALE_SME2_INSN ("bfscale", 0xc120a180, 0xfff0ffe1, sme_misc, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zm), OP_SVE_VVV_H, 0, 1),
+  SVE_BFSCALE_SME2_INSN ("bfscale", 0xc120a980, 0xfff0ffe3, sme_misc, OP3 (SME_Zdnx4, SME_Zdnx4, SME_Zm), OP_SVE_VVV_H, 0, 1),
+  SVE_BFSCALE_SME2_INSN ("bfscale", 0xc120b180, 0xffe1ffe1, sme_misc, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zmx2), OP_SVE_VVV_H, 0, 1),
+  SVE_BFSCALE_SME2_INSN ("bfscale", 0xc120b980, 0xffe3ffe3, sme_misc, OP3 (SME_Zdnx4, SME_Zdnx4, SME_Zmx4), OP_SVE_VVV_H, 0, 1),
+  SVE_BFSCALE_SME2_INSN ("bfmul", 0xc120e800, 0xffe1fc21, sme_misc, OP3 (SME_Zdnx2, SME_Znx2, SME_Zm_17), OP_SVE_VVV_H, 0, 0),
+  SVE_BFSCALE_SME2_INSN ("bfmul", 0xc121e800, 0xffe1fc63, sme_misc, OP3 (SME_Zdnx4, SME_Znx4, SME_Zm_17), OP_SVE_VVV_H, 0, 0),
+  SVE_BFSCALE_SME2_INSN ("bfmul", 0xc120e400, 0xffe1fc21, sme_misc, OP3 (SME_Zdnx2, SME_Znx2, SME_Zmx2), OP_SVE_VVV_H, 0, 0),
+  SVE_BFSCALE_SME2_INSN ("bfmul", 0xc121e400, 0xffe3fc63, sme_misc, OP3 (SME_Zdnx4, SME_Znx4, SME_Zmx4), OP_SVE_VVV_H, 0, 0),
+
   /* SIMD Dot Product (optional in v8.2-A).  */
   DOT_INSN ("udot", 0x2e009400, 0xbf20fc00, dotproduct, OP3 (Vd, Vn, Vm), QL_V3DOT, F_SIZEQ),
   DOT_INSN ("sdot", 0x0e009400, 0xbf20fc00, dotproduct, OP3 (Vd, Vn, Vm), QL_V3DOT, F_SIZEQ),
@@ -7551,6 +7572,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(SVE_REGLIST, sve_aligned_reglist, "SME_Zdnx4", 4 << OPD_F_OD_LSB,	\
       F(FLD_SME_Zdn4), "a list of SVE vector registers")		\
     Y(SVE_REG, regno, "SME_Zm", 0, F(FLD_SME_Zm),			\
+      "an SVE vector register")						\
+    Y(SVE_REG, regno, "SME_Zm_17", 0, F(FLD_SME_Zm2),			\
       "an SVE vector register")						\
     Y(SVE_REGLIST, sve_aligned_reglist, "SME_Zmx2", 2 << OPD_F_OD_LSB,	\
       F(FLD_SME_Zm2), "a list of SVE vector registers")			\

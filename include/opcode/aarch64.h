@@ -264,6 +264,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SME_F8F16,
   /* Non-widening half-precision FP16 to FP16 arithmetic for SME2.  */
   AARCH64_FEATURE_SME_F16F16,
+  /* FEAT_SVE_BFSCALE.  */
+  AARCH64_FEATURE_SVE_BFSCALE,
   /* SVE Z-targeting non-widening BFloat16 instructions.  */
   AARCH64_FEATURE_SVE_B16B16,
   /* SME non-widening BFloat16 instructions.  */
@@ -291,6 +293,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_FP8DOT2_SVE,
   /* +sme-f16f16 or +sme-f8f16  */
   AARCH64_FEATURE_SME_F16F16_F8F16,
+  /* +sve2 or +sme2 */
+  AARCH64_FEATURE_SVE2_SME2,
   /* +sve2p1 or +sme */
   AARCH64_FEATURE_SVE2p1_SME,
   /* +sve2p1 or +sme2 */
@@ -894,6 +898,7 @@ enum aarch64_opnd
   AARCH64_OPND_SME_Zdnx2,	/* SVE vector register list from [4:1]*2.  */
   AARCH64_OPND_SME_Zdnx4,	/* SVE vector register list from [4:2]*4.  */
   AARCH64_OPND_SME_Zm,		/* SVE vector register list in 4-bit Zm.  */
+  AARCH64_OPND_SME_Zm_17,	/* SVE vector register list in [20:17].  */
   AARCH64_OPND_SME_Zmx2,	/* SVE vector register list from [20:17]*2.  */
   AARCH64_OPND_SME_Zmx4,	/* SVE vector register list from [20:18]*4.  */
   AARCH64_OPND_SME_Znx2,	/* SVE vector register list from [9:6]*2.  */
