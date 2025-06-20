@@ -4650,6 +4650,7 @@ copy_section (bfd *ibfd, sec_ptr isection, bfd *obfd)
 	  char *to = (char *) memhunk;
 	  char *end = (char *) memhunk + size;
 	  int i;
+	  bfd_size_type memhunk_size = size;
 
 	  /* If the section address is not exactly divisible by the interleave,
 	     then we must bias the from address.  If the copy_byte is less than
@@ -4669,6 +4670,11 @@ copy_section (bfd *ibfd, sec_ptr isection, bfd *obfd)
 	      }
 
 	  size = (size + interleave - 1 - copy_byte) / interleave * copy_width;
+
+	  /* Don't extend the output section size.  */
+	  if (size > memhunk_size)
+	    size = memhunk_size;
+
 	  osection->lma /= interleave;
 	  if (copy_byte < extra)
 	    osection->lma++;
