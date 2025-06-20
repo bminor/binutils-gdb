@@ -3971,20 +3971,17 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
 	break;
     }
 
-  /* We should always get here with loc == sec->contents + 4, but it is
-     possible to craft bogus SHT_GROUP sections that will cause segfaults
-     in objcopy without checking loc here and in the loop above.  */
-  if (loc == sec->contents)
-    BFD_ASSERT (0);
-  else
+  /* We should always get here with loc == sec->contents + 4.  Return
+     an error for bogus SHT_GROUP sections.  */
+  loc -= 4;
+  if (loc != sec->contents)
     {
-      loc -= 4;
-      if (loc != sec->contents)
-	{
-	  BFD_ASSERT (0);
-	  memset (sec->contents + 4, 0, loc - sec->contents);
-	  loc = sec->contents;
-	}
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: corrupted group section: `%pA'"),
+			  abfd, sec);
+      bfd_set_error (bfd_error_bad_value);
+      *failedptr = true;
+      return;
     }
 
   H_PUT_32 (abfd, sec->flags & SEC_LINK_ONCE ? GRP_COMDAT : 0, loc);
