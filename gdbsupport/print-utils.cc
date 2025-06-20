@@ -304,8 +304,7 @@ core_addr_to_string (const CORE_ADDR addr)
 {
   char *str = get_print_cell ();
 
-  strcpy (str, "0x");
-  strcat (str, phex (addr));
+  xsnprintf (str, PRINT_CELL_SIZE, "0x%s", phex (addr));
   return str;
 }
 
@@ -316,8 +315,7 @@ core_addr_to_string_nz (const CORE_ADDR addr)
 {
   char *str = get_print_cell ();
 
-  strcpy (str, "0x");
-  strcat (str, phex_nz (addr));
+  xsnprintf (str, PRINT_CELL_SIZE, "0x%s", phex_nz (addr));
   return str;
 }
 
