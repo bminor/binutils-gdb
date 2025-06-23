@@ -31,6 +31,7 @@
 #include "gdbsupport/btrace-common.h"
 #include <vector>
 #include "gdbsupport/byte-vector.h"
+#include <sys/stat.h>
 
 struct emit_ops;
 struct process_info;
