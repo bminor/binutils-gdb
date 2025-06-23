@@ -386,7 +386,17 @@ check-all-boards: all $(abs_builddir)/site.exp
 	${abs_srcdir}/make-check-all.sh --keep-results \
 		--host-user "$(GDB_HOST_USERNAME)" \
 		--target-user "$(GDB_TARGET_USERNAME)" \
-		"$(TESTS)"
+		"$(TESTS)" \
+	result=$$?; \
+	if test -d check-all; then \
+	  $(SHELL) $(srcdir)/../../contrib/dg-extract-results.sh \
+	    `find check-all -name gdb.sum -print` > check-all/gdb.sum; \
+	  $(SHELL) $(srcdir)/../../contrib/dg-extract-results.sh -L \
+	    `find check-all -name gdb.log -print` > check-all/gdb.log; \
+	  sed -n '/=== gdb Summary ===/,$$ p' check-all/gdb.sum; \
+	fi; \
+	exit $$result
+
 
 force:;
 
