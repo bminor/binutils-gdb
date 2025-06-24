@@ -1,7 +1,7 @@
 #name: GNU Property (single input, CFI_LP_UNLABELED)
 #source: property-zicfilp-unlabeled.s
 #as: -march=rv64g
-#ld: -shared
+#ld: -shared -melf64lriscv
 #readelf: -n
 
 Displaying notes found in: .note.gnu.property

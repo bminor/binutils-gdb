@@ -2,5 +2,5 @@
 #source: property1.s
 #source: property2.s
 #as: -march=rv64g
-#ld: -shared
+#ld: -shared -melf64lriscv
 #readelf: -n

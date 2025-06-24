@@ -1,6 +1,6 @@
 #name: Unlabled landing pad PLT
 #source: zicfilp-unlabeled-plt.s
-#ld: -shared
+#ld: -shared -melf64lriscv
 #objdump: -dr -j .plt
 #as: -march=rv64gc_zicfilp
 
