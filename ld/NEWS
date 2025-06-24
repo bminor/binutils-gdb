@@ -1,5 +1,8 @@
 -*- text -*-
 
+* On RISC-V, add new PLT formats, and GNU property merge rules for zicfiss and
+  zicfilp extensions.
+
 * The linker's --stats option can take an optional argument which if used is
   interpreted as a filename into which resource usage information should be
   stored.  As an alternative mechanism the LD_STATS environment variable can

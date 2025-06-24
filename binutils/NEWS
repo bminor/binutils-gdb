@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Readelf now recognizes RISC-V GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS and
+  GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED for zicfiss and zicfilp
+  extensions.
+
 * For RISC-V dis-assembler, the definition of mapping symbol $x is changed,
   so the file needs to be rebuilt since 2.45 once used .option arch directives.
 
