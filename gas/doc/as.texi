@@ -260,7 +260,8 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--sectname-subst}]
  [@b{--size-check=[error|warning]}]
  [@b{--statistics}]
- [@b{-v}] [@b{-version}] [@b{--version}]
+ [@b{-v}] [@b{--verbose}]
+ [@b{-version}] [@b{--version}]
  [@b{-W}] [@b{--no-warn}] [@b{--warn}] [@b{--fatal-warnings}]
  [@b{-w}] [@b{-x}]
  [@b{-Z}] [@b{@@@var{FILE}}]
@@ -975,10 +976,11 @@ assembly.
 Remove local absolute symbols from the outgoing symbol table.
 
 @item -v
-@itemx -version
+@itemx --verbose
 Print the @command{as} version.
 
 @item --version
+@itemx -version
 Print the @command{as} version and exit.
 
 @item -W
