@@ -8,11 +8,13 @@
   to have the same ISA as elf architecture attribute.  Once used .option arch
   directives, the file need to be rebuilt since 2.45.
 
-* Add support for RISC-V privileged version 1.13, Profiles.
+* Add support for RISC-V privileged version 1.13, profiles 20/22/23, and
+  .bfloat16 directive.
 
 * Add support for RISC-V standard extensions:
   ssqosid v1.0, ssnpm v1.0, smnpm v1.0, smmpm v1.0, sspm v1.0, supm v1.0,
-  sha v1.0, zce v1.0, smcdeleg v1.0, ssccfg v1.0, svvptc v1.0.
+  sha v1.0, zce v1.0, smcdeleg v1.0, ssccfg v1.0, svvptc v1.0, zilsd v1.0,
+  zclsd v1.0, smrnmi v1.0 instruction.
 
 * Add support for RISC-V vendor extensions:
   T-Head: xtheadvdot v1.0.
