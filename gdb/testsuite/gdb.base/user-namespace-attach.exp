@@ -56,10 +56,22 @@ proc run_test { flags } {
 	set prefix ""
     }
 
+    set unshare_cmd "unshare $flags"
 
+    # Run '/bin/true' using UNSHARE_CMD.  If the flags in UNSHARE_CMD
+    # aren't supported then this will fail, this means we shouldn't
+    # spawn the command with our test executable and try attaching.
+    #
+    # This will also fail if /bin/true isn't present, or doesn't work
+    # as we expect.  But this should be fine for many targets.
+    set res [remote_exec target "$unshare_cmd /bin/true"]
+    if { [lindex $res 0] != 0 } {
+	unsupported "unshare flags not supported"
+	return
+    }
 
     set inferior_spawn_id \
-	[spawn_wait_for_attach [list "unshare $flags $::binfile"]]
+	[spawn_wait_for_attach [list "$unshare_cmd $::binfile"]]
     if { $inferior_spawn_id == -1 } {
 	unsupported "failed to spawn for attach"
 	return
