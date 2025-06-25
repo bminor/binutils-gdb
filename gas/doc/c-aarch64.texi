@@ -247,6 +247,8 @@ automatically cause those extensions to be disabled.
  @tab Enable Privileged Access Never support.
 @item @code{pauth} @tab
  @tab Enable Pointer Authentication.
+@item @code{pops} @tab
+ @tab Enable Point of Physical Storage.
 @item @code{predres} @tab
  @tab Enable the Execution and Data and Prediction instructions.
 @item @code{predres2} @tab @code{predres}

@@ -294,6 +294,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_V9_5A,
   /* FPRCVT instructions.  */
   AARCH64_FEATURE_FPRCVT,
+  /* Point of Physical Storage.  */
+  AARCH64_FEATURE_PoPS,
 
   /* Virtual features.  These are used to gate instructions that are enabled
      by either of two (or more) sets of command line flags.  */
