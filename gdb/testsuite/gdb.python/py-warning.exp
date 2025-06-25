@@ -40,7 +40,24 @@ gdb_test "python gdb.warning(\"\")" \
 	 "Error occurred in Python: Empty text string passed to gdb\\.warning"]
 
 # Missing argument gives an error.
-gdb_test "python gdb.warning()" \
+set re1 \
     [multi_line \
-	 "Python Exception <class 'TypeError'>: function missing required argument 'text' \\(pos 1\\)" \
-	 "Error occurred in Python: function missing required argument 'text' \\(pos 1\\)"]
+	 [string_to_regexp \
+	      [concat \
+		   "Python Exception <class 'TypeError'>:" \
+		   "function missing required argument 'text' (pos 1)"]] \
+	 [string_to_regexp \
+	      [concat \
+		   "Error occurred in Python:" \
+		   "function missing required argument 'text' (pos 1)"]]]
+set re2 \
+    [multi_line \
+	 [string_to_regexp \
+	      [concat \
+		   "Python Exception <class 'TypeError'>:" \
+		   "Required argument 'text' (pos 1) not found"]] \
+	 [string_to_regexp \
+	      [concat \
+		   "Error occurred in Python:" \
+		   "Required argument 'text' (pos 1) not found"]]]
+gdb_test "python gdb.warning()" $re1|$re2
