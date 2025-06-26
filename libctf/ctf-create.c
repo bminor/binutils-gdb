@@ -788,7 +788,7 @@ ctf_add_struct_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
   size_t initial_vlen = sizeof (ctf_lmember_t) * INITIAL_VLEN;
 
   /* Promote root-visible forwards to structs.  */
-  if (name != NULL)
+  if (name != NULL && flag == CTF_ADD_ROOT)
     type = ctf_lookup_by_rawname (fp, CTF_K_STRUCT, name);
 
   /* Prohibit promotion if this type was ctf_open()ed.  */
@@ -832,7 +832,7 @@ ctf_add_union_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
   size_t initial_vlen = sizeof (ctf_lmember_t) * INITIAL_VLEN;
 
   /* Promote root-visible forwards to unions.  */
-  if (name != NULL)
+  if (name != NULL && flag == CTF_ADD_ROOT)
     type = ctf_lookup_by_rawname (fp, CTF_K_UNION, name);
 
   /* Prohibit promotion if this type was ctf_open()ed.  */
@@ -875,7 +875,7 @@ ctf_add_enum (ctf_dict_t *fp, uint32_t flag, const char *name)
   size_t initial_vlen = sizeof (ctf_enum_t) * INITIAL_VLEN;
 
   /* Promote root-visible forwards to enums.  */
-  if (name != NULL)
+  if (name != NULL && flag == CTF_ADD_ROOT)
     type = ctf_lookup_by_rawname (fp, CTF_K_ENUM, name);
 
   /* Prohibit promotion if this type was ctf_open()ed.  */
