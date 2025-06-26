@@ -288,13 +288,27 @@ mipsnbsd_cannot_store_register (struct gdbarch *gdbarch, int regno)
 	  || regno == mips_regnum (gdbarch)->fp_implementation_revision);
 }
 
-/* Shared library support.  */
+/* solib_ops for ILP32 NetBSD/MIPS systems.  */
 
-/* NetBSD/mips uses a slightly different `struct link_map' than the
-   other NetBSD platforms.  */
+struct mips_nbsd_ilp32_svr4_solib_ops : public svr4_solib_ops
+{
+  /* NetBSD/MIPS uses a slightly different `struct link_map' than the
+     other NetBSD platforms.  */
+  link_map_offsets *fetch_link_map_offsets () const override;
+};
 
-static struct link_map_offsets *
-mipsnbsd_ilp32_fetch_link_map_offsets (void)
+/* Return a new solib_ops for ILP32 NetBSD/MIPS systems.  */
+
+static solib_ops_up
+make_mips_nbsd_ilp32_svr4_solib_ops ()
+{
+  return std::make_unique<mips_nbsd_ilp32_svr4_solib_ops> ();
+}
+
+/* See mips_nbsd_ilp32_svr4_solib_ops.  */
+
+link_map_offsets *
+mips_nbsd_ilp32_svr4_solib_ops::fetch_link_map_offsets () const
 {
   static struct link_map_offsets lmo;
   static struct link_map_offsets *lmp = NULL;
@@ -322,8 +336,27 @@ mipsnbsd_ilp32_fetch_link_map_offsets (void)
   return lmp;
 }
 
-static struct link_map_offsets *
-mipsnbsd_lp64_fetch_link_map_offsets (void)
+/* solib_ops for LP64 NetBSD/MIPS systems.  */
+
+struct mips_nbsd_lp64_svr4_solib_ops : public svr4_solib_ops
+{
+  /* NetBSD/MIPS uses a slightly different `struct link_map' than the
+     other NetBSD platforms.  */
+  link_map_offsets *fetch_link_map_offsets () const override;
+};
+
+/* Return a new solib_ops for LP64 NetBSD/MIPS systems.  */
+
+static solib_ops_up
+make_mips_nbsd_lp64_svr4_solib_ops ()
+{
+  return std::make_unique<mips_nbsd_lp64_svr4_solib_ops> ();
+}
+
+/* See mips_nbsd_lp64_svr4_solib_ops.  */
+
+link_map_offsets *
+mips_nbsd_lp64_svr4_solib_ops::fetch_link_map_offsets () const
 {
   static struct link_map_offsets lmo;
   static struct link_map_offsets *lmp = NULL;
@@ -369,10 +402,9 @@ mipsnbsd_init_abi (struct gdbarch_info info,
   set_gdbarch_software_single_step (gdbarch, mips_software_single_step);
 
   /* NetBSD/mips has SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, (gdbarch_ptr_bit (gdbarch) == 32 ?
-	       mipsnbsd_ilp32_fetch_link_map_offsets :
-	       mipsnbsd_lp64_fetch_link_map_offsets));
+  set_solib_svr4_ops (gdbarch, (gdbarch_ptr_bit (gdbarch) == 32
+				? make_mips_nbsd_ilp32_svr4_solib_ops
+				: make_mips_nbsd_lp64_svr4_solib_ops));
 }
 
 INIT_GDB_FILE (mipsnbsd_tdep)

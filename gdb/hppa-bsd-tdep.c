@@ -128,8 +128,7 @@ hppabsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_skip_trampoline_code (gdbarch, hppa_skip_trampoline_code);
 
   /* OpenBSD and NetBSD use SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_ops (gdbarch, make_svr4_ilp32_solib_ops);
 
   /* Hook in the DWARF CFI frame unwinder.  */
   dwarf2_frame_set_init_reg (gdbarch, hppabsd_dwarf2_frame_init_reg);

@@ -1383,7 +1383,7 @@ follow_exec (ptid_t ptid, const char *exec_file_target)
   target_find_description ();
 
   current_program_space->set_solib_ops
-    (*gdbarch_so_ops (following_inferior->arch ()));
+    (gdbarch_make_solib_ops (following_inferior->arch ()));
   gdb::observers::inferior_execd.notify (execing_inferior, following_inferior);
 
   breakpoint_re_set ();

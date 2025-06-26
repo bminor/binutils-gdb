@@ -862,10 +862,25 @@ windows_get_siginfo_type (struct gdbarch *gdbarch)
   return siginfo_type;
 }
 
+/* solib_ops for Windows systems.  */
+
+struct windows_solib_ops : target_solib_ops
+{
+  void create_inferior_hook (int from_tty) const override;
+};
+
+/* Return a new solib_ops for Windows systems.  */
+
+static solib_ops_up
+make_windows_solib_ops ()
+{
+  return std::make_unique<windows_solib_ops> ();
+}
+
 /* Implement the "solib_create_inferior_hook" solib_ops method.  */
 
-static void
-windows_solib_create_inferior_hook (int from_tty)
+void
+windows_solib_ops::create_inferior_hook (int from_tty) const
 {
   CORE_ADDR exec_base = 0;
 
@@ -910,8 +925,6 @@ windows_solib_create_inferior_hook (int from_tty)
     }
 }
 
-static solib_ops windows_so_ops;
-
 /* Common parts for gdbarch initialization for the Windows and Cygwin OS
    ABIs.  */
 
@@ -928,10 +941,7 @@ windows_init_abi_common (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_iterate_over_objfiles_in_search_order
     (gdbarch, windows_iterate_over_objfiles_in_search_order);
 
-  windows_so_ops = solib_target_so_ops;
-  windows_so_ops.solib_create_inferior_hook
-    = windows_solib_create_inferior_hook;
-  set_gdbarch_so_ops (gdbarch, &windows_so_ops);
+  set_gdbarch_make_solib_ops (gdbarch, make_windows_solib_ops);
 
   set_gdbarch_get_siginfo_type (gdbarch, windows_get_siginfo_type);
 }

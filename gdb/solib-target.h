@@ -20,7 +20,19 @@
 #ifndef GDB_SOLIB_TARGET_H
 #define GDB_SOLIB_TARGET_H
 
-struct solib_ops;
-extern const solib_ops solib_target_so_ops;
+#include "solib.h"
+
+/* solib_ops for systems fetching solibs from the target.  */
+
+struct target_solib_ops : solib_ops
+{
+  void relocate_section_addresses (solib &so, target_section *) const override;
+  owning_intrusive_list<solib> current_sos () const override;
+  bool in_dynsym_resolve_code (CORE_ADDR pc) const override;
+};
+
+/* Return a new solib_ops for systems fetching solibs from the target.  */
+
+solib_ops_up make_target_solib_ops ();
 
 #endif /* GDB_SOLIB_TARGET_H */

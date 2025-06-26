@@ -22,6 +22,7 @@
 
 #include "bfd.h"
 #include "displaced-stepping.h"
+#include "solib.h"
 
 struct inferior;
 struct regcache;
@@ -111,10 +112,5 @@ extern CORE_ADDR linux_get_hwcap2 (const std::optional<gdb::byte_vector> &auxv,
 /* Same as the above, but obtain all the inputs from the current inferior.  */
 
 extern CORE_ADDR linux_get_hwcap2 ();
-
-/* Fetch (and possibly build) an appropriate `struct link_map_offsets'
-   for ILP32 and LP64 Linux systems.  */
-extern struct link_map_offsets *linux_ilp32_fetch_link_map_offsets ();
-extern struct link_map_offsets *linux_lp64_fetch_link_map_offsets ();
 
 #endif /* GDB_LINUX_TDEP_H */

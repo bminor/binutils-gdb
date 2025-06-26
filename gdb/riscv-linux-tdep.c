@@ -20,6 +20,7 @@
 #include "osabi.h"
 #include "glibc-tdep.h"
 #include "linux-tdep.h"
+#include "solib-svr4-linux.h"
 #include "svr4-tls-tdep.h"
 #include "solib-svr4.h"
 #include "regset.h"
@@ -512,10 +513,9 @@ riscv_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_software_single_step (gdbarch, riscv_software_single_step);
 
-  set_solib_svr4_fetch_link_map_offsets (gdbarch,
-					 (riscv_isa_xlen (gdbarch) == 4
-					  ? linux_ilp32_fetch_link_map_offsets
-					  : linux_lp64_fetch_link_map_offsets));
+  set_solib_svr4_ops (gdbarch, (riscv_isa_xlen (gdbarch) == 4
+				? make_linux_ilp32_svr4_solib_ops
+				: make_linux_lp64_svr4_solib_ops));
 
   /* GNU/Linux uses SVR4-style shared libraries.  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);

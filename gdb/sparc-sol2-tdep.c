@@ -207,8 +207,7 @@ sparc32_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Solaris has SVR4-style shared libraries...  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_ops (gdbarch, make_svr4_ilp32_solib_ops);
 
   /* ...which means that we need some special handling when doing
      prologue analysis.  */

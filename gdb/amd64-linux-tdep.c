@@ -33,6 +33,7 @@
 #include "amd64-linux-tdep.h"
 #include "i386-linux-tdep.h"
 #include "linux-tdep.h"
+#include "solib-svr4-linux.h"
 #include "svr4-tls-tdep.h"
 #include "gdbsupport/x86-xstate.h"
 #include "inferior.h"
@@ -2130,8 +2131,7 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->i386_syscall_record = amd64_linux_syscall_record;
 
   /* GNU/Linux uses SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, linux_lp64_fetch_link_map_offsets);
+  set_solib_svr4_ops (gdbarch, make_linux_lp64_svr4_solib_ops);
 
   /* Register DTrace handlers.  */
   set_gdbarch_dtrace_parse_probe_argument (gdbarch, amd64_dtrace_parse_probe_argument);
@@ -2344,8 +2344,7 @@ amd64_x32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->i386_syscall_record = amd64_x32_linux_syscall_record;
 
   /* GNU/Linux uses SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, linux_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_ops (gdbarch, make_linux_ilp32_svr4_solib_ops);
 }
 
 INIT_GDB_FILE (amd64_linux_tdep)

@@ -157,7 +157,7 @@ struct gdbarch
   gdbarch_single_step_through_delay_ftype *single_step_through_delay = nullptr;
   gdbarch_print_insn_ftype *print_insn = default_print_insn;
   gdbarch_skip_trampoline_code_ftype *skip_trampoline_code = generic_skip_trampoline_code;
-  const solib_ops * so_ops = &solib_target_so_ops;
+  gdbarch_make_solib_ops_ftype *make_solib_ops = make_target_solib_ops;
   gdbarch_skip_solib_resolver_ftype *skip_solib_resolver = generic_skip_solib_resolver;
   gdbarch_in_solib_return_trampoline_ftype *in_solib_return_trampoline = generic_in_solib_return_trampoline;
   gdbarch_in_indirect_branch_thunk_ftype *in_indirect_branch_thunk = default_in_indirect_branch_thunk;
@@ -425,7 +425,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of single_step_through_delay, has predicate.  */
   /* Skip verify of print_insn, invalid_p == 0.  */
   /* Skip verify of skip_trampoline_code, invalid_p == 0.  */
-  /* Skip verify of so_ops, invalid_p == 0.  */
+  /* Skip verify of make_solib_ops, invalid_p == 0.  */
   /* Skip verify of skip_solib_resolver, invalid_p == 0.  */
   /* Skip verify of in_solib_return_trampoline, invalid_p == 0.  */
   /* Skip verify of in_indirect_branch_thunk, invalid_p == 0.  */
@@ -966,8 +966,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
 	      "gdbarch_dump: skip_trampoline_code = <%s>\n",
 	      host_address_to_string (gdbarch->skip_trampoline_code));
   gdb_printf (file,
-	      "gdbarch_dump: so_ops = %s\n",
-	      host_address_to_string (gdbarch->so_ops));
+	      "gdbarch_dump: make_solib_ops = <%s>\n",
+	      host_address_to_string (gdbarch->make_solib_ops));
   gdb_printf (file,
 	      "gdbarch_dump: skip_solib_resolver = <%s>\n",
 	      host_address_to_string (gdbarch->skip_solib_resolver));
@@ -3469,21 +3469,21 @@ set_gdbarch_skip_trampoline_code (struct gdbarch *gdbarch,
   gdbarch->skip_trampoline_code = skip_trampoline_code;
 }
 
-const solib_ops *
-gdbarch_so_ops (struct gdbarch *gdbarch)
+solib_ops_up
+gdbarch_make_solib_ops (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of so_ops, invalid_p == 0.  */
+  gdb_assert (gdbarch->make_solib_ops != NULL);
   if (gdbarch_debug >= 2)
-    gdb_printf (gdb_stdlog, "gdbarch_so_ops called\n");
-  return gdbarch->so_ops;
+    gdb_printf (gdb_stdlog, "gdbarch_make_solib_ops called\n");
+  return gdbarch->make_solib_ops ();
 }
 
 void
-set_gdbarch_so_ops (struct gdbarch *gdbarch,
-		    const solib_ops * so_ops)
+set_gdbarch_make_solib_ops (struct gdbarch *gdbarch,
+			    gdbarch_make_solib_ops_ftype make_solib_ops)
 {
-  gdbarch->so_ops = so_ops;
+  gdbarch->make_solib_ops = make_solib_ops;
 }
 
 CORE_ADDR

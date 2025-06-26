@@ -254,8 +254,7 @@ ppcobsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_return_value (gdbarch, ppc_sysv_abi_broken_return_value);
 
   /* OpenBSD uses SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_ops (gdbarch, make_svr4_ilp32_solib_ops);
 
   set_gdbarch_iterate_over_regset_sections
     (gdbarch, ppcobsd_iterate_over_regset_sections);

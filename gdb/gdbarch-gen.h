@@ -818,10 +818,11 @@ typedef CORE_ADDR (gdbarch_skip_trampoline_code_ftype) (const frame_info_ptr &fr
 extern CORE_ADDR gdbarch_skip_trampoline_code (struct gdbarch *gdbarch, const frame_info_ptr &frame, CORE_ADDR pc);
 extern void set_gdbarch_skip_trampoline_code (struct gdbarch *gdbarch, gdbarch_skip_trampoline_code_ftype *skip_trampoline_code);
 
-/* Vtable of solib operations functions. */
+/* Return a newly-allocated solib_ops object capable of providing the solibs for this architecture. */
 
-extern const solib_ops * gdbarch_so_ops (struct gdbarch *gdbarch);
-extern void set_gdbarch_so_ops (struct gdbarch *gdbarch, const solib_ops * so_ops);
+typedef solib_ops_up (gdbarch_make_solib_ops_ftype) ();
+extern solib_ops_up gdbarch_make_solib_ops (struct gdbarch *gdbarch);
+extern void set_gdbarch_make_solib_ops (struct gdbarch *gdbarch, gdbarch_make_solib_ops_ftype *make_solib_ops);
 
 /* If in_solib_dynsym_resolve_code() returns true, and SKIP_SOLIB_RESOLVER
    evaluates non-zero, this is the address where the debugger will place

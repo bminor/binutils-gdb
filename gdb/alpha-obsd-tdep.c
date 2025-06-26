@@ -109,8 +109,7 @@ alphaobsd_init_abi(struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_software_single_step (gdbarch, alpha_software_single_step);
 
   /* OpenBSD/alpha has SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_lp64_fetch_link_map_offsets);
+  set_solib_svr4_ops (gdbarch, make_svr4_lp64_solib_ops);
   set_gdbarch_skip_solib_resolver (gdbarch, obsd_skip_solib_resolver);
 
   tdep->dynamic_sigtramp_offset = alphaobsd_sigtramp_offset;

@@ -113,7 +113,7 @@ x86_darwin_init_abi_64 (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->jb_pc_offset = 56;
 
-  set_gdbarch_so_ops (gdbarch, &darwin_so_ops);
+  set_gdbarch_make_solib_ops (gdbarch, make_darwin_solib_ops);
 }
 
 INIT_GDB_FILE (amd64_darwin_tdep)

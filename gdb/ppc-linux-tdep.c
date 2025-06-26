@@ -48,6 +48,7 @@
 #include "arch-utils.h"
 #include "xml-syscall.h"
 #include "linux-tdep.h"
+#include "solib-svr4-linux.h"
 #include "svr4-tls-tdep.h"
 #include "linux-record.h"
 #include "record-full.h"
@@ -86,8 +87,6 @@
 #include "features/rs6000/powerpc-e500l.c"
 #include "dwarf2/frame.h"
 
-/* Shared library operations for PowerPC-Linux.  */
-static solib_ops powerpc_so_ops;
 
 /* The syscall's XML filename for PPC and PPC64.  */
 #define XML_SYSCALL_FILENAME_PPC "syscalls/ppc-linux.xml"
@@ -306,16 +305,33 @@ static const struct ppc_insn_pattern powerpc32_plt_stub_so_2[] =
 /* The max number of insns we check using ppc_insns_match_pattern.  */
 #define POWERPC32_PLT_CHECK_LEN (ARRAY_SIZE (powerpc32_plt_stub) - 1)
 
-/* Check if PC is in PLT stub.  For non-secure PLT, stub is in .plt
-   section.  For secure PLT, stub is in .text and we need to check
-   instruction patterns.  */
+/* solib_ops for ILP32 PowerPC/Linux systems.  */
 
-static bool
-powerpc_linux_in_dynsym_resolve_code (CORE_ADDR pc)
+struct ppc_linux_ilp32_svr4_solib_ops : public linux_ilp32_svr4_solib_ops
+{
+  /* Check if PC is in PLT stub.  For non-secure PLT, stub is in .plt
+     section.  For secure PLT, stub is in .text and we need to check
+     instruction patterns.  */
+
+  bool in_dynsym_resolve_code (CORE_ADDR pc) const override;
+};
+
+/* Return a new solib_ops for ILP32 PowerPC/Linux systems.  */
+
+static solib_ops_up
+make_ppc_linux_ilp32_svr4_solib_ops ()
+{
+  return std::make_unique<ppc_linux_ilp32_svr4_solib_ops> ();
+}
+
+/* See ppc_linux_ilp32_svr4_solib_ops.  */
+
+bool
+ppc_linux_ilp32_svr4_solib_ops::in_dynsym_resolve_code (CORE_ADDR pc) const
 {
   /* Check whether PC is in the dynamic linker.  This also checks
      whether it is in the .plt section, used by non-PIC executables.  */
-  if (svr4_in_dynsym_resolve_code (pc))
+  if (linux_ilp32_svr4_solib_ops::in_dynsym_resolve_code (pc))
     return true;
 
   /* Check if we are in the resolver.  */
@@ -2265,8 +2281,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
 
       /* Shared library handling.  */
       set_gdbarch_skip_trampoline_code (gdbarch, ppc_skip_trampoline_code);
-      set_solib_svr4_fetch_link_map_offsets
-	(gdbarch, linux_ilp32_fetch_link_map_offsets);
 
       /* Setting the correct XML syscall filename.  */
       set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_PPC);
@@ -2283,14 +2297,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
       else
 	set_gdbarch_gcore_bfd_target (gdbarch, "elf32-powerpc");
 
-      if (powerpc_so_ops.in_dynsym_resolve_code == NULL)
-	{
-	  powerpc_so_ops = svr4_so_ops;
-	  /* Override dynamic resolve function.  */
-	  powerpc_so_ops.in_dynsym_resolve_code =
-	    powerpc_linux_in_dynsym_resolve_code;
-	}
-      set_gdbarch_so_ops (gdbarch, &powerpc_so_ops);
+      set_solib_svr4_ops (gdbarch, make_ppc_linux_ilp32_svr4_solib_ops);
 
       set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
     }
@@ -2317,8 +2324,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
 
       /* Shared library handling.  */
       set_gdbarch_skip_trampoline_code (gdbarch, ppc64_skip_trampoline_code);
-      set_solib_svr4_fetch_link_map_offsets
-	(gdbarch, linux_lp64_fetch_link_map_offsets);
+      set_solib_svr4_ops (gdbarch, make_linux_lp64_svr4_solib_ops);
 
       /* Setting the correct XML syscall filename.  */
       set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_PPC64);

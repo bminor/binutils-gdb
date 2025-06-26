@@ -25,6 +25,7 @@
 #include "inferior.h"
 #include "linux-record.h"
 #include "linux-tdep.h"
+#include "solib-svr4-linux.h"
 #include "loongarch-tdep.h"
 #include "record-full.h"
 #include "regset.h"
@@ -1145,10 +1146,9 @@ loongarch_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   linux_init_abi (info, gdbarch, 0);
 
-  set_solib_svr4_fetch_link_map_offsets (gdbarch,
-					 info.bfd_arch_info->bits_per_address == 32
-					 ? linux_ilp32_fetch_link_map_offsets
-					 : linux_lp64_fetch_link_map_offsets);
+  set_solib_svr4_ops (gdbarch, (info.bfd_arch_info->bits_per_address == 32
+				? make_linux_ilp32_svr4_solib_ops
+				: make_linux_lp64_svr4_solib_ops));
 
   /* GNU/Linux uses SVR4-style shared libraries.  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);

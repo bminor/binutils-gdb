@@ -21,6 +21,7 @@
 #ifndef GDB_PROGSPACE_H
 #define GDB_PROGSPACE_H
 
+#include "solib.h"
 #include "target.h"
 #include "gdb_bfd.h"
 #include "registry.h"
@@ -234,19 +235,23 @@ struct program_space
   /* Set this program space's solib provider.
 
      The solib provider must be unset prior to calling this method.  */
-  void set_solib_ops (const struct solib_ops &ops)
+  void set_solib_ops (solib_ops_up ops)
   {
     gdb_assert (m_solib_ops == nullptr);
-    m_solib_ops = &ops;
+    m_solib_ops = std::move (ops);
   };
 
-  /* Unset this program space's solib provider.  */
+  /* Unset and free this program space's solib provider.  */
   void unset_solib_ops ()
   { m_solib_ops = nullptr; }
 
+  /* Unset and return this program space's solib provider.  */
+  solib_ops_up release_solib_ops ()
+  { return std::move (m_solib_ops); }
+
   /* Get this program space's solib provider.  */
   const struct solib_ops *solib_ops () const
-  { return m_solib_ops; }
+  { return m_solib_ops.get (); }
 
   /* Return the list of all the solibs in this program space.  */
   owning_intrusive_list<solib> &solibs ()
@@ -373,7 +378,7 @@ private:
   owning_intrusive_list<objfile> m_objfiles_list;
 
   /* solib_ops implementation used to provide solibs in this program space.  */
-  const struct solib_ops *m_solib_ops = nullptr;
+  solib_ops_up m_solib_ops;
 
   /* List of shared objects mapped into this space.  Managed by
      solib.c.  */

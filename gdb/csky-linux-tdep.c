@@ -22,6 +22,7 @@
 #include "osabi.h"
 #include "glibc-tdep.h"
 #include "linux-tdep.h"
+#include "solib-svr4-linux.h"
 #include "gdbarch.h"
 #include "solib-svr4.h"
 #include "regset.h"
@@ -407,8 +408,7 @@ csky_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Shared library handling.  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
   set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
-  set_solib_svr4_fetch_link_map_offsets (gdbarch,
-					 linux_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_ops (gdbarch, make_linux_ilp32_svr4_solib_ops);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,

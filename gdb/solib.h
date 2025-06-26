@@ -133,22 +133,31 @@ using solib_up = std::unique_ptr<solib>;
 
 struct solib_ops
 {
+  virtual ~solib_ops () = default;
+
   /* Adjust the section binding addresses by the base address at
      which the object was actually mapped.  */
-  void (*relocate_section_addresses) (solib &so, target_section *);
+  virtual void relocate_section_addresses (solib &so, target_section *) const
+    = 0;
 
   /* Reset private data structures associated with SO.
      This is called when SO is about to be reloaded.
-     It is also called when SO is about to be freed.  */
-  void (*clear_so) (const solib &so);
+     It is also called when SO is about to be freed.
+
+     Defaults to no-op.  */
+  virtual void clear_so (const solib &so) const {}
 
   /* Free private data structures associated to PSPACE.  This method
      should not free resources associated to individual solib entries,
-     those are cleared by the clear_so method.  */
-  void (*clear_solib) (program_space *pspace);
+     those are cleared by the clear_so method.
 
-  /* Target dependent code to run after child process fork.  */
-  void (*solib_create_inferior_hook) (int from_tty);
+     Defaults to no-op.  */
+  virtual void clear_solib (program_space *pspace) const {}
+
+  /* Target dependent code to run after child process fork.
+
+     Defaults to no-op.  */
+  virtual void create_inferior_hook (int from_tty) const {};
 
   /* Construct a list of the currently loaded shared objects.  This
      list does not include an entry for the main executable file.
@@ -157,45 +166,51 @@ struct solib_ops
      inferior --- we don't examine any of the shared library files
      themselves.  The declaration of `struct solib' says which fields
      we provide values for.  */
-  owning_intrusive_list<solib> (*current_sos) ();
+  virtual owning_intrusive_list<solib> current_sos () const = 0;
 
   /* Find, open, and read the symbols for the main executable.  If
-     FROM_TTY is non-zero, allow messages to be printed.  */
-  int (*open_symbol_file_object) (int from_ttyp);
+     FROM_TTY is non-zero, allow messages to be printed.
+
+     Return true if this was done successfully.  Defaults to false.  */
+  virtual bool open_symbol_file_object (int from_tty) const { return false; }
 
   /* Determine if PC lies in the dynamic symbol resolution code of
-     the run time loader.  */
-  bool (*in_dynsym_resolve_code) (CORE_ADDR pc);
+     the run time loader.
+
+     Defaults to false.  */
+  virtual bool in_dynsym_resolve_code (CORE_ADDR pc) const
+  { return false; };
 
   /* Find and open shared library binary file.  */
-  gdb_bfd_ref_ptr (*bfd_open) (const char *pathname);
+  virtual gdb_bfd_ref_ptr bfd_open (const char *pathname) const;
 
-  /* Given two solib objects, one from the GDB thread list
-     and another from the list returned by current_sos, return 1
-     if they represent the same library.
-     Falls back to using strcmp on ORIGINAL_NAME when set to nullptr.  */
-  int (*same) (const solib &gdb, const solib &inferior);
+  /* Given two solib objects, GDB from the GDB thread list and INFERIOR from the
+     list returned by current_sos, return true if they represent the same library.
+
+     Defaults to comparing the solib original names using filename_cmp.  */
+  virtual bool same (const solib &gdb, const solib &inferior) const;
 
   /* Return whether a region of memory must be kept in a core file
      for shared libraries loaded before "gcore" is used to be
      handled correctly when the core file is loaded.  This only
      applies when the section would otherwise not be kept in the
-     core file (in particular, for readonly sections).  */
-  int (*keep_data_in_core) (CORE_ADDR vaddr,
-			    unsigned long size);
+     core file (in particular, for readonly sections).
 
-  /* Enable or disable optional solib event breakpoints as
-     appropriate.  This should be called whenever
-     stop_on_solib_events is changed.  This pointer can be
-     NULL, in which case no enabling or disabling is necessary
-     for this target.  */
-  void (*update_breakpoints) (void);
+     Defaults to false.  */
+  virtual bool keep_data_in_core (CORE_ADDR vaddr, unsigned long size) const
+  { return false; };
 
-  /* Target-specific processing of solib events that will be
-     performed before solib_add is called.  This pointer can be
-     NULL, in which case no specific preprocessing is necessary
-     for this target.  */
-  void (*handle_event) (void);
+  /* Enable or disable optional solib event breakpoints as appropriate.  This
+     should be called whenever stop_on_solib_events is changed.
+
+     Defaults to no-op.  */
+  virtual void update_breakpoints () const {};
+
+  /* Target-specific processing of solib events that will be performed before
+     solib_add is called.
+
+     Defaults to no-op.  */
+  virtual void handle_event () const {};
 
   /* Return an address within the inferior's address space which is known
      to be part of SO.  If there is no such address, or GDB doesn't know
@@ -210,27 +225,44 @@ struct solib_ops
      mapped file, and thus to a build-id.  GDB can then use this
      information to help locate the shared library objfile, if the objfile
      is not in the expected place (as defined by the shared libraries file
-     name).  */
-  std::optional<CORE_ADDR> (*find_solib_addr) (solib &so);
+     name).
 
-  /* Return which linker namespace contains the current so.
-     If the linker or libc does not support linkage namespaces at all
-     (which is basically all of them but solib-svr4), this function should
-     be set to nullptr, so that "info shared" won't add an unnecessary
-     column.
+     The default implementation of returns an empty option, indicating GDB is
+     unable to find an address within the library SO.  */
+  virtual std::optional<CORE_ADDR> find_solib_addr (solib &so) const
+  { return {}; };
 
-     If the namespace can not be determined (such as when we're stepping
-     though the dynamic linker), this function should throw a
-     gdb_exception_error.  */
-  int (*find_solib_ns) (const solib &so);
+  /* Return true if the linker or libc supports linkage namespaces.
 
-  /* Returns the number of active namespaces in the inferior.  */
-  int (*num_active_namespaces) ();
+     Defaults to false.  */
+  virtual bool supports_namespaces () const { return false; }
+
+  /* Return which linker namespace contains SO.
+
+     The supports_namespaces method must return true for this to be
+     called.
+
+     Throw an error if the namespace can not be determined (such as when we're
+     stepping though the dynamic linker).  */
+  virtual int find_solib_ns (const solib &so) const
+  { gdb_assert_not_reached ("namespaces not supported"); }
+
+  /* Returns the number of active namespaces in the inferior.
+
+     The supports_namespaces method must return true for this to be called.  */
+  virtual int num_active_namespaces () const
+  { gdb_assert_not_reached ("namespaces not supported"); }
 
   /* Returns all solibs for a given namespace.  If the namespace is not
-     active, returns an empty vector.  */
-  std::vector<const solib *> (*get_solibs_in_ns) (int ns);
+     active, returns an empty vector.
+
+     The supports_namespaces method must return true for this to be called.  */
+  virtual std::vector<const solib *> get_solibs_in_ns (int ns) const
+  { gdb_assert_not_reached ("namespaces not supported"); }
 };
+
+/* A unique pointer to an solib_ops.  */
+using solib_ops_up = std::unique_ptr<solib_ops>;
 
 /* Find main executable binary file.  */
 extern gdb::unique_xmalloc_ptr<char> exec_file_find (const char *in_pathname,
@@ -245,11 +277,6 @@ extern gdb_bfd_ref_ptr solib_bfd_fopen (const char *pathname, int fd);
 
 /* Find solib binary file and open it.  */
 extern gdb_bfd_ref_ptr solib_bfd_open (const char *in_pathname);
-
-/* A default implementation of the solib_ops::find_solib_addr callback.
-   This just returns an empty std::optional<CORE_ADDR> indicating GDB is
-   unable to find an address within the library SO.  */
-extern std::optional<CORE_ADDR> default_find_solib_addr (solib &so);
 
 /* Called when we free all symtabs of PSPACE, to free the shared library
    information as well.  */

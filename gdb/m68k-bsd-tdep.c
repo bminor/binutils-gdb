@@ -147,8 +147,7 @@ m68kbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->struct_return = pcc_struct_return;
 
   /* NetBSD ELF uses SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_ops (gdbarch, make_svr4_ilp32_solib_ops);
 }
 
 INIT_GDB_FILE (m68kbsd_tdep)

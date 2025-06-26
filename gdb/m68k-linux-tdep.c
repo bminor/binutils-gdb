@@ -35,6 +35,7 @@
 #include "observable.h"
 #include "elf/common.h"
 #include "linux-tdep.h"
+#include "solib-svr4-linux.h"
 #include "regset.h"
 
 /* Offsets (in target ints) into jmp_buf.  */
@@ -407,8 +408,7 @@ m68k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Shared library handling.  */
 
   /* GNU/Linux uses SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets (gdbarch,
-					 linux_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_ops (gdbarch, make_linux_ilp32_svr4_solib_ops);
 
   /* GNU/Linux uses the dynamic linker included in the GNU C Library.  */
   set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);

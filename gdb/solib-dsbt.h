@@ -20,8 +20,10 @@
 #ifndef GDB_SOLIB_DSBT_H
 #define GDB_SOLIB_DSBT_H
 
-struct solib_ops;
+#include "solib.h"
 
-extern const solib_ops dsbt_so_ops;
+/* Return a new solib_ops for DSBT systems.  */
+
+solib_ops_up make_dsbt_solib_ops ();
 
 #endif /* GDB_SOLIB_DSBT_H */

@@ -313,8 +313,7 @@ sparc32nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   frame_unwind_append_unwinder (gdbarch, &sparc32nbsd_sigcontext_frame_unwind);
 
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_ops (gdbarch, make_svr4_ilp32_solib_ops);
 }
 
 INIT_GDB_FILE (sparcnbsd_tdep)

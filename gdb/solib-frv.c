@@ -26,6 +26,26 @@
 #include "elf/frv.h"
 #include "gdb_bfd.h"
 #include "inferior.h"
+#include "solib-frv.h"
+
+/* solib_ops for FR-V systems.  */
+
+struct frv_solib_ops : public solib_ops
+{
+  void relocate_section_addresses (solib &so, target_section *) const override;
+  void clear_solib (program_space *pspace) const override;
+  void create_inferior_hook (int from_tty) const override;
+  owning_intrusive_list<solib> current_sos () const override;
+  bool in_dynsym_resolve_code (CORE_ADDR pc) const override;
+};
+
+/* See solib-frv.h.  */
+
+solib_ops_up
+make_frv_solib_ops ()
+{
+  return std::make_unique<frv_solib_ops> ();
+}
 
 /* FR-V pointers are four bytes wide.  */
 enum { FRV_PTR_SIZE = 4 };
@@ -293,11 +313,8 @@ lm_base (void)
   return lm_base_cache;
 }
 
-
-/* Implement the "current_sos" solib_ops method.  */
-
-static owning_intrusive_list<solib>
-frv_current_sos ()
+owning_intrusive_list<solib>
+frv_solib_ops::current_sos () const
 {
   bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   CORE_ADDR lm_addr, mgot;
@@ -367,7 +384,7 @@ frv_current_sos ()
 	      break;
 	    }
 
-	  auto &sop = sos.emplace_back (frv_so_ops);
+	  auto &sop = sos.emplace_back (*this);
 	  auto li = std::make_unique<lm_info_frv> ();
 	  li->map = loadmap;
 	  li->got_value = got_addr;
@@ -414,8 +431,8 @@ static CORE_ADDR interp_text_sect_high;
 static CORE_ADDR interp_plt_sect_low;
 static CORE_ADDR interp_plt_sect_high;
 
-static bool
-frv_in_dynsym_resolve_code (CORE_ADDR pc)
+bool
+frv_solib_ops::in_dynsym_resolve_code (CORE_ADDR pc) const
 {
   return ((pc >= interp_text_sect_low && pc < interp_text_sect_high)
 	  || (pc >= interp_plt_sect_low && pc < interp_plt_sect_high)
@@ -776,8 +793,8 @@ frv_relocate_main_executable (void)
    to be relocated.  The shared library breakpoints also need to be
    enabled.  */
 
-static void
-frv_solib_create_inferior_hook (int from_tty)
+void
+frv_solib_ops::create_inferior_hook (int from_tty) const
 {
   /* Relocate main executable.  */
   frv_relocate_main_executable ();
@@ -790,8 +807,8 @@ frv_solib_create_inferior_hook (int from_tty)
     }
 }
 
-static void
-frv_clear_solib (program_space *pspace)
+void
+frv_solib_ops::clear_solib (program_space *pspace) const
 {
   lm_base_cache = 0;
   enable_break2_done = 0;
@@ -801,8 +818,9 @@ frv_clear_solib (program_space *pspace)
   main_executable_lm_info = NULL;
 }
 
-static void
-frv_relocate_section_addresses (solib &so, target_section *sec)
+void
+frv_solib_ops::relocate_section_addresses (solib &so,
+					   target_section *sec) const
 {
   int seg;
   auto *li = gdb::checked_static_cast<lm_info_frv *> (so.lm_info.get ());
@@ -1063,20 +1081,3 @@ frv_fetch_objfile_link_map (struct objfile *objfile)
   /* Not found!  */
   return 0;
 }
-
-const solib_ops frv_so_ops =
-{
-  frv_relocate_section_addresses,
-  nullptr,
-  frv_clear_solib,
-  frv_solib_create_inferior_hook,
-  frv_current_sos,
-  nullptr,
-  frv_in_dynsym_resolve_code,
-  solib_bfd_open,
-  nullptr,
-  nullptr,
-  nullptr,
-  nullptr,
-  default_find_solib_addr,
-};

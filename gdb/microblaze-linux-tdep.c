@@ -35,6 +35,7 @@
 #include "frame-unwind.h"
 #include "tramp-frame.h"
 #include "linux-tdep.h"
+#include "solib-svr4-linux.h"
 
 static int
 microblaze_linux_memory_remove_breakpoint (struct gdbarch *gdbarch, 
@@ -125,8 +126,7 @@ microblaze_linux_init_abi (struct gdbarch_info info,
 					microblaze_linux_memory_remove_breakpoint);
 
   /* Shared library handling.  */
-  set_solib_svr4_fetch_link_map_offsets (gdbarch,
-					 linux_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_ops (gdbarch, make_linux_ilp32_svr4_solib_ops);
 
   /* Trampolines.  */
   tramp_frame_prepend_unwinder (gdbarch,

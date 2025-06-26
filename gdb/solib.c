@@ -467,6 +467,12 @@ solib_bfd_open (const char *pathname)
   return abfd;
 }
 
+gdb_bfd_ref_ptr
+solib_ops::bfd_open (const char *pathname) const
+{
+  return solib_bfd_open (pathname);
+}
+
 /* Given a pointer to one of the shared objects in our list of mapped
    objects, use the recorded name to open a bfd descriptor for the
    object, build a section table, relocate all the section addresses
@@ -598,8 +604,7 @@ solib::clear ()
   this->name = this->original_name;
 
   /* Do the same for target-specific data.  */
-  if (this->ops ().clear_so != NULL)
-    this->ops ().clear_so (*this);
+  this->ops ().clear_so (*this);
 }
 
 lm_info::~lm_info () = default;
@@ -722,8 +727,7 @@ update_solib_list (int from_tty)
 	 have not opened a symbol file, we may be able to get its
 	 symbols now!  */
       if (inf->attach_flag
-	  && current_program_space->symfile_object_file == nullptr
-	  && ops->open_symbol_file_object != nullptr)
+	  && current_program_space->symfile_object_file == nullptr)
 	{
 	  try
 	    {
@@ -772,19 +776,8 @@ update_solib_list (int from_tty)
       /* Check to see whether the shared object *gdb also appears in
 	 the inferior's current list.  */
       for (; inferior_iter != inferior.end (); ++inferior_iter)
-	{
-	  if (ops->same)
-	    {
-	      if (ops->same (*gdb_iter, *inferior_iter))
-		break;
-	    }
-	  else
-	    {
-	      if (!filename_cmp (gdb_iter->original_name.c_str (),
-				 inferior_iter->original_name.c_str ()))
-		break;
-	    }
-	}
+	if (ops->same (*gdb_iter, *inferior_iter))
+	  break;
 
       /* If the shared object appears on the inferior's list too, then
 	 it's still loaded, so we don't need to do anything.  Delete
@@ -1037,7 +1030,7 @@ print_solib_list_table (std::vector<const solib *> solib_list,
      active namespace.  Fold all these into the PRINT_NAMESPACE condition.  */
   print_namespace = (print_namespace
 		     && ops != nullptr
-		     && ops->num_active_namespaces != nullptr
+		     && ops->supports_namespaces ()
 		     && ops->num_active_namespaces () > 1);
 
   int num_cols = 4;
@@ -1167,7 +1160,7 @@ info_linker_namespace_command (const char *pattern, int from_tty)
 
   /* This command only really makes sense for inferiors that support
      linker namespaces, so we can leave early.  */
-  if (ops == nullptr || ops->num_active_namespaces == nullptr)
+  if (ops == nullptr || !ops->supports_namespaces ())
     error (_("Current inferior does not support linker namespaces.  "
 	     "Use \"info sharedlibrary\" instead."));
 
@@ -1277,6 +1270,13 @@ solib_name_from_address (struct program_space *pspace, CORE_ADDR address)
   return nullptr;
 }
 
+bool
+solib_ops::same (const solib &a, const solib &b) const
+{
+  return (filename_cmp (a.original_name.c_str (), b.original_name.c_str ())
+	  == 0);
+}
+
 /* See solib.h.  */
 
 bool
@@ -1284,10 +1284,7 @@ solib_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
 {
   const solib_ops *ops = current_program_space->solib_ops ();
 
-  if (ops != nullptr && ops->keep_data_in_core != nullptr)
-    return ops->keep_data_in_core (vaddr, size) != 0;
-  else
-    return false;
+  return ops != nullptr && ops->keep_data_in_core (vaddr, size);
 }
 
 /* See solib.h.  */
@@ -1306,9 +1303,8 @@ clear_solib (program_space *pspace)
 
   pspace->solibs ().clear ();
 
-  const solib_ops *ops = pspace->solib_ops ();
-
-  if (ops != nullptr && ops->clear_solib != nullptr)
+  if (const solib_ops *ops = pspace->solib_ops ();
+      ops != nullptr)
     ops->clear_solib (pspace);
 }
 
@@ -1320,10 +1316,9 @@ clear_solib (program_space *pspace)
 void
 solib_create_inferior_hook (int from_tty)
 {
-  const solib_ops *ops = current_program_space->solib_ops ();
-
-  if (ops != nullptr && ops->solib_create_inferior_hook != nullptr)
-    ops->solib_create_inferior_hook (from_tty);
+  if (const solib_ops *ops = current_program_space->solib_ops ();
+      ops != nullptr)
+    ops->create_inferior_hook (from_tty);
 }
 
 /* See solib.h.  */
@@ -1333,8 +1328,7 @@ in_solib_dynsym_resolve_code (CORE_ADDR pc)
 {
   const solib_ops *ops = current_program_space->solib_ops ();
 
-  return (ops != nullptr && ops->in_dynsym_resolve_code != nullptr
-	  && ops->in_dynsym_resolve_code (pc));
+  return ops != nullptr && ops->in_dynsym_resolve_code (pc);
 }
 
 /* Implements the "sharedlibrary" command.  */
@@ -1378,7 +1372,7 @@ update_solib_breakpoints (void)
 {
   const solib_ops *ops = current_program_space->solib_ops ();
 
-  if (ops != nullptr && ops->update_breakpoints != nullptr)
+  if (ops != nullptr)
     ops->update_breakpoints ();
 }
 
@@ -1387,9 +1381,8 @@ update_solib_breakpoints (void)
 void
 handle_solib_event (void)
 {
-  const solib_ops *ops = current_program_space->solib_ops ();
-
-  if (ops != nullptr && ops->handle_event != nullptr)
+  if (const solib_ops *ops = current_program_space->solib_ops ();
+      ops != nullptr)
     ops->handle_event ();
 
   current_inferior ()->pspace->clear_solib_cache ();
@@ -1422,7 +1415,8 @@ reload_shared_libraries_1 (int from_tty)
 
       gdb::unique_xmalloc_ptr<char> filename (
 	tilde_expand (so.original_name.c_str ()));
-      gdb_bfd_ref_ptr abfd (solib_bfd_open (filename.get ()));
+
+      gdb_bfd_ref_ptr abfd = so.ops ().bfd_open (filename.get ());
       if (abfd != NULL)
 	found_pathname = bfd_get_filename (abfd.get ());
 
@@ -1484,11 +1478,10 @@ reload_shared_libraries (const char *ignored, int from_tty,
      about ld.so.  */
   if (target_has_execution ())
     {
-      const solib_ops *ops = current_program_space->solib_ops ();
-
       /* Reset or free private data structures not associated with
 	 solib entries.  */
-      if (ops != nullptr && ops->clear_solib != nullptr)
+      if (const solib_ops *ops = current_program_space->solib_ops ();
+	  ops != nullptr)
 	ops->clear_solib (current_program_space);
 
       /* Remove any previous solib event breakpoint.  This is usually
@@ -1815,15 +1808,8 @@ remove_user_added_objfile (struct objfile *objfile)
     }
 }
 
-/* See solist.h.  */
-
-std::optional<CORE_ADDR>
-default_find_solib_addr (solib &so)
-{
-  return {};
-}
-
 /* Implementation of the linker_namespace convenience variable.
+
    This returns the GDB internal identifier of the linker namespace,
    for the selected frame, as an integer.  If the inferior doesn't support
    linker namespaces, this always returns 0.  */
@@ -1838,7 +1824,7 @@ linker_namespace_make_value (gdbarch *gdbarch, internalvar *var,
   for (const solib &so : current_program_space->solibs ())
     if (solib_contains_address_p (so, curr_pc))
       {
-	if (so.ops ().find_solib_ns != nullptr)
+	if (so.ops ().supports_namespaces ())
 	  nsid = so.ops ().find_solib_ns (so);
 
 	break;

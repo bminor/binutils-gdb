@@ -891,6 +891,7 @@ ALL_TARGET_OBS = \
 	solib-dsbt.o \
 	solib-frv.o \
 	solib-svr4.o \
+	solib-svr4-linux.o \
 	sparc-linux-tdep.o \
 	sparc-netbsd-tdep.o \
 	sparc-obsd-tdep.o \
@@ -1478,7 +1479,9 @@ HFILES_NO_SRCDIR = \
 	solib.h \
 	solib-aix.h \
 	solib-darwin.h \
+	solib-frv.h \
 	solib-svr4.h \
+	solib-svr4-linux.h \
 	solib-target.h \
 	source.h \
 	source-cache.h \

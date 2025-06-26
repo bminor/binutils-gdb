@@ -20,8 +20,10 @@
 #ifndef GDB_SOLIB_DARWIN_H
 #define GDB_SOLIB_DARWIN_H
 
-struct solib_ops;
+#include "solib.h"
 
-extern const solib_ops darwin_so_ops;
+/* Return a new solib_ops for Darwin systems.  */
+
+extern solib_ops_up make_darwin_solib_ops ();
 
 #endif /* GDB_SOLIB_DARWIN_H */

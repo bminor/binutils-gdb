@@ -25,6 +25,7 @@
 #include "frame.h"
 #include "frame-unwind.h"
 #include "frame-base.h"
+#include "solib-frv.h"
 #include "trad-frame.h"
 #include "dis-asm.h"
 #include "sim-regno.h"
@@ -1554,7 +1555,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_convert_from_func_ptr_addr (gdbarch,
 					    frv_convert_from_func_ptr_addr);
 
-  set_gdbarch_so_ops (gdbarch, &frv_so_ops);
+  set_gdbarch_make_solib_ops (gdbarch, make_frv_solib_ops);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

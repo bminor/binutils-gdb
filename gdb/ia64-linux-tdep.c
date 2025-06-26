@@ -26,6 +26,7 @@
 #include "solib-svr4.h"
 #include "symtab.h"
 #include "linux-tdep.h"
+#include "solib-svr4-linux.h"
 #include "regset.h"
 
 #include <ctype.h>
@@ -235,8 +236,7 @@ ia64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, linux_lp64_fetch_link_map_offsets);
+  set_solib_svr4_ops (gdbarch, make_linux_lp64_svr4_solib_ops);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,

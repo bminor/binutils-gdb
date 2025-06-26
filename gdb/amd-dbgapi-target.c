@@ -104,10 +104,24 @@ amd_dbgapi_lib_debug_module ()
 
 static gdb::observers::token amd_dbgapi_target_inferior_created_observer_token;
 
+/* See amd-dbgapi-target.h.  */
+
 const gdb::observers::token &
 get_amd_dbgapi_target_inferior_created_observer_token ()
 {
   return amd_dbgapi_target_inferior_created_observer_token;
+}
+
+/* inferior_execd observer token.  */
+
+static gdb::observers::token amd_dbgapi_target_inferior_execd_observer_token;
+
+/* See amd-dbgapi-target.h.  */
+
+const gdb::observers::token &
+get_amd_dbgapi_target_inferior_execd_observer_token ()
+{
+  return amd_dbgapi_target_inferior_execd_observer_token;
 }
 
 /* A type holding coordinates, etc. info for a given wave.  */
@@ -2503,7 +2517,9 @@ INIT_GDB_FILE (amd_dbgapi_target)
   gdb::observers::inferior_created.attach
     (amd_dbgapi_target_inferior_created,
      amd_dbgapi_target_inferior_created_observer_token, "amd-dbgapi");
-  gdb::observers::inferior_execd.attach (amd_dbgapi_inferior_execd, "amd-dbgapi");
+  gdb::observers::inferior_execd.attach
+    (amd_dbgapi_inferior_execd, amd_dbgapi_target_inferior_execd_observer_token,
+     "amd-dbgapi");
   gdb::observers::inferior_forked.attach (amd_dbgapi_inferior_forked, "amd-dbgapi");
   gdb::observers::inferior_exit.attach (amd_dbgapi_inferior_exited, "amd-dbgapi");
   gdb::observers::inferior_pre_detach.attach (amd_dbgapi_inferior_pre_detach, "amd-dbgapi");

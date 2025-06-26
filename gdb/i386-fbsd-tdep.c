@@ -402,8 +402,7 @@ i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				     i386fbsd_core_read_description);
 
   /* FreeBSD uses SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  set_solib_svr4_ops (gdbarch, make_svr4_ilp32_solib_ops);
 
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
 					     svr4_fetch_objfile_link_map);
