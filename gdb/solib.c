@@ -707,7 +707,10 @@ notify_solib_unloaded (program_space *pspace, const solib &so,
 void
 update_solib_list (int from_tty)
 {
-  const solib_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
+  const solib_ops *ops = current_program_space->solib_ops ();
+
+  if (ops == nullptr)
+    return;
 
   /* We can reach here due to changing solib-search-path or the
      sysroot, before having any inferior.  */
@@ -1021,16 +1024,21 @@ print_solib_list_table (std::vector<const solib *> solib_list,
   gdbarch *gdbarch = current_inferior ()->arch ();
   /* "0x", a little whitespace, and two hex digits per byte of pointers.  */
   int addr_width = 4 + (gdbarch_ptr_bit (gdbarch) / 4);
-  const solib_ops *ops = gdbarch_so_ops (gdbarch);
+  const solib_ops *ops = current_program_space->solib_ops ();
   struct ui_out *uiout = current_uiout;
   bool so_missing_debug_info = false;
+
+  if (ops == nullptr)
+    return;
 
   /* There are 3 conditions for this command to print solib namespaces,
      first PRINT_NAMESPACE has to be true, second the solib_ops has to
      support multiple namespaces, and third there must be more than one
      active namespace.  Fold all these into the PRINT_NAMESPACE condition.  */
-  print_namespace = print_namespace && ops->num_active_namespaces != nullptr
-		    && ops->num_active_namespaces () > 1;
+  print_namespace = (print_namespace
+		     && ops != nullptr
+		     && ops->num_active_namespaces != nullptr
+		     && ops->num_active_namespaces () > 1);
 
   int num_cols = 4;
   if (print_namespace)
@@ -1155,10 +1163,11 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
 static void
 info_linker_namespace_command (const char *pattern, int from_tty)
 {
-  const solib_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
+  const solib_ops *ops = current_program_space->solib_ops ();
+
   /* This command only really makes sense for inferiors that support
      linker namespaces, so we can leave early.  */
-  if (ops->num_active_namespaces == nullptr)
+  if (ops == nullptr || ops->num_active_namespaces == nullptr)
     error (_("Current inferior does not support linker namespaces.  "
 	     "Use \"info sharedlibrary\" instead."));
 
@@ -1273,9 +1282,9 @@ solib_name_from_address (struct program_space *pspace, CORE_ADDR address)
 bool
 solib_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
 {
-  const solib_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
+  const solib_ops *ops = current_program_space->solib_ops ();
 
-  if (ops->keep_data_in_core)
+  if (ops != nullptr && ops->keep_data_in_core != nullptr)
     return ops->keep_data_in_core (vaddr, size) != 0;
   else
     return false;
@@ -1286,8 +1295,6 @@ solib_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
 void
 clear_solib (program_space *pspace)
 {
-  const solib_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
-
   for (solib &so : pspace->solibs ())
     {
       bool still_in_use
@@ -1299,7 +1306,9 @@ clear_solib (program_space *pspace)
 
   pspace->solibs ().clear ();
 
-  if (ops->clear_solib != nullptr)
+  const solib_ops *ops = pspace->solib_ops ();
+
+  if (ops != nullptr && ops->clear_solib != nullptr)
     ops->clear_solib (pspace);
 }
 
@@ -1311,9 +1320,9 @@ clear_solib (program_space *pspace)
 void
 solib_create_inferior_hook (int from_tty)
 {
-  const solib_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
+  const solib_ops *ops = current_program_space->solib_ops ();
 
-  if (ops->solib_create_inferior_hook != nullptr)
+  if (ops != nullptr && ops->solib_create_inferior_hook != nullptr)
     ops->solib_create_inferior_hook (from_tty);
 }
 
@@ -1322,10 +1331,10 @@ solib_create_inferior_hook (int from_tty)
 bool
 in_solib_dynsym_resolve_code (CORE_ADDR pc)
 {
-  const auto in_dynsym_resolve_code
-    = gdbarch_so_ops (current_inferior ()->arch ())->in_dynsym_resolve_code;
+  const solib_ops *ops = current_program_space->solib_ops ();
 
-  return in_dynsym_resolve_code && in_dynsym_resolve_code (pc);
+  return (ops != nullptr && ops->in_dynsym_resolve_code != nullptr
+	  && ops->in_dynsym_resolve_code (pc));
 }
 
 /* Implements the "sharedlibrary" command.  */
@@ -1367,9 +1376,9 @@ no_shared_libraries_command (const char *ignored, int from_tty)
 void
 update_solib_breakpoints (void)
 {
-  const solib_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
+  const solib_ops *ops = current_program_space->solib_ops ();
 
-  if (ops->update_breakpoints != NULL)
+  if (ops != nullptr && ops->update_breakpoints != nullptr)
     ops->update_breakpoints ();
 }
 
@@ -1378,9 +1387,9 @@ update_solib_breakpoints (void)
 void
 handle_solib_event (void)
 {
-  const solib_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
+  const solib_ops *ops = current_program_space->solib_ops ();
 
-  if (ops->handle_event != NULL)
+  if (ops != nullptr && ops->handle_event != nullptr)
     ops->handle_event ();
 
   current_inferior ()->pspace->clear_solib_cache ();
@@ -1464,8 +1473,6 @@ reload_shared_libraries (const char *ignored, int from_tty,
 {
   reload_shared_libraries_1 (from_tty);
 
-  const solib_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
-
   /* Creating inferior hooks here has two purposes.  First, if we reload 
      shared libraries then the address of solib breakpoint we've computed
      previously might be no longer valid.  For example, if we forgot to set
@@ -1477,9 +1484,11 @@ reload_shared_libraries (const char *ignored, int from_tty,
      about ld.so.  */
   if (target_has_execution ())
     {
+      const solib_ops *ops = current_program_space->solib_ops ();
+
       /* Reset or free private data structures not associated with
 	 solib entries.  */
-      if (ops->clear_solib != nullptr)
+      if (ops != nullptr && ops->clear_solib != nullptr)
 	ops->clear_solib (current_program_space);
 
       /* Remove any previous solib event breakpoint.  This is usually

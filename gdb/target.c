@@ -2464,6 +2464,7 @@ target_pre_inferior ()
   if (!gdbarch_has_global_solist (current_inferior ()->arch ()))
     {
       no_shared_libraries (current_program_space);
+      current_program_space->unset_solib_ops ();
 
       invalidate_target_mem_regions ();
 

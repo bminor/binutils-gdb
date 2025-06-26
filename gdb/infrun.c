@@ -472,6 +472,7 @@ holding the child stopped.  Try \"set %ps\" or \"%ps\".\n"),
 
   inferior *parent_inf = current_inferior ();
   inferior *child_inf = nullptr;
+  bool child_has_new_pspace = false;
 
   gdb_assert (parent_inf->thread_waiting_for_vfork_done == nullptr);
 
@@ -536,6 +537,7 @@ holding the child stopped.  Try \"set %ps\" or \"%ps\".\n"),
 	  else
 	    {
 	      child_inf->pspace = new program_space (new_address_space ());
+	      child_has_new_pspace = true;
 	      child_inf->aspace = child_inf->pspace->aspace;
 	      child_inf->removable = true;
 	      clone_program_space (child_inf->pspace, parent_inf->pspace);
@@ -625,6 +627,7 @@ holding the child stopped.  Try \"set %ps\" or \"%ps\".\n"),
       else
 	{
 	  child_inf->pspace = new program_space (new_address_space ());
+	  child_has_new_pspace = true;
 	  child_inf->aspace = child_inf->pspace->aspace;
 	  child_inf->removable = true;
 	  child_inf->symfile_flags = SYMFILE_NO_READ;
@@ -723,7 +726,8 @@ holding the child stopped.  Try \"set %ps\" or \"%ps\".\n"),
 	maybe_restore.emplace ();
 
       switch_to_thread (*child_inf->threads ().begin ());
-      post_create_inferior (0);
+
+      post_create_inferior (0, child_has_new_pspace);
     }
 
   return false;
@@ -1321,6 +1325,7 @@ follow_exec (ptid_t ptid, const char *exec_file_target)
      we don't want those to be satisfied by the libraries of the
      previous incarnation of this process.  */
   no_shared_libraries (current_program_space);
+  current_program_space->unset_solib_ops ();
 
   inferior *execing_inferior = current_inferior ();
   inferior *following_inferior;
@@ -1377,6 +1382,8 @@ follow_exec (ptid_t ptid, const char *exec_file_target)
      registers.  */
   target_find_description ();
 
+  current_program_space->set_solib_ops
+    (*gdbarch_so_ops (following_inferior->arch ()));
   gdb::observers::inferior_execd.notify (execing_inferior, following_inferior);
 
   breakpoint_re_set ();
@@ -3818,7 +3825,7 @@ start_remote (int from_tty)
   /* Now that the inferior has stopped, do any bookkeeping like
      loading shared libraries.  We want to do this before normal_stop,
      so that the displayed frame is up to date.  */
-  post_create_inferior (from_tty);
+  post_create_inferior (from_tty, true);
 
   normal_stop ();
 }

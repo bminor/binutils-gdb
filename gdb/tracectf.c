@@ -1174,7 +1174,7 @@ ctf_target_open (const char *args, int from_tty)
   merge_uploaded_trace_state_variables (&uploaded_tsvs);
   merge_uploaded_tracepoints (&uploaded_tps);
 
-  post_create_inferior (from_tty);
+  post_create_inferior (from_tty, true);
 }
 
 /* This is the implementation of target_ops method to_close.  Destroy

@@ -567,7 +567,7 @@ tfile_target_open (const char *arg, int from_tty)
 
   merge_uploaded_tracepoints (&uploaded_tps);
 
-  post_create_inferior (from_tty);
+  post_create_inferior (from_tty, true);
 }
 
 /* Interpret the given line from the definitions part of the trace

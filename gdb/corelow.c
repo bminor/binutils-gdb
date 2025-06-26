@@ -1180,7 +1180,7 @@ core_target_open (const char *arg, int from_tty)
   if (current_program_space->exec_bfd () == nullptr)
     set_gdbarch_from_file (current_program_space->core_bfd ());
 
-  post_create_inferior (from_tty);
+  post_create_inferior (from_tty, true);
 
   /* Now go through the target stack looking for threads since there
      may be a thread_stratum target loaded on top of target core by
