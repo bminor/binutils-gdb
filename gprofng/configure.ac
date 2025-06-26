@@ -33,6 +33,7 @@ gl_PROG_BISON([BISON],[3.0.4])
 
 AC_DISABLE_SHARED
 LT_INIT
+AC_C_BIGENDIAN
 
 GPROFNG_LIBADD="-L../../libiberty -liberty"
 if test "$enable_shared" = "yes"; then

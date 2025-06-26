@@ -87,7 +87,6 @@ LoadObject::LoadObject (const char *loname)
   size = 0;
   type = SEG_UNKNOWN;
   isReadStabs = false;
-  need_swap_endian = false;
   instHTable = new DbeInstr*[LO_InstHTableSize];
   for (int i = 0; i < LO_InstHTableSize; i++)
     instHTable[i] = NULL;

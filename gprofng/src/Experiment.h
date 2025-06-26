@@ -135,6 +135,7 @@ public:
 			// for current experiment, i.e. 8 for 32bit addresses
   int broken;           // If SP_JCMD_RUN line not seen
   int obsolete;         // If pointer file experiment detected
+  bool bigendian;       // the experiment was created on a big_endian machine
   bool hwc_default;     // True if HW counters were enabled by default
   int hwc_bogus;        // Count of bogus HWC packets
   int hwc_lost_int;     // Count of packets reflecting lost interrupt

@@ -120,6 +120,7 @@ public:
   bool is_timeline_available ();
   bool is_ifreq_available ();
   bool is_omp_available ();
+  static bool is_bigendian ();
   bool has_java ();
   bool has_ompavail ();
 

@@ -2017,6 +2017,17 @@ DbeSession::is_omp_available ()
 }
 
 bool
+DbeSession::is_bigendian ()
+{
+#ifdef WORDS_BIGENDIAN
+  return true;
+#else
+  return false;
+#endif
+
+}
+
+bool
 DbeSession::has_java ()
 {
   int status_has_java = 0;

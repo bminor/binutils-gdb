@@ -167,7 +167,6 @@ public:
 
   unsigned int flags;           // SEG_FLAG_*
   bool isReadStabs;
-  bool need_swap_endian;
   int seg_idx;                  // for compatibility (ADDRESS)
   seg_type type;
   int64_t size;                 // size of loadobject in bytes

@@ -2051,8 +2051,15 @@ log_header_write (sp_origin_t origin)
     {
       long page_size = CALL_UTIL (sysconf)(_SC_PAGESIZE);
       long npages = CALL_UTIL (sysconf)(_SC_PHYS_PAGES);
-      __collector_log_write ("<system hostname=\"%s\" arch=\"%s\" os=\"%s %s\" pagesz=\"%ld\" npages=\"%ld\">\n",
-			     sysinfo.nodename, sysinfo.machine, sysinfo.sysname, sysinfo.release, page_size, npages);
+#ifdef WORDS_BIGENDIAN
+      int bigendian = 1;
+#else
+      int bigendian = 0;
+#endif
+      __collector_log_write ("<system hostname=\"%s\" arch=\"%s\" os=\"%s %s\" "
+		"pagesz=\"%ld\" npages=\"%ld\" bigendian=\"%d\">\n",
+		sysinfo.nodename, sysinfo.machine, sysinfo.sysname,
+		sysinfo.release, page_size, npages, bigendian);
     }
 
   //YXXX Updating this section?  Check similar cut/paste code in:
