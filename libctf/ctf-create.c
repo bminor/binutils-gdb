@@ -1518,7 +1518,7 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
   /* Enumeration constant names are only added, and only checked for duplicates,
      if the enum they are part of is a root-visible type.  */
 
-  if (root == CTF_ADD_ROOT && ctf_dynhash_lookup (fp->ctf_names, name))
+  if (root && ctf_dynhash_lookup (fp->ctf_names, name))
     {
       if (fp->ctf_flags & LCTF_STRICT_NO_DUP_ENUMERATORS)
 	return (ctf_set_errno (ofp, ECTF_DUPLICATE));
