@@ -61,7 +61,9 @@ class scoped_command_stats
   bool m_symtab_enabled : 1;
   run_time_clock::time_point m_start_cpu_time;
   std::chrono::steady_clock::time_point m_start_wall_time;
+#ifdef HAVE_USEFUL_SBRK
   long m_start_space;
+#endif
   /* Total number of symtabs (over all objfiles).  */
   int m_start_nr_symtabs;
   /* A count of the compunits.  */
