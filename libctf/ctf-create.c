@@ -1193,7 +1193,7 @@ ctf_add_sou_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
     return (ctf_set_errno (fp, ECTF_NOPARENT));
 
   /* Promote root-visible forwards to structs/unions.  */
-  if (name != NULL)
+  if (name != NULL && root_flag == CTF_ADD_ROOT)
     type = ctf_lookup_by_rawname (fp, kind, name);
 
   if (type > 0)
@@ -1269,7 +1269,7 @@ ctf_add_enum_internal (ctf_dict_t *fp, uint32_t flag, const char *name,
     return (ctf_set_errno (fp, ECTF_NOPARENT));
 
   /* Promote root-visible forwards to enums.  */
-  if (name != NULL)
+  if (name != NULL && flag == CTF_ADD_ROOT)
     type = ctf_lookup_by_rawname (fp, kind, name);
 
   /* Prohibit promotion if this type was ctf_open()ed.  */
@@ -1322,7 +1322,7 @@ ctf_add_enum_encoded_internal (ctf_dict_t *fp, uint32_t flag, const char *name,
      enums or forwards to them.  (This includes other slices: you cannot slice a
      slice, which would be a useless thing to do anyway.)  */
 
-  if (name != NULL)
+  if (name != NULL && flag == CTF_ADD_ROOT)
     type = ctf_lookup_by_rawname (fp, CTF_K_ENUM, name);
 
   if (type != 0)
