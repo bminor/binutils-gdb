@@ -766,7 +766,6 @@ rocm_solib_target_inferior_created (inferior *inf)
   solib_add (nullptr, 0, auto_solib_add);
 }
 
-void
 INIT_GDB_FILE (rocm_solib)
 {
   /* The dependency on the amd-dbgapi exists because solib-rocm's

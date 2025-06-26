@@ -2475,7 +2475,6 @@ maybe_reset_amd_dbgapi ()
 	   get_status_string (status));
 }
 
-void
 INIT_GDB_FILE (amd_dbgapi_target)
 {
   /* Make sure the loaded debugger library version is greater than or equal to
