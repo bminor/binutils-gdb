@@ -100,7 +100,6 @@ gdb_test_multiple $cmd "print value of rr" {
 	fail $gdb_test_name
     }
 }
-    
 
 gdb_test "python print (gdb.lookup_static_symbol ('rr').needs_frame)" \
     "False" \
