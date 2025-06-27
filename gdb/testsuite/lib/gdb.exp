@@ -9568,7 +9568,13 @@ proc remove_core {pid {test ""}} {
     }
 }
 
-proc core_find {binfile {deletefiles {}} {arg ""}} {
+# Runs ${binfile} expecting it to crash and generate a core file.
+# If DELETEFILES is provided, remove these files after running the program.
+# If ARG is provided, pass it as a command line argument to the program.
+# If OUTPUT_FILE is provided, save the program output to it.
+# Returns the name of the core dump, or empty string if not found.
+
+proc core_find {binfile {deletefiles {}} {arg ""} {output_file "/dev/null"}} {
     global objdir subdir
 
     set destcore "$binfile.core"
@@ -9590,7 +9596,7 @@ proc core_find {binfile {deletefiles {}} {arg ""}} {
     set found 0
     set coredir [standard_output_file coredir.[getpid]]
     file mkdir $coredir
-    catch "system \"(cd ${coredir}; ulimit -c unlimited; ${binfile} ${arg}; true) >/dev/null 2>&1\""
+    catch "system \"(cd ${coredir}; ulimit -c unlimited; ${binfile} ${arg}; true) >${output_file} 2>&1\""
     #      remote_exec host "${binfile}"
     set binfile_basename [file tail $binfile]
     foreach i [list \
