@@ -209,14 +209,6 @@ static const struct gdb_xml_element library_list_elements[] = {
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
 
-/* See solib-target.h.  */
-
-solib_ops_up
-make_target_solib_ops ()
-{
-  return std::make_unique<target_solib_ops> ();
-}
-
 static std::vector<lm_info_target_up>
 solib_target_parse_libraries (const char *library)
 {
@@ -392,4 +384,12 @@ target_solib_ops::in_dynsym_resolve_code (CORE_ADDR pc) const
      may not be one in the program's address space.  So only report
      PLT entries (which may be import stubs).  */
   return in_plt_section (pc);
+}
+
+/* See solib-target.h.  */
+
+solib_ops_up
+make_target_solib_ops ()
+{
+  return std::make_unique<target_solib_ops> ();
 }
