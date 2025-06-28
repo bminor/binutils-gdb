@@ -59,6 +59,12 @@ maintenance check symtabs
 maintenance canonicalize
   Show the canonical form of a C++ name.
 
+maintenance set console-translation-mode <binary|text>
+maintenance show console-translation-mode
+  Controls the translation mode of GDB stdout/stderr.  MS-Windows only.  In
+  binary mode, no translation is done.  In text mode, a Line Feed is
+  translated into a Carriage Return-Line Feed combination.
+
 set riscv numeric-register-names on|off
 show riscv numeric-register-names
   Controls whether GDB refers to risc-v registers by their numeric names

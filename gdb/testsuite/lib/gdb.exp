@@ -272,6 +272,10 @@ if ![info exists INTERNAL_GDBFLAGS] {
 
     # Handle the case that "interactive-mode auto" reports off.
     append INTERNAL_GDBFLAGS { -iex "set interactive-mode on"}
+
+    if { [ishost "*-*-mingw*"] } {
+	append INTERNAL_GDBFLAGS { -iex "maint set console-translation-mode binary"}
+    }
 }
 
 # The variable gdb_prompt is a regexp which matches the gdb prompt.

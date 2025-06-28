@@ -23,6 +23,8 @@
 #include "gdbsupport/gdb_select.h"
 #include "inferior.h"
 #include "cli/cli-style.h"
+#include "command.h"
+#include "cli/cli-cmds.h"
 
 #include <windows.h>
 #include <signal.h>
@@ -444,4 +446,66 @@ install_sigint_handler (c_c_handler_ftype *fn)
   c_c_handler_ftype *result = current_handler;
   current_handler = fn;
   return result;
+}
+
+/* Set stdout and stderr handles to translation mode MODE.  */
+
+static void
+set_console_translation_mode (int mode)
+{
+  setmode (fileno (stdout), mode);
+  setmode (fileno (stderr), mode);
+}
+
+/* Arg in "maint set console-translation-mode <arg>.  */
+
+static std::string maint_console_translation_mode;
+
+/* Current value of "maint set/show console-translation-mode".  */
+
+static std::string console_translation_mode = "unknown";
+
+/* Sets the console translation mode.  */
+
+static void
+set_maint_console_translation_mode (const char *args, int from_tty,
+				    struct cmd_list_element *c)
+{
+  if (maint_console_translation_mode == "binary")
+    set_console_translation_mode (O_BINARY);
+  else if (maint_console_translation_mode == "text")
+    set_console_translation_mode (O_TEXT);
+  else
+    error (_("Invalid console translation mode: %s"),
+	   maint_console_translation_mode.c_str ());
+
+  console_translation_mode = maint_console_translation_mode;
+}
+
+/* Shows the console translation mode.  */
+
+static void
+show_maint_console_translation_mode (struct ui_file *file, int from_tty,
+				     struct cmd_list_element *c,
+				     const char *value)
+{
+  gdb_printf (file, _("Console translation mode is %s.\n"),
+	      console_translation_mode.c_str ());
+}
+
+extern void _initialize_mingw_hdep ();
+
+void
+_initialize_mingw_hdep ()
+{
+  add_setshow_string_cmd ("console-translation-mode",
+			  class_maintenance,
+			  &maint_console_translation_mode, _("\
+Set the translation mode of stdout/stderr."), _("\
+Show the translation mode of stdout/stderr."), _("\
+Use \"binary\", or \"text\""),
+			   set_maint_console_translation_mode,
+			   show_maint_console_translation_mode,
+			   &maintenance_set_cmdlist,
+			   &maintenance_show_cmdlist);
 }

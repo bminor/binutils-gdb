@@ -42755,6 +42755,23 @@ reports and error and the command is aborted.
 
 @item show watchdog
 Show the current setting of the target wait timeout.
+
+@kindex maint set console-translation-mode
+@kindex maint show console-translation-mode
+@item maint set console-translation-mode @r{[}binary|text@r{]}
+@itemx maint show console-translation-mode
+Controls the translation mode of @value{GDBN} stdout/stderr.  MS-Windows
+only.  Useful for running the @value{GDBN} testsuite.
+
+The translation mode values are as follows:
+@table @code
+@item binary
+No translation.
+@item text
+Translate @samp{\n} (LF, a single Line Feed) into @samp{\r\n} (CR-LF, a
+Carriage Return-Line Feed combination).
+@end table
+
 @end table
 
 @node Remote Protocol
