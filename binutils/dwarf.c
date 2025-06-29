@@ -10930,7 +10930,7 @@ display_debug_links (struct dwarf_section *  section,
       (padding)   If needed to reach a 4 byte boundary.
       (uint32_t)  CRC32 value.
 
-    The .gun_debugaltlink section is formatted as:
+    The .gnu_debugaltlink section is formatted as:
       (c-string)  Filename.
       (binary)    Build-ID.  */
 
@@ -12330,7 +12330,7 @@ load_build_id_debug_file (const char * main_filename ATTRIBUTE_UNUSED, void * ma
 		      + strlen (".debug")
 		      /* The next string should be the same as the longest
 			 name found in the prefixes[] array below.  */
-		      + strlen ("/usrlib64/debug/usr")
+		      + strlen ("/usr/lib64/debug/usr/")
 		      + 1);
   void * handle;
 
@@ -12341,7 +12341,7 @@ load_build_id_debug_file (const char * main_filename ATTRIBUTE_UNUSED, void * ma
       "/usr/lib/debug/",
       "/usr/lib/debug/usr/",
       "/usr/lib64/debug/",
-      "/usr/lib64/debug/usr"
+      "/usr/lib64/debug/usr/"
     };
   long unsigned int i;
 
