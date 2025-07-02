@@ -4924,6 +4924,8 @@ public:
     /* Corner cases.  */
     ECALL,
     EBREAK,
+    SRET,
+    MRET,
   };
 
 private:
@@ -5008,6 +5010,14 @@ private:
     return (ival >> OP_SH_CSR) & OP_MASK_CSR;
   }
 
+  /* Set any record type.  Always returns true.  */
+  bool
+  set_record_type (record_type type) noexcept
+  {
+    m_record_type = type;
+    return true;
+  }
+
   /* Set ordinary record type.  Always returns true.  */
   bool
   set_ordinary_record_type () noexcept
@@ -5066,7 +5076,8 @@ private:
     return (is_beq_insn (ival) || is_bne_insn (ival) || is_blt_insn (ival)
 	   || is_bge_insn (ival) || is_bltu_insn (ival) || is_bgeu_insn (ival)
 	   || is_fence_insn (ival) || is_pause_insn (ival)
-	   || is_fence_i_insn (ival));
+	   || is_fence_i_insn (ival) || is_wfi_insn (ival)
+	   || is_sfence_vma_insn (ival));
   }
 
   /* Returns true if instruction is classified.  */
@@ -5270,14 +5281,26 @@ private:
 
     if (is_ecall_insn (ival))
       {
-	m_record_type = record_type::ECALL;
-	return true;
+	return set_record_type (record_type::ECALL);
       }
 
     if (is_ebreak_insn (ival))
       {
-	m_record_type = record_type::EBREAK;
-	return true;
+	return set_record_type (record_type::EBREAK);
+      }
+
+    if (is_sret_insn (ival))
+      {
+	return (!save_reg (RISCV_CSR_SSTATUS_REGNUM)
+	       || !save_reg (RISCV_CSR_MEPC_REGNUM)
+	       || set_record_type (record_type::SRET));
+      }
+
+    if (is_mret_insn (ival))
+      {
+	return (!save_reg (RISCV_CSR_MSTATUS_REGNUM)
+	       || !save_reg (RISCV_CSR_MEPC_REGNUM)
+	       || set_record_type (record_type::MRET));
       }
 
     if (try_save_pc (ival) || try_save_pc_rd (ival) || try_save_pc_fprd (ival)
@@ -5371,8 +5394,7 @@ private:
 
     if (is_c_ebreak_insn (ival))
       {
-	m_record_type = record_type::EBREAK;
-	return true;
+	return set_record_type (record_type::EBREAK);
       }
 
     if (is_c_jalr_insn (ival))
@@ -5414,8 +5436,20 @@ public:
     gdb_assert (regcache != nullptr);
 
     int m_length = 0;
+    ULONGEST ival = 0;
     m_xlen = riscv_isa_xlen (gdbarch);
-    ULONGEST ival = riscv_insn::fetch_instruction (gdbarch, addr, &m_length);
+
+    /* Since fetch_instruction can throw an exception,
+       it must be wrapped in a try-catch block.  */
+    try
+      {
+	ival = riscv_insn::fetch_instruction (gdbarch, addr, &m_length);
+      }
+    catch (const gdb_exception_error &ex)
+      {
+	warning ("%s", ex.what ());
+	return false;
+      }
     if (!save_reg (RISCV_PC_REGNUM))
       return false;
 
@@ -5509,6 +5543,9 @@ riscv_record_insn_details (struct gdbarch *gdbarch, struct regcache *regcache,
   switch (insn.get_record_type ())
     {
     case riscv_recorded_insn::record_type::ORDINARY:
+    case riscv_recorded_insn::record_type::EBREAK:
+    case riscv_recorded_insn::record_type::SRET:
+    case riscv_recorded_insn::record_type::MRET:
       break;
 
     case riscv_recorded_insn::record_type::ECALL:
@@ -5523,9 +5560,6 @@ riscv_record_insn_details (struct gdbarch *gdbarch, struct regcache *regcache,
 	  return -1;
 	return tdep->riscv_syscall_record (regcache, reg_val);
       }
-
-    case riscv_recorded_insn::record_type::EBREAK:
-      break;
 
     default:
       return -1;
