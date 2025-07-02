@@ -19,7 +19,7 @@
 # instructions.
 
 require is_x86_64_m64_target have_avx
-require {istarget *-*-linux*}
+require support_displaced_stepping
 
 standard_testfile .S
 
