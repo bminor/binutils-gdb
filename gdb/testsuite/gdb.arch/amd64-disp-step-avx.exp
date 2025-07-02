@@ -19,6 +19,7 @@
 # instructions.
 
 require is_x86_64_m64_target have_avx
+require {istarget *-*-linux*}
 
 standard_testfile .S
 
