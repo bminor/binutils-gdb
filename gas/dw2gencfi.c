@@ -2598,9 +2598,11 @@ cfi_finish (void)
 
   /* Generate SFrame section if the user:
 	- enables via the command line option, or
+	- default-enabled at configure-time via --enable-default-sframe, or
 	- specifies .sframe in the .cfi_sections directive and does not disable
 	  via the command line.  */
   if (flag_gen_sframe == GEN_SFRAME_ENABLED
+      || flag_gen_sframe == GEN_SFRAME_CONFIG_ENABLED
       || ((all_cfi_sections & CFI_EMIT_sframe) != 0
 	  && flag_gen_sframe != GEN_SFRAME_DISABLED))
     {
@@ -2619,7 +2621,9 @@ cfi_finish (void)
 	}
       else
 #endif
-	as_bad (_(".sframe not supported for target"));
+	/* Avoid erroring with DEFAULT_SFRAME for non-default options, like
+	   -32 on x86_64.  */
+	sframe_as_bad (_(".sframe not supported for target"));
     }
 
   if ((all_cfi_sections & CFI_EMIT_debug_frame) != 0)

@@ -820,6 +820,7 @@ enable_default_compressed_debug_sections_algorithm
 enable_x86_relax_relocations
 enable_x86_tls_check
 enable_elf_stt_common
+enable_default_sframe
 enable_generate_build_notes
 enable_mips_fix_loongson3_llsc
 enable_x86_used_note
@@ -1497,6 +1498,7 @@ Optional Features:
   --enable-x86-tls-check  check x86 TLS relocation by default
   --enable-elf-stt-common generate ELF common symbols with STT_COMMON type by
                           default
+  --enable-default-sframe generate SFrame by default
   --enable-generate-build-notes
                           generate GNU Build notes if none are provided by the
                           input
@@ -10777,7 +10779,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10780 "configure"
+#line 10782 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10883,7 +10885,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10886 "configure"
+#line 10888 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11599,6 +11601,15 @@ if test "${enable_elf_stt_common+set}" = set; then :
 esac
 fi
 
+ac_default_sframe=unset
+# Provide a configure time option to override our default.
+# Check whether --enable-default-sframe was given.
+if test "${enable_default_sframe+set}" = set; then :
+  enableval=$enable_default_sframe; case "${enableval}" in
+  yes) ac_default_sframe=1 ;;
+  no)  ac_default_sframe=0 ;;
+esac
+fi
 
 # Decide if the ELF assembler should default to generating
 # GNU Build notes if none are provided by the input.
@@ -12720,6 +12731,15 @@ fi
 
 cat >>confdefs.h <<_ACEOF
 #define DEFAULT_GENERATE_ELF_STT_COMMON $ac_default_elf_stt_common
+_ACEOF
+
+
+if test ${ac_default_sframe} = unset; then
+  ac_default_sframe=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_SFRAME $ac_default_sframe
 _ACEOF
 
 

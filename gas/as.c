@@ -113,6 +113,12 @@ int flag_use_elf_stt_common = DEFAULT_GENERATE_ELF_STT_COMMON;
 bool flag_generate_build_notes = DEFAULT_GENERATE_BUILD_NOTES;
 #endif
 
+/* If DEFAULT_SFRAME is 0 instead, flag_gen_sframe gets the default
+   enum value GEN_SFRAME_DEFAULT_NONE.  */
+#if DEFAULT_SFRAME
+enum gen_sframe_option flag_gen_sframe = GEN_SFRAME_CONFIG_ENABLED;
+#endif
+
 segT reg_section;
 segT expr_section;
 segT text_section;
@@ -312,7 +318,7 @@ Options:\n\
                           generate GNU Build notes if none are present in the input\n"));
   fprintf (stream, _("\
   --gsframe[={no|yes}]    whether to generate SFrame stack trace information\n\
-                          (default: no)\n"));
+                          (default: %s)\n"), DEFAULT_SFRAME ? "yes" : "no");
 # if defined (TARGET_USE_SCFI) && defined (TARGET_USE_GINSN)
   fprintf (stream, _("\
   --scfi=experimental     Synthesize DWARF CFI for hand-written asm\n\

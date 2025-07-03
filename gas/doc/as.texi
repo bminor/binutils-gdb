@@ -864,7 +864,8 @@ configure option.
 @itemx --gsframe=yes
 Create @var{.sframe} section from CFI directives.  The explicit
 @option{--gsframe=yes} option behaves the same as @option{--gsframe}.
-Generation can be suppressed with @option{--gsframe=no}.
+Generation can be suppressed with @option{--gsframe=no}.  The default can be
+controlled by a configure option @option{--enable-default-sframe}.
 
 @end ifset
 

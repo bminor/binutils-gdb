@@ -117,6 +117,15 @@ AC_ARG_ENABLE(elf_stt_common,
   yes)  ac_default_elf_stt_common=1 ;;
 esac])dnl
 
+ac_default_sframe=unset
+# Provide a configure time option to override our default.
+AC_ARG_ENABLE(default-sframe,
+	      AS_HELP_STRING([--enable-default-sframe],
+	      [generate SFrame by default]),
+[case "${enableval}" in
+  yes) ac_default_sframe=1 ;;
+  no)  ac_default_sframe=0 ;;
+esac])dnl
 
 # Decide if the ELF assembler should default to generating
 # GNU Build notes if none are provided by the input.
@@ -756,6 +765,13 @@ AC_DEFINE_UNQUOTED(DEFAULT_GENERATE_ELF_STT_COMMON,
   $ac_default_elf_stt_common,
   [Define to 1 if you want to generate ELF common symbols with the
    STT_COMMON type by default.])
+
+if test ${ac_default_sframe} = unset; then
+  ac_default_sframe=0
+fi
+AC_DEFINE_UNQUOTED(DEFAULT_SFRAME,
+  $ac_default_sframe,
+  [Define to 1 if you want to emit SFrames by default.])
 
 AC_DEFINE_UNQUOTED(DEFAULT_GENERATE_BUILD_NOTES,
   $ac_default_generate_build_notes,
