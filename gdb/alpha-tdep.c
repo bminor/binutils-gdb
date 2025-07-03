@@ -1829,6 +1829,7 @@ INIT_GDB_FILE (alpha_tdep)
   gdbarch_register (bfd_arch_alpha, alpha_gdbarch_init, NULL);
 
   initialize_tdesc_alpha ();
+
   /* Let the user set the fence post for heuristic_proc_start.  */
 
   /* We really would like to have both "0" and "unlimited" work, but
