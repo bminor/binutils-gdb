@@ -1441,11 +1441,10 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */
       if (h->dynindx == -1
-	  && !h->forced_local)
-	{
-	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
-	    return false;
-	}
+	  && !h->forced_local
+	  && h->root.type == bfd_link_hash_undefweak
+	  && !bfd_elf_link_record_dynamic_symbol (info, h))
+	return false;
 
       if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, bfd_link_pic (info), h))
 	{
@@ -1497,21 +1496,20 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   if (h->got.refcount > 0)
     {
       asection *s;
-      bool dyn;
+      bool dyn = htab->elf.dynamic_sections_created;
       int tls_type = riscv_elf_hash_entry (h)->tls_type;
 
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */
-      if (h->dynindx == -1
-	  && !h->forced_local)
-	{
-	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
-	    return false;
-	}
+      if (dyn
+	  && h->dynindx == -1
+	  && !h->forced_local
+	  && h->root.type == bfd_link_hash_undefweak
+	  && !bfd_elf_link_record_dynamic_symbol (info, h))
+	return false;
 
       s = htab->elf.sgot;
       h->got.offset = s->size;
-      dyn = htab->elf.dynamic_sections_created;
       if (tls_type & (GOT_TLS_GD | GOT_TLS_IE | GOT_TLSDESC))
 	{
 	  int indx = 0;
@@ -1545,7 +1543,10 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       else
 	{
 	  s->size += GOT_ENTRY_SIZE;
-	  if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, bfd_link_pic (info), h)
+	  if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	       || h->root.type != bfd_link_hash_undefweak)
+	      && (bfd_link_pic (info)
+		  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h))
 	      && ! UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	    htab->elf.srelgot->size += sizeof (ElfNN_External_Rela);
 	}
@@ -1591,11 +1592,9 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  /* Make sure undefined weak symbols are output as a dynamic
 	     symbol in PIEs.  */
 	  else if (h->dynindx == -1
-		   && !h->forced_local)
-	    {
-	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
-		return false;
-	    }
+		   && !h->forced_local
+		   && !bfd_elf_link_record_dynamic_symbol (info, h))
+	    return false;
 	}
     }
   else
@@ -1614,11 +1613,10 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  /* Make sure this symbol is output as a dynamic symbol.
 	     Undefined weak syms won't yet be marked as dynamic.  */
 	  if (h->dynindx == -1
-	      && !h->forced_local)
-	    {
-	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
-		return false;
-	    }
+	      && !h->forced_local
+	      && h->root.type == bfd_link_hash_undefweak
+	      && !bfd_elf_link_record_dynamic_symbol (info, h))
+	    return false;
 
 	  /* If that succeeded, we know we'll be keeping all the
 	     relocs.  */
@@ -2459,6 +2457,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
       const char *msg = NULL;
       bool resolved_to_zero;
       bool via_plt = false;
+      bool relative_got = false;
 
       if (howto == NULL)
 	continue;
@@ -2873,6 +2872,15 @@ riscv_elf_relocate_section (bfd *output_bfd,
 		    off &= ~1;
 		  else
 		    {
+		      /* If a symbol is not dynamic and is not undefined weak,
+			 bind it locally and generate a RELATIVE relocation
+			 under PIC mode.  */
+		      if (h->dynindx == -1
+			  && !h->forced_local
+			  && h->root.type != bfd_link_hash_undefweak
+			  && bfd_link_pic (info))
+			relative_got = true;
+
 		      bfd_put_NN (output_bfd, relocation,
 				  htab->elf.sgot->contents + off);
 		      h->got.offset |= 1;
@@ -2896,27 +2904,27 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	      else
 		{
 		  if (bfd_link_pic (info))
-		    {
-		      asection *s;
-		      Elf_Internal_Rela outrel;
-
-		      /* We need to generate a R_RISCV_RELATIVE reloc
-			 for the dynamic linker.  */
-		      s = htab->elf.srelgot;
-		      BFD_ASSERT (s != NULL);
-
-		      outrel.r_offset = sec_addr (htab->elf.sgot) + off;
-		      outrel.r_info =
-			ELFNN_R_INFO (0, R_RISCV_RELATIVE);
-		      outrel.r_addend = relocation;
-		      relocation = 0;
-		      riscv_elf_append_rela (output_bfd, s, &outrel);
-		    }
+		    relative_got = true;
 
 		  bfd_put_NN (output_bfd, relocation,
 			      htab->elf.sgot->contents + off);
 		  local_got_offsets[r_symndx] |= 1;
 		}
+	    }
+
+	  /* We need to generate a R_RISCV_RELATIVE relocation later in the
+	     riscv_elf_finish_dynamic_symbol if h->dynindx != -1;  Otherwise,
+	     generate a R_RISCV_RELATIVE relocation here now.  */
+	  if (relative_got)
+	    {
+	      asection *s = htab->elf.srelgot;
+	      BFD_ASSERT (s != NULL);
+
+	      Elf_Internal_Rela outrel;
+	      outrel.r_offset = sec_addr (htab->elf.sgot) + off;
+	      outrel.r_info = ELFNN_R_INFO (0, R_RISCV_RELATIVE);
+	      outrel.r_addend = relocation;
+	      riscv_elf_append_rela (output_bfd, s, &outrel);
 	    }
 
 	  if (rel->r_addend != 0)

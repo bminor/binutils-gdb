@@ -238,6 +238,10 @@ if [istarget "riscv*-*-*"] {
     run_dump_test "pie-bind-locally-rv32"
     run_dump_test "pie-bind-locally-rv64"
 
+    run_dump_test "discard-exe"
+    run_dump_test "discard-pie"
+    run_dump_test "discard-pic"
+
     # IFUNC testcases.
     # Check IFUNC by single type relocs.
     run_dump_test_ifunc "ifunc-reloc-call-01" rv32 exe
