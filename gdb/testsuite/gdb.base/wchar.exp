@@ -72,3 +72,7 @@ gdb_test "print repeat_p" "= $hex L\"A$cent$cent\"\.\.\." \
 
 # From PR cli/14977, but here because it requires wchar_t.
 gdb_test "printf \"%ls\\n\", 0" "\\(null\\)"
+
+# From PR exp/33124 - a bug when converting escapes.
+set result [string_to_regexp {L'\\'}]
+gdb_test "print L'\\\\'" " = $decimal $result"
