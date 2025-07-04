@@ -332,6 +332,7 @@ struct riscv_option_stack
   struct riscv_option_stack *next;
   struct riscv_set_options options;
   riscv_subset_list_t *subset_list;
+  unsigned xlen;
 };
 
 static struct riscv_option_stack *riscv_opts_stack = NULL;
@@ -5113,6 +5114,7 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
       s->next = riscv_opts_stack;
       s->options = riscv_opts;
       s->subset_list = riscv_rps_as.subset_list;
+      s->xlen = xlen;
       riscv_opts_stack = s;
       riscv_rps_as.subset_list = riscv_copy_subset_list (s->subset_list);
     }
@@ -5129,6 +5131,7 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
 	  riscv_opts_stack = s->next;
 	  riscv_opts = s->options;
 	  riscv_rps_as.subset_list = s->subset_list;
+	  xlen = s->xlen;
 	  riscv_release_subset_list (release_subsets);
 	  free (s);
 	}
