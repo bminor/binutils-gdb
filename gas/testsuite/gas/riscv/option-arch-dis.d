@@ -22,5 +22,5 @@ Disassembly of section .text:
 [ 	]+2:[  	]+00b50533[    	]+add[        	]+a0,a0,a1
 [ 	]+6:[  	]+00302573[    	]+frcsr[        	]+a0
 [ 	]+a:[  	]+952e[    	]+add[        	]+a0,a0,a1
-[ 	]+c:[  	]+c8002573[    	]+.insn[ 	]+4, 0xc8002573
+[ 	]+c:[  	]+c8002573[    	]+rdcycleh[ 	]+a0
 #...

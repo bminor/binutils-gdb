@@ -7,5 +7,5 @@ frcsr	a0
 .option pop
 .option arch, +m3p0, +d3p0, +xvendor32x3p0
 add a0, a0, a1			# func-level, rv64i_m3p0_d3p0_c_xvendor32x3p0
-.option arch, rv32i2p1c2p0	# FIXME: maybe we should adjust xlen in dis-assembler according to mappin symbols?
-rdcycleh a0			# func-level, rv32i2p1_c2p0
+.option arch, rv32i2p1c2p0
+rdcycleh a0			# func-level, rv32i2p1_c2p0, won't affcet file-level attribute
