@@ -566,3 +566,30 @@ run_dump_test "multibyte1"
 run_dump_test "multibyte2"
 run_list_test "multibyte3" "--multibyte-handling=warn"
 run_list_test "multibyte3" "-f --multibyte-handling=warn"
+
+# EVAX has an extra line printed by objdump when there are no relocations,
+# and doesn't appear to enter absolute symbols into the symbol table.
+# SOM (HPPA) won't properly handle at least the latter two tests.
+switch -glob $target_triplet {
+    alpha-*-*vms* { }
+    hppa-*-hpux* { }
+    default {
+	run_dump_test "version"
+	# Non-ELF symbol tables may include section symbols.
+	# MSP430 adds references to library symbols.
+	# RL78 includes a special absolute symbol.
+	if { [is_elf_format]
+	     && ![istarget "msp430*-*-*"]
+	     && ![istarget "rl78*-*-*"] } {
+	    run_dump_test "version2"
+	}
+	# ECOFF/XCOFF don't look to (reliably) emit local absolute symbols.
+	# IA64, when targeting HPUX, deliberately omits unreferenced symbols.
+	if { ![is_xcoff_format]
+	     && ![istarget "alpha-*-linux*ecoff*"]
+	     && ![istarget "alpha-*-osf*"]
+	     && ![istarget "ia64-*-hpux*"] } {
+	    run_dump_test "version3"
+	}
+    }
+}

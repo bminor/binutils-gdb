@@ -486,6 +486,7 @@ parse_args (int * pargc, char *** pargv)
       OPTION_GDWARF_CIE_VERSION,
       OPTION_GCODEVIEW,
       OPTION_STRIP_LOCAL_ABSOLUTE,
+      OPTION_EMIT_LOCAL_ABSOLUTE,
       OPTION_TRADITIONAL_FORMAT,
       OPTION_WARN,
       OPTION_TARGET_HELP,
@@ -590,6 +591,7 @@ parse_args (int * pargc, char *** pargv)
     ,{"reduce-memory-overheads", no_argument, NULL, OPTION_REDUCE_MEMORY_OVERHEADS}
     ,{"statistics", no_argument, NULL, OPTION_STATISTICS}
     ,{"strip-local-absolute", no_argument, NULL, OPTION_STRIP_LOCAL_ABSOLUTE}
+    ,{"emit-local-absolute", no_argument, NULL, OPTION_EMIT_LOCAL_ABSOLUTE}
     ,{"version", no_argument, NULL, OPTION_VERSION}
     ,{"verbose", no_argument, NULL, 'v'}
     ,{"target-help", no_argument, NULL, OPTION_TARGET_HELP}
@@ -686,6 +688,10 @@ parse_args (int * pargc, char *** pargv)
 
 	case OPTION_STRIP_LOCAL_ABSOLUTE:
 	  flag_strip_local_absolute = 1;
+	  break;
+
+	case OPTION_EMIT_LOCAL_ABSOLUTE:
+	  flag_strip_local_absolute = -1;
 	  break;
 
 	case OPTION_TRADITIONAL_FORMAT:
@@ -1163,6 +1169,26 @@ This program has absolutely no warranty.\n"));
 #endif
 }
 
+/* Pre-define a symbol with its name derived from TMPL (wrapping in
+   GAS(...)), to value VAL.  */
+
+void
+predefine_symbol (const char *tmpl, valueT val)
+{
+  char *name = xasprintf ("GAS(%s)", tmpl);
+  symbolS *s;
+
+  /* Also put the symbol in the symbol table, if requested.  */
+  if (flag_strip_local_absolute < 0)
+    s = symbol_new (name, absolute_section, &zero_address_frag, val);
+  else
+    s = symbol_create (name, absolute_section, &zero_address_frag, val);
+  S_CLEAR_EXTERNAL (s);
+  symbol_table_insert (s);
+
+  xfree (name);
+}
+
 static void
 dump_statistics (void)
 {
@@ -1204,6 +1230,10 @@ perform_an_assembly_pass (int argc, char ** argv)
 #ifndef OBJ_MACH_O
   subseg_set (text_section, 0);
 #endif
+
+  predefine_symbol ("version", BFD_VERSION);
+  if (strstr (BFD_VERSION_STRING, "." XSTRING (BFD_VERSION_DATE)) != NULL)
+    predefine_symbol ("date", BFD_VERSION_DATE);
 
   /* This may add symbol table entries, which requires having an open BFD,
      and sections already created.  */

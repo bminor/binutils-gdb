@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Predefined symbols "GAS(version)" and, on non-release builds, "GAS(date)" are
+  now being made available.
+
 * Support for x86 AVX10.2 256 bit rounding has been dropped, as all the
   hardware would directly support 512 bit vecotr width.
 

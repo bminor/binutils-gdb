@@ -339,7 +339,8 @@ COMMON enum synth_cfi_type flag_synth_cfi;
 /* This is true if the assembler should output time and space usage.  */
 COMMON unsigned char flag_print_statistics;
 
-/* True if local absolute symbols are to be stripped.  */
+/* True (positive) if local absolute symbols are to be stripped.  Negative if
+   even pre-defined symbols should be emitted.  */
 COMMON int flag_strip_local_absolute;
 
 /* True if we should generate a traditional format object file.  */
@@ -514,6 +515,7 @@ void   as_report_context (void);
 const char * as_where (unsigned int *);
 const char * as_where_top (unsigned int *);
 const char * as_where_physical (unsigned int *);
+void   predefine_symbol (const char *, valueT);
 void   bump_line_counters (void);
 void   do_scrub_begin (int);
 void   input_scrub_begin (void);

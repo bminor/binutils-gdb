@@ -779,6 +779,10 @@ symbols with the @code{STT_COMMON} type.  The default can be controlled
 by a configure option @option{--enable-elf-stt-common}.
 @end ifset
 
+@item --emit-local-absolute
+Emit even pre-defined (local) absolute symbols to the outgoing symbol table.
+Note that this isn't the exact opposite of @samp{--strip-local-absolute}.
+
 @item --emulation=@var{name}
 If the assembler is configured to support multiple different target
 configurations then this option can be used to select the desired form.
@@ -3909,6 +3913,7 @@ the same order they were declared.  This may break some debuggers.
 * Symbol Names::                Symbol Names
 * Dot::                         The Special Dot Symbol
 * Symbol Attributes::           Symbol Attributes
+* Predefined Symbols::          Predefined Symbols
 @end menu
 
 @node Labels
@@ -4249,6 +4254,30 @@ The attributes are described in @cite{HP9000 Series 800 Assembly
 Language Reference Manual} (HP 92432-90001) under the @code{IMPORT} and
 @code{EXPORT} assembler directive documentation.
 @end ifset
+
+@node Predefined Symbols
+@section Predefined Symbols
+
+Certain pre-defined symbols will be made available for use, and possibly also
+inserted in the symbol table.  Because of the use of parentheses, access to
+these symbols will require quotation.
+
+Independent of the specific target, the following symbols will (perhaps
+conditionally; see each individual item) be made available:
+@itemize @bullet
+
+@item @code{GAS(version)}
+The version of the assembler, expressed as @samp{major} @code{*} 100000000
+@code{+} @samp{minor} @code{*} 1000000 @code{+} @samp{rev} @code{*} 10000.
+
+@item @code{GAS(date)}
+The date of the assembler sources (which may not be the date the assembler was
+built).  This is added only for non-release versions of gas.  The specific
+value probably better isn't checked for, just its defined-ness.
+
+@end itemize
+
+All symbols of the form @code{GAS(...)} are reserved for use by GNU @value{AS}.
 
 @node Expressions
 @chapter Expressions

@@ -2428,7 +2428,7 @@ S_IS_LOCAL (const symbolS *s)
 
   flags = s->bsym->flags;
 
-  if (flag_strip_local_absolute
+  if (flag_strip_local_absolute > 0
       /* Keep BSF_FILE symbols in order to allow debuggers to identify
 	 the source file even when the object file is stripped.  */
       && (flags & (BSF_GLOBAL | BSF_FILE)) == 0
