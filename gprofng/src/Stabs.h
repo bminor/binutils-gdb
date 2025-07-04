@@ -76,7 +76,6 @@ class Stabs {
 	DBGD_ERR_CHK_SUM
     };
 
-    static Stabs *NewStabs(char *_path, char *lo_name);
     Stabs(char *_path, char *_lo_name);
     ~Stabs();
 
@@ -100,7 +99,6 @@ class Stabs {
     static Function *find_func(char *fname, Vector<Function*> *functions, bool fortran, bool inner_names=false);
     Module	*append_Module(LoadObject *lo, char *name, int lastMod = 0);
     Function	*append_Function(Module *module, char *fname);
-    Function	*append_Function(Module *module, char *linkerName, uint64_t pc);
     Function	*map_PC_to_func(uint64_t pc, uint64_t &low_pc, Vector<Function*> *functions);
     char		*path;			// path to the object file
     char                *lo_name;       // User name of load object

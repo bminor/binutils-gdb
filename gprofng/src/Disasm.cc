@@ -50,19 +50,6 @@ struct DisContext
 
 static const int MAX_DISASM_STR     = 2048;
 
-Disasm::Disasm (char *fname)
-{
-  dwin = NULL;
-  dis_str = NULL;
-  need_swap_endian = false;
-  my_stabs = Stabs::NewStabs (fname, fname);
-  if (my_stabs == NULL)
-    return;
-  stabs = my_stabs;
-  platform = stabs->get_platform ();
-  disasm_open ();
-}
-
 Disasm::Disasm (Platform_t _platform, Stabs *_stabs)
 {
   dwin = NULL;
@@ -70,7 +57,6 @@ Disasm::Disasm (Platform_t _platform, Stabs *_stabs)
   need_swap_endian = false;
   stabs = _stabs;
   platform = _platform;
-  my_stabs = NULL;
   disasm_open ();
 }
 
@@ -263,7 +249,6 @@ Disasm::disasm_open ()
 
 Disasm::~Disasm ()
 {
-  delete my_stabs;
   delete dwin;
   delete dis_str;
 }

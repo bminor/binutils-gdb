@@ -35,10 +35,8 @@ class DbeFile;
 template <class ITEM> class Vector;
 template <typename Key_t, typename Value_t> class Map;
 
-#define GELF_R_SYM(info)    ((info)>>32)
 #define GELF_ST_TYPE(info)  ((info) & 0xf)
 #define GELF_ST_BIND(info)  ((info) >> 4)
-#define GELF_R_TYPE(info)   ((((uint64_t)(info))<<56)>>56)
 
 #define	SHF_SUNW_ABSENT		0x00200000	/* section data not present */
 #define	SEC_DECOMPRESSED	0x00400000	/* bfd allocated this memory */
@@ -94,8 +92,6 @@ public:
   char *elf_strptr (unsigned int sec, uint64_t off);
   long elf_getSymCount (bool is_dynamic);
   asymbol *elf_getsym (unsigned int ndx, Elf_Internal_Sym *dst, bool is_dynamic);
-  Elf_Internal_Rela *elf_getrel (Elf_Data *edta, unsigned int ndx, Elf_Internal_Rela *dst);
-  Elf_Internal_Rela *elf_getrela (Elf_Data *edta, unsigned int ndx, Elf_Internal_Rela *dst);
   Elf64_Ancillary *elf_getancillary (Elf_Data *edta, unsigned int ndx, Elf64_Ancillary *dst);
   Elf *find_ancillary_files (char *lo_name); // read the .gnu_debuglink and .SUNW_ancillary seections
   const char *get_funcname_in_plt (uint64_t pc);
@@ -132,7 +128,7 @@ public:
   Elf *gnu_debug_file;
   DbeFile *dbeFile;
   Map<const char*, Symbol*> *elfSymbols;
-  unsigned int gnuLink, analyzerInfo, SUNW_ldynsym, stab, stabStr, symtab, dynsym;
+  unsigned int analyzerInfo, stab, stabStr;
   unsigned int stabIndex, stabIndexStr, stabExcl, stabExclStr, info, plt;
   bool dwarf;
 
@@ -152,30 +148,6 @@ protected:
   asymbol **bfd_dynsym;
   asymbol *bfd_synthsym;
   Vector <asymbol *> *synthsym;
-};
-
-
-class ElfReloc
-{
-public:
-  struct Sreloc
-  {
-    long long offset;
-    long long value;
-    int stt_type;
-  };
-
-  static ElfReloc *get_elf_reloc (Elf *elf, char *sec_name, ElfReloc *rlc);
-  ElfReloc (Elf *_elf);
-  ~ElfReloc ();
-  long long get_reloc_addr (long long offset);
-  void dump ();
-  void dump_rela_debug_sec (int sec);
-
-private:
-  Elf *elf;
-  Vector<Sreloc *> *reloc;
-  int cur_reloc_ind;
 };
 
 #endif

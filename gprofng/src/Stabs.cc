@@ -163,18 +163,6 @@ Stabs::removeDupSyms ()
   SymLst->truncate (last);
 }
 
-Stabs *
-Stabs::NewStabs (char *_path, char *lo_name)
-{
-  Stabs *stabs = new Stabs (_path, lo_name);
-  if (stabs->status != Stabs::DBGD_ERR_NONE)
-    {
-      delete stabs;
-      return NULL;
-    }
-  return stabs;
-}
-
 Stabs::Stabs (char *_path, char *_lo_name)
 {
   path = dbe_strdup (_path);
@@ -2130,57 +2118,6 @@ Stabs::append_Function (Module *module, char *fname)
   module->loadobject->functions->append (func);
   return func;
 }
-
-Function *
-Stabs::append_Function (Module *module, char *linkerName, uint64_t pc)
-{
-  Dprintf (DEBUG_STABS, NTXT ("Stabs::append_Function: module=%s linkerName=%s pc=0x%llx\n"),
-	   STR (module->get_name ()), STR (linkerName), (unsigned long long) pc);
-  long i;
-  Symbol *sitem = NULL, *sp;
-  Function *func;
-  sp = new Symbol;
-  if (pc)
-    {
-      sp->value = pc;
-      i = SymLst->bisearch (0, -1, &sp, SymFindCmp);
-      if (i != -1)
-	sitem = SymLst->fetch (i);
-    }
-
-  if (!sitem && linkerName)
-    {
-      if (SymLstByName == NULL)
-	{
-	  SymLstByName = SymLst->copy ();
-	  SymLstByName->sort (SymNameCmp);
-	}
-      sp->name = linkerName;
-      i = SymLstByName->bisearch (0, -1, &sp, SymNameCmp);
-      sp->name = NULL;
-      if (i != -1)
-	sitem = SymLstByName->fetch (i);
-    }
-  delete sp;
-
-  if (!sitem)
-    return NULL;
-  if (sitem->alias)
-    sitem = sitem->alias;
-  if (sitem->func)
-    return sitem->func;
-
-  sitem->func = func = dbeSession->createFunction ();
-  func->img_fname = path;
-  func->img_offset = sitem->img_offset;
-  func->save_addr = sitem->save;
-  func->size = sitem->size;
-  func->module = module;
-  func->set_name (sitem->name); //XXXX ?? Now call it to set obj->name
-  module->functions->append (func);
-  module->loadobject->functions->append (func);
-  return func;
-}// Stabs::append_Function
 
 Dwarf *
 Stabs::openDwarf ()

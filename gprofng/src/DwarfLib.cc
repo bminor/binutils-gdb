@@ -35,31 +35,6 @@
 #define CASE_S(x)   case x: s = (char *) #x; break
 
 static char *
-gelf_st_type2str (int type)
-{
-  static char buf[128];
-  char *s;
-  switch (type)
-    {
-      CASE_S (STT_NOTYPE);
-      CASE_S (STT_OBJECT);
-      CASE_S (STT_FUNC);
-      CASE_S (STT_SECTION);
-      CASE_S (STT_FILE);
-      CASE_S (STT_COMMON);
-      CASE_S (STT_TLS);
-      //    CASE_S(STT_NUM);
-      CASE_S (STT_LOPROC);
-      CASE_S (STT_HIPROC);
-    default: s = NTXT ("???");
-      break;
-    }
-  snprintf (buf, sizeof (buf), NTXT ("%s(%d)"), s, type);
-  buf[sizeof (buf) - 1] = 0;
-  return buf;
-}
-
-static char *
 special_opcode2str (int opcode)
 {
   static char buf[128];
@@ -167,233 +142,6 @@ get_string (DwrSec *sec, uint64_t off)
 }
 
   
-//////////////////////////////////////////////////////////
-//  class ElfReloc
-
-ElfReloc::ElfReloc (Elf *_elf)
-{
-  elf = _elf;
-  reloc = NULL;
-  cur_reloc_ind = 0;
-}
-
-ElfReloc::~ElfReloc ()
-{
-  if (reloc)
-    {
-      reloc->destroy ();
-      delete reloc;
-    }
-}
-
-void
-ElfReloc::dump_rela_debug_sec (int sec)
-{
-  if (!DUMP_RELA_SEC)
-    return;
-  Elf_Internal_Shdr *shdr = elf->get_shdr (sec);
-  if (shdr == NULL)
-    return;
-
-  Elf_Data *data = elf->elf_getdata (sec);
-  if (data == NULL)
-    return;
-
-  uint64_t ScnSize = data->d_size;
-  uint64_t EntSize = shdr->sh_entsize;
-  if (ScnSize == 0 || EntSize == 0)
-    return;
-
-  Elf_Internal_Rela rela;
-  int n, cnt = (int) (ScnSize / EntSize);
-
-  char *sec_name = elf->get_sec_name (sec);
-  if (sec_name == NULL) // It can not be, but let's check
-    return;
-  Dprintf (DUMP_RELA_SEC,
-	   "======= DwarfLib::dump_rela_debug_sec  Section:%2d  '%s'\n",
-	   sec, sec_name);
-  Dprintf (DUMP_RELA_SEC,
-	   " N |addend|   offset   |       r_info      |    stt_type   |\n");
-  for (n = 0; n < cnt; n++)
-    {
-      if (strncmp (sec_name, NTXT (".rela."), 6) == 0)
-	elf->elf_getrela (data, n, &rela);
-      else
-	{
-	  elf->elf_getrel (data, n, &rela);
-	  rela.r_addend = 0;
-	}
-      int ndx = (int) GELF_R_SYM (rela.r_info);
-      Elf_Internal_Shdr *secHdr;
-      Elf_Internal_Sym sym;
-      asymbol *asym;
-      asym = elf->elf_getsym (ndx, &sym, false);
-      Dprintf (DUMP_RELA_SEC, NTXT ("%3d:%5d |%11lld |0x%016llx | %-15s|"),
-	       n, (int) rela.r_addend,
-	       (long long) rela.r_offset, (long long) rela.r_info,
-	       gelf_st_type2str ((int) GELF_ST_TYPE (sym.st_info)));
-      switch (GELF_ST_TYPE (sym.st_info))
-	{
-	case STT_FUNC:
-	case STT_OBJECT:
-	case STT_NOTYPE:
-	  Dprintf (DUMP_RELA_SEC, NTXT (" img_offset=0x%llx"),
-		   (long long) (bfd_asymbol_value (asym)));
-	  Dprintf (DUMP_RELA_SEC, NTXT ("  %s"),  bfd_asymbol_name (asym));
-	  break;
-	case STT_SECTION:
-	  secHdr = elf->get_shdr (sym.st_shndx);
-	  if (secHdr)
-	    {
-	      Dprintf (DUMP_RELA_SEC, NTXT ("       value=0x%016llx (%lld)"),
-		       (long long) (secHdr->sh_offset + rela.r_addend),
-		       (long long) (secHdr->sh_offset + rela.r_addend));
-	    }
-	  break;
-	default:
-	  break;
-	}
-      Dprintf (DUMP_RELA_SEC, NTXT ("\n"));
-    }
-  Dprintf (DUMP_RELA_SEC, NTXT ("\n"));
-}
-
-void
-ElfReloc::dump ()
-{
-  if (!DUMP_ELF_RELOC || (reloc == NULL) || (reloc->size () == 0))
-    return;
-  Dprintf (DUMP_ELF_RELOC, NTXT ("======= ElfReloc::dump\n"));
-  Dprintf (DUMP_ELF_RELOC, NTXT (" N |   offset   |    value   | STT_TYPE\n"));
-  for (int i = 0; i < reloc->size (); i++)
-    {
-      Sreloc *srlc = reloc->fetch (i);
-      Dprintf (DUMP_ELF_RELOC, NTXT ("%3d:%11lld |%11lld | %s\n"),
-	       i, (long long) srlc->offset, (long long) srlc->value,
-	       gelf_st_type2str (srlc->stt_type));
-    }
-  Dprintf (DUMP_ELF_RELOC, NTXT ("\n"));
-}
-
-static int
-DwrRelocOffsetCmp (const void *a, const void *b)
-{
-  ElfReloc::Sreloc *item1 = *((ElfReloc::Sreloc **) a);
-  ElfReloc::Sreloc *item2 = *((ElfReloc::Sreloc **) b);
-  return item1->offset < item2->offset ? -1 :
-	 item1->offset == item2->offset ? 0 : 1;
-}
-
-ElfReloc *
-ElfReloc::get_elf_reloc (Elf *elfp, char *sec_name, ElfReloc *rlc)
-{
-  int et = elfp->elf_getehdr ()->e_type;
-  if (et == ET_EXEC || et == ET_DYN)
-    return rlc;
-  int sec = elfp->elf_get_sec_num (sec_name);
-  if (sec == 0)
-    return rlc;
-  Elf_Internal_Shdr *shdr = elfp->get_shdr (sec);
-  if (shdr == NULL || shdr->sh_entsize == 0)
-    return rlc;
-
-  Elf_Data *data = elfp->elf_getdata (sec);
-  if (data == NULL || data->d_size == 0)
-    return rlc;
-
-  int cnt = (int) (data->d_size / shdr->sh_entsize);
-  Vector<Sreloc *> *vp = NULL;
-
-  for (int n = 0; n < cnt; n++)
-    {
-      Elf_Internal_Shdr *secHdr;
-      Sreloc *srlc;
-      Elf_Internal_Rela rela;
-      if (strncmp (sec_name, NTXT (".rela."), 6) == 0)
-	elfp->elf_getrela (data, n, &rela);
-      else
-	{
-	  elfp->elf_getrel (data, n, &rela);
-	  rela.r_addend = 0;
-	}
-      int ndx = (int) GELF_R_SYM (rela.r_info);
-      Elf_Internal_Sym sym;
-      elfp->elf_getsym (ndx, &sym, false);
-
-      srlc = new Sreloc;
-      srlc->offset = rela.r_offset;
-      srlc->value = 0;
-      srlc->stt_type = (int) GELF_ST_TYPE (sym.st_info);
-      switch (GELF_ST_TYPE (sym.st_info))
-	{
-	case STT_FUNC:
-	  secHdr = elfp->get_shdr (sym.st_shndx);
-	  if (secHdr)
-	    srlc->value = secHdr->sh_offset + sym.st_value;
-	  break;
-	case STT_OBJECT:
-	case STT_NOTYPE:
-	  secHdr = elfp->get_shdr (shdr->sh_info);
-	  if (secHdr)
-	    {
-	      srlc->offset = rela.r_info;
-	      srlc->value = secHdr->sh_offset + rela.r_addend;
-	    }
-	  break;
-	case STT_SECTION:
-	  secHdr = elfp->get_shdr (sym.st_shndx);
-	  if (secHdr)
-	    srlc->value = rela.r_addend;
-	  break;
-	default:
-	  srlc->value = 0;
-	  break;
-	}
-      if (rlc == NULL)
-	{
-	  rlc = new ElfReloc (elfp);
-	  vp = rlc->reloc;
-	}
-      if (vp == NULL)
-	{
-	  vp = new Vector<Sreloc*>;
-	  rlc->reloc = vp;
-	}
-      vp->append (srlc);
-    }
-  if (vp)
-    vp->sort (DwrRelocOffsetCmp);
-  if (rlc)
-    {
-      rlc->dump_rela_debug_sec (sec);
-      rlc->dump ();
-    }
-  return rlc;
-}
-
-long long
-ElfReloc::get_reloc_addr (long long offset)
-{
-  Sreloc *srlc;
-  int i = cur_reloc_ind - 1;
-  if (i >= 0 && i < reloc->size ())
-    {
-      srlc = reloc->fetch (i);
-      if (srlc->offset > offset)  // need to reset
-	cur_reloc_ind = 0;
-    }
-  for (; cur_reloc_ind < reloc->size (); cur_reloc_ind++)
-    {
-      srlc = reloc->fetch (cur_reloc_ind);
-      if (srlc->offset == offset)
-	return srlc->value;
-      if (srlc->offset > offset)
-	return 0;
-    }
-  return 0;
-}
-
 DwrLocation *
 DwrCU::dwr_get_location (DwrSec *secp, DwrLocation *lp)
 {
@@ -1058,34 +806,28 @@ Dwr_Tag::dump ()
 
 DwrSec::DwrSec (unsigned char *_data, uint64_t _size, bool _need_swap_endian, bool _addr32)
 {
-  isCopy = false;
   data = _data;
   sizeSec = _size;
   size = (data ? _size : 0);
   offset = 0;
   fmt64 = false;
-  reloc = NULL;
   need_swap_endian = _need_swap_endian;
   addr32 = _addr32;
 }
 
 DwrSec::DwrSec (DwrSec *secp, uint64_t _offset)
 {
-  isCopy = true;
   data = secp->data;
   sizeSec = secp->sizeSec;
   size = secp->size;
   offset = _offset;
   fmt64 = secp->fmt64;
-  reloc = secp->reloc;
   need_swap_endian = secp->need_swap_endian;
   addr32 = secp->addr32;
 }
 
 DwrSec::~DwrSec ()
 {
-  if (!isCopy)
-    delete reloc;
 }
 
 bool
@@ -1213,17 +955,13 @@ DwrSec::GetLong ()
 uint64_t
 DwrSec::GetADDR_32 ()
 {
-  uint64_t res = reloc ? reloc->get_reloc_addr (offset) : 0;
-  res += Get_32 ();
-  return res;
+  return Get_32 ();
 }
 
 uint64_t
 DwrSec::GetADDR_64 ()
 {
-  uint64_t res = reloc ? reloc->get_reloc_addr (offset) : 0;
-  res += Get_64 ();
-  return res;
+  return Get_64 ();
 }
 
 uint64_t

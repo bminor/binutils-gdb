@@ -31,7 +31,6 @@ enum Platform_t;
 class Disasm
 {
 public:
-  Disasm (char *fname);
   Disasm (Platform_t _platform, Stabs *_stabs);
   ~Disasm ();
   void remove_disasm_hndl (void *hndl);
@@ -59,7 +58,7 @@ private:
 
   disassemble_info dis_info;
   Data_window *dwin;
-  Stabs *stabs, *my_stabs;
+  Stabs *stabs;
   Platform_t platform;
   char addr_fmt[32];
   int hex_visible;

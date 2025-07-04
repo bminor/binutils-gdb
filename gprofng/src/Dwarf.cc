@@ -378,13 +378,6 @@ Dwarf::Dwarf (Stabs *_stabs)
       return;
     }
   debug_infoSec = dwrGetSec (NTXT (".debug_info"));
-  if (debug_infoSec)
-    {
-      debug_infoSec->reloc = ElfReloc::get_elf_reloc (elf, NTXT (".rela.debug_info"), NULL);
-      debug_infoSec->reloc = ElfReloc::get_elf_reloc (elf, NTXT (".rel.debug_info"), debug_infoSec->reloc);
-      if (debug_infoSec->reloc)
-	debug_infoSec->reloc->dump ();
-    }
   debug_abbrevSec = dwrGetSec (NTXT (".debug_abbrev"));
   debug_strSec = dwrGetSec (NTXT (".debug_str"));
   debug_lineSec = dwrGetSec (NTXT (".debug_line"));

@@ -28,6 +28,7 @@
 #include "Map.h"
 #include "StringBuilder.h"
 #include "DbeFile.h"
+#include "DbeSession.h"
 
 typedef uint32_t Elf32_Word;
 typedef uint32_t Elf64_Word;
@@ -82,56 +83,6 @@ struct S_Elf64_Dyn
     Elf64_Addr d_ptr;       /* Address value */
   } d_un;
 };
-
-
-// Symbol table
-typedef struct
-{
-  Elf32_Word st_name;
-  Elf32_Addr st_value;
-  Elf32_Word st_size;
-  unsigned char st_info;    /* bind, type: ELF_32_ST_... */
-  unsigned char st_other;
-  Elf32_Half st_shndx;      /* SHN_... */
-} Elf32_Sym;
-
-typedef struct
-{
-  Elf64_Word st_name;
-  unsigned char st_info;    /* bind, type: ELF_64_ST_... */
-  unsigned char st_other;
-  Elf64_Half st_shndx;      /* SHN_... */
-  Elf64_Addr st_value;
-  Elf64_Xword st_size;
-} Elf64_Sym;
-
-
-// Relocation
-typedef struct
-{
-  Elf32_Addr r_offset;
-  Elf32_Word r_info;        /* sym, type: ELF32_R_... */
-} Elf32_Rel;
-
-typedef struct
-{
-  Elf32_Addr r_offset;
-  Elf32_Word r_info;        /* sym, type: ELF32_R_... */
-  Elf32_Sword r_addend;
-} Elf32_Rela;
-
-typedef struct
-{
-  Elf64_Addr r_offset;
-  Elf64_Xword r_info;       /* sym, type: ELF64_R_... */
-} Elf64_Rel;
-
-typedef struct
-{
-  Elf64_Addr r_offset;
-  Elf64_Xword r_info;       /* sym, type: ELF64_R_... */
-  Elf64_Sxword r_addend;
-} Elf64_Rela;
 
 int Elf::bfd_status = -1;
 
@@ -196,23 +147,13 @@ Elf::Elf (char *filename) : DbeMessages (), Data_window (filename)
     }
   status = ELF_ERR_NONE;
 
-#if ARCH(SPARC)
-  need_swap_endian = is_Intel ();
-#else
-  need_swap_endian = !is_Intel ();
-#endif
-
+  need_swap_endian = DbeSession::is_bigendian () != bfd_big_endian (abfd);
   analyzerInfo = 0;
-  SUNW_ldynsym = 0;
-  gnuLink = 0;
   stab = 0;
-  stabStr = 0;
   stabIndex = 0;
   stabIndexStr = 0;
   stabExcl = 0;
   stabExclStr = 0;
-  symtab = 0;
-  dynsym = 0;
   info = 0;
   plt = 0;
   dwarf = false;
@@ -234,20 +175,12 @@ Elf::Elf (char *filename) : DbeMessages (), Data_window (filename)
 	stabExcl = sec;
       else if (streq (name, NTXT (".stab.exclstr")))
 	stabExclStr = sec;
-      else if (streq (name, NTXT (".gnu_debuglink")))
-	gnuLink = sec;
       else if (streq (name, NTXT (".__analyzer_info")))
 	analyzerInfo = sec;
       else if (streq (name, NTXT (".info")))
 	info = true;
       else if (streq (name, NTXT (".plt")))
 	plt = sec;
-      else if (streq (name, NTXT (".SUNW_ldynsym")))
-	SUNW_ldynsym = sec;
-      else if (streq (name, NTXT (".dynsym")))
-	dynsym = sec;
-      else if (streq (name, NTXT (".symtab")))
-	symtab = sec;
       else if (strncmp (name, NTXT (".debug"), 6) == 0)
 	dwarf = true;
     }
@@ -570,50 +503,6 @@ Elf::elf_getsym (unsigned int ndx, Elf_Internal_Sym *dst, bool is_dynamic)
     *dst = ((elf_symbol_type *) asym)->internal_elf_sym;
 
   return asym;
-}
-
-Elf_Internal_Rela *
-Elf::elf_getrel (Elf_Data *edta, unsigned int ndx, Elf_Internal_Rela *dst)
-{
-  if (dst == NULL || edta == NULL || edta->d_buf == NULL)
-    return NULL;
-  if (elf_getclass () == ELFCLASS32)
-    {
-      Elf32_Rel *rel = ((Elf32_Rel *) edta->d_buf) + ndx;
-      dst->r_offset = decode (rel->r_offset);
-      dst->r_info = ELF64_R_INFO (ELF32_R_SYM (decode (rel->r_info)),
-				  ELF32_R_TYPE (decode (rel->r_info)));
-    }
-  else
-    {
-      Elf64_Rel *rel = ((Elf64_Rel *) edta->d_buf) + ndx;
-      dst->r_offset = decode (rel->r_offset);
-      dst->r_info = decode (rel->r_info);
-    }
-  return dst;
-}
-
-Elf_Internal_Rela *
-Elf::elf_getrela (Elf_Data *edta, unsigned int ndx, Elf_Internal_Rela *dst)
-{
-  if (dst == NULL || edta == NULL || edta->d_buf == NULL)
-    return NULL;
-  if (elf_getclass () == ELFCLASS32)
-    {
-      Elf32_Rela *rela = ((Elf32_Rela *) edta->d_buf) + ndx;
-      dst->r_offset = decode (rela->r_offset);
-      dst->r_addend = decode (rela->r_addend);
-      dst->r_info = ELF64_R_INFO (ELF32_R_SYM (decode (rela->r_info)),
-				  ELF32_R_TYPE (decode (rela->r_info)));
-    }
-  else
-    {
-      Elf64_Rela *rela = ((Elf64_Rela *) edta->d_buf) + ndx;
-      dst->r_offset = decode (rela->r_offset);
-      dst->r_addend = decode (rela->r_addend);
-      dst->r_info = decode (rela->r_info);
-    }
-  return dst;
 }
 
 Elf64_Ancillary *

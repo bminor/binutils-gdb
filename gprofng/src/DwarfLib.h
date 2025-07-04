@@ -23,7 +23,6 @@
 
 #include "dwarf2.h"
 
-class ElfReloc;
 class Dwr_type;
 class Function;
 class Range;
@@ -76,7 +75,6 @@ public:
     return (uint32_t) GetULEB128 ();
   }
 
-  ElfReloc *reloc;
   uint64_t sizeSec;
   uint64_t size;
   uint64_t offset;
@@ -87,7 +85,6 @@ public:
   int segment_selector_size; // DWARF 5
 
 private:
-  bool isCopy;
   unsigned char *data;
   bool bounds_violation (uint64_t sz);
 };
