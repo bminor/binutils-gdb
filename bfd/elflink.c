@@ -2281,68 +2281,85 @@ _bfd_elf_export_symbol (struct elf_link_hash_entry *h, void *data)
   return true;
 }
 
-/* Return the glibc version reference if VERSION_DEP is added to the
-   list of glibc version dependencies successfully.  VERSION_DEP will
-   be put into the .gnu.version_r section.  GLIBC_MINOR_BASE is the
-   pointer to the glibc minor base version.  */
+/* Return true if linked against glibc.  Otherwise return false.  If
+   linked against glibc, add VERSION_DEP to the list of glibc version
+   dependencies and set *AUTO_VERSION to true.  If *AUTO_VERSION is
+   true, add VERSION_DEP to the version dependency list only if libc.so
+   defines VERSION_DEP.  GLIBC_MINOR_BASE is the pointer to the glibc
+   minor base version.  */
 
-static Elf_Internal_Verneed *
+static bool
 elf_link_add_glibc_verneed (struct elf_find_verdep_info *rinfo,
-			    Elf_Internal_Verneed *glibc_verref,
 			    const char *version_dep,
-			    int *glibc_minor_base)
+			    int *glibc_minor_base,
+			    bool *auto_version)
 {
   Elf_Internal_Verneed *t;
   Elf_Internal_Vernaux *a;
   size_t amt;
   int minor_version = -1;
+  bool added = false;
+  bool glibc = false;
 
-  if (glibc_verref != NULL)
+  for (t = elf_tdata (rinfo->info->output_bfd)->verref;
+       t != NULL;
+       t = t->vn_nextref)
     {
-      t = glibc_verref;
+      const char *soname = bfd_elf_get_dt_soname (t->vn_bfd);
+      if (soname != NULL && startswith (soname, "libc.so."))
+	break;
+    }
 
-      for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
+  /* Skip the shared library if it isn't libc.so.  */
+  if (t == NULL)
+    goto update_auto_version_and_return;
+
+  for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
+    {
+      /* Return if VERSION_DEP dependency has been added.  */
+      if (a->vna_nodename == version_dep
+	  || strcmp (a->vna_nodename, version_dep) == 0)
 	{
-	  /* Return if VERSION_DEP dependency has been added.  */
-	  if (a->vna_nodename == version_dep
-	      || strcmp (a->vna_nodename, version_dep) == 0)
-	    return t;
+	  glibc = true;
+	  goto update_auto_version_and_return;
+	}
+
+      /* Check if libc.so provides GLIBC_2.XX version.  */
+      if (startswith (a->vna_nodename, "GLIBC_2."))
+	{
+	  minor_version = strtol (a->vna_nodename + 8, NULL, 10);
+	  if (minor_version < *glibc_minor_base)
+	    *glibc_minor_base = minor_version;
 	}
     }
-  else
+
+  /* Skip if it isn't linked against glibc.  */
+  if (minor_version < 0)
+    goto update_auto_version_and_return;
+
+  glibc = true;
+
+  if (auto_version && *auto_version)
     {
-      for (t = elf_tdata (rinfo->info->output_bfd)->verref;
-	   t != NULL;
-	   t = t->vn_nextref)
-	{
-	  const char *soname = bfd_elf_get_dt_soname (t->vn_bfd);
-	  if (soname != NULL && startswith (soname, "libc.so."))
+      /* Add VERSION_DEP to the version dependency list only if
+	 libc.so defines VERSION_DEP.  */
+
+      bool defined = false;
+      Elf_Internal_Verdef *d;
+
+      for (d = elf_tdata (t->vn_bfd)->verdef;
+	   d != NULL;
+	   d = d->vd_nextdef)
+	if (strcmp (d->vd_nodename, version_dep) == 0)
+	  {
+	    defined = true;
 	    break;
-	}
+	  }
 
-      /* Skip the shared library if it isn't libc.so.  */
-      if (t == NULL)
-	return t;
-
-      for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
-	{
-	  /* Return if VERSION_DEP dependency has been added.  */
-	  if (a->vna_nodename == version_dep
-	      || strcmp (a->vna_nodename, version_dep) == 0)
-	    return t;
-
-	  /* Check if libc.so provides GLIBC_2.XX version.  */
-	  if (startswith (a->vna_nodename, "GLIBC_2."))
-	    {
-	      minor_version = strtol (a->vna_nodename + 8, NULL, 10);
-	      if (minor_version < *glibc_minor_base)
-		*glibc_minor_base = minor_version;
-	    }
-	}
-
-      /* Skip if it isn't linked against glibc.  */
-      if (minor_version < 0)
-	return NULL;
+      /* Set *AUTO_VERSION to false and return true to indicate that
+	 libc.so doesn't define VERSION_DEP.  */
+      if (!defined)
+	goto update_auto_version_and_return;
     }
 
   /* Skip if 2.GLIBC_MINOR_BASE includes VERSION_DEP.  */
@@ -2350,7 +2367,7 @@ elf_link_add_glibc_verneed (struct elf_find_verdep_info *rinfo,
     {
       minor_version = strtol (version_dep + 8, NULL, 10);
       if (minor_version <= *glibc_minor_base)
-	return NULL;
+	goto update_auto_version_and_return;
     }
 
   amt = sizeof *a;
@@ -2358,7 +2375,8 @@ elf_link_add_glibc_verneed (struct elf_find_verdep_info *rinfo,
   if (a == NULL)
     {
       rinfo->failed = true;
-      return NULL;
+      glibc = false;
+      goto update_auto_version_and_return;
     }
 
   a->vna_nodename = version_dep;
@@ -2369,7 +2387,13 @@ elf_link_add_glibc_verneed (struct elf_find_verdep_info *rinfo,
 
   t->vn_auxptr = a;
 
-  return t;
+  added = true;
+
+ update_auto_version_and_return:
+  if (auto_version)
+    *auto_version = added;
+
+  return glibc;
 }
 
 /* Add VERSION_DEP to the list of version dependencies when linked
@@ -2378,19 +2402,19 @@ elf_link_add_glibc_verneed (struct elf_find_verdep_info *rinfo,
 void
 _bfd_elf_link_add_glibc_version_dependency
   (struct elf_find_verdep_info *rinfo,
-   const char *const version_dep[])
+   const char *const version_dep[],
+   bool *auto_version)
 {
-  Elf_Internal_Verneed *t = NULL;
   int glibc_minor_base = INT_MAX;
 
   do
     {
-      t = elf_link_add_glibc_verneed (rinfo, t, *version_dep,
-				      &glibc_minor_base);
-      /* Return if there is no glibc version reference.  */
-      if (t == NULL)
+      /* Return if not linked against glibc.  */
+      if (!elf_link_add_glibc_verneed (rinfo, *version_dep,
+				       &glibc_minor_base, auto_version))
 	return;
       version_dep++;
+      auto_version++;
     }
   while (*version_dep != NULL);
 }
@@ -2408,7 +2432,7 @@ _bfd_elf_link_add_dt_relr_dependency (struct elf_find_verdep_info *rinfo)
 	  "GLIBC_ABI_DT_RELR",
 	  NULL
 	};
-      _bfd_elf_link_add_glibc_version_dependency (rinfo, version);
+      _bfd_elf_link_add_glibc_version_dependency (rinfo, version, NULL);
     }
 }
 

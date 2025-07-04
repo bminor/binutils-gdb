@@ -2694,6 +2694,10 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 	    eh->zero_undefweak &= 0x2;
 	  break;
 
+	case R_X86_64_TLSDESC_CALL:
+	  htab->has_tls_desc_call = 1;
+	  goto need_got;
+
 	case R_X86_64_GOTTPOFF:
 	case R_X86_64_CODE_4_GOTTPOFF:
 	case R_X86_64_CODE_5_GOTTPOFF:
@@ -2715,7 +2719,7 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_X86_64_GOTPLT64:
 	case R_X86_64_GOTPC32_TLSDESC:
 	case R_X86_64_CODE_4_GOTPC32_TLSDESC:
-	case R_X86_64_TLSDESC_CALL:
+need_got:
 	  /* This symbol requires a global offset table entry.	*/
 	  {
 	    int tls_type, old_tls_type;
@@ -6243,7 +6247,8 @@ elf_x86_64_add_glibc_version_dependency
   (struct elf_find_verdep_info *rinfo)
 {
   unsigned int i = 0;
-  const char *version[3] = { NULL, NULL, NULL };
+  const char *version[4] = { NULL, NULL, NULL, NULL };
+  bool auto_version[4] = { false, false, false, false };
   struct elf_x86_link_hash_table *htab;
 
   if (rinfo->info->enable_dt_relr)
@@ -6253,14 +6258,27 @@ elf_x86_64_add_glibc_version_dependency
     }
 
   htab = elf_x86_hash_table (rinfo->info, X86_64_ELF_DATA);
-  if (htab != NULL && htab->params->mark_plt)
+  if (htab != NULL)
     {
-      version[i] = "GLIBC_2.36";
-      i++;
+      if (htab->params->gnu2_tls_version_tag && htab->has_tls_desc_call)
+	{
+	  version[i] = "GLIBC_ABI_GNU2_TLS";
+	  /* 2 == auto, enable if libc.so defines the GLIBC_ABI_GNU2_TLS
+	     version.  */
+	  if (htab->params->gnu2_tls_version_tag == 2)
+	    auto_version[i] = true;
+	  i++;
+	}
+      if (htab->params->mark_plt)
+	{
+	  version[i] = "GLIBC_2.36";
+	  i++;
+	}
     }
 
   if (i != 0)
-    _bfd_elf_link_add_glibc_version_dependency (rinfo, version);
+    _bfd_elf_link_add_glibc_version_dependency (rinfo, version,
+						auto_version);
 }
 
 static const struct bfd_elf_special_section
@@ -6354,6 +6372,8 @@ elf_x86_64_special_sections[]=
 #define elf64_bed elf64_x86_64_bed
 
 #include "elf64-target.h"
+
+#undef elf_backend_add_glibc_version_dependency
 
 /* FreeBSD support.  */
 
@@ -6463,6 +6483,10 @@ elf64_x86_64_copy_solaris_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUS
 #undef elf_backend_bfd_from_remote_memory
 #define elf_backend_bfd_from_remote_memory \
   _bfd_elf32_bfd_from_remote_memory
+
+#undef elf_backend_add_glibc_version_dependency
+#define elf_backend_add_glibc_version_dependency \
+  elf_x86_64_add_glibc_version_dependency
 
 #undef elf_backend_size_info
 #define elf_backend_size_info \

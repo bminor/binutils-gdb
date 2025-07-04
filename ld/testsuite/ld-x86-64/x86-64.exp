@@ -2360,7 +2360,7 @@ run_dump_test "ibt-plt-3b-x32"
 run_dump_test "ibt-plt-3c-x32"
 run_dump_test "ibt-plt-3d-x32"
 
-# Skip -z mark-plt tests on MUSL.
+# Skip -z mark-plt and --gnu2-tls-tag tests on MUSL.
 if { [istarget "x86_64-*-musl*"]} {
     set ASFLAGS "$saved_ASFLAGS"
     return
@@ -2385,6 +2385,30 @@ if { [check_compiler_available] } {
 	    {{readelf {-W --version-info} mark-plt-1a.rd} \
 	     {readelf {-W --version-info} mark-plt-1b.rd}} \
 	    "mark-plt-1.so" \
+	] \
+	[list \
+	    "Build mark-plt-2.so" \
+	    "-shared -Wl,--no-as-needed,-z,mark-plt,-z,nopack-relative-relocs" \
+	    "-fPIC" \
+	    { mark-plt-2.s } \
+	    {{readelf {-W --version-info} mark-plt-2.rd}} \
+	    "mark-plt-2.so" \
+	] \
+	[list \
+	    "Build gnu2-tls-1a.so" \
+	    "-shared -Wl,--no-as-needed,--gnu2-tls-tag" \
+	    "-fPIC" \
+	    { gnu2-tls-1.s } \
+	    {{readelf {-W --version-info} gnu2-tls-1a.rd}} \
+	    "gnu2-tls-1a.so" \
+	] \
+	[list \
+	    "Build gnu2-tls-1b.so" \
+	    "-shared -Wl,--no-as-needed,--no-gnu2-tls-tag" \
+	    "-fPIC" \
+	    { gnu2-tls-1.s } \
+	    {{readelf {-W --version-info} gnu2-tls-1b.rd}} \
+	    "gnu2-tls-1b.so" \
 	] \
     ]
 }
