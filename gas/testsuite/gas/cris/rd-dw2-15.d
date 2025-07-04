@@ -1,6 +1,6 @@
 #readelf: -wl
 #source: prefix.s
-#as: --em=criself --gdwarf2
+#as: --emulation=criself --gdwarf2
 
 # Various prefixes, assembled standalone.
 #...

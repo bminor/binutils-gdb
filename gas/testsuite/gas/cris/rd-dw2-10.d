@@ -1,6 +1,6 @@
 #readelf: -wl
 #source: continue.s
-#as: --em=criself --gdwarf2
+#as: --emulation=criself --gdwarf2
 
 # Continued line.
 #...

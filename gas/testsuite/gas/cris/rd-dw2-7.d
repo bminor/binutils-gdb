@@ -1,6 +1,6 @@
 #readelf: -wl
 #source: brokw-1.s
-#as: --em=criself --gdwarf2
+#as: --emulation=criself --gdwarf2
 
 # Most simple broken word.
 #...

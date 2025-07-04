@@ -1,6 +1,6 @@
 #readelf: -wl
 #source: pushpop.s
-#as: --em=criself --gdwarf2
+#as: --emulation=criself --gdwarf2
 
 # Pushes and other prefixes.
 #...

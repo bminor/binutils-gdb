@@ -1,5 +1,5 @@
 #source: tls-ie-8.s --pic
-#as: --no-underscore --em=criself
+#as: --no-underscore --emulation=criself
 #ld: -m crislinux --shared --hash-style=sysv
 #readelf: -a -x 7
 

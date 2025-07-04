@@ -1,6 +1,6 @@
 #readelf: -wl
 #source: unimplemented.s
-#as: --em=criself --gdwarf2
+#as: --emulation=criself --gdwarf2
 
 # Prefixes of various sizes.
 #...

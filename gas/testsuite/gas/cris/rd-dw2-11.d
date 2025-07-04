@@ -1,6 +1,6 @@
 #readelf: -wl
 #source: fragtest.s
-#as: --em=criself --gdwarf2
+#as: --emulation=criself --gdwarf2
 
 # Highly "fragmented" code.
 #...

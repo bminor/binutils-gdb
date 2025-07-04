@@ -1,6 +1,6 @@
 #readelf: -wl
 #source: branch-warn-3.s
-#as: --em=criself --gdwarf2
+#as: --emulation=criself --gdwarf2
 
 # Simple branch-expansion, type 3.
 #...

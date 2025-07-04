@@ -1,6 +1,6 @@
 #readelf: -wl
 #source: brokw-2.s
-#as: --em=criself --gdwarf2
+#as: --emulation=criself --gdwarf2
 
 # Simple broken word, table with two labels.
 #...

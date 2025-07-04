@@ -1,6 +1,6 @@
 #readelf: -wl
 #source: addi.s
-#as: --em=criself --gdwarf2
+#as: --emulation=criself --gdwarf2
 # A most simple instruction sequence.
 #...
  Line Number Statements:

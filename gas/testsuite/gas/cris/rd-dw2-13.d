@@ -1,6 +1,6 @@
 #readelf: -wl
 #source: rd-pic-1.s
-#as: --em=criself --pic --gdwarf2
+#as: --emulation=criself --pic --gdwarf2
 
 # PIC prefix relocs.
 #...

@@ -1,6 +1,6 @@
 #readelf: -wl
 #source: branch.s
-#as: --em=criself --gdwarf2
+#as: --emulation=criself --gdwarf2
 
 # Complicated branch expansion.
 #...

@@ -1,6 +1,6 @@
 #readelf: -wl
 #source: brokw-3.s
-#as: --em=criself --gdwarf2
+#as: --emulation=criself --gdwarf2
 
 # Long broken word table.
 #...
