@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add .errif and .warnif directives, permitting user-controlled diagnostics
+  with conditionals that are evaluated only at the end of assembly.
+
 * Predefined symbols "GAS(version)" and, on non-release builds, "GAS(date)" are
   now being made available.
 

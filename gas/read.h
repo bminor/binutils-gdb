@@ -169,6 +169,7 @@ extern symbolS *s_comm_internal (int, symbolS *(*) (int, symbolS *, addressT));
 extern symbolS *s_lcomm_internal (int, symbolS *, addressT);
 extern void temp_ilp (char *);
 extern void restore_ilp (void);
+extern void evaluate_deferred_diags (void);
 extern void s_file_string (char *);
 
 extern void s_abort (int) ATTRIBUTE_NORETURN;

@@ -236,6 +236,7 @@ static unsigned int bundle_lock_depth;
 static void do_s_func (int end_p, const char *default_prefix);
 static void s_altmacro (int);
 static void s_bad_end (int);
+static void s_errwarn_if (int);
 static void s_reloc (int);
 static int hex_float (int, char *);
 static segT get_known_segmented_expression (expressionS * expP);
@@ -401,6 +402,7 @@ static const pseudo_typeS potable[] = {
   {"equiv", s_set, 1},
   {"eqv", s_set, -1},
   {"err", s_err, 0},
+  {"errif", s_errwarn_if, 1},
   {"error", s_errwarn, 1},
   {"exitm", s_mexit, 0},
 /* extend  */
@@ -515,6 +517,7 @@ static const pseudo_typeS potable[] = {
   {"xdef", s_globl, 0},
   {"xref", s_ignore, 0},
   {"xstabs", s_xstab, 's'},
+  {"warnif", s_errwarn_if, 0},
   {"warning", s_errwarn, 0},
   {"weakref", s_weakref, 0},
   {"word", cons, 2},
@@ -2235,6 +2238,62 @@ s_errwarn (int err)
   else
     as_warn ("%s", msg);
   demand_empty_rest_of_line ();
+}
+
+/* Handle the .errif and .warnif pseudo-ops.  */
+
+static struct deferred_diag {
+  struct deferred_diag *next;
+  const char *file;
+  unsigned int lineno;
+  bool err;
+  expressionS exp;
+} *deferred_diags, *last_deferred_diag;
+
+static void
+s_errwarn_if (int err)
+{
+  struct deferred_diag *diag = XNEW (struct deferred_diag);
+  int errcnt = had_errors ();
+
+  deferred_expression (&diag->exp);
+  if (errcnt != had_errors ())
+    {
+      ignore_rest_of_line ();
+      return;
+    }
+
+  diag->err = err;
+  diag->file = as_where (&diag->lineno);
+  diag->next = NULL;
+  if ( deferred_diags == NULL )
+    deferred_diags = diag;
+  else
+    last_deferred_diag->next = diag;
+  last_deferred_diag = diag;
+
+  demand_empty_rest_of_line ();
+}
+
+void
+evaluate_deferred_diags (void)
+{
+  struct deferred_diag *diag;
+
+  for (diag = deferred_diags; diag != NULL; diag = diag->next)
+    {
+      if (!resolve_expression (&diag->exp) || diag->exp.X_op != O_constant)
+	as_warn_where (diag->file, diag->lineno,
+		       _("expression does not evaluate to a constant"));
+      else if (diag->exp.X_add_number == 0)
+	continue;
+      else if (diag->err)
+	as_bad_where (diag->file, diag->lineno,
+		      _(".errif expression evaluates to true"));
+      else
+	as_warn_where (diag->file, diag->lineno,
+		       _(".warnif expression evaluates to true"));
+    }
 }
 
 /* Handle the MRI fail pseudo-op.  */

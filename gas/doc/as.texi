@@ -4582,6 +4582,7 @@ Some machine configurations provide additional directives.
 * Equiv::                       @code{.equiv @var{symbol}, @var{expression}}
 * Eqv::                         @code{.eqv @var{symbol}, @var{expression}}
 * Err::				@code{.err}
+* Errif::			@code{.errif @var{expression}}
 * Error::			@code{.error @var{string}}
 * Exitm::			@code{.exitm}
 * Extern::                      @code{.extern}
@@ -4714,6 +4715,7 @@ Some machine configurations provide additional directives.
 * VTableInherit::               @code{.vtable_inherit @var{child}, @var{parent}}
 @end ifset
 
+* Warnif::			@code{.warnif @var{expression}}
 * Warning::			@code{.warning @var{string}}
 * Weak::                        @code{.weak @var{names}}
 * Weakref::                     @code{.weakref @var{alias}, @var{symbol}}
@@ -5556,6 +5558,13 @@ value is taken.
 If @command{@value{AS}} assembles a @code{.err} directive, it will print an error
 message and, unless the @option{-Z} option was used, it will not generate an
 object file.  This can be used to signal an error in conditionally compiled code.
+
+@node Errif
+@section @code{.errif "@var{expression}"}
+@cindex errif directive
+
+Record @var{expression} for evaluation at the end of assembly.  Raise an error
+if the expression evaluates to non-zero.
 
 @node Error
 @section @code{.error "@var{string}"}
@@ -7749,6 +7758,13 @@ This directive finds the symbol @code{child} and finds or creates the symbol
 parent whose addend is the value of the child symbol.  As a special case the
 parent name of @code{0} is treated as referring to the @code{*ABS*} section.
 @end ifset
+
+@node Warnif
+@section @code{.warnif "@var{expression}"}
+@cindex errif directive
+
+Record @var{expression} for evaluation at the end of assembly.  Raise a
+warning if the expression evaluates to non-zero.
 
 @node Warning
 @section @code{.warning "@var{string}"}

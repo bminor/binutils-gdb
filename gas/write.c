@@ -2321,6 +2321,8 @@ write_object_file (void)
   resolve_local_symbol_values ();
   resolve_reloc_expr_symbols ();
 
+  evaluate_deferred_diags ();
+
 #ifdef OBJ_ELF
   if (IS_ELF)
     maybe_generate_build_notes ();
