@@ -44,7 +44,7 @@ static const char *myname;
 
 static SIM_DESC sd;
 
-static RETSIGTYPE
+static void
 cntrl_c (int sig)
 {
   if (! sim_stop (sd))
@@ -64,7 +64,7 @@ main (int argc, char **argv)
   enum sim_stop reason;
   int sigrc = 0;
   int single_step = 0;
-  RETSIGTYPE (*prev_sigint) (int);
+  void (*prev_sigint) (int);
 
   myname = lbasename (argv[0]);
 

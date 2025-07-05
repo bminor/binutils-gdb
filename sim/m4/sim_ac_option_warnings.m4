@@ -189,7 +189,7 @@ AC_DEFUN([_SIM_TEST_WARNING_FLAG], [dnl
   dnl Check whether GCC accepts it.
   saved_CFLAGS="$CFLAGS"
   CFLAGS="$CFLAGS -Werror $wtest"
-  AC_TRY_COMPILE([],[],$2,$3)
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[]])],[$2],[$3])
   CFLAGS="$saved_CFLAGS"
 ])
 dnl Export variable $1 to $2 for use in makefiles.
