@@ -1729,8 +1729,8 @@ resolve_symbol_value (symbolS *symp)
 	    case O_bit_or_not:		left |= ~right; break;
 	    case O_bit_exclusive_or:	left ^= right; break;
 	    case O_bit_and:		left &= right; break;
-	    case O_add:			left += right; break;
-	    case O_subtract:		left -= right; break;
+	    case O_add:			left += (valueT) right; break;
+	    case O_subtract:		left -= (valueT) right; break;
 	    case O_eq:
 	    case O_ne:
 	      left = (left == right && seg_left == seg_right
