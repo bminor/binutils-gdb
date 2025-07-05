@@ -388,11 +388,11 @@ Generic command for manipulating the kernel memory interface."),
 
 #ifndef HAVE_STRUCT_THREAD_TD_PCB
   add_cmd ("proc", class_obscure, bsd_kvm_proc_cmd,
-	   _("Set current context from proc address"), &bsd_kvm_cmdlist);
+	   _("Set current context from proc address."), &bsd_kvm_cmdlist);
 #endif
   add_cmd ("pcb", class_obscure, bsd_kvm_pcb_cmd,
 	   /* i18n: PCB == "Process Control Block".  */
-	   _("Set current context from pcb address"), &bsd_kvm_cmdlist);
+	   _("Set current context from pcb address."), &bsd_kvm_cmdlist);
 
   /* Some notes on the ptid usage on this target.
 
