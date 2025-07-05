@@ -712,7 +712,7 @@ pending_bundle_size (fragS *frag)
   if (frag->fr_type == rs_machine_dependent)
     size += md_frag_max_var (frag);
 
-  gas_assert (size >= offset);
+  gas_assert (size >= offset || now_seg == absolute_section);
 
   return size - offset;
 }
