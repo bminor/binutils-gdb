@@ -685,11 +685,11 @@ start_bundle (void)
 
 /* Calculate the maximum size after relaxation of the region starting
    at the given frag and extending through frag_now (which is unfinished).  */
-static unsigned int
+static valueT
 pending_bundle_size (fragS *frag)
 {
-  unsigned int offset = frag->fr_fix;
-  unsigned int size = 0;
+  valueT offset = frag->fr_fix;
+  valueT size = 0;
 
   gas_assert (frag != frag_now);
   gas_assert (frag->fr_type == rs_align_code);
@@ -719,7 +719,7 @@ pending_bundle_size (fragS *frag)
 
 /* Finish off the frag created to ensure bundle alignment.  */
 static void
-finish_bundle (fragS *frag, unsigned int size)
+finish_bundle (fragS *frag, valueT size)
 {
   gas_assert (bundle_align_p2 > 0);
   gas_assert (frag->fr_type == rs_align_code);
@@ -763,20 +763,20 @@ assemble_one (char *line)
     {
       /* Make sure this hasn't pushed the locked sequence
 	 past the bundle size.  */
-      unsigned int bundle_size = pending_bundle_size (bundle_lock_frag);
+      valueT bundle_size = pending_bundle_size (bundle_lock_frag);
       if (bundle_size > 1U << bundle_align_p2)
-	as_bad (_ (".bundle_lock sequence at %u bytes, "
+	as_bad (_ (".bundle_lock sequence at %" PRIu64 " bytes, "
 		   "but .bundle_align_mode limit is %u bytes"),
-		bundle_size, 1U << bundle_align_p2);
+		(uint64_t) bundle_size, 1U << bundle_align_p2);
     }
   else if (bundle_align_p2 > 0)
     {
-      unsigned int insn_size = pending_bundle_size (insn_start_frag);
+      valueT insn_size = pending_bundle_size (insn_start_frag);
 
       if (insn_size > 1U << bundle_align_p2)
-	as_bad (_("single instruction is %u bytes long, "
+	as_bad (_("single instruction is %" PRIu64 " bytes long, "
 		  "but .bundle_align_mode limit is %u bytes"),
-		insn_size, 1U << bundle_align_p2);
+		(uint64_t) insn_size, 1U << bundle_align_p2);
 
       finish_bundle (insn_start_frag, insn_size);
     }
@@ -6772,7 +6772,7 @@ s_bundle_lock (int arg ATTRIBUTE_UNUSED)
 void
 s_bundle_unlock (int arg ATTRIBUTE_UNUSED)
 {
-  unsigned int size;
+  valueT size;
 
   demand_empty_rest_of_line ();
 
@@ -6791,9 +6791,9 @@ s_bundle_unlock (int arg ATTRIBUTE_UNUSED)
   size = pending_bundle_size (bundle_lock_frag);
 
   if (size > 1U << bundle_align_p2)
-    as_bad (_(".bundle_lock sequence is %u bytes, "
+    as_bad (_(".bundle_lock sequence is %" PRIu64 " bytes, "
 	      "but bundle size is only %u bytes"),
-	    size, 1u << bundle_align_p2);
+	    (uint64_t) size, 1u << bundle_align_p2);
   else
     finish_bundle (bundle_lock_frag, size);
 
