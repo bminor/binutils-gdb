@@ -13577,6 +13577,9 @@ _bfd_elf_section_offset (bfd *abfd,
     case SEC_INFO_TYPE_EH_FRAME:
       return _bfd_elf_eh_frame_section_offset (abfd, info, sec, offset);
 
+    case SEC_INFO_TYPE_SFRAME:
+      return _bfd_elf_sframe_section_offset (abfd, info, sec, offset);
+
     default:
       if ((sec->flags & SEC_ELF_REVERSE_COPY) != 0)
 	{
