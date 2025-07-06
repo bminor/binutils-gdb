@@ -41,7 +41,7 @@ add_fde1 (sframe_encoder_ctx *encode, int idx)
 
   unsigned char finfo = sframe_fde_create_func_info (SFRAME_FRE_TYPE_ADDR1,
 						     SFRAME_FDE_TYPE_PCINC);
-  err = sframe_encoder_add_funcdesc (encode, 0xfffff03e, 0x1b, finfo, 4);
+  err = sframe_encoder_add_funcdesc (encode, 0xfffff022, 0x1b, finfo, 4);
   if (err == -1)
     return err;
 
@@ -66,7 +66,7 @@ add_fde2 (sframe_encoder_ctx *encode, int idx)
 
   unsigned char finfo = sframe_fde_create_func_info (SFRAME_FRE_TYPE_ADDR1,
 						     SFRAME_FDE_TYPE_PCINC);
-  err = sframe_encoder_add_funcdesc (encode, 0xfffff059, 0x10, finfo, 4);
+  err = sframe_encoder_add_funcdesc (encode, 0xfffff029, 0x10, finfo, 4);
   if (err == -1)
     return err;
 
@@ -145,7 +145,8 @@ int main (void)
     }                                                                         \
     while (0)
 
-  encode = sframe_encode (SFRAME_VERSION, 0,
+  encode = sframe_encode (SFRAME_VERSION,
+			  SFRAME_F_FDE_FUNC_START_PCREL,
 			  SFRAME_ABI_AMD64_ENDIAN_LITTLE,
 			  SFRAME_CFA_FIXED_FP_INVALID,
 			  -8, /* Fixed RA offset for AMD64.  */

@@ -21,6 +21,7 @@
 #include "as.h"
 #include "subsegs.h"
 #include "sframe.h"
+#include "sframe-api.h"
 #include "gen-sframe.h"
 #include "dw2gencfi.h"
 
@@ -598,7 +599,8 @@ output_sframe_funcdesc (symbolS *start_of_fre_section,
   dw_fde_start_addrS = get_dw_fde_start_addrS (sframe_fde->dw_fde);
   dw_fde_end_addrS = get_dw_fde_end_addrS (sframe_fde->dw_fde);
 
-  /* Start address of the function.  */
+  /* Start address of the function.  gas always emits this value with encoding
+     SFRAME_F_FDE_FUNC_START_PCREL.  See PR ld/32666.  */
   exp.X_op = O_subtract;
   exp.X_add_symbol = dw_fde_start_addrS; /* to location.  */
   exp.X_op_symbol = symbol_temp_new_now (); /* from location.  */
@@ -663,8 +665,9 @@ output_sframe_internal (void)
   int fixed_ra_offset = SFRAME_CFA_FIXED_RA_INVALID;
 
   /* The function descriptor entries as dumped by the assembler are not
-     sorted on PCs.  */
-  unsigned char sframe_flags = 0;
+     sorted on PCs.  Fix for PR ld/32666 requires setting of an additional
+     flag in SFrame Version 2.  */
+  unsigned char sframe_flags = SFRAME_F_FDE_FUNC_START_PCREL;
 
   unsigned int num_fdes = get_num_sframe_fdes ();
   unsigned int num_fres = get_num_sframe_fres ();
@@ -680,6 +683,10 @@ output_sframe_internal (void)
   /* Output the preamble of SFrame section.  */
   out_two (SFRAME_MAGIC);
   out_one (SFRAME_VERSION);
+  /* gas must ensure emitted SFrame sections have at least the required flags
+     set.  */
+  gas_assert ((sframe_flags & SFRAME_F_LD_MUSTHAVE_FLAGS)
+	      == SFRAME_F_LD_MUSTHAVE_FLAGS);
   out_one (sframe_flags);
   /* abi/arch.  */
 #ifdef sframe_get_abi_arch
