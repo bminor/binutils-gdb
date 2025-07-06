@@ -2,12 +2,10 @@
 #source: ../../../gas/testsuite/gas/mips/mips16-hilo.s
 #source: mips16-hilo.s
 #as: -march=mips1
-#objdump: -mmips:16 --prefix-addresses -tdr --show-raw-insn
+#objdump: -mmips:16 --prefix-addresses -dr --show-raw-insn
 #ld: -Tmips16-hilo.ld -e 0x500000 -N
 
 .*:     file format elf.*mips.*
-
-#...
 
 Disassembly of section .text:
 0+500000 <[^>]*> 6c00      	li	a0,0
