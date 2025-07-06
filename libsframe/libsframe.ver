@@ -38,3 +38,8 @@ LIBSFRAME_1.0 {
   local:
     *;
 } LIBSFRAME_0.0;
+
+LIBSFRAME_1.1 {
+    sframe_decoder_get_flags;
+    sframe_encoder_get_flags;
+} LIBSFRAME_1.0;
