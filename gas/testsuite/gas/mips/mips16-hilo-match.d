@@ -1,4 +1,4 @@
-#objdump: -r 
+#objdump: -r
 #as: -mabi=32 -march=mips1 -mpdr
 #name: MIPS16 mips16-hilo-match
 
@@ -32,10 +32,7 @@ OFFSET +TYPE +VALUE
 00000086 R_MIPS16_LO16     hilo_match
 0000008a R_MIPS16_26       func1
 
-
 RELOCATION RECORDS FOR \[\.pdr\]:
 OFFSET +TYPE +VALUE
 00000000 R_MIPS_32         _pinit
 00000020 R_MIPS_32         pdelt
-
-
