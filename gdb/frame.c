@@ -213,56 +213,6 @@ get_frame_pc_masked (const frame_info_ptr &frame)
   return frame->next->prev_pc.masked;
 }
 
-/* A frame stash used to speed up frame lookups.  Create a hash table
-   to stash frames previously accessed from the frame cache for
-   quicker subsequent retrieval.  The hash table is emptied whenever
-   the frame cache is invalidated.  */
-
-static htab_t frame_stash;
-
-/* Internal function to calculate a hash from the frame_id addresses,
-   using as many valid addresses as possible.  Frames below level 0
-   are not stored in the hash table.  */
-
-static hashval_t
-frame_addr_hash (const void *ap)
-{
-  const frame_info *frame = (const frame_info *) ap;
-  const struct frame_id f_id = frame->this_id.value;
-  hashval_t hash = 0;
-
-  gdb_assert (f_id.stack_status != FID_STACK_INVALID
-	      || f_id.code_addr_p
-	      || f_id.special_addr_p);
-
-  if (f_id.stack_status == FID_STACK_VALID)
-    hash = iterative_hash (&f_id.stack_addr,
-			   sizeof (f_id.stack_addr), hash);
-  if (f_id.code_addr_p)
-    hash = iterative_hash (&f_id.code_addr,
-			   sizeof (f_id.code_addr), hash);
-  if (f_id.special_addr_p)
-    hash = iterative_hash (&f_id.special_addr,
-			   sizeof (f_id.special_addr), hash);
-
-  char user_created_p = f_id.user_created_p;
-  hash = iterative_hash (&user_created_p, sizeof (user_created_p), hash);
-
-  return hash;
-}
-
-/* Internal equality function for the hash table.  This function
-   defers equality operations to frame_id::operator==.  */
-
-static int
-frame_addr_hash_eq (const void *a, const void *b)
-{
-  const frame_info *f_entry = (const frame_info *) a;
-  const frame_info *f_element = (const frame_info *) b;
-
-  return f_entry->this_id.value == f_element->this_id.value;
-}
-
 /* Deletion function for the frame cache hash table.  */
 
 static void
@@ -275,20 +225,117 @@ frame_info_del (frame_info *frame)
     frame->base->unwind->dealloc_cache (frame, frame->base_cache);
 }
 
-/* Internal function to create the frame_stash hash table.  100 seems
-   to be a good compromise to start the hash table at.  */
+/* A wrapper for frame_info that calls the 'frame_info_del' when
+   destroyed.  */
 
-static void
-frame_stash_create (void)
+struct frame_info_stash_entry
 {
-  frame_stash = htab_create
-    (100, frame_addr_hash, frame_addr_hash_eq,
-     [] (void *p)
-       {
-	 auto frame = static_cast<frame_info *> (p);
-	 frame_info_del (frame);
-       });
-}
+  explicit frame_info_stash_entry (frame_info *info)
+    : frame (info)
+  {
+  }
+
+  ~frame_info_stash_entry ()
+  {
+    destroy ();
+  }
+
+  DISABLE_COPY_AND_ASSIGN (frame_info_stash_entry);
+
+  frame_info_stash_entry (frame_info_stash_entry &&other)
+    : frame (other.frame)
+  {
+    other.frame = nullptr;
+  }
+
+  frame_info_stash_entry &operator= (frame_info_stash_entry &&other)
+  {
+    destroy ();
+    frame = other.frame;
+    other.frame = nullptr;
+    return *this;
+  }
+
+  void destroy ()
+  {
+    if (frame != nullptr)
+      frame_info_del (frame);
+  }
+
+  frame_info *frame;
+};
+
+struct frame_info_stash_hash
+{
+  using is_transparent = void;
+  using is_avalanching = void;
+
+  uint64_t operator() (const frame_id &f_id) const noexcept
+  {
+    hashval_t hash = 0;
+
+    gdb_assert (f_id.stack_status != FID_STACK_INVALID
+		|| f_id.code_addr_p
+		|| f_id.special_addr_p);
+
+    if (f_id.stack_status == FID_STACK_VALID)
+      hash = iterative_hash (&f_id.stack_addr,
+			     sizeof (f_id.stack_addr), hash);
+    if (f_id.code_addr_p)
+      hash = iterative_hash (&f_id.code_addr,
+			     sizeof (f_id.code_addr), hash);
+    if (f_id.special_addr_p)
+      hash = iterative_hash (&f_id.special_addr,
+			     sizeof (f_id.special_addr), hash);
+
+    char user_created_p = f_id.user_created_p;
+    hash = iterative_hash (&user_created_p, sizeof (user_created_p), hash);
+
+    return hash;
+  }
+
+  uint64_t operator() (const frame_info_stash_entry &info) const noexcept
+  {
+    return (*this) (info.frame->this_id.value);
+  }
+
+  uint64_t operator() (const frame_info *frame) const noexcept
+  {
+    return (*this) (frame->this_id.value);
+  }
+};
+
+struct frame_info_stash_eq
+{
+  using is_transparent = void;
+
+  bool operator() (const frame_id &lhs, const frame_info_stash_entry &rhs)
+    const noexcept
+  {
+    return lhs == rhs.frame->this_id.value;
+  }
+
+  bool operator() (const frame_info *lhs, const frame_info_stash_entry &rhs)
+    const noexcept
+  {
+    return (*this) (lhs->this_id.value, rhs);
+  }
+
+  bool operator() (const frame_info_stash_entry &lhs,
+		   const frame_info_stash_entry &rhs)
+    const noexcept
+  {
+    return (*this) (lhs.frame->this_id.value, rhs);
+  }
+};
+
+/* A frame stash used to speed up frame lookups.  Create a hash table
+   to stash frames previously accessed from the frame cache for
+   quicker subsequent retrieval.  The hash table is emptied whenever
+   the frame cache is invalidated.  */
+
+static gdb::unordered_set<frame_info_stash_entry, frame_info_stash_hash,
+			  frame_info_stash_eq> frame_stash;
 
 /* Internal function to add a frame to the frame_stash hash table.
    Returns false if a frame with the same ID was already stashed, true
@@ -300,18 +347,7 @@ frame_stash_add (frame_info *frame)
   /* Valid frame levels are -1 (sentinel frames) and above.  */
   gdb_assert (frame->level >= -1);
 
-  frame_info **slot = (frame_info **) htab_find_slot (frame_stash,
-						      frame, INSERT);
-
-  /* If we already have a frame in the stack with the same id, we
-     either have a stack cycle (corrupted stack?), or some bug
-     elsewhere in GDB.  In any case, ignore the duplicate and return
-     an indication to the caller.  */
-  if (*slot != nullptr)
-    return false;
-
-  *slot = frame;
-  return true;
+  return frame_stash.emplace (frame).second;
 }
 
 /* Internal function to search the frame stash for an entry with the
@@ -321,12 +357,10 @@ frame_stash_add (frame_info *frame)
 static frame_info_ptr
 frame_stash_find (struct frame_id id)
 {
-  struct frame_info dummy;
-  frame_info *frame;
-
-  dummy.this_id.value = id;
-  frame = (frame_info *) htab_find (frame_stash, &dummy);
-  return frame_info_ptr (frame);
+  auto iter = frame_stash.find (id);
+  if (iter == frame_stash.end ())
+    return nullptr;
+  return frame_info_ptr (iter->frame);
 }
 
 /* Internal function to invalidate the frame stash by removing all
@@ -336,7 +370,7 @@ frame_stash_find (struct frame_id id)
 static void
 frame_stash_invalidate (void)
 {
-  htab_empty (frame_stash);
+  frame_stash.clear ();
 }
 
 /* See frame.h  */
@@ -2111,7 +2145,7 @@ reinit_frame_cache (void)
 {
   ++frame_cache_generation;
 
-  if (htab_elements (frame_stash) > 0)
+  if (!frame_stash.empty ())
     annotate_frames_invalid ();
 
   invalidate_selected_frame ();
@@ -3425,8 +3459,6 @@ frame_info_ptr::reinflate () const
 INIT_GDB_FILE (frame)
 {
   obstack_init (&frame_cache_obstack);
-
-  frame_stash_create ();
 
   gdb::observers::target_changed.attach (frame_observer_target_changed,
 					 "frame");
