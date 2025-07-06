@@ -1,7 +1,7 @@
 #objdump: -dr
 #name: MIPS16e2 lui/addi n32
 #as: -mips16 -mabi=n32 -march=mips64r2 -mmips16e2
-#source: mips16e2-hilo.s
+#source: mips-hilo.s
 
 .*: +file format .*mips.*
 

@@ -1,6 +1,4 @@
-# Source file used to test li/addi on MIPS16e2
-
-	.set	mips16
+# Source file used to test lui/addiu.
 
 	.data
 data_label:

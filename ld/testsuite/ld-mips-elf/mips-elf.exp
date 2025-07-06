@@ -816,6 +816,14 @@ run_dump_test "mode-change-error-1"
 
 run_dump_test_o32 "mips16-hilo" noarch
 run_dump_test_n32 "mips16-hilo-n32" noarch
+run_dump_test_o32 "mips16e2-hilo" noarch
+run_dump_test_n32 "mips16e2-hilo-n32" noarch
+run_dump_test_o32 "mips-hilo"
+run_dump_test_n32 "mips-hilo-n32"
+run_dump_test_n64 "mips-hilo-n64"
+run_dump_test_o32 "micromips-hilo" noarch
+run_dump_test_n32 "micromips-hilo-n32" noarch
+run_dump_test_n64 "micromips-hilo-n64" noarch
 
 if { $linux_gnu } {
     run_dump_test_n32 "textrel-1"
