@@ -1,6 +1,6 @@
 #objdump: -r
-#as: -mabi=32 -march=mips1 -mpdr
-#name: MIPS16 mips16-hilo-match
+#as: -mabi=32 -march=mips1 -mpdr --defsym micromips=1
+#name: microMIPS micromips-hilo-match
 #source: mips-hilo-match.s
 
 .*: +file format .*mips.*
@@ -24,14 +24,14 @@ OFFSET +TYPE +VALUE
 0000004c R_MIPS_26         func3
 00000024 R_MIPS_HI16       hilo_match
 00000050 R_MIPS_LO16       hilo_match
-0000005e R_MIPS16_HI16     .data
-00000068 R_MIPS16_LO16     .data
-0000006c R_MIPS16_26       func1
-00000072 R_MIPS16_26       func2
-00000078 R_MIPS16_HI16     hilo_match
-00000080 R_MIPS16_LO16     hilo_match
-00000086 R_MIPS16_LO16     hilo_match
-0000008a R_MIPS16_26       func1
+0000005e R_MICROMIPS_HI16  .data
+00000068 R_MICROMIPS_LO16  .data
+0000006c R_MICROMIPS_26_S1  func1
+00000074 R_MICROMIPS_26_S1  func2
+0000007c R_MICROMIPS_HI16  hilo_match
+00000084 R_MICROMIPS_LO16  hilo_match
+0000008a R_MICROMIPS_LO16  hilo_match
+0000008e R_MICROMIPS_26_S1  func1
 
 RELOCATION RECORDS FOR \[\.pdr\]:
 OFFSET +TYPE +VALUE

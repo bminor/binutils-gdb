@@ -1,6 +1,7 @@
 	.align	2
 	.globl	_pinit
 .LFB84:
+	.set	nomicromips
 	.set	nomips16
 	.ent	_pinit
 _pinit:
@@ -43,7 +44,11 @@ _pinit:
 	.align	2
 	.globl	pdelt
 .LFB120:
+	.ifdef	micromips
+	.set	micromips
+	.else
 	.set	mips16
+	.endif
 	.ent	pdelt
 pdelt:
 	.set	macro
