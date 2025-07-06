@@ -217,11 +217,11 @@ Disassembly of section \.text:
 [ 	]*[0-9a-f]+:	f000 6d20 	lui	a1,0x0
 [ 	]*[0-9a-f]+: R_MIPS16_HI16	\.data
 [ 	]*[0-9a-f]+:	f000 9d80 	lw	a0,0\(a1\)
-[ 	]*[0-9a-f]+: R_MIPS16_HI16	\.data
+[ 	]*[0-9a-f]+: R_MIPS16_LO16	\.data
 [ 	]*[0-9a-f]+:	f000 6d20 	lui	a1,0x0
 [ 	]*[0-9a-f]+: R_MIPS16_HI16	\.data\+0x4
 [ 	]*[0-9a-f]+:	f000 9d80 	lw	a0,0\(a1\)
-[ 	]*[0-9a-f]+: R_MIPS16_HI16	\.data\+0x4
+[ 	]*[0-9a-f]+: R_MIPS16_LO16	\.data\+0x4
 [ 	]*[0-9a-f]+:	f000 6d20 	lui	a1,0x0
 [ 	]*[0-9a-f]+: R_MIPS16_HI16	big_external_data_label
 [ 	]*[0-9a-f]+:	f000 9d80 	lw	a0,0\(a1\)
