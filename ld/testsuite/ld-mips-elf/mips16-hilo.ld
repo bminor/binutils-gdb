@@ -7,6 +7,6 @@ SECTIONS
   .sdata : { *(.sdata) }
   . = 0x0765430;
   .bss : { *(.bss) *(COMMON) }
-  .sbss : { *(.sbss) *(.scommon) }
+  .sbss : { *(.scommon) *(.sbss) }
   /DISCARD/ : { *(*) }
 }
