@@ -60,6 +60,7 @@ dump_sframe_header_flags (sframe_decoder_ctx *sfd_ctx)
 
   PRINT_FLAG (SFRAME_F_FDE_SORTED);
   PRINT_FLAG (SFRAME_F_FRAME_POINTER);
+  PRINT_FLAG (SFRAME_F_FDE_FUNC_START_PCREL);
 #undef PRINT_FLAG
 
   /* Print any residual flags, should this implementation be out of sync when
