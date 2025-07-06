@@ -1,6 +1,7 @@
 #name: R_MIPS16_HI16 and R_MIPS16_LO16 relocs
 #source: ../../../gas/testsuite/gas/mips/mips16-hilo.s
 #source: mips16-hilo.s
+#as: -march=mips1
 #objdump: -mmips:16 --prefix-addresses -tdr --show-raw-insn
 #ld: -Tmips16-hilo.ld -e 0x500000 -N
 
