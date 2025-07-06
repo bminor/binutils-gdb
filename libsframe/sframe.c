@@ -913,7 +913,7 @@ sframe_decode (const char *sf_buf, size_t sf_size, int *errp)
   sfheaderp = &dctx->sfd_header;
   if (!sframe_header_sanity_check_p (sfheaderp))
     {
-      sframe_ret_set_errno (errp, SFRAME_ERR_NOMEM);
+      sframe_ret_set_errno (errp, SFRAME_ERR_BUF_INVAL);
       goto decode_fail_free;
     }
   hdrsz = sframe_get_hdr_size (sfheaderp);
