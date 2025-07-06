@@ -5,9 +5,9 @@
 #objdump: -mmips:16 -dr
 #ld: -Tmips-hilo.ld -e 0x500000 -N
 
-.*:     file format elf.*mips.*
+.*:     file format (:?elf.*mips.*|srec)
 
-Disassembly of section .text:
+Disassembly of section \.(:?text|sec1):
 
 0*500000 <[^>]*>:
  *500000:	6c00      	li	a0,0

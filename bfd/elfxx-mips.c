@@ -2599,15 +2599,13 @@ _bfd_mips_elf_lo16_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
      addend is adjusted for the fact that the low part is sign
      extended.  For example, an addend of 0x38000 would have 0x0004 in
      the high part and 0x8000 (=0xff..f8000) in the low part.
-     To extract the actual addend, calculate (a)
+     To extract the actual addend, calculate
      ((hi & 0xffff) << 16) + ((lo & 0xffff) ^ 0x8000) - 0x8000.
      We will be applying (symbol + addend) & 0xffff to the low insn,
-     and we want to apply (b) (symbol + addend + 0x8000) >> 16 to the
+     and we want to apply (symbol + addend + 0x8000) >> 16 to the
      high insn (the +0x8000 adjusting for when the applied low part is
-     negative).  Substituting (a) into (b) and recognising that
-     (hi & 0xffff) is already in the high insn gives a high part
-     addend adjustment of (lo & 0xffff) ^ 0x8000.  */
-  vallo = (bfd_get_32 (abfd, location) & 0xffff) ^ 0x8000;
+     negative).  */
+  vallo = ((bfd_get_32 (abfd, location) & 0xffff) ^ 0x8000) - 0x8000;
   _bfd_mips_elf_reloc_shuffle (abfd, reloc_entry->howto->type, false,
 			       location);
 
@@ -2706,6 +2704,29 @@ _bfd_mips_elf_generic_reloc (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc_entry,
 
       /* Add in the separate addend, if any.  */
       val += reloc_entry->addend;
+
+      /* The high 16 bits of the addend are stored in the high insn, the
+	 low 16 bits in the low insn, but there is a catch:  You can't
+	 just concatenate the high and low parts.  The high part of the
+	 addend is adjusted for the fact that the low part is sign
+	 extended.  For example, an addend of 0x38000 would have 0x0004 in
+	 the high part and 0x8000 (=0xff..f8000) in the low part.
+	 We will be applying (symbol + addend) & 0xffff to the low insn,
+	 and we want to apply (symbol + addend + 0x8000) >> 16 to the
+	 high insn (the +0x8000 adjusting for when the applied low part is
+	 negative).  Analogously for the higher parts of a 64-bit addend.  */
+      if (reloc_entry->howto->bitsize == 16
+	  && reloc_entry->howto->rightshift % 16 == 0)
+#ifdef BFD64
+	val += 0x800080008000ULL >> (48 - reloc_entry->howto->rightshift);
+#else
+	{
+	  if (reloc_entry->howto->rightshift <= 16)
+	    val += 0x8000 >> (16 - reloc_entry->howto->rightshift);
+	  else
+	    abort ();
+	}
+#endif
 
       /* Add VAL to the relocation field.  */
       _bfd_mips_elf_reloc_unshuffle (abfd, reloc_entry->howto->type, false,

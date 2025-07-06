@@ -6,9 +6,9 @@
 #ld: -Tmips-hilo.ld -e 0x500000 -N
 #notarget: mips*el-ps2-elf*
 
-.*:     file format elf.*mips.*
+.*:     file format (:?elf.*mips.*|srec)
 
-Disassembly of section \.text:
+Disassembly of section \.(:?text|sec1):
 
 0*500000 <[^>]*>:
  *500000:	f000 6c20 	lui	a0,0x0
