@@ -861,8 +861,7 @@ typedef struct ctf_enum64
 #define CTFA_MAGIC 0x8b47f2a4d7623eec	/* V1, below, incremented.  */
 struct ctf_archive
 {
-  /* Magic number.  (In loaded files, overwritten with the file size
-     so ctf_arc_close() knows how much to munmap()).  */
+  /* Magic number.  */
   uint64_t ctfa_magic;
 
   /* CTF data model.  */
@@ -886,7 +885,8 @@ struct ctf_archive
      size is followed by an arbitrary (property-dependent) binary blob.  */
   uint64_t ctfa_prop_values;
 
-  /* Offset of the modent table mapping names to CTFs.  */
+  /* Offset of the modent array mapping names to CTFs.  Sorted by member
+     name.  */
   uint64_t ctfa_modents;
 
   /* Offset of the modent table mapping names to properties.  Ignored if
@@ -896,10 +896,10 @@ struct ctf_archive
 
 #define CTFA_V1_MAGIC 0x8b47f2a4d7623eeb /* Random.  */
 
+/* Old format.  No longer generated.  */
 struct ctf_archive_v1
 {
-  /* Magic number.  (In loaded files, overwritten with the file size
-     so ctf_arc_close() knows how much to munmap()).  */
+  /* Magic number.  */
   uint64_t ctfa_magic;
 
   /* CTF data model.  */
@@ -914,6 +914,8 @@ struct ctf_archive_v1
   /* Offset of the CTF table.  Each element starts with a size (a little-
      endian uint64_t) then a ctf_dict_t of that size.  */
   uint64_t ctfa_ctfs;
+
+  /* Modent array is off the end.  */
 };
 
 /* An array of ctfa_ndicts of this structure lies at the offset given by
