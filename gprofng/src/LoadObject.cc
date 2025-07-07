@@ -102,7 +102,6 @@ LoadObject::LoadObject (const char *loname)
   noname = dbeSession->createUnknownModule (this);
   modules->put (noname->get_name (), noname);
   pathname = NULL;
-  arch_name = NULL;
   runTimePath = NULL;
   objStabs = NULL;
   firstExp = NULL;
@@ -135,7 +134,6 @@ LoadObject::~LoadObject ()
   delete modules;
   delete elf_lo;
   free (pathname);
-  free (arch_name);
   free (runTimePath);
   delete objStabs;
   delete warnq;
@@ -167,45 +165,66 @@ LoadObject::get_elf ()
 	  {
 	  case Elf::ELF_ERR_CANT_OPEN_FILE:
 	    append_msg (CMSG_ERROR, GTXT ("Cannot open ELF file `%s'"), fnm);
-	    break;
+	    return NULL;
 	  case Elf::ELF_ERR_BAD_ELF_FORMAT:
 	  default:
 	    append_msg (CMSG_ERROR, GTXT ("Cannot read ELF header of `%s'"),
 			fnm);
-	    break;
+	    return NULL;
 	  }
+      if (dbeFile->inArchive)
+	{
+	  // Try to find gnu_debug and gnu debug_alt files in archive
+	  char *nm = dbe_sprintf ("%s_debug", fnm);
+          elf_lo->gnu_debug_file = Elf::elf_begin (nm);
+	  free (nm);
+	  if (elf_lo->gnu_debug_file)
+	    {
+	      nm = dbe_sprintf ("%s_debug_alt", fnm);
+	      elf_lo->gnu_debug_file->gnu_debugalt_file = Elf::elf_begin (nm);
+	      free (nm);
+	    }
+	  nm = dbe_sprintf ("%s_alt", fnm);
+	  elf_lo->gnu_debugalt_file = Elf::elf_begin (nm);
+	  free (nm);
+	}
+      else if (checksum != 0 && elf_lo->elf_checksum () != 0 &&
+	  checksum != elf_lo->elf_checksum ())
+	{
+	  char *msg = dbe_sprintf (GTXT ("%s has an unexpected checksum value;"
+				  "perhaps it was rebuilt. File ignored"),
+				  dbeFile->get_location ());
+	  commentq->append (new Emsg (CMSG_ERROR, msg));
+	  delete msg;
+	  delete elf_lo;
+	  elf_lo = NULL;
+	  return NULL;
+	}
+      elf_lo->find_gnu_debug_files ();
+      elf_lo->find_ancillary_files (get_pathname ());
     }
   return elf_lo;
 }
 
 Stabs *
-LoadObject::openDebugInfo (char *fname, Stabs::Stab_status *stp)
+LoadObject::openDebugInfo (Stabs::Stab_status *stp)
 {
   if (objStabs == NULL)
     {
-      if (fname == NULL)
-	return NULL;
-      objStabs = new Stabs (fname, get_pathname ());
-      Stabs::Stab_status st = objStabs->get_status ();
-      if ((st == Stabs::DBGD_ERR_NONE) && (checksum != 0))
+      Stabs::Stab_status st = Stabs::DBGD_ERR_BAD_ELF_LIB;
+      Elf *elf = get_elf ();
+      if (elf)
 	{
-	  Elf *elf = get_elf ();
-	  if (elf && (checksum != elf->elf_checksum ()))
+	  objStabs = new Stabs (elf, get_pathname ());
+	  st = objStabs->get_status ();
+	  if (st != Stabs::DBGD_ERR_NONE)
 	    {
-	      char *buf = dbe_sprintf (GTXT ("*** Note: '%s' has an unexpected checksum value; perhaps it was rebuilt. File ignored"),
-				       fname);
-	      commentq->append (new Emsg (CMSG_ERROR, buf));
-	      delete buf;
-	      st = Stabs::DBGD_ERR_CHK_SUM;
+	      delete objStabs;
+	      objStabs = NULL;
 	    }
 	}
       if (stp)
 	*stp = st;
-      if (st != Stabs::DBGD_ERR_NONE)
-	{
-	  delete objStabs;
-	  objStabs = NULL;
-	}
     }
   return objStabs;
 }
@@ -560,7 +579,7 @@ fixFuncAlias (Vector<Function*> *SymLst)
 void
 LoadObject::post_process_functions ()
 {
-  if (flags & SEG_FLAG_DYNAMIC || platform == Java)
+  if ((flags & SEG_FLAG_DYNAMIC) != 0 || platform == Java)
     return;
 
   char *msg = GTXT ("Processing Load Object Data");
@@ -726,21 +745,8 @@ LoadObject::read_stabs ()
 	  delete msg;
 	  return ARCHIVE_ERR_OPEN;
 	}
-      else if (checksum != 0 && checksum != elf->elf_checksum ())
-	{
-	  char *msg = dbe_sprintf (GTXT ("%s has an unexpected checksum value;"
-					"perhaps it was rebuilt. File ignored"),
-				   dbeFile->get_location ());
-	  commentq->append (new Emsg (CMSG_ERROR, msg));
-	  delete msg;
-	  return ARCHIVE_ERR_OPEN;
-	}
       Stabs::Stab_status status = Stabs::DBGD_ERR_CANT_OPEN_FILE;
-      char *location = dbeFile->get_location (true);
-      if (location == NULL)
-	return ARCHIVE_ERR_OPEN;
-
-      if (openDebugInfo (location, &status))
+      if (openDebugInfo (&status))
 	{
 	  status = objStabs->read_archive (this);
 	  isRelocatable = objStabs->is_relocatable ();

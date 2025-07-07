@@ -6811,7 +6811,8 @@ Experiment::copy_file_to_common_archive (const char *name, const char *aname,
  * @return 0 - success
  */
 int
-Experiment::copy_file (char *name, char *aname, int hide_msg, char *common_archive, int relative_path)
+Experiment::copy_file (const char *name, const char *aname, int hide_msg,
+		       const char *common_archive, int relative_path)
 {
   if (common_archive)
     {

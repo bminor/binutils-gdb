@@ -355,7 +355,7 @@ Disasm::get_funcname_in_plt (uint64_t pc)
 {
   if (stabs)
     {
-      Elf *elf = stabs->openElf (true);
+      Elf *elf = stabs->openElf (false);
       if (elf)
 	return elf->get_funcname_in_plt (pc);
     }

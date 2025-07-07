@@ -47,6 +47,7 @@ public:
 private:
   void usage ();
   int check_args (int argc, char *argv[]);
+  int archive_file (const char *from, const char *to);
   int clean_old_archive (char *expname, ArchiveExp *founder_exp);
   int mask_is_on (const char *str);
   void check_env_var ();

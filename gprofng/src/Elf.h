@@ -32,6 +32,7 @@
 
 class Symbol;
 class DbeFile;
+class DwrSec;
 template <class ITEM> class Vector;
 template <typename Key_t, typename Value_t> class Map;
 
@@ -93,7 +94,14 @@ public:
   long elf_getSymCount (bool is_dynamic);
   asymbol *elf_getsym (unsigned int ndx, Elf_Internal_Sym *dst, bool is_dynamic);
   Elf64_Ancillary *elf_getancillary (Elf_Data *edta, unsigned int ndx, Elf64_Ancillary *dst);
-  Elf *find_ancillary_files (char *lo_name); // read the .gnu_debuglink and .SUNW_ancillary seections
+
+  // read the .SUNW_ancillary section
+  void find_ancillary_files (const char *lo_name);
+
+  // read the .gnu_debuglink and .gnu_debugaltlink sections
+  void find_gnu_debug_files ();
+
+  DwrSec *get_dwr_section (const char *sec_name);  // Used in Dwarf reader
   const char *get_funcname_in_plt (uint64_t pc);
   char *get_location ();
   char *dump ();
@@ -126,6 +134,7 @@ public:
   Elf_status status;
   Vector<Elf*> *ancillary_files;
   Elf *gnu_debug_file;
+  Elf *gnu_debugalt_file;  // if the .gun_debugaltlink section presents
   DbeFile *dbeFile;
   Map<const char*, Symbol*> *elfSymbols;
   unsigned int analyzerInfo, stab, stabStr;
@@ -139,6 +148,7 @@ protected:
   int elf_datatype;
   Elf_Internal_Ehdr *ehdrp;
   Elf_Data **data;
+  DwrSec **sections;
   bfd *abfd;
   static int bfd_status;
   long bfd_symcnt;

@@ -357,25 +357,59 @@ er_archive::start (int argc, char *argv[])
 	}
       lo->sync_read_stabs ();
       Elf *elf = lo->get_elf ();
-      if (elf && (lo->checksum != 0) && (lo->checksum != elf->elf_checksum ()))
+      if (elf == NULL)
 	{
 	  if (!quiet)
-	    fprintf (stderr, GTXT ("gp-archive: '%s' has an unexpected checksum value; perhaps it was rebuilt. File ignored\n"),
+	    fprintf (stderr, GTXT ("gp-archive: Cannot open \"%s\"\n"),
 		       df->get_location ());
+	  Dprintf (DEBUG_ARCHIVE,
+		  " loadObjs[%ld]: not found '%s'\n", i, df->get_location ());
 	  continue;
 	}
-      copy_files->append (df);
-      if (elf)
+      else if (df->inArchive)
 	{
-	  Elf *f = elf->find_ancillary_files (lo->get_pathname ());
-	  if (f)
-	    copy_files->append (f->dbeFile);
-	  for (long i1 = 0, sz1 = VecSize(elf->ancillary_files); i1 < sz1; i1++)
+	  Dprintf (DEBUG_ARCHIVE,
+		  " loadObjs[%ld]: inArchive=1 '%s'\n", i, df->get_name ());
+	  continue;
+	}
+      else if (!mask_is_on (df->get_name ()))
+	{
+	  Dprintf (DEBUG_ARCHIVE,
+		" loadObjs[%ld]: mask_is_on=0 '%s'\n", i, df->get_name ());
+	  continue;
+	}
+      char *fnm = elf->get_location ();
+      char *anm = founder_exp->getNameInArchive (fnm);
+      archive_file (fnm, anm);
+
+      // archive gnu_debug and gnu_debugalt files
+      if (elf->gnu_debug_file)
+	{
+	  char *arch_nm = dbe_sprintf ("%s_debug", anm);
+	  archive_file (elf->gnu_debug_file->get_location (), arch_nm);
+	  free (arch_nm);
+	  if (elf->gnu_debug_file->gnu_debugalt_file)
 	    {
-	      Elf *ancElf = elf->ancillary_files->get (i1);
-	      copy_files->append (ancElf->dbeFile);
+	      arch_nm = dbe_sprintf ("%s_debug_alt", anm);
+	      archive_file (elf->gnu_debug_file->gnu_debugalt_file->get_location (), arch_nm);
+	      free (arch_nm);
 	    }
 	}
+      if (elf->gnu_debugalt_file)
+	{
+	  char *arch_nm = dbe_sprintf ("%s_alt", anm);
+	  archive_file (elf->gnu_debugalt_file->get_location (), arch_nm);
+	  free (arch_nm);
+	}
+      free (anm);
+
+      elf->find_ancillary_files (lo->get_pathname ());
+      for (long i1 = 0, sz1 = VecSize (elf->ancillary_files); i1 < sz1; i1++)
+	{
+	  Elf *ancElf = elf->ancillary_files->get (i1);
+	  copy_files->append (ancElf->dbeFile);
+	}
+
       Vector<Module*> *modules = lo->seg_modules;
       for (long i1 = 0, sz1 = VecSize(modules); i1 < sz1; i1++)
 	{
@@ -469,7 +503,7 @@ er_archive::start (int argc, char *argv[])
       int res = founder_exp->copy_file (fnm, anm, quiet, common_archive_dir, use_relative_path);
       if (0 == res)  // file successfully archived
 	df->inArchive = 1;
-      delete anm;
+      free (anm);
     }
   delete copy_files;
 
@@ -487,6 +521,15 @@ er_archive::start (int argc, char *argv[])
 	      " See the gp-archive man page for more details.\n"));
     }
   delete notfound_files;
+}
+
+int
+er_archive::archive_file (const char *from, const char *to)
+{
+  if (force)
+    unlink (to);
+  return Experiment::copy_file (from, to, quiet, common_archive_dir,
+			  use_relative_path);
 }
 
 int

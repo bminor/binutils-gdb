@@ -29,6 +29,7 @@
 #include "StringBuilder.h"
 #include "DbeFile.h"
 #include "DbeSession.h"
+#include "Dwarf.h"
 
 typedef uint32_t Elf32_Word;
 typedef uint32_t Elf64_Word;
@@ -84,6 +85,31 @@ struct S_Elf64_Dyn
   } d_un;
 };
 
+#ifndef DEBUGDIR
+#define DEBUGDIR "/lib/debug"
+#endif
+#ifndef EXTRA_DEBUG_ROOT1
+#define EXTRA_DEBUG_ROOT1 "/usr/lib/debug"
+#endif
+#ifndef EXTRA_DEBUG_ROOT2
+#define EXTRA_DEBUG_ROOT2 "/usr/lib/debug/usr"
+#endif
+
+static const char *debug_dirs[] = {
+  DEBUGDIR, EXTRA_DEBUG_ROOT1, EXTRA_DEBUG_ROOT2, "."
+};
+
+template<> void Vector<asymbol *>::dump (const char *msg)
+{
+  Dprintf (1, NTXT ("\nFile: %s Vector<asymbol *> [%ld]\n"),
+	   msg ? msg : "NULL", (long) size ());
+  for (long i = 0, sz = size (); i < sz; i++)
+    {
+      asymbol *sym = get (i);
+      Dprintf (1, "  %3ld %s\n", i, sym->name);
+    }
+}
+
 int Elf::bfd_status = -1;
 
 void
@@ -100,6 +126,8 @@ Elf::Elf (char *filename) : DbeMessages (), Data_window (filename)
   ancillary_files = NULL;
   elfSymbols = NULL;
   gnu_debug_file = NULL;
+  gnu_debugalt_file = NULL;
+  sections = NULL;
   dbeFile = NULL;
   abfd = NULL;
   bfd_symcnt = -1;
@@ -209,6 +237,12 @@ Elf::~Elf ()
 	}
       free (data);
     }
+  if (sections)
+    {
+      for (int i = 0; i < (int) ehdrp->e_shnum; i++)
+	delete sections[i];
+      free (sections);
+    }
   if (ancillary_files)
     {
       ancillary_files->destroy ();
@@ -216,6 +250,7 @@ Elf::~Elf ()
     }
   delete elfSymbols;
   delete gnu_debug_file;
+  delete gnu_debugalt_file;
   delete dbeFile;
   delete synthsym;
   free (bfd_sym);
@@ -338,9 +373,36 @@ Elf::get_sec_name (unsigned int sec)
   return elf_strptr (ehdrp->e_shstrndx, shdr->sh_name);
 }
 
+DwrSec *
+Elf::get_dwr_section (const char *sec_name)
+{
+  int sec_num = elf_get_sec_num (sec_name);
+  if (sec_num > 0)
+    {
+      if (sections == NULL)
+	{
+	  sections = (DwrSec **) xmalloc (ehdrp->e_shnum * sizeof (DwrSec *));
+	  for (int i = 0; i < (int) ehdrp->e_shnum; i++)
+	    sections[i] = NULL;
+	}
+      if (sections[sec_num] == NULL)
+	{
+	  Elf_Data *elfData = elf_getdata (sec_num);
+	  if (elfData)
+	    sections[sec_num] = new DwrSec ((unsigned char *) elfData->d_buf,
+				    elfData->d_size, need_swap_endian,
+				    elf_getclass () == ELFCLASS32);
+	}
+      return sections[sec_num];
+    }
+  return NULL;
+}
+
 Elf_Data *
 Elf::elf_getdata (unsigned int sec)
 {
+  if (sec == 0)
+    return NULL;
   if (data == NULL)
     {
       data = (Elf_Data **) xmalloc (ehdrp->e_shnum * sizeof (Elf_Data *));
@@ -565,25 +627,54 @@ Elf::get_related_file (const char *lo_name, const char *nm)
   return NULL;
 }
 
-Elf *
-Elf::find_ancillary_files (char *lo_name)
+static char *
+find_file (char *(bfd_func) (bfd *, const char *), bfd *abfd)
 {
-  // read the .gnu_debuglink and .SUNW_ancillary seections
-  if (gnu_debug_file)
-    return gnu_debug_file;
-  unsigned int sec = elf_get_sec_num (NTXT (".gnu_debuglink"));
-  if (sec > 0)
+  char *fnm = NULL;
+  for (size_t i = 0; i < ARR_SIZE (debug_dirs); i++)
     {
-      Elf_Data *dp = elf_getdata (sec);
-      if (dp)
+      fnm = bfd_func (abfd, debug_dirs[i]);
+      if (fnm)
+	break;
+    }
+  Dprintf (DUMP_DWARFLIB, "FOUND: gnu_debug_file: %s --> %s\n",
+	   abfd->filename, fnm);
+  return fnm;
+}
+
+void
+Elf::find_gnu_debug_files ()
+{
+  char *fnm;
+  if (gnu_debug_file == NULL)
+    {
+      fnm = find_file (bfd_follow_gnu_debuglink, abfd);
+      if (fnm)
 	{
-	  gnu_debug_file = get_related_file (lo_name, (char *) (dp->d_buf));
+	  gnu_debug_file = Elf::elf_begin (fnm);
+	  free (fnm);
 	  if (gnu_debug_file)
-	    return gnu_debug_file;
+	    gnu_debug_file->find_gnu_debug_files ();
 	}
     }
+  if (gnu_debugalt_file == NULL)
+    {
+      fnm = find_file (bfd_follow_gnu_debugaltlink, abfd);
+      if (fnm)
+	{
+	  gnu_debugalt_file = Elf::elf_begin (fnm);
+	  free (fnm);
+	}
+    }
+}
 
-  sec = elf_get_sec_num (NTXT (".SUNW_ancillary"));
+void
+Elf::find_ancillary_files (const char *lo_name)
+{
+  // read the .SUNW_ancillary section
+  if (ancillary_files != NULL)
+    return;
+  unsigned int sec = elf_get_sec_num (".SUNW_ancillary");
   if (sec > 0)
     {
       Elf_Internal_Shdr *shdr = get_shdr (sec);
@@ -644,7 +735,6 @@ Elf::find_ancillary_files (char *lo_name)
 	    }
 	}
     }
-  return NULL;
 }
 
 void
@@ -717,6 +807,8 @@ Elf::get_funcname_in_plt (uint64_t pc)
       for (long i = 0; i < bfd_synthcnt; i++)
 	synthsym->append (bfd_synthsym + i);
       synthsym->sort (cmp_sym_addr);
+      if (DUMP_ELF_SYM)
+	synthsym->dump (get_location ());
     }
 
   asymbol sym, *symp = &sym;

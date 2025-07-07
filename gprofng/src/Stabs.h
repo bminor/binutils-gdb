@@ -76,7 +76,7 @@ class Stabs {
 	DBGD_ERR_CHK_SUM
     };
 
-    Stabs(char *_path, char *_lo_name);
+    Stabs(Elf *elf, char *_lo_name);
     ~Stabs();
 
     bool	is_relocatable(){ return isRelocatable; }
@@ -136,7 +136,6 @@ class Stabs {
     Vector<char*>	*LocalFile;		// list of local files
     Vector<int>		*LocalFileIdx;		// start index in LocalLst
 
-    Elf         *openElf(char *fname, Stab_status &st);
     Map<const char*, Symbol*> *get_elf_symbols();
     Dwarf       *dwarf;
 

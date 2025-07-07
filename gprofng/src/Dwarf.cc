@@ -368,6 +368,7 @@ Dwarf::Dwarf (Stabs *_stabs)
   debug_infoSec = NULL;
   debug_abbrevSec = NULL;
   debug_strSec = NULL;
+  debug_alt_strSec = NULL;
   debug_lineSec = NULL;
   debug_line_strSec = NULL;
   debug_rangesSec = NULL;
@@ -384,6 +385,8 @@ Dwarf::Dwarf (Stabs *_stabs)
   debug_rangesSec = dwrGetSec (NTXT (".debug_ranges"));
   debug_line_strSec = dwrGetSec (".debug_line_str");
   debug_rnglists = NULL;
+  if (elf->gnu_debugalt_file)
+    debug_alt_strSec = elf->gnu_debugalt_file->get_dwr_section (".debug_str");
 
   if ((debug_infoSec == NULL) || (debug_abbrevSec == NULL) || (debug_lineSec == NULL))
     {
@@ -394,27 +397,16 @@ Dwarf::Dwarf (Stabs *_stabs)
 
 Dwarf::~Dwarf ()
 {
-  delete debug_infoSec;
-  delete debug_abbrevSec;
-  delete debug_strSec;
-  delete debug_lineSec;
-  delete debug_rangesSec;
   Destroy (dwrCUs);
 }
 
 DwrSec *
 Dwarf::dwrGetSec (const char *sec_name)
 {
-  int secN = elf->elf_get_sec_num (sec_name);
-  if (secN > 0)
-    {
-      Elf_Data *elfData = elf->elf_getdata (secN);
-      if (elfData)
-	return new DwrSec ((unsigned char *) elfData->d_buf, elfData->d_size,
-			   elf->need_swap_endian,
-			   elf->elf_getclass () == ELFCLASS32);
-    }
-  return NULL;
+  DwrSec *p = elf->get_dwr_section (sec_name);
+  if (p)
+    p->offset = 0;
+  return p;
 }
 
 uint64_t
@@ -1182,7 +1174,6 @@ Dwarf::get_debug_rnglists ()
       debug_rnglistsSec->size = debug_rnglistsSec->sizeSec;
       debug_rnglistsSec->offset = length;
     }
-  delete debug_rnglistsSec;
   debug_rnglists->dump ("Dwarf::get_debug_rnglists");
   return debug_rnglists;
 }

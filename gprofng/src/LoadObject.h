@@ -117,13 +117,6 @@ public:
     return pathname;
   }
 
-  void
-  set_archname (char *aname)
-  {
-    free (arch_name);
-    arch_name = aname;
-  }
-
   bool
   is_relocatable ()
   {
@@ -144,7 +137,7 @@ public:
   Module *get_comparable_Module (Module *mod);
   void append_module (Module *mod);
   Elf *get_elf ();
-  Stabs *openDebugInfo (char *fname, Stabs::Stab_status *stp = NULL);
+  Stabs *openDebugInfo (Stabs::Stab_status *stp = NULL);
   Arch_status read_stabs ();
   Arch_status sync_read_stabs ();
   void post_process_functions ();
@@ -192,7 +185,6 @@ private:
   char *pathname;               // User name of object file
   ino64_t inode;                // inode number of segment file
   bool isRelocatable;           // is relocatable .o
-  char *arch_name;              // .archive name
   Emsgqueue *warnq;
   Emsgqueue *commentq;
   Function **funcHTable;        // hash table for functions

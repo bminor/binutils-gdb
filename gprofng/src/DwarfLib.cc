@@ -53,6 +53,7 @@ extended_opcode2str (int opcode)
       CASE_S (DW_LNE_end_sequence);
       CASE_S (DW_LNE_set_address);
       CASE_S (DW_LNE_define_file);
+      CASE_S (DW_LNS_set_file);
     default:
       snprintf (buf, sizeof (buf), NTXT ("??? (%d)"), opcode);
       buf[sizeof (buf) - 1] = 0;
@@ -141,7 +142,6 @@ get_string (DwrSec *sec, uint64_t off)
   return NULL;
 }
 
-  
 DwrLocation *
 DwrCU::dwr_get_location (DwrSec *secp, DwrLocation *lp)
 {
@@ -684,6 +684,8 @@ DwrCU::form2str (int tag)
       CASE_S (DW_FORM_strp);
       CASE_S (DW_FORM_udata);
       CASE_S (DW_FORM_ref_addr);
+      CASE_S (DW_FORM_GNU_ref_alt);
+      CASE_S (DW_FORM_GNU_strp_alt);
       CASE_S (DW_FORM_ref1);
       CASE_S (DW_FORM_ref2);
       CASE_S (DW_FORM_ref4);
@@ -741,6 +743,7 @@ Dwr_Tag::dump ()
 	case DW_FORM_strp:
 	case DW_FORM_string:
 	case DW_FORM_line_strp:
+	case DW_FORM_GNU_strp_alt:
 	case DW_FORM_strp_sup:
 	case DW_FORM_strx1:
 	case DW_FORM_strx2:
@@ -781,6 +784,7 @@ Dwr_Tag::dump ()
 	case DW_FORM_ref_udata:
 	case DW_FORM_indirect:
 	case DW_FORM_sec_offset:
+	case DW_FORM_GNU_ref_alt:
 	case DW_FORM_exprloc:
 	case DW_FORM_ref_sig8:
 	case DW_FORM_flag_present:
@@ -1021,6 +1025,7 @@ DwrSec::get_value (int dw_form)
     case DW_FORM_line_strp:
     case DW_FORM_strp:
     case DW_FORM_strp_sup:
+    case DW_FORM_GNU_strp_alt:
       return GetRef ();
     case DW_FORM_data1:
       return Get_8 ();
@@ -1284,6 +1289,8 @@ DwrLineRegs::read_file_names_dwarf5 ()
 		  nm = get_string (dwarf->debug_line_strSec, off);
 		else if (efmt[k].form_code == DW_FORM_strp)
 		  nm = get_string (dwarf->debug_strSec, off);
+		else if (efmt[k].form_code == DW_FORM_GNU_strp_alt)
+		  nm = get_string (dwarf->debug_alt_strSec, off);
 	      }
 	    break;
 	  case DW_LNCT_directory_index:
@@ -1581,7 +1588,7 @@ DwrCU::DwrCU (Dwarf *_dwarf)
   if (DUMP_DWARFLIB)
     {
       Dprintf (DUMP_DWARFLIB,
-	       "CU_HEADER: header_offset = 0x%08llx %lld"
+	       "File: %s\nCU_HEADER: header_offset = 0x%08llx %lld"
 	       " next_header_offset=0x%08llx %lld\n"
 	       "    abbrev_offset = 0x%08llx %lld\n"
 	       "    unit_length   = %lld\n"
@@ -1589,6 +1596,7 @@ DwrCU::DwrCU (Dwarf *_dwarf)
 	       "    address_size  = %d\n"
 	       "    fmt64         = %s\n"
 	       "debug_info:   need_swap_endian=%s  fmt64=%s addr32=%s\n",
+	       dwarf->elf->get_location (),
 	       (long long) cu_offset, (long long) cu_offset,
 	       (long long) next_cu_offset, (long long) next_cu_offset,
 	       (long long) debug_abbrev_offset, (long long) debug_abbrev_offset,
@@ -1788,6 +1796,9 @@ DwrCU::set_die (Dwarf_Die die)
 	  else
 	    atf->u.offset = debug_infoSec->GetADDR ();
 	  break;
+	case DW_FORM_GNU_ref_alt:
+	  atf->u.offset = debug_infoSec->GetRef ();
+	  break;
 	case DW_FORM_sec_offset:
 	  atf->u.offset = debug_infoSec->GetRef ();
 	  break;
@@ -1810,6 +1821,10 @@ DwrCU::set_die (Dwarf_Die die)
 	case DW_FORM_loclistx:
 	case DW_FORM_rnglistx:
 	  atf->u.offset = debug_infoSec->GetULEB128 ();
+	  break;
+	case DW_FORM_GNU_strp_alt:
+	  atf->u.offset = debug_infoSec->GetRef ();
+	  atf->u.str = get_string (dwarf->debug_alt_strSec, atf->u.offset);
 	  break;
 	case DW_FORM_strx:
 	  atf->u.offset = debug_infoSec->GetULEB128 ();

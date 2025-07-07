@@ -78,6 +78,7 @@ public:
   DwrSec *debug_infoSec;
   DwrSec *debug_abbrevSec;
   DwrSec *debug_strSec;
+  DwrSec *debug_alt_strSec;
   DwrSec *debug_lineSec;
   DwrSec *debug_line_strSec;
   DwrSec *debug_rangesSec;

@@ -267,8 +267,8 @@ public:
   static int copy_file_to_archive (const char *name, const char *aname, int hide_msg);
   static int copy_file_to_common_archive (const char *name, const char *aname,
 	       int hide_msg, const char *common_archive, int relative_path = 0);
-  static int copy_file (char *name, char *aname, int hide_msg,
-			char *common_archive = NULL, int relative_path = 0);
+  static int copy_file (const char *name, const char *aname, int hide_msg,
+		      const char *common_archive = NULL, int relative_path = 0);
 
   // get_raw_events()
   // action: get unfiltered packets, loading them if required

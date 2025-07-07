@@ -131,7 +131,7 @@ Stabs *
 Module::openDebugInfo ()
 {
   setFile ();
-  objStabs = loadobject->openDebugInfo (disPath);
+  objStabs = loadobject->openDebugInfo ();
   return objStabs;
 }
 
