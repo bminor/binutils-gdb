@@ -66,8 +66,8 @@ Disassembly of section \.text:
 .*:	d50325bf 	hint	#0x2d
 .*:	d50325df 	hint	#0x2e
 .*:	d50325ff 	hint	#0x2f
-.*:	d503261f 	hint	#0x30
-.*:	d503263f 	hint	#0x31
+.*:	d503261f 	(hint	#0x30|stshh	keep)
+.*:	d503263f 	(hint	#0x31|stshh	strm)
 .*:	d503265f 	hint	#0x32
 .*:	d503267f 	hint	#0x33
 .*:	d503269f 	hint	#0x34
@@ -335,7 +335,7 @@ Disassembly of section \.text:
 .*:	f9800c77 	prfm	pstslcstrm, \[x3, #24\]
 .*:	d8000018 	prfm	#0x18, 0 <LABEL1>
 .*: R_AARCH64_(P32_|)LD_PREL_LO19	LABEL1
-.*:	f9800c78 	prfm	#0x18, \[x3, #24\]
+.*:	f9800c78 	prfm	ir, \[x3, #24\]
 .*:	d8000019 	prfm	#0x19, 0 <LABEL1>
 .*: R_AARCH64_(P32_|)LD_PREL_LO19	LABEL1
 .*:	f9800c79 	prfm	#0x19, \[x3, #24\]
