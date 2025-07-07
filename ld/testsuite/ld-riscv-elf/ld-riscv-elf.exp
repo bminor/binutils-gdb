@@ -235,6 +235,9 @@ if [istarget "riscv*-*-*"] {
 
     run_dump_test "zicfilp-unlabeled-plt"
 
+    run_dump_test "pie-bind-locally-rv32"
+    run_dump_test "pie-bind-locally-rv64"
+
     # IFUNC testcases.
     # Check IFUNC by single type relocs.
     run_dump_test_ifunc "ifunc-reloc-call-01" rv32 exe

@@ -99,7 +99,7 @@
   ((H) != NULL \
    && (H)->dynindx != -1 \
    && (!bfd_link_pic (INFO) \
-       || !SYMBOLIC_BIND ((INFO), (H)) \
+       || !(bfd_link_pie ((INFO)) || SYMBOLIC_BIND ((INFO), (H))) \
        || !(H)->def_regular))
 
 /* True if this is actually a static link, or it is a -Bsymbolic link
