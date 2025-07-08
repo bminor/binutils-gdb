@@ -2904,6 +2904,10 @@ remote_target::remote_add_inferior (bool fake_pid_p, int pid, int attached,
 	  inf = add_inferior_with_spaces ();
 	}
       switch_to_inferior_no_thread (inf);
+
+      /* Clear any data left by previous executions.  */
+      target_pre_inferior ();
+
       inf->push_target (this);
       inferior_appeared (inf, pid);
     }
@@ -3029,6 +3033,12 @@ remote_target::remote_notice_new_inferior (ptid_t currthread, bool executing)
 
 	  inf = remote_add_inferior (fake_pid_p,
 				     currthread.pid (), -1, 1);
+
+	  /* Fetch the target description for this inferior.  Make sure to
+	     leave the currently selected inferior unchanged.  */
+	  scoped_restore_current_thread restore_thread;
+	  switch_to_inferior_no_thread (inf);
+	  target_find_description ();
 	}
 
       /* This is really a new thread.  Add it.  */
@@ -4869,7 +4879,11 @@ remote_target::add_current_inferior_and_thread (const char *wait_status)
       fake_pid_p = true;
     }
 
-  remote_add_inferior (fake_pid_p, curr_ptid.pid (), -1, 1);
+  const auto inf = remote_add_inferior (fake_pid_p, curr_ptid.pid (), -1, 1);
+  switch_to_inferior_no_thread (inf);
+
+  /* Fetch the target description for this inferior.  */
+  target_find_description ();
 
   /* Add the main thread and switch to it.  Don't try reading
      registers yet, since we haven't fetched the target description
