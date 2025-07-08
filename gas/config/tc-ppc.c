@@ -6338,7 +6338,7 @@ ppc_frob_symbol (symbolS *sym)
       asymbol *bsym = symbol_get_bfdsym (symbol_get_tc (sym)->within);
       combined_entry_type *c = coffsymbol (bsym)->native;
 
-      S_SET_VALUE (sym, (valueT) (size_t) c);
+      S_SET_VALUE (sym, (uintptr_t) c);
       coffsymbol (symbol_get_bfdsym (sym))->native->fix_value = 1;
     }
   else if (S_GET_STORAGE_CLASS (sym) == C_STSYM)

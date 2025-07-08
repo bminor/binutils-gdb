@@ -3657,7 +3657,7 @@ generate_unwind_image (const segT text_seg)
       unwind.info = expr_build_dot ();
 
       frag_var (rs_machine_dependent, size, size, 0, 0,
-		(offsetT) (long) unwind.personality_routine,
+		(intptr_t) unwind.personality_routine,
 		(char *) list);
 
       /* Add the personality address to the image.  */

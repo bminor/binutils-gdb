@@ -3070,7 +3070,7 @@ md_assemble (char *str)
 	      f = frag_var (rs_machine_dependent, 6, 2, SUBYPTE_LOOP_16_22,
 			    fixups[0].exp.X_add_symbol,
 			    fixups[0].exp.X_add_number,
-			    (char *)(size_t) fixups[0].opindex);
+			    (char *)(intptr_t) fixups[0].opindex);
 	      md_number_to_chars (f, insn, insn_size);
 	      md_number_to_chars (f+4, 0, 4);
 	    }
@@ -3087,7 +3087,7 @@ md_assemble (char *str)
 	      f = frag_var (rs_machine_dependent, 4, 2, SUBYPTE_UNCOND_9_22,
 			    fixups[0].exp.X_add_symbol,
 			    fixups[0].exp.X_add_number,
-			    (char *)(size_t) fixups[0].opindex);
+			    (char *)(intptr_t) fixups[0].opindex);
 	      md_number_to_chars (f, insn, insn_size);
 	      md_number_to_chars (f + 2, 0, 2);
 	    }
@@ -3096,7 +3096,7 @@ md_assemble (char *str)
 	      f = frag_var (rs_machine_dependent, 6, 4, SUBYPTE_UNCOND_9_22_32,
 			    fixups[0].exp.X_add_symbol,
 			    fixups[0].exp.X_add_number,
-			    (char *)(size_t) fixups[0].opindex);
+			    (char *)(intptr_t) fixups[0].opindex);
 	      md_number_to_chars (f, insn, insn_size);
 	      md_number_to_chars (f + 2, 0, 4);
 	    }
@@ -3113,7 +3113,7 @@ md_assemble (char *str)
 		      f = frag_var (rs_machine_dependent, 8, 6, SUBYPTE_SA_9_17_22,
 				    fixups[0].exp.X_add_symbol,
 				    fixups[0].exp.X_add_number,
-				    (char *)(size_t) fixups[0].opindex);
+				    (char *)(intptr_t) fixups[0].opindex);
 		      md_number_to_chars (f, insn, insn_size);
 		      md_number_to_chars (f + 2, 0, 6);
 		    }
@@ -3122,7 +3122,7 @@ md_assemble (char *str)
 		      f = frag_var (rs_machine_dependent, 6, 4, SUBYPTE_COND_9_17_22,
 				    fixups[0].exp.X_add_symbol,
 				    fixups[0].exp.X_add_number,
-				    (char *)(size_t) fixups[0].opindex);
+				    (char *)(intptr_t) fixups[0].opindex);
 		      md_number_to_chars (f, insn, insn_size);
 		      md_number_to_chars (f + 2, 0, 4);
 		    }
@@ -3134,7 +3134,7 @@ md_assemble (char *str)
 		      f = frag_var (rs_machine_dependent, 8, 6, SUBYPTE_SA_9_22,
 				    fixups[0].exp.X_add_symbol,
 				    fixups[0].exp.X_add_number,
-				    (char *)(size_t) fixups[0].opindex);
+				    (char *)(intptr_t) fixups[0].opindex);
 		      md_number_to_chars (f, insn, insn_size);
 		      md_number_to_chars (f + 2, 0, 6);
 		    }
@@ -3143,7 +3143,7 @@ md_assemble (char *str)
 		      f = frag_var (rs_machine_dependent, 6, 4, SUBYPTE_COND_9_22,
 				    fixups[0].exp.X_add_symbol,
 				    fixups[0].exp.X_add_number,
-				    (char *)(size_t) fixups[0].opindex);
+				    (char *)(intptr_t) fixups[0].opindex);
 		      md_number_to_chars (f, insn, insn_size);
 		      md_number_to_chars (f + 2, 0, 4);
 		    }
@@ -3158,7 +3158,7 @@ md_assemble (char *str)
 		      f = frag_var (rs_machine_dependent, 10, 8, SUBYPTE_SA_9_17_22_32,
 				    fixups[0].exp.X_add_symbol,
 				    fixups[0].exp.X_add_number,
-				    (char *)(size_t) fixups[0].opindex);
+				    (char *)(intptr_t) fixups[0].opindex);
 		      md_number_to_chars (f, insn, insn_size);
 		      md_number_to_chars (f + 2, 0, 8);
 		    }
@@ -3167,7 +3167,7 @@ md_assemble (char *str)
 		      f = frag_var (rs_machine_dependent, 8, 6, SUBYPTE_COND_9_17_22_32,
 				    fixups[0].exp.X_add_symbol,
 				    fixups[0].exp.X_add_number,
-				    (char *)(size_t) fixups[0].opindex);
+				    (char *)(intptr_t) fixups[0].opindex);
 		      md_number_to_chars (f, insn, insn_size);
 		      md_number_to_chars (f + 2, 0, 6);
 		    }
@@ -3179,7 +3179,7 @@ md_assemble (char *str)
 		      f = frag_var (rs_machine_dependent, 10, 8, SUBYPTE_SA_9_22_32,
 				    fixups[0].exp.X_add_symbol,
 				    fixups[0].exp.X_add_number,
-				    (char *)(size_t) fixups[0].opindex);
+				    (char *)(intptr_t) fixups[0].opindex);
 		      md_number_to_chars (f, insn, insn_size);
 		      md_number_to_chars (f + 2, 0, 8);
 		    }
@@ -3188,7 +3188,7 @@ md_assemble (char *str)
 		      f = frag_var (rs_machine_dependent, 8, 6, SUBYPTE_COND_9_22_32,
 				    fixups[0].exp.X_add_symbol,
 				    fixups[0].exp.X_add_number,
-				    (char *)(size_t) fixups[0].opindex);
+				    (char *)(intptr_t) fixups[0].opindex);
 		      md_number_to_chars (f, insn, insn_size);
 		      md_number_to_chars (f + 2, 0, 6);
 		    }

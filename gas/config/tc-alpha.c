@@ -2262,7 +2262,7 @@ emit_ldXu (const expressionS *tok,
 	   const void * vlgsize)
 {
   if (alpha_target & AXP_OPCODE_BWX)
-    emit_ir_load (tok, ntok, ldXu_op[(long) vlgsize]);
+    emit_ir_load (tok, ntok, ldXu_op[(intptr_t) vlgsize]);
   else
     {
       expressionS newtok[3];
@@ -2302,7 +2302,7 @@ emit_ldXu (const expressionS *tok,
       /* Emit "extXl targ, $at, targ".  */
       set_tok_reg (newtok[1], basereg);
       newtok[2] = newtok[0];
-      assemble_tokens_to_insn (extXl_op[(long) vlgsize], newtok, 3, &insn);
+      assemble_tokens_to_insn (extXl_op[(intptr_t) vlgsize], newtok, 3, &insn);
 
       if (lituse)
 	{
@@ -2325,7 +2325,7 @@ emit_ldX (const expressionS *tok,
 	  const void * vlgsize)
 {
   emit_ldXu (tok, ntok, vlgsize);
-  assemble_tokens (sextX_op[(long) vlgsize], tok, 1, 1);
+  assemble_tokens (sextX_op[(intptr_t) vlgsize], tok, 1, 1);
 }
 
 /* Load an integral value from an unaligned address as an unsigned
@@ -2336,7 +2336,7 @@ emit_uldXu (const expressionS *tok,
 	    int ntok,
 	    const void * vlgsize)
 {
-  long lgsize = (long) vlgsize;
+  int lgsize = (intptr_t) vlgsize;
   expressionS newtok[3];
 
   if (alpha_noat_on)
@@ -2386,7 +2386,7 @@ emit_uldX (const expressionS *tok,
 	   const void * vlgsize)
 {
   emit_uldXu (tok, ntok, vlgsize);
-  assemble_tokens (sextX_op[(long) vlgsize], tok, 1, 1);
+  assemble_tokens (sextX_op[(intptr_t) vlgsize], tok, 1, 1);
 }
 
 /* Implement the ldil macro.  */
@@ -2411,7 +2411,7 @@ emit_stX (const expressionS *tok,
 	  int ntok,
 	  const void * vlgsize)
 {
-  int lgsize = (int) (long) vlgsize;
+  int lgsize = (intptr_t) vlgsize;
 
   if (alpha_target & AXP_OPCODE_BWX)
     emit_loadstore (tok, ntok, stX_op[lgsize]);
@@ -2513,7 +2513,7 @@ emit_ustX (const expressionS *tok,
 	   int ntok,
 	   const void * vlgsize)
 {
-  int lgsize = (int) (long) vlgsize;
+  int lgsize = (intptr_t) vlgsize;
   expressionS newtok[3];
 
   /* Emit "lda $at, exp".  */
@@ -2584,7 +2584,7 @@ emit_sextX (const expressionS *tok,
 	    int ntok,
 	    const void * vlgsize)
 {
-  long lgsize = (long) vlgsize;
+  int lgsize = (intptr_t) vlgsize;
 
   if (alpha_target & AXP_OPCODE_BWX)
     assemble_tokens (sextX_op[lgsize], tok, ntok, 0);
