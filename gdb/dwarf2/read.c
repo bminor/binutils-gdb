@@ -9971,7 +9971,12 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
 	  CORE_ADDR offset;
 	  if (decode_locdesc (data_member_location_attr->as_block (), cu,
 			      &offset))
-	    field->set_loc_bitpos (offset * bits_per_byte);
+	    {
+	      field->set_loc_bitpos (offset * bits_per_byte);
+
+	      if (has_bit_offset)
+		apply_bit_offset_to_field (*field, bit_offset, anonymous_size);
+	    }
 	  else
 	    {
 	      dwarf2_per_objfile *per_objfile = cu->per_objfile;
