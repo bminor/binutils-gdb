@@ -6167,6 +6167,7 @@ remote_unpush_target (remote_target *target)
   /* We have to unpush the target from all inferiors, even those that
      aren't running.  */
   scoped_restore_current_inferior restore_current_inferior;
+  scoped_restore_current_program_space restore_program_space;
 
   for (inferior *inf : all_inferiors (target))
     {
