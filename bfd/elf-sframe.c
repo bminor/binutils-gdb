@@ -23,6 +23,7 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "sframe-api.h"
+#include "sframe-internal.h"
 
 /* Return TRUE if the function has been marked for deletion during the linking
    process.  */
@@ -373,8 +374,8 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
       uint8_t tflags = dctx_flags & ~SFRAME_F_FDE_SORTED;
       /* ld always generates an output section with
 	 SFRAME_F_FDE_FUNC_START_PCREL flag set.  Later using
-	 SFRAME_F_LD_MUSTHAVE_FLAGS, it is enforced that the provided input
-	 sections also have this flag set.  */
+	 SFRAME_V2_GNU_AS_LD_ENCODING_FLAGS, it is enforced that the provided
+	 input sections also have this flag set.  */
       tflags |= SFRAME_F_FDE_FUNC_START_PCREL;
       htab->sfe_info.sfe_ctx = sframe_encode (SFRAME_VERSION_2,
 					      tflags, /* SFrame flags.  */
@@ -430,8 +431,8 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
      related flags set.  The implementation does not support updating these
      data encodings on the fly; confirm by checking the ectx_flags.  */
   ectx_flags = sframe_encoder_get_flags (sfe_ctx);
-  if ((dctx_flags & ectx_flags & SFRAME_F_LD_MUSTHAVE_FLAGS)
-      != SFRAME_F_LD_MUSTHAVE_FLAGS)
+  if ((dctx_flags & ectx_flags & SFRAME_V2_GNU_AS_LD_ENCODING_FLAGS)
+      != SFRAME_V2_GNU_AS_LD_ENCODING_FLAGS)
     {
       _bfd_error_handler
 	(_("SFrame sections with unexpected data encoding prevent"

@@ -21,7 +21,7 @@
 #include "as.h"
 #include "subsegs.h"
 #include "sframe.h"
-#include "sframe-api.h"
+#include "sframe-internal.h"
 #include "gen-sframe.h"
 #include "dw2gencfi.h"
 
@@ -685,8 +685,8 @@ output_sframe_internal (void)
   out_one (SFRAME_VERSION);
   /* gas must ensure emitted SFrame sections have at least the required flags
      set.  */
-  gas_assert ((sframe_flags & SFRAME_F_LD_MUSTHAVE_FLAGS)
-	      == SFRAME_F_LD_MUSTHAVE_FLAGS);
+  gas_assert ((sframe_flags & SFRAME_V2_GNU_AS_LD_ENCODING_FLAGS)
+	      == SFRAME_V2_GNU_AS_LD_ENCODING_FLAGS);
   out_one (sframe_flags);
   /* abi/arch.  */
 #ifdef sframe_get_abi_arch
