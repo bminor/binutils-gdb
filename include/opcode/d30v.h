@@ -279,8 +279,8 @@ extern const struct d30v_format d30v_format_table[];
 /* formats, 2 SHORT_A forms and a LONG form. */
 struct d30v_insn
 {
-  struct d30v_opcode *op;	/* pointer to an entry in the opcode table */
-  struct d30v_format *form;	/* pointer to an entry in the format table */
+  const struct d30v_opcode *op;	/* pointer to an entry in the opcode table */
+  const struct d30v_format *form; /* pointer to an entry in the format table */
   int ecc;			/* execution condition code */
 };
 

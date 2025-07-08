@@ -306,11 +306,11 @@ md_section_align (asection *seg, valueT addr)
 void
 md_begin (void)
 {
-  struct d30v_opcode *opcode;
+  const struct d30v_opcode *opcode;
   d30v_hash = str_htab_create ();
 
   /* Insert opcode names into a hash table.  */
-  for (opcode = (struct d30v_opcode *) d30v_opcode_table; opcode->name; opcode++)
+  for (opcode = d30v_opcode_table; opcode->name; opcode++)
       str_hash_insert (d30v_hash, opcode->name, opcode, 0);
 
   fixups = &FixUps[0];
@@ -484,8 +484,8 @@ build_insn (struct d30v_insn *opcode, expressionS *opers)
   int i, bits, shift, flags;
   unsigned long number, id = 0;
   long long insn;
-  struct d30v_opcode *op = opcode->op;
-  struct d30v_format *form = opcode->form;
+  const struct d30v_opcode *op = opcode->op;
+  const struct d30v_format *form = opcode->form;
 
   insn =
     opcode->ecc << 28 | op->op1 << 25 | op->op2 << 20 | form->modifier << 18;
@@ -682,8 +682,8 @@ parallel_ok (struct d30v_insn *op1,
   int i, j, shift, regno, bits, ecc;
   unsigned long flags, mask, flags_set1, flags_set2, flags_used1, flags_used2;
   unsigned long ins, mod_reg[2][3], used_reg[2][3], flag_reg[2];
-  struct d30v_format *f;
-  struct d30v_opcode *op;
+  const struct d30v_format *f;
+  const struct d30v_opcode *op;
 
   /* Section 4.3: Both instructions must not be IU or MU only.  */
   if ((op1->op->unit == IU && op2->op->unit == IU)
@@ -1122,14 +1122,14 @@ write_2_short (struct d30v_insn *opcode1,
    It must look at all formats for an opcode and use the operands
    to choose the correct one.  Return NULL on error.  */
 
-static struct d30v_format *
-find_format (struct d30v_opcode *opcode,
+static const struct d30v_format *
+find_format (const struct d30v_opcode *opcode,
 	     expressionS myops[],
 	     int fsize,
 	     int cmp_hack)
 {
   int match, opcode_index, i = 0, j, k;
-  struct d30v_format *fm;
+  const struct d30v_format *fm;
 
   if (opcode == NULL)
     return NULL;
@@ -1145,7 +1145,7 @@ find_format (struct d30v_opcode *opcode,
       if (fsize == FORCE_LONG && opcode_index < LONG)
 	continue;
 
-      fm = (struct d30v_format *) &d30v_format_table[opcode_index];
+      fm = &d30v_format_table[opcode_index];
       k = opcode_index;
       while (fm->form == opcode_index)
 	{
@@ -1266,7 +1266,7 @@ find_format (struct d30v_opcode *opcode,
 
 	      return fm;
 	    }
-	  fm = (struct d30v_format *) &d30v_format_table[++k];
+	  fm = &d30v_format_table[++k];
 	}
     }
   return NULL;
@@ -1339,7 +1339,7 @@ do_assemble (char *str,
   if (startswith (name, "cmp"))
     {
       int p, i;
-      char **d30v_str = (char **) d30v_cc_names;
+      const char **d30v_str = d30v_cc_names;
 
       if (name[3] == 'u')
 	p = 4;
