@@ -170,33 +170,13 @@ struct alpha_macro
 #define note_fpreg(R)		(alpha_fprmask |= (1 << (R)))
 
 /* Predicates for 16- and 32-bit ranges */
-/* XXX: The non-shift version appears to trigger a compiler bug when
-   cross-assembling from x86 w/ gcc 2.7.2.  */
-
-#if 1
-#define range_signed_16(x) \
-	(((offsetT) (x) >> 15) == 0 || ((offsetT) (x) >> 15) == -1)
-#define range_signed_32(x) \
-	(((offsetT) (x) >> 31) == 0 || ((offsetT) (x) >> 31) == -1)
-#else
-#define range_signed_16(x)	((offsetT) (x) >= -(offsetT) 0x8000 &&	\
-				 (offsetT) (x) <=  (offsetT) 0x7FFF)
-#define range_signed_32(x)	((offsetT) (x) >= -(offsetT) 0x80000000 && \
-				 (offsetT) (x) <=  (offsetT) 0x7FFFFFFF)
-#endif
+#define range_signed_16(x)	((valueT) (x) + 0x8000 <= 0xFFFF)
+#define range_signed_32(x)	((valueT) (x) + 0x80000000 <= 0xFFFFFFFF)
 
 /* Macros for sign extending from 16- and 32-bits.  */
-/* XXX: The cast macros will work on all the systems that I care about,
-   but really a predicate should be found to use the non-cast forms.  */
-
-#if 1
-#define sign_extend_16(x)	((short) (x))
-#define sign_extend_32(x)	((int) (x))
-#else
-#define sign_extend_16(x)	((offsetT) (((x) & 0xFFFF) ^ 0x8000) - 0x8000)
-#define sign_extend_32(x)	((offsetT) (((x) & 0xFFFFFFFF) \
-					   ^ 0x80000000) - 0x80000000)
-#endif
+#define sign_extend_16(x)	((((valueT) (x) & 0xFFFF) ^ 0x8000) - 0x8000)
+#define sign_extend_32(x)	((((valueT) (x) & 0xFFFFFFFF) ^ 0x80000000) \
+				 - 0x80000000)
 
 /* Macros to build tokens.  */
 
