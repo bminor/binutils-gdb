@@ -9918,33 +9918,37 @@ static void
 handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
 			struct field *field)
 {
-  struct attribute *attr;
+  const auto data_member_location_attr
+    = dwarf2_attr (die, DW_AT_data_member_location, cu);
 
-  attr = dwarf2_attr (die, DW_AT_data_member_location, cu);
-  if (attr != NULL)
+  if (data_member_location_attr != nullptr)
     {
       bool has_bit_offset = false;
       LONGEST bit_offset = 0;
       LONGEST anonymous_size = 0;
+      const auto bit_offset_attr = dwarf2_attr (die, DW_AT_bit_offset, cu);
 
-      attribute *attr2 = dwarf2_attr (die, DW_AT_bit_offset, cu);
-      if (attr2 != nullptr && attr2->form_is_constant ())
+      if (bit_offset_attr != nullptr && bit_offset_attr->form_is_constant ())
 	{
 	  has_bit_offset = true;
-	  bit_offset = attr2->confused_constant ().value_or (0);
-	  attr2 = dwarf2_attr (die, DW_AT_byte_size, cu);
-	  if (attr2 != nullptr && attr2->form_is_constant ())
+	  bit_offset = bit_offset_attr->confused_constant ().value_or (0);
+
+	  const auto byte_size_attr = dwarf2_attr (die, DW_AT_byte_size, cu);
+
+	  if (byte_size_attr != nullptr && byte_size_attr->form_is_constant ())
 	    {
 	      /* The size of the anonymous object containing
 		 the bit field is explicit, so use the
 		 indicated size (in bytes).  */
-	      anonymous_size = attr2->unsigned_constant ().value_or (0);
+	      anonymous_size
+		= byte_size_attr->unsigned_constant ().value_or (0);
 	    }
 	}
 
-      if (attr->form_is_constant ())
+      if (data_member_location_attr->form_is_constant ())
 	{
-	  LONGEST offset = attr->confused_constant ().value_or (0);
+	  LONGEST offset
+	    = data_member_location_attr->confused_constant ().value_or (0);
 
 	  /* Work around this GCC 11 bug, where it would erroneously use -1
 	     data member locations, instead of 0:
@@ -9962,10 +9966,11 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
 	  if (has_bit_offset)
 	    apply_bit_offset_to_field (*field, bit_offset, anonymous_size);
 	}
-      else if (attr->form_is_block ())
+      else if (data_member_location_attr->form_is_block ())
 	{
 	  CORE_ADDR offset;
-	  if (decode_locdesc (attr->as_block (), cu, &offset))
+	  if (decode_locdesc (data_member_location_attr->as_block (), cu,
+			      &offset))
 	    field->set_loc_bitpos (offset * bits_per_byte);
 	  else
 	    {
@@ -9985,8 +9990,8 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
 	      else
 		dlbaton = OBSTACK_ZALLOC (&objfile->objfile_obstack,
 					  struct dwarf2_locexpr_baton);
-	      dlbaton->data = attr->as_block ()->data;
-	      dlbaton->size = attr->as_block ()->size;
+	      dlbaton->data = data_member_location_attr->as_block ()->data;
+	      dlbaton->size = data_member_location_attr->as_block ()->size;
 	      /* When using this baton, we want to compute the address
 		 of the field, not the value.  This is why
 		 is_reference is set to false here.  */
@@ -9999,16 +10004,19 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
 	}
       else
 	complaint (_("Unsupported form %s for DW_AT_data_member_location"),
-		   dwarf_form_name (attr->form));
+		   dwarf_form_name (data_member_location_attr->form));
     }
   else
     {
-      attr = dwarf2_attr (die, DW_AT_data_bit_offset, cu);
-      if (attr != nullptr)
+      const auto data_bit_offset_attr
+	= dwarf2_attr (die, DW_AT_data_bit_offset, cu);
+
+      if (data_bit_offset_attr != nullptr)
 	{
-	  if (attr->form_is_constant ())
-	    field->set_loc_bitpos (attr->unsigned_constant ().value_or (0));
-	  else if (attr->form_is_block ())
+	  if (data_bit_offset_attr->form_is_constant ())
+	    field->set_loc_bitpos (data_bit_offset_attr->unsigned_constant ()
+				   .value_or (0));
+	  else if (data_bit_offset_attr->form_is_block ())
 	    {
 	      /* This is a DWARF extension.  See
 		 https://dwarfstd.org/issues/250501.1.html.  */
@@ -10016,8 +10024,8 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
 	      dwarf2_locexpr_baton *dlbaton
 		= OBSTACK_ZALLOC (&per_objfile->objfile->objfile_obstack,
 				  dwarf2_locexpr_baton);
-	      dlbaton->data = attr->as_block ()->data;
-	      dlbaton->size = attr->as_block ()->size;
+	      dlbaton->data = data_bit_offset_attr->as_block ()->data;
+	      dlbaton->size = data_bit_offset_attr->as_block ()->size;
 	      dlbaton->per_objfile = per_objfile;
 	      dlbaton->per_cu = cu->per_cu;
 
@@ -10025,7 +10033,7 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
 	    }
 	  else
 	    complaint (_("Unsupported form %s for DW_AT_data_bit_offset"),
-		       dwarf_form_name (attr->form));
+		       dwarf_form_name (data_bit_offset_attr->form));
 	}
     }
 }
