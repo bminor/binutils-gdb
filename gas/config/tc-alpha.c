@@ -442,7 +442,7 @@ static int alpha_flag_show_after_trunc = 0;		/* -H */
 #define ALPHA_RELOC_TABLE(op)						\
 (&alpha_reloc_op[ ((!USER_RELOC_P (op))					\
 		  ? (abort (), 0)					\
-		  : (int) (op) - (int) O_literal) ])
+		  : (op) - O_literal) ])
 
 #define DEF(NAME, RELOC, REQ, ALLOW) \
  { #NAME, sizeof(#NAME)-1, O_##NAME, RELOC, REQ, ALLOW}

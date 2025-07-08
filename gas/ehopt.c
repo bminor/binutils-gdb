@@ -334,7 +334,7 @@ check_eh_frame (expressionS *exp, unsigned int *pnbytes)
 	/* Stop scanning if we don't see the expected FDE fields.  */
 	d->state = state_error;
       else
-	d->state = (enum frame_state) (d->state + 1);
+	d->state++;
       break;
 
     case state_saw_pc_begin:

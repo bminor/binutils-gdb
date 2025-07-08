@@ -522,7 +522,7 @@ static unsigned cl_features = 0;
 #define ARC_RELOC_TABLE(op)				\
   (&arc_reloc_op[ ((!USER_RELOC_P (op))			\
 		   ? (abort (), 0)			\
-		   : (int) (op) - (int) O_gotoff) ])
+		   : (op) - O_gotoff) ])
 
 #define DEF(NAME, RELOC, REQ)				\
   { #NAME, sizeof (#NAME)-1, O_##NAME, RELOC, REQ}
@@ -1444,7 +1444,7 @@ apply_fixups (struct arc_insn *insn, fragS *fragP, int fix)
 	offset = insn->len;
 
       /* Some fixups are only used internally, thus no howto.  */
-      if ((int) fixup->reloc == 0)
+      if (fixup->reloc == 0)
 	as_fatal (_("Unhandled reloc type"));
 
       if ((int) fixup->reloc < 0)

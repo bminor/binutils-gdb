@@ -960,7 +960,7 @@ obj_mach_o_fileprop (int prop)
   if (prop < 0 || prop >= OBJ_MACH_O_FILE_PROP_MAX)
     as_fatal (_("internal error: bad file property ID %d"), prop);
 
-  switch ((obj_mach_o_file_properties) prop)
+  switch (prop)
     {
       case OBJ_MACH_O_FILE_PROP_SUBSECTS_VIA_SYMS:
         obj_mach_o_subsections_by_symbols = 1;
@@ -1023,7 +1023,7 @@ obj_mach_o_set_symbol_qualifier (symbolS *sym, int type)
   if (sec != NULL)
     sectype = sec->flags & BFD_MACH_O_SECTION_TYPE_MASK;
 
-  switch ((obj_mach_o_symbol_type) type)
+  switch (type)
     {
       case OBJ_MACH_O_SYM_LOCAL:
 	/* This is an extension over the system tools.  */

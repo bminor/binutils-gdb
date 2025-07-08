@@ -1447,7 +1447,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 					    (bfd_reloc_code_real_type) code);
       reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
-      gas_assert (reloc->howto && (unsigned int) code == reloc->howto->type);
+      gas_assert (reloc->howto && code == reloc->howto->type);
       break;
     }
 #else /* OBJ_SOM */

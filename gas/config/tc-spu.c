@@ -298,7 +298,7 @@ md_assemble (char *op)
 	  insn.reloc[i] = BFD_RELOC_NONE;
 	}
       insn.opcode = format->opcode;
-      insn.tag = (enum spu_insns) (format - spu_opcodes);
+      insn.tag = format - spu_opcodes;
 
       syntax_error_arg = 0;
       syntax_error_param = 0;

@@ -1312,7 +1312,7 @@ get_directive (directiveE *directive, bool *negated)
       if (strncmp (directive_string, directive_info[i].name, len) == 0)
 	{
 	  input_line_pointer += len;
-	  *directive = (directiveE) i;
+	  *directive = i;
 	  if (*negated && !directive_info[i].can_be_negated)
 	    as_bad (_("directive %s cannot be negated"),
 		    directive_info[i].name);
@@ -1321,7 +1321,7 @@ get_directive (directiveE *directive, bool *negated)
     }
 
   as_bad (_("unknown directive"));
-  *directive = (directiveE) XTENSA_UNDEFINED;
+  *directive = XTENSA_UNDEFINED;
 }
 
 
@@ -10321,7 +10321,7 @@ relax_frag_immed (segT segP,
 				 min_steps, stretch);
   gas_assert (num_steps >= min_steps && num_steps <= RELAX_IMMED_MAXSTEPS);
 
-  fragP->tc_frag_data.slot_subtypes[slot] = (int) RELAX_IMMED + num_steps;
+  fragP->tc_frag_data.slot_subtypes[slot] = RELAX_IMMED + num_steps;
 
   /* Figure out the number of bytes needed.  */
   num_literal_bytes = get_num_stack_literal_bytes (&istack);
@@ -10350,8 +10350,7 @@ relax_frag_immed (segT segP,
 					 min_steps, stretch + old_size);
 	  gas_assert (num_steps >= min_steps && num_steps <= RELAX_IMMED_MAXSTEPS);
 
-	  fragP->tc_frag_data.slot_subtypes[slot]
-	    = (int) RELAX_IMMED + num_steps;
+	  fragP->tc_frag_data.slot_subtypes[slot] = RELAX_IMMED + num_steps;
 
 	  num_literal_bytes = get_num_stack_literal_bytes (&istack);
 	  literal_diff

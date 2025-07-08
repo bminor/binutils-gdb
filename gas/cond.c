@@ -348,7 +348,7 @@ s_elseif (int arg)
       if (operand.X_op != O_constant)
 	as_bad (_("non-constant expression in \".elseif\" statement"));
 
-      switch ((operatorT) arg)
+      switch (arg)
 	{
 	case O_eq: t = operand.X_add_number == 0; break;
 	case O_ne: t = operand.X_add_number != 0; break;

@@ -1379,7 +1379,7 @@ static const st_t map_coff_sym_type[] = {
 };
 
 /* Keep track of different sized allocation requests.  */
-static alloc_info_t alloc_counts[(int) alloc_type_last];
+static alloc_info_t alloc_counts[alloc_type_last];
 
 /* Record whether we have seen any debugging information.  */
 int ecoff_debugging_seen = 0;
@@ -1529,8 +1529,8 @@ add_varray_page (varray_t *vp /* varray to add page to */)
 #endif
     new_links->datum = allocate_page ();
 
-  alloc_counts[(int) alloc_type_varray].total_alloc++;
-  alloc_counts[(int) alloc_type_varray].total_pages++;
+  alloc_counts[alloc_type_varray].total_alloc++;
+  alloc_counts[alloc_type_varray].total_pages++;
 
   new_links->start_index = vp->num_allocated;
   vp->objects_last_page = 0;
@@ -1635,8 +1635,8 @@ add_ecoff_symbol (const char *str,	/* symbol name */
   psym->sym_index = -1;
   memset (&psym->ecoff_sym, 0, sizeof (EXTR));
   psym->ecoff_sym.asym.value = value;
-  psym->ecoff_sym.asym.st = (unsigned) type;
-  psym->ecoff_sym.asym.sc = (unsigned) storage;
+  psym->ecoff_sym.asym.st = type;
+  psym->ecoff_sym.asym.sc = storage;
   psym->ecoff_sym.asym.index = indx;
 
   /* If there is an associated symbol, we wait until the end of the
@@ -1700,7 +1700,7 @@ add_ecoff_symbol (const char *str,	/* symbol name */
 	as_fatal (_("too many st_End's"));
       else
 	{
-	  st_t begin_type = (st_t) pscope->lsym->ecoff_sym.asym.st;
+	  st_t begin_type = pscope->lsym->ecoff_sym.asym.st;
 
 	  psym->begin_ptr = pscope->lsym;
 
@@ -1861,16 +1861,16 @@ add_aux_sym_tir (type_info_t *t,	/* current type information */
   vp = &cur_file_ptr->aux_syms;
 
   memset (&aux, 0, sizeof (aux));
-  aux.ti.bt = (int) t->basic_type;
+  aux.ti.bt = t->basic_type;
   aux.ti.continued = 0;
   aux.ti.fBitfield = t->bitfield;
 
-  aux.ti.tq0 = (int) t->type_qualifiers[0];
-  aux.ti.tq1 = (int) t->type_qualifiers[1];
-  aux.ti.tq2 = (int) t->type_qualifiers[2];
-  aux.ti.tq3 = (int) t->type_qualifiers[3];
-  aux.ti.tq4 = (int) t->type_qualifiers[4];
-  aux.ti.tq5 = (int) t->type_qualifiers[5];
+  aux.ti.tq0 = t->type_qualifiers[0];
+  aux.ti.tq1 = t->type_qualifiers[1];
+  aux.ti.tq2 = t->type_qualifiers[2];
+  aux.ti.tq3 = t->type_qualifiers[3];
+  aux.ti.tq4 = t->type_qualifiers[4];
+  aux.ti.tq5 = t->type_qualifiers[5];
 
   /* For anything that adds additional information, we must not hash,
      so check here, and reset our state.  */
@@ -3909,8 +3909,8 @@ ecoff_build_symbols (const struct ecoff_debug_swap *backend,
 		         we must offset it by the vma of the section,
 		         just as BFD does, because BFD will not see
 		         this value).  */
-		      if (sym_ptr->ecoff_sym.asym.st == (int) st_Block
-			  && sym_ptr->ecoff_sym.asym.sc == (int) sc_Text)
+		      if (sym_ptr->ecoff_sym.asym.st == st_Block
+			  && sym_ptr->ecoff_sym.asym.sc == sc_Text)
 			{
 			  symbolS *begin_sym;
 
@@ -4021,8 +4021,8 @@ ecoff_build_symbols (const struct ecoff_debug_swap *backend,
 			      sc = sc_Data;
 			    }
 
-			  sym_ptr->ecoff_sym.asym.st = (int) st;
-			  sym_ptr->ecoff_sym.asym.sc = (int) sc;
+			  sym_ptr->ecoff_sym.asym.st = st;
+			  sym_ptr->ecoff_sym.asym.sc = sc;
 			}
 
 		      /* This is just an external symbol if it is
@@ -4035,7 +4035,7 @@ ecoff_build_symbols (const struct ecoff_debug_swap *backend,
 			   || S_IS_WEAK (as_sym)
 			   || ! S_IS_DEFINED (as_sym))
 			  && sym_ptr->proc_ptr == (proc_t *) NULL
-			  && sym_ptr->ecoff_sym.asym.st != (int) st_Nil
+			  && sym_ptr->ecoff_sym.asym.st != st_Nil
 			  && ! ECOFF_IS_STAB (&sym_ptr->ecoff_sym.asym))
 			local = 0;
 
@@ -4070,7 +4070,7 @@ ecoff_build_symbols (const struct ecoff_debug_swap *backend,
 		      begin_ptr = sym_ptr->begin_ptr;
 		      know (begin_ptr->sym_index != -1);
 		      sym_ptr->ecoff_sym.asym.index = begin_ptr->sym_index;
-		      if (sym_ptr->ecoff_sym.asym.sc != (int) sc_Info)
+		      if (sym_ptr->ecoff_sym.asym.sc != sc_Info)
 			sym_ptr->ecoff_sym.asym.iss =
 			  begin_ptr->ecoff_sym.asym.iss;
 
@@ -4122,7 +4122,7 @@ ecoff_build_symbols (const struct ecoff_debug_swap *backend,
 #endif
 			}
 		      else if (begin_type == st_Block
-			       && sym_ptr->ecoff_sym.asym.sc != (int) sc_Info)
+			       && sym_ptr->ecoff_sym.asym.sc != sc_Info)
 			{
 			  symbolS *begin_sym;
 
@@ -4545,8 +4545,8 @@ ecoff_setup_ext (void)
 
 	  lsym = symbol_get_obj (sym)->ecoff_symbol;
 	  lsym->ecoff_sym.asym.value = 0;
-	  lsym->ecoff_sym.asym.st = (int) st_Nil;
-	  lsym->ecoff_sym.asym.sc = (int) sc_Nil;
+	  lsym->ecoff_sym.asym.st = st_Nil;
+	  lsym->ecoff_sym.asym.sc = sc_Nil;
 	  lsym->ecoff_sym.asym.index = indexNil;
 	}
 
@@ -4773,23 +4773,23 @@ allocate_scope (void)
 
 #ifndef MALLOC_CHECK
 
-  ptr = alloc_counts[(int) alloc_type_scope].free_list.f_scope;
+  ptr = alloc_counts[alloc_type_scope].free_list.f_scope;
   if (ptr != (scope_t *) NULL)
-    alloc_counts[(int) alloc_type_scope].free_list.f_scope = ptr->free;
+    alloc_counts[alloc_type_scope].free_list.f_scope = ptr->free;
   else
     {
-      int unallocated	= alloc_counts[(int) alloc_type_scope].unallocated;
-      page_type *cur_page	= alloc_counts[(int) alloc_type_scope].cur_page;
+      int unallocated = alloc_counts[alloc_type_scope].unallocated;
+      page_type *cur_page = alloc_counts[alloc_type_scope].cur_page;
 
       if (unallocated == 0)
 	{
 	  unallocated = PAGE_SIZE / sizeof (scope_t);
-	  alloc_counts[(int) alloc_type_scope].cur_page = cur_page = allocate_page ();
-	  alloc_counts[(int) alloc_type_scope].total_pages++;
+	  alloc_counts[alloc_type_scope].cur_page = cur_page = allocate_page ();
+	  alloc_counts[alloc_type_scope].total_pages++;
 	}
 
       ptr = &cur_page->scope[--unallocated];
-      alloc_counts[(int) alloc_type_scope].unallocated = unallocated;
+      alloc_counts[alloc_type_scope].unallocated = unallocated;
     }
 
 #else
@@ -4798,7 +4798,7 @@ allocate_scope (void)
 
 #endif
 
-  alloc_counts[(int) alloc_type_scope].total_alloc++;
+  alloc_counts[alloc_type_scope].total_alloc++;
   memset (ptr, 0, sizeof (*ptr));
   return ptr;
 }
@@ -4808,13 +4808,13 @@ allocate_scope (void)
 static void
 free_scope (scope_t *ptr)
 {
-  alloc_counts[(int) alloc_type_scope].total_free++;
+  alloc_counts[alloc_type_scope].total_free++;
 
 #ifndef MALLOC_CHECK
-  ptr->free = alloc_counts[(int) alloc_type_scope].free_list.f_scope;
-  alloc_counts[(int) alloc_type_scope].free_list.f_scope = ptr;
+  ptr->free = alloc_counts[alloc_type_scope].free_list.f_scope;
+  alloc_counts[alloc_type_scope].free_list.f_scope = ptr;
 #else
-  free ((void *) ptr);
+  free (ptr);
 #endif
 }
 
@@ -4827,18 +4827,18 @@ allocate_vlinks (void)
 
 #ifndef MALLOC_CHECK
 
-  int unallocated = alloc_counts[(int) alloc_type_vlinks].unallocated;
-  page_type *cur_page = alloc_counts[(int) alloc_type_vlinks].cur_page;
+  int unallocated = alloc_counts[alloc_type_vlinks].unallocated;
+  page_type *cur_page = alloc_counts[alloc_type_vlinks].cur_page;
 
   if (unallocated == 0)
     {
       unallocated = PAGE_SIZE / sizeof (vlinks_t);
-      alloc_counts[(int) alloc_type_vlinks].cur_page = cur_page = allocate_page ();
-      alloc_counts[(int) alloc_type_vlinks].total_pages++;
+      alloc_counts[alloc_type_vlinks].cur_page = cur_page = allocate_page ();
+      alloc_counts[alloc_type_vlinks].total_pages++;
     }
 
   ptr = &cur_page->vlinks[--unallocated];
-  alloc_counts[(int) alloc_type_vlinks].unallocated = unallocated;
+  alloc_counts[alloc_type_vlinks].unallocated = unallocated;
 
 #else
 
@@ -4846,7 +4846,7 @@ allocate_vlinks (void)
 
 #endif
 
-  alloc_counts[(int) alloc_type_vlinks].total_alloc++;
+  alloc_counts[alloc_type_vlinks].total_alloc++;
   memset (ptr, 0, sizeof (*ptr));
   return ptr;
 }
@@ -4860,18 +4860,18 @@ allocate_shash (void)
 
 #ifndef MALLOC_CHECK
 
-  int unallocated = alloc_counts[(int) alloc_type_shash].unallocated;
-  page_type *cur_page = alloc_counts[(int) alloc_type_shash].cur_page;
+  int unallocated = alloc_counts[alloc_type_shash].unallocated;
+  page_type *cur_page = alloc_counts[alloc_type_shash].cur_page;
 
   if (unallocated == 0)
     {
       unallocated = PAGE_SIZE / sizeof (shash_t);
-      alloc_counts[(int) alloc_type_shash].cur_page = cur_page = allocate_page ();
-      alloc_counts[(int) alloc_type_shash].total_pages++;
+      alloc_counts[alloc_type_shash].cur_page = cur_page = allocate_page ();
+      alloc_counts[alloc_type_shash].total_pages++;
     }
 
   ptr = &cur_page->shash[--unallocated];
-  alloc_counts[(int) alloc_type_shash].unallocated = unallocated;
+  alloc_counts[alloc_type_shash].unallocated = unallocated;
 
 #else
 
@@ -4879,7 +4879,7 @@ allocate_shash (void)
 
 #endif
 
-  alloc_counts[(int) alloc_type_shash].total_alloc++;
+  alloc_counts[alloc_type_shash].total_alloc++;
   memset (ptr, 0, sizeof (*ptr));
   return ptr;
 }
@@ -4893,18 +4893,18 @@ allocate_thash (void)
 
 #ifndef MALLOC_CHECK
 
-  int unallocated = alloc_counts[(int) alloc_type_thash].unallocated;
-  page_type *cur_page = alloc_counts[(int) alloc_type_thash].cur_page;
+  int unallocated = alloc_counts[alloc_type_thash].unallocated;
+  page_type *cur_page = alloc_counts[alloc_type_thash].cur_page;
 
   if (unallocated == 0)
     {
       unallocated = PAGE_SIZE / sizeof (thash_t);
-      alloc_counts[(int) alloc_type_thash].cur_page = cur_page = allocate_page ();
-      alloc_counts[(int) alloc_type_thash].total_pages++;
+      alloc_counts[alloc_type_thash].cur_page = cur_page = allocate_page ();
+      alloc_counts[alloc_type_thash].total_pages++;
     }
 
   ptr = &cur_page->thash[--unallocated];
-  alloc_counts[(int) alloc_type_thash].unallocated = unallocated;
+  alloc_counts[alloc_type_thash].unallocated = unallocated;
 
 #else
 
@@ -4912,7 +4912,7 @@ allocate_thash (void)
 
 #endif
 
-  alloc_counts[(int) alloc_type_thash].total_alloc++;
+  alloc_counts[alloc_type_thash].total_alloc++;
   memset (ptr, 0, sizeof (*ptr));
   return ptr;
 }
@@ -4926,23 +4926,23 @@ allocate_tag (void)
 
 #ifndef MALLOC_CHECK
 
-  ptr = alloc_counts[(int) alloc_type_tag].free_list.f_tag;
+  ptr = alloc_counts[alloc_type_tag].free_list.f_tag;
   if (ptr != (tag_t *) NULL)
-    alloc_counts[(int) alloc_type_tag].free_list.f_tag = ptr->free;
+    alloc_counts[alloc_type_tag].free_list.f_tag = ptr->free;
   else
     {
-      int unallocated = alloc_counts[(int) alloc_type_tag].unallocated;
-      page_type *cur_page = alloc_counts[(int) alloc_type_tag].cur_page;
+      int unallocated = alloc_counts[alloc_type_tag].unallocated;
+      page_type *cur_page = alloc_counts[alloc_type_tag].cur_page;
 
       if (unallocated == 0)
 	{
 	  unallocated = PAGE_SIZE / sizeof (tag_t);
-	  alloc_counts[(int) alloc_type_tag].cur_page = cur_page = allocate_page ();
-	  alloc_counts[(int) alloc_type_tag].total_pages++;
+	  alloc_counts[alloc_type_tag].cur_page = cur_page = allocate_page ();
+	  alloc_counts[alloc_type_tag].total_pages++;
 	}
 
       ptr = &cur_page->tag[--unallocated];
-      alloc_counts[(int) alloc_type_tag].unallocated = unallocated;
+      alloc_counts[alloc_type_tag].unallocated = unallocated;
     }
 
 #else
@@ -4951,7 +4951,7 @@ allocate_tag (void)
 
 #endif
 
-  alloc_counts[(int) alloc_type_tag].total_alloc++;
+  alloc_counts[alloc_type_tag].total_alloc++;
   memset (ptr, 0, sizeof (*ptr));
   return ptr;
 }
@@ -4961,11 +4961,11 @@ allocate_tag (void)
 static void
 free_tag (tag_t *ptr)
 {
-  alloc_counts[(int) alloc_type_tag].total_free++;
+  alloc_counts[alloc_type_tag].total_free++;
 
 #ifndef MALLOC_CHECK
-  ptr->free = alloc_counts[(int) alloc_type_tag].free_list.f_tag;
-  alloc_counts[(int) alloc_type_tag].free_list.f_tag = ptr;
+  ptr->free = alloc_counts[alloc_type_tag].free_list.f_tag;
+  alloc_counts[alloc_type_tag].free_list.f_tag = ptr;
 #else
   free ((PTR_T) ptr);
 #endif
@@ -4980,18 +4980,18 @@ allocate_forward (void)
 
 #ifndef MALLOC_CHECK
 
-  int unallocated = alloc_counts[(int) alloc_type_forward].unallocated;
-  page_type *cur_page = alloc_counts[(int) alloc_type_forward].cur_page;
+  int unallocated = alloc_counts[alloc_type_forward].unallocated;
+  page_type *cur_page = alloc_counts[alloc_type_forward].cur_page;
 
   if (unallocated == 0)
     {
       unallocated = PAGE_SIZE / sizeof (forward_t);
-      alloc_counts[(int) alloc_type_forward].cur_page = cur_page = allocate_page ();
-      alloc_counts[(int) alloc_type_forward].total_pages++;
+      alloc_counts[alloc_type_forward].cur_page = cur_page = allocate_page ();
+      alloc_counts[alloc_type_forward].total_pages++;
     }
 
   ptr = &cur_page->forward[--unallocated];
-  alloc_counts[(int) alloc_type_forward].unallocated = unallocated;
+  alloc_counts[alloc_type_forward].unallocated = unallocated;
 
 #else
 
@@ -4999,7 +4999,7 @@ allocate_forward (void)
 
 #endif
 
-  alloc_counts[(int) alloc_type_forward].total_alloc++;
+  alloc_counts[alloc_type_forward].total_alloc++;
   memset (ptr, 0, sizeof (*ptr));
   return ptr;
 }
@@ -5013,23 +5013,23 @@ allocate_thead (void)
 
 #ifndef MALLOC_CHECK
 
-  ptr = alloc_counts[(int) alloc_type_thead].free_list.f_thead;
-  if (ptr != (thead_t *) NULL)
-    alloc_counts[(int) alloc_type_thead].free_list.f_thead = ptr->free;
+  ptr = alloc_counts[alloc_type_thead].free_list.f_thead;
+  if (ptr != NULL)
+    alloc_counts[alloc_type_thead].free_list.f_thead = ptr->free;
   else
     {
-      int unallocated = alloc_counts[(int) alloc_type_thead].unallocated;
-      page_type *cur_page = alloc_counts[(int) alloc_type_thead].cur_page;
+      int unallocated = alloc_counts[alloc_type_thead].unallocated;
+      page_type *cur_page = alloc_counts[alloc_type_thead].cur_page;
 
       if (unallocated == 0)
 	{
 	  unallocated = PAGE_SIZE / sizeof (thead_t);
-	  alloc_counts[(int) alloc_type_thead].cur_page = cur_page = allocate_page ();
-	  alloc_counts[(int) alloc_type_thead].total_pages++;
+	  alloc_counts[alloc_type_thead].cur_page = cur_page = allocate_page ();
+	  alloc_counts[alloc_type_thead].total_pages++;
 	}
 
       ptr = &cur_page->thead[--unallocated];
-      alloc_counts[(int) alloc_type_thead].unallocated = unallocated;
+      alloc_counts[alloc_type_thead].unallocated = unallocated;
     }
 
 #else
@@ -5038,7 +5038,7 @@ allocate_thead (void)
 
 #endif
 
-  alloc_counts[(int) alloc_type_thead].total_alloc++;
+  alloc_counts[alloc_type_thead].total_alloc++;
   memset (ptr, 0, sizeof (*ptr));
   return ptr;
 }
@@ -5048,11 +5048,11 @@ allocate_thead (void)
 static void
 free_thead (thead_t *ptr)
 {
-  alloc_counts[(int) alloc_type_thead].total_free++;
+  alloc_counts[alloc_type_thead].total_free++;
 
 #ifndef MALLOC_CHECK
-  ptr->free = (thead_t *) alloc_counts[(int) alloc_type_thead].free_list.f_thead;
-  alloc_counts[(int) alloc_type_thead].free_list.f_thead = ptr;
+  ptr->free = (thead_t *) alloc_counts[alloc_type_thead].free_list.f_thead;
+  alloc_counts[alloc_type_thead].free_list.f_thead = ptr;
 #else
   free ((PTR_T) ptr);
 #endif
@@ -5065,18 +5065,18 @@ allocate_lineno_list (void)
 
 #ifndef MALLOC_CHECK
 
-  int unallocated = alloc_counts[(int) alloc_type_lineno].unallocated;
-  page_type *cur_page = alloc_counts[(int) alloc_type_lineno].cur_page;
+  int unallocated = alloc_counts[alloc_type_lineno].unallocated;
+  page_type *cur_page = alloc_counts[alloc_type_lineno].cur_page;
 
   if (unallocated == 0)
     {
       unallocated = PAGE_SIZE / sizeof (lineno_list_t);
-      alloc_counts[(int) alloc_type_lineno].cur_page = cur_page = allocate_page ();
-      alloc_counts[(int) alloc_type_lineno].total_pages++;
+      alloc_counts[alloc_type_lineno].cur_page = cur_page = allocate_page ();
+      alloc_counts[alloc_type_lineno].total_pages++;
     }
 
   ptr = &cur_page->lineno[--unallocated];
-  alloc_counts[(int) alloc_type_lineno].unallocated = unallocated;
+  alloc_counts[alloc_type_lineno].unallocated = unallocated;
 
 #else
 
@@ -5084,7 +5084,7 @@ allocate_lineno_list (void)
 
 #endif
 
-  alloc_counts[(int) alloc_type_lineno].total_alloc++;
+  alloc_counts[alloc_type_lineno].total_alloc++;
   memset (ptr, 0, sizeof (*ptr));
   return ptr;
 }
