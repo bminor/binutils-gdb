@@ -461,10 +461,10 @@ mt_apply_fix (fixS *fixP, valueT *valueP, segT seg)
 bool
 mt_fix_adjustable (fixS * fixP)
 {
-  if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
+  if (fixP->fx_r_type >= BFD_RELOC_UNUSED)
     {
       const CGEN_INSN *insn = NULL;
-      int opindex = (int) fixP->fx_r_type - (int) BFD_RELOC_UNUSED;
+      int opindex = fixP->fx_r_type - BFD_RELOC_UNUSED;
       const CGEN_OPERAND *operand;
 
       operand = cgen_operand_lookup_by_num(gas_cgen_cpu_desc, opindex);

@@ -481,9 +481,9 @@ xstormy16_md_apply_fix (fixS *   fixP,
   if (fixP->fx_subsy != (symbolS *) NULL)
     as_bad_subtract (fixP);
 
-  if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
+  if (fixP->fx_r_type >= BFD_RELOC_UNUSED)
     {
-      int opindex = (int) fixP->fx_r_type - (int) BFD_RELOC_UNUSED;
+      int opindex = fixP->fx_r_type - BFD_RELOC_UNUSED;
       const CGEN_OPERAND *operand = cgen_operand_lookup_by_num (cd, opindex);
       const char *errmsg;
       bfd_reloc_code_real_type reloc_type;

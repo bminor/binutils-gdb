@@ -3310,8 +3310,7 @@ md_assemble (char *str)
 		       f - frag_now->fr_literal, 4,
 		       & fixups[i].exp,
 		       (operand->flags & V850_PCREL) != 0,
-		       (bfd_reloc_code_real_type) (fixups[i].opindex
-						   + (int) BFD_RELOC_UNUSED));
+		       fixups[i].opindex + BFD_RELOC_UNUSED);
 	}
     }
 
@@ -3439,14 +3438,14 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
       fixP->fx_addnumber = value;
     }
 
-  if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
+  if (fixP->fx_r_type >= BFD_RELOC_UNUSED)
     {
       int opindex;
       const struct v850_operand *operand;
       unsigned long insn;
       const char *errmsg = NULL;
 
-      opindex = (int) fixP->fx_r_type - (int) BFD_RELOC_UNUSED;
+      opindex = fixP->fx_r_type - BFD_RELOC_UNUSED;
       operand = &v850_operands[opindex];
 
       /* Fetch the instruction, insert the fully resolved operand

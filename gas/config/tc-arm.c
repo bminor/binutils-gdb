@@ -3844,9 +3844,8 @@ s_arm_elf_cons (int nbytes)
 	    emit_expr (&exp, (unsigned int) nbytes);
 	  else
 	    {
-	      reloc_howto_type *howto = (reloc_howto_type *)
-		  bfd_reloc_type_lookup (stdoutput,
-					 (bfd_reloc_code_real_type) reloc);
+	      reloc_howto_type *howto = bfd_reloc_type_lookup (stdoutput,
+							       reloc);
 	      int size = bfd_get_reloc_size (howto);
 
 	      if (reloc == BFD_RELOC_ARM_PLT32)
@@ -22218,8 +22217,8 @@ fix_new_arm (fragS *	   frag,
       break;
 
     default:
-      new_fix = (fixS *) fix_new (frag, where, size, make_expr_symbol (exp), 0,
-				  pc_rel, (enum bfd_reloc_code_real) reloc);
+      new_fix = fix_new (frag, where, size, make_expr_symbol (exp), 0,
+			 pc_rel, reloc);
       break;
     }
 

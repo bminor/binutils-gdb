@@ -7728,17 +7728,16 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
       && delayed_branch_p (ip))
     {
       relaxed_branch = true;
-      add_relaxed_insn (ip, (relaxed_branch_length
-			     (NULL, NULL,
-			      uncond_branch_p (ip) ? -1
-			      : branch_likely_p (ip) ? 1
-			      : 0)), 4,
-			RELAX_BRANCH_ENCODE
-			(AT, mips_pic != NO_PIC,
-			 uncond_branch_p (ip),
-			 branch_likely_p (ip),
-			 pinfo & INSN_WRITE_GPR_31,
-			 0),
+      add_relaxed_insn (ip,
+			relaxed_branch_length (NULL, NULL,
+					       uncond_branch_p (ip) ? -1
+					       : branch_likely_p (ip) ? 1
+					       : 0),
+			4,
+			RELAX_BRANCH_ENCODE (AT, mips_pic != NO_PIC,
+					     uncond_branch_p (ip),
+					     branch_likely_p (ip),
+					     pinfo & INSN_WRITE_GPR_31, 0),
 			address_expr->X_add_symbol,
 			address_expr->X_add_number);
       *reloc_type = BFD_RELOC_UNUSED;
@@ -7814,15 +7813,15 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  offset = 0;
 	}
       add_relaxed_insn (ip, 12, 0,
-			RELAX_MIPS16_ENCODE
-			(*reloc_type - BFD_RELOC_UNUSED,
-			 mips_opts.ase & ASE_MIPS16E2,
-			 mips_pic != NO_PIC,
-			 HAVE_32BIT_SYMBOLS,
-			 mips_opts.warn_about_macros,
-			 require_unextended, require_extended,
-			 delayed_branch_p (&history[0]),
-			 history[0].mips16_absolute_jump_p),
+			RELAX_MIPS16_ENCODE (*reloc_type - BFD_RELOC_UNUSED,
+					     mips_opts.ase & ASE_MIPS16E2,
+					     mips_pic != NO_PIC,
+					     HAVE_32BIT_SYMBOLS,
+					     mips_opts.warn_about_macros,
+					     require_unextended,
+					     require_extended,
+					     delayed_branch_p (&history[0]),
+					     history[0].mips16_absolute_jump_p),
 			symbol, offset);
     }
   else if (mips_opts.mips16 && insn_length (ip) == 2)
@@ -8438,7 +8437,7 @@ match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 	    case 'D':
 	    case 'E':
 	      if (!forced_insn_length)
-		*offset_reloc = (int) BFD_RELOC_UNUSED + c;
+		*offset_reloc = BFD_RELOC_UNUSED + c;
 	      else if (c == 'D')
 		*offset_reloc = BFD_RELOC_MICROMIPS_10_PCREL_S1;
 	      else
@@ -8566,7 +8565,7 @@ match_mips16_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 		}
 	    }
 	  else if (relax_char)
-	    *offset_reloc = (int) BFD_RELOC_UNUSED + relax_char;
+	    *offset_reloc = BFD_RELOC_UNUSED + relax_char;
 
 	  check_completed_insn (&arg);
 	  return true;
@@ -8988,11 +8987,11 @@ macro_read_relocs (va_list *args, bfd_reloc_code_real_type *r)
 
   next = va_arg (*args, int);
   if (next >= 0)
-    r[0] = (bfd_reloc_code_real_type) next;
+    r[0] = next;
   else
     {
       for (i = 0; i < 3; i++)
-	r[i] = (bfd_reloc_code_real_type) va_arg (*args, int);
+	r[i] = va_arg (*args, int);
       /* This function is only used for 16-bit relocation fields.
 	 To make the macro code simpler, treat an unrelocated value
 	 in the same way as BFD_RELOC_LO16.  */
@@ -9240,7 +9239,7 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
 	    gas_assert (ep != NULL);
 
 	    if (ep->X_op != O_constant)
-	      *r = (int) BFD_RELOC_UNUSED + c;
+	      *r = BFD_RELOC_UNUSED + c;
 	    else if (calculate_reloc (*r, ep->X_add_number, &value))
 	      {
 		mips16_immed (NULL, 0, c, *r, value, 0, &insn.insn_opcode);
@@ -11120,7 +11119,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	}
       else if (!mips_big_got && !HAVE_NEWABI)
 	{
-	  int lw_reloc_type = (int) BFD_RELOC_MIPS_GOT16;
+	  int lw_reloc_type = BFD_RELOC_MIPS_GOT16;
 
 	  /* If this is a reference to an external symbol, and there
 	     is no constant, we want
@@ -11157,7 +11156,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	      if (mips_pic == SVR4_PIC
 		  && breg == 0
 		  && (call || tempreg == PIC_CALL_REG))
-		lw_reloc_type = (int) BFD_RELOC_MIPS_CALL16;
+		lw_reloc_type = BFD_RELOC_MIPS_CALL16;
 
 	      relax_start (offset_expr.X_add_symbol);
 	      macro_build (&offset_expr, ADDRESS_LOAD_INSN, "t,o(b)", tempreg,
@@ -11319,9 +11318,9 @@ macro (struct mips_cl_insn *ip, char *str)
       else if (mips_big_got && !HAVE_NEWABI)
 	{
 	  int gpdelay;
-	  int lui_reloc_type = (int) BFD_RELOC_MIPS_GOT_HI16;
-	  int lw_reloc_type = (int) BFD_RELOC_MIPS_GOT_LO16;
-	  int local_reloc_type = (int) BFD_RELOC_MIPS_GOT16;
+	  int lui_reloc_type = BFD_RELOC_MIPS_GOT_HI16;
+	  int lw_reloc_type = BFD_RELOC_MIPS_GOT_LO16;
+	  int local_reloc_type = BFD_RELOC_MIPS_GOT16;
 
 	  /* This is the large GOT case.  If this is a reference to an
 	     external symbol, and there is no constant, we want
@@ -11371,8 +11370,8 @@ macro (struct mips_cl_insn *ip, char *str)
 	  if (expr1.X_add_number == 0 && breg == 0
 	      && (call || tempreg == PIC_CALL_REG))
 	    {
-	      lui_reloc_type = (int) BFD_RELOC_MIPS_CALL_HI16;
-	      lw_reloc_type = (int) BFD_RELOC_MIPS_CALL_LO16;
+	      lui_reloc_type = BFD_RELOC_MIPS_CALL_HI16;
+	      lw_reloc_type = BFD_RELOC_MIPS_CALL_LO16;
 	    }
 	  macro_build (&offset_expr, "lui", LUI_FMT, tempreg, lui_reloc_type);
 	  macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t",
@@ -11474,8 +11473,8 @@ macro (struct mips_cl_insn *ip, char *str)
 	}
       else if (mips_big_got && HAVE_NEWABI)
 	{
-	  int lui_reloc_type = (int) BFD_RELOC_MIPS_GOT_HI16;
-	  int lw_reloc_type = (int) BFD_RELOC_MIPS_GOT_LO16;
+	  int lui_reloc_type = BFD_RELOC_MIPS_GOT_HI16;
+	  int lw_reloc_type = BFD_RELOC_MIPS_GOT_LO16;
 	  int add_breg_early = 0;
 
 	  /* This is the large GOT case.  If this is a reference to an
@@ -11517,8 +11516,8 @@ macro (struct mips_cl_insn *ip, char *str)
 	  if (expr1.X_add_number == 0 && breg == 0
 	      && (call || tempreg == PIC_CALL_REG))
 	    {
-	      lui_reloc_type = (int) BFD_RELOC_MIPS_CALL_HI16;
-	      lw_reloc_type = (int) BFD_RELOC_MIPS_CALL_LO16;
+	      lui_reloc_type = BFD_RELOC_MIPS_CALL_HI16;
+	      lw_reloc_type = BFD_RELOC_MIPS_CALL_LO16;
 	    }
 	  macro_build (&offset_expr, "lui", LUI_FMT, tempreg, lui_reloc_type);
 	  macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t",
@@ -12532,7 +12531,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	}
       else if (!mips_big_got)
 	{
-	  int lw_reloc_type = (int) BFD_RELOC_MIPS_GOT16;
+	  int lw_reloc_type = BFD_RELOC_MIPS_GOT16;
 
 	  /* If this is a reference to an external symbol, we want
 	       lw	$tempreg,<sym>($gp)	(BFD_RELOC_MIPS_GOT16)

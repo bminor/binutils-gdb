@@ -1906,8 +1906,7 @@ md_gather_operands (char *str,
 	fixP = fix_new_exp (frag_now, f - frag_now->fr_literal, 4,
 			    &fixups[i].exp,
 			    (operand->flags & S390_OPERAND_PCREL) != 0,
-			    ((bfd_reloc_code_real_type)
-			     (fixups[i].opindex + (int) BFD_RELOC_UNUSED)));
+			    fixups[i].opindex + BFD_RELOC_UNUSED);
       /* s390_insert_operand () does the range checking.  */
       if (operand->flags & S390_OPERAND_PCREL)
 	fixP->fx_no_overflow = 1;
@@ -2490,12 +2489,12 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   else
     fixP->fx_done = 1;
 
-  if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
+  if (fixP->fx_r_type >= BFD_RELOC_UNUSED)
     {
       const struct s390_operand *operand;
       int opindex;
 
-      opindex = (int) fixP->fx_r_type - (int) BFD_RELOC_UNUSED;
+      opindex = fixP->fx_r_type - BFD_RELOC_UNUSED;
       operand = &s390_operands[opindex];
 
       if (fixP->fx_done)

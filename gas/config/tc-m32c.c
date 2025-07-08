@@ -1136,9 +1136,9 @@ m32c_fix_adjustable (fixS * fixP)
 
   /* We need the symbol name for the VTABLE entries.  */
   reloc = fixP->fx_r_type;
-  if (reloc > (int)BFD_RELOC_UNUSED)
+  if (reloc > BFD_RELOC_UNUSED)
     {
-      reloc -= (int)BFD_RELOC_UNUSED;
+      reloc -= BFD_RELOC_UNUSED;
       switch (reloc)
 	{
 	case M32C_OPERAND_DSP_32_S16:

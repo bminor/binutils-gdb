@@ -1523,10 +1523,10 @@ frv_fix_adjustable (fixS *fixP)
 {
   bfd_reloc_code_real_type reloc_type;
 
-  if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
+  if (fixP->fx_r_type >= BFD_RELOC_UNUSED)
     {
       const CGEN_INSN *insn = NULL;
-      int opindex = (int) fixP->fx_r_type - (int) BFD_RELOC_UNUSED;
+      int opindex = fixP->fx_r_type - BFD_RELOC_UNUSED;
       const CGEN_OPERAND *operand = cgen_operand_lookup_by_num(gas_cgen_cpu_desc, opindex);
       reloc_type = md_cgen_lookup_reloc (insn, operand, fixP);
     }
@@ -1705,7 +1705,7 @@ frv_frob_file_section (bfd *abfd, asection *sec, void *ptr ATTRIBUTE_UNUSED)
 	}
       else
 	{
-	  opindex = (int) fixp->fx_r_type - (int) BFD_RELOC_UNUSED;
+	  opindex = fixp->fx_r_type - BFD_RELOC_UNUSED;
 	  operand = cgen_operand_lookup_by_num (cd, opindex);
 	  reloc = md_cgen_lookup_reloc (insn, operand, fixp);
 	}

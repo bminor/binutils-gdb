@@ -1457,8 +1457,7 @@ apply_fixups (struct arc_insn *insn, fragS *fragP, int fix)
       else
 	{
 	  reloc_howto_type *reloc_howto =
-	    bfd_reloc_type_lookup (stdoutput,
-				   (bfd_reloc_code_real_type) fixup->reloc);
+	    bfd_reloc_type_lookup (stdoutput, fixup->reloc);
 	  gas_assert (reloc_howto);
 
 	  /* FIXME! the reloc size is wrong in the BFD file.
@@ -4058,8 +4057,7 @@ assemble_insn (const struct arc_opcode *opcode,
 	    {
 	      /* sanity checks.  */
 	      reloc_howto_type *reloc_howto
-		= bfd_reloc_type_lookup (stdoutput,
-					 (bfd_reloc_code_real_type) reloc);
+		= bfd_reloc_type_lookup (stdoutput, reloc);
 	      unsigned reloc_bitsize = reloc_howto->bitsize;
 	      if (reloc_howto->rightshift)
 		reloc_bitsize -= reloc_howto->rightshift;
@@ -4083,8 +4081,7 @@ assemble_insn (const struct arc_opcode *opcode,
 	  else
 	    {
 	      reloc_howto_type *reloc_howto =
-		bfd_reloc_type_lookup (stdoutput,
-				       (bfd_reloc_code_real_type) fixup->reloc);
+		bfd_reloc_type_lookup (stdoutput, fixup->reloc);
 	      pcrel = reloc_howto->pc_relative;
 	    }
 	  fixup->pcrel = pcrel;

@@ -2145,7 +2145,7 @@ md_assemble (char *str)
 
 	      fixP = fix_new_exp (frag_now, f - frag_now->fr_literal + offset,
 				  reloc_size / 8, &fixups[i].exp, pcrel,
-				  ((bfd_reloc_code_real_type) reloc));
+				  reloc);
 
 	      if (pcrel)
 		fixP->fx_offset += offset;

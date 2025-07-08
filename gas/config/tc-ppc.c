@@ -2298,7 +2298,7 @@ ppc_elf_suffix (char **str_p, expressionS *exp_p)
 	  }
 	*str_p = str;
 
-	if (reloc == (int) BFD_RELOC_PPC64_TOC
+	if (reloc == BFD_RELOC_PPC64_TOC
 	    && exp_p->X_op == O_symbol
 	    && strcmp (S_GET_NAME (exp_p->X_add_symbol), ".TOC.") == 0)
 	  {
@@ -2311,7 +2311,7 @@ ppc_elf_suffix (char **str_p, expressionS *exp_p)
 	    && (ppc_cpu & PPC_OPCODE_POWER10) == 0)
 	  reloc = BFD_RELOC_PPC64_REL24_P9NOTOC;
 
-	return (bfd_reloc_code_real_type) reloc;
+	return reloc;
       }
 
   return BFD_RELOC_NONE;
@@ -2779,7 +2779,7 @@ ppc_xcoff_suffix (char **str_p)
 	&& (ppc_obj64 ? ptr->valid64 : ptr->valid32))
       {
 	*str_p = str;
-	return (bfd_reloc_code_real_type) ptr->reloc;
+	return ptr->reloc;
       }
 
   return BFD_RELOC_NONE;

@@ -1777,8 +1777,7 @@ emit_insn (struct alpha_insn *insn)
       else
 	{
 	  reloc_howto_type *reloc_howto =
-              bfd_reloc_type_lookup (stdoutput,
-                                     (bfd_reloc_code_real_type) fixup->reloc);
+	    bfd_reloc_type_lookup (stdoutput, fixup->reloc);
 	  gas_assert (reloc_howto);
 
 	  size = bfd_get_reloc_size (reloc_howto);
@@ -1800,7 +1799,7 @@ emit_insn (struct alpha_insn *insn)
 	}
 
       fixP = fix_new_exp (frag_now, f - frag_now->fr_literal, size,
-			  &fixup->exp, pcrel, (bfd_reloc_code_real_type) fixup->reloc);
+			  &fixup->exp, pcrel, fixup->reloc);
 
       /* Turn off complaints that the addend is too large for some fixups,
          and copy in the sequence number for the explicit relocations.  */
@@ -2138,8 +2137,7 @@ assemble_insn (const struct alpha_opcode *opcode,
       else if (reloc < BFD_RELOC_UNUSED && reloc > 0)
 	{
 	  reloc_howto_type *reloc_howto
-              = bfd_reloc_type_lookup (stdoutput,
-                                       (bfd_reloc_code_real_type) reloc);
+	    = bfd_reloc_type_lookup (stdoutput, reloc);
 	  if (reloc_operand == NULL
 	      || reloc_howto->bitsize != reloc_operand->bits)
 	    {

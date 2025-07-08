@@ -251,7 +251,7 @@ epiphany_apply_fix (fixS *fixP, valueT *valP, segT seg)
   if (fixP->fx_addsy == (symbolS *) NULL)
     fixP->fx_done = 1;
 
-  if (((int) fixP->fx_r_type < (int) BFD_RELOC_UNUSED)
+  if ((fixP->fx_r_type < BFD_RELOC_UNUSED)
       && fixP->fx_done)
     {
       /* Install EPIPHANY-dependent relocations HERE because nobody else
@@ -1025,10 +1025,10 @@ epiphany_fix_adjustable (fixS *fixP)
 {
  bfd_reloc_code_real_type reloc_type;
 
-  if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
+  if (fixP->fx_r_type >= BFD_RELOC_UNUSED)
     {
       const CGEN_INSN *insn = fixP->fx_cgen.insn;
-      int opindex = (int) fixP->fx_r_type - (int) BFD_RELOC_UNUSED;
+      int opindex = fixP->fx_r_type - BFD_RELOC_UNUSED;
       const CGEN_OPERAND *operand =
 	cgen_operand_lookup_by_num (gas_cgen_cpu_desc, opindex);
 
