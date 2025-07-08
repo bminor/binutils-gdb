@@ -50,8 +50,9 @@ static int ctf_arc_range_check_hdr (struct ctf_archive_internal *arci, size_t,
 static int ctf_arc_range_check_modents (ctf_archive_modent_t *modent,
 					struct ctf_archive *arc_hdr,
 					unsigned char *arc_bytes,
-					uint64_t ctf_base, size_t ctf_els,
-					size_t arc_len, int fixup_v1, int *errp);
+					uint64_t contents_base,
+					size_t contents_els, size_t arc_len,
+					int fixup_v1, int *errp);
 static ctf_dict_t *ctf_dict_open_by_offset (const struct ctf_archive_internal *,
 					    const ctf_sect_t *symsect,
 					    const ctf_sect_t *strsect,
@@ -250,8 +251,8 @@ ctf_arc_write_fd (int fd, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
 	  goto err_free;
 	}
 
-      modent->name_offset = namesz;
-      modent->ctf_offset = off - ctf_startoffs;
+      modent->name = namesz;
+      modent->contents = off - ctf_startoffs;
       namesz += strlen (names[i]) + 1;
       modent++;
 
@@ -313,8 +314,8 @@ ctf_arc_write_fd (int fd, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
 
       memset (&props, 0, sizeof (ctf_archive_modent_t));
 
-      props.name_offset = prop_off;
-      props.ctf_offset = 0;
+      props.name = prop_off;
+      props.contents = 0;
 
       if ((prop_values = arc_write_one (fd, known_parent,
 					strlen (known_parent) + 1, 1)) < 0
@@ -500,7 +501,7 @@ sort_modent_by_name (const void *one, const void *two, void *n)
   const ctf_archive_modent_t *b = two;
   char *nametbl = n;
 
-  return strcmp (&nametbl[a->name_offset], &nametbl[b->name_offset]);
+  return strcmp (&nametbl[a->name], &nametbl[b->name]);
 }
 
 /* bsearch_r() function to search for a given name in the sorted array of struct
@@ -516,7 +517,7 @@ search_modent_by_name (const void *key, const void *ent, void *arg)
   arci = (const struct ctf_archive_internal *) arg;
 
   search_nametbl = (char *) arci->ctfi_archive + arci->ctfi_hdr->names;
-  return strcmp (k, &search_nametbl[v->name_offset]);
+  return strcmp (k, &search_nametbl[v->name]);
 }
 
 /* Byteswap an archive (but not its members) if necessary.  After this,
@@ -597,19 +598,19 @@ ctf_arc_flip_modents (ctf_archive_modent_t *modent, uint64_t els,
     {
       uint64_t *ctf_size;
 
-      swap_thing (modent[i].name_offset);
-      swap_thing (modent[i].ctf_offset);
+      swap_thing (modent[i].name);
+      swap_thing (modent[i].contents);
 
-      if (base + modent[i].ctf_offset + sizeof (uint64_t) > arc_len)
+      if (base + modent[i].contents + sizeof (uint64_t) > arc_len)
 	{
 	  ctf_err_warn (NULL, 0, EOVERFLOW,
-			"CTF archive overflow in CTF offset for member %" PRIu64
-		       " of %zi + %zi", i, base, modent[i].ctf_offset);
+			"CTF archive overflow in content offset for member %" PRIu64
+		       " of %zi + %zi", i, base, modent[i].contents);
 	  ctf_set_open_errno (errp, EOVERFLOW);
 	  return -1;
 	}
 
-      ctf_size = (uint64_t *) (ents + modent[i].ctf_offset);
+      ctf_size = (uint64_t *) (ents + modent[i].contents);
       swap_thing (*ctf_size);
     }
 
@@ -771,14 +772,14 @@ static int
 ctf_arc_range_check_modents (ctf_archive_modent_t *modent,
 			     struct ctf_archive *arc_hdr,
 			     unsigned char *arc_bytes,
-			     uint64_t ctf_base, size_t ctf_els, size_t arc_len,
-			     int fixup_v1, int *errp)
+			     uint64_t contents_base, size_t contents_els,
+			     size_t arc_len, int fixup_v1, int *errp)
 {
   uint64_t i;
   char *names = (char *) arc_bytes + arc_hdr->names;
   uint64_t name_base = arc_hdr->names;
-  unsigned char *ctfs = (unsigned char *) arc_bytes + ctf_base;
-  size_t closest_names_offset, closest_ctfs_offset;
+  unsigned char *contents = (unsigned char *) arc_bytes + contents_base;
+  size_t closest_names_offset, closest_contents_offset;
 
   /* Figure out the offset of the thing that is closest to, but after the
      end of, the names section, or the end of the file if none.  */
@@ -786,14 +787,15 @@ ctf_arc_range_check_modents (ctf_archive_modent_t *modent,
   closest_names_offset = arc_len;
 
   closest_names_offset = ctf_arc_closest_section (arc_hdr, name_base, arc_len);
-  closest_ctfs_offset = ctf_arc_closest_section (arc_hdr, ctf_base, arc_len);
+  closest_contents_offset = ctf_arc_closest_section (arc_hdr, contents_base,
+						     arc_len);
 
-  for (i = 0; i < ctf_els; i++)
+  for (i = 0; i < contents_els; i++)
     {
-      uint64_t name_off = modent[i].name_offset + name_base;
-      uint64_t ctf_off = modent[i].ctf_offset + ctf_base;
+      uint64_t name_off = modent[i].name + name_base;
+      uint64_t contents_off = modent[i].contents + contents_base;
       ssize_t space_left;
-      uint64_t *ctf_size;
+      uint64_t *contents_size;
 
       /* We already checked for modent table overflow and overlap, but we
 	 cannot check for name table overlap except member-by-member.  We
@@ -801,7 +803,7 @@ ctf_arc_range_check_modents (ctf_archive_modent_t *modent,
 	 the string is safe, then check that.  */
 
       if (name_off > closest_names_offset
-	  || (ctf_off + sizeof (uint64_t) > closest_ctfs_offset))
+	  || (contents_off + sizeof (uint64_t) > closest_contents_offset))
 	goto err;
 
       space_left = closest_names_offset - name_off;
@@ -809,15 +811,16 @@ ctf_arc_range_check_modents (ctf_archive_modent_t *modent,
       if (space_left < 0)
 	goto err;
 
-      if (strnlen (&names[modent[i].name_offset], space_left)
+      if (strnlen (&names[modent[i].name], space_left)
 	  == (size_t) space_left)
 	goto err;
 
-      /* Checking the CTF offset is simpler: we already checked that the
-	 actual size didn't overflow, so now we just need to make sure that
-	 the entire dict (or, depending on the call, property value) fits.  */
+      /* Checking the contents offset is simpler: we already checked that
+	 the actual size didn't overflow, so now we just need to make sure
+	 that the entire dict (or, depending on the call, property value)
+	 fits.  */
 
-      ctf_size = (uint64_t *) (ctfs + modent[i].ctf_offset);
+      contents_size = (uint64_t *) (contents + modent[i].contents);
 
       /* If this was a v1 archive, the size is actually wrong: it includes
 	 the size of the size uint64_t itself, so all archive opens opened
@@ -827,12 +830,13 @@ ctf_arc_range_check_modents (ctf_archive_modent_t *modent,
 
       if (fixup_v1)
 	{
-	  if (*ctf_size < sizeof (uint64_t))
+	  if (*contents_size < sizeof (uint64_t))
 	    goto err;
-	  *ctf_size -= sizeof (uint64_t);
+	  *contents_size -= sizeof (uint64_t);
 	}
 
-      if (ctf_off + sizeof (uint64_t) + *ctf_size > closest_ctfs_offset)
+      if (contents_off + sizeof (uint64_t) + *contents_size
+	  > closest_contents_offset)
 	goto err;
     }
 
@@ -1156,7 +1160,7 @@ ctf_dict_open_internal (const struct ctf_archive_internal *arci,
       return NULL;
     }
 
-  return ctf_dict_open_by_offset (arci, symsect, strsect, modent->ctf_offset,
+  return ctf_dict_open_by_offset (arci, symsect, strsect, modent->contents,
 				  little_endian_symtab, errp);
 }
 
@@ -1387,13 +1391,13 @@ ctf_arc_get_property (const struct ctf_archive_internal *arci, const char *prop)
 
   size = (uint64_t *) (arci->ctfi_archive
 		       + arci->ctfi_hdr->propents
-		       + modent->ctf_offset);
+		       + modent->contents);
   if (*size == 0)
     return "";
 
   return (char *) (arci->ctfi_archive
 		   + arci->ctfi_hdr->propents
-		   + modent->ctf_offset
+		   + modent->contents
 		   + sizeof (uint64_t));
 }
 
@@ -1806,17 +1810,17 @@ ctf_archive_raw_iter (const struct ctf_archive_internal *arci,
     {
       const char *name;
       unsigned char *content;
-      size_t name_offset, ctf_offset, ctf_size;
+      size_t name_off, content_off, content_size;
 
-      name_offset = modent[i].name_offset;
-      ctf_offset = modent[i].ctf_offset;
+      name_off = modent[i].name;
+      content_off = modent[i].contents;
 
-      name = &nametbl[name_offset];
-      content = arci->ctfi_archive + arci->ctfi_hdr->ctfs + ctf_offset;
-      ctf_size = *((uint64_t *) content);
+      name = &nametbl[name_off];
+      content = arci->ctfi_archive + arci->ctfi_hdr->ctfs + content_off;
+      content_size = *((uint64_t *) content);
 
       if ((rc = func (name, (void *) (content + sizeof (uint64_t)),
-		      ctf_size, data)) != 0)
+		      content_size, data)) != 0)
 	return rc;
     }
   return 0;
@@ -1934,7 +1938,7 @@ ctf_archive_next (const struct ctf_archive_internal *arci, ctf_next_t **it,
       modent = (ctf_archive_modent_t *) ((char *) arci->ctfi_archive
 				     + arci->ctfi_hdr->modents);
       nametbl = (const char *) arci->ctfi_archive + arci->ctfi_hdr->names;
-      name_ = &nametbl[modent[i->ctn_n].name_offset];
+      name_ = &nametbl[modent[i->ctn_n].name];
       i->ctn_n++;
     }
   while (skip_parent && strcmp (name_, _CTF_SECTION) == 0);

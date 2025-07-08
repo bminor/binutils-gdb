@@ -874,11 +874,11 @@ struct ctf_archive
   /* Number of shared properties.  */
   uint64_t nprops;
 
-  /* Offset of the name table, used for both CTF member names and property
+  /* Offset of the name table, used for both CTF/BTF member names and property
      names.  */
   uint64_t names;
 
-  /* Offset of the CTF table.  Each element starts with a size (a little-
+  /* Offset of the CTF/BTF table.  Each element starts with a size (a little-
      endian uint64_t) then a ctf_dict_t of that size.  */
   uint64_t ctfs;
 
@@ -920,11 +920,11 @@ struct ctf_archive_v1
 };
 
 /* An array of ctfa_ndicts of this structure lies at the offset given by
-   ctfa_modents (or, in v1, at ctf_archive[sizeof(struct ctf_archive)]) and gives
-   the ctfa_ctfs or ctfa_names-relative offsets of each name or ctf_dict_t.
+   ctfa_modents (or, in v1, at ctf_archive[sizeof(struct ctf_archive)]) and
+   gives the ctfs or names-relative offsets of each name or ctf_dict_t.
 
    Another array of ctfa_nprops of this structure lies at the ctfa_propents
-   offset: for this, the ctf_offset is the ctfa_propents-relative offset of
+   offset: for this, the contents offset is the propents-relative offset of
    proprty values.
 
    Both property values and CTFs are prepended by a uint64 giving their length.
@@ -932,8 +932,8 @@ struct ctf_archive_v1
 
 typedef struct ctf_archive_modent
 {
-  uint64_t name_offset;
-  uint64_t ctf_offset;
+  uint64_t name;
+  uint64_t contents;
 } ctf_archive_modent_t;
 
 #ifdef	__cplusplus
