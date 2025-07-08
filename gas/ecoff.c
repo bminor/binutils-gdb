@@ -2079,21 +2079,9 @@ add_unknown_tag (tag_t *ptag /* pointer to tag information */)
     }
 #endif
 
-  sym = add_ecoff_symbol (name,
-			  st_Block,
-			  sc_Info,
-			  (symbolS *) NULL,
-			  (bfd_vma) 0,
-			  (symint_t) 0,
-			  (symint_t) 0);
+  sym = add_ecoff_symbol (name, st_Block, sc_Info, NULL, 0, 0, 0);
 
-  (void) add_ecoff_symbol (name,
-			   st_End,
-			   sc_Info,
-			   (symbolS *) NULL,
-			   (bfd_vma) 0,
-			   (symint_t) 0,
-			   (symint_t) 0);
+  (void) add_ecoff_symbol (name, st_End, sc_Info, NULL, 0, 0, 0);
 
   for (pf = &sym->forward_ref; *pf != (forward_t *) NULL; pf = &(*pf)->next)
     ;
@@ -2144,9 +2132,7 @@ add_procedure (char *func /* func name */, int aent)
   new_proc_ptr->pdr.lnHigh = -1;
 
   /* Push the start of the function.  */
-  new_proc_ptr->sym = add_ecoff_symbol ((const char *) NULL, st_Proc, sc_Text,
-					sym, (bfd_vma) 0, (symint_t) 0,
-					(symint_t) 0);
+  new_proc_ptr->sym = add_ecoff_symbol (NULL, st_Proc, sc_Text, sym, 0, 0, 0);
 
   ++proc_cnt;
 
@@ -2221,7 +2207,7 @@ add_file (const char *file_name, int indx ATTRIBUTE_UNUSED, int fake)
       (void) add_ecoff_symbol (file_name, st_Nil, sc_Nil,
 			       symbol_new (FAKE_LABEL_NAME, now_seg,
 					   frag_now, frag_now_fix ()),
-			       (bfd_vma) 0, 0, ECOFF_MARK_STAB (N_SOL));
+			       0, 0, ECOFF_MARK_STAB (N_SOL));
       return;
     }
 
@@ -2285,9 +2271,7 @@ add_file (const char *file_name, int indx ATTRIBUTE_UNUSED, int fake)
 
       /* Push the start of the filename. We assume that the filename
          will be stored at string offset 1.  */
-      (void) add_ecoff_symbol (file_name, st_File, sc_Text,
-			       (symbolS *) NULL, (bfd_vma) 0,
-			       (symint_t) 0, (symint_t) 0);
+      (void) add_ecoff_symbol (file_name, st_File, sc_Text, NULL, 0, 0, 0);
       fil_ptr->fdr.rss = 1;
       fil_ptr->name = &fil_ptr->strings.last->datum->byte[1];
 
@@ -2428,9 +2412,8 @@ ecoff_directive_begin (int ignore ATTRIBUTE_UNUSED)
 
   name_end = get_symbol_name (&name);
 
-  (void) add_ecoff_symbol ((const char *) NULL, st_Block, sc_Text,
-			   symbol_find_or_make (name),
-			   (bfd_vma) 0, (symint_t) 0, (symint_t) 0);
+  (void) add_ecoff_symbol (NULL, st_Block, sc_Text,
+			   symbol_find_or_make (name), 0, 0, 0);
 
   (void) restore_line_pointer (name_end);
 
@@ -2472,8 +2455,7 @@ ecoff_directive_bend (int ignore ATTRIBUTE_UNUSED)
   if (endsym == (symbolS *) NULL)
     as_warn (_(".bend directive names unknown symbol"));
   else
-    (void) add_ecoff_symbol ((const char *) NULL, st_End, sc_Text, endsym,
-			     (bfd_vma) 0, (symint_t) 0, (symint_t) 0);
+    (void) add_ecoff_symbol (NULL, st_End, sc_Text, endsym, 0, 0, 0);
 
   restore_line_pointer (name_end);
 
@@ -2940,13 +2922,8 @@ ecoff_directive_endef (int ignore ATTRIBUTE_UNUSED)
     }
 
   /* Add the symbol.  */
-  sym = add_ecoff_symbol (name,
-			  coff_symbol_typ,
-			  coff_storage_class,
-			  coff_sym_value,
-			  coff_sym_addend,
-			  (symint_t) coff_value,
-			  indx);
+  sym = add_ecoff_symbol (name, coff_symbol_typ, coff_storage_class,
+			  coff_sym_value, coff_sym_addend, coff_value, indx);
 
   /* deal with struct, union, and enum tags.  */
   if (coff_symbol_typ == st_Block)
@@ -3008,10 +2985,10 @@ ecoff_directive_end (int ignore ATTRIBUTE_UNUSED)
   if (ent == (symbolS *) NULL)
     as_warn (_(".end directive names unknown symbol"));
   else
-    (void) add_ecoff_symbol ((const char *) NULL, st_End, sc_Text,
+    (void) add_ecoff_symbol (NULL, st_End, sc_Text,
 			     symbol_new (FAKE_LABEL_NAME, now_seg,
 					 frag_now, frag_now_fix ()),
-			     (bfd_vma) 0, (symint_t) 0, (symint_t) 0);
+			     0, 0, 0);
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
@@ -3251,10 +3228,10 @@ ecoff_directive_loc (int ignore ATTRIBUTE_UNUSED)
      ECOFF line number info.  */
   if (stabs_seen)
     {
-      (void) add_ecoff_symbol ((char *) NULL, st_Label, sc_Text,
+      (void) add_ecoff_symbol (NULL, st_Label, sc_Text,
 			       symbol_new (FAKE_LABEL_NAME, now_seg,
 					   frag_now, frag_now_fix ()),
-			       (bfd_vma) 0, 0, lineno);
+			       0, 0, lineno);
       return;
     }
 
@@ -3315,9 +3292,7 @@ mark_stabs (int ignore ATTRIBUTE_UNUSED)
     {
       /* Add a dummy @stabs symbol.  */
       stabs_seen = 1;
-      (void) add_ecoff_symbol (stabs_symbol, st_Nil, sc_Info,
-			       (symbolS *) NULL,
-			       (bfd_vma) 0, (symint_t) -1,
+      (void) add_ecoff_symbol (stabs_symbol, st_Nil, sc_Info, NULL, 0, -1,
 			       ECOFF_MARK_STAB (0));
     }
 }
@@ -4630,8 +4605,8 @@ ecoff_build_debug (HDRR *hdr,
 	continue;
 
       cur_file_ptr = symbol_get_obj (sym)->ecoff_file;
-      add_ecoff_symbol ((const char *) NULL, st_Nil, sc_Nil, sym,
-			(bfd_vma) 0, S_GET_VALUE (sym), indexNil);
+      add_ecoff_symbol (NULL, st_Nil, sc_Nil, sym,
+			0, S_GET_VALUE (sym), indexNil);
     }
   cur_proc_ptr = hold_proc_ptr;
   cur_file_ptr = hold_file_ptr;
@@ -4656,12 +4631,7 @@ ecoff_build_debug (HDRR *hdr,
 	    }
 	}
       if (cur_file_ptr->cur_scope != (scope_t *) NULL)
-	(void) add_ecoff_symbol ((const char *) NULL,
-				 st_End, sc_Text,
-				 (symbolS *) NULL,
-				 (bfd_vma) 0,
-				 (symint_t) 0,
-				 (symint_t) 0);
+	(void) add_ecoff_symbol (NULL, st_End, sc_Text, NULL, 0, 0, 0);
     }
 
   /* Build the symbolic information.  */
