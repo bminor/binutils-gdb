@@ -2630,9 +2630,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	      if (fixP->fx_pcrel)
 		value >>= 1;
 
-	      mop = bfd_getb16 ((unsigned char *) where);
-	      mop |= (unsigned short) (value & 0xfff);
-	      bfd_putb16 ((bfd_vma) mop, (unsigned char *) where);
+	      mop = bfd_getb16 (where);
+	      mop |= value & 0xfff;
+	      bfd_putb16 (mop, where);
 	    }
 	  break;
 
@@ -2642,10 +2642,10 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  if (fixP->fx_done)
 	    {
 	      unsigned int mop;
-	      mop = bfd_getb32 ((unsigned char *) where);
-	      mop |= (unsigned int) ((value & 0xfff) << 8 |
-				     (value & 0xff000) >> 12);
-	      bfd_putb32 ((bfd_vma) mop, (unsigned char *) where);
+	      mop = bfd_getb32 (where);
+	      mop |= ((value & 0xfff) << 8
+		      | (value & 0xff000) >> 12);
+	      bfd_putb32 (mop, where);
 	    }
 	  break;
 
@@ -2685,9 +2685,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	      unsigned int mop;
 	      value >>= 1;
 
-	      mop = bfd_getb32 ((unsigned char *) where - 1);
-	      mop |= (unsigned int) (value & 0xffffff);
-	      bfd_putb32 ((bfd_vma) mop, (unsigned char *) where - 1);
+	      mop = bfd_getb32 (where - 1);
+	      mop |= value & 0xffffff;
+	      bfd_putb32 (mop, where - 1);
 	    }
 	  break;
 

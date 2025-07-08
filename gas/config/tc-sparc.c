@@ -3544,9 +3544,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
       /* It's a relocation against an instruction.  */
 
       if (INSN_BIG_ENDIAN)
-	insn = bfd_getb32 ((unsigned char *) buf);
+	insn = bfd_getb32 (buf);
       else
-	insn = bfd_getl32 ((unsigned char *) buf);
+	insn = bfd_getl32 (buf);
 
       switch (fixP->fx_r_type)
 	{
@@ -3588,9 +3588,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
 		 then we can optimize if the call destination is near
 		 by changing the call into a branch always.  */
 	      if (INSN_BIG_ENDIAN)
-		delay = bfd_getb32 ((unsigned char *) buf + 4);
+		delay = bfd_getb32 (buf + 4);
 	      else
-		delay = bfd_getl32 ((unsigned char *) buf + 4);
+		delay = bfd_getl32 (buf + 4);
 	      if ((insn & OP (~0)) != OP (1) || (delay & OP (~0)) != OP (2))
 		break;
 	      if ((delay & OP3 (~0)) != OP3 (0x3d) /* Restore.  */
@@ -3624,9 +3624,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
 		  int reg;
 
 		  if (INSN_BIG_ENDIAN)
-		    setter = bfd_getb32 ((unsigned char *) buf - 4);
+		    setter = bfd_getb32 (buf - 4);
 		  else
-		    setter = bfd_getl32 ((unsigned char *) buf - 4);
+		    setter = bfd_getl32 (buf - 4);
 		  if ((setter & (0xffffffff ^ RD (~0)))
 		      != (INSN_OR | RS1 (O7) | RS2 (G0)))
 		    break;
@@ -3643,9 +3643,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
 		    break;
 
 		  if (INSN_BIG_ENDIAN)
-		    bfd_putb32 (INSN_NOP, (unsigned char *) buf + 4);
+		    bfd_putb32 (INSN_NOP, buf + 4);
 		  else
-		    bfd_putl32 (INSN_NOP, (unsigned char *) buf + 4);
+		    bfd_putl32 (INSN_NOP, buf + 4);
 		}
 	    }
 	  break;
@@ -3820,9 +3820,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
 	}
 
       if (INSN_BIG_ENDIAN)
-	bfd_putb32 (insn, (unsigned char *) buf);
+	bfd_putb32 (insn, buf);
       else
-	bfd_putl32 (insn, (unsigned char *) buf);
+	bfd_putl32 (insn, buf);
     }
 
   /* Are we finished with this relocation now?  */

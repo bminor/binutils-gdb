@@ -4347,19 +4347,19 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   switch (fixP->fx_r_type)
     {
     case BFD_RELOC_32:
-      bfd_putb32 ((bfd_vma) value, (unsigned char *) where);
+      bfd_putb32 (value, where);
       break;
 
     case BFD_RELOC_24:
     case BFD_RELOC_M68HC11_24:
-      bfd_putb16 ((bfd_vma) (value & 0x0ffff), (unsigned char *) where);
-      ((bfd_byte*) where)[2] = ((value >> 16) & 0x0ff);
+      bfd_putb16 (value & 0x0ffff, where);
+      where[2] = (value >> 16) & 0xff;
       break;
 
     case BFD_RELOC_16:
     case BFD_RELOC_16_PCREL:
     case BFD_RELOC_M68HC11_LO16:
-      bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
+      bfd_putb16 (value, where);
       if (value < -65537 || value > 65535)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Value out of 16-bit range."));
@@ -4376,11 +4376,11 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_M68HC11_LO8:
     case BFD_RELOC_8:
     case BFD_RELOC_M68HC11_PAGE:
-      ((bfd_byte *) where)[0] = (bfd_byte) value;
+      where[0] = value & 0xff;
       break;
 
     case BFD_RELOC_8_PCREL:
-      ((bfd_byte *) where)[0] = (bfd_byte) value;
+      where[0] = value & 0xff;
 
       if (value < -128 || value > 127)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
@@ -4390,8 +4390,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
     /* These next two are for XGATE. */
     case BFD_RELOC_M68HC12_9_PCREL:
-     ((bfd_byte *) where)[0] |= (bfd_byte) ((value >>9) & 0x01);
-     ((bfd_byte *) where)[1] = (bfd_byte) ((value>>1) & 0xff);
+     where[0] |= (value >> 9) & 0x01;
+     where[1] = (value >> 1) & 0xff;
       if (value < -512 || value > 511)
         as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Value %ld too large for 9-bit PC-relative branch."),
@@ -4399,8 +4399,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       break;
 
     case BFD_RELOC_M68HC12_10_PCREL:
-     ((bfd_byte *) where)[0] |= (bfd_byte) ((value >>9) & 0x03);
-     ((bfd_byte *) where)[1] = (bfd_byte) ((value>>1) & 0xff);
+     where[0] |= (value >> 9) & 0x03;
+     where[1] = (value>> 1) & 0xff;
       if (value < -1024 || value > 1023)
         as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Value %ld too large for 10-bit PC-relative branch."),

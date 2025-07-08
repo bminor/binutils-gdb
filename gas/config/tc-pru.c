@@ -765,11 +765,11 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       break;
     case BFD_RELOC_PRU_GNU_DIFF16:
     case BFD_RELOC_PRU_GNU_DIFF16_PMEM:
-      bfd_putl16 ((bfd_vma) value, where);
+      bfd_putl16 (value, where);
       break;
     case BFD_RELOC_PRU_GNU_DIFF32:
     case BFD_RELOC_PRU_GNU_DIFF32_PMEM:
-      bfd_putl32 ((bfd_vma) value, where);
+      bfd_putl32 (value, where);
       break;
     default:
       break;

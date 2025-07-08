@@ -284,8 +284,8 @@ adjust_stab_sections (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   p = seg_info (sec)->stabu.p;
   gas_assert (p != 0);
 
-  bfd_h_put_16 (abfd, (bfd_vma) nsyms, (bfd_byte *) p + 6);
-  bfd_h_put_32 (abfd, (bfd_vma) strsz, (bfd_byte *) p + 8);
+  bfd_h_put_16 (abfd, nsyms, p + 6);
+  bfd_h_put_32 (abfd, strsz, p + 8);
 }
 
 /* Called late in the assembly phase to adjust the special

@@ -634,7 +634,7 @@ md_apply_fix (fixS * fixP, valueT * value, segT segment)
       break;
     default:
       /* It's a relocation against an instruction.  */
-      insn = bfd_getb32 ((unsigned char *) buf);
+      insn = bfd_getb32 (buf);
 
       switch (fixP->fx_r_type)
 	{
@@ -687,7 +687,7 @@ md_apply_fix (fixS * fixP, valueT * value, segT segment)
 	  break;
 	}
 
-      bfd_putb32 (insn, (unsigned char *) buf);
+      bfd_putb32 (insn, buf);
       visium_update_parity_bit (buf);
       break;
     }

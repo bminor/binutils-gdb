@@ -1527,7 +1527,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   /* Fetch the instruction, insert the fully resolved operand
      value, and stuff the instruction back again.  */
   where = fixP->fx_frag->fr_literal + fixP->fx_where;
-  insn = bfd_getb32 ((unsigned char *) where);
+  insn = bfd_getb32 (where);
 
   switch (fixP->fx_r_type)
     {
@@ -1551,7 +1551,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       /* Instruction addresses are always right-shifted by 2.  */
       value >>= AT_WORD_RIGHT_SHIFT;
       if (fixP->fx_size == 2)
-	bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
+	bfd_putb16 (value, where);
       else
 	{
 	  struct d10v_opcode *rep, *repi;
@@ -1569,14 +1569,14 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	       fixP->fx_line);
 	  insn =
 	    d10v_insert_operand (insn, op_type, (offsetT) value, left, fixP);
-	  bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
+	  bfd_putb32 (insn, where);
 	}
       break;
     case BFD_RELOC_32:
-      bfd_putb32 ((bfd_vma) value, (unsigned char *) where);
+      bfd_putb32 (value, where);
       break;
     case BFD_RELOC_16:
-      bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
+      bfd_putb16 (value, where);
       break;
     case BFD_RELOC_8:
       *where = value;

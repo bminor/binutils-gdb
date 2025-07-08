@@ -456,7 +456,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
   switch (fixP->fx_r_type)
     {
     case BFD_RELOC_CRX_NUM8:
-      bfd_put_8 (stdoutput, (unsigned char) val, buf);
+      bfd_put_8 (stdoutput, val, buf);
       break;
     case BFD_RELOC_CRX_NUM16:
       bfd_put_16 (stdoutput, val, buf);

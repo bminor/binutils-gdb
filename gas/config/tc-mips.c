@@ -2407,9 +2407,9 @@ static unsigned long
 read_insn (char *buf)
 {
   if (target_big_endian)
-    return bfd_getb32 ((bfd_byte *) buf);
+    return bfd_getb32 (buf);
   else
-    return bfd_getl32 ((bfd_byte *) buf);
+    return bfd_getl32 (buf);
 }
 
 /* Write standard MIPS instruction INSN to BUF.  Return a pointer to
@@ -2436,9 +2436,9 @@ read_compressed_insn (char *buf, unsigned int length)
     {
       insn <<= 16;
       if (target_big_endian)
-	insn |= bfd_getb16 ((char *) buf);
+	insn |= bfd_getb16 (buf);
       else
-	insn |= bfd_getl16 ((char *) buf);
+	insn |= bfd_getl16 (buf);
       buf += 2;
     }
   return insn;

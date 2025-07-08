@@ -705,7 +705,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
 		      _("Value out of 16-bit range."));
       value >>= 8;
       value &= 0x00ff;
-      bfd_putb16 ((bfd_vma) value | opcode, (void *) where);
+      bfd_putb16 (value | opcode, where);
       break;
     case BFD_RELOC_XGATE_24:
     case BFD_RELOC_XGATE_IMM8_LO:
@@ -713,7 +713,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Value out of 16-bit range."));
       value &= 0x00ff;
-      bfd_putb16 ((bfd_vma) value | opcode, (void *) where);
+      bfd_putb16 (value | opcode, where);
       break;
     case BFD_RELOC_XGATE_IMM3:
       if (value < 0 || value > 7)
@@ -737,13 +737,13 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
       number_to_chars_bigendian (where, (opcode | value), 2);
       break;
     case BFD_RELOC_8:
-      ((bfd_byte *) where)[0] = (bfd_byte) value;
+      *where = value & 0xff;
       break;
     case BFD_RELOC_32:
-      bfd_putb32 ((bfd_vma) value, (unsigned char *) where);
+      bfd_putb32 (value, where);
       break;
     case BFD_RELOC_16:
-      bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
+      bfd_putb16 (value, where);
       break;
     default:
       as_fatal (_("Line %d: unknown relocation type: 0x%x."), fixP->fx_line,

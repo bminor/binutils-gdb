@@ -3456,9 +3456,9 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
       where = fixP->fx_frag->fr_literal + fixP->fx_where;
 
       if (fixP->fx_size > 2)
-	insn = bfd_getl32 ((unsigned char *) where);
+	insn = bfd_getl32 (where);
       else
-	insn = bfd_getl16 ((unsigned char *) where);
+	insn = bfd_getl16 (where);
 
       /* When inserting loop offsets a backwards displacement
 	 is encoded as a positive value.  */
@@ -3471,9 +3471,9 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
 	as_warn_where (fixP->fx_file, fixP->fx_line, "%s", errmsg);
 
       if (fixP->fx_size > 2)
-	bfd_putl32 ((bfd_vma) insn, (unsigned char *) where);
+	bfd_putl32 (insn, where);
       else
-	bfd_putl16 ((bfd_vma) insn, (unsigned char *) where);
+	bfd_putl16 (insn, where);
 
       if (fixP->fx_done)
 	/* Nothing else to do here.  */
@@ -3522,14 +3522,14 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
           else if (fixP->fx_size == 1)
             where -= 3;
 
-          insn = bfd_getl32 ((unsigned char *) where);
+          insn = bfd_getl32 (where);
 
           /* Use the operand's insertion procedure, if present, in order to
              make sure that the value is correctly stored in the insn.  */
           insn = operand->insert (insn, (offsetT) value, & message);
           /* Ignore message even if it is set.  */
 
-          bfd_putl32 ((bfd_vma) insn, (unsigned char *) where);
+          bfd_putl32 (insn, where);
         }
       else
         {
@@ -3537,17 +3537,17 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
 	    {
 	    case BFD_RELOC_V850_32_ABS:
 	    case BFD_RELOC_V850_32_PCREL:
-	      bfd_putl32 (value & 0xfffffffe, (unsigned char *) where);
+	      bfd_putl32 (value & 0xfffffffe, where);
 	      break;
 
 	    case BFD_RELOC_32:
-	      bfd_putl32 (value, (unsigned char *) where);
+	      bfd_putl32 (value, where);
 	      break;
 
 	    case BFD_RELOC_V850_23:
 	      bfd_putl32 (((value & 0x7f) << 4) | ((value & 0x7fff80) << (16-7))
 			  | (bfd_getl32 (where) & ~((0x7f << 4) | (0xffff << 16))),
-			  (unsigned char *) where);
+			  where);
 	    break;
 
 	    case BFD_RELOC_16:
@@ -3558,7 +3558,7 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
 	    case BFD_RELOC_V850_SDA_16_16_OFFSET:
 	    case BFD_RELOC_V850_TDA_16_16_OFFSET:
 	    case BFD_RELOC_V850_CALLT_16_16_OFFSET:
-	      bfd_putl16 (value & 0xffff, (unsigned char *) where);
+	      bfd_putl16 (value & 0xffff, where);
 	      break;
 
 	    case BFD_RELOC_8:
@@ -3577,7 +3577,7 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
 
 	    case BFD_RELOC_V850_16_PCREL:
 	      bfd_putl16 ((-value & 0xfffe) | (bfd_getl16 (where + 2) & 0x0001),
-			  (unsigned char *) (where + 2));
+			  where + 2);
 	      break;
 
 	    case BFD_RELOC_V850_22_PCREL:
@@ -3589,7 +3589,7 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
 	    case BFD_RELOC_V850_LO16_S1:
 	    case BFD_RELOC_V850_ZDA_15_16_OFFSET:
 	    case BFD_RELOC_V850_SDA_15_16_OFFSET:
-	      bfd_putl16 (value & 0xfffe, (unsigned char *) where);
+	      bfd_putl16 (value & 0xfffe, where);
 	      break;
 
 	    case BFD_RELOC_V850_16_SPLIT_OFFSET:

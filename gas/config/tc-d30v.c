@@ -1911,27 +1911,27 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   /* Fetch the instruction, insert the fully resolved operand
      value, and stuff the instruction back again.  */
   where = fixP->fx_frag->fr_literal + fixP->fx_where;
-  insn = bfd_getb32 ((unsigned char *) where);
+  insn = bfd_getb32 (where);
 
   switch (fixP->fx_r_type)
     {
     case BFD_RELOC_8:
-      *(unsigned char *) where = value;
+      *where = value;
       break;
 
     case BFD_RELOC_16:
-      bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
+      bfd_putb16 (value, where);
       break;
 
     case BFD_RELOC_64:
-      bfd_putb32 ((bfd_vma) value, (unsigned char *) where);
-      bfd_putb32 (0, ((unsigned char *) where) + 4);
+      bfd_putb32 (value, where);
+      bfd_putb32 (0, where + 4);
       break;
 
     case BFD_RELOC_D30V_6:
       check_size (value, 6, fixP->fx_file, fixP->fx_line);
       insn |= value & 0x3F;
-      bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
+      bfd_putb32 (insn, where);
       break;
 
     case BFD_RELOC_D30V_9_PCREL:
@@ -1944,13 +1944,13 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	}
       check_size (value, 9, fixP->fx_file, fixP->fx_line);
       insn |= ((value >> 3) & 0x3F) << 12;
-      bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
+      bfd_putb32 (insn, where);
       break;
 
     case BFD_RELOC_D30V_15:
       check_size (value, 15, fixP->fx_file, fixP->fx_line);
       insn |= (value >> 3) & 0xFFF;
-      bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
+      bfd_putb32 (insn, where);
       break;
 
     case BFD_RELOC_D30V_15_PCREL:
@@ -1963,13 +1963,13 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	}
       check_size (value, 15, fixP->fx_file, fixP->fx_line);
       insn |= (value >> 3) & 0xFFF;
-      bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
+      bfd_putb32 (insn, where);
       break;
 
     case BFD_RELOC_D30V_21:
       check_size (value, 21, fixP->fx_file, fixP->fx_line);
       insn |= (value >> 3) & 0x3FFFF;
-      bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
+      bfd_putb32 (insn, where);
       break;
 
     case BFD_RELOC_D30V_21_PCREL:
@@ -1982,29 +1982,29 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	}
       check_size (value, 21, fixP->fx_file, fixP->fx_line);
       insn |= (value >> 3) & 0x3FFFF;
-      bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
+      bfd_putb32 (insn, where);
       break;
 
     case BFD_RELOC_D30V_32:
-      insn2 = bfd_getb32 ((unsigned char *) where + 4);
+      insn2 = bfd_getb32 (where + 4);
       insn |= (value >> 26) & 0x3F;		/* Top 6 bits.  */
       insn2 |= ((value & 0x03FC0000) << 2);	/* Next 8 bits.  */
       insn2 |= value & 0x0003FFFF;		/* Bottom 18 bits.  */
-      bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
-      bfd_putb32 ((bfd_vma) insn2, (unsigned char *) where + 4);
+      bfd_putb32 (insn, where);
+      bfd_putb32 (insn2, where + 4);
       break;
 
     case BFD_RELOC_D30V_32_PCREL:
-      insn2 = bfd_getb32 ((unsigned char *) where + 4);
+      insn2 = bfd_getb32 (where + 4);
       insn |= (value >> 26) & 0x3F;		/* Top 6 bits.  */
       insn2 |= ((value & 0x03FC0000) << 2);	/* Next 8 bits.  */
       insn2 |= value & 0x0003FFFF;		/* Bottom 18 bits.  */
-      bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
-      bfd_putb32 ((bfd_vma) insn2, (unsigned char *) where + 4);
+      bfd_putb32 (insn, where);
+      bfd_putb32 (insn2, where + 4);
       break;
 
     case BFD_RELOC_32:
-      bfd_putb32 ((bfd_vma) value, (unsigned char *) where);
+      bfd_putb32 (value, where);
       break;
 
     default:

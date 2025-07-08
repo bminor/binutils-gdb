@@ -3946,23 +3946,23 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   switch (fixP->fx_r_type)
     {
     case BFD_RELOC_8:
-      ((bfd_byte *) where)[0] = (bfd_byte) value;
+      where[0] = value;
       break;
     case BFD_RELOC_16:
-      bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
+      bfd_putb16 (value, where);
       break;
     case BFD_RELOC_24:
-      bfd_putb24 ((bfd_vma) value, (unsigned char *) where);
+      bfd_putb24 (value, where);
       break;
     case BFD_RELOC_S12Z_OPR:
       {
         switch (fixP->fx_size)
           {
           case 3:
-            bfd_putb24 ((bfd_vma) value, (unsigned char *) where);
+            bfd_putb24 (value, where);
             break;
           case 2:
-            bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
+            bfd_putb16 (value, where);
             break;
           default:
             abort ();
@@ -3970,14 +3970,14 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       }
       break;
     case BFD_RELOC_32:
-      bfd_putb32 ((bfd_vma) value, (unsigned char *) where);
+      bfd_putb32 (value, where);
       break;
     case BFD_RELOC_16_PCREL:
       if (value < -0x4000 || value > 0x3FFF)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Value out of 16-bit range."));
 
-      bfd_putb16 ((bfd_vma) value | 0x8000, (unsigned char *) where);
+      bfd_putb16 (value | 0x8000, where);
       break;
 
     default:

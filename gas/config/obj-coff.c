@@ -1812,8 +1812,8 @@ coff_frob_section (segT sec)
 
   /* Store the values.  */
   p = fragp->fr_literal;
-  bfd_h_put_16 (stdoutput, n_entries, (bfd_byte *) p + 6);
-  bfd_h_put_32 (stdoutput, size, (bfd_byte *) p + 8);
+  bfd_h_put_16 (stdoutput, n_entries, p + 6);
+  bfd_h_put_32 (stdoutput, size, p + 8);
 }
 
 void

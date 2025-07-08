@@ -1423,10 +1423,10 @@ avr_operands (struct avr_opcodes_s *opcode, char **line)
 	  && AVR_SKIP_P (frag_now->tc_frag_data.prev_opcode))
 	as_warn (_("skipping two-word instruction"));
 
-      bfd_putl32 ((bfd_vma) bin, frag);
+      bfd_putl32 (bin, frag);
     }
   else
-    bfd_putl16 ((bfd_vma) bin, frag);
+    bfd_putl16 (bin, frag);
 
   frag_now->tc_frag_data.prev_opcode = bin;
   *line = str;
@@ -1588,10 +1588,10 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
       *where = value;
 	  break;
     case BFD_RELOC_AVR_DIFF16:
-      bfd_putl16 ((bfd_vma) value, where);
+      bfd_putl16 (value, where);
       break;
     case BFD_RELOC_AVR_DIFF32:
-      bfd_putl32 ((bfd_vma) value, where);
+      bfd_putl32 (value, where);
       break;
     case BFD_RELOC_AVR_CALL:
       break;
@@ -1619,7 +1619,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("operand out of range: %ld"), value);
 	  value = (value << 3) & 0x3f8;
-	  bfd_putl16 ((bfd_vma) (value | insn), where);
+	  bfd_putl16 (value | insn, where);
 	  break;
 
 	case BFD_RELOC_AVR_13_PCREL:
@@ -1640,15 +1640,15 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	    }
 
 	  value &= 0xfff;
-	  bfd_putl16 ((bfd_vma) (value | insn), where);
+	  bfd_putl16 (value | insn, where);
 	  break;
 
 	case BFD_RELOC_32:
-	  bfd_putl32 ((bfd_vma) value, where);
+	  bfd_putl32 (value, where);
 	  break;
 
 	case BFD_RELOC_16:
-	  bfd_putl16 ((bfd_vma) value, where);
+	  bfd_putl16 (value, where);
 	  break;
 
 	case BFD_RELOC_8:
@@ -1659,14 +1659,14 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	  break;
 
 	case BFD_RELOC_AVR_16_PM:
-	  bfd_putl16 ((bfd_vma) (value >> 1), where);
+	  bfd_putl16 (value >> 1, where);
 	  break;
 
 	case BFD_RELOC_AVR_LDI:
 	  if (value > 255)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("operand out of range: %ld"), value);
-	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (value), where);
+	  bfd_putl16 (insn | LDI_IMMEDIATE (value), where);
 	  break;
 
 	case BFD_RELOC_AVR_LDS_STS_16:
@@ -1675,78 +1675,78 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 			   _("operand out of range: 0x%lx"),
 			   (unsigned long)value);
 	  insn |= ((value & 0xF) | ((value & 0x30) << 5) | ((value & 0x40) << 2));
-	  bfd_putl16 ((bfd_vma) insn, where);
+	  bfd_putl16 (insn, where);
 	  break;
 
 	case BFD_RELOC_AVR_6:
 	  if ((value > 63) || (value < 0))
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("operand out of range: %ld"), value);
-	  bfd_putl16 ((bfd_vma) insn | ((value & 7) | ((value & (3 << 3)) << 7)
-					| ((value & (1 << 5)) << 8)), where);
+	  bfd_putl16 (insn | ((value & 7) | ((value & (3 << 3)) << 7)
+			      | ((value & (1 << 5)) << 8)), where);
 	  break;
 
 	case BFD_RELOC_AVR_6_ADIW:
 	  if ((value > 63) || (value < 0))
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("operand out of range: %ld"), value);
-	  bfd_putl16 ((bfd_vma) insn | (value & 0xf) | ((value & 0x30) << 2), where);
+	  bfd_putl16 (insn | (value & 0xf) | ((value & 0x30) << 2), where);
 	  break;
 
 	case BFD_RELOC_AVR_LO8_LDI:
-	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (value), where);
+	  bfd_putl16 (insn | LDI_IMMEDIATE (value), where);
 	  break;
 
 	case BFD_RELOC_AVR_HI8_LDI:
-	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (value >> 8), where);
+	  bfd_putl16 (insn | LDI_IMMEDIATE (value >> 8), where);
 	  break;
 
 	case BFD_RELOC_AVR_MS8_LDI:
-	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (value >> 24), where);
+	  bfd_putl16 (insn | LDI_IMMEDIATE (value >> 24), where);
 	  break;
 
 	case BFD_RELOC_AVR_HH8_LDI:
-	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (value >> 16), where);
+	  bfd_putl16 (insn | LDI_IMMEDIATE (value >> 16), where);
 	  break;
 
 	case BFD_RELOC_AVR_LO8_LDI_NEG:
-	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (-value), where);
+	  bfd_putl16 (insn | LDI_IMMEDIATE (-value), where);
 	  break;
 
 	case BFD_RELOC_AVR_HI8_LDI_NEG:
-	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (-value >> 8), where);
+	  bfd_putl16 (insn | LDI_IMMEDIATE (-value >> 8), where);
 	  break;
 
 	case BFD_RELOC_AVR_MS8_LDI_NEG:
-	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (-value >> 24), where);
+	  bfd_putl16 (insn | LDI_IMMEDIATE (-value >> 24), where);
 	  break;
 
 	case BFD_RELOC_AVR_HH8_LDI_NEG:
-	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (-value >> 16), where);
+	  bfd_putl16 (insn | LDI_IMMEDIATE (-value >> 16), where);
 	  break;
 
 	case BFD_RELOC_AVR_LO8_LDI_PM:
-	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (value >> 1), where);
+	  bfd_putl16 (insn | LDI_IMMEDIATE (value >> 1), where);
 	  break;
 
 	case BFD_RELOC_AVR_HI8_LDI_PM:
-	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (value >> 9), where);
+	  bfd_putl16 (insn | LDI_IMMEDIATE (value >> 9), where);
 	  break;
 
 	case BFD_RELOC_AVR_HH8_LDI_PM:
-	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (value >> 17), where);
+	  bfd_putl16 (insn | LDI_IMMEDIATE (value >> 17), where);
 	  break;
 
 	case BFD_RELOC_AVR_LO8_LDI_PM_NEG:
-	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (-value >> 1), where);
+	  bfd_putl16 (insn | LDI_IMMEDIATE (-value >> 1), where);
 	  break;
 
 	case BFD_RELOC_AVR_HI8_LDI_PM_NEG:
-	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (-value >> 9), where);
+	  bfd_putl16 (insn | LDI_IMMEDIATE (-value >> 9), where);
 	  break;
 
 	case BFD_RELOC_AVR_HH8_LDI_PM_NEG:
-	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (-value >> 17), where);
+	  bfd_putl16 (insn | LDI_IMMEDIATE (-value >> 17), where);
 	  break;
 
 	case BFD_RELOC_AVR_CALL:
@@ -1759,8 +1759,8 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 			    _("odd address operand: %ld"), value);
 	    value >>= 1;
 	    x |= ((value & 0x10000) | ((value << 3) & 0x1f00000)) >> 16;
-	    bfd_putl16 ((bfd_vma) x, where);
-	    bfd_putl16 ((bfd_vma) (value & 0xffff), where + 2);
+	    bfd_putl16 (x, where);
+	    bfd_putl16 (value & 0xffff, where + 2);
 	  }
 	  break;
 
@@ -1785,14 +1785,14 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	  if (value > 63)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("operand out of range: %ld"), value);
-	  bfd_putl16 ((bfd_vma) insn | ((value & 0x30) << 5) | (value & 0x0f), where);
+	  bfd_putl16 (insn | ((value & 0x30) << 5) | (value & 0x0f), where);
 	  break;
 
 	case BFD_RELOC_AVR_PORT5:
 	  if (value > 31)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("operand out of range: %ld"), value);
-	  bfd_putl16 ((bfd_vma) insn | ((value & 0x1f) << 3), where);
+	  bfd_putl16 (insn | ((value & 0x1f) << 3), where);
 	  break;
 	}
     }
@@ -2546,7 +2546,7 @@ avr_emit_insn (const char *insn, int reg, char **pwhere)
 		|| 0 == strcmp ("mov", op->name)
 		|| 0 == strcmp ("ldi", op->name));
 
-  bfd_putl16 ((bfd_vma) bin, *pwhere);
+  bfd_putl16 (bin, *pwhere);
   (*pwhere) += 2 * op->insn_size;
 }
 
