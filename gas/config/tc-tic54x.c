@@ -536,8 +536,7 @@ tic54x_bss (int x ATTRIBUTE_UNUSED)
     symbol_get_frag (symbolP)->fr_symbol = (symbolS *) NULL;
 
   symbol_set_frag (symbolP, frag_now);
-  p = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP,
-		(offsetT) (words * OCTETS_PER_BYTE), (char *) 0);
+  p = frag_var (rs_org, 1, 1, 0, symbolP, words * OCTETS_PER_BYTE, NULL);
   *p = 0;			/* Fill char.  */
 
   S_SET_SEGMENT (symbolP, bss_section);
@@ -1295,10 +1294,8 @@ tic54x_space (int arg)
       bi->seg = now_seg;
       bi->type = bes;
       bi->sym = label;
-      p = frag_var (rs_machine_dependent,
-		    65536 * 2, 1, (relax_substateT) 0,
-		    make_expr_symbol (&expn), (offsetT) 0,
-		    (char *) bi);
+      p = frag_var (rs_machine_dependent, 65536 * 2, 1, 0,
+		    make_expr_symbol (&expn), 0, (char *) bi);
       if (p)
 	*p = 0;
 
@@ -1362,9 +1359,7 @@ tic54x_space (int arg)
     }
 
   if (!need_pass_2)
-    p = frag_var (rs_fill, 1, 1,
-		  (relax_substateT) 0, (symbolS *) 0,
-		  (offsetT) octets, (char *) 0);
+    p = frag_var (rs_fill, 1, 1, 0, NULL, octets, NULL);
 
   /* Make note of how many bits of this word we've allocated so far.  */
   frag_now->tc_frag_data = bit_offset;
@@ -1470,9 +1465,7 @@ tic54x_usect (int x ATTRIBUTE_UNUSED)
 
   seg_info (seg)->bss = 1;	/* Uninitialized data.  */
 
-  p = frag_var (rs_fill, 1, 1,
-		(relax_substateT) 0, (symbolS *) line_label,
-		size * OCTETS_PER_BYTE, (char *) 0);
+  p = frag_var (rs_fill, 1, 1, 0, line_label, size * OCTETS_PER_BYTE, NULL);
   *p = 0;
 
   if (blocking_flag)
@@ -1808,10 +1801,8 @@ tic54x_field (int ignore ATTRIBUTE_UNUSED)
 	      bi->seg = now_seg;
 	      bi->type = TYPE_FIELD;
 	      bi->value = value;
-	      p = frag_var (rs_machine_dependent,
-			    4, 1, (relax_substateT) 0,
-			    make_expr_symbol (&size_exp), (offsetT) 0,
-			    (char *) bi);
+	      p = frag_var (rs_machine_dependent, 4, 1, 0,
+			    make_expr_symbol (&size_exp), 0, (char *) bi);
 	      goto getout;
 	    }
 	  else if (bit_offset == 0 || bit_offset + size > 16)

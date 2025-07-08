@@ -2395,10 +2395,8 @@ s_fill (int ignore ATTRIBUTE_UNUSED)
 
       if (rep_exp.X_op == O_constant)
 	{
-	  p = frag_var (rs_fill, (int) size, (int) size,
-			(relax_substateT) 0, (symbolS *) 0,
-			(offsetT) rep_exp.X_add_number,
-			(char *) 0);
+	  p = frag_var (rs_fill, size, size, 0, NULL,
+			rep_exp.X_add_number, NULL);
 	}
       else
 	{
@@ -2422,8 +2420,7 @@ s_fill (int ignore ATTRIBUTE_UNUSED)
 	      rep_sym = make_expr_symbol (&rep_exp);
 	    }
 
-	  p = frag_var (rs_space, (int) size, (int) size,
-			(relax_substateT) 0, rep_sym, (offsetT) 0, (char *) 0);
+	  p = frag_var (rs_space, size, size, 0, rep_sym, 0, NULL);
 	}
 
       memset (p, 0, (unsigned int) size);
@@ -2972,7 +2969,7 @@ do_org (segT segment, expressionS *exp, int fill)
 	  off = 0;
 	}
 
-      p = frag_var (rs_org, 1, 1, (relax_substateT) 0, sym, off, (char *) 0);
+      p = frag_var (rs_org, 1, 1, 0, sym, off, NULL);
       *p = fill;
     }
 }
@@ -3591,8 +3588,7 @@ s_space (int mult)
 	    }
 
 	  if (!need_pass_2)
-	    p = frag_var (rs_fill, 1, 1, (relax_substateT) 0, (symbolS *) 0,
-			  (offsetT) total, (char *) 0);
+	    p = frag_var (rs_fill, 1, 1, 0, NULL, total, NULL);
 	}
       else
 	{
@@ -3609,8 +3605,7 @@ s_space (int mult)
 	    }
 
 	  if (!need_pass_2)
-	    p = frag_var (rs_space, 1, 1, (relax_substateT) 0,
-			  make_expr_symbol (&exp), (offsetT) 0, (char *) 0);
+	    p = frag_var (rs_space, 1, 1, 0, make_expr_symbol (&exp), 0, NULL);
 	}
 
       if ((val.X_op != O_constant || val.X_add_number != 0) && in_bss ())
@@ -5506,7 +5501,7 @@ emit_leb128_expr (expressionS *exp, int sign)
 	 resolve things later.  */
 
       frag_var (rs_leb128, sizeof_uleb128 (~(valueT) 0), 0, sign,
-		make_expr_symbol (exp), 0, (char *) NULL);
+		make_expr_symbol (exp), 0, NULL);
     }
 }
 

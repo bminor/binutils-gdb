@@ -1152,9 +1152,7 @@ obj_elf_vms_common (int ignore ATTRIBUTE_UNUSED)
   cur_size = bfd_section_size (now_seg);
   if ((int) size > cur_size)
     {
-      char *pfrag
-        = frag_var (rs_fill, 1, 1, (relax_substateT)0, NULL,
-                    (valueT)size - (valueT)cur_size, NULL);
+      char *pfrag = frag_var (rs_fill, 1, 1, 0, NULL, size - cur_size, NULL);
       *pfrag = 0;
       bfd_set_section_size (now_seg, size);
     }

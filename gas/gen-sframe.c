@@ -543,7 +543,7 @@ output_sframe_row_entry (symbolS *fde_start_addr,
   create_fre_start_addr_exp (&exp, sframe_fre->pc_begin, fde_start_addr,
 			     fde_end_addr);
   frag_grow (fre_addr_size);
-  frag_var (rs_sframe, fre_addr_size, 0, (relax_substateT) 0,
+  frag_var (rs_sframe, fre_addr_size, 0, 0,
 	    make_expr_symbol (&exp), 0, (char *) frag_now);
 #else
   gas_assert (fde_end_addr);
@@ -639,8 +639,8 @@ output_sframe_funcdesc (symbolS *start_of_fre_section,
   create_func_info_exp (&cexp, dw_fde_end_addrS, dw_fde_start_addrS,
 			func_info);
   frag_grow (1); /* Size of func info is unsigned char.  */
-  frag_var (rs_sframe, 1, 0, (relax_substateT) 0,
-	    make_expr_symbol (&cexp), 0, (char *) frag_now);
+  frag_var (rs_sframe, 1, 0, 0, make_expr_symbol (&cexp), 0,
+	    (char *) frag_now);
 #else
   out_one (func_info);
 #endif

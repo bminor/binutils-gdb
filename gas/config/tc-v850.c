@@ -247,8 +247,7 @@ v850_offset (int ignore ATTRIBUTE_UNUSED)
   char *pfrag;
   int temp = get_absolute_expression ();
 
-  pfrag = frag_var (rs_org, 1, 1, (relax_substateT)0, (symbolS *)0,
-		    (offsetT) temp, (char *) 0);
+  pfrag = frag_var (rs_org, 1, 1, 0, NULL, temp, NULL);
   *pfrag = 0;
 
   demand_empty_rest_of_line ();
@@ -412,8 +411,7 @@ v850_comm (int area)
 	    }
 
 	  symbol_set_frag (symbolP, frag_now);
-	  pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP,
-			    (offsetT) size, (char *) 0);
+	  pfrag = frag_var (rs_org, 1, 1, 0, symbolP, size, NULL);
 	  *pfrag = 0;
 	  S_SET_SIZE (symbolP, size);
 

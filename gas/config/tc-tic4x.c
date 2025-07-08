@@ -695,9 +695,7 @@ tic4x_seg_alloc (char *name ATTRIBUTE_UNUSED,
     {
       char *p;
 
-      p = frag_var (rs_fill, 1, 1, (relax_substateT) 0,
-		    (symbolS *) symbolP,
-		    size * OCTETS_PER_BYTE, (char *) 0);
+      p = frag_var (rs_fill, 1, 1, 0, symbolP, size * OCTETS_PER_BYTE, NULL);
       *p = 0;
     }
 }
@@ -772,8 +770,7 @@ tic4x_bss (int x ATTRIBUTE_UNUSED)
 
   symbol_set_frag (symbolP, frag_now);
 
-  p = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP,
-		size * OCTETS_PER_BYTE, (char *) 0);
+  p = frag_var (rs_org, 1, 1, 0, symbolP, size * OCTETS_PER_BYTE, NULL);
   *p = 0;			/* Fill char.  */
 
   S_SET_SEGMENT (symbolP, bss_section);

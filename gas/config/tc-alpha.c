@@ -3552,7 +3552,7 @@ s_alpha_comm (int ignore ATTRIBUTE_UNUSED)
       symbolS *sec_symbol;
       segT current_seg = now_seg;
       subsegT current_subseg = now_subseg;
-      int cur_size;
+      offsetT cur_size;
 
       input_line_pointer++;
       SKIP_WHITESPACE ();
@@ -3567,13 +3567,12 @@ s_alpha_comm (int ignore ATTRIBUTE_UNUSED)
 
       /* Reuse stab_string_size to store the size of the section.  */
       cur_size = seg_info (sec)->stabu.stab_string_size;
-      if ((int) size > cur_size)
+      if (size > cur_size)
 	{
-	  char *pfrag
-	    = frag_var (rs_fill, 1, 1, (relax_substateT)0, NULL,
-			(valueT)size - (valueT)cur_size, NULL);
+	  char *pfrag = frag_var (rs_fill, 1, 1, 0, NULL,
+				  size - cur_size, NULL);
 	  *pfrag = 0;
-	  seg_info (sec)->stabu.stab_string_size = (int)size;
+	  seg_info (sec)->stabu.stab_string_size = size;
 	}
 
       S_SET_SEGMENT (symbolP, sec);
@@ -3598,8 +3597,7 @@ s_alpha_comm (int ignore ATTRIBUTE_UNUSED)
       record_alignment (bss_section, log_align);
 
       symbol_set_frag (symbolP, frag_now);
-      pfrag = frag_var (rs_org, 1, 1, (relax_substateT)0, symbolP,
-                        size, NULL);
+      pfrag = frag_var (rs_org, 1, 1, 0, symbolP, size, NULL);
       *pfrag = 0;
 
       S_SET_SEGMENT (symbolP, bss_section);

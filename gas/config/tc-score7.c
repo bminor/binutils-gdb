@@ -6036,7 +6036,7 @@ s7_s_score_lcomm (int bytes_p)
         symbol_get_frag (symbolP)->fr_symbol = NULL;
 
       symbol_set_frag (symbolP, frag_now);
-      pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP, (offsetT) temp, NULL);
+      pfrag = frag_var (rs_org, 1, 1, 0, symbolP, temp, NULL);
       *pfrag = 0;
 
 

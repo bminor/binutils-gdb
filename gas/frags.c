@@ -325,8 +325,7 @@ frag_align (int alignment, int fill_character, int max)
     {
       char *p;
 
-      p = frag_var (rs_align, 1, 1, (relax_substateT) max,
-		    (symbolS *) 0, (offsetT) alignment, (char *) 0);
+      p = frag_var (rs_align, 1, 1, max, NULL, alignment, NULL);
       *p = fill_character;
     }
 }
@@ -344,8 +343,7 @@ frag_align_pattern (int alignment, const char *fill_pattern,
 {
   char *p;
 
-  p = frag_var (rs_align, n_fill, n_fill, (relax_substateT) max,
-		(symbolS *) 0, (offsetT) alignment, (char *) 0);
+  p = frag_var (rs_align, n_fill, n_fill, max, NULL, alignment, NULL);
   memcpy (p, fill_pattern, n_fill);
 }
 
@@ -367,9 +365,8 @@ frag_align_code (int alignment, int max)
 {
   char *p;
 
-  p = frag_var (rs_align_code, MAX_MEM_FOR_RS_ALIGN_CODE (alignment, max), 1,
-		(relax_substateT) max, (symbolS *) 0,
-		(offsetT) alignment, (char *) 0);
+  p = frag_var (rs_align_code, MAX_MEM_FOR_RS_ALIGN_CODE (alignment, max),
+		1, max, NULL, alignment, NULL);
   *p = NOP_OPCODE;
 }
 

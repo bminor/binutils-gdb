@@ -531,13 +531,8 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
 			+ new_broken_words * md_long_jump_size);
 
       frag_tmp = frag_now;
-      frag_opcode = frag_var (rs_broken_word,
-			      possible_bytes,
-			      possible_bytes,
-			      (relax_substateT) 0,
-			      (symbolS *) broken_words,
-			      (offsetT) 0,
-			      NULL);
+      frag_opcode = frag_var (rs_broken_word, possible_bytes, possible_bytes,
+			      0, (symbolS *) broken_words, 0, NULL);
 
       /* We want to store the pointer to where to insert the jump
 	 table in the fr_opcode of the rs_broken_word frag.  This

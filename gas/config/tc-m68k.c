@@ -4410,7 +4410,7 @@ md_assemble (char *str)
 	  fixP->fx_pcrel_adjust = the_ins.reloc[m].pcrel_fix;
 	}
       (void) frag_var (rs_machine_dependent, FRAG_VAR_SIZE, 0,
-		       (relax_substateT) (the_ins.fragb[n].fragty),
+		       the_ins.fragb[n].fragty,
 		       the_ins.fragb[n].fadd, the_ins.fragb[n].foff, to_beg_P);
     }
   gas_assert (the_ins.nfrag >= 1);

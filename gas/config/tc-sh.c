@@ -3206,8 +3206,7 @@ sh_cons_align (int nbytes)
       return;
     }
 
-  frag_var (rs_align_test, 1, 1, (relax_substateT) 0,
-	    (symbolS *) NULL, (offsetT) nalign, (char *) NULL);
+  frag_var (rs_align_test, 1, 1, 0, NULL, nalign, NULL);
 
   record_alignment (now_seg, nalign);
 }

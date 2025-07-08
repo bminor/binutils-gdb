@@ -2470,8 +2470,7 @@ ppc_elf_lcomm (int xxx ATTRIBUTE_UNUSED)
   if (S_GET_SEGMENT (symbolP) == bss_section)
     symbol_get_frag (symbolP)->fr_symbol = 0;
   symbol_set_frag (symbolP, frag_now);
-  pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP, size,
-		    (char *) 0);
+  pfrag = frag_var (rs_org, 1, 1, 0, symbolP, size, NULL);
   *pfrag = 0;
   S_SET_SIZE (symbolP, size);
   S_SET_SEGMENT (symbolP, bss_section);
@@ -4465,8 +4464,7 @@ ppc_comm (int lcomm)
       frag_align (align, 0, 0);
 
       symbol_set_frag (def_sym, frag_now);
-      pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, def_sym,
-			def_size, (char *) NULL);
+      pfrag = frag_var (rs_org, 1, 1, 0, def_sym, def_size, NULL);
       *pfrag = 0;
       S_SET_SEGMENT (def_sym, section->segment);
       symbol_get_tc (def_sym)->align = align;

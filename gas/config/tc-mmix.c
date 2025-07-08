@@ -4086,7 +4086,7 @@ s_loc (int ignore ATTRIBUTE_UNUSED)
 	  loc_asserts->frag = frag_now;
 	}
 
-      p = frag_var (rs_org, 1, 1, (relax_substateT) 0, sym, off, (char *) 0);
+      p = frag_var (rs_org, 1, 1, 0, sym, off, NULL);
       *p = 0;
     }
 

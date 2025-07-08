@@ -1572,8 +1572,7 @@ m32r_scomm (int ignore ATTRIBUTE_UNUSED)
 
       symbol_set_frag (symbolP, frag_now);
 
-      pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP, size,
-			(char *) 0);
+      pfrag = frag_var (rs_org, 1, 1, 0, symbolP, size, NULL);
       *pfrag = 0;
       S_SET_SIZE (symbolP, size);
       S_SET_SEGMENT (symbolP, sbss_section);

@@ -244,8 +244,7 @@ microblaze_s_lcomm (int xxx ATTRIBUTE_UNUSED)
   if (S_GET_SEGMENT (symbolP) == current_seg)
     symbol_get_frag (symbolP)->fr_symbol = 0;
   symbol_set_frag (symbolP, frag_now);
-  pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP, size,
-		    (char *) 0);
+  pfrag = frag_var (rs_org, 1, 1, 0, symbolP, size, NULL);
   *pfrag = 0;
   S_SET_SIZE (symbolP, size);
   S_SET_SEGMENT (symbolP, current_seg);

@@ -4219,8 +4219,7 @@ s_reserve (int ignore ATTRIBUTE_UNUSED)
 	    symbol_get_frag (symbolP)->fr_symbol = NULL;
 
 	  symbol_set_frag (symbolP, frag_now);
-	  pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP,
-			    (offsetT) size, (char *) 0);
+	  pfrag = frag_var (rs_org, 1, 1, 0, symbolP, size, NULL);
 	  *pfrag = 0;
 
 	  S_SET_SEGMENT (symbolP, bss_section);
@@ -4336,8 +4335,7 @@ s_common (int ignore ATTRIBUTE_UNUSED)
 	  if (S_GET_SEGMENT (symbolP) == bss_section)
 	    symbol_get_frag (symbolP)->fr_symbol = 0;
 	  symbol_set_frag (symbolP, frag_now);
-	  p = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP,
-			(offsetT) size, (char *) 0);
+	  p = frag_var (rs_org, 1, 1, 0, symbolP, size, NULL);
 	  *p = 0;
 	  S_SET_SEGMENT (symbolP, bss_section);
 	  S_CLEAR_EXTERNAL (symbolP);
@@ -4635,8 +4633,7 @@ sparc_cons_align (int nbytes)
       return;
     }
 
-  frag_var (rs_align_test, 1, 1, (relax_substateT) 0,
-	    (symbolS *) NULL, (offsetT) nalign, (char *) NULL);
+  frag_var (rs_align_test, 1, 1, 0, NULL, nalign, NULL);
 
   record_alignment (now_seg, nalign);
 }

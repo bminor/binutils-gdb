@@ -1934,9 +1934,8 @@ build_jump_insn (struct m68hc11_opcode *opcode, operand operands[],
 	  number_to_chars_bigendian (op, code, 1);
 	  number_to_chars_bigendian (op + 1, 0, 1);
 	  frag_variant (rs_machine_dependent, 1, 1,
-                        ENCODE_RELAX (STATE_PC_RELATIVE, STATE_UNDF),
-                        operands[0].exp.X_add_symbol, (offsetT) n,
-                        op);
+			ENCODE_RELAX (STATE_PC_RELATIVE, STATE_UNDF),
+			operands[0].exp.X_add_symbol, n, op);
 	}
       else if (current_architecture & cpu6812)
 	{
@@ -1945,7 +1944,7 @@ build_jump_insn (struct m68hc11_opcode *opcode, operand operands[],
 	  number_to_chars_bigendian (op + 1, 0, 1);
 	  frag_var (rs_machine_dependent, 2, 2,
 		    ENCODE_RELAX (STATE_CONDITIONAL_BRANCH_6812, STATE_UNDF),
-		    operands[0].exp.X_add_symbol, (offsetT) n, op);
+		    operands[0].exp.X_add_symbol, n, op);
 	}
       else
 	{
@@ -1954,7 +1953,7 @@ build_jump_insn (struct m68hc11_opcode *opcode, operand operands[],
 	  number_to_chars_bigendian (op + 1, 0, 1);
 	  frag_var (rs_machine_dependent, 3, 3,
 		    ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_UNDF),
-		    operands[0].exp.X_add_symbol, (offsetT) n, op);
+		    operands[0].exp.X_add_symbol, n, op);
 	}
     }
 }
@@ -2044,7 +2043,7 @@ build_dbranch_insn (struct m68hc11_opcode *opcode, operand operands[],
 	  number_to_chars_bigendian (f + 1, 0, 1);
 	  frag_var (rs_machine_dependent, 3, 3,
 		    ENCODE_RELAX (STATE_XBCC_BRANCH, STATE_UNDF),
-		    operands[1].exp.X_add_symbol, (offsetT) n, f);
+		    operands[1].exp.X_add_symbol, n, f);
 	}
     }
 }
