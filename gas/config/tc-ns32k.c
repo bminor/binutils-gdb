@@ -1577,13 +1577,13 @@ md_number_to_field (char *buf, long val, bit_fixS *field_ptr)
 #ifdef ENDIAN
       *mem_ptr = object;
 #else
-      mem_ptr[0] = (char) object;
+      mem_ptr[0] = object;
       object >>= 8;
-      mem_ptr[1] = (char) object;
+      mem_ptr[1] = object;
       object >>= 8;
-      mem_ptr[2] = (char) object;
+      mem_ptr[2] = object;
       object >>= 8;
-      mem_ptr[3] = (char) object;
+      mem_ptr[3] = object;
 #endif
     }
   else
@@ -1723,26 +1723,26 @@ convert_iif (void)
 			    {
 			    case 4:
 			      gen_to_words (words, 2, 8);
-			      md_number_to_imm (memP, (long) words[0],
+			      md_number_to_imm (memP, words[0],
 						sizeof (LITTLENUM_TYPE));
 			      md_number_to_imm (memP + sizeof (LITTLENUM_TYPE),
-						(long) words[1],
+						words[1],
 						sizeof (LITTLENUM_TYPE));
 			      break;
 			    case 8:
 			      gen_to_words (words, 4, 11);
-			      md_number_to_imm (memP, (long) words[0],
+			      md_number_to_imm (memP, words[0],
 						sizeof (LITTLENUM_TYPE));
 			      md_number_to_imm (memP + sizeof (LITTLENUM_TYPE),
-						(long) words[1],
+						words[1],
 						sizeof (LITTLENUM_TYPE));
 			      md_number_to_imm ((memP + 2
 						 * sizeof (LITTLENUM_TYPE)),
-						(long) words[2],
+						words[2],
 						sizeof (LITTLENUM_TYPE));
 			      md_number_to_imm ((memP + 3
 						 * sizeof (LITTLENUM_TYPE)),
-						(long) words[3],
+						words[3],
 						sizeof (LITTLENUM_TYPE));
 			      break;
 			    }
@@ -2035,7 +2035,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
   disp = (S_GET_VALUE (fragP->fr_symbol) + fragP->fr_offset) - object_address;
   disp += md_pcrel_adjust (fragP);
 
-  md_number_to_disp (buffer_address, (long) disp, (int) ext);
+  md_number_to_disp (buffer_address, disp, ext);
   fragP->fr_fix += ext;
 }
 
@@ -2093,8 +2093,8 @@ md_create_short_jump (char *ptr,
   valueT offset;
 
   offset = to_addr - from_addr;
-  md_number_to_chars (ptr, (valueT) 0xEA, 1);
-  md_number_to_disp (ptr + 1, (valueT) offset, 2);
+  *ptr++ = 0xEA;
+  md_number_to_disp (ptr, offset, 2);
 }
 
 void
@@ -2107,8 +2107,8 @@ md_create_long_jump (char *ptr,
   valueT offset;
 
   offset = to_addr - from_addr;
-  md_number_to_chars (ptr, (valueT) 0xEA, 1);
-  md_number_to_disp (ptr + 1, (valueT) offset, 4);
+  *ptr++ = 0xEA;
+  md_number_to_disp (ptr, offset, 4);
 }
 
 const char md_shortopts[] = "m:";

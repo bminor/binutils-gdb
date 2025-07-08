@@ -3745,7 +3745,7 @@ v850_md_finish (void)
 
       /* Write the note type.  */
       p = frag_more (4);
-      md_number_to_chars (p, (valueT) id, 4);
+      md_number_to_chars (p, id, 4);
 
       /* Write the name field.  */
       p = frag_more (4);

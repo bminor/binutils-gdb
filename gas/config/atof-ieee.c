@@ -553,7 +553,7 @@ gen_to_words (LITTLENUM_TYPE *words, int precision, long exponent_bits)
 	      tmp_bits = prec_bits;
 	      while (tmp_bits > LITTLENUM_NUMBER_OF_BITS)
 		{
-		  if (lp[n] != (LITTLENUM_TYPE) - 1)
+		  if (lp[n] != (LITTLENUM_TYPE) -1)
 		    break;
 		  --n;
 		  tmp_bits -= LITTLENUM_NUMBER_OF_BITS;
@@ -835,17 +835,17 @@ ieee_md_atof (int type,
 
   if (big_wordian)
     {
-      for (wordP = words; prec --;)
+      for (wordP = words; prec--;)
 	{
-	  md_number_to_chars (litP, (valueT) (* wordP ++), sizeof (LITTLENUM_TYPE));
+	  md_number_to_chars (litP, *wordP++, sizeof (LITTLENUM_TYPE));
 	  litP += sizeof (LITTLENUM_TYPE);
 	}
     }
   else
     {
-      for (wordP = words + prec; prec --;)
+      for (wordP = words + prec; prec--;)
 	{
-	  md_number_to_chars (litP, (valueT) (* -- wordP), sizeof (LITTLENUM_TYPE));
+	  md_number_to_chars (litP, *--wordP, sizeof (LITTLENUM_TYPE));
 	  litP += sizeof (LITTLENUM_TYPE);
 	}
     }

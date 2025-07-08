@@ -4001,7 +4001,7 @@ emit_insn (tic54x_insn *insn)
       char *p = frag_more (size);
 
       if (size == 2)
-	md_number_to_chars (p, (valueT) insn->opcode[i].word, 2);
+	md_number_to_chars (p, insn->opcode[i].word, 2);
       else
 	md_number_to_chars (p, (valueT) insn->opcode[i].word << 16, 4);
 

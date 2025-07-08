@@ -942,7 +942,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
       fixP->fx_r_type = fixP->fx_cgen.opinfo;
     }
 
-  md_number_to_chars (displacement, (valueT) addend, extension + 1);
+  md_number_to_chars (displacement, addend, extension + 1);
 
   fragP->fr_fix += (extension & -2); /* 0,2 or 4 bytes added.  */
 }

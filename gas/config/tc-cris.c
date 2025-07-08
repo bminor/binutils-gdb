@@ -1274,7 +1274,7 @@ md_assemble (char *str)
       opcodep = cris_insn_first_word_frag ();
 
       /* Output the prefix opcode.  */
-      md_number_to_chars (opcodep, (long) prefix.opcode, 2);
+      md_number_to_chars (opcodep, prefix.opcode, 2);
 
       /* Having a specified reloc only happens for DIP and for BDAP with
 	 PIC or TLS operands, but it is ok to drop through here for the other
@@ -1324,7 +1324,7 @@ md_assemble (char *str)
     opcodep = frag_more (2);
 
   /* Output the instruction opcode.  */
-  md_number_to_chars (opcodep, (long) (output_instruction.opcode), 2);
+  md_number_to_chars (opcodep, output_instruction.opcode, 2);
 
   /* Output the symbol-dependent instruction stuff.  */
   if (output_instruction.insn_type == CRIS_INSN_BRANCH)

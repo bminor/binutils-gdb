@@ -11663,8 +11663,7 @@ ia64_float_to_chars_bigendian (char *lit, LITTLENUM_TYPE *words,
 {
   while (prec--)
     {
-      number_to_chars_bigendian (lit, (long) (*words++),
-				 sizeof (LITTLENUM_TYPE));
+      number_to_chars_bigendian (lit, *words++, sizeof (LITTLENUM_TYPE));
       lit += sizeof (LITTLENUM_TYPE);
     }
 }
@@ -11675,7 +11674,7 @@ ia64_float_to_chars_littleendian (char *lit, LITTLENUM_TYPE *words,
 {
   while (prec--)
     {
-      number_to_chars_littleendian (lit, (long) (words[prec]),
+      number_to_chars_littleendian (lit, words[prec],
 				    sizeof (LITTLENUM_TYPE));
       lit += sizeof (LITTLENUM_TYPE);
     }

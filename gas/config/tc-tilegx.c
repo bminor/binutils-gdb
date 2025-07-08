@@ -1351,7 +1351,7 @@ md_atof (int type, char *litP, int *sizeP)
      the bigendian 386.  */
   for (wordP = words + prec - 1; prec--;)
     {
-      md_number_to_chars (litP, (valueT) (*wordP--), sizeof (LITTLENUM_TYPE));
+      md_number_to_chars (litP, *wordP--, sizeof (LITTLENUM_TYPE));
       litP += sizeof (LITTLENUM_TYPE);
     }
   return 0;

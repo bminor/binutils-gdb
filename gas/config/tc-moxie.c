@@ -590,7 +590,7 @@ md_atof (int type, char *litP, int *sizeP)
 
   for (i = prec - 1; i >= 0; i--)
     {
-      md_number_to_chars (litP, (valueT) words[i], 2);
+      md_number_to_chars (litP, words[i], 2);
       litP += 2;
     }
 

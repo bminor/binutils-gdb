@@ -1907,7 +1907,7 @@ print_insn (ins *insn)
   /* Write the instruction encoding to frag.  */
   for (i = 0; i < insn_size; i++)
     {
-      md_number_to_chars (this_frag, (valueT) words[i], 2);
+      md_number_to_chars (this_frag, words[i], 2);
       this_frag += 2;
     }
 }

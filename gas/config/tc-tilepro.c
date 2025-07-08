@@ -878,8 +878,8 @@ tilepro_flush_bundle (void)
 					f);
     }
 
-  number_to_chars_littleendian (f, (unsigned int)bits, 4);
-  number_to_chars_littleendian (f + 4, (unsigned int)(bits >> 32), 4);
+  number_to_chars_littleendian (f, bits, 4);
+  number_to_chars_littleendian (f + 4, bits >> 32, 4);
   current_bundle_index = 0;
 
   /* Emit DWARF2 debugging information.  */
@@ -1227,7 +1227,7 @@ md_atof (int type, char *litP, int *sizeP)
      the bigendian 386.  */
   for (wordP = words + prec - 1; prec--;)
     {
-      md_number_to_chars (litP, (valueT) (*wordP--), sizeof (LITTLENUM_TYPE));
+      md_number_to_chars (litP, *wordP--, sizeof (LITTLENUM_TYPE));
       litP += sizeof (LITTLENUM_TYPE);
     }
   return 0;

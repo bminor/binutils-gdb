@@ -5813,13 +5813,13 @@ s3_s_score_end (int x ATTRIBUTE_UNUSED)
       exp.X_add_number = 0;
       emit_expr (&exp, 4);
       fragp = frag_more (7 * 4);
-      md_number_to_chars (fragp, (valueT) s3_cur_proc_ptr->reg_mask, 4);
-      md_number_to_chars (fragp + 4, (valueT) s3_cur_proc_ptr->reg_offset, 4);
-      md_number_to_chars (fragp + 8, (valueT) s3_cur_proc_ptr->fpreg_mask, 4);
-      md_number_to_chars (fragp + 12, (valueT) s3_cur_proc_ptr->leaf, 4);
-      md_number_to_chars (fragp + 16, (valueT) s3_cur_proc_ptr->frame_offset, 4);
-      md_number_to_chars (fragp + 20, (valueT) s3_cur_proc_ptr->frame_reg, 4);
-      md_number_to_chars (fragp + 24, (valueT) s3_cur_proc_ptr->pc_reg, 4);
+      md_number_to_chars (fragp, s3_cur_proc_ptr->reg_mask, 4);
+      md_number_to_chars (fragp + 4, s3_cur_proc_ptr->reg_offset, 4);
+      md_number_to_chars (fragp + 8, s3_cur_proc_ptr->fpreg_mask, 4);
+      md_number_to_chars (fragp + 12, s3_cur_proc_ptr->leaf, 4);
+      md_number_to_chars (fragp + 16, s3_cur_proc_ptr->frame_offset, 4);
+      md_number_to_chars (fragp + 20, s3_cur_proc_ptr->frame_reg, 4);
+      md_number_to_chars (fragp + 24, s3_cur_proc_ptr->pc_reg, 4);
       subseg_set (saved_seg, saved_subseg);
 
     }
@@ -6613,19 +6613,19 @@ s3_atof (int type, char *litP, int *sizeP)
   if (target_big_endian)
     {
       for (i = 0; i < prec; i++)
-        {
-          s3_md_number_to_chars (litP, (valueT) words[i], 2);
-          litP += 2;
-        }
+	{
+	  s3_md_number_to_chars (litP, words[i], 2);
+	  litP += 2;
+	}
     }
   else
     {
       for (i = 0; i < prec; i += 2)
-        {
-          s3_md_number_to_chars (litP, (valueT) words[i + 1], 2);
-          s3_md_number_to_chars (litP + 2, (valueT) words[i], 2);
-          litP += 4;
-        }
+	{
+	  s3_md_number_to_chars (litP, words[i + 1], 2);
+	  s3_md_number_to_chars (litP + 2, words[i], 2);
+	  litP += 4;
+	}
     }
 
   return 0;

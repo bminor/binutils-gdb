@@ -2581,15 +2581,13 @@ md_atof (int type, char *litP, int *sizeP)
   for (wordP = words; wordP<(words+prec) ; wordP+=2)
     {
       if (wordP < (words + prec - 1)) /* Dump wordP[1] (if we have one).  */
-        {
-          md_number_to_chars (litP, (valueT) (wordP[1]),
-                              sizeof (LITTLENUM_TYPE));
-          litP += sizeof (LITTLENUM_TYPE);
-        }
+	{
+	  md_number_to_chars (litP, wordP[1], sizeof (LITTLENUM_TYPE));
+	  litP += sizeof (LITTLENUM_TYPE);
+	}
 
       /* Dump wordP[0] */
-      md_number_to_chars (litP, (valueT) (wordP[0]),
-                          sizeof (LITTLENUM_TYPE));
+      md_number_to_chars (litP, wordP[0], sizeof (LITTLENUM_TYPE));
       litP += sizeof (LITTLENUM_TYPE);
     }
   return NULL;

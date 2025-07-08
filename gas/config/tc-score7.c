@@ -5655,13 +5655,13 @@ s7_s_score_end (int x ATTRIBUTE_UNUSED)
       exp.X_add_number = 0;
       emit_expr (&exp, 4);
       fragp = frag_more (7 * 4);
-      s7_number_to_chars (fragp, (valueT) s7_cur_proc_ptr->reg_mask, 4);
-      s7_number_to_chars (fragp + 4, (valueT) s7_cur_proc_ptr->reg_offset, 4);
-      s7_number_to_chars (fragp + 8, (valueT) s7_cur_proc_ptr->fpreg_mask, 4);
-      s7_number_to_chars (fragp + 12, (valueT) s7_cur_proc_ptr->leaf, 4);
-      s7_number_to_chars (fragp + 16, (valueT) s7_cur_proc_ptr->frame_offset, 4);
-      s7_number_to_chars (fragp + 20, (valueT) s7_cur_proc_ptr->frame_reg, 4);
-      s7_number_to_chars (fragp + 24, (valueT) s7_cur_proc_ptr->pc_reg, 4);
+      s7_number_to_chars (fragp, s7_cur_proc_ptr->reg_mask, 4);
+      s7_number_to_chars (fragp + 4, s7_cur_proc_ptr->reg_offset, 4);
+      s7_number_to_chars (fragp + 8, s7_cur_proc_ptr->fpreg_mask, 4);
+      s7_number_to_chars (fragp + 12, s7_cur_proc_ptr->leaf, 4);
+      s7_number_to_chars (fragp + 16, s7_cur_proc_ptr->frame_offset, 4);
+      s7_number_to_chars (fragp + 20, s7_cur_proc_ptr->frame_reg, 4);
+      s7_number_to_chars (fragp + 24, s7_cur_proc_ptr->pc_reg, 4);
       subseg_set (saved_seg, saved_subseg);
 
     }
@@ -5844,7 +5844,7 @@ s7_s_score_gpword (int ignore ATTRIBUTE_UNUSED)
       ignore_rest_of_line ();
     }
   p = frag_more (4);
-  s7_number_to_chars (p, (valueT) 0, 4);
+  s7_number_to_chars (p, 0, 4);
   fix_new_exp (frag_now, p - frag_now->fr_literal, 4, &ex, false, BFD_RELOC_GPREL32);
   demand_empty_rest_of_line ();
 }
@@ -6184,19 +6184,19 @@ s7_atof (int type, char *litP, int *sizeP)
   if (target_big_endian)
     {
       for (i = 0; i < prec; i++)
-        {
-          s7_number_to_chars (litP, (valueT) words[i], 2);
-          litP += 2;
-        }
+	{
+	  s7_number_to_chars (litP, words[i], 2);
+	  litP += 2;
+	}
     }
   else
     {
       for (i = 0; i < prec; i += 2)
-        {
-          s7_number_to_chars (litP, (valueT) words[i + 1], 2);
-          s7_number_to_chars (litP + 2, (valueT) words[i], 2);
-          litP += 4;
-        }
+	{
+	  s7_number_to_chars (litP, words[i + 1], 2);
+	  s7_number_to_chars (litP + 2, words[i], 2);
+	  litP += 4;
+	}
     }
 
   return 0;

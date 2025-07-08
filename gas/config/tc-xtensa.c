@@ -9001,15 +9001,15 @@ xtensa_add_config_info (void)
   /* Follow the standard note section layout:
      First write the length of the name string.  */
   p = frag_more (4);
-  md_number_to_chars (p, (valueT) XTINFO_NAMESZ, 4);
+  md_number_to_chars (p, XTINFO_NAMESZ, 4);
 
   /* Next comes the length of the "descriptor", i.e., the actual data.  */
   p = frag_more (4);
-  md_number_to_chars (p, (valueT) sz, 4);
+  md_number_to_chars (p, sz, 4);
 
   /* Write the note type.  */
   p = frag_more (4);
-  md_number_to_chars (p, (valueT) XTINFO_TYPE, 4);
+  md_number_to_chars (p, XTINFO_TYPE, 4);
 
   /* Write the name field.  */
   p = frag_more (XTINFO_NAMESZ);

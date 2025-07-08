@@ -7352,8 +7352,7 @@ md_atof (int type, char *litP, int *sizeP)
     {
       for (i = 0; i < prec; i++)
 	{
-	  md_number_to_chars (litP, (valueT) words[i],
-			      sizeof (LITTLENUM_TYPE));
+	  md_number_to_chars (litP, words[i], sizeof (LITTLENUM_TYPE));
 	  litP += sizeof (LITTLENUM_TYPE);
 	}
     }
@@ -7361,8 +7360,7 @@ md_atof (int type, char *litP, int *sizeP)
     {
       for (i = prec - 1; i >= 0; i--)
 	{
-	  md_number_to_chars (litP, (valueT) words[i],
-			      sizeof (LITTLENUM_TYPE));
+	  md_number_to_chars (litP, words[i], sizeof (LITTLENUM_TYPE));
 	  litP += sizeof (LITTLENUM_TYPE);
 	}
     }

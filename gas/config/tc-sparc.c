@@ -3402,9 +3402,9 @@ output_insn (const struct sparc_opcode *insn, struct sparc_it *theinsn)
 
   /* Put out the opcode.  */
   if (INSN_BIG_ENDIAN)
-    number_to_chars_bigendian (toP, (valueT) theinsn->opcode, 4);
+    number_to_chars_bigendian (toP, theinsn->opcode, 4);
   else
-    number_to_chars_littleendian (toP, (valueT) theinsn->opcode, 4);
+    number_to_chars_littleendian (toP, theinsn->opcode, 4);
 
   /* Put out the symbol-dependent stuff.  */
   if (theinsn->reloc != BFD_RELOC_NONE)

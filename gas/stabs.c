@@ -358,10 +358,10 @@ s_stab_generic (int what,
       /* At least for now, stabs in a special stab section are always
 	 output as 12 byte blocks of information.  */
       p = frag_more (8);
-      md_number_to_chars (p, (valueT) stroff, 4);
-      md_number_to_chars (p + 4, (valueT) type, 1);
-      md_number_to_chars (p + 5, (valueT) other, 1);
-      md_number_to_chars (p + 6, (valueT) desc, 2);
+      md_number_to_chars (p, stroff, 4);
+      md_number_to_chars (p + 4, type, 1);
+      md_number_to_chars (p + 5, other, 1);
+      md_number_to_chars (p + 6, desc, 2);
 
       if (what == 's' || what == 'n')
 	{

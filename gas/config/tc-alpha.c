@@ -4586,7 +4586,7 @@ s_alpha_pdesc (int ignore ATTRIBUTE_UNUSED)
       *(p + 3) = alpha_evax_proc->ra_save;
       break;
     case PDSC_S_K_KIND_FP_STACK:
-      md_number_to_chars (p + 2, (valueT) alpha_evax_proc->rsa_offset, 2);
+      md_number_to_chars (p + 2, alpha_evax_proc->rsa_offset, 2);
       break;
     default:		/* impossible */
       break;
@@ -4596,7 +4596,7 @@ s_alpha_pdesc (int ignore ATTRIBUTE_UNUSED)
   *(p + 5) = alpha_evax_proc->type & 0x0f;
 
   /* Signature offset.  */
-  md_number_to_chars (p + 6, (valueT) 0, 2);
+  md_number_to_chars (p + 6, 0, 2);
 
   fix_new_exp (frag_now, p - frag_now->fr_literal + 8,
                8, &exp, 0, BFD_RELOC_64);
@@ -4606,8 +4606,8 @@ s_alpha_pdesc (int ignore ATTRIBUTE_UNUSED)
 
   /* pdesc+16: Size.  */
   p = frag_more (6);
-  md_number_to_chars (p, (valueT) alpha_evax_proc->framesize, 4);
-  md_number_to_chars (p + 4, (valueT) 0, 2);
+  md_number_to_chars (p, alpha_evax_proc->framesize, 4);
+  md_number_to_chars (p + 4, 0, 2);
 
   /* Entry length.  */
   exp.X_op = O_subtract;

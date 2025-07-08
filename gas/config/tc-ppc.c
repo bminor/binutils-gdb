@@ -1959,13 +1959,13 @@ ppc_cleanup (void)
     bfd_set_section_flags (apuinfo_secp, SEC_HAS_CONTENTS | SEC_READONLY);
 
     p = frag_more (4);
-    md_number_to_chars (p, (valueT) 8, 4);
+    md_number_to_chars (p, 8, 4);
 
     p = frag_more (4);
-    md_number_to_chars (p, (valueT) ppc_apuinfo_num * 4, 4);
+    md_number_to_chars (p, ppc_apuinfo_num * 4, 4);
 
     p = frag_more (4);
-    md_number_to_chars (p, (valueT) 2, 4);
+    md_number_to_chars (p, 2, 4);
 
     p = frag_more (8);
     strcpy (p, APUINFO_LABEL);
@@ -1973,7 +1973,7 @@ ppc_cleanup (void)
     for (i = 0; i < ppc_apuinfo_num; i++)
       {
 	p = frag_more (4);
-	md_number_to_chars (p, (valueT) ppc_apuinfo_list[i], 4);
+	md_number_to_chars (p, ppc_apuinfo_list[i], 4);
       }
 
     frag_align (2, 0, 0);

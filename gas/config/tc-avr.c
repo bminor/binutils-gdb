@@ -2190,8 +2190,7 @@ avr_output_property_record (char * const frag_base, char *frag_ptr,
   fix->fx_line = 0;
   frag_ptr += 4;
 
-  md_number_to_chars (frag_ptr, (bfd_byte) record->type, 1);
-  frag_ptr += 1;
+  *frag_ptr++ = record->type & 0xff;
 
   /* Write out the rest of the data.  */
   switch (record->type)

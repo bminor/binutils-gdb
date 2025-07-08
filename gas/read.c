@@ -2434,7 +2434,7 @@ s_fill (int ignore ATTRIBUTE_UNUSED)
       md_number_to_chars (p, fill,
 			  (size > BSD_FILL_SIZE_CROCK_4
 			   ? BSD_FILL_SIZE_CROCK_4
-			   : (int) size));
+			   : size));
       /* Note: .fill (),0 emits no frag (since we are asked to .fill 0 bytes)
 	 but emits no error message because it seems a legal thing to do.
 	 It is a degenerate case of .fill but could be emitted by a
@@ -4749,7 +4749,7 @@ emit_expr_with_reloc (expressionS *exp,
 		   (uint64_t) get, (uint64_t) use);
 	}
       /* Put bytes in right order.  */
-      md_number_to_chars (p, use, (int) nbytes);
+      md_number_to_chars (p, use, nbytes);
     }
   else if (op == O_big)
     {
@@ -4798,7 +4798,7 @@ emit_expr_with_reloc (expressionS *exp,
 
       if (nbytes == 1)
 	{
-	  md_number_to_chars (p, (valueT) generic_bignum[0], 1);
+	  md_number_to_chars (p, generic_bignum[0], 1);
 	  return;
 	}
       know (nbytes % CHARS_PER_LITTLENUM == 0);
@@ -4816,7 +4816,7 @@ emit_expr_with_reloc (expressionS *exp,
 	  while (size >= CHARS_PER_LITTLENUM)
 	    {
 	      --nums;
-	      md_number_to_chars (p, (valueT) *nums, CHARS_PER_LITTLENUM);
+	      md_number_to_chars (p, *nums, CHARS_PER_LITTLENUM);
 	      size -= CHARS_PER_LITTLENUM;
 	      p += CHARS_PER_LITTLENUM;
 	    }
@@ -4826,7 +4826,7 @@ emit_expr_with_reloc (expressionS *exp,
 	  nums = generic_bignum;
 	  while (size >= CHARS_PER_LITTLENUM)
 	    {
-	      md_number_to_chars (p, (valueT) *nums, CHARS_PER_LITTLENUM);
+	      md_number_to_chars (p, *nums, CHARS_PER_LITTLENUM);
 	      ++nums;
 	      size -= CHARS_PER_LITTLENUM;
 	      p += CHARS_PER_LITTLENUM;

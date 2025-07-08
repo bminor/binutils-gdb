@@ -1061,7 +1061,7 @@ tic30_parallel_insn (char *token)
     char *p;
 
     p = frag_more (INSN_SIZE);
-    md_number_to_chars (p, (valueT) p_insn.opcode, INSN_SIZE);
+    md_number_to_chars (p, p_insn.opcode, INSN_SIZE);
   }
 
   {
@@ -1672,7 +1672,7 @@ md_assemble (char *line)
 
       insn.opcode |= insn.addressing_mode;
       p = frag_more (INSN_SIZE);
-      md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+      md_number_to_chars (p, insn.opcode, INSN_SIZE);
     }
   else
     {
@@ -1723,12 +1723,12 @@ md_assemble (char *line)
 		     into instruction word, and output.  */
 		  insn.opcode |=
 		    (insn.operand_type[am_insn]->direct.address & 0x0000FFFF);
-		  md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+		  md_number_to_chars (p, insn.opcode, INSN_SIZE);
 		}
 	      else
 		{
 		  /* Unresolved direct addressing mode instruction.  */
-		  md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+		  md_number_to_chars (p, insn.opcode, INSN_SIZE);
 		  fix_new_exp (frag_now, p + 2 - (frag_now->fr_literal), 2,
 			       & insn.operand_type[am_insn]->direct.direct_expr,
 			       0, 0);
@@ -1748,7 +1748,7 @@ md_assemble (char *line)
 		    {
 		    case Imm_Float:
 		      debug ("Floating point first operand\n");
-		      md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+		      md_number_to_chars (p, insn.opcode, INSN_SIZE);
 
 		      keeploc = input_line_pointer;
 		      input_line_pointer =
@@ -1771,7 +1771,7 @@ md_assemble (char *line)
 			as_warn (_("only lower 16-bits of first operand are used"));
 		      insn.opcode |=
 			(insn.operand_type[0]->immediate.u_number & 0x0000FFFFL);
-		      md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+		      md_number_to_chars (p, insn.opcode, INSN_SIZE);
 		      break;
 
 		    case Imm_SInt:
@@ -1788,7 +1788,7 @@ md_assemble (char *line)
 			}
 		      insn.opcode |=
 			(insn.operand_type[0]->immediate.s_number & 0x0000FFFFL);
-		      md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+		      md_number_to_chars (p, insn.opcode, INSN_SIZE);
 		      break;
 		    }
 		}
@@ -1797,7 +1797,7 @@ md_assemble (char *line)
 		  /* Unresolved immediate label.  */
 		  if (insn.operands > 1)
 		    insn.opcode |= (insn.operand_type[1]->reg.opcode << 16);
-		  md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+		  md_number_to_chars (p, insn.opcode, INSN_SIZE);
 		  fix_new_exp (frag_now, p + 2 - (frag_now->fr_literal), 2,
 			       & insn.operand_type[0]->immediate.imm_expr,
 			       0, 0);
@@ -1814,7 +1814,7 @@ md_assemble (char *line)
 		{
 		  insn.opcode |= (insn.operand_type[0]->reg.opcode);
 		  insn.opcode |= PC_Register;
-		  md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+		  md_number_to_chars (p, insn.opcode, INSN_SIZE);
 		}
 	      else
 		{
@@ -1823,11 +1823,11 @@ md_assemble (char *line)
 		    {
 		      insn.opcode |=
 			(insn.operand_type[0]->immediate.s_number & 0x0000FFFF);
-		      md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+		      md_number_to_chars (p, insn.opcode, INSN_SIZE);
 		    }
 		  else
 		    {
-		      md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+		      md_number_to_chars (p, insn.opcode, INSN_SIZE);
 		      fix_new_exp (frag_now, p + 2 - (frag_now->fr_literal),
 				   2, & insn.operand_type[0]->immediate.imm_expr,
 				   1, 0);
@@ -1842,7 +1842,7 @@ md_assemble (char *line)
 		{
 		  insn.opcode |= (insn.operand_type[1]->reg.opcode);
 		  insn.opcode |= PC_Register;
-		  md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+		  md_number_to_chars (p, insn.opcode, INSN_SIZE);
 		}
 	      else if (insn.operand_type[1]->immediate.resolved == 1)
 		{
@@ -1859,12 +1859,12 @@ md_assemble (char *line)
 		    }
 		  insn.opcode |= (insn.operand_type[1]->immediate.s_number);
 		  insn.opcode |= PC_Relative;
-		  md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+		  md_number_to_chars (p, insn.opcode, INSN_SIZE);
 		}
 	      else
 		{
 		  insn.opcode |= PC_Relative;
-		  md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+		  md_number_to_chars (p, insn.opcode, INSN_SIZE);
 		  fix_new_exp (frag_now, p + 2 - frag_now->fr_literal, 2,
 			       & insn.operand_type[1]->immediate.imm_expr,
 			       1, 0);
@@ -1882,14 +1882,14 @@ md_assemble (char *line)
 	      as_bad (_("interrupt vector for trap instruction out of range"));
 	      return;
 	    }
-	  md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+	  md_number_to_chars (p, insn.opcode, INSN_SIZE);
 	}
       else if (insn.tm->opcode_modifier == StackOp
 	       || insn.tm->opcode_modifier == Rotate)
 	{
 	  /* Push, Pop and Rotate instructions.  */
 	  insn.opcode |= (insn.operand_type[0]->reg.opcode << 16);
-	  md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+	  md_number_to_chars (p, insn.opcode, INSN_SIZE);
 	}
       else if ((insn.tm->operand_types[0] & (Abs24 | Direct))
 	       == (Abs24 | Direct))
@@ -1903,13 +1903,13 @@ md_assemble (char *line)
 		  /* Direct addressing uses lower 8 bits of direct address.  */
 		  insn.opcode |=
 		    (insn.operand_type[0]->direct.address & 0x00FF0000) >> 16;
-		  md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+		  md_number_to_chars (p, insn.opcode, INSN_SIZE);
 		}
 	      else
 		{
 		  fixS *fix;
 
-		  md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+		  md_number_to_chars (p, insn.opcode, INSN_SIZE);
 		  fix = fix_new_exp (frag_now, p + 3 - (frag_now->fr_literal),
 				     1, &insn.operand_type[0]->direct.direct_expr, 0, 0);
 		  /* Ensure that the assembler doesn't complain
@@ -1929,12 +1929,12 @@ md_assemble (char *line)
 		    }
 		  insn.opcode |=
 		    ((insn.operand_type[0]->immediate.u_number & 0x00FF0000) >> 16);
-		  md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+		  md_number_to_chars (p, insn.opcode, INSN_SIZE);
 		}
 	      else
 		{
 		  fixS *fix;
-		  md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+		  md_number_to_chars (p, insn.opcode, INSN_SIZE);
 		  fix = fix_new_exp (frag_now, p + 3 - (frag_now->fr_literal),
 				     1, &insn.operand_type[0]->immediate.imm_expr,
 				     0, 0);
@@ -1951,22 +1951,22 @@ md_assemble (char *line)
 		as_warn (_("first operand is too large for a 24-bit displacement"));
 	      insn.opcode |=
 		(insn.operand_type[0]->immediate.u_number & 0x00FFFFFF);
-	      md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+	      md_number_to_chars (p, insn.opcode, INSN_SIZE);
 	    }
 	  else
 	    {
-	      md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+	      md_number_to_chars (p, insn.opcode, INSN_SIZE);
 	      fix_new_exp (frag_now, p + 1 - (frag_now->fr_literal), 3,
 			   & insn.operand_type[0]->immediate.imm_expr, 0, 0);
 	    }
 	}
       else if (insn.tm->operand_types[0] & NotReq)
 	/* Check for NOP instruction without arguments.  */
-	md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+	md_number_to_chars (p, insn.opcode, INSN_SIZE);
 
       else if (insn.tm->operands == 0)
 	/* Check for instructions without operands.  */
-	md_number_to_chars (p, (valueT) insn.opcode, INSN_SIZE);
+	md_number_to_chars (p, insn.opcode, INSN_SIZE);
     }
   debug ("Addressing mode: %08X\n", insn.addressing_mode);
   {
