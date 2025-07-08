@@ -53,6 +53,8 @@
 #include "gdbsupport/gdb_argv_vec.h"
 #include "gdbsupport/remote-args.h"
 
+#include <getopt.h>
+
 /* PBUFSIZ must also be at least as big as IPA_CMD_BUF_SIZE, because
    the client state data is passed directly to some agent
    functions.  */
@@ -4104,9 +4106,6 @@ static void test_registers_raw_compare_zero_length ()
 captured_main (int argc, char *argv[])
 {
   int pid;
-  char *arg_end;
-  const char *port = NULL;
-  char **next_arg = &argv[1];
   volatile bool multi_mode = false;
   volatile bool attach = false;
   bool selftest = false;
@@ -4128,184 +4127,278 @@ captured_main (int argc, char *argv[])
 	     safe_strerror (errno));
     }
 
-  while (*next_arg != NULL && **next_arg == '-')
+  enum opts { OPT_VERSION = 1, OPT_HELP, OPT_ATTACH, OPT_MULTI, OPT_WRAPPER,
+    OPT_DEBUG, OPT_DEBUG_FILE, OPT_DEBUG_FORMAT, OPT_DISABLE_PACKET,
+    OPT_DISABLE_RANDOMIZATION, OPT_NO_DISABLE_RANDOMIZATION,
+    OPT_STARTUP_WITH_SHELL, OPT_NO_STARTUP_WITH_SHELL, OPT_ONCE,
+    OPT_SELFTEST,
+  };
+
+  static struct option longopts[] =
     {
-      if (strcmp (*next_arg, "--version") == 0)
+      {"version", no_argument, nullptr, OPT_VERSION},
+      {"help", no_argument, nullptr, OPT_HELP},
+      {"attach", no_argument, nullptr, OPT_ATTACH},
+      {"multi", no_argument, nullptr, OPT_MULTI},
+      {"wrapper", no_argument, nullptr, OPT_WRAPPER},
+      {"debug", optional_argument, nullptr, OPT_DEBUG},
+      {"debug-file", required_argument, nullptr, OPT_DEBUG_FILE},
+      {"debug-format", required_argument, nullptr, OPT_DEBUG_FORMAT},
+      /* --disable-packet is optional_argument only so that we can print a
+	 better help list when the argument is missing.  */
+      {"disable-packet", optional_argument, nullptr, OPT_DISABLE_PACKET},
+      {"disable-randomization", no_argument, nullptr,
+       OPT_DISABLE_RANDOMIZATION},
+      {"no-disable-randomization", no_argument, nullptr,
+       OPT_NO_DISABLE_RANDOMIZATION},
+      {"startup-with-shell", no_argument, nullptr, OPT_STARTUP_WITH_SHELL},
+      {"no-startup-with-shell", no_argument, nullptr,
+       OPT_NO_STARTUP_WITH_SHELL},
+      {"once", no_argument, nullptr, OPT_ONCE},
+      {"selftest", optional_argument, nullptr, OPT_SELFTEST},
+      {nullptr, no_argument, nullptr, 0}
+    };
+
+  /* Ask getopt_long not to print error messages, we'll do that ourselves.
+     Look for handling of '?' from getopt_long.  */
+  opterr = 0;
+
+  int optc, longindex;
+
+  /* The '+' passed to getopt_long here stops ARGV being reordered.  In a
+     command line like: 'gdbserver PORT program --arg1 --arg2', the
+     '--arg1' and '--arg2' are arguments to 'program', not to gdbserver.
+     If getopt_long is free to reorder ARGV then it will try to steal those
+     arguments for itself.  */
+  while ((longindex = -1,
+	  optc = getopt_long (argc, argv, "+", longopts, &longindex)) != -1)
+    {
+      /* We only support '--option=value' form, not '--option value'.  To
+	 achieve this, if global OPTARG points to the start of the previous
+	 ARGV entry, then we must have used the second (unsupported) form,
+	 so set OPTARG to NULL and decrement OPTIND to make it appear that
+	 there was no value passed.  If the option requires an argument,
+	 then this means we should convert OPTC to '?' to indicate an
+	 error.  */
+      if (longindex != -1
+	  && longopts[longindex].has_arg != no_argument)
 	{
+	  if (optarg == argv[optind - 1])
+	    {
+	      optarg = nullptr;
+	      --optind;
+	    }
+
+	  if (longopts[longindex].has_arg == required_argument
+	      && optarg == nullptr)
+	    optc = '?';
+	}
+
+      switch (optc)
+	{
+	case OPT_VERSION:
 	  gdbserver_version ();
 	  exit (0);
-	}
-      else if (strcmp (*next_arg, "--help") == 0)
-	{
+
+	case OPT_HELP:
 	  gdbserver_usage (stdout);
 	  exit (0);
-	}
-      else if (strcmp (*next_arg, "--attach") == 0)
-	attach = true;
-      else if (strcmp (*next_arg, "--multi") == 0)
-	multi_mode = true;
-      else if (strcmp (*next_arg, "--wrapper") == 0)
-	{
-	  char **tmp;
 
-	  next_arg++;
-
-	  tmp = next_arg;
-	  while (*next_arg != NULL && strcmp (*next_arg, "--") != 0)
-	    {
-	      wrapper_argv += *next_arg;
-	      wrapper_argv += ' ';
-	      next_arg++;
-	    }
-
-	  if (!wrapper_argv.empty ())
-	    {
-	      /* Erase the last whitespace.  */
-	      wrapper_argv.erase (wrapper_argv.end () - 1);
-	    }
-
-	  if (next_arg == tmp || *next_arg == NULL)
-	    {
-	      gdbserver_usage (stderr);
-	      exit (1);
-	    }
-
-	  /* Consume the "--".  */
-	  *next_arg = NULL;
-	}
-      else if (startswith (*next_arg, "--debug="))
-	{
-	  try
-	    {
-	      parse_debug_options ((*next_arg) + sizeof ("--debug=") - 1);
-	    }
-	  catch (const gdb_exception_error &exception)
-	    {
-	      fflush (stdout);
-	      fprintf (stderr, "gdbserver: %s\n", exception.what ());
-	      exit (1);
-	    }
-	}
-      else if (strcmp (*next_arg, "--debug") == 0)
-	{
-	  try
-	    {
-	      parse_debug_options ("");
-	    }
-	  catch (const gdb_exception_error &exception)
-	    {
-	      fflush (stdout);
-	      fprintf (stderr, "gdbserver: %s\n", exception.what ());
-	      exit (1);
-	    }
-	}
-      else if (startswith (*next_arg, "--debug-format="))
-	{
-	  std::string error_msg
-	    = parse_debug_format_options ((*next_arg)
-					  + sizeof ("--debug-format=") - 1, 0);
-
-	  if (!error_msg.empty ())
-	    {
-	      fprintf (stderr, "%s", error_msg.c_str ());
-	      exit (1);
-	    }
-	}
-      else if (startswith (*next_arg, "--debug-file="))
-	debug_set_output ((*next_arg) + sizeof ("--debug-file=") -1);
-      else if (strcmp (*next_arg, "--disable-packet") == 0)
-	{
-	  gdbserver_show_disableable (stdout);
-	  exit (1);
-	}
-      else if (startswith (*next_arg, "--disable-packet="))
-	{
-	  char *packets = *next_arg += sizeof ("--disable-packet=") - 1;
-	  char *saveptr;
-	  for (char *tok = strtok_r (packets, ",", &saveptr);
-	       tok != NULL;
-	       tok = strtok_r (NULL, ",", &saveptr))
-	    {
-	      if (strcmp ("vCont", tok) == 0)
-		disable_packet_vCont = true;
-	      else if (strcmp ("Tthread", tok) == 0)
-		disable_packet_Tthread = true;
-	      else if (strcmp ("qC", tok) == 0)
-		disable_packet_qC = true;
-	      else if (strcmp ("qfThreadInfo", tok) == 0)
-		disable_packet_qfThreadInfo = true;
-	      else if (strcmp ("T", tok) == 0)
-		disable_packet_T = true;
-	      else if (strcmp ("threads", tok) == 0)
-		{
-		  disable_packet_vCont = true;
-		  disable_packet_Tthread = true;
-		  disable_packet_qC = true;
-		  disable_packet_qfThreadInfo = true;
-		}
-	      else
-		{
-		  fprintf (stderr, "Don't know how to disable \"%s\".\n\n",
-			   tok);
-		  gdbserver_show_disableable (stderr);
-		  exit (1);
-		}
-	    }
-	}
-      else if (strcmp (*next_arg, "-") == 0)
-	{
-	  /* "-" specifies a stdio connection and is a form of port
-	     specification.  */
-	  port = STDIO_CONNECTION_NAME;
-
-	  /* Implying --once here prevents a hang after stdin has been closed.  */
-	  run_once = true;
-
-	  next_arg++;
+	case OPT_ATTACH:
+	  attach = true;
 	  break;
-	}
-      else if (strcmp (*next_arg, "--disable-randomization") == 0)
-	cs.disable_randomization = 1;
-      else if (strcmp (*next_arg, "--no-disable-randomization") == 0)
-	cs.disable_randomization = 0;
-      else if (strcmp (*next_arg, "--startup-with-shell") == 0)
-	startup_with_shell = true;
-      else if (strcmp (*next_arg, "--no-startup-with-shell") == 0)
-	startup_with_shell = false;
-      else if (strcmp (*next_arg, "--once") == 0)
-	run_once = true;
-      else if (strcmp (*next_arg, "--selftest") == 0)
-	selftest = true;
-      else if (startswith (*next_arg, "--selftest="))
-	{
-	  selftest = true;
 
+	case OPT_MULTI:
+	  multi_mode = true;
+	  break;
+
+	case OPT_WRAPPER:
+	  {
+	    int original_optind = optind;
+
+	    while (argv[optind] != nullptr
+		   && strcmp (argv[optind], "--") != 0)
+	      {
+		wrapper_argv += argv[optind];
+		wrapper_argv += ' ';
+		++optind;
+	      }
+
+	    if (!wrapper_argv.empty ())
+	      {
+		/* Erase the last whitespace.  */
+		wrapper_argv.erase (wrapper_argv.end () - 1);
+	      }
+
+	    if (original_optind == optind || argv[optind] == nullptr)
+	      {
+		gdbserver_usage (stderr);
+		exit (1);
+	      }
+
+	    /* Consume the "--".  */
+	    ++optind;
+	  }
+	  break;
+
+	case OPT_DEBUG:
+	  {
+	    const char *debug_opt = (optarg == nullptr) ? "" : optarg;
+	    try
+	      {
+		parse_debug_options (debug_opt);
+	      }
+	    catch (const gdb_exception_error &exception)
+	      {
+		fflush (stdout);
+		fprintf (stderr, "gdbserver: %s\n", exception.what ());
+		exit (1);
+	      }
+	  }
+	  break;
+
+	case OPT_DEBUG_FILE:
+	  {
+	    gdb_assert (optarg != nullptr);
+	    debug_set_output (optarg);
+	  }
+	  break;
+
+	case OPT_DEBUG_FORMAT:
+	  {
+	    gdb_assert (optarg != nullptr);
+	    std::string error_msg
+	      = parse_debug_format_options (optarg, 0);
+
+	    if (!error_msg.empty ())
+	      {
+		fprintf (stderr, "%s", error_msg.c_str ());
+		exit (1);
+	      }
+	  }
+	  break;
+
+	case OPT_DISABLE_PACKET:
+	  {
+	    char *packets = optarg;
+	    if (packets == nullptr)
+	      {
+		gdbserver_show_disableable (stdout);
+		exit (1);
+	      }
+	    char *saveptr;
+	    for (char *tok = strtok_r (packets, ",", &saveptr);
+		 tok != nullptr;
+		 tok = strtok_r (nullptr, ",", &saveptr))
+	      {
+		if (strcmp ("vCont", tok) == 0)
+		  disable_packet_vCont = true;
+		else if (strcmp ("Tthread", tok) == 0)
+		  disable_packet_Tthread = true;
+		else if (strcmp ("qC", tok) == 0)
+		  disable_packet_qC = true;
+		else if (strcmp ("qfThreadInfo", tok) == 0)
+		  disable_packet_qfThreadInfo = true;
+		else if (strcmp ("T", tok) == 0)
+		  disable_packet_T = true;
+		else if (strcmp ("threads", tok) == 0)
+		  {
+		    disable_packet_vCont = true;
+		    disable_packet_Tthread = true;
+		    disable_packet_qC = true;
+		    disable_packet_qfThreadInfo = true;
+		  }
+		else
+		  {
+		    fprintf (stderr, "Don't know how to disable \"%s\".\n\n",
+			     tok);
+		    gdbserver_show_disableable (stderr);
+		    exit (1);
+		  }
+	      }
+	  }
+	  break;
+
+	case OPT_DISABLE_RANDOMIZATION:
+	  cs.disable_randomization = 1;
+	  break;
+
+	case OPT_NO_DISABLE_RANDOMIZATION:
+	  cs.disable_randomization = 0;
+	  break;
+
+	case OPT_STARTUP_WITH_SHELL:
+	  startup_with_shell = true;
+	  break;
+
+	case OPT_NO_STARTUP_WITH_SHELL:
+	  startup_with_shell = false;
+	  break;
+
+	case OPT_ONCE:
+	  run_once = true;
+	  break;
+
+	case OPT_SELFTEST:
+	  {
+	    selftest = true;
+	    if (optarg != nullptr)
+	      {
 #if GDB_SELF_TEST
-	  const char *filter = *next_arg + strlen ("--selftest=");
-	  if (*filter == '\0')
-	    {
-	      fprintf (stderr, _("Error: selftest filter is empty.\n"));
-	      exit (1);
-	    }
+		if (*optarg == '\0')
+		  {
+		    fprintf (stderr, _("Error: selftest filter is empty.\n"));
+		    exit (1);
+		  }
 
-	  selftest_filters.push_back (filter);
+		selftest_filters.push_back (optarg);
 #endif
-	}
-      else
-	{
-	  fprintf (stderr, "Unknown argument: %s\n", *next_arg);
+	      }
+	  }
+	  break;
+
+	case '?':
+	  /* Figuring out which element of ARGV contained the invalid
+	     argument is not simple.  There are a couple of cases we need
+	     to consider.
+
+	     (1) Something like '-x'.  gdbserver doesn't support single
+		 character options, so a '-' followed by a character is
+		 always invalid.  In this case global OPTOPT will be set to
+		 'x', and global OPTIND will point to the next ARGV entry.
+
+	     (2) Something like '-xyz'.  gdbserver doesn't support single
+		 dash arguments for its command line options.  The
+		 getopt_long call treats this like '-x -y -z', in which
+		 case global OPTOPT is set to 'x' and global OPTIND will
+		 point to this ARGV entry.
+
+	     (3) Something like '--unknown'.  This is just an unknown
+		 double dash argument.  Global OPTOPT is set to '\0', and
+		 global OPTIND points to the next ARGV entry.  */
+	  std::string bad_arg;
+	  if (optopt == '\0' || argv[optind] == nullptr
+	      || argv[optind][0] != '-' || argv[optind][1] != optopt)
+	    bad_arg = argv[optind - 1];
+	  else
+	    bad_arg = argv[optind];
+
+	  fprintf (stderr, "Unknown argument: %s\n", bad_arg.c_str ());
 	  exit (1);
 	}
-
-      next_arg++;
-      continue;
     }
 
-  if (port == NULL)
+  const char *port = argv[optind];
+  ++optind;
+  if (port != nullptr && strcmp (port, "-") == 0)
     {
-      port = *next_arg;
-      next_arg++;
+      port = STDIO_CONNECTION_NAME;
+
+      /* Implying --once here prevents a hang after stdin has been closed.  */
+      run_once = true;
     }
+
+  char **next_arg = &argv[optind];
   if ((port == NULL || (!attach && !multi_mode && *next_arg == NULL))
        && !selftest)
     {
@@ -4337,6 +4430,7 @@ captured_main (int argc, char *argv[])
       next_arg++;
     }
 
+  char *arg_end;
   if (attach
       && (*next_arg == NULL
 	  || (*next_arg)[0] == '\0'
