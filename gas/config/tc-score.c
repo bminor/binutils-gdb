@@ -6504,7 +6504,7 @@ s3_normal_chars_to_number (const char *buf, int n)
 static void
 s3_number_to_chars_littleendian (void *p, valueT data, int n)
 {
-  char *buf = (char *) p;
+  char *buf = p;
 
   switch (n)
     {

@@ -615,7 +615,7 @@ expand_debug_syms (sym_linkS *syms, int align)
       next_syms = syms->next;
       input_line_pointer = (char *) ".\n";
       pseudo_set (symbolP);
-      free ((char *) syms);
+      free (syms);
     }
 
   input_line_pointer = save_input_line;

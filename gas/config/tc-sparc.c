@@ -805,8 +805,8 @@ struct priv_reg_entry v9a_asr_table[] =
 static int
 cmp_reg_entry (const void *parg, const void *qarg)
 {
-  const struct priv_reg_entry *p = (const struct priv_reg_entry *) parg;
-  const struct priv_reg_entry *q = (const struct priv_reg_entry *) qarg;
+  const struct priv_reg_entry *p = parg;
+  const struct priv_reg_entry *q = qarg;
 
   if (p->name == q->name)
     return 0;
@@ -921,8 +921,8 @@ struct perc_entry perc_table[NUM_PERC_ENTRIES];
 static int
 cmp_perc_entry (const void *parg, const void *qarg)
 {
-  const struct perc_entry *p = (const struct perc_entry *) parg;
-  const struct perc_entry *q = (const struct perc_entry *) qarg;
+  const struct perc_entry *p = parg;
+  const struct perc_entry *q = qarg;
 
   if (p->name == q->name)
     return 0;

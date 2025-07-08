@@ -538,7 +538,7 @@ make_mapping_symbol (enum riscv_seg_mstate state,
     {
       /* Store current $x+arch into tc_segment_info.  */
       seg_info (now_seg)->tc_segment_info_data.arch_map_symbol = symbol;
-      xfree ((void *) buff);
+      xfree (buff);
     }
 
   /* If .fill or other data filling directive generates zero sized data,
@@ -5753,7 +5753,7 @@ riscv_insert_uleb128_fixes (bfd *abfd ATTRIBUTE_UNUSED,
       exp_dup->X_add_number = 0; /* Set addend of SUB_ULEB128 to zero.  */
       fix_new_exp (fragP, fragP->fr_fix, 0,
 		   exp_dup, 0, BFD_RELOC_RISCV_SUB_ULEB128);
-      free ((void *) exp_dup);
+      free (exp_dup);
     }
 }
 

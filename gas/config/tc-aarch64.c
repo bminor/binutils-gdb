@@ -5622,7 +5622,7 @@ static const char *aarch64_apply_style
 {
   int res;
   char *ptr;
-  struct obstack *stack = (struct obstack *) styler->state;
+  struct obstack *stack = styler->state;
   va_list ap;
 
   /* Calculate the required space.  */
@@ -5651,7 +5651,7 @@ print_operands (char *buf, const aarch64_opcode *opcode,
   obstack_init (&content);
 
   styler.apply_style = aarch64_apply_style;
-  styler.state = (void *) &content;
+  styler.state = &content;
 
   for (i = 0; i < AARCH64_MAX_OPND_NUM; ++i)
     {

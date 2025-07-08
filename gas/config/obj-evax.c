@@ -107,8 +107,7 @@ evax_frob_symbol (symbolS *sym, int *punt)
 
   else if ((symbol->flags & BSF_GLOBAL) && (symbol->flags & BSF_FUNCTION))
     {
-      struct evax_private_udata_struct *udata
-	= (struct evax_private_udata_struct *)symbol->udata.p;
+      struct evax_private_udata_struct *udata = symbol->udata.p;
 
       /* Fix up equates of function definitions.  */
       while (udata->enbsym == NULL)

@@ -1149,7 +1149,7 @@ tic54x_global (int type)
 static void
 free_subsym_ent (void *ent)
 {
-  string_tuple_t *tuple = (string_tuple_t *) ent;
+  string_tuple_t *tuple = ent;
   subsym_ent_t *val = (void *) tuple->value;
   if (val->freekey)
     free ((void *) tuple->key);
@@ -1169,7 +1169,7 @@ subsym_htab_create (void)
 static void
 free_local_label_ent (void *ent)
 {
-  string_tuple_t *tuple = (string_tuple_t *) ent;
+  string_tuple_t *tuple = ent;
   free ((void *) tuple->key);
   free ((void *) tuple->value);
   free (ent);
@@ -2371,7 +2371,7 @@ tic54x_mlib (int ignore ATTRIBUTE_UNUSED)
       /* Write to a temporary file, then use s_include to include it
 	 a bit of a hack.  */
       ftmp = fopen (fname, "w+b");
-      fwrite ((void *) buf, size, 1, ftmp);
+      fwrite (buf, size, 1, ftmp);
       if (size == 0 || buf[size - 1] != '\n')
 	fwrite ("\n", 1, 1, ftmp);
       fclose (ftmp);

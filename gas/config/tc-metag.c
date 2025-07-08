@@ -6263,10 +6263,9 @@ find_insn_templates (const char *mnemonic)
   insn_templates *slot;
 
   entry.template = &template;
+  template.name = mnemonic;
 
-  memcpy ((void *)&entry.template->name, &mnemonic, sizeof (char *));
-
-  slot = (insn_templates *) htab_find (mnemonic_htab, &entry);
+  slot = htab_find (mnemonic_htab, &entry);
 
   if (slot)
     return slot;
@@ -6307,8 +6306,8 @@ hash_templates (const void *p)
 static int
 eq_templates (const void *a, const void *b)
 {
-  insn_templates *ta = (insn_templates *)a;
-  insn_templates *tb = (insn_templates *)b;
+  const insn_templates *ta = a;
+  const insn_templates *tb = b;
   return strcasecmp (ta->template->name, tb->template->name) == 0;
 }
 
@@ -6456,8 +6455,8 @@ hash_scond (const void *p)
 static int
 eq_scond (const void *a, const void *b)
 {
-  split_condition *ra = (split_condition *)a;
-  split_condition *rb = (split_condition *)b;
+  const split_condition *ra = a;
+  const split_condition *rb = b;
 
   return strcasecmp (ra->name, rb->name) == 0;
 }

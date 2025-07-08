@@ -352,7 +352,7 @@ get_recorded_alignment (segT seg)
 static void
 renumber_sections (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *countparg)
 {
-  int *countp = (int *) countparg;
+  int *countp = countparg;
 
   sec->index = *countp;
   ++*countp;
@@ -553,7 +553,7 @@ static void
 relax_seg (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *xxx)
 {
   segment_info_type *seginfo = seg_info (sec);
-  struct relax_seg_info *info = (struct relax_seg_info *) xxx;
+  struct relax_seg_info *info = xxx;
 
   if (seginfo && seginfo->frchainP
       && relax_segment (seginfo->frchainP->frch_root, sec, info->pass))

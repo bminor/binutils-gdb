@@ -481,7 +481,7 @@ match_section (const asection *sec, const struct elf_section_match *match)
 static bool
 get_section_by_match (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
 {
-  struct elf_section_match *match = (struct elf_section_match *) inf;
+  struct elf_section_match *match = inf;
   const char *gname = match->group_name;
   const char *group_name = elf_group_name (sec);
 
@@ -614,7 +614,7 @@ change_section (const char *name,
     old_sec = group_section_find (match_p, name, &group_idx);
   else
     old_sec = bfd_get_section_by_name_if (stdoutput, name, get_section_by_match,
-					  (void *) match_p);
+					  match_p);
   if (old_sec)
     {
       sec = old_sec;

@@ -3509,7 +3509,7 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
           && ((struct v850_operand *) fixP->tc_fix_data)->insert != NULL)
         {
           const char * message = NULL;
-          struct v850_operand * operand = (struct v850_operand *) fixP->tc_fix_data;
+          struct v850_operand * operand = fixP->tc_fix_data;
           unsigned long insn;
 
           /* The variable "where" currently points at the exact point inside

@@ -90,7 +90,7 @@ stack_init (unsigned long chunk_size,
 }
 
 static char *
-stack_push (stack *st, char *element)
+stack_push (stack *st, void *element)
 {
   if (st->pointer + st->element_size >= st->size)
     {
@@ -1325,7 +1325,7 @@ coff_frob_symbol (symbolS *symp, int *punt)
 	  if (S_GET_STORAGE_CLASS (symp) == C_BLOCK)
 	    {
 	      if (streq (S_GET_NAME (symp), ".bb"))
-		stack_push (block_stack, (char *) &symp);
+		stack_push (block_stack, &symp);
 	      else
 		{
 		  symbolS *begin;

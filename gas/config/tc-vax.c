@@ -332,8 +332,7 @@ bignum_copy (LITTLENUM_TYPE *in,
       LITTLENUM_TYPE *p;	/* -> most significant (non-zero) input
 				      littlenum.  */
 
-      memcpy ((void *) out, (void *) in,
-	      (unsigned int) out_length << LITTLENUM_SHIFT);
+      memcpy (out, in, (unsigned int) out_length << LITTLENUM_SHIFT);
       for (p = in + in_length - 1; p >= in; --p)
 	{
 	  if (*p)
@@ -346,11 +345,10 @@ bignum_copy (LITTLENUM_TYPE *in,
     }
   else
     {
-      memcpy ((char *) out, (char *) in,
-	      (unsigned int) in_length << LITTLENUM_SHIFT);
+      memcpy (out, in, (unsigned int) in_length << LITTLENUM_SHIFT);
 
       if (out_length > in_length)
-	memset ((char *) (out + in_length), '\0',
+	memset (out + in_length, 0,
 		(unsigned int) (out_length - in_length) << LITTLENUM_SHIFT);
 
       significant_littlenums_dropped = 0;

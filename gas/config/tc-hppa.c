@@ -1200,7 +1200,7 @@ fix_new_hppa (fragS *frag,
     new_fix = fix_new_exp (frag, where, size, exp, pcrel, r_type);
   else
     new_fix = fix_new (frag, where, size, add_symbol, offset, pcrel, r_type);
-  new_fix->tc_fix_data = (void *) hppa_fix;
+  new_fix->tc_fix_data = hppa_fix;
   hppa_fix->fx_r_type = r_type;
   hppa_fix->fx_r_field = r_field;
   hppa_fix->fx_r_format = r_format;
@@ -1351,7 +1351,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
   if (fixp->fx_addsy == 0)
     return &no_relocs;
 
-  hppa_fixp = (struct hppa_fix_struct *) fixp->tc_fix_data;
+  hppa_fixp = fixp->tc_fix_data;
   gas_assert (hppa_fixp != 0);
   gas_assert (section != 0);
 
@@ -1726,7 +1726,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     fixP->fx_done = 1;
 
   /* There should be a HPPA specific fixup associated with the GAS fixup.  */
-  hppa_fixP = (struct hppa_fix_struct *) fixP->tc_fix_data;
+  hppa_fixP = fixP->tc_fix_data;
   if (hppa_fixP == NULL)
     {
       as_bad_where (fixP->fx_file, fixP->fx_line,
@@ -8317,7 +8317,7 @@ hppa_fix_adjustable (fixS *fixp)
 #endif
   struct hppa_fix_struct *hppa_fix;
 
-  hppa_fix = (struct hppa_fix_struct *) fixp->tc_fix_data;
+  hppa_fix = fixp->tc_fix_data;
 
 #ifdef OBJ_ELF
   /* LR/RR selectors are implicitly used for a number of different relocation
@@ -8436,7 +8436,7 @@ hppa_force_relocation (struct fix *fixp)
 {
   struct hppa_fix_struct *hppa_fixp;
 
-  hppa_fixp = (struct hppa_fix_struct *) fixp->tc_fix_data;
+  hppa_fixp = fixp->tc_fix_data;
 #ifdef OBJ_SOM
   if (fixp->fx_r_type == (int) R_HPPA_ENTRY
       || fixp->fx_r_type == (int) R_HPPA_EXIT
@@ -8545,7 +8545,7 @@ pa_vtable_entry (int ignore ATTRIBUTE_UNUSED)
       hppa_fix->fx_r_format = 32;
       hppa_fix->fx_arg_reloc = 0;
       hppa_fix->segment = now_seg;
-      new_fix->tc_fix_data = (void *) hppa_fix;
+      new_fix->tc_fix_data = hppa_fix;
       new_fix->fx_r_type = (int) R_PARISC_GNU_VTENTRY;
     }
 }
@@ -8566,7 +8566,7 @@ pa_vtable_inherit (int ignore ATTRIBUTE_UNUSED)
       hppa_fix->fx_r_format = 32;
       hppa_fix->fx_arg_reloc = 0;
       hppa_fix->segment = now_seg;
-      new_fix->tc_fix_data = (void *) hppa_fix;
+      new_fix->tc_fix_data = hppa_fix;
       new_fix->fx_r_type = (int) R_PARISC_GNU_VTINHERIT;
     }
 }

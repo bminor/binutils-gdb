@@ -1698,7 +1698,7 @@ obj_mach_o_set_section_vma (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *v_p
 {
   bfd_mach_o_section *ms = bfd_mach_o_get_mach_o_section (sec);
   unsigned bfd_align = bfd_section_alignment (sec);
-  obj_mach_o_set_vma_data *p = (struct obj_mach_o_set_vma_data *)v_p;
+  obj_mach_o_set_vma_data *p = v_p;
   unsigned sectype = (ms->flags & BFD_MACH_O_SECTION_TYPE_MASK);
   unsigned zf;
 
@@ -1741,11 +1741,11 @@ void obj_mach_o_post_relax_hook (void)
 
   memset (&d, 0, sizeof (d));
 
-  bfd_map_over_sections (stdoutput, obj_mach_o_set_section_vma, (char *) &d);
+  bfd_map_over_sections (stdoutput, obj_mach_o_set_section_vma, &d);
   if ((d.vma_pass = d.zerofill_seen) != 0)
-    bfd_map_over_sections (stdoutput, obj_mach_o_set_section_vma, (char *) &d);
+    bfd_map_over_sections (stdoutput, obj_mach_o_set_section_vma, &d);
   if ((d.vma_pass = d.gb_zerofill_seen) != 0)
-    bfd_map_over_sections (stdoutput, obj_mach_o_set_section_vma, (char *) &d);
+    bfd_map_over_sections (stdoutput, obj_mach_o_set_section_vma, &d);
 }
 
 static void
@@ -1777,8 +1777,7 @@ obj_mach_o_set_indirect_symbols (bfd *abfd, asection *sec,
 	  obj_mach_o_indirect_sym *isym;
 	  obj_mach_o_indirect_sym *list = NULL;
 	  obj_mach_o_indirect_sym *list_tail = NULL;
-	  unsigned long eltsiz =
-			bfd_mach_o_section_get_entry_size (abfd, ms);
+	  unsigned long eltsiz = bfd_mach_o_section_get_entry_size (abfd, ms);
 
 	  for (isym = indirect_syms; isym != NULL; isym = isym->next)
 	    {

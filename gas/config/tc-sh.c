@@ -2871,7 +2871,7 @@ struct sh_count_relocs
 static void
 sh_count_relocs (bfd *abfd ATTRIBUTE_UNUSED, segT sec, void *data)
 {
-  struct sh_count_relocs *info = (struct sh_count_relocs *) data;
+  struct sh_count_relocs *info = data;
   segment_info_type *seginfo;
   symbolS *sym;
   fixS *fix;

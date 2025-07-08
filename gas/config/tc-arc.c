@@ -778,7 +778,7 @@ arc_insert_opcode (const struct arc_opcode *opcode)
 static void
 arc_opcode_free (void *elt)
 {
-  string_tuple_t *tuple = (string_tuple_t *) elt;
+  string_tuple_t *tuple = elt;
   struct arc_opcode_hash_entry *entry = (void *) tuple->value;
   free (entry->opcode);
   free (entry);

@@ -194,8 +194,8 @@ hash_symbol_entry (const void *e)
 static int
 eq_symbol_entry (const void *a, const void *b)
 {
-  const symbol_entry_t *ea = (const symbol_entry_t *) a;
-  const symbol_entry_t *eb = (const symbol_entry_t *) b;
+  const symbol_entry_t *ea = a;
+  const symbol_entry_t *eb = b;
 
   return (ea->sy.hash == eb->sy.hash
 	  && strcmp (ea->sy.name, eb->sy.name) == 0);
@@ -464,7 +464,7 @@ local_symbol_make (const char *name, segT section, fragS *frag, valueT val)
 static symbolS *
 local_symbol_convert (void *sym)
 {
-  symbol_entry_t *ent = (symbol_entry_t *) sym;
+  symbol_entry_t *ent = sym;
   struct xsymbol *xtra;
   valueT val;
 
@@ -2059,7 +2059,7 @@ static size_t fb_label_max;
 static void
 fb_label_init (void)
 {
-  memset ((void *) fb_low_counter, '\0', sizeof (fb_low_counter));
+  memset (fb_low_counter, 0, sizeof (fb_low_counter));
 }
 
 /* Add one to the instance number of this fb label.  */

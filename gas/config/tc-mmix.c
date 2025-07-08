@@ -3686,10 +3686,8 @@ mmix_md_finish (void)
 static int
 cmp_greg_symbol_fixes (const void *parg, const void *qarg)
 {
-  const struct mmix_symbol_greg_fixes *p
-    = (const struct mmix_symbol_greg_fixes *) parg;
-  const struct mmix_symbol_greg_fixes *q
-    = (const struct mmix_symbol_greg_fixes *) qarg;
+  const struct mmix_symbol_greg_fixes *p = parg;
+  const struct mmix_symbol_greg_fixes *q = qarg;
 
   return p->offs > q->offs ? 1 : p->offs < q->offs ? -1 : 0;
 }
