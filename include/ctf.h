@@ -862,36 +862,36 @@ typedef struct ctf_enum64
 struct ctf_archive
 {
   /* Magic number.  */
-  uint64_t ctfa_magic;
+  uint64_t magic;
 
   /* CTF data model.  */
-  uint64_t ctfa_model;
+  uint64_t model;
 
   /* Number of CTF dicts in the archive.  */
-  uint64_t ctfa_ndicts;
+  uint64_t ndicts;
 
   /* Number of shared properties.  */
-  uint64_t ctfa_nprops;
+  uint64_t nprops;
 
   /* Offset of the name table, used for both CTF member names and property
      names.  */
-  uint64_t ctfa_names;
+  uint64_t names;
 
   /* Offset of the CTF table.  Each element starts with a size (a little-
      endian uint64_t) then a ctf_dict_t of that size.  */
-  uint64_t ctfa_ctfs;
+  uint64_t ctfs;
 
   /* Offset of the shared properties value table: identical format, except the
      size is followed by an arbitrary (property-dependent) binary blob.  */
-  uint64_t ctfa_prop_values;
+  uint64_t prop_values;
 
   /* Offset of the modent array mapping names to CTFs.  Sorted by member
      name.  */
-  uint64_t ctfa_modents;
+  uint64_t modents;
 
   /* Offset of the modent table mapping names to properties.  Ignored if
      nprops is 0.  */
-  uint64_t ctfa_propents;
+  uint64_t propents;
 };
 
 #define CTFA_V1_MAGIC 0x8b47f2a4d7623eeb /* Random.  */
@@ -900,20 +900,20 @@ struct ctf_archive
 struct ctf_archive_v1
 {
   /* Magic number.  */
-  uint64_t ctfa_magic;
+  uint64_t magic;
 
   /* CTF data model.  */
-  uint64_t ctfa_model;
+  uint64_t model;
 
   /* Number of CTF dicts in the archive.  */
-  uint64_t ctfa_ndicts;
+  uint64_t ndicts;
 
   /* Offset of the name table.  */
-  uint64_t ctfa_names;
+  uint64_t names;
 
   /* Offset of the CTF table.  Each element starts with a size (a little-
      endian uint64_t) then a ctf_dict_t of that size.  */
-  uint64_t ctfa_ctfs;
+  uint64_t ctfs;
 
   /* Modent array is off the end.  */
 };

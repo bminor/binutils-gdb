@@ -143,11 +143,11 @@ The definition of an archive in @file{ctf.h} is as follows:
 @verbatim
 struct ctf_archive
 {
-  uint64_t ctfa_magic;
-  uint64_t ctfa_model;
-  uint64_t ctfa_nfiles;
-  uint64_t ctfa_names;
-  uint64_t ctfa_ctfs;
+  uint64_t magic;
+  uint64_t model;
+  uint64_t nfiles;
+  uint64_t names;
+  uint64_t ctfs;
 };
 
 typedef struct ctf_archive_modent
@@ -168,45 +168,45 @@ of the machine endianness.
 The archive header has the following fields:
 
 @tindex struct ctf_archive
-@multitable {Offset} {@code{uint64_t ctfa_nfiles}} {The data model for this archive: an arbitrary integer}
+@multitable {Offset} {@code{uint64_t nfiles}} {The data model for this archive: an arbitrary integer}
 @headitem Offset @tab Name @tab Description
 @item 0x00
-@tab @code{uint64_t ctfa_magic}
-@vindex ctfa_magic
-@vindex struct ctf_archive, ctfa_magic
+@tab @code{uint64_t magic}
+@vindex magic
+@vindex struct ctf_archive, magic
 @tab The magic number for archives, @code{CTFA_MAGIC}: 0x8b47f2a4d7623eeb.
 @tindex CTFA_MAGIC
 
 @item 0x08
-@tab @code{uint64_t ctfa_model}
-@vindex ctfa_model
-@vindex struct ctf_archive, ctfa_model
+@tab @code{uint64_t model}
+@vindex model
+@vindex struct ctf_archive, model
 @tab The data model for this archive: an arbitrary integer that serves no
 purpose but to be handed back by the libctf API. @xref{Data models}.
 
 @item 0x10
-@tab @code{uint64_t ctfa_nfiles}
-@vindex ctfa_nfiles
-@vindex struct ctf_archive, ctfa_nfiles
+@tab @code{uint64_t nfiles}
+@vindex nfiles
+@vindex struct ctf_archive, nfiles
 @tab The number of CTF dictionaries in this archive.
 
 @item 0x18
-@tab @code{uint64_t ctfa_names}
-@vindex ctfa_names
-@vindex struct ctf_archive, ctfa_names
+@tab @code{uint64_t names}
+@vindex names
+@vindex struct ctf_archive, names
 @tab Offset of the name table, in bytes from the start of the archive.
-The name table is an array of @code{struct ctf_archive_modent_t[ctfa_nfiles]}.
+The name table is an array of @code{struct ctf_archive_modent_t[nfiles]}.
 
 @item 0x20
-@tab @code{uint64_t ctfa_ctfs}
-@vindex ctfa_ctfs
-@vindex struct ctf_archive, ctfa_ctfs
+@tab @code{uint64_t ctfs}
+@vindex ctfs
+@vindex struct ctf_archive, ctfs
 @tab Offset of the CTF table.  Each element starts with a @code{uint64_t} size,
 followed by a CTF dictionary.
 
 @end multitable
 
-The array pointed to by @code{ctfa_names} is an array of entries of
+The array pointed to by @code{names} is an array of entries of
 @code{ctf_archive_modent}:
 
 @tindex struct ctf_archive_modent
@@ -229,13 +229,13 @@ The array pointed to by @code{ctfa_names} is an array of entries of
 
 @end multitable
 
-The @code{ctfa_names} array is sorted into ASCIIbetical order by name
+The archive @code{names} array is sorted into ASCIIbetical order by name
 (i.e. by the result of dereferencing the @code{name_offset}).
 
 The archive file also contains a name table and a table of CTF
 dictionaries: these are pointed to by the structures above.  The name
 table is a simple strtab which is not required to be sorted; the
-dictionary array is described above in the entry for @code{ctfa_ctfs}.
+dictionary array is described above in the entry for @code{ctfs}.
 
 The relative order of these various parts is not defined, except that
 the header naturally always comes first.
