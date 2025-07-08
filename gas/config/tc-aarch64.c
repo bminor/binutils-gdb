@@ -10123,7 +10123,7 @@ cons_fix_new_aarch64 (fragS * frag, int where, int size, expressionS * exp)
     }
 #endif
 
-  fix_new_exp (frag, where, (int) size, exp, pcrel, type);
+  fix_new_exp (frag, where, size, exp, pcrel, type);
 }
 
 /* Implement md_after_parse_args.  This is the earliest time we need to decide

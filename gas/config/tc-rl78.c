@@ -705,7 +705,7 @@ rl78_cons_fix_new (fragS *	frag,
 	type = BFD_RELOC_RL78_DIFF;
     }
 
-  fixP = fix_new_exp (frag, where, (int) size, exp, 0, type);
+  fixP = fix_new_exp (frag, where, size, exp, 0, type);
   switch (exp->X_md)
     {
       /* These are intended to have values larger than the container,

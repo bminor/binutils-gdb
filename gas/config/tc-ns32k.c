@@ -1758,7 +1758,7 @@ convert_iif (void)
                          the object later.  */
 		      exprP.X_add_number += iif.iifP[i].object_adjust;
 		      fix_new_ns32k_exp (frag_now,
-					 (long) (memP - frag_now->fr_literal),
+					 memP - frag_now->fr_literal,
 					 size,
 					 &exprP,
 					 iif.iifP[i].pcrel,
@@ -1806,12 +1806,12 @@ convert_iif (void)
 		    size = default_disp_size; /* Normally 4 bytes.  */
 		    memP = frag_more (size);
 		    fix_new_ns32k_exp (frag_now,
-				       (long) (memP - frag_now->fr_literal),
+				       memP - frag_now->fr_literal,
 				       size,
 				       &exprP,
 				       0, /* never iif.iifP[i].pcrel, */
 				       1, /* always iif.iifP[i].im_disp */
-				       (bit_fixS *) 0, 0,
+				       0, 0,
 				       inst_frag,
 				       inst_offset);
 		    break;		/* Exit this absolute hack.  */
@@ -2053,7 +2053,7 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
 	  /* We don't relax symbols defined in another segment.  The
 	     thing to do is to assume the object will occupy 4 bytes.  */
 	  fix_new_ns32k (fragP,
-			 (int) (fragP->fr_fix),
+			 fragP->fr_fix,
 			 4,
 			 fragP->fr_symbol,
 			 fragP->fr_offset,

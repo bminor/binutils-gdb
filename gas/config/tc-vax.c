@@ -3354,7 +3354,7 @@ vax_cons_fix_new (fragS *frag, int where, unsigned int nbytes, expressionS *exp,
 	 : nbytes == 2 ? BFD_RELOC_16
 	 : BFD_RELOC_32);
 
-  fix_new_exp (frag, where, (int) nbytes, exp, 0, r);
+  fix_new_exp (frag, where, nbytes, exp, 0, r);
 }
 
 const char *

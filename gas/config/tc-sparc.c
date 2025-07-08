@@ -4934,7 +4934,7 @@ cons_fix_new_sparc (fragS *frag,
 	}
    }
 
-  fix_new_exp (frag, where, (int) nbytes, exp, 0, r);
+  fix_new_exp (frag, where, nbytes, exp, 0, r);
 }
 
 void

@@ -5320,7 +5320,7 @@ csky_cons_fix_new (fragS *frag,
 	reloc = BFD_RELOC_32;
 	break;
       }
-  fixP = fix_new_exp (frag, off, (int) len, exp, 0, reloc);
+  fixP = fix_new_exp (frag, off, len, exp, 0, reloc);
   if (BFD_RELOC_CKCORE_TLS_IE32 == insn_reloc
       || BFD_RELOC_CKCORE_TLS_GD32 == insn_reloc
       || BFD_RELOC_CKCORE_TLS_LDM32 == insn_reloc)

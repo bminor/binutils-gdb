@@ -1265,8 +1265,7 @@ cons_fix_new_hppa (fragS *frag, int where, int size, expressionS *exp,
       hppa_field_selector = e_fsel;
     }
 
-  fix_new_hppa (frag, where, size,
-		(symbolS *) NULL, (offsetT) 0, exp, 0, rel_type,
+  fix_new_hppa (frag, where, size, NULL, 0, exp, 0, rel_type,
 		hppa_field_selector, size * 8, 0, 0);
 }
 
@@ -5762,7 +5761,7 @@ md_assemble (char *str)
 		  where = frag_more (0);
 		  u = UNWIND_LOW32 (&last_call_info->ci_unwind.descriptor);
 		  fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
-				NULL, (offsetT) 0, NULL,
+				NULL, 0, NULL,
 				0, R_HPPA_ENTRY, e_fsel, 0, 0, u);
 		}
 #endif
@@ -5786,7 +5785,7 @@ md_assemble (char *str)
   /* If necessary output more stuff.  */
   if (the_insn.reloc != R_HPPA_NONE)
     fix_new_hppa (frag_now, (to - frag_now->fr_literal), 4, NULL,
-		  (offsetT) 0, &the_insn.exp, the_insn.pcrel,
+		  0, &the_insn.exp, the_insn.pcrel,
 		  (int) the_insn.reloc, the_insn.field_selector,
 		  the_insn.format, the_insn.arg_reloc, 0);
 
@@ -5856,7 +5855,7 @@ pa_brtab (int begin ATTRIBUTE_UNUSED)
   char *where = frag_more (0);
 
   fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
-		NULL, (offsetT) 0, NULL,
+		NULL, 0, NULL,
 		0, begin ? R_HPPA_BEGIN_BRTAB : R_HPPA_END_BRTAB,
 		e_fsel, 0, 0, 0);
 #endif
@@ -5880,7 +5879,7 @@ pa_try (int begin ATTRIBUTE_UNUSED)
      the beginning and end of exception handling regions).  */
 
   fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
-		NULL, (offsetT) 0, begin ? NULL : &exp,
+		NULL, 0, begin ? NULL : &exp,
 		0, begin ? R_HPPA_BEGIN_TRY : R_HPPA_END_TRY,
 		e_fsel, 0, 0, 0);
 #endif
@@ -6019,10 +6018,8 @@ pa_build_unwind_subspace (struct call_info *call_info)
 
   /* Relocation info. for start offset of the function.  */
   md_number_to_chars (p, 0, 4);
-  fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
-		symbolP, (offsetT) 0,
-		(expressionS *) NULL, 0, reloc,
-		e_fsel, 32, 0, 0);
+  fix_new_hppa (frag_now, p - frag_now->fr_literal, 4, symbolP, 0,
+		NULL, 0, reloc, e_fsel, 32, 0, 0);
 
   /* Relocation info. for end offset of the function.
 
@@ -6033,9 +6030,8 @@ pa_build_unwind_subspace (struct call_info *call_info)
      finished with its work.  */
   md_number_to_chars (p + 4, 0, 4);
   fix_new_hppa (frag_now, p + 4 - frag_now->fr_literal, 4,
-		call_info->end_symbol, (offsetT) 0,
-		(expressionS *) NULL, 0, reloc,
-		e_fsel, 32, 0, 0);
+		call_info->end_symbol, 0,
+		NULL, 0, reloc, e_fsel, 32, 0, 0);
 
   /* Dump the descriptor.  */
   unwind = UNWIND_LOW32 (&call_info->ci_unwind.descriptor);
@@ -6335,8 +6331,7 @@ pa_entry (int unused ATTRIBUTE_UNUSED)
       where = frag_more (0);
       u = UNWIND_LOW32 (&last_call_info->ci_unwind.descriptor);
       fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
-		    NULL, (offsetT) 0, NULL,
-		    0, R_HPPA_ENTRY, e_fsel, 0, 0, u);
+		    NULL, 0, NULL, 0, R_HPPA_ENTRY, e_fsel, 0, 0, u);
     }
 #endif
 }
@@ -6494,8 +6489,7 @@ process_exit (void)
      if we split the unwind bits up between the relocations which
      denote the entry and exit points.  */
   fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
-		NULL, (offsetT) 0,
-		NULL, 0, R_HPPA_EXIT, e_fsel, 0, 0,
+		NULL, 0, NULL, 0, R_HPPA_EXIT, e_fsel, 0, 0,
 		UNWIND_HIGH32 (&last_call_info->ci_unwind.descriptor));
 #endif
 }
@@ -7011,8 +7005,8 @@ pa_procend (int unused ATTRIBUTE_UNUSED)
 		  where = frag_more (0);
 		  u = UNWIND_LOW32 (&last_call_info->ci_unwind.descriptor);
 		  fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
-				NULL, (offsetT) 0, NULL,
-				0, R_HPPA_ENTRY, e_fsel, 0, 0, u);
+				NULL, 0, NULL, 0, R_HPPA_ENTRY, e_fsel,
+				0, 0, u);
 		}
 #endif
 	    }

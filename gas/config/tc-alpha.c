@@ -3394,8 +3394,8 @@ add_to_link_pool (symbolS *sym, offsetT addend)
   expsym = make_expr_symbol (&e);
 
   /* Create a fixup for the entry.  */
-  fixp = fix_new
-    (frag_now, p - frag_now->fr_literal, 8, sym, addend, 0, BFD_RELOC_64);
+  fixp = fix_new (frag_now, p - frag_now->fr_literal, 8,
+		  sym, addend, 0, BFD_RELOC_64);
   fixp->tc_fix_data.info = get_alpha_reloc_tag (next_sequence_num--);
   fixp->tc_fix_data.info->sym = expsym;
 

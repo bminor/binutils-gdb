@@ -2252,7 +2252,7 @@ rx_cons_fix_new (fragS *	frag,
 	type = BFD_RELOC_RX_DIFF;
     }
 
-  fix_new_exp (frag, where, (int) size, exp, 0, type);
+  fix_new_exp (frag, where, size, exp, 0, type);
 }
 
 void

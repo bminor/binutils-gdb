@@ -725,12 +725,7 @@ md_create_short_jump (char *ptr,
   ptr[1] = 0x00;
   ptr[2] = 0x00;
   ptr[3] = 0x00;
-  fix_new (frag,
-	   ptr - frag->fr_literal,
-	   4,
-	   to_symbol,
-	   (offsetT) 0,
-	   0,
+  fix_new (frag, ptr - frag->fr_literal, 4, to_symbol, 0, 0,
 	   BFD_RELOC_SPU_PCREL16);
 }
 
@@ -747,12 +742,7 @@ md_create_long_jump (char *ptr,
   ptr[1] = 0x00;
   ptr[2] = 0x00;
   ptr[3] = 0x00;
-  fix_new (frag,
-	   ptr - frag->fr_literal,
-	   4,
-	   to_symbol,
-	   (offsetT) 0,
-	   0,
+  fix_new (frag, ptr - frag->fr_literal, 4, to_symbol, 0, 0,
 	   BFD_RELOC_SPU_PCREL16);
 }
 #endif
