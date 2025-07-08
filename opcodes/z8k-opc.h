@@ -289,7 +289,7 @@ typedef struct {
 #endif
   const char *name;
   unsigned char opcode;
-  void (*func) (void);
+  const void *p;
   unsigned int arg_info[4];
   unsigned int byte_info[10];
   unsigned int noperands;
