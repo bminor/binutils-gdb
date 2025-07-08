@@ -1950,11 +1950,11 @@ mapping_state (map_state state)
    {
      struct frag * const frag_first = seg_info (now_seg)->frchainP->frch_root;
      if (frag_now != frag_first || frag_now_fix () > 0)
-       make_mapping_symbol (MAP_DATA, (valueT) 0, frag_first);
+       make_mapping_symbol (MAP_DATA, 0, frag_first);
    }
 
   seg_info (now_seg)->tc_segment_info_data.current_state = state;
-  make_mapping_symbol (state, (valueT) frag_now_fix (), frag_now);
+  make_mapping_symbol (state, frag_now_fix (), frag_now);
 }
 
 /* Dump the literal pool.  */
@@ -7689,7 +7689,7 @@ csky_cons (int nbytes)
 			howto->name, nbytes);
 	      else
 		{
-		  register char *p = frag_more ((int) nbytes);
+		  register char *p = frag_more (nbytes);
 		  int offset = nbytes - size;
 
 		  fix_new_exp (frag_now,
@@ -7698,7 +7698,7 @@ csky_cons (int nbytes)
 		}
 	    }
 	  else
-	    emit_expr (&exp, (unsigned int) nbytes);
+	    emit_expr (&exp, nbytes);
 	  if (now_seg == text_section)
 	    poolspan += nbytes;
 	}

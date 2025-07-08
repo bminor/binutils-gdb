@@ -1705,7 +1705,7 @@ xtensa_elf_cons (int nbytes)
 	    as_bad (_("invalid use of %s relocation"), reloc_howto->name);
 	  else
 	    {
-	      char *p = frag_more ((int) nbytes);
+	      char *p = frag_more (nbytes);
 	      xtensa_set_frag_assembly_state (frag_now);
 	      fix_new_exp (frag_now, p - frag_now->fr_literal,
 			   nbytes, &exp, reloc_howto->pc_relative, reloc);
@@ -1714,7 +1714,7 @@ xtensa_elf_cons (int nbytes)
       else
 	{
 	  xtensa_set_frag_assembly_state (frag_now);
-	  emit_expr (&exp, (unsigned int) nbytes);
+	  emit_expr (&exp, nbytes);
 	}
     }
   while (*input_line_pointer++ == ',');
@@ -5378,7 +5378,7 @@ xtensa_frob_label (symbolS *sym)
   /* Since the label was already attached to a frag associated with the
      previous basic block, it now needs to be reset to the current frag.  */
   symbol_set_frag (sym, frag_now);
-  S_SET_VALUE (sym, (valueT) frag_now_fix ());
+  S_SET_VALUE (sym, frag_now_fix ());
 
   if (generating_literals)
     xtensa_add_literal_sym (sym);

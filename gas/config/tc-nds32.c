@@ -4015,7 +4015,7 @@ add_mapping_symbol (enum mstate state, unsigned int padding_byte,
 
   /* start adding mapping symbol  */
   seg_info (now_seg)->tc_segment_info_data.mapstate = state;
-  make_mapping_symbol (state, (valueT) frag_now_fix () + padding_byte,
+  make_mapping_symbol (state, frag_now_fix () + padding_byte,
 		       frag_now, align);
 }
 

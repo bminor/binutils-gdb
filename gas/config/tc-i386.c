@@ -18148,7 +18148,7 @@ s_bss (int ignore ATTRIBUTE_UNUSED)
   int temp;
 
   temp = get_absolute_expression ();
-  subseg_set (bss_section, (subsegT) temp);
+  subseg_set (bss_section, temp);
   demand_empty_rest_of_line ();
 }
 
@@ -18328,7 +18328,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 			  _("symbol size computation overflow"));
 	  fixp->fx_addsy = NULL;
 	  fixp->fx_subsy = NULL;
-	  md_apply_fix (fixp, (valueT *) &value, NULL);
+	  md_apply_fix (fixp, &value, NULL);
 	  return NULL;
 	}
       if (!fixp->fx_addsy || fixp->fx_subsy)

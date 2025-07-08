@@ -903,7 +903,7 @@ obj_coff_line (int ignore ATTRIBUTE_UNUSED)
       extern int listing;
 
       if (listing)
-	listing_source_line ((unsigned int) this_base);
+	listing_source_line (this_base);
     }
 #endif
 }
@@ -982,8 +982,8 @@ obj_coff_type (int ignore ATTRIBUTE_UNUSED)
 
   S_SET_DATA_TYPE (def_symbol_in_progress, get_absolute_expression ());
 
-  if (ISFCN (S_GET_DATA_TYPE (def_symbol_in_progress)) &&
-      S_GET_STORAGE_CLASS (def_symbol_in_progress) != C_TPDEF)
+  if (ISFCN (S_GET_DATA_TYPE (def_symbol_in_progress))
+      && S_GET_STORAGE_CLASS (def_symbol_in_progress) != C_TPDEF)
     SF_SET_FUNCTION (def_symbol_in_progress);
 
   demand_empty_rest_of_line ();
@@ -1011,7 +1011,7 @@ obj_coff_val (int ignore ATTRIBUTE_UNUSED)
 	{
 	  /* If the .val is != from the .def (e.g. statics).  */
 	  symbol_set_frag (def_symbol_in_progress, frag_now);
-	  S_SET_VALUE (def_symbol_in_progress, (valueT) frag_now_fix ());
+	  S_SET_VALUE (def_symbol_in_progress, frag_now_fix ());
 	}
       else if (! streq (S_GET_NAME (def_symbol_in_progress), symbol_name))
 	{
@@ -1356,8 +1356,8 @@ coff_frob_symbol (symbolS *symp, int *punt)
 		as_fatal (_("C_EFCN symbol for %s out of scope"),
 			  S_GET_NAME (symp));
 	      SA_SET_SYM_FSIZE (last_functionP,
-				(long) (S_GET_VALUE (symp)
-					- S_GET_VALUE (last_functionP)));
+				(S_GET_VALUE (symp)
+				 - S_GET_VALUE (last_functionP)));
 	    }
 	}
 
@@ -1669,7 +1669,7 @@ obj_coff_section (int ignore ATTRIBUTE_UNUSED)
 	}
     }
 
-  sec = subseg_new (name, (subsegT) exp);
+  sec = subseg_new (name, exp);
 
   if (is_bss)
     seg_info (sec)->bss = 1;

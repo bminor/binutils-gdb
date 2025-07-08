@@ -4640,7 +4640,7 @@ ppc_change_csect (symbolS *sym, offsetT align)
 	frag_align (align, 0, 0);
 
       symbol_set_frag (sym, frag_now);
-      S_SET_VALUE (sym, (valueT) frag_now_fix ());
+      S_SET_VALUE (sym, frag_now_fix ());
 
       symbol_get_tc (sym)->align = align;
       symbol_get_tc (sym)->output = 1;
@@ -5120,7 +5120,7 @@ ppc_stabx (int ignore ATTRIBUTE_UNUSED)
       exp.X_add_number = 0;
       /* Fall through.  */
     case O_constant:
-      S_SET_VALUE (sym, (valueT) exp.X_add_number);
+      S_SET_VALUE (sym, exp.X_add_number);
       symbol_set_frag (sym, &zero_address_frag);
       break;
 
@@ -5647,7 +5647,7 @@ ppc_toc (int ignore ATTRIBUTE_UNUSED)
       sym = symbol_find_or_make ("TOC[TC0]");
       symbol_set_frag (sym, frag_now);
       S_SET_SEGMENT (sym, data_section);
-      S_SET_VALUE (sym, (valueT) frag_now_fix ());
+      S_SET_VALUE (sym, frag_now_fix ());
       symbol_get_tc (sym)->subseg = subseg;
       symbol_get_tc (sym)->output = 1;
       symbol_get_tc (sym)->within = sym;
@@ -5801,7 +5801,7 @@ ppc_tc (int ignore ATTRIBUTE_UNUSED)
 
     S_SET_SEGMENT (sym, now_seg);
     symbol_set_frag (sym, frag_now);
-    S_SET_VALUE (sym, (valueT) frag_now_fix ());
+    S_SET_VALUE (sym, frag_now_fix ());
 
     /* AIX assembler seems to allow any storage class to be set in .tc.
        But for now, only XMC_TC and XMC_TE are supported by us.  */
@@ -6141,8 +6141,7 @@ ppc_frob_symbol (symbolS *sym)
       if (symbol_get_tc (sym)->u.size != NULL)
 	{
 	  resolve_symbol_value (symbol_get_tc (sym)->u.size);
-	  SA_SET_SYM_FSIZE (sym,
-			    (long) S_GET_VALUE (symbol_get_tc (sym)->u.size));
+	  SA_SET_SYM_FSIZE (sym, S_GET_VALUE (symbol_get_tc (sym)->u.size));
 	}
       else
 	{

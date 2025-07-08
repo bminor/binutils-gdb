@@ -163,7 +163,7 @@ aout_process_stab (int what, const char *string, int type, int other, int desc)
       /* .stabd sets the name to NULL.  Why?  */
       S_SET_NAME (symbol, NULL);
       symbol_set_frag (symbol, frag_now);
-      S_SET_VALUE (symbol, (valueT) frag_now_fix ());
+      S_SET_VALUE (symbol, frag_now_fix ());
     }
 
   symbol_append (symbol, symbol_lastP, &symbol_rootP, &symbol_lastP);
@@ -323,7 +323,7 @@ s_stab_generic (int what,
       switch (type)
 	{
 	case N_SLINE:
-	  listing_source_line ((unsigned int) desc);
+	  listing_source_line (desc);
 	  break;
 	case N_SO:
 	case N_SOL:

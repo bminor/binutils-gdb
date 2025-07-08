@@ -445,7 +445,7 @@ sh_elf_cons (int nbytes)
   do
     {
       expression (&exp);
-      emit_expr (&exp, (unsigned int) nbytes);
+      emit_expr (&exp, nbytes);
     }
   while (*input_line_pointer++ == ',');
 

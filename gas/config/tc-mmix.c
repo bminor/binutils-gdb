@@ -4254,7 +4254,7 @@ mmix_cons (int nbytes)
       exp.X_unsigned = 0;
       exp.X_add_symbol = NULL;
       exp.X_op_symbol = NULL;
-      emit_expr (&exp, (unsigned int) nbytes);
+      emit_expr (&exp, nbytes);
     }
   else
     do
@@ -4272,7 +4272,7 @@ mmix_cons (int nbytes)
 		exp.X_op = O_constant;
 		exp.X_add_number = c;
 		exp.X_unsigned = 1;
-		emit_expr (&exp, (unsigned int) nbytes);
+		emit_expr (&exp, nbytes);
 	      }
 
 	    if (input_line_pointer[-1] != '\"')
@@ -4289,7 +4289,7 @@ mmix_cons (int nbytes)
 	  default:
 	    {
 	      expression (&exp);
-	      emit_expr (&exp, (unsigned int) nbytes);
+	      emit_expr (&exp, nbytes);
 	      SKIP_WHITESPACE ();
 	    }
 	    break;

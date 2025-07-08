@@ -1856,7 +1856,7 @@ s_comm_internal (int param,
     symbolP = (*comm_parse_extra) (param, symbolP, size);
   else
     {
-      S_SET_VALUE (symbolP, (valueT) size);
+      S_SET_VALUE (symbolP, size);
       S_SET_EXTERNAL (symbolP);
       S_SET_SEGMENT (symbolP, bfd_com_section_ptr);
     }
@@ -1993,7 +1993,7 @@ s_data (int ignore ATTRIBUTE_UNUSED)
   else
     section = data_section;
 
-  subseg_set (section, (subsegT) temp);
+  subseg_set (section, temp);
 
   demand_empty_rest_of_line ();
 }
@@ -2423,7 +2423,7 @@ s_fill (int ignore ATTRIBUTE_UNUSED)
 	  p = frag_var (rs_space, size, size, 0, rep_sym, 0, NULL);
 	}
 
-      memset (p, 0, (unsigned int) size);
+      memset (p, 0, size);
 
       /* The magic number BSD_FILL_SIZE_CROCK_4 is from BSD 4.2 VAX
 	 flavoured AS.  The following bizarre behaviour is to be
@@ -2760,7 +2760,7 @@ s_lsym (int ignore ATTRIBUTE_UNUSED)
 		     (exp.X_op == O_constant
 		      ? absolute_section
 		      : reg_section));
-      S_SET_VALUE (symbolP, (valueT) exp.X_add_number);
+      S_SET_VALUE (symbolP, exp.X_add_number);
     }
   else
     {
@@ -3895,7 +3895,7 @@ s_float_space (int float_type)
       char *p;
 
       p = frag_more (flen);
-      memcpy (p, temp, (unsigned int) flen);
+      memcpy (p, temp, flen);
     }
 
   demand_empty_rest_of_line ();
@@ -3933,7 +3933,7 @@ s_text (int ignore ATTRIBUTE_UNUSED)
   int temp;
 
   temp = get_absolute_expression ();
-  subseg_set (text_section, (subsegT) temp);
+  subseg_set (text_section, temp);
   demand_empty_rest_of_line ();
 }
 
@@ -4331,7 +4331,7 @@ cons_worker (int nbytes,	/* 1=.byte, 2=.word, 4=.long.  */
 
 #ifdef TC_M68K
       if (flag_m68k_mri)
-	parse_mri_cons (&exp, (unsigned int) nbytes);
+	parse_mri_cons (&exp, nbytes);
       else
 #endif
 	{
@@ -4343,7 +4343,7 @@ cons_worker (int nbytes,	/* 1=.byte, 2=.word, 4=.long.  */
 	      return;
 	    }
 #endif
-	  ret = TC_PARSE_CONS_EXPRESSION (&exp, (unsigned int) nbytes);
+	  ret = TC_PARSE_CONS_EXPRESSION (&exp, nbytes);
 	}
 
       if (rva)
@@ -4353,7 +4353,7 @@ cons_worker (int nbytes,	/* 1=.byte, 2=.word, 4=.long.  */
 	  else
 	    as_fatal (_("rva without symbol"));
 	}
-      emit_expr_with_reloc (&exp, (unsigned int) nbytes, ret);
+      emit_expr_with_reloc (&exp, nbytes, ret);
 #ifdef TC_CONS_FIX_CHECK
       TC_CONS_FIX_CHECK (&exp, nbytes, *cur_fix);
 #endif
@@ -4559,7 +4559,7 @@ emit_expr_with_reloc (expressionS *exp,
 	   && nbytes == 2
 	   && exp->X_op == O_constant
 	   && (exp->X_add_number == -1 || exp->X_add_number == 0xffff))
-    listing_source_line ((unsigned int) dwarf_line);
+    listing_source_line (dwarf_line);
   else if (nbytes == 4
 	   && exp->X_op == O_constant
 	   && exp->X_add_number >= 0)
@@ -4672,7 +4672,7 @@ emit_expr_with_reloc (expressionS *exp,
     as_bad (_("attempt to store non-zero value in section `%s'"),
 	    segment_name (now_seg));
 
-  p = frag_more ((int) nbytes);
+  p = frag_more (nbytes);
 
   if (reloc != TC_PARSE_CONS_RETURN_NONE)
     {
@@ -5158,7 +5158,7 @@ float_cons (/* Clobbers input_line-pointer, checks end-of-line.  */
 	  while (--count >= 0)
 	    {
 	      p = frag_more (length);
-	      memcpy (p, temp, (unsigned int) length);
+	      memcpy (p, temp, length);
 	    }
 	}
       SKIP_WHITESPACE ();
@@ -5228,7 +5228,7 @@ unsigned int
 sizeof_leb128 (valueT value, int sign)
 {
   if (sign)
-    return sizeof_sleb128 ((offsetT) value);
+    return sizeof_sleb128 (value);
   else
     return sizeof_uleb128 (value);
 }
@@ -5287,7 +5287,7 @@ unsigned int
 output_leb128 (char *p, valueT value, int sign)
 {
   if (sign)
-    return output_sleb128 (p, (offsetT) value);
+    return output_sleb128 (p, value);
   else
     return output_uleb128 (p, value);
 }

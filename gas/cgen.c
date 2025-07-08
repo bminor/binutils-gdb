@@ -475,13 +475,13 @@ gas_cgen_parse_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 	  /* Re-init rightshift quantity, just in case.  */
 	  rightshift = operand->length;
 	  queue_fixup_recursively (opindex, opinfo_1, & exp,
-				   (reloc_type == BFD_RELOC_RELC) ?
-				   & (operand->index_fields) : 0,
+				   (reloc_type == BFD_RELOC_RELC
+				    ? &operand->index_fields : 0),
 				   signed_p, -1);
 	}
-      * resultP = errmsg
-	? CGEN_PARSE_OPERAND_RESULT_ERROR
-	: CGEN_PARSE_OPERAND_RESULT_QUEUED;
+      *resultP = (errmsg
+		  ? CGEN_PARSE_OPERAND_RESULT_ERROR
+		  : CGEN_PARSE_OPERAND_RESULT_QUEUED);
       *valueP = 0;
 #else
       queue_fixup (opindex, opinfo_1, &exp);
@@ -910,7 +910,7 @@ gas_cgen_md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
 	    /* ??? 0 is passed for `pc'.  */
 	    errmsg = CGEN_CPU_INSERT_OPERAND (cd) (cd, opindex, fields,
-						   &insn_value, (bfd_vma) 0);
+						   &insn_value, 0);
 	    cgen_put_insn_value (cd, (unsigned char *) where,
 				 CGEN_INSN_BITSIZE (insn), insn_value,
                                  cd->insn_endian);
@@ -918,8 +918,7 @@ gas_cgen_md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 #else
 	  /* ??? 0 is passed for `pc'.  */
 	  errmsg = CGEN_CPU_INSERT_OPERAND (cd) (cd, opindex, fields,
-						 (unsigned char *) where,
-						 (bfd_vma) 0);
+						 (unsigned char *) where, 0);
 #endif
 	  if (errmsg)
 	    as_bad_where (fixP->fx_file, fixP->fx_line, "%s", errmsg);

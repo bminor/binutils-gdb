@@ -1817,7 +1817,7 @@ pru_frob_label (symbolS *lab)
 
   /* Update the label's address with the current output pointer.  */
   symbol_set_frag (lab, frag_now);
-  S_SET_VALUE (lab, (valueT) frag_now_fix ());
+  S_SET_VALUE (lab, frag_now_fix ());
 
   /* Record this label for future adjustment after we find out what
      kind of data it references, and the required alignment therewith.  */

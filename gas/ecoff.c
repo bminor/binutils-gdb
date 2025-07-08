@@ -1943,7 +1943,7 @@ add_aux_sym_tir (type_info_t *t,	/* current type information */
      for an enum bitfield.  */
 
   if (t->bitfield)
-    (void) add_aux_sym_symint ((symint_t) t->sizes[t->num_sizes - 1]);
+    (void) add_aux_sym_symint (t->sizes[t->num_sizes - 1]);
 
   /* Add tag information if needed.  Structure, union, and enum
      references add 2 aux symbols: a [file index, symbol index]
@@ -1984,7 +1984,7 @@ add_aux_sym_tir (type_info_t *t,	/* current type information */
 			       cur_file_ptr->int_type);
 
       (void) add_aux_sym_symint (cur_file_ptr->file_index);	/* file index*/
-      (void) add_aux_sym_symint ((symint_t) 0);			/* low bound */
+      (void) add_aux_sym_symint (0);				/* low bound */
       (void) add_aux_sym_symint (t->dimensions[i] - 1);		/* high bound*/
       (void) add_aux_sym_symint ((t->dimensions[i] == 0)	/* stride */
 				 ? 0
@@ -2925,9 +2925,7 @@ ecoff_directive_endef (int ignore ATTRIBUTE_UNUSED)
   if (coff_symbol_typ == st_Block)
     {
       /* Create or update the tag information.  */
-      tag_t *tag_ptr = get_tag (name,
-				sym,
-				coff_type.basic_type);
+      tag_t *tag_ptr = get_tag (name, sym, coff_type.basic_type);
       forward_t **pf;
 
       /* Remember any forward references.  */
@@ -3432,7 +3430,7 @@ ecoff_stab (int what,
 
 #ifndef NO_LISTING
       if (listing)
-	listing_source_line ((unsigned int) desc);
+	listing_source_line (desc);
 #endif
 
       dummy_symr.index = desc;

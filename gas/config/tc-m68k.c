@@ -7904,7 +7904,7 @@ m68k_elf_cons (int nbytes /* 4=.long */)
 	    }
 	}
       else
-	emit_expr (&exp, (unsigned int) nbytes);
+	emit_expr (&exp, nbytes);
     }
   while (*input_line_pointer++ == ',');
 

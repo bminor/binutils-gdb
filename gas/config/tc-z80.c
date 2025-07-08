@@ -3720,7 +3720,7 @@ is_overflow (long value, unsigned bitsize)
 {
   if (value < 0)
     return signed_overflow (value, bitsize);
-  return unsigned_overflow ((unsigned long)value, bitsize);
+  return unsigned_overflow (value, bitsize);
 }
 
 void

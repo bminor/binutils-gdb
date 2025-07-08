@@ -496,7 +496,7 @@ xstormy16_md_apply_fix (fixS *   fixP,
 	  CGEN_FIELDS *fields = xmalloc (CGEN_CPU_SIZEOF_FIELDS (cd));
 
 	  CGEN_CPU_SET_FIELDS_BITSIZE (cd) (fields, CGEN_INSN_BITSIZE (insn));
-	  CGEN_CPU_SET_VMA_OPERAND (cd) (cd, opindex, fields, (bfd_vma) value);
+	  CGEN_CPU_SET_VMA_OPERAND (cd) (cd, opindex, fields, value);
 
 #if CGEN_INT_INSN_P
 	  {
@@ -507,7 +507,7 @@ xstormy16_md_apply_fix (fixS *   fixP,
 
 	    /* ??? 0 is passed for `pc'.  */
 	    errmsg = CGEN_CPU_INSERT_OPERAND (cd) (cd, opindex, fields,
-						   &insn_value, (bfd_vma) 0);
+						   &insn_value, 0);
 	    cgen_put_insn_value (cd, (unsigned char *) where,
 				 CGEN_INSN_BITSIZE (insn), insn_value,
 				 gas_cgen_cpu_desc->insn_endian);
@@ -516,7 +516,7 @@ xstormy16_md_apply_fix (fixS *   fixP,
 	  /* ??? 0 is passed for `pc'.  */
 	  errmsg = CGEN_CPU_INSERT_OPERAND (cd) (cd, opindex, fields,
 						 (unsigned char *) where,
-						 (bfd_vma) 0);
+						 0);
 #endif
 	  if (errmsg)
 	    as_bad_where (fixP->fx_file, fixP->fx_line, "%s", errmsg);

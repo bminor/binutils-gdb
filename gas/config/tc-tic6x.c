@@ -668,7 +668,7 @@ s_tic6x_scomm (int ignore ATTRIBUTE_UNUSED)
     }
   else
     {
-      S_SET_VALUE (symbolP, (valueT) size);
+      S_SET_VALUE (symbolP, size);
       S_SET_ALIGN (symbolP, 1 << align2);
       S_SET_EXTERNAL (symbolP);
       S_SET_SEGMENT (symbolP, &scom_section);

@@ -235,7 +235,7 @@ l_cons (int nbytes)
 
       if ((*(input_line_pointer) == '@') && (*(input_line_pointer +1) == 'c'))
 	code_label = 1;
-      emit_expr (&exp, (unsigned int) nbytes);
+      emit_expr (&exp, nbytes);
       ++c;
       if ((*(input_line_pointer) == '@') && (*(input_line_pointer +1) == 'c'))
 	{

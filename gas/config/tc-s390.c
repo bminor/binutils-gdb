@@ -1316,7 +1316,7 @@ s390_elf_cons (int nbytes /* 1=.byte, 2=.word, 4=.long */)
 	    as_bad (_("relocation not applicable"));
 	}
       else
-	emit_expr (&exp, (unsigned int) nbytes);
+	emit_expr (&exp, nbytes);
     }
   while (*input_line_pointer++ == ',');
 
@@ -2083,7 +2083,7 @@ s390_literals (int ignore ATTRIBUTE_UNUSED)
 
   /* Emit symbol for start of literal pool.  */
   S_SET_SEGMENT (lp_sym, now_seg);
-  S_SET_VALUE (lp_sym, (valueT) frag_now_fix ());
+  S_SET_VALUE (lp_sym, frag_now_fix ());
   symbol_set_frag (lp_sym, frag_now);
 
   while (lpe_list)
@@ -2091,7 +2091,7 @@ s390_literals (int ignore ATTRIBUTE_UNUSED)
       lpe = lpe_list;
       lpe_list = lpe_list->next;
       S_SET_SEGMENT (lpe->sym, now_seg);
-      S_SET_VALUE (lpe->sym, (valueT) frag_now_fix ());
+      S_SET_VALUE (lpe->sym, frag_now_fix ());
       symbol_set_frag (lpe->sym, frag_now);
 
       /* Emit literal pool entry.  */
@@ -2501,7 +2501,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	{
 	  /* Insert the fully resolved operand value.  */
 	  s390_insert_operand ((unsigned char *) where, operand,
-			       (offsetT) value, fixP->fx_file, fixP->fx_line, 0);
+			       value, fixP->fx_file, fixP->fx_line, 0);
 	  return;
 	}
 

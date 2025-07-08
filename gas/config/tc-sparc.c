@@ -4345,7 +4345,7 @@ s_common (int ignore ATTRIBUTE_UNUSED)
       else
 	{
 	allocate_common:
-	  S_SET_VALUE (symbolP, (valueT) size);
+	  S_SET_VALUE (symbolP, size);
 	  S_SET_ALIGN (symbolP, temp);
 	  S_SET_SIZE (symbolP, size);
 	  S_SET_EXTERNAL (symbolP);
@@ -4551,7 +4551,7 @@ s_register (int ignore ATTRIBUTE_UNUSED)
 	      if (! (flags & (BSF_GLOBAL|BSF_LOCAL|BSF_WEAK)))
 		flags |= BSF_GLOBAL;
 	      symbol_get_bfdsym (globals[reg])->flags = flags;
-	      S_SET_VALUE (globals[reg], (valueT) reg);
+	      S_SET_VALUE (globals[reg], reg);
 	      S_SET_ALIGN (globals[reg], reg);
 	      S_SET_SIZE (globals[reg], 0);
 	      /* Although we actually want undefined_section here,

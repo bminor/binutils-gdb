@@ -1668,9 +1668,8 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 
       if (f->fr_fix)
 	{
-	  x = bfd_set_section_contents (stdoutput, sec,
-					f->fr_literal, (file_ptr) offset,
-					(bfd_size_type) f->fr_fix);
+	  x = bfd_set_section_contents (stdoutput, sec, f->fr_literal,
+					offset, f->fr_fix);
 	  if (!x)
 	    as_fatal (ngettext ("can't write %ld byte "
 				"to section %s of %s: '%s'",
@@ -1694,10 +1693,8 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 	      /* Do it the old way. Can this ever happen?  */
 	      while (count--)
 		{
-		  x = bfd_set_section_contents (stdoutput, sec,
-						fill_literal,
-						(file_ptr) offset,
-						(bfd_size_type) fill_size);
+		  x = bfd_set_section_contents (stdoutput, sec, fill_literal,
+						offset, fill_size);
 		  if (!x)
 		    as_fatal (ngettext ("can't fill %ld byte "
 					"in section %s of %s: '%s'",
@@ -1732,9 +1729,8 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 	      for (; count > 0; count -= n_per_buf)
 		{
 		  n_per_buf = n_per_buf > count ? count : n_per_buf;
-		  x = bfd_set_section_contents
-		    (stdoutput, sec, buf, (file_ptr) offset,
-		     (bfd_size_type) n_per_buf * fill_size);
+		  x = bfd_set_section_contents (stdoutput, sec, buf, offset,
+						n_per_buf * fill_size);
 		  if (!x)
 		    as_fatal (ngettext ("can't fill %ld byte "
 					"in section %s of %s: '%s'",
@@ -2896,8 +2892,7 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 			    {
 			      char buf[50];
 
-			      bfd_sprintf_vma (stdoutput, buf,
-					       (addressT) lie->addnum);
+			      bfd_sprintf_vma (stdoutput, buf, lie->addnum);
 			      as_warn_where (fragP->fr_file, fragP->fr_line,
 					     _(".word %s-%s+%s didn't fit"),
 					     S_GET_NAME (lie->add),

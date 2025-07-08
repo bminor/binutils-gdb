@@ -3881,7 +3881,7 @@ md_begin (void)
 
     if (mips_abi != N64_ABI)
       {
-	sec = subseg_new (".reginfo", (subsegT) 0);
+	sec = subseg_new (".reginfo", 0);
 
 	bfd_set_section_flags (sec, flags);
 	bfd_set_section_alignment (sec, HAVE_NEWABI ? 3 : 2);
@@ -3892,7 +3892,7 @@ md_begin (void)
       {
 	/* The 64-bit ABI uses a .MIPS.options section rather than
 	   .reginfo section.  */
-	sec = subseg_new (".MIPS.options", (subsegT) 0);
+	sec = subseg_new (".MIPS.options", 0);
 	bfd_set_section_flags (sec, flags);
 	bfd_set_section_alignment (sec, 3);
 
@@ -3914,7 +3914,7 @@ md_begin (void)
 	}
       }
 
-    sec = subseg_new (".MIPS.abiflags", (subsegT) 0);
+    sec = subseg_new (".MIPS.abiflags", 0);
     bfd_set_section_flags (sec,
 			   SEC_READONLY | SEC_DATA | SEC_ALLOC | SEC_LOAD);
     bfd_set_section_alignment (sec, 3);
@@ -3922,13 +3922,13 @@ md_begin (void)
 
     if (ECOFF_DEBUGGING)
       {
-	sec = subseg_new (".mdebug", (subsegT) 0);
+	sec = subseg_new (".mdebug", 0);
 	bfd_set_section_flags (sec, SEC_HAS_CONTENTS | SEC_READONLY);
 	bfd_set_section_alignment (sec, 2);
       }
     else if (mips_flag_pdr)
       {
-	pdr_seg = subseg_new (".pdr", (subsegT) 0);
+	pdr_seg = subseg_new (".pdr", 0);
 	bfd_set_section_flags (pdr_seg,
 			       SEC_READONLY | SEC_RELOC | SEC_DEBUGGING);
 	bfd_set_section_alignment (pdr_seg, 2);
@@ -6170,7 +6170,7 @@ match_float_constant (struct mips_arg_info *arg, expressionS *imm,
 	newname = ".lit8";
     }
 
-  new_seg = subseg_new (newname, (subsegT) 0);
+  new_seg = subseg_new (newname, 0);
   bfd_set_section_flags (new_seg,
 			 SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_DATA);
   frag_align (length == 4 ? 2 : 3, 0, 0);
@@ -16337,13 +16337,12 @@ s_change_sec (int sec)
       s_data (0);
       break;
     case 'b':
-      subseg_set (bss_section, (subsegT) get_absolute_expression ());
+      subseg_set (bss_section, get_absolute_expression ());
       demand_empty_rest_of_line ();
       break;
 
     case 'r':
-      seg = subseg_new (RDATA_SECTION_NAME,
-			(subsegT) get_absolute_expression ());
+      seg = subseg_new (RDATA_SECTION_NAME, get_absolute_expression ());
       bfd_set_section_flags (seg, (SEC_ALLOC | SEC_LOAD | SEC_READONLY
 				   | SEC_RELOC | SEC_DATA));
       if (!startswith (TARGET_OS, "elf"))
@@ -16352,7 +16351,7 @@ s_change_sec (int sec)
       break;
 
     case 's':
-      seg = subseg_new (".sdata", (subsegT) get_absolute_expression ());
+      seg = subseg_new (".sdata", get_absolute_expression ());
       bfd_set_section_flags (seg, (SEC_ALLOC | SEC_LOAD | SEC_RELOC
 				   | SEC_DATA | SEC_SMALL_DATA));
       if (!startswith (TARGET_OS, "elf"))
@@ -16361,7 +16360,7 @@ s_change_sec (int sec)
       break;
 
     case 'B':
-      seg = subseg_new (".sbss", (subsegT) get_absolute_expression ());
+      seg = subseg_new (".sbss", get_absolute_expression ());
       bfd_set_section_flags (seg, SEC_ALLOC | SEC_SMALL_DATA);
       if (!startswith (TARGET_OS, "elf"))
 	record_alignment (seg, 4);

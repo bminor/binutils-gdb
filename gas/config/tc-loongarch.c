@@ -1755,8 +1755,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
 	  unsigned int subtype;
 	  offsetT loc;
-	  subtype = bfd_get_8 (NULL, &((fragS *)
-		      (fixP->fx_frag->fr_opcode))->fr_literal[fixP->fx_where]);
+	  fragS *opfrag = (fragS *) fixP->fx_frag->fr_opcode;
+	  subtype = bfd_get_8 (NULL, opfrag->fr_literal + fixP->fx_where);
 	  loc = fixP->fx_frag->fr_fix - (subtype & 7);
 	  switch (subtype)
 	    {
@@ -1792,7 +1792,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	      if (subtype < 0x80 && (subtype & 0x40))
 		{
 		  /* DW_CFA_advance_loc.  */
-		  fixP->fx_frag = (fragS *) fixP->fx_frag->fr_opcode;
+		  fixP->fx_frag = opfrag;
 		  fixP->fx_next->fx_frag = fixP->fx_frag;
 		  fixP->fx_r_type = BFD_RELOC_LARCH_ADD6;
 		  fixP->fx_next->fx_r_type = BFD_RELOC_LARCH_SUB6;

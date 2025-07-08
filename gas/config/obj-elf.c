@@ -1613,7 +1613,7 @@ obj_elf_bss (int i ATTRIBUTE_UNUSED)
   obj_elf_section_change_hook ();
 
   temp = get_absolute_expression ();
-  subseg_set (bss_section, (subsegT) temp);
+  subseg_set (bss_section, temp);
   demand_empty_rest_of_line ();
 
 #ifdef md_elf_section_change_hook
@@ -1687,7 +1687,7 @@ obj_elf_subsection (int ignore ATTRIBUTE_UNUSED)
   obj_elf_section_change_hook ();
 
   temp = get_absolute_expression ();
-  subseg_set (now_seg, (subsegT) temp);
+  subseg_set (now_seg, temp);
   demand_empty_rest_of_line ();
 
 #ifdef md_elf_section_change_hook

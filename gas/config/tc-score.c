@@ -5551,7 +5551,7 @@ s3_s_change_sec (int sec)
   switch (sec)
     {
     case 'r':
-      seg = subseg_new (s3_RDATA_SECTION_NAME, (subsegT) get_absolute_expression ());
+      seg = subseg_new (s3_RDATA_SECTION_NAME, get_absolute_expression ());
       bfd_set_section_flags (seg, (SEC_ALLOC | SEC_LOAD | SEC_READONLY
 				   | SEC_RELOC | SEC_DATA));
       if (strcmp (TARGET_OS, "elf") != 0)
@@ -5559,7 +5559,7 @@ s3_s_change_sec (int sec)
       demand_empty_rest_of_line ();
       break;
     case 's':
-      seg = subseg_new (".sdata", (subsegT) get_absolute_expression ());
+      seg = subseg_new (".sdata", get_absolute_expression ());
       bfd_set_section_flags (seg, (SEC_ALLOC | SEC_LOAD | SEC_RELOC
 				   | SEC_DATA | SEC_SMALL_DATA));
       if (strcmp (TARGET_OS, "elf") != 0)
@@ -6458,7 +6458,7 @@ s3_begin (void)
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, 0);
   seg = now_seg;
   subseg = now_subseg;
-  s3_pdr_seg = subseg_new (".pdr", (subsegT) 0);
+  s3_pdr_seg = subseg_new (".pdr", 0);
   bfd_set_section_flags (s3_pdr_seg, SEC_READONLY | SEC_RELOC | SEC_DEBUGGING);
   bfd_set_section_alignment (s3_pdr_seg, 2);
   subseg_set (seg, subseg);

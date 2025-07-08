@@ -491,7 +491,7 @@ static void
 define_sym_at_dot (symbolS *symbolP)
 {
   symbolP->frag = frag_now;
-  S_SET_VALUE (symbolP, (valueT) frag_now_fix ());
+  S_SET_VALUE (symbolP, frag_now_fix ());
   S_SET_SEGMENT (symbolP, now_seg);
 }
 
@@ -626,11 +626,8 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
 			 If the new size is larger we just change its
 			 value.  If the new size is smaller, we ignore
 			 this symbol.  */
-		      if (S_GET_VALUE (symbolP)
-			  < ((unsigned) frag_now_fix ()))
-			{
-			  S_SET_VALUE (symbolP, (valueT) frag_now_fix ());
-			}
+		      if (S_GET_VALUE (symbolP) < frag_now_fix ())
+			S_SET_VALUE (symbolP, frag_now_fix ());
 		    }
 		  else
 		    {

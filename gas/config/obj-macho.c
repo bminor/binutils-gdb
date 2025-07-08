@@ -552,7 +552,7 @@ obj_mach_o_zerofill (int ignore ATTRIBUTE_UNUSED)
   new_seg = obj_mach_o_make_or_get_sect (segname, sectname, specified_mask,
 					 BFD_MACH_O_S_ZEROFILL,
 					 BFD_MACH_O_S_ATTR_NONE,
-					 align, (offsetT) 0 /*stub size*/);
+					 align, 0 /*stub size*/);
   if (new_seg == NULL)
     return;
 

@@ -1699,7 +1699,7 @@ alpha_align (int n,
   if (label != NULL && S_GET_SEGMENT (label) == now_seg)
     {
       symbol_set_frag (label, frag_now);
-      S_SET_VALUE (label, (valueT) frag_now_fix ());
+      S_SET_VALUE (label, frag_now_fix ());
     }
 
   record_alignment (now_seg, n);
@@ -5485,7 +5485,7 @@ md_begin (void)
 #ifdef OBJ_ELF
   if (ECOFF_DEBUGGING)
     {
-      segT sec = subseg_new (".mdebug", (subsegT) 0);
+      segT sec = subseg_new (".mdebug", 0);
       bfd_set_section_flags (sec, SEC_HAS_CONTENTS | SEC_READONLY);
       bfd_set_section_alignment (sec, 3);
     }

@@ -5095,7 +5095,7 @@ dot_pred_rel (int type)
       if (count == 0)
 	mask = ~(valueT) 0;
       clear_qp_mutex (mask);
-      clear_qp_implies (mask, (valueT) 0);
+      clear_qp_implies (mask, 0);
       break;
     case 'i':
       if (count != 2 || p1 == -1 || p2 == -1)

@@ -8662,7 +8662,7 @@ md_assemble (char *str)
   if (last_label_seen != NULL)
     {
       symbol_set_frag (last_label_seen, frag_now);
-      S_SET_VALUE (last_label_seen, (valueT) frag_now_fix ());
+      S_SET_VALUE (last_label_seen, frag_now_fix ());
       S_SET_SEGMENT (last_label_seen, now_seg);
     }
 
