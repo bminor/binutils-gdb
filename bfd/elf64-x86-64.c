@@ -6136,13 +6136,14 @@ elf_x86_64_fake_sections (bfd *abfd ATTRIBUTE_UNUSED,
 
 static bool
 elf_x86_64_copy_private_section_data (bfd *ibfd, asection *isec,
-				      bfd *obfd, asection *osec)
+				      bfd *obfd, asection *osec,
+				      struct bfd_link_info *link_info)
 {
-  if (!_bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec))
+  if (!_bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec, link_info))
     return false;
 
   /* objcopy --set-section-flags without "large" drops SHF_X86_64_LARGE.  */
-  if (ibfd != obfd)
+  if (link_info == NULL && ibfd != obfd)
     elf_section_flags (osec) &= ~SHF_X86_64_LARGE;
 
   return true;

@@ -3115,9 +3115,11 @@ bool
 _bfd_XX_bfd_copy_private_section_data (bfd *ibfd,
 				       asection *isec,
 				       bfd *obfd,
-				       asection *osec)
+				       asection *osec,
+				       struct bfd_link_info *link_info)
 {
-  if (bfd_get_flavour (ibfd) != bfd_target_coff_flavour
+  if (link_info != NULL
+      || bfd_get_flavour (ibfd) != bfd_target_coff_flavour
       || bfd_get_flavour (obfd) != bfd_target_coff_flavour)
     return true;
 

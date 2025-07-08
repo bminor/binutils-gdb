@@ -2874,7 +2874,7 @@ lang_add_section (lang_statement_list_type *ptr,
       /* This must happen after flags have been updated.  The output
 	 section may have been created before we saw its first input
 	 section, eg. for a data statement.  */
-      bfd_init_private_section_data (section->owner, section,
+      bfd_copy_private_section_data (section->owner, section,
 				     link_info.output_bfd,
 				     output->bfd_section,
 				     &link_info);
@@ -10494,7 +10494,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *p)
 
   /* Allow the BFD backend to copy any private data it understands
      from the input section to the output section.  */
-  if (!bfd_copy_private_section_data (ibfd, isection, obfd, osection))
+  if (!bfd_copy_private_section_data (ibfd, isection, obfd, osection, NULL))
     {
       err = _("failed to copy private data");
       goto loser;

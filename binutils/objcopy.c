@@ -4398,7 +4398,7 @@ setup_section (bfd *ibfd, sec_ptr isection, bfd *obfd)
 
   /* Allow the BFD backend to copy any private data it understands
      from the input section to the output section.  */
-  if (!bfd_copy_private_section_data (ibfd, isection, obfd, osection))
+  if (!bfd_copy_private_section_data (ibfd, isection, obfd, osection, NULL))
     err = _("failed to copy private data");
 
   if (make_nobits)

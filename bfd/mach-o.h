@@ -691,7 +691,8 @@ bool bfd_mach_o_write_contents (bfd *);
 bool bfd_mach_o_bfd_copy_private_symbol_data (bfd *, asymbol *,
 					      bfd *, asymbol *);
 bool bfd_mach_o_bfd_copy_private_section_data (bfd *, asection *,
-					       bfd *, asection *);
+					       bfd *, asection *,
+					       struct bfd_link_info *);
 bool bfd_mach_o_bfd_copy_private_header_data (bfd *, bfd *);
 bool bfd_mach_o_bfd_set_private_flags (bfd *, flagword);
 bool bfd_mach_o_bfd_print_private_bfd_data (bfd *, void *);

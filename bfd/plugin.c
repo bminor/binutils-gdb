@@ -73,8 +73,6 @@ dlerror (void)
 #define bfd_plugin_bfd_free_cached_info		      _bfd_generic_bfd_free_cached_info
 #define bfd_plugin_new_section_hook		      _bfd_generic_new_section_hook
 #define bfd_plugin_get_section_contents		      _bfd_generic_get_section_contents
-#define bfd_plugin_init_private_section_data	      _bfd_generic_init_private_section_data
-#define bfd_plugin_bfd_copy_private_header_data	      _bfd_generic_bfd_copy_private_header_data
 #define bfd_plugin_bfd_merge_private_bfd_data	      _bfd_generic_bfd_merge_private_bfd_data
 #define bfd_plugin_bfd_copy_private_header_data	      _bfd_generic_bfd_copy_private_header_data
 #define bfd_plugin_bfd_set_private_flags	      _bfd_generic_bfd_set_private_flags
@@ -782,7 +780,8 @@ static bool
 bfd_plugin_bfd_copy_private_section_data (bfd *ibfd ATTRIBUTE_UNUSED,
 					  asection *isection ATTRIBUTE_UNUSED,
 					  bfd *obfd ATTRIBUTE_UNUSED,
-					  asection *osection ATTRIBUTE_UNUSED)
+					  asection *osection ATTRIBUTE_UNUSED,
+					  struct bfd_link_info *link_info ATTRIBUTE_UNUSED)
 {
   BFD_ASSERT (0);
   return true;

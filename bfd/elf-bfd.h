@@ -2393,10 +2393,8 @@ extern bool _bfd_elf_copy_private_header_data
   (bfd *, bfd *);
 extern bool _bfd_elf_copy_private_symbol_data
   (bfd *, asymbol *, bfd *, asymbol *);
-extern bool _bfd_elf_init_private_section_data
-  (bfd *, asection *, bfd *, asection *, struct bfd_link_info *);
 extern bool _bfd_elf_copy_private_section_data
-  (bfd *, asection *, bfd *, asection *);
+  (bfd *, asection *, bfd *, asection *, struct bfd_link_info *);
 extern bool _bfd_elf_write_object_contents
   (bfd *);
 extern bool _bfd_elf_write_corefile_contents

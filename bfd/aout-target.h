@@ -214,9 +214,11 @@ static bool
 MY_bfd_copy_private_section_data (bfd *ibfd,
 				  asection *isec ATTRIBUTE_UNUSED,
 				  bfd *obfd,
-				  asection *osec ATTRIBUTE_UNUSED)
+				  asection *osec ATTRIBUTE_UNUSED,
+				  struct bfd_link_info *link_info)
 {
-  if (bfd_get_flavour (ibfd) == bfd_target_aout_flavour
+  if (link_info == NULL
+      && bfd_get_flavour (ibfd) == bfd_target_aout_flavour
       && bfd_get_flavour (obfd) == bfd_target_aout_flavour)
     obj_aout_subformat (obfd) = obj_aout_subformat (ibfd);
   return true;
@@ -561,9 +563,6 @@ MY_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 #ifndef MY_bfd_merge_private_bfd_data
 #define MY_bfd_merge_private_bfd_data _bfd_generic_bfd_merge_private_bfd_data
 #endif
-
-#define MY_init_private_section_data \
-  _bfd_generic_init_private_section_data
 
 #ifndef MY_bfd_copy_private_symbol_data
 #define MY_bfd_copy_private_symbol_data _bfd_generic_bfd_copy_private_symbol_data

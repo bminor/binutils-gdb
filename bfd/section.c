@@ -1667,7 +1667,8 @@ FUNCTION
 
 SYNOPSIS
 	bool bfd_copy_private_section_data
-	  (bfd *ibfd, asection *isec, bfd *obfd, asection *osec);
+	  (bfd *ibfd, asection *isec, bfd *obfd, asection *osec,
+	   struct bfd_link_info *link_info);
 
 DESCRIPTION
 	Copy private section information from @var{isec} in the BFD
@@ -1678,9 +1679,9 @@ DESCRIPTION
 	o <<bfd_error_no_memory>> -
 	Not enough memory exists to create private data for @var{osec}.
 
-.#define bfd_copy_private_section_data(ibfd, isection, obfd, osection) \
+.#define bfd_copy_private_section_data(ibfd, isec, obfd, osec, link_info) \
 .	BFD_SEND (obfd, _bfd_copy_private_section_data, \
-.		  (ibfd, isection, obfd, osection))
+.		  (ibfd, isec, obfd, osec, link_info))
 */
 
 /*

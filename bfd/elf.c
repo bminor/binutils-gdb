@@ -8375,25 +8375,34 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
   return rewrite_elf_program_header (ibfd, obfd, maxpagesize);
 }
 
-/* Initialize private output section information from input section.  */
+/* Copy private section information from input to output.  This function
+   is called both by objcopy where LINK_INFO is NULL, and ld where
+   LINK_INFO is non-NULL in the usual case but NULL for a special case
+   when dealing with LTO IR or cloning output sections.  */
 
 bool
-_bfd_elf_init_private_section_data (bfd *ibfd,
+_bfd_elf_copy_private_section_data (bfd *ibfd,
 				    asection *isec,
 				    bfd *obfd,
 				    asection *osec,
 				    struct bfd_link_info *link_info)
-
 {
-  Elf_Internal_Shdr *ihdr, *ohdr;
-  bool final_link = (link_info != NULL
-		     && !bfd_link_relocatable (link_info));
-
   if (ibfd->xvec->flavour != bfd_target_elf_flavour
       || obfd->xvec->flavour != bfd_target_elf_flavour)
     return true;
 
-  BFD_ASSERT (elf_section_data (osec) != NULL);
+  Elf_Internal_Shdr *ihdr = &elf_section_data (isec)->this_hdr;
+  Elf_Internal_Shdr *ohdr = &elf_section_data (osec)->this_hdr;
+  if (link_info == NULL)
+    {
+      ohdr->sh_entsize = ihdr->sh_entsize;
+
+      if (ihdr->sh_type == SHT_SYMTAB
+	  || ihdr->sh_type == SHT_DYNSYM
+	  || ihdr->sh_type == SHT_GNU_verneed
+	  || ihdr->sh_type == SHT_GNU_verdef)
+	ohdr->sh_info = ihdr->sh_info;
+    }
 
   /* If this is a known ABI section, ELF section type and flags may
      have been set up when OSEC was created.  For normal sections we
@@ -8403,11 +8412,14 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
       || elf_section_type (osec) == SHT_NOTE
       || elf_section_type (osec) == SHT_NOBITS)
     elf_section_type (osec) = SHT_NULL;
+
   /* For objcopy and relocatable link, copy the ELF section type from
      the input file if the BFD section flags are the same.  (If they
      are different the user may be doing something like
      "objcopy --set-section-flags .text=alloc,data".)  For a final
      link allow some flags that the linker clears to differ.  */
+  bool final_link = (link_info != NULL
+		     && !bfd_link_relocatable (link_info));
   if (elf_section_type (osec) == SHT_NULL
       && (osec->flags == isec->flags
 	  || (final_link
@@ -8445,14 +8457,11 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
     elf_section_flags (osec) |= (elf_section_flags (isec)
 				 & SHF_COMPRESSED);
 
-  ihdr = &elf_section_data (isec)->this_hdr;
-
   /* We need to handle elf_linked_to_section for SHF_LINK_ORDER. We
      don't use the output section of the linked-to section since it
      may be NULL at this point.  */
   if ((ihdr->sh_flags & SHF_LINK_ORDER) != 0)
     {
-      ohdr = &elf_section_data (osec)->this_hdr;
       ohdr->sh_flags |= SHF_LINK_ORDER;
       elf_linked_to_section (osec) = elf_linked_to_section (isec);
     }
@@ -8460,36 +8469,6 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
   osec->use_rela_p = isec->use_rela_p;
 
   return true;
-}
-
-/* Copy private section information.  This copies over the entsize
-   field, and sometimes the info field.  */
-
-bool
-_bfd_elf_copy_private_section_data (bfd *ibfd,
-				    asection *isec,
-				    bfd *obfd,
-				    asection *osec)
-{
-  Elf_Internal_Shdr *ihdr, *ohdr;
-
-  if (ibfd->xvec->flavour != bfd_target_elf_flavour
-      || obfd->xvec->flavour != bfd_target_elf_flavour)
-    return true;
-
-  ihdr = &elf_section_data (isec)->this_hdr;
-  ohdr = &elf_section_data (osec)->this_hdr;
-
-  ohdr->sh_entsize = ihdr->sh_entsize;
-
-  if (ihdr->sh_type == SHT_SYMTAB
-      || ihdr->sh_type == SHT_DYNSYM
-      || ihdr->sh_type == SHT_GNU_verneed
-      || ihdr->sh_type == SHT_GNU_verdef)
-    ohdr->sh_info = ihdr->sh_info;
-
-  return _bfd_elf_init_private_section_data (ibfd, isec, obfd, osec,
-					     NULL);
 }
 
 /* Look at all the SHT_GROUP sections in IBFD, making any adjustments

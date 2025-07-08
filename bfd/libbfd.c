@@ -1514,11 +1514,11 @@ _bfd_write_unsigned_leb128 (bfd_byte *p, bfd_byte *end, bfd_vma val)
 }
 
 bool
-_bfd_generic_init_private_section_data (bfd *ibfd ATTRIBUTE_UNUSED,
-					asection *isec ATTRIBUTE_UNUSED,
-					bfd *obfd ATTRIBUTE_UNUSED,
-					asection *osec ATTRIBUTE_UNUSED,
-					struct bfd_link_info *link_info ATTRIBUTE_UNUSED)
+_bfd_generic_bfd_copy_private_section_data (bfd *ibfd ATTRIBUTE_UNUSED,
+					    asection *isec ATTRIBUTE_UNUSED,
+					    bfd *obfd ATTRIBUTE_UNUSED,
+					    asection *osec ATTRIBUTE_UNUSED,
+					    struct bfd_link_info *link_info ATTRIBUTE_UNUSED)
 {
   return true;
 }

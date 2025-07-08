@@ -2621,7 +2621,6 @@ const bfd_target rs6000_xcoff64_vec =
     /* Copy */
     _bfd_xcoff_copy_private_bfd_data,
     _bfd_generic_bfd_merge_private_bfd_data,
-    _bfd_generic_init_private_section_data,
     _bfd_generic_bfd_copy_private_section_data,
     _bfd_generic_bfd_copy_private_symbol_data,
     _bfd_generic_bfd_copy_private_header_data,
@@ -2892,7 +2891,6 @@ const bfd_target rs6000_xcoff64_aix_vec =
     /* Copy */
     _bfd_xcoff_copy_private_bfd_data,
     _bfd_generic_bfd_merge_private_bfd_data,
-    _bfd_generic_init_private_section_data,
     _bfd_generic_bfd_copy_private_section_data,
     _bfd_generic_bfd_copy_private_symbol_data,
     _bfd_generic_bfd_copy_private_header_data,

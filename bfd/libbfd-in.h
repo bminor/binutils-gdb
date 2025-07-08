@@ -270,16 +270,13 @@ extern bool _bfd_generic_get_section_contents
 #define _bfd_generic_bfd_merge_private_bfd_data \
   _bfd_bool_bfd_link_true
 #define _bfd_generic_bfd_set_private_flags _bfd_bool_bfd_uint_true
-#define _bfd_generic_bfd_copy_private_section_data \
-  _bfd_bool_bfd_asection_bfd_asection_true
+extern bool _bfd_generic_bfd_copy_private_section_data
+  (bfd *, asection *, bfd *, asection *, struct bfd_link_info *)
+  ATTRIBUTE_HIDDEN;
 #define _bfd_generic_bfd_copy_private_symbol_data \
   _bfd_bool_bfd_asymbol_bfd_asymbol_true
 #define _bfd_generic_bfd_copy_private_header_data _bfd_bool_bfd_bfd_true
 #define _bfd_generic_bfd_print_private_bfd_data _bfd_bool_bfd_ptr_true
-
-extern bool _bfd_generic_init_private_section_data
-  (bfd *, asection *, bfd *, asection *, struct bfd_link_info *)
-  ATTRIBUTE_HIDDEN;
 
 /* Routines to use for BFD_JUMP_TABLE_CORE when there is no core file
    support.  Use BFD_JUMP_TABLE_CORE (_bfd_nocore).  */

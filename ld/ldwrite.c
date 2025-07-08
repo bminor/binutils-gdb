@@ -366,7 +366,7 @@ clone_section (bfd *abfd, asection *s, const char *name, int *count)
   n->reloc_count = 0;
   n->alignment_power = s->alignment_power;
 
-  bfd_copy_private_section_data (abfd, s, abfd, n);
+  bfd_copy_private_section_data (abfd, s, abfd, n, NULL);
 
   return n;
 }
