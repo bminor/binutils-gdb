@@ -1589,7 +1589,7 @@ valueT
 md_section_align (asection *segment, valueT size)
 {
   int align = bfd_section_alignment (segment);
-  int align2 = (1 << align) - 1;
+  valueT align2 = ((valueT) 1 << align) - 1;
 
   return (size + align2) & ~align2;
 }

@@ -2223,7 +2223,7 @@ valueT
 md_section_align (segT segment, valueT size)
 {
   int align = bfd_section_alignment (segment);
-  return ((size + (1 << align) - 1) & (-1U << align));
+  return (size + ((valueT) 1 << align) - 1) & -((valueT) 1 << align);
 }
 
 void

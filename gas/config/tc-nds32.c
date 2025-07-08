@@ -6608,7 +6608,7 @@ md_section_align (segT segment, valueT size)
 {
   int align = bfd_section_alignment (segment);
 
-  return ((size + (1 << align) - 1) & ((valueT) -1 << align));
+  return (size + ((valueT) 1 << align) - 1) & -((valueT) 1 << align);
 }
 
 /* GAS will call this function when a symbol table lookup fails, before it

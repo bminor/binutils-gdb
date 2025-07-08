@@ -6493,7 +6493,7 @@ md_section_align (asection *seg ATTRIBUTE_UNUSED, valueT addr)
 #else
   int align = bfd_section_alignment (seg);
 
-  return ((addr + (1 << align) - 1) & -(1 << align));
+  return (addr + ((valueT) 1 << align) - 1) & -((valueT) 1 << align);
 #endif
 }
 
