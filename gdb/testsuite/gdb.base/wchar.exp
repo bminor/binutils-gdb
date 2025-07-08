@@ -74,5 +74,5 @@ gdb_test "print repeat_p" "= $hex L\"A$cent$cent\"\.\.\." \
 gdb_test "printf \"%ls\\n\", 0" "\\(null\\)"
 
 # From PR exp/33124 - a bug when converting escapes.
-set result [string_to_regexp {L'\\'}]
-gdb_test "print L'\\\\'" " = $decimal $result"
+set wbs {L'\\'}
+gdb_test "print $wbs" " = $decimal [string_to_regexp $wbs]"
