@@ -195,23 +195,23 @@ ctf_arc_write_fd (int fd, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
 
   /* Fill in everything we can, which is everything other than the name
      table and shared properties table offsets.  */
-  archdr->ctfa_magic = CTFA_MAGIC;
-  archdr->ctfa_ndicts = ctf_dict_cnt;
-  archdr->ctfa_ctfs = ctf_startoffs;
-  archdr->ctfa_nprops = 0;			/* Updated later.  */
-  archdr->ctfa_propents = 0;			/* Updated later.  */
-  archdr->ctfa_modents = sizeof (struct ctf_archive);
+  archdr->magic = CTFA_MAGIC;
+  archdr->ndicts = ctf_dict_cnt;
+  archdr->ctfs = ctf_startoffs;
+  archdr->nprops = 0;			/* Updated later.  */
+  archdr->propents = 0;			/* Updated later.  */
+  archdr->modents = sizeof (struct ctf_archive);
 
   /* We could validate that all CTF files have the same data model, but
      since any reasonable construction process will be building things of
      only one bitness anyway, this is pretty pointless, so just use the
      model of the first CTF file for all of them.  (It *is* valid to
-     create an empty archive: the value of ctfa_model is irrelevant in
+     create an empty archive: the value of model is irrelevant in
      this case, but we must be sure not to dereference uninitialized
      memory.)  */
 
   if (ctf_dict_cnt > 0)
-    archdr->ctfa_model = ctf_getmodel (ctf_dicts[0]);
+    archdr->model = ctf_getmodel (ctf_dicts[0]);
 
   /* Now write out the CTFs: ctf_archive_modent array via the mapping,
      ctfs via write().  The names themselves have not been written yet: we
@@ -224,7 +224,7 @@ ctf_arc_write_fd (int fd, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
 
      The name table is not sorted.  */
 
-  for (i = 0, namesz = 0; i < archdr->ctfa_ndicts; i++)
+  for (i = 0, namesz = 0; i < archdr->ndicts; i++)
     namesz += strlen (names[i]) + 1;
 
   nametbl = malloc (namesz);
@@ -237,7 +237,7 @@ ctf_arc_write_fd (int fd, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
   for (i = 0, namesz = 0,
        modent = (ctf_archive_modent_t *) ((char *) archdr
 					  + sizeof (struct ctf_archive));
-       i < archdr->ctfa_ndicts; i++)
+       i < archdr->ndicts; i++)
     {
       off_t off;
 
@@ -268,7 +268,7 @@ ctf_arc_write_fd (int fd, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
 
   ctf_qsort_r ((ctf_archive_modent_t *) ((char *) archdr
 					 + sizeof (struct ctf_archive)),
-	       archdr->ctfa_ndicts,
+	       archdr->ndicts,
 	       sizeof (ctf_archive_modent_t), sort_modent_by_name,
 	       nametbl);
 
@@ -278,7 +278,7 @@ ctf_arc_write_fd (int fd, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
     {
       char *new_nametbl;
 
-      archdr->ctfa_nprops++;
+      archdr->nprops++;
       if ((new_nametbl = realloc (nametbl, namesz
 				  + strlen ("parent_name") + 1)) == NULL)
 	{
@@ -293,7 +293,7 @@ ctf_arc_write_fd (int fd, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
 
    /* Now the name table.  */
 
-  if (ctf_arc_value_write (fd, nametbl, namesz, &archdr->ctfa_names) < 0)
+  if (ctf_arc_value_write (fd, nametbl, namesz, &archdr->names) < 0)
     {
       errmsg = N_("ctf_arc_write(): cannot write name table to archive");
       goto err_free;
@@ -322,13 +322,13 @@ ctf_arc_write_fd (int fd, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
 				   &propents) < 0))
 	{
 	  /* Something went wrong: just blank out the props and keep going.  */
-	  archdr->ctfa_prop_values = 0;
-	  archdr->ctfa_propents = 0;
+	  archdr->prop_values = 0;
+	  archdr->propents = 0;
 	}
       else
 	{
-	  archdr->ctfa_prop_values = prop_values;
-	  archdr->ctfa_propents = propents;
+	  archdr->prop_values = prop_values;
+	  archdr->propents = propents;
 	}
     }
 
@@ -515,7 +515,7 @@ search_modent_by_name (const void *key, const void *ent, void *arg)
 
   arci = (const struct ctf_archive_internal *) arg;
 
-  search_nametbl = (char *) arci->ctfi_archive + arci->ctfi_hdr->ctfa_names;
+  search_nametbl = (char *) arci->ctfi_archive + arci->ctfi_hdr->names;
   return strcmp (k, &search_nametbl[v->name_offset]);
 }
 
@@ -532,10 +532,10 @@ ctf_arc_flip_archive (struct ctf_archive_internal *arci, size_t arc_len,
   unsigned char *arc_bytes = arci->ctfi_archive;
   unsigned char *ents;
 
-  if (bswap_64 (hdr->ctfa_magic) == CTFA_MAGIC)
+  if (bswap_64 (hdr->magic) == CTFA_MAGIC)
     needs_flipping = 1;
   else if (arci->ctfi_archive_v1
-	   && bswap_64 (hdr->ctfa_magic) == CTFA_V1_MAGIC)
+	   && bswap_64 (hdr->magic) == CTFA_V1_MAGIC)
     needs_flipping = 1;
 
   if (!needs_flipping)
@@ -544,23 +544,23 @@ ctf_arc_flip_archive (struct ctf_archive_internal *arci, size_t arc_len,
   /* Headers.  Some headers are v2-only.  The layout has already been
      adjusted to be v2-compatible.  */
 
-  swap_thing (hdr->ctfa_magic);
-  swap_thing (hdr->ctfa_model);
-  swap_thing (hdr->ctfa_ndicts);
-  swap_thing (hdr->ctfa_names);
-  swap_thing (hdr->ctfa_ctfs);
+  swap_thing (hdr->magic);
+  swap_thing (hdr->model);
+  swap_thing (hdr->ndicts);
+  swap_thing (hdr->names);
+  swap_thing (hdr->ctfs);
 
   if (!arci->ctfi_archive_v1)
     {
-      swap_thing (hdr->ctfa_nprops);
-      swap_thing (hdr->ctfa_prop_values);
-      swap_thing (hdr->ctfa_modents);
-      swap_thing (hdr->ctfa_propents);
+      swap_thing (hdr->nprops);
+      swap_thing (hdr->prop_values);
+      swap_thing (hdr->modents);
+      swap_thing (hdr->propents);
     }
 
   /* Swap the tables and the sizes of things therein.
 
-     ctfa_modents for v1 is populated by ctf_new_archive_internal, below.
+     modents for v1 is populated by ctf_new_archive_internal, below.
 
      We must range-check first to be sure that the modent arrays are not out
      of range.  */
@@ -568,16 +568,16 @@ ctf_arc_flip_archive (struct ctf_archive_internal *arci, size_t arc_len,
   if (ctf_arc_range_check_hdr (arci, arc_len, errp) < 0)
     return -1;					/* errp is set for us.  */
 
-  modent = (ctf_archive_modent_t *) (arc_bytes + arci->ctfi_hdr->ctfa_modents);
-  ents = (unsigned char *) (arc_bytes + arci->ctfi_hdr->ctfa_ctfs);
-  if (ctf_arc_flip_modents (modent, arci->ctfi_hdr->ctfa_ndicts, ents,
-			    arci->ctfi_hdr->ctfa_ctfs, arc_len, errp) < 0)
+  modent = (ctf_archive_modent_t *) (arc_bytes + arci->ctfi_hdr->modents);
+  ents = (unsigned char *) (arc_bytes + arci->ctfi_hdr->ctfs);
+  if (ctf_arc_flip_modents (modent, arci->ctfi_hdr->ndicts, ents,
+			    arci->ctfi_hdr->ctfs, arc_len, errp) < 0)
     return -1;					/* errp is set for us.  */
 
-  modent = (ctf_archive_modent_t *) (arc_bytes + arci->ctfi_hdr->ctfa_propents);
-  ents = (unsigned char *) (arc_bytes + arci->ctfi_hdr->ctfa_prop_values);
-  if (ctf_arc_flip_modents (modent, arci->ctfi_hdr->ctfa_nprops, ents,
-			    arci->ctfi_hdr->ctfa_prop_values, arc_len, errp) < 0)
+  modent = (ctf_archive_modent_t *) (arc_bytes + arci->ctfi_hdr->propents);
+  ents = (unsigned char *) (arc_bytes + arci->ctfi_hdr->prop_values);
+  if (ctf_arc_flip_modents (modent, arci->ctfi_hdr->nprops, ents,
+			    arci->ctfi_hdr->prop_values, arc_len, errp) < 0)
     return -1;					/* errp is set for us.  */
 
   return 0;
@@ -628,51 +628,51 @@ ctf_arc_range_check_hdr (struct ctf_archive_internal *arci, size_t arc_len,
   const char *err;
   uint64_t ndict_end, nprop_end;
 
-  ndict_end = arci->ctfi_hdr->ctfa_modents +
-    (sizeof (ctf_archive_modent_t) * arci->ctfi_hdr->ctfa_ndicts);
+  ndict_end = arci->ctfi_hdr->modents +
+    (sizeof (ctf_archive_modent_t) * arci->ctfi_hdr->ndicts);
 
   if (ndict_end > arc_len)
     {
       ctf_err_warn (NULL, 0, EOVERFLOW, "CTF archive overflow: archive is %zi bytes, but ctfs end at %zi + (%zi * %zi) = %zi",
-		   arc_len, arci->ctfi_hdr->ctfa_modents,
+		   arc_len, arci->ctfi_hdr->modents,
 		   sizeof (ctf_archive_modent_t),
-		   arci->ctfi_hdr->ctfa_ndicts, ndict_end);
+		   arci->ctfi_hdr->ndicts, ndict_end);
 
       ctf_set_open_errno (errp, EOVERFLOW);
       return -1;
     }
 
-  if ((arci->ctfi_hdr->ctfa_modents < arci->ctfi_hdr->ctfa_names
-       && ndict_end > arci->ctfi_hdr->ctfa_names)
-      || (arci->ctfi_hdr->ctfa_modents < arci->ctfi_hdr->ctfa_ctfs
-	  && ndict_end > arci->ctfi_hdr->ctfa_ctfs)
-      || (arci->ctfi_hdr->ctfa_modents < arci->ctfi_hdr->ctfa_prop_values
-	  && ndict_end > arci->ctfi_hdr->ctfa_prop_values)
-      || (arci->ctfi_hdr->ctfa_modents < arci->ctfi_hdr->ctfa_propents
-	  && ndict_end > arci->ctfi_hdr->ctfa_propents)
-      || arci->ctfi_hdr->ctfa_names == arci->ctfi_hdr->ctfa_ctfs
-      || (arci->ctfi_hdr->ctfa_names == arci->ctfi_hdr->ctfa_prop_values
-	  && arci->ctfi_hdr->ctfa_prop_values != 0)
-      || arci->ctfi_hdr->ctfa_names == arci->ctfi_hdr->ctfa_modents
-      || (arci->ctfi_hdr->ctfa_names == arci->ctfi_hdr->ctfa_propents
-	  && arci->ctfi_hdr->ctfa_propents != 0)
-      || (arci->ctfi_hdr->ctfa_ctfs == arci->ctfi_hdr->ctfa_prop_values
-	  && arci->ctfi_hdr->ctfa_prop_values != 0)
-      || arci->ctfi_hdr->ctfa_ctfs == arci->ctfi_hdr->ctfa_modents
-      || (arci->ctfi_hdr->ctfa_ctfs == arci->ctfi_hdr->ctfa_propents
-	  && arci->ctfi_hdr->ctfa_propents != 0)
-      || (arci->ctfi_hdr->ctfa_prop_values != 0
-	  && arci->ctfi_hdr->ctfa_prop_values == arci->ctfi_hdr->ctfa_modents
-	  && arci->ctfi_hdr->ctfa_prop_values == arci->ctfi_hdr->ctfa_propents)
-      || (arci->ctfi_hdr->ctfa_propents != 0
-	  && arci->ctfi_hdr->ctfa_modents == arci->ctfi_hdr->ctfa_propents))
+  if ((arci->ctfi_hdr->modents < arci->ctfi_hdr->names
+       && ndict_end > arci->ctfi_hdr->names)
+      || (arci->ctfi_hdr->modents < arci->ctfi_hdr->ctfs
+	  && ndict_end > arci->ctfi_hdr->ctfs)
+      || (arci->ctfi_hdr->modents < arci->ctfi_hdr->prop_values
+	  && ndict_end > arci->ctfi_hdr->prop_values)
+      || (arci->ctfi_hdr->modents < arci->ctfi_hdr->propents
+	  && ndict_end > arci->ctfi_hdr->propents)
+      || arci->ctfi_hdr->names == arci->ctfi_hdr->ctfs
+      || (arci->ctfi_hdr->names == arci->ctfi_hdr->prop_values
+	  && arci->ctfi_hdr->prop_values != 0)
+      || arci->ctfi_hdr->names == arci->ctfi_hdr->modents
+      || (arci->ctfi_hdr->names == arci->ctfi_hdr->propents
+	  && arci->ctfi_hdr->propents != 0)
+      || (arci->ctfi_hdr->ctfs == arci->ctfi_hdr->prop_values
+	  && arci->ctfi_hdr->prop_values != 0)
+      || arci->ctfi_hdr->ctfs == arci->ctfi_hdr->modents
+      || (arci->ctfi_hdr->ctfs == arci->ctfi_hdr->propents
+	  && arci->ctfi_hdr->propents != 0)
+      || (arci->ctfi_hdr->prop_values != 0
+	  && arci->ctfi_hdr->prop_values == arci->ctfi_hdr->modents
+	  && arci->ctfi_hdr->prop_values == arci->ctfi_hdr->propents)
+      || (arci->ctfi_hdr->propents != 0
+	  && arci->ctfi_hdr->modents == arci->ctfi_hdr->propents))
     {
       err = "ctf table";
       goto err;
     }
 
-  nprop_end = arci->ctfi_hdr->ctfa_propents +
-    (sizeof (ctf_archive_modent_t) * arci->ctfi_hdr->ctfa_nprops);
+  nprop_end = arci->ctfi_hdr->propents +
+    (sizeof (ctf_archive_modent_t) * arci->ctfi_hdr->nprops);
 
   if (nprop_end > arc_len)
     {
@@ -680,13 +680,13 @@ ctf_arc_range_check_hdr (struct ctf_archive_internal *arci, size_t arc_len,
       goto err;
     }
 
-  if (arci->ctfi_hdr->ctfa_names > arc_len)
+  if (arci->ctfi_hdr->names > arc_len)
     {
       err = "name table";
       goto err;
     }
 
-  if (arci->ctfi_hdr->ctfa_ctfs > arc_len)
+  if (arci->ctfi_hdr->ctfs > arc_len)
     {
       err = "member table";
       goto err;
@@ -714,19 +714,19 @@ ctf_arc_range_check (struct ctf_archive_internal *arci, size_t arc_len,
   if (ctf_arc_range_check_hdr (arci, arc_len, errp) < 0)
     return -1;					/* errno is set for us.  */
 
-  modents = (ctf_archive_modent_t *) (arc_bytes + arci->ctfi_hdr->ctfa_modents);
+  modents = (ctf_archive_modent_t *) (arc_bytes + arci->ctfi_hdr->modents);
 
   if (ctf_arc_range_check_modents (modents, arci->ctfi_hdr, arc_bytes,
-				   arci->ctfi_hdr->ctfa_ctfs,
-				   arci->ctfi_hdr->ctfa_ndicts, arc_len,
+				   arci->ctfi_hdr->ctfs,
+				   arci->ctfi_hdr->ndicts, arc_len,
 				   arci->ctfi_archive_v1, errp) < 0)
     return -1;					/* errno is set for us.  */
 
-  modents = (ctf_archive_modent_t *) (arc_bytes + arci->ctfi_hdr->ctfa_propents);
+  modents = (ctf_archive_modent_t *) (arc_bytes + arci->ctfi_hdr->propents);
 
   if (ctf_arc_range_check_modents (modents, arci->ctfi_hdr, arc_bytes,
-				   arci->ctfi_hdr->ctfa_prop_values,
-				   arci->ctfi_hdr->ctfa_nprops, arc_len,
+				   arci->ctfi_hdr->prop_values,
+				   arci->ctfi_hdr->nprops, arc_len,
 				   0, errp) < 0)
     return -1;					/* errno is set for us.  */
 
@@ -742,25 +742,25 @@ ctf_arc_closest_section (struct ctf_archive *arc_hdr, uint64_t base,
 {
   uint64_t closest = arc_len;
 
-  if (arc_hdr->ctfa_names > base
-      && arc_hdr->ctfa_ctfs < closest)
-    closest = arc_hdr->ctfa_names;
+  if (arc_hdr->names > base
+      && arc_hdr->ctfs < closest)
+    closest = arc_hdr->names;
 
-  if (arc_hdr->ctfa_ctfs > base
-      && arc_hdr->ctfa_ctfs < closest)
-    closest = arc_hdr->ctfa_ctfs;
+  if (arc_hdr->ctfs > base
+      && arc_hdr->ctfs < closest)
+    closest = arc_hdr->ctfs;
 
-  if (arc_hdr->ctfa_prop_values > base
-      && arc_hdr->ctfa_prop_values < closest)
-    closest = arc_hdr->ctfa_prop_values;
+  if (arc_hdr->prop_values > base
+      && arc_hdr->prop_values < closest)
+    closest = arc_hdr->prop_values;
 
-  if (arc_hdr->ctfa_modents > base
-      && arc_hdr->ctfa_modents < closest)
-    closest = arc_hdr->ctfa_modents;
+  if (arc_hdr->modents > base
+      && arc_hdr->modents < closest)
+    closest = arc_hdr->modents;
 
-  if (arc_hdr->ctfa_propents > base
-      && arc_hdr->ctfa_propents < closest)
-    closest = arc_hdr->ctfa_propents;
+  if (arc_hdr->propents > base
+      && arc_hdr->propents < closest)
+    closest = arc_hdr->propents;
 
   return closest;
 }
@@ -775,8 +775,8 @@ ctf_arc_range_check_modents (ctf_archive_modent_t *modent,
 			     int fixup_v1, int *errp)
 {
   uint64_t i;
-  char *names = (char *) arc_bytes + arc_hdr->ctfa_names;
-  uint64_t name_base = arc_hdr->ctfa_names;
+  char *names = (char *) arc_bytes + arc_hdr->names;
+  uint64_t name_base = arc_hdr->names;
   unsigned char *ctfs = (unsigned char *) arc_bytes + ctf_base;
   size_t closest_names_offset, closest_ctfs_offset;
 
@@ -895,12 +895,12 @@ ctf_new_archive_internal (int is_archive, int is_v1, int unmap_on_close,
 	  struct ctf_archive_v1 *v1hdr = (struct ctf_archive_v1 *) arc;
 
 	  memset (arci->ctfi_hdr, 0, sizeof (struct ctf_archive));
-	  arci->ctfi_hdr->ctfa_magic = v1hdr->ctfa_magic;
-	  arci->ctfi_hdr->ctfa_model = v1hdr->ctfa_model;
-	  arci->ctfi_hdr->ctfa_ndicts = v1hdr->ctfa_ndicts;
-	  arci->ctfi_hdr->ctfa_names = v1hdr->ctfa_names;
-	  arci->ctfi_hdr->ctfa_ctfs = v1hdr->ctfa_ctfs;
-	  arci->ctfi_hdr->ctfa_modents = sizeof (struct ctf_archive_v1);
+	  arci->ctfi_hdr->magic = v1hdr->magic;
+	  arci->ctfi_hdr->model = v1hdr->model;
+	  arci->ctfi_hdr->ndicts = v1hdr->ndicts;
+	  arci->ctfi_hdr->names = v1hdr->names;
+	  arci->ctfi_hdr->ctfs = v1hdr->ctfs;
+	  arci->ctfi_hdr->modents = sizeof (struct ctf_archive_v1);
 	}
 
       if (ctf_arc_flip_archive (arci, arc_len, errp) < 0)
@@ -969,7 +969,7 @@ ctf_arc_bufpreamble_v1 (const ctf_sect_t *ctfsect)
   if (le64toh ((*(uint64_t *) ctfsect->cts_data)) == CTFA_V1_MAGIC)
     {
       struct ctf_archive_v1 *arc = (struct ctf_archive_v1 *) ctfsect->cts_data;
-      return (const ctf_preamble_t *) ((char *) arc + le64toh (arc->ctfa_ctfs)
+      return (const ctf_preamble_t *) ((char *) arc + le64toh (arc->ctfs)
 				       + sizeof (uint64_t));
     }
 
@@ -1054,21 +1054,21 @@ ctf_arc_open_internal (const char *filename, int *errp)
       goto err_close;
     }
 
-  if (arc->ctfa_magic != CTFA_MAGIC && bswap_64 (arc->ctfa_magic) != CTFA_MAGIC
-      && le64toh (arc->ctfa_magic) != CTFA_V1_MAGIC)
+  if (arc->magic != CTFA_MAGIC && bswap_64 (arc->magic) != CTFA_MAGIC
+      && le64toh (arc->magic) != CTFA_V1_MAGIC)
     {
       errmsg = N_("ctf_arc_open(): %s: invalid magic number");
       errno = ECTF_FMT;
       goto err_unmap;
     }
 
-  if (le64toh (arc->ctfa_magic) == CTFA_V1_MAGIC)
+  if (le64toh (arc->magic) == CTFA_V1_MAGIC)
     is_v1 = 1;
 
   /* This horrible hack lets us know how much to unmap when the file is
      closed.  (We no longer need the magic number, and the mapping
      is private.)  */
-  arc->ctfa_magic = s.st_size;
+  arc->magic = s.st_size;
   close (fd);
 
   return ctf_new_archive_internal (1, is_v1, 1, arc, s.st_size, NULL,
@@ -1093,7 +1093,7 @@ ctf_arc_close_internal (struct ctf_archive *arc)
     return;
 
   /* See the comment in ctf_arc_open().  */
-  arc_mmap_unmap (arc, arc->ctfa_magic, NULL);
+  arc_mmap_unmap (arc, arc->magic, NULL);
 }
 
 /* Public entry point: close an archive (via its wrapper), or CTF dict.  */
@@ -1141,9 +1141,9 @@ ctf_dict_open_internal (const struct ctf_archive_internal *arci,
   ctf_dprintf ("ctf_dict_open_internal(%s): opening\n", name);
 
   modent = (ctf_archive_modent_t *) (arci->ctfi_archive
-				     + arci->ctfi_hdr->ctfa_modents);
+				     + arci->ctfi_hdr->modents);
 
-  modent = bsearch_r (name, modent, arci->ctfi_hdr->ctfa_ndicts,
+  modent = bsearch_r (name, modent, arci->ctfi_hdr->ndicts,
 		      sizeof (ctf_archive_modent_t),
 		      search_modent_by_name, (void *) arci);
 
@@ -1273,7 +1273,7 @@ ctf_dict_open_cached (struct ctf_archive_internal *arci, const char *name, int *
      allocations in the parent to use provisional IDs, permitting you to
      import children into it even if you modify the parent before you import
      any.  */
-  if (arci->ctfi_is_archive && arci->ctfi_hdr->ctfa_ndicts > 1
+  if (arci->ctfi_is_archive && arci->ctfi_hdr->ndicts > 1
       && !(fp->ctf_flags & LCTF_CHILD))
     {
       ctf_dprintf ("archived parent: max children bumped.\n");
@@ -1304,7 +1304,7 @@ ctf_arc_flush_caches (struct ctf_archive_internal *arci)
   arci->ctfi_crossdict_cache = NULL;
 }
 
-/* Return the ctf_dict_t at the given ctfa_ctfs-relative offset, or NULL if
+/* Return the ctf_dict_t at the given ctfs-relative offset, or NULL if
    none, setting 'err' if non-NULL.  */
 static ctf_dict_t *
 ctf_dict_open_by_offset (const struct ctf_archive_internal *arci,
@@ -1320,7 +1320,7 @@ ctf_dict_open_by_offset (const struct ctf_archive_internal *arci,
 
   memset (&ctfsect, 0, sizeof (ctf_sect_t));
 
-  offset += arci->ctfi_hdr->ctfa_ctfs;
+  offset += arci->ctfi_hdr->ctfs;
 
   ctfsect.cts_name = _CTF_SECTION;
   ctfsect.cts_size = *((uint64_t *) (arci->ctfi_archive + offset));
@@ -1330,7 +1330,7 @@ ctf_dict_open_by_offset (const struct ctf_archive_internal *arci,
   fp = ctf_bufopen (&ctfsect, symsect, strsect, errp);
   if (fp)
     {
-      ctf_setmodel (fp, arci->ctfi_hdr->ctfa_model);
+      ctf_setmodel (fp, arci->ctfi_hdr->model);
       if (little_endian_symtab >= 0)
 	ctf_symsect_endianness (fp, little_endian_symtab);
     }
@@ -1367,14 +1367,14 @@ ctf_arc_get_property (const struct ctf_archive_internal *arci, const char *prop)
   if (!arci->ctfi_archive)
     return NULL;
 
-  if (arci->ctfi_hdr->ctfa_propents == 0
-      || arci->ctfi_hdr->ctfa_prop_values == 0)
+  if (arci->ctfi_hdr->propents == 0
+      || arci->ctfi_hdr->prop_values == 0)
     return NULL;
 
   modent = (ctf_archive_modent_t *) (arci->ctfi_archive
-				     + arci->ctfi_hdr->ctfa_modents);
+				     + arci->ctfi_hdr->modents);
 
-  modent = bsearch_r (prop, modent, arci->ctfi_hdr->ctfa_nprops,
+  modent = bsearch_r (prop, modent, arci->ctfi_hdr->nprops,
 		      sizeof (ctf_archive_modent_t),
 		      search_modent_by_name, (void *) arci);
 
@@ -1386,13 +1386,13 @@ ctf_arc_get_property (const struct ctf_archive_internal *arci, const char *prop)
      the null string.  */
 
   size = (uint64_t *) (arci->ctfi_archive
-		       + arci->ctfi_hdr->ctfa_propents
+		       + arci->ctfi_hdr->propents
 		       + modent->ctf_offset);
   if (*size == 0)
     return "";
 
   return (char *) (arci->ctfi_archive
-		   + arci->ctfi_hdr->ctfa_propents
+		   + arci->ctfi_hdr->propents
 		   + modent->ctf_offset
 		   + sizeof (uint64_t));
 }
@@ -1455,7 +1455,7 @@ ctf_archive_count (const struct ctf_archive_internal *arci)
   if (!arci->ctfi_is_archive)
     return 1;
 
-  return arci->ctfi_hdr->ctfa_ndicts;
+  return arci->ctfi_hdr->ndicts;
 }
 
 /* Look up a symbol in an archive by name or index (if the name is set, a lookup
@@ -1799,10 +1799,10 @@ ctf_archive_raw_iter (const struct ctf_archive_internal *arci,
     return -EINVAL;				/* Not supported.  */
 
   modent = (ctf_archive_modent_t *) (arci->ctfi_archive
-				     + arci->ctfi_hdr->ctfa_modents);
-  nametbl = (const char *) arci->ctfi_archive + arci->ctfi_hdr->ctfa_names;
+				     + arci->ctfi_hdr->modents);
+  nametbl = (const char *) arci->ctfi_archive + arci->ctfi_hdr->names;
 
-  for (i = 0; i < arci->ctfi_hdr->ctfa_ndicts; i++)
+  for (i = 0; i < arci->ctfi_hdr->ndicts; i++)
     {
       const char *name;
       unsigned char *content;
@@ -1812,7 +1812,7 @@ ctf_archive_raw_iter (const struct ctf_archive_internal *arci,
       ctf_offset = modent[i].ctf_offset;
 
       name = &nametbl[name_offset];
-      content = arci->ctfi_archive + arci->ctfi_hdr->ctfa_ctfs + ctf_offset;
+      content = arci->ctfi_archive + arci->ctfi_hdr->ctfs + ctf_offset;
       ctf_size = *((uint64_t *) content);
 
       if ((rc = func (name, (void *) (content + sizeof (uint64_t)),
@@ -1922,7 +1922,7 @@ ctf_archive_next (const struct ctf_archive_internal *arci, ctf_next_t **it,
 
   do
     {
-      if ((!arci->ctfi_is_archive) || (i->ctn_n >= arci->ctfi_hdr->ctfa_ndicts))
+      if ((!arci->ctfi_is_archive) || (i->ctn_n >= arci->ctfi_hdr->ndicts))
 	{
 	  ctf_next_destroy (i);
 	  *it = NULL;
@@ -1932,8 +1932,8 @@ ctf_archive_next (const struct ctf_archive_internal *arci, ctf_next_t **it,
 	}
 
       modent = (ctf_archive_modent_t *) ((char *) arci->ctfi_archive
-				     + arci->ctfi_hdr->ctfa_modents);
-      nametbl = (const char *) arci->ctfi_archive + arci->ctfi_hdr->ctfa_names;
+				     + arci->ctfi_hdr->modents);
+      nametbl = (const char *) arci->ctfi_archive + arci->ctfi_hdr->names;
       name_ = &nametbl[modent[i->ctn_n].name_offset];
       i->ctn_n++;
     }
