@@ -942,13 +942,12 @@ obj_elf_parse_section_letters (char *str, size_t len,
 	      if (ISDIGIT (*str))
 		{
 		  char * end;
-		  struct elf_backend_data *bed;
+		  const struct elf_backend_data *bed;
 		  bfd_vma numeric_flags = strtoul (str, &end, 0);
 
 		  attr |= numeric_flags;
 
-		  bed = (struct elf_backend_data *)
-		    get_elf_backend_data (stdoutput);
+		  bed = get_elf_backend_data (stdoutput);
 
 		  if (bed->elf_osabi == ELFOSABI_NONE
 		      || bed->elf_osabi == ELFOSABI_STANDALONE

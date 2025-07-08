@@ -2379,7 +2379,7 @@ write_object_file (void)
 	  if (name)
 	    {
 	      const char *name2 =
-		decode_local_label_name ((char *) S_GET_NAME (symp));
+		decode_local_label_name (S_GET_NAME (symp));
 	      /* They only differ if `name' is a fb or dollar local
 		 label name.  */
 	      if (name2 != name && ! S_IS_DEFINED (symp))

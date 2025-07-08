@@ -68,7 +68,7 @@ has_relocation_of_size (const struct kvx_reloc **relocs)
   if (!relocs)
     return 0;
 
-  struct kvx_reloc **relocs_it = (struct kvx_reloc **) relocs;
+  const struct kvx_reloc **relocs_it = relocs;
   int has_only_one_p = relocs[0] && !relocs[1];
 
   while (*relocs_it)
@@ -101,15 +101,13 @@ has_relocation_of_size (const struct kvx_reloc **relocs)
   return 0;
 }
 
-struct pseudo_func *
-kvx_get_pseudo_func2 (symbolS * sym, struct kvx_reloc **relocs);
-struct pseudo_func *
-kvx_get_pseudo_func2 (symbolS *sym, struct kvx_reloc **relocs)
+static struct pseudo_func *
+kvx_get_pseudo_func2 (symbolS *sym, const struct kvx_reloc **relocs)
 {
   if (!relocs)
     return NULL;
 
-  struct kvx_reloc **relocs_it = (struct kvx_reloc **) relocs;
+  const struct kvx_reloc **relocs_it = relocs;
 
   for (int i = 0; i < 26; i++)
   {

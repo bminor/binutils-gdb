@@ -104,7 +104,7 @@ static void get_default_target (void);
 static char *extract_word (char *, char *, int);
 static struct xgate_opcode *xgate_find_match (struct xgate_opcode_handle *,
 					      int, s_operand [], unsigned int);
-static int cmp_opcode (struct xgate_opcode *, struct xgate_opcode *);
+static int cmp_opcode (const void *, const void *);
 static void xgate_print_table (void);
 static unsigned int xgate_get_operands (char *, s_operand []);
 static register_id reg_name_search (char *);
@@ -308,7 +308,7 @@ md_begin (void)
     xgate_op_table[i] = xgate_opcode_ptr[i];
 
   qsort (xgate_op_table, xgate_num_opcodes, sizeof (struct xgate_opcode),
-	 (int (*)(const void *, const void *)) cmp_opcode);
+	 cmp_opcode);
 
   /* Calculate number of handles since this will be
      smaller than the raw number of opcodes in the table.  */
@@ -896,8 +896,10 @@ xgate_parse_exp (char *s, expressionS * op)
 }
 
 static int
-cmp_opcode (struct xgate_opcode *op1, struct xgate_opcode *op2)
+cmp_opcode (const void *p1, const void *p2)
 {
+  const struct xgate_opcode *op1 = p1;
+  const struct xgate_opcode *op2 = p2;
   return strcmp (op1->name, op2->name);
 }
 

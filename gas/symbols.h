@@ -54,7 +54,7 @@ notes_memdup0 (const char *in, size_t len)
 char * symbol_relc_make_expr  (expressionS *);
 char * symbol_relc_make_sym   (symbolS *);
 char * symbol_relc_make_value (offsetT);
-char *decode_local_label_name (char *s);
+const char *decode_local_label_name (const char *);
 symbolS *symbol_find (const char *name);
 symbolS *symbol_find_noref (const char *name, int noref);
 symbolS *symbol_find_exact (const char *name);

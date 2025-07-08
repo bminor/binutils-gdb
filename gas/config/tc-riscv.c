@@ -4935,7 +4935,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 
 	  /* Record PCREL_HI20.  */
 	  if (!riscv_record_pcrel_fixup (riscv_pcrel_hi_fixup_hash,
-					 (const asection *) seg,
+					 seg,
 					 md_pcrel_from (fixP),
 					 fixP->fx_addsy,
 					 target))
@@ -4964,8 +4964,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	 and set fx_done for -mno-relax.  */
       {
 	bfd_vma location_pcrel_hi = S_GET_VALUE (fixP->fx_addsy) + *valP;
-	riscv_pcrel_hi_fixup search =
-		{(const asection *) seg, location_pcrel_hi, 0, 0};
+	riscv_pcrel_hi_fixup search = {seg, location_pcrel_hi, 0, 0};
 	riscv_pcrel_hi_fixup *entry = htab_find (riscv_pcrel_hi_fixup_hash,
 						 &search);
 	if (entry && entry->symbol

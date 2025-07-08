@@ -3659,7 +3659,7 @@ find_reloc (const char *name,
 	  if (!nflg)
 	    continue;
 	  found_flag = false;
-	  unsigned * psflg = (unsigned *)r->flags;
+	  const unsigned *psflg = r->flags;
 	  do
 	    {
 	      tmp = false;
@@ -4673,7 +4673,7 @@ arc_extinsn (int ignore ATTRIBUTE_UNUSED)
     as_warn ("%s", errmsg);
 
   /* Insert the extension instruction.  */
-  arc_insert_opcode ((const struct arc_opcode *) arc_ext_opcodes);
+  arc_insert_opcode (arc_ext_opcodes);
 
   create_extinst_section (&einsn);
 }

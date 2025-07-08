@@ -275,7 +275,7 @@ void
 md_begin (void)
 {
   const char *prev_name = "";
-  struct d10v_opcode *opcode;
+  const struct d10v_opcode *opcode;
   d10v_hash = str_htab_create ();
 
   /* Insert unique names into hash table.  The D10v instruction set
@@ -325,7 +325,7 @@ postfix (char *p)
 }
 
 static bfd_reloc_code_real_type
-get_reloc (struct d10v_operand *op)
+get_reloc (const struct d10v_operand *op)
 {
   int bits = op->bits;
 
@@ -564,7 +564,7 @@ build_insn (struct d10v_opcode *opcode,
 	  else
 	    {
 	      fixups->fix[fixups->fc].reloc =
-		get_reloc ((struct d10v_operand *) &d10v_operands[opcode->operands[i]]);
+		get_reloc (&d10v_operands[opcode->operands[i]]);
 
 	      /* Check that an immediate was passed to ops that expect one.  */
 	      if ((flags & OPERAND_NUM)
@@ -1521,7 +1521,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	}
       else
 	fixP->fx_r_type =
-	  get_reloc ((struct d10v_operand *) &d10v_operands[op_type]);
+	  get_reloc (&d10v_operands[op_type]);
     }
 
   /* Fetch the instruction, insert the fully resolved operand

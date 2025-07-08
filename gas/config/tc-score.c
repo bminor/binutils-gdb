@@ -6477,17 +6477,16 @@ s3_number_to_chars (char *buf, valueT val, int n)
 }
 
 static valueT
-s3_normal_chars_to_number (char *buf, int n)
+s3_normal_chars_to_number (const char *buf, int n)
 {
   valueT result = 0;
-  unsigned char *where = (unsigned char *)buf;
 
   if (target_big_endian)
     {
       while (n--)
         {
           result <<= 8;
-          result |= (*where++ & 255);
+          result |= (*buf++ & 255);
         }
     }
   else
@@ -6495,7 +6494,7 @@ s3_normal_chars_to_number (char *buf, int n)
       while (n--)
         {
           result <<= 8;
-          result |= (where[n] & 255);
+          result |= (buf[n] & 255);
         }
     }
 
@@ -6528,7 +6527,7 @@ s3_number_to_chars_littleendian (void *p, valueT data, int n)
 static valueT
 s3_chars_to_number_littleendian (const void *p, int n)
 {
-  char *buf = (char *) p;
+  const char *buf = p;
   valueT result = 0;
 
   switch (n)

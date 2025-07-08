@@ -5209,7 +5209,7 @@ static struct nds32_relax_hint_table relax_ls_table[] =
    elimination itself or not, we have to return the next instruction range.  */
 
 static int
-nds32_elf_sethi_range (struct nds32_relocs_pattern *pattern)
+nds32_elf_sethi_range (const struct nds32_relocs_pattern *pattern)
 {
   int range = 0;
   while (pattern)
@@ -5658,12 +5658,12 @@ static struct nds32_hint_map hint_map [] =
 /* Find the relaxation pattern according to instructions.  */
 
 static bool
-nds32_find_reloc_table (struct nds32_relocs_pattern *relocs_pattern,
+nds32_find_reloc_table (const struct nds32_relocs_pattern *relocs_pattern,
 			struct nds32_relax_hint_table *hint_info)
 {
   unsigned int opcode, seq_size;
   enum nds32_br_range range;
-  struct nds32_relocs_pattern *pattern, *hi_pattern = NULL;
+  const struct nds32_relocs_pattern *pattern, *hi_pattern = NULL;
   const char *opc = NULL;
   relax_info_t *relax_info = NULL;
   nds32_relax_fixup_info_t *fixup_info, *hint_fixup;
@@ -5928,9 +5928,8 @@ nds32_match_hint_insn (struct nds32_opcode *opcode, uint32_t seq)
 static void
 nds32_elf_append_relax_relocs (const char *key, const void *value)
 {
-  struct nds32_relocs_pattern *relocs_pattern =
-    (struct nds32_relocs_pattern *) value;
-  struct nds32_relocs_pattern *pattern_temp, *pattern_now;
+  const struct nds32_relocs_pattern *relocs_pattern = value;
+  const struct nds32_relocs_pattern *pattern_temp, *pattern_now;
   symbolS *sym, *hi_sym = NULL;
   expressionS exp;
   fragS *fragP;
@@ -6265,7 +6264,7 @@ static int
 nds32_elf_append_relax_relocs_traverse (void **slot, void *arg ATTRIBUTE_UNUSED)
 {
   string_tuple_t *tuple = *((string_tuple_t **) slot);
-  nds32_elf_append_relax_relocs (tuple->key, (void *) tuple->value);
+  nds32_elf_append_relax_relocs (tuple->key, (const void *) tuple->value);
   return 1;
 }
 

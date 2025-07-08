@@ -341,10 +341,10 @@ s_pru_align (int ignore ATTRIBUTE_UNUSED)
     {
       input_line_pointer++;
       fill = get_absolute_expression ();
-      pfill = (const char *) &fill;
+      pfill = &fill;
     }
   else if (subseg_text_p (now_seg))
-    pfill = (const char *) &nop;
+    pfill = nop;
   else
     {
       pfill = NULL;

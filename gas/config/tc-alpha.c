@@ -2180,7 +2180,7 @@ emit_ir_load (const expressionS *tok,
     basereg = tok[2].X_add_number;
 
   lituse = load_expression (tok[0].X_add_number, &tok[1],
-			    &basereg, &newtok[1], (const char *) opname);
+			    &basereg, &newtok[1], opname);
 
   if (basereg == alpha_gp_register &&
       (symlen > 4 && strcmp (&symname [symlen - 4], "..lk") == 0))
@@ -2189,7 +2189,7 @@ emit_ir_load (const expressionS *tok,
   newtok[0] = tok[0];
   set_tok_preg (newtok[2], basereg);
 
-  assemble_tokens_to_insn ((const char *) opname, newtok, 3, &insn);
+  assemble_tokens_to_insn (opname, newtok, 3, &insn);
 
   if (lituse)
     {
@@ -2227,7 +2227,7 @@ emit_loadstore (const expressionS *tok,
 	as_bad (_("macro requires $at register while noat in effect"));
 
       lituse = load_expression (AXP_REG_AT, &tok[1],
-				&basereg, &newtok[1], (const char *) opname);
+				&basereg, &newtok[1], opname);
     }
   else
     {
@@ -2238,7 +2238,7 @@ emit_loadstore (const expressionS *tok,
   newtok[0] = tok[0];
   set_tok_preg (newtok[2], basereg);
 
-  assemble_tokens_to_insn ((const char *) opname, newtok, 3, &insn);
+  assemble_tokens_to_insn (opname, newtok, 3, &insn);
 
   if (lituse)
     {
@@ -2684,7 +2684,7 @@ emit_division (const expressionS *tok,
 	}
     }
 
-  sym = symbol_find_or_make ((const char *) symname);
+  sym = symbol_find_or_make (symname);
 
   set_tok_reg (newtok[0], AXP_REG_AT);
   set_tok_sym (newtok[1], sym, 0);
@@ -2737,7 +2737,7 @@ emit_division (const expressionS *tok,
   else
     rr = regno (tok[2].X_add_number);
 
-  sym = symbol_find_or_make ((const char *) symname);
+  sym = symbol_find_or_make (symname);
 
   /* Move the operands into the right place.  */
   if (yr == AXP_REG_T10 && xr == AXP_REG_T11)
@@ -2818,7 +2818,7 @@ emit_jsrjmp (const expressionS *tok,
 	     int ntok,
 	     const void * vopname)
 {
-  const char *opname = (const char *) vopname;
+  const char *opname = vopname;
   struct alpha_insn insn;
   expressionS newtok[3];
   int r, tokidx = 0;
@@ -2914,7 +2914,7 @@ emit_retjcr (const expressionS *tok,
 	     int ntok,
 	     const void * vopname)
 {
-  const char *opname = (const char *) vopname;
+  const char *opname = vopname;
   expressionS newtok[3];
   int r, tokidx = 0;
 

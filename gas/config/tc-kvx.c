@@ -700,7 +700,7 @@ assemble_insn (const struct kvxopc * opcode, struct token_list *tok, struct kvxi
   insn->immx1 = NOIMMX;
 
   struct token_list *tok_ = tok;
-  struct kvx_operand **format = (struct kvx_operand **) opcode->format;
+  struct kvx_operand *const *format = opcode->format;
 
   while (tok_)
     {
@@ -1441,8 +1441,8 @@ kvx_set_cpu (void)
 static int
 kvxop_compar (const void *a, const void *b)
 {
-  const struct kvxopc *opa = (const struct kvxopc *) a;
-  const struct kvxopc *opb = (const struct kvxopc *) b;
+  const struct kvxopc *opa = a;
+  const struct kvxopc *opb = b;
   int res = strcmp (opa->as_op, opb->as_op);
 
   if (res)
