@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: bfd 2.43.90\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
 "POT-Creation-Date: 2025-01-19 12:19+0000\n"
-"PO-Revision-Date: 2025-05-26 00:22+0800\n"
+"PO-Revision-Date: 2025-07-04 21:09+0800\n"
 "Last-Translator: Sharuzzaman Ahmat Raslan <sharuzzaman@gmail.com>\n"
 "Language-Team: Malay <translation-team-ms@lists.sourceforge.net>\n"
 "Language: ms\n"
@@ -212,7 +212,9 @@ msgstr "Format Fail"
 #: bfd.c:791
 #, fuzzy
 msgid "section has no contents"
-msgstr "Kand_ungan"
+msgstr ""
+"\n"
+"Terdapat direktori nyahpijat dalam %s, tetapi bahagian itu tidak mempunyai kandungan\n"
 
 #: bfd.c:792
 #, fuzzy
@@ -607,9 +609,11 @@ msgid "warning: type of symbol `%s' changed from %d to %d in %pB"
 msgstr ""
 
 #: cofflink.c:2340
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: relocs in section `%pA', but it has no contents"
 msgstr ""
+"\n"
+"Terdapat direktori nyahpijat dalam %s, tetapi bahagian itu tidak mempunyai kandungan\n"
 
 #: cofflink.c:2403 elflink.c:11809
 #, c-format
@@ -659,7 +663,9 @@ msgstr "%s: tidak dapat mencari seksyen .text dalam %s\n"
 #: dwarf2.c:710
 #, fuzzy, c-format
 msgid "DWARF error: section %s has no contents"
-msgstr "Ralat menyenaraikan kandungan folder '%s': %s"
+msgstr ""
+"\n"
+"Terdapat direktori nyahpijat dalam %s, tetapi bahagian itu tidak mempunyai kandungan\n"
 
 #. PR 26946
 #: dwarf2.c:719
@@ -786,7 +792,7 @@ msgstr ""
 #: ecoff.c:1313
 #, fuzzy, c-format
 msgid "unknown basic type %d"
-msgstr "Jenis anak panah %d tak diketahui\n"
+msgstr "Jenis bus %d tidak diketahui"
 
 #: ecoff.c:1571
 #, fuzzy, c-format
@@ -1141,7 +1147,7 @@ msgstr ""
 #: elf.c:614
 #, fuzzy, c-format
 msgid "%pB: could not read contents of group [%u]"
-msgstr "Tidak dapat membaca kandungan %s"
+msgstr "Tidak dapat membaca kandungan folder"
 
 #: elf.c:645
 #, c-format
@@ -2252,7 +2258,7 @@ msgstr ""
 #: elf32-avr.c:3335 elfnn-aarch64.c:3219
 #, fuzzy, c-format
 msgid "cannot create stub entry %s"
-msgstr "%s: Tak dapat mencipta symlink ke %s"
+msgstr "Tidak dapat cipta folder '%s'"
 
 #: elf32-bfin.c:107 elf32-bfin.c:364
 #, fuzzy
@@ -3197,7 +3203,7 @@ msgstr "Tidak boleh mengendalikan lokasi \"%s:\"."
 #: elf32-ppc.c:1627
 #, fuzzy, c-format
 msgid "corrupt %s section in %pB"
-msgstr "%pB: gagal membaca bahagian data nyahpepijat"
+msgstr "%s Pb"
 
 #: elf32-ppc.c:1646
 #, fuzzy, c-format
@@ -4521,7 +4527,9 @@ msgstr ""
 #: elf64-mmix.c:2208
 #, fuzzy
 msgid "register section has contents\n"
-msgstr "Bahagian"
+msgstr ""
+"\n"
+"Terdapat direktori nyahpijat dalam %s, tetapi bahagian itu tidak mempunyai kandungan\n"
 
 #: elf64-mmix.c:2398
 #, c-format
@@ -6628,7 +6636,7 @@ msgstr "(Kod mekanisma GSSAPI tidak diketahui: %x)"
 #: pei-x86_64.c:403 pei-x86_64.c:413 pei-x86_64.c:422
 #, fuzzy, c-format
 msgid "warning: xdata section corrupt\n"
-msgstr "AMARAN"
+msgstr "Bahagian .rsrc yang rosak dikesan!\n"
 
 #: pei-x86_64.c:477
 #, fuzzy, c-format
@@ -6653,11 +6661,13 @@ msgid "Warning: %s section size (%ld) is smaller than virtual size (%ld)\n"
 msgstr ""
 
 #: pei-x86_64.c:594
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "The Function Table (interpreted %s section contents)\n"
 msgstr ""
+"\n"
+"Terdapat direktori nyahpijat dalam %s, tetapi bahagian itu tidak mempunyai kandungan\n"
 
 #: pei-x86_64.c:597
 #, c-format
@@ -6915,7 +6925,7 @@ msgstr ""
 #: vms-alpha.c:1441
 #, fuzzy, c-format
 msgid "unknown EGSD subtype %d"
-msgstr "Subjenis polyline tak diketahui: %d\n"
+msgstr "Subjenis spline tak diketahui: %d\n"
 
 #: vms-alpha.c:1474
 #, c-format
@@ -6951,7 +6961,7 @@ msgstr "Fail rosak?"
 #: vms-alpha.c:1989
 #, fuzzy, c-format
 msgid "bad section index in %s"
-msgstr "Tiada seksyen sebegitu: %s"
+msgstr "Nilai magik buruk dalam profile_section_t"
 
 #: vms-alpha.c:2003
 #, fuzzy, c-format
@@ -9063,7 +9073,7 @@ msgstr "Tidak boleh muatkan lokasi"
 #: xtensa-dynconfig.c:86
 #, fuzzy, c-format
 msgid "%s is defined but could not be loaded: %s"
-msgstr "Fail '%s' tidak dapat dimuatkan."
+msgstr "Profil tidak dapat dimuatkan: %s"
 
 #: xtensa-dynconfig.c:102
 #, fuzzy, c-format
@@ -9485,7 +9495,9 @@ msgstr "_Pangkalan Direktori:"
 #: peXXigen.c:1233
 #, fuzzy
 msgid "Debug Directory"
-msgstr "gagal mengemaskini offset fail dalam direktori nyahpijat"
+msgstr ""
+"\n"
+"Terdapat direktori nyahpijat dalam %s, tetapi bahagian itu tidak mempunyai kandungan\n"
 
 #: peXXigen.c:1234
 #, fuzzy
@@ -9543,7 +9555,9 @@ msgstr ""
 msgid ""
 "\n"
 "There is an import table in %s, but that section has no contents\n"
-msgstr "Jadual %s telah dipindahkan ke %s."
+msgstr ""
+"\n"
+"Terdapat direktori nyahpijat dalam %s, tetapi bahagian itu tidak mempunyai kandungan\n"
 
 #: peXXigen.c:1320
 #, fuzzy, c-format
@@ -9553,11 +9567,13 @@ msgid ""
 msgstr "[find_call] %s: 0x%lx ke 0x%lx\n"
 
 #: peXXigen.c:1326
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "The Import Tables (interpreted %s section contents)\n"
 msgstr ""
+"\n"
+"Terdapat direktori nyahpijat dalam %s, tetapi bahagian itu tidak mempunyai kandungan\n"
 
 #: peXXigen.c:1329
 #, c-format
@@ -9619,12 +9635,14 @@ msgid ""
 msgstr "[find_call] %s: 0x%lx ke 0x%lx\n"
 
 #: peXXigen.c:1666
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "The Export Tables (interpreted %s section contents)\n"
 "\n"
 msgstr ""
+"\n"
+"Terdapat direktori nyahpijat dalam %s, tetapi bahagian itu tidak mempunyai kandungan\n"
 
 #: peXXigen.c:1670
 #, fuzzy, c-format
@@ -9789,7 +9807,7 @@ msgstr ""
 #: peXXigen.c:2276
 #, fuzzy, c-format
 msgid "%03x %*.s Entry: "
-msgstr "Masukan EXIF '%s' "
+msgstr " Sumber bermula pada offset: %#03x\n"
 
 #: peXXigen.c:2300
 #, fuzzy, c-format
@@ -9822,9 +9840,9 @@ msgid "%03x %*.s  Leaf: Addr: %#08lx, Size: %#08lx, Codepage: %d\n"
 msgstr ""
 
 #: peXXigen.c:2402
-#, fuzzy, c-format
+#, c-format
 msgid "<unknown directory type: %d>\n"
-msgstr "Jenis objek tak diketahui %d\n"
+msgstr "<jenis direktori tidak diketahui: %d>\n"
 
 #: peXXigen.c:2410
 #, c-format
@@ -9832,9 +9850,9 @@ msgid " Table: Char: %d, Time: %08lx, Ver: %d/%d, Num Names: %d, IDs: %d\n"
 msgstr ""
 
 #: peXXigen.c:2498
-#, fuzzy, c-format
+#, c-format
 msgid "Corrupt .rsrc section detected!\n"
-msgstr "Fail rosak?"
+msgstr "Bahagian .rsrc yang rosak dikesan!\n"
 
 #: peXXigen.c:2522
 #, c-format
@@ -9844,28 +9862,32 @@ msgid ""
 msgstr ""
 
 #: peXXigen.c:2528
-#, c-format
+#, fuzzy, c-format
 msgid " String table starts at offset: %#03x\n"
-msgstr ""
+msgstr " Sumber bermula pada offset: %#03x\n"
 
 #: peXXigen.c:2531
-#, fuzzy, c-format
+#, c-format
 msgid " Resources start at offset: %#03x\n"
-msgstr "Mulakan Offset"
+msgstr " Sumber bermula pada offset: %#03x\n"
 
 #: peXXigen.c:2588
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "There is a debug directory, but the section containing it could not be found\n"
 msgstr ""
+"\n"
+"Terdapat direktori nyahpijat dalam %s, tetapi bahagian itu tidak mempunyai kandungan\n"
 
 #: peXXigen.c:2594
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "\n"
 "There is a debug directory in %s, but that section has no contents\n"
-msgstr "Gagal memproses laporan nyahpijat, meninggalkan fail dalam direktori \"%s\"."
+msgstr ""
+"\n"
+"Terdapat direktori nyahpijat dalam %s, tetapi bahagian itu tidak mempunyai kandungan\n"
 
 #: peXXigen.c:2601
 #, c-format
@@ -9963,9 +9985,9 @@ msgstr ""
 
 #. Corrupted .rsrc section - cannot merge.
 #: peXXigen.c:4286
-#, c-format
+#, fuzzy, c-format
 msgid "%pB: .rsrc merge failure: corrupt .rsrc section"
-msgstr ""
+msgstr "Bahagian .rsrc yang rosak dikesan!\n"
 
 #: peXXigen.c:4294
 #, c-format
