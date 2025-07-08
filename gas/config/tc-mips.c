@@ -1135,8 +1135,7 @@ static bool mips_ignore_branch_isa;
    but it's not clear that it would actually improve performance.  */
 #define RELAX_BRANCH_ENCODE(at, pic,				\
 			    uncond, likely, link, toofar)	\
-  ((relax_substateT)						\
-   (0xc0000000							\
+  ((0xc0000000							\
     | ((at) & 0x1f)						\
     | ((pic) ? 0x20 : 0)					\
     | ((toofar) ? 0x40 : 0)					\
@@ -16227,7 +16226,7 @@ get_symbol (void)
   symbolS *p;
 
   c = get_symbol_name (&name);
-  p = (symbolS *) symbol_find_or_make (name);
+  p = symbol_find_or_make (name);
   (void) restore_line_pointer (c);
   return p;
 }

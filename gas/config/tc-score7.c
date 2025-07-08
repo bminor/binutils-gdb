@@ -5251,7 +5251,7 @@ s7_b32_relax_to_b16 (fragS * fragp)
   if (s == NULL)
     frag_addr = 0;
   else
-    symbol_address = (addressT) symbol_get_frag (s)->fr_address;
+    symbol_address = symbol_get_frag (s)->fr_address;
 
   value = s7_md_chars_to_number (fragp->fr_literal, s7_INSN_SIZE);
 
@@ -5440,7 +5440,7 @@ s7_get_symbol (void)
   symbolS *p;
 
   c = get_symbol_name (&name);
-  p = (symbolS *) symbol_find_or_make (name);
+  p = symbol_find_or_make (name);
   (void) restore_line_pointer (c);
   return p;
 }
@@ -6080,7 +6080,7 @@ s7_begin (void)
 
   s7_build_dependency_insn_hsh ();
 
-  for (i = (int) REG_TYPE_FIRST; i < (int) s7_REG_TYPE_MAX; i++)
+  for (i = REG_TYPE_FIRST; i < s7_REG_TYPE_MAX; i++)
     s7_build_reg_hsh (s7_all_reg_maps + i);
 
   /* Initialize dependency vector.  */

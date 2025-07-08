@@ -3174,7 +3174,7 @@ s_rept (int expand_count)
 {
   size_t count;
 
-  count = (size_t) get_absolute_expression ();
+  count = get_absolute_expression ();
 
   do_repeat (count, "REPT", "ENDR", expand_count ? "" : NULL);
 }
@@ -4636,7 +4636,7 @@ emit_expr_with_reloc (expressionS *exp,
       /* We can ignore any carry out, because it will be handled by
 	 extra_digit if it is needed.  */
 
-      extra_digit = (valueT) -1;
+      extra_digit = -1;
       op = O_big;
     }
 
@@ -5453,7 +5453,7 @@ emit_leb128_expr (expressionS *exp, int sign)
 
   /* Let check_eh_frame know that data is being emitted.  nbytes == -1 is
      a signal that this is leb128 data.  It shouldn't optimize this away.  */
-  nbytes = (unsigned int) -1;
+  nbytes = -1u;
   if (check_eh_frame (exp, &nbytes))
     abort ();
 
@@ -6293,7 +6293,7 @@ char				/* Return terminator.  */
 get_absolute_expression_and_terminator (long *val_pointer /* Return value of expression.  */)
 {
   /* FIXME: val_pointer should probably be offsetT *.  */
-  *val_pointer = (long) get_absolute_expression ();
+  *val_pointer = get_absolute_expression ();
   return (*input_line_pointer++);
 }
 
@@ -6357,7 +6357,7 @@ demand_copy_string (int *lenP)
       ignore_rest_of_line ();
     }
   *lenP = len;
-  return (retval);
+  return retval;
 }
 
 /* In:	Input_line_pointer->next character.

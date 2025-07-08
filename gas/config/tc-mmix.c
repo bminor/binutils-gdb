@@ -2489,8 +2489,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT segment)
     case BFD_RELOC_MMIX_PUSHJ_STUBBABLE:
       /* If this fixup is out of range, punt to the linker to emit an
 	 error.  This should only happen with -no-expand.  */
-      if (val < -(((offsetT) 1 << 19)/2)
-	  || val >= ((offsetT) 1 << 19)/2 - 1
+      if (val < -((1 << 19) / 2)
+	  || val >= (1 << 19) / 2 - 1
 	  || (val & 3) != 0)
 	{
 	  if (warn_on_expansion)
@@ -2513,8 +2513,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT segment)
     case BFD_RELOC_MMIX_JMP:
       /* If this fixup is out of range, punt to the linker to emit an
 	 error.  This should only happen with -no-expand.  */
-      if (val < -(((offsetT) 1 << 27)/2)
-	  || val >= ((offsetT) 1 << 27)/2 - 1
+      if (val < -((1 << 27) / 2)
+	  || val >= (1 << 27) / 2 - 1
 	  || (val & 3) != 0)
 	{
 	  if (warn_on_expansion)
@@ -2773,7 +2773,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
 		  && (bfd_vma) val + 256 > lowest_data_loc
 		  && bfd_is_abs_section (addsec))
 		{
-		  val -= (offsetT) lowest_data_loc;
+		  val -= lowest_data_loc;
 		  addsy = section_symbol (data_section);
 		}
 	      /* Likewise text section.  */
@@ -2781,7 +2781,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
 		       && (bfd_vma) val + 256 > lowest_text_loc
 		       && bfd_is_abs_section (addsec))
 		{
-		  val -= (offsetT) lowest_text_loc;
+		  val -= lowest_text_loc;
 		  addsy = section_symbol (text_section);
 		}
 	    }
@@ -3437,9 +3437,8 @@ mmix_md_relax_frag (segT seg, fragS *fragP, long stretch)
 	if (fragP == seginfo->tc_segment_info_data.last_stubfrag)
 	  seginfo->tc_segment_info_data.nstubs = 0;
 
-	return
-	   (mmix_relax_table[fragP->fr_subtype].rlx_length
-	    - mmix_relax_table[prev_type].rlx_length);
+	return (mmix_relax_table[fragP->fr_subtype].rlx_length
+		- mmix_relax_table[prev_type].rlx_length);
       }
 
     case ENCODE_RELAX (STATE_PUSHJ, STATE_MAX):
@@ -3634,7 +3633,7 @@ mmix_md_finish (void)
       if (! merge_gregs)
 	continue;
 
-      osymval = (offsetT) S_GET_VALUE (symbolP);
+      osymval = S_GET_VALUE (symbolP);
       osymfrag = symbol_get_frag (symbolP);
 
       /* If the symbol isn't defined, we can't say that another symbol
@@ -3725,7 +3724,7 @@ mmix_frob_file (void)
 	}
 
       sym = fixP->fx_addsy;
-      offs = (offsetT) fixP->fx_offset;
+      offs = fixP->fx_offset;
 
       /* If the symbol is defined, then it must be resolved to a section
 	 symbol at this time, or else we don't know how to handle it.  */
@@ -3748,7 +3747,7 @@ mmix_frob_file (void)
 	  && (bfd_vma) offs + 256 > lowest_data_loc
 	  && bfd_is_abs_section (S_GET_SEGMENT (sym)))
 	{
-	  offs -= (offsetT) lowest_data_loc;
+	  offs -= lowest_data_loc;
 	  sym = section_symbol (data_section);
 	}
       /* Likewise text section.  */
@@ -3756,7 +3755,7 @@ mmix_frob_file (void)
 	       && (bfd_vma) offs + 256 > lowest_text_loc
 	       && bfd_is_abs_section (S_GET_SEGMENT (sym)))
 	{
-	  offs -= (offsetT) lowest_text_loc;
+	  offs -= lowest_text_loc;
 	  sym = section_symbol (text_section);
 	}
 

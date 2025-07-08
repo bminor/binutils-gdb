@@ -452,7 +452,7 @@ static hashval_t
 align_sec_sym_hash (const void *entry)
 {
   const align_sec_sym *e = entry;
-  return (hashval_t) (e->sec_id);
+  return e->sec_id;
 }
 
 static int

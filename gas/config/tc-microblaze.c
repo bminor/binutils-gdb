@@ -484,7 +484,7 @@ parse_reg (char * s, unsigned * reg)
         }
       else
         as_bad (_("register expected, but saw '%.6s'"), s);
-      if ((int) tmpreg >= MIN_PVR_REGNUM && tmpreg <= MAX_PVR_REGNUM)
+      if (tmpreg - MIN_PVR_REGNUM <= MAX_PVR_REGNUM - MIN_PVR_REGNUM)
         *reg = REG_PVR + tmpreg;
       else
         {
@@ -513,7 +513,7 @@ parse_reg (char * s, unsigned * reg)
       else
 	as_bad (_("register expected, but saw '%.6s'"), s);
 
-      if ((int) tmpreg >= MIN_REGNUM && tmpreg <= MAX_REGNUM)
+      if (tmpreg - MIN_REGNUM <= MAX_REGNUM - MIN_REGNUM)
         *reg = tmpreg;
       else
 	{
@@ -550,7 +550,7 @@ parse_reg (char * s, unsigned * reg)
           else
             as_bad (_("register expected, but saw '%.6s'"), s);
 
-          if ((int)tmpreg >= MIN_REGNUM && tmpreg <= MAX_REGNUM)
+          if (tmpreg - MIN_REGNUM <= MAX_REGNUM - MIN_REGNUM)
             *reg = tmpreg;
           else
 	    {

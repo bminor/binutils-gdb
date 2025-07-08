@@ -727,9 +727,9 @@ s390_insert_operand (unsigned char *insn,
 	{
 	  if (operand->flags & S390_OPERAND_PCREL)
 	    {
-	      val = (offsetT) ((addressT) val << 1);
-	      min = (offsetT) ((addressT) min << 1);
-	      max = (offsetT) ((addressT) max << 1);
+	      val = (addressT) val << 1;
+	      min = (addressT) min << 1;
+	      max = (addressT) max << 1;
 	    }
 
 	  s390_bad_operand_out_of_range (operand_number, val, min, max,
@@ -738,7 +738,7 @@ s390_insert_operand (unsigned char *insn,
 	  return;
 	}
       /* val is ok, now restrict it to operand->bits bits.  */
-      uval = (addressT) val & ((((addressT) 1 << (operand->bits-1)) << 1) - 1);
+      uval = val & ((((addressT) 1 << (operand->bits-1)) << 1) - 1);
       /* val is restrict, now check for special case.  */
       if (operand->bits == 20 && operand->shift == 20)
         uval = (uval >> 12) | ((uval & 0xfff) << 8);
@@ -748,8 +748,8 @@ s390_insert_operand (unsigned char *insn,
       addressT min, max;
 
       max = (((addressT) 1 << (operand->bits - 1)) << 1) - 1;
-      min = (offsetT) 0;
-      uval = (addressT) val;
+      min = 0;
+      uval = val;
 
       /* Vector register operands have an additional bit in the RXB
 	 field.  */

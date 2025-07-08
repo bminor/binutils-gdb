@@ -147,12 +147,12 @@ make_invalid_floating_point_number (LITTLENUM_TYPE *words)
 {
   as_bad (_("cannot create floating-point number"));
   /* Zero the leftmost bit.  */
-  words[0] = (LITTLENUM_TYPE) ((unsigned) -1) >> 1;
-  words[1] = (LITTLENUM_TYPE) -1;
-  words[2] = (LITTLENUM_TYPE) -1;
-  words[3] = (LITTLENUM_TYPE) -1;
-  words[4] = (LITTLENUM_TYPE) -1;
-  words[5] = (LITTLENUM_TYPE) -1;
+  words[0] = (LITTLENUM_TYPE) -1 >> 1;
+  words[1] = -1;
+  words[2] = -1;
+  words[3] = -1;
+  words[4] = -1;
+  words[5] = -1;
 }
 
 /* Build a floating point constant at str into a IEEE floating
@@ -283,7 +283,7 @@ atof_ieee (char *str,			/* Text to convert to binary.  */
 
     default:
       make_invalid_floating_point_number (words);
-      return (NULL);
+      return NULL;
     }
 
   return atof_ieee_detail (str, precision, exponent_bits, words, NULL);

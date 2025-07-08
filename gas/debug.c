@@ -22,7 +22,8 @@
 #include "as.h"
 #include "subsegs.h"
 
-dmp_frags ()
+void
+dmp_frags (void)
 {
   asection *s;
   frchainS *chp;
@@ -48,9 +49,8 @@ dmp_frags ()
       }
 }
 
-dmp_frag (fp, indent)
-     struct frag *fp;
-     char *indent;
+void
+dmp_frag (struct frag *fp, char *indent)
 {
   for (; fp; fp = fp->fr_next)
     {
@@ -90,9 +90,8 @@ dmp_frag (fp, indent)
     }
 }
 
-var_chars (fp, n)
-     struct frag *fp;
-     int n;
+void
+var_chars (struct frag *fp, int n)
 {
   unsigned char *p;
 

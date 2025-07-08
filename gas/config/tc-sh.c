@@ -3703,8 +3703,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       if (val >= 0)
 	val >>= shift;
       else
-	val = ((val >> shift)
-	       | ((long) -1 & ~ ((long) -1 >> shift)));
+	val = (val >> shift) | (-1L & ~ (-1L >> shift));
     }
 
   /* Extend sign for 64-bit host.  */

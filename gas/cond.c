@@ -504,7 +504,7 @@ ignore_input (void)
   else
     {
       if (s[-1] != '.')
-	return (current_cframe != NULL) && (current_cframe->ignoring);
+	return current_cframe != NULL && current_cframe->ignoring;
     }
 
   /* We cannot ignore certain pseudo ops.  */
@@ -526,15 +526,14 @@ ignore_input (void)
       break;
     }
 
-  return (current_cframe != NULL) && (current_cframe->ignoring);
+  return current_cframe != NULL && current_cframe->ignoring;
 }
 
 static void
 initialize_cframe (struct conditional_frame *cframe)
 {
   memset (cframe, 0, sizeof (*cframe));
-  cframe->if_file_line.file
-	    = as_where (&cframe->if_file_line.line);
+  cframe->if_file_line.file = as_where (&cframe->if_file_line.line);
   cframe->previous_cframe = current_cframe;
   cframe->dead_tree = current_cframe != NULL && current_cframe->ignoring;
   cframe->macro_nest = macro_nest;

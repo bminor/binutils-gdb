@@ -795,7 +795,7 @@ calc_hex (list_info_type *list)
 {
   size_t data_buffer_size;
   list_info_type *first = list;
-  unsigned int address = ~(unsigned int) 0;
+  unsigned int address = ~0u;
   fragS *frag;
   fragS *frag_ptr;
   unsigned int octet_in_frag;
@@ -817,7 +817,7 @@ calc_hex (list_info_type *list)
       while (octet_in_frag < frag_ptr->fr_fix
 	     && data_buffer_size < MAX_BYTES - 3)
 	{
-	  if (address == ~(unsigned int) 0)
+	  if (address == ~0u)
 	    address = frag_ptr->fr_address / OCTETS_PER_BYTE;
 
 	  sprintf (data_buffer + data_buffer_size,
@@ -836,7 +836,7 @@ calc_hex (list_info_type *list)
 		  < frag_ptr->fr_fix + frag_ptr->fr_var * frag_ptr->fr_offset)
 		 && data_buffer_size < MAX_BYTES - 3)
 	    {
-	      if (address == ~(unsigned int) 0)
+	      if (address == ~0u)
 		address = frag_ptr->fr_address / OCTETS_PER_BYTE;
 
 	      sprintf (data_buffer + data_buffer_size,
@@ -875,7 +875,7 @@ print_lines (list_info_type *list, unsigned int lineno,
   nchars = (LISTING_WORD_SIZE * 2 + 1) * listing_lhs_width;
 
   /* Print the hex for the first line.  */
-  if (address == ~(unsigned int) 0)
+  if (address == ~0u)
     {
       fprintf (list_file, "% 4d     ", lineno);
       for (idx = 0; idx < nchars; idx++)
@@ -1302,7 +1302,7 @@ listing_listing (char *name ATTRIBUTE_UNUSED)
 		  p = buffer_line (list->file, buffer, width);
 
 		  if (list->file->linenum < list_line)
-		    address = ~(unsigned int) 0;
+		    address = ~0u;
 		  else
 		    address = calc_hex (list);
 
@@ -1354,11 +1354,11 @@ print_timestamp (void)
 }
 
 static void
-print_single_option (char * opt, int *pos)
+print_single_option (char *opt, size_t *pos)
 {
   size_t opt_len = strlen (opt);
 
-   if ((*pos + opt_len) < paper_width)
+   if (*pos + opt_len < paper_width)
      {
         fprintf (list_file, _("%s "), opt);
         *pos = *pos + opt_len;
@@ -1376,7 +1376,7 @@ static void
 print_options (char ** argv)
 {
   const char *field_name = _("\n options passed\t: ");
-  int pos = strlen (field_name);
+  size_t pos = strlen (field_name);
   char **p;
 
   fputs (field_name, list_file);

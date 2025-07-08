@@ -3525,7 +3525,7 @@ md_assemble (char *str)
       bool found_match = false;
 
       for (i = 0; i < TIC6X_NUM_PREFER; i++)
-	opc_rank[i] = (unsigned int) -1;
+	opc_rank[i] = -1u;
 
       min_rank = TIC6X_NUM_PREFER - 1;
       max_rank = 0;
@@ -3574,7 +3574,7 @@ md_assemble (char *str)
 	      if (rank > max_rank)
 		max_rank = rank;
 
-	      if (opc_rank[rank] == (unsigned int) -1)
+	      if (opc_rank[rank] == -1u)
 		opc_rank[rank] = i;
 	      else
 		/* The opcode table should provide a total ordering
@@ -3605,7 +3605,7 @@ md_assemble (char *str)
     {
       fix_needed = false;
 
-      if (opc_rank[try_rank] == (unsigned int) -1)
+      if (opc_rank[try_rank] == -1u)
 	continue;
 
       opcode_value = tic6x_try_encode (opcm[opc_rank[try_rank]], operands,
@@ -4466,7 +4466,7 @@ tic6x_pcrel_from_section (fixS *fixp, segT sec)
       && (!S_IS_DEFINED (fixp->fx_addsy)
 	  || S_GET_SEGMENT (fixp->fx_addsy) != sec))
     return 0;
-  return (fixp->fx_where + fixp->fx_frag->fr_address) & ~(long) 0x1f;
+  return (fixp->fx_where + fixp->fx_frag->fr_address) & ~0x1fULL;
 }
 
 /* Round up a section size to the appropriate boundary.  */

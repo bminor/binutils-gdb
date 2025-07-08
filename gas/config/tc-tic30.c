@@ -598,7 +598,7 @@ tic30_operand (char *token)
 		  current_op->immediate.s_number
 		    = current_op->immediate.imm_expr.X_add_number;
 		  current_op->immediate.u_number
-		    = (unsigned int) current_op->immediate.imm_expr.X_add_number;
+		    = current_op->immediate.imm_expr.X_add_number;
 		  current_op->immediate.resolved = 1;
 		}
 	    }
@@ -610,8 +610,8 @@ tic30_operand (char *token)
 		  current_op->immediate.decimal_found = 1;
 	      current_op->immediate.label = xstrdup (token);
 	      current_op->immediate.f_number = (float) atof (token);
-	      current_op->immediate.s_number = (int) atoi (token);
-	      current_op->immediate.u_number = (unsigned int) atoi (token);
+	      current_op->immediate.s_number = atoi (token);
+	      current_op->immediate.u_number = atoi (token);
 	      current_op->immediate.resolved = 1;
 	    }
 	  current_op->op_type = Disp | Abs24 | Imm16 | Imm24;
@@ -1279,7 +1279,7 @@ md_atof (int what_statement_type,
 	      if (mant == 0)
 		{
 		  mant |= 0x00800000;
-		  exp = (long) exp - 0x01000000;
+		  exp = exp - 0x01000000;
 		}
 	    }
 	  tmsfloat = exp | mant;

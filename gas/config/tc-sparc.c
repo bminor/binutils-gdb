@@ -1254,7 +1254,7 @@ synthetize_setuw (const struct sparc_opcode *insn)
 	      && (the_insn.exp.X_add_number < -(offsetT) U0x80000000
 		  || the_insn.exp.X_add_number > (offsetT) U0xffffffff))
 	    as_warn (_("set: number not in -2147483648..4294967295 range"));
-	  the_insn.exp.X_add_number = (int) the_insn.exp.X_add_number;
+	  the_insn.exp.X_add_number = (int32_t) the_insn.exp.X_add_number;
 	}
     }
 

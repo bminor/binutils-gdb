@@ -1228,7 +1228,7 @@ obj_elf_section (int push)
       if (push && ISDIGIT (*input_line_pointer))
 	{
 	  /* .pushsection has an optional subsection.  */
-	  new_subsection = (subsegT) get_absolute_expression ();
+	  new_subsection = get_absolute_expression ();
 
 	  SKIP_WHITESPACE ();
 
@@ -1459,7 +1459,7 @@ obj_elf_section (int push)
 		  char *t = input_line_pointer;
 		  match.sh_info = strtoul (input_line_pointer,
 					&input_line_pointer, 0);
-		  if (match.sh_info == (unsigned int) -1)
+		  if (match.sh_info == -1u)
 		    {
 		      as_warn (_("unsupported mbind section info: %s"), t);
 		      match.sh_info = 0;
@@ -1496,8 +1496,7 @@ obj_elf_section (int push)
 			      errno = 0;
 			      id = strtoul (input_line_pointer,
 					    &input_line_pointer, 0);
-			      overflow = (id == (unsigned long) -1
-					  && errno == ERANGE);
+			      overflow = id == -1ul && errno == ERANGE;
 			    }
 			  else
 			    {
@@ -1506,7 +1505,7 @@ obj_elf_section (int push)
 				 (const char **) &input_line_pointer, 0);
 			      overflow = id == ~(bfd_vma) 0;
 			    }
-			  if (overflow || id > (unsigned int) -1)
+			  if (overflow || id > -1u)
 			    {
 			      char *linefeed, saved_char = 0;
 			      if ((linefeed = strchr (t, '\n')) != NULL)

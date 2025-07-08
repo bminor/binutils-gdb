@@ -5596,25 +5596,25 @@ md_apply_fix (fixS   *fixP,
 	  case BFD_RELOC_CKCORE_PCREL_IMM8BY4:
 	  case BFD_RELOC_CKCORE_PCREL_IMM10BY4:
 	  case BFD_RELOC_CKCORE_PCREL_IMM16BY4:
-	    max = (offsetT) howto->dst_mask;
+	    max = howto->dst_mask;
 	    min = 0;
 	    break;
 	    /* lrw16.  */
 	  case BFD_RELOC_CKCORE_PCREL_IMM7BY4:
 	    if (do_extend_lrw)
-	      max = (offsetT)((1 << (howto->bitsize + 1)) - 2);
+	      max = ((valueT) 1 << (howto->bitsize + 1)) - 2;
 	    else
-	      max = (offsetT)((1 << howto->bitsize) - 1);
+	      max = ((valueT) 1 << howto->bitsize) - 1;
 	    min = 0;
 	    break;
 	    /* flrws, flrwd: the offset bits are divided in two parts.  */
 	  case BFD_RELOC_CKCORE_PCREL_FLRW_IMM8BY4:
-	    max = (offsetT)((1 << howto->bitsize) - 1);
+	    max = ((valueT) 1 << howto->bitsize) - 1;
 	    min = 0;
 	    break;
 	    /* Offset is signed.  */
 	  default:
-	    max = (offsetT)(howto->dst_mask >> 1);
+	    max = howto->dst_mask >> 1;
 	    min = - max - 1;
 	    issigned = 1;
 	  }
@@ -5630,7 +5630,7 @@ md_apply_fix (fixS   *fixP,
 	if (do_extend_lrw && (opcode & 0xfc00) == CSKYV2_INST_LRW16)
 	  val &= 0xff;
 	else
-	  val &= issigned ? (offsetT)(howto->dst_mask) : max;
+	  val &= issigned ? (offsetT) howto->dst_mask : max;
 
 	if (fixP->fx_r_type == BFD_RELOC_CKCORE_PCREL_BLOOP_IMM4BY4)
 	  val = (val & 0xf) << 12;

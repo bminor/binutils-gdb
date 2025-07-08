@@ -1103,7 +1103,7 @@ check_operand (const struct mn10300_operand *operand,
 
       test = val;
 
-      if (test < (offsetT) min || test > (offsetT) max)
+      if (test < min || test > max)
 	return false;
     }
   return true;
@@ -1146,8 +1146,9 @@ mn10300_insert_operand (unsigned long *insnp,
 
       test = val;
 
-      if (test < (offsetT) min || test > (offsetT) max)
-	as_warn_value_out_of_range (_("operand"), test, (offsetT) min, (offsetT) max, file, line);
+      if (test < min || test > max)
+	as_warn_value_out_of_range (_("operand"), test, (offsetT) min,
+				    (offsetT) max, file, line);
     }
 
   if ((operand->flags & MN10300_OPERAND_SPLIT) != 0)
@@ -1209,20 +1210,20 @@ mn10300_insert_operand (unsigned long *insnp,
     }
   else if ((operand->flags & MN10300_OPERAND_EXTENDED) == 0)
     {
-      *insnp |= (((long) val & ((1 << operand->bits) - 1))
+      *insnp |= ((val & ((1 << operand->bits) - 1))
 		 << (operand->shift + shift));
 
       if ((operand->flags & MN10300_OPERAND_REPEATED) != 0)
-	*insnp |= (((long) val & ((1 << operand->bits) - 1))
+	*insnp |= ((val & ((1 << operand->bits) - 1))
 		   << (operand->shift + shift + operand->bits));
     }
   else
     {
-      *extensionp |= (((long) val & ((1 << operand->bits) - 1))
+      *extensionp |= ((val & ((1 << operand->bits) - 1))
 		      << (operand->shift + shift));
 
       if ((operand->flags & MN10300_OPERAND_REPEATED) != 0)
-	*extensionp |= (((long) val & ((1 << operand->bits) - 1))
+	*extensionp |= ((val & ((1 << operand->bits) - 1))
 			<< (operand->shift + shift + operand->bits));
     }
 }

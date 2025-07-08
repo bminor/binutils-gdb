@@ -419,8 +419,8 @@ input_scrub_next_buffer (char **bufp)
       partial_size = limit - p;
 
       /* Save the fragment after that last newline.  */
-      memcpy (save_source, partial_where, (int) AFTER_SIZE);
-      memcpy (partial_where, AFTER_STRING, (int) AFTER_SIZE);
+      memcpy (save_source, partial_where, AFTER_SIZE);
+      memcpy (partial_where, AFTER_STRING, AFTER_SIZE);
       return partial_where;
 
     read_more:

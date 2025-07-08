@@ -7333,7 +7333,7 @@ m68k_set_extension (char const *name, int allow_m, int silent)
 
   if (negated)
     not_current_architecture |= (ext->control_regs
-				 ? *(unsigned *)ext->control_regs: ext->arch);
+				 ? *ext->control_regs: ext->arch);
   else
     current_architecture |= ext->arch;
   return 1;

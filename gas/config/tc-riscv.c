@@ -4322,12 +4322,12 @@ riscv_ip_hardcode (char *str,
       switch (imm_expr->X_op)
 	{
 	case O_constant:
-	  values[num++] = (insn_t) imm_expr->X_add_number;
+	  values[num++] = imm_expr->X_add_number;
 	  break;
 	case O_big:
 	  /* Extract lower 32-bits of a big number.
 	     Assume that generic_bignum_to_int32 work on such number.  */
-	  values[num++] = (insn_t) generic_bignum_to_int32 ();
+	  values[num++] = generic_bignum_to_int32 ();
 	  break;
 	default:
 	  /* The first value isn't constant, so it should be
@@ -4616,7 +4616,7 @@ bool riscv_parse_name (const char *name, struct expressionS *ep,
   gas_assert (mode == expr_normal);
 
   regno = reg_lookup_internal (name, RCLASS_GPR);
-  if (regno == (unsigned int)-1)
+  if (regno == -1u)
     return false;
 
   if (symbol_find (name) != NULL)

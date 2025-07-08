@@ -539,7 +539,7 @@ static char *
 fix_ld_st_operand (unsigned long opcode, char* str)
 {
   /* Check the opcode.  */
-  switch ((int) opcode)
+  switch (opcode)
     {
     case  LBOP:
     case  LBUOP:

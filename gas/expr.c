@@ -1991,8 +1991,8 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 				       symbol_get_frag (right.X_add_symbol),
 				       &frag_off))
 	{
-	  offsetT symval_diff = S_GET_VALUE (resultP->X_add_symbol)
-				- S_GET_VALUE (right.X_add_symbol);
+	  offsetT symval_diff = (S_GET_VALUE (resultP->X_add_symbol)
+				 - S_GET_VALUE (right.X_add_symbol));
 	  subtract_from_result (resultP, right.X_add_number, right.X_extrabit);
 	  subtract_from_result (resultP, frag_off / OCTETS_PER_BYTE, 0);
 	  add_to_result (resultP, symval_diff, symval_diff < 0);

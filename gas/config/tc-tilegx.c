@@ -441,25 +441,25 @@ apply_special_operator (operatorT op, offsetT num, const char *file,
       check_shift = 0;
       /* Fall through.  */
     case O_hw0:
-      ret = (signed short)num;
+      ret = (int16_t) num;
       break;
 
     case O_hw1_last:
       check_shift = 16;
       /* Fall through.  */
     case O_hw1:
-      ret = (signed short)(num >> 16);
+      ret = (int16_t) (num >> 16);
       break;
 
     case O_hw2_last:
       check_shift = 32;
       /* Fall through.  */
     case O_hw2:
-      ret = (signed short)(num >> 32);
+      ret = (int16_t) (num >> 32);
       break;
 
     case O_hw3:
-      ret = (signed short)(num >> 48);
+      ret = (int16_t) (num >> 48);
       break;
 
     default:
@@ -959,10 +959,8 @@ tilegx_flush_bundle (void)
       /* Figure out what pipe the fnop must be in via arithmetic.
        * p0 + p1 + p2 must sum to the sum of TILEGX_PIPELINE_Y[012].  */
       current_bundle[0].pipe =
-	(tilegx_pipeline)((TILEGX_PIPELINE_Y0
-			   + TILEGX_PIPELINE_Y1
-			   + TILEGX_PIPELINE_Y2) -
-			  (current_bundle[1].pipe + current_bundle[2].pipe));
+	(TILEGX_PIPELINE_Y0 + TILEGX_PIPELINE_Y1 + TILEGX_PIPELINE_Y2
+	 - current_bundle[1].pipe - current_bundle[2].pipe);
     }
 
   check_illegal_reg_writes ();

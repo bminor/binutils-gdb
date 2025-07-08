@@ -579,9 +579,7 @@ lex_opr (uint8_t *buffer, int *n_bytes, expressionS *exp,
 	    }
 	  else if (lex_reg_name (REG_BIT_Dn, &reg2))
 	    {
-	      if (c >= -1 * (long) (0x1u << 17)
-		  &&
-		  c < (long) (0x1u << 17) - 1)
+	      if (c >= -1 * (1L << 17) && c < (1L << 17) - 1)
 		{
 		  *n_bytes = 3;
 		  *xb = 0x80;

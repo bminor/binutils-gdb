@@ -828,8 +828,7 @@ mn10200_insert_operand (unsigned long *insnp,
   if (operand->bits < 24
       && (operand->flags & MN10200_OPERAND_NOCHECK) == 0)
     {
-      long min, max;
-      offsetT test;
+      offsetT min, max;
 
       if ((operand->flags & MN10200_OPERAND_SIGNED) != 0)
 	{
@@ -842,11 +841,8 @@ mn10200_insert_operand (unsigned long *insnp,
 	  min = 0;
 	}
 
-      test = val;
-
-      if (test < min || test > max)
-	as_warn_value_out_of_range (_("operand"), test, (offsetT) min,
-				    (offsetT) max, file, line);
+      if (val < min || val > max)
+	as_warn_value_out_of_range (_("operand"), val, min, max, file, line);
     }
 
   if ((operand->flags & MN10200_OPERAND_EXTENDED) == 0)

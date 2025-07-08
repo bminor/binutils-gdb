@@ -3669,9 +3669,8 @@ ecoff_build_lineno (const struct ecoff_debug_swap *backend,
       else if (l->next->frag->fr_address + l->next->paddr
 	       > l->frag->fr_address + l->paddr)
 	{
-	  count = ((l->next->frag->fr_address + l->next->paddr
-		    - (l->frag->fr_address + l->paddr))
-		   >> 2);
+	  count = (l->next->frag->fr_address + l->next->paddr
+		   - (l->frag->fr_address + l->paddr)) >> 2;
 	}
       else
 	{
@@ -3785,7 +3784,7 @@ ecoff_build_lineno (const struct ecoff_debug_swap *backend,
       while (count > 0)
 	{
 	  if (bufptr >= *bufend)
-	    bufptr = ecoff_add_bytes (buf, bufend, bufptr, (long) 1);
+	    bufptr = ecoff_add_bytes (buf, bufend, bufptr, 1);
 	  /* 1 is added to each count read.  */
 	  --count;
 	  if (count > 0x0f)

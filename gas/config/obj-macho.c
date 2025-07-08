@@ -531,8 +531,8 @@ obj_mach_o_zerofill (int ignore ATTRIBUTE_UNUSED)
       SKIP_WHITESPACE ();
       if (*input_line_pointer == ',')
 	{
-	  align = (unsigned int) parse_align (0);
-	  if (align == (unsigned int) -1)
+	  align = parse_align (0);
+	  if (align == -1u)
 	    {
 	      as_warn (_("align value not recognized, using size"));
 	      align = size;
@@ -1800,7 +1800,7 @@ obj_mach_o_set_indirect_symbols (bfd *abfd, asection *sec,
 	     entry size, we're dead ... */
 	  gas_assert (eltsiz != 0);
 
-	  ncalc = (unsigned int) (sect_size / eltsiz);
+	  ncalc = sect_size / eltsiz;
 	  if (nactual != ncalc)
 	    as_bad (_("the number of .indirect_symbols defined in section %s"
 		      " does not match the number expected (%d defined, %d"

@@ -1869,7 +1869,7 @@ expression_end (const char *name)
 }
 
 
-#define ERROR_REG_NUM ((unsigned) -1)
+#define ERROR_REG_NUM (-1u)
 
 static unsigned
 tc_get_register (const char *prefix)
@@ -1961,7 +1961,7 @@ expression_maybe_register (xtensa_opcode opc, int opnd, expressionS *tok)
 	    case BFD_RELOC_HI16:
 	      if (tok->X_op == O_constant)
 		{
-		  tok->X_add_number = ((unsigned) tok->X_add_number) >> 16;
+		  tok->X_add_number = ((uint32_t) tok->X_add_number) >> 16;
 		  return;
 		}
 	      break;

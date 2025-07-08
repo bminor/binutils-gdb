@@ -387,13 +387,13 @@ apply_special_operator (operatorT op, int num)
   switch (op)
     {
     case O_lo16:
-      return (signed short)num;
+      return (int16_t) num;
 
     case O_hi16:
-      return (signed short)(num >> 16);
+      return (int16_t) (num >> 16);
 
     case O_ha16:
-      return (signed short)((num + 0x8000) >> 16);
+      return (int16_t) ((num + 0x8000) >> 16);
 
     default:
       abort ();
@@ -846,10 +846,8 @@ tilepro_flush_bundle (void)
       /* Figure out what pipe the fnop must be in via arithmetic.
        * p0 + p1 + p2 must sum to the sum of TILEPRO_PIPELINE_Y[012].  */
       current_bundle[0].pipe =
-	(tilepro_pipeline)((TILEPRO_PIPELINE_Y0
-			    + TILEPRO_PIPELINE_Y1
-			    + TILEPRO_PIPELINE_Y2) -
-			   (current_bundle[1].pipe + current_bundle[2].pipe));
+	(TILEPRO_PIPELINE_Y0 + TILEPRO_PIPELINE_Y1 + TILEPRO_PIPELINE_Y2
+	 - current_bundle[1].pipe - current_bundle[2].pipe);
     }
 
   check_illegal_reg_writes ();

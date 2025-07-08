@@ -1562,7 +1562,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 
   if (fragP->fr_type == rs_machine_dependent)
     {
-      switch ((int) fragP->fr_subtype)
+      switch (fragP->fr_subtype)
 	{
 	case 0:
 	  fragP->fr_type = rs_fill;
@@ -6615,7 +6615,7 @@ pa_type_args (symbolS *symbolP, int is_export)
      than BFD understands.  This is how we get this information
      to the SOM BFD backend.  */
 #ifdef obj_set_symbol_type
-  obj_set_symbol_type (bfdsym, (int) type);
+  obj_set_symbol_type (bfdsym, type);
 #else
   (void) type;
 #endif
@@ -7548,7 +7548,6 @@ pa_subspace (int create_new)
       /* Now that all the flags are set, update an existing subspace,
 	 or create a new one.  */
       if (ssd)
-
 	current_subspace = update_subspace (space, ss_name, loadable,
 					    code_only, comdat, common,
 					    dup_common, sort, zero, access_ctr,
@@ -7973,7 +7972,7 @@ pa_subsegment_to_subspace (asection *seg, subsegT subseg)
 	  for (subspace_chain = space_chain->sd_subspaces;
 	       subspace_chain;
 	       subspace_chain = subspace_chain->ssd_next)
-	    if (subspace_chain->ssd_subseg == (int) subseg)
+	    if (subspace_chain->ssd_subseg == subseg)
 	      return subspace_chain;
 	}
     }
@@ -8432,12 +8431,12 @@ hppa_force_relocation (struct fix *fixp)
 
   hppa_fixp = fixp->tc_fix_data;
 #ifdef OBJ_SOM
-  if (fixp->fx_r_type == (int) R_HPPA_ENTRY
-      || fixp->fx_r_type == (int) R_HPPA_EXIT
-      || fixp->fx_r_type == (int) R_HPPA_BEGIN_BRTAB
-      || fixp->fx_r_type == (int) R_HPPA_END_BRTAB
-      || fixp->fx_r_type == (int) R_HPPA_BEGIN_TRY
-      || fixp->fx_r_type == (int) R_HPPA_END_TRY
+  if (fixp->fx_r_type == R_HPPA_ENTRY
+      || fixp->fx_r_type == R_HPPA_EXIT
+      || fixp->fx_r_type == R_HPPA_BEGIN_BRTAB
+      || fixp->fx_r_type == R_HPPA_END_BRTAB
+      || fixp->fx_r_type == R_HPPA_BEGIN_TRY
+      || fixp->fx_r_type == R_HPPA_END_TRY
       || (fixp->fx_addsy != NULL && fixp->fx_subsy != NULL
 	  && (hppa_fixp->segment->flags & SEC_CODE) != 0))
     return 1;

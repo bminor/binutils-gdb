@@ -1021,7 +1021,7 @@ kvx_print_insn (struct kvxopc * op ATTRIBUTE_UNUSED)
 
   /* This is a hack which works because the Bundling is the same for all cores
      for now.  */
-  switch ((int) op->bundling)
+  switch (op->bundling)
     {
     case Bundling_kv3_v1_ALL:
       insn_type = "ALL  ";
@@ -1109,7 +1109,7 @@ kvx_reorder_bundle (struct kvxinsn *bundle_insn[], int bundle_insncnt)
       tag = -1, exu = -1;
       /* This is a hack. It works because all the Bundling are the same for all
          cores for now.  */
-      switch ((int) find_bundling (kvxinsn))
+      switch (find_bundling (kvxinsn))
 	{
 	case Bundling_kv3_v1_ALL:
 	  if (bundle_insncnt > 1)

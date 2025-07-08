@@ -478,7 +478,7 @@ tic54x_bss (int x ATTRIBUTE_UNUSED)
   char c;
   char *name;
   char *p;
-  int words;
+  offsetT words;
   segT current_seg;
   subsegT current_subseg;
   symbolS *symbolP;
@@ -504,7 +504,7 @@ tic54x_bss (int x ATTRIBUTE_UNUSED)
   words = get_absolute_expression ();
   if (words < 0)
     {
-      as_bad (_(".bss size %d < 0!"), words);
+      as_bad (_(".bss size %d < 0!"), (int) words);
       ignore_rest_of_line ();
       return;
     }
@@ -860,7 +860,7 @@ tic54x_tag (int ignore ATTRIBUTE_UNUSED)
 static void
 tic54x_struct_field (int type)
 {
-  int size;
+  unsigned int size;
   int count = 1;
   int new_bitfield_offset = 0;
   int field_align = current_stag->current_bitfield_offset != 0;
@@ -964,12 +964,12 @@ tic54x_struct_field (int type)
   if (current_stag->is_union)
     {
       /* Note we treat the element as if it were an array of COUNT.  */
-      if (current_stag->size < (unsigned) size * count)
+      if (current_stag->size < size * count)
 	current_stag->size = size * count;
     }
   else
     {
-      abs_section_offset += (unsigned) size * count;
+      abs_section_offset += size * count;
       current_stag->current_bitfield_offset = new_bitfield_offset;
     }
   line_label = NULL;
@@ -1831,7 +1831,7 @@ tic54x_field (int ignore ATTRIBUTE_UNUSED)
 
 	  /* OR in existing value.  */
 	  if (alloc_frag->tc_frag_data)
-	    value |= ((unsigned short) p[1] << 8) | p[0];
+	    value |= ((uint16_t) p[1] << 8) | p[0];
 	  md_number_to_chars (p, value, 2);
 	  alloc_frag->tc_frag_data += size;
 	  if (alloc_frag->tc_frag_data == 16)
@@ -3937,16 +3937,14 @@ encode_operand (tic54x_insn *insn, enum optype type, struct opstruct *operand)
       if (strcasecmp (operand->buf, "st0") == 0
 	  || strcasecmp (operand->buf, "st1") == 0)
 	{
-	  insn->opcode[0].word |=
-	    ((unsigned short) (operand->buf[2] - '0')) << 9;
+	  insn->opcode[0].word |= ((uint16_t) (operand->buf[2] - '0')) << 9;
 	  return 1;
 	}
       else if (operand->exp.X_op == O_constant
 	       && (operand->exp.X_add_number == 0
 		   || operand->exp.X_add_number == 1))
 	{
-	  insn->opcode[0].word |=
-	    ((unsigned short) (operand->exp.X_add_number)) << 9;
+	  insn->opcode[0].word |= ((uint16_t) (operand->exp.X_add_number)) << 9;
 	  return 1;
 	}
       as_bad (_("Invalid status register \"%s\""), operand->buf);
@@ -5269,7 +5267,7 @@ tic54x_relax_frag (fragS *frag, long stretch ATTRIBUTE_UNUSED)
 
 	      valueT value = bi->value;
 	      value <<= available - size;
-	      value |= ((unsigned short) p[1] << 8) | p[0];
+	      value |= ((uint16_t) p[1] << 8) | p[0];
 	      md_number_to_chars (p, value, 2);
 	      if ((prev_frag->tc_frag_data += size) == 16)
 		prev_frag->tc_frag_data = 0;

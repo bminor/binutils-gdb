@@ -412,10 +412,9 @@ relaxed_symbol_addr (fragS *fragp, long stretch)
 	  if (f->fr_type == rs_align || f->fr_type == rs_align_code)
 	    {
 	      if (stretch < 0)
-		stretch = - ((- stretch)
-			     & ~ ((1 << (int) f->fr_offset) - 1));
+		stretch = -(-stretch & ~((1ul << f->fr_offset) - 1));
 	      else
-		stretch &= ~ ((1 << (int) f->fr_offset) - 1);
+		stretch &= ~((1ul << f->fr_offset) - 1);
 	      if (stretch == 0)
 		break;
 	    }
@@ -683,7 +682,7 @@ md_apply_fix (fixS * fixP, valueT * value, segT segment)
 	default:
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
 			"bad or unhandled relocation type: 0x%02x",
-			fixP->fx_r_type);
+			(unsigned int) fixP->fx_r_type);
 	  break;
 	}
 
@@ -1373,9 +1372,8 @@ md_assemble (char *str0)
 		      if (imm < 0 || imm > 31)
 			as_bad ("immediate value out of range");
 
-		      opcode |=
-			(r1 << 10) | (r2 << 16) | (1 << 9) | ((imm & 0x1f) <<
-							      4);
+		      opcode |= ((r1 << 10) | (r2 << 16) | (1 << 9)
+				 | ((imm & 0x1f) << 4));
 		    }
 		  else
 		    {
@@ -1889,9 +1887,8 @@ md_assemble (char *str0)
 		  if (finst < 0 || finst > 15)
 		    as_bad ("finst out of range");
 
-		  opcode |=
-		    ((finst & 0xf) << 27) | (r1 << 10) | (r2 << 16) | (r3 <<
-								       4);
+		  opcode |= (((finst & 0xf) << 27)
+			     | (r1 << 10) | (r2 << 16) | (r3 << 4));
 		}
 	      else
 		{
@@ -1955,9 +1952,8 @@ md_assemble (char *str0)
 		  if (finst < 0 || finst > 15)
 		    as_bad ("finst out of range");
 
-		  opcode |=
-		    ((finst & 0xf) << 27) | (r1 << 10) | (r2 << 16) | (r3 <<
-								       4);
+		  opcode |= (((finst & 0xf) << 27)
+			     | (r1 << 10) | (r2 << 16) | (r3 << 4));
 		}
 	      else
 		{

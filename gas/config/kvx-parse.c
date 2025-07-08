@@ -458,7 +458,7 @@ get_token_class (struct token_s *token, struct token_classes *classes, int insn_
 {
   int cur = 0;
   int found = 0;
-  int tok_sz = token->end - token->begin;
+  size_t tok_sz = token->end - token->begin;
   char *tok = token->insn + token->begin;
   expressionS exp;
 
@@ -557,7 +557,7 @@ get_token_class (struct token_s *token, struct token_classes *classes, int insn_
 	  for (int i = 0; !found && i < class[cur].sz; ++i)
 	    {
 	      const char *ref = class[cur].class_values[i];
-	      found = ((long) strlen (ref) == tok_sz) && !strncmp (tok, ref, tok_sz);
+	      found = (strlen (ref) == tok_sz) && !strncmp (tok, ref, tok_sz);
 	      token->val = i;
 	    }
 
@@ -669,7 +669,7 @@ static struct token_list *
 create_token (struct token_s tok, int len, int loc)
 {
   struct token_list *tl = calloc (1, sizeof *tl);
-  int tok_sz = tok.end - tok.begin;
+  size_t tok_sz = tok.end - tok.begin;
   tl->tok = calloc (tok_sz + 1, sizeof (char));
   memcpy (tl->tok, tok.insn + tok.begin, tok_sz * sizeof (char));
   tl->val = tok.val;

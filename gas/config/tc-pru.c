@@ -255,7 +255,7 @@ pru_align (int log_size, const char *pfill, symbolS *label)
 
 	  old_frag = symbol_get_frag (label);
 	  old_value = S_GET_VALUE (label);
-	  new_value = (valueT) frag_now_fix ();
+	  new_value = frag_now_fix ();
 
 	  /* It is possible to have more than one label at a particular
 	     address, especially if debugging is enabled, so we must
@@ -949,7 +949,7 @@ pru_assemble_expression (const char *exprstr,
   if (pru_mode == PRU_MODE_TEST && ep->X_op == O_constant)
     value = ep->X_add_number;
 
-  return (unsigned long) value;
+  return value;
 }
 
 /* Try to parse a non-relocatable expression.  */
@@ -1100,7 +1100,6 @@ pru_assemble_arg_b (pru_insn_infoS *insn_info, const char *argstr)
       SET_INSN_FIELD (RS2, insn_info->insn_code, src2->index);
       SET_INSN_FIELD (RS2SEL, insn_info->insn_code, src2->regsel);
     }
-
 }
 
 static void
@@ -1554,7 +1553,6 @@ md_show_usage (FILE *stream)
       "  -mlink-relax     generate relocations for linker relaxation (default).\n"
       "  -mno-link-relax  don't generate relocations for linker relaxation.\n"
     ));
-
 }
 
 /* This function is called once, at assembler startup time.

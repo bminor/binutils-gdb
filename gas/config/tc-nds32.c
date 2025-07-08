@@ -3896,7 +3896,7 @@ nds32_adjust_label (int n)
   /* Only frag by alignment when needed.
      Otherwise, it will fail to optimize labels on 4-byte boundary.  (bug8454)
      See md_convert_frag () and RELAX_SET_RELAXABLE (frag) for details.  */
-  if (frag_now_fix () & ((1 << n) -1 ))
+  if (frag_now_fix () & (((addressT) 1 << n) - 1))
     {
       if (subseg_text_p (now_seg))
 	{
@@ -3921,7 +3921,7 @@ nds32_adjust_label (int n)
 
       old_frag  = symbol_get_frag (label);
       old_value = S_GET_VALUE (label);
-      new_value = (valueT) frag_now_fix ();
+      new_value = frag_now_fix ();
 
       /* Multiple labels may be on the same address.  And the last symbol
 	 may not be a label at all, e.g., register name, external function names,
@@ -4207,8 +4207,6 @@ struct relax_hint_id *record_id_head = NULL;
 
 /* Is the buffer large enough?  */
 #define MAX_BUFFER 12
-
-static char *nds_itoa (int n);
 
 static char *
 nds_itoa (int n)

@@ -741,7 +741,7 @@ typedef struct unw_rec_list {
   struct unw_rec_list *next;
 } unw_rec_list;
 
-#define SLOT_NUM_NOT_SET        (unsigned)-1
+#define SLOT_NUM_NOT_SET        -1UL
 
 /* Linked list of saved prologue counts.  A very poor
    implementation of a map from label numbers to prologue counts.  */
@@ -1045,9 +1045,9 @@ obj_elf_vms_common (int ignore ATTRIBUTE_UNUSED)
   const char *sec_name;
   char *sym_name;
   char c;
-  offsetT size;
-  offsetT cur_size;
-  offsetT temp;
+  valueT size;
+  valueT cur_size;
+  valueT temp;
   symbolS *symbolP;
   segT current_seg = now_seg;
   subsegT current_subseg = now_subseg;
@@ -1109,7 +1109,7 @@ obj_elf_vms_common (int ignore ATTRIBUTE_UNUSED)
 
   temp = get_absolute_expression ();
   size = temp;
-  size &= ((offsetT) 2 << (stdoutput->arch_info->bits_per_address - 1)) - 1;
+  size &= ((valueT) 2 << (stdoutput->arch_info->bits_per_address - 1)) - 1;
   if (temp != size)
     {
       as_warn (_("size (%ld) out of range, ignored"), (long) temp);
@@ -1150,7 +1150,7 @@ obj_elf_vms_common (int ignore ATTRIBUTE_UNUSED)
   record_alignment (now_seg, log_align);
 
   cur_size = bfd_section_size (now_seg);
-  if ((int) size > cur_size)
+  if (size > cur_size)
     {
       char *pfrag = frag_var (rs_fill, 1, 1, 0, NULL, size - cur_size, NULL);
       *pfrag = 0;

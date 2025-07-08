@@ -1507,7 +1507,7 @@ s3_data_op2 (char **str, int shift, enum score_data_type data_type)
               sprintf (s3_err_msg,
                        _("invalid constant: %d bit expression not in range %u..%u"),
                        s3_score_df_range[data_type].bits,
-                       0, (unsigned)0xffffffff);
+                       0, 0xffffffff);
             }
           else if (data_type == _IMM5_MULTI_LOAD)
             {
@@ -4124,7 +4124,7 @@ s3_build_la_pic (int reg_rd, expressionS exp)
       var_num = 1;
       /* Fix part
          For an external symbol: addi rD, <constant> */
-      sprintf (tmp, "addi r%d, %d", reg_rd, (int)add_number);
+      sprintf (tmp, "addi r%d, %d", reg_rd, (int) add_number);
       if (s3_append_insn (tmp, false) == s3_FAIL)
 	return;
 
@@ -4811,13 +4811,15 @@ s3_nopic_need_relax (symbolS * sym, int before_relaxing)
         {
           return 1;
         }
-      else if ((!S_IS_DEFINED (sym) || S_IS_COMMON (sym)) && (0
-							      /* We must defer this decision until after the whole file has been read,
-								 since there might be a .extern after the first use of this symbol.  */
-							      || (before_relaxing
-								  && S_GET_VALUE (sym) == 0)
-							      || (S_GET_VALUE (sym) != 0
-								  && S_GET_VALUE (sym) <= s3_g_switch_value)))
+      else if ((!S_IS_DEFINED (sym) || S_IS_COMMON (sym))
+	       && (0
+		   /* We must defer this decision until after the
+		      whole file has been read, since there might be a
+		      .extern after the first use of this symbol.  */
+		   || (before_relaxing
+		       && S_GET_VALUE (sym) == 0)
+		   || (S_GET_VALUE (sym) != 0
+		       && S_GET_VALUE (sym) <= s3_g_switch_value)))
         {
           return 0;
         }
@@ -5601,7 +5603,7 @@ s3_get_symbol (void)
   symbolS *p;
 
   c = get_symbol_name (&name);
-  p = (symbolS *) symbol_find_or_make (name);
+  p = symbol_find_or_make (name);
   (void) restore_line_pointer (c);
   return p;
 }
@@ -6449,7 +6451,7 @@ s3_begin (void)
 
   s3_build_dependency_insn_hsh ();
 
-  for (i = (int)s3_REG_TYPE_FIRST; i < (int)s3_REG_TYPE_MAX; i++)
+  for (i = s3_REG_TYPE_FIRST; i < s3_REG_TYPE_MAX; i++)
     s3_build_reg_hsh (s3_all_reg_maps + i);
 
   /* Initialize dependency vector.  */
@@ -6767,7 +6769,7 @@ s3_relax_branch_inst16 (fragS * fragp)
   if (s == NULL)
     frag_addr = 0;
   else
-    symbol_address = (addressT) symbol_get_frag (s)->fr_address;
+    symbol_address = symbol_get_frag (s)->fr_address;
 
   inst_value = s3_md_chars_to_number (fragp->fr_literal, s3_INSN16_SIZE);
   offset = (inst_value & 0x1ff) << 1;
@@ -6810,7 +6812,7 @@ s3_relax_cmpbranch_inst32 (fragS * fragp)
   if (s == NULL)
     frag_addr = 0;
   else
-    symbol_address = (addressT) symbol_get_frag (s)->fr_address;
+    symbol_address = symbol_get_frag (s)->fr_address;
 
   inst_value = s3_md_chars_to_number (fragp->fr_literal, s3_INSN_SIZE);
   offset = (inst_value & 0x1)

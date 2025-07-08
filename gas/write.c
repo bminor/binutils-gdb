@@ -587,8 +587,8 @@ size_seg (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *xxx ATTRIBUTE_UNUSED)
     size = 0;
 
   flags = bfd_section_flags (sec);
-  if (size == 0 && bfd_section_size (sec) != 0 &&
-    (flags & SEC_HAS_CONTENTS) != 0)
+  if (size == 0 && bfd_section_size (sec) != 0
+      && (flags & SEC_HAS_CONTENTS) != 0)
     return;
 
   if (size > 0 && ! seginfo->bss)

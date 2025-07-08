@@ -746,7 +746,7 @@ symbol_find_or_make (const char *name)
       symbol_table_insert (symbolP);
     }				/* if symbol wasn't found */
 
-  return (symbolP);
+  return symbolP;
 }
 
 symbolS *
@@ -760,7 +760,7 @@ symbol_make (const char *name)
   if (!symbolP)
     symbolP = symbol_new (name, undefined_section, &zero_address_frag, 0);
 
-  return (symbolP);
+  return symbolP;
 }
 
 symbolS *
@@ -2241,7 +2241,7 @@ S_GET_VALUE_WHERE (symbolS *s, const char * file, unsigned int line)
 		    S_GET_NAME (s));
 	}
     }
-  return (valueT) s->x->value.X_add_number;
+  return s->x->value.X_add_number;
 }
 
 valueT
