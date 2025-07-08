@@ -605,7 +605,7 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
       if (l1 == '1')
 	{
 	  if (src[2] >= '0' && src[2] <= '5'
-	      && ! IDENT_CHAR ((unsigned char) src[3]))
+	      && ! IDENT_CHAR (src[3]))
 	    {
 	      *mode = A_REG_N;
 	      *reg = 10 + src[2] - '0';
@@ -613,26 +613,26 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
 	    }
 	}
       if (l1 >= '0' && l1 <= '9'
-	  && ! IDENT_CHAR ((unsigned char) src[2]))
+	  && ! IDENT_CHAR (src[2]))
 	{
 	  *mode = A_REG_N;
 	  *reg = (l1 - '0');
 	  return 2;
 	}
       if (l1 >= '0' && l1 <= '7' && strncasecmp (&src[2], "_bank", 5) == 0
-	  && ! IDENT_CHAR ((unsigned char) src[7]))
+	  && ! IDENT_CHAR (src[7]))
 	{
 	  *mode = A_REG_B;
 	  *reg  = (l1 - '0');
 	  return 7;
 	}
 
-      if (l1 == 'e' && ! IDENT_CHAR ((unsigned char) src[2]))
+      if (l1 == 'e' && ! IDENT_CHAR (src[2]))
 	{
 	  *mode = A_RE;
 	  return 2;
 	}
-      if (l1 == 's' && ! IDENT_CHAR ((unsigned char) src[2]))
+      if (l1 == 's' && ! IDENT_CHAR (src[2]))
 	{
 	  *mode = A_RS;
 	  return 2;
@@ -643,13 +643,13 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
     {
       if (l1 == '0')
 	{
-	  if (! IDENT_CHAR ((unsigned char) src[2]))
+	  if (! IDENT_CHAR (src[2]))
 	    {
 	      *mode = DSP_REG_N;
 	      *reg = A_A0_NUM;
 	      return 2;
 	    }
-	  if (TOLOWER (src[2]) == 'g' && ! IDENT_CHAR ((unsigned char) src[3]))
+	  if (TOLOWER (src[2]) == 'g' && ! IDENT_CHAR (src[3]))
 	    {
 	      *mode = DSP_REG_N;
 	      *reg = A_A0G_NUM;
@@ -658,13 +658,13 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
 	}
       if (l1 == '1')
 	{
-	  if (! IDENT_CHAR ((unsigned char) src[2]))
+	  if (! IDENT_CHAR (src[2]))
 	    {
 	      *mode = DSP_REG_N;
 	      *reg = A_A1_NUM;
 	      return 2;
 	    }
-	  if (TOLOWER (src[2]) == 'g' && ! IDENT_CHAR ((unsigned char) src[3]))
+	  if (TOLOWER (src[2]) == 'g' && ! IDENT_CHAR (src[3]))
 	    {
 	      *mode = DSP_REG_N;
 	      *reg = A_A1G_NUM;
@@ -673,21 +673,21 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
 	}
 
       if (l1 == 'x' && src[2] >= '0' && src[2] <= '1'
-	  && ! IDENT_CHAR ((unsigned char) src[3]))
+	  && ! IDENT_CHAR (src[3]))
 	{
 	  *mode = A_REG_N;
 	  *reg = 4 + (l1 - '0');
 	  return 3;
 	}
       if (l1 == 'y' && src[2] >= '0' && src[2] <= '1'
-	  && ! IDENT_CHAR ((unsigned char) src[3]))
+	  && ! IDENT_CHAR (src[3]))
 	{
 	  *mode = A_REG_N;
 	  *reg = 6 + (l1 - '0');
 	  return 3;
 	}
       if (l1 == 's' && src[2] >= '0' && src[2] <= '3'
-	  && ! IDENT_CHAR ((unsigned char) src[3]))
+	  && ! IDENT_CHAR (src[3]))
 	{
 	  int n = l1 - '0';
 
@@ -697,7 +697,7 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
 	}
     }
 
-  if (l0 == 'i' && l1 && ! IDENT_CHAR ((unsigned char) src[2]))
+  if (l0 == 'i' && l1 && ! IDENT_CHAR (src[2]))
     {
       if (l1 == 's')
 	{
@@ -720,7 +720,7 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
     }
 
   if (l0 == 'x' && l1 >= '0' && l1 <= '1'
-      && ! IDENT_CHAR ((unsigned char) src[2]))
+      && ! IDENT_CHAR (src[2]))
     {
       *mode = DSP_REG_N;
       *reg = A_X0_NUM + l1 - '0';
@@ -728,7 +728,7 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
     }
 
   if (l0 == 'y' && l1 >= '0' && l1 <= '1'
-      && ! IDENT_CHAR ((unsigned char) src[2]))
+      && ! IDENT_CHAR (src[2]))
     {
       *mode = DSP_REG_N;
       *reg = A_Y0_NUM + l1 - '0';
@@ -736,7 +736,7 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
     }
 
   if (l0 == 'm' && l1 >= '0' && l1 <= '1'
-      && ! IDENT_CHAR ((unsigned char) src[2]))
+      && ! IDENT_CHAR (src[2]))
     {
       *mode = DSP_REG_N;
       *reg = l1 == '0' ? A_M0_NUM : A_M1_NUM;
@@ -745,59 +745,59 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
 
   if (l0 == 's'
       && l1 == 's'
-      && TOLOWER (src[2]) == 'r' && ! IDENT_CHAR ((unsigned char) src[3]))
+      && TOLOWER (src[2]) == 'r' && ! IDENT_CHAR (src[3]))
     {
       *mode = A_SSR;
       return 3;
     }
 
   if (l0 == 's' && l1 == 'p' && TOLOWER (src[2]) == 'c'
-      && ! IDENT_CHAR ((unsigned char) src[3]))
+      && ! IDENT_CHAR (src[3]))
     {
       *mode = A_SPC;
       return 3;
     }
 
   if (l0 == 's' && l1 == 'g' && TOLOWER (src[2]) == 'r'
-      && ! IDENT_CHAR ((unsigned char) src[3]))
+      && ! IDENT_CHAR (src[3]))
     {
       *mode = A_SGR;
       return 3;
     }
 
   if (l0 == 'd' && l1 == 's' && TOLOWER (src[2]) == 'r'
-      && ! IDENT_CHAR ((unsigned char) src[3]))
+      && ! IDENT_CHAR (src[3]))
     {
       *mode = A_DSR;
       return 3;
     }
 
   if (l0 == 'd' && l1 == 'b' && TOLOWER (src[2]) == 'r'
-      && ! IDENT_CHAR ((unsigned char) src[3]))
+      && ! IDENT_CHAR (src[3]))
     {
       *mode = A_DBR;
       return 3;
     }
 
-  if (l0 == 's' && l1 == 'r' && ! IDENT_CHAR ((unsigned char) src[2]))
+  if (l0 == 's' && l1 == 'r' && ! IDENT_CHAR (src[2]))
     {
       *mode = A_SR;
       return 2;
     }
 
-  if (l0 == 's' && l1 == 'p' && ! IDENT_CHAR ((unsigned char) src[2]))
+  if (l0 == 's' && l1 == 'p' && ! IDENT_CHAR (src[2]))
     {
       *mode = A_REG_N;
       *reg = 15;
       return 2;
     }
 
-  if (l0 == 'p' && l1 == 'r' && ! IDENT_CHAR ((unsigned char) src[2]))
+  if (l0 == 'p' && l1 == 'r' && ! IDENT_CHAR (src[2]))
     {
       *mode = A_PR;
       return 2;
     }
-  if (l0 == 'p' && l1 == 'c' && ! IDENT_CHAR ((unsigned char) src[2]))
+  if (l0 == 'p' && l1 == 'c' && ! IDENT_CHAR (src[2]))
     {
       /* Don't use A_DISP_PC here - that would accept stuff like 'mova pc,r0'
          and use an uninitialized immediate.  */
@@ -805,26 +805,26 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
       return 2;
     }
   if (l0 == 'g' && l1 == 'b' && TOLOWER (src[2]) == 'r'
-      && ! IDENT_CHAR ((unsigned char) src[3]))
+      && ! IDENT_CHAR (src[3]))
     {
       *mode = A_GBR;
       return 3;
     }
   if (l0 == 'v' && l1 == 'b' && TOLOWER (src[2]) == 'r'
-      && ! IDENT_CHAR ((unsigned char) src[3]))
+      && ! IDENT_CHAR (src[3]))
     {
       *mode = A_VBR;
       return 3;
     }
 
   if (l0 == 't' && l1 == 'b' && TOLOWER (src[2]) == 'r'
-      && ! IDENT_CHAR ((unsigned char) src[3]))
+      && ! IDENT_CHAR (src[3]))
     {
       *mode = A_TBR;
       return 3;
     }
   if (l0 == 'm' && l1 == 'a' && TOLOWER (src[2]) == 'c'
-      && ! IDENT_CHAR ((unsigned char) src[4]))
+      && ! IDENT_CHAR (src[4]))
     {
       if (TOLOWER (src[3]) == 'l')
 	{
@@ -838,7 +838,7 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
 	}
     }
   if (l0 == 'm' && l1 == 'o' && TOLOWER (src[2]) == 'd'
-      && ! IDENT_CHAR ((unsigned char) src[3]))
+      && ! IDENT_CHAR (src[3]))
     {
       *mode = A_MOD;
       return 3;
@@ -848,7 +848,7 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
       if (src[2] == '1')
 	{
 	  if (src[3] >= '0' && src[3] <= '5'
-	      && ! IDENT_CHAR ((unsigned char) src[4]))
+	      && ! IDENT_CHAR (src[4]))
 	    {
 	      *mode = F_REG_N;
 	      *reg = 10 + src[3] - '0';
@@ -856,7 +856,7 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
 	    }
 	}
       if (src[2] >= '0' && src[2] <= '9'
-	  && ! IDENT_CHAR ((unsigned char) src[3]))
+	  && ! IDENT_CHAR (src[3]))
 	{
 	  *mode = F_REG_N;
 	  *reg = (src[2] - '0');
@@ -868,7 +868,7 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
       if (src[2] == '1')
 	{
 	  if (src[3] >= '0' && src[3] <= '4' && ! ((src[3] - '0') & 1)
-	      && ! IDENT_CHAR ((unsigned char) src[4]))
+	      && ! IDENT_CHAR (src[4]))
 	    {
 	      *mode = D_REG_N;
 	      *reg = 10 + src[3] - '0';
@@ -876,7 +876,7 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
 	    }
 	}
       if (src[2] >= '0' && src[2] <= '8' && ! ((src[2] - '0') & 1)
-	  && ! IDENT_CHAR ((unsigned char) src[3]))
+	  && ! IDENT_CHAR (src[3]))
 	{
 	  *mode = D_REG_N;
 	  *reg = (src[2] - '0');
@@ -888,7 +888,7 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
       if (src[2] == '1')
 	{
 	  if (src[3] >= '0' && src[3] <= '4' && ! ((src[3] - '0') & 1)
-	      && ! IDENT_CHAR ((unsigned char) src[4]))
+	      && ! IDENT_CHAR (src[4]))
 	    {
 	      *mode = X_REG_N;
 	      *reg = 11 + src[3] - '0';
@@ -896,7 +896,7 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
 	    }
 	}
       if (src[2] >= '0' && src[2] <= '8' && ! ((src[2] - '0') & 1)
-	  && ! IDENT_CHAR ((unsigned char) src[3]))
+	  && ! IDENT_CHAR (src[3]))
 	{
 	  *mode = X_REG_N;
 	  *reg = (src[2] - '0') + 1;
@@ -905,14 +905,14 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
     }
   if (l0 == 'f' && l1 == 'v')
     {
-      if (src[2] == '1'&& src[3] == '2' && ! IDENT_CHAR ((unsigned char) src[4]))
+      if (src[2] == '1'&& src[3] == '2' && ! IDENT_CHAR (src[4]))
 	{
 	  *mode = V_REG_N;
 	  *reg = 12;
 	  return 4;
 	}
       if ((src[2] == '0' || src[2] == '4' || src[2] == '8')
-	  && ! IDENT_CHAR ((unsigned char) src[3]))
+	  && ! IDENT_CHAR (src[3]))
 	{
 	  *mode = V_REG_N;
 	  *reg = (src[2] - '0');
@@ -921,7 +921,7 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
     }
   if (l0 == 'f' && l1 == 'p' && TOLOWER (src[2]) == 'u'
       && TOLOWER (src[3]) == 'l'
-      && ! IDENT_CHAR ((unsigned char) src[4]))
+      && ! IDENT_CHAR (src[4]))
     {
       *mode = FPUL_N;
       return 4;
@@ -929,7 +929,7 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
 
   if (l0 == 'f' && l1 == 'p' && TOLOWER (src[2]) == 's'
       && TOLOWER (src[3]) == 'c'
-      && TOLOWER (src[4]) == 'r' && ! IDENT_CHAR ((unsigned char) src[5]))
+      && TOLOWER (src[4]) == 'r' && ! IDENT_CHAR (src[5]))
     {
       *mode = FPSCR_N;
       return 5;
@@ -937,7 +937,7 @@ parse_reg_without_prefix (char *src, sh_arg_type *mode, int *reg)
 
   if (l0 == 'x' && l1 == 'm' && TOLOWER (src[2]) == 't'
       && TOLOWER (src[3]) == 'r'
-      && TOLOWER (src[4]) == 'x' && ! IDENT_CHAR ((unsigned char) src[5]))
+      && TOLOWER (src[4]) == 'x' && ! IDENT_CHAR (src[5]))
     {
       *mode = XMTRX_M4;
       return 5;

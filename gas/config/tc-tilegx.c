@@ -1678,7 +1678,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
 	 ORing in values is OK since we know the existing bits for
 	 this operand are zero.  */
       for (; bits != 0; bits >>= 8)
-	*p++ |= (char)bits;
+	*p++ |= bits;
     }
   else
     {

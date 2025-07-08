@@ -187,7 +187,7 @@ is_ldst_registers (char *name)
 
   /* The first character of the register name got to be either %, $, r of R.  */
   if ((ptr[0] == '%' || ptr[0] == '$' || ptr[0] == 'r' || ptr[0] == 'R')
-      && ISDIGIT ((unsigned char) ptr[1]))
+      && ISDIGIT (ptr[1]))
     return 1;
 
   /* Now check the software register representation.  */
@@ -616,7 +616,7 @@ parse_operand (char *s, expressionS *operandp)
 
   /* Check for the % and $ register representation    */
   if ((s[0] == '%' || s[0] == '$' || s[0] == 'r' || s[0] == 'R')
-      && ISDIGIT ((unsigned char) s[1]))
+      && ISDIGIT (s[1]))
     {
       /* We have a numeric register expression.  No biggy.  */
       s += 1;
@@ -1124,7 +1124,7 @@ md_operand (expressionS* expressionP)
 {
   /* Check for the #number representation    */
   if (input_line_pointer[0] == '#' &&
-      ISDIGIT ((unsigned char) input_line_pointer[1]))
+      ISDIGIT (input_line_pointer[1]))
     {
       /* We have a numeric number expression.  No biggy.  */
       input_line_pointer += 1;	/* Skip # */

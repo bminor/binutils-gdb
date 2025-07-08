@@ -283,11 +283,11 @@ md_begin (void)
      on the operands.  This hash table then provides a quick index to
      the first opcode with a particular name in the opcode table.  */
 
-  for (opcode = (struct d10v_opcode *) d10v_opcodes; opcode->name; opcode++)
+  for (opcode = d10v_opcodes; opcode->name; opcode++)
     {
       if (strcmp (prev_name, opcode->name))
 	{
-	  prev_name = (char *) opcode->name;
+	  prev_name = opcode->name;
 	  str_hash_insert (d10v_hash, opcode->name, opcode, 0);
 	}
     }

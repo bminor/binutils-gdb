@@ -569,7 +569,7 @@ get_reg (const char *param, struct spu_insn *insn, int arg, int accept_expr)
       char *save_ptr;
       expressionS ex;
       save_ptr = input_line_pointer;
-      input_line_pointer = (char *)param;
+      input_line_pointer = (char *) param;
       expression (&ex);
       param = input_line_pointer;
       input_line_pointer = save_ptr;
@@ -721,7 +721,7 @@ md_create_short_jump (char *ptr,
 		      fragS *frag,
 		      symbolS *to_symbol)
 {
-  ptr[0] = (char) 0xc0;
+  ptr[0] = 0xc0;
   ptr[1] = 0x00;
   ptr[2] = 0x00;
   ptr[3] = 0x00;
@@ -743,7 +743,7 @@ md_create_long_jump (char *ptr,
 		     fragS *frag,
 		     symbolS *to_symbol)
 {
-  ptr[0] = (char) 0xc0;
+  ptr[0] = 0xc0;
   ptr[1] = 0x00;
   ptr[2] = 0x00;
   ptr[3] = 0x00;

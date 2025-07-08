@@ -577,7 +577,7 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 
       if (check_multibyte)
 	(void) scan_for_multibyte_characters ((const unsigned char *) from,
-					      (const unsigned char* ) fromend,
+					      (const unsigned char *) fromend,
 					      true /* Generate warnings.  */);
     }
 
@@ -1218,7 +1218,7 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	      else
 		ch = process_escape (ch);
 	    }
-	  sprintf (out_buf, "%d", (int) (unsigned char) ch);
+	  sprintf (out_buf, "%d", ch & 0xff);
 
 	  /* None of these 'x constants for us.  We want 'x'.  */
 	  if ((ch = GET ()) != '\'')

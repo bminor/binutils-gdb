@@ -2514,7 +2514,7 @@ md_assemble (char *op)
       strcpy (param1, get_b_cc (op));
       strcat (param1,",");
       strcat (param1, param);
-      param = (char *) &param1;
+      param = param1;
       cr16_assemble ("b", param);
       return;
     }

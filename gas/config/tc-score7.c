@@ -5130,14 +5130,13 @@ static valueT
 s7_md_chars_to_number (char *buf, int n)
 {
   valueT result = 0;
-  unsigned char *where = (unsigned char *) buf;
 
   if (target_big_endian)
     {
       while (n--)
         {
           result <<= 8;
-          result |= (*where++ & 255);
+          result |= (*buf++ & 255);
         }
     }
   else
@@ -5145,7 +5144,7 @@ s7_md_chars_to_number (char *buf, int n)
       while (n--)
         {
           result <<= 8;
-          result |= (where[n] & 255);
+          result |= (buf[n] & 255);
         }
     }
 
@@ -5679,7 +5678,7 @@ s7_s_score_set (int x ATTRIBUTE_UNUSED)
 
   while (!is_end_of_stmt (*input_line_pointer))
     {
-      name[i] = (char) * input_line_pointer;
+      name[i] = *input_line_pointer;
       i++;
       ++input_line_pointer;
     }

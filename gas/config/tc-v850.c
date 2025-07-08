@@ -1956,7 +1956,7 @@ md_begin (void)
     {
       if (strcmp (prev_name, op->name))
 	{
-	  prev_name = (char *) op->name;
+	  prev_name = op->name;
 	  str_hash_insert (v850_hash, op->name, op, 0);
 	}
       op++;

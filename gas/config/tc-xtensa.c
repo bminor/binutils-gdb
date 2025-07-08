@@ -1903,7 +1903,7 @@ tc_get_register (const char *prefix)
       return ERROR_REG_NUM;
     }
 
-  if (!ISDIGIT ((unsigned char) *input_line_pointer))
+  if (!ISDIGIT (*input_line_pointer))
     {
       as_bad (_("bad register number: %s"), input_line_pointer);
       return ERROR_REG_NUM;
@@ -1911,7 +1911,7 @@ tc_get_register (const char *prefix)
 
   reg = 0;
 
-  while (ISDIGIT ((int) *input_line_pointer))
+  while (ISDIGIT (*input_line_pointer))
     reg = reg * 10 + *input_line_pointer++ - '0';
 
   if (!(next_expr = expression_end (input_line_pointer)))

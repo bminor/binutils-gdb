@@ -180,7 +180,6 @@ md_parse_option (int c, const char *arg)
   int ret = 1;
   char lp64[256] = "";
   char ilp32[256] = "";
-  unsigned char *suf = (unsigned char *)arg;
 
   lp64['s'] = lp64['S'] = EF_LOONGARCH_ABI_SOFT_FLOAT;
   lp64['f'] = lp64['F'] = EF_LOONGARCH_ABI_SINGLE_FLOAT;
@@ -193,7 +192,7 @@ md_parse_option (int c, const char *arg)
   switch (c)
     {
     case OPTION_ABI:
-      if (strncasecmp (arg, "lp64", 4) == 0 && lp64[suf[4]] != 0)
+      if (strncasecmp (arg, "lp64", 4) == 0 && lp64[arg[4] & 0xff] != 0)
 	{
 	  LARCH_opts.ase_ilp32 = 1;
 	  LARCH_opts.ase_lp64 = 1;
@@ -201,11 +200,11 @@ md_parse_option (int c, const char *arg)
 	  LARCH_opts.ase_lasx = 1;
 	  LARCH_opts.ase_lvz = 1;
 	  LARCH_opts.ase_lbt = 1;
-	  LARCH_opts.ase_abi = lp64[suf[4]];
+	  LARCH_opts.ase_abi = lp64[arg[4] & 0xff];
 	}
-      else if (strncasecmp (arg, "ilp32", 5) == 0 && ilp32[suf[5]] != 0)
+      else if (strncasecmp (arg, "ilp32", 5) == 0 && ilp32[arg[5] & 0xff] != 0)
 	{
-	  LARCH_opts.ase_abi = ilp32[suf[5]];
+	  LARCH_opts.ase_abi = ilp32[arg[5] & 0xff];
 	  LARCH_opts.ase_ilp32 = 1;
 	}
       else
@@ -2284,12 +2283,12 @@ loongarch_relax_frag (asection *sec, fragS *fragp,
 static void
 loongarch_convert_frag_branch (fragS *fragp)
 {
-  bfd_byte *buf;
+  char *buf;
   expressionS exp;
   fixS *fixp;
   insn_t insn;
 
-  buf = (bfd_byte *)fragp->fr_literal + fragp->fr_fix;
+  buf = fragp->fr_literal + fragp->fr_fix;
 
   exp.X_op = O_symbol;
   exp.X_add_symbol = fragp->fr_symbol;
@@ -2319,17 +2318,17 @@ loongarch_convert_frag_branch (fragS *fragp)
 
       /* Add the B instruction and jump to the original target.  */
       bfd_putl32 (LARCH_B, buf);
-      fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
+      fixp = fix_new_exp (fragp, buf - fragp->fr_literal,
 			  4, &exp, false, BFD_RELOC_LARCH_B26);
       buf += 4;
       break;
     case RELAX_BRANCH_21:
-      fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
+      fixp = fix_new_exp (fragp, buf - fragp->fr_literal,
 			  4, &exp, false, BFD_RELOC_LARCH_B21);
       buf += 4;
       break;
     case RELAX_BRANCH_16:
-      fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
+      fixp = fix_new_exp (fragp, buf - fragp->fr_literal,
 			  4, &exp, false, BFD_RELOC_LARCH_B16);
       buf += 4;
       break;
@@ -2341,8 +2340,7 @@ loongarch_convert_frag_branch (fragS *fragp)
   fixp->fx_file = fragp->fr_file;
   fixp->fx_line = fragp->fr_line;
 
-  gas_assert (buf == (bfd_byte *)fragp->fr_literal
-	      + fragp->fr_fix + fragp->fr_var);
+  gas_assert (buf == fragp->fr_literal + fragp->fr_fix + fragp->fr_var);
 
   fragp->fr_fix += fragp->fr_var;
 }
@@ -2352,7 +2350,7 @@ loongarch_convert_frag_branch (fragS *fragp)
 static void
 loongarch_convert_frag_align (fragS *fragp, asection *sec)
 {
-  bfd_byte *buf = (bfd_byte *)fragp->fr_literal + fragp->fr_fix;
+  char *buf = fragp->fr_literal + fragp->fr_fix;
 
   offsetT nop_bytes;
   if (NULL == fragp->fr_symbol)
@@ -2371,7 +2369,7 @@ loongarch_convert_frag_align (fragS *fragp, asection *sec)
       exp.X_add_symbol = fragp->fr_symbol;
       exp.X_add_number = fragp->fr_offset;
 
-      fixS *fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
+      fixS *fixp = fix_new_exp (fragp, buf - fragp->fr_literal,
 				nop_bytes, &exp, false, BFD_RELOC_LARCH_ALIGN);
       fixp->fx_file = fragp->fr_file;
       fixp->fx_line = fragp->fr_line;
@@ -2379,8 +2377,7 @@ loongarch_convert_frag_align (fragS *fragp, asection *sec)
       buf += nop_bytes;
     }
 
-  gas_assert (buf == (bfd_byte *)fragp->fr_literal
-	      + fragp->fr_fix + fragp->fr_var);
+  gas_assert (buf == fragp->fr_literal + fragp->fr_fix + fragp->fr_var);
 
   fragp->fr_fix += fragp->fr_var;
 }

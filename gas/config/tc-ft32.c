@@ -530,12 +530,11 @@ static valueT
 md_chars_to_number (char * buf, int n)
 {
   valueT result = 0;
-  unsigned char * where = (unsigned char *) buf;
 
   while (n--)
     {
       result <<= 8;
-      result |= (where[n] & 255);
+      result |= (buf[n] & 255);
     }
 
   return result;

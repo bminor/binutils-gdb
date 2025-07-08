@@ -3083,14 +3083,13 @@ static valueT
 md_chars_to_number (char *buf, int n)
 {
   valueT result = 0;
-  unsigned char *p = (unsigned char *) buf;
 
   if (target_big_endian)
     {
       while (n--)
 	{
 	  result <<= 8;
-	  result |= (*p++ & 0xff);
+	  result |= (*buf++ & 0xff);
 	}
     }
   else
@@ -3098,7 +3097,7 @@ md_chars_to_number (char *buf, int n)
       while (n--)
 	{
 	  result <<= 8;
-	  result |= (p[n] & 0xff);
+	  result |= (buf[n] & 0xff);
 	}
     }
 

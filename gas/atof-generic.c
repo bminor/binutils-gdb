@@ -303,7 +303,7 @@ atof_generic (/* return pointer to just AFTER number we read.  */
 	    {
 	      if (decimal_exponent > LONG_MAX / 10
 		  || (decimal_exponent == LONG_MAX / 10
-		      && c > '0' + (char) (LONG_MAX - LONG_MAX / 10 * 10)))
+		      && c > '0' + (LONG_MAX - LONG_MAX / 10 * 10)))
 		return_value = ERROR_EXPONENT_OVERFLOW;
 	      decimal_exponent = decimal_exponent * 10 + c - '0';
 	    }

@@ -2814,7 +2814,7 @@ md_undefined_symbol (char *name)
       char *s = name + 1;
       int lab = 0;
 
-      while (ISDIGIT ((unsigned char) *s))
+      while (ISDIGIT (*s))
 	{
 	  lab = lab * 10 + *s - '0';
 	  s++;

@@ -2966,10 +2966,10 @@ emit_lea (char prefix, char opcode, const char * args)
   switch (rnum)
     {
     case REG_IX:
-      opcode = (opcode == (char)0x33) ? 0x55 : (opcode|0x00);
+      opcode = opcode == 0x33 ? 0x55 : opcode | 0x00;
       break;
     case REG_IY:
-      opcode = (opcode == (char)0x32) ? 0x54 : (opcode|0x01);
+      opcode = opcode == 0x32 ? 0x54 : opcode | 0x01;
     }
 
   q = frag_more (2);
@@ -3420,7 +3420,7 @@ assemble_suffix (const char **suffix)
         i = 0x40;
         break;
     }
-  *frag_more (1) = (char)i;
+  *frag_more (1) = i;
   switch (i)
     {
     case 0x40: inst_mode = INST_MODE_FORCED | INST_MODE_S | INST_MODE_IS; break;
@@ -4064,8 +4064,8 @@ str_to_zeda32(char *litP, int *sizeP)
   else if (!sign)
     mantissa &= (1ull << 23) - 1;
   for (i = 0; i < 24; i += 8)
-    *litP++ = (char)(mantissa >> i);
-  *litP = (char)(0x80 + exponent);
+    *litP++ = mantissa >> i;
+  *litP = 0x80 + exponent;
   return NULL;
 }
 
@@ -4111,9 +4111,9 @@ str_to_float48(char *litP, int *sizeP)
     return _("overflow");
   if (!sign)
     mantissa &= (1ull << 39) - 1;
-  *litP++ = (char)(0x80 + exponent);
+  *litP++ = 0x80 + exponent;
   for (i = 0; i < 40; i += 8)
-    *litP++ = (char)(mantissa >> i);
+    *litP++ = mantissa >> i;
   return NULL;
 }
 

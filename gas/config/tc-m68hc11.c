@@ -989,7 +989,7 @@ print_opcode_list (void)
 		printf ("\n");
 
 	      printf ("%-5.5s ", opcodes->name);
-	      prev_name = (char *) opcodes->name;
+	      prev_name = opcodes->name;
 	    }
 	  if (fmt[0])
 	    printf ("  [%s]", fmt);

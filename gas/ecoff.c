@@ -3470,7 +3470,7 @@ ecoff_stab (int what,
 	  value = get_absolute_expression ();
 	  addend = 0;
 	}
-      else if (! is_name_beginner ((unsigned char) *input_line_pointer))
+      else if (! is_name_beginner (*input_line_pointer))
 	{
 	  as_warn (_("illegal .stab%c directive, bad character"), what);
 	  return;

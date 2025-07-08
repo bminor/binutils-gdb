@@ -504,7 +504,7 @@ get_operands (int max_operands, char *s, expressionS *exp)
   /* Mark the end of the valid operands with an illegal expression.  */
   exp[numexp].X_op = O_illegal;
 
-  return (numexp);
+  return numexp;
 }
 
 /* Get the value of a special register, or -1 if the name does not match
@@ -1912,7 +1912,7 @@ mmix_assemble_return_nonzero (char *str)
   /* Normal instruction handling downcases, so we must too.  */
   while (ISALNUM (*s2))
     {
-      if (ISUPPER ((unsigned char) *s2))
+      if (ISUPPER (*s2))
 	*s2 = TOLOWER (*s2);
       s2++;
     }
