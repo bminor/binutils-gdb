@@ -169,7 +169,7 @@ vms_file_stats_name (const char *dirname,
       return 0;
     }
 
-  fullname = concat (dirname, filename, NULL);
+  fullname = concat (dirname, filename, (const char *) NULL);
   tryfile = to_vms_file_spec (fullname);
 
   /* Allocate and initialize a FAB and NAM structures.  */
@@ -278,7 +278,7 @@ vms_file_stats_name (const char *dirname,
   struct tm *ts;
   long long gmtoff, secs, nsecs;
 
-  fullname = concat (dirname, filename, NULL);
+  fullname = concat (dirname, filename, (const char *) NULL);
 
   if ((stat (fullname, &buff)) != 0)
     {

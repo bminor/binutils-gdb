@@ -4798,7 +4798,7 @@ s3_nopic_need_relax (symbolS * sym, int before_relaxing)
          not be referenced off the $gp, although it appears as though
          they can.  */
       symname = S_GET_NAME (sym);
-      if (symname != (const char *)NULL
+      if (symname != NULL
           && (strcmp (symname, "eprol") == 0
               || strcmp (symname, "etext") == 0
               || strcmp (symname, "_gp") == 0
@@ -5574,7 +5574,7 @@ s3_s_score_mask (int reg_type ATTRIBUTE_UNUSED)
 {
   long mask, off;
 
-  if (s3_cur_proc_ptr == (s3_procS *) NULL)
+  if (s3_cur_proc_ptr == NULL)
     {
       as_warn (_(".mask outside of .ent"));
       demand_empty_rest_of_line ();
@@ -5708,7 +5708,7 @@ s3_s_score_frame (int ignore ATTRIBUTE_UNUSED)
   backupstr = input_line_pointer;
 
 #ifdef OBJ_ELF
-  if (s3_cur_proc_ptr == (s3_procS *) NULL)
+  if (s3_cur_proc_ptr == NULL)
     {
       as_warn (_(".frame outside of .ent"));
       demand_empty_rest_of_line ();

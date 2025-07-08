@@ -1951,7 +1951,7 @@ ppc_cleanup (void)
     char *p;
     asection *seg = now_seg;
     subsegT subseg = now_subseg;
-    asection *apuinfo_secp = (asection *) NULL;
+    asection *apuinfo_secp = NULL;
     unsigned int i;
 
     /* Create the .PPC.EMB.apuinfo section.  */
@@ -2071,7 +2071,7 @@ ppc_insert_operand (uint64_t insn,
 
       errmsg = NULL;
       insn = (*operand->insert) (insn, val, cpu, &errmsg);
-      if (errmsg != (const char *) NULL)
+      if (errmsg != NULL)
 	as_bad_where (file, line, "%s", errmsg);
     }
   else
@@ -2947,7 +2947,7 @@ ppc_frob_label (symbolS *sym)
   /* Set the class of a label based on where it is defined.  This handles
      symbols without suffixes.  Also, move the symbol so that it follows
      the csect symbol.  */
-  if (ppc_current_csect != (symbolS *) NULL)
+  if (ppc_current_csect != NULL)
     {
       if (symbol_get_tc (sym)->symbol_class == -1)
 	symbol_get_tc (sym)->symbol_class = symbol_get_tc (ppc_current_csect)->symbol_class;
@@ -3452,7 +3452,7 @@ md_assemble (char *str)
 	      if (operand->insert)
 		{
 		  insn = (*operand->insert) (insn, val, ppc_cpu, &errmsg);
-		  if (errmsg != (const char *) NULL)
+		  if (errmsg != NULL)
 		    as_bad ("%s", errmsg);
 		}
 	      else if (operand->shift >= 0)
@@ -3495,7 +3495,7 @@ md_assemble (char *str)
 		   && (operand->flags & PPC_OPERAND_GPR_0) != 0))
 	    as_warn (_("invalid register expression"));
 	  insn = ppc_insert_operand (insn, operand, ex.X_add_number,
-				     ppc_cpu, (char *) NULL, 0);
+				     ppc_cpu, NULL, 0);
 	}
       else if (ex.X_op == O_constant
 	       || (ex.X_op == O_big && ex.X_add_number > 0))
@@ -3693,7 +3693,7 @@ md_assemble (char *str)
 		  else
 		    insn = ppc_insert_operand (insn, operand,
 					       ppc_obj64 ? 13 : 2,
-					       ppc_cpu, (char *) NULL, 0);
+					       ppc_cpu, NULL, 0);
 		  break;
 
 		  /* We'll only use the 32 (or 64) bit form of these relocations
@@ -4647,7 +4647,7 @@ ppc_change_csect (symbolS *sym, offsetT align)
       symbol_get_tc (sym)->within = sym;
 
       for (list = section->csects;
-	   symbol_get_tc (list)->next != (symbolS *) NULL;
+	   symbol_get_tc (list)->next != NULL;
 	   list = symbol_get_tc (list)->next)
 	;
       symbol_get_tc (list)->next = sym;
@@ -5288,7 +5288,7 @@ ppc_function (int ignore ATTRIBUTE_UNUSED)
   /* Ignore any [PR] suffix.  */
   name = ppc_canonicalize_symbol_name (name);
   s = strchr (name, '[');
-  if (s != (char *) NULL
+  if (s != NULL
       && strcmp (s + 1, "PR]") == 0)
     *s = '\0';
 
@@ -5389,7 +5389,6 @@ ppc_bf (int ignore ATTRIBUTE_UNUSED)
       saved_bi_sym = 0;
     }
 
-
   symbol_get_tc (sym)->output = 1;
 
   ppc_frob_label (sym);
@@ -5459,13 +5458,13 @@ ppc_biei (int ei)
     saved_bi_sym = sym;
 
   for (look = last_biei ? last_biei : symbol_rootP;
-       (look != (symbolS *) NULL
+       (look != NULL
 	&& (S_GET_STORAGE_CLASS (look) == C_FILE
 	    || S_GET_STORAGE_CLASS (look) == C_BINCL
 	    || S_GET_STORAGE_CLASS (look) == C_EINCL));
        look = symbol_next (look))
     ;
-  if (look != (symbolS *) NULL)
+  if (look != NULL)
     {
       symbol_remove (sym, &symbol_rootP, &symbol_lastP);
       symbol_insert (sym, look, &symbol_rootP, &symbol_lastP);
@@ -5631,7 +5630,7 @@ ppc_ec (int ignore ATTRIBUTE_UNUSED)
 static void
 ppc_toc (int ignore ATTRIBUTE_UNUSED)
 {
-  if (ppc_toc_csect != (symbolS *) NULL)
+  if (ppc_toc_csect != NULL)
     subseg_set (data_section, symbol_get_tc (ppc_toc_csect)->subseg);
   else
     {
@@ -5656,7 +5655,7 @@ ppc_toc (int ignore ATTRIBUTE_UNUSED)
       ppc_toc_csect = sym;
 
       for (list = ppc_xcoff_data_section.csects;
-	   symbol_get_tc (list)->next != (symbolS *) NULL;
+	   symbol_get_tc (list)->next != NULL;
 	   list = symbol_get_tc (list)->next)
 	;
       symbol_get_tc (list)->next = sym;
@@ -5764,7 +5763,7 @@ ppc_tc (int ignore ATTRIBUTE_UNUSED)
     char endc;
     symbolS *sym;
 
-    if (ppc_toc_csect == (symbolS *) NULL
+    if (ppc_toc_csect == NULL
 	|| ppc_toc_csect != ppc_current_csect)
       {
 	as_bad (_(".tc not in .toc section"));
@@ -6008,7 +6007,7 @@ ppc_symbol_new_hook (symbolS *sym)
     return;
 
   s = strchr (S_GET_NAME (sym), '[');
-  if (s == (const char *) NULL)
+  if (s == NULL)
     {
       /* There is no suffix.  */
       return;
@@ -6109,7 +6108,7 @@ ppc_frob_symbol (symbolS *sym)
   if (sym == abs_section_sym)
     return 1;
 
-  if (symbol_get_tc (sym)->real_name != (char *) NULL)
+  if (symbol_get_tc (sym)->real_name != NULL)
     S_SET_NAME (sym, symbol_get_tc (sym)->real_name);
   else
     {
@@ -6118,7 +6117,7 @@ ppc_frob_symbol (symbolS *sym)
 
       name = S_GET_NAME (sym);
       s = strchr (name, '[');
-      if (s != (char *) NULL)
+      if (s != NULL)
 	{
 	  unsigned int len;
 	  char *snew;
@@ -6130,7 +6129,7 @@ ppc_frob_symbol (symbolS *sym)
 	}
     }
 
-  if (set_end != (symbolS *) NULL)
+  if (set_end != NULL)
     {
       SA_SET_SYM_ENDNDX (set_end, sym);
       set_end = NULL;
@@ -6139,7 +6138,7 @@ ppc_frob_symbol (symbolS *sym)
   if (SF_GET_FUNCTION (sym))
     {
       ppc_last_function = sym;
-      if (symbol_get_tc (sym)->u.size != (symbolS *) NULL)
+      if (symbol_get_tc (sym)->u.size != NULL)
 	{
 	  resolve_symbol_value (symbol_get_tc (sym)->u.size);
 	  SA_SET_SYM_FSIZE (sym,
@@ -6159,7 +6158,7 @@ ppc_frob_symbol (symbolS *sym)
   else if (S_GET_STORAGE_CLASS (sym) == C_FCN
 	   && strcmp (S_GET_NAME (sym), ".ef") == 0)
     {
-      if (ppc_last_function == (symbolS *) NULL)
+      if (ppc_last_function == NULL)
 	as_bad (_(".ef with no preceding .function"));
       else
 	{
@@ -6202,7 +6201,7 @@ ppc_frob_symbol (symbolS *sym)
 	{
 	  /* This is a csect symbol.  x_scnlen is the size of the
 	     csect.  */
-	  if (symbol_get_tc (sym)->next == (symbolS *) NULL)
+	  if (symbol_get_tc (sym)->next == NULL)
 	    a->u.auxent.x_csect.x_scnlen.u64
 	      = bfd_section_size (S_GET_SEGMENT (sym)) - S_GET_VALUE (sym);
 	  else
@@ -6257,10 +6256,10 @@ ppc_frob_symbol (symbolS *sym)
 	  next = symbol_next (sym);
 	  while (symbol_get_tc (next)->symbol_class == XMC_TC0)
 	    next = symbol_next (next);
-	  if (next == (symbolS *) NULL
+	  if (next == NULL
 	      || (!ppc_is_toc_sym (next)))
 	    {
-	      if (ppc_after_toc_frag == (fragS *) NULL)
+	      if (ppc_after_toc_frag == NULL)
 		a->u.auxent.x_csect.x_scnlen.u64
 		  = bfd_section_size (data_section) - S_GET_VALUE (sym);
 	      else
@@ -6293,14 +6292,14 @@ ppc_frob_symbol (symbolS *sym)
 	  /* Skip the initial dummy symbol.  */
 	  csect = symbol_get_tc (csect)->next;
 
-	  if (csect == (symbolS *) NULL)
+	  if (csect == NULL)
 	    {
 	      as_warn (_("warning: symbol %s has no csect"), S_GET_NAME (sym));
 	      a->u.auxent.x_csect.x_scnlen.u64 = 0;
 	    }
 	  else
 	    {
-	      while (symbol_get_tc (csect)->next != (symbolS *) NULL)
+	      while (symbol_get_tc (csect)->next != NULL)
 		{
 		  resolve_symbol_value (symbol_get_tc (csect)->next);
 		  if (S_GET_VALUE (symbol_get_tc (csect)->next)
@@ -6598,17 +6597,17 @@ ppc_fix_adjustable (fixS *fix)
   if (bfd_section_flags (symseg) & SEC_DEBUGGING)
     return 1;
 
-  if (ppc_toc_csect != (symbolS *) NULL
+  if (ppc_toc_csect != NULL
       && fix->fx_addsy != ppc_toc_csect
       && symseg == data_section
       && val >= ppc_toc_frag->fr_address
-      && (ppc_after_toc_frag == (fragS *) NULL
+      && (ppc_after_toc_frag == NULL
 	  || val < ppc_after_toc_frag->fr_address))
     {
       symbolS *sy;
 
       for (sy = symbol_next (ppc_toc_csect);
-	   sy != (symbolS *) NULL;
+	   sy != NULL;
 	   sy = symbol_next (sy))
 	{
 	  TC_SYMFIELD_TYPE *sy_tc = symbol_get_tc (sy);
@@ -6989,7 +6988,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
      use *valP, and must use fx_offset instead.  If the relocation
      is PC-relative, we then need to re-apply md_pcrel_from_section
      to this new relocation value.  */
-  if (fixP->fx_addsy == (symbolS *) NULL)
+  if (fixP->fx_addsy == NULL)
     fixP->fx_done = 1;
 
   else
@@ -7763,7 +7762,7 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
       reloc->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_PPC_NEG);
       reloc->addend = fixp->fx_addnumber;
 
-      if (reloc->howto == (reloc_howto_type *) NULL)
+      if (reloc->howto == NULL)
         {
 	  as_bad_subtract (fixp);
 	  relocs[0] = NULL;

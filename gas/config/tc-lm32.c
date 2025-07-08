@@ -80,7 +80,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "hword",   cons,                2 },
   { "word",    cons,                4 },
   { "dword",   cons,                8 },
-  {(char *)0 , (void(*)(int))0,     0}
+  { NULL,      NULL,                0 }
 };
 
 /* Target specific command line options.  */
@@ -357,7 +357,7 @@ md_pcrel_from (fixS *fixP)
 long
 md_pcrel_from_section (fixS * fixP, segT sec)
 {
-  if ((fixP->fx_addsy != (symbolS *) NULL)
+  if ((fixP->fx_addsy != NULL)
       && (! S_IS_DEFINED (fixP->fx_addsy)
 	  || (S_GET_SEGMENT (fixP->fx_addsy) != sec)))
     {
@@ -368,7 +368,7 @@ md_pcrel_from_section (fixS * fixP, segT sec)
 
   /*fprintf(stderr, "%s extern %d local %d\n", S_GET_NAME (fixP->fx_addsy), S_IS_EXTERN (fixP->fx_addsy), S_IS_LOCAL (fixP->fx_addsy));*/
   /* FIXME: Weak problem? */
-  if ((fixP->fx_addsy != (symbolS *) NULL)
+  if ((fixP->fx_addsy != NULL)
       && S_IS_EXTERNAL (fixP->fx_addsy))
     {
       /* If the symbol is external, let the linker handle it.  */

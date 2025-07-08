@@ -5269,7 +5269,7 @@ md_pcrel_from_section (fixS * fixP, segT seg)
 {
   /* If the symbol is undefined or defined in another section
      we leave the add number alone for the linker to fix it later.  */
-  if (fixP->fx_addsy != (symbolS *) NULL
+  if (fixP->fx_addsy != NULL
       && (! S_IS_DEFINED (fixP->fx_addsy)
 	  || S_GET_SEGMENT (fixP->fx_addsy) != seg))
     return fixP->fx_size;

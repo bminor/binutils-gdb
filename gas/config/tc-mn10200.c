@@ -676,7 +676,7 @@ valueT
 md_section_align (asection *seg, valueT addr)
 {
   int align = bfd_section_alignment (seg);
-  return ((addr + (1 << align) - 1) & -(1 << align));
+  return ((addr + ((valueT) 1 << align) - 1) & -((valueT) 1 << align));
 }
 
 void
@@ -697,7 +697,7 @@ md_begin (void)
     {
       if (strcmp (prev_name, op->name))
 	{
-	  prev_name = (char *) op->name;
+	  prev_name = op->name;
 	  str_hash_insert (mn10200_hash, op->name, op, 0);
 	}
       op++;
@@ -734,7 +734,7 @@ check_operand (unsigned long insn ATTRIBUTE_UNUSED,
 
       test = val;
 
-      if (test < (offsetT) min || test > (offsetT) max)
+      if (test < min || test > max)
 	return 0;
       else
 	return 1;
@@ -844,17 +844,18 @@ mn10200_insert_operand (unsigned long *insnp,
 
       test = val;
 
-      if (test < (offsetT) min || test > (offsetT) max)
-	as_warn_value_out_of_range (_("operand"), test, (offsetT) min, (offsetT) max, file, line);
+      if (test < min || test > max)
+	as_warn_value_out_of_range (_("operand"), test, (offsetT) min,
+				    (offsetT) max, file, line);
     }
 
   if ((operand->flags & MN10200_OPERAND_EXTENDED) == 0)
     {
-      *insnp |= (((long) val & ((1 << operand->bits) - 1))
+      *insnp |= ((val & ((1 << operand->bits) - 1))
 		 << (operand->shift + shift));
 
       if ((operand->flags & MN10200_OPERAND_REPEATED) != 0)
-	*insnp |= (((long) val & ((1 << operand->bits) - 1))
+	*insnp |= ((val & ((1 << operand->bits) - 1))
 		   << (operand->shift + shift + 2));
     }
   else
@@ -1318,7 +1319,7 @@ md_assemble (char *str)
 
 	      fixP = fix_new_exp (frag_now, f - frag_now->fr_literal + offset,
 				  reloc_size, &fixups[i].exp, pcrel,
-				  ((bfd_reloc_code_real_type) reloc));
+				  reloc);
 
 	      /* PC-relative offsets are from the first byte of the
 		 next instruction, not from the start of the current

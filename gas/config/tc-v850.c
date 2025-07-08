@@ -3393,7 +3393,7 @@ v850_pcrel_from_section (fixS *fixp, segT section)
   /* If the symbol is undefined, or in a section other than our own,
      or it is weak (in which case it may well be in another section,
      then let the linker figure it out.  */
-  if (fixp->fx_addsy != (symbolS *) NULL
+  if (fixp->fx_addsy != NULL
       && (! S_IS_DEFINED (fixp->fx_addsy)
 	  || S_IS_WEAK (fixp->fx_addsy)
 	  || (S_GET_SEGMENT (fixp->fx_addsy) != section)))
@@ -3417,7 +3417,7 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
       return;
     }
 
-  if (fixP->fx_addsy == (symbolS *) NULL)
+  if (fixP->fx_addsy == NULL)
     fixP->fx_addnumber = value,
     fixP->fx_done = 1;
 
@@ -3427,7 +3427,7 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
   else
     {
       value = fixP->fx_offset;
-      if (fixP->fx_subsy != (symbolS *) NULL)
+      if (fixP->fx_subsy != NULL)
 	{
 	  if (S_GET_SEGMENT (fixP->fx_subsy) == absolute_section)
 	    value -= S_GET_VALUE (fixP->fx_subsy);

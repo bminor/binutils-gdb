@@ -246,7 +246,7 @@ obj_som_init_stab_section (segT stab, segT stabstr)
      the call to get_stab_string_offset.  */
   p = frag_more (12);
   memset (p, 0, 12);
-  file = as_where ((unsigned int *) NULL);
+  file = as_where (NULL);
   stroff = get_stab_string_offset (file, stabstr);
   know (stroff == 1);
   md_number_to_chars (p, stroff, 4);
@@ -294,7 +294,7 @@ adjust_stab_sections (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 void
 som_frob_file (void)
 {
-  bfd_map_over_sections (stdoutput, adjust_stab_sections, (void *) 0);
+  bfd_map_over_sections (stdoutput, adjust_stab_sections, NULL);
 }
 
 static void

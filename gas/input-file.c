@@ -58,7 +58,7 @@ struct saved_file
 void
 input_file_begin (void)
 {
-  f_in = (FILE *) 0;
+  f_in = NULL;
 }
 
 void
@@ -237,7 +237,7 @@ input_file_give_next_buffer (char *where /* Where to place 1st character of new 
   char *return_value;		/* -> Last char of what we read, + 1.  */
   size_t size;
 
-  if (f_in == (FILE *) 0)
+  if (f_in == NULL)
     return 0;
   /* fflush (stdin); could be done here if you want to synchronise
      stdin and stdout, for the case where our input file is stdin.
@@ -266,7 +266,7 @@ input_file_give_next_buffer (char *where /* Where to place 1st character of new 
       if (fclose (f_in))
 	as_warn (_("can't close %s: %s"), file_name, xstrerror (errno));
 
-      f_in = (FILE *) 0;
+      f_in = NULL;
       return_value = 0;
     }
 

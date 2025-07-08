@@ -1452,7 +1452,7 @@ md_section_align (asection *seg, valueT addr)
 long
 md_pcrel_from_section (fixS *fixp, segT sec)
 {
-  if (fixp->fx_addsy != (symbolS *) NULL
+  if (fixp->fx_addsy != NULL
       && (!S_IS_DEFINED (fixp->fx_addsy)
 	  || (S_GET_SEGMENT (fixp->fx_addsy) != sec)))
     return 0;
@@ -1519,7 +1519,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
   unsigned long insn;
   long value = *valP;
 
-  if (fixP->fx_addsy == (symbolS *) NULL)
+  if (fixP->fx_addsy == NULL)
     fixP->fx_done = 1;
 
   else if (fixP->fx_pcrel)
@@ -1567,7 +1567,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
       fixP->fx_subsy = NULL;
   }
   /* We don't actually support subtracting a symbol.  */
-  if (fixP->fx_subsy != (symbolS *) NULL)
+  if (fixP->fx_subsy != NULL)
     as_bad_subtract (fixP);
 
   /* For the DIFF relocs, write the value into the object file while still
@@ -1856,7 +1856,7 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED,
 
   reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
 
-  if (reloc->howto == (reloc_howto_type *) NULL)
+  if (reloc->howto == NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
 		    _("reloc %d not supported by object file format"),

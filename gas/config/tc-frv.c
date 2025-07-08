@@ -175,7 +175,7 @@ static flagword frv_flags = DEFAULT_FLAGS | DEFAULT_FDPIC;
 
 static int frv_user_set_flags_p = 0;
 static int frv_pic_p = 0;
-static const char *frv_pic_flag = DEFAULT_FDPIC ? "-mfdpic" : (const char *)0;
+static const char *frv_pic_flag = DEFAULT_FDPIC ? "-mfdpic" : NULL;
 
 /* Print tomcat-specific debugging info.  */
 static int tomcat_debug = 0;
@@ -1311,7 +1311,7 @@ long
 md_pcrel_from_section (fixS *fixP, segT sec)
 {
   if (TC_FORCE_RELOCATION (fixP)
-      || (fixP->fx_addsy != (symbolS *) NULL
+      || (fixP->fx_addsy != NULL
 	  && S_GET_SEGMENT (fixP->fx_addsy) != sec))
     {
       /* If we can't adjust this relocation, or if it references a
@@ -1790,7 +1790,7 @@ frv_frob_file_section (bfd *abfd, asection *sec, void *ptr ATTRIBUTE_UNUSED)
 void
 frv_frob_file (void)
 {
-  bfd_map_over_sections (stdoutput, frv_frob_file_section, (void *) 0);
+  bfd_map_over_sections (stdoutput, frv_frob_file_section, NULL);
 }
 
 void

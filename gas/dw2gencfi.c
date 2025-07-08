@@ -236,7 +236,7 @@ get_debugseg_name (segT seg, const char *base_name)
     {
       if (!strcmp (base_name, ".eh_frame_entry")
 	  && strcmp (name, ".text") != 0)
-	return notes_concat (base_name, ".", name, NULL);
+	return notes_concat (base_name, ".", name, (const char *) NULL);
 
       name = "";
     }
@@ -249,7 +249,7 @@ get_debugseg_name (segT seg, const char *base_name)
   else
     name = dollar;
 
-  return notes_concat (base_name, name, NULL);
+  return notes_concat (base_name, name, (const char *) NULL);
 }
 
 /* Allocate a dwcfi_seg_list structure.  */

@@ -680,7 +680,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   /* In general, fix instructions with immediate
      constants.  But leave LDI32 for the linker,
      which is prepared to shorten insns.  */
-  if (fixP->fx_addsy == (symbolS *) NULL
+  if (fixP->fx_addsy == NULL
       && fixP->fx_r_type != BFD_RELOC_PRU_LDI32)
     fixP->fx_done = 1;
 
@@ -751,7 +751,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       fixP->fx_subsy = NULL;
   }
   /* We don't actually support subtracting a symbol.  */
-  if (fixP->fx_subsy != (symbolS *) NULL)
+  if (fixP->fx_subsy != NULL)
     as_bad_subtract (fixP);
 
   /* For the DIFF relocs, write the value into the object file while still

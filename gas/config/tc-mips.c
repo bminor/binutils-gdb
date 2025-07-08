@@ -2617,7 +2617,7 @@ set_insn_error_ss (int argnum, const char *msg, const char *s1, const char *s2)
 static void
 report_insn_error (const char *str)
 {
-  const char *msg = concat (insn_error.msg, " `%s'", NULL);
+  const char *msg = concat (insn_error.msg, " `%s'", (const char *) NULL);
 
   switch (insn_error.format)
     {
@@ -17656,7 +17656,7 @@ nopic_need_relax (symbolS *sym, int before_relaxing)
 	 not be referenced off the $gp, although it appears as though
 	 they can.  */
       symname = S_GET_NAME (sym);
-      if (symname != (const char *) NULL
+      if (symname != NULL
 	  && (strcmp (symname, "eprol") == 0
 	      || strcmp (symname, "etext") == 0
 	      || strcmp (symname, "_gp") == 0
@@ -19915,7 +19915,7 @@ s_mips_frame (int ignore ATTRIBUTE_UNUSED)
     {
       long val;
 
-      if (cur_proc_ptr == (procS *) NULL)
+      if (cur_proc_ptr == NULL)
 	{
 	  as_warn (_(".frame outside of .ent"));
 	  demand_empty_rest_of_line ();
@@ -19956,7 +19956,7 @@ s_mips_mask (int reg_type)
     {
       long mask, off;
 
-      if (cur_proc_ptr == (procS *) NULL)
+      if (cur_proc_ptr == NULL)
 	{
 	  as_warn (_(".mask/.fmask outside of .ent"));
 	  demand_empty_rest_of_line ();

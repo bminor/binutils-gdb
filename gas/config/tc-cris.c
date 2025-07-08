@@ -877,7 +877,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec ATTRIBUTE_UNUSED,
 
     case ENCODE_RELAX (STATE_COND_BRANCH, STATE_DWORD):
       gen_cond_branch_32 (fragP->fr_opcode, var_partp, fragP,
-			  fragP->fr_symbol, (symbolS *) NULL,
+			  fragP->fr_symbol, NULL,
 			  fragP->fr_offset);
       /* Ten bytes added: a branch, nop and a jump.  */
       var_part_size = 2 + 2 + 4 + 2;
@@ -885,7 +885,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec ATTRIBUTE_UNUSED,
 
     case ENCODE_RELAX (STATE_COND_BRANCH_PIC, STATE_DWORD):
       gen_cond_branch_32 (fragP->fr_opcode, var_partp, fragP,
-			  fragP->fr_symbol, (symbolS *) NULL,
+			  fragP->fr_symbol, NULL,
 			  fragP->fr_offset);
       /* Twelve bytes added: a branch, nop and a pic-branch-32.  */
       var_part_size = 2 + 2 + 4 + 2 + 2;
@@ -893,7 +893,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec ATTRIBUTE_UNUSED,
 
     case ENCODE_RELAX (STATE_COND_BRANCH_V32, STATE_DWORD):
       gen_cond_branch_32 (fragP->fr_opcode, var_partp, fragP,
-			  fragP->fr_symbol, (symbolS *) NULL,
+			  fragP->fr_symbol, NULL,
 			  fragP->fr_offset);
       /* Twelve bytes added: a branch, nop and another branch and nop.  */
       var_part_size = 2 + 2 + 2 + 4 + 2;
@@ -1392,8 +1392,7 @@ md_assemble (char *str)
 			 ? 12 : 10);
 
 	  gen_cond_branch_32 (opcodep, cond_jump, frag_now,
-			      output_instruction.expr.X_add_symbol,
-			      (symbolS *) NULL,
+			      output_instruction.expr.X_add_symbol, NULL,
 			      output_instruction.expr.X_add_number);
 	}
     }
@@ -4047,7 +4046,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
     fixP->fx_done = 1;
 
   /* We can't actually support subtracting a symbol.  */
-  if (fixP->fx_subsy != (symbolS *) NULL)
+  if (fixP->fx_subsy != NULL)
     as_bad_subtract (fixP);
 
   /* This operand-type is scaled.  */

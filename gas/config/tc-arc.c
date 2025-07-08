@@ -2767,7 +2767,7 @@ md_pcrel_from_section (fixS *fixP,
 
   pr_debug ("pcrel_from_section, fx_offset = %d\n", (int) fixP->fx_offset);
 
-  if (fixP->fx_addsy != (symbolS *) NULL
+  if (fixP->fx_addsy != NULL
       && (!S_IS_DEFINED (fixP->fx_addsy)
 	  || S_GET_SEGMENT (fixP->fx_addsy) != sec))
     {
@@ -3917,7 +3917,7 @@ assemble_insn (const struct arc_opcode *opcode,
   for (argidx = opcode->operands; *argidx; ++argidx)
     {
       const struct arc_operand *operand = &arc_operands[*argidx];
-      const expressionS *t = (const expressionS *) 0;
+      const expressionS *t = NULL;
 
       if (ARC_OPERAND_IS_FAKE (operand))
 	continue;

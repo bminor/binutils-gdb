@@ -315,7 +315,7 @@ immediate_overflow (int64_t value, unsigned bits)
 long
 md_pcrel_from_section (fixS *fixP, segT sec)
 {
-  if (fixP->fx_addsy != (symbolS *) NULL
+  if (fixP->fx_addsy != NULL
       && (! S_IS_DEFINED (fixP->fx_addsy)
           || (S_GET_SEGMENT (fixP->fx_addsy) != sec)
           || S_IS_EXTERNAL (fixP->fx_addsy)
@@ -362,7 +362,7 @@ tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED, fixS *fixP)
 
   reloc->howto = bfd_reloc_type_lookup (stdoutput, r_type);
 
-  if (reloc->howto == (reloc_howto_type *) NULL)
+  if (reloc->howto == NULL)
     {
       as_bad_where (fixP->fx_file, fixP->fx_line,
 		    _("relocation is not supported"));
@@ -848,7 +848,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       break;
     }
 
-  if (fixP->fx_addsy == (symbolS *) NULL)
+  if (fixP->fx_addsy == NULL)
     fixP->fx_done = 1;
 
   if (fixP->fx_done)

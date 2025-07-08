@@ -4396,7 +4396,7 @@ md_section_align (asection * seg, valueT addr)
 long
 md_pcrel_from_section (fixS * fixp, segT sec)
 {
-  if (fixp->fx_addsy != (symbolS *) NULL
+  if (fixp->fx_addsy != NULL
       && (!S_IS_DEFINED (fixp->fx_addsy)
 	  || (S_GET_SEGMENT (fixp->fx_addsy) != sec)))
     return 0;
@@ -4431,7 +4431,7 @@ md_apply_fix (fixS * fixp, valueT * valuep, segT seg)
   unsigned long insn;
   long value;
 
-  if (fixp->fx_addsy == (symbolS *) NULL)
+  if (fixp->fx_addsy == NULL)
     {
       value = *valuep;
       fixp->fx_done = 1;
@@ -4464,7 +4464,7 @@ md_apply_fix (fixS * fixp, valueT * valuep, segT seg)
     {
       value = fixp->fx_offset;
 
-      if (fixp->fx_subsy != (symbolS *) NULL)
+      if (fixp->fx_subsy != NULL)
 	{
 	  if (S_GET_SEGMENT (fixp->fx_subsy) == absolute_section)
 	    {

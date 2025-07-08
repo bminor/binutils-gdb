@@ -1613,7 +1613,7 @@ obj_mach_o_check_before_writing (bfd *abfd ATTRIBUTE_UNUSED,
 void
 obj_mach_o_pre_output_hook (void)
 {
-  bfd_map_over_sections (stdoutput, obj_mach_o_check_before_writing, (char *) 0);
+  bfd_map_over_sections (stdoutput, obj_mach_o_check_before_writing, NULL);
 }
 
 /* Here we count up frags in each subsection (where a sub-section is defined
@@ -1662,7 +1662,7 @@ obj_mach_o_set_subsections (bfd *abfd ATTRIBUTE_UNUSED,
 void
 obj_mach_o_pre_relax_hook (void)
 {
-  bfd_map_over_sections (stdoutput, obj_mach_o_set_subsections, (char *) 0);
+  bfd_map_over_sections (stdoutput, obj_mach_o_set_subsections, NULL);
 }
 
 /* Zerofill and GB Zerofill sections must be sorted to follow all other
@@ -1875,7 +1875,7 @@ obj_mach_o_set_indirect_symbols (bfd *abfd, asection *sec,
 void
 obj_mach_o_frob_file_after_relocs (void)
 {
-  bfd_map_over_sections (stdoutput, obj_mach_o_set_indirect_symbols, (char *) 0);
+  bfd_map_over_sections (stdoutput, obj_mach_o_set_indirect_symbols, NULL);
 }
 
 /* Reverse relocations order to make ld happy.  */

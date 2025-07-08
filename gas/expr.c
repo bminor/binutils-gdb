@@ -132,7 +132,7 @@ static unsigned int nr_seen[2];
 static symbolS *
 symbol_lookup_or_make (const char *name, bool start)
 {
-  char *buf = concat (start ? ".startof." : ".sizeof.", name, NULL);
+  char *buf = concat (start ? ".startof." : ".sizeof.", name, (char *) NULL);
   symbolS *symbolP;
   unsigned int i;
 

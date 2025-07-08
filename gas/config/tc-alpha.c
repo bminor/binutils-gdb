@@ -638,7 +638,7 @@ alpha_adjust_relocs (bfd *abfd ATTRIBUTE_UNUSED,
   for (fixp = seginfo->fix_root; fixp; fixp = next)
     {
       next = fixp->fx_next;
-      fixp->fx_next = (fixS *) 0;
+      fixp->fx_next = NULL;
 
       switch (fixp->fx_r_type)
 	{
@@ -736,7 +736,7 @@ alpha_adjust_relocs (bfd *abfd ATTRIBUTE_UNUSED,
 	      && ! fixp->tc_fix_data.info->multi_section_p)
 	    {
 	      for (slave = fixp->tc_fix_data.info->slaves;
-		   slave != (fixS *) 0;
+		   slave != NULL;
 		   slave = slave->tc_fix_data.next_reloc)
 		{
 		  slave->fx_next = fixp->fx_next;
@@ -1738,7 +1738,7 @@ emit_insn (struct alpha_insn *insn)
 
   /* Take care of alignment duties.  */
   if (alpha_auto_align_on && alpha_current_align < 2)
-    alpha_align (2, (char *) NULL, alpha_insn_label, 0);
+    alpha_align (2, NULL, alpha_insn_label, 0);
   if (alpha_current_align > 2)
     alpha_current_align = 2;
   alpha_insn_label = NULL;
@@ -1754,7 +1754,7 @@ emit_insn (struct alpha_insn *insn)
   /* Apply the fixups in order.  */
   for (i = 0; i < insn->nfixups; ++i)
     {
-      const struct alpha_operand *operand = (const struct alpha_operand *) 0;
+      const struct alpha_operand *operand = NULL;
       struct alpha_fixup *fixup = &insn->fixups[i];
       struct alpha_reloc_tag *info = NULL;
       int size, pcrel;
@@ -2028,7 +2028,7 @@ assemble_insn (const struct alpha_opcode *opcode,
   for (argidx = opcode->operands; *argidx; ++argidx)
     {
       const struct alpha_operand *operand = &alpha_operands[*argidx];
-      const expressionS *t = (const expressionS *) 0;
+      const expressionS *t = NULL;
 
       if (operand->flags & AXP_OPERAND_FAKE)
 	{
@@ -3387,11 +3387,11 @@ add_to_link_pool (symbolS *sym, offsetT addend)
 
   if (seginfo->frchainP)
     for (fixp = seginfo->frchainP->fix_root;
-	 fixp != (fixS *) NULL;
+	 fixp != NULL;
 	 fixp = fixp->fx_next)
       {
 	if (fixp->fx_addsy == sym
-	    && fixp->fx_offset == (valueT)addend
+	    && fixp->fx_offset == (valueT) addend
 	    && fixp->tc_fix_data.info
 	    && fixp->tc_fix_data.info->sym
 	    && symbol_symbolS (fixp->tc_fix_data.info->sym)
@@ -4864,7 +4864,7 @@ s_alpha_gprel32 (int ignore ATTRIBUTE_UNUSED)
 #endif
 
   if (alpha_auto_align_on && alpha_current_align < 2)
-    alpha_align (2, (char *) NULL, alpha_insn_label, 0);
+    alpha_align (2, NULL, alpha_insn_label, 0);
   if (alpha_current_align > 2)
     alpha_current_align = 2;
   alpha_insn_label = NULL;
@@ -4907,7 +4907,7 @@ s_alpha_float_cons (int type)
     }
 
   if (alpha_auto_align_on && alpha_current_align < log_size)
-    alpha_align (log_size, (char *) NULL, alpha_insn_label, 0);
+    alpha_align (log_size, NULL, alpha_insn_label, 0);
   if (alpha_current_align > log_size)
     alpha_current_align = log_size;
   alpha_insn_label = NULL;
@@ -5092,7 +5092,7 @@ alpha_cons_align (int size)
     ++log_size;
 
   if (alpha_auto_align_on && alpha_current_align < log_size)
-    alpha_align (log_size, (char *) NULL, alpha_insn_label, 0);
+    alpha_align (log_size, NULL, alpha_insn_label, 0);
   if (alpha_current_align > log_size)
     alpha_current_align = log_size;
   alpha_insn_label = NULL;

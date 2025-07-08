@@ -1785,7 +1785,7 @@ md_estimate_size_before_relax (fragS *fragp ATTRIBUTE_UNUSED,
 long
 md_pcrel_from_section (fixS *fixp, segT sec)
 {
-  if (fixp->fx_addsy != (symbolS *) NULL
+  if (fixp->fx_addsy != NULL
       && (!S_IS_DEFINED (fixp->fx_addsy)
 	  || (S_GET_SEGMENT (fixp->fx_addsy) != sec)))
     return 0;
@@ -1888,7 +1888,7 @@ d30v_cons_align (int size)
     ++log_size;
 
   if (d30v_current_align < log_size)
-    d30v_align (log_size, (char *) NULL, NULL);
+    d30v_align (log_size, NULL, NULL);
   else if (d30v_current_align > log_size)
     d30v_current_align = log_size;
   d30v_last_label = NULL;
@@ -1901,11 +1901,11 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   unsigned long insn, insn2;
   long value = *valP;
 
-  if (fixP->fx_addsy == (symbolS *) NULL)
+  if (fixP->fx_addsy == NULL)
     fixP->fx_done = 1;
 
   /* We don't support subtracting a symbol.  */
-  if (fixP->fx_subsy != (symbolS *) NULL)
+  if (fixP->fx_subsy != NULL)
     as_bad_subtract (fixP);
 
   /* Fetch the instruction, insert the fully resolved operand

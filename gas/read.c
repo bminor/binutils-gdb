@@ -1235,7 +1235,7 @@ read_a_source_file (const char *name)
 				   || pop->poc_handler == s_globl
 				   || pop->poc_handler == s_ignore)))
 			{
-			  do_align (1, (char *) NULL, 0, 0);
+			  do_align (1, NULL, 0, 0);
 			  mri_pending_align = 0;
 
 			  if (line_label != NULL)
@@ -1296,7 +1296,7 @@ read_a_source_file (const char *name)
 
 		      if (mri_pending_align)
 			{
-			  do_align (1, (char *) NULL, 0, 0);
+			  do_align (1, NULL, 0, 0);
 			  mri_pending_align = 0;
 			  if (line_label != NULL)
 			    {
@@ -1623,7 +1623,7 @@ s_align (signed int arg, int bytes_p)
     {
       if (arg < 0)
 	as_warn (_("expected fill pattern missing"));
-      do_align (align, (char *) NULL, 0, max);
+      do_align (align, NULL, 0, max);
     }
   else
     {
@@ -3482,7 +3482,7 @@ s_space (int mult)
 	}
       else
 	{
-	  do_align (1, (char *) NULL, 0, 0);
+	  do_align (1, NULL, 0, 0);
 	  if (line_label != NULL)
 	    {
 	      symbol_set_frag (line_label, frag_now);

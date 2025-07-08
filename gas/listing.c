@@ -223,7 +223,7 @@ static char *data_buffer;
 static void
 listing_message (const char *name, const char *message)
 {
-  if (listing_tail != (list_info_type *) NULL)
+  if (listing_tail != NULL)
     {
       char *n = concat (name, message, (char *) NULL);
       struct list_message *lm = XNEW (struct list_message);
@@ -256,7 +256,7 @@ file_info (const char *file_name)
   /* Find an entry with this file name.  */
   file_info_type *p = file_info_head;
 
-  while (p != (file_info_type *) NULL)
+  while (p != NULL)
     {
       if (filename_cmp (p->filename, file_name) == 0)
 	return p;
@@ -406,11 +406,11 @@ listing_newline (char *ps)
   new_i->frag = frag_now;
   new_i->line = line;
   new_i->file = file_info (file);
-  new_i->next = (list_info_type *) NULL;
+  new_i->next = NULL;
   new_i->messages = NULL;
   new_i->last_message = NULL;
   new_i->edict = EDICT_NONE;
-  new_i->hll_file = (file_info_type *) NULL;
+  new_i->hll_file = NULL;
   new_i->hll_line = 0;
 
   new_frag ();
@@ -488,7 +488,7 @@ listing_prev_line (void)
   list_info_type *l;
   fragS *f;
 
-  if (head == (list_info_type *) NULL
+  if (head == NULL
       || head == listing_tail)
     return;
 
@@ -497,7 +497,7 @@ listing_prev_line (void)
   for (l = head; l->next != listing_tail; l = l->next)
     ;
 
-  for (f = frchain_now->frch_root; f != (fragS *) NULL; f = f->fr_next)
+  for (f = frchain_now->frch_root; f != NULL; f = f->fr_next)
     if (f->line == listing_tail)
       f->line = l;
 
@@ -810,7 +810,7 @@ calc_hex (list_info_type *list)
   data_buffer_size = 0;
 
   /* Dump all the frags which belong to this line.  */
-  while (frag_ptr != (fragS *) NULL && frag_ptr->line == first)
+  while (frag_ptr != NULL && frag_ptr->line == first)
     {
       /* Print as many bytes from the fixed part as is sensible.  */
       octet_in_frag = 0;
@@ -1013,7 +1013,7 @@ list_symbol_table (void)
 
   got_some = 0;
 
-  for (ptr = symbol_rootP; ptr != (symbolS *) NULL; ptr = symbol_next (ptr))
+  for (ptr = symbol_rootP; ptr != NULL; ptr = symbol_next (ptr))
     {
       if (S_GET_NAME (ptr) && strlen (S_GET_NAME (ptr)) != 0)
 	{

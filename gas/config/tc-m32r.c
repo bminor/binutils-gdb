@@ -35,7 +35,7 @@ typedef struct sym_link
   symbolS *symbol;
 } sym_linkS;
 
-static sym_linkS *debug_sym_link = (sym_linkS *) 0;
+static sym_linkS *debug_sym_link = NULL;
 
 /* Structure to hold all of the different components describing
    an individual instruction.  */
@@ -609,7 +609,7 @@ expand_debug_syms (sym_linkS *syms, int align)
     return;
 
   (void) frag_align_code (align, 0);
-  for (; syms != (sym_linkS *) 0; syms = next_syms)
+  for (; syms != NULL; syms = next_syms)
     {
       symbolS *symbolP = syms->symbol;
       next_syms = syms->next;
@@ -627,7 +627,7 @@ m32r_flush_pending_output (void)
   if (debug_sym_link)
     {
       expand_debug_syms (debug_sym_link, 1);
-      debug_sym_link = (sym_linkS *) 0;
+      debug_sym_link = NULL;
     }
 }
 
@@ -653,7 +653,7 @@ m32r_fill_insn (int done)
   if (done && debug_sym_link)
     {
       expand_debug_syms (debug_sym_link, 1);
-      debug_sym_link = (sym_linkS *) 0;
+      debug_sym_link = NULL;
     }
 
   return 1;
@@ -911,7 +911,7 @@ assemble_two_insns (char *str1, char *str2, int parallel_p)
   fill_insn (0);
 
   first.debug_sym_link = debug_sym_link;
-  debug_sym_link = (sym_linkS *) 0;
+  debug_sym_link = NULL;
 
   /* Parse the first instruction.  */
   if (! (first.insn = m32r_cgen_assemble_insn
@@ -1215,7 +1215,7 @@ md_assemble (char *str)
     }
 
   insn.debug_sym_link = debug_sym_link;
-  debug_sym_link = (sym_linkS *) 0;
+  debug_sym_link = NULL;
 
   insn.insn = m32r_cgen_assemble_insn
     (gas_cgen_cpu_desc, str, &insn.fields, insn.buffer, & errmsg);
@@ -1837,7 +1837,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 long
 md_pcrel_from_section (fixS *fixP, segT sec)
 {
-  if (fixP->fx_addsy != (symbolS *) NULL
+  if (fixP->fx_addsy != NULL
       && (! S_IS_DEFINED (fixP->fx_addsy)
 	  || S_GET_SEGMENT (fixP->fx_addsy) != sec
           || S_IS_EXTERNAL (fixP->fx_addsy)

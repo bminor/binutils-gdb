@@ -325,7 +325,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS * fixP)
   gas_assert ((int) fixP->fx_r_type > 0);
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type);
 
-  if (reloc->howto == (reloc_howto_type *) NULL)
+  if (reloc->howto == NULL)
     {
       as_bad_where (fixP->fx_file, fixP->fx_line,
 		    _("internal error: reloc %d (`%s') not supported by object file format"),
@@ -569,8 +569,8 @@ process_label_constant (char *str, ins * crx_ins)
 	      str);
       crx_ins->exp.X_op = O_constant;
       crx_ins->exp.X_add_number = 0;
-      crx_ins->exp.X_add_symbol = (symbolS *) 0;
-      crx_ins->exp.X_op_symbol = (symbolS *) 0;
+      crx_ins->exp.X_add_symbol = NULL;
+      crx_ins->exp.X_op_symbol = NULL;
       /* Fall through.  */
 
     case O_constant:

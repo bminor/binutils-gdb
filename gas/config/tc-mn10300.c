@@ -2312,7 +2312,7 @@ md_estimate_size_before_relax (fragS *fragp, asection *seg)
 long
 md_pcrel_from (fixS *fixp)
 {
-  if (fixp->fx_addsy != (symbolS *) NULL
+  if (fixp->fx_addsy != NULL
       && (!S_IS_DEFINED (fixp->fx_addsy) || S_IS_WEAK (fixp->fx_addsy)))
     /* The symbol is undefined or weak.  Let the linker figure it out.  */
     return 0;

@@ -331,7 +331,7 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
 long
 md_pcrel_from_section (fixS * fixP, segT sec)
 {
-  if ((fixP->fx_addsy != (symbolS *) NULL
+  if ((fixP->fx_addsy != NULL
        && (! S_IS_DEFINED (fixP->fx_addsy)
 	   || S_GET_SEGMENT (fixP->fx_addsy) != sec))
       || xstormy16_force_relocation (fixP))
@@ -474,11 +474,11 @@ xstormy16_md_apply_fix (fixS *   fixP,
 	break;
       }
 
-  if (fixP->fx_addsy == (symbolS *) NULL)
+  if (fixP->fx_addsy == NULL)
     fixP->fx_done = 1;
 
   /* We don't actually support subtracting a symbol.  */
-  if (fixP->fx_subsy != (symbolS *) NULL)
+  if (fixP->fx_subsy != NULL)
     as_bad_subtract (fixP);
 
   if (fixP->fx_r_type >= BFD_RELOC_UNUSED)

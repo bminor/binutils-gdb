@@ -1151,7 +1151,7 @@ symbolS *
 md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 {
   debug ("In md_undefined_symbol()\n");
-  return (symbolS *) 0;
+  return NULL;
 }
 
 valueT

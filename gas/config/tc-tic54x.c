@@ -533,7 +533,7 @@ tic54x_bss (int x ATTRIBUTE_UNUSED)
   symbolP = symbol_find_or_make (name);
 
   if (S_GET_SEGMENT (symbolP) == bss_section)
-    symbol_get_frag (symbolP)->fr_symbol = (symbolS *) NULL;
+    symbol_get_frag (symbolP)->fr_symbol = NULL;
 
   symbol_set_frag (symbolP, frag_now);
   p = frag_var (rs_org, 1, 1, 0, symbolP, words * OCTETS_PER_BYTE, NULL);
@@ -573,11 +573,11 @@ stag_add_field_symbols (struct stag *stag,
 
   /* Construct a symbol for every field contained within this structure
      including fields within structure fields.  */
-  prefix = concat (path, *path ? "." : "", NULL);
+  prefix = concat (path, *path ? "." : "", (const char *) NULL);
 
   while (field != NULL)
     {
-      char *name = concat (prefix, field->name, NULL);
+      char *name = concat (prefix, field->name, (const char *) NULL);
       char *freename = name;
 
       if (rootsym == NULL)
@@ -593,7 +593,8 @@ stag_add_field_symbols (struct stag *stag,
 	{
 	  subsym_ent_t *ent = xmalloc (sizeof (*ent));
 	  ent->u.s = concat (S_GET_NAME (rootsym), "+", root_stag_name,
-			     name + strlen (S_GET_NAME (rootsym)), NULL);
+			     name + strlen (S_GET_NAME (rootsym)),
+			     (const char *) NULL);
 	  ent->freekey = 1;
 	  ent->freeval = 1;
 	  ent->isproc = 0;

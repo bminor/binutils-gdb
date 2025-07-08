@@ -5783,7 +5783,7 @@ riscv_md_end (void)
 void
 riscv_adjust_symtab (void)
 {
-  bfd_map_over_sections (stdoutput, riscv_check_mapping_symbols, (char *) 0);
+  bfd_map_over_sections (stdoutput, riscv_check_mapping_symbols, NULL);
   elf_adjust_symtab ();
 }
 

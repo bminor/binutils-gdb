@@ -3572,7 +3572,7 @@ start_unwind_section (const segT text_seg, int sec_index)
       suffix += sizeof (".gnu.linkonce.t.") - 1;
     }
 
-  sec_name = concat (prefix, suffix, NULL);
+  sec_name = concat (prefix, suffix, (const char *) NULL);
 
   /* Handle COMDAT group.  */
   if ((text_seg->flags & SEC_LINK_ONCE) != 0
@@ -3591,7 +3591,8 @@ start_unwind_section (const segT text_seg, int sec_index)
 	}
 
       /* We have to construct a fake section directive.  */
-      section = concat (sec_name, ",\"aG\",@progbits,", group_name, ",comdat", NULL);
+      section = concat (sec_name, ",\"aG\",@progbits,", group_name,
+			",comdat", (const char *) NULL);
       set_section (section);
       free (section);
     }

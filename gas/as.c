@@ -791,7 +791,7 @@ This program has absolutely no warranty.\n"));
 	    if (*s == '\0')
 	      as_fatal (_("bad defsym; format is --defsym name=value"));
 	    *s++ = '\0';
-	    i = bfd_scan_vma (s, (const char **) NULL, 0);
+	    i = bfd_scan_vma (s, NULL, 0);
 	    n = XNEW (struct defsym_list);
 	    n->next = defsyms;
 	    n->name = optarg;

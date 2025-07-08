@@ -221,7 +221,7 @@ as_warn (const char *format, ...)
       va_start (args, format);
       vsnprintf (buffer, sizeof (buffer), format, args);
       va_end (args);
-      as_warn_internal ((char *) NULL, 0, buffer);
+      as_warn_internal (NULL, 0, buffer);
     }
 }
 
@@ -294,7 +294,7 @@ as_bad (const char *format, ...)
   vsnprintf (buffer, sizeof (buffer), format, args);
   va_end (args);
 
-  as_bad_internal ((char *) NULL, 0, buffer);
+  as_bad_internal (NULL, 0, buffer);
 }
 
 /* Like as_bad but the file name and line number are passed in.

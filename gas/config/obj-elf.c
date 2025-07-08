@@ -2691,7 +2691,7 @@ set_additional_section_info (bfd *abfd,
   if (!strcmp ("str", sec->name + strlen (sec->name) - 3))
     return;
 
-  name = concat (sec->name, "str", NULL);
+  name = concat (sec->name, "str", (const char *) NULL);
   strsec = bfd_get_section_by_name (abfd, name);
   if (strsec)
     strsz = bfd_section_size (strsec);

@@ -3816,7 +3816,7 @@ long
 md_pcrel_from_section (fixS *fixP, segT sec)
 {
   if (! sh_local_pcrel (fixP)
-      && fixP->fx_addsy != (symbolS *) NULL
+      && fixP->fx_addsy != NULL
       && (generic_force_reloc (fixP)
 	  || S_GET_SEGMENT (fixP->fx_addsy) != sec))
     {

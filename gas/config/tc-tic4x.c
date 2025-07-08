@@ -3000,7 +3000,7 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixP)
   reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
   reloc->address /= OCTETS_PER_BYTE;
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type);
-  if (reloc->howto == (reloc_howto_type *) NULL)
+  if (reloc->howto == NULL)
     {
       as_bad_where (fixP->fx_file, fixP->fx_line,
 		    _("Reloc %d not supported by object file format"),

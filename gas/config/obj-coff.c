@@ -462,7 +462,7 @@ obj_coff_ln (int ignore ATTRIBUTE_UNUSED)
   /* If there is no lineno symbol, treat a .ln directive
      as if it were a (no longer existing) .appline one.  */
   if (current_lineno_sym == NULL)
-    new_logical_line ((char *) NULL, l - 1);
+    new_logical_line (NULL, l - 1);
   else
     add_lineno (frag_now, frag_now_fix (), l);
 
@@ -1392,7 +1392,7 @@ coff_frob_symbol (symbolS *symp, int *punt)
     *punt = 1;
 #endif
 
-  if (set_end != (symbolS *) NULL
+  if (set_end != NULL
       && ! *punt
       && ((symbol_get_bfdsym (symp)->flags & BSF_NOT_AT_END) != 0
 	  || (S_IS_DEFINED (symp)
@@ -1827,7 +1827,7 @@ obj_coff_init_stab_section (segT stab ATTRIBUTE_UNUSED, segT stabstr)
   p = frag_more (12);
   /* Zero it out.  */
   memset (p, 0, 12);
-  file = as_where ((unsigned int *) NULL);
+  file = as_where (NULL);
   stroff = get_stab_string_offset (file, stabstr);
   know (stroff == 1);
   md_number_to_chars (p, stroff, 4);
@@ -1839,7 +1839,7 @@ const char * s_get_name (symbolS *);
 const char *
 s_get_name (symbolS *s)
 {
-  return ((s == NULL) ? "(NULL)" : S_GET_NAME (s));
+  return s == NULL ? "(NULL)" : S_GET_NAME (s);
 }
 
 void symbol_dump (void);
