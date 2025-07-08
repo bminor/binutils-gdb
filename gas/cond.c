@@ -110,8 +110,7 @@ s_ifdef (int test_defined)
       cframe.ignoring = ! (test_defined ^ is_defined);
     }
 
-  current_cframe =
-    (struct conditional_frame *) obstack_alloc (&cond_obstack, sizeof cframe);
+  current_cframe = obstack_alloc (&cond_obstack, sizeof cframe);
   memcpy (current_cframe, &cframe, sizeof cframe);
 
   if (LISTING_SKIP_COND ()
@@ -168,8 +167,7 @@ s_if (int arg)
      using an undefined result.  No big deal.  */
   initialize_cframe (&cframe);
   cframe.ignoring = cframe.dead_tree || ! t;
-  current_cframe =
-    (struct conditional_frame *) obstack_alloc (&cond_obstack, sizeof cframe);
+  current_cframe = obstack_alloc (&cond_obstack, sizeof cframe);
   memcpy (current_cframe, & cframe, sizeof cframe);
 
   if (LISTING_SKIP_COND ()
@@ -205,8 +203,7 @@ s_ifb (int test_blank)
       cframe.ignoring = (test_blank == !is_eol);
     }
 
-  current_cframe =
-    (struct conditional_frame *) obstack_alloc (&cond_obstack, sizeof cframe);
+  current_cframe = obstack_alloc (&cond_obstack, sizeof cframe);
   memcpy (current_cframe, &cframe, sizeof cframe);
 
   if (LISTING_SKIP_COND ()
@@ -286,8 +283,7 @@ s_ifc (int arg)
 
   initialize_cframe (&cframe);
   cframe.ignoring = cframe.dead_tree || ! (res ^ arg);
-  current_cframe =
-    (struct conditional_frame *) obstack_alloc (&cond_obstack, sizeof cframe);
+  current_cframe = obstack_alloc (&cond_obstack, sizeof cframe);
   memcpy (current_cframe, &cframe, sizeof cframe);
   
  if (LISTING_SKIP_COND ()
@@ -481,8 +477,7 @@ s_ifeqs (int arg)
 
   initialize_cframe (&cframe);
   cframe.ignoring = cframe.dead_tree || ! (res ^ arg);
-  current_cframe =
-    (struct conditional_frame *) obstack_alloc (&cond_obstack, sizeof cframe);
+  current_cframe = obstack_alloc (&cond_obstack, sizeof cframe);
   memcpy (current_cframe, &cframe, sizeof cframe);
 
   if (LISTING_SKIP_COND ()

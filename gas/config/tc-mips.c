@@ -3384,7 +3384,7 @@ mips_parse_arguments (char *s, char float_format)
       SKIP_SPACE_TABS (s);
     }
   mips_add_token (&token, OT_END);
-  return (struct mips_operand_token *) obstack_finish (&mips_operand_tokens);
+  return obstack_finish (&mips_operand_tokens);
 }
 
 /* Return TRUE if opcode MO is valid on the currently selected ISA, ASE

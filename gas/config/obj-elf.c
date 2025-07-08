@@ -205,7 +205,7 @@ elf_file_symbol (const char *s)
   if (name_length > strlen (S_GET_NAME (sym)))
     {
       obstack_grow (&notes, s, name_length + 1);
-      S_SET_NAME (sym, (const char *) obstack_finish (&notes));
+      S_SET_NAME (sym, obstack_finish (&notes));
     }
   else
     strcpy ((char *) S_GET_NAME (sym), s);

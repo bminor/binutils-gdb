@@ -142,7 +142,7 @@ fix_new_internal (fragS *frag,		/* Which frag?  */
 
   n_fixups++;
 
-  fixP = (fixS *) obstack_alloc (&notes, sizeof (fixS));
+  fixP = obstack_alloc (&notes, sizeof (fixS));
 
   fixP->fx_frag = frag;
   fixP->fx_where = where;

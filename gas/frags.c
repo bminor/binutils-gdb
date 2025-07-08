@@ -81,7 +81,7 @@ frag_alloc (struct obstack *ob, size_t extra)
   (void) obstack_alloc (ob, 0);
   oalign = obstack_alignment_mask (ob);
   obstack_alignment_mask (ob) = 0;
-  ptr = (fragS *) obstack_alloc (ob, extra + SIZEOF_STRUCT_FRAG);
+  ptr = obstack_alloc (ob, extra + SIZEOF_STRUCT_FRAG);
   obstack_alignment_mask (ob) = oalign;
   memset (ptr, 0, SIZEOF_STRUCT_FRAG);
   totalfrags++;

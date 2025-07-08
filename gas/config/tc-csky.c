@@ -7861,8 +7861,7 @@ static void
 csky_stack_size (int arg ATTRIBUTE_UNUSED)
 {
   expressionS exp;
-  stack_size_entry *sse
-    = (stack_size_entry *) xcalloc (1, sizeof (stack_size_entry));
+  stack_size_entry *sse = xcalloc (1, sizeof (stack_size_entry));
 
   expression (&exp);
   if (exp.X_op == O_symbol)

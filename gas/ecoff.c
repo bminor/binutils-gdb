@@ -1524,7 +1524,7 @@ add_varray_page (varray_t *vp /* varray to add page to */)
 
 #ifdef MALLOC_CHECK
   if (vp->object_size > 1)
-    new_links->datum = (page_type *) xcalloc (1, vp->object_size);
+    new_links->datum = xcalloc (1, vp->object_size);
   else
 #endif
     new_links->datum = allocate_page ();
@@ -4715,7 +4715,7 @@ ecoff_build_debug (HDRR *hdr,
 static page_type *
 allocate_cluster (unsigned long npages)
 {
-  page_type *value = (page_type *) xmalloc (npages * PAGE_USIZE);
+  page_type *value = xmalloc (npages * PAGE_USIZE);
 
 #ifdef ECOFF_DEBUG
   if (debug > 3)

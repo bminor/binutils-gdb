@@ -6348,7 +6348,7 @@ demand_copy_string (int *lenP)
       /* JF this next line is so demand_copy_C_string will return a
 	 null terminated string.  */
       obstack_1grow (&notes, '\0');
-      retval = (char *) obstack_finish (&notes);
+      retval = obstack_finish (&notes);
     }
   else
     {
@@ -6567,7 +6567,7 @@ s_include (int arg ATTRIBUTE_UNUSED)
 	}
 
       obstack_1grow (&notes, '\0');
-      filename = (char *) obstack_finish (&notes);
+      filename = obstack_finish (&notes);
       while (!is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
     }

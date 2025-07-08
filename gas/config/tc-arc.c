@@ -4971,7 +4971,7 @@ arc_stralloc (char * s1, const char * s2)
   gas_assert (s2);
   len += strlen (s2) + 1;
 
-  p = (char *) xmalloc (len);
+  p = xmalloc (len);
 
   if (s1)
     {

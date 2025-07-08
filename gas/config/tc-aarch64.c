@@ -5632,7 +5632,7 @@ static const char *aarch64_apply_style
   gas_assert (res >= 0);
 
   /* Allocate space on the obstack and format the result.  */
-  ptr = (char *) obstack_alloc (stack, res + 1);
+  ptr = obstack_alloc (stack, res + 1);
   res = vsnprintf (ptr, (res + 1), fmt, args);
   gas_assert (res >= 0);
 

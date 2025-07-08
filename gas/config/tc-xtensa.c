@@ -2522,7 +2522,7 @@ xg_translate_idioms (char **popname, int *pnum_args, char **arg_strings)
     {
       if (*pnum_args == 0)
 	{
-	  arg_strings[0] = (char *) xmalloc (2);
+	  arg_strings[0] = xmalloc (2);
 	  strcpy (arg_strings[0], "0");
 	  *pnum_args = 1;
 	}

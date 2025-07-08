@@ -3701,7 +3701,7 @@ symbol_locate (symbolS *    symbolP,
 
   name_length = strlen (name) + 1;   /* +1 for \0.  */
   obstack_grow (&notes, name, name_length);
-  preserved_copy_of_name = (char *) obstack_finish (&notes);
+  preserved_copy_of_name = obstack_finish (&notes);
 
 #ifdef tc_canonicalize_symbol_name
   preserved_copy_of_name =

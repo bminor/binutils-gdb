@@ -1886,15 +1886,13 @@ riscv_record_pcrel_fixup (htab_t p, const asection *sec, bfd_vma address,
 			  symbolS *symbol, bfd_vma target)
 {
   riscv_pcrel_hi_fixup entry = {sec, address, symbol, target};
-  riscv_pcrel_hi_fixup **slot =
-	(riscv_pcrel_hi_fixup **) htab_find_slot (p, &entry, INSERT);
+  void **slot = htab_find_slot (p, &entry, INSERT);
   if (slot == NULL)
     return false;
 
-  *slot = (riscv_pcrel_hi_fixup *) xmalloc (sizeof (riscv_pcrel_hi_fixup));
-  if (*slot == NULL)
-    return false;
-  **slot = entry;
+  riscv_pcrel_hi_fixup *pent = xmalloc (sizeof (*pent));
+  *slot = pent;
+  *pent = entry;
   return true;
 }
 

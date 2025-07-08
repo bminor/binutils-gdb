@@ -132,7 +132,7 @@ subseg_set_rest (segT seg, subsegT subseg)
     {
       /* This should be the only code that creates a frchainS.  */
 
-      newP = (frchainS *) obstack_alloc (&frchains, sizeof (frchainS));
+      newP = obstack_alloc (&frchains, sizeof (frchainS));
       newP->frch_subseg = subseg;
       newP->fix_root = NULL;
       newP->fix_tail = NULL;

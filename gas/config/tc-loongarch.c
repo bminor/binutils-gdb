@@ -483,7 +483,7 @@ static symbolS *get_align_symbol (segT sec)
 							    &entry, INSERT);
   if (slot == NULL)
     return NULL;
-  *slot = (align_sec_sym *) xmalloc (sizeof (align_sec_sym));
+  *slot = xmalloc (sizeof (align_sec_sym));
   if (*slot == NULL)
     return NULL;
   **slot = entry;

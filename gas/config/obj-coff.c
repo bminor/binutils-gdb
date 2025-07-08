@@ -369,10 +369,10 @@ void
 coff_obj_symbol_new_hook (symbolS *symbolP)
 {
   size_t sz = (OBJ_COFF_MAX_AUXENTRIES + 1) * sizeof (combined_entry_type);
-  char *s  = notes_alloc (sz);
+  combined_entry_type *s  = notes_alloc (sz);
 
   memset (s, 0, sz);
-  coffsymbol (symbol_get_bfdsym (symbolP))->native = (combined_entry_type *) s;
+  coffsymbol (symbol_get_bfdsym (symbolP))->native = s;
   coffsymbol (symbol_get_bfdsym (symbolP))->native->is_sym = true;
 
   S_SET_DATA_TYPE (symbolP, T_NULL);

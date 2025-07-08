@@ -937,7 +937,7 @@ Expr_Node_Create (Expr_Node_Type type,
 {
 
 
-  Expr_Node *node = (Expr_Node *) allocate (sizeof (Expr_Node));
+  Expr_Node *node = allocate (sizeof (Expr_Node));
   node->type = type;
   node->value = value;
   node->Left_Child = Left_Child;
@@ -1857,8 +1857,8 @@ bfin_gen_loop (Expr_Node *exp, REG_T reg, int rop, REG_T preg)
   symbolS *sym;
 
   loopsym = exp->value.s_value;
-  lbeginsym = (char *) xmalloc (strlen (loopsym) + strlen ("__BEGIN") + 5);
-  lendsym = (char *) xmalloc (strlen (loopsym) + strlen ("__END") + 5);
+  lbeginsym = xmalloc (strlen (loopsym) + strlen ("__BEGIN") + 5);
+  lendsym = xmalloc (strlen (loopsym) + strlen ("__END") + 5);
 
   lbeginsym[0] = 0;
   lendsym[0] = 0;
@@ -1902,7 +1902,7 @@ bfin_loop_beginend (Expr_Node *exp, int begin)
   const char *suffix = begin ? "__BEGIN" : "__END";
 
   loopsym = exp->value.s_value;
-  label_name = (char *) xmalloc (strlen (loopsym) + strlen (suffix) + 5);
+  label_name = xmalloc (strlen (loopsym) + strlen (suffix) + 5);
 
   label_name[0] = 0;
 

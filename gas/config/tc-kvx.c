@@ -1644,7 +1644,7 @@ md_apply_fix (fixS * fixP, valueT * valueP, segT segmentP ATTRIBUTE_UNUSED)
   valueT image;
   arelent *rel;
 
-  rel = (arelent *) xmalloc (sizeof (arelent));
+  rel = xmalloc (sizeof (arelent));
 
   rel->howto = bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type);
   if (rel->howto == NULL)
