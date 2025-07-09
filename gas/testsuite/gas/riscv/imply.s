@@ -50,13 +50,6 @@ imply zve32x_zvl256b
 imply zve32x_zvl128b
 imply zve32x_zvl64b
 
-imply zcb
-imply zcd
-imply zcf
-imply zcmp
-imply zcmop
-imply zcmt
-
 imply zicfilp
 imply zicfiss
 
@@ -72,6 +65,9 @@ imply h
 imply zhinx
 imply zhinxmin
 
+imply zcd
+imply zcf
+
 imply q
 imply zqinx
 
@@ -85,6 +81,15 @@ imply zfhmin
 imply zfinx
 imply f
 
+imply zce,if,32
+imply zce,if,64
+imply zce,id,32
+imply zce,id,64
+imply zce
+imply zcb
+imply zcmp
+imply zcmop
+imply zcmt
 imply c,if,32
 imply c,if,64
 imply c,id,32
