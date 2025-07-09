@@ -8905,7 +8905,7 @@ is_nomach_augmentation (char c ATTRIBUTE_UNUSED)
 static bool
 is_aarch64_augmentation (char c)
 {
-  return (c == 'B');
+  return (c == 'B' || c == 'G');
 }
 
 void
