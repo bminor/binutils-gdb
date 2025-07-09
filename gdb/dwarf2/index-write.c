@@ -872,7 +872,7 @@ public:
     m_debugstrlookup.file_write (file_str);
   }
 
-  void add_cu (dwarf2_per_cu *per_cu, offset_type index)
+  void add_cu (const dwarf2_per_cu *per_cu, offset_type index)
   {
     m_cu_index_htab.emplace (per_cu, index);
   }
@@ -1289,6 +1289,40 @@ write_shortcuts_table (cooked_index *table, data_buf &shortcuts,
   shortcuts.append_offset (main_name_offset);
 }
 
+/* Get sorted (by section offset) lists of comp units and type units.  */
+
+static std::pair<std::vector<const dwarf2_per_cu *>,
+		 std::vector<const signatured_type *>>
+get_unit_lists (const dwarf2_per_bfd &per_bfd)
+{
+  std::vector<const dwarf2_per_cu *> comp_units;
+  std::vector<const signatured_type *> type_units;
+
+  for (const auto &unit : per_bfd.all_units)
+    if (unit->is_debug_types)
+      type_units.emplace_back (static_cast<const signatured_type *>
+			       (unit.get ()));
+    else
+      comp_units.emplace_back (unit.get ());
+
+  auto by_sect_off = [] (const dwarf2_per_cu *lhs, const dwarf2_per_cu *rhs)
+		       { return lhs->sect_off < rhs->sect_off; };
+
+  /* Sort both lists, even though it is technically not always required:
+
+      - while .gdb_index requires the CU list to be sorted, DWARF 5 doesn't
+	say anything about the order of CUs in .debug_names.
+      - .gdb_index doesn't require the TU list to be sorted, and DWARF 5
+	doesn't say anything about the order of TUs in .debug_names.
+
+     However, it helps make sure that GDB produce a stable and predictable
+     output, which is nice.  */
+  std::sort (comp_units.begin (), comp_units.end (), by_sect_off);
+  std::sort (type_units.begin (), type_units.end (), by_sect_off);
+
+  return {std::move (comp_units), std::move (type_units)};
+}
+
 /* Write contents of a .gdb_index section for OBJFILE into OUT_FILE.
    If OBJFILE has an associated dwz file, write contents of a .gdb_index
    section for that dwz file into DWZ_OUT_FILE.  If OBJFILE does not have an
@@ -1299,8 +1333,6 @@ write_gdbindex (dwarf2_per_bfd *per_bfd, cooked_index *table,
 		FILE *out_file, FILE *dwz_out_file)
 {
   mapped_symtab symtab;
-  data_buf objfile_cu_list;
-  data_buf dwz_cu_list;
 
   /* While we're scanning CU's create a table that maps a dwarf2_per_cu (which
      is what addrmap records) to its index (which is what is recorded in the
@@ -1308,40 +1340,44 @@ write_gdbindex (dwarf2_per_bfd *per_bfd, cooked_index *table,
   cu_index_map cu_index_htab;
   cu_index_htab.reserve (per_bfd->all_units.size ());
 
-  /* Store out the .debug_type CUs, if any.  */
-  data_buf types_cu_list;
-
-  /* The CU list is already sorted, so we don't need to do additional
-     work here.  */
-
+  auto [comp_units, type_units] = get_unit_lists (*per_bfd);
   int counter = 0;
-  for (const dwarf2_per_cu_up &per_cu : per_bfd->all_units)
-    {
-      const auto insertpair = cu_index_htab.emplace (per_cu.get (), counter);
-      gdb_assert (insertpair.second);
 
-      /* See enhancement PR symtab/30838.  */
-      gdb_assert (!(per_cu->is_dwz && per_cu->is_debug_types));
+  /* Write comp units.  */
+  data_buf objfile_cu_list;
+  data_buf dwz_cu_list;
+
+  for (const dwarf2_per_cu *per_cu : comp_units)
+    {
+      const auto insertpair = cu_index_htab.emplace (per_cu, counter);
+      gdb_assert (insertpair.second);
 
       /* The all_units list contains CUs read from the objfile as well as
 	 from the eventual dwz file.  We need to place the entry in the
 	 corresponding index.  */
-      data_buf &cu_list = (per_cu->is_debug_types
-			   ? types_cu_list
-			   : per_cu->is_dwz ? dwz_cu_list : objfile_cu_list);
+      data_buf &cu_list = per_cu->is_dwz ? dwz_cu_list : objfile_cu_list;
       cu_list.append_uint (8, BFD_ENDIAN_LITTLE,
 			   to_underlying (per_cu->sect_off));
-      if (per_cu->is_debug_types)
-	{
-	  signatured_type *sig_type = (signatured_type *) per_cu.get ();
-	  cu_list.append_uint (8, BFD_ENDIAN_LITTLE,
-			       to_underlying (sig_type->type_offset_in_tu));
-	  cu_list.append_uint (8, BFD_ENDIAN_LITTLE,
-			       sig_type->signature);
-	}
-      else
-	cu_list.append_uint (8, BFD_ENDIAN_LITTLE, per_cu->length ());
+      cu_list.append_uint (8, BFD_ENDIAN_LITTLE, per_cu->length ());
+      ++counter;
+    }
 
+  /* Write type units.  */
+  data_buf types_cu_list;
+
+  for (const signatured_type *sig_type : type_units)
+    {
+      const auto insertpair = cu_index_htab.emplace (sig_type, counter);
+      gdb_assert (insertpair.second);
+
+      /* See enhancement PR symtab/30838.  */
+      gdb_assert (!sig_type->is_dwz);
+
+      types_cu_list.append_uint (8, BFD_ENDIAN_LITTLE,
+				 to_underlying (sig_type->sect_off));
+      types_cu_list.append_uint (8, BFD_ENDIAN_LITTLE,
+				 to_underlying (sig_type->type_offset_in_tu));
+      types_cu_list.append_uint (8, BFD_ENDIAN_LITTLE, sig_type->signature);
       ++counter;
     }
 
@@ -1388,29 +1424,35 @@ write_debug_names (dwarf2_per_bfd *per_bfd, cooked_index *table,
   const enum bfd_endian dwarf5_byte_order
     = bfd_big_endian (per_bfd->obfd) ? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE;
 
-  /* The CU list is already sorted, so we don't need to do additional
-     work here.  Also, the debug_types entries do not appear in
-     all_units, but only in their own hash table.  */
-  data_buf cu_list;
-  data_buf types_cu_list;
+  auto [comp_units, type_units] = get_unit_lists (*per_bfd);
   debug_names nametable (per_bfd, dwarf5_is_dwarf64, dwarf5_byte_order);
-  int counter = 0;
-  int types_counter = 0;
-  for (const dwarf2_per_cu_up &per_cu : per_bfd->all_units)
-    {
-      int &this_counter = per_cu->is_debug_types ? types_counter : counter;
-      data_buf &this_list = per_cu->is_debug_types ? types_cu_list : cu_list;
+  data_buf comp_unit_list;
+  int comp_unit_counter = 0;
 
-      nametable.add_cu (per_cu.get (), this_counter);
-      this_list.append_uint (nametable.dwarf5_offset_size (),
-			     dwarf5_byte_order,
-			     to_underlying (per_cu->sect_off));
-      ++this_counter;
+  for (const auto per_cu : comp_units)
+    {
+      nametable.add_cu (per_cu, comp_unit_counter);
+      comp_unit_list.append_uint (nametable.dwarf5_offset_size (),
+				  dwarf5_byte_order,
+				  to_underlying (per_cu->sect_off));
+      comp_unit_counter++;
+    }
+
+  data_buf type_unit_list;
+  int type_unit_counter = 0;
+
+  for (const auto per_cu : type_units)
+    {
+      nametable.add_cu (per_cu, type_unit_counter);
+      type_unit_list.append_uint (nametable.dwarf5_offset_size (),
+				  dwarf5_byte_order,
+				  to_underlying (per_cu->sect_off));
+      type_unit_counter++;
     }
 
    /* Verify that all units are represented.  */
-  gdb_assert (counter == per_bfd->num_comp_units);
-  gdb_assert (types_counter == per_bfd->num_type_units);
+  gdb_assert (comp_unit_counter == per_bfd->num_comp_units);
+  gdb_assert (type_unit_counter == per_bfd->num_type_units);
 
   for (const cooked_index_entry *entry : table->all_entries ())
     nametable.insert (entry);
@@ -1425,8 +1467,8 @@ write_debug_names (dwarf2_per_bfd *per_bfd, cooked_index *table,
        + sizeof (dwarf5_augmentation_3));
   size_t expected_bytes = 0;
   expected_bytes += bytes_of_header;
-  expected_bytes += cu_list.size ();
-  expected_bytes += types_cu_list.size ();
+  expected_bytes += comp_unit_list.size ();
+  expected_bytes += type_unit_list.size ();
   expected_bytes += nametable.bytes ();
   data_buf header;
 
@@ -1449,11 +1491,11 @@ write_debug_names (dwarf2_per_bfd *per_bfd, cooked_index *table,
   header.append_uint (2, dwarf5_byte_order, 0);
 
   /* comp_unit_count - The number of CUs in the CU list.  */
-  header.append_uint (4, dwarf5_byte_order, counter);
+  header.append_uint (4, dwarf5_byte_order, comp_unit_counter);
 
   /* local_type_unit_count - The number of TUs in the local TU
      list.  */
-  header.append_uint (4, dwarf5_byte_order, types_counter);
+  header.append_uint (4, dwarf5_byte_order, type_unit_counter);
 
   /* foreign_type_unit_count - The number of TUs in the foreign TU
      list.  */
@@ -1481,8 +1523,8 @@ write_debug_names (dwarf2_per_bfd *per_bfd, cooked_index *table,
   gdb_assert (header.size () == bytes_of_header);
 
   header.file_write (out_file);
-  cu_list.file_write (out_file);
-  types_cu_list.file_write (out_file);
+  comp_unit_list.file_write (out_file);
+  type_unit_list.file_write (out_file);
   nametable.file_write (out_file, out_file_str);
 
   assert_file_size (out_file, expected_bytes);
