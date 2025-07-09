@@ -199,9 +199,11 @@ command-line options are respected for the bulk of the file being assembled.
 
 @item rvc
 @itemx norvc
-Enables or disables the generation of compressed instructions.  Instructions
-are opportunistically compressed by the RISC-V assembler when possible, but
-sometimes this behavior is not desirable, especially when handling alignments.
+Enable the generation of base compressed instructions (C extension), or
+disable the generation of all compressed instructions (C and all Zc*
+extensions).  Instructions are opportunistically compressed by the RISC-V
+assembler when possible, but sometimes this behavior is not desirable,
+especially when handling alignments.
 
 @item pic
 @itemx nopic

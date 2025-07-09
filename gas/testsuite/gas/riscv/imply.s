@@ -1,6 +1,6 @@
-.macro imply string base=i
+.macro imply string base=i xlen=32
 .option push
-.option arch, rv32\base\string
+.option arch, rv\xlen\base\string
 nop
 .option pop
 .endm
@@ -84,6 +84,12 @@ imply zfh
 imply zfhmin
 imply zfinx
 imply f
+
+imply c,if,32
+imply c,if,64
+imply c,id,32
+imply c,id,64
+imply c
 
 imply b
 

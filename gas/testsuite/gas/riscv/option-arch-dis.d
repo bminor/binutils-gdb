@@ -8,10 +8,10 @@ SYMBOL TABLE:
 0+00 l    d  .text	0+00 .text
 0+00 l    d  .data	0+00 .data
 0+00 l    d  .bss	0+00 .bss
-0+00 l       .text	0+00 \$xrv64i2p0_c2p0
+0+00 l       .text	0+00 \$xrv64i2p0_c2p0_zca1p0
 0+02 l       .text	0+00 \$xrv64i2p0_f2p0_d2p0_xvendor1p0
-0+0a l       .text	0+00 \$xrv64i2p0_m3p0_f2p0_d3p0_c2p0_zmmul1p0_xvendor32x3p0
-0+0c l       .text	0+00 \$xrv32i2p1_c2p0
+0+0a l       .text	0+00 \$xrv64i2p0_m3p0_f2p0_d3p0_c2p0_zmmul1p0_zca1p0_zcd1p0_xvendor32x3p0
+0+0c l       .text	0+00 \$xrv32i2p1_c2p0_zca1p0
 0+00 l    d  .riscv.attributes	0+00 .riscv.attributes
 
 

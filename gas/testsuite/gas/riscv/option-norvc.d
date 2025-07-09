@@ -8,11 +8,11 @@ SYMBOL TABLE:
 0+00 l    d  .text	0+00 .text
 0+00 l    d  .data	0+00 .data
 0+00 l    d  .bss	0+00 .bss
-0+00 l       .text	0+00 \$xrv64i2p0_c2p0
+0+00 l       .text	0+00 \$xrv64i2p0_c2p0_zca1p0
 0+02 l       .text	0+00 \$xrv64i2p0
-0+06 l       .text	0+00 \$xrv32i2p0_f2p0_c2p0
+0+06 l       .text	0+00 \$xrv32i2p0_f2p0_c2p0_zca1p0_zcf1p0
 0+08 l       .text	0+00 \$xrv32i2p0_f2p0
-0+0c l       .text	0+00 \$xrv64i2p0_f2p0_d2p0_c2p0
+0+0c l       .text	0+00 \$xrv64i2p0_f2p0_d2p0_c2p0_zca1p0_zcd1p0
 0+0e l       .text	0+00 \$xrv64i2p0_f2p0_d2p0
 0+12 l       .text	0+00 \$xrv64i2p0_f2p0_d2p0_zca1p0
 0+14 l       .text	0+00 \$xrv64i2p0_f2p0_d2p0

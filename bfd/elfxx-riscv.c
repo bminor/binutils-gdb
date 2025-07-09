@@ -1178,9 +1178,20 @@ static bool
 check_implicit_for_zcf (riscv_parse_subset_t *rps,
 			const riscv_subset_t *subset ATTRIBUTE_UNUSED)
 {
-  riscv_subset_t *tmp = NULL;
-  return *rps->xlen == 32
-	 && riscv_lookup_subset (rps->subset_list, "f", &tmp);
+  return (rps != NULL
+	  && rps->xlen != NULL
+	  && *rps->xlen == 32
+	  && riscv_subset_supports (rps, "f"));
+}
+
+/* Add the implicit only when 'd' extension is also available.  */
+
+static bool
+check_implicit_for_zcd (riscv_parse_subset_t *rps,
+			const riscv_subset_t *subset ATTRIBUTE_UNUSED)
+{
+  return (rps != NULL
+	  && riscv_subset_supports (rps, "d"));
 }
 
 /* Record all implicit information for the subsets.  */
@@ -1274,6 +1285,10 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zfhmin", "+f", check_implicit_always},
   {"zfinx", "+zicsr", check_implicit_always},
   {"f", "+zicsr", check_implicit_always},
+
+  {"c", "+zcf", check_implicit_for_zcf},
+  {"c", "+zcd", check_implicit_for_zcd},
+  {"c", "+zca", check_implicit_always},
 
   {"b", "+zba,+zbb,+zbs", check_implicit_always},
 
@@ -2208,7 +2223,7 @@ riscv_parse_check_conflicts (riscv_parse_subset_t *rps)
       && riscv_subset_supports (rps, "zcd"))
     {
       rps->error_handler
-	(_("zcmp' is incompatible with `d/zcd' extension"));
+	(_("zcmp' is incompatible with `d' and `c', or `zcd' extension"));
       no_conflict = false;
     }
   if (riscv_lookup_subset (rps->subset_list, "zcf", &subset)
@@ -2795,10 +2810,9 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zifencei");
     case INSN_CLASS_ZIHINTNTL:
       return riscv_subset_supports (rps, "zihintntl");
-    case INSN_CLASS_ZIHINTNTL_AND_C:
-      return (riscv_subset_supports (rps, "zihintntl")
-	      && (riscv_subset_supports (rps, "c")
-		  || riscv_subset_supports (rps, "zca")));
+    case INSN_CLASS_ZIHINTNTL_AND_ZCA:
+      return riscv_subset_supports (rps, "zihintntl")
+	     && riscv_subset_supports (rps, "zca");
     case INSN_CLASS_ZIHINTPAUSE:
       return riscv_subset_supports (rps, "zihintpause");
     case INSN_CLASS_ZIMOP:
@@ -2833,17 +2847,12 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "d");
     case INSN_CLASS_Q:
       return riscv_subset_supports (rps, "q");
-    case INSN_CLASS_C:
-      return (riscv_subset_supports (rps, "c")
-	      || riscv_subset_supports (rps, "zca"));
-    case INSN_CLASS_F_AND_C:
-      return (riscv_subset_supports (rps, "f")
-	      && (riscv_subset_supports (rps, "c")
-		  || riscv_subset_supports (rps, "zcf")));
-    case INSN_CLASS_D_AND_C:
-      return (riscv_subset_supports (rps, "d")
-	      && (riscv_subset_supports (rps, "c")
-		  || riscv_subset_supports (rps, "zcd")));
+    case INSN_CLASS_ZCA:
+      return riscv_subset_supports (rps, "zca");
+    case INSN_CLASS_ZCF:
+      return riscv_subset_supports (rps, "zcf");
+    case INSN_CLASS_ZCD:
+      return riscv_subset_supports (rps, "zcd");
     case INSN_CLASS_F_INX:
       return (riscv_subset_supports (rps, "f")
 	      || riscv_subset_supports (rps, "zfinx"));
@@ -3090,11 +3099,10 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zicfilp";
     case INSN_CLASS_ZIHINTNTL:
       return "zihintntl";
-    case INSN_CLASS_ZIHINTNTL_AND_C:
+    case INSN_CLASS_ZIHINTNTL_AND_ZCA:
       if (!riscv_subset_supports (rps, "zihintntl"))
 	{
-	  if (!riscv_subset_supports (rps, "c")
-	      && !riscv_subset_supports (rps, "zca"))
+	  if (!riscv_subset_supports (rps, "zca"))
 	    return _("zihintntl' and `c', or `zihintntl' and `zca");
 	  else
 	    return "zihintntl";
@@ -3125,30 +3133,12 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "d";
     case INSN_CLASS_Q:
       return "q";
-    case INSN_CLASS_C:
+    case INSN_CLASS_ZCA:
       return _("c' or `zca");
-    case INSN_CLASS_F_AND_C:
-      if (!riscv_subset_supports (rps, "f"))
-	{
-	  if (!riscv_subset_supports (rps, "c")
-	      && !riscv_subset_supports (rps, "zcf"))
-	    return _("f' and `c', or `f' and `zcf"); 
-	  else
-	    return "f";
-	}
-      else
-	return _("c' or `zcf");
-    case INSN_CLASS_D_AND_C:
-      if (!riscv_subset_supports (rps, "d"))
-	{
-	  if (!riscv_subset_supports (rps, "c")
-	      && !riscv_subset_supports (rps, "zcd"))
-	    return _("d' and `c', or `d' and `zcd");
-	  else
-	    return "d";
-	}
-      else
-	return _("c' or `zcd");
+    case INSN_CLASS_ZCF:
+      return _("f' and `c', or `zcf");
+    case INSN_CLASS_ZCD:
+      return _("d' and `c', or `zcd");
     case INSN_CLASS_F_INX:
       return _("f' or `zfinx");
     case INSN_CLASS_D_INX:

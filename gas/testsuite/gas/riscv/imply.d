@@ -73,6 +73,11 @@ SYMBOL TABLE:
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_f2p2_zicsr2p0_zfhmin1p0
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_zicsr2p0_zfinx1p0
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_f2p2_zicsr2p0
+[0-9a-f]+ l       .text	0+000 \$xrv32i2p1_f2p2_c2p0_zicsr2p0_zca1p0_zcf1p0
+[0-9a-f]+ l       .text	0+000 \$xrv64i2p1_f2p2_c2p0_zicsr2p0_zca1p0
+[0-9a-f]+ l       .text	0+000 \$xrv32i2p1_f2p2_d2p2_c2p0_zicsr2p0_zca1p0_zcd1p0_zcf1p0
+[0-9a-f]+ l       .text	0+000 \$xrv64i2p1_f2p2_d2p2_c2p0_zicsr2p0_zca1p0_zcd1p0
+[0-9a-f]+ l       .text	0+000 \$xrv32i2p1_c2p0_zca1p0
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_b1p0_zba1p0_zbb1p0_zbs1p0
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_zbkb1p0_zbkc1p0_zbkx1p0_zk1p0_zkn1p0_zknd1p0_zkne1p0_zknh1p0_zkr1p0_zkt1p0
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_zbkb1p0_zbkc1p0_zbkx1p0_zkn1p0_zknd1p0_zkne1p0_zknh1p0
