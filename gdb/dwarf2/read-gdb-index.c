@@ -117,6 +117,10 @@ struct mapped_gdb_index : public dwarf_scanner_base
   /* Index data format version.  */
   int version = 0;
 
+  /* Compile units followed by type units, in the order as found in the
+     index.  Indices found in index entries can index directly into this.  */
+  std::vector<dwarf2_per_cu *> units;
+
   /* The address table data.  */
   gdb::array_view<const gdb_byte> address_table;
 
@@ -1106,14 +1110,14 @@ dw2_expand_marked_cus (dwarf2_per_objfile *per_objfile, offset_type idx,
 	}
 
       /* Don't crash on bad data.  */
-      if (cu_index >= per_objfile->per_bfd->all_units.size ())
+      if (cu_index >= index.units.size ())
 	{
 	  complaint (_(".gdb_index entry has bad CU index"
 		       " [in module %s]"), objfile_name (per_objfile->objfile));
 	  continue;
 	}
 
-      dwarf2_per_cu *per_cu = per_objfile->per_bfd->get_unit (cu_index);
+      dwarf2_per_cu *per_cu = index.units[cu_index];
 
       if (!dw2_expand_symtabs_matching_one (per_cu, per_objfile, file_matcher,
 					    expansion_notify, lang_matcher))
@@ -1313,7 +1317,7 @@ static void
 create_cus_from_gdb_index_list (dwarf2_per_bfd *per_bfd,
 				const gdb_byte *cu_list, offset_type n_elements,
 				struct dwarf2_section_info *section,
-				int is_dwz)
+				int is_dwz, std::vector<dwarf2_per_cu *> &units)
 {
   for (offset_type i = 0; i < n_elements; i += 2)
     {
@@ -1324,10 +1328,10 @@ create_cus_from_gdb_index_list (dwarf2_per_bfd *per_bfd,
       ULONGEST length = extract_unsigned_integer (cu_list + 8, 8, BFD_ENDIAN_LITTLE);
       cu_list += 2 * 8;
 
-      per_bfd->all_units.emplace_back (per_bfd->allocate_per_cu (section,
-								 sect_off,
-								 length,
-								 is_dwz));
+      dwarf2_per_cu_up per_cu = per_bfd->allocate_per_cu (section, sect_off,
+							  length, is_dwz);
+      units.emplace_back (per_cu.get ());
+      per_bfd->all_units.emplace_back (std::move (per_cu));
     }
 }
 
@@ -1337,20 +1341,21 @@ create_cus_from_gdb_index_list (dwarf2_per_bfd *per_bfd,
 static void
 create_cus_from_gdb_index (dwarf2_per_bfd *per_bfd,
 			   const gdb_byte *cu_list, offset_type cu_list_elements,
+			   std::vector<dwarf2_per_cu *> &units,
 			   const gdb_byte *dwz_list, offset_type dwz_elements)
 {
   gdb_assert (per_bfd->all_units.empty ());
   per_bfd->all_units.reserve ((cu_list_elements + dwz_elements) / 2);
 
   create_cus_from_gdb_index_list (per_bfd, cu_list, cu_list_elements,
-				  &per_bfd->infos[0], 0);
+				  &per_bfd->infos[0], 0, units);
 
   if (dwz_elements == 0)
     return;
 
   dwz_file *dwz = per_bfd->get_dwz_file ();
   create_cus_from_gdb_index_list (per_bfd, dwz_list, dwz_elements,
-				  &dwz->info, 1);
+				  &dwz->info, 1, units);
 }
 
 /* Create the signatured type hash table from the index.  */
@@ -1358,7 +1363,8 @@ create_cus_from_gdb_index (dwarf2_per_bfd *per_bfd,
 static void
 create_signatured_type_table_from_gdb_index
   (dwarf2_per_bfd *per_bfd, struct dwarf2_section_info *section,
-   const gdb_byte *bytes, offset_type elements)
+   const gdb_byte *bytes, offset_type elements,
+   std::vector<dwarf2_per_cu *> &units)
 {
   signatured_type_set sig_types_hash;
 
@@ -1382,6 +1388,7 @@ create_signatured_type_table_from_gdb_index
       sig_type->type_offset_in_tu = type_offset_in_tu;
 
       sig_types_hash.emplace (sig_type.get ());
+      units.emplace_back (sig_type.get ());
       per_bfd->all_units.emplace_back (sig_type.release ());
     }
 
@@ -1419,14 +1426,14 @@ create_addrmap_from_gdb_index (dwarf2_per_objfile *per_objfile,
 	  continue;
 	}
 
-      if (cu_index >= per_bfd->all_units.size ())
+      if (cu_index >= index->units.size ())
 	{
 	  complaint (_(".gdb_index address table has invalid CU number %u"),
 		     (unsigned) cu_index);
 	  continue;
 	}
 
-      mutable_map.set_empty (lo, hi - 1, per_bfd->get_unit (cu_index));
+      mutable_map.set_empty (lo, hi - 1, index->units[cu_index]);
     }
 
   index->index_addrmap
@@ -1528,8 +1535,8 @@ dwarf2_read_gdb_index
 	}
     }
 
-  create_cus_from_gdb_index (per_bfd, cu_list, cu_list_elements, dwz_list,
-			     dwz_list_elements);
+  create_cus_from_gdb_index (per_bfd, cu_list, cu_list_elements, map->units,
+			     dwz_list, dwz_list_elements);
 
   if (types_list_elements)
     {
@@ -1548,7 +1555,8 @@ dwarf2_read_gdb_index
 	   : &per_bfd->infos[0]);
 
       create_signatured_type_table_from_gdb_index (per_bfd, section, types_list,
-						   types_list_elements);
+						   types_list_elements,
+						   map->units);
     }
 
   finalize_all_units (per_bfd);
