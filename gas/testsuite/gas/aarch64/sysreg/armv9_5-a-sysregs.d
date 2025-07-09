@@ -1,5 +1,5 @@
 #source: armv9_5-a-sysregs.s
-#as: -march=armv9.5-a -I$srcdir/$subdir
+#as: -menable-sysreg-checking -march=armv9.5-a -I$srcdir/$subdir
 #objdump: -dr
 
 .*:     file format .*

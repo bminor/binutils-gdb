@@ -1,5 +1,5 @@
 #source: pops-sysregs.s
-#as: -I$srcdir/$subdir
+#as: -menable-sysreg-checking -I$srcdir/$subdir
 #objdump: -dr
 
 [^:]+:     file format .*

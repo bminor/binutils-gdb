@@ -1,4 +1,4 @@
-#as: -march=armv8-a+sve
+#as: -menable-sysreg-checking -march=armv8-a+sve
 #objdump: -dr
 
 

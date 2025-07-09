@@ -136,6 +136,12 @@ is enabled by default.
 @item -mno-verbose-error
 This option disables verbose error messages in AArch64 gas.
 
+@cindex @code{-menable-sysreg-checking} command-line option, AArch64
+@item -menable-sysreg-checking
+This option enables error messages that are issued if an attempt is made to
+assemble a system register access which will not execute on the target
+architecture.
+
 @end table
 @c man end
 

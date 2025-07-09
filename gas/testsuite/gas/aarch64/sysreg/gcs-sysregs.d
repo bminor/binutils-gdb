@@ -1,5 +1,5 @@
 #name: Test of Guarded Control Stack system registers
-#as: -march=armv8.8-a+gcs
+#as: -menable-sysreg-checking -march=armv8.8-a+gcs
 #objdump: -dr
 
 .*:     file format .*

@@ -4956,6 +4956,10 @@ parse_sme_sm_za (char **str)
   return TOLOWER (p[0]);
 }
 
+/* By default, system register accesses are unguarded (apart from the
+   requirement of +d128 for mrrs/msrr).  */
+static int sysreg_checking_p = 0;
+
 /* Parse a system register or a PSTATE field name for an MSR/MRS instruction.
    Returns the encoding for the option, or PARSE_FAIL.
 
@@ -5010,10 +5014,11 @@ parse_sys_reg (char **str, htab_t sys_regs,
     }
   else
     {
-      if (pstatefield_p && !aarch64_pstatefield_supported_p (cpu_variant, o))
+      if (pstatefield_p && sysreg_checking_p
+	  && !aarch64_pstatefield_supported_p (cpu_variant, o))
 	as_bad (_("selected processor does not support PSTATE field "
 		  "name '%s'"), buf);
-      if (!pstatefield_p
+      if (!pstatefield_p && sysreg_checking_p
 	  && !aarch64_sys_ins_reg_supported_p (cpu_variant, o->name,
 					       o->flags, &o->features))
 	as_bad (_("selected processor does not support system register "
@@ -10603,6 +10608,9 @@ static struct aarch64_option_table aarch64_opts[] = {
    NULL},
   {"mno-verbose-error", N_("do not output verbose error messages"),
    &verbose_error_p, 0, NULL},
+  {"menable-sysreg-checking",
+   N_("enable feature flag gating for system registers"),
+   &sysreg_checking_p, 1, NULL},
   {NULL, NULL, NULL, 0, NULL}
 };
 

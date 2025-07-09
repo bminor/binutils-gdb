@@ -1,5 +1,5 @@
 #source: sysreg-2.s
-#as: -march=armv8.2-a+profile -I$srcdir/$subdir
+#as: -menable-sysreg-checking -march=armv8.2-a+profile -I$srcdir/$subdir
 #objdump: -dr
 
 .*:     file .*

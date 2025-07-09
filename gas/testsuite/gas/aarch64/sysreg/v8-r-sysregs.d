@@ -1,5 +1,5 @@
 #name: Exhaustive test of Armv8-R system registers
-#as: -march=armv8-r
+#as: -menable-sysreg-checking -march=armv8-r
 #objdump: -dr -m aarch64:armv8-r
 
 .*:     file format .*

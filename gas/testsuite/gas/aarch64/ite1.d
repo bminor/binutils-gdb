@@ -1,4 +1,4 @@
-#as: -march=armv9.4-a+ite
+#as: -menable-sysreg-checking -march=armv9.4-a+ite
 #objdump: -dr
 
 .*:     file format .*

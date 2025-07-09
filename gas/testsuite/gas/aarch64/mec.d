@@ -1,5 +1,5 @@
 #name: MEC System registers
-#as: -march=armv9.2-a
+#as: -menable-sysreg-checking -march=armv9.2-a
 #objdump: -dr
 
 .*:     file format .*

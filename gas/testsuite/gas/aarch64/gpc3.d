@@ -1,5 +1,5 @@
 #name: RME_GPC3 System register
-#as: -march=armv9.5-a
+#as: -menable-sysreg-checking -march=armv9.5-a
 #objdump: -dr
 
 .*:     file format .*

@@ -1,5 +1,5 @@
 #source: sysreg-4.s
-#as: -march=armv8.5-a+rng+memtag
+#as: -menable-sysreg-checking -march=armv8.5-a+rng+memtag
 #objdump: -dr
 
 .*:     file format .*

@@ -1,5 +1,5 @@
 #source: sysreg-10.s
-#as: -march=armv8.8-a -I$srcdir/$subdir
+#as: -menable-sysreg-checking -march=armv8.8-a -I$srcdir/$subdir
 #objdump: -dr
 
 [^:]+:     file format .*

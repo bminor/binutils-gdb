@@ -1,6 +1,6 @@
 #name: Test that fpmr register is gated and available via the fp8 feature
 #source: fpmr.s
-#as: -march=armv9.2-a+fp8
+#as: -menable-sysreg-checking -march=armv9.2-a+fp8
 #objdump: -dr
 
 .*:     file format .*
