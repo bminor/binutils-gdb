@@ -29,10 +29,6 @@
 /* Private data for each loaded library.  */
 struct lm_info_target final : public lm_info
 {
-  /* The library's name.  The name is normally kept in the struct
-     solib; it is only here during XML parsing.  */
-  std::string name;
-
   /* The target can either specify segment bases or section bases, not
      both.  */
 
@@ -51,9 +47,18 @@ struct lm_info_target final : public lm_info
 
 using lm_info_target_up = std::unique_ptr<lm_info_target>;
 
+/* Type used to convey the information about one target library while parsing
+   the XML.  */
+
+struct target_library
+{
+  std::string name;
+  lm_info_target_up info;
+};
+
 #if !defined(HAVE_LIBEXPAT)
 
-static std::vector<lm_info_target_up>
+static std::vector<target_library>
 solib_target_parse_libraries (const char *library)
 {
   static int have_warned;
@@ -80,17 +85,17 @@ library_list_start_segment (struct gdb_xml_parser *parser,
 			    void *user_data,
 			    std::vector<gdb_xml_value> &attributes)
 {
-  auto *list = (std::vector<lm_info_target_up> *) user_data;
-  lm_info_target *last = list->back ().get ();
+  const auto list = static_cast<std::vector<target_library> *> (user_data);
+  target_library &last = list->back ();
   ULONGEST *address_p
     = (ULONGEST *) xml_find_attribute (attributes, "address")->value.get ();
   CORE_ADDR address = (CORE_ADDR) *address_p;
 
-  if (!last->section_bases.empty ())
+  if (!last.info->section_bases.empty ())
     gdb_xml_error (parser,
 		   _("Library list with both segments and sections"));
 
-  last->segment_bases.push_back (address);
+  last.info->segment_bases.push_back (address);
 }
 
 static void
@@ -99,17 +104,17 @@ library_list_start_section (struct gdb_xml_parser *parser,
 			    void *user_data,
 			    std::vector<gdb_xml_value> &attributes)
 {
-  auto *list = (std::vector<lm_info_target_up> *) user_data;
-  lm_info_target *last = list->back ().get ();
+  const auto list = static_cast<std::vector<target_library> *> (user_data);
+  target_library &last = list->back ();
   ULONGEST *address_p
     = (ULONGEST *) xml_find_attribute (attributes, "address")->value.get ();
   CORE_ADDR address = (CORE_ADDR) *address_p;
 
-  if (!last->segment_bases.empty ())
+  if (!last.info->segment_bases.empty ())
     gdb_xml_error (parser,
 		   _("Library list with both segments and sections"));
 
-  last->section_bases.push_back (address);
+  last.info->section_bases.push_back (address);
 }
 
 /* Handle the start of a <library> element.  */
@@ -120,12 +125,12 @@ library_list_start_library (struct gdb_xml_parser *parser,
 			    void *user_data,
 			    std::vector<gdb_xml_value> &attributes)
 {
-  auto *list = (std::vector<lm_info_target_up> *) user_data;
-  lm_info_target *item = new lm_info_target;
-  item->name
+  const auto list = static_cast<std::vector<target_library> *> (user_data);
+  std::string name
     = (const char *) xml_find_attribute (attributes, "name")->value.get ();
 
-  list->emplace_back (item);
+  list->emplace_back (target_library { std::move (name),
+				       std::make_unique<lm_info_target> () });
 }
 
 static void
@@ -133,10 +138,10 @@ library_list_end_library (struct gdb_xml_parser *parser,
 			  const struct gdb_xml_element *element,
 			  void *user_data, const char *body_text)
 {
-  auto *list = (std::vector<lm_info_target_up> *) user_data;
-  lm_info_target *lm_info = list->back ().get ();
+  const auto list = static_cast<std::vector<target_library> *> (user_data);
+  target_library &last = list->back ();
 
-  if (lm_info->segment_bases.empty () && lm_info->section_bases.empty ())
+  if (last.info->segment_bases.empty () && last.info->section_bases.empty ())
     gdb_xml_error (parser, _("No segment or section bases defined"));
 }
 
@@ -209,10 +214,10 @@ static const struct gdb_xml_element library_list_elements[] = {
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
 
-static std::vector<lm_info_target_up>
+static std::vector<target_library>
 solib_target_parse_libraries (const char *library)
 {
-  std::vector<lm_info_target_up> result;
+  std::vector<target_library> result;
 
   if (gdb_xml_parse_quick (_("target library list"), "library-list.dtd",
 			   library_list_elements, library, &result) == 0)
@@ -239,18 +244,18 @@ target_solib_ops::current_sos () const
     return {};
 
   /* Parse the list.  */
-  std::vector<lm_info_target_up> library_list
+  std::vector<target_library> library_list
     = solib_target_parse_libraries (library_document->data ());
 
   /* Build a struct solib for each entry on the list.  */
-  for (lm_info_target_up &info : library_list)
+  for (auto &library : library_list)
     {
       auto &new_solib = sos.emplace_back (*this);
 
       /* We don't need a copy of the name in INFO anymore.  */
-      new_solib.name = std::move (info->name);
+      new_solib.name = std::move (library.name);
       new_solib.original_name = new_solib.name;
-      new_solib.lm_info = std::move (info);
+      new_solib.lm_info = std::move (library.info);
     }
 
   return sos;
