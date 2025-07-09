@@ -235,6 +235,8 @@ automatically cause those extensions to be disabled.
  @tab Enable the 128-bit Atomic Instructions extension.
 @item @code{lsfe} @tab @code{fp}
  @tab Enable Large System Float Extension.
+@item @code{lsui} @tab
+ @tab Enable Unprivileged Load/Store instructions.
 @item @code{lut} @tab
  @tab Enable the Lookup Table (LUT) extension.
 @item @code{memtag} @tab

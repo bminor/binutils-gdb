@@ -187,6 +187,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_THE,
   /* LSE128.  */
   AARCH64_FEATURE_LSE128,
+  /* LSUI - Unprivileged Load Store.  */
+  AARCH64_FEATURE_LSUI,
   /* ARMv8.9-A RAS Extensions.  */
   AARCH64_FEATURE_RASv2,
   /* Delegated SError exceptions for EL3. */
