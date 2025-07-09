@@ -232,7 +232,7 @@ mapped_debug_names_reader::scan_one_entry (const char *name,
 	case DW_IDX_compile_unit:
 	  {
 	    /* Don't crash on bad data.  */
-	    if (ull >= per_objfile->per_bfd->all_comp_units.size ())
+	    if (ull >= per_objfile->per_bfd->num_comp_units)
 	      {
 		complaint (_(".debug_names entry has bad CU index %s"
 			     " [in module %s]"),
@@ -245,7 +245,7 @@ mapped_debug_names_reader::scan_one_entry (const char *name,
 	  break;
 	case DW_IDX_type_unit:
 	  /* Don't crash on bad data.  */
-	  if (ull >= per_objfile->per_bfd->all_type_units.size ())
+	  if (ull >= per_objfile->per_bfd->num_type_units)
 	    {
 	      complaint (_(".debug_names entry has bad TU index %s"
 			   " [in module %s]"),
@@ -254,7 +254,7 @@ mapped_debug_names_reader::scan_one_entry (const char *name,
 	      continue;
 	    }
 	  {
-	    int nr_cus = per_objfile->per_bfd->all_comp_units.size ();
+	    int nr_cus = per_objfile->per_bfd->num_comp_units;
 	    per_cu = per_objfile->per_bfd->get_unit (nr_cus + ull);
 	  }
 	  break;
@@ -450,7 +450,7 @@ check_signatured_type_table_from_debug_names
 {
   struct objfile *objfile = per_objfile->objfile;
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
-  int nr_cus = per_bfd->all_comp_units.size ();
+  int nr_cus = per_bfd->num_comp_units;
   int nr_cus_tus = per_bfd->all_units.size ();
 
   section->read (objfile);
@@ -705,7 +705,7 @@ check_cus_from_debug_names_list (dwarf2_per_bfd *per_bfd,
 				  dwarf2_section_info &section,
 				  bool is_dwz)
 {
-  int nr_cus = per_bfd->all_comp_units.size ();
+  int nr_cus = per_bfd->num_comp_units;
 
   if (!map.augmentation_is_gdb)
     {

@@ -618,11 +618,6 @@ public:
      the target compilation unit of a particular reference.  */
   std::vector<dwarf2_per_cu_up> all_units;
 
-  /* The all_units vector contains both CUs and TUs.  Provide views on the
-     vector that are limited to either the CU part or the TU part.  */
-  gdb::array_view<dwarf2_per_cu_up> all_comp_units;
-  gdb::array_view<dwarf2_per_cu_up> all_type_units;
-
   /* Number of compilation and type units in the ALL_UNITS vector.  */
   unsigned int num_comp_units = 0;
   unsigned int num_type_units = 0;

@@ -3367,7 +3367,7 @@ cooked_index_worker_debug_info::process_type_units
   abbrev_table_up abbrev_table;
   sect_offset abbrev_offset;
 
-  if (per_objfile->per_bfd->all_type_units.size () == 0)
+  if (per_objfile->per_bfd->num_type_units == 0)
     return;
 
   /* TUs typically share abbrev tables, and there can be way more TUs than
@@ -3394,7 +3394,7 @@ cooked_index_worker_debug_info::process_type_units
   /* Sort in a separate table to maintain the order of all_units
      for .gdb_index: TU indices directly index all_type_units.  */
   std::vector<tu_abbrev_offset> sorted_by_abbrev;
-  sorted_by_abbrev.reserve (per_objfile->per_bfd->all_type_units.size ());
+  sorted_by_abbrev.reserve (per_objfile->per_bfd->num_type_units);
 
   for (const auto &cu : per_objfile->per_bfd->all_units)
     if (cu->is_debug_types)
@@ -3651,10 +3651,6 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 void
 finalize_all_units (dwarf2_per_bfd *per_bfd)
 {
-  gdb::array_view<dwarf2_per_cu_up> tmp = per_bfd->all_units;
-  per_bfd->all_comp_units = tmp.slice (0, per_bfd->num_comp_units);
-  per_bfd->all_type_units
-    = tmp.slice (per_bfd->num_comp_units, per_bfd->num_type_units);
 }
 
 /* See read.h.  */
