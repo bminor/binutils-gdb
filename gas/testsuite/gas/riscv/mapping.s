@@ -11,7 +11,7 @@ j	funcA			# rv32ic
 .globl funcB
 funcB:
 addi	a0, zero, 2		# rv32ic, need to be added since start of section
-.option arch, -c
+.option norvc
 j	funcB			# rv32i
 .option pop
 
@@ -35,7 +35,7 @@ addi	a0, zero, 2		# $x, but same as previous addi, so removed
 .option arch, +c
 addi	a0, zero, 1		# $xrv32ic
 .byte	1			# $d
-.option arch, -c
+.option norvc
 .align	3			# odd alignment, $x replaced by $d + $x
 addi	a0, zero, 2		# $xrv32i
 .option pop
@@ -81,7 +81,7 @@ addi	a0, zero, 2
 .align	2			# $xrv32ic, .align and .fill are in the different frag, so neither be removed,
 				# but will be removed in riscv_check_mapping_symbols
 .fill	1, 0, 0			# $d with zero size, removed in make_mapping_symbol when adding $xrv32ic
-.option arch, -c
+.option norvc
 addi	a0, zero, 1		# $xrv32i
 addi	a0, zero, 2
 .option pop
@@ -89,7 +89,7 @@ addi	a0, zero, 2
 .section .text.last.section, "ax"
 .option push
 .option norelax
-.option arch, -c
+.option norvc
 addi	a0, zero, 1		# $xrv32i
 .word	1			# $d
 .align	2			# zero section padding, $x at the end of section, removed in riscv_check_mapping_symbols
@@ -112,7 +112,7 @@ addi	a0, zero, 2		# $xrv32iac
 .option arch, rv32ic
 .balign	4			# $xrv32ic, add at the start of section
 addi	a0, zero, 1		# $x, won't added
-.option arch, -c
+.option norvc
 .align	3			# $x, won't added
 addi	a0, zero, 2		# $xrv32i
 .option pop

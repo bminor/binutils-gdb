@@ -11,7 +11,7 @@
 	.global	_start
 _start:
 	.option	push
-	.option	arch, -c
+	.option norvc
 	# _start + 0x00
 	auipc	t0, 0
 	addiw	t1, t0, 0x18

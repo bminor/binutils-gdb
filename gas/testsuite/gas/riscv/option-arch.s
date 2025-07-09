@@ -1,7 +1,8 @@
 .attribute arch, "rv64ic"	# file-level, rv64ic
 add	a0, a0, a1
 .option push
-.option arch, +d2p0, -c, +xvendor1p0
+.option arch, +d2p0, +xvendor1p0
+.option norvc
 add	a0, a0, a1		# func-level, rv64i_d2p0_xvendor1p0
 frcsr	a0
 .option pop

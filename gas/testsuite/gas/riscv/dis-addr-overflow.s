@@ -24,7 +24,7 @@ topbase = 0
 
 target:
 	.option	push
-	.option	arch, -c
+	.option norvc
 	## Use hi_addr
 	# Load
 	lui	t0, 0xfffff
@@ -50,7 +50,7 @@ target:
 	c.addi	t6, -20
 .ifdef rv64
 	.option	push
-	.option	arch, -c
+	.option norvc
 	# ADDIW (not compressed)
 	lui	s6, 0xffff8
 	addiw	s7, s6, -24

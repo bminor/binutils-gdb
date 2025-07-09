@@ -2602,7 +2602,7 @@ riscv_remove_subset (riscv_subset_list_t *subset_list,
    called from riscv_update_subset./
 
    The IMPLICIT_EXTS, +extension[version] [,...,+extension_n[version_n]]
-		      -extension [,...,-extension_n],
+		      (Deprecated) -extension [,...,-extension_n],
 		      full ISA.  */
 
 static bool
@@ -2694,16 +2694,26 @@ riscv_update_subset1 (riscv_parse_subset_t *rps,
 	  return false;
 	}
 
-      if (explicit_subset == NULL
-	  && (strcmp (subset, "i") == 0
-	      || strcmp (subset, "e") == 0
-	      || strcmp (subset, "g") == 0))
+      if (explicit_subset == NULL)
 	{
-	  rps->error_handler
-	    (_("%scannot + or - base extension `%s' in %s `%s'"),
-	       errmsg_internal, subset, errmsg_caller, implicit_exts);
-	  free (subset);
-	  return false;
+	  if (removed)
+	    {
+	      rps->error_handler
+		(_("%sdeprecated - extension `%s' in %s `%s'"),
+		   errmsg_internal, subset, errmsg_caller, implicit_exts);
+	      free (subset);
+	      return false;
+	    }
+	  else if (strcmp (subset, "i") == 0
+		   || strcmp (subset, "e") == 0
+		   || strcmp (subset, "g") == 0)
+	    {
+	      rps->error_handler
+		(_("%scannot + base extension `%s' in %s `%s'"),
+		   errmsg_internal, subset, errmsg_caller, implicit_exts);
+	      free (subset);
+	      return false;
+	    }
 	}
 
       if (removed)
@@ -2729,14 +2739,24 @@ riscv_update_subset1 (riscv_parse_subset_t *rps,
   return no_conflict;
 }
 
-/* Add/Remove an extension to/from the subset list.  This is used for
-   the .option rvc or norvc, and .option arch directives.  */
+/* Add an extension to/from the subset list.  This is used for the .option rvc
+   and .option arch directives.  */
 
 bool
 riscv_update_subset (riscv_parse_subset_t *rps,
 		     const char *str)
 {
   return riscv_update_subset1 (rps, NULL, str);
+}
+
+/* Called from .option norvc directives.  */
+
+bool
+riscv_update_subset_norvc (riscv_parse_subset_t *rps)
+{
+  return riscv_update_subset1 (rps, rps->subset_list->head,
+			       "-c,-zca,-zcd,-zcf,-zcb,-zce,-zcmp,-zcmt,"
+			       "-zcmop,-zclsd");
 }
 
 /* Check if the FEATURE subset is supported or not in the subset list.

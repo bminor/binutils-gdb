@@ -119,6 +119,9 @@ extern bool
 riscv_update_subset (riscv_parse_subset_t *, const char *);
 
 extern bool
+riscv_update_subset_norvc (riscv_parse_subset_t *);
+
+extern bool
 riscv_subset_supports (riscv_parse_subset_t *, const char *);
 
 extern bool
