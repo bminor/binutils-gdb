@@ -295,6 +295,10 @@ public:
     return m_length;
   }
 
+  /* Return true if the length of this CU has been set.  */
+  bool length_is_set () const
+  { return m_length != 0; }
+
   void set_length (unsigned int length, bool strict_p = true)
   {
     if (m_length == 0)
@@ -1213,7 +1217,7 @@ extern void dw_expand_symtabs_matching_file_matcher
 extern const char *read_indirect_string_at_offset
   (dwarf2_per_objfile *per_objfile, LONGEST str_offset);
 
-/* Initialize the views on all_units.  */
+/* Finalize the all_units vector.  */
 
 extern void finalize_all_units (dwarf2_per_bfd *per_bfd);
 
@@ -1258,14 +1262,17 @@ extern pc_bounds_kind dwarf2_get_pc_bounds (die_info *die,
 					    dwarf2_cu *cu, addrmap_mutable *map,
 					    void *datum);
 
-/* Locate the .debug_info compilation unit from CU's objfile which contains
-   the DIE at OFFSET.  Raises an error on failure.  */
+/* Locate the unit in PER_OBJFILE which contains the DIE at TARGET.  Raises an
+   error on failure.  */
 
-extern dwarf2_per_cu *dwarf2_find_containing_comp_unit (sect_offset sect_off,
-							unsigned int
-							  offset_in_dwz,
-							dwarf2_per_bfd
-							  *per_bfd);
+extern dwarf2_per_cu *dwarf2_find_containing_unit
+  (const section_and_offset &target, dwarf2_per_objfile *per_objfile);
+
+/* Locate the unit starting at START in PER_BFD.  Return nullptr if not
+   found.  */
+
+extern dwarf2_per_cu *dwarf2_find_unit (const section_and_offset &start,
+					dwarf2_per_bfd *per_bfd);
 
 /* Decode simple location descriptions.
 
@@ -1307,5 +1314,11 @@ extern int dwarf2_ranges_read (unsigned offset, unrelocated_addr *low_return,
 
 extern file_and_directory &find_file_and_directory (die_info *die,
 						    dwarf2_cu *cu);
+
+
+/* Return the section that ATTR, an attribute with ref form, references.  */
+
+extern const dwarf2_section_info &get_section_for_ref
+  (const attribute &attr, dwarf2_cu *cu);
 
 #endif /* GDB_DWARF2_READ_H */

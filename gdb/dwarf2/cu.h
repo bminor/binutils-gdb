@@ -54,6 +54,11 @@ struct dwarf2_cu
 
   DISABLE_COPY_AND_ASSIGN (dwarf2_cu);
 
+  /* The section the DIEs were effectively read from.  This could be
+     .debug_info, .debug_types, or with split DWARF, their .dwo
+     variants.  */
+  const dwarf2_section_info &section () const;
+
   /* TU version of handle_DW_AT_stmt_list for read_type_unit_scope.
      Create the set of symtabs used by this TU, or if this TU is sharing
      symtabs with another TU and the symtabs have already been created

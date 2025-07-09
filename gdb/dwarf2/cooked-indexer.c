@@ -83,19 +83,17 @@ tag_can_have_linkage_name (enum dwarf_tag tag)
 
 cutu_reader *
 cooked_indexer::ensure_cu_exists (cutu_reader *reader,
-				  sect_offset sect_off, bool is_dwz,
+				  const section_and_offset &sect_off,
 				  bool for_scanning)
 {
   /* Lookups for type unit references are always in the CU, and
      cross-CU references will crash.  */
-  if (reader->cu ()->per_cu->is_dwz == is_dwz
-      && reader->cu ()->header.offset_in_unit_p (sect_off))
+  if (reader->section () == sect_off.section
+      && reader->cu ()->header.offset_in_unit_p (sect_off.offset))
     return reader;
 
   dwarf2_per_objfile *per_objfile = reader->cu ()->per_objfile;
-  dwarf2_per_cu *per_cu
-    = dwarf2_find_containing_comp_unit (sect_off, is_dwz,
-					per_objfile->per_bfd);
+  dwarf2_per_cu *per_cu = dwarf2_find_containing_unit (sect_off, per_objfile);
 
   /* When scanning, we only want to visit a given CU a single time.
      Doing this check here avoids self-imports as well.  */
@@ -148,10 +146,8 @@ cooked_indexer::scan_attributes (dwarf2_per_cu *scanning_per_cu,
 				 bool *is_enum_class,
 				 bool for_specification)
 {
-  bool origin_is_dwz = false;
   bool is_declaration = false;
-  sect_offset origin_offset {};
-
+  std::optional<section_and_offset> origin;
   std::optional<unrelocated_addr> low_pc;
   std::optional<unrelocated_addr> high_pc;
   bool high_pc_relative = false;
@@ -221,8 +217,8 @@ cooked_indexer::scan_attributes (dwarf2_per_cu *scanning_per_cu,
 	case DW_AT_specification:
 	case DW_AT_abstract_origin:
 	case DW_AT_extension:
-	  origin_offset = attr.get_ref_die_offset ();
-	  origin_is_dwz = attr.form_is_alt ();
+	  origin = { &get_section_for_ref (attr, reader->cu ()),
+		     attr.get_ref_die_offset () };
 	  break;
 
 	case DW_AT_external:
@@ -311,19 +307,19 @@ cooked_indexer::scan_attributes (dwarf2_per_cu *scanning_per_cu,
 	    || (*linkage_name == nullptr
 		&& tag_can_have_linkage_name (abbrev->tag))
 	    || (*parent_entry == nullptr && m_language != language_c))
-	   && origin_offset != sect_offset (0))
+	   && origin.has_value ())
     {
       cutu_reader *new_reader
-	= ensure_cu_exists (reader, origin_offset, origin_is_dwz, false);
+	= ensure_cu_exists (reader, *origin, false);
       if (new_reader == nullptr)
 	error (_(DWARF_ERROR_PREFIX
 		 "cannot follow reference to DIE at %s"
 		 " [in module %s]"),
-	       sect_offset_str (origin_offset),
+	       sect_offset_str (origin->offset),
 	       bfd_get_filename (reader->abfd ()));
 
       const gdb_byte *new_info_ptr
-	= (new_reader->buffer () + to_underlying (origin_offset));
+	= (new_reader->buffer () + to_underlying (origin->offset));
 
       if (*parent_entry == nullptr)
 	{
@@ -347,7 +343,7 @@ cooked_indexer::scan_attributes (dwarf2_per_cu *scanning_per_cu,
       if (new_abbrev == nullptr)
 	error (_(DWARF_ERROR_PREFIX
 		 "Unexpected null DIE at offset %s [in module %s]"),
-	       sect_offset_str (origin_offset),
+	       sect_offset_str (origin->offset),
 	       bfd_get_filename (new_reader->abfd ()));
 
       new_info_ptr += bytes_read;
@@ -411,8 +407,7 @@ cooked_indexer::index_imported_unit (cutu_reader *reader,
 				     const gdb_byte *info_ptr,
 				     const abbrev_info *abbrev)
 {
-  sect_offset sect_off {};
-  bool is_dwz = false;
+  std::optional<section_and_offset> target;
 
   for (int i = 0; i < abbrev->num_attrs; ++i)
     {
@@ -421,19 +416,16 @@ cooked_indexer::index_imported_unit (cutu_reader *reader,
       info_ptr = reader->read_attribute (&attr, &abbrev->attrs[i], info_ptr);
 
       if (attr.name == DW_AT_import)
-	{
-	  sect_off = attr.get_ref_die_offset ();
-	  is_dwz = (attr.form_is_alt ()
-		    || reader->cu ()->per_cu->is_dwz);
-	}
+	target = { &get_section_for_ref (attr, reader->cu ()),
+		   attr.get_ref_die_offset () };
     }
 
   /* Did not find DW_AT_import.  */
-  if (sect_off == sect_offset (0))
+  if (!target.has_value ())
     return info_ptr;
 
   cutu_reader *new_reader
-    = ensure_cu_exists (reader, sect_off, is_dwz, true);
+    = ensure_cu_exists (reader, *target, true);
   if (new_reader != nullptr)
     {
       index_dies (new_reader, new_reader->info_ptr (), nullptr, false);

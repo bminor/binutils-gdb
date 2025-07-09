@@ -462,36 +462,32 @@ build_and_check_tu_list_from_debug_names (dwarf2_per_objfile *per_objfile,
 {
   struct objfile *objfile = per_objfile->objfile;
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
-  int nr_cus = per_bfd->num_comp_units;
-  int nr_cus_tus = per_bfd->all_units.size ();
 
   section->read (objfile);
 
-  uint32_t j = nr_cus;
   for (uint32_t i = 0; i < map.tu_count; ++i)
     {
+      /* Read one entry from the TU list.  */
       sect_offset sect_off
 	= (sect_offset) (extract_unsigned_integer
 			 (map.tu_table_reordered + i * map.offset_size,
 			  map.offset_size,
 			  map.dwarf5_byte_order));
 
-      bool found = false;
-      for (; j < nr_cus_tus; j++)
-	if (per_bfd->get_unit (j)->sect_off == sect_off)
-	  {
-	    found = true;
-	    break;
-	  }
-      if (!found)
+      /* Find the matching dwarf2_per_cu.  */
+      dwarf2_per_cu *per_cu = dwarf2_find_unit ({ section, sect_off },
+						per_bfd);
+
+      if (per_cu == nullptr || !per_cu->is_debug_types)
 	{
 	  warning (_("Section .debug_names has incorrect entry in TU table,"
 		     " ignoring .debug_names."));
 	  return false;
 	}
 
-      map.type_units.emplace_back (per_bfd->get_unit (j));
+      map.type_units.emplace_back (per_cu);
     }
+
   return true;
 }
 
@@ -715,39 +711,9 @@ read_debug_names_from_section (dwarf2_per_objfile *per_objfile,
 static bool
 build_and_check_cu_list_from_debug_names (dwarf2_per_bfd *per_bfd,
 					  mapped_debug_names_reader &map,
-					  dwarf2_section_info &section,
-					  bool is_dwz)
+					  dwarf2_section_info &section)
 {
   int nr_cus = per_bfd->num_comp_units;
-
-  if (!map.augmentation_is_gdb)
-    {
-      uint32_t j = 0;
-      for (uint32_t i = 0; i < map.cu_count; ++i)
-	{
-	  sect_offset sect_off
-	    = (sect_offset) (extract_unsigned_integer
-			     (map.cu_table_reordered + i * map.offset_size,
-			      map.offset_size,
-			      map.dwarf5_byte_order));
-	  bool found = false;
-	  for (; j < nr_cus; j++)
-	    if (per_bfd->get_unit (j)->sect_off == sect_off)
-	      {
-		found = true;
-		break;
-	      }
-	  if (!found)
-	    {
-	      warning (_("Section .debug_names has incorrect entry in CU table,"
-			 " ignoring .debug_names."));
-	      return false;
-	    }
-
-	  map.comp_units.emplace_back (per_bfd->get_unit (j));
-	}
-      return true;
-    }
 
   if (map.cu_count != nr_cus)
     {
@@ -763,14 +729,18 @@ build_and_check_cu_list_from_debug_names (dwarf2_per_bfd *per_bfd,
 			 (map.cu_table_reordered + i * map.offset_size,
 			  map.offset_size,
 			  map.dwarf5_byte_order));
-      if (sect_off != per_bfd->get_unit (i)->sect_off)
+
+      /* Find the matching dwarf2_per_cu.  */
+      dwarf2_per_cu *per_cu = dwarf2_find_unit ({ &section, sect_off }, per_bfd);
+
+      if (per_cu == nullptr || per_cu->is_debug_types)
 	{
 	  warning (_("Section .debug_names has incorrect entry in CU table,"
 		     " ignoring .debug_names."));
 	  return false;
 	}
 
-      map.comp_units.emplace_back (per_bfd->get_unit (i));
+      map.comp_units.emplace_back (per_cu);
     }
 
   return true;
@@ -788,16 +758,14 @@ build_and_check_cu_lists_from_debug_names (dwarf2_per_bfd *per_bfd,
 					   mapped_debug_names_reader &dwz_map)
 {
   if (!build_and_check_cu_list_from_debug_names (per_bfd, map,
-						 per_bfd->infos[0],
-						 false /* is_dwz */))
+						 per_bfd->infos[0]))
     return false;
 
   if (dwz_map.cu_count == 0)
     return true;
 
   dwz_file *dwz = per_bfd->get_dwz_file ();
-  return build_and_check_cu_list_from_debug_names (per_bfd, dwz_map, dwz->info,
-						   true /* is_dwz */);
+  return build_and_check_cu_list_from_debug_names (per_bfd, dwz_map, dwz->info);
 }
 
 /* This does all the work for dwarf2_read_debug_names, but putting it

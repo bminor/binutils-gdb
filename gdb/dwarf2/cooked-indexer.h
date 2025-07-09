@@ -30,6 +30,7 @@ struct cooked_index_worker_result;
 struct cutu_reader;
 struct dwarf2_per_cu;
 struct dwarf2_per_objfile;
+struct section_and_offset;
 
 /* An instance of this is created to index a CU.  */
 
@@ -55,8 +56,7 @@ private:
      the DIEs in the CU; when false, this use is assumed to be to look
      up just a single DIE.  */
   cutu_reader *ensure_cu_exists (cutu_reader *reader,
-				 sect_offset sect_off,
-				 bool is_dwz,
+				 const section_and_offset &sect_off,
 				 bool for_scanning);
 
   /* Index DIEs in the READER starting at INFO_PTR.  PARENT is
