@@ -3591,16 +3591,11 @@ find_debug_base_for_solib (const solib *solib)
   auto *lm_info
     = gdb::checked_static_cast<const lm_info_svr4 *> (solib->lm_info.get ());
 
-  for (const auto &tuple : info->solib_lists)
-    {
-      CORE_ADDR debug_base = tuple.first;
-      const std::vector<svr4_so> &sos = tuple.second;
-
-      for (const svr4_so &so : sos)
-	if (svr4_same (solib->original_name.c_str (), so.name.c_str (),
-		       *lm_info, *so.lm_info))
-	  return debug_base;
-    }
+  for (const auto &[debug_base, sos] : info->solib_lists)
+    for (const svr4_so &so : sos)
+      if (svr4_same (solib->original_name.c_str (), so.name.c_str (), *lm_info,
+		     *so.lm_info))
+	return debug_base;
 
   return 0;
 }

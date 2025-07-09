@@ -451,11 +451,8 @@ core_target::build_file_mappings ()
   const bfd_build_id *core_build_id
     = build_id_bfd_get (current_program_space->core_bfd ());
 
-  for (const auto &iter : mapped_files)
+  for (const auto &[filename, file_data] : mapped_files)
     {
-      const std::string &filename = iter.first;
-      const mapped_file &file_data = iter.second;
-
       /* If this mapped file has the same build-id as was discovered for
 	 the core-file itself, then we assume this is the main
 	 executable.  Record the filename as we can use this later.  */

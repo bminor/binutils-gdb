@@ -1018,20 +1018,15 @@ handle_general_set (char *own_buf)
 	    });
 	}
 
-      for (const auto &iter : set_options)
-	{
-	  thread_info *thread = iter.first;
-	  gdb_thread_options options = iter.second;
+      for (const auto [thread, options] : set_options)
+	if (thread->thread_options != options)
+	  {
+	    threads_debug_printf ("[options for %s are now %s]\n",
+				  target_pid_to_str (thread->id).c_str (),
+				  to_string (options).c_str ());
 
-	  if (thread->thread_options != options)
-	    {
-	      threads_debug_printf ("[options for %s are now %s]\n",
-				    target_pid_to_str (thread->id).c_str (),
-				    to_string (options).c_str ());
-
-	      thread->thread_options = options;
-	    }
-	}
+	    thread->thread_options = options;
+	  }
 
       write_ok (own_buf);
       return;

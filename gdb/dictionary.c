@@ -952,14 +952,9 @@ mdict_create_hashed (struct obstack *obstack,
   retval->n_allocated_dictionaries = nsyms.size ();
 
   int idx = 0;
-  for (const auto &pair : nsyms)
-    {
-      enum language language = pair.first;
-      std::vector<symbol *> symlist = pair.second;
-
-      retval->dictionaries[idx++]
-	= dict_create_hashed (obstack, language, symlist);
-    }
+  for (const auto &[language, symlist] : nsyms)
+    retval->dictionaries[idx++] = dict_create_hashed (obstack, language,
+						      symlist);
 
   return retval;
 }
@@ -997,14 +992,9 @@ mdict_create_linear (struct obstack *obstack,
   retval->n_allocated_dictionaries = nsyms.size ();
 
   int idx = 0;
-  for (const auto &pair : nsyms)
-    {
-      enum language language = pair.first;
-      std::vector<symbol *> symlist = pair.second;
-
-      retval->dictionaries[idx++]
-	= dict_create_linear (obstack, language, symlist);
-    }
+  for (const auto &[language, symlist] : nsyms)
+    retval->dictionaries[idx++] = dict_create_linear (obstack, language,
+						      symlist);
 
   return retval;
 }
@@ -1135,10 +1125,8 @@ mdict_add_pending (struct multidictionary *mdict,
   gdb::unordered_map<enum language, std::vector<symbol *>> nsyms
     = collate_pending_symbols_by_language (symbol_list);
 
-  for (const auto &pair : nsyms)
+  for (const auto &[language, symlist] : nsyms)
     {
-      enum language language = pair.first;
-      std::vector<symbol *> symlist = pair.second;
       struct dictionary *dict = find_language_dictionary (mdict, language);
 
       if (dict == nullptr)

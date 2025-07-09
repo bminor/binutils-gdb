@@ -1210,14 +1210,13 @@ info_linker_namespace_command (const char *pattern, int from_tty)
 
   bool ns_separator = false;
 
-  for (auto &solibs_pair : all_solibs_to_print)
+  for (const auto &[ns, solibs_to_print] : all_solibs_to_print)
     {
       if (ns_separator)
 	uiout->message ("\n\n");
       else
 	ns_separator = true;
-      int ns = solibs_pair.first;
-      std::vector<const solib *> solibs_to_print = solibs_pair.second;
+
       if (solibs_to_print.size () == 0)
 	{
 	  uiout->message (_("Linker namespace [[%d]] is not active.\n"), ns);

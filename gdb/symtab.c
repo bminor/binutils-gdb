@@ -6986,11 +6986,8 @@ info_module_subcommand (bool quiet, const char *module_regexp,
 
   const char *last_filename = "";
   const symbol *last_module_symbol = nullptr;
-  for (const module_symbol_search &ms : module_symbols)
+  for (const auto &[p, q] : module_symbols)
     {
-      const symbol_search &p = ms.first;
-      const symbol_search &q = ms.second;
-
       gdb_assert (q.symbol != nullptr);
 
       if (last_module_symbol != p.symbol)
