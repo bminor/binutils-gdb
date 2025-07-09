@@ -520,20 +520,6 @@ struct dwarf2_per_bfd
     return this->all_units[index].get ();
   }
 
-  /* Return the CU given its index in the CU table in the index.  */
-  dwarf2_per_cu *get_index_cu (int index) const
-  {
-    if (this->all_comp_units_index_cus.empty ())
-      return get_unit (index);
-
-    return this->all_comp_units_index_cus[index];
-  }
-
-  dwarf2_per_cu *get_index_tu (int index) const
-  {
-    return this->all_comp_units_index_tus[index];
-  }
-
   /* Return the separate '.dwz' debug file.  If there is no
      .gnu_debugaltlink or .debug_sup section in the file, then the
      result depends on REQUIRE: if REQUIRE is true, error out; if
@@ -621,9 +607,6 @@ public:
   /* Number of compilation and type units in the ALL_UNITS vector.  */
   unsigned int num_comp_units = 0;
   unsigned int num_type_units = 0;
-
-  std::vector<dwarf2_per_cu *> all_comp_units_index_cus;
-  std::vector<dwarf2_per_cu *> all_comp_units_index_tus;
 
   /* Set of signatured_types, used to look up by signature.  */
   signatured_type_set signatured_types;
