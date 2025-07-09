@@ -8384,6 +8384,11 @@ implies precise exceptions, with the runtime providing the exact
 instruction where the fault occurred, and the exact faulting address.
 The @samp{async} mode implies imprecise exceptions.
 
+@kindex -z memtag-stack
+@cindex Mark program stack for MTE protection
+The @samp{-z memtag-stack} specifies that output object uses MTE
+instructions for stack memory usage.
+
 @ifclear GENERIC
 @lowersections
 @end ifclear

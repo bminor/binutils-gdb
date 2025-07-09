@@ -44,6 +44,7 @@ static aarch64_protection_opts sw_protections = {
 
 static aarch64_memtag_opts memtag_opts = {
   .memtag_mode = AARCH64_MEMTAG_MODE_NONE,
+  .memtag_stack = 0,
 };
 
 #define COMPILE_TIME_STRLEN(s) \
@@ -557,6 +558,8 @@ PARSE_AND_LIST_OPTIONS='
                                          sync: Enable precise exceptions when mismatched address and\n\
                                                allocation tags detected on load/store operations.\n\
                                          async: Enable imprecise exceptions.\n"));
+  fprintf (file, _("\
+  -z memtag-stack               Mark program stack with MTE protection.\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASE_Z_AARCH64='
@@ -574,6 +577,8 @@ PARSE_AND_LIST_ARGS_CASE_Z_AARCH64='
 	{}
      else if (aarch64_parse_memtag_mode_option (optarg))
 	{}
+     else if (strcmp (optarg, "memtag-stack") == 0)
+	memtag_opts.memtag_stack = 1;
 '
 PARSE_AND_LIST_ARGS_CASE_Z="$PARSE_AND_LIST_ARGS_CASE_Z $PARSE_AND_LIST_ARGS_CASE_Z_AARCH64"
 
