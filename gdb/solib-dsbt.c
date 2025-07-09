@@ -144,13 +144,19 @@ make_dsbt_solib_ops (program_space *pspace)
 
 struct lm_info_dsbt final : public lm_info
 {
+  explicit lm_info_dsbt (int_elf32_dsbt_loadmap *map)
+    : map (map)
+  {}
+
+  DISABLE_COPY_AND_ASSIGN (lm_info_dsbt);
+
   ~lm_info_dsbt ()
   {
     xfree (this->map);
   }
 
   /* The loadmap, digested into an easier to use form.  */
-  int_elf32_dsbt_loadmap *map = NULL;
+  int_elf32_dsbt_loadmap *map;
 };
 
 /* Per pspace dsbt specific data.  */
@@ -604,9 +610,6 @@ dsbt_solib_ops::current_sos () const
 	      break;
 	    }
 
-	  auto &sop = sos.emplace_back (*this);
-	  auto li = std::make_unique<lm_info_dsbt> ();
-	  li->map = loadmap;
 	  /* Fetch the name.  */
 	  addr = extract_unsigned_integer (lm_buf.l_name,
 					   sizeof (lm_buf.l_name),
@@ -621,12 +624,12 @@ dsbt_solib_ops::current_sos () const
 	      if (solib_dsbt_debug)
 		gdb_printf (gdb_stdlog, "current_sos: name = %s\n",
 			    name_buf.get ());
-
-	      sop.name = name_buf.get ();
-	      sop.original_name = sop.name;
 	    }
 
-	  sop.lm_info = std::move (li);
+	  sos.emplace_back (std::make_unique<lm_info_dsbt> (loadmap),
+			    name_buf != nullptr ? name_buf.get () : "",
+			    name_buf != nullptr ? name_buf.get () : "",
+			    *this);
 	}
       else
 	{
@@ -809,8 +812,7 @@ dsbt_relocate_main_executable (void)
   ldm = info->exec_loadmap;
 
   delete info->main_executable_lm_info;
-  info->main_executable_lm_info = new lm_info_dsbt;
-  info->main_executable_lm_info->map = ldm;
+  info->main_executable_lm_info = new lm_info_dsbt (ldm);
 
   objfile *objf = current_program_space->symfile_object_file;
   section_offsets new_offsets (objf->section_offsets.size ());

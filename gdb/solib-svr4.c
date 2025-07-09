@@ -1069,13 +1069,8 @@ svr4_solib_ops::solibs_from_svr4_sos (const std::vector<svr4_so> &sos) const
   owning_intrusive_list<solib> dst;
 
   for (const svr4_so &so : sos)
-    {
-      auto &newobj = dst.emplace_back (*this);
-
-      newobj.name = so.name;
-      newobj.original_name = so.name;
-      newobj.lm_info = std::make_unique<lm_info_svr4> (*so.lm_info);
-    }
+    dst.emplace_back (std::make_unique<lm_info_svr4> (*so.lm_info), so.name,
+		      so.name, *this);
 
   return dst;
 }
@@ -1275,11 +1270,8 @@ svr4_solib_ops::default_sos (svr4_info *info) const
   li->l_addr_p = 1;
 
   owning_intrusive_list<solib> sos;
-  auto &newobj = sos.emplace_back (*this);
-
-  newobj.lm_info = std::move (li);
-  newobj.name = info->debug_loader_name;
-  newobj.original_name = newobj.name;
+  sos.emplace_back (std::move (li), info->debug_loader_name,
+		    info->debug_loader_name, *this);
 
   return sos;
 }

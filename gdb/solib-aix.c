@@ -495,10 +495,8 @@ aix_solib_ops::current_sos () const
 	}
 
       /* Add it to the list.  */
-      auto &new_solib = sos.emplace_back (*this);
-      new_solib.original_name = so_name;
-      new_solib.name = so_name;
-      new_solib.lm_info = std::make_unique<lm_info_aix> (info);
+      sos.emplace_back (std::make_unique<lm_info_aix> (info), so_name, so_name,
+			*this);
     }
 
   return sos;

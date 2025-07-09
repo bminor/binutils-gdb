@@ -218,6 +218,13 @@ struct ext_link_map
 
 struct lm_info_frv final : public lm_info
 {
+  lm_info_frv (int_elf32_fdpic_loadmap *map, CORE_ADDR got_value,
+	       CORE_ADDR lm_addr)
+    : map (map), got_value (got_value), lm_addr (lm_addr)
+  {}
+
+  DISABLE_COPY_AND_ASSIGN (lm_info_frv);
+
   ~lm_info_frv ()
   {
     xfree (this->map);
@@ -226,11 +233,11 @@ struct lm_info_frv final : public lm_info
   }
 
   /* The loadmap, digested into an easier to use form.  */
-  int_elf32_fdpic_loadmap *map = NULL;
+  int_elf32_fdpic_loadmap *map;
   /* The GOT address for this link map entry.  */
-  CORE_ADDR got_value = 0;
+  CORE_ADDR got_value;
   /* The link map address, needed for frv_fetch_objfile_link_map().  */
-  CORE_ADDR lm_addr = 0;
+  CORE_ADDR lm_addr;
 
   /* Cached dynamic symbol table and dynamic relocs initialized and
      used only by find_canonical_descriptor_in_load_object().
@@ -385,13 +392,6 @@ frv_solib_ops::current_sos () const
 	      break;
 	    }
 
-	  auto &sop = sos.emplace_back (*this);
-	  auto li = std::make_unique<lm_info_frv> ();
-	  li->map = loadmap;
-	  li->got_value = got_addr;
-	  li->lm_addr = lm_addr;
-	  sop.lm_info = std::move (li);
-
 	  /* Fetch the name.  */
 	  addr = extract_unsigned_integer (lm_buf.l_name,
 					   sizeof (lm_buf.l_name),
@@ -403,11 +403,12 @@ frv_solib_ops::current_sos () const
 
 	  if (name_buf == nullptr)
 	    warning (_("Can't read pathname for link map entry."));
-	  else
-	    {
-	      sop.name = name_buf.get ();
-	      sop.original_name = sop.name;
-	    }
+
+	  sos.emplace_back (std::make_unique<lm_info_frv> (loadmap, got_addr,
+							   lm_addr),
+			    name_buf != nullptr ? name_buf.get () : "",
+			    name_buf != nullptr ? name_buf.get () : "",
+			    *this);
 	}
       else
 	{
@@ -743,8 +744,7 @@ frv_relocate_main_executable (void)
     error (_("Unable to load the executable's loadmap."));
 
   delete main_executable_lm_info;
-  main_executable_lm_info = new lm_info_frv;
-  main_executable_lm_info->map = ldm;
+  main_executable_lm_info = new lm_info_frv (ldm, 0, 0);
 
   objfile *objf = current_program_space->symfile_object_file;
   section_offsets new_offsets (objf->section_offsets.size ());

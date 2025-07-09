@@ -158,8 +158,12 @@ darwin_load_image_infos (struct darwin_info *info)
 
 struct lm_info_darwin final : public lm_info
 {
+  explicit lm_info_darwin (CORE_ADDR lm_addr)
+    : lm_addr (lm_addr)
+  {}
+
   /* The target location of lm.  */
-  CORE_ADDR lm_addr = 0;
+  CORE_ADDR lm_addr;
 };
 
 /* Lookup the value for a specific symbol.  */
@@ -269,15 +273,8 @@ darwin_solib_ops::current_sos () const
 	break;
 
       /* Create and fill the new struct solib element.  */
-      auto &newobj = sos.emplace_back (*this);
-
-      auto li = std::make_unique<lm_info_darwin> ();
-
-      newobj.name = file_path.get ();
-      newobj.original_name = newobj.name;
-      li->lm_addr = load_addr;
-
-      newobj.lm_info = std::move (li);
+      sos.emplace_back (std::make_unique<lm_info_darwin> (load_addr),
+			file_path.get (), file_path.get (), *this);
     }
 
   return sos;

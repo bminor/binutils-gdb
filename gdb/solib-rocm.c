@@ -280,13 +280,8 @@ rocm_solib_ops::solibs_from_rocm_sos (const std::vector<rocm_so> &sos) const
   owning_intrusive_list<solib> dst;
 
   for (const rocm_so &so : sos)
-    {
-      auto &newobj = dst.emplace_back (*this);
-
-      newobj.lm_info = std::make_unique<lm_info_svr4> (*so.lm_info);
-      newobj.name = so.name;
-      newobj.original_name = so.unique_name;
-    }
+    dst.emplace_back (std::make_unique<lm_info_svr4> (*so.lm_info),
+		      so.unique_name, so.name, *this);
 
   return dst;
 }
