@@ -3018,7 +3018,6 @@ md_convert_frag (bfd *headers ATTRIBUTE_UNUSED, segT seg, fragS *fragP)
     {
     case C (COND_JUMP, COND8):
     case C (COND_JUMP_DELAY, COND8):
-      subseg_change (seg, 0);
       fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, fragP->fr_offset,
 	       1, BFD_RELOC_SH_PCDISP8BY2);
       fragP->fr_fix += 2;
@@ -3026,7 +3025,6 @@ md_convert_frag (bfd *headers ATTRIBUTE_UNUSED, segT seg, fragS *fragP)
       break;
 
     case C (UNCOND_JUMP, UNCOND12):
-      subseg_change (seg, 0);
       fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, fragP->fr_offset,
 	       1, BFD_RELOC_SH_PCDISP12BY2);
       fragP->fr_fix += 2;
@@ -3082,7 +3080,6 @@ md_convert_frag (bfd *headers ATTRIBUTE_UNUSED, segT seg, fragS *fragP)
 	   its delay-slot insn already makes the branch reach.  */
 
 	/* Build a relocation to six / four bytes farther on.  */
-	subseg_change (seg, 0);
 	fix_new (fragP, fragP->fr_fix, 2, section_symbol (seg),
 		 fragP->fr_address + fragP->fr_fix + (delay ? 4 : 6),
 		 1, BFD_RELOC_SH_PCDISP8BY2);

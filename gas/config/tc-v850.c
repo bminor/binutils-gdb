@@ -1673,42 +1673,29 @@ md_atof (int type, char *litp, int *sizep)
 
 void
 md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
-		 asection *sec,
+		 asection *sec ATTRIBUTE_UNUSED,
 		 fragS *fragP)
 {
-  union u
-  {
-    bfd_reloc_code_real_type fx_r_type;
-    char * fr_opcode;
-  }
-  opcode_converter;
-  subseg_change (sec, 0);
-
-  opcode_converter.fr_opcode = fragP->fr_opcode;
-
-  subseg_change (sec, 0);
+  unsigned int opindex = (uintptr_t) fragP->fr_opcode;
 
   if (fragP->fr_subtype == SUBYPTE_LOOP_16_22)
     {
       fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
-	       fragP->fr_offset, 1,
-	       BFD_RELOC_UNUSED + opcode_converter.fx_r_type);
+	       fragP->fr_offset, 1, BFD_RELOC_UNUSED + opindex);
       fragP->fr_fix += 4;
     }
   else if (fragP->fr_subtype == SUBYPTE_LOOP_16_22 + 1)
     {
-      unsigned char * buffer =
-	(unsigned char *) (fragP->fr_fix + &fragP->fr_literal[0]);
-      int loop_reg = (buffer[0] & 0x1f);
+      char *buffer = fragP->fr_literal + fragP->fr_fix;
+      int loop_reg = buffer[0] & 0x1f;
 
       /* Add -1.reg.  */
-      md_number_to_chars ((char *) buffer, 0x025f | (loop_reg << 11), 2);
+      md_number_to_chars (buffer, 0x025f | (loop_reg << 11), 2);
       /* Now create the conditional branch + fixup to the final target.  */
       /* 0x000107ea = bne LBL(disp17).  */
-      md_number_to_chars ((char *) buffer + 2, 0x000107ea, 4);
+      md_number_to_chars (buffer + 2, 0x000107ea, 4);
       fix_new (fragP, fragP->fr_fix + 2, 4, fragP->fr_symbol,
-	       fragP->fr_offset, 1,
-	       BFD_RELOC_V850_17_PCREL);
+	       fragP->fr_offset, 1, BFD_RELOC_V850_17_PCREL);
       fragP->fr_fix += 6;
     }
   /* In range conditional or unconditional branch.  */
@@ -1725,8 +1712,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 
     {
       fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
-	       fragP->fr_offset, 1,
-	       BFD_RELOC_UNUSED + opcode_converter.fx_r_type);
+	       fragP->fr_offset, 1, BFD_RELOC_UNUSED + opindex);
       fragP->fr_fix += 2;
     }
   /* V850e2r-v3 17bit conditional branch.  */
@@ -1735,8 +1721,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 	   || fragP->fr_subtype == SUBYPTE_SA_9_17_22 + 1
 	   || fragP->fr_subtype == SUBYPTE_SA_9_17_22_32 + 1)
     {
-      unsigned char *buffer =
-	(unsigned char *) (fragP->fr_fix + &fragP->fr_literal[0]);
+      char *buffer = fragP->fr_literal + fragP->fr_fix;
 
       buffer[0] &= 0x0f;	/* Use condition.  */
       buffer[0] |= 0xe0;
@@ -1744,7 +1729,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 
       /* Now create the unconditional branch + fixup to the final
 	 target.  */
-      md_number_to_chars ((char *) buffer + 2, 0x0001, 2);
+      md_number_to_chars (buffer + 2, 0x0001, 2);
       fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
 	       fragP->fr_offset, 1, BFD_RELOC_V850_17_PCREL);
       fragP->fr_fix += 4;
@@ -1755,8 +1740,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 	   || fragP->fr_subtype == SUBYPTE_COND_9_17_22 + 2
 	   || fragP->fr_subtype == SUBYPTE_COND_9_17_22_32 + 2)
     {
-      unsigned char *buffer =
-	(unsigned char *) (fragP->fr_fix + fragP->fr_literal);
+      char *buffer = fragP->fr_literal + fragP->fr_fix;
 
       /* Reverse the condition of the first branch.  */
       buffer[0] ^= 0x08;
@@ -1769,7 +1753,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 
       /* Now create the unconditional branch + fixup to the final
 	 target.  */
-      md_number_to_chars ((char *) buffer + 2, 0x00000780, 4);
+      md_number_to_chars (buffer + 2, 0x00000780, 4);
       fix_new (fragP, fragP->fr_fix + 2, 4, fragP->fr_symbol,
 	       fragP->fr_offset, 1, BFD_RELOC_V850_22_PCREL);
       fragP->fr_fix += 6;
@@ -1778,8 +1762,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
   else if (fragP->fr_subtype == SUBYPTE_COND_9_22_32 + 2
 	   || fragP->fr_subtype == SUBYPTE_COND_9_17_22_32 + 3)
     {
-      unsigned char *buffer =
-	(unsigned char *) (fragP->fr_fix + fragP->fr_literal);
+      char *buffer = fragP->fr_literal + fragP->fr_fix;
 
       /* Reverse the condition of the first branch.  */
       buffer[0] ^= 0x08;
@@ -1792,7 +1775,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 
       /* Now create the unconditional branch + fixup to the final
 	 target.  */
-      md_number_to_chars ((char *) buffer + 2, 0x02e0, 2);
+      md_number_to_chars (buffer + 2, 0x02e0, 2);
       fix_new (fragP, fragP->fr_fix + 4, 4, fragP->fr_symbol,
 	       fragP->fr_offset + 2, 1, BFD_RELOC_V850_32_PCREL);
       fragP->fr_fix += 8;
@@ -1820,8 +1803,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 	   || fragP->fr_subtype == SUBYPTE_SA_9_17_22 + 2
 	   || fragP->fr_subtype == SUBYPTE_SA_9_17_22_32 + 2)
     {
-      unsigned char *buffer =
-	(unsigned char *) (fragP->fr_fix + fragP->fr_literal);
+      char *buffer = fragP->fr_literal + fragP->fr_fix;
 
       /* bsa .+4 */
       buffer[0] &= 0x8f;
@@ -1829,23 +1811,21 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
       buffer[1] &= 0x07;
 
       /* br .+6 */
-      md_number_to_chars ((char *) buffer + 2, 0x05b5, 2);
+      md_number_to_chars (buffer + 2, 0x05b5, 2);
 
       /* Now create the unconditional branch + fixup to the final
 	 target.  */
       /* jr SYM */
-      md_number_to_chars ((char *) buffer + 4, 0x00000780, 4);
+      md_number_to_chars (buffer + 4, 0x00000780, 4);
       fix_new (fragP, fragP->fr_fix + 4, 4, fragP->fr_symbol,
-	       fragP->fr_offset, 1,
-	       BFD_RELOC_V850_22_PCREL);
+	       fragP->fr_offset, 1, BFD_RELOC_V850_22_PCREL);
       fragP->fr_fix += 8;
     }
   /* Out of range SA conditional branch.  Emit a branch around a 32bit jump.  */
   else if (fragP->fr_subtype == SUBYPTE_SA_9_22_32 + 2
 	   || fragP->fr_subtype == SUBYPTE_SA_9_17_22_32 + 3)
     {
-      unsigned char *buffer =
-	(unsigned char *) (fragP->fr_fix + fragP->fr_literal);
+      char *buffer = fragP->fr_literal + fragP->fr_fix;
 
       /* bsa .+2 */
       buffer[0] &= 0x8f;
@@ -1853,12 +1833,12 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
       buffer[1] &= 0x07;
 
       /* br .+8 */
-      md_number_to_chars ((char *) buffer + 2, 0x05c5, 2);
+      md_number_to_chars (buffer + 2, 0x05c5, 2);
 
       /* Now create the unconditional branch + fixup to the final
 	 target.  */
       /* jr SYM */
-      md_number_to_chars ((char *) buffer + 4, 0x02e0, 2);
+      md_number_to_chars (buffer + 4, 0x02e0, 2);
       fix_new (fragP, fragP->fr_fix + 6, 4, fragP->fr_symbol,
 	       fragP->fr_offset + 2, 1, BFD_RELOC_V850_32_PCREL);
 
@@ -3068,7 +3048,7 @@ md_assemble (char *str)
 	      f = frag_var (rs_machine_dependent, 6, 2, SUBYPTE_LOOP_16_22,
 			    fixups[0].exp.X_add_symbol,
 			    fixups[0].exp.X_add_number,
-			    (char *)(intptr_t) fixups[0].opindex);
+			    (char *) (uintptr_t) fixups[0].opindex);
 	      md_number_to_chars (f, insn, insn_size);
 	      md_number_to_chars (f+4, 0, 4);
 	    }
@@ -3085,7 +3065,7 @@ md_assemble (char *str)
 	      f = frag_var (rs_machine_dependent, 4, 2, SUBYPTE_UNCOND_9_22,
 			    fixups[0].exp.X_add_symbol,
 			    fixups[0].exp.X_add_number,
-			    (char *)(intptr_t) fixups[0].opindex);
+			    (char *) (uintptr_t) fixups[0].opindex);
 	      md_number_to_chars (f, insn, insn_size);
 	      md_number_to_chars (f + 2, 0, 2);
 	    }
@@ -3094,7 +3074,7 @@ md_assemble (char *str)
 	      f = frag_var (rs_machine_dependent, 6, 4, SUBYPTE_UNCOND_9_22_32,
 			    fixups[0].exp.X_add_symbol,
 			    fixups[0].exp.X_add_number,
-			    (char *)(intptr_t) fixups[0].opindex);
+			    (char *) (uintptr_t) fixups[0].opindex);
 	      md_number_to_chars (f, insn, insn_size);
 	      md_number_to_chars (f + 2, 0, 4);
 	    }
@@ -3111,7 +3091,7 @@ md_assemble (char *str)
 		      f = frag_var (rs_machine_dependent, 8, 6, SUBYPTE_SA_9_17_22,
 				    fixups[0].exp.X_add_symbol,
 				    fixups[0].exp.X_add_number,
-				    (char *)(intptr_t) fixups[0].opindex);
+				    (char *) (uintptr_t) fixups[0].opindex);
 		      md_number_to_chars (f, insn, insn_size);
 		      md_number_to_chars (f + 2, 0, 6);
 		    }
@@ -3120,7 +3100,7 @@ md_assemble (char *str)
 		      f = frag_var (rs_machine_dependent, 6, 4, SUBYPTE_COND_9_17_22,
 				    fixups[0].exp.X_add_symbol,
 				    fixups[0].exp.X_add_number,
-				    (char *)(intptr_t) fixups[0].opindex);
+				    (char *) (uintptr_t) fixups[0].opindex);
 		      md_number_to_chars (f, insn, insn_size);
 		      md_number_to_chars (f + 2, 0, 4);
 		    }
@@ -3132,7 +3112,7 @@ md_assemble (char *str)
 		      f = frag_var (rs_machine_dependent, 8, 6, SUBYPTE_SA_9_22,
 				    fixups[0].exp.X_add_symbol,
 				    fixups[0].exp.X_add_number,
-				    (char *)(intptr_t) fixups[0].opindex);
+				    (char *) (uintptr_t) fixups[0].opindex);
 		      md_number_to_chars (f, insn, insn_size);
 		      md_number_to_chars (f + 2, 0, 6);
 		    }
@@ -3141,7 +3121,7 @@ md_assemble (char *str)
 		      f = frag_var (rs_machine_dependent, 6, 4, SUBYPTE_COND_9_22,
 				    fixups[0].exp.X_add_symbol,
 				    fixups[0].exp.X_add_number,
-				    (char *)(intptr_t) fixups[0].opindex);
+				    (char *) (uintptr_t) fixups[0].opindex);
 		      md_number_to_chars (f, insn, insn_size);
 		      md_number_to_chars (f + 2, 0, 4);
 		    }
@@ -3156,7 +3136,7 @@ md_assemble (char *str)
 		      f = frag_var (rs_machine_dependent, 10, 8, SUBYPTE_SA_9_17_22_32,
 				    fixups[0].exp.X_add_symbol,
 				    fixups[0].exp.X_add_number,
-				    (char *)(intptr_t) fixups[0].opindex);
+				    (char *) (uintptr_t) fixups[0].opindex);
 		      md_number_to_chars (f, insn, insn_size);
 		      md_number_to_chars (f + 2, 0, 8);
 		    }
@@ -3165,7 +3145,7 @@ md_assemble (char *str)
 		      f = frag_var (rs_machine_dependent, 8, 6, SUBYPTE_COND_9_17_22_32,
 				    fixups[0].exp.X_add_symbol,
 				    fixups[0].exp.X_add_number,
-				    (char *)(intptr_t) fixups[0].opindex);
+				    (char *) (uintptr_t) fixups[0].opindex);
 		      md_number_to_chars (f, insn, insn_size);
 		      md_number_to_chars (f + 2, 0, 6);
 		    }
@@ -3177,7 +3157,7 @@ md_assemble (char *str)
 		      f = frag_var (rs_machine_dependent, 10, 8, SUBYPTE_SA_9_22_32,
 				    fixups[0].exp.X_add_symbol,
 				    fixups[0].exp.X_add_number,
-				    (char *)(intptr_t) fixups[0].opindex);
+				    (char *) (uintptr_t) fixups[0].opindex);
 		      md_number_to_chars (f, insn, insn_size);
 		      md_number_to_chars (f + 2, 0, 8);
 		    }
@@ -3186,7 +3166,7 @@ md_assemble (char *str)
 		      f = frag_var (rs_machine_dependent, 8, 6, SUBYPTE_COND_9_22_32,
 				    fixups[0].exp.X_add_symbol,
 				    fixups[0].exp.X_add_number,
-				    (char *)(intptr_t) fixups[0].opindex);
+				    (char *) (uintptr_t) fixups[0].opindex);
 		      md_number_to_chars (f, insn, insn_size);
 		      md_number_to_chars (f + 2, 0, 6);
 		    }

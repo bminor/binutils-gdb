@@ -368,14 +368,14 @@ md_estimate_size_before_relax (fragS *fragp, asection *seg)
 }
 
 void
-md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, fragS *fragP)
+md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
+		 asection *sec ATTRIBUTE_UNUSED,
+		 fragS *fragP)
 {
   /* 'opcode' points to the start of the instruction, whether
      we need to change the instruction's fixed encoding.  */
   char *opcode = &fragP->fr_literal[0] + fragP->fr_fix;
   bfd_reloc_code_real_type reloc;
-
-  subseg_change (sec, 0);
 
   switch (fragP->fr_subtype)
     {
