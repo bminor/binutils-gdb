@@ -43,8 +43,8 @@ AC_CHECK_HEADERS(sys/time.h)
 AC_CHECK_FUNCS(setitimer)
 
 ALL_LINGUAS="bg da de eo es fi fr ga hu id it ja ms nl pt_BR ro ru rw sr sv tr uk vi"
-ZW_GNU_GETTEXT_SISTER_DIR
 AM_PO_SUBDIRS
+ZW_GNU_GETTEXT_SISTER_DIR
 
 AM_MAINTAINER_MODE
 AM_CONDITIONAL(GENINSRC_NEVER, false)

@@ -86,8 +86,8 @@ AC_EXEEXT
 # host-specific stuff:
 
 ALL_LINGUAS="da de es fi fr ga id it nl pt_BR ro sr sv tr uk vi zh_CN"
-ZW_GNU_GETTEXT_SISTER_DIR
 AM_PO_SUBDIRS
+ZW_GNU_GETTEXT_SISTER_DIR
 
 . ${srcdir}/../bfd/configure.host
 
