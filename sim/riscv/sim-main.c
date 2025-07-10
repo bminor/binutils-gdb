@@ -1302,7 +1302,7 @@ execute_one (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
     case INSN_CLASS_ZAAMO:
     case INSN_CLASS_ZALRSC:
       return execute_a (cpu, iw, op);
-    case INSN_CLASS_C:
+    case INSN_CLASS_ZCA:
       /* Check whether model with C extension is selected.  */
       if (riscv_cpu->csr.misa & 4)
 	return execute_c (cpu, iw, op);
