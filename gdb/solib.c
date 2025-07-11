@@ -62,8 +62,8 @@ show_solib_search_path (struct ui_file *file, int from_tty,
 			struct cmd_list_element *c, const char *value)
 {
   gdb_printf (file,
-	      _ ("The search path for loading non-absolute "
-		 "shared library symbol files is %s.\n"),
+	      _("The search path for loading non-absolute "
+		"shared library symbol files is %s.\n"),
 	      value);
 }
 
@@ -420,7 +420,7 @@ solib_bfd_fopen (const char *pathname, int fd)
   if (abfd == NULL)
     {
       /* Arrange to free PATHNAME when the error is thrown.  */
-      error (_ ("Could not open `%s' as an executable file: %s"), pathname,
+      error (_("Could not open `%s' as an executable file: %s"), pathname,
 	     bfd_errmsg (bfd_get_error ()));
     }
 
@@ -453,14 +453,14 @@ solib_bfd_open (const char *pathname)
 
   /* Check bfd format.  */
   if (!bfd_check_format (abfd.get (), bfd_object))
-    error (_ ("`%s': not in executable format: %s"),
+    error (_("`%s': not in executable format: %s"),
 	   bfd_get_filename (abfd.get ()), bfd_errmsg (bfd_get_error ()));
 
   /* Check bfd arch.  */
   b = gdbarch_bfd_arch_info (current_inferior ()->arch ());
   if (!b->compatible (b, bfd_get_arch_info (abfd.get ())))
-    error (_ ("`%s': Shared library architecture %s is not compatible "
-	      "with target architecture %s."),
+    error (_("`%s': Shared library architecture %s is not compatible "
+	     "with target architecture %s."),
 	   bfd_get_filename (abfd.get ()),
 	   bfd_get_arch_info (abfd.get ())->printable_name, b->printable_name);
 
@@ -534,7 +534,7 @@ solib_map_sections (solib &so)
 
 	  if (abfd == nullptr && mismatch)
 	    {
-	      warning (_ ("Build-id of %ps does not match core file."),
+	      warning (_("Build-id of %ps does not match core file."),
 		       styled_string (file_name_style.style (),
 				      filename.get ()));
 	      abfd = nullptr;
@@ -658,8 +658,8 @@ solib_read_symbols (solib &so, symfile_add_flags flags)
       catch (const gdb_exception_error &e)
 	{
 	  exception_fprintf (gdb_stderr, e,
-			     _ ("Error while reading shared"
-				" library symbols for %s:\n"),
+			     _("Error while reading shared"
+			       " library symbols for %s:\n"),
 			     so.name.c_str ());
 	}
 
@@ -843,8 +843,8 @@ update_solib_list (int from_tty)
 	  catch (const gdb_exception_error &e)
 	    {
 	      exception_fprintf (gdb_stderr, e,
-				 _ ("Error while mapping shared "
-				    "library sections:\n"));
+				 _("Error while mapping shared "
+				   "library sections:\n"));
 	    }
 
 	  /* Notify any observer that the shared object has been
@@ -863,15 +863,15 @@ update_solib_list (int from_tty)
 	 stand out well.  */
 
       if (not_found == 1)
-	warning (_ ("Could not load shared library symbols for %ps.\n"
-		    "Do you need \"%ps\" or \"%ps\"?"),
+	warning (_("Could not load shared library symbols for %ps.\n"
+		   "Do you need \"%ps\" or \"%ps\"?"),
 		 styled_string (file_name_style.style (),
 				not_found_filename),
 		 styled_string (command_style.style (),
 				"set solib-search-path"),
 		 styled_string (command_style.style (), "set sysroot"));
       else if (not_found > 1)
-	warning (_ ("\
+	warning (_("\
 Could not load shared library symbols for %d libraries, e.g. %ps.\n\
 Use the \"%ps\" command to see the complete listing.\n\
 Do you need \"%ps\" or \"%ps\"?"),
@@ -929,11 +929,11 @@ solib_add (const char *pattern, int from_tty, int readsyms)
     {
       if (pattern != NULL)
 	{
-	  gdb_printf (_ ("Loading symbols for shared libraries: %s\n"),
+	  gdb_printf (_("Loading symbols for shared libraries: %s\n"),
 		      pattern);
 	}
       else
-	gdb_printf (_ ("Loading symbols for shared libraries.\n"));
+	gdb_printf (_("Loading symbols for shared libraries.\n"));
     }
 
   current_program_space->solib_add_generation++;
@@ -943,7 +943,7 @@ solib_add (const char *pattern, int from_tty, int readsyms)
       char *re_err = re_comp (pattern);
 
       if (re_err)
-	error (_ ("Invalid regexp: %s"), re_err);
+	error (_("Invalid regexp: %s"), re_err);
     }
 
   update_solib_list (from_tty);
@@ -977,7 +977,7 @@ solib_add (const char *pattern, int from_tty, int readsyms)
 		  /* If no pattern was given, be quiet for shared
 		     libraries we have already loaded.  */
 		  if (pattern && (from_tty || info_verbose))
-		    gdb_printf (_ ("Symbols already loaded for %ps\n"),
+		    gdb_printf (_("Symbols already loaded for %ps\n"),
 				styled_string (file_name_style.style (),
 					       gdb.name.c_str ()));
 		}
@@ -1097,8 +1097,8 @@ print_solib_list_table (std::vector<const solib *> solib_list,
   }
 
   if (so_missing_debug_info)
-    uiout->message (_ ("(*): Shared library is missing "
-		       "debugging information.\n"));
+    uiout->message (_("(*): Shared library is missing "
+		      "debugging information.\n"));
 }
 
 /* Implement the "info sharedlibrary" command.  Walk through the
@@ -1116,7 +1116,7 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
       char *re_err = re_comp (pattern);
 
       if (re_err)
-	error (_ ("Invalid regexp: %s"), re_err);
+	error (_("Invalid regexp: %s"), re_err);
     }
 
   update_solib_list (from_tty);
@@ -1140,9 +1140,9 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
   if (print_libs.size () == 0)
     {
       if (pattern)
-	uiout->message (_ ("No shared libraries matched.\n"));
+	uiout->message (_("No shared libraries matched.\n"));
       else
-	uiout->message (_ ("No shared libraries loaded at this time.\n"));
+	uiout->message (_("No shared libraries loaded at this time.\n"));
     }
 }
 
@@ -1173,7 +1173,7 @@ info_linker_namespace_command (const char *pattern, int from_tty)
 
   if (pattern == nullptr || pattern[0] == '\0')
     {
-      uiout->message (_ ("There are %d linker namespaces loaded\n"),
+      uiout->message (_("There are %d linker namespaces loaded\n"),
 		      ops->num_active_namespaces ());
 
       int printed = 0;
@@ -1203,7 +1203,7 @@ info_linker_namespace_command (const char *pattern, int from_tty)
 	  char * end = nullptr;
 	  ns = strtol (pattern, &end, 10);
 	  if (end[0] != '\0')
-	    error (_ ("Invalid linker namespace identifier: %s"), pattern);
+	    error (_("Invalid linker namespace identifier: %s"), pattern);
 	}
 
       all_solibs_to_print.push_back
@@ -1228,10 +1228,10 @@ info_linker_namespace_command (const char *pattern, int from_tty)
 	  break;
 	}
       uiout->message
-	(_ ("There are %zu libraries loaded in linker namespace [[%d]]\n"),
+	(_("There are %zu libraries loaded in linker namespace [[%d]]\n"),
 	 solibs_to_print.size (), ns);
       uiout->message
-	(_ ("Displaying libraries for linker namespace [[%d]]:\n"), ns);
+	(_("Displaying libraries for linker namespace [[%d]]:\n"), ns);
 
       print_solib_list_table (solibs_to_print, false);
     }
@@ -1402,7 +1402,7 @@ static void
 reload_shared_libraries_1 (int from_tty)
 {
   if (print_symbol_loading_p (from_tty, 0, 0))
-    gdb_printf (_ ("Loading symbols for shared libraries.\n"));
+    gdb_printf (_("Loading symbols for shared libraries.\n"));
 
   for (solib &so : current_program_space->solibs ())
     {
@@ -1449,8 +1449,8 @@ reload_shared_libraries_1 (int from_tty)
 	  catch (const gdb_exception_error &e)
 	    {
 	      exception_fprintf (gdb_stderr, e,
-				 _ ("Error while mapping "
-				    "shared library sections:\n"));
+				 _("Error while mapping "
+				   "shared library sections:\n"));
 	      got_error = true;
 	    }
 
@@ -1530,9 +1530,9 @@ gdb_sysroot_changed (const char *ignored, int from_tty,
 
       if (!warning_issued)
 	{
-	  warning (_ ("\"%s\" is deprecated, use \"%s\" instead."), old_prefix,
+	  warning (_("\"%s\" is deprecated, use \"%s\" instead."), old_prefix,
 		   new_prefix);
-	  warning (_ ("sysroot set to \"%s\"."), gdb_sysroot.c_str ());
+	  warning (_("sysroot set to \"%s\"."), gdb_sysroot.c_str ());
 
 	  warning_issued = true;
 	}
@@ -1545,7 +1545,7 @@ static void
 show_auto_solib_add (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _ ("Autoloading of shared library symbols is %s.\n"),
+  gdb_printf (file, _("Autoloading of shared library symbols is %s.\n"),
 	      value);
 }
 
@@ -1861,23 +1861,23 @@ INIT_GDB_FILE (solib)
 
   add_com (
     "sharedlibrary", class_files, sharedlibrary_command,
-    _ ("Load shared object library symbols for files matching REGEXP."));
+    _("Load shared object library symbols for files matching REGEXP."));
   cmd_list_element *info_sharedlibrary_cmd
     = add_info ("sharedlibrary", info_sharedlibrary_command,
-		_ ("Status of loaded shared object libraries."));
+		_("Status of loaded shared object libraries."));
   add_info_alias ("dll", info_sharedlibrary_cmd, 1);
   add_com ("nosharedlibrary", class_files, no_shared_libraries_command,
-	   _ ("Unload all shared object library symbols."));
+	   _("Unload all shared object library symbols."));
 
   add_info ("linker-namespaces", info_linker_namespace_command,
-      _ ("Get information about linker namespaces in the inferior."));
+      _("Get information about linker namespaces in the inferior."));
 
   add_setshow_boolean_cmd ("auto-solib-add", class_support, &auto_solib_add,
-			   _ ("\
+			   _("\
 Set autoloading of shared library symbols."),
-			   _ ("\
+			   _("\
 Show autoloading of shared library symbols."),
-			   _ ("\
+			   _("\
 If \"on\", symbols from all shared object libraries will be loaded\n\
 automatically when the inferior begins execution, when the dynamic linker\n\
 informs gdb that a new library has been loaded, or when attaching to the\n\
@@ -1887,11 +1887,11 @@ inferior.  Otherwise, symbols must be loaded manually, using \
 
   set_show_commands sysroot_cmds
     = add_setshow_optional_filename_cmd ("sysroot", class_support,
-					 &gdb_sysroot, _ ("\
+					 &gdb_sysroot, _("\
 Set an alternate system root."),
-					 _ ("\
+					 _("\
 Show the current system root."),
-					 _ ("\
+					 _("\
 The system root is used to load absolute shared library symbol files.\n\
 For other (relative) files, you can add directories using\n\
 `set solib-search-path'."),
@@ -1904,22 +1904,22 @@ For other (relative) files, you can add directories using\n\
 		 &showlist);
 
   add_setshow_optional_filename_cmd ("solib-search-path", class_support,
-				     &solib_search_path, _ ("\
+				     &solib_search_path, _("\
 Set the search path for loading non-absolute shared library symbol files."),
-				     _ ("\
+				     _("\
 Show the search path for loading non-absolute shared library symbol files."),
-				     _ ("\
+				     _("\
 This takes precedence over the environment variables \
 PATH and LD_LIBRARY_PATH."),
 				     reload_shared_libraries,
 				     show_solib_search_path, &setlist,
 				     &showlist);
 
-  add_setshow_boolean_cmd ("solib", class_maintenance, &debug_solib, _ ("\
+  add_setshow_boolean_cmd ("solib", class_maintenance, &debug_solib, _("\
 Set solib debugging."),
-			   _ ("\
+			   _("\
 Show solib debugging."),
-			   _ ("\
+			   _("\
 When true, solib-related debugging output is enabled."),
 			   nullptr, nullptr, &setdebuglist, &showdebuglist);
 }
