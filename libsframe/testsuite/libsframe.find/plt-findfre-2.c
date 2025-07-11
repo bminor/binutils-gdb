@@ -48,7 +48,11 @@ add_plt0_fde (sframe_encoder_ctx *ectx, uint32_t plt_vaddr,
 
   unsigned char finfo = sframe_fde_create_func_info (SFRAME_FRE_TYPE_ADDR1,
 						     SFRAME_FDE_TYPE_PCINC);
-  int32_t func_start_addr = plt_vaddr - sframe_vaddr;
+  uint32_t offsetof_fde_in_sec
+    = sframe_encoder_get_offsetof_fde_start_addr (ectx, idx, NULL);
+
+  int32_t func_start_addr = (plt_vaddr
+			     - (sframe_vaddr + offsetof_fde_in_sec));
 
   /* 1 PCINC-type FDE for 1 plt0 entry of 32 bytes.  */
   int err = sframe_encoder_add_funcdesc_v2 (ectx, func_start_addr,
@@ -77,7 +81,11 @@ add_pltn_fde (sframe_encoder_ctx *ectx, uint32_t plt_vaddr,
 
   unsigned char finfo = sframe_fde_create_func_info (SFRAME_FRE_TYPE_ADDR1,
 						     SFRAME_FDE_TYPE_PCMASK);
-  int32_t func_start_addr = plt_vaddr - sframe_vaddr;
+  uint32_t offsetof_fde_in_sec
+    = sframe_encoder_get_offsetof_fde_start_addr (ectx, idx, NULL);
+
+  int32_t func_start_addr = (plt_vaddr
+			     - (sframe_vaddr + offsetof_fde_in_sec));
 
   /* 1 PCMASK-type FDE for 5 pltN entries of 32 bytes each.  */
   int err = sframe_encoder_add_funcdesc_v2 (ectx, func_start_addr,
@@ -117,7 +125,8 @@ void test_plt_findfre (const char suffix, const uint32_t plt_vaddr,
     }									\
     while (0)
 
-  ectx = sframe_encode (SFRAME_VERSION, 0, SFRAME_ABI_S390X_ENDIAN_BIG,
+  ectx = sframe_encode (SFRAME_VERSION, SFRAME_F_FDE_FUNC_START_PCREL,
+			SFRAME_ABI_S390X_ENDIAN_BIG,
 			SFRAME_CFA_FIXED_FP_INVALID,
 			SFRAME_CFA_FIXED_RA_INVALID,
 			&err);
