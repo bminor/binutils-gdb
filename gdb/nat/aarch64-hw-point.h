@@ -110,13 +110,18 @@ unsigned int aarch64_watchpoint_offset (unsigned int ctrl);
 unsigned int aarch64_watchpoint_length (unsigned int ctrl);
 enum target_hw_bp_type aarch64_watchpoint_type (unsigned int ctrl);
 
-/* Helper for the "stopped_data_address" target method.  Returns TRUE
-   if a hardware watchpoint trap at ADDR_TRAP matches a set
-   watchpoint.  The address of the matched watchpoint is returned in
-   *ADDR_P.  */
+/* Helper for the "stopped_data_addresses" target method.  Returns a vector
+   containing the addresses of all hardware watchpoints that could account
+   for a watchpoint trap at ADDR_TRAP.  Return an empty vector if no
+   suitable watchpoint addresses can be identified.
 
-bool aarch64_stopped_data_address (const struct aarch64_debug_reg_state *state,
-				   CORE_ADDR addr_trap, CORE_ADDR *addr_p);
+   It is possible that multiple watchpoints could account for a trap at
+   ADDR_TRAP, in which case all possible addresses are returned, and GDB
+   core is responsible for selecting a suitable watchpoint, or otherwise
+   letting the user know that there is some ambiguity.  */
+
+extern std::vector<CORE_ADDR> aarch64_stopped_data_addresses
+  (const struct aarch64_debug_reg_state *state, CORE_ADDR addr_trap);
 
 int aarch64_handle_breakpoint (enum target_hw_bp_type type, CORE_ADDR addr,
 			       int len, int is_insert, ptid_t ptid,

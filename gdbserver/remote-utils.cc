@@ -1182,21 +1182,21 @@ prepare_resume_reply (char *buf, ptid_t ptid, const target_waitstatus &status)
 
 	if (the_target->stopped_by_watchpoint ())
 	  {
-	    CORE_ADDR addr;
-	    int i;
+	    std::vector<CORE_ADDR> addr_vec = the_target->stopped_data_addresses ();
 
-	    memcpy (buf, "watch:", 6);
-	    buf += 6;
+	    for (const CORE_ADDR addr : addr_vec)
+	      {
+		memcpy (buf, "watch:", 6);
+		buf += 6;
 
-	    addr = the_target->stopped_data_address ();
-
-	    /* Convert each byte of the address into two hexadecimal
-	       chars.  Note that we take sizeof (void *) instead of
-	       sizeof (addr); this is to avoid sending a 64-bit
-	       address to a 32-bit GDB.  */
-	    for (i = sizeof (void *) * 2; i > 0; i--)
-	      *buf++ = tohex ((addr >> (i - 1) * 4) & 0xf);
-	    *buf++ = ';';
+		/* Convert each byte of the address into two hexadecimal
+		   chars.  Note that we take sizeof (void *) instead of
+		   sizeof (addr); this is to avoid sending a 64-bit
+		   address to a 32-bit GDB.  */
+		for (int i = sizeof (void *) * 2; i > 0; i--)
+		  *buf++ = tohex ((addr >> (i - 1) * 4) & 0xf);
+		*buf++ = ';';
+	      }
 	  }
 	else if (cs.swbreak_feature && target_stopped_by_sw_breakpoint ())
 	  {

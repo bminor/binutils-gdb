@@ -100,7 +100,7 @@ protected:
 
   bool low_stopped_by_watchpoint () override;
 
-  CORE_ADDR low_stopped_data_address () override;
+  std::vector<CORE_ADDR> low_stopped_data_addresses () override;
 
   arch_process_info *low_new_process () override;
 
@@ -729,11 +729,11 @@ arm_target::low_stopped_by_watchpoint ()
 
 /* Return data address that triggered watchpoint.  Called only if
    low_stopped_by_watchpoint returned true.  */
-CORE_ADDR
-arm_target::low_stopped_data_address ()
+std::vector<CORE_ADDR>
+arm_target::low_stopped_data_addresses ()
 {
   struct lwp_info *lwp = get_thread_lwp (current_thread);
-  return lwp->arch_private->stopped_data_address;
+  return { lwp->arch_private->stopped_data_address };
 }
 
 /* Called when a new process is created.  */

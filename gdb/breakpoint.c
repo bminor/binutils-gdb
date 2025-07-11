@@ -2140,7 +2140,7 @@ add_dummy_location (struct breakpoint *b,
    The following constraints influence the location where we can reset
    hardware watchpoints:
 
-   * target_stopped_by_watchpoint and target_stopped_data_address are
+   * target_stopped_by_watchpoint and target_stopped_data_addresses are
      called several times when GDB stops.
 
    [linux] 
@@ -5243,10 +5243,7 @@ bpstat::bpstat ()
 int
 watchpoints_triggered (const target_waitstatus &ws)
 {
-  bool stopped_by_watchpoint = target_stopped_by_watchpoint ();
-  CORE_ADDR addr;
-
-  if (!stopped_by_watchpoint)
+  if (!target_stopped_by_watchpoint ())
     {
       /* We were not stopped by a watchpoint.  Mark all watchpoints
 	 as not triggered.  */
@@ -5261,7 +5258,9 @@ watchpoints_triggered (const target_waitstatus &ws)
       return 0;
     }
 
-  if (!target_stopped_data_address (current_inferior ()->top_target (), &addr))
+  std::vector<CORE_ADDR> addr_list
+    = target_stopped_data_addresses (current_inferior ()->top_target ());
+  if (addr_list.empty ())
     {
       /* We were stopped by a watchpoint, but we don't know where.
 	 Mark all watchpoints as unknown.  */
@@ -5279,36 +5278,44 @@ watchpoints_triggered (const target_waitstatus &ws)
   /* The target could report the data address.  Mark watchpoints
      affected by this data address as triggered, and all others as not
      triggered.  */
-
   for (breakpoint &b : all_breakpoints ())
     if (is_hardware_watchpoint (&b))
       {
 	watchpoint &w = gdb::checked_static_cast<watchpoint &> (b);
-
 	w.watchpoint_triggered = watch_triggered_no;
-	for (bp_location &loc : b.locations ())
-	  {
-	    if (is_masked_watchpoint (&b))
-	      {
-		CORE_ADDR newaddr = addr & w.hw_wp_mask;
-		CORE_ADDR start = loc.address & w.hw_wp_mask;
+      }
 
-		if (newaddr == start)
+  for (const CORE_ADDR addr : addr_list)
+    {
+      for (breakpoint &b : all_breakpoints ())
+	if (is_hardware_watchpoint (&b))
+	  {
+	    watchpoint &w = gdb::checked_static_cast<watchpoint &> (b);
+
+	    for (bp_location &loc : b.locations ())
+	      {
+		if (is_masked_watchpoint (&b))
+		  {
+		    CORE_ADDR newaddr = addr & w.hw_wp_mask;
+		    CORE_ADDR start = loc.address & w.hw_wp_mask;
+
+		    if (newaddr == start)
+		      {
+			w.watchpoint_triggered = watch_triggered_yes;
+			break;
+		      }
+		  }
+		/* Exact match not required.  Within range is sufficient.  */
+		else if (target_watchpoint_addr_within_range
+			 (current_inferior ()->top_target (), addr, loc.address,
+			  loc.length))
 		  {
 		    w.watchpoint_triggered = watch_triggered_yes;
 		    break;
 		  }
 	      }
-	    /* Exact match not required.  Within range is sufficient.  */
-	    else if (target_watchpoint_addr_within_range
-		       (current_inferior ()->top_target (), addr, loc.address,
-			loc.length))
-	      {
-		w.watchpoint_triggered = watch_triggered_yes;
-		break;
-	      }
 	  }
-      }
+    }
 
   return 1;
 }
@@ -5405,7 +5412,7 @@ watchpoint_check (bpstat *bs)
 
       if (is_masked_watchpoint (b))
 	/* Since we don't know the exact trigger address (from
-	   stopped_data_address), just tell the user we've triggered
+	   stopped_data_addresses), just tell the user we've triggered
 	   a mask watchpoint.  */
 	return WP_VALUE_CHANGED;
 

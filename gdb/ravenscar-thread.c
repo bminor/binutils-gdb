@@ -101,7 +101,7 @@ struct ravenscar_thread_target final : public target_ops
 
   bool stopped_by_watchpoint () override;
 
-  bool stopped_data_address (CORE_ADDR *) override;
+  std::vector<CORE_ADDR> stopped_data_addresses () override;
 
   enum target_xfer_status xfer_partial (enum target_object object,
 					const char *annex,
@@ -818,14 +818,14 @@ ravenscar_thread_target::stopped_by_watchpoint ()
   return beneath ()->stopped_by_watchpoint ();
 }
 
-/* Implement the to_stopped_data_address target_ops "method".  */
+/* Implement the to_stopped_data_addresses target_ops "method".  */
 
-bool
-ravenscar_thread_target::stopped_data_address (CORE_ADDR *addr_p)
+std::vector<CORE_ADDR>
+ravenscar_thread_target::stopped_data_addresses ()
 {
   scoped_restore_current_thread saver;
   set_base_thread_from_ravenscar_task (inferior_ptid);
-  return beneath ()->stopped_data_address (addr_p);
+  return beneath ()->stopped_data_addresses ();
 }
 
 void

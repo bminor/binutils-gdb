@@ -52,14 +52,14 @@ struct x86_linux_nat_target : public x86_nat_target<linux_nat_target>
   bool stopped_by_watchpoint () override
   { return linux_nat_target::stopped_by_watchpoint (); }
 
-  bool stopped_data_address (CORE_ADDR *addr_p) override
-  { return linux_nat_target::stopped_data_address (addr_p); }
+  std::vector<CORE_ADDR> stopped_data_addresses () override
+  { return linux_nat_target::stopped_data_addresses (); }
 
   bool low_stopped_by_watchpoint () override
   { return x86_nat_target::stopped_by_watchpoint (); }
 
   bool low_stopped_data_address (CORE_ADDR *addr_p) override
-  { return x86_nat_target::stopped_data_address (addr_p); }
+  { return x86_stopped_data_address (addr_p); }
 
   void low_new_fork (struct lwp_info *parent, pid_t child_pid) override;
 

@@ -199,7 +199,7 @@ public:
 
   bool stopped_by_watchpoint () override;
 
-  CORE_ADDR stopped_data_address () override;
+  std::vector<CORE_ADDR> stopped_data_addresses () override;
 
   bool supports_read_offsets () override;
 
@@ -652,7 +652,7 @@ protected:
 
   virtual bool low_stopped_by_watchpoint ();
 
-  virtual CORE_ADDR low_stopped_data_address ();
+  virtual std::vector<CORE_ADDR> low_stopped_data_addresses ();
 
   /* Hooks to reformat register data for PEEKUSR/POKEUSR (in particular
      for registers smaller than an xfer unit).  */
@@ -858,10 +858,9 @@ struct lwp_info
   enum target_stop_reason stop_reason = TARGET_STOPPED_BY_NO_REASON;
 
   /* On architectures where it is possible to know the data address of
-     a triggered watchpoint, STOPPED_DATA_ADDRESS is non-zero, and
-     contains such data address.  Only valid if STOPPED_BY_WATCHPOINT
-     is true.  */
-  CORE_ADDR stopped_data_address = 0;
+     a triggered watchpoint, STOPPED_DATA_ADDRESS is the list of such
+     data addresses.  Only valid if STOPPED_BY_WATCHPOINT is true.  */
+  std::vector<CORE_ADDR> stopped_data_addresses;
 
   /* If this is non-zero, it is a breakpoint to be reinserted at our next
      stop (SIGTRAP stops only).  */

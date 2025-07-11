@@ -2194,7 +2194,7 @@ linux_process_target::check_stopped_by_watchpoint (lwp_info *child)
   if (low_stopped_by_watchpoint ())
     {
       child->stop_reason = TARGET_STOPPED_BY_WATCHPOINT;
-      child->stopped_data_address = low_stopped_data_address ();
+      child->stopped_data_addresses = low_stopped_data_addresses ();
     }
 
   return child->stop_reason == TARGET_STOPPED_BY_WATCHPOINT;
@@ -2206,10 +2206,10 @@ linux_process_target::low_stopped_by_watchpoint ()
   return false;
 }
 
-CORE_ADDR
-linux_process_target::low_stopped_data_address ()
+std::vector<CORE_ADDR>
+linux_process_target::low_stopped_data_addresses ()
 {
-  return 0;
+  return {};
 }
 
 /* Return the ptrace options that we want to try to enable.  */
@@ -5641,12 +5641,12 @@ linux_process_target::stopped_by_watchpoint ()
   return lwp->stop_reason == TARGET_STOPPED_BY_WATCHPOINT;
 }
 
-CORE_ADDR
-linux_process_target::stopped_data_address ()
+std::vector<CORE_ADDR>
+linux_process_target::stopped_data_addresses ()
 {
   struct lwp_info *lwp = get_thread_lwp (current_thread);
 
-  return lwp->stopped_data_address;
+  return lwp->stopped_data_addresses;
 }
 
 /* This is only used for targets that define PT_TEXT_ADDR,

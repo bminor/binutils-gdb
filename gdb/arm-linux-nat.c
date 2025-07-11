@@ -88,7 +88,7 @@ public:
 			 struct expression *) override;
   bool stopped_by_watchpoint () override;
 
-  bool stopped_data_address (CORE_ADDR *) override;
+  std::vector<CORE_ADDR> stopped_data_addresses () override;
 
   bool watchpoint_addr_within_range (CORE_ADDR, CORE_ADDR, int) override;
 
@@ -1169,41 +1169,37 @@ arm_linux_nat_target::remove_watchpoint (CORE_ADDR addr,
 }
 
 /* What was the data address the target was stopped on accessing.  */
-bool
-arm_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
+std::vector<CORE_ADDR>
+arm_linux_nat_target::stopped_data_addresses ()
 {
   siginfo_t siginfo;
-  int slot;
-
   if (!linux_nat_get_siginfo (inferior_ptid, &siginfo))
-    return false;
+    return {};
 
   /* This must be a hardware breakpoint.  */
   if (siginfo.si_signo != SIGTRAP
       || (siginfo.si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
-    return false;
+    return {};
 
   /* We must be able to set hardware watchpoints.  */
   if (arm_linux_get_hw_watchpoint_count () == 0)
-    return 0;
+    return {};
 
-  slot = siginfo.si_errno;
+  int slot = siginfo.si_errno;
 
   /* If we are in a positive slot then we're looking at a breakpoint and not
      a watchpoint.  */
   if (slot >= 0)
-    return false;
+    return {};
 
-  *addr_p = (CORE_ADDR) (uintptr_t) siginfo.si_addr;
-  return true;
+  return { (CORE_ADDR) (uintptr_t) siginfo.si_addr };
 }
 
 /* Has the target been stopped by hitting a watchpoint?  */
 bool
 arm_linux_nat_target::stopped_by_watchpoint ()
 {
-  CORE_ADDR addr;
-  return stopped_data_address (&addr);
+  return !stopped_data_addresses ().empty ();
 }
 
 bool

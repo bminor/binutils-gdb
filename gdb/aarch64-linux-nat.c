@@ -74,7 +74,7 @@ public:
 
   /* Add our hardware breakpoint and watchpoint implementation.  */
   bool stopped_by_watchpoint () override;
-  bool stopped_data_address (CORE_ADDR *) override;
+  std::vector<CORE_ADDR> stopped_data_addresses () override;
 
   int can_do_single_step () override;
 
@@ -922,21 +922,21 @@ aarch64_linux_nat_target::low_siginfo_fixup (siginfo_t *native, gdb_byte *inf,
   return false;
 }
 
-/* Implement the "stopped_data_address" target_ops method.  */
+/* Implement the "stopped_data_addresses" target_ops method.  */
 
-bool
-aarch64_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
+std::vector<CORE_ADDR>
+aarch64_linux_nat_target::stopped_data_addresses ()
 {
   siginfo_t siginfo;
   struct aarch64_debug_reg_state *state;
 
   if (!linux_nat_get_siginfo (inferior_ptid, &siginfo))
-    return false;
+    return {};
 
   /* This must be a hardware breakpoint.  */
   if (siginfo.si_signo != SIGTRAP
       || (siginfo.si_code & 0xffff) != TRAP_HWBKPT)
-    return false;
+    return {};
 
   /* Make sure to ignore the top byte, otherwise we may not recognize a
      hardware watchpoint hit.  The stopped data addresses coming from the
@@ -947,7 +947,7 @@ aarch64_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
 
   /* Check if the address matches any watched address.  */
   state = aarch64_get_debug_reg_state (inferior_ptid.pid ());
-  return aarch64_stopped_data_address (state, addr_trap, addr_p);
+  return aarch64_stopped_data_addresses (state, addr_trap);
 }
 
 /* Implement the "stopped_by_watchpoint" target_ops method.  */
@@ -955,7 +955,7 @@ aarch64_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
 bool
 aarch64_linux_nat_target::stopped_by_watchpoint ()
 {
-  return stopped_data_address (nullptr);
+  return !stopped_data_addresses ().empty ();
 }
 
 /* Implement the "can_do_single_step" target_ops method.  */

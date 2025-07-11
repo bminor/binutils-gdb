@@ -209,6 +209,12 @@ vFile:stat
   lstat rather than stat.  This has now been corrected.  The
   documentation has also been clarified.
 
+T
+  The signal stop packet can now include multiple 'watch', 'rwatch',
+  and 'awatch' stop reason entries.  GDB will select between all of
+  the possible watchpoint addresses that are return when presenting
+  the stop to the user.
+
 * MI changes
 
 ** The =library-unloaded event now includes the 'ranges' field, which

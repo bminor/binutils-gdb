@@ -232,7 +232,7 @@ public:
   void async (bool) override;
   ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
   bool stopped_by_watchpoint () override;
-  bool stopped_data_address (CORE_ADDR *) override;
+  std::vector<CORE_ADDR> stopped_data_addresses () override;
 
   bool stopped_by_sw_breakpoint () override;
   bool supports_stopped_by_sw_breakpoint () override;
@@ -1501,13 +1501,13 @@ record_full_base_target::stopped_by_watchpoint ()
     return beneath ()->stopped_by_watchpoint ();
 }
 
-bool
-record_full_base_target::stopped_data_address (CORE_ADDR *addr_p)
+std::vector<CORE_ADDR>
+record_full_base_target::stopped_data_addresses ()
 {
   if (RECORD_FULL_IS_REPLAY)
-    return false;
+    return {};
   else
-    return this->beneath ()->stopped_data_address (addr_p);
+    return this->beneath ()->stopped_data_addresses ();
 }
 
 /* The stopped_by_sw_breakpoint method of target record-full.  */

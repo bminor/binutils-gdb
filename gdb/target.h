@@ -601,8 +601,8 @@ struct target_ops
       TARGET_DEFAULT_RETURN (false);
     virtual bool have_steppable_watchpoint ()
       TARGET_DEFAULT_RETURN (false);
-    virtual bool stopped_data_address (CORE_ADDR *)
-      TARGET_DEFAULT_RETURN (false);
+    virtual std::vector<CORE_ADDR> stopped_data_addresses ()
+      TARGET_DEFAULT_RETURN (std::vector<CORE_ADDR> ());
     virtual bool watchpoint_addr_within_range (CORE_ADDR, CORE_ADDR, int)
       TARGET_DEFAULT_FUNC (default_watchpoint_addr_within_range);
 
@@ -2169,11 +2169,22 @@ extern int target_remove_hw_breakpoint (gdbarch *gdbarch,
 
 extern int target_ranged_break_num_registers (void);
 
-/* Return non-zero if target knows the data address which triggered this
-   target_stopped_by_watchpoint, in such case place it to *ADDR_P.  Only the
-   INFERIOR_PTID task is being queried.  */
-#define target_stopped_data_address(target, addr_p) \
-  (target)->stopped_data_address (addr_p)
+/* Return a vector containing the data addresses which triggered this
+   target_stopped_by_watchpoint if the addresses are known.  If the
+   addresses are not known then an empty vector is returned.  Only the
+   INFERIOR_PTID task is being queried.
+
+   Some target, for example AArch64, can only watch ranges of memory,
+   e.g. 8 or 16 bytes.  As a result, many watchpoints could fall within any
+   single region.  In such a case, this method will return the address of
+   all possible watchpoints, and it is up to GDB core to select a suitable
+   watchpoint to display to the user, for example, by checking the value of
+   write watchpoints.  Or GDB core could tell the user that it is unable to
+   disambiguate between multiple read watchpoints (though this isn't
+   currently done).  */
+
+#define target_stopped_data_addresses(target) \
+  (target)->stopped_data_addresses ()
 
 /* Return non-zero if ADDR is within the range of a watchpoint spanning
    LENGTH bytes beginning at START.  */

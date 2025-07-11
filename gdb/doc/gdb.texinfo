@@ -43909,8 +43909,15 @@ The currently defined stop reasons are:
 @item watch
 @itemx rwatch
 @itemx awatch
-The packet indicates a watchpoint hit, and @var{r} is the data address, in
-hex.
+The packet indicates a watchpoint hit, and @var{r} is the data
+address, in hex.
+
+Some targets, for example AArch64, are unable to accurately report the
+address which triggered a watchpoint trap.  As a consequence, multiple
+watched addresses could explain a single watchpoint trap.  In these
+cases, multiple instances of these stop reasons can appear in a single
+stop packet.  @value{GDBN} will select between the multiple reported
+stop addresses when displaying the stop to the user.
 
 @item syscall_entry
 @itemx syscall_return
