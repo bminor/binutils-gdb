@@ -1167,9 +1167,7 @@ info_linker_namespace_command (const char *pattern, int from_tty)
   struct ui_out *uiout = current_uiout;
   std::vector<std::pair<int, std::vector<const solib *>>> all_solibs_to_print;
 
-  if (pattern != nullptr)
-    while (*pattern == ' ')
-      pattern++;
+  pattern = skip_spaces (pattern);
 
   if (pattern == nullptr || pattern[0] == '\0')
     {
