@@ -2868,23 +2868,23 @@ static const aarch64_feature_set aarch64_feature_sve2 =
 static const aarch64_feature_set aarch64_feature_sve2aes =
   AARCH64_FEATURES (2, SVE_AES, SVE2_SSVE_AES);
 static const aarch64_feature_set aarch64_feature_sve2sha3 =
-  AARCH64_FEATURES (2, SVE2, SVE2_SHA3);
+  AARCH64_FEATURE (SVE2_SHA3);
 static const aarch64_feature_set aarch64_feature_sve2sm4 =
-  AARCH64_FEATURES (2, SVE2, SVE2_SM4);
+  AARCH64_FEATURE (SVE2_SM4);
 static const aarch64_feature_set aarch64_feature_sve2bitperm =
-  AARCH64_FEATURES (2, SVE2, SVE2_BITPERM);
+  AARCH64_FEATURE (SVE2_BITPERM);
 static const aarch64_feature_set aarch64_feature_sme =
-  AARCH64_FEATURES (2, SVE2, SME);
+  AARCH64_FEATURE (SME);
 static const aarch64_feature_set aarch64_feature_sme_f64f64 =
-  AARCH64_FEATURES (3, SVE2, SME, SME_F64F64);
+  AARCH64_FEATURE (SME_F64F64);
 static const aarch64_feature_set aarch64_feature_sme_i16i64 =
-  AARCH64_FEATURES (3, SVE2, SME, SME_I16I64);
+  AARCH64_FEATURE (SME_I16I64);
 static const aarch64_feature_set aarch64_feature_sme2 =
-  AARCH64_FEATURES (3, SVE2, SME, SME2);
+  AARCH64_FEATURE (SME2);
 static const aarch64_feature_set aarch64_feature_sme2_i16i64 =
-  AARCH64_FEATURES (2, SME2, SME_I16I64);
+  AARCH64_FEATURE (SME_I16I64);
 static const aarch64_feature_set aarch64_feature_sme2_f64f64 =
-  AARCH64_FEATURES (2, SME2, SME_F64F64);
+  AARCH64_FEATURE (SME_F64F64);
 static const aarch64_feature_set aarch64_feature_i8mm =
   AARCH64_FEATURE (I8MM);
 static const aarch64_feature_set aarch64_feature_i8mm_sve =
@@ -2924,7 +2924,7 @@ static const aarch64_feature_set aarch64_feature_the =
 static const aarch64_feature_set aarch64_feature_d128_the =
   AARCH64_FEATURES (2, D128, THE);
 static const aarch64_feature_set aarch64_feature_sve_b16b16_sve2 =
-  AARCH64_FEATURES (2, SVE_B16B16, SVE2);
+  AARCH64_FEATURES (2, SVE_B16B16, SVE2_SME2);
 static const aarch64_feature_set aarch64_feature_sve_b16b16_sme2 =
   AARCH64_FEATURES (2, SVE_B16B16, SME2);
 static const aarch64_feature_set aarch64_feature_sme_b16b16 =
@@ -2956,7 +2956,7 @@ static const aarch64_feature_set aarch64_feature_faminmax =
 static const aarch64_feature_set aarch64_feature_faminmax_sve2 =
   AARCH64_FEATURES (2, FAMINMAX, SVE2);
 static const aarch64_feature_set aarch64_feature_faminmax_sme2 =
-  AARCH64_FEATURES (3, SVE2, FAMINMAX, SME2);
+  AARCH64_FEATURES (2, FAMINMAX, SME2);
 static const aarch64_feature_set aarch64_feature_fp8 =
   AARCH64_FEATURE (FP8);
 static const aarch64_feature_set aarch64_feature_fp8_sve2 =
@@ -2984,31 +2984,31 @@ static const aarch64_feature_set aarch64_feature_fp8dot4 =
 static const aarch64_feature_set aarch64_feature_fp8dot2 =
   AARCH64_FEATURE (FP8DOT2);
 static const aarch64_feature_set aarch64_feature_fp8fma_sve =
-  AARCH64_FEATURES (2, FP8FMA_SVE, SVE);
+  AARCH64_FEATURE (FP8FMA_SVE);
 static const aarch64_feature_set aarch64_feature_fp8dot4_sve =
-  AARCH64_FEATURES (2, FP8DOT4_SVE, SVE);
+  AARCH64_FEATURE (FP8DOT4_SVE);
 static const aarch64_feature_set aarch64_feature_fp8dot2_sve =
-  AARCH64_FEATURES (2, FP8DOT2_SVE, SVE);
+  AARCH64_FEATURE (FP8DOT2_SVE);
 static const aarch64_feature_set aarch64_feature_sme_f8f32 =
-  AARCH64_FEATURES (2, SME_F8F32, SME2);
+  AARCH64_FEATURE (SME_F8F32);
 static const aarch64_feature_set aarch64_feature_sme_f8f16 =
-  AARCH64_FEATURES (2, SME_F8F16, SME2);
+  AARCH64_FEATURE (SME_F8F16);
 static const aarch64_feature_set aarch64_feature_sme_f16f16_f8f16 =
-  AARCH64_FEATURES (2, SME_F16F16_F8F16, SME2);
+  AARCH64_FEATURE (SME_F16F16_F8F16);
 static const aarch64_feature_set aarch64_feature_sme_f16f16 =
-  AARCH64_FEATURES (2, SME_F16F16, SME2);
+  AARCH64_FEATURE (SME_F16F16);
 static const aarch64_feature_set aarch64_feature_sve2p1_sme =
-  AARCH64_FEATURES (2, SVE2p1_SME, SVE);
+  AARCH64_FEATURE (SVE2p1_SME);
 static const aarch64_feature_set aarch64_feature_sve2p1_sme2 =
-  AARCH64_FEATURES (2, SVE2p1_SME2, SVE);
+  AARCH64_FEATURE (SVE2p1_SME2);
 static const aarch64_feature_set aarch64_feature_sve2p1_sme2p1 =
-  AARCH64_FEATURES (2, SVE2p1_SME2p1, SVE);
+  AARCH64_FEATURE (SVE2p1_SME2p1);
 static const aarch64_feature_set aarch64_feature_sme2p2 =
-  AARCH64_FEATURES (2, SME2p2, SME);
+  AARCH64_FEATURE (SME2p2);
 static const aarch64_feature_set aarch64_feature_sve_sme2p2 =
-  AARCH64_FEATURES (2, SVE_SME2p2, SVE);
+  AARCH64_FEATURE (SVE_SME2p2);
 static const aarch64_feature_set aarch64_feature_sve2p2_sme2p2 =
-  AARCH64_FEATURES (2, SVE2p2_SME2p2, SVE);
+  AARCH64_FEATURE (SVE2p2_SME2p2);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
