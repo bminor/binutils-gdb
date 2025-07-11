@@ -19,7 +19,6 @@
 
 #include "extract-store-integer.h"
 #include "inferior.h"
-#include "gdbcore.h"
 #include "solib.h"
 #include "objfiles.h"
 #include "symtab.h"

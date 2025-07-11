@@ -18,7 +18,6 @@
 
 
 #include "extract-store-integer.h"
-#include "gdbcore.h"
 #include "solib.h"
 #include "frv-tdep.h"
 #include "objfiles.h"
