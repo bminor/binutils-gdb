@@ -520,7 +520,7 @@ flip_sframe (char *frame_buf, size_t buf_size, uint32_t to_foreign)
 	  fre_offset = fdep->sfde_func_start_fre_off;
 	}
 
-      fp = frame_buf + sframe_get_hdr_size (ihp) + ihp->sfh_freoff;
+      fp = frame_buf + hdrsz + ihp->sfh_freoff;
       fp += fre_offset;
       for (; j < prev_frep_index + num_fres; j++)
 	{
@@ -535,8 +535,12 @@ flip_sframe (char *frame_buf, size_t buf_size, uint32_t to_foreign)
       prev_frep_index = j;
     }
   /* All FDEs and FREs must have been endian flipped by now.  */
-  if ((j != ihp->sfh_num_fres) || (bytes_flipped != (buf_size - hdrsz)))
+  if ((j != ihp->sfh_num_fres) || (bytes_flipped > (buf_size - hdrsz)))
     goto bad;
+  /* Optional trailing section padding.  */
+  for (fp = frame_buf + hdrsz + bytes_flipped; fp < frame_buf + buf_size; fp++)
+    if (*fp != '\0')
+      goto bad;
 
   /* Success.  */
   return 0;
