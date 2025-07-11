@@ -1541,7 +1541,24 @@ extern const aarch64_opcode aarch64_opcode_table[];
 
 /* For LSFE instructions with size[30:31] field.  */
 #define F_LSFE_SZ (1ULL << 41)
-/* Next bit is 42.  */
+
+/* When parsing immediate values, register names should not be misinterpreted
+   as symbols.  However, for backwards compatibility we need to permit some
+   newer register names within older instructions.  These flags specify which
+   register names are invalid immediate value, and are required for all
+   instructions with immediate operands (and are otherwise ignored).  */
+#define F_INVALID_IMM_SYMS (3ULL << 42)
+
+/* Any GP or SIMD register except WSP/SP.  */
+#define F_INVALID_IMM_SYMS_1 (1ULL << 42)
+
+/* As above, plus WSP/SP, and Z and P registers.  */
+#define F_INVALID_IMM_SYMS_2 (2ULL << 42)
+
+/* As above, plus PN registers.  */
+#define F_INVALID_IMM_SYMS_3 (3ULL << 42)
+
+/* Next bit is 44.  */
 
 /* Instruction constraints.  */
 /* This instruction has a predication constraint on the instruction at PC+4.  */

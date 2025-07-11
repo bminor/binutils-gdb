@@ -5094,12 +5094,14 @@ parse_sys_ins_reg (char **str, htab_t sys_ins_regs, bool sysreg128_p)
   } while (0)
 
 #define po_imm_nc_or_fail() do {				\
-    if (! parse_constant_immediate (&str, &val, imm_reg_type))	\
+    aarch64_reg_type invalid_types = imm_invalid_reg_types (opcode->flags); \
+    if (! parse_constant_immediate (&str, &val, invalid_types))	\
       goto failure;						\
   } while (0)
 
 #define po_imm_or_fail(min, max) do {				\
-    if (! parse_constant_immediate (&str, &val, imm_reg_type))	\
+    aarch64_reg_type invalid_types = imm_invalid_reg_types (opcode->flags); \
+    if (! parse_constant_immediate (&str, &val, invalid_types))	\
       goto failure;						\
     if (val < min || val > max)					\
       {								\
@@ -5110,8 +5112,9 @@ parse_sys_ins_reg (char **str, htab_t sys_ins_regs, bool sysreg128_p)
   } while (0)
 
 #define po_enum_or_fail(array) do {				\
+    aarch64_reg_type invalid_types = imm_invalid_reg_types (opcode->flags); \
     if (!parse_enum_string (&str, &val, array,			\
-			    ARRAY_SIZE (array), imm_reg_type))	\
+			    ARRAY_SIZE (array), invalid_types))	\
       goto failure;						\
   } while (0)
 
@@ -6657,6 +6660,28 @@ reg_list_valid_p (uint32_t reginfo, struct aarch64_reglist *list,
   return true;
 }
 
+static aarch64_reg_type
+imm_invalid_reg_types (uint64_t flags)
+{
+  switch (flags & F_INVALID_IMM_SYMS)
+    {
+    case F_INVALID_IMM_SYMS_1:
+      return REG_TYPE_R_ZR_BHSDQ_V;
+
+    case F_INVALID_IMM_SYMS_2:
+      return REG_TYPE_R_ZR_SP_BHSDQ_VZP;
+
+    case F_INVALID_IMM_SYMS_3:
+      return REG_TYPE_R_ZR_SP_BHSDQ_VZP_PN;
+
+    default:
+      /* All instructions with immediate operands require an explicit flag -
+	 this ensures that the flags will not be forgotten when adding new
+	 instructions.  */
+      gas_assert (0);
+    }
+}
+
 /* Generic instruction operand parser.	This does no encoding and no
    semantic validation; it merely squirrels values away in the inst
    structure.  Returns TRUE or FALSE depending on whether the
@@ -6669,18 +6694,9 @@ parse_operands (char *str, const aarch64_opcode *opcode)
   char *backtrack_pos = 0;
   const enum aarch64_opnd *operands = opcode->operands;
   const uint64_t flags = opcode->flags;
-  aarch64_reg_type imm_reg_type;
 
   clear_error ();
   skip_whitespace (str);
-
-  if (AARCH64_CPU_HAS_FEATURE (*opcode->avariant, SME2))
-    imm_reg_type = REG_TYPE_R_ZR_SP_BHSDQ_VZP_PN;
-  else if (AARCH64_CPU_HAS_FEATURE (*opcode->avariant, SVE)
-	   || AARCH64_CPU_HAS_FEATURE (*opcode->avariant, SVE2))
-    imm_reg_type = REG_TYPE_R_ZR_SP_BHSDQ_VZP;
-  else
-    imm_reg_type = REG_TYPE_R_ZR_BHSDQ_V;
 
   for (i = 0; operands[i] != AARCH64_OPND_NIL; i++)
     {
@@ -7237,13 +7253,15 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  {
 	    int qfloat;
 	    bool res1 = false, res2 = false;
+	    aarch64_reg_type invalid_types
+	      = imm_invalid_reg_types (opcode->flags);
 	    /* N.B. -0.0 will be rejected; although -0.0 shouldn't be rejected,
 	       it is probably not worth the effort to support it.  */
 	    if (!(res1 = parse_aarch64_imm_float (&str, &qfloat, false,
-						  imm_reg_type))
+						  invalid_types))
 		&& (error_p ()
 		    || !(res2 = parse_constant_immediate (&str, &val,
-							  imm_reg_type))))
+							  invalid_types))))
 	      goto failure;
 	    if ((res1 && qfloat == 0) || (res2 && val == 0))
 	      {
@@ -7277,7 +7295,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
 	case AARCH64_OPND_SIMD_IMM:
 	case AARCH64_OPND_SIMD_IMM_SFT:
-	  if (! parse_big_immediate (&str, &val, imm_reg_type))
+	  if (! parse_big_immediate (&str, &val,
+				     imm_invalid_reg_types (opcode->flags)))
 	    goto failure;
 	  assign_imm_if_const_or_fixup_later (&inst.reloc, info,
 					      /* addr_off_p */ 0,
@@ -7305,11 +7324,13 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SIMD_FPIMM:
 	case AARCH64_OPND_SVE_FPIMM8:
 	  {
+	    aarch64_reg_type invalid_types
+	      = imm_invalid_reg_types (opcode->flags);
 	    int qfloat;
 	    bool dp_p;
 
 	    dp_p = double_precision_operand_p (&inst.base.operands[0]);
-	    if (!parse_aarch64_imm_float (&str, &qfloat, dp_p, imm_reg_type)
+	    if (!parse_aarch64_imm_float (&str, &qfloat, dp_p, invalid_types)
 		|| !aarch64_imm_float_p (qfloat))
 	      {
 		if (!error_p ())
@@ -7326,11 +7347,13 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_I1_HALF_TWO:
 	case AARCH64_OPND_SVE_I1_ZERO_ONE:
 	  {
+	    aarch64_reg_type invalid_types
+	      = imm_invalid_reg_types (opcode->flags);
 	    int qfloat;
 	    bool dp_p;
 
 	    dp_p = double_precision_operand_p (&inst.base.operands[0]);
-	    if (!parse_aarch64_imm_float (&str, &qfloat, dp_p, imm_reg_type))
+	    if (!parse_aarch64_imm_float (&str, &qfloat, dp_p, invalid_types))
 	      {
 		if (!error_p ())
 		  set_fatal_syntax_error (_("invalid floating-point"
@@ -7419,13 +7442,17 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
 	case AARCH64_OPND_EXCEPTION:
 	case AARCH64_OPND_UNDEFINED:
-	  po_misc_or_fail (parse_immediate_expression (&str, &inst.reloc.exp,
-						       imm_reg_type));
-	  assign_imm_if_const_or_fixup_later (&inst.reloc, info,
-					      /* addr_off_p */ 0,
-					      /* need_libopcodes_p */ 0,
-					      /* skip_p */ 1);
-	  break;
+	  {
+	    aarch64_reg_type invalid_types
+	      = imm_invalid_reg_types (opcode->flags);
+	    po_misc_or_fail (parse_immediate_expression (&str, &inst.reloc.exp,
+							 invalid_types));
+	    assign_imm_if_const_or_fixup_later (&inst.reloc, info,
+						/* addr_off_p */ 0,
+						/* need_libopcodes_p */ 0,
+						/* skip_p */ 1);
+	    break;
+	  }
 
 	case AARCH64_OPND_NZCV:
 	  {
@@ -8094,7 +8121,9 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    {
 	      /* DSB nXS barrier variant accept 5-bit unsigned immediate, with
 	         possible values 16, 20, 24 or 28 , encoded as val<3:2>.  */
-	      if (! parse_constant_immediate (&str, &val, imm_reg_type))
+	      aarch64_reg_type invalid_types
+		= imm_invalid_reg_types (opcode->flags);
+	      if (! parse_constant_immediate (&str, &val, invalid_types))
 	        goto failure;
 	      if (!(val == 16 || val == 20 || val == 24 || val == 28))
 	        {
