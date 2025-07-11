@@ -157,10 +157,12 @@ SFRAME_CFA_FIXED_RA_INVALID).  Used on s390x as padding offset to represent
 FP without RA saved.
   @item SFRAME_S390X_CFA_OFFSET_ADJUSTMENT: CFA offset (from CFA base register)
 adjustment value.  Used to enable use of 8-bit SFrame offsets on s390x.
+  @item SFRAME_S390X_CFA_OFFSET_ALIGNMENT_FACTOR: CFA offset alignment factor.
+Used to scale down the CFA offset to improve the use of 8-bit SFrame offsets.
   @item SFRAME_V2_S390X_CFA_OFFSET_ENCODE: Encode CFA offset (i.e., apply
-CFA offset adjustment).
-  @item SFRAME_V2_S390X_CFA_OFFSET_DECODE: Decode CFA offset (i.e., revert
-CFA offset adjustment).
+CFA offset adjustment and then scale down by CFA offset alignment factor).
+  @item SFRAME_V2_S390X_CFA_OFFSET_DECODE: Decode CFA offset (i.e., scale up
+by CFA offset alignment factor and then revert CFA offset adjustment).
  @end itemize
 @end itemize
 
@@ -892,14 +894,17 @@ in any stack frame.
 
 Irrespective of the ABI, the first stack offset is always used to locate the
 CFA.  On s390x the value of the offset is stored adjusted by the s390x-specific
-@code{SFRAME_S390X_CFA_OFFSET_ADJUSTMENT} to enable the use of signed 8-bit
-offsets on s390x.
+@code{SFRAME_S390X_CFA_OFFSET_ADJUSTMENT} and scaled down by the s390x-specific
+@code{SFRAME_S390X_CFA_OFFSET_ALIGNMENT_FACTOR}, to enable and improve the use
+of signed 8-bit offsets on s390x.
 s390x-specific helpers @code{SFRAME_V2_S390X_CFA_OFFSET_ENCODE} and
-@code{SFRAME_V2_S390X_CFA_OFFSET_DECODE} are provided to perform and undo
-the adjustment.  The CFA offset can therefore be interpreted as:
-CFA = @code{BASE_REG} + @code{SFRAME_V2_S390X_CFA_OFFSET_DECODE(offset1)}
+@code{SFRAME_V2_S390X_CFA_OFFSET_DECODE} are provided to perform or undo
+the adjustment and scaling.  The CFA offset can therefore be interpreted as:
+CFA = @code{BASE_REG} + offset1 - @code{SFRAME_S390X_CFA_OFFSET_ADJUSTMENT}
 or
-CFA = @code{BASE_REG} + offset1 - @code{SFRAME_S390X_CFA_OFFSET_ADJUSTMENT}.
+CFA = @code{BASE_REG}
+    + (offset1 * @code{SFRAME_S390X_CFA_OFFSET_ALIGNMENT_FACTOR})
+    - @code{SFRAME_S390X_CFA_OFFSET_ADJUSTMENT}.
 The identification of the @code{BASE_REG} is done by using the
 @code{fre_cfa_base_reg_id} field in the SFrame FRE info word.
 

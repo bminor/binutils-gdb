@@ -377,12 +377,17 @@ typedef struct sframe_frame_row_entry_addr4
   (1ULL << ((SFRAME_FRE_TYPE_ADDR4 * 2) * 8))
 
 /* On s390x, the CFA offset from CFA base register is by definition a minimum
-   of 160.  Store it adjusted by -160 to enable use of 8-bit SFrame offsets.  */
+   of 160.  Store it adjusted by -160 to enable use of 8-bit SFrame offsets.
+   Additionally scale by an alignment factor of 8, as the SP and thus CFA
+   offset on s390x is always 8-byte aligned.  */
 #define SFRAME_S390X_CFA_OFFSET_ADJUSTMENT		SFRAME_S390X_SP_VAL_OFFSET
+#define SFRAME_S390X_CFA_OFFSET_ALIGNMENT_FACTOR	8
 #define SFRAME_V2_S390X_CFA_OFFSET_ENCODE(offset) \
-  ((offset) + SFRAME_S390X_CFA_OFFSET_ADJUSTMENT)
+  (((offset) + SFRAME_S390X_CFA_OFFSET_ADJUSTMENT) \
+   / SFRAME_S390X_CFA_OFFSET_ALIGNMENT_FACTOR)
 #define SFRAME_V2_S390X_CFA_OFFSET_DECODE(offset) \
-  ((offset) - SFRAME_S390X_CFA_OFFSET_ADJUSTMENT)
+  (((offset) * SFRAME_S390X_CFA_OFFSET_ALIGNMENT_FACTOR) \
+   - SFRAME_S390X_CFA_OFFSET_ADJUSTMENT)
 
 /* On s390x, the CFA is defined as SP at call site + 160.  Therefore the
    SP value offset from CFA is -160.  */
