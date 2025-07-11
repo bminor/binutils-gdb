@@ -135,18 +135,15 @@ set s390xtests {
      "pr32969_64-2"}
 }
 
-if [istarget "s390-*-*"] {
+if { [istarget "s390-*-*"] || [istarget "s390x-*-*"] } {
     run_ld_link_tests $s390tests
+
+    run_dump_test "pr26918-1"
+    run_dump_test "reloccheck-1"
+    run_dump_test "reloctlsle-1"
+
 }
 
 if [istarget "s390x-*-*"] {
-    run_ld_link_tests $s390tests
     run_ld_link_tests $s390xtests
-}
-
-set test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
-foreach t $test_list {
-    # We need to strip the ".d", but can leave the dirname.
-    verbose [file rootname $t]
-    run_dump_test [file rootname $t]
 }
