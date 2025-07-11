@@ -65,7 +65,7 @@ protected:
 
   bool low_stopped_by_watchpoint () override;
 
-  CORE_ADDR low_stopped_data_address () override;
+  std::vector<CORE_ADDR> low_stopped_data_addresses () override;
 
   arch_process_info *low_new_process () override;
 
@@ -555,10 +555,10 @@ loongarch_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
 }
 
 
-/* Implementation of linux target ops method "low_stopped_data_address".  */
+/* Implementation of linux target ops method "low_stopped_data_addresses".  */
 
-CORE_ADDR
-loongarch_target::low_stopped_data_address ()
+std::vector<CORE_ADDR>
+loongarch_target::low_stopped_data_addresses ()
 {
   siginfo_t siginfo;
   struct loongarch_debug_reg_state *state;
@@ -566,20 +566,20 @@ loongarch_target::low_stopped_data_address ()
 
   /* Get the siginfo.  */
   if (ptrace (PTRACE_GETSIGINFO, pid, NULL, &siginfo) != 0)
-    return (CORE_ADDR) 0;
+    return {};
 
   /* Need to be a hardware breakpoint/watchpoint trap.  */
   if (siginfo.si_signo != SIGTRAP
       || (siginfo.si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
-    return (CORE_ADDR) 0;
+    return {};
 
   /* Check if the address matches any watched address.  */
   state = loongarch_get_debug_reg_state (current_thread->id.pid ());
   CORE_ADDR result;
   if (loongarch_stopped_data_address (state, (CORE_ADDR) siginfo.si_addr, &result))
-    return result;
+    return { result };
 
-  return (CORE_ADDR) 0;
+  return {};
 }
 
 /* Implementation of linux target ops method "low_stopped_by_watchpoint".  */
@@ -587,7 +587,7 @@ loongarch_target::low_stopped_data_address ()
 bool
 loongarch_target::low_stopped_by_watchpoint ()
 {
-  return (low_stopped_data_address () != 0);
+  return !low_stopped_data_addresses ().empty ();
 }
 
 /* Implementation of linux target ops method "low_new_process".  */

@@ -187,6 +187,10 @@ target_debug_print_std_vector_mem_region (const std::vector<mem_region> &vec)
 { return host_address_to_string (vec.data ()); }
 
 static std::string
+target_debug_print_std_vector_CORE_ADDR (const std::vector<CORE_ADDR> &vec)
+{ return host_address_to_string (vec.data ()); }
+
+static std::string
 target_debug_print_std_vector_static_tracepoint_marker
   (const std::vector<static_tracepoint_marker> &vec)
 { return host_address_to_string (vec.data ()); }

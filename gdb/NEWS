@@ -231,6 +231,11 @@ info linker-namespaces [[N]]
   Print information about the given linker namespace (identified as N),
   or about all the namespaces if no argument is given.
 
+set remote multiple-watchpoint-addresses-packet
+show remote multiple-watchpoint-addresses-packet
+  Set/show the support for receiving multiple watchpoint addresses in
+  the 'T' stop reply packet.
+
 * Changed commands
 
 info sharedlibrary
@@ -354,6 +359,20 @@ vFile:stat
   Previously, gdbserver incorrectly implemented this packet using
   lstat rather than stat.  This has now been corrected.  The
   documentation has also been clarified.
+
+T
+  The signal stop packet can now include multiple 'watch', 'rwatch',
+  and 'awatch' stop reason entries.  GDB will select between all of
+  the possible watchpoint addresses that are returned when presenting
+  the stop to the user.
+
+multi-wp-addr in qSupported
+  The qSupported packet allows GDB to inform the stub it supports
+  receiving multiple watchpoint stop reasons in a single 'T' stop
+  reply packet.  This improves support for targets with ambiguous
+  hardware watchpoint address reporting (e.g. AArch64).  GDB will
+  always accept multiple watchpoint addresses regardless of whether
+  the stub claims to support this feature or not.
 
 * MI changes
 

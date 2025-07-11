@@ -218,9 +218,9 @@ public:
      otherwise.  */
   virtual bool stopped_by_watchpoint ();
 
-  /* Returns the address associated with the watchpoint that hit, if any;
-     returns 0 otherwise.  */
-  virtual CORE_ADDR stopped_data_address ();
+  /* Returns the list of addresses associated with the watchpoint(s)
+     that were hit, if any; returns an empty vector otherwise.  */
+  virtual std::vector<CORE_ADDR> stopped_data_addresses ();
 
   /* Return true if the read_offsets target op is supported.  */
   virtual bool supports_read_offsets ();

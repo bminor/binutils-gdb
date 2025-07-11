@@ -1,0 +1,182 @@
+# Copyright 2025 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# The inferior has two adjacent variables.  We add a 'watch' on one
+# field, and an 'rwatch' on the other.  Running the inferior writes to
+# both fields.  Check GDB reports the expected 'watch' watchpoint.
+#
+# Multiple inferiors are compiled, using a variety of types for the
+# two fields.
+
+require allow_hw_watchpoint_multi_tests
+
+standard_testfile
+
+# When printing a value, for some variable types, GDB will add a
+# suffix containing an alternative representation of the value.  For
+# example, characters will be printed as decimal, and then as the
+# character.
+#
+# Return a regexp to match the suffix for a variable of VAR_TYPE.
+# This doesn't match the specific value contents, it will match all
+# possible suffix values for something of VAR_TYPE.
+proc get_value_suffix { var_type } {
+    if { $var_type eq "char" } {
+	set suffix " '\[^'\]+'"
+    } else {
+	set suffix ""
+    }
+
+    return $suffix
+}
+
+# Start FILENAME, then set a watch and rwatch watchpoint on WATCH_VAR
+# and RWATCH_VAR respectively.  Continue the inferior and expect to
+# see GDB stop due to WATCH_VAR being written too.
+proc run_write_test { filename var_type watch_var rwatch_var } {
+    clean_restart $filename
+
+    if { ![runto_main] } {
+	return
+    }
+
+    delete_breakpoints
+
+    gdb_test_no_output "set breakpoint always-inserted on"
+
+    gdb_test "watch obj.$watch_var" \
+	"Hardware watchpoint $::decimal: obj.$watch_var"
+    set wp_num [get_integer_valueof "\$bpnum" "*UNKNOWN*"]
+    gdb_test "rwatch obj.$rwatch_var" \
+	"Hardware read watchpoint $::decimal: obj.$rwatch_var"
+
+    if { $watch_var eq "a" } {
+	set new_val 1
+    } else {
+	set new_val 2
+    }
+
+    set suffix [get_value_suffix $var_type]
+
+    gdb_test "continue" \
+	[multi_line \
+	     "Hardware watchpoint $wp_num: obj.$watch_var" \
+	     "" \
+	     "Old value = 0${suffix}" \
+	     "New value = ${new_val}${suffix}" \
+	     ".*"]
+
+}
+
+# Start FILENAME, continue until the call to the `reader` function in
+# the inferior.  Then create an 'rwatch' watchpoint on RWATCH var,
+# which will be either 'a' or 'b'.  Next create 'watch' watchpoints on
+# both the 'a' and 'b' variables, watching for writes.
+#
+# Continue the inferior, both 'a' and 'b' are read, and GDB should stop
+# and let us know that we stopped at the 'rwatch' watchpoint.
+#
+# On some architectures, for some variable sizes, the hardware cannot
+# figure out which watchpoint triggered as the hardware might have
+# imprecise reporting of watchpoint event addresses.  In this case the
+# backend code will report the address of all possible watchpoints to
+# core GDB.  Core GDB will test the 'watch' watchpoints to see if the
+# value has changed, and if none have, GDB will report the first
+# 'rwatch' watchpoint, assuming that this might be the watchpoint that
+# triggered the stop.
+proc run_read_test { filename var_type rwatch_var rwatch_first watch_vars } {
+    clean_restart $filename
+
+    if { ![runto_main] } {
+	return
+    }
+
+    gdb_breakpoint [gdb_get_line_number "Break for read test"]
+    gdb_continue_to_breakpoint "prepare for read test"
+    delete_breakpoints
+
+    gdb_test_no_output "set breakpoint always-inserted on"
+
+    if { $rwatch_first } {
+	gdb_test "rwatch obj.${rwatch_var}" \
+	    "Hardware read watchpoint $::decimal: obj.$rwatch_var"
+	set wp_num [get_integer_valueof "\$bpnum" "*UNKNOWN*"]
+    }
+
+    foreach v $watch_vars {
+	gdb_test "watch obj.$v" \
+	    "Hardware watchpoint $::decimal: obj.$v"
+    }
+
+    if { !$rwatch_first } {
+	gdb_test "rwatch obj.${rwatch_var}" \
+	    "Hardware read watchpoint $::decimal: obj.$rwatch_var"
+	set wp_num [get_integer_valueof "\$bpnum" "*UNKNOWN*"]
+    }
+
+    if { $rwatch_var eq "a" } {
+	set val 1
+    } else {
+	set val 2
+    }
+
+    set suffix [get_value_suffix $var_type]
+
+    gdb_test "continue" \
+	[multi_line \
+	     "Hardware read watchpoint ${wp_num}: obj.$rwatch_var" \
+	     "" \
+	     "Value = ${val}${suffix}" \
+	     ".*"]
+}
+
+# Build a binary using VAR_TYPE as the test variable type.  Then call
+# run_test twice.
+proc build_and_run_test { var_type } {
+    set filename ${::testfile}-${var_type}
+
+    set flags [list debug additional_flags=-DVAR_TYPE=${var_type}]
+    if {[build_executable "failed to build" $filename $::srcfile $flags]} {
+	return
+    }
+
+    set test_list [list \
+		       { a {a b} } \
+		       { b {a b} } \
+		       { a {b} } \
+		       { b {a} }]
+    foreach_with_prefix test $test_list {
+	set rwatch_var [lindex $test 0]
+	set watch_vars [lindex $test 1]
+
+	foreach_with_prefix rwatch_first { true false } {
+	    run_read_test $filename $var_type $rwatch_var $rwatch_first $watch_vars
+	}
+    }
+
+    foreach test { {a b} {b a} } {
+	set watch_var [lindex $test 0]
+	set rwatch_var [lindex $test 1]
+
+	with_test_prefix "watch: ${watch_var}, rwatch: ${rwatch_var}" {
+	    run_write_test $filename $var_type $watch_var $rwatch_var
+	}
+    }
+}
+
+# Run the test with a series of different types.
+foreach_with_prefix var_type { type_ll int short char float double } {
+    build_and_run_test $var_type
+}

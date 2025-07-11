@@ -655,7 +655,7 @@ x86_dr_stopped_data_address (struct x86_debug_reg_state *state,
 
       /* This second condition makes sure DRi is set up for a data
 	 watchpoint, not a hardware breakpoint.  The reason is that
-	 GDB doesn't call the target_stopped_data_address method
+	 GDB doesn't call the target_stopped_data_addresses method
 	 except for data watchpoints.  In other words, I'm being
 	 paranoiac.  */
       if (X86_DR_GET_RW_LEN (control, i) != 0)

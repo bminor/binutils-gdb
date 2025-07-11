@@ -56,7 +56,7 @@ struct dummy_target : public target_ops
   int remove_mask_watchpoint (CORE_ADDR arg0, CORE_ADDR arg1, enum target_hw_bp_type arg2) override;
   bool stopped_by_watchpoint () override;
   bool have_steppable_watchpoint () override;
-  bool stopped_data_address (CORE_ADDR *arg0) override;
+  std::vector<CORE_ADDR> stopped_data_addresses () override;
   bool watchpoint_addr_within_range (CORE_ADDR arg0, CORE_ADDR arg1, int arg2) override;
   int region_ok_for_hw_watchpoint (CORE_ADDR arg0, int arg1) override;
   bool can_accel_watchpoint_condition (CORE_ADDR arg0, int arg1, int arg2, struct expression *arg3) override;
@@ -237,7 +237,7 @@ struct debug_target : public target_ops
   int remove_mask_watchpoint (CORE_ADDR arg0, CORE_ADDR arg1, enum target_hw_bp_type arg2) override;
   bool stopped_by_watchpoint () override;
   bool have_steppable_watchpoint () override;
-  bool stopped_data_address (CORE_ADDR *arg0) override;
+  std::vector<CORE_ADDR> stopped_data_addresses () override;
   bool watchpoint_addr_within_range (CORE_ADDR arg0, CORE_ADDR arg1, int arg2) override;
   int region_ok_for_hw_watchpoint (CORE_ADDR arg0, int arg1) override;
   bool can_accel_watchpoint_condition (CORE_ADDR arg0, int arg1, int arg2, struct expression *arg3) override;
@@ -1020,28 +1020,27 @@ debug_target::have_steppable_watchpoint ()
   return result;
 }
 
-bool
-target_ops::stopped_data_address (CORE_ADDR *arg0)
+std::vector<CORE_ADDR>
+target_ops::stopped_data_addresses ()
 {
-  return this->beneath ()->stopped_data_address (arg0);
+  return this->beneath ()->stopped_data_addresses ();
 }
 
-bool
-dummy_target::stopped_data_address (CORE_ADDR *arg0)
+std::vector<CORE_ADDR>
+dummy_target::stopped_data_addresses ()
 {
-  return false;
+  return std::vector<CORE_ADDR> ();
 }
 
-bool
-debug_target::stopped_data_address (CORE_ADDR *arg0)
+std::vector<CORE_ADDR>
+debug_target::stopped_data_addresses ()
 {
-  target_debug_printf_nofunc ("-> %s->stopped_data_address (...)", this->beneath ()->shortname ());
-  bool result
-    = this->beneath ()->stopped_data_address (arg0);
-  target_debug_printf_nofunc ("<- %s->stopped_data_address (%s) = %s",
+  target_debug_printf_nofunc ("-> %s->stopped_data_addresses (...)", this->beneath ()->shortname ());
+  std::vector<CORE_ADDR> result
+    = this->beneath ()->stopped_data_addresses ();
+  target_debug_printf_nofunc ("<- %s->stopped_data_addresses () = %s",
 	      this->beneath ()->shortname (),
-	      target_debug_print_CORE_ADDR_p (arg0).c_str (),
-	      target_debug_print_bool (result).c_str ());
+	      target_debug_print_std_vector_CORE_ADDR (result).c_str ());
   return result;
 }
 

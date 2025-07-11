@@ -1211,21 +1211,42 @@ prepare_resume_reply (char *buf, ptid_t ptid, const target_waitstatus &status)
 
 	if (the_target->stopped_by_watchpoint ())
 	  {
-	    CORE_ADDR addr;
-	    int i;
+	    std::vector<CORE_ADDR> addr_vec
+	      = the_target->stopped_data_addresses ();
 
-	    memcpy (buf, "watch:", 6);
-	    buf += 6;
+	    /* If the debugger has not said that it can handle multiple
+	       watchpoint addresses then discard everything except the
+	       first address.
 
-	    addr = the_target->stopped_data_address ();
+	       Choosing the first address is pretty arbitrary, and might
+	       not be the best choice.  For example, if gdbserver tracked
+	       the memory contents for write watchpoints then we could
+	       check them all now to see which (if any) have changed.
 
-	    /* Convert each byte of the address into two hexadecimal
-	       chars.  Note that we take sizeof (void *) instead of
-	       sizeof (addr); this is to avoid sending a 64-bit
-	       address to a 32-bit GDB.  */
-	    for (i = sizeof (void *) * 2; i > 0; i--)
-	      *buf++ = tohex ((addr >> (i - 1) * 4) & 0xf);
-	    *buf++ = ';';
+	       For read watchpoints there's not much we can do.  If the
+	       debugger cannot accept multiple addresses, then we'd just
+	       have to pick one (at random) and send that.
+
+	       For now though, our preference is to pass all the addresses
+	       to the debugger (when supported), and rely on it to make a
+	       smart choice.  */
+	    if (!cs.multiple_wp_addr_feature
+		&& addr_vec.size () > 1)
+	      addr_vec.erase (addr_vec.begin () + 1, addr_vec.end ());
+
+	    for (const CORE_ADDR addr : addr_vec)
+	      {
+		memcpy (buf, "watch:", 6);
+		buf += 6;
+
+		/* Convert each byte of the address into two hexadecimal
+		   chars.  Note that we take sizeof (void *) instead of
+		   sizeof (addr); this is to avoid sending a 64-bit
+		   address to a 32-bit GDB.  */
+		for (int i = sizeof (void *) * 2; i > 0; i--)
+		  *buf++ = tohex ((addr >> (i - 1) * 4) & 0xf);
+		*buf++ = ';';
+	      }
 	  }
 	else if (cs.swbreak_feature && target_stopped_by_sw_breakpoint ())
 	  {

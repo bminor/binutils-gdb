@@ -202,6 +202,11 @@ struct client_state
      arguments as a single string.  When false the debugger will attempt
      to split the inferior arguments before sending them.  */
   bool single_inferior_argument = false;
+
+  /* When true, GDB supports receiving multiple watchpoint addresses within
+     a 'T' stop reply packet.  When false, GDB only expects (at most) a
+     single watchpoint address, and gdbserver must select one.  */
+  bool multiple_wp_addr_feature = false;
 };
 
 client_state &get_client_state ();

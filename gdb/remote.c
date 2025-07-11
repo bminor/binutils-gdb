@@ -411,6 +411,14 @@ enum {
   /* Support the qExecAndArgs packet.  */
   PACKET_qExecAndArgs,
 
+  /* Support for receiving multiple watchpoint addresses in a stop reply
+     packet.  This is useful for targets that have imprecise hardware
+     watchpoint address reporting (e.g. AArch64),and gdbserver might not be
+     able to figure out which watchpoint triggered.  All possible
+     watchpoint addresses will then be passed back to GDB, and GDB can pick
+     the most likely watchpoint to show to the user.  */
+  PACKET_multi_wp_addr,
+
   PACKET_MAX
 };
 
@@ -986,7 +994,7 @@ public:
 
   bool stopped_by_watchpoint () override;
 
-  bool stopped_data_address (CORE_ADDR *) override;
+  std::vector<CORE_ADDR> stopped_data_addresses () override;
 
   bool watchpoint_addr_within_range (CORE_ADDR, CORE_ADDR, int) override;
 
@@ -1623,7 +1631,7 @@ struct stop_reply : public notif_event
 
   enum target_stop_reason stop_reason;
 
-  CORE_ADDR watch_data_address;
+  std::vector<CORE_ADDR> watch_data_addresses;
 
   int core;
 };
@@ -1838,9 +1846,12 @@ struct remote_thread_info : public private_thread_info
   /* Whether the target stopped for a breakpoint/watchpoint.  */
   enum target_stop_reason stop_reason = TARGET_STOPPED_BY_NO_REASON;
 
-  /* This is set to the data address of the access causing the target
-     to stop for a watchpoint.  */
-  CORE_ADDR watch_data_address = 0;
+  /* This is set to all the watchpoint addresses of the access causing the
+     target to stop for a watchpoint.  Some targets (e.g. AArch64) have
+     imprecise watchpoint address reporting, so multiple watchpoints could
+     account for a stop.  All possible watchpoint addresses are reported
+     back to GDB, and GDB must select between them.  */
+  std::vector<CORE_ADDR> watch_data_addresses;
 
   /* Get the thread's resume state.  */
   enum resume_state get_resume_state () const
@@ -6254,6 +6265,8 @@ static const struct protocol_feature remote_protocol_features[] = {
   { "binary-upload", PACKET_DISABLE, remote_supported_packet, PACKET_x },
   { "single-inf-arg", PACKET_DISABLE, remote_supported_packet,
     PACKET_vRun_single_argument },
+  { "multi-watchpoint-addr", PACKET_ENABLE, remote_supported_packet,
+    PACKET_multi_wp_addr },
 };
 
 static char *remote_support_xml;
@@ -6379,6 +6392,10 @@ remote_target::remote_query_supported ()
       if (m_features.packet_set_cmd_state (PACKET_accept_error_message)
 	  != AUTO_BOOLEAN_FALSE)
 	remote_query_supported_append (&q, "error-message+");
+
+      if (m_features.packet_set_cmd_state (PACKET_multi_wp_addr)
+	  != AUTO_BOOLEAN_FALSE)
+	remote_query_supported_append (&q, "multi-wp-addr+");
 
       q = "qSupported:" + q;
       putpkt (q.c_str ());
@@ -7295,7 +7312,7 @@ resume_clear_thread_private_info (struct thread_info *thread)
       remote_thread_info *priv = get_remote_thread_info (thread);
 
       priv->stop_reason = TARGET_STOPPED_BY_NO_REASON;
-      priv->watch_data_address = 0;
+      priv->watch_data_addresses.clear ();
     }
 }
 
@@ -7911,7 +7928,7 @@ remote_target::remote_stop_ns (ptid_t ptid)
 	    sr->ws.set_stopped (GDB_SIGNAL_0);
 	    sr->arch = tp.inf->arch ();
 	    sr->stop_reason = TARGET_STOPPED_BY_NO_REASON;
-	    sr->watch_data_address = 0;
+	    sr->watch_data_addresses.clear ();
 	    sr->core = 0;
 	    this->push_stop_reply (std::move (sr));
 
@@ -8497,7 +8514,7 @@ Packet: '%s'\n"),
 	    {
 	      event->stop_reason = TARGET_STOPPED_BY_WATCHPOINT;
 	      p = unpack_varlen_hex (++p1, &addr);
-	      event->watch_data_address = (CORE_ADDR) addr;
+	      event->watch_data_addresses.push_back ((CORE_ADDR) addr);
 	    }
 	  else if (strprefix (p, p1, "swbreak"))
 	    {
@@ -9010,7 +9027,7 @@ remote_target::process_stop_reply (stop_reply_up stop_reply,
       remote_thread_info *remote_thr = get_remote_thread_info (this, ptid);
       remote_thr->core = stop_reply->core;
       remote_thr->stop_reason = stop_reply->stop_reason;
-      remote_thr->watch_data_address = stop_reply->watch_data_address;
+      remote_thr->watch_data_addresses = stop_reply->watch_data_addresses;
 
       if (target_is_non_stop_p ())
 	{
@@ -11900,20 +11917,16 @@ remote_target::stopped_by_watchpoint ()
 	      == TARGET_STOPPED_BY_WATCHPOINT));
 }
 
-bool
-remote_target::stopped_data_address (CORE_ADDR *addr_p)
+std::vector<CORE_ADDR>
+remote_target::stopped_data_addresses ()
 {
   struct thread_info *thread = inferior_thread ();
 
   if (thread->priv != NULL
-      && (get_remote_thread_info (thread)->stop_reason
-	  == TARGET_STOPPED_BY_WATCHPOINT))
-    {
-      *addr_p = get_remote_thread_info (thread)->watch_data_address;
-      return true;
-    }
+      && (get_remote_thread_info (thread)->stop_reason == TARGET_STOPPED_BY_WATCHPOINT))
+      return get_remote_thread_info (thread)->watch_data_addresses;
 
-  return false;
+  return {};
 }
 
 
@@ -17089,6 +17102,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (PACKET_qExecAndArgs, "qExecAndArgs",
 			 "fetch-exec-and-args", 0);
+
+  add_packet_config_cmd (PACKET_multi_wp_addr,
+			 "multi-wp-addr", "multiple-watchpoint-addresses", 0);
 
   /* Assert that we've registered "set remote foo-packet" commands
      for all packet configs.  */

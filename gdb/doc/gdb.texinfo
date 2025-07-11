@@ -25012,6 +25012,10 @@ future connections is shown.  The available settings are:
 @tab @code{no resumed thread left stop reply}
 @tab Tracking thread lifetime.
 
+@item @code{multiple-watchpoint-addresses}
+@tab @code{multiple watchpoint stop reasons}
+@tab Allow multiple, ambiguous, watchpoint addresses in @samp{T} stop reply.
+
 @end multitable
 
 @cindex packet size, remote, configuring
@@ -44152,8 +44156,24 @@ The currently defined stop reasons are:
 @item watch
 @itemx rwatch
 @itemx awatch
-The packet indicates a watchpoint hit, and @var{r} is the data address, in
-hex.
+The packet indicates a watchpoint hit, and @var{r} is the data
+address, in hex.
+
+Some targets, for example AArch64, are unable to accurately report the
+address which triggered a watchpoint trap.  As a consequence, multiple
+watched addresses could explain a single watchpoint trap.
+
+If @value{GDBN} sent the @samp{multi-wp-addr} feature flag in its
+@samp{qSupported} packet (@pxref{multi-wp-addr feature}), then
+multiple instances of these stop reasons can appear in a single
+@samp{T} stop reply packet.  @value{GDBN} will select between the
+multiple reported watchpoint addresses when displaying the stop to the
+user.
+
+If the @samp{multi-wp-addr} was not sent by @value{GDBN}, then
+@value{GDBN} only expects one watchpoint related stop address in a
+single @samp{T} packet.  The server must select the most likely
+watchpoint address.
 
 @item syscall_entry
 @itemx syscall_return
@@ -45273,6 +45293,16 @@ inferior arguments as a single string within the @samp{vRun} packet.
 @value{GDBN} will not send the arguments as a single string unless the
 stub also reports that it supports this behaviour by including
 @samp{single-inf-arg+} in its @samp{qSupported} reply.
+
+@anchor{multi-wp-addr feature}
+@item multi-wp-addr
+This features indicates that @value{GDBN} supports receiving multiple
+watchpoint addresses in the @samp{T} stop reply packet (@pxref{Stop
+Reply Packets}).
+
+Use of this feature is controlled by the @code{set remote
+multiple-watchpoint-addresses-packet} command (@pxref{Remote
+Configuration, set remote multiple-watchpoint-addresses-packet}).
 @end table
 
 Stubs should ignore any unknown values for
@@ -45581,6 +45611,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{multi-wp-addr}
+@tab No
+@tab @samp{+}
+@tab No
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -45836,6 +45871,14 @@ The remote stub would like to receive the inferior arguments as a
 single string within the @samp{vRun} packet.  The stub should only
 send this feature if @value{GDBN} sent @samp{single-inf-arg+} in the
 @samp{qSupported} packet.
+
+@item multi-wp-addr
+The remote stub supports sending multiple watchpoint addresses within
+@samp{T} stop reply packet.  Stubs that don't support this feature
+don't need to tell @value{GDBN}.  Not supporting this feature just
+means sending back one watchpoint address instead of multiple, and
+@value{GDBN} has always supported receiving a single watchpoint
+address.
 @end table
 
 @item qSymbol::

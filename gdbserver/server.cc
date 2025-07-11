@@ -2746,6 +2746,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 		cs.error_message_supported = true;
 	      else if (feature == "single-inf-arg+")
 		cs.single_inferior_argument = true;
+	      else if (feature == "multi-wp-addr+")
+		cs.multiple_wp_addr_feature = true;
 	      else
 		{
 		  /* Move the unknown features all together.  */
@@ -4634,6 +4636,7 @@ captured_main (int argc, char *argv[])
       cs.vCont_supported = 0;
       cs.memory_tagging_feature = false;
       cs.error_message_supported = false;
+      cs.multiple_wp_addr_feature = false;
 
       remote_open (port);
 

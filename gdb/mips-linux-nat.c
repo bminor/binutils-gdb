@@ -60,7 +60,7 @@ public:
 
   bool stopped_by_watchpoint () override;
 
-  bool stopped_data_address (CORE_ADDR *) override;
+  std::vector<CORE_ADDR> stopped_data_addresses () override;
 
   int region_ok_for_hw_watchpoint (CORE_ADDR, int) override;
 
@@ -598,16 +598,17 @@ mips_linux_nat_target::stopped_by_watchpoint ()
   return false;
 }
 
-/* Target to_stopped_data_address implementation.  Set the address
-   where the watch triggered (if known).  Return 1 if the address was
-   known.  */
+/* Target stopped_data_addresses implementation.  Return a vector
+   containing the address(es) of the watchpoint(s) that triggered, if
+   known.  Return an empty vector if it is unknown which watchpoint(s)
+   triggered.  */
 
-bool
-mips_linux_nat_target::stopped_data_address (CORE_ADDR *paddr)
+std::vector<CORE_ADDR>
+mips_linux_nat_target::stopped_data_addresses ()
 {
   /* On mips we don't know the low order 3 bits of the data address,
-     so we must return false.  */
-  return false;
+     so we must return an empty vector.  */
+  return {};
 }
 
 /* Target to_region_ok_for_hw_watchpoint implementation.  Return 1 if

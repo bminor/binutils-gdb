@@ -144,7 +144,7 @@ public:
 
   bool stopped_by_watchpoint () override;
 
-  CORE_ADDR stopped_data_address () override;
+  std::vector<CORE_ADDR> stopped_data_addresses () override;
 
   bool supports_qxfer_siginfo () override;
 

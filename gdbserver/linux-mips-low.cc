@@ -62,7 +62,7 @@ protected:
 
   bool low_stopped_by_watchpoint () override;
 
-  CORE_ADDR low_stopped_data_address () override;
+  std::vector<CORE_ADDR> low_stopped_data_addresses () override;
 
   void low_collect_ptrace_register (regcache *regcache, int regno,
 				    char *buf) override;
@@ -658,10 +658,10 @@ mips_target::low_stopped_by_watchpoint ()
 }
 
 /* This is the implementation of linux target ops method
-   low_stopped_data_address.  */
+   low_stopped_data_addresses.  */
 
-CORE_ADDR
-mips_target::low_stopped_data_address ()
+std::vector<CORE_ADDR>
+mips_target::low_stopped_data_addresses ()
 {
   struct process_info *proc = current_process ();
   struct arch_process_info *priv = proc->priv->arch_private;
@@ -679,7 +679,7 @@ mips_target::low_stopped_data_address ()
 					&priv->watch_readback,
 					&priv->watch_readback_valid,
 					0))
-    return 0;
+    return {};
 
   num_valid = mips_linux_watch_get_num_valid (&priv->watch_readback);
 
@@ -711,12 +711,12 @@ mips_target::low_stopped_data_address ()
 	      }
 	    /* Check for overlap of even a single byte.  */
 	    if (last_byte >= t_low && addr <= t_low + t_hi)
-	      return addr;
+	      return { addr };
 	  }
       }
 
   /* Shouldn't happen.  */
-  return 0;
+  return {};
 }
 
 /* Fetch the thread-local storage pointer for libthread_db.  */

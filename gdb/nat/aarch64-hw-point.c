@@ -215,14 +215,14 @@ aarch64_point_is_aligned (ptid_t ptid, int is_watchpoint, CORE_ADDR addr,
 
    Another limitation is that because the watched region is enlarged,
    the watchpoint fault address discovered by
-   aarch64_stopped_data_address may be outside of the original watched
+   aarch64_stopped_data_addresses may be outside of the original watched
    region, especially when the triggering instruction is accessing a
    larger region.  When the fault address is not within any known
    range, watchpoints_triggered in gdb will get confused, as the
    higher-level watchpoint management is only aware of original
    watched regions, and will think that some unknown watchpoint has
    been triggered.  To prevent such a case,
-   aarch64_stopped_data_address implementations in gdb and gdbserver
+   aarch64_stopped_data_addresses implementations in gdb and gdbserver
    try to match the trapped address with a watched region, and return
    an address within the latter. */
 
@@ -648,63 +648,52 @@ aarch64_region_ok_for_watchpoint (CORE_ADDR addr, int len)
 
 /* See nat/aarch64-hw-point.h.  */
 
-bool
-aarch64_stopped_data_address (const struct aarch64_debug_reg_state *state,
-			      CORE_ADDR addr_trap, CORE_ADDR *addr_p)
+std::vector<CORE_ADDR>
+aarch64_stopped_data_addresses (const struct aarch64_debug_reg_state *state,
+				CORE_ADDR addr_trap)
 {
-  bool found = false;
-  for (int phase = 0; phase <= 1; ++phase)
-    for (int i = aarch64_num_wp_regs - 1; i >= 0; --i)
-      {
-	if (!(state->dr_ref_count_wp[i]
-	      && DR_CONTROL_ENABLED (state->dr_ctrl_wp[i])))
-	  {
-	    /* Watchpoint disabled.  */
-	    continue;
-	  }
+  /* List of all watchpoint addresses that could account for a watchpoint
+     trap triggered at ADDR_TRAP.  */
+  std::vector<CORE_ADDR> matching_addresses;
 
-	const enum target_hw_bp_type type
-	  = aarch64_watchpoint_type (state->dr_ctrl_wp[i]);
-	if (type == hw_execute)
-	  {
-	    /* Watchpoint disabled.  */
-	    continue;
-	  }
+  for (int i = aarch64_num_wp_regs - 1; i >= 0; --i)
+    {
+      if (!(state->dr_ref_count_wp[i]
+	    && DR_CONTROL_ENABLED (state->dr_ctrl_wp[i])))
+	{
+	  /* Watchpoint disabled.  */
+	  continue;
+	}
 
-	if (phase == 0)
-	  {
-	    /* Phase 0: No hw_write.  */
-	    if (type == hw_write)
-	      continue;
-	  }
-	else
-	  {
-	    /* Phase 1: Only hw_write.  */
-	    if (type != hw_write)
-	      continue;
-	  }
+      const enum target_hw_bp_type type
+	= aarch64_watchpoint_type (state->dr_ctrl_wp[i]);
+      if (type == hw_execute)
+	{
+	  /* Watchpoint disabled.  */
+	  continue;
+	}
 
-	const unsigned int offset
-	  = aarch64_watchpoint_offset (state->dr_ctrl_wp[i]);
-	const unsigned int len
-	  = aarch64_watchpoint_length (state->dr_ctrl_wp[i]);
-	const CORE_ADDR addr_watch = state->dr_addr_wp[i] + offset;
-	const CORE_ADDR addr_watch_aligned
-	  = align_down (state->dr_addr_wp[i], AARCH64_HWP_MAX_LEN_PER_REG);
-	const CORE_ADDR addr_orig = state->dr_addr_orig_wp[i];
+      const unsigned int offset
+	= aarch64_watchpoint_offset (state->dr_ctrl_wp[i]);
+      const unsigned int len
+	= aarch64_watchpoint_length (state->dr_ctrl_wp[i]);
+      const CORE_ADDR addr_watch = state->dr_addr_wp[i] + offset;
+      const CORE_ADDR addr_watch_aligned
+	= align_down (state->dr_addr_wp[i], AARCH64_HWP_MAX_LEN_PER_REG);
+      const CORE_ADDR addr_orig = state->dr_addr_orig_wp[i];
 
-	/* ADDR_TRAP reports the first address of the memory range
-	   accessed by the CPU, regardless of what was the memory
-	   range watched.  Thus, a large CPU access that straddles
-	   the ADDR_WATCH..ADDR_WATCH+LEN range may result in an
-	   ADDR_TRAP that is lower than the
-	   ADDR_WATCH..ADDR_WATCH+LEN range.  E.g.:
+      /* ADDR_TRAP reports the first address of the memory range
+	 accessed by the CPU, regardless of what was the memory
+	 range watched.  Thus, a large CPU access that straddles
+	 the ADDR_WATCH..ADDR_WATCH+LEN range may result in an
+	 ADDR_TRAP that is lower than the
+	 ADDR_WATCH..ADDR_WATCH+LEN range.  E.g.:
 
 	   addr: |   4	 |   5	 |   6	 |   7	 |   8	 |
 				 |---- range watched ----|
 		 |----------- range accessed ------------|
 
-	   In this case, ADDR_TRAP will be 4.
+	 In this case, ADDR_TRAP will be 4.
 
 	   The access size also can be larger than that of the watchpoint
 	   itself.  For instance, the access size of an stp instruction is 16.
@@ -714,47 +703,16 @@ aarch64_stopped_data_address (const struct aarch64_debug_reg_state *state,
 	const CORE_ADDR max_access_size = 16;
 	const CORE_ADDR addr_watch_base = addr_watch_aligned -
 	  (max_access_size - AARCH64_HWP_MAX_LEN_PER_REG);
-	if (!(addr_trap >= addr_watch_base
-	      && addr_trap < addr_watch + len))
-	  {
-	    /* Not a match.  */
-	    continue;
-	  }
 
-	/* To match a watchpoint known to GDB core, we must never
-	   report *ADDR_P outside of any ADDR_WATCH..ADDR_WATCH+LEN
-	   range.  ADDR_WATCH <= ADDR_TRAP < ADDR_ORIG is a false
-	   positive on kernels older than 4.10.  See PR
-	   external/20207.  */
-	if (addr_p != nullptr)
-	  *addr_p = addr_orig;
-
-	if (phase == 0)
-	  {
-	    /* Phase 0: Return first match.  */
-	    return true;
-	  }
-
-	/* Phase 1.  */
-	if (addr_p == nullptr)
-	  {
-	    /* First match, and we don't need to report an address.  No need
-	       to look for other matches.  */
-	    return true;
-	  }
-
-	if (!found)
-	  {
-	    /* First match, and we need to report an address.  Look for other
-	       matches.  */
-	    found = true;
-	    continue;
-	  }
-
-	/* More than one match, and we need to return an address.  No need to
-	   look for further matches.  */
-	return false;
+      if (!(addr_trap >= addr_watch_base
+	    && addr_trap < addr_watch + len))
+      {
+	/* Not a match.  */
+	continue;
       }
 
-  return found;
+      matching_addresses.push_back (addr_orig);
+    }
+
+  return matching_addresses;
 }
