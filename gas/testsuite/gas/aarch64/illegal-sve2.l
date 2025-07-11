@@ -50,27 +50,27 @@
 [^ :]+:[0-9]+: Error: expected a register at operand 1 -- `addp z32\.s,p0/m,z32\.s,z0\.s'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 4 -- `addp z0\.s,p0/m,z0\.s,z32\.s'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `addp z0\.s,p8/m,z0\.s,z0\.s'
-[^ :]+:[0-9]+: Warning: SVE instruction expected after `movprfx' -- `aesd z0\.b,z0\.b,z0\.b'
+[^ :]+:[0-9]+: Warning: SVE `movprfx' compatible instruction expected -- `aesd z0\.b,z0\.b,z0\.b'
 [^ :]+:[0-9]+: Error: operand 2 must be the same register as operand 1 -- `aesd z0\.b,z1\.b,z0\.b'
 [^ :]+:[0-9]+: Error: operand mismatch -- `aesd z0\.b,z0\.s,z0\.b'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	aesd z0\.b, z0\.b, z0\.b
 [^ :]+:[0-9]+: Error: expected a register or register list at operand 1 -- `aesd z32\.b,z0\.b,z0\.b'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `aesd z0\.b,z0\.b,z32\.b'
-[^ :]+:[0-9]+: Warning: SVE instruction expected after `movprfx' -- `aese z0\.b,z0\.b,z0\.b'
+[^ :]+:[0-9]+: Warning: SVE `movprfx' compatible instruction expected -- `aese z0\.b,z0\.b,z0\.b'
 [^ :]+:[0-9]+: Error: operand 2 must be the same register as operand 1 -- `aese z0\.b,z1\.b,z0\.b'
 [^ :]+:[0-9]+: Error: operand mismatch -- `aese z0\.b,z0\.s,z0\.b'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	aese z0\.b, z0\.b, z0\.b
 [^ :]+:[0-9]+: Error: expected a register or register list at operand 1 -- `aese z32\.b,z0\.b,z0\.b'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `aese z0\.b,z0\.b,z32\.b'
-[^ :]+:[0-9]+: Warning: SVE instruction expected after `movprfx' -- `aesimc z0\.b,z0\.b'
+[^ :]+:[0-9]+: Warning: SVE `movprfx' compatible instruction expected -- `aesimc z0\.b,z0\.b'
 [^ :]+:[0-9]+: Error: operand 2 must be the same register as operand 1 -- `aesimc z0\.b,z1\.b'
 [^ :]+:[0-9]+: Error: operand mismatch -- `aesimc z0\.b,z0\.s'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	aesimc z0\.b, z0\.b
 [^ :]+:[0-9]+: Error: expected a vector register at operand 1 -- `aesimc z32\.b,z0\.b'
-[^ :]+:[0-9]+: Warning: SVE instruction expected after `movprfx' -- `aesmc z0\.b,z0\.b'
+[^ :]+:[0-9]+: Warning: SVE `movprfx' compatible instruction expected -- `aesmc z0\.b,z0\.b'
 [^ :]+:[0-9]+: Error: operand 2 must be the same register as operand 1 -- `aesmc z0\.b,z1\.b'
 [^ :]+:[0-9]+: Error: operand mismatch -- `aesmc z0\.b,z0\.s'
 [^ :]+:[0-9]+: Info:    did you mean this\?

@@ -2789,12 +2789,7 @@
   QLF3(V_4S, V_8H, S_H),	\
 }
 
-/* Opcode table.
-
-  Any SVE or SVE2 feature must include AARCH64_FEATURE_{SVE|SVE2} in its
-  bitmask, even if this is implied by other selected feature bits.  This
-  allows verify_constraints to identify SVE instructions when selecting an
-  error message for MOVPRFX constraint violations.  */
+/* Opcode table.  */
 
 static const aarch64_feature_set aarch64_feature_v8 =
   AARCH64_FEATURE (V8);
