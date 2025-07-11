@@ -1,0 +1,40 @@
+# Copyright 2025 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This test verifies that we can read and write the value of a pseudo register
+# in unwound frames.  For the test, we choose one raw register, rbx, and one
+# pseudo register that is backed by rbx, ebx.  We have two frames (the inner one,
+# #0 and the outer one, #1) that each set a value for rbx.  We verify that we
+# can read both rbx and ebx correctly for each frame, and that when we write to
+# ebx, rbx for that frame is correctly updated.
+
+require is_x86_64_m64_target
+
+standard_testfile
+
+if { [prepare_for_testing "failed to prepare" ${testfile} \
+	"${srcfile}" {debug}] } {
+    return -1
+}
+
+if {![runto_main]} {
+    return
+}
+
+gdb_breakpoint [gdb_get_line_number "break-here"]
+gdb_continue_to_breakpoint "break-here"
+gdb_test "with confirm off --return -1" "result = test_function \\(\\);"
+gdb_test "step" "dummy \\(\\);"
+gdb_test "print result" "= -1"

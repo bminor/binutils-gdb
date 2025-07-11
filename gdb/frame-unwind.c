@@ -297,8 +297,16 @@ struct value *
 frame_unwind_got_register (const frame_info_ptr &frame,
 			   int regnum, int new_regnum)
 {
+  struct gdbarch *gdbarch = frame_unwind_arch (frame);
+  struct type *regnum_type = register_type (gdbarch, regnum);
+  struct type *new_regnum_type = register_type (gdbarch, new_regnum);
+
+  /* REGNUM has been copied into NEW_REGNUM, therefore, the former
+     must be smaller or equal in size to the latter.  */
+  gdb_assert (regnum_type->length () <= new_regnum_type->length ());
+
   return value_of_register_lazy (get_next_frame_sentinel_okay (frame),
-				 new_regnum);
+				 new_regnum, regnum_type);
 }
 
 /* Return a value which indicates that FRAME saved REGNUM in memory at

@@ -65,14 +65,15 @@ value_of_register (int regnum, const frame_info_ptr &next_frame)
 /* See value.h.  */
 
 value *
-value_of_register_lazy (const frame_info_ptr &next_frame, int regnum)
+value_of_register_lazy (const frame_info_ptr &next_frame, int regnum,
+			struct type *type)
 {
   gdbarch *gdbarch = frame_unwind_arch (next_frame);
 
   gdb_assert (regnum < gdbarch_num_cooked_regs (gdbarch));
   gdb_assert (next_frame != nullptr);
 
-  return value::allocate_register_lazy (next_frame, regnum);
+  return value::allocate_register_lazy (next_frame, regnum, type);
 }
 
 /* Given a pointer of type TYPE in target form in BUF, return the
