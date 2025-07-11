@@ -3,7 +3,7 @@
 #source: sframe-bar.s
 #objdump: --sframe=.sframe
 #ld: -shared --no-rosegment
-#name: SFrame simple link
+#name: SFrame for plt0 and pltN
 
 .*: +file format .*
 
@@ -18,15 +18,12 @@ Contents of the SFrame section .sframe:
 
   Function Index :
 
-#...
-    func idx \[2\]: pc = 0x228, size = 8 bytes
+    func idx \[0\]: pc = 0x1e8, size = 32 bytes
     STARTPC +CFA +FP +RA +
-    0+228 +sp\+160 +u +u +
+    0+1e8 +sp\+160 +u +u +
 
-    func idx \[3\]: pc = 0x230, size = 42 bytes
-    STARTPC +CFA +FP +RA +
-    0+230 +sp\+160 +u +u +
-    0+236 +sp\+160 +u +c-48 +
-    0+23c +sp\+320 +u +c-48 +
-    0+252 +sp\+160 +u +c-48 +
-    0+258 +sp\+160 +u +u +
+    func idx \[1\]: pc = 0x208, size = 32 bytes
+    STARTPC\[m\] +CFA +FP +RA +
+    0+0 +sp\+160 +u +u +
+
+#...
