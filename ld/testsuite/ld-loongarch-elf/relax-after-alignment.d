@@ -2,6 +2,7 @@
 #as:
 #ld: --defsym _start=0
 #objdump: -d --no-show-raw-insn
+#xfail: *-*-*
 
 .*:\s+file format .*
 

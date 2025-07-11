@@ -5374,22 +5374,17 @@ loongarch_relax_pcala_addi (bfd *abfd, asection *sec, asection *sym_sec,
     symval = sec_addr (sec)
 	     + loongarch_calc_relaxed_addr (info, symval - sec_addr (sec));
 
-  /* If pc and symbol not in the same segment, add/sub segment alignment if the
-     section has not undergone alignment processing because distances may grow
-     after alignment.  */
-  if (!loongarch_sec_closed_for_deletion (sec))
-    {
-      if (!loongarch_two_sections_in_same_segment (info->output_bfd,
-						   sec->output_section,
-						   sym_sec->output_section))
-	max_alignment = info->maxpagesize > max_alignment ? info->maxpagesize
-							  : max_alignment;
+  /* If pc and symbol not in the same segment, add/sub segment alignment.  */
+  if (!loongarch_two_sections_in_same_segment (info->output_bfd,
+					       sec->output_section,
+					       sym_sec->output_section))
+    max_alignment = info->maxpagesize > max_alignment ? info->maxpagesize
+						      : max_alignment;
 
-      if (symval > pc)
-	pc -= (max_alignment > 4 ? max_alignment : 0);
-      else if (symval < pc)
-	pc += (max_alignment > 4 ? max_alignment : 0);
-    }
+  if (symval > pc)
+    pc -= (max_alignment > 4 ? max_alignment : 0);
+  else if (symval < pc)
+    pc += (max_alignment > 4 ? max_alignment : 0);
 
   const uint32_t pcaddi = LARCH_OP_PCADDI;
 
@@ -5444,22 +5439,17 @@ loongarch_relax_call36 (bfd *abfd, asection *sec, asection *sym_sec,
     symval = sec_addr (sec)
 	     + loongarch_calc_relaxed_addr (info, symval - sec_addr (sec));
 
-  /* If pc and symbol not in the same segment, add/sub segment alignment if the
-     section has not undergone alignment processing because distances may grow
-     after alignment.  */
-  if (!loongarch_sec_closed_for_deletion (sec))
-    {
-      if (!loongarch_two_sections_in_same_segment (info->output_bfd,
-						   sec->output_section,
-						   sym_sec->output_section))
-	max_alignment = info->maxpagesize > max_alignment ? info->maxpagesize
-							  : max_alignment;
+  /* If pc and symbol not in the same segment, add/sub segment alignment.  */
+  if (!loongarch_two_sections_in_same_segment (info->output_bfd,
+					       sec->output_section,
+					       sym_sec->output_section))
+    max_alignment = info->maxpagesize > max_alignment ? info->maxpagesize
+						      : max_alignment;
 
-      if (symval > pc)
-	pc -= (max_alignment > 4 ? max_alignment : 0);
-      else if (symval < pc)
-	pc += (max_alignment > 4 ? max_alignment : 0);
-    }
+  if (symval > pc)
+    pc -= (max_alignment > 4 ? max_alignment : 0);
+  else if (symval < pc)
+    pc += (max_alignment > 4 ? max_alignment : 0);
 
   /* Is pcalau12i + addi.d insns?  */
   if (!LARCH_INSN_JIRL (jirl)
@@ -5513,22 +5503,17 @@ loongarch_relax_pcala_ld (bfd *abfd, asection *sec,
     symval = sec_addr (sec)
 	     + loongarch_calc_relaxed_addr (info, symval - sec_addr (sec));
 
-  /* If pc and symbol not in the same segment, add/sub segment alignment if the
-     section has not undergone alignment processing because distances may grow
-     after alignment.  */
-  if (!loongarch_sec_closed_for_deletion (sec))
-    {
-      if (!loongarch_two_sections_in_same_segment (info->output_bfd,
-						   sec->output_section,
-						   sym_sec->output_section))
-	max_alignment = info->maxpagesize > max_alignment ? info->maxpagesize
-							  : max_alignment;
+  /* If pc and symbol not in the same segment, add/sub segment alignment.  */
+  if (!loongarch_two_sections_in_same_segment (info->output_bfd,
+					       sec->output_section,
+					       sym_sec->output_section))
+    max_alignment = info->maxpagesize > max_alignment ? info->maxpagesize
+						      : max_alignment;
 
-      if (symval > pc)
-	pc -= (max_alignment > 4 ? max_alignment : 0);
-      else if (symval < pc)
-	pc += (max_alignment > 4 ? max_alignment : 0);
-    }
+  if (symval > pc)
+    pc -= (max_alignment > 4 ? max_alignment : 0);
+  else if (symval < pc)
+    pc += (max_alignment > 4 ? max_alignment : 0);
 
   if ((ELFNN_R_TYPE (rel_lo->r_info) != R_LARCH_GOT_PC_LO12)
       || (LARCH_GET_RD (ld) != rd)
@@ -5651,22 +5636,17 @@ loongarch_relax_tls_ld_gd_desc (bfd *abfd, asection *sec, asection *sym_sec,
     symval = sec_addr (sec)
 	     + loongarch_calc_relaxed_addr (info, symval - sec_addr (sec));
 
-  /* If pc and symbol not in the same segment, add/sub segment alignment if the
-     section has not undergone alignment processing because distances may grow
-     after alignment.  */
-  if (!loongarch_sec_closed_for_deletion (sec))
-    {
-      if (!loongarch_two_sections_in_same_segment (info->output_bfd,
-						   sec->output_section,
-						   sym_sec->output_section))
-	max_alignment = info->maxpagesize > max_alignment ? info->maxpagesize
-							  : max_alignment;
+  /* If pc and symbol not in the same segment, add/sub segment alignment.  */
+  if (!loongarch_two_sections_in_same_segment (info->output_bfd,
+					       sec->output_section,
+					       sym_sec->output_section))
+    max_alignment = info->maxpagesize > max_alignment ? info->maxpagesize
+						      : max_alignment;
 
-      if (symval > pc)
-	pc -= (max_alignment > 4 ? max_alignment : 0);
-      else if (symval < pc)
-	pc += (max_alignment > 4 ? max_alignment : 0);
-    }
+  if (symval > pc)
+    pc -= (max_alignment > 4 ? max_alignment : 0);
+  else if (symval < pc)
+    pc += (max_alignment > 4 ? max_alignment : 0);
 
   const uint32_t pcaddi = LARCH_OP_PCADDI;
 
