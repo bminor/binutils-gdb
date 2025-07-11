@@ -135,10 +135,26 @@ sframe_fre_set_cfa_base_reg (struct sframe_row_entry *fre,
   fre->merge_candidate = false;
 }
 
+static offsetT
+sframe_fre_get_cfa_offset (const struct sframe_row_entry * fre)
+{
+  offsetT offset = fre->cfa_offset;
+
+  /* For s390x undo adjustment of CFA offset (to enable 8-bit offsets).  */
+  if (sframe_get_abi_arch () == SFRAME_ABI_S390X_ENDIAN_BIG)
+    offset = SFRAME_V2_S390X_CFA_OFFSET_DECODE (offset);
+
+  return offset;
+}
+
 static void
 sframe_fre_set_cfa_offset (struct sframe_row_entry *fre,
 			   offsetT cfa_offset)
 {
+  /* For s390x adjust CFA offset to enable 8-bit offsets.  */
+  if (sframe_get_abi_arch () == SFRAME_ABI_S390X_ENDIAN_BIG)
+    cfa_offset = SFRAME_V2_S390X_CFA_OFFSET_ENCODE (cfa_offset);
+
   fre->cfa_offset = cfa_offset;
   fre->merge_candidate = false;
 }
@@ -1043,7 +1059,7 @@ sframe_xlate_do_def_cfa_register (struct sframe_xlate_ctx *xlate_ctx,
     }
   sframe_fre_set_cfa_base_reg (cur_fre, cfi_insn->u.r);
   if (last_fre)
-    sframe_fre_set_cfa_offset (cur_fre, last_fre->cfa_offset);
+    sframe_fre_set_cfa_offset (cur_fre, sframe_fre_get_cfa_offset (last_fre));
 
   cur_fre->merge_candidate = false;
 

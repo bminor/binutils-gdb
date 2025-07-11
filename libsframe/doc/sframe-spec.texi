@@ -155,6 +155,12 @@ an FP/RA offset.
   @item SFRAME_FRE_RA_OFFSET_INVALID: Invalid RA offset value (like
 SFRAME_CFA_FIXED_RA_INVALID).  Used on s390x as padding offset to represent
 FP without RA saved.
+  @item SFRAME_S390X_CFA_OFFSET_ADJUSTMENT: CFA offset (from CFA base register)
+adjustment value.  Used to enable use of 8-bit SFrame offsets on s390x.
+  @item SFRAME_V2_S390X_CFA_OFFSET_ENCODE: Encode CFA offset (i.e., apply
+CFA offset adjustment).
+  @item SFRAME_V2_S390X_CFA_OFFSET_DECODE: Decode CFA offset (i.e., revert
+CFA offset adjustment).
  @end itemize
 @end itemize
 
@@ -885,7 +891,15 @@ case in the topmost stack frame of the callchain.  For FP this may be the case
 in any stack frame.
 
 Irrespective of the ABI, the first stack offset is always used to locate the
-CFA, by interpreting it as: CFA = @code{BASE_REG} + offset1.
+CFA.  On s390x the value of the offset is stored adjusted by the s390x-specific
+@code{SFRAME_S390X_CFA_OFFSET_ADJUSTMENT} to enable the use of signed 8-bit
+offsets on s390x.
+s390x-specific helpers @code{SFRAME_V2_S390X_CFA_OFFSET_ENCODE} and
+@code{SFRAME_V2_S390X_CFA_OFFSET_DECODE} are provided to perform and undo
+the adjustment.  The CFA offset can therefore be interpreted as:
+CFA = @code{BASE_REG} + @code{SFRAME_V2_S390X_CFA_OFFSET_DECODE(offset1)}
+or
+CFA = @code{BASE_REG} + offset1 - @code{SFRAME_S390X_CFA_OFFSET_ADJUSTMENT}.
 The identification of the @code{BASE_REG} is done by using the
 @code{fre_cfa_base_reg_id} field in the SFrame FRE info word.
 

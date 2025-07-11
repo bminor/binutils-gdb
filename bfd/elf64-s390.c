@@ -621,8 +621,8 @@ struct elf_s390x_sframe_plt
 static const sframe_frame_row_entry elf_s390x_sframe_plt_fre =
 {
   0, /* SFrame FRE start address.  */
-  {0, 160, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, /* 12 bytes.  */
-  SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_2B) /* FRE info.  */
+  { SFRAME_V2_S390X_CFA_OFFSET_ENCODE (160), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, /* Offset bytes.  */
+  SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B) /* FRE info.  */
 };
 
 /* SFrame helper object for PLT.  */

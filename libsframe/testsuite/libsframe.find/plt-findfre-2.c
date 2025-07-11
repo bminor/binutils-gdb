@@ -43,8 +43,8 @@ add_plt0_fde (sframe_encoder_ctx *ectx, uint32_t plt_vaddr,
   /* 1 single FRE.  */
   sframe_frame_row_entry fre
     = { 0x0,
-	{ 0, 160 + PLT0_CFA_OFFSET_MAGIC },
-	SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_2B) };
+	{ SFRAME_V2_S390X_CFA_OFFSET_ENCODE (160 + PLT0_CFA_OFFSET_MAGIC) },
+	SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B) };
 
   unsigned char finfo = sframe_fde_create_func_info (SFRAME_FRE_TYPE_ADDR1,
 						     SFRAME_FDE_TYPE_PCINC);
@@ -72,8 +72,8 @@ add_pltn_fde (sframe_encoder_ctx *ectx, uint32_t plt_vaddr,
   /* 1 single FRE.  */
   sframe_frame_row_entry fre
     = { 0x0,
-	{ 0, 160 + PLTN_CFA_OFFSET_MAGIC },
-	SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_2B) };
+	{ SFRAME_V2_S390X_CFA_OFFSET_ENCODE (160 + PLTN_CFA_OFFSET_MAGIC) },
+	SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B) };
 
   unsigned char finfo = sframe_fde_create_func_info (SFRAME_FRE_TYPE_ADDR1,
 						     SFRAME_FDE_TYPE_PCMASK);
