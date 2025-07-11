@@ -358,6 +358,19 @@ typedef struct sframe_frame_row_entry_addr4
    SP value offset from CFA is -160.  */
 #define SFRAME_S390X_SP_VAL_OFFSET			(-160)
 
+/* On s390x, the FP and RA registers can be saved either on the stack or,
+   in case of leaf functions, in registers.  Store DWARF register numbers
+   encoded as offset by using the least-significant bit (LSB) as indicator:
+   - LSB=0: Stack offset.  The s390x ELF ABI mandates that stack register
+     slots must be 8-byte aligned.
+   - LSB=1: DWARF register number shifted to the left by one.  */
+#define SFRAME_V2_S390X_OFFSET_IS_REGNUM(offset) \
+  ((offset) & 1)
+#define SFRAME_V2_S390X_OFFSET_ENCODE_REGNUM(regnum) \
+  (((regnum) << 1) | 1)
+#define SFRAME_V2_S390X_OFFSET_DECODE_REGNUM(offset) \
+  ((offset) >> 1)
+
 #ifdef	__cplusplus
 }
 #endif

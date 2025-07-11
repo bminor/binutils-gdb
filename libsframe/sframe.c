@@ -701,7 +701,10 @@ sframe_fre_get_cfa_offset (sframe_decoder_ctx *dctx ATTRIBUTE_UNUSED,
   return sframe_get_fre_offset (fre, SFRAME_FRE_CFA_OFFSET_IDX, errp);
 }
 
-/* Get the FP offset from the FRE.  If the offset is invalid, sets errp.  */
+/* Get the FP offset from the FRE.  If the offset is invalid, sets errp.
+
+   For s390x the offset may be an encoded register number, indicated by
+   LSB set to one, which is only valid in the topmost frame.  */
 
 int32_t
 sframe_fre_get_fp_offset (sframe_decoder_ctx *dctx,
@@ -728,7 +731,10 @@ sframe_fre_get_fp_offset (sframe_decoder_ctx *dctx,
   return sframe_get_fre_offset (fre, fp_offset_idx, errp);
 }
 
-/* Get the RA offset from the FRE.  If the offset is invalid, sets errp.  */
+/* Get the RA offset from the FRE.  If the offset is invalid, sets errp.
+
+   For s390x the offset may be an encoded register number, indicated by
+   LSB set to one, which is only valid in the topmost frame.  */
 
 int32_t
 sframe_fre_get_ra_offset (sframe_decoder_ctx *dctx,

@@ -1,6 +1,6 @@
-#name: SFrame generation on s390x - FP and then RA saved in register
+#name: SFrame generation on s390x - FP without RA saved in registers
 #as: --gsframe
-#warning: FP register 11 in .cfi_register
+#warning: FP without RA on stack
 #objdump: --sframe=.sframe
 #...
 Contents of the SFrame section .sframe:
