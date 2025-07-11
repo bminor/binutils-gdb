@@ -64,8 +64,9 @@ proc gas_x86_64_check { } {
 }
 
 # common tests
-if  { ([istarget "x86_64-*-*"] || [istarget "aarch64*-*-*"]) \
-       && [gas_sframe_check] } then {
+if  { ([istarget "x86_64-*-*"] || [istarget "aarch64*-*-*"]
+       || [istarget "s390x-*-*"]) \
+      && [gas_sframe_check] } then {
 
     global ASFLAGS
     set old_ASFLAGS "$ASFLAGS"
@@ -108,4 +109,17 @@ if { [istarget "aarch64*-*-*"] && [gas_sframe_check] } then {
     run_dump_test "cfi-sframe-aarch64-3"
     run_dump_test "cfi-sframe-aarch64-4"
     run_dump_test "cfi-sframe-aarch64-pac-ab-key-1"
+}
+
+# s390x specific tests
+if { [istarget "s390x*-*-*"] && [gas_sframe_check] } then {
+    run_dump_test "cfi-sframe-s390x-1"
+    run_dump_test "cfi-sframe-s390x-2"
+    run_dump_test "cfi-sframe-s390x-err-1"
+    run_dump_test "cfi-sframe-s390x-err-2"
+    run_dump_test "cfi-sframe-s390x-err-3"
+    run_dump_test "cfi-sframe-s390x-fpra-offset-1"
+    run_dump_test "cfi-sframe-s390x-fpra-offset-err-1"
+    run_dump_test "cfi-sframe-s390x-fpra-register-err-1"
+    run_dump_test "cfi-sframe-s390x-fpra-register-err-2"
 }

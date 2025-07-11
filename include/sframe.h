@@ -104,6 +104,7 @@ extern "C"
 #define SFRAME_ABI_AARCH64_ENDIAN_BIG      1 /* AARCH64 big endian.  */
 #define SFRAME_ABI_AARCH64_ENDIAN_LITTLE   2 /* AARCH64 little endian.  */
 #define SFRAME_ABI_AMD64_ENDIAN_LITTLE     3 /* AMD64 little endian.  */
+#define SFRAME_ABI_S390X_ENDIAN_BIG        4 /* s390x big endian.  */
 
 /* SFrame FRE types.  */
 #define SFRAME_FRE_TYPE_ADDR1	0
@@ -201,7 +202,7 @@ typedef struct sframe_func_desc_entry
      - 2-bits: Unused.
      ------------------------------------------------------------------------
      |     Unused    |  PAC auth A/B key (aarch64) |  FDE type |   FRE type   |
-     |               |        Unused (amd64)       |           |              |
+     |               |     Unused (amd64, s390x)   |           |              |
      ------------------------------------------------------------------------
      8               6                             5           4              0     */
   uint8_t sfde_func_info;
@@ -259,7 +260,7 @@ typedef struct sframe_fre_info
      - 1 bit: Mangled RA state bit (aarch64 only).
      ----------------------------------------------------------------------------------
      | Mangled-RA (aarch64) |  Size of offsets   |   Number of offsets    |   base_reg |
-     |  Unused (amd64)      |                    |                        |            |
+     | Unused (amd64, s390x)|                    |                        |            |
      ----------------------------------------------------------------------------------
      8                     7                    5                        1            0
 
@@ -285,7 +286,7 @@ typedef struct sframe_fre_info
 
 /* SFrame Frame Row Entry definitions.
 
-   Used for both AMD64 and AARCH64.
+   Used for AMD64, AARCH64, and s390x.
 
    An SFrame Frame Row Entry is a self-sufficient record which contains
    information on how to generate the stack trace for the specified range of
@@ -352,6 +353,10 @@ typedef struct sframe_frame_row_entry_addr4
    is 0x100000000 (not inclusive).  */
 #define SFRAME_FRE_TYPE_ADDR4_LIMIT   \
   (1ULL << ((SFRAME_FRE_TYPE_ADDR4 * 2) * 8))
+
+/* On s390x, the CFA is defined as SP at call site + 160.  Therefore the
+   SP value offset from CFA is -160.  */
+#define SFRAME_S390X_SP_VAL_OFFSET			(-160)
 
 #ifdef	__cplusplus
 }

@@ -714,7 +714,7 @@ output_sframe_internal (void)
     }
   out_one (fixed_ra_offset);
 
-  /* None of the AMD64, or AARCH64 ABIs need the auxiliary header.
+  /* None of the AMD64, AARCH64, or s390x ABIs need the auxiliary header.
      When the need does arise to use this field, the appropriate backend
      must provide this information.  */
   out_one (0); /* Auxiliary SFrame header length.  */
@@ -1117,7 +1117,11 @@ sframe_xlate_do_val_offset (const struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_U
   if (cfi_insn->u.ri.reg == SFRAME_CFA_FP_REG
       || (sframe_ra_tracking_p () && cfi_insn->u.ri.reg == SFRAME_CFA_RA_REG)
       /* Ignore SP reg, if offset matches assumed default rule.  */
-      || (cfi_insn->u.ri.reg == SFRAME_CFA_SP_REG && cfi_insn->u.ri.offset != 0))
+      || (cfi_insn->u.ri.reg == SFRAME_CFA_SP_REG
+	  && ((sframe_get_abi_arch () != SFRAME_ABI_S390X_ENDIAN_BIG
+	       && cfi_insn->u.ri.offset != 0)
+	      || (sframe_get_abi_arch () == SFRAME_ABI_S390X_ENDIAN_BIG
+		  && cfi_insn->u.ri.offset != SFRAME_S390X_SP_VAL_OFFSET))))
     {
       as_warn (_("no SFrame FDE emitted; %s with %s reg %u"),
 	       cfi_esc_p ? ".cfi_escape DW_CFA_val_offset" : ".cfi_val_offset",

@@ -146,4 +146,8 @@ if { [istarget "s390-*-*"] || [istarget "s390x-*-*"] } {
 
 if [istarget "s390x-*-*"] {
     run_ld_link_tests $s390xtests
+
+    if { ![skip_sframe_tests] } {
+	run_dump_test "sframe-simple-1"
+    }
 }

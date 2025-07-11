@@ -81,8 +81,8 @@ The SFrame stack trace information is provided in a loaded section, known as the
 @code{.sframe} section.  When available, the @code{.sframe} section appears in
 a new segment of its own, PT_GNU_SFRAME.
 
-The SFrame format is currently supported only for select ABIs, namely, AMD64
-and AAPCS64.
+The SFrame format is currently supported only for select ABIs, namely, AMD64,
+AAPCS64, and s390x.
 
 A portion of the SFrame format follows an unaligned on-disk representation.
 Some data structures, however, (namely the SFrame header and the SFrame
@@ -138,6 +138,14 @@ bytes to the start PC of the associated function from the field itself.
   @item if unset, @code{sfde_func_start_address} field contains the offset in
 bytes to the start PC of the associated function from the start of the SFrame
 section.
+ @end itemize
+@item
+Add a new ABI/arch identifier SFRAME_ABI_S390X_ENDIAN_BIG for the s390
+architecture (64-bit) s390x ABI.  Other s390x-specific backward compatible
+changes including the following helper definitions have been incrementally
+added to SFrame version 2 only:
+ @itemize @minus
+  @item SFRAME_S390X_SP_VAL_OFFSET: SP value offset from CFA.
  @end itemize
 @end itemize
 
@@ -420,6 +428,10 @@ in the format.
 @tindex SFRAME_ABI_AMD64_ENDIAN_LITTLE
 @item @code{SFRAME_ABI_AMD64_ENDIAN_LITTLE}
 @tab 3 @tab AMD64 little-endian
+
+@tindex SFRAME_ABI_S390X_ENDIAN_BIG
+@item @code{SFRAME_ABI_S390X_ENDIAN_BIG}
+@tab 4 @tab s390x big-endian
 
 @end multitable
 
@@ -794,6 +806,7 @@ auxiliary SFrame header, etc., if used, must also be outlined here.
 @menu
 * AMD64::
 * AArch64::
+* s390x::
 @end menu
 
 @node AMD64
@@ -849,6 +862,50 @@ Hence, in summary:
 @item 2 @tab RA = CFA + offset2
 @item 3 @tab FP = CFA + offset3
 @end multitable
+
+@node s390x
+@section s390x
+
+A stack tracer implementation must initialize the SP to the designated SP
+register value, the FP to the preferred FP register value, and the RA to the
+designated RA register value in the topmost stack frame of the callchain.  This
+is required, as either the SP or FP is used as CFA base register and as the FP
+and/or RA are not necessarily saved on the stack.  For RA this may only be the
+case in the topmost stack frame of the callchain.  For FP this may be the case
+in any stack frame.
+
+Irrespective of the ABI, the first stack offset is always used to locate the
+CFA, by interpreting it as: CFA = @code{BASE_REG} + offset1.
+The identification of the @code{BASE_REG} is done by using the
+@code{fre_cfa_base_reg_id} field in the SFrame FRE info word.
+
+The (64-bit) s390x ELF ABI does not mandate the precise location in a function
+where the return address (RA) and frame pointer (FP) are saved, if at all.
+Hence the need to track RA in the SFrame stack trace format.  As RA is being
+tracked in this ABI, the second stack offset is always used to locate the RA
+stack slot, by interpreting it as: RA = CFA + offset2.  RA remains unchanged,
+if the offset is not available.  Stack tracers are recommended to validate that
+the "unchanged RA" pattern, when present, is seen only for the topmost stack
+frame.  The third stack offset is used to locate the FP stack slot, by
+interpreting it as: FP = CFA + offset3.  FP remains unchanged, if the offset is
+not available.
+
+Given the nature of things, the number of stack offsets seen on s390x per
+SFrame FRE is either 1, 2, or 3.
+
+Hence, in summary:
+
+@multitable {Offset ID} {Interpretation in s390x in X}
+@headitem Offset ID @tab Interpretation in s390x
+@item 1 @tab CFA = @code{BASE_REG} + offset1
+@item 2 @tab RA = CFA + offset2
+@item 3 @tab FP = CFA + offset3
+@end multitable
+
+The s390x ELF ABI defines the CFA as stack pointer (SP) at call site +160.  The
+SP can therefore be obtained using the SP value offset from CFA
+@code{SFRAME_S390X_SP_VAL_OFFSET} of -160 as follows:
+SP = CFA + @code{SFRAME_S390X_SP_VAL_OFFSET}
 
 @node Generating Stack Traces using SFrame
 @appendix Generating Stack Traces using SFrame
@@ -913,7 +970,7 @@ SFrame section.
         fp_offset = sframe_fre_get_fp_offset (fre);
 
         cfa = base_reg_val + cfa_offset;
-        next_frame->sp = cfa;
+        next_frame->sp = cfa [+ SFRAME_S390X_SP_VAL_OFFSET on s390x];
 
         ra_stack_loc = cfa + ra_offset;
         // Get the address stored in the stack location.
