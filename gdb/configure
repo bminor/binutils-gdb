@@ -957,6 +957,7 @@ with_libexpat_prefix
 with_libexpat_type
 with_python
 with_python_libdir
+enable_py_limited_api
 with_guile
 enable_gdb_compile
 enable_source_highlight
@@ -1662,6 +1663,8 @@ Optional Features:
   --enable-gdbtk          enable gdbtk graphical user interface (GUI)
   --enable-profiling      enable profiling of GDB
   --enable-codesign=CERT  sign gdb with 'codesign -s CERT'
+  --enable-py-limited-api enable build against the Python limited C API,
+                          default 'no'
   --enable-gdb-compile    enable support for the compile subsystem, default
                           'yes'
   --enable-source-highlight
@@ -11888,7 +11891,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11891 "configure"
+#line 11894 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11994,7 +11997,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11997 "configure"
+#line 12000 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -28725,6 +28728,33 @@ else
   HAVE_PYTHON_FALSE=
 fi
 
+
+# Check whether to build GDB against Python limited C API.
+# Check whether --enable-py-limited-api was given.
+if test "${enable_py_limited_api+set}" = set; then :
+  enableval=$enable_py_limited_api;
+	   case $enableval in
+	     yes | no)
+	       ;;
+	     *)
+	       as_fn_error $? "bad value $enableval for --enable-py-limited-api" "$LINENO" 5
+	       ;;
+	   esac
+
+else
+  enable_py_limited_api=no
+fi
+
+
+if test "$enable_py_limited_api" == yes; then
+  # The minimal Python limited API version is currently set to 3.11 for the
+  # support of PyBuffer_FillInfo and PyBuffer_Release.
+  # The choice of the minimal version for the Python limited API won't be frozen
+  # until the end of the migration.
+
+$as_echo "#define Py_LIMITED_API 0x030b0000" >>confdefs.h
+
+fi
 
 # -------------------- #
 # Check for libguile.  #

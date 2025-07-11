@@ -1070,6 +1070,22 @@ AC_SUBST(PYTHON_CPPFLAGS)
 AC_SUBST(PYTHON_LIBS)
 AM_CONDITIONAL(HAVE_PYTHON, test "${have_libpython}" != no)
 
+# Check whether to build GDB against Python limited C API.
+AC_ARG_ENABLE([py-limited-api],
+	      [AS_HELP_STRING([--enable-py-limited-api],
+			      [enable build against the Python limited C API, default 'no'])],
+	      [GDB_CHECK_YES_NO_VAL([$enableval], [--enable-py-limited-api])],
+	      [enable_py_limited_api=no])
+
+if test "$enable_py_limited_api" == yes; then
+  # The minimal Python limited API version is currently set to 3.11 for the
+  # support of PyBuffer_FillInfo and PyBuffer_Release.
+  # The choice of the minimal version for the Python limited API won't be frozen
+  # until the end of the migration.
+  AC_DEFINE(Py_LIMITED_API, 0x030b0000,
+	    [Define if GDB should be built against the Python limited C API.])
+fi
+
 # -------------------- #
 # Check for libguile.  #
 # -------------------- #
