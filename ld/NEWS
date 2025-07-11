@@ -35,6 +35,12 @@
 
 * On s390, add support for linker option --[no-]ld-generated-unwind-info.
 
+* On LoongArch, linker relaxation time complexity is no longer quadratic with
+  respect to relocation counts.  Linking time of large software should be
+  improved.
+
+* On LoongArch, R_LARCH_32_PCREL records are now checked for overflow.
+
 Changes in 2.44:
 
 * Support for Nios II target has been removed, as this architecture has been

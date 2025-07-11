@@ -39,6 +39,15 @@
 
 * Add support for the x86 Zhaoxin PadLock XMODX instructions.
 
+* Add support for several instruction aliases defined for the LoongArch 32-bit
+  reduced subset (LA32R): rdcntvl.w, rdcntvh.w, rdcntid.w.
+
+* For LoongArch, warn about out-of-range 3rd arguments (maximum number of
+  bytes to skip) of .align directives.
+
+* For LoongArch, warn about negative right-shift amounts and
+  division/modulus-by-zero when evaluating expressions.
+
 Changes in 2.44:
 
 * Add support for the x86 Intel Diamond Rapids AMX instructions, including
