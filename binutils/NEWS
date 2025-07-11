@@ -1,5 +1,12 @@
 -*- text -*-
 
+* On s390 64-bit (s390x), gas, ld, objdump, and readelf now support generating
+  and processing SFrame V2 stack trace information (.sframe).  The assembler
+  generates SFrame info from CFI directives with option "--gsframe".  The
+  linker generates SFrame info for the linker-generated .plt section and merges
+  all .sframe sections.  Both objdump and readelf dump SFrame info with option
+  "--sframe[=<section-name>]".
+
 * For SFrame stack trace format, the function start address in each SFrame
   FDE has a changed encoding:  The 32-bit signed integer now holds the offset
   of the start PC of the associated function from the sfde_func_start_address
