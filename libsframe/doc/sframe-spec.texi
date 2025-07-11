@@ -152,6 +152,9 @@ DWARF register number.
 FP/RA offset.
   @item SFRAME_V2_S390X_OFFSET_DECODE_REGNUM: Decode a DWARF register number from
 an FP/RA offset.
+  @item SFRAME_FRE_RA_OFFSET_INVALID: Invalid RA offset value (like
+SFRAME_CFA_FIXED_RA_INVALID).  Used on s390x as padding offset to represent
+FP without RA saved.
  @end itemize
 @end itemize
 
@@ -890,12 +893,13 @@ The (64-bit) s390x ELF ABI does not mandate the precise location in a function
 where the return address (RA) and frame pointer (FP) are saved, if at all.
 Hence the need to track RA in the SFrame stack trace format.  As RA is being
 tracked in this ABI, the second stack offset is always used to locate the RA
-stack slot, by interpreting it as: RA = CFA + offset2.  RA remains unchanged,
-if the offset is not available.  Stack tracers are recommended to validate that
-the "unchanged RA" pattern, when present, is seen only for the topmost stack
-frame.  The third stack offset is used to locate the FP stack slot, by
-interpreting it as: FP = CFA + offset3.  FP remains unchanged, if the offset is
-not available.
+stack slot, by interpreting it as: RA = CFA + offset2, unless the offset has a
+value of @code{SFRAME_FRE_RA_OFFSET_INVALID}.  RA remains unchanged, if the
+offset is not available or has a value of @code{SFRAME_FRE_RA_OFFSET_INVALID}.
+Stack tracers are recommended to validate that the "unchanged RA" pattern, when
+present, is seen only for the topmost stack frame.  The third stack offset is
+used to locate the FP stack slot, by interpreting it as: FP = CFA + offset3.
+FP remains unchanged, if the offset is not available.
 
 In leaf functions the RA and FP may be saved in other registers, such as
 floating-point registers (FPRs), instead of on the stack.  To represent this
@@ -919,6 +923,7 @@ Hence, in summary:
 @item 1 @tab CFA = @code{BASE_REG} + offset1
 @item 2 @tab RA stack slot = CFA + offset2, if (offset2 & 1 == 0)
            @*RA register number = offset2 >> 1, if (offset2 & 1 == 1)
+           @*RA not saved if (offset2 == @code{SFRAME_FRE_RA_OFFSET_INVALID})
 @item 3 @tab FP stack slot = CFA + offset3, if (offset3 & 1 == 0)
            @*FP register number = offset3 >> 1, if (offset3 & 1 == 1)
 @end multitable

@@ -340,7 +340,10 @@ get_fre_num_offsets (struct sframe_row_entry *sframe_fre)
   if (sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
     fre_num_offsets++;
   if (sframe_ra_tracking_p ()
-      && sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
+      && (sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK
+	  /* For s390x account padding RA offset, if FP without RA saved.  */
+	  || (sframe_get_abi_arch () == SFRAME_ABI_S390X_ENDIAN_BIG
+	      && sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)))
     fre_num_offsets++;
   return fre_num_offsets;
 }
@@ -362,9 +365,15 @@ sframe_get_fre_offset_size (struct sframe_row_entry *sframe_fre)
   cfa_offset_size = get_offset_size_in_bytes (sframe_fre->cfa_offset);
   if (sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
     bp_offset_size = get_offset_size_in_bytes (sframe_fre->bp_offset);
-  if (sframe_ra_tracking_p ()
-      && sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
-    ra_offset_size = get_offset_size_in_bytes (sframe_fre->ra_offset);
+  if (sframe_ra_tracking_p ())
+    {
+      if (sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
+	ra_offset_size = get_offset_size_in_bytes (sframe_fre->ra_offset);
+      /* For s390x account padding RA offset, if FP without RA saved.  */
+      else if (sframe_get_abi_arch () == SFRAME_ABI_S390X_ENDIAN_BIG
+	       && sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
+	ra_offset_size = get_offset_size_in_bytes (SFRAME_FRE_RA_OFFSET_INVALID);
+    }
 
   /* Get the maximum size needed to represent the offsets.  */
   max_offset_size = cfa_offset_size;
@@ -570,11 +579,20 @@ output_sframe_row_entry (symbolS *fde_start_addr,
   fre_offset_func_map[idx].out_func (sframe_fre->cfa_offset);
   fre_write_offsets++;
 
-  if (sframe_ra_tracking_p ()
-      && sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
+  if (sframe_ra_tracking_p ())
     {
-      fre_offset_func_map[idx].out_func (sframe_fre->ra_offset);
-      fre_write_offsets++;
+      if (sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
+	{
+	  fre_offset_func_map[idx].out_func (sframe_fre->ra_offset);
+	  fre_write_offsets++;
+	}
+      /* For s390x write padding RA offset, if FP without RA saved.  */
+      else if (sframe_get_abi_arch () == SFRAME_ABI_S390X_ENDIAN_BIG
+	       && sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
+	{
+	  fre_offset_func_map[idx].out_func (SFRAME_FRE_RA_OFFSET_INVALID);
+	  fre_write_offsets++;
+	}
     }
   if (sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
     {
@@ -1804,7 +1822,9 @@ sframe_do_fde (struct sframe_xlate_ctx *xlate_ctx,
 	= get_dw_fde_end_addrS (xlate_ctx->dw_fde);
     }
 
-  if (sframe_ra_tracking_p ())
+  /* ABI/arch except s390x cannot represent FP without RA saved.  */
+  if (sframe_ra_tracking_p ()
+      && sframe_get_abi_arch () != SFRAME_ABI_S390X_ENDIAN_BIG)
     {
       struct sframe_row_entry *fre;
 

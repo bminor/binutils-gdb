@@ -248,6 +248,10 @@ typedef struct sframe_func_desc_entry
    may or may not be tracked.  */
 #define SFRAME_FRE_FP_OFFSET_IDX    2
 
+/* Invalid RA offset.  Currently used for s390x as padding to represent FP
+   without RA saved.  */
+#define SFRAME_FRE_RA_OFFSET_INVALID 0
+
 typedef struct sframe_fre_info
 {
   /* Information about
@@ -310,6 +314,24 @@ typedef struct sframe_fre_info
      fi
      Note that in AAPCS64, a frame record, if created, will save both FP and
      LR on stack.
+
+   s390x:
+     offset1 (interpreted as CFA = BASE_REG + offset1)
+     if RA is being tracked
+       offset2 (interpreted as RA = CFA + offset2; an offset value of
+	       SFRAME_FRE_RA_OFFSET_INVALID indicates a dummy padding RA offset
+	       to represent FP without RA saved on stack)
+       if FP is being tracked
+	 offset3 (intrepreted as FP = CFA + offset3)
+       fi
+     else
+      if FP is being tracked
+	offset2 (intrepreted as FP = CFA + offset2)
+      fi
+    fi
+    Note that in s390x, if a FP/RA offset2/offset3 value has the least-
+    significant bit set it represents a DWARF register number shifted to the
+    left by 1 to restore the FP/RA value from.
 */
 
 /* Used when SFRAME_FRE_TYPE_ADDR1 is specified as FRE type.  */

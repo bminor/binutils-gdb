@@ -211,6 +211,10 @@ dump_sframe_func_with_fres (sframe_decoder_ctx *sfd_ctx,
       if (sframe_decoder_get_fixed_ra_offset (sfd_ctx)
 	  != SFRAME_CFA_FIXED_RA_INVALID)
 	strcpy (temp, "f");
+      /* If an ABI does track RA offset, e.g. s390x, it can be a padding
+	 to represent FP without RA being saved on stack.  */
+      else if (err[2] == 0 && ra_offset == SFRAME_FRE_RA_OFFSET_INVALID)
+	sprintf (temp, "U");
       else if (err[2] == 0)
 	{
 	  if (is_sframe_abi_arch_s390x (sfd_ctx)
