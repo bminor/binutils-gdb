@@ -855,6 +855,17 @@ run_dump_test_n32 "micromips-hilo-srec" \
 run_dump_test_n64 "micromips-hilo-srec-n64" \
 	[list noarch \
 	      [list objdump [expr { [istarget *el-*-*] ? "-EL" : "-EB" }]]]
+run_dump_test_o32 "pcrel-hilo"
+run_dump_test_n32 "pcrel-hilo" [list [list name (n32)]]
+run_dump_test_n64 "pcrel-hilo" [list [list name (n64)]]
+run_dump_test_o32 "pcrel-hilo-srec" \
+	[list [list objdump [expr { [istarget *el-*-*] ? "-EL" : "-EB" }]]]
+run_dump_test_n32 "pcrel-hilo-srec" \
+	[list [list name (n32)] \
+	      [list objdump [expr { [istarget *el-*-*] ? "-EL" : "-EB" }]]]
+run_dump_test_n64 "pcrel-hilo-srec" \
+	[list [list name (n64)] \
+	      [list objdump [expr { [istarget *el-*-*] ? "-EL" : "-EB" }]]]
 
 if { $linux_gnu } {
     run_dump_test_n32 "textrel-1"

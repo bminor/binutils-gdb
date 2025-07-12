@@ -2600,20 +2600,22 @@ _bfd_mips_elf_lo16_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
      extended.  For example, an addend of 0x38000 would have 0x0004 in
      the high part and 0x8000 (=0xff..f8000) in the low part.
      To extract the actual addend, calculate
-     ((hi & 0xffff) << 16) + ((lo & 0xffff) ^ 0x8000) - 0x8000.
-     We will be applying (symbol + addend) & 0xffff to the low insn,
-     and we want to apply (symbol + addend + 0x8000) >> 16 to the
-     high insn (the +0x8000 adjusting for when the applied low part is
-     negative).  */
+     ((hi & 0xffff) << 16) + ((lo & 0xffff) ^ 0x8000) - 0x8000.  */
   vallo = _bfd_mips_elf_sign_extend (bfd_get_32 (abfd, location) & 0xffff, 16);
   _bfd_mips_elf_reloc_shuffle (abfd, reloc_entry->howto->type, false,
 			       location);
+  /* Add in the separate addend, if any.  Since we are REL here this
+     will have been set and the in-place addend cleared if we have
+     been called from GAS via `bfd_install_relocation'.  */
+  vallo += reloc_entry->addend;
 
   tdata = mips_elf_tdata (abfd);
   while (tdata->mips_hi16_list != NULL)
     {
       bfd_reloc_status_type ret;
       struct mips_hi16 *hi;
+      bfd_vma addhi;
+      bfd_vma addlo;
 
       hi = tdata->mips_hi16_list;
 
@@ -2629,7 +2631,19 @@ _bfd_mips_elf_lo16_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
       else if (hi->rel.howto->type == R_MICROMIPS_GOT16)
 	hi->rel.howto = MIPS_ELF_RTYPE_TO_HOWTO (abfd, R_MICROMIPS_HI16, false);
 
-      hi->rel.addend += vallo;
+      /* We will be applying (symbol + addend) & 0xffff to the low insn,
+	 and we want to apply (symbol + addend + 0x8000) >> 16 to the
+	 high insn (the +0x8000 adjusting for when the applied low part is
+	 negative).  */
+      addhi = (hi->rel.addend + 0x8000) & ~(bfd_vma) 0xffff;
+      addlo = vallo;
+
+      /* For a PC-relative relocation the PCLO16 part of the addend
+	 is relative to its PC and not ours, so we need to adjust it.  */
+      if (hi->rel.howto->type == R_MIPS_PCHI16)
+	addlo -= reloc_entry->address - hi->rel.address;
+
+      hi->rel.addend = addhi + _bfd_mips_elf_sign_extend (addlo & 0xffff, 16);
 
       ret = _bfd_mips_elf_generic_reloc (abfd, &hi->rel, symbol, hi->data,
 					 hi->input_section, output_bfd,
@@ -8334,6 +8348,10 @@ mips_elf_add_lo16_rel_addend (bfd *abfd,
 				contents);
 
   l <<= lo16_howto->rightshift;
+  /* For a PC-relative relocation the PCLO16 part of the addend
+     is relative to its PC and not ours, so we need to adjust it.  */
+  if (r_type == R_MIPS_PCHI16)
+    l = (l - (lo16_relocation->r_offset - rel->r_offset)) & 0xffff;
   l = _bfd_mips_elf_sign_extend (l, 16);
 
   *addend <<= 16;

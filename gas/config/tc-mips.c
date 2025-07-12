@@ -4328,14 +4328,16 @@ got16_reloc_p (bfd_reloc_code_real_type reloc)
 static inline bool
 hi16_reloc_p (bfd_reloc_code_real_type reloc)
 {
-  return (reloc == BFD_RELOC_HI16_S || reloc == BFD_RELOC_MIPS16_HI16_S
+  return (reloc == BFD_RELOC_HI16_S || reloc == BFD_RELOC_HI16_S_PCREL
+	  || reloc == BFD_RELOC_MIPS16_HI16_S
 	  || reloc == BFD_RELOC_MICROMIPS_HI16_S);
 }
 
 static inline bool
 lo16_reloc_p (bfd_reloc_code_real_type reloc)
 {
-  return (reloc == BFD_RELOC_LO16 || reloc == BFD_RELOC_MIPS16_LO16
+  return (reloc == BFD_RELOC_LO16 || reloc == BFD_RELOC_LO16_PCREL
+	  || reloc == BFD_RELOC_MIPS16_LO16
 	  || reloc == BFD_RELOC_MICROMIPS_LO16);
 }
 
@@ -4402,8 +4404,9 @@ static inline bfd_reloc_code_real_type
 matching_lo_reloc (bfd_reloc_code_real_type reloc)
 {
   return (mips16_reloc_p (reloc) ? BFD_RELOC_MIPS16_LO16
-	  : (micromips_reloc_p (reloc) ? BFD_RELOC_MICROMIPS_LO16
-	     : BFD_RELOC_LO16));
+	  : micromips_reloc_p (reloc) ? BFD_RELOC_MICROMIPS_LO16
+	  : reloc == BFD_RELOC_HI16_S_PCREL ? BFD_RELOC_LO16_PCREL
+	  : BFD_RELOC_LO16);
 }
 
 /* Return true if the given fixup is followed by a matching R_MIPS_LO16
@@ -4415,7 +4418,12 @@ fixup_has_matching_lo_p (fixS *fixp)
   return (fixp->fx_next != NULL
 	  && fixp->fx_next->fx_r_type == matching_lo_reloc (fixp->fx_r_type)
 	  && fixp->fx_addsy == fixp->fx_next->fx_addsy
-	  && fixp->fx_offset == fixp->fx_next->fx_offset);
+	  && (fixp->fx_r_type == BFD_RELOC_HI16_S_PCREL
+	      ? (fixp->fx_next->fx_offset - fixp->fx_offset
+		 == ((fixp->fx_next->fx_frag->fr_address
+			+ fixp->fx_next->fx_where)
+		     - (fixp->fx_frag->fr_address + fixp->fx_where)))
+	      : fixp->fx_offset == fixp->fx_next->fx_offset));
 }
 
 /* Move all labels in LABELS to the current insertion point.  TEXT_P
@@ -15413,6 +15421,13 @@ mips_frob_file_before_adjust (void)
    if the user knows that adding 2 to "foo" will not induce a carry to
    the high 16 bits.
 
+   A %pcrel_lo() expression matches a %pcrel_hi() expression if:
+
+      (a) it refers to the same symbol; and
+      (b) the offset applied in the %pcrel_lo() expression equals
+	  the offset applied in the %pcrel_hi() expression plus the
+	  distance from the location of %pcrel_hi() to %pcrel_lo().
+
    When several %lo()s match a particular %got() or %hi(), we use the
    following rules to distinguish them:
 
@@ -15484,9 +15499,14 @@ mips_frob_file (void)
 
 	  if ((*pos)->fx_r_type == looking_for_rtype
 	      && symbol_same_p ((*pos)->fx_addsy, l->fixp->fx_addsy)
-	      && (*pos)->fx_offset >= l->fixp->fx_offset
+	      && (l->fixp->fx_r_type == BFD_RELOC_HI16_S_PCREL
+		  ? ((*pos)->fx_offset - l->fixp->fx_offset
+		     == (((*pos)->fx_frag->fr_address + (*pos)->fx_where)
+			 - (l->fixp->fx_frag->fr_address + l->fixp->fx_where)))
+		  : (*pos)->fx_offset >= l->fixp->fx_offset)
 	      && (lo_pos == NULL
-		  || (*pos)->fx_offset < (*lo_pos)->fx_offset
+		  || (l->fixp->fx_r_type != BFD_RELOC_HI16_S_PCREL
+		      && (*pos)->fx_offset < (*lo_pos)->fx_offset)
 		  || (!matched_lo_p
 		      && (*pos)->fx_offset == (*lo_pos)->fx_offset)))
 	    lo_pos = pos;
@@ -15497,15 +15517,20 @@ mips_frob_file (void)
 
       /* If we found a match, remove the high-part relocation from its
 	 current position and insert it before the low-part relocation.
-	 Make the offsets match so that fixup_has_matching_lo_p()
-	 will return true.
+
+	 For absolute relocations make the offsets match so that
+	 fixup_has_matching_lo_p() will return true.  For PC-relative
+	 relocations the distance between the offsets is retained
+	 according to expectations in `fixup_has_matching_lo_p',
+	 `_bfd_mips_elf_lo16_reloc' and `mips_elf_add_lo16_rel_addend'.
 
 	 We don't warn about unmatched high-part relocations since some
 	 versions of gcc have been known to emit dead "lui ...%hi(...)"
 	 instructions.  */
       if (lo_pos != NULL)
 	{
-	  l->fixp->fx_offset = (*lo_pos)->fx_offset;
+	  if (l->fixp->fx_r_type != BFD_RELOC_HI16_S_PCREL)
+	    l->fixp->fx_offset = (*lo_pos)->fx_offset;
 	  if (l->fixp->fx_next != *lo_pos)
 	    {
 	      *hi_pos = l->fixp->fx_next;

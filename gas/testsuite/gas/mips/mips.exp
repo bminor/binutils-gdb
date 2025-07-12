@@ -1724,6 +1724,13 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "pcrel-4-n32"
 	run_dump_test "pcrel-4-64"
     }
+    run_dump_test "pcrel-hilo-match"
+    run_dump_test "pcrel-hilo-addend"
+    run_dump_test "pcrel-hilo"
+    if $has_newabi {
+	run_dump_test "pcrel-hilo-n32"
+	run_dump_test "pcrel-hilo-64"
+    }
 
     run_dump_test "pcrel-reloc-1"
     run_dump_test "pcrel-reloc-1-r6"
