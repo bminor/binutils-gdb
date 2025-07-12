@@ -1,5 +1,6 @@
 #name: FEAT_OCCMO Test
 #as: -march=armv8-a+occmo
+#as: -march=armv9.6-a
 #objdump: -dr
 
 .*:     file format .*

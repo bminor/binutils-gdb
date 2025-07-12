@@ -1,6 +1,7 @@
 #name: FEAT_LSUI Test
 #objdump: -dr
 #as:-march=armv9-a+lsui+fp
+#as:-march=armv9.6-a
 
 .*:     file format .*
 

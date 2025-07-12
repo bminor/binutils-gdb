@@ -1,5 +1,6 @@
 #name: FEAT_OCCMO + MEMTAG Test
 #as: -march=armv8-a+occmo+memtag
+#as: -march=armv9.6-a+memtag
 #objdump: -dr
 
 .*:     file format .*

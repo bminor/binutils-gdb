@@ -1,5 +1,6 @@
 #name: Test for FEAT_CMPBR
 #as: -march=armv8-a+cmpbr
+#as: -march=armv9.6-a
 #objdump: -dr
 
 .*:     file format .*

@@ -375,6 +375,7 @@ automatically cause those extensions to be disabled.
 @item @code{armv9.3-a} @tab @code{armv9.2-a}, @code{armv8.8-a}
 @item @code{armv9.4-a} @tab @code{armv9.3-a}, @code{armv8.9-a}
 @item @code{armv9.5-a} @tab @code{armv9.4-a}, @code{cpa}, @code{lut}, @code{faminmax}
+@item @code{armv9.6-a} @tab @code{armv9.5-a}, @code{cmpbr}, @code{fprcvt}, @code{lsui}, @code{occmo}, @code{sve2p2}
 @item @code{armv8-r} @tab @code{armv8.4-a+nolor}
 @end multitable
 

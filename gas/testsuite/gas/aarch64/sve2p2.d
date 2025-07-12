@@ -1,5 +1,6 @@
 #as: -march=armv8-a+sve2p2
 #as: -march=armv8-a+sme2p2
+#as: -march=armv9.6-a
 #objdump: -dr
 
 .*:     file format .*

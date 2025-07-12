@@ -304,6 +304,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_V9_4A,
   /* Armv9.5-A processors.  */
   AARCH64_FEATURE_V9_5A,
+  /* Armv9.6-A processors.  */
+  AARCH64_FEATURE_V9_6A,
   /* FPRCVT instructions.  */
   AARCH64_FEATURE_FPRCVT,
   /* Point of Physical Storage.  */
@@ -473,6 +475,12 @@ static_assert ((AA64_REPLICATE (REP_PLUS, AA64_REPVAL,
 					 | AARCH64_FEATBIT (X, SPMU2)	\
 					 | AARCH64_FEATBIT (X, STEP2)	\
 					)
+#define AARCH64_ARCH_V9_6A_FEATURES(X)	(AARCH64_FEATBIT (X, V9_6A)	\
+					 | AARCH64_FEATBIT (X, CMPBR)	\
+					 | AARCH64_FEATBIT (X, FPRCVT)	\
+					 | AARCH64_FEATBIT (X, LSUI)	\
+					 | AARCH64_FEATBIT (X, OCCMO)	\
+					 | AARCH64_FEATBIT (X, SVE2p2))
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8A(X)	(AARCH64_FEATBIT (X, V8) \
@@ -512,6 +520,8 @@ static_assert ((AA64_REPLICATE (REP_PLUS, AA64_REPVAL,
 				 | AARCH64_ARCH_V9_4A_FEATURES (X))
 #define AARCH64_ARCH_V9_5A(X)	(AARCH64_ARCH_V9_4A (X) \
 				 | AARCH64_ARCH_V9_5A_FEATURES (X))
+#define AARCH64_ARCH_V9_6A(X)	(AARCH64_ARCH_V9_5A (X) \
+				 | AARCH64_ARCH_V9_6A_FEATURES (X))
 
 #define AARCH64_ARCH_NONE(X)	0
 
