@@ -4103,14 +4103,12 @@ static void test_registers_raw_compare_zero_length ()
 [[noreturn]] static void
 captured_main (int argc, char *argv[])
 {
-  int bad_attach;
   int pid;
   char *arg_end;
   const char *port = NULL;
   char **next_arg = &argv[1];
-  volatile int multi_mode = 0;
-  volatile int attach = 0;
-  int was_running;
+  volatile bool multi_mode = false;
+  volatile bool attach = false;
   bool selftest = false;
 #if GDB_SELF_TEST
   std::vector<const char *> selftest_filters;
@@ -4143,9 +4141,9 @@ captured_main (int argc, char *argv[])
 	  exit (0);
 	}
       else if (strcmp (*next_arg, "--attach") == 0)
-	attach = 1;
+	attach = true;
       else if (strcmp (*next_arg, "--multi") == 0)
-	multi_mode = 1;
+	multi_mode = true;
       else if (strcmp (*next_arg, "--wrapper") == 0)
 	{
 	  char **tmp;
@@ -4328,14 +4326,14 @@ captured_main (int argc, char *argv[])
   if (port != NULL)
     remote_prepare (port);
 
-  bad_attach = 0;
+  bool bad_attach = false;
   pid = 0;
 
   /* --attach used to come after PORT, so allow it there for
        compatibility.  */
   if (*next_arg != NULL && strcmp (*next_arg, "--attach") == 0)
     {
-      attach = 1;
+      attach = true;
       next_arg++;
     }
 
@@ -4345,7 +4343,7 @@ captured_main (int argc, char *argv[])
 	  || (pid = strtoul (*next_arg, &arg_end, 0)) == 0
 	  || *arg_end != '\0'
 	  || next_arg[1] != NULL))
-    bad_attach = 1;
+    bad_attach = true;
 
   if (bad_attach)
     {
@@ -4410,11 +4408,12 @@ captured_main (int argc, char *argv[])
   if (current_thread != nullptr)
     current_process ()->dlls_changed = false;
 
+  bool was_running;
   if (cs.last_status.kind () == TARGET_WAITKIND_EXITED
       || cs.last_status.kind () == TARGET_WAITKIND_SIGNALLED)
-    was_running = 0;
+    was_running = false;
   else
-    was_running = 1;
+    was_running = true;
 
   if (!was_running && !multi_mode)
     error ("No program to debug");
