@@ -1079,18 +1079,6 @@ sframe_decoder_get_offsetof_fde_start_addr (sframe_decoder_ctx *dctx,
 	  + offsetof (sframe_func_desc_entry, sfde_func_start_address));
 }
 
-/* Find the function descriptor entry which contains the specified address
-   ADDR.
-   This function is deprecated and will be removed from libsframe.so.2.  */
-
-void *
-sframe_get_funcdesc_with_addr (sframe_decoder_ctx *ctx __attribute__ ((unused)),
-			       int32_t addr __attribute__ ((unused)),
-			       int *errp)
-{
-  return sframe_ret_set_errno (errp, SFRAME_ERR_INVAL);
-}
-
 /* Find the function descriptor entry starting which contains the specified
    address ADDR.  */
 
