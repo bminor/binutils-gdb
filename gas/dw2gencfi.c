@@ -409,7 +409,7 @@ alloc_fde_entry (void)
   fde->lsda_encoding = DW_EH_PE_omit;
   fde->eh_header_type = EH_COMPACT_UNKNOWN;
 #ifdef tc_fde_entry_init_extra
-  tc_fde_entry_init_extra (fde)
+  tc_fde_entry_init_extra (fde);
 #endif
 
   return fde;
@@ -2272,7 +2272,7 @@ select_cie_for_fde (struct fde_entry *fde, bool eh_frame,
   cie->personality = fde->personality;
   cie->first = fde->data;
 #ifdef tc_cie_entry_init_extra
-  tc_cie_entry_init_extra (cie, fde)
+  tc_cie_entry_init_extra (cie, fde);
 #endif
 
   for (i = cie->first; i ; i = i->next)
