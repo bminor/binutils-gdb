@@ -572,6 +572,27 @@ if { ![skip_sframe_tests] } {
     run_dump_test "sframe-ibt-plt-1"
     run_dump_test "sframe-pltgot-1"
     run_dump_test "sframe-pltgot-2"
+
+    run_ld_link_tests [list \
+	[list \
+	    "Build sframe-reloc-2.o" \
+	    "-m elf_x86_64 -r" \
+	    "" \
+	    "--64 --gsframe" \
+	    {sframe-reloc-2a.s sframe-reloc-2b.s} \
+	    "" \
+	    "sframe-reloc-2.o" \
+	] \
+	[list \
+	    "Build sframe-reloc-2" \
+	    "-m elf_x86_64 tmpdir/sframe-reloc-2.o" \
+	    "" \
+	    "--64 --gsframe" \
+	    {dummy.s} \
+	    "" \
+	    "sframe-reloc-2" \
+	] \
+    ]
 }
 
 if ![istarget "x86_64-*-linux*"] {

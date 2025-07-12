@@ -120,7 +120,6 @@ sframe_decoder_init_func_bfdinfo (bfd *abfd,
   if ((sec->flags & SEC_LINKER_CREATED) && cookie->rels == NULL)
     return true;
 
-  BFD_ASSERT (cookie->rels + fde_count == cookie->relend);
   rel = cookie->rels;
   for (i = 0; i < fde_count; i++)
     {
@@ -131,6 +130,14 @@ sframe_decoder_init_func_bfdinfo (bfd *abfd,
 
       rel++;
     }
+
+  /* If there are more relocation entries, they must be R_*_NONE which
+     may be generated from relocations against discarded sections by
+     ld -r.  */
+  for (; rel < cookie->relend; rel++)
+   if (rel->r_info != 0)
+     break;
+  BFD_ASSERT (rel == cookie->relend);
 
   return true;
 }
