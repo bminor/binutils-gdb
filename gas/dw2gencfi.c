@@ -91,11 +91,6 @@
 #define tc_cfi_reloc_for_encoding(e) BFD_RELOC_NONE
 #endif
 
-/* Targets which support SFrame format will define this and return true.  */
-#ifndef support_sframe_p
-# define support_sframe_p() false
-#endif
-
 /* Private segment collection list.  */
 struct dwcfi_seg_list
 {
@@ -2606,6 +2601,7 @@ cfi_finish (void)
 	- .sframe in the .cfi_sections directive.  */
   if (flag_gen_sframe || (all_cfi_sections & CFI_EMIT_sframe) != 0)
     {
+#ifdef support_sframe_p
       if (support_sframe_p () && !SUPPORT_FRAME_LINKONCE)
 	{
 	  segT sframe_seg;
@@ -2618,6 +2614,7 @@ cfi_finish (void)
 	  output_sframe (sframe_seg);
 	}
       else
+#endif
 	as_bad (_(".sframe not supported for target"));
     }
 
