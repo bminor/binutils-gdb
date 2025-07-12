@@ -876,7 +876,7 @@ sframe_decode_fre (const char *fre_buf, sframe_frame_row_entry *fre,
   return 0;
 }
 
-/* Decode the specified SFrame buffer CF_BUF of size CF_SIZE and return the
+/* Decode the specified SFrame buffer SF_BUF of size SF_SIZE and return the
    new SFrame decoder context.
 
    Sets ERRP for the caller if any error.  Frees up the allocated memory in
@@ -1639,7 +1639,7 @@ sframe_encoder_add_funcdesc (sframe_encoder_ctx *encoder,
 			     int32_t start_addr,
 			     uint32_t func_size,
 			     unsigned char func_info,
-			     uint32_t num_fres __attribute__ ((unused)))
+			     uint32_t num_fres ATTRIBUTE_UNUSED)
 {
   sframe_header *ehp;
   sf_fde_tbl *fd_info;
@@ -1721,7 +1721,7 @@ sframe_encoder_add_funcdesc_v2 (sframe_encoder_ctx *encoder,
 				uint32_t func_size,
 				unsigned char func_info,
 				uint8_t rep_block_size,
-				uint32_t num_fres __attribute__ ((unused)))
+				uint32_t num_fres ATTRIBUTE_UNUSED)
 {
   sf_fde_tbl *fd_info;
   int err;
