@@ -376,6 +376,8 @@ run_dump_test_lp64 "variant_pcs-r"
 run_dump_test_lp64 "variant_pcs-shared"
 run_dump_test_lp64 "variant_pcs-now"
 
+run_dump_test_lp64 "mte-tagged-frame"
+
 set aarch64elflinktests {
   {"ld-aarch64/so with global symbol" "-shared" "" "" {copy-reloc-so.s}
     {} "copy-reloc-so.so"}

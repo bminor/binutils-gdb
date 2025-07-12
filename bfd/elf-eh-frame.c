@@ -802,6 +802,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 		switch (*aug++)
 		  {
 		  case 'B':
+		  case 'G':
 		    if (abfd->arch_info->arch != bfd_arch_aarch64)
 		      goto unrecognized;
 		    break;
