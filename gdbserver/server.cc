@@ -4216,7 +4216,7 @@ captured_main (int argc, char *argv[])
       else if (strcmp (*next_arg, "--disable-packet") == 0)
 	{
 	  gdbserver_show_disableable (stdout);
-	  exit (0);
+	  exit (1);
 	}
       else if (startswith (*next_arg, "--disable-packet="))
 	{
