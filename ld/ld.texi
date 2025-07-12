@@ -8374,6 +8374,16 @@ GCS markings.
 If issues are found, a maximum of 20 messages will be emitted, and then a summary
 with the total number of issues will be displayed at the end.
 
+@kindex -z memtag-mode=@var{mode}
+@cindex MTE modes of operation
+The @samp{-z memtag-mode=mode} specifies the MTE mode of operation.
+The value of @samp{mode} can be one of @samp{none}, @samp{sync} or
+@samp{async}.  The specified modes determine the value of the
+@samp{DT_AARCH64_MEMTAG_MODE} dynamic tag.  The @samp{sync} mode
+implies precise exceptions, with the runtime providing the exact
+instruction where the fault occurred, and the exact faulting address.
+The @samp{async} mode implies imprecise exceptions.
+
 @ifclear GENERIC
 @lowersections
 @end ifclear

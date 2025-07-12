@@ -2622,6 +2622,9 @@ struct elf_aarch64_link_hash_table
   /* Don't apply link-time values for dynamic relocations.  */
   int no_apply_dynamic_relocs;
 
+  /* Memtag Extension mode of operation.  */
+  aarch64_memtag_opts memtag_opts;
+
   /* The number of bytes in the initial entry in the PLT.  */
   bfd_size_type plt_header_size;
 
@@ -5009,13 +5012,15 @@ bfd_elfNN_aarch64_set_options (struct bfd *output_bfd,
 			       int fix_erratum_835769,
 			       erratum_84319_opts fix_erratum_843419,
 			       int no_apply_dynamic_relocs,
-			       const aarch64_protection_opts *sw_protections)
+			       const aarch64_protection_opts *sw_protections,
+			       const aarch64_memtag_opts *memtag_opts)
 {
   struct elf_aarch64_link_hash_table *globals;
 
   globals = elf_aarch64_hash_table (link_info);
   globals->pic_veneer = pic_veneer;
   globals->fix_erratum_835769 = fix_erratum_835769;
+  globals->memtag_opts = *memtag_opts;
   /* If the default options are used, then ERRAT_ADR will be set by default
      which will enable the ADRP->ADR workaround for the erratum 843419
      workaround.  */
@@ -9775,7 +9780,14 @@ elfNN_aarch64_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		   && !add_dynamic_entry (DT_AARCH64_PAC_PLT, 0))
 	    return false;
 	}
+
+      if (is_aarch64_elf (output_bfd)
+	  && htab->memtag_opts.memtag_mode != AARCH64_MEMTAG_MODE_NONE
+	  && !add_dynamic_entry (DT_AARCH64_MEMTAG_MODE,
+				 htab->memtag_opts.memtag_mode == AARCH64_MEMTAG_MODE_ASYNC))
+	return false;
     }
+
 #undef add_dynamic_entry
 
   return true;
