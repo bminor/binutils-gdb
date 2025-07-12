@@ -2294,6 +2294,17 @@ lo16_reloc_p (int r_type)
 }
 
 static inline bool
+tls_hi16_reloc_p (int r_type)
+{
+  return (r_type == R_MIPS_TLS_DTPREL_HI16
+	  || r_type == R_MIPS_TLS_TPREL_HI16
+	  || r_type == R_MIPS16_TLS_DTPREL_HI16
+	  || r_type == R_MIPS16_TLS_TPREL_HI16
+	  || r_type == R_MICROMIPS_TLS_DTPREL_HI16
+	  || r_type == R_MICROMIPS_TLS_TPREL_HI16);
+}
+
+static inline bool
 mips16_call_reloc_p (int r_type)
 {
   return r_type == R_MIPS16_26 || r_type == R_MIPS16_CALL16;
@@ -8312,14 +8323,44 @@ mips_elf_add_lo16_rel_addend (bfd *abfd,
   bfd_vma l;
 
   r_type = ELF_R_TYPE (abfd, rel->r_info);
-  if (mips16_reloc_p (r_type))
-    lo16_type = R_MIPS16_LO16;
-  else if (micromips_reloc_p (r_type))
-    lo16_type = R_MICROMIPS_LO16;
-  else if (r_type == R_MIPS_PCHI16)
-    lo16_type = R_MIPS_PCLO16;
-  else
-    lo16_type = R_MIPS_LO16;
+  switch (r_type)
+    {
+    case R_MIPS_HI16:
+    case R_MIPS_GOT16:
+      lo16_type = R_MIPS_LO16;
+      break;
+    case R_MIPS_PCHI16:
+      lo16_type = R_MIPS_PCLO16;
+      break;
+    case R_MIPS_TLS_DTPREL_HI16:
+      lo16_type = R_MIPS_TLS_DTPREL_LO16;
+      break;
+    case R_MIPS_TLS_TPREL_HI16:
+      lo16_type = R_MIPS_TLS_TPREL_LO16;
+      break;
+    case R_MIPS16_HI16:
+    case R_MIPS16_GOT16:
+      lo16_type = R_MIPS16_LO16;
+      break;
+    case R_MIPS16_TLS_DTPREL_HI16:
+      lo16_type = R_MIPS16_TLS_DTPREL_LO16;
+      break;
+    case R_MIPS16_TLS_TPREL_HI16:
+      lo16_type = R_MIPS16_TLS_TPREL_LO16;
+      break;
+    case R_MICROMIPS_HI16:
+    case R_MICROMIPS_GOT16:
+      lo16_type = R_MICROMIPS_LO16;
+      break;
+    case R_MICROMIPS_TLS_DTPREL_HI16:
+      lo16_type = R_MICROMIPS_TLS_DTPREL_LO16;
+      break;
+    case R_MICROMIPS_TLS_TPREL_HI16:
+      lo16_type = R_MICROMIPS_TLS_TPREL_LO16;
+      break;
+    default:
+      abort ();
+    }
 
   /* The combined value is the sum of the HI16 addend, left-shifted by
      sixteen bits, and the LO16 addend, sign extended.  (Usually, the
@@ -10547,7 +10588,8 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      if (hi16_reloc_p (r_type)
 		  || (got16_reloc_p (r_type)
 		      && mips_elf_local_relocation_p (input_bfd, rel,
-						      local_sections)))
+						      local_sections))
+		  || tls_hi16_reloc_p (r_type))
 		{
 		  if (!mips_elf_add_lo16_rel_addend (input_bfd, input_section,
 						     rel, relend,
@@ -10585,7 +10627,9 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  if (!rela_relocation_p && rel->r_addend)
 	    {
 	      addend += rel->r_addend;
-	      if (hi16_reloc_p (r_type) || got16_reloc_p (r_type))
+	      if (hi16_reloc_p (r_type)
+		  || got16_reloc_p (r_type)
+		  || tls_hi16_reloc_p (r_type))
 		addend = mips_elf_high (addend);
 	      else if (r_type == R_MIPS_HIGHER)
 		addend = mips_elf_higher (addend);

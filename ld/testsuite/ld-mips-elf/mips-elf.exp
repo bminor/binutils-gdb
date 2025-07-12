@@ -867,6 +867,16 @@ run_dump_test_n64 "pcrel-hilo-srec" \
 	[list [list name (n64)] \
 	      [list objdump [expr { [istarget *el-*-*] ? "-EL" : "-EB" }]]]
 
+run_dump_test_o32 "pr19977"
+run_dump_test_n32 "pr19977" [list [list name (n32)]]
+run_dump_test_o32 "pr19977-mips16" noarch
+run_dump_test_n32 "pr19977-mips16" [list noarch [list name (n32)]]
+run_dump_test_o32 "pr19977-micromips" noarch
+run_dump_test_n32 "pr19977-micromips" [list noarch [list name (n32)]]
+run_dump_test_o32 "pr19977-r"
+run_dump_test_o32 "pr19977-r-mips16" noarch
+run_dump_test_o32 "pr19977-r-micromips" noarch
+
 if { $linux_gnu } {
     run_dump_test_n32 "textrel-1"
     run_dump_test "got-page-1"
