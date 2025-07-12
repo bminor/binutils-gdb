@@ -1,4 +1,4 @@
-#name: R_MICROMIPS_HI16 and R_MICROMIPS_LO16 relocs n64
+#name: R_MICROMIPS_HI16 and R_MICROMIPS_LO16 relocs (n64)
 #source: ../../../gas/testsuite/gas/mips/mips-hilo-n64.s
 #source: mips-hilo.s
 #as: -mmicromips -march=mips64r2

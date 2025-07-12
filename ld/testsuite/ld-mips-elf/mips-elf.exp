@@ -815,38 +815,42 @@ run_dump_test_n32 "jalbal" noarch
 run_dump_test "mode-change-error-1"
 
 run_dump_test_o32 "mips16-hilo" noarch
-run_dump_test_n32 "mips16-hilo-n32" noarch
+run_dump_test_n32 "mips16-hilo" [list noarch [list name (n32)]]
 run_dump_test_o32 "mips16-hilo-srec" \
 	[list noarch \
 	      [list objdump [expr { [istarget *el-*-*] ? "-EL" : "-EB" }]]]
-run_dump_test_n32 "mips16-hilo-srec-n32" \
+run_dump_test_n32 "mips16-hilo-srec" \
 	[list noarch \
+	      [list name (n32)] \
 	      [list objdump [expr { [istarget *el-*-*] ? "-EL" : "-EB" }]]]
 run_dump_test_o32 "mips16e2-hilo" noarch
-run_dump_test_n32 "mips16e2-hilo-n32" noarch
+run_dump_test_n32 "mips16e2-hilo" [list noarch [list name (n32)]]
 run_dump_test_o32 "mips16e2-hilo-srec" \
 	[list noarch \
 	      [list objdump [expr { [istarget *el-*-*] ? "-EL" : "-EB" }]]]
-run_dump_test_n32 "mips16e2-hilo-srec-n32" \
+run_dump_test_n32 "mips16e2-hilo-srec" \
 	[list noarch \
+	      [list name (n32)] \
 	      [list objdump [expr { [istarget *el-*-*] ? "-EL" : "-EB" }]]]
 run_dump_test_o32 "mips-hilo"
-run_dump_test_n32 "mips-hilo-n32"
+run_dump_test_n32 "mips-hilo" [list [list name (n32)]]
 run_dump_test_n64 "mips-hilo-n64"
 run_dump_test_o32 "mips-hilo-srec" \
 	[list [list objdump [expr { [istarget *el-*-*] ? "-EL" : "-EB" }]]]
-run_dump_test_n32 "mips-hilo-srec-n32" \
-	[list [list objdump [expr { [istarget *el-*-*] ? "-EL" : "-EB" }]]]
+run_dump_test_n32 "mips-hilo-srec" \
+	[list [list name (n32)] \
+	      [list objdump [expr { [istarget *el-*-*] ? "-EL" : "-EB" }]]]
 run_dump_test_n64 "mips-hilo-srec-n64" \
 	[list [list objdump [expr { [istarget *el-*-*] ? "-EL" : "-EB" }]]]
 run_dump_test_o32 "micromips-hilo" noarch
-run_dump_test_n32 "micromips-hilo-n32" noarch
+run_dump_test_n32 "micromips-hilo" [list noarch [list name (n32)]]
 run_dump_test_n64 "micromips-hilo-n64" noarch
 run_dump_test_o32 "micromips-hilo-srec" \
 	[list noarch \
 	      [list objdump [expr { [istarget *el-*-*] ? "-EL" : "-EB" }]]]
-run_dump_test_n32 "micromips-hilo-srec-n32" \
+run_dump_test_n32 "micromips-hilo-srec" \
 	[list noarch \
+	      [list name (n32)] \
 	      [list objdump [expr { [istarget *el-*-*] ? "-EL" : "-EB" }]]]
 run_dump_test_n64 "micromips-hilo-srec-n64" \
 	[list noarch \
