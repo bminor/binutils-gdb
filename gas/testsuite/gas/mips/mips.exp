@@ -1606,6 +1606,9 @@ if { [istarget mips*-*-vxworks*] } {
     if $has_newabi { run_dump_test "cfi-n64-1" }
 
     run_dump_test "pr12915"
+
+    run_dump_test_arches "pr19977"	[mips_arch_list_all]
+
     run_dump_test "reginfo-1a"
     run_dump_test "reginfo-1b"
     run_dump_test "reginfo-2"
