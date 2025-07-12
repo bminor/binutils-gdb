@@ -11293,7 +11293,7 @@ _bfd_elf_default_action_discarded (asection *sec)
       && strncmp (sec->name, ".eh_frame.", 10) == 0)
     return 0;
 
-  if (strcmp (".sframe", sec->name) == 0)
+  if (elf_section_type (sec) == SHT_GNU_SFRAME)
     return 0;
 
   if (strcmp (".gcc_except_table", sec->name) == 0)

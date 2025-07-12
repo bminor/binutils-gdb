@@ -77,9 +77,10 @@ Appendices
 @section Overview
 @cindex Overview
 
-The SFrame stack trace information is provided in a loaded section, known as the
-@code{.sframe} section.  When available, the @code{.sframe} section appears in
-a new segment of its own, PT_GNU_SFRAME.
+The SFrame stack trace information is provided in a loaded section, known as
+the @code{.sframe} section.  When available, the @code{.sframe} section appears
+in segment of type PT_GNU_SFRAME.  An ELF SFrame section will have the type
+SHT_GNU_SFRAME.
 
 The SFrame format is currently supported only for select ABIs, namely, AMD64,
 AAPCS64, and s390x.

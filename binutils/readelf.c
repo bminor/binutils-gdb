@@ -5964,6 +5964,7 @@ get_os_specific_section_type_name (Filedata * filedata, unsigned int sh_type)
     case SHT_GNU_HASH:                return "GNU_HASH";
     case SHT_GNU_LIBLIST:             return "GNU_LIBLIST";
     case SHT_GNU_OBJECT_ONLY:	      return "GNU_OBJECT_ONLY";
+    case SHT_GNU_SFRAME:              return "GNU_SFRAME";
 
     case SHT_SUNW_move:               return "SUNW_MOVE";
     case SHT_SUNW_COMDAT:             return "SUNW_COMDAT";
@@ -8367,6 +8368,7 @@ process_section_headers (Filedata * filedata)
 
 	case SHT_NOTE:
 	case SHT_PROGBITS:
+	case SHT_GNU_SFRAME:
 	  /* Having a zero sized section is not illegal according to the
 	     ELF standard, but it might be an indication that something
 	     is wrong.  So issue a warning if we are running in lint mode.  */

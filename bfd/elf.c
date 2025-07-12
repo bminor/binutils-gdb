@@ -2476,6 +2476,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
     case SHT_PREINIT_ARRAY:	/* .preinit_array section.  */
     case SHT_GNU_LIBLIST:	/* .gnu.liblist section.  */
     case SHT_GNU_HASH:		/* .gnu.hash section.  */
+    case SHT_GNU_SFRAME:	/* .sframe section.  */
       ret = _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex);
       goto success;
 

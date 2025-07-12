@@ -8,6 +8,8 @@
   with the applicable encoding.  Setting the flag ensures compliance with the
   updated SFrame V2 specification.
 
+  ELF SFrame sections now have section type set to SHT_GNU_SFRAME.
+
 * Add .errif and .warnif directives, permitting user-controlled diagnostics
   with conditionals that are evaluated only at the end of assembly.
 

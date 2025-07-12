@@ -568,6 +568,7 @@
 
 #define SHT_ANDROID_RELR             0x6fffff00
 
+#define SHT_GNU_SFRAME		     0x6ffffff4	/* SFrame stack trace information.  */
 #define SHT_GNU_ATTRIBUTES           0x6ffffff5	/* Object attributes */
 #define SHT_GNU_HASH	             0x6ffffff6	/* GNU style symbol hash table */
 #define SHT_GNU_LIBLIST	             0x6ffffff7	/* List of prelink dependencies */

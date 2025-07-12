@@ -9,6 +9,8 @@
   sfde_func_start_address field in the SFrame section.  Relocatable SFrame
   links are now fixed.
 
+  ELF SFrame sections now have section type set to SHT_GNU_SFRAME.
+
 * On RISC-V, add new PLT formats, and GNU property merge rules for zicfiss and
   zicfilp extensions.
 

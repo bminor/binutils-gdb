@@ -2611,6 +2611,7 @@ cfi_finish (void)
 				    (SEC_ALLOC | SEC_LOAD | SEC_DATA
 				     | DWARF2_EH_FRAME_READ_ONLY),
 				    alignment);
+	  elf_section_type (sframe_seg) = SHT_GNU_SFRAME;
 	  output_sframe (sframe_seg);
 	}
       else

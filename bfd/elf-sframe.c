@@ -191,6 +191,18 @@ _bfd_elf_parse_sframe (bfd *abfd,
   bfd_size_type sf_size;
   int decerr = 0;
 
+  /* Prior versions of assembler and ld were generating SFrame sections with
+     section type SHT_PROGBITS.  Issue an error for lack of support for such
+     objects now.  Even if section size is zero, a valid section type is
+     expected.  */
+  if (elf_section_type (sec) != SHT_GNU_SFRAME)
+    {
+      _bfd_error_handler
+	(_("error in %pB(%pA); unexpected SFrame section type"),
+	 abfd, sec);
+      return false;
+    }
+
   if (sec->size == 0
       || (sec->flags & SEC_HAS_CONTENTS) == 0
       || sec->sec_info_type != SEC_INFO_TYPE_NONE)
@@ -298,8 +310,7 @@ _bfd_elf_discard_section_sframe
    BFD ABFD.  Returns true if no error.  */
 
 bool
-_bfd_elf_set_section_sframe (bfd *abfd,
-				struct bfd_link_info *info)
+_bfd_elf_set_section_sframe (bfd *abfd, struct bfd_link_info *info)
 {
   asection *cfsec;
 
@@ -307,6 +318,7 @@ _bfd_elf_set_section_sframe (bfd *abfd,
   if (!cfsec)
     return false;
 
+  elf_section_type (cfsec) = SHT_GNU_SFRAME;
   elf_sframe (abfd) = cfsec;
 
   return true;

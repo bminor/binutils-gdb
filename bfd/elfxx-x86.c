@@ -4785,11 +4785,10 @@ _bfd_x86_elf_link_setup_gnu_properties
 			    | SEC_HAS_CONTENTS | SEC_IN_MEMORY
 			    | SEC_LINKER_CREATED);
 
-	  sec = bfd_make_section_anyway_with_flags (dynobj,
-						    ".sframe",
-						    flags);
+	  sec = bfd_make_section_anyway_with_flags (dynobj, ".sframe", flags);
 	  if (sec == NULL)
 	    info->callbacks->fatal (_("%P: failed to create PLT .sframe section\n"));
+	  elf_section_type (sec) = SHT_GNU_SFRAME;
 
 	  // FIXME check this
 	  // if (!bfd_set_section_alignment (sec, class_align))
@@ -4805,6 +4804,7 @@ _bfd_x86_elf_link_setup_gnu_properties
 							flags);
 	      if (sec == NULL)
 		info->callbacks->fatal (_("%P: failed to create second PLT .sframe section\n"));
+	      elf_section_type (sec) = SHT_GNU_SFRAME;
 
 	      htab->plt_second_sframe = sec;
 	    }
@@ -4817,6 +4817,7 @@ _bfd_x86_elf_link_setup_gnu_properties
 							flags);
 	      if (sec == NULL)
 		info->callbacks->fatal (_("%P: failed to create PLT GOT .sframe section\n"));
+	      elf_section_type (sec) = SHT_GNU_SFRAME;
 
 	      htab->plt_got_sframe = sec;
 	    }
