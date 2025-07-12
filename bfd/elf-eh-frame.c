@@ -802,6 +802,8 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 		switch (*aug++)
 		  {
 		  case 'B':
+		    if (abfd->arch_info->arch != bfd_arch_aarch64)
+		      goto unrecognized;
 		    break;
 		  case 'L':
 		    REQUIRE (read_byte (&buf, end, &cie->lsda_encoding));
@@ -843,6 +845,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 		      REQUIRE (skip_bytes (&buf, end, per_width));
 		    }
 		    break;
+		  unrecognized:
 		  default:
 		    /* Unrecognized augmentation. Better bail out.  */
 		    goto free_no_table;
