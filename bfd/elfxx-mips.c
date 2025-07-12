@@ -2605,7 +2605,7 @@ _bfd_mips_elf_lo16_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
      and we want to apply (symbol + addend + 0x8000) >> 16 to the
      high insn (the +0x8000 adjusting for when the applied low part is
      negative).  */
-  vallo = ((bfd_get_32 (abfd, location) & 0xffff) ^ 0x8000) - 0x8000;
+  vallo = _bfd_mips_elf_sign_extend (bfd_get_32 (abfd, location) & 0xffff, 16);
   _bfd_mips_elf_reloc_shuffle (abfd, reloc_entry->howto->type, false,
 			       location);
 
