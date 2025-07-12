@@ -4551,8 +4551,8 @@ dump_dwarf (bfd *abfd, bool is_mainfile)
       break;
     }
 
-  init_dwarf_regnames_by_bfd_arch_and_mach (bfd_get_arch (abfd),
-					    bfd_get_mach (abfd));
+  init_dwarf_by_bfd_arch_and_mach (bfd_get_arch (abfd),
+				   bfd_get_mach (abfd));
 
   bfd_map_over_sections (abfd, dump_dwarf_section, (void *) &is_mainfile);
 }

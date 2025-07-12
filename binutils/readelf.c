@@ -6828,7 +6828,7 @@ process_file_header (Filedata * filedata)
     return false;
 
   if (! filedata->is_separate)
-    init_dwarf_regnames_by_elf_machine_code (header->e_machine);
+    init_dwarf_by_elf_machine_code (header->e_machine);
 
   if (do_header)
     {

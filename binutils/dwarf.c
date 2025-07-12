@@ -8895,7 +8895,7 @@ init_dwarf_regnames_loongarch (void)
 }
 
 void
-init_dwarf_regnames_by_elf_machine_code (unsigned int e_machine)
+init_dwarf_by_elf_machine_code (unsigned int e_machine)
 {
   dwarf_regnames_lookup_func = NULL;
   is_aarch64 = false;
@@ -8941,8 +8941,8 @@ init_dwarf_regnames_by_elf_machine_code (unsigned int e_machine)
    architecture and specific machine type of a BFD.  */
 
 void
-init_dwarf_regnames_by_bfd_arch_and_mach (enum bfd_architecture arch,
-					  unsigned long mach)
+init_dwarf_by_bfd_arch_and_mach (enum bfd_architecture arch,
+				 unsigned long mach)
 {
   dwarf_regnames_lookup_func = NULL;
   is_aarch64 = false;
