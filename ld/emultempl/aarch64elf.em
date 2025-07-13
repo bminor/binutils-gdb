@@ -448,22 +448,22 @@ aarch64_parse_gcs_option (const char *_optarg)
 }
 
 static bool
-aarch64_parse_memtag_mode_option (const char *optarg)
+aarch64_parse_memtag_mode_option (const char *_optarg)
 {
   #define MEMTAG_MODE      "memtag-mode"
   #define MEMTAG_MODE_LEN  COMPILE_TIME_STRLEN (MEMTAG_MODE)
 
-  if (strncmp (optarg, MEMTAG_MODE, MEMTAG_MODE_LEN) != 0)
+  if (strncmp (_optarg, MEMTAG_MODE, MEMTAG_MODE_LEN) != 0)
     return false;
 
-  if (strcmp (optarg + MEMTAG_MODE_LEN, "=none") == 0)
+  if (strcmp (_optarg + MEMTAG_MODE_LEN, "=none") == 0)
     memtag_opts.memtag_mode = AARCH64_MEMTAG_MODE_NONE;
-  else if (strcmp (optarg + MEMTAG_MODE_LEN, "=sync") == 0)
+  else if (strcmp (_optarg + MEMTAG_MODE_LEN, "=sync") == 0)
     memtag_opts.memtag_mode = AARCH64_MEMTAG_MODE_SYNC;
-  else if (strcmp (optarg + MEMTAG_MODE_LEN, "=async") == 0)
+  else if (strcmp (_optarg + MEMTAG_MODE_LEN, "=async") == 0)
     memtag_opts.memtag_mode = AARCH64_MEMTAG_MODE_ASYNC;
   else
-    einfo (_("%X%P: error: unrecognized value '-z %s'\n"), optarg);
+    einfo (_("%X%P: error: unrecognized value '-z %s'\n"), _optarg);
 
   return true;
 
