@@ -1,3 +1,7 @@
+2025-07-13  Nick Clifton  <nickc@redhat.com>
+
+	* 2.45 Branch point.
+
 2025-02-08  Alexandre Oliva <oliva@adacore.com>
 
 	* testsuite/ld-sparc/got-def.s: New test.

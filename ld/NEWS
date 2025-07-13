@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.45:
+
 * On s390 64-bit (s390x), generate SFrame stack trace information (.sframe)
   for the linker generated .plt section.  Enabled by default.  Can be disabled
   using linker option --no-ld-generated-unwind-info.

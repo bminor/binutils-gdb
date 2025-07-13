@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.45:
+
 * Add support to generate SFrame stack trace information (.sframe)
   from CFI directives on s390 64-bit (s390x).
 
