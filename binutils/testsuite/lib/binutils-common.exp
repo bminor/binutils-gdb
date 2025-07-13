@@ -482,10 +482,6 @@ proc supports_dt_relr {} {
 
 # Whether a target assembler supports --gsframe.
 proc gas_sframe_check {} {
-    if { ![is_elf_format] } then {
-	return 0;
-    }
-
     global check_as_sframe_result
     global AS
     global ASFLAGS
@@ -502,23 +498,16 @@ proc gas_sframe_check {} {
     remote_download host $as_file
     verbose -log "Checking SFrame support in AS:"
 
-    set old_ASFLAGS "$ASFLAGS"
-    set ASFLAGS "$ASFLAGS --gsframe"
+    set status [remote_exec host "$AS $ASFLAGS --gsframe $as_file"]
 
-    global comp_output
-
-    set output_file "tmpdir/check_as_sframe.out"
-    set status [remote_exec host "$AS $ASFLAGS $as_file" "2> $output_file"]
-    set comp_output [file_contents "$output_file"]
-    set ASFLAGS "$old_ASFLAGS"
-
-    if { ![string match "" $comp_output] } then {
+    if { [lindex $status 0] != 0 } then {
 	verbose -log "SFrame not supported in AS"
-	return 0
+	set check_as_sframe_result 0
     } else {
 	verbose -log "SFrame supported in AS"
-	return 1
+	set check_as_sframe_result 1
     }
+    return $check_as_sframe_result
 }
 
 # get_relative_path FROM TO
