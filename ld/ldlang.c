@@ -10887,6 +10887,9 @@ cmdline_emit_object_only_section (void)
   lang_init (true);
   ldexp_init (true);
 
+  /* Allow lang_add_section to add new sections.  */
+  map_head_is_link_order = false;
+
   /* Set up the object-only output. */
   lang_final ();
 
