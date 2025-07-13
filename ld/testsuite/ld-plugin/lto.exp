@@ -51,6 +51,11 @@ if { [check_lto_fat_available] } {
   set no_lto "-fno-lto"
 }
 
+set as_gsframe ""
+if { [gas_sframe_check] } {
+    set as_gsframe "-Wa,--gsframe"
+}
+
 # Simple LTO tests and generate input files for complex LTO tests.
 set lto_link_tests [list \
   [list "LTO 1" \
@@ -76,10 +81,10 @@ set lto_link_tests [list \
    "" "-flto $lto_fat" \
    {lto-4a.c} {} ""] \
   [list "Compile 4b" \
-   "" "-O2" \
+   "" "-O2 $as_gsframe" \
    {lto-4b.c} {} ""] \
   [list "Compile 4c" \
-   "" "-O2" \
+   "" "-O2 $as_gsframe" \
    {lto-4c.c} {} ""] \
   [list "Compile 5a" \
    "" "-flto $lto_fat" \
