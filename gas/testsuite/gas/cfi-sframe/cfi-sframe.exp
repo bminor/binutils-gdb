@@ -18,43 +18,6 @@ if { ![is_elf_format] } then {
     return
 }
 
-proc gas_sframe_check { } {
-    global check_as_sframe_result
-    global AS
-    global ASFLAGS
-    if [info exists check_as_sframe_result] {
-	return $check_as_sframe_result
-    }
-
-    set as_file "tmpdir/check_as_sframe.s"
-    set as_fh [open $as_file w 0666]
-    puts $as_fh "# Generated file. DO NOT EDIT"
-    puts $as_fh "\t.cfi_startproc"
-    puts $as_fh "\t.cfi_endproc"
-    close $as_fh
-    remote_download host $as_file
-    verbose -log "Checking SFrame support in AS:"
-
-    set old_ASFLAGS "$ASFLAGS"
-    set ASFLAGS "$ASFLAGS --gsframe"
-
-    global comp_output
-
-    set output_file "tmpdir/check_as_sframe.out"
-    set status [gas_host_run "$AS $ASFLAGS $as_file" "2>$output_file"]
-    set comp_output [file_contents "$output_file"]
-    set ASFLAGS "$old_ASFLAGS"
-
-    if { ![string match "" $comp_output]
-	 || [string match "*sframe not supported for target*" $comp_output] } then {
-	verbose -log "SFrame not supported in AS"
-	return 0
-    } else {
-	verbose -log "SFrame supported in AS"
-	return 1
-    }
-}
-
 proc gas_x86_64_check { } {
     global NM
     global NMFLAGS
