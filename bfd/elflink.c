@@ -15298,6 +15298,8 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 		{
 		  if (i->size != i->rawsize)
 		    changed = 1;
+		  if (i->size == 0)
+		    i->flags |= SEC_EXCLUDE;
 		}
 	    }
 	  fini_reloc_cookie_for_section (&cookie, i);

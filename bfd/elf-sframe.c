@@ -274,12 +274,14 @@ _bfd_elf_discard_section_sframe
   unsigned int i;
   unsigned int func_desc_offset;
   unsigned int num_fidx;
+  unsigned int num_fidx_deleted = 0;
   struct sframe_dec_info *sfd_info;
 
   changed = false;
   /* FIXME - if relocatable link and changed = true, how does the final
      .rela.sframe get updated ?.  */
   keep = false;
+  sec->rawsize = sec->size;
 
   sfd_info = (struct sframe_dec_info *) elf_section_data (sec)->sec_info;
 
@@ -299,9 +301,16 @@ _bfd_elf_discard_section_sframe
 	  if (!keep)
 	    {
 	      sframe_decoder_mark_func_deleted (sfd_info, i);
+	      num_fidx_deleted++;
 	      changed = true;
 	    }
 	}
+
+      /* PR libsframe/33127
+	 Set section size to zero if all FDE are to be deleted.  Using size,
+	 later bfd_elf_discard_info will mark this section as SEC_EXCLUDE.  */
+      if (changed && num_fidx_deleted == num_fidx)
+	bfd_set_section_size (sec, 0);
     }
   return changed;
 }
