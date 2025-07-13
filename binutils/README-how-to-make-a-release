@@ -140,10 +140,10 @@ Approx time to complete from here: 2 hours ...
 	
 	Add a .dirstamp file to the gas/doc subdirectory:
 
-          touch -d `date +%Y-%m-%d` binutils-2.44.90/gas/doc/.dirstamp
-          tar rvf binutils-2.44.90.tar binutils-2.44.90/gas/doc/.dirstamp
-          rm binutils-2.44.90.tar.xz
-          xz -9 -k binutils-2.44.90.tar
+          touch -d `date +%Y-%m-%d` binutils-2.45.90/gas/doc/.dirstamp
+          tar rvf binutils-2.45.90.tar binutils-2.45.90/gas/doc/.dirstamp
+          rm binutils-2.45.90.tar.xz
+          xz -9 -k binutils-2.45.90.tar
 
 	 ...END OF FIXME
 
@@ -154,7 +154,12 @@ Approx time to complete from here: 2 hours ...
 	   tar xvf binutils-*.tar.xz
 	   mkdir build
 	   cd build
+	   
+     For EVEN numbered releases:
 	   ../binutils-*/configure --quiet --enable-gold
+     For ODD numbered releases:
+	   ../binutils-*/configure --quiet
+	   
 	   make
 	   popd
 
@@ -162,8 +167,8 @@ Approx time to complete from here: 2 hours ...
 
      d. Upload the pre-release snapshot to the sourceware FTP site:
 
-          scp binutils-2.44.90.tar.xz sourceware.org:/var/ftp/pub/binutils/snapshots
-          ssh sourceware.org sha256sum ~ftp/pub/binutils/snapshots/binutils-2.44.90.tar.xz
+          scp binutils-2.45.90.tar.xz sourceware.org:/var/ftp/pub/binutils/snapshots
+          ssh sourceware.org sha256sum ~ftp/pub/binutils/snapshots/binutils-2.45.90.tar.xz
 
         Paranoia: Compare the checksum with the local version.
 
@@ -182,7 +187,7 @@ Dear Translation Project
 
   A snapshot of the branch sources can be found here:
 
-    https://sourceware.org/pub/binutils/snapshots/binutils-2.44.90.tar.xz
+    https://sourceware.org/pub/binutils/snapshots/binutils-2.45.90.tar.xz
 
   We hope to make the official release of the sources on the <DATE>
   although that could change if there are important bugs that need to
