@@ -222,6 +222,15 @@ Hi Everyone,
   Ideally I would like to make the release happen in two weeks time,
   i.e. <DATE>.  Which I hope will be enough time for everyone
   to get their final fixes in.
+
+If this is an EVEN numbered release:
+
+  Note - this release does contain the sources for GOLD.
+
+If this is an ODD numbered release:
+
+  Note - this release does not contain the sources for GOLD.
+  
 ------------------------------------------------------------------------
 
   12. Build various different toolchains, test them and nag
@@ -354,7 +363,7 @@ How to create the release.
 	make check-gas check-binutils check-ld 
         make install-gas install-ld install-binutils install-gprofng
 
-     If this is an ODD numbered release:
+     If this is an EVEN numbered release:
      
 	make -j1 all-gold
 	make check-gold
@@ -533,6 +542,17 @@ Cheers
         to tar.  The date used for these tarballs was obtained by running:
 
            git log -1 --format=%cd --date=format:%F bfd/version.m4
+
+If this is an EVEN numbered release:
+
+        As this is an even numbered release, the sources for the GOLD
+	linker are included.
+
+If this is an ODD numbered release:
+
+         As this is an odd numbered release, the sources for the GOLD
+	 linker are *not* included.
+  
 
         This release contains numerous bug fixes, and also the
         following new features:
