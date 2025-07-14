@@ -1869,8 +1869,8 @@ amd64_linux_get_tls_dtv_addr (struct gdbarch *gdbarch, ptid_t ptid,
 }
 
 static void
-amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch,
-			    int num_disp_step_buffers)
+amd64_linux_init_abi_common (struct gdbarch_info info, struct gdbarch *gdbarch,
+			     int num_disp_step_buffers)
 {
   i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
 
