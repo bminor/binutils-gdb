@@ -271,4 +271,4 @@ struct arc_relax_type
 extern void arc_md_end (void);
 #define md_end arc_md_end
 
-#endif
+#endif /* TC_ARC */

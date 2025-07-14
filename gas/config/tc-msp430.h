@@ -20,6 +20,7 @@
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
+#ifndef TC_MSP430
 #define TC_MSP430
 /*   By convention, you should define this macro in the `.h' file.  For
      example, `tc-m68k.h' defines `TC_M68K'.  You might have to use this
@@ -172,3 +173,5 @@ extern bool msp430_allow_local_subtract (expressionS *, expressionS *, segT);
 #define TC_LINKRELAX_FIXUP(seg) ((seg->flags & SEC_CODE) || (seg->flags & SEC_DEBUGGING))
 
 #define DWARF2_ADDR_SIZE(bfd) 4
+
+#endif /* TC_MSP430 */

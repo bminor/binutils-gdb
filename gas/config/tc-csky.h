@@ -106,4 +106,4 @@ extern long csky_relax_frag (segT, fragS *, long);
 const char * elf32_csky_target_format (void);
 #endif
 
-#endif
+#endif /* TC_CSKY */

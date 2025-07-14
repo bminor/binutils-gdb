@@ -19,6 +19,7 @@
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
+#ifndef TC_PPC
 #define TC_PPC
 
 #include "opcode/ppc.h"
@@ -367,3 +368,5 @@ extern int ppc_dwarf2_line_min_insn_length;
 #define DWARF2_DEFAULT_RETURN_COLUMN    0x41
 #define DWARF2_CIE_DATA_ALIGNMENT       ppc_cie_data_alignment
 #define EH_FRAME_ALIGNMENT		2
+
+#endif /* TC_PPC */

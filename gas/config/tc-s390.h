@@ -19,6 +19,7 @@
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
+#ifndef TC_S390
 #define TC_S390
 
 struct fix;
@@ -129,3 +130,5 @@ extern offsetT s390_sframe_cfa_ra_offset (void);
 /* The abi/arch identifier for SFrame.  */
 unsigned char s390_sframe_get_abi_arch (void);
 #define sframe_get_abi_arch s390_sframe_get_abi_arch
+
+#endif /* TC_S390 */

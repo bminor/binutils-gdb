@@ -20,6 +20,7 @@
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
+#ifndef TC_ARM
 #define TC_ARM 1
 
 #ifndef TARGET_BYTES_BIG_ENDIAN
@@ -377,3 +378,5 @@ extern bool arm_tc_equal_in_insn (int, char *);
 #define TC_LARGEST_EXPONENT_IS_NORMAL(PRECISION) \
 	arm_is_largest_exponent_ok ((PRECISION))
 int arm_is_largest_exponent_ok (int precision);
+
+#endif /* TC_ARM */
