@@ -633,6 +633,33 @@ z80_start_line_hook (void)
 	  break;
 	}
     }
+  /* Remove leading zeros from dollar local labels if SDCC compat enabled.  */
+  if (sdcc_compat && *input_line_pointer == '0')
+    {
+      char *dollar;
+
+      /* SDCC emits at most one label definition per line, so it is
+	 enough to look at only the first label.  Hand-written asm
+	 might use more, but then it is unlikely to use leading zeros
+	 on dollar local labels.  */
+
+      /* Place p at the first character after [0-9]+.  */
+      for (p = input_line_pointer; *p >= '0' && *p <= '9'; ++p)
+	;
+
+      /* Is this a dollar sign label?
+	 GAS allows spaces between $ and :, but SDCC does not.  */
+      if (p[0] == '$' && p[1] == ':')
+	{
+	  dollar = p;
+	  /* Replace zeros with spaces until the first non-zero,
+	     but leave the last character before $ intact (for e.g. 0$:).  */
+	  for (p = input_line_pointer; *p == '0' && p < dollar - 1; ++p)
+	    {
+	      *p = ' ';
+	    }
+	}
+    }
   /* Check for <label>[:] =|([.](EQU|DEFL)) <value>.  */
   if (is_name_beginner (*input_line_pointer))
     {

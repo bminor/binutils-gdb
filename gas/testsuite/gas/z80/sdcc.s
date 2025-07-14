@@ -1,3 +1,7 @@
+;; This file uses syntax emitted by the Small Device C Compiler.  It
+;; is used to test the -sdcc flag to the z80 assembler.  Modifications
+;; to this file should take care to keep SDCC syntax.
+
         .module longpolls
         .optsdcc -mz80
 
@@ -13,7 +17,7 @@ valueadr = 0x1234
 _start::
 ;comment
 	ld      hl, #4+0
-0$:
+00000$:
 	adc	a, a
 	adc	a, b
 	adc	a, c
@@ -29,7 +33,7 @@ _start::
 	adc	a, (hl)
 	adc	a, 5 (ix)
 	adc	a, -2 (iy)
-100$:
+00100$:
 	add	a, a
 	add	a, b
 	add	a, c
@@ -45,7 +49,7 @@ _start::
 	add	a, (hl)
 	add	a, 5 (ix)
 	add	a, -2 (iy)
-200$:
+00200$:
 	and	a, a
 	and	a, b
 	and	a, c
@@ -61,7 +65,7 @@ _start::
 	and	a, (hl)
 	and	a, 5 (ix)
 	and	a, -2 (iy)
-300$:
+00300$:
 	cp	a, a
 	cp	a, b
 	cp	a, c
@@ -77,7 +81,7 @@ _start::
 	cp	a, (hl)
 	cp	a, 5 (ix)
 	cp	a, -2 (iy)
-400$:
+00400$:
 	or	a, a
 	or	a, b
 	or	a, c
@@ -93,7 +97,7 @@ _start::
 	or	a, (hl)
 	or	a, 5 (ix)
 	or	a, -2 (iy)
-500$:
+00500$:
 	sbc	a, a
 	sbc	a, b
 	sbc	a, c
@@ -109,7 +113,7 @@ _start::
 	sbc	a, (hl)
 	sbc	a, 5 (ix)
 	sbc	a, -2 (iy)
-600$:
+00600$:
 	sub	a, a
 	sub	a, b
 	sub	a, c
@@ -125,7 +129,7 @@ _start::
 	sub	a, (hl)
 	sub	a, 5 (ix)
 	sub	a, -2 (iy)
-700$:
+00700$:
 	xor	a, a
 	xor	a, b
 	xor	a, c
@@ -142,21 +146,21 @@ _start::
 	xor	a, 5 (ix)
 	xor	a, -2 (iy)
 
-	jp	0$
-	jp	100$
-	jp	200$
-	jp	300$
-	jp	500$
-	jp	600$
-	jp	700$
+	jp	00000$
+	jp	00100$
+	jp	00200$
+	jp	00300$
+	jp	00500$
+	jp	00600$
+	jp	00700$
 _func:
 	ld	hl,0
 	ld	(hl),#<function
-100$:
+00100$:
 	inc	hl
 	ld	(hl),#>function
-600$:
-	jr	100$
+00600$:
+	jr	00100$
 _finish::
 	ld	a, 2 (iy)
 	ld	-1 (ix), a
