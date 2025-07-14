@@ -37643,423 +37643,423 @@ aarch64_extract_operand (const aarch64_operand *self,
 			   aarch64_operand_error *errors)
 {
   /* Use the index as the key.  */
-  int key = self - aarch64_operands;
+  enum aarch64_opnd key = self - aarch64_operands;
   switch (key)
     {
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 7:
-    case 8:
-    case 9:
-    case 10:
-    case 12:
-    case 13:
-    case 14:
-    case 20:
-    case 21:
-    case 22:
-    case 23:
-    case 25:
-    case 26:
-    case 27:
-    case 28:
-    case 29:
-    case 30:
-    case 31:
-    case 32:
-    case 33:
-    case 34:
-    case 127:
-    case 128:
-    case 129:
-    case 192:
-    case 193:
-    case 194:
-    case 195:
-    case 196:
-    case 197:
-    case 198:
-    case 199:
-    case 200:
-    case 201:
-    case 202:
-    case 203:
-    case 204:
-    case 205:
-    case 221:
-    case 222:
-    case 223:
-    case 224:
-    case 234:
-    case 235:
-    case 236:
-    case 237:
-    case 238:
-    case 249:
-    case 253:
-    case 257:
-    case 258:
-    case 266:
-    case 267:
-    case 268:
-    case 275:
-    case 276:
-    case 277:
-    case 278:
-    case 313:
-    case 317:
+    case AARCH64_OPND_Rd:
+    case AARCH64_OPND_Rn:
+    case AARCH64_OPND_Rm:
+    case AARCH64_OPND_Rt:
+    case AARCH64_OPND_Rt2:
+    case AARCH64_OPND_Rt_LS64:
+    case AARCH64_OPND_Rt_SP:
+    case AARCH64_OPND_Rs:
+    case AARCH64_OPND_Ra:
+    case AARCH64_OPND_Rd_SP:
+    case AARCH64_OPND_Rn_SP:
+    case AARCH64_OPND_Rm_SP:
+    case AARCH64_OPND_Fd:
+    case AARCH64_OPND_Fn:
+    case AARCH64_OPND_Fm:
+    case AARCH64_OPND_Fa:
+    case AARCH64_OPND_Ft2:
+    case AARCH64_OPND_Sd:
+    case AARCH64_OPND_Sn:
+    case AARCH64_OPND_Sm:
+    case AARCH64_OPND_Va:
+    case AARCH64_OPND_Vd:
+    case AARCH64_OPND_Vn:
+    case AARCH64_OPND_Vm:
+    case AARCH64_OPND_VdD1:
+    case AARCH64_OPND_VnD1:
+    case AARCH64_OPND_Rt_IN_SYS_ALIASES:
+    case AARCH64_OPND_LSE128_Rt:
+    case AARCH64_OPND_LSE128_Rt2:
+    case AARCH64_OPND_SVE_Pd:
+    case AARCH64_OPND_SVE_PNd:
+    case AARCH64_OPND_SVE_Pg3:
+    case AARCH64_OPND_SVE_Pg4_5:
+    case AARCH64_OPND_SVE_Pg4_10:
+    case AARCH64_OPND_SVE_PNg4_10:
+    case AARCH64_OPND_SVE_Pg4_16:
+    case AARCH64_OPND_SVE_Pm:
+    case AARCH64_OPND_SVE_Pn:
+    case AARCH64_OPND_SVE_PNn:
+    case AARCH64_OPND_SVE_Pt:
+    case AARCH64_OPND_SVE_PNt:
+    case AARCH64_OPND_SVE_Rm:
+    case AARCH64_OPND_SVE_Rn_SP:
+    case AARCH64_OPND_SVE_VZn:
+    case AARCH64_OPND_SVE_Vd:
+    case AARCH64_OPND_SVE_Vm:
+    case AARCH64_OPND_SVE_Vn:
+    case AARCH64_OPND_SVE_Za_5:
+    case AARCH64_OPND_SVE_Za_16:
+    case AARCH64_OPND_SVE_Zd:
+    case AARCH64_OPND_SVE_Zm_5:
+    case AARCH64_OPND_SVE_Zm_16:
+    case AARCH64_OPND_SVE_Zn:
+    case AARCH64_OPND_SVE_Zt:
+    case AARCH64_OPND_SME_Zm:
+    case AARCH64_OPND_SME_Zm_17:
+    case AARCH64_OPND_SME_ZAda_1b:
+    case AARCH64_OPND_SME_ZAda_2b:
+    case AARCH64_OPND_SME_ZAda_3b:
+    case AARCH64_OPND_SME_Pm:
+    case AARCH64_OPND_SME_PNd3:
+    case AARCH64_OPND_SME_PNg3:
+    case AARCH64_OPND_SME_PNn:
+    case AARCH64_OPND_SVE_Zn0_INDEX:
+    case AARCH64_OPND_SVE_Zd0_INDEX:
       return aarch64_ext_regno (self, info, code, inst, errors);
-    case 6:
-    case 122:
-    case 123:
-    case 323:
-    case 326:
+    case AARCH64_OPND_X16:
+    case AARCH64_OPND_BARRIER_PSB:
+    case AARCH64_OPND_BARRIER_GCSB:
+    case AARCH64_OPND_SME_ZT0:
+    case AARCH64_OPND_SME_ZT0_LIST:
       return aarch64_ext_none (self, info, code, inst, errors);
-    case 11:
+    case AARCH64_OPND_Rt_SYS:
       return aarch64_ext_regrt_sysins (self, info, code, inst, errors);
-    case 15:
-    case 16:
+    case AARCH64_OPND_PAIRREG:
+    case AARCH64_OPND_PAIRREG_OR_XZR:
       return aarch64_ext_regno_pair (self, info, code, inst, errors);
-    case 17:
+    case AARCH64_OPND_Rm_EXT:
       return aarch64_ext_reg_extended (self, info, code, inst, errors);
-    case 18:
+    case AARCH64_OPND_Rm_SFT:
       return aarch64_ext_reg_shifted (self, info, code, inst, errors);
-    case 19:
+    case AARCH64_OPND_Rm_LSL:
       return aarch64_ext_reg_lsl_shifted (self, info, code, inst, errors);
-    case 24:
+    case AARCH64_OPND_Ft:
       return aarch64_ext_ft (self, info, code, inst, errors);
-    case 35:
-    case 36:
-    case 37:
-    case 38:
-    case 39:
-    case 328:
+    case AARCH64_OPND_Ed:
+    case AARCH64_OPND_En:
+    case AARCH64_OPND_Em:
+    case AARCH64_OPND_Em16:
+    case AARCH64_OPND_Em8:
+    case AARCH64_OPND_SM3_IMM2:
       return aarch64_ext_reglane (self, info, code, inst, errors);
-    case 40:
-    case 41:
-    case 42:
-    case 239:
-    case 240:
-    case 243:
-    case 279:
-    case 280:
-    case 295:
-    case 296:
-    case 297:
-    case 298:
-    case 299:
-    case 300:
-    case 301:
-    case 302:
-    case 303:
-    case 304:
-    case 305:
-    case 306:
-    case 307:
-    case 308:
-    case 309:
-    case 310:
-    case 311:
-    case 312:
-    case 314:
-    case 315:
-    case 316:
-    case 318:
-    case 319:
-    case 320:
+    case AARCH64_OPND_Em_INDEX1_14:
+    case AARCH64_OPND_Em_INDEX2_13:
+    case AARCH64_OPND_Em_INDEX3_12:
+    case AARCH64_OPND_SVE_Zm1_23_INDEX:
+    case AARCH64_OPND_SVE_Zm2_22_INDEX:
+    case AARCH64_OPND_SVE_Zm3_12_INDEX:
+    case AARCH64_OPND_SME_PNn3_INDEX1:
+    case AARCH64_OPND_SME_PNn3_INDEX2:
+    case AARCH64_OPND_SME_Zm_INDEX1:
+    case AARCH64_OPND_SME_Zm_INDEX2:
+    case AARCH64_OPND_SME_Zm_INDEX2_3:
+    case AARCH64_OPND_SME_Zm_INDEX3_1:
+    case AARCH64_OPND_SME_Zm_INDEX3_2:
+    case AARCH64_OPND_SME_Zm_INDEX3_3:
+    case AARCH64_OPND_SME_Zm_INDEX3_10:
+    case AARCH64_OPND_SME_Zm_INDEX4_1:
+    case AARCH64_OPND_SME_Zm_INDEX4_2:
+    case AARCH64_OPND_SME_Zm_INDEX4_3:
+    case AARCH64_OPND_SME_Zm_INDEX4_10:
+    case AARCH64_OPND_SME_Zn_INDEX1_16:
+    case AARCH64_OPND_SME_Zn_INDEX2_15:
+    case AARCH64_OPND_SME_Zn_INDEX2_16:
+    case AARCH64_OPND_SME_Zn_INDEX2_19:
+    case AARCH64_OPND_SME_Zn_INDEX3_14:
+    case AARCH64_OPND_SME_Zn_INDEX3_15:
+    case AARCH64_OPND_SME_Zn_INDEX4_14:
+    case AARCH64_OPND_SVE_Zn1_17_INDEX:
+    case AARCH64_OPND_SVE_Zn2_18_INDEX:
+    case AARCH64_OPND_SVE_Zn3_22_INDEX:
+    case AARCH64_OPND_SVE_Zd1_17_INDEX:
+    case AARCH64_OPND_SVE_Zd2_18_INDEX:
+    case AARCH64_OPND_SVE_Zd3_22_INDEX:
       return aarch64_ext_simple_index (self, info, code, inst, errors);
-    case 43:
+    case AARCH64_OPND_LVn:
       return aarch64_ext_reglist (self, info, code, inst, errors);
-    case 44:
+    case AARCH64_OPND_LVt:
       return aarch64_ext_ldst_reglist (self, info, code, inst, errors);
-    case 45:
+    case AARCH64_OPND_LVt_AL:
       return aarch64_ext_ldst_reglist_r (self, info, code, inst, errors);
-    case 46:
+    case AARCH64_OPND_LVn_LUT:
       return aarch64_ext_lut_reglist (self, info, code, inst, errors);
-    case 47:
+    case AARCH64_OPND_LEt:
       return aarch64_ext_ldst_elemlist (self, info, code, inst, errors);
-    case 48:
-    case 49:
-    case 50:
-    case 51:
-    case 61:
-    case 62:
-    case 63:
-    case 64:
-    case 65:
-    case 66:
-    case 67:
-    case 68:
-    case 69:
-    case 70:
-    case 71:
-    case 72:
-    case 73:
-    case 74:
-    case 75:
-    case 76:
-    case 77:
-    case 78:
-    case 79:
-    case 90:
-    case 91:
-    case 92:
-    case 93:
-    case 94:
-    case 95:
-    case 121:
-    case 126:
-    case 189:
-    case 191:
-    case 212:
-    case 213:
-    case 214:
-    case 215:
-    case 216:
-    case 217:
-    case 218:
-    case 219:
-    case 220:
-    case 281:
-    case 321:
-    case 322:
-    case 324:
-    case 325:
-    case 327:
-    case 332:
-    case 333:
+    case AARCH64_OPND_CRn:
+    case AARCH64_OPND_CRm:
+    case AARCH64_OPND_IDX:
+    case AARCH64_OPND_MASK:
+    case AARCH64_OPND_IMMR:
+    case AARCH64_OPND_IMMS:
+    case AARCH64_OPND_WIDTH:
+    case AARCH64_OPND_IMM:
+    case AARCH64_OPND_IMM_2:
+    case AARCH64_OPND_IMMP1_2:
+    case AARCH64_OPND_IMMS1_2:
+    case AARCH64_OPND_UIMM3_OP1:
+    case AARCH64_OPND_UIMM3_OP2:
+    case AARCH64_OPND_UIMM4:
+    case AARCH64_OPND_UIMM4_ADDG:
+    case AARCH64_OPND_UIMM7:
+    case AARCH64_OPND_UIMM10:
+    case AARCH64_OPND_BIT_NUM:
+    case AARCH64_OPND_EXCEPTION:
+    case AARCH64_OPND_UNDEFINED:
+    case AARCH64_OPND_CCMP_IMM:
+    case AARCH64_OPND_SIMM5:
+    case AARCH64_OPND_NZCV:
+    case AARCH64_OPND_ADDR_ADRP:
+    case AARCH64_OPND_ADDR_PCREL9:
+    case AARCH64_OPND_ADDR_PCREL14:
+    case AARCH64_OPND_ADDR_PCREL19:
+    case AARCH64_OPND_ADDR_PCREL21:
+    case AARCH64_OPND_ADDR_PCREL26:
+    case AARCH64_OPND_RPRFMOP:
+    case AARCH64_OPND_BRBOP:
+    case AARCH64_OPND_SVE_PATTERN:
+    case AARCH64_OPND_SVE_PRFOP:
+    case AARCH64_OPND_SVE_SIMM5:
+    case AARCH64_OPND_SVE_SIMM5B:
+    case AARCH64_OPND_SVE_SIMM6:
+    case AARCH64_OPND_SVE_SIMM8:
+    case AARCH64_OPND_SVE_UIMM3:
+    case AARCH64_OPND_SVE_UIMM7:
+    case AARCH64_OPND_SVE_UIMM8:
+    case AARCH64_OPND_SVE_UIMM8_53:
+    case AARCH64_OPND_SVE_UIMM4:
+    case AARCH64_OPND_SME_list_of_64bit_tiles:
+    case AARCH64_OPND_SME_VLxN_10:
+    case AARCH64_OPND_SME_VLxN_13:
+    case AARCH64_OPND_SME_ZT0_INDEX:
+    case AARCH64_OPND_SME_ZT0_INDEX_MUL_VL:
+    case AARCH64_OPND_TME_UIMM16:
+    case AARCH64_OPND_CSSC_SIMM8:
+    case AARCH64_OPND_CSSC_UIMM8:
       return aarch64_ext_imm (self, info, code, inst, errors);
-    case 52:
-    case 53:
+    case AARCH64_OPND_IMM_VLSL:
+    case AARCH64_OPND_IMM_VLSR:
       return aarch64_ext_advsimd_imm_shift (self, info, code, inst, errors);
-    case 54:
-    case 55:
-    case 56:
+    case AARCH64_OPND_SIMD_IMM:
+    case AARCH64_OPND_SIMD_IMM_SFT:
+    case AARCH64_OPND_SIMD_FPIMM:
       return aarch64_ext_advsimd_imm_modified (self, info, code, inst, errors);
-    case 57:
+    case AARCH64_OPND_SHLL_IMM:
       return aarch64_ext_shll_imm (self, info, code, inst, errors);
-    case 60:
-    case 179:
+    case AARCH64_OPND_FPIMM:
+    case AARCH64_OPND_SVE_FPIMM8:
       return aarch64_ext_fpimm (self, info, code, inst, errors);
-    case 80:
-    case 187:
+    case AARCH64_OPND_LIMM:
+    case AARCH64_OPND_SVE_LIMM:
       return aarch64_ext_limm (self, info, code, inst, errors);
-    case 81:
+    case AARCH64_OPND_AIMM:
       return aarch64_ext_aimm (self, info, code, inst, errors);
-    case 82:
+    case AARCH64_OPND_HALF:
       return aarch64_ext_imm_half (self, info, code, inst, errors);
-    case 83:
+    case AARCH64_OPND_FBITS:
       return aarch64_ext_fbits (self, info, code, inst, errors);
-    case 85:
-    case 86:
-    case 184:
+    case AARCH64_OPND_IMM_ROT1:
+    case AARCH64_OPND_IMM_ROT2:
+    case AARCH64_OPND_SVE_IMM_ROT2:
       return aarch64_ext_imm_rotate2 (self, info, code, inst, errors);
-    case 87:
-    case 183:
-    case 185:
+    case AARCH64_OPND_IMM_ROT3:
+    case AARCH64_OPND_SVE_IMM_ROT1:
+    case AARCH64_OPND_SVE_IMM_ROT3:
       return aarch64_ext_imm_rotate1 (self, info, code, inst, errors);
-    case 88:
-    case 89:
+    case AARCH64_OPND_COND:
+    case AARCH64_OPND_COND1:
       return aarch64_ext_cond (self, info, code, inst, errors);
-    case 96:
-    case 105:
+    case AARCH64_OPND_ADDR_SIMPLE:
+    case AARCH64_OPND_SIMD_ADDR_SIMPLE:
       return aarch64_ext_addr_simple (self, info, code, inst, errors);
-    case 97:
+    case AARCH64_OPND_ADDR_REGOFF:
       return aarch64_ext_addr_regoff (self, info, code, inst, errors);
-    case 98:
-    case 99:
-    case 100:
-    case 102:
-    case 104:
+    case AARCH64_OPND_ADDR_SIMM7:
+    case AARCH64_OPND_ADDR_SIMM9:
+    case AARCH64_OPND_ADDR_SIMM9_2:
+    case AARCH64_OPND_ADDR_SIMM11:
+    case AARCH64_OPND_ADDR_SIMM13:
       return aarch64_ext_addr_simm (self, info, code, inst, errors);
-    case 101:
+    case AARCH64_OPND_ADDR_SIMM10:
       return aarch64_ext_addr_simm10 (self, info, code, inst, errors);
-    case 103:
+    case AARCH64_OPND_ADDR_UIMM12:
       return aarch64_ext_addr_uimm12 (self, info, code, inst, errors);
-    case 106:
+    case AARCH64_OPND_ADDR_OFFSET:
       return aarch64_ext_addr_offset (self, info, code, inst, errors);
-    case 107:
+    case AARCH64_OPND_SIMD_ADDR_POST:
       return aarch64_ext_simd_addr_post (self, info, code, inst, errors);
-    case 108:
-    case 109:
+    case AARCH64_OPND_SYSREG:
+    case AARCH64_OPND_SYSREG128:
       return aarch64_ext_sysreg (self, info, code, inst, errors);
-    case 110:
+    case AARCH64_OPND_PSTATEFIELD:
       return aarch64_ext_pstatefield (self, info, code, inst, errors);
-    case 111:
-    case 112:
-    case 113:
-    case 114:
-    case 115:
-    case 116:
+    case AARCH64_OPND_SYSREG_AT:
+    case AARCH64_OPND_SYSREG_DC:
+    case AARCH64_OPND_SYSREG_IC:
+    case AARCH64_OPND_SYSREG_TLBI:
+    case AARCH64_OPND_SYSREG_TLBIP:
+    case AARCH64_OPND_SYSREG_SR:
       return aarch64_ext_sysins_op (self, info, code, inst, errors);
-    case 117:
-    case 119:
+    case AARCH64_OPND_BARRIER:
+    case AARCH64_OPND_BARRIER_ISB:
       return aarch64_ext_barrier (self, info, code, inst, errors);
-    case 118:
+    case AARCH64_OPND_BARRIER_DSB_NXS:
       return aarch64_ext_barrier_dsb_nxs (self, info, code, inst, errors);
-    case 120:
+    case AARCH64_OPND_PRFOP:
       return aarch64_ext_prfop (self, info, code, inst, errors);
-    case 124:
-    case 125:
+    case AARCH64_OPND_BTI_TARGET:
+    case AARCH64_OPND_STSHH_POLICY:
       return aarch64_ext_hint (self, info, code, inst, errors);
-    case 130:
-    case 131:
+    case AARCH64_OPND_SVE_ADDR_RI_S4x16:
+    case AARCH64_OPND_SVE_ADDR_RI_S4x32:
       return aarch64_ext_sve_addr_ri_s4 (self, info, code, inst, errors);
-    case 132:
-    case 133:
-    case 134:
-    case 135:
+    case AARCH64_OPND_SVE_ADDR_RI_S4xVL:
+    case AARCH64_OPND_SVE_ADDR_RI_S4x2xVL:
+    case AARCH64_OPND_SVE_ADDR_RI_S4x3xVL:
+    case AARCH64_OPND_SVE_ADDR_RI_S4x4xVL:
       return aarch64_ext_sve_addr_ri_s4xvl (self, info, code, inst, errors);
-    case 136:
+    case AARCH64_OPND_SVE_ADDR_RI_S6xVL:
       return aarch64_ext_sve_addr_ri_s6xvl (self, info, code, inst, errors);
-    case 137:
+    case AARCH64_OPND_SVE_ADDR_RI_S9xVL:
       return aarch64_ext_sve_addr_ri_s9xvl (self, info, code, inst, errors);
-    case 138:
-    case 139:
-    case 140:
-    case 141:
+    case AARCH64_OPND_SVE_ADDR_RI_U6:
+    case AARCH64_OPND_SVE_ADDR_RI_U6x2:
+    case AARCH64_OPND_SVE_ADDR_RI_U6x4:
+    case AARCH64_OPND_SVE_ADDR_RI_U6x8:
       return aarch64_ext_sve_addr_ri_u6 (self, info, code, inst, errors);
-    case 142:
-    case 143:
-    case 144:
-    case 145:
-    case 146:
-    case 147:
-    case 148:
-    case 149:
-    case 150:
-    case 151:
-    case 152:
-    case 153:
-    case 154:
-    case 155:
-    case 156:
-    case 157:
-    case 158:
-    case 159:
-    case 160:
-    case 161:
+    case AARCH64_OPND_SVE_ADDR_RR:
+    case AARCH64_OPND_SVE_ADDR_RR_LSL1:
+    case AARCH64_OPND_SVE_ADDR_RR_LSL2:
+    case AARCH64_OPND_SVE_ADDR_RR_LSL3:
+    case AARCH64_OPND_SVE_ADDR_RR_LSL4:
+    case AARCH64_OPND_SVE_ADDR_RM:
+    case AARCH64_OPND_SVE_ADDR_RM_LSL1:
+    case AARCH64_OPND_SVE_ADDR_RM_LSL2:
+    case AARCH64_OPND_SVE_ADDR_RM_LSL3:
+    case AARCH64_OPND_SVE_ADDR_RM_LSL4:
+    case AARCH64_OPND_SVE_ADDR_RX:
+    case AARCH64_OPND_SVE_ADDR_RX_LSL1:
+    case AARCH64_OPND_SVE_ADDR_RX_LSL2:
+    case AARCH64_OPND_SVE_ADDR_RX_LSL3:
+    case AARCH64_OPND_SVE_ADDR_RX_LSL4:
+    case AARCH64_OPND_SVE_ADDR_ZX:
+    case AARCH64_OPND_SVE_ADDR_RZ:
+    case AARCH64_OPND_SVE_ADDR_RZ_LSL1:
+    case AARCH64_OPND_SVE_ADDR_RZ_LSL2:
+    case AARCH64_OPND_SVE_ADDR_RZ_LSL3:
       return aarch64_ext_sve_addr_rr_lsl (self, info, code, inst, errors);
-    case 162:
-    case 163:
-    case 164:
-    case 165:
-    case 166:
-    case 167:
-    case 168:
-    case 169:
+    case AARCH64_OPND_SVE_ADDR_RZ_XTW_14:
+    case AARCH64_OPND_SVE_ADDR_RZ_XTW_22:
+    case AARCH64_OPND_SVE_ADDR_RZ_XTW1_14:
+    case AARCH64_OPND_SVE_ADDR_RZ_XTW1_22:
+    case AARCH64_OPND_SVE_ADDR_RZ_XTW2_14:
+    case AARCH64_OPND_SVE_ADDR_RZ_XTW2_22:
+    case AARCH64_OPND_SVE_ADDR_RZ_XTW3_14:
+    case AARCH64_OPND_SVE_ADDR_RZ_XTW3_22:
       return aarch64_ext_sve_addr_rz_xtw (self, info, code, inst, errors);
-    case 170:
-    case 171:
-    case 172:
-    case 173:
+    case AARCH64_OPND_SVE_ADDR_ZI_U5:
+    case AARCH64_OPND_SVE_ADDR_ZI_U5x2:
+    case AARCH64_OPND_SVE_ADDR_ZI_U5x4:
+    case AARCH64_OPND_SVE_ADDR_ZI_U5x8:
       return aarch64_ext_sve_addr_zi_u5 (self, info, code, inst, errors);
-    case 174:
+    case AARCH64_OPND_SVE_ADDR_ZZ_LSL:
       return aarch64_ext_sve_addr_zz_lsl (self, info, code, inst, errors);
-    case 175:
+    case AARCH64_OPND_SVE_ADDR_ZZ_SXTW:
       return aarch64_ext_sve_addr_zz_sxtw (self, info, code, inst, errors);
-    case 176:
+    case AARCH64_OPND_SVE_ADDR_ZZ_UXTW:
       return aarch64_ext_sve_addr_zz_uxtw (self, info, code, inst, errors);
-    case 177:
+    case AARCH64_OPND_SVE_AIMM:
       return aarch64_ext_sve_aimm (self, info, code, inst, errors);
-    case 178:
+    case AARCH64_OPND_SVE_ASIMM:
       return aarch64_ext_sve_asimm (self, info, code, inst, errors);
-    case 180:
+    case AARCH64_OPND_SVE_I1_HALF_ONE:
       return aarch64_ext_sve_float_half_one (self, info, code, inst, errors);
-    case 181:
+    case AARCH64_OPND_SVE_I1_HALF_TWO:
       return aarch64_ext_sve_float_half_two (self, info, code, inst, errors);
-    case 182:
+    case AARCH64_OPND_SVE_I1_ZERO_ONE:
       return aarch64_ext_sve_float_zero_one (self, info, code, inst, errors);
-    case 186:
+    case AARCH64_OPND_SVE_INV_LIMM:
       return aarch64_ext_inv_limm (self, info, code, inst, errors);
-    case 188:
+    case AARCH64_OPND_SVE_LIMM_MOV:
       return aarch64_ext_sve_limm_mov (self, info, code, inst, errors);
-    case 190:
+    case AARCH64_OPND_SVE_PATTERN_SCALED:
       return aarch64_ext_sve_scale (self, info, code, inst, errors);
-    case 206:
-    case 207:
-    case 208:
+    case AARCH64_OPND_SVE_SHLIMM_PRED:
+    case AARCH64_OPND_SVE_SHLIMM_UNPRED:
+    case AARCH64_OPND_SVE_SHLIMM_UNPRED_22:
       return aarch64_ext_sve_shlimm (self, info, code, inst, errors);
-    case 209:
-    case 210:
-    case 211:
-    case 294:
+    case AARCH64_OPND_SVE_SHRIMM_PRED:
+    case AARCH64_OPND_SVE_SHRIMM_UNPRED:
+    case AARCH64_OPND_SVE_SHRIMM_UNPRED_22:
+    case AARCH64_OPND_SME_SHRIMM5:
       return aarch64_ext_sve_shrimm (self, info, code, inst, errors);
-    case 225:
-    case 226:
-    case 227:
-    case 228:
+    case AARCH64_OPND_SME_ZA_array_vrsb_1:
+    case AARCH64_OPND_SME_ZA_array_vrsh_1:
+    case AARCH64_OPND_SME_ZA_array_vrss_1:
+    case AARCH64_OPND_SME_ZA_array_vrsd_1:
       return aarch64_ext_sme_za_vrs1 (self, info, code, inst, errors);
-    case 229:
-    case 230:
-    case 231:
-    case 232:
+    case AARCH64_OPND_SME_ZA_array_vrsb_2:
+    case AARCH64_OPND_SME_ZA_array_vrsh_2:
+    case AARCH64_OPND_SME_ZA_array_vrss_2:
+    case AARCH64_OPND_SME_ZA_array_vrsd_2:
       return aarch64_ext_sme_za_vrs2 (self, info, code, inst, errors);
-    case 233:
+    case AARCH64_OPND_SME_ZA_ARRAY4:
       return aarch64_ext_sme_za_tile_to_vec (self, info, code, inst, errors);
-    case 241:
-    case 242:
-    case 244:
-    case 245:
-    case 246:
-    case 247:
-    case 248:
+    case AARCH64_OPND_SVE_Zm3_INDEX:
+    case AARCH64_OPND_SVE_Zm3_11_INDEX:
+    case AARCH64_OPND_SVE_Zm3_19_INDEX:
+    case AARCH64_OPND_SVE_Zm3_22_INDEX:
+    case AARCH64_OPND_SVE_Zm3_10_INDEX:
+    case AARCH64_OPND_SVE_Zm4_11_INDEX:
+    case AARCH64_OPND_SVE_Zm4_INDEX:
       return aarch64_ext_sve_quad_index (self, info, code, inst, errors);
-    case 250:
-    case 251:
+    case AARCH64_OPND_SVE_Zn_INDEX:
+    case AARCH64_OPND_SVE_Zn_5_INDEX:
       return aarch64_ext_sve_index (self, info, code, inst, errors);
-    case 252:
-    case 254:
-    case 274:
+    case AARCH64_OPND_SVE_ZnxN:
+    case AARCH64_OPND_SVE_ZtxN:
+    case AARCH64_OPND_SME_PdxN:
       return aarch64_ext_sve_reglist (self, info, code, inst, errors);
-    case 255:
-    case 256:
-    case 259:
-    case 260:
-    case 261:
-    case 262:
-    case 263:
-    case 273:
+    case AARCH64_OPND_SME_Zdnx2:
+    case AARCH64_OPND_SME_Zdnx4:
+    case AARCH64_OPND_SME_Zmx2:
+    case AARCH64_OPND_SME_Zmx4:
+    case AARCH64_OPND_SME_Znx2:
+    case AARCH64_OPND_SME_Znx2_BIT_INDEX:
+    case AARCH64_OPND_SME_Znx4:
+    case AARCH64_OPND_SME_Pdx2:
       return aarch64_ext_sve_aligned_reglist (self, info, code, inst, errors);
-    case 264:
-    case 265:
+    case AARCH64_OPND_SME_Ztx2_STRIDED:
+    case AARCH64_OPND_SME_Ztx4_STRIDED:
       return aarch64_ext_sve_strided_reglist (self, info, code, inst, errors);
-    case 269:
-    case 271:
-    case 282:
+    case AARCH64_OPND_SME_ZA_HV_idx_src:
+    case AARCH64_OPND_SME_ZA_HV_idx_dest:
+    case AARCH64_OPND_SME_ZA_HV_idx_ldstr:
       return aarch64_ext_sme_za_hv_tiles (self, info, code, inst, errors);
-    case 270:
-    case 272:
+    case AARCH64_OPND_SME_ZA_HV_idx_srcxN:
+    case AARCH64_OPND_SME_ZA_HV_idx_destxN:
       return aarch64_ext_sme_za_hv_tiles_range (self, info, code, inst, errors);
-    case 283:
-    case 284:
-    case 285:
-    case 286:
-    case 287:
-    case 288:
-    case 289:
+    case AARCH64_OPND_SME_ZA_array_off1x4:
+    case AARCH64_OPND_SME_ZA_array_off2x2:
+    case AARCH64_OPND_SME_ZA_array_off2x4:
+    case AARCH64_OPND_SME_ZA_array_off3_0:
+    case AARCH64_OPND_SME_ZA_array_off3_5:
+    case AARCH64_OPND_SME_ZA_array_off3x2:
+    case AARCH64_OPND_SME_ZA_array_off4:
       return aarch64_ext_sme_za_array (self, info, code, inst, errors);
-    case 290:
+    case AARCH64_OPND_SME_ADDR_RI_U4xVL:
       return aarch64_ext_sme_addr_ri_u4xvl (self, info, code, inst, errors);
-    case 291:
+    case AARCH64_OPND_SME_SM_ZA:
       return aarch64_ext_sme_sm_za (self, info, code, inst, errors);
-    case 292:
+    case AARCH64_OPND_SME_PnT_Wm_imm:
       return aarch64_ext_sme_pred_reg_with_index (self, info, code, inst, errors);
-    case 293:
+    case AARCH64_OPND_SME_SHRIMM4:
       return aarch64_ext_plain_shrimm (self, info, code, inst, errors);
-    case 329:
-    case 330:
-    case 331:
+    case AARCH64_OPND_MOPS_ADDR_Rd:
+    case AARCH64_OPND_MOPS_ADDR_Rs:
+    case AARCH64_OPND_MOPS_WB_Rn:
       return aarch64_ext_x0_to_x30 (self, info, code, inst, errors);
-    case 334:
-    case 335:
-    case 336:
-    case 337:
+    case AARCH64_OPND_RCPC3_ADDR_OPT_POSTIND:
+    case AARCH64_OPND_RCPC3_ADDR_OPT_PREIND_WB:
+    case AARCH64_OPND_RCPC3_ADDR_POSTIND:
+    case AARCH64_OPND_RCPC3_ADDR_PREIND_WB:
       return aarch64_ext_rcpc3_addr_opt_offset (self, info, code, inst, errors);
-    case 338:
+    case AARCH64_OPND_RCPC3_ADDR_OFFSET:
       return aarch64_ext_rcpc3_addr_offset (self, info, code, inst, errors);
     default: assert (0); abort ();
     }

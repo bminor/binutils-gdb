@@ -1032,7 +1032,6 @@ print_operand_table (void)
 }
 
 /* Generate aarch64_insert_operand in C to the standard output.  */
-
 static void
 print_operand_inserter (void)
 {
@@ -1051,7 +1050,7 @@ print_operand_inserter (void)
 			   aarch64_operand_error *errors)\n");
   printf ("{\n");
   printf ("  /* Use the index as the key.  */\n");
-  printf ("  int key = self - aarch64_operands;\n");
+  printf ("  enum aarch64_opnd key = self - aarch64_operands;\n");
   printf ("  switch (key)\n");
   printf ("    {\n");
 
@@ -1065,7 +1064,7 @@ print_operand_inserter (void)
 	  int j = i + 1;
 	  const int len = strlen (opnd->inserter);
 	  operand *opnd2 = opnd + 1;
-	  printf ("    case %u:\n", (unsigned int)(opnd - operands));
+	  printf ("    case AARCH64_OPND_%s:\n", opnd->str);
 	  opnd->processed = 1;
 	  for (; j < num; ++j, ++opnd2)
 	    {
@@ -1074,7 +1073,8 @@ print_operand_inserter (void)
 		  && len == strlen (opnd2->inserter)
 		  && strncmp (opnd->inserter, opnd2->inserter, len) == 0)
 		{
-		  printf ("    case %u:\n", (unsigned int)(opnd2 - operands));
+		  printf ("    case AARCH64_OPND_%s:\n", opnd2->str);
+
 		  opnd2->processed = 1;
 		}
 	    }
@@ -1108,7 +1108,7 @@ print_operand_extractor (void)
 			   aarch64_operand_error *errors)\n");
   printf ("{\n");
   printf ("  /* Use the index as the key.  */\n");
-  printf ("  int key = self - aarch64_operands;\n");
+  printf ("  enum aarch64_opnd key = self - aarch64_operands;\n");
   printf ("  switch (key)\n");
   printf ("    {\n");
 
@@ -1122,7 +1122,7 @@ print_operand_extractor (void)
 	  int j = i + 1;
 	  const int len = strlen (opnd->extractor);
 	  operand *opnd2 = opnd + 1;
-	  printf ("    case %u:\n", (unsigned int)(opnd - operands));
+	  printf ("    case AARCH64_OPND_%s:\n", opnd->str);
 	  opnd->processed = 1;
 	  for (; j < num; ++j, ++opnd2)
 	    {
@@ -1131,7 +1131,7 @@ print_operand_extractor (void)
 		  && len == strlen (opnd2->extractor)
 		  && strncmp (opnd->extractor, opnd2->extractor, len) == 0)
 		{
-		  printf ("    case %u:\n", (unsigned int)(opnd2 - operands));
+		  printf ("    case AARCH64_OPND_%s:\n", opnd2->str);
 		  opnd2->processed = 1;
 		}
 	    }
