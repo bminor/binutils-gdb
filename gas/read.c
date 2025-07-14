@@ -2248,7 +2248,7 @@ static struct deferred_diag {
   unsigned int lineno;
   bool err;
   expressionS exp;
-} *deferred_diags, *last_deferred_diag;
+} *deferred_diag_head, **deferred_diag_tail = &deferred_diag_head;
 
 static void
 s_errwarn_if (int err)
@@ -2260,17 +2260,15 @@ s_errwarn_if (int err)
   if (errcnt != had_errors ())
     {
       ignore_rest_of_line ();
+      free (diag);
       return;
     }
 
   diag->err = err;
   diag->file = as_where (&diag->lineno);
   diag->next = NULL;
-  if ( deferred_diags == NULL )
-    deferred_diags = diag;
-  else
-    last_deferred_diag->next = diag;
-  last_deferred_diag = diag;
+  *deferred_diag_tail = diag;
+  deferred_diag_tail = &diag->next;
 
   demand_empty_rest_of_line ();
 }
@@ -2280,20 +2278,23 @@ evaluate_deferred_diags (void)
 {
   struct deferred_diag *diag;
 
-  for (diag = deferred_diags; diag != NULL; diag = diag->next)
+  while ((diag = deferred_diag_head) != NULL)
     {
       if (!resolve_expression (&diag->exp) || diag->exp.X_op != O_constant)
 	as_warn_where (diag->file, diag->lineno,
 		       _("expression does not evaluate to a constant"));
       else if (diag->exp.X_add_number == 0)
-	continue;
+	;
       else if (diag->err)
 	as_bad_where (diag->file, diag->lineno,
 		      _(".errif expression evaluates to true"));
       else
 	as_warn_where (diag->file, diag->lineno,
 		       _(".warnif expression evaluates to true"));
+      deferred_diag_head = diag->next;
+      free (diag);
     }
+  deferred_diag_tail = &deferred_diag_head;
 }
 
 /* Handle the MRI fail pseudo-op.  */
