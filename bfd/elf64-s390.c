@@ -4299,6 +4299,8 @@ elf_s390_create_dynamic_sections (bfd *dynobj,
 								 flags);
 	  if (htab->plt_sframe == NULL)
 	    return false;
+
+	  elf_section_type (htab->plt_sframe) = SHT_GNU_SFRAME;
 	}
     }
 
