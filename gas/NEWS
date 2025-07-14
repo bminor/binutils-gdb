@@ -26,8 +26,10 @@ Changes in 2.45:
 
 * For RISC-V, stop generating mapping symbols $x and replace with $x<isa>.  The
   $x was defined to have the same ISA as previous $x<isa>, but now is defined
-  to have the same ISA as elf architecture attribute.  Once used .option arch
-  directives, the file need to be rebuilt since 2.45.
+  to have the same ISA as elf architecture attribute.  Once both used .option
+  arch/rvc/norvc/push/pop directives (some code have different architectures
+  with file attribute) and data directives in text, then the file need to be
+  rebuilt since 2.45.
 
 * Add support for RISC-V privileged version 1.13, profiles 20/22/23, and
   .bfloat16 directive.
