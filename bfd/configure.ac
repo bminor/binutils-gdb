@@ -207,7 +207,6 @@ bfd_default_target_size=32
 # host stuff:
 
 ALL_LINGUAS="da es fi fr hr id ja ro ru rw sr sv tr uk vi zh_CN pt"
-AM_PO_SUBDIRS
 ZW_GNU_GETTEXT_SISTER_DIR
 
 # Permit host specific settings.
@@ -1040,8 +1039,7 @@ esac
 
 AC_CONFIG_FILES([Makefile bfd-in3.h:bfd-in2.h po/Makefile.in:po/Make-in])
 
-dnl We need this duplication, even though we use AM_PO_SUBDIRS, because of
-dnl our two separate POTFILES.  Yuck.
+dnl We need this duplication because of our two separate POTFILES.
 AC_CONFIG_COMMANDS([default],
 [[
 case "$srcdir" in
