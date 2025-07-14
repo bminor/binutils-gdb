@@ -228,4 +228,7 @@ void tic6x_cfi_endproc (struct fde_entry *fde);
 
 #define tc_cfi_section_name ".c6xabi.exidx"
 
+/* The target supports Object Attributes.  */
+#define TC_OBJ_ATTR 1
+
 #endif /* TC_TIC6X */

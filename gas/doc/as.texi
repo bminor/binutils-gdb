@@ -7991,7 +7991,8 @@ architecture-dependent ones.
 
 @subsection Common @sc{gnu} attributes
 
-These attributes are valid on all architectures.
+The following attribute is supported on all targets that support
+processor-specific attribute tags as described below.
 
 @table @r
 @item Tag_compatibility (32)

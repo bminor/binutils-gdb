@@ -178,4 +178,7 @@ extern int sparc_cie_data_alignment;
    this, BFD_RELOC_32_PCREL will be emitted directly instead.  */
 #define CFI_DIFF_EXPR_OK 0
 
+/* The target supports Object Attributes.  */
+#define TC_OBJ_ATTR 1
+
 #endif /* TC_SPARC */

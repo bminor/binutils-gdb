@@ -379,4 +379,9 @@ extern bool arm_tc_equal_in_insn (int, char *);
 	arm_is_largest_exponent_ok ((PRECISION))
 int arm_is_largest_exponent_ok (int precision);
 
+#ifdef OBJ_ELF
+/* The target supports Object Attributes.  */
+#define TC_OBJ_ATTR 1
+#endif
+
 #endif /* TC_ARM */

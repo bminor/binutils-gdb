@@ -174,4 +174,7 @@ extern bool msp430_allow_local_subtract (expressionS *, expressionS *, segT);
 
 #define DWARF2_ADDR_SIZE(bfd) 4
 
+/* The target supports Object Attributes.  */
+#define TC_OBJ_ATTR 1
+
 #endif /* TC_MSP430 */

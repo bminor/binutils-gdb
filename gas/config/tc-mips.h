@@ -217,4 +217,7 @@ extern bfd_reloc_code_real_type mips_cfi_reloc_for_encoding (int encoding);
 #define CONVERT_SYMBOLIC_ATTRIBUTE(name) mips_convert_symbolic_attribute (name)
 extern int mips_convert_symbolic_attribute (const char *);
 
+/* The target supports Object Attributes.  */
+#define TC_OBJ_ATTR 1
+
 #endif /* TC_MIPS */

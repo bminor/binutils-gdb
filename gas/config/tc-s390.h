@@ -131,4 +131,7 @@ extern offsetT s390_sframe_cfa_ra_offset (void);
 unsigned char s390_sframe_get_abi_arch (void);
 #define sframe_get_abi_arch s390_sframe_get_abi_arch
 
+/* The target supports Object Attributes.  */
+#define TC_OBJ_ATTR 1
+
 #endif /* TC_S390 */

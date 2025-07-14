@@ -432,6 +432,19 @@ changequote([,])dnl
 	;;
     esac
 
+    # Does the target support Object Attributes ?
+    case ${cpu_type} in
+      arc* | arm* | csky | m68k | mips* | msp430 | ppc* \
+      | riscv* | s390* | sparc* | tic6x)
+	for f in config/obj-elf-attr.o; do
+	  case " $extra_objects " in
+	    *" $f "*) ;;
+	    *) extra_objects="$extra_objects $f" ;;
+	  esac
+	done
+	;;
+    esac
+
     # Any other special object files needed ?
     case ${cpu_type} in
 

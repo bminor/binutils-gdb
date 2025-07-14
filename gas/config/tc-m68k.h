@@ -155,4 +155,7 @@ struct m68k_tc_sy
 
 #define TC_SYMFIELD_TYPE struct m68k_tc_sy
 
+/* The target supports Object Attributes.  */
+#define TC_OBJ_ATTR 1
+
 #endif /* TC_M68K_H */

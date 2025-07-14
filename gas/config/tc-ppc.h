@@ -369,4 +369,9 @@ extern int ppc_dwarf2_line_min_insn_length;
 #define DWARF2_CIE_DATA_ALIGNMENT       ppc_cie_data_alignment
 #define EH_FRAME_ALIGNMENT		2
 
+#ifdef OBJ_ELF
+/* The target supports Object Attributes.  */
+#define TC_OBJ_ATTR 1
+#endif
+
 #endif /* TC_PPC */

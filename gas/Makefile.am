@@ -291,6 +291,8 @@ TARGET_CPU_HFILES = \
 
 TARGET_EXTRA_FILES = \
 	config/bfin-lex-wrapper.c \
+	config/obj-elf-attr.c \
+	config/obj-elf-attr.h \
 	config/xtensa-relax.c \
 	config/xtensa-relax.h \
 	config/kvx-parse.h \
