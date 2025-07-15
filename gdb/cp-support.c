@@ -1472,9 +1472,8 @@ add_symbol_overload_list_qualified (const char *func_name,
 				     ? selected_block->objfile ()
 				     : nullptr);
 
-  gdbarch_iterate_over_objfiles_in_search_order
-    (current_objfile ? current_objfile->arch () : current_inferior ()->arch (),
-     [func_name, surrounding_static_block, &overload_list]
+  current_program_space->iterate_over_objfiles_in_search_order
+    ([func_name, surrounding_static_block, &overload_list]
      (struct objfile *obj)
        {
 	 /* Look through the partial symtabs for all symbols which

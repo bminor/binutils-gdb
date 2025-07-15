@@ -146,6 +146,21 @@ program_space::free_all_objfiles ()
 /* See progspace.h.  */
 
 void
+program_space::iterate_over_objfiles_in_search_order
+  (iterate_over_objfiles_in_search_order_cb_ftype cb, objfile *current_objfile)
+{
+  if (m_solib_ops != nullptr)
+    return m_solib_ops->iterate_over_objfiles_in_search_order
+      (cb, current_objfile);
+
+  for (const auto objfile : this->objfiles ())
+    if (cb (objfile))
+      return;
+}
+
+/* See progspace.h.  */
+
+void
 program_space::add_objfile (std::unique_ptr<objfile> &&objfile,
 			    struct objfile *before)
 {

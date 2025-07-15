@@ -776,9 +776,8 @@ elf_gnu_ifunc_resolve_by_cache (const char *name, CORE_ADDR *addr_p)
 
      To search other namespaces, we would need to provide context, e.g. in
      form of an objfile in that namespace.  */
-  gdbarch_iterate_over_objfiles_in_search_order
-    (current_inferior ()->arch (),
-     [name, &addr_p, &found] (struct objfile *objfile)
+  current_program_space->iterate_over_objfiles_in_search_order
+    ([name, &addr_p, &found] (struct objfile *objfile)
        {
 	 htab_t htab;
 	 elf_gnu_ifunc_cache *entry_p;
@@ -830,9 +829,8 @@ elf_gnu_ifunc_resolve_by_got (const char *name, CORE_ADDR *addr_p)
 
      To search other namespaces, we would need to provide context, e.g. in
      form of an objfile in that namespace.  */
-  gdbarch_iterate_over_objfiles_in_search_order
-    (current_inferior ()->arch (),
-     [name, name_got_plt, &addr_p, &found] (struct objfile *objfile)
+  current_program_space->iterate_over_objfiles_in_search_order
+    ([name, name_got_plt, &addr_p, &found] (struct objfile *objfile)
        {
 	 bfd *obfd = objfile->obfd.get ();
 	 struct gdbarch *gdbarch = objfile->arch ();

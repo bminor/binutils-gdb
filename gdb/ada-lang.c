@@ -4901,9 +4901,8 @@ ada_lookup_simple_minsym (const char *name, struct objfile *objfile)
   symbol_name_matcher_ftype *match_name
     = ada_get_symbol_name_matcher (lookup_name);
 
-  gdbarch_iterate_over_objfiles_in_search_order
-    (objfile != NULL ? objfile->arch () : current_inferior ()->arch (),
-     [&result, lookup_name, match_name] (struct objfile *obj)
+  current_program_space->iterate_over_objfiles_in_search_order
+    ([&result, lookup_name, match_name] (struct objfile *obj)
        {
 	 for (minimal_symbol *msymbol : obj->msymbols ())
 	   {

@@ -2654,9 +2654,8 @@ lookup_global_or_static_symbol (const char *name,
 
   /* Do a global search (of global blocks, heh).  */
   if (result.symbol == NULL)
-    gdbarch_iterate_over_objfiles_in_search_order
-      (objfile != NULL ? objfile->arch () : current_inferior ()->arch (),
-       [&result, block_index, name, domain] (struct objfile *objfile_iter)
+    current_program_space->iterate_over_objfiles_in_search_order
+      ([&result, block_index, name, domain] (struct objfile *objfile_iter)
 	 {
 	   result = lookup_symbol_in_objfile (objfile_iter, block_index,
 					      name, domain);
@@ -6575,9 +6574,8 @@ find_main_name (void)
 
   /* Try to find language for main in psymtabs.  */
   bool symbol_found_p = false;
-  gdbarch_iterate_over_objfiles_in_search_order
-    (current_inferior ()->arch (),
-     [&symbol_found_p, pspace] (objfile *obj)
+  current_program_space->iterate_over_objfiles_in_search_order
+    ([&symbol_found_p, pspace] (objfile *obj)
        {
 	 language lang
 	   = obj->lookup_global_symbol_language ("main",

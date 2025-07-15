@@ -49,10 +49,6 @@
 
 static void svr4_relocate_main_executable (void);
 static void probes_table_remove_objfile_probes (struct objfile *objfile);
-static void svr4_iterate_over_objfiles_in_search_order
-  (gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype cb,
-   objfile *current_objfile);
-
 
 /* On SVR4 systems, a list of symbols in the dynamic linker where
    GDB can try to place a breakpoint to monitor shared library
@@ -3444,8 +3440,6 @@ void
 set_solib_svr4_ops (gdbarch *gdbarch, gdbarch_make_solib_ops_ftype make_solib_ops)
 {
   set_gdbarch_make_solib_ops (gdbarch, make_solib_ops);
-  set_gdbarch_iterate_over_objfiles_in_search_order
-    (gdbarch, svr4_iterate_over_objfiles_in_search_order);
 }
 
 /* See solib-svr4.h.  */
@@ -3598,10 +3592,10 @@ find_debug_base_for_solib (const solib *solib)
    stay in the same namespace as that file.  Otherwise, we only consider
    the initial namespace.  */
 
-static void
-svr4_iterate_over_objfiles_in_search_order
-  (gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype cb,
-   objfile *current_objfile)
+void
+svr4_solib_ops::iterate_over_objfiles_in_search_order
+  (iterate_over_objfiles_in_search_order_cb_ftype cb,
+   objfile *current_objfile) const
 {
   bool checked_current_objfile = false;
   if (current_objfile != nullptr)
@@ -3611,10 +3605,13 @@ svr4_iterate_over_objfiles_in_search_order
       if (current_objfile->separate_debug_objfile_backlink != nullptr)
 	current_objfile = current_objfile->separate_debug_objfile_backlink;
 
-      if (current_objfile == current_program_space->symfile_object_file)
-	abfd = current_program_space->exec_bfd ();
+      if (current_objfile == m_pspace->symfile_object_file)
+	abfd = m_pspace->exec_bfd ();
       else
 	abfd = current_objfile->obfd.get ();
+
+      /* gdb_bfd_scan_elf_dyntag relies on the current program space.  */
+      gdb_assert (m_pspace == current_program_space);
 
       if (abfd != nullptr
 	  && gdb_bfd_scan_elf_dyntag (DT_SYMBOLIC, abfd, nullptr, nullptr) == 1)
@@ -3625,6 +3622,9 @@ svr4_iterate_over_objfiles_in_search_order
 	}
     }
 
+  /* elf_locate_base relies on the current program space.  */
+  gdb_assert (m_pspace == current_program_space);
+
   /* The linker namespace to iterate identified by the address of its
      r_debug object, defaulting to the initial namespace.  */
   CORE_ADDR initial = elf_locate_base ();
@@ -3633,7 +3633,7 @@ svr4_iterate_over_objfiles_in_search_order
   if (debug_base == 0)
     debug_base = initial;
 
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile *objfile : m_pspace->objfiles ())
     {
       if (checked_current_objfile && objfile == current_objfile)
 	continue;

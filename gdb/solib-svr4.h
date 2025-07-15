@@ -96,6 +96,9 @@ struct svr4_solib_ops : public solib_ops
   int find_solib_ns (const solib &so) const override;
   int num_active_namespaces () const override;
   std::vector<const solib *> get_solibs_in_ns (int nsid) const override;
+  void iterate_over_objfiles_in_search_order
+    (iterate_over_objfiles_in_search_order_cb_ftype cb,
+     objfile *current_objfile) const override;
 
   /* Return the appropriate link map offsets table for the architecture.  */
   virtual link_map_offsets *fetch_link_map_offsets () const = 0;

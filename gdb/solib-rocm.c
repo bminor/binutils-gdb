@@ -211,6 +211,14 @@ struct rocm_solib_ops : public solib_ops
   std::vector<const solib *> get_solibs_in_ns (int nsid) const override
   { return m_host_ops->get_solibs_in_ns (nsid); }
 
+  void iterate_over_objfiles_in_search_order
+    (iterate_over_objfiles_in_search_order_cb_ftype cb,
+     objfile *current_objfile) const override
+  {
+    return m_host_ops->iterate_over_objfiles_in_search_order
+      (cb, current_objfile);
+  }
+
 private:
   owning_intrusive_list<solib>
   solibs_from_rocm_sos (const std::vector<rocm_so> &sos) const;

@@ -2562,27 +2562,6 @@ one for live targets.
     predicate=True,
 )
 
-Method(
-    comment="""
-Iterate over all objfiles in the order that makes the most sense
-for the architecture to make global symbol searches.
-
-CB is a callback function passed an objfile to be searched.  The iteration stops
-if this function returns nonzero.
-
-If not NULL, CURRENT_OBJFILE corresponds to the objfile being
-inspected when the symbol search was requested.
-""",
-    type="void",
-    name="iterate_over_objfiles_in_search_order",
-    params=[
-        ("iterate_over_objfiles_in_search_order_cb_ftype", "cb"),
-        ("struct objfile *", "current_objfile"),
-    ],
-    predefault="default_iterate_over_objfiles_in_search_order",
-    invalid=False,
-)
-
 Value(
     comment="""
 Ravenscar arch-dependent ops.

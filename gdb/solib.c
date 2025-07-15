@@ -473,6 +473,18 @@ solib_ops::bfd_open (const char *pathname) const
   return solib_bfd_open (pathname);
 }
 
+/* See solib.h.  */
+
+void
+solib_ops::iterate_over_objfiles_in_search_order
+  (iterate_over_objfiles_in_search_order_cb_ftype cb,
+   objfile *current_objfile) const
+{
+  for (objfile *objfile : m_pspace->objfiles ())
+    if (cb (objfile))
+      return;
+}
+
 /* Given a pointer to one of the shared objects in our list of mapped
    objects, use the recorded name to open a bfd descriptor for the
    object, build a section table, relocate all the section addresses

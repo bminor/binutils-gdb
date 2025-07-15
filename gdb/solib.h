@@ -131,6 +131,12 @@ private:
 /* A unique pointer to an solib.  */
 using solib_up = std::unique_ptr<solib>;
 
+/* Callback type for the 'iterate_over_objfiles_in_search_order'
+   methods.  */
+
+using iterate_over_objfiles_in_search_order_cb_ftype
+  = gdb::function_view<bool (objfile *)>;
+
 struct solib_ops
 {
   explicit solib_ops (program_space *pspace)
@@ -263,6 +269,18 @@ struct solib_ops
      The supports_namespaces method must return true for this to be called.  */
   virtual std::vector<const solib *> get_solibs_in_ns (int ns) const
   { gdb_assert_not_reached ("namespaces not supported"); }
+
+  /* Iterate over all objfiles of the program space in the order that makes the
+     most sense for the architecture to make global symbol searches.
+
+     CB is a callback function passed an objfile to be searched.  The iteration
+     stops if this function returns true.
+
+     If not nullptr, CURRENT_OBJFILE corresponds to the objfile being inspected
+     when the symbol search was requested.  */
+  virtual void iterate_over_objfiles_in_search_order
+    (iterate_over_objfiles_in_search_order_cb_ftype cb,
+     objfile *current_objfile) const;
 
 protected:
   /* The program space for which this solib_ops was created.  */

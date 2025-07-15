@@ -1010,10 +1010,6 @@ in_plt_section (CORE_ADDR pc)
 extern scoped_restore_tmpl<int> inhibit_section_map_updates
     (struct program_space *pspace);
 
-extern void default_iterate_over_objfiles_in_search_order
-  (gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype cb,
-   objfile *current_objfile);
-
 /* Reset the per-BFD storage area on OBJ.  */
 
 void set_objfile_per_bfd (struct objfile *obj);

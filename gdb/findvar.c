@@ -445,9 +445,8 @@ language_defn::read_var_value (struct symbol *var,
 	struct obj_section *obj_section;
 	bound_minimal_symbol bmsym;
 
-	gdbarch_iterate_over_objfiles_in_search_order
-	  (var->arch (),
-	   [var, &bmsym] (objfile *objfile)
+	current_program_space->iterate_over_objfiles_in_search_order
+	  ([var, &bmsym] (objfile *objfile)
 	     {
 		bmsym = lookup_minimal_symbol (current_program_space,
 					       var->linkage_name (), objfile);

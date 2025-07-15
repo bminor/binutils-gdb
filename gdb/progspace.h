@@ -212,6 +212,18 @@ struct program_space
       (objfiles_range (objfiles_iterator (m_objfiles_list.begin ())));
   }
 
+  /* Iterate over all objfiles of the program space in the order that makes the
+     most sense to make global symbol searches.
+
+     CB is a callback function passed an objfile to be searched.  The iteration stops
+     if this function returns true.
+
+     If not nullptr, CURRENT_OBJFILE corresponds to the objfile being
+     inspected when the symbol search was requested.  */
+  void iterate_over_objfiles_in_search_order
+    (iterate_over_objfiles_in_search_order_cb_ftype cb,
+     objfile *current_objfile);
+
   /* Add OBJFILE to the list of objfiles, putting it just before
      BEFORE.  If BEFORE is nullptr, it will go at the end of the
      list.  */
