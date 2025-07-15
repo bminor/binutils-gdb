@@ -276,7 +276,7 @@ static const dependency isa_dependencies[] =
   { "AMX_MOVRS",
     "AMX_TILE" },
   { "AMX_AVX512",
-    "AMX_TILE|AVX10_2" },
+    "AMX_TILE|AVX512F" },
   { "KL",
     "SSE2" },
   { "WIDEKL",
