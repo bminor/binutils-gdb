@@ -281,6 +281,9 @@ elf32_sparc_reloc_type_class (const struct bfd_link_info *info,
 #undef	TARGET_BIG_NAME
 #define	TARGET_BIG_NAME				"elf32-sparc-sol2"
 
+#undef ELF_TARGET_OS
+#define ELF_TARGET_OS				is_solaris
+
 #undef elf32_bed
 #define elf32_bed				elf32_sparc_sol2_bed
 

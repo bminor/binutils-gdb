@@ -1008,6 +1008,9 @@ const struct elf_size_info elf64_sparc_size_info =
 #undef	TARGET_BIG_NAME
 #define	TARGET_BIG_NAME				"elf64-sparc-sol2"
 
+#undef ELF_TARGET_OS
+#define ELF_TARGET_OS				is_solaris
+
 /* Restore default: we cannot use ELFOSABI_SOLARIS, otherwise ELFOSABI_NONE
    objects won't be recognized.  */
 #undef	ELF_OSABI

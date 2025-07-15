@@ -2882,8 +2882,10 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 
     default:
       /* Possibly an attributes section.  */
-      if (hdr->sh_type == SHT_GNU_ATTRIBUTES
-	  || hdr->sh_type == bed->obj_attrs_section_type)
+      if (get_elf_backend_data (abfd)->target_os != is_solaris
+	  /* PR 33153: Solaris defines SHT_SUNW_cap which collides with SHT_GNU_ATTRIBUTES.  */
+	  && (hdr->sh_type == SHT_GNU_ATTRIBUTES
+	      || hdr->sh_type == bed->obj_attrs_section_type))
 	{
 	  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
 	    goto fail;
