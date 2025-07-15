@@ -311,8 +311,7 @@ Options:\n\
   fprintf (stream, _("\
                           generate GNU Build notes if none are present in the input\n"));
   fprintf (stream, _("\
-  --gsframe=[no|yes]      whether to generate SFrame stack trace information\n\
-                          (default: no)\n"));
+  --gsframe               generate SFrame stack trace information\n"));
 # if defined (TARGET_USE_SCFI) && defined (TARGET_USE_GINSN)
   fprintf (stream, _("\
   --scfi=experimental     Synthesize DWARF CFI for hand-written asm\n\
@@ -540,7 +539,7 @@ parse_args (int * pargc, char *** pargv)
     ,{"elf-stt-common", required_argument, NULL, OPTION_ELF_STT_COMMON}
     ,{"sectname-subst", no_argument, NULL, OPTION_SECTNAME_SUBST}
     ,{"generate-missing-build-notes", required_argument, NULL, OPTION_ELF_BUILD_NOTES}
-    ,{"gsframe", optional_argument, NULL, OPTION_SFRAME}
+    ,{"gsframe", no_argument, NULL, OPTION_SFRAME}
 # if defined (TARGET_USE_SCFI) && defined (TARGET_USE_GINSN)
     ,{"scfi", required_argument, NULL, OPTION_SCFI}
 # endif
@@ -1039,17 +1038,7 @@ This program has absolutely no warranty.\n"));
 	  break;
 
 	case OPTION_SFRAME:
-	  if (optarg)
-	    {
-	    if (strcasecmp (optarg, "no") == 0)
-	      flag_gen_sframe = 0;
-	    else if (strcasecmp (optarg, "yes") == 0)
-	      flag_gen_sframe = 1;
-	    else
-	      as_fatal (_("Invalid --gsframe option: `%s'"), optarg);
-	  else
-	    flag_gen_sframe = 1;
-	    }
+	  flag_gen_sframe = 1;
 	  break;
 
 #endif /* OBJ_ELF */
