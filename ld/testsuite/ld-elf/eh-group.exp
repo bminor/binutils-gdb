@@ -40,6 +40,11 @@ if ![is_elf_format] {
     return
 }
 
+set as_gsframe ""
+if { [gas_sframe_check] } {
+    set as_gsframe "--gsframe"
+}
+
 # alpha-linux-gnu does not support 64-bit relocations:
 #   relocation truncated to fit: REFLONG against `.gcc_except_table'
 # arm-eabi does not support 64-bit relocations:
@@ -58,7 +63,7 @@ if [is_elf64 "tmpdir/eh-group1size.o"] {
 
 set build_tests_ld [list			\
   [list "Build eh-group1.o"			\
-   "-r" "" "$as_options"			\
+   "-r" "" "$as_options $as_gsframe"		\
    {eh-group1.s eh-group2.s} {} "eh-group.o"]	\
 ]
 
