@@ -1328,13 +1328,14 @@ sframe_decoder_get_fre (sframe_decoder_ctx *ctx,
 	 if (!sframe_fre_sanity_check_p (&ifre))
 	   return sframe_set_errno (&err, SFRAME_ERR_FRE_INVAL);
 
-	 sframe_frame_row_entry_copy (fre, &ifre);
+	  /* Although a stricter sanity check on fre_start_addr like:
+	       if (fdep->sfde_func_size)
+		 sframe_assert (frep->fre_start_addr < fdep->sfde_func_size);
+	     is more suitable, some code has been seen to not abide by it.  See
+	     PR libsframe/33131.  */
+	  sframe_assert (ifre.fre_start_addr <= fdep->sfde_func_size);
 
-	 if (fdep->sfde_func_size)
-	   sframe_assert (fre->fre_start_addr < fdep->sfde_func_size);
-	 else
-	   /* A SFrame FDE with func size equal to zero is possible.  */
-	   sframe_assert (fre->fre_start_addr == fdep->sfde_func_size);
+	 sframe_frame_row_entry_copy (fre, &ifre);
 
 	 return 0;
        }
@@ -1587,11 +1588,12 @@ sframe_encoder_add_fre (sframe_encoder_ctx *encoder,
     = frep->fre_start_addr;
   ectx_frep->fre_info = frep->fre_info;
 
-  if (fdep->sfde_func_size)
-    sframe_assert (frep->fre_start_addr < fdep->sfde_func_size);
-  else
-    /* A SFrame FDE with func size equal to zero is possible.  */
-    sframe_assert (frep->fre_start_addr == fdep->sfde_func_size);
+  /* Although a stricter sanity check on fre_start_addr like:
+       if (fdep->sfde_func_size)
+	 sframe_assert (frep->fre_start_addr < fdep->sfde_func_size);
+     is more suitable, some code has been seen to not abide by it.  See PR
+     libsframe/33131.  */
+  sframe_assert (frep->fre_start_addr <= fdep->sfde_func_size);
 
   /* frep has already been sanity check'd.  Get offsets size.  */
   offsets_sz = sframe_fre_offset_bytes_size (frep->fre_info);
