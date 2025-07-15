@@ -8199,7 +8199,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "a register destination address with writeback")			\
     Y(INT_REG, x0_to_x30, "MOPS_ADDR_Rs", 0, F(FLD_Rs),			\
       "a register source address with writeback")			\
-    Y(INT_REG, x0_to_x30, "MOPS_WB_Rd", 0, F(FLD_Rn),			\
+    Y(INT_REG, x0_to_x30, "MOPS_WB_Rn", 0, F(FLD_Rn),			\
       "an integer register with writeback")				\
     Y(IMMEDIATE, imm, "CSSC_SIMM8", OPD_F_SEXT, F(FLD_CSSC_imm8),	\
       "an 8-bit signed immediate")					\
