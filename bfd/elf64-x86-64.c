@@ -3268,10 +3268,14 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	  wrel->r_addend = 0;
 
 	  /* For ld -r, remove relocations in debug sections against
-	     sections defined in discarded sections.  Not done for
-	     eh_frame editing code expects to be present.  */
+	     sections defined in discarded sections, including sframe
+	     sections.  Not done for eh_frame editing code expects to
+	     be present.  NB: Since sframe code keeps R_X86_64_NONE
+	     reloc as is, its r_offset is wrong, we must not generate
+	     R_X86_64_NONE reloc in sframe section.  */
 	   if (bfd_link_relocatable (info)
-	       && (input_section->flags & SEC_DEBUGGING))
+	       && ((input_section->flags & SEC_DEBUGGING) != 0
+		   || elf_section_type (input_section) == SHT_GNU_SFRAME))
 	     wrel--;
 
 	  continue;
