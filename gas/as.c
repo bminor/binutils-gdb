@@ -1041,12 +1041,12 @@ This program has absolutely no warranty.\n"));
 	case OPTION_SFRAME:
 	  if (optarg)
 	    {
-	    if (strcasecmp (optarg, "no") == 0)
-	      flag_gen_sframe = 0;
-	    else if (strcasecmp (optarg, "yes") == 0)
-	      flag_gen_sframe = 1;
-	    else
-	      as_fatal (_("Invalid --gsframe option: `%s'"), optarg);
+	      if (strcasecmp (optarg, "no") == 0)
+		flag_gen_sframe = 0;
+	      else if (strcasecmp (optarg, "yes") == 0)
+		flag_gen_sframe = 1;
+	      else
+		as_fatal (_("Invalid --gsframe option: `%s'"), optarg);
 	    }
 	  else
 	    flag_gen_sframe = 1;
