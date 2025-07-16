@@ -21727,8 +21727,13 @@ print_v850_note (Elf_Internal_Note * pnote)
 {
   unsigned int val;
 
+  printf ("  %s: ", get_v850_elf_note_type (pnote->type));
+
   if (pnote->descsz != 4)
-    return false;
+    {
+      printf ("<corrupt descsz: %#lx>\n", pnote->descsz);
+      return false;
+    }
 
   val = byte_get ((unsigned char *) pnote->descdata, pnote->descsz);
 
@@ -23297,10 +23302,15 @@ process_v850_notes (Filedata * filedata, uint64_t offset, uint64_t length)
 	    " %#" PRIx64 " with length %#" PRIx64 ":\n"),
 	  offset, length);
 
-  while ((char *) external + sizeof (Elf_External_Note) < end)
+  while ((char *) external < end)
     {
-      Elf_External_Note * next;
+      char *next;
       Elf_Internal_Note inote;
+      size_t data_remaining = end - (char *) external;
+
+      if (data_remaining < offsetof (Elf_External_Note, name))
+	break;
+      data_remaining -= offsetof (Elf_External_Note, name);
 
       inote.type     = BYTE_GET (external->type);
       inote.namesz   = BYTE_GET (external->namesz);
@@ -23308,47 +23318,25 @@ process_v850_notes (Filedata * filedata, uint64_t offset, uint64_t length)
       inote.descsz   = BYTE_GET (external->descsz);
       inote.descdata = inote.namedata + align_power (inote.namesz, 2);
       inote.descpos  = offset + (inote.descdata - (char *) pnotes);
+      next = inote.descdata + align_power (inote.descsz, 2);
 
-      if (inote.descdata < (char *) pnotes || inote.descdata >= end)
+      if ((size_t) (inote.descdata - inote.namedata) < inote.namesz
+	  || (size_t) (inote.descdata - inote.namedata) > data_remaining
+	  || (size_t) (next - inote.descdata) < inote.descsz
+	  || ((size_t) (next - inote.descdata)
+	      > data_remaining - (size_t) (inote.descdata - inote.namedata)))
 	{
-	  warn (_("Corrupt note: name size is too big: %lx\n"), inote.namesz);
-	  inote.descdata = inote.namedata;
-	  inote.namesz   = 0;
-	}
-
-      next = (Elf_External_Note *) (inote.descdata + align_power (inote.descsz, 2));
-
-      if (   ((char *) next > end)
-	  || ((char *) next <  (char *) pnotes))
-	{
-	  warn (_("corrupt descsz found in note at offset %#tx\n"),
+	  warn (_("note with invalid namesz and/or descsz found at offset %#tx\n"),
 		(char *) external - (char *) pnotes);
-	  warn (_(" type: %#lx, namesize: %#lx, descsize: %#lx\n"),
-		inote.type, inote.namesz, inote.descsz);
+	  warn (_(" type: %#lx, namesize: %#lx, descsize: %#lx, alignment: %u\n"),
+		inote.type, inote.namesz, inote.descsz, 2);
 	  break;
 	}
 
-      external = next;
-
-      /* Prevent out-of-bounds indexing.  */
-      if (   inote.namedata + inote.namesz > end
-	  || inote.namedata + inote.namesz < inote.namedata)
-        {
-          warn (_("corrupt namesz found in note at offset %#zx\n"),
-                (char *) external - (char *) pnotes);
-          warn (_(" type: %#lx, namesize: %#lx, descsize: %#lx\n"),
-                inote.type, inote.namesz, inote.descsz);
-          break;
-        }
-
-      printf ("  %s: ", get_v850_elf_note_type (inote.type));
+      external = (Elf_External_Note *) next;
 
       if (! print_v850_note (& inote))
-	{
-	  res = false;
-	  printf ("<corrupt sizes: namesz: %#lx, descsz: %#lx>\n",
-		  inote.namesz, inote.descsz);
-	}
+	res = false;
     }
 
   free (pnotes);
