@@ -4393,6 +4393,11 @@ wait_for_inferior (inferior *inf)
   scoped_finish_thread_state finish_state
     (inf->process_target (), minus_one_ptid);
 
+  /* The commit_resumed_state of INF should already be false at this point
+     as INF will be a newly started remote target.  This might not be true
+     for other targets but this will be handled in stop_all_threads.  */
+  gdb_assert (!inf->process_target ()->commit_resumed_state);
+
   while (1)
     {
       execution_control_state ecs;
@@ -5698,6 +5703,8 @@ stop_all_threads (const char *reason, inferior *inf)
       if (debug_infrun)
 	debug_prefixed_printf ("infrun", "stop_all_threads", "done");
     };
+
+  scoped_disable_commit_resumed disable_commit_resumed ("stop all threads");
 
   /* Request threads to stop, and then wait for the stops.  Because
      threads we already know about can spawn more threads while we're

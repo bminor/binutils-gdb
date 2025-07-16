@@ -1,0 +1,180 @@
+# This testcase is part of GDB, the GNU debugger.
+#
+# Copyright 2025 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Set an inferior running in the background (using "run&"), then
+# connect to gdbserver in a second inferior.  When this test was added
+# there were two bugs in GDB.  First, just connecting to gdbserver
+# while an inferior was running on a different connection type
+# (e.g. inferior 1 was native, and inferior 2 was gdbserver) would
+# trigger an assertion.
+#
+# Then, once the assertion was fixed, GDB would stop the thread from
+# the first inferior, but would fail to update it's state in GDB core,
+# this would leave the thread stopped, but GDB core thinking the
+# thread was running.  Check this is fixed by looking at the 'info
+# threads' output after connecting to the remote target.
+
+# This tests the use of native and remote targets, and also depends on use
+# of the 'run' command.  If we try to run it with a board that forces native
+# targets to become remote, then this test isn't going to work, especially
+# for 'remote' targets where 'run' is not supported.
+require {string equal [target_info gdb_protocol] ""}
+
+load_lib gdbserver-support.exp
+
+require allow_gdbserver_tests
+
+standard_testfile
+
+if { [build_executable "failed to build" $testfile $srcfile] } {
+    return
+}
+
+# Set non-stop mode based on NON_STOP.  Start a native inferior running in
+# the background, then start a second, remote inferior.  Based on the value
+# of NON_STOP we might expect the inferior thread to have been stopped.
+# Confirm inferior one is in the correct state, and that it can be
+# interrupted and/or resumed.
+proc run_test { target_non_stop non_stop } {
+    clean_restart $::testfile
+
+    # Setup non-stop settings.
+    gdb_test_no_output "maint set target-non-stop $target_non_stop"
+    gdb_test_no_output "set non-stop $non_stop"
+
+    # Start the first inferior running in the background.
+    gdb_test -no-prompt-anchor "run&" "Starting program: .*" "start background inferior"
+
+    # Add a second inferior.
+    gdb_test "add-inferior" "Added inferior 2.*"
+    gdb_test "inferior 2" "Switching to inferior 2.*"
+
+    # Setup the sysroot if possible.  This will make connecting to
+    # gdbserver quicker.
+    if { ![is_remote host] && ![is_remote target] } {
+	gdb_test "set sysroot"
+    }
+
+    # Setup, and connect to, a remote target.
+    set target_exec [gdbserver_download_current_prog]
+    set res [gdbserver_start "" $target_exec]
+    set gdbserver_protocol [lindex $res 0]
+    set gdbserver_gdbport [lindex $res 1]
+    set res [gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport]
+    gdb_assert {$res == 0} "connect to remote target"
+
+    # FIXME: A bug in GDB means that the state of thread 1.1 will be wrong,
+    # GDB's frontend thinks that the thread is running when really the
+    # thread is stopped.  This will be fixed in the next commit, at which
+    # point this whole 'if' will be removed.
+    if { $target_non_stop == "on" && $non_stop == "off" } {
+	gdb_test "p 1 + 2" " = 3" "check GDB is still alive"
+	return
+    }
+
+    # Check the info threads output.  We're checking that we see the two
+    # threads we expect, that the correct thread (inferior two's thread)
+    # is current, and that none of the threads are running.
+    set state_inferior_1 ""
+    set state_inferior_2 ""
+    gdb_test_multiple "info threads" "" {
+	-re "^info threads\r\n" {
+	    exp_continue
+	}
+
+	-re "^\\s+Id\\s+Target Id\\s+Frame\\s*\r\n" {
+	    exp_continue
+	}
+
+	-re "^\\s+1\\.1\\s+\[^\r\n\]+\\(running\\)\r\n" {
+	    set state_inferior_1 "running"
+	    exp_continue
+	}
+
+	-re "^\\*\\s+2\\.1\\s+\[^\r\n\]+\\(running\\)\r\n" {
+	    set state_inferior_2 "running"
+	    exp_continue
+	}
+
+	-re "^\\s+1\\.1\\s+\[^\r\n\]+\r\n" {
+	    set state_inferior_1 "stopped"
+	    exp_continue
+	}
+
+	-re "^\\*\\s+2\\.1\\s+\[^\r\n\]+\r\n" {
+	    set state_inferior_2 "stopped"
+	    exp_continue
+	}
+
+	-re "^$::gdb_prompt $" {
+	    if { $non_stop } {
+		gdb_assert { $state_inferior_1 == "running" \
+				 && $state_inferior_2 == "stopped" } \
+		    $gdb_test_name
+	    } else {
+		gdb_assert { $state_inferior_1 == "stopped" \
+				 && $state_inferior_2 == "stopped" } \
+		    $gdb_test_name
+	    }
+	}
+    }
+
+    # Allow inferior 2 to reach main.  The confirms that inferior 2 can be
+    # set running again.
+    gdb_breakpoint main
+    gdb_continue_to_breakpoint "breakpoint in main"
+    gdb_test "bt 1" \
+	"#0\\s+main \\(\\) at\[^\r\n\]+" \
+	"check inferior 2 is in main"
+
+    # Switch to inferior 1 and allow it to continue.  This is a
+    # critical part of the test.  When the test was added a bug (in
+    # all-stop mode) would leave inferior 1 stopped, but GDB code
+    # would think the thread was running.  As such. the thread
+    # couldn't be resumed again.
+    gdb_test "inferior 1" "Switching to inferior 1.*"
+
+    # In non-stop mode, thread 1.1 is correctly left running, so we
+    # need to stop it now.
+    if { $non_stop } {
+	gdb_test -no-prompt-anchor "interrupt"
+	gdb_test "p 1 + 1" " = 2" \
+	    "simple print to resync output"
+    }
+
+    gdb_breakpoint breakpt
+    gdb_continue_to_breakpoint "continue to breakpoint in breakpt"
+    gdb_test "bt 1" \
+	[multi_line \
+	     "#0\\s+breakpt \\(\\) at\[^\r\n\]+" \
+	     "\\(More stack frames follow\\.\\.\\.\\)"] \
+	"check inferior 1 is in breakpt"
+
+    # Switch back to inferior 2.  The testing infrastructure will try to
+    # use 'monitor exit' to close gdbserver.  It helps if we are in the
+    # gdbserver inferior when the script finishes.
+    gdb_test "inferior 2" "Switching to inferior 2.*" \
+	"switch back to inferior 2"
+}
+
+# Multi-inferior support requires non-stop targets.
+foreach_with_prefix target_non_stop { auto on } {
+    # But it's OK if we're emulating all-stop mode on top of non-stop.
+    foreach_with_prefix non_stop { on off } {
+	run_test $target_non_stop $non_stop
+    }
+}
