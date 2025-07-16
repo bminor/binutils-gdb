@@ -1761,11 +1761,18 @@ if test "${gdb_native}" = yes; then
      AC_RUN_IFELSE(
        [AC_LANG_PROGRAM(
          [#include "Python.h"],
-         [int err;
+         [
+          const char *code = "import ctypes\n";
           Py_Initialize ();
-          err = PyRun_SimpleString ("import ctypes\n");
+          PyObject *main_module = PyImport_AddModule ("__main__");
+          PyObject *global_dict = PyModule_GetDict (main_module);
+          PyObject *local_dict = PyDict_New ();
+          PyObject *py_code = Py_CompileString (code, "test", Py_single_input);
+          if (py_code == NULL)
+            return 1;
+          PyObject *res = PyEval_EvalCode (py_code, global_dict, local_dict);
           Py_Finalize ();
-          return err == 0 ? 0 : 1;])],
+          return res ? 0 : 1;])],
        [dynamic_list=true], [], [true])
      LIBS="$old_LIBS"
      CFLAGS="$old_CFLAGS"
