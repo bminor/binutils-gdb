@@ -22,7 +22,6 @@
 #include "arch-utils.h"
 #include "breakpoint.h"
 #include "cli/cli-decode.h"
-#include "mi/mi-common.h"
 #include "progspace.h"
 #include "solib.h"
 #include "target.h"

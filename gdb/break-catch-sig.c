@@ -18,9 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "arch-utils.h"
-#include <ctype.h>
 #include "breakpoint.h"
-#include "cli/cli-cmds.h"
 #include "inferior.h"
 #include "infrun.h"
 #include "annotate.h"

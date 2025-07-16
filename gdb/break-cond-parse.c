@@ -23,7 +23,6 @@
 #include "break-cond-parse.h"
 #include "tid-parse.h"
 #include "ada-lang.h"
-#include "exceptions.h"
 
 /* When parsing tokens from a string, which direction are we parsing?
 
