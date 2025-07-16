@@ -65,6 +65,14 @@ AM_MAINTAINER_MODE
 AM_INSTALL_LIBBFD
 ACX_PROG_CC_WARNING_OPTS([-Wall], [ac_libctf_warn_cflags])
 
+case "${host}" in
+  # PR libctf/29292
+  # libctf's use of mmap doesn't work on Solaris 11.4, so disable it.
+  *-*-solaris2.11*)
+    ac_cv_func_mmap_fixed_mapped=no
+  ;;
+esac
+
 GCC_AC_FUNC_MMAP
 # Needed for BFD capability checks.
 AC_SEARCH_LIBS(dlsym, dl)
