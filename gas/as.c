@@ -311,7 +311,7 @@ Options:\n\
   fprintf (stream, _("\
                           generate GNU Build notes if none are present in the input\n"));
   fprintf (stream, _("\
-  --gsframe=[no|yes]      whether to generate SFrame stack trace information\n\
+  --gsframe[={no|yes}]    whether to generate SFrame stack trace information\n\
                           (default: no)\n"));
 # if defined (TARGET_USE_SCFI) && defined (TARGET_USE_GINSN)
   fprintf (stream, _("\

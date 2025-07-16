@@ -240,7 +240,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--gdwarf-<N>}] [@b{--gdwarf-sections}]
  [@b{--gdwarf-cie-version}=@var{VERSION}]
  [@b{--generate-missing-build-notes=[no|yes]}]
- [@b{--gsframe}]
+ [@b{--gsframe}] [@b{--gsframe=[no|yes]}]
  [@b{--hash-size}=@var{N}]
  [@b{--help}] [@b{--target-help}]
  [@b{--info}] [@b{--no-info}]
@@ -860,7 +860,11 @@ configure option.
 
 @item --gsframe
 @itemx --gsframe
-Create @var{.sframe} section from CFI directives.
+@itemx --gsframe=no
+@itemx --gsframe=yes
+Create @var{.sframe} section from CFI directives.  The explicit
+@option{--gsframe=yes} option behaves the same as @option{--gsframe}.
+Generation can be suppressed with @option{--gsframe=no}.
 
 @end ifset
 
