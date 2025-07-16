@@ -1,0 +1,109 @@
+# Copyright 2025 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Start multiple inferiors while schedule-multiple is on.  Make use of
+# the multi-target.exp.tcl support library for the helper procs, but
+# don't use its 'setup' proc as that only turns on schedule-multiple
+# after starting all the inferiors, and that is too late for this test.
+#
+# The specific bug that this test guards against was that, when a
+# native target starts and runs upto a breakpoint, the thread would
+# have its last signal recorded as SIGTRAP.
+#
+# When starting a gdbserver inferior (with schedule-multiple on) the
+# native target would also be resumed.
+#
+# However, GDBs 'run' command was failing to clear out the old signal
+# state from the native inferior, and so GDB would deliver a SIGTRAP
+# to that inferior, killing it.
+
+source $srcdir/$subdir/multi-target.exp.tcl
+
+if {![multi_target_prepare]} {
+    return
+}
+
+# Some breakpoint locations.
+set line1 [gdb_get_line_number "set break 1 here"]
+set line2 [gdb_get_line_number "set break 2 here"]
+
+# Start two inferiors using TARGET_TYPE_1 and TARGET_TYPE_2 (either
+# 'extended-remote' or 'native').  Due to the way that inferior 1 is
+# special (existing once GDB starts up), we just use the existing
+# helper functions to create inferiors 2 and 3 using these types, and
+# we leave inferior 1 unused.
+proc run_test { target_type_1 target_type_2 } {
+    cleanup_gdbservers
+
+    clean_restart
+
+    gdb_test_no_output "set sysroot"
+
+    # The schedule-multiple setting relies on all targets running in
+    # non-stop mode.  Force it on for remote targets, until this is
+    # the default.
+    gdb_test_no_output "maint set target-non-stop on"
+
+    # Run in all-stop mode.
+    gdb_test_no_output "set non-stop off"
+
+    # Turn on schedule-multiple before starting any inferiors.
+    gdb_test_no_output "set schedule-multiple on"
+
+    if {![add_inferior 2 $target_type_1 $::binfile]} {
+	return 0
+    }
+
+    if {![add_inferior 3 $target_type_2 $::binfile]} {
+	return 0
+    }
+
+    # Check we see all the expected threads.
+    gdb_test "info threads" \
+	[multi_line \
+	     "\\s+Id\\s+Target Id\\s+Frame\\s*" \
+	     "\\s+2\\.1\\s+\[^\r\n\]+" \
+	     "\\s+2\\.2\\s+\[^\r\n\]+" \
+	     "\\*\\s+3\\.1\\s+\[^\r\n\]+" \
+	     "\\s+3\\.2\\s+\[^\r\n\]+"]
+
+    # Ensure that all inferiors can be set running again.
+    gdb_test "break ${::srcfile}:${::line1} thread 3.1"
+    gdb_test "break ${::srcfile}:${::line2} thread 2.1"
+    gdb_test "continue" \
+	[multi_line \
+	     "Thread 3\\.1 \[^\r\n\]+, main \\(\[^\r\n\]+\\) at \[^\r\n\]+" \
+	     "$::decimal\\s+function1 \\(\\); /\\* set break 1 here \\*/"] \
+	"continue to function1"
+
+    # Unblock thread 2.1 and continue again.  This time, thread 2.1
+    # will hit a breakpoint.
+    gdb_test "thread apply 2.1 set wait_for_gdb = 0" ".*"
+    gdb_test "continue" \
+	[multi_line \
+	     "Thread 2\\.1 \[^\r\n\]+, main \\(\[^\r\n\]+\\) at \[^\r\n\]+" \
+	     "$::decimal\\s+function2 \\(\\); /\\* set break 2 here \\*/"] \
+	"continue to function2"
+}
+
+set all_target_types { extended-remote native }
+
+foreach_with_prefix target_type_1 $all_target_types {
+    foreach_with_prefix target_type_2 $all_target_types {
+	run_test $target_type_1 $target_type_2
+    }
+}
+
+multi_target_cleanup

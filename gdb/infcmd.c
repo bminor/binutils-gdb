@@ -495,6 +495,11 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
       thr->set_pending_waitstatus (ws);
     }
 
+  /* Still call clear_proceed_status; in schedule multiple mode the proceed
+     can resume threads from other inferiors, which might need clearing
+     prior to a proceed call.  */
+  clear_proceed_status (0);
+
   /* Start the target running.  Do not use -1 continuation as it would skip
      breakpoint right at the entry point.  */
   proceed (regcache_read_pc (get_thread_regcache (inferior_thread ())),
