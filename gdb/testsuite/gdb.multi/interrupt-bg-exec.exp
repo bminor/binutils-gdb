@@ -1,0 +1,143 @@
+# Copyright 2025 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# In all-stop mode, set one inferior running in the background, then
+# continue a second inferior.  When the second inferior hits a breakpoint,
+# both inferiors should be stopped.
+
+# This tests the use of native and remote targets.  If we try to run
+# it with a board that forces native targets to become remote, then
+# this doesn't really make sense (for this test).
+require {string equal [target_info gdb_protocol] ""}
+
+source $srcdir/$subdir/multi-target.exp.tcl
+
+load_lib gdbserver-support.exp
+
+require allow_gdbserver_tests
+
+# This overrides the call in multi-target.exp.tcl.
+standard_testfile
+
+if { [build_executable "failed to build" $testfile $srcfile] } {
+    return
+}
+
+# Start two inferiors, TARGET_TYPE_1 and TARGET_TYPE_2 are strings, either
+# 'extended-remote' or 'native', and control the connection type of each
+# inferior.
+#
+# Set the first inferior running in the background, then continue theA
+# second inferior allowing it to hit a breakpoint.
+#
+# Once the breakpoint is hit, both inferiors should be stopped.
+proc run_test { target_type_1 target_type_2 } {
+    cleanup_gdbservers
+
+    clean_restart
+
+    gdb_test "disconnect" ".*"
+
+    gdb_test_no_output "set sysroot"
+
+    # multi-target depends on target running in non-stop mode.  Force it
+    # on for remote targets, until this is the default.
+    gdb_test_no_output "maint set target-non-stop on"
+
+    # Run in all-stop mode.
+    gdb_test_no_output "set non-stop off"
+
+    if {![add_inferior 2 $target_type_1 $::binfile]} {
+	return 0
+    }
+
+    if {![add_inferior 3 $target_type_2 $::binfile]} {
+	return 0
+    }
+
+    # Check we see all the expected threads.
+    gdb_test "info threads" \
+	[multi_line \
+	     "\\s+Id\\s+Target Id\\s+Frame\\s*" \
+	     "\\s+2\\.1\\s+\[^\r\n\]+" \
+	     "\\*\\s+3\\.1\\s+\[^\r\n\]+"] \
+	"check expected threads exist"
+
+    # The breakpoint will be set in both inferiors, but only inferior 3
+    # will hit it as 'wait_for_gdb' is cleared only in that inferior.
+    gdb_breakpoint breakpt
+    gdb_test "thread apply 3.1 set wait_for_gdb = 0"
+
+    # Let inferior 2 run in the background.
+    gdb_test "thread 2.1"
+    gdb_test -no-prompt-anchor "continue&"
+
+    # Run inferior 3 until it hits a breakpoint.
+    gdb_test "thread 3.1"
+    gdb_test "continue" \
+	[multi_line \
+	     "Thread 3\\.1 \[^\r\n\]+ hit Breakpoint \[^\r\n\]+, breakpt \\(\\) \[^\r\n\]+" \
+	     "$::decimal\\s+\[^\r\n\]+"] \
+	"continue to breakpt function"
+
+    # Check the state of all threads.  None should be running.
+    set saw_inferior_2 false
+    set saw_inferior_3 false
+    gdb_test_multiple "info threads" "check threads after stop" {
+	-re "^info threads\r\n" {
+	    exp_continue
+	}
+
+	-re "^\\s+Id\\s+Target Id\\s+Frame\\s*\r\n" {
+	    exp_continue
+	}
+
+	-re "^\\s+2\\.1\\s+\[^\r\n\]+\\s+\\(running\\)\\s*\r\n" {
+	    # Don't count this as seeing inferior 2 as the thread is
+	    # incorrectly still marked as running.  By not setting the
+	    # SAW_INFERIOR_2 flag this test will now fail.
+	    exp_continue
+	}
+
+	-re "^\\s+2\\.1\\s+\[^\r\n\]+\r\n" {
+	    set saw_inferior_2 true
+	    exp_continue
+	}
+
+	-re "^\\*\\s+3\\.1\\s+\[^\r\n\]+\r\n" {
+	    set saw_inferior_3 true
+	    exp_continue
+	}
+
+	-re "^$::gdb_prompt $" {
+	    gdb_assert { $saw_inferior_2 && $saw_inferior_3 } \
+		$gdb_test_name
+	}
+
+	-re "^\[^\r\n\]*\r\n" {
+	    exp_continue
+	}
+    }
+}
+
+set all_target_types { extended-remote native }
+
+foreach_with_prefix target_type_1 $all_target_types {
+    foreach_with_prefix target_type_2 $all_target_types {
+	run_test $target_type_1 $target_type_2
+    }
+}
+
+multi_target_cleanup

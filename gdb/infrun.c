@@ -9525,6 +9525,7 @@ normal_stop ()
      here, so do this before any filtered output.  */
 
   ptid_t finish_ptid = null_ptid;
+  process_stratum_target *finish_target = nullptr;
 
   if (!non_stop)
     finish_ptid = minus_one_ptid;
@@ -9537,17 +9538,30 @@ normal_stop ()
 	 linux-fork.c automatically switches to another fork from
 	 within target_mourn_inferior.  */
       if (inferior_ptid != null_ptid)
-	finish_ptid = ptid_t (inferior_ptid.pid ());
+	{
+	  finish_ptid = ptid_t (inferior_ptid.pid ());
+	  finish_target = current_inferior ()->process_target ();
+	}
     }
   else if (last.kind () != TARGET_WAITKIND_NO_RESUMED
 	   && last.kind () != TARGET_WAITKIND_THREAD_EXITED)
-    finish_ptid = inferior_ptid;
+    {
+      finish_ptid = inferior_ptid;
+      finish_target = current_inferior ()->process_target ();
+    }
 
   std::optional<scoped_finish_thread_state> maybe_finish_thread_state;
   if (finish_ptid != null_ptid)
     {
-      maybe_finish_thread_state.emplace
-	(user_visible_resume_target (finish_ptid), finish_ptid);
+      /* It might be tempting to use user_visible_resume_target to compute
+	 FINISH_TARGET from FINISH_PTID, however, that is the wrong choice
+	 in this case.
+
+	 When resuming, we only resume the current target unless
+	 schedule-multiple is in effect.  However, when handling a stop, if
+	 FINISH_PTID is minus_one_ptid, then we really do want to look for
+	 stop events from _any_ target.  */
+      maybe_finish_thread_state.emplace (finish_target, finish_ptid);
     }
 
   /* As we're presenting a stop, and potentially removing breakpoints,
