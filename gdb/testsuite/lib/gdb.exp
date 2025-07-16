@@ -9993,6 +9993,10 @@ proc gdb_stdin_log_init { } {
 
     set logfile [standard_output_file_with_gdb_instance gdb.in]
     set in_file [open $logfile w]
+
+    verbose -log ""
+    verbose -log "Starting logfile: $logfile"
+    verbose -log ""
 }
 
 # Write to the file for logging gdb input.
