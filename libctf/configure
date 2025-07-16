@@ -15966,6 +15966,14 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+case "${host}" in
+  # PR libctf/29292
+  # libctf's use of mmap doesn't work on Solaris 11.4, so disable it.
+  *-*-solaris2.11*)
+    ac_cv_func_mmap_fixed_mapped=no
+  ;;
+esac
+
 
 
 
