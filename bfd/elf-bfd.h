@@ -3280,11 +3280,14 @@ extern asection _bfd_elf_large_com_section;
     _bfd_clear_contents (howto, input_bfd, input_section,		\
 			 contents, rel[index].r_offset);		\
 									\
+    /* For ld -r, remove relocations in debug and sframe sections	\
+       against symbols defined in discarded sections.  Not done for	\
+       others.  In particular the .eh_frame editing code expects	\
+       such relocs to be present.  */					\
     if (bfd_link_relocatable (info)					\
-	&& (input_section->flags & SEC_DEBUGGING))			\
+	&& ((input_section->flags & SEC_DEBUGGING) != 0			\
+	    || elf_section_type (input_section) == SHT_GNU_SFRAME))	\
       {									\
-	/* Only remove relocations in debug sections since other	\
-	   sections may require relocations.  */			\
 	Elf_Internal_Shdr *rel_hdr;					\
 									\
 	rel_hdr = _bfd_elf_single_rel_hdr (input_section->output_section); \
