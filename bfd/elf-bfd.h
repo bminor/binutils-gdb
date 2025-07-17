@@ -3287,25 +3287,20 @@ extern asection _bfd_elf_large_com_section;
 	&& ((input_section->flags & SEC_DEBUGGING) != 0			\
 	    || elf_section_type (input_section) == SHT_GNU_SFRAME))	\
       {									\
-	Elf_Internal_Shdr *rel_hdr;					\
+	Elf_Internal_Shdr *rel_hdr					\
+	  = _bfd_elf_single_rel_hdr (input_section->output_section);	\
 									\
-	rel_hdr = _bfd_elf_single_rel_hdr (input_section->output_section); \
+	rel_hdr->sh_size -= rel_hdr->sh_entsize;			\
+	rel_hdr = _bfd_elf_single_rel_hdr (input_section);		\
+	rel_hdr->sh_size -= rel_hdr->sh_entsize;			\
 									\
-	/* Avoid empty output section.  */				\
-	if (rel_hdr->sh_size > rel_hdr->sh_entsize)			\
-	  {								\
-	    rel_hdr->sh_size -= rel_hdr->sh_entsize;			\
-	    rel_hdr = _bfd_elf_single_rel_hdr (input_section);		\
-	    rel_hdr->sh_size -= rel_hdr->sh_entsize;			\
+	memmove (rel, rel + count,					\
+		 (relend - rel - count) * sizeof (*rel));		\
 									\
-	    memmove (rel, rel + count,					\
-		     (relend - rel - count) * sizeof (*rel));		\
-									\
-	    input_section->reloc_count -= count;			\
-	    relend -= count;						\
-	    rel--;							\
-	    continue;							\
-	  }								\
+	input_section->reloc_count -= count;				\
+	relend -= count;						\
+	rel--;								\
+	continue;							\
       }									\
 									\
     for (int i_ = 0; i_ < count; i_++)					\
