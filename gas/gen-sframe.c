@@ -1286,11 +1286,18 @@ sframe_xlate_do_restore (struct sframe_xlate_ctx *xlate_ctx,
      list of FREs for the specific function.  */
   struct sframe_row_entry *cur_fre = xlate_ctx->cur_fre;
 
+  /* PR gas/33170.  It is valid to have a:
+       .cfi_restore N
+    even at the entry of a function; in which case cie_fre is not yet setup.
+    Point cie_fre to cur_fre, and let the machinery proceed to update
+    merge_candidate as usual.  */
+  if (cie_fre == NULL)
+    cie_fre = cur_fre;
+
   /* Change the rule for the indicated register to the rule assigned to
-     it by the initial_instructions in the CIE.  */
-  gas_assert (cie_fre);
-  /* SFrame FREs track only CFA and FP / RA for backtracing purposes;
-     skip the other .cfi_restore directives.  */
+     it by the initial_instructions in the CIE.  SFrame FREs track only CFA
+     and FP / RA for backtracing purposes; skip the other .cfi_restore
+     directives.  */
   if (cfi_insn->u.r == SFRAME_CFA_FP_REG)
     {
       gas_assert (cur_fre);
