@@ -1383,44 +1383,6 @@ metag_final_link_relocate (reloc_howto_type *howto,
   return r;
 }
 
-/* This is defined because R_METAG_NONE != 0...
-   See RELOC_AGAINST_DISCARDED_SECTION for details.  */
-#define METAG_RELOC_AGAINST_DISCARDED_SECTION(info, input_bfd, input_section, \
-					      rel, relend, howto, contents) \
-  {									\
-    _bfd_clear_contents (howto, input_bfd, input_section,		\
-			 contents, rel->r_offset);			\
-									\
-    if (bfd_link_relocatable (info)					\
-	&& (input_section->flags & SEC_DEBUGGING))			\
-      {									\
-	/* Only remove relocations in debug sections since other	\
-	   sections may require relocations.  */			\
-	Elf_Internal_Shdr *rel_hdr;					\
-									\
-	rel_hdr = _bfd_elf_single_rel_hdr (input_section->output_section); \
-									\
-	/* Avoid empty output section.  */				\
-	if (rel_hdr->sh_size > rel_hdr->sh_entsize)			\
-	  {								\
-	    rel_hdr->sh_size -= rel_hdr->sh_entsize;			\
-	    rel_hdr = _bfd_elf_single_rel_hdr (input_section);		\
-	    rel_hdr->sh_size -= rel_hdr->sh_entsize;			\
-									\
-	    memmove (rel, rel + 1, (relend - rel) * sizeof (*rel));	\
-									\
-	    input_section->reloc_count--;				\
-	    relend--;							\
-	    rel--;							\
-	    continue;							\
-	  }								\
-      }									\
-									\
-    rel->r_info = R_METAG_NONE;						\
-    rel->r_addend = 0;							\
-    continue;								\
-  }
-
 /* Relocate a META ELF section.
 
 The RELOCATE_SECTION function is called by the new ELF backend linker
@@ -1529,8 +1491,9 @@ elf_metag_relocate_section (bfd *output_bfd,
 	}
 
       if (sec != NULL && discarded_section (sec))
-	  METAG_RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
-						 rel, relend, howto, contents);
+	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
+					 rel, 1, relend, R_METAG_NONE,
+					 howto, 0, contents);
 
       if (bfd_link_relocatable (info))
 	continue;

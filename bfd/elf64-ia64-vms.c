@@ -3518,7 +3518,8 @@ elf64_ia64_relocate_section (bfd *output_bfd,
 	 section contents zeroed.  Avoid any special processing.  */
       if (sym_sec != NULL && discarded_section (sym_sec))
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
-					 rel, 1, relend, howto, 0, contents);
+					 rel, 1, relend, R_IA64_NONE,
+					 howto, 0, contents);
 
       if (bfd_link_relocatable (info))
 	continue;

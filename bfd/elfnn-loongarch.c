@@ -3403,8 +3403,9 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       name = loongarch_sym_name (input_bfd, h, sym);
 
       if (sec != NULL && discarded_section (sec))
-	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section, rel,
-					 1, relend, howto, 0, contents);
+	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
+					 rel, 1, relend, R_LARCH_NONE,
+					 howto, 0, contents);
 
       if (bfd_link_relocatable (info))
 	continue;

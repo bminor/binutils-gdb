@@ -10480,7 +10480,7 @@ mips_reloc_against_discarded_section (bfd *output_bfd,
   do
     {
        RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
-					(*rel), count, (*relend),
+					(*rel), count, (*relend), R_MIPS_NONE,
 					howto, i, contents);
     }
   while (0);

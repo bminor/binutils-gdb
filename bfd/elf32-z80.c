@@ -441,7 +441,8 @@ z80_elf_relocate_section (bfd *output_bfd,
 	  reloc_howto_type *howto;
 	  howto = z80_rtype_to_howto (input_bfd, r_type);
 	  RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
-					   rel, 1, relend, howto, 0, contents);
+					   rel, 1, relend, R_Z80_NONE,
+					   howto, 0, contents);
 	}
 
       if (bfd_link_relocatable (info))
