@@ -37,6 +37,11 @@ if {![check_ctf_available]} {
     return 0
 }
 
+if {![check_ctf_linker_dedup]} {
+    unsupported "no CTF deduplication support in the linker"
+    return 0
+}
+
 if {[info exists env(LC_ALL)]} {
     set old_lc_all $env(LC_ALL)
 }

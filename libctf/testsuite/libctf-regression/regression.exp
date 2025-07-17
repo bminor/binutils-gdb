@@ -23,6 +23,11 @@ if {![check_ctf_available]} {
     return 0
 }
 
+if {![check_ctf_linker_dedup]} {
+    unsupported "no CTF deduplication support in the linker"
+    return 0
+}
+
 if ![is_elf_format] {
     unsupported "CTF needs bfd changes to be emitted on non-ELF"
     return 0
