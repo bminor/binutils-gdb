@@ -278,13 +278,7 @@ gdb_test_multiline "input multi-line-output command" \
 
 set test "verify pagination from test_multiline"
 gdb_test_multiple "test_multiline" $test {
-    -re "--Type <RET>" {
-	exp_continue
-    }
-    -re " for more, q to quit" {
-	exp_continue
-    }
-    -re ", c to continue without paging--$" {
+    -re "$pagination_prompt$" {
 	pass $test
     }
 }
