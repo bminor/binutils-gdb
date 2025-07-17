@@ -859,7 +859,7 @@ proc previous_line_is_ok { str } {
     # For lines that don't match this pattern, we cannot comment on
     # where the style reset should occur, so lets just claim the line
     # is fine.
-    if { ![regexp "\\s+$::hex - $::hex is \[^\r\n\]+ in " $str] } {
+    if { ![regexp "\\s+$::hex - $::hex is \[^\r\n\]+ in \033" $str] } {
 	return true
     }
 
