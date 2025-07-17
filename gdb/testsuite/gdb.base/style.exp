@@ -924,7 +924,8 @@ proc test_pagination_prompt_styling {} {
     }
 
     # Now setup the screen width.
-    gdb_test_no_output "set width $desired_width"
+    gdb_test_no_output "set width $desired_width" \
+	"set width to desired width"
 
     # Re-run 'info files'.  Check that the content before any
     # pagination prompt correctly disables styling.
