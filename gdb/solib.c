@@ -633,15 +633,12 @@ solib_read_symbols (solib &so, symfile_add_flags flags)
 	  /* Have we already loaded this shared object?  */
 	  so.objfile = nullptr;
 	  for (objfile *objfile : current_program_space->objfiles ())
-	    {
-	      if (filename_cmp (objfile_name (objfile), so.name.c_str ())
-		    == 0
-		  && objfile->addr_low == so.addr_low)
-		{
-		  so.objfile = objfile;
-		  break;
-		}
-	    }
+	    if (objfile->addr_low == so.addr_low)
+	      {
+		so.objfile = objfile;
+		break;
+	      }
+
 	  if (so.objfile == NULL)
 	    {
 	      section_addr_info sap
