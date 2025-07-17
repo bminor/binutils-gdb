@@ -2529,7 +2529,6 @@ merge_gnu_build_notes (bfd *          abfd,
 
   /* Reconstruct the ELF notes.  */
   bfd_byte *     new_contents;
-  bfd_byte *     old;
   bfd_byte *     new;
   bfd_vma        prev_start = 0;
   bfd_vma        prev_end = 0;
@@ -2537,12 +2536,8 @@ merge_gnu_build_notes (bfd *          abfd,
   /* Not sure how, but the notes might grow in size.
      (eg see PR 1774507).  Allow for this here.  */
   new = new_contents = xmalloc (size * 2);
-  for (pnote = pnotes, old = contents;
-       pnote < pnotes_end;
-       pnote ++)
+  for (pnote = pnotes; pnote < pnotes_end; pnote ++)
     {
-      bfd_size_type note_size = 12 + pnote->padded_namesz + pnote->note.descsz;
-
       if (! is_deleted_note (pnote))
 	{
 	  /* Create the note, potentially using the
@@ -2585,8 +2580,6 @@ merge_gnu_build_notes (bfd *          abfd,
 	      prev_end = pnote->end;
 	    }
 	}
-
-      old += note_size;
     }
 
 #if DEBUG_MERGE
