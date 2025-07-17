@@ -1743,8 +1743,8 @@ gdb_bfd_read_elf_soname (const char *filename)
    if symbol is not found.  */
 
 static CORE_ADDR
-bfd_lookup_symbol_from_dyn_symtab (
-  bfd *abfd, gdb::function_view<bool (const asymbol *)> match_sym)
+bfd_lookup_symbol_from_dyn_symtab
+  (bfd *abfd, gdb::function_view<bool (const asymbol *)> match_sym)
 {
   long storage_needed = bfd_get_dynamic_symtab_upper_bound (abfd);
   CORE_ADDR symaddr = 0;
