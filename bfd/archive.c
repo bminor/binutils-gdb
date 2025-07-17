@@ -2299,7 +2299,6 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
 {
   char *first_name = NULL;
   bfd *current;
-  file_ptr elt_no = 0;
   struct orl *map = NULL;
   unsigned int orl_max = 1024;		/* Fine initial default.  */
   unsigned int orl_count = 0;
@@ -2334,7 +2333,7 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
   /* Map over each element.  */
   for (current = arch->archive_head;
        current != NULL;
-       current = current->archive_next, elt_no++)
+       current = current->archive_next)
     {
       if (bfd_check_format (current, bfd_object)
 	  && (bfd_get_file_flags (current) & HAS_SYMS) != 0)
