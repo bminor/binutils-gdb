@@ -21,7 +21,7 @@
 # Written by H.J. Lu (hongjiu.lu@intel.com)
 #
 
-if { ![is_elf_format] } {
+if { ![istarget *-*-gnu*] } {
     return
 }
 
