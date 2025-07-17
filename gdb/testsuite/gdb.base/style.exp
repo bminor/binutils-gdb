@@ -923,6 +923,11 @@ proc test_pagination_prompt_styling {} {
 	}
     }
 
+    if { $desired_width < [string length $::pagination_prompt_str] + 2 } {
+	# Avoid readline wrapping after printing the pagination prompt.
+	return
+    }
+
     # Now setup the screen width.
     gdb_test_no_output "set width $desired_width" \
 	"set width to desired width"
