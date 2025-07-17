@@ -5028,6 +5028,24 @@ remote_target::process_initial_stop_replies (int from_tty)
      the inferiors.  */
   if (!non_stop)
     {
+      /* Ensure changes to the thread state are propagated to the
+	 frontend.  In non-stop mode only the current inferior will be
+	 stopped, but in all-stop mode, all inferiors will change, and
+	 the frontend will need updating.  */
+      process_stratum_target *finish_target;
+      ptid_t finish_ptid;
+      if (non_stop)
+	{
+	  finish_target = current_inferior ()->process_target ();
+	  finish_ptid = ptid_t (current_inferior ()->pid);
+	}
+      else
+	{
+	  finish_target = nullptr;
+	  finish_ptid = minus_one_ptid;
+	}
+      scoped_finish_thread_state finish_state (finish_target, finish_ptid);
+
       {
 	/* At this point, the remote target is not async.  It needs to be for
 	   the poll in stop_all_threads to consider events from it, so enable

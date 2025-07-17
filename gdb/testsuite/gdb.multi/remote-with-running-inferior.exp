@@ -77,15 +77,6 @@ proc run_test { target_non_stop non_stop } {
     set res [gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport]
     gdb_assert {$res == 0} "connect to remote target"
 
-    # FIXME: A bug in GDB means that the state of thread 1.1 will be wrong,
-    # GDB's frontend thinks that the thread is running when really the
-    # thread is stopped.  This will be fixed in the next commit, at which
-    # point this whole 'if' will be removed.
-    if { $target_non_stop == "on" && $non_stop == "off" } {
-	gdb_test "p 1 + 2" " = 3" "check GDB is still alive"
-	return
-    }
-
     # Check the info threads output.  We're checking that we see the two
     # threads we expect, that the correct thread (inferior two's thread)
     # is current, and that none of the threads are running.
