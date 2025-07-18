@@ -764,19 +764,19 @@ assemble_one (char *line)
       /* Make sure this hasn't pushed the locked sequence
 	 past the bundle size.  */
       valueT bundle_size = pending_bundle_size (bundle_lock_frag);
-      if (bundle_size > 1U << bundle_align_p2)
+      if (bundle_size > (valueT) 1 << bundle_align_p2)
 	as_bad (_ (".bundle_lock sequence at %" PRIu64 " bytes, "
-		   "but .bundle_align_mode limit is %u bytes"),
-		(uint64_t) bundle_size, 1U << bundle_align_p2);
+		   "but .bundle_align_mode limit is %" PRIu64 " bytes"),
+		(uint64_t) bundle_size, (uint64_t) 1 << bundle_align_p2);
     }
   else if (bundle_align_p2 > 0)
     {
       valueT insn_size = pending_bundle_size (insn_start_frag);
 
-      if (insn_size > 1U << bundle_align_p2)
+      if (insn_size > (valueT) 1 << bundle_align_p2)
 	as_bad (_("single instruction is %" PRIu64 " bytes long, "
-		  "but .bundle_align_mode limit is %u bytes"),
-		(uint64_t) insn_size, 1U << bundle_align_p2);
+		  "but .bundle_align_mode limit is %" PRIu64 " bytes"),
+		(uint64_t) insn_size, (uint64_t) 1 << bundle_align_p2);
 
       finish_bundle (insn_start_frag, insn_size);
     }
@@ -6786,10 +6786,10 @@ s_bundle_unlock (int arg ATTRIBUTE_UNUSED)
 
   size = pending_bundle_size (bundle_lock_frag);
 
-  if (size > 1U << bundle_align_p2)
+  if (size > (valueT) 1 << bundle_align_p2)
     as_bad (_(".bundle_lock sequence is %" PRIu64 " bytes, "
-	      "but bundle size is only %u bytes"),
-	    (uint64_t) size, 1u << bundle_align_p2);
+	      "but bundle size is only %" PRIu64 " bytes"),
+	    (uint64_t) size, (uint64_t) 1 << bundle_align_p2);
   else
     finish_bundle (bundle_lock_frag, size);
 
