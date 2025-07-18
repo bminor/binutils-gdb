@@ -139,6 +139,10 @@
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'ssbs'
 .*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'icc_apr_el1'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'icc_apr_el1'
+.*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'rcwmask_el1'
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'rcwmask_el1'

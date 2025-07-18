@@ -86,6 +86,8 @@
 .*:	d5384260 	mrs	x0, pan
 .*:	d51b42c0 	msr	ssbs, x0
 .*:	d53b42c0 	mrs	x0, ssbs
+.*:	d519c000 	msr	icc_apr_el1, x0
+.*:	d539c000 	mrs	x0, icc_apr_el1
 .*:	d558d0c2 	msrr	rcwmask_el1, x2, x3
 .*:	d578d0c2 	mrrs	x2, x3, rcwmask_el1
 .*:	d55c2002 	msrr	ttbr0_el2, x2, x3

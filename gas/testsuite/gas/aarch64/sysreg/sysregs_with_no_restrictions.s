@@ -49,6 +49,7 @@
 	rw_sys_reg disr_el1   // RAS
 	rw_sys_reg pan   // PAN
 	rw_sys_reg ssbs   // SSBS
+	rw_sys_reg icc_apr_el1   // GCIE
 
 	.arch_extension d128 // For the msrr and mrrs instructions.
 	rw_sys_reg_128 rcwmask_el1 xreg1=x2 xreg2=x3  // THE

@@ -82,6 +82,8 @@
 	rw_sys_reg pan   // PAN
 	.arch_extension ssbs
 	rw_sys_reg ssbs   // SSBS
+	.arch_extension gcie
+	rw_sys_reg icc_apr_el1   // GCIE
 
 	.arch_extension d128 // For the msrr and mrrs instructions.
 	.arch_extension the
