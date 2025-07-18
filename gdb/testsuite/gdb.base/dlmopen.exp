@@ -95,9 +95,19 @@ if { $dyln_name eq "" } {
     return
 }
 
+# If the dynamic linker path contains a symlink, some instances show the real
+# path instead of the original path.  Accept both.
+lassign [remote_exec target realpath "$dyln_name"] realpath_ret dyln_realpath_name
+
+if { $realpath_ret == 0 } {
+    set dyln_realpath_name [string trim $dyln_realpath_name]
+} else {
+    set dyln_realpath_name "not-a-valid-path"
+}
+
 # Return true if FILENAME is the dynamic linker.  Otherwise return false.
 proc is_dyln { filename } {
-    return [expr {$filename eq $::dyln_name}]
+    return [expr {$filename eq $::dyln_name || $filename eq $::dyln_realpath_name}]
 }
 
 # Check that 'info shared' show NUM occurrences of DSO.

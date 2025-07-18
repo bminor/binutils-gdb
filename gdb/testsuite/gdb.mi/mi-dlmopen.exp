@@ -65,9 +65,19 @@ if { $dyln_name eq "" } {
 set bp_main [gdb_get_line_number "bp.main" $srcfile]
 set bp_loaded [gdb_get_line_number "bp.loaded" $srcfile]
 
+# If the dynamic linker path contains a symlink, some instances show the real
+# path instead of the original path.  Accept both.
+lassign [remote_exec target realpath "$dyln_name"] realpath_ret dyln_realpath_name
+
+if { $realpath_ret == 0 } {
+    set dyln_realpath_name [string trim $dyln_realpath_name]
+} else {
+    set dyln_realpath_name "not-a-valid-path"
+}
+
 # Return true if FILENAME is the dynamic linker.  Otherwise return false.
 proc is_dyln { filename } {
-    return [expr {$filename eq $::dyln_name}]
+    return [expr {$filename eq $::dyln_name || $filename eq $::dyln_realpath_name}]
 }
 
 # Run 'info sharedlibrary' and count the number of mappings that look
