@@ -2242,7 +2242,7 @@ write_object_file (void)
 	char *table_ptr;
 	addressT table_addr;
 	addressT from_addr, to_addr;
-	int n, m;
+	int n;
 
 	subseg_change (lie->seg, lie->subseg);
 	fragP = lie->dispfrag;
@@ -2267,9 +2267,9 @@ write_object_file (void)
 	table_ptr += md_short_jump_size;
 	table_addr += md_short_jump_size;
 
-	for (m = 0;
+	for (;
 	     lie && lie->dispfrag == fragP;
-	     m++, lie = lie->next_broken_word)
+	     lie = lie->next_broken_word)
 	  {
 	    if (lie->added == 2)
 	      continue;

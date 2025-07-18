@@ -3606,7 +3606,6 @@ ecoff_build_lineno (const struct ecoff_debug_swap *backend,
   efdr_t *file;
   proc_t *proc;
   unsigned long c;
-  long iline;
   long totcount;
   lineno_list_t first;
   lineno_list_t *local_first_lineno = first_lineno;
@@ -3620,7 +3619,6 @@ ecoff_build_lineno (const struct ecoff_debug_swap *backend,
   proc = NULL;
   last = NULL;
   c = offset;
-  iline = 0;
   totcount = 0;
 
   /* FIXME?  Now that MIPS embedded-PIC is gone, it may be safe to
@@ -3800,7 +3798,6 @@ ecoff_build_lineno (const struct ecoff_debug_swap *backend,
 	  ++c;
 	}
 
-      ++iline;
       last = l;
     }
 
