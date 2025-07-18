@@ -13819,15 +13819,14 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
   while (1)
     {
       bfd *input_bfd;
-      unsigned int bfd_indx;
       struct map_stub *group;
 
       htab->stub_iteration += 1;
       htab->relr_count = 0;
 
-      for (input_bfd = info->input_bfds, bfd_indx = 0;
+      for (input_bfd = info->input_bfds;
 	   input_bfd != NULL;
-	   input_bfd = input_bfd->link.next, bfd_indx++)
+	   input_bfd = input_bfd->link.next)
 	{
 	  Elf_Internal_Shdr *symtab_hdr;
 	  asection *section;

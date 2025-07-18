@@ -801,7 +801,6 @@ mips_relocate_section (bfd *output_bfd,
   bool gp_undefined;
   struct external_reloc *ext_rel;
   struct external_reloc *ext_rel_end;
-  unsigned int i;
   bool got_lo;
   struct internal_reloc lo_int_rel;
   bfd_size_type amt;
@@ -861,7 +860,7 @@ mips_relocate_section (bfd *output_bfd,
 
   ext_rel = (struct external_reloc *) external_relocs;
   ext_rel_end = ext_rel + input_section->reloc_count;
-  for (i = 0; ext_rel < ext_rel_end; ext_rel++, i++)
+  for (; ext_rel < ext_rel_end; ext_rel++)
     {
       struct internal_reloc int_rel;
       bool use_lo = false;
