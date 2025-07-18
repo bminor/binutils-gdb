@@ -251,6 +251,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_FPRCVT,
   /* Point of Physical Storage.  */
   AARCH64_FEATURE_PoPS,
+  /* GICv5 (Generic Interrupt Controller) CPU Interface Extension.  */
+  AARCH64_FEATURE_GCIE,
 
   /* Virtual features.  These are used to gate instructions that are enabled
      by either of two (or more) sets of command line flags.  */

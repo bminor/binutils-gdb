@@ -10858,6 +10858,7 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"pops",		AARCH64_FEATURE (PoPS), AARCH64_NO_FEATURES},
   {"sve2p2",		AARCH64_FEATURE (SVE2p2), AARCH64_FEATURE (SVE2p1)},
   {"sme2p2",		AARCH64_FEATURE (SME2p2), AARCH64_FEATURE (SME2p1)},
+  {"gcie",		AARCH64_FEATURE (GCIE), AARCH64_NO_FEATURES},
   {NULL,		AARCH64_NO_FEATURES, AARCH64_NO_FEATURES},
 };
 

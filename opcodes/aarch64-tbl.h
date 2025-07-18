@@ -3009,6 +3009,8 @@ static const aarch64_feature_set aarch64_feature_sve_sme2p2 =
   AARCH64_FEATURE (SVE_SME2p2);
 static const aarch64_feature_set aarch64_feature_sve2p2_sme2p2 =
   AARCH64_FEATURE (SVE2p2_SME2p2);
+static const aarch64_feature_set aarch64_feature_gcie =
+  AARCH64_FEATURE (GCIE);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -3119,6 +3121,7 @@ static const aarch64_feature_set aarch64_feature_sve2p2_sme2p2 =
 #define SME2p2		&aarch64_feature_sme2p2
 #define SVE_SME2p2	&aarch64_feature_sve_sme2p2
 #define SVE2p2_SME2p2	&aarch64_feature_sve2p2_sme2p2
+#define GCIE		&aarch64_feature_gcie
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS | F_INVALID_IMM_SYMS_1, 0, 0, NULL }

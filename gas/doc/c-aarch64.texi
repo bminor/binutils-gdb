@@ -223,6 +223,8 @@ automatically cause those extensions to be disabled.
  @tab Enable Armv9.6 fprcvt instructions.
 @item @code{frintts} @tab @code{fp}
  @tab Enable floating-point round to integral value instructions.
+@item @code{gcie} @tab
+ @tab Enable the GICv5 (Generic Interrupt Controller) CPU Interface Extension.
 @item @code{gcs} @tab
  @tab Enable the Guarded Control Stack Extension.
 @item @code{hbc} @tab
