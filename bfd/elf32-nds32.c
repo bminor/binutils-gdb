@@ -4344,7 +4344,6 @@ nds32_elf_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       Elf_Internal_Shdr *symtab_hdr;
       asection *sgot;
       char *local_tls_type;
-      unsigned long symndx;
       bfd_vma *local_tlsdesc_gotent;
 
       if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
@@ -4386,8 +4385,8 @@ nds32_elf_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       sgot = elf_hash_table (info)->sgot;
       local_tls_type = elf32_nds32_local_got_tls_type (ibfd);
       local_tlsdesc_gotent = elf32_nds32_local_tlsdesc_gotent (ibfd);
-      for (symndx = 0; local_got < end_local_got;
-	   ++local_got, ++local_tls_type, ++local_tlsdesc_gotent, ++symndx)
+      for (; local_got < end_local_got;
+	   ++local_got, ++local_tls_type, ++local_tlsdesc_gotent)
 	{
 	  if (*local_got > 0)
 	    {

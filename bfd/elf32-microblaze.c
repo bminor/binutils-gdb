@@ -1765,7 +1765,6 @@ microblaze_elf_relax_section (bfd *abfd,
   Elf_Internal_Rela *irel, *irelend;
   bfd_byte *contents = NULL;
   bfd_byte *free_contents = NULL;
-  int rel_count;
   unsigned int shndx;
   size_t i, sym_index;
   asection *o;
@@ -1818,8 +1817,7 @@ microblaze_elf_relax_section (bfd *abfd,
     goto error_return;
 
   irelend = internal_relocs + sec->reloc_count;
-  rel_count = 0;
-  for (irel = internal_relocs; irel < irelend; irel++, rel_count++)
+  for (irel = internal_relocs; irel < irelend; irel++)
     {
       bfd_vma symval;
       if ((ELF32_R_TYPE (irel->r_info) != (int) R_MICROBLAZE_64_PCREL)
@@ -1935,10 +1933,9 @@ microblaze_elf_relax_section (bfd *abfd,
   if (sdata->relax_count > 0)
     {
       shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
-      rel_count = 0;
       sdata->relax[sdata->relax_count].addr = sec->size;
 
-      for (irel = internal_relocs; irel < irelend; irel++, rel_count++)
+      for (irel = internal_relocs; irel < irelend; irel++)
 	{
 	  bfd_vma nraddr;
 

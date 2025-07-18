@@ -1376,7 +1376,6 @@ bfin_relocate_section (bfd * output_bfd,
   asection *sgot;
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
-  int i = 0;
 
   dynobj = elf_hash_table (info)->dynobj;
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -1387,7 +1386,7 @@ bfin_relocate_section (bfd * output_bfd,
 
   rel = relocs;
   relend = relocs + input_section->reloc_count;
-  for (; rel < relend; rel++, i++)
+  for (; rel < relend; rel++)
     {
       int r_type;
       reloc_howto_type *howto;
