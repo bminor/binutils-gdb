@@ -344,14 +344,9 @@ v850_comm (int area)
 	  int old_subsec;
 	  char *pfrag;
 	  int align;
-	  flagword applicable;
 
 	  old_sec = now_seg;
 	  old_subsec = now_subseg;
-
-	  applicable = bfd_applicable_section_flags (stdoutput);
-
-	  applicable &= SEC_ALLOC;
 
 	  switch (area)
 	    {

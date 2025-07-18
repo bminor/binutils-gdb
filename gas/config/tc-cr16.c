@@ -119,7 +119,6 @@ const size_t md_longopts_size = sizeof (md_longopts);
 static void
 l_cons (int nbytes)
 {
-  int c;
   expressionS exp;
 
 #ifdef md_flush_pending_output
@@ -141,7 +140,6 @@ l_cons (int nbytes)
   md_cons_align (nbytes);
 #endif
 
-  c = 0;
   do
     {
       unsigned int bits_available = BITS_PER_CHAR * nbytes;
@@ -236,7 +234,6 @@ l_cons (int nbytes)
       if ((*(input_line_pointer) == '@') && (*(input_line_pointer +1) == 'c'))
 	code_label = 1;
       emit_expr (&exp, nbytes);
-      ++c;
       if ((*(input_line_pointer) == '@') && (*(input_line_pointer +1) == 'c'))
 	{
 	  input_line_pointer +=3;

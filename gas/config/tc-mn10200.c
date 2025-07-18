@@ -896,7 +896,6 @@ md_assemble (char *str)
   for (;;)
     {
       const char *errmsg = NULL;
-      int op_idx;
       char *hold;
       int extra_shift = 0;
 
@@ -906,9 +905,9 @@ md_assemble (char *str)
       next_opindex = 0;
       insn = opcode->opcode;
       extension = 0;
-      for (op_idx = 1, opindex_ptr = opcode->operands;
+      for (opindex_ptr = opcode->operands;
 	   *opindex_ptr != 0;
-	   opindex_ptr++, op_idx++)
+	   opindex_ptr++)
 	{
 	  const struct mn10200_operand *operand;
 	  expressionS ex;
