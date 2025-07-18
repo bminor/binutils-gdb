@@ -16,9 +16,27 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <unistd.h>
+#include <stdlib.h>
+
+extern void test_call (void);
+
+void
+unreachable (void)
+{
+  abort ();
+}
 
 void
 setup_alarm (void)
 {
   alarm (300);
+}
+
+int
+main ()
+{
+  setup_alarm ();
+  test_call ();
+  unreachable ();
+  return 0;
 }

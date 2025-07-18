@@ -18,33 +18,12 @@
    handling.  */
 
 	.text
-
-	.global main
-main:
-	nop
-
-	call	setup_alarm
-
-	nop
-
-/***********************************************/
-
-/* test call/ret */
-
 	.global test_call
 test_call:
 	call test_call
-	nop
+	call unreachable
 	.global test_ret_end
 test_ret_end:
 	nop
 
-/***********************************************/
-
-/* all done */
-
-done:
-	pushl $0
-	call exit
-	hlt
 	.section	.note.GNU-stack,"",@progbits
