@@ -43,6 +43,7 @@
 #include "hashtab.h"
 #include "elf-bfd.h"
 #include "bfdver.h"
+#include <errno.h>
 
 #if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
@@ -10840,9 +10841,18 @@ cmdline_add_object_only_section (bfd_byte *contents, size_t size)
       fatal (_("%P: failed to finish output with object-only section\n"));
     }
 
+  /* ibfd needs to be closed *after* obfd, otherwise ld may crash with a
+     segmentation fault.  */
+  if (!bfd_close (ibfd))
+    einfo (_("%P%F: failed to close input\n"));
+
   /* Must be freed after bfd_close ().  */
   free (isympp);
   free (osympp);
+
+  /* Must unlink to ensure rename works on Windows.  */
+  if (unlink (output_filename) && errno != ENOENT)
+    einfo (_("%P%F: failed to unlink %s\n"), output_filename);
 
   if (rename (ofilename, output_filename))
     {
@@ -10854,10 +10864,14 @@ cmdline_add_object_only_section (bfd_byte *contents, size_t size)
   return;
 
 loser:
-  free (isympp);
-  free (osympp);
   if (obfd)
     bfd_close (obfd);
+  /* ibfd needs to be closed *after* obfd, otherwise ld may crash with a
+     segmentation fault.  */
+  if (ibfd)
+    bfd_close (ibfd);
+  free (isympp);
+  free (osympp);
   if (ofilename)
     {
       unlink (ofilename);
