@@ -111,7 +111,6 @@ private:
   void create_event_breakpoints (svr4_info *info, gdbarch *gdbarch,
 				 CORE_ADDR address) const;
   int enable_break (svr4_info *info, int from_tty) const;
-  bool is_default_namespace (CORE_ADDR debug_base) const;
   void free_probes_table (svr4_info *info) const;
   CORE_ADDR find_r_brk (svr4_info *info) const;
   CORE_ADDR find_r_ldsomap (svr4_info *info) const;
@@ -123,22 +122,15 @@ private:
   CORE_ADDR lm_addr_check (const solib &so, bfd *abfd) const;
   CORE_ADDR read_r_next (CORE_ADDR debug_base) const;
   CORE_ADDR read_r_map (CORE_ADDR debug_base) const;
-  int parse_libraries (const char *document, svr4_library_list *list);
-  int current_sos_via_xfer_libraries (svr4_library_list *list,
-				      const char *annex) const;
   owning_intrusive_list<solib> collect_probes_sos (svr4_info *info) const;
   owning_intrusive_list<solib> current_sos_1 (svr4_info *info) const;
   owning_intrusive_list<solib> solibs_from_svr4_sos
     (const std::vector<svr4_so> &sos) const;
-  void register_event_probe (objfile *objfile, probe *prob, CORE_ADDR address,
-			     enum probe_action action) const;
   void disable_probes_interface (svr4_info *info) const;
-  probe_and_action *event_probe_at (CORE_ADDR address) const;
   void update_full (svr4_info *info) const;
   int update_incremental (svr4_info *info, CORE_ADDR debug_base,
 			  CORE_ADDR lm) const;
   bool update_event_breakpoint (breakpoint *b) const;
-  CORE_ADDR find_debug_base (const solib *solib) const;
 };
 
 /* solib_ops for ILP32 SVR4 systems.  */
