@@ -41,7 +41,6 @@
 #include "target-select.h"
 #include "tls.h"
 #include "freebsd.h"
-#include "nacl.h"
 #include "gc.h"
 #include "icf.h"
 #include "aarch64-reloc-property.h"

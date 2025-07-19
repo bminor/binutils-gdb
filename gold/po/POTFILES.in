@@ -57,8 +57,6 @@ mapfile.h
 merge.cc
 merge.h
 mips.cc
-nacl.cc
-nacl.h
 object.cc
 object.h
 options.cc
