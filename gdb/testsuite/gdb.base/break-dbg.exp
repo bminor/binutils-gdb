@@ -46,7 +46,17 @@ gdb_test "catch load" "^Catchpoint $decimal \\(load\\)"
 gdb_test "catch unload" "^Catchpoint $decimal \\(unload\\)"
 
 gdb_test "catch signal" "^Catchpoint $decimal \\(standard signals\\)"
-gdb_test "catch syscall" "^Catchpoint $decimal \\(any syscall\\)"
+
+set re_warning_xml_disabled \
+    [string_to_regexp \
+	 [join \
+	      [list \
+		   "warning: Can not parse XML syscalls information;" \
+		   "XML support was disabled at compile time."]]]
+gdb_test "catch syscall" \
+    [multi_line \
+	 "^($re_warning_xml_disabled" \
+	 ")?Catchpoint $decimal [string_to_regexp {(any syscall)}]"]
 
 gdb_test "watch -l global_var" "\[Ww]atchpoint $decimal: -location global_var"
 
