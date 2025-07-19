@@ -328,5 +328,7 @@ proc_with_prefix py_test_clear_thread {} {
 # Run all the tests.
 test_no_inf_display
 test_pending_toggle
-py_test_toggle_thread
-py_test_clear_thread
+if { [allow_python_tests] } {
+    py_test_toggle_thread
+    py_test_clear_thread
+}
