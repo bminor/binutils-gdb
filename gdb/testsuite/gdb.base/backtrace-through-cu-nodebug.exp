@@ -31,7 +31,7 @@ proc prepare_test {has_cfi} {
 	     "${objcallerfile}" \
 	     object [list {additional_flags=-fomit-frame-pointer \
 		 -funwind-tables -fasynchronous-unwind-tables}]] != "" } {
-	    untested "couldn't compile with cfi"
+	    untested "couldn't compile"
 	    return false
       }
     } else {
@@ -41,7 +41,7 @@ proc prepare_test {has_cfi} {
 	     object [list {additional_flags=-fomit-frame-pointer \
 		 -fno-unwind-tables \
 		 -fno-asynchronous-unwind-tables}]] != "" } {
-	    untested "couldn't compile without cfi"
+	    untested "couldn't compile"
 	    return false
       }
     }
@@ -54,15 +54,12 @@ proc prepare_test {has_cfi} {
 
     clean_restart "$binfile-${extension}"
 
-    with_test_prefix "${extension}" {
-
-	if ![runto callback] then {
-	   fail "has_cfi=$has_cfi: Can't run to callback"
-	   return false
-	}
-	gdb_test_no_output "maint frame-unwinder disable ARCH"
-	return true
+    if ![runto callback] then {
+	fail "has_cfi=$has_cfi: Can't run to callback"
+	return false
     }
+    gdb_test_no_output "maint frame-unwinder disable ARCH"
+    return true
 }
 
 if {[gdb_compile "${srcdir}/${subdir}/${srcfile2}" \
@@ -72,7 +69,11 @@ if {[gdb_compile "${srcdir}/${subdir}/${srcfile2}" \
     return
 }
 
-if { [prepare_test false] } {
+proc_with_prefix no-cfi {} {
+    if { ![prepare_test false] } {
+	return
+    }
+
     set re_msg \
 	[string_list_to_regexp \
 	     "Required frame unwinder may have been disabled," \
@@ -85,7 +86,7 @@ if { [prepare_test false] } {
 	     $re_msg]
     gdb_test "bt -no-filters" \
 	$re_bt_no_filters \
-	"verify no-filters unwind fail without CFI"
+	"verify no-filters unwind fail"
 
     # Flush frame cache to retrigger the message.
     gdb_test "maint flush register-cache" \
@@ -99,10 +100,14 @@ if { [prepare_test false] } {
 	     $re_bt_line]
     gdb_test "bt" \
 	"($re_bt|$re_bt_no_filters)" \
-	"verify unwind fail without CFI"
+	"verify unwind fail"
 }
 
-if { [prepare_test true] } {
+proc_with_prefix cfi {} {
+    if { ![prepare_test true] } {
+	return
+    }
+
     if { [istarget "arm*-*-*"] } {
 	setup_kfail backtrace/31950 *-*-*
     }
@@ -111,6 +116,12 @@ if { [prepare_test true] } {
     # #1  0x00000000004004e9 in caller ()
     # #2  0x00000000004004cd in main () at ...
     gdb_test "bt" \
-	"#0 +callback $text\r\n#1 $text in caller $text\r\n#2 $text in main $text" \
-	"Verify unwinding works based only on CFI information"
+	[multi_line \
+	     "#0 +callback $text" \
+	     "#1 $text in caller $text" \
+	     "#2 $text in main $text"] \
+	"Verify unwinding works"
 }
+
+no-cfi
+cfi
