@@ -1546,7 +1546,7 @@ Stabs::readSymSec (Elf *elf, bool is_dynamic)
       switch (GELF_ST_TYPE (Sym.st_info))
 	{
 	case STT_FUNC:
-	  if (Sym.st_size == 0 || ELF_ST_BIND (Sym.st_info) == STB_WEAK)
+	  if (Sym.st_size == 0)
 	    break;
 	  if (Sym.st_shndx == 0)
 	    {
