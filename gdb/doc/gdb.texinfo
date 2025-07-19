@@ -27659,6 +27659,16 @@ or a prompt that does not.
 @item set prompt @var{newprompt}
 Directs @value{GDBN} to use @var{newprompt} as its prompt string henceforth.
 
+For example, this will set a blue-colored ``(gdb)'' prompt:
+
+@smallexample
+set prompt \001\033[0;34m\002(gdb)\001\033[0m\002
+@end smallexample
+
+It uses @samp{\001} and @samp{\002} to begin and end a sequence of
+non-printing characters, to make sure they're not counted in the string
+length.
+
 @kindex show prompt
 @item show prompt
 Prints a line of the form: @samp{Gdb's prompt is: @var{your-prompt}}
