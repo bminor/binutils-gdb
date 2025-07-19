@@ -2,7 +2,7 @@
 #source: linkonce1b.s
 #ld: -r
 #objdump: -r
-#xfail: [is_generic]
+#notarget: [is_generic]
 
 .*:     file format .*
 #...
