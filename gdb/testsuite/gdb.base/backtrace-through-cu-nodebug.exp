@@ -73,10 +73,32 @@ if {[gdb_compile "${srcdir}/${subdir}/${srcfile2}" \
 }
 
 if { [prepare_test false] } {
-    gdb_test "bt" \
+    set re_msg \
+	[string_list_to_regexp \
+	     "Required frame unwinder may have been disabled," \
+	     " see 'maint info frame-unwinders'"]
+    set hs {[^\r\n]}
+    set re_bt_line "#0\\s+[string_to_regexp {callback ()}] $hs+"
+    set re_bt_no_filters \
 	[multi_line \
-	     "\[^\r\n\]+Required frame unwinder may have been disabled, \[^\r\n\]+" \
-	     "#0\\s+callback \\(\\) \[^\r\n\]+"] \
+	     $re_bt_line \
+	     $re_msg]
+    gdb_test "bt -no-filters" \
+	$re_bt_no_filters \
+	"verify no-filters unwind fail without CFI"
+
+    # Flush frame cache to retrigger the message.
+    gdb_test "maint flush register-cache" \
+	[string_to_regexp "Register cache flushed."]
+
+    # This output may occur when we run into the message while applying the
+    # frame filters.
+    set re_bt \
+	[multi_line \
+	     $hs+$re_msg \
+	     $re_bt_line]
+    gdb_test "bt" \
+	"($re_bt|$re_bt_no_filters)" \
 	"verify unwind fail without CFI"
 }
 
