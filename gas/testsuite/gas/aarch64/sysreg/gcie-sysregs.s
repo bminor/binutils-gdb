@@ -54,3 +54,38 @@
 	rw_sys_reg icc_ppi_sactiver1_el1
 	rw_sys_reg icc_ppi_spendr0_el1
 	rw_sys_reg icc_ppi_spendr1_el1
+
+	/* Hypervisor control registers.  */
+
+	rw_sys_reg ich_apr_el2
+	rw_sys_reg ich_contextr_el2
+	rw_sys_reg ich_hfgitr_el2
+	rw_sys_reg ich_hfgrtr_el2
+	rw_sys_reg ich_hfgwtr_el2
+	rw_sys_reg ich_hppir_el2 w=0
+	rw_sys_reg ich_ppi_activer0_el2
+	rw_sys_reg ich_ppi_activer1_el2
+	rw_sys_reg ich_ppi_dvir0_el2
+	rw_sys_reg ich_ppi_dvir1_el2
+	rw_sys_reg ich_ppi_enabler0_el2
+	rw_sys_reg ich_ppi_enabler1_el2
+	rw_sys_reg ich_ppi_pendr0_el2
+	rw_sys_reg ich_ppi_pendr1_el2
+	rw_sys_reg ich_ppi_priorityr0_el2
+	rw_sys_reg ich_ppi_priorityr1_el2
+	rw_sys_reg ich_ppi_priorityr2_el2
+	rw_sys_reg ich_ppi_priorityr3_el2
+	rw_sys_reg ich_ppi_priorityr4_el2
+	rw_sys_reg ich_ppi_priorityr5_el2
+	rw_sys_reg ich_ppi_priorityr6_el2
+	rw_sys_reg ich_ppi_priorityr7_el2
+	rw_sys_reg ich_ppi_priorityr8_el2
+	rw_sys_reg ich_ppi_priorityr9_el2
+	rw_sys_reg ich_ppi_priorityr10_el2
+	rw_sys_reg ich_ppi_priorityr11_el2
+	rw_sys_reg ich_ppi_priorityr12_el2
+	rw_sys_reg ich_ppi_priorityr13_el2
+	rw_sys_reg ich_ppi_priorityr14_el2
+	rw_sys_reg ich_ppi_priorityr15_el2
+	rw_sys_reg ich_vctlr_el2
+	rw_sys_reg ich_vmcr_el2
