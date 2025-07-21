@@ -17,7 +17,6 @@
 
 
 #include "arc.h"
-#include <stdlib.h>
 #include <unordered_map>
 #include <string>
 

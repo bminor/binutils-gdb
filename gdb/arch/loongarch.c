@@ -16,7 +16,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "loongarch.h"
-#include <stdlib.h>
 #include <unordered_map>
 
 /* Target description features.  */

@@ -16,7 +16,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "riscv.h"
-#include <stdlib.h>
 #include <unordered_map>
 
 #include "../features/riscv/32bit-cpu.c"

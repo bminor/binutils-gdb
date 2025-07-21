@@ -60,9 +60,7 @@
 
 #include "stap-probe.h"
 #include "user-regs.h"
-#include "cli/cli-utils.h"
 #include "expression.h"
-#include "parser-defs.h"
 #include <ctype.h>
 #include <algorithm>
 #include <unordered_set>

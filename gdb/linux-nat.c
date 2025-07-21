@@ -51,17 +51,13 @@
 #include <pwd.h>
 #include <sys/types.h>
 #include <dirent.h>
-#include "xml-support.h"
 #include <sys/vfs.h>
-#include "solib.h"
 #include "nat/linux-osdata.h"
 #include "linux-tdep.h"
-#include "symfile.h"
 #include "gdbsupport/agent.h"
 #include "tracepoint.h"
 #include "target-descriptions.h"
 #include "gdbsupport/filestuff.h"
-#include "objfiles.h"
 #include "nat/linux-namespaces.h"
 #include "gdbsupport/block-signals.h"
 #include "gdbsupport/fileio.h"
