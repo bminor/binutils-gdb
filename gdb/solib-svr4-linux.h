@@ -26,6 +26,8 @@
 
 struct linux_ilp32_svr4_solib_ops : public svr4_solib_ops
 {
+  using svr4_solib_ops::svr4_solib_ops;
+
   link_map_offsets *fetch_link_map_offsets () const override;
 };
 
@@ -33,15 +35,17 @@ struct linux_ilp32_svr4_solib_ops : public svr4_solib_ops
 
 struct linux_lp64_svr4_solib_ops : public svr4_solib_ops
 {
+  using svr4_solib_ops::svr4_solib_ops;
+
   link_map_offsets *fetch_link_map_offsets () const override;
 };
 
 /* Return a new solib_ops for ILP32 Linux systems.  */
 
-extern solib_ops_up make_linux_ilp32_svr4_solib_ops ();
+extern solib_ops_up make_linux_ilp32_svr4_solib_ops (program_space *pspace);
 
 /* Return a new solib_ops for LP64 Linux systems.  */
 
-extern solib_ops_up make_linux_lp64_svr4_solib_ops ();
+extern solib_ops_up make_linux_lp64_svr4_solib_ops (program_space *pspace);
 
 #endif /* GDB_SOLIB_SVR4_LINUX_H */

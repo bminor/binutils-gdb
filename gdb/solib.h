@@ -133,6 +133,10 @@ using solib_up = std::unique_ptr<solib>;
 
 struct solib_ops
 {
+  explicit solib_ops (program_space *pspace)
+    : m_pspace (pspace)
+  {}
+
   virtual ~solib_ops () = default;
 
   /* Adjust the section binding addresses by the base address at
@@ -259,6 +263,10 @@ struct solib_ops
      The supports_namespaces method must return true for this to be called.  */
   virtual std::vector<const solib *> get_solibs_in_ns (int ns) const
   { gdb_assert_not_reached ("namespaces not supported"); }
+
+protected:
+  /* The program space for which this solib_ops was created.  */
+  program_space *m_pspace;
 };
 
 /* A unique pointer to an solib_ops.  */

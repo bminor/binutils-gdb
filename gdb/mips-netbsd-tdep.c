@@ -292,6 +292,8 @@ mipsnbsd_cannot_store_register (struct gdbarch *gdbarch, int regno)
 
 struct mips_nbsd_ilp32_svr4_solib_ops : public svr4_solib_ops
 {
+  using svr4_solib_ops::svr4_solib_ops;
+
   /* NetBSD/MIPS uses a slightly different `struct link_map' than the
      other NetBSD platforms.  */
   link_map_offsets *fetch_link_map_offsets () const override;
@@ -300,9 +302,9 @@ struct mips_nbsd_ilp32_svr4_solib_ops : public svr4_solib_ops
 /* Return a new solib_ops for ILP32 NetBSD/MIPS systems.  */
 
 static solib_ops_up
-make_mips_nbsd_ilp32_svr4_solib_ops ()
+make_mips_nbsd_ilp32_svr4_solib_ops (program_space *pspace)
 {
-  return std::make_unique<mips_nbsd_ilp32_svr4_solib_ops> ();
+  return std::make_unique<mips_nbsd_ilp32_svr4_solib_ops> (pspace);
 }
 
 /* See mips_nbsd_ilp32_svr4_solib_ops.  */
@@ -340,6 +342,8 @@ mips_nbsd_ilp32_svr4_solib_ops::fetch_link_map_offsets () const
 
 struct mips_nbsd_lp64_svr4_solib_ops : public svr4_solib_ops
 {
+  using svr4_solib_ops::svr4_solib_ops;
+
   /* NetBSD/MIPS uses a slightly different `struct link_map' than the
      other NetBSD platforms.  */
   link_map_offsets *fetch_link_map_offsets () const override;
@@ -348,9 +352,9 @@ struct mips_nbsd_lp64_svr4_solib_ops : public svr4_solib_ops
 /* Return a new solib_ops for LP64 NetBSD/MIPS systems.  */
 
 static solib_ops_up
-make_mips_nbsd_lp64_svr4_solib_ops ()
+make_mips_nbsd_lp64_svr4_solib_ops (program_space *pspace)
 {
-  return std::make_unique<mips_nbsd_lp64_svr4_solib_ops> ();
+  return std::make_unique<mips_nbsd_lp64_svr4_solib_ops> (pspace);
 }
 
 /* See mips_nbsd_lp64_svr4_solib_ops.  */

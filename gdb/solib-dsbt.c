@@ -123,6 +123,8 @@ struct dbst_ext_link_map
 
 struct dsbt_solib_ops : public solib_ops
 {
+  using solib_ops::solib_ops;
+
   void relocate_section_addresses (solib &so, target_section *) const override;
   void clear_solib (program_space *pspace) const override;
   void create_inferior_hook (int from_tty) const override;
@@ -133,9 +135,9 @@ struct dsbt_solib_ops : public solib_ops
 /* See solib-dsbt.h.  */
 
 solib_ops_up
-make_dsbt_solib_ops ()
+make_dsbt_solib_ops (program_space *pspace)
 {
-  return std::make_unique<dsbt_solib_ops> ();
+  return std::make_unique<dsbt_solib_ops> (pspace);
 }
 
 /* Link map info to include in an allocated solib entry */

@@ -261,7 +261,8 @@ post_create_inferior (int from_tty, bool set_pspace_solib_ops)
 
   if (set_pspace_solib_ops)
     current_program_space->set_solib_ops
-      (gdbarch_make_solib_ops (current_inferior ()->arch ()));
+      (gdbarch_make_solib_ops (current_inferior ()->arch (),
+			       current_program_space));
 
   if (current_program_space->exec_bfd ())
     {

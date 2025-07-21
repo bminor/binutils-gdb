@@ -78,6 +78,8 @@ enum probe_action
 
 struct svr4_solib_ops : public solib_ops
 {
+  using solib_ops::solib_ops;
+
   void relocate_section_addresses (solib &so, target_section *) const override;
   void clear_so (const solib &so) const override;
   void clear_solib (program_space *pspace) const override;
@@ -137,6 +139,8 @@ private:
 
 struct ilp32_svr4_solib_ops : public svr4_solib_ops
 {
+  using svr4_solib_ops::svr4_solib_ops;
+
   link_map_offsets *fetch_link_map_offsets () const override;
 };
 
@@ -192,11 +196,11 @@ extern CORE_ADDR svr4_fetch_objfile_link_map (struct objfile *objfile);
 
 /* Return a new solib_ops for ILP32 SVR4 systems.  */
 
-extern solib_ops_up make_svr4_ilp32_solib_ops ();
+extern solib_ops_up make_svr4_ilp32_solib_ops (program_space *pspace);
 
 /* Return a new solib_ops for LP64 SVR4 systems.  */
 
-extern solib_ops_up make_svr4_lp64_solib_ops ();
+extern solib_ops_up make_svr4_lp64_solib_ops (program_space *pspace);
 
 /* For the MUSL C library, given link map address LM_ADDR, return the
    corresponding TLS module id, or 0 if not found.  */

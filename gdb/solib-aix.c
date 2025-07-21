@@ -28,6 +28,8 @@
 
 struct aix_solib_ops : public solib_ops
 {
+  using solib_ops::solib_ops;
+
   void relocate_section_addresses (solib &so, target_section *) const override;
   void create_inferior_hook (int from_tty) const override;
   owning_intrusive_list<solib> current_sos () const override;
@@ -37,9 +39,9 @@ struct aix_solib_ops : public solib_ops
 /* See solib-aix.h.  */
 
 solib_ops_up
-make_aix_solib_ops ()
+make_aix_solib_ops (program_space *pspace)
 {
-  return std::make_unique<aix_solib_ops> ();
+  return std::make_unique<aix_solib_ops> (pspace);
 }
 
 /* Our private data in struct solib.  */

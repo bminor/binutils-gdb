@@ -160,8 +160,8 @@ struct rocm_solib_ops : public solib_ops
 {
   /* HOST_OPS is the host solib_ops that rocm_solib_ops hijacks / wraps,
      in order to provide support for ROCm code objects.  */
-  explicit rocm_solib_ops (solib_ops_up host_ops)
-    : m_host_ops (std::move (host_ops))
+  explicit rocm_solib_ops (program_space *pspace, solib_ops_up host_ops)
+    : solib_ops (pspace), m_host_ops (std::move (host_ops))
   {
   }
 
@@ -807,7 +807,8 @@ rocm_solib_target_inferior_created (inferior *inf)
   get_solib_info (inf)->solib_list.clear ();
 
   auto prev_ops = inf->pspace->release_solib_ops ();
-  auto rocm_ops = std::make_unique<rocm_solib_ops> (std::move (prev_ops));
+  auto rocm_ops
+    = std::make_unique<rocm_solib_ops> (inf->pspace, std::move (prev_ops));
   inf->pspace->set_solib_ops (std::move (rocm_ops));
 
   rocm_update_solib_list ();
@@ -825,9 +826,11 @@ rocm_solib_target_inferior_execd (inferior *exec_inf, inferior *follow_inf)
   if (get_amd_dbgapi_process_id (follow_inf) == AMD_DBGAPI_PROCESS_NONE)
     return;
 
-  auto prev_ops = follow_inf->pspace->release_solib_ops ();
-  auto rocm_ops = std::make_unique<rocm_solib_ops> (std::move (prev_ops));
-  follow_inf->pspace->set_solib_ops (std::move (rocm_ops));
+  auto pspace = follow_inf->pspace;
+  auto prev_ops = pspace->release_solib_ops ();
+  auto rocm_ops
+    = std::make_unique<rocm_solib_ops> (pspace, std::move (prev_ops));
+  pspace->set_solib_ops (std::move (rocm_ops));
 
   get_solib_info (exec_inf)->solib_list.clear ();
 }

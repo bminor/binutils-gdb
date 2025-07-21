@@ -23,6 +23,6 @@
 
 /* Return a new solib_ops for FR-V systems.  */
 
-solib_ops_up make_frv_solib_ops ();
+solib_ops_up make_frv_solib_ops (program_space *pspace);
 
 #endif /* GDB_SOLIB_FRV_H */

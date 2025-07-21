@@ -3470,13 +3470,13 @@ set_gdbarch_skip_trampoline_code (struct gdbarch *gdbarch,
 }
 
 solib_ops_up
-gdbarch_make_solib_ops (struct gdbarch *gdbarch)
+gdbarch_make_solib_ops (struct gdbarch *gdbarch, program_space *pspace)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->make_solib_ops != NULL);
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_make_solib_ops called\n");
-  return gdbarch->make_solib_ops ();
+  return gdbarch->make_solib_ops (pspace);
 }
 
 void

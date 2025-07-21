@@ -1435,7 +1435,7 @@ Function(
     comment="Return a newly-allocated solib_ops object capable of providing the solibs for this architecture.",
     type="solib_ops_up",
     name="make_solib_ops",
-    params=[],
+    params=[("program_space *", "pspace")],
     predefault="make_target_solib_ops",
     invalid=False,
 )

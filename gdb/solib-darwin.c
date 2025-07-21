@@ -37,6 +37,8 @@
 
 struct darwin_solib_ops : public solib_ops
 {
+  using solib_ops::solib_ops;
+
   void relocate_section_addresses (solib &so, target_section *) const override;
   void clear_solib (program_space *pspace) const override;
   void create_inferior_hook (int from_tty) const override;
@@ -47,9 +49,9 @@ struct darwin_solib_ops : public solib_ops
 /* See solib-darwin.h.  */
 
 solib_ops_up
-make_darwin_solib_ops ()
+make_darwin_solib_ops (program_space *pspace)
 {
-  return std::make_unique<darwin_solib_ops> ();
+  return std::make_unique<darwin_solib_ops> (pspace);
 }
 
 struct gdb_dyld_image_info

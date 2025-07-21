@@ -480,6 +480,8 @@ mips_fbsd_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 
 struct mips_fbsd_ilp32_solib_ops : public svr4_solib_ops
 {
+  using svr4_solib_ops::svr4_solib_ops;
+
   /* FreeBSD/MIPS uses a slightly different `struct link_map' than the
      other FreeBSD platforms as it includes an additional `l_off' member.  */
 
@@ -489,9 +491,9 @@ struct mips_fbsd_ilp32_solib_ops : public svr4_solib_ops
 /* Return a new solib_ops for ILP32 FreeBSD/MIPS systems.  */
 
 static solib_ops_up
-make_mips_fbsd_ilp32_solib_ops ()
+make_mips_fbsd_ilp32_solib_ops (program_space *pspace)
 {
-  return std::make_unique<mips_fbsd_ilp32_solib_ops> ();
+  return std::make_unique<mips_fbsd_ilp32_solib_ops> (pspace);
 }
 
 /* See mips_fbsd_ilp32_solib_ops.  */
@@ -528,6 +530,8 @@ mips_fbsd_ilp32_solib_ops::fetch_link_map_offsets () const
 
 struct mips_fbsd_lp64_solib_ops : public svr4_solib_ops
 {
+  using svr4_solib_ops::svr4_solib_ops;
+
   /* FreeBSD/MIPS uses a slightly different `struct link_map' than the
      other FreeBSD platforms as it includes an additional `l_off' member.  */
 
@@ -537,9 +541,9 @@ struct mips_fbsd_lp64_solib_ops : public svr4_solib_ops
 /* Return a new solib_ops for LP64 FreeBSD/MIPS systems.  */
 
 static solib_ops_up
-make_mips_fbsd_lp64_solib_ops ()
+make_mips_fbsd_lp64_solib_ops (program_space *pspace)
 {
-  return std::make_unique<mips_fbsd_lp64_solib_ops> ();
+  return std::make_unique<mips_fbsd_lp64_solib_ops> (pspace);
 }
 
 /* See mips_fbsd_lp64_solib_ops.  */

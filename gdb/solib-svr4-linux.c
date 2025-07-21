@@ -22,9 +22,9 @@
 /* See solib-svr4-linux.h.  */
 
 solib_ops_up
-make_linux_ilp32_svr4_solib_ops ()
+make_linux_ilp32_svr4_solib_ops (program_space *pspace)
 {
-  return std::make_unique<linux_ilp32_svr4_solib_ops> ();
+  return std::make_unique<linux_ilp32_svr4_solib_ops> (pspace);
 }
 
 /* See solib-svr4-linux.h.  */
@@ -61,9 +61,9 @@ linux_ilp32_svr4_solib_ops::fetch_link_map_offsets () const
 /* See solib-svr4-linux.h.  */
 
 solib_ops_up
-make_linux_lp64_svr4_solib_ops ()
+make_linux_lp64_svr4_solib_ops (program_space *pspace)
 {
-  return std::make_unique<linux_lp64_svr4_solib_ops> ();
+  return std::make_unique<linux_lp64_svr4_solib_ops> (pspace);
 }
 
 /* See linux-tdep.h.  */

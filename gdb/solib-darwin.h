@@ -24,6 +24,6 @@
 
 /* Return a new solib_ops for Darwin systems.  */
 
-extern solib_ops_up make_darwin_solib_ops ();
+extern solib_ops_up make_darwin_solib_ops (program_space *pspace);
 
 #endif /* GDB_SOLIB_DARWIN_H */

@@ -866,15 +866,17 @@ windows_get_siginfo_type (struct gdbarch *gdbarch)
 
 struct windows_solib_ops : target_solib_ops
 {
+  using target_solib_ops::target_solib_ops;
+
   void create_inferior_hook (int from_tty) const override;
 };
 
 /* Return a new solib_ops for Windows systems.  */
 
 static solib_ops_up
-make_windows_solib_ops ()
+make_windows_solib_ops (program_space *pspace)
 {
-  return std::make_unique<windows_solib_ops> ();
+  return std::make_unique<windows_solib_ops> (pspace);
 }
 
 /* Implement the "solib_create_inferior_hook" solib_ops method.  */

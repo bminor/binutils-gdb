@@ -309,6 +309,8 @@ static const struct ppc_insn_pattern powerpc32_plt_stub_so_2[] =
 
 struct ppc_linux_ilp32_svr4_solib_ops : public linux_ilp32_svr4_solib_ops
 {
+  using linux_ilp32_svr4_solib_ops::linux_ilp32_svr4_solib_ops;
+
   /* Check if PC is in PLT stub.  For non-secure PLT, stub is in .plt
      section.  For secure PLT, stub is in .text and we need to check
      instruction patterns.  */
@@ -319,9 +321,9 @@ struct ppc_linux_ilp32_svr4_solib_ops : public linux_ilp32_svr4_solib_ops
 /* Return a new solib_ops for ILP32 PowerPC/Linux systems.  */
 
 static solib_ops_up
-make_ppc_linux_ilp32_svr4_solib_ops ()
+make_ppc_linux_ilp32_svr4_solib_ops (program_space *pspace)
 {
-  return std::make_unique<ppc_linux_ilp32_svr4_solib_ops> ();
+  return std::make_unique<ppc_linux_ilp32_svr4_solib_ops> (pspace);
 }
 
 /* See ppc_linux_ilp32_svr4_solib_ops.  */

@@ -3454,9 +3454,9 @@ set_solib_svr4_ops (gdbarch *gdbarch, gdbarch_make_solib_ops_ftype make_solib_op
 /* See solib-svr4.h.  */
 
 solib_ops_up
-make_svr4_ilp32_solib_ops ()
+make_svr4_ilp32_solib_ops (program_space *pspace)
 {
-  return std::make_unique<ilp32_svr4_solib_ops> ();
+  return std::make_unique<ilp32_svr4_solib_ops> (pspace);
 }
 
 /* Most OS'es that have SVR4-style ELF dynamic libraries define a
@@ -3499,15 +3499,17 @@ ilp32_svr4_solib_ops::fetch_link_map_offsets () const
 
 struct lp64_svr4_solib_ops : public svr4_solib_ops
 {
+  using svr4_solib_ops::svr4_solib_ops;
+
   link_map_offsets *fetch_link_map_offsets () const override;
 };
 
 /* See solib-svr4.h.  */
 
 solib_ops_up
-make_svr4_lp64_solib_ops ()
+make_svr4_lp64_solib_ops (program_space *pspace)
 {
-  return std::make_unique<lp64_svr4_solib_ops> ();
+  return std::make_unique<lp64_svr4_solib_ops> (pspace);
 }
 
 /* Fetch (and possibly build) an appropriate `struct link_map_offsets'

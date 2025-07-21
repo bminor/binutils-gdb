@@ -24,6 +24,6 @@ extern CORE_ADDR solib_aix_get_toc_value (CORE_ADDR pc);
 
 /* Return a new solib_ops for AIX systems.  */
 
-solib_ops_up make_aix_solib_ops ();
+solib_ops_up make_aix_solib_ops (program_space *pspace);
 
 #endif /* GDB_SOLIB_AIX_H */

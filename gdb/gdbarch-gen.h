@@ -820,8 +820,8 @@ extern void set_gdbarch_skip_trampoline_code (struct gdbarch *gdbarch, gdbarch_s
 
 /* Return a newly-allocated solib_ops object capable of providing the solibs for this architecture. */
 
-typedef solib_ops_up (gdbarch_make_solib_ops_ftype) ();
-extern solib_ops_up gdbarch_make_solib_ops (struct gdbarch *gdbarch);
+typedef solib_ops_up (gdbarch_make_solib_ops_ftype) (program_space *pspace);
+extern solib_ops_up gdbarch_make_solib_ops (struct gdbarch *gdbarch, program_space *pspace);
 extern void set_gdbarch_make_solib_ops (struct gdbarch *gdbarch, gdbarch_make_solib_ops_ftype *make_solib_ops);
 
 /* If in_solib_dynsym_resolve_code() returns true, and SKIP_SOLIB_RESOLVER
