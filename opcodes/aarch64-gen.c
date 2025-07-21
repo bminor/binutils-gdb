@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <ctype.h>
 
 #include "libiberty.h"
 #include "getopt.h"
@@ -32,6 +33,10 @@
 #include "aarch64-tbl.h"
 
 static int debug = 0;
+
+/* Table of labels for opcode nodes.  We use this to stabilize the indices of
+   the data structures as the list of opcodes expands.  */
+const char **opcode_node_labels;
 
 /* Structure used in the decoding tree to group a list of aarch64_opcode
    entries.  */
@@ -462,11 +467,9 @@ print_decision_tree_1 (unsigned int indent, struct bittree* bittree)
       assert (bittree->list != NULL);
       indented_print (indent, "/* 33222222222211111111110000000000\n");
       indented_print (indent, "   10987654321098765432109876543210\n");
-      indented_print (indent, "   %s\n", pattern);
-      indented_print (indent, "   %s.  */\n",
-		      get_aarch64_opcode (bittree->list)->name);
-      indented_print (indent, "return %u;\n",
-		      real_index (bittree->list->index));
+      indented_print (indent, "   %s.  */\n", pattern);
+      indented_print (indent, "return %s;\n",
+		      opcode_node_labels[real_index (bittree->list->index)]);
       return;
     }
 
@@ -494,7 +497,7 @@ print_decision_tree (struct bittree* bittree)
 
   printf ("/* Called by aarch64_opcode_lookup.  */\n\n");
 
-  printf ("static int\n");
+  printf ("static enum aarch64_opcode_idx\n");
   printf ("aarch64_opcode_lookup_1 (uint32_t word)\n");
   printf ("{\n");
 
@@ -531,19 +534,13 @@ print_find_next_opcode_1 (struct bittree* bittree)
 	      const aarch64_opcode *curr = get_aarch64_opcode (list);
 	      const aarch64_opcode *next = get_aarch64_opcode (list->next);
 
-	      printf ("    case %u: ",
-		      (unsigned int)(curr - aarch64_opcode_table));
+	      printf ("    case %s:\n",
+		      opcode_node_labels[curr - aarch64_opcode_table]);
 	      if (list->next != NULL)
-		{
-		  printf ("value = %u; break;\t",
-			  real_index (list->next->index));
-		  printf ("/* %s --> %s.  */\n", curr->name, next->name);
-		}
+		printf ("      value = %s;\n      break;\n",
+			opcode_node_labels[real_index (list->next->index)]);
 	      else
-		{
-		  printf ("return NULL;\t\t");
-		  printf ("/* %s --> NULL.  */\n", curr->name);
-		}
+		printf ("      return NULL;\n");
 
 	      list = list->next;
 	    }
@@ -569,8 +566,8 @@ print_find_next_opcode (struct bittree* bittree)
   printf ("aarch64_find_next_opcode (const aarch64_opcode *opcode)\n");
   printf ("{\n");
   printf ("  /* Use the index as the key to locate the next opcode.  */\n");
-  printf ("  int key = opcode - aarch64_opcode_table;\n");
-  printf ("  int value;\n");
+  printf ("  enum aarch64_opcode_idx key = opcode - aarch64_opcode_table;\n");
+  printf ("  enum aarch64_opcode_idx value;\n");
   printf ("  switch (key)\n");
   printf ("    {\n");
 
@@ -633,8 +630,8 @@ print_find_real_opcode (const opcode_node *table, int num)
   printf ("aarch64_find_real_opcode (const aarch64_opcode *opcode)\n");
   printf ("{\n");
   printf ("  /* Use the index as the key to locate the real opcode.  */\n");
-  printf ("  int key = opcode - aarch64_opcode_table;\n");
-  printf ("  int value;\n");
+  printf ("  enum aarch64_opcode_idx key = opcode - aarch64_opcode_table;\n");
+  printf ("  enum aarch64_opcode_idx value;\n");
   printf ("  switch (key)\n");
   printf ("    {\n");
 
@@ -643,10 +640,10 @@ print_find_real_opcode (const opcode_node *table, int num)
       const opcode_node *real = table + i;
       const opcode_node *alias = real->next;
       for (; alias; alias = alias->next)
-	printf ("    case %u:\t/* %s */\n", real_index (alias->index),
-		get_aarch64_opcode (alias)->name);
-      printf ("      value = %u;\t/* --> %s.  */\n", real_index (real->index),
-	      get_aarch64_opcode (real)->name);
+	printf ("    case %s:\n",
+		opcode_node_labels[real_index (alias->index)]);
+      printf ("      value = %s;\n",
+	      opcode_node_labels[real_index (real->index)]);
       printf ("      break;\n");
     }
 
@@ -674,8 +671,8 @@ print_find_alias_opcode (const opcode_node *table, int num)
   printf ("aarch64_find_alias_opcode (const aarch64_opcode *opcode)\n");
   printf ("{\n");
   printf ("  /* Use the index as the key to locate the alias opcode.  */\n");
-  printf ("  int key = opcode - aarch64_opcode_table;\n");
-  printf ("  int value;\n");
+  printf ("  enum aarch64_opcode_idx key = opcode - aarch64_opcode_table;\n");
+  printf ("  enum aarch64_opcode_idx value;\n");
   printf ("  switch (key)\n");
   printf ("    {\n");
 
@@ -683,10 +680,9 @@ print_find_alias_opcode (const opcode_node *table, int num)
     {
       const opcode_node *node = table + i;
       assert (node->next);
-      printf ("    case %u: value = %u; break;", real_index (node->index),
-	      real_index (node->next->index));
-      printf ("\t/* %s --> %s.  */\n", get_aarch64_opcode (node)->name,
-	      get_aarch64_opcode (node->next)->name);
+      printf ("    case %s:\n      value = %s;\n      break;\n",
+	      opcode_node_labels[real_index (node->index)],
+	      opcode_node_labels[real_index (node->next->index)]);
     }
 
   printf ("    default: return NULL;\n");
@@ -713,8 +709,8 @@ print_find_next_alias_opcode (const opcode_node *table, int num)
   printf ("aarch64_find_next_alias_opcode (const aarch64_opcode *opcode)\n");
   printf ("{\n");
   printf ("  /* Use the index as the key to locate the next opcode.  */\n");
-  printf ("  int key = opcode - aarch64_opcode_table;\n");
-  printf ("  int value;\n");
+  printf ("  enum aarch64_opcode_idx key = opcode - aarch64_opcode_table;\n");
+  printf ("  enum aarch64_opcode_idx value;\n");
   printf ("  switch (key)\n");
   printf ("    {\n");
 
@@ -726,12 +722,9 @@ print_find_next_alias_opcode (const opcode_node *table, int num)
 	continue;
       while (node->next->next)
 	{
-	  printf ("    case %u: value = %u; break;",
-		  real_index (node->next->index),
-		  real_index (node->next->next->index));
-	  printf ("\t/* %s --> %s.  */\n",
-		  get_aarch64_opcode (node->next)->name,
-		  get_aarch64_opcode (node->next->next)->name);
+	  printf ("    case %s:\n      value = %s;\n      break;\n",
+		  opcode_node_labels[real_index (node->next->index)],
+		  opcode_node_labels[real_index (node->next->next->index)]);
 	  node = node->next;
 	}
     }
@@ -1145,6 +1138,86 @@ print_operand_extractor (void)
   printf ("}\n");
 }
 
+/* Generate a set of labels for the opcode table, so that we can refer to index
+   entries through stable names.  The general format for the label is:
+	<opcode>_<mnemonic>(_operand_name)*
+   We currently do not need to use the qualifiers to discriminate further, and
+   hopefully never will.  */
+#define ENUM_PFX ""
+#define MAX_LABEL_LEN 100
+void
+label_opcode_nodes (void)
+{
+  unsigned count = sizeof (aarch64_opcode_table) / sizeof (aarch64_opcode);
+  unsigned i;
+  const aarch64_opcode *opc;
+
+  opcode_node_labels = malloc (count * sizeof (char *));
+
+  for (i = 0, opc = aarch64_opcode_table; i < count - 1; ++i, ++opc)
+    {
+      char buf[MAX_LABEL_LEN];
+      char *p;
+      unsigned j;
+      size_t l;
+      int written;
+
+      written = snprintf (buf, MAX_LABEL_LEN, "A64_OPID_%08x_%s",
+			  opc->opcode, opc->name);
+      assert (written >= 0
+	      && written < MAX_LABEL_LEN);
+      p = buf + written;
+
+      for (j = 0;
+	   j < AARCH64_MAX_OPND_NUM && opc->operands[j] != AARCH64_OPND_NIL;
+	   j++)
+	{
+	  written = snprintf (p, MAX_LABEL_LEN - (p - buf), "_%s",
+			      operands[opc->operands[j]].str);
+	  assert (written >= 0
+		  && written < MAX_LABEL_LEN - (p - buf));
+	  p += written;
+	}
+
+      /* Sanitize the opcode name into something that can be used as
+	 an identifier.  */
+      for (p = buf; *p != '\0'; ++p)
+	if (!(isalpha (*p) || isdigit (*p) || *p == '_'))
+	  *p = '_';
+
+      opcode_node_labels[i] = strdup (buf);
+    }
+
+  opcode_node_labels[i] = "A64_OPID_MAX";
+}
+
+/* Emit the opcode labels as an enum  */
+void
+print_opcode_labels_defn (void)
+{
+  unsigned count = sizeof (aarch64_opcode_table) / sizeof (aarch64_opcode);
+  unsigned i;
+
+  printf ("/* Mnemonic names for the indices in the aarch64_opcode table,\n"
+	  "   so that we can refer to the entries by name.  This serves two\n"
+	  "   main purposes.  Firstly, the names change rarely, if at all,\n"
+	  "   so diffs in the generated files as instructions are added to\n"
+	  "   the table are much smaller.  Secondly, the names are useful\n"
+	  "   when   viewing the generated code in, for example, a debugger,\n"
+	  "   giving a better indication of what is going on.\n\n");
+  printf ("   The format of the names is:\n"
+	  "\tA64_OPID_<opcode>_<mnemonic>[_<operand_type>]*\n"
+	  "   The operand modifier information is not included in the names\n"
+	  "   as this would make them too long and is currently unnecessary\n"
+	  "   for generating a unique name.  */\n\n");
+
+  printf ("enum aarch64_opcode_idx\n{\n");
+  for (i = 0; i < count; ++i)
+    printf ("  %s,\n", opcode_node_labels[i]);
+  printf ("};\n");
+}
+
+
 /* Table indexed by opcode enumerator stores the index of the corresponding
    opcode entry in aarch64_opcode_table.  */
 static unsigned op_enum_table [OP_TOTAL_NUM];
@@ -1190,10 +1263,10 @@ print_get_opcode (void)
   printf ("/* Indexed by an enum aarch64_op enumerator, the value is the\n"
 	  "   offset of the corresponding aarch64_opcode entry in the\n"
 	  "   aarch64_opcode_table.  */\n\n");
-  printf ("static const unsigned op_enum_table [] =\n");
+  printf ("static const enum aarch64_opcode_idx op_enum_table [] =\n");
   printf ("{\n");
   for (i = 0; i < num; ++i)
-    printf ("  %u,\n", op_enum_table[i]);
+    printf ("  %s,\n", opcode_node_labels[op_enum_table[i]]);
   printf ("};\n");
 
   /* Print the function.  */
@@ -1231,6 +1304,7 @@ struct option long_options[] =
   {"gen-opc", no_argument,       NULL, 'c'},
   {"gen-asm", no_argument,       NULL, 'a'},
   {"gen-dis", no_argument,       NULL, 's'},
+  {"gen-idx", no_argument,       NULL, 'i'},
   {0,         no_argument,       NULL, 0}
 };
 
@@ -1247,7 +1321,8 @@ usage (FILE * stream, int status)
   fprintf (stream, "Usage: %s [-V | --version] [-d | --debug] [--help]\n",
 	   program_name);
   fprintf (stream,
-	   "\t[ [-c | --gen-opc] | [-a | --gen-asm] | [-s | --gen-dis] ]\n");
+	   "\t[ [-c | --gen-opc] | [-a | --gen-asm] "
+	   "| [-s | --gen-dis] | [ --gen-idx | -i ]]\n");
   xexit (status);
 }
 
@@ -1259,6 +1334,7 @@ main (int argc, char **argv)
   int gen_opcode_p = 0;
   int gen_assembler_p = 0;
   int gen_disassembler_p = 0;
+  int gen_indices_p = 0;
 
   program_name = *argv;
   xmalloc_set_program_name (program_name);
@@ -1277,6 +1353,9 @@ main (int argc, char **argv)
       case '?':
 	usage (stderr, 0);
 	break;
+      case 'i':
+	gen_indices_p = 1;
+	break;
       case 'c':
 	gen_opcode_p = 1;
 	break;
@@ -1294,10 +1373,11 @@ main (int argc, char **argv)
   if (argc == 1 || optind != argc)
     usage (stdout, 1);
 
-  if (gen_opcode_p + gen_assembler_p + gen_disassembler_p > 1)
+  if (gen_opcode_p + gen_assembler_p + gen_disassembler_p + gen_indices_p > 1)
     {
-      printf ("Please specify only one of the following options\n\
-	      [-c | --gen-opc] [-a | --gen-asm] [-s | --gen-dis]\n");
+      printf ("Please specify only one of the following options\n\t"
+	      "[-c | --gen-opc] [-a | --gen-asm] "
+	      "[-s | --gen-dis] [-i | --gen-idx]\n");
       xexit (2);
     }
 
@@ -1306,6 +1386,8 @@ main (int argc, char **argv)
   decoder_tree = initialize_decoder_tree ();
   if (debug)
     print_divide_result (decoder_tree);
+
+  label_opcode_nodes ();
 
   printf
     ("/* This file is automatically generated by aarch64-gen.  "
@@ -1327,14 +1409,20 @@ main (int argc, char **argv)
      "   see <http://www.gnu.org/licenses/>.  */\n");
 
   printf ("\n");
-  printf ("#include \"sysdep.h\"\n");
-  if (gen_opcode_p)
-    printf ("#include \"aarch64-opc.h\"\n");
-  if (gen_assembler_p)
-    printf ("#include \"aarch64-asm.h\"\n");
-  if (gen_disassembler_p)
-    printf ("#include \"aarch64-dis.h\"\n");
-  printf ("\n");
+  if (gen_indices_p)
+    print_opcode_labels_defn ();
+  else
+    {
+      printf ("#include \"sysdep.h\"\n");
+      printf ("#include \"aarch64-tbl-2.h\"\n");
+      if (gen_opcode_p)
+	printf ("#include \"aarch64-opc.h\"\n");
+      if (gen_assembler_p)
+	printf ("#include \"aarch64-asm.h\"\n");
+      if (gen_disassembler_p)
+	printf ("#include \"aarch64-dis.h\"\n");
+      printf ("\n");
+    }
 
   /* Generate opcode entry lookup for the disassembler.  */
   if (gen_disassembler_p)
