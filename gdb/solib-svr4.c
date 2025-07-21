@@ -3720,11 +3720,8 @@ svr4_solib_ops::get_solibs_in_ns (int nsid) const
   CORE_ADDR debug_base = info->namespace_id[nsid];
   std::unordered_map<std::string, const lm_info_svr4 *> namespace_solibs;
   for (svr4_so &so : info->solib_lists[debug_base])
-    {
-      namespace_solibs[so.name]
-	= gdb::checked_static_cast<const lm_info_svr4 *>
-	    (so.lm_info.get ());
-    }
+    namespace_solibs[so.name] = so.lm_info.get ();
+
   for (const solib &so: current_program_space->solibs ())
     {
       auto *lm_inferior
