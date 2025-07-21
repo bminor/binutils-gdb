@@ -31,7 +31,7 @@
 	rw_sys_reg sys_reg=id_aa64isar3_el1 xreg=x0 w=0
 	rw_sys_reg sys_reg=id_aa64isar3_el1 xreg=x30 w=0
 
-	rw_sys_reg sys_reg=s3_0_c12_c15_0 w=0
+	rw_sys_reg sys_reg=s3_7_c0_c15_0 w=0
 	rw_sys_reg sys_reg=s3_0_c4_c11_0
 	rw_sys_reg sys_reg=s2_1_c0_c3_0
 	rw_sys_reg sys_reg=id_aa64fpfr0_el1 w=0
