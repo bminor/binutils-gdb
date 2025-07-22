@@ -5987,43 +5987,49 @@ elfNN_riscv_merge_gnu_properties (struct bfd_link_info *info, bfd *abfd,
 #define TARGET_BIG_SYM				riscv_elfNN_be_vec
 #define TARGET_BIG_NAME				"elfNN-bigriscv"
 
-#define elf_backend_reloc_type_class		riscv_reloc_type_class
+#define elf_info_to_howto_rel			NULL
+#define elf_info_to_howto			riscv_info_to_howto_rela
 
 #define bfd_elfNN_bfd_reloc_name_lookup		riscv_reloc_name_lookup
-#define bfd_elfNN_bfd_link_hash_table_create	riscv_elf_link_hash_table_create
+#define bfd_elfNN_bfd_link_hash_table_create	\
+  riscv_elf_link_hash_table_create
 #define bfd_elfNN_bfd_reloc_type_lookup		riscv_reloc_type_lookup
-#define bfd_elfNN_bfd_merge_private_bfd_data \
+#define bfd_elfNN_bfd_merge_private_bfd_data	\
   _bfd_riscv_elf_merge_private_bfd_data
-#define bfd_elfNN_bfd_is_target_special_symbol	riscv_elf_is_target_special_symbol
+#define bfd_elfNN_bfd_is_target_special_symbol	\
+  riscv_elf_is_target_special_symbol
+#define bfd_elfNN_bfd_relax_section		_bfd_riscv_relax_section
+#define bfd_elfNN_mkobject			elfNN_riscv_mkobject
+#define bfd_elfNN_get_synthetic_symtab		\
+  elfNN_riscv_get_synthetic_symtab
 
+#define elf_backend_reloc_type_class		riscv_reloc_type_class
 #define elf_backend_copy_indirect_symbol	riscv_elf_copy_indirect_symbol
-#define elf_backend_create_dynamic_sections	riscv_elf_create_dynamic_sections
+#define elf_backend_create_dynamic_sections	\
+  riscv_elf_create_dynamic_sections
 #define elf_backend_check_relocs		riscv_elf_check_relocs
 #define elf_backend_adjust_dynamic_symbol	riscv_elf_adjust_dynamic_symbol
 #define elf_backend_late_size_sections		riscv_elf_late_size_sections
 #define elf_backend_relocate_section		riscv_elf_relocate_section
 #define elf_backend_finish_dynamic_symbol	riscv_elf_finish_dynamic_symbol
-#define elf_backend_finish_dynamic_sections	riscv_elf_finish_dynamic_sections
+#define elf_backend_finish_dynamic_sections	\
+  riscv_elf_finish_dynamic_sections
 #define elf_backend_plt_sym_val			riscv_elf_plt_sym_val
 #define elf_backend_grok_prstatus		riscv_elf_grok_prstatus
 #define elf_backend_grok_psinfo			riscv_elf_grok_psinfo
 #define elf_backend_object_p			riscv_elf_object_p
 #define elf_backend_write_core_note		riscv_write_core_note
 #define elf_backend_maybe_function_sym		riscv_maybe_function_sym
-#define elf_info_to_howto_rel			NULL
-#define elf_info_to_howto			riscv_info_to_howto_rela
-#define bfd_elfNN_bfd_relax_section		_bfd_riscv_relax_section
-#define bfd_elfNN_mkobject			elfNN_riscv_mkobject
-#define bfd_elfNN_get_synthetic_symtab		elfNN_riscv_get_synthetic_symtab
 #define elf_backend_additional_program_headers \
   riscv_elf_additional_program_headers
 #define elf_backend_modify_segment_map		riscv_elf_modify_segment_map
-#define elf_backend_merge_symbol_attribute	riscv_elf_merge_symbol_attribute
-
+#define elf_backend_merge_symbol_attribute	\
+  riscv_elf_merge_symbol_attribute
 #define elf_backend_init_index_section		_bfd_elf_init_1_index_section
-
-#define elf_backend_setup_gnu_properties	elfNN_riscv_link_setup_gnu_properties
-#define elf_backend_merge_gnu_properties	elfNN_riscv_merge_gnu_properties
+#define elf_backend_setup_gnu_properties	\
+  elfNN_riscv_link_setup_gnu_properties
+#define elf_backend_merge_gnu_properties	\
+  elfNN_riscv_merge_gnu_properties
 
 #define elf_backend_can_gc_sections		1
 #define elf_backend_can_refcount		1
@@ -6044,6 +6050,7 @@ elfNN_riscv_merge_gnu_properties (struct bfd_link_info *info, bfd *abfd,
 #define elf_backend_obj_attrs_section_type	SHT_RISCV_ATTRIBUTES
 #undef  elf_backend_obj_attrs_section
 #define elf_backend_obj_attrs_section		RISCV_ATTRIBUTES_SECTION_NAME
-#define elf_backend_obj_attrs_handle_unknown	riscv_elf_obj_attrs_handle_unknown
+#define elf_backend_obj_attrs_handle_unknown	\
+  riscv_elf_obj_attrs_handle_unknown
 
 #include "elfNN-target.h"
