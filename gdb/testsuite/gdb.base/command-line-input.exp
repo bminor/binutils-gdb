@@ -21,6 +21,9 @@
 gdb_exit
 gdb_start
 
+set bs "\\"
+set re_bs [string_to_regexp $bs]
+
 set test "print 1\\\\n + 2"
 gdb_test_multiple "print 1\\\n + 2" $test {
     -re "^print 1\\\\\r\n \\+ 2\r\n\\\$$decimal = 3\r\n$gdb_prompt $" {
@@ -32,5 +35,32 @@ set test "print 1\\\\n2"
 gdb_test_multiple "print 1\\\n2" $test {
     -re "^print 1\\\\\r\n2\r\n\\\$$decimal = 12\r\n$gdb_prompt $" {
 	pass $test
+    }
+}
+
+with_test_prefix "cancel multiline" {
+    send_gdb "print$bs\n 1"
+    gdb_test_multiple "" "setup" {
+	-re "print$re_bs\r\n 1" {
+	    pass $gdb_test_name
+	}
+    }
+
+    send_gdb "\003"
+    gdb_test_multiple "" "cancel" {
+	-re -wrap "" {
+	    pass $gdb_test_name
+	}
+    }
+
+    # Regression test for PR cli/33063.
+    gdb_test_multiple "print 2" "command after cancel" {
+	-re -wrap " = 2" {
+	    pass $gdb_test_name
+	}
+	-re -wrap "" {
+	    # Avoid undefined command error.
+	    fail $gdb_test_name
+	}
     }
 }

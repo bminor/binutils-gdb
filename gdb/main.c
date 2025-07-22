@@ -420,6 +420,7 @@ start_event_loop ()
 	     get around to resetting the prompt, which leaves readline
 	     in a messed-up state.  Reset it here.  */
 	  current_ui->prompt_state = PROMPT_NEEDED;
+	  current_ui->line_buffer.clear ();
 	  top_level_interpreter ()->on_command_error ();
 	  /* This call looks bizarre, but it is required.  If the user
 	     entered a command that caused an error,
