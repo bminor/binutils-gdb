@@ -18,23 +18,33 @@
 # Test issuing a command split in multiple lines with continuation
 # characters.
 
-gdb_exit
-gdb_start
+clean_restart
 
 set bs "\\"
 set re_bs [string_to_regexp $bs]
+set re_dollar [string_to_regexp $]
 
-set test "print 1\\\\n + 2"
-gdb_test_multiple "print 1\\\n + 2" $test {
-    -re "^print 1\\\\\r\n \\+ 2\r\n\\\$$decimal = 3\r\n$gdb_prompt $" {
-	pass $test
+set re \
+    [multi_line \
+	 ^[string_to_regexp "print 1$bs"] \
+	 [string_to_regexp " + 2"] \
+	 "$re_dollar$decimal = 3" \
+	 "$gdb_prompt $"]
+gdb_test_multiple "print 1$bs\n + 2" "print 1$bs${bs}n + 2" {
+    -re $re {
+	pass $gdb_test_name
     }
 }
 
-set test "print 1\\\\n2"
-gdb_test_multiple "print 1\\\n2" $test {
-    -re "^print 1\\\\\r\n2\r\n\\\$$decimal = 12\r\n$gdb_prompt $" {
-	pass $test
+set re \
+    [multi_line \
+	 ^[string_to_regexp "print 1$bs"] \
+	 "2" \
+	 "$re_dollar$decimal = 12" \
+	 "$gdb_prompt $"]
+gdb_test_multiple "print 1$bs\n2" "print 1$bs${bs}n2" {
+    -re $re {
+	pass $gdb_test_name
     }
 }
 
