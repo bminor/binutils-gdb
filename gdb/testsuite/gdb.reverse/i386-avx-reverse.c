@@ -299,10 +299,10 @@ vpbroadcast_test ()
   asm volatile ("vbroadcastss %xmm1, %xmm0");
   asm volatile ("vbroadcastss %xmm1, %ymm15");
   asm volatile ("vbroadcastss %0, %%ymm0" : : "m" (global_buf0));
-  asm volatile ("vbroadcastss %0, %%xmm15": : "m" (dyn_buf0));
+  asm volatile ("vbroadcastss %0, %%xmm15": : "m" (*dyn_buf0));
   asm volatile ("vbroadcastsd %xmm1, %ymm0");
   asm volatile ("vbroadcastsd %0, %%ymm15": : "m" (global_buf0));
-  asm volatile ("vbroadcastf128 %0, %%ymm0" : : "m" (dyn_buf0));
+  asm volatile ("vbroadcastf128 %0, %%ymm0" : : "m" (*dyn_buf0));
 
   /* We have a return statement to deal with
      epilogue in different compilers.  */
