@@ -136,17 +136,6 @@ Approx time to complete from here: 2 hours ...
 	 
             ./src-release.sh -x binutils
 
-        FIXME: Not sure if the following steps are needed...
-	
-	Add a .dirstamp file to the gas/doc subdirectory:
-
-          touch -d `date +%Y-%m-%d` binutils-2.45.90/gas/doc/.dirstamp
-          tar rvf binutils-2.45.90.tar binutils-2.45.90/gas/doc/.dirstamp
-          rm binutils-2.45.90.tar.xz
-          xz -9 -k binutils-2.45.90.tar
-
-	 ...END OF FIXME
-
      c. Build a test target using this tarball.
 
            cp binutils-*.tar.xz /dev/shm
