@@ -1008,7 +1008,7 @@ complete_files_symbols (completion_tracker &tracker,
 	 name, they cannot be asking for completion on files.  */
       if (strcspn (text, gdb_completer_file_name_break_characters)
 	  == text_len)
-	fn_list = make_source_files_completion_list (text, text);
+	fn_list = make_source_files_completion_list (text);
     }
 
   if (!fn_list.empty () && !tracker.have_completions ())
@@ -1059,7 +1059,7 @@ complete_source_filenames (const char *text)
      the user cannot be asking for completion on files.  */
   if (strcspn (text, gdb_completer_file_name_break_characters)
       == text_len)
-    return make_source_files_completion_list (text, text);
+    return make_source_files_completion_list (text);
 
   return {};
 }
@@ -1142,7 +1142,7 @@ collect_explicit_location_matches (completion_tracker &tracker,
 	const char *source
 	  = string_or_empty (explicit_loc->source_filename.get ());
 	completion_list matches
-	  = make_source_files_completion_list (source, source);
+	  = make_source_files_completion_list (source);
 	tracker.add_completions (std::move (matches));
       }
       break;

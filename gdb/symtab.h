@@ -2482,8 +2482,7 @@ extern void collect_file_symbol_completion_matches
    symbol_name_match_type name_match_type,
    const char *, const char *, const char *);
 
-extern completion_list
-  make_source_files_completion_list (const char *, const char *);
+extern completion_list make_source_files_completion_list (const char *);
 
 /* Return whether SYM is a function/method, as opposed to a data symbol.  */
 

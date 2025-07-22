@@ -6402,7 +6402,7 @@ add_partial_filename_data::operator() (const char *filename,
    program.  */
 
 completion_list
-make_source_files_completion_list (const char *text, const char *word)
+make_source_files_completion_list (const char *text)
 {
   size_t text_len = strlen (text);
   completion_list list;
@@ -6428,7 +6428,7 @@ make_source_files_completion_list (const char *text, const char *word)
 		{
 		  /* This file matches for a completion; add it to the current
 		     list of matches.  */
-		  add_filename_to_list (s->filename, text, word, &list);
+		  add_filename_to_list (s->filename, text, text, &list);
 		}
 	      else
 		{
@@ -6440,7 +6440,7 @@ make_source_files_completion_list (const char *text, const char *word)
 		  if (base_name != s->filename
 		      && !filenames_seen.seen (base_name)
 		      && filename_ncmp (base_name, text, text_len) == 0)
-		    add_filename_to_list (base_name, text, word, &list);
+		    add_filename_to_list (base_name, text, text, &list);
 		}
 	    }
 	}
@@ -6448,7 +6448,7 @@ make_source_files_completion_list (const char *text, const char *word)
 
   datum.filename_seen_cache = &filenames_seen;
   datum.text = text;
-  datum.word = word;
+  datum.word = text;
   datum.text_len = text_len;
   datum.list = &list;
   map_symbol_filenames (datum, false /*need_fullname*/);
