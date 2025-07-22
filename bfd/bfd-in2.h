@@ -2903,7 +2903,14 @@ bool generic_core_file_matches_executable_p
    (bfd *core_bfd, bfd *exec_bfd);
 
 /* Extracted from format.c.  */
+bool bfd_check_format_lto (bfd *abfd, bfd_format format,
+    bool lto_sections_removed);
+
 bool bfd_check_format (bfd *abfd, bfd_format format);
+
+bool bfd_check_format_matches_lto
+   (bfd *abfd, bfd_format format, char ***matching,
+    bool lto_sections_removed);
 
 bool bfd_check_format_matches
    (bfd *abfd, bfd_format format, char ***matching);

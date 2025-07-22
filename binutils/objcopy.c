@@ -3748,10 +3748,13 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
       l->obfd = NULL;
       list = l;
 
+#if BFD_SUPPORTS_PLUGINS
+      /* Ignore plugin target if all LTO sections should be removed.  */
+      ok_object = bfd_check_format_lto (this_element, bfd_object,
+					lto_sections_removed);
+#else
       ok_object = bfd_check_format (this_element, bfd_object);
-      if (!ok_object)
-	bfd_nonfatal_message (NULL, this_element, NULL,
-			      _("Unable to recognise the format of file"));
+#endif
 
       /* PR binutils/3110: Cope with archives
 	 containing multiple target types.  */
@@ -3887,9 +3890,8 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
     }
 
 #if BFD_SUPPORTS_PLUGINS
-  /* Enable LTO plugin in strip unless all LTO sections should be
-     removed.  */
-  if (is_strip && !target && !lto_sections_removed)
+  /* Enable LTO plugin in strip.  */
+  if (is_strip && !target)
     target = "plugin";
 #endif
 
@@ -3987,7 +3989,21 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
 			 input_arch))
 	status = 1;
     }
-  else if (bfd_check_format_matches (ibfd, bfd_object, &obj_matching))
+  else if (
+#if BFD_SUPPORTS_PLUGINS
+	   /* Ignore plugin target first if all LTO sections should be
+	      removed.  Try with plugin target next if ignoring plugin
+	      target fails to match the format.  */
+	   bfd_check_format_matches_lto (ibfd, bfd_object, &obj_matching,
+					 lto_sections_removed)
+	   || (lto_sections_removed
+	       && bfd_check_format_matches_lto (ibfd, bfd_object,
+						&obj_matching, false))
+#else
+	   bfd_check_format_matches_lto (ibfd, bfd_object, &obj_matching,
+					 false)
+#endif
+	   )
     {
       bfd *obfd;
     do_copy:
@@ -5043,9 +5059,13 @@ strip_main (int argc, char *argv[])
 #if BFD_SUPPORTS_PLUGINS
   /* Check if all GCC LTO sections should be removed, assuming all LTO
      sections will be removed with -R .gnu.lto_.*.  * Remove .gnu.lto_.*
-     sections will also remove .gnu.debuglto_.  sections.  */
-  lto_sections_removed = !!find_section_list (".gnu.lto_.*", false,
-					      SECTION_CONTEXT_REMOVE);
+     sections will also remove .gnu.debuglto_.  sections.  LLVM IR
+     bitcode is stored in .llvm.lto section which will be removed with
+     -R .llvm.lto.  */
+  lto_sections_removed = (!!find_section_list (".gnu.lto_.*", false,
+					       SECTION_CONTEXT_REMOVE)
+			  || !!find_section_list (".llvm.lto", false,
+					       SECTION_CONTEXT_REMOVE));
 #endif
 
   i = optind;

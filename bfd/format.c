@@ -56,15 +56,18 @@ extern const size_t _bfd_target_vector_entries;
 
 /*
 FUNCTION
-	bfd_check_format
+	bfd_check_format_lto
 
 SYNOPSIS
-	bool bfd_check_format (bfd *abfd, bfd_format format);
+	bool bfd_check_format_lto (bfd *abfd, bfd_format format,
+				   bool lto_sections_removed);
 
 DESCRIPTION
 	Verify if the file attached to the BFD @var{abfd} is compatible
 	with the format @var{format} (i.e., one of <<bfd_object>>,
 	<<bfd_archive>> or <<bfd_core>>).
+
+	If LTO_SECTION_REMOVED is true, ignore plugin target.
 
 	If the BFD has been set to a specific target before the
 	call, only the named target and format combination is
@@ -100,9 +103,30 @@ DESCRIPTION
 */
 
 bool
+bfd_check_format_lto (bfd *abfd, bfd_format format,
+		      bool lto_sections_removed)
+{
+  return bfd_check_format_matches_lto (abfd, format, NULL,
+				       lto_sections_removed);
+}
+
+
+/*
+FUNCTION
+	bfd_check_format
+
+SYNOPSIS
+	bool bfd_check_format (bfd *abfd, bfd_format format);
+
+DESCRIPTION
+	Similar to bfd_check_format_plugin, except plugin target isn't
+	ignored.
+*/
+
+bool
 bfd_check_format (bfd *abfd, bfd_format format)
 {
-  return bfd_check_format_matches (abfd, format, NULL);
+  return bfd_check_format_matches_lto (abfd, format, NULL, false);
 }
 
 struct bfd_preserve
@@ -407,11 +431,12 @@ bfd_set_lto_type (bfd *abfd ATTRIBUTE_UNUSED)
 
 /*
 FUNCTION
-	bfd_check_format_matches
+	bfd_check_format_matches_lto
 
 SYNOPSIS
-	bool bfd_check_format_matches
-	  (bfd *abfd, bfd_format format, char ***matching);
+	bool bfd_check_format_matches_lto
+	  (bfd *abfd, bfd_format format, char ***matching,
+	   bool lto_sections_removed);
 
 DESCRIPTION
 	Like <<bfd_check_format>>, except when it returns FALSE with
@@ -423,10 +448,14 @@ DESCRIPTION
 
 	When done with the list that @var{matching} points to, the caller
 	should free it.
+
+	If LTO_SECTION_REMOVED is true, ignore plugin target.
 */
 
 bool
-bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
+bfd_check_format_matches_lto (bfd *abfd, bfd_format format,
+			      char ***matching,
+			      bool lto_sections_removed ATTRIBUTE_UNUSED)
 {
   extern const bfd_target binary_vec;
   const bfd_target * const *target;
@@ -495,8 +524,13 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
   if (!bfd_preserve_save (abfd, &preserve, NULL))
     goto err_ret;
 
-  /* If the target type was explicitly specified, just check that target.  */
-  if (!abfd->target_defaulted)
+  /* If the target type was explicitly specified, just check that target.
+     If LTO_SECTION_REMOVED is true, don't match the plugin target.  */
+  if (!abfd->target_defaulted
+#if BFD_SUPPORTS_PLUGINS
+      && (!lto_sections_removed || !bfd_plugin_target_p (abfd->xvec))
+#endif
+     )
     {
       if (bfd_seek (abfd, 0, SEEK_SET) != 0)	/* rewind! */
 	goto err_ret;
@@ -540,10 +574,12 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 	 searching.  Don't match the plugin target if we have another
 	 alternative since we want to properly set the input format
 	 before allowing a plugin to claim the file.  Also, don't
-	 check the default target twice.  */
+	 check the default target twice.   If LTO_SECTION_REMOVED is
+	 true, don't match the plugin target.  */
       if (*target == &binary_vec
 #if BFD_SUPPORTS_PLUGINS
-	  || (match_count != 0 && bfd_plugin_target_p (*target))
+	  || ((lto_sections_removed || match_count != 0)
+	      && bfd_plugin_target_p (*target))
 #endif
 	  || (!abfd->target_defaulted && *target == save_targ))
 	continue;
@@ -793,6 +829,32 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
   bfd_cache_set_uncloseable (abfd, old_in_format_matches, NULL);
   bfd_unlock ();
   return false;
+}
+
+/*
+FUNCTION
+	bfd_check_format_matches
+
+SYNOPSIS
+	bool bfd_check_format_matches
+	  (bfd *abfd, bfd_format format, char ***matching);
+
+DESCRIPTION
+	Like <<bfd_check_format>>, except when it returns FALSE with
+	<<bfd_errno>> set to <<bfd_error_file_ambiguously_recognized>>.  In that
+	case, if @var{matching} is not NULL, it will be filled in with
+	a NULL-terminated list of the names of the formats that matched,
+	allocated with <<malloc>>.
+	Then the user may choose a format and try again.
+
+	When done with the list that @var{matching} points to, the caller
+	should free it.
+*/
+
+bool
+bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
+{
+  return bfd_check_format_matches_lto (abfd, format, matching, false);
 }
 
 /*
