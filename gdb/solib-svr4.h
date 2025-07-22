@@ -136,6 +136,10 @@ private:
   int update_incremental (svr4_info *info, CORE_ADDR debug_base,
 			  CORE_ADDR lm) const;
   bool update_event_breakpoint (breakpoint *b) const;
+
+  /* Return the base address of the dynamic linker structure for the default
+     namespace.  */
+  CORE_ADDR default_debug_base (svr4_info *info, bool *changed = nullptr) const;
 };
 
 /* solib_ops for ILP32 SVR4 systems.  */
