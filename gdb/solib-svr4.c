@@ -2715,8 +2715,8 @@ svr4_solib_ops::enable_break (svr4_info *info, int from_tty) const
 	 linker.  Warn and drop into the old code.  */
     bkpt_at_symbol:
       warning (_("Unable to find dynamic linker breakpoint function.\n"
-	       "GDB will be unable to debug shared library initializers\n"
-	       "and track explicitly loaded dynamic code."));
+		 "GDB will be unable to debug shared library initializers\n"
+		 "and track explicitly loaded dynamic code."));
     }
 
   /* Scan through the lists of symbols, trying to look up the symbol and
