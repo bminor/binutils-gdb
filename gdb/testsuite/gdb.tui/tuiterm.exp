@@ -102,7 +102,7 @@ proc test_backspace {} {
 
     Term::_move_cursor 1 2
 
-    Term::_ctl_0x08
+    Term::_ctl_0x08 0
     check "backspace one" {
 	"abcdefgh"
 	"ijklmnop"
@@ -111,13 +111,22 @@ proc test_backspace {} {
     } 0 2
 
     # Cursor should not move if it is already at column 0.
-    Term::_ctl_0x08
+    Term::_ctl_0x08 0
     check "backspace 2" {
 	"abcdefgh"
 	"ijklmnop"
 	"qrstuvwx"
 	"yz01234 "
     } 0 2
+
+    # Cursor should wrap to previous line.
+    Term::_ctl_0x08 1
+    check "backspace 3" {
+	"abcdefgh"
+	"ijklmnop"
+	"qrstuvwx"
+	"yz01234 "
+    } 7 1
 }
 
 proc test_linefeed { } {
