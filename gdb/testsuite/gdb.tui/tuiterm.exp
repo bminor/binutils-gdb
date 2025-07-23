@@ -451,6 +451,14 @@ proc test_horizontal_absolute { } {
 	"qrstuvwx"
 	"yz01234 "
     } 7 2
+
+    Term::_csi_`
+    check "horizontal position absolute 1" {
+	"abcdefgh"
+	"ijklmnop"
+	"qrstuvwx"
+	"yz01234 "
+    } 0 2
 }
 
 proc test_cursor_position { } {

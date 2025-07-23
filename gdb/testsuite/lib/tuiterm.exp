@@ -155,6 +155,14 @@ namespace eval Term {
 	}
     }
 
+    # Horizontal Position Absolute.
+    #
+    # https://vt100.net/docs/vt510-rm/HPA.html
+    proc _csi_` {args} {
+	# Same as Cursor Horizontal Absolute.
+	return [Term::_csi_G {*}$args]
+    }
+
     # Cursor Up.
     #
     # https://vt100.net/docs/vt510-rm/CUU.html
@@ -740,7 +748,7 @@ namespace eval Term {
 		_log "wait_for: unsupported escape"
 		error "unsupported escape"
 	    }
-	    -re "^\x1b\\\[(\[0-9;\]*)(\[a-zA-Z@\])" {
+	    -re "^\x1b\\\[(\[0-9;\]*)(\[a-zA-Z@`\])" {
 		set cmd $expect_out(2,string)
 		set params [split $expect_out(1,string) ";"]
 		_log "wait_for: _csi_$cmd <<<$expect_out(1,string)>>>"
