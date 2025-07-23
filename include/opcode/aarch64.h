@@ -945,6 +945,9 @@ enum aarch64_opnd
   AARCH64_OPND_RCPC3_ADDR_POSTIND,	 /* [<Xn|SP>], #<imm>.  */
   AARCH64_OPND_RCPC3_ADDR_PREIND_WB, 	 /* [<Xn|SP>, #<imm>]!.  */
   AARCH64_OPND_RCPC3_ADDR_OFFSET,
+  AARCH64_OPND_GIC,
+  AARCH64_OPND_GICR,
+  AARCH64_OPND_GSB,
 };
 
 /* Qualifier constrains an operand.  It either specifies a variant of an
@@ -1629,6 +1632,9 @@ extern const aarch64_sys_ins_reg aarch64_sys_regs_ic [];
 extern const aarch64_sys_ins_reg aarch64_sys_regs_dc [];
 extern const aarch64_sys_ins_reg aarch64_sys_regs_at [];
 extern const aarch64_sys_ins_reg aarch64_sys_regs_tlbi [];
+extern const aarch64_sys_ins_reg aarch64_sys_ins_gic [];
+extern const aarch64_sys_ins_reg aarch64_sys_ins_gicr [];
+extern const aarch64_sys_ins_reg aarch64_sys_ins_gsb [];
 extern const aarch64_sys_ins_reg aarch64_sys_regs_sr [];
 
 /* Shift/extending operator kinds.

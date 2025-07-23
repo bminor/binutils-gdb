@@ -3843,5 +3843,8 @@ enum aarch64_opcode_idx
   A64_OPID_c121e800_fmul_SME_Zdnx4_SME_Znx4_SME_Zm_17,
   A64_OPID_c120e400_fmul_SME_Zdnx2_SME_Znx2_SME_Zmx2,
   A64_OPID_c121e400_fmul_SME_Zdnx4_SME_Znx4_SME_Zmx4,
+  A64_OPID_d5080000_gic_GIC_Rd,
+  A64_OPID_d5080000_gicr_Rd_GICR,
+  A64_OPID_d5080000_gsb_GSB,
   A64_OPID_MAX,
 };

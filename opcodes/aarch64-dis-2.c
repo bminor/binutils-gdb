@@ -34859,7 +34859,7 @@ aarch64_find_alias_opcode (const aarch64_opcode *opcode)
       value = A64_OPID_d503323f_dsb_BARRIER_DSB_NXS;
       break;
     case A64_OPID_d5080000_sys_UIMM3_OP1_CRn_CRm_UIMM3_OP2_Rt:
-      value = A64_OPID_d50b72e0_trcit_Rt;
+      value = A64_OPID_d5080000_gsb_GSB;
       break;
     case A64_OPID_d5480000_sysp_UIMM3_OP1_CRn_CRm_UIMM3_OP2_Rt_PAIRREG_OR_XZR:
       value = A64_OPID_d5480000_tlbip_SYSREG_TLBIP_Rt_SYS_PAIRREG_OR_XZR;
@@ -35508,6 +35508,15 @@ aarch64_find_next_alias_opcode (const aarch64_opcode *opcode)
     case A64_OPID_d5033c9f_dfb:
       value = A64_OPID_d503309f_dsb_BARRIER;
       break;
+    case A64_OPID_d5080000_gsb_GSB:
+      value = A64_OPID_d5080000_gicr_Rd_GICR;
+      break;
+    case A64_OPID_d5080000_gicr_Rd_GICR:
+      value = A64_OPID_d5080000_gic_GIC_Rd;
+      break;
+    case A64_OPID_d5080000_gic_GIC_Rd:
+      value = A64_OPID_d50b72e0_trcit_Rt;
+      break;
     case A64_OPID_d50b72e0_trcit_Rt:
       value = A64_OPID_d5097280_brb_BRBOP_Rt_IN_SYS_ALIASES;
       break;
@@ -35946,6 +35955,9 @@ aarch64_extract_operand (const aarch64_operand *self,
     case AARCH64_OPND_SYSREG_TLBI:
     case AARCH64_OPND_SYSREG_TLBIP:
     case AARCH64_OPND_SYSREG_SR:
+    case AARCH64_OPND_GIC:
+    case AARCH64_OPND_GICR:
+    case AARCH64_OPND_GSB:
       return aarch64_ext_sysins_op (self, info, code, inst, errors);
     case AARCH64_OPND_BARRIER:
     case AARCH64_OPND_BARRIER_ISB:

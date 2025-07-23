@@ -3410,6 +3410,8 @@ static const aarch64_feature_set aarch64_feature_gcie =
 #define SME2p2_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, 0, SME2p2, OPS, QUALS, \
     F_STRICT | FLAGS, 0, TIED, NULL }
+#define GCIE_INSN(NAME,OPCODE,MASK,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, ic_system, 0, GCIE, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 #define MOPS_CPY_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS) \
   MOPS_INSN (NAME, OPCODE, MASK, 0, \
@@ -7480,6 +7482,11 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2p2_INSN ("fmul", 0xc120e400, 0xff21fc21, sme_size_22_hsd, OP3 (SME_Zdnx2, SME_Znx2, SME_Zmx2), OP_SVE_VVV_HSD, 0, 0),
   SME2p2_INSN ("fmul", 0xc121e400, 0xff21fc63, sme_size_22_hsd, OP3 (SME_Zdnx4, SME_Znx4, SME_Zmx4), OP_SVE_VVV_HSD, 0, 0),
 
+  /* Generalised Interrupt Controller v5 instructions.  */
+  GCIE_INSN ("gic", 0xd5080000, 0xfff80000, OP2 (GIC, Rd), QL_SRC_X, F_ALIAS),
+  GCIE_INSN ("gicr", 0xd5080000, 0xfff80000, OP2 (Rd, GICR), QL_DST_X, F_ALIAS),
+  GCIE_INSN ("gsb", 0xd508001f, 0xfff8001f, OP1 (GSB), QL_IMM_NIL, F_ALIAS),
+
   {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, 0, NULL},
 };
 
@@ -8221,4 +8228,10 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "RCPC3_ADDR_PREIND_WB", 0, F(),					\
       "an address with pre-incrementing with write-back by ammount of stored bytes") \
     Y(ADDRESS, rcpc3_addr_offset, "RCPC3_ADDR_OFFSET", 0, F(FLD_Rn,FLD_imm9), \
-      "an address with an optional 8-bit signed immediate offset")
+      "an address with an optional 8-bit signed immediate offset") \
+    Y(SYSTEM, sysins_op, "GIC", 0, F(), \
+      "Generic Interrupt Controller") \
+    Y(SYSTEM, sysins_op, "GICR", 0, F(), \
+      "Generic Interrupt Controller") \
+    Y(SYSTEM, sysins_op, "GSB", 0, F(), \
+      "Generic Interrupt Controller Synchronization Barrier")

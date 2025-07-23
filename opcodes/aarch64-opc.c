@@ -5019,6 +5019,9 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 		style_reg (styler, aarch64_pstatefields[i].name));
       break;
 
+    case AARCH64_OPND_GIC:
+    case AARCH64_OPND_GICR:
+    case AARCH64_OPND_GSB:
     case AARCH64_OPND_SYSREG_AT:
     case AARCH64_OPND_SYSREG_DC:
     case AARCH64_OPND_SYSREG_IC:
@@ -5391,6 +5394,50 @@ const aarch64_sys_ins_reg aarch64_sys_regs_tlbi[] =
 #undef TLBI_XS_OP
 
     { 0,       CPENS(0,0,0,0), 0, AARCH64_NO_FEATURES }
+};
+
+const aarch64_sys_ins_reg aarch64_sys_ins_gic[] =
+{
+    { "cdaff", CPENS (0,C12,C1,3), 0, AARCH64_NO_FEATURES },
+    { "cddi", CPENS (0,C12,C2,0), 0, AARCH64_NO_FEATURES },
+    { "cddis", CPENS (0,C12,C1,0), 0, AARCH64_NO_FEATURES },
+    { "cden", CPENS (0,C12,C1,1), 0, AARCH64_NO_FEATURES },
+    { "cdeoi", CPENS (0,C12,C1,7), 0, AARCH64_NO_FEATURES },
+    { "cdhm", CPENS (0,C12,C2,1), 0, AARCH64_NO_FEATURES },
+    { "cdpend", CPENS (0,C12,C1,4), 0, AARCH64_NO_FEATURES },
+    { "cdpri", CPENS (0,C12,C1,2), 0, AARCH64_NO_FEATURES },
+    { "cdrcfg", CPENS (0,C12,C1,5), 0, AARCH64_NO_FEATURES },
+    { "vdaff", CPENS (4,C12,C1,3), 0, AARCH64_NO_FEATURES },
+    { "vddi", CPENS (4,C12,C2,0), 0, AARCH64_NO_FEATURES },
+    { "vddis", CPENS (4,C12,C1,0), 0, AARCH64_NO_FEATURES },
+    { "vden", CPENS (4,C12,C1,1), 0, AARCH64_NO_FEATURES },
+    { "vdhm", CPENS (4,C12,C2,1), 0, AARCH64_NO_FEATURES },
+    { "vdpend", CPENS (4,C12,C1,4), 0, AARCH64_NO_FEATURES },
+    { "vdpri", CPENS (4,C12,C1,2), 0, AARCH64_NO_FEATURES },
+    { "vdrcfg", CPENS (4,C12,C1,5), 0, AARCH64_NO_FEATURES },
+    { "ldaff", CPENS (6,C12,C1,3), 0, AARCH64_NO_FEATURES },
+    { "lddi", CPENS (6,C12,C2,0), 0, AARCH64_NO_FEATURES },
+    { "lddis", CPENS (6,C12,C1,0), 0, AARCH64_NO_FEATURES },
+    { "lden", CPENS (6,C12,C1,1), 0, AARCH64_NO_FEATURES },
+    { "ldhm", CPENS (6,C12,C2,1), 0, AARCH64_NO_FEATURES },
+    { "ldpend", CPENS (6,C12,C1,4), 0, AARCH64_NO_FEATURES },
+    { "ldpri", CPENS (6,C12,C1,2), 0, AARCH64_NO_FEATURES },
+    { "ldrcfg", CPENS (6,C12,C1,5), 0, AARCH64_NO_FEATURES },
+    { 0, CPENS (0,0,0,0), 0, AARCH64_NO_FEATURES }
+};
+
+const aarch64_sys_ins_reg aarch64_sys_ins_gicr[] =
+{
+    { "cdia", CPENS (0,C12,C3,0), 0, AARCH64_NO_FEATURES },
+    { "cdnmia", CPENS (0,C12,C3,1), 0, AARCH64_NO_FEATURES },
+    { 0, CPENS (0,0,0,0), 0, AARCH64_NO_FEATURES }
+};
+
+const aarch64_sys_ins_reg aarch64_sys_ins_gsb[] =
+{
+    { "sys", CPENS (0,C12,0,0), 0, AARCH64_NO_FEATURES },
+    { "ack", CPENS (0,C12,0,1), 0, AARCH64_NO_FEATURES },
+    { 0, CPENS (0,0,0,0), 0, AARCH64_NO_FEATURES }
 };
 
 const aarch64_sys_ins_reg aarch64_sys_regs_sr[] =

@@ -364,6 +364,9 @@ const struct aarch64_operand aarch64_operands[] =
   {AARCH64_OPND_CLASS_ADDRESS, "RCPC3_ADDR_POSTIND", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "an address with post-incrementing by ammount of loaded bytes"},
   {AARCH64_OPND_CLASS_ADDRESS, "RCPC3_ADDR_PREIND_WB", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "an address with pre-incrementing with write-back by ammount of stored bytes"},
   {AARCH64_OPND_CLASS_ADDRESS, "RCPC3_ADDR_OFFSET", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn,FLD_imm9}, "an address with an optional 8-bit signed immediate offset"},
+  {AARCH64_OPND_CLASS_SYSTEM, "GIC", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "Generic Interrupt Controller"},
+  {AARCH64_OPND_CLASS_SYSTEM, "GICR", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "Generic Interrupt Controller"},
+  {AARCH64_OPND_CLASS_SYSTEM, "GSB", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {}, "Generic Interrupt Controller Synchronization Barrier"},
   {AARCH64_OPND_CLASS_NIL, "", 0, {0}, "DUMMY"},
 };
 

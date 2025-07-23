@@ -564,6 +564,9 @@ static htab_t aarch64_barrier_opt_hsh;
 static htab_t aarch64_nzcv_hsh;
 static htab_t aarch64_pldop_hsh;
 static htab_t aarch64_hint_opt_hsh;
+static htab_t aarch64_sys_ins_gic_hsh;
+static htab_t aarch64_sys_ins_gicr_hsh;
+static htab_t aarch64_sys_ins_gsb_hsh;
 
 /* Stuff needed to resolve the label ambiguity
    As:
@@ -8079,6 +8082,22 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SYSREG_TLBIP:
 	  inst.base.operands[i].sysins_op =
 	    parse_sys_ins_reg (&str, aarch64_sys_regs_tlbi_hsh, true);
+	  goto sys_reg_ins;
+
+	case AARCH64_OPND_GIC:
+	  inst.base.operands[i].sysins_op =
+	    parse_sys_ins_reg (&str, aarch64_sys_ins_gic_hsh, false);
+	  goto sys_reg_ins;
+
+	case AARCH64_OPND_GICR:
+	  inst.base.operands[i].sysins_op =
+	    parse_sys_ins_reg (&str, aarch64_sys_ins_gicr_hsh, false);
+	  goto sys_reg_ins;
+
+	case AARCH64_OPND_GSB:
+	  inst.base.operands[i].sysins_op =
+	    parse_sys_ins_reg (&str, aarch64_sys_ins_gsb_hsh, false);
+
 	sys_reg_ins:
 	  if (inst.base.operands[i].sysins_op == NULL)
 	    {
@@ -10412,6 +10431,9 @@ md_begin (void)
   aarch64_nzcv_hsh = str_htab_create ();
   aarch64_pldop_hsh = str_htab_create ();
   aarch64_hint_opt_hsh = str_htab_create ();
+  aarch64_sys_ins_gic_hsh = str_htab_create ();
+  aarch64_sys_ins_gicr_hsh = str_htab_create ();
+  aarch64_sys_ins_gsb_hsh = str_htab_create ();
 
   fill_instruction_hash_table ();
 
@@ -10534,6 +10556,18 @@ md_begin (void)
 	checked_hash_insert (aarch64_hint_opt_hsh, upper_name,
 			     aarch64_hint_options + i);
     }
+
+  for (i = 0; aarch64_sys_ins_gic[i].name != NULL; i++)
+    sysreg_hash_insert (aarch64_sys_ins_gic_hsh, aarch64_sys_ins_gic[i].name,
+			aarch64_sys_ins_gic + i);
+
+  for (i = 0; aarch64_sys_ins_gicr[i].name != NULL; i++)
+    sysreg_hash_insert (aarch64_sys_ins_gicr_hsh, aarch64_sys_ins_gicr[i].name,
+			aarch64_sys_ins_gicr + i);
+
+  for (i = 0; aarch64_sys_ins_gsb[i].name != NULL; i++)
+    sysreg_hash_insert (aarch64_sys_ins_gsb_hsh, aarch64_sys_ins_gsb[i].name,
+			aarch64_sys_ins_gsb + i);
 
   /* Set the cpu variant based on the command-line options.  */
   if (!mcpu_cpu_opt)

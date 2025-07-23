@@ -1428,6 +1428,9 @@ aarch64_ext_sysins_op (const aarch64_operand *self ATTRIBUTE_UNUSED,
 
   switch (info->type)
     {
+    case AARCH64_OPND_GIC: sysins_ops = aarch64_sys_ins_gic; break;
+    case AARCH64_OPND_GICR: sysins_ops = aarch64_sys_ins_gicr; break;
+    case AARCH64_OPND_GSB: sysins_ops = aarch64_sys_ins_gsb; break;
     case AARCH64_OPND_SYSREG_AT: sysins_ops = aarch64_sys_regs_at; break;
     case AARCH64_OPND_SYSREG_DC: sysins_ops = aarch64_sys_regs_dc; break;
     case AARCH64_OPND_SYSREG_IC: sysins_ops = aarch64_sys_regs_ic; break;
