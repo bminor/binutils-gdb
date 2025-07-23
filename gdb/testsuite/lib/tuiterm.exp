@@ -631,6 +631,11 @@ namespace eval Term {
     #
     # https://vt100.net/docs/vt510-rm/SGR.html
     proc _csi_m {args} {
+	if { [llength $args] == 0 } {
+	    # Apply default.
+	    set args [list 0]
+	}
+
 	_log_cur "Select Graphic Rendition ([join $args {, }])" {
 	    variable _attrs
 
