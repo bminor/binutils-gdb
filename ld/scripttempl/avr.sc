@@ -186,7 +186,9 @@ SECTIONS
   /* Internal text space or external memory.  */
   .text ${RELOCATING-0} :
   {
-    ${RELOCATING+*(.vectors)
+EOF
+test -z "${RELOCATING}" || cat <<EOF
+    *(.vectors)
     KEEP(*(.vectors))
 
     /* For data that needs to reside in the lower 64k of progmem.
@@ -197,7 +199,7 @@ SECTIONS
     *(.progmem.*)
     __progmem_end = . ;
     ASSERT (__progmem_start == __progmem_end || __progmem_end <= 0x10000,
-            \".progmem section exceeds 0x10000\");
+	    ".progmem section exceeds 0x10000");
 
     . = ALIGN(2);
     __trampolines_start = . ;
@@ -210,8 +212,9 @@ SECTIONS
 
     /* For code that needs to reside in the lower 128k progmem.  */
     *(.lowtext)
-    *(.lowtext*)}
-
+    *(.lowtext*)
+EOF
+cat <<EOF
     ${CONSTRUCTING+ __ctors_start = . ; }
     ${CONSTRUCTING+ *(.ctors) }
     ${CONSTRUCTING+ __ctors_end = . ; }
@@ -365,21 +368,20 @@ EOF
 fi
 
 if test -n "${HAVE_FLMAP}"; then
-    cat <<EOF
-
-${RELOCATING+
+test -z "${RELOCATING}" || cat <<EOF
 __flmap_init_label = DEFINED(__flmap_init_start) ? __flmap_init_start : 0 ;
 /* User can specify position of .rodata in flash (LMA) by supplying
    __RODATA_FLASH_START__ or __flmap, where the former takes precedence. */
 __RODATA_FLASH_START__ = DEFINED(__RODATA_FLASH_START__)
    ? __RODATA_FLASH_START__
    : DEFINED(__flmap) ? __flmap * 32K : ${RODATA_FLASH_START};
-ASSERT (__RODATA_FLASH_START__ % 32K == 0, \"__RODATA_FLASH_START__ must be a multiple of 32 KiB\")
+ASSERT (__RODATA_FLASH_START__ % 32K == 0, "__RODATA_FLASH_START__ must be a multiple of 32 KiB")
 __flmap = ${FLMAP_MASK} & (__RODATA_FLASH_START__ >> 15);
 __RODATA_FLASH_START__ = __flmap << 15;
 __rodata_load_start = MAX (__data_load_end, __RODATA_FLASH_START__);
-__rodata_start = __RODATA_ORIGIN__ + __rodata_load_start - __RODATA_FLASH_START__;}
-
+__rodata_start = __RODATA_ORIGIN__ + __rodata_load_start - __RODATA_FLASH_START__;
+EOF
+cat << EOF
   .rodata ${RELOCATING+ __rodata_start} ${RELOCATING-0} : ${RELOCATING+ AT (__rodata_load_start)}
   {
     *(.rodata)
