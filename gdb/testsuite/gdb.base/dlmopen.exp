@@ -116,7 +116,7 @@ proc check_dso_count { dso num } {
 
     set count 0
     gdb_test_multiple "info shared" "info shared" {
-	-re "$hex  $hex  \(\[\[$::decimal\]\]\\s+\)\?Yes \[^\r\n\]*$dso\r\n" {
+	-re "$hex  $hex  \($::decimal\\s+\)\?Yes \[^\r\n\]*$dso\r\n" {
 	    # use longer form so debug remote does not interfere
 	    set count [expr $count + 1]
 	    exp_continue
@@ -243,7 +243,7 @@ proc get_dyld_info {} {
     set dyld_count 0
     set dyld_start_addr ""
     gdb_test_multiple "info sharedlibrary" "" {
-	-re "From\\s+To\\s+\(NS\\s+\)?Syms\\s+Read\\s+Shared Object Library\r\n" {
+	-re "From\\s+To\\s+\(Linker NS\\s+\)?Syms\\s+Read\\s+Shared Object Library\r\n" {
 	    exp_continue
 	}
 	-re "^($::hex)\\s+$::hex\\s+\(\#$::decimal\\s+\)?\[^/\]+(/\[^\r\n\]+)\r\n" {

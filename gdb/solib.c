@@ -1042,7 +1042,7 @@ print_solib_list_table (std::vector<const solib *> solib_list,
     uiout->table_header (addr_width - 1, ui_left, "from", "From");
     uiout->table_header (addr_width - 1, ui_left, "to", "To");
     if (print_namespace)
-      uiout->table_header (5, ui_left, "namespace", "NS");
+      uiout->table_header (9, ui_left, "namespace", "Linker NS");
     uiout->table_header (12 - 1, ui_left, "syms-read", "Syms Read");
     uiout->table_header (0, ui_noalign, "name", "Shared Object Library");
 
@@ -1070,7 +1070,7 @@ print_solib_list_table (std::vector<const solib *> solib_list,
 	  {
 	    try
 	      {
-		uiout->field_fmt ("namespace", "[[%d]]", ops->find_solib_ns (*so));
+		uiout->field_fmt ("namespace", "%d", ops->find_solib_ns (*so));
 	      }
 	    catch (const gdb_exception_error &er)
 	      {
@@ -1168,7 +1168,7 @@ info_linker_namespace_command (const char *pattern, int from_tty)
 
   if (pattern == nullptr || pattern[0] == '\0')
     {
-      uiout->message (_("There are %d linker namespaces loaded\n"),
+      uiout->message (_("There are %d linker namespaces loaded.\n"),
 		      ops->num_active_namespaces ());
 
       int printed = 0;
@@ -1205,27 +1205,26 @@ info_linker_namespace_command (const char *pattern, int from_tty)
 	(std::make_pair (ns, ops->get_solibs_in_ns (ns)));
     }
 
-  bool ns_separator = false;
-
   for (const auto &[ns, solibs_to_print] : all_solibs_to_print)
     {
-      if (ns_separator)
-	uiout->message ("\n\n");
-      else
-	ns_separator = true;
+      uiout->message ("\n");
 
       if (solibs_to_print.size () == 0)
 	{
-	  uiout->message (_("Linker namespace [[%d]] is not active.\n"), ns);
+	  uiout->message (_("Linker namespace %d is not active.\n"), ns);
 	  /* If we got here, a specific namespace was requested, so there
 	     will only be one vector.  We can leave early.  */
 	  break;
 	}
-      uiout->message
-	(_("There are %zu libraries loaded in linker namespace [[%d]]\n"),
-	 solibs_to_print.size (), ns);
-      uiout->message
-	(_("Displaying libraries for linker namespace [[%d]]:\n"), ns);
+
+      if (solibs_to_print.size () == 1)
+	uiout->message
+	  (_("1 library loaded in linker namespace %d:\n"), ns);
+      else
+	uiout->message
+	  (_("%zu libraries loaded in linker namespace %d:\n"),
+	   solibs_to_print.size (), ns);
+
 
       print_solib_list_table (solibs_to_print, false);
     }
