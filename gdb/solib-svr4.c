@@ -1115,7 +1115,7 @@ static const struct gdb_xml_attribute svr4_library_attributes[] =
   { "lm", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
   { "l_addr", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
   { "l_ld", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
-  { "lmid", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+  { "lmid", GDB_XML_AF_OPTIONAL, gdb_xml_parse_attr_ulongest, NULL },
   { NULL, GDB_XML_AF_NONE, NULL, NULL }
 };
 
