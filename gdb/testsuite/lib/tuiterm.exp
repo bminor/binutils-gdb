@@ -251,7 +251,7 @@ namespace eval Term {
 	    variable _cur_col
 	    variable _cols
 
-	    set _cur_col [expr {min ($arg - 1, $_cols)}]
+	    set _cur_col [expr {min ($arg, $_cols)} - 1]
 	}
     }
 
