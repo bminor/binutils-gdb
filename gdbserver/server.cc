@@ -1018,7 +1018,7 @@ handle_general_set (char *own_buf)
 	    });
 	}
 
-      for (const auto [thread, options] : set_options)
+      for (const auto &[thread, options] : set_options)
 	if (thread->thread_options != options)
 	  {
 	    threads_debug_printf ("[options for %s are now %s]\n",
