@@ -116,6 +116,12 @@ static const struct probe_info probe_info[] =
 
 #define NUM_PROBES ARRAY_SIZE (probe_info)
 
+static lm_info_svr4 &
+get_lm_info_svr4 (const solib &solib)
+{
+  return gdb::checked_static_cast<lm_info_svr4 &> (*solib.lm_info);
+}
+
 /* Return non-zero if GDB_SO_NAME and INFERIOR_SO_NAME represent
    the same shared library.  */
 
@@ -165,13 +171,11 @@ svr4_same (const char *gdb_name, const char *inferior_name,
 bool
 svr4_solib_ops::same (const solib &gdb, const solib &inferior) const
 {
-  auto *lmg
-    = gdb::checked_static_cast<const lm_info_svr4 *> (gdb.lm_info.get ());
-  auto *lmi
-    = gdb::checked_static_cast<const lm_info_svr4 *> (inferior.lm_info.get ());
+  auto &lmg = get_lm_info_svr4 (gdb);
+  auto &lmi = get_lm_info_svr4 (inferior);
 
   return svr4_same (gdb.original_name.c_str (),
-		    inferior.original_name.c_str (), *lmg, *lmi);
+		    inferior.original_name.c_str (), lmg, lmi);
 }
 
 lm_info_svr4_up
@@ -218,19 +222,19 @@ svr4_solib_ops::has_lm_dynamic_from_link_map () const
 CORE_ADDR
 svr4_solib_ops::lm_addr_check (const solib &so, bfd *abfd) const
 {
-  auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so.lm_info.get ());
+  auto &li = get_lm_info_svr4 (so);
 
-  if (!li->l_addr_p)
+  if (!li.l_addr_p)
     {
       struct bfd_section *dyninfo_sect;
       CORE_ADDR l_addr, l_dynaddr, dynaddr;
 
-      l_addr = li->l_addr_inferior;
+      l_addr = li.l_addr_inferior;
 
       if (!abfd || !this->has_lm_dynamic_from_link_map ())
 	goto set_addr;
 
-      l_dynaddr = li->l_ld;
+      l_dynaddr = li.l_ld;
 
       dyninfo_sect = bfd_get_section_by_name (abfd, ".dynamic");
       if (dyninfo_sect == NULL)
@@ -314,11 +318,11 @@ svr4_solib_ops::lm_addr_check (const solib &so, bfd *abfd) const
 	}
 
     set_addr:
-      li->l_addr = l_addr;
-      li->l_addr_p = 1;
+      li.l_addr = l_addr;
+      li.l_addr_p = 1;
     }
 
-  return li->l_addr;
+  return li.l_addr;
 }
 
 struct svr4_so
@@ -1007,10 +1011,7 @@ svr4_free_objfile_observer (struct objfile *objfile)
 void
 svr4_solib_ops::clear_so (const solib &so) const
 {
-  auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so.lm_info.get ());
-
-  if (li != NULL)
-    li->l_addr_p = 0;
+  get_lm_info_svr4 (so).l_addr_p = 0;
 }
 
 /* Create the solib objects equivalent to the svr4_sos in SOS.  */
@@ -1509,9 +1510,9 @@ svr4_solib_ops::current_sos () const
 		[ 9] .dynamic DYNAMIC ffffffffff700580 000580 0000f0
 	  */
 
-	  auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so->lm_info.get ());
+	  const auto &li = get_lm_info_svr4 (*so);
 
-	  if (vsyscall_range.contains (li->l_ld))
+	  if (vsyscall_range.contains (li.l_ld))
 	    {
 	      so = sos.erase (so);
 	      break;
@@ -1543,12 +1544,7 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
      of shared libraries.  */
   for (const solib &so : current_program_space->solibs ())
     if (so.objfile == objfile)
-      {
-	auto *li
-	  = gdb::checked_static_cast<lm_info_svr4 *> (so.lm_info.get ());
-
-	return li->lm_addr;
-      }
+      return get_lm_info_svr4 (so).lm_addr;
 
   /* Not found!  */
   return 0;
@@ -1632,8 +1628,9 @@ musl_link_map_to_tls_module_id (CORE_ADDR lm_addr)
       if (has_thread_local_section (so))
 	mod_id++;
 
-      auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so.lm_info.get ());
-      if (li->lm_addr == lm_addr)
+      const auto &li = get_lm_info_svr4 (so);
+
+      if (li.lm_addr == lm_addr)
 	return mod_id;
     }
   return 0;
@@ -3584,12 +3581,11 @@ find_debug_base_for_solib (const solib *solib)
   svr4_info *info = get_svr4_info (solib->objfile->pspace ());
   gdb_assert (info != nullptr);
 
-  auto *lm_info
-    = gdb::checked_static_cast<const lm_info_svr4 *> (solib->lm_info.get ());
+  auto &lm_info = get_lm_info_svr4 (*solib);
 
   for (const auto &[debug_base, sos] : info->solib_lists)
     for (const svr4_so &so : sos)
-      if (svr4_same (solib->original_name.c_str (), so.name.c_str (), *lm_info,
+      if (svr4_same (solib->original_name.c_str (), so.name.c_str (), lm_info,
 		     *so.lm_info))
 	return debug_base;
 
@@ -3664,8 +3660,7 @@ svr4_iterate_over_objfiles_in_search_order
 std::optional<CORE_ADDR>
 svr4_solib_ops::find_solib_addr (solib &so) const
 {
-  auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so.lm_info.get ());
-  return li->l_addr_inferior;
+  return get_lm_info_svr4 (so).l_addr_inferior;
 }
 
 int
@@ -3715,15 +3710,14 @@ svr4_solib_ops::get_solibs_in_ns (int nsid) const
 
   for (const solib &so: current_program_space->solibs ())
     {
-      auto *lm_inferior
-	= gdb::checked_static_cast<const lm_info_svr4 *> (so.lm_info.get ());
+      auto &lm_inferior = get_lm_info_svr4 (so);
 
       /* This is inspired by the svr4_same, by finding the svr4_so object
 	 in the map, and then double checking if the lm_info is considered
 	 the same.  */
       if (namespace_solibs.count (so.original_name) > 0
-	  && namespace_solibs[so.original_name]->l_addr_inferior
-	      == lm_inferior->l_addr_inferior)
+	  && (namespace_solibs[so.original_name]->l_addr_inferior
+	      == lm_inferior.l_addr_inferior))
 	{
 	  ns_solibs.push_back (&so);
 	  /* Remove the SO from the map, so that we don't end up
