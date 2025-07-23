@@ -2898,6 +2898,7 @@ This can be changed using \"set listsize\", and the current value\n\
 can be shown using \"show listsize\"."));
 
   add_com_alias ("l", list_cmd, class_files, 1);
+  set_cmd_completer(list_cmd, location_completer);
 
   c = add_com ("disassemble", class_vars, disassemble_command, _("\
 Disassemble a specified section of memory.\n\
