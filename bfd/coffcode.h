@@ -909,7 +909,9 @@ fill_comdat_hash (bfd *abfd)
   if (! _bfd_coff_get_external_symbols (abfd))
     return true;
 
-  esymstart = esym = (bfd_byte *) obj_coff_external_syms (abfd);
+  esymstart = esym = obj_coff_external_syms (abfd);
+  if (esym == NULL)
+    return true;
   esymend = esym + obj_raw_syment_count (abfd) * bfd_coff_symesz (abfd);
 
   for (struct internal_syment isym;
