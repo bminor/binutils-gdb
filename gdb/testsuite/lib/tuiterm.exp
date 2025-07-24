@@ -45,9 +45,16 @@ namespace eval Term {
 	set orig_cur_row $_cur_row
 	set orig_cur_col $_cur_col
 
-	uplevel $body
+	set code [catch {uplevel $body} result]
 
 	_log "$what, cursor: ($orig_cur_row, $orig_cur_col) -> ($_cur_row, $_cur_col)"
+
+	if { $code == 1 } {
+	    global errorInfo errorCode
+	    return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+	} else {
+	    return -code $code $result
+	}
     }
 
     # If ARG is empty, return DEF: otherwise ARG.  This is useful for
