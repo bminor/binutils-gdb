@@ -56,6 +56,14 @@ Changes in 2.45:
 * For LoongArch, warn about negative right-shift amounts and
   division/modulus-by-zero when evaluating expressions.
 
+* Add support for most Armv9.6 extensions, enabled by the option
+  `-march=armv9.6-a' and extensions '+cmpbr', '+f8f16mm', '+f8f32mm',
+  '+fprcvt', '+lsfe', '+lsui', '+occmo', '+pops', '+sme2p2', '+ssve-aes',
+  '+sve-aes', '+sve-aes2', '+sve-bfscale', '+sve-f16f32mm' and '+sve2p2'.
+
+* AArch64 system registers can now be assembled without restriction.  The
+  previous behavior can be enabled with '-menable-sysreg-checking'.
+
 Changes in 2.44:
 
 * Add support for the x86 Intel Diamond Rapids AMX instructions, including
