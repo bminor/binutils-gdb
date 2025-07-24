@@ -1009,10 +1009,10 @@ namespace eval Term {
 	return $res
     }
 
-    # Return the text of screen line N.  Lines are 0-based.  If C is given,
-    # stop before column C.  Columns are also zero-based.  If ATTRS, annotate
-    # with attributes.
-    proc get_line_1 {n c attrs} {
+    # Return the text of screen line N.  Lines are 0-based.  Start at column
+    # X.  If C is non-empty, stop before column C.  Columns are also
+    # zero-based.  If ATTRS, annotate with attributes.
+    proc get_string {n x c {attrs 0}} {
 	variable _rows
 	# This can happen during resizing, if the cursor seems to
 	# temporarily be off-screen.
@@ -1024,7 +1024,6 @@ namespace eval Term {
 	variable _cols
 	variable _chars
 	set c [_default $c $_cols]
-	set x 0
 	if { $attrs } {
 	    _reset_attrs line_attrs
 	}
@@ -1042,6 +1041,20 @@ namespace eval Term {
 	    append result [apply_attrs line_attrs $char_attrs]
 	}
 	return $result
+    }
+
+    # Return the text of screen line N.  Lines are 0-based.  Start at column
+    # X.  If C is non-empty, stop before column C.  Columns are also
+    # zero-based. Annotate with attributes.
+    proc get_string_with_attrs { n x c } {
+	return [get_string $n $x $c 1]
+    }
+
+    # Return the text of screen line N.  Lines are 0-based.  If C is
+    # non-empty, stop before column C.  Columns are also zero-based. If
+    # ATTRS, annotate with attributes.
+    proc get_line_1 {n c attrs} {
+	return [get_string $n 0 $c $attrs]
     }
 
     # Return the text of screen line N, without attributes.  Lines are
