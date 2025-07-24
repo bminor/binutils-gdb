@@ -197,6 +197,8 @@ automatically cause those extensions to be disabled.
  @tab Enable 8-bit floating-point matrix multiply-accumulate to half-precision instructions.
 @item @code{f8f32mm} @tab @code{simd} @code{fp}
  @tab Enable 8-bit floating-point matrix multiply-accumulate to single-precision instructions.
+@item @code{faminmax} @tab @code{simd}
+ @tab Enable the famin and famax instructions.
 @item @code{fcma} @tab @code{fp16}, @code{simd}
  @tab Enable the complex number SIMD extensions.
 @item @code{flagm} @tab
@@ -243,7 +245,7 @@ automatically cause those extensions to be disabled.
  @tab Enable Large System Float Extension.
 @item @code{lsui} @tab
  @tab Enable Unprivileged Load/Store instructions.
-@item @code{lut} @tab
+@item @code{lut} @tab @code{simd}
  @tab Enable the Lookup Table (LUT) extension.
 @item @code{memtag} @tab
  @tab Enable Armv8.5-A Memory Tagging Extensions.
@@ -258,9 +260,9 @@ automatically cause those extensions to be disabled.
 @item @code{pops} @tab
  @tab Enable Point of Physical Storage.
 @item @code{predres} @tab
- @tab Enable the Execution and Data and Prediction instructions.
+ @tab Enable execution and data prediction restriction instructions.
 @item @code{predres2} @tab @code{predres}
- @tab Enable Prediction instructions.
+ @tab Enable additional prediction restriction instructions.
 @item @code{profile} @tab
  @tab Enable statistical profiling extensions.
 @item @code{ras} @tab
@@ -297,6 +299,8 @@ automatically cause those extensions to be disabled.
  @tab Enable the SME F8F16 Extension.
 @item @code{sme-f8f32} @tab @code{sme2}, @code{fp8}
  @tab Enable the SME F8F32 Extension.
+@item @code{sme-f16f16} @tab @code{sme2}
+ @tab Enable the SME2 F16F16 Extension.
 @item @code{sme-f64f64} @tab @code{sme}
  @tab Enable SME F64F64 Extension.
 @item @code{sme-i16i64} @tab @code{sme}
@@ -311,10 +315,10 @@ automatically cause those extensions to be disabled.
  @tab Enable SME2.2.
 @item @code{ssbs} @tab
  @tab Enable Speculative Store Bypassing Safe state read and write.
-@item @code{ssve-fp8dot2} @tab @code{sme2}, @code{fp8}
- @tab Enable the Streaming SVE FP8 2-way dot product instructions.
 @item @code{ssve-aes} @tab @code{sme2}, @code{sve-aes}
  @tab Enable SVE AES instructions in streaming mode.
+@item @code{ssve-fp8dot2} @tab @code{sme2}, @code{fp8}
+ @tab Enable the Streaming SVE FP8 2-way dot product instructions.
 @item @code{ssve-fp8dot4} @tab @code{sme2}, @code{fp8}
  @tab Enable the Streaming SVE FP8 4-way dot product instructions.
 @item @code{ssve-fp8fma} @tab @code{sme2}, @code{fp8}
@@ -322,7 +326,7 @@ automatically cause those extensions to be disabled.
 @item @code{sve} @tab @code{fcma}
  @tab Enable the Scalable Vector Extension.
 @item @code{sve-aes} @tab @code{aes}
- @tab Enable the SVE PMULL128 instructions.
+ @tab Enable the SVE2 AES and PMULL Extensions.
 @item @code{sve-aes2} @tab
 @tab Enable the SVE-AES2 extension.
 @item @code{sve-b16b16} @tab
@@ -333,7 +337,7 @@ automatically cause those extensions to be disabled.
 @tab Enable the SVE_F16F32MM extension.
 @item @code{sve2} @tab @code{sve}
  @tab Enable SVE2.
-@item @code{sve2-aes} @tab @code{sve2}, @code{aes}
+@item @code{sve2-aes} @tab @code{sve2}, @code{sve-aes}
  @tab Enable the SVE2 AES and PMULL Extensions.
 @item @code{sve2-bitperm} @tab @code{sve2}
  @tab Enable the SVE2 BITPERM Extension.
@@ -353,8 +357,6 @@ automatically cause those extensions to be disabled.
  @tab Enable @code{wfet} and @code{wfit} instructions.
 @item @code{xs} @tab
  @tab Enable the XS memory attribute extension.
-@item @code{sme-f16f16} @tab
- @tab Enable the SME2 F16F16 Extension.
 @end multitable
 
 @multitable @columnfractions .20 .80
