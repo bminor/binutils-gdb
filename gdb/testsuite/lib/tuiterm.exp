@@ -92,7 +92,7 @@ namespace eval Term {
 
     # Return 1 if tuiterm has the bw/auto_left_margin enabled.
     proc _have_bw {} {
-	return 0
+	return [string equal $Term::_TERM "ansiw"]
     }
 
     # Backspace.
@@ -890,8 +890,16 @@ namespace eval Term {
     # BODY.
     proc with_tuiterm {rows cols body} {
 	global env stty_init
+	variable _TERM
 	save_vars {env(TERM) env(NO_COLOR) stty_init} {
-	    setenv TERM ansi
+	    if { [ishost *-*-*bsd*] } {
+		setenv TERM ansiw
+	    } else {
+		setenv TERM ansi
+	    }
+	    # Save active TERM variable.
+	    set Term::_TERM $env(TERM)
+
 	    setenv NO_COLOR ""
 	    _setup $rows $cols
 
