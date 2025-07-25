@@ -493,10 +493,7 @@ show_maint_console_translation_mode (struct ui_file *file, int from_tty,
 	      console_translation_mode.c_str ());
 }
 
-extern void _initialize_mingw_hdep ();
-
-void
-_initialize_mingw_hdep ()
+INIT_GDB_FILE (mingw_hdep)
 {
   add_setshow_string_cmd ("console-translation-mode",
 			  class_maintenance,
