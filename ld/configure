@@ -3362,6 +3362,19 @@ fi
 
 
 
+case $target in
+  *-*-solaris2*)
+    case "$SHELL" in
+      *bash*)
+        ;;
+      *)
+        # PR 32580: Force use of bash to avoid corrupt linker scripts.
+        SHELL=/bin/bash
+        ;;
+    esac
+    ;;
+esac
+
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -11501,7 +11514,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11504 "configure"
+#line 11517 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11607,7 +11620,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11610 "configure"
+#line 11623 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
