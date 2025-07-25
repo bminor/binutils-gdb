@@ -15,6 +15,8 @@
 
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
+package require Tcl 8.5
+
 # Generic gdb subroutines that should work for any target.  If these
 # need to be modified for any target, it can be done with a variable
 # or by passing arguments.
@@ -1693,23 +1695,6 @@ proc tcl_version_at_least { major minor {patchlevel 0} } {
 		  $tcl_version_major \
 		  $tcl_version_minor \
 		  $tcl_version_patchlevel]]
-}
-
-if { [tcl_version_at_least 8 5] == 0 } {
-    # lrepeat was added in tcl 8.5.  Only add if missing.
-    proc lrepeat { n element } {
-        if { [string is integer -strict $n] == 0 } {
-            error "expected integer but got \"$n\""
-        }
-        if { $n < 0 } {
-            error "bad count \"$n\": must be integer >= 0"
-        }
-        set res [list]
-        for {set i 0} {$i < $n} {incr i} {
-            lappend res $element
-        }
-        return $res
-    }
 }
 
 if { [tcl_version_at_least 8 6] == 0 } {
