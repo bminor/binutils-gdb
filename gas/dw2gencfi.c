@@ -2596,10 +2596,13 @@ cfi_finish (void)
       flag_traditional_format = save_flag_traditional_format;
     }
 
-  /* Generate SFrame section if the user specifies:
-	- the command line option to gas, or
-	- .sframe in the .cfi_sections directive.  */
-  if (flag_gen_sframe || (all_cfi_sections & CFI_EMIT_sframe) != 0)
+  /* Generate SFrame section if the user:
+	- enables via the command line option, or
+	- specifies .sframe in the .cfi_sections directive and does not disable
+	  via the command line.  */
+  if (flag_gen_sframe == GEN_SFRAME_ENABLED
+      || ((all_cfi_sections & CFI_EMIT_sframe) != 0
+	  && flag_gen_sframe != GEN_SFRAME_DISABLED))
     {
 #ifdef support_sframe_p
       if (support_sframe_p () && !SUPPORT_FRAME_LINKONCE)

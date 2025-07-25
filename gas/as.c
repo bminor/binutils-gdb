@@ -1042,14 +1042,14 @@ This program has absolutely no warranty.\n"));
 	  if (optarg)
 	    {
 	      if (strcasecmp (optarg, "no") == 0)
-		flag_gen_sframe = 0;
+		flag_gen_sframe = GEN_SFRAME_DISABLED;
 	      else if (strcasecmp (optarg, "yes") == 0)
-		flag_gen_sframe = 1;
+		flag_gen_sframe = GEN_SFRAME_ENABLED;
 	      else
 		as_fatal (_("Invalid --gsframe option: `%s'"), optarg);
 	    }
 	  else
-	    flag_gen_sframe = 1;
+	    flag_gen_sframe = GEN_SFRAME_ENABLED;
 	  break;
 
 #endif /* OBJ_ELF */
