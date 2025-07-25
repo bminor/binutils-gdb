@@ -55,6 +55,20 @@ static void child_terminal_ours_1 (target_terminal_state);
 
 static struct serial *stdin_serial;
 
+/* See terminal.h.  */
+
+scoped_gdb_ttystate::scoped_gdb_ttystate ()
+{
+  m_ttystate = serial_get_tty_state (stdin_serial);
+}
+
+/* See terminal.h.  */
+
+scoped_gdb_ttystate::~scoped_gdb_ttystate ()
+{
+  serial_set_tty_state (stdin_serial, m_ttystate);
+}
+
 /* Terminal related info we need to keep track of.  Each inferior
    holds an instance of this structure --- we save it whenever the
    corresponding inferior stops, and restore it to the terminal when
@@ -161,6 +175,15 @@ set_initial_gdb_ttystate (void)
       our_terminal_info.process_group = tcgetpgrp (0);
 #endif
     }
+}
+
+/* See terminal.h.  */
+
+void
+restore_initial_gdb_ttystate ()
+{
+  if (initial_gdb_ttystate != nullptr)
+    serial_set_tty_state (stdin_serial, initial_gdb_ttystate);
 }
 
 /* Does GDB have a terminal (on stdin)?  */

@@ -51,6 +51,7 @@
 #include "cli/cli-cmds.h"
 #include "cli/cli-style.h"
 #include "cli/cli-utils.h"
+#include "terminal.h"
 
 #include "extension.h"
 #include "gdbsupport/pathstuff.h"
@@ -949,6 +950,9 @@ shell_escape (const char *arg, int from_tty)
 static void
 shell_command (const char *arg, int from_tty)
 {
+  scoped_gdb_ttystate save_restore_gdb_ttystate;
+  restore_initial_gdb_ttystate ();
+
   shell_escape (arg, from_tty);
 }
 
