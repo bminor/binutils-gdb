@@ -2927,6 +2927,8 @@ extern char *elfcore_write_xstatereg
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_x86_segbases
   (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_i386_tls
+  (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_ppc_vmx
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_ppc_vsx

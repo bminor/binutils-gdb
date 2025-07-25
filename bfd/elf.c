@@ -49,6 +49,10 @@ SECTION
 #include CORE_HEADER
 #endif
 
+/* Name of a pseudo-section which represents NT_386_TLS notes within a core
+   file.  */
+#define PSEUDO_SECTION_NAME_I386_TLS ".reg-i386-tls"
+
 static int elf_sort_sections (const void *, const void *);
 static bool assign_file_positions_except_relocs (bfd *, struct bfd_link_info *);
 static bool swap_out_syms (bfd *, struct elf_strtab_hash **, int,
@@ -10674,6 +10678,13 @@ elfcore_grok_gdb_tdesc (bfd *abfd, Elf_Internal_Note *note)
 }
 
 static bool
+elfcore_grok_i386_tls (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, PSEUDO_SECTION_NAME_I386_TLS,
+					  note);
+}
+
+static bool
 elfcore_grok_loongarch_cpucfg (bfd *abfd, Elf_Internal_Note *note)
 {
   return elfcore_make_note_pseudosection (abfd, ".reg-loongarch-cpucfg", note);
@@ -11333,6 +11344,13 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
       if (note->namesz == 6
 	  && strcmp (note->namedata, "LINUX") == 0)
 	return elfcore_grok_aarch_tls (abfd, note);
+      else
+	return true;
+
+    case NT_386_TLS:
+      if (note->namesz == 6
+	  && strcmp (note->namedata, "LINUX") == 0)
+	return elfcore_grok_i386_tls (abfd, note);
       else
 	return true;
 
@@ -12594,6 +12612,14 @@ elfcore_write_x86_segbases (bfd *abfd, char *buf, int *bufsiz,
 }
 
 char *
+elfcore_write_i386_tls (bfd *abfd, char *buf, int *bufsiz,
+			    const void *regs, int size)
+{
+  return elfcore_write_note (abfd, buf, bufsiz, "LINUX", NT_386_TLS,
+			     regs, size);
+}
+
+char *
 elfcore_write_ppc_vmx (bfd *abfd,
 		       char *buf,
 		       int *bufsiz,
@@ -13287,6 +13313,8 @@ elfcore_write_register_note (bfd *abfd,
     return elfcore_write_loongarch_lsx (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-loongarch-lasx") == 0)
     return elfcore_write_loongarch_lasx (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, PSEUDO_SECTION_NAME_I386_TLS) == 0)
+    return elfcore_write_i386_tls (abfd, buf, bufsiz, data, size);
   return NULL;
 }
 
