@@ -28,6 +28,19 @@ AM_INIT_AUTOMAKE
 AM_SILENT_RULES([yes])
 AM_MAINTAINER_MODE
 
+case $target in
+  *-*-solaris2*)
+    case "$SHELL" in
+      *bash*)
+        ;;
+      *)
+        # PR 32580: Force use of bash to avoid corrupt linker scripts.
+        SHELL=/bin/bash
+        ;;
+    esac
+    ;;
+esac
+
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_GREP

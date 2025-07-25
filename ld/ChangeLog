@@ -1,3 +1,9 @@
+2025-07-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR ld/32580
+	* configure.ac <*-*-solaris2*>: Enforce SHELL=/bin/bash.
+	* configure: Regenerate.
+
 2025-07-13  Nick Clifton  <nickc@redhat.com>
 
 	* 2.45 Branch point.
