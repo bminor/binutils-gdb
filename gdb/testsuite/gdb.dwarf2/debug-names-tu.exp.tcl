@@ -18,6 +18,10 @@ load_lib dwarf.exp
 # This test can only be run on targets which support DWARF-2 and use gas.
 require dwarf2_support
 
+# When using readnow, the index isn't used, which invalidates this
+# test.
+require !readnow
+
 standard_testfile _start.c debug-names.S
 
 set func_info_vars \
