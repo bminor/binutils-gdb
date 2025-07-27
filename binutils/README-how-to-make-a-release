@@ -232,6 +232,10 @@ If this is an ODD numbered release:
 For the next few weeks, monitor the mailing list for new translations
 and respond to any requests to have patches applied to the branch.
 
+Also - expect to receive lots of new/updated translations from the
+Translation Project.  These all need to be checked in to both the
+mainline and the branch.
+
 ==============================================================================
 ==============================================================================
 
@@ -253,7 +257,7 @@ How to create the release.
 
   21. a. Update the release number in bfd/version.m4 on the release
          branch to a whole new minor version number, without a point
-         value.  Eg "2.44.90" becomes "2.45".  NB/ Not: "2.45.00"
+         value.  Eg "2.45.90" becomes "2.46".  NB/ Not: "2.46.00"
 
       b. Change bfd/development.sh to set all values to "false".
 
@@ -280,11 +284,10 @@ How to create the release.
 	 to exist in the master repository, and that the GDB project would
 	 need to agree to have it there.
 	
-      e. Add ChangeLog entries for all of the updates and add a
-         "this-is-the-2.43-release" comment and commit.
+      e. Commit.
 
 	   git add .
-           git commit -m "This is the 2.45 release"
+           git commit -m "This is the 2.46 release"
 	   git push
 	   
   22. Check that your file creation mask will create the
@@ -311,17 +314,15 @@ How to create the release.
   
        If this is an EVEN numbered release:
 	 
-            ./src-release.sh -b -g -l -x -z binutils_with_gold
+            ./src-release.sh -b -g -l -x -z \
+	      -r `git log -1 --format=%cd --date=format:%F bfd/version.m4` \
+	      binutils_with_gold
 
        If this is an ODD numbered release:
 	 
-            ./src-release.sh -b -g -l -x -z binutils
-
-       OR ... for a more reproducible tarball:
-
             ./src-release.sh -b -g -l -x -z \
 	      -r `git log -1 --format=%cd --date=format:%F bfd/version.m4` \
-	      [binutils | binutils_with_gold]
+	      binutils
 
   24. Check that the files in the tarballs have the correct
       permissions.
@@ -330,7 +331,7 @@ How to create the release.
 
       Also check that the man files are not empty.  (cf PR 28144).
 
-           tar tvf binutils-*.tar | grep -e "\.1"
+           tar tvf binutils-*.tar | grep -e "\.1"   (look for zero sized files)
 
   25. Sanity check the release on x86_64-pc-linux-gnu by building and
        running the testsuites (gas, gold, binutils and ld).
@@ -365,21 +366,23 @@ How to create the release.
         popd
 
   26. Tag the branch with the new release number:
-	[optional: add "-u XXXXX" to sign with a gpg key]
-	enter a tag message such as: "Official GNU Binutils 2.4x release"
+	[Optional: add "-u XXXXX" to sign with a gpg key.
+	Note: This may require changing the setting of [gpg] in your .gitconfig file]
+	
+	Enter a tag message such as: "Official GNU Binutils 2.4x release"
 
 	    git tag -a <TAG>         -u <Your Key>
 	  eg:
-	    git tag -a binutils-2_44 -u DD9E3C4F      <=== Be careful to get the tag right
+	    git tag -a binutils-2_46 -u DD9E3C4F      <=== Be careful to get the tag right
 	  or:
-	    git tag -a binutils-2_44 -u DD9E3C4F -m "Official GNU Binutils 2.44 release"
+	    git tag -a binutils-2_46 -u DD9E3C4F -m "Official GNU Binutils 2.46 release"
 
         NB/ If you do sign the binaries make sure to use a key
 	that has been published with the FSF.
 
         Then push the release:
 	
-	    git push origin binutils-2_44
+	    git push origin binutils-2_46
 
         If you get an error message along the lines of:
 	  "Invalid revision range ..."
@@ -387,11 +390,11 @@ How to create the release.
 
   27.  Upload the tarballs to ftp.gnu.org.
 
-          gnupload --to ftp.gnu.org:binutils binutils-2.44.tar.*
+          gnupload --to ftp.gnu.org:binutils binutils-2.46.tar.*
 
         Be prepared to provide the password for the key, if you
 	signed the binaries.
-      
+
         The gnupload script is in the build-aux/ directory of the gnulib
 	project's srouces.  It uses the ncftp package for transmitting
 	the files.
@@ -420,8 +423,8 @@ How to create the release.
       Create a new docs sub-directory and move into it:
 
         cd binutils-htdocs
-	mkdir docs-2.45
-        cd docs-2.45
+	mkdir docs-2.46
+        cd docs-2.46
 	
       Copy the index.html from the previous release
 
@@ -457,8 +460,8 @@ How to create the release.
 	 cp <build-dir>/ld/ld.pdf    .		    [NB/ Path not like others]
 
 	    [NB/ The gprofng documentation does not have a node-per-page selection]
-	 cp <build-dir>/gprofng/doc/gprof.html   .
-	 cp <build-dir>/gprofng/doc/gprof.pdf    .
+	 cp <build-dir>/gprofng/gprof.html   .
+	 cp <build-dir>/gprofng/gprof.pdf    .
 	 
 	 cp <build-dir>/libctf/doc/ctf-spec.html   .
 	 cp <build-dir>/libctf/doc/ctf-spec.pdf    .
@@ -470,19 +473,20 @@ How to create the release.
 
          cd ..     [Should now be in be in binutils-htdocs/ ]
 	 rm docs
-	 ln -s docs-2.45 docs
+	 ln -s docs-2.46 docs
 	 
       Edit index.html file to change the links to point to the new
       release, mention any new features, update dates and so on.
 
-      Check that the new web page is correct:
+      Check that the new web page is correct by opening it in a browser:
 
          file:///<path-to-binutils-htdocs>/index.html
 
       Add the new directories and files, commit and push the changes:
 
+        get add docs-2.46
         git add .
-        git commit -m"Update documenation for the 2.45 release"
+        git commit -m"Update documenation for the 2.46 release"
 	git push
 
 
