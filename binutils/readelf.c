@@ -17493,6 +17493,7 @@ display_debug_section (int shndx, Elf_Internal_Shdr * section, Filedata * fileda
 
       if (streq (sec->uncompressed_name, name)
 	  || (id == line && startswith (name, ".debug_line."))
+	  || (id == sframe && section->sh_type == SHT_GNU_SFRAME)
 	  || streq (sec->compressed_name, name))
 	{
 	  bool secondary = (section != find_section (filedata, name));
@@ -17501,6 +17502,8 @@ display_debug_section (int shndx, Elf_Internal_Shdr * section, Filedata * fileda
 	    free_debug_section (id);
 
 	  if (i == line && startswith (name, ".debug_line."))
+	    sec->name = name;
+	  else if (id == sframe && section->sh_type == SHT_GNU_SFRAME)
 	    sec->name = name;
 	  else if (streq (sec->uncompressed_name, name))
 	    sec->name = sec->uncompressed_name;

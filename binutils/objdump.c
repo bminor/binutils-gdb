@@ -4498,6 +4498,9 @@ dump_dwarf_section (bfd *abfd, asection *section,
   else
     match = name;
 
+  if (elf_section_type (section) == SHT_GNU_SFRAME)
+    match = ".sframe";
+
   for (i = 0; i < max; i++)
     if ((strcmp (debug_displays [i].section.uncompressed_name, match) == 0
 	 || strcmp (debug_displays [i].section.compressed_name, match) == 0
@@ -4997,6 +5000,18 @@ dump_sframe_section (bfd *abfd, const char *sect_name, bool is_mainfile)
       if (sec == NULL)
 	{
 	  printf (_("No %s section present\n\n"), sanitize_string (sect_name));
+	  return;
+	}
+      /* Starting with Binutils 2.45, SFrame sections have section type
+	 SHT_GNU_SFRAME.  For SFrame sections from Binutils 2.44 or earlier,
+	 check explcitly for SFrame sections of type SHT_PROGBITS and name
+	 ".sframe" to allow them.  */
+      else if (elf_section_type (sec) != SHT_GNU_SFRAME
+	       && !(elf_section_type (sec) == SHT_PROGBITS
+		    && strcmp (sect_name, ".sframe") == 0))
+	{
+	  printf (_("Section %s does not contain SFrame data\n\n"),
+		  sanitize_string (sect_name));
 	  return;
 	}
     }
@@ -6332,8 +6347,10 @@ main (int argc, char **argv)
 
 	  if (optarg)
 	    dump_sframe_section_name = xstrdup (optarg);
+	  else
+	    dump_sframe_section_name = ".sframe";
 
-	  /* Error checking for user-provided section name is done in
+	  /* Error checking for dump_sframe_section_name is done in
 	     dump_sframe_section ().  Initialize for now with the default
 	     internal name: "sframe-internal-only".  */
 	  dwarf_select_sections_by_names ("sframe-internal-only");
