@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2025-07-13 08:45+0100\n"
+"POT-Creation-Date: 2025-07-27 09:50+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -220,112 +220,115 @@ msgstr ""
 
 #: as.c:313
 #, c-format
-msgid "  --gsframe               generate SFrame stack trace information\n"
+msgid ""
+"  --gsframe[={no|yes}]    whether to generate SFrame stack trace "
+"information\n"
+"                          (default: no)\n"
 msgstr ""
 
-#: as.c:316
+#: as.c:317
 #, c-format
 msgid ""
 "  --scfi=experimental     Synthesize DWARF CFI for hand-written asm\n"
 "                          (experimental support)\n"
 msgstr ""
 
-#: as.c:322
+#: as.c:323
 #, c-format
 msgid "  -f                      skip whitespace and comment preprocessing\n"
 msgstr ""
 
-#: as.c:324
+#: as.c:325
 #, c-format
 msgid "  -g, --gen-debug         generate debugging information\n"
 msgstr ""
 
-#: as.c:326
+#: as.c:327
 #, c-format
 msgid "  --gstabs                generate STABS debugging information\n"
 msgstr ""
 
-#: as.c:328
+#: as.c:329
 #, c-format
 msgid ""
 "  --gstabs+               generate STABS debug info with GNU extensions\n"
 msgstr ""
 
-#: as.c:330
+#: as.c:331
 #, c-format
 msgid ""
 "  --gdwarf-<N>            generate DWARF<N> debugging information. 2 <= <N> "
 "<= 5\n"
 msgstr ""
 
-#: as.c:332
+#: as.c:333
 #, c-format
 msgid "  --gdwarf-cie-version=<N> generate version 1, 3 or 4 DWARF CIEs\n"
 msgstr ""
 
-#: as.c:334
+#: as.c:335
 #, c-format
 msgid ""
 "  --gdwarf-sections       generate per-function section names for DWARF line "
 "information\n"
 msgstr ""
 
-#: as.c:337
+#: as.c:338
 #, c-format
 msgid "  --gcodeview             generate CodeView debugging information\n"
 msgstr ""
 
-#: as.c:340
+#: as.c:341
 #, c-format
 msgid "  --hash-size=<N>         ignored\n"
 msgstr ""
 
-#: as.c:342
+#: as.c:343
 #, c-format
 msgid "  --help                  show all assembler options\n"
 msgstr ""
 
-#: as.c:344
+#: as.c:345
 #, c-format
 msgid "  --target-help           show target specific options\n"
 msgstr ""
 
-#: as.c:346
+#: as.c:347
 #, c-format
 msgid ""
 "  -I DIR                  add DIR to search list for .include directives\n"
 msgstr ""
 
-#: as.c:348
+#: as.c:349
 #, c-format
 msgid "  -J                      don't warn about signed overflow\n"
 msgstr ""
 
-#: as.c:350
+#: as.c:351
 #, c-format
 msgid ""
 "  -K                      warn when differences altered for long "
 "displacements\n"
 msgstr ""
 
-#: as.c:352
+#: as.c:353
 #, c-format
 msgid "  -L, --keep-locals       keep local symbols (e.g. starting with `L')\n"
 msgstr ""
 
-#: as.c:354
+#: as.c:355
 #, c-format
 msgid "  -M, --mri               assemble in MRI compatibility mode\n"
 msgstr ""
 
-#: as.c:356
+#: as.c:357
 #, c-format
 msgid ""
 "  --MD FILE               write dependency information in FILE (default "
 "none)\n"
 msgstr ""
 
-#: as.c:358
+#: as.c:359
 #, c-format
 msgid ""
 "  --multibyte-handling=<method>\n"
@@ -333,83 +336,83 @@ msgid ""
 "in the input\n"
 msgstr ""
 
-#: as.c:361
+#: as.c:362
 #, c-format
 msgid "  -nocpp                  ignored\n"
 msgstr ""
 
-#: as.c:363
+#: as.c:364
 #, c-format
 msgid ""
 "  -no-pad-sections        do not pad the end of sections to alignment "
 "boundaries\n"
 msgstr ""
 
-#: as.c:365
+#: as.c:366
 #, c-format
 msgid ""
 "  -o OBJFILE              name the object-file output OBJFILE (default a."
 "out)\n"
 msgstr ""
 
-#: as.c:367
+#: as.c:368
 #, c-format
 msgid "  -R                      fold data section into text section\n"
 msgstr ""
 
-#: as.c:369
+#: as.c:370
 #, c-format
 msgid "  --reduce-memory-overheads ignored\n"
 msgstr ""
 
-#: as.c:371
+#: as.c:372
 #, c-format
 msgid ""
 "  --statistics            print various measured statistics from execution\n"
 msgstr ""
 
-#: as.c:373
+#: as.c:374
 #, c-format
 msgid "  --strip-local-absolute  strip local absolute symbols\n"
 msgstr ""
 
-#: as.c:375
+#: as.c:376
 #, c-format
 msgid ""
 "  --traditional-format    Use same format as native assembler when possible\n"
 msgstr ""
 
-#: as.c:377
+#: as.c:378
 #, c-format
 msgid "  --version               print assembler version number and exit\n"
 msgstr ""
 
-#: as.c:379
+#: as.c:380
 #, c-format
 msgid "  -W, --no-warn           suppress warnings\n"
 msgstr ""
 
-#: as.c:381
+#: as.c:382
 #, c-format
 msgid "  --warn                  don't suppress warnings\n"
 msgstr ""
 
-#: as.c:383
+#: as.c:384
 #, c-format
 msgid "  --fatal-warnings        treat warnings as errors\n"
 msgstr ""
 
-#: as.c:385
+#: as.c:386
 #, c-format
 msgid "  --no-info               suppress information messages\n"
 msgstr ""
 
-#: as.c:387
+#: as.c:388
 #, c-format
 msgid "  --info                  don't suppress information messages\n"
 msgstr ""
 
-#: as.c:390
+#: as.c:391
 #, c-format
 msgid ""
 "  --itbl INSTTBL          extend instruction set to include instructions\n"
@@ -417,22 +420,22 @@ msgid ""
 "INSTTBL\n"
 msgstr ""
 
-#: as.c:394
+#: as.c:395
 #, c-format
 msgid "  -w                      ignored\n"
 msgstr ""
 
-#: as.c:396
+#: as.c:397
 #, c-format
 msgid "  -X                      ignored\n"
 msgstr ""
 
-#: as.c:398
+#: as.c:399
 #, c-format
 msgid "  -Z                      generate object file even after errors\n"
 msgstr ""
 
-#: as.c:400
+#: as.c:401
 #, c-format
 msgid ""
 "  --listing-lhs-width     set the width in words of the output data column "
@@ -440,7 +443,7 @@ msgid ""
 "                          the listing\n"
 msgstr ""
 
-#: as.c:403
+#: as.c:404
 #, c-format
 msgid ""
 "  --listing-lhs-width2    set the width in words of the continuation lines\n"
@@ -449,62 +452,62 @@ msgid ""
 "                          the width of the first line\n"
 msgstr ""
 
-#: as.c:407
+#: as.c:408
 #, c-format
 msgid ""
 "  --listing-rhs-width     set the max width in characters of the lines from\n"
 "                          the source file\n"
 msgstr ""
 
-#: as.c:410
+#: as.c:411
 #, c-format
 msgid ""
 "  --listing-cont-lines    set the maximum number of continuation lines used\n"
 "                          for the output data column of the listing\n"
 msgstr ""
 
-#: as.c:413
+#: as.c:414
 #, c-format
 msgid "  @FILE                   read options from FILE\n"
 msgstr ""
 
-#: as.c:421
+#: as.c:422
 #, c-format
 msgid "Report bugs to %s\n"
 msgstr ""
 
-#: as.c:653
+#: as.c:654
 #, c-format
 msgid "unrecognized option `-%c%s'"
 msgstr ""
 
-#: as.c:655
+#: as.c:656
 #, c-format
 msgid "unrecognized option `--%s=%s'"
 msgstr ""
 
-#: as.c:657
+#: as.c:658
 #, c-format
 msgid "unrecognized option `--%s'"
 msgstr ""
 
-#: as.c:711
+#: as.c:712
 #, c-format
 msgid "unexpected argument to --multibyte-input-option: '%s'"
 msgstr ""
 
 #. This output is intended to follow the GNU standards document.
-#: as.c:716
+#: as.c:717
 #, c-format
 msgid "GNU assembler %s\n"
 msgstr ""
 
-#: as.c:717
+#: as.c:718
 #, c-format
 msgid "Copyright (C) 2025 Free Software Foundation, Inc.\n"
 msgstr ""
 
-#: as.c:718
+#: as.c:719
 #, c-format
 msgid ""
 "This program is free software; you may redistribute it under the terms of\n"
@@ -512,152 +515,157 @@ msgid ""
 "This program has absolutely no warranty.\n"
 msgstr ""
 
-#: as.c:723
+#: as.c:724
 #, c-format
 msgid ""
 "This assembler was configured for a target of `%s' and default,\n"
 "cpu type `%s'.\n"
 msgstr ""
 
-#: as.c:727
+#: as.c:728
 #, c-format
 msgid "This assembler was configured for a target of `%s'.\n"
 msgstr ""
 
-#: as.c:735
+#: as.c:736
 msgid "multiple emulation names specified"
 msgstr ""
 
-#: as.c:737
+#: as.c:738
 msgid "emulations not handled in this configuration"
-msgstr ""
-
-#: as.c:742
-#, c-format
-msgid "alias = %s\n"
 msgstr ""
 
 #: as.c:743
 #, c-format
-msgid "canonical = %s\n"
+msgid "alias = %s\n"
 msgstr ""
 
 #: as.c:744
 #, c-format
+msgid "canonical = %s\n"
+msgstr ""
+
+#: as.c:745
+#, c-format
 msgid "cpu-type = %s\n"
 msgstr ""
 
-#: as.c:746
+#: as.c:747
 #, c-format
 msgid "format = %s\n"
 msgstr ""
 
-#: as.c:749
+#: as.c:750
 #, c-format
 msgid "bfd-target = %s\n"
 msgstr ""
 
-#: as.c:760
+#: as.c:761
 msgid "--compress-debug-sections=zstd: gas is not built with zstd support"
 msgstr ""
 
-#: as.c:764
+#: as.c:765
 #, c-format
 msgid "Invalid --compress-debug-sections option: `%s'"
 msgstr ""
 
-#: as.c:767
+#: as.c:768
 #, c-format
 msgid "--compress-debug-sections=%s is unsupported"
 msgstr ""
 
-#: as.c:792
+#: as.c:793
 msgid "bad defsym; format is --defsym name=value"
 msgstr ""
 
-#: as.c:810
+#: as.c:811
 msgid "no file name following -t option"
 msgstr ""
 
-#: as.c:819
+#: as.c:820
 #, c-format
 msgid "failed to read instruction table %s\n"
 msgstr ""
 
-#: as.c:841
+#: as.c:842
 #, c-format
 msgid "unknown DWARF option %s\n"
 msgstr ""
 
-#: as.c:843
+#: as.c:844
 #, c-format
 msgid "unknown option `%s'"
 msgstr ""
 
-#: as.c:900
+#: as.c:901
 #, c-format
 msgid "Invalid --gdwarf-cie-version `%s'"
 msgstr ""
 
-#: as.c:1002
+#: as.c:1003
 #, c-format
 msgid "Invalid --scfi= option: `%s'; suggested option: experimental"
 msgstr ""
 
-#: as.c:1013
+#: as.c:1014
 #, c-format
 msgid "Invalid --size-check= option: `%s'"
 msgstr ""
 
-#: as.c:1022
+#: as.c:1023
 #, c-format
 msgid "Invalid --elf-stt-common= option: `%s'"
 msgstr ""
 
-#: as.c:1036
+#: as.c:1037
 #, c-format
 msgid "Invalid --generate-missing-build-notes option: `%s'"
 msgstr ""
 
-#: as.c:1114
+#: as.c:1049
+#, c-format
+msgid "Invalid --gsframe option: `%s'"
+msgstr ""
+
+#: as.c:1125
 #, c-format
 msgid "invalid listing option `%c'"
 msgstr ""
 
-#: as.c:1197
+#: as.c:1208
 #, c-format
 msgid "%s: total time in assembly: %ld.%06ld\n"
 msgstr ""
 
-#: as.c:1299
+#: as.c:1310
 msgid "libbfd ABI mismatch"
 msgstr ""
 
-#: as.c:1465
+#: as.c:1476
 #, c-format
 msgid "The input '%s' and output '%s' files are the same"
 msgstr ""
 
-#: as.c:1518
+#: as.c:1529
 #, c-format
 msgid "%d warning"
 msgid_plural "%d warnings"
 msgstr[0] ""
 msgstr[1] ""
 
-#: as.c:1520
+#: as.c:1531
 #, c-format
 msgid "%d error"
 msgid_plural "%d errors"
 msgstr[0] ""
 msgstr[1] ""
 
-#: as.c:1524
+#: as.c:1535
 #, c-format
 msgid "%s, treating warnings as errors"
 msgstr ""
 
-#: as.c:1535
+#: as.c:1546
 #, c-format
 msgid "%s, %s, generating bad object file\n"
 msgstr ""
@@ -687,7 +695,7 @@ msgstr ""
 #: cgen.c:367 cgen.c:389 config/tc-d10v.c:460 config/tc-d30v.c:450
 #: config/tc-mn10200.c:1031 config/tc-mn10300.c:1678 config/tc-ppc.c:3482
 #: config/tc-v850.c:2616 config/tc-v850.c:2650 config/tc-v850.c:2690
-#: config/tc-v850.c:2936 config/tc-z80.c:785
+#: config/tc-v850.c:2936 config/tc-z80.c:812
 msgid "illegal operand"
 msgstr ""
 
@@ -696,7 +704,7 @@ msgstr ""
 #: config/tc-mmix.c:485 config/tc-mn10200.c:1034 config/tc-mn10300.c:1681
 #: config/tc-msp430.c:417 config/tc-ppc.c:3484 config/tc-sh.c:989
 #: config/tc-v850.c:2620 config/tc-v850.c:2654 config/tc-v850.c:2694
-#: config/tc-v850.c:2939 config/tc-xgate.c:892 config/tc-z80.c:933
+#: config/tc-v850.c:2939 config/tc-xgate.c:892 config/tc-z80.c:960
 #: config/tc-z8k.c:349
 msgid "missing operand"
 msgstr ""
@@ -3015,7 +3023,7 @@ msgstr ""
 
 #: config/tc-alpha.c:5521 config/tc-arc.c:2531 config/tc-arc.c:2545
 #: config/tc-arm.c:888 config/tc-xtensa.c:5474 config/tc-xtensa.c:5550
-#: config/tc-xtensa.c:5667 config/tc-z80.c:3677
+#: config/tc-xtensa.c:5667 config/tc-z80.c:3704
 msgid "syntax error"
 msgstr ""
 
@@ -3337,7 +3345,7 @@ msgid "Insn %s has an instruction %s with limm in its delay slot."
 msgstr ""
 
 #: config/tc-arc.c:4290 config/tc-microblaze.c:2611 config/tc-mn10300.c:1068
-#: config/tc-sh.c:418 config/tc-z80.c:1120 read.c:4899
+#: config/tc-sh.c:418 config/tc-z80.c:1147 read.c:4899
 #, c-format
 msgid "unsupported BFD relocation size %u"
 msgstr ""
@@ -6070,7 +6078,7 @@ msgstr ""
 #: config/tc-d30v.c:1768 config/tc-metag.c:7003 config/tc-mn10200.c:774
 #: config/tc-mn10300.c:2178 config/tc-msp430.c:4649 config/tc-ppc.c:7746
 #: config/tc-spu.c:868 config/tc-spu.c:1079 config/tc-v850.c:3336
-#: config/tc-z80.c:3871
+#: config/tc-z80.c:3898
 #, c-format
 msgid "reloc %d not supported by object file format"
 msgstr ""
@@ -11615,7 +11623,7 @@ msgstr ""
 msgid "Line %d: unknown relocation type: 0x%x."
 msgstr ""
 
-#: config/tc-m68hc11.c:4492 config/tc-z80.c:3452 config/tc-z80.c:3472
+#: config/tc-m68hc11.c:4492 config/tc-z80.c:3479 config/tc-z80.c:3499
 msgid "Invalid directive"
 msgstr ""
 
@@ -14130,7 +14138,7 @@ msgstr ""
 #. We will only get here in rare cases involving #NO_APP,
 #. where the unterminated string is not recognized by the
 #. preformatting pass.
-#: config/tc-mmix.c:4124 config/tc-mmix.c:4282 config/tc-z80.c:3202
+#: config/tc-mmix.c:4124 config/tc-mmix.c:4282 config/tc-z80.c:3229
 msgid "unterminated string"
 msgstr ""
 
@@ -15344,7 +15352,7 @@ msgstr ""
 msgid "No instruction found"
 msgstr ""
 
-#: config/tc-pdp11.c:717 config/tc-z80.c:3668
+#: config/tc-pdp11.c:717 config/tc-z80.c:3695
 #, c-format
 msgid "Unknown instruction '%s'"
 msgstr ""
@@ -20596,7 +20604,7 @@ msgstr ""
 msgid "missing table index"
 msgstr ""
 
-#: config/tc-wasm32.c:726 config/tc-z80.c:3697 read.c:4072
+#: config/tc-wasm32.c:726 config/tc-z80.c:3724 read.c:4072
 #, c-format
 msgid "junk at end of line, first unrecognized character is `%c'"
 msgstr ""
@@ -21356,57 +21364,57 @@ msgstr ""
 msgid "-- unterminated string"
 msgstr ""
 
-#: config/tc-z80.c:794
+#: config/tc-z80.c:821
 msgid "undocumented instruction"
 msgstr ""
 
-#: config/tc-z80.c:838 config/tc-z80.c:844
+#: config/tc-z80.c:865 config/tc-z80.c:871
 msgid "mismatched parentheses"
 msgstr ""
 
-#: config/tc-z80.c:936
+#: config/tc-z80.c:963
 msgid "bad expression syntax"
 msgstr ""
 
-#: config/tc-z80.c:1147
+#: config/tc-z80.c:1174
 #, c-format
 msgid "%d-bit overflow (%+<PRId64>)"
 msgstr ""
 
-#: config/tc-z80.c:1162
+#: config/tc-z80.c:1189
 #, c-format
 msgid "invalid data size %d"
 msgstr ""
 
-#: config/tc-z80.c:1247
+#: config/tc-z80.c:1274
 msgid "cannot make a relative jump to an absolute location"
 msgstr ""
 
-#: config/tc-z80.c:1254
+#: config/tc-z80.c:1281
 #, c-format
 msgid "index overflow (%+<PRId64>)"
 msgstr ""
 
-#: config/tc-z80.c:1257
+#: config/tc-z80.c:1284
 #, c-format
 msgid "offset overflow (%+<PRId64>)"
 msgstr ""
 
-#: config/tc-z80.c:1460 config/tc-z80.c:1707 config/tc-z80.c:1750
-#: config/tc-z80.c:1831 config/tc-z80.c:1861 config/tc-z80.c:1920
-#: config/tc-z80.c:1980 config/tc-z80.c:2033 config/tc-z80.c:2066
-#: config/tc-z80.c:2123 config/tc-z80.c:2741 config/tc-z80.c:2790
-#: config/tc-z80.c:2828 config/tc-z80.c:2888 config/tc-z80.c:2948
-#: config/tc-z80.c:3024 config/tc-z80.c:3047
+#: config/tc-z80.c:1487 config/tc-z80.c:1734 config/tc-z80.c:1777
+#: config/tc-z80.c:1858 config/tc-z80.c:1888 config/tc-z80.c:1947
+#: config/tc-z80.c:2007 config/tc-z80.c:2060 config/tc-z80.c:2093
+#: config/tc-z80.c:2150 config/tc-z80.c:2768 config/tc-z80.c:2817
+#: config/tc-z80.c:2855 config/tc-z80.c:2915 config/tc-z80.c:2975
+#: config/tc-z80.c:3051 config/tc-z80.c:3074
 msgid "bad instruction syntax"
 msgstr ""
 
-#: config/tc-z80.c:1898
+#: config/tc-z80.c:1925
 msgid "condition code invalid for jr"
 msgstr ""
 
-#: config/tc-z80.c:2487 config/tc-z80.c:2498 config/tc-z80.c:2514
-#: config/tc-z80.c:2547
+#: config/tc-z80.c:2514 config/tc-z80.c:2525 config/tc-z80.c:2541
+#: config/tc-z80.c:2574
 msgid "ADL mode instruction"
 msgstr ""
 
@@ -21414,62 +21422,62 @@ msgstr ""
 #. LIS prefix, in Z80 it is LD C,C
 #. SIL prefix, in Z80 it is LD D,D
 #. LIL prefix, in Z80 it is LD E,E
-#: config/tc-z80.c:2622
+#: config/tc-z80.c:2649
 msgid "unsupported instruction, assembled as NOP"
 msgstr ""
 
-#: config/tc-z80.c:3215 config/tc-z80.c:3246
+#: config/tc-z80.c:3242 config/tc-z80.c:3273
 msgid "parentheses ignored"
 msgstr ""
 
-#: config/tc-z80.c:3263
+#: config/tc-z80.c:3290
 msgid "CPU mode is unsupported by target"
 msgstr ""
 
-#: config/tc-z80.c:3285
+#: config/tc-z80.c:3312
 msgid "assignment expected"
 msgstr ""
 
-#: config/tc-z80.c:3690
+#: config/tc-z80.c:3717
 #, c-format
 msgid "Unknown instruction `%s'"
 msgstr ""
 
-#: config/tc-z80.c:3766
+#: config/tc-z80.c:3793
 #, c-format
 msgid "8-bit signed offset out of range (%+ld)"
 msgstr ""
 
-#: config/tc-z80.c:3789
+#: config/tc-z80.c:3816
 #, c-format
 msgid "8-bit overflow (%+ld)"
 msgstr ""
 
-#: config/tc-z80.c:3806
+#: config/tc-z80.c:3833
 #, c-format
 msgid "16-bit overflow (%+ld)"
 msgstr ""
 
-#: config/tc-z80.c:3814
+#: config/tc-z80.c:3841
 #, c-format
 msgid "24-bit overflow (%+ld)"
 msgstr ""
 
-#: config/tc-z80.c:3823
+#: config/tc-z80.c:3850
 #, c-format
 msgid "32-bit overflow (%+ld)"
 msgstr ""
 
-#: config/tc-z80.c:3836
+#: config/tc-z80.c:3863
 #, c-format
 msgid "md_apply_fix: unknown reloc type 0x%x\n"
 msgstr ""
 
-#: config/tc-z80.c:4033 config/tc-z80.c:4092
+#: config/tc-z80.c:4060 config/tc-z80.c:4119
 msgid "invalid syntax"
 msgstr ""
 
-#: config/tc-z80.c:4111
+#: config/tc-z80.c:4138
 msgid "overflow"
 msgstr ""
 
@@ -21813,15 +21821,15 @@ msgstr ""
 msgid "return column number %d overflows in CIE version 1"
 msgstr ""
 
-#: dw2gencfi.c:2475 dw2gencfi.c:2663
+#: dw2gencfi.c:2475 dw2gencfi.c:2666
 msgid "open CFI at the end of file; missing .cfi_endproc directive"
 msgstr ""
 
-#: dw2gencfi.c:2619
+#: dw2gencfi.c:2622
 msgid ".sframe not supported for target"
 msgstr ""
 
-#: dw2gencfi.c:2713
+#: dw2gencfi.c:2716
 msgid "CFI is not supported for this target"
 msgstr ""
 
@@ -22216,15 +22224,15 @@ msgid ""
 "no SFrame FDE emitted; .cfi_remember_state without prior SFrame FRE state"
 msgstr ""
 
-#: gen-sframe.c:1336
+#: gen-sframe.c:1343
 msgid "no SFrame FDE emitted; .cfi_negate_ra_state_with_pc"
 msgstr ""
 
-#: gen-sframe.c:1363
+#: gen-sframe.c:1370
 msgid "no SFrame FDE emitted; .cfi_window_save"
 msgstr ""
 
-#: gen-sframe.c:1421
+#: gen-sframe.c:1428
 #, c-format
 msgid "no SFrame FDE emitted; .cfi_escape DW_CFA_expression with %s reg %u"
 msgstr ""
@@ -22233,31 +22241,31 @@ msgstr ""
 #. OS-specific CFI opcodes), skip inspecting the DWARF expression.
 #. This may impact the asynchronicity due to loss of coverage.
 #. Continue to warn the user and bail out.
-#: gen-sframe.c:1582
+#: gen-sframe.c:1589
 #, c-format
 msgid "no SFrame FDE emitted; .cfi_escape with op (%#lx)"
 msgstr ""
 
-#: gen-sframe.c:1607
+#: gen-sframe.c:1614
 #, c-format
 msgid "no SFrame FDE emitted; %s reg %u in .cfi_undefined"
 msgstr ""
 
-#: gen-sframe.c:1784
+#: gen-sframe.c:1791
 msgid "(unknown)"
 msgstr ""
 
-#: gen-sframe.c:1785
+#: gen-sframe.c:1792
 #, c-format
 msgid "no SFrame FDE emitted; CFI insn %s (%#x)"
 msgstr ""
 
-#: gen-sframe.c:1809
+#: gen-sframe.c:1816
 #, c-format
 msgid "no SFrame FDE emitted; non-default RA register %u"
 msgstr ""
 
-#: gen-sframe.c:1854
+#: gen-sframe.c:1861
 msgid "no SFrame FDE emitted; FP without RA on stack"
 msgstr ""
 
