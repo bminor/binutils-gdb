@@ -1,4 +1,4 @@
-#as: --gsframe
+#as:
 #objdump: --sframe=.sframe
 #name: SFrame generation using CFI directive .cfi_sections
 #...
