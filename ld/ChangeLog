@@ -1,3 +1,8 @@
+2025-07-28  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* testsuite/ld-elf/indirect.exp (Run with libpr19553c.so):
+	Skip on *-*-solaris2*.
+
 2025-07-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	PR ld/32580
