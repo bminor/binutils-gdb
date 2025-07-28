@@ -1,5 +1,10 @@
 2025-07-28  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
+	* testsuite/ld-plugin/lto.exp (PR ld/28138 test): Raise fd limit
+	to 25.
+
+2025-07-28  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
 	* testsuite/ld-elf/indirect.exp (Run with libpr19553c.so):
 	Skip on *-*-solaris2*.
 
