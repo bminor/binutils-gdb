@@ -71,6 +71,12 @@ proc test_with_menu {command result} {
 		fail $command
 	    }
 	}
+	"Argument to arithmetic operation not a number or boolean." {
+	    fail $command
+	}
+	-re "No definition of \".*\" in current context." {
+	    fail $command
+	}
 	timeout {
 	    fail "$command (timeout)"
 	}
