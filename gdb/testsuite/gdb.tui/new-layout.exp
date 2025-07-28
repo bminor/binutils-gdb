@@ -45,15 +45,12 @@ gdb_test "tui new-layout example src 1 src 1" \
 gdb_test "tui new-layout example src 1" \
     "New layout does not contain the \"cmd\" window"
 
-# Avoid unbalanced curly braces problems with tcl 8.5.
-if { [tcl_version_at_least 8 6] } {
-    gdb_test "tui new-layout example src 1\}" \
-	"Extra '\}' in layout specification"
-    gdb_test "tui new-layout example {src 1} 1\}" \
-	"Extra '\}' in layout specification"
-    gdb_test "tui new-layout example \{src 1" \
-	"Missing '\}' in layout specification"
-}
+gdb_test "tui new-layout example src 1\}" \
+    "Extra '\}' in layout specification"
+gdb_test "tui new-layout example {src 1} 1\}" \
+    "Extra '\}' in layout specification"
+gdb_test "tui new-layout example \{src 1" \
+    "Missing '\}' in layout specification"
 
 # Each entry of this list describes a layout, and some associated
 # tests.  The items within each entry are:

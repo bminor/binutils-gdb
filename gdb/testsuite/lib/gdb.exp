@@ -15,7 +15,7 @@
 
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
-package require Tcl 8.5
+package require Tcl 8.6.2
 
 # Generic gdb subroutines that should work for any target.  If these
 # need to be modified for any target, it can be done with a variable
@@ -1685,44 +1685,6 @@ proc tcl_version_at_least { major minor {patchlevel 0} } {
     return [expr {[package vcompare $current_version $min_version] >= 0}]
 }
 
-if { [tcl_version_at_least 8 6] == 0 } {
-    # lmap was added in tcl 8.6.  Only add if missing.
-
-    # Note that we only implement the simple variant for now.
-    proc lmap { varname list body } {
-	set res {}
-	foreach val $list {
-	    uplevel 1 "set $varname $val"
-	    lappend res [uplevel 1 $body]
-	}
-
-	return $res
-    }
-
-    # ::tcl_platform(pathSeparator) was added in 8.6.
-    switch $::tcl_platform(platform) {
-	windows {
-	    set ::tcl_platform(pathSeparator) ;
-	}
-	default {
-	    set ::tcl_platform(pathSeparator) :
-	}
-    }
-}
-
-if { [tcl_version_at_least 8 6 2] == 0 } {
-    # string cat was added in tcl 8.6.2.  Only add if missing.
-
-    rename string tcl_proc_string
-
-    proc string { what args } {
-	if { $what == "cat" } {
-	    return [join $args ""]
-	}
-	return [tcl_proc_string $what {*}$args]
-    }
-}
-
 # gdb_test_no_output [-prompt PROMPT_REGEXP] [-nopass] COMMAND [MESSAGE]
 # Send a command to GDB and verify that this command generated no output.
 #
@@ -3026,11 +2988,6 @@ gdb_caching_proc allow_dap_tests {} {
 
     # The dap code uses module typing, available starting python 3.5.
     if { ![python_version_at_least 3 5] } {
-	return 0
-    }
-
-    # ton.tcl uses "string is entier", supported starting tcl 8.6.
-    if { ![tcl_version_at_least 8 6] } {
 	return 0
     }
 
