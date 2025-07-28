@@ -122,11 +122,11 @@ get_lm_info_svr4 (const solib &solib)
   return gdb::checked_static_cast<lm_info_svr4 &> (*solib.lm_info);
 }
 
-/* Return non-zero if GDB_SO_NAME and INFERIOR_SO_NAME represent
-   the same shared library.  */
+/* Return true if GDB_SO_NAME and INFERIOR_SO_NAME represent the same shared
+   library.  */
 
-static int
-svr4_same_1 (const char *gdb_so_name, const char *inferior_so_name)
+static bool
+svr4_same_name (const char *gdb_so_name, const char *inferior_so_name)
 {
   if (strcmp (gdb_so_name, inferior_so_name) == 0)
     return 1;
@@ -159,7 +159,7 @@ svr4_same (const char *gdb_name, const char *inferior_name,
 	   const lm_info_svr4 &gdb_lm_info,
 	   const lm_info_svr4 &inferior_lm_info)
 {
-  if (!svr4_same_1 (gdb_name, inferior_name))
+  if (!svr4_same_name (gdb_name, inferior_name))
     return false;
 
   /* There may be different instances of the same library, in different
@@ -2586,7 +2586,7 @@ svr4_solib_ops::enable_break (svr4_info *info, int from_tty) const
 	 address from the shared library table.  */
       for (const solib &so : current_program_space->solibs ())
 	{
-	  if (svr4_same_1 (interp_name, so.original_name.c_str ()))
+	  if (svr4_same_name (interp_name, so.original_name.c_str ()))
 	    {
 	      load_addr_found = 1;
 	      loader_found_in_list = 1;
