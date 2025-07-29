@@ -3452,8 +3452,9 @@ nds32_lookup_pseudo_opcode (const char *str)
 
   for (i = 0; i < maxlen; i++)
     {
-      if (is_whitespace (op[i] = str[i]))
+      if (is_end_of_stmt (str[i]) || is_whitespace (str[i]))
 	break;
+      op[i] = str[i];
     }
   op[i] = '\0';
 
@@ -4093,7 +4094,8 @@ nds32_relax_relocs (int relax)
     {"", "",};
 
   name = input_line_pointer;
-  while (*input_line_pointer && !is_whitespace (*input_line_pointer))
+  while (!is_end_of_stmt (*input_line_pointer)
+	 && !is_whitespace (*input_line_pointer))
     input_line_pointer++;
   saved_char = *input_line_pointer;
   *input_line_pointer = 0;
@@ -4228,7 +4230,8 @@ nds32_relax_hint (int mode ATTRIBUTE_UNUSED)
   struct relax_hint_id *record_id;
 
   name = input_line_pointer;
-  while (*input_line_pointer && !is_whitespace (*input_line_pointer))
+  while (!is_end_of_stmt (*input_line_pointer)
+	 && !is_whitespace (*input_line_pointer))
     input_line_pointer++;
   saved_char = *input_line_pointer;
   *input_line_pointer = 0;
@@ -4361,7 +4364,8 @@ nds32_flag (int ignore ATTRIBUTE_UNUSED)
 
   /* Skip whitespaces.  */
   name = input_line_pointer;
-  while (*input_line_pointer && !is_whitespace (*input_line_pointer))
+  while (!is_end_of_stmt (*input_line_pointer)
+	 && !is_whitespace (*input_line_pointer))
     input_line_pointer++;
   saved_char = *input_line_pointer;
   *input_line_pointer = 0;
@@ -4398,7 +4402,8 @@ ict_model (int ignore ATTRIBUTE_UNUSED)
 
   /* Skip whitespaces.  */
   name = input_line_pointer;
-  while (*input_line_pointer && !is_whitespace (*input_line_pointer))
+  while (!is_end_of_stmt (*input_line_pointer)
+	 && !is_whitespace (*input_line_pointer))
     input_line_pointer++;
   saved_char = *input_line_pointer;
   *input_line_pointer = 0;
@@ -5944,7 +5949,7 @@ nds32_elf_append_relax_relocs (const char *key, const void *value)
   char *where;
   int pcrel;
 
-  if (!relocs_pattern)
+  if (!relocs_pattern || !relocs_pattern->opcode)
     return;
 
   if (!nds32_find_reloc_table (relocs_pattern, &hint_info))
