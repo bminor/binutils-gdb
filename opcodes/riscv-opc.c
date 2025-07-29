@@ -313,37 +313,12 @@ match_c_addi4spn (const struct riscv_opcode *op, insn_t insn)
   return match_opcode (op, insn) && EXTRACT_CIWTYPE_ADDI4SPN_IMM (insn) != 0;
 }
 
-/* This requires a non-zero shift.  A zero rd is a hint, so is allowed.  */
-
-static int
-match_c_slli (const struct riscv_opcode *op, insn_t insn)
-{
-  return match_opcode (op, insn) && EXTRACT_CITYPE_IMM (insn) != 0;
-}
-
-/* This requires a non-zero rd, and a non-zero shift.  */
-
-static int
-match_slli_as_c_slli (const struct riscv_opcode *op, insn_t insn)
-{
-  return match_rd_nonzero (op, insn) && EXTRACT_CITYPE_IMM (insn) != 0;
-}
-
 /* This requires a zero shift.  A zero rd is a hint, so is allowed.  */
 
 static int
 match_c_slli64 (const struct riscv_opcode *op, insn_t insn)
 {
   return match_opcode (op, insn) && EXTRACT_CITYPE_IMM (insn) == 0;
-}
-
-/* This is used for both srli and srai.  This requires a non-zero shift.
-   A zero rd is not possible.  */
-
-static int
-match_srxi_as_c_srxi (const struct riscv_opcode *op, insn_t insn)
-{
-  return match_opcode (op, insn) && EXTRACT_CITYPE_IMM (insn) != 0;
 }
 
 static int
@@ -577,19 +552,19 @@ const struct riscv_opcode riscv_opcodes[] =
 {"mips.ehb", 0, INSN_CLASS_XMIPSEXECTL, "", MATCH_MIPS_EHB, MASK_MIPS_EHB, match_opcode, 0 },
 {"mips.ihb", 0, INSN_CLASS_XMIPSEXECTL, "", MATCH_MIPS_IHB, MASK_MIPS_IHB, match_opcode, 0 },
 {"mips.pause", 0, INSN_CLASS_XMIPSEXECTL, "", MATCH_MIPS_PAUSE, MASK_MIPS_PAUSE, match_opcode, 0 },
-{"slli",        0, INSN_CLASS_ZCA, "d,CU,C>",   MATCH_C_SLLI, MASK_C_SLLI, match_slli_as_c_slli, INSN_ALIAS },
+{"slli",        0, INSN_CLASS_ZCA, "d,CU,C>",   MATCH_C_SLLI, MASK_C_SLLI, match_rd_nonzero, INSN_ALIAS },
 {"slli",        0, INSN_CLASS_I, "d,s,>",     MATCH_SLLI, MASK_SLLI, match_opcode, 0 },
-{"sll",         0, INSN_CLASS_ZCA, "d,CU,C>",   MATCH_C_SLLI, MASK_C_SLLI, match_slli_as_c_slli, INSN_ALIAS },
+{"sll",         0, INSN_CLASS_ZCA, "d,CU,C>",   MATCH_C_SLLI, MASK_C_SLLI, match_rd_nonzero, INSN_ALIAS },
 {"sll",         0, INSN_CLASS_I, "d,s,t",     MATCH_SLL, MASK_SLL, match_opcode, 0 },
 {"sll",         0, INSN_CLASS_I, "d,s,>",     MATCH_SLLI, MASK_SLLI, match_opcode, INSN_ALIAS },
-{"srli",        0, INSN_CLASS_ZCA, "Cs,Cw,C>",  MATCH_C_SRLI, MASK_C_SRLI, match_srxi_as_c_srxi, INSN_ALIAS },
+{"srli",        0, INSN_CLASS_ZCA, "Cs,Cw,C>",  MATCH_C_SRLI, MASK_C_SRLI, match_rd_nonzero, INSN_ALIAS },
 {"srli",        0, INSN_CLASS_I, "d,s,>",     MATCH_SRLI, MASK_SRLI, match_opcode, 0 },
-{"srl",         0, INSN_CLASS_ZCA, "Cs,Cw,C>",  MATCH_C_SRLI, MASK_C_SRLI, match_srxi_as_c_srxi, INSN_ALIAS },
+{"srl",         0, INSN_CLASS_ZCA, "Cs,Cw,C>",  MATCH_C_SRLI, MASK_C_SRLI, match_rd_nonzero, INSN_ALIAS },
 {"srl",         0, INSN_CLASS_I, "d,s,t",     MATCH_SRL, MASK_SRL, match_opcode, 0 },
 {"srl",         0, INSN_CLASS_I, "d,s,>",     MATCH_SRLI, MASK_SRLI, match_opcode, INSN_ALIAS },
-{"srai",        0, INSN_CLASS_ZCA, "Cs,Cw,C>",  MATCH_C_SRAI, MASK_C_SRAI, match_srxi_as_c_srxi, INSN_ALIAS },
+{"srai",        0, INSN_CLASS_ZCA, "Cs,Cw,C>",  MATCH_C_SRAI, MASK_C_SRAI, match_rd_nonzero, INSN_ALIAS },
 {"srai",        0, INSN_CLASS_I, "d,s,>",     MATCH_SRAI, MASK_SRAI, match_opcode, 0 },
-{"sra",         0, INSN_CLASS_ZCA, "Cs,Cw,C>",  MATCH_C_SRAI, MASK_C_SRAI, match_srxi_as_c_srxi, INSN_ALIAS },
+{"sra",         0, INSN_CLASS_ZCA, "Cs,Cw,C>",  MATCH_C_SRAI, MASK_C_SRAI, match_rd_nonzero, INSN_ALIAS },
 {"sra",         0, INSN_CLASS_I, "d,s,t",     MATCH_SRA, MASK_SRA, match_opcode, 0 },
 {"sra",         0, INSN_CLASS_I, "d,s,>",     MATCH_SRAI, MASK_SRAI, match_opcode, INSN_ALIAS },
 {"sub",         0, INSN_CLASS_ZCA, "Cs,Cw,Ct",  MATCH_C_SUB, MASK_C_SUB, match_opcode, INSN_ALIAS },
@@ -1199,12 +1174,12 @@ const struct riscv_opcode riscv_opcodes[] =
 {"c.and",      0, INSN_CLASS_ZCA,   "Cs,Ct",     MATCH_C_AND, MASK_C_AND, match_opcode, 0 },
 {"c.or",       0, INSN_CLASS_ZCA,   "Cs,Ct",     MATCH_C_OR, MASK_C_OR, match_opcode, 0 },
 {"c.xor",      0, INSN_CLASS_ZCA,   "Cs,Ct",     MATCH_C_XOR, MASK_C_XOR, match_opcode, 0 },
-{"c.slli",     0, INSN_CLASS_ZCA,   "d,C>",      MATCH_C_SLLI, MASK_C_SLLI, match_c_slli, 0 },
-{"c.srli",     0, INSN_CLASS_ZCA,   "Cs,C>",     MATCH_C_SRLI, MASK_C_SRLI, match_c_slli, 0 },
-{"c.srai",     0, INSN_CLASS_ZCA,   "Cs,C>",     MATCH_C_SRAI, MASK_C_SRAI, match_c_slli, 0 },
-{"c.slli64",   0, INSN_CLASS_ZCA,   "d",         MATCH_C_SLLI64, MASK_C_SLLI64, match_c_slli64, 0 },
-{"c.srli64",   0, INSN_CLASS_ZCA,   "Cs",        MATCH_C_SRLI64, MASK_C_SRLI64, match_c_slli64, 0 },
-{"c.srai64",   0, INSN_CLASS_ZCA,   "Cs",        MATCH_C_SRAI64, MASK_C_SRAI64, match_c_slli64, 0 },
+{"c.slli64",   0, INSN_CLASS_ZCA,   "d",         MATCH_C_SLLI64, MASK_C_SLLI64, match_c_slli64, INSN_ALIAS },
+{"c.srli64",   0, INSN_CLASS_ZCA,   "Cs",        MATCH_C_SRLI64, MASK_C_SRLI64, match_c_slli64, INSN_ALIAS },
+{"c.srai64",   0, INSN_CLASS_ZCA,   "Cs",        MATCH_C_SRAI64, MASK_C_SRAI64, match_c_slli64, INSN_ALIAS },
+{"c.slli",     0, INSN_CLASS_ZCA,   "d,C>",      MATCH_C_SLLI, MASK_C_SLLI, match_opcode, 0 },
+{"c.srli",     0, INSN_CLASS_ZCA,   "Cs,C>",     MATCH_C_SRLI, MASK_C_SRLI, match_opcode, 0 },
+{"c.srai",     0, INSN_CLASS_ZCA,   "Cs,C>",     MATCH_C_SRAI, MASK_C_SRAI, match_opcode, 0 },
 {"c.andi",     0, INSN_CLASS_ZCA,   "Cs,Co",     MATCH_C_ANDI, MASK_C_ANDI, match_opcode, 0 },
 {"c.addiw",   64, INSN_CLASS_ZCA,   "d,Co",      MATCH_C_ADDIW, MASK_C_ADDIW, match_rd_nonzero, 0 },
 {"c.addw",    64, INSN_CLASS_ZCA,   "Cs,Ct",     MATCH_C_ADDW, MASK_C_ADDW, match_opcode, 0 },
