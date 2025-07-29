@@ -70,7 +70,8 @@ lassign $scopes scope reg_scope
 gdb_assert {[dict get $scope name] == "Locals"} "scope is locals"
 gdb_assert {[dict get $scope presentationHint] == "locals"} \
     "locals presentation hint"
-gdb_assert {[dict get $scope namedVariables] == 3} "three vars in scope"
+set count [dict get $scope namedVariables]
+gdb_assert {$count == 4} "four vars in scope"
 
 gdb_assert {[dict get $reg_scope name] == "Registers"} \
     "second scope is registers"
@@ -89,8 +90,8 @@ set refs1 [lindex [dap_check_request_and_response "fetch variables 0,1" \
 set refs2 [lindex [dap_check_request_and_response "fetch variables 2" \
 		       "variables" \
 		       [format {o variablesReference [i %d] \
-				    start [i 2] count [i 1]} \
-			    $num]] \
+				    start [i 2] count [i %d]} \
+			    $num [expr {$count - 2}]]] \
 	       0]
 
 set vars [concat [dict get $refs1 body variables] \
@@ -115,6 +116,10 @@ foreach var $vars {
 	"scalar" {
 	    gdb_assert {[dict get $var value] == 23} "check value of scalar"
 	}
+	"ptr" {
+	    gdb_assert {[dict get $var memoryReference] != ""} \
+		"check memoryReference of ptr"
+	}
 	default {
 	    fail "unknown variable $name"
 	}
@@ -129,10 +134,23 @@ set deivals [dict get $refs body variables]
 gdb_assert {[llength $deivals] == 2} "dei has two members"
 
 set num [dict get $reg_scope variablesReference]
-# The request succeeding is sufficient.
-set val [dap_check_request_and_response "fetch first register" \
+lassign [dap_check_request_and_response "fetch all registers" \
 	     "variables" \
-	     [format {o variablesReference [i %d] count [i 1]} $num]]
+	     [format {o variablesReference [i %d] count [i %d]} $num\
+		  [dict get $reg_scope namedVariables]]] \
+    val events
+
+# If any register has children, try to fetch those as well.  This is a
+# regression test for part of PR dap/33228.
+foreach var [dict get $val body variables] {
+    set regvar [dict get $var variablesReference]
+    if {$regvar > 0} {
+	dap_check_request_and_response "fetch register children for $regvar" \
+	    "variables" \
+	    [format {o variablesReference [i %d] count [i %d]} \
+		 $regvar [dict get $var namedVariables]]
+    }
+}
 
 set num [dict get $scope variablesReference]
 set refs [lindex [dap_check_request_and_response "set variable scalar" \

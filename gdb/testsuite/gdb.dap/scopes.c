@@ -27,6 +27,8 @@ int main ()
 
   static int scalar = 23;
 
+  void *ptr = (void *) &scalar;
+
   {
     const char *inner = "inner block";
 
