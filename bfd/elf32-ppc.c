@@ -53,6 +53,10 @@ static bfd_reloc_status_type ppc_elf_addr16_ha_reloc
 static bfd_reloc_status_type ppc_elf_unhandled_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 
+#ifndef ARRAY_SIZE
+#define ARRAY_SIZE(a) (sizeof (a) / sizeof ((a)[0]))
+#endif
+
 /* Branch prediction bit for branch taken relocs.  */
 #define BRANCH_PREDICT_BIT 0x200000
 /* Mask to set RA in memory instructions.  */
@@ -702,13 +706,10 @@ ppc_elf_howto_init (void)
 {
   unsigned int i, type;
 
-  for (i = 0;
-       i < sizeof (ppc_elf_howto_raw) / sizeof (ppc_elf_howto_raw[0]);
-       i++)
+  for (i = 0; i < ARRAY_SIZE (ppc_elf_howto_raw); i++)
     {
       type = ppc_elf_howto_raw[i].type;
-      if (type >= (sizeof (ppc_elf_howto_table)
-		   / sizeof (ppc_elf_howto_table[0])))
+      if (type >= ARRAY_SIZE (ppc_elf_howto_table))
 	abort ();
       ppc_elf_howto_table[type] = &ppc_elf_howto_raw[i];
     }
@@ -870,9 +871,7 @@ ppc_elf_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 {
   unsigned int i;
 
-  for (i = 0;
-       i < sizeof (ppc_elf_howto_raw) / sizeof (ppc_elf_howto_raw[0]);
-       i++)
+  for (i = 0; i < ARRAY_SIZE (ppc_elf_howto_raw); i++)
     if (ppc_elf_howto_raw[i].name != NULL
 	&& strcasecmp (ppc_elf_howto_raw[i].name, r_name) == 0)
       return &ppc_elf_howto_raw[i];
@@ -894,7 +893,8 @@ ppc_elf_info_to_howto (bfd *abfd,
     ppc_elf_howto_init ();
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  if (r_type >= R_PPC_max)
+  if (r_type >= ARRAY_SIZE (ppc_elf_howto_table)
+      || ppc_elf_howto_table[r_type] == NULL)
     {
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
@@ -904,19 +904,6 @@ ppc_elf_info_to_howto (bfd *abfd,
     }
 
   cache_ptr->howto = ppc_elf_howto_table[r_type];
-
-  /* Just because the above assert didn't trigger doesn't mean that
-     ELF32_R_TYPE (dst->r_info) is necessarily a valid relocation.  */
-  if (cache_ptr->howto == NULL)
-    {
-      /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
-			  abfd, r_type);
-      bfd_set_error (bfd_error_bad_value);
-
-      return false;
-    }
-
   return true;
 }
 
@@ -7088,12 +7075,11 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  /* For relocs against symbols from removed linkonce sections,
 	     or sections discarded by a linker script, we just want the
 	     section contents zeroed.  Avoid any special processing.  */
-	  howto = NULL;
-	  if (r_type < R_PPC_max)
-	    howto = ppc_elf_howto_table[r_type];
-
-	  _bfd_clear_contents (howto, input_bfd, input_section,
-			       contents, rel->r_offset);
+	  if (r_type < ARRAY_SIZE (ppc_elf_howto_table)
+	      && ppc_elf_howto_table[r_type] != NULL)
+	    _bfd_clear_contents (ppc_elf_howto_table[r_type],
+				 input_bfd, input_section,
+				 contents, rel->r_offset);
 	  wrel->r_offset = rel->r_offset;
 	  wrel->r_info = 0;
 	  wrel->r_addend = 0;
@@ -7653,7 +7639,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
       addend = rel->r_addend;
       save_unresolved_reloc = unresolved_reloc;
       howto = NULL;
-      if (r_type < R_PPC_max)
+      if (r_type < ARRAY_SIZE (ppc_elf_howto_table))
 	howto = ppc_elf_howto_table[r_type];
 
       tls_type = 0;
