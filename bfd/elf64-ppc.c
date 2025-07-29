@@ -1379,7 +1379,8 @@ ppc64_elf_info_to_howto (bfd *abfd, arelent *cache_ptr,
     ppc_howto_init ();
 
   type = ELF64_R_TYPE (dst->r_info);
-  if (type >= ARRAY_SIZE (ppc64_elf_howto_table))
+  if (type >= ARRAY_SIZE (ppc64_elf_howto_table)
+      || ppc64_elf_howto_table[type] == NULL)
     {
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
@@ -1388,15 +1389,6 @@ ppc64_elf_info_to_howto (bfd *abfd, arelent *cache_ptr,
       return false;
     }
   cache_ptr->howto = ppc64_elf_howto_table[type];
-  if (cache_ptr->howto == NULL || cache_ptr->howto->name == NULL)
-    {
-      /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
-			  abfd, type);
-      bfd_set_error (bfd_error_bad_value);
-      return false;
-    }
-
   return true;
 }
 
@@ -5104,7 +5096,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      if (!ppc64_elf_howto_table[R_PPC64_ADDR32])
 		ppc_howto_init ();
 	      /* xgettext:c-format */
-	      info->callbacks->einfo (_("%H: %s reloc unsupported "
+	      info->callbacks->einfo (_("%H: %s unsupported "
 					"in shared libraries and PIEs\n"),
 				      abfd, sec, rel->r_offset,
 				      ppc64_elf_howto_table[r_type]->name);
@@ -5274,7 +5266,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  if (ppc64_sec->sec_type != sec_toc
 	      || rel->r_offset % 8 != 0)
 	    {
-	      info->callbacks->einfo (_("%H: %s reloc unsupported here\n"),
+	      info->callbacks->einfo (_("%H: %s unsupported here\n"),
 				      abfd, sec, rel->r_offset,
 				      ppc64_elf_howto_table[r_type]->name);
 	      bfd_set_error (bfd_error_bad_value);
@@ -15685,9 +15677,11 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
       if (sec != NULL && discarded_section (sec))
 	{
-	  _bfd_clear_contents (ppc64_elf_howto_table[r_type],
-			       input_bfd, input_section,
-			       contents, rel->r_offset);
+	  if (r_type < ARRAY_SIZE (ppc64_elf_howto_table)
+	      && ppc64_elf_howto_table[r_type] != NULL)
+	    _bfd_clear_contents (ppc64_elf_howto_table[r_type],
+				 input_bfd, input_section,
+				 contents, rel->r_offset);
 	  wrel->r_offset = rel->r_offset;
 	  wrel->r_info = 0;
 	  wrel->r_addend = 0;
@@ -15750,6 +15744,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	 relocs are used with non-tls syms.  */
       if (r_symndx != STN_UNDEF
 	  && r_type != R_PPC64_NONE
+	  && r_type < ARRAY_SIZE (ppc64_elf_howto_table)
+	  && ppc64_elf_howto_table[r_type] != NULL
 	  && (h == NULL
 	      || h->elf.root.type == bfd_link_hash_defined
 	      || h->elf.root.type == bfd_link_hash_defweak)
@@ -16865,9 +16861,15 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       switch (r_type)
 	{
 	default:
-	  /* xgettext:c-format */
-	  _bfd_error_handler (_("%pB: %s unsupported"),
-			      input_bfd, ppc64_elf_howto_table[r_type]->name);
+	  if (r_type < ARRAY_SIZE (ppc64_elf_howto_table)
+	      && ppc64_elf_howto_table[r_type] != NULL)
+	    /* xgettext:c-format */
+	    _bfd_error_handler (_("%pB: %s unsupported"),
+				input_bfd, ppc64_elf_howto_table[r_type]->name);
+	  else
+	    /* xgettext:c-format */
+	    _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+				input_bfd, r_type);
 
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = false;
@@ -17909,7 +17911,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       /* Dynamic relocs are not propagated for SEC_DEBUGGING sections
 	 because such sections are not SEC_ALLOC and thus ld.so will
 	 not process them.  */
-      howto = ppc64_elf_howto_table[(int) r_type];
+      howto = ppc64_elf_howto_table[r_type];
       if (unresolved_reloc
 	  && !((input_section->flags & SEC_DEBUGGING) != 0
 	       && h->elf.def_dynamic)
