@@ -38,6 +38,70 @@ if { [build_executable "failed to build" $testfile $srcfile \
     return
 }
 
+# Return a list of shared libraries extract from the "info sharedlibrary"
+# command.  Each item in the list is itself a list with the following items:
+#
+#  - "from" address
+#  - "to" address
+#  - namespace ID
+#  - name (file path)
+
+proc get_info_shared {{arg ""}} {
+    set from_re "($::hex)\\s+"
+    set to_re "($::hex)\\s+"
+    set ns_re "(?:($::decimal)\\s+)?"
+    set syms_read_re "(Yes( \\(\\*\\))?|No)\\s+"
+    set name_re "(\[^\r\n\]+)"
+    set libs {}
+
+    gdb_test_multiple "info sharedlibrary $arg" "" {
+	-re {From\s+To\s+(NS\s+)?Syms Read\s+Shared Object Library\r\n} {
+		exp_continue
+	}
+
+	-re "^${from_re}${to_re}${ns_re}${syms_read_re}${name_re}\r\n" {
+		set from $expect_out(1,string)
+		set to $expect_out(2,string)
+		set ns $expect_out(3,string)
+		set name $expect_out(4,string)
+
+		lappend libs [list $from $to $ns $name]
+		exp_continue
+	}
+
+	-re {^\(\*\): Shared library is missing debugging information\.\r\n} {
+	    exp_continue
+	}
+
+	-re "^$::gdb_prompt " {
+	    pass $gdb_test_name
+	}
+    }
+
+    return $libs
+}
+
+# Verify that "info sharedlibrary" does not contain duplicate entries.
+
+proc check_no_duplicates {} {
+    with_test_prefix "check no duplicates" {
+	set libs [get_info_shared]
+	array set seen {}
+	set seen_duplicate 0
+
+	foreach lib $libs {
+	    if {[info exists seen($lib)]} {
+		verbose -log "already seen: $lib"
+		set seen_duplicate 1
+	    }
+
+	    set seen($lib) 1
+	}
+
+	gdb_assert {!$seen_duplicate} "no duplicates"
+    }
+}
+
 # Run the command "info sharedlibrary" and get the first namespace
 # for the so
 proc get_first_so_ns {} {
@@ -80,6 +144,8 @@ proc test_info_shared {} {
     gdb_test "info sharedlibrary" \
 	"From\\s+To\\s+Linker NS\\s+Syms\\s+Read\\s+Shared Object Library.*" \
 	"after loading everything"
+
+    check_no_duplicates
 
     gdb_assert {[get_first_so_ns] == 1} "before closing any library"
 

@@ -34,6 +34,10 @@ struct svr4_so;
 
 struct lm_info_svr4 final : public lm_info
 {
+  explicit lm_info_svr4 (CORE_ADDR debug_base)
+    : debug_base (debug_base)
+  {}
+
   /* Amount by which addresses in the binary should be relocated to
      match the inferior.  The direct inferior value is L_ADDR_INFERIOR.
      When prelinking is involved and the prelink base address changes,
@@ -49,6 +53,18 @@ struct lm_info_svr4 final : public lm_info
 
   /* Values read in from inferior's fields of the same name.  */
   CORE_ADDR l_ld = 0, l_next = 0, l_prev = 0, l_name = 0;
+
+  /* The address of the dynamic linker structure (r_debug) this solib comes
+     from.  This identifies which namespace this library is in.
+
+     This field can be 0 in the following situations:
+
+       - we receive the libraries through XML from an old gdbserver that
+	 doesn't include the "lmid" field
+       - the default debug base is not yet known
+
+     In other cases, this field should have a sensible value.  */
+  CORE_ADDR debug_base;
 };
 
 using lm_info_svr4_up = std::unique_ptr<lm_info_svr4>;
@@ -121,8 +137,9 @@ private:
   CORE_ADDR find_r_ldsomap (svr4_info *info) const;
   owning_intrusive_list<solib> default_sos (svr4_info *info) const;
   int read_so_list (svr4_info *info, CORE_ADDR lm, CORE_ADDR prev_lm,
-		    std::vector<svr4_so> &sos, int ignore_first) const;
-  lm_info_svr4_up read_lm_info (CORE_ADDR lm_addr) const;
+		    CORE_ADDR debug_base, std::vector<svr4_so> &sos,
+		    int ignore_first) const;
+  lm_info_svr4_up read_lm_info (CORE_ADDR lm_addr, CORE_ADDR debug_base) const;
   int has_lm_dynamic_from_link_map () const;
   CORE_ADDR lm_addr_check (const solib &so, bfd *abfd) const;
   CORE_ADDR read_r_next (CORE_ADDR debug_base) const;
