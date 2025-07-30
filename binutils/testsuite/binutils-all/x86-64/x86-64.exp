@@ -254,3 +254,36 @@ run_pr33198_test "" "-R .gnu.lto_* -R .gnu.debuglto_* -R .llvm.lto -N __gnu_lto_
 run_pr33198_test "-fat" "-R .gnu.lto_* -R .gnu.debuglto_* -R .llvm.lto -N __gnu_lto_v1"
 run_pr33198_test "" "-R .llvm.lto"
 run_pr33198_test "-fat" "-R .llvm.lto"
+
+set t $srcdir/$subdir/pr33230.obj.bz2
+# We need to strip the ".bz2", but can leave the dirname.
+set test $subdir/[file tail $t]
+set testname [file rootname $test]
+verbose $testname
+set obj tmpdir/pr33230.o
+if {[catch "system \"bzip2 -dc $t > $obj\""] != 0} {
+  untested "bzip2 -dc ($testname)"
+} else {
+    set cmd "$STRIP $obj -o ${obj}.strip"
+    send_log "$cmd\n"
+    verbose "$cmd" 1
+    catch "exec $cmd" got
+    if [regexp "Unable to recognise the format" $got] then {
+	pass "$testname"
+    } else {
+	send_log "$got\n"
+	verbose "$got" 1
+	fail "$testname"
+    }
+    set cmd "$STRIP --input-target=default $obj -o ${obj}.strip"
+    send_log "$cmd\n"
+    verbose "$cmd" 1
+    catch "exec $cmd" got
+    if [regexp "Unable to recognise the format" $got] then {
+	pass "$testname"
+    } else {
+	send_log "$got\n"
+	verbose "$got" 1
+	fail "$testname (--input-target=default)"
+    }
+}

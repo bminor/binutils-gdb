@@ -2661,7 +2661,8 @@ set_long_section_mode (bfd *output_bfd, bfd *input_bfd, enum long_section_name_h
    Returns TRUE upon success, FALSE otherwise.  */
 
 static bool
-copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
+copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch,
+	     bool target_defaulted)
 {
   bfd_vma start;
   long symcount;
@@ -2812,7 +2813,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
       imach = 0;
     }
   if (!bfd_set_arch_mach (obfd, iarch, imach)
-      && (ibfd->target_defaulted
+      && (target_defaulted
 	  || bfd_get_arch (ibfd) != bfd_get_arch (obfd)))
     {
       if (bfd_get_arch (ibfd) == bfd_arch_unknown)
@@ -3615,7 +3616,8 @@ fail:
 static bool
 copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	      bool force_output_target,
-	      const bfd_arch_info_type *input_arch)
+	      const bfd_arch_info_type *input_arch,
+	      bool target_defaulted)
 {
   struct name_list
     {
@@ -3772,7 +3774,8 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 #endif
       if (ok_object)
 	{
-	  ok = copy_object (this_element, output_element, input_arch);
+	  ok = copy_object (this_element, output_element, input_arch,
+			    target_defaulted);
 
 	  if (!ok && bfd_get_arch (this_element) == bfd_arch_unknown)
 	    /* Try again as an unknown object file.  */
@@ -3872,6 +3875,8 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
   char **core_matching;
   off_t size = get_file_size (input_filename);
   const char *target = input_target;
+  bool target_defaulted = (!input_target
+			   || strcmp (input_target, "default") == 0);
 
   if (size < 1)
     {
@@ -3979,7 +3984,7 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
 	}
 
       if (!copy_archive (ibfd, obfd, output_target, force_output_target,
-			 input_arch))
+			 input_arch, target_defaulted))
 	status = 1;
     }
   else if (
@@ -4034,7 +4039,7 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
       else
 #endif
 	{
-	  if (! copy_object (ibfd, obfd, input_arch))
+	  if (! copy_object (ibfd, obfd, input_arch, target_defaulted))
 	    status = 1;
 
 	  /* PR 17512: file: 0f15796a.
