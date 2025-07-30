@@ -1291,7 +1291,7 @@ namespace eval Term {
 
 	for {set y 0} {$y < $_rows} {incr y} {
 	    set fmt [format %5d $y]
-	    verbose -log "$fmt [get_line_1 $y "" $attrs]"
+	    verbose -log "$fmt [get_line_1 $y {} $attrs]"
 	}
     }
 
