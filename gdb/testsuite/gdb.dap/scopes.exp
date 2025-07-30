@@ -133,6 +133,13 @@ set refs [lindex [dap_check_request_and_response "fetch contents of dei" \
 set deivals [dict get $refs body variables]
 gdb_assert {[llength $deivals] == 2} "dei has two members"
 
+# Request more children than exist.  See PR dap/33228.
+set seq [dap_send_request variables \
+	     [format {o variablesReference [i %d] count [i 100]} $dei_ref]]
+lassign [dap_read_response variables $seq] response ignore
+gdb_assert {[dict get $response success] == "false"} \
+    "variables with invalid count"
+
 set num [dict get $reg_scope variablesReference]
 lassign [dap_check_request_and_response "fetch all registers" \
 	     "variables" \

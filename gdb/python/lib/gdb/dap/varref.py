@@ -146,6 +146,10 @@ class BaseReference(ABC):
         if self._children is None:
             self._children = [None] * self.child_count()
         for idx in range(start, start + count):
+            if idx >= len(self._children):
+                raise DAPException(
+                    f"requested child {idx} outside range of variable {self._ref}"
+                )
             if self._children[idx] is None:
                 (name, value) = self.fetch_one_child(idx)
                 name = self._compute_name(name)
