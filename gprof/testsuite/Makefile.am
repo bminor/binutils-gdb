@@ -37,7 +37,9 @@ tst-gmon-gprof.out: tst-gmon$(EXEEXT) $(GPROF)
 
 check_SCRIPTS += tst-gmon-gprof-l.sh
 check_DATA += tst-gmon-gprof-l.out
-tst-gmon-gprof-l.out: tst-gmon$(EXEEXT) $(GPROF)
+# Run tst-gmon-gprof-l.sh after tst-gmon-gprof.sh to avoid the race
+# condition since they both generate gmon.out.
+tst-gmon-gprof-l.out: tst-gmon$(EXEEXT) $(GPROF) tst-gmon-gprof.out
 	$(srcdir)/tst-gmon-gprof-l.sh $(GPROF) tst-gmon$(EXEEXT)
 
 endif NATIVE

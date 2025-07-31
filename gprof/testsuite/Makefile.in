@@ -884,7 +884,9 @@ uninstall-am:
 @NATIVE_TRUE@	$(LINK) tst-gmon.$(OBJEXT)
 @NATIVE_TRUE@tst-gmon-gprof.out: tst-gmon$(EXEEXT) $(GPROF)
 @NATIVE_TRUE@	$(srcdir)/tst-gmon-gprof.sh $(GPROF) tst-gmon$(EXEEXT)
-@NATIVE_TRUE@tst-gmon-gprof-l.out: tst-gmon$(EXEEXT) $(GPROF)
+# Run tst-gmon-gprof-l.sh after tst-gmon-gprof.sh to avoid the race
+# condition since they both generate gmon.out.
+@NATIVE_TRUE@tst-gmon-gprof-l.out: tst-gmon$(EXEEXT) $(GPROF) tst-gmon-gprof.out
 @NATIVE_TRUE@	$(srcdir)/tst-gmon-gprof-l.sh $(GPROF) tst-gmon$(EXEEXT)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
