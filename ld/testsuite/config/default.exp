@@ -185,8 +185,11 @@ if {[istarget mips64*-*-linux*] &&
 }
 
 if { [istarget rx-*-*] } {
-    global ASFLAGS
     set ASFLAGS "-muse-conventional-section-names"
+}
+
+if { [istarget ia64-*-*] } {
+    set ASFLAGS "-x"
 }
 
 # Blackfin ELF targets require selection of an explicit CPU.  Use the sim.

@@ -1293,7 +1293,7 @@ proc objcopy_test_elf_common_symbols {} {
 # ia64 specific tests
 if { ([istarget "ia64-*-elf*"]
        || [istarget "ia64-*-linux*"]) } {
-    objcopy_test "ia64 link order" link-order.s object "" ""
+    objcopy_test "ia64 link order" link-order.s object "-x" ""
 }
 
 # ELF specific tests
