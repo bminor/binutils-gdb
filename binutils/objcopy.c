@@ -3953,7 +3953,8 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
 
       /* bfd_get_target does not return the correct value until
 	 bfd_check_format succeeds.  */
-      if (output_target == NULL)
+      if (output_target == NULL
+	  || strcmp (output_target, "default") == 0)
 	{
 	  output_target = bfd_get_target (ibfd);
 	  force_output_target = false;
@@ -4008,7 +4009,8 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
 
       /* bfd_get_target does not return the correct value until
 	 bfd_check_format succeeds.  */
-      if (output_target == NULL)
+      if (output_target == NULL
+	  || strcmp (output_target, "default") == 0)
 	output_target = bfd_get_target (ibfd);
 
       if (ofd >= 0)

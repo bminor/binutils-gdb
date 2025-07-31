@@ -255,6 +255,56 @@ run_pr33198_test "-fat" "-R .gnu.lto_* -R .gnu.debuglto_* -R .llvm.lto -N __gnu_
 run_pr33198_test "" "-R .llvm.lto"
 run_pr33198_test "-fat" "-R .llvm.lto"
 
+proc run_pr33230_test { testname obj strip_flags run_readelf } {
+    global srcdir
+    global subdir
+    global READELF
+    global STRIP
+
+    append strip_flags " --strip-debug"
+    append testname " ($strip_flags)"
+
+    set cmd "$STRIP $strip_flags $obj -o ${obj}.strip"
+    send_log "$cmd\n"
+    verbose "$cmd" 1
+    catch "exec $cmd" got
+    if { $run_readelf == "yes" } {
+	if ![string match "" $got] then {
+	    send_log "$got\n"
+	    verbose "$got" 1
+	    fail "$testname (${obj})"
+	    return
+	}
+	set cmd "$READELF -h $obj"
+	send_log "$cmd\n"
+	verbose "$cmd" 1
+	catch "exec $cmd" got
+	if { ![regexp "Machine: +AArch64" $got] } then {
+	    send_log "$got\n"
+	    verbose "$got" 1
+	    fail "$testname (${obj})"
+	    return
+	}
+	set cmd "$READELF -h ${obj}.strip"
+	send_log "$cmd\n"
+	verbose "$cmd" 1
+	catch "exec $cmd" got
+	if { ![regexp "Machine: +AArch64" $got] } then {
+	    send_log "$got\n"
+	    verbose "$got" 1
+	    fail "$testname (${obj}.strip)"
+	    return
+	}
+    } elseif { ![regexp "Unable to recognise the format" $got] } then {
+	send_log "$got\n"
+	verbose "$got" 1
+	fail "$testname"
+	return
+    }
+
+    pass "$testname"
+}
+
 set t $srcdir/$subdir/pr33230.obj.bz2
 # We need to strip the ".bz2", but can leave the dirname.
 set test $subdir/[file tail $t]
@@ -264,26 +314,12 @@ set obj tmpdir/pr33230.o
 if {[catch "system \"bzip2 -dc $t > $obj\""] != 0} {
   untested "bzip2 -dc ($testname)"
 } else {
-    set cmd "$STRIP $obj -o ${obj}.strip"
-    send_log "$cmd\n"
-    verbose "$cmd" 1
-    catch "exec $cmd" got
-    if [regexp "Unable to recognise the format" $got] then {
-	pass "$testname"
+    catch "exec $STRIP --help" got
+    if { [regexp "elf64-littleaarch64" $got] } {
+	set run_readelf "yes"
     } else {
-	send_log "$got\n"
-	verbose "$got" 1
-	fail "$testname"
+	set run_readelf "no"
     }
-    set cmd "$STRIP --input-target=default $obj -o ${obj}.strip"
-    send_log "$cmd\n"
-    verbose "$cmd" 1
-    catch "exec $cmd" got
-    if [regexp "Unable to recognise the format" $got] then {
-	pass "$testname"
-    } else {
-	send_log "$got\n"
-	verbose "$got" 1
-	fail "$testname (--input-target=default)"
-    }
+    run_pr33230_test "$testname" $obj "" $run_readelf
+    run_pr33230_test "$testname" $obj "--input-target=default" $run_readelf
 }
