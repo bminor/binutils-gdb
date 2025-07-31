@@ -1764,7 +1764,7 @@ if { ([istarget "*-*-linux*"]
 	    "" \
 	    $AFLAGS_PIE \
 	    { pr23161b.c } \
-	    {{readelf {--dyn-syms -rW} pr23161b.rd}} \
+	    {{readelf {--dyn-syms -W} pr23161b.rd}} \
 	    "pr23161a" \
 	    "-fPIC -O0 $NOSANITIZE_CFLAGS" \
 	] \
@@ -1784,23 +1784,17 @@ if { ([istarget "*-*-linux*"]
 	    "" \
 	    $AFLAGS_PIE \
 	    { pr23161b.c } \
-	    {{readelf {--dyn-syms -rW} pr23161b.rd}} \
+	    {{readelf {--dyn-syms -W} pr23161b.rd}} \
 	    "pr23161b" \
 	    "-fPIC -O0 $NOSANITIZE_CFLAGS" \
 	] \
-    ]
-}
-
-if { [istarget "i?86-*-*"]
-     || [istarget "x86_64-*-*"] } {
-    run_ld_link_tests [list \
 	[list \
 	    "Build libpr23161c.so" \
 	    "-shared" \
 	    "" \
 	    "$AFLAGS_PIC" \
 	    { pr23161c.c } \
-	    {{readelf {--dyn-syms -rW} pr23161c.rd}} \
+	    {{readelf {--dyn-syms -W} pr23161c.rd}} \
 	    "libpr23161c.so" \
 	    "-fPIC -O2 $NOSANITIZE_CFLAGS" \
 	] \
@@ -1810,7 +1804,7 @@ if { [istarget "i?86-*-*"]
 	    "" \
 	    $AFLAGS_PIE \
 	    { pr23161b.c } \
-	    {{readelf {--dyn-syms -rW} pr23161d.rd}} \
+	    {{readelf {--dyn-syms -W} pr23161c.rd}} \
 	    "pr23161c" \
 	    "-fPIC -O0 $NOSANITIZE_CFLAGS" \
 	] \
