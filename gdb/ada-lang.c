@@ -1677,8 +1677,6 @@ ada_decode_symbol (const struct general_symbol_info *arg)
 void
 ada_fixup_array_indexes_type (struct type *index_desc_type)
 {
-  int i;
-
   if (index_desc_type == NULL)
     return;
   gdb_assert (index_desc_type->num_fields () > 0);
@@ -1696,13 +1694,13 @@ ada_fixup_array_indexes_type (struct type *index_desc_type)
     return;
 
   /* Fixup each field of INDEX_DESC_TYPE.  */
-  for (i = 0; i < index_desc_type->num_fields (); i++)
+  for (auto &field : index_desc_type->fields ())
    {
-     const char *name = index_desc_type->field (i).name ();
+     const char *name = field.name ();
      struct type *raw_type = ada_check_typedef (ada_find_any_type (name));
 
      if (raw_type)
-       index_desc_type->field (i).set_type (raw_type);
+       field.set_type (raw_type);
    }
 }
 
@@ -7080,17 +7078,16 @@ ada_search_struct_field (const char *name, struct value *arg, int offset,
       else if (ada_is_variant_part (type, i))
 	{
 	  /* PNH: Do we ever get here?  See find_struct_field.  */
-	  int j;
 	  struct type *field_type = ada_check_typedef (type->field (i).type ());
 	  int var_offset = offset + type->field (i).loc_bitpos () / 8;
 
-	  for (j = 0; j < field_type->num_fields (); j += 1)
+	  for (const auto &field : field_type->fields ())
 	    {
-	      struct value *v = ada_search_struct_field /* Force line
-							   break.  */
-		(name, arg,
-		 var_offset + field_type->field (j).loc_bitpos () / 8,
-		 field_type->field (j).type ());
+	      struct value *v
+		= (ada_search_struct_field
+		   (name, arg,
+		    var_offset + field.loc_bitpos () / 8,
+		    field.type ()));
 
 	      if (v != NULL)
 		return v;
@@ -8182,12 +8179,11 @@ ada_is_redundant_index_type_desc (struct type *array_type,
 				  struct type *desc_type)
 {
   struct type *this_layer = check_typedef (array_type);
-  int i;
 
-  for (i = 0; i < desc_type->num_fields (); i++)
+  for (const auto &field : desc_type->fields ())
     {
       if (!ada_is_redundant_range_encoding (this_layer->index_type (),
-					    desc_type->field (i).type ()))
+					    field.type ()))
 	return 0;
       this_layer = check_typedef (this_layer->target_type ());
     }
@@ -8784,9 +8780,9 @@ ada_atr_enum_val (struct expression *exp, enum noside noside, struct type *type,
     error (_("'Enum_Val requires integral argument"));
 
   LONGEST value = value_as_long (arg);
-  for (int i = 0; i < type->num_fields (); ++i)
+  for (const auto &field : type->fields ())
     {
-      if (type->field (i).loc_enumval () == value)
+      if (field.loc_enumval () == value)
 	return value_from_longest (original_type, value);
     }
 
@@ -10502,7 +10498,6 @@ static LONGEST
 convert_char_literal (struct type *type, LONGEST val)
 {
   char name[12];
-  int f;
 
   if (type == NULL)
     return val;
@@ -10519,17 +10514,17 @@ convert_char_literal (struct type *type, LONGEST val)
   else
     xsnprintf (name, sizeof (name), "QWW%08lx", (unsigned long) val);
   size_t len = strlen (name);
-  for (f = 0; f < type->num_fields (); f += 1)
+  for (const auto &field : type->fields ())
     {
       /* Check the suffix because an enum constant in a package will
 	 have a name like "pkg__QUxx".  This is safe enough because we
 	 already have the correct type, and because mangling means
 	 there can't be clashes.  */
-      const char *ename = type->field (f).name ();
+      const char *ename = field.name ();
       size_t elen = strlen (ename);
 
       if (elen >= len && strcmp (name, ename + elen - len) == 0)
-	return type->field (f).loc_enumval ();
+	return field.loc_enumval ();
     }
   return val;
 }

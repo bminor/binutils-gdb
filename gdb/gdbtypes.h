@@ -1080,17 +1080,18 @@ struct type
     this->main_type->m_nfields = num_fields;
   }
 
-  /* Get the fields array of this type.  */
-  struct field *fields () const
-  {
-    return this->main_type->flds_bnds.fields;
-  }
-
   /* Get the field at index IDX.  */
   struct field &field (int idx) const
   {
     gdb_assert (idx >= 0 && idx < num_fields ());
     return this->fields ()[idx];
+  }
+
+  /* Return an array view of the fields.  */
+  gdb::array_view<struct field> fields () const
+  {
+    return gdb::make_array_view (this->main_type->flds_bnds.fields,
+				 num_fields ());
   }
 
   /* Set the fields array of this type.  */
@@ -2470,8 +2471,9 @@ extern struct type *lookup_memberptr_type (struct type *, struct type *);
 extern struct type *lookup_methodptr_type (struct type *);
 
 extern void smash_to_method_type (struct type *type, struct type *self_type,
-				  struct type *to_type, struct field *args,
-				  int nargs, int varargs);
+				  struct type *to_type,
+				  gdb::array_view<struct field> args,
+				  int varargs);
 
 extern void smash_to_memberptr_type (struct type *, struct type *,
 				     struct type *);

@@ -4431,8 +4431,9 @@ again:
 	  if (args == NULL)
 	    return error_type (pp, objfile);
 	  type = dbx_alloc_type (typenums, objfile);
-	  smash_to_method_type (type, domain, return_type, args,
-				nargs, varargs);
+	  smash_to_method_type (type, domain, return_type,
+				gdb::make_array_view (args, nargs),
+				varargs);
 	}
       break;
 

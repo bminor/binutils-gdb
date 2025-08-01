@@ -126,15 +126,15 @@ rust_underscore_fields (struct type *type)
 
   if (type->code () != TYPE_CODE_STRUCT)
     return false;
-  for (int i = 0; i < type->num_fields (); ++i)
+  for (const auto &field : type->fields ())
     {
-      if (!type->field (i).is_static ())
+      if (!field.is_static ())
 	{
 	  char buf[20];
 
 	  xsnprintf (buf, sizeof (buf), "%d", field_number);
 
-	  const char *field_name = type->field (i).name ();
+	  const char *field_name = field.name ();
 	  if (startswith (field_name, "__"))
 	    field_name += 2;
 	  if (strcmp (buf, field_name) != 0)
@@ -376,11 +376,11 @@ rust_array_like_element_type (struct type *type)
 {
   /* Caller must check this.  */
   gdb_assert (rust_slice_type_p (type));
-  for (int i = 0; i < type->num_fields (); ++i)
+  for (const auto &field : type->fields ())
     {
-      if (strcmp (type->field (i).name (), "data_ptr") == 0)
+      if (strcmp (field.name (), "data_ptr") == 0)
 	{
-	  struct type *base_type = type->field (i).type ()->target_type ();
+	  struct type *base_type = field.type ()->target_type ();
 	  if (rewrite_slice_type (base_type, nullptr, 0, nullptr))
 	    return nullptr;
 	  return base_type;
@@ -1017,9 +1017,9 @@ rust_internal_print_type (struct type *type, const char *varstring,
 	  }
 	gdb_puts ("{\n", stream);
 
-	for (int i = 0; i < type->num_fields (); ++i)
+	for (const auto &field : type->fields ())
 	  {
-	    const char *name = type->field (i).name ();
+	    const char *name = field.name ();
 
 	    QUIT;
 

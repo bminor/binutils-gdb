@@ -492,7 +492,7 @@ fake_method::fake_method (type_instance_flags flags,
 
 fake_method::~fake_method ()
 {
-  xfree (m_type.fields ());
+  xfree (m_type.fields ().data ());
 }
 
 namespace expr

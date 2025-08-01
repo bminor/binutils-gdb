@@ -4504,9 +4504,9 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
   else
     {
       struct type *disr_type = nullptr;
-      for (int i = 0; i < type->num_fields (); ++i)
+      for (const auto &field : type->fields ())
 	{
-	  disr_type = type->field (i).type ();
+	  disr_type = field.type ();
 
 	  if (disr_type->code () != TYPE_CODE_STRUCT)
 	    {
@@ -4545,7 +4545,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       field *new_fields
 	= (struct field *) TYPE_ZALLOC (type, ((type->num_fields () + 1)
 					       * sizeof (struct field)));
-      memcpy (new_fields + 1, type->fields (),
+      memcpy (new_fields + 1, type->fields ().data (),
 	      type->num_fields () * sizeof (struct field));
       type->set_fields (new_fields);
       type->set_num_fields (type->num_fields () + 1);
@@ -4559,13 +4559,12 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	 variant name.  For convenience we build a map here.  */
       struct type *enum_type = disr_field->type ();
       gdb::unordered_map<std::string_view, ULONGEST> discriminant_map;
-      for (int i = 0; i < enum_type->num_fields (); ++i)
+      for (const auto &field : enum_type->fields ())
 	{
-	  if (enum_type->field (i).loc_kind () == FIELD_LOC_KIND_ENUMVAL)
+	  if (field.loc_kind () == FIELD_LOC_KIND_ENUMVAL)
 	    {
-	      const char *name
-		= rust_last_path_segment (enum_type->field (i).name ());
-	      discriminant_map[name] = enum_type->field (i).loc_enumval ();
+	      const char *name = rust_last_path_segment (field.name ());
+	      discriminant_map[name] = field.loc_enumval ();
 	    }
 	}
 
@@ -4601,7 +4600,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	  if (sub_type->num_fields () > 0)
 	    {
 	      sub_type->set_num_fields (sub_type->num_fields () - 1);
-	      sub_type->set_fields (sub_type->fields () + 1);
+	      sub_type->set_fields (sub_type->fields ().data () + 1);
 	    }
 	  type->field (i).set_name (variant_name);
 	  sub_type->set_name
@@ -10629,7 +10628,6 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
       smash_to_method_type (fnp->type, type,
 			    this_type->target_type (),
 			    this_type->fields (),
-			    this_type->num_fields (),
 			    this_type->has_varargs ());
 
       /* Handle static member functions.
@@ -10851,8 +10849,7 @@ quirk_gcc_member_function_pointer (struct type *type, struct objfile *objfile)
   self_type = pfn_type->field (0).type ()->target_type ();
   new_type = type_allocator (type).new_type ();
   smash_to_method_type (new_type, self_type, pfn_type->target_type (),
-			pfn_type->fields (), pfn_type->num_fields (),
-			pfn_type->has_varargs ());
+			pfn_type->fields (), pfn_type->has_varargs ());
   smash_to_methodptr_type (type, new_type);
 }
 
@@ -12773,8 +12770,7 @@ read_tag_ptr_to_member_type (struct die_info *die, struct dwarf2_cu *cu)
 	= type_allocator (cu->per_objfile->objfile, cu->lang ()).new_type ();
 
       smash_to_method_type (new_type, domain, to_type->target_type (),
-			    to_type->fields (), to_type->num_fields (),
-			    to_type->has_varargs ());
+			    to_type->fields (), to_type->has_varargs ());
       type = lookup_methodptr_type (new_type);
     }
   else

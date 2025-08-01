@@ -513,20 +513,19 @@ amd64_has_unaligned_fields (struct type *type)
   if (type->code () == TYPE_CODE_STRUCT
       || type->code () == TYPE_CODE_UNION)
     {
-      for (int i = 0; i < type->num_fields (); i++)
+      for (const auto &field : type->fields ())
 	{
-	  struct type *subtype = check_typedef (type->field (i).type ());
+	  struct type *subtype = check_typedef (field.type ());
 
 	  /* Ignore static fields, empty fields (for example nested
 	     empty structures), and bitfields (these are handled by
 	     the caller).  */
-	  if (type->field (i).is_static ()
-	      || (type->field (i).bitsize () == 0
-		  && subtype->length () == 0)
-	      || type->field (i).is_packed ())
+	  if (field.is_static ()
+	      || (field.bitsize () == 0 && subtype->length () == 0)
+	      || field.is_packed ())
 	    continue;
 
-	  int bitpos = type->field (i).loc_bitpos ();
+	  int bitpos = field.loc_bitpos ();
 
 	  if (bitpos % 8 != 0)
 	    return true;

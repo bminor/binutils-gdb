@@ -1312,10 +1312,9 @@ static PyObject *
 typy_has_key (PyObject *self, PyObject *args)
 {
   struct type *type = ((type_object *) self)->type;
-  const char *field;
-  int i;
+  const char *field_name;
 
-  if (!PyArg_ParseTuple (args, "s", &field))
+  if (!PyArg_ParseTuple (args, "s", &field_name))
     return NULL;
 
   /* We want just fields of this type, not of base types, so instead of
@@ -1326,11 +1325,11 @@ typy_has_key (PyObject *self, PyObject *args)
   if (type == NULL)
     return NULL;
 
-  for (i = 0; i < type->num_fields (); i++)
+  for (const auto &field : type->fields ())
     {
-      const char *t_field_name = type->field (i).name ();
+      const char *t_field_name = field.name ();
 
-      if (t_field_name && (strcmp_iw (t_field_name, field) == 0))
+      if (t_field_name && (strcmp_iw (t_field_name, field_name) == 0))
 	Py_RETURN_TRUE;
     }
   Py_RETURN_FALSE;

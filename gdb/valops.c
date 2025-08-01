@@ -45,9 +45,6 @@
 
 /* Local functions.  */
 
-static int typecmp (bool staticp, bool varargs, int nargs,
-		    struct field t1[], const gdb::array_view<value *> t2);
-
 static struct value *search_struct_field (const char *, struct value *, 
 					  struct type *, int);
 
@@ -1766,7 +1763,7 @@ value_string (const gdb_byte *ptr, ssize_t count, struct type *char_type)
 
 
 /* See if we can pass arguments in T2 to a function which takes arguments
-   of types T1.  T1 is a list of NARGS arguments, and T2 is an array_view
+   of types T1.  T1 is an array_view of arguments, and T2 is an array_view
    of the values we're trying to pass.  If some arguments need coercion of
    some sort, then the coerced values are written into T2.  Return value is
    0 if the arguments could be matched, or the position at which they
@@ -1783,8 +1780,8 @@ value_string (const gdb_byte *ptr, ssize_t count, struct type *char_type)
    requested operation is type secure, shouldn't we?  FIXME.  */
 
 static int
-typecmp (bool staticp, bool varargs, int nargs,
-	 struct field t1[], gdb::array_view<value *> t2)
+typecmp (bool staticp, bool varargs,
+	 gdb::array_view<struct field> t1, gdb::array_view<value *> t2)
 {
   int i;
 
@@ -1794,7 +1791,7 @@ typecmp (bool staticp, bool varargs, int nargs,
     t2 = t2.slice (1);
 
   for (i = 0;
-       (i < nargs) && t1[i].type ()->code () != TYPE_CODE_VOID;
+       (i < t1.size ()) && t1[i].type ()->code () != TYPE_CODE_VOID;
        i++)
     {
       struct type *tt1, *tt2;
@@ -2227,7 +2224,6 @@ search_struct_method (const char *name, struct value **arg1p,
 		gdb_assert (args.has_value ());
 		if (!typecmp (TYPE_FN_FIELD_STATIC_P (f, j),
 			      TYPE_FN_FIELD_TYPE (f, j)->has_varargs (),
-			      TYPE_FN_FIELD_TYPE (f, j)->num_fields (),
 			      TYPE_FN_FIELD_ARGS (f, j), *args))
 		  {
 		    if (TYPE_FN_FIELD_VIRTUAL_P (f, j))

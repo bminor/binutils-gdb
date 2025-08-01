@@ -299,8 +299,6 @@ void
 f_language::f_type_print_base (struct type *type, struct ui_file *stream,
 			       int show, int level) const
 {
-  int index;
-
   QUIT;
 
   stream->wrap_here (4);
@@ -423,14 +421,13 @@ f_language::f_type_print_base (struct type *type, struct ui_file *stream,
       if (show > 0)
 	{
 	  gdb_puts ("\n", stream);
-	  for (index = 0; index < type->num_fields (); index++)
+	  for (const auto &field : type->fields ())
 	    {
-	      f_type_print_base (type->field (index).type (), stream,
-				 show - 1, level + 4);
+	      f_type_print_base (field.type (), stream, show - 1, level + 4);
 	      gdb_puts (" :: ", stream);
-	      fputs_styled (type->field (index).name (),
+	      fputs_styled (field.name (),
 			    variable_name_style.style (), stream);
-	      f_type_print_varspec_suffix (type->field (index).type (),
+	      f_type_print_varspec_suffix (field.type (),
 					   stream, show - 1, 0, 0, 0, false);
 	      gdb_puts ("\n", stream);
 	    }
