@@ -18,7 +18,7 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-extern const char i386_mnemonics[];
+static const char i386_mnemonics[];
 
 #define MN_ud0 0x1
 #define MN_prefetcht0 0x5

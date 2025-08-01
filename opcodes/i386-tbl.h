@@ -48232,7 +48232,7 @@ static const i386_op_off_t i386_op_sets[] =
 
 /* i386 mnemonics table.  */
 
-const char i386_mnemonics[] =
+static const char i386_mnemonics[] =
   "\0""ud0"
   "\0""prefetcht0"
   "\0""prefetchit0"

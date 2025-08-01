@@ -2062,8 +2062,8 @@ process_i386_opcodes (FILE *table)
   process_copyright (fp);
 
   fprintf (table, "\n/* i386 mnemonics table.  */\n\n");
-  fprintf (table, "const char i386_mnemonics[] =\n");
-  fprintf (fp, "\nextern const char i386_mnemonics[];\n\n");
+  fprintf (table, "static const char i386_mnemonics[] =\n");
+  fprintf (fp, "\nstatic const char i386_mnemonics[];\n\n");
 
   str = NULL;
   for (l = strlen (opcode_array[offs = j = 0]->name); j < i; j++)
