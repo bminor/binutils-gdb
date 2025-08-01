@@ -4204,25 +4204,58 @@ captured_main (int argc, char *argv[])
   while ((longindex = -1,
 	  optc = getopt_long (argc, argv, "+", longopts, &longindex)) != -1)
     {
-      /* We only support '--option=value' form, not '--option value'.  To
-	 achieve this, if global OPTARG points to the start of the previous
-	 ARGV entry, then we must have used the second (unsupported) form,
-	 so set OPTARG to NULL and decrement OPTIND to make it appear that
-	 there was no value passed.  If the option requires an argument,
-	 then this means we should convert OPTC to '?' to indicate an
-	 error.  */
-      if (longindex != -1
-	  && longopts[longindex].has_arg != no_argument)
-	{
-	  if (optarg == argv[optind - 1])
-	    {
-	      optarg = nullptr;
-	      --optind;
-	    }
+      /* As a GNU extension, getopt_long supports '--arg value' form,
+	 without an '=' symbol between the 'arg' and the 'value'.  This
+	 block aids in supporting this form.
 
-	  if (longopts[longindex].has_arg == required_argument
-	      && optarg == nullptr)
-	    optc = '?';
+	 If we found a matching entry in LONGOPTS, the entry has an
+	 optional argument, and OPTARG is NULL, then this indicates that we
+	 saw the '--arg value' form. Look at the next ARGV entry to see if
+	 it exists, and doesn't look like a port number, or the start of
+	 another argument.  If this is the case, then make the next ARGV
+	 entry the argument value.  Otherwise, continue with no
+	 argument.
+
+	 If we found a matching entry in LONGOPTS, the entry has a required
+	 argument, then OPTARG will not be NULL.  In this case, if the
+	 start of OPTARG is the start of the previous ARGV entry, then this
+	 indicates we saw the '--arg value' form.  If OPTARG looks like a
+	 port number, or the start of another argument, then assume the
+	 user didn't in fact pass a value, but forgot.  Pretend we are
+	 missing the argument value.  */
+      if (longindex != -1
+	  && ((longopts[longindex].has_arg == optional_argument
+	       &&optarg == nullptr)
+	      || (longopts[longindex].has_arg == required_argument
+		  && optarg == argv[optind - 1])))
+	{
+	  if (longopts[longindex].has_arg == optional_argument)
+	    {
+	      /* Claim the next entry from ARGV as the argument value.  */
+	      optarg = argv[optind];
+	      optind++;
+	    }
+	  else
+	    gdb_assert (optarg != nullptr);
+
+	  if (optarg == nullptr
+	      || strcmp (optarg, "-") == 0
+	      || strcmp (optarg, STDIO_CONNECTION_NAME) == 0
+	      || startswith (optarg, "--")
+	      || strchr (optarg, ':') != nullptr)
+	    {
+	      /* OPTARG is NULL, looks like a port number, or could be the
+		 start of another argument.  Clear OPTARG as we don't have
+		 an argument, and decrement OPTIND so the next call to
+		 getopt will process this as an argument.  */
+	      optarg = nullptr;
+	      optind--;
+
+	      /* For required arguments, if we don't have an argument, then
+		 this is an errror, set OPTC to reflect this.  */
+	      if (longopts[longindex].has_arg == required_argument)
+		optc = '?';
+	    }
 	}
 
       switch (optc)
