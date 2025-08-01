@@ -1764,16 +1764,6 @@ desc_base_type (struct type *type)
     return type;
 }
 
-/* True iff TYPE indicates a "thin" array pointer type.  */
-
-static int
-is_thin_pntr (struct type *type)
-{
-  return
-    is_suffix (ada_type_name (desc_base_type (type)), "___XUT")
-    || is_suffix (ada_type_name (desc_base_type (type)), "___XUT___XVE");
-}
-
 /* The descriptor type for thin pointer type TYPE.  */
 
 static struct type *
@@ -1812,14 +1802,45 @@ thin_data_pntr (struct value *val)
     return value_from_longest (data_type, val->address ());
 }
 
-/* True iff TYPE indicates a "thick" array pointer type.  */
+/* Different kinds of Ada-specific pointers.  */
+enum class pointer_kind
+{
+  /* Not a thin or thick pointer.  */
+  NOT_SPECIAL,
+  /* A thin pointer.  */
+  THIN,
+  /* Thick pointer where the bounds are accessed via the P_BOUNDS
+     member, a pointer to the bounds.  */
+  P_BOUNDS,
+  /* Thick pointer where the bounds are accessed via the BOUNDS
+     member, which directly holds the bounds.  */
+  EXTENDED_ACCESS,
+};
 
-static int
-is_thick_pntr (struct type *type)
+/* Return a pointer_kind indicating whether TYPE is a special category
+   of pointer.  Note that TYPE may be NULL, in which case NOT_SPECIAL
+   is returned.  */
+
+static pointer_kind
+categorize_pointer (struct type *type)
 {
   type = desc_base_type (type);
-  return (type != NULL && type->code () == TYPE_CODE_STRUCT
-	  && lookup_struct_elt_type (type, "P_BOUNDS", 1) != NULL);
+  if (type == nullptr)
+    return pointer_kind::NOT_SPECIAL;
+
+  if (is_suffix (ada_type_name (type), "___XUT")
+      || is_suffix (ada_type_name (type), "___XUT___XVE"))
+    return pointer_kind::THIN;
+
+  if (type->code () == TYPE_CODE_STRUCT)
+    {
+      if (lookup_struct_elt_type (type, "P_BOUNDS", 1) != nullptr)
+	return pointer_kind::P_BOUNDS;
+      if (lookup_struct_elt_type (type, "BOUNDS", 1) != nullptr)
+	return pointer_kind::EXTENDED_ACCESS;
+    }
+
+  return pointer_kind::NOT_SPECIAL;
 }
 
 /* If TYPE is the type of an array descriptor (fat or thin pointer) or a
@@ -1830,11 +1851,9 @@ desc_bounds_type (struct type *type)
 {
   struct type *r;
 
+  pointer_kind kind = categorize_pointer (type);
   type = desc_base_type (type);
-
-  if (type == NULL)
-    return NULL;
-  else if (is_thin_pntr (type))
+  if (kind == pointer_kind::THIN)
     {
       type = thin_descriptor_type (type);
       if (type == NULL)
@@ -1843,25 +1862,36 @@ desc_bounds_type (struct type *type)
       if (r != NULL)
 	return ada_check_typedef (r);
     }
-  else if (type->code () == TYPE_CODE_STRUCT)
+  else if (kind == pointer_kind::P_BOUNDS
+	   || kind == pointer_kind::EXTENDED_ACCESS)
     {
-      r = lookup_struct_elt_type (type, "P_BOUNDS", 1);
+      const char *field_name = (kind == pointer_kind::EXTENDED_ACCESS
+				? "BOUNDS"
+				: "P_BOUNDS");
+      r = lookup_struct_elt_type (type, field_name, 1);
       if (r != NULL)
-	return ada_check_typedef (ada_check_typedef (r)->target_type ());
+	{
+	  struct type *bounds_type = ada_check_typedef (r);
+	  if (bounds_type->code () == TYPE_CODE_PTR)
+	    bounds_type = ada_check_typedef (bounds_type->target_type ());
+	  return bounds_type;
+	}
     }
   return NULL;
 }
 
 /* If ARR is an array descriptor (fat or thin pointer), or pointer to
-   one, a pointer to its bounds data.  Otherwise, throw an
-   exception.  */
+   one, return a pointer to its bounds data.  For a fat pointer, this
+   means the structure holding the bounds -- so for extended access
+   pointers in particular, it will just return the descriptor itself.
+   Otherwise, throw an exception.  */
 
 static struct value *
 desc_bounds (struct value *arr)
 {
   struct type *type = ada_check_typedef (arr->type ());
-
-  if (is_thin_pntr (type))
+  pointer_kind kind = categorize_pointer (type);
+  if (kind == pointer_kind::THIN)
     {
       struct type *bounds_type =
 	desc_bounds_type (thin_descriptor_type (type));
@@ -1882,14 +1912,18 @@ desc_bounds (struct value *arr)
 	value_from_longest (lookup_pointer_type (bounds_type),
 			    addr - bounds_type->length ());
     }
-
-  else if (is_thick_pntr (type))
+  else if (kind == pointer_kind::P_BOUNDS
+	   || kind == pointer_kind::EXTENDED_ACCESS)
     {
-      struct value *p_bounds = value_struct_elt (&arr, {}, "P_BOUNDS", NULL,
-					       _("Bad GNAT array descriptor"));
+      const char *field_name = (kind == pointer_kind::EXTENDED_ACCESS
+				? "BOUNDS"
+				: "P_BOUNDS");
+      struct value *p_bounds
+	= value_struct_elt (&arr, {}, field_name, nullptr,
+			    _("Bad GNAT array descriptor"));
       struct type *p_bounds_type = p_bounds->type ();
 
-      if (p_bounds_type
+      if (p_bounds_type != nullptr
 	  && p_bounds_type->code () == TYPE_CODE_PTR)
 	{
 	  struct type *target_type = p_bounds_type->target_type ();
@@ -1899,7 +1933,8 @@ desc_bounds (struct value *arr)
 				   (ada_check_typedef (target_type)),
 				   p_bounds);
 	}
-      else
+      else if (p_bounds_type == nullptr
+	       || kind != pointer_kind::EXTENDED_ACCESS)
 	error (_("Bad GNAT array descriptor"));
 
       return p_bounds;
@@ -1939,12 +1974,13 @@ fat_pntr_bounds_bitsize (struct type *type)
 static struct type *
 desc_data_target_type (struct type *type)
 {
+  pointer_kind kind = categorize_pointer (type);
   type = desc_base_type (type);
-
   /* NOTE: The following is bogus; see comment in desc_bounds.  */
-  if (is_thin_pntr (type))
+  if (kind == pointer_kind::THIN)
     return desc_base_type (thin_descriptor_type (type)->field (1).type ());
-  else if (is_thick_pntr (type))
+  else if (kind == pointer_kind::P_BOUNDS
+	   || kind == pointer_kind::EXTENDED_ACCESS)
     {
       struct type *data_type = lookup_struct_elt_type (type, "P_ARRAY", 1);
 
@@ -1963,10 +1999,11 @@ static struct value *
 desc_data (struct value *arr)
 {
   struct type *type = arr->type ();
-
-  if (is_thin_pntr (type))
+  pointer_kind kind = categorize_pointer (type);
+  if (kind == pointer_kind::THIN)
     return thin_data_pntr (arr);
-  else if (is_thick_pntr (type))
+  else if (kind == pointer_kind::P_BOUNDS
+	   || kind == pointer_kind::EXTENDED_ACCESS)
     return value_struct_elt (&arr, {}, "P_ARRAY", NULL,
 			     _("Bad GNAT array descriptor"));
   else
@@ -2164,7 +2201,10 @@ ada_type_of_array (struct value *arr, int bounds)
 	return ada_check_typedef (arr->type ());
 
       descriptor = desc_bounds (arr);
-      if (value_as_long (descriptor) == 0)
+      /* In the extended access case, the bounds struct is "inline" so
+	 the pointer cannot be NULL.  */
+      if (ada_check_typedef (descriptor->type ())->code () == TYPE_CODE_PTR
+	  && value_as_long (descriptor) == 0)
 	return NULL;
       while (arity > 0)
 	{
@@ -2305,7 +2345,8 @@ ada_is_unconstrained_packed_array_type (struct type *type)
   /* If we saw GNAT encodings, then the above code is sufficient.
      However, with minimal encodings, we will just have a thick
      pointer instead.  */
-  if (is_thick_pntr (type))
+  pointer_kind kind = categorize_pointer (type);
+  if (kind == pointer_kind::P_BOUNDS || kind == pointer_kind::EXTENDED_ACCESS)
     {
       type = desc_base_type (type);
       /* The structure's first field is a pointer to an array, so this
@@ -2357,7 +2398,9 @@ decode_packed_array_bitsize (struct type *type)
   tail = strstr (raw_name, "___XP");
   if (tail == nullptr)
     {
-      gdb_assert (is_thick_pntr (type));
+      pointer_kind kind = categorize_pointer (type);
+      gdb_assert (kind == pointer_kind::P_BOUNDS
+		  || kind == pointer_kind::EXTENDED_ACCESS);
       /* The structure's first field is a pointer to an array, so this
 	 fetches the array type.  */
       type = type->field (0).type ()->target_type ();
@@ -3018,8 +3061,11 @@ value_assign_to_component (struct value *container, struct value *component,
 bool
 ada_is_access_to_unconstrained_array (struct type *type)
 {
-  return (type->code () == TYPE_CODE_TYPEDEF
-	  && is_thick_pntr (ada_typedef_target_type (type)));
+  if (type->code () != TYPE_CODE_TYPEDEF)
+    return false;
+  pointer_kind kind = categorize_pointer (ada_typedef_target_type (type));
+  return (kind == pointer_kind::P_BOUNDS
+	  || kind == pointer_kind::EXTENDED_ACCESS);
 }
 
 /* The value of the element of array ARR at the ARITY indices given in IND.
@@ -11054,7 +11100,9 @@ ada_unop_ind_operation::evaluate (struct type *expect_type,
 
 	  if (arrType == NULL)
 	    error (_("Attempt to dereference null array pointer."));
-	  if (is_thick_pntr (type))
+	  pointer_kind kind = categorize_pointer (type);
+	  if (kind == pointer_kind::P_BOUNDS
+	      || kind == pointer_kind::EXTENDED_ACCESS)
 	    return arg1;
 	  return value_at_lazy (arrType, 0);
 	}
