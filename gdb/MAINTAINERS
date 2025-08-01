@@ -234,7 +234,7 @@ Pedro Alves			pedro@palves.net
 John Baldwin			jhb@freebsd.org
 Kevin Buettner			kevinb@redhat.com
 Andrew Burgess			aburgess@redhat.com
-Luis Machado			luis.machado@arm.com
+Luis Machado			luis.machado.foss@gmail.com
 Simon Marchi			simon.marchi@polymtl.ca
 Tom Tromey			tom@tromey.com
 Tom de Vries			tdevries@suse.de
@@ -320,7 +320,7 @@ the native maintainer when resolving ABI issues.
 
 	aarch64		--target=aarch64-elf
 			Alan Hayward		alan.hayward@arm.com
-			Luis Machado		luis.machado@arm.com
+			Luis Machado		luis.machado.foss@gmail.com
 
 	alpha		--target=alpha-elf
 
@@ -332,7 +332,7 @@ the native maintainer when resolving ABI issues.
 
 	arm		--target=arm-elf
 			Alan Hayward		alan.hayward@arm.com
-			Luis Machado		luis.machado@arm.com
+			Luis Machado		luis.machado.foss@gmail.com
 
 	avr		--target=avr
 
