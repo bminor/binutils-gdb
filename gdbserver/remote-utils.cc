@@ -557,8 +557,8 @@ hex_or_minus_one (const char *buf, const char **obuf)
   return ret;
 }
 
-/* Extract a PTID from BUF.  If non-null, OBUF is set to the to one
-   passed the last parsed char.  Returns null_ptid on error.  */
+/* Extract a PTID from BUF.  If non-null, OBUF is set to one past the last
+   parsed char.  Throws on error.  */
 ptid_t
 read_ptid (const char *buf, const char **obuf)
 {
@@ -586,6 +586,13 @@ read_ptid (const char *buf, const char **obuf)
 
   /* No multi-process.  Just a tid.  */
   ULONGEST tid = hex_or_minus_one (p, &pp);
+
+  /* Handle special thread ids.  */
+  if (tid == (ULONGEST) -1)
+    return minus_one_ptid;
+
+  if (tid == 0)
+    return null_ptid;
 
   /* Since GDB is not sending a process id (multi-process extensions
      are off), then there's only one process.  Default to the first in
