@@ -72,7 +72,7 @@ struct ppc_mopt {
   ppc_cpu_t sticky;
 };
 
-struct ppc_mopt ppc_opts[] = {
+static const struct ppc_mopt ppc_opts[] = {
   { "403",     PPC_OPCODE_PPC | PPC_OPCODE_403,
     0 },
   { "405",     PPC_OPCODE_PPC | PPC_OPCODE_403 | PPC_OPCODE_405,
