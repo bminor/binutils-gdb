@@ -4024,28 +4024,41 @@ static void
 print_sme_za_list (char *buf, size_t size, int mask,
 		   struct aarch64_styler *styler)
 {
-  const char* zan[] = { "za",    "za0.h", "za1.h", "za0.s",
-                        "za1.s", "za2.s", "za3.s", "za0.d",
-                        "za1.d", "za2.d", "za3.d", "za4.d",
-                        "za5.d", "za6.d", "za7.d", " " };
-  const int zan_v[] = { 0xff, 0x55, 0xaa, 0x11,
-                        0x22, 0x44, 0x88, 0x01,
-                        0x02, 0x04, 0x08, 0x10,
-                        0x20, 0x40, 0x80, 0x00 };
-  int i, k;
-  const int ZAN_SIZE = sizeof(zan) / sizeof(zan[0]);
+  static const struct {
+    unsigned char mask;
+    char name[7];
+  } zan[] = {
+    { 0xff, "za" },
+    { 0x55, "za0.h" },
+    { 0xaa, "za1.h" },
+    { 0x11, "za0.s" },
+    { 0x22, "za1.s" },
+    { 0x44, "za2.s" },
+    { 0x88, "za3.s" },
+    { 0x01, "za0.d" },
+    { 0x02, "za1.d" },
+    { 0x04, "za2.d" },
+    { 0x08, "za3.d" },
+    { 0x10, "za4.d" },
+    { 0x20, "za5.d" },
+    { 0x40, "za6.d" },
+    { 0x80, "za7.d" },
+    { 0x00, " " },
+  };
+  int k;
 
   k = snprintf (buf, size, "{");
-  for (i = 0; i < ZAN_SIZE; i++)
+  for (unsigned int i = 0; i < ARRAY_SIZE (zan); i++)
     {
-      if ((mask & zan_v[i]) == zan_v[i])
-        {
-          mask &= ~zan_v[i];
-          if (k > 1)
+      if ((mask & zan[i].mask) == zan[i].mask)
+	{
+	  mask &= ~zan[i].mask;
+	  if (k > 1)
 	    k += snprintf (buf + k, size - k, ", ");
 
-	  k += snprintf (buf + k, size - k, "%s", style_reg (styler, zan[i]));
-        }
+	  k += snprintf (buf + k, size - k, "%s",
+			 style_reg (styler, zan[i].name));
+	}
       if (mask == 0)
         break;
     }
