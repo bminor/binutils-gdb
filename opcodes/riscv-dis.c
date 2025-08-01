@@ -1612,7 +1612,7 @@ typedef enum
 
 /* Valid RISCV disassembler options.  */
 
-static struct
+static const struct
 {
   const char *name;
   const char *description;
