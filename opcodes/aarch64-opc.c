@@ -814,7 +814,7 @@ struct operand_qualifier_data
 };
 
 /* Indexed by the operand qualifier enumerators.  */
-struct operand_qualifier_data aarch64_opnd_qualifiers[] =
+static const struct operand_qualifier_data aarch64_opnd_qualifiers[] =
 {
   {0, 0, 0, "NIL", OQK_NIL},
 
