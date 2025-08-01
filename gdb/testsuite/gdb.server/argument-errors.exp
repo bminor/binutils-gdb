@@ -1,0 +1,81 @@
+# This testcase is part of GDB, the GNU debugger.
+#
+# Copyright 2025 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test gdbserver prints a suitable message when argument values are
+# missing.
+
+load_lib gdbserver-support.exp
+
+standard_testfile
+
+require allow_gdbserver_tests
+
+set gdbserver [find_gdbserver]
+if { $gdbserver == "" } {
+    unsupported "could not find gdbserver"
+    return
+}
+
+# Start gdbserver using CMD_ARGS and a non-existent program name.  We
+# expect to see an error message matching ERROR_RE from gdbserver.
+proc test_argument_error { cmd_args error_re } {
+    # Fire off gdbserver.  gdbserver should give an error because
+    # --debug-file is missing its argument.
+    set spawn_id [remote_spawn target "$::gdbserver $cmd_args non-existing-program"]
+
+    set saw_expected_error false
+    set test "check gdbserver error: $cmd_args"
+    expect {
+	-i $spawn_id
+	-re $error_re {
+	    set saw_expected_error true
+	    exp_continue
+	}
+	eof {
+	    gdb_assert $saw_expected_error $test
+	    wait
+	}
+	timeout {
+	    fail "$test (timeout)"
+	}
+    }
+
+    # expect defaults to spawn_id in many places.  Avoid confusing any
+    # following code.
+    unset spawn_id
+}
+
+# Check that an argument that expects a value will not use a port, or
+# another argument, as its value.
+foreach arg { --debug-format --debug-file } {
+    test_argument_error "$arg stdio" \
+	"Missing argument value for: $arg"
+    test_argument_error "$arg :54321" \
+	"Missing argument value for: $arg"
+    test_argument_error "$arg -" \
+	"Missing argument value for: $arg"
+    test_argument_error "$arg --once -" \
+	"Missing argument value for: $arg"
+}
+
+# Test unknown argument handling.
+test_argument_error "--unknown -" \
+    "Unknown argument: --unknown"
+test_argument_error "-unknown -" \
+    "Unknown argument: -unknown"
+test_argument_error "--unknown=blah -" \
+    "Unknown argument: --unknown"
