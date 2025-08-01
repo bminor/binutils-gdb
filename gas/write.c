@@ -632,6 +632,10 @@ size_seg (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 #ifdef obj_frob_section
   obj_frob_section (sec);
 #endif
+
+  if (sec->entsize && (sec->size % sec->entsize))
+    as_warn (_("section `%s' size (%#" PRIx64 ") is not a multiple of its entry size %#x"),
+	     sec->name, (uint64_t) sec->size, sec->entsize);
 }
 
 #ifdef DEBUG2
