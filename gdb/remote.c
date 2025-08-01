@@ -5661,7 +5661,7 @@ remote_target::start_remote_1 (int from_tty, int extended_p)
       target_update_thread_list ();
 
       /* Let the stub know that we want it to return the thread.  */
-      set_continue_thread (minus_one_ptid);
+      set_general_thread (any_thread_ptid);
 
       if (thread_count (this) == 0)
 	{
