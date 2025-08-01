@@ -501,7 +501,7 @@ aarch64_ext_ldst_reglist (const aarch64_operand *self ATTRIBUTE_UNUSED,
   /* Number of elements in each structure to be loaded/stored.  */
   unsigned expected_num = get_opcode_dependent_value (inst->opcode);
 
-  struct
+  static const struct
     {
       unsigned is_reserved;
       unsigned num_regs;
