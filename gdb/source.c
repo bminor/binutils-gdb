@@ -774,9 +774,9 @@ prepare_path_for_appending (const char *path)
 
    If FILENAME_OPENED is non-null, set it to a newly allocated string naming
    the actual file opened (this string will always start with a "/").  We
-   have to take special pains to avoid doubling the "/" between the directory
-   and the file, sigh!  Emacs gets confuzzed by this when we print the
-   source file name!!! 
+   have to ensure that we avoid doubling the "/" between the directory and the
+   file, because Emacs has special treatment of double slashes.
+   See "(emacs) Minibuffer File".
 
    If OPTS has OPF_RETURN_REALPATH set return FILENAME_OPENED resolved by
    gdb_realpath.  Even without OPF_RETURN_REALPATH this function still returns
