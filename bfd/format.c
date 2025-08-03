@@ -389,6 +389,11 @@ bfd_set_lto_type (bfd *abfd ATTRIBUTE_UNUSED)
 	    abfd->object_only_section = sec;
 	    break;
 	  }
+	else if (strcmp (sec->name, ".llvm.lto") == 0)
+	  {
+	    type = lto_fat_ir_object;
+	    break;
+	  }
 	else if (lsection.major_version == 0
 		 && startswith (sec->name, ".gnu.lto_.lto.")
 		 && bfd_get_section_contents (abfd, sec, &lsection, 0,
@@ -453,10 +458,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
     }
 
   if (abfd->format != bfd_unknown)
-    {
-      bfd_set_lto_type (abfd);
-      return abfd->format == format;
-    }
+    return abfd->format == format;
 
   if (matching != NULL || *bfd_associated_vector != NULL)
     {
@@ -510,7 +512,20 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 
       cleanup = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
 
-      if (cleanup)
+      /* When called from strip, don't treat archive member nor
+	 standalone fat IR object as an IR object.  For archive
+	 member, it will be copied as an unknown object if the
+	 plugin target is in use or it is a slim IR object.  For
+	 standalone fat IR object, it will be copied as non-IR
+	 object.  */
+      if (cleanup
+#if BFD_SUPPORTS_PLUGINS
+	  && (!abfd->is_strip_input
+	      || !bfd_plugin_target_p (abfd->xvec)
+	      || (abfd->lto_type != lto_fat_ir_object
+		  && abfd->my_archive == NULL))
+#endif
+	  )
 	goto ok_ret;
 
       /* For a long time the code has dropped through to check all

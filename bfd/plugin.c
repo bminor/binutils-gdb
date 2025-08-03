@@ -206,6 +206,9 @@ bfd_plugin_get_symbols_in_object_only (bfd *abfd)
 	  bfd_close (nbfd);
 	  return;
 	}
+
+      /* Copy LTO type derived from input sections.  */
+      abfd->lto_type = nbfd->lto_type;
     }
   else
     {
