@@ -3687,6 +3687,8 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
       bool ok_object;
       const char *element_name;
 
+      this_element->is_strip_input = 1;
+
       element_name = bfd_get_filename (this_element);
       /* PR binutils/17533: Do not allow directory traversal
 	 outside of the current directory tree by archive members.  */
@@ -3768,7 +3770,9 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 
 #if BFD_SUPPORTS_PLUGINS
       /* Copy LTO IR file as unknown object.  */
-      if (bfd_plugin_target_p (this_element->xvec))
+      if ((!lto_sections_removed
+	   && this_element->lto_type == lto_slim_ir_object)
+	  || bfd_plugin_target_p (this_element->xvec))
 	ok_object = false;
       else
 #endif
@@ -3945,6 +3949,8 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
     default:
       break;
     }
+
+  ibfd->is_strip_input = 1;
 
   if (bfd_check_format (ibfd, bfd_archive))
     {
@@ -5066,6 +5072,11 @@ strip_main (int argc, char *argv[])
 					       SECTION_CONTEXT_REMOVE)
 			  || !!find_section_list (".llvm.lto", false,
 					       SECTION_CONTEXT_REMOVE));
+  /* NB: Must keep .gnu.debuglto_* sections unless all GCC LTO sections
+     will be removed to avoid undefined references to symbols in GCC LTO
+     debug sections.  */
+  if (!lto_sections_removed)
+    find_section_list (".gnu.debuglto_*", true, SECTION_CONTEXT_KEEP);
 #endif
 
   i = optind;

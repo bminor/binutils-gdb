@@ -356,3 +356,178 @@ run_cc_link_tests [list \
 	"tmpdir/libstrip-1b-fat-s.a" \
     ] \
 ]
+
+proc run_pr33246_test { llvm fat } {
+    global srcdir
+    global subdir
+    global plug_opt
+    global llvm_plug_opt
+    global ar
+    global CLANG_FOR_TARGET
+    global CC_FOR_TARGET
+    global NM
+    global READELF
+    global strip
+
+    set strip_flags "--strip-debug --enable-deterministic-archives"
+
+    set test pr33246
+    set testname "${test}${llvm}${fat} with $strip_flags"
+
+    if { "$llvm" == "-llvm" } {
+	# Skip native x32 and i?86 targets since system LLVMgold.so may
+	# not be compatible with native x32 and i?86 targets binutils.
+	if { [istarget "x86_64-*-linux*-gnux32"]
+	     || [istarget "i?86-*-*"]
+	     || ![info exists CLANG_FOR_TARGET]
+	     || [string match "" $llvm_plug_opt] } then {
+	    untested $testname
+	    return
+	}
+	set CC $CLANG_FOR_TARGET
+	set binutils_plug_opt "$llvm_plug_opt"
+    } else {
+	if { ![info exists CC_FOR_TARGET]
+	     || [string match "" $plug_opt] } then {
+	    untested $testname
+	    return
+	}
+	set CC $CC_FOR_TARGET
+	set binutils_plug_opt "$plug_opt"
+    }
+
+    append strip_flags " $binutils_plug_opt"
+
+    set src $srcdir/$subdir/${test}.c
+    set obj tmpdir/${test}${llvm}${fat}.o
+    set archive tmpdir/${test}${llvm}${fat}.a
+    set CFLAGS "-c -g -O2 -flto"
+    if { "$fat" == "-fat" } {
+	append CFLAGS " -ffat-lto-objects"
+    } else {
+	append CFLAGS " -fno-fat-lto-objects"
+    }
+
+    set cmd "$CC $CFLAGS -o $obj $src"
+    send_log "$cmd\n"
+    verbose "$cmd" 1
+    catch "exec $cmd" got
+    if ![string match "" $got] then {
+	send_log "$got\n"
+	verbose "$got" 1
+	fail "$testname ($obj)"
+	return
+    }
+
+    set cmd "$strip $strip_flags $obj -o ${obj}.strip"
+    send_log "$cmd\n"
+    verbose "$cmd" 1
+    catch "exec $cmd" got
+    if ![string match "" $got] then {
+	send_log "$got\n"
+	verbose "$got" 1
+	fail "$testname (strip $obj)"
+	return
+    }
+
+    set cmd "$NM $binutils_plug_opt ${obj}.strip"
+    send_log "$cmd\n"
+    verbose "$cmd" 1
+    catch "exec $cmd" got
+    if ![regexp "0+ T foo" $got] then {
+	send_log "$got\n"
+	verbose "$got" 1
+	fail "$testname (strip $obj)"
+	return
+    }
+
+    if { "$fat" == "-fat" } {
+	set cmd "$READELF -SW ${obj}.strip"
+	send_log "$cmd\n"
+	verbose "$cmd" 1
+	catch "exec $cmd" got
+	if [regexp " \.debug_" $got] then {
+	    send_log "$got\n"
+	    verbose "$got" 1
+	    fail "$testname (strip $obj)"
+	    return
+	}
+    } else {
+	set cmd "cmp $obj ${obj}.strip"
+	send_log "$cmd\n"
+	verbose "$cmd" 1
+	catch "exec $cmd" got
+	if ![string match "" $got] then {
+	    send_log "$got\n"
+	    verbose "$got" 1
+	    fail "$testname (strip $obj)"
+	    return
+	}
+    }
+
+    pass "$testname (strip $obj)"
+
+    set cmd "$ar $binutils_plug_opt -D -s -r -c $archive $obj"
+    send_log "$cmd\n"
+    verbose "$cmd" 1
+    catch "exec $cmd" got
+    if ![string match "" $got] then {
+	send_log "$got\n"
+	verbose "$got" 1
+	fail "$testname ($archive)"
+	return
+    }
+
+    set cmd "$strip $strip_flags $archive -o ${archive}.strip"
+    send_log "$cmd\n"
+    verbose "$cmd" 1
+    catch "exec $cmd" got
+    if ![string match "" $got] then {
+	send_log "$got\n"
+	verbose "$got" 1
+	fail "$testname (strip $archive)"
+	return
+    }
+
+    set cmd "$NM $binutils_plug_opt ${archive}.strip"
+    send_log "$cmd\n"
+    verbose "$cmd" 1
+    catch "exec $cmd" got
+    if ![regexp "0+ T foo" $got] then {
+	send_log "$got\n"
+	verbose "$got" 1
+	fail "$testname (strip $archive)"
+	return
+    }
+
+    if { "$fat" == "-fat" } {
+	set cmd "$READELF -SW ${archive}.strip"
+	send_log "$cmd\n"
+	verbose "$cmd" 1
+	catch "exec $cmd" got
+	if [regexp " \.debug_" $got] then {
+	    send_log "$got\n"
+	    verbose "$got" 1
+	    fail "$testname (strip $archive)"
+	    return
+	}
+    } else {
+	set cmd "cmp $archive ${archive}.strip"
+	send_log "$cmd\n"
+	verbose "$cmd" 1
+	catch "exec $cmd" got
+	if ![string match "" $got] then {
+	    send_log "$got\n"
+	    verbose "$got" 1
+	    fail "$testname (strip $archive)"
+	    return
+	}
+    }
+
+    pass "$testname (strip $archive)"
+}
+
+run_pr33246_test "" ""
+run_pr33246_test "" "-fat"
+run_pr33246_test "-llvm" ""
+run_pr33246_test "-llvm" "-fat"
