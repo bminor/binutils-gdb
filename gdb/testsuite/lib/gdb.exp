@@ -10430,7 +10430,11 @@ proc with_override { name override body } {
 proc with_ansi_styling_terminal { body } {
     save_vars { ::env(TERM) ::env(NO_COLOR) ::env(COLORTERM) } {
 	# Set environment variables to allow styling.
-	setenv TERM ansi
+	if { [ishost *-*-*bsd*] } {
+	    setenv TERM ansiw
+	} else {
+	    setenv TERM ansi
+	}
 	unset -nocomplain ::env(NO_COLOR)
 	unset -nocomplain ::env(COLORTERM)
 
