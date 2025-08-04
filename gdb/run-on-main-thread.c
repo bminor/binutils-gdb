@@ -22,6 +22,7 @@
 #include <thread>
 #include <mutex>
 #endif
+#include "gdbsupport/cleanups.h"
 #include "gdbsupport/event-loop.h"
 
 /* The serial event used when posting runnables.  */

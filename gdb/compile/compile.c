@@ -45,6 +45,7 @@
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/scoped_ignore_signal.h"
 #include "gdbsupport/buildargv.h"
+#include "gdbsupport/cleanups.h"
 
 /* Hold "compile" commands.  */
 

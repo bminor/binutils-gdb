@@ -34,6 +34,7 @@
 #include "value.h"
 #include "language.h"
 #include "terminal.h"
+#include "gdbsupport/cleanups.h"
 #include "gdbsupport/job-control.h"
 #include "annotate.h"
 #include "completer.h"

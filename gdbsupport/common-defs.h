@@ -216,7 +216,6 @@
 #include "errors.h"
 #include "print-utils.h"
 #include "common-debug.h"
-#include "cleanups.h"
 #include "common-exceptions.h"
 #include "gdbsupport/poison.h"
 

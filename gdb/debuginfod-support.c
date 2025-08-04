@@ -18,6 +18,7 @@
 
 #include "diagnostics.h"
 #include <errno.h>
+#include "gdbsupport/cleanups.h"
 #include "gdbsupport/scoped_fd.h"
 #include "debuginfod-support.h"
 #include <optional>
