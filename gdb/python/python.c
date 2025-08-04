@@ -1202,15 +1202,22 @@ gdbpy_post_event (PyObject *self, PyObject *args)
 static PyObject *
 gdbpy_interrupt (PyObject *self, PyObject *args)
 {
+#ifdef __MINGW32__
   {
-    /* Make sure the interrupt isn't delivered immediately somehow.
-       This probably is not truly needed, but at the same time it
-       seems more clear to be explicit about the intent.  */
     gdbpy_allow_threads temporarily_exit_python;
     scoped_disable_cooperative_sigint_handling no_python_sigint;
 
     set_quit_flag ();
   }
+#else
+  {
+    /* For targets with support kill() just send SIGINT.  This will be
+       handled as if the user hit Ctrl+C.  This isn't exactly the same as
+       the above, which directly sets the quit flag.  Consider, for
+       example, every place that install_sigint_handler is called.  */
+    kill (getpid (), SIGINT);
+  }
+#endif
 
   Py_RETURN_NONE;
 }
