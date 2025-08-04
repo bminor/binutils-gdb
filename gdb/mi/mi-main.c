@@ -52,7 +52,6 @@
 #include <optional>
 #include "gdbsupport/byte-vector.h"
 
-#include <ctype.h>
 #include "gdbsupport/run-time-clock.h"
 #include <chrono>
 #include "progspace-and-thread.h"

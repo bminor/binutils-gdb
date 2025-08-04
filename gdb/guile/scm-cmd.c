@@ -20,7 +20,6 @@
 /* See README file in this directory for implementation notes, coding
    conventions, et.al.  */
 
-#include <ctype.h>
 #include "charset.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"

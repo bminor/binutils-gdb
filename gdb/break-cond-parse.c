@@ -66,12 +66,12 @@ find_next_token (const char **curr, parse_direction direction)
     {
       gdb_assert (direction == parse_direction::backward);
 
-      while (isspace (**curr))
+      while (c_isspace (**curr))
 	--(*curr);
 
       tok_end = *curr;
 
-      while (!isspace (**curr))
+      while (!c_isspace (**curr))
 	--(*curr);
 
       tok_start = (*curr) + 1;

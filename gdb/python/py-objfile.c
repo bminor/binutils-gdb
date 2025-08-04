@@ -556,7 +556,7 @@ objfpy_build_id_ok (const char *string)
     return 0;
   for (i = 0; i < n; ++i)
     {
-      if (!isxdigit (string[i]))
+      if (!c_isxdigit (string[i]))
 	return 0;
     }
   return 1;

@@ -46,7 +46,6 @@
 #include "cli/cli-style.h"
 #include "gdbsupport/unordered_map.h"
 
-#include <ctype.h>
 #include <algorithm>
 
 /* This enum represents the values that the user can choose when
@@ -488,7 +487,7 @@ read_mapping (const char *line)
 
   p = skip_spaces (p);
   const char *permissions_start = p;
-  while (*p && !isspace (*p))
+  while (*p && !c_isspace (*p))
     p++;
   mapping.permissions = std::string (permissions_start,
 				     (size_t) (p - permissions_start));
@@ -497,7 +496,7 @@ read_mapping (const char *line)
 
   p = skip_spaces (p);
   const char *device_start = p;
-  while (*p && !isspace (*p))
+  while (*p && !c_isspace (*p))
     p++;
   mapping.device = {device_start, (size_t) (p - device_start)};
 
@@ -843,7 +842,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
   char filename[100];
   fileio_error target_errno;
 
-  if (args && isdigit (args[0]))
+  if (args && c_isdigit (args[0]))
     {
       char *tem;
 
@@ -2227,7 +2226,7 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
      specifically under the entry of `/proc/[pid]/stat'.  */
 
   /* Getting rid of the PID, since we already have it.  */
-  while (isdigit (*proc_stat))
+  while (c_isdigit (*proc_stat))
     ++proc_stat;
 
   proc_stat = skip_spaces (proc_stat);
@@ -2299,10 +2298,10 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
     {
       /* Advancing the pointer to the beginning of the UID.  */
       tmpstr += sizeof ("Uid:");
-      while (*tmpstr != '\0' && !isdigit (*tmpstr))
+      while (*tmpstr != '\0' && !c_isdigit (*tmpstr))
 	++tmpstr;
 
-      if (isdigit (*tmpstr))
+      if (c_isdigit (*tmpstr))
 	p->pr_uid = strtol (tmpstr, &tmpstr, 10);
     }
 
@@ -2312,10 +2311,10 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
     {
       /* Advancing the pointer to the beginning of the GID.  */
       tmpstr += sizeof ("Gid:");
-      while (*tmpstr != '\0' && !isdigit (*tmpstr))
+      while (*tmpstr != '\0' && !c_isdigit (*tmpstr))
 	++tmpstr;
 
-      if (isdigit (*tmpstr))
+      if (c_isdigit (*tmpstr))
 	p->pr_gid = strtol (tmpstr, &tmpstr, 10);
     }
 

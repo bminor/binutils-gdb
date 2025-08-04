@@ -31,7 +31,6 @@
 #include "python.h"
 #include "extension-priv.h"
 #include "cli/cli-utils.h"
-#include <ctype.h>
 #include "location.h"
 #include "run-on-main-thread.h"
 #include "observable.h"

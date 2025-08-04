@@ -31,7 +31,6 @@
 #include "cp-abi.h"
 #include "typeprint.h"
 #include "valprint.h"
-#include <ctype.h>
 #include "cli/cli-utils.h"
 #include "extension.h"
 #include "completer.h"
@@ -367,7 +366,7 @@ whatis_exp (const char *exp, int show)
 	{
 	  int seen_one = 0;
 
-	  for (++exp; *exp && !isspace (*exp); ++exp)
+	  for (++exp; *exp && !c_isspace (*exp); ++exp)
 	    {
 	      switch (*exp)
 		{
@@ -413,7 +412,7 @@ whatis_exp (const char *exp, int show)
 
 	  if (!*exp && !seen_one)
 	    error (_("flag expected"));
-	  if (!isspace (*exp))
+	  if (!c_isspace (*exp))
 	    error (_("expected space after format"));
 	  exp = skip_spaces (exp);
 	}

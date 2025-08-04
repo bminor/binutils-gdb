@@ -30,7 +30,6 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <ctype.h>
 #include "gdbsupport/event-loop.h"
 #include "ui-out.h"
 
@@ -1254,7 +1253,7 @@ captured_main_1 (struct captured_main_args *context)
 	 If pid_or_core_arg's first character is a digit, try attach
 	 first and then corefile.  Otherwise try just corefile.  */
 
-      if (isdigit (pid_or_core_arg[0]))
+      if (c_isdigit (pid_or_core_arg[0]))
 	{
 	  ret = catch_command_errors (attach_command, pid_or_core_arg,
 				      !batch_flag);

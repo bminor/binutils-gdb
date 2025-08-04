@@ -25,7 +25,6 @@
 #include "varobj.h"
 #include "language.h"
 #include "value.h"
-#include <ctype.h>
 #include "mi-getopt.h"
 #include "gdbthread.h"
 #include "mi-parse.h"
@@ -109,7 +108,7 @@ mi_cmd_var_create (const char *command, const char *const *argv, int argc)
       gen_name = varobj_gen_name ();
       name = gen_name.c_str ();
     }
-  else if (!isalpha (name[0]))
+  else if (!c_isalpha (name[0]))
     error (_("-var-create: name of object must begin with a letter"));
 
   if (strcmp (frame, "*") == 0)

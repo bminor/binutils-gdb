@@ -61,7 +61,6 @@
 #include "cli/cli-utils.h"
 #include "parser-defs.h"
 #include "user-regs.h"
-#include <ctype.h>
 #include "elf-bfd.h"
 #include "producer.h"
 #include "target-float.h"
@@ -1712,10 +1711,10 @@ static int
 ppc_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
 {
   return (*s == 'i' /* Literal number.  */
-	  || (isdigit (*s) && s[1] == '('
-	      && isdigit (s[2])) /* Displacement.  */
-	  || (*s == '(' && isdigit (s[1])) /* Register indirection.  */
-	  || isdigit (*s)); /* Register value.  */
+	  || (c_isdigit (*s) && s[1] == '('
+	      && c_isdigit (s[2])) /* Displacement.  */
+	  || (*s == '(' && c_isdigit (s[1])) /* Register indirection.  */
+	  || c_isdigit (*s)); /* Register value.  */
 }
 
 /* Implementation of `gdbarch_stap_parse_special_token', as defined in
@@ -1725,7 +1724,7 @@ static expr::operation_up
 ppc_stap_parse_special_token (struct gdbarch *gdbarch,
 			      struct stap_parse_info *p)
 {
-  if (isdigit (*p->arg))
+  if (c_isdigit (*p->arg))
     {
       /* This temporary pointer is needed because we have to do a lookahead.
 	  We could be dealing with a register displacement, and in such case
@@ -1734,7 +1733,7 @@ ppc_stap_parse_special_token (struct gdbarch *gdbarch,
       char *regname;
       int len;
 
-      while (isdigit (*s))
+      while (c_isdigit (*s))
 	++s;
 
       if (*s == '(')

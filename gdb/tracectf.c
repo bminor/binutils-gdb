@@ -28,7 +28,6 @@
 #include "inferior.h"
 #include "gdbthread.h"
 #include "tracefile.h"
-#include <ctype.h>
 #include <algorithm>
 #include "gdbsupport/filestuff.h"
 #include "gdbarch.h"

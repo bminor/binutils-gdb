@@ -43,7 +43,6 @@
 #include "auto-load.h"
 #include "cli/cli-utils.h"
 #include <signal.h>
-#include <ctype.h>
 #include "nat/linux-namespaces.h"
 #include <algorithm>
 #include "gdbsupport/pathstuff.h"

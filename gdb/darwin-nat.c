@@ -47,7 +47,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <signal.h>
-#include <ctype.h>
 #include <sys/sysctl.h>
 #include <sys/proc.h>
 #include <libproc.h>

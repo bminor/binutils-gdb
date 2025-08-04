@@ -516,7 +516,7 @@ s12z_print_ccw_info (struct gdbarch *gdbarch,
 	    gdb_putc (ccw_bits[b], file);
 	}
       else
-	gdb_putc (tolower (ccw_bits[b]), file);
+	gdb_putc (c_tolower (ccw_bits[b]), file);
     }
   gdb_putc ('\n', file);
 }

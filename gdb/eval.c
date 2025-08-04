@@ -38,7 +38,6 @@
 #include "gdbsupport/gdb_obstack.h"
 #include "objfiles.h"
 #include "typeprint.h"
-#include <ctype.h>
 #include "expop.h"
 #include "c-exp.h"
 #include "inferior.h"

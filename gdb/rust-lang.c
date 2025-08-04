@@ -18,7 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
-#include <ctype.h>
 
 #include "block.h"
 #include "c-lang.h"
@@ -1788,7 +1787,7 @@ rust_language::emitchar (int ch, struct type *chtype,
     gdb_puts ("\\t", stream);
   else if (ch == '\0')
     gdb_puts ("\\0", stream);
-  else if (ch >= 32 && ch <= 127 && isprint (ch))
+  else if (ch >= 32 && ch <= 127 && c_isprint (ch))
     gdb_putc (ch, stream);
   else if (ch <= 255)
     gdb_printf (stream, "\\x%02x", ch);

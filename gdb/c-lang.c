@@ -33,7 +33,6 @@
 #include "cp-abi.h"
 #include "cp-support.h"
 #include "gdbsupport/gdb_obstack.h"
-#include <ctype.h>
 #include "gdbcore.h"
 #include "gdbarch.h"
 #include "c-exp.h"

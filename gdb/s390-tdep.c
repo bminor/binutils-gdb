@@ -7057,10 +7057,10 @@ s390_gnu_triplet_regexp (struct gdbarch *gdbarch)
 static int
 s390_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
 {
-  return ((isdigit (*s) && s[1] == '(' && s[2] == '%') /* Displacement
+  return ((c_isdigit (*s) && s[1] == '(' && s[2] == '%') /* Displacement
 							  or indirection.  */
 	  || *s == '%' /* Register access.  */
-	  || isdigit (*s)); /* Literal number.  */
+	  || c_isdigit (*s)); /* Literal number.  */
 }
 
 /* gdbarch init.  */

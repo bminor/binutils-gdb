@@ -26,7 +26,6 @@
 #include "probe.h"
 #include "cp-support.h"
 
-#include <ctype.h>
 #include <string.h>
 
 static std::string
@@ -408,15 +407,15 @@ explicit_location_spec_lex_one (const char **inp,
      whitespace or comma.  */
   if (*start == '-' || *start == '+')
     {
-      while (*inp[0] != '\0' && *inp[0] != ',' && !isspace (*inp[0]))
+      while (*inp[0] != '\0' && *inp[0] != ',' && !c_isspace (*inp[0]))
 	++(*inp);
     }
   else
     {
       /* Handle numbers first, stopping at the next whitespace or ','.  */
-      while (isdigit (*inp[0]))
+      while (c_isdigit (*inp[0]))
 	++(*inp);
-      if (*inp[0] == '\0' || isspace (*inp[0]) || *inp[0] == ',')
+      if (*inp[0] == '\0' || c_isspace (*inp[0]) || *inp[0] == ',')
 	return gdb::unique_xmalloc_ptr<char> (savestring (start,
 							  *inp - start));
 
@@ -425,7 +424,7 @@ explicit_location_spec_lex_one (const char **inp,
       *inp = start;
       while ((*inp)[0]
 	     && (*inp)[0] != ','
-	     && !(isspace ((*inp)[0])
+	     && !(c_isspace ((*inp)[0])
 		  || linespec_lexer_lex_keyword (&(*inp)[1])))
 	{
 	  /* Special case: C++ operator,.  */
@@ -454,14 +453,14 @@ is_cp_operator (const char *start, const char *comma)
     {
       const char *p = comma;
 
-      while (p > start && isspace (p[-1]))
+      while (p > start && c_isspace (p[-1]))
 	p--;
       if (p - start >= CP_OPERATOR_LEN)
 	{
 	  p -= CP_OPERATOR_LEN;
 	  if (strncmp (p, CP_OPERATOR_STR, CP_OPERATOR_LEN) == 0
 	      && (p == start
-		  || !(isalnum (p[-1]) || p[-1] == '_')))
+		  || !(c_isalnum (p[-1]) || p[-1] == '_')))
 	    {
 	      return true;
 	    }
@@ -624,7 +623,7 @@ string_to_explicit_location_spec (const char **argp,
   if (argp == NULL
       || *argp == NULL
       || *argp[0] != '-'
-      || !isalpha ((*argp)[1])
+      || !c_isalpha ((*argp)[1])
       || ((*argp)[0] == '-' && (*argp)[1] == 'p'))
     return NULL;
 
@@ -728,7 +727,7 @@ string_to_explicit_location_spec (const char **argp,
 	}
       /* Only emit an "invalid argument" error for options
 	 that look like option strings.  */
-      else if (opt.get ()[0] == '-' && !isdigit (opt.get ()[1]))
+      else if (opt.get ()[0] == '-' && !c_isdigit (opt.get ()[1]))
 	{
 	  if (completion_info == NULL)
 	    error (_("invalid explicit location argument, \"%s\""), opt.get ());

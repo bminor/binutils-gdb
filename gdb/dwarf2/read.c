@@ -13440,7 +13440,7 @@ ada_get_gnat_encoded_number (const char *encoding, int &k, gdb_mpz *result)
 {
   /* The next character should be an underscore ('_') followed
      by a digit.  */
-  if (encoding[k] != '_' || !isdigit (encoding[k + 1]))
+  if (encoding[k] != '_' || !c_isdigit (encoding[k + 1]))
     return false;
 
   /* Skip the underscore.  */
@@ -13448,7 +13448,7 @@ ada_get_gnat_encoded_number (const char *encoding, int &k, gdb_mpz *result)
   int start = k;
 
   /* Determine the number of digits for our number.  */
-  while (isdigit (encoding[k]))
+  while (c_isdigit (encoding[k]))
     k++;
   if (k == start)
     return false;

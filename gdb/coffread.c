@@ -25,7 +25,6 @@
 
 #include "bfd.h"
 #include "gdbsupport/gdb_obstack.h"
-#include <ctype.h>
 
 #include "coff/internal.h"
 #include "libcoff.h"
@@ -336,7 +335,7 @@ coff_locate_sections (bfd *abfd, asection *sectp, void *csip)
       /* We can have multiple .stab sections if linked with
 	 --split-by-reloc.  */
       for (s = name + sizeof ".stab" - 1; *s != '\0'; s++)
-	if (!isdigit (*s))
+	if (!c_isdigit (*s))
 	  break;
       if (*s == '\0')
 	csi->stabsects->push_back (sectp);
@@ -525,9 +524,9 @@ is_import_fixup_symbol (struct coff_symbol *cs,
   /* The name must start with "__fu<digits>__".  */
   if (!startswith (cs->c_name, "__fu"))
     return 0;
-  if (! isdigit (cs->c_name[4]))
+  if (! c_isdigit (cs->c_name[4]))
     return 0;
-  for (i = 5; cs->c_name[i] != '\0' && isdigit (cs->c_name[i]); i++)
+  for (i = 5; cs->c_name[i] != '\0' && c_isdigit (cs->c_name[i]); i++)
     /* Nothing, just incrementing index past all digits.  */;
   if (cs->c_name[i] != '_' || cs->c_name[i + 1] != '_')
     return 0;

@@ -56,7 +56,6 @@
 #include "stap-probe.h"
 #include "parser-defs.h"
 #include "user-regs.h"
-#include <ctype.h>
 #include "elf/common.h"
 
 /* Under ARM GNU/Linux the traditional way of performing a breakpoint
@@ -1167,10 +1166,10 @@ arm_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
 static int
 arm_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
 {
-  return (*s == '#' || *s == '$' || isdigit (*s) /* Literal number.  */
+  return (*s == '#' || *s == '$' || c_isdigit (*s) /* Literal number.  */
 	  || *s == '[' /* Register indirection or
 			  displacement.  */
-	  || isalpha (*s)); /* Register value.  */
+	  || c_isalpha (*s)); /* Register value.  */
 }
 
 /* This routine is used to parse a special token in ARM's assembly.
@@ -1202,7 +1201,7 @@ arm_stap_parse_special_token (struct gdbarch *gdbarch,
       start = tmp;
 
       /* Register name.  */
-      while (isalnum (*tmp))
+      while (c_isalnum (*tmp))
 	++tmp;
 
       if (*tmp != ',')
@@ -1212,7 +1211,7 @@ arm_stap_parse_special_token (struct gdbarch *gdbarch,
       regname = (char *) alloca (len + 2);
 
       offset = 0;
-      if (isdigit (*start))
+      if (c_isdigit (*start))
 	{
 	  /* If we are dealing with a register whose name begins with a
 	     digit, it means we should prefix the name with the letter

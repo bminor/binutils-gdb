@@ -18,7 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "arch-utils.h"
-#include <ctype.h>
 #include "cli/cli-cmds.h"
 #include "value.h"
 #include "target.h"
@@ -76,12 +75,12 @@ parse_find_args (const char *args, ULONGEST *max_countp,
     {
       ++s;
 
-      while (*s != '\0' && *s != '/' && !isspace (*s))
+      while (*s != '\0' && *s != '/' && !c_isspace (*s))
 	{
-	  if (isdigit (*s))
+	  if (c_isdigit (*s))
 	    {
 	      max_count = atoi (s);
-	      while (isdigit (*s))
+	      while (c_isdigit (*s))
 		++s;
 	      continue;
 	    }

@@ -61,7 +61,6 @@
 #include "stap-probe.h"
 #include "user-regs.h"
 #include "expression.h"
-#include <ctype.h>
 #include <algorithm>
 #include <unordered_set>
 #include "producer.h"
@@ -3895,9 +3894,9 @@ int
 i386_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
 {
   return (*s == '$' /* Literal number.  */
-	  || (isdigit (*s) && s[1] == '(' && s[2] == '%') /* Displacement.  */
+	  || (c_isdigit (*s) && s[1] == '(' && s[2] == '%') /* Displacement.  */
 	  || (*s == '(' && s[1] == '%') /* Register indirection.  */
-	  || (*s == '%' && isalpha (s[1]))); /* Register access.  */
+	  || (*s == '%' && c_isalpha (s[1]))); /* Register access.  */
 }
 
 /* Helper function for i386_stap_parse_special_token.
@@ -3914,7 +3913,7 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 {
   const char *s = p->arg;
 
-  if (isdigit (*s) || *s == '-' || *s == '+')
+  if (c_isdigit (*s) || *s == '-' || *s == '+')
     {
       bool got_minus[3];
       int i;
@@ -3932,7 +3931,7 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 	  got_minus[0] = true;
 	}
 
-      if (!isdigit ((unsigned char) *s))
+      if (!c_isdigit (*s))
 	return {};
 
       displacements[0] = strtol (s, &endp, 10);
@@ -3953,7 +3952,7 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 	  got_minus[1] = true;
 	}
 
-      if (!isdigit ((unsigned char) *s))
+      if (!c_isdigit (*s))
 	return {};
 
       displacements[1] = strtol (s, &endp, 10);
@@ -3974,7 +3973,7 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
 	  got_minus[2] = true;
 	}
 
-      if (!isdigit ((unsigned char) *s))
+      if (!c_isdigit (*s))
 	return {};
 
       displacements[2] = strtol (s, &endp, 10);
@@ -3986,7 +3985,7 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
       s += 2;
       start = s;
 
-      while (isalnum (*s))
+      while (c_isalnum (*s))
 	++s;
 
       if (*s++ != ')')
@@ -4047,7 +4046,7 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 {
   const char *s = p->arg;
 
-  if (isdigit (*s) || *s == '(' || *s == '-' || *s == '+')
+  if (c_isdigit (*s) || *s == '(' || *s == '-' || *s == '+')
     {
       bool offset_minus = false;
       long offset = 0;
@@ -4065,10 +4064,10 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
 	  offset_minus = true;
 	}
 
-      if (offset_minus && !isdigit (*s))
+      if (offset_minus && !c_isdigit (*s))
 	return {};
 
-      if (isdigit (*s))
+      if (c_isdigit (*s))
 	{
 	  char *endp;
 
@@ -4082,7 +4081,7 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
       s += 2;
       start = s;
 
-      while (isalnum (*s))
+      while (c_isalnum (*s))
 	++s;
 
       if (*s != ',' || s[1] != '%')
@@ -4098,7 +4097,7 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
       s += 2;
       start = s;
 
-      while (isalnum (*s))
+      while (c_isalnum (*s))
 	++s;
 
       len_index = s - start;

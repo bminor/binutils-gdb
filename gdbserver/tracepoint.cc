@@ -20,7 +20,6 @@
 #include "gdbthread.h"
 #include "gdbsupport/rsp-low.h"
 
-#include <ctype.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <chrono>
@@ -1867,7 +1866,7 @@ add_tracepoint_action (struct tracepoint *tpoint, const char *packet)
 	    trace_debug ("Want to collect registers");
 	    ++act;
 	    /* skip past hex digits of mask for now */
-	    while (isxdigit(*act))
+	    while (c_isxdigit(*act))
 	      ++act;
 	    break;
 	  }

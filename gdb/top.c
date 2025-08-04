@@ -69,7 +69,6 @@
 
 #include "event-top.h"
 #include <sys/stat.h>
-#include <ctype.h>
 #include "ui-out.h"
 #include "cli-out.h"
 #include "tracepoint.h"

@@ -227,7 +227,7 @@ parse_option (gdb::array_view<const option_def_group> options_group,
 	      match = &o;
 	      match_ctx = grp.ctx;
 
-	      if ((isspace (arg[len]) || arg[len] == '\0')
+	      if ((c_isspace (arg[len]) || arg[len] == '\0')
 		  && strlen (o.name) == len)
 		break; /* Exact match.  */
 	    }
@@ -635,7 +635,7 @@ complete_options (completion_tracker &tracker,
 	      if (ov
 		  && !tracker.have_completions ()
 		  && **args == '\0'
-		  && *args > text && !isspace ((*args)[-1]))
+		  && *args > text && !c_isspace ((*args)[-1]))
 		{
 		  tracker.advance_custom_word_point_by
 		    (*args - text);

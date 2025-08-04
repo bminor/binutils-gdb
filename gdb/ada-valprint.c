@@ -17,7 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include <ctype.h>
 #include "event-top.h"
 #include "extract-store-integer.h"
 #include "gdbtypes.h"
@@ -265,10 +264,10 @@ ada_emit_char (int c, struct type *type, struct ui_file *stream,
   /* If this character fits in the normal ASCII range, and is
      a printable character, then print the character as if it was
      an ASCII character, even if this is a wide character.
-     The UCHAR_MAX check is necessary because the isascii function
+     The UCHAR_MAX check is necessary because the c_isascii function
      requires that its argument have a value of an unsigned char,
      or EOF (EOF is obviously not printable).  */
-  if (c <= UCHAR_MAX && isascii (c) && isprint (c))
+  if (c <= UCHAR_MAX && c_isascii (c) && c_isprint (c))
     {
       if (c == quoter && c == '"')
 	gdb_printf (stream, "\"\"");

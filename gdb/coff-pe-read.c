@@ -35,7 +35,6 @@
 #include "gdbsupport/common-utils.h"
 #include "coff/internal.h"
 
-#include <ctype.h>
 
 /* Internal section information */
 
@@ -189,7 +188,7 @@ add_pe_forwarded_sym (minimal_symbol_reader &reader,
       int i;
 
       for (i = 0; i < forward_dll_name_len; i++)
-	forward_qualified_name[i] = tolower (forward_qualified_name[i]);
+	forward_qualified_name[i] = c_tolower (forward_qualified_name[i]);
       msymbol = lookup_minimal_symbol (current_program_space,
 				       forward_qualified_name.c_str ());
     }

@@ -17,7 +17,6 @@
 
 #include "readline/tilde.h"
 #include "value.h"
-#include <ctype.h>
 #include "arch-utils.h"
 #include "observable.h"
 #include "interps.h"
@@ -49,7 +48,7 @@ parse_auto_binary_operation (const char *arg)
     {
       int length = strlen (arg);
 
-      while (isspace (arg[length - 1]) && length > 0)
+      while (c_isspace (arg[length - 1]) && length > 0)
 	length--;
 
       /* Note that "o" is ambiguous.  */

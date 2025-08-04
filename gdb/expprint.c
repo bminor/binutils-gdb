@@ -33,7 +33,6 @@
 #include "expop.h"
 #include "ada-exp.h"
 
-#include <ctype.h>
 
 /* Meant to be used in debug sessions, so don't export it in a header file.  */
 extern void ATTRIBUTE_USED debug_exp (struct expression *exp);

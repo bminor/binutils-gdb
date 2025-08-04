@@ -16,7 +16,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "symtab.h"
-#include <ctype.h>
 #include "gdbsupport/gdb_regex.h"
 #include "completer.h"
 #include "ui-out.h"
@@ -2053,8 +2052,8 @@ print_doc_line (struct ui_file *stream, const char *str,
   if (for_value_prefix)
     {
       char &c = (*line_buffer)[0];
-      if (islower (c))
-	c = toupper (c);
+      if (c_islower (c))
+	c = c_toupper (c);
       if (line_buffer->back () == '.')
 	line_buffer->pop_back ();
     }
@@ -2227,7 +2226,7 @@ valid_cmd_char_p (int c)
   /* Alas "42" is a legitimate user-defined command.
      In the interests of not breaking anything we preserve that.  */
 
-  return isalnum (c) || c == '-' || c == '_' || c == '.';
+  return c_isalnum (c) || c == '-' || c == '_' || c == '.';
 }
 
 /* See command.h.  */
@@ -2491,7 +2490,7 @@ lookup_cmd (const char **line, struct cmd_list_element *list,
     }
   else
     {
-      if (c->type == set_cmd && **line != '\0' && !isspace (**line))
+      if (c->type == set_cmd && **line != '\0' && !c_isspace (**line))
 	error (_("Argument must be preceded by space."));
 
       /* We've got something.  It may still not be what the caller

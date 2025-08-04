@@ -47,7 +47,6 @@
 #include "parser-defs.h"
 #include "user-regs.h"
 #include "xml-syscall.h"
-#include <ctype.h>
 
 #include "record-full.h"
 #include "linux-record.h"
@@ -1749,9 +1748,9 @@ aarch64_linux_core_read_description (struct gdbarch *gdbarch,
 static int
 aarch64_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
 {
-  return (*s == '#' || isdigit (*s) /* Literal number.  */
+  return (*s == '#' || c_isdigit (*s) /* Literal number.  */
 	  || *s == '[' /* Register indirection.  */
-	  || isalpha (*s)); /* Register value.  */
+	  || c_isalpha (*s)); /* Register value.  */
 }
 
 /* This routine is used to parse a special token in AArch64's assembly.
@@ -1782,7 +1781,7 @@ aarch64_stap_parse_special_token (struct gdbarch *gdbarch,
       start = tmp;
 
       /* Register name.  */
-      while (isalnum (*tmp))
+      while (c_isalnum (*tmp))
 	++tmp;
 
       if (*tmp != ',')
@@ -1810,7 +1809,7 @@ aarch64_stap_parse_special_token (struct gdbarch *gdbarch,
       else if (*tmp == '+')
 	++tmp;
 
-      if (!isdigit (*tmp))
+      if (!c_isdigit (*tmp))
 	return {};
 
       displacement = strtol (tmp, &endp, 10);

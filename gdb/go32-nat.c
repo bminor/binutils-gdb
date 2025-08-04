@@ -103,7 +103,6 @@
 #include "cli/cli-utils.h"
 #include "inf-child.h"
 
-#include <ctype.h>
 #include <unistd.h>
 #include <sys/utsname.h>
 #include <io.h>

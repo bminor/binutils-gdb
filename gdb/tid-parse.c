@@ -20,7 +20,6 @@
 #include "tid-parse.h"
 #include "inferior.h"
 #include "gdbthread.h"
-#include <ctype.h>
 
 /* See tid-parse.h.  */
 
@@ -184,7 +183,7 @@ tid_range_parser::finished () const
 	 or we are not in a range and not in front of an integer, negative
 	 integer, convenience var or negative convenience var.  */
       return (*m_cur_tok == '\0'
-	      || !(isdigit (*m_cur_tok)
+	      || !(c_isdigit (*m_cur_tok)
 		   || *m_cur_tok == '$'
 		   || *m_cur_tok == '*'));
     case STATE_THREAD_RANGE:
@@ -261,7 +260,7 @@ tid_range_parser::get_tid_or_range (int *inf_num,
 	  m_qualified = true;
 	  p = dot + 1;
 
-	  if (isspace (*p))
+	  if (c_isspace (*p))
 	    return false;
 	}
       else
@@ -272,7 +271,7 @@ tid_range_parser::get_tid_or_range (int *inf_num,
 	}
 
       m_range_parser.init (p);
-      if (p[0] == '*' && (p[1] == '\0' || isspace (p[1])))
+      if (p[0] == '*' && (p[1] == '\0' || c_isspace (p[1])))
 	{
 	  /* Setup the number range parser to return numbers in the
 	     whole [1,INT_MAX] range.  */

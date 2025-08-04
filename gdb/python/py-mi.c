@@ -218,11 +218,11 @@ py_object_to_mi_key (PyObject *key_obj)
   {
     gdb_assert (name != nullptr);
 
-    if (*name == '\0' || !isalpha (*name))
+    if (*name == '\0' || !c_isalpha (*name))
       return false;
 
     for (; *name != '\0'; ++name)
-      if (!isalnum (*name) && *name != '_' && *name != '-')
+      if (!c_isalnum (*name) && *name != '_' && *name != '-')
 	return false;
 
     return true;
@@ -363,7 +363,7 @@ gdbpy_notify_mi (PyObject *self, PyObject *args, PyObject *kwargs)
     }
   for (int i = 0; i < name_len; i++)
     {
-      if (!isalnum (name[i]) && name[i] != '-')
+      if (!c_isalnum (name[i]) && name[i] != '-')
 	{
 	  PyErr_Format
 	    (PyExc_ValueError,

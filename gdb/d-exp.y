@@ -38,7 +38,6 @@
 
 %{
 
-#include <ctype.h>
 #include "expression.h"
 #include "value.h"
 #include "parser-defs.h"
@@ -684,15 +683,15 @@ parse_number (struct parser_state *ps, const char *p,
       len = strlen (s);
 
       /* Check suffix for `i' , `fi' or `li' (idouble, ifloat or ireal).  */
-      if (len >= 1 && tolower (s[len - 1]) == 'i')
+      if (len >= 1 && c_tolower (s[len - 1]) == 'i')
 	{
-	  if (len >= 2 && tolower (s[len - 2]) == 'f')
+	  if (len >= 2 && c_tolower (s[len - 2]) == 'f')
 	    {
 	      putithere->typed_val_float.type
 		= parse_d_type (ps)->builtin_ifloat;
 	      len -= 2;
 	    }
-	  else if (len >= 2 && tolower (s[len - 2]) == 'l')
+	  else if (len >= 2 && c_tolower (s[len - 2]) == 'l')
 	    {
 	      putithere->typed_val_float.type
 		= parse_d_type (ps)->builtin_ireal;
@@ -706,13 +705,13 @@ parse_number (struct parser_state *ps, const char *p,
 	    }
 	}
       /* Check suffix for `f' or `l'' (float or real).  */
-      else if (len >= 1 && tolower (s[len - 1]) == 'f')
+      else if (len >= 1 && c_tolower (s[len - 1]) == 'f')
 	{
 	  putithere->typed_val_float.type
 	    = parse_d_type (ps)->builtin_float;
 	  len -= 1;
 	}
-      else if (len >= 1 && tolower (s[len - 1]) == 'l')
+      else if (len >= 1 && c_tolower (s[len - 1]) == 'l')
 	{
 	  putithere->typed_val_float.type
 	    = parse_d_type (ps)->builtin_real;
@@ -1133,8 +1132,8 @@ lex_one_token (struct parser_state *par_state)
 	    /* Hex exponents start with 'p', because 'e' is a valid hex
 	       digit and thus does not indicate a floating point number
 	       when the radix is hex.  */
-	    if ((!hex && !got_e && tolower (p[0]) == 'e')
-		|| (hex && !got_e && tolower (p[0] == 'p')))
+	    if ((!hex && !got_e && c_tolower (p[0]) == 'e')
+		|| (hex && !got_e && c_tolower (p[0] == 'p')))
 	      got_dot = got_e = 1;
 	    /* A '.' always indicates a decimal floating point number
 	       regardless of the radix.  If we have a '..' then its the
@@ -1142,7 +1141,8 @@ lex_one_token (struct parser_state *par_state)
 	    else if (!got_dot && (p[0] == '.' && p[1] != '.'))
 		got_dot = 1;
 	    /* This is the sign of the exponent, not the end of the number.  */
-	    else if (got_e && (tolower (p[-1]) == 'e' || tolower (p[-1]) == 'p')
+	    else if (got_e && (c_tolower (p[-1]) == 'e'
+			       || c_tolower (p[-1]) == 'p')
 		     && (*p == '-' || *p == '+'))
 	      continue;
 	    /* We will take any letters or digits, ignoring any embedded '_'.
@@ -1167,9 +1167,9 @@ lex_one_token (struct parser_state *par_state)
 	const char *p = &tokstart[1];
 	size_t len = strlen ("entry");
 
-	while (isspace (*p))
+	while (c_isspace (*p))
 	  p++;
-	if (strncmp (p, "entry", len) == 0 && !isalnum (p[len])
+	if (strncmp (p, "entry", len) == 0 && !c_isalnum (p[len])
 	    && p[len] != '_')
 	  {
 	    pstate->lexptr = &p[len];

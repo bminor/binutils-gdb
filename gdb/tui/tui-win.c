@@ -45,7 +45,6 @@
 #include "tui/tui-win.h"
 
 #include "gdb_curses.h"
-#include <ctype.h>
 #include "readline/readline.h"
 #include <signal.h>
 #include <string_view>
@@ -1041,7 +1040,7 @@ parse_scrolling_args (const char *arg,
       /* Process the number of lines to scroll.  */
       std::string copy = arg;
       buf_ptr = &copy[0];
-      if (isdigit (*buf_ptr))
+      if (c_isdigit (*buf_ptr))
 	{
 	  char *num_str;
 

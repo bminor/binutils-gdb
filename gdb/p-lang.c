@@ -30,7 +30,6 @@
 #include "p-lang.h"
 #include "valprint.h"
 #include "value.h"
-#include <ctype.h>
 #include "c-lang.h"
 #include "gdbarch.h"
 #include "cli/cli-style.h"

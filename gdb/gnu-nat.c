@@ -50,7 +50,6 @@ extern "C"
 }
 
 
-#include <ctype.h>
 #include <setjmp.h>
 #include <signal.h>
 #include <sys/ptrace.h>
@@ -2926,7 +2925,7 @@ set_sig_thread_cmd (const char *args, int from_tty)
 {
   struct inf *inf = cur_inf ();
 
-  if (!args || (!isdigit (*args) && strcmp (args, "none") != 0))
+  if (!args || (!c_isdigit (*args) && strcmp (args, "none") != 0))
     error (_("Illegal argument to \"set signal-thread\" command.\n"
 	     "Should be a thread ID, or \"none\"."));
 

@@ -35,7 +35,6 @@
 
 %{
 
-#include <ctype.h>
 #include "gdbsupport/unordered_map.h"
 #include "expression.h"
 #include "value.h"
@@ -1380,7 +1379,7 @@ write_object_renaming (struct parser_state *par_state,
 	[[fallthrough]];
       case 'S':
 	renaming_expr += 1;
-	if (isdigit (*renaming_expr))
+	if (c_isdigit (*renaming_expr))
 	  {
 	    char *next;
 	    long val = strtol (renaming_expr, &next, 10);
@@ -1888,7 +1887,7 @@ ada_parse_state::find_completion_bounds ()
   const char *end = pstate->lexptr;
   /* First the end of the prefix.  Here we stop at the token start or
      at '.' or space.  */
-  for (; end > m_original_expr && end[-1] != '.' && !isspace (end[-1]); --end)
+  for (; end > m_original_expr && end[-1] != '.' && !c_isspace (end[-1]); --end)
     {
       /* Nothing.  */
     }

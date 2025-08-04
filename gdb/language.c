@@ -28,7 +28,6 @@
    return data out of a "language-specific" struct pointer that is set
    whenever the working language changes.  That would be a lot faster.  */
 
-#include <ctype.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "value.h"

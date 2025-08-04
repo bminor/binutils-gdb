@@ -17,7 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include <ctype.h>
 #include "gdbsupport/gdb_wait.h"
 #include "gdbsupport/scoped_signal_handler.h"
 #include "event-top.h"

@@ -29,7 +29,6 @@
 #include "solib-svr4-linux.h"
 #include "regset.h"
 
-#include <ctype.h>
 
 /* The sigtramp code is in a non-readable (executable-only) region
    of memory called the ``gate page''.  The addresses in question
@@ -128,9 +127,9 @@ ia64_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 static int
 ia64_linux_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
 {
-  return ((isdigit (*s) && s[1] == '[' && s[2] == 'r') /* Displacement.  */
+  return ((c_isdigit (*s) && s[1] == '[' && s[2] == 'r') /* Displacement.  */
 	  || *s == 'r' /* Register value.  */
-	  || isdigit (*s));  /* Literal number.  */
+	  || c_isdigit (*s));  /* Literal number.  */
 }
 
 /* Core file support. */

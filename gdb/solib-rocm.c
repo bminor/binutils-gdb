@@ -511,7 +511,7 @@ rocm_bfd_iovec_open (bfd *abfd, inferior *inferior)
   protocol_end += protocol_delim.length ();
 
   std::transform (protocol.begin (), protocol.end (), protocol.begin (),
-		  [] (unsigned char c) { return std::tolower (c); });
+		  [] (unsigned char c) { return c_tolower (c); });
 
   std::string_view path;
   size_t path_end = uri.find_first_of ("#?", protocol_end);
@@ -526,8 +526,8 @@ rocm_bfd_iovec_open (bfd *abfd, inferior *inferior)
   for (size_t i = 0; i < path.length (); ++i)
     if (path[i] == '%'
 	&& i < path.length () - 2
-	&& std::isxdigit (path[i + 1])
-	&& std::isxdigit (path[i + 2]))
+	&& c_isxdigit (path[i + 1])
+	&& c_isxdigit (path[i + 2]))
       {
 	std::string_view hex_digits = path.substr (i + 1, 2);
 	decoded_path += std::stoi (std::string (hex_digits), 0, 16);

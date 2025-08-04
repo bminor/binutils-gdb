@@ -46,7 +46,6 @@
 #include "cli/cli-utils.h"
 #include "c-exp.h"
 
-#include <ctype.h>
 #include <algorithm>
 
 struct objc_object {
@@ -850,9 +849,9 @@ parse_selector (char *method, char **selector)
 
   for (;;)
     {
-      if (isalnum (*s2) || (*s2 == '_') || (*s2 == ':'))
+      if (c_isalnum (*s2) || (*s2 == '_') || (*s2 == ':'))
 	*s1++ = *s2;
-      else if (isspace (*s2))
+      else if (c_isspace (*s2))
 	;
       else if ((*s2 == '\0') || (*s2 == '\''))
 	break;
@@ -914,7 +913,7 @@ parse_method (char *method, char *type, char **theclass,
   s1++;
 
   nclass = s1;
-  while (isalnum (*s1) || (*s1 == '_'))
+  while (c_isalnum (*s1) || (*s1 == '_'))
     s1++;
   
   s2 = s1;
@@ -925,7 +924,7 @@ parse_method (char *method, char *type, char **theclass,
       s2++;
       s2 = skip_spaces (s2);
       ncategory = s2;
-      while (isalnum (*s2) || (*s2 == '_'))
+      while (c_isalnum (*s2) || (*s2 == '_'))
 	s2++;
       *s2++ = '\0';
     }
@@ -938,9 +937,9 @@ parse_method (char *method, char *type, char **theclass,
 
   for (;;)
     {
-      if (isalnum (*s2) || (*s2 == '_') || (*s2 == ':'))
+      if (c_isalnum (*s2) || (*s2 == '_') || (*s2 == ':'))
 	*s1++ = *s2;
-      else if (isspace (*s2))
+      else if (c_isspace (*s2))
 	;
       else if (*s2 == ']')
 	break;

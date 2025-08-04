@@ -18,7 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
-#include <ctype.h>
 #include "event-top.h"
 #include "exceptions.h"
 #include "extract-store-integer.h"
@@ -875,7 +874,7 @@ is_compiler_suffix (const char *str)
 {
   gdb_assert (*str == '[');
   ++str;
-  while (*str != '\0' && isalpha (*str))
+  while (*str != '\0' && c_isalpha (*str))
     ++str;
   /* We accept a missing "]" in order to support completion.  */
   return *str == '\0' || (str[0] == ']' && str[1] == '\0');
@@ -1167,7 +1166,7 @@ ada_encode (const char *decoded, bool fold)
 static int
 is_lower_alphanum (const char c)
 {
-  return (isdigit (c) || (isalpha (c) && islower (c)));
+  return (c_isdigit (c) || (c_isalpha (c) && c_islower (c)));
 }
 
 /* ENCODED is the linkage name of a symbol and LEN contains its length.
@@ -1185,11 +1184,11 @@ is_lower_alphanum (const char c)
 static void
 ada_remove_trailing_digits (const char *encoded, int *len)
 {
-  if (*len > 1 && isdigit (encoded[*len - 1]))
+  if (*len > 1 && c_isdigit (encoded[*len - 1]))
     {
       int i = *len - 2;
 
-      while (i > 0 && isdigit (encoded[i]))
+      while (i > 0 && c_isdigit (encoded[i]))
 	i--;
       if (i >= 0 && encoded[i] == '.')
 	*len = i;
@@ -1220,7 +1219,7 @@ ada_remove_po_subprogram_suffix (const char *encoded, int *len)
 
   if (*len > 1
       && encoded[*len - 1] == 'N'
-      && (isdigit (encoded[*len - 2]) || islower (encoded[*len - 2])))
+      && (c_isdigit (encoded[*len - 2]) || c_islower (encoded[*len - 2])))
     *len = *len - 1;
 }
 
@@ -1232,7 +1231,7 @@ static int
 remove_compiler_suffix (const char *encoded, int *len)
 {
   int offset = *len - 1;
-  while (offset > 0 && isalpha (encoded[offset]))
+  while (offset > 0 && c_isalpha (encoded[offset]))
     --offset;
   if (offset > 0 && encoded[offset] == '.')
     {
@@ -1252,7 +1251,7 @@ convert_hex (const char *str, int n, uint32_t *out)
 
   for (int i = 0; i < n; ++i)
     {
-      if (!isxdigit (str[i]))
+      if (!c_isxdigit (str[i]))
 	return false;
       result <<= 4;
       result |= fromhex (str[i]);
@@ -1384,11 +1383,11 @@ ada_decode (const char *encoded, bool wrap, bool operators, bool wide)
 
   /* Remove trailing __{digit}+ or trailing ${digit}+.  */
 
-  if (len0 > 1 && isdigit (encoded[len0 - 1]))
+  if (len0 > 1 && c_isdigit (encoded[len0 - 1]))
     {
       i = len0 - 2;
-      while ((i >= 0 && isdigit (encoded[i]))
-	     || (i >= 1 && encoded[i] == '_' && isdigit (encoded[i - 1])))
+      while ((i >= 0 && c_isdigit (encoded[i]))
+	     || (i >= 1 && encoded[i] == '_' && c_isdigit (encoded[i - 1])))
 	i -= 1;
       if (i > 1 && encoded[i] == '_' && encoded[i - 1] == '_')
 	len0 = i - 1;
@@ -1399,7 +1398,7 @@ ada_decode (const char *encoded, bool wrap, bool operators, bool wide)
   /* The first few characters that are not alphabetic are not part
      of any encoding we use, so we can copy them over verbatim.  */
 
-  for (i = 0; i < len0 && !isalpha (encoded[i]); i += 1)
+  for (i = 0; i < len0 && !c_isalpha (encoded[i]); i += 1)
     decoded.push_back (encoded[i]);
 
   at_start_name = 1;
@@ -1415,7 +1414,7 @@ ada_decode (const char *encoded, bool wrap, bool operators, bool wide)
 	      int op_len = strlen (ada_opname_table[k].encoded);
 	      if ((strncmp (ada_opname_table[k].encoded + 1, encoded + i + 1,
 			    op_len - 1) == 0)
-		  && !isalnum (encoded[i + op_len]))
+		  && !c_isalnum (encoded[i + op_len]))
 		{
 		  decoded.append (ada_opname_table[k].decoded);
 		  at_start_name = 0;
@@ -1440,11 +1439,11 @@ ada_decode (const char *encoded, bool wrap, bool operators, bool wide)
 
       if (len0 - i > 5 && encoded [i] == '_' && encoded [i+1] == '_'
 	  && encoded [i+2] == 'B' && encoded [i+3] == '_'
-	  && isdigit (encoded [i+4]))
+	  && c_isdigit (encoded [i+4]))
 	{
 	  int k = i + 5;
 	  
-	  while (k < len0 && isdigit (encoded[k]))
+	  while (k < len0 && c_isdigit (encoded[k]))
 	    k++;  /* Skip any extra digit.  */
 
 	  /* Double-check that the "__B_{DIGITS}+" sequence we found
@@ -1467,11 +1466,11 @@ ada_decode (const char *encoded, bool wrap, bool operators, bool wide)
 	 internally generated.  */
 
       if (len0 - i > 3 && encoded [i] == '_' && encoded[i+1] == 'E'
-	  && isdigit (encoded[i+2]))
+	  && c_isdigit (encoded[i+2]))
 	{
 	  int k = i + 3;
 
-	  while (k < len0 && isdigit (encoded[k]))
+	  while (k < len0 && c_isdigit (encoded[k]))
 	    k++;
 
 	  if (k < len0
@@ -1505,7 +1504,7 @@ ada_decode (const char *encoded, bool wrap, bool operators, bool wide)
 	    i++;
 	}
 
-      if (wide && i < len0 + 3 && encoded[i] == 'U' && isxdigit (encoded[i + 1]))
+      if (wide && i < len0 + 3 && encoded[i] == 'U' && c_isxdigit (encoded[i + 1]))
 	{
 	  if (convert_from_hex_encoded (decoded, &encoded[i + 1], 2))
 	    {
@@ -1513,7 +1512,7 @@ ada_decode (const char *encoded, bool wrap, bool operators, bool wide)
 	      continue;
 	    }
 	}
-      else if (wide && i < len0 + 5 && encoded[i] == 'W' && isxdigit (encoded[i + 1]))
+      else if (wide && i < len0 + 5 && encoded[i] == 'W' && c_isxdigit (encoded[i + 1]))
 	{
 	  if (convert_from_hex_encoded (decoded, &encoded[i + 1], 4))
 	    {
@@ -1522,7 +1521,7 @@ ada_decode (const char *encoded, bool wrap, bool operators, bool wide)
 	    }
 	}
       else if (wide && i < len0 + 10 && encoded[i] == 'W' && encoded[i + 1] == 'W'
-	       && isxdigit (encoded[i + 2]))
+	       && c_isxdigit (encoded[i + 2]))
 	{
 	  if (convert_from_hex_encoded (decoded, &encoded[i + 2], 8))
 	    {
@@ -1531,7 +1530,7 @@ ada_decode (const char *encoded, bool wrap, bool operators, bool wide)
 	    }
 	}
 
-      if (encoded[i] == 'X' && i != 0 && isalnum (encoded[i - 1]))
+      if (encoded[i] == 'X' && i != 0 && c_isalnum (encoded[i - 1]))
 	{
 	  /* This is a X[bn]* sequence not separated from the previous
 	     part of the name with a non-alpha-numeric character (in other
@@ -1568,7 +1567,7 @@ ada_decode (const char *encoded, bool wrap, bool operators, bool wide)
   if (operators)
     {
       for (i = 0; i < decoded.length(); ++i)
-	if (isupper (decoded[i]) || decoded[i] == ' ')
+	if (c_isupper (decoded[i]) || decoded[i] == ' ')
 	  goto Suppress;
     }
 
@@ -5729,10 +5728,10 @@ is_name_suffix (const char *str)
 
   /* Skip optional leading __[0-9]+.  */
 
-  if (len > 3 && str[0] == '_' && str[1] == '_' && isdigit (str[2]))
+  if (len > 3 && str[0] == '_' && str[1] == '_' && c_isdigit (str[2]))
     {
       str += 3;
-      while (isdigit (str[0]))
+      while (c_isdigit (str[0]))
 	str += 1;
     }
   
@@ -5741,7 +5740,7 @@ is_name_suffix (const char *str)
   if (str[0] == '.' || str[0] == '$')
     {
       matching = str + 1;
-      while (isdigit (matching[0]))
+      while (c_isdigit (matching[0]))
 	matching += 1;
       if (matching[0] == '\0')
 	return 1;
@@ -5752,7 +5751,7 @@ is_name_suffix (const char *str)
   if (len > 3 && str[0] == '_' && str[1] == '_' && str[2] == '_')
     {
       matching = str + 3;
-      while (isdigit (matching[0]))
+      while (c_isdigit (matching[0]))
 	matching += 1;
       if (matching[0] == '\0')
 	return 1;
@@ -5781,10 +5780,10 @@ is_name_suffix (const char *str)
 #endif
 
   /* _E[0-9]+[bs]$ */
-  if (len > 3 && str[0] == '_' && str [1] == 'E' && isdigit (str[2]))
+  if (len > 3 && str[0] == '_' && str [1] == 'E' && c_isdigit (str[2]))
     {
       matching = str + 3;
-      while (isdigit (matching[0]))
+      while (c_isdigit (matching[0]))
 	matching += 1;
       if ((matching[0] == 'b' || matching[0] == 's')
 	  && matching [1] == '\0')
@@ -5834,17 +5833,17 @@ is_name_suffix (const char *str)
 	    return 1;
 	  return 0;
 	}
-      if (!isdigit (str[2]))
+      if (!c_isdigit (str[2]))
 	return 0;
       for (k = 3; str[k] != '\0'; k += 1)
-	if (!isdigit (str[k]) && str[k] != '_')
+	if (!c_isdigit (str[k]) && str[k] != '_')
 	  return 0;
       return 1;
     }
-  if (str[0] == '$' && isdigit (str[1]))
+  if (str[0] == '$' && c_isdigit (str[1]))
     {
       for (k = 2; str[k] != '\0'; k += 1)
-	if (!isdigit (str[k]) && str[k] != '_')
+	if (!c_isdigit (str[k]) && str[k] != '_')
 	  return 0;
       return 1;
     }
@@ -5867,7 +5866,7 @@ is_valid_name_for_wild_match (const char *name0)
     return 0;
 
   for (i=0; decoded_name[i] != '\0'; i++)
-    if (isalpha (decoded_name[i]) && !islower (decoded_name[i]))
+    if (c_isalpha (decoded_name[i]) && !c_islower (decoded_name[i]))
       return 0;
 
   return 1;
@@ -6091,7 +6090,7 @@ ada_lookup_name_info::matches
 	 angle bracket notation.  */
       const char *tmp;
 
-      for (tmp = sym_name; *tmp != '\0' && !isupper (*tmp); tmp++);
+      for (tmp = sym_name; *tmp != '\0' && !c_isupper (*tmp); tmp++);
       if (*tmp != '\0')
 	match = false;
     }
@@ -6206,7 +6205,7 @@ ada_is_ignored_field (struct type *type, int field_num)
       {
 	/* Wrapper field.  */
       }
-    else if (isupper (name[0]))
+    else if (c_isupper (name[0]))
       return 1;
   }
 
@@ -6717,14 +6716,14 @@ ada_scan_number (const char str[], int k, LONGEST * R, int *new_k)
 {
   ULONGEST RU;
 
-  if (!isdigit (str[k]))
+  if (!c_isdigit (str[k]))
     return 0;
 
   /* Do it the hard way so as not to make any assumption about
      the relationship of unsigned long (%lu scan format code) and
      LONGEST.  */
   RU = 0;
-  while (isdigit (str[k]))
+  while (c_isdigit (str[k]))
     {
       RU = RU * 10 + (str[k] - '0');
       k += 1;
@@ -7380,10 +7379,10 @@ field_alignment (struct type *type, int f)
 
   len = strlen (name);
 
-  if (!isdigit (name[len - 1]))
+  if (!c_isdigit (name[len - 1]))
     return 1;
 
-  if (isdigit (name[len - 2]))
+  if (c_isdigit (name[len - 2]))
     align_offset = len - 2;
   else
     align_offset = len - 1;
@@ -8964,7 +8963,7 @@ ada_unqualify_enum_name (const char *name)
     {
       while ((tmp = strstr (name, "__")) != NULL)
 	{
-	  if (isdigit (tmp[2]))
+	  if (c_isdigit (tmp[2]))
 	    break;
 	  else
 	    name = tmp + 2;
@@ -9007,7 +9006,7 @@ ada_enum_name (const char *name)
       else
 	return name;
 
-      if (isascii (v) && isprint (v))
+      if (c_isascii (v) && c_isprint (v))
 	storage = string_printf ("'%c'", v);
       else if (name[1] == 'U')
 	storage = string_printf ("'[\"%02x\"]'", v);
@@ -12556,7 +12555,7 @@ catch_ada_exception_command_split (const char *args,
 
   args = skip_spaces (args);
   if (startswith (args, "if")
-      && (isspace (args[2]) || args[2] == '\0'))
+      && (c_isspace (args[2]) || args[2] == '\0'))
     {
       args += 2;
       args = skip_spaces (args);
@@ -12833,7 +12832,7 @@ catch_ada_assert_command_split (const char *args, std::string &cond_string)
 
   /* Check whether a condition was provided.  */
   if (startswith (args, "if")
-      && (isspace (args[2]) || args[2] == '\0'))
+      && (c_isspace (args[2]) || args[2] == '\0'))
     {
       args += 2;
       args = skip_spaces (args);
@@ -13237,7 +13236,7 @@ do_full_match (const char *symbol_search_name,
 	      && symbol_search_name[1] == '_')
 	    {
 	      symbol_search_name += 2;
-	      while (isdigit (*symbol_search_name))
+	      while (c_isdigit (*symbol_search_name))
 		++symbol_search_name;
 	      if (symbol_search_name[0] == '_'
 		  && symbol_search_name[1] == '_')

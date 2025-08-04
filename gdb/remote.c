@@ -19,7 +19,6 @@
 
 /* See the GDB User Guide for details of the GDB remote protocol.  */
 
-#include <ctype.h>
 #include <fcntl.h>
 #include "exceptions.h"
 #include "gdbsupport/common-inferior.h"
@@ -2559,7 +2558,7 @@ packet_check_result (const char *buf)
       /* The stub recognized the packet request.  Check that the
 	 operation succeeded.  */
       if (buf[0] == 'E'
-	  && isxdigit (buf[1]) && isxdigit (buf[2])
+	  && c_isxdigit (buf[1]) && c_isxdigit (buf[2])
 	  && buf[3] == '\0')
 	/* "Enn"  - definitely an error.  */
 	return packet_result::make_numeric_error (buf + 1);
@@ -11950,7 +11949,7 @@ remote_target::xfer_partial (enum target_object object,
   while (annex[i] && (i < (get_remote_packet_size () - 8)))
     {
       /* Bad caller may have sent forbidden characters.  */
-      gdb_assert (isprint (annex[i]) && annex[i] != '$' && annex[i] != '#');
+      gdb_assert (c_isprint (annex[i]) && annex[i] != '$' && annex[i] != '#');
       *p2++ = annex[i];
       i++;
     }
@@ -12200,7 +12199,7 @@ private:
     for (int i = 0; i < buf.size (); ++i)
       {
 	gdb_byte c = buf[i];
-	if (isprint (c))
+	if (c_isprint (c))
 	  gdb_putc (c, &stb);
 	else
 	  gdb_printf (&stb, "\\x%02x", (unsigned char) c);

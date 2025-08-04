@@ -301,8 +301,8 @@ with_command_completer_1 (const char *set_cmd_prefix,
      command as if it was a "set" command.  */
   if (delim == text
       || delim == nullptr
-      || !isspace (delim[-1])
-      || !(isspace (delim[2]) || delim[2] == '\0'))
+      || !c_isspace (delim[-1])
+      || !(c_isspace (delim[2]) || delim[2] == '\0'))
     {
       std::string new_text = std::string (set_cmd_prefix) + text;
       tracker.advance_custom_word_point_by (-(int) strlen (set_cmd_prefix));
@@ -785,14 +785,14 @@ source_command (const char *args, int from_tty)
 	  if (args[0] != '-')
 	    break;
 
-	  if (args[1] == 'v' && isspace (args[2]))
+	  if (args[1] == 'v' && c_isspace (args[2]))
 	    {
 	      source_verbose = 1;
 
 	      /* Skip passed -v.  */
 	      args = &args[3];
 	    }
-	  else if (args[1] == 's' && isspace (args[2]))
+	  else if (args[1] == 's' && c_isspace (args[2]))
 	    {
 	      search_path = 1;
 
@@ -1184,7 +1184,7 @@ pipe_command_completer (struct cmd_list_element *ignore,
     delimiter = opts.delimiter.c_str ();
 
   /* Check if we're past option values already.  */
-  if (text > org_text && !isspace (text[-1]))
+  if (text > org_text && !c_isspace (text[-1]))
     return;
 
   const char *delim = strstr (text, delimiter);
@@ -1669,7 +1669,7 @@ disassemble_command (const char *arg, int from_tty)
       if (*p == '\0')
 	error (_("Missing modifier."));
 
-      while (*p && ! isspace (*p))
+      while (*p && ! c_isspace (*p))
 	{
 	  switch (*p++)
 	    {
@@ -1938,8 +1938,8 @@ alias_command_completer (struct cmd_list_element *ignore,
      typing COMMAND DEFAULT-ARGS...  */
   if (delim != text
       && delim != nullptr
-      && isspace (delim[-1])
-      && (isspace (delim[1]) || delim[1] == '\0'))
+      && c_isspace (delim[-1])
+      && (c_isspace (delim[1]) || delim[1] == '\0'))
     {
       std::string new_text = std::string (delim + 1);
 

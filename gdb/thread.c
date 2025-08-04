@@ -33,7 +33,6 @@
 #include "regcache.h"
 #include "btrace.h"
 
-#include <ctype.h>
 #include <sys/types.h>
 #include <signal.h>
 #include "ui-out.h"
@@ -1808,7 +1807,7 @@ thread_apply_command_completer (cmd_list_element *ignore,
 
   /* Check if we're past a valid thread ID list already.  */
   if (parser.finished ()
-      && cmd > text && !isspace (cmd[-1]))
+      && cmd > text && !c_isspace (cmd[-1]))
     return;
 
   /* We're past the thread ID list, advance word point.  */
@@ -1871,7 +1870,7 @@ thread_apply_command (const char *tidlist, int from_tty)
   if (*cmd == '\0')
     error (_("Please specify a command following the thread ID list"));
 
-  if (tidlist == cmd || isdigit (cmd[0]))
+  if (tidlist == cmd || c_isdigit (cmd[0]))
     invalid_thread_id_error (cmd);
 
   scoped_restore_current_thread restore_thread;

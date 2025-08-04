@@ -35,7 +35,6 @@
 #include "interps.h"
 #include "target.h"
 #include "arch-utils.h"
-#include <ctype.h>
 #include "cli/cli-utils.h"
 #include "filenames.h"
 #include "ada-lang.h"
@@ -459,7 +458,7 @@ linespec_lexer_lex_number (linespec_parser *parser, linespec_token *tokenp)
       ++(parser->lexer.stream);
     }
 
-  while (isdigit (*parser->lexer.stream))
+  while (c_isdigit (*parser->lexer.stream))
     {
       ++tokenp->data.string.length;
       ++(parser->lexer.stream);
@@ -468,7 +467,7 @@ linespec_lexer_lex_number (linespec_parser *parser, linespec_token *tokenp)
   /* If the next character in the input buffer is not a space, comma,
      quote, or colon, this input does not represent a number.  */
   if (*parser->lexer.stream != '\0'
-      && !isspace (*parser->lexer.stream) && *parser->lexer.stream != ','
+      && !c_isspace (*parser->lexer.stream) && *parser->lexer.stream != ','
       && *parser->lexer.stream != ':'
       && !strchr (linespec_quote_characters, *parser->lexer.stream))
     {
@@ -512,7 +511,7 @@ linespec_lexer_lex_keyword (const char *p)
 	      if (i == FORCE_KEYWORD_INDEX && p[len] == '\0')
 		return linespec_keywords[i];
 
-	      if (!isspace (p[len]))
+	      if (!c_isspace (p[len]))
 		continue;
 
 	      if (i == FORCE_KEYWORD_INDEX)
@@ -524,7 +523,7 @@ linespec_lexer_lex_keyword (const char *p)
 		      int nextlen = strlen (linespec_keywords[j]);
 
 		      if (strncmp (p, linespec_keywords[j], nextlen) == 0
-			  && isspace (p[nextlen]))
+			  && c_isspace (p[nextlen]))
 			return linespec_keywords[i];
 		    }
 		}
@@ -538,7 +537,7 @@ linespec_lexer_lex_keyword (const char *p)
 		      int nextlen = strlen (linespec_keywords[j]);
 
 		      if (strncmp (p, linespec_keywords[j], nextlen) == 0
-			  && isspace (p[nextlen]))
+			  && c_isspace (p[nextlen]))
 			return NULL;
 		    }
 		}
@@ -763,7 +762,7 @@ linespec_lexer_lex_string (linespec_parser *parser)
 
       while (1)
 	{
-	  if (isspace (*parser->lexer.stream))
+	  if (c_isspace (*parser->lexer.stream))
 	    {
 	      p = skip_spaces (parser->lexer.stream);
 	      /* When we get here we know we've found something followed by
@@ -841,14 +840,14 @@ linespec_lexer_lex_string (linespec_parser *parser)
 		{
 		  const char *op = parser->lexer.stream;
 
-		  while (op > start && isspace (op[-1]))
+		  while (op > start && c_isspace (op[-1]))
 		    op--;
 		  if (op - start >= CP_OPERATOR_LEN)
 		    {
 		      op -= CP_OPERATOR_LEN;
 		      if (strncmp (op, CP_OPERATOR_STR, CP_OPERATOR_LEN) == 0
 			  && (op == start
-			      || !(isalnum (op[-1]) || op[-1] == '_')))
+			      || !(c_isalnum (op[-1]) || op[-1] == '_')))
 			{
 			  /* This is an operator name.  Keep going.  */
 			  ++(parser->lexer.stream);
@@ -1642,7 +1641,7 @@ linespec_parse_line_offset (const char *string)
   else
     line_offset.sign = LINE_OFFSET_NONE;
 
-  if (*string != '\0' && !isdigit (*string))
+  if (*string != '\0' && !c_isdigit (*string))
     error (_("malformed line offset: \"%s\""), start);
 
   /* Right now, we only allow base 10 for offsets.  */

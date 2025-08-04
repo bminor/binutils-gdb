@@ -39,7 +39,6 @@
 #include "expop.h"
 #include "gdbsupport/unordered_map.h"
 
-#include <ctype.h>
 
 /* The name of the SystemTap section where we will find information about
    the probes.  */
@@ -575,14 +574,14 @@ stap_is_integer_prefix (struct gdbarch *gdbarch, const char *s,
       if (r != NULL)
 	*r = "";
 
-      return isdigit (*s) > 0;
+      return c_isdigit (*s) > 0;
     }
 
   for (p = t; *p != NULL; ++p)
     {
       size_t len = strlen (*p);
 
-      if ((len == 0 && isdigit (*s))
+      if ((len == 0 && c_isdigit (*s))
 	  || (len > 0 && strncasecmp (s, *p, len) == 0))
 	{
 	  /* Integers may or may not have a prefix.  The "len == 0"
@@ -732,7 +731,7 @@ stap_parse_register_operand (struct stap_parse_info *p)
 
   struct type *long_type = builtin_type (gdbarch)->builtin_long;
   operation_up disp_op;
-  if (isdigit (*p->arg))
+  if (c_isdigit (*p->arg))
     {
       /* The value of the displacement.  */
       long displacement;
@@ -767,14 +766,14 @@ stap_parse_register_operand (struct stap_parse_info *p)
   start = p->arg;
 
   /* We assume the register name is composed by letters and numbers.  */
-  while (isalnum (*p->arg))
+  while (c_isalnum (*p->arg))
     ++p->arg;
 
   std::string regname (start, p->arg - start);
 
   /* We only add the GDB's register prefix/suffix if we are dealing with
      a numeric register.  */
-  if (isdigit (*start))
+  if (c_isdigit (*start))
     {
       if (gdb_reg_prefix != NULL)
 	regname = gdb_reg_prefix + regname;
@@ -921,7 +920,7 @@ stap_parse_single_operand (struct stap_parse_info *p)
       if (p->inside_paren_p)
 	tmp = skip_spaces (tmp);
 
-      while (isdigit (*tmp))
+      while (c_isdigit (*tmp))
 	{
 	  /* We skip the digit here because we are only interested in
 	     knowing what kind of unary operation this is.  The digit
@@ -959,7 +958,7 @@ stap_parse_single_operand (struct stap_parse_info *p)
 		      (std::move (result)));
 	}
     }
-  else if (isdigit (*p->arg))
+  else if (c_isdigit (*p->arg))
     {
       /* A temporary variable, needed for lookahead.  */
       const char *tmp = p->arg;
@@ -1042,7 +1041,7 @@ stap_parse_argument_conditionally (struct stap_parse_info *p)
 
   expr::operation_up result;
   if (*p->arg == '-' || *p->arg == '~' || *p->arg == '+' || *p->arg == '!'
-      || isdigit (*p->arg)
+      || c_isdigit (*p->arg)
       || gdbarch_stap_is_single_operand (p->gdbarch, p->arg))
     result = stap_parse_single_operand (p);
   else if (*p->arg == '(')
@@ -1111,7 +1110,7 @@ stap_parse_argument_1 (struct stap_parse_info *p,
      This loop shall continue until we run out of characters in the input,
      or until we find a close-parenthesis, which means that we've reached
      the end of a sub-expression.  */
-  while (*p->arg != '\0' && *p->arg != ')' && !isspace (*p->arg))
+  while (*p->arg != '\0' && *p->arg != ')' && !c_isspace (*p->arg))
     {
       const char *tmp_exp_buf;
       enum exp_opcode opcode;
@@ -1270,8 +1269,8 @@ stap_probe::parse_arguments (struct gdbarch *gdbarch)
 	 Where `N' can be [+,-][1,2,4,8].  This is not mandatory, so
 	 we check it here.  If we don't find it, go to the next
 	 state.  */
-      if ((cur[0] == '-' && isdigit (cur[1]) && cur[2] == '@')
-	  || (isdigit (cur[0]) && cur[1] == '@'))
+      if ((cur[0] == '-' && c_isdigit (cur[1]) && cur[2] == '@')
+	  || (c_isdigit (cur[0]) && cur[1] == '@'))
 	{
 	  if (*cur == '-')
 	    {

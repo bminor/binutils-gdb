@@ -335,7 +335,6 @@ false		{ return FALSEKEYWORD; }
 .		{ error (_("Invalid character '%s' in expression."), yytext); }
 %%
 
-#include <ctype.h>
 /* Initialize the lexer for processing new expression. */
 
 static void
@@ -355,7 +354,7 @@ canonicalizeNumeral (char *s1, const char *s2)
     {
       if (*s2 != '_')
 	{
-	  *s1 = tolower(*s2);
+	  *s1 = c_tolower(*s2);
 	  s1 += 1;
 	}
     }
@@ -411,7 +410,7 @@ processInt (struct parser_state *par_state, const char *base0,
     exp = strtol(exp0, (char **) NULL, 10);
 
   gdb_mpz result;
-  while (isxdigit (*num0))
+  while (c_isxdigit (*num0))
     {
       int dig = fromhex (*num0);
       if (dig >= base)
@@ -527,7 +526,7 @@ processId (const char *name0, int len)
   struct stoken result;
 
   result.ptr = name;
-  while (len > 0 && isspace (name0[len-1]))
+  while (len > 0 && c_isspace (name0[len-1]))
     len -= 1;
 
   if (name0[0] == '<' || strstr (name0, "___") != NULL)
@@ -549,12 +548,12 @@ processId (const char *name0, int len)
 	}
       else if (in_quotes)
 	name[i++] = name0[i0++];
-      else if (isalnum (name0[i0]))
+      else if (c_isalnum (name0[i0]))
 	{
-	  name[i] = tolower (name0[i0]);
+	  name[i] = c_tolower (name0[i0]);
 	  i += 1; i0 += 1;
 	}
-      else if (isspace (name0[i0]))
+      else if (c_isspace (name0[i0]))
 	i0 += 1;
       else if (name0[i0] == '\'')
 	{
@@ -634,10 +633,10 @@ find_dot_all (const char *str)
 
 	do
 	  i += 1;
-	while (isspace (str[i]));
+	while (c_isspace (str[i]));
 
 	if (strncasecmp (str + i, "all", 3) == 0
-	    && !isalnum (str[i + 3]) && str[i + 3] != '_')
+	    && !c_isalnum (str[i + 3]) && str[i + 3] != '_')
 	  return i0;
       }
   return -1;
@@ -653,7 +652,7 @@ subseqMatch (const char *subseq, const char *str)
     return 1;
   else if (str[0] == '\0')
     return 0;
-  else if (tolower (subseq[0]) == tolower (str[0]))
+  else if (c_tolower (subseq[0]) == c_tolower (str[0]))
     return subseqMatch (subseq+1, str+1) || subseqMatch (subseq, str+1);
   else
     return subseqMatch (subseq, str+1);
@@ -690,7 +689,7 @@ processAttribute (const char *str)
 {
   gdb_assert (*str == '\'');
   ++str;
-  while (isspace (*str))
+  while (c_isspace (*str))
     ++str;
 
   int len = strlen (str);
@@ -749,7 +748,7 @@ static void
 rewind_to_char (int ch)
 {
   pstate->lexptr -= yyleng;
-  while (toupper (*pstate->lexptr) != toupper (ch))
+  while (c_toupper (*pstate->lexptr) != c_toupper (ch))
     pstate->lexptr -= 1;
   yyrestart (NULL);
 }

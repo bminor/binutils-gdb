@@ -23,7 +23,6 @@
 #include "cli/cli-style.h"
 #include "typeprint.h"
 #include "ada-lang.h"
-#include <ctype.h>
 
 static int print_selected_record_field_types (struct type *, struct type *,
 					      int, int,
@@ -70,7 +69,7 @@ decoded_type_name (struct type *type)
       if (s == name_buffer)
 	return name_buffer;
 
-      if (!islower (s[1]))
+      if (!c_islower (s[1]))
 	return NULL;
 
       for (s = q = name_buffer; *s != '\0'; q += 1)

@@ -58,7 +58,6 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <ctype.h>
 #include <chrono>
 #include <algorithm>
 
@@ -2748,7 +2747,7 @@ set_ext_lang_command (const char *args,
     error (_("'%s': Filename extension must begin with '.'"), ext_args.c_str ());
 
   /* Find end of first arg.  */
-  while (*end != '\0' && !isspace (*end))
+  while (*end != '\0' && !c_isspace (*end))
     end++;
 
   if (*end == '\0')

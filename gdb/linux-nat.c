@@ -42,7 +42,6 @@
 #include "elf-bfd.h"
 #include "gregset.h"
 #include "gdbcore.h"
-#include <ctype.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "inf-loop.h"

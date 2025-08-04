@@ -29,7 +29,6 @@
 #include "valprint.h"
 #include "mi-getopt.h"
 #include "extension.h"
-#include <ctype.h>
 #include "mi-parse.h"
 #include <optional>
 #include "inferior.h"

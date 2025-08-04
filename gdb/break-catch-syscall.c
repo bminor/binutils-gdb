@@ -17,7 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include <ctype.h>
 #include "breakpoint.h"
 #include "inferior.h"
 #include "cli/cli-utils.h"
@@ -369,7 +368,7 @@ catch_syscall_split_args (const char *arg)
       /* Skip whitespace.  */
       arg = skip_spaces (arg);
 
-      for (i = 0; i < 127 && arg[i] && !isspace (arg[i]); ++i)
+      for (i = 0; i < 127 && arg[i] && !c_isspace (arg[i]); ++i)
 	cur_name[i] = arg[i];
       cur_name[i] = '\0';
       arg += i;

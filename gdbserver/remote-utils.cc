@@ -30,7 +30,6 @@
 #include "gdbsupport/netstuff.h"
 #include "gdbsupport/filestuff.h"
 #include "gdbsupport/gdb-sigmask.h"
-#include <ctype.h>
 #if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
@@ -759,7 +758,7 @@ input_interrupt (int unused)
       else if (cc != 1 || c != '\003')
 	{
 	  fprintf (stderr, "input_interrupt, count = %d c = %d ", cc, c);
-	  if (isprint (c))
+	  if (c_isprint (c))
 	    fprintf (stderr, "('%c')\n", c);
 	  else
 	    fprintf (stderr, "('\\x%02x')\n", c & 0xff);
@@ -1165,8 +1164,8 @@ prepare_resume_reply (char *buf, ptid_t ptid, const target_waitstatus &status)
 	       here is convert the buffer from a T packet to an S packet
 	       and the avoid adding any extra content by breaking out.  */
 	    gdb_assert (buf_start[0] == 'T');
-	    gdb_assert (isxdigit (buf_start[1]));
-	    gdb_assert (isxdigit (buf_start[2]));
+	    gdb_assert (c_isxdigit (buf_start[1]));
+	    gdb_assert (c_isxdigit (buf_start[2]));
 	    buf_start[0] = 'S';
 	    buf_start[3] = '\0';
 	    break;

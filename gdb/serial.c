@@ -17,7 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include <ctype.h>
 #include "serial.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-utils.h"
@@ -116,7 +115,7 @@ serial_logchar (struct ui_file *stream, int ch_type, int ch, int timeout)
 	    break;
 	  default:
 	    gdb_printf (stream,
-			isprint (ch) ? "%c" : "\\x%02x", ch & 0xFF);
+			c_isprint (ch) ? "%c" : "\\x%02x", ch & 0xFF);
 	    break;
 	  }
     }

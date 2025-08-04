@@ -21,7 +21,6 @@
 
 #include <sys/types.h>
 #include <sys/sysinfo.h>
-#include <ctype.h>
 #include <utmp.h>
 #include <time.h>
 #include <unistd.h>
@@ -205,7 +204,7 @@ get_cores_used_by_process (PID_T pid, int *cores, const int num_cores)
 	  PID_T tid;
 	  int core;
 
-	  if (!isdigit (dp->d_name[0])
+	  if (!c_isdigit (dp->d_name[0])
 	      || NAMELEN (dp) > MAX_PID_T_STRLEN)
 	    continue;
 
@@ -310,7 +309,7 @@ linux_xfer_osdata_processes ()
 	  std::string cores_str;
 	  int i;
 
-	  if (!isdigit (dp->d_name[0])
+	  if (!c_isdigit (dp->d_name[0])
 	      || NAMELEN (dp) > MAX_PID_T_STRLEN)
 	    continue;
 
@@ -419,7 +418,7 @@ linux_xfer_osdata_processgroups ()
 	{
 	  PID_T pid, pgid;
 
-	  if (!isdigit (dp->d_name[0])
+	  if (!c_isdigit (dp->d_name[0])
 	      || NAMELEN (dp) > MAX_PID_T_STRLEN)
 	    continue;
 
@@ -483,7 +482,7 @@ linux_xfer_osdata_threads ()
 	  struct stat statbuf;
 	  char procentry[sizeof ("/proc/4294967295")];
 
-	  if (!isdigit (dp->d_name[0])
+	  if (!c_isdigit (dp->d_name[0])
 	      || NAMELEN (dp) > sizeof ("4294967295") - 1)
 	    continue;
 
@@ -513,7 +512,7 @@ linux_xfer_osdata_threads ()
 		      PID_T tid;
 		      int core;
 
-		      if (!isdigit (dp2->d_name[0])
+		      if (!c_isdigit (dp2->d_name[0])
 			  || NAMELEN (dp2) > sizeof ("4294967295") - 1)
 			continue;
 
@@ -633,7 +632,7 @@ linux_xfer_osdata_fds ()
 	  struct stat statbuf;
 	  char procentry[sizeof ("/proc/4294967295")];
 
-	  if (!isdigit (dp->d_name[0])
+	  if (!c_isdigit (dp->d_name[0])
 	      || NAMELEN (dp) > sizeof ("4294967295") - 1)
 	    continue;
 
@@ -662,7 +661,7 @@ linux_xfer_osdata_fds ()
 		      char buf[1000];
 		      ssize_t rslt;
 
-		      if (!isdigit (dp2->d_name[0]))
+		      if (!c_isdigit (dp2->d_name[0]))
 			continue;
 
 		      std::string fdname

@@ -72,7 +72,7 @@ check_doc (struct cmd_list_element *commandlist, const char *prefix)
 	   "first line is not terminated with a '.' character");
 
       /* Checks the doc is not terminated with a new line.  */
-      if (isspace (c->doc[strlen (c->doc) - 1]))
+      if (c_isspace (c->doc[strlen (c->doc) - 1]))
 	broken_doc_invariant
 	  (prefix, c->name,
 	   "has superfluous trailing whitespace");
@@ -87,7 +87,7 @@ check_doc (struct cmd_list_element *commandlist, const char *prefix)
 	  else
 	    {
 	      /* \n\n is ok, so we check that explicitly here.  */
-	      if (isspace (nl[-1]) && nl[-1] != '\n')
+	      if (c_isspace (nl[-1]) && nl[-1] != '\n')
 		broken_doc_invariant (prefix, c->name,
 				      "has whitespace before a newline");
 	    }

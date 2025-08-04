@@ -113,8 +113,8 @@ typedef char gdb_wchar_t;
 typedef int gdb_wint_t;
 
 #define gdb_wcslen strlen
-#define gdb_iswprint isprint
-#define gdb_iswxdigit isxdigit
+#define gdb_iswprint c_isprint
+#define gdb_iswxdigit c_isxdigit
 #define gdb_btowc /* empty */
 #define gdb_WEOF EOF
 

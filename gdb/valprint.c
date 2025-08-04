@@ -34,7 +34,6 @@
 #include "gdbsupport/gdb_obstack.h"
 #include "charset.h"
 #include "typeprint.h"
-#include <ctype.h>
 #include <algorithm>
 #include "gdbsupport/byte-vector.h"
 #include "cli/cli-option.h"

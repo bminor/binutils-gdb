@@ -46,7 +46,6 @@
 #include "c-lang.h"
 #include "cp-abi.h"
 #include "cp-support.h"
-#include <ctype.h>
 #include "block.h"
 #include "filenames.h"
 
@@ -3067,7 +3066,7 @@ process_reference (const char **string)
   p = *string + 1;
 
   /* Read number as reference id.  */
-  while (*p && isdigit (*p))
+  while (*p && c_isdigit (*p))
     {
       refnum = refnum * 10 + *p - '0';
       p++;
@@ -3251,7 +3250,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
      deftypes we know how to handle is a local.  */
   if (!strchr ("cfFGpPrStTvVXCR", *p))
 #else
-  if (isdigit (*p) || *p == '(' || *p == '-')
+  if (c_isdigit (*p) || *p == '(' || *p == '-')
 #endif
     deftype = 'l';
   else
@@ -4340,7 +4339,7 @@ again:
       break;
 
     case '@':
-      if (isdigit (**pp) || **pp == '(' || **pp == '-')
+      if (c_isdigit (**pp) || **pp == '(' || **pp == '-')
 	{			/* Member (class & variable) type */
 	  /* FIXME -- we should be doing smash_to_XXX types here.  */
 

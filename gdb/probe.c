@@ -33,7 +33,6 @@
 #include "ax.h"
 #include "ax-gdb.h"
 #include "location.h"
-#include <ctype.h>
 #include <algorithm>
 #include <optional>
 
@@ -826,7 +825,7 @@ probe_is_linespec_by_keyword (const char **linespecp, const char *const *keyword
       const char *keyword = *csp;
       size_t len = strlen (keyword);
 
-      if (strncmp (s, keyword, len) == 0 && isspace (s[len]))
+      if (strncmp (s, keyword, len) == 0 && c_isspace (s[len]))
 	{
 	  *linespecp += len + 1;
 	  return 1;

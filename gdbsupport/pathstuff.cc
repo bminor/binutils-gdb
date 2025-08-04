@@ -106,7 +106,7 @@ gdb_realpath_keepfile (const char *filename)
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM
   /* We need to be careful when filename is of the form 'd:foo', which
      is equivalent of d:./foo, which is totally different from d:/foo.  */
-  if (strlen (dir_name) == 2 && isalpha (dir_name[0]) && dir_name[1] == ':')
+  if (strlen (dir_name) == 2 && c_isalpha (dir_name[0]) && dir_name[1] == ':')
     {
       dir_name[2] = '.';
       dir_name[3] = '\000';

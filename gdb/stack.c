@@ -3064,7 +3064,7 @@ frame_apply_level_cmd_completer (struct cmd_list_element *ignore,
 
   /* Check if we're past a valid LEVEL already.  */
   if (levels.finished ()
-      && cmd > text && !isspace (cmd[-1]))
+      && cmd > text && !c_isspace (cmd[-1]))
     return;
 
   /* We're past LEVELs, advance word point.  */
@@ -3098,7 +3098,7 @@ frame_apply_cmd_completer (struct cmd_list_element *ignore,
     return;
 
   /* Check if we're past a valid COUNT already.  */
-  if (cmd > text && !isspace (cmd[-1]))
+  if (cmd > text && !c_isspace (cmd[-1]))
     return;
 
   /* We're past COUNT, advance word point.  */

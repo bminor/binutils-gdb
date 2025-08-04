@@ -31,7 +31,7 @@ mapped_index_string_hash (int index_version, const void *p)
   while ((c = *str++) != 0)
     {
       if (index_version >= 5)
-	c = tolower (c);
+	c = c_tolower (c);
       r = r * 67 + c - 113;
     }
 
@@ -45,12 +45,12 @@ dwarf5_djb_hash (const char *str_)
 {
   const unsigned char *str = (const unsigned char *) str_;
 
-  /* Note: tolower here ignores UTF-8, which isn't fully compliant.
+  /* Note: c_tolower here ignores UTF-8, which isn't fully compliant.
      See http://dwarfstd.org/ShowIssue.php?issue=161027.1.  */
 
   uint32_t hash = 5381;
   while (int c = *str++)
-    hash = hash * 33 + tolower (c);
+    hash = hash * 33 + c_tolower (c);
   return hash;
 }
 
@@ -59,11 +59,11 @@ dwarf5_djb_hash (const char *str_)
 uint32_t
 dwarf5_djb_hash (std::string_view str)
 {
-  /* Note: tolower here ignores UTF-8, which isn't fully compliant.
+  /* Note: c_tolower here ignores UTF-8, which isn't fully compliant.
      See http://dwarfstd.org/ShowIssue.php?issue=161027.1.  */
 
   uint32_t hash = 5381;
   for (char c : str)
-    hash = hash * 33 + tolower (c & 0xff);
+    hash = hash * 33 + c_tolower (c & 0xff);
   return hash;
 }

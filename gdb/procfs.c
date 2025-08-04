@@ -38,7 +38,6 @@
 #include <sys/syscall.h>
 #include "gdbsupport/gdb_wait.h"
 #include <signal.h>
-#include <ctype.h>
 #include "gdb_bfd.h"
 #include "auxv.h"
 #include "procfs.h"
@@ -3304,7 +3303,7 @@ procfs_target::info_proc (const char *args, enum info_proc_what what)
   gdb_argv built_argv (args);
   for (char *arg : built_argv)
     {
-      if (isdigit (arg[0]))
+      if (c_isdigit (arg[0]))
 	{
 	  pid = strtoul (arg, &tmp, 10);
 	  if (*tmp == '/')
@@ -3415,7 +3414,7 @@ proc_trace_syscalls (const char *args, int from_tty, int entry_or_exit, int mode
     error_no_arg (_("system call to trace"));
 
   pi = find_procinfo_or_die (inferior_ptid.pid (), 0);
-  if (isdigit (args[0]))
+  if (c_isdigit (args[0]))
     {
       const int syscallnum = atoi (args);
 

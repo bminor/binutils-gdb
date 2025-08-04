@@ -51,7 +51,6 @@
 
 %{
 
-#include <ctype.h>
 #include "expression.h"
 #include "value.h"
 #include "parser-defs.h"
@@ -663,13 +662,13 @@ parse_number (struct parser_state *par_state,
 
       /* Handle suffixes: 'f' for float32, 'l' for long double.
 	 FIXME: This appears to be an extension -- do we want this?  */
-      if (len >= 1 && tolower (p[len - 1]) == 'f')
+      if (len >= 1 && c_tolower (p[len - 1]) == 'f')
 	{
 	  putithere->typed_val_float.type
 	    = builtin_go_types->builtin_float32;
 	  len--;
 	}
-      else if (len >= 1 && tolower (p[len - 1]) == 'l')
+      else if (len >= 1 && c_tolower (p[len - 1]) == 'l')
 	{
 	  putithere->typed_val_float.type
 	    = parse_type (par_state)->builtin_long_double;
@@ -1113,9 +1112,9 @@ lex_one_token (struct parser_state *par_state)
 	const char *p = &tokstart[1];
 	size_t len = strlen ("entry");
 
-	while (isspace (*p))
+	while (c_isspace (*p))
 	  p++;
-	if (strncmp (p, "entry", len) == 0 && !isalnum (p[len])
+	if (strncmp (p, "entry", len) == 0 && !c_isalnum (p[len])
 	    && p[len] != '_')
 	  {
 	    par_state->lexptr = &p[len];

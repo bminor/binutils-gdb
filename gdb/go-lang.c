@@ -41,7 +41,6 @@
 #include "parser-defs.h"
 #include "gdbarch.h"
 
-#include <ctype.h>
 
 /* The main function in the main package.  */
 static const char GO_MAIN_MAIN[] = "main.main";
@@ -292,7 +291,7 @@ unpack_mangled_go_symbol (const char *mangled_name,
   while (p > buf)
     {
       int current = *(const unsigned char *) --p;
-      int current_is_digit = isdigit (current);
+      int current_is_digit = c_isdigit (current);
 
       if (saw_digit)
 	{

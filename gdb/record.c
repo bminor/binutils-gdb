@@ -28,7 +28,6 @@
 #include "interps.h"
 #include "top.h"
 
-#include <ctype.h>
 
 /* This is the debug switch for process record.  */
 unsigned int record_debug = 0;
@@ -423,7 +422,7 @@ get_insn_number (const char **arg)
   begin = *arg;
   pos = skip_spaces (begin);
 
-  if (!isdigit (*pos))
+  if (!c_isdigit (*pos))
     error (_("Expected positive number, got: %s."), pos);
 
   number = strtoulst (pos, &end, 10);
@@ -443,7 +442,7 @@ get_context_size (const char **arg)
 
   pos = skip_spaces (*arg);
 
-  if (!isdigit (*pos))
+  if (!c_isdigit (*pos))
     error (_("Expected positive number, got: %s."), pos);
 
   long result = strtol (pos, &end, 10);
@@ -483,7 +482,7 @@ get_insn_history_modifiers (const char **arg)
 
       for (; *args; ++args)
 	{
-	  if (isspace (*args))
+	  if (c_isspace (*args))
 	    break;
 
 	  if (*args == '/')
@@ -627,7 +626,7 @@ get_call_history_modifiers (const char **arg)
 
       for (; *args; ++args)
 	{
-	  if (isspace (*args))
+	  if (c_isspace (*args))
 	    break;
 
 	  if (*args == '/')

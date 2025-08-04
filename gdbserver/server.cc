@@ -22,7 +22,6 @@
 #include "tdesc.h"
 #include "gdbsupport/rsp-low.h"
 #include "gdbsupport/signals-state-save-restore.h"
-#include <ctype.h>
 #include <unistd.h>
 #if HAVE_SIGNAL_H
 #include <signal.h>
@@ -1427,7 +1426,7 @@ parse_debug_format_options (const char *arg, int is_monitor)
   debug_timestamp = 0;
 
   /* First remove leading spaces, for "monitor set debug-format".  */
-  while (isspace (*arg))
+  while (c_isspace (*arg))
     ++arg;
 
   std::vector<gdb::unique_xmalloc_ptr<char>> options
@@ -1473,8 +1472,8 @@ parse_debug_format_options (const char *arg, int is_monitor)
 struct debug_opt
 {
   /* NAME is the name of this debug option, this should be a simple string
-     containing no whitespace, starting with a letter from isalpha(), and
-     contain only isalnum() characters and '_' underscore and '-' hyphen.
+     containing no whitespace, starting with a letter from c_isalpha(), and
+     contain only c_isalnum() characters and '_' underscore and '-' hyphen.
 
      SETTER is a callback function used to set the debug variable.  This
      callback will be passed true to enable the debug setting, or false to
@@ -1483,7 +1482,7 @@ struct debug_opt
     : m_name (name),
       m_setter (setter)
   {
-    gdb_assert (isalpha (*name));
+    gdb_assert (c_isalpha (*name));
   }
 
   /* Called to enable or disable the debug setting.  */

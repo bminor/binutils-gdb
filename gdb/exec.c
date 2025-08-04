@@ -42,7 +42,6 @@
 #include "readline/tilde.h"
 #include "gdbcore.h"
 
-#include <ctype.h>
 #include <sys/stat.h>
 #include "solib.h"
 #include <algorithm>
@@ -1015,7 +1014,7 @@ set_section_command (const char *args, int from_tty)
     error (_("Must specify section name and its virtual address"));
 
   /* Parse out section name.  */
-  for (secname = args; !isspace (*args); args++);
+  for (secname = args; !c_isspace (*args); args++);
   unsigned seclen = args - secname;
 
   /* Parse out new virtual address.  */

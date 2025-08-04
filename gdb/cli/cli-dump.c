@@ -23,7 +23,6 @@
 #include "cli/cli-cmds.h"
 #include "value.h"
 #include "completer.h"
-#include <ctype.h>
 #include "target.h"
 #include "readline/tilde.h"
 #include "gdbcore.h"

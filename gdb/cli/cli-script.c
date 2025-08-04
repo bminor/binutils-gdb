@@ -19,7 +19,6 @@
 
 #include "event-top.h"
 #include "value.h"
-#include <ctype.h>
 
 #include "ui-out.h"
 #include "top.h"
@@ -829,7 +828,7 @@ locate_arg (const char *p)
   while ((p = strchr (p, '$')))
     {
       if (startswith (p, "$arg")
-	  && (isdigit (p[4]) || p[4] == 'c'))
+	  && (c_isdigit (p[4]) || p[4] == 'c'))
 	return p;
       p++;
     }
@@ -1324,9 +1323,9 @@ validate_comname (const char **comname)
 
   /* Find the last word of the argument.  */
   p = *comname + strlen (*comname);
-  while (p > *comname && isspace (p[-1]))
+  while (p > *comname && c_isspace (p[-1]))
     p--;
-  while (p > *comname && !isspace (p[-1]))
+  while (p > *comname && !c_isspace (p[-1]))
     p--;
   last_word = p;
 
