@@ -94,6 +94,8 @@ int batch_silent = 0;
 int return_child_result = 0;
 int return_child_result_value = -1;
 
+/* True if --max was seen.  */
+bool max = false;
 
 /* GDB as it has been invoked from the command line (i.e. argv[0]).  */
 static char *gdb_program_name;
@@ -788,6 +790,7 @@ captured_main_1 (struct captured_main_args *context)
       {"n", no_argument, &inhibit_gdbinit, 1},
       {"batch-silent", no_argument, 0, 'B'},
       {"batch", no_argument, &batch_flag, 1},
+      {"max", no_argument, 0, 'G'},
 
     /* This is a synonym for "--annotate=1".  --annotate is now
        preferred, but keep this here for a long time because people
@@ -945,6 +948,9 @@ captured_main_1 (struct captured_main_args *context)
 		     gdb_program_name);
 	    set_gdb_data_directory (optarg);
 	    gdb_datadir_provided = 1;
+	    break;
+	  case 'G':
+	    max = true;
 	    break;
 #ifdef GDBTK
 	  case 'z':
@@ -1450,6 +1456,8 @@ Operating modes:\n\n\
   --batch-silent     Like --batch, but suppress all gdb stdout output.\n\
   --return-child-result\n\
 		     GDB exit code will be the child's exit code.\n\
+  --max              Disassemble all instructions without checking\n\
+		    architecture compatibility.\n\
   --configuration    Print details about GDB configuration and then exit.\n\
   --help             Print this message and then exit.\n\
   --version          Print version information and then exit.\n\n\

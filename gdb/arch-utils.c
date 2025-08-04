@@ -45,6 +45,8 @@
 
 #include "dis-asm.h"
 
+#include "opcodes/riscv-dis.h"
+
 bool
 default_displaced_step_hw_singlestep (struct gdbarch *gdbarch)
 {
@@ -1033,10 +1035,22 @@ default_guess_tracepoint_registers (struct gdbarch *gdbarch,
   regcache->raw_supply (pc_regno, regs);
 }
 
+/*  GDB disassembler option (-M,max): Ignore architecture constraints
+    and decode all known instructions.  */
+extern bool max;
+
 int
 default_print_insn (bfd_vma memaddr, disassemble_info *info)
 {
   disassembler_ftype disassemble_fn;
+
+  struct riscv_private_data *pd = (struct riscv_private_data *)info->private_data;
+  pd->all_ext = false;
+
+  /*  Flag indicating if the -M,max disassembler option was
+    specified.  */
+  if (max)
+    pd->all_ext = true;
 
   disassemble_fn = disassembler (info->arch, info->endian == BFD_ENDIAN_BIG,
 				 info->mach, current_program_space->exec_bfd ());
