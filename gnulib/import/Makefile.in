@@ -50,6 +50,7 @@
 #  accept \
 #  alloca \
 #  bind \
+#  c-ctype \
 #  canonicalize-lgpl \
 #  chown \
 #  connect \
@@ -557,12 +558,13 @@ am__dirstamp = $(am__leading_dot)dirstamp
 @GL_COND_OBJ_WMEMPCPY_TRUE@	libgnu_a-wmempcpy.$(OBJEXT)
 am_libgnu_a_OBJECTS = $(am__objects_1) libgnu_a-openat-proc.$(OBJEXT) \
 	libgnu_a-basename-lgpl.$(OBJEXT) $(am__objects_2) \
-	$(am__objects_3) $(am__objects_4) $(am__objects_5) \
-	$(am__objects_6) $(am__objects_7) libgnu_a-cloexec.$(OBJEXT) \
-	$(am__objects_8) $(am__objects_9) $(am__objects_10) \
-	libgnu_a-count-one-bits.$(OBJEXT) $(am__objects_11) \
-	libgnu_a-dirname-lgpl.$(OBJEXT) libgnu_a-stripslash.$(OBJEXT) \
-	$(am__objects_12) $(am__objects_13) $(am__objects_14) \
+	$(am__objects_3) libgnu_a-c-ctype.$(OBJEXT) $(am__objects_4) \
+	$(am__objects_5) $(am__objects_6) $(am__objects_7) \
+	libgnu_a-cloexec.$(OBJEXT) $(am__objects_8) $(am__objects_9) \
+	$(am__objects_10) libgnu_a-count-one-bits.$(OBJEXT) \
+	$(am__objects_11) libgnu_a-dirname-lgpl.$(OBJEXT) \
+	libgnu_a-stripslash.$(OBJEXT) $(am__objects_12) \
+	$(am__objects_13) $(am__objects_14) \
 	libgnu_a-exitfail.$(OBJEXT) $(am__objects_15) \
 	$(am__objects_16) libgnu_a-fd-hook.$(OBJEXT) \
 	libgnu_a-fd-safer-flag.$(OBJEXT) \
@@ -2150,8 +2152,8 @@ MAINTAINERCLEANFILES =
 AM_CPPFLAGS = 
 AM_CFLAGS = 
 libgnu_a_SOURCES = $(am__append_1) openat-priv.h openat-proc.c \
-	basename-lgpl.c $(am__append_2) $(am__append_3) \
-	$(am__append_4) $(am__append_5) $(am__append_6) \
+	basename-lgpl.c $(am__append_2) $(am__append_3) c-ctype.h \
+	c-ctype.c $(am__append_4) $(am__append_5) $(am__append_6) \
 	$(am__append_7) cloexec.c $(am__append_8) $(am__append_9) \
 	$(am__append_10) count-one-bits.c $(am__append_11) \
 	dirname-lgpl.c stripslash.c $(am__append_12) $(am__append_13) \
@@ -2328,6 +2330,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libgnu_a-basename-lgpl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libgnu_a-bind.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libgnu_a-btowc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libgnu_a-c-ctype.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libgnu_a-canonicalize-lgpl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libgnu_a-chdir-long.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libgnu_a-chown.Po@am__quote@
@@ -2543,6 +2546,20 @@ libgnu_a-btowc.obj: btowc.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='btowc.c' object='libgnu_a-btowc.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgnu_a_CFLAGS) $(CFLAGS) -c -o libgnu_a-btowc.obj `if test -f 'btowc.c'; then $(CYGPATH_W) 'btowc.c'; else $(CYGPATH_W) '$(srcdir)/btowc.c'; fi`
+
+libgnu_a-c-ctype.o: c-ctype.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgnu_a_CFLAGS) $(CFLAGS) -MT libgnu_a-c-ctype.o -MD -MP -MF $(DEPDIR)/libgnu_a-c-ctype.Tpo -c -o libgnu_a-c-ctype.o `test -f 'c-ctype.c' || echo '$(srcdir)/'`c-ctype.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libgnu_a-c-ctype.Tpo $(DEPDIR)/libgnu_a-c-ctype.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='c-ctype.c' object='libgnu_a-c-ctype.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgnu_a_CFLAGS) $(CFLAGS) -c -o libgnu_a-c-ctype.o `test -f 'c-ctype.c' || echo '$(srcdir)/'`c-ctype.c
+
+libgnu_a-c-ctype.obj: c-ctype.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgnu_a_CFLAGS) $(CFLAGS) -MT libgnu_a-c-ctype.obj -MD -MP -MF $(DEPDIR)/libgnu_a-c-ctype.Tpo -c -o libgnu_a-c-ctype.obj `if test -f 'c-ctype.c'; then $(CYGPATH_W) 'c-ctype.c'; else $(CYGPATH_W) '$(srcdir)/c-ctype.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libgnu_a-c-ctype.Tpo $(DEPDIR)/libgnu_a-c-ctype.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='c-ctype.c' object='libgnu_a-c-ctype.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgnu_a_CFLAGS) $(CFLAGS) -c -o libgnu_a-c-ctype.obj `if test -f 'c-ctype.c'; then $(CYGPATH_W) 'c-ctype.c'; else $(CYGPATH_W) '$(srcdir)/c-ctype.c'; fi`
 
 libgnu_a-canonicalize-lgpl.o: canonicalize-lgpl.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgnu_a_CFLAGS) $(CFLAGS) -MT libgnu_a-canonicalize-lgpl.o -MD -MP -MF $(DEPDIR)/libgnu_a-canonicalize-lgpl.Tpo -c -o libgnu_a-canonicalize-lgpl.o `test -f 'canonicalize-lgpl.c' || echo '$(srcdir)/'`canonicalize-lgpl.c

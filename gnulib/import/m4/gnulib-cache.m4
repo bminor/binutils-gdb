@@ -41,6 +41,7 @@
 #  accept \
 #  alloca \
 #  bind \
+#  c-ctype \
 #  canonicalize-lgpl \
 #  chown \
 #  connect \
@@ -96,6 +97,7 @@ gl_MODULES([
   accept
   alloca
   bind
+  c-ctype
   canonicalize-lgpl
   chown
   connect

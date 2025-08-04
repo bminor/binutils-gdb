@@ -36,6 +36,7 @@
 #  accept \
 #  alloca \
 #  bind \
+#  c-ctype \
 #  canonicalize-lgpl \
 #  chown \
 #  connect \
@@ -245,6 +246,12 @@ libgnu_a_SOURCES += btowc.c
 endif
 
 ## end   gnulib module btowc
+
+## begin gnulib module c-ctype
+
+libgnu_a_SOURCES += c-ctype.h c-ctype.c
+
+## end   gnulib module c-ctype
 
 ## begin gnulib module canonicalize-lgpl
 

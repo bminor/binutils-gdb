@@ -33,6 +33,7 @@ IMPORTED_GNULIB_MODULES="\
     accept \
     alloca \
     bind \
+    c-ctype \
     canonicalize-lgpl \
     chown \
     connect \

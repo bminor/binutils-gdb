@@ -54,6 +54,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module bind:
   # Code from module btowc:
   # Code from module builtin-expect:
+  # Code from module c-ctype:
   # Code from module c99:
   # Code from module canonicalize-lgpl:
   # Code from module chdir:
@@ -1130,6 +1131,8 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/bind.c
   lib/btowc.c
   lib/c++defs.h
+  lib/c-ctype.c
+  lib/c-ctype.h
   lib/canonicalize-lgpl.c
   lib/cdefs.h
   lib/chdir-long.c
