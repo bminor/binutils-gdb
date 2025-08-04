@@ -46,7 +46,6 @@
 #include <langinfo.h>
 #include <iconv.h>
 #include "gdbsupport/filestuff.h"
-#include "gdbsupport/gdb-safe-ctype.h"
 #include "tracepoint.h"
 #include <inttypes.h>
 #include "gdbsupport/common-inferior.h"
@@ -7012,7 +7011,7 @@ replace_non_ascii (char *dest, const char *name)
   const char *result = dest;
   while (*name != '\0')
     {
-      if (!ISPRINT (*name))
+      if (!c_isprint (*name))
 	*dest++ = '?';
       else
 	*dest++ = *name;

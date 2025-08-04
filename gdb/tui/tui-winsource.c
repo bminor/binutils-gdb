@@ -26,7 +26,6 @@
 #include "value.h"
 #include "source.h"
 #include "objfiles.h"
-#include "gdbsupport/gdb-safe-ctype.h"
 
 #include "tui/tui.h"
 #include "tui/tui-data.h"
@@ -109,7 +108,7 @@ tui_copy_source_line (const char **ptr, int *length)
 	}
       else if (c == '\t')
 	process_tab ();
-      else if (ISCNTRL (c))
+      else if (c_iscntrl (c))
 	{
 	  result.push_back ('^');
 	  result.push_back (c + 0100);

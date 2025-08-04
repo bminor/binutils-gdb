@@ -35,7 +35,6 @@
 #include "namespace.h"
 #include <signal.h>
 #include "gdbsupport/gdb_setjmp.h"
-#include "gdbsupport/gdb-safe-ctype.h"
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/gdb-sigmask.h"
 #include <atomic>
@@ -105,7 +104,7 @@ static int
 cp_already_canonical (const char *string)
 {
   /* Identifier start character [a-zA-Z_].  */
-  if (!ISIDST (string[0]))
+  if (!c_isalpha (string[0]) || string[0] == '_')
     return 0;
 
   /* These are the only two identifiers which canonicalize to other
@@ -117,7 +116,7 @@ cp_already_canonical (const char *string)
     return 0;
 
   /* Identifier character [a-zA-Z0-9_].  */
-  while (ISIDNUM (string[1]))
+  while (c_isalpha (string[1]) || c_isdigit (string[1]) || string[1] == '_')
     string++;
 
   if (string[1] == '\0')
@@ -1137,7 +1136,7 @@ cp_find_first_component_aux (const char *name, int permissive)
 	      && startswith (name + index, CP_OPERATOR_STR))
 	    {
 	      index += CP_OPERATOR_LEN;
-	      while (ISSPACE(name[index]))
+	      while (c_isspace(name[index]))
 		++index;
 	      switch (name[index])
 		{
@@ -2350,7 +2349,7 @@ find_toplevel_char (const char *s, char c)
 	      scan += CP_OPERATOR_LEN;
 	      if (*scan == c)
 		return scan;
-	      while (ISSPACE (*scan))
+	      while (c_isspace (*scan))
 		{
 		  ++scan;
 		  if (*scan == c)

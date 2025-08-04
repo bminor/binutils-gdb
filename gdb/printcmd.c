@@ -54,7 +54,6 @@
 #include "source.h"
 #include "gdbsupport/byte-vector.h"
 #include <optional>
-#include "gdbsupport/gdb-safe-ctype.h"
 #include "inferior.h"
 
 /* Chain containing all defined memory-tag subcommands.  */

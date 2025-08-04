@@ -56,7 +56,6 @@
 #include "arch/riscv.h"
 #include "record-full.h"
 #include "riscv-ravenscar-thread.h"
-#include "gdbsupport/gdb-safe-ctype.h"
 
 #include <vector>
 
@@ -4183,9 +4182,9 @@ riscv_print_insn (bfd_vma addr, struct disassemble_info *info)
 static int
 riscv_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
 {
-  return (ISDIGIT (*s) /* Literal number.  */
+  return (c_isdigit (*s) /* Literal number.  */
 	  || *s == '(' /* Register indirection.  */
-	  || ISALPHA (*s)); /* Register value.  */
+	  || c_isalpha (*s)); /* Register value.  */
 }
 
 /* String that appears before a register name in a SystemTap register

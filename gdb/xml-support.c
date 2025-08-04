@@ -21,7 +21,6 @@
 #include "xml-builtin.h"
 #include "xml-support.h"
 #include "gdbsupport/filestuff.h"
-#include "gdbsupport/gdb-safe-ctype.h"
 #include <vector>
 #include <string>
 
@@ -430,10 +429,10 @@ gdb_xml_parser::end_element (const XML_Char *name)
 	  body = scope->body.c_str ();
 
 	  /* Strip leading and trailing whitespace.  */
-	  while (length > 0 && ISSPACE (body[length - 1]))
+	  while (length > 0 && c_isspace (body[length - 1]))
 	    length--;
 	  scope->body.erase (length);
-	  while (*body && ISSPACE (*body))
+	  while (*body && c_isspace (*body))
 	    body++;
 	}
 

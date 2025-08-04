@@ -32,7 +32,6 @@
 #include <ctype.h>
 #include "mi-parse.h"
 #include <optional>
-#include "gdbsupport/gdb-safe-ctype.h"
 #include "inferior.h"
 
 enum what_to_list { locals, arguments, all };

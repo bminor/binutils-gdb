@@ -28,7 +28,6 @@
 #include "cli/cli-cmds.h"
 #include "dis-asm.h"
 #include "source.h"
-#include "gdbsupport/gdb-safe-ctype.h"
 #include <algorithm>
 #include <optional>
 #include "valprint.h"

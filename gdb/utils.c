@@ -75,7 +75,6 @@
 #include "gdbsupport/scope-exit.h"
 #include "gdbarch.h"
 #include "cli-out.h"
-#include "gdbsupport/gdb-safe-ctype.h"
 #include "bt-utils.h"
 #include "gdbsupport/buildargv.h"
 #include "pager.h"
@@ -1008,7 +1007,7 @@ parse_escape (struct gdbarch *gdbarch, const char **string_ptr)
 	  while (++count < 3)
 	    {
 	      c = (**string_ptr);
-	      if (ISDIGIT (c) && c != '8' && c != '9')
+	      if (c_isdigit (c) && c != '8' && c != '9')
 		{
 		  (*string_ptr)++;
 		  i *= 8;
@@ -2068,7 +2067,7 @@ fprintf_symbol (struct ui_file *stream, const char *name,
 static bool
 valid_identifier_name_char (int ch)
 {
-  return (ISALNUM (ch) || ch == '_');
+  return (c_isalnum (ch) || ch == '_');
 }
 
 /* Skip to end of token, or to END, whatever comes first.  Input is
@@ -2078,7 +2077,7 @@ static const char *
 cp_skip_operator_token (const char *token, const char *end)
 {
   const char *p = token;
-  while (p != end && !ISSPACE (*p) && *p != '(')
+  while (p != end && !c_isspace (*p) && *p != '(')
     {
       if (valid_identifier_name_char (*p))
 	{
@@ -2132,9 +2131,9 @@ cp_skip_operator_token (const char *token, const char *end)
 static void
 skip_ws (const char *&string1, const char *&string2, const char *end_str2)
 {
-  while (ISSPACE (*string1))
+  while (c_isspace (*string1))
     string1++;
-  while (string2 < end_str2 && ISSPACE (*string2))
+  while (string2 < end_str2 && c_isspace (*string2))
     string2++;
 }
 
@@ -2198,7 +2197,7 @@ skip_template_parameter_list (const char **name)
       /* Skip any whitespace that might occur after the closing of the
 	 parameter list, but only if it is the end of parameter list.  */
       const char *q = p;
-      while (ISSPACE (*q))
+      while (c_isspace (*q))
 	++q;
       if (*q == '>')
 	p = q;
@@ -2230,8 +2229,8 @@ strncmp_iw_with_mode (const char *string1, const char *string2,
   while (1)
     {
       if (skip_spaces
-	  || ((ISSPACE (*string1) && !valid_identifier_name_char (*string2))
-	      || (ISSPACE (*string2) && !valid_identifier_name_char (*string1))))
+	  || ((c_isspace (*string1) && !valid_identifier_name_char (*string2))
+	      || (c_isspace (*string2) && !valid_identifier_name_char (*string1))))
 	{
 	  skip_ws (string1, string2, end_str2);
 	  skip_spaces = false;
@@ -2264,7 +2263,7 @@ strncmp_iw_with_mode (const char *string1, const char *string2,
 	  if (match_for_lcd != NULL && abi_start != string1)
 	    match_for_lcd->mark_ignored_range (abi_start, string1);
 
-	  while (ISSPACE (*string1))
+	  while (c_isspace (*string1))
 	    string1++;
 	}
 
@@ -2331,9 +2330,9 @@ strncmp_iw_with_mode (const char *string1, const char *string2,
 	  string1++;
 	  string2++;
 
-	  while (ISSPACE (*string1))
+	  while (c_isspace (*string1))
 	    string1++;
-	  while (string2 < end_str2 && ISSPACE (*string2))
+	  while (string2 < end_str2 && c_isspace (*string2))
 	    string2++;
 	  continue;
 	}
@@ -2433,14 +2432,13 @@ strncmp_iw_with_mode (const char *string1, const char *string2,
       if (case_sensitivity == case_sensitive_on && *string1 != *string2)
 	break;
       if (case_sensitivity == case_sensitive_off
-	  && (TOLOWER ((unsigned char) *string1)
-	      != TOLOWER ((unsigned char) *string2)))
+	  && c_tolower (*string1) != c_tolower (*string2))
 	break;
 
       /* If we see any non-whitespace, non-identifier-name character
 	 (any of "()<>*&" etc.), then skip spaces the next time
 	 around.  */
-      if (!ISSPACE (*string1) && !valid_identifier_name_char (*string1))
+      if (!c_isspace (*string1) && !valid_identifier_name_char (*string1))
 	skip_spaces = true;
 
       string1++;
@@ -3153,16 +3151,16 @@ strcmp_iw_ordered (const char *string1, const char *string2)
 
       while (*string1 != '\0' && *string2 != '\0')
 	{
-	  while (ISSPACE (*string1))
+	  while (c_isspace (*string1))
 	    string1++;
-	  while (ISSPACE (*string2))
+	  while (c_isspace (*string2))
 	    string2++;
 
 	  switch (case_pass)
 	  {
 	    case case_sensitive_off:
-	      c1 = TOLOWER ((unsigned char) *string1);
-	      c2 = TOLOWER ((unsigned char) *string2);
+	      c1 = c_tolower (*string1);
+	      c2 = c_tolower (*string2);
 	      break;
 	    case case_sensitive_on:
 	      c1 = *string1;
@@ -3271,17 +3269,17 @@ string_to_core_addr (const char *my_string)
 {
   CORE_ADDR addr = 0;
 
-  if (my_string[0] == '0' && TOLOWER (my_string[1]) == 'x')
+  if (my_string[0] == '0' && c_tolower (my_string[1]) == 'x')
     {
       /* Assume that it is in hex.  */
       int i;
 
       for (i = 2; my_string[i] != '\0'; i++)
 	{
-	  if (ISDIGIT (my_string[i]))
+	  if (c_isdigit (my_string[i]))
 	    addr = (my_string[i] - '0') + (addr * 16);
-	  else if (ISXDIGIT (my_string[i]))
-	    addr = (TOLOWER (my_string[i]) - 'a' + 0xa) + (addr * 16);
+	  else if (c_isxdigit (my_string[i]))
+	    addr = (c_tolower (my_string[i]) - 'a' + 0xa) + (addr * 16);
 	  else
 	    error (_("invalid hex \"%s\""), my_string);
 	}
@@ -3293,7 +3291,7 @@ string_to_core_addr (const char *my_string)
 
       for (i = 0; my_string[i] != '\0'; i++)
 	{
-	  if (ISDIGIT (my_string[i]))
+	  if (c_isdigit (my_string[i]))
 	    addr = (my_string[i] - '0') + (addr * 10);
 	  else
 	    error (_("invalid decimal \"%s\""), my_string);

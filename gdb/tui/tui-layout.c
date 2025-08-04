@@ -37,7 +37,6 @@
 #include "tui/tui-layout.h"
 #include "tui/tui-source.h"
 #include "gdb_curses.h"
-#include "gdbsupport/gdb-safe-ctype.h"
 
 /* The layouts.  */
 static std::vector<std::unique_ptr<tui_layout_split>> layouts;
@@ -381,14 +380,14 @@ tui_register_window (const char *name, window_factory &&factory)
 
   for (const char &c : name_copy)
     {
-      if (ISSPACE (c))
+      if (c_isspace (c))
 	error (_("invalid whitespace character in window name"));
 
-      if (!ISALNUM (c) && strchr ("-_.", c) == nullptr)
+      if (!c_isalnum (c) && strchr ("-_.", c) == nullptr)
 	error (_("invalid character '%c' in window name"), c);
     }
 
-  if (!ISALPHA (name_copy[0]))
+  if (!c_isalpha (name_copy[0]))
     error (_("window name must start with a letter, not '%c'"), name_copy[0]);
 
   /* We already check above for all the builtin window names.  If we get

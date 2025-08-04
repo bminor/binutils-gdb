@@ -2029,13 +2029,13 @@ parse_number (struct parser_state *par_state,
 	  len -= 2;
 	}
       /* Handle suffixes: 'f' for float, 'l' for long double.  */
-      else if (len >= 1 && TOLOWER (buf[len - 1]) == 'f')
+      else if (len >= 1 && c_tolower (buf[len - 1]) == 'f')
 	{
 	  putithere->typed_val_float.type
 	    = parse_type (par_state)->builtin_float;
 	  len -= 1;
 	}
-      else if (len >= 1 && TOLOWER (buf[len - 1]) == 'l')
+      else if (len >= 1 && c_tolower (buf[len - 1]) == 'l')
 	{
 	  putithere->typed_val_float.type
 	    = parse_type (par_state)->builtin_long_double;
@@ -2241,9 +2241,9 @@ c_parse_escape (const char **ptr, struct obstack *output)
       if (output)
 	obstack_grow_str (output, "\\x");
       ++tokptr;
-      if (!ISXDIGIT (*tokptr))
+      if (!c_isxdigit (*tokptr))
 	error (_("\\x escape without a following hex digit"));
-      while (ISXDIGIT (*tokptr))
+      while (c_isxdigit (*tokptr))
 	{
 	  if (output)
 	    obstack_1grow (output, *tokptr);
@@ -2266,7 +2266,7 @@ c_parse_escape (const char **ptr, struct obstack *output)
 	if (output)
 	  obstack_grow_str (output, "\\");
 	for (i = 0;
-	     i < 3 && ISDIGIT (*tokptr) && *tokptr != '8' && *tokptr != '9';
+	     i < 3 && c_isdigit (*tokptr) && *tokptr != '8' && *tokptr != '9';
 	     ++i)
 	  {
 	    if (output)
@@ -2291,9 +2291,9 @@ c_parse_escape (const char **ptr, struct obstack *output)
 	    obstack_1grow (output, *tokptr);
 	  }
 	++tokptr;
-	if (!ISXDIGIT (*tokptr))
+	if (!c_isxdigit (*tokptr))
 	  error (_("\\%c escape without a following hex digit"), c);
-	for (i = 0; i < len && ISXDIGIT (*tokptr); ++i)
+	for (i = 0; i < len && c_isxdigit (*tokptr); ++i)
 	  {
 	    if (output)
 	      obstack_1grow (output, *tokptr);
@@ -2878,7 +2878,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	    size_t len = strlen ("selector");
 
 	    if (strncmp (p, "selector", len) == 0
-		&& (p[len] == '\0' || ISSPACE (p[len])))
+		&& (p[len] == '\0' || c_isspace (p[len])))
 	      {
 		pstate->lexptr = p + len;
 		return SELECTOR;
@@ -2887,7 +2887,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	      goto parse_string;
 	  }
 
-	while (ISSPACE (*p))
+	while (c_isspace (*p))
 	  p++;
 	size_t len = strlen ("entry");
 	if (strncmp (p, "entry", len) == 0 && !c_ident_is_alnum (p[len])

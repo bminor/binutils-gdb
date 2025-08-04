@@ -19,9 +19,7 @@
 #ifndef GDB_C_SUPPORT_H
 #define GDB_C_SUPPORT_H
 
-#include "safe-ctype.h"
-
-/* Like ISALPHA, but also returns true for the union of all UTF-8
+/* Like isalpha, but also returns true for the union of all UTF-8
    multi-byte sequence bytes and non-ASCII characters in
    extended-ASCII charsets (e.g., Latin1).  I.e., returns true if the
    high bit is set.  Note that not all UTF-8 ranges are allowed in C++
@@ -32,15 +30,15 @@
 static inline bool
 c_ident_is_alpha (unsigned char ch)
 {
-  return ISALPHA (ch) || ch >= 0x80;
+  return c_isalpha (ch) || ch >= 0x80;
 }
 
-/* Similarly, but Like ISALNUM.  */
+/* Similarly, but Like isalnum.  */
 
 static inline bool
 c_ident_is_alnum (unsigned char ch)
 {
-  return ISALNUM (ch) || ch >= 0x80;
+  return c_isalnum (ch) || ch >= 0x80;
 }
 
 #endif /* GDB_C_SUPPORT_H */

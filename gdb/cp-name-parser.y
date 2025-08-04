@@ -39,7 +39,6 @@
 
 
 #include <unistd.h>
-#include "gdbsupport/gdb-safe-ctype.h"
 #include "demangle.h"
 #include "cp-support.h"
 #include "c-support.h"
@@ -1362,7 +1361,7 @@ cpname_state::parse_number (const char *p, int len, int parsed_float,
 
       /* See if it has `f' or `l' suffix (float or long double).  */
 
-      c = TOLOWER (p[len - 1]);
+      c = c_tolower (p[len - 1]);
 
       if (c == 'f')
       	{
@@ -1374,7 +1373,7 @@ cpname_state::parse_number (const char *p, int len, int parsed_float,
 	  len--;
 	  type = make_builtin_type ("long double");
 	}
-      else if (ISDIGIT (c) || c == '.')
+      else if (c_isdigit (c) || c == '.')
 	type = make_builtin_type ("double");
       else
 	return ERROR;
@@ -1439,10 +1438,10 @@ cpname_state::parse_number (const char *p, int len, int parsed_float,
   for (int off = 0; off < len; ++off)
     {
       int dig;
-      if (ISDIGIT (p[off]))
+      if (c_isdigit (p[off]))
 	dig = p[off] - '0';
       else
-	dig = TOLOWER (p[off]) - 'a' + 10;
+	dig = c_tolower (p[off]) - 'a' + 10;
       if (dig >= base)
 	return ERROR;
       value *= base;
@@ -1769,7 +1768,7 @@ yylex (YYSTYPE *lvalp, cpname_state *state)
 	      }
 	    /* We will take any letters or digits.  parse_number will
 	       complain if past the radix, or if L or U are not final.  */
-	    else if (! ISALNUM (*p))
+	    else if (! c_isalnum (*p))
 	      break;
 	    if (no_tick.has_value ())
 	      no_tick->push_back (*p);

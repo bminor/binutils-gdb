@@ -19,7 +19,6 @@
 
 #include "dwarf2/cooked-index-entry.h"
 #include "dwarf2/tag.h"
-#include "gdbsupport/gdb-safe-ctype.h"
 #include "gdbsupport/selftest.h"
 
 /* See cooked-index-entry.h.  */
@@ -57,7 +56,7 @@ cooked_index_entry::compare (const char *stra, const char *strb,
 	 template functions" section in the manual.  */
       if (c == '<')
 	return '\0';
-      return TOLOWER ((unsigned char) c);
+      return c_tolower (c);
     };
 
   unsigned char a = munge (*stra);

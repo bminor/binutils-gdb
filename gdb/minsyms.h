@@ -195,7 +195,7 @@ unsigned int msymbol_hash_iw (const char *);
    requirements.  */
 
 #define SYMBOL_HASH_NEXT(hash, c)			\
-  ((hash) * 67 + TOLOWER ((unsigned char) (c)) - 113)
+  ((hash) * 67 + c_tolower (c) - 113)
 
 
 

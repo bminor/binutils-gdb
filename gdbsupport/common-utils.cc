@@ -19,7 +19,6 @@
 
 #include "common-utils.h"
 #include "host-defs.h"
-#include "gdbsupport/gdb-safe-ctype.h"
 #include "gdbsupport/gdb-xfree.h"
 
 void *
@@ -180,7 +179,7 @@ extract_string_maybe_quoted (const char **arg)
   /* Parse p similarly to gdb_argv buildargv function.  */
   while (*p != '\0')
     {
-      if (ISSPACE (*p) && !squote && !dquote && !bsquote)
+      if (c_isspace (*p) && !squote && !dquote && !bsquote)
 	break;
       else
 	{
@@ -254,21 +253,21 @@ make_quoted_string (const char *str)
 static int
 is_digit_in_base (unsigned char digit, int base)
 {
-  if (!ISALNUM (digit))
+  if (!c_isalnum (digit))
     return 0;
   if (base <= 10)
-    return (ISDIGIT (digit) && digit < base + '0');
+    return (c_isdigit (digit) && digit < base + '0');
   else
-    return (ISDIGIT (digit) || TOLOWER (digit) < base - 10 + 'a');
+    return (c_isdigit (digit) || c_tolower (digit) < base - 10 + 'a');
 }
 
 static int
 digit_to_int (unsigned char c)
 {
-  if (ISDIGIT (c))
+  if (c_isdigit (c))
     return c - '0';
   else
-    return TOLOWER (c) - 'a' + 10;
+    return c_tolower (c) - 'a' + 10;
 }
 
 /* As for strtoul, but for ULONGEST results.  */
@@ -282,7 +281,7 @@ strtoulst (const char *num, const char **trailer, int base)
   int i = 0;
 
   /* Skip leading whitespace.  */
-  while (ISSPACE (num[i]))
+  while (c_isspace (num[i]))
     i++;
 
   /* Handle prefixes.  */
@@ -349,7 +348,7 @@ skip_spaces (char *chp)
 {
   if (chp == NULL)
     return NULL;
-  while (*chp && ISSPACE (*chp))
+  while (*chp && c_isspace (*chp))
     chp++;
   return chp;
 }
@@ -361,7 +360,7 @@ skip_spaces (const char *chp)
 {
   if (chp == NULL)
     return NULL;
-  while (*chp && ISSPACE (*chp))
+  while (*chp && c_isspace (*chp))
     chp++;
   return chp;
 }
@@ -373,7 +372,7 @@ skip_to_space (const char *chp)
 {
   if (chp == NULL)
     return NULL;
-  while (*chp && !ISSPACE (*chp))
+  while (*chp && !c_isspace (*chp))
     chp++;
   return chp;
 }

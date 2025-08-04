@@ -25,7 +25,6 @@
 #include "symtab.h"
 #include "buildsym.h"
 #include "dictionary.h"
-#include "gdbsupport/gdb-safe-ctype.h"
 #include "gdbsupport/unordered_map.h"
 #include "language.h"
 
@@ -772,7 +771,7 @@ language_defn::search_name_hash (const char *string0) const
 
 	      if (c == 'B' && string[3] == '_')
 		{
-		  for (string += 4; ISDIGIT (*string); ++string)
+		  for (string += 4; c_isdigit (*string); ++string)
 		    ;
 		  continue;
 		}
