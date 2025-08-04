@@ -76,6 +76,7 @@ HFILES = \
 	mep-desc.h mep-opc.h \
 	microblaze-opc.h \
 	mt-desc.h mt-opc.h \
+	riscv-dis.h \
 	score-opc.h \
 	sh-opc.h \
 	sysdep.h \

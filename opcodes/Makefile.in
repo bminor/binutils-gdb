@@ -148,7 +148,7 @@ ARFLAGS = cru
 AM_V_AR = $(am__v_AR_@AM_V@)
 am__v_AR_ = $(am__v_AR_@AM_DEFAULT_V@)
 am__v_AR_0 = @echo "  AR      " $@;
-am__v_AR_1 = 
+am__v_AR_1 =
 libopcodes_a_AR = $(AR) $(ARFLAGS)
 libopcodes_a_LIBADD =
 am_libopcodes_a_OBJECTS =
@@ -189,7 +189,7 @@ libopcodes_la_OBJECTS = $(am_libopcodes_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
-am__v_lt_1 = 
+am__v_lt_1 =
 libopcodes_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libopcodes_la_LDFLAGS) $(LDFLAGS) -o $@
@@ -202,11 +202,11 @@ am__v_P_1 = :
 AM_V_GEN = $(am__v_GEN_@AM_V@)
 am__v_GEN_ = $(am__v_GEN_@AM_DEFAULT_V@)
 am__v_GEN_0 = @echo "  GEN     " $@;
-am__v_GEN_1 = 
+am__v_GEN_1 =
 AM_V_at = $(am__v_at_@AM_V@)
 am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
-am__v_at_1 = 
+am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/../depcomp
 am__depfiles_maybe = depfiles
@@ -220,7 +220,7 @@ LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 AM_V_CC = $(am__v_CC_@AM_V@)
 am__v_CC_ = $(am__v_CC_@AM_DEFAULT_V@)
 am__v_CC_0 = @echo "  CC      " $@;
-am__v_CC_1 = 
+am__v_CC_1 =
 CCLD = $(CC)
 LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -228,7 +228,7 @@ LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
-am__v_CCLD_1 = 
+am__v_CCLD_1 =
 SOURCES = $(libopcodes_a_SOURCES) $(libopcodes_la_SOURCES) \
 	$(EXTRA_libopcodes_la_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
@@ -382,10 +382,10 @@ am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
 archdefs = @archdefs@
-@INSTALL_LIBBFD_FALSE@bfdincludedir = 
+@INSTALL_LIBBFD_FALSE@bfdincludedir =
 @INSTALL_LIBBFD_TRUE@bfdincludedir = @bfdincludedir@
 # Empty these so that the respective installation directories will not be created.
-@INSTALL_LIBBFD_FALSE@bfdlibdir = 
+@INSTALL_LIBBFD_FALSE@bfdlibdir =
 @INSTALL_LIBBFD_TRUE@bfdlibdir = @bfdlibdir@
 bindir = @bindir@
 build = @build@
@@ -478,6 +478,7 @@ HFILES = \
 	mep-desc.h mep-opc.h \
 	microblaze-opc.h \
 	mt-desc.h mt-opc.h \
+	riscv-dis.h \
 	score-opc.h \
 	sh-opc.h \
 	sysdep.h \
@@ -695,7 +696,7 @@ EXTRA_libopcodes_la_SOURCES = $(LIBOPCODES_CFILES)
 # programs that use libopcodes.a simultaneously.  This is a hack which
 # should be removed if everything else starts using libtool.  FIXME.
 noinst_LIBRARIES = libopcodes.a
-libopcodes_a_SOURCES = 
+libopcodes_a_SOURCES =
 POTFILES = $(HFILES) $(LIBOPCODES_CFILES)
 CLEANFILES = \
 	stamp-epiphany stamp-fr30 stamp-frv stamp-ip2k stamp-iq2000 stamp-lm32 \
@@ -715,31 +716,31 @@ CGENDEPS = \
 	cgen-asm.in cgen-dis.in cgen-ibld.in
 
 CGEN_CPUS = cris epiphany fr30 frv ip2k iq2000 lm32 m32c m32r mep mt or1k xstormy16
-@CGEN_MAINT_FALSE@CRIS_DEPS = 
+@CGEN_MAINT_FALSE@CRIS_DEPS =
 @CGEN_MAINT_TRUE@CRIS_DEPS = stamp-cris
-@CGEN_MAINT_FALSE@EPIPHANY_DEPS = 
+@CGEN_MAINT_FALSE@EPIPHANY_DEPS =
 @CGEN_MAINT_TRUE@EPIPHANY_DEPS = stamp-epiphany
-@CGEN_MAINT_FALSE@FR30_DEPS = 
+@CGEN_MAINT_FALSE@FR30_DEPS =
 @CGEN_MAINT_TRUE@FR30_DEPS = stamp-fr30
-@CGEN_MAINT_FALSE@FRV_DEPS = 
+@CGEN_MAINT_FALSE@FRV_DEPS =
 @CGEN_MAINT_TRUE@FRV_DEPS = stamp-frv
-@CGEN_MAINT_FALSE@IP2K_DEPS = 
+@CGEN_MAINT_FALSE@IP2K_DEPS =
 @CGEN_MAINT_TRUE@IP2K_DEPS = stamp-ip2k
-@CGEN_MAINT_FALSE@IQ2000_DEPS = 
+@CGEN_MAINT_FALSE@IQ2000_DEPS =
 @CGEN_MAINT_TRUE@IQ2000_DEPS = stamp-iq2000
-@CGEN_MAINT_FALSE@LM32_DEPS = 
+@CGEN_MAINT_FALSE@LM32_DEPS =
 @CGEN_MAINT_TRUE@LM32_DEPS = stamp-lm32
-@CGEN_MAINT_FALSE@M32C_DEPS = 
+@CGEN_MAINT_FALSE@M32C_DEPS =
 @CGEN_MAINT_TRUE@M32C_DEPS = stamp-m32c
-@CGEN_MAINT_FALSE@M32R_DEPS = 
+@CGEN_MAINT_FALSE@M32R_DEPS =
 @CGEN_MAINT_TRUE@M32R_DEPS = stamp-m32r
-@CGEN_MAINT_FALSE@MEP_DEPS = 
+@CGEN_MAINT_FALSE@MEP_DEPS =
 @CGEN_MAINT_TRUE@MEP_DEPS = stamp-mep
-@CGEN_MAINT_FALSE@MT_DEPS = 
+@CGEN_MAINT_FALSE@MT_DEPS =
 @CGEN_MAINT_TRUE@MT_DEPS = stamp-mt
-@CGEN_MAINT_FALSE@OR1K_DEPS = 
+@CGEN_MAINT_FALSE@OR1K_DEPS =
 @CGEN_MAINT_TRUE@OR1K_DEPS = stamp-or1k
-@CGEN_MAINT_FALSE@XSTORMY16_DEPS = 
+@CGEN_MAINT_FALSE@XSTORMY16_DEPS =
 @CGEN_MAINT_TRUE@XSTORMY16_DEPS = stamp-xstormy16
 MOSTLYCLEANFILES = aarch64-gen$(EXEEXT_FOR_BUILD) i386-gen$(EXEEXT_FOR_BUILD) \
 	ia64-gen$(EXEEXT_FOR_BUILD) s390-mkopc$(EXEEXT_FOR_BUILD) s390-opc.tab \
@@ -806,7 +807,7 @@ config.h: stamp-h1
 stamp-h1: $(srcdir)/config.in $(top_builddir)/config.status
 	@rm -f stamp-h1
 	cd $(top_builddir) && $(SHELL) ./config.status config.h
-$(srcdir)/config.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps) 
+$(srcdir)/config.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	($(am__cd) $(top_srcdir) && $(AUTOHEADER))
 	rm -f stamp-h1
 	touch $@
@@ -865,7 +866,7 @@ clean-noinstLTLIBRARIES:
 	  rm -f $${locs}; \
 	}
 
-libopcodes.la: $(libopcodes_la_OBJECTS) $(libopcodes_la_DEPENDENCIES) $(EXTRA_libopcodes_la_DEPENDENCIES) 
+libopcodes.la: $(libopcodes_la_OBJECTS) $(libopcodes_la_DEPENDENCIES) $(EXTRA_libopcodes_la_DEPENDENCIES)
 	$(AM_V_CCLD)$(libopcodes_la_LINK) $(am_libopcodes_la_rpath) $(libopcodes_la_OBJECTS) $(libopcodes_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:

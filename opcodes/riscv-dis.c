@@ -23,11 +23,9 @@
 #include "sysdep.h"
 #include "disassemble.h"
 #include "libiberty.h"
-#include "opcode/riscv.h"
 #include "opintl.h"
-#include "elf-bfd.h"
-#include "elf/riscv.h"
-#include "elfxx-riscv.h"
+#include "riscv-dis.h"
+
 
 #include <stdint.h>
 #include <ctype.h>
@@ -39,40 +37,6 @@
 
 /* The earliest privilege spec supported by disassembler. */
 #define PRIV_SPEC_EARLIEST PRIV_SPEC_CLASS_1P10
-
-struct riscv_private_data
-{
-  bfd_vma gp;
-  bfd_vma print_addr;
-  bfd_vma hi_addr[OP_MASK_RD + 1];
-  bool to_print_addr;
-  bool has_gp;
-  /* Current XLEN for the disassembler.  */
-  unsigned xlen;
-  /* Default ISA specification version.  */
-  enum riscv_spec_class default_isa_spec;
-  /* Default privileged specification.  */
-  enum riscv_spec_class default_priv_spec;
-  /* Used for architecture parser.  */
-  riscv_parse_subset_t riscv_rps_dis;
-  /* Default architecture string for the object file.  It will be changed once
-     elf architecture attribute exits.  This is used for mapping symbol $x.  */
-  const char* default_arch;
-  /* Used for mapping symbols.  */
-  int last_map_symbol;
-  bfd_vma last_stop_offset;
-  bfd_vma last_map_symbol_boundary;
-  enum riscv_seg_mstate last_map_state;
-  asection *last_map_section;
-  /* Register names as used by the disassembler.  */
-  const char (*riscv_gpr_names)[NRC];
-  const char (*riscv_fpr_names)[NRC];
-  /* If set, disassemble as most general instruction.  */
-  bool no_aliases;
-  /* If set, disassemble without checking architecture string, just like what
-     we did at the beginning.  */
-  bool all_ext;
-};
 
 /* Set default RISC-V disassembler options.  */
 
