@@ -513,38 +513,47 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
   if (!bfd_preserve_save (abfd, &preserve, NULL))
     goto err_ret;
 
-  /* If the target type was explicitly specified, just check that target.  */
+  /* First try matching the current target.  The current target may
+     have been set due to a user option, or due to the linker trying
+     optimistically to load input files for the same target as the
+     output, or due to the plugin support setting "plugin", or failing
+     any of those bfd_find_target will have chosen a default target.
+     target_defaulted will be set in the last case, or when "plugin"
+     is the target (even if chosen by user option).  Note that
+     bfd_plugin_no excluding the plugin target condition is an
+     optimisation, and can be removed if desired.  */
   fail_targ = NULL;
-  if (!abfd->target_defaulted
 #if BFD_SUPPORTS_PLUGINS
-      && !(abfd->plugin_format == bfd_plugin_no
-	   && bfd_plugin_target_p (save_targ))
+  if (!(abfd->plugin_format == bfd_plugin_no
+	&& bfd_plugin_target_p (save_targ)))
 #endif
-      )
     {
-      if (bfd_seek (abfd, 0, SEEK_SET) != 0)	/* rewind! */
+      if (bfd_seek (abfd, 0, SEEK_SET) != 0)
 	goto err_ret;
 
+      bfd_set_error (bfd_error_no_error);
       cleanup = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
-
       if (cleanup)
-	goto ok_ret;
-
-      /* For a long time the code has dropped through to check all
-	 targets if the specified target was wrong.  I don't know why,
-	 and I'm reluctant to change it.  However, in the case of an
-	 archive, it can cause problems.  If the specified target does
-	 not permit archives (e.g., the binary target), then we should
-	 not allow some other target to recognize it as an archive, but
-	 should instead allow the specified target to recognize it as an
-	 object.  When I first made this change, it broke the PE target,
-	 because the specified pei-i386 target did not recognize the
-	 actual pe-i386 archive.  Since there may be other problems of
-	 this sort, I changed this test to check only for the binary
-	 target.  */
-      if (format == bfd_archive && save_targ == &binary_vec)
-	goto err_unrecog;
-      fail_targ = save_targ;
+	{
+	  if (abfd->format != bfd_archive
+	      /* An archive with object files matching the archive
+		 target is OK.  Other archives should be further
+		 tested.  */
+	      || (bfd_has_map (abfd)
+		  && bfd_get_error () != bfd_error_wrong_object_format)
+	      /* Empty archives can match the current target.
+		 Attempting to read the armap will result in a file
+		 truncated error.  */
+	      || (!bfd_has_map (abfd)
+		  && bfd_get_error () == bfd_error_file_truncated))
+	    goto ok_ret;
+	}
+      else
+	{
+	  if (!abfd->target_defaulted && !abfd->is_linker_input)
+	    goto err_unrecog;
+	  fail_targ = save_targ;
+	}
     }
 
   /* Check all targets in the hope that one will be recognized.  */
@@ -606,6 +615,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       if (bfd_seek (abfd, 0, SEEK_SET) != 0)
 	goto err_ret;
 
+      bfd_set_error (bfd_error_no_error);
       cleanup = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
       if (cleanup)
 	{

@@ -1572,7 +1572,11 @@ bfd_find_target (const char *target_name, bfd *abfd)
     }
 
   if (abfd)
-    abfd->target_defaulted = false;
+    /* Treating "plugin" specially here is due to the fact that some
+       of the binutils magically supply a "plugin" target.  That
+       really is a defaulted target, but unfortunately we can't
+       distinguish it from a user supplied "plugin" target.  */
+    abfd->target_defaulted = strcmp (targname, "plugin") == 0;
 
   target = find_target (targname);
   if (target == NULL)

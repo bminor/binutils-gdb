@@ -950,8 +950,8 @@ bfd_generic_archive_p (bfd *abfd)
       if (first != NULL)
 	{
 	  first->target_defaulted = false;
-	  if (bfd_check_format (first, bfd_object)
-	      && first->xvec != abfd->xvec)
+	  if (!bfd_check_format (first, bfd_object)
+	      || first->xvec != abfd->xvec)
 	    bfd_set_error (bfd_error_wrong_object_format);
 	  bfd_close (first);
 	}

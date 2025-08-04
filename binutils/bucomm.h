@@ -94,9 +94,8 @@ set_plugin_target (bfd *abfd, const struct bfd_target *targ)
   if (abfd->my_archive && targ)
     {
       abfd->xvec = targ;
-      /* Arrange for the plugin target to be tried first in
-	 bfd_check_format.  */
-      abfd->target_defaulted = false;
+      /* Don't fail if the element isn't recognised by the plugin.  */
+      abfd->target_defaulted = true;
     }
 }
 

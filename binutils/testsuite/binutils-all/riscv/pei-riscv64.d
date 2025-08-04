@@ -1,7 +1,7 @@
 #as: -march=rv64gc -mabi=lp64d
 #ld: -m elf64lriscv -e0
 #PROG: objcopy
-#objcopy: -j .text -j .sdata -j .data -j .dynamic -j .dynsym -j .rel -j .rela -j .rel.* -j .rela.* -j .rel* -j .rela* -j .reloc --target=pei-riscv64-little
+#objcopy: -j .text -j .sdata -j .data -j .dynamic -j .dynsym -j .rel -j .rela -j .rel.* -j .rela.* -j .rel* -j .rela* -j .reloc --output-target=pei-riscv64-little
 #objdump: -h -f
 #name: Check if efi app format is recognized
 

@@ -1,6 +1,6 @@
 #ld: -e0
 #PROG: objcopy
-#objcopy: -j .text -j .sdata -j .data -j .dynamic -j .dynsym -j .rel -j .rela -j .rel.* -j .rela.* -j .rel* -j .rela* -j .reloc --target=pei-loongarch64
+#objcopy: -j .text -j .sdata -j .data -j .dynamic -j .dynsym -j .rel -j .rela -j .rel.* -j .rela.* -j .rel* -j .rela* -j .reloc --output-target=pei-loongarch64
 #objdump: -h -f
 #name: Check if efi app format is recognized
 
