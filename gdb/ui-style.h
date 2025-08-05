@@ -266,7 +266,9 @@ struct ui_file_style
     return (m_foreground == other.m_foreground
 	    && m_background == other.m_background
 	    && m_intensity == other.m_intensity
-	    && m_reverse == other.m_reverse);
+	    && m_reverse == other.m_reverse
+	    && m_italic == other.m_italic
+	    && m_underline == other.m_underline);
   }
 
   bool operator!= (const ui_file_style &other) const
@@ -284,7 +286,9 @@ struct ui_file_style
     return (m_foreground == NONE
 	    && m_background == NONE
 	    && m_intensity == NORMAL
-	    && !m_reverse);
+	    && !m_reverse
+	    && !m_italic
+	    && !m_underline);
   }
 
   /* Return true if this style specified reverse display; false
@@ -330,6 +334,32 @@ struct ui_file_style
     return m_intensity;
   }
 
+  /* Return true if this style specified italic display; false
+     otherwise.  */
+  bool is_italic () const
+  {
+    return m_italic;
+  }
+
+  /* Set/clear the italic display flag.  */
+  void set_italic (bool italic)
+  {
+    m_italic = italic;
+  }
+
+  /* Return true if this style specified underline display; false
+     otherwise.  */
+  bool is_underline () const
+  {
+    return m_underline;
+  }
+
+  /* Set/clear the underline display flag.  */
+  void set_underline (bool underline)
+  {
+    m_underline = underline;
+  }
+
   /* Parse an ANSI escape sequence in BUF, modifying this style.  BUF
      must begin with an ESC character.  Return true if an escape
      sequence was successfully parsed; false otherwise.  In either
@@ -351,6 +381,8 @@ private:
   color m_foreground = NONE;
   color m_background = NONE;
   intensity m_intensity = NORMAL;
+  bool m_italic = false;
+  bool m_underline = false;
   bool m_reverse = false;
 };
 

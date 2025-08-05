@@ -323,10 +323,10 @@ proc run_style_tests { } {
 	    gdb_test_no_output "set style version background 255"
 	    gdb_test_no_output "set style version foreground #FED210"
 	    gdb_test "show style version background" \
-		"The \033\\\[38;2;254;210;16;48;5;255;22;27m.*\".*version.*\".*style.*\033\\\[m background color is: 255" \
+		"The \033\\\[38;2;254;210;16;48;5;255;22;23;24;27m.*\".*version.*\".*style.*\033\\\[m background color is: 255" \
 		"Version's 256-color background style"
 	    gdb_test "show style version foreground" \
-		"The \033\\\[38;2;254;210;16;48;5;255;22;27m.*\".*version.*\".*style.*\033\\\[m foreground color is: #FED210" \
+		"The \033\\\[38;2;254;210;16;48;5;255;22;23;24;27m.*\".*version.*\".*style.*\033\\\[m foreground color is: #FED210" \
 		"Version's TrueColor foreground style"
 	}
 
@@ -782,7 +782,7 @@ proc test_pagination_cmd_after_quit_styling {} {
 	    -re "^apropos time\r\n" {
 		exp_continue
 	    }
-	    -re "^\033\\\[39;49;1;27m\[^\r\n\]+\r\n" {
+	    -re "^\033\\\[39;49;1;23;24;27m\[^\r\n\]+\r\n" {
 		exp_continue
 	    }
 	    -re "^$::pagination_prompt$" {
@@ -828,7 +828,7 @@ proc test_pagination_cmd_after_quit_styling {} {
     # non-default style that was in use when pagination kicked in
     # above.
     gdb_test "maintenance time" \
-	"^\"\033\\\[39;49;1;27mmaintenance time\033\\\[m\" takes a numeric argument\\."
+	"^\"\033\\\[39;49;1;23;24;27mmaintenance time\033\\\[m\" takes a numeric argument\\."
 }
 
 # Helper for test_pagination_prompt_styling.  Return false if STR, a
@@ -995,20 +995,20 @@ proc test_pagination_continue_styling_1 { length } {
 	    exp_continue
 	}
 
-	-re "^The current logfile is \"\033\\\[32;49;22;27m(?:ax)+\033\\\[m" {
+	-re "^The current logfile is \"\033\\\[32;49;22;23;24;27m(?:ax)+\033\\\[m" {
 	    exp_continue
 	}
 
-	-re "^\r\n\033\\\[32;49;22;27m(?:ax)+\033\\\[m(?=--)" {
+	-re "^\r\n\033\\\[32;49;22;23;24;27m(?:ax)+\033\\\[m(?=--)" {
 	    exp_continue
 	}
 
-	-re "^\r\n\033\\\[32;49;22;27m(?:ax)+(?=--)" {
+	-re "^\r\n\033\\\[32;49;22;23;24;27m(?:ax)+(?=--)" {
 	    set saw_bad_styling true
 	    exp_continue
 	}
 
-	-re "^\r\n\033\\\[32;49;22;27m(?:ax)+\033\\\[m\"\\.\r\n" {
+	-re "^\r\n\033\\\[32;49;22;23;24;27m(?:ax)+\033\\\[m\"\\.\r\n" {
 	    exp_continue
 	}
 

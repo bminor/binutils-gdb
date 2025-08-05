@@ -290,6 +290,16 @@ ui_file_style::to_ansi () const
       else
 	result.append (std::to_string (m_intensity));
       result.push_back (';');
+      if (m_italic)
+	result.append ("3");
+      else
+	result.append ("23");
+      result.push_back (';');
+      if (m_underline)
+	result.append ("4");
+      else
+	result.append ("24");
+      result.push_back (';');
       if (m_reverse)
 	result.push_back ('7');
       else
@@ -435,6 +445,14 @@ ui_file_style::parse (const char *buf, size_t *n_read)
 	      /* Dim.  */
 	      m_intensity = DIM;
 	      break;
+	    case 3:
+	      /* Italic.  */
+	      m_italic = true;
+	      break;
+	    case 4:
+	      /* Underline.  */
+	      m_underline = true;
+	      break;
 	    case 7:
 	      /* Reverse.  */
 	      m_reverse = true;
@@ -445,6 +463,14 @@ ui_file_style::parse (const char *buf, size_t *n_read)
 	    case 22:
 	      /* Normal.  */
 	      m_intensity = NORMAL;
+	      break;
+	    case 23:
+	      /* Non-italic.  */
+	      m_italic = false;
+	      break;
+	    case 24:
+	      /* Non-underline.  */
+	      m_underline = false;
 	      break;
 	    case 27:
 	      /* Inverse off.  */
