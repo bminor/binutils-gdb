@@ -196,7 +196,10 @@ bfd_plugin_get_symbols_in_object_only (bfd *abfd)
 	     abfd->filename, bfd_errmsg (bfd_get_error ()));
 	  return;
 	}
-      else if (!bfd_check_format (nbfd, bfd_object))
+      /* Prevent this recursive call into bfd_check_format from
+	 attempting to load the plugin again while it is running.  */
+      nbfd->plugin_format = bfd_plugin_no;
+      if (!bfd_check_format (nbfd, bfd_object))
 	{
 	  /* There is no object only section if it isn't a bfd_object
 	     file.  */
@@ -206,6 +209,7 @@ bfd_plugin_get_symbols_in_object_only (bfd *abfd)
     }
   else
     {
+      BFD_ASSERT (abfd->plugin_format == bfd_plugin_no);
       if (!bfd_check_format (abfd, bfd_object))
 	{
 	  (*_bfd_error_handler)
@@ -239,6 +243,9 @@ bfd_plugin_get_symbols_in_object_only (bfd *abfd)
 
   /* Open the file containing object only section.  */
   nbfd = bfd_openr (object_only_file, NULL);
+  /* Prevent this recursive call into bfd_check_format from
+     attempting to load the plugin again while it is running.  */
+  nbfd->plugin_format = bfd_plugin_no;
   if (!bfd_check_format (nbfd, bfd_object))
     {
       (*_bfd_error_handler)
@@ -598,6 +605,10 @@ try_load_plugin (const char *pname,
   if (status != LDPS_OK)
     goto short_circuit;
 
+  /* Setting bfd_plugin_no here prevents recursive calls into
+     bfd_check_format from within the plugin (unless the plugin opens
+     another bfd.)  Attempting to load the plugin again while it is
+     running is *not* a good idea.  */
   abfd->plugin_format = bfd_plugin_no;
 
   if (!current_plugin->claim_file)
@@ -625,14 +636,6 @@ void
 bfd_plugin_set_plugin (const char *p)
 {
   plugin_name = p;
-}
-
-/* Return TRUE if a plugin library is used.  */
-
-bool
-bfd_plugin_specified_p (void)
-{
-  return plugin_list != NULL;
 }
 
 /* Return TRUE if ABFD can be claimed by linker LTO plugin.  */

@@ -170,6 +170,8 @@ static bool sections_removed;
 #if BFD_SUPPORTS_PLUGINS
 /* TRUE if all GCC LTO sections are to be removed.  */
 static bool lto_sections_removed;
+#else
+#define lto_sections_removed false
 #endif
 
 /* TRUE if only some sections are to be copied.  */
@@ -3745,11 +3747,10 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 
 #if BFD_SUPPORTS_PLUGINS
       /* Ignore plugin target if all LTO sections should be removed.  */
-      ok_object = bfd_check_format_lto (this_element, bfd_object,
-					lto_sections_removed);
-#else
-      ok_object = bfd_check_format (this_element, bfd_object);
+      if (lto_sections_removed)
+	this_element->plugin_format = bfd_plugin_no;
 #endif
+      ok_object = bfd_check_format (this_element, bfd_object);
 
       /* PR binutils/3110: Cope with archives
 	 containing multiple target types.  */
@@ -3861,6 +3862,25 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
       free (dir);
     }
   return ok;
+}
+
+static bool
+check_format_object (bfd *ibfd, char ***obj_matching,
+		     bool no_plugins ATTRIBUTE_UNUSED)
+{
+#if BFD_SUPPORTS_PLUGINS
+  /* Ignore plugin target first if all LTO sections should be
+     removed.  Try with plugin target next if ignoring plugin
+     target fails to match the format.  */
+  if (no_plugins && ibfd->plugin_format == bfd_plugin_unknown)
+    {
+      ibfd->plugin_format = bfd_plugin_no;
+      if (bfd_check_format_matches (ibfd, bfd_object, obj_matching))
+	return true;
+      ibfd->plugin_format = bfd_plugin_unknown;
+    }
+#endif
+  return bfd_check_format_matches (ibfd, bfd_object, obj_matching);
 }
 
 /* The top-level control.  */
@@ -3988,21 +4008,7 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
 			 input_arch, target_defaulted))
 	status = 1;
     }
-  else if (
-#if BFD_SUPPORTS_PLUGINS
-	   /* Ignore plugin target first if all LTO sections should be
-	      removed.  Try with plugin target next if ignoring plugin
-	      target fails to match the format.  */
-	   bfd_check_format_matches_lto (ibfd, bfd_object, &obj_matching,
-					 lto_sections_removed)
-	   || (lto_sections_removed
-	       && bfd_check_format_matches_lto (ibfd, bfd_object,
-						&obj_matching, false))
-#else
-	   bfd_check_format_matches_lto (ibfd, bfd_object, &obj_matching,
-					 false)
-#endif
-	   )
+  else if (check_format_object (ibfd, &obj_matching, lto_sections_removed))
     {
       bfd *obfd;
     do_copy:
