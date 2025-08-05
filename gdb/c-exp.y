@@ -106,6 +106,12 @@ struct c_parse_state
 
   /* The type stack.  */
   struct type_stack type_stack;
+
+  /* When set, a name token is not looked up.  This can be useful when
+     the search domain is known by context.  TYPE_CODE_UNDEF is used
+     to mean "unset" here -- only types with tags (enum, struct,
+     class, union) can use this feature.  */
+  type_code assume_classification = TYPE_CODE_UNDEF;
 };
 
 /* This is set and cleared in c_parse.  */
@@ -171,7 +177,7 @@ static void c_print_token (FILE *file, int type, YYSTYPE value);
 
 %type <voidval> exp exp1 type_exp start variable qualified_name lcurly function_method
 %type <lval> rcurly
-%type <tval> type typebase scalar_type
+%type <tval> type typebase scalar_type tag_name_or_complete
 %type <tvec> nonempty_typelist func_mod parameter_typelist
 /* %type <bval> block */
 
@@ -1504,71 +1510,37 @@ typebase
 			{
 			  $$ = init_complex_type (nullptr, $2);
 			}
-	|	STRUCT name
-			{ $$
-			    = lookup_struct (copy_name ($2).c_str (),
-					     pstate->expression_context_block);
-			}
-	|	STRUCT COMPLETE
+	|	STRUCT
 			{
-			  pstate->mark_completion_tag (TYPE_CODE_STRUCT,
-						       "", 0);
-			  $$ = NULL;
+			  cpstate->assume_classification = TYPE_CODE_STRUCT;
 			}
-	|	STRUCT name COMPLETE
+		tag_name_or_complete
 			{
-			  pstate->mark_completion_tag (TYPE_CODE_STRUCT,
-						       $2.ptr, $2.length);
-			  $$ = NULL;
+			  $$ = $3;
 			}
-	|	CLASS name
-			{ $$ = lookup_struct
-			    (copy_name ($2).c_str (),
-			     pstate->expression_context_block);
-			}
-	|	CLASS COMPLETE
+	|	CLASS
 			{
-			  pstate->mark_completion_tag (TYPE_CODE_STRUCT,
-						       "", 0);
-			  $$ = NULL;
+			  cpstate->assume_classification = TYPE_CODE_STRUCT;
 			}
-	|	CLASS name COMPLETE
+		tag_name_or_complete
 			{
-			  pstate->mark_completion_tag (TYPE_CODE_STRUCT,
-						       $2.ptr, $2.length);
-			  $$ = NULL;
+			  $$ = $3;
 			}
-	|	UNION name
-			{ $$
-			    = lookup_union (copy_name ($2).c_str (),
-					    pstate->expression_context_block);
-			}
-	|	UNION COMPLETE
+	|	ENUM
 			{
-			  pstate->mark_completion_tag (TYPE_CODE_UNION,
-						       "", 0);
-			  $$ = NULL;
+			  cpstate->assume_classification = TYPE_CODE_ENUM;
 			}
-	|	UNION name COMPLETE
+		tag_name_or_complete
 			{
-			  pstate->mark_completion_tag (TYPE_CODE_UNION,
-						       $2.ptr, $2.length);
-			  $$ = NULL;
+			  $$ = $3;
 			}
-	|	ENUM name
-			{ $$ = lookup_enum (copy_name ($2).c_str (),
-					    pstate->expression_context_block);
-			}
-	|	ENUM COMPLETE
+	|	UNION
 			{
-			  pstate->mark_completion_tag (TYPE_CODE_ENUM, "", 0);
-			  $$ = NULL;
+			  cpstate->assume_classification = TYPE_CODE_UNION;
 			}
-	|	ENUM name COMPLETE
+		tag_name_or_complete
 			{
-			  pstate->mark_completion_tag (TYPE_CODE_ENUM, $2.ptr,
-						       $2.length);
-			  $$ = NULL;
+			  $$ = $3;
 			}
 		/* It appears that this rule for templates is never
 		   reduced; template recognition happens by lookahead
@@ -1807,6 +1779,47 @@ field_name
 	|	SHORT { $$ = typename_stoken ("short"); }
 	|	SIGNED_KEYWORD { $$ = typename_stoken ("signed"); }
 	|	UNSIGNED { $$ = typename_stoken ("unsigned"); }
+	;
+
+/* This rule is used when the preceding token is a keyword that takes
+   a tag name (e.g., "struct").  The "caller" should disable name
+   lookup, see c_parse_state::assume_classification.  */
+tag_name_or_complete
+	:	NAME
+		{
+		  switch (cpstate->assume_classification)
+		    {
+		    case TYPE_CODE_STRUCT:
+		      $$ = lookup_struct (copy_name ($1.stoken).c_str (),
+					  pstate->expression_context_block);
+		      break;
+		    case TYPE_CODE_ENUM:
+		      $$ = lookup_enum (copy_name ($1.stoken).c_str (),
+					pstate->expression_context_block);
+		      break;
+		    case TYPE_CODE_UNION:
+		      $$ = lookup_union (copy_name ($1.stoken).c_str (),
+					 pstate->expression_context_block);
+		      break;
+		    default:
+		      gdb_assert_not_reached ();
+		    }
+		  cpstate->assume_classification = TYPE_CODE_UNDEF;
+		}
+	|	COMPLETE
+		{
+		  pstate->mark_completion_tag (cpstate->assume_classification,
+					       "", 0);
+		  cpstate->assume_classification = TYPE_CODE_UNDEF;
+		  $$ = nullptr;
+		}
+	|	NAME COMPLETE
+		{
+		  pstate->mark_completion_tag (cpstate->assume_classification,
+					       $1.stoken.ptr, $1.stoken.length);
+		  cpstate->assume_classification = TYPE_CODE_UNDEF;
+		  $$ = nullptr;
+		}
 	;
 
 name	:	NAME { $$ = $1.stoken; }
@@ -3250,12 +3263,15 @@ yylex (void)
      subsequent code is C++-only; but also depends on seeing a "::" or
      name-like token.  */
   current.token = lex_one_token (pstate, &is_quoted_name);
-  if (current.token == NAME)
+  if (cpstate->assume_classification == TYPE_CODE_UNDEF
+      && current.token == NAME)
     current.token = classify_name (pstate, pstate->expression_context_block,
 				   is_quoted_name, last_lex_was_structop);
   if (pstate->language ()->la_language != language_cplus
       || (current.token != TYPENAME && current.token != COLONCOLON
-	  && current.token != FILENAME))
+	  && current.token != FILENAME
+	  && (cpstate->assume_classification == TYPE_CODE_UNDEF
+	      || current.token != NAME)))
     return current.token;
 
   /* Read any sequence of alternating "::" and name-like tokens into
@@ -3296,7 +3312,8 @@ yylex (void)
     search_block = NULL;
   else
     {
-      gdb_assert (current.token == TYPENAME);
+      gdb_assert (current.token == TYPENAME
+		  || cpstate->assume_classification != TYPE_CODE_UNDEF);
       search_block = pstate->expression_context_block;
       obstack_grow (&name_obstack, current.value.sval.ptr,
 		    current.value.sval.length);
@@ -3319,8 +3336,11 @@ yylex (void)
 	  int classification;
 
 	  yylval = next.value;
-	  classification = classify_inner_name (pstate, search_block,
-						context_type);
+	  if (cpstate->assume_classification != TYPE_CODE_UNDEF)
+	    classification = NAME;
+	  else
+	    classification = classify_inner_name (pstate, search_block,
+						  context_type);
 	  /* We keep going until we either run out of names, or until
 	     we have a qualified name which is not a type.  */
 	  if (classification != TYPENAME && classification != NAME)
@@ -3330,7 +3350,7 @@ yylex (void)
 	  checkpoint = next_to_examine;
 
 	  /* Update the partial name we are constructing.  */
-	  if (context_type != NULL)
+	  if (next_to_examine > 1)
 	    {
 	      /* We don't want to put a leading "::" into the name.  */
 	      obstack_grow_str (&name_obstack, "::");
@@ -3345,7 +3365,8 @@ yylex (void)
 
 	  last_was_coloncolon = 0;
 
-	  if (classification == NAME)
+	  if (cpstate->assume_classification == TYPE_CODE_UNDEF
+	      && classification == NAME)
 	    break;
 
 	  context_type = yylval.tsym.type;
