@@ -5729,6 +5729,10 @@ proc gdb_simple_compile {name code {type object} {compile_flags {}} {object obj}
 	    set ext "d"
 	    break
 	}
+	if { "$flag" eq "rust" } {
+	    set ext "rs"
+	    break
+	}
     }
     set src [standard_temp_file $name.$ext]
     set obj [standard_temp_file $name.$postfix]
