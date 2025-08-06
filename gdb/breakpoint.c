@@ -13998,26 +13998,11 @@ insert_single_step_breakpoint (struct gdbarch *gdbarch,
   update_global_location_list (UGLL_INSERT);
 }
 
-/* Try to setup for software single stepping.  Return true if
-   target_resume() should use hardware single step.
+/* Insert single step breakpoints according to the current state.  */
 
-   GDBARCH is the current gdbarch.  */
-
-bool
-maybe_software_singlestep (struct gdbarch *gdbarch)
+int
+insert_single_step_breakpoints (struct gdbarch *gdbarch)
 {
-  if (execution_direction != EXEC_FORWARD)
-    return true;
-
-  if (target_can_do_single_step () == 1)
-    {
-      /* The target definitely has hardware single step.  */
-      return true;
-    }
-
-  if (!gdbarch_software_single_step_p (gdbarch))
-    return true;
-
   regcache *regcache = get_thread_regcache (inferior_thread ());
   std::vector<CORE_ADDR> next_pcs;
 
@@ -14031,10 +14016,10 @@ maybe_software_singlestep (struct gdbarch *gdbarch)
       for (CORE_ADDR pc : next_pcs)
 	insert_single_step_breakpoint (gdbarch, aspace, pc);
 
-      return false;
+      return 1;
     }
   else
-    return true;
+    return 0;
 }
 
 /* See breakpoint.h.  */
