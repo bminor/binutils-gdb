@@ -48,6 +48,8 @@ if [istarget "loongarch64-*-*"] {
     run_dump_test "relax-after-alignment"
     run_dump_test "relax-medium-call"
     run_dump_test "relax-medium-call-1"
+    run_dump_test "relax-sym-size-1"
+    run_dump_test "relax-sym-size-2"
     run_dump_test "check_got_relax"
 }
 

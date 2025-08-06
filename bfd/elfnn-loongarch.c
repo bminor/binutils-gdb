@@ -4903,6 +4903,60 @@ loongarch_relax_delete_or_nop (bfd *abfd,
     bfd_put (32, abfd, LARCH_NOP, contents + addr);
 }
 
+/* If some bytes in a symbol is deleted, we need to adjust its size.  */
+static void
+loongarch_relax_resize_symbol (bfd_size_type *size, bfd_vma orig_value,
+			       splay_tree pdops)
+{
+  splay_tree_key key = (splay_tree_key)orig_value;
+  bfd_vma orig_end = orig_value + *size;
+  splay_tree_node node = splay_tree_predecessor (pdops, key);
+
+  if (node)
+    {
+      bfd_vma addr = (bfd_vma)node->key;
+      struct pending_delete_op *op = (struct pending_delete_op *)node->value;
+
+      /* This shouldn't happen unless people write something really insane like
+	     .reloc ., R_LARCH_ALIGN, 60
+	     .rept 15
+	     1: nop
+	     .endr
+	     .set x, 1b
+	     .size x, . - 1b
+	 But let's just try to make it "work" anyway.  */
+      if (orig_value < addr + op->size)
+	{
+	  bfd_size_type n_deleted = op->size - (orig_value - addr);
+	  if (n_deleted >= *size)
+	    {
+	      *size = 0;
+	      return;
+	    }
+
+	  *size -= n_deleted;
+	}
+    }
+
+  node = splay_tree_lookup (pdops, key);
+  if (!node)
+    node = splay_tree_successor (pdops, key);
+
+  for (; node; node = splay_tree_successor (pdops, node->key))
+    {
+      bfd_vma addr = (bfd_vma)node->key;
+      struct pending_delete_op *op = (struct pending_delete_op *)node->value;
+
+      if (addr >= orig_end)
+	return;
+
+      if (orig_end < addr + op->size)
+	*size -= orig_end - addr;
+      else
+	*size -= op->size;
+    }
+}
+
 static void
 loongarch_relax_perform_deletes (bfd *abfd, asection *sec,
 				 struct bfd_link_info *link_info)
@@ -5001,30 +5055,8 @@ loongarch_relax_perform_deletes (bfd *abfd, asection *sec,
 	    sym->st_value
 		= loongarch_calc_relaxed_addr (link_info, orig_value);
 
-	  /* If the symbol *spans* some deleted bytes, that is its *end* is in
-	     the moved bytes but its *start* isn't, then we must adjust its
-	     size.
-
-	     This test needs to use the original value of st_value, otherwise
-	     we might accidentally decrease size when deleting bytes right
-	     before the symbol.  */
-	  bfd_vma sym_end = orig_value + sym->st_size;
-	  if (sym_end <= toaddr)
-	    {
-	      splay_tree_node node = splay_tree_predecessor (
-		  pdops, (splay_tree_key)orig_value);
-	      for (; node; node = splay_tree_successor (pdops, node->key))
-		{
-		  bfd_vma addr = (bfd_vma)node->key;
-		  struct pending_delete_op *op
-		      = (struct pending_delete_op *)node->value;
-
-		  if (addr >= sym_end)
-		    break;
-		  if (orig_value <= addr && sym_end > addr)
-		    sym->st_size -= op->size;
-		}
-	    }
+	  if (orig_value + sym->st_size <= toaddr)
+	    loongarch_relax_resize_symbol (&sym->st_size, orig_value, pdops);
 	}
     }
 
@@ -5071,29 +5103,13 @@ loongarch_relax_perform_deletes (bfd *abfd, asection *sec,
 	{
 	  bfd_vma orig_value = sym_hash->root.u.def.value;
 
-	  /* As above, adjust the value.  */
+	  /* As above, adjust the value and size.  */
 	  if (orig_value <= toaddr)
 	    sym_hash->root.u.def.value
 		= loongarch_calc_relaxed_addr (link_info, orig_value);
 
-	  /* As above, adjust the size if needed.  */
-	  bfd_vma sym_end = orig_value + sym_hash->size;
-	  if (sym_end <= toaddr)
-	    {
-	      splay_tree_node node = splay_tree_predecessor (
-		  pdops, (splay_tree_key)orig_value);
-	      for (; node; node = splay_tree_successor (pdops, node->key))
-		{
-		  bfd_vma addr = (bfd_vma)node->key;
-		  struct pending_delete_op *op
-		      = (struct pending_delete_op *)node->value;
-
-		  if (addr >= sym_end)
-		    break;
-		  if (orig_value <= addr && sym_end > addr)
-		    sym_hash->size -= op->size;
-		}
-	    }
+	  if (orig_value + sym_hash->size <= toaddr)
+	    loongarch_relax_resize_symbol (&sym_hash->size, orig_value, pdops);
 	}
     }
 }
