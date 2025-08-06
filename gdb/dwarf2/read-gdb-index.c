@@ -1489,6 +1489,7 @@ dwarf2_read_gdb_index
   offset_type cu_list_elements, types_list_elements, dwz_list_elements = 0;
   struct objfile *objfile = per_objfile->objfile;
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
+  scoped_remove_all_units remove_all_units (*per_bfd);
 
   gdb::array_view<const gdb_byte> main_index_contents
     = get_gdb_index_contents (objfile, per_bfd);
@@ -1544,10 +1545,7 @@ dwarf2_read_gdb_index
 	 an index.  */
       if (per_bfd->infos.size () > 1
 	  || per_bfd->types.size () > 1)
-	{
-	  per_bfd->all_units.clear ();
-	  return false;
-	}
+	return false;
 
       dwarf2_section_info *section
 	= (per_bfd->types.size () == 1
@@ -1566,6 +1564,7 @@ dwarf2_read_gdb_index
   set_main_name_from_gdb_index (per_objfile, map.get ());
 
   per_bfd->index_table = std::move (map);
+  remove_all_units.disable ();
 
   return true;
 }

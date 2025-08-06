@@ -673,6 +673,36 @@ public:
   std::string captured_debug_dir;
 };
 
+/* Scoped object to remove all units from PER_BFD and clear other associated
+   fields in case of failure.  */
+
+struct scoped_remove_all_units
+{
+  explicit scoped_remove_all_units (dwarf2_per_bfd &per_bfd)
+    : m_per_bfd (&per_bfd)
+  {}
+
+  DISABLE_COPY_AND_ASSIGN (scoped_remove_all_units);
+
+  ~scoped_remove_all_units ()
+  {
+    if (m_per_bfd == nullptr)
+      return;
+
+    m_per_bfd->all_units.clear ();
+    m_per_bfd->num_comp_units = 0;
+    m_per_bfd->num_type_units = 0;
+  }
+
+  /* Disable this object.  Call this to keep the units of M_PER_BFD on the
+     success path.  */
+  void disable () { m_per_bfd = nullptr; }
+
+private:
+  /* This is nullptr if the object is disabled.  */
+  dwarf2_per_bfd *m_per_bfd;
+};
+
 /* An iterator for all_units that is based on index.  This
    approach makes it possible to iterate over all_units safely,
    when some caller in the loop may add new units.  */

@@ -768,12 +768,12 @@ build_and_check_cu_lists_from_debug_names (dwarf2_per_bfd *per_bfd,
   return build_and_check_cu_list_from_debug_names (per_bfd, dwz_map, dwz->info);
 }
 
-/* This does all the work for dwarf2_read_debug_names, but putting it
-   into a separate function makes some cleanup a bit simpler.  */
+/* See read-debug-names.h.  */
 
-static bool
-do_dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
+bool
+dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
 {
+  scoped_remove_all_units remove_all_units (*per_objfile->per_bfd);
   mapped_debug_names_reader map;
   mapped_debug_names_reader dwz_map;
   struct objfile *objfile = per_objfile->objfile;
@@ -850,17 +850,7 @@ do_dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
 	       (per_objfile, std::move (map)));
   auto idx = std::make_unique<debug_names_index> (std::move (cidn));
   per_bfd->start_reading (std::move (idx));
+  remove_all_units.disable ();
 
   return true;
-}
-
-/* See read-debug-names.h.  */
-
-bool
-dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
-{
-  bool result = do_dwarf2_read_debug_names (per_objfile);
-  if (!result)
-    per_objfile->per_bfd->all_units.clear ();
-  return result;
 }

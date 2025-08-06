@@ -3679,6 +3679,10 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 void
 finalize_all_units (dwarf2_per_bfd *per_bfd)
 {
+  /* Sanity check.  */
+  gdb_assert (per_bfd->all_units.size ()
+	      == per_bfd->num_comp_units + per_bfd->num_type_units);
+
   /* Ensure that the all_units vector is in the expected order for
      dwarf2_find_containing_unit to be able to perform a binary search.  */
   std::sort (per_bfd->all_units.begin (), per_bfd->all_units.end (),
@@ -3694,6 +3698,7 @@ void
 create_all_units (dwarf2_per_objfile *per_objfile)
 {
   gdb_assert (per_objfile->per_bfd->all_units.empty ());
+  scoped_remove_all_units remove_all_units (*per_objfile->per_bfd);
 
   signatured_type_set sig_types;
 
@@ -3714,8 +3719,6 @@ create_all_units (dwarf2_per_objfile *per_objfile)
 
       if (!dwz->types.empty ())
 	{
-	  per_objfile->per_bfd->all_units.clear ();
-
 	  /* See enhancement PR symtab/30838.  */
 	  error (_(DWARF_ERROR_PREFIX
 		   ".debug_types section not supported in dwz file"));
@@ -3725,6 +3728,7 @@ create_all_units (dwarf2_per_objfile *per_objfile)
   per_objfile->per_bfd->signatured_types = std::move (sig_types);
 
   finalize_all_units (per_objfile->per_bfd);
+  remove_all_units.disable ();
 }
 
 /* Return the initial uleb128 in the die at INFO_PTR.  */
