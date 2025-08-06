@@ -109,9 +109,7 @@ proc _selftest_setup { executable } {
     return 0
 }
 
-# Prepare for running a self-test by moving the GDB executable to a
-# location where we can use it as the inferior.  Return the filename
-# of the new location.
+# Return the location of the gdb executable to test.
 #
 # If the current testing setup is not suitable for running a
 # self-test, then return an empty string.
@@ -136,23 +134,7 @@ proc selftest_prepare {} {
 	return
     }
 
-    # Run the test with self.  Copy the file executable file in case
-    # this OS doesn't like to edit its own text space.
-
-    set gdb_fullpath [_selftest_find_gdb $::GDB]
-
-    if {[is_remote host]} {
-	set xgdb x$::tool
-    } else {
-	set xgdb [standard_output_file x$::tool]
-    }
-
-    # Remove any old copy lying around.
-    remote_file host delete $xgdb
-
-    set filename [remote_download host $gdb_fullpath $xgdb]
-
-    return $filename
+    return [_selftest_find_gdb $::GDB]
 }
 
 # A simple way to run some self-tests.
@@ -176,7 +158,6 @@ proc do_self_tests {body} {
     }
 
     gdb_exit
-    catch "remote_file host delete $file"
 
     if {$result == -1} {
 	warning "Couldn't test self"
