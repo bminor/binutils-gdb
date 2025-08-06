@@ -36,7 +36,6 @@
 #include "filenames.h"
 #include <fnmatch.h>
 #if BFD_SUPPORTS_PLUGINS
-#include "plugin-api.h"
 #include "plugin.h"
 #endif /* BFD_SUPPORTS_PLUGINS */
 

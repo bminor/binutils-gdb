@@ -28,7 +28,6 @@
 #include "libiberty.h"
 #include "objalloc.h"
 #if BFD_SUPPORTS_PLUGINS
-#include "plugin-api.h"
 #include "plugin.h"
 #endif
 

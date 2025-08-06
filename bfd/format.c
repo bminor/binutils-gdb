@@ -47,7 +47,6 @@ SUBSECTION
 #include "bfd.h"
 #include "libbfd.h"
 #if BFD_SUPPORTS_PLUGINS
-#include "plugin-api.h"
 #include "plugin.h"
 #endif
 

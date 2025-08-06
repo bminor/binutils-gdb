@@ -138,6 +138,14 @@ struct plugin_list_entry
   const char *plugin_name;
 };
 
+struct plugin_data_struct
+{
+  int nsyms;
+  const struct ld_plugin_symbol *syms;
+  int object_only_nsyms;
+  asymbol **object_only_syms;
+};
+
 static const char *plugin_program_name;
 
 void
@@ -336,9 +344,8 @@ add_symbols (void * handle,
 	     const struct ld_plugin_symbol * syms)
 {
   bfd *abfd = handle;
-  struct plugin_data_struct *plugin_data =
-    bfd_alloc (abfd, sizeof (plugin_data_struct));
-
+  struct plugin_data_struct *plugin_data = bfd_alloc (abfd,
+						      sizeof (*plugin_data));
   if (!plugin_data)
     return LDPS_ERR;
 

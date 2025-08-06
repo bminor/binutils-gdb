@@ -42,7 +42,6 @@
 #include "ldctor.h"
 #if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
-#include "plugin-api.h"
 #endif /* BFD_SUPPORTS_PLUGINS */
 
 /* Somewhere above, sys/stat.h got included.  */

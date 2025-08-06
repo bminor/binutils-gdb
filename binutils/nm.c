@@ -36,9 +36,10 @@
 #include "libcoff.h"
 #include "bucomm.h"
 #include "demanguse.h"
-#include "plugin-api.h"
-#include "plugin.h"
 #include "safe-ctype.h"
+#if BFD_SUPPORTS_PLUGINS
+#include "plugin.h"
+#endif
 
 #ifndef streq
 #define streq(a,b) (strcmp ((a),(b)) == 0)

@@ -30,8 +30,9 @@
 #include "coff/internal.h"
 #include "libcoff.h"
 #include "safe-ctype.h"
-#include "plugin-api.h"
+#if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
+#endif
 
 /* FIXME: See bfd/peXXigen.c for why we include an architecture specific
    header in generic PE code.  */

@@ -32,9 +32,9 @@
 #include "arsup.h"
 #include "filenames.h"
 #include "binemul.h"
-#include "plugin-api.h"
+#if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
-#include "ansidecl.h"
+#endif
 
 #ifdef __GO32___
 #define EXT_NAME_LEN 3		/* Bufflen of addition to name if it's MS-DOS.  */

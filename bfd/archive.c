@@ -142,7 +142,6 @@ SUBSECTION
 #include "filenames.h"
 #include "bfdlink.h"
 #if BFD_SUPPORTS_PLUGINS
-#include "plugin-api.h"
 #include "plugin.h"
 #endif
 
