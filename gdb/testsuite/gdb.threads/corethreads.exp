@@ -29,6 +29,7 @@ if { [gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executa
 
 set corefile [core_find $binfile]
 if {$corefile == ""} {
+    untested "unable to create or find corefile"
     return 0
 }
 

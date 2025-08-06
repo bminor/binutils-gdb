@@ -33,6 +33,7 @@ if {[build_executable "failed to prepare" $testfile $srcfile debug]} {
 # Generate core file.
 set corefile [core_find $binfile]
 if {$corefile == ""} {
+    untested "unable to create or find corefile"
     return 0
 }
 

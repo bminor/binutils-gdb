@@ -218,6 +218,7 @@ proc test_core {file displacement} {
 
 	set corefile [core_find $file {} "segv"]
 	if {$corefile == ""} {
+	    untested "unable to create or find corefile"
 	    return
 	}
 

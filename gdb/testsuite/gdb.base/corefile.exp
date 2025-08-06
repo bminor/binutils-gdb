@@ -31,6 +31,7 @@ if {[build_executable $testfile.exp $testfile $srcfile debug] == -1} {
 # mmapped data in core file" test.
 set corefile [core_find $binfile {}]
 if {$corefile == ""} {
+    untested "unable to create or find corefile"
     return 0
 }
 
