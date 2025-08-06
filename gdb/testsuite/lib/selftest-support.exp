@@ -16,7 +16,7 @@
 # Find a pathname to a file that we would execute if the shell was asked
 # to run $arg using the current PATH.
 
-proc find_gdb { arg } {
+proc _selftest_find_gdb { arg } {
 
     # If the arg directly specifies an existing executable file, then
     # simply use it.
@@ -43,7 +43,7 @@ proc find_gdb { arg } {
 # Return 0 in case of success, -1 in case of failure, and -2 in case of
 # skipping the test-case.
 
-proc selftest_setup { executable function } {
+proc _selftest_setup { executable function } {
     global gdb_prompt
     global INTERNAL_GDBFLAGS
 
@@ -132,7 +132,7 @@ proc selftest_prepare {} {
 
     # ... or with a stub-like server?  I.e., gdbserver + "target
     # remote"?  In that case we won't be able to pass command line
-    # arguments to GDB, and selftest_setup wants to do exactly that.
+    # arguments to GDB, and _selftest_setup wants to do exactly that.
     if [use_gdb_stub] {
 	return
     }
@@ -140,7 +140,7 @@ proc selftest_prepare {} {
     # Run the test with self.  Copy the file executable file in case
     # this OS doesn't like to edit its own text space.
 
-    set gdb_fullpath [find_gdb $::GDB]
+    set gdb_fullpath [_selftest_find_gdb $::GDB]
 
     if {[is_remote host]} {
 	set xgdb x$::tool
@@ -170,7 +170,7 @@ proc do_self_tests {function body} {
     # time, especially if the build is non-optimized.  Bump the timeout for the
     # duration of the test.
     with_timeout_factor 10 {
-	set result [selftest_setup $file $function]
+	set result [_selftest_setup $file $function]
 	if {$result == 0} {
 	    set result [uplevel $body]
 	}
