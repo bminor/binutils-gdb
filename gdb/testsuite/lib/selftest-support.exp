@@ -119,6 +119,10 @@ proc _selftest_setup { } {
 	return -2
     }
 
+    # Debugging on Windows shows random threads starting and exiting,
+    # interfering with the tests.  Disable them, since they are not useful here.
+    gdb_test_no_output "set print thread-events off"
+
     # run yourself
 
     set description "run until breakpoint at $function"
