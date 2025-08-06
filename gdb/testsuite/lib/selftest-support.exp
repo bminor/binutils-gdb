@@ -52,6 +52,37 @@ proc _selftest_has_libtool {} {
     return [expr {$status == 0}]
 }
 
+# If GDB is executed from a build tree, run libtool to obtain the real
+# executable path for EXECUTABLE, which may be a libtool wrapper.  Return
+# the path on success.  On failure, issue an UNTESTED test result and return
+# an empty string.
+#
+# If GDB is executed from an installed location, return EXECUTABLE unchanged.
+#
+# If libtool is not present on the host system, return EXECUTABLE unchanged.
+# The test might still work, because the GDB binary is not always a libtool
+# wrapper.
+
+proc selftest_libtool_get_real_gdb_executable { executable } {
+    if [_selftest_gdb_is_installed] {
+	return $executable
+    }
+
+    if ![_selftest_has_libtool] {
+	return $executable
+    }
+
+    lassign [remote_exec host libtool "--mode=execute echo -n $executable"] \
+	status executable
+
+    if { $status != 0 } {
+	untested "failed to run libtool"
+	return ""
+    }
+
+    return $executable
+}
+
 # Return true if EXECUTABLE has debug info.
 #
 # If it doesn't, or if it's not possible to determine, issue an UNTESTED test
@@ -73,15 +104,12 @@ proc _selftest_check_executable_debug_info { executable } {
     #
     # If testing against an installed GDB, then there won't be a libtool
     # wrapper, no need to convert.
-    if { ![_selftest_gdb_is_installed] && [_selftest_has_libtool] } {
-	lassign [remote_exec host libtool \
-		 "--mode=execute echo -n $executable"] \
-	    status executable
+    set executable [selftest_libtool_get_real_gdb_executable $executable]
 
-	if { $status != 0 } {
-	    untested "failed to run libtool"
-	    return false
-	}
+    if { $executable == "" } {
+	# selftest_libtool_get_real_gdb_executable already records an UNTESTED
+	# on failure.
+	return false
     }
 
     gdb_start

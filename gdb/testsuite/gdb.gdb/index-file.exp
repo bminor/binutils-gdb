@@ -30,6 +30,13 @@ if { $filename eq "" } {
     return -1
 }
 
+# If FILENAME is a libtool wrapper, then we need to get the path of the real
+# executable.
+set filename [selftest_libtool_get_real_gdb_executable $filename]
+if { $filename eq "" } {
+    return -1
+}
+
 with_timeout_factor $timeout_factor {
     # Start GDB, load FILENAME.
     clean_restart $filename
