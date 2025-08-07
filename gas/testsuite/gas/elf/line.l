@@ -2,17 +2,17 @@
 
 .*: Assembler messages:
 line\.s:[0-9]*18: Warning: \.warning .*
-line\.s:2: Warning: m1/1: 123
+.*line\.s:2: Warning: m1/1: 123
 line\.s:[0-9]*21:  Info: .*
-line\.s:4: Warning: m1/2: 123
+.*line\.s:4: Warning: m1/2: 123
 line\.s:[0-9]*21:  Info: .*
-line\.s:2: Warning: m1/1: abc
+.*line\.s:2: Warning: m1/1: abc
 line\.s:[0-9]*22:  Info: .*
-line\.s:4: Warning: m1/2: abc
+.*line\.s:4: Warning: m1/2: abc
 line\.s:[0-9]*22:  Info: .*
-line\.s:2: Warning: m1/1: XYZ
+.*line\.s:2: Warning: m1/1: XYZ
 line\.s:[0-9]*23:  Info: .*
-line\.s:4: Warning: m1/2: XYZ
+.*line\.s:4: Warning: m1/2: XYZ
 line\.s:[0-9]*23:  Info: .*
 line\.s:[0-9]*24: Warning: \.warning .*
 Line2\.s:10: Warning: m2/1: 987

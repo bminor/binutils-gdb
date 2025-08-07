@@ -112,11 +112,13 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
     unsigned int line;
     char *linefile;
 
-    as_where_top (&line);
-    if (!flag_m68k_mri)
-      linefile = xasprintf ("\t.linefile %u .", line + 1);
+    const char *prefix = flag_m68k_mri ? "" : ".";
+    const char *file = as_where_top (&line);
+
+    if (file)
+      linefile = xasprintf ("\t%slinefile %u \"%s\"", prefix, line + 1, file);
     else
-      linefile = xasprintf ("\tlinefile %u .", line + 1);
+      linefile = xasprintf ("\t%slinefile %u .", prefix, line + 1);
     sb_add_string (ptr, linefile);
     xfree (linefile);
   }
