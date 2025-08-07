@@ -27,7 +27,6 @@
 extern const char *strsignal (int);
 #endif
 
-static void identify (const char *);
 static void as_show_where (void);
 static void as_warn_internal (const char *, unsigned int, char *);
 static void as_bad_internal (const char *, unsigned int, char *);
@@ -72,8 +71,16 @@ static void signal_crash (int) ATTRIBUTE_NORETURN;
    as_abort () is used for logic failure (assert or abort, signal).
 */
 
+static const char *ident_name;
+
+void
+set_identify_name (const char *name)
+{
+  ident_name = name;
+}
+
 static void
-identify (const char *file)
+identify (void)
 {
   static int identified;
 
@@ -81,14 +88,8 @@ identify (const char *file)
     return;
   identified++;
 
-  if (!file)
-    {
-      unsigned int x;
-      file = as_where (&x);
-    }
-
-  if (file)
-    fprintf (stderr, "%s: ", file);
+  if (ident_name && *ident_name)
+    fprintf (stderr, "%s: ", ident_name);
   fprintf (stderr, _("Assembler messages:\n"));
 }
 
@@ -121,7 +122,7 @@ as_show_where (void)
   unsigned int line;
 
   file = as_where_top (&line);
-  identify (file);
+  identify ();
   if (file)
     {
       if (line != 0)
@@ -185,7 +186,7 @@ as_warn_internal (const char *file, unsigned int line, char *buffer)
       context = true;
     }
 
-  identify (file);
+  identify ();
   if (file)
     {
       if (line != 0)
@@ -259,7 +260,7 @@ as_bad_internal (const char *file, unsigned int line, char *buffer)
       context = true;
     }
 
-  identify (file);
+  identify ();
   if (file)
     {
       if (line != 0)

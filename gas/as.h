@@ -500,6 +500,7 @@ PRINTF_WHERE_LIKE (as_bad_where);
 PRINTF_WHERE_LIKE (as_warn_where);
 PRINTF_INDENT_LIKE (as_info_where);
 
+void   set_identify_name (const char *);
 void   as_abort (const char *, int, const char *) ATTRIBUTE_NORETURN;
 void   signal_init (void);
 int    had_errors (void);

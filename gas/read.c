@@ -895,6 +895,8 @@ read_a_source_file (const char *name)
   found_comment = 0;
 #endif
 
+  set_identify_name (name);
+
   buffer = input_scrub_new_file (name);
 
   listing_file (name);
