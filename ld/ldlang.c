@@ -44,13 +44,9 @@
 #include "elf-bfd.h"
 #include "bfdver.h"
 #include <errno.h>
-
 #if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
 #endif
-
-/* FIXME: Put it here to avoid NAME conflict from ldgram.h.  */
-#include "elf-bfd.h"
 
 #ifndef offsetof
 #define offsetof(TYPE, MEMBER) ((size_t) & (((TYPE*) 0)->MEMBER))
