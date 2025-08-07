@@ -201,9 +201,9 @@ GCC_AC_FUNC_MMAP
 AC_CHECK_FUNCS(fseeko fseeko64 getc_unlocked mkdtemp mkstemp utimensat utimes)
 
 AC_MSG_CHECKING([for mbstate_t])
-AC_TRY_COMPILE([#include <wchar.h>],
-[mbstate_t teststate;],
-have_mbstate_t=yes, have_mbstate_t=no)
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <wchar.h>]],
+[[mbstate_t teststate;]])],
+[have_mbstate_t=yes],[have_mbstate_t=no])
 AC_MSG_RESULT($have_mbstate_t)
 if test x"$have_mbstate_t" = xyes; then
   AC_DEFINE(HAVE_MBSTATE_T,1,[Define if mbstate_t exists in wchar.h.])

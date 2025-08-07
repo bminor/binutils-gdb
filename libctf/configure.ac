@@ -98,12 +98,12 @@ LDFLAGS="-L../bfd -L../libiberty $LDFLAGS"
 intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
 LIBS="-lbfd -liberty $intl $LIBS"
 AC_CACHE_CHECK([for ELF support in BFD], ac_cv_libctf_bfd_elf,
-[AC_TRY_LINK([#include <stdlib.h>
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <stdlib.h>
 	     #include <string.h>
 	     #include "bfd.h"
-	     #include "elf-bfd.h"],
-	    [(void) bfd_section_from_elf_index (NULL, 0);
-	     return 0;],
+	     #include "elf-bfd.h"]],
+	   [[(void) bfd_section_from_elf_index (NULL, 0);
+	     return 0;]])],
 	    [ac_cv_libctf_bfd_elf=yes],
 	    [ac_cv_libctf_bfd_elf=no])])
 CFLAGS=$OLD_CFLAGS

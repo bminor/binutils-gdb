@@ -86,6 +86,7 @@ AC_CACHE_CHECK([whether gprof tests can run],
   fi])
 AM_CONDITIONAL(NATIVE, test "$gprof_cv_sys_native" = "yes")
 
-AC_OUTPUT(Makefile testsuite/Makefile po/Makefile.in:po/Make-in)
+AC_CONFIG_FILES([Makefile testsuite/Makefile po/Makefile.in:po/Make-in])
+AC_OUTPUT
 
 GNU_MAKE_JOBSERVER

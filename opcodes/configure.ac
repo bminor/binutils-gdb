@@ -101,10 +101,10 @@ AC_CHECK_DECLS([basename, stpcpy])
 # Check if sigsetjmp is available.  Using AC_CHECK_FUNCS won't do
 # since sigsetjmp might only be defined as a macro.
 AC_CACHE_CHECK([for sigsetjmp], gdb_cv_func_sigsetjmp,
-[AC_TRY_COMPILE([
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <setjmp.h>
-], [sigjmp_buf env; while (! sigsetjmp (env, 1)) siglongjmp (env, 1);],
-bfd_cv_func_sigsetjmp=yes, bfd_cv_func_sigsetjmp=no)])
+]], [[sigjmp_buf env; while (! sigsetjmp (env, 1)) siglongjmp (env, 1);]])],
+[bfd_cv_func_sigsetjmp=yes], [bfd_cv_func_sigsetjmp=no])])
 if test $bfd_cv_func_sigsetjmp = yes; then
   AC_DEFINE(HAVE_SIGSETJMP, 1, [Define if sigsetjmp is available. ])
 fi
