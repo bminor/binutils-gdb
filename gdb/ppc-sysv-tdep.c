@@ -2060,10 +2060,12 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
     }
 
   /* Small character arrays are returned, right justified, in r3.  */
-  if (valtype->code () == TYPE_CODE_ARRAY
+  if (tdep->elf_abi == POWERPC_ELF_V1
+      && valtype->code () == TYPE_CODE_ARRAY
       && !valtype->is_vector ()
       && valtype->length () <= 8
-      && valtype->target_type ()->code () == TYPE_CODE_INT
+      && (valtype->target_type ()->code () == TYPE_CODE_INT
+	  || valtype->target_type ()->code () == TYPE_CODE_CHAR)
       && valtype->target_type ()->length () == 1)
     {
       int regnum = tdep->ppc_gp0_regnum + 3;
