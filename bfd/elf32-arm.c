@@ -12542,7 +12542,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
     case R_ARM_THM_ALU_ABS_G2_NC:
     case R_ARM_THM_ALU_ABS_G3_NC:
 	{
-	    const int shift_array[4] = {0, 8, 16, 24};
+	    static const int shift_array[4] = {0, 8, 16, 24};
 	    bfd_vma insn = bfd_get_16 (input_bfd, hit_data);
 	    bfd_vma addr = value;
 	    int shift = shift_array[r_type - R_ARM_THM_ALU_ABS_G0_NC];
@@ -14061,11 +14061,12 @@ set_secondary_compatible_arch (bfd *abfd, int arch)
 
 static int
 tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
-		      int newtag, int secondary_compat, const char* name_table[])
+		      int newtag, int secondary_compat,
+		      const char *const name_table[])
 {
 #define T(X) TAG_CPU_ARCH_##X
   int tagl, tagh, result;
-  const int v6t2[] =
+  static const int v6t2[] =
     {
       T(V6T2),   /* PRE_V4.  */
       T(V6T2),   /* V4.  */
@@ -14077,7 +14078,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V7),     /* V6KZ.  */
       T(V6T2)    /* V6T2.  */
     };
-  const int v6k[] =
+  static const int v6k[] =
     {
       T(V6K),    /* PRE_V4.  */
       T(V6K),    /* V4.  */
@@ -14090,7 +14091,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V7),     /* V6T2.  */
       T(V6K)     /* V6K.  */
     };
-  const int v7[] =
+  static const int v7[] =
     {
       T(V7),     /* PRE_V4.  */
       T(V7),     /* V4.  */
@@ -14104,7 +14105,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V7),     /* V6K.  */
       T(V7)      /* V7.  */
     };
-  const int v6_m[] =
+  static const int v6_m[] =
     {
       -1,	 /* PRE_V4.  */
       -1,	 /* V4.  */
@@ -14119,7 +14120,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V7),     /* V7.  */
       T(V6_M)    /* V6_M.  */
     };
-  const int v6s_m[] =
+  static const int v6s_m[] =
     {
       -1,	 /* PRE_V4.  */
       -1,	 /* V4.  */
@@ -14135,7 +14136,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V6S_M),  /* V6_M.  */
       T(V6S_M)   /* V6S_M.  */
     };
-  const int v7e_m[] =
+  static const int v7e_m[] =
     {
       -1,	 /* PRE_V4.  */
       -1,	 /* V4.  */
@@ -14152,7 +14153,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V7E_M),  /* V6S_M.  */
       T(V7E_M)   /* V7E_M.  */
     };
-  const int v8[] =
+  static const int v8[] =
     {
       T(V8),		/* PRE_V4.  */
       T(V8),		/* V4.  */
@@ -14177,7 +14178,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V8),		/* V8.3.  */
       T(V8),		/* V8.1-M.MAIN.  */
     };
-  const int v8r[] =
+  static const int v8r[] =
     {
       T(V8R),		/* PRE_V4.  */
       T(V8R),		/* V4.  */
@@ -14196,7 +14197,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V8),		/* V8.  */
       T(V8R),		/* V8R.  */
     };
-  const int v8m_baseline[] =
+  static const int v8m_baseline[] =
     {
       -1,		/* PRE_V4.  */
       -1,		/* V4.  */
@@ -14216,7 +14217,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       -1,		/* V8R.  */
       T(V8M_BASE)	/* V8-M BASELINE.  */
     };
-  const int v8m_mainline[] =
+  static const int v8m_mainline[] =
     {
       -1,		/* PRE_V4.  */
       -1,		/* V4.  */
@@ -14237,7 +14238,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V8M_MAIN),	/* V8-M BASELINE.  */
       T(V8M_MAIN)	/* V8-M MAINLINE.  */
     };
-  const int v8_1m_mainline[] =
+  static const int v8_1m_mainline[] =
     {
       -1,		/* PRE_V4.  */
       -1,		/* V4.  */
@@ -14262,7 +14263,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       -1,		/* Unused (20).  */
       T(V8_1M_MAIN)	/* V8.1-M MAINLINE.  */
     };
-  const int v9[] =
+  static const int v9[] =
     {
       T(V9),		/* PRE_V4.  */
       T(V9),		/* V4.  */
@@ -14288,7 +14289,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V9),		/* V8.1-M.MAIN.  */
       T(V9),		/* V9.  */
      };
-  const int v4t_plus_v6_m[] =
+  static const int v4t_plus_v6_m[] =
     {
       -1,		/* PRE_V4.  */
       -1,		/* V4.  */
@@ -14315,7 +14316,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V9),		/* V9.  */
       T(V4T_PLUS_V6_M)	/* V4T plus V6_M.  */
     };
-  const int *comb[] =
+  static const int *const comb[] =
     {
       v6t2,
       v6k,
@@ -14539,7 +14540,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    int secondary_compat = -1, secondary_compat_out = -1;
 	    unsigned int saved_out_attr = out_attr[i].i;
 	    int arch_attr;
-	    static const char *name_table[] =
+	    static const char *const name_table[] =
 	      {
 		/* These aren't real CPU names, but we can't guess
 		   that from the architecture version alone.  */
