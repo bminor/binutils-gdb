@@ -33,7 +33,7 @@ require {!is_remote host}
 # Set the current working directory to $out/cwd, so that we can test compiling
 # using relative paths.
 
-set out_dir [standard_output_file ""]
+set out_dir [build_standard_output_file ""]
 file mkdir $out_dir/cwd
 file mkdir $out_dir/other
 file copy -force $srcdir/$subdir/$srcfile $out_dir/cwd
@@ -53,7 +53,7 @@ proc test { src name } {
 	    return
 	}
 
-	clean_restart $binfile
+	clean_restart [host_file_normalize $binfile]
 
 	if { ![runto_main] } {
 	    return

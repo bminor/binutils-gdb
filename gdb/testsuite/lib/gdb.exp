@@ -2252,6 +2252,177 @@ proc gdb_assert { condition {message ""} } {
     return $res
 }
 
+# Comparison command for "lsort -command".  Sorts two strings by
+# descending file name length.
+
+proc compare_length_desc {a b} {
+    expr {[string length $b] - [string length $a]}
+}
+
+# Fill in and return the global cache for Windows <=> Unix mount point
+# mappings, for Windows.
+#
+# Calling external processes on MSYS2/Cygwin is expensive so instead
+# of calling "cygpath -ua $FILENAME" or "cygpath -ma $FILENAME" for
+# every file name, we extract the Windows and Unix file names of each
+# mount point using the 'mount' command output, and cache the
+# mappings, for both directions.
+
+gdb_caching_proc get_mount_point_map {} {
+    array set win_to_unix {}
+    array set unix_to_win {}
+
+    # The 'mount' command provides all mappings.  The general format
+    # is: 'WindowsFileName on UnixFileName type ...'
+    #
+    # For example:
+    #   'C:/msys64 on / type ntfs (binary,auto)'
+    #   'C: on /c type ntfs (binary,posix=0,user,noumount,auto)'
+    set mount_output [exec mount]
+
+    foreach line [split $mount_output \n] {
+	if {[regexp {^(.+) on (.+) type } $line -> win_filename unix_filename]} {
+	    set win_to_unix($win_filename) $unix_filename
+	    set unix_to_win($unix_filename) $win_filename
+	}
+    }
+
+    # Sort each mapping's keys by descending file name length,
+    # otherwise we wouldn't be able to look for '/foo' in '/' (for
+    # example).
+
+    set sorted_win {}
+    foreach k [lsort -command compare_length_desc [array names win_to_unix]] {
+	lappend sorted_win $k $win_to_unix($k)
+    }
+
+    set sorted_unix {}
+    foreach k [lsort -command compare_length_desc [array names unix_to_win]] {
+	lappend sorted_unix $k $unix_to_win($k)
+    }
+
+    # Return both sorted lists: {win => unix} {unix => win}
+    return [list $sorted_win $sorted_unix]
+}
+
+# Normalize backward slashes to forward slashes.
+
+proc normalize_slashes {filename} {
+    return [string map {\\ /} $filename]
+}
+
+# Sanitize a host file name, without making it absolute or resolving
+# symlinks.  On native Windows, this normalizes slashes to forward
+# slashes, and makes sure that if the file name starts with a drive
+# letter, it is upper case.  On other systems, it just returns the
+# file name unmodified.
+
+proc host_file_sanitize {filename} {
+    if {[ishost *-*-mingw*]} {
+	set filename [normalize_slashes $filename]
+
+	# If the file name starts with a drive letter, uppercase it.
+	if {[regexp {^([a-zA-Z]):(/.*)?} $filename -> drive rest]} {
+	    set filename "[string toupper $drive]:$rest"
+	}
+    }
+
+    return $filename
+}
+
+# Normalize a file name for the build machine.  If running native
+# Windows GDB, this converts a Windows file name to the corresponding
+# Unix filename, per the mount table.  For example, this replaces
+# 'c:/foo' with '/c/foo' (on MSYS2) or '/cygdrive/c/foo' (on Cygwin).
+# On other systems, it just wraps "file normalize".
+
+proc build_file_normalize {filename} {
+    if {[ishost *-*-mingw*]} {
+	set filename [host_file_sanitize $filename]
+
+	# Handle Windows => Unix mount point conversion.  We assume
+	# there are no symlinks to resolve, which is a reasonable
+	# assumption for native Windows testing.
+
+	# Get Windows => Unix map.
+	lassign [get_mount_point_map] win_to_unix _
+
+	foreach {win_filename unix_filename} $win_to_unix {
+	    if {[string equal -length [string length $win_filename] \
+		     $win_filename $filename]} {
+		set rest [string range $filename \
+			      [string length $win_filename] end]
+		return "${unix_filename}$rest"
+	    }
+	}
+    }
+
+    return [file normalize $filename]
+}
+
+# Normalize a file name for the host machine.  If running native
+# Windows GDB, this converts a Unix file name to a Windows filename,
+# per the mount table.  E.g., '/c/foo' (on MSYS2) or '/cygdrive/c/foo'
+# (on Cygwin) is converted to 'c:/foo'.
+
+proc host_file_normalize {filename} {
+    if {[ishost *-*-mingw*]} {
+	set filename [host_file_sanitize $filename]
+
+	# If the file name already starts with a drive letter (e.g.,
+	# C:/foo), we're done.  Don't let it fallthrough to "file
+	# normalize", which would misinterpret it as a relative file
+	# name.
+	if {[regexp {^[A-Z]:/} $filename]} {
+	    return $filename
+	}
+
+	# Get Unix => Windows map.
+	lassign [get_mount_point_map] _ unix_to_win
+
+	foreach {unix_filename win_filename} $unix_to_win {
+	    set mount_len [string length $unix_filename]
+	    if {[string equal -length $mount_len $unix_filename $filename]} {
+		if {[string length $filename] == $mount_len} {
+		    return "$win_filename/"
+		} elseif {[string index $filename $mount_len] eq "/"} {
+		    set rest [string range $filename $mount_len end]
+		    return "$win_filename$rest"
+		}
+	    }
+	}
+    }
+
+    return [file normalize $filename]
+}
+
+# Wrapper around "file join" that handles host-specific details.
+#
+# For Cygwin/MSYS2's Tcl, file names that start with a drive letter
+# are not considered absolute file names, thus 'file join "c:/" "d:/"'
+# returns "c:/d:".  This procedure thus detects absolute Windows-style
+# file names, and treats them as absolute, bypassing "file join".
+
+proc host_file_join {args} {
+    if {[isbuild *-*-mingw*]} {
+	set result ""
+	foreach filename $args {
+	    set filename [host_file_sanitize $filename]
+
+	    # If the file name starts with drive letter and colon
+	    # (e.g., "C:/"), treat it as absolute.
+	    if {[regexp {^[A-Z]:/} $filename]} {
+		set result $filename
+	    } else {
+		set result [file join $result $filename]
+	    }
+	}
+	return $result
+    } else {
+	return [file join {*}$args]
+    }
+}
+
 proc gdb_reinitialize_dir { subdir } {
     global gdb_prompt
 
@@ -2266,7 +2437,8 @@ proc gdb_reinitialize_dir { subdir } {
 	    }
 	    gdb_expect 60 {
 		-re "Source directories searched.*$gdb_prompt $" {
-		    send_gdb "dir $subdir\n"
+		    set dir [host_file_normalize $subdir]
+		    send_gdb "dir $dir\n"
 		    gdb_expect 60 {
 			-re "Source directories searched.*$gdb_prompt $" {
 			    verbose "Dir set to $subdir"
@@ -7473,13 +7645,13 @@ proc clean_standard_output_dir {} {
     }
 
     # Directory containing the standard output files.
-    set standard_output_dir [file normalize [standard_output_file ""]]
+    set standard_output_dir [build_standard_output_file ""]
 
     # Ensure that standard_output_dir is clean, or only contains
     # gdb.log / gdb.sum.
     set log_file_info [split [log_file -info]]
     set log_file [file normalize [lindex $log_file_info end]]
-    if { $log_file == [file normalize [standard_output_file gdb.log]] } {
+    if { $log_file == [file normalize [build_standard_output_file gdb.log]] } {
 	# Dir already contains active gdb.log.  Don't remove the dir, but
 	# check that it's clean otherwise.
 	set res [glob -directory $standard_output_dir -tails *]
@@ -7734,22 +7906,39 @@ proc make_gdb_parallel_path { args } {
 }
 
 # Turn BASENAME into a full file name in the standard output
-# directory.  It is ok if BASENAME is the empty string; in this case
-# the directory is returned.
+# directory, as seen from the build machine.  I.e., as seen from the
+# system driving DejaGnu.  (E.g., if DejaGnu is being driven by MSYS2
+# to test native Windows GDB, the "build" file names should be file
+# names TCL understands, i.e., Unix file names.)  It is OK if BASENAME
+# is the empty string; in this case the directory is returned.
+
+proc build_standard_output_file {basename} {
+    global objdir subdir gdb_test_file_name
+
+    set dir [make_gdb_parallel_path outputs $subdir $gdb_test_file_name]
+    file mkdir $dir
+    return [file join $dir $basename]
+}
+
+# Turn BASENAME into a full file name in the standard output
+# directory, as seen from a non-remote host.  I.e., assuming the build
+# and the host share the filesystem.  E.g., if DejaGnu is being driven
+# by MSYS2 to test native Windows GDB, the "host" file names should be
+# file names GDB understands, i.e., Windows file names.  It is OK if
+# BASENAME is the empty string; in this case the directory is
+# returned.
 
 proc standard_output_file {basename} {
     global objdir subdir gdb_test_file_name
 
     set dir [make_gdb_parallel_path outputs $subdir $gdb_test_file_name]
     file mkdir $dir
-    # If running on MinGW, replace /c/foo with c:/foo
-    if { [ishost *-*-mingw*] } {
-        set dir [exec sh -c "cd ${dir} && pwd -W"]
-    }
-    return [file join $dir $basename]
+    set dir [host_file_normalize $dir]
+    return [host_file_join $dir $basename]
 }
 
-# Turn BASENAME into a file name on host.
+# Like standard_output_file, but handles remote hosts.  Turn BASENAME
+# into a file name on (potentially remote) host.
 
 proc host_standard_output_file { basename } {
     if { [is_remote host] } {

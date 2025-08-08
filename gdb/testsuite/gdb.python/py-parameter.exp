@@ -38,7 +38,8 @@ proc_with_prefix test_directories { } {
 	# doesn't set search directories on remote host.
 	set directories ".*\\\$cdir.\\\$cwd"
     } else {
-	set escaped_directory [string_to_regexp "$::srcdir/$::subdir"]
+	set directory [host_file_normalize "$::srcdir/$::subdir"]
+	set escaped_directory [string_to_regexp $directory]
 	set directories "$escaped_directory.\\\$cdir.\\\$cwd"
     }
     gdb_test "python print (gdb.parameter ('directories'))" $directories

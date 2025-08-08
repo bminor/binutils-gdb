@@ -39,7 +39,8 @@ if { [is_remote host] } {
     gdb_test "guile (print (parameter-value \"directories\"))" \
 	"\\\$cdir.\\\$cwd"
 } else {
-    set escaped_directory [string_to_regexp "$srcdir/$subdir"]
+    set directory [host_file_normalize "$::srcdir/$::subdir"]
+    set escaped_directory [string_to_regexp $directory]
     gdb_test "guile (print (parameter-value \"directories\"))" \
 	"$escaped_directory.\\\$cdir.\\\$cwd"
 }
