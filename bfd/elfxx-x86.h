@@ -224,12 +224,16 @@
 		   || (EH)->elf.root.type == bfd_link_hash_undefined)))
 
 /* TRUE if this input relocation should be copied to output.  H->dynindx
-   may be -1 if this symbol was marked to become local.  */
+   may be -1 if this symbol was marked to become local.  STV_PROTECTED
+   symbols with indirect external access are local. */
 #define COPY_INPUT_RELOC_P(IS_X86_64, INFO, H, R_TYPE) \
   ((H) != NULL \
    && (H)->dynindx != -1 \
    && (X86_PCREL_TYPE_P (IS_X86_64, R_TYPE) \
-       || !(bfd_link_executable (INFO) || SYMBOLIC_BIND ((INFO), (H))) \
+       || !(bfd_link_executable (INFO) \
+	    || SYMBOLIC_BIND ((INFO), (H)) \
+	    || ((INFO)->indirect_extern_access > 0 \
+		&& ELF_ST_VISIBILITY ((H)->other) == STV_PROTECTED)) \
        || !(H)->def_regular))
 
 /* TRUE if this is actually a static link, or it is a -Bsymbolic link

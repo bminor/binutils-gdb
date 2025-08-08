@@ -520,6 +520,7 @@ run_dump_test "pr28894"
 run_dump_test "pr30787"
 run_dump_test "pr31047"
 run_dump_test "pr32191"
+run_dump_test "pr33260"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]
