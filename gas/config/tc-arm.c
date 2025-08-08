@@ -1474,7 +1474,7 @@ parse_neon_type (struct neon_type *type, char **str)
   while (type->elems < NEON_MAX_TYPE_ELS)
     {
       enum neon_el_type thistype = NT_untyped;
-      unsigned thissize = -1u;
+      unsigned long thissize = -1ul;
 
       if (*ptr != '.')
 	break;
@@ -1505,14 +1505,17 @@ parse_neon_type (struct neon_type *type, char **str)
 	      return FAIL;
 	    }
 	  ptr += 1;
+	  if (!ISDIGIT (*ptr) || *ptr == '0')
+	    goto unexpected;
 	  thissize = strtoul (ptr, &ptr, 10);
 	  if (thissize != 16)
 	    {
-	      as_bad (_("bad size %d in type specifier"), thissize);
+	      as_bad (_("bad size %lu in type specifier"), thissize);
 	      return FAIL;
 	    }
 	  goto done;
 	default:
+	unexpected:
 	  as_bad (_("unexpected character `%c' in type specifier"), *ptr);
 	  return FAIL;
 	}
@@ -1525,12 +1528,14 @@ parse_neon_type (struct neon_type *type, char **str)
       else
 	{
 	parsesize:
+	  if (!ISDIGIT (*ptr) || *ptr == '0')
+	    goto unexpected;
 	  thissize = strtoul (ptr, &ptr, 10);
 
 	  if (thissize != 8 && thissize != 16 && thissize != 32
 	      && thissize != 64)
 	    {
-	      as_bad (_("bad size %d in type specifier"), thissize);
+	      as_bad (_("bad size %lu in type specifier"), thissize);
 	      return FAIL;
 	    }
 	}
@@ -22470,7 +22475,8 @@ opcode_lookup (char **str)
 	  if (parse_neon_type (&inst.vectype, str) == FAIL)
 	    return NULL;
 	}
-      else if (end[offset] != '\0' && !is_whitespace (end[offset]))
+
+      if (**str != '\0' && !is_whitespace (**str))
 	return NULL;
     }
   else
