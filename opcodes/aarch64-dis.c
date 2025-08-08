@@ -501,21 +501,21 @@ aarch64_ext_ldst_reglist (const aarch64_operand *self ATTRIBUTE_UNUSED,
 
   static const struct
     {
-      unsigned is_reserved;
-      unsigned num_regs;
-      unsigned num_elements;
+      unsigned num_regs:8;
+      unsigned num_elements:8;
+      bool is_reserved:1;
     } data [] =
-  {   {0, 4, 4},
-      {1, 4, 4},
-      {0, 4, 1},
-      {0, 4, 2},
-      {0, 3, 3},
-      {1, 3, 3},
-      {0, 3, 1},
-      {0, 1, 1},
-      {0, 2, 2},
-      {1, 2, 2},
-      {0, 2, 1},
+  {   {4, 4, false},
+      {4, 4, true},
+      {4, 1, false},
+      {4, 2, false},
+      {3, 3, false},
+      {3, 3, true},
+      {3, 1, false},
+      {1, 1, false},
+      {2, 2, false},
+      {2, 2, true},
+      {2, 1, false},
   };
 
   /* Rt */
