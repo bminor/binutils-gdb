@@ -125,7 +125,7 @@ proc run_lto_binutils_test { lto_tests } {
 		    objdump
 			{ set dump_prog $objdump }
 		    nm
-			{ set dump_prog $nm }
+			{ set dump_prog "$nm $plug_opt" }
 		    readelf
 			{ set dump_prog $READELF }
 		    default
