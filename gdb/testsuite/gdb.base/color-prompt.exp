@@ -1,4 +1,4 @@
-# Copyright 2023-2025 Free Software Foundation, Inc.
+# Copyright 2025 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,18 +13,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Check using a prompt with color in TUI.
+# Check using a prompt with color in CLI.
 
-require allow_tui_tests
+# Using tuiterm requires setting TERM on host.
+require {!is_remote host}
 
+# We use a tuiterm, which allows us to determine cursor position.
 tuiterm_env
+Term::clean_restart 8 80
 
-Term::clean_restart 24 80
+# We start with an empty screen, to generate a visible prompt.
+Term::gen_prompt
 
-if {![Term::enter_tui]} {
-    unsupported "TUI not supported"
-    return
-}
-
-set tui 1
-source $srcdir/$subdir/color-prompt.exp.tcl
+set tui 0
+source $srcdir/$subdir/../gdb.tui/color-prompt.exp.tcl

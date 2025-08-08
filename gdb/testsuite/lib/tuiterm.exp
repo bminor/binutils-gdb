@@ -886,6 +886,31 @@ namespace eval Term {
 	return 1
     }
 
+    # Accept some output from gdb and update the screen.  Wait for the current
+    # screen line to match REGEXP and cursor position POS, unless POS is empty.
+    # Return 0 on timeout, 1 on success.
+    proc wait_for_line { regexp {pos ""} } {
+	variable _cur_row
+	variable _cur_col
+	variable _cols
+
+	while 1 {
+	    if { [accept_gdb_output] == 0 } {
+		return 0
+	    }
+
+	    if { ![check_region_contents_p 0 $_cur_row $_cols 1 $regexp] } {
+		continue
+	    }
+
+	    if { $pos == "" || $_cur_col == $pos } {
+		break
+	    }
+	}
+
+	return 1
+    }
+
     # Setup the terminal with dimensions ROWSxCOLS, TERM=ansi, and execute
     # BODY.
     proc with_tuiterm {rows cols body} {
