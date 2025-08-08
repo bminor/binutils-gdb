@@ -92,7 +92,9 @@ namespace eval Term {
 
     # Return 1 if tuiterm has the bw/auto_left_margin enabled.
     proc _have_bw {} {
-	return [string equal $Term::_TERM "ansiw"]
+	return [expr \
+		    [string equal $Term::_TERM "ansiw"] \
+		    || [string equal $Term::_TERM "ansis"]]
     }
 
     # Backspace.
@@ -699,6 +701,14 @@ namespace eval Term {
 		}
 	    }
 	}
+    }
+
+    # Request Terminal Parameters (DECREQTPARM)
+    #
+    # https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
+    # https://vt100.net/docs/vt100-ug/chapter3.html
+    proc _csi_x {} {
+	# Ignore.
     }
 
     # Insert string at the cursor location.
