@@ -1383,13 +1383,12 @@ amd64_get_insn_details (gdb_byte *insn, struct amd64_insn *details)
     }
   else if (prefix != nullptr && vex2_prefix_p (*prefix))
     {
-      need_modrm = twobyte_has_modrm[*insn];
+      /* All VEX2 instructions need ModR/M, except vzeroupper/vzeroall.  */
+      need_modrm = *insn != 0x77 ? 1 : 0;
       details->opcode_len = 2;
     }
   else if (prefix != nullptr && vex3_prefix_p (*prefix))
     {
-      need_modrm = twobyte_has_modrm[*insn];
-
       gdb_byte m = prefix[1] & 0x1f;
       if (m == 0)
 	{
@@ -1398,12 +1397,16 @@ amd64_get_insn_details (gdb_byte *insn, struct amd64_insn *details)
 	}
       else if (m == 1)
 	{
-	  /* Escape 0x0f.  */
+	  /* Escape 0x0f.  All VEX3 instructions in this map need ModR/M,
+	     except vzeroupper/vzeroall.  */
+	  need_modrm = *insn != 0x77 ? 1 : 0;
 	  details->opcode_len = 2;
 	}
       else if (m == 2 || m == 3)
 	{
-	  /* Escape 0x0f 0x38 or 0x0f 0x3a.  */
+	  /* Escape 0x0f 0x38 or 0x0f 0x3a.  All VEX3 instructions in
+	     this map need ModR/M.  */
+	  need_modrm = 1;
 	  details->opcode_len = 3;
 	}
       else if (m == 7)
@@ -1419,7 +1422,8 @@ amd64_get_insn_details (gdb_byte *insn, struct amd64_insn *details)
     }
   else if (prefix != nullptr && evex_prefix_p (*prefix))
     {
-      need_modrm = twobyte_has_modrm[*insn];
+      /* All EVEX instructions need ModR/M.  */
+      need_modrm = 1;
 
       gdb_byte m = prefix[1] & 0x7;
       if (m == 1)
@@ -3754,6 +3758,28 @@ test_amd64_get_insn_details (void)
   updated_insn
     = { 0x62, 0xf1, 0x7c, 0x48, 0x28, 0x81, 0x00, 0xfc, 0xff, 0xff };
   fixup_riprel (details, insn.data (), ECX_REG_NUM);
+  SELF_CHECK (insn == updated_insn);
+
+  /* INSN: vpblendw $0x7,%xmm4,%xmm6,%xmm2, vex3 prefix.  */
+  insn = { 0xc4, 0xe3, 0x49, 0x0e, 0xd4, 0x07 };
+  amd64_get_insn_details (insn.data (), &details);
+  SELF_CHECK (details.opcode_len == 3);
+  SELF_CHECK (details.enc_prefix_offset == 0);
+  SELF_CHECK (details.opcode_offset == 3);
+  SELF_CHECK (details.modrm_offset == 4);
+
+  /* INSN: vpblendw $0x7,0xff(%rip),%ymm6,%ymm2, vex3 prefix.  */
+  insn = { 0xc4, 0xe3, 0x4d, 0x0e, 0x15, 0xff, 0x00, 0x00, 0x00, 0x07 };
+  amd64_get_insn_details (insn.data (), &details);
+  SELF_CHECK (details.opcode_len == 3);
+  SELF_CHECK (details.enc_prefix_offset == 0);
+  SELF_CHECK (details.opcode_offset == 3);
+  SELF_CHECK (details.modrm_offset == 4);
+
+  /* INSN: vpblendw $0x7,0xff(%ecx),%ymm6,%ymm2, vex3 prefix.  */
+  fixup_riprel (details, insn.data (), ECX_REG_NUM);
+  updated_insn
+    = { 0xc4, 0xe3, 0x4d, 0x0e, 0x91, 0xff, 0x00, 0x00, 0x00, 0x07 };
   SELF_CHECK (insn == updated_insn);
 }
 
