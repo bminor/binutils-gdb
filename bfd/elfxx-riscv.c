@@ -43,7 +43,7 @@ static bfd_reloc_status_type riscv_elf_ignore_reloc
 
 /* The relocation table used for SHT_RELA sections.  */
 
-static reloc_howto_type howto_table[] =
+static const reloc_howto_type howto_table[] =
 {
   /* No relocation.  */
   HOWTO (R_RISCV_NONE,			/* type */
@@ -879,7 +879,7 @@ static reloc_howto_type howto_table[] =
 	 false) 			/* pcrel_offset */
 };
 
-static reloc_howto_type howto_table_internal[] =
+static const reloc_howto_type howto_table_internal[] =
 {
   /* R_RISCV_DELETE.  */
   EMPTY_HOWTO (0),
@@ -1204,7 +1204,7 @@ struct riscv_implicit_subset
 		      const riscv_subset_t *);
 };
 /* Please added in order since this table is only run once time.  */
-static struct riscv_implicit_subset riscv_implicit_subsets[] =
+static const struct riscv_implicit_subset riscv_implicit_subsets[] =
 {
   {"g", "+i,+m,+a,+f,+d,+zicsr,+zifencei", check_implicit_always},
   {"e", "+i", check_implicit_always},
@@ -1336,7 +1336,7 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
 };
 
 /* This table records the mapping form RISC-V Profiles into march string.  */
-static struct riscv_profiles riscv_profiles_table[] =
+static const struct riscv_profiles riscv_profiles_table[] =
 {
   /* RVI20U only contains the base extension 'i' as mandatory extension.  */
   {"rvi20u64", "rv64i"},
@@ -1408,7 +1408,7 @@ struct riscv_supported_ext
 
 /* The standard extensions must be added in canonical order.  */
 
-static struct riscv_supported_ext riscv_supported_std_ext[] =
+static const struct riscv_supported_ext riscv_supported_std_ext[] =
 {
   {"e",		ISA_SPEC_CLASS_20191213,	1, 9, 0 },
   {"e",		ISA_SPEC_CLASS_20190608,	1, 9, 0 },
@@ -1443,7 +1443,7 @@ static struct riscv_supported_ext riscv_supported_std_ext[] =
   {NULL, 0, 0, 0, 0}
 };
 
-static struct riscv_supported_ext riscv_supported_std_z_ext[] =
+static const struct riscv_supported_ext riscv_supported_std_z_ext[] =
 {
   {"zic64b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"ziccamoa",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
@@ -1550,7 +1550,7 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {NULL, 0, 0, 0, 0}
 };
 
-static struct riscv_supported_ext riscv_supported_std_s_ext[] =
+static const struct riscv_supported_ext riscv_supported_std_s_ext[] =
 {
   {"sha",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"shcounterenw",	ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
@@ -1597,12 +1597,12 @@ static struct riscv_supported_ext riscv_supported_std_s_ext[] =
   {NULL, 0, 0, 0, 0}
 };
 
-static struct riscv_supported_ext riscv_supported_std_zxm_ext[] =
+static const struct riscv_supported_ext riscv_supported_std_zxm_ext[] =
 {
   {NULL, 0, 0, 0, 0}
 };
 
-static struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
+static const struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
 {
   {"xcvalu",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xcvbi",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
@@ -1639,7 +1639,7 @@ static struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
   {NULL, 0, 0, 0, 0}
 };
 
-const struct riscv_supported_ext *riscv_all_supported_ext[] =
+static const struct riscv_supported_ext *riscv_all_supported_ext[] =
 {
   riscv_supported_std_ext,
   riscv_supported_std_z_ext,
@@ -1701,7 +1701,7 @@ riscv_get_prefix_class (const char *arch)
 
 static bool
 riscv_known_prefixed_ext (const char *ext,
-			  struct riscv_supported_ext *known_exts)
+			  const struct riscv_supported_ext *known_exts)
 {
   size_t i;
   for (i = 0; known_exts[i].name != NULL; ++i)
@@ -1894,7 +1894,7 @@ riscv_get_default_ext_version (enum riscv_spec_class *default_isa_spec,
       || *default_isa_spec == ISA_SPEC_CLASS_NONE)
     return;
 
-  struct riscv_supported_ext *table = NULL;
+  const struct riscv_supported_ext *table = NULL;
   enum riscv_prefix_ext_class class = riscv_get_prefix_class (name);
   switch (class)
     {
@@ -2185,7 +2185,7 @@ riscv_update_subset1 (riscv_parse_subset_t *, riscv_subset_t *, const char *);
 static void
 riscv_parse_add_implicit_subsets (riscv_parse_subset_t *rps)
 {
-  struct riscv_implicit_subset *t = riscv_implicit_subsets;
+  const struct riscv_implicit_subset *t = riscv_implicit_subsets;
   for (; t->ext; t++)
     {
       riscv_subset_t *subset = NULL;
