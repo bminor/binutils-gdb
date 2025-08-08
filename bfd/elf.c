@@ -10948,7 +10948,7 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
 
   type = bfd_get_32 (abfd, note->descdata);
 
-  struct
+  static const struct
   {
     const char *type_name;
     unsigned long min_size;
@@ -13345,7 +13345,7 @@ elf_parse_notes (bfd *abfd, char *buf, size_t size, file_ptr offset,
 	case bfd_core:
 	  {
 #define GROKER_ELEMENT(S,F) {S, sizeof (S) - 1, F}
-	    struct
+	    static const struct
 	    {
 	      const char * string;
 	      size_t len;

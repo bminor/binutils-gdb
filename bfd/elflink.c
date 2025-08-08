@@ -2380,7 +2380,7 @@ elf_link_add_glibc_verneed (struct elf_find_verdep_info *rinfo,
 void
 _bfd_elf_link_add_glibc_version_dependency
   (struct elf_find_verdep_info *rinfo,
-   const char *version_dep[])
+   const char *const version_dep[])
 {
   Elf_Internal_Verneed *t = NULL;
   int glibc_minor_base = INT_MAX;
@@ -2405,7 +2405,7 @@ _bfd_elf_link_add_dt_relr_dependency (struct elf_find_verdep_info *rinfo)
 {
   if (rinfo->info->enable_dt_relr)
     {
-      const char *version[] =
+      static const char *const version[] =
 	{
 	  "GLIBC_ABI_DT_RELR",
 	  NULL
