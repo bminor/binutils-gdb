@@ -6849,7 +6849,20 @@ gdb_caching_proc can_spawn_for_attach {} {
 
     set me "can_spawn_for_attach"
     set src {
-	#include <unistd.h>
+	#ifdef _WIN32
+	# include <windows.h>
+	#else
+	# include <unistd.h>
+	#endif
+
+	#ifdef _WIN32
+	unsigned
+	sleep (unsigned seconds)
+	{
+	    Sleep (seconds * 1000);
+	    return 0;
+	}
+	#endif
 
 	int
 	main (void)
