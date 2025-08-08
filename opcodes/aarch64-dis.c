@@ -149,7 +149,6 @@ aarch64_insn
 extract_fields (aarch64_insn code, aarch64_insn mask, ...)
 {
   uint32_t num;
-  const aarch64_field *field;
   enum aarch64_field_kind kind;
   va_list va;
 
@@ -160,8 +159,7 @@ extract_fields (aarch64_insn code, aarch64_insn mask, ...)
   while (num--)
     {
       kind = va_arg (va, enum aarch64_field_kind);
-      field = &fields[kind];
-      value <<= field->width;
+      value <<= aarch64_fields[kind].width;
       value |= extract_field (kind, code, mask);
     }
   va_end (va);
@@ -184,7 +182,7 @@ extract_all_fields_after (const aarch64_operand *self, unsigned int start,
        i < ARRAY_SIZE (self->fields) && self->fields[i] != FLD_NIL; ++i)
     {
       kind = self->fields[i];
-      value <<= fields[kind].width;
+      value <<= aarch64_fields[kind].width;
       value |= extract_field (kind, code, 0);
     }
   return value;
@@ -1240,7 +1238,8 @@ aarch64_ext_addr_simm (const aarch64_operand *self, aarch64_opnd_info *info,
   info->addr.base_regno = extract_field (FLD_Rn, code, 0);
   /* simm (imm9 or imm7)  */
   imm = extract_field (self->fields[0], code, 0);
-  info->addr.offset.imm = sign_extend (imm, fields[self->fields[0]].width - 1);
+  info->addr.offset.imm
+    = sign_extend (imm, aarch64_fields[self->fields[0]].width - 1);
   if (self->fields[0] == FLD_imm7
       || info->qualifier == AARCH64_OPND_QLF_imm_tag)
     /* scaled immediate in ld/st pair instructions.  */

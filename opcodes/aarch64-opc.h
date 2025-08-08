@@ -251,7 +251,7 @@ struct aarch64_field
 
 typedef struct aarch64_field aarch64_field;
 
-extern const aarch64_field fields[];
+extern const aarch64_field aarch64_fields[];
 
 /* Operand description.  */
 
@@ -427,7 +427,7 @@ static inline unsigned
 get_operand_field_width (const aarch64_operand *operand, unsigned n)
 {
   assert (operand->fields[n] != FLD_NIL);
-  return fields[operand->fields[n]].width;
+  return aarch64_fields[operand->fields[n]].width;
 }
 
 /* Return the total width of the operand *OPERAND.  */
@@ -437,7 +437,7 @@ get_operand_fields_width (const aarch64_operand *operand)
   int i = 0;
   unsigned width = 0;
   while (operand->fields[i] != FLD_NIL)
-    width += fields[operand->fields[i++]].width;
+    width += aarch64_fields[operand->fields[i++]].width;
   assert (width > 0 && width < 32);
   return width;
 }
@@ -482,7 +482,7 @@ gen_mask (int width)
 static inline int
 gen_sub_field (enum aarch64_field_kind kind, int lsb_rel, int width, aarch64_field *ret)
 {
-  const aarch64_field *field = &fields[kind];
+  const aarch64_field *field = &aarch64_fields[kind];
   if (lsb_rel < 0 || width <= 0 || lsb_rel + width > field->width)
     return 0;
   ret->lsb = field->lsb + lsb_rel;
@@ -528,7 +528,7 @@ static inline void
 insert_field (enum aarch64_field_kind kind, aarch64_insn *code,
 	      aarch64_insn value, aarch64_insn mask)
 {
-  insert_field_2 (&fields[kind], code, value, mask);
+  insert_field_2 (&aarch64_fields[kind], code, value, mask);
 }
 
 /* Extract field KIND of CODE and return the value.  MASK can be zero or the
@@ -538,7 +538,7 @@ static inline aarch64_insn
 extract_field (enum aarch64_field_kind kind, aarch64_insn code,
 	       aarch64_insn mask)
 {
-  return extract_field_2 (&fields[kind], code, mask);
+  return extract_field_2 (&aarch64_fields[kind], code, mask);
 }
 
 extern aarch64_insn

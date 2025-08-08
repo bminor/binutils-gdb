@@ -223,7 +223,7 @@ aarch64_select_operand_for_sizeq_field_coding (const aarch64_opcode *opcode)
 
 /* Instruction bit-fields.
 +   Keep synced with 'enum aarch64_field_kind'.  */
-const aarch64_field fields[] =
+const aarch64_field aarch64_fields[] =
 {
     {  0,  0 },	/* NIL.  */
     {  8,  4 },	/* CRm: in the system instructions.  */

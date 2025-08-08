@@ -40,7 +40,6 @@ static inline void
 insert_fields (aarch64_insn *code, aarch64_insn value, aarch64_insn mask, ...)
 {
   uint32_t num;
-  const aarch64_field *field;
   enum aarch64_field_kind kind;
   va_list va;
 
@@ -50,9 +49,8 @@ insert_fields (aarch64_insn *code, aarch64_insn value, aarch64_insn mask, ...)
   while (num--)
     {
       kind = va_arg (va, enum aarch64_field_kind);
-      field = &fields[kind];
       insert_field (kind, code, value, mask);
-      value >>= field->width;
+      value >>= aarch64_fields[kind].width;
     }
   va_end (va);
 }
@@ -72,7 +70,7 @@ insert_all_fields_after (const aarch64_operand *self, unsigned int start,
       {
 	kind = self->fields[i];
 	insert_field (kind, code, value, 0);
-	value >>= fields[kind].width;
+	value >>= aarch64_fields[kind].width;
       }
 }
 
