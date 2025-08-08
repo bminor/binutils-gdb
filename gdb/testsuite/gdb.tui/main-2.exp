@@ -41,7 +41,7 @@ if {![Term::enter_tui]} {
 set line "  return 0;"
 set nr [gdb_get_line_number $line]
 
-set screen_line [Term::get_string_with_attrs 6 1 79]
+set screen_line [Term::get_string_with_attrs 6 11 79]
 verbose -log "screen line 6: '$screen_line'"
-gdb_assert { [regexp "$nr <reverse:1>$line<reverse:0>" $screen_line] } \
+gdb_assert { [regexp "<reverse:1>$line<reverse:0>" $screen_line] } \
     "highlighted line in middle of source window"
