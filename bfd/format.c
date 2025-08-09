@@ -511,20 +511,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 
       cleanup = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
 
-      /* When called from strip, don't treat archive member nor
-	 standalone fat IR object as an IR object.  For archive
-	 member, it will be copied as an unknown object if the
-	 plugin target is in use or it is a slim IR object.  For
-	 standalone fat IR object, it will be copied as non-IR
-	 object.  */
-      if (cleanup
-#if BFD_SUPPORTS_PLUGINS
-	  && (!abfd->is_strip_input
-	      || !bfd_plugin_target_p (abfd->xvec)
-	      || (abfd->lto_type != lto_fat_ir_object
-		  && abfd->my_archive == NULL))
-#endif
-	  )
+      if (cleanup)
 	goto ok_ret;
 
       /* For a long time the code has dropped through to check all

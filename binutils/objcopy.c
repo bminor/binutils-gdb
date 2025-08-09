@@ -3690,8 +3690,6 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
       bool ok_object;
       const char *element_name;
 
-      this_element->is_strip_input = 1;
-
       element_name = bfd_get_filename (this_element);
       /* PR binutils/17533: Do not allow directory traversal
 	 outside of the current directory tree by archive members.  */
@@ -3748,11 +3746,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
       l->obfd = NULL;
       list = l;
 
-#if BFD_SUPPORTS_PLUGINS
-      /* Ignore plugin target if all LTO sections should be removed.  */
-      if (lto_sections_removed)
-	this_element->plugin_format = bfd_plugin_no;
-#endif
+      this_element->plugin_format = bfd_plugin_no;
       ok_object = bfd_check_format (this_element, bfd_object);
 
       /* PR binutils/3110: Cope with archives
@@ -3772,11 +3766,9 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 
 #if BFD_SUPPORTS_PLUGINS
       /* Copy LTO IR file as unknown object.  */
-      if ((!lto_sections_removed
-	   && this_element->lto_type == lto_slim_ir_object)
-	  || bfd_plugin_target_p (this_element->xvec))
+      if (!lto_sections_removed
+	  && this_element->lto_type == lto_slim_ir_object)
 	ok_object = false;
-      else
 #endif
       if (ok_object)
 	{
@@ -3811,8 +3803,15 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	  if (preserve_dates && stat_status == 0)
 	    set_times (output_name, &buf);
 
-	  /* Open the newly created output file and attach to our list.  */
-	  output_element = bfd_openr (output_name, output_target);
+	  /* Open the newly created output file and attach to our
+	     list.  We must enable the plugin target here in order to
+	     read IR symbols for the archive map.  */
+	  const char *targ = output_target;
+#if BFD_SUPPORTS_PLUGINS
+	  if (!force_output_target)
+	    targ = "plugin";
+#endif
+	  output_element = bfd_openr (output_name, targ);
 
 	  list->obfd = output_element;
 
@@ -3869,25 +3868,6 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
   return ok;
 }
 
-static bool
-check_format_object (bfd *ibfd, char ***obj_matching,
-		     bool no_plugins ATTRIBUTE_UNUSED)
-{
-#if BFD_SUPPORTS_PLUGINS
-  /* Ignore plugin target first if all LTO sections should be
-     removed.  Try with plugin target next if ignoring plugin
-     target fails to match the format.  */
-  if (no_plugins && ibfd->plugin_format == bfd_plugin_unknown)
-    {
-      ibfd->plugin_format = bfd_plugin_no;
-      if (bfd_check_format_matches (ibfd, bfd_object, obj_matching))
-	return true;
-      ibfd->plugin_format = bfd_plugin_unknown;
-    }
-#endif
-  return bfd_check_format_matches (ibfd, bfd_object, obj_matching);
-}
-
 /* The top-level control.  */
 
 static void
@@ -3911,12 +3891,6 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
       status = 1;
       return;
     }
-
-#if BFD_SUPPORTS_PLUGINS
-  /* Enable LTO plugin in strip.  */
-  if (is_strip && !target)
-    target = "plugin";
-#endif
 
   /* To allow us to do "strip *" without dying on the first
      non-object file, failures are nonfatal.  */
@@ -3971,7 +3945,7 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
       break;
     }
 
-  ibfd->is_strip_input = 1;
+  ibfd->plugin_format = bfd_plugin_no;
 
   if (bfd_check_format (ibfd, bfd_archive))
     {
@@ -4014,16 +3988,66 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
       if (!copy_archive (ibfd, obfd, output_target, force_output_target,
 			 input_arch, target_defaulted))
 	status = 1;
+      return;
     }
-  else if (check_format_object (ibfd, &obj_matching, lto_sections_removed))
+
+  bool ok_plugin = false;
+  bool ok_object = bfd_check_format_matches (ibfd, bfd_object, &obj_matching);
+  bfd_error_type obj_error = bfd_get_error ();
+  bfd_error_type core_error = bfd_error_no_error;
+  if (!ok_object)
+    {
+      ok_object = bfd_check_format_matches (ibfd, bfd_core, &core_matching);
+      core_error = bfd_get_error ();
+      if (ok_object)
+	{
+	  if (obj_error == bfd_error_file_ambiguously_recognized)
+	    free (obj_matching);
+	  obj_error = bfd_error_no_error;
+	}
+#if BFD_SUPPORTS_PLUGINS
+      else
+	{
+	  /* This is for LLVM bytecode files, which are not ELF objects.
+	     Since objcopy/strip does nothing with these files except
+	     copy them whole perhaps we ought to just reject them?  */
+	  bfd_find_target ("plugin", ibfd);
+	  ibfd->plugin_format = bfd_plugin_unknown;
+	  ok_plugin = bfd_check_format (ibfd, bfd_object);
+	}
+#endif
+    }
+
+  if (obj_error == bfd_error_file_ambiguously_recognized)
+    {
+      if (core_error == bfd_error_file_ambiguously_recognized)
+	free (core_matching);
+      bfd_set_error (obj_error);
+      status = 1;
+      bfd_nonfatal_message (input_filename, NULL, NULL, NULL);
+      list_matching_formats (obj_matching);
+    }
+  else if (core_error == bfd_error_file_ambiguously_recognized)
+    {
+      status = 1;
+      bfd_nonfatal_message (input_filename, NULL, NULL, NULL);
+      list_matching_formats (core_matching);
+    }
+  else if (!ok_object && !ok_plugin)
+    {
+      status = 1;
+      bfd_set_error (obj_error);
+      bfd_nonfatal_message (input_filename, NULL, NULL, NULL);
+    }
+  else
     {
       bfd *obfd;
-    do_copy:
 
       /* bfd_get_target does not return the correct value until
 	 bfd_check_format succeeds.  */
-      if (output_target == NULL
-	  || strcmp (output_target, "default") == 0)
+      if (ok_object
+	  && (output_target == NULL
+	      || strcmp (output_target, "default") == 0))
 	output_target = bfd_get_target (ibfd);
 
       if (ofd >= 0)
@@ -4042,65 +4066,32 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
  	}
 
 #if BFD_SUPPORTS_PLUGINS
-      if (bfd_plugin_target_p (ibfd->xvec))
-	{
-	  /* Copy LTO IR file as unknown file.  */
-	  if (!copy_unknown_file (ibfd, obfd, in_stat->st_size,
-				  in_stat->st_mode))
-	    status = 1;
-	  else if (!bfd_close_all_done (obfd))
-	    status = 1;
-	}
-      else
+      /* Copy LTO IR file as unknown object.  */
+      if (!lto_sections_removed
+	  && ibfd->lto_type == lto_slim_ir_object)
+	ok_object = false;
 #endif
-	{
-	  if (! copy_object (ibfd, obfd, input_arch, target_defaulted))
-	    status = 1;
+      if (ok_object
+	  ? !copy_object (ibfd, obfd, input_arch, target_defaulted)
+	  : !copy_unknown_file (ibfd, obfd,
+				in_stat->st_size, in_stat->st_mode))
+	status = 1;
 
-	  /* PR 17512: file: 0f15796a.
-	     If the file could not be copied it may not be in a writeable
-	     state.  So use bfd_close_all_done to avoid the possibility of
-	     writing uninitialised data into the file.  */
-	  if (! (status ? bfd_close_all_done (obfd) : bfd_close (obfd)))
-	    {
-	      status = 1;
-	      bfd_nonfatal_message (output_filename, NULL, NULL, NULL);
-	    }
-	}
-
-      if (!bfd_close (ibfd))
+      /* PR 17512: file: 0f15796a.
+	 If the file could not be copied it may not be in a writeable
+	 state.  So use bfd_close_all_done to avoid the possibility of
+	 writing uninitialised data into the file.  */
+      if (!(ok_object && !status ? bfd_close : bfd_close_all_done) (obfd))
 	{
 	  status = 1;
-	  bfd_nonfatal_message (input_filename, NULL, NULL, NULL);
+	  bfd_nonfatal_message (output_filename, NULL, NULL, NULL);
 	}
     }
-  else
+
+  if (!bfd_close (ibfd))
     {
-      bfd_error_type obj_error = bfd_get_error ();
-      bfd_error_type core_error;
-
-      if (bfd_check_format_matches (ibfd, bfd_core, &core_matching))
-	{
-	  /* This probably can't happen..  */
-	  if (obj_error == bfd_error_file_ambiguously_recognized)
-	    free (obj_matching);
-	  goto do_copy;
-	}
-
-      core_error = bfd_get_error ();
-      /* Report the object error in preference to the core error.  */
-      if (obj_error != core_error)
-	bfd_set_error (obj_error);
-
-      bfd_nonfatal_message (input_filename, NULL, NULL, NULL);
-
-      if (obj_error == bfd_error_file_ambiguously_recognized)
-	list_matching_formats (obj_matching);
-      if (core_error == bfd_error_file_ambiguously_recognized)
-	list_matching_formats (core_matching);
-
-      bfd_close (ibfd);
       status = 1;
+      bfd_nonfatal_message (input_filename, NULL, NULL, NULL);
     }
 }
 
