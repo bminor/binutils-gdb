@@ -1,6 +1,6 @@
 #source: pr33260.s
 #as: -mrelax-relocations=yes --x32
-#ld: -melf32_x86_64 -shared -z indirect-extern-access
+#ld: -melf32_x86_64 -shared
 #readelf: -r --wide
 
 Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 2 entries:
