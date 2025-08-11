@@ -2166,9 +2166,14 @@ record_btrace_stop_replaying_at_end (struct thread_info *tp)
     return;
 
   btrace_insn_end (&end, btinfo);
+  if (btrace_insn_cmp (replay, &end) != 0)
+    return;
 
-  if (btrace_insn_cmp (replay, &end) == 0)
-    record_btrace_stop_replaying (tp);
+  xfree (replay);
+  btinfo->replay = nullptr;
+
+  /* Discard any frames from the btrace unwinder.  */
+  reinit_frame_cache ();
 }
 
 /* The resume method of target record-btrace.  */
