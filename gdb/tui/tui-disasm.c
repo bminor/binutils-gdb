@@ -100,6 +100,9 @@ tui_disassemble (struct gdbarch *gdbarch,
 {
   bool term_out = disassembler_styling && gdb_stdout->can_emit_style_escape ();
   string_file gdb_dis_out (term_out);
+  struct ui_file *stream = (addr_size == nullptr
+			    ? (decltype (stream))&null_stream
+			    : (decltype (stream))&gdb_dis_out);
 
   /* Must start with an empty list.  */
   asm_lines.clear ();
@@ -108,11 +111,13 @@ tui_disassemble (struct gdbarch *gdbarch,
   for (int i = 0; i < count; ++i)
     {
       tui_asm_line tal;
-      CORE_ADDR orig_pc = pc;
+
+      /* Save the instruction address.  */
+      tal.addr = pc;
 
       try
 	{
-	  pc = pc + gdb_print_insn (gdbarch, pc, &gdb_dis_out, NULL);
+	  pc += gdb_print_insn (gdbarch, pc, stream, NULL);
 	}
       catch (const gdb_exception_error &except)
 	{
@@ -124,25 +129,24 @@ tui_disassemble (struct gdbarch *gdbarch,
 	  return pc;
 	}
 
+      /* If that's all we need, continue.  */
+      if (addr_size == nullptr)
+	{
+	  asm_lines.push_back (std::move (tal));
+	  continue;
+	}
+
       /* Capture the disassembled instruction.  */
       tal.insn = gdb_dis_out.release ();
 
       /* And capture the address the instruction is at.  */
-      tal.addr = orig_pc;
-      print_address (gdbarch, orig_pc, &gdb_dis_out);
+      print_address (gdbarch, tal.addr, &gdb_dis_out);
       tal.addr_string = gdb_dis_out.release ();
+      tal.addr_size = (term_out
+		       ? len_without_escapes (tal.addr_string)
+		       : tal.addr_string.size ());
 
-      if (addr_size != nullptr)
-	{
-	  size_t new_size;
-
-	  if (term_out)
-	    new_size = len_without_escapes (tal.addr_string);
-	  else
-	    new_size = tal.addr_string.size ();
-	  *addr_size = std::max (*addr_size, new_size);
-	  tal.addr_size = new_size;
-	}
+      *addr_size = std::max (*addr_size, tal.addr_size);
 
       asm_lines.push_back (std::move (tal));
     }
