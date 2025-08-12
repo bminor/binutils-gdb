@@ -11867,22 +11867,11 @@ fi
 
 
 case "${target}" in
-    hppa*64*-*-*) ;;
     *-*-*aout*| i[3-7]86-*-msdos* | ns32k-*-* | pdp11-*-*)
 	if test "$plugins" = "yes"; then
 	    if test "${enable_plugins+set}" = set; then
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Enabling plugins for AOUT is experimental" >&5
 $as_echo "$as_me: WARNING: Enabling plugins for AOUT is experimental" >&2;}
-	    else
-		plugins=no
-	    fi
-	fi ;;
-    hppa*-*-hpux* | *-*-*vms* | \
-    powerpc*-*-aix* | powerpc-*-beos* | powerpc-*-macos* | rs6000-*-*)
-	if test "$plugins" = "yes"; then
-	    if test "${enable_plugins+set}" = set; then
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Enabling plugins may result in ar creating non-standard archives for ${target}" >&5
-$as_echo "$as_me: WARNING: Enabling plugins may result in ar creating non-standard archives for ${target}" >&2;}
 	    else
 		plugins=no
 	    fi

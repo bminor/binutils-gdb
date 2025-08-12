@@ -84,4 +84,20 @@ extern int smart_rename (const char *, const char *, int,
   ((*res) = (a), (*res) *= (b), (b) != 0 && (*res) / (b) != (a))
 #endif
 
+/* Change ABFD target vector to TARG.  ABFD is an archive element.
+   TARG is plugin_vec, or NULL if plugins are not supported.  */
+static inline void
+set_plugin_target (bfd *abfd, const struct bfd_target *targ)
+{
+  /* Don't change the target for archives like pdb that handle
+     elements specially, as detected by my_archive being NULL.  */
+  if (abfd->my_archive && targ)
+    {
+      abfd->xvec = targ;
+      /* Arrange for the plugin target to be tried first in
+	 bfd_check_format.  */
+      abfd->target_defaulted = false;
+    }
+}
+
 #endif /* _BUCOMM_H */

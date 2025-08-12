@@ -42,12 +42,9 @@
 #define EXT_NAME_LEN 6		/* Ditto for *NIX.  */
 #endif
 
-/* Static declarations.  */
+/* Forward declarations.  */
 
-static void mri_emul (void);
 static const char *normalize (const char *, bfd *);
-static void remove_output (void);
-static void map_over_members (bfd *, void (*)(bfd *), char **, int);
 static void print_contents (bfd * member);
 static void delete_members (bfd *, char **files_to_delete);
 
@@ -58,8 +55,7 @@ static void print_descr (bfd * abfd);
 static void write_archive (bfd *);
 static int  ranlib_only (const char *archname);
 static int  ranlib_touch (const char *archname);
-static void usage (int);
-
+
 /** Globals and flags.  */
 
 static int mri_mode;
@@ -977,11 +973,10 @@ open_inarch (const char *archive_filename, const char *file)
   struct stat sbuf;
   bfd *arch;
   char **matching;
+  const char *arch_target = target;
+  const struct bfd_target *plugin_vec;
 
   bfd_set_error (bfd_error_no_error);
-
-  if (target == NULL)
-    target = plugin_target;
 
   if (stat (archive_filename, &sbuf) != 0)
     {
@@ -1008,16 +1003,16 @@ open_inarch (const char *archive_filename, const char *file)
 
       /* If the target isn't set, try to figure out the target to use
 	 for the archive from the first object on the list.  */
-      if (target == NULL && file != NULL)
+      if (arch_target == NULL && file != NULL)
 	{
 	  bfd *obj;
 
-	  obj = bfd_openr (file, target);
+	  obj = bfd_openr (file, arch_target);
 	  if (obj != NULL)
 	    {
 	      if (bfd_check_format (obj, bfd_object)
 		  && bfd_target_supports_archives (obj))
-		target = bfd_get_target (obj);
+		arch_target = bfd_get_target (obj);
 	      (void) bfd_close (obj);
 	    }
 	}
@@ -1026,7 +1021,7 @@ open_inarch (const char *archive_filename, const char *file)
       output_filename = xstrdup (archive_filename);
 
       /* Create an empty archive.  */
-      arch = bfd_openw (archive_filename, target);
+      arch = bfd_openw (archive_filename, arch_target);
       if (arch == NULL
 	  || ! bfd_set_format (arch, bfd_archive)
 	  || ! bfd_close (arch))
@@ -1035,7 +1030,7 @@ open_inarch (const char *archive_filename, const char *file)
         non_fatal (_("creating %s"), archive_filename);
     }
 
-  arch = bfd_openr (archive_filename, target);
+  arch = bfd_openr (archive_filename, arch_target);
   if (arch == NULL)
     {
     bloser:
@@ -1069,12 +1064,21 @@ open_inarch (const char *archive_filename, const char *file)
 	}
     }
 
+  /* We didn't open the archive using plugin_target, because the
+     plugin bfd_target does not support archives.  Select
+     plugin_target now for elements so that we can recognise LTO IR
+     files and read IR symbols for use in the archive map.  */
+  plugin_vec = NULL;
+  if (!target && plugin_target)
+    plugin_vec = bfd_find_target (plugin_target, NULL);
+
+  /* Open all the archive contents.  */
   last_one = &(arch->archive_next);
-  /* Read all the contents right away, regardless.  */
   for (next_one = bfd_openr_next_archived_file (arch, NULL);
        next_one;
        next_one = bfd_openr_next_archived_file (arch, next_one))
     {
+      set_plugin_target (next_one, plugin_vec);
       *last_one = next_one;
       last_one = &next_one->archive_next;
     }
@@ -1566,8 +1570,9 @@ replace_members (bfd *arch, char **files_to_move, bool quick)
 		    }
 		  else
 		    {
+		      const char *targ = target ? target : plugin_target;
 		      replaced = ar_emul_replace (after_bfd, *files_to_move,
-						  target, verbose);
+						  targ, verbose);
 		    }
 		  if (replaced)
 		    {
@@ -1593,7 +1598,8 @@ replace_members (bfd *arch, char **files_to_move, bool quick)
 	}
       else
         {
-	  changed |= ar_emul_append (after_bfd, *files_to_move, target,
+	  const char *targ = target ? target : plugin_target;
+	  changed |= ar_emul_append (after_bfd, *files_to_move, targ,
 				     verbose, make_thin_archive);
 	}
 

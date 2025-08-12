@@ -1601,6 +1601,14 @@ display_archive (bfd *file)
   if (print_armap)
     print_symdef_entry (file);
 
+  /* We didn't open the archive using plugin_target, because the
+     plugin bfd_target does not support archives.  Select
+     plugin_target now for elements so that we can recognise LTO IR
+     files and print IR symbols.  */
+  const struct bfd_target *plugin_vec = NULL;
+  if (!target && plugin_target)
+    plugin_vec = bfd_find_target (plugin_target, NULL);
+
   bfd *last_arfile = NULL;
   for (;;)
     {
@@ -1617,6 +1625,8 @@ display_archive (bfd *file)
 
       if (last_arfile != NULL)
 	bfd_close (last_arfile);
+
+      set_plugin_target (arfile, plugin_vec);
 
       char **matching;
       if (bfd_check_format_matches (arfile, bfd_object, &matching))
