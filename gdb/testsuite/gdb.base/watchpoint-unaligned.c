@@ -18,6 +18,8 @@
 #include <stdint.h>
 #include <assert.h>
 
+static volatile int volatile_dummy;
+
 static int again;
 
 static volatile struct
@@ -53,6 +55,14 @@ write_size8twice (void)
   data.u.size8twice[offset] = first;
   data.u.size8twice[offset + 1] = second;
 #endif
+
+  /* Setting a breakpoint on an instruction after an instruction triggering a
+     watchpoint makes it ambiguous which one will be reported.
+     Insert a dummy instruction in between to make sure the watchpoint gets
+     reported.  */
+  volatile_dummy = 1;
+
+  return; /* write_size8twice_return */
 }
 
 int
