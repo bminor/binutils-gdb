@@ -2153,6 +2153,15 @@ record_btrace_stop_replaying (struct thread_info *tp)
   switch (tp->state)
     {
     case THREAD_STOPPED:
+      /* Forget why we stopped; it was at a different location.  */
+      tp->set_stop_reason (TARGET_STOPPED_BY_NO_REASON);
+      tp->set_stop_signal (GDB_SIGNAL_0);
+      tp->control.stop_step = 0;
+
+      if (tp->has_pending_waitstatus ())
+	tp->clear_pending_waitstatus ();
+
+      bpstat_clear (&tp->control.stop_bpstat);
       break;
 
     case THREAD_RUNNING:
