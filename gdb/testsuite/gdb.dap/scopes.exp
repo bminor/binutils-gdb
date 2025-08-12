@@ -152,10 +152,17 @@ lassign [dap_check_request_and_response "fetch all registers" \
 foreach var [dict get $val body variables] {
     set regvar [dict get $var variablesReference]
     if {$regvar > 0} {
+	# If variablesReference is non-zero, then there must be either
+	# named or indexed children.
+	if {[dict exists $var namedVariables]} {
+	    set n [dict get $var namedVariables]
+	} else {
+	    set n [dict get $var indexedVariables]
+	}
+
 	dap_check_request_and_response "fetch register children for $regvar" \
 	    "variables" \
-	    [format {o variablesReference [i %d] count [i %d]} \
-		 $regvar [dict get $var namedVariables]]
+	    [format {o variablesReference [i %d] count [i %d]} $regvar $n]
     }
 }
 
