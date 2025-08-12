@@ -71,8 +71,16 @@ read_size8twice (void)
   static uint64_t volatile first;
   static uint64_t volatile second;
 
+#ifdef __aarch64__
+  volatile void *p = &data.u.size8twice[offset];
+  asm volatile ("ldp %0, %1, [%2]"
+	       : "=r" (first), "=r" (second) /* output */
+	       : "r" (p)  /* input */
+	       : /* clobber */);
+#else
   first = data.u.size8twice[offset];
   second = data.u.size8twice[offset + 1];
+#endif
 
   /* Setting a breakpoint on an instruction after an instruction triggering a
      watchpoint makes it ambiguous which one will be reported.

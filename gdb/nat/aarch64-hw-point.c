@@ -710,10 +710,8 @@ aarch64_stopped_data_address (const struct aarch64_debug_reg_state *state,
 	   itself.  For instance, the access size of an stp instruction is 16.
 	   So, if we use stp to store to address p, and set a watchpoint on
 	   address p + 8, the reported ADDR_TRAP can be p + 8 (observed on
-	   RK3399 SOC). But it also can be p (observed on M1 SOC).  Checking
-	   for this situation introduces the possibility of false positives,
-	   so we only do this for hw_write watchpoints.  */
-	const CORE_ADDR max_access_size = type == hw_write ? 16 : 8;
+	   RK3399 SOC). But it also can be p (observed on M1 SOC).  */
+	const CORE_ADDR max_access_size = 16;
 	const CORE_ADDR addr_watch_base = addr_watch_aligned -
 	  (max_access_size - AARCH64_HWP_MAX_LEN_PER_REG);
 	if (!(addr_trap >= addr_watch_base
