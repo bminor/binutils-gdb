@@ -254,24 +254,22 @@ run_lto_binutils_test [list \
     ] \
 ]
 
-if { [check_lto_fat_available] } {
-    run_lto_binutils_test [list \
-	[list \
-	    "strip" \
-	    "-R .gnu.*lto_* -N __gnu_lto_v1" \
-	    "strip-1a.o" \
-	    "strip-1a-s-all.o" \
-	    {{nm -n strip-1a-s-all.nd}} \
-	] \
-	[list \
-	    "strip" \
-	    "-R .gnu.*lto_* -N __gnu_lto_v1" \
-	    "libstrip-1a.a" \
-	    "libstrip-1a-s-all.a" \
-	    {{nm -n strip-1a-s-all.nd}} \
-	] \
-    ]
-}
+run_lto_binutils_test [list \
+    [list \
+	"strip" \
+	"-R .gnu.*lto_* -N __gnu_lto_v1" \
+	"strip-1a.o" \
+	"strip-1a-s-all.o" \
+	{{nm -n strip-1a-s-all.nd}} \
+    ] \
+    [list \
+	"strip" \
+	"-R .gnu.*lto_* -N __gnu_lto_v1" \
+	"libstrip-1a.a" \
+	"libstrip-1a-s-all.a" \
+	{{nm -n strip-1a-s-all.nd}} \
+    ] \
+]
 
 run_cc_link_tests [list \
     [list \

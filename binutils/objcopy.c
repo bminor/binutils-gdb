@@ -168,13 +168,6 @@ static struct section_list *change_sections;
 /* TRUE if some sections are to be removed.  */
 static bool sections_removed;
 
-#if BFD_SUPPORTS_PLUGINS
-/* TRUE if all GCC LTO sections are to be removed.  */
-static bool lto_sections_removed;
-#else
-#define lto_sections_removed false
-#endif
-
 /* TRUE if only some sections are to be copied.  */
 static bool sections_copied;
 
@@ -3765,9 +3758,8 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	}
 
 #if BFD_SUPPORTS_PLUGINS
-      /* Copy LTO IR file as unknown object.  */
-      if (!lto_sections_removed
-	  && this_element->lto_type == lto_slim_ir_object)
+      /* Copy slim LTO IR file as unknown object.  */
+      if (this_element->lto_type == lto_slim_ir_object)
 	ok_object = false;
 #endif
       if (ok_object)
@@ -4066,9 +4058,8 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
  	}
 
 #if BFD_SUPPORTS_PLUGINS
-      /* Copy LTO IR file as unknown object.  */
-      if (!lto_sections_removed
-	  && ibfd->lto_type == lto_slim_ir_object)
+  /* Copy slim LTO IR file as unknown file.  */
+      if (ibfd->lto_type == lto_slim_ir_object)
 	ok_object = false;
 #endif
       if (ok_object
@@ -5062,18 +5053,13 @@ strip_main (int argc, char *argv[])
 
 #if BFD_SUPPORTS_PLUGINS
   /* Check if all GCC LTO sections should be removed, assuming all LTO
-     sections will be removed with -R .gnu.lto_.*.  * Remove .gnu.lto_.*
-     sections will also remove .gnu.debuglto_.  sections.  LLVM IR
-     bitcode is stored in .llvm.lto section which will be removed with
-     -R .llvm.lto.  */
-  lto_sections_removed = (!!find_section_list (".gnu.lto_.*", false,
-					       SECTION_CONTEXT_REMOVE)
-			  || !!find_section_list (".llvm.lto", false,
-					       SECTION_CONTEXT_REMOVE));
-  /* NB: Must keep .gnu.debuglto_* sections unless all GCC LTO sections
+     sections will be removed with -R .gnu.lto_.*.  Remove .gnu.lto_.*
+     sections will also remove .gnu.debuglto_.* sections.
+
+     NB: Must keep .gnu.debuglto_* sections unless all GCC LTO sections
      will be removed to avoid undefined references to symbols in GCC LTO
      debug sections.  */
-  if (!lto_sections_removed)
+  if (!find_section_list (".gnu.lto_.*", false, SECTION_CONTEXT_REMOVE))
     find_section_list (".gnu.debuglto_*", true, SECTION_CONTEXT_KEEP);
 #endif
 

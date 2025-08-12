@@ -376,33 +376,49 @@ bfd_set_lto_type (bfd *abfd ATTRIBUTE_UNUSED)
 	     | (bfd_get_flavour (abfd) == bfd_target_elf_flavour
 		? EXEC_P : 0))) == 0)
     {
-      asection *sec;
+      asection *sec = abfd->sections;
       enum bfd_lto_object_type type = lto_non_ir_object;
-      struct lto_section lsection = { 0, 0, 0, 0 };
-      /* GCC uses .gnu.lto_.lto.<some_hash> as a LTO bytecode information
-	 section.  */
-      for (sec = abfd->sections; sec != NULL; sec = sec->next)
-	if (strcmp (sec->name, GNU_OBJECT_ONLY_SECTION_NAME) == 0)
-	  {
-	    type = lto_mixed_object;
-	    abfd->object_only_section = sec;
-	    break;
+      if (sec == NULL)
+	{
+	  /* If there are no sections, check for slim LLVM IR object whose
+	     first 4 bytes are: 'B', 'C', 0xc0, 0xde.  */
+	  bfd_byte llvm_ir_magic[4];
+	  if (bfd_seek (abfd, 0, SEEK_SET) == 0
+	      && bfd_read (llvm_ir_magic, 4, abfd) == 4
+	      && llvm_ir_magic[0] == 'B'
+	      && llvm_ir_magic[1] == 'C'
+	      && llvm_ir_magic[2] == 0xc0
+	      && llvm_ir_magic[3] == 0xde)
+	    type = lto_slim_ir_object;
+	}
+      else
+	{
+	  struct lto_section lsection = { 0, 0, 0, 0 };
+	  /* GCC uses .gnu.lto_.lto.<some_hash> as a LTO bytecode
+	     information section.  */
+	  for (; sec != NULL; sec = sec->next)
+	    if (strcmp (sec->name, GNU_OBJECT_ONLY_SECTION_NAME) == 0)
+	      {
+		type = lto_mixed_object;
+		abfd->object_only_section = sec;
+		break;
+	      }
+	    else if (strcmp (sec->name, ".llvm.lto") == 0)
+	      {
+		type = lto_fat_ir_object;
+		break;
+	      }
+	    else if (lsection.major_version == 0
+		     && startswith (sec->name, ".gnu.lto_.lto.")
+		     && bfd_get_section_contents (abfd, sec, &lsection, 0,
+						  sizeof (struct lto_section)))
+	      {
+		if (lsection.slim_object)
+		  type = lto_slim_ir_object;
+		else
+		  type = lto_fat_ir_object;
 	  }
-	else if (strcmp (sec->name, ".llvm.lto") == 0)
-	  {
-	    type = lto_fat_ir_object;
-	    break;
-	  }
-	else if (lsection.major_version == 0
-		 && startswith (sec->name, ".gnu.lto_.lto.")
-		 && bfd_get_section_contents (abfd, sec, &lsection, 0,
-					      sizeof (struct lto_section)))
-	  {
-	    if (lsection.slim_object)
-	      type = lto_slim_ir_object;
-	    else
-	      type = lto_fat_ir_object;
-	  }
+	}
 
       abfd->lto_type = type;
     }

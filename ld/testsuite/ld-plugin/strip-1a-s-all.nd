@@ -1,3 +1,6 @@
 #...
-[0-9a-f]* C _?__gnu_lto_slim
+ + U foo2
+ + U foo3
+0+ T foo1
+0+ T main
 #pass
