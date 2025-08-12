@@ -151,7 +151,7 @@ foreach_with_prefix wpcount {4 7} {
     gdb_assert $got_hit $test
 }
 
-proc size8twice { function offset index } {
+proc size8twice { function cmd offset index } {
     clean_restart $::testfile
 
     if { ![runto $function] } {
@@ -169,11 +169,11 @@ proc size8twice { function offset index } {
 
     # Set a hardware watchpoint.
     set watch_index [expr $offset + $index]
-    set test "watch data.u.size8twice\[$watch_index\]"
+    set test "$cmd data.u.size8twice\[$watch_index\]"
     set wpnum 0
     gdb_test_multiple $test "" {
-	-re -wrap "Hardware watchpoint ($::decimal): .*" {
-	    set wpnum $expect_out(1,string)
+	-re -wrap "Hardware (read )?watchpoint ($::decimal): .*" {
+	    set wpnum $expect_out(2,string)
 	    pass $gdb_test_name
 	}
 	-re -wrap "Watchpoint ($::decimal): .*" {
@@ -195,7 +195,7 @@ proc size8twice { function offset index } {
     gdb_test_multiple "continue" "" {
 	-re -wrap "\r\nCould not insert hardware watchpoint .*" {
 	}
-	-re -wrap "Hardware watchpoint $wpnum:.*New value = .*" {
+	-re -wrap "Hardware (read )?watchpoint $wpnum:.*(New value|Value) = .*" {
 	    set got_hit 1
 	    send_gdb "continue\n"
 	    exp_continue
@@ -203,7 +203,7 @@ proc size8twice { function offset index } {
 	-re -wrap " $bp_src_string .*" {
 	}
     }
-    gdb_assert $got_hit "size8twice write"
+    gdb_assert { $got_hit }
 
     return $got_hit
 }
@@ -215,10 +215,21 @@ proc size8twice { function offset index } {
 # For each case, check setting a watchpoint at:
 # - the first written element (index == 0), and
 # - the second element (index == 1).
-foreach_with_prefix offset { 0 1 } {
-    foreach_with_prefix index { 0 1 } {
-	if { [size8twice write_size8twice $offset $index] != 1 } {
-	    return
+foreach_with_prefix fun { write_size8twice read_size8twice } {
+    if { $fun == "write_size8twice" } {
+	set cmd "watch"
+    } else {
+	set cmd "rwatch"
+    }
+    foreach_with_prefix offset { 0 1 } {
+	foreach_with_prefix index { 0 1 } {
+	    set res [size8twice $fun $cmd $offset $index]
+	    if { $res != 1 } {
+		break
+	    }
+	}
+	if { $res != 1 } {
+	    break
 	}
     }
 }

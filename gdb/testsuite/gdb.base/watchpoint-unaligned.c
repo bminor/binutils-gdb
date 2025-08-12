@@ -65,6 +65,24 @@ write_size8twice (void)
   return; /* write_size8twice_return */
 }
 
+static void
+read_size8twice (void)
+{
+  static uint64_t volatile first;
+  static uint64_t volatile second;
+
+  first = data.u.size8twice[offset];
+  second = data.u.size8twice[offset + 1];
+
+  /* Setting a breakpoint on an instruction after an instruction triggering a
+     watchpoint makes it ambiguous which one will be reported.
+     Insert a dummy instruction inbetween to make sure the watchpoint gets
+     reported.  */
+  volatile_dummy = 1;
+
+  return; /* read_size8twice_return */
+}
+
 int
 main (void)
 {
@@ -73,6 +91,7 @@ main (void)
   assert (sizeof (data) == 8 + 3 * 8);
 
   write_size8twice ();
+  read_size8twice ();
 
   while (size)
     {
