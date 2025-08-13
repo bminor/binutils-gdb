@@ -413,6 +413,11 @@ record_btrace_target::stop_recording ()
 {
   DEBUG ("stop recording");
 
+  /* Check that before so stop recording is atomic.  */
+  for (thread_info &tp : current_inferior ()->non_exited_threads ())
+    if (tp.state == THREAD_RUNNING)
+      error (_("You cannot stop recording while threads are running."));
+
   bool is_replaying = record_is_replaying (inferior_ptid);
   record_stop_replaying ();
   record_btrace_auto_disable ();
@@ -2140,12 +2145,25 @@ record_btrace_start_replaying (struct thread_info *tp)
 static void
 record_btrace_stop_replaying (struct thread_info *tp)
 {
-  struct btrace_thread_info *btinfo;
+  struct btrace_thread_info *btinfo = &tp->btrace;
 
-  btinfo = &tp->btrace;
+  if (btinfo->replay == nullptr)
+    return;
+
+  switch (tp->state)
+    {
+    case THREAD_STOPPED:
+      break;
+
+    case THREAD_RUNNING:
+      error (_("Cannot stop replaying a running thread."));
+
+    case THREAD_EXITED:
+      gdb_assert_not_reached ("unexpected thread state");
+    }
 
   xfree (btinfo->replay);
-  btinfo->replay = NULL;
+  btinfo->replay = nullptr;
 
   /* Make sure we're not leaving any stale registers.  */
   registers_changed_thread (tp);

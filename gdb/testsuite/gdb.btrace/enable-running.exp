@@ -93,4 +93,4 @@ foreach thread {1 2 3 4} {
 }
 
 # Stop recording while all threads are running.
-gdb_test "record stop" "Process record is stopped \[^\\\r\\\n\]*"
+gdb_test "record stop" "You cannot stop recording while threads are running\."
