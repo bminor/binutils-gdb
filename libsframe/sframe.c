@@ -1516,6 +1516,43 @@ sframe_decoder_get_funcdesc_v2 (const sframe_decoder_ctx *dctx,
 
   return 0;
 }
+
+/* Get the data (NUM_FRES, FUNC_SIZE, START_PC_OFFSET, FUNC_INFO,
+   REP_BLOCK_SIZE) from the SFrame function descriptor entry at the I'th index
+   in the decoder object DCTX.  Return SFRAME_ERR on failure.  */
+
+int
+sframe_decoder_get_funcdesc_v3 (const sframe_decoder_ctx *dctx,
+				unsigned int i,
+				uint32_t *num_fres,
+				uint32_t *func_size,
+				int64_t *start_pc_offset,
+				unsigned char *func_info,
+				uint8_t *rep_block_size)
+{
+  int err = 0;
+  if (dctx == NULL || sframe_decoder_get_version (dctx) != SFRAME_VERSION_3)
+    return sframe_set_errno (&err, SFRAME_ERR_INVAL);
+
+  sframe_func_desc_entry_int *fdp
+    = sframe_decoder_get_funcdesc_at_index (dctx, i);
+  if (fdp == NULL)
+    return sframe_set_errno (&err, SFRAME_ERR_FDE_NOTFOUND);
+
+  if (num_fres)
+    *num_fres = fdp->func_num_fres;
+  if (start_pc_offset)
+    *start_pc_offset = fdp->func_start_pc_offset;
+  if (func_size)
+    *func_size = fdp->func_size;
+  if (func_info)
+    *func_info = fdp->func_info;
+  if (rep_block_size)
+    *rep_block_size = fdp->func_rep_size;
+
+  return 0;
+}
+
 /* Get the FRE_IDX'th FRE of the function at FUNC_IDX'th function
    descriptor entry in the SFrame decoder CTX.  Returns error code as
    applicable.  */
@@ -1931,6 +1968,37 @@ sframe_encoder_add_funcdesc_v2 (sframe_encoder_ctx *ectx,
     return sframe_set_errno (&err, SFRAME_ERR_INVAL);
 
   err = sframe_encoder_add_funcdesc_internal (ectx, start_addr, func_size);
+  if (err)
+    return err;
+
+  sf_fde_tbl *fd_info = ectx->sfe_funcdesc;
+  fd_info->entry[fd_info->count-1].func_info = func_info;
+  fd_info->entry[fd_info->count-1].func_rep_size = rep_block_size;
+
+  return 0;
+}
+
+/* Add a new SFrame function descriptor entry with START_PC_OFFSET, FUNC_SIZE,
+   FUNC_INFO and REP_BLOCK_SIZE to the encoder context ECTX.  Return error
+   code on failure.  */
+
+int
+sframe_encoder_add_funcdesc_v3 (sframe_encoder_ctx *ectx,
+				int64_t start_pc_offset,
+				uint32_t func_size,
+				unsigned char func_info,
+				uint8_t rep_block_size,
+				uint32_t num_fres ATTRIBUTE_UNUSED)
+{
+  int err = 0;
+  if (ectx == NULL || sframe_encoder_get_version (ectx) != SFRAME_VERSION_3)
+    {
+      sframe_set_errno (&err, SFRAME_ERR_INVAL);
+      return err;
+    }
+
+  err = sframe_encoder_add_funcdesc_internal (ectx, start_pc_offset,
+					      func_size);
   if (err)
     return err;
 
