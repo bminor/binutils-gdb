@@ -1189,7 +1189,7 @@ do_slurp_coff_armap (bfd *abfd)
 bool
 bfd_slurp_armap (bfd *abfd)
 {
-  char nextname[17];
+  char nextname[16];
   int i = bfd_read (nextname, 16, abfd);
 
   if (i == 0)
@@ -1200,12 +1200,13 @@ bfd_slurp_armap (bfd *abfd)
   if (bfd_seek (abfd, -16, SEEK_CUR) != 0)
     return false;
 
-  if (startswith (nextname, "__.SYMDEF       ")
-      || startswith (nextname, "__.SYMDEF/      ")) /* Old Linux archives.  */
+  if (memcmp (nextname, "__.SYMDEF       ", 16) == 0
+      /* Old Linux archives.  */
+      || memcmp (nextname, "__.SYMDEF/      ", 16) == 0)
     return do_slurp_bsd_armap (abfd);
-  else if (startswith (nextname, "/               "))
+  else if (memcmp (nextname, "/               ", 16) == 0)
     return do_slurp_coff_armap (abfd);
-  else if (startswith (nextname, "/SYM64/         "))
+  else if (memcmp (nextname, "/SYM64/         ", 16) == 0)
     {
       /* 64bit (Irix 6) archive.  */
 #ifdef BFD64
@@ -1215,13 +1216,27 @@ bfd_slurp_armap (bfd *abfd)
       return false;
 #endif
     }
-  else if (startswith (nextname, "#1/20           "))
+  else if (memcmp (nextname, "________", 8) == 0
+	   && ((nextname[8] == '_' && nextname[9] == '_')
+	       || (nextname[8] == '6' && nextname[9] == '4'))
+	   && nextname[10] == 'E'
+	   && (nextname[11] == 'B' || nextname[11] == 'L')
+	   && nextname[12] == 'E'
+	   && (nextname[13] == 'B' || nextname[13] == 'L')
+	   && nextname[14] == '_'
+	   && (nextname[15] == ' ' || nextname[15] == 'X'))
+    {
+      /* ECOFF archive.  */
+      bfd_set_error (bfd_error_wrong_format);
+      return false;
+    }
+  else if (memcmp (nextname, "#1/20           ", 16) == 0)
     {
       /* Mach-O has a special name for armap when the map is sorted by name.
 	 However because this name has a space it is slightly more difficult
 	 to check it.  */
       struct ar_hdr hdr;
-      char extname[21];
+      char extname[20];
 
       if (bfd_read (&hdr, sizeof (hdr), abfd) != sizeof (hdr))
 	return false;
@@ -1230,9 +1245,8 @@ bfd_slurp_armap (bfd *abfd)
 	return false;
       if (bfd_seek (abfd, -(file_ptr) (sizeof (hdr) + 20), SEEK_CUR) != 0)
 	return false;
-      extname[20] = 0;
-      if (startswith (extname, "__.SYMDEF SORTED")
-	  || startswith (extname, "__.SYMDEF"))
+      if (memcmp (extname, "__.SYMDEF SORTED", 16) == 0
+	  || memcmp (extname, "__.SYMDEF", 9) == 0)
 	return do_slurp_bsd_armap (abfd);
     }
 
