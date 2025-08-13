@@ -22,6 +22,7 @@ LIBSFRAME_3.0 {
     sframe_find_fre;
     sframe_decoder_get_num_fidx;
     sframe_decoder_get_funcdesc_v2;
+    sframe_decoder_get_funcdesc_v3;
     sframe_decoder_get_fre;
     sframe_encode;
     sframe_encoder_free;
@@ -34,6 +35,7 @@ LIBSFRAME_3.0 {
     sframe_encoder_add_fre;
     sframe_encoder_add_funcdesc;
     sframe_encoder_add_funcdesc_v2;
+    sframe_encoder_add_funcdesc_v3;
     sframe_encoder_write;
     dump_sframe;
     sframe_errmsg;

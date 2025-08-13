@@ -182,6 +182,18 @@ sframe_decoder_get_funcdesc_v2 (const sframe_decoder_ctx *ctx,
 				unsigned char *func_info,
 				uint8_t *rep_block_size);
 
+/* Get the data (NUM_FRES, FUNC_SIZE, FUNC_START_ADDRESS, FUNC_INFO,
+   REP_BLOCK_SIZE) from the SFrame function descriptor entry at the I'th index
+   in the decoder object DCTX.  If failed, return SFRAME_ERR.  */
+extern int
+sframe_decoder_get_funcdesc_v3 (const sframe_decoder_ctx *dctx,
+				unsigned int i,
+				uint32_t *num_fres,
+				uint32_t *func_size,
+				int64_t *func_start_address,
+				unsigned char *func_info,
+				uint8_t *rep_block_size);
+
 /* SFrame textual dump.  */
 extern void
 dump_sframe (const sframe_decoder_ctx *decoder, uint64_t addr);
@@ -295,7 +307,17 @@ sframe_encoder_add_funcdesc_v2 (sframe_encoder_ctx *ectx,
 				uint8_t rep_block_size,
 				uint32_t num_fres);
 
-/* Serialize the contents of the encoder context ECTX and return the buffer.
+/* Add a new SFrame function descriptor entry with START_ADDR, FUNC_SIZE,
+   FUNC_INFO and REP_BLOCK_SIZE to the encoder context ECTX.  */
+extern int
+sframe_encoder_add_funcdesc_v3 (sframe_encoder_ctx *ectx,
+				int64_t start_addr,
+				uint32_t func_size,
+				unsigned char func_info,
+				uint8_t rep_block_size,
+				uint32_t num_fres);
+
+/* Serialize the contents of the encoder object ECTX and return the buffer.
    ENCODED_SIZE is updated to the size of the buffer.
    Sets ERRP if failure.  */
 extern char  *
