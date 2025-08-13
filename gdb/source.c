@@ -1312,13 +1312,11 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
   int nlines = stopline - line;
   struct ui_out *uiout = current_uiout;
 
-  /* Regardless of whether we can open the file, set current_source_symtab.  */
+  /* Regardless of whether we can open the file, we'll want to set
+     current_source_symtab, but not if throw an error, or return without
+     printing any source lines.  */
   current_source_location *loc
     = get_source_location (current_program_space);
-
-  loc->set (s, line);
-  first_line_listed = line;
-  last_line_listed = line;
 
   /* If printing of source lines is disabled, just print file and line
      number.  */
@@ -1380,6 +1378,10 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	  uiout->text ("\n");
 	}
 
+      loc->set (s, line);
+      first_line_listed = line;
+      last_line_listed = line;
+
       return;
     }
 
@@ -1399,7 +1401,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
     }
 
   const char *iter = lines.c_str ();
-  int new_lineno = loc->line ();
+  int new_lineno = line;
   for (; nlines-- > 0 && *iter != '\0'; ++new_lineno)
     {
       if (flags & PRINT_SOURCE_LINES_FILENAME)
@@ -1470,8 +1472,9 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 
   /* As NEW_LINENO was incremented after displaying the last source line,
      the last line shown was the one before NEW_LINENO.  */
+  first_line_listed = line;
   last_line_listed = new_lineno - 1;
-  loc->set (loc->symtab (), new_lineno);
+  loc->set (s, new_lineno);
 }
 
 

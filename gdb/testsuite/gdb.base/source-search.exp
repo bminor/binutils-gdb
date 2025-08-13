@@ -79,3 +79,28 @@ gdb_test "list 127"
 gdb_test "reverse-search Last line" \
     "Expression not found" \
     "reverse search for the last line fails"
+
+# List some lines from the middle of the file.  Then try an invalid
+# 'list' command.  Finally, check searches pick up from the middle of
+# the file where the first 'list' successfully completed.
+foreach_with_prefix search_direction { forward reverse } {
+    foreach_with_prefix bad_list { out-of-range backwards } {
+	gdb_test "list 50"
+
+	if { $bad_list eq "out-of-range" } {
+	    gdb_test "list 1000" \
+		"Line number 995 out of range; \[^\r\n\]+ has 127 lines\\."
+	} else {
+	    gdb_test_no_output "list 60,50"
+	}
+
+	if { $search_direction eq "forward" } {
+	    set line 55
+	} else {
+	    set line 53
+	}
+
+	gdb_test "${search_direction}-search Line" \
+	    "$line\\s+/\\* Line $line  \\*/"
+    }
+}
