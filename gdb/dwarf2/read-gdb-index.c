@@ -1419,7 +1419,7 @@ create_addrmap_from_gdb_index (dwarf2_per_objfile *per_objfile,
       cu_index = extract_unsigned_integer (iter, 4, BFD_ENDIAN_LITTLE);
       iter += 4;
 
-      if (lo > hi)
+      if (lo >= hi)
 	{
 	  complaint (_(".gdb_index address table has invalid range (%s - %s)"),
 		     hex_string (lo), hex_string (hi));
