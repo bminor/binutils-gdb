@@ -17,11 +17,7 @@
 
 standard_testfile
 
-set flags {}
-lappend flags debug
-lappend_include_file flags $srcdir/lib/attributes.h
-
-if { [prepare_for_testing "failed to prepare" $testfile $srcfile $flags] } {
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
     return -1
 }
 

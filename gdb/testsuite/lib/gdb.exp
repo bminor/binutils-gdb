@@ -6311,6 +6311,9 @@ proc gdb_compile {source dest type options} {
 	}
     }
 
+    # Automatically handle includes in testsuite/lib/.
+    auto_lappend_include_files options $source
+
     cond_wrap [expr $pie != -1 || $nopie != -1] \
 	with_PIE_multilib_flags_filtered {
 	set result [target_compile $source $dest $type $options]
@@ -11111,6 +11114,66 @@ proc lappend_include_file { flags file } {
 	if { $dir != [file join $::srcdir $::subdir] } {
 	    lappend up_flags "additional_flags=-I$dir"
 	}
+    }
+}
+
+# Helper for auto_lappend_include_files that handles one source file,
+# and tracks the list of already-visited files.
+
+proc auto_lappend_include_files_1 {flags source {visited {}}} {
+    upvar $flags up_flags
+    upvar $visited up_visited
+    global srcdir
+
+    set ext [string tolower [file extension $source]]
+    if {$ext ni {".c" ".cpp" ".cc" ".h" ".s"}} {
+	return
+    }
+
+    if {[catch {open $source r} fh err]} {
+	error "Failed to open file '$source': $err"
+    }
+    set contents [read $fh]
+    close $fh
+
+    lappend up_visited $source
+
+    # Match lines like:
+    #  #include "gdb_foo.h"
+    set re "^\\s*#include\\s+\"(.*)\""
+
+    foreach line [split $contents "\n"] {
+	if {[regexp $re $line -> basename]} {
+	    set lib_file "$srcdir/lib/$basename"
+
+	    # If already processed, skip.
+	    if {[lsearch -exact $up_visited $lib_file] != -1} {
+		continue
+	    }
+
+	    if {![file exists $lib_file]} {
+		continue
+	    }
+
+	    # Append to include list, and recurse into the included
+	    # file.
+	    lappend_include_file up_flags $lib_file
+	    auto_lappend_include_files_1 up_flags $lib_file up_visited
+	}
+    }
+}
+
+# Automatically handle includes under gdb/testsuite/lib/.
+#
+# For each source file in SOURCES, look for #include directives
+# including files that live in testsuite/lib/.  For each such included
+# file, call lappend_include_file for it.
+
+proc auto_lappend_include_files {flags sources} {
+    upvar $flags up_flags
+    set visited {}
+    foreach src $sources {
+	auto_lappend_include_files_1 up_flags $src visited
     }
 }
 
