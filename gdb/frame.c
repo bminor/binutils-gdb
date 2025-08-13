@@ -2663,15 +2663,14 @@ get_prev_frame (const frame_info_ptr &this_frame)
 {
   FRAME_SCOPED_DEBUG_ENTER_EXIT;
 
-  CORE_ADDR frame_pc;
-  int frame_pc_p;
+  std::optional<CORE_ADDR> frame_pc;
 
   /* There is always a frame.  If this assertion fails, suspect that
      something should be calling get_selected_frame() or
      get_current_frame().  */
   gdb_assert (this_frame != NULL);
 
-  frame_pc_p = get_frame_pc_if_available (this_frame, &frame_pc);
+  frame_pc = get_frame_pc_if_available (this_frame);
 
   /* tausq/2004-12-07: Dummy frames are skipped because it doesn't make much
      sense to stop unwinding at a dummy frame.  One place where a dummy
@@ -2686,7 +2685,7 @@ get_prev_frame (const frame_info_ptr &this_frame)
   if (this_frame->level >= 0
       && get_frame_type (this_frame) == NORMAL_FRAME
       && !user_set_backtrace_options.backtrace_past_main
-      && frame_pc_p
+      && frame_pc.has_value ()
       && inside_main_func (this_frame))
     /* Don't unwind past main().  Note, this is done _before_ the
        frame has been marked as previously unwound.  That way if the
@@ -2733,7 +2732,7 @@ get_prev_frame (const frame_info_ptr &this_frame)
   if (this_frame->level >= 0
       && get_frame_type (this_frame) == NORMAL_FRAME
       && !user_set_backtrace_options.backtrace_past_entry
-      && frame_pc_p
+      && frame_pc.has_value ()
       && inside_entry_func (this_frame))
     {
       frame_debug_got_null_frame (this_frame, "inside entry func");
@@ -2747,7 +2746,7 @@ get_prev_frame (const frame_info_ptr &this_frame)
       && (get_frame_type (this_frame) == NORMAL_FRAME
 	  || get_frame_type (this_frame) == INLINE_FRAME)
       && get_frame_type (get_next_frame (this_frame)) == NORMAL_FRAME
-      && frame_pc_p && frame_pc == 0)
+      && frame_pc.has_value () && *frame_pc == 0)
     {
       frame_debug_got_null_frame (this_frame, "zero PC");
       return NULL;
@@ -2763,25 +2762,24 @@ get_frame_pc (const frame_info_ptr &frame)
   return frame_unwind_pc (frame_info_ptr (frame->next));
 }
 
-bool
-get_frame_pc_if_available (const frame_info_ptr &frame, CORE_ADDR *pc)
+std::optional<CORE_ADDR>
+get_frame_pc_if_available (const frame_info_ptr &frame)
 {
+  std::optional<CORE_ADDR> pc;
 
   gdb_assert (frame->next != NULL);
 
   try
     {
-      *pc = frame_unwind_pc (frame_info_ptr (frame->next));
+      pc = frame_unwind_pc (frame_info_ptr (frame->next));
     }
   catch (const gdb_exception_error &ex)
     {
-      if (ex.error == NOT_AVAILABLE_ERROR)
-	return false;
-      else
+      if (ex.error != NOT_AVAILABLE_ERROR)
 	throw;
     }
 
-  return true;
+  return pc;
 }
 
 /* Return an address that falls within THIS_FRAME's code block.  */
@@ -2870,7 +2868,7 @@ find_frame_sal (const frame_info_ptr &frame)
 {
   frame_info_ptr next_frame;
   int notcurrent;
-  CORE_ADDR pc;
+  std::optional<CORE_ADDR> pc;
 
   if (frame_inlined_callees (frame) > 0)
     {
@@ -2914,11 +2912,11 @@ find_frame_sal (const frame_info_ptr &frame)
      PC and such a PC indicates the current (rather than next)
      instruction/line, consequently, for such cases, want to get the
      line containing fi->pc.  */
-  if (!get_frame_pc_if_available (frame, &pc))
+  if (!(pc = get_frame_pc_if_available (frame)))
     return {};
 
-  notcurrent = (pc != get_frame_address_in_block (frame));
-  return find_pc_line (pc, notcurrent);
+  notcurrent = (*pc != get_frame_address_in_block (frame));
+  return find_pc_line (*pc, notcurrent);
 }
 
 /* Per "frame.h", return the ``address'' of the frame.  Code should

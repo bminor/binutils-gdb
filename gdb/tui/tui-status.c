@@ -271,10 +271,14 @@ tui_show_frame_info (const frame_info_ptr &fi)
       symtab_and_line sal = find_frame_sal (fi);
 
       const char *func_name;
+      std::optional<CORE_ADDR> tmp_pc = get_frame_pc_if_available (fi);
       /* find_frame_sal does not always set PC, but we want to ensure
 	 that it is available in the SAL.  */
-      if (get_frame_pc_if_available (fi, &sal.pc))
-	func_name = tui_get_function_from_frame (fi);
+      if (tmp_pc.has_value ())
+	{
+	  sal.pc = *tmp_pc;
+	  func_name = tui_get_function_from_frame (fi);
+	}
       else
 	func_name = _("<unavailable>");
 

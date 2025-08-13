@@ -208,16 +208,16 @@ set_tracepoint_num (int num)
 static void
 set_traceframe_context (const frame_info_ptr &trace_frame)
 {
-  CORE_ADDR trace_pc;
+  std::optional<CORE_ADDR> trace_pc;
   struct symbol *traceframe_fun;
   symtab_and_line traceframe_sal;
 
   /* Save as globals for internal use.  */
   if (trace_frame != NULL
-      && get_frame_pc_if_available (trace_frame, &trace_pc))
+      && (trace_pc = get_frame_pc_if_available (trace_frame)))
     {
-      traceframe_sal = find_pc_line (trace_pc, 0);
-      traceframe_fun = find_pc_function (trace_pc);
+      traceframe_sal = find_pc_line (*trace_pc, 0);
+      traceframe_fun = find_pc_function (*trace_pc);
 
       /* Save linenumber as "$trace_line", a debugger variable visible to
 	 users.  */

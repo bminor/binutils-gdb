@@ -504,7 +504,8 @@ extern CORE_ADDR get_frame_pc (const frame_info_ptr &);
 /* Same as get_frame_pc, but return a boolean indication of whether
    the PC is actually available, instead of throwing an error.  */
 
-extern bool get_frame_pc_if_available (const frame_info_ptr &frame, CORE_ADDR *pc);
+extern std::optional<CORE_ADDR> get_frame_pc_if_available
+  (const frame_info_ptr &frame);
 
 /* An address (not necessarily aligned to an instruction boundary)
    that falls within THIS frame's code block.
