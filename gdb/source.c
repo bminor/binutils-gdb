@@ -1400,11 +1400,8 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 
   const char *iter = lines.c_str ();
   int new_lineno = loc->line ();
-  while (nlines-- > 0 && *iter != '\0')
+  for (; nlines-- > 0 && *iter != '\0'; ++new_lineno)
     {
-      char buf[20];
-
-      last_line_listed = loc->line ();
       if (flags & PRINT_SOURCE_LINES_FILENAME)
 	{
 	  uiout->message ("%ps",
@@ -1415,7 +1412,6 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 
       uiout->message ("%ps\t", styled_string (line_number_style.style (),
 					      pulongest (new_lineno)));
-      ++new_lineno;
 
       while (*iter != '\0')
 	{
@@ -1457,6 +1453,8 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	    }
 	  else if (*iter > 0 && *iter < 040)
 	    {
+	      char buf[20];
+
 	      xsnprintf (buf, sizeof (buf), "^%c", *iter + 0100);
 	      uiout->text (buf);
 	      ++iter;
@@ -1470,6 +1468,9 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
       uiout->text ("\n");
     }
 
+  /* As NEW_LINENO was incremented after displaying the last source line,
+     the last line shown was the one before NEW_LINENO.  */
+  last_line_listed = new_lineno - 1;
   loc->set (loc->symtab (), new_lineno);
 }
 
