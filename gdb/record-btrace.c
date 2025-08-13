@@ -2847,6 +2847,9 @@ record_btrace_set_replay (struct thread_info *tp,
 {
   struct btrace_thread_info *btinfo;
 
+  if (tp->state == THREAD_RUNNING)
+    error (_("You cannot do that while the thread is running."));
+
   btinfo = &tp->btrace;
 
   if (it == NULL)
