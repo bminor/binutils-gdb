@@ -31,7 +31,6 @@ AC_USE_SYSTEM_EXTENSIONS
 # there.
 ACX_LARGEFILE
 gl_EARLY
-AM_PROG_CC_STDC
 
 AC_CONFIG_AUX_DIR(..)
 AC_CANONICAL_TARGET
@@ -56,14 +55,15 @@ AC_CHECK_TOOL(AR, ar)
 # Checks for libraries.  #
 # ---------------------- #
 
-AC_CONFIG_FILES(Makefile.gnulib.inc)
-
-AC_OUTPUT(Makefile import/Makefile,
+AC_CONFIG_FILES([Makefile.gnulib.inc]
+		[Makefile import/Makefile])
+AC_CONFIG_COMMANDS([default],
 [
 case x$CONFIG_HEADERS in
 xconfig.h:config.in)
 echo > stamp-h ;;
 esac
-])
+],[])
+AC_OUTPUT
 
 exit 0
