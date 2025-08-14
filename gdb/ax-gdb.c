@@ -538,8 +538,7 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
       break;
 
     case LOC_CONST_BYTES:
-      internal_error (_("gen_var_ref: LOC_CONST_BYTES "
-			"symbols are not supported"));
+      error (_("gen_var_ref: LOC_CONST_BYTES symbols are not supported"));
 
       /* Variable at a fixed location in memory.  Easy.  */
     case LOC_STATIC:
