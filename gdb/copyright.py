@@ -191,10 +191,19 @@ def main(argv: list[str]) -> int | None:
     if BY_HAND:
         print()
         print(
-            "\033[31mREMINDER: The following files must be updated by hand." "\033[0m"
+            "\033[31mREMINDER: The following files must be updated by hand:" "\033[0m"
         )
         for filename in BY_HAND:
             print("  ", filename)
+
+    print()
+    print(
+        "\033[31mREMINDER: The following files contain code to print a copyright "
+        "notice at runtime, they must be updated by hand:\033[0m"
+    )
+    print("  gdb/top.c")
+    print("  gdbserver/gdbreplay.cc")
+    print("  gdbserver/server.cc")
 
 
 ############################################################################
