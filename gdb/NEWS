@@ -40,11 +40,11 @@
   namespace into which the library was loaded, if more than one namespace
   is active.
 
-* New built-in convenience variables $_active_linker_namespaces and
+* New built-in convenience variables $linker_namespace_count and
   $_linker_namespace.  These show the number of active linker
   namespaces, and the namespace to which the current location belongs to.
-  In systems that don't support linker namespaces, these always return
-  the integers 1 and 0 respectively.
+  In systems that don't support linker namespaces, or if the inferior hasn't
+  started yet, these always return the integer 0.
 
 * Add record full support for rv64gc architectures
 

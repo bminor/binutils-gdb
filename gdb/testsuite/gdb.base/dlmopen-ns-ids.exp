@@ -107,11 +107,13 @@ proc test_info_shared {} {
 
 # Run all tests related to the linkage namespaces convenience
 # variables, _active_namespaces and _current_namespaces.
+# Also tests that the namespace ID is only printed at the correct
+# times.
 proc_with_prefix test_conv_vars {} {
     clean_restart $::binfile
 
-    gdb_test "print \$_active_linker_namespaces" "1" \
-	"1 namespace before starting inferior"
+    gdb_test "print \$_linker_namespace_count" "0" \
+	"0 namespace before starting inferior"
     gdb_test "print \$_linker_namespace" "No registers." \
 	"No current namespace before starting inferior"
 
@@ -119,7 +121,7 @@ proc_with_prefix test_conv_vars {} {
 	return
     }
 
-    gdb_test "print \$_active_linker_namespaces" "1" \
+    gdb_test "print \$_linker_namespace_count" "1" \
 	"Before activating namespaces"
     gdb_test "print \$_linker_namespace" ".* = 0" \
 	"Still in the default namespace"
@@ -141,12 +143,12 @@ proc_with_prefix test_conv_vars {} {
 	"print namespace of selected frame"
 
     gdb_continue_to_breakpoint "first dlclose"
-    gdb_test "print \$_active_linker_namespaces" "4" "all SOs loaded"
+    gdb_test "print \$_linker_namespace_count" "4" "all SOs loaded"
 
     gdb_test "next" ".*second dlclose.*" "close one SO"
-    gdb_test "print \$_active_linker_namespaces" "3" "one SOs unloaded"
+    gdb_test "print \$_linker_namespace_count" "3" "one SOs unloaded"
     gdb_test "next" ".*third dlclose.*" "close another SO"
-    gdb_test "print \$_active_linker_namespaces" "2" "two SOs unloaded"
+    gdb_test "print \$_linker_namespace_count" "2" "two SOs unloaded"
 
     # Restarting GDB so that we can test setting a breakpoint
     # using the convenience variable, while a proper bp syntax

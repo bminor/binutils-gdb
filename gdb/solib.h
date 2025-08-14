@@ -373,4 +373,8 @@ extern void update_solib_breakpoints (void);
 
 extern void handle_solib_event (void);
 
+/* Calculate the number of linker namespaces active in PSPACE.  */
+
+extern int solib_linker_namespace_count (program_space *pspace);
+
 #endif /* GDB_SOLIB_H */

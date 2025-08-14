@@ -1805,6 +1805,18 @@ remove_user_added_objfile (struct objfile *objfile)
     }
 }
 
+/* See solib.h.  */
+
+int
+solib_linker_namespace_count (program_space *pspace)
+{
+  if (const auto ops = pspace->solib_ops (); ops != nullptr
+      && ops->supports_namespaces ())
+    return ops->num_active_namespaces ();
+
+  return 0;
+}
+
 /* Implementation of the linker_namespace convenience variable.
 
    This returns the GDB internal identifier of the linker namespace,
@@ -1840,6 +1852,23 @@ static const struct internalvar_funcs linker_namespace_funcs =
   nullptr,
 };
 
+static value *
+linker_namespace_count_make_value (gdbarch *gdbarch, internalvar *var,
+				   void *ignore)
+{
+  return value_from_longest
+    (builtin_type (gdbarch)->builtin_int,
+     solib_linker_namespace_count (current_program_space));
+}
+
+/* Implementation of `$_linker_namespace_count' variable.  */
+
+static const struct internalvar_funcs linker_namespace_count_funcs =
+{
+  linker_namespace_count_make_value,
+  nullptr,
+};
+
 INIT_GDB_FILE (solib)
 {
   gdb::observers::free_objfile.attach (remove_user_added_objfile, "solib");
@@ -1854,7 +1883,8 @@ INIT_GDB_FILE (solib)
      for consistency.  */
   create_internalvar_type_lazy ("_linker_namespace",
 				&linker_namespace_funcs, nullptr);
-  set_internalvar_integer (lookup_internalvar ("_active_linker_namespaces"), 1);
+  create_internalvar_type_lazy ("_linker_namespace_count",
+				&linker_namespace_count_funcs, nullptr);
 
   add_com (
     "sharedlibrary", class_files, sharedlibrary_command,
