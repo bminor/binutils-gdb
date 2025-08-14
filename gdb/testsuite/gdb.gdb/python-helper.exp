@@ -291,4 +291,4 @@ proc test_python_helper {} {
 }
 
 # Use the self-test framework to run the test.
-do_self_tests captured_main test_python_helper
+do_self_tests main test_python_helper

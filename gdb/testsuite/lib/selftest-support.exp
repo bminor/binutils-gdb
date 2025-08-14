@@ -72,21 +72,39 @@ proc selftest_setup { executable function } {
     # run yourself
 
     set description "run until breakpoint at $function"
+    set re_hs {[^\r\n]+}
+    set re_args [string cat \
+		     [string_to_regexp "("] \
+		     $re_hs \
+		     [string_to_regexp ")"]]
+    set re_pass \
+	[multi_line \
+	     "Starting program: $re_hs" \
+	     ".*" \
+	     [string cat "Breakpoint $::decimal, $function $re_args at" \
+		  " ${re_hs}gdb.c:$re_hs"] \
+	     ".*"]
+    set re_xfail \
+	[multi_line \
+	     "Starting program: $re_hs" \
+	     ".*" \
+	     "Breakpoint $::decimal, $function $re_args$re_hs" \
+	     ".*"]
     gdb_test_multiple "run $INTERNAL_GDBFLAGS" "$description" {
-        -re "Starting program.*Breakpoint \[0-9\]+,.*$function \\(.*\\).* at .*main.c:.*$gdb_prompt $" {
-            pass "$description"
-        }
-        -re "Starting program.*Breakpoint \[0-9\]+,.*$function \\(.*\\).*$gdb_prompt $" {
-            xfail "$description (line numbers scrambled?)"
-        }
-        -re "vfork: No more processes.*$gdb_prompt $" {
-            fail "$description (out of virtual memory)"
-            return -1
-        }
-        -re ".*$gdb_prompt $" {
-            fail "$description"
-            return -1
-        }
+	-re -wrap $re_pass {
+	    pass $description
+	}
+	-re -wrap $re_xfail {
+	    xfail "$description (line numbers scrambled?)"
+	}
+	-re -wrap "vfork: No more processes.*" {
+	    fail "$description (out of virtual memory)"
+	    return -1
+	}
+	-re -wrap "" {
+	    fail $description
+	    return -1
+	}
     }
 
     return 0
