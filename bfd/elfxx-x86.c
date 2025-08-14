@@ -4604,6 +4604,8 @@ _bfd_x86_elf_link_setup_gnu_properties
 	    htab->sframe_plt = init_table->sframe_non_lazy_plt;
 	}
     }
+  else if (lazy_plt)
+    htab->sframe_plt = init_table->sframe_lazy_plt;
   else
     htab->sframe_plt = NULL;
 
