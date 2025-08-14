@@ -43,7 +43,10 @@ if {![Term::enter_tui]} {
 }
 
 send_gdb "file [standard_output_file $testfile]\n"
-gdb_assert { [Term::wait_for "Reading symbols from"] } "file command"
+# Matching the output is difficult because it may or may not wrap.  Simply
+# match the resulting prompt.
+gdb_assert { [Term::wait_for ""] } "file command"
+
 Term::check_contents "show main after file" \
     [string_to_regexp "|___[format %06d $nr]_$line"]
 

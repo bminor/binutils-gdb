@@ -43,6 +43,9 @@ if {![Term::enter_tui]} {
     return
 }
 
+# Proc enter_tui switches off styling, re-enable it.
+Term::command "set style enabled on"
+
 Term::command "layout asm"
 Term::check_box "asm box" 0 0 80 15
 

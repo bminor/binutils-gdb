@@ -1013,6 +1013,10 @@ namespace eval Term {
 
 	gdb_test_no_output "set tui border-kind ascii"
 	gdb_test_no_output "maint set tui-resize-message on"
+	# When matching GDB output using Term::wait_for, the number of
+	# matching attempts in wait_for can be influenced by CLI styling.
+	# Disable it by default to avoid this.
+	gdb_test_no_output "set style enabled off"
 	return 1
     }
 
