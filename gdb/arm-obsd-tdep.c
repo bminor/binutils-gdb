@@ -96,7 +96,7 @@ armobsd_init_abi (struct gdbarch_info info,
   tdep->struct_return = pcc_struct_return;
 
   /* Single stepping.  */
-  set_gdbarch_software_single_step (gdbarch, arm_software_single_step);
+  set_gdbarch_get_next_pcs (gdbarch, arm_software_single_step);
 
   /* Breakpoints.  */
   switch (info.byte_order)

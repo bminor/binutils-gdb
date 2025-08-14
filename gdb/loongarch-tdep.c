@@ -1895,7 +1895,7 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_align (gdbarch, loongarch_frame_align);
 
   /* Breakpoint manipulation.  */
-  set_gdbarch_software_single_step (gdbarch, loongarch_software_single_step);
+  set_gdbarch_get_next_pcs (gdbarch, loongarch_software_single_step);
   set_gdbarch_breakpoint_kind_from_pc (gdbarch, loongarch_breakpoint::kind_from_pc);
   set_gdbarch_sw_breakpoint_from_kind (gdbarch, loongarch_breakpoint::bp_from_kind);
   set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);

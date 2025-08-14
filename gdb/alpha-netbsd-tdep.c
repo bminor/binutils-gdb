@@ -261,7 +261,7 @@ alphanbsd_init_abi (struct gdbarch_info info,
 
   /* NetBSD/alpha does not provide single step support via ptrace(2); we
      must use software single-stepping.  */
-  set_gdbarch_software_single_step (gdbarch, alpha_software_single_step);
+  set_gdbarch_get_next_pcs (gdbarch, alpha_software_single_step);
 
   /* NetBSD/alpha has SVR4-style shared libraries.  */
   set_solib_svr4_ops (gdbarch, make_svr4_lp64_solib_ops);

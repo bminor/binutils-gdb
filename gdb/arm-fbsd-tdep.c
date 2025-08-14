@@ -318,7 +318,7 @@ arm_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     }
 
   /* Single stepping.  */
-  set_gdbarch_software_single_step (gdbarch, arm_software_single_step);
+  set_gdbarch_get_next_pcs (gdbarch, arm_software_single_step);
 }
 
 INIT_GDB_FILE (arm_fbsd_tdep)

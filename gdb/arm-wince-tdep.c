@@ -135,7 +135,7 @@ arm_wince_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_skip_trampoline_code (gdbarch, arm_pe_skip_trampoline_code);
 
   /* Single stepping.  */
-  set_gdbarch_software_single_step (gdbarch, arm_software_single_step);
+  set_gdbarch_get_next_pcs (gdbarch, arm_software_single_step);
 
   /* Skip call to __gccmain that gcc places in main.  */
   set_gdbarch_skip_main_prologue (gdbarch, arm_wince_skip_main_prologue);

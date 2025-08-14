@@ -1805,7 +1805,7 @@ arm_linux_init_abi (struct gdbarch_info info,
   set_solib_svr4_ops (gdbarch, make_linux_ilp32_svr4_solib_ops);
 
   /* Single stepping.  */
-  set_gdbarch_software_single_step (gdbarch, arm_linux_software_single_step);
+  set_gdbarch_get_next_pcs (gdbarch, arm_linux_software_single_step);
 
   /* Shared library handling.  */
   set_gdbarch_skip_trampoline_code (gdbarch, arm_linux_skip_trampoline_code);

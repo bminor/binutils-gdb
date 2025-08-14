@@ -48,7 +48,7 @@
 bool
 default_displaced_step_hw_singlestep (struct gdbarch *gdbarch)
 {
-  return !gdbarch_software_single_step_p (gdbarch);
+  return !gdbarch_get_next_pcs_p (gdbarch);
 }
 
 CORE_ADDR

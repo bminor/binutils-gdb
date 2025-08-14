@@ -792,11 +792,11 @@ extern void set_gdbarch_memtag_granule_size (struct gdbarch *gdbarch, CORE_ADDR 
    the condition is true, so that we ensure forward progress when stepping
    past a conditional branch to self. */
 
-extern bool gdbarch_software_single_step_p (struct gdbarch *gdbarch);
+extern bool gdbarch_get_next_pcs_p (struct gdbarch *gdbarch);
 
-typedef std::vector<CORE_ADDR> (gdbarch_software_single_step_ftype) (struct regcache *regcache);
-extern std::vector<CORE_ADDR> gdbarch_software_single_step (struct gdbarch *gdbarch, struct regcache *regcache);
-extern void set_gdbarch_software_single_step (struct gdbarch *gdbarch, gdbarch_software_single_step_ftype *software_single_step);
+typedef std::vector<CORE_ADDR> (gdbarch_get_next_pcs_ftype) (struct regcache *regcache);
+extern std::vector<CORE_ADDR> gdbarch_get_next_pcs (struct gdbarch *gdbarch, struct regcache *regcache);
+extern void set_gdbarch_get_next_pcs (struct gdbarch *gdbarch, gdbarch_get_next_pcs_ftype *get_next_pcs);
 
 /* Return non-zero if the processor is executing a delay slot and a
    further single-step is needed before the instruction finishes. */
@@ -1148,7 +1148,7 @@ extern void set_gdbarch_displaced_step_copy_insn (struct gdbarch *gdbarch, gdbar
    the displaced instruction buffer).
 
    The default implementation returns false on all targets that provide a
-   gdbarch_software_single_step routine, and true otherwise. */
+   gdbarch_get_next_pcs routine, and true otherwise. */
 
 typedef bool (gdbarch_displaced_step_hw_singlestep_ftype) (struct gdbarch *gdbarch);
 extern bool gdbarch_displaced_step_hw_singlestep (struct gdbarch *gdbarch);

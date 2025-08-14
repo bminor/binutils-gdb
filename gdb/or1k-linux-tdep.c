@@ -153,7 +153,7 @@ or1k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* GNU/Linux uses the dynamic linker included in the GNU C Library.  */
   set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
 
-  set_gdbarch_software_single_step (gdbarch, or1k_software_single_step);
+  set_gdbarch_get_next_pcs (gdbarch, or1k_software_single_step);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,

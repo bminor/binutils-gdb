@@ -728,7 +728,7 @@ arc_linux_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				       arc_linux_sw_breakpoint_from_kind);
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
 					     svr4_fetch_objfile_link_map);
-  set_gdbarch_software_single_step (gdbarch, arc_linux_software_single_step);
+  set_gdbarch_get_next_pcs (gdbarch, arc_linux_software_single_step);
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
   set_gdbarch_skip_solib_resolver (gdbarch, arc_linux_skip_solib_resolver);
   set_gdbarch_iterate_over_regset_sections

@@ -106,7 +106,7 @@ alphaobsd_init_abi(struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* OpenBSD/alpha 3.0 and earlier does not provide single step
      support via ptrace(2); use software single-stepping for now.  */
-  set_gdbarch_software_single_step (gdbarch, alpha_software_single_step);
+  set_gdbarch_get_next_pcs (gdbarch, alpha_software_single_step);
 
   /* OpenBSD/alpha has SVR4-style shared libraries.  */
   set_solib_svr4_ops (gdbarch, make_svr4_lp64_solib_ops);

@@ -26,7 +26,7 @@ static void
 arm_pikeos_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   /* Single stepping.  */
-  set_gdbarch_software_single_step (gdbarch, arm_software_single_step);
+  set_gdbarch_get_next_pcs (gdbarch, arm_software_single_step);
 }
 
 /* The ARM PikeOS OSABI sniffer (see gdbarch_register_osabi_sniffer).

@@ -1797,7 +1797,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_cannot_step_breakpoint (gdbarch, 1);
 
   /* Handles single stepping of atomic sequences.  */
-  set_gdbarch_software_single_step (gdbarch, alpha_software_single_step);
+  set_gdbarch_get_next_pcs (gdbarch, alpha_software_single_step);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

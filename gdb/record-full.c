@@ -1091,7 +1091,7 @@ record_full_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
       if (!step)
 	{
 	  /* This is not hard single step.  */
-	  if (!gdbarch_software_single_step_p (gdbarch))
+	  if (!gdbarch_get_next_pcs_p (gdbarch))
 	    {
 	      /* This is a normal continue.  */
 	      step = 1;
@@ -1266,7 +1266,7 @@ record_full_wait_1 (struct target_ops *ops,
 		      process_stratum_target *proc_target
 			= current_inferior ()->process_target ();
 
-		      if (gdbarch_software_single_step_p (gdbarch))
+		      if (gdbarch_get_next_pcs_p (gdbarch))
 			{
 			  /* Try to insert the software single step breakpoint.
 			     If insert success, set step to 0.  */

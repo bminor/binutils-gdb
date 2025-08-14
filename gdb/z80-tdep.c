@@ -1173,7 +1173,7 @@ z80_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_skip_prologue (gdbarch, z80_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan); // falling stack
 
-  set_gdbarch_software_single_step (gdbarch, z80_software_single_step);
+  set_gdbarch_get_next_pcs (gdbarch, z80_software_single_step);
   set_gdbarch_breakpoint_kind_from_pc (gdbarch, z80_breakpoint_kind_from_pc);
   set_gdbarch_sw_breakpoint_from_kind (gdbarch, z80_sw_breakpoint_from_kind);
   set_gdbarch_insn_is_call (gdbarch, z80_insn_is_call);

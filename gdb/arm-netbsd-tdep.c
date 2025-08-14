@@ -139,7 +139,7 @@ arm_netbsd_init_abi_common (struct gdbarch_info info,
   set_gdbarch_iterate_over_regset_sections
     (gdbarch, arm_nbsd_iterate_over_regset_sections);
   /* Single stepping.  */
-  set_gdbarch_software_single_step (gdbarch, arm_software_single_step);
+  set_gdbarch_get_next_pcs (gdbarch, arm_software_single_step);
 }
 
 static void

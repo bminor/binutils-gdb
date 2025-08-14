@@ -1088,7 +1088,7 @@ moxie_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_unwind_append_unwinder (gdbarch, &moxie_frame_unwind);
 
   /* Single stepping.  */
-  set_gdbarch_software_single_step (gdbarch, moxie_software_single_step);
+  set_gdbarch_get_next_pcs (gdbarch, moxie_software_single_step);
 
   /* Support simple overlay manager.  */
   set_gdbarch_overlay_update (gdbarch, simple_overlay_update);

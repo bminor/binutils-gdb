@@ -1395,7 +1395,7 @@ the condition is true, so that we ensure forward progress when stepping
 past a conditional branch to self.
 """,
     type="std::vector<CORE_ADDR>",
-    name="software_single_step",
+    name="get_next_pcs",
     params=[("struct regcache *", "regcache")],
     predicate=True,
 )
@@ -1891,7 +1891,7 @@ receive control again (e.g. by placing a software breakpoint instruction into
 the displaced instruction buffer).
 
 The default implementation returns false on all targets that provide a
-gdbarch_software_single_step routine, and true otherwise.
+gdbarch_get_next_pcs routine, and true otherwise.
 """,
     type="bool",
     name="displaced_step_hw_singlestep",

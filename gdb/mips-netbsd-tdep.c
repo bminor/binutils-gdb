@@ -399,7 +399,7 @@ mipsnbsd_init_abi (struct gdbarch_info info,
   set_gdbarch_cannot_fetch_register (gdbarch, mipsnbsd_cannot_fetch_register);
   set_gdbarch_cannot_store_register (gdbarch, mipsnbsd_cannot_store_register);
 
-  set_gdbarch_software_single_step (gdbarch, mips_software_single_step);
+  set_gdbarch_get_next_pcs (gdbarch, mips_software_single_step);
 
   /* NetBSD/mips has SVR4-style shared libraries.  */
   set_solib_svr4_ops (gdbarch, (gdbarch_ptr_bit (gdbarch) == 32

@@ -153,7 +153,7 @@ struct gdbarch
   gdbarch_set_memtags_ftype *set_memtags = default_set_memtags;
   gdbarch_get_memtag_ftype *get_memtag = default_get_memtag;
   CORE_ADDR memtag_granule_size = 0;
-  gdbarch_software_single_step_ftype *software_single_step = nullptr;
+  gdbarch_get_next_pcs_ftype *get_next_pcs = nullptr;
   gdbarch_single_step_through_delay_ftype *single_step_through_delay = nullptr;
   gdbarch_print_insn_ftype *print_insn = default_print_insn;
   gdbarch_skip_trampoline_code_ftype *skip_trampoline_code = generic_skip_trampoline_code;
@@ -421,7 +421,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of set_memtags, invalid_p == 0.  */
   /* Skip verify of get_memtag, invalid_p == 0.  */
   /* Skip verify of memtag_granule_size, invalid_p == 0.  */
-  /* Skip verify of software_single_step, has predicate.  */
+  /* Skip verify of get_next_pcs, has predicate.  */
   /* Skip verify of single_step_through_delay, has predicate.  */
   /* Skip verify of print_insn, invalid_p == 0.  */
   /* Skip verify of skip_trampoline_code, invalid_p == 0.  */
@@ -948,11 +948,11 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
 	      "gdbarch_dump: memtag_granule_size = %s\n",
 	      core_addr_to_string_nz (gdbarch->memtag_granule_size));
   gdb_printf (file,
-	      "gdbarch_dump: gdbarch_software_single_step_p() = %d\n",
-	      gdbarch_software_single_step_p (gdbarch));
+	      "gdbarch_dump: gdbarch_get_next_pcs_p() = %d\n",
+	      gdbarch_get_next_pcs_p (gdbarch));
   gdb_printf (file,
-	      "gdbarch_dump: software_single_step = <%s>\n",
-	      host_address_to_string (gdbarch->software_single_step));
+	      "gdbarch_dump: get_next_pcs = <%s>\n",
+	      host_address_to_string (gdbarch->get_next_pcs));
   gdb_printf (file,
 	      "gdbarch_dump: gdbarch_single_step_through_delay_p() = %d\n",
 	      gdbarch_single_step_through_delay_p (gdbarch));
@@ -3388,27 +3388,27 @@ set_gdbarch_memtag_granule_size (struct gdbarch *gdbarch,
 }
 
 bool
-gdbarch_software_single_step_p (struct gdbarch *gdbarch)
+gdbarch_get_next_pcs_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->software_single_step != NULL;
+  return gdbarch->get_next_pcs != NULL;
 }
 
 std::vector<CORE_ADDR>
-gdbarch_software_single_step (struct gdbarch *gdbarch, struct regcache *regcache)
+gdbarch_get_next_pcs (struct gdbarch *gdbarch, struct regcache *regcache)
 {
   gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->software_single_step != NULL);
+  gdb_assert (gdbarch->get_next_pcs != NULL);
   if (gdbarch_debug >= 2)
-    gdb_printf (gdb_stdlog, "gdbarch_software_single_step called\n");
-  return gdbarch->software_single_step (regcache);
+    gdb_printf (gdb_stdlog, "gdbarch_get_next_pcs called\n");
+  return gdbarch->get_next_pcs (regcache);
 }
 
 void
-set_gdbarch_software_single_step (struct gdbarch *gdbarch,
-				  gdbarch_software_single_step_ftype software_single_step)
+set_gdbarch_get_next_pcs (struct gdbarch *gdbarch,
+			  gdbarch_get_next_pcs_ftype get_next_pcs)
 {
-  gdbarch->software_single_step = software_single_step;
+  gdbarch->get_next_pcs = get_next_pcs;
 }
 
 bool

@@ -214,7 +214,7 @@ sparc32_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->plt_entry_size = 12;
 
   /* Solaris has kernel-assisted single-stepping support.  */
-  set_gdbarch_software_single_step (gdbarch, NULL);
+  set_gdbarch_get_next_pcs (gdbarch, NULL);
 
   frame_unwind_append_unwinder (gdbarch, &sparc32_sol2_sigtramp_frame_unwind);
 }

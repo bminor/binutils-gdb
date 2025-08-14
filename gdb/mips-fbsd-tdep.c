@@ -580,7 +580,7 @@ mips_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Generic FreeBSD support.  */
   fbsd_init_abi (info, gdbarch);
 
-  set_gdbarch_software_single_step (gdbarch, mips_software_single_step);
+  set_gdbarch_get_next_pcs (gdbarch, mips_software_single_step);
 
   switch (abi)
     {

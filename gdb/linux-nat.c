@@ -549,8 +549,8 @@ linux_nat_target::follow_fork (inferior *child_inf, ptid_t child_ptid,
 	  /* Note that we consult the parent's architecture instead of
 	     the child's because there's no inferior for the child at
 	     this point.  */
-	  if (!gdbarch_software_single_step_p (target_thread_architecture
-					       (parent_ptid)))
+	  if (!gdbarch_get_next_pcs_p (target_thread_architecture
+				       (parent_ptid)))
 	    {
 	      int status;
 
