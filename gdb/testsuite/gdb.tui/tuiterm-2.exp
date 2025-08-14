@@ -106,6 +106,48 @@ with_override Term::accept_gdb_output test_accept_gdb_output {
 		}
 		gdb_assert { [Term::wait_for ""] }
 	    }
+
+	    with_test_prefix "Term::wait_for 2" {
+		Term::_setup 4 20
+		set send_cnt 0
+		set expect_send {}
+		set action_cnt 0
+		set actions {
+		    {
+			Term::_move_cursor 0 0
+
+			Term::_insert "${::border}(gdb) "
+			set pos $Term::_cur_col
+
+			Term::_insert "foo"
+
+			Term::_move_cursor 19 0
+			Term::_insert "$::border"
+
+			Term::_move_cursor $pos 0
+		    }
+		    {
+			Term::_move_cursor 0 1
+
+			Term::_insert "${::border}(gdb) "
+			set pos $Term::_cur_col
+
+			Term::_move_cursor 19 1
+			Term::_insert "$::border"
+
+			Term::_move_cursor $pos 1
+		    }
+		}
+
+		# Wait for a prompt.
+		gdb_assert { [Term::wait_for ""] }
+
+		# The first action sets the cursor after the prompt on the
+		# first line.  The second action sets the cursor after the
+		# prompt on the second line.   Check that wait_for returns
+		# after the second action, not the first.
+		gdb_assert { $Term::_cur_row == 1 }
+	    }
 	}
     }
 }

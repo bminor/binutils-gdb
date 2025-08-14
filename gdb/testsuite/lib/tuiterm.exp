@@ -864,16 +864,32 @@ namespace eval Term {
 	    } else {
 		set prev [get_line $_cur_row]
 	    }
-	    if {[regexp -- $wait_for $prev]} {
-		debug_tui_matching "$fn: match: '$prev'"
-		if {$wait_for == "$prompt_wait_for"} {
-		    break
-		}
-		set wait_for $prompt_wait_for
-		debug_tui_matching "$fn: regexp prompt: '$wait_for'"
-	    } else {
+
+	    if { ![regexp -- $wait_for $prev] } {
 		debug_tui_matching "$fn: mismatch: '$prev'"
+		continue
 	    }
+
+	    if {$wait_for == "$prompt_wait_for"} {
+		# We've detected that the cursor is just after the prompt.
+		# Now check that there's nothing else on the line.
+		set prev [get_line $_cur_row]
+		if { ![regexp -- "(^|\\|)$gdb_prompt +($|\\||\\+)" $prev] } {
+		    debug_tui_matching "$fn: mismatch: '$prev'"
+		    continue
+		}
+	    }
+
+	    debug_tui_matching "$fn: match: '$prev'"
+
+	    if {$wait_for == "$prompt_wait_for"} {
+		# Matched the prompt, we're done.
+		break
+	    }
+
+	    # Now try to match the prompt.
+	    set wait_for $prompt_wait_for
+	    debug_tui_matching "$fn: regexp prompt: '$wait_for'"
 	}
 
 	return 1
