@@ -1180,6 +1180,9 @@ quit (void)
       throw_forced_quit ("SIGTERM");
     }
 
+  /* Pressing ^C cancels i-search.  Tell readline that a ^C happened.  */
+  rl_callback_sigcleanup ();
+
 #ifdef __MSDOS__
   /* No steenking SIGINT will ever be coming our way when the
      program is resumed.  Don't lie.  */

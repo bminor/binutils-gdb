@@ -72,9 +72,8 @@ save_vars { env(LC_ALL) } {
 	# Send ^C to clear the command line.
 	send_gdb "\003"
     } else {
-	# Sending ^C currently doesn't abort the i-search. PR cli/30498 is
-	# open about this.
-	kfail cli/30498 $test
+	# Sending ^C currently doesn't abort the i-search.
+	fail $test
 
 	# At this point we don't have a responsive prompt.  Send ^G to abort
 	# the i-search.
