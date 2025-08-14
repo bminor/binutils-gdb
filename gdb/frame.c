@@ -2617,7 +2617,7 @@ inside_main_func (const frame_info_ptr &this_frame)
 					      SEARCH_FUNCTION_DOMAIN, nullptr);
 
       /* This lookup should always yield a block-valued symbol.  */
-      if (bs.symbol != nullptr && bs.symbol->aclass () == LOC_BLOCK)
+      if (bs.symbol != nullptr && bs.symbol->loc_class () == LOC_BLOCK)
 	{
 	  const struct block *block = bs.symbol->value_block ();
 	  gdb_assert (block != nullptr);

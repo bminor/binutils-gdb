@@ -1655,7 +1655,7 @@ info_address_command (const char *exp, int from_tty)
       return;
     }
 
-  switch (sym->aclass ())
+  switch (sym->loc_class ())
     {
     case LOC_CONST:
     case LOC_CONST_BYTES:

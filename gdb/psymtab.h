@@ -184,10 +184,10 @@ struct partial_symbol
   ENUM_BITFIELD(domain_enum) domain : SYMBOL_DOMAIN_BITS;
 
   /* Address class (for info_symbols).  Note that we don't allow
-     synthetic "aclass" values here at present, simply because there's
+     synthetic "loc_class" values here at present, simply because there's
      no need.  */
 
-  ENUM_BITFIELD(address_class) aclass : SYMBOL_ACLASS_BITS;
+  ENUM_BITFIELD(location_class) loc_class : SYMBOL_LOC_CLASS_BITS;
 };
 
 /* A convenience enum to give names to some constants used when
@@ -333,7 +333,7 @@ struct partial_symtab
      If COPY_NAME is true, make a copy of NAME, otherwise use the passed
      reference.
 
-     THECLASS is the type of symbol.
+     LOC_CLASS is the type of symbol.
 
      SECTION is the index of the section of OBJFILE in which the symbol is found.
 
@@ -348,7 +348,7 @@ struct partial_symtab
 
   void add_psymbol (std::string_view name,
 		    bool copy_name, domain_enum domain,
-		    enum address_class theclass,
+		    location_class loc_class,
 		    int section,
 		    psymbol_placement where,
 		    unrelocated_addr coreaddr,

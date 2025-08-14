@@ -109,7 +109,7 @@ ada_alias_get_block_value (const struct symbol *sym)
   if (real_symbol.symbol == nullptr)
     error (_("could not find alias '%s' for function '%s'"),
 	   name, sym->print_name ());
-  if (real_symbol.symbol->aclass () != LOC_BLOCK)
+  if (real_symbol.symbol->loc_class () != LOC_BLOCK)
     error (_("alias '%s' for function '%s' is not a function"),
 	   name, sym->print_name ());
 

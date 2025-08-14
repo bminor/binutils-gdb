@@ -758,7 +758,7 @@ print_frame_args (const frame_print_options &fp_opts,
 	      break;
 	    }
 
-	  switch (sym->aclass ())
+	  switch (sym->loc_class ())
 	    {
 	    case LOC_ARG:
 	    case LOC_REF_ARG:
@@ -813,7 +813,7 @@ print_frame_args (const frame_print_options &fp_opts,
 	      nsym = lookup_symbol_search_name (sym->search_name (),
 						b, SEARCH_VAR_DOMAIN).symbol;
 	      gdb_assert (nsym != NULL);
-	      if (nsym->aclass () == LOC_REGISTER
+	      if (nsym->loc_class () == LOC_REGISTER
 		  && !nsym->is_argument ())
 		{
 		  /* There is a LOC_ARG/LOC_REGISTER pair.  This means
@@ -2216,7 +2216,7 @@ iterate_over_block_locals (const struct block *b,
 {
   for (struct symbol *sym : block_iterator_range (b))
     {
-      switch (sym->aclass ())
+      switch (sym->loc_class ())
 	{
 	case LOC_CONST:
 	case LOC_CONST_BYTES:

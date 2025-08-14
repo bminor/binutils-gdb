@@ -219,7 +219,7 @@ typedef_hash_table::add_template_parameters (struct type *t)
       struct decl_field *tf;
 
       /* We only want type-valued template parameters in the hash.  */
-      if (TYPE_TEMPLATE_ARGUMENT (t, i)->aclass () != LOC_TYPEDEF)
+      if (TYPE_TEMPLATE_ARGUMENT (t, i)->loc_class () != LOC_TYPEDEF)
 	continue;
 
       tf = XOBNEW (&m_storage, struct decl_field);

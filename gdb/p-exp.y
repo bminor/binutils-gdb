@@ -1519,7 +1519,7 @@ yylex (void)
     /* Call lookup_symtab, not lookup_partial_symtab, in case there are
        no psymtabs (coff, xcoff, or some future change to blow away the
        psymtabs once once symbols are read).  */
-    if ((sym && sym->aclass () == LOC_BLOCK)
+    if ((sym && sym->loc_class () == LOC_BLOCK)
 	|| lookup_symtab (current_program_space, tmp.c_str ()))
       {
 	yylval.ssym.sym.symbol = sym;
@@ -1528,7 +1528,7 @@ yylex (void)
 	free (uptokstart);
 	return BLOCKNAME;
       }
-    if (sym && sym->aclass () == LOC_TYPEDEF)
+    if (sym && sym->loc_class () == LOC_TYPEDEF)
 	{
 #if 1
 	  /* Despite the following flaw, we need to keep this code enabled.
@@ -1597,7 +1597,7 @@ yylex (void)
 					 SEARCH_VFT, NULL).symbol;
 		      if (cur_sym)
 			{
-			  if (cur_sym->aclass () == LOC_TYPEDEF)
+			  if (cur_sym->loc_class () == LOC_TYPEDEF)
 			    {
 			      best_sym = cur_sym;
 			      pstate->lexptr = p;

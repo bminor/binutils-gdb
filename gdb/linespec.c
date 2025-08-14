@@ -230,7 +230,7 @@ collect_info::add_symbol (block_symbol *bsym)
 {
   /* In list mode, add all matching symbols, regardless of class.
      This allows the user to type "list a_global_variable".  */
-  if (bsym->symbol->aclass () == LOC_BLOCK || this->state->list_mode)
+  if (bsym->symbol->loc_class () == LOC_BLOCK || this->state->list_mode)
     this->result.symbols->push_back (*bsym);
 
   /* Continue iterating.  */
@@ -2129,7 +2129,7 @@ create_sals_line_offset (struct linespec_state *self,
 	       line 16 will also result in a breakpoint in main, at line 17.  */
 	    if (!was_exact
 		&& sym != nullptr
-		&& sym->aclass () == LOC_BLOCK
+		&& sym->loc_class () == LOC_BLOCK
 		&& sal.pc == sym->value_block ()->entry_pc ()
 		&& val.line < sym->line ())
 	      continue;
@@ -2224,7 +2224,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec *ls)
 
 	      if (state->funfirstline
 		   && !ls->minimal_symbols.empty ()
-		   && sym.symbol->aclass () == LOC_BLOCK)
+		   && sym.symbol->loc_class () == LOC_BLOCK)
 		{
 		  const CORE_ADDR addr
 		    = sym.symbol->value_block ()->entry_pc ();
@@ -3361,7 +3361,7 @@ decode_compound_collector::operator () (block_symbol *bsym)
   struct type *t;
   struct symbol *sym = bsym->symbol;
 
-  if (sym->aclass () != LOC_TYPEDEF)
+  if (sym->loc_class () != LOC_TYPEDEF)
     return true; /* Continue iterating.  */
 
   t = sym->type ();
@@ -4316,14 +4316,14 @@ static bool
 symbol_to_sal (struct symtab_and_line *result,
 	       bool funfirstline, struct symbol *sym)
 {
-  if (sym->aclass () == LOC_BLOCK)
+  if (sym->loc_class () == LOC_BLOCK)
     {
       *result = find_function_start_sal (sym, funfirstline);
       return true;
     }
   else
     {
-      if (sym->aclass () == LOC_LABEL && sym->value_address () != 0)
+      if (sym->loc_class () == LOC_LABEL && sym->value_address () != 0)
 	{
 	  *result = {};
 	  result->symtab = sym->symtab ();

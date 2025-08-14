@@ -472,7 +472,7 @@ patch_block_stabs (struct pending *symbols, struct pending_stabs *stabs,
 		 a N_GSYM stab for it, but no regular (C_EXT) symbol.  */
 	      sym = new (&objfile->objfile_obstack) symbol;
 	      sym->set_domain (VAR_DOMAIN);
-	      sym->set_aclass_index (LOC_OPTIMIZED_OUT);
+	      sym->set_loc_class_index (LOC_OPTIMIZED_OUT);
 	      sym->set_linkage_name
 		(obstack_strndup (&objfile->objfile_obstack, name, pp - name));
 	      pp += 2;
@@ -3123,7 +3123,7 @@ static const struct symbol_register_ops stab_register_funcs = {
   stab_reg_to_regnum
 };
 
-/* The "aclass" indices for computed symbols.  */
+/* The "loc_class" indices for computed symbols.  */
 
 static int stab_register_index;
 static int stab_regparm_index;
@@ -3268,7 +3268,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	 (where type 6 is defined by "blobs:t6=eblob1:0,blob2:1,;").  */
       if (*p != '=')
 	{
-	  sym->set_aclass_index (LOC_CONST);
+	  sym->set_loc_class_index (LOC_CONST);
 	  sym->set_type (error_type (&p, objfile));
 	  sym->set_domain (VAR_DOMAIN);
 	  add_symbol_to_list (sym, get_file_symbols ());
@@ -3291,7 +3291,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
 	    sym->set_type (dbl_type);
 	    sym->set_value_bytes (dbl_valu);
-	    sym->set_aclass_index (LOC_CONST_BYTES);
+	    sym->set_loc_class_index (LOC_CONST_BYTES);
 	  }
 	  break;
 	case 'i':
@@ -3305,7 +3305,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
 	    sym->set_type (builtin_type (objfile)->builtin_long);
 	    sym->set_value_longest (atoi (p));
-	    sym->set_aclass_index (LOC_CONST);
+	    sym->set_loc_class_index (LOC_CONST);
 	  }
 	  break;
 
@@ -3313,7 +3313,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  {
 	    sym->set_type (builtin_type (objfile)->builtin_char);
 	    sym->set_value_longest (atoi (p));
-	    sym->set_aclass_index (LOC_CONST);
+	    sym->set_loc_class_index (LOC_CONST);
 	  }
 	  break;
 
@@ -3327,7 +3327,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
 	    if (quote != '\'' && quote != '"')
 	      {
-		sym->set_aclass_index (LOC_CONST);
+		sym->set_loc_class_index (LOC_CONST);
 		sym->set_type (error_type (&p, objfile));
 		sym->set_domain (VAR_DOMAIN);
 		add_symbol_to_list (sym, get_file_symbols ());
@@ -3352,7 +3352,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	      }
 	    if (*p != quote)
 	      {
-		sym->set_aclass_index (LOC_CONST);
+		sym->set_loc_class_index (LOC_CONST);
 		sym->set_type (error_type (&p, objfile));
 		sym->set_domain (VAR_DOMAIN);
 		add_symbol_to_list (sym, get_file_symbols ());
@@ -3375,7 +3375,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	    p++;
 
 	    sym->set_value_bytes (string_value);
-	    sym->set_aclass_index (LOC_CONST_BYTES);
+	    sym->set_loc_class_index (LOC_CONST_BYTES);
 	  }
 	  break;
 
@@ -3385,7 +3385,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	     e.g. "b:c=e6,0" for "const b = blob1"
 	     (where type 6 is defined by "blobs:t6=eblob1:0,blob2:1,;").  */
 	  {
-	    sym->set_aclass_index (LOC_CONST);
+	    sym->set_loc_class_index (LOC_CONST);
 	    sym->set_type (read_type (&p, objfile));
 
 	    if (*p != ',')
@@ -3406,7 +3406,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  break;
 	default:
 	  {
-	    sym->set_aclass_index (LOC_CONST);
+	    sym->set_loc_class_index (LOC_CONST);
 	    sym->set_type (error_type (&p, objfile));
 	  }
 	}
@@ -3417,7 +3417,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
     case 'C':
       /* The name of a caught exception.  */
       sym->set_type (read_type (&p, objfile));
-      sym->set_aclass_index (LOC_LABEL);
+      sym->set_loc_class_index (LOC_LABEL);
       sym->set_domain (VAR_DOMAIN);
       sym->set_value_address (valu);
       add_symbol_to_list (sym, get_local_symbols ());
@@ -3426,7 +3426,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
     case 'f':
       /* A static function definition.  */
       sym->set_type (read_type (&p, objfile));
-      sym->set_aclass_index (LOC_BLOCK);
+      sym->set_loc_class_index (LOC_BLOCK);
       sym->set_domain (FUNCTION_DOMAIN);
       add_symbol_to_list (sym, get_file_symbols ());
       /* fall into process_function_types.  */
@@ -3497,7 +3497,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
     case 'F':
       /* A global function definition.  */
       sym->set_type (read_type (&p, objfile));
-      sym->set_aclass_index (LOC_BLOCK);
+      sym->set_loc_class_index (LOC_BLOCK);
       sym->set_domain (FUNCTION_DOMAIN);
       add_symbol_to_list (sym, get_global_symbols ());
       goto process_function_types;
@@ -3508,7 +3508,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	 corresponding linker definition to find the value.
 	 These definitions appear at the end of the namelist.  */
       sym->set_type (read_type (&p, objfile));
-      sym->set_aclass_index (LOC_STATIC);
+      sym->set_loc_class_index (LOC_STATIC);
       sym->set_domain (VAR_DOMAIN);
       /* Don't add symbol references to global_sym_chain.
 	 Symbol references don't have valid names and won't match up with
@@ -3529,7 +3529,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
     case 's':
     case 'l':
       sym->set_type (read_type (&p, objfile));
-      sym->set_aclass_index (LOC_LOCAL);
+      sym->set_loc_class_index (LOC_LOCAL);
       sym->set_value_longest (valu);
       sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_local_symbols ());
@@ -3549,7 +3549,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       else
 	sym->set_type (read_type (&p, objfile));
 
-      sym->set_aclass_index (LOC_ARG);
+      sym->set_loc_class_index (LOC_ARG);
       sym->set_value_longest (valu);
       sym->set_domain (VAR_DOMAIN);
       sym->set_is_argument (1);
@@ -3598,7 +3598,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
     case 'R':
       /* Parameter which is in a register.  */
       sym->set_type (read_type (&p, objfile));
-      sym->set_aclass_index (stab_register_index);
+      sym->set_loc_class_index (stab_register_index);
       sym->set_is_argument (1);
       sym->set_value_longest (valu);
       sym->set_domain (VAR_DOMAIN);
@@ -3608,7 +3608,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
     case 'r':
       /* Register variable (either global or local).  */
       sym->set_type (read_type (&p, objfile));
-      sym->set_aclass_index (stab_register_index);
+      sym->set_loc_class_index (stab_register_index);
       sym->set_value_longest (valu);
       sym->set_domain (VAR_DOMAIN);
       if (within_function)
@@ -3640,12 +3640,12 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	      struct symbol *prev_sym;
 
 	      prev_sym = local_symbols->symbol[local_symbols->nsyms - 1];
-	      if ((prev_sym->aclass () == LOC_REF_ARG
-		   || prev_sym->aclass () == LOC_ARG)
+	      if ((prev_sym->loc_class () == LOC_REF_ARG
+		   || prev_sym->loc_class () == LOC_ARG)
 		  && strcmp (prev_sym->linkage_name (),
 			     sym->linkage_name ()) == 0)
 		{
-		  prev_sym->set_aclass_index (stab_register_index);
+		  prev_sym->set_loc_class_index (stab_register_index);
 		  /* Use the type from the LOC_REGISTER; that is the type
 		     that is actually in that register.  */
 		  prev_sym->set_type (sym->type ());
@@ -3663,7 +3663,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
     case 'S':
       /* Static symbol at top level of file.  */
       sym->set_type (read_type (&p, objfile));
-      sym->set_aclass_index (LOC_STATIC);
+      sym->set_loc_class_index (LOC_STATIC);
       sym->set_value_address (valu);
       sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_file_symbols ());
@@ -3694,7 +3694,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       if (nameless)
 	return NULL;
 
-      sym->set_aclass_index (LOC_TYPEDEF);
+      sym->set_loc_class_index (LOC_TYPEDEF);
       sym->set_value_longest (valu);
       sym->set_domain (TYPE_DOMAIN);
       /* C++ vagaries: we may have a type which is derived from
@@ -3771,7 +3771,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  struct symbol *struct_sym = new (&objfile->objfile_obstack) symbol;
 
 	  *struct_sym = *sym;
-	  struct_sym->set_aclass_index (LOC_TYPEDEF);
+	  struct_sym->set_loc_class_index (LOC_TYPEDEF);
 	  struct_sym->set_value_longest (valu);
 	  struct_sym->set_domain (STRUCT_DOMAIN);
 	  if (sym->type ()->name () == 0)
@@ -3798,7 +3798,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       if (nameless)
 	return NULL;
 
-      sym->set_aclass_index (LOC_TYPEDEF);
+      sym->set_loc_class_index (LOC_TYPEDEF);
       sym->set_value_longest (valu);
       sym->set_domain (STRUCT_DOMAIN);
       if (sym->type ()->name () == 0)
@@ -3813,7 +3813,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  struct symbol *typedef_sym = new (&objfile->objfile_obstack) symbol;
 
 	  *typedef_sym = *sym;
-	  typedef_sym->set_aclass_index (LOC_TYPEDEF);
+	  typedef_sym->set_loc_class_index (LOC_TYPEDEF);
 	  typedef_sym->set_value_longest (valu);
 	  typedef_sym->set_domain (TYPE_DOMAIN);
 	  if (sym->type ()->name () == 0)
@@ -3827,7 +3827,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
     case 'V':
       /* Static symbol of local scope.  */
       sym->set_type (read_type (&p, objfile));
-      sym->set_aclass_index (LOC_STATIC);
+      sym->set_loc_class_index (LOC_STATIC);
       sym->set_value_address (valu);
       sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_local_symbols ());
@@ -3836,7 +3836,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
     case 'v':
       /* Reference parameter */
       sym->set_type (read_type (&p, objfile));
-      sym->set_aclass_index (LOC_REF_ARG);
+      sym->set_loc_class_index (LOC_REF_ARG);
       sym->set_is_argument (1);
       sym->set_value_longest (valu);
       sym->set_domain (VAR_DOMAIN);
@@ -3846,7 +3846,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
     case 'a':
       /* Reference parameter which is in a register.  */
       sym->set_type (read_type (&p, objfile));
-      sym->set_aclass_index (stab_regparm_index);
+      sym->set_loc_class_index (stab_regparm_index);
       sym->set_is_argument (1);
       sym->set_value_longest (valu);
       sym->set_domain (VAR_DOMAIN);
@@ -3859,7 +3859,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	 that Pascal uses it too, but when I tried it Pascal used
 	 "x:3" (local symbol) instead.  */
       sym->set_type (read_type (&p, objfile));
-      sym->set_aclass_index (LOC_LOCAL);
+      sym->set_loc_class_index (LOC_LOCAL);
       sym->set_value_longest (valu);
       sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_local_symbols ());
@@ -3867,7 +3867,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
     default:
       sym->set_type (error_type (&p, objfile));
-      sym->set_aclass_index (LOC_CONST);
+      sym->set_loc_class_index (LOC_CONST);
       sym->set_value_longest (0);
       sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_file_symbols ());
@@ -3883,12 +3883,12 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
     {
       /* We have to convert LOC_REGISTER to LOC_REGPARM_ADDR (for
 	 variables passed in a register).  */
-      if (sym->aclass () == LOC_REGISTER)
-	sym->set_aclass_index (LOC_REGPARM_ADDR);
+      if (sym->loc_class () == LOC_REGISTER)
+	sym->set_loc_class_index (LOC_REGPARM_ADDR);
       /* Likewise for converting LOC_ARG to LOC_REF_ARG (for the 7th
 	 and subsequent arguments on SPARC, for example).  */
-      else if (sym->aclass () == LOC_ARG)
-	sym->set_aclass_index (LOC_REF_ARG);
+      else if (sym->loc_class () == LOC_ARG)
+	sym->set_loc_class_index (LOC_REF_ARG);
     }
 
   return sym;
@@ -4139,7 +4139,7 @@ again:
 	    {
 	      struct symbol *sym = ppt->symbol[i];
 
-	      if (sym->aclass () == LOC_TYPEDEF
+	      if (sym->loc_class () == LOC_TYPEDEF
 		  && sym->domain () == STRUCT_DOMAIN
 		  && (sym->type ()->code () == code)
 		  && strcmp (sym->linkage_name (), type_name) == 0)
@@ -6060,7 +6060,7 @@ read_enum_type (const char **pp, struct type *type,
       sym->set_linkage_name (name);
       sym->set_language (get_current_subfile ()->language,
 			 &objfile->objfile_obstack);
-      sym->set_aclass_index (LOC_CONST);
+      sym->set_loc_class_index (LOC_CONST);
       sym->set_domain (VAR_DOMAIN);
       sym->set_value_longest (n);
       if (n < 0)
@@ -6727,7 +6727,7 @@ common_block_end (struct objfile *objfile)
   sym = new (&objfile->objfile_obstack) symbol;
   /* Note: common_block_name already saved on objfile_obstack.  */
   sym->set_linkage_name (common_block_name);
-  sym->set_aclass_index (LOC_BLOCK);
+  sym->set_loc_class_index (LOC_BLOCK);
 
   /* Now we copy all the symbols which have been defined since the BCOMM.  */
 
@@ -6935,7 +6935,7 @@ cleanup_undefined_types_1 (void)
 		      {
 			struct symbol *sym = ppt->symbol[i];
 
-			if (sym->aclass () == LOC_TYPEDEF
+			if (sym->loc_class () == LOC_TYPEDEF
 			    && sym->domain () == STRUCT_DOMAIN
 			    && (sym->type ()->code () == (*type)->code ())
 			    && ((*type)->instance_flags ()
@@ -7045,7 +7045,7 @@ scan_file_globals (struct objfile *objfile)
 		     the same symbol if there are multiple references.  */
 		  if (sym)
 		    {
-		      if (sym->aclass () == LOC_BLOCK)
+		      if (sym->loc_class () == LOC_BLOCK)
 			fix_common_block
 			  (sym, msymbol->value_address (resolve_objfile),
 			   msymbol->section_index ());
@@ -7091,8 +7091,8 @@ scan_file_globals (struct objfile *objfile)
 	  prev->set_value_address (0);
 
 	  /* Complain about unresolved common block symbols.  */
-	  if (prev->aclass () == LOC_STATIC)
-	    prev->set_aclass_index (LOC_UNRESOLVED);
+	  if (prev->loc_class () == LOC_STATIC)
+	    prev->set_loc_class_index (LOC_UNRESOLVED);
 	  else
 	    complaint (_("%s: common block `%s' from "
 			 "global_sym_chain unresolved"),

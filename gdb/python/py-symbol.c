@@ -126,7 +126,7 @@ sympy_get_addr_class (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  return gdb_py_object_from_longest (symbol->aclass ()).release ();
+  return gdb_py_object_from_longest (symbol->loc_class ()).release ();
 }
 
 /* Implement gdb.Symbol.domain attribute.  Return the domain as an
@@ -156,42 +156,39 @@ static PyObject *
 sympy_is_constant (PyObject *self, void *closure)
 {
   struct symbol *symbol = NULL;
-  enum address_class theclass;
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  theclass = symbol->aclass ();
+  location_class loc_class = symbol->loc_class ();
 
-  return PyBool_FromLong (theclass == LOC_CONST || theclass == LOC_CONST_BYTES);
+  return PyBool_FromLong (loc_class == LOC_CONST || loc_class == LOC_CONST_BYTES);
 }
 
 static PyObject *
 sympy_is_function (PyObject *self, void *closure)
 {
   struct symbol *symbol = NULL;
-  enum address_class theclass;
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  theclass = symbol->aclass ();
+  location_class loc_class = symbol->loc_class ();
 
-  return PyBool_FromLong (theclass == LOC_BLOCK);
+  return PyBool_FromLong (loc_class == LOC_BLOCK);
 }
 
 static PyObject *
 sympy_is_variable (PyObject *self, void *closure)
 {
   struct symbol *symbol = NULL;
-  enum address_class theclass;
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  theclass = symbol->aclass ();
+  location_class loc_class = symbol->loc_class ();
 
   return PyBool_FromLong (!symbol->is_argument ()
-			  && (theclass == LOC_LOCAL || theclass == LOC_REGISTER
-			      || theclass == LOC_STATIC || theclass == LOC_COMPUTED
-			      || theclass == LOC_OPTIMIZED_OUT));
+			  && (loc_class == LOC_LOCAL || loc_class == LOC_REGISTER
+			      || loc_class == LOC_STATIC || loc_class == LOC_COMPUTED
+			      || loc_class == LOC_OPTIMIZED_OUT));
 }
 
 /* Implementation of Symbol.is_artificial.  */
@@ -279,7 +276,7 @@ sympy_value (PyObject *self, PyObject *args)
     }
 
   SYMPY_REQUIRE_VALID (self, symbol);
-  if (symbol->aclass () == LOC_TYPEDEF)
+  if (symbol->loc_class () == LOC_TYPEDEF)
     {
       PyErr_SetString (PyExc_TypeError, "cannot get the value of a typedef");
       return NULL;

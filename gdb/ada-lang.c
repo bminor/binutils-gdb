@@ -3637,7 +3637,7 @@ See set/show multiple-symbol."));
       if (syms[i].symbol == NULL)
 	continue;
 
-      if (syms[i].symbol->aclass () == LOC_BLOCK)
+      if (syms[i].symbol->loc_class () == LOC_BLOCK)
 	{
 	  struct symtab_and_line sal =
 	    find_function_start_sal (syms[i].symbol, 1);
@@ -3659,7 +3659,7 @@ See set/show multiple-symbol."));
       else
 	{
 	  int is_enumeral =
-	    (syms[i].symbol->aclass () == LOC_CONST
+	    (syms[i].symbol->loc_class () == LOC_CONST
 	     && syms[i].symbol->type () != NULL
 	     && syms[i].symbol->type ()->code () == TYPE_CODE_ENUM);
 	  struct symtab *symtab = NULL;
@@ -3822,7 +3822,7 @@ ada_resolve_variable (struct symbol *sym, const struct block *block,
 		   candidates.end (),
 		   [] (block_symbol &bsym)
 		   {
-		     switch (bsym.symbol->aclass ())
+		     switch (bsym.symbol->loc_class ())
 		       {
 		       case LOC_REGISTER:
 		       case LOC_ARG:
@@ -3845,7 +3845,7 @@ ada_resolve_variable (struct symbol *sym, const struct block *block,
 	  candidates.end (),
 	  [] (block_symbol &bsym)
 	  {
-	    return bsym.symbol->aclass () == LOC_TYPEDEF;
+	    return bsym.symbol->loc_class () == LOC_TYPEDEF;
 	  }),
 	 candidates.end ());
     }
@@ -4000,7 +4000,7 @@ ada_args_match (struct symbol *func, struct value **actuals, int n_actuals)
   int i;
   struct type *func_type = func->type ();
 
-  if (func->aclass () == LOC_CONST
+  if (func->loc_class () == LOC_CONST
       && func_type->code () == TYPE_CODE_ENUM)
     return (n_actuals == 0);
   else if (func_type == NULL || func_type->code () != TYPE_CODE_FUNC)
@@ -4310,7 +4310,7 @@ ada_parse_renaming (struct symbol *sym,
 
   if (sym == NULL)
     return ADA_NOT_RENAMING;
-  switch (sym->aclass ()) 
+  switch (sym->loc_class ())
     {
     default:
       return ADA_NOT_RENAMING;
@@ -4776,7 +4776,7 @@ is_nonfunction (const std::vector<struct block_symbol> &syms)
   for (const block_symbol &sym : syms)
     if (sym.symbol->type ()->code () != TYPE_CODE_FUNC
 	&& (sym.symbol->type ()->code () != TYPE_CODE_ENUM
-	    || sym.symbol->aclass () != LOC_CONST))
+	    || sym.symbol->loc_class () != LOC_CONST))
       return 1;
 
   return 0;
@@ -4811,10 +4811,10 @@ lesseq_defined_than (struct symbol *sym0, struct symbol *sym1)
   if (sym0 == sym1)
     return 1;
   if (sym0->domain () != sym1->domain ()
-      || sym0->aclass () != sym1->aclass ())
+      || sym0->loc_class () != sym1->loc_class ())
     return 0;
 
-  switch (sym0->aclass ())
+  switch (sym0->loc_class ())
     {
     case LOC_UNDEF:
       return 1;
@@ -5069,7 +5069,7 @@ remove_extra_symbols (std::vector<struct block_symbol> &syms)
 	 should be identical.  */
 
       else if (syms[i].symbol->linkage_name () != NULL
-	  && syms[i].symbol->aclass () == LOC_STATIC
+	  && syms[i].symbol->loc_class () == LOC_STATIC
 	  && is_nondebugging_type (syms[i].symbol->type ()))
 	{
 	  for (j = 0; !remove_p && j < syms.size (); j += 1)
@@ -5078,8 +5078,8 @@ remove_extra_symbols (std::vector<struct block_symbol> &syms)
 		  && syms[j].symbol->linkage_name () != NULL
 		  && strcmp (syms[i].symbol->linkage_name (),
 			     syms[j].symbol->linkage_name ()) == 0
-		  && (syms[i].symbol->aclass ()
-		      == syms[j].symbol->aclass ())
+		  && (syms[i].symbol->loc_class ()
+		      == syms[j].symbol->loc_class ())
 		  && syms[i].symbol->value_address ()
 		  == syms[j].symbol->value_address ())
 		remove_p = true;
@@ -5088,12 +5088,12 @@ remove_extra_symbols (std::vector<struct block_symbol> &syms)
       
       /* Two functions with the same block are identical.  */
 
-      else if (syms[i].symbol->aclass () == LOC_BLOCK)
+      else if (syms[i].symbol->loc_class () == LOC_BLOCK)
 	{
 	  for (j = 0; !remove_p && j < syms.size (); j += 1)
 	    {
 	      if (i != j
-		  && syms[j].symbol->aclass () == LOC_BLOCK
+		  && syms[j].symbol->loc_class () == LOC_BLOCK
 		  && (syms[i].symbol->value_block ()
 		      == syms[j].symbol->value_block ()))
 		remove_p = true;
@@ -5170,7 +5170,7 @@ is_package_name (const char *name)
 static int
 old_renaming_is_invisible (const struct symbol *sym, const char *function_name)
 {
-  if (sym->aclass () != LOC_TYPEDEF)
+  if (sym->loc_class () != LOC_TYPEDEF)
     return 0;
 
   std::string scope = xget_renaming_scope (sym->type ());
@@ -5249,7 +5249,7 @@ remove_irrelevant_renamings (std::vector<struct block_symbol> *syms,
       const char *name;
       const char *suffix;
 
-      if (sym == NULL || sym->aclass () == LOC_TYPEDEF)
+      if (sym == NULL || sym->loc_class () == LOC_TYPEDEF)
 	continue;
       name = sym->linkage_name ();
       suffix = strstr (name, "___XR");
@@ -5374,7 +5374,7 @@ match_data::operator() (struct block_symbol *bsym)
     }
   else 
     {
-      if (sym->aclass () == LOC_UNRESOLVED)
+      if (sym->loc_class () == LOC_UNRESOLVED)
 	return true;
       else if (sym->is_argument ())
 	arg_sym = sym;
@@ -5979,7 +5979,7 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
     {
       if (sym->matches (domain))
 	{
-	  if (sym->aclass () != LOC_UNRESOLVED)
+	  if (sym->loc_class () != LOC_UNRESOLVED)
 	    {
 	      if (sym->is_argument ())
 		arg_sym = sym;
@@ -6028,7 +6028,7 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
 	    if (cmp == 0
 		&& is_name_suffix (sym->linkage_name () + name_len + 5))
 	      {
-		if (sym->aclass () != LOC_UNRESOLVED)
+		if (sym->loc_class () != LOC_UNRESOLVED)
 		  {
 		    if (sym->is_argument ())
 		      arg_sym = sym;
@@ -11707,9 +11707,9 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
 
   /* Make sure that the symbol we found corresponds to a function.  */
 
-  if (sym->aclass () != LOC_BLOCK)
+  if (sym->loc_class () != LOC_BLOCK)
     error (_("Symbol \"%s\" is not a function (class = %d)"),
-	   sym->linkage_name (), sym->aclass ());
+	   sym->linkage_name (), sym->loc_class ());
 
   sym = standard_lookup (einfo->catch_handlers_sym, NULL,
 			 SEARCH_FUNCTION_DOMAIN);
@@ -11729,9 +11729,9 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
 
   /* Make sure that the symbol we found corresponds to a function.  */
 
-  if (sym->aclass () != LOC_BLOCK)
+  if (sym->loc_class () != LOC_BLOCK)
     error (_("Symbol \"%s\" is not a function (class = %d)"),
-	   sym->linkage_name (), sym->aclass ());
+	   sym->linkage_name (), sym->loc_class ());
 
   return 1;
 }
@@ -12686,7 +12686,7 @@ ada_exception_sal (enum ada_exception_catchpoint_kind ex)
     throw_error (NOT_FOUND_ERROR, _("Catchpoint symbol not found: %s"),
 		 sym_name);
 
-  if (sym->aclass () != LOC_BLOCK)
+  if (sym->loc_class () != LOC_BLOCK)
     error (_("Unable to insert catchpoint. %s is not a function."), sym_name);
 
   return find_function_start_sal (sym, 1);
@@ -12852,10 +12852,10 @@ ada_is_exception_sym (struct symbol *sym)
 {
   const char *type_name = sym->type ()->name ();
 
-  return (sym->aclass () != LOC_TYPEDEF
-	  && sym->aclass () != LOC_BLOCK
-	  && sym->aclass () != LOC_CONST
-	  && sym->aclass () != LOC_UNRESOLVED
+  return (sym->loc_class () != LOC_TYPEDEF
+	  && sym->loc_class () != LOC_BLOCK
+	  && sym->loc_class () != LOC_CONST
+	  && sym->loc_class () != LOC_UNRESOLVED
 	  && type_name != NULL && strcmp (type_name, "exception") == 0);
 }
 
@@ -12988,7 +12988,7 @@ ada_add_exceptions_from_frame (compiled_regex *preg,
     {
       for (struct symbol *sym : block_iterator_range (block))
 	{
-	  switch (sym->aclass ())
+	  switch (sym->loc_class ())
 	    {
 	    case LOC_TYPEDEF:
 	    case LOC_BLOCK:

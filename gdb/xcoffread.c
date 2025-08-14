@@ -1491,7 +1491,7 @@ process_xcoff_symbol (struct xcoff_symbol *cs, struct objfile *objfile)
       sym->set_type (builtin_type (objfile)->nodebug_text_symbol);
 
       sym->set_domain (FUNCTION_DOMAIN);
-      sym->set_aclass_index (LOC_BLOCK);
+      sym->set_loc_class_index (LOC_BLOCK);
       sym2 = new (&objfile->objfile_obstack) symbol (*sym);
 
       if (cs->c_sclass == C_EXT || C_WEAKEXT)

@@ -537,7 +537,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
     }
   else
     {
-      if (symbol->aclass () == LOC_TYPEDEF)
+      if (symbol->loc_class () == LOC_TYPEDEF)
 	gdb_printf (outfile, "typedef ");
       if (symbol->type ())
 	{
@@ -552,7 +552,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
       else
 	gdb_printf (outfile, "%s ", symbol->print_name ());
 
-      switch (symbol->aclass ())
+      switch (symbol->loc_class ())
 	{
 	case LOC_CONST:
 	  gdb_printf (outfile, "const %s (%s)",
@@ -646,7 +646,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 
 	default:
 	  gdb_printf (outfile, "botched symbol class %x",
-		      symbol->aclass ());
+		      symbol->loc_class ());
 	  break;
 	}
     }

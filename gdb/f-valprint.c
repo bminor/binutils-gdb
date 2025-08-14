@@ -631,7 +631,7 @@ info_common_command_for_block (const struct block *block, const char *comname,
 	const struct common_block *common = sym->value_common_block ();
 	size_t index;
 
-	gdb_assert (sym->aclass () == LOC_COMMON_BLOCK);
+	gdb_assert (sym->loc_class () == LOC_COMMON_BLOCK);
 
 	if (comname && (!sym->linkage_name ()
 			|| strcmp (comname, sym->linkage_name ()) != 0))

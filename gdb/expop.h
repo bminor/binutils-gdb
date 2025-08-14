@@ -476,11 +476,11 @@ check_constant (const gdb_mpz &cst)
 static inline bool
 check_constant (struct symbol *sym)
 {
-  enum address_class sc = sym->aclass ();
-  return (sc == LOC_BLOCK
-	  || sc == LOC_CONST
-	  || sc == LOC_CONST_BYTES
-	  || sc == LOC_LABEL);
+  location_class lc = sym->loc_class ();
+  return (lc == LOC_BLOCK
+	  || lc == LOC_CONST
+	  || lc == LOC_CONST_BYTES
+	  || lc == LOC_LABEL);
 }
 
 static inline bool

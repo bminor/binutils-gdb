@@ -1780,7 +1780,7 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
      index without doing the check that is done by the wrapper macros
      like SECT_OFF_TEXT.  */
   int fallback;
-  switch (sym->aclass ())
+  switch (sym->loc_class ())
     {
     case LOC_STATIC:
       fallback = objfile->sect_index_data;
@@ -3038,7 +3038,7 @@ find_symbol_at_address (CORE_ADDR address)
 
 	  for (struct symbol *sym : block_iterator_range (b))
 	    {
-	      if (sym->aclass () == LOC_STATIC
+	      if (sym->loc_class () == LOC_STATIC
 		  && sym->value_address () == addr)
 		return sym;
 	    }
@@ -4310,7 +4310,7 @@ find_function_alias_target (bound_minimal_symbol msymbol)
 
   symbol *sym = find_pc_function (func_addr);
   if (sym != NULL
-      && sym->aclass () == LOC_BLOCK
+      && sym->loc_class () == LOC_BLOCK
       && sym->value_block ()->entry_pc () == func_addr)
     return sym;
 
@@ -5021,12 +5021,12 @@ global_symbol_searcher::add_matching_symbols
 
 	      if ((kind & SEARCH_VAR_DOMAIN) != 0)
 		{
-		  if (sym->aclass () == LOC_UNRESOLVED
+		  if (sym->loc_class () == LOC_UNRESOLVED
 		      /* LOC_CONST can be used for more than
 			 just enums, e.g., c++ static const
 			 members.  We only want to skip enums
 			 here.  */
-		      || (sym->aclass () == LOC_CONST
+		      || (sym->loc_class () == LOC_CONST
 			  && (sym->type ()->code () == TYPE_CODE_ENUM)))
 		    continue;
 		}
@@ -5234,7 +5234,7 @@ symbol_to_info_string (struct symbol *sym, int block)
       string_file tmp_stream;
 
       type_print (sym->type (),
-		  (sym->aclass () == LOC_TYPEDEF
+		  (sym->loc_class () == LOC_TYPEDEF
 		   ? "" : sym->print_name ()),
 		  &tmp_stream, 0);
 
@@ -5753,7 +5753,7 @@ completion_list_add_symbol (completion_tracker &tracker,
      the msymbol name and removes the msymbol name from the completion
      tracker.  */
   if (sym->language () == language_cplus
-      && sym->aclass () == LOC_BLOCK)
+      && sym->loc_class () == LOC_BLOCK)
     {
       /* The call to canonicalize returns the empty string if the input
 	 string is already in canonical form, thanks to this we don't
@@ -5898,7 +5898,7 @@ completion_list_add_fields (completion_tracker &tracker,
 			    const lookup_name_info &lookup_name,
 			    const char *text, const char *word)
 {
-  if (sym->aclass () == LOC_TYPEDEF)
+  if (sym->loc_class () == LOC_TYPEDEF)
     {
       struct type *t = sym->type ();
       enum type_code c = t->code ();
@@ -5950,7 +5950,7 @@ symbol_is_function_or_method (minimal_symbol *msymbol)
 bound_minimal_symbol
 find_gnu_ifunc (const symbol *sym)
 {
-  if (sym->aclass () != LOC_BLOCK)
+  if (sym->loc_class () != LOC_BLOCK)
     return {};
 
   lookup_name_info lookup_name (sym->search_name (),
@@ -6629,13 +6629,13 @@ main_language (void)
 
 /* The next index to hand out in response to a registration request.  */
 
-static int next_aclass_value = LOC_FINAL_VALUE;
+static int next_loc_class_value = LOC_FINAL_VALUE;
 
-/* The maximum number of "aclass" registrations we support.  This is
+/* The maximum number of "loc_class" registrations we support.  This is
    constant for convenience.  */
 #define MAX_SYMBOL_IMPLS (LOC_FINAL_VALUE + 11)
 
-/* The objects representing the various "aclass" values.  The elements
+/* The objects representing the various "loc_class" values.  The elements
    from 0 up to LOC_FINAL_VALUE-1 represent themselves, and subsequent
    elements are those registered at gdb initialization time.  */
 
@@ -6648,22 +6648,22 @@ gdb::array_view<const struct symbol_impl> symbol_impls (symbol_impl);
 
 /* Make sure we saved enough room in struct symbol.  */
 
-static_assert (MAX_SYMBOL_IMPLS <= (1 << SYMBOL_ACLASS_BITS));
+static_assert (MAX_SYMBOL_IMPLS <= (1 << SYMBOL_LOC_CLASS_BITS));
 
-/* Register a computed symbol type.  ACLASS must be LOC_COMPUTED.  OPS
+/* Register a computed symbol type.  LOC_CLASS must be LOC_COMPUTED.  OPS
    is the ops vector associated with this index.  This returns the new
-   index, which should be used as the aclass_index field for symbols
+   index, which should be used as the loc_class_index field for symbols
    of this type.  */
 
 int
-register_symbol_computed_impl (enum address_class aclass,
+register_symbol_computed_impl (location_class loc_class,
 			       const struct symbol_computed_ops *ops)
 {
-  int result = next_aclass_value++;
+  int result = next_loc_class_value++;
 
-  gdb_assert (aclass == LOC_COMPUTED);
+  gdb_assert (loc_class == LOC_COMPUTED);
   gdb_assert (result < MAX_SYMBOL_IMPLS);
-  symbol_impl[result].aclass = aclass;
+  symbol_impl[result].loc_class = loc_class;
   symbol_impl[result].ops_computed = ops;
 
   /* Sanity check OPS.  */
@@ -6676,20 +6676,20 @@ register_symbol_computed_impl (enum address_class aclass,
   return result;
 }
 
-/* Register a function with frame base type.  ACLASS must be LOC_BLOCK.
+/* Register a function with frame base type.  LOC_CLASS must be LOC_BLOCK.
    OPS is the ops vector associated with this index.  This returns the
-   new index, which should be used as the aclass_index field for symbols
+   new index, which should be used as the loc_class_index field for symbols
    of this type.  */
 
 int
-register_symbol_block_impl (enum address_class aclass,
+register_symbol_block_impl (location_class loc_class,
 			    const struct symbol_block_ops *ops)
 {
-  int result = next_aclass_value++;
+  int result = next_loc_class_value++;
 
-  gdb_assert (aclass == LOC_BLOCK);
+  gdb_assert (loc_class == LOC_BLOCK);
   gdb_assert (result < MAX_SYMBOL_IMPLS);
-  symbol_impl[result].aclass = aclass;
+  symbol_impl[result].loc_class = loc_class;
   symbol_impl[result].ops_block = ops;
 
   /* Sanity check OPS.  */
@@ -6700,35 +6700,33 @@ register_symbol_block_impl (enum address_class aclass,
   return result;
 }
 
-/* Register a register symbol type.  ACLASS must be LOC_REGISTER or
+/* Register a register symbol type.  LOC_CLASS must be LOC_REGISTER or
    LOC_REGPARM_ADDR.  OPS is the register ops vector associated with
    this index.  This returns the new index, which should be used as
-   the aclass_index field for symbols of this type.  */
+   the loc_class_index field for symbols of this type.  */
 
 int
-register_symbol_register_impl (enum address_class aclass,
+register_symbol_register_impl (location_class loc_class,
 			       const struct symbol_register_ops *ops)
 {
-  int result = next_aclass_value++;
+  int result = next_loc_class_value++;
 
-  gdb_assert (aclass == LOC_REGISTER || aclass == LOC_REGPARM_ADDR);
+  gdb_assert (loc_class == LOC_REGISTER || loc_class == LOC_REGPARM_ADDR);
   gdb_assert (result < MAX_SYMBOL_IMPLS);
-  symbol_impl[result].aclass = aclass;
+  symbol_impl[result].loc_class = loc_class;
   symbol_impl[result].ops_register = ops;
 
   return result;
 }
 
 /* Initialize elements of 'symbol_impl' for the constants in enum
-   address_class.  */
+   location_class.  */
 
 static void
 initialize_ordinary_address_classes (void)
 {
-  int i;
-
-  for (i = 0; i < LOC_FINAL_VALUE; ++i)
-    symbol_impl[i].aclass = (enum address_class) i;
+  for (int i = 0; i < LOC_FINAL_VALUE; ++i)
+    symbol_impl[i].loc_class = static_cast<location_class> (i);
 }
 
 
@@ -6776,7 +6774,7 @@ CORE_ADDR
 symbol::get_maybe_copied_address () const
 {
   gdb_assert (this->maybe_copied);
-  gdb_assert (this->aclass () == LOC_STATIC);
+  gdb_assert (this->loc_class () == LOC_STATIC);
 
   const char *linkage_name = this->linkage_name ();
   bound_minimal_symbol minsym

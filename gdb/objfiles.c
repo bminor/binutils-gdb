@@ -521,8 +521,8 @@ relocate_one_symbol (struct symbol *sym, struct objfile *objfile,
      any symbols in STRUCT_DOMAIN or UNDEF_DOMAIN.
      But I'm leaving out that test, on the theory that
      they can't possibly pass the tests below.  */
-  if ((sym->aclass () == LOC_LABEL
-       || sym->aclass () == LOC_STATIC)
+  if ((sym->loc_class () == LOC_LABEL
+       || sym->loc_class () == LOC_STATIC)
       && sym->section_index () >= 0)
     sym->set_value_address (sym->value_address ()
 			    + delta[sym->section_index ()]);

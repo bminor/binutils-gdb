@@ -248,7 +248,7 @@ static struct type *parse_type (int, union aux_ext *, unsigned int, int *,
 				int, const char *);
 
 static struct symbol *mylookup_symbol (const char *, const struct block *,
-				       domain_enum, enum address_class);
+				       domain_enum, location_class);
 
 static void sort_blocks (struct symtab *);
 
@@ -550,7 +550,7 @@ static const struct symbol_register_ops mdebug_register_funcs = {
   mdebug_reg_to_regnum
 };
 
-/* The "aclass" indices for computed symbols.  */
+/* The "loc_class" indices for computed symbols.  */
 
 static int mdebug_register_index;
 static int mdebug_regparm_index;
@@ -559,11 +559,11 @@ static int mdebug_regparm_index;
 
 static void
 add_data_symbol (SYMR *sh, union aux_ext *ax, int bigend,
-		 struct symbol *s, int aclass_index, struct block *b,
+		 struct symbol *s, int loc_class_index, struct block *b,
 		 struct objfile *objfile, const char *name)
 {
   s->set_domain (VAR_DOMAIN);
-  s->set_aclass_index (aclass_index);
+  s->set_loc_class_index (loc_class_index);
   add_symbol (s, top_stack->cur_st, b);
 
   /* Type could be missing if file is compiled without debugging info.  */
@@ -688,19 +688,19 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	{
 	case scRegister:
 	  /* Pass by value in register.  */
-	  s->set_aclass_index (mdebug_register_index);
+	  s->set_loc_class_index (mdebug_register_index);
 	  break;
 	case scVar:
 	  /* Pass by reference on stack.  */
-	  s->set_aclass_index (LOC_REF_ARG);
+	  s->set_loc_class_index (LOC_REF_ARG);
 	  break;
 	case scVarRegister:
 	  /* Pass by reference in register.  */
-	  s->set_aclass_index (mdebug_regparm_index);
+	  s->set_loc_class_index (mdebug_regparm_index);
 	  break;
 	default:
 	  /* Pass by value on stack.  */
-	  s->set_aclass_index (LOC_ARG);
+	  s->set_loc_class_index (LOC_ARG);
 	  break;
 	}
       s->set_value_longest (svalue);
@@ -711,7 +711,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
     case stLabel:		/* label, goes into current block.  */
       s = new_symbol (name);
       s->set_domain (LABEL_DOMAIN);	/* So that it can be used */
-      s->set_aclass_index (LOC_LABEL);	/* but not misused.  */
+      s->set_loc_class_index (LOC_LABEL);	/* but not misused.  */
       s->set_section_index (section_index);
       s->set_value_address (sh->value);
       s->set_type (builtin_type (objfile)->builtin_int);
@@ -753,7 +753,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	}
       s = new_symbol (name);
       s->set_domain (FUNCTION_DOMAIN);
-      s->set_aclass_index (LOC_BLOCK);
+      s->set_loc_class_index (LOC_BLOCK);
       s->set_section_index (section_index);
       /* Type of the return value.  */
       if (SC_IS_UNDEF (sh->sc) || sh->sc == scNil)
@@ -1074,7 +1074,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		enum_sym->set_linkage_name
 		  (obstack_strdup (&mdebugread_objfile->objfile_obstack,
 				   f->name ()));
-		enum_sym->set_aclass_index (LOC_CONST);
+		enum_sym->set_loc_class_index (LOC_CONST);
 		enum_sym->set_type (t);
 		enum_sym->set_domain (VAR_DOMAIN);
 		enum_sym->set_value_longest (tsym.value);
@@ -1107,7 +1107,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
 	s = new_symbol (name);
 	s->set_domain (STRUCT_DOMAIN);
-	s->set_aclass_index (LOC_TYPEDEF);
+	s->set_loc_class_index (LOC_TYPEDEF);
 	s->set_value_longest (0);
 	s->set_type (t);
 	add_symbol (s, top_stack->cur_st, top_stack->cur_block);
@@ -1164,7 +1164,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  /* Make up special symbol to contain procedure specific info.  */
 	  s = new_symbol (MDEBUG_EFI_SYMBOL_NAME);
 	  s->set_domain (LABEL_DOMAIN);
-	  s->set_aclass_index (LOC_CONST);
+	  s->set_loc_class_index (LOC_CONST);
 	  s->set_type (builtin_type (mdebugread_objfile)->builtin_void);
 	  e = OBSTACK_ZALLOC (&mdebugread_objfile->objfile_obstack,
 			      mdebug_extra_func_info);
@@ -1297,7 +1297,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	break;
       s = new_symbol (name);
       s->set_domain (TYPE_DOMAIN);
-      s->set_aclass_index (LOC_TYPEDEF);
+      s->set_loc_class_index (LOC_TYPEDEF);
       s->set_value_block (top_stack->cur_block);
       s->set_type (t);
       add_symbol (s, top_stack->cur_st, top_stack->cur_block);
@@ -3369,7 +3369,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	  for (cur_sdx = 0; cur_sdx < fh->csym;)
 	    {
 	      char *sym_name;
-	      enum address_class theclass;
+	      location_class loc_class;
 	      unrelocated_addr minsym_value;
 	      int section = -1;
 
@@ -3526,7 +3526,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		    reader.record_with_info (sym_name, minsym_value,
 					     mst_file_bss,
 					     SECT_OFF_BSS (objfile));
-		  theclass = LOC_STATIC;
+		  loc_class = LOC_STATIC;
 		  break;
 
 		case stIndirect:	/* Irix5 forward declaration */
@@ -3538,11 +3538,11 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		     structs from alpha and mips cc.  */
 		  if (sh.iss == 0 || has_opaque_xref (fh, &sh))
 		    goto skip;
-		  theclass = LOC_TYPEDEF;
+		  loc_class = LOC_TYPEDEF;
 		  break;
 
 		case stConstant:	/* Constant decl */
-		  theclass = LOC_CONST;
+		  loc_class = LOC_CONST;
 		  break;
 
 		case stUnion:
@@ -3600,7 +3600,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		}
 	      /* Use this gdb symbol.  */
 	      pst->add_psymbol (sym_name, true,
-				VAR_DOMAIN, theclass, section,
+				VAR_DOMAIN, loc_class, section,
 				psymbol_placement::STATIC,
 				unrelocated_addr (sh.value),
 				psymtab_language,
@@ -3616,7 +3616,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	  PST_PRIVATE (save_pst)->extern_tab = ext_ptr;
 	  for (; --cur_sdx >= 0; ext_ptr++)
 	    {
-	      enum address_class theclass;
+	      location_class loc_class;
 	      SYMR *psh;
 	      CORE_ADDR svalue;
 	      int section;
@@ -3663,7 +3663,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		     Ignore them, as parse_external will ignore them too.  */
 		  continue;
 		case stLabel:
-		  theclass = LOC_LABEL;
+		  loc_class = LOC_LABEL;
 		  break;
 		default:
 		  unknown_ext_complaint (debug_info->ssext + psh->iss);
@@ -3675,12 +3675,12 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		  if (SC_IS_COMMON (psh->sc))
 		    continue;
 
-		  theclass = LOC_STATIC;
+		  loc_class = LOC_STATIC;
 		  break;
 		}
 	      char *sym_name = debug_info->ssext + psh->iss;
 	      pst->add_psymbol (sym_name, true,
-				VAR_DOMAIN, theclass,
+				VAR_DOMAIN, loc_class,
 				section,
 				psymbol_placement::GLOBAL,
 				unrelocated_addr (svalue),
@@ -3991,7 +3991,7 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 		  struct symbol *s = new_symbol (MDEBUG_EFI_SYMBOL_NAME);
 
 		  s->set_domain (LABEL_DOMAIN);
-		  s->set_aclass_index (LOC_CONST);
+		  s->set_loc_class_index (LOC_CONST);
 		  s->set_type (builtin_type (objfile)->builtin_void);
 		  s->set_value_bytes ((gdb_byte *) e);
 		  e->pdr.framereg = -1;
@@ -4464,7 +4464,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp,
 
 static struct symbol *
 mylookup_symbol (const char *name, const struct block *block,
-		 domain_enum domain, enum address_class theclass)
+		 domain_enum domain, location_class loc_class)
 {
   int inc;
 
@@ -4473,14 +4473,14 @@ mylookup_symbol (const char *name, const struct block *block,
     {
       if (sym->linkage_name ()[0] == inc
 	  && sym->domain () == domain
-	  && sym->aclass () == theclass
+	  && sym->loc_class () == loc_class
 	  && strcmp (sym->linkage_name (), name) == 0)
 	return sym;
     }
 
   block = block->superblock ();
   if (block)
-    return mylookup_symbol (name, block, domain, theclass);
+    return mylookup_symbol (name, block, domain, loc_class);
   return 0;
 }
 

@@ -2678,11 +2678,11 @@ var_value_operation::evaluate_for_address (struct expression *exp,
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
       struct type *type = lookup_pointer_type (var->type ());
-      enum address_class sym_class = var->aclass ();
+      location_class loc_class = var->loc_class ();
 
-      if (sym_class == LOC_CONST
-	  || sym_class == LOC_CONST_BYTES
-	  || sym_class == LOC_REGISTER)
+      if (loc_class == LOC_CONST
+	  || loc_class == LOC_CONST_BYTES
+	  || loc_class == LOC_REGISTER)
 	error (_("Attempt to take address of register or constant."));
 
       return value::zero (type, not_lval);

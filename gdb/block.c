@@ -618,7 +618,7 @@ block_iterator_next (struct block_iterator *iterator)
 bool
 best_symbol (struct symbol *a, const domain_search_flags domain)
 {
-  if (a->aclass () == LOC_UNRESOLVED)
+  if (a->loc_class () == LOC_UNRESOLVED)
     return false;
 
   if ((domain & SEARCH_VAR_DOMAIN) != 0)
@@ -644,10 +644,10 @@ better_symbol (struct symbol *a, struct symbol *b,
   if (b->matches (domain) && !a->matches (domain))
     return b;
 
-  if (a->aclass () != LOC_UNRESOLVED && b->aclass () == LOC_UNRESOLVED)
+  if (a->loc_class () != LOC_UNRESOLVED && b->loc_class () == LOC_UNRESOLVED)
     return a;
 
-  if (b->aclass () != LOC_UNRESOLVED && a->aclass () == LOC_UNRESOLVED)
+  if (b->loc_class () != LOC_UNRESOLVED && a->loc_class () == LOC_UNRESOLVED)
     return b;
 
   return a;

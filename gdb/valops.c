@@ -3822,7 +3822,7 @@ value_maybe_namespace_elt (const struct type *curtype,
   if (sym.symbol == NULL)
     return NULL;
   else if ((noside == EVAL_AVOID_SIDE_EFFECTS)
-	   && (sym.symbol->aclass () == LOC_TYPEDEF))
+	   && (sym.symbol->loc_class () == LOC_TYPEDEF))
     result = value::allocate (sym.symbol->type ());
   else
     result = value_of_variable (sym.symbol, sym.block);

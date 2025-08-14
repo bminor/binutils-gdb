@@ -689,14 +689,14 @@ validate_actionline (const char *line, tracepoint *t)
 		       (exp->op.get ()));
 		  sym = vvop->get_symbol ();
 
-		  if (sym->aclass () == LOC_CONST)
+		  if (sym->loc_class () == LOC_CONST)
 		    {
 		      error (_("constant `%s' (value %s) "
 			       "will not be collected."),
 			     sym->print_name (),
 			     plongest (sym->value_longest ()));
 		    }
-		  else if (sym->aclass () == LOC_OPTIMIZED_OUT)
+		  else if (sym->loc_class () == LOC_OPTIMIZED_OUT)
 		    {
 		      error (_("`%s' is optimized away "
 			       "and cannot be collected."),
@@ -916,11 +916,11 @@ collection_list::collect_symbol (struct symbol *sym,
   int treat_as_expr = 0;
 
   len = check_typedef (sym->type ())->length ();
-  switch (sym->aclass ())
+  switch (sym->loc_class ())
     {
     default:
       gdb_printf ("%s: don't know symbol class %d\n",
-		  sym->print_name (), sym->aclass ());
+		  sym->print_name (), sym->loc_class ());
       break;
     case LOC_CONST:
       gdb_printf ("constant %s (value %s) will not be collected.\n",
@@ -2508,12 +2508,12 @@ info_scope_command (const char *args_in, int from_tty)
 					     gdb_stdout);
 	  else
 	    {
-	      switch (sym->aclass ())
+	      switch (sym->loc_class ())
 		{
 		default:
 		case LOC_UNDEF:	/* Messed up symbol?  */
 		  gdb_printf ("a bogus symbol, class %d.\n",
-			      sym->aclass ());
+			      sym->loc_class ());
 		  count--;		/* Don't count this one.  */
 		  continue;
 		case LOC_CONST:
