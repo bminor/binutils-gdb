@@ -46,7 +46,7 @@ if { [build_executable "failed to build" $testfile $srcfile \
 #  - namespace ID
 #  - name (file path)
 
-proc get_info_shared {{arg ""}} {
+proc get_info_shared {} {
     set from_re "($::hex)\\s+"
     set to_re "($::hex)\\s+"
     set ns_re "(?:($::decimal)\\s+)?"
@@ -54,19 +54,19 @@ proc get_info_shared {{arg ""}} {
     set name_re "(\[^\r\n\]+)"
     set libs {}
 
-    gdb_test_multiple "info sharedlibrary $arg" "" {
-	-re {From\s+To\s+(NS\s+)?Syms Read\s+Shared Object Library\r\n} {
-		exp_continue
+    gdb_test_multiple "info sharedlibrary" "" {
+	-re {From\s+To\s+(Linker NS\s+)?Syms Read\s+Shared Object Library\r\n} {
+	    exp_continue
 	}
 
 	-re "^${from_re}${to_re}${ns_re}${syms_read_re}${name_re}\r\n" {
-		set from $expect_out(1,string)
-		set to $expect_out(2,string)
-		set ns $expect_out(3,string)
-		set name $expect_out(4,string)
+	    set from $expect_out(1,string)
+	    set to $expect_out(2,string)
+	    set ns $expect_out(3,string)
+	    set name $expect_out(4,string)
 
-		lappend libs [list $from $to $ns $name]
-		exp_continue
+    	    lappend libs [list $from $to $ns $name]
+	    exp_continue
 	}
 
 	-re {^\(\*\): Shared library is missing debugging information\.\r\n} {
