@@ -116,5 +116,5 @@ verbose -log "status line: '$status'"
 
 # The status line uses standout, which may translate to different attributes
 # depending on the terminal settings.  Just check for at least one attribute.
-gdb_assert { [regexp "^<.*>exec" $status] == 1 } \
+gdb_assert { [regexp "^<.*>(exec|extended-r)" $status] == 1 } \
     "status window: reverse"
