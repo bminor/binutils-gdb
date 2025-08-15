@@ -950,14 +950,13 @@ obj_elf_parse_section_letters (char *str, size_t len,
 		  bed = get_elf_backend_data (stdoutput);
 
 		  if (bed->elf_osabi == ELFOSABI_NONE
-		      || bed->elf_osabi == ELFOSABI_STANDALONE
 		      || bed->elf_osabi == ELFOSABI_GNU
 		      || bed->elf_osabi == ELFOSABI_FREEBSD)
 		    {
 		      /* Add flags in the SHF_MASKOS range to gnu_attr for
 			 OSABIs that support those flags.
-			 Also adding the flags for ELFOSABI_{NONE,STANDALONE}
-			 allows them to be validated later in obj_elf_section.
+			 Also adding the flags for ELFOSABI_NONE allows them
+			 to be validated later in obj_elf_section.
 			 We can't just always set these bits in gnu_attr for
 			 all OSABIs, since Binutils does not recognize all
 			 SHF_MASKOS bits for non-GNU OSABIs.  It's therefore
