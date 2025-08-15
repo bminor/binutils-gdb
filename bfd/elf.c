@@ -8434,9 +8434,28 @@ _bfd_elf_copy_private_section_data (bfd *ibfd,
 		  & ~(SEC_LINK_ONCE | SEC_LINK_DUPLICATES | SEC_RELOC)) == 0)))
     elf_section_type (osec) = elf_section_type (isec);
 
-  /* FIXME: Is this correct for all OS/PROC specific flags?  */
-  elf_section_flags (osec) = (elf_section_flags (isec)
-			      & (SHF_MASKOS | SHF_MASKPROC));
+  elf_section_flags (osec) = elf_section_flags (isec);
+  /* Like for type, retain flags for objcopy (yet unlike for type, don't do so
+     for relocatable link).  Same heuristic as there: If the BFD section flags
+     are different, assume --set-section-flags is in use for the section.
+
+     FIXME: Is this correct for all OS/PROC specific flags?  */
+  if (link_info != NULL || osec->flags != isec->flags)
+    elf_section_flags (osec) &= (SHF_MASKOS | SHF_MASKPROC);
+  else
+    {
+      /* Clear only flags which are set below or elsewhere.  */
+      elf_section_flags (osec) &= ~(SHF_WRITE | SHF_ALLOC | SHF_EXECINSTR
+				    | SHF_MERGE | SHF_STRINGS | SHF_LINK_ORDER
+				    | SHF_INFO_LINK | SHF_GROUP | SHF_TLS
+				    | SHF_COMPRESSED);
+      if (elf_section_flags (osec) & ~(SHF_MASKOS | SHF_MASKPROC))
+	_bfd_error_handler
+	  (_("%pB:%pA: warning: retaining unknown section flag(s) %#" PRIx64),
+	   ibfd, isec,
+	   (uint64_t) (elf_section_flags (osec)
+		       & ~(SHF_MASKOS | SHF_MASKPROC)));
+    }
 
   /* Copy sh_info from input for mbind section.  */
   if ((elf_tdata (ibfd)->has_gnu_osabi & elf_gnu_osabi_mbind) != 0
