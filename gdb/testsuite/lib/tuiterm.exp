@@ -631,6 +631,13 @@ proc Term::_csi_l { args } {
     }
 }
 
+# Set Scrolling Region (DECSTBM, CSI Ps ; Ps r)
+#
+# https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
+proc Term::_csi_r { top bottom } {
+    _log "ignored: set scrolling region"
+}
+
 # Window manipulation (XTWINOPS, CSI Ps ; Ps ; Ps t)
 #
 # https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
