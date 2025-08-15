@@ -870,7 +870,7 @@ obj_elf_change_section (const char *name,
 }
 
 static bfd_vma
-obj_elf_parse_section_letters (char *str, size_t len,
+obj_elf_parse_section_letters (char *str, size_t len, bool push,
 			       bool *is_clone, int *inherit, bfd_vma *gnu_attr)
 {
   bfd_vma attr = 0;
@@ -976,7 +976,8 @@ obj_elf_parse_section_letters (char *str, size_t len,
 		*inherit = *str == '+' ? 1 : -1;
 	      else
 		{
-		  as_bad (_("unrecognized .section attribute: want %s%s%s,? or number"),
+		  as_bad (_("unrecognized .%ssection attribute: want %s%s%s,? or number"),
+		    push ? "push" : "",
 		    gnu_attr != NULL ? "a,d,e,o,w,x,G,M,R,S,T"
 				     : "a,e,o,w,x,G,M,S,T",
 		    md_extra != NULL ? "," : "", md_extra);
@@ -1268,8 +1269,8 @@ obj_elf_section (int push)
 	    }
 
 	  const struct elf_backend_data *bed = get_elf_backend_data (stdoutput);
-	  attr = obj_elf_parse_section_letters (beg, strlen (beg), &is_clone,
-						&inherit,
+	  attr = obj_elf_parse_section_letters (beg, strlen (beg), push,
+						&is_clone, &inherit,
 						bed->elf_osabi == ELFOSABI_NONE
 						|| (bed->elf_osabi
 						    == ELFOSABI_GNU)
