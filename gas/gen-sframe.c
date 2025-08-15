@@ -330,7 +330,7 @@ get_num_sframe_fres (void);
 /* Get CFA base register ID as represented in SFrame Frame Row Entry.  */
 
 static unsigned int
-get_fre_base_reg_id (struct sframe_row_entry *sframe_fre)
+get_fre_base_reg_id (const struct sframe_row_entry *sframe_fre)
 {
   unsigned int cfi_insn_cfa_base_reg = sframe_fre->cfa_base_reg;
   unsigned fre_base_reg = SFRAME_BASE_REG_SP;
@@ -348,7 +348,7 @@ get_fre_base_reg_id (struct sframe_row_entry *sframe_fre)
 /* Get number of offsets necessary for the SFrame Frame Row Entry.  */
 
 static unsigned int
-get_fre_num_offsets (struct sframe_row_entry *sframe_fre)
+get_fre_num_offsets (const struct sframe_row_entry *sframe_fre)
 {
   /* Atleast 1 must always be present (to recover CFA).  */
   unsigned int fre_num_offsets = 1;
@@ -368,7 +368,7 @@ get_fre_num_offsets (struct sframe_row_entry *sframe_fre)
    SFrame frame row entry.  */
 
 static unsigned int
-sframe_get_fre_offset_size (struct sframe_row_entry *sframe_fre)
+sframe_get_fre_offset_size (const struct sframe_row_entry *sframe_fre)
 {
   unsigned int max_offset_size = 0;
   unsigned int cfa_offset_size = 0;
@@ -549,7 +549,7 @@ sframe_fde_free (struct sframe_func_entry *sframe_fde)
 static void
 output_sframe_row_entry (symbolS *fde_start_addr,
 			 symbolS *fde_end_addr,
-			 struct sframe_row_entry *sframe_fre)
+			 const struct sframe_row_entry *sframe_fre)
 {
   unsigned char fre_info;
   unsigned int fre_num_offsets;
@@ -624,7 +624,7 @@ output_sframe_row_entry (symbolS *fde_start_addr,
 static void
 output_sframe_funcdesc (symbolS *start_of_fre_section,
 			symbolS *fre_symbol,
-			struct sframe_func_entry *sframe_fde)
+			const struct sframe_func_entry *sframe_fde)
 {
   expressionS exp;
   symbolS *dw_fde_start_addrS, *dw_fde_end_addrS;
@@ -897,7 +897,7 @@ sframe_xlate_ctx_finalize (struct sframe_xlate_ctx *xlate_ctx,
 
 static void
 sframe_xlate_ctx_add_fre (struct sframe_xlate_ctx *xlate_ctx,
-			 struct sframe_row_entry *fre)
+			  struct sframe_row_entry *fre)
 {
   gas_assert (xlate_ctx && fre);
 
@@ -924,7 +924,7 @@ sframe_xlate_ctx_add_fre (struct sframe_xlate_ctx *xlate_ctx,
 
 static void
 sframe_row_entry_initialize (struct sframe_row_entry *cur_fre,
-			     struct sframe_row_entry *prev_fre)
+			     const struct sframe_row_entry *prev_fre)
 {
   gas_assert (prev_fre);
   cur_fre->cfa_base_reg = prev_fre->cfa_base_reg;
@@ -958,7 +958,7 @@ sframe_register_name (unsigned int reg)
 
 static int
 sframe_xlate_do_advance_loc (struct sframe_xlate_ctx *xlate_ctx,
-			     struct cfi_insn_data *cfi_insn)
+			     const struct cfi_insn_data *cfi_insn)
 {
   struct sframe_row_entry *last_fre = xlate_ctx->last_fre;
   /* Get the scratchpad FRE currently being updated as the cfi_insn's
@@ -1004,7 +1004,7 @@ sframe_xlate_do_advance_loc (struct sframe_xlate_ctx *xlate_ctx,
 
 static int
 sframe_xlate_do_def_cfa (struct sframe_xlate_ctx *xlate_ctx,
-			 struct cfi_insn_data *cfi_insn)
+			 const struct cfi_insn_data *cfi_insn)
 
 {
   /* Get the scratchpad FRE.  This FRE will eventually get linked in.  */
@@ -1039,9 +1039,9 @@ sframe_xlate_do_def_cfa (struct sframe_xlate_ctx *xlate_ctx,
 
 static int
 sframe_xlate_do_def_cfa_register (struct sframe_xlate_ctx *xlate_ctx,
-				  struct cfi_insn_data *cfi_insn)
+				  const struct cfi_insn_data *cfi_insn)
 {
-  struct sframe_row_entry *last_fre = xlate_ctx->last_fre;
+  const struct sframe_row_entry *last_fre = xlate_ctx->last_fre;
   /* Get the scratchpad FRE.  This FRE will eventually get linked in.  */
   struct sframe_row_entry *cur_fre = xlate_ctx->cur_fre;
 
@@ -1071,7 +1071,7 @@ sframe_xlate_do_def_cfa_register (struct sframe_xlate_ctx *xlate_ctx,
 
 static int
 sframe_xlate_do_def_cfa_offset (struct sframe_xlate_ctx *xlate_ctx,
-				struct cfi_insn_data *cfi_insn)
+				const struct cfi_insn_data *cfi_insn)
 {
   /* The scratchpad FRE currently being updated with each cfi_insn
      being interpreted.  This FRE eventually gets linked in into the
@@ -1105,7 +1105,7 @@ sframe_xlate_do_def_cfa_offset (struct sframe_xlate_ctx *xlate_ctx,
 
 static int
 sframe_xlate_do_offset (struct sframe_xlate_ctx *xlate_ctx,
-			struct cfi_insn_data *cfi_insn)
+			const struct cfi_insn_data *cfi_insn)
 {
   /* The scratchpad FRE currently being updated with each cfi_insn
      being interpreted.  This FRE eventually gets linked in into the
@@ -1172,7 +1172,7 @@ sframe_xlate_do_val_offset (const struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_U
 
 static int
 s390_sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx,
-			       struct cfi_insn_data *cfi_insn)
+			       const struct cfi_insn_data *cfi_insn)
 {
   /* The scratchpad FRE currently being updated with each cfi_insn
      being interpreted.  This FRE eventually gets linked in into the
@@ -1201,8 +1201,8 @@ s390_sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx,
    Return SFRAME_XLATE_OK if success.  */
 
 static int
-sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
-			  struct cfi_insn_data *cfi_insn)
+sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx,
+			  const struct cfi_insn_data *cfi_insn)
 {
   /* Conditionally invoke S390-specific implementation.  */
   if (sframe_get_abi_arch () == SFRAME_ABI_S390X_ENDIAN_BIG)
@@ -1232,7 +1232,7 @@ sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
 static int
 sframe_xlate_do_remember_state (struct sframe_xlate_ctx *xlate_ctx)
 {
-  struct sframe_row_entry *last_fre = xlate_ctx->last_fre;
+  const struct sframe_row_entry *last_fre = xlate_ctx->last_fre;
 
   /* If there is no FRE state to remember, nothing to do here.  Return
      early with non-zero error code, this will cause no SFrame stack trace
@@ -1278,7 +1278,7 @@ sframe_xlate_do_restore_state (struct sframe_xlate_ctx *xlate_ctx)
 
 static int
 sframe_xlate_do_restore (struct sframe_xlate_ctx *xlate_ctx,
-			 struct cfi_insn_data *cfi_insn)
+			 const struct cfi_insn_data *cfi_insn)
 {
   struct sframe_row_entry *cie_fre = xlate_ctx->first_fre;
   /* The scratchpad FRE currently being updated with each cfi_insn
@@ -1321,7 +1321,7 @@ sframe_xlate_do_restore (struct sframe_xlate_ctx *xlate_ctx,
 
 static int
 sframe_xlate_do_aarch64_negate_ra_state (struct sframe_xlate_ctx *xlate_ctx,
-					 struct cfi_insn_data *cfi_insn ATTRIBUTE_UNUSED)
+					 const struct cfi_insn_data *cfi_insn ATTRIBUTE_UNUSED)
 {
   struct sframe_row_entry *cur_fre = xlate_ctx->cur_fre;
 
@@ -1338,7 +1338,7 @@ sframe_xlate_do_aarch64_negate_ra_state (struct sframe_xlate_ctx *xlate_ctx,
 
 static int
 sframe_xlate_do_aarch64_negate_ra_state_with_pc (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
-						 struct cfi_insn_data *cfi_insn ATTRIBUTE_UNUSED)
+						 const struct cfi_insn_data *cfi_insn ATTRIBUTE_UNUSED)
 {
   as_warn (_("no SFrame FDE emitted; .cfi_negate_ra_state_with_pc"));
   /* The used signing method should be encoded inside the FDE in SFrame v3.
@@ -1358,7 +1358,7 @@ sframe_xlate_do_aarch64_negate_ra_state_with_pc (struct sframe_xlate_ctx *xlate_
 
 static int
 sframe_xlate_do_gnu_window_save (struct sframe_xlate_ctx *xlate_ctx,
-				 struct cfi_insn_data *cfi_insn)
+				 const struct cfi_insn_data *cfi_insn)
 {
   unsigned char abi_arch = sframe_get_abi_arch ();
 
@@ -1725,7 +1725,7 @@ sframe_get_cfi_name (int cfi_opc)
 
 static int
 sframe_do_cfi_insn (struct sframe_xlate_ctx *xlate_ctx,
-		    struct cfi_insn_data *cfi_insn)
+		    const struct cfi_insn_data *cfi_insn)
 {
   int err = 0;
 
@@ -1805,7 +1805,7 @@ static int
 sframe_do_fde (struct sframe_xlate_ctx *xlate_ctx,
 	       const struct fde_entry *dw_fde)
 {
-  struct cfi_insn_data *cfi_insn;
+  const struct cfi_insn_data *cfi_insn;
   int err = SFRAME_XLATE_OK;
 
   xlate_ctx->dw_fde = dw_fde;
