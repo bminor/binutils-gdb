@@ -240,4 +240,8 @@ run_dump_test "segment-start" {{name (default)}}
 run_dump_test "segment-start" {{name (overridden)} \
 			       {ld -Ttext-segment=0x10000000}}
 
+run_dump_test "pr33265-1"
+run_dump_test "pr33265-2"
+run_dump_test "pr33265-3"
+
 set LDFLAGS $old_LDFLAGS

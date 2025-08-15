@@ -58,6 +58,9 @@
 #define TO_ADDR(X) ((X) >> opb_shift)
 #define TO_SIZE(X) ((X) << opb_shift)
 
+/* The maximum nested group depth.  */
+#define MAX_NESTED_GROUP_DEPTH 100
+
 /* Local variables.  */
 static struct obstack stat_obstack;
 static struct obstack map_obstack;
@@ -3634,18 +3637,21 @@ static struct bfd_link_hash_entry *plugin_undefs = NULL;
 static void
 open_input_bfds (lang_statement_union_type *s,
 		 lang_output_section_statement_type *os,
-		 enum open_bfd_mode mode)
+		 enum open_bfd_mode mode,
+		 unsigned int *nested_group_count_p)
 {
   for (; s != NULL; s = s->header.next)
     {
       switch (s->header.type)
 	{
 	case lang_constructors_statement_enum:
-	  open_input_bfds (constructor_list.head, os, mode);
+	  open_input_bfds (constructor_list.head, os, mode,
+			   nested_group_count_p);
 	  break;
 	case lang_output_section_statement_enum:
 	  os = &s->output_section_statement;
-	  open_input_bfds (os->children.head, os, mode);
+	  open_input_bfds (os->children.head, os, mode,
+			   nested_group_count_p);
 	  break;
 	case lang_wild_statement_enum:
 	  /* Maybe we should load the file's symbols.  */
@@ -3654,7 +3660,8 @@ open_input_bfds (lang_statement_union_type *s,
 	      && !wildcardp (s->wild_statement.filename)
 	      && !archive_path (s->wild_statement.filename))
 	    lookup_name (s->wild_statement.filename);
-	  open_input_bfds (s->wild_statement.children.head, os, mode);
+	  open_input_bfds (s->wild_statement.children.head, os, mode,
+			   nested_group_count_p);
 	  break;
 	case lang_group_statement_enum:
 	  {
@@ -3667,6 +3674,8 @@ open_input_bfds (lang_statement_union_type *s,
 	       until no new symbols are added to the list of undefined
 	       symbols.  */
 
+	    ++*nested_group_count_p;
+
 	    do
 	      {
 #if BFD_SUPPORTS_PLUGINS
@@ -3674,7 +3683,8 @@ open_input_bfds (lang_statement_union_type *s,
 #endif
 		undefs = link_info.hash->undefs_tail;
 		open_input_bfds (s->group_statement.children.head, os,
-				 mode | OPEN_BFD_FORCE);
+				 mode | OPEN_BFD_FORCE,
+				 nested_group_count_p);
 	      }
 	    while (undefs != link_info.hash->undefs_tail
 #if BFD_SUPPORTS_PLUGINS
@@ -3684,6 +3694,8 @@ open_input_bfds (lang_statement_union_type *s,
 		   || (plugin_insert != plugin_insert_save && plugin_undefs)
 #endif
 		   );
+
+	    --*nested_group_count_p;
 	  }
 	  break;
 	case lang_target_statement_enum:
@@ -3695,6 +3707,10 @@ open_input_bfds (lang_statement_union_type *s,
 	      lang_statement_union_type **os_tail;
 	      lang_statement_list_type add;
 	      bfd *abfd;
+
+	      if (*nested_group_count_p >= MAX_NESTED_GROUP_DEPTH)
+		fatal (_("%P: group nested too deeply in linker script '%s'\n"),
+		       s->input_statement.filename);
 
 	      s->input_statement.target = current_target;
 
@@ -8285,6 +8301,8 @@ lang_os_merge_sort_children (void)
 void
 lang_process (void)
 {
+  unsigned int nested_group_count = 0;
+
   lang_os_merge_sort_children ();
 
   /* Finalize dynamic list.  */
@@ -8316,7 +8334,8 @@ lang_process (void)
   /* Create a bfd for each input file.  */
   current_target = default_target;
   lang_statement_iteration++;
-  open_input_bfds (statement_list.head, NULL, OPEN_BFD_NORMAL);
+  open_input_bfds (statement_list.head, NULL, OPEN_BFD_NORMAL,
+		   &nested_group_count);
 
   /* Now that open_input_bfds has processed assignments and provide
      statements we can give values to symbolic origin/length now.  */
@@ -8351,7 +8370,8 @@ lang_process (void)
 	last_os = ((lang_output_section_statement_type *)
 		   ((char *) lang_os_list.tail
 		    - offsetof (lang_output_section_statement_type, next)));
-      open_input_bfds (*added.tail, last_os, OPEN_BFD_NORMAL);
+      open_input_bfds (*added.tail, last_os, OPEN_BFD_NORMAL,
+		       &nested_group_count);
       if (plugin_undefs == link_info.hash->undefs_tail)
 	plugin_undefs = NULL;
       /* Restore the global list pointer now they have all been added.  */
@@ -8402,7 +8422,8 @@ lang_process (void)
 	  /* Rescan archives in case new undefined symbols have appeared.  */
 	  files = file_chain;
 	  lang_statement_iteration++;
-	  open_input_bfds (statement_list.head, NULL, OPEN_BFD_RESCAN);
+	  open_input_bfds (statement_list.head, NULL, OPEN_BFD_RESCAN,
+			   &nested_group_count);
 	  lang_list_remove_tail (&file_chain, &files);
 	  while (files.head != NULL)
 	    {
@@ -10886,6 +10907,7 @@ cmdline_emit_object_only_section (void)
   size_t size, off;
   bfd_byte *contents;
   struct stat st;
+  unsigned int nested_group_count = 0;
 
   /* Get a temporary object-only file.  */
   output_filename = make_temp_file (".obj-only.o");
@@ -10922,7 +10944,8 @@ cmdline_emit_object_only_section (void)
   cmdline_get_object_only_input_files ();
 
   /* Open object-only input files.  */
-  open_input_bfds (statement_list.head, NULL, OPEN_BFD_NORMAL);
+  open_input_bfds (statement_list.head, NULL, OPEN_BFD_NORMAL,
+		   &nested_group_count);
 
   ldemul_after_open ();
 
