@@ -125,6 +125,19 @@ tui_rl_switch_mode (int notused1, int notused2)
 	}
       else
 	{
+	  /* If we type "foo", entering it into the readline buffer
+
+	       (gdb) foo
+			^
+	     and then switch to TUI and back, we may get back
+
+	       (gdb) foo
+		     ^
+	     which is confusing because "foo" is no longer part of the
+	     readline buffer.  Fix this by clearing it before switching to
+	     TUI.  */
+	  rl_clear_visible_line ();
+
 	  /* If tui_enable throws, we'll re-prep below.  */
 	  rl_deprep_terminal ();
 	  tui_enable ();
