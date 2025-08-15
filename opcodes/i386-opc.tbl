@@ -3244,8 +3244,8 @@ tilezero, 0xf249, AMX_TILE, Modrm|Vex128|Space0F38|VexW0|NoSuf, { RegTMM }
 
 <loc:opc, $t:0x0, t1:0x1>
 
-t2rpntlvw<z><loc>, 0x<z:pfx>6e | <loc:opc>, APX_F(AMX_TRANSPOSE), Sibmem|Vex128|EVex128|Space0F38|VexW0|NoSuf|ImplicitGroup, { Unspecified|BaseIndex, RegTMM }
-t2rpntlvw<z>rs<loc>, 0x<z:pfx>f8 | <loc:opc>, AMX_TRANSPOSE&APX_F(AMX_MOVRS), Sibmem|Vex128|EVex128|Map5|VexW0|NoSuf|ImplicitGroup, { Unspecified|BaseIndex, RegTMM }
+t2rpntlvw<z><loc>, 0x<z:pfx>6e | <loc:opc>, AMX_TRANSPOSE, Sibmem|Vex128|Space0F38|VexW0|NoSuf|ImplicitGroup, { Unspecified|BaseIndex, RegTMM }
+t2rpntlvw<z>rs<loc>, 0x<z:pfx>f8 | <loc:opc>, AMX_TRANSPOSE&AMX_MOVRS, Sibmem|Vex128|Map5|VexW0|NoSuf|ImplicitGroup, { Unspecified|BaseIndex, RegTMM }
 
 <z>
 <loc>

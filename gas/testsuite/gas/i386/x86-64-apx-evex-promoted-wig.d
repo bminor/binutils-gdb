@@ -139,14 +139,6 @@ Disassembly of section \.text:
 [	 ]*[a-f0-9]+:[	 ]*62 52 87 00 f7 df[	 ]+shrx[	 ]+%r31,%r15,%r11
 [	 ]*[a-f0-9]+:[	 ]*62 5a 87 00 f7 bc 87 23 01 00 00[	 ]+shrx[	 ]+%r31,0x123\(%r31,%rax,4\),%r15
 [	 ]*[a-f0-9]+:[	 ]*62 da 7d 08 49 84 87 23 01 00 00[	 ]+sttilecfg[	 ]+0x123\(%r31,%rax,4\)
-[	 ]*[a-f0-9]+:[	 ]*62 da 7c 08 6e b4 c7 23 01 00 00[	 ]+t2rpntlvwz0[	 ]+0x123\(%r31,%rax,8\),%tmm6
-[	 ]*[a-f0-9]+:[	 ]*62 dd 7c 08 f8 b4 c7 23 01 00 00[	 ]+t2rpntlvwz0rs[	 ]+0x123\(%r31,%rax,8\),%tmm6
-[	 ]*[a-f0-9]+:[	 ]*62 dd 7c 08 f9 b4 c7 23 01 00 00[	 ]+t2rpntlvwz0rst1[	 ]+0x123\(%r31,%rax,8\),%tmm6
-[	 ]*[a-f0-9]+:[	 ]*62 da 7c 08 6f b4 c7 23 01 00 00[	 ]+t2rpntlvwz0t1[	 ]+0x123\(%r31,%rax,8\),%tmm6
-[	 ]*[a-f0-9]+:[	 ]*62 da 7d 08 6e b4 c7 23 01 00 00[	 ]+t2rpntlvwz1[	 ]+0x123\(%r31,%rax,8\),%tmm6
-[	 ]*[a-f0-9]+:[	 ]*62 dd 7d 08 f8 b4 c7 23 01 00 00[	 ]+t2rpntlvwz1rs[	 ]+0x123\(%r31,%rax,8\),%tmm6
-[	 ]*[a-f0-9]+:[	 ]*62 dd 7d 08 f9 b4 c7 23 01 00 00[	 ]+t2rpntlvwz1rst1[	 ]+0x123\(%r31,%rax,8\),%tmm6
-[	 ]*[a-f0-9]+:[	 ]*62 da 7d 08 6f b4 c7 23 01 00 00[	 ]+t2rpntlvwz1t1[	 ]+0x123\(%r31,%rax,8\),%tmm6
 [	 ]*[a-f0-9]+:[	 ]*62 da 7f 08 4b b4 87 23 01 00 00[	 ]+tileloadd[	 ]+0x123\(%r31,%rax,4\),%tmm6
 [	 ]*[a-f0-9]+:[	 ]*62 b2 7b 08 4a b4 fd 00 00 00 10[	 ]+tileloaddrs[  ]+0x10000000\(%rbp,%r31,8\),%tmm6
 [	 ]*[a-f0-9]+:[	 ]*62 fa 7f 08 4a 1c 20[	 ]+tileloaddrs[	 ]+\(%r16,%riz,1\),%tmm3
@@ -286,14 +278,6 @@ Disassembly of section \.text:
 [	 ]*[a-f0-9]+:[	 ]*62 52 87 00 f7 df[	 ]+shrx[	 ]+%r31,%r15,%r11
 [	 ]*[a-f0-9]+:[	 ]*62 5a 87 00 f7 bc 87 23 01 00 00[	 ]+shrx[	 ]+%r31,0x123\(%r31,%rax,4\),%r15
 [	 ]*[a-f0-9]+:[	 ]*62 da 7d 08 49 84 87 23 01 00 00[	 ]+sttilecfg[	 ]+0x123\(%r31,%rax,4\)
-[	 ]*[a-f0-9]+:[	 ]*62 da 7c 08 6e b4 c7 23 01 00 00[	 ]+t2rpntlvwz0[	 ]+0x123\(%r31,%rax,8\),%tmm6
-[	 ]*[a-f0-9]+:[	 ]*62 dd 7c 08 f8 b4 c7 23 01 00 00[	 ]+t2rpntlvwz0rs[	 ]+0x123\(%r31,%rax,8\),%tmm6
-[	 ]*[a-f0-9]+:[	 ]*62 dd 7c 08 f9 b4 c7 23 01 00 00[	 ]+t2rpntlvwz0rst1[	 ]+0x123\(%r31,%rax,8\),%tmm6
-[	 ]*[a-f0-9]+:[	 ]*62 da 7c 08 6f b4 c7 23 01 00 00[	 ]+t2rpntlvwz0t1[	 ]+0x123\(%r31,%rax,8\),%tmm6
-[	 ]*[a-f0-9]+:[	 ]*62 da 7d 08 6e b4 c7 23 01 00 00[	 ]+t2rpntlvwz1[	 ]+0x123\(%r31,%rax,8\),%tmm6
-[	 ]*[a-f0-9]+:[	 ]*62 dd 7d 08 f8 b4 c7 23 01 00 00[	 ]+t2rpntlvwz1rs[	 ]+0x123\(%r31,%rax,8\),%tmm6
-[	 ]*[a-f0-9]+:[	 ]*62 dd 7d 08 f9 b4 c7 23 01 00 00[	 ]+t2rpntlvwz1rst1[	 ]+0x123\(%r31,%rax,8\),%tmm6
-[	 ]*[a-f0-9]+:[	 ]*62 da 7d 08 6f b4 c7 23 01 00 00[	 ]+t2rpntlvwz1t1[	 ]+0x123\(%r31,%rax,8\),%tmm6
 [	 ]*[a-f0-9]+:[	 ]*62 da 7f 08 4b b4 87 23 01 00 00[	 ]+tileloadd[	 ]+0x123\(%r31,%rax,4\),%tmm6
 [	 ]*[a-f0-9]+:[	 ]*62 b2 7b 08 4a b4 fd 00 00 00 10[	 ]+tileloaddrs[  ]+0x10000000\(%rbp,%r31,8\),%tmm6
 [	 ]*[a-f0-9]+:[	 ]*62 fa 7f 08 4a 1c 20[	 ]+tileloaddrs[	 ]+\(%r16,%riz,1\),%tmm3
