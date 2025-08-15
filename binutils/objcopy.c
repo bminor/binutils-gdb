@@ -4058,7 +4058,7 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
  	}
 
 #if BFD_SUPPORTS_PLUGINS
-  /* Copy slim LTO IR file as unknown file.  */
+      /* Copy slim LTO IR file as unknown file.  */
       if (ibfd->lto_type == lto_slim_ir_object)
 	ok_object = false;
 #endif
