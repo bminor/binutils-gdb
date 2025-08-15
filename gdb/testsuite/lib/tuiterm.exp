@@ -186,6 +186,20 @@ proc Term::_esc_0x28_0 {} {
     _log "ignored: G0: DEC Special Character and Line Drawing Set"
 }
 
+# DECKPAM (Application Keypad, ESC =)
+#
+# https://vt100.net/docs/vt510-rm/DECKPAM.html
+proc Term::_esc_0x3d {} {
+    _log "ignored: Application Keypad"
+}
+
+# DECKPNM (Normal Keypad, ESC >)
+#
+# https://vt100.net/docs/vt510-rm/DECKPNM.html
+proc Term::_esc_0x3e {} {
+    _log "ignored: Normal Keypad"
+}
+
 # Insert Character.
 #
 # https://vt100.net/docs/vt510-rm/ICH.html
@@ -997,6 +1011,11 @@ proc Term::accept_gdb_output { } {
 	    set hexval [format "%02x" $val]
 	    set cmd $expect_out(2,string)
 	    eval _esc_0x${hexval}_$cmd
+	}
+	-re "^\x1b(\[=>\])" {
+	    scan $expect_out(1,string) %c val
+	    set hexval [format "%02x" $val]
+	    _esc_0x$hexval
 	}
 	-re "^\x1b\\\[(\\??)(\[0-9;\]*)(\[a-zA-Z@`\])" {
 	    set prefix $expect_out(1,string)
