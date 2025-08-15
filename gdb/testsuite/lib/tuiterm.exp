@@ -32,6 +32,11 @@ namespace eval Term {
     variable _last_char
 
     variable _resize_count
+
+    variable _alternate
+    variable _alternate_setup
+    set _alternate 0
+    set _alternate_setup 0
 }
 
 proc Term::_log { what } {
@@ -626,6 +631,64 @@ proc Term::_csi_l { args } {
     }
 }
 
+# DECSET (CSI ? h)
+#
+# https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Mouse-Tracking
+proc Term::_csi_0x3f_h { args } {
+    foreach item $args {
+	switch -exact -- $item {
+	    1 {
+		_log "ignored: Application Cursor Keys"
+	    }
+	    7 {
+		_log "ignored: autowrap mode"
+	    }
+	    1000 {
+		_log "ignored: Send Mouse X & Y on button press and release"
+	    }
+	    1006 {
+		_log "ignored: Enable SGR Mouse Mode"
+	    }
+	    1049 {
+		_log "switch to alternate screen"
+		_set_alternate 1
+	    }
+	    default {
+		error unsupported
+	    }
+	}
+    }
+}
+
+# DECRST (CSI ? l)
+#
+# https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Mouse-Tracking
+proc Term::_csi_0x3f_l { args } {
+    foreach item $args {
+	switch -exact -- $item {
+	    1 {
+		_log "ignored: Normal Cursor Keys"
+	    }
+	    7 {
+		_log "ignored: no autowrap mode"
+	    }
+	    1000 {
+		_log "ignored: Don't send Mouse X & Y on button press and release"
+	    }
+	    1006 {
+		_log "ignored: Disable SGR Mouse Mode"
+	    }
+	    1049 {
+		_log "switch from alternate screen"
+		_set_alternate 0
+	    }
+	    default {
+		error "unsupported"
+	    }
+	}
+    }
+}
+
 # Reset the attributes in attributes array UPVAR_NAME to the default values.
 proc Term::_reset_attrs { upvar_name } {
     upvar $upvar_name var
@@ -794,6 +857,66 @@ proc Term::_move_cursor { col row } {
     set _cur_row $row
 }
 
+# Enable or disable alternate screen.
+proc Term::_set_alternate { enable } {
+    variable _alternate
+    if { $enable == $_alternate } {
+	return
+    }
+    set _alternate $enable
+
+    variable _attrs
+    variable _chars
+    variable _cur_col
+    variable _cur_row
+
+    variable _save_attrs
+    variable _save_chars
+    variable _save_cur_col
+    variable _save_cur_row
+
+    variable _alternate_setup
+
+    if { $_alternate_setup } {
+	set tmp $_save_chars
+    }
+    set _save_chars [array get _chars]
+    if { $_alternate_setup } {
+	array set _chars $tmp
+    }
+
+    if { $_alternate_setup } {
+	set tmp $_save_attrs
+    }
+    set _save_attrs [array get _attrs]
+    if { $_alternate_setup } {
+	array set _attrs $tmp
+    }
+
+    if { $_alternate_setup } {
+	set tmp $_save_cur_col
+    }
+    set _save_cur_col $_cur_col
+    if { $_alternate_setup } {
+	set _cur_col $tmp
+    }
+
+    if { $_alternate_setup } {
+	set tmp $_save_cur_row
+    }
+    set _save_cur_row $_cur_row
+    if { $_alternate_setup } {
+	set _cur_row $tmp
+    }
+
+    if { ! $_alternate_setup } {
+	variable _rows
+	variable _cols
+	_setup $_rows $_cols
+	set _alternate_setup 1
+    }
+}
+
 # Initialize.
 proc Term::_setup {rows cols} {
     global stty_init
@@ -830,6 +953,20 @@ proc Term::accept_gdb_output { } {
 	-re "^\x1b(\[0-9a-zA-Z\])" {
 	    _log "wait_for: unsupported escape"
 	    error "unsupported escape"
+	}
+	-re "^\x1b\\\[(\\??)(\[0-9;\]*)(\[a-zA-Z@`\])" {
+	    set prefix $expect_out(1,string)
+	    set cmd $expect_out(3,string)
+	    set params [split $expect_out(2,string) ";"]
+	    if { $prefix == "" } {
+		_log "wait_for: _csi_$cmd <<<$expect_out(1,string)>>>"
+		eval _csi_$cmd $params
+	    } else {
+		scan $prefix %c val
+		set hexval [format "%02x" $val]
+		_log "wait_for: _csi_0x${hexval}_$cmd <<<$expect_out(1,string)>>>"
+		eval _csi_0x${hexval}_$cmd $params
+	    }
 	}
 	-re "^\x1b\\\[(\[0-9;\]*)(\[a-zA-Z@`\])" {
 	    set cmd $expect_out(2,string)
