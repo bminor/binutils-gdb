@@ -792,7 +792,7 @@ change_section (const char *name,
 	= match_p->linked_to_symbol_name;
 
       bfd_set_section_flags (sec, flags);
-      if (flags & (SEC_MERGE | SEC_STRINGS))
+      if (entsize != 0)
 	sec->entsize = entsize;
       elf_group_name (sec) = match_p->group_name;
 
@@ -847,7 +847,7 @@ change_section (const char *name,
 	       processor or application specific attribute as suspicious?  */
 	    elf_section_flags (sec) = attr;
 
-	  if ((flags & (SEC_MERGE | SEC_STRINGS))
+	  if (entsize != 0
 	      && old_sec->entsize != (unsigned) entsize)
 	    as_bad (_("changed section entity size for %s"), name);
 	}
@@ -871,7 +871,8 @@ obj_elf_change_section (const char *name,
 
 static bfd_vma
 obj_elf_parse_section_letters (char *str, size_t len, bool push,
-			       bool *is_clone, int *inherit, bfd_vma *gnu_attr)
+			       bool *is_clone, int *inherit, bfd_vma *gnu_attr,
+			       bool *has_entsize)
 {
   bfd_vma attr = 0;
 
@@ -912,6 +913,9 @@ obj_elf_parse_section_letters (char *str, size_t len, bool push,
 	  break;
 	case 'x':
 	  attr |= SHF_EXECINSTR;
+	  break;
+	case 'E':
+	  *has_entsize = true;
 	  break;
 	case 'G':
 	  attr |= SHF_GROUP;
@@ -978,8 +982,8 @@ obj_elf_parse_section_letters (char *str, size_t len, bool push,
 		{
 		  as_bad (_("unrecognized .%ssection attribute: want %s%s%s,? or number"),
 		    push ? "push" : "",
-		    gnu_attr != NULL ? "a,d,e,o,w,x,G,M,R,S,T"
-				     : "a,e,o,w,x,G,M,S,T",
+		    gnu_attr != NULL ? "a,d,e,o,w,x,E,G,M,R,S,T"
+				     : "a,e,o,w,x,E,G,M,S,T",
 		    md_extra != NULL ? "," : "", md_extra);
 		  return attr;
 		}
@@ -1187,7 +1191,7 @@ obj_elf_section (int push)
   bfd_vma attr;
   bfd_vma gnu_attr;
   int entsize;
-  bool linkonce;
+  bool linkonce, has_entsize;
   subsegT new_subsection = 0;
   struct elf_section_match match;
   unsigned long linked_to_section_index = -1UL;
@@ -1232,6 +1236,7 @@ obj_elf_section (int push)
   attr = 0;
   gnu_attr = 0;
   entsize = 0;
+  has_entsize = false;
   linkonce = 0;
 
   if (*input_line_pointer == ',')
@@ -1276,7 +1281,8 @@ obj_elf_section (int push)
 						    == ELFOSABI_GNU)
 						|| (bed->elf_osabi
 						    == ELFOSABI_FREEBSD)
-						? &gnu_attr : NULL);
+						? &gnu_attr : NULL,
+						&has_entsize);
 
 	  if (inherit > 0)
 	    attr |= elf_section_flags (now_seg);
@@ -1284,6 +1290,9 @@ obj_elf_section (int push)
 	    attr = elf_section_flags (now_seg) & ~attr;
 	  if (inherit)
 	    type = elf_section_type (now_seg);
+
+	  if ((attr & (SHF_MERGE | SHF_STRINGS)) != 0)
+	    has_entsize = true;
 
 	  SKIP_WHITESPACE ();
 	  if (*input_line_pointer == ',')
@@ -1324,16 +1333,18 @@ obj_elf_section (int push)
 	    }
 
 	  SKIP_WHITESPACE ();
-	  if ((attr & (SHF_MERGE | SHF_STRINGS)) != 0
-	      && *input_line_pointer == ',')
+	  if (has_entsize && *input_line_pointer == ',')
 	    {
 	      ++input_line_pointer;
 	      SKIP_WHITESPACE ();
 	      if (inherit && *input_line_pointer == ','
+		  && ((bfd_section_flags (now_seg)
+		       & (SEC_MERGE | SEC_STRINGS)) != 0
+		      || now_seg->entsize))
+		goto fetch_entsize;
+	      if (is_end_of_stmt (*input_line_pointer)
 		  && (bfd_section_flags (now_seg)
 		      & (SEC_MERGE | SEC_STRINGS)) != 0)
-		goto fetch_entsize;
-	      if (is_end_of_stmt (*input_line_pointer))
 		{
 		  /* ??? This is here for older versions of gcc that
 		     test for gas string merge support with
@@ -1341,7 +1352,7 @@ obj_elf_section (int push)
 		     Unfortunately '@' begins a comment on arm.
 		     This isn't as_warn because gcc tests with
 		     --fatal-warnings. */
-		  as_tsktsk (_("missing merge / string entity size, 1 assumed"));
+		  as_tsktsk (_("missing section entity size, 1 assumed"));
 		  entsize = 1;
 		}
 	      else
@@ -1350,15 +1361,17 @@ obj_elf_section (int push)
 		  SKIP_WHITESPACE ();
 		  if (entsize <= 0)
 		    {
-		      as_warn (_("invalid merge / string entity size"));
+		      as_warn (_("invalid section entity size"));
 		      attr &= ~(SHF_MERGE | SHF_STRINGS);
+		      has_entsize = false;
 		      entsize = 0;
 		    }
 		}
 	    }
-	  else if ((attr & (SHF_MERGE | SHF_STRINGS)) != 0 && inherit
-		    && (bfd_section_flags (now_seg)
-			& (SEC_MERGE | SEC_STRINGS)) != 0)
+	  else if (has_entsize && inherit
+		    && ((bfd_section_flags (now_seg)
+			 & (SEC_MERGE | SEC_STRINGS)) != 0
+			|| now_seg->entsize))
 	    {
 	    fetch_entsize:
 	      entsize = now_seg->entsize;
@@ -1369,6 +1382,7 @@ obj_elf_section (int push)
 		 entsize must be specified if SHF_MERGE is set.  */
 	      as_warn (_("entity size for SHF_MERGE not specified"));
 	      attr &= ~(SHF_MERGE | SHF_STRINGS);
+	      has_entsize = false;
 	    }
 	  else if ((attr & SHF_STRINGS) != 0)
 	    {
@@ -1377,6 +1391,11 @@ obj_elf_section (int push)
 		 so we have to default this silently for
 		 compatibility.  */
 	      entsize = 1;
+	    }
+	  else if (has_entsize)
+	    {
+	      as_warn (_("entity size not specified"));
+	      has_entsize = false;
 	    }
 
 	  if ((attr & (SHF_MERGE | SHF_STRINGS)) != 0 && type == SHT_NOBITS)

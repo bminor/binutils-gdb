@@ -7004,12 +7004,14 @@ section) in the same file.
 section is writable
 @item x
 section is executable
+@item E
+section has a (non-zero) element/entry size
+@item G
+section is a member of a section group
 @item M
 section is mergeable
 @item S
 section contains zero terminated strings
-@item G
-section is a member of a section group
 @item T
 section is used for thread-local-storage
 @item ?
@@ -7118,8 +7120,8 @@ is not generally a good idea as section indices are rarely known at assembly
 time, but the facility is provided for testing purposes.  An index of zero is
 allowed.  It indicates that the linked-to section has already been discarded.
 
-Note: If both one of @var{M} or @var{S} and @var{o} flags are present, then the
-fields for the Merge/String flag should come first, like this:
+Note: If both one of @var{M}, @var{S}, or @var{E} and @var{o} flags are present,
+then the type and entry size fields should come first, like this:
 
 @smallexample
 .section @var{name},"@var{flags}"Mo,@@@var{type},@var{entsize},@var{SymbolName}
@@ -7142,8 +7144,8 @@ indicates that only one copy of this section should be retained
 an alias for comdat
 @end table
 
-Note: Uf both one of @var{M} or @var{S} and @var{G} flags are present then the
-fields for the Merge/String flag should come first, like this:
+Note: If both one of @var{M}, @var{S}, or @var{E} and @var{G} flags are present
+then the type and entry size fields should come first, like this:
 
 @smallexample
 .section @var{name} , "@var{flags}"MG, @@@var{type}, @var{entsize}, @var{GroupName}[, @var{linkage}]

@@ -869,19 +869,15 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
   else if ((flags & SEC_LOAD) != 0)
     flags |= SEC_DATA;
   if ((hdr->sh_flags & SHF_MERGE) != 0)
-    {
-      flags |= SEC_MERGE;
-      newsect->entsize = hdr->sh_entsize;
-    }
+    flags |= SEC_MERGE;
   if ((hdr->sh_flags & SHF_STRINGS) != 0)
-    {
-      flags |= SEC_STRINGS;
-      newsect->entsize = hdr->sh_entsize;
-    }
+    flags |= SEC_STRINGS;
   if ((hdr->sh_flags & SHF_TLS) != 0)
     flags |= SEC_THREAD_LOCAL;
   if ((hdr->sh_flags & SHF_EXCLUDE) != 0)
     flags |= SEC_EXCLUDE;
+
+  newsect->entsize = hdr->sh_entsize;
 
   switch (elf_elfheader (abfd)->e_ident[EI_OSABI])
     {
@@ -3769,6 +3765,9 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
     }
   if ((asect->flags & (SEC_GROUP | SEC_EXCLUDE)) == SEC_EXCLUDE)
     this_hdr->sh_flags |= SHF_EXCLUDE;
+
+  if (this_hdr->sh_entsize == 0)
+    this_hdr->sh_entsize = asect->entsize;
 
   /* If the section has relocs, set up a section header for the
      SHT_REL[A] section.  If two relocation sections are required for

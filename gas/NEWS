@@ -1,5 +1,8 @@
 -*- text -*-
 
+* ELF targets can now have section entity size specified for arbitrary
+  sections, using the new attribute letter 'E'.
+
 * NaCl target support is removed.
 
 Changes in 2.45:
