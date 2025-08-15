@@ -172,6 +172,20 @@ proc Term::_ctl_0x0d {} {
     }
 }
 
+# Designate G0 Character Set, USASCII (ESC ( B)
+#
+# https://invisible-island.net/xterm/ctlseqs/ctlseqs.html (see "ESC ( C", case C = B)
+proc Term::_esc_0x28_B {} {
+    _log "ignored: G0: USASCII"
+}
+
+# Designate G0 Character Set, DEC Special Character and Line Drawing Set (ESC ( 0)
+#
+# https://invisible-island.net/xterm/ctlseqs/ctlseqs.html (see "ESC ( C", case C = 0)
+proc Term::_esc_0x28_0 {} {
+    _log "ignored: G0: DEC Special Character and Line Drawing Set"
+}
+
 # Insert Character.
 #
 # https://vt100.net/docs/vt510-rm/ICH.html
@@ -977,6 +991,12 @@ proc Term::accept_gdb_output { } {
 	-re "^\x1b(\[0-9a-zA-Z\])" {
 	    _log "wait_for: unsupported escape"
 	    error "unsupported escape"
+	}
+	-re "^\x1b(\[\\(\])(\[a-zA-Z\])" {
+	    scan $expect_out(1,string) %c val
+	    set hexval [format "%02x" $val]
+	    set cmd $expect_out(2,string)
+	    eval _esc_0x${hexval}_$cmd
 	}
 	-re "^\x1b\\\[(\\??)(\[0-9;\]*)(\[a-zA-Z@`\])" {
 	    set prefix $expect_out(1,string)
