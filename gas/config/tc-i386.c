@@ -18669,17 +18669,15 @@ i386_solaris_fix_up_eh_frame (segT sec)
 /* For ELF on x86-64, add support for SHF_X86_64_LARGE.  */
 
 bfd_vma
-x86_64_section_letter (int letter, const char **ptr_msg)
+x86_64_section_letter (int letter, const char **extra)
 {
   if (flag_code == CODE_64BIT)
     {
       if (letter == 'l')
 	return SHF_X86_64_LARGE;
 
-      *ptr_msg = _("bad .section directive: want a,l,w,x,M,S,G,T in string");
+      *extra = "l";
     }
-  else
-    *ptr_msg = _("bad .section directive: want a,w,x,M,S,G,T in string");
   return -1;
 }
 

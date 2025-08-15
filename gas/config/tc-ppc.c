@@ -4171,12 +4171,12 @@ ppc_section_flags (flagword flags, bfd_vma attr ATTRIBUTE_UNUSED, int type)
 }
 
 bfd_vma
-ppc_elf_section_letter (int letter, const char **ptrmsg)
+ppc_elf_section_letter (int letter, const char **extra)
 {
   if (letter == 'v')
     return SHF_PPC_VLE;
 
-  *ptrmsg = _("bad .section directive: want a,e,v,w,x,M,S,G,T in string");
+  *extra = "v";
   return -1;
 }
 #endif /* OBJ_ELF */

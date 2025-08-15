@@ -896,6 +896,11 @@ obj_elf_parse_section_letters (char *str, size_t len,
 		}
 	    }
 	  break;
+	case 'd':
+	  if (gnu_attr == NULL)
+	    goto unrecognized;
+	  *gnu_attr |= SHF_GNU_MBIND;
+	  break;
 	case 'e':
 	  attr |= SHF_EXCLUDE;
 	  break;
@@ -908,33 +913,33 @@ obj_elf_parse_section_letters (char *str, size_t len,
 	case 'x':
 	  attr |= SHF_EXECINSTR;
 	  break;
+	case 'G':
+	  attr |= SHF_GROUP;
+	  break;
 	case 'M':
 	  attr |= SHF_MERGE;
+	  break;
+	case 'R':
+	  if (gnu_attr == NULL)
+	    goto unrecognized;
+	  *gnu_attr |= SHF_GNU_RETAIN;
 	  break;
 	case 'S':
 	  attr |= SHF_STRINGS;
 	  break;
-	case 'G':
-	  attr |= SHF_GROUP;
-	  break;
 	case 'T':
 	  attr |= SHF_TLS;
-	  break;
-	case 'd':
-	  *gnu_attr |= SHF_GNU_MBIND;
-	  break;
-	case 'R':
-	  *gnu_attr |= SHF_GNU_RETAIN;
 	  break;
 	case '?':
 	  *is_clone = true;
 	  break;
 	default:
+	unrecognized:
 	  {
-	    const char *bad_msg = _("unrecognized .section attribute:"
-				    " want a,e,o,w,x,M,S,G,T or number");
+	    const char *md_extra = "";
+
 #ifdef md_elf_section_letter
-	    bfd_vma md_attr = md_elf_section_letter (*str, &bad_msg);
+	    bfd_vma md_attr = md_elf_section_letter (*str, &md_extra);
 	    if (md_attr != (bfd_vma) -1)
 	      attr |= md_attr;
 	    else
@@ -942,21 +947,14 @@ obj_elf_parse_section_letters (char *str, size_t len,
 	      if (ISDIGIT (*str))
 		{
 		  char * end;
-		  const struct elf_backend_data *bed;
 		  bfd_vma numeric_flags = strtoul (str, &end, 0);
 
 		  attr |= numeric_flags;
 
-		  bed = get_elf_backend_data (stdoutput);
-
-		  if (bed->elf_osabi == ELFOSABI_NONE
-		      || bed->elf_osabi == ELFOSABI_GNU
-		      || bed->elf_osabi == ELFOSABI_FREEBSD)
+		  if (gnu_attr != NULL)
 		    {
 		      /* Add flags in the SHF_MASKOS range to gnu_attr for
 			 OSABIs that support those flags.
-			 Also adding the flags for ELFOSABI_NONE allows them
-			 to be validated later in obj_elf_section.
 			 We can't just always set these bits in gnu_attr for
 			 all OSABIs, since Binutils does not recognize all
 			 SHF_MASKOS bits for non-GNU OSABIs.  It's therefore
@@ -972,10 +970,18 @@ obj_elf_parse_section_letters (char *str, size_t len,
 		  len -= (end - str);
 		  str = end;
 		}
-	      else if (!attr && !*gnu_attr && (*str == '+' || *str == '-'))
+	      else if (!*inherit && !attr
+		       && (gnu_attr == NULL || !*gnu_attr)
+		       && (*str == '+' || *str == '-'))
 		*inherit = *str == '+' ? 1 : -1;
 	      else
-		as_fatal ("%s", bad_msg);
+		{
+		  as_bad (_("unrecognized .section attribute: want %s%s%s,? or number"),
+		    gnu_attr != NULL ? "a,d,e,o,w,x,G,M,R,S,T"
+				     : "a,e,o,w,x,G,M,S,T",
+		    md_extra != NULL ? "," : "", md_extra);
+		  return attr;
+		}
 	  }
 	  break;
 	}
@@ -1260,8 +1266,16 @@ obj_elf_section (int push)
 	      ignore_rest_of_line ();
 	      return;
 	    }
+
+	  const struct elf_backend_data *bed = get_elf_backend_data (stdoutput);
 	  attr = obj_elf_parse_section_letters (beg, strlen (beg), &is_clone,
-						&inherit, &gnu_attr);
+						&inherit,
+						bed->elf_osabi == ELFOSABI_NONE
+						|| (bed->elf_osabi
+						    == ELFOSABI_GNU)
+						|| (bed->elf_osabi
+						    == ELFOSABI_FREEBSD)
+						? &gnu_attr : NULL);
 
 	  if (inherit > 0)
 	    attr |= elf_section_flags (now_seg);
@@ -1571,28 +1585,17 @@ obj_elf_section (int push)
 
   if ((gnu_attr & (SHF_GNU_MBIND | SHF_GNU_RETAIN)) != 0)
     {
-      const struct elf_backend_data *bed;
       bool mbind_p = (gnu_attr & SHF_GNU_MBIND) != 0;
 
       if (mbind_p && (attr & SHF_ALLOC) == 0)
 	as_bad (_("SHF_ALLOC isn't set for GNU_MBIND section: %s"), name);
 
-      bed = get_elf_backend_data (stdoutput);
+      if (mbind_p)
+	elf_tdata (stdoutput)->has_gnu_osabi |= elf_gnu_osabi_mbind;
+      if ((gnu_attr & SHF_GNU_RETAIN) != 0)
+	elf_tdata (stdoutput)->has_gnu_osabi |= elf_gnu_osabi_retain;
 
-      if (bed->elf_osabi != ELFOSABI_GNU
-	  && bed->elf_osabi != ELFOSABI_FREEBSD
-	  && bed->elf_osabi != ELFOSABI_NONE)
-	as_bad (_("%s section is supported only by GNU and FreeBSD targets"),
-		mbind_p ? "GNU_MBIND" : "GNU_RETAIN");
-      else
-	{
-	  if (mbind_p)
-	    elf_tdata (stdoutput)->has_gnu_osabi |= elf_gnu_osabi_mbind;
-	  if ((gnu_attr & SHF_GNU_RETAIN) != 0)
-	    elf_tdata (stdoutput)->has_gnu_osabi |= elf_gnu_osabi_retain;
-
-	  attr |= gnu_attr;
-	}
+      attr |= gnu_attr;
     }
 
   change_section (name, type, attr, entsize, &match, linkonce, push,

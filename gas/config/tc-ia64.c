@@ -853,20 +853,20 @@ set_section (char *name)
 /* Map 's' to SHF_IA_64_SHORT.  */
 
 bfd_vma
-ia64_elf_section_letter (int letter, const char **ptr_msg)
+ia64_elf_section_letter (int letter, const char **extra)
 {
   if (letter == 's')
     return SHF_IA_64_SHORT;
-  else if (letter == 'o')
-    return SHF_LINK_ORDER;
 #ifdef TE_VMS
   else if (letter == 'O')
     return SHF_IA_64_VMS_OVERLAID;
   else if (letter == 'g')
     return SHF_IA_64_VMS_GLOBAL;
+  *extra = "g,s,O";
+#else
+  *extra = "s";
 #endif
 
-  *ptr_msg = _("bad .section directive: want a,o,s,w,x,M,S,G,T in string");
   return -1;
 }
 

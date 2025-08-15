@@ -2081,12 +2081,12 @@ mep_fix_adjustable (fixS *fixP)
 }
 
 bfd_vma
-mep_elf_section_letter (int letter, const char **ptrmsg)
+mep_elf_section_letter (int letter, const char **extra)
 {
   if (letter == 'v')
     return SHF_MEP_VLIW;
 
-  *ptrmsg = _("bad .section directive: want a,v,w,x,M,S in string");
+  *extra = "v";
   return -1;
 }
 

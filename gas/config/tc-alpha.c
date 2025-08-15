@@ -5306,12 +5306,12 @@ select_gp_value (void)
 /* Map 's' to SHF_ALPHA_GPREL.  */
 
 bfd_vma
-alpha_elf_section_letter (int letter, const char **ptr_msg)
+alpha_elf_section_letter (int letter, const char **extra)
 {
   if (letter == 's')
     return SHF_ALPHA_GPREL;
 
-  *ptr_msg = _("bad .section directive: want a,s,w,x,M,S,G,T in string");
+  *extra = "s";
   return -1;
 }
 

@@ -1,2 +1,2 @@
 .*: Assembler messages:
-.*:1: Fatal error: .*
+.*:1: Error: unrecognized [.]section attribute: .*
