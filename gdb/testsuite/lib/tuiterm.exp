@@ -33,6 +33,9 @@ namespace eval Term {
 
     variable _resize_count
 
+    variable _TERM
+    set _TERM ""
+
     variable _alternate
     variable _alternate_setup
     set _alternate 0
@@ -1172,13 +1175,24 @@ proc Term::wait_for_line { regexp {pos ""} } {
     return 1
 }
 
+# In BODY, when using Term::with_tuiterm, use TERM instead of the default.
+
+proc Term::with_term { term body } {
+    save_vars { Term::_TERM } {
+	set Term::_TERM $term
+	uplevel $body
+    }
+}
+
 # Setup the terminal with dimensions ROWSxCOLS, TERM=ansi, and execute
 # BODY.
 proc Term::with_tuiterm {rows cols body} {
     global env stty_init
     variable _TERM
     save_vars {env(TERM) env(NO_COLOR) stty_init} {
-	if { [ishost *-*-*bsd*] } {
+	if { $Term::_TERM != "" } {
+	    setenv TERM $Term::_TERM
+	} elseif { [ishost *-*-*bsd*] } {
 	    setenv TERM ansiw
 	} else {
 	    setenv TERM ansi
