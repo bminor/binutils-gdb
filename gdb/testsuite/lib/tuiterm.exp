@@ -631,6 +631,23 @@ proc Term::_csi_l { args } {
     }
 }
 
+# Window manipulation (XTWINOPS, CSI Ps ; Ps ; Ps t)
+#
+# https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
+proc Term::_csi_t { arg1 arg2 arg3 } {
+    if { $arg1 == 22 && $arg2 == 0 && $arg3 == 0 } {
+	_log "ignored: Save xterm icon and window title on stack"
+	return
+    }
+
+    if { $arg1 == 23 && $arg2 == 0 && $arg3 == 0 } {
+	_log "ignored: Restore xterm icon and window title from stack"
+	return
+    }
+
+    error unsupported
+}
+
 # DECSET (CSI ? h)
 #
 # https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Mouse-Tracking
