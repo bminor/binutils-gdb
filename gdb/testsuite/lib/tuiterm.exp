@@ -592,6 +592,40 @@ proc Term::_csi_d {args} {
     }
 }
 
+# Set Mode (SM, CSI h)
+#
+# https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
+proc Term::_csi_h { args } {
+    foreach item $args {
+	switch -exact -- $item {
+	    4 {
+		# Insert Mode (IRM)
+		_log "ignored: insert mode"
+	    }
+	    default {
+		error unsupported
+	    }
+	}
+    }
+}
+
+# Reset Mode (RM, CSI l)
+#
+# https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
+proc Term::_csi_l { args } {
+    foreach item $args {
+	switch -exact -- $item {
+	    4 {
+		# Replace Mode (IRM)
+		_log "ignored: replace mode"
+	    }
+	    default {
+		error unsupported
+	    }
+	}
+    }
+}
+
 # Reset the attributes in attributes array UPVAR_NAME to the default values.
 proc Term::_reset_attrs { upvar_name } {
     upvar $upvar_name var
