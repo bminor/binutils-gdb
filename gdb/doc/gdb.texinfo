@@ -44887,7 +44887,8 @@ packets.)
 @anchor{qSearch memory}
 Search @var{length} bytes at @var{address} for @var{search-pattern}.
 Both @var{address} and @var{length} are encoded in hex;
-@var{search-pattern} is a sequence of bytes, also hex encoded.
+@var{search-pattern} is a sequence of binary-encoded bytes
+(@pxref{Binary Data}).
 
 Reply:
 @table @samp
