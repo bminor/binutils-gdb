@@ -151,3 +151,31 @@ with_override Term::accept_gdb_output test_accept_gdb_output {
 	}
     }
 }
+
+with_test_prefix "Unrecognized escape sequence" {
+    spawn $srcdir/$subdir/gdb.tcl
+    switch_gdb_spawn_id  $spawn_id
+
+    Term::_setup 4 20
+
+    save_vars timeout {
+	set timeout 1
+
+	set line { 0 0 20 1 }
+
+	# Parse "foo".
+	gdb_assert { [Term::wait_for_region_contents \
+			  {*}$line \
+			  [string_to_regexp "foo"]] } \
+	    "foo"
+
+	# Parse "\033(%5".
+	gdb_assert { ![Term::accept_gdb_output 0] } \
+	    "fail to parse escape sequence"
+	gdb_assert { [Term::wait_for_region_contents \
+			  {*}$line \
+			  [string_to_regexp "^\[(%5"]] } \
+	    "echoed escape sequence"
+    }
+    Term::dump_screen
+}

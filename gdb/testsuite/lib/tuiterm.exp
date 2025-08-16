@@ -999,31 +999,86 @@ proc Term::_setup {rows cols} {
 
 # Accept some output from gdb and update the screen.
 # Return 1 if successful, or 0 if a timeout occurred.
-proc Term::accept_gdb_output { } {
+proc Term::accept_gdb_output { {warn 1} } {
     global expect_out
+
+    set ctls "\x07\x08\x0a\x0d"
+    set esc "\x1b"
+    set re_ctls "\[$ctls\]"
+    set re_others "\[^$esc$ctls\]"
+    set have_esc 0
     gdb_expect {
-	-re "^\[\x07\x08\x0a\x0d\]" {
+	-re ^$re_ctls {
 	    scan $expect_out(0,string) %c val
 	    set hexval [format "%02x" $val]
 	    _log "wait_for: _ctl_0x${hexval}"
 	    _ctl_0x${hexval}
 	}
-	-re "^\x1b(\[0-9a-zA-Z\])" {
+	-re "^$esc" {
+	    _log "wait_for: ESC"
+	    set have_esc 1
+	}
+	-re "^$re_others+" {
+	    _insert $expect_out(0,string)
+	}
+
+	timeout {
+	    # Assume a timeout means we somehow missed the
+	    # expected result, and carry on.
+	    warning "timeout in accept_gdb_output"
+	    dump_screen
+	    return 0
+	}
+    }
+
+    if { !$have_esc } {
+	return 1
+    }
+
+    set re_csi [string_to_regexp "\["]
+    set have_csi 0
+    gdb_expect {
+	-re "^(\[0-9a-zA-Z\])" {
 	    _log "wait_for: unsupported escape"
 	    error "unsupported escape"
 	}
-	-re "^\x1b(\[\\(\])(\[a-zA-Z\])" {
+	-re "^(\[\\(\])(\[a-zA-Z\])" {
 	    scan $expect_out(1,string) %c val
 	    set hexval [format "%02x" $val]
 	    set cmd $expect_out(2,string)
 	    eval _esc_0x${hexval}_$cmd
 	}
-	-re "^\x1b(\[=>\])" {
+	-re "^(\[=>\])" {
 	    scan $expect_out(1,string) %c val
 	    set hexval [format "%02x" $val]
 	    _esc_0x$hexval
 	}
-	-re "^\x1b\\\[(\\??)(\[0-9;\]*)(\[a-zA-Z@`\])" {
+	-re "^$re_csi" {
+	    _log "wait_for: CSI"
+	    set have_csi 1
+	}
+
+	timeout {
+	    # Assume a timeout means we somehow missed the
+	    # expected result, and carry on.
+	    if { $warn } {
+		warning "timeout in accept_gdb_output following ESC"
+		dump_screen
+	    }
+	    _insert "^\["
+	    return 0
+	}
+    }
+
+    if { !$have_csi } {
+	return 1
+    }
+
+    set re_csi_prefix {[?]}
+    set re_csi_args {[0-9;]}
+    set re_csi_cmd {[a-zA-Z@`]}
+    gdb_expect {
+	-re "^($re_csi_prefix?)($re_csi_args*)($re_csi_cmd)" {
 	    set prefix $expect_out(1,string)
 	    set cmd $expect_out(3,string)
 	    set params [split $expect_out(2,string) ";"]
@@ -1037,21 +1092,15 @@ proc Term::accept_gdb_output { } {
 		eval _csi_0x${hexval}_$cmd $params
 	    }
 	}
-	-re "^\x1b\\\[(\[0-9;\]*)(\[a-zA-Z@`\])" {
-	    set cmd $expect_out(2,string)
-	    set params [split $expect_out(1,string) ";"]
-	    _log "wait_for: _csi_$cmd <<<$expect_out(1,string)>>>"
-	    eval _csi_$cmd $params
-	}
-	-re "^\[^\x07\x08\x0a\x0d\x1b\]+" {
-	    _insert $expect_out(0,string)
-	}
 
 	timeout {
 	    # Assume a timeout means we somehow missed the
 	    # expected result, and carry on.
-	    warning "timeout in accept_gdb_output"
-	    dump_screen
+	    if { $warn } {
+		warning "timeout in accept_gdb_output following CSI"
+		dump_screen
+	    }
+	    _insert "^\[\["
 	    return 0
 	}
     }
