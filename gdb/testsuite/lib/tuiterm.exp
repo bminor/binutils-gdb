@@ -1078,19 +1078,25 @@ proc Term::accept_gdb_output { {warn 1} } {
     set re_csi_args {[0-9;]}
     set re_csi_cmd {[a-zA-Z@`]}
     gdb_expect {
+	-re "^($re_csi_cmd)" {
+	    set cmd $expect_out(1,string)
+	    _log "wait_for: _csi_$cmd"
+	    eval _csi_$cmd
+	}
+	-re "^($re_csi_args*)($re_csi_cmd)" {
+	    set params [split $expect_out(1,string) ";"]
+	    set cmd $expect_out(2,string)
+	    _log "wait_for: _csi_$cmd <<<$params>>>"
+	    eval _csi_$cmd $params
+	}
 	-re "^($re_csi_prefix?)($re_csi_args*)($re_csi_cmd)" {
 	    set prefix $expect_out(1,string)
-	    set cmd $expect_out(3,string)
 	    set params [split $expect_out(2,string) ";"]
-	    if { $prefix == "" } {
-		_log "wait_for: _csi_$cmd <<<$expect_out(1,string)>>>"
-		eval _csi_$cmd $params
-	    } else {
-		scan $prefix %c val
-		set hexval [format "%02x" $val]
-		_log "wait_for: _csi_0x${hexval}_$cmd <<<$expect_out(1,string)>>>"
-		eval _csi_0x${hexval}_$cmd $params
-	    }
+	    set cmd $expect_out(3,string)
+	    scan $prefix %c val
+	    set hexval [format "%02x" $val]
+	    _log "wait_for: _csi_0x${hexval}_$cmd <<<$expect_out(1,string)>>>"
+	    eval _csi_0x${hexval}_$cmd $params
 	}
 
 	timeout {
