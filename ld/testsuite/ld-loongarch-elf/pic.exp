@@ -115,31 +115,33 @@ run_ld_link_tests $link_tests
 set link_tests_libc [list \
   [list \
     "$testname readelf -s/-r nopic-global-so" \
-    "-L./tmpdir -lnopic-global -L/usr/lib -lc" "" \
+    "-Wl,--no-as-needed" "" \
     {nopic-global.s} \
     {{readelf {-s} nopic-global-so.sd} \
      {readelf {-r} nopic-global-so.rd}} \
     "nopic-global-so" \
+    "" "-L./tmpdir -lnopic-global" \
   ] \
   [list \
     "$testname readelf -s/-x nopic-weak-global-so" \
-    "-L./tmpdir -lnopic-global -L/usr/lib -lc" "" \
+    "-Wl,--no-as-needed" "" \
     {nopic-weak-global.s} \
     {{readelf {-s} nopic-weak-global-so.sd} \
      {readelf {-r} nopic-weak-global-so.rd}} \
     "nopic-weak-global-so" \
+    "" "-L./tmpdir -lnopic-global" \
   ] \
 ]
 
 
 #  0:name
-#  1:ld/ar leading options, placed before object files
-#  2:ld/ar trailing options, placed after object files
-#  3:assembler options
-#  4:filenames of assembler files
-#  5:list of actions, options and expected outputs.
-#  6:name of output file
-#  7:compiler flags (optional)
+#  1:leading ld or ar options
+#  2:compile options
+#  3:filenames of source files
+#  4:action and options.
+#  5:name of output file
+#  6:language (optional)
+#  7:trailing ld options (optional), placed after object files
 run_cc_link_tests $link_tests_libc
 
 
@@ -170,10 +172,11 @@ set link_exec_tests [list \
   ] \
   [list \
     "$testname" \
-    "-L./tmpdir -lnopic-global -lc -Wl,-rpath=./tmpdir -no-pie" "" \
+    "-Wl,--no-as-needed" "" \
     { nopic-global.s }   \
     "nopic-global-so" \
-    "nopic-global.out" \
+    "nopic-global.out" "" "" "" \
+    "-L./tmpdir -lnopic-global -lc -Wl,-rpath=./tmpdir -no-pie" \
   ] \
   [list \
     "$testname" \
@@ -184,10 +187,11 @@ set link_exec_tests [list \
   ] \
   [list \
     "$testname" \
-    "-L./tmpdir -lnopic-global -lc -Wl,-rpath=./tmpdir -no-pie" "" \
+    "-Wl,--no-as-needed" "" \
     { nopic-weak-global.s }   \
     "nopic-weak-global-so" \
-    "nopic-weak-global.out" \
+    "nopic-weak-global.out" "" "" "" \
+    "-L./tmpdir -lnopic-global -lc -Wl,-rpath=./tmpdir -no-pie" \
   ] \
 ]
 
