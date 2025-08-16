@@ -109,10 +109,31 @@ struct c_parse_state
 
   /* When set, a name token is not looked up.  This can be useful when
      the search domain is known by context.  TYPE_CODE_UNDEF is used
-     to mean "unset" here -- only types with tags (enum, struct,
-     class, union) can use this feature.  */
+     to mean "unset" here -- typically only types with tags (enum,
+     struct, class, union) use this feature, but TYPE_CODE_VOID is
+     also used to avoid the lookup for field names.  */
   type_code assume_classification = TYPE_CODE_UNDEF;
 };
+
+/* Used for field names, which skip name lookup.  */
+struct qualified_name_token
+{
+  /* The prefix, if any.  This can be nullptr.  */
+  const char *prefix;
+  /* The field name itself.  */
+  const char *name;
+  /* True if the COMPLETE token was seen.  */
+  bool complete;
+};
+
+/* A convenient overload of copy_name.  */
+static std::string
+copy_name (qualified_name_token token)
+{
+  if (token.prefix == nullptr)
+    return token.name;
+  return std::string (token.prefix) + "::" + token.name;
+}
 
 /* This is set and cleared in c_parse.  */
 
@@ -125,6 +146,8 @@ static int yylex (void);
 static void yyerror (const char *);
 
 static int type_aggregate_p (struct type *);
+
+static void handle_qualified_field_name (qualified_name_token token);
 
 using namespace expr;
 %}
@@ -146,6 +169,7 @@ using namespace expr;
     } typed_val_float;
     struct type *tval;
     struct stoken sval;
+    qualified_name_token qval;
     struct typed_stoken tsval;
     struct ttype tsym;
     struct symtoken ssym;
@@ -166,7 +190,7 @@ using namespace expr;
 static int parse_number (struct parser_state *par_state,
 			 const char *, int, int, YYSTYPE *);
 static struct stoken operator_stoken (const char *);
-static struct stoken typename_stoken (const char *);
+static qualified_name_token typename_stoken (const char *);
 static void check_parameter_typelist (std::vector<struct type *> *);
 
 #if defined(YYBISON) && YYBISON < 30800
@@ -208,7 +232,9 @@ static void c_print_token (FILE *file, int type, YYSTYPE value);
 %token <voidval> COMPLETE
 %token <tsym> TYPENAME
 %token <theclass> CLASSNAME	/* ObjC Class name */
-%type <sval> name field_name
+%type <sval> name
+%type <qval> qual_field_name field_name field_name_or_complete
+%type <qval> field_or_destructor
 %type <svec> string_exp
 %type <ssym> name_not_typename
 %type <tsym> type_name
@@ -370,115 +396,71 @@ exp	:	ALIGNOF '(' type_exp ')'	%prec UNARY
 			{ pstate->wrap<unop_alignof_operation> (); }
 	;
 
-exp	:	exp ARROW field_name
+exp	:	exp ARROW
 			{
-			  pstate->push_new<structop_ptr_operation>
-			    (pstate->pop (), copy_name ($3));
+			  cpstate->assume_classification = TYPE_CODE_VOID;
 			}
-	;
-
-exp	:	exp ARROW field_name COMPLETE
+		field_name_or_complete
 			{
-			  structop_base_operation *op
-			    = new structop_ptr_operation (pstate->pop (),
-							  copy_name ($3));
-			  pstate->mark_struct_expression (op);
-			  pstate->push (operation_up (op));
-			}
-	;
+			  cpstate->assume_classification = TYPE_CODE_UNDEF;
 
-exp	:	exp ARROW COMPLETE
-			{
-			  structop_base_operation *op
-			    = new structop_ptr_operation (pstate->pop (), "");
-			  pstate->mark_struct_expression (op);
-			  pstate->push (operation_up (op));
+			  if ($4.prefix != nullptr)
+			    {
+			      handle_qualified_field_name ($4);
+			      /* exp->type::name becomes exp->*(&type::name) */
+			      /* Note: this doesn't work if name is a
+				 static member!  FIXME */
+			      pstate->wrap<unop_addr_operation> ();
+			      pstate->wrap2<structop_mptr_operation> ();
+			    }
+			  else
+			    {
+			      structop_base_operation *op
+				= new structop_ptr_operation (pstate->pop (),
+							      copy_name ($4));
+			      if ($4.complete)
+				pstate->mark_struct_expression (op);
+			      pstate->push (operation_up (op));
+			    }
 			}
-	;
-
-exp	:	exp ARROW '~' name
-			{
-			  pstate->push_new<structop_ptr_operation>
-			    (pstate->pop (), "~" + copy_name ($4));
-			}
-	;
-
-exp	:	exp ARROW '~' name COMPLETE
-			{
-			  structop_base_operation *op
-			    = new structop_ptr_operation (pstate->pop (),
-							  "~" + copy_name ($4));
-			  pstate->mark_struct_expression (op);
-			  pstate->push (operation_up (op));
-			}
-	;
-
-exp	:	exp ARROW qualified_name
-			{ /* exp->type::name becomes exp->*(&type::name) */
-			  /* Note: this doesn't work if name is a
-			     static member!  FIXME */
-			  pstate->wrap<unop_addr_operation> ();
-			  pstate->wrap2<structop_mptr_operation> (); }
 	;
 
 exp	:	exp ARROW_STAR exp
 			{ pstate->wrap2<structop_mptr_operation> (); }
 	;
 
-exp	:	exp '.' field_name
+exp	:	exp '.'
 			{
-			  if (pstate->language ()->la_language
-			      == language_opencl)
+			  cpstate->assume_classification = TYPE_CODE_VOID;
+			}
+		field_name_or_complete
+			{
+			  cpstate->assume_classification = TYPE_CODE_UNDEF;
+
+			  if ($4.prefix != nullptr)
+			    {
+			      handle_qualified_field_name ($4);
+			      /* exp.type::name becomes exp.*(&type::name) */
+			      /* Note: this doesn't work if name is a
+				 static member!  FIXME */
+			      pstate->wrap<unop_addr_operation> ();
+			      pstate->wrap2<structop_member_operation> ();
+			    }
+			  else if (pstate->language ()->la_language
+				   == language_opencl
+				   && !$4.complete)
 			    pstate->push_new<opencl_structop_operation>
-			      (pstate->pop (), copy_name ($3));
+			      (pstate->pop (), copy_name ($4));
 			  else
-			    pstate->push_new<structop_operation>
-			      (pstate->pop (), copy_name ($3));
+			    {
+			      structop_base_operation *op
+				= new structop_operation (pstate->pop (),
+							  copy_name ($4));
+			      if ($4.complete)
+				pstate->mark_struct_expression (op);
+			      pstate->push (operation_up (op));
+			    }
 			}
-	;
-
-exp	:	exp '.' field_name COMPLETE
-			{
-			  structop_base_operation *op
-			    = new structop_operation (pstate->pop (),
-						      copy_name ($3));
-			  pstate->mark_struct_expression (op);
-			  pstate->push (operation_up (op));
-			}
-	;
-
-exp	:	exp '.' COMPLETE
-			{
-			  structop_base_operation *op
-			    = new structop_operation (pstate->pop (), "");
-			  pstate->mark_struct_expression (op);
-			  pstate->push (operation_up (op));
-			}
-	;
-
-exp	:	exp '.' '~' name
-			{
-			  pstate->push_new<structop_operation>
-			    (pstate->pop (), "~" + copy_name ($4));
-			}
-	;
-
-exp	:	exp '.' '~' name COMPLETE
-			{
-			  structop_base_operation *op
-			    = new structop_operation (pstate->pop (),
-						      "~" + copy_name ($4));
-			  pstate->mark_struct_expression (op);
-			  pstate->push (operation_up (op));
-			}
-	;
-
-exp	:	exp '.' qualified_name
-			{ /* exp.type::name becomes exp.*(&type::name) */
-			  /* Note: this doesn't work if name is a
-			     static member!  FIXME */
-			  pstate->wrap<unop_addr_operation> ();
-			  pstate->wrap2<structop_member_operation> (); }
 	;
 
 exp	:	exp DOT_STAR exp
@@ -1765,13 +1747,66 @@ oper:	OPERATOR NEW
 			}
 	;
 
+qual_field_name:
+	qual_field_name COLONCOLON name
+		{
+		  $$.complete = false;
+		  if ($1.prefix == nullptr)
+		    $$.prefix = $1.name;
+		  else
+		    $$.prefix = obconcat (&cpstate->expansion_obstack,
+					  $1.prefix, "::", $1.name, nullptr);
+		  $$.name = obstack_strndup (&cpstate->expansion_obstack,
+					     $3.ptr, $3.length);
+		}
+	| name
+		{
+		  $$.complete = false;
+		  $$.prefix = nullptr;
+		  $$.name = obstack_strndup (&cpstate->expansion_obstack,
+					     $1.ptr, $1.length);
+		}
+	;
+
+field_or_destructor:
+	qual_field_name
+	| qual_field_name COLONCOLON '~' name
+		{
+		  $$.complete = false;
+		  if ($1.prefix == nullptr)
+		    $$.prefix = $1.name;
+		  else
+		    $$.prefix = obconcat (&cpstate->expansion_obstack,
+					  $1.prefix, "::", $1.name, nullptr);
+		  char *name
+		    = (char *) obstack_alloc (&cpstate->expansion_obstack,
+					      $4.length + 2);
+		  name[0] = '~';
+		  memcpy (&name[1], $4.ptr, $4.length);
+		  name[$4.length + 1] = '\0';
+		  $$.name = name;
+		}
+	| '~' name
+		{
+		  $$.complete = false;
+		  $$.prefix = nullptr;
+		  char *name
+		    = (char *) obstack_alloc (&cpstate->expansion_obstack,
+					      $2.length + 2);
+		  name[0] = '~';
+		  memcpy (&name[1], $2.ptr, $2.length);
+		  name[$2.length + 1] = '\0';
+		  $$.name = name;
+		}
+	;
+
 /* This rule exists in order to allow some tokens that would not normally
    match the 'name' rule to appear as fields within a struct.  The example
    that initially motivated this was the RISC-V target which models the
    floating point registers as a union with fields called 'float' and
    'double'.  */
 field_name
-	:	name
+	:	field_or_destructor
 	|	DOUBLE_KEYWORD { $$ = typename_stoken ("double"); }
 	|	FLOAT_KEYWORD { $$ = typename_stoken ("float"); }
 	|	INT_KEYWORD { $$ = typename_stoken ("int"); }
@@ -1779,6 +1814,20 @@ field_name
 	|	SHORT { $$ = typename_stoken ("short"); }
 	|	SIGNED_KEYWORD { $$ = typename_stoken ("signed"); }
 	|	UNSIGNED { $$ = typename_stoken ("unsigned"); }
+	;
+
+field_name_or_complete
+	:	field_name
+	|	field_name COMPLETE
+			{
+			  $$ = $1;
+			  $$.complete = true;
+			}
+	|	COMPLETE
+			{
+			  $$ = typename_stoken ("");
+			  $$.complete = true;
+			}
 	;
 
 /* This rule is used when the preceding token is a keyword that takes
@@ -1879,12 +1928,10 @@ operator_stoken (const char *op)
 
 /* Returns a stoken of the type named TYPE.  */
 
-static struct stoken
+static qualified_name_token
 typename_stoken (const char *type)
 {
-  struct stoken st = { type, 0 };
-  st.length = strlen (type);
-  return st;
+  return qualified_name_token { nullptr, type, false };
 };
 
 /* Return true if the type is aggregate-like.  */
@@ -3231,6 +3278,48 @@ classify_inner_name (struct parser_state *par_state,
   internal_error (_("not reached"));
 }
 
+/* A helper function for the specific case of a qualified field name,
+   like "obj->type1::type2::field".  This takes the type prefix
+   ("type1::type2" in the example) and finds the corresponding type.
+   It will either throw an exception, or push a scope_operation on the
+   operation stack.  */
+static void
+handle_qualified_field_name (qualified_name_token token)
+{
+  struct type *type = nullptr;
+  std::string accum;
+  for (const auto name : split_name (token.prefix, split_style::CXX))
+    {
+      std::string current (name);
+
+      if (accum.empty ())
+	accum = name;
+      else
+	accum = accum + "::" + current;
+
+      yylval.ssym.stoken.ptr = current.c_str ();
+      yylval.ssym.stoken.length = current.size ();
+      yylval.ssym.sym = {};
+      yylval.ssym.is_a_field_of_this = 0;
+
+      int kind = classify_inner_name (pstate,
+				      pstate->expression_context_block,
+				      type);
+      if (kind != TYPENAME)
+	error (_("could not find type '%s'"), accum.c_str ());
+
+      type = yylval.tsym.type;
+    }
+
+  type = check_typedef (type);
+  if (!type_aggregate_p (type))
+    error (_("`%s' is not defined as an aggregate type."),
+	   TYPE_SAFE_NAME (type));
+  if (token.name[0] == '~')
+    destructor_name_p (token.name, type);
+  pstate->push_new<scope_operation> (type, token.name);
+}
+
 /* The outer level of a two-level lexer.  This calls the inner lexer
    to return tokens.  It then either returns these tokens, or
    aggregates them into a larger token.  This lets us work around a
@@ -3271,7 +3360,8 @@ yylex (void)
       || (current.token != TYPENAME && current.token != COLONCOLON
 	  && current.token != FILENAME
 	  && (cpstate->assume_classification == TYPE_CODE_UNDEF
-	      || current.token != NAME)))
+	      || current.token != NAME))
+      || cpstate->assume_classification == TYPE_CODE_VOID)
     return current.token;
 
   /* Read any sequence of alternating "::" and name-like tokens into
