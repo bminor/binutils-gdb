@@ -653,13 +653,21 @@ proc test_cursor_backward_tabulation { } {
 }
 
 proc test_repeat { } {
-    Term::_move_cursor 2 1
-    set Term::_last_char X
+    Term::_move_cursor 0 1
 
-    Term::_csi_b 3
+    Term::_insert "xxX"
+    gdb_assert { $Term::_last_char == "X"  }
+    check "insert" {
+	"abcdefgh"
+	"xxXlmnop"
+	"qrstuvwx"
+	"yz01234 "
+    } 3 1
+
+    Term::_csi_b 2
     check "repeat" {
 	"abcdefgh"
-	"ijXXXnop"
+	"xxXXXnop"
 	"qrstuvwx"
 	"yz01234 "
     } 5 1

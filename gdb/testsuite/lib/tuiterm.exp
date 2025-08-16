@@ -889,6 +889,9 @@ proc Term::_insert {str} {
 		}
 	    }
 	}
+
+	variable _last_char
+	set _last_char [string index $str end]
     }
 }
 
@@ -1042,8 +1045,6 @@ proc Term::accept_gdb_output { } {
 	}
 	-re "^\[^\x07\x08\x0a\x0d\x1b\]+" {
 	    _insert $expect_out(0,string)
-	    variable _last_char
-	    set _last_char [string index $expect_out(0,string) end]
 	}
 
 	timeout {
