@@ -117,11 +117,17 @@ if {![info exists CC_FOR_TARGET]} {
 if {![info exists CFLAGS_FOR_TARGET]} {
     set CFLAGS_FOR_TARGET "-g -O2"
 }
+if {![info exists CFLAGS_FOR_TARGET_TEST]} {
+    set CFLAGS_FOR_TARGET_TEST ""
+}
 if {![info exists CXX_FOR_TARGET]} {
     set CXX_FOR_TARGET [find_g++]
 }
 if {![info exists CXXFLAGS_FOR_TARGET]} {
     set CXXFLAGS_FOR_TARGET ""
+}
+if {![info exists CXXFLAGS_FOR_TARGET_TEST]} {
+    set CXXFLAGS_FOR_TARGET_TEST ""
 }
 
 # This allows us to run the linker testsuite with clang as the compilation

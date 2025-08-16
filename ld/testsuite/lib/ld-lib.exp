@@ -253,6 +253,8 @@ proc default_ld_link { ld target objects } {
 proc default_ld_compile { cc source object } {
     global CFLAGS_FOR_TARGET
     global CXXFLAGS_FOR_TARGET
+    global CFLAGS_FOR_TARGET_TEST
+    global CXXFLAGS_FOR_TARGET_TEST
     global srcdir
     global subdir
     global host_triplet
@@ -286,10 +288,14 @@ proc default_ld_compile { cc source object } {
     }
 
     set ccexe [string replace $ccexe 0 [string last "/" $ccexe] ""]
+    set cflag_test ""
+    set cxxflag_test ""
     if {[string match "*++*" $ccexe]} {
 	append flags " $CXXFLAGS_FOR_TARGET"
+	set cflag_test "$CXXFLAGS_FOR_TARGET_TEST"
     } else {
 	append flags " $CFLAGS_FOR_TARGET"
+	set cflag_test "$CFLAGS_FOR_TARGET_TEST"
     }
 
     if [board_info [target_info name] exists cflags] {
@@ -300,7 +306,7 @@ proc default_ld_compile { cc source object } {
 	append flags " [board_info [target_info name] multilib_flags]"
     }
 
-    set cmd "$cc $flags $ccflags -c $source -o $object"
+    set cmd "$cc $flags $ccflags $cflag_test -c $source -o $object"
     verbose -log "$cmd"
 
     set status [remote_exec host [concat sh -c [list "$cmd 2>&1"]] "" "/dev/null" "ld.tmp"]
@@ -727,6 +733,8 @@ proc run_ld_link_exec_tests { ldtests args } {
     global env
     global CC_FOR_TARGET
     global CXX_FOR_TARGET
+    global CFLAGS_FOR_TARGET_TEST
+    global CXXFLAGS_FOR_TARGET_TEST
     global errcnt
     global exec_output
     global STATIC_LDFLAGS
@@ -780,9 +788,9 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    lappend objfiles $objfile
 
 	    if { [ string match "c++" $lang ] } {
-		set cmd "$CXX_FOR_TARGET -c $cflags"
+		set cmd "$CXX_FOR_TARGET -c $cflags $CXXFLAGS_FOR_TARGET_TEST"
 	    } else {
-		set cmd "$CC_FOR_TARGET -c $cflags"
+		set cmd "$CC_FOR_TARGET -c $cflags $CFLAGS_FOR_TARGET_TEST"
 	    }
 	    if ![ld_compile $cmd $srcdir/$subdir/$src_file $objfile] {
 		set failed 1
@@ -799,10 +807,10 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    set link_cmd $ld
 	} elseif { [ string match "c++" $lang ] } {
 	    set link_proc ld_link
-	    set link_cmd $CXX_FOR_TARGET
+	    set link_cmd "$CXX_FOR_TARGET $CXXFLAGS_FOR_TARGET_TEST"
 	} else {
 	    set link_proc ld_link
-	    set link_cmd $CC_FOR_TARGET
+	    set link_cmd "$CC_FOR_TARGET $CFLAGS_FOR_TARGET_TEST"
 	}
 
 	if { $binfile eq "tmpdir/" } {
@@ -888,6 +896,8 @@ proc run_cc_link_tests { ldtests } {
     global env
     global CC_FOR_TARGET
     global CXX_FOR_TARGET
+    global CFLAGS_FOR_TARGET_TEST
+    global CXXFLAGS_FOR_TARGET_TEST
     global ar
     global exec_output
     global STATIC_LDFLAGS
@@ -969,9 +979,9 @@ proc run_cc_link_tests { ldtests } {
 	    lappend objfiles $objfile
 
 	    if { [ string match "c++" $lang ] } {
-		set cmd "$CXX_FOR_TARGET -c $cflags"
+		set cmd "$CXX_FOR_TARGET $CXXFLAGS_FOR_TARGET_TEST -c $cflags"
 	    } else {
-		set cmd "$CC_FOR_TARGET -c $cflags"
+		set cmd "$CC_FOR_TARGET $CFLAGS_FOR_TARGET_TEST -c $cflags"
 	    }
 	    if ![ld_compile $cmd $srcdir/$subdir/$src_file $objfile] {
 		set failed 1
@@ -987,9 +997,9 @@ proc run_cc_link_tests { ldtests } {
 	reset_vars
 
 	if { [ string match "c++" $lang ] } {
-	    set cc_cmd $CXX_FOR_TARGET
+	    set cc_cmd "$CXX_FOR_TARGET $CXXFLAGS_FOR_TARGET_TEST"
 	} else {
-	    set cc_cmd $CC_FOR_TARGET
+	    set cc_cmd "$CC_FOR_TARGET $CFLAGS_FOR_TARGET_TEST"
 	}
 
 	if { $binfile eq "tmpdir/" } {
