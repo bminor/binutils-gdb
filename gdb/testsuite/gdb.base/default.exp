@@ -766,8 +766,6 @@ set show_conv_list \
 	{$_gdb_maint_setting = <internal function _gdb_maint_setting>} \
 	{$_gdb_setting_str = <internal function _gdb_setting_str>} \
 	{$_gdb_setting = <internal function _gdb_setting>} \
-	{$_gdb_major = 17} \
-	{$_gdb_minor = 1} \
 	{$_shell_exitsignal = void} \
 	{$_shell_exitcode = 0} \
 	{$_active_linker_namespaces = 1} \
@@ -810,6 +808,18 @@ if { [regexp "$re_var = $re_val" $lines] } {
     incr matches
 } else {
     set all_found 0
+}
+
+set re_vars \
+    [list \
+	 [string_to_regexp {$_gdb_major}] \
+	 [string_to_regexp {$_gdb_minor}]]
+foreach re_var $re_vars {
+    if { [regexp "$re_var = $decimal" $lines] } {
+	incr matches
+    } else {
+	set all_found 0
+    }
 }
 
 if { [regexp [string_to_regexp {$_tlb = void}] $lines] } {
