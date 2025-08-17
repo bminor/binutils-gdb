@@ -6246,7 +6246,7 @@ static void
 elf_x86_64_add_glibc_version_dependency
   (struct elf_find_verdep_info *rinfo)
 {
-  unsigned int i = 0;
+  int i = 0, mark_plt = -1;
   const char *version[4] = { NULL, NULL, NULL, NULL };
   bool auto_version[4] = { false, false, false, false };
   struct elf_x86_link_hash_table *htab;
@@ -6271,14 +6271,28 @@ elf_x86_64_add_glibc_version_dependency
 	}
       if (htab->params->mark_plt)
 	{
-	  version[i] = "GLIBC_2.36";
+	  mark_plt = i;
+	  auto_version[i] = true;
+	  version[i] = "GLIBC_ABI_DT_X86_64_PLT";
 	  i++;
 	}
     }
 
-  if (i != 0)
-    _bfd_elf_link_add_glibc_version_dependency (rinfo, version,
-						auto_version);
+  if (i == 0
+      || !_bfd_elf_link_add_glibc_version_dependency (rinfo, version,
+						      auto_version))
+    return;
+
+  if (mark_plt < 0 || auto_version[mark_plt])
+    return;
+
+  /* Add the GLIBC_2.36 version dependency if libc.so doesn't have
+     GLIBC_ABI_DT_X86_64_PLT.  */
+  version[0] = "GLIBC_2.36";
+  auto_version[0] = false;
+  version[1] = NULL;
+  _bfd_elf_link_add_glibc_version_dependency (rinfo, version,
+					      auto_version);
 }
 
 static const struct bfd_elf_special_section
