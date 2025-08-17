@@ -1519,10 +1519,26 @@ run_ld_link_tests [list \
     ] \
 ]
 
-# The musl C library does not support --gnu2-tls-tag.
+# The musl C library does not support --gnu-tls-tag nor --gnu2-tls-tag.
 if { ![istarget *-*-musl]
      && [check_compiler_available] } {
     run_cc_link_tests [list \
+	[list \
+	    "Build gnu-tls-1a.so" \
+	    "-shared -Wl,--no-as-needed,--gnu-tls-tag" \
+	    "-fPIC" \
+	    { gnu-tls-1.s } \
+	    {{readelf {-W --version-info} gnu-tls-1a.rd}} \
+	    "gnu-tls-1a.so" \
+	] \
+	[list \
+	    "Build gnu-tls-1b.so" \
+	    "-shared -Wl,--no-as-needed,--no-gnu-tls-tag" \
+	    "-fPIC" \
+	    { gnu-tls-1.s } \
+	    {{readelf {-W --version-info} gnu-tls-1b.rd}} \
+	    "gnu-tls-1b.so" \
+	] \
 	[list \
 	    "Build gnu2-tls-1a.so" \
 	    "-shared -Wl,--no-as-needed,--gnu2-tls-tag" \

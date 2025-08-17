@@ -4501,8 +4501,8 @@ elf_i386_add_glibc_version_dependency
   (struct elf_find_verdep_info *rinfo)
 {
   int i = 0;
-  const char *version[3] = { NULL, NULL, NULL };
-  bool auto_version[3] = { false, false, false };
+  const char *version[4] = { NULL, NULL, NULL, NULL };
+  bool auto_version[4] = { false, false, false, false };
   struct elf_x86_link_hash_table *htab;
 
   if (rinfo->info->enable_dt_relr)
@@ -4520,6 +4520,16 @@ elf_i386_add_glibc_version_dependency
 	  /* 2 == auto, enable if libc.so defines the GLIBC_ABI_GNU2_TLS
 	     version.  */
 	  if (htab->params->gnu2_tls_version_tag == 2)
+	    auto_version[i] = true;
+	  i++;
+	}
+      if (htab->params->gnu_tls_version_tag
+	  && htab->has_tls_get_addr_call)
+	{
+	  version[i] = "GLIBC_ABI_GNU_TLS";
+	  /* 2 == auto, enable if libc.so defines the GLIBC_ABI_GNU_TLS
+	     version.  */
+	  if (htab->params->gnu_tls_version_tag == 2)
 	    auto_version[i] = true;
 	  i++;
 	}

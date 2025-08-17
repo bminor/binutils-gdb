@@ -1,5 +1,10 @@
 -*- text -*-
 
+* Add --gnu-tls-tag/--no-gnu-tls-tag options to i386 ELF linker to add
+  the GLIBC_ABI_GNU_TLS version dependency in output if input object
+  files call ___tls_get_addr.  Also added --enable-gnu-tls-tag configure
+  option to enable --gnu-tls-tag by default.
+
 * Add --gnu2-tls-tag/--no-gnu2-tls-tag options to i386 and x86-64 ELF
   linkers to add the GLIBC_ABI_GNU2_TLS version dependency in output if
   input object files have R_386_TLS_DESC_CALL or R_X86_64_TLSDESC_CALL

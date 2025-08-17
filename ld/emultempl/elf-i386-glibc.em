@@ -35,7 +35,43 @@ elf_i386_glibc_before_parse (void)
 {
   elf_x86_before_parse ();
   elf_x86_glibc_before_parse ();
+  params.gnu_tls_version_tag = DEFAULT_LD_GNU_TLS_TAG;
 }
 EOF
 
 LDEMUL_BEFORE_PARSE=elf_i386_glibc_before_parse
+
+PARSE_AND_LIST_LONGOPTS_386='
+  { "gnu-tls-tag", no_argument, NULL, OPTION_GNU_TLS_VERSION_TAG },
+  { "no-gnu-tls-tag", no_argument, NULL, OPTION_NO_GNU_TLS_VERSION_TAG },
+'
+
+PARSE_AND_LIST_OPTIONS_386='
+  if (DEFAULT_LD_GNU_TLS_TAG == 0)
+    fprintf (file, _("\
+  --gnu-tls-tag               Add GLIBC_ABI_GNU_TLS dependency\n\
+  --no-gnu-tls-tag            Do not add GLIBC_ABI_GNU_TLS dependency (default)\n"));
+  else if (DEFAULT_LD_GNU_TLS_TAG == 1)
+    fprintf (file, _("\
+  --gnu-tls-tag               Add GLIBC_ABI_GNU_TLS dependency (default)\n\
+  --no-gnu-tls-tag            Do not add GLIBC_ABI_GNU_TLS dependency\n"));
+  else
+    fprintf (file, _("\
+  --gnu-tls-tag               Add GLIBC_ABI_GNU_TLS dependency (auto)\n\
+                                when no options are specified (default)\n\
+  --no-gnu-tls-tag            Do not add GLIBC_ABI_GNU_TLS dependency\n"));
+'
+
+PARSE_AND_LIST_ARGS_CASES_386='
+    case OPTION_GNU_TLS_VERSION_TAG:
+      params.gnu_tls_version_tag = 1;
+      break;
+
+    case OPTION_NO_GNU_TLS_VERSION_TAG:
+      params.gnu_tls_version_tag = 0;
+      break;
+'
+
+PARSE_AND_LIST_LONGOPTS="$PARSE_AND_LIST_LONGOPTS $PARSE_AND_LIST_LONGOPTS_386"
+PARSE_AND_LIST_OPTIONS="$PARSE_AND_LIST_OPTIONS $PARSE_AND_LIST_OPTIONS_386"
+PARSE_AND_LIST_ARGS_CASES="$PARSE_AND_LIST_ARGS_CASES $PARSE_AND_LIST_ARGS_CASES_386"

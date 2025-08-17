@@ -882,6 +882,8 @@ _bfd_x86_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
 		  h = (struct elf_link_hash_entry *) h->root.u.i.link;
 		  elf_x86_hash_entry (h)->tls_get_addr = 1;
 		}
+
+	      htab->has_tls_get_addr_call = 1;
 	    }
 
 	  /* Pass NULL for __ehdr_start which will be defined by

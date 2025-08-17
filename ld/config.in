@@ -35,6 +35,10 @@
    by default. */
 #undef DEFAULT_LD_GNU2_TLS_TAG
 
+/* Define to 1 if you want to enable --gnu-tls-tag in ELF i386 linker by
+   default. */
+#undef DEFAULT_LD_GNU_TLS_TAG
+
 /* Define to 1 if you want to enable --rosegment in the ELF linker by default.
    */
 #undef DEFAULT_LD_ROSEGMENT
