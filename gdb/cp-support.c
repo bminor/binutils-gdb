@@ -150,7 +150,8 @@ inspect_type (struct demangle_parse_info *info,
 
   try
     {
-      sym = lookup_symbol (name, 0, SEARCH_VFT, 0).symbol;
+      sym = lookup_symbol (name, 0, (SEARCH_TYPE_DOMAIN
+				     | SEARCH_STRUCT_DOMAIN), 0).symbol;
     }
   catch (const gdb_exception &except)
     {
@@ -504,7 +505,8 @@ replace_typedefs (struct demangle_parse_info *info,
 	      try
 		{
 		  sym = lookup_symbol (local_name.get (), 0,
-				       SEARCH_VFT, 0).symbol;
+				       (SEARCH_TYPE_DOMAIN
+					| SEARCH_STRUCT_DOMAIN), 0).symbol;
 		}
 	      catch (const gdb_exception &except)
 		{
