@@ -45,6 +45,9 @@ proc_with_prefix test_directories { } {
 }
 
 proc_with_prefix test_data_directory { } {
+    # Proc assumes local host.
+    require {!is_remote host}
+
     clean_restart
 
     # Check we can correctly read the data-directory parameter.  First,
@@ -187,6 +190,8 @@ proc_with_prefix test_enum_parameter { } {
 
 # Test an color parameter.
 proc_with_prefix test_color_parameter { } {
+    require {!is_remote host}
+
     global env
     with_ansi_styling_terminal {
 	# This enables 256 colors support and disables colors approximation.

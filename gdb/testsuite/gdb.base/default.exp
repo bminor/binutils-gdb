@@ -759,7 +759,6 @@ set show_conv_list \
 	{$_probe_arg10 = <error: No frame selected>} \
 	{$_probe_arg11 = <error: No frame selected>} \
 	{$_cimag = <internal function _cimag>} \
-	{$_colorsupport = "monochrome"} \
 	{$_creal = <internal function _creal>} \
 	{$_isvoid = <internal function _isvoid>} \
 	{$_shell = <internal function _shell>} \
@@ -788,10 +787,40 @@ if [allow_python_tests] {
 	    {$_any_caller_matches = <internal function _any_caller_matches>} \
 	}
 }
-gdb_test_list_exact "show convenience" "show convenience" \
-    "\[^\r\n\]+\[\r\n\]+" \
-    "\[^\r\n\]+" \
-    $show_conv_list
+
+set lines [gdb_get_lines_no_pass "show convenience"]
+set matches 0
+set all_found 1
+foreach s $show_conv_list {
+    if { ![regexp (^|\r\n)[string_to_regexp $s](\r\n|$) $lines] } {
+	verbose -log "didn't match: '$s'"
+	set all_found 0
+	break
+    }
+    incr matches
+}
+
+set re_var [string_to_regexp {$_colorsupport}]
+if { [is_remote host] } {
+    set re_val {[^\r\n]+}
+} else {
+    set re_val [string_to_regexp {"monochrome"}]
+}
+if { [regexp "$re_var = $re_val" $lines] } {
+    incr matches
+} else {
+    set all_found 0
+}
+
+if { [regexp [string_to_regexp {$_tlb = void}] $lines] } {
+    incr matches
+} else {
+    # Convenience variable _tlb is added only if support for windows targets
+    # is enabled.  Don't complain if it's missing.
+}
+
+gdb_assert { $all_found && $matches == [count_newlines $lines] } \
+    "show convenience"
 
 #test show directories
 gdb_test "show directories" "Source directories searched: .cdir\[:;\].cwd"

@@ -21,6 +21,8 @@
 # Tests for readline operations.
 #
 
+require {!is_remote host}
+
 # This function is used to test operate-and-get-next.
 # NAME is the name of the test.
 # ARGS is a list of alternating commands and expected results.
