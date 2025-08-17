@@ -1060,8 +1060,14 @@ get_version_header (windres_bfd *wrbfd, const bfd_byte *data,
   *vallen = windres_get_16 (wrbfd, data + 2);
   *type = windres_get_16 (wrbfd, data + 4);
 
-  *off = 6;
+  if (*len > length)
+    {
+      non_fatal (_("version length %lu greater than resource length %lu"),
+		 (unsigned long) *len, (unsigned long) length);
+      return false;
+    }
 
+  *off = 6;
   length -= 6;
   data += 6;
 
@@ -1101,6 +1107,14 @@ get_version_header (windres_bfd *wrbfd, const bfd_byte *data,
     }
 
   *off = (*off + 3) &~ 3;
+
+  if (*len < *off)
+    {
+      non_fatal (_("version length %lu does not cover header length %lu"),
+		 (unsigned long) *len, (unsigned long) *off);
+      return false;
+    }
+
   return true;
 }
 
@@ -1119,14 +1133,6 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data,
   if (!get_version_header (wrbfd, data, length, "VS_VERSION_INFO",
 			   (unichar **) NULL, &verlen, &vallen, &type, &off))
     return NULL;
-
-  /* PR 17512: The verlen field does not include padding length.  */
-  if (verlen > length)
-    {
-      non_fatal (_("version length %lu greater than resource length %lu"),
-		 (unsigned long) verlen, (unsigned long) length);
-      return NULL;
-    }
 
   if (type != 0)
     {
@@ -1311,7 +1317,7 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data,
 		  if (stverlen < sverlen)
 		    {
 		      non_fatal (_("unexpected version string length %ld < %ld"),
-				 (long) verlen, (long) sverlen);
+				 (long) stverlen, (long) sverlen);
 		      return NULL;
 		    }
 		  stverlen -= sverlen;
