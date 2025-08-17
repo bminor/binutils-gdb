@@ -957,7 +957,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
       break;
     }
 
-  if ((flags & SEC_ALLOC) == 0)
+  if ((flags & (SEC_ALLOC | SEC_GROUP)) == 0)
     {
       /* The debugging sections appear to be recognized only by name,
 	 not any sort of flag.  Their SEC_ALLOC bits are cleared.  */
