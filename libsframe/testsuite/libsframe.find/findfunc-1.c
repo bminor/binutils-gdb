@@ -56,8 +56,9 @@ add_fde1 (sframe_encoder_ctx *encode, uint32_t start_pc_vaddr,
 			      - (sframe_vaddr + offsetof_fde_in_sec));
   unsigned char finfo = sframe_fde_create_func_info (SFRAME_FRE_TYPE_ADDR1,
 						     SFRAME_FDE_TYPE_PCINC);
-  int err = sframe_encoder_add_funcdesc (encode, func1_start_addr, *func_size,
-					 finfo, FDE1_NUM_FRES);
+  int err = sframe_encoder_add_funcdesc_v2 (encode, func1_start_addr,
+					    *func_size, finfo, 0,
+					    FDE1_NUM_FRES);
   if (err == -1)
     return err;
 
@@ -90,8 +91,9 @@ add_fde2 (sframe_encoder_ctx *encode, uint32_t start_pc_vaddr,
 			      - (sframe_vaddr + offsetof_fde_in_sec));
   unsigned char finfo = sframe_fde_create_func_info (SFRAME_FRE_TYPE_ADDR1,
 						     SFRAME_FDE_TYPE_PCINC);
-  int err = sframe_encoder_add_funcdesc (encode, func2_start_addr, *func_size,
-					 finfo, FDE2_NUM_FRES);
+  int err = sframe_encoder_add_funcdesc_v2 (encode, func2_start_addr,
+					    *func_size, finfo, 0,
+					    FDE2_NUM_FRES);
   if (err == -1)
     return err;
 
@@ -124,8 +126,9 @@ add_fde3 (sframe_encoder_ctx *encode, uint32_t start_pc_vaddr,
 			      - (sframe_vaddr + offsetof_fde_in_sec));
   unsigned char finfo = sframe_fde_create_func_info (SFRAME_FRE_TYPE_ADDR1,
 						     SFRAME_FDE_TYPE_PCINC);
-  int err = sframe_encoder_add_funcdesc (encode, func3_start_addr, *func_size,
-					 finfo, FDE3_NUM_FRES);
+  int err = sframe_encoder_add_funcdesc_v2 (encode, func3_start_addr,
+					    *func_size, finfo, 0,
+					    FDE3_NUM_FRES);
   if (err == -1)
     return err;
 

@@ -46,6 +46,7 @@ main (void)
   struct stat st;
   char *sf_buf;
   size_t sf_size;
+  uint8_t rep_block_size;
 
 #define TEST(name, cond)                                                      \
   do                                                                          \
@@ -85,7 +86,8 @@ main (void)
   unsigned int fde_cnt = sframe_decoder_get_num_fidx (dctx);
   TEST ("frecnt-1: Decoder FDE count", fde_cnt == 1);
 
-  err = sframe_decoder_get_funcdesc (dctx, 0, &nfres, &fsize, &fstart, &finfo);
+  err = sframe_decoder_get_funcdesc_v2 (dctx, 0, &nfres, &fsize, &fstart,
+					&finfo, &rep_block_size);
   TEST ("frecnt-1: Decoder get FDE", err == 0);
   TEST ("frecnt-1: Decoder FRE count", nfres == 4);
 
