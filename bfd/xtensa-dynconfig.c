@@ -69,43 +69,44 @@ const void *xtensa_load_config (const char *name ATTRIBUTE_UNUSED,
 				const void *no_name_def ATTRIBUTE_UNUSED)
 {
   static int init;
-#if BFD_SUPPORTS_PLUGINS
-  static void *handle;
-  void *p;
-
-  if (!init)
+  if (bfd_plugin_enabled ())
     {
-      const char *path = getenv (CONFIG_ENV_NAME);
+      static void *handle;
+      void *p;
 
-      init = 1;
-      if (!path)
-	return no_plugin_def;
-      handle = dlopen (path, RTLD_LAZY);
-      if (!handle)
+      if (!init)
 	{
-	  _bfd_error_handler (_("%s is defined but could not be loaded: %s"),
-			      CONFIG_ENV_NAME, dlerror ());
+	  const char *path = getenv (CONFIG_ENV_NAME);
+
+	  init = 1;
+	  if (!path)
+	    return no_plugin_def;
+	  handle = dlopen (path, RTLD_LAZY);
+	  if (!handle)
+	    {
+	      _bfd_error_handler (_("%s is defined but could not be loaded: %s"),
+				  CONFIG_ENV_NAME, dlerror ());
+	      abort ();
+	    }
+	}
+      else if (!handle)
+	{
+	  return no_plugin_def;
+	}
+
+      p = dlsym (handle, name);
+      if (!p)
+	{
+	  if (no_name_def)
+	    return no_name_def;
+
+	  _bfd_error_handler (_("%s is loaded but symbol \"%s\" is not found: %s"),
+			      CONFIG_ENV_NAME, name, dlerror ());
 	  abort ();
 	}
+      return p;
     }
-  else if (!handle)
-    {
-      return no_plugin_def;
-    }
-
-  p = dlsym (handle, name);
-  if (!p)
-    {
-      if (no_name_def)
-	return no_name_def;
-
-      _bfd_error_handler (_("%s is loaded but symbol \"%s\" is not found: %s"),
-			  CONFIG_ENV_NAME, name, dlerror ());
-      abort ();
-    }
-  return p;
-#else
-  if (!init)
+  else if (!init)
     {
       const char *path = getenv (CONFIG_ENV_NAME);
 
@@ -118,7 +119,6 @@ const void *xtensa_load_config (const char *name ATTRIBUTE_UNUSED,
 	}
     }
   return no_plugin_def;
-#endif
 }
 
 XTENSA_CONFIG_INSTANCE_LIST;

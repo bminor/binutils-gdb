@@ -27,9 +27,7 @@
 #include "safe-ctype.h"
 #include "libiberty.h"
 #include "objalloc.h"
-#if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
-#endif
 
 #include <limits.h>
 #ifndef CHAR_BIT
@@ -3678,11 +3676,8 @@ elf_link_is_defined_archive_symbol (bfd * abfd, carsym * symdef)
      get the correct symbol table.  */
   if (abfd->plugin_format == bfd_plugin_yes
       || abfd->plugin_format == bfd_plugin_yes_unused
-#if BFD_SUPPORTS_PLUGINS
       || (abfd->plugin_format == bfd_plugin_unknown
-	  && bfd_link_plugin_object_p (abfd))
-#endif
-      )
+	  && bfd_link_plugin_object_p (abfd)))
     {
       /* Use the IR symbol table if the object has been claimed by
 	 plugin.  */

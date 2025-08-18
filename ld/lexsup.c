@@ -41,9 +41,7 @@
 #include "ldver.h"
 #include "ldemul.h"
 #include "demangle.h"
-#if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
-#endif /* BFD_SUPPORTS_PLUGINS */
 
 #ifndef PATH_SEPARATOR
 #if defined (__MSDOS__) || (defined (_WIN32) && ! defined (__CYGWIN32__))
@@ -182,7 +180,6 @@ static const struct ld_option ld_options[] =
     'O', NULL, N_("Optimize output file"), ONE_DASH },
   { {"out-implib", required_argument, NULL, OPTION_OUT_IMPLIB},
     '\0', N_("FILE"), N_("Generate import library"), TWO_DASHES },
-#if BFD_SUPPORTS_PLUGINS
   { {"plugin", required_argument, NULL, OPTION_PLUGIN},
     '\0', N_("PLUGIN"), N_("Load named plugin"), ONE_DASH },
   { {"plugin-opt", required_argument, NULL, OPTION_PLUGIN_OPT},
@@ -196,12 +193,6 @@ static const struct ld_option ld_options[] =
   { {"flto-partition=", required_argument, NULL, OPTION_IGNORE},
     '\0', NULL, N_("Ignored for GCC LTO option compatibility"),
     ONE_DASH },
-#else
-  { {"plugin", required_argument, NULL, OPTION_IGNORE},
-    '\0', N_("PLUGIN"), N_("Load named plugin (ignored)"), ONE_DASH },
-  { {"plugin-opt", required_argument, NULL, OPTION_IGNORE},
-    '\0', N_("ARG"), N_("Send arg to last-loaded plugin (ignored)"), ONE_DASH },
-#endif /* BFD_SUPPORTS_PLUGINS */
   { {"fuse-ld=", required_argument, NULL, OPTION_IGNORE},
     '\0', NULL, N_("Ignored for GCC linker option compatibility"),
     ONE_DASH },
@@ -1213,18 +1204,18 @@ parse_args (unsigned argc, char **argv)
 	case OPTION_PRINT_OUTPUT_FORMAT:
 	  command_line.print_output_format = true;
 	  break;
-#if BFD_SUPPORTS_PLUGINS
 	case OPTION_PLUGIN:
-	  plugin_opt_plugin (optarg);
+	  if (bfd_plugin_enabled ())
+	    plugin_opt_plugin (optarg);
 	  break;
 	case OPTION_PLUGIN_OPT:
-	  if (plugin_opt_plugin_arg (optarg))
+	  if (bfd_plugin_enabled ()
+	      && plugin_opt_plugin_arg (optarg))
 	    fatal (_("%P: bad -plugin-opt option\n"));
 	  break;
 	case OPTION_PLUGIN_SAVE_TEMPS:
 	  config.plugin_save_temps = true;
 	  break;
-#endif /* BFD_SUPPORTS_PLUGINS */
 	case 'q':
 	  link_info.emitrelocations = true;
 	  break;
@@ -1543,9 +1534,7 @@ parse_args (unsigned argc, char **argv)
 	      int level ATTRIBUTE_UNUSED = strtoul (optarg, &end, 0);
 	      if (*end)
 		fatal (_("%P: invalid number `%s'\n"), optarg);
-#if BFD_SUPPORTS_PLUGINS
 	      report_plugin_symbols = level > 1;
-#endif /* BFD_SUPPORTS_PLUGINS */
 	    }
 	  break;
 	case 'v':
@@ -2474,7 +2463,13 @@ help (void)
 	  for (; len < 30; len++)
 	    putchar (' ');
 
-	  printf ("%s\n", _(ld_options[i].doc));
+	  printf ("%s", _(ld_options[i].doc));
+	  if ((ld_options[i].opt.val == OPTION_PLUGIN
+	       || ld_options[i].opt.val == OPTION_PLUGIN_OPT)
+	      && !bfd_plugin_enabled ())
+	    puts (_(" (ignored)"));
+	  else
+	    putchar ('\n');
 	}
     }
   printf (_("  @FILE"));

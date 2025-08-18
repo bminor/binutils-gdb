@@ -36,9 +36,7 @@
 #include "filenames.h"
 #include <fnmatch.h>
 #include "same-inode.h"
-#if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
-#endif /* BFD_SUPPORTS_PLUGINS */
 
 bool ldfile_assumed_script = false;
 const char *ldfile_output_machine_name = "";
@@ -366,9 +364,7 @@ ldfile_try_open_bfd (const char *attempt,
     }
 
   /* PR 30568: Do not track lto generated temporary object files.  */
-#if BFD_SUPPORTS_PLUGINS
   if (!entry->flags.lto_output)
-#endif
     track_dependency_files (attempt);
 
   /* Linker needs to decompress sections.  */
@@ -377,10 +373,8 @@ ldfile_try_open_bfd (const char *attempt,
   /* This is a linker input BFD.  */
   entry->the_bfd->is_linker_input = 1;
 
-#if BFD_SUPPORTS_PLUGINS
   if (entry->flags.lto_output)
     entry->the_bfd->lto_output = 1;
-#endif
 
   /* If we are searching for this file, see if the architecture is
      compatible with the output file.  If it isn't, keep searching.
@@ -518,7 +512,6 @@ ldfile_try_open_bfd (const char *attempt,
 	}
     }
  success:
-#if BFD_SUPPORTS_PLUGINS
   /* If plugins are active, they get first chance to claim
      any successfully-opened input file.  We skip archives
      here; the plugin wants us to offer it the individual
@@ -534,7 +527,6 @@ ldfile_try_open_bfd (const char *attempt,
     plugin_maybe_claim (entry);
   else
     cmdline_check_object_only_section (entry->the_bfd, false);
-#endif /* BFD_SUPPORTS_PLUGINS */
 
   /* It opened OK, the format checked out, and the plugins have had
      their chance to claim it, so this is success.  */

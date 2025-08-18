@@ -44,9 +44,7 @@
 #include "elf-bfd.h"
 #include "bfdver.h"
 #include <errno.h>
-#if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
-#endif
 
 #ifndef offsetof
 #define offsetof(TYPE, MEMBER) ((size_t) & (((TYPE*) 0)->MEMBER))
@@ -3629,10 +3627,8 @@ enum open_bfd_mode
     OPEN_BFD_FORCE = 1,
     OPEN_BFD_RESCAN = 2
   };
-#if BFD_SUPPORTS_PLUGINS
 static lang_input_statement_type *plugin_insert = NULL;
 static struct bfd_link_hash_entry *plugin_undefs = NULL;
-#endif
 
 static void
 open_input_bfds (lang_statement_union_type *s,
@@ -3666,9 +3662,7 @@ open_input_bfds (lang_statement_union_type *s,
 	case lang_group_statement_enum:
 	  {
 	    struct bfd_link_hash_entry *undefs;
-#if BFD_SUPPORTS_PLUGINS
 	    lang_input_statement_type *plugin_insert_save;
-#endif
 
 	    /* We must continually search the entries in the group
 	       until no new symbols are added to the list of undefined
@@ -3678,22 +3672,17 @@ open_input_bfds (lang_statement_union_type *s,
 
 	    do
 	      {
-#if BFD_SUPPORTS_PLUGINS
 		plugin_insert_save = plugin_insert;
-#endif
 		undefs = link_info.hash->undefs_tail;
 		open_input_bfds (s->group_statement.children.head, os,
 				 mode | OPEN_BFD_FORCE,
 				 nested_group_count_p);
 	      }
 	    while (undefs != link_info.hash->undefs_tail
-#if BFD_SUPPORTS_PLUGINS
 		   /* Objects inserted by a plugin, which are loaded
 		      before we hit this loop, may have added new
 		      undefs.  */
-		   || (plugin_insert != plugin_insert_save && plugin_undefs)
-#endif
-		   );
+		   || (plugin_insert != plugin_insert_save && plugin_undefs));
 
 	    --*nested_group_count_p;
 	  }
@@ -3720,10 +3709,8 @@ open_input_bfds (lang_statement_union_type *s,
 		 has been loaded already.  Do the same for a rescan.
 		 Likewise reload --as-needed shared libs.  */
 	      if (mode != OPEN_BFD_NORMAL
-#if BFD_SUPPORTS_PLUGINS
 		  && ((mode & OPEN_BFD_RESCAN) == 0
 		      || plugin_insert == NULL)
-#endif
 		  && s->input_statement.flags.loaded
 		  && (abfd = s->input_statement.the_bfd) != NULL
 		  && ((bfd_get_format (abfd) == bfd_archive
@@ -3767,12 +3754,10 @@ open_input_bfds (lang_statement_union_type *s,
 		    }
 		}
 	    }
-#if BFD_SUPPORTS_PLUGINS
 	  /* If we have found the point at which a plugin added new
 	     files, clear plugin_insert to enable archive rescan.  */
 	  if (&s->input_statement == plugin_insert)
 	    plugin_insert = NULL;
-#endif
 	  break;
 	case lang_assignment_statement_enum:
 	  if (s->assignment_statement.exp->type.node_class != etree_assert)
@@ -7358,11 +7343,9 @@ lang_check (void)
        file != NULL;
        file = file->next)
     {
-#if BFD_SUPPORTS_PLUGINS
       /* Don't check format of files claimed by plugin.  */
       if (file->flags.claimed)
 	continue;
-#endif /* BFD_SUPPORTS_PLUGINS */
       input_bfd = file->the_bfd;
       compatible
 	= bfd_arch_get_compatible (input_bfd, link_info.output_bfd,
@@ -7889,10 +7872,8 @@ lang_gc_sections (void)
       LANG_FOR_EACH_INPUT_STATEMENT (f)
 	{
 	  asection *sec;
-#if BFD_SUPPORTS_PLUGINS
 	  if (f->flags.claimed)
 	    continue;
-#endif
 	  for (sec = f->the_bfd->sections; sec != NULL; sec = sec->next)
 	    if ((sec->flags & SEC_DEBUGGING) == 0
 		|| strcmp (sec->name, ".stabstr") != 0)
@@ -8036,7 +8017,6 @@ lang_relax_sections (bool need_layout)
     }
 }
 
-#if BFD_SUPPORTS_PLUGINS
 /* Find the insert point for the plugin's replacement files.  We
    place them after the first claimed real object file, or if the
    first claimed object is an archive member, after the last real
@@ -8164,7 +8144,6 @@ find_next_input_statement (lang_statement_union_type **s)
     }
   return s;
 }
-#endif /* BFD_SUPPORTS_PLUGINS */
 
 /* Insert SRCLIST into DESTLIST after given element by chaining
    on FIELD as the next-pointer.  (Counterintuitively does not need
@@ -8343,7 +8322,6 @@ lang_process (void)
 
   ldemul_before_plugin_all_symbols_read ();
 
-#if BFD_SUPPORTS_PLUGINS
   if (link_info.lto_plugin_active)
     {
       lang_statement_list_type added;
@@ -8456,9 +8434,7 @@ lang_process (void)
 	    }
 	}
     }
-  else
-#endif /* BFD_SUPPORTS_PLUGINS */
-    if (bfd_link_relocatable (&link_info))
+  else if (bfd_link_relocatable (&link_info))
     {
       /* Check if .gnu_object_only section should be created.  */
       bfd *p;

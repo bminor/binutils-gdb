@@ -30,9 +30,7 @@
 #include "coff/internal.h"
 #include "libcoff.h"
 #include "safe-ctype.h"
-#if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
-#endif
 
 /* FIXME: See bfd/peXXigen.c for why we include an architecture specific
    header in generic PE code.  */
@@ -763,10 +761,9 @@ strip_usage (FILE *stream, int exit_status)
      --info                        List object formats & architectures supported\n\
   -o <file>                        Place stripped output into <file>\n\
 "));
-#if BFD_SUPPORTS_PLUGINS
-  fprintf (stream, _("\
+  if (bfd_plugin_enabled ())
+    fprintf (stream, _("\
       --plugin NAME                Load the specified plugin\n"));
-#endif
 
   list_supported_targets (program_name, stream);
   if (REPORT_BUGS_TO[0] && exit_status == 0)
@@ -3757,11 +3754,9 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	  goto cleanup_and_exit;
 	}
 
-#if BFD_SUPPORTS_PLUGINS
       /* Copy slim LTO IR file as unknown object.  */
       if (this_element->lto_type == lto_slim_ir_object)
 	ok_object = false;
-#endif
       if (ok_object)
 	{
 	  ok = copy_object (this_element, output_element, input_arch,
@@ -3991,8 +3986,7 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
 	    free (obj_matching);
 	  obj_error = bfd_error_no_error;
 	}
-#if BFD_SUPPORTS_PLUGINS
-      else
+      else if (bfd_plugin_enabled ())
 	{
 	  /* This is for LLVM bytecode files, which are not ELF objects.
 	     Since objcopy/strip does nothing with these files except
@@ -4001,7 +3995,6 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
 	  ibfd->plugin_format = bfd_plugin_unknown;
 	  ok_plugin = bfd_check_format (ibfd, bfd_object);
 	}
-#endif
     }
 
   if (obj_error == bfd_error_file_ambiguously_recognized)
@@ -4051,11 +4044,9 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
  	  return;
  	}
 
-#if BFD_SUPPORTS_PLUGINS
       /* Copy slim LTO IR file as unknown file.  */
       if (ibfd->lto_type == lto_slim_ir_object)
 	ok_object = false;
-#endif
       if (ok_object
 	  ? !copy_object (ibfd, obfd, input_arch, target_defaulted)
 	  : !copy_unknown_file (ibfd, obfd,
@@ -4900,9 +4891,7 @@ strip_main (int argc, char *argv[])
   char *output_file = NULL;
   bool merge_notes_set = false;
 
-#if BFD_SUPPORTS_PLUGINS
   bfd_plugin_set_program_name (argv[0]);
-#endif
 
   while ((c = getopt_long (argc, argv, "I:O:F:K:MN:R:o:sSpdgxXHhVvwDU",
 			   strip_options, (int *) 0)) != EOF)
@@ -4995,11 +4984,9 @@ strip_main (int argc, char *argv[])
 	  keep_section_symbols = true;
 	  break;
 	case OPTION_PLUGIN:	/* --plugin */
-#if BFD_SUPPORTS_PLUGINS
+	  if (!bfd_plugin_enabled ())
+	    fatal (_("sorry - this program has been built without plugin support\n"));
 	  bfd_plugin_set_plugin (optarg);
-#else
-	  fatal (_("sorry - this program has been built without plugin support\n"));
-#endif
 	  break;
 	case 0:
 	  /* We've been given a long option.  */
@@ -5045,7 +5032,6 @@ strip_main (int argc, char *argv[])
   if (output_target == NULL)
     output_target = input_target;
 
-#if BFD_SUPPORTS_PLUGINS
   /* Check if all GCC LTO sections should be removed, assuming all LTO
      sections will be removed with -R .gnu.lto_.*.  Remove .gnu.lto_.*
      sections will also remove .gnu.debuglto_.* sections.
@@ -5055,7 +5041,6 @@ strip_main (int argc, char *argv[])
      debug sections.  */
   if (!find_section_list (".gnu.lto_.*", false, SECTION_CONTEXT_REMOVE))
     find_section_list (".gnu.debuglto_*", true, SECTION_CONTEXT_KEEP);
-#endif
 
   i = optind;
   if (i == argc

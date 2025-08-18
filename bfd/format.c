@@ -46,9 +46,7 @@ SUBSECTION
 #include "sysdep.h"
 #include "bfd.h"
 #include "libbfd.h"
-#if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
-#endif
 
 /* IMPORT from targets.c.  */
 extern const size_t _bfd_target_vector_entries;
@@ -366,9 +364,8 @@ struct lto_section
 /* Set lto_type in ABFD.  */
 
 static void
-bfd_set_lto_type (bfd *abfd ATTRIBUTE_UNUSED)
+bfd_set_lto_type (bfd *abfd)
 {
-#if BFD_SUPPORTS_PLUGINS
   if (abfd->format == bfd_object
       && abfd->lto_type == lto_non_object
       && (abfd->flags
@@ -422,7 +419,6 @@ bfd_set_lto_type (bfd *abfd ATTRIBUTE_UNUSED)
 
       abfd->lto_type = type;
     }
-#endif
 }
 
 /*
@@ -520,19 +516,17 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
      have target_defaulted false.  Failing that, bfd_find_target will
      have chosen a default target, and target_defaulted will be true.  */
   fail_targ = NULL;
-#if BFD_SUPPORTS_PLUGINS
-  if (abfd->format == bfd_object
+  if (bfd_plugin_enabled ()
+      && abfd->format == bfd_object
       && abfd->target_defaulted
       && !abfd->is_linker_input
       && abfd->plugin_format != bfd_plugin_no)
     {
-      extern const bfd_target plugin_vec;
-
       if (bfd_seek (abfd, 0, SEEK_SET) != 0)
 	goto err_ret;
 
-      BFD_ASSERT (save_targ != &plugin_vec);
-      abfd->xvec = &plugin_vec;
+      BFD_ASSERT (save_targ != bfd_plugin_vec ());
+      abfd->xvec = bfd_plugin_vec ();
       bfd_set_error (bfd_error_no_error);
       cleanup = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
       if (cleanup)
@@ -548,7 +542,6 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
      The test can be removed if desired.  */
   if (!(abfd->plugin_format == bfd_plugin_no
 	&& bfd_plugin_target_p (save_targ)))
-#endif
     {
       if (bfd_seek (abfd, 0, SEEK_SET) != 0)
 	goto err_ret;
@@ -604,12 +597,9 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 	 bfd_plugin_get_symbols_in_object_only.)  */
       if (*target == &binary_vec
 	  || *target == fail_targ
-#if BFD_SUPPORTS_PLUGINS
 	  || (((abfd->is_linker_input && match_count != 0)
 	       || abfd->plugin_format == bfd_plugin_no)
-	      && bfd_plugin_target_p (*target))
-#endif
-	  )
+	      && bfd_plugin_target_p (*target)))
 	continue;
 
       /* If we already tried a match, the bfd is modified and may

@@ -658,16 +658,6 @@ bfd_link_plugin_object_p (bfd *abfd)
   return false;
 }
 
-extern const bfd_target plugin_vec;
-
-/* Return TRUE if TARGET is a pointer to plugin_vec.  */
-
-bool
-bfd_plugin_target_p (const bfd_target *target)
-{
-  return target == &plugin_vec;
-}
-
 /* Register OBJECT_P to be used by bfd_plugin_object_p.  */
 
 void

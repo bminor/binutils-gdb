@@ -21,7 +21,6 @@
 
 #include "sysdep.h"
 #include "bfd.h"
-#if BFD_SUPPORTS_PLUGINS
 #include "plugin-api.h"
 #include "filenames.h"
 /* For ARRAY_SIZE macro only - we don't link the library itself.  */
@@ -681,4 +680,3 @@ oncleanup (void)
   fflush (NULL);
   return cleanup_ret;
 }
-#endif /* BFD_SUPPORTS_PLUGINS */

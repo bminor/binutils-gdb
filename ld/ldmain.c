@@ -40,9 +40,7 @@
 #include "ldfile.h"
 #include "ldemul.h"
 #include "ldctor.h"
-#if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
-#endif /* BFD_SUPPORTS_PLUGINS */
 
 /* Somewhere above, sys/stat.h got included.  */
 #if !defined(S_ISDIR) && defined(S_IFDIR)
@@ -227,13 +225,11 @@ ld_cleanup (void)
       inext = ibfd->link.next;
       bfd_close_all_done (ibfd);
     }
-#if BFD_SUPPORTS_PLUGINS
   /* Note - we do not call ld_plugin_start (PHASE_PLUGINS) here as this
      function is only called when the linker is exiting - ie after any
      stats may have been reported, and potentially in the middle of a
      phase where we have already started recording plugin stats.  */
   plugin_call_cleanup ();
-#endif
   if (output_filename && delete_output_file_on_failure)
     unlink_if_ordinary (output_filename);
 }
@@ -724,12 +720,10 @@ main (int argc, char **argv)
 
   ld_stop_phase (PHASE_PARSE);
   
-#if BFD_SUPPORTS_PLUGINS
   ld_start_phase (PHASE_PLUGINS);
   /* Now all the plugin arguments have been gathered, we can load them.  */
   plugin_load_plugins ();
   ld_stop_phase (PHASE_PLUGINS);
-#endif /* BFD_SUPPORTS_PLUGINS */
 
   ld_start_phase (PHASE_PARSE);
 
@@ -1307,7 +1301,6 @@ add_archive_element (struct bfd_link_info *info,
      (if enabled) may possibly alter it to point to a replacement
      BFD, but we still want to output the original BFD filename.  */
   orig_input = *input;
-#if BFD_SUPPORTS_PLUGINS
   /* Don't claim a fat IR object if no IR object should be claimed.  */
   if (link_info.lto_plugin_active
       && (!no_more_claiming
@@ -1336,7 +1329,6 @@ add_archive_element (struct bfd_link_info *info,
     }
   else
     cmdline_check_object_only_section (input->the_bfd, false);
-#endif /* BFD_SUPPORTS_PLUGINS */
 
   if (link_info.input_bfds_tail == &input->the_bfd->link.next
       || input->the_bfd->link.next != NULL)

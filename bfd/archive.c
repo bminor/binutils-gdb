@@ -141,9 +141,7 @@ SUBSECTION
 #include "hashtab.h"
 #include "filenames.h"
 #include "bfdlink.h"
-#if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
-#endif
 
 #ifndef errno
 extern int errno;
@@ -2360,9 +2358,7 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
 	  long src_count;
 
 	  if (bfd_get_lto_type (current) == lto_slim_ir_object
-#if BFD_SUPPORTS_PLUGINS
 	      && !bfd_plugin_target_p (current->xvec)
-#endif
 	      && report_plugin_err)
 	    {
 	      report_plugin_err = false;
@@ -2420,9 +2416,7 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
 
 		      if (bfd_lto_slim_symbol_p (current,
 						 syms[src_count]->name)
-#if BFD_SUPPORTS_PLUGINS
 			  && !bfd_plugin_target_p (current->xvec)
-#endif
 			  && report_plugin_err)
 			{
 			  report_plugin_err = false;

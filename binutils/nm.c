@@ -37,9 +37,7 @@
 #include "bucomm.h"
 #include "demanguse.h"
 #include "safe-ctype.h"
-#if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
-#endif
 
 #ifndef streq
 #define streq(a,b) (strcmp ((a),(b)) == 0)
@@ -339,10 +337,9 @@ usage (FILE *stream, int status)
   -P, --portability      Same as --format=posix\n"));
   fprintf (stream, _("\
   -r, --reverse-sort     Reverse the sense of the sort\n"));
-#if BFD_SUPPORTS_PLUGINS
-  fprintf (stream, _("\
+  if (bfd_plugin_enabled ())
+    fprintf (stream, _("\
       --plugin NAME      Load the specified plugin\n"));
-#endif
   fprintf (stream, _("\
   -S, --print-size       Print size of defined symbols\n"));
   fprintf (stream, _("\
@@ -798,9 +795,7 @@ filter_symbols (bfd *abfd, bool is_dynamic, void *minisyms,
 	continue;
 
       if (bfd_lto_slim_symbol_p (abfd, sym->name)
-#if BFD_SUPPORTS_PLUGINS
 	  && !bfd_plugin_target_p (abfd->xvec)
-#endif
 	  && report_plugin_err)
 	{
 	  report_plugin_err = false;
@@ -1484,10 +1479,7 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
   /* lto_type is set to lto_non_ir_object when a bfd is loaded with a
      compiler LTO plugin.  */
   if (bfd_get_lto_type (abfd) == lto_slim_ir_object
-#if BFD_SUPPORTS_PLUGINS
-      && !bfd_plugin_target_p (abfd->xvec)
-#endif
-     )
+      && !bfd_plugin_target_p (abfd->xvec))
     {
       report_plugin_err = false;
       non_fatal (_("%s: plugin needed to handle lto object"),
@@ -1988,9 +1980,7 @@ main (int argc, char **argv)
   program_name = *argv;
   xmalloc_set_program_name (program_name);
   bfd_set_error_program_name (program_name);
-#if BFD_SUPPORTS_PLUGINS
   bfd_plugin_set_program_name (program_name);
-#endif
 
   expandargv (&argc, &argv);
 
@@ -2137,11 +2127,9 @@ main (int argc, char **argv)
 	  break;
 
 	case OPTION_PLUGIN:	/* --plugin */
-#if BFD_SUPPORTS_PLUGINS
+	  if (!bfd_plugin_enabled ())
+	    fatal (_("sorry - this program has been built without plugin support\n"));
 	  bfd_plugin_set_plugin (optarg);
-#else
-	  fatal (_("sorry - this program has been built without plugin support\n"));
-#endif
 	  break;
 
 	case OPTION_IFUNC_CHARS:

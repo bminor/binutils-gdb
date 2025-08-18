@@ -20,7 +20,6 @@
 
 #include "sysdep.h"
 #include "bfd.h"
-#if BFD_SUPPORTS_PLUGINS
 #include "plugin-api.h"
 
 #include <ctype.h> /* For isspace.  */
@@ -340,4 +339,3 @@ onload (struct ld_plugin_tv *tv)
   fflush (NULL);
   return LDPS_OK;
 }
-#endif /* BFD_SUPPORTS_PLUGINS */

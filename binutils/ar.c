@@ -32,9 +32,7 @@
 #include "arsup.h"
 #include "filenames.h"
 #include "binemul.h"
-#if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
-#endif
 
 #ifdef __GO32___
 #define EXT_NAME_LEN 3		/* Bufflen of addition to name if it's MS-DOS.  */
@@ -270,18 +268,18 @@ usage (int help)
 {
   FILE *s;
 
-#if BFD_SUPPORTS_PLUGINS
-  /* xgettext:c-format */
-  const char *command_line
-    = _("Usage: %s [emulation options] [-]{dmpqrstx}[abcDfilMNoOPsSTuvV]"
-	" [--plugin <name>] [member-name] [count] archive-file file...\n");
+  const char *command_line;
+  if (bfd_plugin_enabled ())
+    /* xgettext:c-format */
+    command_line
+      = _("Usage: %s [emulation options] [-]{dmpqrstx}[abcDfilMNoOPsSTuvV]"
+	  " [--plugin <name>] [member-name] [count] archive-file file...\n");
+  else
+    /* xgettext:c-format */
+    command_line
+      = _("Usage: %s [emulation options] [-]{dmpqrstx}[abcDfilMNoOPsSTuvV]"
+	  " [member-name] [count] archive-file file...\n");
 
-#else
-  /* xgettext:c-format */
-  const char *command_line
-    = _("Usage: %s [emulation options] [-]{dmpqrstx}[abcDfilMNoOPsSTuvV]"
-	" [member-name] [count] archive-file file...\n");
-#endif
   s = help ? stdout : stderr;
 
   fprintf (s, command_line, program_name);
@@ -333,10 +331,11 @@ usage (int help)
   fprintf (s, _("  --output=DIRNAME - specify the output directory for extraction operations\n"));
   fprintf (s, _("  --record-libdeps=<text> - specify the dependencies of this library\n"));
   fprintf (s, _("  --thin       - make a thin archive\n"));
-#if BFD_SUPPORTS_PLUGINS
-  fprintf (s, _(" optional:\n"));
-  fprintf (s, _("  --plugin <p> - load the specified plugin\n"));
-#endif
+  if (bfd_plugin_enabled ())
+    {
+      fprintf (s, _(" optional:\n"));
+      fprintf (s, _("  --plugin <p> - load the specified plugin\n"));
+    }
 
   ar_emul_usage (s);
 
@@ -360,10 +359,9 @@ ranlib_usage (int help)
   fprintf (s, _(" Generate an index to speed access to archives\n"));
   fprintf (s, _(" The options are:\n\
   @<file>                      Read options from <file>\n"));
-#if BFD_SUPPORTS_PLUGINS
-  fprintf (s, _("\
+  if (bfd_plugin_enabled ())
+    fprintf (s, _("\
   --plugin <name>              Load the specified plugin\n"));
-#endif
   if (DEFAULT_AR_DETERMINISTIC)
     fprintf (s, _("\
   -D                           Use zero for symbol map timestamp (default)\n\
@@ -590,12 +588,9 @@ decode_options (int argc, char **argv)
           deterministic = false;
           break;
 	case OPTION_PLUGIN:
-#if BFD_SUPPORTS_PLUGINS
+	  if (!bfd_plugin_enabled ())
+	    fatal (_("sorry - this program has been built without plugin support\n"));
 	  bfd_plugin_set_plugin (optarg);
-#else
-	  fprintf (stderr, _("sorry - this program has been built without plugin support\n"));
-	  xexit (1);
-#endif
 	  break;
 	case OPTION_TARGET:
 	  target = optarg;
@@ -665,12 +660,9 @@ ranlib_main (int argc, char **argv)
 
 	  /* PR binutils/13493: Support plugins.  */
 	case OPTION_PLUGIN:
-#if BFD_SUPPORTS_PLUGINS
+	  if (!bfd_plugin_enabled ())
+	    fatal (_("sorry - this program has been built without plugin support\n"));
 	  bfd_plugin_set_plugin (optarg);
-#else
-	  fprintf (stderr, _("sorry - this program has been built without plugin support\n"));
-	  xexit (1);
-#endif
 	  break;
 	}
     }
@@ -721,9 +713,7 @@ main (int argc, char **argv)
   program_name = argv[0];
   xmalloc_set_program_name (program_name);
   bfd_set_error_program_name (program_name);
-#if BFD_SUPPORTS_PLUGINS
   bfd_plugin_set_program_name (program_name);
-#endif
 
   expandargv (&argc, &argv);
 
