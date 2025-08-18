@@ -30,16 +30,21 @@ for { set i 1 } { $i <= 11 } { incr i } {
 # Type "foo".
 send_gdb "foo"
 set line { 0 11 40 1 }
-Term::wait_for_region_contents {*}$line "^$gdb_prompt foo"
+gdb_assert { [Term::wait_for_region_contents {*}$line "^$gdb_prompt foo"] } \
+    "type foo"
 
 # Enter TUI.
 send_gdb "\030\001"
-Term::wait_for ""
+gdb_assert { [Term::wait_for ""] } "enter TUI"
 
-# Exit TUI, type b.
+# Exit TUI.
 send_gdb "\030\001"
+gdb_assert { [Term::wait_for ""] } "exit TUI"
+
+# Type b.
 send_gdb "b"
-Term::wait_for_region_contents {*}$line "^$gdb_prompt b"
+gdb_assert { [Term::wait_for_region_contents {*}$line "^$gdb_prompt b"] } \
+    "type b"
 
 # Check that we don't see "boo".
 gdb_assert { ![Term::check_region_contents_p {*}$line "^$gdb_prompt boo"] } \
