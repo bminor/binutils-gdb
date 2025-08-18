@@ -51,7 +51,7 @@ SECTION
 
 /* Utility macro to make testing for string equality easier to read.  */
 #ifndef streq
-#define streq(A,B) strcmp ((A), (B)) == 0
+#define streq(A,B) (strcmp ((A), (B)) == 0)
 #endif
 
 /* Core note names.  */
