@@ -10713,6 +10713,9 @@ cmdline_add_object_only_section (bfd_byte *contents, size_t size)
       goto loser;
     }
 
+  /* This is a linker input BFD.  */
+  ibfd->is_linker_input = 1;
+
   if (!bfd_check_format_matches (ibfd, bfd_object, &matching))
     {
       err = bfd_errmsg (bfd_get_error ());
