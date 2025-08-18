@@ -513,17 +513,39 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
   if (!bfd_preserve_save (abfd, &preserve, NULL))
     goto err_ret;
 
-  /* First try matching the current target.  The current target may
-     have been set due to a user option, or due to the linker trying
-     optimistically to load input files for the same target as the
-     output, or due to the plugin support setting "plugin", or failing
-     any of those bfd_find_target will have chosen a default target.
-     target_defaulted will be set in the last case, or when "plugin"
-     is the target (even if chosen by user option).  Note that
-     bfd_plugin_no excluding the plugin target condition is an
-     optimisation, and can be removed if desired.  */
+  /* First try matching the plugin target if appropriate.  Next try
+     the current target.  The current target may have been set due to
+     a user option, or due to the linker trying optimistically to load
+     input files for the same target as the output.  Either will
+     have target_defaulted false.  Failing that, bfd_find_target will
+     have chosen a default target, and target_defaulted will be true.  */
   fail_targ = NULL;
 #if BFD_SUPPORTS_PLUGINS
+  if (abfd->format == bfd_object
+      && abfd->target_defaulted
+      && !abfd->is_linker_input
+      && abfd->plugin_format != bfd_plugin_no)
+    {
+      extern const bfd_target plugin_vec;
+
+      if (bfd_seek (abfd, 0, SEEK_SET) != 0)
+	goto err_ret;
+
+      BFD_ASSERT (save_targ != &plugin_vec);
+      abfd->xvec = &plugin_vec;
+      bfd_set_error (bfd_error_no_error);
+      cleanup = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
+      if (cleanup)
+	goto ok_ret;
+
+      bfd_reinit (abfd, initial_section_id, &preserve, cleanup);
+      bfd_release (abfd, preserve.marker);
+      preserve.marker = bfd_alloc (abfd, 1);
+      abfd->xvec = save_targ;
+    }
+
+  /* bfd_plugin_no excluding the plugin target is an optimisation.
+     The test can be removed if desired.  */
   if (!(abfd->plugin_format == bfd_plugin_no
 	&& bfd_plugin_target_p (save_targ)))
 #endif

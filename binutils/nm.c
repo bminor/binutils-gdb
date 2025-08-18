@@ -222,11 +222,6 @@ static char other_format[] = "%02x";
 static char desc_format[] = "%04x";
 
 static char *target = NULL;
-#if BFD_SUPPORTS_PLUGINS
-static const char *plugin_target = "plugin";
-#else
-static const char *plugin_target = NULL;
-#endif
 
 typedef enum unicode_display_type
 {
@@ -1601,14 +1596,6 @@ display_archive (bfd *file)
   if (print_armap)
     print_symdef_entry (file);
 
-  /* We didn't open the archive using plugin_target, because the
-     plugin bfd_target does not support archives.  Select
-     plugin_target now for elements so that we can recognise LTO IR
-     files and print IR symbols.  */
-  const struct bfd_target *plugin_vec = NULL;
-  if (!target && plugin_target)
-    plugin_vec = bfd_find_target (plugin_target, NULL);
-
   bfd *last_arfile = NULL;
   for (;;)
     {
@@ -1625,8 +1612,6 @@ display_archive (bfd *file)
 
       if (last_arfile != NULL)
 	bfd_close (last_arfile);
-
-      set_plugin_target (arfile, plugin_vec);
 
       char **matching;
       if (bfd_check_format_matches (arfile, bfd_object, &matching))
@@ -1660,7 +1645,7 @@ display_file (char *filename)
   if (get_file_size (filename) < 1)
     return false;
 
-  file = bfd_openr (filename, target ? target : plugin_target);
+  file = bfd_openr (filename, target);
   if (file == NULL)
     {
       bfd_nonfatal (filename);

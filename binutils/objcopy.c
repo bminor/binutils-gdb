@@ -3795,14 +3795,8 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	  if (preserve_dates && stat_status == 0)
 	    set_times (output_name, &buf);
 
-	  /* Open the newly created output file and attach to our
-	     list.  We must enable the plugin target here in order to
-	     read IR symbols for the archive map.  */
-	  const char *targ = output_target;
-#if BFD_SUPPORTS_PLUGINS
-	  if (!force_output_target)
-	    targ = "plugin";
-#endif
+	  /* Open the newly created output file and attach to our list.  */
+	  const char *targ = force_output_target ? output_target : NULL;
 	  output_element = bfd_openr (output_name, targ);
 
 	  list->obfd = output_element;

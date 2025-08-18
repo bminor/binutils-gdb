@@ -41,12 +41,6 @@ static char *temp_name;
 static int temp_fd;
 static FILE *outfile;
 
-#if BFD_SUPPORTS_PLUGINS
-static const char *plugin_target = "plugin";
-#else
-static const char *plugin_target = NULL;
-#endif
-
 static void
 map_over_list (bfd *arch, void (*function) (bfd *, bfd *), struct list *list)
 {
@@ -203,15 +197,8 @@ ar_open (char *name, int t)
 	  ptr = &(obfd->archive_head);
 	  element = bfd_openr_next_archived_file (ibfd, NULL);
 
-#if BFD_SUPPORTS_PLUGINS
-	  const struct bfd_target *plugin_vec
-	    = bfd_find_target (plugin_target, NULL);
-#endif
 	  while (element)
 	    {
-#if BFD_SUPPORTS_PLUGINS
-	      set_plugin_target (element, plugin_vec);
-#endif
 	      *ptr = element;
 	      ptr = &element->archive_next;
 	      element = bfd_openr_next_archived_file (ibfd, element);
@@ -270,7 +257,7 @@ ar_addmod (struct list *list)
 	{
 	  bfd *abfd;
 
-	  abfd = bfd_openr (list->name, plugin_target);
+	  abfd = bfd_openr (list->name, NULL);
 	  if (!abfd)
 	    {
 	      fprintf (stderr, _("%s: can't open file %s\n"),
@@ -397,7 +384,7 @@ ar_replace (struct list *list)
 	      if (FILENAME_CMP (bfd_get_filename (member), list->name) == 0)
 		{
 		  /* Found the one to replace.  */
-		  bfd *abfd = bfd_openr (list->name, plugin_target);
+		  bfd *abfd = bfd_openr (list->name, NULL);
 
 		  if (!abfd)
 		    {
@@ -421,7 +408,7 @@ ar_replace (struct list *list)
 
 	  if (!found)
 	    {
-	      bfd *abfd = bfd_openr (list->name, plugin_target);
+	      bfd *abfd = bfd_openr (list->name, NULL);
 
 	      fprintf (stderr,_("%s: can't find module file %s\n"),
 		       program_name, list->name);

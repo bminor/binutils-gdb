@@ -144,12 +144,6 @@ static int show_version = 0;
 
 static int show_help = 0;
 
-#if BFD_SUPPORTS_PLUGINS
-static const char *plugin_target = "plugin";
-#else
-static const char *plugin_target = NULL;
-#endif
-
 static const char *target = NULL;
 
 enum long_option_numbers
@@ -884,7 +878,7 @@ main (int argc, char **argv)
 	  if (! bfd_make_readable (libdeps_bfd))
 	    fatal (_("Cannot make libdeps object readable."));
 
-	  if (bfd_find_target (plugin_target, libdeps_bfd) == NULL)
+	  if (bfd_find_target (target, libdeps_bfd) == NULL)
 	    fatal (_("Cannot reset libdeps record type."));
 
 	  /* Insert our libdeps record in 2nd slot of the list of files
@@ -974,7 +968,6 @@ open_inarch (const char *archive_filename, const char *file)
   bfd *arch;
   char **matching;
   const char *arch_target = target;
-  const struct bfd_target *plugin_vec;
 
   bfd_set_error (bfd_error_no_error);
 
@@ -1064,21 +1057,12 @@ open_inarch (const char *archive_filename, const char *file)
 	}
     }
 
-  /* We didn't open the archive using plugin_target, because the
-     plugin bfd_target does not support archives.  Select
-     plugin_target now for elements so that we can recognise LTO IR
-     files and read IR symbols for use in the archive map.  */
-  plugin_vec = NULL;
-  if (!target && plugin_target)
-    plugin_vec = bfd_find_target (plugin_target, NULL);
-
   /* Open all the archive contents.  */
   last_one = &(arch->archive_next);
   for (next_one = bfd_openr_next_archived_file (arch, NULL);
        next_one;
        next_one = bfd_openr_next_archived_file (arch, next_one))
     {
-      set_plugin_target (next_one, plugin_vec);
       *last_one = next_one;
       last_one = &next_one->archive_next;
     }
@@ -1570,9 +1554,8 @@ replace_members (bfd *arch, char **files_to_move, bool quick)
 		    }
 		  else
 		    {
-		      const char *targ = target ? target : plugin_target;
 		      replaced = ar_emul_replace (after_bfd, *files_to_move,
-						  targ, verbose);
+						  target, verbose);
 		    }
 		  if (replaced)
 		    {
@@ -1598,8 +1581,7 @@ replace_members (bfd *arch, char **files_to_move, bool quick)
 	}
       else
         {
-	  const char *targ = target ? target : plugin_target;
-	  changed |= ar_emul_append (after_bfd, *files_to_move, targ,
+	  changed |= ar_emul_append (after_bfd, *files_to_move, target,
 				     verbose, make_thin_archive);
 	}
 

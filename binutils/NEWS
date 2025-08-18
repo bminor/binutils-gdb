@@ -1,5 +1,12 @@
 -*- text -*-
 
+* Internal changes to plugin support, and stricter target checking may result
+  in some errors being exposed in user options passed to the various binutils.
+  For example objcopy --target=TARGET now will only work if the input file is
+  for TARGET whereas prior versions of objcopy accepted other target input
+  files and produced a TARGET output.  If you do in fact want the old
+  behaviour the correct usage is objcopy --output-target=TARGET.
+
 * NaCl target support is removed.
 
 Changes in 2.45:
