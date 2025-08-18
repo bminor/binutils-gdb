@@ -110,7 +110,7 @@ SECTION
 #define NOTE_PSEUDO_SECTION_S390_VXRS_HIGH	".reg-s390-vxrs-high"
 #define NOTE_PSEUDO_SECTION_S390_VXRS_LOW	".reg-s390-vxrs-low"
 #define NOTE_PSEUDO_SECTION_SSP		 	".reg-ssp"
-#define NOTE_PSEUDO_SECTION_TDESC		".reg-tdesc"
+#define NOTE_PSEUDO_SECTION_TDESC		".gdb-tdesc"
 #define NOTE_PSEUDO_SECTION_X86_SEGBASES 	".reg-x86-segbases"
 #define NOTE_PSEUDO_SECTION_XFP          	".reg-xfp"
 #define NOTE_PSEUDO_SECTION_XSTATE       	".reg-xstate"
