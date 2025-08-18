@@ -72,8 +72,6 @@ public:
 			 struct expression *cond) override;
   int remove_watchpoint (CORE_ADDR addr, int len, enum target_hw_bp_type type,
 			 struct expression *cond) override;
-  bool watchpoint_addr_within_range (CORE_ADDR addr, CORE_ADDR start,
-				     int length) override;
 
   /* Add our hardware breakpoint and watchpoint implementation.  */
   bool stopped_by_watchpoint () override;
@@ -580,15 +578,6 @@ loongarch_linux_nat_target::remove_watchpoint (CORE_ADDR addr, int len,
   return ret;
 
 }
-
-bool
-loongarch_linux_nat_target::watchpoint_addr_within_range (CORE_ADDR addr,
-							  CORE_ADDR start,
-							  int length)
-{
-  return start <= addr && start + length - 1 >= addr;
-}
-
 
 /* Implement the "stopped_data_address" target_ops method.  */
 
