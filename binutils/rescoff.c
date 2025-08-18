@@ -308,6 +308,8 @@ read_coff_res_dir (windres_bfd *wrbfd, const bfd_byte *data,
 	  re->subdir = 1;
 	  re->u.dir = read_coff_res_dir (wrbfd, flaginfo->data + rva, flaginfo,
 					 type, level + 1);
+	  if (re->u.dir == NULL)
+	    return NULL;
 	}
       else
 	{
@@ -319,6 +321,8 @@ read_coff_res_dir (windres_bfd *wrbfd, const bfd_byte *data,
 	  re->subdir = 0;
 	  re->u.res = read_coff_data_entry (wrbfd, flaginfo->data + rva,
 					    flaginfo, type);
+	  if (re->u.res == NULL)
+	    return NULL;
 	}
 
       *pp = re;
@@ -359,6 +363,8 @@ read_coff_res_dir (windres_bfd *wrbfd, const bfd_byte *data,
 	  re->subdir = 1;
 	  re->u.dir = read_coff_res_dir (wrbfd, flaginfo->data + rva, flaginfo,
 					 type, level + 1);
+	  if (re->u.dir == NULL)
+	    return NULL;
 	}
       else
 	{
@@ -370,6 +376,8 @@ read_coff_res_dir (windres_bfd *wrbfd, const bfd_byte *data,
 	  re->subdir = 0;
 	  re->u.res = read_coff_data_entry (wrbfd, flaginfo->data + rva,
 					    flaginfo, type);
+	  if (re->u.res == NULL)
+	    return NULL;
 	}
 
       *pp = re;
