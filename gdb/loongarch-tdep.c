@@ -98,7 +98,9 @@ static bool
 loongarch_insn_is_ll (insn_t insn)
 {
   if ((insn & 0xff000000) == 0x20000000		/* ll.w  */
-      || (insn & 0xff000000) == 0x22000000)	/* ll.d  */
+      || (insn & 0xff000000) == 0x22000000	/* ll.d  */
+      || (insn & 0xfffffc00) == 0x38578000	/* llacq.w  */
+      || (insn & 0xfffffc00) == 0x38578800)	/* llacq.d  */
     return true;
   return false;
 }
@@ -109,7 +111,10 @@ static bool
 loongarch_insn_is_sc (insn_t insn)
 {
   if ((insn & 0xff000000) == 0x21000000		/* sc.w  */
-      || (insn & 0xff000000) == 0x23000000)	/* sc.d  */
+      || (insn & 0xff000000) == 0x23000000	/* sc.d  */
+      || (insn & 0xffff8000) == 0x38570000	/* sc.q  */
+      || (insn & 0xfffffc00) == 0x38578400	/* screl.w  */
+      || (insn & 0xfffffc00) == 0x38578c00)	/* screl.d  */
     return true;
   return false;
 }
