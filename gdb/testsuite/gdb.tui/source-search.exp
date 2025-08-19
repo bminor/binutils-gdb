@@ -36,9 +36,10 @@ proc check_src_window { testname first_line } {
 
 }
 
+# Initialise the src window so that it is displaying known contents.
+# Check that the expected contents are displayed.
+Term::command "list 20"
 set first_line 15
-
-# Check that the window contents are as expected.
 check_src_window "initial src contents" $first_line
 
 # Search forward.  Searches are from the last line displayed, so this
