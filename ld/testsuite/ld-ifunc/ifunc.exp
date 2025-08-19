@@ -54,6 +54,13 @@ if ![check_shared_lib_support] {
     return
 }
 
+set need_direct_extern_access ""
+if { [istarget i?86-*-linux*]
+     || [istarget i?86-*-gnu*] } then {
+    # These targets need direct extern access in some tests.
+    set need_direct_extern_access "$DIRECT_EXTERN_ACCESS_CFLAGS"
+}
+
 set saved_ASFLAGS "$ASFLAGS"
 if { [istarget "i?86-*-*"] || [istarget "x86_64-*-*"] } {
     set ASFLAGS "$ASFLAGS -mx86-used-note=no"
@@ -497,6 +504,7 @@ if { [check_ifunc_available] } {
 	    { ifunc-main.c } \
 	    "ifunc-main" \
 	    "ifunc-main.out" \
+	    "$need_direct_extern_access" \
 	] \
 	[list \
 	    "Run ifunc-main with -fpic" \
@@ -514,6 +522,7 @@ if { [check_ifunc_available] } {
 	    { ifunc-main.c } \
 	    "ifunc-mainn" \
 	    "ifunc-main.out" \
+	    "$need_direct_extern_access" \
 	] \
 	[list \
 	    "Run ifunc-main with PIE (-z now)" \

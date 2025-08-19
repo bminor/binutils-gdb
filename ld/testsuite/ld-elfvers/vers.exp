@@ -60,6 +60,13 @@ if { ![istarget *-*-solaris2*]
     return
 }
 
+set need_direct_extern_access ""
+if { [istarget i?86-*-linux*]
+     || [istarget i?86-*-gnu*] } then {
+    # These targets need direct extern access in some tests.
+    set need_direct_extern_access "$DIRECT_EXTERN_ACCESS_CFLAGS"
+}
+
 set diff diff
 set tmpdir tmpdir
 set VOBJDUMP_FLAGS --private-headers
@@ -558,7 +565,8 @@ proc build_vers_lib_no_pic { test source libname other mapfile verexp versymexp 
   global shared
   # Make sure that PLT is used since PLT is expected.
   global PLT_CFLAGS
-  build_binary "$shared -z notext" $PLT_CFLAGS $test $source $libname $other $mapfile $verexp $versymexp $symexp ""
+  global need_direct_extern_access
+  build_binary "$shared -z notext" "$PLT_CFLAGS $need_direct_extern_access" $test $source $libname $other $mapfile $verexp $versymexp $symexp ""
 }
 
 proc build_vers_lib_pic { test source libname other mapfile verexp versymexp symexp } {

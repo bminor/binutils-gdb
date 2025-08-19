@@ -50,6 +50,13 @@ if { ![istarget hppa*64*-*-hpux*] \
     return
 }
 
+set need_direct_extern_access ""
+if { [istarget i?86-*-linux*]
+     || [istarget i?86-*-gnu*] } then {
+    # These targets need direct extern access in some tests.
+    set need_direct_extern_access "$DIRECT_EXTERN_ACCESS_CFLAGS"
+}
+
 if [is_xcoff_format] {
     set test_list [lsort [glob -nocomplain $srcdir/$subdir/*-xcoff*.d]]
 } else {
@@ -238,6 +245,7 @@ proc visibility_run {visibility} {
     global COMPRESS_LDFLAG
     global NOSANITIZE_CFLAGS
     global NOLTO_CFLAGS
+    global need_direct_extern_access
 
     if [ string match $visibility "hidden" ] {
 	set VSBCFLAG "-DHIDDEN_TEST"
@@ -284,7 +292,7 @@ proc visibility_run {visibility} {
     } else {
     # Compile the main program.  Make sure that PLT is used since PLT
     # is expected.
-    if ![ld_compile "$CC_FOR_TARGET -g $NOPIE_CFLAGS $PLT_CFLAGS $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/main.c $tmpdir/mainnp.o] {
+    if ![ld_compile "$CC_FOR_TARGET -g $NOPIE_CFLAGS $PLT_CFLAGS $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS $need_direct_extern_access" $srcdir/$subdir/main.c $tmpdir/mainnp.o] {
 	unsupported "visibility ($visibility) (non PIC)"
 	unsupported "visibility ($visibility)"
     } else {
@@ -294,8 +302,8 @@ proc visibility_run {visibility} {
 	# will need to do more relocation work.  However, note that not
 	# using -fpic will cause some of the tests to return different
 	# results.  Make sure that PLT is used since PLT is expected.
-	if { ![ld_compile "$CC_FOR_TARGET -g $NOPIE_CFLAGS $PLT_CFLAGS $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/sh1.c $tmpdir/sh1np.o]
-	     || ![ld_compile "$CC_FOR_TARGET -g $NOPIE_CFLAGS $PLT_CFLAGS $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/sh2.c $tmpdir/sh2np.o] } {
+	if { ![ld_compile "$CC_FOR_TARGET -g $NOPIE_CFLAGS $PLT_CFLAGS $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS $need_direct_extern_access" $srcdir/$subdir/sh1.c $tmpdir/sh1np.o]
+	     || ![ld_compile "$CC_FOR_TARGET -g $NOPIE_CFLAGS $PLT_CFLAGS $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS $need_direct_extern_access" $srcdir/$subdir/sh2.c $tmpdir/sh2np.o] } {
 	    unsupported "visibility ($visibility) (non PIC)"
 	} else {
 	    # SunOS non PIC shared libraries don't permit some cases of

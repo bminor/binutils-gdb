@@ -62,6 +62,13 @@ if { ![istarget hppa*64*-*-hpux*] \
     return
 }
 
+set need_direct_extern_access ""
+if { [istarget i?86-*-linux*]
+     || [istarget i?86-*-gnu*] } then {
+    # These targets need direct extern access in some tests.
+    set need_direct_extern_access "$DIRECT_EXTERN_ACCESS_CFLAGS"
+}
+
 set tmpdir tmpdir
 set SHCFLAG ""
 set shared_needs_pic "no"
@@ -217,8 +224,8 @@ if ![ld_compile "$CC_FOR_TARGET $NOPIE_CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $
     # will need to do more relocation work.  However, note that not
     # using -fpic will cause some of the tests to return different
     # results.  Make sure that PLT is used since PLT is expected.
-    if { ![ld_compile "$CC_FOR_TARGET $PLT_CFLAGS $NOPIE_CFLAGS $SHCFLAG" $srcdir/$subdir/sh1.c $tmpdir/sh1np.o]
-	 || ![ld_compile "$CC_FOR_TARGET $PLT_CFLAGS $NOPIE_CFLAGS $SHCFLAG" $srcdir/$subdir/sh2.c $tmpdir/sh2np.o] } {
+    if { ![ld_compile "$CC_FOR_TARGET $PLT_CFLAGS $NOPIE_CFLAGS $SHCFLAG $need_direct_extern_access" $srcdir/$subdir/sh1.c $tmpdir/sh1np.o]
+	 || ![ld_compile "$CC_FOR_TARGET $PLT_CFLAGS $NOPIE_CFLAGS $SHCFLAG $need_direct_extern_access" $srcdir/$subdir/sh2.c $tmpdir/sh2np.o] } {
 	unsupported "shared (non PIC)"
     } else { if { [is_xcoff_format] } {
 	shared_test shnp "shared (non PIC)" mainnp.o sh1np.o sh2np.o xcoff "" $NOPIE_LDFLAGS

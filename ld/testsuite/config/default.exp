@@ -456,6 +456,15 @@ if { ![info exists NOPIE_CFLAGS] || ![info exists NOPIE_LDFLAGS] } then {
     }
 }
 
+if { ![info exists DIRECT_EXTERN_ACCESS_CFLAGS] } then {
+    set DIRECT_EXTERN_ACCESS_CFLAGS ""
+    if [compiler_supports "-mdirect-extern-access"] {
+	set DIRECT_EXTERN_ACCESS_CFLAGS "-mdirect-extern-access"
+    } elseif [compiler_supports "-fdirect-access-external-data"] {
+	set DIRECT_EXTERN_ACCESS_CFLAGS "-fdirect-access-external-data"
+    }
+}
+
 if { ![info exists NOCF_PROTECTION_CFLAGS] } then {
     set NOCF_PROTECTION_CFLAGS ""
     if [compiler_supports "-fcf-protection=none"] {
