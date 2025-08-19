@@ -117,6 +117,11 @@ elf_solaris2_before_allocation (void)
 	  /* Create a version pattern for this symbol.  Some of them start
 	     off as local, others as global, so try both.  */
 	  globals = lang_new_vers_pattern (globals, *sym, NULL, true);
+
+	  /* Treat basever symbols as if from a linker script to
+	     appease --no-undefined-version.  */
+	  globals->script = 1;
+
 	  locals = lang_new_vers_pattern (locals, *sym, NULL, true);
 	}
 
