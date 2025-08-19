@@ -8574,6 +8574,7 @@ typedef struct Frame_Chunk
   uint64_t pc_range;
   unsigned int cfa_reg;
   uint64_t cfa_offset;
+  bool cfa_ofs_signed_p;
   unsigned int ra;
   unsigned char fde_encoding;
   unsigned char cfa_exp;
@@ -9071,7 +9072,8 @@ frame_display_row (Frame_Chunk *fc, int *need_col_headers, unsigned int *max_reg
   if (fc->cfa_exp)
     strcpy (tmp, "exp");
   else
-    sprintf (tmp, "%s%+d", regname (fc->cfa_reg, 1), (int) fc->cfa_offset);
+    sprintf (tmp, (fc->cfa_ofs_signed_p ? "%s%+" PRId64 : "%s+%" PRIu64),
+	     regname (fc->cfa_reg, 1), fc->cfa_offset);
   printf ("%-8s ", tmp);
 
   for (r = 0; r < fc->ncols; r++)
@@ -9794,6 +9796,7 @@ display_debug_frames (struct dwarf_section *section,
 	      fc->data_factor = cie->data_factor;
 	      fc->cfa_reg = cie->cfa_reg;
 	      fc->cfa_offset = cie->cfa_offset;
+	      fc->cfa_ofs_signed_p = cie->cfa_ofs_signed_p;
 	      fc->ra = cie->ra;
 	      if (frame_need_space (fc, max_regs > 0 ? max_regs - 1: 0) < 0)
 		{
@@ -10263,6 +10266,7 @@ display_debug_frames (struct dwarf_section *section,
 		printf ("  DW_CFA_remember_state\n");
 	      rs = (Frame_Chunk *) xmalloc (sizeof (Frame_Chunk));
 	      rs->cfa_offset = fc->cfa_offset;
+	      rs->cfa_ofs_signed_p = fc->cfa_ofs_signed_p;
 	      rs->cfa_reg = fc->cfa_reg;
 	      rs->ra = fc->ra;
 	      rs->cfa_exp = fc->cfa_exp;
@@ -10285,6 +10289,7 @@ display_debug_frames (struct dwarf_section *section,
 		{
 		  remembered_state = rs->next;
 		  fc->cfa_offset = rs->cfa_offset;
+		  fc->cfa_ofs_signed_p = rs->cfa_ofs_signed_p;
 		  fc->cfa_reg = rs->cfa_reg;
 		  fc->ra = rs->ra;
 		  fc->cfa_exp = rs->cfa_exp;
@@ -10311,10 +10316,11 @@ display_debug_frames (struct dwarf_section *section,
 	    case DW_CFA_def_cfa:
 	      READ_ULEB (fc->cfa_reg, start, block_end);
 	      READ_ULEB (fc->cfa_offset, start, block_end);
+	      fc->cfa_ofs_signed_p = false;
 	      fc->cfa_exp = 0;
 	      if (! do_debug_frames_interp)
-		printf ("  DW_CFA_def_cfa: %s ofs %d\n",
-			regname (fc->cfa_reg, 0), (int) fc->cfa_offset);
+		printf ("  DW_CFA_def_cfa: %s ofs %" PRIu64 "\n",
+			regname (fc->cfa_reg, 0), fc->cfa_offset);
 	      break;
 
 	    case DW_CFA_def_cfa_register:
@@ -10327,8 +10333,9 @@ display_debug_frames (struct dwarf_section *section,
 
 	    case DW_CFA_def_cfa_offset:
 	      READ_ULEB (fc->cfa_offset, start, block_end);
+	      fc->cfa_ofs_signed_p = false;
 	      if (! do_debug_frames_interp)
-		printf ("  DW_CFA_def_cfa_offset: %d\n", (int) fc->cfa_offset);
+		printf ("  DW_CFA_def_cfa_offset: %" PRIu64 "\n", fc->cfa_offset);
 	      break;
 
 	    case DW_CFA_nop:
@@ -10448,6 +10455,7 @@ display_debug_frames (struct dwarf_section *section,
 	      ofs = sofs;
 	      ofs *= fc->data_factor;
 	      fc->cfa_offset = ofs;
+	      fc->cfa_ofs_signed_p = true;
 	      fc->cfa_exp = 0;
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_def_cfa_sf: %s ofs %" PRId64 "\n",
@@ -10459,6 +10467,7 @@ display_debug_frames (struct dwarf_section *section,
 	      ofs = sofs;
 	      ofs *= fc->data_factor;
 	      fc->cfa_offset = ofs;
+	      fc->cfa_ofs_signed_p = true;
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_def_cfa_offset_sf: %" PRId64 "\n", ofs);
 	      break;
