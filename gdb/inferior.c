@@ -19,6 +19,7 @@
 
 #include "exec.h"
 #include "inferior.h"
+#include "gdbsupport/common-inferior.h"
 #include "target.h"
 #include "command.h"
 #include "completer.h"

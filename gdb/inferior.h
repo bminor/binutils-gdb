@@ -54,10 +54,8 @@ struct thread_info;
 #include "symfile-add-flags.h"
 #include "gdbsupport/refcounted-object.h"
 #include "gdbsupport/forward-scope-exit.h"
-#include "gdbsupport/gdb_unique_ptr.h"
 #include "gdbsupport/intrusive_list.h"
 
-#include "gdbsupport/common-inferior.h"
 #include "gdbthread.h"
 
 #include "process-stratum-target.h"

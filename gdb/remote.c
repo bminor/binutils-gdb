@@ -22,6 +22,7 @@
 #include <ctype.h>
 #include <fcntl.h>
 #include "exceptions.h"
+#include "gdbsupport/common-inferior.h"
 #include "inferior.h"
 #include "infrun.h"
 #include "bfd.h"

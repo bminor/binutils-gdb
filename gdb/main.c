@@ -19,6 +19,7 @@
 
 #include "annotate.h"
 #include "exceptions.h"
+#include "gdbsupport/common-inferior.h"
 #include "top.h"
 #include "ui.h"
 #include "target.h"

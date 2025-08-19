@@ -25,6 +25,7 @@
 #include "inferior.h"
 #include "infrun.h"
 #include "gdbsupport/environ.h"
+#include "gdbsupport/common-inferior.h"
 #include "value.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-style.h"
