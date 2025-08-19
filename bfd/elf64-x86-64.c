@@ -6281,7 +6281,7 @@ elf_x86_64_special_sections[]=
 #define ELF_TARGET_ID			    X86_64_ELF_DATA
 #define ELF_MACHINE_CODE		    EM_X86_64
 #define ELF_MAXPAGESIZE			    0x1000
-#define ELF_COMMONPAGESIZE		    0x1000
+#define ELF_COMMONPAGESIZE		    ELF_MAXPAGESIZE
 
 #define elf_backend_can_gc_sections	    1
 #define elf_backend_can_refcount	    1
@@ -6392,7 +6392,10 @@ elf_x86_64_special_sections[]=
 #undef  TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		    "elf64-x86-64-sol2"
 
-#undef ELF_TARGET_OS
+#undef	ELF_MAXPAGESIZE
+#define ELF_MAXPAGESIZE			    0x100000
+
+#undef	ELF_TARGET_OS
 #define	ELF_TARGET_OS			    is_solaris
 
 /* Restore default: we cannot use ELFOSABI_SOLARIS, otherwise ELFOSABI_NONE
@@ -6453,8 +6456,8 @@ elf64_x86_64_copy_solaris_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUS
 #undef ELF_ARCH
 #define ELF_ARCH			    bfd_arch_i386
 
-#undef	ELF_MACHINE_CODE
-#define ELF_MACHINE_CODE		    EM_X86_64
+#undef	ELF_MAXPAGESIZE
+#define ELF_MAXPAGESIZE			    0x1000
 
 #undef	ELF_TARGET_OS
 #undef	ELF_OSABI

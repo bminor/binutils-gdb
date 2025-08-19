@@ -4586,6 +4586,9 @@ elf_i386_fbsd_init_file_header (bfd *abfd, struct bfd_link_info *info)
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf32-i386-sol2"
 
+#undef	ELF_MAXPAGESIZE
+#define ELF_MAXPAGESIZE			0x10000
+
 #undef	ELF_TARGET_OS
 #define	ELF_TARGET_OS			is_solaris
 
@@ -4712,6 +4715,9 @@ elf32_iamcu_elf_object_p (bfd *abfd)
 
 #undef	ELF_MACHINE_CODE
 #define	ELF_MACHINE_CODE		EM_IAMCU
+
+#undef	ELF_MAXPAGESIZE
+#define ELF_MAXPAGESIZE			0x1000
 
 #undef	ELF_TARGET_OS
 #undef	ELF_OSABI
