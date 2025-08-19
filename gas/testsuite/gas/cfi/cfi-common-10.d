@@ -3,7 +3,7 @@
 #...
 Contents of the .eh_frame section:
 
-00000000 0+0014 0+0000 CIE
+0+0000 0+00(10|14) 0+0000 CIE
   Version:               1
   Augmentation:          "zR"
   Code alignment factor: .*
@@ -12,7 +12,7 @@ Contents of the .eh_frame section:
   Augmentation data:     [01][abc]
 #...
 
-00000018 0+00(18|1c) 0+001c FDE cie=0+0000 pc=.*
+0+00(14|18) 0+00(18|1c) 0+00(18|1c) FDE cie=0+0000 pc=.*
 #...
   DW_CFA_advance_loc: 4 to 0+0004
   DW_CFA_def_cfa_offset: 1099511627808
