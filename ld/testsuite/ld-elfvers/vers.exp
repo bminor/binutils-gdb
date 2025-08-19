@@ -961,7 +961,10 @@ if [string match "yes" $pic] then {
 build_vers_lib_pic "vers26a" vers26a.c vers26a "" vers26a.map vers26a.ver vers26a.dsym ""
 build_vers_lib_pic "vers26b1" vers26b.c vers26b1 "" "" vers26b.ver vers26b.dsym ""
 build_vers_lib_pic "vers26b2" vers26b.c vers26b2 "vers26a.so vers26b1.so vers26a.o" "" vers26b.ver vers26b.dsym ""
-if [string match "yes" $pic] then {
+if { [istarget x86_64-*-linux*] || [istarget x86_64-*-solaris2*] } then {
+    # gcc -fPIC generates code that ld rejects.
+    unsupported "vers26b3"
+} elseif [string match "yes" $pic] then {
     xfail "vers26b3"
 } else {
     build_vers_lib_no_pic "vers26b3" vers26b.c vers26b3 "vers26a.so vers26b1.so vers26a.o" "" vers26b.ver vers26b.dsym ""
