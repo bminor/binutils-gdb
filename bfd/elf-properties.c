@@ -697,6 +697,23 @@ _bfd_elf_link_create_gnu_property_sec (struct bfd_link_info *info, bfd *elf_bfd,
   return sec;
 }
 
+/* Prune empty generic properties.  */
+
+static void
+elf_prune_empty_properties (elf_property_list **pp)
+{
+  elf_property_list *p;
+
+  while ((p = *pp) != NULL)
+    if ((p->property.pr_type < GNU_PROPERTY_LOPROC
+	 || p->property.pr_type >= GNU_PROPERTY_LOUSER)
+	&& p->property.pr_datasz != 0
+	&& p->property.pr_kind == property_number
+	&& p->property.u.number == 0)
+      *pp = p->next;
+    else
+      pp = &p->next;
+}
 
 /* Set up GNU properties.  Return the first relocatable ELF input with
    GNU properties if found.  Otherwise, return NULL.  */
@@ -878,22 +895,6 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
       if (bed->fixup_gnu_properties)
 	bed->fixup_gnu_properties (info, &elf_properties (first_pbfd));
 
-      if (elf_properties (first_pbfd) == NULL)
-	{
-	  /* Discard .note.gnu.property section if all properties have
-	     been removed.  */
-	  sec->output_section = bfd_abs_section_ptr;
-	  return NULL;
-	}
-
-      /* Compute the section size.  */
-      list = elf_properties (first_pbfd);
-      size = elf_get_gnu_property_section_size (list, align_size);
-
-      /* Update .note.gnu.property section now.  */
-      sec->size = size;
-      contents = (bfd_byte *) bfd_zalloc (first_pbfd, size);
-
       if (info->indirect_extern_access <= 0)
 	{
 	  /* Get GNU_PROPERTY_1_NEEDED properties.  */
@@ -916,6 +917,24 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 		  &= ~GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS;
 	    }
 	}
+
+      elf_prune_empty_properties (&elf_properties (first_pbfd));
+
+      if (elf_properties (first_pbfd) == NULL)
+	{
+	  /* Discard .note.gnu.property section if all properties have
+	     been removed.  */
+	  sec->output_section = bfd_abs_section_ptr;
+	  return NULL;
+	}
+
+      /* Compute the section size.  */
+      list = elf_properties (first_pbfd);
+      size = elf_get_gnu_property_section_size (list, align_size);
+
+      /* Update .note.gnu.property section now.  */
+      sec->size = size;
+      contents = (bfd_byte *) bfd_zalloc (first_pbfd, size);
 
       elf_write_gnu_properties (info, first_pbfd, contents, list, size,
 				align_size);
