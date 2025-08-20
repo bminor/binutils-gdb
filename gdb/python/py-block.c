@@ -356,6 +356,9 @@ block_to_block_object (const struct block *block, struct objfile *objfile)
     }
 
   result = PyObject_New (block_object, &block_object_type);
+  if (result == nullptr)
+    return nullptr;
+
   result->block = block;
   result->objfile = objfile;
 
