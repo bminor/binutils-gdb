@@ -20,8 +20,6 @@
 #ifndef GDBSUPPORT_FORMAT_H
 #define GDBSUPPORT_FORMAT_H
 
-#include <string_view>
-
 #if defined(__MINGW32__) && !defined(PRINTF_HAS_LONG_LONG)
 # define USE_PRINTF_I64 1
 # define PRINTF_HAS_LONG_LONG
@@ -51,21 +49,15 @@ enum argclass
 
 struct format_piece
 {
-  format_piece (const char *str, enum argclass argc, int n)
-    : string (str),
+  format_piece (std::string::size_type start, enum argclass argc, int n)
+    : start (start),
       argclass (argc),
       n_int_args (n)
-  {
-    gdb_assert (str != nullptr);
-  }
+  {}
 
-  bool operator== (const format_piece &other) const
-  {
-    return (this->argclass == other.argclass
-	    && std::string_view (this->string) == other.string);
-  }
+  /* Where this piece starts, within FORMAT_PIECES::M_STORAGE.  */
+  std::string::size_type start;
 
-  const char *string;
   enum argclass argclass;
   /* Count the number of preceding 'int' arguments that must be passed
      along.  This is used for a width or precision of '*'.  Note that
@@ -95,10 +87,17 @@ public:
     return m_pieces.end ();
   }
 
+  /* Return the string associated to PIECE.  */
+  const char *piece_str (const format_piece &piece)
+  { return &m_storage[piece.start]; }
+
 private:
 
   std::vector<format_piece> m_pieces;
-  gdb::unique_xmalloc_ptr<char> m_storage;
+
+  /* This is used as a buffer of concatenated null-terminated strings.  The
+     individual strings are referenced by FORMAT_PIECE::START.  */
+  std::string m_storage;
 };
 
 #endif /* GDBSUPPORT_FORMAT_H */

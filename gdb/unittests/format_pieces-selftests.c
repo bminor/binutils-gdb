@@ -29,17 +29,35 @@
 namespace selftests {
 namespace format_pieces {
 
+/* Like format_piece, but with the expected string hardcoded instead of an
+   index.  */
+
+struct expected_format_piece
+{
+  std::string_view str;
+  enum argclass argclass;
+  int n_int_args;
+};
+
 /* Verify that parsing STR gives pieces equal to EXPECTED_PIECES.  */
 
 static void
-check (const char *str, const std::vector<format_piece> &expected_pieces,
+check (const char *str,
+       const std::vector<expected_format_piece> &expected_pieces,
        bool gdb_format = false)
 {
   ::format_pieces pieces (&str, gdb_format);
 
   SELF_CHECK ((pieces.end () - pieces.begin ()) == expected_pieces.size ());
-  SELF_CHECK (std::equal (pieces.begin (), pieces.end (),
-			  expected_pieces.begin ()));
+
+  for (auto it = pieces.begin (); it != pieces.end (); ++it)
+    {
+      auto &expected = expected_pieces[it - pieces.begin ()];
+
+      SELF_CHECK (expected.str == pieces.piece_str (*it));
+      SELF_CHECK (expected.argclass == it->argclass);
+      SELF_CHECK (expected.n_int_args == it->n_int_args);
+    }
 }
 
 static void
@@ -47,7 +65,7 @@ test_escape_sequences ()
 {
   check ("This is an escape sequence: \\e",
     {
-      format_piece ("This is an escape sequence: \e", literal_piece, 0),
+      {"This is an escape sequence: \e", literal_piece, 0},
     });
 }
 
@@ -58,11 +76,11 @@ test_format_specifier ()
      see a trailing empty literal piece.  */
   check ("Hello\\t %d%llx%%d%d", /* ARI: %ll */
     {
-      format_piece ("Hello\t ", literal_piece, 0),
-      format_piece ("%d", int_arg, 0),
-      format_piece ("%" LL "x", long_long_arg, 0),
-      format_piece ("%%d", literal_piece, 0),
-      format_piece ("%d", int_arg, 0),
+      {"Hello\t ", literal_piece, 0},
+      {"%d", int_arg, 0},
+      {"%" LL "x", long_long_arg, 0},
+      {"%%d", literal_piece, 0},
+      {"%d", int_arg, 0},
     });
 }
 
@@ -71,13 +89,13 @@ test_gdb_formats ()
 {
   check ("Hello\\t \"%p[%pF%ps%*.*d%p]\"",
     {
-      format_piece ("Hello\\t \"", literal_piece, 0),
-      format_piece ("%p[", ptr_arg, 0),
-      format_piece ("%pF", ptr_arg, 0),
-      format_piece ("%ps", ptr_arg, 0),
-      format_piece ("%*.*d", int_arg, 2),
-      format_piece ("%p]", ptr_arg, 0),
-      format_piece ("\"", literal_piece, 0),
+      {"Hello\\t \"", literal_piece, 0},
+      {"%p[", ptr_arg, 0},
+      {"%pF", ptr_arg, 0},
+      {"%ps", ptr_arg, 0},
+      {"%*.*d", int_arg, 2},
+      {"%p]", ptr_arg, 0},
+      {"\"", literal_piece, 0},
     }, true);
 }
 
@@ -89,38 +107,38 @@ test_format_int_sizes ()
 {
   check ("Hello\\t %hu%lu%llu%zu", /* ARI: %ll */
     {
-      format_piece ("Hello\t ", literal_piece, 0),
-      format_piece ("%hu", int_arg, 0),
-      format_piece ("%lu", long_arg, 0),
-      format_piece ("%" LL "u", long_long_arg, 0),
-      format_piece ("%zu", size_t_arg, 0)
+      {"Hello\t ", literal_piece, 0},
+      {"%hu", int_arg, 0},
+      {"%lu", long_arg, 0},
+      {"%" LL "u", long_long_arg, 0},
+      {"%zu", size_t_arg, 0},
     });
 
   check ("Hello\\t %hx%lx%llx%zx", /* ARI: %ll */
     {
-      format_piece ("Hello\t ", literal_piece, 0),
-      format_piece ("%hx", int_arg, 0),
-      format_piece ("%lx", long_arg, 0),
-      format_piece ("%" LL "x", long_long_arg, 0),
-      format_piece ("%zx", size_t_arg, 0)
+      {"Hello\t ", literal_piece, 0},
+      {"%hx", int_arg, 0},
+      {"%lx", long_arg, 0},
+      {"%" LL "x", long_long_arg, 0},
+      {"%zx", size_t_arg, 0},
     });
 
   check ("Hello\\t %ho%lo%llo%zo", /* ARI: %ll */
     {
-      format_piece ("Hello\t ", literal_piece, 0),
-      format_piece ("%ho", int_arg, 0),
-      format_piece ("%lo", long_arg, 0),
-      format_piece ("%" LL "o", long_long_arg, 0),
-      format_piece ("%zo", size_t_arg, 0)
+      {"Hello\t ", literal_piece, 0},
+      {"%ho", int_arg, 0},
+      {"%lo", long_arg, 0},
+      {"%" LL "o", long_long_arg, 0},
+      {"%zo", size_t_arg, 0},
     });
 
   check ("Hello\\t %hd%ld%lld%zd", /* ARI: %ll */
     {
-      format_piece ("Hello\t ", literal_piece, 0),
-      format_piece ("%hd", int_arg, 0),
-      format_piece ("%ld", long_arg, 0),
-      format_piece ("%" LL "d", long_long_arg, 0),
-      format_piece ("%zd", size_t_arg, 0)
+      {"Hello\t ", literal_piece, 0},
+      {"%hd", int_arg, 0},
+      {"%ld", long_arg, 0},
+      {"%" LL "d", long_long_arg, 0},
+      {"%zd", size_t_arg, 0},
     });
 }
 
@@ -129,8 +147,8 @@ test_windows_formats ()
 {
   check ("rc%I64d",
     {
-     format_piece ("rc", literal_piece, 0),
-     format_piece ("%I64d", long_long_arg, 0),
+     {"rc", literal_piece, 0},
+     {"%I64d", long_long_arg, 0},
     });
 }
 

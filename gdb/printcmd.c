@@ -2703,7 +2703,6 @@ ui_printf (const char *arg, struct ui_file *stream)
   {
     int nargs_wanted;
     int i;
-    const char *current_substring;
 
     nargs_wanted = 0;
     for (auto &&piece : fpieces)
@@ -2732,7 +2731,8 @@ ui_printf (const char *arg, struct ui_file *stream)
     i = 0;
     for (auto &&piece : fpieces)
       {
-	current_substring = piece.string;
+	const char *current_substring = fpieces.piece_str (piece);
+
 	switch (piece.argclass)
 	  {
 	  case string_arg:

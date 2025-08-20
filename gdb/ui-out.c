@@ -586,7 +586,7 @@ ui_out::vmessage (const ui_file_style &in_style, const char *format,
 
   for (auto &&piece : fpieces)
     {
-      const char *current_substring = piece.string;
+      const char *current_substring = fpieces.piece_str (piece);
 
       gdb_assert (piece.n_int_args >= 0 && piece.n_int_args <= 2);
       int intvals[2] = { 0, 0 };
