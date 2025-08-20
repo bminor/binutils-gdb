@@ -1,0 +1,46 @@
+# Copyright 2025 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+standard_testfile .cc
+
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
+    return
+}
+
+runto_main
+
+# Test for reference type.
+gdb_test "print v_struct.get () == 1 && v_struct.get () == 2" \
+    " = false"
+gdb_test "print v_struct.get () == 1 || v_struct.get () == 2" \
+    " = true"
+
+# Test for correct type resolution using 'ptype'.
+gdb_test "ptype v_struct.get ()" \
+    "type = int &"
+gdb_test "ptype v_struct.get () == 1" \
+    "type = bool"
+gdb_test "ptype v_struct.get () + 1" \
+    "type = int"
+gdb_test "ptype v_struct.get () && 1" \
+    "type = bool"
+gdb_test "ptype v_struct.get () || 1" \
+    "type = bool"
+gdb_test "ptype !v_struct.get ()" \
+    "type = bool"
+gdb_test "ptype v_struct.get () ? 2 : 3" \
+    "type = int"
+gdb_test "ptype v_struct.get () | 1" \
+    "type = int"

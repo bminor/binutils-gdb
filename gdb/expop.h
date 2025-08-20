@@ -308,6 +308,25 @@ dump_for_expression (struct ui_file *stream, int depth,
     op->dump (stream, depth);
 }
 
+/* If evaluating with noside == EVAL_AVOID_SIDE_EFFECTS, we are essentially
+   interested in the type of ARG.  However, if ARG is of reference type,
+   this would give us a memory value that would cause a failure if GDB
+   attempts to access the contents.  Convert to the target type to avoid
+   such problems.  */
+
+static value *
+convert_reference_to_target_type (value *arg, enum noside noside)
+{
+  struct type *type = check_typedef (arg->type ());
+  if (noside == EVAL_AVOID_SIDE_EFFECTS && TYPE_IS_REFERENCE (type))
+    {
+      struct type *target_type = check_typedef (type->target_type ());
+      return value::zero (target_type, not_lval);
+    }
+
+  return arg;
+}
+
 extern void dump_for_expression (struct ui_file *stream, int depth,
 				 enum exp_opcode op);
 extern void dump_for_expression (struct ui_file *stream, int depth,
@@ -953,7 +972,7 @@ public:
     struct value *val
       = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
 
-    if (value_logical_not (val))
+    if (noside != EVAL_AVOID_SIDE_EFFECTS && value_logical_not (val))
       return std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
     return std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
   }
@@ -1187,6 +1206,10 @@ public:
       = std::get<0> (m_storage)->evaluate_with_coercion (exp, noside);
     value *rhs
       = std::get<1> (m_storage)->evaluate_with_coercion (exp, noside);
+
+    lhs = convert_reference_to_target_type (lhs, noside);
+    rhs = convert_reference_to_target_type (rhs, noside);
+
     return eval_op_add (expect_type, exp, noside, lhs, rhs);
   }
 
@@ -1223,6 +1246,10 @@ public:
       = std::get<0> (m_storage)->evaluate_with_coercion (exp, noside);
     value *rhs
       = std::get<1> (m_storage)->evaluate_with_coercion (exp, noside);
+
+    lhs = convert_reference_to_target_type (lhs, noside);
+    rhs = convert_reference_to_target_type (rhs, noside);
+
     return eval_op_sub (expect_type, exp, noside, lhs, rhs);
   }
 
@@ -1265,6 +1292,10 @@ public:
       = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
     value *rhs
       = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+
+    lhs = convert_reference_to_target_type (lhs, noside);
+    rhs = convert_reference_to_target_type (rhs, noside);
+
     return FUNC (expect_type, exp, noside, OP, lhs, rhs);
   }
 
@@ -1340,6 +1371,10 @@ public:
     value *rhs
       = std::get<1> (this->m_storage)->evaluate (lhs->type (), exp,
 						 noside);
+
+    lhs = convert_reference_to_target_type (lhs, noside);
+    rhs = convert_reference_to_target_type (rhs, noside);
+
     return FUNC (expect_type, exp, noside, OP, lhs, rhs);
   }
 };
@@ -1434,6 +1469,7 @@ public:
 		   enum noside noside) override
   {
     value *val = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    val = convert_reference_to_target_type (val, noside);
     return FUNC (expect_type, exp, noside, OP, val);
   }
 
