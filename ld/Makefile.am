@@ -373,8 +373,6 @@ ALL_EMULATION_SOURCES = \
 ALL_EMULATIONS = $(ALL_EMULATION_SOURCES:.c=.@OBJEXT@)
 
 ALL_64_EMULATION_SOURCES = \
-	eaarch64cloudabi.c \
-	eaarch64cloudabib.c \
 	eaarch64elf.c \
 	eaarch64elf32.c \
 	eaarch64elf32b.c \
@@ -457,7 +455,6 @@ ALL_64_EMULATION_SOURCES = \
 	eelf64tilegx_be.c \
 	eelf_mipsel_haiku.c \
 	eelf_x86_64.c \
-	eelf_x86_64_cloudabi.c \
 	eelf_x86_64_fbsd.c \
 	eelf_x86_64_haiku.c \
 	eelf_x86_64_sol2.c \

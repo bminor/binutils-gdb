@@ -1,5 +1,3 @@
-eaarch64cloudabi.c
-eaarch64cloudabib.c
 eaarch64elf.c
 eaarch64elf32.c
 eaarch64elf32b.c
@@ -213,7 +211,6 @@ eelf_iamcu.c
 eelf_mipsel_haiku.c
 eelf_s390.c
 eelf_x86_64.c
-eelf_x86_64_cloudabi.c
 eelf_x86_64_fbsd.c
 eelf_x86_64_haiku.c
 eelf_x86_64_sol2.c

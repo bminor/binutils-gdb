@@ -10214,18 +10214,10 @@ aarch64_after_parse_args (void)
 const char *
 elf64_aarch64_target_format (void)
 {
-#ifdef TE_CLOUDABI
-  /* FIXME: What to do for ilp32_p ?  */
-  if (target_big_endian)
-    return "elf64-bigaarch64-cloudabi";
-  else
-    return "elf64-littleaarch64-cloudabi";
-#else
   if (target_big_endian)
     return ilp32_p ? "elf32-bigaarch64" : "elf64-bigaarch64";
   else
     return ilp32_p ? "elf32-littleaarch64" : "elf64-littleaarch64";
-#endif
 }
 
 void

@@ -32,7 +32,6 @@ proc is_elf_format {} {
 #	 && ![istarget *-*-windiss*]
 
     if {    ![istarget *-*-chorus*]
-	 && ![istarget *-*-cloudabi*]
 	 && ![istarget *-*-eabi*]
 	 && ![istarget *-*-*elf*]
 	 && ![istarget *-*-*freebsd*]
