@@ -22,14 +22,8 @@
 format_pieces::format_pieces (const char **arg, bool gdb_extensions,
 			      bool value_extension)
 {
-  const char *s;
+  const char *s = *arg;
   const char *string;
-  const char *prev_start;
-  const char *percent_loc;
-  char *sub_start, *current_substring;
-  enum argclass this_argclass;
-
-  s = *arg;
 
   if (gdb_extensions)
     {
@@ -106,16 +100,15 @@ format_pieces::format_pieces (const char **arg, bool gdb_extensions,
     }
 
   /* Need extra space for the '\0's.  Doubling the size is sufficient.  */
-
-  current_substring = (char *) xmalloc (strlen (string) * 2 + 1000);
+  char *current_substring = (char *) xmalloc (strlen (string) * 2 + 1000);
   m_storage.reset (current_substring);
 
   /* Now scan the string for %-specs and see what kinds of args they want.
      argclass classifies the %-specs so we can give printf-type functions
      something of the right size.  */
-
   const char *f = string;
-  prev_start = string;
+  const char *prev_start = string;
+
   while (*f)
     if (*f++ == '%')
       {
@@ -135,7 +128,7 @@ format_pieces::format_pieces (const char **arg, bool gdb_extensions,
 	    continue;
 	  }
 
-	sub_start = current_substring;
+	const char *sub_start = current_substring;
 
 	strncpy (current_substring, prev_start, f - 1 - prev_start);
 	current_substring += f - 1 - prev_start;
@@ -144,7 +137,7 @@ format_pieces::format_pieces (const char **arg, bool gdb_extensions,
 	if (*sub_start != '\0')
 	  m_pieces.emplace_back (sub_start, literal_piece, 0);
 
-	percent_loc = f - 1;
+	const char *percent_loc = f - 1;
 
 	/* Check the validity of the format specifier, and work
 	   out what argument it expects.  We only accept C89
@@ -250,6 +243,8 @@ format_pieces::format_pieces (const char **arg, bool gdb_extensions,
 	      }
 	    break;
 	}
+
+	argclass this_argclass;
 
 	switch (*f)
 	  {
@@ -422,7 +417,7 @@ format_pieces::format_pieces (const char **arg, bool gdb_extensions,
 
   if (f > prev_start)
     {
-      sub_start = current_substring;
+      const char *sub_start = current_substring;
 
       strncpy (current_substring, prev_start, f - prev_start);
       current_substring += f - prev_start;
