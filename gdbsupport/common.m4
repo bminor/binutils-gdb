@@ -21,7 +21,6 @@ AC_DEFUN([GDB_AC_COMMON], [
   # Set the 'development' global.
   . $srcdir/../bfd/development.sh
 
-  AC_HEADER_STDC
   AC_FUNC_ALLOCA
 
   WIN32APILIBS=

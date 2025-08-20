@@ -50,8 +50,6 @@ AC_ARG_PROGRAM
 # necessary, set CXX_DIALECT to some -std=xxx switch.
 AX_CXX_COMPILE_STDCXX(17, , mandatory)
 
-AC_HEADER_STDC
-
 GDB_AC_COMMON
 # This is set by GDB_AC_COMMON.
 AC_SUBST(WIN32APILIBS)

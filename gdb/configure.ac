@@ -1376,7 +1376,6 @@ AC_SUBST(SRCHIGH_CFLAGS)
 # Checks for header files.  #
 # ------------------------- #
 
-AC_HEADER_STDC
 AC_CHECK_HEADERS([ \
   IOKit/serial/ioss.h \
   asm/termios.h \
