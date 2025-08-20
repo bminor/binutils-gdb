@@ -2861,6 +2861,7 @@ lang_add_section (lang_statement_list_type *ptr,
 	      && output->bfd_section->entsize != section->entsize))
 	{
 	  output->bfd_section->flags &= ~ (SEC_MERGE | SEC_STRINGS);
+	  output->bfd_section->entsize = 0;
 	  flags &= ~ (SEC_MERGE | SEC_STRINGS);
 	}
     }
