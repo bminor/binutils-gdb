@@ -51790,6 +51790,12 @@ composed as @file{@var{prefix}.@var{pid}}, where @var{pid} is the
 process ID of the running program being analyzed by @command{gcore}.
 If not specified, @var{prefix} defaults to @var{core}.
 
+@item -g @var{gdb}
+Use @var{gdb} as the executable binary to invoke @value{GDBN} for
+running the gcore command.  This argument is optional, and defaults to
+invoking the @value{GDBN} binary that is installed alongside
+@command{gcore}.
+
 @item -d @var{directory}
 Use @var{directory} as the data directory when invoking @value{GDBN} for running
 the gcore command. This argument is optional.

@@ -32,12 +32,15 @@ dump_all_cmds=()
 
 data_directory_opt=()
 
+# The GDB binary to run.
+gdb_binary=
+
 function print_usage() {
     prefix="Usage: $0"
     padding=$(printf '%*s' ${#prefix})
 
     echo "$prefix [-h|--help] [-v|--version]"
-    echo "$padding [-a] [-o prefix] [-d data-directory]"
+    echo "$padding [-a] [-o prefix] [-g gdb] [-d data-directory]"
     echo "$padding pid1 [pid2...pidN]"
 }
 
@@ -55,6 +58,8 @@ function print_help() {
     echo "  -a                 Dump all memory mappings."
     echo "  -o prefix          Use 'prefix.pid' as the core file name."
     echo "                       The default prefix is 'core'."
+    echo "  -g gdb             The GDB binary to run."
+    echo "                       Defaults to GDB installed alongside gcore."
     echo "  -d dir             Pass '--data-directory dir' as an argument"
     echo "                       to GDB."
 }
@@ -63,7 +68,7 @@ function print_version() {
     echo "GNU gcore (${PKGVERSION}) ${VERSION}"
 }
 
-while getopts vhao:d:-: OPT; do
+while getopts vhao:g:d:-: OPT; do
     if [ "$OPT" = "-" ]; then
 	OPT="${OPTARG%%=*}"
 	OPTARG="${OPTARG#'$OPT'}"
@@ -81,6 +86,9 @@ while getopts vhao:d:-: OPT; do
             ;;
         o)
             prefix=$OPTARG
+            ;;
+        g)
+            gdb_binary="$OPTARG"
             ;;
         d)
             data_directory_opt=("--data-directory" "$OPTARG")
@@ -144,10 +152,16 @@ if test "x$binary_path" = x. ; then
   fi
 fi
 
+if [ -z "$gdb_binary" ]; then
+   gdb_binary="$binary_path/@GDB_TRANSFORM_NAME@"
+fi
+
+gdb_binary_basename=`basename "$gdb_binary"`
+
 # Check if the GDB binary is in the expected path.  If not, just
 # quit with a message.
-if [ ! -f "$binary_path/@GDB_TRANSFORM_NAME@" ]; then
-  echo "gcore: GDB binary (${binary_path}/@GDB_TRANSFORM_NAME@) not found"
+if [ ! -f "$gdb_binary" ]; then
+  echo "gcore: GDB binary ($gdb_binary) not found"
   exit 1
 fi
 
@@ -159,7 +173,7 @@ for pid in "$@"
 do
 	# `</dev/null' to avoid touching interactive terminal if it is
 	# available but not accessible as GDB would get stopped on SIGTTIN.
-	"$binary_path/@GDB_TRANSFORM_NAME@" </dev/null \
+	"$gdb_binary" </dev/null \
             "${data_directory_opt[@]}" \
 	    --nx --batch --readnever -iex 'set debuginfod enabled off' \
 	    -ex "set pagination off" -ex "set height 0" -ex "set width 0" \
@@ -169,7 +183,7 @@ do
 	if [ -r "$prefix.$pid" ] ; then
 	    rc=0
 	else
-	    echo "@GCORE_TRANSFORM_NAME@: failed to create $prefix.$pid"
+	    echo "$gdb_binary_basename: failed to create $prefix.$pid"
 	    rc=1
 	    break
 	fi

@@ -67,6 +67,9 @@ single-inf-arg in qSupported
   a -h or --help option, which prints each options and a brief
   description.
 
+* The gcore script now has a -g option that lets you specify the GDB
+  binary invoked by gcore.
+
 * On systems that support linker namespaces, the output of the command
   "info sharedlibraries" may add one more column, NS, which identifies the
   namespace into which the library was loaded, if more than one namespace

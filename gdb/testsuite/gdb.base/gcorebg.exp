@@ -46,10 +46,10 @@ proc test_body { detached } {
     global binfile
     global GCORE
     global corefile
-    global GDB_DATA_DIRECTORY
+    global GDB GDB_DATA_DIRECTORY
 
     # We can't use gdb_test_multiple here because GDB is not started.
-    set gcore_cmd $GCORE
+    set gcore_cmd "$GCORE -g $GDB"
     if {$GDB_DATA_DIRECTORY ne ""} {
 	    set gcore_cmd "$gcore_cmd -d '$GDB_DATA_DIRECTORY'"
     }
