@@ -48,6 +48,8 @@
 #include "arch/amd64-linux-tdesc.h"
 #include "inferior.h"
 #include "x86-tdep.h"
+#include "dwarf2/frame.h"
+#include "frame-unwind.h"
 
 /* The syscall's XML filename for i386.  */
 #define XML_SYSCALL_FILENAME_AMD64 "syscalls/amd64-linux.xml"
@@ -1921,6 +1923,88 @@ amd64_linux_get_tls_dtv_addr (struct gdbarch *gdbarch, ptid_t ptid,
   return dtv_addr;
 }
 
+/* Return the number of bytes required to update the shadow stack pointer
+   by one element.  For x32 the shadow stack elements are still 64-bit
+   aligned.  Thus, gdbarch_addr_bit cannot be used to compute the new
+   stack pointer.  */
+
+static inline int
+amd64_linux_shadow_stack_element_size_aligned (gdbarch *gdbarch)
+{
+  const bfd_arch_info *binfo = gdbarch_bfd_arch_info (gdbarch);
+  return (binfo->bits_per_word / binfo->bits_per_byte);
+}
+
+
+/* Implement shadow stack pointer unwinding.  For each new shadow stack
+   pointer check if its address is still in the shadow stack memory range.
+   If it's outside the range set the returned value to unavailable,
+   otherwise return a value containing the new shadow stack pointer.  */
+
+static value *
+amd64_linux_dwarf2_prev_ssp (const frame_info_ptr &this_frame,
+			     void **this_cache, int regnum)
+{
+  value *v = frame_unwind_got_register (this_frame, regnum, regnum);
+  gdb_assert (v != nullptr);
+
+  gdbarch *gdbarch = get_frame_arch (this_frame);
+
+  if (v->entirely_available () && !v->optimized_out ())
+    {
+      int size = register_size (gdbarch, regnum);
+      bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+      CORE_ADDR ssp = extract_unsigned_integer (v->contents_all ().data (),
+						size, byte_order);
+
+      /* Using /proc/PID/smaps we can only check if the current shadow
+	 stack pointer SSP points to shadow stack memory.  Only if this is
+	 the case a valid previous shadow stack pointer can be
+	 calculated.  */
+      std::pair<CORE_ADDR, CORE_ADDR> range;
+      if (linux_address_in_shadow_stack_mem_range (ssp, &range))
+	{
+	  /* The shadow stack grows downwards.  To compute the previous
+	     shadow stack pointer, we need to increment SSP.  */
+	  CORE_ADDR new_ssp
+	    = ssp + amd64_linux_shadow_stack_element_size_aligned (gdbarch);
+
+	  /* There can be scenarios where we have a shadow stack pointer
+	     but the shadow stack is empty, as no call instruction has
+	     been executed yet.  If NEW_SSP points to the end of or before
+	     (<=) the current shadow stack memory range we consider
+	     NEW_SSP as valid (but empty).  */
+	  if (new_ssp <= range.second)
+	    return frame_unwind_got_address (this_frame, regnum, new_ssp);
+	}
+    }
+
+  /* Return a value which is marked as unavailable in case we could not
+     calculate a valid previous shadow stack pointer.  */
+  value *retval
+    = value::allocate_register (get_next_frame_sentinel_okay (this_frame),
+				regnum, register_type (gdbarch, regnum));
+  retval->mark_bytes_unavailable (0, retval->type ()->length ());
+  return retval;
+}
+
+/* Implement the "init_reg" dwarf2_frame_ops method.  */
+
+static void
+amd64_init_reg (gdbarch *gdbarch, int regnum, dwarf2_frame_state_reg *reg,
+		const frame_info_ptr &this_frame)
+{
+  if (regnum == gdbarch_pc_regnum (gdbarch))
+    reg->how = DWARF2_FRAME_REG_RA;
+  else if (regnum == gdbarch_sp_regnum (gdbarch))
+    reg->how = DWARF2_FRAME_REG_CFA;
+  else if (regnum == AMD64_PL3_SSP_REGNUM)
+    {
+      reg->how = DWARF2_FRAME_REG_FN;
+      reg->loc.fn = amd64_linux_dwarf2_prev_ssp;
+    }
+}
+
 static void
 amd64_linux_init_abi_common (struct gdbarch_info info, struct gdbarch *gdbarch,
 			     int num_disp_step_buffers)
@@ -1978,6 +2062,7 @@ amd64_linux_init_abi_common (struct gdbarch_info info, struct gdbarch *gdbarch,
 
   set_gdbarch_remove_non_address_bits_watchpoint
     (gdbarch, amd64_linux_remove_non_address_bits_watchpoint);
+  dwarf2_frame_set_init_reg (gdbarch, amd64_init_reg);
 }
 
 static void
