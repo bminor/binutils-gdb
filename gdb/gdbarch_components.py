@@ -2855,7 +2855,8 @@ Some targets support special hardware-assisted control-flow protection
 technologies.  For example, the Intel Control-Flow Enforcement Technology
 (Intel CET) on x86 provides a shadow stack and indirect branch tracking.
 To enable shadow stack support for inferior calls the shadow_stack_push
-gdbarch hook has to be provided.
+gdbarch hook has to be provided.  The get_shadow_stack_pointer gdbarch
+hook has to be provided to enable displaced stepping.
 
 Push NEW_ADDR to the shadow stack and update the shadow stack pointer.
 """,
@@ -2863,4 +2864,22 @@ Push NEW_ADDR to the shadow stack and update the shadow stack pointer.
     name="shadow_stack_push",
     params=[("CORE_ADDR", "new_addr"), ("regcache *", "regcache")],
     predicate=True,
+)
+
+Method(
+    comment="""
+If possible, return the shadow stack pointer.  If the shadow stack
+feature is enabled then set SHADOW_STACK_ENABLED to true, otherwise
+set SHADOW_STACK_ENABLED to false.  This hook has to be provided to enable
+displaced stepping for shadow stack enabled programs.
+On some architectures, the shadow stack pointer is available even if the
+feature is disabled.  So dependent on the target, an implementation of
+this function may return a valid shadow stack pointer, but set
+SHADOW_STACK_ENABLED to false.
+""",
+    type="std::optional<CORE_ADDR>",
+    name="get_shadow_stack_pointer",
+    params=[("regcache *", "regcache"), ("bool &", "shadow_stack_enabled")],
+    predefault="default_get_shadow_stack_pointer",
+    invalid=False,
 )
