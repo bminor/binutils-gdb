@@ -254,15 +254,15 @@ disasm_info_object_is_valid (disasm_info_object *obj)
 /* Fill in OBJ with all the other arguments.  */
 
 static void
-disasm_info_fill (disasm_info_object *obj, struct gdbarch *gdbarch,
+disasm_info_fill (disasm_info_object &obj, struct gdbarch *gdbarch,
 		  program_space *progspace, bfd_vma address,
 		  disassemble_info *di, disasm_info_object *next)
 {
-  obj->gdbarch = gdbarch;
-  obj->program_space = progspace;
-  obj->address = address;
-  obj->gdb_info = di;
-  obj->next = next;
+  obj.gdbarch = gdbarch;
+  obj.program_space = progspace;
+  obj.address = address;
+  obj.gdb_info = di;
+  obj.next = next;
 }
 
 /* Implement DisassembleInfo.__init__.  Takes a single argument that must
@@ -281,7 +281,7 @@ disasm_info_init (PyObject *self, PyObject *args, PyObject *kwargs)
 
   disasm_info_object *other = (disasm_info_object *) info_obj;
   disasm_info_object *info = (disasm_info_object *) self;
-  disasm_info_fill (info, other->gdbarch, other->program_space,
+  disasm_info_fill (*info, other->gdbarch, other->program_space,
 		    other->address, other->gdb_info, other->next);
   other->next = info;
 
@@ -1156,19 +1156,18 @@ gdbpy_disassembler::gdbpy_disassembler (disasm_info_object *obj)
    happens when gdbpy_print_insn returns.  This class is responsible for
    marking the DisassembleInfo as invalid in its destructor.  */
 
-struct scoped_disasm_info_object
+struct scoped_invalidate_disasm_info
 {
-  /* Constructor.  */
-  scoped_disasm_info_object (struct gdbarch *gdbarch, CORE_ADDR memaddr,
-			     disassemble_info *info)
-    : m_disasm_info (allocate_disasm_info_object ())
+  /* Constructor.  Just cache DISASM_INFO for use in the destructor.  */
+  scoped_invalidate_disasm_info
+    (gdbpy_ref<disasm_info_object> disasm_info)
+      : m_disasm_info (std::move (disasm_info))
   {
-    disasm_info_fill (m_disasm_info.get (), gdbarch, current_program_space,
-		      memaddr, info, nullptr);
+    /* Nothing.  */
   }
 
   /* Upon destruction mark m_disasm_info as invalid.  */
-  ~scoped_disasm_info_object ()
+  ~scoped_invalidate_disasm_info ()
   {
     /* Invalidate the original DisassembleInfo object as well as any copies
        that the user might have made.  */
@@ -1178,30 +1177,15 @@ struct scoped_disasm_info_object
       obj->gdb_info = nullptr;
   }
 
-  /* Return a pointer to the underlying disasm_info_object instance.  */
-  disasm_info_object *
-  get () const
-  {
-    return m_disasm_info.get ();
-  }
-
 private:
 
-  /* Wrapper around the call to PyObject_New, this wrapper function can be
-     called from the constructor initialization list, while PyObject_New, a
-     macro, can't.  */
-  static disasm_info_object *
-  allocate_disasm_info_object ()
-  {
-    return (disasm_info_object *) PyObject_New (disasm_info_object,
-						&disasm_info_object_type);
-  }
-
   /* A reference to a gdb.disassembler.DisassembleInfo object.  When this
-     containing instance goes out of scope this reference is released,
-     however, the user might be holding other references to the
-     DisassembleInfo object in Python code, so the underlying object might
-     not be deleted.  */
+     object goes out of scope this reference is released, however, the user
+     might be holding other references to the DisassembleInfo (either
+     directly, or via copies of this object), in which case the underlying
+     object will not be deleted.  The destructor of this class ensures
+     that this DisassembleInfo object, and any copies, are all marked
+     invalid.  */
   gdbpy_ref<disasm_info_object> m_disasm_info;
 };
 
@@ -1242,17 +1226,30 @@ gdbpy_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
       return {};
     }
 
-  /* Create the new DisassembleInfo object we will pass into Python.  This
-     object will be marked as invalid when we leave this scope.  */
-  scoped_disasm_info_object scoped_disasm_info (gdbarch, memaddr, info);
-  disasm_info_object *disasm_info = scoped_disasm_info.get ();
+  /* Create the new DisassembleInfo object we will pass into Python.  */
+  gdbpy_ref<disasm_info_object> disasm_info
+    ((disasm_info_object *) PyObject_New (disasm_info_object,
+					  &disasm_info_object_type));
+  if (disasm_info == nullptr)
+    {
+      gdbpy_print_stack ();
+      return {};
+    }
+
+  /* Initialise the DisassembleInfo object.  */
+  disasm_info_fill (*disasm_info.get (), gdbarch, current_program_space,
+		    memaddr, info, nullptr);
+
+  /* Ensure the DisassembleInfo, along with any copies the user makes, are
+     marked as invalid when we leave this scope.  */
+  scoped_invalidate_disasm_info invalidate_disasm (disasm_info);
 
   /* Call into the registered disassembler to (possibly) perform the
      disassembly.  */
-  PyObject *insn_disas_obj = (PyObject *) disasm_info;
-  gdbpy_ref<> result (PyObject_CallFunctionObjArgs (hook.get (),
-						    insn_disas_obj,
-						    nullptr));
+  gdbpy_ref<> result
+    (PyObject_CallFunctionObjArgs (hook.get (),
+				   (PyObject *) disasm_info.get (),
+				   nullptr));
 
   if (result == nullptr)
     {
