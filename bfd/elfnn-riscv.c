@@ -3605,19 +3605,13 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
 	      else
 		{
 		  /* Generate R_RISCV_NN.  */
-		  BFD_ASSERT ((h->got.offset & 1) == 0);
-		  BFD_ASSERT (h->dynindx != -1);
-		  rela.r_info = ELFNN_R_INFO (h->dynindx, R_RISCV_NN);
-		  rela.r_addend = 0;
+		  goto do_reloc_nn;
 		}
 	    }
 	  else if (bfd_link_pic (info))
 	    {
 	      /* Generate R_RISCV_NN.  */
-	      BFD_ASSERT ((h->got.offset & 1) == 0);
-	      BFD_ASSERT (h->dynindx != -1);
-	      rela.r_info = ELFNN_R_INFO (h->dynindx, R_RISCV_NN);
-	      rela.r_addend = 0;
+	      goto do_reloc_nn;
 	    }
 	  else
 	    {
@@ -3655,14 +3649,14 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
 	}
       else
 	{
+  do_reloc_nn:
 	  BFD_ASSERT ((h->got.offset & 1) == 0);
 	  BFD_ASSERT (h->dynindx != -1);
 	  rela.r_info = ELFNN_R_INFO (h->dynindx, R_RISCV_NN);
 	  rela.r_addend = 0;
+	  bfd_put_NN (output_bfd, 0,
+		      sgot->contents + (h->got.offset & ~(bfd_vma) 1));
 	}
-
-      bfd_put_NN (output_bfd, 0,
-		  sgot->contents + (h->got.offset & ~(bfd_vma) 1));
 
       if (use_elf_append_rela)
 	riscv_elf_append_rela (output_bfd, srela, &rela);
