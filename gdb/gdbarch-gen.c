@@ -262,6 +262,7 @@ struct gdbarch
   gdbarch_read_core_file_mappings_ftype *read_core_file_mappings = default_read_core_file_mappings;
   gdbarch_use_target_description_from_corefile_notes_ftype *use_target_description_from_corefile_notes = default_use_target_description_from_corefile_notes;
   gdbarch_core_parse_exec_context_ftype *core_parse_exec_context = default_core_parse_exec_context;
+  gdbarch_shadow_stack_push_ftype *shadow_stack_push = nullptr;
 };
 
 /* Create a new ``struct gdbarch'' based on information provided by
@@ -535,6 +536,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of read_core_file_mappings, invalid_p == 0.  */
   /* Skip verify of use_target_description_from_corefile_notes, invalid_p == 0.  */
   /* Skip verify of core_parse_exec_context, invalid_p == 0.  */
+  /* Skip verify of shadow_stack_push, has predicate.  */
   if (!log.empty ())
     internal_error (_("verify_gdbarch: the following are invalid ...%s"),
 		    log.c_str ());
@@ -1406,6 +1408,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   gdb_printf (file,
 	      "gdbarch_dump: core_parse_exec_context = <%s>\n",
 	      host_address_to_string (gdbarch->core_parse_exec_context));
+  gdb_printf (file,
+	      "gdbarch_dump: gdbarch_shadow_stack_push_p() = %d\n",
+	      gdbarch_shadow_stack_push_p (gdbarch));
+  gdb_printf (file,
+	      "gdbarch_dump: shadow_stack_push = <%s>\n",
+	      host_address_to_string (gdbarch->shadow_stack_push));
   if (gdbarch->dump_tdep != NULL)
     gdbarch->dump_tdep (gdbarch, file);
 }
@@ -5550,4 +5558,28 @@ set_gdbarch_core_parse_exec_context (struct gdbarch *gdbarch,
 				     gdbarch_core_parse_exec_context_ftype core_parse_exec_context)
 {
   gdbarch->core_parse_exec_context = core_parse_exec_context;
+}
+
+bool
+gdbarch_shadow_stack_push_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->shadow_stack_push != NULL;
+}
+
+void
+gdbarch_shadow_stack_push (struct gdbarch *gdbarch, CORE_ADDR new_addr, regcache *regcache)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->shadow_stack_push != NULL);
+  if (gdbarch_debug >= 2)
+    gdb_printf (gdb_stdlog, "gdbarch_shadow_stack_push called\n");
+  gdbarch->shadow_stack_push (gdbarch, new_addr, regcache);
+}
+
+void
+set_gdbarch_shadow_stack_push (struct gdbarch *gdbarch,
+			       gdbarch_shadow_stack_push_ftype shadow_stack_push)
+{
+  gdbarch->shadow_stack_push = shadow_stack_push;
 }

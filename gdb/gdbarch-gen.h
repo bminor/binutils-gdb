@@ -1802,3 +1802,17 @@ extern void set_gdbarch_use_target_description_from_corefile_notes (struct gdbar
 typedef core_file_exec_context (gdbarch_core_parse_exec_context_ftype) (struct gdbarch *gdbarch, bfd *cbfd);
 extern core_file_exec_context gdbarch_core_parse_exec_context (struct gdbarch *gdbarch, bfd *cbfd);
 extern void set_gdbarch_core_parse_exec_context (struct gdbarch *gdbarch, gdbarch_core_parse_exec_context_ftype *core_parse_exec_context);
+
+/* Some targets support special hardware-assisted control-flow protection
+   technologies.  For example, the Intel Control-Flow Enforcement Technology
+   (Intel CET) on x86 provides a shadow stack and indirect branch tracking.
+   To enable shadow stack support for inferior calls the shadow_stack_push
+   gdbarch hook has to be provided.
+
+   Push NEW_ADDR to the shadow stack and update the shadow stack pointer. */
+
+extern bool gdbarch_shadow_stack_push_p (struct gdbarch *gdbarch);
+
+typedef void (gdbarch_shadow_stack_push_ftype) (struct gdbarch *gdbarch, CORE_ADDR new_addr, regcache *regcache);
+extern void gdbarch_shadow_stack_push (struct gdbarch *gdbarch, CORE_ADDR new_addr, regcache *regcache);
+extern void set_gdbarch_shadow_stack_push (struct gdbarch *gdbarch, gdbarch_shadow_stack_push_ftype *shadow_stack_push);
