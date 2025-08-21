@@ -2554,11 +2554,15 @@ Method(
     comment="""
 Implement the "info proc" command for core files.  Note that there
 are two "info_proc"-like methods on gdbarch -- one for core files,
-one for live targets.
+one for live targets.  CBFD is the core file being read from.
 """,
     type="void",
     name="core_info_proc",
-    params=[("const char *", "args"), ("enum info_proc_what", "what")],
+    params=[
+        ("struct bfd *", "cbfd"),
+        ("const char *", "args"),
+        ("enum info_proc_what", "what")
+    ],
     predicate=True,
 )
 

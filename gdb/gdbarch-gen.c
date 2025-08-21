@@ -5150,13 +5150,13 @@ gdbarch_core_info_proc_p (struct gdbarch *gdbarch)
 }
 
 void
-gdbarch_core_info_proc (struct gdbarch *gdbarch, const char *args, enum info_proc_what what)
+gdbarch_core_info_proc (struct gdbarch *gdbarch, struct bfd *cbfd, const char *args, enum info_proc_what what)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->core_info_proc != NULL);
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_core_info_proc called\n");
-  gdbarch->core_info_proc (gdbarch, args, what);
+  gdbarch->core_info_proc (gdbarch, cbfd, args, what);
 }
 
 void

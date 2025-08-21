@@ -1826,7 +1826,8 @@ core_target::info_proc (const char *args, enum info_proc_what request)
   /* Since this is the core file target, call the 'core_info_proc'
      method on gdbarch, not 'info_proc'.  */
   if (gdbarch_core_info_proc_p (gdbarch))
-    gdbarch_core_info_proc (gdbarch, args, request);
+    gdbarch_core_info_proc (gdbarch, current_program_space->core_bfd (),
+			    args, request);
 
   return true;
 }

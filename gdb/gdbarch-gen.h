@@ -1626,12 +1626,12 @@ extern void set_gdbarch_info_proc (struct gdbarch *gdbarch, gdbarch_info_proc_ft
 
 /* Implement the "info proc" command for core files.  Note that there
    are two "info_proc"-like methods on gdbarch -- one for core files,
-   one for live targets. */
+   one for live targets.  CBFD is the core file being read from. */
 
 extern bool gdbarch_core_info_proc_p (struct gdbarch *gdbarch);
 
-typedef void (gdbarch_core_info_proc_ftype) (struct gdbarch *gdbarch, const char *args, enum info_proc_what what);
-extern void gdbarch_core_info_proc (struct gdbarch *gdbarch, const char *args, enum info_proc_what what);
+typedef void (gdbarch_core_info_proc_ftype) (struct gdbarch *gdbarch, struct bfd *cbfd, const char *args, enum info_proc_what what);
+extern void gdbarch_core_info_proc (struct gdbarch *gdbarch, struct bfd *cbfd, const char *args, enum info_proc_what what);
 extern void set_gdbarch_core_info_proc (struct gdbarch *gdbarch, gdbarch_core_info_proc_ftype *core_info_proc);
 
 /* Ravenscar arch-dependent ops. */

@@ -1433,8 +1433,8 @@ fbsd_core_info_proc_status (struct gdbarch *gdbarch)
 /* Implement the "core_info_proc" gdbarch method.  */
 
 static void
-fbsd_core_info_proc (struct gdbarch *gdbarch, const char *args,
-		     enum info_proc_what what)
+fbsd_core_info_proc (struct gdbarch *gdbarch, struct bfd *cbfd,
+		     const char *args, enum info_proc_what what)
 {
   bool do_cmdline = false;
   bool do_cwd = false;
@@ -1482,7 +1482,6 @@ fbsd_core_info_proc (struct gdbarch *gdbarch, const char *args,
       return;
     }
 
-  bfd *cbfd = current_program_space->core_bfd ();
   pid = bfd_core_file_pid (cbfd);
   if (pid != 0)
     gdb_printf (_("process %d\n"), pid);
