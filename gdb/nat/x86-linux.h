@@ -75,4 +75,8 @@ private:
 
 extern x86_linux_arch_size x86_linux_ptrace_get_arch_size (int tid);
 
+/* Check shadow stack hardware and kernel support.  */
+
+extern bool x86_check_ssp_support (const int tid);
+
 #endif /* GDB_NAT_X86_LINUX_H */

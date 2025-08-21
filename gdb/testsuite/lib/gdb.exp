@@ -4294,6 +4294,76 @@ gdb_caching_proc allow_tsx_tests {} {
     return $allow_tsx_tests
 }
 
+# Run a test on the target to check if it supports x86 shadow stack.  Return 1
+# if shadow stack is enabled, 0 otherwise.
+
+gdb_caching_proc allow_ssp_tests {} {
+    global srcdir subdir gdb_prompt hex
+
+    set me "allow_ssp_tests"
+
+    if { ![istarget i?86-*-*] && ![istarget x86_64-*-* ] } {
+	verbose "$me: target known to not support shadow stack."
+	return 0
+    }
+
+    # There is no need to check the actual HW in addition to ptrace support.
+    # We need both checks and ptrace will tell us about the HW state.
+    set compile_flags "{additional_flags=-fcf-protection=return}"
+    set src { int main() { return 0; } }
+    if {![gdb_simple_compile $me $src executable $compile_flags]} {
+	return 0
+    }
+
+    save_vars { ::env(GLIBC_TUNABLES) } {
+
+	append_environment GLIBC_TUNABLES "glibc.cpu.hwcaps" "SHSTK"
+
+	# No error message, compilation succeeded so now run it via gdb.
+	gdb_exit
+	gdb_start
+	gdb_reinitialize_dir $srcdir/$subdir
+	gdb_load $obj
+	if {![runto_main]} {
+	    remote_file build delete $obj
+	    return 0
+	}
+	set shadow_stack_disabled_re "(<unavailable>)"
+	if {[istarget *-*-linux*]} {
+	    # Starting with v6.6, the Linux kernel supports CET shadow stack.
+	    # Dependent on the target we can see a nullptr or "<unavailable>"
+	    # when shadow stack is supported by HW and the Linux kernel but
+	    # not enabled for the current thread (for example due to a lack
+	    # of compiler or glibc support for -fcf-protection).
+	    set shadow_stack_disabled_re "$shadow_stack_disabled_re|(.*0x0)"
+	}
+
+	set allow_ssp_tests 0
+	gdb_test_multiple "print \$pl3_ssp" "test shadow stack support" {
+	    -re -wrap "(.*$hex)((?!(.*0x0)).)" {
+		verbose -log "$me: Shadow stack support detected."
+		set allow_ssp_tests 1
+	    }
+	    -re -wrap $shadow_stack_disabled_re {
+		# In case shadow stack is not enabled (for example due to a
+		# lack of compiler or glibc support for -fcf-protection).
+		verbose -log "$me: Shadow stack is not enabled."
+	    }
+	    -re -wrap "void" {
+		# In case we don't have hardware or kernel support.
+		verbose -log "$me: No shadow stack support."
+	    }
+	}
+
+	gdb_exit
+    }
+
+    remote_file build delete $obj
+
+    verbose "$me: returning $allow_ssp_tests" 2
+    return $allow_ssp_tests
+}
+
 # Run a test on the target to see if it supports avx512bf16.  Return 1 if so,
 # 0 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
 

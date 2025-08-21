@@ -253,7 +253,8 @@ static const int x86_64_regmap[] =
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
-  -1					/* pkru  */
+  -1,					/* pkru  */
+  -1					/* CET user mode register PL3_SSP.  */
 };
 
 #define X86_64_NUM_REGS (sizeof (x86_64_regmap) / sizeof (x86_64_regmap[0]))
@@ -406,6 +407,18 @@ x86_target::low_cannot_fetch_register (int regno)
 }
 
 static void
+x86_fill_ssp_reg (regcache *regcache, void *buf)
+{
+  collect_register_by_name (regcache, "pl3_ssp", buf);
+}
+
+static void
+x86_store_ssp_reg (regcache *regcache, const void *buf)
+{
+  supply_register_by_name (regcache, "pl3_ssp", buf);
+}
+
+static void
 collect_register_i386 (struct regcache *regcache, int regno, void *buf)
 {
   collect_register (regcache, regno, buf);
@@ -544,6 +557,8 @@ static struct regset_info x86_regsets[] =
     x86_fill_gregset, x86_store_gregset },
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_X86_XSTATE, 0,
     EXTENDED_REGS, x86_fill_xstateregset, x86_store_xstateregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_X86_SHSTK, 0,
+    OPTIONAL_RUNTIME_REGS, x86_fill_ssp_reg, x86_store_ssp_reg },
 # ifndef __x86_64__
 #  ifdef HAVE_PTRACE_GETFPXREGS
   { PTRACE_GETFPXREGS, PTRACE_SETFPXREGS, 0, sizeof (elf_fpxregset_t),
@@ -897,6 +912,17 @@ x86_linux_read_description ()
 	    {
 	      if (regset->nt_type == NT_X86_XSTATE)
 		regset->size = xsave_len;
+	      else if (regset->nt_type == NT_X86_SHSTK)
+		{
+		  /* We must configure the size of the NT_X86_SHSTK regset
+		     from non-zero value to it's appropriate size, even though
+		     the ptrace call is only tested for NT_X86_XSTATE request,
+		     because the NT_X86_SHSTK regset is of type
+		     OPTIONAL_RUNTIME_REGS.  A ptrace call with NT_X86_SHSTK
+		     request may only be successful later on, once shadow
+		     stack is enabled for the current thread.  */
+		    regset->size = sizeof (CORE_ADDR);
+		}
 	      else
 		gdb_assert_not_reached ("invalid regset type.");
 	    }

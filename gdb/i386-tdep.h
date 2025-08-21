@@ -195,6 +195,10 @@ struct i386_gdbarch_tdep : gdbarch_tdep_base
   /* PKEYS register names.  */
   const char * const *pkeys_register_names = nullptr;
 
+  /* Register number for the shadow stack pointer register.  If supported,
+     set this to a value >= 0.  */
+  int ssp_regnum = -1;
+
   /* Register number for %fsbase.  If supported, set this to a value
      >= 0.  */
   int fsbase_regnum = -1;
@@ -297,6 +301,7 @@ enum i386_regnum
   I386_ZMM0H_REGNUM,		/* %zmm0h */
   I386_ZMM7H_REGNUM = I386_ZMM0H_REGNUM + 7,
   I386_PKRU_REGNUM,
+  I386_PL3_SSP_REGNUM,
   I386_FSBASE_REGNUM,
   I386_GSBASE_REGNUM
 };

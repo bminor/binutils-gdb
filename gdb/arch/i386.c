@@ -28,6 +28,7 @@
 #include "../features/i386/32bit-avx512.c"
 #include "../features/i386/32bit-segments.c"
 #include "../features/i386/pkeys.c"
+#include "../features/i386/32bit-ssp.c"
 
 /* See arch/i386.h.  */
 
@@ -65,6 +66,9 @@ i386_create_target_description (uint64_t xstate_bv, bool is_linux,
 
   if (xstate_bv & X86_XSTATE_PKRU)
     regnum = create_feature_i386_pkeys (tdesc.get (), regnum);
+
+  if (xstate_bv & X86_XSTATE_CET_U)
+    regnum = create_feature_i386_32bit_ssp (tdesc.get (), regnum);
 
   return tdesc.release ();
 }

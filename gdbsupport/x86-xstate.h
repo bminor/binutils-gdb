@@ -28,6 +28,7 @@
 #define X86_XSTATE_ZMM_H_ID	6
 #define X86_XSTATE_ZMM_ID	7
 #define X86_XSTATE_PKRU_ID	9
+#define X86_XSTATE_CET_U_ID	11
 
 /* The extended state feature bits.  */
 #define X86_XSTATE_X87		(1ULL << X86_XSTATE_X87_ID)
@@ -42,6 +43,7 @@
 				 | X86_XSTATE_ZMM)
 
 #define X86_XSTATE_PKRU		(1ULL << X86_XSTATE_PKRU_ID)
+#define X86_XSTATE_CET_U	(1ULL << X86_XSTATE_CET_U_ID)
 
 /* Total size of the XSAVE area extended region and offsets of
    register states within the region.  Offsets are set to 0 to
@@ -86,7 +88,8 @@ constexpr bool operator!= (const x86_xsave_layout &lhs,
 /* Supported mask of state-component bitmap xstate_bv.  The SDM defines
    xstate_bv as XCR0 | IA32_XSS.  */
 
-#define X86_XSTATE_ALL_MASK		(X86_XSTATE_AVX_AVX512_PKU_MASK)
+#define X86_XSTATE_ALL_MASK		(X86_XSTATE_AVX_AVX512_PKU_MASK\
+					| X86_XSTATE_CET_U)
 
 #define X86_XSTATE_SSE_SIZE	576
 #define X86_XSTATE_AVX_SIZE	832
