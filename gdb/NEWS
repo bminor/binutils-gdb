@@ -83,6 +83,16 @@ qExecAndArgs
   ** The gdb.write() function now takes an additional, optional,
      'style' argument, which can be used to style the output.
 
+  ** New gdb.Corefile class which represents a loaded core file.  This
+     has an attribute Corefile.filename, the file name of the loaded
+     core file, and a method Corefile.is_valid(), which returns False
+     when a Corefile object becomes invalid (e.g. when the core file
+     is unloaded).
+
+  ** New Inferior.corefile attribute.  This read only attribute
+     contains the gdb.Corefile object if a core file is loaded into
+     the inferior, otherwise, this contains None.
+
 *** Changes in GDB 17
 
 * Debugging Linux programs that use x86-64 or x86-64 with 32-bit pointer

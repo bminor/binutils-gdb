@@ -973,6 +973,22 @@ infpy_get_main_name (PyObject *self, void *closure)
   return host_string_to_python_string (name).release ();
 }
 
+/* Implement the Inferior.corefile getter.  Returns a gdb.Corefile
+   object, or None.  */
+
+static PyObject *
+infpy_get_core_file (PyObject *self, void *closure)
+{
+  inferior_object *inf = (inferior_object *) self;
+
+  INFPY_REQUIRE_VALID (inf);
+
+  inferior *inferior = inf->inferior;
+  gdb_assert (inferior != nullptr);
+
+  return gdbpy_core_file_from_inferior (inferior).release ();
+}
+
 static void
 infpy_dealloc (PyObject *obj)
 {
@@ -1062,6 +1078,8 @@ static gdb_PyGetSetDef inferior_object_getset[] =
   { "progspace", infpy_get_progspace, NULL, "Program space of this inferior" },
   { "main_name", infpy_get_main_name, nullptr,
     "Name of 'main' function, if known.", nullptr },
+  { "corefile", infpy_get_core_file, nullptr,
+    "The corefile loaded in to this inferior, or None.", nullptr },
   { NULL }
 };
 

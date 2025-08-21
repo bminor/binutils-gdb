@@ -399,6 +399,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-color.c \
 	python/py-connection.c \
 	python/py-continueevent.c \
+	python/py-corefile.c \
 	python/py-dap.c \
 	python/py-disasm.c \
 	python/py-event.c \

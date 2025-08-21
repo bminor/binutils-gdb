@@ -234,6 +234,7 @@ optional arguments while skipping others.  Example:
 * Disassembly In Python::       Instruction Disassembly In Python
 * Missing Debug Info In Python:: Handle missing debug info from Python.
 * Missing Objfiles In Python::  Handle objfiles from Python.
+* Core Files In Python::        Python representation of core files.
 @end menu
 
 @node Basic Python
@@ -3632,6 +3633,15 @@ Either a string or a sequence of strings can be assigned to this
 attribute.  When a string is assigned, it is assumed to have any
 necessary quoting for the shell; when a sequence is assigned, the
 quoting is applied by @value{GDBN}.
+@end defvar
+
+@defvar Inferior.corefile
+If a core file has been loaded into this inferior (@pxref{core-file
+command}), then this contains a @code{gdb.Corefile} object that
+represents the loaded core file (@pxref{Core Files In Python}).
+
+If no core file has been loaded into this inferior, then this
+attribute contains @code{None}.
 @end defvar
 
 A @code{gdb.Inferior} object has the following methods:
@@ -8883,6 +8893,45 @@ missing-objfile-handlers} above, but instead of listing the matching
 handlers, all of the matching handlers are enabled.  The
 @code{enabled} field of each matching handler is set to @code{True}.
 @end table
+
+@node Core Files In Python
+@subsubsection Core Files In Python
+@cindex python, core files
+
+When a core file is loaded into an inferior (@pxref{Inferiors In
+Python}) for examination (@pxref{core-file command}), information
+about the core file is contained in a @code{gdb.Corefile} object.
+
+The @code{gdb.Corefile} for an inferior can be accessed using the
+@code{Inferior.corefile} attribute.  This will be @code{None} if
+no core file is loaded.
+
+A @code{gdb.Corefile} object has the following attributes:
+
+@defvar Corefile.filename
+This read only attribute contains a non-empty string, the file name of
+the core file.  Attempting to access this attribute on an invalid
+@code{gdb.Corefile} object will raise a @code{RuntimeError} exception.
+@end defvar
+
+A @code{gdb.Corefile} object has the following methods:
+
+@defun Corefile.is_valid ()
+Returns @code{True} if the @code{gdb.Corefile} object is valid,
+@code{False} if not.  A @code{gdb.Corefile} object will become invalid
+when the core file is unloaded from the inferior using the
+@kbd{core-file} command (@pxref{core-file command}), or if the
+inferior in which the core file is loaded is deleted.  All other
+@code{gdb.Corefile} methods and attributes will throw an exception if
+it is invalid at the time the method is called, or the attribute
+accessed.
+@end defun
+
+One may add arbitrary attributes to @code{gdb.Corefile} objects in the
+usual Python way.  This is useful if, for example, one needs to do
+some extra record keeping associated with the corefile.
+@xref{choosing attribute names}, for guidance on selecting a suitable
+name for new attributes.
 
 @node Python Auto-loading
 @subsection Python Auto-loading

@@ -260,6 +260,12 @@ extern observable <program_space */* pspace */> free_program_space;
 
 extern observable<bool /* enabled */> tui_enabled;
 
+/* The core file loaded into the program space inferior INF has changed.
+   The process of changing has completed, i.e. when unloading, the unload
+   is now complete.  When loading a new core file, the load is complete,
+   shared libraries have been loaded, registers and threads read in, etc.  */
+extern observable<inferior */* inf */> core_file_changed;
+
 } /* namespace observers */
 
 } /* namespace gdb */

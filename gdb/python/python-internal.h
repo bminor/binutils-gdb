@@ -1127,6 +1127,14 @@ extern std::optional<int> gdbpy_print_insn (struct gdbarch *gdbarch,
 					    CORE_ADDR address,
 					    disassemble_info *info);
 
+/* Return the gdb.Corefile object representing the core file loaded into
+   the program space of INF, or None if there is no core file loaded.  INF
+   must not be NULL.  If an error occurs then NULL is returned, and a
+   suitable Python error will be set.  */
+
+extern gdbpy_ref<> gdbpy_core_file_from_inferior (inferior *inf);
+
+
 /* A wrapper for PyType_Ready that also automatically registers the
    type in the appropriate module.  Returns 0 on success, -1 on error.
    If MOD is supplied, then the type is added to that module.  If MOD

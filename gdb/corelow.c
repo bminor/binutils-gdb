@@ -53,6 +53,7 @@
 #include "xml-tdesc.h"
 #include "memtag.h"
 #include "cli/cli-style.h"
+#include "observable.h"
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
@@ -678,6 +679,9 @@ core_target::clear_core ()
       clear_solib (current_program_space);
 
       current_program_space->cbfd.reset (nullptr);
+
+      /* Notify that the core file has changed.  */
+      gdb::observers::core_file_changed.notify (current_inferior ());
     }
 }
 
@@ -1278,6 +1282,9 @@ core_target_open (const char *arg, int from_tty)
 	  exception_print (gdb_stderr, except);
 	}
     }
+
+  /* Notify that the core file has changed.  */
+  gdb::observers::core_file_changed.notify (current_inferior ());
 }
 
 void

@@ -1,0 +1,178 @@
+# Copyright (C) 2025 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This file is part of the GDB testsuite.  It tests the core file
+# support in Python.
+
+require isnative
+
+load_lib gdb-python.exp
+
+require allow_python_tests
+
+standard_testfile
+
+if {[build_executable "build executable" $testfile $srcfile] == -1} {
+    return
+}
+
+set corefile [core_find $binfile]
+if {$corefile == ""} {
+    unsupported "couldn't create or find corefile"
+    return
+}
+
+# Create a copy of the corefile.
+set other_corefile [standard_output_file ${testfile}-other.core]
+remote_exec build "cp $corefile $other_corefile"
+
+clean_restart
+
+gdb_test_no_output "python inf = gdb.selected_inferior()" \
+    "capture current inferior"
+
+gdb_test "python print(inf.corefile)" "^None" \
+    "Inferior.corefile is None before loading a core file"
+
+gdb_test "core-file $corefile" ".*" \
+    "load core file"
+
+set file_re [string_to_regexp $corefile]
+gdb_test "python print(inf.corefile)" "^<gdb\\.Corefile inferior=1 filename='$file_re'>" \
+    "Inferior.corefile is a valid object after loading a core file"
+
+gdb_test_no_output "python core1=inf.corefile" "capture gdb.Corefile object"
+
+gdb_test "python print(core1.__dict__)" "^\\{\\}" \
+    "print Corefile.__dict__ when empty"
+
+gdb_test_no_output "python core1._my_attribute = \"Hello\"" \
+    "write new attribute into Corefile object"
+
+gdb_test "python print(core1._my_attribute)" "^Hello" \
+    "immediately read new attribute"
+
+gdb_test "python print(core1.__dict__)" "^\\{'_my_attribute': 'Hello'\\}" \
+    "print Corefile.__dict__ after adding an attribute"
+
+gdb_test "python print(core1.filename)" "^$file_re" \
+    "Corefile.filename attribute works as expected"
+
+gdb_test "python print(core1.is_valid())" "^True" \
+    "Corefile.is_valid() is True while corefile is loaded"
+
+gdb_test "core-file" "^No core file now\\." "unload current core file"
+
+gdb_test "python print(core1.is_valid())" "^False" \
+    "Corefile.is_valid() is False after corefile is unloaded"
+
+gdb_test "python print(core1.__dict__)" "^\\{'_my_attribute': 'Hello'\\}" \
+    "print Corefile.__dict__ with attribute when invalid"
+
+gdb_test "python print(core1)" "^<gdb\\.Corefile \\(invalid\\)>" \
+    "print an invalid gdb.Corefile object"
+
+gdb_test "python print(core1.filename)" \
+    [multi_line \
+	 "Python Exception <class 'RuntimeError'>: Corefile no longer exists\\." \
+	 "Error occurred in Python: Corefile no longer exists\\."] \
+    "error when reading filename from invalid Corefile"
+
+gdb_test "python print(inf.corefile)" "^None" \
+    "Inferior.corefile is None again after corefile unload"
+
+gdb_test "python print(core1._my_attribute)" "^Hello" \
+    "read new attribute from invalid core file"
+
+# Create a second inferior.
+gdb_test "add-inferior"
+gdb_test "inferior 2"
+
+with_test_prefix "in second inferior" {
+    gdb_test "core-file $corefile" ".*" \
+	"load core file"
+
+    gdb_test "python print(inf.corefile)" "^None" \
+	"first inferior still has no core file"
+
+    gdb_test_no_output "python core2=gdb.selected_inferior().corefile" \
+	"capture gdb.Corefile object"
+
+    # The _my_attribute was added to CORE1, not CORE2.  Check it
+    # doesn't somehow appear on CORE2.
+    gdb_test "python print(core2._my_attribute)" \
+	"AttributeError.*: 'gdb\\.Corefile' object has no attribute '_my_attribute'" \
+	"try to read attribute that doesn't exist"
+
+    gdb_test "python print(core2.filename)" "^$file_re" \
+	"Corefile.filename attribute works as expected"
+
+    gdb_test "inferior 1"
+}
+
+# Read the name of the core file from the second program space while
+# the current program space is the first one.
+gdb_test "python print(core2.filename)" "^$file_re" \
+    "Corefile.filename attribute works from different progspace"
+
+# Load the other corefile into the first inferior.
+gdb_test "core $other_corefile" ".*" \
+    "load other corefile into inferior 1"
+
+# Delete the second inferior.  We need to switch to the second
+# inferior and unload its corefile before we can do that.  Then,
+# switch back to the first inferior, delete the second, and try to
+# read the filename of the core file from the (now deleted) second
+# inferior.  We should get an error about the gdb.Corefile being
+# invalid.
+with_test_prefix "remove second inferior" {
+    gdb_test "inferior 2"
+
+    gdb_test "python print(inf.corefile.filename)" \
+	"^[string_to_regexp $other_corefile]" \
+	"read inferior 1 corefile when in inferior 2"
+
+    gdb_test_no_output "python core1=inf.corefile" \
+	"capture inferior 1 gdb.Corefile while in inferior 2"
+
+    # This is a new CORE1 object, check that _my_attribute is gone.
+    gdb_test "python print(core1._my_attribute)" \
+	"AttributeError.*: 'gdb\\.Corefile' object has no attribute '_my_attribute'" \
+	"try to read attribute that doesn't exist"
+
+    gdb_test "core-file"
+
+    gdb_test "python print(core2.filename)" \
+	[multi_line \
+	     "Python Exception <class 'RuntimeError'>: Corefile no longer exists\\." \
+	     "Error occurred in Python: Corefile no longer exists\\."] \
+	"error when reading filename from invalid Corefile"
+
+    gdb_test "inferior 1"
+
+    gdb_test "remove-inferiors 2"
+
+    gdb_test "python print(core2.is_valid())" "^False" \
+	"Corefile.is_valid() is False after corefile is unloaded, and Progspace is deleted"
+
+    gdb_test "python print(core2.filename)" \
+	[multi_line \
+	     "Python Exception <class 'RuntimeError'>: Corefile no longer exists\\." \
+	     "Error occurred in Python: Corefile no longer exists\\."] \
+	"error when reading filename of an invalid Corefile, from deleted program space"
+
+    gdb_test "python print(core1.is_valid())" "^True" \
+	"check inferior 1 core file is still valid"
+}
