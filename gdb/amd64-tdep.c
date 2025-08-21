@@ -1916,6 +1916,22 @@ amd64_displaced_step_fixup (struct gdbarch *gdbarch,
       displaced_debug_printf ("relocated return addr at %s to %s",
 			      paddress (gdbarch, rsp),
 			      paddress (gdbarch, retaddr));
+
+      /* If shadow stack is enabled, we need to correct the return address
+	 on the shadow stack too.  */
+      bool shadow_stack_enabled;
+      std::optional<CORE_ADDR> ssp
+	= gdbarch_get_shadow_stack_pointer (gdbarch, regs,
+					    shadow_stack_enabled);
+      if (shadow_stack_enabled)
+	{
+	  gdb_assert (ssp.has_value ());
+	  write_memory_unsigned_integer (*ssp, retaddr_len, byte_order,
+					 retaddr);
+	  displaced_debug_printf ("relocated shadow stack return addr at %s "
+				  "to %s", paddress (gdbarch, *ssp),
+				  paddress (gdbarch, retaddr));
+	}
     }
 }
 

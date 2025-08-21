@@ -30,6 +30,11 @@ call1 ()
 int
 main ()
 {
+  /* Depending on instruction generation we might end up in the call
+     instruction of call1 function after "runto_main".  Avoid this by
+     adding a nop instruction, to simplify the testing in
+     amd64-shadow-stack-disp-step.exp.  */
+  asm ("nop");
   call1 (); /* break main.  */
   return 0;
 }

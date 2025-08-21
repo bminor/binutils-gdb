@@ -3,6 +3,9 @@
 
 *** Changes since GDB 16
 
+* Debugging Linux programs that use x86-64 or x86-64 with 32-bit pointer
+  size (X32) Shadow Stacks are now supported.
+
 * Support for the shadow stack pointer register on x86-64 or x86-64 with
   32-bit pointer size (X32) GNU/Linux.
 
