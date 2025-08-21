@@ -2880,7 +2880,8 @@ riscv_elf_relocate_section (bfd *output_bfd,
 		      if (h->dynindx == -1
 			  && !h->forced_local
 			  && h->root.type != bfd_link_hash_undefweak
-			  && bfd_link_pic (info))
+			  && bfd_link_pic (info)
+			  && !bfd_is_abs_section(h->root.u.def.section))
 			relative_got = true;
 
 		      bfd_put_NN (output_bfd, relocation,

@@ -338,4 +338,5 @@ if [istarget "riscv*-*-*"] {
     }
     run_dump_test "tls"
     run_dump_test "tlsbin"
+    run_dump_test "absolute-no-relative"
 }
