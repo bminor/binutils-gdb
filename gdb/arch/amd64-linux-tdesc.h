@@ -22,9 +22,10 @@
 
 struct target_desc;
 
-/* Return the AMD64 target descriptions corresponding to XCR0 and IS_X32.  */
+/* Return the AMD64 target descriptions corresponding to XSTATE_BV and
+   IS_X32.  */
 
-extern const target_desc *amd64_linux_read_description (uint64_t xcr0,
-							bool is_x32);
+extern const target_desc *amd64_linux_read_description
+  (uint64_t xstate_bv, bool is_x32);
 
 #endif /* GDB_ARCH_AMD64_LINUX_TDESC_H */

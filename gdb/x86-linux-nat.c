@@ -97,15 +97,20 @@ const struct target_desc *
 x86_linux_nat_target::read_description ()
 {
   /* The x86_linux_tdesc_for_tid call only reads xcr0 the first time it is
-     called, the xcr0 value is stored here and reused on subsequent calls.  */
-  static uint64_t xcr0_storage;
+     called.  The mask is stored in XSTATE_BV_STORAGE and reused on
+     subsequent calls.  Note that GDB currently supports features for user
+     state components only.  However, once supervisor state components are
+     supported in GDB, the value XSTATE_BV_STORAGE will not be configured
+     based on xcr0 only.  */
+  static uint64_t xstate_bv_storage;
 
   if (inferior_ptid == null_ptid)
     return this->beneath ()->read_description ();
 
   int tid = inferior_ptid.pid ();
 
-  return x86_linux_tdesc_for_tid (tid, &xcr0_storage, &this->m_xsave_layout);
+  return x86_linux_tdesc_for_tid (tid, &xstate_bv_storage,
+				  &this->m_xsave_layout);
 }
 
 

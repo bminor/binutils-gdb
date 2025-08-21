@@ -108,8 +108,12 @@ extern void amd64_init_abi (struct gdbarch_info info,
 extern void amd64_x32_init_abi (struct gdbarch_info info,
 				struct gdbarch *gdbarch,
 				const target_desc *default_tdesc);
-extern const struct target_desc *amd64_target_description (uint64_t xcr0,
-							   bool segments);
+
+/* Return the target description for the specified xsave features as
+   defined in XSTATE_BV and SEGMENTS.  */
+
+extern const struct target_desc *amd64_target_description
+  (uint64_t xstate_bv, bool segments);
 
 /* Fill register REGNUM in REGCACHE with the appropriate
    floating-point or SSE register value from *FXSAVE.  If REGNUM is
