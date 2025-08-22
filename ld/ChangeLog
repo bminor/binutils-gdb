@@ -1,3 +1,8 @@
+2025-08-22  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* testsuite/ld-shared/shared.exp: Enable on *-*-solaris2* rather
+	than sparc*-*-solaris2* only.
+
 2025-08-19  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* testsuite/ld-elfvers/vers.exp (vers26b3): Mark unsupported on

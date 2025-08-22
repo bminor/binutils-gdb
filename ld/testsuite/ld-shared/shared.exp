@@ -37,7 +37,8 @@ if { ![check_shared_lib_support] } {
 
 # This test can only be run on a couple of ELF platforms.
 # Square bracket expressions seem to confuse istarget.
-if { ![istarget hppa*64*-*-hpux*] \
+if {    ![istarget *-*-solaris2*] \
+     && ![istarget hppa*64*-*-hpux*] \
      && ![istarget hppa*-*-linux*] \
      && ![istarget i?86-*-elf*] \
      && ![istarget i?86-*-linux*] \
@@ -51,7 +52,6 @@ if { ![istarget hppa*64*-*-hpux*] \
      && ![istarget powerpc*-*-linux*] \
      && ![istarget powerpc*-*-sysv4*] \
      && ![istarget sparc*-*-elf] \
-     && ![istarget sparc*-*-solaris2*] \
      && ![istarget sparc*-*-linux*] \
      && ![istarget arm*-*-linux*] \
      && ![istarget alpha*-*-linux*] \
