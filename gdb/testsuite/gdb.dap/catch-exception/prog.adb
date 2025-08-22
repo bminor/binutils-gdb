@@ -19,15 +19,14 @@ procedure Prog is
 begin
 
    begin
-      raise Program_Error;
+      raise Constraint_Error;
    exception
       when others =>
          null;
    end;
 
    begin
-      Global_Var := 23;
-      raise Program_Error;
+      raise Program_Error;      -- EXPECTED
    exception
       when others =>
          null;

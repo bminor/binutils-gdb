@@ -373,10 +373,12 @@ def set_insn_breakpoints(
 @in_gdb_thread
 def _catch_exception(filterId, **args):
     if filterId in ("assert", "exception", "throw", "rethrow", "catch"):
-        cmd = "-catch-" + filterId
+        cmd = ["-catch-" + filterId]
     else:
         raise DAPException("Invalid exception filterID: " + str(filterId))
-    result = exec_mi_and_log(cmd)
+    if "exception" in args and args["exception"] is not None:
+        cmd += ["-e", args["exception"]]
+    result = exec_mi_and_log(*cmd)
     # While the Ada catchpoints emit a "bkptno" field here, the C++
     # ones do not.  So, instead we look at the "number" field.
     num = result["bkpt"]["number"]
@@ -404,6 +406,13 @@ def _rewrite_exception_breakpoint(
     # Note that exception breakpoints do not support a hit count.
     **args,
 ):
+    if filterId == "exception":
+        # Treat Ada exceptions specially -- in particular the
+        # condition is just an exception name, not an expression.
+        return {
+            "filterId": filterId,
+            "exception": condition,
+        }
     return {
         "filterId": filterId,
         "condition": condition,

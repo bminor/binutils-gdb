@@ -35,7 +35,7 @@ set obj [dap_check_request_and_response "set exception catchpoints" \
 	     setExceptionBreakpoints \
 	     {o filters [a [s nosuchfilter] [s assert]] \
 		  filterOptions [a [o filterId [s exception] \
-					condition [s "Global_Var = 23"]]]}]
+					condition [s program_error]]]}]
 
 set bps [dict get [lindex $obj 0] body breakpoints]
 # We should get three responses, because we requested three
@@ -76,6 +76,20 @@ dap_check_response "launch response" launch $launch_id
 dap_wait_for_event_and_check "stopped at first raise" stopped \
     "body reason" breakpoint \
     "body hitBreakpointIds" 2
+
+set found_line -1
+set line [gdb_get_line_number "EXPECTED" $testdir/prog.adb]
+set bt [lindex [dap_check_request_and_response "backtrace" stackTrace \
+		    {o threadId [i 1]}] \
+	    0]
+foreach frame [dict get $bt body stackFrames] {
+    if {[dict exists $frame source path]
+	&& [file tail [dict get $frame source path]] == "prog.adb"} {
+	set found_line [dict get $frame line]
+    }
+}
+
+gdb_assert {$found_line == $line} "stopped at correct raise"
 
 dap_check_request_and_response "continue to assert" continue \
     {o threadId [i 1]}
