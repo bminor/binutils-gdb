@@ -90,7 +90,6 @@ responsibility among the other maintainers.
   gprofng	   Vladimir Mezentsev <vladimir.mezentsev@oracle.com>
   HPPA		   Dave Anglin <dave.anglin@bell.net>
   HPPA elf64	   Jeff Law <law@redhat.com> [Basic maintainance only]
-  IA-64		   Jim Wilson <wilson@tuliptree.org>
   ix86		   H.J. Lu <hjl.tools@gmail.com>
   ix86 COFF	   DJ Delorie <dj@redhat.com>
   ix86 PE/COFF	   Dave Korn <dave.korn.cygwin@gmail.com>
@@ -166,6 +165,7 @@ goes with them.
   M R Swami Reddy
   Martin Schwidefsky
   Matt Thomas
+  Jim Wilson
 
       --------- CGEN Maintainers -------------
 
