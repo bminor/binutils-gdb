@@ -425,51 +425,51 @@
 .*:106: *Info: macro .*
 .*:78: Warning: scalar fp16 instruction cannot be conditional, the behaviour is UNPREDICTABLE
 .*:110: *Info: macro .*
-.*:78: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
+.*:78: Warning: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
 .*:110: *Info: macro .*
 .*:78: Warning: scalar fp16 instruction cannot be conditional, the behaviour is UNPREDICTABLE
 .*:110: *Info: macro .*
-.*:78: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
+.*:78: Warning: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
 .*:110: *Info: macro .*
 .*:78: Warning: scalar fp16 instruction cannot be conditional, the behaviour is UNPREDICTABLE
 .*:110: *Info: macro .*
-.*:78: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
+.*:78: Warning: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
 .*:110: *Info: macro .*
 .*:78: Warning: scalar fp16 instruction cannot be conditional, the behaviour is UNPREDICTABLE
 .*:110: *Info: macro .*
-.*:78: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
+.*:78: Warning: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
 .*:110: *Info: macro .*
 .*:78: Warning: scalar fp16 instruction cannot be conditional, the behaviour is UNPREDICTABLE
 .*:110: *Info: macro .*
-.*:78: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
+.*:78: Warning: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
 .*:110: *Info: macro .*
 .*:78: Warning: scalar fp16 instruction cannot be conditional, the behaviour is UNPREDICTABLE
 .*:110: *Info: macro .*
-.*:78: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
+.*:78: Warning: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
 .*:110: *Info: macro .*
 .*:78: Warning: scalar fp16 instruction cannot be conditional, the behaviour is UNPREDICTABLE
 .*:110: *Info: macro .*
-.*:78: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
+.*:78: Warning: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
 .*:110: *Info: macro .*
 .*:78: Warning: scalar fp16 instruction cannot be conditional, the behaviour is UNPREDICTABLE
 .*:110: *Info: macro .*
-.*:78: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
+.*:78: Warning: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
 .*:110: *Info: macro .*
 .*:78: Warning: scalar fp16 instruction cannot be conditional, the behaviour is UNPREDICTABLE
 .*:110: *Info: macro .*
-.*:78: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
+.*:78: Warning: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
 .*:110: *Info: macro .*
 .*:78: Warning: scalar fp16 instruction cannot be conditional, the behaviour is UNPREDICTABLE
 .*:110: *Info: macro .*
-.*:78: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
+.*:78: Warning: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
 .*:110: *Info: macro .*
 .*:78: Warning: scalar fp16 instruction cannot be conditional, the behaviour is UNPREDICTABLE
 .*:110: *Info: macro .*
-.*:78: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
+.*:78: Warning: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
 .*:110: *Info: macro .*
 .*:78: Warning: scalar fp16 instruction cannot be conditional, the behaviour is UNPREDICTABLE
 .*:110: *Info: macro .*
-.*:78: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
+.*:78: Warning: IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R
 .*:110: *Info: macro .*
 .*:87: Error: co-processor offset out of range
 .*:88: Error: co-processor offset out of range

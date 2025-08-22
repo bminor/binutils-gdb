@@ -27,11 +27,6 @@
 extern const char *strsignal (int);
 #endif
 
-static void as_show_where (void);
-static void as_warn_internal (const char *, unsigned int, char *);
-static void as_bad_internal (const char *, unsigned int, char *);
-static void signal_crash (int) ATTRIBUTE_NORETURN;
-
 /* Despite the rest of the comments in this file, (FIXME-SOON),
    here is the current scheme for error messages etc:
 
@@ -152,33 +147,12 @@ as_info_where (const char *file, unsigned int line, unsigned int indent,
 	   file, line, (int)indent, "", _("Info: "), buffer);
 }
 
-/* Send to stderr a string as a warning, and locate warning
-   in input file(s).
-   Please only use this for when we have some recovery action.
-   Please explain in string (which may have '\n's) what recovery was
-   done.  */
-
-void
-as_tsktsk (const char *format, ...)
-{
-  va_list args;
-
-  as_show_where ();
-  va_start (args, format);
-  vfprintf (stderr, format, args);
-  va_end (args);
-  (void) putc ('\n', stderr);
-  as_report_context ();
-}
-
-/* The common portion of as_warn and as_warn_where.  */
+/* The common portion of as_warn, as_warn_where, and as_tsktsk.  */
 
 static void
 as_warn_internal (const char *file, unsigned int line, char *buffer)
 {
   bool context = false;
-
-  ++warning_count;
 
   if (file == NULL)
     {
@@ -219,6 +193,8 @@ as_warn (const char *format, ...)
 
   if (!flag_no_warnings)
     {
+      ++warning_count;
+
       va_start (args, format);
       vsnprintf (buffer, sizeof (buffer), format, args);
       va_end (args);
@@ -238,11 +214,31 @@ as_warn_where (const char *file, unsigned int line, const char *format, ...)
 
   if (!flag_no_warnings)
     {
+      ++warning_count;
+
       va_start (args, format);
       vsnprintf (buffer, sizeof (buffer), format, args);
       va_end (args);
       as_warn_internal (file, line, buffer);
     }
+}
+
+/* Send to stderr a string as a warning, and locate warning
+   in input file(s).
+   Please only use this for when we have some recovery action.
+   Please explain in string (which may have '\n's) what recovery was
+   done.  */
+
+void
+as_tsktsk (const char *format, ...)
+{
+  va_list args;
+  char buffer[2000];
+
+  va_start (args, format);
+  vsnprintf (buffer, sizeof (buffer), format, args);
+  va_end (args);
+  as_warn_internal (NULL, 0, buffer);
 }
 
 /* The common portion of as_bad and as_bad_where.  */

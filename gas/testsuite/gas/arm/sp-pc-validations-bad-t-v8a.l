@@ -1,134 +1,134 @@
 [^:]*: Assembler messages:
-[^:]*:6: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
+[^:]*:6: Warning: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
 [^:]*:17: *Info: macro .*
 [^:]*:27: *Info: macro .*
-[^:]*:6: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
+[^:]*:6: Warning: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
 [^:]*:17: *Info: macro .*
 [^:]*:27: *Info: macro .*
 [^:]*:6: Error: branch must be last instruction in IT block -- `ldreq r15,\[r0\]'
 [^:]*:17: *Info: macro .*
 [^:]*:27: *Info: macro .*
-[^:]*:6: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
+[^:]*:6: Warning: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
 [^:]*:17: *Info: macro .*
 [^:]*:28: *Info: macro .*
-[^:]*:6: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
+[^:]*:6: Warning: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
 [^:]*:17: *Info: macro .*
 [^:]*:28: *Info: macro .*
 [^:]*:6: Error: branch must be last instruction in IT block -- `ldreq r15,\[r0,#0\]'
 [^:]*:17: *Info: macro .*
 [^:]*:28: *Info: macro .*
-[^:]*:6: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
+[^:]*:6: Warning: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
 [^:]*:17: *Info: macro .*
 [^:]*:29: *Info: macro .*
-[^:]*:6: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
+[^:]*:6: Warning: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
 [^:]*:17: *Info: macro .*
 [^:]*:29: *Info: macro .*
 [^:]*:6: Error: branch must be last instruction in IT block -- `ldreq r15,\[sp\]'
 [^:]*:17: *Info: macro .*
 [^:]*:29: *Info: macro .*
-[^:]*:6: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
+[^:]*:6: Warning: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
 [^:]*:17: *Info: macro .*
 [^:]*:30: *Info: macro .*
-[^:]*:6: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
+[^:]*:6: Warning: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
 [^:]*:17: *Info: macro .*
 [^:]*:30: *Info: macro .*
 [^:]*:6: Error: branch must be last instruction in IT block -- `ldreq r15,\[sp,#0\]'
 [^:]*:17: *Info: macro .*
 [^:]*:30: *Info: macro .*
-[^:]*:12: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
+[^:]*:12: Warning: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
 [^:]*:21: *Info: macro .*
 [^:]*:31: *Info: macro .*
-[^:]*:12: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
+[^:]*:12: Warning: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
 [^:]*:21: *Info: macro .*
 [^:]*:31: *Info: macro .*
 [^:]*:12: Error: branch must be last instruction in IT block -- `ldreq.w r15,\[r0\]'
 [^:]*:21: *Info: macro .*
 [^:]*:31: *Info: macro .*
-[^:]*:12: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
+[^:]*:12: Warning: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
 [^:]*:21: *Info: macro .*
 [^:]*:32: *Info: macro .*
-[^:]*:12: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
+[^:]*:12: Warning: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
 [^:]*:21: *Info: macro .*
 [^:]*:32: *Info: macro .*
 [^:]*:12: Error: branch must be last instruction in IT block -- `ldreq.w r15,\[r0,#0\]'
 [^:]*:21: *Info: macro .*
 [^:]*:32: *Info: macro .*
-[^:]*:6: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
+[^:]*:6: Warning: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
 [^:]*:17: *Info: macro .*
 [^:]*:33: *Info: macro .*
-[^:]*:6: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
+[^:]*:6: Warning: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
 [^:]*:17: *Info: macro .*
 [^:]*:33: *Info: macro .*
 [^:]*:6: Error: branch must be last instruction in IT block -- `ldreq r15,\[r0,#-4\]'
 [^:]*:17: *Info: macro .*
 [^:]*:33: *Info: macro .*
-[^:]*:6: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
+[^:]*:6: Warning: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
 [^:]*:17: *Info: macro .*
 [^:]*:34: *Info: macro .*
-[^:]*:6: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
+[^:]*:6: Warning: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
 [^:]*:17: *Info: macro .*
 [^:]*:34: *Info: macro .*
 [^:]*:6: Error: branch must be last instruction in IT block -- `ldreq r15,\[r0\],#4'
 [^:]*:17: *Info: macro .*
 [^:]*:34: *Info: macro .*
-[^:]*:6: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
+[^:]*:6: Warning: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
 [^:]*:17: *Info: macro .*
 [^:]*:35: *Info: macro .*
-[^:]*:6: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
+[^:]*:6: Warning: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
 [^:]*:17: *Info: macro .*
 [^:]*:35: *Info: macro .*
 [^:]*:6: Error: branch must be last instruction in IT block -- `ldreq r15,\[r0,#0\]!'
 [^:]*:17: *Info: macro .*
 [^:]*:35: *Info: macro .*
-[^:]*:6: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
+[^:]*:6: Warning: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
 [^:]*:17: *Info: macro .*
 [^:]*:38: *Info: macro .*
-[^:]*:6: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
+[^:]*:6: Warning: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
 [^:]*:17: *Info: macro .*
 [^:]*:38: *Info: macro .*
 [^:]*:6: Error: branch must be last instruction in IT block -- `ldreq r15,label'
 [^:]*:17: *Info: macro .*
 [^:]*:38: *Info: macro .*
-[^:]*:12: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
+[^:]*:12: Warning: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
 [^:]*:21: *Info: macro .*
 [^:]*:39: *Info: macro .*
-[^:]*:12: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
+[^:]*:12: Warning: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
 [^:]*:21: *Info: macro .*
 [^:]*:39: *Info: macro .*
 [^:]*:12: Error: branch must be last instruction in IT block -- `ldreq.w r15,label'
 [^:]*:21: *Info: macro .*
 [^:]*:39: *Info: macro .*
-[^:]*:12: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
+[^:]*:12: Warning: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
 [^:]*:21: *Info: macro .*
 [^:]*:40: *Info: macro .*
-[^:]*:12: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
+[^:]*:12: Warning: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
 [^:]*:21: *Info: macro .*
 [^:]*:40: *Info: macro .*
 [^:]*:12: Error: branch must be last instruction in IT block -- `ldreq.w r15,\[pc,#-0\]'
 [^:]*:21: *Info: macro .*
 [^:]*:40: *Info: macro .*
-[^:]*:6: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
+[^:]*:6: Warning: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
 [^:]*:17: *Info: macro .*
 [^:]*:43: *Info: macro .*
-[^:]*:6: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
+[^:]*:6: Warning: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
 [^:]*:17: *Info: macro .*
 [^:]*:43: *Info: macro .*
 [^:]*:6: Error: branch must be last instruction in IT block -- `ldreq r15,\[r0,r1\]'
 [^:]*:17: *Info: macro .*
 [^:]*:43: *Info: macro .*
-[^:]*:12: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
+[^:]*:12: Warning: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
 [^:]*:21: *Info: macro .*
 [^:]*:44: *Info: macro .*
-[^:]*:12: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
+[^:]*:12: Warning: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
 [^:]*:21: *Info: macro .*
 [^:]*:44: *Info: macro .*
 [^:]*:12: Error: branch must be last instruction in IT block -- `ldreq.w r15,\[r0,r1\]'
 [^:]*:21: *Info: macro .*
 [^:]*:44: *Info: macro .*
-[^:]*:12: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
+[^:]*:12: Warning: IT blocks containing 16-bit Thumb instructions of the following class are performance deprecated in ARMv8-A and ARMv8-R: Short branches, Undefined, SVC, LDM/STM
 [^:]*:21: *Info: macro .*
 [^:]*:45: *Info: macro .*
-[^:]*:12: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
+[^:]*:12: Warning: IT blocks containing more than one conditional instruction are performance deprecated in ARMv8-A and ARMv8-R
 [^:]*:21: *Info: macro .*
 [^:]*:45: *Info: macro .*
 [^:]*:12: Error: branch must be last instruction in IT block -- `ldreq.w r15,\[r0,r1,LSL ?#2\]'

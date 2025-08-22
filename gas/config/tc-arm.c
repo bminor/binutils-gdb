@@ -920,20 +920,16 @@ struct asm_opcode
 #define BAD_CDE_COPROC	_("coprocessor for insn is not enabled for cde")
 #define UNPRED_REG(R)	_("using " R " results in unpredictable behaviour")
 #define THUMB1_RELOC_ONLY  _("relocation valid in thumb1 code only")
-#define MVE_NOT_IT	_("Warning: instruction is UNPREDICTABLE in an IT " \
-			  "block")
-#define MVE_NOT_VPT	_("Warning: instruction is UNPREDICTABLE in a VPT " \
-			  "block")
-#define MVE_BAD_PC	_("Warning: instruction is UNPREDICTABLE with PC" \
-			  " operand")
-#define MVE_BAD_SP	_("Warning: instruction is UNPREDICTABLE with SP" \
-			  " operand")
+#define MVE_NOT_IT	_("instruction is UNPREDICTABLE in an IT block")
+#define MVE_NOT_VPT	_("instruction is UNPREDICTABLE in a VPT block")
+#define MVE_BAD_PC	_("instruction is UNPREDICTABLE with PC operand")
+#define MVE_BAD_SP	_("instruction is UNPREDICTABLE with SP operand")
 #define BAD_SIMD_TYPE	_("bad type in SIMD instruction")
 #define BAD_MVE_AUTO	\
   _("GAS auto-detection mode and -march=all is deprecated for MVE, please" \
     " use a valid -march or -mcpu option.")
-#define BAD_MVE_SRCDEST	_("Warning: 32-bit element size and same destination "\
-			  "and source operands makes instruction UNPREDICTABLE")
+#define BAD_MVE_SRCDEST	_("32-bit element size and same destination and " \
+			  "source operands makes instruction UNPREDICTABLE")
 #define BAD_EL_TYPE	_("bad element type for instruction")
 #define MVE_BAD_QREG	_("MVE vector register Q[0..7] expected")
 #define BAD_PACBTI	_("selected processor does not support PACBTI extention")
@@ -1977,7 +1973,7 @@ parse_reg_list (char ** strp, enum reg_list_els etype)
 		    {
 		      if (range & (1 << i))
 			as_tsktsk
-			  (_("Warning: duplicated register (r%d) in register list"),
+			  (_("duplicated register (r%d) in register list"),
 			   i);
 		      else
 			range |= 1 << i;
@@ -1986,10 +1982,10 @@ parse_reg_list (char ** strp, enum reg_list_els etype)
 		}
 
 	      if (range & (1 << reg))
-		as_tsktsk (_("Warning: duplicated register (r%d) in register list"),
+		as_tsktsk (_("duplicated register (r%d) in register list"),
 			   reg);
 	      else if (reg <= cur_reg)
-		as_tsktsk (_("Warning: register range not in ascending order"));
+		as_tsktsk (_("register range not in ascending order"));
 
 	      range |= 1 << reg;
 	      cur_reg = reg;
@@ -2027,7 +2023,7 @@ parse_reg_list (char ** strp, enum reg_list_els etype)
 		  regno &= -regno;
 		  regno = (1 << regno) - 1;
 		  as_tsktsk
-		    (_("Warning: duplicated register (r%d) in register list"),
+		    (_("duplicated register (r%d) in register list"),
 		     regno);
 		}
 
@@ -4355,10 +4351,10 @@ parse_dot_save (char **str_p, int prev_reg)
       if (!in_range)
 	{
 	  if (core_regs & (1 << reg))
-	    as_tsktsk (_("Warning: duplicated register (r%d) in register list"),
+	    as_tsktsk (_("duplicated register (r%d) in register list"),
 		       reg);
 	  else if (reg <= prev_reg)
-	    as_tsktsk (_("Warning: register list not in ascending order"));
+	    as_tsktsk (_("register list not in ascending order"));
 
 	  core_regs |= (1 << reg);
 	  prev_reg = reg;
@@ -4375,7 +4371,7 @@ parse_dot_save (char **str_p, int prev_reg)
 	  for (i = prev_reg + 1; i <= reg; i++)
 	    {
 	      if (core_regs & (1 << i))
-		as_tsktsk (_("Warning: duplicated register (r%d) in register list"),
+		as_tsktsk (_("duplicated register (r%d) in register list"),
 			   i);
 	      else
 		core_regs |= 1 << i;
@@ -17958,7 +17954,7 @@ do_mve_vhcadd (void)
   constraint (rot != 90 && rot != 270, _("immediate out of range"));
 
   if (et.size == 32 && inst.operands[0].reg == inst.operands[2].reg)
-    as_tsktsk (_("Warning: 32-bit element size and same first and third "
+    as_tsktsk (_("32-bit element size and same first and third "
 		 "operand makes instruction UNPREDICTABLE"));
 
   mve_encode_qqq (0, et.size);
@@ -19730,7 +19726,7 @@ do_neon_rev (void)
 
   if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext) && elsize == 64
       && inst.operands[0].reg == inst.operands[1].reg)
-    as_tsktsk (_("Warning: 64-bit element size and same destination and source"
+    as_tsktsk (_("64-bit element size and same destination and source"
 		 " operands makes instruction UNPREDICTABLE"));
 
   gas_assert (elsize != 0);
@@ -21281,7 +21277,7 @@ do_vcadd (void)
       et = neon_check_type (3, rs, N_EQK, N_EQK, N_KEY | N_F16 | N_F32 | N_I8
 			    | N_I16 | N_I32);
       if (et.size == 32 && inst.operands[0].reg == inst.operands[2].reg)
-	as_tsktsk (_("Warning: 32-bit element size and same first and third "
+	as_tsktsk (_("32-bit element size and same first and third "
 		     "operand makes instruction UNPREDICTABLE"));
     }
 
@@ -22824,8 +22820,7 @@ handle_pred_state (void)
 		{
 		  if (unified_syntax
 		      && !(implicit_it_mode & IMPLICIT_IT_MODE_ARM))
-		    as_tsktsk (_("Warning: conditional outside an IT block"\
-				 " for Thumb."));
+		    as_tsktsk (_("conditional outside an IT block for Thumb"));
 		}
 	      else
 		{
