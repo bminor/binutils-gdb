@@ -1,5 +1,12 @@
 2025-08-22  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
+	* testsuite/ld-shared/shared.exp (shared (non PIC)): Update
+	comment.  xfail on 64-bit Solaris only.
+	(shared (PIC main, non PIC so)): Likewise.
+	(shared (non PIC, load offset)): Update comment.
+
+2025-08-22  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
 	* testsuite/ld-shared/shared.exp: Enable on *-*-solaris2* rather
 	than sparc*-*-solaris2* only.
 

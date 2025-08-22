@@ -230,8 +230,9 @@ if ![ld_compile "$CC_FOR_TARGET $NOPIE_CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $
     } else { if { [is_xcoff_format] } {
 	shared_test shnp "shared (non PIC)" mainnp.o sh1np.o sh2np.o xcoff "" $NOPIE_LDFLAGS
     } else {
-	# Solaris defaults to -z text.
-	setup_xfail "*-*-solaris2*"
+	# 64-bit Solaris requires PIC.
+	setup_xfail "sparcv9*-*-solaris2*"
+	setup_xfail "x86_64-*-solaris2*"
 	setup_xfail "ia64-*-linux*"
 	setup_xfail "alpha*-*-linux*"
 	setup_xfail "powerpc-*-linux-musl"
@@ -277,7 +278,7 @@ if ![ld_compile "$CC_FOR_TARGET $NOPIE_CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $
 	    setup_xfail "arm*-*-linux*"
 	}
 	setup_xfail "aarch64*-*-linux*"
-	# Solaris defaults to -z text.
+	# Solaris refuses to map shared objects with non-zero load addresses.
 	setup_xfail "*-*-solaris2*"
 	shared_test shnp "shared (non PIC, load offset)" \
 		mainnp.o sh1np.o sh2np.o shared \
@@ -312,8 +313,9 @@ if ![ld_compile "$CC_FOR_TARGET $SHCFLAG $picflag" $srcdir/$subdir/main.c $tmpdi
         if { [is_xcoff_format] } {
 	    shared_test shmpnp "shared (PIC main, non PIC so)" mainp.o sh1np.o sh2np.o xcoff "" $NOPIE_LDFLAGS
 	} else {
-	    # Solaris defaults to -z text.
-	    setup_xfail "*-*-solaris2*"
+	    # 64-bit Solaris requires PIC.
+	    setup_xfail "sparcv9*-*-solaris2*"
+	    setup_xfail "x86_64-*-solaris2*"
 	    setup_xfail "ia64-*-linux*"
 	    setup_xfail "alpha*-*-linux*"
 	    setup_xfail "powerpc-*-linux-musl"
