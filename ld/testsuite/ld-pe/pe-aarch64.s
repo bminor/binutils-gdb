@@ -4,6 +4,11 @@
 
 .section .text
 
+    .global _start
+    .def _start
+    .scl 2 /* C_EXT */
+    .type 32 /* DT_FUNC */
+    .endef
 _start:
     mov x1, 20
     b foo
