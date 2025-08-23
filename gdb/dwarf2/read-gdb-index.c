@@ -1434,7 +1434,15 @@ create_addrmap_from_gdb_index (dwarf2_per_objfile *per_objfile,
 	  return false;
 	}
 
-      mutable_map.set_empty (lo, hi - 1, index->units[cu_index]);
+      bool full_range_p
+	= mutable_map.set_empty (lo, hi - 1, index->units[cu_index]);
+      if (!full_range_p)
+	{
+	  complaint (_(".gdb_index address table has a range (%s - %s) that"
+		       " overlaps with an earlier range"),
+		     hex_string (lo), hex_string (hi));
+	  return false;
+	}
     }
 
   index->index_addrmap
