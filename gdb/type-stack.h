@@ -212,7 +212,7 @@ public:
      stack is a tp_pointer, and the new values are inserted above the
      first item.  */
 
-  void insert (struct expr_builder *pstate, const char *string);
+  void insert (struct gdbarch *gdbarch, const char *string);
 
   /* Append the elements of the type stack FROM to the type stack
      THIS.  Always returns THIS.  */

@@ -1248,12 +1248,12 @@ single_qualifier:
 			{ cpstate->type_stack.insert (tp_restrict); }
 	|	'@' NAME
 		{
-		  cpstate->type_stack.insert (pstate,
+		  cpstate->type_stack.insert (pstate->gdbarch (),
 					      copy_name ($2.stoken).c_str ());
 		}
 	|	'@' UNKNOWN_CPP_NAME
 		{
-		  cpstate->type_stack.insert (pstate,
+		  cpstate->type_stack.insert (pstate->gdbarch (),
 					      copy_name ($2.stoken).c_str ());
 		}
 	;

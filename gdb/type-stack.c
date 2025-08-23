@@ -20,7 +20,6 @@
 #include "type-stack.h"
 
 #include "gdbtypes.h"
-#include "parser-defs.h"
 
 /* See type-stack.h.  */
 
@@ -51,7 +50,7 @@ type_stack::insert (enum type_pieces tp)
 /* See type-stack.h.  */
 
 void
-type_stack::insert (struct expr_builder *pstate, const char *string)
+type_stack::insert (struct gdbarch *gdbarch, const char *string)
 {
   union type_stack_elt element;
   int slot;
@@ -67,8 +66,7 @@ type_stack::insert (struct expr_builder *pstate, const char *string)
   element.piece = tp_space_identifier;
   insert_into (slot, element);
   element.int_val
-    = address_space_name_to_type_instance_flags (pstate->gdbarch (),
-						 string);
+    = address_space_name_to_type_instance_flags (gdbarch, string);
   insert_into (slot, element);
 }
 
