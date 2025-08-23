@@ -201,10 +201,11 @@ xfree_wrapper (splay_tree_key key)
   xfree ((void *) key);
 }
 
-void
+bool
 addrmap_mutable::set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
 			    void *obj)
 {
+  bool full_range = true;
   splay_tree_node n, next;
   void *prior_value;
 
@@ -234,7 +235,12 @@ addrmap_mutable::set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
        n && addrmap_node_key (n) <= end_inclusive;
        n = splay_tree_successor (addrmap_node_key (n)))
     {
-      if (! addrmap_node_value (n))
+      if (addrmap_node_value (n))
+	{
+	  /* Already mapped.  */
+	  full_range = false;
+	}
+      else
 	addrmap_node_set_value (n, obj);
     }
 
@@ -254,6 +260,8 @@ addrmap_mutable::set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
       else
 	prior_value = addrmap_node_value (n);
     }
+
+  return full_range;
 }
 
 
@@ -433,7 +441,9 @@ test_addrmap ()
   check_addrmap_find (map, array, 0, 19, nullptr);
 
   /* Insert address range into mutable addrmap.  */
-  map.set_empty (core_addr (&array[10]), core_addr (&array[12]), val1);
+  bool full_range_p
+    = map.set_empty (core_addr (&array[10]), core_addr (&array[12]), val1);
+  SELF_CHECK (full_range_p);
   check_addrmap_find (map, array, 0, 9, nullptr);
   check_addrmap_find (map, array, 10, 12, val1);
   check_addrmap_find (map, array, 13, 19, nullptr);
@@ -469,7 +479,9 @@ test_addrmap ()
   check_addrmap_find (*map2, array, 14, 19, nullptr);
 
   /* Insert partially overlapping address range into mutable addrmap.  */
-  map.set_empty (core_addr (&array[11]), core_addr (&array[13]), val2);
+  full_range_p
+    = map.set_empty (core_addr (&array[11]), core_addr (&array[13]), val2);
+  SELF_CHECK (!full_range_p);
   check_addrmap_find (map, array, 0, 9, nullptr);
   check_addrmap_find (map, array, 10, 12, val1);
   check_addrmap_find (map, array, 13, 13, val2);
