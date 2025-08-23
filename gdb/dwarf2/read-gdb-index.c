@@ -1395,9 +1395,10 @@ create_signatured_type_table_from_gdb_index
   per_bfd->signatured_types = std::move (sig_types_hash);
 }
 
-/* Read the address map data from the mapped GDB index.  */
+/* Read the address map data from the mapped GDB index.  Return true if no
+   errors were found, otherwise return false.  */
 
-static void
+static bool
 create_addrmap_from_gdb_index (dwarf2_per_objfile *per_objfile,
 			       mapped_gdb_index *index)
 {
@@ -1423,14 +1424,14 @@ create_addrmap_from_gdb_index (dwarf2_per_objfile *per_objfile,
 	{
 	  complaint (_(".gdb_index address table has invalid range (%s - %s)"),
 		     hex_string (lo), hex_string (hi));
-	  continue;
+	  return false;
 	}
 
       if (cu_index >= index->units.size ())
 	{
 	  complaint (_(".gdb_index address table has invalid CU number %u"),
 		     (unsigned) cu_index);
-	  continue;
+	  return false;
 	}
 
       mutable_map.set_empty (lo, hi - 1, index->units[cu_index]);
@@ -1438,6 +1439,8 @@ create_addrmap_from_gdb_index (dwarf2_per_objfile *per_objfile,
 
   index->index_addrmap
     = new (&per_bfd->obstack) addrmap_fixed (&per_bfd->obstack, &mutable_map);
+
+  return true;
 }
 
 /* Sets the name and language of the main function from the shortcut table.  */
@@ -1559,7 +1562,8 @@ dwarf2_read_gdb_index
 
   finalize_all_units (per_bfd);
 
-  create_addrmap_from_gdb_index (per_objfile, map.get ());
+  if (!create_addrmap_from_gdb_index (per_objfile, map.get ()))
+    return false;
 
   set_main_name_from_gdb_index (per_objfile, map.get ());
 
