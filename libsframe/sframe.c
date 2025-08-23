@@ -969,11 +969,10 @@ sframe_decode (const char *sf_buf, size_t sf_size, int *errp)
       sframe_ret_set_errno (errp, SFRAME_ERR_NOMEM);
       goto decode_fail_free;
     }
-  memcpy (dctx->sfd_funcdesc, frame_buf, fidx_size);
+  /* SFrame FDEs are at an offset of sfh_fdeoff from SFrame header end.  */
+  memcpy (dctx->sfd_funcdesc, frame_buf + sfheaderp->sfh_fdeoff, fidx_size);
 
   debug_printf ("%u total fidx size\n", fidx_size);
-
-  frame_buf += (fidx_size);
 
   /* Handle the SFrame Frame Row Entry section.  */
   dctx->sfd_fres = (char *) malloc (sfheaderp->sfh_fre_len);
@@ -982,7 +981,10 @@ sframe_decode (const char *sf_buf, size_t sf_size, int *errp)
       sframe_ret_set_errno (errp, SFRAME_ERR_NOMEM);
       goto decode_fail_free;
     }
-  memcpy (dctx->sfd_fres, frame_buf, sfheaderp->sfh_fre_len);
+  /* SFrame FREs are at an offset of sfh_freoff from SFrame header end.  */
+  memcpy (dctx->sfd_fres,
+	  frame_buf + sfheaderp->sfh_freoff,
+	  sfheaderp->sfh_fre_len);
 
   fre_bytes = sfheaderp->sfh_fre_len;
   dctx->sfd_fre_nbytes = fre_bytes;
