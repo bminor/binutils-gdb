@@ -20,6 +20,7 @@
 
 #include "sysdep.h"
 #include "bfd.h"
+#include "libbfd.h"
 
 #define TARGET_SYM		riscv64_pei_vec
 #define TARGET_NAME		"pei-riscv64-little"
@@ -58,9 +59,6 @@
 { COFF_SECTION_NAME_PARTIAL_MATCH (".gnu.linkonce.wi."), \
   COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 0 }
 
-#include "sysdep.h"
-#include "bfd.h"
-#include "libbfd.h"
 #include "coff/riscv64.h"
 #include "coff/internal.h"
 #include "coff/pe.h"

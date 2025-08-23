@@ -18,9 +18,8 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-
-#ifndef COFF_WITH_peLoongArch64
-#define COFF_WITH_peLoongArch64
+#ifndef COFF_WITH_PE
+#error non-PE COFF unsupported
 #endif
 
 #include "sysdep.h"

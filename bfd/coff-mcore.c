@@ -18,6 +18,10 @@
    Foundation, 51 Franklin Street - Fifth Floor,
    Boston, MA 02110-1301, USA.  */
 
+#ifndef COFF_WITH_PE
+#error non-PE COFF unsupported
+#endif
+
 #include "sysdep.h"
 #include "bfd.h"
 #include "libbfd.h"
