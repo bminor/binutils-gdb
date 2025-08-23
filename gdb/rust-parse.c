@@ -335,7 +335,7 @@ struct rust_parser
     return std::string (current_string_val.ptr, current_string_val.length);
   }
 
-  /* A pointer to this is installed globally.  */
+  /* Storage for use while parsing.  */
   auto_obstack obstack;
 
   /* The parser state gdb gave us.  */
