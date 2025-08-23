@@ -1303,15 +1303,13 @@ direct_abs_decl: '(' abs_decl ')'
 	|	direct_abs_decl array_mod
 			{
 			  cpstate->type_stack.push ($1);
-			  cpstate->type_stack.push ($2);
-			  cpstate->type_stack.push (tp_array);
+			  cpstate->type_stack.push (tp_array, $2);
 			  $$ = cpstate->type_stack.create ();
 			  cpstate->type_stacks.emplace_back ($$);
 			}
 	|	array_mod
 			{
-			  cpstate->type_stack.push ($1);
-			  cpstate->type_stack.push (tp_array);
+			  cpstate->type_stack.push (tp_array, $1);
 			  $$ = cpstate->type_stack.create ();
 			  cpstate->type_stacks.emplace_back ($$);
 			}

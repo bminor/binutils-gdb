@@ -1159,8 +1159,7 @@ push_kind_type (LONGEST val, struct type *type)
       ival = static_cast <int> (val);
     }
 
-  type_stack->push (ival);
-  type_stack->push (tp_kind);
+  type_stack->push (tp_kind, ival);
 }
 
 /* Helper function for convert_to_kind_type.  */
