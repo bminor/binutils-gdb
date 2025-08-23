@@ -146,27 +146,46 @@ public:
     m_elements.push_back (elt);
   }
 
+  /* Pop the topmost element of the stack and return it.
+
+     If the stack is empty, tp_end is returned.
+
+     If the topmost element requires a payload -- for example,
+     tp_array takes an integer parameter -- then the value is returned
+     but *not* popped from the stack.  Instead the appropriate
+     payload-specific pop_* method (e.g., pop_int) must then be
+     called.  This somewhat odd approach ensures that the stack can't
+     be put into an invalid state.  */
   enum type_pieces pop ()
   {
     if (m_elements.empty ())
       return tp_end;
     type_stack_elt elt = m_elements.back ();
-    m_elements.pop_back ();
+    if (!requires_payload (elt.piece))
+      m_elements.pop_back ();
     return elt.piece;
   }
 
   int pop_int ()
   {
-    gdb_assert (!m_elements.empty ());
+    gdb_assert (m_elements.size () >= 2);
     type_stack_elt elt = m_elements.back ();
+    m_elements.pop_back ();
+    type_pieces tp = elt.piece;
+    gdb_assert (tp == tp_array || tp == tp_space_identifier || tp == tp_kind);
+    elt = m_elements.back ();
     m_elements.pop_back ();
     return elt.int_val;
   }
 
   std::vector<struct type *> *pop_typelist ()
   {
-    gdb_assert (!m_elements.empty ());
+    gdb_assert (m_elements.size () >= 2);
     type_stack_elt elt = m_elements.back ();
+    m_elements.pop_back ();
+    type_pieces tp = elt.piece;
+    gdb_assert (tp == tp_function_with_arguments);
+    elt = m_elements.back ();
     m_elements.pop_back ();
     return elt.typelist_val;
   }
@@ -175,8 +194,12 @@ public:
 
   struct type_stack *pop_type_stack ()
   {
-    gdb_assert (!m_elements.empty ());
+    gdb_assert (m_elements.size () >= 2);
     type_stack_elt elt = m_elements.back ();
+    m_elements.pop_back ();
+    type_pieces tp = elt.piece;
+    gdb_assert (tp == tp_type_stack);
+    elt = m_elements.back ();
     m_elements.pop_back ();
     return elt.stack_val;
   }
@@ -214,9 +237,9 @@ public:
 
 private:
 
-  /* A helper function for insert_type and insert_type_address_space.
-     This does work of expanding the type stack and inserting the new
-     element, ELEMENT, into the stack at location SLOT.  */
+  /* A helper function for the insert methods.  This does work of
+     expanding the type stack and inserting the new element, ELEMENT,
+     into the stack at location SLOT.  */
 
   void insert_into (int slot, union type_stack_elt element)
   {
