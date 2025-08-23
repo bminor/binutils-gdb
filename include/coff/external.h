@@ -223,7 +223,10 @@ typedef union external_auxent
 
   union
   {
-    char x_fname[E_FILNMLEN];
+    /* Make x_fname the full auxent size, so that if coff/pe.h
+       redefines E_FILNMLEN from 14 to 18 we don't trigger sanitisers
+       accessing x_fname.  Beware use of sizeof (x_file.x_fname).  */
+    char x_fname[AUXESZ];
 
     struct
     {
