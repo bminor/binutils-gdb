@@ -366,7 +366,7 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	htab->elf.srelgot->size += htab->sizeof_reloc;
       if (GOT_TLS_GDESC_P (tls_type))
 	{
-	  htab->elf.srelplt->size += htab->sizeof_reloc;
+	  htab->rel_tls_desc->size += htab->sizeof_reloc;
 	  if (bed->target_id == X86_64_ELF_DATA)
 	    htab->elf.tlsdesc_plt = (bfd_vma) -1;
 	}
@@ -2157,6 +2157,16 @@ _bfd_elf_x86_finish_relative_relocs (struct bfd_link_info *info)
   return true;
 }
 
+asection *
+_bfd_elf_x86_get_reloc_section (bfd *abfd, const char *name)
+{
+  /* Treat .rel.tls/.rela.tls section the same as .rel.plt/.rela.plt
+     section.  */
+  if (strcmp (name, ".tls") == 0)
+    name = ".plt";
+  return _bfd_elf_plt_get_reloc_section (abfd, name);
+}
+
 bool
 _bfd_elf_x86_valid_reloc_p (asection *input_section,
 			    struct bfd_link_info *info,
@@ -2376,7 +2386,7 @@ _bfd_x86_elf_late_size_sections (bfd *output_bfd,
 		    srel->size += htab->sizeof_reloc;
 		  if (GOT_TLS_GDESC_P (*local_tls_type))
 		    {
-		      htab->elf.srelplt->size += htab->sizeof_reloc;
+		      htab->rel_tls_desc->size += htab->sizeof_reloc;
 		      if (bed->target_id == X86_64_ELF_DATA)
 			htab->elf.tlsdesc_plt = (bfd_vma) -1;
 		    }
@@ -2417,7 +2427,6 @@ _bfd_x86_elf_late_size_sections (bfd *output_bfd,
      so that R_{386,X86_64}_IRELATIVE entries come last.  */
   if (htab->elf.srelplt)
     {
-      htab->next_tls_desc_index = htab->elf.srelplt->reloc_count;
       htab->sgotplt_jump_table_size
 	= elf_x86_compute_jump_table_size (htab);
       htab->next_irelative_index = htab->elf.srelplt->reloc_count - 1;
@@ -4741,6 +4750,14 @@ _bfd_x86_elf_link_setup_gnu_properties
 	      htab->plt_second = sec;
 	    }
 	}
+
+      sec = bfd_make_section_anyway_with_flags
+	(dynobj, bed->rela_plts_and_copies_p ? ".rela.tls" : ".rel.tls",
+	 bed->dynamic_sec_flags | SEC_READONLY);
+      if (sec == NULL
+	  || !bfd_set_section_alignment (sec, bed->s->log_file_align))
+	return false;
+      htab->rel_tls_desc = sec;
 
       if (!info->no_ld_generated_unwind_info)
 	{

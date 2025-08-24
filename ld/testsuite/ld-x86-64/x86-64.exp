@@ -570,6 +570,8 @@ run_dump_test "pr33260-2"
 run_dump_test "pr33260-2-x32"
 run_dump_test "pr33292"
 run_dump_test "pr33292-x32"
+run_dump_test "pr28387"
+run_dump_test "pr28387-x32"
 
 if { ![skip_sframe_tests] } {
     run_dump_test "sframe-simple-1"

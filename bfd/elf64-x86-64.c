@@ -4627,7 +4627,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 				     + htab->elf.sgotplt->output_offset
 				     + offplt
 				     + htab->sgotplt_jump_table_size);
-		  sreloc = htab->elf.srelplt;
+		  sreloc = htab->rel_tls_desc;
 		  if (indx == 0)
 		    outrel.r_addend = relocation - _bfd_x86_elf_dtpoff_base (info);
 		  else

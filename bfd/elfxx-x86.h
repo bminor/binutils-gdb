@@ -650,13 +650,13 @@ struct elf_x86_link_hash_table
   /* The index of the next R_X86_64_IRELATIVE entry in .rela.plt.  */
   bfd_vma next_irelative_index;
 
+  /* The .rela.tls/.rel.tls section for R_386_TLS_DESC or R_X86_64_TLSDESC
+     relocation.  */
+  asection *rel_tls_desc;
+
   /* The (unloaded but important) .rel.plt.unloaded section on VxWorks.
      This is used for i386 only.  */
   asection *srelplt2;
-
-  /* The index of the next unused R_386_TLS_DESC slot in .rel.plt.  This
-     is only used for i386.  */
-  bfd_vma next_tls_desc_index;
 
   /* DT_RELR bitmap.  */
   struct elf_dt_relr_bitmap dt_relr_bitmap;
@@ -871,6 +871,9 @@ extern bool _bfd_elf_x86_size_relative_relocs
 extern bool _bfd_elf_x86_finish_relative_relocs
   (struct bfd_link_info *) ATTRIBUTE_HIDDEN;
 
+extern asection * _bfd_elf_x86_get_reloc_section
+  (bfd *, const char *) ATTRIBUTE_HIDDEN;
+
 extern void _bfd_elf32_write_addend 
   (bfd *, uint64_t, void *) ATTRIBUTE_HIDDEN;
 extern void _bfd_elf64_write_addend
@@ -994,6 +997,8 @@ extern void _bfd_x86_elf_link_report_tls_transition_error
   _bfd_elf_x86_size_relative_relocs
 #define elf_backend_finish_relative_relocs \
   _bfd_elf_x86_finish_relative_relocs
+#define elf_backend_get_reloc_section \
+  _bfd_elf_x86_get_reloc_section
 #define elf_backend_use_mmap true
 
 #define ELF_P_ALIGN ELF_MINPAGESIZE

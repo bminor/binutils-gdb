@@ -3163,7 +3163,6 @@ elf_i386_relocate_section (bfd *output_bfd,
 
 	      if (GOT_TLS_GDESC_P (tls_type))
 		{
-		  bfd_byte *loc;
 		  outrel.r_info = ELF32_R_INFO (indx, R_386_TLS_DESC);
 		  BFD_ASSERT (htab->sgotplt_jump_table_size + offplt + 8
 			      <= htab->elf.sgotplt->size);
@@ -3171,13 +3170,8 @@ elf_i386_relocate_section (bfd *output_bfd,
 				     + htab->elf.sgotplt->output_offset
 				     + offplt
 				     + htab->sgotplt_jump_table_size);
-		  sreloc = htab->elf.srelplt;
-		  loc = sreloc->contents;
-		  loc += (htab->next_tls_desc_index++
-			  * sizeof (Elf32_External_Rel));
-		  BFD_ASSERT (loc + sizeof (Elf32_External_Rel)
-			      <= sreloc->contents + sreloc->size);
-		  bfd_elf32_swap_reloc_out (output_bfd, &outrel, loc);
+		  sreloc = htab->rel_tls_desc;
+		  elf_append_rel (output_bfd, sreloc, &outrel);
 		  if (indx == 0)
 		    {
 		      BFD_ASSERT (! unresolved_reloc);

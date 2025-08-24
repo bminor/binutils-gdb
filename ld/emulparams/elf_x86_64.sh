@@ -34,6 +34,8 @@ OTHER_PLT_SECTIONS="
 .plt.got      ${RELOCATING-0} : { *(.plt.got) }
 .plt.sec      ${RELOCATING-0} : { *(.plt.sec) }
 "
+OTHER_GOT_RELOC_SECTIONS="
+  .rela.tls	${RELOCATING-0} : { *(.rela.tls) }"
 
 if [ "x${host}" = "x${target}" ]; then
   case " $EMULATION_LIBPATH " in
