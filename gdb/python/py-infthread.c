@@ -366,18 +366,9 @@ thpy_repr (PyObject *self)
 PyObject *
 gdbpy_create_ptid_object (ptid_t ptid)
 {
-  int pid;
-  long lwp;
-  ULONGEST tid;
-  PyObject *ret;
-
-  ret = PyTuple_New (3);
-  if (!ret)
-    return NULL;
-
-  pid = ptid.pid ();
-  lwp = ptid.lwp ();
-  tid = ptid.tid ();
+  int pid = ptid.pid ();
+  long lwp = ptid.lwp ();
+  ULONGEST tid = ptid.tid ();
 
   gdbpy_ref<> pid_obj = gdb_py_object_from_longest (pid);
   if (pid_obj == nullptr)
@@ -389,12 +380,16 @@ gdbpy_create_ptid_object (ptid_t ptid)
   if (tid_obj == nullptr)
     return nullptr;
 
-  /* Note that these steal references, hence the use of 'release'.  */
-  PyTuple_SET_ITEM (ret, 0, pid_obj.release ());
-  PyTuple_SET_ITEM (ret, 1, lwp_obj.release ());
-  PyTuple_SET_ITEM (ret, 2, tid_obj.release ());
+  gdbpy_ref<> ret (PyTuple_New (3));
+  if (ret == nullptr)
+    return nullptr;
 
-  return ret;
+  /* Note that these steal references, hence the use of 'release'.  */
+  PyTuple_SET_ITEM (ret.get (), 0, pid_obj.release ());
+  PyTuple_SET_ITEM (ret.get (), 1, lwp_obj.release ());
+  PyTuple_SET_ITEM (ret.get (), 2, tid_obj.release ());
+
+  return ret.release ();
 }
 
 /* Implementation of gdb.selected_thread () -> gdb.InferiorThread.
