@@ -655,7 +655,7 @@ move_section_contents (bfd *abfd,
 	{
 	  /* Different chunk, so move pointer. */
 	  d = find_chunk (abfd, chunk_number, must_write);
-	  if (!d)
+	  if (!d && must_write)
 	    return false;
 	  prev_number = chunk_number;
 	}
