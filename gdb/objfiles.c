@@ -189,7 +189,7 @@ objfile_lookup_static_link (struct objfile *objfile,
 
 static void
 add_to_objfile_sections (struct bfd *abfd, struct bfd_section *asect,
-			      struct objfile *objfile, int force)
+			 struct objfile *objfile, int force)
 {
   struct obj_section *section;
 
