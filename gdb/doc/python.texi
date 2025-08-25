@@ -8927,11 +8927,72 @@ it is invalid at the time the method is called, or the attribute
 accessed.
 @end defun
 
+@defun Corefile.mapped_files ()
+Return a list of @code{gdb.CorefileMappedFile} (see below) objects
+representing files that were mapped into the process when the core
+file was created.  This information is read from the @samp{NT_FILE}
+core file note on Linux.  Not every target supports accessing this
+information, for targets without support, an empty list will be
+returned.
+@end defun
+
 One may add arbitrary attributes to @code{gdb.Corefile} objects in the
 usual Python way.  This is useful if, for example, one needs to do
 some extra record keeping associated with the corefile.
 @xref{choosing attribute names}, for guidance on selecting a suitable
 name for new attributes.
+
+The @code{Corefile.mapped_files ()} method returns a list of
+@code{gdb.CorefileMappedFile} objects.  Each of these objects
+represents a file that was fully, or partially, mapped into the
+processes address space when the core file was created.
+
+A @code{gdb.CorefileMappedFile} object has the following attributes:
+
+@defvar CorefileMappedFile.filename
+This read only attribute contains a non-empty string, the file name of
+the mapped file.
+@end defvar
+
+@defvar CorefileMappedFile.build_id
+This read only attribute contains a non-empty string or @code{None}.
+This is the build-id of the mapped file extracted from the core file,
+or @code{None} if there was no build-id, or @value{GDBN} was unable to
+extract the build-id.
+@end defvar
+
+@defvar CorefileMappedFile.is_main_executable
+This read only attribute is @code{True} if @value{GDBN} believes this
+mapping represents the main executable for which this core file was
+created.  This will be @code{False} for all other mappings.
+@end defvar
+
+@defvar CorefileMappedFile.regions
+This read only attribute contains a list of
+@code{gdb.CorefileMappedFileRegion} objects.  Each of these objects
+describes a region of the file that was mapped into the process when
+the core file was created, further details are given below.
+@end defvar
+
+The @code{gdb.CorefileMappedFileRegion} object describes which part of
+a file that was mapped into a process when the core file was created.
+
+A @code{gdb.CorefileMappedFile} object has the following attributes:
+
+@defvar CorefileMappedFileRegion.start
+This read only attribute contains the start address of this mapping
+within the inferior.
+@end defvar
+
+@defvar CorefileMappedFileRegion.end
+This read only attribute contains end address of this mapping within
+the inferior.
+@end defvar
+
+@defvar CorefileMappedFileRegion.file_offset
+This read only attribute contains the offset within the mapped file
+for this mapping.
+@end defvar
 
 @node Python Auto-loading
 @subsection Python Auto-loading

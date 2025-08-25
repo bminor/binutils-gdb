@@ -176,3 +176,61 @@ with_test_prefix "remove second inferior" {
     gdb_test "python print(core1.is_valid())" "^True" \
 	"check inferior 1 core file is still valid"
 }
+
+# Test the Corefile.mapped_files() API.  The Python script that is
+# sourced here implements 'info proc mappings' in Python using the
+# mapped_files API.  The output from the built-in command, and the
+# Python command should be identical.
+with_test_prefix "test mapped files data" {
+    clean_restart
+
+    set remote_python_file \
+	[gdb_remote_download host ${srcdir}/${subdir}/${testfile}.py]
+
+    # Load the Python script into GDB.
+    gdb_test "source $remote_python_file" "^Success" \
+	"source python script"
+
+    # Load the core file.
+    gdb_test "core-file $corefile" ".*" \
+	"load core file"
+
+    # Two files to write the output to.
+    set out_1 [standard_output_file ${gdb_test_file_name}-out-1.txt]
+    set out_2 [standard_output_file ${gdb_test_file_name}-out-2.txt]
+
+    # Run the built-in command, then the new Python command, capture
+    # the output.
+    gdb_test "pipe info proc mappings | tee $out_1" ".*" \
+	"capture built-in mappings output"
+    gdb_test "pipe info proc py-mappings | tee $out_2" ".*" \
+	"capture Python based mappings data"
+
+    # Check the output is identical.
+    gdb_test "shell diff -s $out_1 $out_2" \
+	"Files \[^\r\n\]+-out-1.txt and \[^\r\n\]+-out-2.txt are identical" \
+	"diff input and output one"
+
+    # Check build-ids within the core file mapping data.
+    gdb_test "check-build-ids" "^PASS"
+
+    # Check the is_main_executable flag in the mapping data.
+    gdb_test "check-main-executable" "^PASS"
+
+    # Check that the mapped files "list" is actually an immutable
+    # tuple.
+    gdb_test_no_output "python core = gdb.selected_inferior().corefile"
+    gdb_test_no_output "python mapped_files = core.mapped_files()"
+    gdb_test "python print(type(mapped_files))" \
+	"^<class 'tuple'>"
+    gdb_test "python mapped_files\[0\] = None" \
+	"'tuple' object does not support item assignment"
+    gdb_test "python print(mapped_files\[0\] is None)" "^False"
+
+    # And same for the list of regions for a mapped file.
+    gdb_test_no_output "python regions = mapped_files\[0\].regions"
+    gdb_test "python print(type(regions))" \
+	"^<class 'tuple'>"
+    gdb_test "python regions\[0\] = None" \
+	"'tuple' object does not support item assignment"
+}

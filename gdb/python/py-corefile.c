@@ -21,6 +21,8 @@
 #include "progspace.h"
 #include "observable.h"
 #include "inferior.h"
+#include "gdbcore.h"
+#include "gdbsupport/rsp-low.h"
 
 /* A gdb.Corefile object.  */
 
@@ -37,10 +39,60 @@ struct corefile_object
   /* Dictionary holding user-added attributes.  This is the __dict__
      attribute of the object.  This is an owning reference.  */
   PyObject *dict;
+
+  /* A Tuple of gdb.CorefileMappedFile objects.  This tuple is only created
+     the first time the user calls gdb.Corefile.mapped_files(), the result
+     is cached here.  If this pointer is not NULL then this is an owning
+     pointer (i.e. this owns a reference to the Tuple).  */
+  PyObject *mapped_files;
 };
 
 extern PyTypeObject corefile_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("corefile_object");
+
+/* A gdb.CorefileMapped object.  */
+
+struct corefile_mapped_file_object
+{
+  PyObject_HEAD
+
+  /* The name of a file that was mapped when the core file was created.
+     This is a 'str' object.  */
+  PyObject *filename;
+
+  /* The build-id of a file that was mapped when the core file was
+     created.  This is either a 'str' if the file had a build-id, or
+     'None' if there was no build-id for this file.  */
+  PyObject *build_id;
+
+  /* A List of gdb.CorefileMappedFileRegion objects.  */
+  PyObject *regions;
+
+  /* True if this represents the main executable from which the core file
+     was created.  */
+  bool is_main_exec_p;
+};
+
+extern PyTypeObject corefile_mapped_file_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("corefile_mapped_file_object");
+
+/* A gdb.CorefileMappedFileRegion object.  */
+
+struct corefile_mapped_file_region_object
+{
+  PyObject_HEAD
+
+  /* The start and end addresses for this mapping, these are addresses
+     within the inferior's address space.  */
+  CORE_ADDR start;
+  CORE_ADDR end;
+
+  /* The offset within the mapped file for this mapping.  */
+  ULONGEST file_offset;
+};
+
+extern PyTypeObject corefile_mapped_file_region_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("corefile_mapped_file_region_object");
 
 /* Clear the inferior pointer in a Corefile object OBJ when an inferior is
    deleted.  */
@@ -94,6 +146,7 @@ gdbpy_core_file_from_inferior (inferior *inf)
 	 cfpy_dealloc will be called, which requires that the 'inferior' be
 	 set to NULL.  */
       object->inferior = nullptr;
+      object->mapped_files = nullptr;
       object->dict = PyDict_New ();
       if (object->dict == nullptr)
 	return nullptr;
@@ -168,6 +221,123 @@ cfpy_is_valid (PyObject *self, PyObject *args)
   Py_RETURN_TRUE;
 }
 
+/* Implement gdb.Corefile.mapped_files ().  Return a List of
+   gdb.CorefileMappedFile objects.  The list is created the first time
+   this method is called, and then cached within the gdb.Corefile object,
+   future calls just return a reference to the same list.  */
+
+static PyObject *
+cfpy_mapped_files (PyObject *self, PyObject *args)
+{
+  corefile_object *obj = (corefile_object *) self;
+
+  CFPY_REQUIRE_VALID (obj);
+
+  /* If we have already created the List then just return another reference
+     to the existing list.  */
+  if (obj->mapped_files != nullptr)
+    {
+      Py_INCREF (obj->mapped_files);
+      return obj->mapped_files;
+    }
+
+  /* Get all the mapping data from GDB.  */
+  std::vector<core_mapped_file> mapped_files;
+  try
+    {
+      mapped_files
+	= gdb_read_core_file_mappings (obj->inferior->arch (),
+				       current_program_space->core_bfd ());
+    }
+  catch (const gdb_exception &except)
+    {
+      return gdbpy_handle_gdb_exception (nullptr, except);
+    }
+
+  /* Create a new list to hold the results.  */
+  gdbpy_ref<> tuple (PyTuple_New (mapped_files.size ()));
+  if (tuple == nullptr)
+    return nullptr;
+
+  /* Create each gdb.CorefileMappedFile object.  */
+  Py_ssize_t tuple_idx = 0;
+  for (const core_mapped_file &file : mapped_files)
+    {
+      /* The filename 'str' object.  */
+      gdbpy_ref<> filename
+	= host_string_to_python_string (file.filename.c_str ());
+      if (filename == nullptr)
+	return nullptr;
+
+      /* The build-id object.  Either a 'str' or 'None'.  */
+      gdbpy_ref<> build_id;
+      if (file.build_id != nullptr)
+	{
+	  std::string hex_form = bin2hex (file.build_id->data,
+					  file.build_id->size);
+
+	  build_id
+	    = host_string_to_python_string (hex_form.c_str ());
+	  if (build_id == nullptr)
+	    return nullptr;
+	}
+      else
+	build_id = gdbpy_ref<>::new_reference (Py_None);
+
+      /* List to hold all the gdb.CorefileMappedFileRegion objects.  */
+      gdbpy_ref<> regions (PyTuple_New (file.regions.size ()));
+      if (regions == nullptr)
+	return nullptr;
+
+      /* Create all the gdb.CorefileMappedFileRegion objects.  */
+      Py_ssize_t regions_idx = 0;
+      for (const core_mapped_file::region &r : file.regions)
+	{
+	  /* Actually create the object.  */
+	  gdbpy_ref<corefile_mapped_file_region_object> region_obj
+	    (PyObject_New (corefile_mapped_file_region_object,
+			   &corefile_mapped_file_region_object_type));
+	  if (region_obj == nullptr)
+	    return nullptr;
+
+	  /* Initialise the object.  */
+	  region_obj->start = r.start;
+	  region_obj->end = r.end;
+	  region_obj->file_offset = r.file_ofs;
+
+	  /* Add to the gdb.CorefileMappedFileRegion list.  */
+	  if (PyTuple_SetItem (regions.get (), regions_idx++,
+			       (PyObject *) region_obj.release ()) < 0)
+	    return nullptr;
+	}
+
+      /* Actually create the gdb.CorefileMappedFile object.  */
+      gdbpy_ref<corefile_mapped_file_object> entry
+	(PyObject_New (corefile_mapped_file_object,
+		       &corefile_mapped_file_object_type));
+      if (entry == nullptr)
+	return nullptr;
+
+      /* Initialise the object.  */
+      entry->filename = filename.release ();
+      entry->build_id = build_id.release ();
+      entry->regions = regions.release ();
+      entry->is_main_exec_p = file.is_main_exec;
+
+      /* Add to the gdb.CorefileMappedFile list.  */
+      if (PyTuple_SetItem (tuple.get (), tuple_idx++,
+			   (PyObject *) entry.release ()) < 0)
+	return nullptr;
+    }
+
+  /* No errors.  Move the reference currently in LIST into the Corefile
+     object itself.  Then create a new reference and hand this back to the
+     user.  */
+  obj->mapped_files = tuple.release ();
+  Py_INCREF (obj->mapped_files);
+  return obj->mapped_files;
+}
+
 /* Callback from gdb::observers::core_file_changed.  The core file in
    PSPACE has been changed.  */
 
@@ -191,6 +361,7 @@ cfpy_dealloc (PyObject *obj)
   gdb_assert (corefile->inferior == nullptr);
 
   Py_XDECREF (corefile->dict);
+  Py_XDECREF (corefile->mapped_files);
 
   Py_TYPE (obj)->tp_free (obj);
 }
@@ -215,6 +386,114 @@ cfpy_repr (PyObject *self)
 
 
 
+/* Called when a gdb.CorefileMappedFile is destroyed.  */
+
+static void
+cfmfpy_dealloc (PyObject *obj)
+{
+  corefile_mapped_file_object *mapped_file
+    = (corefile_mapped_file_object *) obj;
+
+  Py_XDECREF (mapped_file->filename);
+  Py_XDECREF (mapped_file->build_id);
+  Py_XDECREF (mapped_file->regions);
+
+  Py_TYPE (obj)->tp_free (obj);
+}
+
+/* Read the gdb.CorefileMappedFile.filename attribute.  */
+
+static PyObject *
+cfmfpy_get_filename (PyObject *self, void *closure)
+{
+  corefile_mapped_file_object *obj
+    = (corefile_mapped_file_object *) self;
+
+  gdb_assert (obj->filename != nullptr);
+
+  Py_INCREF (obj->filename);
+  return obj->filename;
+}
+
+/* Read the gdb.CorefileMappedFile.build_id attribute.  */
+
+static PyObject *
+cfmfpy_get_build_id (PyObject *self, void *closure)
+{
+  corefile_mapped_file_object *obj
+    = (corefile_mapped_file_object *) self;
+
+  gdb_assert (obj->build_id != nullptr);
+
+  Py_INCREF (obj->build_id);
+  return obj->build_id;
+}
+
+/* Read the gdb.CorefileMappedFile.regions attribute.  */
+
+static PyObject *
+cfmfpy_get_regions (PyObject *self, void *closure)
+{
+  corefile_mapped_file_object *obj
+    = (corefile_mapped_file_object *) self;
+
+  gdb_assert (obj->regions != nullptr);
+
+  Py_INCREF (obj->regions);
+  return obj->regions;
+}
+
+/* Read the gdb.CorefileMappedFile.is_main_executable attribute.  */
+
+static PyObject *
+cfmf_is_main_exec (PyObject *self, void *closure)
+{
+  corefile_mapped_file_object *obj
+    = (corefile_mapped_file_object *) self;
+
+  if (obj->is_main_exec_p)
+    Py_RETURN_TRUE;
+  else
+    Py_RETURN_FALSE;
+}
+
+
+
+/* Read the gdb.CorefileMappedFileRegion.start attribute.  */
+
+static PyObject *
+cfmfrpy_get_start (PyObject *self, void *closure)
+{
+  corefile_mapped_file_region_object *obj
+    = (corefile_mapped_file_region_object *) self;
+
+  return gdb_py_object_from_ulongest (obj->start).release ();
+}
+
+/* Read the gdb.CorefileMappedFileRegion.end attribute.  */
+
+static PyObject *
+cfmfrpy_get_end (PyObject *self, void *closure)
+{
+  corefile_mapped_file_region_object *obj
+    = (corefile_mapped_file_region_object *) self;
+
+  return gdb_py_object_from_ulongest (obj->end).release ();
+}
+
+/* Read the gdb.CorefileMappedFileRegion.file_offset attribute.  */
+
+static PyObject *
+cfmfrpy_get_file_offset (PyObject *self, void *closure)
+{
+  corefile_mapped_file_region_object *obj
+    = (corefile_mapped_file_region_object *) self;
+
+  return gdb_py_object_from_ulongest (obj->file_offset).release ();
+}
+
+
+
 static int
 gdbpy_initialize_corefile ()
 {
@@ -222,6 +501,12 @@ gdbpy_initialize_corefile ()
 					    "py-corefile");
 
   if (gdbpy_type_ready (&corefile_object_type) < 0)
+    return -1;
+
+  if (gdbpy_type_ready (&corefile_mapped_file_object_type) < 0)
+    return -1;
+
+  if (gdbpy_type_ready (&corefile_mapped_file_region_object_type) < 0)
     return -1;
 
   return 0;
@@ -245,6 +530,10 @@ static PyMethodDef corefile_object_methods[] =
   { "is_valid", cfpy_is_valid, METH_NOARGS,
     "is_valid () -> Boolean.\n\
 Return true if this Corefile is valid, false if not." },
+  { "mapped_files", cfpy_mapped_files, METH_NOARGS,
+    "mapped_files () -> List of mapping tuples.\n\
+Return a list of tuples.  Each tuple represents a mapping from the\
+core file." },
   { nullptr }
 };
 
@@ -285,6 +574,114 @@ PyTypeObject corefile_object_type =
   0,				  /* tp_descr_get */
   0,				  /* tp_descr_set */
   offsetof (corefile_object, dict), /* tp_dictoffset */
+  0,				  /* tp_init */
+  0,				  /* tp_alloc */
+  0,				  /* tp_new */
+};
+
+static gdb_PyGetSetDef corefile_mapped_file_object_getset[] =
+{
+  { "filename", cfmfpy_get_filename, nullptr,
+    "The filename of a CorefileMappedFile object.", nullptr },
+  { "build_id", cfmfpy_get_build_id, nullptr,
+    "The build-id of a CorefileMappedFile object or None.", nullptr },
+  { "regions", cfmfpy_get_regions, nullptr,
+    "The list of regions from a CorefileMappedFile object.", nullptr },
+  { "is_main_executable", cfmf_is_main_exec, nullptr,
+    "True for the main executable mapping, otherwise False.", nullptr },
+  { nullptr }
+};
+
+PyTypeObject corefile_mapped_file_object_type =
+{
+  PyVarObject_HEAD_INIT (NULL, 0)
+  "gdb.CorefileMappedFile",	  /*tp_name*/
+  sizeof (corefile_mapped_file_object),	/*tp_basicsize*/
+  0,				  /*tp_itemsize*/
+  cfmfpy_dealloc,		  /*tp_dealloc*/
+  0,				  /*tp_print*/
+  0,				  /*tp_getattr*/
+  0,				  /*tp_setattr*/
+  0,				  /*tp_compare*/
+  0,				  /*tp_repr*/
+  0,				  /*tp_as_number*/
+  0,				  /*tp_as_sequence*/
+  0,				  /*tp_as_mapping*/
+  0,				  /*tp_hash */
+  0,				  /*tp_call*/
+  0,				  /*tp_str*/
+  0,				  /*tp_getattro*/
+  0,				  /*tp_setattro*/
+  0,				  /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT,		  /*tp_flags*/
+  "GDB corefile mapped file object",	/* tp_doc */
+  0,				  /* tp_traverse */
+  0,				  /* tp_clear */
+  0,				  /* tp_richcompare */
+  0,				  /* tp_weaklistoffset */
+  0,				  /* tp_iter */
+  0,				  /* tp_iternext */
+  0,				  /* tp_methods */
+  0,				  /* tp_members */
+  corefile_mapped_file_object_getset,	/* tp_getset */
+  0,				  /* tp_base */
+  0,				  /* tp_dict */
+  0,				  /* tp_descr_get */
+  0,				  /* tp_descr_set */
+  0,				  /* tp_dictoffset */
+  0,				  /* tp_init */
+  0,				  /* tp_alloc */
+  0,				  /* tp_new */
+};
+
+static gdb_PyGetSetDef corefile_mapped_file_region_object_getset[] =
+{
+  { "start", cfmfrpy_get_start, nullptr,
+    "The start address of a CorefileMappedFileRegion object.", nullptr },
+  { "end", cfmfrpy_get_end, nullptr,
+    "The end address of a CorefileMappedFileRegion object.", nullptr },
+  { "file_offset", cfmfrpy_get_file_offset, nullptr,
+    "The file offset of a CorefileMappedFileRegion object.", nullptr },
+  { nullptr }
+};
+
+PyTypeObject corefile_mapped_file_region_object_type =
+{
+  PyVarObject_HEAD_INIT (NULL, 0)
+  "gdb.CorefileMappedFileRegion",  /*tp_name*/
+  sizeof (corefile_mapped_file_region_object),	/*tp_basicsize*/
+  0,				  /*tp_itemsize*/
+  0,				  /*tp_dealloc*/
+  0,				  /*tp_print*/
+  0,				  /*tp_getattr*/
+  0,				  /*tp_setattr*/
+  0,				  /*tp_compare*/
+  0,				  /*tp_repr*/
+  0,				  /*tp_as_number*/
+  0,				  /*tp_as_sequence*/
+  0,				  /*tp_as_mapping*/
+  0,				  /*tp_hash */
+  0,				  /*tp_call*/
+  0,				  /*tp_str*/
+  0,				  /*tp_getattro*/
+  0,				  /*tp_setattro*/
+  0,				  /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT,		  /*tp_flags*/
+  "GDB corefile mapped file region object",	/* tp_doc */
+  0,				  /* tp_traverse */
+  0,				  /* tp_clear */
+  0,				  /* tp_richcompare */
+  0,				  /* tp_weaklistoffset */
+  0,				  /* tp_iter */
+  0,				  /* tp_iternext */
+  0,				  /* tp_methods */
+  0,				  /* tp_members */
+  corefile_mapped_file_region_object_getset,	/* tp_getset */
+  0,				  /* tp_base */
+  0,				  /* tp_dict */
+  0,				  /* tp_descr_get */
+  0,				  /* tp_descr_set */
+  0,				  /* tp_dictoffset */
   0,				  /* tp_init */
   0,				  /* tp_alloc */
   0,				  /* tp_new */

@@ -87,7 +87,18 @@ qExecAndArgs
      has an attribute Corefile.filename, the file name of the loaded
      core file, and a method Corefile.is_valid(), which returns False
      when a Corefile object becomes invalid (e.g. when the core file
-     is unloaded).
+     is unloaded).  There is also Corefile.mapped_files() which
+     returns a list of CorefileMappedFile objects, representing files
+     that were mapped into the core file when it was created.
+
+  ** New gdb.CorefileMappedFile type representing a file that was
+     mapped when the core file was created.  Has read-only attributes
+     filename (string), build_id (string), is_main_executable
+     (boolean), and regions (list of CorefileMappedFileRegion objects).
+
+  ** New gdb.CorefileMappedFileRegion type, which represents a mapped
+     region of a file (see gdb.CorefileMappedFile above).  Has
+     read-only attributes start, end, and file_offset.
 
   ** New Inferior.corefile attribute.  This read only attribute
      contains the gdb.Corefile object if a core file is loaded into
