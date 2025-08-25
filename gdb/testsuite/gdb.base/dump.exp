@@ -107,14 +107,7 @@ set endian [get_endianness]
 # Now generate some dump files.
 
 proc make_dump_file { command msg } {
-  global gdb_prompt
-
-    gdb_test_multiple "${command}" "$msg" {
-	-re ".*\[Ee\]rror.*$gdb_prompt $"      { fail $msg }
-	-re ".*\[Ww\]arning.*$gdb_prompt $"    { fail $msg }
-	-re ".*\[Uu\]ndefined .*$gdb_prompt $" { fail $msg }
-	-re ".*$gdb_prompt $"                  { pass $msg }
-    }
+    gdb_test_no_output "${command}" "$msg"
 }
 
 make_dump_file "dump val [set intarr1.bin] intarray" \
