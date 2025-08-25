@@ -258,4 +258,47 @@ std::optional<core_target_mapped_file_info>
 core_target_find_mapped_file (const char *filename,
 			      std::optional<CORE_ADDR> addr);
 
+/* Type holding information about a single file mapped into the inferior
+   at the point when the core file was created.  Associates a build-id
+   with the list of regions the file is mapped into.  */
+struct core_mapped_file
+{
+  /* Type for a region of a file that was mapped into the inferior when
+     the core file was generated.  */
+  struct region
+  {
+    /* Constructor.   See member variables for argument descriptions.  */
+    region (CORE_ADDR start_, CORE_ADDR end_, CORE_ADDR file_ofs_)
+      : start (start_),
+	end (end_),
+	file_ofs (file_ofs_)
+    { /* Nothing.  */ }
+
+    /* The inferior address for the start of the mapped region.  */
+    CORE_ADDR start;
+
+    /* The inferior address immediately after the mapped region.  */
+    CORE_ADDR end;
+
+    /* The offset within the mapped file for this content.  */
+    CORE_ADDR file_ofs;
+  };
+
+  /* The filename as recorded in the core file.  */
+  std::string filename;
+
+  /* If not nullptr, then this is the build-id associated with this
+     file.  */
+  const bfd_build_id *build_id = nullptr;
+
+  /* All the mapped regions of this file.  */
+  std::vector<region> regions;
+
+  /* True if this is the main executable.  */
+  bool is_main_exec = false;
+};
+
+extern std::vector<core_mapped_file> gdb_read_core_file_mappings
+  (struct gdbarch *gdbarch, struct bfd *cbfd);
+
 #endif /* GDB_GDBCORE_H */

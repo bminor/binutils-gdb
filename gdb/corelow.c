@@ -366,108 +366,27 @@ core_target::core_target ()
 void
 core_target::build_file_mappings ()
 {
-  /* Type holding information about a single file mapped into the inferior
-     at the point when the core file was created.  Associates a build-id
-     with the list of regions the file is mapped into.  */
-  struct mapped_file
-  {
-    /* Type for a region of a file that was mapped into the inferior when
-       the core file was generated.  */
-    struct region
-    {
-      /* Constructor.   See member variables for argument descriptions.  */
-      region (CORE_ADDR start_, CORE_ADDR end_, CORE_ADDR file_ofs_)
-	: start (start_),
-	  end (end_),
-	  file_ofs (file_ofs_)
-      { /* Nothing.  */ }
-
-      /* The inferior address for the start of the mapped region.  */
-      CORE_ADDR start;
-
-      /* The inferior address immediately after the mapped region.  */
-      CORE_ADDR end;
-
-      /* The offset within the mapped file for this content.  */
-      CORE_ADDR file_ofs;
-    };
-
-    /* If not nullptr, then this is the build-id associated with this
-       file.  */
-    const bfd_build_id *build_id = nullptr;
-
-    /* If true then we have seen multiple different build-ids associated
-       with the same filename.  The build_id field will have been set back
-       to nullptr, and we should not set build_id in future.  */
-    bool ignore_build_id_p = false;
-
-    /* All the mapped regions of this file.  */
-    std::vector<region> regions;
-  };
-
   gdb::unordered_map<std::string, struct bfd *> bfd_map;
   gdb::unordered_set<std::string> unavailable_paths;
 
   /* All files mapped into the core file.  The key is the filename.  */
-  gdb::unordered_map<std::string, mapped_file> mapped_files;
+  std::vector<core_mapped_file> mapped_files
+    = gdb_read_core_file_mappings (m_core_gdbarch,
+				   current_program_space->core_bfd ());
 
-  /* See linux_read_core_file_mappings() in linux-tdep.c for an example
-     read_core_file_mappings method.  */
-  gdbarch_read_core_file_mappings (m_core_gdbarch,
-				   current_program_space->core_bfd (),
-
-    /* After determining the number of mappings, read_core_file_mappings
-       will invoke this lambda.  */
-    [&] (ULONGEST)
-      {
-      },
-
-    /* read_core_file_mappings will invoke this lambda for each mapping
-       that it finds.  */
-    [&] (int num, ULONGEST start, ULONGEST end, ULONGEST file_ofs,
-	 const char *filename, const bfd_build_id *build_id)
-      {
-	/* Architecture-specific read_core_mapping methods are expected to
-	   weed out non-file-backed mappings.  */
-	gdb_assert (filename != nullptr);
-
-	/* Add this mapped region to the data for FILENAME.  */
-	mapped_file &file_data = mapped_files[filename];
-	file_data.regions.emplace_back (start, end, file_ofs);
-	if (build_id != nullptr && !file_data.ignore_build_id_p)
-	  {
-	    if (file_data.build_id == nullptr)
-	      file_data.build_id = build_id;
-	    else if (!build_id_equal (build_id, file_data.build_id))
-	      {
-		warning (_("Multiple build-ids found for %ps"),
-			 styled_string (file_name_style.style (), filename));
-		file_data.build_id = nullptr;
-		file_data.ignore_build_id_p = true;
-	      }
-	  }
-      });
-
-  /* Get the build-id of the core file.  */
-  const bfd_build_id *core_build_id
-    = build_id_bfd_get (current_program_space->core_bfd ());
-
-  for (const auto &[filename, file_data] : mapped_files)
+  for (const core_mapped_file &file_data : mapped_files)
     {
-      /* If this mapped file has the same build-id as was discovered for
-	 the core-file itself, then we assume this is the main
-	 executable.  Record the filename as we can use this later.  */
-      if (file_data.build_id != nullptr
-	  && m_expected_exec_filename.empty ()
-	  && build_id_equal (file_data.build_id, core_build_id))
-	m_expected_exec_filename = filename;
+      /* If this mapped file is marked as the main executable then record
+	 the filename as we can use this later.  */
+      if (file_data.is_main_exec && m_expected_exec_filename.empty ())
+	m_expected_exec_filename = file_data.filename;
 
       /* Use exec_file_find() to do sysroot expansion.  It'll
 	 also strip the potential sysroot "target:" prefix.  If
 	 there is no sysroot, an equivalent (possibly more
 	 canonical) pathname will be provided.  */
       gdb::unique_xmalloc_ptr<char> expanded_fname
-	= exec_file_find (filename.c_str (), nullptr);
+	= exec_file_find (file_data.filename.c_str (), nullptr);
 
       bool build_id_mismatch = false;
       if (expanded_fname != nullptr && file_data.build_id != nullptr)
@@ -509,7 +428,7 @@ core_target::build_file_mappings ()
 	{
 	  abfd = find_objfile_by_build_id (current_program_space,
 					   file_data.build_id,
-					   filename.c_str ());
+					   file_data.filename.c_str ());
 
 	  if (abfd != nullptr)
 	    {
@@ -527,7 +446,7 @@ core_target::build_file_mappings ()
 	}
 
       std::vector<mem_range> ranges;
-      for (const mapped_file::region &region : file_data.regions)
+      for (const core_mapped_file::region &region : file_data.regions)
 	ranges.emplace_back (region.start, region.end - region.start);
 
       if (expanded_fname == nullptr
@@ -545,7 +464,7 @@ core_target::build_file_mappings ()
 	  bool content_is_in_core_file_p = true;
 
 	  /* Record all regions for this file as unavailable.  */
-	  for (const mapped_file::region &region : file_data.regions)
+	  for (const core_mapped_file::region &region : file_data.regions)
 	    {
 	      /* Check to see if the region is available within the core
 		 file.  */
@@ -577,33 +496,33 @@ core_target::build_file_mappings ()
 	  if (build_id_mismatch)
 	    {
 	      if (expanded_fname == nullptr
-		  || filename == expanded_fname.get ())
+		  || file_data.filename == expanded_fname.get ())
 		warning (_("File %ps doesn't match build-id from core-file "
 			   "during file-backed mapping processing"),
 			 styled_string (file_name_style.style (),
-					filename.c_str ()));
+					file_data.filename.c_str ()));
 	      else
 		warning (_("File %ps which was expanded to %ps, doesn't match "
 			   "build-id from core-file during file-backed "
 			   "mapping processing"),
 			 styled_string (file_name_style.style (),
-					filename.c_str ()),
+					file_data.filename.c_str ()),
 			 styled_string (file_name_style.style (),
 					expanded_fname.get ()));
 	    }
 	  else if (!content_is_in_core_file_p)
 	    {
 	      if (expanded_fname == nullptr
-		  || filename == expanded_fname.get ())
+		  || file_data.filename == expanded_fname.get ())
 		warning (_("Can't open file %ps during file-backed mapping "
 			   "note processing"),
 			 styled_string (file_name_style.style (),
-					filename.c_str ()));
+					file_data.filename.c_str ()));
 	      else
 		warning (_("Can't open file %ps which was expanded to %ps "
 			   "during file-backed mapping note processing"),
 			 styled_string (file_name_style.style (),
-					filename.c_str ()),
+					file_data.filename.c_str ()),
 			 styled_string (file_name_style.style (),
 					expanded_fname.get ()));
 	    }
@@ -617,7 +536,7 @@ core_target::build_file_mappings ()
 				    abfd.get ());
 
 	  /* Create sections for each mapped region.  */
-	  for (const mapped_file::region &region : file_data.regions)
+	  for (const core_mapped_file::region &region : file_data.regions)
 	    {
 	      /* Make new BFD section.  All sections have the same name,
 		 which is permitted by bfd_make_section_anyway().  */
@@ -653,7 +572,7 @@ core_target::build_file_mappings ()
 	      soname = gdb_bfd_read_elf_soname (actual_filename);
 	    }
 
-	  m_mapped_file_info.add (soname.get (), filename.c_str (),
+	  m_mapped_file_info.add (soname.get (), file_data.filename.c_str (),
 				  actual_filename, std::move (ranges),
 				  file_data.build_id);
 	}
@@ -2159,6 +2078,103 @@ mapped_file_info::lookup (const char *filename,
     }
 
   return {};
+}
+
+/* See gdbcore.h.  */
+
+std::vector<core_mapped_file>
+gdb_read_core_file_mappings (struct gdbarch *gdbarch, struct bfd *cbfd)
+{
+  std::vector<core_mapped_file> results;
+
+  /* A map entry used while building RESULTS.  */
+  struct map_entry
+  {
+    explicit map_entry (core_mapped_file *ptr)
+      : file_data (ptr)
+    { /* Nothing.  */ }
+
+    /* Points to an entry in RESULTS, this allows entries to be quickly
+       looked up and updated as new mappings are read.  */
+    core_mapped_file *file_data = nullptr;
+
+    /* If true then we have seen multiple different build-ids associated
+       with the filename of FILE_DATA.  The FILE_DATA->build_id field will
+       have been set to nullptr, and we should not set FILE_DATA->build_id
+       in future.  */
+    bool ignore_build_id_p = false;
+  };
+
+  /* All files mapped into the core file.  The key is the filename.  */
+  gdb::unordered_map<std::string, map_entry> mapped_files;
+
+  /* Get the build-id of the core file.  At least on Linux, this will be
+     the build-id for the main executable.  If other targets add the
+     gdbarch_read_core_file_mappings method, then it might turn out that
+     this logic is no longer true, in which case this might need to move
+     into the gdbarch_read_core_file_mappings method.  */
+  const bfd_build_id *core_build_id = build_id_bfd_get (cbfd);
+
+  /* See linux_read_core_file_mappings() in linux-tdep.c for an example
+     read_core_file_mappings method.  */
+  gdbarch_read_core_file_mappings (gdbarch, cbfd,
+    /* After determining the number of mappings, read_core_file_mappings
+       will invoke this lambda.  */
+    [&] (ULONGEST)
+      {
+      },
+
+    /* read_core_file_mappings will invoke this lambda for each mapping
+       that it finds.  */
+    [&] (int num, ULONGEST start, ULONGEST end, ULONGEST file_ofs,
+	 const char *filename, const bfd_build_id *build_id)
+      {
+	/* Architecture-specific read_core_mapping methods are expected to
+	   weed out non-file-backed mappings.  */
+	gdb_assert (filename != nullptr);
+
+	/* Add this mapped region to the data for FILENAME.  */
+	auto iter = mapped_files.find (filename);
+	if (iter == mapped_files.end ())
+	  {
+	    /* Create entry in results list.  */
+	    results.emplace_back ();
+
+	    /* The entry to be added to the lookup map.  */
+	    map_entry entry (&results.back ());
+	    entry.file_data->filename = filename;
+
+	    /* Add entry to the quick lookup map and update ITER.  */
+	    auto inserted_result
+	      = mapped_files.insert ({filename, std::move (entry)});
+	    gdb_assert (inserted_result.second);
+	    iter = inserted_result.first;
+	  }
+
+	core_mapped_file &file_data = *iter->second.file_data;
+	bool &ignore_build_id_p = iter->second.ignore_build_id_p;
+
+	file_data.regions.emplace_back (start, end, file_ofs);
+	if (build_id != nullptr && !ignore_build_id_p)
+	  {
+	    if (file_data.build_id == nullptr)
+	      file_data.build_id = build_id;
+	    else if (!build_id_equal (build_id, file_data.build_id))
+	      {
+		warning (_("Multiple build-ids found for %ps"),
+			 styled_string (file_name_style.style (), filename));
+		file_data.build_id = nullptr;
+		ignore_build_id_p = true;
+	      }
+	  }
+
+	if (build_id != nullptr
+	    && core_build_id != nullptr
+	    && build_id_equal (build_id, core_build_id))
+	  file_data.is_main_exec = true;
+      });
+
+  return results;
 }
 
 /* See gdbcore.h.  */
