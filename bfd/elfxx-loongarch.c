@@ -1388,7 +1388,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 	 false,					/* partial_inplace.  */
 	 0,					/* src_mask */
 	 0xffffffff,				/* dst_mask */
-	 false,					/* pcrel_offset */
+	 true,					/* pcrel_offset */
 	 BFD_RELOC_LARCH_32_PCREL,		/* bfd_reloc_code_real_type */
 	 reloc_sign_bits,			/* adjust_reloc_bits */
 	 NULL),					/* larch_reloc_type_name */
@@ -1580,7 +1580,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 	 false,					/* partial_inplace.  */
 	 0,					/* src_mask */
 	 0xffffffffffffffff,			/* dst_mask */
-	 false,					/* pcrel_offset */
+	 true,					/* pcrel_offset */
 	 BFD_RELOC_LARCH_64_PCREL,		/* bfd_reloc_code_real_type */
 	 NULL,					/* adjust_reloc_bits */
 	 NULL),					/* larch_reloc_type_name */
