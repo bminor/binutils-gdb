@@ -503,7 +503,12 @@ PyObject *gdbpy_create_lazy_string_object (CORE_ADDR address, long length,
 					   const char *encoding,
 					   struct type *type);
 PyObject *gdbpy_inferiors (PyObject *unused, PyObject *unused2);
-PyObject *gdbpy_create_ptid_object (ptid_t ptid);
+
+/* Return a reference to a new Python Tuple object representing a ptid_t.
+   The object is a tuple containing (pid, lwp, tid).  */
+
+extern gdbpy_ref<> gdbpy_create_ptid_object (ptid_t ptid);
+
 PyObject *gdbpy_selected_thread (PyObject *self, PyObject *args);
 PyObject *gdbpy_selected_inferior (PyObject *self, PyObject *args);
 PyObject *gdbpy_string_to_argv (PyObject *self, PyObject *args);

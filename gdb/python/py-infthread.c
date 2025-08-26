@@ -190,7 +190,7 @@ thpy_get_ptid (PyObject *self, void *closure)
 
   THPY_REQUIRE_VALID (thread_obj);
 
-  return gdbpy_create_ptid_object (thread_obj->thread->ptid);
+  return gdbpy_create_ptid_object (thread_obj->thread->ptid).release ();
 }
 
 /* Implement gdb.InferiorThread.ptid_string attribute.  */
@@ -361,9 +361,9 @@ thpy_repr (PyObject *self)
 			       target_pid_to_str (thr->ptid).c_str ());
 }
 
-/* Return a reference to a new Python object representing a ptid_t.
-   The object is a tuple containing (pid, lwp, tid). */
-PyObject *
+/* See python-internal.h.  */
+
+gdbpy_ref<>
 gdbpy_create_ptid_object (ptid_t ptid)
 {
   int pid = ptid.pid ();
@@ -389,7 +389,7 @@ gdbpy_create_ptid_object (ptid_t ptid)
   PyTuple_SET_ITEM (ret.get (), 1, lwp_obj.release ());
   PyTuple_SET_ITEM (ret.get (), 2, tid_obj.release ());
 
-  return ret.release ();
+  return ret;
 }
 
 /* Implementation of gdb.selected_thread () -> gdb.InferiorThread.
