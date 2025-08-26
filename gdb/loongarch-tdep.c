@@ -34,6 +34,33 @@
 #include "trad-frame.h"
 #include "user-regs.h"
 
+/* LoongArch frame cache structure.  */
+struct loongarch_frame_cache
+{
+  /* The program counter at the start of the function.  It is used to
+     identify this frame as a prologue frame.  */
+  CORE_ADDR func;
+
+  /* The stack pointer at the time this frame was created; i.e. the
+     caller's stack pointer when this function was called.  It is used
+     to identify this frame.  */
+  CORE_ADDR prev_sp;
+
+  CORE_ADDR pc;
+
+  int available_p;
+
+  /* This register stores the frame base of the frame.  */
+  int framebase_reg;
+
+  /* The framebase_offset is the distance from frame base to the prev_sp,
+     so the value of framebase_reg is just prev_sp - framebase_offset. */
+  int framebase_offset;
+
+  /* Saved register offsets.  */
+  trad_frame_saved_reg *saved_regs;
+};
+
 /* Fetch the instruction at PC.  */
 
 static insn_t
@@ -125,7 +152,7 @@ loongarch_insn_is_sc (insn_t insn)
 static CORE_ADDR
 loongarch_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
 			 CORE_ADDR limit_pc, const frame_info_ptr &this_frame,
-			 struct trad_frame_cache *this_cache)
+			 struct loongarch_frame_cache *this_cache)
 {
   CORE_ADDR cur_pc = start_pc, prologue_end = 0;
   int32_t sp = LOONGARCH_SP_REGNUM;
