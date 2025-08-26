@@ -158,6 +158,7 @@ loongarch_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
   CORE_ADDR cur_pc = start_pc, prologue_end = 0;
   int32_t sp = LOONGARCH_SP_REGNUM;
   int32_t fp = LOONGARCH_FP_REGNUM;
+  int32_t ra = LOONGARCH_RA_REGNUM;
   int32_t reg_value[32] = {0};
   int32_t reg_used[32] = {1, 0};
   int i;
@@ -168,6 +169,8 @@ loongarch_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
   for (i = 0; i < LOONGARCH_USED_NUM_GREGSET; i++)
     regs[i] = pv_register (i, 0);
 
+  pv_area stack (LOONGARCH_SP_REGNUM, gdbarch_addr_bit (gdbarch));
+
   while (cur_pc < limit_pc)
     {
       insn_t insn = loongarch_fetch_instruction (cur_pc);
@@ -176,6 +179,7 @@ loongarch_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
       int32_t rj = loongarch_decode_imm ("5:5", insn, 0);
       int32_t rk = loongarch_decode_imm ("10:5", insn, 0);
       int32_t si12 = loongarch_decode_imm ("10:12", insn, 1);
+      int32_t si14 = loongarch_decode_imm ("10:14", insn, 1);
       int32_t si20 = loongarch_decode_imm ("5:20", insn, 1);
 
       if ((insn & 0xffc00000) == 0x02c00000	/* addi.d sp,sp,si12  */
@@ -194,11 +198,21 @@ loongarch_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
 	       && rj == sp)
 	{
 	  prologue_end = cur_pc + insn_len;
+	  /* ra, fp, s0~s8 are saved by callee with sp as a base */
+	  if ((rd >= fp && rd <= fp + 9) || rd == ra)
+	    {
+	      stack.store (pv_add_constant (regs[sp], si12), register_size (gdbarch, rd), regs[rd]);
+	    }
 	}
       else if ((insn & 0xff000000) == 0x27000000 /* stptr.d rd,sp,si14  */
 	       && rj == sp)
 	{
 	  prologue_end = cur_pc + insn_len;
+	  /* ra, fp, s0~s8 are saved by callee with sp as a base */
+	  if ((rd >= fp && rd <= fp + 9) || rd == ra)
+	    {
+	      stack.store (pv_add_constant (regs[sp], si14), register_size (gdbarch, rd), regs[rd]);
+	    }
 	}
       else if ((insn & 0xfe000000) == 0x14000000) /* lu12i.w rd,si20  */
 	{
@@ -253,6 +267,16 @@ loongarch_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
       /* We're just out of luck.  We don't know where the frame is.  */
       this_cache->framebase_reg = -1;
       this_cache->framebase_offset = 0;
+    }
+
+  for (i = 0; i < LOONGARCH_USED_NUM_GREGSET; i++)
+    {
+      CORE_ADDR offset;
+
+      if (stack.find_reg (gdbarch, i, &offset))
+	{
+	  this_cache->saved_regs[i].set_addr (offset);
+	}
     }
 
   return prologue_end;
@@ -554,6 +578,7 @@ loongarch_frame_cache_1 (const frame_info_ptr &this_frame,
 			 struct loongarch_frame_cache *cache)
 {
   CORE_ADDR unwound_fp;
+  int reg;
 
   loongarch_analyze_prologue (this_frame, cache);
 
@@ -566,6 +591,13 @@ loongarch_frame_cache_1 (const frame_info_ptr &this_frame,
 
   cache->prev_sp = unwound_fp;
   cache->prev_sp += cache->framebase_offset;
+
+  /* Calculate actual addresses of saved registers using offsets
+     determined by loongarch_scan_prologue.  */
+  for (reg = 0; reg < gdbarch_num_regs (get_frame_arch (this_frame)); reg++)
+    if (cache->saved_regs[reg].is_addr ())
+      cache->saved_regs[reg].set_addr (cache->saved_regs[reg].addr ()
+				       + cache->prev_sp);
 
   cache->func = get_frame_func (this_frame);
 
