@@ -2654,8 +2654,7 @@ set_long_section_mode (bfd *output_bfd, bfd *input_bfd, enum long_section_name_h
    Returns TRUE upon success, FALSE otherwise.  */
 
 static bool
-copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch,
-	     bool target_defaulted)
+copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 {
   bfd_vma start;
   long symcount;
@@ -2806,7 +2805,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch,
       imach = 0;
     }
   if (!bfd_set_arch_mach (obfd, iarch, imach)
-      && (target_defaulted
+      && (ibfd->target_defaulted
 	  || bfd_get_arch (ibfd) != bfd_get_arch (obfd)))
     {
       if (bfd_get_arch (ibfd) == bfd_arch_unknown)
@@ -3609,8 +3608,7 @@ fail:
 static bool
 copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	      bool force_output_target,
-	      const bfd_arch_info_type *input_arch,
-	      bool target_defaulted)
+	      const bfd_arch_info_type *input_arch)
 {
   struct name_list
     {
@@ -3759,8 +3757,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	ok_object = false;
       if (ok_object)
 	{
-	  ok = copy_object (this_element, output_element, input_arch,
-			    target_defaulted);
+	  ok = copy_object (this_element, output_element, input_arch);
 
 	  if (!ok && bfd_get_arch (this_element) == bfd_arch_unknown)
 	    /* Try again as an unknown object file.  */
@@ -3861,8 +3858,6 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
   char **core_matching;
   off_t size = get_file_size (input_filename);
   const char *target = input_target;
-  bool target_defaulted = (!input_target
-			   || strcmp (input_target, "default") == 0);
 
   if (size < 1)
     {
@@ -3967,7 +3962,7 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
 	}
 
       if (!copy_archive (ibfd, obfd, output_target, force_output_target,
-			 input_arch, target_defaulted))
+			 input_arch))
 	status = 1;
       return;
     }
@@ -4048,7 +4043,7 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
       if (ibfd->lto_type == lto_slim_ir_object)
 	ok_object = false;
       if (ok_object
-	  ? !copy_object (ibfd, obfd, input_arch, target_defaulted)
+	  ? !copy_object (ibfd, obfd, input_arch)
 	  : !copy_unknown_file (ibfd, obfd,
 				in_stat->st_size, in_stat->st_mode))
 	status = 1;
