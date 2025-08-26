@@ -1567,3 +1567,33 @@ if { ![is_xcoff_format] } {
 }
 
 run_dump_test "rename-section-01"
+
+proc objcopy_tek2bin {} {
+    global OBJCOPY
+    global OBJDUMP
+    global srcdir
+    global subdir
+
+    set tek $srcdir/$subdir/tek2.obj
+    set out tmpdir/tek2bin
+    if [isremote host] {
+	set tek [remote_download host $tek]
+	set out tek2bin
+    }
+
+    set got [binutils_run $OBJCOPY "-O binary $tek $out"]
+    if ![string equal "" $got] then {
+	send_log "$got\n"
+	fail "objcopy tek2bin"
+    } else {
+	set got [binutils_run $OBJDUMP "-s -b binary $out"]
+	if {![regexp ".* 0000 000031 .*" $got]} {
+	    fail "objcopy tek2bin (objdump)"
+	} else {
+	    pass "objcopy tek2bin"
+	}
+    }
+    remote_file host delete $out
+}
+
+objcopy_tek2bin

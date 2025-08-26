@@ -1013,8 +1013,8 @@ tek1.obj:
 *: no symbols
 
 tek2.obj:
-00000001 D _binary_x_end
-00000001 A _binary_x_size
+00000003 D _binary_x_end
+00000003 A _binary_x_size
 00000000 D _binary_x_start
 } $got] {
 	fail $testname
