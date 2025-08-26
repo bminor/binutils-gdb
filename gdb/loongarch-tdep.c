@@ -26,6 +26,7 @@
 #include "gdbcore.h"
 #include "linux-record.h"
 #include "loongarch-tdep.h"
+#include "prologue-value.h"
 #include "record.h"
 #include "record-full.h"
 #include "reggroups.h"
@@ -159,6 +160,13 @@ loongarch_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
   int32_t fp = LOONGARCH_FP_REGNUM;
   int32_t reg_value[32] = {0};
   int32_t reg_used[32] = {1, 0};
+  int i;
+
+  /* Track 32 GPR, ORIG_A0, PC, BADV in prologue.  */
+  pv_t regs[LOONGARCH_USED_NUM_GREGSET];
+
+  for (i = 0; i < LOONGARCH_USED_NUM_GREGSET; i++)
+    regs[i] = pv_register (i, 0);
 
   while (cur_pc < limit_pc)
     {
@@ -174,11 +182,13 @@ loongarch_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
 	  && rd == sp && rj == sp && si12 < 0)
 	{
 	  prologue_end = cur_pc + insn_len;
+	  regs[rd] = pv_add_constant (regs[rj], si12);
 	}
       else if ((insn & 0xffc00000) == 0x02c00000 /* addi.d fp,sp,si12  */
 	       && rd == fp && rj == sp && si12 > 0)
 	{
 	  prologue_end = cur_pc + insn_len;
+	  regs[rd] = pv_add_constant (regs[rj], si12);
 	}
       else if ((insn & 0xffc00000) == 0x29c00000 /* st.d rd,sp,si12  */
 	       && rj == sp)
@@ -222,6 +232,28 @@ loongarch_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
 
   if (prologue_end == 0)
     prologue_end = cur_pc;
+
+  if (this_cache == NULL)
+    return prologue_end;
+
+  if (pv_is_register (regs[LOONGARCH_FP_REGNUM], LOONGARCH_SP_REGNUM))
+    {
+      /* Frame pointer is fp.  */
+      this_cache->framebase_reg = LOONGARCH_FP_REGNUM;
+      this_cache->framebase_offset = -regs[LOONGARCH_FP_REGNUM].k;
+    }
+  else if (pv_is_register (regs[LOONGARCH_SP_REGNUM], LOONGARCH_SP_REGNUM))
+    {
+      /* Try the stack pointer.  */
+      this_cache->framebase_reg = LOONGARCH_SP_REGNUM;
+      this_cache->framebase_offset = -regs[LOONGARCH_SP_REGNUM].k;
+    }
+  else
+    {
+      /* We're just out of luck.  We don't know where the frame is.  */
+      this_cache->framebase_reg = -1;
+      this_cache->framebase_offset = 0;
+    }
 
   return prologue_end;
 }
@@ -573,6 +605,16 @@ static enum unwind_stop_reason
 loongarch_frame_unwind_stop_reason (const frame_info_ptr &this_frame,
 				    void **this_cache)
 {
+  struct loongarch_frame_cache *cache
+    = loongarch_frame_cache (this_frame, this_cache);
+
+  if (!cache->available_p)
+    return UNWIND_UNAVAILABLE;
+
+  /* We've hit a wall, stop.  */
+  if (cache->prev_sp == 0)
+    return UNWIND_OUTERMOST;
+
   return UNWIND_NO_REASON;
 }
 
