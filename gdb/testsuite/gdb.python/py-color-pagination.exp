@@ -67,15 +67,22 @@ proc test_pagination { type mode } {
 	    exp_continue
 	}
 
-	-re "^(${::any_color}?)(${::any_color})$::str" {
+	-re "^(${::any_color})(${::any_color})$::str" {
 	    # After a continuation prompt GDB will restore the previous
 	    # color, and then we immediately switch to a new color.
 	    set restored_color $expect_out(1,string)
-	    if { $restored_color ne ""
-		 && $restored_color ne $expected_restore_color } {
+	    if { $restored_color ne $expected_restore_color } {
 		set saw_bad_color_handling true
 	    }
 	    set last_color $expect_out(2,string)
+	    exp_continue
+	}
+
+	-re "^(${::any_color})$::str" {
+	    # This pattern matches printing STR in all cases that are not
+	    # immediately after a pagination prompt.  In this case there is
+	    # a single escape sequence to set the color.
+	    set last_color $expect_out(1,string)
 	    exp_continue
 	}
 
@@ -87,18 +94,25 @@ proc test_pagination { type mode } {
 	    exp_continue
 	}
 
-	-re "^((?:\033\\\[m)?)$::pagination_prompt$" {
+	-re "^\033\\\[m$::pagination_prompt$" {
 	    # After a pagination prompt we expect GDB to restore the last
 	    # color.
 	    set expected_restore_color $last_color
 
-	    # If we didn't see a color reset sequence then the pagination
-	    # prompt will have been printed in the wrong color, this is a
-	    # GDB bug.
-	    set color_reset $expect_out(1,string)
-	    if { $color_reset eq "" } {
-		set saw_bad_color_handling true
-	    }
+	    # Send '\n' to view more output.
+	    send_gdb "\n"
+	    exp_continue
+	}
+
+	-re "^$::pagination_prompt$" {
+	    # After a pagination prompt we expect GDB to restore the last
+	    # color.
+	    set expected_restore_color $last_color
+
+	    # If we didn't see a color reset sequence before the pagination
+	    # prompt, then the prompt will have been printed in the wrong
+	    # color, this is a GDB bug.
+	    set saw_bad_color_handling true
 
 	    # Send '\n' to view more output.
 	    send_gdb "\n"
