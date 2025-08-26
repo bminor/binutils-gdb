@@ -1181,6 +1181,15 @@ vex3_prefix_p (gdb_byte pfx)
   return pfx == 0xc4;
 }
 
+/* True if PFX is the start of an XOP prefix.  */
+
+static bool
+xop_prefix_p (const gdb_byte *pfx)
+{
+  gdb_byte m = pfx[1] & 0x1f;
+  return pfx[0] == 0x8f && m >= 8;
+}
+
 /* Return true if PFX is the start of the 4-byte EVEX prefix.  */
 
 static bool
@@ -1351,7 +1360,7 @@ amd64_get_insn_details (gdb_byte *insn, struct amd64_insn *details)
       details->enc_prefix_offset = insn - start;
       insn += 2;
     }
-  else if (vex3_prefix_p (*insn))
+  else if (vex3_prefix_p (*insn) || xop_prefix_p (insn))
     {
       details->enc_prefix_offset = insn - start;
       insn += 3;
@@ -1442,6 +1451,11 @@ amd64_get_insn_details (gdb_byte *insn, struct amd64_insn *details)
 	  return;
 	}
     }
+  else if (prefix != nullptr && xop_prefix_p (prefix))
+    {
+      details->opcode_len = 1;
+      need_modrm = 1;
+    }
   else if (*insn == TWO_BYTE_OPCODE_ESCAPE)
     {
       /* Two or three-byte opcode.  */
@@ -1512,7 +1526,7 @@ fixup_riprel (const struct amd64_insn &details, gdb_byte *insn,
 	{
 	  /* VEX.!B is set implicitly.  */
 	}
-      else if (vex3_prefix_p (pfx[0]))
+      else if (vex3_prefix_p (pfx[0]) || xop_prefix_p (pfx))
 	pfx[1] |= VEX3_NOT_B;
       else if (evex_prefix_p (pfx[0]))
 	{
@@ -3780,6 +3794,20 @@ test_amd64_get_insn_details (void)
   fixup_riprel (details, insn.data (), ECX_REG_NUM);
   updated_insn
     = { 0xc4, 0xe3, 0x4d, 0x0e, 0x91, 0xff, 0x00, 0x00, 0x00, 0x07 };
+  SELF_CHECK (insn == updated_insn);
+
+  /* INSN: vpcomtrueuq 0x0(%rip),%xmm7,%xmm0, xop prefix.  */
+  insn = { 0x8f, 0xe8, 0x40, 0xef, 0x05, 0x00, 0x00, 0x00, 0x00, 0x07 };
+  amd64_get_insn_details (insn.data (), &details);
+  SELF_CHECK (details.opcode_len == 1);
+  SELF_CHECK (details.enc_prefix_offset == 0);
+  SELF_CHECK (details.opcode_offset == 3);
+  SELF_CHECK (details.modrm_offset == 4);
+
+  /* INSN: vpcomtrueuq 0x0(%ecx),%xmm7,%xmm0, xop prefix.  */
+  fixup_riprel (details, insn.data (), ECX_REG_NUM);
+  updated_insn
+    = { 0x8f, 0xe8, 0x40, 0xef, 0x81, 0x00, 0x00, 0x00, 0x00, 0x07 };
   SELF_CHECK (insn == updated_insn);
 }
 
