@@ -2854,15 +2854,24 @@ lang_add_section (lang_statement_list_type *ptr,
       /* Only set SEC_READONLY flag on the first input section.  */
       flags &= ~ SEC_READONLY;
 
-      /* Keep SEC_MERGE and SEC_STRINGS only if they are the same.  */
-      if ((output->bfd_section->flags & (SEC_MERGE | SEC_STRINGS))
-	  != (flags & (SEC_MERGE | SEC_STRINGS))
-	  || ((flags & SEC_MERGE) != 0
-	      && output->bfd_section->entsize != section->entsize))
+      /* Keep entry size, SEC_MERGE, and SEC_STRINGS only if entry sizes are
+	 the same.  */
+      if (output->bfd_section->entsize != section->entsize)
 	{
-	  output->bfd_section->flags &= ~ (SEC_MERGE | SEC_STRINGS);
 	  output->bfd_section->entsize = 0;
-	  flags &= ~ (SEC_MERGE | SEC_STRINGS);
+	  flags &= ~(SEC_MERGE | SEC_STRINGS);
+	}
+
+      /* Keep SEC_MERGE and SEC_STRINGS (each) only if they are the same.  */
+      if ((output->bfd_section->flags ^ flags) & SEC_MERGE)
+	{
+	  output->bfd_section->flags &= ~SEC_MERGE;
+	  flags &= ~SEC_MERGE;
+	}
+      if ((output->bfd_section->flags ^ flags) & SEC_STRINGS)
+	{
+	  output->bfd_section->flags &= ~SEC_STRINGS;
+	  flags &= ~SEC_STRINGS;
 	}
     }
   output->bfd_section->flags |= flags;
@@ -2877,8 +2886,7 @@ lang_add_section (lang_statement_list_type *ptr,
 				     link_info.output_bfd,
 				     output->bfd_section,
 				     &link_info);
-      if ((flags & SEC_MERGE) != 0)
-	output->bfd_section->entsize = section->entsize;
+      output->bfd_section->entsize = section->entsize;
     }
 
   if ((flags & SEC_TIC54X_BLOCK) != 0
