@@ -458,26 +458,122 @@ loongarch_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
   return align_down (addr, 16);
 }
 
+/* Analyze the function prologue for THIS_FRAME and populate the frame
+   cache CACHE.  */
+
+static void
+loongarch_analyze_prologue (const frame_info_ptr &this_frame,
+			    struct loongarch_frame_cache *cache)
+{
+  CORE_ADDR block_addr = get_frame_address_in_block (this_frame);
+  CORE_ADDR prologue_start = 0;
+  CORE_ADDR prologue_end = 0;
+  CORE_ADDR pc = get_frame_pc (this_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+
+  cache->pc = pc;
+
+  /* Assume we do not find a frame.  */
+  cache->framebase_reg = -1;
+  cache->framebase_offset = 0;
+
+
+  if (find_pc_partial_function (block_addr, NULL, &prologue_start,
+				&prologue_end))
+    {
+      struct symtab_and_line sal = find_pc_line (prologue_start, 0);
+
+      if (sal.line == 0)
+	{
+	  /* No line info so use the current PC.  */
+	  prologue_end = pc;
+	}
+      else if (sal.end < prologue_end)
+	{
+	  if (sal.symtab != NULL && sal.symtab->language () == language_asm)
+	    {
+	      /* This sal.end usually cannot point to prologue_end correctly
+		 in asm file. */
+	      prologue_end = pc;
+	    }
+	  else
+	    {
+	      /* The next line begins after the prologue_end.  */
+	      prologue_end = sal.end;
+	    }
+	}
+
+    }
+  else
+    {
+      /* We're in the boondocks: we have no idea where the start of the
+	 function is.  */
+      return;
+    }
+
+  prologue_end = std::min (prologue_end, pc);
+  loongarch_scan_prologue (gdbarch, prologue_start, prologue_end, nullptr, cache);
+}
+
+/* Fill in *CACHE with information about the prologue of *THIS_FRAME.  */
+
+static void
+loongarch_frame_cache_1 (const frame_info_ptr &this_frame,
+			 struct loongarch_frame_cache *cache)
+{
+  CORE_ADDR unwound_fp;
+
+  loongarch_analyze_prologue (this_frame, cache);
+
+  if (cache->framebase_reg == -1)
+    return;
+
+  unwound_fp = get_frame_register_unsigned (this_frame, cache->framebase_reg);
+  if (unwound_fp == 0)
+    return;
+
+  cache->prev_sp = unwound_fp;
+  cache->prev_sp += cache->framebase_offset;
+
+  cache->func = get_frame_func (this_frame);
+
+  cache->available_p = 1;
+}
+
 /* Generate, or return the cached frame cache for frame unwinder.  */
 
-static struct trad_frame_cache *
+static struct loongarch_frame_cache *
 loongarch_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
-  struct trad_frame_cache *cache;
-  CORE_ADDR pc;
+  struct loongarch_frame_cache *cache;
 
-  if (*this_cache != nullptr)
-    return (struct trad_frame_cache *) *this_cache;
+  if (*this_cache != NULL)
+    return (struct loongarch_frame_cache *) *this_cache;
 
-  cache = trad_frame_cache_zalloc (this_frame);
+  cache = FRAME_OBSTACK_ZALLOC (struct loongarch_frame_cache);
+  cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
   *this_cache = cache;
 
-  trad_frame_set_reg_realreg (cache, LOONGARCH_PC_REGNUM, LOONGARCH_RA_REGNUM);
-
-  pc = get_frame_address_in_block (this_frame);
-  trad_frame_set_id (cache, frame_id_build_unavailable_stack (pc));
+  try
+    {
+      loongarch_frame_cache_1 (this_frame, cache);
+    }
+  catch (const gdb_exception_error &ex)
+    {
+      if (ex.error != NOT_AVAILABLE_ERROR)
+	throw;
+    }
 
   return cache;
+}
+
+/* Implement the "stop_reason" frame_unwind method.  */
+
+static enum unwind_stop_reason
+loongarch_frame_unwind_stop_reason (const frame_info_ptr &this_frame,
+				    void **this_cache)
+{
+  return UNWIND_NO_REASON;
 }
 
 /* Implement the this_id callback for frame unwinder.  */
@@ -486,10 +582,15 @@ static void
 loongarch_frame_this_id (const frame_info_ptr &this_frame, void **prologue_cache,
 			 struct frame_id *this_id)
 {
-  struct trad_frame_cache *info;
+  struct loongarch_frame_cache *cache
+    = loongarch_frame_cache (this_frame, prologue_cache);
 
-  info = loongarch_frame_cache (this_frame, prologue_cache);
-  trad_frame_get_id (info, this_id);
+  /* Our frame ID for a normal frame is the current function's starting
+     PC and the caller's SP when we were called.  */
+  if (!cache->available_p)
+    *this_id = frame_id_build_unavailable_stack (cache->func);
+  else
+    *this_id = frame_id_build (cache->prev_sp, cache->func);
 }
 
 /* Implement the prev_register callback for frame unwinder.  */
@@ -498,17 +599,55 @@ static struct value *
 loongarch_frame_prev_register (const frame_info_ptr &this_frame,
 			       void **prologue_cache, int regnum)
 {
-  struct trad_frame_cache *info;
+  struct loongarch_frame_cache *cache
+    = loongarch_frame_cache (this_frame, prologue_cache);
 
-  info = loongarch_frame_cache (this_frame, prologue_cache);
-  return trad_frame_get_register (info, this_frame, regnum);
+  /* If we are asked to unwind the PC, then we need to return the RA
+     instead.  The prologue may save PC, but it will point into this
+     frame's prologue, not the previou frame's resume location.  */
+  if (regnum == LOONGARCH_PC_REGNUM)
+    {
+      CORE_ADDR ra;
+      ra = frame_unwind_register_unsigned (this_frame, LOONGARCH_RA_REGNUM);
+
+      return frame_unwind_got_constant (this_frame, regnum, ra);
+    }
+
+  /* SP is generally not saved to the stack, but this frame is
+     identified by the next frame's stack pointer at the time of the
+     call.  The value was already reconstructed into PREV_SP.  */
+  /*
+	addi.d          $sp, $sp, -32
+	st.d            $ra, $sp, 24
+	st.d            $fp, $sp, 16
+	addi.d          $fp, $sp, 32
+
+	+->+----------+
+	|  | saved ra |
+	|  | saved fp |
+	|  |          |
+	|  |          |
+	|  +----------+  <- Previous SP == FP
+	|  | saved ra |
+	+--| saved fp |
+	   |          |
+	   |          |
+	   +----------+   <- SP
+			*/
+
+  if (regnum == LOONGARCH_SP_REGNUM)
+    return frame_unwind_got_constant (this_frame, regnum, cache->prev_sp);
+
+  return trad_frame_get_prev_register (this_frame, cache->saved_regs, regnum);
+
 }
 
+/* LoongArch prologue unwinder.  */
 static const struct frame_unwind_legacy loongarch_frame_unwind (
   "loongarch prologue",
   /*.type	   =*/NORMAL_FRAME,
   /*.unwinder_class=*/FRAME_UNWIND_ARCH,
-  /*.stop_reason   =*/default_frame_unwind_stop_reason,
+  /*.stop_reason   =*/loongarch_frame_unwind_stop_reason,
   /*.this_id	   =*/loongarch_frame_this_id,
   /*.prev_register =*/loongarch_frame_prev_register,
   /*.unwind_data   =*/nullptr,
