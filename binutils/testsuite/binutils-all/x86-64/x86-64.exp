@@ -295,7 +295,7 @@ proc run_pr33230_test { testname obj strip_flags run_readelf } {
 	    fail "$testname (${obj}.strip)"
 	    return
 	}
-    } elseif { ![regexp "Unable to recognise the format" $got] } then {
+    } elseif { ![regexp "Unable to recognise the architecture" $got] } then {
 	send_log "$got\n"
 	verbose "$got" 1
 	fail "$testname"

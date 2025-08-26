@@ -2804,17 +2804,20 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
       iarch = bed->arch;
       imach = 0;
     }
-  if (!bfd_set_arch_mach (obfd, iarch, imach)
-      && (ibfd->target_defaulted
-	  || bfd_get_arch (ibfd) != bfd_get_arch (obfd)))
+  if (iarch == bfd_arch_unknown
+      && bfd_get_flavour (ibfd) == bfd_target_elf_flavour
+      && ibfd->target_defaulted)
     {
-      if (bfd_get_arch (ibfd) == bfd_arch_unknown)
-	non_fatal (_("Unable to recognise the format of the input file `%s'"),
-		   bfd_get_archive_filename (ibfd));
-      else
-	non_fatal (_("Output file cannot represent architecture `%s'"),
-		   bfd_printable_arch_mach (bfd_get_arch (ibfd),
-					    bfd_get_mach (ibfd)));
+      non_fatal (_("Unable to recognise the architecture of the input file `%s'"),
+		 bfd_get_archive_filename (ibfd));
+      return false;
+    }
+  if (!bfd_set_arch_mach (obfd, iarch, imach)
+      && iarch != bfd_arch_unknown)
+    {
+      non_fatal (_("Output file cannot represent architecture `%s'"),
+		 bfd_printable_arch_mach (bfd_get_arch (ibfd),
+					  bfd_get_mach (ibfd)));
       return false;
     }
 
