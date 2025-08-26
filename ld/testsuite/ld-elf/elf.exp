@@ -86,6 +86,9 @@ run_ld_link_tests [list \
 
 if [is_elf64 tmpdir/symbol3w.a] {
     set ASFLAGS "$ASFLAGS --defsym ALIGN=3"
+    if { [istarget powerpc*-*-linux*] } {
+	set LDFLAGS "$LDFLAGS --no-ld-generated-unwind-info"
+    }
     set pr23900_1_exp "pr23900-1-64.rd"
     set pr25490_2_exp "pr25490-2-64.rd"
     set pr25490_3_exp "pr25490-3-64.rd"

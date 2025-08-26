@@ -19,7 +19,7 @@ SECTIONS
   . = 0x12340000;
   .far               : { *(.far) }
   /* Start of the Read Only Data region.  */
-  .note.gnu-property : { *(.note.gnu-property) }
+  .note.gnu.property : { *(.note.gnu.property) }
 
   /* Start of the Read Write Data region.  */
   . = ALIGN (CONSTANT (MAXPAGESIZE));

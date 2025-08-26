@@ -734,7 +734,7 @@ cat <<EOF
      data, but this is not guaranteed to always be the case.  */
   .note.build-id :      { *(.note.build-id) } ${RELOCATING+${REGION}}
   .note.GNU-stack :     { *(.note.GNU-stack) } ${RELOCATING+${REGION}}
-  .note.gnu-property :  { *(.note.gnu-property) } ${RELOCATING+${REGION}}
+  .note.gnu.property :  { *(.note.gnu.property) } ${RELOCATING+${REGION}}
   .note.ABI-tag :       { *(.note.ABI-tag) } ${RELOCATING+${REGION}}
   .note.package :       { *(.note.package) } ${RELOCATING+${REGION}}
   .note.dlopen :        { *(.note.dlopen) } ${RELOCATING+${REGION}}
