@@ -23,8 +23,6 @@
 
 load_lib dwarf.exp
 
-require dwarf2_support
-
 standard_testfile macro-source-path.c
 
 lassign [function_range main $srcdir/$subdir/$srcfile] \

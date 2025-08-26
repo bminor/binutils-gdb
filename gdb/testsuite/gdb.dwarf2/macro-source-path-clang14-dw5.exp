@@ -18,6 +18,8 @@
 # Generate binaries imitating different ways source file paths can be passed to
 # compilers.  Test printing macros from those binaries.
 
+require dwarf2_support
+
 # The do_test proc comes from macro-source-path.exp.tcl.
 source $srcdir/$subdir/macro-source-path.exp.tcl
 
