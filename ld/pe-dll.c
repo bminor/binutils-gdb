@@ -1630,9 +1630,8 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 		  const struct bfd_link_hash_entry *blhe
 		    = bfd_wrapped_link_hash_lookup (abfd, info, sym->name,
 						    false, false, false);
-
 		  /* Don't create relocs for undefined weak symbols.  */
-		  if (sym->flags == BSF_WEAK)
+		  if (sym->flags & BSF_WEAK)
 		    {
 		      if (blhe && blhe->type == bfd_link_hash_undefweak)
 			{
@@ -1657,7 +1656,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 			continue;
 		    }
 		  /* Nor for Dwarf FDE references to discarded sections.  */
-		  else if (bfd_is_abs_section (sym->section->output_section))
+		  if (bfd_is_abs_section (sym->section->output_section))
 		    {
 		      /* We only ignore relocs from .eh_frame sections, as
 			 they are discarded by the final link rather than
@@ -1666,10 +1665,10 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 			continue;
 		    }
 		  /* Nor for absolute symbols.  */
-		  else if (blhe && ldexp_is_final_sym_absolute (blhe)
-			   && (!blhe->linker_def
-			       || (strcmp (sym->name, "__image_base__")
-				   && strcmp (sym->name, U ("__ImageBase")))))
+		  if (blhe && ldexp_is_final_sym_absolute (blhe)
+		      && (!blhe->linker_def
+			  || (strcmp (sym->name, "__image_base__")
+			      && strcmp (sym->name, U ("__ImageBase")))))
 		    continue;
 
 		  reloc_data[total_relocs].vma = sec_vma + relocs[i]->address;
