@@ -1180,8 +1180,8 @@ ternop_slice_operation::evaluate (struct type *expect_type,
   struct value *upper
     = std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
 
-  int lowbound = value_as_long (low);
-  int upperbound = value_as_long (upper);
+  LONGEST lowbound = value_as_long (low);
+  LONGEST upperbound = value_as_long (upper);
   return value_slice (array, lowbound, upperbound - lowbound + 1);
 }
 

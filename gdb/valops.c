@@ -4020,7 +4020,7 @@ value_of_this_silent (const struct language_defn *lang)
    bound as the original ARRAY.  */
 
 struct value *
-value_slice (struct value *array, int lowbound, int length)
+value_slice (struct value *array, LONGEST lowbound, LONGEST length)
 {
   struct type *slice_range_type, *slice_type, *range_type;
   LONGEST lowerbound, upperbound;

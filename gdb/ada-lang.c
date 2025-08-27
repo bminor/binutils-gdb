@@ -3119,7 +3119,7 @@ ada_value_ptr_subscript (struct value *arr, int arity, struct value **ind)
    this array is LOW, as per Ada rules.  */
 static struct value *
 ada_value_slice_from_ptr (struct value *array_ptr, struct type *type,
-			  int low, int high)
+			  LONGEST low, LONGEST high)
 {
   struct type *type0 = ada_check_typedef (type);
   struct type *base_index_type = type0->index_type ()->target_type ();
@@ -3130,7 +3130,7 @@ ada_value_slice_from_ptr (struct value *array_ptr, struct type *type,
 			      (alloc, type0->target_type (), index_type,
 			       type0->dyn_prop (DYN_PROP_BYTE_STRIDE),
 			       type0->field (0).bitsize ());
-  int base_low =  ada_discrete_type_low_bound (type0->index_type ());
+  LONGEST base_low = ada_discrete_type_low_bound (type0->index_type ());
   std::optional<LONGEST> base_low_pos, low_pos;
   CORE_ADDR base;
 
@@ -3154,7 +3154,7 @@ ada_value_slice_from_ptr (struct value *array_ptr, struct type *type,
 
 
 static struct value *
-ada_value_slice (struct value *array, int low, int high)
+ada_value_slice (struct value *array, LONGEST low, LONGEST high)
 {
   struct type *type = ada_check_typedef (array->type ());
   struct type *base_index_type = type->index_type ()->target_type ();
@@ -3427,7 +3427,7 @@ ada_array_length (struct value *arr, int n)
    less than LOW, then LOW-1 is used.  */
 
 static struct value *
-empty_array (struct type *arr_type, int low, int high)
+empty_array (struct type *arr_type, LONGEST low, LONGEST high)
 {
   struct type *arr_type0 = ada_check_typedef (arr_type);
   type_allocator alloc (arr_type0->index_type ()->target_type ());
@@ -10303,8 +10303,7 @@ ada_ternop_slice_operation::evaluate (struct type *expect_type,
 	    to_fixed_array_type (type0->target_type (), NULL, 1);
 
 	  return ada_value_slice_from_ptr (array, arr_type0,
-					   longest_to_int (low_bound),
-					   longest_to_int (high_bound));
+					   low_bound, high_bound);
 	}
     }
   else if (noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -10312,8 +10311,7 @@ ada_ternop_slice_operation::evaluate (struct type *expect_type,
   else if (high_bound < low_bound)
     return empty_array (array->type (), low_bound, high_bound);
   else
-    return ada_value_slice (array, longest_to_int (low_bound),
-			    longest_to_int (high_bound));
+    return ada_value_slice (array, low_bound, high_bound);
 }
 
 /* Implement BINOP_IN_BOUNDS.  */

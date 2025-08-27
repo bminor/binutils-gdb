@@ -1589,7 +1589,7 @@ extern struct value *make_cv_value (int, int, struct value *);
 
 extern struct value *varying_to_slice (struct value *);
 
-extern struct value *value_slice (struct value *, int, int);
+extern struct value *value_slice (struct value *, LONGEST, LONGEST);
 
 /* Create a complex number.  The type is the complex type; the values
    are cast to the underlying scalar type before the complex number is
