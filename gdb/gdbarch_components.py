@@ -1777,12 +1777,17 @@ How the core target extracts the name of a thread from a core file.
 Method(
     comment="""
 Read offset OFFSET of TARGET_OBJECT_SIGNAL_INFO signal information
-from core file into buffer READBUF with length LEN.  Return the number
+from core file CBFD into buffer READBUF with length LEN.  Return the number
 of bytes read (zero indicates EOF, a negative value indicates failure).
 """,
     type="LONGEST",
     name="core_xfer_siginfo",
-    params=[("gdb_byte *", "readbuf"), ("ULONGEST", "offset"), ("ULONGEST", "len")],
+    params=[
+        ("struct bfd &", "cbfd"),
+        ("gdb_byte *", "readbuf"),
+        ("ULONGEST", "offset"),
+        ("ULONGEST", "len")
+    ],
     predicate=True,
 )
 

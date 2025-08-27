@@ -1671,8 +1671,10 @@ core_target::xfer_partial (enum target_object object, const char *annex,
 	  if (m_core_gdbarch != nullptr
 	      && gdbarch_core_xfer_siginfo_p (m_core_gdbarch))
 	    {
-	      LONGEST l = gdbarch_core_xfer_siginfo  (m_core_gdbarch, readbuf,
-						      offset, len);
+	      struct bfd *cbfd = current_program_space->core_bfd ();
+	      gdb_assert (cbfd != nullptr);
+	      LONGEST l = gdbarch_core_xfer_siginfo  (m_core_gdbarch, *cbfd,
+						      readbuf, offset, len);
 
 	      if (l >= 0)
 		{

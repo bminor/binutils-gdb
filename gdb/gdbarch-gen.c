@@ -4066,13 +4066,13 @@ gdbarch_core_xfer_siginfo_p (struct gdbarch *gdbarch)
 }
 
 LONGEST
-gdbarch_core_xfer_siginfo (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len)
+gdbarch_core_xfer_siginfo (struct gdbarch *gdbarch, struct bfd &cbfd, gdb_byte *readbuf, ULONGEST offset, ULONGEST len)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->core_xfer_siginfo != NULL);
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_core_xfer_siginfo called\n");
-  return gdbarch->core_xfer_siginfo (gdbarch, readbuf, offset, len);
+  return gdbarch->core_xfer_siginfo (gdbarch, cbfd, readbuf, offset, len);
 }
 
 void
