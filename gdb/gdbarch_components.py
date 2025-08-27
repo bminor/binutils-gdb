@@ -1803,12 +1803,12 @@ of bytes read (zero indicates EOF, a negative value indicates failure).
 
 Method(
     comment="""
-Read x86 XSAVE layout information from core file into XSAVE_LAYOUT.
+Read x86 XSAVE layout information from core file CBFD into XSAVE_LAYOUT.
 Returns true if the layout was read successfully.
 """,
     type="bool",
     name="core_read_x86_xsave_layout",
-    params=[("x86_xsave_layout &", "xsave_layout")],
+    params=[("struct bfd &", "cbfd"), ("x86_xsave_layout &", "xsave_layout")],
     predicate=True,
 )
 

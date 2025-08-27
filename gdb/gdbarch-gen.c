@@ -4090,13 +4090,13 @@ gdbarch_core_read_x86_xsave_layout_p (struct gdbarch *gdbarch)
 }
 
 bool
-gdbarch_core_read_x86_xsave_layout (struct gdbarch *gdbarch, x86_xsave_layout &xsave_layout)
+gdbarch_core_read_x86_xsave_layout (struct gdbarch *gdbarch, struct bfd &cbfd, x86_xsave_layout &xsave_layout)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->core_read_x86_xsave_layout != NULL);
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_core_read_x86_xsave_layout called\n");
-  return gdbarch->core_read_x86_xsave_layout (gdbarch, xsave_layout);
+  return gdbarch->core_read_x86_xsave_layout (gdbarch, cbfd, xsave_layout);
 }
 
 void

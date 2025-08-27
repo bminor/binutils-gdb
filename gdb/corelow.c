@@ -1912,7 +1912,9 @@ core_target::fetch_x86_xsave_layout ()
       gdbarch_core_read_x86_xsave_layout_p (m_core_gdbarch))
     {
       x86_xsave_layout layout;
-      if (!gdbarch_core_read_x86_xsave_layout (m_core_gdbarch, layout))
+      bfd *cbfd = current_program_space->core_bfd ();
+      gdb_assert (cbfd != nullptr);
+      if (!gdbarch_core_read_x86_xsave_layout (m_core_gdbarch, *cbfd, layout))
 	return {};
 
       return layout;

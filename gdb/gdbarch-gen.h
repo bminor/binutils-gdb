@@ -1069,13 +1069,13 @@ typedef LONGEST (gdbarch_core_xfer_siginfo_ftype) (struct gdbarch *gdbarch, stru
 extern LONGEST gdbarch_core_xfer_siginfo (struct gdbarch *gdbarch, struct bfd &cbfd, gdb_byte *readbuf, ULONGEST offset, ULONGEST len);
 extern void set_gdbarch_core_xfer_siginfo (struct gdbarch *gdbarch, gdbarch_core_xfer_siginfo_ftype *core_xfer_siginfo);
 
-/* Read x86 XSAVE layout information from core file into XSAVE_LAYOUT.
+/* Read x86 XSAVE layout information from core file CBFD into XSAVE_LAYOUT.
    Returns true if the layout was read successfully. */
 
 extern bool gdbarch_core_read_x86_xsave_layout_p (struct gdbarch *gdbarch);
 
-typedef bool (gdbarch_core_read_x86_xsave_layout_ftype) (struct gdbarch *gdbarch, x86_xsave_layout &xsave_layout);
-extern bool gdbarch_core_read_x86_xsave_layout (struct gdbarch *gdbarch, x86_xsave_layout &xsave_layout);
+typedef bool (gdbarch_core_read_x86_xsave_layout_ftype) (struct gdbarch *gdbarch, struct bfd &cbfd, x86_xsave_layout &xsave_layout);
+extern bool gdbarch_core_read_x86_xsave_layout (struct gdbarch *gdbarch, struct bfd &cbfd, x86_xsave_layout &xsave_layout);
 extern void set_gdbarch_core_read_x86_xsave_layout (struct gdbarch *gdbarch, gdbarch_core_read_x86_xsave_layout_ftype *core_read_x86_xsave_layout);
 
 /* BFD target to use when generating a core file. */

@@ -274,11 +274,10 @@ i386_fbsd_core_read_xsave_info (bfd *abfd, x86_xsave_layout &layout)
 /* See i386-fbsd-tdep.h.  */
 
 bool
-i386_fbsd_core_read_x86_xsave_layout (struct gdbarch *gdbarch,
+i386_fbsd_core_read_x86_xsave_layout (struct gdbarch *gdbarch, bfd &cbfd,
 				      x86_xsave_layout &layout)
 {
-  return i386_fbsd_core_read_xsave_info (current_program_space->core_bfd (),
-					 layout) != 0;
+  return i386_fbsd_core_read_xsave_info (&cbfd, layout) != 0;
 }
 
 /* Implement the core_read_description gdbarch method.  */

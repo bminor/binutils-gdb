@@ -32,8 +32,9 @@
 uint64_t i386_fbsd_core_read_xsave_info (bfd *abfd, x86_xsave_layout &layout);
 
 /* Implement the core_read_x86_xsave_layout gdbarch method.  */
-bool i386_fbsd_core_read_x86_xsave_layout (struct gdbarch *gdbarch,
-					   x86_xsave_layout &layout);
+extern bool i386_fbsd_core_read_x86_xsave_layout (struct gdbarch *gdbarch,
+						  bfd &cbfd,
+						  x86_xsave_layout &layout);
 
 /* The format of the XSAVE extended area is determined by hardware.
    Cores store the XSAVE extended area in a NT_X86_XSTATE note that
