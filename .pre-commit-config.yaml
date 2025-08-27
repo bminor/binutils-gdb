@@ -47,7 +47,7 @@ repos:
         types_or: [file]
         files: 'gdb/.*\.py(\.in)?$'
   - repo:  https://github.com/pycqa/flake8
-    rev: 7.2.0
+    rev: 7.3.0
     hooks:
     - id: flake8
       types_or: [file]
