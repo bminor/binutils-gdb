@@ -38,12 +38,10 @@ proc _selftest_find_gdb { arg } {
 
 # A helper proc that sets up for self-testing.
 # EXECUTABLE is the gdb to use.
-# FUNCTION is the function to break in, either captured_main
-# or captured_command_loop.
 # Return 0 in case of success, -1 in case of failure, and -2 in case of
 # skipping the test-case.
 
-proc _selftest_setup { executable function } {
+proc _selftest_setup { executable } {
     global gdb_prompt
     global INTERNAL_GDBFLAGS
 
@@ -63,7 +61,8 @@ proc _selftest_setup { executable function } {
 	return -2
     }
 
-    # Set a breakpoint at $function.
+    # Set a breakpoint at main
+    set function main
     if { [gdb_breakpoint $function "no-message"] != 1 } {
 	untested "Cannot set breakpoint at $function, skipping testcase."
 	return -2
@@ -158,7 +157,7 @@ proc selftest_prepare {} {
 
 # A simple way to run some self-tests.
 
-proc do_self_tests {function body} {
+proc do_self_tests {body} {
     set file [selftest_prepare]
     if { $file eq "" } {
 	return
@@ -170,7 +169,7 @@ proc do_self_tests {function body} {
     # time, especially if the build is non-optimized.  Bump the timeout for the
     # duration of the test.
     with_timeout_factor 10 {
-	set result [_selftest_setup $file $function]
+	set result [_selftest_setup $file]
 	if {$result == 0} {
 	    set result [uplevel $body]
 	}
