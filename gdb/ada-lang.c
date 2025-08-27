@@ -182,7 +182,7 @@ static struct value *ada_search_struct_field (const char *, struct value *, int,
 					      struct type *);
 
 static int find_struct_field (const char *, struct type *, int,
-			      struct type **, int *, int *, int *, int *);
+			      struct type **, int *, int *, int *, LONGEST *);
 
 static int ada_resolve_function (std::vector<struct block_symbol> &,
 				 struct value **, int, const char *,
@@ -2175,8 +2175,8 @@ ada_type_of_array (struct value *arr, int bounds)
 	  arity -= 1;
 	  struct type *range_type
 	    = create_static_range_type (alloc, low->type (),
-					longest_to_int (value_as_long (low)),
-					longest_to_int (value_as_long (high)));
+					value_as_long (low),
+					value_as_long (high));
 	  elt_type = create_array_type (alloc, elt_type, range_type);
 	  INIT_GNAT_SPECIFIC (elt_type);
 
@@ -6932,7 +6932,7 @@ static int
 find_struct_field (const char *name, struct type *type, int offset,
 		   struct type **field_type_p,
 		   int *byte_offset_p, int *bit_offset_p, int *bit_size_p,
-		   int *index_p)
+		   LONGEST *index_p)
 {
   int i;
   int parent_offset = -1;
@@ -7046,12 +7046,10 @@ find_struct_field (const char *name, struct type *type, int offset,
 
 /* Number of user-visible fields in record type TYPE.  */
 
-static int
+static LONGEST
 num_visible_fields (struct type *type)
 {
-  int n;
-
-  n = 0;
+  LONGEST n = 0;
   find_struct_field (NULL, type, 0, NULL, NULL, NULL, NULL, &n);
   return n;
 }
@@ -9569,12 +9567,12 @@ void
 ada_name_association::assign (aggregate_assigner &assigner,
 			      operation_up &op)
 {
-  int index;
+  LONGEST index;
 
   if (ada_is_direct_array_type (assigner.lhs->type ()))
     {
       value *tem = m_val->evaluate (nullptr, assigner.exp, EVAL_NORMAL);
-      index = longest_to_int (value_as_long (tem));
+      index = value_as_long (tem);
     }
   else
     {
