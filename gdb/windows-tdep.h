@@ -33,6 +33,7 @@ extern void windows_xfer_shared_library (const char* so_name,
 					 std::string &xml);
 
 extern ULONGEST windows_core_xfer_shared_libraries (struct gdbarch *gdbarch,
+						    struct bfd &cbfd,
 						    gdb_byte *readbuf,
 						    ULONGEST offset,
 						    ULONGEST len);

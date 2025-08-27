@@ -1738,7 +1738,12 @@ failed, otherwise, return the red length of READBUF.
 """,
     type="ULONGEST",
     name="core_xfer_shared_libraries",
-    params=[("gdb_byte *", "readbuf"), ("ULONGEST", "offset"), ("ULONGEST", "len")],
+    params=[
+        ("struct bfd &", "cbfd"),
+        ("gdb_byte *", "readbuf"),
+        ("ULONGEST", "offset"),
+        ("ULONGEST", "len"),
+    ],
     predicate=True,
 )
 
@@ -1750,7 +1755,12 @@ Return the number of bytes read (zero indicates failure).
 """,
     type="ULONGEST",
     name="core_xfer_shared_libraries_aix",
-    params=[("gdb_byte *", "readbuf"), ("ULONGEST", "offset"), ("ULONGEST", "len")],
+    params=[
+        ("struct bfd &", "cbfd"),
+        ("gdb_byte *", "readbuf"),
+        ("ULONGEST", "offset"),
+        ("ULONGEST", "len"),
+    ],
     predicate=True,
 )
 

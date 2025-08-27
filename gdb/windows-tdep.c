@@ -1162,13 +1162,11 @@ core_process_module_section (bfd *abfd, asection *sect, void *obj)
 
 ULONGEST
 windows_core_xfer_shared_libraries (struct gdbarch *gdbarch,
-				    gdb_byte *readbuf,
+				    struct bfd &cbfd, gdb_byte *readbuf,
 				    ULONGEST offset, ULONGEST len)
 {
   cpms_data data { gdbarch, "<library-list>\n", 0 };
-  bfd_map_over_sections (current_program_space->core_bfd (),
-			 core_process_module_section,
-			 &data);
+  bfd_map_over_sections (&cbfd, core_process_module_section, &data);
   data.xml += "</library-list>\n";
 
   ULONGEST len_avail = data.xml.length ();

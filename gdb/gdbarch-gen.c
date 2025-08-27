@@ -3970,13 +3970,13 @@ gdbarch_core_xfer_shared_libraries_p (struct gdbarch *gdbarch)
 }
 
 ULONGEST
-gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len)
+gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, struct bfd &cbfd, gdb_byte *readbuf, ULONGEST offset, ULONGEST len)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->core_xfer_shared_libraries != NULL);
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_core_xfer_shared_libraries called\n");
-  return gdbarch->core_xfer_shared_libraries (gdbarch, readbuf, offset, len);
+  return gdbarch->core_xfer_shared_libraries (gdbarch, cbfd, readbuf, offset, len);
 }
 
 void
@@ -3994,13 +3994,13 @@ gdbarch_core_xfer_shared_libraries_aix_p (struct gdbarch *gdbarch)
 }
 
 ULONGEST
-gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, ULONGEST len)
+gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch, struct bfd &cbfd, gdb_byte *readbuf, ULONGEST offset, ULONGEST len)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->core_xfer_shared_libraries_aix != NULL);
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_core_xfer_shared_libraries_aix called\n");
-  return gdbarch->core_xfer_shared_libraries_aix (gdbarch, readbuf, offset, len);
+  return gdbarch->core_xfer_shared_libraries_aix (gdbarch, cbfd, readbuf, offset, len);
 }
 
 void

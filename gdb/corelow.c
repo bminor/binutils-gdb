@@ -1632,9 +1632,9 @@ core_target::xfer_partial (enum target_object object, const char *annex,
 	    return TARGET_XFER_E_IO;
 	  else
 	    {
-	      *xfered_len = gdbarch_core_xfer_shared_libraries (m_core_gdbarch,
-								readbuf,
-								offset, len);
+	      *xfered_len = gdbarch_core_xfer_shared_libraries
+		(m_core_gdbarch, *current_program_space->core_bfd (),
+		 readbuf, offset, len);
 
 	      if (*xfered_len == 0)
 		return TARGET_XFER_EOF;
@@ -1653,9 +1653,9 @@ core_target::xfer_partial (enum target_object object, const char *annex,
 	  else
 	    {
 	      *xfered_len
-		= gdbarch_core_xfer_shared_libraries_aix (m_core_gdbarch,
-							  readbuf, offset,
-							  len);
+		= gdbarch_core_xfer_shared_libraries_aix
+		(m_core_gdbarch, *current_program_space->core_bfd (),
+		 readbuf, offset, len);
 
 	      if (*xfered_len == 0)
 		return TARGET_XFER_EOF;
