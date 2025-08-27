@@ -1202,7 +1202,9 @@ with_test_prefix "format_string" {
 	set current_lang "c"
 	prepare_gdb "${binfile}"
 	test_all_common
-	test_styling
+	if { ![is_remote host] } {
+	    test_styling
+	}
       }
     }
   }

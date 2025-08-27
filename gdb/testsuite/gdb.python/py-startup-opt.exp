@@ -17,6 +17,7 @@
 # initialized.
 
 require allow_python_tests
+require {!is_remote host}
 
 # Return a list containing two directory paths for newly created home
 # directories.

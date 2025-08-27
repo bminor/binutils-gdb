@@ -19,6 +19,7 @@
 load_lib gdb-guile.exp
 
 require allow_guile_tests
+require {!is_remote host}
 
 # Start GDB with styling support.
 with_ansi_styling_terminal {

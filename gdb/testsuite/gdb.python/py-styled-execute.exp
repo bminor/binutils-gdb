@@ -17,6 +17,7 @@
 # on the value of the third argument passed to gdb.execute.
 
 require allow_python_tests
+require {!is_remote host}
 
 load_lib gdb-python.exp
 
