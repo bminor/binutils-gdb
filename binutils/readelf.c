@@ -1832,7 +1832,9 @@ count_relr_relocations (Filedata *          filedata,
 
 static bool
 dump_relr_relocations (Filedata *          filedata,
-		       Elf_Internal_Shdr * section,
+		       uint64_t            relr_size,
+		       int                 relr_entsize,
+		       uint64_t            relr_offset,
 		       Elf_Internal_Sym *  symtab,
 		       uint64_t            nsyms,
 		       char *              strtab,
@@ -1840,9 +1842,6 @@ dump_relr_relocations (Filedata *          filedata,
 {
   uint64_t *  relrs;
   uint64_t    nentries, i;
-  uint64_t    relr_size = section->sh_size;
-  int         relr_entsize = section->sh_entsize;
-  uint64_t    relr_offset = section->sh_offset;
   uint64_t    where = 0;
   int         num_bits_in_entry;
 
@@ -9522,7 +9521,10 @@ display_relocations (Elf_Internal_Shdr *  section,
   bool res;
 
   if (rel_type == reltype_relr)
-    res = dump_relr_relocations (filedata, section, symtab, nsyms, strtab, strtablen);
+    res = dump_relr_relocations (filedata, section->sh_size,
+				 section->sh_entsize,
+				 section->sh_offset,
+				 symtab, nsyms, strtab, strtablen);
   else
     res = dump_relocations (filedata, rel_offset, rel_size,
 			    symtab, nsyms, strtab, strtablen,
@@ -9556,55 +9558,67 @@ process_relocs (Filedata * filedata)
 
       for (i = 0; i < ARRAY_SIZE (dynamic_relocations); i++)
 	{
+	  rel_size = filedata->dynamic_info[dynamic_relocations [i].size];
+
+	  if (!rel_size)
+	    continue;
+
+	  has_dynamic_reloc = true;
+
 	  rel_type = dynamic_relocations [i].rel_type;
 	  name = dynamic_relocations [i].name;
-	  rel_size = filedata->dynamic_info[dynamic_relocations [i].size];
 	  rel_offset = filedata->dynamic_info[dynamic_relocations [i].reloc];
-
-	  if (rel_size)
-	    has_dynamic_reloc = true;
 
 	  if (rel_type == reltype_unknown)
 	    {
-	      if (dynamic_relocations [i].reloc == DT_JMPREL)
-		switch (filedata->dynamic_info[DT_PLTREL])
-		  {
-		  case DT_REL:
-		    rel_type = reltype_rel;
-		    break;
-		  case DT_RELA:
-		    rel_type = reltype_rela;
-		    break;
-		  }
+	      if (dynamic_relocations [i].reloc != DT_JMPREL)
+		abort ();
+	      switch (filedata->dynamic_info[DT_PLTREL])
+		{
+		case DT_REL:
+		  rel_type = reltype_rel;
+		  break;
+		case DT_RELA:
+		  rel_type = reltype_rela;
+		  break;
+		}
 	    }
 
-	  if (rel_size)
-	    {
-	      if (filedata->is_separate)
-		printf
-		  (_("\nIn linked file '%s' section '%s' at offset %#" PRIx64
-		     " contains %" PRId64 " bytes:\n"),
-		   filedata->file_name, name, rel_offset, rel_size);
-	      else
-		printf
-		  (_("\n'%s' relocation section at offset %#" PRIx64
-		     " contains %" PRId64 " bytes:\n"),
-		   name, rel_offset, rel_size);
+	  if (filedata->is_separate)
+	    printf
+	      (_("\nIn linked file '%s' section '%s' at offset %#" PRIx64
+		 " contains %" PRId64 " bytes:\n"),
+	       filedata->file_name, name, rel_offset, rel_size);
+	  else
+	    printf
+	      (_("\n'%s' relocation section at offset %#" PRIx64
+		 " contains %" PRId64 " bytes:\n"),
+	       name, rel_offset, rel_size);
 
-	      dump_relocations (filedata,
-				offset_from_vma (filedata, rel_offset, rel_size),
-				rel_size,
-				filedata->dynamic_symbols,
-				filedata->num_dynamic_syms,
-				filedata->dynamic_strings,
-				filedata->dynamic_strings_length,
-				rel_type, true /* is_dynamic */);
-	    }
+	  if (rel_type == reltype_relr)
+	    dump_relr_relocations (filedata,
+				   filedata->dynamic_info[DT_RELRSZ],
+				   filedata->dynamic_info[DT_RELRENT],
+				   filedata->dynamic_info[DT_RELR],
+				   filedata->dynamic_symbols,
+				   filedata->num_dynamic_syms,
+				   filedata->dynamic_strings,
+				   filedata->dynamic_strings_length);
+	  else
+	    dump_relocations (filedata,
+			      offset_from_vma (filedata, rel_offset,
+					       rel_size),
+			      rel_size,
+			      filedata->dynamic_symbols,
+			      filedata->num_dynamic_syms,
+			      filedata->dynamic_strings,
+			      filedata->dynamic_strings_length,
+			      rel_type, true /* is_dynamic */);
 	}
 
-      if (is_ia64_vms (filedata))
-        if (process_ia64_vms_dynamic_relocs (filedata))
-	  has_dynamic_reloc = true;
+      if (is_ia64_vms (filedata)
+	  && process_ia64_vms_dynamic_relocs (filedata))
+	has_dynamic_reloc = true;
 
       if (! has_dynamic_reloc)
 	{
