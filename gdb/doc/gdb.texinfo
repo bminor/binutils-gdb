@@ -38880,7 +38880,7 @@ Example output:
 
 @smallexample
 (gdb) -list-features
-^done,result=["feature1","feature2"]
+^done,features=["feature1","feature2"]
 @end smallexample
 
 The current list of features is:
@@ -38945,7 +38945,7 @@ Example output:
 
 @smallexample
 (gdb) -list-target-features
-^done,result=["async"]
+^done,features=["async"]
 @end smallexample
 
 The current list of features is:
