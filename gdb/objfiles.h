@@ -395,7 +395,9 @@ struct obj_section
     return addr >= this->addr () && addr < endaddr ();
   }
 
-  /* BFD section pointer */
+  /* BFD section pointer.  This is nullptr if the corresponding BFD section is
+     not allocatable (!SEC_ALLOC), in which case this obj_section can be
+     considered NULL / empty.  */
   struct bfd_section *the_bfd_section;
 
   /* Objfile this section is part of.  */
