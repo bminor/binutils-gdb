@@ -34,6 +34,8 @@ if { $gdbserver == "" } {
 # to spawn the program before opening the connection.
 set spawn_id [remote_spawn target "$gdbserver stdio non-existing-program"]
 
+set eol {[\r\n]}
+
 set msg "gdbserver exits cleanly"
 set saw_exiting 0
 expect {
@@ -51,7 +53,7 @@ expect {
 	exp_continue
     }
     # This is what we get on Windows.
-    -re "Error creating process\r\n\r\nExiting\r\n" {
+    -re "Error creating process.*$eol+Exiting$eol+" {
 	set saw_exiting 1
 	exp_continue
     }
