@@ -1463,18 +1463,23 @@ proc objcopy_test_without_global_symbol { } {
     global OBJDUMPFLAGS
     global srcdir
     global subdir
+    global CFLAGS_FOR_TARGET
 
     set test "strip without global symbol "
 
-    if { [target_compile $srcdir/$subdir/pr19547.c tmpdir/pr19547.o object debug] != "" } {
+    set opts "debug"
+    if [string match "*-fsanitize=*" $CFLAGS_FOR_TARGET] {
+	append opts " additional_flags=-fno-sanitize=all"
+    }
+
+    set objfile tmpdir/pr19547.o
+    if { [target_compile $srcdir/$subdir/pr19547.c $objfile object $opts] != "" } {
 	untested $test
 	return
     }
 
     if [is_remote host] {
-	set objfile [remote_download host tmpdir/pr19547.o]
-    } else {
-	set objfile tmpdir/pr19547.o
+	set objfile [remote_download host $objfile]
     }
 
     set exec_output [binutils_run $OBJCOPY "$OBJCOPYFLAGS --strip-unneeded $objfile"]
