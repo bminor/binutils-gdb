@@ -1052,16 +1052,17 @@ core_target_open (const char *arg, int from_tty)
 
   target_preopen (from_tty);
 
+  /* The target_preopen call will remove any existing process stratum
+     target, which includes any existing core_target.  */
+  gdb_assert (current_inferior ()->process_target () == nullptr);
+
+  /* Which will clear up any existing core file BFD.  */
+  gdb_assert (current_program_space->core_bfd () == nullptr);
+
   std::string filename = extract_single_filename_arg (arg);
 
   if (filename.empty ())
-    {
-      if (current_program_space->core_bfd ())
-	error (_("No core file specified.  (Use `detach' "
-		 "to stop debugging a core file.)"));
-      else
-	error (_("No core file specified."));
-    }
+    error (_("No core file specified."));
 
   if (!IS_ABSOLUTE_PATH (filename.c_str ()))
     filename = gdb_abspath (filename);
