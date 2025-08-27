@@ -11490,5 +11490,46 @@ gdb_caching_proc have_builtin_trap {} {
     } executable]
 }
 
+# Return 1 if there is a startup shell.  Return -1 if there's no startup shell.
+# Return -1 otherwise.
+
+gdb_caching_proc have_startup_shell {} {
+    if { [is_remote target] } {
+	# For remote debugging targets, there is no guarantee that a "shell"
+	# is used.
+	return -1
+    }
+
+
+    gdb_exit
+    gdb_start
+
+    set re_on \
+	[string_to_regexp "Use of shell to start subprocesses is on."]
+    set re_off \
+	[string_to_regexp "Use of shell to start subprocesses is off."]
+    set re_cmd_unsupported \
+	[string_to_regexp \
+	     {Undefined show command: "startup-with-shell".  Try "help show".}]
+
+    set supported -1
+    gdb_test_multiple "show startup-with-shell" "" {
+	-re -wrap $re_on {
+	    set supported 1
+	}
+	-re -wrap $re_off {
+	    set supported 0
+	}
+	-re -wrap $re_cmd_unsupported {
+	}
+	-re -wrap "" {
+	}
+    }
+
+    gdb_exit
+
+    return $supported
+}
+
 # Always load compatibility stuff.
 load_lib future.exp

@@ -17,6 +17,7 @@
 
 # This does not work on boards that don't support inferior arguments.
 require {!target_info exists noargs}
+require {expr [have_startup_shell] != -1}
 
 standard_testfile .c
 

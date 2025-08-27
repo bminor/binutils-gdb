@@ -21,6 +21,7 @@ require {!target_info exists noargs}
 # This test requires starting new inferior processes, skip it if the target
 # board is a stub.
 require !use_gdb_stub
+require {expr [have_startup_shell] != -1}
 
 standard_testfile
 

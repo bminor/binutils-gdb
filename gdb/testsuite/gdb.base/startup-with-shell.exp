@@ -22,6 +22,8 @@ require !use_gdb_stub
 # (via dejagnu) yet.
 require {!is_remote target}
 
+require {expr [have_startup_shell] != -1}
+
 standard_testfile
 
 if { [build_executable "failed to prepare" $testfile $srcfile debug] } {
