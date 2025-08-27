@@ -54,12 +54,12 @@ hppabsd_find_global_pointer (struct gdbarch *gdbarch, struct value *function)
   faddr_sec = find_pc_section (faddr);
   if (faddr_sec != NULL)
     {
-      for (struct obj_section *sec : faddr_sec->objfile->sections ())
+      for (struct obj_section &sec : faddr_sec->objfile->sections ())
 	{
-	  if (strcmp (sec->the_bfd_section->name, ".dynamic") == 0)
+	  if (strcmp (sec.the_bfd_section->name, ".dynamic") == 0)
 	    {
-	      CORE_ADDR addr = sec->addr ();
-	      CORE_ADDR endaddr = sec->endaddr ();
+	      CORE_ADDR addr = sec.addr ();
+	      CORE_ADDR endaddr = sec.endaddr ();
 
 	      while (addr < endaddr)
 		{
@@ -81,7 +81,7 @@ hppabsd_find_global_pointer (struct gdbarch *gdbarch, struct value *function)
 			 DT_PLTGOT, so we have to do it ourselves.  */
 		      pltgot = extract_unsigned_integer (buf, sizeof buf,
 							 byte_order);
-		      pltgot += sec->objfile->text_section_offset ();
+		      pltgot += sec.objfile->text_section_offset ();
 
 		      return pltgot;
 		    }

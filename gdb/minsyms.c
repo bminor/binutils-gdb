@@ -712,11 +712,11 @@ static int
 frob_address (struct objfile *objfile, CORE_ADDR pc,
 	      unrelocated_addr *unrel_addr)
 {
-  for (obj_section *iter : objfile->sections ())
+  for (obj_section &iter : objfile->sections ())
     {
-      if (iter->contains (pc))
+      if (iter.contains (pc))
 	{
-	  *unrel_addr = unrelocated_addr (pc - iter->offset ());
+	  *unrel_addr = unrelocated_addr (pc - iter.offset ());
 	  return 1;
 	}
     }

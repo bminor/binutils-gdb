@@ -1846,18 +1846,18 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
 	 this reason, we still attempt a lookup by name prior to doing
 	 a search of the section table.  */
 
-      for (obj_section *s : objfile->sections ())
+      for (obj_section &s : objfile->sections ())
 	{
-	  if ((bfd_section_flags (s->the_bfd_section) & SEC_ALLOC) == 0)
+	  if ((bfd_section_flags (s.the_bfd_section) & SEC_ALLOC) == 0)
 	    continue;
 
-	  int idx = s - objfile->sections_start;
+	  int idx = &s - objfile->sections_start;
 	  CORE_ADDR offset = objfile->section_offsets[idx];
 
 	  if (fallback == -1)
 	    fallback = idx;
 
-	  if (s->addr () - offset <= addr && addr < s->endaddr () - offset)
+	  if (s.addr () - offset <= addr && addr < s.endaddr () - offset)
 	    {
 	      sym->set_section_index (idx);
 	      return;

@@ -962,11 +962,11 @@ z80_overlay_update_1 (struct obj_section *osect)
 
   /* we have interest for sections with same VMA */
   for (objfile *objfile : current_program_space->objfiles ())
-    for (obj_section *sect : objfile->sections ())
-      if (section_is_overlay (sect))
+    for (obj_section &sect : objfile->sections ())
+      if (section_is_overlay (&sect))
 	{
-	  sect->ovly_mapped = (lma == bfd_section_lma (sect->the_bfd_section));
-	  i |= sect->ovly_mapped; /* true, if at least one section is mapped */
+	  sect.ovly_mapped = (lma == bfd_section_lma (sect.the_bfd_section));
+	  i |= sect.ovly_mapped; /* true, if at least one section is mapped */
 	}
   return i;
 }
@@ -985,18 +985,18 @@ z80_overlay_update (struct obj_section *osect)
 
   /* Update all sections, even if only one was requested.  */
   for (objfile *objfile : current_program_space->objfiles ())
-    for (obj_section *sect : objfile->sections ())
+    for (obj_section &sect : objfile->sections ())
       {
-	if (!section_is_overlay (sect))
+	if (!section_is_overlay (&sect))
 	  continue;
 
-	asection *bsect = sect->the_bfd_section;
+	asection *bsect = sect.the_bfd_section;
 	bfd_vma lma = bfd_section_lma (bsect);
 	bfd_vma vma = bfd_section_vma (bsect);
 
 	for (int i = 0; i < cache_novly_regions; ++i)
 	  if (cache_ovly_region_table[i][Z80_VMA] == vma)
-	    sect->ovly_mapped =
+	    sect.ovly_mapped =
 	      (cache_ovly_region_table[i][Z80_MAPPED_TO_LMA] == lma);
       }
 }

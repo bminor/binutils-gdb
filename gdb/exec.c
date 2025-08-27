@@ -653,13 +653,13 @@ program_space::add_target_sections (struct objfile *objfile)
   gdb_assert (objfile != nullptr);
 
   /* Compute the number of sections to add.  */
-  for (obj_section *osect : objfile->sections ())
+  for (obj_section &osect : objfile->sections ())
     {
-      if (bfd_section_size (osect->the_bfd_section) == 0)
+      if (bfd_section_size (osect.the_bfd_section) == 0)
 	continue;
 
-      m_target_sections.emplace_back (osect->addr (), osect->endaddr (),
-				      osect->the_bfd_section, objfile);
+      m_target_sections.emplace_back (osect.addr (), osect.endaddr (),
+				      osect.the_bfd_section, objfile);
     }
 }
 

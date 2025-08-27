@@ -665,11 +665,11 @@ public:
     section_iterator &operator= (const section_iterator &) = default;
     section_iterator &operator= (section_iterator &&) = default;
 
-    typedef section_iterator self_type;
-    typedef obj_section *value_type;
+    using self_type = section_iterator;
+    using reference = obj_section &;
 
-    value_type operator* ()
-    { return m_iter; }
+    reference operator* ()
+    { return *m_iter; }
 
     section_iterator &operator++ ()
     {
@@ -701,8 +701,8 @@ public:
 	++m_iter;
     }
 
-    value_type m_iter;
-    value_type m_end;
+    obj_section *m_iter;
+    obj_section *m_end;
   };
 
   iterator_range<section_iterator> sections ()

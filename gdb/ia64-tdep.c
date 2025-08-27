@@ -3432,12 +3432,12 @@ ia64_find_global_pointer_from_dynamic_section (struct gdbarch *gdbarch,
   faddr_sect = find_pc_section (faddr);
   if (faddr_sect != NULL)
     {
-      for (obj_section *osect : faddr_sect->objfile->sections ())
+      for (obj_section &osect : faddr_sect->objfile->sections ())
 	{
-	  if (strcmp (osect->the_bfd_section->name, ".dynamic") == 0)
+	  if (strcmp (osect.the_bfd_section->name, ".dynamic") == 0)
 	    {
-	      CORE_ADDR addr = osect->addr ();
-	      CORE_ADDR endaddr = osect->endaddr ();
+	      CORE_ADDR addr = osect.addr ();
+	      CORE_ADDR endaddr = osect.endaddr ();
 
 	      while (addr < endaddr)
 		{
@@ -3513,12 +3513,12 @@ find_extant_func_descr (struct gdbarch *gdbarch, CORE_ADDR faddr)
 
   if (faddr_sect != NULL)
     {
-      for (obj_section *osect : faddr_sect->objfile->sections ())
+      for (obj_section &osect : faddr_sect->objfile->sections ())
 	{
-	  if (strcmp (osect->the_bfd_section->name, ".opd") == 0)
+	  if (strcmp (osect.the_bfd_section->name, ".opd") == 0)
 	    {
-	      CORE_ADDR addr = osect->addr ();
-	      CORE_ADDR endaddr = osect->endaddr ();
+	      CORE_ADDR addr = osect.addr ();
+	      CORE_ADDR endaddr = osect.endaddr ();
 
 	      while (addr < endaddr)
 		{

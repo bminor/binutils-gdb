@@ -1622,8 +1622,8 @@ is_thread_local_section (struct bfd_section *bfd_sect)
 static bool
 has_thread_local_section (const objfile *objf)
 {
-  for (obj_section *objsec : objf->sections ())
-    if (is_thread_local_section (objsec->the_bfd_section))
+  for (obj_section &objsec : objf->sections ())
+    if (is_thread_local_section (objsec.the_bfd_section))
       return true;
   return false;
 }
