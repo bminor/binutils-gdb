@@ -1014,12 +1014,11 @@ fbsd_info_proc_files_entry (int kf_type, int kf_fd, int kf_flags,
   gdb_printf ("\n");
 }
 
-/* Implement "info proc files" for a corefile.  */
+/* Implement "info proc files" for corefile CBFD.  */
 
 static void
-fbsd_core_info_proc_files (struct gdbarch *gdbarch)
+fbsd_core_info_proc_files (struct gdbarch *gdbarch, bfd *cbfd)
 {
-  bfd *cbfd = current_program_space->core_bfd ();
   asection *section = bfd_get_section_by_name (cbfd, ".note.freebsdcore.files");
   if (section == NULL)
     {
@@ -1142,15 +1141,14 @@ fbsd_info_proc_mappings_entry (int addr_bit, ULONGEST kve_start,
     }
 }
 
-/* Implement "info proc mappings" for a corefile.  */
+/* Implement "info proc mappings" for corefile CBFD.  */
 
 static void
-fbsd_core_info_proc_mappings (struct gdbarch *gdbarch)
+fbsd_core_info_proc_mappings (struct gdbarch *gdbarch, bfd *cbfd)
 {
   asection *section;
   unsigned char *descdata, *descend;
   size_t note_size;
-  bfd *cbfd = current_program_space->core_bfd ();
 
   section = bfd_get_section_by_name (cbfd, ".note.freebsdcore.vmmap");
   if (section == NULL)
@@ -1193,15 +1191,14 @@ fbsd_core_info_proc_mappings (struct gdbarch *gdbarch)
 }
 
 /* Fetch the pathname of a vnode for a single file descriptor from the
-   file table core note.  */
+   file table core note in CBFD.  */
 
 static gdb::unique_xmalloc_ptr<char>
-fbsd_core_vnode_path (struct gdbarch *gdbarch, int fd)
+fbsd_core_vnode_path (struct gdbarch *gdbarch, bfd *cbfd, int fd)
 {
   asection *section;
   unsigned char *descdata, *descend;
   size_t note_size;
-  bfd *cbfd = current_program_space->core_bfd ();
 
   section = bfd_get_section_by_name (cbfd, ".note.freebsdcore.files");
   if (section == NULL)
@@ -1241,14 +1238,12 @@ fbsd_core_vnode_path (struct gdbarch *gdbarch, int fd)
   return nullptr;
 }
 
-/* Helper function to read a struct timeval.  */
+/* Helper function to read a struct timeval from core file CBFD.  */
 
 static void
-fbsd_core_fetch_timeval (struct gdbarch *gdbarch, unsigned char *data,
-			 LONGEST &sec, ULONGEST &usec)
+fbsd_core_fetch_timeval (struct gdbarch *gdbarch, bfd *cbfd,
+			 unsigned char *data, LONGEST &sec, ULONGEST &usec)
 {
-  bfd *cbfd = current_program_space->core_bfd ();
-
   if (gdbarch_addr_bit (gdbarch) == 64)
     {
       sec = bfd_get_signed_64 (cbfd, data);
@@ -1266,12 +1261,11 @@ fbsd_core_fetch_timeval (struct gdbarch *gdbarch, unsigned char *data,
     }
 }
 
-/* Print out the contents of a signal set.  */
+/* Print out the contents of a signal set SIGSET in core file CBFD.  */
 
 static void
-fbsd_print_sigset (const char *descr, unsigned char *sigset)
+fbsd_print_sigset (bfd *cbfd, const char *descr, unsigned char *sigset)
 {
-  bfd *cbfd = current_program_space->core_bfd ();
   gdb_printf ("%s: ", descr);
   for (int i = 0; i < SIG_WORDS; i++)
     gdb_printf ("%08x ",
@@ -1279,10 +1273,10 @@ fbsd_print_sigset (const char *descr, unsigned char *sigset)
   gdb_printf ("\n");
 }
 
-/* Implement "info proc status" for a corefile.  */
+/* Implement "info proc status" for corefile CBFD.  */
 
 static void
-fbsd_core_info_proc_status (struct gdbarch *gdbarch)
+fbsd_core_info_proc_status (struct gdbarch *gdbarch, bfd *cbfd)
 {
   const struct kinfo_proc_layout *kp;
   asection *section;
@@ -1291,7 +1285,6 @@ fbsd_core_info_proc_status (struct gdbarch *gdbarch)
   size_t note_size;
   ULONGEST value;
   LONGEST sec;
-  bfd *cbfd = current_program_space->core_bfd ();
 
   section = bfd_get_section_by_name (cbfd, ".note.freebsdcore.proc");
   if (section == NULL)
@@ -1386,25 +1379,25 @@ fbsd_core_info_proc_status (struct gdbarch *gdbarch)
   value = bfd_get (long_bit, cbfd,
 		   descdata + kp->ki_rusage_ch + kp->ru_majflt);
   gdb_printf ("Major faults, children: %s\n", pulongest (value));
-  fbsd_core_fetch_timeval (gdbarch,
+  fbsd_core_fetch_timeval (gdbarch, cbfd,
 			   descdata + kp->ki_rusage + kp->ru_utime,
 			   sec, value);
   gdb_printf ("utime: %s.%06d\n", plongest (sec), (int) value);
-  fbsd_core_fetch_timeval (gdbarch,
+  fbsd_core_fetch_timeval (gdbarch, cbfd,
 			   descdata + kp->ki_rusage + kp->ru_stime,
 			   sec, value);
   gdb_printf ("stime: %s.%06d\n", plongest (sec), (int) value);
-  fbsd_core_fetch_timeval (gdbarch,
+  fbsd_core_fetch_timeval (gdbarch, cbfd,
 			   descdata + kp->ki_rusage_ch + kp->ru_utime,
 			   sec, value);
   gdb_printf ("utime, children: %s.%06d\n", plongest (sec), (int) value);
-  fbsd_core_fetch_timeval (gdbarch,
+  fbsd_core_fetch_timeval (gdbarch, cbfd,
 			   descdata + kp->ki_rusage_ch + kp->ru_stime,
 			   sec, value);
   gdb_printf ("stime, children: %s.%06d\n", plongest (sec), (int) value);
   gdb_printf ("'nice' value: %d\n",
 	      (int) bfd_get_signed_8 (core_bfd, descdata + kp->ki_nice));
-  fbsd_core_fetch_timeval (gdbarch, descdata + kp->ki_start, sec, value);
+  fbsd_core_fetch_timeval (gdbarch, cbfd, descdata + kp->ki_start, sec, value);
   gdb_printf ("Start time: %s.%06d\n", plongest (sec), (int) value);
   gdb_printf ("Virtual memory size: %s kB\n",
 	      pulongest (bfd_get (addr_bit, cbfd,
@@ -1425,8 +1418,8 @@ fbsd_core_info_proc_status (struct gdbarch *gdbarch)
 	      pulongest (bfd_get (long_bit, cbfd,
 				  descdata + kp->ki_rusage
 				  + kp->ru_maxrss)));
-  fbsd_print_sigset ("Ignored Signals", descdata + kp->ki_sigignore);
-  fbsd_print_sigset ("Caught Signals", descdata + kp->ki_sigcatch);
+  fbsd_print_sigset (cbfd, "Ignored Signals", descdata + kp->ki_sigignore);
+  fbsd_print_sigset (cbfd, "Caught Signals", descdata + kp->ki_sigcatch);
 }
 
 /* Implement the "core_info_proc" gdbarch method.  */
@@ -1498,7 +1491,7 @@ fbsd_core_info_proc (struct gdbarch *gdbarch, struct bfd *cbfd,
   if (do_cwd)
     {
       gdb::unique_xmalloc_ptr<char> cwd =
-	fbsd_core_vnode_path (gdbarch, KINFO_FILE_FD_TYPE_CWD);
+	fbsd_core_vnode_path (gdbarch, cbfd, KINFO_FILE_FD_TYPE_CWD);
       if (cwd)
 	gdb_printf ("cwd = '%s'\n", cwd.get ());
       else
@@ -1507,18 +1500,18 @@ fbsd_core_info_proc (struct gdbarch *gdbarch, struct bfd *cbfd,
   if (do_exe)
     {
       gdb::unique_xmalloc_ptr<char> exe =
-	fbsd_core_vnode_path (gdbarch, KINFO_FILE_FD_TYPE_TEXT);
+	fbsd_core_vnode_path (gdbarch, cbfd, KINFO_FILE_FD_TYPE_TEXT);
       if (exe)
 	gdb_printf ("exe = '%s'\n", exe.get ());
       else
 	warning (_("unable to read executable path name"));
     }
   if (do_files)
-    fbsd_core_info_proc_files (gdbarch);
+    fbsd_core_info_proc_files (gdbarch, cbfd);
   if (do_mappings)
-    fbsd_core_info_proc_mappings (gdbarch);
+    fbsd_core_info_proc_mappings (gdbarch, cbfd);
   if (do_status)
-    fbsd_core_info_proc_status (gdbarch);
+    fbsd_core_info_proc_status (gdbarch, cbfd);
 }
 
 /* Print descriptions of FreeBSD-specific AUXV entries to FILE.  */
