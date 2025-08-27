@@ -2561,7 +2561,7 @@ one for live targets.  CBFD is the core file being read from.
     params=[
         ("struct bfd *", "cbfd"),
         ("const char *", "args"),
-        ("enum info_proc_what", "what")
+        ("enum info_proc_what", "what"),
     ],
     predicate=True,
 )
