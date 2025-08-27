@@ -1051,12 +1051,12 @@ typedef std::string (gdbarch_core_pid_to_str_ftype) (struct gdbarch *gdbarch, pt
 extern std::string gdbarch_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid);
 extern void set_gdbarch_core_pid_to_str (struct gdbarch *gdbarch, gdbarch_core_pid_to_str_ftype *core_pid_to_str);
 
-/* How the core target extracts the name of a thread from a core file. */
+/* How the core target extracts the name of a thread from core file CBFD. */
 
 extern bool gdbarch_core_thread_name_p (struct gdbarch *gdbarch);
 
-typedef const char * (gdbarch_core_thread_name_ftype) (struct gdbarch *gdbarch, struct thread_info *thr);
-extern const char * gdbarch_core_thread_name (struct gdbarch *gdbarch, struct thread_info *thr);
+typedef const char * (gdbarch_core_thread_name_ftype) (struct gdbarch *gdbarch, struct bfd &cbfd, struct thread_info *thr);
+extern const char * gdbarch_core_thread_name (struct gdbarch *gdbarch, struct bfd &cbfd, struct thread_info *thr);
 extern void set_gdbarch_core_thread_name (struct gdbarch *gdbarch, gdbarch_core_thread_name_ftype *core_thread_name);
 
 /* Read offset OFFSET of TARGET_OBJECT_SIGNAL_INFO signal information

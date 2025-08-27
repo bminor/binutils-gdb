@@ -1776,11 +1776,11 @@ How the core target converts a PTID from a core file to a string.
 
 Method(
     comment="""
-How the core target extracts the name of a thread from a core file.
+How the core target extracts the name of a thread from core file CBFD.
 """,
     type="const char *",
     name="core_thread_name",
-    params=[("struct thread_info *", "thr")],
+    params=[("struct bfd &", "cbfd"), ("struct thread_info *", "thr")],
     predicate=True,
 )
 

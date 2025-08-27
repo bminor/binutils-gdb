@@ -4042,13 +4042,13 @@ gdbarch_core_thread_name_p (struct gdbarch *gdbarch)
 }
 
 const char *
-gdbarch_core_thread_name (struct gdbarch *gdbarch, struct thread_info *thr)
+gdbarch_core_thread_name (struct gdbarch *gdbarch, struct bfd &cbfd, struct thread_info *thr)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->core_thread_name != NULL);
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_core_thread_name called\n");
-  return gdbarch->core_thread_name (gdbarch, thr);
+  return gdbarch->core_thread_name (gdbarch, cbfd, thr);
 }
 
 void

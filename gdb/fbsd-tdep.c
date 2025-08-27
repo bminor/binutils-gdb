@@ -548,7 +548,8 @@ fbsd_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
    string in a static buffer.  */
 
 static const char *
-fbsd_core_thread_name (struct gdbarch *gdbarch, struct thread_info *thr)
+fbsd_core_thread_name (struct gdbarch *gdbarch, bfd &cbfd,
+		       struct thread_info *thr)
 {
   static char buf[80];
   struct bfd_section *section;
@@ -564,16 +565,15 @@ fbsd_core_thread_name (struct gdbarch *gdbarch, struct thread_info *thr)
 	 extract the null-terminated name from the start of the
 	 note.  */
       thread_section_name section_name (".thrmisc", thr->ptid);
-      bfd *cbfd = current_program_space->core_bfd ();
 
-      section = bfd_get_section_by_name (cbfd, section_name.c_str ());
+      section = bfd_get_section_by_name (&cbfd, section_name.c_str ());
       if (section != NULL && bfd_section_size (section) > 0)
 	{
 	  /* Truncate the name if it is longer than "buf".  */
 	  size = bfd_section_size (section);
 	  if (size > sizeof buf - 1)
 	    size = sizeof buf - 1;
-	  if (bfd_get_section_contents (cbfd, section, buf, (file_ptr) 0, size)
+	  if (bfd_get_section_contents (&cbfd, section, buf, (file_ptr) 0, size)
 	      && buf[0] != '\0')
 	    {
 	      buf[size] = '\0';
@@ -582,7 +582,7 @@ fbsd_core_thread_name (struct gdbarch *gdbarch, struct thread_info *thr)
 		 as its thread name instead of an empty name if a name
 		 has not been set explicitly.  Return a NULL name in
 		 that case.  */
-	      if (strcmp (buf, elf_tdata (cbfd)->core->program) != 0)
+	      if (strcmp (buf, elf_tdata (&cbfd)->core->program) != 0)
 		return buf;
 	    }
 	}

@@ -1800,7 +1800,11 @@ core_target::thread_name (struct thread_info *thr)
 {
   if (m_core_gdbarch != nullptr
       && gdbarch_core_thread_name_p (m_core_gdbarch))
-    return gdbarch_core_thread_name (m_core_gdbarch, thr);
+    {
+      bfd *cbfd = current_program_space->core_bfd ();
+      gdb_assert (cbfd != nullptr);
+      return gdbarch_core_thread_name (m_core_gdbarch, *cbfd, thr);
+    }
   return NULL;
 }
 
