@@ -36,30 +36,81 @@ proc _selftest_find_gdb { arg } {
     return $arg
 }
 
+# Return true if the GDB under test is installed (as opposed to a GDB in its
+# build directory).
+
+proc _selftest_gdb_is_installed {} {
+    # If GDB_DATA_DIRECTORY is empty, assume that it is an installed GDB.  It is
+    # not a perfectly accurate check, but should be good enough.
+    return [expr {"$::GDB_DATA_DIRECTORY" == ""}]
+}
+
+# Return true if the libtool binary is present on the host.
+
+proc _selftest_has_libtool {} {
+    lassign [remote_exec host "sh -c \"command -v libtool\""] status output
+    return [expr {$status == 0}]
+}
+
+# Return true if EXECUTABLE has debug info.
+#
+# If it doesn't, or if it's not possible to determine, issue an UNTESTED test
+# result and return false.
+
+proc _selftest_check_executable_debug_info { executable } {
+    set ::gdb_file_cmd_debug_info "unset"
+    set result true
+
+    # On Cygwin (at least), gdb/gdb.exe is a libtool wrapper (which happens to
+    # be a PE executable).  The real binary is gdb/.libs/gdb.exe.  If we load
+    # gdb/gdb.exe, we won't see any debug info and conclude that we can't run
+    # the test.  Obtain the real executable path using libtool.
+    #
+    # At the time of writing, we don't see a libtool wrapper generated on Linux.
+    # But if there was one, it would be a shell script, and it would not be
+    # possible to load it in gdb.  This conversion would therefore also be
+    # necessary.
+    #
+    # If testing against an installed GDB, then there won't be a libtool
+    # wrapper, no need to convert.
+    if { ![_selftest_gdb_is_installed] && [_selftest_has_libtool] } {
+	lassign [remote_exec host libtool \
+		 "--mode=execute echo -n $executable"] \
+	    status executable
+
+	if { $status != 0 } {
+	    untested "failed to run libtool"
+	    return false
+	}
+    }
+
+    gdb_start
+
+    if {[gdb_load $executable] != 0} {
+	untested "failed to load executable when checking for debug info"
+	set result false
+    }
+
+    if {$::gdb_file_cmd_debug_info != "debug"} {
+	untested "no debug information, skipping testcase."
+	set result false
+    }
+
+    gdb_exit
+
+    return $result
+}
+
 # A helper proc that sets up for self-testing.
-# EXECUTABLE is the gdb to use.
+#
+# Assumes that the inferior GDB is already loaded in the top-level GDB.
+#
 # Return 0 in case of success, -1 in case of failure, and -2 in case of
 # skipping the test-case.
 
-proc _selftest_setup { executable } {
+proc _selftest_setup { } {
     global gdb_prompt
     global INTERNAL_GDBFLAGS
-
-    # load yourself into the debugger
-
-    global gdb_file_cmd_debug_info
-    set gdb_file_cmd_debug_info "unset"
-
-    set result [gdb_load $executable]
-
-    if {$result != 0} {
-	return -1
-    }
-
-    if {$gdb_file_cmd_debug_info != "debug"} {
-	untested "no debug information, skipping testcase."
-	return -2
-    }
 
     # Set a breakpoint at main
     set function main
@@ -145,13 +196,32 @@ proc do_self_tests {body} {
 	return
     }
 
-    gdb_start
+    # Check if the gdb executable has debug info.
+    if { ![_selftest_check_executable_debug_info $file] } {
+	return
+    }
+
+    # FILE might be a libtool wrapper.  In order to debug the real thing, pass
+    # FILE on the command-line of the top-level gdb, and run under
+    # `libtool --mode=execute.  libtool will replace FILE with the path to the
+    # real executable and set any path required for it to find its dependent
+    # libraries.
+    #
+    # If testing against an installed GDB, there won't be a libtool wrapper.
+    save_vars { ::GDB ::GDBFLAGS } {
+	if { ![_selftest_gdb_is_installed] && [_selftest_has_libtool] } {
+	    set ::GDB "libtool --mode=execute $::GDB"
+	}
+
+	set ::GDBFLAGS "$::GDBFLAGS $file"
+	gdb_start
+    }
 
     # When debugging GDB with GDB, some operations can take a relatively long
     # time, especially if the build is non-optimized.  Bump the timeout for the
     # duration of the test.
     with_timeout_factor 10 {
-	set result [_selftest_setup $file]
+	set result [_selftest_setup]
 	if {$result == 0} {
 	    set result [uplevel $body]
 	}
