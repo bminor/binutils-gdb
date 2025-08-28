@@ -21,8 +21,6 @@
 # The entry points for this test are in the various
 # gdb.dwarf2/macro-source-path-*.exp files.
 
-load_lib dwarf.exp
-
 standard_testfile macro-source-path.c
 
 lassign [function_range main $srcdir/$subdir/$srcfile] \
