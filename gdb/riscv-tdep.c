@@ -5579,10 +5579,7 @@ riscv_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 
   riscv_recorded_insn insn;
   if (!insn.record (gdbarch, regcache, addr))
-    {
-      record_full_arch_list_add_end ();
-      return -1;
-    }
+    return -1;
 
   int ret_val = riscv_record_insn_details (gdbarch, regcache, insn);
 
