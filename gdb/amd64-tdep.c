@@ -2586,6 +2586,59 @@ amd64_analyze_frame_setup (gdbarch *gdbarch, CORE_ADDR pc,
   return pc;
 }
 
+/* Check whether PC points at code pushing registers onto the stack.  If so,
+   update CACHE and return pc after those pushes or CURRENT_PC, whichever is
+   smaller.  Otherwise, return PC passed to this function.
+
+   In AMD64 prologue, we only expect GPRs being pushed onto the stack.  */
+
+static CORE_ADDR
+amd64_analyze_register_saves (CORE_ADDR pc, CORE_ADDR current_pc,
+			      amd64_frame_cache *cache)
+{
+  gdb_byte op;
+
+  /* Limit iterating to 16 GPRs available.  */
+  for (int i = 0; i < 16 && pc < current_pc; i++)
+    {
+      int reg = 0;
+      int pc_offset = 0;
+
+      if (target_read_code (pc, &op, 1) == -1)
+	return pc;
+
+      /* push %r8 - %r15 REX prefix.  We expect only REX.B to be set, but
+	 because, for example, REX.R would be "unused" if it were there,
+	 we mask opcode with 0xF1 in case compilers don't get rid of it
+	 "because it doesn't matter anyway".  */
+      if ((op & 0xF1) == 0x41)
+	{
+	  reg += 8;
+	  pc_offset = 1;
+
+	  if (target_read_code (pc + 1, &op, 1) == -1)
+	    return pc;
+	}
+
+      /* push %rax|%rcx|%rdx|%rbx|%rsp|%rbp|%rsi|%rdi
+
+	 or with 0x41 prefix:
+	 push %r8|%r9|%r10|%r11|%r12|%r13|%r14|%r15.  */
+      if (op < 0x50 || op > 0x57)
+	break;
+
+      reg += op - 0x50;
+
+      int regnum = amd64_arch_reg_to_regnum (reg);
+      cache->sp_offset += 8;
+      cache->saved_regs[regnum] = -cache->sp_offset;
+
+      pc += 1 + pc_offset;
+    }
+
+  return pc;
+}
+
 /* Do a limited analysis of the prologue at PC and update CACHE
    accordingly.  Bail out early if CURRENT_PC is reached.  Return the
    address where the analysis stopped.
@@ -2627,7 +2680,8 @@ amd64_analyze_prologue (gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR current_pc,
   if (current_pc <= pc)
     return current_pc;
 
-  return amd64_analyze_frame_setup (gdbarch, pc, current_pc, cache);
+  pc = amd64_analyze_frame_setup (gdbarch, pc, current_pc, cache);
+  return amd64_analyze_register_saves (pc, current_pc, cache);
 }
 
 /* Work around false termination of prologue - GCC PR debug/48827.
