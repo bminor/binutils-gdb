@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add --got-contents option to readelf to display the contents of
+  Global Offset Table (GOT) sections.
+
 * Internal changes to plugin support, and stricter target checking may result
   in some errors being exposed in user options passed to the various binutils.
   For example objcopy --target=TARGET now will only work if the input file is

@@ -5076,6 +5076,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{--ctf-strings=}@var{section}]
         [@option{--sframe=}@var{section}]
         [@option{-I}|@option{--histogram}]
+        [@option{--got-contents}]
         [@option{-v}|@option{--version}]
         [@option{-W}|@option{--wide}]
         [@option{-T}|@option{--silent-truncation}]
@@ -5111,7 +5112,8 @@ given.
 Equivalent to specifying @option{--file-header},
 @option{--program-headers}, @option{--sections}, @option{--symbols},
 @option{--relocs}, @option{--dynamic}, @option{--notes},
-@option{--version-info}, @option{--arch-specific}, @option{--unwind},
+@option{--got-contents}, @option{--version-info},
+@option{--arch-specific}, @option{--unwind},
 @option{--section-groups} and @option{--histogram}.
 
 Note - this option does not enable @option{--use-dynamic} itself, so
@@ -5386,6 +5388,14 @@ string table are used.
 
 If either of @option{--ctf-symbols} or @option{--ctf-strings} is specified, the
 other must be specified as well.
+
+@item --got-contents
+@cindex ELF section information
+@cindex ELF reloc information
+Displays the contents of the file's Global Offset Table (GOT) sections,
+if it has any.  For MIPS, this option is similar to
+@option{--arch-specific}, but it only displays the GOT related contents
+and it is ignored when @option{--arch-specific} is used.
 
 @item -I
 @itemx --histogram

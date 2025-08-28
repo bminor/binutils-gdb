@@ -229,6 +229,7 @@ static bool do_dyn_syms = false;
 static bool do_lto_syms = false;
 static bool do_reloc = false;
 static bool do_sections = false;
+static bool do_got_section_contents = false;
 static bool do_section_groups = false;
 static bool do_section_details = false;
 static bool do_segments = false;
@@ -371,6 +372,21 @@ enum versioned_symbol_info
   symbol_hidden,
   symbol_public
 };
+
+/* Relocation entries */
+
+typedef struct elf_relocation
+{
+  bfd_vma r_offset;	/* Location at which to apply the action */
+  bfd_vma r_addend;	/* Constant addend used to compute value */
+  const char *r_name;	/* Relocation name.  */
+  char *r_symbol;	/* Relocation symbol.  */
+  relocation_type r_type; /* Relocation type.  */
+} elf_relocation;
+
+static elf_relocation *all_relocations_root;
+static elf_relocation *all_relocations;
+static size_t all_relocations_count;
 
 static int
 fseek64 (FILE *stream, int64_t offset, int whence)
@@ -1767,6 +1783,32 @@ symcmp (const void *p, const void *q)
   return sp->st_value > sq->st_value ? 1 : (sp->st_value < sq->st_value ? -1 : 0);
 }
 
+static void
+update_all_relocations (size_t nentries)
+{
+  size_t sz;
+
+  if (!do_got_section_contents)
+    return;
+
+  if (!all_relocations_root)
+    {
+      sz = nentries * sizeof (elf_relocation);
+      all_relocations_root = (elf_relocation *) xmalloc (sz);
+      all_relocations = all_relocations_root;
+      all_relocations_count = nentries;
+    }
+  else
+    {
+      size_t orig_count = all_relocations_count;
+      sz = (orig_count + nentries) * sizeof (elf_relocation);
+      all_relocations_root = (elf_relocation *)
+	xrealloc (all_relocations_root, sz);
+      all_relocations = all_relocations_root + orig_count;
+      all_relocations_count += nentries;
+    }
+}
+
 static uint64_t
 count_relr_relocations (Filedata *          filedata,
 			Elf_Internal_Shdr * section)
@@ -1830,6 +1872,9 @@ count_relr_relocations (Filedata *          filedata,
   return count;
 }
 
+/* If DUMP_RELOC is false, don't display RELR relocations, just collect
+   RELR relocations for displaying GOT section contents later.  */
+
 static bool
 dump_relr_relocations (Filedata *          filedata,
 		       uint64_t            relr_size,
@@ -1838,7 +1883,8 @@ dump_relr_relocations (Filedata *          filedata,
 		       Elf_Internal_Sym *  symtab,
 		       uint64_t            nsyms,
 		       char *              strtab,
-		       uint64_t            strtablen)
+		       uint64_t            strtablen,
+		       bool                dump_reloc)
 {
   uint64_t *  relrs;
   uint64_t    nentries, i;
@@ -1860,7 +1906,8 @@ dump_relr_relocations (Filedata *          filedata,
     num_bits_in_entry = 63;
   else
     {
-      warn (_("Unexpected entsize for RELR section\n"));
+      if (dump_reloc)
+	warn (_("Unexpected entsize for RELR section\n"));
       return false;
     }
 
@@ -1874,6 +1921,161 @@ dump_relr_relocations (Filedata *          filedata,
   if (symtab == NULL)
     nsyms = 0;
 
+  const char *rtype = NULL;
+  if (do_got_section_contents)
+    switch (filedata->file_header.e_machine)
+      {
+      default:
+	abort ();
+
+      case EM_386:
+      case EM_IAMCU:
+	rtype = "R_386_RELATIVE";
+	break;
+
+      case EM_68K:
+	rtype = "R_68K_RELATIVE";
+	break;
+
+      case EM_860:
+	rtype = "R_860_RELATIVE";
+	break;
+
+      case EM_AARCH64:
+	rtype = "R_AARCH64_RELATIVE";
+	break;
+
+      case EM_AMDGPU:
+	rtype = "R_AMDGPU_RELATIVE64";
+	break;
+
+      case EM_ALPHA:
+	rtype = "R_ALPHA_RELATIVE";
+	break;
+
+      case EM_ALTERA_NIOS2:
+	rtype = "R_NIOS2_RELATIVE";
+	break;
+
+      case EM_ARM:
+	rtype = "R_ARM_RELATIVE";
+	break;
+
+      case EM_ARC:
+      case EM_ARC_COMPACT:
+      case EM_ARC_COMPACT2:
+      case EM_ARC_COMPACT3:
+      case EM_ARC_COMPACT3_64:
+	rtype = "R_ARC_RELATIVE";
+	break;
+
+      case EM_CRIS:
+	rtype = "R_CRIS_RELATIVE";
+	break;
+
+      case EM_CSKY:
+	rtype = "R_CKCORE_RELATIVE";
+	break;
+
+      case EM_KVX:
+	rtype = "R_KVX_RELATIVE";
+	break;
+
+      case EM_LATTICEMICO32:
+	rtype = "R_LM32_RELATIVE";
+	break;
+
+      case EM_LOONGARCH:
+	rtype = "R_LARCH_RELATIVE";
+	break;
+
+      case EM_M32R:
+      case EM_CYGNUS_M32R:
+	rtype = "R_M32R_RELATIVE";
+	break;
+
+      case EM_MCORE:
+	rtype = "R_MCORE_RELATIVE";
+	break;
+
+      case EM_METAG:
+	rtype = "R_METAG_RELATIVE";
+	break;
+
+      case EM_MN10300:
+      case EM_CYGNUS_MN10300:
+	rtype = "R_MN10300_RELATIVE";
+	break;
+
+      case EM_NDS32:
+	rtype = "R_NDS32_RELATIVE";
+	break;
+
+      case EM_OR1K:
+	rtype = "R_OR1K_RELATIVE";
+	break;
+
+      case EM_PPC:
+	rtype = "R_PPC_RELATIVE";
+	break;
+
+      case EM_PPC64:
+	rtype = "R_PPC64_RELATIVE";
+	break;
+
+      case EM_RISCV:
+	rtype = "R_RISCV_RELATIVE";
+	break;
+
+      case EM_S370:
+	rtype = "R_I370_RELATIVE";
+	break;
+
+      case EM_S390_OLD:
+      case EM_S390:
+	rtype = "R_390_RELATIVE";
+	break;
+
+      case EM_SH:
+	rtype = "R_SH_RELATIVE";
+	break;
+
+      case EM_OLD_SPARCV9:
+      case EM_SPARC32PLUS:
+      case EM_SPARCV9:
+      case EM_SPARC:
+	rtype = "R_SPARC_RELATIVE";
+	break;
+
+      case EM_TILEGX:
+	rtype = "R_TILEGX_RELATIVE";
+	break;
+
+      case EM_TILEPRO:
+	rtype = "R_TILEPRO_RELATIVE";
+	break;
+
+      case EM_V850:
+      case EM_CYGNUS_V850:
+	rtype = "R_V850_RELATIVE";
+	break;
+
+      case EM_VAX:
+	rtype = "R_VAX_RELATIVE";
+	break;
+
+      case EM_X86_64:
+      case EM_L1OM:
+      case EM_K1OM:
+	rtype = "R_X86_64_RELATIVE";
+	break;
+
+      case EM_XTENSA_OLD:
+      case EM_XTENSA:
+	rtype = "R_XTENSA_RELATIVE";
+	break;
+      }
+
   if (symtab != NULL)
     {
       /* Symbol tables are not sorted on address, but we want a quick lookup
@@ -1884,11 +2086,15 @@ dump_relr_relocations (Filedata *          filedata,
       nsyms = filter_display_syms (filedata, symtab, nsyms, strtab, strtablen);
     }
 
-  if (relr_entsize == sizeof (Elf32_External_Relr))
-    printf (_ ("Index: Entry    Address   Symbolic Address\n"));
-  else
-    printf (_ ("Index: Entry            Address           Symbolic Address\n"));
+  if (dump_reloc)
+    {
+      if (relr_entsize == sizeof (Elf32_External_Relr))
+	printf (_ ("Index: Entry    Address   Symbolic Address\n"));
+      else
+	printf (_ ("Index: Entry            Address           Symbolic Address\n"));
+    }
 
+  uint64_t r = 0;
   for (i = 0; i < nentries; i++)
     {
       uint64_t entry;
@@ -1898,16 +2104,34 @@ dump_relr_relocations (Filedata *          filedata,
       else
 	entry = BYTE_GET (((Elf64_External_Relr *)relrs)[i].r_data);
 
-      /* We assume that there will never be more than 9999 entries.  */
-      printf (_("%04u:  "), (unsigned int) i);
-      print_vma (entry, ZERO_HEX);
-      printf (" ");
+      if (dump_reloc)
+	{
+	  /* We assume that there will never be more than 9999
+	     entries.  */
+	  printf (_("%04u:  "), (unsigned int) i);
+	  print_vma (entry, ZERO_HEX);
+	  printf (" ");
+	}
 
       if ((entry & 1) == 0)
 	{
 	  where = entry;
-	  print_relr_addr_and_sym (filedata, symtab, nsyms, strtab, where);
-	  printf ("\n");
+	  if (dump_reloc)
+	    {
+	      print_relr_addr_and_sym (filedata, symtab, nsyms, strtab,
+				       where);
+	      printf ("\n");
+	    }
+
+	  if (do_got_section_contents)
+	    {
+	      all_relocations[r].r_offset = where;
+	      all_relocations[r].r_name = rtype;
+	      all_relocations[r].r_symbol = NULL;
+	      all_relocations[r].r_type = reltype_relr;
+	      r++;
+	    }
+
 	  where += relr_entsize;
 	}
       else
@@ -1920,7 +2144,7 @@ dump_relr_relocations (Filedata *          filedata,
 	    /* This can actually happen when the linker is allowed to shrink
 	       RELR sections.  For more details see: https://reviews.llvm.org/D67164. */
 	    continue;
-	  else if (i == 0)
+	  else if (dump_reloc && i == 0)
 	    warn (_("Unusual RELR bitmap - no previous entry to set the base address\n"));
 
 	  for (j = 0; entry >>= 1; j++)
@@ -1928,19 +2152,35 @@ dump_relr_relocations (Filedata *          filedata,
 	      {
 		uint64_t addr = where + (j * relr_entsize);
 
-		if (first)
+		if (dump_reloc)
 		  {
-		    print_relr_addr_and_sym (filedata, symtab, nsyms, strtab, addr);
-		    first = false;
+		    if (first)
+		      {
+			print_relr_addr_and_sym (filedata, symtab, nsyms,
+						 strtab, addr);
+			first = false;
+		      }
+		    else
+		      {
+			printf (_("\n%*s "),
+				relr_entsize == 4 ? 15 : 23, " ");
+			print_relr_addr_and_sym (filedata, symtab, nsyms,
+						 strtab, addr);
+		      }
 		  }
-		else
+
+		if (do_got_section_contents)
 		  {
-		    printf (_("\n%*s "), relr_entsize == 4 ? 15 : 23, " ");
-		    print_relr_addr_and_sym (filedata, symtab, nsyms, strtab, addr);
+		    all_relocations[r].r_offset = addr;
+		    all_relocations[r].r_name = rtype;
+		    all_relocations[r].r_symbol = NULL;
+		    all_relocations[r].r_type = reltype_relr;
+		    r++;
 		  }
 	      }
 
-	  printf ("\n");
+	  if (dump_reloc)
+	    printf ("\n");
 	  where += num_bits_in_entry * relr_entsize;
 	}
     }
@@ -1950,7 +2190,8 @@ dump_relr_relocations (Filedata *          filedata,
 }
 
 /* Display the contents of the relocation data found at the specified
-   offset.  */
+   offset.  If DUMP_RELOC is false, don't display relocations, just
+   collect relocations for displaying GOT section contents later.  */
 
 static bool
 dump_relocations (Filedata *          filedata,
@@ -1961,7 +2202,8 @@ dump_relocations (Filedata *          filedata,
 		  char *              strtab,
 		  uint64_t            strtablen,
 		  relocation_type     rel_type,
-		  bool                is_dynsym)
+		  bool                is_dynsym,
+		  bool                dump_reloc)
 {
   size_t i;
   Elf_Internal_Rela * rels;
@@ -1986,26 +2228,26 @@ dump_relocations (Filedata *          filedata,
       return false;
     }
 
-  if (is_32bit_elf)
+  if (dump_reloc)
     {
-      if (rel_type == reltype_rela)
+      if (is_32bit_elf)
 	{
-	  if (do_wide)
-	    printf (_(" Offset     Info    Type                Sym. Value  Symbol's Name + Addend\n"));
+	  if (rel_type == reltype_rela)
+	    {
+	      if (do_wide)
+		printf (_(" Offset     Info    Type                Sym. Value  Symbol's Name + Addend\n"));
+	      else
+		printf (_(" Offset     Info    Type            Sym.Value  Sym. Name + Addend\n"));
+	    }
 	  else
-	    printf (_(" Offset     Info    Type            Sym.Value  Sym. Name + Addend\n"));
+	    {
+	      if (do_wide)
+		printf (_(" Offset     Info    Type                Sym. Value  Symbol's Name\n"));
+	      else
+		printf (_(" Offset     Info    Type            Sym.Value  Sym. Name\n"));
+	    }
 	}
-      else
-	{
-	  if (do_wide)
-	    printf (_(" Offset     Info    Type                Sym. Value  Symbol's Name\n"));
-	  else
-	    printf (_(" Offset     Info    Type            Sym.Value  Sym. Name\n"));
-	}
-    }
-  else
-    {
-      if (rel_type == reltype_rela)
+      else if (rel_type == reltype_rela)
 	{
 	  if (do_wide)
 	    printf (_("    Offset             Info             Type               Symbol's Value  Symbol's Name + Addend\n"));
@@ -2035,18 +2277,16 @@ dump_relocations (Filedata *          filedata,
       type = get_reloc_type (filedata, inf);
       symtab_index = get_reloc_symindex  (inf);
 
-      if (is_32bit_elf)
+      if (dump_reloc)
 	{
-	  printf ("%8.8lx  %8.8lx ",
-		  (unsigned long) offset & 0xffffffff,
-		  (unsigned long) inf & 0xffffffff);
-	}
-      else
-	{
-	  printf (do_wide
-		  ? "%16.16" PRIx64 "  %16.16" PRIx64 " "
-		  : "%12.12" PRIx64 "  %12.12" PRIx64 " ",
-		  offset, inf);
+	  if (is_32bit_elf)
+	    printf ("%8.8" PRIx32 "  %8.8" PRIx32 " ",
+		    (uint32_t) offset, (uint32_t) inf);
+	  else
+	    printf (do_wide
+		    ? "%16.16" PRIx64 "  %16.16" PRIx64 " "
+		    : "%12.12" PRIx64 "  %12.12" PRIx64 " ",
+		    offset, inf);
 	}
 
       switch (filedata->file_header.e_machine)
@@ -2396,10 +2636,15 @@ dump_relocations (Filedata *          filedata,
 	  break;
 	}
 
-      if (rtype == NULL)
-	printf (_("unrecognized: %-7lx"), (unsigned long) type & 0xffffffff);
-      else
-	printf (do_wide ? "%-22s" : "%-17.17s", rtype);
+      char *symbol_name = NULL;
+      if (dump_reloc)
+	{
+	  if (rtype == NULL)
+	    printf (_("unrecognized: %-7lx"),
+		    (unsigned long) type & 0xffffffff);
+	  else
+	    printf (do_wide ? "%-22s" : "%-17.17s", rtype);
+	}
 
       if (filedata->file_header.e_machine == EM_ALPHA
 	  && rtype != NULL
@@ -2418,23 +2663,29 @@ dump_relocations (Filedata *          filedata,
 	    default: rtype = NULL;
 	    }
 
-	  if (rtype)
-	    printf (" (%s)", rtype);
-	  else
+	  if (dump_reloc)
 	    {
-	      putchar (' ');
-	      printf (_("<unknown addend: %" PRIx64 ">"),
-		      rels[i].r_addend);
-	      res = false;
+	      if (rtype)
+		printf (" (%s)", rtype);
+	      else
+		{
+		  putchar (' ');
+		  printf (_("<unknown addend: %" PRIx64 ">"),
+			  rels[i].r_addend);
+		  res = false;
+		}
 	    }
 	}
       else if (symtab_index)
 	{
 	  if (symtab == NULL || symtab_index >= nsyms)
 	    {
-	      error (_(" bad symbol index: %08lx in reloc\n"),
-		     (unsigned long) symtab_index);
-	      res = false;
+	      if (dump_reloc)
+		{
+		  error (_(" bad symbol index: %08lx in reloc\n"),
+			 (unsigned long) symtab_index);
+		  res = false;
+		}
 	    }
 	  else
 	    {
@@ -2453,7 +2704,8 @@ dump_relocations (Filedata *          filedata,
 					     &sym_info,
 					     &vna_other);
 
-	      printf (" ");
+	      if (dump_reloc)
+		printf (" ");
 
 	      if (ELF_ST_TYPE (psym->st_info) == STT_GNU_IFUNC)
 		{
@@ -2478,13 +2730,30 @@ dump_relocations (Filedata *          filedata,
 		  else
 		    name = strtab + psym->st_name;
 
-		  len = print_symbol_name (width, name);
-		  if (version_string)
-		    printf (sym_info == symbol_public ? "@@%s" : "@%s",
-			    version_string);
-		  printf ("()%-*s", len <= width ? (width + 1) - len : 1, " ");
+		  if (do_got_section_contents)
+		    {
+		      if (version_string)
+			symbol_name = concat (name,
+					      sym_info == symbol_public
+					      ? "@@" : "@",
+					      version_string, NULL);
+		      else
+			symbol_name = xstrdup (name);
+		    }
+
+		  if (dump_reloc)
+		    {
+		      len = print_symbol_name (width, name);
+		      if (version_string)
+			printf (sym_info == symbol_public
+				? "@@%s" : "@%s",
+				version_string);
+		      printf ("()%-*s",
+			      len <= width ? (width + 1) - len : 1,
+			      " ");
+		    }
 		}
-	      else
+	      else if (dump_reloc)
 		{
 		  print_vma (psym->st_value, LONG_HEX);
 
@@ -2499,25 +2768,49 @@ dump_relocations (Filedata *          filedata,
 		    sec_name = printable_section_name_from_index
 		      (filedata, psym->st_shndx, NULL);
 
-		  print_symbol_name (22, sec_name);
+		  if (do_got_section_contents)
+		    symbol_name = xstrdup (sec_name);
+		  if (dump_reloc)
+		    print_symbol_name (22, sec_name);
 		}
 	      else if (strtab == NULL)
-		printf (_("<string table index: %3ld>"), psym->st_name);
+		{
+		  if (dump_reloc)
+		    printf (_("<string table index: %3ld>"),
+			    psym->st_name);
+		}
 	      else if (psym->st_name >= strtablen)
 		{
-		  error (_("<corrupt string table index: %3ld>\n"),
-			 psym->st_name);
-		  res = false;
+		  if (dump_reloc)
+		    {
+		      error (_("<corrupt string table index: %3ld>\n"),
+			     psym->st_name);
+		      res = false;
+		    }
 		}
 	      else
 		{
-		  print_symbol_name (22, strtab + psym->st_name);
-		  if (version_string)
-		    printf (sym_info == symbol_public ? "@@%s" : "@%s",
-			    version_string);
+		  if (dump_reloc)
+		    {
+		      print_symbol_name (22, strtab + psym->st_name);
+		      if (version_string)
+			printf (sym_info == symbol_public
+				? "@@%s" : "@%s",
+				version_string);
+		    }
+		  if (do_got_section_contents)
+		    {
+		      if (version_string)
+			symbol_name = concat (strtab + psym->st_name,
+					      sym_info == symbol_public
+					      ? "@@" : "@",
+					      version_string, NULL);
+		      else
+			symbol_name = xstrdup (strtab + psym->st_name);
+		    }
 		}
 
-	      if (rel_type == reltype_rela)
+	      if (dump_reloc && rel_type == reltype_rela)
 		{
 		  uint64_t off = rels[i].r_addend;
 
@@ -2528,7 +2821,7 @@ dump_relocations (Filedata *          filedata,
 		}
 	    }
 	}
-      else if (rel_type == reltype_rela)
+      else if (dump_reloc && rel_type == reltype_rela)
 	{
 	  uint64_t off = rels[i].r_addend;
 
@@ -2539,37 +2832,50 @@ dump_relocations (Filedata *          filedata,
 	    printf ("%" PRIx64, off);
 	}
 
-      if (filedata->file_header.e_machine == EM_SPARCV9
-	  && rtype != NULL
-	  && streq (rtype, "R_SPARC_OLO10"))
-	printf (" + %" PRIx64, ELF64_R_TYPE_DATA (inf));
-
-      putchar ('\n');
-
-      if (! is_32bit_elf && filedata->file_header.e_machine == EM_MIPS)
+      if (do_got_section_contents)
 	{
-	  uint64_t type2 = ELF64_MIPS_R_TYPE2 (inf);
-	  uint64_t type3 = ELF64_MIPS_R_TYPE3 (inf);
-	  const char * rtype2 = elf_mips_reloc_type (type2);
-	  const char * rtype3 = elf_mips_reloc_type (type3);
+	  all_relocations[i].r_offset = offset;
+	  all_relocations[i].r_name = rtype;
+	  all_relocations[i].r_symbol = symbol_name;
+	  all_relocations[i].r_addend = rels[i].r_addend;
+	  all_relocations[i].r_type = rel_type;
+	}
 
-	  printf ("                    Type2: ");
-
-	  if (rtype2 == NULL)
-	    printf (_("unrecognized: %-7lx"),
-		    (unsigned long) type2 & 0xffffffff);
-	  else
-	    printf ("%-17.17s", rtype2);
-
-	  printf ("\n                    Type3: ");
-
-	  if (rtype3 == NULL)
-	    printf (_("unrecognized: %-7lx"),
-		    (unsigned long) type3 & 0xffffffff);
-	  else
-	    printf ("%-17.17s", rtype3);
+      if (dump_reloc)
+	{
+	  if (filedata->file_header.e_machine == EM_SPARCV9
+	      && rtype != NULL
+	      && streq (rtype, "R_SPARC_OLO10"))
+	    printf (" + %" PRIx64, ELF64_R_TYPE_DATA (inf));
 
 	  putchar ('\n');
+
+	  if (! is_32bit_elf
+	      && filedata->file_header.e_machine == EM_MIPS)
+	    {
+	      uint64_t type2 = ELF64_MIPS_R_TYPE2 (inf);
+	      uint64_t type3 = ELF64_MIPS_R_TYPE3 (inf);
+	      const char * rtype2 = elf_mips_reloc_type (type2);
+	      const char * rtype3 = elf_mips_reloc_type (type3);
+
+	      printf ("                    Type2: ");
+
+	      if (rtype2 == NULL)
+		printf (_("unrecognized: %-7lx"),
+			(unsigned long) type2 & 0xffffffff);
+	      else
+		printf ("%-17.17s", rtype2);
+
+	      printf ("\n                    Type3: ");
+
+	      if (rtype3 == NULL)
+		printf (_("unrecognized: %-7lx"),
+			(unsigned long) type3 & 0xffffffff);
+	      else
+		printf ("%-17.17s", rtype3);
+
+	      putchar ('\n');
+	    }
 	}
     }
 
@@ -6097,7 +6403,8 @@ enum long_option_values
   OPTION_NO_RECURSE_LIMIT,
   OPTION_NO_DEMANGLING,
   OPTION_NO_EXTRA_SYM_INFO,
-  OPTION_SYM_BASE
+  OPTION_SYM_BASE,
+  OPTION_GOT_CONTENTS
 };
 
 static struct option options[] =
@@ -6160,6 +6467,7 @@ static struct option options[] =
 #endif
   {"sframe",	       optional_argument, 0, OPTION_SFRAME_DUMP},
   {"sym-base",	       optional_argument, 0, OPTION_SYM_BASE},
+  {"got-contents",     no_argument, 0, OPTION_GOT_CONTENTS},
 
   {0,		       no_argument, 0, 0}
 };
@@ -6171,7 +6479,7 @@ usage (FILE * stream)
   fprintf (stream, _(" Display information about the contents of ELF format files\n"));
   fprintf (stream, _(" Options are:\n"));
   fprintf (stream, _("\
-  -a --all               Equivalent to: -h -l -S -s -r -d -V -A -I\n"));
+  -a --all               Equivalent to: -h -l -S -s -r -d -V -A -I --got-contents\n"));
   fprintf (stream, _("\
   -h --file-header       Display the ELF file header\n"));
   fprintf (stream, _("\
@@ -6317,6 +6625,8 @@ usage (FILE * stream)
   fprintf (stream, _("\
   -I --histogram         Display histogram of bucket list lengths\n"));
   fprintf (stream, _("\
+  --got-contents         Display GOT section contents\n"));
+  fprintf (stream, _("\
   -W --wide              Allow output width to exceed 80 characters\n"));
   fprintf (stream, _("\
   -T --silent-truncation If a symbol name is truncated, do not add [...] suffix\n"));
@@ -6441,6 +6751,7 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	  do_histogram = true;
 	  do_arch = true;
 	  do_notes = true;
+	  do_got_section_contents = true;
 	  break;
 
 	case 'g':
@@ -6698,6 +7009,11 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 		    break;
 		}
 	    }
+	  break;
+
+	case OPTION_GOT_CONTENTS:
+	  do_got_section_contents = true;
+	  do_dump = true;
 	  break;
 
 	default:
@@ -9437,7 +9753,8 @@ rel_type_from_sh_type (unsigned int sh_type)
 
 static bool
 display_relocations (Elf_Internal_Shdr *  section,
-		     Filedata *           filedata)
+		     Filedata *           filedata,
+		     bool                 dump_reloc)
 {
   relocation_type rel_type = rel_type_from_sh_type (section->sh_type);
 
@@ -9449,19 +9766,23 @@ display_relocations (Elf_Internal_Shdr *  section,
   if (rel_size == 0)
     return false;
 
-  if (filedata->is_separate)
-    printf (_("\nIn linked file '%s' relocation section "),
-	    printable_string (filedata->file_name, 0));
-  else
-    printf (_("\nRelocation section "));
+  if (dump_reloc)
+    {
+      if (filedata->is_separate)
+	printf (_("\nIn linked file '%s' relocation section "),
+		printable_string (filedata->file_name, 0));
+      else
+	printf (_("\nRelocation section "));
 
-  if (filedata->string_table == NULL)
-    printf ("%d", section->sh_name);
-  else
-    printf ("'%s'", printable_section_name (filedata, section));
+      if (filedata->string_table == NULL)
+	printf ("%d", section->sh_name);
+      else
+	printf ("'%s'", printable_section_name (filedata, section));
+    }
 
-  uint64_t num_rela = rel_size / section->sh_entsize;
   uint64_t rel_offset = section->sh_offset;
+  uint64_t num_rela = rel_size / section->sh_entsize;
+  uint64_t num_reloc;
 
   if (rel_type == reltype_relr)
     {
@@ -9470,25 +9791,32 @@ display_relocations (Elf_Internal_Shdr *  section,
 	 the number of words in the compressed RELR format.  So also provide
 	 the number of locations affected.  */
 
-      uint64_t num_reloc = count_relr_relocations (filedata, section);
+      num_reloc = count_relr_relocations (filedata, section);
 
-      printf (_(" at offset %#" PRIx64), rel_offset);
-      printf (ngettext (" contains %" PRIu64 " entry which relocates",
-			" contains %" PRIu64 " entries which relocate",
-			num_rela), num_rela);
-      printf (ngettext (" %" PRIu64 " location:\n",
-			" %" PRIu64 " locations:\n",
-			num_reloc), num_reloc);
+      if (dump_reloc)
+	{
+	  printf (_(" at offset %#" PRIx64), rel_offset);
+	  printf (ngettext (" contains %" PRIu64 " entry which relocates",
+			    " contains %" PRIu64 " entries which relocate",
+			    num_rela), num_rela);
+	  printf (ngettext (" %" PRIu64 " location:\n",
+			    " %" PRIu64 " locations:\n",
+			    num_reloc), num_reloc);
+	}
     }
   else
     {
-      printf (ngettext (" at offset %#" PRIx64
-			" contains %" PRIu64 " entry:\n",
-			" at offset %#" PRIx64
-			" contains %" PRIu64 " entries:\n",
-			num_rela),
-	      rel_offset, num_rela);
+      num_reloc = num_rela;
+      if (dump_reloc)
+	printf (ngettext (" at offset %#" PRIx64
+			  " contains %" PRIu64 " entry:\n",
+			  " at offset %#" PRIx64
+			  " contains %" PRIu64 " entries:\n",
+			  num_rela),
+		rel_offset, num_rela);
     }
+
+  update_all_relocations (num_reloc);
 
   Elf_Internal_Shdr * symsec;
   Elf_Internal_Sym *  symtab = NULL;
@@ -9524,12 +9852,15 @@ display_relocations (Elf_Internal_Shdr *  section,
     res = dump_relr_relocations (filedata, section->sh_size,
 				 section->sh_entsize,
 				 section->sh_offset,
-				 symtab, nsyms, strtab, strtablen);
+				 symtab, nsyms, strtab, strtablen,
+				 dump_reloc);
   else
     res = dump_relocations (filedata, rel_offset, rel_size,
 			    symtab, nsyms, strtab, strtablen,
 			    rel_type,
-			    symsec == NULL ? false : symsec->sh_type == SHT_DYNSYM);
+			    symsec == NULL
+			    ? false : symsec->sh_type == SHT_DYNSYM,
+			    dump_reloc);
   free (strtab);
   free (symtab);
 
@@ -9543,14 +9874,16 @@ process_relocs (Filedata * filedata)
 {
   uint64_t rel_size;
   uint64_t rel_offset;
+  unsigned int rel_entsz;
 
-  if (!do_reloc)
+  if (!do_reloc && !do_got_section_contents)
     return true;
 
   if (do_using_dynamic)
     {
       relocation_type rel_type;
       const char * name;
+      const char * entsz_name;
       bool  has_dynamic_reloc;
       unsigned int i;
 
@@ -9584,16 +9917,37 @@ process_relocs (Filedata * filedata)
 		}
 	    }
 
-	  if (filedata->is_separate)
-	    printf
-	      (_("\nIn linked file '%s' section '%s' at offset %#" PRIx64
-		 " contains %" PRId64 " bytes:\n"),
-	       filedata->file_name, name, rel_offset, rel_size);
-	  else
-	    printf
-	      (_("\n'%s' relocation section at offset %#" PRIx64
-		 " contains %" PRId64 " bytes:\n"),
-	       name, rel_offset, rel_size);
+	  switch (rel_type)
+	    {
+	    default:
+	      abort ();
+	    case reltype_rel:
+	      rel_entsz = filedata->dynamic_info[DT_RELENT];
+	      entsz_name = "DT_RELENT";
+	      break;
+	    case reltype_rela:
+	      rel_entsz = filedata->dynamic_info[DT_RELAENT];
+	      entsz_name = "DT_RELAENT";
+	      break;
+	    case reltype_relr:
+	      rel_entsz = filedata->dynamic_info[DT_RELRENT];
+	      entsz_name = "DT_RELRENT";
+	      break;
+	    }
+
+	  if (do_reloc)
+	    {
+	      if (filedata->is_separate)
+		printf
+		  (_("\nIn linked file '%s' section '%s' at offset"
+		     "%#" PRIx64 " contains %" PRId64 " bytes:\n"),
+		   filedata->file_name, name, rel_offset, rel_size);
+	      else
+		printf
+		  (_("\n'%s' relocation section at offset %#" PRIx64
+		     " contains %" PRId64 " bytes:\n"),
+		   name, rel_offset, rel_size);
+	    }
 
 	  if (rel_type == reltype_relr)
 	    dump_relr_relocations (filedata,
@@ -9603,24 +9957,37 @@ process_relocs (Filedata * filedata)
 				   filedata->dynamic_symbols,
 				   filedata->num_dynamic_syms,
 				   filedata->dynamic_strings,
-				   filedata->dynamic_strings_length);
+				   filedata->dynamic_strings_length,
+				   do_reloc);
 	  else
-	    dump_relocations (filedata,
-			      offset_from_vma (filedata, rel_offset,
-					       rel_size),
-			      rel_size,
-			      filedata->dynamic_symbols,
-			      filedata->num_dynamic_syms,
-			      filedata->dynamic_strings,
-			      filedata->dynamic_strings_length,
-			      rel_type, true /* is_dynamic */);
+	    {
+	      if (rel_entsz == 0)
+		{
+		  printf (_("<missing or corrupt dynamic tag: %s>\n"),
+			  entsz_name);
+		  continue;
+		}
+
+	      update_all_relocations (rel_size / rel_entsz);
+
+	      dump_relocations (filedata,
+				offset_from_vma (filedata, rel_offset,
+						 rel_size),
+				rel_size,
+				filedata->dynamic_symbols,
+				filedata->num_dynamic_syms,
+				filedata->dynamic_strings,
+				filedata->dynamic_strings_length,
+				rel_type, true /* is_dynamic */,
+				do_reloc);
+	    }
 	}
 
       if (is_ia64_vms (filedata)
 	  && process_ia64_vms_dynamic_relocs (filedata))
 	has_dynamic_reloc = true;
 
-      if (! has_dynamic_reloc)
+      if (do_reloc && ! has_dynamic_reloc)
 	{
 	  if (filedata->is_separate)
 	    printf (_("\nThere are no dynamic relocations in linked file '%s'.\n"),
@@ -9639,11 +10006,11 @@ process_relocs (Filedata * filedata)
 	   i < filedata->file_header.e_shnum;
 	   i++, section++)
 	{
-	  if (display_relocations (section, filedata))
+	  if (display_relocations (section, filedata, do_reloc))
 	    found = true;
 	}
 
-      if (! found)
+      if (do_reloc && ! found)
 	{
 	  /* Users sometimes forget the -D option, so try to be helpful.  */
 	  for (i = 0; i < ARRAY_SIZE (dynamic_relocations); i++)
@@ -17627,7 +17994,7 @@ process_section_contents (Filedata * filedata)
 	    case SHT_RELA:
 	    case SHT_REL:
 	    case SHT_RELR:
-	      res &= display_relocations (section, filedata);
+	      res &= display_relocations (section, filedata, true);
 	      break;
 
 	    case SHT_NOTE:
@@ -19644,8 +20011,11 @@ get_mips_reg_size (int reg_size)
 	 : -1;
 }
 
+/* If DUMP_GOT is true, display only the GOT related contents.
+   Otherwise, display all MIPS specific information.  */
+
 static bool
-process_mips_specific (Filedata * filedata)
+process_mips_specific (Filedata * filedata, bool dump_got)
 {
   Elf_Internal_Dyn * entry;
   Elf_Internal_Shdr *sect = NULL;
@@ -19664,60 +20034,63 @@ process_mips_specific (Filedata * filedata)
   uint64_t symtabno = 0;
   bool res = true;
 
-  if (! process_attributes (filedata, NULL, SHT_GNU_ATTRIBUTES, NULL,
-			    display_mips_gnu_attribute))
-    res = false;
-
-  sect = find_section (filedata, ".MIPS.abiflags");
-
-  if (sect != NULL)
+  if (!dump_got)
     {
-      Elf_External_ABIFlags_v0 *abiflags_ext;
-      Elf_Internal_ABIFlags_v0 abiflags_in;
+      if (! process_attributes (filedata, NULL, SHT_GNU_ATTRIBUTES, NULL,
+				display_mips_gnu_attribute))
+	res = false;
 
-      if (sizeof (Elf_External_ABIFlags_v0) != sect->sh_size)
+      sect = find_section (filedata, ".MIPS.abiflags");
+
+      if (sect != NULL)
 	{
-	  error (_("Corrupt MIPS ABI Flags section.\n"));
-	  res = false;
-	}
-      else
-	{
-	  abiflags_ext = get_data (NULL, filedata, sect->sh_offset, 1,
-				   sect->sh_size, _("MIPS ABI Flags section"));
-	  if (abiflags_ext)
+	  Elf_External_ABIFlags_v0 *abiflags_ext;
+	  Elf_Internal_ABIFlags_v0 abiflags_in;
+
+	  if (sizeof (Elf_External_ABIFlags_v0) != sect->sh_size)
 	    {
-	      abiflags_in.version = BYTE_GET (abiflags_ext->version);
-	      abiflags_in.isa_level = BYTE_GET (abiflags_ext->isa_level);
-	      abiflags_in.isa_rev = BYTE_GET (abiflags_ext->isa_rev);
-	      abiflags_in.gpr_size = BYTE_GET (abiflags_ext->gpr_size);
-	      abiflags_in.cpr1_size = BYTE_GET (abiflags_ext->cpr1_size);
-	      abiflags_in.cpr2_size = BYTE_GET (abiflags_ext->cpr2_size);
-	      abiflags_in.fp_abi = BYTE_GET (abiflags_ext->fp_abi);
-	      abiflags_in.isa_ext = BYTE_GET (abiflags_ext->isa_ext);
-	      abiflags_in.ases = BYTE_GET (abiflags_ext->ases);
-	      abiflags_in.flags1 = BYTE_GET (abiflags_ext->flags1);
-	      abiflags_in.flags2 = BYTE_GET (abiflags_ext->flags2);
+	      error (_("Corrupt MIPS ABI Flags section.\n"));
+	      res = false;
+	    }
+	  else
+	    {
+	      abiflags_ext = get_data (NULL, filedata, sect->sh_offset, 1,
+				       sect->sh_size, _("MIPS ABI Flags section"));
+	      if (abiflags_ext)
+		{
+		  abiflags_in.version = BYTE_GET (abiflags_ext->version);
+		  abiflags_in.isa_level = BYTE_GET (abiflags_ext->isa_level);
+		  abiflags_in.isa_rev = BYTE_GET (abiflags_ext->isa_rev);
+		  abiflags_in.gpr_size = BYTE_GET (abiflags_ext->gpr_size);
+		  abiflags_in.cpr1_size = BYTE_GET (abiflags_ext->cpr1_size);
+		  abiflags_in.cpr2_size = BYTE_GET (abiflags_ext->cpr2_size);
+		  abiflags_in.fp_abi = BYTE_GET (abiflags_ext->fp_abi);
+		  abiflags_in.isa_ext = BYTE_GET (abiflags_ext->isa_ext);
+		  abiflags_in.ases = BYTE_GET (abiflags_ext->ases);
+		  abiflags_in.flags1 = BYTE_GET (abiflags_ext->flags1);
+		  abiflags_in.flags2 = BYTE_GET (abiflags_ext->flags2);
 
-	      printf ("\nMIPS ABI Flags Version: %d\n", abiflags_in.version);
-	      printf ("\nISA: MIPS%d", abiflags_in.isa_level);
-	      if (abiflags_in.isa_rev > 1)
-		printf ("r%d", abiflags_in.isa_rev);
-	      printf ("\nGPR size: %d",
-		      get_mips_reg_size (abiflags_in.gpr_size));
-	      printf ("\nCPR1 size: %d",
-		      get_mips_reg_size (abiflags_in.cpr1_size));
-	      printf ("\nCPR2 size: %d",
-		      get_mips_reg_size (abiflags_in.cpr2_size));
-	      fputs ("\nFP ABI: ", stdout);
-	      print_mips_fp_abi_value (abiflags_in.fp_abi);
-	      fputs ("ISA Extension: ", stdout);
-	      print_mips_isa_ext (abiflags_in.isa_ext);
-	      fputs ("\nASEs:", stdout);
-	      print_mips_ases (abiflags_in.ases);
-	      printf ("\nFLAGS 1: %8.8lx", abiflags_in.flags1);
-	      printf ("\nFLAGS 2: %8.8lx", abiflags_in.flags2);
-	      fputc ('\n', stdout);
-	      free (abiflags_ext);
+		  printf ("\nMIPS ABI Flags Version: %d\n", abiflags_in.version);
+		  printf ("\nISA: MIPS%d", abiflags_in.isa_level);
+		  if (abiflags_in.isa_rev > 1)
+		    printf ("r%d", abiflags_in.isa_rev);
+		  printf ("\nGPR size: %d",
+			  get_mips_reg_size (abiflags_in.gpr_size));
+		  printf ("\nCPR1 size: %d",
+			  get_mips_reg_size (abiflags_in.cpr1_size));
+		  printf ("\nCPR2 size: %d",
+			  get_mips_reg_size (abiflags_in.cpr2_size));
+		  fputs ("\nFP ABI: ", stdout);
+		  print_mips_fp_abi_value (abiflags_in.fp_abi);
+		  fputs ("ISA Extension: ", stdout);
+		  print_mips_isa_ext (abiflags_in.isa_ext);
+		  fputs ("\nASEs:", stdout);
+		  print_mips_ases (abiflags_in.ases);
+		  printf ("\nFLAGS 1: %8.8lx", abiflags_in.flags1);
+		  printf ("\nFLAGS 2: %8.8lx", abiflags_in.flags2);
+		  fputc ('\n', stdout);
+		  free (abiflags_ext);
+		}
 	    }
 	}
     }
@@ -19865,7 +20238,7 @@ process_mips_specific (Filedata * filedata)
 	break;
       }
 
-  if (liblist_offset != 0 && liblistno != 0 && do_dynamic)
+  if (!dump_got && liblist_offset != 0 && liblistno != 0 && do_dynamic)
     {
       Elf32_External_Lib * elib;
       size_t cnt;
@@ -19950,7 +20323,7 @@ process_mips_specific (Filedata * filedata)
 	res = false;
     }
 
-  if (options_offset != 0)
+  if (!dump_got && options_offset != 0)
     {
       Elf_External_Options * eopt;
       size_t offset;
@@ -20199,7 +20572,7 @@ process_mips_specific (Filedata * filedata)
 	res = false;
     }
 
-  if (conflicts_offset != 0 && conflictsno != 0)
+  if (!dump_got && conflicts_offset != 0 && conflictsno != 0)
     {
       Elf32_Conflict * iconf;
       size_t cnt;
@@ -20556,6 +20929,206 @@ process_nds32_specific (Filedata * filedata)
     }
 
   return true;
+}
+
+static int
+elf_relocation_cmp (const void *p, const void *q)
+{
+  const elf_relocation *rp = (const elf_relocation *) p;
+  const elf_relocation *rq = (const elf_relocation *) q;
+
+  return (rp->r_offset > rq->r_offset
+	  ? 1
+	  : (rp->r_offset < rq->r_offset ? -1 : 0));
+}
+
+static void
+display_elf_relocation_at (uint64_t offset, uint64_t g)
+{
+  bool matched = false;
+
+  for (size_t i = 0; i < all_relocations_count; i++)
+    if (all_relocations_root[i].r_offset == offset)
+      {
+	if (do_wide)
+	  printf (" %-22s", all_relocations_root[i].r_name);
+	else
+	  printf (" %-17.17s", all_relocations_root[i].r_name);
+
+	uint64_t off;
+	switch (all_relocations_root[i].r_type)
+	  {
+	  default:
+	    abort ();
+	  case reltype_rel:
+	  case reltype_relr:
+	    off = g;
+	    break;
+	  case reltype_rela:
+	    off = all_relocations_root[i].r_addend;
+	    break;
+	  }
+
+	if (all_relocations_root[i].r_symbol)
+	  {
+	    printf (" %s", all_relocations_root[i].r_symbol);
+	    if ((int64_t) off < 0)
+	      printf (" - %" PRIx64, -off);
+	    else
+	      printf (" + %" PRIx64, off);
+	  }
+	else
+	  {
+	    if ((int64_t) off < 0)
+	      printf (" -%" PRIx64, -off);
+	    else
+	      printf (" %" PRIx64, off);
+	  }
+
+	matched = true;
+	break;
+      }
+    else if (all_relocations_root[i].r_offset > offset)
+      break;
+
+  if (!matched)
+    {
+      if (do_wide)
+	printf ("%*c", 24, ' ');
+      else
+	printf ("%*c", 19, ' ');
+      printf ("%" PRIx64, g);
+    }
+}
+
+static bool
+process_got_section_contents (Filedata * filedata)
+{
+  Elf_Internal_Shdr * section;
+  unsigned int i;
+  uint64_t entries;
+  unsigned char *data;
+  bool res = true;
+
+  if (!do_got_section_contents)
+    return res;
+
+  switch (filedata->file_header.e_machine)
+    {
+    case EM_MIPS:
+    case EM_MIPS_RS3_LE:
+      /* process_mips_specific also displays GOT related contents.  */
+      if (!do_arch)
+	res = process_mips_specific (filedata, true);
+      goto out;
+    }
+
+  qsort (all_relocations_root, all_relocations_count,
+	 sizeof (elf_relocation), elf_relocation_cmp);
+
+  initialise_dumps_byname (filedata);
+
+  for (i = 0, section = filedata->section_headers;
+       i < filedata->file_header.e_shnum;
+       i++, section++)
+    if (section->sh_type == SHT_PROGBITS
+	&& section->sh_size != 0)
+      {
+	const char *name = printable_section_name (filedata, section);
+
+	if (!startswith (name, ".got"))
+	  continue;
+
+	data = (unsigned char *) get_section_contents (section,
+						       filedata);
+	if (data == NULL)
+	  {
+	    res = false;
+	    goto out;
+	  }
+
+	uint32_t entsz = section->sh_entsize;
+	entries = section->sh_size / entsz;
+	if (entries == 1)
+	  printf (_("\nGlobal Offset Table '%s' contains 1 entry:\n"),
+		  name);
+	else
+	  printf (_("\nGlobal Offset Table '%s' contains %" PRIu64
+		    " entries:\n"), name, entries);
+
+	uint64_t g;
+
+	if (is_32bit_elf)
+	  {
+	    uint32_t j, n = entries;
+	    uint32_t addr;
+	    struct got32
+	      {
+		unsigned char bytes[4];
+	      } *got;
+
+	    if (do_wide)
+	      printf (_("   Index:  Address      Reloc             Sym. Name + Addend/Value\n"));
+		      /* |---9---| |---8--| |---------22---------| |...........  */
+	    else
+	      printf (_(" Index:  Address      Reloc        Sym. Name + Addend/Value\n"));
+		    /* |--7--| |---8--| |-------17------| |...........  */
+
+	    addr = section->sh_addr;
+	    got = (struct got32 *) data;
+	    for (j = 0; j < n; j++)
+	      {
+		g = BYTE_GET (got[j].bytes);
+		if (do_wide)
+		  printf ("%8" PRIu32 ": %8.8" PRIx32, j, addr);
+		else
+		  printf ("%6" PRIu32 ": %8.8" PRIx32, j, addr);
+		display_elf_relocation_at (addr, g);
+		putchar ('\n');
+		addr += entsz;
+	      }
+	  }
+	else
+	  {
+	    uint64_t j, addr;
+	    struct got64
+	      {
+		unsigned char bytes[4];
+	      } *got;
+
+	    if (do_wide)
+	      printf (_("   Index:      Address          Reloc             Sym. Name + Addend/Value\n"));
+		      /* |---9---| |------16------| |---------22---------| |...........  */
+	    else
+	      printf (_(" Index:    Address       Reloc         Sym. Name + Addend/Value\n"));
+		      /* |--7--| |----12----| |------17-------| |...........  */
+
+	    addr = section->sh_addr;
+	    got = (struct got64 *) data;
+	    for (j = 0; j < entries; j++)
+	      {
+		g = BYTE_GET (got[j].bytes);
+		if (do_wide)
+		  printf ("%8" PRIu64 ": %16.16" PRIx64, j, addr);
+		else
+		  printf ("%6" PRIu64 ": %12.12" PRIx64, j, addr);
+		display_elf_relocation_at (addr, g);
+		putchar ('\n');
+		addr += entsz;
+	      }
+	  }
+
+	free (data);
+      }
+
+ out:
+  for (size_t j = 0; j < all_relocations_count; j++)
+    free (all_relocations_root[j].r_symbol);
+  free (all_relocations_root);
+  all_relocations_root = NULL;
+  all_relocations = NULL;
+  all_relocations_count = 0;
+  return res;
 }
 
 static bool
@@ -23469,7 +24042,7 @@ process_arch_specific (Filedata * filedata)
 
     case EM_MIPS:
     case EM_MIPS_RS3_LE:
-      return process_mips_specific (filedata);
+      return process_mips_specific (filedata, false);
 
     case EM_MSP430:
      return process_attributes (filedata, "mspabi", SHT_MSP430_ATTRIBUTES,
@@ -23831,6 +24404,9 @@ process_object (Filedata * filedata)
     have_separate_files = false;
 
   if (! process_section_contents (filedata))
+    res = false;
+
+  if (! process_got_section_contents (filedata))
     res = false;
 
   if (have_separate_files)
