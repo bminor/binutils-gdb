@@ -61,6 +61,7 @@ GEN_SYSCALLS_FILES = \
 	mips-o32-linux.xml \
 	ppc-linux.xml \
 	ppc64-linux.xml \
+	riscv-linux.xml \
 	s390-linux.xml \
 	s390x-linux.xml \
 	sparc-linux.xml \

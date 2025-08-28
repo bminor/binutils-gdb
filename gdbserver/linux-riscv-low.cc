@@ -58,6 +58,10 @@ protected:
   void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
 
   bool low_breakpoint_at (CORE_ADDR pc) override;
+
+  bool low_supports_catch_syscall () override;
+
+  void low_get_syscall_trapinfo (regcache *regcache, int *sysno) override;
 };
 
 /* The singleton target ops object.  */
@@ -76,6 +80,26 @@ riscv_target::low_cannot_store_register (int regno)
 {
   gdb_assert_not_reached ("linux target op low_cannot_store_register "
 			  "is not implemented by the target");
+}
+
+/* Implementation of linux target ops method "low_supports_catch_syscall".  */
+
+bool
+riscv_target::low_supports_catch_syscall ()
+{
+  return true;
+}
+
+/* Implementation of linux target ops method "low_get_syscall_trapinfo".  */
+
+void
+riscv_target::low_get_syscall_trapinfo (regcache *regcache, int *sysno)
+{
+  LONGEST l_sysno;
+
+  /* The content of a register.  */
+  collect_register_by_name (regcache, "a7", &l_sysno);
+  *sysno = (int)l_sysno;
 }
 
 /* Implementation of linux target ops method "low_arch_setup".  */

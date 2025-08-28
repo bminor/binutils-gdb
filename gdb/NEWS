@@ -96,6 +96,8 @@ single-inf-arg in qSupported
   translation mode of its stdout/stderr to binary mode.  This disables
   Line Feed translation.  MS-Windows only.
 
+* The "catch syscall" command now works on riscv*-linux* targets.
+
 * New commands
 
 maintenance check psymtabs

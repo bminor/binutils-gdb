@@ -40,6 +40,9 @@ case "$f" in
     *aarch64-linux.xml.in)
 	startyear=2015
 	;;
+    *riscv-linux.xml.in)
+	startyear=2025
+	;;
 esac
 
 year=$(date +%Y)

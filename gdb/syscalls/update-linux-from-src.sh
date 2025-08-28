@@ -325,6 +325,11 @@ regen ()
 	    gen_from_kernel_headers "$f" arm64
 	    return
 	    ;;
+	riscv-linux.xml.in)
+	    # No syscall.tbl.
+	    gen_from_kernel_headers "$f" riscv
+	    return
+	    ;;
 	arm-linux.xml.in)
 	    t="arch/arm/tools/syscall.tbl"
 	    h="arch/arm/include/uapi/asm/unistd.h"
