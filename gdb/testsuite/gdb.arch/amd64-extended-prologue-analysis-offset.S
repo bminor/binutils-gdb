@@ -37,37 +37,59 @@ foo:
 	pushq	%r12
 	pushq	%rbp
 	pushq	%rbx
-	movl	%edi, %ebp
+	subq	$272, %rsp
+	movl	%edi, %ebx
 	movl	%esi, %r13d
 	movl	%edx, %r12d
+	movl	%ecx, %ebp
+	movq	%fs:40, %rax
+	movq	%rax, 264(%rsp)
+	xorl	%eax, %eax
+.L3:
+	leal	(%rbx,%rax), %ecx
+	movslq	%eax, %rdx
+	movb	%cl, (%rsp,%rdx)
+	addl	$1, %eax
+	cmpl	$256, %eax
+	jne	.L3
+	movl	%ebx, %edi
 	call	bar
-	movl	%eax, %ebx
+	movl	%eax, %r14d
 	movl	%r13d, %edi
 	call	bar
-	addl	%eax, %ebx
+	leal	(%r14,%rax), %r13d
 	movl	%r12d, %edi
 	call	bar
+	addl	%eax, %r13d
+	movl	%ebp, %edi
+	call	bar
+	addl	%r13d, %eax
 	addl	%ebx, %eax
-	addl	%ebp, %eax
+	movq	264(%rsp), %rdx
+	subq	%fs:40, %rdx
+	jne	.L7
+	addq	$272, %rsp
 	popq	%rbx
 	popq	%rbp
 	popq	%r12
 	popq	%r13
 	popq	%r14
 	ret
+.L7:
+	call	__stack_chk_fail@PLT
 	.size	foo, .-foo
 	.globl	main
 	.type	main, @function
 main:
 	endbr64
-	subq	$16, %rsp
+	subq	$24, %rsp
 	leal	(%rdi,%rdi), %ecx
 	leal	2(%rdi), %edx
 	leal	1(%rdi), %esi
 	call	foo
 	movl	%eax, 12(%rsp)
 	movl	12(%rsp), %eax
-	addq	$16, %rsp
+	addq	$24, %rsp
 	ret
 	.size	main, .-main
 	.ident	"GCC: (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0"

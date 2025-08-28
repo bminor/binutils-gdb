@@ -2639,6 +2639,71 @@ amd64_analyze_register_saves (CORE_ADDR pc, CORE_ADDR current_pc,
   return pc;
 }
 
+/* Check whether PC points at code allocating space on the stack.
+   If so, update CACHE and return pc past it or CURRENT_PC, whichever is
+   smaller.  Otherwise, return PC passed to this function.  */
+
+static CORE_ADDR
+amd64_analyze_stack_alloc (gdbarch *arch, CORE_ADDR pc, CORE_ADDR current_pc,
+			   amd64_frame_cache *cache)
+{
+  static const gdb_byte sub_imm8_rsp[]  = { 0x83, 0xec };
+  static const gdb_byte sub_imm32_rsp[] = { 0x81, 0xec };
+  static const gdb_byte lea_disp_rsp[]  = { 0x8D, 0x64 };
+
+  bfd_endian byte_order = gdbarch_byte_order (arch);
+  const CORE_ADDR start_pc = pc;
+
+  gdb_byte op;
+  if (target_read_code (pc, &op, 1) == -1)
+    return pc;
+
+  /* Check for REX.W, indicating 64-bit operand size (in this case, for
+     %rsp).  */
+  if (op == 0x48)
+    pc++;
+
+  if (current_pc <= pc)
+    return current_pc;
+
+  gdb_byte buf[2];
+  read_code (pc, buf, 2);
+
+  /* Check for instruction allocating space on the stack, which looks like
+       sub imm8/32, %rsp
+     or
+       lea -imm (%rsp), %rsp
+
+     and forward pc past it + update cache.  */
+
+  /* sub imm8, %rsp.  */
+  if (memcmp (buf, sub_imm8_rsp, 2) == 0)
+    {
+      /* Instruction is 3 bytes long.  The imm8 arg is the 3rd, single
+	 byte.  */
+      cache->sp_offset += read_code_integer (pc + 2, 1, byte_order);
+      return pc + 3;
+    }
+  /* sub imm32, %rsp.  */
+  else if (memcmp (buf, sub_imm32_rsp, 2) == 0)
+    {
+      /* Instruction is 6 bytes long.  The imm32 arg is stored in 4 bytes,
+	 starting from 3rd one.  */
+      cache->sp_offset += read_code_integer (pc + 2, 4, byte_order);
+      return pc + 6;
+    }
+  /* lea -imm (%rsp), %rsp.  */
+  else if (memcmp (buf, lea_disp_rsp, 2) == 0)
+    {
+      /* Instruction is 4 bytes long.  The imm arg is the 4th, single
+	 byte.  */
+      cache->sp_offset += -1 * read_code_integer (pc + 3, 1, byte_order);
+      return pc + 4;
+    }
+
+  return start_pc;
+}
+
 /* Do a limited analysis of the prologue at PC and update CACHE
    accordingly.  Bail out early if CURRENT_PC is reached.  Return the
    address where the analysis stopped.
@@ -2684,7 +2749,8 @@ amd64_analyze_prologue (gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR current_pc,
   if (current_pc <= pc)
     return current_pc;
 
-  return amd64_analyze_register_saves (pc, current_pc, cache);
+  pc = amd64_analyze_register_saves (pc, current_pc, cache);
+  return amd64_analyze_stack_alloc (gdbarch, pc, current_pc, cache);
 }
 
 /* Work around false termination of prologue - GCC PR debug/48827.

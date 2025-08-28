@@ -14,11 +14,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # This test verifies that when placing a breakpoint on a function with a frame
-# pointer, instructions that push callee-saved registers in the prologue are
-# skipped, without debug info.  When stopped on such breakpoint, the pushed
-# registers should be able to be immediately unwound.  With debug info present,
-# GDB would try to use prologue-end markers found in the line table to
-# determine where the prologue ends.
+# pointer, instructions that push callee-saved registers and stack allocation
+# in the prologue are skipped, without debug info.  When stopped on such
+# breakpoint, the pushed registers should be able to be immediately unwound.
+# With debug info present, GDB would try to use prologue-end markers found in
+# the line table to determine where the prologue ends.
 #
 # It is also tested both with and without .eh_frame's .cfi directives - with
 # them, GDB can only unwind a register once stopped after .cfi directive for

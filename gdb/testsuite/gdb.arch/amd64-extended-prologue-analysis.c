@@ -29,15 +29,22 @@ bar (int x)
     .cfi_def_cfa_register %rbp
     push  %reg1
     push  %reg2
+    sub   $XXX, %rsp
     .cfi_offset %reg2, 32
     .cfi_offset %reg1, 24
 
     So to be able to unwind a register, GDB needs to skip prologue past
-    register pushes (to access .cfi directives).  */
+    register pushes and stack allocation (to access .cfi directives).  */
 int __attribute__ ((noinline))
 foo (int a, int b, int c, int d)
 {
-  a += bar (a) + bar (b) + bar (c);
+  /* "volatile" alone isn't enough for clang to not optimize it out and
+     allocate space on the stack.  */
+  volatile char s[256];
+  for (int i = 0; i < 256; i++)
+    s[i] = (char) (a + i);
+
+  a += bar (a) + bar (b) + bar (c) + bar (d);
   return a;
 }
 

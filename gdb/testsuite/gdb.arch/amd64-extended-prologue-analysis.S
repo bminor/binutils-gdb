@@ -42,33 +42,60 @@ foo:
 	.cfi_offset 6, -16
 	movq	%rsp, %rbp
 	.cfi_def_cfa_register 6
+	pushq	%r15
 	pushq	%r14
 	pushq	%r13
 	pushq	%r12
 	pushq	%rbx
-	.cfi_offset 14, -24
-	.cfi_offset 13, -32
-	.cfi_offset 12, -40
-	.cfi_offset 3, -48
-	movl	%edi, %r12d
+	subq	$280, %rsp
+	.cfi_offset 15, -24
+	.cfi_offset 14, -32
+	.cfi_offset 13, -40
+	.cfi_offset 12, -48
+	.cfi_offset 3, -56
+	movl	%edi, %ebx
 	movl	%esi, %r14d
 	movl	%edx, %r13d
+	movl	%ecx, %r12d
+	movq	%fs:40, %rax
+	movq	%rax, -56(%rbp)
+	xorl	%eax, %eax
+.L3:
+	leal	(%rbx,%rax), %ecx
+	movslq	%eax, %rdx
+	movb	%cl, -320(%rbp,%rdx)
+	addl	$1, %eax
+	cmpl	$256, %eax
+	jne	.L3
+	movl	%ebx, %edi
 	call	bar
-	movl	%eax, %ebx
+	movl	%eax, %r15d
 	movl	%r14d, %edi
 	call	bar
-	addl	%eax, %ebx
+	leal	(%r15,%rax), %r14d
 	movl	%r13d, %edi
 	call	bar
+	addl	%eax, %r14d
+	movl	%r12d, %edi
+	call	bar
+	addl	%r14d, %eax
 	addl	%ebx, %eax
-	addl	%r12d, %eax
+	movq	-56(%rbp), %rdx
+	subq	%fs:40, %rdx
+	jne	.L7
+	addq	$280, %rsp
 	popq	%rbx
 	popq	%r12
 	popq	%r13
 	popq	%r14
+	popq	%r15
 	popq	%rbp
+	.cfi_remember_state
 	.cfi_def_cfa 7, 8
 	ret
+.L7:
+	.cfi_restore_state
+	call	__stack_chk_fail@PLT
 	.cfi_endproc
 .LFE1:
 	.size	foo, .-foo
