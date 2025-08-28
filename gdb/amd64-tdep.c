@@ -2750,6 +2750,9 @@ amd64_analyze_prologue (gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR current_pc,
     return current_pc;
 
   pc = amd64_analyze_register_saves (pc, current_pc, cache);
+  if (current_pc <= pc)
+    return current_pc;
+
   return amd64_analyze_stack_alloc (gdbarch, pc, current_pc, cache);
 }
 
