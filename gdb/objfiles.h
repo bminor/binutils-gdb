@@ -657,61 +657,18 @@ public:
     this->section_offsets[idx] = offset;
   }
 
-  class section_iterator
+  /* Filter function for section_iterator.  */
+  struct filter_out_null_bfd_section
   {
-  public:
-    section_iterator (const section_iterator &) = default;
-    section_iterator (section_iterator &&) = default;
-    section_iterator &operator= (const section_iterator &) = default;
-    section_iterator &operator= (section_iterator &&) = default;
-
-    using self_type = section_iterator;
-    using reference = obj_section &;
-
-    reference operator* ()
-    { return *m_iter; }
-
-    section_iterator &operator++ ()
-    {
-      ++m_iter;
-      skip_null ();
-      return *this;
-    }
-
-    bool operator== (const section_iterator &other) const
-    { return m_iter == other.m_iter && m_end == other.m_end; }
-
-    bool operator!= (const section_iterator &other) const
-    { return !(*this == other); }
-
-  private:
-
-    friend class objfile;
-
-    section_iterator (obj_section *iter, obj_section *end)
-      : m_iter (iter),
-	m_end (end)
-    {
-      skip_null ();
-    }
-
-    void skip_null ()
-    {
-      while (m_iter < m_end && m_iter->the_bfd_section == nullptr)
-	++m_iter;
-    }
-
-    obj_section *m_iter;
-    obj_section *m_end;
+    bool operator() (const obj_section &sec) const noexcept
+    { return sec.the_bfd_section != nullptr; }
   };
 
-  iterator_range<section_iterator> sections ()
-  {
-    return (iterator_range<section_iterator>
-	    (section_iterator (sections_start, sections_end),
-	     section_iterator (sections_end, sections_end)));
-  }
+  using section_iterator = filtered_iterator<obj_section *, filter_out_null_bfd_section>;
 
+  /* Return an iterable that yields the "non-null" sections of this objfile.
+     That is, the sections for which obj_section::the_bfd_section is
+     non-nullptr.  */
   iterator_range<section_iterator> sections () const
   {
     return (iterator_range<section_iterator>
