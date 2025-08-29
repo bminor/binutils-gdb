@@ -1512,6 +1512,15 @@ owning_intrusive_list<solib>
 svr4_solib_ops::current_sos () const
 {
   svr4_info *info = get_svr4_info (current_program_space);
+
+  /* Call this for the side-effect of updating the debug base in existing
+     solibs' lm_info_svr4, if needed.  It is possible for the core to have
+     an solib with a stale lm_info_svr4::debug_base.  In that case, we are
+     about to return the same solib, but with an updated debug_base.  If we
+     didn't do this call, then it would appear as two different libraries to
+     the core, and it would appear as a spurious unload / load.  */
+  this->default_debug_base (info);
+
   owning_intrusive_list<solib> sos = this->current_sos_1 (info);
   struct mem_range vsyscall_range;
 
