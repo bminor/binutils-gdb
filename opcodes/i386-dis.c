@@ -1325,6 +1325,7 @@ enum
   X86_64_CE,
   X86_64_D4,
   X86_64_D5,
+  X86_64_D6,
   X86_64_E8,
   X86_64_E9,
   X86_64_EA,
@@ -2194,7 +2195,7 @@ static const struct dis386 dis386[] = {
   { REG_TABLE (REG_D3) },
   { X86_64_TABLE (X86_64_D4) },
   { X86_64_TABLE (X86_64_D5) },
-  { Bad_Opcode },
+  { X86_64_TABLE (X86_64_D6) },
   { "xlat",		{ DSBX }, 0 },
   /* d8 */
   { FLOAT },
@@ -4509,6 +4510,12 @@ static const struct dis386 x86_64_table[][2] = {
   /* X86_64_D5 */
   {
     { "aad", { Ib }, 0 },
+  },
+
+  /* X86_64_D6 */
+  {
+    { Bad_Opcode },
+    { "udb", { XX }, 0 },
   },
 
   /* X86_64_E8 */

@@ -457,6 +457,7 @@
 	int1
 	int3
 	int    $0x90
+	udb
 
 	.insn 0xf6/1, $1, %cl
 	.insn 0xf7/1, $2{:u16}, %cx

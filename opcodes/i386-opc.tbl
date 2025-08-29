@@ -993,6 +993,8 @@ ud2b, 0xfb9, i286, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|U
 // 3rd official undefined instr (older CPUs don't take a ModR/M byte)
 ud0, 0xfff, i286, NoSuf, {}
 ud0, 0xfff, i286, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+// 4th official undefined instruction (single byte in 64-bit mode only)
+udb, 0xd6, x64, NoSuf, {}
 
 // C (commutative) isn't quite correct here on its own; the condition also
 // needs inverting when source operands are swapped in order to convert to
