@@ -3437,8 +3437,8 @@ _bfd_riscv_elf_link_setup_gnu_properties (struct bfd_link_info *info,
 					    | SEC_READONLY | SEC_HAS_CONTENTS
 					    | SEC_DATA));
 	  if (sec == NULL)
-	    info->callbacks->einfo (
-	      _ ("%F%P: failed to create GNU property section\n"));
+	    info->callbacks->fatal (
+	      _("%P: failed to create GNU property section\n"));
 
 	  elf_section_type (sec) = SHT_NOTE;
 	}

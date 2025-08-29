@@ -10849,7 +10849,7 @@ cmdline_add_object_only_section (bfd_byte *contents, size_t size)
   /* ibfd needs to be closed *after* obfd, otherwise ld may crash with a
      segmentation fault.  */
   if (!bfd_close (ibfd))
-    einfo (_("%P%F: failed to close input\n"));
+    fatal (_("%P: failed to close input\n"));
 
   /* Must be freed after bfd_close ().  */
   free (isympp);
@@ -10857,7 +10857,7 @@ cmdline_add_object_only_section (bfd_byte *contents, size_t size)
 
   /* Must unlink to ensure rename works on Windows.  */
   if (unlink (output_filename) && errno != ENOENT)
-    einfo (_("%P%F: failed to unlink %s\n"), output_filename);
+    fatal (_("%P: failed to unlink %s\n"), output_filename);
 
   if (rename (ofilename, output_filename))
     {
