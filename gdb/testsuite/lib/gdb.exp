@@ -2376,11 +2376,33 @@ proc host_file_normalize_mingw {filename unix_to_win} {
 	return $filename
     }
 
+    # Collapse all repeated forward slashes.
+    set filename [regsub -all {//+} $filename {/}]
+
+    # Strip trailing slash, except for root.
+    if {$filename ne "/" && [string match */ $filename]} {
+	set filename [string range $filename 0 end-1]
+    }
+
     foreach {unix_filename win_filename} $unix_to_win {
 	set mount_len [string length $unix_filename]
 	if {[string equal -length $mount_len $unix_filename $filename]} {
-	    if {[string length $filename] == $mount_len} {
-		return "$win_filename/"
+	    if {$unix_filename eq "/"} {
+		if {$filename eq "/"} {
+		    return "$win_filename"
+		} else {
+		    return "$win_filename$filename"
+		}
+	    } elseif {[string length $filename] == $mount_len} {
+		# Like "cygpath -ma" if the file name resolves to a
+		# drive letter, append a slash, to make it unambiguous
+		# that we resolved to the root of the drive and not
+		# the drive's current directory.
+		if {[string match {[A-Za-z]:} $win_filename]} {
+		    return "$win_filename/"
+		} else {
+		    return "$win_filename"
+		}
 	    } elseif {[string index $filename $mount_len] eq "/"} {
 		set rest [string range $filename $mount_len end]
 		return "$win_filename$rest"

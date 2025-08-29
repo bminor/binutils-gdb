@@ -28,6 +28,22 @@ proc test {from to} {
     gdb_assert {$got == $to} $from
 }
 
-test "/" "C:/msys64/"
+# Drive letters always get a '/' suffix, other Windows file names do
+# not.
+test "/" "C:/msys64"
+test "/c" "C:/"
+test "/bin" "C:/msys64/usr/bin"
 
+# A file name that already starts with a drive letter.
 test "C:/msys64" "C:/msys64"
+
+# A subdir/subfile under each mount.
+test "/foo" "C:/msys64/foo"
+test "/c/foo" "C:/foo"
+test "/bin/foo" "C:/msys64/usr/bin/foo"
+
+# Test slash normalization.
+test "//" "C:/msys64"
+test "/c///foo//bar//" "C:/foo/bar"
+# We don't currently handle UNC paths.
+test "//server///" "C:/msys64/server"
