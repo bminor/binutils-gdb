@@ -67,7 +67,7 @@ class TestUnwinder(Unwinder):
             val = pending_frame.read_register(reg)
             # Having unavailable registers leads to a fall back to the standard
             # unwinders.  Don't add unavailable registers to avoid this.
-            if (str (val) == "<unavailable>"):
+            if str(val) == "<unavailable>":
                 continue
             unwinder.add_saved_register(reg, val)
         return unwinder
