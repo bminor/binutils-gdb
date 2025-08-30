@@ -269,7 +269,6 @@ proc test_info_linker_namespaces {} {
     gdb_assert {$n_libraries <= 3}  "the correct number of libraries was reported"
 
     set binfile_lib_re [string_to_regexp $::binfile_lib]
-    puts $binfile_lib_re
 
     foreach_with_prefix ns {1 2 3} {
 	set found_test_so false
