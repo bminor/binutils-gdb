@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef ARCH_AARCH64_GCS_LINUX_H
-#define ARCH_AARCH64_GCS_LINUX_H
+#ifndef GDB_ARCH_AARCH64_GCS_LINUX_H
+#define GDB_ARCH_AARCH64_GCS_LINUX_H
 
 #include <stdint.h>
 
@@ -41,4 +41,4 @@ struct user_gcs
 
 #endif /* GCS_MAGIC */
 
-#endif /* ARCH_AARCH64_GCS_LINUX_H */
+#endif /* GDB_ARCH_AARCH64_GCS_LINUX_H */
