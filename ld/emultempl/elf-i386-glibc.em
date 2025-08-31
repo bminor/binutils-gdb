@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-# Copyright (C) 2019-2025 Free Software Foundation, Inc.
+#   Copyright (C) 2025 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -18,41 +18,24 @@
 # see <http://www.gnu.org/licenses/>.
 #
 
-# This file is sourced from elf.em, and defines x86 specific routines.
+# This file is sourced from elf.em, and defines i386 glibc specific
+# routines.
 #
-fragment <<EOF
 
-#include "ldlex.h"
-#include "elf-linker-x86.h"
+source_em ${srcdir}/emultempl/elf-x86.em
+source_em ${srcdir}/emultempl/elf-x86-glibc.em
 
-static struct elf_linker_x86_params params;
-
-/* This is a convenient point to tell BFD about target specific flags.
-   After the output has been created, but before inputs are read.  */
-
-static void
-elf_x86_create_output_section_statements (void)
-{
-  _bfd_elf_linker_x86_set_options (&link_info, &params);
-}
-
-EOF
-
-LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=elf_x86_create_output_section_statements
-
-if test -n "$CALL_NOP_BYTE"; then
+# Define some shell vars to insert bits of code into the standard elf
+# parse_args and list_options functions.
+#
 
 fragment <<EOF
-
 static void
-elf_x86_before_parse (void)
+elf_i386_glibc_before_parse (void)
 {
-  params.call_nop_byte = $CALL_NOP_BYTE;
-
-  gld${EMULATION_NAME}_before_parse ();
+  elf_x86_before_parse ();
+  elf_x86_glibc_before_parse ();
 }
-
 EOF
 
-LDEMUL_BEFORE_PARSE=elf_x86_before_parse
-fi
+LDEMUL_BEFORE_PARSE=elf_i386_glibc_before_parse

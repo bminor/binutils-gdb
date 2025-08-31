@@ -1687,6 +1687,10 @@ elf_i386_scan_relocs (bfd *abfd,
 	  size_reloc = true;
 	  goto do_size;
 
+	case R_386_TLS_DESC_CALL:
+	  htab->has_tls_desc_call = 1;
+	  goto need_got;
+
 	case R_386_TLS_IE_32:
 	case R_386_TLS_IE:
 	case R_386_TLS_GOTIE:
@@ -1698,7 +1702,7 @@ elf_i386_scan_relocs (bfd *abfd,
 	case R_386_GOT32X:
 	case R_386_TLS_GD:
 	case R_386_TLS_GOTDESC:
-	case R_386_TLS_DESC_CALL:
+ need_got:
 	  /* This symbol requires a global offset table entry.  */
 	  {
 	    int tls_type, old_tls_type;
@@ -4500,6 +4504,40 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
   return _bfd_x86_elf_link_setup_gnu_properties (info, &init_table);
 }
 
+static void
+elf_i386_add_glibc_version_dependency
+  (struct elf_find_verdep_info *rinfo)
+{
+  int i = 0;
+  const char *version[3] = { NULL, NULL, NULL };
+  bool auto_version[3] = { false, false, false };
+  struct elf_x86_link_hash_table *htab;
+
+  if (rinfo->info->enable_dt_relr)
+    {
+      version[i] = "GLIBC_ABI_DT_RELR";
+      i++;
+    }
+
+  htab = elf_x86_hash_table (rinfo->info, I386_ELF_DATA);
+  if (htab != NULL)
+    {
+      if (htab->params->gnu2_tls_version_tag && htab->has_tls_desc_call)
+	{
+	  version[i] = "GLIBC_ABI_GNU2_TLS";
+	  /* 2 == auto, enable if libc.so defines the GLIBC_ABI_GNU2_TLS
+	     version.  */
+	  if (htab->params->gnu2_tls_version_tag == 2)
+	    auto_version[i] = true;
+	  i++;
+	}
+    }
+
+  if (i != 0)
+    _bfd_elf_link_add_glibc_version_dependency (rinfo, version,
+						auto_version);
+}
+
 #define TARGET_LITTLE_SYM		i386_elf32_vec
 #define TARGET_LITTLE_NAME		"elf32-i386"
 #define ELF_ARCH			bfd_arch_i386
@@ -4540,12 +4578,16 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
 #define elf_backend_relocate_section	      elf_i386_relocate_section
 #define elf_backend_setup_gnu_properties      elf_i386_link_setup_gnu_properties
 #define elf_backend_hide_symbol		      _bfd_x86_elf_hide_symbol
+#define elf_backend_add_glibc_version_dependency \
+  elf_i386_add_glibc_version_dependency
 
 #define elf_backend_linux_prpsinfo32_ugid16	true
 
 #define	elf32_bed			      elf32_i386_bed
 
 #include "elf32-target.h"
+
+#undef elf_backend_add_glibc_version_dependency
 
 /* FreeBSD support.  */
 

@@ -1745,6 +1745,21 @@ Supported for Linux/i386 and Linux/x86_64.
 
 Other keywords are ignored for Solaris compatibility.
 
+@item --gnu2-tls-tag
+@itemx --no-gnu2-tls-tag
+Add @code{GLIBC_ABI_GNU2_TLS} version tag dependency in output programs
+and shared libraries when linking against glibc if input relocatable
+object files have @code{R_386_TLS_DESC_CALL} or
+@code{R_X86_64_TLSDESC_CALL} relocation.  The output will fail to load
+and run at run-time against glibc which doesn't define the
+@code{GLIBC_ABI_GNU2_TLS} version tag.  Unless disabled by the
+@option{--disable-gnu2-tls-tag} configure option at the linker build
+time, when no options are specified, linker will add the
+@code{GLIBC_ABI_GNU2_TLS} version tag dependency if inputs have
+@code{R_386_TLS_DESC_CALL} or @code{R_X86_64_TLSDESC_CALL} relocation
+and libc.so defines the @code{GLIBC_ABI_GNU2_TLS} version tag.
+Supported for Linux/i386 and Linux/x86_64.
+
 @kindex -(
 @cindex groups of archives
 @item -( @var{archives} -)

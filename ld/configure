@@ -851,6 +851,7 @@ enable_textrel_check
 enable_separate_code
 enable_rosegment
 enable_mark_plt
+enable_gnu2_tls_tag
 enable_memory_seal
 enable_warn_execstack
 enable_error_execstack
@@ -1548,6 +1549,8 @@ Optional Features:
   --enable-separate-code  enable -z separate-code in ELF linker by default
   --enable-rosegment      enable --rosegment in the ELF linker by default
   --enable-mark-plt       enable -z mark-plt in ELF x86-64 linker by default
+  --enable-gnu2-tls-tag   enable --gnu2-tls-tag in ELF i386/x86-64 linker by
+                          default
   --enable-memory-seal    enable -z memory-seal in ELF linker by default
   --enable-warn-execstack enable warnings when creating an executable stack
   --enable-error-execstack
@@ -11514,7 +11517,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11517 "configure"
+#line 11520 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11620,7 +11623,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11623 "configure"
+#line 11626 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15507,6 +15510,18 @@ esac
 fi
 
 
+# Decide if --gnu2-tls-tag should be enabled in ELF i386 and x86-64
+# linkers by default.
+ac_default_ld_enable_gnu2_tls_tag=unset
+# Check whether --enable-gnu2-tls-tag was given.
+if test "${enable_gnu2_tls_tag+set}" = set; then :
+  enableval=$enable_gnu2_tls_tag; case "${enableval}" in
+  yes) ac_default_ld_enable_gnu2_tls_tag=1 ;;
+  no) ac_default_ld_enable_gnu2_tls_tag=0 ;;
+esac
+fi
+
+
 # Decide if -z memory-seal should be enabled in ELF linker by default.
 ac_default_ld_z_memory_seal=unset
 # Check whether --enable-memory-seal was given.
@@ -18980,6 +18995,16 @@ cat >>confdefs.h <<_ACEOF
 #define DEFAULT_LD_Z_MEMORY_SEAL $ac_default_ld_z_memory_seal
 _ACEOF
 
+
+if test "${ac_default_ld_enable_gnu2_tls_tag}" = unset; then
+  # Default to enable --gnu2-tls-tag if libc.so has the GLIBC_ABI_GNU2_TLS
+  # version.
+  ac_default_ld_enable_gnu2_tls_tag=2
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_LD_GNU2_TLS_TAG $ac_default_ld_enable_gnu2_tls_tag
+_ACEOF
 
 
 

@@ -667,6 +667,10 @@ struct elf_x86_link_hash_table
   /* Number of relative reloc generation pass.  */
   unsigned int generate_relative_reloc_pass;
 
+  /* TRUE if inputs have R_386_TLS_DESC_CALL or R_X86_64_TLSDESC_CALL
+     relocation.  */
+  unsigned int has_tls_desc_call : 1;
+
    /* Value used to fill the unused bytes of the first PLT entry.  This
       is only used for i386.  */
   bfd_byte plt0_pad_byte;

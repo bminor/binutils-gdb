@@ -72,6 +72,14 @@ struct elf_linker_x86_params
   /* Mark PLT with dynamic tags.  */
   unsigned int mark_plt : 1;
 
+  /* Add the GLIBC_ABI_GNU2_TLS version dependency if input object files
+     have R_386_TLS_DESC_CALL or R_X86_64_TLSDESC_CALL relocation:
+     0: Disable.
+     1: Enable.
+     2: Auto.  Enable if libc.so has the GLIBC_ABI_GNU2_TLS version.
+   */
+  unsigned int gnu2_tls_version_tag : 2;
+
   /* X86-64 ISA level needed.  */
   unsigned int isa_level;
 

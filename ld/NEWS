@@ -1,5 +1,11 @@
 -*- text -*-
 
+* Add --gnu2-tls-tag/--no-gnu2-tls-tag options to i386 and x86-64 ELF
+  linkers to add the GLIBC_ABI_GNU2_TLS version dependency in output if
+  input object files have R_386_TLS_DESC_CALL or R_X86_64_TLSDESC_CALL
+  relocation.  Also added --enable-gnu2-tls-tag configure option to
+  enable --gnu2-tls-tag by default.
+
 Changes in 2.45:
 
 * On s390 64-bit (s390x), generate SFrame stack trace information (.sframe)
