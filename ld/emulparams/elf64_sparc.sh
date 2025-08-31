@@ -12,15 +12,7 @@ GENERATE_SHLIB_SCRIPT=yes
 GENERATE_PIE_SCRIPT=yes
 NOP=0x01000000
 NO_SMALL_DATA=yes
-
-case "$target" in
-  sparc*-solaris*)
-    TEXT_START_ADDR=0x100000000
-    ;;
-  *)
-    TEXT_START_ADDR=0x100000
-    ;;
-esac
+TEXT_START_ADDR=0x100000
 
 # Treat a host that matches the target with the possible exception of "64"
 # and "v7", "v8", "v9" in the name as if it were native.

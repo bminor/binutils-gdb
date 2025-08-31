@@ -1,3 +1,8 @@
+2025-08-31  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* emulparams/elf64_sparc.sh (TEXT_START_ADDR): Move ...
+	* emulparams/elf64_sparc_sol2.sh (TEXT_START_ADDR): ... here.
+
 2025-08-22  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* testsuite/ld-shared/shared.exp (shared (non PIC)): Update
