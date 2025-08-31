@@ -36,7 +36,6 @@ struct iterator_range
   {}
 
   /* Create an iterator range using explicit BEGIN and END iterators.  */
-  template <typename... Args>
   iterator_range (IteratorType begin, IteratorType end)
     : m_begin (std::move (begin)), m_end (std::move (end))
   {}
