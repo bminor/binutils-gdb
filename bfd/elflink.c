@@ -2402,7 +2402,7 @@ elf_link_add_glibc_verneed (struct elf_find_verdep_info *rinfo,
 /* Add VERSION_DEP to the list of version dependencies when linked
    against glibc.  */
 
-void
+bool
 _bfd_elf_link_add_glibc_version_dependency
   (struct elf_find_verdep_info *rinfo,
    const char *version_dep[],
@@ -2415,11 +2415,13 @@ _bfd_elf_link_add_glibc_version_dependency
       /* Return if not linked against glibc.  */
       if (!elf_link_add_glibc_verneed (rinfo, *version_dep,
 				       &glibc_minor_base, auto_version))
-	return;
+	return false;
       version_dep++;
       auto_version++;
     }
   while (*version_dep != NULL);
+
+  return true;
 }
 
 /* Add GLIBC_ABI_DT_RELR to the list of version dependencies when
