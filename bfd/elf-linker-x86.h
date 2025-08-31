@@ -80,6 +80,15 @@ struct elf_linker_x86_params
    */
   unsigned int gnu2_tls_version_tag : 2;
 
+  /* Add the GLIBC_ABI_GNU_TLS version dependency if input object files
+     call ___tls_get_addr:
+     0: Disable.
+     1: Enable.
+     2: Auto.  Enable if libc.so has the GLIBC_ABI_GNU_TLS version.
+     This is only used by i386.
+   */
+  unsigned int gnu_tls_version_tag : 2;
+
   /* X86-64 ISA level needed.  */
   unsigned int isa_level;
 

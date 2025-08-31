@@ -256,6 +256,16 @@ AC_ARG_ENABLE(gnu2-tls-tag,
   no) ac_default_ld_enable_gnu2_tls_tag=0 ;;
 esac])
 
+# Decide if --gnu-tls-tag should be enabled in ELF i386 linker by default.
+ac_default_ld_enable_gnu_tls_tag=unset
+AC_ARG_ENABLE(gnu-tls-tag,
+	      AS_HELP_STRING([--enable-gnu-tls-tag],
+	      [enable --gnu-tls-tag in ELF i386 linker by default]),
+[case "${enableval}" in
+  yes) ac_default_ld_enable_gnu_tls_tag=1 ;;
+  no) ac_default_ld_enable_gnu_tls_tag=0 ;;
+esac])
+
 # Decide if -z memory-seal should be enabled in ELF linker by default.
 ac_default_ld_z_memory_seal=unset
 AC_ARG_ENABLE(memory-seal,
@@ -666,6 +676,15 @@ fi
 AC_DEFINE_UNQUOTED(DEFAULT_LD_GNU2_TLS_TAG,
   $ac_default_ld_enable_gnu2_tls_tag,
   [Define to 1 if you want to enable --gnu2-tls-tag in ELF i386/x86-64 linker by default.])
+
+if test "${ac_default_ld_enable_gnu_tls_tag}" = unset; then
+  # Default to enable --gnu-tls-tag if libc.so has the GLIBC_ABI_GNU_TLS
+  # version.
+  ac_default_ld_enable_gnu_tls_tag=2
+fi
+AC_DEFINE_UNQUOTED(DEFAULT_LD_GNU_TLS_TAG,
+  $ac_default_ld_enable_gnu_tls_tag,
+  [Define to 1 if you want to enable --gnu-tls-tag in ELF i386 linker by default.])
 
 AC_DEFINE_UNQUOTED(DEFAULT_LD_WARN_EXECSTACK,
   $ac_default_ld_warn_execstack,

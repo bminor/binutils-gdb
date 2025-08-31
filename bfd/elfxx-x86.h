@@ -671,6 +671,9 @@ struct elf_x86_link_hash_table
      relocation.  */
   unsigned int has_tls_desc_call : 1;
 
+  /* TRUE if inputs call ___tls_get_addr.  This is only used for i386.  */
+  unsigned int has_tls_get_addr_call : 1;
+
    /* Value used to fill the unused bytes of the first PLT entry.  This
       is only used for i386.  */
   bfd_byte plt0_pad_byte;

@@ -1745,6 +1745,19 @@ Supported for Linux/i386 and Linux/x86_64.
 
 Other keywords are ignored for Solaris compatibility.
 
+@item --gnu-tls-tag
+@itemx --no-gnu-tls-tag
+Add @code{GLIBC_ABI_GNU_TLS} version tag dependency in output programs
+and shared libraries when linking against glibc if input relocatable
+object files call @code{___tls_get_addr}.  The output will fail to load
+and run at run-time against glibc which doesn't define the
+@code{GLIBC_ABI_GNU_TLS} version tag.  Unless disabled by the
+@option{--disable-gnu-tls-tag} configure option at the linker build
+time, when no options are specified, linker will add the
+@code{GLIBC_ABI_GNU_TLS} version tag dependency if inputs have
+@code{___tls_get_addr} call and libc.so defines the
+@code{GLIBC_ABI_GNU_TLS} version tag.  Supported for Linux/i386.
+
 @item --gnu2-tls-tag
 @itemx --no-gnu2-tls-tag
 Add @code{GLIBC_ABI_GNU2_TLS} version tag dependency in output programs
