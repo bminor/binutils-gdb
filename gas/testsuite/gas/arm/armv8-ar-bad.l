@@ -1,10 +1,10 @@
 .*: Assembler messages:
 .*:6: Error: swp{b} use is obsoleted for ARMv8 and later
-.*:9: Warning: This coprocessor register access is deprecated in ARMv8
-.*:10: Warning: This coprocessor register access is deprecated in ARMv8
-.*:11: Warning: This coprocessor register access is deprecated in ARMv8
-.*:12: Warning: This coprocessor register access is deprecated in ARMv8
-.*:13: Warning: This coprocessor register access is deprecated in ARMv8
+.*:9: Warning: this coprocessor register access is deprecated in ARMv8
+.*:10: Warning: this coprocessor register access is deprecated in ARMv8
+.*:11: Warning: this coprocessor register access is deprecated in ARMv8
+.*:12: Warning: this coprocessor register access is deprecated in ARMv8
+.*:13: Warning: this coprocessor register access is deprecated in ARMv8
 .*:16: Warning: setend use is deprecated for ARMv8
 .*:19: Warning: setend use is deprecated for ARMv8
 .*:23: Error: immediate value out of range -- `hlt 0x10000'

@@ -9455,7 +9455,7 @@ struct deprecated_coproc_regs_s
 };
 
 #define DEPR_ACCESS_V8 \
-  N_("This coprocessor register access is deprecated in ARMv8")
+  N_("this coprocessor register access is deprecated in ARMv8")
 
 /* Table of all deprecated coprocessor registers.  */
 static struct deprecated_coproc_regs_s deprecated_coproc_regs[] =
@@ -9517,7 +9517,7 @@ do_co_reg (void)
 	    && inst.operands[4].reg == r->crm
 	    && inst.operands[5].imm == r->opc2)
 	  {
-	    if (! ARM_CPU_IS_ANY (cpu_variant)
+	    if (!(r->obs_msg && check_obsolete (&r->obsoleted, r->obs_msg))
 		&& warn_on_deprecated
 		&& ARM_CPU_HAS_FEATURE (cpu_variant, r->deprecated))
 	      as_tsktsk ("%s", r->dep_msg);
