@@ -1339,7 +1339,7 @@ main (int argc, char **argv)
   program_name = *argv;
   xmalloc_set_program_name (program_name);
 
-  while ((c = getopt_long (argc, argv, "vVdhacs", long_options, 0)) != EOF)
+  while ((c = getopt_long (argc, argv, "vVdhacsi", long_options, 0)) != EOF)
     switch (c)
       {
       case 'V':
