@@ -25,166 +25,155 @@ if {[build_executable ${testfile}.exp $testfile] == -1} {
     return
 }
 
-save_vars { ::env(GLIBC_TUNABLES) } {
-
-    # If x86 shadow stack is supported we need to configure GLIBC_TUNABLES
-    # such that the feature is enabled and the register pl3_ssp is
-    # available.  Otherwise the request to fetch all registers will fail
-    # with "message": "value is not available".
-    if { [allow_ssp_tests] } {
-	append_environment GLIBC_TUNABLES "glibc.cpu.hwcaps" "SHSTK"
-    }
-
-    if {[dap_initialize] == ""} {
-	return
-    }
-
-    set launch_id [dap_launch $testfile]
-
-    set line [gdb_get_line_number "BREAK"]
-    set obj [dap_check_request_and_response "set breakpoint by line number" \
-		setBreakpoints \
-		[format {o source [o path [%s]] breakpoints [a [o line [i %d]]]} \
-		      [list s $srcfile] $line]]
-    set line_bpno [dap_get_breakpoint_number $obj]
-
-    dap_check_request_and_response "configurationDone" configurationDone
-
-    dap_check_response "launch response" launch $launch_id
-
-    dap_wait_for_event_and_check "inferior started" thread "body reason" started
-
-    dap_wait_for_event_and_check "stopped at line breakpoint" stopped \
-	"body reason" breakpoint \
-	"body hitBreakpointIds" $line_bpno
-
-    set bt [lindex [dap_check_request_and_response "backtrace" stackTrace \
-			{o threadId [i 1]}] \
-		0]
-    set frame_id [dict get [lindex [dict get $bt body stackFrames] 0] id]
-
-    set scopes [dap_check_request_and_response "get scopes" scopes \
-		[format {o frameId [i %d]} $frame_id]]
-    set scopes [dict get [lindex $scopes 0] body scopes]
-
-    # Request the scopes twice, and verify that the results are identical.
-    # GDB previously had a bug where it would return new scopes each time.
-    set scopes2 [dap_check_request_and_response "get scopes again" scopes \
-		 [format {o frameId [i %d]} $frame_id]]
-    set scopes2 [dict get [lindex $scopes2 0] body scopes]
-    gdb_assert {$scopes2 == $scopes} "identical scopes requests yield same body"
-
-    gdb_assert {[llength $scopes] == 2} "two scopes"
-
-    lassign $scopes scope reg_scope
-    gdb_assert {[dict get $scope name] == "Locals"} "scope is locals"
-    gdb_assert {[dict get $scope presentationHint] == "locals"} \
-	"locals presentation hint"
-    set count [dict get $scope namedVariables]
-    gdb_assert {$count == 4} "four vars in scope"
-
-    gdb_assert {[dict get $reg_scope name] == "Registers"} \
-	"second scope is registers"
-    gdb_assert {[dict get $reg_scope presentationHint] == "registers"} \
-	"registers presentation hint"
-    gdb_assert {[dict get $reg_scope namedVariables] > 0} "at least one register"
-
-    set num [dict get $scope variablesReference]
-    # Send two requests and combine them, to verify that using a range
-    # works.
-    set refs1 [lindex [dap_check_request_and_response "fetch variables 0,1" \
-			   "variables" \
-			   [format {o variablesReference [i %d] count [i 2]} \
-				$num]] \
-		   0]
-    set refs2 [lindex [dap_check_request_and_response "fetch variables 2" \
-			   "variables" \
-			   [format {o variablesReference [i %d] \
-					start [i 2] count [i %d]} \
-				$num [expr {$count - 2}]]] \
-		   0]
-
-    set vars [concat [dict get $refs1 body variables] \
-		   [dict get $refs2 body variables]]
-    foreach var $vars {
-	set name [dict get $var name]
-
-	if {$name != "dei"} {
-	    gdb_assert {[dict get $var variablesReference] == 0} \
-		"$name has no structure"
-	}
-
-	switch $name {
-	    "inner" {
-		gdb_assert {[string match "*inner block*" [dict get $var value]]} \
-		    "check value of inner"
-	    }
-	    "dei" {
-		gdb_assert {[dict get $var value] == ""} "check value of dei"
-		set dei_ref [dict get $var variablesReference]
-	    }
-	    "scalar" {
-		gdb_assert {[dict get $var value] == 23} "check value of scalar"
-	    }
-	    "ptr" {
-		gdb_assert {[dict get $var memoryReference] != ""} \
-		    "check memoryReference of ptr"
-	    }
-	    default {
-		fail "unknown variable $name"
-	    }
-	}
-    }
-
-    set refs [lindex [dap_check_request_and_response "fetch contents of dei" \
-			   "variables" \
-			   [format {o variablesReference [i %d]} $dei_ref]] \
-		   0]
-    set deivals [dict get $refs body variables]
-    gdb_assert {[llength $deivals] == 2} "dei has two members"
-
-    # Request more children than exist.  See PR dap/33228.
-    set seq [dap_send_request variables \
-		   [format {o variablesReference [i %d] count [i 100]} $dei_ref]]
-    lassign [dap_read_response variables $seq] response ignore
-    gdb_assert {[dict get $response success] == "false"} \
-	"variables with invalid count"
-
-    set num [dict get $reg_scope variablesReference]
-    lassign [dap_check_request_and_response "fetch all registers" \
-		 "variables" \
-		 [format {o variablesReference [i %d] count [i %d]} $num\
-		      [dict get $reg_scope namedVariables]]] \
-	val events
-
-    # If any register has children, try to fetch those as well.  This is a
-    # regression test for part of PR dap/33228.
-    foreach var [dict get $val body variables] {
-	set regvar [dict get $var variablesReference]
-	if {$regvar > 0} {
-	    # If variablesReference is non-zero, then there must be either
-	    # named or indexed children.
-	    if {[dict exists $var namedVariables]} {
-		set n [dict get $var namedVariables]
-	    } else {
-		set n [dict get $var indexedVariables]
-	    }
-
-	    dap_check_request_and_response "fetch register children for $regvar" \
-		"variables" \
-		[format {o variablesReference [i %d] count [i %d]} $regvar $n]
-	}
-    }
-
-    set num [dict get $scope variablesReference]
-    set refs [lindex [dap_check_request_and_response "set variable scalar" \
-			  "setVariable" \
-			  [format {o variablesReference [i %d] name [s scalar] \
-			   value [s 32]} \
-			   $num]] \
-		  0]
-    gdb_assert { [dict get $refs body value] == 32 } \
-	"setting variable yields updated value"
-
-    dap_shutdown
+if {[dap_initialize] == ""} {
+    return
 }
+
+set launch_id [dap_launch $testfile]
+
+set line [gdb_get_line_number "BREAK"]
+set obj [dap_check_request_and_response "set breakpoint by line number" \
+	     setBreakpoints \
+	     [format {o source [o path [%s]] breakpoints [a [o line [i %d]]]} \
+		  [list s $srcfile] $line]]
+set line_bpno [dap_get_breakpoint_number $obj]
+
+dap_check_request_and_response "configurationDone" configurationDone
+
+dap_check_response "launch response" launch $launch_id
+
+dap_wait_for_event_and_check "inferior started" thread "body reason" started
+
+dap_wait_for_event_and_check "stopped at line breakpoint" stopped \
+    "body reason" breakpoint \
+    "body hitBreakpointIds" $line_bpno
+
+set bt [lindex [dap_check_request_and_response "backtrace" stackTrace \
+		    {o threadId [i 1]}] \
+	    0]
+set frame_id [dict get [lindex [dict get $bt body stackFrames] 0] id]
+
+set scopes [dap_check_request_and_response "get scopes" scopes \
+		[format {o frameId [i %d]} $frame_id]]
+set scopes [dict get [lindex $scopes 0] body scopes]
+
+# Request the scopes twice, and verify that the results are identical.
+# GDB previously had a bug where it would return new scopes each time.
+set scopes2 [dap_check_request_and_response "get scopes again" scopes \
+		 [format {o frameId [i %d]} $frame_id]]
+set scopes2 [dict get [lindex $scopes2 0] body scopes]
+gdb_assert {$scopes2 == $scopes} "identical scopes requests yield same body"
+
+gdb_assert {[llength $scopes] == 2} "two scopes"
+
+lassign $scopes scope reg_scope
+gdb_assert {[dict get $scope name] == "Locals"} "scope is locals"
+gdb_assert {[dict get $scope presentationHint] == "locals"} \
+    "locals presentation hint"
+set count [dict get $scope namedVariables]
+gdb_assert {$count == 4} "four vars in scope"
+
+gdb_assert {[dict get $reg_scope name] == "Registers"} \
+    "second scope is registers"
+gdb_assert {[dict get $reg_scope presentationHint] == "registers"} \
+    "registers presentation hint"
+gdb_assert {[dict get $reg_scope namedVariables] > 0} "at least one register"
+
+set num [dict get $scope variablesReference]
+# Send two requests and combine them, to verify that using a range
+# works.
+set refs1 [lindex [dap_check_request_and_response "fetch variables 0,1" \
+		       "variables" \
+		       [format {o variablesReference [i %d] count [i 2]} \
+			    $num]] \
+	       0]
+set refs2 [lindex [dap_check_request_and_response "fetch variables 2" \
+		       "variables" \
+		       [format {o variablesReference [i %d] \
+				    start [i 2] count [i %d]} \
+			    $num [expr {$count - 2}]]] \
+	       0]
+
+set vars [concat [dict get $refs1 body variables] \
+	      [dict get $refs2 body variables]]
+foreach var $vars {
+    set name [dict get $var name]
+
+    if {$name != "dei"} {
+	gdb_assert {[dict get $var variablesReference] == 0} \
+	    "$name has no structure"
+    }
+
+    switch $name {
+	"inner" {
+	    gdb_assert {[string match "*inner block*" [dict get $var value]]} \
+		"check value of inner"
+	}
+	"dei" {
+	    gdb_assert {[dict get $var value] == ""} "check value of dei"
+	    set dei_ref [dict get $var variablesReference]
+	}
+	"scalar" {
+	    gdb_assert {[dict get $var value] == 23} "check value of scalar"
+	}
+	"ptr" {
+	    gdb_assert {[dict get $var memoryReference] != ""} \
+		"check memoryReference of ptr"
+	}
+	default {
+	    fail "unknown variable $name"
+	}
+    }
+}
+
+set refs [lindex [dap_check_request_and_response "fetch contents of dei" \
+		      "variables" \
+		      [format {o variablesReference [i %d]} $dei_ref]] \
+	      0]
+set deivals [dict get $refs body variables]
+gdb_assert {[llength $deivals] == 2} "dei has two members"
+
+# Request more children than exist.  See PR dap/33228.
+set seq [dap_send_request variables \
+	     [format {o variablesReference [i %d] count [i 100]} $dei_ref]]
+lassign [dap_read_response variables $seq] response ignore
+gdb_assert {[dict get $response success] == "false"} \
+    "variables with invalid count"
+
+set num [dict get $reg_scope variablesReference]
+lassign [dap_check_request_and_response "fetch all registers" \
+	     "variables" \
+	     [format {o variablesReference [i %d] count [i %d]} $num\
+		  [dict get $reg_scope namedVariables]]] \
+    val events
+
+# If any register has children, try to fetch those as well.  This is a
+# regression test for part of PR dap/33228.
+foreach var [dict get $val body variables] {
+    set regvar [dict get $var variablesReference]
+    if {$regvar > 0} {
+	# If variablesReference is non-zero, then there must be either
+	# named or indexed children.
+	if {[dict exists $var namedVariables]} {
+	    set n [dict get $var namedVariables]
+	} else {
+	    set n [dict get $var indexedVariables]
+	}
+
+	dap_check_request_and_response "fetch register children for $regvar" \
+	    "variables" \
+	    [format {o variablesReference [i %d] count [i %d]} $regvar $n]
+    }
+}
+
+set num [dict get $scope variablesReference]
+set refs [lindex [dap_check_request_and_response "set variable scalar" \
+		      "setVariable" \
+		      [format {o variablesReference [i %d] name [s scalar] \
+				   value [s 32]} \
+			   $num]] \
+	      0]
+gdb_assert { [dict get $refs body value] == 32 } \
+    "setting variable yields updated value"
+
+dap_shutdown
