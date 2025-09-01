@@ -1,5 +1,5 @@
 #objdump: -dwMsuffix
-#name: x86_64 MOVRS insns
+#name: x86_64 MOVRS insns (w/ suffix)
 
 .*: +file format .*
 
