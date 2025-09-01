@@ -21009,6 +21009,7 @@ process_got_section_contents (Filedata * filedata)
   uint64_t entries;
   unsigned char *data;
   bool res = true;
+  bool found = false;
 
   if (!do_got_section_contents)
     return res;
@@ -21020,6 +21021,7 @@ process_got_section_contents (Filedata * filedata)
       /* process_mips_specific also displays GOT related contents.  */
       if (!do_arch)
 	res = process_mips_specific (filedata, true);
+      found = true;
       goto out;
     }
 
@@ -21038,6 +21040,8 @@ process_got_section_contents (Filedata * filedata)
 
 	if (!startswith (name, ".got"))
 	  continue;
+
+	found = true;
 
 	data = (unsigned char *) get_section_contents (section,
 						       filedata);
@@ -21122,6 +21126,15 @@ process_got_section_contents (Filedata * filedata)
       }
 
  out:
+  if (! found)
+    {
+      if (filedata->is_separate)
+	printf (_("\nThere is no GOT section in linked file '%s'.\n"),
+		filedata->file_name);
+      else
+	printf (_("\nThere is no GOT section in this file.\n"));
+    }
+
   for (size_t j = 0; j < all_relocations_count; j++)
     free (all_relocations_root[j].r_symbol);
   free (all_relocations_root);
