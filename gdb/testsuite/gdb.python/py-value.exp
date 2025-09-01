@@ -681,6 +681,7 @@ proc_with_prefix test_value_bytes { } {
       "python" "" \
       "def check_value_bytes(var_name):" "" \
       "   val = gdb.parse_and_eval(var_name)" "" \
+      "   assert not val.is_unavailable" "" \
       "   addr = val.address" "" \
       "   len = val.type.sizeof" "" \
       "   mem = gdb.selected_inferior().read_memory(addr, len)" "" \
@@ -763,6 +764,38 @@ proc test_assign {} {
 	"cannot assign to integer"
 }
 
+# Test Value.is_unavailable
+proc test_unavailable {} {
+    set elem_size [get_valueof "/d" "sizeof(long_array\[0\])" "UNKNOWN" \
+		       "get size of long_array element"]
+    set max [expr $elem_size * 10]
+
+    with_set "print elements" 5 {
+	with_max_value_size $max {
+	    gdb_test "p long_array"
+
+	    gdb_test_no_output "set print elements 15"
+
+	    gdb_test_no_output "python v = gdb.history(0)"
+
+	    gdb_test "python print(v.is_unavailable)" "^True" \
+		"overall object shows as unavailable"
+	    for { set i 0 } { $i < 10 } { incr i } {
+		gdb_test "python print(v\[$i\].is_unavailable)" "^False" \
+		    "array element $i is available"
+		gdb_test "python print(v\[$i\])" "^$i" \
+		    "array element $i has correct value"
+	    }
+	    for { set i 10 } { $i < 15 } { incr i } {
+		gdb_test "python print(v\[$i\].is_unavailable)" "^True" \
+		    "array element $i is unavailable"
+		gdb_test "python print(v\[$i\])" "^<unavailable>" \
+		    "array element $i shows as unavailable"
+	    }
+	}
+    }
+}
+
 # Build C version of executable.  C++ is built later.
 if { [build_inferior "${binfile}" "c"] < 0 } {
     return -1
@@ -789,6 +822,7 @@ if {![runto_main]} {
     return 0
 }
 
+test_unavailable
 test_value_in_inferior
 test_value_from_buffer
 test_value_sub_classes

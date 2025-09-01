@@ -910,7 +910,26 @@ this attribute holds @code{None}.
 @cindex optimized out value in Python
 @defvar Value.is_optimized_out
 This read-only boolean attribute is true if the compiler optimized out
-this value, thus it is not available for fetching from the inferior.
+this value, or any part of this value, and thus it is not available
+for fetching from the inferior.
+@end defvar
+
+@cindex unavailable values in Python
+@defvar Value.is_unavailable
+This read-only boolean attribute is true if this value, or any part of
+this value, is not available to @value{GDBN}.  Where an optimized out
+value has been removed from the program by the compiler, an
+unavailable value does exist in the program, but @value{GDBN} is
+unable to fetch it.
+
+Some reasons why this might occur include, but are not limited to: a
+core file format that @value{GDBN} doesn't fully understand; during
+live debugging if the debug API has no mechanism to access the
+required state, e.g.@: the kernel gives an error when trying to read a
+particular register set; or reading a value from @value{GDBN}'s
+history, when only a partial value was stored, e.g.@: due to the
+@kbd{max-value-size} setting (@pxref{set
+max-value-size,,max-value-size}).
 @end defvar
 
 @defvar Value.type

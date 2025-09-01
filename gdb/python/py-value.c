@@ -1288,6 +1288,30 @@ valpy_get_is_optimized_out (PyObject *self, void *closure)
   Py_RETURN_FALSE;
 }
 
+/* Implements gdb.Value.is_unavailable.  Return true if any part of the
+   value is unavailable.  */
+
+static PyObject *
+valpy_get_is_unavailable (PyObject *self, void *closure)
+{
+  struct value *value = ((value_object *) self)->value;
+  bool entirely_available = false;
+
+  try
+    {
+      entirely_available = value->entirely_available ();
+    }
+  catch (const gdb_exception &except)
+    {
+      return gdbpy_handle_gdb_exception (nullptr, except);
+    }
+
+  if (!entirely_available)
+    Py_RETURN_TRUE;
+
+  Py_RETURN_FALSE;
+}
+
 /* Implements gdb.Value.is_lazy.  */
 static PyObject *
 valpy_get_is_lazy (PyObject *self, void *closure)
@@ -2194,6 +2218,9 @@ static gdb_PyGetSetDef value_object_getset[] = {
     "Boolean telling whether the value is optimized "
     "out (i.e., not available).",
     NULL },
+  { "is_unavailable", valpy_get_is_unavailable, nullptr,
+    "Boolean telling whether the value is unavailable.",
+    nullptr },
   { "type", valpy_get_type, NULL, "Type of the value.", NULL },
   { "dynamic_type", valpy_get_dynamic_type, NULL,
     "Dynamic type of the value.", NULL },
