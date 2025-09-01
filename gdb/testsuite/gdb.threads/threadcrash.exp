@@ -132,8 +132,9 @@ proc do_full_test {} {
 	set pthread_kill ".*"
     }
 
-    for {set i 0} {$i < $thread_count } {incr i} {
-	set thread_num [expr [llength $test_list] - $i]
+    set loop_iterations [llength $test_list]
+    for {set i 0} {$i < $loop_iterations } {incr i} {
+	set thread_num [expr $loop_iterations - $i]
 
 	set type [lindex $test_list $i]
 	if { $type == 1 } {
