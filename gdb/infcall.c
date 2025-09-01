@@ -887,15 +887,21 @@ run_inferior_call (std::unique_ptr<call_thread_fsm> sm,
      call async_enable_stdin.  This changes the prompt state to
      PROMPT_NEEDED.
 
-     If the previous prompt state was PROMPT_NEEDED, then as
-     async_enable_stdin has already been called, nothing additional
-     needs to be done here.  */
+     If the previous prompt state was PROMPT_NEEDED, then async_enable_stdin
+     may or may not have been called, so do the same changes as in
+     async_enable_stdin.  */
   if (current_ui->prompt_state == PROMPT_BLOCKED)
     {
       if (call_thread->thread_fsm ()->finished_p ())
 	async_disable_stdin ();
       else
 	async_enable_stdin ();
+    }
+  else if (current_ui->prompt_state == PROMPT_NEEDED)
+    {
+      /* Copied from async_enable_stdin.  */
+      target_terminal::ours ();
+      current_ui->register_file_handler ();
     }
 
   /* If the infcall does NOT succeed, normal_stop will have already
