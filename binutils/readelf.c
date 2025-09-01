@@ -21025,8 +21025,9 @@ process_got_section_contents (Filedata * filedata)
       goto out;
     }
 
-  qsort (all_relocations_root, all_relocations_count,
-	 sizeof (elf_relocation), elf_relocation_cmp);
+  if (all_relocations_count > 1)
+    qsort (all_relocations_root, all_relocations_count,
+	   sizeof (elf_relocation), elf_relocation_cmp);
 
   initialise_dumps_byname (filedata);
 
