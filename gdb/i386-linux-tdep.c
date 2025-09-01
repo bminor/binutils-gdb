@@ -1044,6 +1044,8 @@ int i386_linux_gregset_reg_offset[] =
   -1, -1, -1, -1, -1, -1, -1, -1, /* k0 ... k7 (AVX512)  */
   -1, -1, -1, -1, -1, -1, -1, -1, /* zmm0 ... zmm7 (AVX512)  */
   -1,				  /* PKRU register  */
+  -1,				  /* SSP register.  */
+  -1, -1,			  /* fs/gs base registers.  */
   11 * 4,			  /* "orig_eax"  */
 };
 
@@ -1491,6 +1493,9 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
 INIT_GDB_FILE (i386_linux_tdep)
 {
+  gdb_assert (ARRAY_SIZE (i386_linux_gregset_reg_offset)
+	      == I386_LINUX_NUM_REGS);
+
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_LINUX,
 			  i386_linux_init_abi);
 }

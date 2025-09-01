@@ -303,7 +303,14 @@ enum i386_regnum
   I386_PKRU_REGNUM,
   I386_PL3_SSP_REGNUM,
   I386_FSBASE_REGNUM,
-  I386_GSBASE_REGNUM
+  I386_GSBASE_REGNUM,
+
+  I386_NUM_REGS,	/* Calculated from last *_REGNUM entry.  */
+  I386_SSE_NUM_REGS = I386_MXCSR_REGNUM + 1,
+  I386_AVX_NUM_REGS = I386_YMM7H_REGNUM + 1,
+  I386_AVX512_NUM_REGS = I386_ZMM7H_REGNUM + 1,
+  I386_PKEYS_NUM_REGS = I386_PKRU_REGNUM + 1
+  /* STOP!  New *_REGNUM entries should be added before I386_NUM_REGS.  */
 };
 
 /* Register numbers of RECORD_REGMAP.  */
@@ -339,12 +346,6 @@ enum record_i386_regnum
 
 #define I386_NUM_GREGS	16
 #define I386_NUM_XREGS  9
-
-#define I386_SSE_NUM_REGS	(I386_MXCSR_REGNUM + 1)
-#define I386_AVX_NUM_REGS	(I386_YMM7H_REGNUM + 1)
-#define I386_AVX512_NUM_REGS	(I386_ZMM7H_REGNUM + 1)
-#define I386_PKEYS_NUM_REGS	(I386_PKRU_REGNUM + 1)
-#define I386_NUM_REGS		(I386_GSBASE_REGNUM + 1)
 
 /* Size of the largest register.  */
 #define I386_MAX_REGISTER_SIZE	64
