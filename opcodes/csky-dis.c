@@ -281,6 +281,7 @@ parse_csky_dis_options (const char *opts_in)
 	fprintf (stderr,
 		 "unrecognized disassembler option: %s", opt);
     }
+  free (opts);
 }
 
 /* Get general register name.  */
