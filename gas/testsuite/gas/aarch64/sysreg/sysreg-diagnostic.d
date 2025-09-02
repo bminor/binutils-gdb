@@ -1,5 +1,5 @@
 #objdump: -dr -M notes
-#as: -menable-sysreg-checking -march=armv8-a
+#as: -march=armv8-a
 #warning_output: sysreg-diagnostic.l
 
 .*:     file format .*
@@ -14,3 +14,4 @@ Disassembly of section \.text:
 .*:	d5180003 	msr	midr_el1, x3  // note: writing to a read-only register
 .*:	d5180640 	msr	id_aa64isar2_el1, x0  // note: writing to a read-only register
 .*:	d5180660 	msr	id_aa64isar3_el1, x0  // note: writing to a read-only register
+.*:	d5339c80 	mrs	x0, spmzr_el0  // note: reading from a write-only register

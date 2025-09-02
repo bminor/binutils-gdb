@@ -30,7 +30,7 @@
 	rw_sys_reg pmccntsvr_el1 w=0  // PMUv3_SS
 
 	rw_sys_reg vdisr_el3   // E3DES
-	rw_sys_reg spmzr_el0   // SPMU2
+	rw_sys_reg spmzr_el0 r=0   // SPMU2
 	rw_sys_reg mdstepop_el1   // STEP2
 	rw_sys_reg gpcbw_el3   // V9_5A
 

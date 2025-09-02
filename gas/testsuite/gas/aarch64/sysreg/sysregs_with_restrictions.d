@@ -59,7 +59,6 @@
 .*:	d51ec120 	msr	vdisr_el3, x0
 .*:	d53ec120 	mrs	x0, vdisr_el3
 .*:	d5139c80 	msr	spmzr_el0, x0
-.*:	d5339c80 	mrs	x0, spmzr_el0
 .*:	d5100540 	msr	mdstepop_el1, x0
 .*:	d5300540 	mrs	x0, mdstepop_el1
 .*:	d51e21a0 	msr	gpcbw_el3, x0

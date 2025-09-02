@@ -6,3 +6,4 @@
 	msr     midr_el1, x3
 	msr	id_aa64isar2_el1, x0
 	msr	id_aa64isar3_el1, x0
+	mrs	x0, spmzr_el0

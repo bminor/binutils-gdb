@@ -107,8 +107,6 @@
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'spmzr_el0'
 .*:  Info: macro invoked from here
-.*: Error: selected processor does not support system register name 'spmzr_el0'
-.*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'mdstepop_el1'
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'mdstepop_el1'
