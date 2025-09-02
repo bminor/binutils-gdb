@@ -1,6 +1,4 @@
 .*: Assembler messages:
-.*:1: Error: selected processor does not support system register name 'id_aa64zfr0_el1'
-.*:2: Error: selected processor does not support system register name 'id_aa64zfr0_el1'
 .*:4: Error: selected processor does not support system register name 'zcr_el1'
 .*:5: Error: selected processor does not support system register name 'zcr_el1'
 .*:6: Error: selected processor does not support system register name 'zcr_el1'

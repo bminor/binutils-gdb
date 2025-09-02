@@ -13,20 +13,19 @@
 
 	roreg	lorid_el1
 
-	.arch	armv8.2-a
+	.arch	armv8.1-a
 
 	roreg	ccsidr2_el1
+
+	.arch	armv8.2-a
+
 	rwreg	rcwmask_el1
 	rwreg	rcwsmask_el1
-
-	.arch	armv8.3-a
 
 	rwreg	trfcr_el1
 	roreg	pmmir_el1
 	rwreg	trfcr_el2
-
 	rwreg	trfcr_el12
-
 	rwreg	amcr_el0
 	roreg	amcfgr_el0
 	roreg	amcgcr_el0
@@ -76,7 +75,7 @@
 	rwreg	amevtyper114_el0
 	rwreg	amevtyper115_el0
 
-	.arch	armv8.5-a
+	.arch	armv8.4-a
 
 	roreg	amcg1idr_el0
 	roreg	cntpctss_el0
@@ -121,7 +120,7 @@
 	rwreg	amevcntvoff115_el2
 	rwreg	cntpoff_el2
 
-	.arch	armv8.6-a
+	.arch	armv8.5-a+profile
 
 	rwreg	pmsnevfr_el1
 	rwreg	hcrx_el2

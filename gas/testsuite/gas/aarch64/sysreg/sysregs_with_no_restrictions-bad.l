@@ -1,10 +1,6 @@
 .*: Assembler messages:
 .*: Error: selected processor does not support system register name 'mpuir_el1'
 .*:  Info: macro invoked from here
-.*: Error: selected processor does not support system register name 'afsr0_el12'
-.*:  Info: macro invoked from here
-.*: Error: selected processor does not support system register name 'afsr0_el12'
-.*:  Info: macro invoked from here
 .*: Error: selected processor does not support PSTATE field name 'uao'
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'uao'
@@ -20,12 +16,6 @@
 .*: Error: selected processor does not support system register name 'vsttbr_el2'
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'vsttbr_el2'
-.*:  Info: macro invoked from here
-.*: Error: selected processor does not support system register name 'scxtnum_el0'
-.*:  Info: macro invoked from here
-.*: Error: selected processor does not support system register name 'scxtnum_el0'
-.*:  Info: macro invoked from here
-.*: Error: selected processor does not support system register name 'id_pfr2_el1'
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'amcg1idr_el0'
 .*:  Info: macro invoked from here
@@ -83,17 +73,9 @@
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 's2por_el1'
 .*:  Info: macro invoked from here
-.*: Error: selected processor does not support system register name 'sctlr2_el1'
-.*:  Info: macro invoked from here
-.*: Error: selected processor does not support system register name 'sctlr2_el1'
-.*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'spmaccessr_el1'
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'spmaccessr_el1'
-.*:  Info: macro invoked from here
-.*: Error: selected processor does not support system register name 'tcr2_el1'
-.*:  Info: macro invoked from here
-.*: Error: selected processor does not support system register name 'tcr2_el1'
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'amair2_el1'
 .*:  Info: macro invoked from here
@@ -125,8 +107,6 @@
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'fpmr'
 .*:  Info: macro invoked from here
-.*: Error: selected processor does not support system register name 'id_aa64zfr0_el1'
-.*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'lorc_el1'
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'lorc_el1'
@@ -136,8 +116,6 @@
 .*: Error: selected processor does not support system register name 'gcspr_el0'
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'gcspr_el0'
-.*:  Info: macro invoked from here
-.*: Error: selected processor does not support system register name 'id_aa64smfr0_el1'
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'trcitecr_el1'
 .*:  Info: macro invoked from here
@@ -164,8 +142,4 @@
 .*: Error: selected processor does not support system register name 'rcwmask_el1'
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'rcwmask_el1'
-.*:  Info: macro invoked from here
-.*: Error: selected processor does not support system register name 'ttbr1_el2'
-.*:  Info: macro invoked from here
-.*: Error: selected processor does not support system register name 'ttbr1_el2'
 .*:  Info: macro invoked from here

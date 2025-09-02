@@ -29,7 +29,7 @@
 	.arch armv8.8-a
 	rw_sys_reg allint   // V8_8A
 
-	.arch armv8.9-a
+	.arch armv8.9-a+profile
 	rw_sys_reg pfar_el1   // PFAR
 	rw_sys_reg pir_el1   // S1PIE
 	rw_sys_reg pmecr_el1   // SEBEP

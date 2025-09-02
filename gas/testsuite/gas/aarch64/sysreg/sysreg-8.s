@@ -172,7 +172,7 @@
 	rw_sys_reg	amevcntvoff115_el2
 	rw_sys_reg	cntpoff_el2
 
-	.arch	armv8.7-a
+	.arch	armv8.7-a+profile
 
 	rw_sys_reg	pmsnevfr_el1
 	rw_sys_reg	hcrx_el2

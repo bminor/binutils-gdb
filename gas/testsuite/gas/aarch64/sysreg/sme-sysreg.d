@@ -1,5 +1,5 @@
 #name: SME extension (system registers)
-#as: -menable-sysreg-checking -march=armv8-a+sme
+#as: -menable-sysreg-checking -march=armv8.2-a+sme
 #objdump: -dr
 
 .*:     file format .*
