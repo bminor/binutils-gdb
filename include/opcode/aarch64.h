@@ -131,10 +131,6 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_CVADP,
   /* Random Number instructions.  */
   AARCH64_FEATURE_RNG,
-  /* SCXTNUM_ELx.  */
-  AARCH64_FEATURE_SCXTNUM,
-  /* ID_PFR2 instructions.  */
-  AARCH64_FEATURE_ID_PFR2,
   /* SSBS mechanism enabled.  */
   AARCH64_FEATURE_SSBS,
   /* Compare and branch instructions.  */
@@ -175,12 +171,6 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_CHK,
   /* Guarded Control Stack.  */
   AARCH64_FEATURE_GCS,
-  /* SPE Call Return branch records.  */
-  AARCH64_FEATURE_SPE_CRR,
-  /* SPE Filter by data source.  */
-  AARCH64_FEATURE_SPE_FDS,
-  /* Additional SPE events.  */
-  AARCH64_FEATURE_SPEv1p4,
   /* SME2.  */
   AARCH64_FEATURE_SME2,
   /* Translation Hardening Extension.  */
@@ -191,28 +181,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_LSUI,
   /* ARMv8.9-A RAS Extensions.  */
   AARCH64_FEATURE_RASv2,
-  /* Delegated SError exceptions for EL3. */
-  AARCH64_FEATURE_E3DSE,
-  /* System Control Register2.  */
-  AARCH64_FEATURE_SCTLR2,
-  /* Fine Grained Traps.  */
-  AARCH64_FEATURE_FGT2,
-  /* Physical Fault Address.  */
-  AARCH64_FEATURE_PFAR,
   /* Address Translate Stage 1.  */
   AARCH64_FEATURE_ATS1A,
-  /* Memory Attribute Index Enhancement.  */
-  AARCH64_FEATURE_AIE,
-  /* Stage 1 Permission Indirection Extension.  */
-  AARCH64_FEATURE_S1PIE,
-  /* Stage 2 Permission Indirection Extension.  */
-  AARCH64_FEATURE_S2PIE,
-  /* Stage 1 Permission Overlay Extension.  */
-  AARCH64_FEATURE_S1POE,
-  /* Stage 2 Permission Overlay Extension.  */
-  AARCH64_FEATURE_S2POE,
-  /* Extension to Translation Control Registers.  */
-  AARCH64_FEATURE_TCR2,
   /* Speculation Prediction Restriction instructions.  */
   AARCH64_FEATURE_PREDRES2,
   /* Instrumentation Extension.  */
@@ -220,20 +190,6 @@ enum aarch64_feature_bit {
   /* 128-bit page table descriptor, system registers
      and instructions.  */
   AARCH64_FEATURE_D128,
-  /* Armv8.9-A/Armv9.4-A architecture Debug extension.  */
-  AARCH64_FEATURE_DEBUGv8p9,
-  /* Performance Monitors Extension.  */
-  AARCH64_FEATURE_PMUv3p9,
-  /* Performance Monitors Snapshots Extension.  */
-  AARCH64_FEATURE_PMUv3_SS,
-  /* Performance Monitors Instruction Counter Extension.  */
-  AARCH64_FEATURE_PMUv3_ICNTR,
-  /* System Performance Monitors Extension */
-  AARCH64_FEATURE_SPMU,
-  /* System Performance Monitors Extension version 2 */
-  AARCH64_FEATURE_SPMU2,
-  /* Performance Monitors Synchronous-Exception-Based Event Extension.  */
-  AARCH64_FEATURE_SEBEP,
   /* SME2.1 instructions.  */
   AARCH64_FEATURE_SME2p1,
   /* SVE2.1 instructions.  */
@@ -252,8 +208,6 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SSVE_AES,
   /* RCPC3 instructions.  */
   AARCH64_FEATURE_RCPC3,
-  /* Enhanced Software Step Extension. */
-  AARCH64_FEATURE_STEP2,
   /* Checked Pointer Arithmetic instructions. */
   AARCH64_FEATURE_CPA,
   /* FAMINMAX instructions.  */
@@ -416,8 +370,6 @@ static_assert ((AA64_REPLICATE (REP_PLUS, AA64_REPVAL,
 					 | AARCH64_FEATBIT (X, SB)	\
 					 | AARCH64_FEATBIT (X, PREDRES)	\
 					 | AARCH64_FEATBIT (X, CVADP)	\
-					 | AARCH64_FEATBIT (X, SCXTNUM)	\
-					 | AARCH64_FEATBIT (X, ID_PFR2)	\
 					 | AARCH64_FEATBIT (X, SSBS))
 #define AARCH64_ARCH_V8_6A_FEATURES(X)	(AARCH64_FEATBIT (X, V8_6A)	\
 					 | AARCH64_FEATBIT (X, BFLOAT16) \
@@ -431,26 +383,8 @@ static_assert ((AA64_REPLICATE (REP_PLUS, AA64_REPVAL,
 					 | AARCH64_FEATBIT (X, HBC))
 #define AARCH64_ARCH_V8_9A_FEATURES(X)	(AARCH64_FEATBIT (X, V8_9A)	\
 					 | AARCH64_FEATBIT (X, CSSC) \
-					 | AARCH64_FEATBIT (X, SPEv1p4) \
-					 | AARCH64_FEATBIT (X, SPE_CRR)	\
-					 | AARCH64_FEATBIT (X, SPE_FDS) \
 					 | AARCH64_FEATBIT (X, RASv2)	\
-					 | AARCH64_FEATBIT (X, SCTLR2)	\
-					 | AARCH64_FEATBIT (X, FGT2)	\
-					 | AARCH64_FEATBIT (X, PFAR)	\
 					 | AARCH64_FEATBIT (X, ATS1A)	\
-					 | AARCH64_FEATBIT (X, AIE)	\
-					 | AARCH64_FEATBIT (X, S1PIE)	\
-					 | AARCH64_FEATBIT (X, S2PIE)	\
-					 | AARCH64_FEATBIT (X, S1POE)	\
-					 | AARCH64_FEATBIT (X, S2POE)	\
-					 | AARCH64_FEATBIT (X, TCR2)	\
-					 | AARCH64_FEATBIT (X, DEBUGv8p9) \
-					 | AARCH64_FEATBIT (X, PMUv3p9)	\
-					 | AARCH64_FEATBIT (X, PMUv3_SS) \
-					 | AARCH64_FEATBIT (X, PMUv3_ICNTR) \
-					 | AARCH64_FEATBIT (X, SPMU) \
-					 | AARCH64_FEATBIT (X, SEBEP) \
 					 | AARCH64_FEATBIT (X, PREDRES2) \
 					)
 
@@ -471,9 +405,6 @@ static_assert ((AA64_REPLICATE (REP_PLUS, AA64_REPVAL,
 					 | AARCH64_FEATBIT (X, CPA)	\
 					 | AARCH64_FEATBIT (X, LUT)	\
 					 | AARCH64_FEATBIT (X, FAMINMAX)\
-					 | AARCH64_FEATBIT (X, E3DSE)	\
-					 | AARCH64_FEATBIT (X, SPMU2)	\
-					 | AARCH64_FEATBIT (X, STEP2)	\
 					)
 #define AARCH64_ARCH_V9_6A_FEATURES(X)	(AARCH64_FEATBIT (X, V9_6A)	\
 					 | AARCH64_FEATBIT (X, CMPBR)	\
