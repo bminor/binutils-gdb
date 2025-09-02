@@ -2360,6 +2360,37 @@ proc build_file_normalize {filename} {
     return [file normalize $filename]
 }
 
+# Normalize a file name for the host machine and native Windows GDB.
+# This converts a Unix file name to a Windows filename,
+# per the mount table.  E.g., '/c/foo' (on MSYS2) or '/cygdrive/c/foo'
+# (on Cygwin) is converted to 'c:/foo'.
+
+proc host_file_normalize_mingw {filename unix_to_win} {
+    set filename [host_file_sanitize $filename]
+
+    # If the file name already starts with a drive letter (e.g.,
+    # C:/foo), we're done.  Don't let it fallthrough to "file
+    # normalize", which would misinterpret it as a relative file
+    # name.
+    if {[regexp {^[A-Z]:/} $filename]} {
+	return $filename
+    }
+
+    foreach {unix_filename win_filename} $unix_to_win {
+	set mount_len [string length $unix_filename]
+	if {[string equal -length $mount_len $unix_filename $filename]} {
+	    if {[string length $filename] == $mount_len} {
+		return "$win_filename/"
+	    } elseif {[string index $filename $mount_len] eq "/"} {
+		set rest [string range $filename $mount_len end]
+		return "$win_filename$rest"
+	    }
+	}
+    }
+
+    return [file normalize $filename]
+}
+
 # Normalize a file name for the host machine.  If running native
 # Windows GDB, this converts a Unix file name to a Windows filename,
 # per the mount table.  E.g., '/c/foo' (on MSYS2) or '/cygdrive/c/foo'
@@ -2367,30 +2398,9 @@ proc build_file_normalize {filename} {
 
 proc host_file_normalize {filename} {
     if {[ishost *-*-mingw*]} {
-	set filename [host_file_sanitize $filename]
-
-	# If the file name already starts with a drive letter (e.g.,
-	# C:/foo), we're done.  Don't let it fallthrough to "file
-	# normalize", which would misinterpret it as a relative file
-	# name.
-	if {[regexp {^[A-Z]:/} $filename]} {
-	    return $filename
-	}
-
 	# Get Unix => Windows map.
 	lassign [get_mount_point_map] _ unix_to_win
-
-	foreach {unix_filename win_filename} $unix_to_win {
-	    set mount_len [string length $unix_filename]
-	    if {[string equal -length $mount_len $unix_filename $filename]} {
-		if {[string length $filename] == $mount_len} {
-		    return "$win_filename/"
-		} elseif {[string index $filename $mount_len] eq "/"} {
-		    set rest [string range $filename $mount_len end]
-		    return "$win_filename$rest"
-		}
-	    }
-	}
+	return [host_file_normalize_mingw $filename $unix_to_win]
     }
 
     return [file normalize $filename]
