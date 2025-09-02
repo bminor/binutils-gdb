@@ -92,4 +92,16 @@ Disassembly of section \.text:
 .*	(3d e0 ff ff|ff ff e0 3d) 
 .*:	(06 10 7f ff|ff 7f 10 06) 	paddis  r15,0,2147483647,1	# 148
 .*	(3d e0 ff ff|ff ff e0 3d) 
+.*:	(03 a8 b8 11|11 b8 a8 03) 	vucmprhn v13,v24,v21
+.*:	(43 b0 b8 11|11 b8 b0 43) 	vucmprln v13,v24,v22
+.*:	(83 b0 d8 11|11 d8 b0 83) 	vucmprhb v14,v24,v22
+.*:	(c3 a8 d8 11|11 d8 a8 c3) 	vucmprlb v14,v24,v21
+.*:	(03 b1 f8 11|11 f8 b1 03) 	vucmprhh v15,v24,v22
+.*:	(43 a9 f8 11|11 f8 a9 43) 	vucmprlh v15,v24,v21
+.*:	(83 b1 a0 12|12 a0 b1 83) 	vupkhsntob v21,v22
+.*:	(83 a9 81 12|12 81 a9 83) 	vupklsntob v20,v21
+.*:	(83 91 2b 12|12 2b 91 83) 	vupkint4tobf16 v17,v18,3
+.*:	(83 c9 e3 11|11 e3 c9 83) 	vupkint8tobf16 v15,v25,1
+.*:	(83 c1 17 12|12 17 c1 83) 	vupkint4tofp32 v16,v24,7
+.*:	(83 b9 2f 12|12 2f b9 83) 	vupkint8tofp32 v17,v23,3
 #pass

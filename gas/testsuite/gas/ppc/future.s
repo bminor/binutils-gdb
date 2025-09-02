@@ -66,4 +66,16 @@ _start:
 	psubis 30, 10, -2147483647, 0
 	paddis 15, 0, 2147483647, 1
 	psubis 15, 0, -2147483647, 1
+	vucmprhn 13, 24, 21
+	vucmprln 13, 24, 22
+	vucmprhb 14, 24, 22
+	vucmprlb 14, 24, 21
+	vucmprhh 15, 24, 22
+	vucmprlh 15, 24, 21
+	vupkhsntob 21, 22
+	vupklsntob 20, 21
+	vupkint4tobf16 17, 18, 3
+	vupkint8tobf16 15, 25, 1
+	vupkint4tofp32 16, 24, 7
+	vupkint8tofp32 17, 23, 3
 

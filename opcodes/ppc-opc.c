@@ -3813,6 +3813,7 @@ const struct powerpc_operand powerpc_operands[] =
 
 #define R RMC + 1
 #define MP R
+#define UIMM1 R
 #define P1 R
   { 0x1, 16, NULL, NULL, 0 },
 
@@ -4406,6 +4407,12 @@ const unsigned int num_powerpc_operands = ARRAY_SIZE (powerpc_operands);
 /* A VX form instruction.  */
 #define VX(op, xop) (OP (op) | (((uint64_t)(xop)) & 0x7ff))
 
+/* A VX form instruction with selector bit  */
+#define VXSEL5(op, xop, sel) (VX(op, xop) | (((sel) & 0x1f) << 16))
+#define VXSEL4(op, xop, sel) (VX(op, xop) | (((sel) & 0xf) << 17))
+#define VXSEL3(op, xop, sel) (VX(op, xop) | (((sel) & 0x7) << 18))
+#define VXSEL2(op, xop, sel) (VX(op, xop) | (((sel) & 0x3) << 19))
+
 /* The mask for an VX form instruction.  */
 #define VX_MASK	VX(0x3f, 0x7ff)
 
@@ -4496,6 +4503,9 @@ const unsigned int num_powerpc_operands = ARRAY_SIZE (powerpc_operands);
 
 /* A VX_MASK with a UIMM2 field.  */
 #define VXUIMM2_MASK (VX_MASK | (0x7 << 18))
+
+/* A VX_MASK with a UIMM1 field.  */
+#define VXUIMM1_MASK (VX_MASK | (0xf << 17))
 
 /* A VX_MASK with a PS field.  */
 #define VXPS_MASK (VX_MASK & ~(0x1 << 9))
@@ -5212,6 +5222,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"vaddubm",	VX (4,	 0),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
 {"vmul10cuq",	VX (4,	 1),	VXVB_MASK,   PPCVEC3,	0,		{VD, VA}},
 {"vmaxub",	VX (4,	 2),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
+{"vucmprhn",	VX (4,	 3),	VX_MASK,     FUTURE,	0,		{VD, VA, VB}},
 {"vrlb",	VX (4,	 4),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
 {"vrlq",	VX (4,	 5),	VX_MASK,     POWER10,	0,		{VD, VA, VB}},
 {"vcmpequb",	VXR(4,	 6,0),	VXR_MASK,    PPCVEC,	0,		{VD, VA, VB}},
@@ -5305,6 +5316,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"vadduhm",	VX (4,	64),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
 {"vmul10ecuq",	VX (4,	65),	VX_MASK,     PPCVEC3,	0,		{VD, VA, VB}},
 {"vmaxuh",	VX (4,	66),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
+{"vucmprln",	VX (4,	67),	VX_MASK,     FUTURE,	0,		{VD, VA, VB}},
 {"vrlh",	VX (4,	68),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
 {"vrlqmi",	VX (4,	69),	VX_MASK,     POWER10,	0,		{VD, VA, VB}},
 {"vcmpequh",	VXR(4,	70,0),	VXR_MASK,    PPCVEC,	0,		{VD, VA, VB}},
@@ -5327,6 +5339,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"ps_cmpu1",	X  (4,	64),	XBF_MASK,    PPCPS,	0,		{BF, FRA, FRB}},
 {"vadduwm",	VX (4,	128),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
 {"vmaxuw",	VX (4,	130),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
+{"vucmprhb",	VX (4,	131),	VX_MASK,     FUTURE,	0,		{VD, VA, VB}},
 {"vrlw",	VX (4,	132),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
 {"vrlwmi",	VX (4,	133),	VX_MASK,     PPCVEC3,	0,		{VD, VA, VB}},
 {"vcmpequw",	VXR(4,	134,0), VXR_MASK,    PPCVEC,	0,		{VD, VA, VB}},
@@ -5344,6 +5357,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"ps_cmpo1",	X  (4,	96),	XBF_MASK,    PPCPS,	0,		{BF, FRA, FRB}},
 {"vaddudm",	VX (4, 192),	VX_MASK,     PPCVEC2,	0,		{VD, VA, VB}},
 {"vmaxud",	VX (4, 194),	VX_MASK,     PPCVEC2,	0,		{VD, VA, VB}},
+{"vucmprlb",	VX (4, 195),	VX_MASK,     FUTURE,	0,		{VD, VA, VB}},
 {"vrld",	VX (4, 196),	VX_MASK,     PPCVEC2,	0,		{VD, VA, VB}},
 {"vrldmi",	VX (4, 197),	VX_MASK,     PPCVEC3,	0,		{VD, VA, VB}},
 {"vcmpeqfp",	VXR(4, 198,0),	VXR_MASK,    PPCVEC,	0,		{VD, VA, VB}},
@@ -5359,6 +5373,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"vadduqm",	VX (4, 256),	VX_MASK,     PPCVEC2,	0,		{VD, VA, VB}},
 {"vcmpuq",	VX (4, 257),	VXBF_MASK,   POWER10,	0,		{BF, VA, VB}},
 {"vmaxsb",	VX (4, 258),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
+{"vucmprhh",	VX (4, 259),	VX_MASK,     FUTURE,	0,		{VD, VA, VB}},
 {"vslb",	VX (4, 260),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
 {"vslq",	VX (4, 261),	VX_MASK,     POWER10,	0,		{VD, VA, VB}},
 {"vcmpnezb",	VXR(4, 263,0),	VXR_MASK,    PPCVEC3,	0,		{VD, VA, VB}},
@@ -5377,6 +5392,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"vaddcuq",	VX (4, 320),	VX_MASK,     PPCVEC2,	0,		{VD, VA, VB}},
 {"vcmpsq",	VX (4, 321),	VXBF_MASK,   POWER10,	0,		{BF, VA, VB}},
 {"vmaxsh",	VX (4, 322),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
+{"vucmprlh",	VX (4, 323),	VX_MASK,     FUTURE,	0,		{VD, VA, VB}},
 {"vslh",	VX (4, 324),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
 {"vrlqnm",	VX (4, 325),	VX_MASK,     POWER10,	0,		{VD, VA, VB}},
 {"vcmpnezh",	VXR(4, 327,0),	VXR_MASK,    PPCVEC3,	0,		{VD, VA, VB}},
@@ -5393,6 +5409,12 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"nmacchw.",	XO (4, 174,0,1), XO_MASK,    MULHW,	0,		{RT, RA, RB}},
 {"vaddcuw",	VX (4, 384),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
 {"vmaxsw",	VX (4, 386),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
+{"vupkhsntob",	VXSEL5 (4, 387,0),	VXVA_MASK,	FUTURE,	0,	{VD, VB}},
+{"vupklsntob",	VXSEL5 (4, 387,1),	VXVA_MASK,	FUTURE,	0,	{VD, VB}},
+{"vupkint8tobf16", VXSEL4 (4, 387,1),	VXUIMM1_MASK,	FUTURE,	0,	{VD, VB, UIMM1}},
+{"vupkint4tobf16", VXSEL3 (4, 387,2),	VXUIMM2_MASK,	FUTURE,	0,	{VD, VB, UIMM2}},
+{"vupkint8tofp32", VXSEL3 (4, 387,3),	VXUIMM2_MASK,	FUTURE,	0,	{VD, VB, UIMM2}},
+{"vupkint4tofp32", VXSEL2 (4, 387,2),	VXUIMM3_MASK,	FUTURE,	0,	{VD, VB, UIMM3}},
 {"vslw",	VX (4, 388),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
 {"vrlwnm",	VX (4, 389),	VX_MASK,     PPCVEC3,	0,		{VD, VA, VB}},
 {"vcmpnezw",	VXR(4, 391,0),	VXR_MASK,    PPCVEC3,	0,		{VD, VA, VB}},
