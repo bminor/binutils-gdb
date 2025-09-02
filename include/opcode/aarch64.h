@@ -1703,7 +1703,7 @@ extern bool aarch64_sys_ins_reg_has_xt (const aarch64_sys_ins_reg *);
 extern bool
 aarch64_sys_ins_reg_supported_p (const aarch64_feature_set,
 				 const char *reg_name,
-				 uint32_t, const aarch64_feature_set *);
+				 const aarch64_feature_set *);
 
 extern const aarch64_sys_ins_reg aarch64_sys_regs_ic [];
 extern const aarch64_sys_ins_reg aarch64_sys_regs_dc [];

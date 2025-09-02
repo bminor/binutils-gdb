@@ -307,8 +307,7 @@ verify_constraints (const struct aarch64_inst *, const aarch64_insn, bfd_vma,
 #undef F_DEPRECATED
 #define F_DEPRECATED	(1 << 0)  /* Deprecated system register.  */
 
-#undef F_ARCHEXT
-#define F_ARCHEXT	(1 << 1)  /* Architecture dependent system register.  */
+/*			(1 << 1)     Unused.  */
 
 #undef F_HASXT
 #define F_HASXT		(1 << 2)  /* System instruction register <Xt>
