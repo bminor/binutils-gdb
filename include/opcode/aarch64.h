@@ -41,30 +41,39 @@ typedef uint32_t aarch64_insn;
 /* An enum containing all known CPU features.  The values act as bit positions
    into aarch64_feature_set.  */
 enum aarch64_feature_bit {
-  /* All processors.  */
+  /* Architecture versions.  */
   AARCH64_FEATURE_V8,
-  /* ARMv8.6 processors.  */
+  AARCH64_FEATURE_V8_1A,
+  AARCH64_FEATURE_V8_2A,
+  AARCH64_FEATURE_V8_3A,
+  AARCH64_FEATURE_V8_4A,
+  AARCH64_FEATURE_V8_5A,
   AARCH64_FEATURE_V8_6A,
+  AARCH64_FEATURE_V8_7A,
+  AARCH64_FEATURE_V8_8A,
+  AARCH64_FEATURE_V8_9A,
+
+  AARCH64_FEATURE_V9A,
+  AARCH64_FEATURE_V9_1A,
+  AARCH64_FEATURE_V9_2A,
+  AARCH64_FEATURE_V9_3A,
+  AARCH64_FEATURE_V9_4A,
+  AARCH64_FEATURE_V9_5A,
+  AARCH64_FEATURE_V9_6A,
+
+  /* Armv8-A processors only - this is unset for Armv8-R.  */
+  AARCH64_FEATURE_V8A,
+  /* Armv8-R processors.  */
+  AARCH64_FEATURE_V8R,
+
   /* Bfloat16 insns.  */
   AARCH64_FEATURE_BFLOAT16,
-  /* Armv8-A processors.  */
-  AARCH64_FEATURE_V8A,
   /* SVE2 instructions.  */
   AARCH64_FEATURE_SVE2,
-  /* ARMv8.2 processors.  */
-  AARCH64_FEATURE_V8_2A,
-  /* ARMv8.3 processors.  */
-  AARCH64_FEATURE_V8_3A,
   AARCH64_FEATURE_SVE2_AES,
   AARCH64_FEATURE_SVE2_BITPERM,
   AARCH64_FEATURE_SVE2_SM4,
   AARCH64_FEATURE_SVE2_SHA3,
-  /* ARMv8.4 processors.  */
-  AARCH64_FEATURE_V8_4A,
-  /* Armv8-R processors.  */
-  AARCH64_FEATURE_V8R,
-  /* Armv8.7 processors.  */
-  AARCH64_FEATURE_V8_7A,
   /* Scalable Matrix Extension.  */
   AARCH64_FEATURE_SME,
   /* Atomic 64-byte load/store.  */
@@ -87,8 +96,6 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_LOR,
   /* v8.1 SIMD instructions.  */
   AARCH64_FEATURE_RDMA,
-  /* v8.1 features.  */
-  AARCH64_FEATURE_V8_1A,
   /* v8.2 FP16 instructions.  */
   AARCH64_FEATURE_F16,
   /* RAS Extensions.  */
@@ -117,8 +124,6 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_AES,
   /* v8.2 FP16FML ins.  */
   AARCH64_FEATURE_F16_FML,
-  /* ARMv8.5 processors.  */
-  AARCH64_FEATURE_V8_5A,
   /* v8.5 Flag Manipulation version 2.  */
   AARCH64_FEATURE_FLAGMANIP,
   /* FRINT[32,64][Z,X] insns.  */
@@ -155,18 +160,12 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_F64MM,
   /* v8.4 Flag Manipulation.  */
   AARCH64_FEATURE_FLAGM,
-  /* Armv9.0-A processors.  */
-  AARCH64_FEATURE_V9A,
   /* SME F64F64.  */
   AARCH64_FEATURE_SME_F64F64,
   /* SME I16I64.  */
   AARCH64_FEATURE_SME_I16I64,
-  /* Armv8.8 processors.  */
-  AARCH64_FEATURE_V8_8A,
   /* Common Short Sequence Compression instructions.  */
   AARCH64_FEATURE_CSSC,
-  /* Armv8.9-A processors.  */
-  AARCH64_FEATURE_V8_9A,
   /* Check Feature Status Extension.  */
   AARCH64_FEATURE_CHK,
   /* Guarded Control Stack.  */
@@ -248,18 +247,6 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SVE2p2,
   /* SME2.2.  */
   AARCH64_FEATURE_SME2p2,
-  /* Armv9.1-A processors.  */
-  AARCH64_FEATURE_V9_1A,
-  /* Armv9.2-A processors.  */
-  AARCH64_FEATURE_V9_2A,
-  /* Armv9.3-A processors.  */
-  AARCH64_FEATURE_V9_3A,
-  /* Armv9.4-A processors.  */
-  AARCH64_FEATURE_V9_4A,
-  /* Armv9.5-A processors.  */
-  AARCH64_FEATURE_V9_5A,
-  /* Armv9.6-A processors.  */
-  AARCH64_FEATURE_V9_6A,
   /* FPRCVT instructions.  */
   AARCH64_FEATURE_FPRCVT,
   /* Point of Physical Storage.  */
