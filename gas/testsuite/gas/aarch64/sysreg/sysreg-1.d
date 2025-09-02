@@ -24,10 +24,6 @@ Disassembly of section \.text:
  *[0-9a-f]+:	d5340707 	mrs	x7, dbgvcr32_el2
  *[0-9a-f]+:	d51c5307 	msr	fpexc32_el2, x7
  *[0-9a-f]+:	d53c5307 	mrs	x7, fpexc32_el2
- *[0-9a-f]+:	d5120007 	msr	teecr32_el1, x7
- *[0-9a-f]+:	d5320007 	mrs	x7, teecr32_el1
- *[0-9a-f]+:	d5121007 	msr	teehbr32_el1, x7
- *[0-9a-f]+:	d5321007 	mrs	x7, teehbr32_el1
  *[0-9a-f]+:	d51be207 	msr	cntp_tval_el0, x7
  *[0-9a-f]+:	d53be207 	mrs	x7, cntp_tval_el0
  *[0-9a-f]+:	d51be227 	msr	cntp_ctl_el0, x7

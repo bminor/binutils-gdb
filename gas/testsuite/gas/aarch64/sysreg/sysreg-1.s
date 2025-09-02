@@ -38,9 +38,6 @@
 
 	rw_sys_reg sys_reg=fpexc32_el2 xreg=x7
 
-	rw_sys_reg sys_reg=teecr32_el1 xreg=x7
-	rw_sys_reg sys_reg=teehbr32_el1 xreg=x7
-
 	rw_sys_reg sys_reg=cntp_tval_el0 xreg=x7
 	rw_sys_reg sys_reg=cntp_ctl_el0 xreg=x7
 	rw_sys_reg sys_reg=cntp_cval_el0 xreg=x7
