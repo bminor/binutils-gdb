@@ -40,6 +40,10 @@
   SYSREG ("actlr_el1",		CPENC (3,0,1,0,1),	0,		AARCH64_NO_FEATURES)
   SYSREG ("actlr_el2",		CPENC (3,4,1,0,1),	0,		AARCH64_NO_FEATURES)
   SYSREG ("actlr_el3",		CPENC (3,6,1,0,1),	0,		AARCH64_NO_FEATURES)
+  SYSREG ("actlralias_el1",	CPENC (3,0,1,4,5),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
+  SYSREG ("actlrmask_el1",	CPENC (3,0,1,4,1),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
+  SYSREG ("actlrmask_el12",	CPENC (3,5,1,4,1),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
+  SYSREG ("actlrmask_el2",	CPENC (3,4,1,4,1),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
   SYSREG ("afsr0_el1",		CPENC (3,0,5,1,0),	0,		AARCH64_NO_FEATURES)
   SYSREG ("afsr0_el12",		CPENC (3,5,5,1,0),	0,		AARCH64_FEATURE (V8_1A))
   SYSREG ("afsr0_el2",		CPENC (3,4,5,1,0),	0,		AARCH64_NO_FEATURES)
@@ -299,8 +303,12 @@
   SYSREG ("contextidr_el2",	CPENC (3,4,13,0,1),	0,		AARCH64_FEATURE (V8_1A))
   SYSREG ("cpacr_el1",		CPENC (3,0,1,0,2),	0,		AARCH64_NO_FEATURES)
   SYSREG ("cpacr_el12",		CPENC (3,5,1,0,2),	0,		AARCH64_FEATURE (V8_1A))
+  SYSREG ("cpacralias_el1",	CPENC (3,0,1,4,4),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
+  SYSREG ("cpacrmask_el1",	CPENC (3,0,1,4,2),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
+  SYSREG ("cpacrmask_el12",	CPENC (3,5,1,4,2),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
   SYSREG ("cptr_el2",		CPENC (3,4,1,1,2),	0,		AARCH64_NO_FEATURES)
   SYSREG ("cptr_el3",		CPENC (3,6,1,1,2),	0,		AARCH64_NO_FEATURES)
+  SYSREG ("cptrmask_el2",	CPENC (3,4,1,4,2),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
   SYSREG ("csrcr_el0",		CPENC (2,3,8,0,0),	0,		AARCH64_NO_FEATURES)
   SYSREG ("csrcr_el1",		CPENC (2,0,8,0,0),	0,		AARCH64_NO_FEATURES)
   SYSREG ("csrcr_el12",		CPENC (2,5,8,0,0),	0,		AARCH64_NO_FEATURES)
@@ -871,6 +879,14 @@
   SYSREG ("sctlr2_el12",	CPENC (3,5,1,0,3),	0,		AARCH64_FEATURE (SCTLR2))
   SYSREG ("sctlr2_el2",		CPENC (3,4,1,0,3),	0,		AARCH64_FEATURE (SCTLR2))
   SYSREG ("sctlr2_el3",		CPENC (3,6,1,0,3),	0,		AARCH64_FEATURE (SCTLR2))
+  SYSREG ("sctlr2alias_el1",	CPENC (3,0,1,4,7),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
+  SYSREG ("sctlr2mask_el1",	CPENC (3,0,1,4,3),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
+  SYSREG ("sctlr2mask_el12",	CPENC (3,5,1,4,3),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
+  SYSREG ("sctlr2mask_el2",	CPENC (3,4,1,4,3),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
+  SYSREG ("sctlralias_el1",	CPENC (3,0,1,4,6),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
+  SYSREG ("sctlrmask_el1",	CPENC (3,0,1,4,0),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
+  SYSREG ("sctlrmask_el12",	CPENC (3,5,1,4,0),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
+  SYSREG ("sctlrmask_el2",	CPENC (3,4,1,4,0),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
   SYSREG ("scxtnum_el0",	CPENC (3,3,13,0,7),	0,		AARCH64_FEATURE (SCXTNUM))
   SYSREG ("scxtnum_el1",	CPENC (3,0,13,0,7),	0,		AARCH64_FEATURE (SCXTNUM))
   SYSREG ("scxtnum_el12",	CPENC (3,5,13,0,7),	0,		AARCH64_FEATURE (SCXTNUM))
@@ -993,6 +1009,14 @@
   SYSREG ("tcr2_el1",		CPENC (3,0,2,0,3),	0,		AARCH64_FEATURE (TCR2))
   SYSREG ("tcr2_el12",		CPENC (3,5,2,0,3),	0,		AARCH64_FEATURE (TCR2))
   SYSREG ("tcr2_el2",		CPENC (3,4,2,0,3),	0,		AARCH64_FEATURE (TCR2))
+  SYSREG ("tcr2alias_el1",	CPENC (3,0,2,7,7),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
+  SYSREG ("tcr2mask_el1",	CPENC (3,0,2,7,3),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
+  SYSREG ("tcr2mask_el12",	CPENC (3,5,2,7,3),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
+  SYSREG ("tcr2mask_el2",	CPENC (3,4,2,7,3),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
+  SYSREG ("tcralias_el1",	CPENC (3,0,2,7,6),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
+  SYSREG ("tcrmask_el1",	CPENC (3,0,2,7,2),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
+  SYSREG ("tcrmask_el12",	CPENC (3,5,2,7,2),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
+  SYSREG ("tcrmask_el2",	CPENC (3,4,2,7,2),	0,		AARCH64_FEATURE (V9_5A)) /* SRMASK */
   SYSREG ("teecr32_el1",	CPENC (2,2,0,0,0),	0,		AARCH64_NO_FEATURES)
   SYSREG ("teehbr32_el1",	CPENC (2,2,1,0,0),	0,		AARCH64_NO_FEATURES)
   SYSREG ("tfsr_el1",		CPENC (3,0,5,6,0),	0,		AARCH64_FEATURE (MEMTAG))
