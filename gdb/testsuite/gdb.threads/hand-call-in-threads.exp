@@ -44,7 +44,7 @@ proc get_dummy_frame_number { } {
     return ""
 }
 
-clean_restart ${binfile}
+clean_restart ${::testfile}
 
 if { ![runto_main] } {
     return 0

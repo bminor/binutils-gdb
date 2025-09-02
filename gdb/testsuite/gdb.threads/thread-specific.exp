@@ -62,7 +62,7 @@ proc get_thread_list { } {
   return $thr_list
 }
 
-clean_restart ${binfile}
+clean_restart ${::testfile}
 
 gdb_test_no_output "set print sevenbit-strings"
 gdb_test_no_output "set width 0"

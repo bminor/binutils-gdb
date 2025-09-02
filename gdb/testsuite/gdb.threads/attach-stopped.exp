@@ -43,7 +43,7 @@ proc corefunc { threadtype } {
     # Stop the program 
     remote_exec build "kill -s STOP ${testpid}"
 
-    clean_restart $binfile
+    clean_restart $::testfile
 
     # Verify that we can attach to the stopped process.
        

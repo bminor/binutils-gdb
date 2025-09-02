@@ -106,7 +106,7 @@ proc test {non_stop displaced third_thread} {
 	    save_vars { GDBFLAGS } {
 		append GDBFLAGS " -ex \"set non-stop $non_stop\""
 		append GDBFLAGS " -ex \"set displaced $displaced\""
-		clean_restart $binfile
+		clean_restart $::testfile
 	    }
 
 	    runto_main

@@ -169,7 +169,7 @@ proc testdriver {displaced} {
 
     save_vars { GDBFLAGS } {
 	append GDBFLAGS " -ex \"set non-stop on\""
-	clean_restart $binfile
+	clean_restart $::testfile
     }
 
     gdb_test_no_output "set displaced-stepping $displaced"

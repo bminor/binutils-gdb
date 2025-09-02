@@ -27,7 +27,7 @@ set core_supported [expr {$corefile != ""}]
 
 # Generate a core file with "gcore".
 
-clean_restart ${binfile}
+clean_restart ${::testfile}
 
 runto thread_proc
 
@@ -43,7 +43,7 @@ proc tls_core_test {supported corefile} {
     upvar host_triplet host_triplet
     upvar binfile binfile
 
-    clean_restart ${binfile}
+    clean_restart ${::testfile}
 
     set test "load core file"
     if {$supported} {

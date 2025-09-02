@@ -31,7 +31,7 @@ set testpid [spawn_id_get_pid $test_spawn_id]
 # Wait a bit for the leader thread to exit, before attaching.
 sleep 2
 
-clean_restart ${binfile}
+clean_restart ${::testfile}
 
 # Save this early as we may not be able to talk with GDBserver anymore
 # when we need to check it.

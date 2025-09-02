@@ -55,7 +55,7 @@ proc test {step_over_mode non-stop target-non-stop schedlock cmd ns_stop_all} {
     save_vars ::GDBFLAGS {
 	append ::GDBFLAGS " -ex \"maintenance set target-non-stop ${target-non-stop}\""
 	append ::GDBFLAGS " -ex \"set non-stop ${non-stop}\""
-	clean_restart $::binfile
+	clean_restart $::testfile
     }
 
     if { $step_over_mode == "none" } {

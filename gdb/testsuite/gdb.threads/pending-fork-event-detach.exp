@@ -93,7 +93,8 @@ proc do_test { target-non-stop who_forks fork_function stop_mode } {
 
     save_vars { ::GDBFLAGS } {
 	append ::GDBFLAGS " -ex \"maintenance set target-non-stop ${target-non-stop}\""
-	clean_restart $this_binfile
+	clean_restart
+	gdb_load $this_binfile
     }
 
     if {![runto_main]} {

@@ -29,7 +29,7 @@ proc test { command } {
     global srcfile binfile tdlabel_re
 
     with_test_prefix "$command" {
-	clean_restart ${binfile}
+	clean_restart ${::testfile}
 
 	if {![runto_main]} {
 	    return 0

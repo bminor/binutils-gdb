@@ -29,7 +29,7 @@ if { [build_executable "failed to prepare" $testfile \
 proc test {displaced-stepping target-non-stop} {
     save_vars ::GDBFLAGS {
 	append ::GDBFLAGS " -ex \"maintenance set target-non-stop ${target-non-stop}\""
-	clean_restart $::binfile
+	clean_restart $::testfile
     }
 
     gdb_test_no_output "set displaced-stepping ${displaced-stepping}"

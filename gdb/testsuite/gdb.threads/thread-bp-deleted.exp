@@ -38,7 +38,7 @@ set is_remote \
 # This test requires background execution, which relies on non-stop mode.
 save_vars { GDBFLAGS } {
     append GDBFLAGS " -ex \"maint set target-non-stop on\""
-    clean_restart ${binfile}
+    clean_restart ${::testfile}
 }
 
 if {![runto_main]} {
