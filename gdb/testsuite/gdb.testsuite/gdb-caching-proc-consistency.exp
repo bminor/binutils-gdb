@@ -95,7 +95,8 @@ proc test_file { file } {
 	    }
 
 	    if { $setup_gdb } {
-		clean_restart $obj
+		clean_restart
+		gdb_load $obj
 	    }
 
 	    test_proc $procname

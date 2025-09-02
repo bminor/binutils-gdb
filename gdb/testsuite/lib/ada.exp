@@ -220,7 +220,8 @@ proc gnat_runtime_has_debug_info_1 { shared } {
 	return 0
     }
 
-    clean_restart $dst
+    clean_restart
+    gdb_load $dst
 
     if { ! [runto "GNAT_Debug_Info_Test"] } {
 	return 0
