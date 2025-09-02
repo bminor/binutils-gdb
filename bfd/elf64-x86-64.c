@@ -5852,7 +5852,7 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
 	    {
 	      if (memcmp (plt_contents + lazy_ibt_plt->plt_entry_size,
 			  lazy_ibt_plt->plt_entry,
-			  lazy_ibt_plt->plt_got_offset) == 0)
+			  lazy_ibt_plt->plt_reloc_offset) == 0)
 		{
 		  /* The fist entry in the lazy IBT PLT is the same as
 		     the lazy PLT.  */
@@ -5874,7 +5874,7 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
 	      if (memcmp (plt_contents
 			  + lazy_bnd_ibt_plt->plt_entry_size,
 			  lazy_bnd_ibt_plt->plt_entry,
-			  lazy_bnd_ibt_plt->plt_got_offset) == 0)
+			  lazy_bnd_ibt_plt->plt_reloc_offset) == 0)
 		lazy_plt = lazy_bnd_ibt_plt;
 	      else
 		lazy_plt = lazy_bnd_plt;

@@ -4354,7 +4354,7 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
 	      if (lazy_ibt_plt != NULL
 		  && (memcmp (plt_contents + lazy_ibt_plt->plt0_entry_size,
 			      lazy_ibt_plt->plt_entry,
-			      lazy_ibt_plt->plt_got_offset) == 0))
+			      lazy_ibt_plt->plt_reloc_offset) == 0))
 		plt_type = plt_lazy | plt_second;
 	      else
 		plt_type = plt_lazy;
@@ -4367,7 +4367,7 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
 	      if (lazy_ibt_plt != NULL
 		  && (memcmp (plt_contents + lazy_ibt_plt->plt0_entry_size,
 			      lazy_ibt_plt->pic_plt_entry,
-			      lazy_ibt_plt->plt_got_offset) == 0))
+			      lazy_ibt_plt->plt_reloc_offset) == 0))
 		plt_type = plt_lazy | plt_pic | plt_second;
 	      else
 		plt_type = plt_lazy | plt_pic;
