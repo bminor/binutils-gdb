@@ -34,7 +34,7 @@ save_vars { GDBFLAGS } {
 	set GDBFLAGS "$GDBFLAGS -ex \"set sysroot\""
     }
 
-    clean_restart $binfile
+    clean_restart $::testfile
 }
 
 # Make sure we're disconnected, in case we're testing with an

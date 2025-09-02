@@ -50,7 +50,7 @@ if {[build_executable "failed to prepare" $testfile $srcfile debug]} {
 # the contents of the gdb.TargetConnection.details string.
 proc do_test { target } {
     global timeout
-    clean_restart ${::binfile}
+    clean_restart ${::testfile}
 
     # Make sure we're disconnected, in case we're testing with an
     # extended-remote board, therefore already connected.

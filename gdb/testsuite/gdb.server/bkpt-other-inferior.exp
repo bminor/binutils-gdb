@@ -23,7 +23,7 @@ standard_testfile server.c
 
 require allow_gdbserver_tests
 
-if { [prepare_for_testing "failed to prepare" ${binfile} "${srcfile}" \
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
 	  {debug pthreads}] } {
     return
 }
