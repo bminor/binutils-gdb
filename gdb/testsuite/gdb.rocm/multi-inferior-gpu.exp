@@ -28,7 +28,8 @@ if {[build_executable "failed to prepare" $testfile $srcfile {debug hip}]} {
 }
 
 proc do_test {} {
-    clean_restart $::binfile
+    clean_restart
+    gdb_load $::binfile
     gdb_test_no_output "set non-stop on"
     gdb_test_no_output "set detach-on-fork off"
     gdb_test_no_output "set follow-fork parent"

@@ -53,7 +53,8 @@ if { [gdb_compile $srcdir/$subdir/$srcfile \
 
 proc do_test { } {
     with_rocm_gpu_lock {
-	clean_restart $::binfile
+	clean_restart
+	gdb_load $::binfile
 	gdb_test_no_output "set args $::hipmodule_path" "set args"
 
 	if { ![runto_main] } {
