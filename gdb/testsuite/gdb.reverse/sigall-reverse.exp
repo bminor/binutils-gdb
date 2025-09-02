@@ -144,7 +144,7 @@ proc test_one_sig_reverse {prevsig} {
     }
 }
 
-clean_restart $binfile
+clean_restart $::testfile
 
 runto gen_ABRT
 
