@@ -37,7 +37,7 @@ proc check_asm_output { expect_styled testname } {
 	$testname
 }
 
-Term::clean_restart 24 80 $binfile
+Term::clean_restart 24 80 $testfile
 if {![Term::enter_tui]} {
     unsupported "TUI not supported"
     return

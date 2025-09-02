@@ -26,7 +26,7 @@ if { [build_executable "failed to prepare" $testfile $srcfile ] == -1} {
     return -1
 }
 
-Term::clean_restart 24 80 $binfile
+Term::clean_restart 24 80 $testfile
 
 if {![runto_main]} {
     perror "test suppressed"

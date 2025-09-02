@@ -41,7 +41,7 @@ if {[build_executable "failed to prepare" ${testfile} ${srcfile}] == -1} {
     return -1
 }
 
-Term::clean_restart 24 80 $binfile
+Term::clean_restart 24 80 $testfile
 
 gdb_test_no_output "maint set tui-left-margin-verbose on"
 gdb_test_no_output "set tui compact-source on"
