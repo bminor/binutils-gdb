@@ -78,7 +78,7 @@ struct frag {
   unsigned int insn_addr:6;
 
   /* What state is my tail in? */
-  relax_stateT fr_type;
+  ENUM_BITFIELD (_relax_state) fr_type : 8;
   relax_substateT fr_subtype;
 
 #ifdef USING_CGEN
