@@ -21014,6 +21014,15 @@ process_got_section_contents (Filedata * filedata)
   if (!do_got_section_contents)
     return res;
 
+  switch (filedata->file_header.e_type)
+    {
+    case ET_DYN:
+    case ET_EXEC:
+      break;
+    default:
+      goto out;
+    }
+
   switch (filedata->file_header.e_machine)
     {
     case EM_MIPS:
