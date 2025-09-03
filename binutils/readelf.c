@@ -1811,7 +1811,8 @@ update_all_relocations (size_t nentries)
 
 static uint64_t
 count_relr_relocations (Filedata *          filedata,
-			Elf_Internal_Shdr * section)
+			Elf_Internal_Shdr * section,
+			uint64_t         ** relrs_p)
 {
   uint64_t *  relrs;
   uint64_t    nentries;
@@ -1836,9 +1837,6 @@ count_relr_relocations (Filedata *          filedata,
   if (nentries == 0)
     return 0;
 
-  /* FIXME: This call to get_data duplicates one that follows in
-     dump_relr_relocations().  They could be combined into just
-     one call.  */
   relrs = get_data (NULL, filedata, section->sh_offset, 1,
 		    section->sh_size, _("RELR relocation data"));
   if (relrs == NULL)
@@ -1868,7 +1866,8 @@ count_relr_relocations (Filedata *          filedata,
 	}
     }
 
-  free (relrs);
+  *relrs_p = relrs;
+
   return count;
 }
 
@@ -1880,13 +1879,13 @@ dump_relr_relocations (Filedata *          filedata,
 		       uint64_t            relr_size,
 		       int                 relr_entsize,
 		       uint64_t            relr_offset,
-		       Elf_Internal_Sym *  symtab,
+		       uint64_t *          relrs,
+		       const Elf_Internal_Sym * symtab_p,
 		       uint64_t            nsyms,
 		       char *              strtab,
 		       uint64_t            strtablen,
 		       bool                dump_reloc)
 {
-  uint64_t *  relrs;
   uint64_t    nentries, i;
   uint64_t    where = 0;
   int         num_bits_in_entry;
@@ -1911,14 +1910,18 @@ dump_relr_relocations (Filedata *          filedata,
       return false;
     }
 
-  relrs = get_data (NULL, filedata, relr_offset, 1, relr_size, _("RELR relocation data"));
   if (relrs == NULL)
-    return false;
+    {
+      relrs = get_data (NULL, filedata, relr_offset, 1, relr_size,
+			_("RELR relocation data"));
+      if (relrs == NULL)
+	return false;
+    }
 
   /* Paranoia.  */
   if (strtab == NULL)
     strtablen = 0;
-  if (symtab == NULL)
+  if (symtab_p == NULL)
     nsyms = 0;
 
   const char *rtype = NULL;
@@ -2076,12 +2079,14 @@ dump_relr_relocations (Filedata *          filedata,
 	break;
       }
 
-  if (symtab != NULL)
+  Elf_Internal_Sym *symtab = NULL;
+  if (symtab_p != NULL)
     {
       /* Symbol tables are not sorted on address, but we want a quick lookup
 	 for the symbol associated with each address computed below, so sort
-	 the table then filter out unwanted entries. FIXME: This assumes that
-	 the symbol table will not be used later on for some other purpose.  */
+	 the table then filter out unwanted entries.  */
+      size_t sz = nsyms * sizeof (*symtab);
+      symtab = xmemdup (symtab_p, sz, sz);
       qsort (symtab, nsyms, sizeof (Elf_Internal_Sym), symcmp);
       nsyms = filter_display_syms (filedata, symtab, nsyms, strtab, strtablen);
     }
@@ -2185,6 +2190,7 @@ dump_relr_relocations (Filedata *          filedata,
 	}
     }
 
+  free (symtab);
   free (relrs);
   return true;
 }
@@ -9783,6 +9789,7 @@ display_relocations (Elf_Internal_Shdr *  section,
   uint64_t rel_offset = section->sh_offset;
   uint64_t num_rela = rel_size / section->sh_entsize;
   uint64_t num_reloc;
+  uint64_t *relrs = NULL;
 
   if (rel_type == reltype_relr)
     {
@@ -9791,7 +9798,7 @@ display_relocations (Elf_Internal_Shdr *  section,
 	 the number of words in the compressed RELR format.  So also provide
 	 the number of locations affected.  */
 
-      num_reloc = count_relr_relocations (filedata, section);
+      num_reloc = count_relr_relocations (filedata, section, &relrs);
 
       if (dump_reloc)
 	{
@@ -9849,11 +9856,16 @@ display_relocations (Elf_Internal_Shdr *  section,
   bool res;
 
   if (rel_type == reltype_relr)
-    res = dump_relr_relocations (filedata, section->sh_size,
-				 section->sh_entsize,
-				 section->sh_offset,
-				 symtab, nsyms, strtab, strtablen,
-				 dump_reloc);
+    {
+      res = dump_relr_relocations (filedata, section->sh_size,
+				   section->sh_entsize,
+				   section->sh_offset,
+				   relrs,
+				   symtab, nsyms, strtab, strtablen,
+				   dump_reloc);
+      /* RELRS has been freed by dump_relr_relocations.  */
+      relrs = NULL;
+    }
   else
     res = dump_relocations (filedata, rel_offset, rel_size,
 			    symtab, nsyms, strtab, strtablen,
@@ -9954,6 +9966,7 @@ process_relocs (Filedata * filedata)
 				   filedata->dynamic_info[DT_RELRSZ],
 				   filedata->dynamic_info[DT_RELRENT],
 				   filedata->dynamic_info[DT_RELR],
+				   NULL,
 				   filedata->dynamic_symbols,
 				   filedata->num_dynamic_syms,
 				   filedata->dynamic_strings,
