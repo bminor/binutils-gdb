@@ -35,9 +35,9 @@ class all_threads_iterator
 {
 public:
   typedef all_threads_iterator self_type;
-  typedef struct thread_info *value_type;
-  typedef struct thread_info *&reference;
-  typedef struct thread_info **pointer;
+  typedef struct thread_info value_type;
+  typedef struct thread_info &reference;
+  typedef struct thread_info *pointer;
   typedef std::forward_iterator_tag iterator_category;
   typedef int difference_type;
 
@@ -53,7 +53,7 @@ public:
     : m_thr (nullptr)
   {}
 
-  thread_info *operator* () const { return m_thr; }
+  reference operator* () const { return *m_thr; }
 
   all_threads_iterator &operator++ ()
   {

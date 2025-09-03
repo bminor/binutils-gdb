@@ -787,9 +787,9 @@ all_non_exited_threads (process_stratum_target *proc_target = nullptr,
    currently-iterated thread.  When combined with range-for, this
    allow convenient patterns like this:
 
-     for (thread_info *t : all_threads_safe ())
+     for (thread_info &t : all_threads_safe ())
        if (some_condition ())
-	 delete f;
+	 delete &f;
 */
 
 inline all_threads_safe_range

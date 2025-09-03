@@ -1270,9 +1270,9 @@ follow_exec (ptid_t ptid, const char *exec_file_target)
      them.  Deleting them now rather than at the next user-visible
      stop provides a nicer sequence of events for user and MI
      notifications.  */
-  for (thread_info *th : all_threads_safe ())
-    if (th->ptid.pid () == pid && th->ptid != ptid)
-      delete_thread (th);
+  for (thread_info &th : all_threads_safe ())
+    if (th.ptid.pid () == pid && th.ptid != ptid)
+      delete_thread (&th);
 
   /* We also need to clear any left over stale state for the
      leader/event thread.  E.g., if there was any step-resume
@@ -4482,18 +4482,18 @@ clean_up_just_stopped_threads_fsms (struct execution_control_state *ecs)
     {
       scoped_restore_current_thread restore_thread;
 
-      for (thread_info *thr : all_threads_safe ())
+      for (thread_info &thr : all_threads_safe ())
 	{
-	  if (thr->state == THREAD_EXITED)
+	  if (thr.state == THREAD_EXITED)
 	    continue;
 
-	  if (thr == ecs->event_thread)
+	  if (&thr == ecs->event_thread)
 	    continue;
 
-	  if (thr->thread_fsm () != nullptr)
+	  if (thr.thread_fsm () != nullptr)
 	    {
-	      switch_to_thread (thr);
-	      thr->thread_fsm ()->clean_up (thr);
+	      switch_to_thread (&thr);
+	      thr.thread_fsm ()->clean_up (&thr);
 	    }
 
 	  /* As we are cancelling the command/FSM of this thread,
@@ -4501,10 +4501,10 @@ clean_up_just_stopped_threads_fsms (struct execution_control_state *ecs)
 	     exited event to the user, that reason is gone.  Delete
 	     the thread, so that the user doesn't see it in the thread
 	     list, the next proceed doesn't try to resume it, etc.  */
-	  if (thr->has_pending_waitstatus ()
-	      && (thr->pending_waitstatus ().kind ()
+	  if (thr.has_pending_waitstatus ()
+	      && (thr.pending_waitstatus ().kind ()
 		  == TARGET_WAITKIND_THREAD_EXITED))
-	    delete_thread (thr);
+	    delete_thread (&thr);
 	}
     }
 }
@@ -8448,51 +8448,51 @@ restart_stepped_thread (process_stratum_target *resume_target,
   if (start_step_over ())
     return true;
 
-  for (thread_info *tp : all_threads_safe ())
+  for (thread_info &tp : all_threads_safe ())
     {
-      if (tp->state == THREAD_EXITED)
+      if (tp.state == THREAD_EXITED)
 	continue;
 
-      if (tp->has_pending_waitstatus ())
+      if (tp.has_pending_waitstatus ())
 	continue;
 
       /* Ignore threads of processes the caller is not
 	 resuming.  */
       if (!sched_multi
-	  && (tp->inf->process_target () != resume_target
-	      || tp->inf->pid != resume_ptid.pid ()))
+	  && (tp.inf->process_target () != resume_target
+	      || tp.inf->pid != resume_ptid.pid ()))
 	continue;
 
-      if (tp->control.trap_expected)
+      if (tp.control.trap_expected)
 	{
 	  infrun_debug_printf ("switching back to stepped thread (step-over)");
 
-	  if (keep_going_stepped_thread (tp))
+	  if (keep_going_stepped_thread (&tp))
 	    return true;
 	}
     }
 
-  for (thread_info *tp : all_threads_safe ())
+  for (thread_info &tp : all_threads_safe ())
     {
-      if (tp->state == THREAD_EXITED)
+      if (tp.state == THREAD_EXITED)
 	continue;
 
-      if (tp->has_pending_waitstatus ())
+      if (tp.has_pending_waitstatus ())
 	continue;
 
       /* Ignore threads of processes the caller is not
 	 resuming.  */
       if (!sched_multi
-	  && (tp->inf->process_target () != resume_target
-	      || tp->inf->pid != resume_ptid.pid ()))
+	  && (tp.inf->process_target () != resume_target
+	      || tp.inf->pid != resume_ptid.pid ()))
 	continue;
 
       /* Did we find the stepping thread?  */
-      if (tp->control.step_range_end)
+      if (tp.control.step_range_end)
 	{
 	  infrun_debug_printf ("switching back to stepped thread (stepping)");
 
-	  if (keep_going_stepped_thread (tp))
+	  if (keep_going_stepped_thread (&tp))
 	    return true;
 	}
     }

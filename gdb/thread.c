@@ -603,9 +603,9 @@ find_thread_by_handle (gdb::array_view<const gdb_byte> handle,
 struct thread_info *
 iterate_over_threads (gdb::function_view<bool (struct thread_info *)> callback)
 {
-  for (thread_info *tp : all_threads_safe ())
-    if (callback (tp))
-      return tp;
+  for (thread_info &tp : all_threads_safe ())
+    if (callback (&tp))
+      return &tp;
 
   return NULL;
 }
@@ -757,12 +757,12 @@ prune_threads (void)
 {
   scoped_restore_current_thread restore_thread;
 
-  for (thread_info *tp : all_threads_safe ())
+  for (thread_info &tp : all_threads_safe ())
     {
-      switch_to_inferior_no_thread (tp->inf);
+      switch_to_inferior_no_thread (tp.inf);
 
-      if (!thread_alive (tp))
-	delete_thread (tp);
+      if (!thread_alive (&tp))
+	delete_thread (&tp);
     }
 }
 
@@ -771,9 +771,9 @@ prune_threads (void)
 void
 delete_exited_threads (void)
 {
-  for (thread_info *tp : all_threads_safe ())
-    if (tp->state == THREAD_EXITED)
-      delete_thread (tp);
+  for (thread_info &tp : all_threads_safe ())
+    if (tp.state == THREAD_EXITED)
+      delete_thread (&tp);
 }
 
 /* Return true value if stack temporaries are enabled for the thread
