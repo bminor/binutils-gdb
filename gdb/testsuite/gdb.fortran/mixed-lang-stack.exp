@@ -28,7 +28,7 @@ require allow_fortran_tests
 standard_testfile mixed-lang-stack.c mixed-lang-stack.cpp mixed-lang-stack.f90
 
 if {[prepare_for_testing_full "failed to prepare" \
-	 [list ${binfile} {debug f90 additional_flags=-lstdc++} \
+	 [list $testfile {debug f90 additional_flags=-lstdc++} \
 	      $srcfile {debug} \
 	      $srcfile2 {debug c++ additional_flags=-std=c++11} \
 	      $srcfile3 {debug f90}]]} {
@@ -43,7 +43,7 @@ proc run_tests { lang } {
     with_test_prefix "lang=${lang}" {
 	global binfile hex have_index
 
-	clean_restart ${binfile}
+	clean_restart ${::testfile}
 
 	if ![runto_main] {
 	    return -1

@@ -22,7 +22,7 @@ standard_testfile call-no-debug-prog.f90 call-no-debug-func.f90
 load_lib fortran.exp
 
 if {[prepare_for_testing_full "failed to prepare" \
-	 [list ${binfile} [list debug f90] \
+	 [list $testfile [list debug f90] \
 	      $srcfile [list debug f90] \
 	      $srcfile2 [list nodebug f90]]]} {
     return -1

@@ -56,7 +56,7 @@ proc array_slice_to_var { slice_str } {
 proc run_test { repack } {
     global binfile gdb_prompt
 
-    clean_restart ${binfile}
+    clean_restart ${::testfile}
 
     if ![fortran_runto_main] {
 	return -1
