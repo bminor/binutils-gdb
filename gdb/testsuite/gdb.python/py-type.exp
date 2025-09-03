@@ -34,7 +34,8 @@ proc build_inferior {exefile lang} {
 
 # Restart GDB.
 proc restart_gdb {exefile} { 
-  clean_restart $exefile
+  clean_restart
+  gdb_load $exefile
 
   if {![runto_main]} {
       return

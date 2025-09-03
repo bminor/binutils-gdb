@@ -26,7 +26,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
     return -1
 }
 
-if {[mi_clean_restart $binfile]} {
+if {[mi_clean_restart $::testfile]} {
     return
 }
 
@@ -345,7 +345,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}-cxx" \
     return -1
 }
 
-if {[mi_clean_restart ${binfile}-cxx]} {
+if {[mi_clean_restart ${::testfile}-cxx]} {
     return
 }
 

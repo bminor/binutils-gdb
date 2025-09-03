@@ -163,7 +163,8 @@ if ![ishost *-*-mingw*] {
     remote_exec host "rm -f ${symlink_binary}"
     remote_exec host "ln -sf ${testfile} ${symlink_binary}"
     if [remote_file host exists "${symlink_binary}"] {
-	clean_restart "${symlink_binary}"
+	clean_restart
+	gdb_load "${symlink_binary}"
 	gdb_test "python print (gdb.lookup_objfile (\"${symlink_binary}\").filename)" \
 	    "${testfile}" "gdb.lookup_objfile of symlinked binary"
     }

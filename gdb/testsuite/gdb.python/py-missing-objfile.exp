@@ -134,7 +134,7 @@ proc clean_restart_load_python {} {
 # For sanity, lets check that we can load the specify the executable
 # and then load the core-file the easy way.
 with_test_prefix "initial sanity check" {
-    clean_restart $binfile
+    clean_restart $::testfile
     load_core_file
     check_loaded_debug true true
 }

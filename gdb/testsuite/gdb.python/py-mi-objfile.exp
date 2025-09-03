@@ -33,7 +33,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 # gdb will find it.
 set remote_python_file [gdb_remote_download host ${srcdir}/${subdir}/${pyfile}]
 
-if {[mi_clean_restart $binfile]} {
+if {[mi_clean_restart $::testfile]} {
     return
 }
 

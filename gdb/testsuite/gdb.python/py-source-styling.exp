@@ -62,7 +62,7 @@ proc check_source_listing_styling { cmd expect_styled { testname "" } } {
 # highlighting when GNU source highlight is not available (or is
 # disabled, as is done in this test).
 proc test_pygments_styling {} {
-    clean_restart $::binfile
+    clean_restart $::testfile
 
     # Remote host boards disable styling via GDB's command line.  Turn
     # it back on now.
@@ -91,7 +91,7 @@ proc test_pygments_styling {} {
 # string, then set the correct host encoding, and try again.  This
 # time the conversion should succeed.
 proc test_gdb_execute_non_utf8_source {} {
-    clean_restart $::binfile
+    clean_restart $::testfile
 
     # The default host charset is utf-8, the source code contains a
     # non-utf-8 character, so this will fail.
@@ -117,7 +117,7 @@ proc test_gdb_execute_non_utf8_source {} {
 # output to be returned via a string, and in other cases we ask for
 # the output to be sent straight to stdout.
 proc_with_prefix test_source_cache_style_tracking {} {
-    clean_restart $::binfile
+    clean_restart $::testfile
 
     # Remote host boards disable styling via GDB's command line.  Turn
     # it back on now.

@@ -431,7 +431,8 @@ proc test_value_after_death {} {
 
 proc test_subscript_regression {exefile lang} {
  # Start with a fresh gdb.
- clean_restart ${exefile}
+  clean_restart
+  gdb_load $exefile
 
  if {![runto_main]} {
      return
@@ -768,7 +769,7 @@ if { [build_inferior "${binfile}" "c"] < 0 } {
 }
 
 # Start with a fresh gdb.
-clean_restart ${binfile}
+clean_restart ${::testfile}
 
 test_history_count
 test_value_creation

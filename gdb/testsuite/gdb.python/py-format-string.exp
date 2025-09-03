@@ -47,7 +47,8 @@ proc build_inferior {exefile lang} {
 proc prepare_gdb {exefile} {
   global srcdir subdir srcfile testfile hex
 
-  clean_restart $exefile
+  clean_restart
+  gdb_load $exefile
 
   if {![runto_main]} {
       return

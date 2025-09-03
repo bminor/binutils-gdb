@@ -29,7 +29,7 @@ if {[gdb_compile "$srcdir/$subdir/$srcfile" $binfile executable {debug}] != "" }
     return -1
 }
 
-mi_clean_restart $binfile
+mi_clean_restart $::testfile
 
 set pyfile [gdb_remote_download host ${srcdir}/${subdir}/${testfile}.py]
 mi_gdb_test "source ${pyfile}" \
