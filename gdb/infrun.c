@@ -2184,14 +2184,14 @@ start_step_over (void)
   thread_step_over_list_safe_range range
     = make_thread_step_over_list_safe_range (threads_to_step);
 
-  for (thread_info *tp : range)
+  for (thread_info &tp : range)
     {
       step_over_what step_what;
       int must_be_in_line;
 
-      gdb_assert (!tp->stop_requested);
+      gdb_assert (!tp.stop_requested);
 
-      if (tp->inf->displaced_step_state.unavailable)
+      if (tp.inf->displaced_step_state.unavailable)
 	{
 	  /* The arch told us to not even try preparing another displaced step
 	     for this inferior.  Just leave the thread in THREADS_TO_STEP, it
@@ -2199,7 +2199,7 @@ start_step_over (void)
 	  continue;
 	}
 
-      if (tp->inf->thread_waiting_for_vfork_done != nullptr)
+      if (tp.inf->thread_waiting_for_vfork_done != nullptr)
 	{
 	  /* When we stop all threads, handling a vfork, any thread in the step
 	     over chain remains there.  A user could also try to continue a
@@ -2215,36 +2215,36 @@ start_step_over (void)
 	 step over chain indefinitely if something goes wrong when resuming it
 	 If the error is intermittent and it still needs a step over, it will
 	 get enqueued again when we try to resume it normally.  */
-      threads_to_step.erase (threads_to_step.iterator_to (*tp));
+      threads_to_step.erase (threads_to_step.iterator_to (tp));
 
-      step_what = thread_still_needs_step_over (tp);
+      step_what = thread_still_needs_step_over (&tp);
       must_be_in_line = ((step_what & STEP_OVER_WATCHPOINT)
 			 || ((step_what & STEP_OVER_BREAKPOINT)
-			     && !use_displaced_stepping (tp)));
+			     && !use_displaced_stepping (&tp)));
 
       /* We currently stop all threads of all processes to step-over
 	 in-line.  If we need to start a new in-line step-over, let
 	 any pending displaced steps finish first.  */
       if (must_be_in_line && displaced_step_in_progress_any_thread ())
 	{
-	  global_thread_step_over_chain_enqueue (tp);
+	  global_thread_step_over_chain_enqueue (&tp);
 	  continue;
 	}
 
-      if (tp->control.trap_expected
-	  || tp->resumed ()
-	  || tp->executing ())
+      if (tp.control.trap_expected
+	  || tp.resumed ()
+	  || tp.executing ())
 	{
 	  internal_error ("[%s] has inconsistent state: "
 			  "trap_expected=%d, resumed=%d, executing=%d\n",
-			  tp->ptid.to_string ().c_str (),
-			  tp->control.trap_expected,
-			  tp->resumed (),
-			  tp->executing ());
+			  tp.ptid.to_string ().c_str (),
+			  tp.control.trap_expected,
+			  tp.resumed (),
+			  tp.executing ());
 	}
 
       infrun_debug_printf ("resuming [%s] for step-over",
-			   tp->ptid.to_string ().c_str ());
+			   tp.ptid.to_string ().c_str ());
 
       /* keep_going_pass_signal skips the step-over if the breakpoint
 	 is no longer inserted.  In all-stop, we want to keep looking
@@ -2255,8 +2255,8 @@ start_step_over (void)
       if (!target_is_non_stop_p () && !step_what)
 	continue;
 
-      switch_to_thread (tp);
-      execution_control_state ecs (tp);
+      switch_to_thread (&tp);
+      execution_control_state ecs (&tp);
       keep_going_pass_signal (&ecs);
 
       if (!ecs.wait_some_more)
@@ -2264,23 +2264,23 @@ start_step_over (void)
 
       /* If the thread's step over could not be initiated because no buffers
 	 were available, it was re-added to the global step over chain.  */
-      if (tp->resumed  ())
+      if (tp.resumed  ())
 	{
 	  infrun_debug_printf ("[%s] was resumed.",
-			       tp->ptid.to_string ().c_str ());
-	  gdb_assert (!thread_is_in_step_over_chain (tp));
+			       tp.ptid.to_string ().c_str ());
+	  gdb_assert (!thread_is_in_step_over_chain (&tp));
 	}
       else
 	{
 	  infrun_debug_printf ("[%s] was NOT resumed.",
-			       tp->ptid.to_string ().c_str ());
-	  gdb_assert (thread_is_in_step_over_chain (tp));
+			       tp.ptid.to_string ().c_str ());
+	  gdb_assert (thread_is_in_step_over_chain (&tp));
 	}
 
       /* If we started a new in-line step-over, we're done.  */
       if (step_over_info_valid_p ())
 	{
-	  gdb_assert (tp->control.trap_expected);
+	  gdb_assert (tp.control.trap_expected);
 	  started = true;
 	  break;
 	}
@@ -2289,8 +2289,8 @@ start_step_over (void)
 	{
 	  /* On all-stop, shouldn't have resumed unless we needed a
 	     step over.  */
-	  gdb_assert (tp->control.trap_expected
-		      || tp->step_after_step_resume_breakpoint);
+	  gdb_assert (tp.control.trap_expected
+		      || tp.step_after_step_resume_breakpoint);
 
 	  /* With remote targets (at least), in all-stop, we can't
 	     issue any further remote commands until the program stops
@@ -4284,12 +4284,12 @@ prepare_for_detach (void)
   thread_step_over_list_safe_range range
     = make_thread_step_over_list_safe_range (global_thread_step_over_list);
 
-  for (thread_info *tp : range)
-    if (tp->inf == inf)
+  for (thread_info &tp : range)
+    if (tp.inf == inf)
       {
 	infrun_debug_printf ("removing thread %s from global step over chain",
-			     tp->ptid.to_string ().c_str ());
-	global_thread_step_over_chain_remove (tp);
+			     tp.ptid.to_string ().c_str ());
+	global_thread_step_over_chain_remove (&tp);
       }
 
   /* If we were already in the middle of an inline step-over, and the

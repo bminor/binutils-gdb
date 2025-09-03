@@ -35,7 +35,6 @@ struct symtab;
 #include "gdbsupport/forward-scope-exit.h"
 #include "displaced-stepping.h"
 #include "gdbsupport/intrusive_list.h"
-#include "gdbsupport/reference-to-pointer-iterator.h"
 #include "thread-fsm.h"
 #include "language.h"
 
@@ -974,10 +973,8 @@ using thread_step_over_list_node
   = intrusive_member_node<thread_info, &thread_info::step_over_list_node>;
 using thread_step_over_list
   = intrusive_list<thread_info, thread_step_over_list_node>;
-using thread_step_over_list_iterator
-  = reference_to_pointer_iterator<thread_step_over_list::iterator>;
 using thread_step_over_list_safe_iterator
-  = basic_safe_iterator<thread_step_over_list_iterator>;
+  = basic_safe_iterator<thread_step_over_list::iterator>;
 using thread_step_over_list_safe_range
   = iterator_range<thread_step_over_list_safe_iterator>;
 

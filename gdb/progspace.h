@@ -30,6 +30,7 @@
 #include "gdbsupport/owning_intrusive_list.h"
 #include "gdbsupport/refcounted-object.h"
 #include "gdbsupport/gdb_ref_ptr.h"
+#include "gdbsupport/reference-to-pointer-iterator.h"
 #include <vector>
 
 struct target_ops;
