@@ -970,7 +970,7 @@ inf_has_multiple_threads ()
 
   /* Return true as soon as we see the second thread of the current
      inferior.  */
-  for (thread_info *tp ATTRIBUTE_UNUSED : current_inferior ()->threads ())
+  for (thread_info &tp ATTRIBUTE_UNUSED : current_inferior ()->threads ())
     if (++count > 1)
       return true;
 

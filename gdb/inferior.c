@@ -104,8 +104,8 @@ inferior::unpush_target (struct target_ops *t)
     {
       process_stratum_target *proc_target = as_process_stratum_target (t);
 
-      for (thread_info *thread : this->non_exited_threads ())
-	proc_target->maybe_remove_resumed_with_pending_wait_status (thread);
+      for (thread_info &thread : this->non_exited_threads ())
+	proc_target->maybe_remove_resumed_with_pending_wait_status (&thread);
     }
 
   return m_target_stack.unpush (t);
@@ -458,7 +458,7 @@ number_of_live_inferiors (process_stratum_target *proc_target)
 
   for (inferior *inf : all_non_exited_inferiors (proc_target))
     if (inf->has_execution ())
-      for (thread_info *tp ATTRIBUTE_UNUSED : inf->non_exited_threads ())
+      for (thread_info &tp ATTRIBUTE_UNUSED : inf->non_exited_threads ())
 	{
 	  /* Found a live thread in this inferior, go to the next
 	     inferior.  */

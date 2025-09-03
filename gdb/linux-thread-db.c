@@ -1706,12 +1706,12 @@ thread_db_target::thread_handle_to_thread_info (const gdb_byte *thread_handle,
     error (_("Thread handle size mismatch: %d vs %zu (from libthread_db)"),
 	   handle_len, sizeof (handle_tid));
 
-  for (thread_info *tp : inf->non_exited_threads ())
+  for (thread_info &tp : inf->non_exited_threads ())
     {
-      thread_db_thread_info *priv = get_thread_db_thread_info (tp);
+      thread_db_thread_info *priv = get_thread_db_thread_info (&tp);
 
       if (priv != NULL && handle_tid == priv->tid)
-	return tp;
+	return &tp;
     }
 
   return NULL;

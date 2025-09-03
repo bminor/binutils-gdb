@@ -2377,9 +2377,9 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
 			     target_thread_architecture (signalled_thr->ptid),
 			     obfd, note_data, note_size, stop_signal);
     }
-  for (thread_info *thr : current_inferior ()->non_exited_threads ())
+  for (thread_info &thr : current_inferior ()->non_exited_threads ())
     {
-      if (thr == signalled_thr)
+      if (&thr == signalled_thr)
 	continue;
 
       /* On some architectures, like AArch64, each thread can have a distinct
@@ -2388,7 +2388,7 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
 
 	 Fetch each thread's gdbarch and pass it down to the lower layers so
 	 we can dump the right set of registers.  */
-      linux_corefile_thread (thr, target_thread_architecture (thr->ptid),
+      linux_corefile_thread (&thr, target_thread_architecture (thr.ptid),
 			     obfd, note_data, note_size, stop_signal);
     }
 

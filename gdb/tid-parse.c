@@ -117,10 +117,10 @@ parse_thread_id (const char *tidstr, const char **end)
     inf = current_inferior ();
 
   thread_info *tp = nullptr;
-  for (thread_info *it : inf->threads ())
-    if (it->per_inf_num == thr_num)
+  for (thread_info &it : inf->threads ())
+    if (it.per_inf_num == thr_num)
       {
-	tp = it;
+	tp = &it;
 	break;
       }
 

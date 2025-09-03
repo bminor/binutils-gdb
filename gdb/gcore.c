@@ -850,9 +850,9 @@ gcore_find_signalled_thread ()
       && curr_thr->stop_signal () != GDB_SIGNAL_0)
     return curr_thr;
 
-  for (thread_info *thr : current_inferior ()->non_exited_threads ())
-    if (thr->stop_signal () != GDB_SIGNAL_0)
-      return thr;
+  for (thread_info &thr : current_inferior ()->non_exited_threads ())
+    if (thr.stop_signal () != GDB_SIGNAL_0)
+      return &thr;
 
   /* Default to the current thread, unless it has exited.  */
   if (curr_thr->state != THREAD_EXITED)

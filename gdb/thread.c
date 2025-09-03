@@ -558,9 +558,9 @@ delete_thread_silent (thread_info *thread)
 struct thread_info *
 find_thread_global_id (int global_id)
 {
-  for (thread_info *tp : all_threads ())
-    if (tp->global_num == global_id)
-      return tp;
+  for (thread_info &tp : all_threads ())
+    if (tp.global_num == global_id)
+      return &tp;
 
   return NULL;
 }
@@ -568,9 +568,9 @@ find_thread_global_id (int global_id)
 static struct thread_info *
 find_thread_id (struct inferior *inf, int thr_num)
 {
-  for (thread_info *tp : inf->threads ())
-    if (tp->per_inf_num == thr_num)
-      return tp;
+  for (thread_info &tp : inf->threads ())
+    if (tp.per_inf_num == thr_num)
+      return &tp;
 
   return NULL;
 }
@@ -615,7 +615,7 @@ iterate_over_threads (gdb::function_view<bool (struct thread_info *)> callback)
 bool
 any_thread_p ()
 {
-  for (thread_info *tp ATTRIBUTE_UNUSED : all_threads ())
+  for (thread_info &tp ATTRIBUTE_UNUSED : all_threads ())
     return true;
   return false;
 }
@@ -639,8 +639,8 @@ live_threads_count (void)
 int
 valid_global_thread_id (int global_id)
 {
-  for (thread_info *tp : all_threads ())
-    if (tp->global_num == global_id)
+  for (thread_info &tp : all_threads ())
+    if (tp.global_num == global_id)
       return 1;
 
   return 0;
@@ -672,8 +672,8 @@ any_thread_of_inferior (inferior *inf)
   if (inf == current_inferior () && inferior_ptid != null_ptid)
     return inferior_thread ();
 
-  for (thread_info *tp : inf->non_exited_threads ())
-    return tp;
+  for (thread_info &tp : inf->non_exited_threads ())
+    return &tp;
 
   return NULL;
 }
@@ -699,12 +699,12 @@ any_live_thread_of_inferior (inferior *inf)
 	return curr_tp;
     }
 
-  for (thread_info *tp : inf->non_exited_threads ())
+  for (thread_info &tp : inf->non_exited_threads ())
     {
-      if (!tp->executing ())
-	return tp;
+      if (!tp.executing ())
+	return &tp;
 
-      tp_executing = tp;
+      tp_executing = &tp;
     }
 
   /* If both the current thread and all live threads are executing,
@@ -856,8 +856,8 @@ thread_change_ptid (process_stratum_target *targ,
 void
 set_resumed (process_stratum_target *targ, ptid_t ptid, bool resumed)
 {
-  for (thread_info *tp : all_non_exited_threads (targ, ptid))
-    tp->set_resumed (resumed);
+  for (thread_info &tp : all_non_exited_threads (targ, ptid))
+    tp.set_resumed (resumed);
 }
 
 /* Helper for set_running, that marks one thread either running or
@@ -920,8 +920,8 @@ set_running (process_stratum_target *targ, ptid_t ptid, bool running)
      multiple *running notifications just fine.  */
   bool any_started = false;
 
-  for (thread_info *tp : all_non_exited_threads (targ, ptid))
-    if (set_running_thread (tp, running))
+  for (thread_info &tp : all_non_exited_threads (targ, ptid))
+    if (set_running_thread (&tp, running))
       any_started = true;
 
   if (any_started)
@@ -931,8 +931,8 @@ set_running (process_stratum_target *targ, ptid_t ptid, bool running)
 void
 set_executing (process_stratum_target *targ, ptid_t ptid, bool executing)
 {
-  for (thread_info *tp : all_non_exited_threads (targ, ptid))
-    tp->set_executing (executing);
+  for (thread_info &tp : all_non_exited_threads (targ, ptid))
+    tp.set_executing (executing);
 
   /* It only takes one running thread to spawn more threads.  */
   if (executing)
@@ -954,8 +954,8 @@ threads_are_executing (process_stratum_target *target)
 void
 set_stop_requested (process_stratum_target *targ, ptid_t ptid, bool stop)
 {
-  for (thread_info *tp : all_non_exited_threads (targ, ptid))
-    tp->stop_requested = stop;
+  for (thread_info &tp : all_non_exited_threads (targ, ptid))
+    tp.stop_requested = stop;
 
   /* Call the stop requested observer so other components of GDB can
      react to this request.  */
@@ -968,8 +968,8 @@ finish_thread_state (process_stratum_target *targ, ptid_t ptid)
 {
   bool any_started = false;
 
-  for (thread_info *tp : all_non_exited_threads (targ, ptid))
-    if (set_running_thread (tp, tp->executing ()))
+  for (thread_info &tp : all_non_exited_threads (targ, ptid))
+    if (set_running_thread (&tp, tp.executing ()))
       any_started = true;
 
   if (any_started)
@@ -1281,7 +1281,7 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 	   accommodate the largest entry.  */
 	size_t target_id_col_width = 17;
 
-	for (thread_info *tp : all_threads ())
+	for (thread_info &tp : all_threads ())
 	  {
 	    any_thread = true;
 
@@ -1290,16 +1290,16 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 	      switch_to_thread (current_thread);
 
 	    if (!should_print_thread (requested_threads, opts,
-				      default_inf_num, global_ids, pid, tp))
+				      default_inf_num, global_ids, pid, &tp))
 	      continue;
 
 	    /* Switch inferiors so we're looking at the right
 	       target stack.  */
-	    switch_to_inferior_no_thread (tp->inf);
+	    switch_to_inferior_no_thread (tp.inf);
 
 	    target_id_col_width
 	      = std::max (target_id_col_width,
-			  thread_target_id_str (tp).size ());
+			  thread_target_id_str (&tp).size ());
 
 	    ++n_matching_threads;
 	  }
@@ -1327,13 +1327,13 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
       }
 
     for (inferior *inf : all_inferiors ())
-      for (thread_info *tp : inf->threads ())
+      for (thread_info &tp : inf->threads ())
 	{
-	  if (tp == current_thread && tp->state == THREAD_EXITED)
+	  if (&tp == current_thread && tp.state == THREAD_EXITED)
 	    current_exited = true;
 
 	  print_thread (uiout, requested_threads, opts, global_ids, pid,
-			default_inf_num, tp, current_thread);
+			default_inf_num, &tp, current_thread);
 	}
 
     /* This end scope restores the current thread and the frame
@@ -1746,8 +1746,8 @@ thread_apply_all_command (const char *cmd, int from_tty)
       std::vector<thread_info_ref> thr_list_cpy;
       thr_list_cpy.reserve (tc);
 
-      for (thread_info *tp : all_non_exited_threads ())
-	thr_list_cpy.push_back (thread_info_ref::new_reference (tp));
+      for (thread_info &tp : all_non_exited_threads ())
+	thr_list_cpy.push_back (thread_info_ref::new_reference (&tp));
       gdb_assert (thr_list_cpy.size () == tc);
 
       auto *sorter = (ascending
@@ -2031,38 +2031,38 @@ thread_find_command (const char *arg, int from_tty)
 
   update_thread_list ();
 
-  for (thread_info *tp : all_threads ())
+  for (thread_info &tp : all_threads ())
     {
-      switch_to_inferior_no_thread (tp->inf);
+      switch_to_inferior_no_thread (tp.inf);
 
-      if (tp->name () != nullptr && re_exec (tp->name ()))
+      if (tp.name () != nullptr && re_exec (tp.name ()))
 	{
 	  gdb_printf (_("Thread %s has name '%s'\n"),
-		      print_thread_id (tp), tp->name ());
+		      print_thread_id (&tp), tp.name ());
 	  match++;
 	}
 
-      tmp = target_thread_name (tp);
+      tmp = target_thread_name (&tp);
       if (tmp != NULL && re_exec (tmp))
 	{
 	  gdb_printf (_("Thread %s has target name '%s'\n"),
-		      print_thread_id (tp), tmp);
+		      print_thread_id (&tp), tmp);
 	  match++;
 	}
 
-      std::string name = target_pid_to_str (tp->ptid);
+      std::string name = target_pid_to_str (tp.ptid);
       if (!name.empty () && re_exec (name.c_str ()))
 	{
 	  gdb_printf (_("Thread %s has target id '%s'\n"),
-		      print_thread_id (tp), name.c_str ());
+		      print_thread_id (&tp), name.c_str ());
 	  match++;
 	}
 
-      tmp = target_extra_thread_info (tp);
+      tmp = target_extra_thread_info (&tp);
       if (tmp != NULL && re_exec (tmp))
 	{
 	  gdb_printf (_("Thread %s has extra info '%s'\n"),
-		      print_thread_id (tp), tmp);
+		      print_thread_id (&tp), tmp);
 	  match++;
 	}
     }
@@ -2164,9 +2164,9 @@ update_threads_executing (void)
 	  return;
 	}
 
-      for (thread_info *tp : inf->non_exited_threads ())
+      for (thread_info &tp : inf->non_exited_threads ())
 	{
-	  if (tp->executing ())
+	  if (tp.executing ())
 	    {
 	      targ->threads_executing = true;
 	      return;

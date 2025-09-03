@@ -1117,8 +1117,8 @@ record_full_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
 	 all executed instructions, so we can record them all.  */
       process_stratum_target *proc_target
 	= current_inferior ()->process_target ();
-      for (thread_info *thread : all_non_exited_threads (proc_target, ptid))
-	thread->control.may_range_step = 0;
+      for (thread_info &thread : all_non_exited_threads (proc_target, ptid))
+	thread.control.may_range_step = 0;
 
       this->beneath ()->resume (ptid, step, signal);
     }
@@ -1213,8 +1213,8 @@ record_full_wait_1 (struct target_ops *ops,
 		  return ret;
 		}
 
-	      for (thread_info *tp : all_non_exited_threads ())
-		delete_single_step_breakpoints (tp);
+	      for (thread_info &tp : all_non_exited_threads ())
+		delete_single_step_breakpoints (&tp);
 
 	      if (record_full_resume_step)
 		return ret;

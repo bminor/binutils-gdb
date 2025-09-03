@@ -293,10 +293,10 @@ void
 aarch64_notify_debug_reg_change (ptid_t ptid,
 				 int is_watchpoint, unsigned int idx)
 {
-  for (thread_info *tp : current_inferior ()->non_exited_threads ())
+  for (thread_info &tp : current_inferior ()->non_exited_threads ())
     {
-      if (tp->ptid.lwp_p ())
-	aarch64_debug_pending_threads.emplace (tp->ptid.lwp ());
+      if (tp.ptid.lwp_p ())
+	aarch64_debug_pending_threads.emplace (tp.ptid.lwp ());
     }
 }
 

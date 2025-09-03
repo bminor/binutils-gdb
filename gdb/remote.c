@@ -4446,7 +4446,7 @@ static bool
 has_single_non_exited_thread (inferior *inf)
 {
   int count = 0;
-  for (thread_info *tp ATTRIBUTE_UNUSED : inf->non_exited_threads ())
+  for (thread_info &tp ATTRIBUTE_UNUSED : inf->non_exited_threads ())
     if (++count > 1)
       break;
   return count == 1;
@@ -5214,26 +5214,26 @@ remote_target::process_initial_stop_replies (int from_tty)
   /* Now go over all threads that are stopped, and print their current
      frame.  If all-stop, then if there's a signalled thread, pick
      that as current.  */
-  for (thread_info *thread : all_non_exited_threads (this))
+  for (thread_info &thread : all_non_exited_threads (this))
     {
       if (first == NULL)
-	first = thread;
+	first = &thread;
 
       if (!non_stop)
-	thread->set_running (false);
-      else if (thread->state != THREAD_STOPPED)
+	thread.set_running (false);
+      else if (thread.state != THREAD_STOPPED)
 	continue;
 
-      if (selected == nullptr && thread->has_pending_waitstatus ())
-	selected = thread;
+      if (selected == nullptr && thread.has_pending_waitstatus ())
+	selected = &thread;
 
       if (lowest_stopped == NULL
-	  || thread->inf->num < lowest_stopped->inf->num
-	  || thread->per_inf_num < lowest_stopped->per_inf_num)
-	lowest_stopped = thread;
+	  || thread.inf->num < lowest_stopped->inf->num
+	  || thread.per_inf_num < lowest_stopped->per_inf_num)
+	lowest_stopped = &thread;
 
       if (non_stop)
-	print_one_stopped_thread (thread);
+	print_one_stopped_thread (&thread);
     }
 
   /* In all-stop, we only print the status of one thread, and leave
@@ -5623,10 +5623,10 @@ remote_target::start_remote_1 (int from_tty, int extended_p)
 	      remote_debug_printf ("warning: couldn't determine remote "
 				   "current thread; picking first in list.");
 
-	      for (thread_info *tp : all_non_exited_threads (this,
+	      for (thread_info &tp : all_non_exited_threads (this,
 							     minus_one_ptid))
 		{
-		  switch_to_thread (tp);
+		  switch_to_thread (&tp);
 		  break;
 		}
 	    }
@@ -6815,9 +6815,9 @@ remote_target::remote_detach_1 (inferior *inf, int from_tty)
   /* See if any thread of the inferior we are detaching has a pending fork
      status.  In that case, we must detach from the child resulting from
      that fork.  */
-  for (thread_info *thread : inf->non_exited_threads ())
+  for (thread_info &thread : inf->non_exited_threads ())
     {
-      const target_waitstatus *ws = thread_pending_fork_status (thread);
+      const target_waitstatus *ws = thread_pending_fork_status (&thread);
 
       if (ws == nullptr)
 	continue;
@@ -7221,14 +7221,14 @@ char *
 remote_target::append_pending_thread_resumptions (char *p, char *endp,
 						  ptid_t ptid)
 {
-  for (thread_info *thread : all_non_exited_threads (this, ptid))
-    if (inferior_ptid != thread->ptid
-	&& thread->stop_signal () != GDB_SIGNAL_0)
+  for (thread_info &thread : all_non_exited_threads (this, ptid))
+    if (inferior_ptid != thread.ptid
+	&& thread.stop_signal () != GDB_SIGNAL_0)
       {
-	p = append_resumption (p, endp, thread->ptid,
-			       0, thread->stop_signal ());
-	thread->set_stop_signal (GDB_SIGNAL_0);
-	resume_clear_thread_private_info (thread);
+	p = append_resumption (p, endp, thread.ptid,
+			       0, thread.stop_signal ());
+	thread.set_stop_signal (GDB_SIGNAL_0);
+	resume_clear_thread_private_info (&thread);
       }
 
   return p;
@@ -7254,8 +7254,8 @@ remote_target::remote_resume_with_hc (ptid_t ptid, int step,
   else
     set_continue_thread (ptid);
 
-  for (thread_info *thread : all_non_exited_threads (this))
-    resume_clear_thread_private_info (thread);
+  for (thread_info &thread : all_non_exited_threads (this))
+    resume_clear_thread_private_info (&thread);
 
   buf = rs->buf.data ();
   if (::execution_direction == EXEC_REVERSE)
@@ -7417,8 +7417,8 @@ remote_target::resume (ptid_t scope_ptid, int step, enum gdb_signal siggnal)
     remote_resume_with_hc (scope_ptid, step, siggnal);
 
   /* Update resumed state tracked by the remote target.  */
-  for (thread_info *tp : all_non_exited_threads (this, scope_ptid))
-    get_remote_thread_info (tp)->set_resumed ();
+  for (thread_info &tp : all_non_exited_threads (this, scope_ptid))
+    get_remote_thread_info (&tp)->set_resumed ();
 
   /* We've just told the target to resume.  The remote server will
      wait for the inferior to stop, and then send a stop reply.  In
@@ -7630,15 +7630,15 @@ remote_target::commit_resumed ()
 
   bool any_pending_vcont_resume = false;
 
-  for (thread_info *tp : all_non_exited_threads (this))
+  for (thread_info &tp : all_non_exited_threads (this))
     {
-      remote_thread_info *priv = get_remote_thread_info (tp);
+      remote_thread_info *priv = get_remote_thread_info (&tp);
 
       /* If a thread of a process is not meant to be resumed, then we
 	 can't wildcard that process.  */
       if (priv->get_resume_state () == resume_state::NOT_RESUMED)
 	{
-	  get_remote_inferior (tp->inf)->may_wildcard_vcont = false;
+	  get_remote_inferior (tp.inf)->may_wildcard_vcont = false;
 
 	  /* And if we can't wildcard a process, we can't wildcard
 	     everything either.  */
@@ -7652,7 +7652,7 @@ remote_target::commit_resumed ()
       /* If a thread is the parent of an unfollowed fork/vfork/clone,
 	 then we can't do a global wildcard, as that would resume the
 	 pending child.  */
-      if (thread_pending_child_status (tp) != nullptr)
+      if (thread_pending_child_status (&tp) != nullptr)
 	may_global_wildcard_vcont = false;
     }
 
@@ -7669,9 +7669,9 @@ remote_target::commit_resumed ()
   struct vcont_builder vcont_builder (this);
 
   /* Threads first.  */
-  for (thread_info *tp : all_non_exited_threads (this))
+  for (thread_info &tp : all_non_exited_threads (this))
     {
-      remote_thread_info *remote_thr = get_remote_thread_info (tp);
+      remote_thread_info *remote_thr = get_remote_thread_info (&tp);
 
       /* If the thread was previously vCont-resumed, no need to send a specific
 	 action for it.  If we didn't receive a resume request for it, don't
@@ -7679,14 +7679,14 @@ remote_target::commit_resumed ()
       if (remote_thr->get_resume_state () != resume_state::RESUMED_PENDING_VCONT)
 	continue;
 
-      gdb_assert (!thread_is_in_step_over_chain (tp));
+      gdb_assert (!thread_is_in_step_over_chain (&tp));
 
       /* We should never be commit-resuming a thread that has a stop reply.
 	 Otherwise, we would end up reporting a stop event for a thread while
 	 it is running on the remote target.  */
       remote_state *rs = get_remote_state ();
       for (const auto &stop_reply : rs->stop_reply_queue)
-	gdb_assert (stop_reply->ptid != tp->ptid);
+	gdb_assert (stop_reply->ptid != tp.ptid);
 
       const resumed_pending_vcont_info &info
 	= remote_thr->resumed_pending_vcont_info ();
@@ -7694,8 +7694,8 @@ remote_target::commit_resumed ()
       /* Check if we need to send a specific action for this thread.  If not,
 	 it will be included in a wildcard resume instead.  */
       if (info.step || info.sig != GDB_SIGNAL_0
-	  || !get_remote_inferior (tp->inf)->may_wildcard_vcont)
-	vcont_builder.push_action (tp->ptid, info.step, info.sig);
+	  || !get_remote_inferior (tp.inf)->may_wildcard_vcont)
+	vcont_builder.push_action (tp.ptid, info.step, info.sig);
 
       remote_thr->set_resumed ();
     }
@@ -7778,9 +7778,9 @@ remote_target::remote_stop_ns (ptid_t ptid)
      whether the thread wasn't resumed with a signal.  Generating a
      phony stop in that case would result in losing the signal.  */
   bool needs_commit = false;
-  for (thread_info *tp : all_non_exited_threads (this, ptid))
+  for (thread_info &tp : all_non_exited_threads (this, ptid))
     {
-      remote_thread_info *remote_thr = get_remote_thread_info (tp);
+      remote_thread_info *remote_thr = get_remote_thread_info (&tp);
 
       if (remote_thr->get_resume_state ()
 	  == resume_state::RESUMED_PENDING_VCONT)
@@ -7801,17 +7801,17 @@ remote_target::remote_stop_ns (ptid_t ptid)
   if (needs_commit)
     commit_resumed ();
   else
-    for (thread_info *tp : all_non_exited_threads (this, ptid))
+    for (thread_info &tp : all_non_exited_threads (this, ptid))
       {
-	remote_thread_info *remote_thr = get_remote_thread_info (tp);
+	remote_thread_info *remote_thr = get_remote_thread_info (&tp);
 
 	if (remote_thr->get_resume_state ()
 	    == resume_state::RESUMED_PENDING_VCONT)
 	  {
 	    remote_debug_printf ("Enqueueing phony stop reply for thread pending "
-				 "vCont-resume (%d, %ld, %s)", tp->ptid.pid(),
-				 tp->ptid.lwp (),
-				 pulongest (tp->ptid.tid ()));
+				 "vCont-resume (%d, %ld, %s)", tp.ptid.pid(),
+				 tp.ptid.lwp (),
+				 pulongest (tp.ptid.tid ()));
 
 	    /* Check that the thread wasn't resumed with a signal.
 	       Generating a phony stop would result in losing the
@@ -7821,10 +7821,10 @@ remote_target::remote_stop_ns (ptid_t ptid)
 	    gdb_assert (info.sig == GDB_SIGNAL_0);
 
 	    stop_reply_up sr = std::make_unique<stop_reply> ();
-	    sr->ptid = tp->ptid;
+	    sr->ptid = tp.ptid;
 	    sr->rs = rs;
 	    sr->ws.set_stopped (GDB_SIGNAL_0);
-	    sr->arch = tp->inf->arch ();
+	    sr->arch = tp.inf->arch ();
 	    sr->stop_reason = TARGET_STOPPED_BY_NO_REASON;
 	    sr->watch_data_address = 0;
 	    sr->core = 0;
@@ -8120,9 +8120,9 @@ remote_target::remove_new_children (threads_listing_context *context)
 
   /* For any threads stopped at a (v)fork/clone event, remove the
      corresponding child threads from the CONTEXT list.  */
-  for (thread_info *thread : all_non_exited_threads (this))
+  for (thread_info &thread : all_non_exited_threads (this))
     {
-      const target_waitstatus *ws = thread_pending_child_status (thread);
+      const target_waitstatus *ws = thread_pending_child_status (&thread);
 
       if (ws == nullptr)
 	continue;
@@ -8817,17 +8817,17 @@ remote_target::select_thread_for_ambiguous_stop_reply
 
   /* Consider all non-exited threads of the target, find the first resumed
      one.  */
-  for (thread_info *thr : all_non_exited_threads (this))
+  for (thread_info &thr : all_non_exited_threads (this))
     {
-      remote_thread_info *remote_thr = get_remote_thread_info (thr);
+      remote_thread_info *remote_thr = get_remote_thread_info (&thr);
 
       if (remote_thr->get_resume_state () != resume_state::RESUMED)
 	continue;
 
       if (first_resumed_thread == nullptr)
-	first_resumed_thread = thr;
+	first_resumed_thread = &thr;
       else if (!process_wide_stop
-	       || first_resumed_thread->ptid.pid () != thr->ptid.pid ())
+	       || first_resumed_thread->ptid.pid () != thr.ptid.pid ())
 	ambiguous = true;
     }
 
@@ -8937,8 +8937,8 @@ remote_target::process_stop_reply (stop_reply_up stop_reply,
 	{
 	  /* If the target works in all-stop mode, a stop-reply indicates that
 	     all the target's threads stopped.  */
-	  for (thread_info *tp : all_non_exited_threads (this))
-	    get_remote_thread_info (tp)->set_not_resumed ();
+	  for (thread_info &tp : all_non_exited_threads (this))
+	    get_remote_thread_info (&tp)->set_not_resumed ();
 	}
     }
 
@@ -9006,9 +9006,9 @@ remote_target::wait_ns (ptid_t ptid, struct target_waitstatus *status,
 static ptid_t
 first_remote_resumed_thread (remote_target *target)
 {
-  for (thread_info *tp : all_non_exited_threads (target, minus_one_ptid))
-    if (tp->resumed ())
-      return tp->ptid;
+  for (thread_info &tp : all_non_exited_threads (target, minus_one_ptid))
+    if (tp.resumed ())
+      return tp.ptid;
   return null_ptid;
 }
 
@@ -10933,9 +10933,9 @@ remote_target::kill_new_fork_children (inferior *inf)
 
   /* Kill the fork child threads of any threads in inferior INF that are stopped
      at a fork event.  */
-  for (thread_info *thread : inf->non_exited_threads ())
+  for (thread_info &thread : inf->non_exited_threads ())
     {
-      const target_waitstatus *ws = thread_pending_fork_status (thread);
+      const target_waitstatus *ws = thread_pending_fork_status (&thread);
 
       if (ws == nullptr)
 	continue;
@@ -15463,10 +15463,10 @@ remote_target::remote_btrace_maybe_reopen ()
   if (m_features.packet_support (PACKET_qXfer_btrace_conf) != PACKET_ENABLE)
     return;
 
-  for (thread_info *tp : all_non_exited_threads (this))
+  for (thread_info &tp : all_non_exited_threads (this))
     {
       memset (&rs->btrace_config, 0x00, sizeof (struct btrace_config));
-      btrace_read_config (tp, &rs->btrace_config);
+      btrace_read_config (&tp, &rs->btrace_config);
 
       if (rs->btrace_config.format == BTRACE_FORMAT_NONE)
 	continue;
@@ -15496,8 +15496,7 @@ remote_target::remote_btrace_maybe_reopen ()
 		      btrace_format_string (rs->btrace_config.format));
 	}
 
-      tp->btrace.target
-	= new btrace_target_info { tp->ptid, rs->btrace_config };
+      tp.btrace.target = new btrace_target_info { tp.ptid, rs->btrace_config };
     }
 }
 
@@ -15733,18 +15732,18 @@ remote_target::thread_handle_to_thread_info (const gdb_byte *thread_handle,
 					     int handle_len,
 					     inferior *inf)
 {
-  for (thread_info *tp : all_non_exited_threads (this))
+  for (thread_info &tp : all_non_exited_threads (this))
     {
-      remote_thread_info *priv = get_remote_thread_info (tp);
+      remote_thread_info *priv = get_remote_thread_info (&tp);
 
-      if (tp->inf == inf && priv != NULL)
+      if (tp.inf == inf && priv != NULL)
 	{
 	  if (handle_len != priv->thread_handle.size ())
 	    error (_("Thread handle size mismatch: %d vs %zu (from remote)"),
 		   handle_len, priv->thread_handle.size ());
 	  if (memcmp (thread_handle, priv->thread_handle.data (),
 		      handle_len) == 0)
-	    return tp;
+	    return &tp;
 	}
     }
 
@@ -15931,9 +15930,9 @@ remote_target::commit_requested_thread_options ()
   /* Now set non-zero options for threads that need them.  We don't
      bother with the case of all threads of a process wanting the same
      non-zero options as that's not an expected scenario.  */
-  for (thread_info *tp : all_non_exited_threads (this))
+  for (thread_info &tp : all_non_exited_threads (this))
     {
-      gdb_thread_options options = tp->thread_options ();
+      gdb_thread_options options = tp.thread_options ();
 
       if (options == 0)
 	continue;
@@ -15950,10 +15949,10 @@ remote_target::commit_requested_thread_options ()
       *obuf_p++ = ';';
       obuf_p += xsnprintf (obuf_p, obuf_endp - obuf_p, "%s",
 			   phex_nz (options));
-      if (tp->ptid != magic_null_ptid)
+      if (tp.ptid != magic_null_ptid)
 	{
 	  *obuf_p++ = ':';
-	  obuf_p = write_ptid (obuf_p, obuf_endp, tp->ptid);
+	  obuf_p = write_ptid (obuf_p, obuf_endp, tp.ptid);
 	}
 
       size_t osize = obuf_p - obuf;

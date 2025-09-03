@@ -556,13 +556,13 @@ mi_cmd_thread_list_ids (const char *command, const char *const *argv, int argc)
   {
     ui_out_emit_tuple tuple_emitter (current_uiout, "thread-ids");
 
-    for (thread_info *tp : all_non_exited_threads ())
+    for (thread_info &tp : all_non_exited_threads ())
       {
-	if (tp->ptid == inferior_ptid)
-	  current_thread = tp->global_num;
+	if (tp.ptid == inferior_ptid)
+	  current_thread = tp.global_num;
 
 	num++;
-	current_uiout->field_signed ("thread-id", tp->global_num);
+	current_uiout->field_signed ("thread-id", tp.global_num);
       }
   }
 

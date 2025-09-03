@@ -682,8 +682,8 @@ mi_on_resume_1 (struct mi_interp *mi,
       && !multiple_inferiors_p ())
     gdb_printf (mi->raw_stdout, "*running,thread-id=\"all\"\n");
   else
-    for (thread_info *tp : all_non_exited_threads (targ, ptid))
-      mi_output_running (tp);
+    for (thread_info &tp : all_non_exited_threads (targ, ptid))
+      mi_output_running (&tp);
 
   if (!mi->running_result_record_printed && mi->mi_proceeded)
     {

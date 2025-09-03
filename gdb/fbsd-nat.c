@@ -1203,7 +1203,7 @@ fbsd_nat_target::resume_one_process (ptid_t ptid, int step,
       return;
     }
 
-  for (thread_info *tp : inf->non_exited_threads ())
+  for (thread_info &tp : inf->non_exited_threads ())
     {
       /* If ptid is a specific LWP, suspend all other LWPs in the
 	 process, otherwise resume all LWPs in the process..  */
@@ -1887,7 +1887,7 @@ fbsd_nat_target::detach_fork_children (inferior *inf)
 {
   /* Detach any child processes associated with pending fork events in
      threads belonging to this process.  */
-  for (thread_info *tp : inf->non_exited_threads ())
+  for (thread_info &tp : inf->non_exited_threads ())
     detach_fork_children (tp);
 
   /* Unwind state associated with any pending events.  Reset

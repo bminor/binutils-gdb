@@ -469,7 +469,7 @@ public:
   /* Returns a range adapter covering the inferior's threads,
      including exited threads.  Used like this:
 
-       for (thread_info *thr : inf->threads ())
+       for (thread_info &thr : inf->threads ())
 	 { .... }
   */
   inf_threads_range threads ()
@@ -478,7 +478,7 @@ public:
   /* Returns a range adapter covering the inferior's non-exited
      threads.  Used like this:
 
-       for (thread_info *thr : inf->non_exited_threads ())
+       for (thread_info &thr : inf->non_exited_threads ())
 	 { .... }
   */
   inf_non_exited_threads_range non_exited_threads ()
@@ -488,9 +488,9 @@ public:
      used with range-for, safely.  I.e., it is safe to delete the
      currently-iterated thread, like this:
 
-     for (thread_info *t : inf->threads_safe ())
+     for (thread_info &t : inf->threads_safe ())
        if (some_condition ())
-	 delete f;
+	 delete &f;
   */
   inline safe_inf_threads_range threads_safe ()
   { return safe_inf_threads_range (this->thread_list.begin ()); }

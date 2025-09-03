@@ -35,6 +35,7 @@ struct symtab;
 #include "gdbsupport/forward-scope-exit.h"
 #include "displaced-stepping.h"
 #include "gdbsupport/intrusive_list.h"
+#include "gdbsupport/reference-to-pointer-iterator.h"
 #include "thread-fsm.h"
 #include "language.h"
 
@@ -747,7 +748,7 @@ extern struct thread_info *iterate_over_threads (thread_callback_func);
    Used like this, it walks over all threads of all inferiors of all
    targets:
 
-       for (thread_info *thr : all_threads ())
+       for (thread_info &thr : all_threads ())
 	 { .... }
 
    FILTER_PTID can be used to filter out threads that don't match.

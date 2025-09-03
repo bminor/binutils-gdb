@@ -722,12 +722,12 @@ fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
   enum gdb_signal stop_signal = signalled_thr->stop_signal ();
   gcore_elf_build_thread_register_notes (gdbarch, signalled_thr, stop_signal,
 					 obfd, &note_data, note_size);
-  for (thread_info *thr : current_inferior ()->non_exited_threads ())
+  for (thread_info &thr : current_inferior ()->non_exited_threads ())
     {
-      if (thr == signalled_thr)
+      if (&thr == signalled_thr)
 	continue;
 
-      gcore_elf_build_thread_register_notes (gdbarch, thr, stop_signal,
+      gcore_elf_build_thread_register_notes (gdbarch, &thr, stop_signal,
 					     obfd, &note_data, note_size);
     }
 

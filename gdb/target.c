@@ -3812,11 +3812,11 @@ target_pass_ctrlc (void)
       if (proc_target == NULL)
 	continue;
 
-      for (thread_info *thr : inf->non_exited_threads ())
+      for (thread_info &thr : inf->non_exited_threads ())
 	{
 	  /* A thread can be THREAD_STOPPED and executing, while
 	     running an infcall.  */
-	  if (thr->state == THREAD_RUNNING || thr->executing ())
+	  if (thr.state == THREAD_RUNNING || thr.executing ())
 	    {
 	      /* We can get here quite deep in target layers.  Avoid
 		 switching thread context or anything that would

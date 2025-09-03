@@ -2365,8 +2365,8 @@ btrace_free_objfile (struct objfile *objfile)
 {
   DEBUG ("free objfile");
 
-  for (thread_info *tp : all_non_exited_threads ())
-    btrace_clear (tp);
+  for (thread_info &tp : all_non_exited_threads ())
+    btrace_clear (&tp);
 }
 
 /* See btrace.h.  */

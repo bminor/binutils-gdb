@@ -21,15 +21,12 @@
 
 #include "gdbsupport/filtered-iterator.h"
 #include "gdbsupport/iterator-range.h"
-#include "gdbsupport/next-iterator.h"
-#include "gdbsupport/reference-to-pointer-iterator.h"
 #include "gdbsupport/safe-iterator.h"
 
 /* A forward iterator that iterates over a given inferior's
    threads.  */
 
-using inf_threads_iterator
-  = reference_to_pointer_iterator<intrusive_list<thread_info>::iterator>;
+using inf_threads_iterator = intrusive_list<thread_info>::iterator;
 
 /* A forward iterator that iterates over all threads of all
    inferiors.  */
@@ -87,9 +84,9 @@ class all_matching_threads_iterator
 {
 public:
   typedef all_matching_threads_iterator self_type;
-  typedef struct thread_info *value_type;
-  typedef struct thread_info *&reference;
-  typedef struct thread_info **pointer;
+  typedef struct thread_info value_type;
+  typedef struct thread_info &reference;
+  typedef struct thread_info *pointer;
   typedef std::forward_iterator_tag iterator_category;
   typedef int difference_type;
 
@@ -101,7 +98,7 @@ public:
   /* Create a one-past-end iterator.  */
   all_matching_threads_iterator () = default;
 
-  thread_info *operator* () const { return m_thr; }
+  reference operator* () const { return *m_thr; }
 
   all_matching_threads_iterator &operator++ ()
   {
@@ -149,9 +146,9 @@ private:
 
 struct non_exited_thread_filter
 {
-  bool operator() (struct thread_info *thr) const
+  bool operator() (struct thread_info &thr) const
   {
-    return thr->state != THREAD_EXITED;
+    return thr.state != THREAD_EXITED;
   }
 };
 

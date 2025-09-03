@@ -546,15 +546,15 @@ child_interrupt (struct target_ops *self)
 {
   /* Interrupt the first inferior that has a resumed thread.  */
   thread_info *resumed = NULL;
-  for (thread_info *thr : all_non_exited_threads ())
+  for (thread_info &thr : all_non_exited_threads ())
     {
-      if (thr->executing ())
+      if (thr.executing ())
 	{
-	  resumed = thr;
+	  resumed = &thr;
 	  break;
 	}
-      if (thr->has_pending_waitstatus ())
-	resumed = thr;
+      if (thr.has_pending_waitstatus ())
+	resumed = &thr;
     }
 
   if (resumed != NULL)

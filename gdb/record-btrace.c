@@ -393,12 +393,12 @@ record_btrace_target_open (const char *args, int from_tty)
   if (!target_has_execution ())
     error (_("The program is not being run."));
 
-  for (thread_info *tp : current_inferior ()->non_exited_threads ())
-    if (args == NULL || *args == 0 || number_is_in_list (args, tp->global_num))
+  for (thread_info &tp : current_inferior ()->non_exited_threads ())
+    if (args == NULL || *args == 0 || number_is_in_list (args, tp.global_num))
       {
-	btrace_enable (tp, &record_btrace_conf);
+	btrace_enable (&tp, &record_btrace_conf);
 
-	btrace_disable.add_thread (tp);
+	btrace_disable.add_thread (&tp);
       }
 
   record_btrace_push_target ();
@@ -415,9 +415,9 @@ record_btrace_target::stop_recording ()
 
   record_btrace_auto_disable ();
 
-  for (thread_info *tp : current_inferior ()->non_exited_threads ())
-    if (tp->btrace.target != NULL)
-      btrace_disable (tp);
+  for (thread_info &tp : current_inferior ()->non_exited_threads ())
+    if (tp.btrace.target != NULL)
+      btrace_disable (&tp);
 }
 
 /* The disconnect method of target record-btrace.  */
@@ -449,8 +449,8 @@ record_btrace_target::close ()
 
   /* We should have already stopped recording.
      Tear down btrace in case we have not.  */
-  for (thread_info *tp : current_inferior ()->non_exited_threads ())
-    btrace_teardown (tp);
+  for (thread_info &tp : current_inferior ()->non_exited_threads ())
+    btrace_teardown (&tp);
 }
 
 /* The async method of target record-btrace.  */
@@ -1458,8 +1458,8 @@ bool
 record_btrace_target::record_is_replaying (ptid_t ptid)
 {
   process_stratum_target *proc_target = current_inferior ()->process_target ();
-  for (thread_info *tp : all_non_exited_threads (proc_target, ptid))
-    if (btrace_is_replaying (tp))
+  for (thread_info &tp : all_non_exited_threads (proc_target, ptid))
+    if (btrace_is_replaying (&tp))
       return true;
 
   return false;
@@ -2219,18 +2219,18 @@ record_btrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
     {
       gdb_assert (inferior_ptid.matches (ptid));
 
-      for (thread_info *tp : all_non_exited_threads (proc_target, ptid))
+      for (thread_info &tp : all_non_exited_threads (proc_target, ptid))
 	{
-	  if (tp->ptid.matches (inferior_ptid))
-	    record_btrace_resume_thread (tp, flag);
+	  if (tp.ptid.matches (inferior_ptid))
+	    record_btrace_resume_thread (&tp, flag);
 	  else
-	    record_btrace_resume_thread (tp, cflag);
+	    record_btrace_resume_thread (&tp, cflag);
 	}
     }
   else
     {
-      for (thread_info *tp : all_non_exited_threads (proc_target, ptid))
-	record_btrace_resume_thread (tp, flag);
+      for (thread_info &tp : all_non_exited_threads (proc_target, ptid))
+	record_btrace_resume_thread (&tp, flag);
     }
 
   /* Async support.  */
@@ -2616,9 +2616,9 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
 
   /* Keep a work list of moving threads.  */
   process_stratum_target *proc_target = current_inferior ()->process_target ();
-  for (thread_info *tp : all_non_exited_threads (proc_target, ptid))
-    if ((tp->btrace.flags & (BTHR_MOVE | BTHR_STOP)) != 0)
-      moving.push_back (tp);
+  for (thread_info &tp : all_non_exited_threads (proc_target, ptid))
+    if ((tp.btrace.flags & (BTHR_MOVE | BTHR_STOP)) != 0)
+      moving.push_back (&tp);
 
   if (moving.empty ())
     {
@@ -2699,8 +2699,8 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
   /* Stop all other threads. */
   if (!target_is_non_stop_p ())
     {
-      for (thread_info *tp : current_inferior ()->non_exited_threads ())
-	record_btrace_cancel_resume (tp);
+      for (thread_info &tp : current_inferior ()->non_exited_threads ())
+	record_btrace_cancel_resume (&tp);
     }
 
   /* In async mode, we need to announce further events.  */
@@ -2739,10 +2739,10 @@ record_btrace_target::stop (ptid_t ptid)
       process_stratum_target *proc_target
 	= current_inferior ()->process_target ();
 
-      for (thread_info *tp : all_non_exited_threads (proc_target, ptid))
+      for (thread_info &tp : all_non_exited_threads (proc_target, ptid))
 	{
-	  tp->btrace.flags &= ~BTHR_MOVE;
-	  tp->btrace.flags |= BTHR_STOP;
+	  tp.btrace.flags &= ~BTHR_MOVE;
+	  tp.btrace.flags |= BTHR_STOP;
 	}
     }
  }
@@ -2918,8 +2918,8 @@ record_btrace_target::goto_record (ULONGEST insn_number)
 void
 record_btrace_target::record_stop_replaying ()
 {
-  for (thread_info *tp : current_inferior ()->non_exited_threads ())
-    record_btrace_stop_replaying (tp);
+  for (thread_info &tp : current_inferior ()->non_exited_threads ())
+    record_btrace_stop_replaying (&tp);
 }
 
 /* The execution_direction target method.  */

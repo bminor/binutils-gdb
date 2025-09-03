@@ -476,7 +476,7 @@ nbsd_resume(nbsd_nat_target *target, ptid_t ptid, int step,
       /* If ptid is a specific LWP, suspend all other LWPs in the process.  */
       inferior *inf = find_inferior_ptid (target, ptid);
 
-      for (thread_info *tp : inf->non_exited_threads ())
+      for (thread_info &tp : inf->non_exited_threads ())
 	{
 	  if (tp->ptid.lwp () == ptid.lwp ())
 	    request = PT_RESUME;
@@ -491,20 +491,20 @@ nbsd_resume(nbsd_nat_target *target, ptid_t ptid, int step,
     {
       /* If ptid is a wildcard, resume all matching threads (they won't run
 	 until the process is continued however).  */
-      for (thread_info *tp : all_non_exited_threads (target, ptid))
+      for (thread_info &tp : all_non_exited_threads (target, ptid))
 	if (ptrace (PT_RESUME, tp->ptid.pid (), NULL, tp->ptid.lwp ()) == -1)
 	  perror_with_name (("ptrace"));
     }
 
   if (step)
     {
-      for (thread_info *tp : all_non_exited_threads (target, ptid))
+      for (thread_info &tp : all_non_exited_threads (target, ptid))
 	if (ptrace (PT_SETSTEP, tp->ptid.pid (), NULL, tp->ptid.lwp ()) == -1)
 	  perror_with_name (("ptrace"));
     }
   else
     {
-      for (thread_info *tp : all_non_exited_threads (target, ptid))
+      for (thread_info &tp : all_non_exited_threads (target, ptid))
 	if (ptrace (PT_CLEARSTEP, tp->ptid.pid (), NULL, tp->ptid.lwp ()) == -1)
 	  perror_with_name (("ptrace"));
     }

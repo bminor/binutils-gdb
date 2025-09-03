@@ -775,18 +775,18 @@ amd_dbgapi_target::resume (ptid_t scope_ptid, int step, enum gdb_signal signo)
   /* Disable forward progress requirement.  */
   require_forward_progress (scope_ptid, proc_target, false);
 
-  for (thread_info *thread : all_non_exited_threads (proc_target, scope_ptid))
+  for (thread_info &thread : all_non_exited_threads (proc_target, scope_ptid))
     {
-      if (!ptid_is_gpu (thread->ptid))
+      if (!ptid_is_gpu (thread.ptid))
 	continue;
 
-      amd_dbgapi_wave_id_t wave_id = get_amd_dbgapi_wave_id (thread->ptid);
+      amd_dbgapi_wave_id_t wave_id = get_amd_dbgapi_wave_id (thread.ptid);
       amd_dbgapi_status_t status;
 
-      wave_info &wi = get_thread_wave_info (thread);
+      wave_info &wi = get_thread_wave_info (&thread);
       amd_dbgapi_resume_mode_t &resume_mode = wi.last_resume_mode;
       amd_dbgapi_exceptions_t wave_exception;
-      if (thread->ptid == inferior_ptid)
+      if (thread.ptid == inferior_ptid)
 	{
 	  resume_mode = (step
 			 ? AMD_DBGAPI_RESUME_MODE_SINGLE_STEP
@@ -934,10 +934,10 @@ amd_dbgapi_target::stop (ptid_t ptid)
   for (auto *inf : all_inferiors (proc_target))
     /* Use the threads_safe iterator since stop_one_thread may delete the
        thread if it has exited.  */
-    for (auto *thread : inf->threads_safe ())
-      if (thread->state != THREAD_EXITED && thread->ptid.matches (ptid)
-	  && ptid_is_gpu (thread->ptid))
-	stop_one_thread (thread);
+    for (auto &thread : inf->threads_safe ())
+      if (thread.state != THREAD_EXITED && thread.ptid.matches (ptid)
+	  && ptid_is_gpu (thread.ptid))
+	stop_one_thread (&thread);
 }
 
 /* Callback for our async event handler.  */
@@ -1883,15 +1883,15 @@ amd_dbgapi_target::update_thread_list ()
       /* Prune the wave_ids that already have a thread_info.  Any thread_info
 	 which does not have a corresponding wave_id represents a wave which
 	 is gone at this point and should be deleted.  */
-      for (thread_info *tp : inf->threads_safe ())
-	if (ptid_is_gpu (tp->ptid) && tp->state != THREAD_EXITED)
+      for (thread_info &tp : inf->threads_safe ())
+	if (ptid_is_gpu (tp.ptid) && tp.state != THREAD_EXITED)
 	  {
-	    auto it = threads.find (tp->ptid.tid ());
+	    auto it = threads.find (tp.ptid.tid ());
 
 	    if (it == threads.end ())
 	      {
-		auto wave_id = get_amd_dbgapi_wave_id (tp->ptid);
-		wave_info &wi = get_thread_wave_info (tp);
+		auto wave_id = get_amd_dbgapi_wave_id (tp.ptid);
+		wave_info &wi = get_thread_wave_info (&tp);
 
 		/* Waves that were stepping or in progress of being
 		   stopped are guaranteed to report a
@@ -1912,7 +1912,7 @@ amd_dbgapi_target::update_thread_list ()
 		  {
 		    amd_dbgapi_debug_printf ("wave_%ld disappeared, deleting it",
 					     wave_id.handle);
-		    delete_thread_silent (tp);
+		    delete_thread_silent (&tp);
 		  }
 	      }
 	    else
@@ -2117,7 +2117,7 @@ amd_dbgapi_inferior_forked (inferior *parent_inf, inferior *child_inf,
       if (fork_kind != TARGET_WAITKIND_VFORKED)
 	{
 	  scoped_restore_current_thread restore_thread;
-	  switch_to_thread (*child_inf->threads ().begin ());
+	  switch_to_thread (&*child_inf->threads ().begin ());
 	  attach_amd_dbgapi (child_inf);
 	}
     }

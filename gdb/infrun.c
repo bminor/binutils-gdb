@@ -723,7 +723,7 @@ holding the child stopped.  Try \"set %ps\" or \"%ps\".\n"),
       if (!follow_child && !sched_multi)
 	maybe_restore.emplace ();
 
-      switch_to_thread (*child_inf->threads ().begin ());
+      switch_to_thread (&*child_inf->threads ().begin ());
 
       post_create_inferior (0, child_has_new_pspace);
     }
@@ -778,23 +778,23 @@ follow_fork ()
 	 switch back to it, to tell the target to follow it (in either
 	 direction).  We'll afterwards refuse to resume, and inform
 	 the user what happened.  */
-      for (thread_info *tp : all_non_exited_threads (resume_target,
+      for (thread_info &tp : all_non_exited_threads (resume_target,
 						     resume_ptid))
 	{
-	  if (tp == cur_thr)
+	  if (&tp == cur_thr)
 	    continue;
 
 	  /* follow_fork_inferior clears tp->pending_follow, and below
 	     we'll need the value after the follow_fork_inferior
 	     call.  */
-	  target_waitkind kind = tp->pending_follow.kind ();
+	  target_waitkind kind = tp.pending_follow.kind ();
 
 	  if (kind != TARGET_WAITKIND_SPURIOUS)
 	    {
 	      infrun_debug_printf ("need to follow-fork [%s] first",
-				   tp->ptid.to_string ().c_str ());
+				   tp.ptid.to_string ().c_str ());
 
-	      switch_to_thread (tp);
+	      switch_to_thread (&tp);
 
 	      /* Set up inferior(s) as specified by the caller, and
 		 tell the target to do whatever is necessary to follow
@@ -1144,8 +1144,8 @@ handle_vfork_child_exec_or_exit (int exec)
 	  infrun_debug_printf ("resuming vfork parent process %d",
 			       resume_parent->pid);
 
-	  for (thread_info *thread : resume_parent->threads ())
-	    proceed_after_vfork_done (thread);
+	  for (thread_info &thread : resume_parent->threads ())
+	    proceed_after_vfork_done (&thread);
 	}
     }
 }
@@ -1668,8 +1668,8 @@ infrun_inferior_execd (inferior *exec_inf, inferior *follow_inf)
      stepping buffer bytes.  */
   follow_inf->displaced_step_state.reset ();
 
-  for (thread_info *thread : follow_inf->threads ())
-    thread->displaced_step_state.reset ();
+  for (thread_info &thread : follow_inf->threads ())
+    thread.displaced_step_state.reset ();
 
   /* Since an in-line step is done with everything else stopped, if there was
      one in progress at the time of the exec, it must have been the exec'ing
@@ -1973,10 +1973,10 @@ static bool
 any_thread_needs_target_thread_events (process_stratum_target *target,
 				       ptid_t resume_ptid)
 {
-  for (thread_info *tp : all_non_exited_threads (target, resume_ptid))
-    if (displaced_step_in_progress_thread (tp)
-	|| schedlock_applies (tp)
-	|| tp->thread_fsm () != nullptr)
+  for (thread_info &tp : all_non_exited_threads (target, resume_ptid))
+    if (displaced_step_in_progress_thread (&tp)
+	|| schedlock_applies (&tp)
+	|| tp.thread_fsm () != nullptr)
       return true;
   return false;
 }
@@ -2617,10 +2617,10 @@ do_target_resume (ptid_t resume_ptid, bool step, enum gdb_signal sig)
   if (resume_ptid != inferior_ptid && target_supports_set_thread_options (0))
     {
       process_stratum_target *resume_target = tp->inf->process_target ();
-      for (thread_info *thr_iter : all_non_exited_threads (resume_target,
+      for (thread_info &thr_iter : all_non_exited_threads (resume_target,
 							   resume_ptid))
-	if (thr_iter != tp)
-	  thr_iter->set_thread_options (0);
+	if (&thr_iter != tp)
+	  thr_iter.set_thread_options (0);
     }
 
   infrun_debug_printf ("resume_ptid=%s, step=%d, sig=%s",
@@ -3129,8 +3129,8 @@ clear_proceed_status (int step)
 
       /* In all-stop mode, delete the per-thread status of all threads
 	 we're about to resume, implicitly and explicitly.  */
-      for (thread_info *tp : all_non_exited_threads (resume_target, resume_ptid))
-	clear_proceed_status_thread (tp);
+      for (thread_info &tp : all_non_exited_threads (resume_target, resume_ptid))
+	clear_proceed_status_thread (&tp);
     }
 
   if (inferior_ptid != null_ptid)
@@ -3711,25 +3711,25 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
      threads.  */
   if (!non_stop && !schedlock_applies (cur_thr))
     {
-      for (thread_info *tp : all_non_exited_threads (resume_target,
+      for (thread_info &tp : all_non_exited_threads (resume_target,
 						     resume_ptid))
 	{
-	  switch_to_thread_no_regs (tp);
+	  switch_to_thread_no_regs (&tp);
 
 	  /* Ignore the current thread here.  It's handled
 	     afterwards.  */
-	  if (tp == cur_thr)
+	  if (&tp == cur_thr)
 	    continue;
 
-	  if (!thread_still_needs_step_over (tp))
+	  if (!thread_still_needs_step_over (&tp))
 	    continue;
 
-	  gdb_assert (!thread_is_in_step_over_chain (tp));
+	  gdb_assert (!thread_is_in_step_over_chain (&tp));
 
 	  infrun_debug_printf ("need to step-over [%s] first",
-			       tp->ptid.to_string ().c_str ());
+			       tp.ptid.to_string ().c_str ());
 
-	  global_thread_step_over_chain_enqueue (tp);
+	  global_thread_step_over_chain_enqueue (&tp);
 	}
 
       switch_to_thread (cur_thr);
@@ -3769,11 +3769,11 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 
 	/* In all-stop, but the target is always in non-stop mode.
 	   Start all other threads that are implicitly resumed too.  */
-	for (thread_info *tp : all_non_exited_threads (resume_target,
+	for (thread_info &tp : all_non_exited_threads (resume_target,
 						       resume_ptid))
 	  {
-	    switch_to_thread_no_regs (tp);
-	    proceed_resume_thread_checked (tp);
+	    switch_to_thread_no_regs (&tp);
+	    proceed_resume_thread_checked (&tp);
 	  }
       }
     else
@@ -3876,33 +3876,33 @@ infrun_thread_stop_requested (ptid_t ptid)
      but the user/frontend doesn't know about that yet (e.g., the
      thread had been temporarily paused for some step-over), set up
      for reporting the stop now.  */
-  for (thread_info *tp : all_threads (curr_target, ptid))
+  for (thread_info &tp : all_threads (curr_target, ptid))
     {
-      if (tp->state != THREAD_RUNNING)
+      if (tp.state != THREAD_RUNNING)
 	continue;
-      if (tp->executing ())
+      if (tp.executing ())
 	continue;
 
       /* Remove matching threads from the step-over queue, so
 	 start_step_over doesn't try to resume them
 	 automatically.  */
-      if (thread_is_in_step_over_chain (tp))
-	global_thread_step_over_chain_remove (tp);
+      if (thread_is_in_step_over_chain (&tp))
+	global_thread_step_over_chain_remove (&tp);
 
       /* If the thread is stopped, but the user/frontend doesn't
 	 know about that yet, queue a pending event, as if the
 	 thread had just stopped now.  Unless the thread already had
 	 a pending event.  */
-      if (!tp->has_pending_waitstatus ())
+      if (!tp.has_pending_waitstatus ())
 	{
 	  target_waitstatus ws;
 	  ws.set_stopped (GDB_SIGNAL_0);
-	  tp->set_pending_waitstatus (ws);
+	  tp.set_pending_waitstatus (ws);
 	}
 
       /* Clear the inline-frame state, since we're re-processing the
 	 stop.  */
-      clear_inline_frame_state (tp);
+      clear_inline_frame_state (&tp);
 
       /* If this thread was paused because some other thread was
 	 doing an inline-step over, let that finish first.  Once
@@ -3914,7 +3914,7 @@ infrun_thread_stop_requested (ptid_t ptid)
       /* Otherwise we can process the (new) pending event now.  Set
 	 it so this pending event is considered by
 	 do_target_wait.  */
-      tp->set_resumed (true);
+      tp.set_resumed (true);
     }
 }
 
@@ -3950,8 +3950,8 @@ for_each_just_stopped_thread (for_each_just_stopped_thread_callback_func func)
   else
     {
       /* In all-stop mode, all threads have stopped.  */
-      for (thread_info *tp : all_non_exited_threads ())
-	func (tp);
+      for (thread_info &tp : all_non_exited_threads ())
+	func (&tp);
     }
 }
 
@@ -4327,20 +4327,20 @@ prepare_for_detach (void)
 
       /* Stop threads currently displaced stepping, aborting it.  */
 
-      for (thread_info *thr : inf->non_exited_threads ())
+      for (thread_info &thr : inf->non_exited_threads ())
 	{
-	  if (thr->displaced_step_state.in_progress ())
+	  if (thr.displaced_step_state.in_progress ())
 	    {
-	      if (thr->executing ())
+	      if (thr.executing ())
 		{
-		  if (!thr->stop_requested)
+		  if (!thr.stop_requested)
 		    {
-		      target_stop (thr->ptid);
-		      thr->stop_requested = true;
+		      target_stop (thr.ptid);
+		      thr.stop_requested = true;
 		    }
 		}
 	      else
-		thr->set_resumed (false);
+		thr.set_resumed (false);
 	    }
 	}
 
@@ -5458,9 +5458,9 @@ handle_one (const wait_one_event &event)
 	{
 	  int pid  = event.ptid.pid ();
 	  inferior *inf = find_inferior_pid (event.target, pid);
-	  for (thread_info *tp : inf->non_exited_threads ())
+	  for (thread_info &tp : inf->non_exited_threads ())
 	    {
-	      t = tp;
+	      t = &tp;
 	      break;
 	    }
 
@@ -5729,9 +5729,9 @@ stop_all_threads (const char *reason, inferior *inf)
 
 	  /* Go through all threads looking for threads that we need
 	     to tell the target to stop.  */
-	  for (thread_info *t : all_non_exited_threads ())
+	  for (thread_info &t : all_non_exited_threads ())
 	    {
-	      if (inf != nullptr && t->inf != inf)
+	      if (inf != nullptr && t.inf != inf)
 		continue;
 
 	      /* For a single-target setting with an all-stop target,
@@ -5741,38 +5741,38 @@ stop_all_threads (const char *reason, inferior *inf)
 		 targets' threads.  This should be fine due to the
 		 protection of 'check_multi_target_resumption'.  */
 
-	      switch_to_thread_no_regs (t);
+	      switch_to_thread_no_regs (&t);
 	      if (!target_is_non_stop_p ())
 		continue;
 
-	      if (t->executing ())
+	      if (t.executing ())
 		{
 		  /* If already stopping, don't request a stop again.
 		     We just haven't seen the notification yet.  */
-		  if (!t->stop_requested)
+		  if (!t.stop_requested)
 		    {
 		      infrun_debug_printf ("  %s executing, need stop",
-					   t->ptid.to_string ().c_str ());
-		      target_stop (t->ptid);
-		      t->stop_requested = true;
+					   t.ptid.to_string ().c_str ());
+		      target_stop (t.ptid);
+		      t.stop_requested = true;
 		    }
 		  else
 		    {
 		      infrun_debug_printf ("  %s executing, already stopping",
-					   t->ptid.to_string ().c_str ());
+					   t.ptid.to_string ().c_str ());
 		    }
 
-		  if (t->stop_requested)
+		  if (t.stop_requested)
 		    waits_needed++;
 		}
 	      else
 		{
 		  infrun_debug_printf ("  %s not executing",
-				       t->ptid.to_string ().c_str ());
+				       t.ptid.to_string ().c_str ());
 
 		  /* The thread may be not executing, but still be
 		     resumed with a pending status to process.  */
-		  t->set_resumed (false);
+		  t.set_resumed (false);
 		}
 	    }
 
@@ -5886,21 +5886,21 @@ handle_no_resumed (struct execution_control_state *ecs)
      whether to report it to the user.  */
   bool ignore_event = false;
 
-  for (thread_info *thread : all_non_exited_threads ())
+  for (thread_info &thread : all_non_exited_threads ())
     {
-      if (swap_terminal && thread->executing ())
+      if (swap_terminal && thread.executing ())
 	{
-	  if (thread->inf != curr_inf)
+	  if (thread.inf != curr_inf)
 	    {
 	      target_terminal::ours ();
 
-	      switch_to_thread (thread);
+	      switch_to_thread (&thread);
 	      target_terminal::inferior ();
 	    }
 	  swap_terminal = false;
 	}
 
-      if (!ignore_event && thread->resumed ())
+      if (!ignore_event && thread.resumed ())
 	{
 	  /* Either there were no unwaited-for children left in the
 	     target at some point, but there are now, or some target
@@ -6059,8 +6059,8 @@ handle_thread_exited (execution_control_state *ecs)
 		 thread.  */
 	      return handle_as_no_resumed ();
 	    }
-	  thread_info *non_exited_thread = *range.begin ();
-	  switch_to_thread (non_exited_thread);
+	  thread_info &non_exited_thread = *range.begin ();
+	  switch_to_thread (&non_exited_thread);
 	  insert_breakpoints ();
 	  resume (GDB_SIGNAL_0);
 	}
@@ -6615,83 +6615,83 @@ restart_threads (struct thread_info *event_thread, inferior *inf)
   /* In case the instruction just stepped spawned a new thread.  */
   update_thread_list ();
 
-  for (thread_info *tp : all_non_exited_threads ())
+  for (thread_info &tp : all_non_exited_threads ())
     {
-      if (inf != nullptr && tp->inf != inf)
+      if (inf != nullptr && tp.inf != inf)
 	continue;
 
-      if (tp->inf->detaching)
+      if (tp.inf->detaching)
 	{
 	  infrun_debug_printf ("restart threads: [%s] inferior detaching",
-			       tp->ptid.to_string ().c_str ());
+			       tp.ptid.to_string ().c_str ());
 	  continue;
 	}
 
-      switch_to_thread_no_regs (tp);
+      switch_to_thread_no_regs (&tp);
 
-      if (tp == event_thread)
+      if (&tp == event_thread)
 	{
 	  infrun_debug_printf ("restart threads: [%s] is event thread",
-			       tp->ptid.to_string ().c_str ());
+			       tp.ptid.to_string ().c_str ());
 	  continue;
 	}
 
-      if (!(tp->state == THREAD_RUNNING || tp->control.in_infcall))
+      if (!(tp.state == THREAD_RUNNING || tp.control.in_infcall))
 	{
 	  infrun_debug_printf ("restart threads: [%s] not meant to be running",
-			       tp->ptid.to_string ().c_str ());
+			       tp.ptid.to_string ().c_str ());
 	  continue;
 	}
 
-      if (tp->resumed ())
+      if (tp.resumed ())
 	{
 	  infrun_debug_printf ("restart threads: [%s] resumed",
-			      tp->ptid.to_string ().c_str ());
-	  gdb_assert (tp->executing () || tp->has_pending_waitstatus ());
+			      tp.ptid.to_string ().c_str ());
+	  gdb_assert (tp.executing () || tp.has_pending_waitstatus ());
 	  continue;
 	}
 
-      if (thread_is_in_step_over_chain (tp))
+      if (thread_is_in_step_over_chain (&tp))
 	{
 	  infrun_debug_printf ("restart threads: [%s] needs step-over",
-			       tp->ptid.to_string ().c_str ());
-	  gdb_assert (!tp->resumed ());
+			       tp.ptid.to_string ().c_str ());
+	  gdb_assert (!tp.resumed ());
 	  continue;
 	}
 
 
-      if (tp->has_pending_waitstatus ())
+      if (tp.has_pending_waitstatus ())
 	{
 	  infrun_debug_printf ("restart threads: [%s] has pending status",
-			       tp->ptid.to_string ().c_str ());
-	  tp->set_resumed (true);
+			       tp.ptid.to_string ().c_str ());
+	  tp.set_resumed (true);
 	  continue;
 	}
 
-      gdb_assert (!tp->stop_requested);
+      gdb_assert (!tp.stop_requested);
 
       /* If some thread needs to start a step-over at this point, it
 	 should still be in the step-over queue, and thus skipped
 	 above.  */
-      if (thread_still_needs_step_over (tp))
+      if (thread_still_needs_step_over (&tp))
 	{
 	  internal_error ("thread [%s] needs a step-over, but not in "
 			  "step-over queue\n",
-			  tp->ptid.to_string ().c_str ());
+			  tp.ptid.to_string ().c_str ());
 	}
 
-      if (currently_stepping (tp))
+      if (currently_stepping (&tp))
 	{
 	  infrun_debug_printf ("restart threads: [%s] was stepping",
-			       tp->ptid.to_string ().c_str ());
-	  keep_going_stepped_thread (tp);
+			       tp.ptid.to_string ().c_str ());
+	  keep_going_stepped_thread (&tp);
 	}
       else
 	{
 	  infrun_debug_printf ("restart threads: [%s] continuing",
-			       tp->ptid.to_string ().c_str ());
-	  execution_control_state ecs (tp);
-	  switch_to_thread (tp);
+			       tp.ptid.to_string ().c_str ());
+	  execution_control_state ecs (&tp);
+	  switch_to_thread (&tp);
 	  keep_going_pass_signal (&ecs);
 	}
     }
@@ -8515,20 +8515,20 @@ restart_after_all_stop_detach (process_stratum_target *proc_target)
      resumed.  With the remote target (in all-stop), it's even
      impossible to issue another resumption if the target is already
      resumed, until the target reports a stop.  */
-  for (thread_info *thr : all_threads (proc_target))
+  for (thread_info &thr : all_threads (proc_target))
     {
-      if (thr->state != THREAD_RUNNING)
+      if (thr.state != THREAD_RUNNING)
 	continue;
 
       /* If we have any thread that is already executing, then we
 	 don't need to resume the target -- it is already been
 	 resumed.  */
-      if (thr->executing ())
+      if (thr.executing ())
 	return;
 
       /* If we have a pending event to process, skip resuming the
 	 target and go straight to processing it.  */
-      if (thr->resumed () && thr->has_pending_waitstatus ())
+      if (thr.resumed () && thr.has_pending_waitstatus ())
 	return;
     }
 
@@ -8539,13 +8539,13 @@ restart_after_all_stop_detach (process_stratum_target *proc_target)
 
   /* Otherwise, find the first THREAD_RUNNING thread and resume
      it.  */
-  for (thread_info *thr : all_threads (proc_target))
+  for (thread_info &thr : all_threads (proc_target))
     {
-      if (thr->state != THREAD_RUNNING)
+      if (thr.state != THREAD_RUNNING)
 	continue;
 
-      execution_control_state ecs (thr);
-      switch_to_thread (thr);
+      execution_control_state ecs (&thr);
+      switch_to_thread (&thr);
       keep_going (&ecs);
       return;
     }

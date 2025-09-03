@@ -65,13 +65,13 @@ infrun_debug_show_threads (const char *title, ThreadRange threads)
       INFRUN_SCOPED_DEBUG_ENTER_EXIT;
 
       infrun_debug_printf ("%s:", title);
-      for (thread_info *thread : threads)
+      for (thread_info &thread : threads)
 	infrun_debug_printf ("  thread %s, executing = %d, resumed = %d, "
 			     "state = %s",
-			     thread->ptid.to_string ().c_str (),
-			     thread->executing (),
-			     thread->resumed (),
-			     thread_state_string (thread->state));
+			     thread.ptid.to_string ().c_str (),
+			     thread.executing (),
+			     thread.resumed (),
+			     thread_state_string (thread.state));
     }
 }
 
