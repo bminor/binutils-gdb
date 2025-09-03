@@ -1456,7 +1456,6 @@ compress_frag (bool use_zstd, void *ctx, const char *contents, int in_size,
       avail_out = obstack_room (ob);
       if (avail_out <= 0)
 	{
-	  obstack_finish (ob);
 	  f = frag_alloc (ob, 0);
 	  f->fr_type = rs_fill;
 	  (*last_newf)->fr_next = f;
@@ -1570,10 +1569,7 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
       avail_out = obstack_room (ob);
       if (avail_out <= 0)
 	{
-	  fragS *newf;
-
-	  obstack_finish (ob);
-	  newf = frag_alloc (ob, 0);
+	  fragS *newf = frag_alloc (ob, 0);
 	  newf->fr_type = rs_fill;
 	  last_newf->fr_next = newf;
 	  last_newf = newf;

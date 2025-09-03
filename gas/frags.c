@@ -69,8 +69,8 @@ frag_alloc_check (const struct obstack *ob)
 }
 
 /* Allocate a frag on the specified obstack.
-   Call this routine from everywhere else, so that all the weird alignment
-   hackery can be done in just one place.  */
+   Call this routine every time a new frag is made, so that the
+   alignment hackery can be done in just one place.  */
 
 fragS *
 frag_alloc (struct obstack *ob, size_t extra)
@@ -78,7 +78,12 @@ frag_alloc (struct obstack *ob, size_t extra)
   fragS *ptr;
   int oalign;
 
-  (void) obstack_alloc (ob, 0);
+  /* This will align the obstack so the next struct we allocate on it
+     will begin at a correct boundary.  */
+  (void) obstack_finish (ob);
+  /* Turn off alignment as otherwise obstack_alloc will align the end
+     of the frag (obstack next_free pointer), making it seem like the
+     frag already has contents in fr_literal.  */
   oalign = obstack_alignment_mask (ob);
   obstack_alignment_mask (ob) = 0;
   ptr = obstack_alloc (ob, extra + SIZEOF_STRUCT_FRAG);
@@ -172,9 +177,6 @@ frag_new (size_t old_frags_var_max_size
   /* Make sure its type is valid.  */
   gas_assert (frag_now->fr_type != 0);
 
-  /* This will align the obstack so the next struct we allocate on it
-     will begin at a correct boundary.  */
-  obstack_finish (&frchain_now->frch_obstack);
   frchP = frchain_now;
   know (frchP);
   former_last_fragP = frchP->frch_last;
