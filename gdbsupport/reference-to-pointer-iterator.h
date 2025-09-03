@@ -38,9 +38,8 @@ struct reference_to_pointer_iterator
 
   /* Construct a reference_to_pointer_iterator, passing args to the underlying
      iterator.  */
-  template <typename... Args>
-  reference_to_pointer_iterator (Args &&...args)
-    : m_it (std::forward<Args> (args)...)
+  explicit reference_to_pointer_iterator (IteratorType it)
+    : m_it (std::move (it))
   {}
 
   /* Create a past-the-end iterator.
