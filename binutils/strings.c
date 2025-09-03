@@ -757,8 +757,8 @@ display_utf8_char (const unsigned char * buffer)
 
 	case 4:
 	  printf ("\\u%02x%02x%02x",
-		  ((buffer[0] & 0x07) << 6) | ((buffer[1] & 0x3c) >> 2),
-		  ((buffer[1] & 0x03) << 6) | ((buffer[2] & 0x3c) >> 2),
+		  ((buffer[0] & 0x07) << 2) | ((buffer[1] & 0x30) >> 4),
+		  ((buffer[1] & 0x0f) << 4) | ((buffer[2] & 0x3c) >> 2),
 		  ((buffer[2] & 0x03) << 6) | ((buffer[3] & 0x3f)));
 	  break;
 	default:
