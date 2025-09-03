@@ -76,7 +76,7 @@ def step_in(
 @request("stepOut")
 def step_out(*, threadId: int, singleThread: bool = False, **args):
     _handle_thread_step(threadId, singleThread, True)
-    exec_and_expect_stop("finish &", propagate_exception=True)
+    exec_and_expect_stop("finish &")
 
 
 @request("continue")

@@ -204,7 +204,7 @@ def log_stack(level=LogLevel.DEFAULT):
 
 
 @in_gdb_thread
-def exec_and_log(cmd, propagate_exception=False):
+def exec_and_log(cmd):
     """Execute the gdb command CMD.
     If logging is enabled, log the command and its output."""
     log("+++ " + cmd)
@@ -213,10 +213,10 @@ def exec_and_log(cmd, propagate_exception=False):
         if output != "":
             log(">>> " + output)
     except gdb.error as e:
-        if propagate_exception:
-            raise DAPException(str(e)) from e
-        else:
-            log_stack()
+        # Don't normally want to see this, as it interferes with the
+        # test suite.
+        log_stack(LogLevel.FULL)
+        raise DAPException(str(e)) from e
 
 
 @in_gdb_thread

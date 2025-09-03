@@ -1,0 +1,32 @@
+# Copyright 2025 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test "attach" failure in DAP.
+
+require can_spawn_for_attach allow_dap_tests
+
+load_lib dap-support.exp
+
+# Passing an empty remote name here will guarantee a failure without
+# trying to find a real remote.
+set id [dap_target_remote {""}]
+
+dap_check_request_and_response "configurationDone" configurationDone
+
+set resp [lindex [dap_read_response attach $id] 0]
+gdb_assert {[dict get $resp success] == "false"} \
+    "attach failed"
+
+dap_shutdown
