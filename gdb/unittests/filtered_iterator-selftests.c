@@ -115,12 +115,15 @@ test_filtered_iterator ()
   std::vector<int> even_ints;
   const std::vector<int> expected_even_ints { 4, 4, 6, 8 };
 
+  int_array_iterator begin (array, ARRAY_SIZE (array));
+  int_array_iterator end;
   filtered_iterator<int_array_iterator, even_numbers_only>
-    iter (array, ARRAY_SIZE (array));
-  filtered_iterator<int_array_iterator, even_numbers_only> end;
+    filtered_iter (begin, end);
+  filtered_iterator<int_array_iterator, even_numbers_only>
+    filtered_end (end, end);
 
-  for (; iter != end; ++iter)
-    even_ints.push_back (*iter);
+  for (; filtered_iter != filtered_end; ++filtered_iter)
+    even_ints.push_back (*filtered_iter);
 
   SELF_CHECK (even_ints == expected_even_ints);
 }
@@ -152,10 +155,12 @@ test_filtered_iterator_eq ()
 {
   int array[] = { 4, 4, 5, 6, 7, 8, 9 };
 
+  int_array_iterator begin (array, ARRAY_SIZE (array));
+  int_array_iterator end;
   filtered_iterator<int_array_iterator, even_numbers_only>
-    iter1(array, ARRAY_SIZE (array));
+    iter1 (begin, end);
   filtered_iterator<int_array_iterator, even_numbers_only>
-    iter2(array, ARRAY_SIZE (array));
+    iter2 (begin, end);
 
   /* They start equal.  */
   SELF_CHECK (iter1 == iter2);

@@ -237,7 +237,12 @@ public:
   {}
 
   all_non_exited_threads_iterator begin () const
-  { return all_non_exited_threads_iterator (m_filter_target, m_filter_ptid); }
+  {
+    all_matching_threads_iterator begin (m_filter_target, m_filter_ptid);
+
+    return all_non_exited_threads_iterator (std::move (begin));
+  }
+
   all_non_exited_threads_iterator end () const
   { return all_non_exited_threads_iterator (); }
 

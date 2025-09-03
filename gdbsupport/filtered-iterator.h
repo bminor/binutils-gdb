@@ -37,18 +37,19 @@ public:
   using difference_type
     = typename std::iterator_traits<BaseIterator>::difference_type;
 
-  /* Construct by forwarding all arguments to the underlying
-     iterator.  */
-  template<typename... Args>
-  explicit filtered_iterator (Args &&...args)
-    : m_it (std::forward<Args> (args)...)
-  { skip_filtered (); }
+  /* Construct by providing the begin underlying iterators.  The end iterator
+     is default-constructed.  */
+  filtered_iterator (BaseIterator begin)
+    : filtered_iterator (std::move (begin), BaseIterator {})
+  {}
 
+  /* Construct by providing begin and end underlying iterators.  */
   filtered_iterator (BaseIterator begin, BaseIterator end)
     : m_it (std::move (begin)), m_end (std::move (end))
   { skip_filtered (); }
 
-  /* Create a one-past-end iterator.  */
+  /* Create a one-past-end iterator. The underlying end iterator is obtained
+     by default-constructing. */
   filtered_iterator () = default;
 
   /* Need these as the variadic constructor would be a better match

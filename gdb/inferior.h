@@ -487,9 +487,10 @@ public:
   */
   inf_non_exited_threads_range non_exited_threads ()
   {
-    inf_non_exited_threads_iterator begin (this->thread_list.begin ());
+    inf_threads_iterator begin (this->thread_list.begin ());
+    inf_non_exited_threads_iterator filtered_begin (std::move (begin));
 
-    return inf_non_exited_threads_range (std::move (begin));
+    return inf_non_exited_threads_range (std::move (filtered_begin));
   }
 
   /* Like inferior::threads(), but returns a range adapter that can be
@@ -860,9 +861,10 @@ all_inferiors (process_stratum_target *proc_target = nullptr)
 inline all_non_exited_inferiors_range
 all_non_exited_inferiors (process_stratum_target *proc_target = nullptr)
 {
-  all_non_exited_inferiors_iterator begin (proc_target, inferior_list);
+  all_inferiors_iterator begin (proc_target, inferior_list);
+  all_non_exited_inferiors_iterator filtered_begin (std::move (begin));
 
-  return all_non_exited_inferiors_range (std::move (begin));
+  return all_non_exited_inferiors_range (std::move (filtered_begin));
 }
 
 /* Prune away automatically added inferiors that aren't required
