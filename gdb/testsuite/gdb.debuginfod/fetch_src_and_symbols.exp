@@ -107,7 +107,7 @@ proc_with_prefix no_url { } {
     setenv DEBUGINFOD_URLS ""
 
     # Test that GDB cannot find source without debuginfod.
-    clean_restart $binfile
+    clean_restart $::testfile
     gdb_test_no_output "set substitute-path $outputdir /dev/null" \
 	"set substitute-path"
     gdb_test "list" ".*No such file or directory.*"
@@ -126,7 +126,7 @@ proc_with_prefix no_url { } {
     file rename -force $debuginfo $debugdir
 
     # Test that GDB cannot find symbols without debuginfod.
-    clean_restart $binfile
+    clean_restart $::testfile
     gdb_test "file" ".*No symbol file.*"
 
     set buildid "01234567890abcdef0123456"
@@ -157,7 +157,7 @@ proc_with_prefix no_url { } {
 
     # Generate a core file and test that GDB cannot find the
     # executable.
-    clean_restart ${binfile}2
+    clean_restart ${::testfile}2
     if ![runto_main] {
 	return -1
     }

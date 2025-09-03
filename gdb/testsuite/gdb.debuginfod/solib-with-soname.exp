@@ -132,7 +132,7 @@ if {$corefile eq ""} {
 proc load_exec_and_core_file { expect_warning expect_download testname \
 				   {debugdir ""} } {
     with_test_prefix $testname {
-	clean_restart $::binfile
+	clean_restart $::testfile
 
 	if { $debugdir ne "" } {
 	    gdb_test_no_output "set debug-file-directory $debugdir" \
