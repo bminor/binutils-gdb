@@ -918,9 +918,9 @@ try_thread_db_load_1 (struct thread_db_info *info)
 
       linux_stop_and_wait_all_lwps ();
 
-      for (const lwp_info *lp : all_lwps ())
-	if (lp->ptid.pid () == pid)
-	  thread_from_lwp (curr_thread, lp->ptid);
+      for (const lwp_info &lp : all_lwps ())
+	if (lp.ptid.pid () == pid)
+	  thread_from_lwp (curr_thread, lp.ptid);
 
       linux_unstop_all_lwps ();
     }

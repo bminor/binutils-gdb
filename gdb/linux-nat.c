@@ -481,8 +481,8 @@ num_lwps (int pid)
 {
   int count = 0;
 
-  for (const lwp_info *lp ATTRIBUTE_UNUSED : all_lwps ())
-    if (lp->ptid.pid () == pid)
+  for (const lwp_info &lp : all_lwps ())
+    if (lp.ptid.pid () == pid)
       count++;
 
   return count;
@@ -930,12 +930,12 @@ struct lwp_info *
 iterate_over_lwps (ptid_t filter,
 		   gdb::function_view<iterate_over_lwps_ftype> callback)
 {
-  for (lwp_info *lp : all_lwps_safe ())
+  for (lwp_info &lp : all_lwps_safe ())
     {
-      if (lp->ptid.matches (filter))
+      if (lp.ptid.matches (filter))
 	{
-	  if (callback (lp) != 0)
-	    return lp;
+	  if (callback (&lp) != 0)
+	    return &lp;
 	}
     }
 
@@ -2141,9 +2141,9 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 	 PTRACE_GETEVENTMSG, we'd still need to lookup the
 	 corresponding LWP object, and it would be an extra ptrace
 	 syscall, so this way may even be more efficient.  */
-      for (lwp_info *other_lp : all_lwps_safe ())
-	if (other_lp != lp && other_lp->ptid.pid () == lp->ptid.pid ())
-	  exit_lwp (other_lp);
+      for (lwp_info &other_lp : all_lwps_safe ())
+	if (&other_lp != lp && other_lp.ptid.pid () == lp->ptid.pid ())
+	  exit_lwp (&other_lp);
 
       return 0;
     }
@@ -3856,11 +3856,11 @@ linux_proc_xfer_memory_partial (int pid, gdb_byte *readbuf,
 static lwp_info *
 find_stopped_lwp (int pid)
 {
-  for (lwp_info *lp : all_lwps ())
-    if (lp->ptid.pid () == pid
-	&& lp->stopped
-	&& !is_lwp_marked_dead (lp))
-      return lp;
+  for (lwp_info &lp : all_lwps ())
+    if (lp.ptid.pid () == pid
+	&& lp.stopped
+	&& !is_lwp_marked_dead (&lp))
+      return &lp;
   return nullptr;
 }
 
@@ -3962,13 +3962,13 @@ linux_nat_target::update_thread_list ()
 
   /* Update the processor core that each lwp/thread was last seen
      running on.  */
-  for (lwp_info *lwp : all_lwps ())
+  for (lwp_info &lwp : all_lwps ())
     {
       /* Avoid accessing /proc if the thread hasn't run since we last
 	 time we fetched the thread's core.  Accessing /proc becomes
 	 noticeably expensive when we have thousands of LWPs.  */
-      if (lwp->core == -1)
-	lwp->core = linux_common_core_of_thread (lwp->ptid);
+      if (lwp.core == -1)
+	lwp.core = linux_common_core_of_thread (lwp.ptid);
     }
 }
 
@@ -4696,8 +4696,8 @@ maintenance_info_lwps (const char *arg, int from_tty)
      figure out the widest ptid string.  We'll use this to build our
      output table below.  */
   size_t ptid_width = 8;
-  for (lwp_info *lp : all_lwps ())
-    ptid_width = std::max (ptid_width, lp->ptid.to_string ().size ());
+  for (lwp_info &lp : all_lwps ())
+    ptid_width = std::max (ptid_width, lp.ptid.to_string ().size ());
 
   /* Setup the table headers.  */
   struct ui_out *uiout = current_uiout;
@@ -4707,13 +4707,13 @@ maintenance_info_lwps (const char *arg, int from_tty)
   uiout->table_body ();
 
   /* Display one table row for each lwp_info.  */
-  for (lwp_info *lp : all_lwps ())
+  for (lwp_info &lp : all_lwps ())
     {
       ui_out_emit_tuple tuple_emitter (uiout, "lwp-entry");
 
-      thread_info *th = linux_target->find_thread (lp->ptid);
+      thread_info *th = linux_target->find_thread (lp.ptid);
 
-      uiout->field_string ("lwp-ptid", lp->ptid.to_string ().c_str ());
+      uiout->field_string ("lwp-ptid", lp.ptid.to_string ().c_str ());
       if (th == nullptr)
 	uiout->field_string ("thread-info", "None");
       else
