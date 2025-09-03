@@ -43,7 +43,7 @@ if { [supports_statement_frontiers] } {
     lappend options additional_flags=-gstatement-frontiers
 }
 
-if { [prepare_for_testing "failed to prepare" $binfile $srcfile $options] } {
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile $options] } {
     return
 }
 
