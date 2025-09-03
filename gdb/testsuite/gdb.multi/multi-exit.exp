@@ -36,7 +36,7 @@ if {[build_executable "failed to prepare" $testfile $srcfile]} {
 # Hence, go with the all-stop-on-top-of-non-stop mode.
 save_vars { GDBFLAGS } {
     append GDBFLAGS " -ex \"maint set target-non-stop on\""
-    clean_restart ${binfile}
+    clean_restart ${::testfile}
 }
 
 # Start inferior NUM.

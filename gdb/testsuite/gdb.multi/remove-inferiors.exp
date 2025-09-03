@@ -32,7 +32,7 @@ proc add_inferior { expected_num message } {
 proc test_remove_inferiors { } {
     global binfile
 
-    clean_restart ${binfile}
+    clean_restart ${::testfile}
 
     # Add another inferior and switch to it.
     add_inferior 2 "add second inferior"

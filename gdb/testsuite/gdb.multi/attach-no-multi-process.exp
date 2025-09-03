@@ -44,7 +44,7 @@ proc test {target_non_stop} {
 	    "${::GDBFLAGS} -ex \"set remote multiprocess-feature-packet off\""
 	set ::GDBFLAGS \
 	    "${::GDBFLAGS} -ex \"maint set target-non-stop ${target_non_stop}\""
-	clean_restart ${binfile}
+	clean_restart ${::testfile}
     }
 
     # Start the first inferior.

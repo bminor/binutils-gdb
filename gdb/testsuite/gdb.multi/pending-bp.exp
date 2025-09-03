@@ -45,7 +45,7 @@ if { [build_executable "failed to prepare" $testfile $srcfile \
 # 'breakpoint pending' flag is enabled, so pending breakpoints can be created
 # without GDB prompting the user.
 proc do_test_setup { inf_1_stop inf_2_stop } {
-    clean_restart ${::binfile}
+    clean_restart ${::testfile}
 
     gdb_locate_shlib $::binfile_lib
 

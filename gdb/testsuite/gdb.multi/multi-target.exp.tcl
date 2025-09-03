@@ -65,7 +65,7 @@ proc prepare_core {} {
     global gcorefile gcore_created
     global binfile
 
-    clean_restart ${binfile}
+    clean_restart ${::testfile}
 
     if ![runto all_started] then {
 	return -1
@@ -114,7 +114,7 @@ proc setup {non-stop {multi_process ""}} {
 	# Make GDB read files from the local file system, not through the
 	# remote targets, to speed things up.
 	set ::GDBFLAGS "${::GDBFLAGS} -ex \"set sysroot\""
-	clean_restart ${binfile}
+	clean_restart ${::testfile}
     }
 
     # multi-target depends on target running in non-stop mode.  Force
@@ -184,7 +184,7 @@ proc multi_target_prepare {} {
 	return 0
     }
 
-    if { [prepare_for_testing "failed to prepare" ${binfile} "${srcfile}" \
+    if { [prepare_for_testing "failed to prepare" $::testfile $srcfile \
 	      {debug pthreads}] } {
 	return 0
     }

@@ -31,7 +31,7 @@ if {[build_executable "failed to build" $testfile $srcfile {debug}]} {
 proc do_test {dispose} {
     global binfile bkptno_numopt_re
 
-    clean_restart $binfile
+    clean_restart $::testfile
 
     gdb_test_no_output "set follow-fork child"
     gdb_test_no_output "set detach-on-fork off"
