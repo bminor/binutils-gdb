@@ -179,7 +179,7 @@ foreach entry $locs {
 # through.  This is checking that the is-stmt marked lines are
 # displayed differently (without addresses) to addresses that are
 # mid-way through a line, or not marked as is-stmt.
-clean_restart $binfile
+clean_restart $::testfile
 runto_main
 
 foreach entry $locs {

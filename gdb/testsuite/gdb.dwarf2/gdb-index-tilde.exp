@@ -47,7 +47,7 @@ if { [prepare_for_testing "failed to prepare" "${testfile}" ${srcfile}] } {
 }
 
 # Start GDB and load in the executable.
-clean_restart ${binfile}
+clean_restart ${::testfile}
 
 # If the executable was built with an index, or lacks the debug
 # information required to create an index, then we'll not be able to

@@ -56,7 +56,8 @@ if { [ensure_gdb_index $symlink] == -1 } {
 # Ok, we have a copy of $binfile with an index.
 # Restart gdb and verify the index was used.
 
-clean_restart $symlink
+clean_restart
+gdb_load $symlink
 gdb_test "mt print objfiles ${testfile}" \
     "(gdb_index|debug_names).*" \
     "index used"

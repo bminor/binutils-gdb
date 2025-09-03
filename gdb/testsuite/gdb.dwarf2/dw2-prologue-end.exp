@@ -91,7 +91,7 @@ set prologue_end_line [gdb_get_line_number "main assign o"]
 gdb_test "frame" ".*main \\\(\\\) at \[^\r\n\]*:$prologue_end_line\r\n.*"
 
 with_test_prefix "ignore-prologue-end" {
-    clean_restart $binfile
+    clean_restart $::testfile
     gdb_test_no_output "maintenance set ignore-prologue-end-flag on"
 
     if ![runto_main] {

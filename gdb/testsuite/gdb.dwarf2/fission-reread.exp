@@ -62,7 +62,7 @@ pass "$testfile - unload"
 remote_file target delete $dwo
 save_vars { GDBFLAGS } {
     append GDBFLAGS " -iex \"maint set dwarf synchronous on\""
-    clean_restart $binfile
+    clean_restart $::testfile
 }
 set output_dir [standard_output_file ""]
 set cmd "save gdb-index"

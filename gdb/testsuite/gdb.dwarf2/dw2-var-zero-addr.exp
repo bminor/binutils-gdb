@@ -34,7 +34,7 @@ test
 
 save_vars { GDBFLAGS } {
     set GDBFLAGS "$GDBFLAGS --readnow"
-    clean_restart ${binfile}
+    clean_restart ${::testfile}
 }
 
 with_test_prefix "readnow" {

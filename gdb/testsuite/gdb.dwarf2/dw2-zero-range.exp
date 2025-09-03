@@ -26,7 +26,8 @@ standard_testfile .c -shlib.c -dw.S
 # Test for presence of complaint, with the lib relocated.
 
 proc_with_prefix test_relocated { exec_path lib_path complaint_re readnow_p } {
-    clean_restart $exec_path
+    clean_restart
+    gdb_load $exec_path
     gdb_load_shlib $lib_path
 
     if { ![runto_main] } {

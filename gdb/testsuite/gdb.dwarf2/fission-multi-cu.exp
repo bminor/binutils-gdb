@@ -203,7 +203,7 @@ if [build_executable_and_dwo_files "$testfile.exp" "${binfile}" {nodebug} \
     return -1
 }
 
-clean_restart $binfile
+clean_restart $::testfile
 
 if ![runto_main] {
     return -1

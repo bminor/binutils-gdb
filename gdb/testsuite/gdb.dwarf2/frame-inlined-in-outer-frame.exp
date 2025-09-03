@@ -106,7 +106,7 @@ if { [build_executable ${testfile}.exp ${testfile} "$srcfile $dwarf_asm" \
     return
 }
 
-clean_restart $binfile
+clean_restart $::testfile
 
 if { [gdb_starti_cmd] != 0 } {
     fail "failed to run to first instruction"

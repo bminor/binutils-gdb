@@ -330,7 +330,7 @@ if {[gdb_compile_shlib [list $libsrc $asm_file] $lib_so \
 ### Second GDB session.
 
 with_test_prefix "second session" {
-    clean_restart $binfile
+    clean_restart $::testfile
 
     # Again, do whatever is necessary to make sure that the shared library is
     # loaded for remote targets.

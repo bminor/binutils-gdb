@@ -77,6 +77,6 @@ if { [ensure_gdb_index $binfile] == -1 } {
     return -1
 }
 
-clean_restart ${binfile}
+clean_restart ${::testfile}
 
 runto main

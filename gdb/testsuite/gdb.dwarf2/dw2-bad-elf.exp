@@ -170,7 +170,7 @@ if { [build_executable ${testfile}.exp ${testfile} \
 proc run_test { goto_main } {
     global binfile decimal hex
 
-    clean_restart ${binfile}
+    clean_restart ${::testfile}
 
     if { $goto_main } {
 	if ![runto_main] {

@@ -31,6 +31,6 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" "$binfile" object \
     return -1
 }
 
-clean_restart $binfile
+clean_restart $::testfile
 
 gdb_test "ptype a" "type = class sp1::A .*"
