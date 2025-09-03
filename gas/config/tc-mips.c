@@ -3377,7 +3377,7 @@ mips_parse_arguments (char *s, char float_format)
       if (!s)
 	{
 	  obstack_free (&mips_operand_tokens,
-			obstack_finish (&mips_operand_tokens));
+			obstack_base (&mips_operand_tokens));
 	  return 0;
 	}
       SKIP_SPACE_TABS (s);
