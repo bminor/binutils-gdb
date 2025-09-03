@@ -190,6 +190,6 @@ gdb_test "break s::method1" "Breakpoint .* at .*: file .*psmang1.cc.*"
 # We have to exit and restart GDB here, to make sure that all the
 # compilation units are psymtabs again.
 
-clean_restart ${binfile}
+clean_restart ${::testfile}
 
 gdb_test "break s::method2" "Breakpoint .* at .*: file .*psmang2.cc.*"

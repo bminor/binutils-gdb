@@ -71,7 +71,7 @@ proc build_and_run_test { lang symbols } {
 
     # Startup and run to main.
 
-    clean_restart $binfile
+    clean_restart $::testfile
 
     if ![runto_main] then {
 	return
