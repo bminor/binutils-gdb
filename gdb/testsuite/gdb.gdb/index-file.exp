@@ -39,7 +39,8 @@ if { $filename eq "" } {
 
 with_timeout_factor $timeout_factor {
     # Start GDB, load FILENAME.
-    clean_restart $filename
+    clean_restart
+    gdb_load $filename
 }
 
 # Record how many worker threads GDB is using.

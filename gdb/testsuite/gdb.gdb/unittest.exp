@@ -63,7 +63,7 @@ proc run_selftests { binfile } {
 	gdb_exit
 	gdb_start
     } else {
-	clean_restart ${binfile}
+	clean_restart ${::testfile}
     }
 
     if { [is_remote host] } {
