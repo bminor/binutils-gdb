@@ -120,7 +120,7 @@ PerfTest::assemble {
     return 0
 } {
     global binfile
-    clean_restart $binfile
+    clean_restart $::testfile
     return 0
 } {
     global SKIP_STEP_COUNT SKIP_DIRECTIVE_COUNT
