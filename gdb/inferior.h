@@ -502,9 +502,10 @@ public:
   */
   inline safe_inf_threads_range threads_safe ()
   {
-    safe_inf_threads_iterator begin (this->thread_list.begin ());
+    inf_threads_iterator begin (this->thread_list.begin ());
+    safe_inf_threads_iterator safe_begin (std::move (begin));
 
-    return safe_inf_threads_range (std::move (begin));
+    return safe_inf_threads_range (std::move (safe_begin));
   }
 
   /* Find (non-exited) thread PTID of this inferior.  */
@@ -832,9 +833,10 @@ extern intrusive_list<inferior> inferior_list;
 inline all_inferiors_safe_range
 all_inferiors_safe ()
 {
-  all_inferiors_safe_iterator begin (nullptr, inferior_list);
+  all_inferiors_iterator begin (nullptr, inferior_list);
+  all_inferiors_safe_iterator safe_begin (std::move (begin));
 
-  return all_inferiors_safe_range (std::move (begin));
+  return all_inferiors_safe_range (std::move (safe_begin));
 }
 
 /* Returns a range representing all inferiors, suitable to use with

@@ -50,30 +50,24 @@ public:
   typedef typename Iterator::iterator_category iterator_category;
   typedef typename Iterator::difference_type difference_type;
 
-  /* Construct the begin iterator using the given arguments; the end iterator is
-     default constructed.  */
-  template<typename... Args>
-  explicit basic_safe_iterator (Args &&...args)
-    : m_it (std::forward<Args> (args)...),
-      m_next (m_it)
-  {
-    if (m_it != m_end)
-      ++m_next;
-  }
+  /* Construct the iterator using the underlying iterator BEGIN; the end
+     iterator is default constructed.  */
+  explicit basic_safe_iterator (Iterator begin)
+    : basic_safe_iterator (std::move (begin), Iterator {})
+  {}
 
-  /* Construct the iterator using the first argument, and construct
-     the end iterator using the second argument.  */
-  template<typename Arg>
-  explicit basic_safe_iterator (Arg &&arg, Arg &&arg2)
-    : m_it (std::forward<Arg> (arg)),
+  /* Construct the iterator using the underlying iterators BEGIN and END.  */
+  basic_safe_iterator (Iterator begin, Iterator end)
+    : m_it (std::move (begin)),
       m_next (m_it),
-      m_end (std::forward<Arg> (arg2))
+      m_end (std::move (end))
   {
     if (m_it != m_end)
       ++m_next;
   }
 
-  /* Create a one-past-end iterator.  */
+  /* Create a one-past-end iterator.  The underlying end iterator is obtained
+     by default-constructing.  */
   basic_safe_iterator ()
   {}
 
