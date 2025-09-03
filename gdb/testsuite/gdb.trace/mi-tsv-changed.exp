@@ -77,7 +77,7 @@ proc test_create_delete_modify_tsv { } {
 	}
 	gdb_exit
 
-	if {[mi_clean_restart $binfile]} {
+	if {[mi_clean_restart $::testfile]} {
 	    return
 	}
 
@@ -145,7 +145,7 @@ proc test_upload_tsv { } {
 	    return 0
 	}
 
-	clean_restart $testfile
+	clean_restart $::testfile
 	if {![runto_main]} {
 	    return 0
 	}
@@ -175,8 +175,7 @@ proc test_upload_tsv { } {
 	    }
 	}
 
-	global binfile
-	if {[mi_clean_restart $binfile]} {
+	if {[mi_clean_restart $::testfile]} {
 	    return
 	}
 

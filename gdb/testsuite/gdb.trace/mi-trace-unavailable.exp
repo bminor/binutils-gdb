@@ -35,7 +35,7 @@ gdb_exit
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
-mi_clean_restart $binfile
+mi_clean_restart $testfile
 mi_runto_main
 
 mi_gdb_test "-break-insert marker" \

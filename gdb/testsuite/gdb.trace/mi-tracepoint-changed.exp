@@ -89,9 +89,7 @@ proc test_reconnect { } {
 	    }
 	}
 
-	global binfile
-
-	if {[mi_clean_restart $binfile]} {
+	if {[mi_clean_restart $::testfile]} {
 	    return
 	}
 
@@ -155,11 +153,10 @@ proc test_pending_resolved { } {
     with_test_prefix "pending resolved" {
 	global decimal hex
 	global executable
-	global binfile
 	global lib_sl1 lib_sl2
 	global mi_gdb_prompt
 
-	if {[mi_clean_restart $binfile]} {
+	if {[mi_clean_restart $::testfile]} {
 	    return
 	}
 	mi_load_shlibs $lib_sl1 $lib_sl2
