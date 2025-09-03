@@ -608,7 +608,7 @@ namespace eval $testfile {
     }
 
     # Test interaction of condition command and explicit linespec conditons.
-    clean_restart [standard_output_file $exefile]
+    clean_restart $exefile
 
     set tst "condition_command overrides explicit linespec condition"
     if {![runto_main]} {
