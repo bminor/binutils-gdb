@@ -398,7 +398,7 @@ class Server:
         # responses are flushed to the client before exiting.
         self._write_queue.put(None)
         json_writer.join()
-        send_gdb("quit")
+        send_gdb(lambda: exec_and_log("quit"))
 
     @in_dap_thread
     def set_defer_events(self):
@@ -614,7 +614,7 @@ def terminate(**args):
 @capability("supportTerminateDebuggee")
 def disconnect(*, terminateDebuggee: bool = False, **args):
     if terminateDebuggee:
-        send_gdb_with_response("kill")
+        send_gdb_with_response(lambda: exec_and_log("kill"))
     _server.shutdown()
 
 
@@ -631,18 +631,6 @@ def cancel(**args):
     # ... which gdb takes to mean that it is fine for all cancel
     # requests to report success.
     return None
-
-
-class Invoker(object):
-    """A simple class that can invoke a gdb command."""
-
-    def __init__(self, cmd):
-        self._cmd = cmd
-
-    # This is invoked in the gdb thread to run the command.
-    @in_gdb_thread
-    def __call__(self):
-        exec_and_log(self._cmd)
 
 
 class Cancellable(object):
@@ -677,25 +665,16 @@ class Cancellable(object):
 
 def send_gdb(cmd):
     """Send CMD to the gdb thread.
-    CMD can be either a function or a string.
-    If it is a string, it is passed to gdb.execute."""
-    if isinstance(cmd, str):
-        cmd = Invoker(cmd)
-
+    CMD is a function."""
     # Post the event and don't wait for the result.
     gdb.post_event(Cancellable(cmd))
 
 
 def send_gdb_with_response(fn):
     """Send FN to the gdb thread and return its result.
-    If FN is a string, it is passed to gdb.execute and None is
-    returned as the result.
     If FN throws an exception, this function will throw the
     same exception in the calling thread.
     """
-    if isinstance(fn, str):
-        fn = Invoker(fn)
-
     # Post the event and wait for the result in result_q.
     result_q = DAPQueue()
     gdb.post_event(Cancellable(fn, result_q))
