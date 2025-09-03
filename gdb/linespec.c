@@ -4113,7 +4113,12 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
       sal.pspace = current_program_space;
     }
 
-  sal.section = msymbol->obj_section (objfile);
+  /* Don't use the section from the msymbol, the code above might have
+     adjusted FUNC_ADDR, in which case the msymbol's section might not be
+     the section containing FUNC_ADDR.  It might not even be in the same
+     objfile.  As the section is primarily to assist with overlay
+     debugging, it should reflect the SAL's pc value.  */
+  sal.section = find_pc_overlay (sal.pc);
 
   if (self->maybe_add_address (objfile->pspace (), sal.pc))
     add_sal_to_sals (self, result, &sal, msymbol->natural_name (), false);

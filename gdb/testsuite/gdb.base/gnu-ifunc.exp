@@ -185,6 +185,11 @@ proc_with_prefix set-break {resolver_attr resolver_debug final_debug} {
 	# other two locations.
 	gdb_test "info breakpoints" "$location\r\n.*$location\r\n$location"
     }
+
+    # At one point a bug existed such that GDB would trigger an assert
+    # while restarting the inferior with ifunc breakpoints set.
+    gdb_run_cmd
+    gdb_test "" "Breakpoint $::decimal,.*final \\(\[^\r\n\]*\\).*" "restart, run until breakpoint"
 }
 
 # Misc GNU ifunc tests.  For the description of RESOLVER_ATTR,
