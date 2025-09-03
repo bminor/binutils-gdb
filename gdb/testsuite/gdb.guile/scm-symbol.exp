@@ -141,7 +141,7 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}-cxx" executable "
     return -1
 }
 
-clean_restart ${binfile}-cxx
+clean_restart ${::testfile}-cxx
 
 if ![gdb_guile_runto_main] {
     return
