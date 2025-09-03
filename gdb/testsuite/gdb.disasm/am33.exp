@@ -795,7 +795,7 @@ proc dsp_autoincrement_tests { } {
     }
 }
 
-clean_restart $binfile
+clean_restart $::testfile
 
 call_tests
 movm_tests

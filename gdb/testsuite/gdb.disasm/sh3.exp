@@ -100,7 +100,7 @@ proc all_fp_misc_tests { } {
     }
 }
 
-clean_restart $binfile
+clean_restart $::testfile
 
 all_fp_move_and_load_tests
 all_fp_arithmetic_tests

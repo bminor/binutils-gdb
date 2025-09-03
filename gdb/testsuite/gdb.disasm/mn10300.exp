@@ -529,7 +529,7 @@ proc sub_tests { } {
     }
 }
 
-clean_restart $binfile
+clean_restart $::testfile
 
 add_tests
 bcc_tests

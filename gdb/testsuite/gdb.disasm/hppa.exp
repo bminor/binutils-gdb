@@ -1365,7 +1365,7 @@ proc fmemLRbug_tests { } {
     }
 }
 
-clean_restart $binfile
+clean_restart $::testfile
 
 all_integer_memory_tests
 all_immediate_tests
