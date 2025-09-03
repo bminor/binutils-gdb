@@ -76,18 +76,17 @@ fragS *
 frag_alloc (struct obstack *ob, size_t extra)
 {
   fragS *ptr;
-  int oalign;
 
   /* This will align the obstack so the next struct we allocate on it
      will begin at a correct boundary.  */
   (void) obstack_finish (ob);
-  /* Turn off alignment as otherwise obstack_alloc will align the end
-     of the frag (obstack next_free pointer), making it seem like the
-     frag already has contents in fr_literal.  */
-  oalign = obstack_alignment_mask (ob);
-  obstack_alignment_mask (ob) = 0;
-  ptr = obstack_alloc (ob, extra + SIZEOF_STRUCT_FRAG);
-  obstack_alignment_mask (ob) = oalign;
+  /* Do not use obstack_alloc here.  If you do, you'll need to turn
+     off alignment as otherwise obstack_alloc will align the end of
+     the frag (via obstack_finish adjusting obstack next_free
+     pointer), making it seem like the frag already has contents in
+     fr_literal.  */
+  obstack_blank (ob, extra + SIZEOF_STRUCT_FRAG);
+  ptr = obstack_base (ob);
   memset (ptr, 0, SIZEOF_STRUCT_FRAG);
   totalfrags++;
   return ptr;
