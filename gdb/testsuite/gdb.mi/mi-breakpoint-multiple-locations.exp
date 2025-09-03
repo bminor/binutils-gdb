@@ -56,7 +56,7 @@ proc do_test { mi_version use_fix_flag expect_fixed_output } {
 	    global MIFLAGS decimal binfile
 	    set MIFLAGS "-i=mi${mi_version}"
 
-	    mi_clean_restart $binfile
+	    mi_clean_restart $::testfile
 
 	    mi_runto_main
 

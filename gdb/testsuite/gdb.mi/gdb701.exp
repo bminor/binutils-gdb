@@ -35,7 +35,7 @@ if {[gdb_compile $srcdir/$subdir/$srcfile $binfile executable debug] != ""} {
 # If it doesn't, Bad Things Happen(TM).
 
 # Run to main
-mi_clean_restart $binfile
+mi_clean_restart $::testfile
 mi_runto_main
 
 # Step over "foo = 0"

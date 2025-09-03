@@ -27,7 +27,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}.c" "${binfile}" executable {d
      return -1
 }
 
-mi_clean_restart $binfile
+mi_clean_restart $::testfile
 mi_runto_main
 mi_next_to "main" "" "mi-read-memory.c" "20" "next at main"
 

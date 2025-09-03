@@ -24,7 +24,7 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 
 load_lib mi-support.exp
 
-mi_clean_restart $binfile
+mi_clean_restart $::testfile
 
 mi_runto_main
 

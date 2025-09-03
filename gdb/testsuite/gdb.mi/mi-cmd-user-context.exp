@@ -29,7 +29,7 @@ set main_break_line [gdb_get_line_number "main break line"]
 
 set any "\[^\r\n\]*"
 
-mi_clean_restart $binfile
+mi_clean_restart $::testfile
 mi_create_breakpoint "$srcfile:$main_break_line" "set breakpoint in main"
 mi_run_cmd
 mi_expect_stop "breakpoint-hit" "main" "" $srcfile $main_break_line \

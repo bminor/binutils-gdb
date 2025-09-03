@@ -26,7 +26,7 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debu
      return -1
 }
 
-mi_clean_restart $binfile
+mi_clean_restart $::testfile
 
 # Don't run to main to avoid increasing the search scope to include
 # debug info of shared libraries like glibc, libgcc, etc.

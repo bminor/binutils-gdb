@@ -398,7 +398,7 @@ proc test_break {mi_mode} {
     } else {
 	set start_ops ""
     }
-    if [mi_clean_restart $binfile $start_ops ] {
+    if [mi_clean_restart $::testfile $start_ops ] {
 	return
     }
 

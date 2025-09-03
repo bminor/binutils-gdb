@@ -102,7 +102,7 @@ proc do_test {sync_command} {
 }
 
 foreach_with_prefix sync-command {"run" "continue"} {
-    if {[mi_clean_restart $binfile "separate-mi-tty"] != 0} {
+    if {[mi_clean_restart $::testfile "separate-mi-tty"] != 0} {
 	fail "could not start gdb"
 	break
     }

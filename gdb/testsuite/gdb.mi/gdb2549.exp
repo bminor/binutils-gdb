@@ -94,7 +94,7 @@ proc register_tests { } {
     register_test 666 t $binary
 }
 
-mi_clean_restart $binfile
+mi_clean_restart $::testfile
 
 register_tests_no_exec
 

@@ -26,7 +26,7 @@ if {[build_executable $testfile.exp $testfile \
     return -1
 }
 
-mi_clean_restart $binfile
+mi_clean_restart $::testfile
 
 set readnow_p [mi_readnow]
 

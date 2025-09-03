@@ -52,7 +52,7 @@ if { [build_executable "build exec" $binfile $srcfile $opts] == -1} {
 set bp_line [gdb_get_line_number "Break here" $srcfile]
 
 # Start the inferior.
-mi_clean_restart $binfile
+mi_clean_restart $::testfile
 mi_runto_main
 
 # Place a breakpoint at the dlopen() line.

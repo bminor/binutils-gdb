@@ -31,7 +31,7 @@ if {[build_executable $testfile.exp $testfile $srcfile] == -1} {
 set remote_python_file [gdb_remote_download host \
 			    ${srcdir}/${subdir}/${testfile}.py]
 
-mi_clean_restart $binfile
+mi_clean_restart $::testfile
 mi_runto_main
 
 # Delete all breakpoints, watchpoints, tracepoints, and catchpoints.

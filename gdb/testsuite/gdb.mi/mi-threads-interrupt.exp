@@ -33,7 +33,7 @@ proc test_continue_interrupt { } {
   global binfile
   global async
 
-  if {[mi_clean_restart $binfile]} {
+  if {[mi_clean_restart $::testfile]} {
       return
   }
 

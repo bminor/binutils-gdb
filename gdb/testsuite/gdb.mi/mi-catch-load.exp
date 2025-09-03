@@ -36,7 +36,7 @@ gdb_download_shlib $binfile2
 
 # test -catch-load
 with_test_prefix "catch-load" {
-    mi_clean_restart $binfile
+    mi_clean_restart $::testfile
     mi_locate_shlib $binfile2
     mi_runto_main
 
@@ -63,7 +63,7 @@ with_test_prefix "catch-load" {
 
 # test -catch-unload
 with_test_prefix "catch-unload" {
-    mi_clean_restart $binfile
+    mi_clean_restart $::testfile
     mi_locate_shlib $binfile2
     mi_runto_main
 

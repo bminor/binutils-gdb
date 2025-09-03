@@ -24,7 +24,7 @@ if [build_executable $testfile.exp $testfile $srcfile $opts] {
     return -1
 }
 
-mi_clean_restart $binfile
+mi_clean_restart $::testfile
 
 if {[mi_runto_main] < 0} {
     return -1

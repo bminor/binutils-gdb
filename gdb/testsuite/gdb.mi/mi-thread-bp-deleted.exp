@@ -47,7 +47,7 @@ foreach_mi_ui_mode mode {
     save_vars { GDBFLAGS } {
 	append GDBFLAGS " -ex \"maint set target-non-stop on\""
 	append GDBFLAGS " -ex \"set mi-async on\""
-	mi_clean_restart $binfile $start_ops
+	mi_clean_restart $::testfile $start_ops
     }
 
     mi_runto_main

@@ -35,7 +35,7 @@ if [build_executable ${testfile}.exp ${binfile} ${srcfile}] {
 
 proc run_test { unwind_on_signal } {
 
-    if {[mi_clean_restart $::binfile]} {
+    if {[mi_clean_restart $::testfile]} {
 	return
     }
 

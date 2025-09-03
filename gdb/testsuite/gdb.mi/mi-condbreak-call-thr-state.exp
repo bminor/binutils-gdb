@@ -59,7 +59,7 @@ proc test { variant } {
 	    return -1
 	}
 
-	if {[mi_clean_restart $binfile]} {
+	if {[mi_clean_restart $::testfile]} {
 	    return
 	}
 

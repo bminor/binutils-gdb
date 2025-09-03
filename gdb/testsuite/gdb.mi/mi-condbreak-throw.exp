@@ -38,7 +38,7 @@ if [build_executable ${testfile}.exp ${binfile} ${srcfile} {debug c++}] {
 
 proc run_test { unwind_on_exception } {
 
-    if {[mi_clean_restart $::binfile]} {
+    if {[mi_clean_restart $::testfile]} {
 	return
     }
 

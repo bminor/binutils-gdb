@@ -108,7 +108,7 @@ require {istarget "sparc-*-*"}
 
 mi_clean_restart
 sparc_register_tests_no_exec
-mi_clean_restart $binfile
+mi_clean_restart $::testfile
 mi_runto_main
 sparc_register_tests
 

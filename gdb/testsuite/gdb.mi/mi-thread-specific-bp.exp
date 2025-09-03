@@ -90,7 +90,7 @@ foreach_mi_ui_mode mode {
 	set start_ops ""
     }
 
-    if {[mi_clean_restart $binfile $start_ops]} {
+    if {[mi_clean_restart $::testfile $start_ops]} {
 	break
     }
 

@@ -28,7 +28,7 @@ if {[build_executable "failed to prepare" ${testfile} \
     return -1
 }
 
-mi_clean_restart $binfile
+mi_clean_restart $::testfile
 
 mi_runto_main
 

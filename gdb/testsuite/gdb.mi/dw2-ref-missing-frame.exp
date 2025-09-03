@@ -42,7 +42,7 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" $objsfile object {}] != ""
     return -1
 }
 
-if {[mi_clean_restart $binfile]} {
+if {[mi_clean_restart $::testfile]} {
     return
 }
 
@@ -54,7 +54,7 @@ if [mi_runto func_nofb_marker] {
 }
 
 # GDB could have crashed.
-if {[mi_clean_restart $binfile]} {
+if {[mi_clean_restart $::testfile]} {
     return
 }
 

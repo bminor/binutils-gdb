@@ -35,7 +35,7 @@ proc test_async_run {} {
 
 	set GDBFLAGS [concat $GDBFLAGS " -ex \"set mi-async on\""]
 
-	if {[mi_clean_restart $binfile]} {
+	if {[mi_clean_restart $::testfile]} {
 	    return
 	}
 

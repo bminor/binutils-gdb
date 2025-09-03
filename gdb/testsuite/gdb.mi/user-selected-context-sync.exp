@@ -1329,7 +1329,7 @@ foreach_with_prefix mode { "all-stop" "non-stop" } {
 	    set GDBFLAGS [concat $GDBFLAGS " -ex \"set non-stop 1\""]
 	}
 
-	if { [mi_clean_restart $binfile "separate-mi-tty"] != 0 } {
+	if { [mi_clean_restart $::testfile "separate-mi-tty"] != 0 } {
 	    break
 	}
     }

@@ -93,7 +93,7 @@ proc test_break_qualified {} {
 	    "delete temp breakpoints"
 }
 
-if {[mi_clean_restart $binfile]} {
+if {[mi_clean_restart $::testfile]} {
     return
 }
 

@@ -31,7 +31,7 @@ proc test_command_param_changed { } {
     global binfile
 
     with_test_prefix "cmd param" {
-	mi_clean_restart $binfile
+	mi_clean_restart $::testfile
 	mi_runto_main
 
 	if { $scheduler_locking_supported } {

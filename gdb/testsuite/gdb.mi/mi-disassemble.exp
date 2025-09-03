@@ -345,7 +345,7 @@ proc test_disassembly_opcode_format {} {
 	"data-disassemble checking the opcodes bytes format"
 }
 
-mi_clean_restart $binfile
+mi_clean_restart $::testfile
 mi_runto_main
 test_disassembly_only
 test_disassembly_with_opcodes

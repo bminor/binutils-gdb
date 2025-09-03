@@ -22,7 +22,7 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 
 load_lib mi-support.exp
 
-if {[mi_clean_restart $binfile]} {
+if {[mi_clean_restart $::testfile]} {
     return
 }
 

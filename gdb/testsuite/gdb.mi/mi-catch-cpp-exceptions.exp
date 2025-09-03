@@ -27,7 +27,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
     return -1
 }
 
-mi_clean_restart $binfile
+mi_clean_restart $::testfile
 if {[mi_runto_main] < 0} {
     return -1
 }
@@ -46,7 +46,7 @@ proc restart_for_test {} {
     global srcdir subdir binfile srcfile
     global main_lineno
 
-    if {[mi_clean_restart $binfile]} {
+    if {[mi_clean_restart $::testfile]} {
 	return
     }
 

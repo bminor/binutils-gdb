@@ -36,7 +36,7 @@ proc test_list_thread_groups { } {
 	"122\\^done,groups=\\\[\{id=\"i1\",type=\"process\"\}\]" \
 	"-list-thread-groups before run shows no exit-code"
 
-    mi_clean_restart $binfile
+    mi_clean_restart $::testfile
 
     with_test_prefix "first run" {
 	mi_runto_main

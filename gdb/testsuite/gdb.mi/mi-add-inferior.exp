@@ -26,7 +26,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
     return -1
 }
 
-mi_clean_restart ${binfile}
+mi_clean_restart ${::testfile}
 
 # Start execution to establish a connection.
 mi_runto_main

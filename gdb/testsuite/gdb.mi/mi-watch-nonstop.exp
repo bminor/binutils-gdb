@@ -38,7 +38,7 @@ if {[gdb_compile "$srcdir/$subdir/$srcfile" $binfile executable {debug}] != "" }
 
 save_vars { GDBFLAGS } {
     append GDBFLAGS " -ex \"set non-stop on\""
-    mi_clean_restart $binfile
+    mi_clean_restart $::testfile
 }
 
 mi_gdb_test "-gdb-set mi-async 1" ".*"

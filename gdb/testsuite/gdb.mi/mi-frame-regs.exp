@@ -62,7 +62,7 @@ proc_with_prefix do_floating_varobj_test {} {
     global hex
     global expect_out
 
-    if {[mi_clean_restart $binfile]} {
+    if {[mi_clean_restart $::testfile]} {
 	fail "couldn't start gdb"
 	return
     }
@@ -113,7 +113,7 @@ proc_with_prefix do_fixed_varobj_test {} {
     global srcfile binfile
     global hex
 
-    if {[mi_clean_restart $binfile] != 0} {
+    if {[mi_clean_restart $::testfile] != 0} {
 	fail "couldn't start gdb"
 	return
     }

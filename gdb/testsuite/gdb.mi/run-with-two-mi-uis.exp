@@ -29,7 +29,7 @@ if {[build_executable $testfile.exp $testfile ${srcfile} "debug"] == -1} {
 # UI_TO_RUN is the UI that should issue the run command.
 
 proc do_test { ui_to_run } {
-    if {[mi_clean_restart $::binfile "separate-mi-tty"] != 0} {
+    if {[mi_clean_restart $::testfile "separate-mi-tty"] != 0} {
 	fail "could not start gdb"
 	return
     }

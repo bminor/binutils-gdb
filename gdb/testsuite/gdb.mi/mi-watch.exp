@@ -155,7 +155,7 @@ proc test_watchpoint_all {mi_mode type} {
     } else {
 	set start_ops ""
     }
-    if [mi_clean_restart ${binfile} $start_ops] {
+    if [mi_clean_restart ${::testfile} $start_ops] {
 	return
     }
 

@@ -132,7 +132,7 @@ proc get_dyld_info {} {
 # number of unload events for the libraries created for this test, and
 # additionally, check for dynamic linker unload events.
 proc check_solib_unload_events {} {
-    mi_clean_restart $::binfile
+    mi_clean_restart $::testfile
 
     if {[mi_runto_main] == -1} {
 	return

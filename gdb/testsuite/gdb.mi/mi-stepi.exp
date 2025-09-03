@@ -63,7 +63,7 @@ proc test_stepi_nexti {} {
     }
 }
 
-mi_clean_restart $binfile
+mi_clean_restart $::testfile
 mi_runto_main
 test_stepi_nexti
 

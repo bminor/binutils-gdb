@@ -31,7 +31,7 @@ if {[build_executable $testfile.exp $testfile $srcfile $flags] == -1} {
 set bp_location1 [gdb_get_line_number "set breakpoint 1 here"]
 set dp_location1 [gdb_get_line_number "set dprintf 1 here"]
 
-mi_clean_restart $binfile
+mi_clean_restart $::testfile
 mi_runto_main
 
 set i 0

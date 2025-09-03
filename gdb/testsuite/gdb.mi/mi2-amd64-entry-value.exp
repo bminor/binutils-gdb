@@ -31,7 +31,7 @@ if [build_executable ${testfile}.exp ${binfile} ${srcfile} $opts] {
     return -1
 }
 
-if {[mi_clean_restart $binfile]} {
+if {[mi_clean_restart $::testfile]} {
     return
 }
 

@@ -58,7 +58,7 @@ if { [gdb_compile "$srcfileabs" "${binfile}" executable {debug}] != "" } {
 
 file delete -- $srcfileabs
 
-if {[mi_clean_restart $binfile]} {
+if {[mi_clean_restart $::testfile]} {
     return
 }
 

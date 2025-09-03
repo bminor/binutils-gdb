@@ -32,7 +32,7 @@ if [build_executable "Failed to build $testfile" $testfile $srcfile \
     return -1;
 }
 
-if {[mi_clean_restart $binfile]} {
+if {[mi_clean_restart $::testfile]} {
     return
 }
 

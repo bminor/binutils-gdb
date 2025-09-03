@@ -34,7 +34,7 @@ if [build_executable "failed to prepare" $testfile $srcfile $opts] {
     return -1
 }
 
-if [mi_clean_restart $binfile] {
+if [mi_clean_restart $::testfile] {
     return
 }
 
