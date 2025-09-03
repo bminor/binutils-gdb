@@ -476,7 +476,9 @@ public:
 
   compunit_symtab_range compunits ()
   {
-    return compunit_symtab_range (compunit_symtabs);
+    next_iterator<compunit_symtab> begin (compunit_symtabs);
+
+    return compunit_symtab_range (std::move (begin));
   }
 
   /* A range adapter that makes it possible to iterate over all

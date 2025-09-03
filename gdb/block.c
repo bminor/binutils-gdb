@@ -325,10 +325,11 @@ block::set_scope (const char *scope, struct obstack *obstack)
 next_range<using_direct>
 block::get_using () const
 {
-  if (m_namespace_info == nullptr)
-    return {};
-  else
-    return next_range<using_direct> (m_namespace_info->using_decl);
+  next_iterator<using_direct> begin (m_namespace_info != nullptr
+				     ? m_namespace_info->using_decl
+				     : nullptr);
+
+  return next_range<using_direct> (std::move (begin));
 }
 
 /* See block.h.  */

@@ -193,7 +193,9 @@ struct program_space
      for (objfile &objf : pspace->objfiles ()) { ... }  */
   objfiles_range objfiles ()
   {
-    return objfiles_range (objfiles_iterator (m_objfiles_list.begin ()));
+    objfiles_iterator begin (m_objfiles_list.begin ());
+
+    return objfiles_range (std::move (begin));
   }
 
   using objfiles_safe_range = basic_safe_range<objfiles_range>;
@@ -207,8 +209,7 @@ struct program_space
      deleted during iteration.  */
   objfiles_safe_range objfiles_safe ()
   {
-    return objfiles_safe_range
-      (objfiles_range (objfiles_iterator (m_objfiles_list.begin ())));
+    return objfiles_safe_range (this->objfiles ());
   }
 
   /* Iterate over all objfiles of the program space in the order that makes the

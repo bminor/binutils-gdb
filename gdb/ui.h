@@ -227,7 +227,9 @@ using ui_range = next_range<ui>;
 static inline
 ui_range all_uis ()
 {
-  return ui_range (ui_list);
+  next_iterator<ui> begin (ui_list);
+
+  return ui_range (std::move (begin));
 }
 
 #endif /* GDB_UI_H */

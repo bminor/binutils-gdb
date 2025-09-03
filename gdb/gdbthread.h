@@ -794,7 +794,9 @@ all_non_exited_threads (process_stratum_target *proc_target = nullptr,
 inline all_threads_safe_range
 all_threads_safe ()
 {
-  return all_threads_safe_range (all_threads_iterator::begin_t {});
+  all_threads_safe_iterator begin (all_threads_iterator::begin_t {});
+
+  return all_threads_safe_range (std::move (begin));
 }
 
 extern int thread_count (process_stratum_target *proc_target);

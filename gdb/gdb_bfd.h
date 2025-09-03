@@ -24,7 +24,6 @@
 #include "gdbsupport/byte-vector.h"
 #include "gdbsupport/function-view.h"
 #include "gdbsupport/gdb_ref_ptr.h"
-#include "gdbsupport/iterator-range.h"
 #include "gdbsupport/next-iterator.h"
 
 /* A registry adaptor for BFD.  This arranges to store the registry in
@@ -242,13 +241,17 @@ using gdb_bfd_section_range = next_range<asection>;
 static inline gdb_bfd_section_range
 gdb_bfd_sections (bfd *abfd)
 {
-  return gdb_bfd_section_range (abfd->sections);
+  next_iterator<asection> begin (abfd->sections);
+
+  return gdb_bfd_section_range (std::move (begin));
 }
 
 static inline gdb_bfd_section_range
 gdb_bfd_sections (const gdb_bfd_ref_ptr &abfd)
 {
-  return gdb_bfd_section_range (abfd->sections);
+  next_iterator<asection> begin (abfd->sections);
+
+  return gdb_bfd_section_range (std::move (begin));
 };
 
 /* A wrapper for bfd_stat that acquires the per-BFD lock on ABFD.  */

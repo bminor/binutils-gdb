@@ -707,7 +707,9 @@ static intrusive_list<lwp_info> lwp_list;
 lwp_info_range
 all_lwps ()
 {
-  return lwp_info_range (lwp_list.begin ());
+  lwp_info_iterator begin (lwp_list.begin ());
+
+  return lwp_info_range (std::move (begin));
 }
 
 /* See linux-nat.h.  */
@@ -715,7 +717,7 @@ all_lwps ()
 lwp_info_safe_range
 all_lwps_safe ()
 {
-  return lwp_info_safe_range (lwp_list.begin ());
+  return lwp_info_safe_range (all_lwps ());
 }
 
 /* Add LP to sorted-by-reverse-creation-order doubly-linked list.  */

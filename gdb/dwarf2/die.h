@@ -108,7 +108,9 @@ struct die_info
      DIE.  */
   next_range<die_info> children () const
   {
-    return next_range<die_info> (child);
+    next_iterator<die_info> begin (child);
+
+    return next_range<die_info> (std::move (begin));
   }
 
   /* DWARF-2 tag for this DIE.  */

@@ -146,7 +146,11 @@ struct block : public allocate_on_obstack<block>
 
   /* Return an iterator range for this block's multidict.  */
   iterator_range<mdict_iterator_wrapper> multidict_symbols () const
-  { return iterator_range<mdict_iterator_wrapper> (m_multidict); }
+  {
+    mdict_iterator_wrapper begin (m_multidict);
+
+    return iterator_range<mdict_iterator_wrapper> (std::move (begin));
+  }
 
   /* Set this block's multidict.  */
   void set_multidict (multidictionary *multidict)
@@ -610,9 +614,16 @@ private:
   struct block_iterator m_iter;
 };
 
-/* An iterator range for block_iterator_wrapper.  */
+/* Return an iterator range for block_iterator_wrapper.  */
 
-typedef iterator_range<block_iterator_wrapper> block_iterator_range;
+inline iterator_range<block_iterator_wrapper>
+block_iterator_range (const block *block,
+		      const lookup_name_info *name = nullptr)
+{
+  block_iterator_wrapper begin (block, name);
+
+  return iterator_range<block_iterator_wrapper> (std::move (begin));
+}
 
 /* Return true if symbol A is the best match possible for DOMAIN.  */
 

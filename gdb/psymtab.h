@@ -111,7 +111,9 @@ public:
 
   partial_symtab_range range ()
   {
-    return partial_symtab_range (psymtabs);
+    next_iterator<partial_symtab> begin (psymtabs);
+
+    return partial_symtab_range (std::move (begin));
   }
 
 

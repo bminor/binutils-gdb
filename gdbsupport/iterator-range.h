@@ -30,9 +30,8 @@ struct iterator_range
   /* Create an iterator_range using BEGIN as the begin iterator.
 
      Assume that the end iterator can be default-constructed.  */
-  template <typename... Args>
-  iterator_range (Args &&...args)
-    : m_begin (std::forward<Args> (args)...)
+  explicit iterator_range (IteratorType begin)
+    : iterator_range (std::move (begin), IteratorType {})
   {}
 
   /* Create an iterator range using explicit BEGIN and END iterators.  */
