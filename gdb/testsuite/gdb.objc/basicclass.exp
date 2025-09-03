@@ -72,7 +72,7 @@ proc deduce_language_of_main {} {
 proc do_objc_tests {} {
     global binfile
 
-    clean_restart $binfile
+    clean_restart $::testfile
 
     deduce_language_of_main
 }
