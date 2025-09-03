@@ -1072,6 +1072,8 @@ dwarf2_emit_insn (int size)
 {
   struct dwarf2_line_info loc;
 
+  seg_info (now_seg)->insn_seen = 1;
+
   if (debug_type != DEBUG_DWARF2
       ? !dwarf2_loc_directive_seen
       : !seen_at_least_1_file ())

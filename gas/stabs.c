@@ -229,14 +229,14 @@ s_stab_generic (int what,
 	obstack_free (&notes, stab_secname);
 
       subseg_set (stab, 0);
-      if (!seg_info (stab)->hadone)
+      if (!seg_info (stab)->stab_seen)
 	{
 	  bfd_set_section_flags (stab,
 				 SEC_READONLY | SEC_RELOC | SEC_DEBUGGING);
 #ifdef INIT_STAB_SECTION
 	  INIT_STAB_SECTION (stab, stabstr);
 #endif
-	  seg_info (stab)->hadone = 1;
+	  seg_info (stab)->stab_seen = 1;
 	}
     }
   else if (freenames)
