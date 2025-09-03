@@ -231,9 +231,9 @@ proc dap_read_response {cmd num} {
 	set d [_dap_read_json]
 	if {[dict get $d type] == "response"} {
 	    if {[dict get $d request_seq] != $num} {
-		error "saw wrong request_seq in $obj"
+		error "saw wrong request_seq in $d"
 	    } elseif {[dict get $d command] != $cmd} {
-		error "saw wrong command in $obj"
+		error "saw wrong command in $d"
 	    } else {
 		return [list $d $result]
 	    }
