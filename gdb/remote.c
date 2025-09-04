@@ -4669,8 +4669,6 @@ remote_target::get_offsets ()
 	  if (bss_addr != data_addr)
 	    warning (_("Target reported unsupported offsets: %s"), buf);
 	}
-      else
-	lose = 1;
     }
   else if (startswith (ptr, "TextSeg="))
     {
