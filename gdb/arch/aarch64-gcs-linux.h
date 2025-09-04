@@ -24,7 +24,7 @@
 
 /* Feature check for Guarded Control Stack.  */
 #ifndef HWCAP_GCS
-#define HWCAP_GCS (1UL << 32)
+#define HWCAP_GCS (1ULL << 32)
 #endif
 
 /* Make sure we only define these if the kernel header doesn't.  */

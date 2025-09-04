@@ -23,7 +23,7 @@
 
 /* Feature check for Guarded Control Stack.  */
 #ifndef HWCAP_GCS
-#define HWCAP_GCS (1UL << 32)
+#define HWCAP_GCS (1ULL << 32)
 #endif
 
 #ifndef PR_GET_SHADOW_STACK_STATUS
