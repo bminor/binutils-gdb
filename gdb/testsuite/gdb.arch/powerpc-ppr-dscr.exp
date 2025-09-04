@@ -66,7 +66,7 @@ proc ppr_dscr_available {} {
 }
 
 with_test_prefix "check PPR/DSCR access" {
-    clean_restart $binfile
+    clean_restart $::testfile
 
     if ![runto_main] {
 	return
@@ -86,7 +86,7 @@ with_test_prefix "check PPR/DSCR access" {
 }
 
 # Now do the actual test
-clean_restart $binfile
+clean_restart $::testfile
 
 if ![runto_main] {
     return

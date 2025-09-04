@@ -28,7 +28,7 @@ proc do_test { name {opts {}} } {
         return
     }
 
-    clean_restart ${binfile}.${name}
+    clean_restart ${::testfile}.${name}
 
     if {![runto_main]} {
         return

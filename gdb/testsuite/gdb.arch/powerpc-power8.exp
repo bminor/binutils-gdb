@@ -27,7 +27,8 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${objfile}" object {debug}] 
     return -1
 }
 
-clean_restart ${objfile}
+clean_restart
+gdb_load $objfile
 
 # Disassemble the function.
 set func ""
