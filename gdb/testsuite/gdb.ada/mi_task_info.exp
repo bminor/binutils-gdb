@@ -26,7 +26,7 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug additional
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
-if {[mi_clean_restart $binfile]} {
+if {[mi_clean_restart $::testfile]} {
     return
 }
 

@@ -28,7 +28,7 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug additional
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
-mi_clean_restart $binfile
+mi_clean_restart $::testfile
 
 if {[mi_runto_main] < 0} {
    return 0

@@ -29,7 +29,7 @@ foreach_gnat_encoding scenario flags {none all minimal} {
 	return -1
     }
 
-    mi_clean_restart $binfile-$scenario
+    mi_clean_restart $::testfile-$scenario
 
     if {[mi_runto_main] < 0} {
 	return 0

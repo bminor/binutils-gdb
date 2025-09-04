@@ -30,7 +30,7 @@ set any_nb "\[0-9\]+"
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
-mi_clean_restart $binfile
+mi_clean_restart $::testfile
 
 ####################################
 # 1. Try catching all exceptions.  #

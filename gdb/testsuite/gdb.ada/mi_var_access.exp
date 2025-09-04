@@ -26,7 +26,7 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable debug] != "" } {
     return -1
 }
 
-mi_clean_restart $binfile
+mi_clean_restart $::testfile
 
 if {[mi_runto_main] < 0} {
     return 0

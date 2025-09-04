@@ -30,7 +30,7 @@ set any_nb "\[0-9\]+"
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
-if {[mi_clean_restart $binfile]} {
+if {[mi_clean_restart $::testfile]} {
     return
 }
 
