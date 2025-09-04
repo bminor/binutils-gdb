@@ -877,6 +877,9 @@ ldfile_find_command_file (const char *name,
   /* Restore the original path list.  */
   *search_tail_ptr = NULL;
 
+  if (!filename)
+    return NULL;
+
  success:
   /* PR 24576: Catch the case where the user has accidentally included
      the same linker script twice.  */
