@@ -67,7 +67,7 @@ save_vars { ::env(GLIBC_TUNABLES) } {
 
     # Load the core file and check the value of the shadow stack pointer.
     if {$core_generated} {
-	clean_restart $binfile
+	clean_restart $::testfile
 
 	with_test_prefix "OS corefile" {
 	    # Read ssp value from saved output of the test program.
@@ -83,7 +83,7 @@ save_vars { ::env(GLIBC_TUNABLES) } {
 	return
     }
 
-    clean_restart $binfile
+    clean_restart $::testfile
 
     if ![runto $linespec] {
 	return
@@ -110,7 +110,7 @@ save_vars { ::env(GLIBC_TUNABLES) } {
 
     gdb_assert { $gcore_generated } "gcore corefile created"
     if { $gcore_generated } {
-	clean_restart $binfile
+	clean_restart $::testfile
 
 	with_test_prefix "gcore corefile" {
 	    check_core_file $gcore_filename $ssp_in_gcore

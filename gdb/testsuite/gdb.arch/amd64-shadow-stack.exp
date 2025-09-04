@@ -51,7 +51,7 @@ save_vars { ::env(GLIBC_TUNABLES) } {
 	    "continue to SIGSEGV"
     }
 
-    clean_restart ${binfile}
+    clean_restart ${::testfile}
     if { ![runto_main] } {
 	return
     }
