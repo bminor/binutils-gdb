@@ -21075,6 +21075,25 @@ process_got_section_contents (Filedata * filedata)
 	  }
 
 	uint32_t entsz = section->sh_entsize;
+	/* NB: Gold, lld and mold set sh_entsize to 0 on .got and
+	   .got.plt sections.  */
+	if (entsz == 0)
+	  {
+	    if (is_32bit_elf)
+	      switch (filedata->file_header.e_machine)
+		{
+		default:
+		  entsz = 4;
+		  break;
+		case EM_X86_64:
+		  /* x32 uses 8 byte GOT sh_entsize.  */
+		  entsz = 8;
+		  break;
+		}
+	    else
+	      entsz = 8;
+	  }
+
 	entries = section->sh_size / entsz;
 	if (entries == 1)
 	  printf (_("\nGlobal Offset Table '%s' contains 1 entry:\n"),
