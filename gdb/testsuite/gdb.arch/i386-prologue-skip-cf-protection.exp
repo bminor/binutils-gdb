@@ -58,7 +58,7 @@ with_test_prefix "skip-cf-protection" {
 	return
     }
 
-    clean_restart ${binfile}
+    clean_restart ${::testfile}
 
     test_run
 }

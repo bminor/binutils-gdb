@@ -53,7 +53,7 @@ proc skip_breakpoint { msg } {
 }
 
 
-clean_restart $binfile
+clean_restart $::testfile
 
 #
 # Run to `main' where we begin our tests.

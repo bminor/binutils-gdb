@@ -23,7 +23,7 @@ require {is_any_target "i?86-*-*" "x86_64-*-*"}
 
 standard_testfile
 
-if [prepare_for_testing "failed to prepare" ${binfile} ${srcfile} {debug $additional_flags}] {
+if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug $additional_flags}] {
     return -1
 }
 
