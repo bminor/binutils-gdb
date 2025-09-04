@@ -23,7 +23,8 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
     return -1
 }
 
-clean_restart $binfile
+clean_restart
+gdb_load $binfile
 
 # We need to start the inferior to place the breakpoints in the memory at all.
 if ![runto_main] {

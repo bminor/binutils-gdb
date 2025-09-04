@@ -32,7 +32,8 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {"add
     return -1
 }
 
-clean_restart $binfile
+clean_restart
+gdb_load $binfile
 
 gdb_test "b -q main" "Breakpoint 1.*" "set breakpoint at main"
 gdb_test "b -q sub1" "Breakpoint 2.*" "set breakpoint at sub1"

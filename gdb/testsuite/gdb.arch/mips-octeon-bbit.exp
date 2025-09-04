@@ -86,7 +86,8 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable \
 
 pass "compilation"
 
-clean_restart $binfile
+clean_restart
+gdb_load $binfile
 # Native needs run.
 runto_main
 

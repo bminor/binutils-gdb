@@ -25,7 +25,8 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {}] !
     return -1
 }
 
-clean_restart $binfile
+clean_restart
+gdb_load $binfile
 
 proc test_stepi {function } {
     # Restart the program from scratch. If GDB got confused during one
