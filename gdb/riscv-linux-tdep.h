@@ -20,10 +20,10 @@
 
 #include "linux-record.h"
 
-/* riscv64_canonicalize_syscall maps from the native riscv Linux set
-   of syscall ids into a canonical set of syscall ids used by
+/* riscv_linux_canonicalize_syscall maps from the native riscv Linux
+   set of syscall ids into a canonical set of syscall ids used by
    process record.  */
 
-extern enum gdb_syscall riscv64_canonicalize_syscall (int syscall);
+extern enum gdb_syscall riscv_linux_canonicalize_syscall (int syscall);
 
 #endif /* GDB_RISCV_LINUX_TDEP_H */

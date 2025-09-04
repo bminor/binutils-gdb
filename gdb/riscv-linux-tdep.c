@@ -230,7 +230,7 @@ riscv_linux_syscall_record (struct regcache *regcache,
 {
   gdb_assert (regcache != nullptr);
 
-  enum gdb_syscall syscall_gdb = riscv64_canonicalize_syscall (svc_number);
+  enum gdb_syscall syscall_gdb = riscv_linux_canonicalize_syscall (svc_number);
 
   if (record_debug > 1)
     gdb_printf (gdb_stdlog, "Made syscall %s.\n", plongest (svc_number));
@@ -261,12 +261,11 @@ riscv_linux_syscall_record (struct regcache *regcache,
   return 0;
 }
 
-/* Initialize the riscv64_linux_record_tdep.  */
+/* Initialize the riscv_linux_record_tdep.  */
 
 static void
-riscv64_linux_record_tdep_init (struct gdbarch *gdbarch,
-				struct linux_record_tdep &
-				riscv_linux_record_tdep)
+riscv_linux_record_tdep_init (struct gdbarch *gdbarch,
+			      struct linux_record_tdep &riscv_linux_record_tdep)
 {
   gdb_assert (gdbarch != nullptr);
 
@@ -561,7 +560,7 @@ riscv_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->syscall_next_pc = riscv_linux_syscall_next_pc;
   tdep->riscv_syscall_record = riscv_linux_syscall_record;
 
-  riscv64_linux_record_tdep_init (gdbarch, riscv_linux_record_tdep);
+  riscv_linux_record_tdep_init (gdbarch, riscv_linux_record_tdep);
 
   /* Functions for 'catch syscall'.  */
   set_gdbarch_xml_syscall_file (gdbarch, "syscalls/riscv-linux.xml");
