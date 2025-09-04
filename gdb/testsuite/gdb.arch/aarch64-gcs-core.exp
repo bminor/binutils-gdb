@@ -61,7 +61,8 @@ if {!$core_generated} {
 }
 
 if {$core_generated} {
-    clean_restart $binfile
+    clean_restart
+    gdb_load $binfile
 
     with_test_prefix "OS corefile" {
 	# Read GCSPR value from saved output of the test program.
@@ -78,7 +79,8 @@ if ![gcore_cmd_available] {
     return
 }
 
-clean_restart $binfile
+clean_restart
+gdb_load $binfile
 
 if ![runto $linespec] {
     return
@@ -105,7 +107,8 @@ set gcore_generated [gdb_gcore_cmd "$gcore_filename" "generate gcore file"]
 
 gdb_assert { $gcore_generated } "gcore corefile created"
 if {$gcore_generated} {
-    clean_restart $binfile
+    clean_restart
+    gdb_load $binfile
 
     with_test_prefix "gcore corefile" {
 	check_core_file $gcore_filename $gcspr_in_gcore

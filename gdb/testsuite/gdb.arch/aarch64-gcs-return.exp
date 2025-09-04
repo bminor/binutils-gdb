@@ -37,7 +37,8 @@ if ![runto ${begin_line}] {
 
 proc restart_and_run_infcall_call2 {} {
     global binfile call2_line
-    clean_restart ${binfile}
+    clean_restart
+    gdb_load $binfile
     if ![runto_main] {
 	return
     }
@@ -79,7 +80,8 @@ with_test_prefix "test return 'above' an inferior call" {
     gdb_continue_to_end
 }
 
-clean_restart ${binfile}
+clean_restart
+gdb_load $binfile
 if ![runto ${begin_line}] {
     return
 }
@@ -110,7 +112,8 @@ with_test_prefix "test return from current frame" {
     gdb_continue_to_end
 }
 
-clean_restart ${binfile}
+clean_restart
+gdb_load $binfile
 if ![runto_main] {
     return
 }

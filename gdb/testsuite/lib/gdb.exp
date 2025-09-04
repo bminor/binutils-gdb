@@ -4994,7 +4994,8 @@ gdb_caching_proc allow_aarch64_sve_tests {} {
     }
 
     # Compilation succeeded so now run it via gdb.
-    clean_restart $obj
+    clean_restart
+    gdb_load $obj
     gdb_run_cmd
     gdb_expect {
         -re ".*Illegal instruction.*${gdb_prompt} $" {
@@ -5367,7 +5368,8 @@ gdb_caching_proc allow_aarch64_gcs_tests {} {
 
     # Compilation succeeded so now run it via gdb.
     set allow_gcs_tests 0
-    clean_restart $obj
+    clean_restart
+    gdb_load $obj
     gdb_run_cmd
     gdb_expect {
 	-re ".*$inferior_exited_re normally.*${gdb_prompt} $" {

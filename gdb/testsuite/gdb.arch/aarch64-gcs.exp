@@ -78,7 +78,8 @@ gdb_test "print \$gcspr == \$gcspr_in_main - 16" ". = 1" \
     "test value of gcspr when GCS SIGSEGV happens"
 
 # Test writing to GCSPR.
-clean_restart ${binfile}
+clean_restart
+gdb_load $binfile
 if ![runto normal_function0] {
     return
 }
