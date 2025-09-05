@@ -103,7 +103,8 @@ proc return2_tests { } {
 
 # Start with a fresh gdb.
 
-clean_restart ${binfile}
+clean_restart
+gdb_load $binfile
 
 set timeout 30
 return2_tests

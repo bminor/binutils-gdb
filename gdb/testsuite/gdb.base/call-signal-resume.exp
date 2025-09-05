@@ -47,7 +47,8 @@ proc get_dummy_frame_number { } {
 
 # Start with a fresh gdb.
 
-clean_restart ${binfile}
+clean_restart
+gdb_load $binfile
 
 if { ![runto_main] } {
     return 0

@@ -29,7 +29,8 @@ if  {[gdb_compile "${srcdir}/${subdir}/macscp1.c" "${objfile}" \
     return -1
 }
 
-clean_restart ${binfile}
+clean_restart
+gdb_load $binfile
 
 
 # Ask GDB to show the current definition of MACRO, and return a list

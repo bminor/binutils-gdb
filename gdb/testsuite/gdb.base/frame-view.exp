@@ -28,7 +28,8 @@ if { [build_executable "failed to prepare" \
 # "select-frame view".
 
 proc test_select_frame_view { with_pretty_printer } {
-    clean_restart $::binfile
+    clean_restart
+    gdb_load $::binfile
 
     if { $with_pretty_printer } {
 	require allow_python_tests

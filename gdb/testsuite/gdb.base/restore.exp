@@ -96,7 +96,8 @@ restore_tests
 set timeout $prev_timeout
 
 # Test PR cli/23785
-clean_restart $binfile
+clean_restart
+gdb_load $binfile
 if { ![runto_main] } {
     return -1
 }

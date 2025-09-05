@@ -56,7 +56,8 @@ proc gdb_test_with_xfail { cmd re cond} {
 }
 
 proc do_tests {force_internal_tls} {
-    clean_restart $::binfile
+    clean_restart
+    gdb_load $::binfile
     if ![runto_main] {
 	return
     }
@@ -288,7 +289,8 @@ proc do_tests {force_internal_tls} {
 	return
     }
 
-    clean_restart $::binfile
+    clean_restart
+    gdb_load $::binfile
 
     set core_loaded [gdb_core_cmd $corefile "load corefile"]
     if { $core_loaded == -1 } {

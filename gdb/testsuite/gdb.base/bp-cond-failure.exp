@@ -45,7 +45,8 @@ if { [is_address_zero_readable] } {
 }
 
 proc run_test { cond_eval access_type bpexpr nloc } {
-    clean_restart ${::binfile}
+    clean_restart
+    gdb_load $::binfile
 
     if { ![runto_main] } {
 	return -1

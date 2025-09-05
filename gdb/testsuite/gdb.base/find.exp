@@ -22,7 +22,8 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
     return -1
 }
 
-clean_restart ${binfile}
+clean_restart
+gdb_load $binfile
 
 gdb_test "break $srcfile:stop_here" \
     "Breakpoint.*at.* file .*$srcfile, line.*" \

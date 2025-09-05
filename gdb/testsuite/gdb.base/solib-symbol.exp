@@ -34,7 +34,8 @@ if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib} $lib_flags] != ""
   return -1
 }
 
-clean_restart $binfile
+clean_restart
+gdb_load $binfile
 gdb_load_shlib $binfile_lib
 
 # Set a breakpoint in the binary.

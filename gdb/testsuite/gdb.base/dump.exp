@@ -46,7 +46,8 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable ${op
      return -1
 }
 
-clean_restart $binfile
+clean_restart
+gdb_load $binfile
 
 gdb_test "dump mem /dev/null 0x10 0x20" "Cannot access memory at address 0x10" \
 	 "inaccessible memory is reported"

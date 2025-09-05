@@ -201,7 +201,8 @@ gdb_test "maint info blocks" [make_blocks_result normal_func \
 				  inline_func_a inline_func_b] \
     "maint info blocks using stored \$pc, inferior still running"
 
-clean_restart $binfile
+clean_restart
+gdb_load $binfile
 
 # Use the recorded $pc value to check inline frames when the inferior
 # is not executing.

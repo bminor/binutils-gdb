@@ -60,7 +60,8 @@ with_test_prefix "without symbols" {
     gdb_test "" ".*x=3.*x=4.*x=3.*" "run to resolved dprintf"
 }
 
-clean_restart ${binfile}
+clean_restart
+gdb_load $binfile
 gdb_load_shlib $lib_sl
 
 #

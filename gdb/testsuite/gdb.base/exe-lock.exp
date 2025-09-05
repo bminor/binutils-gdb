@@ -27,7 +27,8 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debu
     return -1
 }
 
-clean_restart ${binfile}
+clean_restart
+gdb_load $binfile
 
 # Sanity-check: Verify that the executable exists. This is just to
 # make sure that, when we verify later that the file does not exist,

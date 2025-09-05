@@ -51,7 +51,8 @@ proc args_test { name arglist {re_list {}} } {
 	save_vars { ::GDBFLAGS } {
 	    set ::GDBFLAGS "$::GDBFLAGS --args $::binfile $arglist"
 
-	    clean_restart $::binfile
+	    clean_restart
+	    gdb_load $::binfile
 
 	    gdb_test_no_output "set startup-with-shell ${startup_with_shell}" \
 		"set startup-with-shell for $name"

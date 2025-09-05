@@ -40,7 +40,8 @@ if { [do_compile {-mcpu=native}] != ""
 	return -1
 }
 
-clean_restart ${binfile}
+clean_restart
+gdb_load $binfile
 
 if { ![runto_main] } {
     return -1

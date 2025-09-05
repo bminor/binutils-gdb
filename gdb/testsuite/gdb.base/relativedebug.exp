@@ -24,7 +24,8 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 
 # Get things started.
 
-clean_restart ${binfile}
+clean_restart
+gdb_load $binfile
 
 runto_main
 

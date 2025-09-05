@@ -53,7 +53,8 @@ proc find_location_contexts { } {
     global loc_name loc_index fill
     global decimal hex gdb_prompt binfile
 
-    clean_restart ${binfile}
+    clean_restart
+    gdb_load $binfile
 
     if {![runto_main]} {
 	return
@@ -130,7 +131,8 @@ proc check_bp_locations {bpnum states cond {msg ""}} {
 proc_with_prefix scenario_1 { start_before } {
     global warning decimal fill bkptno_num_re binfile
 
-    clean_restart ${binfile}
+    clean_restart
+    gdb_load $binfile
 
     if { $start_before } {
 	if {![runto_main temporary]} {
@@ -242,7 +244,8 @@ proc setup_bps { bpnum1_name bpnum2_name } {
 proc_with_prefix scenario_2 { start_before } {
     global binfile bkptno_num_re
 
-    clean_restart ${binfile}
+    clean_restart
+    gdb_load $binfile
 
     if { $start_before } {
 	if {![runto_main temporary]} {
@@ -290,7 +293,8 @@ proc_with_prefix scenario_2 { start_before } {
 proc_with_prefix scenario_3 { start_before } {
     global binfile bkptno_num_re loc_index warning
 
-    clean_restart ${binfile}
+    clean_restart
+    gdb_load $binfile
 
     if { $start_before } {
 	if {![runto_main temporary]} {
@@ -367,7 +371,8 @@ proc_with_prefix scenario_3 { start_before } {
 proc_with_prefix scenario_4 { start_before } {
     global binfile bkptno_num_re loc_index warning
 
-    clean_restart ${binfile}
+    clean_restart
+    gdb_load $binfile
 
     if { $start_before } {
 	if {![runto_main temporary]} {

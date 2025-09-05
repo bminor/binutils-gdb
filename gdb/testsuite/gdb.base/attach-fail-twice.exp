@@ -77,7 +77,8 @@ proc test_good_attach {test} {
 }
 
 proc_with_prefix test {} {
-    clean_restart $::binfile
+    clean_restart
+    gdb_load $::binfile
 
     # GDB used to have a bug on Windows where failing to attach once
     # made a subsequent "attach" or "run" hang.  So it's important for

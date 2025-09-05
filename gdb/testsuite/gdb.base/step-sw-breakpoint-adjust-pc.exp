@@ -36,7 +36,8 @@ proc test {non_stop displaced always_inserted} {
 
     save_vars { GDBFLAGS } {
 	set GDBFLAGS "$GDBFLAGS -ex \"set non-stop $non_stop\""
-	clean_restart $binfile
+	clean_restart
+	gdb_load $binfile
     }
 
     gdb_test_no_output "set displaced-stepping $displaced"

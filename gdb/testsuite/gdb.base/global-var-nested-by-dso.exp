@@ -42,7 +42,8 @@ if { [gdb_compile $srcdir/$subdir/$srcfile $binfile executable \
   return -1
 }
 
-clean_restart $binfile
+clean_restart
+gdb_load $binfile
 gdb_load_shlib $binfile_lib1
 gdb_load_shlib $binfile_lib2
 

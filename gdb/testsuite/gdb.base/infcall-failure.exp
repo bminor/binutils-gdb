@@ -39,7 +39,8 @@ proc start_gdb_and_runto_main { target_async target_non_stop } {
 	append ::GDBFLAGS \
 	    " -ex \"maintenance set target-async ${target_async}\""
 
-	clean_restart ${::binfile}
+	clean_restart
+	gdb_load $::binfile
     }
 
     if { ![runto_main] } {

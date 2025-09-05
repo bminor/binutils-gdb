@@ -90,7 +90,8 @@ proc find_env {varname} {
 proc_with_prefix test_set_unset_env {} {
     global binfile
 
-    clean_restart $binfile
+    clean_restart
+    gdb_load $binfile
 
     # First test with no TEST_GDB_VAR.
     with_test_prefix "test1" {
@@ -151,7 +152,8 @@ proc_with_prefix test_inherit_env_var {} {
     save_vars {env(TEST_GDB_GLOBAL)} {
 	set env(TEST_GDB_GLOBAL) "Global environment value"
 
-	clean_restart $binfile
+	clean_restart
+	gdb_load $binfile
 
 	gdb_breakpoint $bp_line
 

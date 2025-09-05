@@ -531,7 +531,8 @@ proc test-string {variant} {
     global srcfile binfile
 
     # Load symbols for the completion test below.
-    clean_restart $binfile
+    clean_restart
+    gdb_load $binfile
 
     # Use these variables to make sure we don't call the wrong command
     # by mistake.

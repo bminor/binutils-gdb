@@ -46,7 +46,8 @@ proc test {cmds_after_kill} {
     global gdb_prompt
     global decimal
 
-    clean_restart ${binfile}
+    clean_restart
+    gdb_load $binfile
 
     if ![runto done] {
 	return

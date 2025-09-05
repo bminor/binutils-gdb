@@ -42,7 +42,8 @@ run_on_host \
 proc initial_setup_simple { startup_with_shell run_args } {
     global hex decimal binfile unique_file
 
-    clean_restart $binfile
+    clean_restart
+    gdb_load $binfile
 
     gdb_test_no_output "set startup-with-shell $startup_with_shell"
     gdb_test_no_output "set print characters unlimited"

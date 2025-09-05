@@ -40,7 +40,8 @@ set other_handler_location [gdb_get_line_number "other handler location"]
 proc restart {} {
     global binfile
 
-    clean_restart $binfile
+    clean_restart
+    gdb_load $binfile
 
     gdb_test "display/i \$pc"
 

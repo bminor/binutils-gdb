@@ -885,7 +885,8 @@ proc previous_line_is_ok { str } {
 # prompt, the previous line disables styling as expected.
 proc test_pagination_prompt_styling {} {
     with_ansi_styling_terminal {
-	clean_restart $::binfile
+	clean_restart
+	gdb_load $::binfile
     }
 
     if {![runto_main]} {
@@ -981,7 +982,8 @@ proc test_pagination_prompt_styling {} {
 # default style once the logging file has finished.
 proc test_pagination_continue_styling_1 { length } {
     with_ansi_styling_terminal {
-	clean_restart $::binfile
+	clean_restart
+	gdb_load $::binfile
     }
 
     set filename [string repeat "ax" $length]
@@ -1036,7 +1038,8 @@ proc test_pagination_continue_styling { } {
 # Check to see if the Python styling of disassembler output is
 # expected or not, this styling requires Python support in GDB, and
 # the Python pygments module to be available.
-clean_restart ${binfile}
+clean_restart
+gdb_load $binfile
 if {[allow_python_tests] && [gdb_py_module_available "pygments"]} {
     set python_disassembly_styling true
 } else {

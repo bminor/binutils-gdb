@@ -29,7 +29,8 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 
 # Start with a fresh gdb.
 
-clean_restart ${binfile}
+clean_restart
+gdb_load $binfile
 
 gdb_test_no_output "set args ${pattern}"	\
     "set buffer exceeding arguments"

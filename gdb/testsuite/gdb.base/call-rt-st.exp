@@ -39,7 +39,8 @@ set allow_float_test [allow_float_test]
 
 # Start with a fresh gdb.
 
-clean_restart ${binfile}
+clean_restart
+gdb_load $binfile
 gdb_test_no_output "set print sevenbit-strings"
 gdb_test_no_output "set print address off"
 gdb_test_no_output "set width 0"

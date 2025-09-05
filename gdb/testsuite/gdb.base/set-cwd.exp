@@ -184,7 +184,9 @@ proc_with_prefix test_cwd_reset { } {
 }
 
 test_cd_into_dir
-clean_restart $binfile
+clean_restart
+gdb_load $binfile
 test_tilde_expansion
-clean_restart $binfile
+clean_restart
+gdb_load $binfile
 test_cwd_reset

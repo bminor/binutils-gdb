@@ -103,7 +103,8 @@ proc jit_test_reread {standalone change_addr} {
 
     with_test_prefix "initial run" {
 	if {$standalone} {
-	    clean_restart $binfile
+	    clean_restart
+	    gdb_load $binfile
 	} else {
 	    clean_restart $binfile_dl
 	}

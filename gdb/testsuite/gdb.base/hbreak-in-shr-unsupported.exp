@@ -34,7 +34,8 @@ if { [gdb_compile_shlib ${srcdir}/${subdir}/${lib_src} ${lib_so} $lib_opts] != "
     return -1
 }
 
-clean_restart $binfile
+clean_restart
+gdb_load $binfile
 gdb_load_shlib $lib_so
 
 if {![runto_main]} {

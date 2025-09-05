@@ -60,7 +60,8 @@ proc_with_prefix test { non-stop threaded run-or-attach } {
 	    set ::GDBFLAGS "$::GDBFLAGS -ex \"maint set target-non-stop on\""
 	}
 
-	clean_restart $::binfile
+	clean_restart
+	gdb_load $::binfile
     }
 
     if { ![runto_main] } {

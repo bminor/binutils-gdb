@@ -35,7 +35,8 @@ if {[gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable \
     return -1
 }
 
-clean_restart ${binfile}
+clean_restart
+gdb_load $binfile
 
 set solib_name [gdb_load_shlib $solib_name]
 
