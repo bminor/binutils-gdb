@@ -3895,10 +3895,13 @@ pt (i386_operand_type t)
 #endif /* DEBUG386 */
 
 static bfd_reloc_code_real_type
-reloc (unsigned int size,
-       int pcrel,
-       int sign,
-       bfd_reloc_code_real_type other)
+_reloc (unsigned int size,
+	bool pcrel,
+	int sign,
+	bfd_reloc_code_real_type other,
+	bool code64,
+	const char *file,
+	unsigned int line)
 {
   if (other != NO_RELOC)
     {
@@ -3939,30 +3942,33 @@ reloc (unsigned int size,
 	    other = BFD_RELOC_SIZE64;
 	  if (pcrel)
 	    {
-	      as_bad (_("there are no pc-relative size relocations"));
+	      as_bad_where (file, line,
+			    _("there are no pc-relative size relocations"));
 	      return NO_RELOC;
 	    }
 	}
 #endif
 
       /* Sign-checking 4-byte relocations in 16-/32-bit code is pointless.  */
-      if (size == 4 && (flag_code != CODE_64BIT || disallow_64bit_reloc))
+      if (size == 4 && (!code64 || disallow_64bit_reloc))
 	sign = -1;
 
       rel = bfd_reloc_type_lookup (stdoutput, other);
       if (!rel)
-	as_bad (_("unknown relocation (%u)"), other);
+	as_bad_where (file, line, _("unknown relocation (%u)"), other);
       else if (size != bfd_get_reloc_size (rel))
-	as_bad (_("%u-byte relocation cannot be applied to %u-byte field"),
-		bfd_get_reloc_size (rel),
-		size);
+	as_bad_where (file, line,
+		      _("%u-byte relocation cannot be applied to %u-byte field"),
+		      bfd_get_reloc_size (rel), size);
       else if (pcrel && !rel->pc_relative)
-	as_bad (_("non-pc-relative relocation for pc-relative field"));
+	as_bad_where (file, line,
+		      _("non-pc-relative relocation for pc-relative field"));
       else if ((rel->complain_on_overflow == complain_overflow_signed
 		&& !sign)
 	       || (rel->complain_on_overflow == complain_overflow_unsigned
 		   && sign > 0))
-	as_bad (_("relocated field and relocation type differ in signedness"));
+	as_bad_where (file, line,
+		      _("relocated field and relocation type differ in signedness"));
       else
 	return other;
       return NO_RELOC;
@@ -3971,7 +3977,8 @@ reloc (unsigned int size,
   if (pcrel)
     {
       if (!sign)
-	as_bad (_("there are no unsigned pc-relative relocations"));
+	as_bad_where (file, line,
+		      _("there are no unsigned pc-relative relocations"));
       switch (size)
 	{
 	case 1: return BFD_RELOC_8_PCREL;
@@ -3979,7 +3986,8 @@ reloc (unsigned int size,
 	case 4: return BFD_RELOC_32_PCREL;
 	case 8: return BFD_RELOC_64_PCREL;
 	}
-      as_bad (_("cannot do %u byte pc-relative relocation"), size);
+      as_bad_where (file, line,
+		    _("cannot do %u byte pc-relative relocation"), size);
     }
   else
     {
@@ -3996,11 +4004,20 @@ reloc (unsigned int size,
 	  case 4: return BFD_RELOC_32;
 	  case 8: return BFD_RELOC_64;
 	  }
-      as_bad (_("cannot do %s %u byte relocation"),
-	      sign > 0 ? "signed" : "unsigned", size);
+      as_bad_where (file, line, _("cannot do %s %u byte relocation"),
+		    sign > 0 ? "signed" : "unsigned", size);
     }
 
   return NO_RELOC;
+}
+
+static bfd_reloc_code_real_type
+reloc (unsigned int size,
+       bool pcrel,
+       int sign,
+       bfd_reloc_code_real_type other)
+{
+  return _reloc (size, pcrel, sign, other, flag_code == CODE_64BIT, NULL, 0);
 }
 
 #ifdef OBJ_ELF
