@@ -1510,6 +1510,64 @@ warn_and_exit:
   return err;
 }
 
+/* Handle DW_CFA_GNU_args_size in .cfi_escape.
+
+   The purpose of DW_CFA_GNU_args_size is to adjust SP when performing stack
+   unwinding for exception handling.  For stack tracing needs,
+   DW_CFA_GNU_args_size can be ignored, when CFA is FP-based.  This is because
+   if the topmost frame is that of the catch block, the SP has been restored to
+   correct value by exception handling logic.  From this point of interest in
+   the catch block now, stack tracing intends to go backwards to the caller
+   frame.  If CFA restoration does not need SP, DW_CFA_GNU_args_size can be
+   ignored for stack tracing.
+
+   Continue to warn and not emit SFrame FDE if CFA is SP based.  The pattern
+   where the CFA is SP based and there is a DW_CFA_GNU_args_size for
+   SP-adjustment is not entirely clear.
+
+   Sets CALLER_WARN_P for skipped cases (and returns SFRAME_XLATE_OK) where the
+   caller must warn.  The caller then must also set
+   SFRAME_XLATE_ERR_NOTREPRESENTED for their callers.  */
+
+static int
+sframe_xlate_do_escape_gnu_args_size (const struct sframe_xlate_ctx *xlate_ctx,
+				      const struct cfi_insn_data *cfi_insn,
+				      bool *caller_warn_p)
+{
+  const struct cfi_escape_data *e = cfi_insn->u.esc;
+  unsigned int i = 0;
+
+  /* Check for (DW_CFA_GNU_args_size offset) sequence.  */
+#define CFI_ESC_NUM_EXP 1
+  offsetT items[CFI_ESC_NUM_EXP] = {0};
+  while (e->next)
+    {
+      e = e->next;
+      if (i >= CFI_ESC_NUM_EXP || e->exp.X_op != O_constant
+	  || e->type != CFI_ESC_byte
+	  || e->reloc != TC_PARSE_CONS_RETURN_NONE)
+	goto warn_and_exit;
+      items[i] = e->exp.X_add_number;
+      i++;
+    }
+  if (i == 0)
+    goto warn_and_exit;
+
+#undef CFI_ESC_NUM_EXP
+
+  offsetT offset = items[0];
+
+  struct sframe_row_entry *cur_fre = xlate_ctx->cur_fre;
+  gas_assert (cur_fre);
+ /* If CFA is FP based, safe to skip.  */
+  if (offset == 0 || cur_fre->cfa_base_reg == SFRAME_CFA_FP_REG)
+    return SFRAME_XLATE_OK;
+
+warn_and_exit:
+  *caller_warn_p = true;
+  return SFRAME_XLATE_OK;
+}
+
 /* Handle CFI_escape in SFrame context.
 
    .cfi_escape CFI directive allows the user to add arbitrary data to the
@@ -1573,7 +1631,9 @@ sframe_xlate_do_cfi_escape (const struct sframe_xlate_ctx *xlate_ctx,
       err = sframe_xlate_do_escape_val_offset (xlate_ctx, cfi_insn, &warn_p);
       break;
 
-    /* FIXME - Also add processing for DW_CFA_GNU_args_size in future?  */
+    case DW_CFA_GNU_args_size:
+      err = sframe_xlate_do_escape_gnu_args_size (xlate_ctx, cfi_insn, &warn_p);
+      break;
 
     default:
       warn_p = true;
