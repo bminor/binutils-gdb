@@ -27,7 +27,7 @@ standard_testfile .c
 # Compile binary
 # and start with a fresh gdb
 
-if { [prepare_for_testing "failed to prepare" ${binfile} ${srcfile}] } {
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
      return -1
 }
 

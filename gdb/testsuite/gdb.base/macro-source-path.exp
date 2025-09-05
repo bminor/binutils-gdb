@@ -53,7 +53,8 @@ proc test { src name } {
 	    return
 	}
 
-	clean_restart [host_file_normalize $binfile]
+	clean_restart
+	gdb_load [host_file_normalize $binfile]
 
 	if { ![runto_main] } {
 	    return

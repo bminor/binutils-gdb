@@ -114,7 +114,8 @@ if { [gdb_compile ${srcfile_main} ${binfile_main} executable $main_flags] != "" 
     return -1
 }
 
-clean_restart ${binfile_main}
+clean_restart
+gdb_load $binfile_main
 
 if {![runto_main]} {
     return 0

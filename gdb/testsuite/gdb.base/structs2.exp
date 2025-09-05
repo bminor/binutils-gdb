@@ -15,7 +15,7 @@
 
 standard_testfile .c
 
-if { [prepare_for_testing "failed to prepare" $binfile $srcfile {debug}] } {
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile {debug}] } {
     return -1
 }
 

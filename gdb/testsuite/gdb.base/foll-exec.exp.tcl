@@ -68,7 +68,8 @@ proc do_exec_tests { execer_lang execee_lang } {
    }
 
    # Now we can start running the tests.
-   clean_restart $execer_binfile
+   clean_restart
+   gdb_load $execer_binfile
 
    # Start the program running, and stop at main.
    if {![runto_main]} {
@@ -93,7 +94,8 @@ proc do_exec_tests { execer_lang execee_lang } {
      return
    }
 
-   clean_restart $execer_binfile
+   clean_restart
+   gdb_load $execer_binfile
 
    # Start the program running, and stop at main.
    #
@@ -182,7 +184,8 @@ proc do_exec_tests { execer_lang execee_lang } {
 
    # Explicitly kill this program, or a subsequent rerun actually runs
    # the exec'd program, not the original program...
-   clean_restart $execer_binfile
+   clean_restart
+   gdb_load $execer_binfile
 
    # Start the program running, and stop at main.
    #
@@ -250,7 +253,8 @@ proc do_exec_tests { execer_lang execee_lang } {
 
    # Explicitly kill this program, or a subsequent rerun actually runs
    # the exec'd program, not the original program...
-   clean_restart $execer_binfile
+   clean_restart
+   gdb_load $execer_binfile
 
    # Start the program running, and stop at main.
    #
@@ -317,7 +321,8 @@ proc do_exec_tests { execer_lang execee_lang } {
 
    # Explicitly kill this program, or a subsequent rerun actually runs
    # the exec'd program, not the original program...
-   clean_restart $execer_binfile
+   clean_restart
+   gdb_load $execer_binfile
 
    # Start the program running, and stop at main.
    #
@@ -378,7 +383,8 @@ proc do_exec_tests { execer_lang execee_lang } {
 
    # Explicitly kill this program, or a subsequent rerun actually runs
    # the exec'd program, not the original program...
-   clean_restart $execer_binfile
+   clean_restart
+   gdb_load $execer_binfile
 
    # Start the program running, and stop at main.
    #

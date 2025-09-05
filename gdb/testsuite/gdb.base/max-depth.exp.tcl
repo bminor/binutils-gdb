@@ -30,7 +30,7 @@ proc compile_and_run_tests { lang } {
 	lappend flags "additional_flags=-std=c++11"
     }
 
-    if { [prepare_for_testing "failed to prepare" "${binfile}" "${srcfile}" "${flags}"] } {
+    if { [prepare_for_testing "failed to prepare" $testfile $srcfile $flags] } {
 	return 0
     }
 

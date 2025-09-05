@@ -73,7 +73,8 @@ proc one_jit_test {solib_binfiles_target match_str} {
 	global main_loader_binfile main_loader_srcfile
 	global main_solib_binfile main_solib_binfile_target main_solib_srcfile
 
-	clean_restart $main_loader_binfile
+	clean_restart
+	gdb_load $main_loader_binfile
 	gdb_locate_shlib $main_solib_binfile
 
 	# This is just to help debugging when things fail

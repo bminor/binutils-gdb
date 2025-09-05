@@ -48,7 +48,8 @@ proc clean_reattach {} {
     gdb_test_no_output "set var wait_for_gdb = 1"
     gdb_test "detach" "Detaching from .*"
 
-    clean_restart ${main_binfile}
+    clean_restart
+    gdb_load $main_binfile
 
     if { ![gdb_attach $testpid \
 	      -pattern "main.*at .*$::main_basename.c:.*"] } {
@@ -84,7 +85,8 @@ proc one_jit_test {jit_solibs_target match_str reattach} {
 	global test_verbose
 	global main_binfile main_srcfile
 
-	clean_restart ${main_binfile}
+	clean_restart
+	gdb_load $main_binfile
 
 	# This is just to help debugging when things fail
 	if {$test_verbose > 0} {

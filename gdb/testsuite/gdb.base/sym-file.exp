@@ -61,7 +61,8 @@ if {[gdb_compile_shlib $libsrc $lib_so {debug}] != ""} {
     return
 }
 
-if {[prepare_for_testing "failed to prepare"  $binfile "$srcfile $srcfile2" $exec_opts]} {
+if { [prepare_for_testing "failed to prepare" $testfile "$srcfile $srcfile2" \
+	  $exec_opts] } {
     return
 }
 

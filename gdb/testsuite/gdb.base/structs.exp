@@ -56,7 +56,7 @@ proc start_structs_test { types } {
     }
 
     set binfile [standard_output_file ${testfile}]
-    if { [prepare_for_testing "failed to prepare" $binfile $srcfile $flags] } {
+    if { [prepare_for_testing "failed to prepare" $testfile $srcfile $flags] } {
 	return -1
     }
 

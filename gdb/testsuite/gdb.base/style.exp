@@ -77,7 +77,7 @@ proc run_style_tests { } {
 
 	# Restart GDB with the correct TERM variable setting, this
 	# means that GDB will enable styling.
-	clean_restart_and_disable "restart 1" ${binfile}
+	clean_restart_and_disable "restart 1" $::testfile
 
 	set readnow [readnow]
 
@@ -358,7 +358,7 @@ proc test_disable_disassembler_styling { } {
 
 	# Restart GDB with the correct TERM variable setting, this
 	# means that GDB will enable styling.
-	clean_restart_and_disable "restart 3" $::binfile
+	clean_restart_and_disable "restart 3" $::testfile
 
 	set styled_hex [limited_style $::hex address]
 	set main [limited_style main function]
@@ -473,7 +473,7 @@ proc test_disassembler_error_handling { } {
 
 	# Restart GDB with the correct TERM variable setting, this
 	# means that GDB will enable styling.
-	clean_restart_and_disable "restart 4" $::binfile
+	clean_restart_and_disable "restart 4" $::testfile
 
 	# Disable use of libopcodes for styling.  As this function is
 	# only called when Python Pygments module is available, we

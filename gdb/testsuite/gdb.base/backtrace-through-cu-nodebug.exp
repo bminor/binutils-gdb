@@ -52,7 +52,8 @@ proc prepare_test {has_cfi} {
 	return false
     }
 
-    clean_restart "$binfile-${extension}"
+    clean_restart
+    gdb_load $binfile-$extension
 
     if ![runto callback] then {
 	fail "has_cfi=$has_cfi: Can't run to callback"

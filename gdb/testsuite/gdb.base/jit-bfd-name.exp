@@ -46,7 +46,8 @@ if { [compile_jit_main ${main_srcfile} ${main_binfile} {}] != 0 } {
     return
 }
 
-clean_restart $::main_binfile
+clean_restart
+gdb_load $::main_binfile
 if { ![runto_main] } {
     return
 }

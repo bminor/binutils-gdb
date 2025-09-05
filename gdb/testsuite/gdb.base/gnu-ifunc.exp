@@ -96,7 +96,8 @@ proc_with_prefix set-break {resolver_attr resolver_debug final_debug} {
     set suffix [make_binsuffix $resolver_attr $resolver_debug $final_debug]
 
     set lib_so [standard_output_file ${libfile}-$suffix.so]
-    clean_restart $binfile-$suffix
+    clean_restart
+    gdb_load $binfile-$suffix
     gdb_load_shlib ${lib_so}
 
     if {![runto_main]} {
@@ -223,7 +224,8 @@ proc misc_tests {resolver_attr resolver_debug final_debug} {
 
     # Start with a fresh gdb.
 
-    clean_restart $binfile-$suffix
+    clean_restart
+    gdb_load $binfile-$suffix
     gdb_load_shlib ${lib_so}
 
     if {![runto_main]} {

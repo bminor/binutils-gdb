@@ -106,7 +106,8 @@ proc do_tests {force_internal_tls {do_kfail_tls_access 0}} {
 	set objcopy [gdb_find_objcopy]
 	set cmd "$objcopy --strip-debug ${::binfile} $binfile_stripped"
 	if ![catch "exec $cmd" cmd_output] {
-	    clean_restart $binfile_stripped
+	    clean_restart
+	    gdb_load $binfile_stripped
 	    if ![runto_main] {
 		return
 	    }

@@ -38,7 +38,8 @@ if [run_on_host "strip" "$strip_program" "-g -o ${stripped_binfile} $binfile"] {
 set perm [file attributes ${binfile} -permissions]
 file attributes ${stripped_binfile} -permissions $perm
 
-clean_restart ${stripped_binfile}
+clean_restart
+gdb_load $stripped_binfile
 
 # The binary is stripped of debug info, but not minsyms.
 if ![runto break_here] {
