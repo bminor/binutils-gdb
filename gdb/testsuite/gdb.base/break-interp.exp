@@ -78,7 +78,8 @@ gdb_test_multiple $test $test {
 }
 
 set interp_system [section_get [standard_output_file $binfile_test] .interp]
-clean_restart $interp_system
+clean_restart
+gdb_load $interp_system
 set dl_main_found 0
 gdb_test_multiple "info addr dl_main" "" {
     -re -wrap "Symbol \"dl_main\" is a function at address $hex\\." {

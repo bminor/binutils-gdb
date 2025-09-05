@@ -55,7 +55,8 @@ proc test {debug} {
 	return
     }
 
-    clean_restart $bin
+    clean_restart
+    gdb_load $bin
     gdb_load_shlib $lib
 
     # Should find two locations: the static foo in the
