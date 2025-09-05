@@ -881,6 +881,7 @@ if {[is_elf_format] || [istarget "*-*-vxworks*"]} then {
     }
 
     run_dump_test "code16-2"
+    run_list_test "reloc16"
 
     if {![istarget "*-*-dragonfly*"]
 	&& ![istarget "*-*-gnu*"]

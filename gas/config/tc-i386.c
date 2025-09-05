@@ -16154,18 +16154,15 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
       int old_fr_fix;
       fixS *fixP = NULL;
 
-      if (fragP->fr_var != NO_RELOC)
-	reloc_type = (enum bfd_reloc_code_real) fragP->fr_var;
-      else if (size == 2)
-	reloc_type = BFD_RELOC_16_PCREL;
+      reloc_type = (enum bfd_reloc_code_real) fragP->fr_var;
 #ifdef OBJ_ELF
-      else if (fragP->tc_frag_data.code == CODE_64BIT
-	       && fragP->fr_offset == 0
-	       && need_plt32_p (fragP->fr_symbol))
+      if (reloc_type == NO_RELOC
+	  && size != 2
+	  && fragP->tc_frag_data.code == CODE_64BIT
+	  && fragP->fr_offset == 0
+	  && need_plt32_p (fragP->fr_symbol))
 	reloc_type = BFD_RELOC_X86_64_PLT32;
 #endif
-      else
-	reloc_type = BFD_RELOC_32_PCREL;
 
       old_fr_fix = fragP->fr_fix;
       opcode = (unsigned char *) fragP->fr_opcode;
@@ -16179,7 +16176,9 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
 	  fixP = fix_new (fragP, old_fr_fix, size,
 			  fragP->fr_symbol,
 			  fragP->fr_offset, 1,
-			  reloc_type);
+			  _reloc (size, 1, 1, reloc_type,
+				  fragP->tc_frag_data.code == CODE_64BIT,
+				  fragP->fr_file, fragP->fr_line));
 	  break;
 
 	case COND_JUMP86:
@@ -16198,7 +16197,9 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
 	      fix_new (fragP, old_fr_fix + 2, 2,
 		       fragP->fr_symbol,
 		       fragP->fr_offset, 1,
-		       reloc_type);
+		       _reloc (size, 1, 1, reloc_type,
+			       fragP->tc_frag_data.code == CODE_64BIT,
+			       fragP->fr_file, fragP->fr_line));
 	      break;
 	    }
 	  /* Fall through.  */
@@ -16224,7 +16225,9 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
 	  fixP = fix_new (fragP, old_fr_fix + 1, size,
 			  fragP->fr_symbol,
 			  fragP->fr_offset, 1,
-			  reloc_type);
+			  _reloc (size, 1, 1, reloc_type,
+				  fragP->tc_frag_data.code == CODE_64BIT,
+				  fragP->fr_file, fragP->fr_line));
 	  break;
 
 	default:
