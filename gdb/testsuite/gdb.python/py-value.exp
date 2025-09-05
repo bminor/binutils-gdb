@@ -844,3 +844,15 @@ if {[allow_cplus_tests]} {
 	test_subscript_regression "${binfile}-cxx" "c++"
     }
 }
+
+if {[allow_rust_tests]} {
+    gdb_test "set lang rust"
+
+    set cst 0x80000000000000000000000000000000
+    gdb_test "python print(int(gdb.parse_and_eval('${cst}u128')))" \
+	"170141183460469231731687303715884105728" \
+	"convert 128 bit unsigned constant to python int"
+    gdb_test "python print(int(gdb.parse_and_eval('${cst}i128')))" \
+	"-170141183460469231731687303715884105728" \
+	"convert 128 bit signed constant to python int"
+}
