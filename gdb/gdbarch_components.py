@@ -1786,7 +1786,7 @@ of bytes read (zero indicates EOF, a negative value indicates failure).
         ("struct bfd &", "cbfd"),
         ("gdb_byte *", "readbuf"),
         ("ULONGEST", "offset"),
-        ("ULONGEST", "len")
+        ("ULONGEST", "len"),
     ],
     predicate=True,
 )
