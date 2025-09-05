@@ -5376,6 +5376,9 @@ gdb_caching_proc allow_aarch64_gcs_tests {} {
 	    verbose -log "\n$me: gcs support detected"
 	    set allow_gcs_tests 1
 	}
+	-re ".*$inferior_exited_re with code 01.*${gdb_prompt} $" {
+	    verbose -log "\n$me: gcs support not detected"
+	}
     }
     gdb_exit
     remote_file build delete $obj
