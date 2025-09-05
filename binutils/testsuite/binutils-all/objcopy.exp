@@ -1581,7 +1581,7 @@ proc objcopy_tek2bin {} {
 
     set tek $srcdir/$subdir/tek2.obj
     set out tmpdir/tek2bin
-    if [isremote host] {
+    if [is_remote host] {
 	set tek [remote_download host $tek]
 	set out tek2bin
     }
