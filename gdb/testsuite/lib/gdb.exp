@@ -5153,7 +5153,8 @@ gdb_caching_proc allow_aarch64_sme_tests {} {
     }
 
     # Compilation succeeded so now run it via gdb.
-    clean_restart $obj
+    clean_restart
+    gdb_load $obj
     gdb_run_cmd
     gdb_expect {
 	-re ".*Illegal instruction.*${gdb_prompt} $" {
