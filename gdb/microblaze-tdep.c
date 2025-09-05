@@ -590,97 +590,6 @@ microblaze_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
   return (type->length () == 16);
 }
 
-/* Return next pc values : next in sequence and/or branch/return target.  */
-
-static std::vector<CORE_ADDR>
-microblaze_get_next_pcs (regcache *regcache)
-{
-  CORE_ADDR pc = regcache_read_pc (regcache);
-  long insn = microblaze_fetch_instruction (pc);
-
-  enum microblaze_instr_type insn_type;
-  short delay_slots;
-  bool isunsignednum;
-
-  /* If the current instruction is an imm, look at the inst after.  */
-
-  get_insn_microblaze (insn, &isunsignednum, &insn_type, &delay_slots);
-
-  int imm;
-  bool immfound = false;
-
-  if (insn_type == immediate_inst)
-    {
-      int rd, ra, rb;
-      immfound = true;
-      microblaze_decode_insn (insn, &rd, &ra, &rb, &imm);
-      pc += INST_WORD_SIZE;
-      insn = microblaze_fetch_instruction (pc);
-      get_insn_microblaze (insn, &isunsignednum, &insn_type, &delay_slots);
-    }
-
-  std::optional<CORE_ADDR> next_pc, branch_or_return_pc;
-
-  /* Compute next instruction address - skip delay slots if any.  */
-
-  if (insn_type != return_inst)
-    next_pc = pc + INST_WORD_SIZE + (delay_slots * INST_WORD_SIZE);
-
-  microblaze_debug ("single-step insn_type=0x%x pc=0x%lx insn=0x%lx",
-		    insn_type, pc, insn);
-
-  /* Compute target instruction address for branch or return instruction.  */
-  if (insn_type == branch_inst || insn_type == return_inst)
-    {
-      int limm;
-      int lrd, lra, lrb;
-      bool targetvalid;
-      bool unconditionalbranch;
-
-      microblaze_decode_insn (insn, &lrd, &lra, &lrb, &limm);
-
-      ULONGEST ra = regcache_raw_get_unsigned (regcache, lra);
-      ULONGEST rb = regcache_raw_get_unsigned (regcache, lrb);
-
-      branch_or_return_pc
-	= microblaze_get_target_address (insn, immfound,
-					 imm, pc, ra, rb, &targetvalid,
-					 &unconditionalbranch);
-
-      microblaze_debug ("single-step uncondbr=%d targetvalid=%d target=0x%lx",
-			unconditionalbranch, targetvalid,
-			branch_or_return_pc.value ());
-
-      /* Can't reach next address.  */
-      if (unconditionalbranch)
-	next_pc.reset ();
-
-      /* Can't reach a distinct (not here) target address.  */
-      if (!targetvalid
-	  || branch_or_return_pc == pc
-	  || (next_pc.has_value () && (branch_or_return_pc == next_pc)))
-	branch_or_return_pc.reset ();
-    } /* if (branch or return instruction).  */
-
-  /* Create next_pcs vector to return.  */
-
-  std::vector<CORE_ADDR> next_pcs;
-
-  if (next_pc.has_value ())
-    {
-      next_pcs.push_back (*next_pc);
-      microblaze_debug ("push_back next_pc(0x%lx)", *next_pc);
-    }
-
-  if (branch_or_return_pc.has_value ())
-    {
-      next_pcs.push_back (*branch_or_return_pc);
-      microblaze_debug ("push_back branch_or_return_pc(0x%lx)",
-			*branch_or_return_pc);
-    }
-
-  return next_pcs;
-}
 
 static int dwarf2_to_reg_map[78] =
 { 0  /* r0  */,   1  /* r1  */,   2  /* r2  */,   3  /* r3  */,  /*  0- 3 */
@@ -805,8 +714,6 @@ microblaze_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				       microblaze_breakpoint::kind_from_pc);
   set_gdbarch_sw_breakpoint_from_kind (gdbarch,
 				       microblaze_breakpoint::bp_from_kind);
-
-  set_gdbarch_get_next_pcs (gdbarch, microblaze_get_next_pcs);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
 
