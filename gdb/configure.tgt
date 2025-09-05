@@ -754,7 +754,7 @@ x86_64-*-rtems*)
 	;;
 x86_64-*-gnu*)
 	# Target: x86_64 running the GNU Hurd
-	gdb_target_obs="amd64-gnu-tdep.o glibc-tdep.o solib-svr4.o"
+	gdb_target_obs="amd64-gnu-tdep.o i386-gnu-tdep.o glibc-tdep.o solib-svr4.o"
 	;;
 xtensa*-*-*linux*)
 	# Target: GNU/Linux Xtensa
