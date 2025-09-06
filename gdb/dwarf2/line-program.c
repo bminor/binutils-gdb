@@ -151,6 +151,7 @@ private:
   }
 
   bool record_line_p ();
+  void finish_line ();
 
   struct dwarf2_cu *m_cu;
 
@@ -336,26 +337,24 @@ dwarf_record_line_1 (struct gdbarch *gdbarch, struct subfile *subfile,
 }
 
 /* Subroutine of dwarf_decode_lines_1 to simplify it.
-   Mark the end of a set of line number records.
-   The arguments are the same as for dwarf_record_line_1.
-   If SUBFILE is NULL the request is ignored.  */
+   Mark the end of a set of line number records.  */
 
-static void
-dwarf_finish_line (struct gdbarch *gdbarch, struct subfile *subfile,
-		   unrelocated_addr address, struct dwarf2_cu *cu)
+void
+lnp_state_machine::finish_line ()
 {
-  if (subfile == NULL)
+  if (m_last_subfile == nullptr)
     return;
 
   if (dwarf_line_debug)
     {
       gdb_printf (gdb_stdlog,
 		  "Finishing current line, file %s, address %s\n",
-		  lbasename (subfile->name.c_str ()),
-		  paddress (gdbarch, (CORE_ADDR) address));
+		  lbasename (m_last_subfile->name.c_str ()),
+		  paddress (m_gdbarch, (CORE_ADDR) m_address));
     }
 
-  dwarf_record_line_1 (gdbarch, subfile, 0, address, LEF_IS_STMT, cu);
+  dwarf_record_line_1 (m_gdbarch, m_last_subfile, 0, m_address, LEF_IS_STMT,
+		       m_currently_recording_lines ? m_cu : nullptr);
 }
 
 void
@@ -408,10 +407,7 @@ lnp_state_machine::record_line (bool end_sequence)
 	   || (!end_sequence && m_line == 0));
 
       if ((file_changed && !ignore_this_line) || end_sequence)
-	{
-	  dwarf_finish_line (m_gdbarch, m_last_subfile, m_address,
-			     m_currently_recording_lines ? m_cu : nullptr);
-	}
+	finish_line ();
 
       if (!end_sequence && !ignore_this_line)
 	{
