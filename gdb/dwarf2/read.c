@@ -1037,12 +1037,6 @@ dwarf2_per_cu_deleter::operator() (dwarf2_per_cu *data)
     delete data;
 }
 
-static const char *compute_include_file_name
-     (const struct line_header *lh,
-      const file_entry &fe,
-      const file_and_directory &cu_info,
-      std::string &name_holder);
-
 static struct dwo_unit *lookup_dwo_unit_in_dwp
   (dwarf2_per_bfd *per_bfd, struct dwp_file *dwp_file,
    const char *comp_dir, ULONGEST signature, int is_debug_types);
@@ -1690,6 +1684,75 @@ dwarf2_per_bfd::allocate_signatured_type (dwarf2_section_info *section,
   result->index = all_units.size ();
   this->num_type_units++;
   return result;
+}
+
+/* Subroutine of dw2_get_file_names_reader to simplify it.
+   Return the file name for the given file_entry.
+   CU_INFO describes the CU's DW_AT_name and DW_AT_comp_dir.
+   If space for the result is malloc'd, *NAME_HOLDER will be set.
+   Returns NULL if FILE_INDEX should be ignored, i.e., it is
+   equivalent to CU_INFO.  */
+
+static const char *
+compute_include_file_name (const struct line_header *lh, const file_entry &fe,
+			   const file_and_directory &cu_info,
+			   std::string &name_holder)
+{
+  const char *include_name = fe.name;
+  const char *include_name_to_compare = include_name;
+
+  const char *dir_name = fe.include_dir (lh);
+
+  std::string hold_compare;
+  if (!IS_ABSOLUTE_PATH (include_name)
+      && (dir_name != nullptr || cu_info.get_comp_dir () != nullptr))
+    {
+      /* Avoid creating a duplicate name for CU_INFO.
+	 We do this by comparing INCLUDE_NAME and CU_INFO.
+	 Before we do the comparison, however, we need to account
+	 for DIR_NAME and COMP_DIR.
+	 First prepend dir_name (if non-NULL).  If we still don't
+	 have an absolute path prepend comp_dir (if non-NULL).
+	 However, the directory we record in the include-file's
+	 psymtab does not contain COMP_DIR (to match the
+	 corresponding symtab(s)).
+
+	 Example:
+
+	 bash$ cd /tmp
+	 bash$ gcc -g ./hello.c
+	 include_name = "hello.c"
+	 dir_name = "."
+	 DW_AT_comp_dir = comp_dir = "/tmp"
+	 DW_AT_name = "./hello.c"
+
+      */
+
+      if (dir_name != NULL)
+	{
+	  name_holder = path_join (dir_name, include_name);
+	  include_name = name_holder.c_str ();
+	  include_name_to_compare = include_name;
+	}
+      if (!IS_ABSOLUTE_PATH (include_name)
+	  && cu_info.get_comp_dir () != nullptr)
+	{
+	  hold_compare = path_join (cu_info.get_comp_dir (), include_name);
+	  include_name_to_compare = hold_compare.c_str ();
+	}
+    }
+
+  std::string copied_name;
+  const char *cu_filename = cu_info.get_name ();
+  if (!IS_ABSOLUTE_PATH (cu_filename) && cu_info.get_comp_dir () != nullptr)
+    {
+      copied_name = path_join (cu_info.get_comp_dir (), cu_filename);
+      cu_filename = copied_name.c_str ();
+    }
+
+  if (FILENAME_CMP (include_name_to_compare, cu_filename) == 0)
+    return nullptr;
+  return include_name;
 }
 
 /* die_reader_func for dw2_get_file_names.  */
@@ -15791,75 +15854,6 @@ dwarf_decode_line_header (sect_offset sect_off, struct dwarf2_cu *cu,
   return dwarf_decode_line_header (sect_off, cu->per_cu->is_dwz,
 				   per_objfile, section, &cu->header,
 				   comp_dir);
-}
-
-/* Subroutine of dwarf_decode_lines to simplify it.
-   Return the file name for the given file_entry.
-   CU_INFO describes the CU's DW_AT_name and DW_AT_comp_dir.
-   If space for the result is malloc'd, *NAME_HOLDER will be set.
-   Returns NULL if FILE_INDEX should be ignored, i.e., it is
-   equivalent to CU_INFO.  */
-
-static const char *
-compute_include_file_name (const struct line_header *lh, const file_entry &fe,
-			   const file_and_directory &cu_info,
-			   std::string &name_holder)
-{
-  const char *include_name = fe.name;
-  const char *include_name_to_compare = include_name;
-
-  const char *dir_name = fe.include_dir (lh);
-
-  std::string hold_compare;
-  if (!IS_ABSOLUTE_PATH (include_name)
-      && (dir_name != nullptr || cu_info.get_comp_dir () != nullptr))
-    {
-      /* Avoid creating a duplicate name for CU_INFO.
-	 We do this by comparing INCLUDE_NAME and CU_INFO.
-	 Before we do the comparison, however, we need to account
-	 for DIR_NAME and COMP_DIR.
-	 First prepend dir_name (if non-NULL).  If we still don't
-	 have an absolute path prepend comp_dir (if non-NULL).
-	 However, the directory we record in the include-file's
-	 psymtab does not contain COMP_DIR (to match the
-	 corresponding symtab(s)).
-
-	 Example:
-
-	 bash$ cd /tmp
-	 bash$ gcc -g ./hello.c
-	 include_name = "hello.c"
-	 dir_name = "."
-	 DW_AT_comp_dir = comp_dir = "/tmp"
-	 DW_AT_name = "./hello.c"
-
-      */
-
-      if (dir_name != NULL)
-	{
-	  name_holder = path_join (dir_name, include_name);
-	  include_name = name_holder.c_str ();
-	  include_name_to_compare = include_name;
-	}
-      if (!IS_ABSOLUTE_PATH (include_name)
-	  && cu_info.get_comp_dir () != nullptr)
-	{
-	  hold_compare = path_join (cu_info.get_comp_dir (), include_name);
-	  include_name_to_compare = hold_compare.c_str ();
-	}
-    }
-
-  std::string copied_name;
-  const char *cu_filename = cu_info.get_name ();
-  if (!IS_ABSOLUTE_PATH (cu_filename) && cu_info.get_comp_dir () != nullptr)
-    {
-      copied_name = path_join (cu_info.get_comp_dir (), cu_filename);
-      cu_filename = copied_name.c_str ();
-    }
-
-  if (FILENAME_CMP (include_name_to_compare, cu_filename) == 0)
-    return nullptr;
-  return include_name;
 }
 
 /* See dwarf2/read.h.  */
