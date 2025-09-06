@@ -152,6 +152,7 @@ private:
 
   bool record_line_p ();
   void finish_line ();
+  void record_line_1 (unsigned int line, linetable_entry_flags flags);
 
   struct dwarf2_cu *m_cu;
 
@@ -312,27 +313,25 @@ lnp_state_machine::record_line_p ()
   return false;
 }
 
-/* Use the CU's builder to record line number LINE beginning at
-   address ADDRESS in the line table of subfile SUBFILE.  */
+/* Use the CU's builder to record line number LINE with the given
+   flags.  */
 
-static void
-dwarf_record_line_1 (struct gdbarch *gdbarch, struct subfile *subfile,
-		     unsigned int line, unrelocated_addr address,
-		     linetable_entry_flags flags,
-		     struct dwarf2_cu *cu)
+void
+lnp_state_machine::record_line_1 (unsigned int line,
+				  linetable_entry_flags flags)
 {
-  unrelocated_addr addr
-    = unrelocated_addr (gdbarch_addr_bits_remove (gdbarch,
-						  (CORE_ADDR) address));
-
-  if (cu != nullptr)
+  if (m_currently_recording_lines)
     {
+      unrelocated_addr addr
+	= unrelocated_addr (gdbarch_addr_bits_remove (m_gdbarch,
+						      (CORE_ADDR) m_address));
+
       if (dwarf_line_debug)
 	gdb_printf (gdb_stdlog, "Recording line %u, file %s, address %s\n",
-		    line, lbasename (subfile->name.c_str ()),
-		    paddress (gdbarch, (CORE_ADDR) address));
+		    m_line, lbasename (m_last_subfile->name.c_str ()),
+		    paddress (m_gdbarch, (CORE_ADDR) addr));
 
-      cu->get_builder ()->record_line (subfile, line, addr, flags);
+      m_builder->record_line (m_last_subfile, line, addr, flags);
     }
 }
 
@@ -353,8 +352,7 @@ lnp_state_machine::finish_line ()
 		  paddress (m_gdbarch, (CORE_ADDR) m_address));
     }
 
-  dwarf_record_line_1 (m_gdbarch, m_last_subfile, 0, m_address, LEF_IS_STMT,
-		       m_currently_recording_lines ? m_cu : nullptr);
+  record_line_1 (0, LEF_IS_STMT);
 }
 
 void
@@ -417,12 +415,8 @@ lnp_state_machine::record_line (bool end_sequence)
 
 	  if (record_line_p ())
 	    {
-	      dwarf_record_line_1 (m_gdbarch,
-				   m_builder->get_current_subfile (),
-				   m_line, m_address, lte_flags,
-				   m_currently_recording_lines ? m_cu : nullptr);
-
 	      m_last_subfile = m_builder->get_current_subfile ();
+	      record_line_1 (m_line, lte_flags);
 	      m_last_line = m_line;
 	    }
 	}
