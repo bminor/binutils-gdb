@@ -150,6 +150,8 @@ private:
       m_line_has_non_zero_discriminator = m_discriminator != 0;
   }
 
+  bool record_line_p ();
+
   struct dwarf2_cu *m_cu;
 
   gdbarch *m_gdbarch;
@@ -291,20 +293,17 @@ lnp_state_machine::handle_const_add_pc ()
    Note: Addresses in the line number state machine can never go backwards
    within one sequence, thus this coalescing is ok.  */
 
-static bool
-dwarf_record_line_p (struct dwarf2_cu *cu,
-		     unsigned int line, unsigned int last_line,
-		     int line_has_non_zero_discriminator,
-		     struct subfile *last_subfile)
+bool
+lnp_state_machine::record_line_p ()
 {
-  if (cu->get_builder ()->get_current_subfile () != last_subfile)
+  if (m_cu->get_builder ()->get_current_subfile () != m_last_subfile)
     return true;
-  if (line != last_line)
+  if (m_line != m_last_line)
     return true;
   /* Same line for the same file that we've seen already.
      As a last check, for pr 17276, only record the line if the line
      has never had a non-zero discriminator.  */
-  if (!line_has_non_zero_discriminator)
+  if (!m_line_has_non_zero_discriminator)
     return true;
   return false;
 }
@@ -418,9 +417,7 @@ lnp_state_machine::record_line (bool end_sequence)
 	  if (m_cu->producer_is_codewarrior ())
 	    lte_flags |= LEF_IS_STMT;
 
-	  if (dwarf_record_line_p (m_cu, m_line, m_last_line,
-				   m_line_has_non_zero_discriminator,
-				   m_last_subfile))
+	  if (record_line_p ())
 	    {
 	      buildsym_compunit *builder = m_cu->get_builder ();
 	      dwarf_record_line_1 (m_gdbarch,
