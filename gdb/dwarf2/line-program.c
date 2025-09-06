@@ -261,7 +261,7 @@ lnp_state_machine::handle_const_add_pc ()
 		% m_line_header->maximum_ops_per_instruction);
 }
 
-/* Return non-zero if we should add LINE to the line number table.
+/* Return true if we should add LINE to the line number table.
    LINE is the line to add, LAST_LINE is the last line that was added,
    LAST_SUBFILE is the subfile for LAST_LINE.
    LINE_HAS_NON_ZERO_DISCRIMINATOR is non-zero if LINE has ever
@@ -291,22 +291,22 @@ lnp_state_machine::handle_const_add_pc ()
    Note: Addresses in the line number state machine can never go backwards
    within one sequence, thus this coalescing is ok.  */
 
-static int
+static bool
 dwarf_record_line_p (struct dwarf2_cu *cu,
 		     unsigned int line, unsigned int last_line,
 		     int line_has_non_zero_discriminator,
 		     struct subfile *last_subfile)
 {
   if (cu->get_builder ()->get_current_subfile () != last_subfile)
-    return 1;
+    return true;
   if (line != last_line)
-    return 1;
+    return true;
   /* Same line for the same file that we've seen already.
      As a last check, for pr 17276, only record the line if the line
      has never had a non-zero discriminator.  */
   if (!line_has_non_zero_discriminator)
-    return 1;
-  return 0;
+    return true;
+  return false;
 }
 
 /* Use the CU's builder to record line number LINE beginning at
@@ -706,7 +706,7 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 
 void
 dwarf_decode_lines (struct line_header *lh, struct dwarf2_cu *cu,
-		    unrelocated_addr lowpc, int decode_mapping)
+		    unrelocated_addr lowpc, bool decode_mapping)
 {
   if (decode_mapping)
     dwarf_decode_lines_1 (lh, cu, lowpc);

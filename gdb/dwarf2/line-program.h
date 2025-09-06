@@ -42,6 +42,6 @@
 
 extern void dwarf_decode_lines (struct line_header *lh,
 				struct dwarf2_cu *cu,
-				unrelocated_addr lowpc, int decode_mapping);
+				unrelocated_addr lowpc, bool decode_mapping);
 
 #endif /* GDB_DWARF2_LINE_PROGRAM_H */
