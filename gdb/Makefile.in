@@ -1344,6 +1344,7 @@ HFILES_NO_SRCDIR = \
 	dwarf2/expr.h \
 	dwarf2/index-cache.h \
 	dwarf2/index-common.h \
+	dwarf2/line-program.h \
 	dwarf2/loc.h \
 	dwarf2/read.h \
 	dwarf2/read-debug-names.h \
@@ -1910,6 +1911,7 @@ DWARF2_SRCS = \
 	dwarf2/index-write.c \
 	dwarf2/leb.c \
 	dwarf2/line-header.c \
+	dwarf2/line-program.c \
 	dwarf2/loc.c \
 	dwarf2/macro.c \
 	dwarf2/parent-map.c \
