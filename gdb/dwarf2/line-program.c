@@ -154,6 +154,9 @@ private:
 
   struct dwarf2_cu *m_cu;
 
+  /* The builder associated with the CU.  */
+  buildsym_compunit *m_builder;
+
   gdbarch *m_gdbarch;
 
   /* The line number header.  */
@@ -296,7 +299,7 @@ lnp_state_machine::handle_const_add_pc ()
 bool
 lnp_state_machine::record_line_p ()
 {
-  if (m_cu->get_builder ()->get_current_subfile () != m_last_subfile)
+  if (m_builder->get_current_subfile () != m_last_subfile)
     return true;
   if (m_line != m_last_line)
     return true;
@@ -397,8 +400,7 @@ lnp_state_machine::record_line (bool end_sequence)
 	 when switching files, if we have seen a stmt at the current
 	 address, and we are switching to create a non-stmt line, then
 	 discard the new line.  */
-      bool file_changed
-	= m_last_subfile != m_cu->get_builder ()->get_current_subfile ();
+      bool file_changed = m_last_subfile != m_builder->get_current_subfile ();
       bool ignore_this_line
 	= ((file_changed && !end_sequence && m_last_address == m_address
 	    && ((m_flags & LEF_IS_STMT) == 0)
@@ -419,13 +421,12 @@ lnp_state_machine::record_line (bool end_sequence)
 
 	  if (record_line_p ())
 	    {
-	      buildsym_compunit *builder = m_cu->get_builder ();
 	      dwarf_record_line_1 (m_gdbarch,
-				   builder->get_current_subfile (),
+				   m_builder->get_current_subfile (),
 				   m_line, m_address, lte_flags,
 				   m_currently_recording_lines ? m_cu : nullptr);
 
-	      m_last_subfile = m_cu->get_builder ()->get_current_subfile ();
+	      m_last_subfile = m_builder->get_current_subfile ();
 	      m_last_line = m_line;
 	    }
 	}
@@ -444,6 +445,7 @@ lnp_state_machine::record_line (bool end_sequence)
 lnp_state_machine::lnp_state_machine (struct dwarf2_cu *cu, gdbarch *arch,
 				      line_header *lh)
   : m_cu (cu),
+    m_builder (cu->get_builder ()),
     m_gdbarch (arch),
     m_line_header (lh),
     /* Call `gdbarch_adjust_dwarf2_line' on the initial 0 address as
