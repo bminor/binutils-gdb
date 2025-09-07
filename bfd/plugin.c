@@ -378,6 +378,7 @@ bfd_plugin_open_input (bfd *ibfd, struct ld_plugin_input_file *file)
 
   iobfd = ibfd;
   while (iobfd->my_archive
+	 && iobfd->my_archive->iovec == iobfd->iovec
 	 && !bfd_is_thin_archive (iobfd->my_archive))
     iobfd = iobfd->my_archive;
   file->name = bfd_get_filename (iobfd);
@@ -470,6 +471,7 @@ bfd_plugin_close_file_descriptor (bfd *abfd, int fd)
   else
     {
       while (abfd->my_archive
+	     && abfd->my_archive->iovec == abfd->iovec
 	     && !bfd_is_thin_archive (abfd->my_archive))
 	abfd = abfd->my_archive;
 

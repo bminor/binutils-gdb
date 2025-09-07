@@ -1304,6 +1304,10 @@ vms_lib_bopen (bfd *el, file_ptr filepos)
   el->iostream = vec;
   el->iovec = &vms_lib_iovec;
 
+  /* Force the next rewind to call vms_lib_bseek even though it will
+     appear to bfd_seek that the file position is already at 0.  */
+  el->last_io = bfd_io_force;
+
   /* File length is not known.  */
   vec->file_len = -1;
 

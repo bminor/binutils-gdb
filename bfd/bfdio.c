@@ -328,6 +328,7 @@ bfd_read (void *ptr, bfd_size_type size, bfd *abfd)
   ufile_ptr offset = 0;
 
   while (abfd->my_archive != NULL
+	 && abfd->my_archive->iovec == abfd->iovec
 	 && !bfd_is_thin_archive (abfd->my_archive))
     {
       offset += abfd->origin;
@@ -339,6 +340,7 @@ bfd_read (void *ptr, bfd_size_type size, bfd *abfd)
      this element.  */
   if (element_bfd->arelt_data != NULL
       && element_bfd->my_archive != NULL
+      && element_bfd->my_archive->iovec == element_bfd->iovec
       && !bfd_is_thin_archive (element_bfd->my_archive))
     {
       bfd_size_type maxbytes = arelt_size (element_bfd);
@@ -392,6 +394,7 @@ bfd_write (const void *ptr, bfd_size_type size, bfd *abfd)
   file_ptr nwrote;
 
   while (abfd->my_archive != NULL
+	 && abfd->my_archive->iovec == abfd->iovec
 	 && !bfd_is_thin_archive (abfd->my_archive))
     abfd = abfd->my_archive;
 
@@ -440,6 +443,7 @@ bfd_tell (bfd *abfd)
   file_ptr ptr;
 
   while (abfd->my_archive != NULL
+	 && abfd->my_archive->iovec == abfd->iovec
 	 && !bfd_is_thin_archive (abfd->my_archive))
     {
       offset += abfd->origin;
@@ -470,6 +474,7 @@ int
 bfd_flush (bfd *abfd)
 {
   while (abfd->my_archive != NULL
+	 && abfd->my_archive->iovec == abfd->iovec
 	 && !bfd_is_thin_archive (abfd->my_archive))
     abfd = abfd->my_archive;
 
@@ -497,6 +502,7 @@ bfd_stat (bfd *abfd, struct stat *statbuf)
   int result;
 
   while (abfd->my_archive != NULL
+	 && abfd->my_archive->iovec == abfd->iovec
 	 && !bfd_is_thin_archive (abfd->my_archive))
     abfd = abfd->my_archive;
 
@@ -531,6 +537,7 @@ bfd_seek (bfd *abfd, file_ptr position, int direction)
   ufile_ptr offset = 0;
 
   while (abfd->my_archive != NULL
+	 && abfd->my_archive->iovec == abfd->iovec
 	 && !bfd_is_thin_archive (abfd->my_archive))
     {
       offset += abfd->origin;
@@ -734,6 +741,7 @@ bfd_mmap (bfd *abfd, void *addr, size_t len,
 	  void **map_addr, size_t *map_len)
 {
   while (abfd->my_archive != NULL
+	 && abfd->my_archive->iovec == abfd->iovec
 	 && !bfd_is_thin_archive (abfd->my_archive))
     {
       offset += abfd->origin;
