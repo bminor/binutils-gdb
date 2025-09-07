@@ -27,6 +27,7 @@
 #include "opcode/loongarch.h"
 #include "obj-elf.h"
 #include "bfd/elfxx-loongarch.h"
+#include "config.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -181,34 +182,24 @@ int
 md_parse_option (int c, const char *arg)
 {
   int ret = 1;
-  char lp64[256] = "";
-  char ilp32[256] = "";
-
-  lp64['s'] = lp64['S'] = EF_LOONGARCH_ABI_SOFT_FLOAT;
-  lp64['f'] = lp64['F'] = EF_LOONGARCH_ABI_SINGLE_FLOAT;
-  lp64['d'] = lp64['D'] = EF_LOONGARCH_ABI_DOUBLE_FLOAT;
-
-  ilp32['s'] = ilp32['S'] = EF_LOONGARCH_ABI_SOFT_FLOAT;
-  ilp32['f'] = ilp32['F'] = EF_LOONGARCH_ABI_SINGLE_FLOAT;
-  ilp32['d'] = ilp32['D'] = EF_LOONGARCH_ABI_DOUBLE_FLOAT;
+  char fabi[256] = "";
+  fabi['s'] = fabi['S'] = EF_LOONGARCH_ABI_SOFT_FLOAT;
+  fabi['f'] = fabi['F'] = EF_LOONGARCH_ABI_SINGLE_FLOAT;
+  fabi['d'] = fabi['D'] = EF_LOONGARCH_ABI_DOUBLE_FLOAT;
 
   switch (c)
     {
     case OPTION_ABI:
-      if (strncasecmp (arg, "lp64", 4) == 0 && lp64[arg[4] & 0xff] != 0)
+      if (strncasecmp (arg, "lp64", 4) == 0 && fabi[arg[4] & 0xff] != 0)
 	{
 	  LARCH_opts.ase_ilp32 = 1;
 	  LARCH_opts.ase_lp64 = 1;
-	  LARCH_opts.ase_lsx = 1;
-	  LARCH_opts.ase_lasx = 1;
-	  LARCH_opts.ase_lvz = 1;
-	  LARCH_opts.ase_lbt = 1;
-	  LARCH_opts.ase_abi = lp64[arg[4] & 0xff];
+	  LARCH_opts.ase_abi = fabi[arg[4] & 0xff];
 	}
-      else if (strncasecmp (arg, "ilp32", 5) == 0 && ilp32[arg[5] & 0xff] != 0)
+      else if (strncasecmp (arg, "ilp32", 5) == 0 && fabi[arg[5] & 0xff] != 0)
 	{
-	  LARCH_opts.ase_abi = ilp32[arg[5] & 0xff];
 	  LARCH_opts.ase_ilp32 = 1;
+	  LARCH_opts.ase_abi = fabi[arg[5] & 0xff];
 	}
       else
 	ret = 0;
@@ -284,43 +275,53 @@ static struct htab *cfi_f_htab = NULL;
 void
 loongarch_after_parse_args ()
 {
-  /* Set default ABI/ISA LP64D.  */
+  /* If no -mabi specified, set ABI by default_arch.  */
   if (!LARCH_opts.ase_ilp32)
     {
       if (strcmp (default_arch, "loongarch64") == 0)
 	{
-	  LARCH_opts.ase_abi = EF_LOONGARCH_ABI_DOUBLE_FLOAT;
 	  LARCH_opts.ase_ilp32 = 1;
 	  LARCH_opts.ase_lp64 = 1;
-	  LARCH_opts.ase_lsx = 1;
-	  LARCH_opts.ase_lasx = 1;
-	  LARCH_opts.ase_lvz = 1;
-	  LARCH_opts.ase_lbt = 1;
 	}
       else if (strcmp (default_arch, "loongarch32") == 0)
-	{
-	  LARCH_opts.ase_abi = EF_LOONGARCH_ABI_DOUBLE_FLOAT;
 	  LARCH_opts.ase_ilp32 = 1;
-	}
       else
 	as_bad ("unknown default architecture `%s'", default_arch);
     }
 
-  LARCH_opts.ase_abi |= EF_LOONGARCH_OBJABI_V1;
-  /* Set default ISA double-float.  */
-  if (!LARCH_opts.ase_nf
-      && !LARCH_opts.ase_sf
-      && !LARCH_opts.ase_df)
+  /* Enable all instructions defaultly.
+     Glibc checks LSX/LASX support when configure.
+     Kernel has float instructions but with -msoft-float option.
+     TODO: Enable la32 or la64 instructions by march option.
+     TODO: Instruction enable and macro expansion may need to be controlled
+     by different variables. ase_ilp32 and ase_lp64 only use for instruction
+     enable and can both be 1. The variables used for macro expand can't both
+     be 1.  */
+  LARCH_opts.ase_sf = 1;
+  LARCH_opts.ase_df = 1;
+  LARCH_opts.ase_lsx = 1;
+  LARCH_opts.ase_lasx = 1;
+  LARCH_opts.ase_lvz = 1;
+  LARCH_opts.ase_lbt = 1;
+
+  /* If no -mabi specified, set e_flags base ABI by target os.  */
+  if (!LARCH_opts.ase_abi)
     {
-      LARCH_opts.ase_sf = 1;
-      LARCH_opts.ase_df = 1;
+      if (strcmp (TARGET_OS, "linux-gnusf") == 0)
+	LARCH_opts.ase_abi = EF_LOONGARCH_ABI_SOFT_FLOAT;
+      else if (strcmp (TARGET_OS, "linux-gnuf32") == 0)
+	LARCH_opts.ase_abi = EF_LOONGARCH_ABI_SINGLE_FLOAT;
+      else if (strcmp (TARGET_OS, "linux-gnu") == 0)
+	LARCH_opts.ase_abi = EF_LOONGARCH_ABI_DOUBLE_FLOAT;
+      else
+	as_fatal (_("unsupport TARGET_OS %s"), TARGET_OS);
     }
 
-  size_t i;
-
-  assert(LARCH_opts.ase_ilp32);
+  /* Set eflags ABI version to v1 (ELF object file ABI 2.0).  */
+  LARCH_opts.ase_abi |= EF_LOONGARCH_OBJABI_V1;
 
   /* Init ilp32/lp64 registers names.  */
+  size_t i;
   if (!r_htab)
     r_htab = str_htab_create ();
   if (!r_deprecated_htab)
@@ -390,12 +391,12 @@ loongarch_after_parse_args ()
 	str_hash_insert_int (f_deprecated_htab, loongarch_f_alias_deprecated[i],
 			     i, 0);
 
-  /* The .cfi directive supports register aliases without the "$" prefix.  */
-  for (i = 0; i < ARRAY_SIZE (loongarch_f_cfi_name); i++)
-    {
-      str_hash_insert_int (cfi_f_htab, loongarch_f_cfi_name[i], i, 0);
-      str_hash_insert_int (cfi_f_htab, loongarch_f_cfi_name_alias[i], i, 0);
-    }
+      /* The .cfi directive supports register aliases without the "$" prefix.  */
+      for (i = 0; i < ARRAY_SIZE (loongarch_f_cfi_name); i++)
+	{
+	  str_hash_insert_int (cfi_f_htab, loongarch_f_cfi_name[i], i, 0);
+	  str_hash_insert_int (cfi_f_htab, loongarch_f_cfi_name_alias[i], i, 0);
+	}
 
       if (!fc_htab)
 	fc_htab = str_htab_create ();
