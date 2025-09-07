@@ -2649,7 +2649,7 @@ _bfd_vms_slurp_eeom (bfd *abfd)
   vms_debug2 ((2, "EEOM\n"));
 
   /* PR 21813: Check for an undersized record.  */
-  if (PRIV (recrd.buf_size) < sizeof (* eeom))
+  if (PRIV (recrd.rec_size) < 10)
     {
       _bfd_error_handler (_("corrupt EEOM record - size is too small"));
       bfd_set_error (bfd_error_bad_value);
@@ -2666,7 +2666,7 @@ _bfd_vms_slurp_eeom (bfd *abfd)
     }
 
   PRIV (eom_data).eom_has_transfer = false;
-  if (PRIV (recrd.rec_size) > 10)
+  if (PRIV (recrd.rec_size) >= sizeof (*eeom))
     {
       PRIV (eom_data).eom_has_transfer = true;
       PRIV (eom_data).eom_b_tfrflg = eeom->tfrflg;
