@@ -1605,37 +1605,43 @@ static bool
 image_write (bfd *abfd, unsigned char *ptr, unsigned int size)
 {
   asection *sec = PRIV (image_section);
-  size_t off = PRIV (image_offset);
 
-  /* Check bounds.  */
-  if (off > sec->size
-      || size > sec->size - off)
-    {
-      bfd_set_error (bfd_error_bad_value);
-      return false;
-    }
-
-#if VMS_DEBUG
-  _bfd_vms_debug (8, "image_write from (%p, %d) to (%ld)\n", ptr, size,
-		  (long) off);
-#endif
-
-  if (PRIV (image_section)->contents != NULL)
-    memcpy (sec->contents + off, ptr, size);
+  if ((sec->flags & SEC_IN_MEMORY) != 0
+      && sec->contents == NULL)
+    /* Not yet allocated.  Just increment size.  */
+    ;
   else
     {
-      unsigned int i;
-      for (i = 0; i < size; i++)
-	if (ptr[i] != 0)
-	  {
-	    bfd_set_error (bfd_error_bad_value);
-	    return false;
-	  }
-    }
+      size_t off = PRIV (image_offset);
+      /* Check bounds.  */
+      if (off > sec->size
+	  || size > sec->size - off)
+	{
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
 
 #if VMS_DEBUG
-  _bfd_hexdump (9, ptr, size, 0);
+      _bfd_vms_debug (8, "image_write from (%p, %d) to (%ld)\n", ptr, size,
+		      (long) off);
 #endif
+
+      if (sec->contents != NULL)
+	memcpy (sec->contents + off, ptr, size);
+      else
+	{
+	  unsigned int i;
+	  for (i = 0; i < size; i++)
+	    if (ptr[i] != 0)
+	      {
+		bfd_set_error (bfd_error_bad_value);
+		return false;
+	      }
+	}
+#if VMS_DEBUG
+      _bfd_hexdump (9, ptr, size, 0);
+#endif
+    }
 
   PRIV (image_offset) += size;
   return true;
@@ -7493,6 +7499,8 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
       /* xgettext:c-format */
       fprintf (file, _(" type: %3u, len: %3u (at 0x%08x): "),
 	       type, len, off);
+      /* !!! The length is short by one!  */
+      len++;
       if (len > dst_size)
 	len = dst_size;
       if (len < sizeof (dsth))
