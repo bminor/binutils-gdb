@@ -4091,6 +4091,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
       if (disassemble_all
 	  || sym == NULL
 	  || sym->section != section
+	  || (section->flags & SEC_CODE) != 0
 	  || bfd_asymbol_value (sym) > addr
 	  || ((sym->flags & BSF_OBJECT) == 0
 	      && (strstr (bfd_asymbol_name (sym), "gnu_compiled")
