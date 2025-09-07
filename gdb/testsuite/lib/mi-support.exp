@@ -1044,6 +1044,9 @@ proc mi_clean_restart {{executable ""} {flags {}}} {
     mi_gdb_reinitialize_dir $srcdir/$subdir
 
     if {$executable != ""} {
+	if { [file pathtype $executable] == "absolute" } {
+	    error "absolute path used"
+	}
 	set binfile [standard_output_file ${executable}]
 	return [mi_gdb_load ${binfile}]
     }

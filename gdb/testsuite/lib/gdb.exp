@@ -9355,6 +9355,10 @@ proc clean_restart {{executable ""}} {
     gdb_reinitialize_dir $srcdir/$subdir
 
     if {$executable != ""} {
+	if { [file pathtype $executable] == "absolute" } {
+	    error "absolute path used"
+	}
+
 	set binfile [standard_output_file ${executable}]
 	return [gdb_load ${binfile}]
     }
