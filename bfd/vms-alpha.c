@@ -1863,11 +1863,16 @@ alpha_vms_fix_sec_rel (bfd *abfd, struct bfd_link_info *info,
 		       unsigned int rel, bfd_vma vma)
 {
   asection *sec;
+  unsigned int sec_indx;
 
   if (PRIV (sections) == NULL)
     return 0;
 
-  sec = PRIV (sections)[rel & RELC_MASK];
+  sec_indx = rel & RELC_MASK;
+  if (sec_indx >= PRIV (section_count))
+    return 0;
+
+  sec = PRIV (sections)[sec_indx];
 
   if (info)
     {
@@ -9655,6 +9660,7 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 	  bfd_vma tfradr = PRIV2 (startbfd, eom_data).eom_l_tfradr;
 	  asection *sec;
 
+	  BFD_ASSERT (ps_idx < PRIV2 (startbfd, section_count));
 	  sec = PRIV2 (startbfd, sections)[ps_idx];
 
 	  bfd_set_start_address
