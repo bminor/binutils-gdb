@@ -326,7 +326,7 @@ i[34567]86-*-linux*)
 			arch/x86-linux-tdesc-features.o"
 	if test "x$have_64_bit_bfd" = "xyes"; then
 	    # Target: GNU/Linux x86-64
-	    gdb_target_obs="amd64-linux-tdep.o \
+	    gdb_target_obs="amd64-linux-tdep.o svr4-tls-tdep.o \
 			    arch/amd64-linux-tdesc.o ${gdb_target_obs}"
 	fi
 	;;
