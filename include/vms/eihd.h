@@ -140,6 +140,8 @@ struct vms_eihd
 #define EIHD__Q_SYMVVA		40
 #define EIHD__L_IMGTYPE		52
 
+/* ext_fixup_off field offset.  Some headers may be missing this and
+   following fields.  */
 #define EIHD__C_LENGTH 104
 
 #endif /* _VMS_EIHD_H */

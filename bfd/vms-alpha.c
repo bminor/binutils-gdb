@@ -467,21 +467,12 @@ static bool
 _bfd_vms_slurp_eihd (bfd *abfd, unsigned int *eisd_offset,
 		     unsigned int *eihs_offset)
 {
-  unsigned int imgtype, size;
+  unsigned int imgtype;
   bfd_vma symvva;
   struct vms_eihd *eihd = (struct vms_eihd *)PRIV (recrd.rec);
 
   vms_debug2 ((8, "_bfd_vms_slurp_eihd\n"));
 
-  /* PR 21813: Check for an undersized record.  */
-  if (PRIV (recrd.buf_size) < sizeof (* eihd))
-    {
-      _bfd_error_handler (_("corrupt EIHD record - size is too small"));
-      bfd_set_error (bfd_error_bad_value);
-      return false;
-    }
-
-  size = bfd_getl32 (eihd->size);
   imgtype = bfd_getl32 (eihd->imgtype);
 
   if (imgtype == EIHD__K_EXE || imgtype == EIHD__K_LIM)
@@ -501,10 +492,8 @@ _bfd_vms_slurp_eihd (bfd *abfd, unsigned int *eisd_offset,
   *eihs_offset = bfd_getl32 (eihd->symdbgoff);
 
   vms_debug2 ((4, "EIHD size %d imgtype %d symvva 0x%lx eisd %d eihs %d\n",
-	       size, imgtype, (unsigned long)symvva,
+	       PRIV (recrd.rec_size), imgtype, (unsigned long) symvva,
 	       *eisd_offset, *eihs_offset));
-  (void) size;
-
   return true;
 }
 
@@ -2841,7 +2830,7 @@ alpha_vms_object_p (bfd *abfd)
 
       /* PR 21813: Check for a truncated record.  */
       /* PR 17512: file: 7d7c57c2.  */
-      if (PRIV (recrd.rec_size) < sizeof (struct vms_eihd))
+      if (PRIV (recrd.rec_size) < EIHD__C_LENGTH)
 	goto err_wrong_format;
 
       if (bfd_seek (abfd, 0, SEEK_SET))
@@ -8043,6 +8032,7 @@ static void
 evax_bfd_print_image (bfd *abfd, FILE *file)
 {
   struct vms_eihd eihd;
+  unsigned int rec_size, size;
   const char *name;
   unsigned int val;
   unsigned int eiha_off;
@@ -8062,15 +8052,17 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
   unsigned int eihvn_off;
 
   if (bfd_seek (abfd, 0, SEEK_SET)
-      || bfd_read (&eihd, sizeof (eihd), abfd) != sizeof (eihd))
+      || (rec_size = bfd_read (&eihd, sizeof (eihd), abfd)) < EIHD__C_LENGTH)
     {
       fprintf (file, _("cannot read EIHD\n"));
       return;
     }
+  size = bfd_getl32 (eihd.size);
   /* xgettext:c-format */
   fprintf (file, _("EIHD: (size: %u, nbr blocks: %u)\n"),
-	   (unsigned)bfd_getl32 (eihd.size),
-	   (unsigned)bfd_getl32 (eihd.hdrblkcnt));
+	   size, (unsigned) bfd_getl32 (eihd.hdrblkcnt));
+  if (size > rec_size)
+    size = rec_size;
   /* xgettext:c-format */
   fprintf (file, _(" majorid: %u, minorid: %u\n"),
 	   (unsigned)bfd_getl32 (eihd.majorid),
@@ -8172,7 +8164,9 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
 	   (unsigned)bfd_getl32 (eihd.symvect_size));
   fprintf (file, _(" BPAGE: %u"),
 	   (unsigned)bfd_getl32 (eihd.virt_mem_block_size));
-  if (val & (EIHD__M_OMV_READY | EIHD__M_EXT_BIND_SECT))
+  if (size >= (offsetof (struct vms_eihd, noopt_psect_off)
+	       + sizeof (eihd.noopt_psect_off))
+      && (val & (EIHD__M_OMV_READY | EIHD__M_EXT_BIND_SECT)))
     {
       eihef_off = bfd_getl32 (eihd.ext_fixup_off);
       eihnp_off = bfd_getl32 (eihd.noopt_psect_off);
@@ -8180,7 +8174,9 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
       fprintf (file, _(", ext fixup offset: %u, no_opt psect off: %u"),
 	       eihef_off, eihnp_off);
     }
-  fprintf (file, _(", alias: %u\n"), (unsigned)bfd_getl16 (eihd.alias));
+  if (size >= offsetof (struct vms_eihd, alias) + sizeof (eihd.alias))
+    fprintf (file, _(", alias: %u"), (unsigned) bfd_getl16 (eihd.alias));
+  fprintf (file, "\n");
 
   if (eihvn_off != 0)
     {
