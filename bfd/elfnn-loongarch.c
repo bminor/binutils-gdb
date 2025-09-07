@@ -5136,9 +5136,8 @@ loongarch_tls_perform_trans (bfd *abfd, asection *sec,
 	if (local_exec)
 	  {
 	    /* DESC -> LE relaxation:
-	       pcalalau12i $a0,%desc_pc_hi20(var) =>
-	       lu12i.w $a0,%le_hi20(var)
-	    */
+	       pcalau12i $a0,%desc_pc_hi20(var) =>
+	       lu12i.w $a0,%le_hi20(var)  */
 	    bfd_put (32, abfd, LARCH_OP_LU12I_W | LARCH_RD_A0,
 		contents + rel->r_offset);
 	    rel->r_info = ELFNN_R_INFO (r_symndx, R_LARCH_TLS_LE_HI20);
@@ -5146,9 +5145,8 @@ loongarch_tls_perform_trans (bfd *abfd, asection *sec,
 	else
 	  {
 	    /* DESC -> IE relaxation:
-	       pcalalau12i $a0,%desc_pc_hi20(var) =>
-	       pcalalau12i $a0,%ie_pc_hi20(var)
-	    */
+	       pcalau12i $a0,%desc_pc_hi20(var) =>
+	       pcalau12i $a0,%ie_pc_hi20(var)  */
 	    rel->r_info = ELFNN_R_INFO (r_symndx, R_LARCH_TLS_IE_PC_HI20);
 	  }
 	return true;
@@ -5158,8 +5156,7 @@ loongarch_tls_perform_trans (bfd *abfd, asection *sec,
 	  {
 	    /* DESC -> LE relaxation:
 	       addi.d $a0,$a0,%desc_pc_lo12(var) =>
-	       ori  $a0,$a0,le_lo12(var)
-	    */
+	       ori  $a0,$a0,le_lo12(var)  */
 	    insn = LARCH_OP_ORI | LARCH_RD_RJ_A0;
 	    bfd_put (32, abfd, LARCH_OP_ORI | LARCH_RD_RJ_A0,
 		contents + rel->r_offset);
@@ -5181,8 +5178,7 @@ loongarch_tls_perform_trans (bfd *abfd, asection *sec,
       case R_LARCH_TLS_DESC_CALL:
 	/* DESC -> LE/IE relaxation:
 	   ld.d $ra,$a0,%desc_ld(var) => NOP
-	   jirl $ra,$ra,%desc_call(var) => NOP
-	*/
+	   jirl $ra,$ra,%desc_call(var) => NOP  */
 	rel->r_info = ELFNN_R_INFO (0, R_LARCH_NONE);
 	bfd_put (32, abfd, LARCH_NOP, contents + rel->r_offset);
 	/* link with -relax option will delete NOP.  */
@@ -5194,9 +5190,8 @@ loongarch_tls_perform_trans (bfd *abfd, asection *sec,
 	if (local_exec)
 	  {
 	    /* IE -> LE relaxation:
-	       pcalalau12i $rd,%ie_pc_hi20(var) =>
-	       lu12i.w $rd,%le_hi20(var)
-	    */
+	       pcalau12i $rd,%ie_pc_hi20(var) =>
+	       lu12i.w $rd,%le_hi20(var)  */
 	    insn = bfd_getl32 (contents + rel->r_offset);
 	    bfd_put (32, abfd, LARCH_OP_LU12I_W | LARCH_GET_RD(insn),
 		contents + rel->r_offset);
