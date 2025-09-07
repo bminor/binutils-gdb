@@ -684,3 +684,16 @@ export SHELLOPTS
   ])
 fi
 ])
+
+# ACX_PROG_GNU_TAIL
+# --------------------
+# Check for GNU tail.
+AC_DEFUN([ACX_PROG_GNU_TAIL],
+  [AC_ARG_VAR([TAIL], [Location of GNU tail.  Defaults to the first
+    GNU version of `tail', `gtail' on PATH.])
+  AC_CACHE_CHECK([for GNU tail], [ac_cv_path_TAIL],
+    [AC_PATH_PROGS_FEATURE_CHECK([TAIL], [tail gtail],
+      [_AC_PATH_PROG_FLAVOR_GNU([$ac_path_TAIL],
+	[ac_cv_path_TAIL=$ac_path_TAIL && ac_path_TAIL_found=:])])])
+  TAIL=$ac_cv_path_TAIL
+])

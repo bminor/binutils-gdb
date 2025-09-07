@@ -208,6 +208,7 @@ check-DEJAGNU: site.exp
 	r=`pwd`; export r; \
 	LC_ALL=C; export LC_ALL; \
 	EXPECT=$(EXPECT); export EXPECT; \
+	TAIL=$(TAIL); export TAIL; \
 	runtest=$(RUNTEST); \
 	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \
 	  $$runtest --tool $(DEJATOOL) --srcdir $${srcdir}/testsuite \

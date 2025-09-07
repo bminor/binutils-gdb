@@ -138,7 +138,7 @@ EXTRA_PROGRAMS = srconv$(EXEEXT) sysdump$(EXEEXT) coffdump$(EXEEXT) \
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../bfd/acinclude.m4 \
-	$(top_srcdir)/../bfd/warning.m4 \
+	$(top_srcdir)/../bfd/warning.m4 $(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/../config/enable.m4 \
 	$(top_srcdir)/../config/gettext-sister.m4 \
@@ -573,6 +573,7 @@ SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
+TAIL = @TAIL@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 WARN_CFLAGS = @WARN_CFLAGS@
@@ -1836,6 +1837,7 @@ check-DEJAGNU: site.exp
 	r=`pwd`; export r; \
 	LC_ALL=C; export LC_ALL; \
 	EXPECT=$(EXPECT); export EXPECT; \
+	TAIL=$(TAIL); export TAIL; \
 	runtest=$(RUNTEST); \
 	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \
 	  $$runtest --tool $(DEJATOOL) --srcdir $${srcdir}/testsuite \

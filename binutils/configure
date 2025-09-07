@@ -656,6 +656,7 @@ zlibdir
 DEMANGLER_NAME
 EXEEXT_FOR_BUILD
 CC_FOR_BUILD
+TAIL
 HDEFINES
 GENINSRC_NEVER_FALSE
 GENINSRC_NEVER_TRUE
@@ -863,6 +864,7 @@ DEBUGINFOD_CFLAGS
 DEBUGINFOD_LIBS
 YACC
 YFLAGS
+TAIL
 ZSTD_CFLAGS
 ZSTD_LIBS
 MSGPACK_CFLAGS
@@ -1567,6 +1569,8 @@ Some influential environment variables:
   YFLAGS      The list of arguments that will be passed by default to $YACC.
               This script will default YFLAGS to the empty string to avoid a
               default value of `-d' given by some make applications.
+  TAIL        Location of GNU tail. Defaults to the first GNU version of
+              `tail', `gtail' on PATH.
   ZSTD_CFLAGS C compiler flags for ZSTD, overriding pkg-config
   ZSTD_LIBS   linker flags for ZSTD, overriding pkg-config
   MSGPACK_CFLAGS
@@ -11081,7 +11085,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11084 "configure"
+#line 11088 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11187,7 +11191,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11190 "configure"
+#line 11194 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14818,6 +14822,48 @@ else
   RANLIB="$ac_cv_prog_RANLIB"
 fi
 
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for GNU tail" >&5
+$as_echo_n "checking for GNU tail... " >&6; }
+if ${ac_cv_path_TAIL+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -z "$TAIL"; then
+  ac_path_TAIL_found=false
+  # Loop through the user's path and test for each of PROGNAME-LIST
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_prog in tail gtail; do
+    for ac_exec_ext in '' $ac_executable_extensions; do
+      ac_path_TAIL="$as_dir/$ac_prog$ac_exec_ext"
+      as_fn_executable_p "$ac_path_TAIL" || continue
+# Check for GNU $ac_path_TAIL
+case `"$ac_path_TAIL" --version 2>&1` in
+*GNU*)
+  ac_cv_path_TAIL=$ac_path_TAIL && ac_path_TAIL_found=:;;
+esac
+
+      $ac_path_TAIL_found && break 3
+    done
+  done
+  done
+IFS=$as_save_IFS
+  if test -z "$ac_cv_path_TAIL"; then
+    :
+  fi
+else
+  ac_cv_path_TAIL=$TAIL
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_path_TAIL" >&5
+$as_echo "$ac_cv_path_TAIL" >&6; }
+  TAIL=$ac_cv_path_TAIL
 
 
 # Put a plausible default for CC_FOR_BUILD in Makefile.

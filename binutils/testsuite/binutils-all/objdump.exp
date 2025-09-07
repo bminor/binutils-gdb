@@ -595,7 +595,14 @@ if { ![is_elf_format] } then {
        send_log "\n"
     }
 
-    set got [remote_exec host "tail -n +4 tmpdir/objdump.out" "" "/dev/null" "tmpdir/objdump.tail"]
+    if {![info exists env(TAIL)]} {
+       # If no GNU tail is available, skip this test.
+       verbose "Need GNU tail for 'objdump -Wi' test"
+       untested "objdump -Wi"
+       return
+    }
+
+    set got [remote_exec host "$env(TAIL) -n +4 tmpdir/objdump.out" "" "/dev/null" "tmpdir/objdump.tail"]
     set output [remote_upload host tmpdir/objdump.tail]
 
     if ![file size $output] then {
