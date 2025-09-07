@@ -2281,6 +2281,13 @@ reloc_bits_sanity (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val,
 	 so the high part need to add 0x8000.  */
       val = (((val + 0x8000) >> 16) << 5) | (((val & 0xffff) << 10) << 32);
       break;
+    case R_LARCH_CALL30:
+      /* call30 = pcaddu12i+jirl, the jirl immediate field has 16 bits.
+	 Only use 10 bits immediate of jirl, so not need to add 0x8000.
+	 Since there is "val = val >> howto->rightshift" in front, only
+	 the lower 10 bits (0x3ff) need to be saved.  */
+      val = ((val >> 10) << 5) | (((val & 0x3ff) << 10) << 32);
+      break;
     default:
       val <<= howto->bitpos;
       break;

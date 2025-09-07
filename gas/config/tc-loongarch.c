@@ -117,7 +117,7 @@ const char md_shortopts[] = "O::g::G:";
 
 static const char default_arch[] = DEFAULT_ARCH;
 
-static bool call36 = 0;
+static bool call_reloc = 0;
 
 /* The dwarf2 data alignment, adjusted for 32 or 64 bit.  */
 int loongarch_cie_data_alignment;
@@ -865,7 +865,7 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
 		      esc_ch1, esc_ch2, bit_field, arg);
 
 	  if (ip->reloc_info[0].type >= BFD_RELOC_LARCH_B16
-	      && ip->reloc_info[0].type <= BFD_RELOC_LARCH_TLS_DESC_PCREL20_S2)
+	      && ip->reloc_info[0].type <= BFD_RELOC_LARCH_TLS_DESC_PCADD_LO12)
 	    {
 	      /* As we compact stack-relocs, it is no need for pop operation.
 		 But break out until here in order to check the imm field.
@@ -1170,13 +1170,14 @@ static void
 append_fixed_insn (struct loongarch_cl_insn *insn)
 {
   /* Ensure the jirl is emitted to the same frag as the pcaddu18i.  */
-  if (BFD_RELOC_LARCH_CALL36 == insn->reloc_info[0].type)
+  if (insn->reloc_info[0].type == BFD_RELOC_LARCH_CALL36
+      || insn->reloc_info[0].type == BFD_RELOC_LARCH_CALL30)
     frag_grow (8);
 
   char *f = frag_more (insn->insn_length);
   move_insn (insn, frag_now, f - frag_now->fr_literal);
 
-  if (call36)
+  if (call_reloc)
     {
       if (strcmp (insn->name, "jirl") == 0)
 	{
@@ -1184,11 +1185,12 @@ append_fixed_insn (struct loongarch_cl_insn *insn)
 	  frag_wane (frag_now);
 	  frag_new (0);
 	}
-      call36 = 0;
+      call_reloc = 0;
     }
 
-  if (BFD_RELOC_LARCH_CALL36 == insn->reloc_info[0].type)
-    call36 = 1;
+  if (insn->reloc_info[0].type == BFD_RELOC_LARCH_CALL36
+      || insn->reloc_info[0].type == BFD_RELOC_LARCH_CALL30)
+    call_reloc = 1;
 }
 
 /* Add instructions based on the worst-case scenario firstly.  */
@@ -1500,6 +1502,8 @@ loongarch_force_relocation (struct fix *fixp)
       case BFD_RELOC_LARCH_GOT_LO12:
       case BFD_RELOC_LARCH_GOT64_LO20:
       case BFD_RELOC_LARCH_GOT64_HI12:
+      case BFD_RELOC_LARCH_GOT_PCADD_HI20:
+      case BFD_RELOC_LARCH_GOT_PCADD_LO12:
 	return 1;
       default:
 	break;
@@ -1589,6 +1593,14 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_LARCH_TLS_LE_ADD_R:
     case BFD_RELOC_LARCH_TLS_LE_HI20_R:
     case BFD_RELOC_LARCH_TLS_LE_LO12_R:
+    case BFD_RELOC_LARCH_TLS_IE_PCADD_HI20:
+    case BFD_RELOC_LARCH_TLS_IE_PCADD_LO12:
+    case BFD_RELOC_LARCH_TLS_LD_PCADD_HI20:
+    case BFD_RELOC_LARCH_TLS_LD_PCADD_LO12:
+    case BFD_RELOC_LARCH_TLS_GD_PCADD_HI20:
+    case BFD_RELOC_LARCH_TLS_GD_PCADD_LO12:
+    case BFD_RELOC_LARCH_TLS_DESC_PCADD_HI20:
+    case BFD_RELOC_LARCH_TLS_DESC_PCADD_LO12:
       /* Add tls lo (got_lo reloc type).  */
       if (fixP->fx_addsy == NULL)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
