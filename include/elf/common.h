@@ -575,7 +575,21 @@
 #define SHT_CHECKSUM	             0x6ffffff8	/* Checksum for DSO content.  */
 #define SHT_GNU_OBJECT_ONLY	     0x6ffffff9	/* Object only */
 
-#define SHT_SUNW_move	             0x6ffffffa
+#define SHT_SUNW_symtabnsort         0x6fffffec
+#define SHT_SUNW_ancillary           0x6fffffee
+#define SHT_SUNW_phname              0x6fffffed
+#define SHT_SUNW_capchain            0x6fffffef
+#define SHT_SUNW_capinfo             0x6ffffff0
+#define SHT_SUNW_symsort             0x6ffffff1
+#define SHT_SUNW_tlssort             0x6ffffff2
+#define SHT_SUNW_LDYNSYM             0x6ffffff3
+#define SHT_SUNW_dof                 0x6ffffff4
+#define SHT_SUNW_cap                 0x6ffffff5
+#define SHT_SUNW_SIGNATURE           0x6ffffff6
+#define SHT_SUNW_ANNOTATE            0x6ffffff7
+#define SHT_SUNW_DEBUGSTR            0x6ffffff8
+#define SHT_SUNW_DEBUG               0x6ffffff9
+#define SHT_SUNW_move                0x6ffffffa
 #define SHT_SUNW_COMDAT              0x6ffffffb
 #define SHT_SUNW_syminfo             0x6ffffffc
 /* The next three section types are defined by Solaris, and are named

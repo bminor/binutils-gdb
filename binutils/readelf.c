@@ -3080,26 +3080,50 @@ get_solaris_section_type (unsigned long type)
 {
   switch (type)
     {
-    case 0x6fffffee: return "SUNW_ancillary";
-    case 0x6fffffef: return "SUNW_capchain";
-    case 0x6ffffff0: return "SUNW_capinfo";
-    case 0x6ffffff1: return "SUNW_symsort";
-    case 0x6ffffff2: return "SUNW_tlssort";
-    case 0x6ffffff3: return "SUNW_LDYNSYM";
-    case 0x6ffffff4: return "SUNW_dof";
-    case 0x6ffffff5: return "SUNW_cap";
-    case 0x6ffffff6: return "SUNW_SIGNATURE";
-    case 0x6ffffff7: return "SUNW_ANNOTATE";
-    case 0x6ffffff8: return "SUNW_DEBUGSTR";
-    case 0x6ffffff9: return "SUNW_DEBUG";
-    case 0x6ffffffa: return "SUNW_move";
-    case 0x6ffffffb: return "SUNW_COMDAT";
-    case 0x6ffffffc: return "SUNW_syminfo";
-    case 0x6ffffffd: return "SUNW_verdef";
-    case 0x6ffffffe: return "SUNW_verneed";
-    case 0x6fffffff: return "SUNW_versym";
-    case 0x70000000: return "SPARC_GOTDATA";
-    default: return NULL;
+    case SHT_SUNW_symtabnsort:
+      return "SUNW_symtabnsort";
+    case SHT_SUNW_ancillary:
+      return "SUNW_ancillary";
+    case SHT_SUNW_phname:
+      return "SUNW_phname";
+    case SHT_SUNW_capchain:
+      return "SUNW_capchain";
+    case SHT_SUNW_capinfo:
+      return "SUNW_capinfo";
+    case SHT_SUNW_symsort:
+      return "SUNW_symsort";
+    case SHT_SUNW_tlssort:
+      return "SUNW_tlssort";
+    case SHT_SUNW_LDYNSYM:
+      return "SUNW_LDYNSYM";
+    case SHT_SUNW_dof:
+      return "SUNW_dof";
+    case SHT_SUNW_cap:
+      return "SUNW_cap";
+    case SHT_SUNW_SIGNATURE:
+      return "SUNW_SIGNATURE";
+    case SHT_SUNW_ANNOTATE:
+      return "SUNW_ANNOTATE";
+    case SHT_SUNW_DEBUGSTR:
+      return "SUNW_DEBUGSTR";
+    case SHT_SUNW_DEBUG:
+      return "SUNW_DEBUG";
+    case SHT_SUNW_move:
+      return "SUNW_move";
+    case SHT_SUNW_COMDAT:
+      return "SUNW_COMDAT";
+    case SHT_SUNW_syminfo:
+      return "SUNW_syminfo";
+    case SHT_SUNW_verdef:
+      return "SUNW_verdef";
+    case SHT_SUNW_verneed:
+      return "SUNW_verneed";
+    case SHT_SUNW_versym:
+      return "SUNW_versym";
+    case 0x70000000:
+      return "SPARC_GOTDATA";
+    default:
+      return NULL;
     }
 }
 
