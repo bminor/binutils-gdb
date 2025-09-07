@@ -8939,13 +8939,13 @@ alpha_vms_add_fixup_lr (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 static bool
 alpha_vms_add_lw_reloc (struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
-  return false;
+  return true;
 }
 
 static bool
 alpha_vms_add_qw_reloc (struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
-  return false;
+  return true;
 }
 
 static struct bfd_hash_entry *
