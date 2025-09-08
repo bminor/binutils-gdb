@@ -1472,7 +1472,7 @@ case "${targ}" in
 #ifdef BFD64
   loongarch32-*)
     targ_defvec=loongarch_elf32_vec
-    targ_selvecs="loongarch_elf32_vec"
+    targ_selvecs="loongarch_elf32_vec loongarch_elf64_vec loongarch64_pei_vec"
     want64=true
     ;;
 
