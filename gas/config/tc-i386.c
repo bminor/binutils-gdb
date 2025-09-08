@@ -648,7 +648,7 @@ static int this_operand = -1;
 /* Are we processing a .insn directive?  */
 #define dot_insn() (i.tm.mnem_off == MN__insn)
 
-enum i386_flag_code i386_flag_code;
+static enum i386_flag_code i386_flag_code;
 #define flag_code i386_flag_code /* Permit to continue using original name.  */
 static unsigned int object_64bit;
 static unsigned int disallow_64bit_reloc;
@@ -861,7 +861,7 @@ static const char *cpu_arch_name = NULL;
 static char *cpu_sub_arch_name = NULL;
 
 /* CPU feature flags.  */
-i386_cpu_flags cpu_arch_flags = CPU_UNKNOWN_FLAGS;
+static i386_cpu_flags cpu_arch_flags = CPU_UNKNOWN_FLAGS;
 
 /* ISA extensions available in 64-bit mode only.  */
 static const i386_cpu_flags cpu_64_flags = CPU_ANY_64_FLAGS;
@@ -870,13 +870,13 @@ static const i386_cpu_flags cpu_64_flags = CPU_ANY_64_FLAGS;
 static int cpu_arch_tune_set = 0;
 
 /* Cpu we are generating instructions for.  */
-enum processor_type cpu_arch_tune = PROCESSOR_UNKNOWN;
+static enum processor_type cpu_arch_tune = PROCESSOR_UNKNOWN;
 
 /* CPU instruction set architecture used.  */
-enum processor_type cpu_arch_isa = PROCESSOR_UNKNOWN;
+static enum processor_type cpu_arch_isa = PROCESSOR_UNKNOWN;
 
 /* CPU feature flags of instruction set architecture used.  */
-i386_cpu_flags cpu_arch_isa_flags;
+static i386_cpu_flags cpu_arch_isa_flags;
 
 /* If set, conditional jumps are not automatically promoted to handle
    larger than a byte offset.  */
@@ -15667,6 +15667,22 @@ i386_att_operand (char *operand_string)
   return 1;			/* Normal return.  */
 }
 
+/* Initialize the tc_frag_data field of a fragment.  */
+
+void i386_frag_init (fragS *fragP, size_t max_bytes)
+{
+  memset (&fragP->tc_frag_data, 0, sizeof (fragP->tc_frag_data));
+  fragP->tc_frag_data.isa = cpu_arch_isa;
+  fragP->tc_frag_data.tune = cpu_arch_tune;
+  fragP->tc_frag_data.cpunop = cpu_arch_flags.bitfield.cpunop;
+  fragP->tc_frag_data.isanop = cpu_arch_isa_flags.bitfield.cpunop;
+  fragP->tc_frag_data.code = i386_flag_code;
+  fragP->tc_frag_data.max_bytes = max_bytes;
+  fragP->tc_frag_data.last_insn_normal
+    = (seg_info(now_seg)->tc_segment_info_data.last_insn.kind
+       == last_insn_other);
+}
+
 /* Calculate the maximum variable size (i.e., excluding fr_fix)
    that an rs_machine_dependent frag may reach.  */
 

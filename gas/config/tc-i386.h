@@ -277,19 +277,14 @@ enum processor_type
   PROCESSOR_NONE
 };
 
-extern i386_cpu_flags cpu_arch_flags;
-extern enum processor_type cpu_arch_tune;
-extern enum processor_type cpu_arch_isa;
-extern i386_cpu_flags cpu_arch_isa_flags;
-
 /* We support four different modes.  I386_FLAG_CODE variable is used to
    distinguish three of these.  */
 
-extern enum i386_flag_code {
+enum i386_flag_code {
 	CODE_32BIT,
 	CODE_16BIT,
 	CODE_64BIT
-} i386_flag_code;
+};
 
 struct i386_segment_info {
   /* Type of previous "instruction", e.g. .byte or stand-alone prefix.  */
@@ -341,31 +336,8 @@ struct i386_tc_frag_data
    the isa/tune settings at the time the .align was assembled.  */
 #define TC_FRAG_TYPE struct i386_tc_frag_data
 
-#define TC_FRAG_INIT(FRAGP, MAX_BYTES)				\
- do								\
-   {								\
-     (FRAGP)->tc_frag_data.u.padding_fragP = NULL;		\
-     (FRAGP)->tc_frag_data.padding_address = 0;			\
-     (FRAGP)->tc_frag_data.isa = cpu_arch_isa;			\
-     (FRAGP)->tc_frag_data.tune = cpu_arch_tune;		\
-     (FRAGP)->tc_frag_data.cpunop = cpu_arch_flags.bitfield.cpunop; \
-     (FRAGP)->tc_frag_data.isanop = cpu_arch_isa_flags.bitfield.cpunop; \
-     (FRAGP)->tc_frag_data.code = i386_flag_code;		\
-     (FRAGP)->tc_frag_data.max_bytes = (MAX_BYTES);		\
-     (FRAGP)->tc_frag_data.length = 0;				\
-     (FRAGP)->tc_frag_data.last_length = 0;			\
-     (FRAGP)->tc_frag_data.max_prefix_length = 0;		\
-     (FRAGP)->tc_frag_data.prefix_length = 0;			\
-     (FRAGP)->tc_frag_data.default_prefix = 0;			\
-     (FRAGP)->tc_frag_data.cmp_size = 0;			\
-     (FRAGP)->tc_frag_data.classified = 0;			\
-     (FRAGP)->tc_frag_data.branch_type = 0;			\
-     (FRAGP)->tc_frag_data.mf_type = 0;				\
-     (FRAGP)->tc_frag_data.last_insn_normal			\
-	= (seg_info(now_seg)->tc_segment_info_data.last_insn.kind \
-	   == last_insn_other);					\
-   }								\
- while (0)
+void i386_frag_init (fragS *, size_t);
+#define TC_FRAG_INIT(fragP, max_bytes) i386_frag_init (fragP, max_bytes)
 
 #define WORKING_DOT_WORD 1
 
