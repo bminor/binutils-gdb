@@ -1841,9 +1841,10 @@ reg_buffer_raw_compare_zero_len_test ()
   const regcache *regcache
     = get_thread_arch_regcache (&inf, ptid_t (1, 1), inf.arch ());
 
-  /* The buffer address is irrelevant since we end up comparing 0 bytes, we just
-     need to pass something.  */
-  gdb_byte buf;
+  /* The buffer address is irrelevant since we end up comparing 0 bytes, we
+     just need to pass something.  The variable needs to be initialized to
+     avoid compiler warnings about uninitialized values.  */
+  gdb_byte buf = 0;
   SELF_CHECK (regcache->raw_compare (0, &buf, register_size (inf.arch (), 0)));
 }
 
