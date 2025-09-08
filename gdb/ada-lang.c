@@ -10284,14 +10284,17 @@ ada_ternop_slice_operation::evaluate (struct type *expect_type,
 			    longest_to_int (high_bound));
 }
 
-} /* namespace expr */
-
-/* A helper function for BINOP_IN_BOUNDS.  */
+/* Implement BINOP_IN_BOUNDS.  */
 
 value *
-ada_binop_in_bounds (struct expression *exp, enum noside noside,
-		     struct value *arg1, struct value *arg2, int n)
+ada_binop_in_bounds_operation::evaluate (struct type *expect_type,
+					 struct expression *exp,
+					 enum noside noside)
 {
+  value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+  value *arg2 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+  int n = std::get<2> (m_storage);
+
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
       struct type *type = language_bool_type (exp->language_defn,
@@ -10315,6 +10318,8 @@ ada_binop_in_bounds (struct expression *exp, enum noside noside,
 			     && (value_less (arg2, arg1)
 				 || value_equal (arg2, arg1)));
 }
+
+} /* namespace expr */
 
 /* A helper function for some attribute operations.  */
 
