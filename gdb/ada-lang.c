@@ -10041,14 +10041,19 @@ ada_unop_neg (struct type *expect_type,
   return value_neg (arg1);
 }
 
-/* A helper function for UNOP_IN_RANGE.  */
+namespace expr
+{
+
+/* Implement UNOP_IN_RANGE.  */
 
 value *
-ada_unop_in_range (struct type *expect_type,
-		   struct expression *exp,
-		   enum noside noside, enum exp_opcode op,
-		   struct value *arg1, struct type *type)
+ada_unop_range_operation::evaluate (struct type *expect_type,
+				    struct expression *exp,
+				    enum noside noside)
 {
+  value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+  struct type *type = std::get<1> (m_storage);
+
   struct value *arg2, *arg3;
   switch (type->code ())
     {
@@ -10074,6 +10079,8 @@ ada_unop_in_range (struct type *expect_type,
 				|| value_equal (arg2, arg1)));
     }
 }
+
+} /* namespace expr */
 
 /* A helper function for OP_ATR_TAG.  */
 

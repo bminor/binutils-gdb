@@ -34,10 +34,6 @@ extern struct value *ada_abs (struct type *expect_type,
 			      struct expression *exp,
 			      enum noside noside, enum exp_opcode op,
 			      struct value *arg1);
-extern struct value *ada_unop_in_range (struct type *expect_type,
-					struct expression *exp,
-					enum noside noside, enum exp_opcode op,
-					struct value *arg1, struct type *type);
 extern struct value *ada_mult_binop (struct type *expect_type,
 				     struct expression *exp,
 				     enum noside noside, enum exp_opcode op,
@@ -224,12 +220,7 @@ public:
 
   value *evaluate (struct type *expect_type,
 		   struct expression *exp,
-		   enum noside noside) override
-  {
-    value *val = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
-    return ada_unop_in_range (expect_type, exp, noside, UNOP_IN_RANGE,
-			      val, std::get<1> (m_storage));
-  }
+		   enum noside noside) override;
 
   enum exp_opcode opcode () const override
   { return UNOP_IN_RANGE; }
