@@ -38,11 +38,6 @@ extern struct value *ada_mult_binop (struct type *expect_type,
 				     struct expression *exp,
 				     enum noside noside, enum exp_opcode op,
 				     struct value *arg1, struct value *arg2);
-extern struct value *ada_ternop_slice (struct expression *exp,
-				       enum noside noside,
-				       struct value *array,
-				       struct value *low_bound_val,
-				       struct value *high_bound_val);
 extern struct value *ada_binop_in_bounds (struct expression *exp,
 					  enum noside noside,
 					  struct value *arg1,
@@ -287,13 +282,7 @@ public:
 
   value *evaluate (struct type *expect_type,
 		   struct expression *exp,
-		   enum noside noside) override
-  {
-    value *array = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
-    value *low = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
-    value *high = std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
-    return ada_ternop_slice (exp, noside, array, low, high);
-  }
+		   enum noside noside) override;
 
   enum exp_opcode opcode () const override
   { return TERNOP_SLICE; }

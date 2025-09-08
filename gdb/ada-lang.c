@@ -10198,16 +10198,19 @@ ada_binop_equal_operation::evaluate (struct type *expect_type,
   return value_from_longest (type, tem);
 }
 
-} /* namespace expr */
-
-/* A helper function for TERNOP_SLICE.  */
+/* Implement TERNOP_SLICE.  */
 
 value *
-ada_ternop_slice (struct expression *exp,
-		  enum noside noside,
-		  struct value *array, struct value *low_bound_val,
-		  struct value *high_bound_val)
+ada_ternop_slice_operation::evaluate (struct type *expect_type,
+				      struct expression *exp,
+				      enum noside noside)
 {
+  value *array = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+  value *low_bound_val
+    = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+  value *high_bound_val
+    = std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
+
   LONGEST low_bound;
   LONGEST high_bound;
 
@@ -10280,6 +10283,8 @@ ada_ternop_slice (struct expression *exp,
     return ada_value_slice (array, longest_to_int (low_bound),
 			    longest_to_int (high_bound));
 }
+
+} /* namespace expr */
 
 /* A helper function for BINOP_IN_BOUNDS.  */
 
