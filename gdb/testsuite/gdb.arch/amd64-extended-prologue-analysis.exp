@@ -59,9 +59,13 @@ proc offset_test_run {} {
 
     set addr_past_prologue "null"
     gdb_test_multiple "disassemble" "Disassemble foo" -lbl {
-	-re "($::hex) <\\+($::decimal)>:\\s*mov.*" {
+	-re "\r\n\\s*($::hex) <\\+($::decimal)>:\\s*mov.*(?=\r\n)" {
 	    set addr_past_prologue $expect_out(1,string)
-	    pass $gdb_test_name
+	    exp_continue
+	}
+
+	-re -wrap "" {
+	    gdb_assert { $addr_past_prologue ne "null" } $gdb_test_name
 	}
     }
 
