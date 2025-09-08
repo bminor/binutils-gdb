@@ -1463,10 +1463,10 @@ instruction with the @samp{data16} instruction prefix), since the 80386
 insists upon masking @samp{%eip} to 16 bits after the word displacement
 is added. (See also @pxref{i386-Arch})
 
-Note that the @samp{jcxz}, @samp{jecxz}, @samp{loop}, @samp{loopz},
-@samp{loope}, @samp{loopnz} and @samp{loopne} instructions only come in byte
-displacements, so that if you use these instructions (@code{@value{GCC}} does
-not use them) you may get an error message (and incorrect code).  The AT&T
+Note that the @samp{jcxz}, @samp{jecxz}, @samp{jrcxz}, @samp{loop},
+@samp{loopz}, @samp{loope}, @samp{loopnz} and @samp{loopne} instructions only
+come with byte displacements, so that if you use these instructions
+(@code{@value{GCC}} does not use them) you may get an error message.  The AT&T
 80386 assembler tries to get around this problem by expanding @samp{jcxz foo}
 to
 
@@ -1760,8 +1760,8 @@ suffixes will disable all insns with wider vector or mask register operands.
 On SVR4-derived platforms, the separator character @samp{/} can be replaced by
 @samp{:}.
 
-Following the CPU architecture (but not a sub-architecture, which are those
-starting with a dot), you may specify @samp{jumps} or @samp{nojumps} to
+Following a 16-bit CPU architecture (but not a sub-architecture, which are
+those starting with a dot), you may specify @samp{jumps} or @samp{nojumps} to
 control automatic promotion of conditional jumps. @samp{jumps} is the
 default, and enables jump promotion;  All external jumps will be of the long
 variety, and file-local jumps will be promoted as necessary.

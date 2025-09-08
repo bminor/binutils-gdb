@@ -329,6 +329,7 @@ struct i386_tc_frag_data
   unsigned int cpunop : 1;
   unsigned int isanop : 1;
   unsigned int last_insn_normal : 1;
+  bool no_cond_jump_promotion : 1;
 };
 
 /* We need to emit the right NOP pattern in .align frags.  This is

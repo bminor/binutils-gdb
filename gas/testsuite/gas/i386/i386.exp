@@ -861,6 +861,7 @@ if {[is_elf_format] || [istarget "*-*-vxworks*"]} then {
     run_dump_test "dw2-compressed-3b"
 
     if {![istarget "i*86-*-elfiamcu"]} then {
+	run_dump_test nojumps
 	run_dump_test "property-2"
 	run_dump_test "property-3"
 	run_dump_test "property-4"

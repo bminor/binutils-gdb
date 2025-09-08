@@ -3517,7 +3517,12 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
       string = s;
 
       if (strcmp (string, "nojumps") == 0)
-	no_cond_jump_promotion = 1;
+	{
+	  if (cpu_arch_flags.bitfield.cpui386)
+	    as_bad (_("`%s' only supported with 16-bit architectures"), string);
+	  else
+	    no_cond_jump_promotion = true;
+	}
       else if (strcmp (string, "jumps") != 0)
 	{
 	  as_bad (_("no such architecture modifier: `%s'"), string);
@@ -15681,6 +15686,7 @@ void i386_frag_init (fragS *fragP, size_t max_bytes)
   fragP->tc_frag_data.last_insn_normal
     = (seg_info(now_seg)->tc_segment_info_data.last_insn.kind
        == last_insn_other);
+  fragP->tc_frag_data.no_cond_jump_promotion = no_cond_jump_promotion;
 }
 
 /* Calculate the maximum variable size (i.e., excluding fr_fix)
@@ -16198,8 +16204,19 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
 	  break;
 
 	case COND_JUMP86:
-	  if (size == 2
-	      && (!no_cond_jump_promotion || fragP->fr_var != NO_RELOC))
+	  if (fragP->tc_frag_data.no_cond_jump_promotion
+	      && fragP->fr_var == NO_RELOC)
+	    {
+	      fragP->fr_fix += 1;
+	      fixP = fix_new (fragP, old_fr_fix, 1,
+			      fragP->fr_symbol,
+			      fragP->fr_offset, 1,
+			      BFD_RELOC_8_PCREL);
+	      fixP->fx_signed = 1;
+	      break;
+	    }
+
+	  if (size == 2)
 	    {
 	      /* Negate the condition, and branch past an
 		 unconditional jump.  */
@@ -16221,17 +16238,6 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
 	  /* Fall through.  */
 
 	case COND_JUMP:
-	  if (no_cond_jump_promotion && fragP->fr_var == NO_RELOC)
-	    {
-	      fragP->fr_fix += 1;
-	      fixP = fix_new (fragP, old_fr_fix, 1,
-			      fragP->fr_symbol,
-			      fragP->fr_offset, 1,
-			      BFD_RELOC_8_PCREL);
-	      fixP->fx_signed = 1;
-	      break;
-	    }
-
 	  /* This changes the byte-displacement jump 0x7N
 	     to the (d)word-displacement jump 0x0f,0x8N.  */
 	  opcode[1] = opcode[0] + 0x10;
@@ -16409,7 +16415,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec ATTRIBUTE_UNUSED,
     }
   else
     {
-      if (no_cond_jump_promotion
+      if (fragP->tc_frag_data.no_cond_jump_promotion
 	  && TYPE_FROM_RELAX_STATE (fragP->fr_subtype) != UNCOND_JUMP)
 	as_warn_where (fragP->fr_file, fragP->fr_line,
 		       _("long jump required"));
