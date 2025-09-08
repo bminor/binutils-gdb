@@ -274,7 +274,7 @@ if ![info exists INTERNAL_GDBFLAGS] {
     append INTERNAL_GDBFLAGS { -iex "set interactive-mode on"}
 
     if { [ishost "*-*-mingw*"] } {
-	append INTERNAL_GDBFLAGS { -iex "maint set console-translation-mode binary"}
+	append INTERNAL_GDBFLAGS { --binary-output}
     }
 }
 

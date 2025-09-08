@@ -1212,6 +1212,17 @@ Run @value{GDBN} using @var{directory} as its data directory.
 The data directory is where @value{GDBN} searches for its
 auxiliary files.  @xref{Data Files}.
 
+@item -binary-output
+@cindex @code{--binary-output}
+
+Instructs @value{GDBN} to set the translation mode of its
+@code{stdout}/@code{stderr} to binary.  MS-Windows only.  Useful for
+running the @value{GDBN} testsuite.  By default, @value{GDBN} opens
+@code{stdout}/@code{stderr} in text mode, and translates @samp{\n}
+(LF, a single Line Feed) into @samp{\r\n} (CR-LF, a Carriage
+Return-Line Feed combination).  If this option is set, no translation
+is done.
+
 @item -fullname
 @itemx -f
 @cindex @code{--fullname}
@@ -42840,22 +42851,6 @@ reports and error and the command is aborted.
 
 @item show watchdog
 Show the current setting of the target wait timeout.
-
-@kindex maint set console-translation-mode
-@kindex maint show console-translation-mode
-@item maint set console-translation-mode @r{[}binary|text@r{]}
-@itemx maint show console-translation-mode
-Controls the translation mode of @value{GDBN} stdout/stderr.  MS-Windows
-only.  Useful for running the @value{GDBN} testsuite.
-
-The translation mode values are as follows:
-@table @code
-@item binary
-No translation.
-@item text
-Translate @samp{\n} (LF, a single Line Feed) into @samp{\r\n} (CR-LF, a
-Carriage Return-Line Feed combination).
-@end table
 
 @end table
 
