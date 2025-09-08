@@ -1060,9 +1060,7 @@ dw2_expand_marked_cus (dwarf2_per_objfile *per_objfile, offset_type idx,
 	 Indices prior to version 7 don't record them,
 	 and indices >= 7 may elide them for certain symbols
 	 (gold does this).  */
-      int attrs_valid =
-	(index.version >= 7
-	 && symbol_kind != GDB_INDEX_SYMBOL_KIND_NONE);
+      int attrs_valid = symbol_kind != GDB_INDEX_SYMBOL_KIND_NONE;
 
       /* Work around gold/15646.  */
       if (attrs_valid
@@ -1210,41 +1208,15 @@ read_gdb_index_from_buffer (const char *filename,
 
   /* Version check.  */
   offset_type version = metadata[0];
-  /* Versions earlier than 3 emitted every copy of a psymbol.  This
-     causes the index to behave very poorly for certain requests.  Version 3
-     contained incomplete addrmap.  So, it seems better to just ignore such
-     indices.  */
-  if (version < 4)
+  /* GDB now requires the symbol attributes, which were added in
+     version 7.  */
+  if (version < 7)
     {
       static int warning_printed = 0;
       if (!warning_printed)
 	{
 	  warning (_("Skipping obsolete .gdb_index section in %s."),
 		   filename);
-	  warning_printed = 1;
-	}
-      return 0;
-    }
-  /* Index version 4 uses a different hash function than index version
-     5 and later.
-
-     Versions earlier than 6 did not emit psymbols for inlined
-     functions.  Using these files will cause GDB not to be able to
-     set breakpoints on inlined functions by name, so we ignore these
-     indices unless the user has done
-     "set use-deprecated-index-sections on".  */
-  if (version < 6 && !deprecated_ok)
-    {
-      static int warning_printed = 0;
-      if (!warning_printed)
-	{
-	  warning (_("\
-Skipping deprecated .gdb_index section in %s.\n\
-Do \"%ps\" before the file is read\n\
-to use the section anyway."),
-		   filename,
-		   styled_string (command_style.style (),
-				  "set use-deprecated-index-sections on"));
 	  warning_printed = 1;
 	}
       return 0;

@@ -3,6 +3,9 @@
 
 *** Changes since GDB 17
 
+* Support for .gdb_index sections with version less than 7 has been
+  removed.
+
 * New targets
 
 GNU/Linux/MicroBlaze (gdbserver) microblazeel-*linux*
