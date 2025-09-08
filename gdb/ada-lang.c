@@ -10169,14 +10169,21 @@ ada_mult_binop (struct type *expect_type,
     }
 }
 
-/* A helper function for BINOP_EQUAL and BINOP_NOTEQUAL.  */
+namespace expr
+{
+
+/* Implement BINOP_EQUAL and BINOP_NOTEQUAL.  */
 
 value *
-ada_equal_binop (struct type *expect_type,
-		 struct expression *exp,
-		 enum noside noside, enum exp_opcode op,
-		 struct value *arg1, struct value *arg2)
+ada_binop_equal_operation::evaluate (struct type *expect_type,
+				     struct expression *exp,
+				     enum noside noside)
 {
+  enum exp_opcode op = std::get<0> (m_storage);
+  value *arg1 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+  value *arg2 = std::get<2> (m_storage)->evaluate (arg1->type (),
+						   exp, noside);
+
   int tem;
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     tem = 0;
@@ -10190,6 +10197,8 @@ ada_equal_binop (struct type *expect_type,
   struct type *type = language_bool_type (exp->language_defn, exp->gdbarch);
   return value_from_longest (type, tem);
 }
+
+} /* namespace expr */
 
 /* A helper function for TERNOP_SLICE.  */
 

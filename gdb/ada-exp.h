@@ -38,10 +38,6 @@ extern struct value *ada_mult_binop (struct type *expect_type,
 				     struct expression *exp,
 				     enum noside noside, enum exp_opcode op,
 				     struct value *arg1, struct value *arg2);
-extern struct value *ada_equal_binop (struct type *expect_type,
-				      struct expression *exp,
-				      enum noside noside, enum exp_opcode op,
-				      struct value *arg1, struct value *arg2);
 extern struct value *ada_ternop_slice (struct expression *exp,
 				       enum noside noside,
 				       struct value *array,
@@ -262,14 +258,7 @@ public:
 
   value *evaluate (struct type *expect_type,
 		   struct expression *exp,
-		   enum noside noside) override
-  {
-    value *arg1 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
-    value *arg2 = std::get<2> (m_storage)->evaluate (arg1->type (),
-						     exp, noside);
-    return ada_equal_binop (expect_type, exp, noside, std::get<0> (m_storage),
-			    arg1, arg2);
-  }
+		   enum noside noside) override;
 
   void do_generate_ax (struct expression *exp,
 		       struct agent_expr *ax,
