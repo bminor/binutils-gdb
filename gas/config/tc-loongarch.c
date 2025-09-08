@@ -1382,6 +1382,18 @@ assember_macro_helper (const char *const args[], void *context_ptr)
   return ret;
 }
 
+static unsigned int pcadd_hi = 0;
+#define PCADD_HI_LABEL_NAME ".Lpcadd_hi"
+
+static char *
+loongarch_pcadd_hi_label_name (unsigned int n)
+{
+  static char symbol_name_build[24];
+  char *p = symbol_name_build;
+  sprintf (p, "%s%u", PCADD_HI_LABEL_NAME, n);
+  return symbol_name_build;
+}
+
 /* Accept instructions separated by ';'
  * assuming 'not starting with space and not ending with space' or pass in
  * empty c_str.  */
@@ -1419,6 +1431,33 @@ loongarch_assemble_INSNs (char *str, unsigned int expand_from_macro)
 
       loongarch_split_args_by_comma (str, the_one.arg_strs);
       get_loongarch_opcode (&the_one);
+
+      /* Make a new label .Lpcadd_hi* for pcadd_lo12.  */
+      if (expand_from_macro
+	  && the_one.reloc_num > 0
+	  && (the_one.reloc_info[0].type == BFD_RELOC_LARCH_PCADD_HI20
+	      || the_one.reloc_info[0].type == BFD_RELOC_LARCH_GOT_PCADD_HI20
+	      || the_one.reloc_info[0].type == BFD_RELOC_LARCH_TLS_IE_PCADD_HI20
+	      || the_one.reloc_info[0].type == BFD_RELOC_LARCH_TLS_LD_PCADD_HI20
+	      || the_one.reloc_info[0].type == BFD_RELOC_LARCH_TLS_GD_PCADD_HI20
+	      || the_one.reloc_info[0].type == BFD_RELOC_LARCH_TLS_DESC_PCADD_HI20))
+	{
+	  char *name = loongarch_pcadd_hi_label_name (pcadd_hi);
+	  local_symbol_make (name, now_seg, frag_now, frag_now_fix ());
+	}
+
+      /* Change symbol to .Lpcadd_hi*.  */
+      if (expand_from_macro
+	  && the_one.reloc_num > 0
+	  && the_one.reloc_info[0].type == BFD_RELOC_LARCH_PCADD_LO12)
+	{
+	  char *name = loongarch_pcadd_hi_label_name (pcadd_hi);
+	  symbolS *s = symbol_find (name);
+	  if (s == NULL)
+	    as_bad (_("no matched pcadd_hi label: %s"), name);
+	  the_one.reloc_info[0].value.X_add_symbol = s;
+	  pcadd_hi++;
+	}
 
       if (!the_one.all_match)
 	{
