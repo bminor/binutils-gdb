@@ -86,6 +86,10 @@ single-inf-arg in qSupported
 * Debugging Linux programs that use AArch64 Guarded Control Stacks is now
   supported.
 
+* New "--binary-output" command line option instructs GDB to set the
+  translation mode of its stdout/stderr to binary mode.  This disables
+  Line Feed translation.  MS-Windows only.
+
 * New commands
 
 maintenance check psymtabs
@@ -96,12 +100,6 @@ maintenance check symtabs
 
 maintenance canonicalize
   Show the canonical form of a C++ name.
-
-maintenance set console-translation-mode <binary|text>
-maintenance show console-translation-mode
-  Controls the translation mode of GDB stdout/stderr.  MS-Windows only.  In
-  binary mode, no translation is done.  In text mode, a Line Feed is
-  translated into a Carriage Return-Line Feed combination.
 
 set riscv numeric-register-names on|off
 show riscv numeric-register-names

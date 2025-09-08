@@ -58,4 +58,10 @@ public:
 private:
   serial_ttystate m_ttystate;
 };
+
+#ifdef USE_WIN32API
+/* Set translation mode of stdout/stderr to binary.  */
+extern void set_output_translation_mode_binary ();
+#endif
+
 #endif /* GDB_TERMINAL_H */

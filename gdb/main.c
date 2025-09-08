@@ -59,6 +59,7 @@
 #include "serial.h"
 #include "cli-out.h"
 #include "bt-utils.h"
+#include "terminal.h"
 
 /* The selected interpreter.  */
 std::string interpreter_p;
@@ -783,6 +784,9 @@ captured_main_1 (struct captured_main_args *context)
       OPT_READNEVER,
       OPT_SET_ESC_ARGS,
       OPT_SET_NO_ESC_ARGS,
+#ifdef USE_WIN32API
+      OPT_BINARY_OUTPUT,
+#endif
     };
     /* This struct requires int* in the struct, but write_files is a bool.
        So use this temporary int that we write back after argument parsing.  */
@@ -859,6 +863,9 @@ captured_main_1 (struct captured_main_args *context)
       {"no-escape-args", no_argument, nullptr, OPT_SET_NO_ESC_ARGS},
       {"l", required_argument, 0, 'l'},
       {"return-child-result", no_argument, &return_child_result, 1},
+#ifdef USE_WIN32API
+      {"binary-output", no_argument, 0, OPT_BINARY_OUTPUT},
+#endif
       {0, no_argument, 0, 0}
     };
 
@@ -1042,6 +1049,12 @@ captured_main_1 (struct captured_main_args *context)
 	      validate_readnow_readnever ();
 	    }
 	    break;
+
+#ifdef USE_WIN32API
+	  case OPT_BINARY_OUTPUT:
+	    set_output_translation_mode_binary ();
+	    break;
+#endif
 
 	  case '?':
 	    error (_("Use `%s --help' for a complete list of options."),
@@ -1482,8 +1495,13 @@ Remote debugging options:\n\n\
 Other options:\n\n\
   --cd=DIR           Change current directory to DIR.\n\
   --data-directory=DIR, -D\n\
-		     Set GDB's data-directory to DIR.\n\
-"), stream);
+		     Set GDB's data-directory to DIR.\n"
+#ifdef USE_WIN32API
+"\
+  --binary-output    Set the translation mode of stdout/stderr to binary,\n\
+		     disabling CRLF translation.\n"
+#endif
+), stream);
   gdb_puts (_("\n\
 At startup, GDB reads the following early init files and executes their\n\
 commands:\n\
