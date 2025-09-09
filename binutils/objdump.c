@@ -4485,7 +4485,8 @@ dump_dwarf_section (bfd *abfd, asection *section,
   else
     match = name;
 
-  if (elf_section_type (section) == SHT_GNU_SFRAME)
+  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
+      && elf_section_type (section) == SHT_GNU_SFRAME)
     match = ".sframe";
 
   for (i = 0; i < max; i++)
@@ -4993,9 +4994,10 @@ dump_sframe_section (bfd *abfd, const char *sect_name, bool is_mainfile)
 	 SHT_GNU_SFRAME.  For SFrame sections from Binutils 2.44 or earlier,
 	 check explcitly for SFrame sections of type SHT_PROGBITS and name
 	 ".sframe" to allow them.  */
-      else if (elf_section_type (sec) != SHT_GNU_SFRAME
-	       && !(elf_section_type (sec) == SHT_PROGBITS
-		    && strcmp (sect_name, ".sframe") == 0))
+      else if (bfd_get_flavour (abfd) != bfd_target_elf_flavour
+	       || (elf_section_type (sec) != SHT_GNU_SFRAME
+		   && !(elf_section_type (sec) == SHT_PROGBITS
+			&& strcmp (sect_name, ".sframe") == 0)))
 	{
 	  printf (_("Section %s does not contain SFrame data\n\n"),
 		  sanitize_string (sect_name));
