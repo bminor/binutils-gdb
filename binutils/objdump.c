@@ -1106,6 +1106,9 @@ remove_useless_symbols (asymbol **symbols, long count)
       if (bfd_is_und_section (sym->section)
 	  || bfd_is_com_section (sym->section))
 	continue;
+      if (strstr (sym->name, "gnu_compiled")
+	  || strstr (sym->name, "gcc2_compiled"))
+	continue;
 
       *out_ptr++ = sym;
     }
@@ -1170,18 +1173,6 @@ compare_symbols (const void *ap, const void *bp)
   bn = bfd_asymbol_name (b);
   anl = strlen (an);
   bnl = strlen (bn);
-
-  /* The symbols gnu_compiled and gcc2_compiled convey no real
-     information, so put them after other symbols with the same value.  */
-  af = (strstr (an, "gnu_compiled") != NULL
-	|| strstr (an, "gcc2_compiled") != NULL);
-  bf = (strstr (bn, "gnu_compiled") != NULL
-	|| strstr (bn, "gcc2_compiled") != NULL);
-
-  if (af && ! bf)
-    return 1;
-  if (! af && bf)
-    return -1;
 
   /* We use a heuristic for the file name, to try to sort it after
      more useful symbols.  It may not work on non Unix systems, but it
@@ -4092,11 +4083,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 	  || sym == NULL
 	  || sym->section != section
 	  || bfd_asymbol_value (sym) > addr
-	  || ((sym->flags & BSF_OBJECT) == 0
-	      && (strstr (bfd_asymbol_name (sym), "gnu_compiled")
-		  == NULL)
-	      && (strstr (bfd_asymbol_name (sym), "gcc2_compiled")
-		  == NULL))
+	  || (sym->flags & BSF_OBJECT) == 0
 	  || (sym->flags & BSF_FUNCTION) != 0)
 	insns = true;
       else
