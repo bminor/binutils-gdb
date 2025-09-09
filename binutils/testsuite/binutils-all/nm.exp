@@ -329,6 +329,23 @@ if [is_elf_format] {
 	    fail "$testname (local ifunc)"
 	}
 
+	# PR 32556
+	# Test nm --ifunc-chars=--
+
+	set got [binutils_run $NM "$NMFLAGS --ifunc-chars=-- $tmpfile"]
+
+	if [regexp -line "^\\S+ - global_foo$" $got] then {
+	    pass "$testname=-- (global ifunc)"
+	} else {
+	    fail "$testname=-- (global ifunc)"
+	}
+
+	if [regexp -line "^\\S+ - local_foo$" $got] then {
+	    pass "$testname=-- (local ifunc)"
+	} else {
+	    fail "$testname=-- (local ifunc)"
+	}
+
 	if { $verbose < 1 } {
 	    remote_file host delete "tmpdir/ifunc.o"
 	}

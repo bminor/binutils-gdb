@@ -70,6 +70,7 @@ struct extended_symbol_info
   bfd_vma ssize;
   elf_symbol_type *elfinfo;
   coff_symbol_type *coffinfo;
+  bool is_stab;
   /* FIXME: We should add more fields for Type, Line, Section.  */
 };
 #define SYM_VALUE(sym)       (sym->sinfo->value)
@@ -1208,8 +1209,11 @@ print_symbol (bfd *        abfd,
 
   bfd_get_symbol_info (abfd, sym, &syminfo);
 
+  info.is_stab = false;
+  if (syminfo.type == '-')
+    info.is_stab = true;
   /* PR 22967 - Distinguish between local and global ifunc symbols.  */
-  if (syminfo.type == 'i'
+  else if (syminfo.type == 'i'
       && sym->flags & BSF_GNU_INDIRECT_FUNCTION)
     {
       if (ifunc_type_chars == NULL || ifunc_type_chars[0] == 0)
@@ -1873,7 +1877,7 @@ print_symbol_info_bsd (struct extended_symbol_info *info, bfd *abfd)
 
   printf (" %c", SYM_TYPE (info));
 
-  if (SYM_TYPE (info) == '-')
+  if (info->is_stab)
     {
       /* A stab.  */
       printf (" ");
@@ -1902,7 +1906,7 @@ print_symbol_info_sysv (struct extended_symbol_info *info, bfd *abfd)
 
   printf ("|   %c  |", SYM_TYPE (info));
 
-  if (SYM_TYPE (info) == '-')
+  if (info->is_stab)
     {
       /* A stab.  */
       printf ("%18s|  ", SYM_STAB_NAME (info));		/* (C) Type.  */
