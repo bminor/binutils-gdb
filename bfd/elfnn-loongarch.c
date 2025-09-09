@@ -6100,6 +6100,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	      relax_func = loongarch_relax_pcala_ld;
 	      break;
 	    case R_LARCH_CALL36:
+	    case R_LARCH_CALL30:
 	      relax_func = loongarch_relax_call36;
 	      break;
 	    case R_LARCH_TLS_LE_HI20_R:
@@ -6158,7 +6159,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 				    + r_symndx;
 
 	  if ((ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
-	       && r_type != R_LARCH_CALL36)
+	       && (r_type != R_LARCH_CALL36 || r_type != R_LARCH_CALL30))
 	      || sym->st_shndx == SHN_ABS)
 	    continue;
 
@@ -6195,7 +6196,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	     is not set yet.  */
 	  if (h != NULL
 	      && ((h->type == STT_GNU_IFUNC
-		   && r_type != R_LARCH_CALL36)
+		   && (r_type != R_LARCH_CALL36 || r_type != R_LARCH_CALL30))
 		  || bfd_is_abs_section (h->root.u.def.section)
 		  || h->start_stop))
 	    continue;
@@ -6223,7 +6224,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	     Undefweak for other relocations handing in the future.  */
 	  else if (h->root.type == bfd_link_hash_undefweak
 		    && !h->root.linker_def
-		    && r_type == R_LARCH_CALL36)
+		    && (r_type == R_LARCH_CALL36 || r_type == R_LARCH_CALL30))
 	    {
 	      sym_sec = sec;
 	      symval = rel->r_offset;

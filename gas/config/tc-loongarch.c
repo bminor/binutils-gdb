@@ -880,7 +880,8 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
 			|| BFD_RELOC_LARCH_TLS_LE_LO12 == reloc_type
 			|| BFD_RELOC_LARCH_TLS_LE64_LO20 == reloc_type
 			|| BFD_RELOC_LARCH_TLS_LE64_HI12 == reloc_type
-			|| BFD_RELOC_LARCH_CALL36 == reloc_type))
+			|| BFD_RELOC_LARCH_CALL36 == reloc_type
+			|| BFD_RELOC_LARCH_CALL30 == reloc_type))
 		{
 		  ip->reloc_info[ip->reloc_num].type = BFD_RELOC_LARCH_RELAX;
 		  ip->reloc_info[ip->reloc_num].value = const_0;
