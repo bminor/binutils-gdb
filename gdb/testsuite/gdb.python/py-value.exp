@@ -458,6 +458,8 @@ proc test_subscript_regression {exefile lang} {
 	 "Derived \[*\]"
      gdb_test "python print (gdb.parse_and_eval('base_ref').dynamic_type)" \
 	 "Derived \[&\]"
+     gdb_test "python print (gdb.parse_and_eval('pod').dynamic_type)" \
+	 "str"
      # A static type case.
      gdb_test "python print (gdb.parse_and_eval('5').dynamic_type)" \
 	 "int"
