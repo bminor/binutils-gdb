@@ -478,6 +478,9 @@ valpy_get_dynamic_type (PyObject *self, void *closure)
 	type = value_rtti_type (val, NULL, NULL, NULL);
       else
 	type = val->type ();
+
+      if (type == nullptr)
+	type = val->type ();
     }
   catch (const gdb_exception &except)
     {
