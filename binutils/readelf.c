@@ -848,8 +848,8 @@ print_symbol_name (signed int width, const char * symbol)
 		  if (width_remaining < 8)
 		    break;
 		  printf ("\\u%02x%02x%02x",
-			  ((bytes[0] & 0x07) << 6) | ((bytes[1] & 0x3c) >> 2),
-			  ((bytes[1] & 0x03) << 6) | ((bytes[2] & 0x3c) >> 2),
+			  ((bytes[0] & 0x07) << 2) | ((bytes[1] & 0x30) >> 4),
+			  ((bytes[1] & 0x0f) << 4) | ((bytes[2] & 0x3c) >> 2),
 			  ((bytes[2] & 0x03) << 6) | (bytes[3] & 0x3f));
 
 		  break;

@@ -566,8 +566,8 @@ display_utf8 (const unsigned char * in, char * out, unsigned int * consumed)
 
 	case 4:
 	  out += sprintf (out, "\\u%02x%02x%02x",
-		  ((in[0] & 0x07) << 6) | ((in[1] & 0x3c) >> 2),
-		  ((in[1] & 0x03) << 6) | ((in[2] & 0x3c) >> 2),
+		  ((in[0] & 0x07) << 2) | ((in[1] & 0x30) >> 4),
+		  ((in[1] & 0x0f) << 4) | ((in[2] & 0x3c) >> 2),
 		  ((in[2] & 0x03) << 6) | ((in[3] & 0x3f)));
 	  break;
 	default:
