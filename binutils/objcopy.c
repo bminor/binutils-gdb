@@ -3876,7 +3876,10 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
   ibfd = bfd_openr (input_filename, target);
   if (ibfd == NULL || bfd_stat (ibfd, in_stat) != 0)
     {
-      bfd_nonfatal_message (input_filename, NULL, NULL, NULL);
+      if (bfd_get_error () == bfd_error_invalid_target && target != NULL)
+	bfd_nonfatal_message (target, NULL, NULL, NULL);
+      else
+	bfd_nonfatal_message (input_filename, NULL, NULL, NULL);
       if (ibfd != NULL)
 	bfd_close (ibfd);
       status = 1;
@@ -3951,7 +3954,10 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
 	{
 	  if (ofd >= 0)
 	    close (ofd);
-	  bfd_nonfatal_message (output_filename, NULL, NULL, NULL);
+	  if (force_output_target && bfd_get_error () == bfd_error_invalid_target)
+	    bfd_nonfatal_message (output_target, NULL, NULL, NULL);
+	  else
+	    bfd_nonfatal_message (output_filename, NULL, NULL, NULL);
 	  bfd_close (ibfd);
 	  status = 1;
 	  return;
@@ -4036,7 +4042,10 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
  	{
 	  if (ofd >= 0)
 	    close (ofd);
- 	  bfd_nonfatal_message (output_filename, NULL, NULL, NULL);
+	  if (bfd_get_error () == bfd_error_invalid_target)
+	    bfd_nonfatal_message (output_target, NULL, NULL, NULL);
+	  else
+	    bfd_nonfatal_message (output_filename, NULL, NULL, NULL);
 	  bfd_close (ibfd);
  	  status = 1;
  	  return;
