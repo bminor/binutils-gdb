@@ -1717,7 +1717,9 @@ elf_x86_64_need_pic (struct bfd_link_info *info,
     {
       object = _("a shared object");
       if (!pic)
-	pic = _("; recompile with -fPIC");
+	pic = (howto->type == R_X86_64_TPOFF32
+	       ? _("; replace local-exec with initial-exec TLS model")
+	       : _("; recompile with -fPIC"));
     }
   else
     {
@@ -2684,7 +2686,7 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 	  goto create_got;
 
 	case R_X86_64_TPOFF32:
-	  if (!bfd_link_executable (info) && ABI_64_P (abfd))
+	  if (!bfd_link_executable (info))
 	    {
 	      elf_x86_64_need_pic (info, abfd, sec, h, symtab_hdr, isym,
 				   &x86_64_elf_howto_table[r_type]);
