@@ -20,6 +20,6 @@ package body Pack is
       return I;
    end Identity;
 
-   procedure Do_Nothing (A : Array_Type) is null;
+   procedure Do_Nothing (A : System.Address) is null;
 
 end Pack;

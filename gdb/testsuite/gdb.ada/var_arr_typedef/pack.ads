@@ -13,6 +13,8 @@
 --  You should have received a copy of the GNU General Public License
 --  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+with System; use System;
+
 package Pack is
    type Rec_Type is record
       I : Integer;
@@ -23,7 +25,7 @@ package Pack is
 
    type Array_Type is array (Positive range <>) of Vec_Type;
 
-   procedure Do_Nothing (A : Array_Type);
+   procedure Do_Nothing (A : System.Address);
    function Identity (I : Integer) return Integer;
 
 end Pack;

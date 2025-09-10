@@ -24,5 +24,5 @@ procedure Var_Arr_Typedef is
 
    A : constant Array_Type (1 .. Identity (4)) := (VA, VA, VB, VB);
 begin
-   Do_Nothing (A); --  BREAK
+   Do_Nothing (A'Address); --  BREAK
 end Var_Arr_Typedef;
