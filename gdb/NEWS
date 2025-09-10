@@ -38,6 +38,11 @@ maintenance test-remote-args ARGS
 maintenance info program-spaces
   This command no longer displays the core file name.
 
+info inferiors
+  If an inferior has a core file loaded, then this will be displayed
+  as an additional line under the inferior's table entry in the
+  output.
+
 * Changed remote packets
 
 single-inf-arg in qSupported

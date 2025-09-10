@@ -634,6 +634,13 @@ print_inferior (struct ui_out *uiout, const char *requested_inferiors)
 	  uiout->text (_("\n\tis vfork parent of inferior "));
 	  uiout->field_signed ("vfork-child", inf->vfork_child->num);
 	}
+      if (inf->pspace->core_bfd () != nullptr)
+	{
+	  uiout->text (_("\n\tcore file "));
+	  uiout->field_string ("core-file",
+			       bfd_get_filename (inf->pspace->core_bfd ()),
+			       file_name_style.style ());
+	}
 
       uiout->text ("\n");
     }

@@ -3367,6 +3367,7 @@ elements, even duplicates or overlapping ranges are valid.  E.g.@:
 To find out what inferiors exist at any moment, use @w{@code{info
 inferiors}}:
 
+@anchor{info inferiors command}
 @table @code
 @kindex info inferiors [ @var{id}@dots{} ]
 @item info inferiors
@@ -3390,8 +3391,12 @@ the connection.
 
 @item
 the name of the executable the inferior is running.
-
 @end enumerate
+
+@noindent
+If an inferior is currently debugging a core file, then an additional
+line will be printed after the line describing the inferior, this
+additional line gives the file name of the core file being debugged.
 
 @noindent
 An asterisk @samp{*} preceding the @value{GDBN} inferior number
@@ -3405,7 +3410,19 @@ For example,
 (@value{GDBP}) info inferiors
   Num  Description       Connection                      Executable
 * 1    process 3401      1 (native)                      goodbye
+  2    process 2307      2 (extended0remote host:10000)  hello
+@end smallexample
+
+Adding an additional inferior that is debugging a core file causes the
+additional core file line to be displayed, for example@:
+
+@smallexample
+(@value{GDBP}) info inferiors
+  Num  Description       Connection                      Executable
+* 1    process 3401      1 (native)                      goodbye
   2    process 2307      2 (extended-remote host:10000)  hello
+  3    process 1578      3 (core)                        broken
+        core file core.1578
 @end smallexample
 
 To get information about the current inferior, use @code{inferior}:
@@ -22069,6 +22086,9 @@ under @value{GDBN}.  So, if you have been running your program and you
 wish to debug a core file instead, you must kill the subprocess in which
 the program is running.  To do this, use the @code{kill} command
 (@pxref{Kill Process, ,Killing the Child Process}).
+
+To see which core files are loaded into which inferiors, use the
+@kbd{info inferiors} command (@pxref{info inferiors command}).
 
 @kindex add-symbol-file
 @cindex dynamic linking

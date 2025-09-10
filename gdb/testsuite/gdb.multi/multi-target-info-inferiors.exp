@@ -75,7 +75,7 @@ proc test_info_inferiors {multi_process} {
     }
 
     set ws "\[ \t\]+"
-    global decimal binfile
+    global decimal binfile gcorefile
 
     # Test "info connections" and "info inferior" by switching to each
     # inferior one by one.
@@ -105,15 +105,19 @@ proc test_info_inferiors {multi_process} {
 			]
 	    }
 
+	    set gcorefile_re [string_to_regexp $gcorefile]
+
 	    gdb_test "info inferiors" \
 		[multi_line \
 		     "Num${ws}Description${ws}Connection${ws}Executable${ws}" \
 		     "[inf_desc 1 $inf]1 \\(native\\)${ws}${binfile}${ws}" \
 		     "[inf_desc 2 $inf]2 \\(extended-remote localhost:$decimal\\)${ws}${binfile}${ws}" \
 		     "[inf_desc 3 $inf]3 \\(core\\)${ws}${binfile}${ws}" \
+		     "${ws}core file ${gcorefile_re}" \
 		     "[inf_desc 4 $inf]1 \\(native\\)${ws}${binfile}${ws}" \
 		     "[inf_desc 5 $inf]4 \\(extended-remote localhost:$decimal\\)${ws}${binfile}${ws}" \
 		     "[inf_desc 6 $inf]5 \\(core\\)${ws}${binfile}${ws}" \
+		     "${ws}core file ${gcorefile_re}"
 		    ]
 
 	    if { $::run_python_tests } {
