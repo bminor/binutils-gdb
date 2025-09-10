@@ -1016,6 +1016,20 @@ run_cc_link_tests [list \
 	 {nm {-u -D --with-symbol-versions} pr26302.nd}} \
 	"pr26302b.so" \
     ] \
+    [list \
+	"Build pr33409a.o" \
+	"" \
+	"$DIRECT_EXTERN_ACCESS_CFLAGS" \
+	{pr33409a.c} \
+    ] \
+    [list \
+	"Build pr33409.so" \
+	"-shared" \
+	"-fPIC" \
+	{pr33409b.c} \
+	{} \
+	"pr33409.so" \
+    ] \
 ]
 
 run_ld_link_tests [list \
@@ -1205,6 +1219,17 @@ set run_tests [list \
      "" \
      "tmpdir/pr31482b-no-lto.so tmpdir/pr31482c-no-lto.a \
       tmpdir/pr31482d-no-lto.a" \
+    ] \
+    [list "Run pr33409" \
+     "-Wl,-z,text" \
+     "" \
+     {pr33409c.c} \
+     "pr33409" \
+     "pass.out" \
+     "$NO_DIRECT_EXTERN_ACCESS_CFLAGS" \
+     "c" \
+     "" \
+     "tmpdir/pr33409a.o tmpdir/pr33409.so" \
     ] \
 ]
 
