@@ -24,11 +24,45 @@
 #endif
 #include "gdbsupport/eintr.h"
 #include "gdbsupport/signals-state-save-restore.h"
+#include "gdbsupport/gdb_file.h"
 
 /* Stores the ptrace options supported by the running kernel.
    A value of -1 means we did not check for features yet.  A value
    of 0 means there are no supported features.  */
 static int supported_ptrace_options = -1;
+
+/* The file from which the kernel.yama.ptrace_scope setting is read.  */
+
+static constexpr char ptrace_scope_filename[]
+  = "/proc/sys/kernel/yama/ptrace_scope";
+
+/* Reads the yama ptrace_scope value from /proc.  Returns the integer value
+   of ptrace_scope (0, 1, 2, or 3) or -1 if the file cannot be read (e.g.,
+   yama is not enabled).  */
+
+static int
+get_ptrace_scope ()
+{
+  int ptrace_scope = -1;
+
+  /* The /proc file that contains the system-wide ptrace scope setting.  */
+  gdb_file_up fp (fopen (ptrace_scope_filename, "r"));
+  if (fp != nullptr)
+    {
+      if (fscanf (fp.get (), "%d", &ptrace_scope) != 1)
+	{
+	  /* If fscanf fails then we couldn't parse the number.  But just
+	     to be safe, set the scope back to -1 to indicate no value is
+	     available.  */
+	  ptrace_scope = -1;
+	}
+    }
+
+  /* If fp is NULL, it's likely because the yama security module is not
+     active.  In this case, we return -1 to indicate that the scope is
+     unknown or not applicable.  */
+  return ptrace_scope;
+}
 
 /* Find all possible reasons we could fail to attach PID and return these
    as a string.  An empty string is returned if we didn't find any reason.  */
@@ -43,6 +77,13 @@ linux_ptrace_attach_fail_reason (pid_t pid)
     string_appendf (result,
 		    _("process %d is already traced by process %d"),
 		    (int) pid, (int) tracerpid);
+
+  int ptrace_scope = get_ptrace_scope ();
+  if (ptrace_scope > 0)
+    string_appendf (result,
+		    _("the %s setting of %d might prevent attaching, "
+		      "see 'man 2 ptrace'"),
+		    ptrace_scope_filename, ptrace_scope);
 
   if (linux_proc_pid_is_zombie_nowarn (pid))
     string_appendf (result,
