@@ -118,6 +118,6 @@ struct microblaze_frame_cache
 
 /* MICROBLAZE_BREAKPOINT defines the breakpoint that should be used.
    Only used for native debugging.  */
-#define MICROBLAZE_BREAKPOINT {0xb9, 0xcc, 0x00, 0x60}
+#define MICROBLAZE_BREAKPOINT {0xba, 0x0c, 0x00, 0x18}
 
 #endif /* GDB_MICROBLAZE_TDEP_H */
