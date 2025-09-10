@@ -1718,7 +1718,7 @@ elf_x86_64_need_pic (struct bfd_link_info *info,
       object = _("a shared object");
       if (!pic)
 	pic = (howto->type == R_X86_64_TPOFF32
-	       ? _("; replace local-exec with initial-exec TLS model")
+	       ? _("; local-exec is incompatible with -shared")
 	       : _("; recompile with -fPIC"));
     }
   else
