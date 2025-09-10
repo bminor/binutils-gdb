@@ -3,6 +3,10 @@
 
 *** Changes since GDB 17
 
+* New targets
+
+GNU/Linux/MicroBlaze (gdbserver) microblazeel-*linux*
+
 *** Changes in GDB 17
 
 * Debugging Linux programs that use x86-64 or x86-64 with 32-bit pointer
