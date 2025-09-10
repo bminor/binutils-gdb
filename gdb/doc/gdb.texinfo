@@ -3655,10 +3655,6 @@ the program space number assigned by @value{GDBN}
 the name of the executable loaded into the program space, with e.g.,
 the @code{file} command.
 
-@item
-the name of the core file loaded into the program space, with e.g.,
-the @code{core-file} command.
-
 @end enumerate
 
 @noindent
@@ -3671,7 +3667,7 @@ example, the list of inferiors bound to the program space.
 
 @smallexample
 (@value{GDBP}) maint info program-spaces
-  Id   Executable        Core File
+  Id   Executable
 * 1    hello
   2    goodbye
         Bound inferiors: ID 1 (process 21561)
@@ -3685,7 +3681,7 @@ the parent and child processes of a @code{vfork} call.  For example,
 
 @smallexample
 (@value{GDBP}) maint info program-spaces
-  Id   Executable        Core File
+  Id   Executable
 * 1    vfork-test
         Bound inferiors: ID 2 (process 18050), ID 1 (process 18045)
 @end smallexample
