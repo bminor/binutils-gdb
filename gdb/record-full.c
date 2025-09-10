@@ -987,8 +987,9 @@ record_full_open (const char *args, int from_tty)
   record_full_list = &record_full_first;
   record_full_list->next = NULL;
 
-  if (current_program_space->core_bfd () != nullptr)
-    record_full_core_open_1 (*current_program_space->core_bfd ());
+  bfd *cbfd = get_inferior_core_bfd (current_inferior ());
+  if (cbfd != nullptr)
+    record_full_core_open_1 (*cbfd);
   else
     record_full_open_1 ();
 

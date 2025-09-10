@@ -2317,7 +2317,7 @@ fbsd_vdso_range (struct gdbarch *gdbarch, struct mem_range *range)
   if (!target_has_execution ())
     {
       /* Search for the ending address in the NT_PROCSTAT_VMMAP note. */
-      bfd *cbfd = current_program_space->core_bfd ();
+      bfd *cbfd = get_inferior_core_bfd (current_inferior ());
       asection *section = bfd_get_section_by_name (cbfd,
 						   ".note.freebsdcore.vmmap");
       if (section == nullptr)

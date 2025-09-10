@@ -26,6 +26,7 @@
 #include "gdb_bfd.h"
 #include "inferior.h"
 #include "solib-frv.h"
+#include "gdbcore.h"
 
 /* solib_ops for FR-V systems.  */
 
@@ -341,7 +342,7 @@ frv_solib_ops::current_sos () const
      solib_create_inferior_hook().   (See post_create_inferior() in
      infcmd.c.)  */
   if (main_executable_lm_info == 0
-      && current_program_space->core_bfd () != nullptr)
+      && get_inferior_core_bfd (current_inferior ()) != nullptr)
     frv_relocate_main_executable ();
 
   /* Fetch the GOT corresponding to the main executable.  */

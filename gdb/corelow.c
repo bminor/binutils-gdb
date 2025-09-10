@@ -1015,7 +1015,7 @@ core_target_open (const char *arg, int from_tty)
   gdb_assert (current_inferior ()->process_target () == nullptr);
 
   /* Which will clear up any existing core file BFD.  */
-  gdb_assert (current_program_space->core_bfd () == nullptr);
+  gdb_assert (get_inferior_core_bfd (current_inferior ()) == nullptr);
 
   std::string filename = extract_single_filename_arg (arg);
 

@@ -1511,12 +1511,13 @@ linux_process_address_in_memtag_page (CORE_ADDR address)
 static bool
 linux_core_file_address_in_memtag_page (CORE_ADDR address)
 {
-  if (current_program_space->core_bfd () == nullptr)
+  bfd *cbfd = get_inferior_core_bfd (current_inferior ());
+
+  if (cbfd == nullptr)
     return false;
 
   memtag_section_info info;
-  return get_next_core_memtag_section (current_program_space->core_bfd (),
-				       nullptr, address, info);
+  return get_next_core_memtag_section (cbfd, nullptr, address, info);
 }
 
 /* See linux-tdep.h.  */
@@ -2693,15 +2694,14 @@ linux_vsyscall_range_raw (struct gdbarch *gdbarch, struct mem_range *range)
       long phdrs_size;
       int num_phdrs, i;
 
-      phdrs_size
-	= bfd_get_elf_phdr_upper_bound (current_program_space->core_bfd ());
+      bfd *cbfd = get_inferior_core_bfd (current_inferior ());
+      phdrs_size = bfd_get_elf_phdr_upper_bound (cbfd);
       if (phdrs_size == -1)
 	return 0;
 
       gdb::unique_xmalloc_ptr<Elf_Internal_Phdr>
 	phdrs ((Elf_Internal_Phdr *) xmalloc (phdrs_size));
-      num_phdrs = bfd_get_elf_phdrs (current_program_space->core_bfd (),
-				     phdrs.get ());
+      num_phdrs = bfd_get_elf_phdrs (cbfd, phdrs.get ());
       if (num_phdrs == -1)
 	return 0;
 

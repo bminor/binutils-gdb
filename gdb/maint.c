@@ -39,6 +39,7 @@
 #include "gdbsupport/thread-pool.h"
 #include "event-top.h"
 #include "cp-support.h"
+#include "gdbcore.h"
 
 #include "cli/cli-decode.h"
 #include "cli/cli-utils.h"
@@ -474,9 +475,9 @@ maintenance_info_sections (const char *arg, int from_tty)
 				  &ofile, arg);
     }
 
-  if (current_program_space->core_bfd () != nullptr)
-    maint_print_all_sections (_("Core file: "),
-			      current_program_space->core_bfd (), nullptr, arg);
+  bfd *cbfd = get_inferior_core_bfd (current_inferior ());
+  if (cbfd != nullptr)
+    maint_print_all_sections (_("Core file: "), cbfd, nullptr, arg);
 }
 
 /* Implement the "maintenance info target-sections" command.  */

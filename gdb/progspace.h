@@ -292,8 +292,6 @@ struct program_space
     ebfd = std::move (abfd);
   }
 
-  bfd *core_bfd () const;
-
   /* Reset saved solib data at the start of an solib event.  This lets
      us properly collect the data when calling solib_add, so it can then
      later be printed.  */

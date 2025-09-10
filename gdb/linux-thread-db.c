@@ -1215,7 +1215,8 @@ thread_db_load (void)
     return false;
 
   /* Don't attempt to use thread_db for remote targets.  */
-  if (!(target_can_run () || current_program_space->core_bfd () != nullptr))
+  if (!(target_can_run ()
+	|| get_inferior_core_bfd (current_inferior ()) != nullptr))
     return false;
 
   if (thread_db_load_search ())
