@@ -749,19 +749,6 @@ if { [array size use_gdb_compile] != 0 } {
     rename gdb_default_target_compile ""
 }
 
-
-# Provide 'lreverse' missing in Tcl before 7.5.
-
-if {[info procs lreverse] == ""} {
-    proc lreverse { arg } {
-	set retval {}
-	while { [llength $retval] < [llength $arg] } {
-	    lappend retval [lindex $arg end-[llength $retval]]
-	}
-	return $retval
-    }
-}
-
 # Various ccache versions provide incorrect debug info such as ignoring
 # different current directory, breaking GDB testsuite.
 set env(CCACHE_DISABLE) 1
