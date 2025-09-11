@@ -1,3 +1,4 @@
+	.option norvc
 	.section	.tbss,"awT",@nobits
 	.global sg1
 sg1:

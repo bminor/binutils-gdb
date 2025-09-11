@@ -1,3 +1,4 @@
+	.option norvc
 	.text
 byte:
 	nop
