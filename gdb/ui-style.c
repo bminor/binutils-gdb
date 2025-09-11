@@ -594,7 +594,11 @@ colorsupport ()
     {
       std::vector<color_space> result = {color_space::MONOCHROME};
 
-      int colors = tgetnum ("Co");
+      /* ncurses versions prior to 6.1 (and other curses
+	 implementations) declare the tgetnum argument to be
+	 'char *', so we need the const_cast, since C++ will not
+	 implicitly convert.  */
+      int colors = tgetnum (const_cast<char*> ("Co"));
       if (colors >= 8)
 	result.push_back (color_space::ANSI_8COLOR);
       if (colors >= 16)
