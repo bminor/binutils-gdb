@@ -19,7 +19,7 @@ jobs:
         uses: SonarSource/sonarqube-scan-action/install-build-wrapper@v5
       - name: Run Build Wrapper
         run: |
-          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} ./configure --target=x86_64-linux-gnu && make all-gas
+          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} ./configure --target=x86_64-linux-gnu --disable-server --disable-gdb  && make all-gas
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5
         env:
