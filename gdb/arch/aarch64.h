@@ -94,6 +94,10 @@ namespace std
 
       /* SME2 feature.  */
       h = h << 1 | features.sme2;
+
+      h = h << 1 | features.gcs;
+      h = h << 1 | features.gcs_linux;
+
       return h;
     }
   };
