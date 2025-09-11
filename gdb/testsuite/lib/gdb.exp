@@ -5351,7 +5351,7 @@ gdb_caching_proc allow_ifunc_tests {} {
 }
 
 # Return whether we should skip tests for showing inlined functions in
-# backtraces.  Requires get_compiler_info and get_debug_format.
+# backtraces.  Requires get_debug_format.
 
 proc skip_inline_frame_tests {} {
     # GDB only recognizes inlining information in DWARF.
@@ -5370,7 +5370,7 @@ proc skip_inline_frame_tests {} {
 }
 
 # Return whether we should skip tests for showing variables from
-# inlined functions.  Requires get_compiler_info and get_debug_format.
+# inlined functions.  Requires get_debug_format.
 
 proc skip_inline_var_tests {} {
     # GDB only recognizes inlining information in DWARF.
@@ -5642,14 +5642,6 @@ gdb_caching_proc target_is_gdbserver {} {
     return $is_gdbserver
 }
 
-# N.B. compiler_info is intended to be local to this file.
-# Call test_compiler_info with no arguments to fetch its value.
-# Yes, this is counterintuitive when there's get_compiler_info,
-# but that's the current API.
-if [info exists compiler_info] {
-    unset compiler_info
-}
-
 # Figure out what compiler I am using.
 # The result is cached so only the first invocation runs the compiler.
 #
@@ -5701,8 +5693,18 @@ if [info exists compiler_info] {
 #   I didn't get desperate enough to try this.
 #
 # -- chastain 2004-01-06
+#
+# Returns "unsupported" if LANGUAGE is not supported, and "unknown" if
+# LANGUAGE is supported but extracting the information out of the
+# compiler for LANGUAGE failed.  Otherwise returns the compiler we're
+# using for LANGUAGE.
 
 proc get_compiler_info {{language "c"}} {
+    # Split to a helper procedure because gdb_caching_proc does not
+    # support optional arguments.
+    return [get_compiler_info_1 $language]
+}
+gdb_caching_proc get_compiler_info_1 {language} {
 
     # For compiler.c, compiler.cc and compiler.F90.
     global srcdir
@@ -5711,13 +5713,8 @@ proc get_compiler_info {{language "c"}} {
     global outdir
     global tool
 
-    # These come from compiler.c, compiler.cc or compiler.F90.
-    gdb_persistent_global compiler_info_cache
-
-    if [info exists compiler_info_cache($language)] {
-	# Already computed.
-	return 0
-    }
+    # 'compiler_info' comes from evaluating the result of
+    # preprocessing compiler.c, compiler.cc or compiler.F90.
 
     # Choose which file to preprocess.
     if { $language == "c++" } {
@@ -5728,7 +5725,7 @@ proc get_compiler_info {{language "c"}} {
 	set ifile "${srcdir}/lib/compiler.c"
     } else {
 	perror "Unable to fetch compiler version for language: $language"
-	return -1
+	return "unsupported"
     }
 
     # Run $ifile through the right preprocessor.
@@ -5790,22 +5787,21 @@ proc get_compiler_info {{language "c"}} {
 	set compiler_info "unknown"
     }
 
-    set compiler_info_cache($language) $compiler_info
-
     # Log what happened.
     verbose -log "get_compiler_info: $compiler_info"
 
-    return 0
+    return $compiler_info
 }
 
-# Return the compiler_info string if no arg is provided.
-# Otherwise the argument is a glob-style expression to match against
-# compiler_info.
+# Return the compiler_info string if COMPILER is not provided.
+# Otherwise COMPILER is a glob-style expression to match against
+# compiler_info, and this returns true/false depending on whether the
+# expression matches or not.
 
 proc test_compiler_info { {compiler ""} {language "c"} } {
-    gdb_persistent_global compiler_info_cache
+    set compiler_info [get_compiler_info $language]
 
-    if [get_compiler_info $language] {
+    if {$compiler_info == "unsupported"} {
 	# An error will already have been printed in this case.  Just
 	# return a suitable result depending on how the user called
 	# this function.
@@ -5818,10 +5814,10 @@ proc test_compiler_info { {compiler ""} {language "c"} } {
 
     # If no arg, return the compiler_info string.
     if [string match "" $compiler] {
-	return $compiler_info_cache($language)
+	return $compiler_info
     }
 
-    return [string match $compiler $compiler_info_cache($language)]
+    return [string match $compiler $compiler_info]
 }
 
 # Return true if the C compiler is GCC, otherwise, return false.

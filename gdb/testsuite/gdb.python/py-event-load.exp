@@ -20,12 +20,6 @@ load_lib gdb-python.exp
 
 require allow_shlib_tests allow_python_tests
 
-if {[get_compiler_info]} {
-    warning "Could not get compiler info"
-    untested "no compiler info"
-    return -1
-}
-
 standard_testfile .c
 if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
 	 executable {debug shlib_load}] != ""} {
