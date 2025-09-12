@@ -63,8 +63,8 @@ proc test_file { file } {
 
     set fp [open $file]
     while { [gets $fp line] >= 0 } {
-	if [regexp -- "^gdb_caching_proc \[ \t\]*(\[^ \t\]*)" $line \
-		match procname] {
+	if { [regexp -- "^gdb_caching_proc \[ \t\]*(\[^ \t\]*)" $line \
+		  match procname] }  {
 	    lappend procnames $procname
 	}
     }
@@ -114,7 +114,7 @@ if { ![gdb_simple_compile $me $src executable] } {
 }
 
 # Test gdb_caching_procs in gdb/testsuite/lib/*.exp
-set files [eval glob -types f $srcdir/lib/*.exp]
+set files [glob -types f $srcdir/lib/*.exp]
 set files [lsort $files]
 foreach file $files {
     test_file $file

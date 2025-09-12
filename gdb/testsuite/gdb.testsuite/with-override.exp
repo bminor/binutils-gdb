@@ -50,11 +50,11 @@ with_test_prefix no-args {
 }
 
 proc foo { {a 0} } {
-    return [expr $a + 1]
+    return [expr {$a + 1}]
 }
 
 proc foo_plus_1 { {a 0} } {
-    return [expr $a + 2]
+    return [expr {$a + 2}]
 }
 
 with_test_prefix default-arg {
