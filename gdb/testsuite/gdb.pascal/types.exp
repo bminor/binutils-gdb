@@ -25,7 +25,7 @@ proc test_integer_literal_types_accepted {} {
 
     # Test various decimal values.
     # Should be integer*4 probably.
-    gdb_test "pt 123" "type = int" 
+    gdb_test "pt 123" "type = int"
 }
 proc test_character_literal_types_accepted {} {
     global gdb_prompt

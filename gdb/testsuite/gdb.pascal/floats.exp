@@ -48,9 +48,9 @@ gdb_test "next" "u := 78\\.3;" "next to 'u := 78.3' line"
 gdb_test "next" "l := 1;" "next to 'l := 1' line"
 gdb_test "next" "i := 1;" "next to 'i := 1' line"
 
-# At that point, 
+# At that point,
 # r should be equal to 1.25
-gdb_test "print r" " = 1\\.25" 
+gdb_test "print r" " = 1\\.25"
 # s should be equal to 2.2
 gdb_test "print s" " = 2\\.(199.*|2|200.*)"
 # t should be equal to -3.2
@@ -120,7 +120,7 @@ gdb_test "next" "s := sin\\(u\\);" "advance to 's := sin(u)' line"
 gdb_test "print r" " = -1" "test cos(pi) is equal to -1"
 gdb_test "next" "" "go past 's := sin(u)' line"
 
-set msg "Test sin(pi) is equal to 0" 
+set msg "Test sin(pi) is equal to 0"
 
 gdb_test_multiple "print s" $msg {
 	-re ".* = (0|-?\[0-9\]\\.\[0-9\]*\[eE\](-?\[0-9\]*))\[\r\n\]+$gdb_prompt $" {

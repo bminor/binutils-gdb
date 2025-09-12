@@ -43,9 +43,9 @@ gdb_test "print i" ".* = 0" "print i before assigned to 1"
 
 gdb_test "next" "i := 1;" "next to 'i := 1' line"
 gdb_test "next" "j := 2;" "next to 'j := 2' line"
-# At that point, 
+# At that point,
 # i should be equal to 1
-gdb_test "print i" " = 1" 
+gdb_test "print i" " = 1"
 # but j should still be equal to zero
 if { $pascal_compiler_is_gpc } {
   setup_xfail *-*-*

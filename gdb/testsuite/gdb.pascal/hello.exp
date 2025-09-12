@@ -46,7 +46,7 @@ gdb_test "print st" \
 
 # This test also fails for gpc because the program
 # stops after the string has been written
-# while it should stop before writing it 
+# while it should stop before writing it
 if { $pascal_compiler_is_gpc } {
     setup_xfail *-*-*
 }
