@@ -422,10 +422,15 @@ def make_visualizer(value):
                 gdb.TYPE_CODE_REF,
                 gdb.TYPE_CODE_RVALUE_REF,
             )
+            # Avoid "void *" here because those pointers can't be
+            # dereferenced without a cast.
             and ty.target().code != gdb.TYPE_CODE_VOID
+            # An optimized-out or unavailable pointer should just be
+            # treated as a scalar, since there's no way to dereference
+            # it.
+            and not value.is_optimized_out
+            and not value.is_unavailable
         ):
-            # Note we avoid "void *" here because those pointers can't
-            # be dereferenced without a cast.
             result = NoOpPointerReferencePrinter(value)
         else:
             result = NoOpScalarPrinter(value)

@@ -1,0 +1,176 @@
+# Copyright (C) 2025 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Tests for gdb.printing.make_visualizer; specifically that the
+# optimized-out and synthetic pointer cases work properly.
+
+load_lib dwarf.exp
+load_lib gdb-python.exp
+
+require dwarf2_support
+require allow_python_tests
+
+# Use a simple plain-"main" source file.
+standard_testfile py-progspace.c -dw.S
+
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug}]} {
+    return
+}
+
+if {![runto_main]} {
+    return
+}
+
+# Get size to create fake DWARF for the test.
+set ptr_size [get_sizeof "void *" 96]
+
+set asm_file [standard_output_file ${srcfile2}]
+Dwarf::assemble $asm_file {
+    cu {} {
+	compile_unit {} {
+	    declare_labels i32_type i32_array \
+		struct_label variable_label pointer_label
+
+	    i32_type: DW_TAG_base_type {
+		DW_AT_name "int32_t"
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_byte_size 4 DW_FORM_sdata
+	    }
+
+	    i32_array: DW_TAG_array_type {
+		DW_AT_name array_type
+		DW_AT_type :$i32_type
+	    } {
+		DW_TAG_subrange_type {
+		    DW_AT_type :$i32_type
+		    DW_AT_lower_bound 0 DW_FORM_data1
+		    DW_AT_upper_bound 3 DW_FORM_data1
+		}
+	    }
+
+	    # Used for testing optimized-out elements of an array.
+	    DW_TAG_variable {
+		DW_AT_name i32_noptr
+		DW_AT_type :$i32_array
+		DW_AT_location {
+		    DW_OP_constu 1779823878
+		    DW_OP_stack_value
+		    DW_OP_piece 4
+		} SPECIAL_expr
+	    }
+
+	    struct_label: DW_TAG_structure_type {
+		DW_AT_name i32_noptr
+		DW_AT_byte_size 4 DW_FORM_sdata
+	    } {
+		DW_TAG_member {
+		    DW_AT_name f
+		    DW_AT_type :$i32_type
+		    DW_AT_data_member_location 0 DW_FORM_data1
+		}
+	    }
+
+	    pointer_label: DW_TAG_pointer_type {
+		DW_AT_byte_size $::ptr_size DW_FORM_sdata
+		DW_AT_type :$struct_label
+	    }
+
+	    variable_label: DW_TAG_variable {
+		DW_AT_name v
+		DW_AT_location {
+		    DW_OP_implicit_value 0x1 0x1 0x1 0x1
+		} SPECIAL_expr
+		DW_AT_type :$struct_label
+	    }
+
+	    # Used for testing synthetic pointers.
+	    DW_TAG_variable {
+		DW_AT_name synthptr
+		DW_AT_location [subst {
+		    GNU_implicit_pointer $variable_label 0
+		}] SPECIAL_expr
+		DW_AT_type :$pointer_label
+	    }
+
+	    # Optimized-out pointer.
+	    DW_TAG_variable {
+		DW_AT_name optoutptr
+		DW_AT_location { } SPECIAL_expr
+		DW_AT_type :$pointer_label
+	    }
+	}
+    }
+}
+
+if {[prepare_for_testing "failed to prepare" ${testfile} \
+	 [list $srcfile $asm_file] {nodebug}]} {
+    return
+}
+
+# Need a frame to evaluate a synthetic pointer.
+if {![runto_main]} {
+    return
+}
+
+gdb_test_no_output "python import gdb"
+gdb_test_no_output "python import gdb.printing"
+
+gdb_test_no_output "python val = gdb.parse_and_eval('i32_noptr')" \
+    "fetch i32_noptr"
+gdb_test_no_output "python vz = gdb.printing.make_visualizer(val)" \
+    "create i32_noptr visualizer"
+gdb_test "python print(isinstance(vz, gdb.printing.NoOpArrayPrinter))" \
+    True \
+    "i32_noptr uses array printer"
+
+gdb_test_no_output "python vz1 = gdb.printing.make_visualizer(val\[0\])" \
+    "create visualizer for valid element"
+gdb_test "python print(isinstance(vz1, gdb.printing.NoOpScalarPrinter))" \
+    True \
+    "valid element uses scalar printer"
+gdb_test "python print(vz1.to_string())" \
+    1779823878 \
+    "string form of valid element"
+
+gdb_test_no_output "python vz2 = gdb.printing.make_visualizer(val\[1\])" \
+    "create visualizer for optimized-out element"
+gdb_test "python print(isinstance(vz2, gdb.printing.NoOpScalarPrinter))" \
+    True \
+    "optimized-out element uses scalar printer"
+gdb_test "python print(vz2.to_string())" \
+    "<optimized out>" \
+    "string form of optimized-out element"
+
+gdb_test_no_output "python val2 = gdb.parse_and_eval('synthptr')" \
+    "fetch synthetic pointer"
+gdb_test_no_output "python vzv2 = gdb.printing.make_visualizer(val2)" \
+    "create synthetic pointer visualizer"
+gdb_test "python print(isinstance(vzv2, gdb.printing.NoOpPointerReferencePrinter))" \
+    True \
+    "synthetic pointer uses pointer printer"
+gdb_test "python print(vzv2.child(0)\[1\])" \
+    "{f = 16843009}" \
+    "child of synthetic pointer"
+
+gdb_test_no_output "python val3 = gdb.parse_and_eval('optoutptr')" \
+    "fetch optimized-out pointer"
+gdb_test_no_output "python vzv3 = gdb.printing.make_visualizer(val3)" \
+    "create optimized-out pointer visualizer"
+gdb_test "python print(isinstance(vzv3, gdb.printing.NoOpScalarPrinter))" \
+    True \
+    "optimized-out pointer uses scalar printer"
+gdb_test "python print(vzv3.to_string())" \
+    "<optimized out>" \
+    "string representation of optimized-out pointer"
