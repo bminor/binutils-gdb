@@ -34,7 +34,7 @@ if {![runto ${srcfile}:$line]} {
 # https://github.com/rust-lang/rust/issues/33121
 # gdb_test "call f2()" "lambda f2"
 
-if ![target_info exists gdb,noinferiorio] {
+if { ![target_info exists gdb,noinferiorio] } {
     gdb_test_stdio "call f3()" "mod1::inner::innest::f3"
     gdb_test_stdio "call self::f2()" "mod1::inner::innest::f2"
     gdb_test_stdio "call self::super::f2()" "mod1::inner::f2"
