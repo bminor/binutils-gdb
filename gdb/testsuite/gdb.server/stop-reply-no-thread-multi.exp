@@ -78,7 +78,7 @@ proc run_test { target_non_stop disable_feature } {
 	"Support for the 'multiprocess-feature' packet on future remote targets is set to \"off\"."
 
     set res [gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport]
-    if ![gdb_assert {$res == 0} "connect"] {
+    if { ![gdb_assert {$res == 0} "connect"] } {
 	return
     }
 

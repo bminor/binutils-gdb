@@ -69,7 +69,7 @@ proc connect_no_symbol_file { sysroot action } {
 	} elseif { $action == "permission" } {
 	  remote_exec target "chmod 000 $target_exec"
 	}
-       
+
 	# Connect to GDBserver.
 	gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport
     }

@@ -21,7 +21,7 @@ load_lib gdbserver-support.exp
 require allow_gdbserver_tests allow_shlib_tests
 
 standard_testfile server.c
-if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] {
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
     return -1
 }
 

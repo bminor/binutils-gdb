@@ -70,7 +70,7 @@ proc test_reload { do_kill_p follow_child_p } {
     set live_inf_ptn "process $decimal"
     set dead_inf_ptn "<null>"
 
-    if ${follow_child_p} {
+    if { $follow_child_p } {
 	gdb_test_no_output "set follow-fork child"
 	set parent_prefix " "
 	set child_prefix "\\*"

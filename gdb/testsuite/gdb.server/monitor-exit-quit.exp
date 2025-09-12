@@ -70,7 +70,7 @@ gdb_test_multiple "quit" "" {
 
 # Cleanup, as in default_gdb_exit.
 if { $do_cleanup } {
-    if ![is_remote host] {
+    if { ![is_remote host] } {
 	    remote_close host
     }
     unset gdb_spawn_id
