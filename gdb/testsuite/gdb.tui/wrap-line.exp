@@ -37,11 +37,11 @@ proc fill_line { width } {
 
     # Take into account that the prompt also takes space.
     set prefix [string length "(gdb) "]
-    set start [expr $prefix + 1]
+    set start [expr {$prefix + 1}]
 
     # Print chars.
     for { set i $start } { $i <= $width } { incr i } {
-	set c [expr $i % 10]
+	set c [expr {$i % 10}]
 	send_gdb $c
 	append res $c
     }
@@ -59,7 +59,7 @@ proc test_wrap { wrap_width tui } {
     set str [fill_line $wrap_width]
 
     # Remaining space on line.
-    set space [string repeat " " [expr $::cols - $wrap_width]]
+    set space [string repeat " " [expr {$::cols - $wrap_width}]]
 
     # Now print the first char we expect to wrap.
     send_gdb "W"

@@ -81,7 +81,7 @@ set layouts \
 proc check_boxes {boxes} {
     set boxno 1
     foreach box $boxes {
-	eval Term::check_box [list "box $boxno"] $box
+	Term::check_box [list "box $boxno"] {*}$box
 	incr boxno
     }
 }

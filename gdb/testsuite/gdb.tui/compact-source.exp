@@ -55,9 +55,9 @@ set re_border "\\|"
 
 set max_line_nr_in_source_file [llength $src_list]
 # Ensure there are more lines in the window than in the source file.
-set src_window_lines [expr $max_line_nr_in_source_file + 2]
+set src_window_lines [expr {$max_line_nr_in_source_file + 2}]
 # Account for border size.
-set src_window_size [expr $src_window_lines + 2]
+set src_window_size [expr {$src_window_lines + 2}]
 Term::command "wh src $src_window_size"
 
 set re_left_margin "___4_"
@@ -65,6 +65,6 @@ set re_left_margin "___4_"
 Term::check_contents "compact source format" \
     "$re_border$re_left_margin$re_line_four *$re_border"
 
-set re_left_margin "___0*[expr $max_line_nr_in_source_file + 1]_"
+set re_left_margin "___0*[expr {$max_line_nr_in_source_file + 1}]_"
 Term::check_contents_not "no surplus line number" \
     "$re_border$re_left_margin *$re_border"
