@@ -17,7 +17,10 @@ with Pck; use Pck;
 
 procedure Main is
 
-   type My_Array is array (Integer range <>, Long_Integer range <>) of Integer;
+   type Shorter_Integer is range -2147483648 .. 2147483647;
+   type Longer_Integer is range -9223372036854775808 .. 9223372036854775807;
+   type My_Array is array (Shorter_Integer range <>,
+                           Longer_Integer range <>) of Integer;
 
    type My_Reg_Acc is access all My_Array;
 
