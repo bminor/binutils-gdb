@@ -47,7 +47,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile $options] } {
     return
 }
 
-if ![runto_main] {
+if { ![runto_main] } {
     return
 }
 

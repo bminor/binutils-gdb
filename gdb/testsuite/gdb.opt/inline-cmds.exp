@@ -241,7 +241,7 @@ gdb_test "step" ".*set breakpoint 2 here.*" "step into finish marker"
 
 # Some architectures will have one or more instructions after
 # the call instruction which still are part of the call sequence,
-# so it should be expected to return to the caller line after issue 
+# so it should be expected to return to the caller line after issue
 # a 'finish' command.
 gdb_test_multiple "finish" "finish from marker to func1" {
     -re -wrap "func1 \\(\\);" {
