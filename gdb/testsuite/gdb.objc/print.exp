@@ -59,7 +59,7 @@ proc test_float_rejected {} {
 
 clean_restart
 
-if [set_lang_objc] {
+if { [set_lang_objc] } {
     test_float_accepted
     test_float_rejected
 } else {
