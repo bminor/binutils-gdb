@@ -1,5 +1,6 @@
 #source: relax-max-align-gp.s
-#ld:
+#as: -march=rv64i
+#ld: -m[riscv_choose_lp64_emul]
 #objdump: -d
 
 .*:[ 	]+file format .*
