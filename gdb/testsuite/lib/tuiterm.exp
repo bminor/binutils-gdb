@@ -102,8 +102,8 @@ proc Term::_ctl_0x07 {} {
 # Return 1 if tuiterm has the bw/auto_left_margin enabled.
 proc Term::_have_bw {} {
     return [expr \
-		[string equal $Term::_TERM "ansiw"] \
-		|| [string equal $Term::_TERM "ansis"]]
+		{ [string equal $Term::_TERM "ansiw"] \
+		      || [string equal $Term::_TERM "ansis"] }]
 }
 
 # Backspace.
@@ -1573,13 +1573,13 @@ proc Term::get_region { x y width height sep { attrs false } } {
     # Grab the contents of the box, join each line together
     # using $sep.
     set result ""
-    for {set yy $y} {$yy < [expr {$y + $height}]} {incr yy} {
+    for {set yy $y} {$yy < $y + $height} {incr yy} {
 	if {$yy > $y} {
 	    # Add the end of line sequence only if this isn't the
 	    # first line.
 	    append result $sep
 	}
-	for {set xx $x} {$xx < [expr {$x + $width}]} {incr xx} {
+	for {set xx $x} {$xx < $x + $width} {incr xx} {
 	    if { $attrs } {
 		set char_attrs [lindex $_chars($xx,$yy) 1]
 		append result [apply_attrs region_attrs $char_attrs]
