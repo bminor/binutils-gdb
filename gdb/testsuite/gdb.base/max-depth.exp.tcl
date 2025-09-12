@@ -35,7 +35,7 @@ proc compile_and_run_tests { lang } {
     }
 
     # Advance to main.
-    if { ![runto_main] } then {
+    if { ![runto_main] } {
 	return 0
     }
 

@@ -33,7 +33,7 @@ proc run_test { lang } {
 	return -1
     }
 
-    if ![runto_main] then {
+    if { ![runto_main] } {
 	return 0
     }
 

@@ -92,7 +92,7 @@ proc start_nested_structs_test { lang types } {
     gdb_test_no_output "set print elements 300"
 
     # Advance to main
-    if { ![runto_main] } then {
+    if { ![runto_main] } {
 	return 0
     }
 

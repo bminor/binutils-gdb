@@ -73,7 +73,7 @@ proc build_and_run_test { lang symbols } {
 
     clean_restart $::testfile
 
-    if ![runto_main] then {
+    if { ![runto_main] } {
 	return
     }
 

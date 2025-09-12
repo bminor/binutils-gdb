@@ -53,7 +53,7 @@ proc add_inferior {num target binfile {gcorefile ""}} {
 	    return 0
 	}
     }
-    if ![runto "all_started"] then {
+    if { ![runto "all_started"] } {
 	return 0
     }
     delete_breakpoints
@@ -67,7 +67,7 @@ proc prepare_core {} {
 
     clean_restart ${::testfile}
 
-    if ![runto all_started] then {
+    if { ![runto all_started] } {
 	return -1
     }
 
@@ -123,13 +123,13 @@ proc setup {non-stop {multi_process ""}} {
 
     gdb_test_no_output "set non-stop ${non-stop}"
 
-    if {${multi_process} ne ""} then {
+    if {${multi_process} ne ""} {
 	gdb_test \
 	    "set remote multiprocess-feature-packet $multi_process" \
 	    "Support for the 'multiprocess-feature' packet on future remote targets is set to \"${multi_process}\"."
     }
 
-    if ![runto all_started] then {
+    if { ![runto all_started] } {
 	return 0
     }
 
