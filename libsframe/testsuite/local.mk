@@ -19,6 +19,9 @@ check-DEJAGNU: site.exp
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
 
+testsuite_LDADD = $(top_builddir)/libsframe.la
+testsuite_CPPFLAGS = -I$(srcdir)/testsuite -I$(srcdir)/../include
+
 # libsframe encoder/decoder/find testsuite
 include %D%/libsframe.decode/local.mk
 include %D%/libsframe.encode/local.mk

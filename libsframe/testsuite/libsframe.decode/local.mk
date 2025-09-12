@@ -4,13 +4,13 @@ if HAVE_COMPAT_DEJAGNU
 endif
 
 %C%_be_flipping_SOURCES = %D%/be-flipping.c
-%C%_be_flipping_LDADD = ${top_builddir}/libsframe.la
-%C%_be_flipping_CPPFLAGS = -I${top_srcdir}/../include -Wall
+%C%_be_flipping_LDADD = $(testsuite_LDADD)
+%C%_be_flipping_CPPFLAGS = $(testsuite_CPPFLAGS)
 
 %C%_frecnt_1_SOURCES = %D%/frecnt-1.c
-%C%_frecnt_1_LDADD = ${top_builddir}/libsframe.la
-%C%_frecnt_1_CPPFLAGS = -I${top_srcdir}/../include -Wall
+%C%_frecnt_1_LDADD = $(testsuite_LDADD)
+%C%_frecnt_1_CPPFLAGS = $(testsuite_CPPFLAGS)
 
 %C%_frecnt_2_SOURCES = %D%/frecnt-2.c
-%C%_frecnt_2_LDADD = ${top_builddir}/libsframe.la 
-%C%_frecnt_2_CPPFLAGS = -I${top_srcdir}/../include -Wall
+%C%_frecnt_2_LDADD = $(testsuite_LDADD)
+%C%_frecnt_2_CPPFLAGS = $(testsuite_CPPFLAGS)

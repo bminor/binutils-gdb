@@ -4,17 +4,17 @@ if HAVE_COMPAT_DEJAGNU
 endif
 
 %C%_findfre_1_SOURCES = %D%/findfre-1.c
-%C%_findfre_1_LDADD = ${top_builddir}/libsframe.la
-%C%_findfre_1_CPPFLAGS = -I${top_srcdir}/../include -Wall
+%C%_findfre_1_LDADD = $(testsuite_LDADD)
+%C%_findfre_1_CPPFLAGS = $(testsuite_CPPFLAGS)
 
 %C%_findfunc_1_SOURCES = %D%/findfunc-1.c
-%C%_findfunc_1_LDADD = ${top_builddir}/libsframe.la
-%C%_findfunc_1_CPPFLAGS = -I${top_srcdir}/../include -Wall
+%C%_findfunc_1_LDADD = $(testsuite_LDADD)
+%C%_findfunc_1_CPPFLAGS = $(testsuite_CPPFLAGS)
 
 %C%_plt_findfre_1_SOURCES = %D%/plt-findfre-1.c
-%C%_plt_findfre_1_LDADD = ${top_builddir}/libsframe.la
-%C%_plt_findfre_1_CPPFLAGS = -I${top_srcdir}/../include -Wall
+%C%_plt_findfre_1_LDADD = $(testsuite_LDADD)
+%C%_plt_findfre_1_CPPFLAGS = $(testsuite_CPPFLAGS)
 
 %C%_plt_findfre_2_SOURCES = %D%/plt-findfre-2.c
-%C%_plt_findfre_2_LDADD = ${top_builddir}/libsframe.la
-%C%_plt_findfre_2_CPPFLAGS = -I${top_srcdir}/../include -Wall
+%C%_plt_findfre_2_LDADD = $(testsuite_LDADD)
+%C%_plt_findfre_2_CPPFLAGS = $(testsuite_CPPFLAGS)

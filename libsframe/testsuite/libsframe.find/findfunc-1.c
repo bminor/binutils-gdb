@@ -22,17 +22,7 @@
    The tests in here stress the sframe_get_funcdesc_with_addr API via calls to
    the sframe_find_fre ().  */
 
-#include "config.h"
-
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-
-#include "sframe-api.h"
-
-/* DejaGnu should not use gnulib's vsnprintf replacement here.  */
-#undef vsnprintf
-#include <dejagnu.h>
+#include "sframe-test.h"
 
 static int
 add_fde1 (sframe_encoder_ctx *encode, uint32_t start_pc_vaddr,
