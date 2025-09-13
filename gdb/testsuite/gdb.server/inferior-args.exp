@@ -113,10 +113,10 @@ proc do_test_inner { extended_p with_shell_p escape_p arglist re_list } {
 # argument.  If RE_ESC_LIST is not given then ARGLIST is reused, which
 # implies the arguments appear unmodified in the test output.
 #
-# The optional RE_NO_ESC_LIST is a list of patterns ot match against the
+# The optional RE_NO_ESC_LIST is a list of patterns to match against the
 # inferior arguments when gdbserver is started with --no-escape-args or
 # --no-startup-with-shell.  There should be one pattern for each argument.
-# If RE_NO_ESC_LIST is not given then RE_ESC_LIST is resused, which implies
+# If RE_NO_ESC_LIST is not given then RE_ESC_LIST is reused, which implies
 # there's no difference in how the arguments are printed.
 proc args_test { name arglist {re_esc_list {}} {re_no_esc_list {}} } {
     if {[llength $re_esc_list] == 0} {
