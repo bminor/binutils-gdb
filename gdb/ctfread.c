@@ -392,7 +392,7 @@ ctf_add_enum_member_cb (const char *name, int enum_value, void *arg)
   fp->set_loc_enumval (enum_value);
   fp->set_bitsize (0);
 
-  if (name != nullptr)
+  if (name != nullptr && *name != '\0')
     {
       struct symbol *sym = new (&ccp->of->objfile_obstack) symbol;
       OBJSTAT (ccp->of, n_syms++);
@@ -421,7 +421,7 @@ new_symbol (struct ctf_context *ccp, struct type *type, ctf_id_t tid)
   struct symbol *sym = nullptr;
 
   const char *name = ctf_type_name_raw (fp, tid);
-  if (name != nullptr)
+  if (name != nullptr && *name != '\0')
     {
       sym = new (&objfile->objfile_obstack) symbol;
       OBJSTAT (objfile, n_syms++);
@@ -495,10 +495,10 @@ read_base_type (struct ctf_context *ccp, ctf_id_t tid)
     }
 
   name = ctf_type_name_raw (fp, tid);
-  if (name == nullptr || strlen (name) == 0)
+  if (name == nullptr || *name == '\0')
     {
       name = ctf_type_aname (fp, tid);
-      if (name == nullptr)
+      if (name == nullptr || *name == '\0')
 	complaint (_("ctf_type_aname read_base_type failed - %s"),
 		   ctf_errmsg (ctf_errno (fp)));
     }
@@ -582,7 +582,7 @@ read_structure_type (struct ctf_context *ccp, ctf_id_t tid)
   type = type_allocator (of, language_c).new_type ();
 
   const char *name = ctf_type_name_raw (fp, tid);
-  if (name != nullptr && strlen (name) != 0)
+  if (name != nullptr && *name != '\0')
     type->set_name (name);
 
   kind = ctf_type_kind (fp, tid);
@@ -692,7 +692,7 @@ read_enum_type (struct ctf_context *ccp, ctf_id_t tid)
   type = type_allocator (of, language_c).new_type ();
 
   const char *name = ctf_type_name_raw (fp, tid);
-  if (name != nullptr && strlen (name) != 0)
+  if (name != nullptr && *name != '\0')
     type->set_name (name);
 
   type->set_code (TYPE_CODE_ENUM);
@@ -930,7 +930,7 @@ read_forward_type (struct ctf_context *ccp, ctf_id_t tid)
   type = type_allocator (of, language_c).new_type ();
 
   const char *name = ctf_type_name_raw (fp, tid);
-  if (name != nullptr && strlen (name) != 0)
+  if (name != nullptr && *name != '\0')
     type->set_name (name);
 
   kind = ctf_type_kind_forwarded (fp, tid);
@@ -1431,7 +1431,7 @@ ctf_psymtab_type_cb (ctf_id_t tid, void *arg)
     }
 
   const char *name = ctf_type_name_raw (ccp->fp, tid);
-  if (name == nullptr || strlen (name) == 0)
+  if (name == nullptr || *name == '\0')
     return 0;
 
   ccp->pst->add_psymbol (name, false,
