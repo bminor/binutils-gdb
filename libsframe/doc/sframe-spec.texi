@@ -22,6 +22,7 @@ License''.
 @title The SFrame Format
 @subtitle Version 2 (Errata 1)
 @sp 15
+@center @strong{*** DRAFT - NOT FOR DISTRIBUTION ***}
 @center @today{}
 @author Indu Bhagat
 
@@ -34,6 +35,9 @@ License''.
 @ifnottex
 @node Top
 @top The SFrame format
+
+@center @strong{*** DRAFT - NOT FOR DISTRIBUTION ***}
+@center @today{}
 
 This manual describes version 2 (errata 1) of the SFrame file format.  SFrame
 stands for Simple Frame.  The SFrame format keeps track of the minimal
