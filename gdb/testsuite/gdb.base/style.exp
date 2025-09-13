@@ -50,7 +50,7 @@ proc clean_restart_and_disable { prefix args } {
     global currently_disabled_style
 
     with_test_prefix "$prefix" {
-	eval "clean_restart $args"
+	clean_restart {*}$args
 
 	if { $currently_disabled_style != "" } {
 	    set st $currently_disabled_style

@@ -141,7 +141,7 @@ proc check_history { hist } {
     if { [llength $hist_lines] == 1 } {
 	set pattern [lindex $hist_lines 0]
     } else {
-	set pattern [eval multi_line $hist_lines]
+	set pattern [multi_line {*}$hist_lines]
     }
 
     # Check the history.

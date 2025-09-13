@@ -1046,7 +1046,7 @@ proc Term::accept_gdb_output { {warn 1} } {
 	    scan $expect_out(1,string) %c val
 	    set hexval [format "%02x" $val]
 	    set cmd $expect_out(2,string)
-	    eval _esc_0x${hexval}_$cmd
+	    _esc_0x${hexval}_$cmd
 	}
 	-re "^(\[=>\])" {
 	    scan $expect_out(1,string) %c val
@@ -1081,13 +1081,13 @@ proc Term::accept_gdb_output { {warn 1} } {
 	-re "^($re_csi_cmd)" {
 	    set cmd $expect_out(1,string)
 	    _log "wait_for: _csi_$cmd"
-	    eval _csi_$cmd
+	    _csi_$cmd
 	}
 	-re "^($re_csi_args*)($re_csi_cmd)" {
 	    set params [split $expect_out(1,string) ";"]
 	    set cmd $expect_out(2,string)
 	    _log "wait_for: _csi_$cmd <<<$params>>>"
-	    eval _csi_$cmd $params
+	    _csi_$cmd {*}$params
 	}
 	-re "^($re_csi_prefix?)($re_csi_args*)($re_csi_cmd)" {
 	    set prefix $expect_out(1,string)
@@ -1096,7 +1096,7 @@ proc Term::accept_gdb_output { {warn 1} } {
 	    scan $prefix %c val
 	    set hexval [format "%02x" $val]
 	    _log "wait_for: _csi_0x${hexval}_$cmd <<<$expect_out(1,string)>>>"
-	    eval _csi_0x${hexval}_$cmd $params
+	    _csi_0x${hexval}_$cmd {*}$params
 	}
 
 	timeout {

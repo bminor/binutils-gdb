@@ -219,14 +219,14 @@ proc gdb_trace_setactions_command { actions_command testname tracepoint args } {
 # gdb_trace_setactions_command.
 #
 proc gdb_trace_setactions { testname tracepoint args } {
-    eval gdb_trace_setactions_command "actions" {$testname} {$tracepoint} $args
+    gdb_trace_setactions_command "actions" $testname $tracepoint {*}$args
 }
 
 # Define actions for a tracepoint, using the "commands" command.  See
 # gdb_trace_setactions_command.
 #
 proc gdb_trace_setcommands { testname tracepoint args } {
-    eval gdb_trace_setactions_command "commands" {$testname} {$tracepoint} $args
+    gdb_trace_setactions_command "commands" $testname $tracepoint {*}$args
 }
 
 #

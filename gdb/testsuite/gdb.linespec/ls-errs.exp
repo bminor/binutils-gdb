@@ -89,9 +89,8 @@ proc do_test {lang} {
     proc test_break {linespec msg_id args} {
 	global error_messages
 
-	gdb_test "break $linespec" [string_to_regexp \
-				    [eval format \$error_messages($msg_id) \
-				     $args]] \
+	gdb_test "break $linespec" \
+	    [string_to_regexp [format $error_messages($msg_id) {*}$args]] \
 	    "'break $linespec'"
     }
 

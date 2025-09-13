@@ -443,7 +443,7 @@ proc dap_search_output {name rx events} {
 # key/value pairs given in ARGS.  NAME is used as the test name.
 proc dap_match_values {name d args} {
     foreach {key value} $args {
-	if {[eval dict get [list $d] $key] != $value} {
+	if {[dict get $d {*}$key] != $value} {
 	    fail "$name (checking $key)"
 	    return ""
 	}
@@ -494,7 +494,7 @@ proc dap_wait_for_event_and_check {name type args} {
 
     set result [_dap_wait_for_event $type]
     set event [lindex $result 0]
-    eval dap_match_values [list $name $event] $args
+    dap_match_values $name $event {*}$args
 
     return $result
 }

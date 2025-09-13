@@ -209,7 +209,7 @@ foreach_with_prefix cmd [list "break" "tbreak"] {
     # that we actually stop where we think we should.
     for {set i 1} {$i < 4} {incr i} {
 	foreach inline {"not_inline" "inline"} {
-	    eval gdb_breakpoint "${inline}_func$i" $break_flags
+	    gdb_breakpoint "${inline}_func$i" {*}$break_flags
 	}
     }
 

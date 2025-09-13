@@ -807,7 +807,7 @@ proc test_attrs {} {
 proc run_one_test_small { test_proc_name } {
     save_vars { env(TERM) stty_init } {
 	setup_small
-	eval $test_proc_name
+	$test_proc_name
     }
 }
 
@@ -816,7 +816,7 @@ proc run_one_test_small { test_proc_name } {
 proc run_one_test_large { test_proc_name } {
     save_vars { env(TERM) stty_init } {
 	setup_large
-	eval $test_proc_name
+	$test_proc_name
     }
 }
 

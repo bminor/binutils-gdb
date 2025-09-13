@@ -45,6 +45,6 @@ gdb_test_multiple "attach $testpid" $test {
 }
 
 if {$parentpid != 0} {
-  eval exec kill -9 $parentpid
+    exec kill -9 $parentpid
 }
 kill_wait_spawned_process $test_spawn_id

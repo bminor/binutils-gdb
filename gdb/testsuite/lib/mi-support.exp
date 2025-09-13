@@ -340,7 +340,7 @@ proc default_mi_gdb_start { { flags {} } } {
 # baseboard file.
 #
 proc mi_gdb_start { args } {
-  return [eval default_mi_gdb_start $args]
+    return [default_mi_gdb_start {*}$args]
 }
 
 # Many of the tests depend on setting breakpoints at various places and
@@ -1010,14 +1010,14 @@ proc mi_run_cmd_full {use_mi_command args} {
 # -exec-continue, as appropriate.  ARGS are passed verbatim to
 # mi_run_cmd_full.
 proc mi_run_cmd {args} {
-    return [eval mi_run_cmd_full 1 $args]
+    return [mi_run_cmd_full 1 {*}$args]
 }
 
 # A wrapper for mi_run_cmd_full which uses the CLI commands 'run' and
 # 'continue', as appropriate.  ARGS are passed verbatim to
 # mi_run_cmd_full.
 proc mi_run_with_cli {args} {
-    return [eval mi_run_cmd_full 0 $args]
+    return [mi_run_cmd_full 0 {*}$args]
 }
 
 # Starts fresh GDB binary and loads an optional executable into GDB.
@@ -1397,7 +1397,7 @@ proc mi_continue_to {func} {
 # returns the breakpoint regexp from that procedure.
 
 proc mi_create_breakpoint {location test args} {
-    set bp [eval mi_make_breakpoint $args]
+    set bp [mi_make_breakpoint {*}$args]
     mi_gdb_test "222-break-insert $location" "222\\^done,$bp" $test
     return $bp
 }
@@ -1406,7 +1406,7 @@ proc mi_create_breakpoint {location test args} {
 # locations using mi_make_breakpoint_multi instead.
 
 proc mi_create_breakpoint_multi {location test args} {
-    set bp [eval mi_make_breakpoint_multi $args]
+    set bp [mi_make_breakpoint_multi {*}$args]
     mi_gdb_test "222-break-insert $location" "222\\^done,$bp" $test
     return $bp
 }
@@ -1414,7 +1414,7 @@ proc mi_create_breakpoint_multi {location test args} {
 # Like mi_create_breakpoint, but creates a pending breakpoint.
 
 proc mi_create_breakpoint_pending {location test args} {
-    set bp [eval mi_make_breakpoint_pending $args]
+    set bp [mi_make_breakpoint_pending {*}$args]
     mi_gdb_test "222-break-insert $location" ".*\r\n222\\^done,$bp" $test
     return $bp
 }
@@ -2686,7 +2686,7 @@ proc mi_make_info_frame_regexp {args} {
 proc mi_info_frame { test args } {
     parse_some_args {{frame ""} {thread ""}}
 
-    set re [eval mi_make_info_frame_regexp $args]
+    set re [mi_make_info_frame_regexp {*}$args]
 
     set cmd "235-stack-info-frame"
     if {$frame ne ""} {

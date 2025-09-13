@@ -26,7 +26,7 @@ proc multi_line_string {str} {
     foreach line [split $str \n] {
 	lappend result [string_to_regexp $line]
     }
-    return [eval multi_line $result]
+    return [multi_line {*}$result]
 }
 
 set inner_string {    case ? is

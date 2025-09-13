@@ -234,11 +234,10 @@ proc ptype_maybe_prototyped { id prototyped plain { overprototyped "NO-MATCH" } 
     # Turn the arguments, which are literal strings, into
     # regular expressions by quoting any special characters they contain.
     foreach var { prototyped plain overprototyped } {
-	eval "set val \$$var"
-	regsub -all "\[\]\[*()\]" $val "\\\\&" val
+	set val [string_to_regexp [set $var]]
 	regsub -all "short int" $val "short( int)?" val
 	regsub -all "long int" $val "long( int)?" val
-	eval "set $var \$val"
+	set $var $val
     }
 
     gdb_test_multiple "ptype $id" "ptype $id" {

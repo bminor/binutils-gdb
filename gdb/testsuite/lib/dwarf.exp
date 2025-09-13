@@ -1094,7 +1094,7 @@ namespace eval Dwarf {
 
 	if {![info exists _deferred_output($_defer)]} {
 	    set _deferred_output($_defer) ""
-	    eval _section $section_spec
+	    _section {*}$section_spec
 	}
 
 	uplevel $body
