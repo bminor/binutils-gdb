@@ -109,6 +109,8 @@ imply zvksg
 imply zvksc
 imply zvks
 
+imply sdtrig
+
 imply smaia
 imply smcdeleg
 imply smcsrind
@@ -124,6 +126,7 @@ imply sscsrind
 imply sscofpmf
 imply sscounterenw
 imply ssstateen
+imply ssstrict
 imply sstc
 imply sstvala
 imply sstvecd

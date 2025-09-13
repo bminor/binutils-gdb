@@ -5,6 +5,9 @@
 
 * NaCl target support is removed.
 
+* Add support for RISC-V standard extensions:
+  sdtrig v1.0, ssstrict v1.0.
+
 Changes in 2.45:
 
 * Add support to generate SFrame stack trace information (.sframe)
