@@ -86,7 +86,9 @@
 #include "ctf.h"
 #include "ctf-api.h"
 
-static const registry<objfile>::key<htab, htab_deleter> ctf_tid_key;
+using ctf_type_map = gdb::unordered_map<ctf_id_t, struct type *>;
+
+static const registry<objfile>::key<ctf_type_map> ctf_tid_key;
 
 struct ctf_fp_info
 {
@@ -205,86 +207,36 @@ static struct type *read_forward_type (struct ctf_context *cp, ctf_id_t tid);
 static struct symbol *new_symbol (struct ctf_context *cp, struct type *type,
 				  ctf_id_t tid);
 
-struct ctf_tid_and_type
-{
-  ctf_id_t tid;
-  struct type *type;
-};
-
-/* Hash function for a ctf_tid_and_type.  */
-
-static hashval_t
-tid_and_type_hash (const void *item)
-{
-  const struct ctf_tid_and_type *ids
-    = (const struct ctf_tid_and_type *) item;
-
-  return ids->tid;
-}
-
-/* Equality function for a ctf_tid_and_type.  */
-
-static int
-tid_and_type_eq (const void *item_lhs, const void *item_rhs)
-{
-  const struct ctf_tid_and_type *ids_lhs
-    = (const struct ctf_tid_and_type *) item_lhs;
-  const struct ctf_tid_and_type *ids_rhs
-    = (const struct ctf_tid_and_type *) item_rhs;
-
-  return ids_lhs->tid == ids_rhs->tid;
-}
-
 /* Set the type associated with TID to TYP.  */
 
 static struct type *
 set_tid_type (struct objfile *of, ctf_id_t tid, struct type *typ)
 {
-  htab_t htab;
-
-  htab = ctf_tid_key.get (of);
-  if (htab == NULL)
-    {
-      htab = htab_create_alloc (1, tid_and_type_hash,
-				tid_and_type_eq,
-				NULL, xcalloc, xfree);
-      ctf_tid_key.set (of, htab);
-    }
-
-  struct ctf_tid_and_type **slot, ids;
-  ids.tid = tid;
-  ids.type = typ;
-  slot = (struct ctf_tid_and_type **) htab_find_slot (htab, &ids, INSERT);
-  if (*slot == nullptr)
-    *slot = XOBNEW (&of->objfile_obstack, struct ctf_tid_and_type);
-  **slot = ids;
+  ctf_type_map *tab = ctf_tid_key.get (of);
+  if (tab == nullptr)
+    tab = ctf_tid_key.emplace (of);
+  tab->emplace (tid, typ);
   return typ;
 }
 
-/* Look up the type for TID in tid_and_type hash, return NULL if hash is
-   empty or TID does not have a saved type.  */
+/* Look up the type for TID in OF's type map.  Return nullptr if TID
+   does not have a saved type.  */
 
 static struct type *
 get_tid_type (struct objfile *of, ctf_id_t tid)
 {
-  struct ctf_tid_and_type *slot, ids;
-  htab_t htab;
-
-  htab = ctf_tid_key.get (of);
-  if (htab == NULL)
+  ctf_type_map *tab = ctf_tid_key.get (of);
+  if (tab == nullptr)
     return nullptr;
 
-  ids.tid = tid;
-  ids.type = nullptr;
-  slot = (struct ctf_tid_and_type *) htab_find (htab, &ids);
-  if (slot)
-    return slot->type;
-  else
+  auto iter = tab->find (tid);
+  if (iter == tab->end ())
     return nullptr;
+  return iter->second;
 }
 
-/* Fetch the type for TID in CCP OF's tid_and_type hash, add the type to
- *    context CCP if hash is empty or TID does not have a saved type.  */
+/* Fetch the type for TID in CCP OF's type map, add the type to
+   context CCP if TID does not have a saved type.  */
 
 static struct type *
 fetch_tid_type (struct ctf_context *ccp, ctf_id_t tid)
