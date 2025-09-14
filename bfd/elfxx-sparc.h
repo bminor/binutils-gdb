@@ -46,9 +46,6 @@ struct _bfd_sparc_elf_link_hash_table
 {
   struct elf_link_hash_table elf;
 
-  /* Short-cut to get to dynamic linker sections.  */
-  asection *interp;
-
   union
   {
     bfd_signed_vma refcount;

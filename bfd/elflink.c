@@ -354,6 +354,7 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 					      flags | SEC_READONLY);
       if (s == NULL)
 	return false;
+      elf_hash_table (info)->interp = s;
     }
 
   /* Create sections to hold version informations.  These are removed
@@ -7547,7 +7548,7 @@ NOTE: This behaviour is deprecated and will be removed in a future version of th
       asection *dynstr;
       asection *s;
 
-      *sinterpptr = bfd_get_linker_section (dynobj, ".interp");
+      *sinterpptr = elf_hash_table (info)->interp;
       BFD_ASSERT (*sinterpptr != NULL || !bfd_link_executable (info) || info->nointerp);
 
       if (info->symbolic)

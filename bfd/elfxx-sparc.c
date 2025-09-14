@@ -679,7 +679,7 @@ _bfd_sparc_elf_info_to_howto (bfd *abfd, arelent *cache_ptr,
 #define UNDEFINED_WEAK_RESOLVED_TO_ZERO(INFO, EH)		\
   ((EH)->elf.root.type == bfd_link_hash_undefweak		\
    && bfd_link_executable (INFO)				\
-   && (_bfd_sparc_elf_hash_table (INFO)->interp == NULL		\
+   && (_bfd_sparc_elf_hash_table (INFO)->elf.interp == NULL	\
        || !(INFO)->dynamic_undefined_weak			\
        || (EH)->has_non_got_reloc				\
        || !(EH)->has_got_reloc))
@@ -2408,12 +2408,11 @@ _bfd_sparc_elf_late_size_sections (bfd *output_bfd,
       /* Set the contents of the .interp section to the interpreter.  */
       if (bfd_link_executable (info) && !info->nointerp)
 	{
-	  s = bfd_get_linker_section (dynobj, ".interp");
+	  s = elf_hash_table (info)->interp;
 	  BFD_ASSERT (s != NULL);
 	  s->size = htab->dynamic_interpreter_size;
 	  s->contents = (unsigned char *) htab->dynamic_interpreter;
 	  s->alloced = 1;
-	  htab->interp = s;
 	}
     }
 

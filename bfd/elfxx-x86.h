@@ -602,7 +602,6 @@ struct elf_x86_link_hash_table
   struct elf_link_hash_table elf;
 
   /* Short-cuts to get to dynamic linker sections.  */
-  asection *interp;
   asection *plt_eh_frame;
   asection *plt_second;
   asection *plt_second_eh_frame;

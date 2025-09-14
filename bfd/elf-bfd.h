@@ -774,6 +774,7 @@ struct elf_link_hash_table
   asection *dynsym;
   asection *srelrdyn;
   asection *dynamic;
+  asection *interp;
 };
 
 /* Returns TRUE if the hash table is a struct elf_link_hash_table.  */

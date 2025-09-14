@@ -2743,7 +2743,7 @@ elf_arc_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 interpreter.  */
       if (bfd_link_executable (info) && !info->nointerp)
 	{
-	  s = bfd_get_section_by_name (dynobj, ".interp");
+	  s = htab->interp;
 	  BFD_ASSERT (s != NULL);
 	  s->size = sizeof (ELF_DYNAMIC_INTERPRETER);
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;

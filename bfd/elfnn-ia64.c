@@ -3007,7 +3007,7 @@ elfNN_ia64_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (ia64_info->root.dynamic_sections_created
       && bfd_link_executable (info) && !info->nointerp)
     {
-      sec = bfd_get_linker_section (dynobj, ".interp");
+      sec = ia64_info->root.interp;
       BFD_ASSERT (sec != NULL);
       sec->contents = (bfd_byte *) ELF_DYNAMIC_INTERPRETER;
       sec->alloced = 1;

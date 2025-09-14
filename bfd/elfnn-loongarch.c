@@ -2384,7 +2384,7 @@ loongarch_elf_late_size_sections (bfd *output_bfd,
       if (bfd_link_executable (info) && !info->nointerp)
 	{
 	  const char *interpreter;
-	  s = bfd_get_linker_section (dynobj, ".interp");
+	  s = htab->elf.interp;
 	  BFD_ASSERT (s != NULL);
 
 	  if (elf_elfheader (output_bfd)->e_ident[EI_CLASS] == ELFCLASS32)

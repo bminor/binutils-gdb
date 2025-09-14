@@ -2408,7 +2408,7 @@ _bfd_cr16_elf_late_size_sections (bfd * output_bfd,
       if (bfd_link_executable (info) && !info->nointerp)
 	{
 #if 0
-	  s = bfd_get_linker_section (dynobj, ".interp");
+	  s = elf_hash_table (info)->interp;
 	  BFD_ASSERT (s != NULL);
 	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;

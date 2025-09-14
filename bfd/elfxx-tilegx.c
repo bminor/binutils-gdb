@@ -2448,7 +2448,7 @@ tilegx_elf_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       /* Set the contents of the .interp section to the interpreter.  */
       if (bfd_link_executable (info) && !info->nointerp)
 	{
-	  s = bfd_get_linker_section (dynobj, ".interp");
+	  s = htab->elf.interp;
 	  BFD_ASSERT (s != NULL);
 	  s->size = strlen (htab->dynamic_interpreter) + 1;
 	  s->contents = (unsigned char *) htab->dynamic_interpreter;

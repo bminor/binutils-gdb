@@ -4046,7 +4046,7 @@ elfNN_kvx_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
     {
       if (bfd_link_executable (info) && !info->nointerp)
 	{
-	  s = bfd_get_linker_section (dynobj, ".interp");
+	  s = htab->root.interp;
 	  if (s == NULL)
 	    abort ();
 	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;

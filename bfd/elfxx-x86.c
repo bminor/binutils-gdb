@@ -3665,7 +3665,7 @@ _bfd_x86_elf_link_symbol_references_local (struct bfd_link_info *info,
       || (h->root.type == bfd_link_hash_undefweak
 	  && (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
 	      || (bfd_link_executable (info)
-		  && htab->interp == NULL)
+		  && htab->elf.interp == NULL)
 	      || info->dynamic_undefined_weak == 0))
       || ((h->def_regular || ELF_COMMON_DEF_P (h))
 	  && info->version_info != NULL
@@ -4702,15 +4702,12 @@ _bfd_x86_elf_link_setup_gnu_properties
     {
       /* Whe creating executable, set the contents of the .interp
 	 section to the interpreter.  */
-      if (bfd_link_executable (info) && !info->nointerp)
+      asection *s = htab->elf.interp;
+      if (s != NULL)
 	{
-	  asection *s = bfd_get_linker_section (dynobj, ".interp");
-	  if (s == NULL)
-	    abort ();
 	  s->size = htab->dynamic_interpreter_size;
 	  s->contents = (unsigned char *) htab->dynamic_interpreter;
 	  s->alloced = 1;
-	  htab->interp = s;
 	}
 
       if (normal_target)
