@@ -888,7 +888,7 @@ read_typedef_type (struct ctf_context *ccp, ctf_id_t tid,
 
   this_type->set_target_is_stub (this_type->target_type () != nullptr);
 
-  return set_tid_type (objfile, tid, this_type);
+  return this_type;
 }
 
 /* Read TID of kind CTF_K_POINTER with base type BTID.  */
