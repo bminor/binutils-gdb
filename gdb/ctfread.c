@@ -175,7 +175,6 @@ struct ctf_per_tu_data
   ctf_dict_t *fp;
   struct objfile *of;
   ctf_archive_t *arc;
-  psymtab_storage *pss;
   psymbol_functions *psf;
 };
 
