@@ -1192,38 +1192,6 @@ get_objfile_text_range (struct objfile *of, size_t *tsize)
   return of->text_section_offset ();
 }
 
-/* Start a symtab for OBJFILE in CTF format.  */
-
-static void
-ctf_start_compunit_symtab (ctf_psymtab *pst,
-			   struct objfile *of, CORE_ADDR text_offset)
-{
-  struct ctf_context *ccp;
-
-  ccp = &pst->context;
-  ccp->builder = new buildsym_compunit
-		       (of, pst->filename, nullptr,
-		       language_c, text_offset);
-  ccp->builder->record_debugformat ("ctf");
-}
-
-/* Finish reading symbol/type definitions in CTF format.
-   END_ADDR is the end address of the file's text.  */
-
-static struct compunit_symtab *
-ctf_end_compunit_symtab (ctf_psymtab *pst,
-			 CORE_ADDR end_addr)
-{
-  struct ctf_context *ccp;
-
-  ccp = &pst->context;
-  struct compunit_symtab *result
-    = ccp->builder->end_compunit_symtab (end_addr);
-  delete ccp->builder;
-  ccp->builder = nullptr;
-  return result;
-}
-
 /* Add all members of an enum with type TID to partial symbol table.  */
 
 static void
@@ -1357,12 +1325,18 @@ ctf_psymtab::read_symtab (struct objfile *objfile)
       size_t tsize;
 
       offset = get_objfile_text_range (objfile, &tsize);
-      ctf_start_compunit_symtab (this, objfile, offset);
+
+      buildsym_compunit builder (objfile, this->filename, nullptr,
+				 language_c, offset);
+      builder.record_debugformat ("ctf");
+      scoped_restore store_builder
+	= make_scoped_restore (&context.builder, &builder);
+
       expand_psymtab (objfile);
 
       set_text_low (unrelocated_addr (0));
       set_text_high (unrelocated_addr (tsize));
-      compunit_symtab = ctf_end_compunit_symtab (this, offset + tsize);
+      compunit_symtab = builder.end_compunit_symtab (offset + tsize);
 
       /* Finish up the debug error message.  */
       if (info_verbose)
