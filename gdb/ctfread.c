@@ -206,9 +206,6 @@ static void process_struct_members (struct ctf_context *cp, ctf_id_t tid,
 
 static struct type *read_forward_type (struct ctf_context *cp, ctf_id_t tid);
 
-static struct symbol *new_symbol (struct ctf_context *cp, struct type *type,
-				  ctf_id_t tid);
-
 /* Set the type associated with TID to TYP.  */
 
 static struct type *
@@ -410,26 +407,25 @@ ctf_add_enum_member_cb (const char *name, int enum_value, void *arg)
   return 0;
 }
 
-/* Add a new symbol entry, with its name from TID, its access index and
-   domain from TID's kind, and its type from TYPE.  */
+/* Add a new type symbol entry, with its name from TID, its access
+   index and domain from TID's kind, and its type from TYPE.  */
 
-static struct symbol *
-new_symbol (struct ctf_context *ccp, struct type *type, ctf_id_t tid)
+static void
+new_type_symbol (struct ctf_context *ccp, struct type *type, ctf_id_t tid)
 {
-  struct objfile *objfile = ccp->of;
   ctf_dict_t *fp = ccp->fp;
-  struct symbol *sym = nullptr;
 
   const char *name = ctf_type_name_raw (fp, tid);
   if (name != nullptr && *name != '\0')
     {
-      sym = new (&objfile->objfile_obstack) symbol;
+      struct objfile *objfile = ccp->of;
+      struct symbol *sym = new (&objfile->objfile_obstack) symbol;
       OBJSTAT (objfile, n_syms++);
 
       sym->set_language (language_c, &objfile->objfile_obstack);
       sym->compute_and_set_names (name, false, objfile->per_bfd);
-      sym->set_domain (VAR_DOMAIN);
-      sym->set_loc_class_index (LOC_OPTIMIZED_OUT);
+      sym->set_domain (TYPE_DOMAIN);
+      sym->set_loc_class_index (LOC_TYPEDEF);
 
       if (type != nullptr)
 	sym->set_type (type);
@@ -440,38 +436,12 @@ new_symbol (struct ctf_context *ccp, struct type *type, ctf_id_t tid)
 	  case CTF_K_STRUCT:
 	  case CTF_K_UNION:
 	  case CTF_K_ENUM:
-	    sym->set_loc_class_index (LOC_TYPEDEF);
 	    sym->set_domain (STRUCT_DOMAIN);
-	    break;
-	  case CTF_K_FUNCTION:
-	    sym->set_loc_class_index (LOC_STATIC);
-	    set_symbol_address (objfile, sym, sym->linkage_name ());
-	    break;
-	  case CTF_K_CONST:
-	    if (sym->type ()->code () == TYPE_CODE_VOID)
-	      sym->set_type (builtin_type (objfile)->builtin_int);
-	    break;
-	  case CTF_K_TYPEDEF:
-	  case CTF_K_INTEGER:
-	  case CTF_K_FLOAT:
-	    sym->set_loc_class_index (LOC_TYPEDEF);
-	    sym->set_domain (TYPE_DOMAIN);
-	    break;
-	  case CTF_K_POINTER:
-	    break;
-	  case CTF_K_VOLATILE:
-	  case CTF_K_RESTRICT:
-	    break;
-	  case CTF_K_SLICE:
-	  case CTF_K_ARRAY:
-	  case CTF_K_UNKNOWN:
 	    break;
 	}
 
       add_symbol_to_list (sym, ccp->builder->get_global_symbols ());
     }
-
-  return sym;
 }
 
 /* Given a TID of kind CTF_K_INTEGER or CTF_K_FLOAT, find a representation
@@ -561,7 +531,7 @@ process_base_type (struct ctf_context *ccp, ctf_id_t tid)
   struct type *type;
 
   type = read_base_type (ccp, tid);
-  new_symbol (ccp, type, tid);
+  new_type_symbol (ccp, type, tid);
 }
 
 /* Start a structure or union scope (definition) with TID to create a type
@@ -615,7 +585,7 @@ process_struct_members (struct ctf_context *ccp,
   /* Attach fields to the type.  */
   attach_fields_to_type (&fi, type);
 
-  new_symbol (ccp, type, tid);
+  new_type_symbol (ccp, type, tid);
 }
 
 static void
@@ -721,7 +691,7 @@ process_enum_type (struct ctf_context *ccp, ctf_id_t tid)
   /* Attach fields to the type.  */
   attach_fields_to_type (&fi, type);
 
-  new_symbol (ccp, type, tid);
+  new_type_symbol (ccp, type, tid);
 }
 
 /* Add given cv-qualifiers CNST+VOLTL to the BASE_TYPE of array TID.  */
@@ -1037,34 +1007,34 @@ ctf_add_type_cb (ctf_id_t tid, void *arg)
 	break;
       case CTF_K_FUNCTION:
 	type = read_func_kind_type (ccp, tid);
-	new_symbol (ccp, type, tid);
+	new_type_symbol (ccp, type, tid);
 	break;
       case CTF_K_INTEGER:
       case CTF_K_FLOAT:
 	process_base_type (ccp, tid);
 	break;
       case CTF_K_TYPEDEF:
-	new_symbol (ccp, read_type_record (ccp, tid), tid);
+	new_type_symbol (ccp, read_type_record (ccp, tid), tid);
 	break;
       case CTF_K_CONST:
 	type = read_const_type (ccp, tid, btid);
-	new_symbol (ccp, type, tid);
+	new_type_symbol (ccp, type, tid);
 	break;
       case CTF_K_VOLATILE:
 	type = read_volatile_type (ccp, tid, btid);
-	new_symbol (ccp, type, tid);
+	new_type_symbol (ccp, type, tid);
 	break;
       case CTF_K_RESTRICT:
 	type = read_restrict_type (ccp, tid, btid);
-	new_symbol (ccp, type, tid);
+	new_type_symbol (ccp, type, tid);
 	break;
       case CTF_K_POINTER:
 	type = read_pointer_type (ccp, tid, btid);
-	new_symbol (ccp, type, tid);
+	new_type_symbol (ccp, type, tid);
 	break;
       case CTF_K_ARRAY:
 	type = read_array_type (ccp, tid);
-	new_symbol (ccp, type, tid);
+	new_type_symbol (ccp, type, tid);
 	break;
       case CTF_K_UNKNOWN:
 	break;
@@ -1088,50 +1058,29 @@ ctf_add_var_cb (const char *name, ctf_id_t id, void *arg)
   type = get_tid_type (ccp->of, id);
 
   kind = ctf_type_kind (ccp->fp, id);
-  switch (kind)
-    {
-      case CTF_K_FUNCTION:
-	if (name != nullptr && strcmp (name, "main") == 0)
-	  set_objfile_main_name (ccp->of, name, language_c);
-	break;
-      case CTF_K_INTEGER:
-      case CTF_K_FLOAT:
-      case CTF_K_VOLATILE:
-      case CTF_K_RESTRICT:
-      case CTF_K_TYPEDEF:
-      case CTF_K_CONST:
-      case CTF_K_POINTER:
-      case CTF_K_ARRAY:
-	if (type != nullptr)
-	  {
-	    sym = new_symbol (ccp, type, id);
-	    if (sym != nullptr)
-	      sym->compute_and_set_names (name, false, ccp->of->per_bfd);
-	  }
-	break;
-      case CTF_K_STRUCT:
-      case CTF_K_UNION:
-      case CTF_K_ENUM:
-	if (type == nullptr)
-	  {
-	    complaint (_("ctf_add_var_cb: %s has NO type (%ld)"), name, id);
-	    type = builtin_type (ccp->of)->builtin_error;
-	  }
-	sym = new (&ccp->of->objfile_obstack) symbol;
-	OBJSTAT (ccp->of, n_syms++);
-	sym->set_type (type);
-	sym->set_domain (VAR_DOMAIN);
-	sym->set_loc_class_index (LOC_OPTIMIZED_OUT);
-	sym->compute_and_set_names (name, false, ccp->of->per_bfd);
-	add_symbol_to_list (sym, ccp->builder->get_global_symbols ());
-	break;
-      default:
-	complaint (_("ctf_add_var_cb: kind unsupported (%d)"), kind);
-	break;
-    }
 
-  if (sym != nullptr)
-    set_symbol_address (ccp->of, sym, name);
+  if (type == nullptr)
+    {
+      complaint (_("ctf_add_var_cb: %s has NO type (%ld)"), name, id);
+      type = builtin_type (ccp->of)->builtin_error;
+    }
+  sym = new (&ccp->of->objfile_obstack) symbol;
+  OBJSTAT (ccp->of, n_syms++);
+  sym->set_type (type);
+  sym->set_loc_class_index (LOC_OPTIMIZED_OUT);
+  sym->compute_and_set_names (name, false, ccp->of->per_bfd);
+
+  if (kind == CTF_K_FUNCTION)
+    {
+      sym->set_domain (FUNCTION_DOMAIN);
+      if (name != nullptr && strcmp (name, "main") == 0)
+	set_objfile_main_name (ccp->of, name, language_c);
+    }
+  else
+    sym->set_domain (VAR_DOMAIN);
+
+  add_symbol_to_list (sym, ccp->builder->get_global_symbols ());
+  set_symbol_address (ccp->of, sym, name);
 
   return 0;
 }
@@ -1156,7 +1105,7 @@ add_stt_entries (struct ctf_context *ccp, int functions)
       sym = new (&ccp->of->objfile_obstack) symbol;
       OBJSTAT (ccp->of, n_syms++);
       sym->set_type (type);
-      sym->set_domain (VAR_DOMAIN);
+      sym->set_domain (functions ? FUNCTION_DOMAIN : VAR_DOMAIN);
       sym->set_loc_class_index (LOC_STATIC);
       sym->compute_and_set_names (tname, false, ccp->of->per_bfd);
       add_symbol_to_list (sym, ccp->builder->get_global_symbols ());
@@ -1230,25 +1179,12 @@ ctf_psymtab_add_stt_entries (ctf_dict_t *cfp, ctf_psymtab *pst,
     {
       uint32_t kind = ctf_type_kind (cfp, tid);
       location_class loc_class;
-      domain_enum tdomain;
-      switch (kind)
-	{
-	  case CTF_K_STRUCT:
-	  case CTF_K_UNION:
-	  case CTF_K_ENUM:
-	    tdomain = STRUCT_DOMAIN;
-	    break;
-	  default:
-	    tdomain = VAR_DOMAIN;
-	    break;
-	}
+      domain_enum tdomain = functions ? FUNCTION_DOMAIN : VAR_DOMAIN;
 
       if (kind == CTF_K_FUNCTION)
-	loc_class = LOC_STATIC;
-      else if (kind == CTF_K_CONST)
-	loc_class = LOC_CONST;
+	loc_class = LOC_BLOCK;
       else
-	loc_class = LOC_TYPEDEF;
+	loc_class = LOC_STATIC;
 
       pst->add_psymbol (tname, true,
 			tdomain, loc_class, -1,
@@ -1395,39 +1331,29 @@ ctf_psymtab_type_cb (ctf_id_t tid, void *arg)
   kind = ctf_type_kind (ccp->fp, tid);
   switch (kind)
     {
-      case CTF_K_ENUM:
-	ctf_psymtab_add_enums (ccp, tid);
-	[[fallthrough]];
-      case CTF_K_STRUCT:
-      case CTF_K_UNION:
-	domain = STRUCT_DOMAIN;
-	loc_class = LOC_TYPEDEF;
-	break;
-      case CTF_K_FUNCTION:
-      case CTF_K_FORWARD:
-	domain = VAR_DOMAIN;
-	loc_class = LOC_STATIC;
-	section = SECT_OFF_TEXT (ccp->of);
-	break;
-      case CTF_K_CONST:
-	domain = VAR_DOMAIN;
-	loc_class = LOC_STATIC;
-	break;
-      case CTF_K_TYPEDEF:
-      case CTF_K_POINTER:
-      case CTF_K_VOLATILE:
-      case CTF_K_RESTRICT:
-	domain = VAR_DOMAIN;
-	loc_class = LOC_TYPEDEF;
-	break;
-      case CTF_K_INTEGER:
-      case CTF_K_FLOAT:
-	domain = VAR_DOMAIN;
-	loc_class = LOC_TYPEDEF;
-	break;
-      case CTF_K_ARRAY:
-      case CTF_K_UNKNOWN:
-	return 0;
+    case CTF_K_ENUM:
+      ctf_psymtab_add_enums (ccp, tid);
+      [[fallthrough]];
+    case CTF_K_STRUCT:
+    case CTF_K_UNION:
+      domain = STRUCT_DOMAIN;
+      loc_class = LOC_TYPEDEF;
+      break;
+    case CTF_K_FUNCTION:
+    case CTF_K_FORWARD:
+    case CTF_K_CONST:
+    case CTF_K_TYPEDEF:
+    case CTF_K_POINTER:
+    case CTF_K_VOLATILE:
+    case CTF_K_RESTRICT:
+    case CTF_K_INTEGER:
+    case CTF_K_FLOAT:
+    case CTF_K_ARRAY:
+      domain = TYPE_DOMAIN;
+      loc_class = LOC_TYPEDEF;
+      break;
+    case CTF_K_UNKNOWN:
+      return 0;
     }
 
   const char *name = ctf_type_name_raw (ccp->fp, tid);
@@ -1450,8 +1376,12 @@ ctf_psymtab_var_cb (const char *name, ctf_id_t id, void *arg)
 {
   struct ctf_context *ccp = (struct ctf_context *) arg;
 
+  uint32_t kind = ctf_type_kind (ccp->fp, id);
   ccp->pst->add_psymbol (name, true,
-			 VAR_DOMAIN, LOC_STATIC, -1,
+			 kind == CTF_K_FUNCTION
+			 ? FUNCTION_DOMAIN
+			 : VAR_DOMAIN,
+			 LOC_STATIC, -1,
 			 psymbol_placement::GLOBAL,
 			 unrelocated_addr (0),
 			 language_c, ccp->partial_symtabs, ccp->of);
