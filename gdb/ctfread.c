@@ -88,12 +88,15 @@
 
 using ctf_type_map = gdb::unordered_map<ctf_id_t, struct type *>;
 
-static const registry<objfile>::key<ctf_type_map> ctf_tid_key;
-
 struct ctf_fp_info
 {
   explicit ctf_fp_info (ctf_dict_t *cfp) : fp (cfp) {}
   ~ctf_fp_info ();
+
+  /* Map from IDs to types.  */
+  ctf_type_map type_map;
+
+  /* The dictionary.  */
   ctf_dict_t *fp;
 };
 
@@ -211,10 +214,9 @@ static struct symbol *new_symbol (struct ctf_context *cp, struct type *type,
 static struct type *
 set_tid_type (struct objfile *of, ctf_id_t tid, struct type *typ)
 {
-  ctf_type_map *tab = ctf_tid_key.get (of);
-  if (tab == nullptr)
-    tab = ctf_tid_key.emplace (of);
-  tab->emplace (tid, typ);
+  ctf_fp_info *info = ctf_dict_key.get (of);
+  gdb_assert (info != nullptr);
+  info->type_map.emplace (tid, typ);
   return typ;
 }
 
@@ -224,12 +226,11 @@ set_tid_type (struct objfile *of, ctf_id_t tid, struct type *typ)
 static struct type *
 get_tid_type (struct objfile *of, ctf_id_t tid)
 {
-  ctf_type_map *tab = ctf_tid_key.get (of);
-  if (tab == nullptr)
-    return nullptr;
+  ctf_fp_info *info = ctf_dict_key.get (of);
+  gdb_assert (info != nullptr);
 
-  auto iter = tab->find (tid);
-  if (iter == tab->end ())
+  auto iter = info->type_map.find (tid);
+  if (iter == info->type_map.end ())
     return nullptr;
   return iter->second;
 }
