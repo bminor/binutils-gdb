@@ -1174,17 +1174,17 @@ proc run_dump_test { name {extra_options {}} } {
 	[big_or_little_endian] opts(ld)
 
     if { $opts(name) == "" } {
-	set testname "$subdir/$name"
+	set base_testname "$subdir/$name"
     } else {
-	set testname $opts(name)
+	set base_testname $opts(name)
     }
 
     set err_warn 0
     foreach opt { warning error warning_output error_output } {
 	if { $opts($opt) != "" } {
 	    if { $err_warn } {
-		perror "$testname: bad mix of warning and error test directives"
-		unresolved $testname
+		perror "$base_testname: bad mix of warning and error test directives"
+		unresolved $base_testname
 		return
 	    }
 	    set err_warn 1
@@ -1223,19 +1223,19 @@ proc run_dump_test { name {extra_options {}} } {
 	    }
 	}
 	if { $targmatch == 0 } {
-	    unsupported $testname
+	    unsupported $base_testname
 	    return
 	}
     }
     foreach targ $opts(alltargets) {
 	if ![match_target $targ] {
-	    unsupported $testname
+	    unsupported $base_testname
 	    return
 	}
     }
     foreach targ $opts(notarget) {
 	if [match_target $targ] {
-	    unsupported $testname
+	    unsupported $base_testname
 	    return
 	}
     }
@@ -1253,7 +1253,7 @@ proc run_dump_test { name {extra_options {}} } {
 		size		{ set dumpprogram size }
 		default		{
 		    perror "unrecognized DUMPPROG option $opts(DUMPPROG) in $file.d"
-		    unresolved $testname
+		    unresolved $base_testname
 		    return
 		}
 	    }
@@ -1263,7 +1263,7 @@ proc run_dump_test { name {extra_options {}} } {
 		if {$opts($p) != ""} {
 		    if {$dumpprogram != ""} {
 			perror "ambiguous dump program in $file.d"
-			unresolved $testname
+			unresolved $base_testname
 			return
 		    } else {
 			set dumpprogram $p
@@ -1273,7 +1273,7 @@ proc run_dump_test { name {extra_options {}} } {
 	}
 	if { $dumpprogram == "" && $opts(map) == "" && !$err_warn } {
 	    perror "dump program unspecified in $file.d"
-	    unresolved $testname
+	    unresolved $base_testname
 	    return
 	}
     }
@@ -1312,7 +1312,7 @@ proc run_dump_test { name {extra_options {}} } {
 	    if { $cmdret != 0} {
 		send_log "compilation of $cfile failed, exit status $cmdret with <$comp_output>"
 		# Should this be 'unresolved', or is that too silent?
-		fail $testname
+		fail $base_testname
 		return 0
 	    }
 	}
@@ -1355,6 +1355,11 @@ proc run_dump_test { name {extra_options {}} } {
     }
 
     foreach as_flags $as_final_flags {
+	if { [llength $as_final_flags] > 1 } {
+	    set testname [concat $base_testname $as_flags]
+	} else {
+	    set testname $base_testname
+	}
 	# Assemble each file.
 	set objfiles {}
 	for { set i 0 } { $i < [llength $sourcefiles] } { incr i } {
