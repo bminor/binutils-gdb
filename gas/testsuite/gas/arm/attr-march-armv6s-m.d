@@ -1,4 +1,4 @@
-# name: attributes for -march=armv6-m
+# name: attributes for -march=armv6s-m
 # source: blank.s
 # as: -march=armv6-m
 # readelf: -A

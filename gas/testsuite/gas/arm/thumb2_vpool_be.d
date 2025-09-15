@@ -2,7 +2,7 @@
 # objdump: -dr --prefix-addresses --show-raw-insn
 # This test is only valid on ELF based ports.
 #notarget: *-*-pe *-*-wince
-#name: Thumb2 vldr with immediate constant
+#name: Thumb2 vldr with immediate constant (BE)
 #source: thumb2_vpool.s
 
 .*: +file format .*arm.*

@@ -1,4 +1,4 @@
-# name: check for armv9-a command line option settings
+# name: check for armv9.1-a command line option settings
 # source: blank.s
 # as: -march=armv9.1-a
 # readelf: -A

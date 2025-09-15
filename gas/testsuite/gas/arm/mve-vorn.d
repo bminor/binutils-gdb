@@ -1,4 +1,4 @@
-# name: MVE vorr instructions
+# name: MVE vorn instructions
 # as: -march=armv8.1-m.main+mve
 # objdump: -dr --prefix-addresses --show-raw-insn -marmv8.1-m.main
 

@@ -1,4 +1,4 @@
-#name: ARM v8.2 FP16 support on scalar
+#name: ARM v8.2 FP16 support on scalar (ext)
 #source: armv8-2-fp16-scalar.s
 #objdump: -d
 #as: -march=armv8.2-a+fp16
