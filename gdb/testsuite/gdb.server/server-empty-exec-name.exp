@@ -1,0 +1,93 @@
+# This testcase is part of GDB, the GNU debugger.
+#
+# Copyright 2025 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test what happens if we try to start gdbserver with an empty string
+# for the executable name.  In theory we could choose to accept this
+# for the extended-remote case, indeed, in the extended-remote case
+# it's OK to start gdbserver with no program name or arguments.
+#
+# But actually specifying an empty executable name seems different,
+# and wrong, so for now at least, we don't allow this.  If that
+# position changes in the future, then this test will need updating.
+
+# Skip test if target does not support argument passing.
+require {!target_info exists noargs}
+
+load_lib gdbserver-support.exp
+
+standard_testfile
+
+require allow_gdbserver_tests
+
+set gdbserver [find_gdbserver]
+if { $gdbserver == "" } {
+    unsupported "could not find gdbserver"
+    return
+}
+
+clean_restart
+
+# Try starting gdbserver in extended, and non-extended mode.
+foreach_with_prefix proto { extended-remote remote } {
+
+    if { $proto eq "extended-remote" } {
+	set server_flag "--multi"
+    } else {
+	set server_flag ""
+    }
+
+    # Try starting gdbserver with and without arguments.
+    foreach_with_prefix args { " a b c" "" } {
+	# Start gdbserver on its own.  This makes it easier to check
+	# the error message that gdbserver emits.  The program name is
+	# the empty string.  gdbserver should exit.
+	set gdbserver_cmd \
+	    "$gdbserver $server_flag --once - \"\"${args}"
+
+	set spawn_id [remote_spawn target $gdbserver_cmd]
+	set testname "start gdbserver"
+	expect {
+	    -i $spawn_id
+
+	    -re "No program to debug\r\nExiting" { pass $testname }
+
+	    eof { fail $testname }
+	    timeout { fail $testname }
+	}
+
+	catch {
+	    close -i $spawn_id
+	    wait -nowait -i $spawn_id
+	}
+
+	# Try connecting to gdbserver from GDB.  The connection should
+	# immediately close as gdbserver exits.  The inferior should
+	# be left with no connection.
+	gdb_test "disconnect" ".*" \
+	    "disconnect before remote connection"
+
+	gdb_test "target $proto | ${::gdbserver} $server_flag --once - \"\"${args}" \
+	    [multi_line \
+		 "Remote debugging using \\| \[^\r\n\]+" \
+		 "Remote communication error\\.  Target disconnected: .*"] \
+	    "start gdbserver over stdin"
+
+	gdb_test "info inferiors" \
+	    "\\*\\s+1\\s+<null>\\s*" \
+	    "check inferior 1 has no connection"
+    }
+}

@@ -4545,6 +4545,9 @@ captured_main (int argc, char *argv[])
     {
       program_path.set (next_arg[0]);
 
+      if (program_path.get () == nullptr)
+	error (_("No program to debug"));
+
       int n = argc - (next_arg - argv);
       program_args
 	= construct_inferior_arguments ({&next_arg[1], &next_arg[n]},
