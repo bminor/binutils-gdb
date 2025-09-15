@@ -578,7 +578,7 @@ run_dump_test "pr27381"
 run_dump_test "multibyte1"
 run_dump_test "multibyte2"
 run_list_test "multibyte3" "--multibyte-handling=warn"
-run_list_test "multibyte3" "-f --multibyte-handling=warn"
+run_list_test "multibyte3" "-f --multibyte-handling=warn" "all multibyte3 -f"
 
 # EVAX has an extra line printed by objdump when there are no relocations,
 # and doesn't appear to enter absolute symbols into the symbol table.
