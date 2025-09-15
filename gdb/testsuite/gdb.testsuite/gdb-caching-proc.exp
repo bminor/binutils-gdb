@@ -22,23 +22,32 @@ gdb_caching_proc gdb_testsuite_gdb_caching_proc_exp_arg { arg } {
     return $arg
 }
 
+gdb_caching_proc gdb_testsuite_gdb_caching_proc_exp_arg_nested { arg } {
+    incr ::count
+    return [gdb_testsuite_gdb_caching_proc_exp_arg $arg]
+}
+
+# List of "expected $::count after running expression" and
+# "expression".
 set assertions {
-    { [gdb_testsuite_gdb_caching_proc_exp_noarg] == 1 }
-    { [gdb_testsuite_gdb_caching_proc_exp_arg 1] == 1 }
-    { [gdb_testsuite_gdb_caching_proc_exp_arg "foo foo"] == "foo foo" }
+    1 { [gdb_testsuite_gdb_caching_proc_exp_noarg] == 1 }
+    1 { [gdb_testsuite_gdb_caching_proc_exp_arg 1] == 1 }
+    1 { [gdb_testsuite_gdb_caching_proc_exp_arg "foo foo"] == "foo foo" }
+    1 { [gdb_testsuite_gdb_caching_proc_exp_arg_nested "foo foo"] == "foo foo" }
+    2 { [gdb_testsuite_gdb_caching_proc_exp_arg_nested "bar bar"] == "bar bar" }
 }
 
 set assertion_nr 0
-foreach assertion $assertions {
+foreach {expected_count assertion} $assertions {
     with_test_prefix $assertion_nr {
 	set ::count 0
 
 	gdb_assert $assertion
-	gdb_assert { $::count == 1 }
+	gdb_assert { $::count == $expected_count }
 
 	with_test_prefix cached {
 	    gdb_assert $assertion
-	    gdb_assert { $::count == 1 }
+	    gdb_assert { $::count == $expected_count }
 	}
     }
     incr assertion_nr

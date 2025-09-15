@@ -42,6 +42,10 @@ with_test_prefix no-args {
 		gdb_assert { [foo] == 2 }
 	    }
 	}
+
+	with_test_prefix "foo1 again" {
+	    gdb_assert { [foo] == 1 }
+	}
     }
 
     with_test_prefix after {
