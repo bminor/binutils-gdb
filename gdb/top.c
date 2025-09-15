@@ -1357,17 +1357,114 @@ There is NO WARRANTY, to the extent permitted by law.",
 		  styled_string (file_name_style.style (),
 				 REPORT_BUGS_TO));
     }
-  gdb_printf (stream,
-	      _("Find the GDB manual and other documentation \
-resources online at:\n    <%ps>."),
-	      styled_string (file_name_style.style (),
-			     "http://www.gnu.org/software/gdb/documentation/"));
-  gdb_printf (stream, "\n\n");
-  gdb_printf (stream, _("For help, type \"%ps\".\n"),
+}
+
+/* Print MESSAGE to STREAM in lines of maximum size WIDTH, so that it fits
+   in an ascii art box of width WIDTH+4.  Messages may be broken on
+   spaces.  */
+static void
+box_one_message (ui_file *stream, std::string message, int width)
+{
+  const char *wall = emojis_ok () ? u8"\u2503" : "|";
+  while (!message.empty ())
+    {
+      std::string line;
+      int n_escape_chars = 0;
+      const char *escape = message.c_str ();
+      while ((escape = strchr (escape, '\033')) != nullptr)
+	{
+	  int tmp;
+	  if (skip_ansi_escape (escape, &tmp))
+	    n_escape_chars += tmp;
+	  else
+	    break;
+	  escape += tmp;
+	}
+      if ((message.length () - n_escape_chars) > width)
+	{
+	  line = message.substr (0, message.rfind (" ", width));
+	  message = message.substr (line.length ());
+	}
+      else
+	{
+	  line = message;
+	  message = "";
+	}
+
+      if ((line.length () - n_escape_chars) < width)
+	line.append (width - line.length () + n_escape_chars, ' ');
+
+      gdb_printf (stream, "%s %s %s\n", wall, line.c_str (), wall);
+    }
+}
+
+/* Print some hints about how to use GDB in a very visible manner.  */
+void
+print_gdb_hints (struct ui_file *stream)
+{
+  int width = get_chars_per_line ();
+
+  /* Arbitrarily setting maximum width to 80 characters, so that
+     things are big and visible but not overwhelming.  */
+  if (80 < width)
+    width = 80;
+
+  std::string docs_url = "http://www.gnu.org/software/gdb/documentation/";
+  std::array<string_file, 4> styled_msg {
+    string_file (true),
+    string_file (true),
+    string_file (true),
+    string_file (true)
+  };
+
+  gdb_printf (&styled_msg[0], _("Find the GDB manual online at:"));
+  gdb_printf (&styled_msg[1], _("%ps."),
+	      styled_string (file_name_style.style (), docs_url.c_str ()));
+  gdb_printf (&styled_msg[2], _("For help, type \"%ps\"."),
 	      styled_string (command_style.style (), "help"));
-  gdb_printf (stream,
-	      _("Type \"%ps\" to search for commands related to \"word\"."),
-	      styled_string (command_style.style (), "apropos word"));
+  gdb_printf (&styled_msg[3],
+	      _("Type \"%ps\" to search for commands related to <word>"),
+	      styled_string (command_style.style (), "apropos <word>"));
+
+  /* If there isn't enough space to display the longest URL in a boxed
+     style, use the simple styling of a singular visual break.  The longest
+     URL is used because the other messages may be broken into multiple
+     lines, but URLs can't.  */
+  if (width - 3 <= docs_url.length ())
+    {
+      std::string sep (width, '-');
+      for (string_file &msg : styled_msg)
+	gdb_printf (stream, "%s\n", msg.c_str ());
+
+      return;
+    }
+  else
+    {
+      std::string sep (width-2, '-');
+
+      if (emojis_ok ())
+	{
+	  gdb_printf (stream, u8"\u250f");
+	  for (int i = 0; i < (width - 2); i++)
+	    gdb_printf (stream, u8"\u2501");
+	  gdb_printf (stream, u8"\u2513\n");
+	}
+      else
+	gdb_printf (stream, "+%s+\n", sep.c_str ());
+
+      for (string_file &msg : styled_msg)
+	box_one_message (stream, msg.release (), width - 4);
+
+      if (emojis_ok ())
+	{
+	  gdb_printf (stream, u8"\u2517");
+	  for (int i = 0; i < (width - 2); i++)
+	    gdb_printf (stream, u8"\u2501");
+	  gdb_printf (stream, u8"\u251b\n");
+	}
+      else
+	gdb_printf (stream, "+%s+\n", sep.c_str ());
+    }
 }
 
 /* Print the details of GDB build-time configuration.  */

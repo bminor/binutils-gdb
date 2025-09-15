@@ -36,6 +36,10 @@ extern auto_boolean interactive_mode;
    mentioned.  */
 extern void print_gdb_version (struct ui_file *stream, bool interactive);
 
+/* Print some hints for an inexperienced user on how to get more
+   information about using GDB.  */
+extern void print_gdb_hints (struct ui_file *stream);
+
 extern void print_gdb_configuration (struct ui_file *);
 
 extern void read_command_file (FILE *);

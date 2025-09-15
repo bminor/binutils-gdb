@@ -1200,6 +1200,8 @@ captured_main_1 (struct captured_main_args *context)
       /* Print all the junk at the top, with trailing "..." if we are
 	 about to read a symbol file (possibly slowly).  */
       print_gdb_version (gdb_stdout, true);
+      gdb_printf ("\n");
+      print_gdb_hints (gdb_stdout);
       if (symarg)
 	gdb_printf ("..");
       gdb_printf ("\n");
