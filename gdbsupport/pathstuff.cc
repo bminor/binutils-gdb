@@ -89,34 +89,25 @@ std::string
 gdb_realpath_keepfile (const char *filename)
 {
   const char *base_name = lbasename (filename);
-  char *dir_name;
 
   /* Extract the basename of filename, and return immediately
      a copy of filename if it does not contain any directory prefix.  */
   if (base_name == filename)
     return filename;
 
-  dir_name = (char *) alloca ((size_t) (base_name - filename + 2));
-  /* Allocate enough space to store the dir_name + plus one extra
-     character sometimes needed under Windows (see below), and
-     then the closing \000 character.  */
-  strncpy (dir_name, filename, base_name - filename);
-  dir_name[base_name - filename] = '\000';
+  std::string dir_name (filename, base_name - filename);
 
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM
   /* We need to be careful when filename is of the form 'd:foo', which
      is equivalent of d:./foo, which is totally different from d:/foo.  */
-  if (strlen (dir_name) == 2 && c_isalpha (dir_name[0]) && dir_name[1] == ':')
-    {
-      dir_name[2] = '.';
-      dir_name[3] = '\000';
-    }
+  if (dir_name.size () == 2 && c_isalpha (dir_name[0]) && dir_name[1] == ':')
+    dir_name += '.';
 #endif
 
   /* Canonicalize the directory prefix, and build the resulting
      filename.  If the dirname realpath already contains an ending
      directory separator, avoid doubling it.  */
-  gdb::unique_xmalloc_ptr<char> path_storage = gdb_realpath (dir_name);
+  gdb::unique_xmalloc_ptr<char> path_storage = gdb_realpath (dir_name.c_str ());
   const char *real_path = path_storage.get ();
   return path_join (real_path, base_name);
 }

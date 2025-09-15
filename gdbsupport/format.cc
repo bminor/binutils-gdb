@@ -25,6 +25,9 @@ format_pieces::format_pieces (const char **arg, bool gdb_extensions,
   const char *s = *arg;
   const char *string;
 
+  /* Buffer to hold the escaped-processed version of the string.  */
+  std::string de_escaped;
+
   if (gdb_extensions)
     {
       string = *arg;
@@ -34,10 +37,6 @@ format_pieces::format_pieces (const char **arg, bool gdb_extensions,
     {
       /* Parse the format-control string and copy it into the string STRING,
 	 processing some kinds of escape sequence.  */
-
-      char *f = (char *) alloca (strlen (s) + 1);
-      string = f;
-
       while (*s != '"' && *s != '\0')
 	{
 	  int c = *s++;
@@ -50,34 +49,34 @@ format_pieces::format_pieces (const char **arg, bool gdb_extensions,
 	      switch (c = *s++)
 		{
 		case '\\':
-		  *f++ = '\\';
+		  de_escaped += '\\';
 		  break;
 		case 'a':
-		  *f++ = '\a';
+		  de_escaped += '\a';
 		  break;
 		case 'b':
-		  *f++ = '\b';
+		  de_escaped += '\b';
 		  break;
 		case 'e':
-		  *f++ = '\e';
+		  de_escaped += '\e';
 		  break;
 		case 'f':
-		  *f++ = '\f';
+		  de_escaped += '\f';
 		  break;
 		case 'n':
-		  *f++ = '\n';
+		  de_escaped += '\n';
 		  break;
 		case 'r':
-		  *f++ = '\r';
+		  de_escaped += '\r';
 		  break;
 		case 't':
-		  *f++ = '\t';
+		  de_escaped += '\t';
 		  break;
 		case 'v':
-		  *f++ = '\v';
+		  de_escaped += '\v';
 		  break;
 		case '"':
-		  *f++ = '"';
+		  de_escaped += '"';
 		  break;
 		default:
 		  /* ??? TODO: handle other escape sequences.  */
@@ -87,12 +86,11 @@ format_pieces::format_pieces (const char **arg, bool gdb_extensions,
 	      break;
 
 	    default:
-	      *f++ = c;
+	      de_escaped += c;
 	    }
 	}
 
-      /* Terminate our escape-processed copy.  */
-      *f++ = '\0';
+      string = de_escaped.c_str ();
 
       /* Whether the format string ended with double-quote or zero, we're
 	 done with it; it's up to callers to complain about syntax.  */

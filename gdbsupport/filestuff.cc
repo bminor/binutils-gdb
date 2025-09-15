@@ -333,14 +333,10 @@ gdb_fopen_cloexec (const char *filename, const char *opentype)
 
   if (!fopen_e_ever_failed_einval)
     {
-      char *copy;
-
-      copy = (char *) alloca (strlen (opentype) + 2);
-      strcpy (copy, opentype);
       /* This is a glibc extension but we try it unconditionally on
 	 this path.  */
-      strcat (copy, "e");
-      result = fopen (filename, copy);
+      auto opentype_e = std::string (opentype) + 'e';
+      result = fopen (filename, opentype_e.c_str ());
 
       if (result == NULL && errno == EINVAL)
 	{
