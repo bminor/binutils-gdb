@@ -4623,12 +4623,13 @@ sort_blocks (struct symtab *s)
 static struct compunit_symtab *
 new_symtab (const char *name, int maxlines, struct objfile *objfile)
 {
-  struct compunit_symtab *cust = allocate_compunit_symtab (objfile, name);
+  auto cusymtab = std::make_unique<compunit_symtab> (objfile, name);
   struct symtab *symtab;
   struct blockvector *bv;
   enum language lang;
 
-  add_compunit_symtab_to_objfile (cust);
+  struct compunit_symtab *cust
+    = add_compunit_symtab_to_objfile (std::move (cusymtab));
   symtab = allocate_symtab (cust, name);
 
   symtab->set_linetable (new_linetable (maxlines));

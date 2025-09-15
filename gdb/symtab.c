@@ -493,8 +493,24 @@ compunit_symtab::forget_cached_source_info ()
 
 /* See symtab.h.  */
 
-void
-compunit_symtab::finalize ()
+compunit_symtab::compunit_symtab (struct objfile *objfile,
+				  const char *name_)
+  : m_objfile (objfile),
+    /* The name we record here is only for display/debugging purposes.
+       Just save the basename to avoid path issues (too long for
+       display, relative vs absolute, etc.).  */
+    name (obstack_strdup (&objfile->objfile_obstack, lbasename (name_))),
+    m_locations_valid (false),
+    m_epilogue_unwind_valid (false)
+{
+  symtab_create_debug_printf_v ("created compunit symtab %s for %s",
+				host_address_to_string (this),
+				name);
+}
+
+/* See symtab.h.  */
+
+compunit_symtab::~compunit_symtab ()
 {
   this->forget_cached_source_info ();
   delete m_call_site_htab;

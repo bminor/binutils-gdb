@@ -122,23 +122,29 @@ dump_objfile (struct objfile *objfile)
 
   objfile->dump ();
 
-  if (objfile->compunit_symtabs != NULL)
+  bool symtabs_printed = false;
+  for (compunit_symtab *cu : objfile->compunits ())
     {
-      gdb_printf ("Symtabs:\n");
-      for (compunit_symtab *cu : objfile->compunits ())
+      if (!symtabs_printed)
 	{
-	  for (symtab *symtab : cu->filetabs ())
-	    {
-	      gdb_printf ("%s at %s",
-			  symtab_to_filename_for_display (symtab),
-			  host_address_to_string (symtab));
-	      if (symtab->compunit ()->objfile () != objfile)
-		gdb_printf (", NOT ON CHAIN!");
-	      gdb_printf ("\n");
-	    }
+	  gdb_printf ("Symtabs:\n");
+	  symtabs_printed = true;
 	}
-      gdb_printf ("\n\n");
+
+      for (symtab *symtab : cu->filetabs ())
+	{
+	  gdb_printf ("%s at %s",
+		      symtab_to_filename_for_display (symtab),
+		      host_address_to_string (symtab));
+	  if (symtab->compunit ()->objfile () != objfile)
+	    gdb_printf (", NOT ON CHAIN!");
+	  gdb_printf ("\n");
+	}
     }
+
+  /* If we printed any symtabs, print some newlines.  */
+  if (symtabs_printed)
+    gdb_printf ("\n\n");
 }
 
 /* Print minimal symbols from this objfile.  */

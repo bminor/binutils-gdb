@@ -517,7 +517,6 @@ jit_symtab_close_impl (struct gdb_symbol_callbacks *cb,
 static void
 finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 {
-  struct compunit_symtab *cust;
   size_t blockvector_size;
   CORE_ADDR begin, end;
   struct blockvector *bv;
@@ -533,9 +532,11 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       return a.end > b.end;
     });
 
-  cust = allocate_compunit_symtab (objfile, stab->file_name.c_str ());
+  auto cusymtab = std::make_unique<compunit_symtab> (objfile,
+						     stab->file_name.c_str ());
+  compunit_symtab *cust
+    = add_compunit_symtab_to_objfile (std::move (cusymtab));
   symtab *filetab = allocate_symtab (cust, stab->file_name.c_str ());
-  add_compunit_symtab_to_objfile (cust);
 
   /* JIT compilers compile in memory.  */
   cust->set_dirname (nullptr);

@@ -384,8 +384,11 @@ private:
      the same lifetime as objfile.  */
   const char *m_debugformat = nullptr;
 
-  /* The compunit we are building.  */
-  struct compunit_symtab *m_compunit_symtab = nullptr;
+  /* The compunit we are building.  If the symtab is owned by this
+     object, both fields are set.  For a re-opened symtab, only
+     m_compunit_symtab is set.  */
+  std::unique_ptr<compunit_symtab> m_owned_compunit_symtab;
+  compunit_symtab *m_compunit_symtab;
 
   /* Language of this compunit_symtab.  */
   enum language m_language;

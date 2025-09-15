@@ -212,11 +212,10 @@ allocate_symtab (struct compunit_symtab *cust, const char *filename)
   return allocate_symtab (cust, filename, filename);
 }
 
-extern struct compunit_symtab *allocate_compunit_symtab (struct objfile *,
-							 const char *)
-  ATTRIBUTE_NONNULL (1);
-
-extern void add_compunit_symtab_to_objfile (struct compunit_symtab *cu);
+/* Add CU to its objfile, transferring ownership to the objfile.
+   Returns a pointer to the compunit symtab.  */
+extern compunit_symtab *add_compunit_symtab_to_objfile
+     (std::unique_ptr<compunit_symtab> cu);
 
 extern void add_symtab_fns (enum bfd_flavour flavour, const struct sym_fns *);
 

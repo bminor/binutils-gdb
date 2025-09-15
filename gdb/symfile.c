@@ -2590,7 +2590,7 @@ reread_symbols (int from_tty)
 	  objfile.sect_index_data = -1;
 	  objfile.sect_index_rodata = -1;
 	  objfile.sect_index_text = -1;
-	  objfile.compunit_symtabs = NULL;
+	  objfile.compunit_symtabs.clear ();
 	  objfile.template_symbols = NULL;
 	  objfile.static_links.clear ();
 
@@ -2820,8 +2820,7 @@ deduce_language_from_filename (const char *filename)
   return language_unknown;
 }
 
-/* Allocate and initialize a new symbol table.
-   CUST is from the result of allocate_compunit_symtab.  */
+/* Allocate and initialize a new symbol table.  */
 
 struct symtab *
 allocate_symtab (struct compunit_symtab *cust, const char *filename,
@@ -2865,41 +2864,15 @@ allocate_symtab (struct compunit_symtab *cust, const char *filename,
   return symtab;
 }
 
-/* Allocate and initialize a new compunit.
-   NAME is the name of the main source file, if there is one, or some
-   descriptive text if there are no source files.  */
+/* See symfile.h.  */
 
-struct compunit_symtab *
-allocate_compunit_symtab (struct objfile *objfile, const char *name)
+compunit_symtab *
+add_compunit_symtab_to_objfile (std::unique_ptr<compunit_symtab> cu)
 {
-  struct compunit_symtab *cu = OBSTACK_ZALLOC (&objfile->objfile_obstack,
-					       struct compunit_symtab);
-  const char *saved_name;
-
-  cu->set_objfile (objfile);
-
-  /* The name we record here is only for display/debugging purposes.
-     Just save the basename to avoid path issues (too long for display,
-     relative vs absolute, etc.).  */
-  saved_name = lbasename (name);
-  cu->name = obstack_strdup (&objfile->objfile_obstack, saved_name);
-
-  cu->set_debugformat ("unknown");
-
-  symtab_create_debug_printf_v ("created compunit symtab %s for %s",
-				host_address_to_string (cu),
-				cu->name);
-
-  return cu;
-}
-
-/* Hook CU to the objfile it comes from.  */
-
-void
-add_compunit_symtab_to_objfile (struct compunit_symtab *cu)
-{
-  cu->next = cu->objfile ()->compunit_symtabs;
-  cu->objfile ()->compunit_symtabs = cu;
+  compunit_symtab *result = cu.get ();
+  struct objfile *objfile = result->objfile ();
+  objfile->compunit_symtabs.push_back (std::move (cu));
+  return result;
 }
 
 

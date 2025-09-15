@@ -57,13 +57,11 @@ buildsym_compunit::buildsym_compunit (struct objfile *objfile_,
   : m_objfile (objfile_),
     m_last_source_file (name == nullptr ? nullptr : xstrdup (name)),
     m_comp_dir (comp_dir_ == nullptr ? "" : comp_dir_),
+    m_owned_compunit_symtab (std::make_unique<compunit_symtab> (m_objfile, name)),
+    m_compunit_symtab (m_owned_compunit_symtab.get ()),
     m_language (language_),
     m_last_source_start_addr (last_addr)
 {
-  /* Allocate the compunit symtab now.  The caller needs it to allocate
-     non-primary symtabs.  It is also needed by get_macro_table.  */
-  m_compunit_symtab = allocate_compunit_symtab (m_objfile, name);
-
   /* Build the subfile for NAME (the main source file) so that we can record
      a pointer to it for later.
      IMPORTANT: Do not allocate a struct symtab for NAME here.
@@ -982,7 +980,7 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
       }
   }
 
-  add_compunit_symtab_to_objfile (cu);
+  add_compunit_symtab_to_objfile (std::move (m_owned_compunit_symtab));
 
   return cu;
 }

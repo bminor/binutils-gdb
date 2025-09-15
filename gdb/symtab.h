@@ -1830,16 +1830,16 @@ using symtab_range = next_range<symtab>;
    where "foo.c(cu)" and "bar.c(cu)" are struct compunit_symtab objects,
    and the files foo.c, etc. are struct symtab objects.  */
 
-struct compunit_symtab
+struct compunit_symtab : intrusive_list_node<compunit_symtab>
 {
+  compunit_symtab (struct objfile *objfile, const char *name);
+  ~compunit_symtab ();
+
+  DISABLE_COPY_AND_ASSIGN (compunit_symtab);
+
   struct objfile *objfile () const
   {
     return m_objfile;
-  }
-
-  void set_objfile (struct objfile *objfile)
-  {
-    m_objfile = objfile;
   }
 
   symtab_range filetabs () const
@@ -1959,15 +1959,6 @@ struct compunit_symtab
   /* Clear any cached source file names.  */
   void forget_cached_source_info ();
 
-  /* This is called when an objfile is being destroyed and will free
-     any resources used by this compunit_symtab.  Normally a
-     destructor would be used instead, but at the moment
-     compunit_symtab objects are allocated on an obstack.  */
-  void finalize ();
-
-  /* Unordered chain of all compunit symtabs of this objfile.  */
-  struct compunit_symtab *next;
-
   /* Object file from which this symtab information was read.  */
   struct objfile *m_objfile;
 
@@ -1980,30 +1971,30 @@ struct compunit_symtab
      source file (e.g., .c, .cc) is guaranteed to be first.
      Each symtab is a file, either the "main" source file (e.g., .c, .cc)
      or header (e.g., .h).  */
-  symtab *m_filetabs;
+  symtab *m_filetabs = nullptr;
 
   /* Last entry in FILETABS list.
      Subfiles are added to the end of the list so they accumulate in order,
      with the main source subfile living at the front.
      The main reason is so that the main source file symtab is at the head
      of the list, and the rest appear in order for debugging convenience.  */
-  symtab *m_last_filetab;
+  symtab *m_last_filetab = nullptr;
 
   /* Non-NULL string that identifies the format of the debugging information,
      such as "stabs", "dwarf 1", "dwarf 2", "coff", etc.  This is mostly useful
      for automated testing of gdb but may also be information that is
      useful to the user.  */
-  const char *m_debugformat;
+  const char *m_debugformat = "unknown";
 
   /* String of producer version information, or NULL if we don't know.  */
-  const char *m_producer;
+  const char *m_producer = nullptr;
 
   /* Directory in which it was compiled, or NULL if we don't know.  */
-  const char *m_dirname;
+  const char *m_dirname = nullptr;
 
   /* List of all symbol scope blocks for this symtab.  It is shared among
      all symtabs in a given compilation unit.  */
-  struct blockvector *m_blockvector;
+  struct blockvector *m_blockvector = nullptr;
 
   /* Symtab has been compiled with both optimizations and debug info so that
      GDB may stop skipping prologues as variables locations are valid already
@@ -2015,13 +2006,13 @@ struct compunit_symtab
   unsigned int m_epilogue_unwind_valid : 1;
 
   /* struct call_site entries for this compilation unit or NULL.  */
-  call_site_htab_t *m_call_site_htab;
+  call_site_htab_t *m_call_site_htab = nullptr;
 
   /* The macro table for this symtab.  Like the blockvector, this
      is shared between different symtabs in a given compilation unit.
      It's debatable whether it *should* be shared among all the symtabs in
      the given compilation unit, but it currently is.  */
-  struct macro_table *m_macro_table;
+  struct macro_table *m_macro_table = nullptr;
 
   /* If non-NULL, then this points to a NULL-terminated vector of
      included compunits.  When searching the static or global
@@ -2030,16 +2021,14 @@ struct compunit_symtab
      list must be flattened -- the symbol reader is responsible for
      ensuring that this vector contains the transitive closure of all
      included compunits.  */
-  struct compunit_symtab **includes;
+  struct compunit_symtab **includes = nullptr;
 
   /* If this is an included compunit, this points to one includer
      of the table.  This user is considered the canonical compunit
      containing this one.  An included compunit may itself be
      included by another.  */
-  struct compunit_symtab *user;
+  struct compunit_symtab *user = nullptr;
 };
-
-using compunit_symtab_range = next_range<compunit_symtab>;
 
 /* Return true if this symtab is the "main" symtab of its compunit_symtab.  */
 
