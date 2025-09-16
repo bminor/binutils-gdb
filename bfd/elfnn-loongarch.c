@@ -4401,7 +4401,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case R_LARCH_TLS_LE_LO12_R:
 	case R_LARCH_TLS_LE64_LO20:
 	case R_LARCH_TLS_LE64_HI12:
-	  BFD_ASSERT (resolved_local && elf_hash_table (info)->tls_sec);
+	  BFD_ASSERT (bfd_link_executable (info));
 
 	  relocation += rel->r_addend;
 	  relocation = tlsoff (info, relocation);
