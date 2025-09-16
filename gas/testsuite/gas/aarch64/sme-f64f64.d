@@ -1,4 +1,4 @@
-#name: SME F64 extension
+#name: SME F64F64 extension
 #as: -march=armv8-a+sme-f64f64
 #source: sme-f64.s
 #objdump: -dr

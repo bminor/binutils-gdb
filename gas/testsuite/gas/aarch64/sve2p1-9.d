@@ -1,4 +1,4 @@
-#name: Test of SVE2.1 ld1q/st1q instructions.
+#name: Test of SVE2.1 ld1[dw]/st1[dw] instructions.
 #as: -march=armv9.4-a
 #as: -march=armv8-a+sve2p1
 #objdump: -dr

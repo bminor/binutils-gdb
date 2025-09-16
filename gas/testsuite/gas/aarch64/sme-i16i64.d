@@ -1,4 +1,4 @@
-#name: SME I64 extension
+#name: SME I16I64 extension
 #as: -march=armv8-a+sme-i16i64
 #source: sme-i64.s
 #objdump: -dr
