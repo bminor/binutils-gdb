@@ -1,3 +1,7 @@
+2025-09-16  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* config.bfd <powerpc-*-solaris2*>: Remove.
+
 2025-07-13  Nick Clifton  <nickc@redhat.com>
 
 	* 2.45 Branch point.

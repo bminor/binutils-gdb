@@ -1146,8 +1146,7 @@ case "${targ}" in
     targ64_selvecs="powerpc_elf64_vec powerpc_elf64_le_vec powerpc_elf64_fbsd_vec"
     ;;
   powerpc-*-*bsd* | powerpc-*-elf* | powerpc-*-sysv4* | powerpc-*-eabi* | \
-  powerpc-*-solaris2* | powerpc-*-linux-* | powerpc-*-rtems* | \
-  powerpc-*-chorus*)
+  powerpc-*-linux-* | powerpc-*-rtems* | powerpc-*-chorus*)
     targ_defvec=powerpc_elf32_vec
     targ_selvecs="rs6000_xcoff_vec powerpc_elf32_le_vec powerpc_boot_vec"
     targ64_selvecs="powerpc_elf64_vec powerpc_elf64_le_vec"

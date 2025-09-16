@@ -298,15 +298,6 @@ changequote([,])dnl
 	AC_DEFINE(AIX_WEAK_SUPPORT, 1,
 		  [Define if using AIX 5.2 value for C_WEAKEXT.])
 	;;
-      ppc-*-solaris*)
-	if test ${this_target} = $target; then
-	  AC_DEFINE(TARGET_SOLARIS_COMMENT, 1,
-		    [Define if default target is PowerPC Solaris.])
-	fi
-	if test x${endian} = xbig; then
-	  AC_MSG_ERROR(Solaris must be configured little endian)
-	fi
-	;;
     esac
 
     if test ${this_target} = $target ; then

@@ -703,7 +703,7 @@ powerpc-*-vxworks*)
 powerpc*-*-elf* | powerpc*-*-eabi* | powerpc*-*-sysv* \
   | powerpc*-*-linux* | powerpc*-*-netbsd* | powerpc*-*-openbsd* \
   | powerpc*-*-rtems* \
-  | powerpc*-*-solaris* | powerpc*-*-kaos* | powerpc*-*-vxworks*)
+  | powerpc*-*-kaos* | powerpc*-*-vxworks*)
 			case "${targ}" in
 			powerpc64*)
 			    targ_emul=elf64ppc

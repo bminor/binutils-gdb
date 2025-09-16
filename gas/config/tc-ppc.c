@@ -134,22 +134,9 @@ static void ppc_elf_gnu_attribute (int);
 /* Generic assembler global variables which must be defined by all
    targets.  */
 
-#ifdef OBJ_ELF
 /* This string holds the chars that always start a comment.  If the
-   pre-processor is disabled, these aren't very useful.  The macro
-   tc_comment_chars points to this.  We use this, rather than the
-   usual comment_chars, so that we can switch for Solaris conventions.  */
-static const char ppc_solaris_comment_chars[] = "#!";
-static const char ppc_eabi_comment_chars[] = "#";
-
-#ifdef TARGET_SOLARIS_COMMENT
-const char *ppc_comment_chars = ppc_solaris_comment_chars;
-#else
-const char *ppc_comment_chars = ppc_eabi_comment_chars;
-#endif
-#else
-const char comment_chars[] = "#";
-#endif
+   pre-processor is disabled, these aren't very useful.  */
+const char ppc_comment_chars[] = "#";
 
 /* Characters which start a comment at the beginning of a line.  */
 const char line_comment_chars[] = "#";
@@ -993,15 +980,6 @@ static enum { SHLIB_NONE, SHLIB_PIC, SHLIB_MRELOCATABLE } shlib = SHLIB_NONE;
 
 /* Flags to set in the elf header.  */
 static flagword ppc_flags = 0;
-
-/* Whether this is Solaris or not.  */
-#ifdef TARGET_SOLARIS_COMMENT
-#define SOLARIS_P true
-#else
-#define SOLARIS_P false
-#endif
-
-static bool msolaris = SOLARIS_P;
 #endif
 
 #ifdef OBJ_XCOFF
@@ -1247,17 +1225,6 @@ md_parse_option (int c, const char *arg)
 	  set_target_endian = 1;
 	}
 
-      else if (strcmp (arg, "solaris") == 0)
-	{
-	  msolaris = true;
-	  ppc_comment_chars = ppc_solaris_comment_chars;
-	}
-
-      else if (strcmp (arg, "no-solaris") == 0)
-	{
-	  msolaris = false;
-	  ppc_comment_chars = ppc_eabi_comment_chars;
-	}
       else if (strcmp (arg, "spe2") == 0)
 	{
 	  ppc_cpu |= PPC_OPCODE_SPE2;
@@ -1444,10 +1411,6 @@ PowerPC options:\n"));
   fprintf (stream, _("\
 -mbig, -mbig-endian, -be\n\
                         generate code for a big endian machine\n"));
-  fprintf (stream, _("\
--msolaris               generate code for Solaris\n"));
-  fprintf (stream, _("\
--mno-solaris            do not generate code for Solaris\n"));
   fprintf (stream, _("\
 -K PIC                  set EF_PPC_RELOCATABLE_LIB in ELF flags\n"));
   fprintf (stream, _("\
@@ -1891,7 +1854,7 @@ md_begin (void)
 
 #ifdef OBJ_ELF
   /* Set the ELF flags if desired.  */
-  if (ppc_flags && !msolaris)
+  if (ppc_flags)
     bfd_set_private_flags (stdoutput, ppc_flags);
 #endif
 
@@ -2359,7 +2322,7 @@ ppc_elf_cons_fix_check (expressionS *exp ATTRIBUTE_UNUSED,
     }
 }
 
-/* Solaris pseduo op to change to the .rodata section.  */
+/* Solaris pseudo op to change to the .rodata section.  */
 static void
 ppc_elf_rdata (int xxx)
 {

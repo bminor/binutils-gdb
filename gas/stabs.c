@@ -297,26 +297,6 @@ s_stab_generic (int what,
       SKIP_WHITESPACE ();
     }
 
-#ifdef TC_PPC
-#ifdef OBJ_ELF
-  /* Solaris on PowerPC has decided that .stabd can take 4 arguments, so if we were
-     given 4 arguments, make it a .stabn */
-  else if (what == 'd')
-    {
-      char *save_location = input_line_pointer;
-
-      SKIP_WHITESPACE ();
-      if (*input_line_pointer == ',')
-	{
-	  input_line_pointer++;
-	  what = 'n';
-	}
-      else
-	input_line_pointer = save_location;
-    }
-#endif /* OBJ_ELF */
-#endif /* TC_PPC */
-
 #ifndef NO_LISTING
   if (listing)
     {

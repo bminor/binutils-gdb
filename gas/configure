@@ -12187,16 +12187,6 @@ $as_echo "#define STRICTCOFF 1" >>confdefs.h
 $as_echo "#define AIX_WEAK_SUPPORT 1" >>confdefs.h
 
 	;;
-      ppc-*-solaris*)
-	if test ${this_target} = $target; then
-
-$as_echo "#define TARGET_SOLARIS_COMMENT 1" >>confdefs.h
-
-	fi
-	if test x${endian} = xbig; then
-	  as_fn_error $? "Solaris must be configured little endian" "$LINENO" 5
-	fi
-	;;
     esac
 
     if test ${this_target} = $target ; then

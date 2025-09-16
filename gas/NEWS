@@ -5,6 +5,8 @@
 
 * NaCl target support is removed.
 
+* Solaris/PowerPC target support is removed.
+
 * Add support for RISC-V standard extensions:
   sdtrig v1.0, ssstrict v1.0.
 

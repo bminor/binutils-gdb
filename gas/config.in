@@ -269,9 +269,6 @@
 /* Target OS. */
 #undef TARGET_OS
 
-/* Define if default target is PowerPC Solaris. */
-#undef TARGET_SOLARIS_COMMENT
-
 /* Target vendor. */
 #undef TARGET_VENDOR
 
