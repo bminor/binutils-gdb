@@ -171,6 +171,18 @@ if [istarget "loongarch64-*-*"] {
       ] \
   ] \
   }
+
+  run_ld_link_tests \
+      [list \
+	   [list \
+		"undefind weak with tls le" \
+		"" "-e0" \
+		"" \
+		{undefweak_le.s} \
+		{} \
+		"undefweak_le" \
+	   ] \
+      ]
 }
 
 if [istarget "loongarch64-*-*"] {
