@@ -186,6 +186,19 @@ proc run_all_tests {} {
 	set ::env(TEST) "ABCD"
 	args_test "shell variable" {{$TEST}} {\\$TEST} {{ABCD}}
     }
+
+    # At one point we had a bug where, if the last inferior argument,
+    # appearing after --args, looked like an option GDB might be able
+    # to process, e.g. started with a dash, then GDB would try to
+    # process it.  This would leave GDB in a broken state, and so GDB
+    # would fail to start.  A example of a failing GDB command line:
+    # $ gdb --args /bin/ls --all
+    foreach_with_prefix flag { args no-escape-args } {
+	args_test "with trailing GDB flag" [list "--${flag}"]
+    }
+    args_test "with trailing GDB option and value" [list "--ex" "start"]
+    args_test "with trailing double dash option" [list "--foo"]
+    args_test "with trailing single dash option" [list "-foo"]
 }
 
 run_all_tests

@@ -866,9 +866,14 @@ captured_main_1 (struct captured_main_args *context)
       {
 	int option_index;
 
+	/* If the previous argument was --args or --no-escape-args, then
+	   stop argument processing.  */
+	if (set_args != NO_ARGS)
+	  break;
+
 	c = getopt_long_only (argc, argv, "",
 			      long_options, &option_index);
-	if (c == EOF || set_args != NO_ARGS)
+	if (c == EOF)
 	  break;
 
 	/* Long option that takes an argument.  */
