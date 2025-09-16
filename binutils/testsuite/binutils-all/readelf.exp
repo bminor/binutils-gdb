@@ -332,8 +332,6 @@ proc readelf_thin_archive_test {} {
     }
 
     readelf_test -h $libname readelf.h.thin
-
-    pass $testname
 }
 
 if ![is_remote host] {
@@ -629,7 +627,7 @@ if ![is_remote host] {
 }
 
 # First, determine the size, so specific output matchers can be used.
-readelf_find_size $tempfile 2
+readelf_find_size $tempfile 4
 
 # Make sure that readelf can decode the contents.
 readelf_test -wi $tempfile dw5-op.W
