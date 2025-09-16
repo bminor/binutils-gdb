@@ -123,6 +123,10 @@ static void ppc_weak (int);
 static void ppc_GNU_visibility (int);
 #endif
 
+/* This string holds the chars that always start a comment.  If the
+   pre-processor is disabled, these aren't very useful.  */
+const char ppc_comment_chars[] = "#";
+
 #ifdef OBJ_ELF
 static void ppc_elf_rdata (int);
 static void ppc_elf_lcomm (int);
@@ -133,10 +137,6 @@ static void ppc_elf_gnu_attribute (int);
 
 /* Generic assembler global variables which must be defined by all
    targets.  */
-
-/* This string holds the chars that always start a comment.  If the
-   pre-processor is disabled, these aren't very useful.  */
-const char ppc_comment_chars[] = "#";
 
 /* Characters which start a comment at the beginning of a line.  */
 const char line_comment_chars[] = "#";
