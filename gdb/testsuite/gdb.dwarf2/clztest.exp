@@ -61,7 +61,7 @@ proc scan_gdb_tests {} {
 	    continue
 	}
 
-	eval $test_cmd
+	{*}$test_cmd
     }
     close $fd
 }

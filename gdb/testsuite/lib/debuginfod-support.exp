@@ -37,7 +37,7 @@ proc allow_debuginfod_tests {} {
     # (installed by ASan) exist on startup.  That makes TCL's exec throw an
     # error.  This is dealt with by the --quiet in INTERNAL_GDBFLAGS.
     if { [string first "with-debuginfod" \
-	      [eval exec $::GDB $::INTERNAL_GDBFLAGS \
+	      [exec $::GDB {*}$::INTERNAL_GDBFLAGS \
 		   --configuration]] == -1 } {
 	return false
     }

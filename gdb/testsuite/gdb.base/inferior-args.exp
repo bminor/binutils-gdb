@@ -170,8 +170,7 @@ lappend test_desc_list [list "test one" \
 # the rest of this mess in order to avoid TCL escaping the quote for
 # me.  It's super important that what we send to GDB is '"' not '\"'.
 set item [list "test two" false]
-set cmd [format "lappend item \{ '%c' '\\%c' \}" 34 34]
-eval $cmd
+lappend item [format { '%c' '\%c' } 34 34]
 set bs "\\\\"
 lappend item [list "$hex \"$bs\"\"" "$hex \"$bs$bs$bs\"\""]
 lappend test_desc_list $item

@@ -5749,7 +5749,7 @@ gdb_caching_proc get_compiler_info_1 {language} {
 	set ifile $tofile
 	set cppout [ gdb_compile "${ifile}" "" preprocess [list "$language" quiet getting_compiler_info] ]
     }
-    eval log_file $saved_log
+    log_file {*}$saved_log
 
     # Eval the output.
     set unknown 0
@@ -7986,12 +7986,12 @@ proc default_gdb_init { test_file_name } {
 
 proc make_gdb_parallel_path { args } {
     global GDB_PARALLEL objdir
-    set joiner [list "file" "join" $objdir]
+    set joiner [list $objdir]
     if { [info exists GDB_PARALLEL] && $GDB_PARALLEL != "yes" } {
 	lappend joiner $GDB_PARALLEL
     }
     set joiner [concat $joiner $args]
-    return [eval $joiner]
+    return [file join {*}$joiner]
 }
 
 # Turn BASENAME into a full file name in the standard output

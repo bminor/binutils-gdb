@@ -146,7 +146,7 @@ namespace eval ::CheckTestNames {
 
 	# If ARGS is the empty list then we don't want to pass a single
 	# empty string as a parameter here.
-	eval "CheckTestNames::log_summary $args"
+	CheckTestNames::log_summary {*}$args
 
 	if { [llength $args] == 0 } {
 	    set which "count"
@@ -184,10 +184,10 @@ foreach nm {pass fail xfail kfail xpass kpass unresolved untested \
 
 # Create new global log_summary to replace Dejagnu's.
 proc log_summary { args } {
-    eval "CheckTestNames::do_log_summary $args"
+    CheckTestNames::do_log_summary {*}$args
 }
 
 # Create new global reset_vars to replace Dejagnu's.
 proc reset_vars {} {
-    eval "CheckTestNames::do_reset_vars"
+    CheckTestNames::do_reset_vars
 }
