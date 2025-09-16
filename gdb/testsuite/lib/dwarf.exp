@@ -587,6 +587,10 @@ namespace eval Dwarf {
     # otherwise false.
     variable _cu_is_fission
 
+    # When assembling, this is used to stash the level in which any
+    # code should be evaluated.
+    variable _level
+
     proc _process_one_constant {name value} {
 	variable _constants
 	variable _FORM
@@ -1014,7 +1018,8 @@ namespace eval Dwarf {
 
 	_op .uleb128 $my_abbrev "Abbrev ($tag_name)"
 
-	uplevel 2 $attrs
+	variable _level
+	uplevel $_level $attrs
 
 	_defer_output $_abbrev_section {
 	    # Terminator.
@@ -1023,7 +1028,7 @@ namespace eval Dwarf {
 	}
 
 	if {$has_children} {
-	    uplevel 2 $children
+	    uplevel $_level $children
 
 	    # Terminate children.
 	    _op .byte 0x0 "Terminate children"
@@ -1473,6 +1478,7 @@ namespace eval Dwarf {
 	variable _cu_addr_size
 	variable _cu_offset_size
 	variable _cu_is_fission
+	variable _level
 
 	# Establish the defaults.
 	set is_64 0
@@ -1485,7 +1491,7 @@ namespace eval Dwarf {
 	set label ""
 
 	foreach { name value } $options {
-	    set value [uplevel 1 "subst \"$value\""]
+	    set value [uplevel $_level "subst \"$value\""]
 	    switch -exact -- $name {
 		is_64 { set is_64 $value }
 		version { set _cu_version $value }
@@ -1584,7 +1590,7 @@ namespace eval Dwarf {
 	    define_label $my_abbrevs
 	}
 
-	uplevel $body
+	uplevel $_level $body
 
 	_defer_output $_abbrev_section {
 	    # Emit the terminator.
@@ -1620,6 +1626,7 @@ namespace eval Dwarf {
 	variable _cu_addr_size
 	variable _cu_offset_size
 	variable _cu_is_fission
+	variable _level
 
 	# Establish the defaults.
 	set is_64 0
@@ -1631,7 +1638,7 @@ namespace eval Dwarf {
 	set label ""
 
 	foreach { name value } $options {
-	    set value [uplevel 1 "subst \"$value\""]
+	    set value [uplevel $_level "subst \"$value\""]
 	    switch -exact -- $name {
 		is_64 { set is_64 $value }
 		version { set _cu_version $value }
@@ -1694,7 +1701,7 @@ namespace eval Dwarf {
 
 	_op .8byte $signature Signature
 	if { $type_label != "" } {
-	    uplevel declare_labels $type_label
+	    uplevel $_level declare_labels $type_label
 	    upvar $type_label my_type_label
 	    if {$is_64} {
 		_op .8byte "$my_type_label - $_cu_label"
@@ -1713,7 +1720,7 @@ namespace eval Dwarf {
 	    define_label $my_abbrevs
 	}
 
-	uplevel $body
+	uplevel $_level $body
 
 	_defer_output $_abbrev_section {
 	    # Emit the terminator.
@@ -1786,7 +1793,8 @@ namespace eval Dwarf {
 	    }
 	}
 
-	uplevel $body
+	variable _level
+	uplevel $_level $body
     }
 
     # Emit a DWARF .debug_rnglists section.
@@ -1835,7 +1843,8 @@ namespace eval Dwarf {
 	}
 
 	with_override Dwarf::table Dwarf::_rnglists_table {
-	    uplevel $body
+	    variable _level
+	    uplevel $_level $body
 	}
     }
 
@@ -1861,6 +1870,7 @@ namespace eval Dwarf {
 	variable _debug_rnglists_addr_size
 	variable _debug_rnglists_offset_size
 	variable _debug_rnglists_is_64_dwarf
+	variable _level
 
 	parse_options {
 	    {post-header-label ""}
@@ -1874,7 +1884,7 @@ namespace eval Dwarf {
 	# lists there are to generate the header and offset table.
 	set lists_ops [_defer_to_string {
 	    with_override Dwarf::list_ Dwarf::_rnglists_list {
-		uplevel $body
+		uplevel $_level $body
 	    }
 	}]
 
@@ -1948,6 +1958,7 @@ namespace eval Dwarf {
 
     proc _rnglists_list { body } {
 	variable _debug_rnglists_list_count
+	variable _level
 
 	# Define a label for this list.  It is used to build the offset
 	# array later.
@@ -1955,7 +1966,7 @@ namespace eval Dwarf {
 	define_label $list_label
 
 	with_override Dwarf::start_end Dwarf::_rnglists_start_end {
-	    uplevel $body
+	    uplevel $_level $body
 	}
 
 	# Emit end of list.
@@ -1991,6 +2002,7 @@ namespace eval Dwarf {
 	variable _debug_loclists_addr_size
 	variable _debug_loclists_offset_size
 	variable _debug_loclists_is_64_dwarf
+	variable _level
 
 	parse_options {{"is-64" "false"}}
 
@@ -2023,7 +2035,7 @@ namespace eval Dwarf {
 	}
 
 	with_override Dwarf::table Dwarf::_loclists_table {
-	    uplevel $body
+	    uplevel $_level $body
 	}
     }
 
@@ -2049,6 +2061,7 @@ namespace eval Dwarf {
 	variable _debug_loclists_addr_size
 	variable _debug_loclists_offset_size
 	variable _debug_loclists_is_64_dwarf
+	variable _level
 
 	parse_options {
 	    {post-header-label ""}
@@ -2062,7 +2075,7 @@ namespace eval Dwarf {
 	# lists there are to generate the header and offset table.
 	set lists_ops [_defer_to_string {
 	    with_override Dwarf::list_ Dwarf::_loclists_list {
-		uplevel $body
+		uplevel $_level $body
 	    }
 	}]
 
@@ -2138,6 +2151,7 @@ namespace eval Dwarf {
 
     proc _loclists_list { body } {
 	variable _debug_loclists_list_count
+	variable _level
 
 	# Count the location descriptions in this list.
 	variable _debug_loclists_locdesc_count 0
@@ -2150,7 +2164,7 @@ namespace eval Dwarf {
 	with_override Dwarf::start_length Dwarf::_loclists_start_length {
 	with_override Dwarf::base_address Dwarf::_loclists_base_address {
 	with_override Dwarf::start_end Dwarf::_loclists_start_end {
-	    uplevel $body
+	    uplevel $_level $body
 	}}}
 
 	# Emit end of list.
@@ -2171,8 +2185,9 @@ namespace eval Dwarf {
 	variable _debug_loclists_table_count
 	variable _debug_loclists_list_count
 	variable _debug_loclists_locdesc_count
+	variable _level
 
-	set locdesc [uplevel [list subst $locdesc]]
+	set locdesc [uplevel $_level [list subst $locdesc]]
 
 	_op .byte 0x08 "DW_LLE_start_length"
 
@@ -2205,8 +2220,9 @@ namespace eval Dwarf {
 	variable _debug_loclists_table_count
 	variable _debug_loclists_list_count
 	variable _debug_loclists_locdesc_count
+	variable _level
 
-	set locdesc [uplevel [list subst $locdesc]]
+	set locdesc [uplevel $_level [list subst $locdesc]]
 
 	_op .byte 0x07 "DW_LLE_start_end"
 
@@ -2243,10 +2259,11 @@ namespace eval Dwarf {
     # (see `_macro_unit`) to generate macro units.
 
     proc macro { body } {
+	variable _level
 	_section ".debug_macro"
 
 	with_override Dwarf::unit Dwarf::_macro_unit {
-	    uplevel $body
+	    uplevel $_level $body
 	}
     }
 
@@ -2302,7 +2319,8 @@ namespace eval Dwarf {
 	with_override Dwarf::define Dwarf::_macro_unit_define {
 	with_override Dwarf::start_file Dwarf::_macro_unit_start_file {
 	with_override Dwarf::end_file Dwarf::_macro_unit_end_file {
-	    uplevel $body
+	    variable _level
+	    uplevel $_level $body
 	}}}}
 
 	_op .byte 0x0 "# End macro unit"
@@ -2764,7 +2782,8 @@ namespace eval Dwarf {
 	    }
 	}
 
-	uplevel $body
+	variable _level
+	uplevel $_level $body
 
 	rename include_dir ""
 	rename file_name ""
@@ -2921,7 +2940,8 @@ namespace eval Dwarf {
 	}
 
 	# Range tuples.
-	uplevel $body
+	variable _level
+	uplevel $_level $body
 
 	# Terminator tuple.
 	set comment "Terminator"
@@ -3017,8 +3037,9 @@ namespace eval Dwarf {
 
 	# Introduce command 'entry'.
 	with_override Dwarf::entry Dwarf::_loc_entry {
+	    variable _level
 	    # Emit entries.
-	    uplevel $body
+	    uplevel $_level $body
 	}
 
 	# Determine how to emit addresses.
@@ -3114,13 +3135,16 @@ namespace eval Dwarf {
 
     # Emit a dummy CU.
     proc dummy_cu {} {
-	# Generate a CU with default options and empty body.
-	cu {label dummy_cu} {
-	  compile_unit {}
-	}
+	variable _level
+	uplevel $_level {
+	    # Generate a CU with default options and empty body.
+	    cu {label dummy_cu} {
+		compile_unit {}
+	    }
 
-	# Generate an .debug_aranges entry for the dummy CU.
-	aranges {} dummy_cu {
+	    # Generate an .debug_aranges entry for the dummy CU.
+	    aranges {} dummy_cu {
+	    }
 	}
     }
 
@@ -3205,7 +3229,8 @@ namespace eval Dwarf {
 	with_override Dwarf::cu Dwarf::_debug_names_cu {
 	with_override Dwarf::tu Dwarf::_debug_names_tu {
 	with_override Dwarf::name Dwarf::_debug_names_name {
-	    uplevel $body
+	    variable _level
+	    uplevel $_level $body
 	}}}
 
 	# Header - CU / TU / foreign TU count.
@@ -3467,10 +3492,13 @@ namespace eval Dwarf {
 	variable _line_header_end_label
 	variable _debug_ranges_64_bit
 	variable _debug_addr_index
+	variable _level
 
 	if { [llength $options] == 1 } {
 	    set options [list filename [lindex $options 0]]
 	}
+
+	set _level "#[info level]"
 
 	parse_options {
 	    { filename "" }
@@ -3503,7 +3531,7 @@ namespace eval Dwarf {
 	# Dummy CU at the start to ensure that the first CU in $body is not
 	# the first in .debug_info.
 	if { $add_dummy_cus } {
-	    dummy_cu
+	    uplevel $_level dummy_cu
 	}
 
 	with_shared_gdb {
