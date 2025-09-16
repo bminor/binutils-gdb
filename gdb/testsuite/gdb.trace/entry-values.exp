@@ -137,15 +137,15 @@ Dwarf::assemble $asm_file {
 		    GNU_call_site_parameter {
 			DW_AT_location {DW_OP_reg0} SPECIAL_expr
 			DW_AT_GNU_call_site_value {
-			    addr global1
-			    deref_size 4
+			    DW_OP_addr global1
+			    DW_OP_deref_size 4
 			} SPECIAL_expr
 		    }
 		    GNU_call_site_parameter {
 			DW_AT_location {DW_OP_reg1} SPECIAL_expr
 			DW_AT_GNU_call_site_value {
-			    addr global2
-			    deref_size 4
+			    DW_OP_addr global2
+			    DW_OP_deref_size 4
 			} SPECIAL_expr
 		    }
 		}

@@ -98,9 +98,9 @@ Dwarf::assemble $asm_file {
 	    # Used for testing synthetic pointers.
 	    DW_TAG_variable {
 		DW_AT_name synthptr
-		DW_AT_location [subst {
-		    GNU_implicit_pointer $variable_label 0
-		}] SPECIAL_expr
+		DW_AT_location {
+		    DW_OP_GNU_implicit_pointer $variable_label 0
+		} SPECIAL_expr
 		DW_AT_type :$pointer_label
 	    }
 

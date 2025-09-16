@@ -70,9 +70,9 @@ Dwarf::assemble $asm_file {
 	    DW_TAG_variable {
 		DW_AT_name the_table
 		DW_AT_type :$array_label
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_addr [gdb_target_symbol global_array]
-		}] SPECIAL_expr
+		} SPECIAL_expr
 		DW_AT_external 1 flag
 	    }
 	}

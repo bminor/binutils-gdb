@@ -66,21 +66,21 @@ Dwarf::assemble $asm_file {
 	    DW_TAG_variable {
 		DW_AT_name i64_noptr
 		DW_AT_type :$i64_array
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_constu $::c64
 		    DW_OP_stack_value
 		    DW_OP_piece 8
-		}] SPECIAL_expr
+		} SPECIAL_expr
 	    }
 
 	    DW_TAG_variable {
 		DW_AT_name i32_noptr
 		DW_AT_type :$i32_array
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_constu $::c32
 		    DW_OP_stack_value
 		    DW_OP_piece 4
-		}] SPECIAL_expr
+		} SPECIAL_expr
 	    }
 	}
     }

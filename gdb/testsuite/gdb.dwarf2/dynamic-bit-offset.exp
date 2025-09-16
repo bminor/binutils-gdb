@@ -78,9 +78,9 @@ Dwarf::assemble $asm_file {
 		DW_AT_name "value"
 		DW_AT_type :$struct
 		DW_AT_external 1 DW_FORM_flag
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_addr [gdb_target_symbol "our_data"]
-		}] SPECIAL_expr
+		} SPECIAL_expr
 	    }
 	}
     }

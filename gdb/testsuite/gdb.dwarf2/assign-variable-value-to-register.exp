@@ -56,9 +56,9 @@ Dwarf::assemble $dwarf_file {
 		DW_TAG_variable {
 		    DW_AT_name foo
 		    DW_AT_type :$float_label
-		    DW_AT_location [subst {
+		    DW_AT_location {
 			DW_OP_regx $::st0_dwarf_regnum
-		    }] SPECIAL_expr
+		    } SPECIAL_expr
 		}
 	    }
 	}

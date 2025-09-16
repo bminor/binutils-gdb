@@ -104,9 +104,9 @@ Dwarf::assemble $asm_file {
 	    }
 
 	    DW_TAG_variable {
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_addr [gdb_target_symbol dyn_object]
-		}] SPECIAL_expr
+		} SPECIAL_expr
 		DW_AT_name "dyn_object"
 		DW_AT_type :$array_type_label
 	    }

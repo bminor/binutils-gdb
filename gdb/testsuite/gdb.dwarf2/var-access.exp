@@ -166,64 +166,64 @@ Dwarf::assemble $asm_file {
 		DW_TAG_variable {
 		    DW_AT_name "a"
 		    DW_AT_type :$array_a8_label
-		    DW_AT_location [subst {
-			addr $buf_var
-		    }] SPECIAL_expr
+		    DW_AT_location {
+			DW_OP_addr $buf_var
+		    } SPECIAL_expr
 		}
 		# Memory pieces: two bytes from &buf[2], and two bytes
 		# from &buf[0].
 		DW_TAG_variable {
 		    DW_AT_name "s1"
 		    DW_AT_type :$struct_s_label
-		    DW_AT_location [subst {
-			addr $buf_var
-			plus_uconst 2
-			piece 2
-			addr $buf_var
-			piece 2
-		    }] SPECIAL_expr
+		    DW_AT_location {
+			DW_OP_addr $buf_var
+			DW_OP_plus_uconst 2
+			DW_OP_piece 2
+			DW_OP_addr $buf_var
+			DW_OP_piece 2
+		    } SPECIAL_expr
 		}
 		# Register- and memory pieces: one byte each from r0,
 		# &buf[4], r1, and &buf[5].
 		DW_TAG_variable {
 		    DW_AT_name "s2"
 		    DW_AT_type :$struct_s_label
-		    DW_AT_location [subst {
-			regx [lindex $dwarf_regnum 0]
-			piece 1
-			addr "$buf_var + 4"
-			piece 1
-			regx [lindex $dwarf_regnum 1]
-			piece 1
-			addr "$buf_var + 5"
-			piece 1
-		    }] SPECIAL_expr
+		    DW_AT_location {
+			DW_OP_regx [lindex $dwarf_regnum 0]
+			DW_OP_piece 1
+			DW_OP_addr "$buf_var + 4"
+			DW_OP_piece 1
+			DW_OP_regx [lindex $dwarf_regnum 1]
+			DW_OP_piece 1
+			DW_OP_addr "$buf_var + 5"
+			DW_OP_piece 1
+		    } SPECIAL_expr
 		}
 		# Memory pieces for bitfield access: 8 bytes optimized
 		# out, 3 bytes from &buf[3], and 1 byte from &buf[1].
 		DW_TAG_variable {
 		    DW_AT_name "st1"
 		    DW_AT_type :$struct_st_label
-		    DW_AT_location [subst {
-			piece 8
-			addr "$buf_var + 3"
-			piece 3
-			addr "$buf_var + 1"
-			piece 1
-		    }] SPECIAL_expr
+		    DW_AT_location {
+			DW_OP_piece 8
+			DW_OP_addr "$buf_var + 3"
+			DW_OP_piece 3
+			DW_OP_addr "$buf_var + 1"
+			DW_OP_piece 1
+		    } SPECIAL_expr
 		}
 		# Register pieces for bitfield access: 4 bytes optimized
 		# out, 3 bytes from r0, and 1 byte from r1.
 		DW_TAG_variable {
 		    DW_AT_name "t2"
 		    DW_AT_type :$struct_t_label
-		    DW_AT_location [subst {
-			piece 4
-			regx [lindex $dwarf_regnum 0]
-			piece 3
-			regx [lindex $dwarf_regnum 1]
-			piece 1
-		    }] SPECIAL_expr
+		    DW_AT_location {
+			DW_OP_piece 4
+			DW_OP_regx [lindex $dwarf_regnum 0]
+			DW_OP_piece 3
+			DW_OP_regx [lindex $dwarf_regnum 1]
+			DW_OP_piece 1
+		    } SPECIAL_expr
 		}
 		# One piece per bitfield, using piece offsets: 32 bits of
 		# an implicit value, 9 bits of a stack value, 13 bits of
@@ -231,17 +231,17 @@ Dwarf::assemble $asm_file {
 		DW_TAG_variable {
 		    DW_AT_name "t3"
 		    DW_AT_type :$struct_t_label
-		    DW_AT_location [subst {
-			implicit_value 0x12 0x34 0x56 0x78 0x9a
-			bit_piece 32 4
-			const2s -280
-			stack_value
-			bit_piece 9 2
-			regx [lindex $dwarf_regnum 0]
-			bit_piece 13 14
-			addr $buf_var
-			bit_piece 10 42
-		    }] SPECIAL_expr
+		    DW_AT_location {
+			DW_OP_implicit_value 0x12 0x34 0x56 0x78 0x9a
+			DW_OP_bit_piece 32 4
+			DW_OP_const2s -280
+			DW_OP_stack_value
+			DW_OP_bit_piece 9 2
+			DW_OP_regx [lindex $dwarf_regnum 0]
+			DW_OP_bit_piece 13 14
+			DW_OP_addr $buf_var
+			DW_OP_bit_piece 10 42
+		    } SPECIAL_expr
 		}
 	    }
 	}

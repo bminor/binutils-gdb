@@ -74,9 +74,9 @@ proc setup_exec { arg_bad } {
 		    DW_AT_name "var_a"
 		    DW_AT_type :${int_label}
 		    DW_AT_external 1 DW_FORM_flag
-		    DW_AT_location [subst {
+		    DW_AT_location {
 			DW_OP_addr [gdb_target_symbol "var_a"]
-		    }] SPECIAL_expr
+		    } SPECIAL_expr
 		}
 
 		var_a_abstract_label: DW_TAG_variable {
@@ -88,9 +88,9 @@ proc setup_exec { arg_bad } {
 		    DW_AT_name "var_b"
 		    DW_AT_type :${int_label}
 		    DW_AT_external 1 DW_FORM_flag
-		    DW_AT_location [subst {
+		    DW_AT_location {
 			DW_OP_addr [gdb_target_symbol "var_b"]
-		    }] SPECIAL_expr
+		    } SPECIAL_expr
 		}
 
 		var_c_label: DW_TAG_variable {
@@ -104,9 +104,9 @@ proc setup_exec { arg_bad } {
 		    DW_AT_name "var_p"
 		    DW_AT_type :${ptr_label}
 		    DW_AT_external 1 DW_FORM_flag
-		    DW_AT_location [subst {
+		    DW_AT_location {
 			DW_OP_addr [gdb_target_symbol "var_p"]
-		    }] SPECIAL_expr
+		    } SPECIAL_expr
 		}
 
 		if { $bad } {
@@ -166,17 +166,17 @@ proc setup_exec { arg_bad } {
 		    DW_AT_name "var_s"
 		    DW_AT_type :${struct_label}
 		    DW_AT_external 1 DW_FORM_flag
-		    DW_AT_location [subst {
+		    DW_AT_location {
 			DW_OP_addr [gdb_target_symbol "var_s"]
-		    }] SPECIAL_expr
+		    } SPECIAL_expr
 		}
 
 		var_untyped_label: DW_TAG_variable {
 		    DW_AT_name "var_untyped"
 		    DW_AT_external 1 DW_FORM_flag
-		    DW_AT_location [subst {
+		    DW_AT_location {
 			DW_OP_addr [gdb_target_symbol "var_b"]
-		    }] SPECIAL_expr
+		    } SPECIAL_expr
 		}
 
 		int_array_label: DW_TAG_array_type {
@@ -202,9 +202,9 @@ proc setup_exec { arg_bad } {
 		    DW_AT_name "varval3"
 		    DW_AT_external 1 DW_FORM_flag
 		    DW_AT_type :${int_array_of_1_label}
-		    DW_AT_location [subst {
+		    DW_AT_location {
 			DW_OP_addr [gdb_target_symbol "var_a"]
-		    }] SPECIAL_expr
+		    } SPECIAL_expr
 		}
 
 		DW_TAG_subprogram {
@@ -215,39 +215,39 @@ proc setup_exec { arg_bad } {
 		    varval_label: DW_TAG_variable {
 			DW_AT_name "varval"
 			DW_AT_type :${int_label}
-			DW_AT_location [subst {
+			DW_AT_location {
 			    DW_OP_GNU_variable_value ${var_a_label}
 			    DW_OP_const1s 0
 			    DW_OP_or
 			    DW_OP_stack_value
-			}] SPECIAL_expr
+			} SPECIAL_expr
 		    }
 		    varval2_label: DW_TAG_variable {
 			DW_AT_name "varval2"
 			DW_AT_type :${int_label}
-			DW_AT_location [subst {
+			DW_AT_location {
 			    DW_OP_GNU_variable_value ${var_a_abstract_label}
 			    DW_OP_stack_value
-			}] SPECIAL_expr
+			} SPECIAL_expr
 		    }
 		    var_a_concrete_label: DW_TAG_variable {
 			DW_AT_abstract_origin :${var_a_abstract_label}
-			DW_AT_location [subst {
+			DW_AT_location {
 			    DW_OP_addr [gdb_target_symbol "var_a"]
-			}] SPECIAL_expr
+			} SPECIAL_expr
 		    }
 		    DW_TAG_variable {
 			DW_AT_name "constval"
 			DW_AT_type :${int_label}
-			DW_AT_location [subst {
+			DW_AT_location {
 			    DW_OP_GNU_variable_value ${var_c_label}
 			    DW_OP_stack_value
-			}] SPECIAL_expr
+			} SPECIAL_expr
 		    }
 		    DW_TAG_variable {
 			DW_AT_name "mixedval"
 			DW_AT_type :${int_label}
-			DW_AT_location [subst {
+			DW_AT_location {
 			    DW_OP_GNU_variable_value ${var_c_label}
 			    DW_OP_GNU_variable_value ${var_b_label}
 			    DW_OP_div
@@ -258,40 +258,40 @@ proc setup_exec { arg_bad } {
 			    DW_OP_GNU_variable_value ${varval_label}
 			    DW_OP_minus
 			    DW_OP_stack_value
-			}] SPECIAL_expr
+			} SPECIAL_expr
 		    }
 		    DW_TAG_variable {
 			DW_AT_name "pointerval"
 			DW_AT_type :${ptr_label}
-			DW_AT_location [subst {
+			DW_AT_location {
 			    DW_OP_GNU_variable_value ${var_p_label}
 			    DW_OP_stack_value
-			}] SPECIAL_expr
+			} SPECIAL_expr
 		    }
 		    if { $bad } {
 			DW_TAG_variable {
 			    DW_AT_name "badval"
 			    DW_AT_type :${int_label}
-			    DW_AT_location [subst {
+			    DW_AT_location {
 				DW_OP_GNU_variable_value ${var_bad_label}
 				DW_OP_stack_value
-			    }] SPECIAL_expr
+			    } SPECIAL_expr
 			}
 		    }
 		    DW_TAG_variable {
 			DW_AT_name "structval"
 			DW_AT_type :${struct_label}
-			DW_AT_location [subst {
+			DW_AT_location {
 			    DW_OP_GNU_variable_value ${var_s_label}
 			    DW_OP_stack_value
-			}] SPECIAL_expr
+			} SPECIAL_expr
 		    }
 		    DW_TAG_variable {
 			DW_AT_name "untypedval"
-			DW_AT_location [subst {
+			DW_AT_location {
 			    DW_OP_GNU_variable_value ${var_untyped_label}
 			    DW_OP_stack_value
-			}] SPECIAL_expr
+			} SPECIAL_expr
 		    }
 		    if { $bad } {
 			DW_TAG_variable {
@@ -303,10 +303,10 @@ proc setup_exec { arg_bad } {
 			}
 			DW_TAG_variable {
 			    DW_AT_name "bad_die_val2"
-			    DW_AT_location [subst {
+			    DW_AT_location {
 				DW_OP_GNU_variable_value ${ptr_label}+1
 				DW_OP_stack_value
-			    }] SPECIAL_expr
+			    } SPECIAL_expr
 			}
 		    }
 		}

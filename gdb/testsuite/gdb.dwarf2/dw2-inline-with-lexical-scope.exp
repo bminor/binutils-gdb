@@ -87,7 +87,9 @@ Dwarf::assemble $asm_file {
 		} {
 		    DW_TAG_variable {
 			DW_AT_abstract_origin %$num_label
-			DW_AT_location [subst {addr $global_num_addr}] SPECIAL_expr
+			DW_AT_location {
+			    DW_OP_addr $global_num_addr
+			} SPECIAL_expr
 		    }
 		    lexical_block {
 			DW_AT_low_pc scope_label1 addr
@@ -95,7 +97,9 @@ Dwarf::assemble $asm_file {
 		    } {
 			DW_TAG_variable {
 			    DW_AT_abstract_origin %$value_label
-			    DW_AT_location [subst {addr $global_value_addr}] SPECIAL_expr
+			    DW_AT_location {
+				DW_OP_addr $global_value_addr
+			    } SPECIAL_expr
 			}
 		    }
 		}

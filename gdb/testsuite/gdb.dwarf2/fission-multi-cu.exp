@@ -71,9 +71,9 @@ Dwarf::assemble $asm_file_1 {
 		DW_TAG_formal_parameter {
 		    DW_AT_name arg
 		    DW_AT_type :$int4_type
-		    DW_AT_location [subst {
+		    DW_AT_location {
 			DW_OP_GNU_addr_index [gdb_target_symbol global_param]
-		    }] SPECIAL_expr
+		    } SPECIAL_expr
 		}
 	    }
 	}

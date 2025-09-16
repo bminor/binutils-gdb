@@ -79,7 +79,7 @@ Dwarf::assemble $asm_file {
 	    DW_TAG_variable {
 		DW_AT_name a
 		DW_AT_type :$int_type_label
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_addr $exec_mask_var
 		    DW_OP_deref_size $int_size
 
@@ -91,7 +91,7 @@ Dwarf::assemble $asm_file {
 		    DW_OP_skip 3
 		    DW_OP_bregx $dwarf_regnum 0
 		    DW_OP_stack_value
-		}] SPECIAL_expr
+		} SPECIAL_expr
 		DW_AT_external 1 flag
 	    }
 	}

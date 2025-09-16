@@ -98,18 +98,18 @@ Dwarf::assemble ${asm_file} {
 		DW_AT_name "s1"
 		DW_AT_type :${struct_label}
 		DW_AT_external 1 DW_FORM_flag
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_addr [gdb_target_symbol "s1"]
-		}] SPECIAL_expr
+		} SPECIAL_expr
 	    }
 
 	    DW_TAG_variable {
 		DW_AT_name "s2"
 		DW_AT_type :${struct_label}
 		DW_AT_external 1 DW_FORM_flag
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_addr [gdb_target_symbol "s2"]
-		}] SPECIAL_expr
+		} SPECIAL_expr
 	    }
 
 	    DW_TAG_subprogram {
@@ -120,9 +120,9 @@ Dwarf::assemble ${asm_file} {
 	        DW_TAG_variable {
 		    DW_AT_name "ref"
 		    DW_AT_type :${ref_label}
-		    DW_AT_location [subst {
+		    DW_AT_location {
 			DW_OP_GNU_implicit_pointer ${variable_label} 0
-		    }] SPECIAL_expr
+		    } SPECIAL_expr
 		}
 	    }
 	}

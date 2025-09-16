@@ -68,16 +68,16 @@ Dwarf::assemble $asm_file {
 	    DW_TAG_variable {
 		DW_AT_name file_locaddr_resolvable
 		DW_AT_type :$integer_label
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_addr [gdb_target_symbol file_locaddr_resolvable]
-		}] SPECIAL_expr
+		} SPECIAL_expr
 	    }
 	    DW_TAG_variable {
 		DW_AT_name file_locaddr_unresolvable
 		DW_AT_type :$integer_label
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_addr [gdb_target_symbol file_locaddr_resolvable]
-		}] SPECIAL_expr
+		} SPECIAL_expr
 	    }
 
 	    DW_TAG_variable {
@@ -106,17 +106,17 @@ Dwarf::assemble $asm_file {
 		DW_AT_name file_extern_locaddr_resolvable
 		DW_AT_type :$integer_label
 		DW_AT_external 1 flag
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_addr [gdb_target_symbol file_extern_locaddr_resolvable]
-		}] SPECIAL_expr
+		} SPECIAL_expr
 	    }
 	    DW_TAG_variable {
 		DW_AT_name file_extern_locaddr_unresolvable
 		DW_AT_type :$integer_label
 		DW_AT_external 1 flag
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_addr [gdb_target_symbol file_extern_locaddr_resolvable]
-		}] SPECIAL_expr
+		} SPECIAL_expr
 	    }
 
 	    DW_TAG_variable {
@@ -140,16 +140,16 @@ Dwarf::assemble $asm_file {
 	    DW_TAG_variable {
 		DW_AT_name main_local_locaddr_resolvable
 		DW_AT_type :$integer_label
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_addr [gdb_target_symbol main_local_locaddr_resolvable]
-		}] SPECIAL_expr
+		} SPECIAL_expr
 	    }
 	    DW_TAG_variable {
 		DW_AT_name main_local_locaddr_unresolvable
 		DW_AT_type :$integer_label
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_addr [gdb_target_symbol main_local_locaddr_resolvable]
-		}] SPECIAL_expr
+		} SPECIAL_expr
 	    }
 
 	    DW_TAG_variable {
@@ -178,17 +178,17 @@ Dwarf::assemble $asm_file {
 		DW_AT_name main_extern_locaddr_resolvable
 		DW_AT_type :$integer_label
 		DW_AT_external 1 flag
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_addr [gdb_target_symbol main_extern_locaddr_resolvable]
-		}] SPECIAL_expr
+		} SPECIAL_expr
 	    }
 	    DW_TAG_variable {
 		DW_AT_name main_extern_locaddr_unresolvable
 		DW_AT_type :$integer_label
 		DW_AT_external 1 flag
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_addr [gdb_target_symbol main_extern_locaddr_resolvable]
-		}] SPECIAL_expr
+		} SPECIAL_expr
 	    }
 	}
     }

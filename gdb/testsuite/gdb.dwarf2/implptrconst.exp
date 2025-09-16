@@ -67,17 +67,17 @@ Dwarf::assemble $asm_file {
 	    DW_TAG_variable {
 		DW_AT_name c
 		DW_AT_type :$ptr_label
-		DW_AT_location [subst {
-		    GNU_implicit_pointer $var_label 0
-		}] SPECIAL_expr
+		DW_AT_location {
+		    DW_OP_GNU_implicit_pointer $var_label 0
+		} SPECIAL_expr
 	    }
 
 	    DW_TAG_variable {
 		DW_AT_name d
 		DW_AT_type :$ptr_label
-		DW_AT_location [subst {
-		    GNU_implicit_pointer $var_label 2
-		}] SPECIAL_expr
+		DW_AT_location {
+		    DW_OP_GNU_implicit_pointer $var_label 2
+		} SPECIAL_expr
 	    }
 	}
     }

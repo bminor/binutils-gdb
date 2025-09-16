@@ -89,18 +89,18 @@ proc run_test { field_name } {
 		DW_TAG_variable {
 		    DW_AT_name obj
 		    DW_AT_type :$stype
-		    DW_AT_location [subst {
+		    DW_AT_location {
 			DW_OP_addr [gdb_target_symbol obj]
-		    }] SPECIAL_expr
+		    } SPECIAL_expr
 		    DW_AT_external 1 flag
 		}
 
 		DW_TAG_variable {
 		    DW_AT_name ptr
 		    DW_AT_type :$ptype
-		    DW_AT_location [subst {
+		    DW_AT_location {
 			DW_OP_addr [gdb_target_symbol ptr]
-		    }] SPECIAL_expr
+		    } SPECIAL_expr
 		    DW_AT_external 1 flag
 		}
 	    }

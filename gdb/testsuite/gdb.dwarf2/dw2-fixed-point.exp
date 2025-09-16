@@ -41,18 +41,18 @@ Dwarf::assemble $asm_file {
 	    DW_TAG_variable {
 		DW_AT_name pck__fp1_var
 		DW_AT_type :$fp1_base_type
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_addr [gdb_target_symbol pck__fp1_var]
-		}] SPECIAL_expr
+		} SPECIAL_expr
 		DW_AT_external 1 flag
 	    }
 
 	    DW_TAG_variable {
 		DW_AT_name pck__fp1_var2
 		DW_AT_type :$fp1_base_type
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_addr [gdb_target_symbol pck__fp1_var2]
-		}] SPECIAL_expr
+		} SPECIAL_expr
 		DW_AT_external 1 flag
 	    }
 
@@ -66,9 +66,9 @@ Dwarf::assemble $asm_file {
 	    DW_TAG_variable {
 		DW_AT_name pck__fp2_var
 		DW_AT_type :$fp2_base_type
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_addr [gdb_target_symbol pck__fp2_var]
-		}] SPECIAL_expr
+		} SPECIAL_expr
 		DW_AT_external 1 flag
 	    }
 
@@ -87,9 +87,9 @@ Dwarf::assemble $asm_file {
 	    DW_TAG_variable {
 		DW_AT_name pck__fp3_var
 		DW_AT_type :$fp3_base_type
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_addr [gdb_target_symbol pck__fp3_var]
-		}] SPECIAL_expr
+		} SPECIAL_expr
 		DW_AT_external 1 flag
 	    }
 
@@ -103,9 +103,9 @@ Dwarf::assemble $asm_file {
 	     DW_TAG_variable {
 		 DW_AT_name pck__fp1_range_var
 		 DW_AT_type :$fp1_range_type
-		 DW_AT_location [subst {
+		 DW_AT_location {
 		     DW_OP_addr [gdb_target_symbol pck__fp1_range_var]
-		 }] SPECIAL_expr
+		 } SPECIAL_expr
 		 DW_AT_external 1 flag
 	     }
 	}

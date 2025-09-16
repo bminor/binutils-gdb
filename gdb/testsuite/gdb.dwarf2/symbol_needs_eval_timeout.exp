@@ -79,24 +79,24 @@ Dwarf::assemble $asm_file {
 	    DW_TAG_variable {
 		DW_AT_name exec_mask
 		DW_AT_type :$int_type_label
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_addr $exec_mask_var
-		}] SPECIAL_expr
+		} SPECIAL_expr
 		DW_AT_external 1 flag
 	    }
 
 	    # add info for subprogram main
 	    DW_TAG_subprogram {
 		MACRO_AT_func { main }
-		DW_AT_frame_base [subst {
+		DW_AT_frame_base {
 		    DW_OP_regx $dwarf_regnum
-		}] SPECIAL_expr
+		} SPECIAL_expr
 	    } {
 		# define artificial variable a
 		DW_TAG_variable {
 		    DW_AT_name a
 		    DW_AT_type :$int_type_label
-		    DW_AT_location [subst {
+		    DW_AT_location {
 			DW_OP_lit1
 			DW_OP_addr $exec_mask_var
 			DW_OP_deref_size $int_size
@@ -112,7 +112,7 @@ Dwarf::assemble $asm_file {
 			# conditional jump to DW_OP_drop
 			DW_OP_bra -9
 			DW_OP_stack_value
-		    }] SPECIAL_expr
+		    } SPECIAL_expr
 		    DW_AT_external 1 flag
 		}
 	    }

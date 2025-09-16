@@ -38,7 +38,9 @@ Dwarf::assemble $asm_file {
 		    DW_AT_name ~S
 		    DW_AT_external 1 flag
 		    DW_AT_virtuality @DW_VIRTUALITY_virtual
-		    DW_AT_vtable_elem_location {const1u 1} SPECIAL_expr
+		    DW_AT_vtable_elem_location {
+			DW_OP_const1u 1
+		    } SPECIAL_expr
 		}
 	    }
 	}

@@ -80,12 +80,16 @@ Dwarf::assemble $asm_file {
 		formal_parameter {
 		    DW_AT_name I
 		    DW_AT_type :$int_label
-		    DW_AT_location [subst {addr $global_I}] SPECIAL_expr
+		    DW_AT_location {
+			DW_OP_addr $global_I
+		    } SPECIAL_expr
 		}
 		formal_parameter {
 		    DW_AT_name J
 		    DW_AT_type :$int_label
-		    DW_AT_location [subst {addr $global_J}] SPECIAL_expr
+		    DW_AT_location {
+			DW_OP_addr $global_J
+		    } SPECIAL_expr
 		}
 		entry_point {
 		    DW_AT_name foo
@@ -96,12 +100,16 @@ Dwarf::assemble $asm_file {
 		    formal_parameter {
 			DW_AT_name J
 			DW_AT_type :$int_label
-			DW_AT_location [subst {addr $global_J}] SPECIAL_expr
+			DW_AT_location {
+			    DW_OP_addr $global_J
+			} SPECIAL_expr
 		    }
 		    formal_parameter {
 			DW_AT_name K
 			DW_AT_type :$int_label
-			DW_AT_location [subst {addr $global_K}] SPECIAL_expr
+			DW_AT_location {
+			    DW_OP_addr $global_K
+			} SPECIAL_expr
 		    }
 		}
 		entry_point {
@@ -113,7 +121,9 @@ Dwarf::assemble $asm_file {
 		    formal_parameter {
 			DW_AT_name J
 			DW_AT_type :$int_label
-			DW_AT_location [subst {addr $global_J}] SPECIAL_expr
+			DW_AT_location {
+			    DW_OP_addr $global_J
+			} SPECIAL_expr
 		    }
 		}
 	    }
@@ -142,12 +152,16 @@ Dwarf::assemble $asm_file {
 		formal_parameter {
 		    DW_AT_name I
 		    DW_AT_type :$int2_label
-		    DW_AT_location [subst {addr $global_I}] SPECIAL_expr
+		    DW_AT_location {
+			DW_OP_addr $global_I
+		    } SPECIAL_expr
 		}
 		formal_parameter {
 		    DW_AT_name J
 		    DW_AT_type :$int2_label
-		    DW_AT_location [subst {addr $global_J}] SPECIAL_expr
+		    DW_AT_location {
+			DW_OP_addr $global_J
+		    } SPECIAL_expr
 		}
 		entry_point {
 		    DW_AT_name fooso
@@ -158,12 +172,16 @@ Dwarf::assemble $asm_file {
 		    formal_parameter {
 			DW_AT_name J
 			DW_AT_type :$int2_label
-			DW_AT_location [subst {addr $global_J}] SPECIAL_expr
+			DW_AT_location {
+			    DW_OP_addr $global_J
+			} SPECIAL_expr
 		    }
 		    formal_parameter {
 			DW_AT_name K
 			DW_AT_type :$int2_label
-			DW_AT_location [subst {addr $global_K}] SPECIAL_expr
+			DW_AT_location {
+			    DW_OP_addr $global_K
+			} SPECIAL_expr
 		    }
 		}
 	    }

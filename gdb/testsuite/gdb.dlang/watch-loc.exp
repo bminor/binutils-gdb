@@ -48,9 +48,9 @@ Dwarf::assemble $asm_file {
 		tag_variable {
 		    DW_AT_name my_data
 		    DW_AT_type :$watch_struct_label
-		    DW_AT_location [subst {
-			addr [gdb_target_symbol my_data]
-		    }] SPECIAL_expr
+		    DW_AT_location {
+			DW_OP_addr [gdb_target_symbol my_data]
+		    } SPECIAL_expr
 		    DW_AT_external 1 flag
 		}
 

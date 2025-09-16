@@ -82,11 +82,11 @@ proc test_1 { name dwarf_version offset_size addr_size ref_addr_size two_cu } {
 			 DW_AT_external 1 flag
 		    } {
 			DW_TAG_variable {
-			     DW_AT_name p
-			    DW_AT_location [subst {
-				GNU_implicit_pointer $variable_label 0
-			    }] SPECIAL_expr
-			     DW_AT_type :$pointer_label "DW_FORM_ref$ref_addr_size"
+			    DW_AT_name p
+			    DW_AT_location {
+				DW_OP_GNU_implicit_pointer $variable_label 0
+			    } SPECIAL_expr
+			    DW_AT_type :$pointer_label "DW_FORM_ref$ref_addr_size"
 			}
 		    }
 		}
@@ -110,11 +110,11 @@ proc test_1 { name dwarf_version offset_size addr_size ref_addr_size two_cu } {
 			 DW_AT_external 1 flag
 		    } {
 			DW_TAG_variable {
-			     DW_AT_name p
-			    DW_AT_location [subst {
-				GNU_implicit_pointer $variable_label 0
-			    }] SPECIAL_expr
-			     DW_AT_type %$pointer_label
+			    DW_AT_name p
+			    DW_AT_location {
+				DW_OP_GNU_implicit_pointer $variable_label 0
+			    } SPECIAL_expr
+			    DW_AT_type %$pointer_label
 			}
 		    }
 		}

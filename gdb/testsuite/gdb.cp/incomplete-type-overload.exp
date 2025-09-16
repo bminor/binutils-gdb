@@ -120,32 +120,36 @@ Dwarf::assemble ${asm_file} {
 	DW_TAG_variable {
 	    DW_AT_name "comp"
 	    DW_AT_type :$complete_label
-	    DW_AT_location [subst {DW_OP_addr [gdb_target_symbol "comp"]}] \
-		SPECIAL_expr
+	    DW_AT_location {
+		DW_OP_addr [gdb_target_symbol "comp"]
+	    } SPECIAL_expr
 	    DW_AT_external 1 DW_FORM_flag
 	}
 
 	DW_TAG_variable {
 	    DW_AT_name "cp"
 	    DW_AT_type :$ptr_comp_label
-	    DW_AT_location [subst {DW_OP_addr [gdb_target_symbol "cp"]}] \
-		SPECIAL_expr
+	    DW_AT_location {
+		DW_OP_addr [gdb_target_symbol "cp"]
+	    } SPECIAL_expr
 	    DW_AT_external 1 DW_FORM_flag
 	}
 
 	DW_TAG_variable {
 	    DW_AT_name "inc"
 	    DW_AT_type :$ptr_inc_label
-	    DW_AT_location [subst {DW_OP_addr [gdb_target_symbol "inc"]}] \
-		SPECIAL_expr
+	    DW_AT_location {
+		DW_OP_addr [gdb_target_symbol "inc"]
+	    } SPECIAL_expr
 	    DW_AT_external 1 DW_FORM_flag
 	}
 
 	DW_TAG_variable {
 	    DW_AT_name "ip"
 	    DW_AT_type :$ptr_int_label
-	    DW_AT_location [subst {DW_OP_addr [gdb_target_symbol "ip"]}] \
-		SPECIAL_expr
+	    DW_AT_location {
+		DW_OP_addr [gdb_target_symbol "ip"]
+	    } SPECIAL_expr
 	    DW_AT_external 1 DW_FORM_flag
 	}
 

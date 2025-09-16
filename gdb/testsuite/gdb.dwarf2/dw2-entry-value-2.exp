@@ -63,11 +63,11 @@ Dwarf::assemble $asm_file {
 		DW_TAG_variable {
 		     DW_AT_name argc
 		     DW_AT_type :$integer
-		     DW_AT_location [subst {
+		     DW_AT_location {
 			DW_OP_entry_value {
 			    DW_OP_regx $::dwarf_regnum
 			}
-		    }] SPECIAL_expr
+		     } SPECIAL_expr
 		}
 	    }
 
@@ -79,13 +79,13 @@ Dwarf::assemble $asm_file {
 		DW_TAG_variable {
 		     DW_AT_name foo
 		     DW_AT_type :$integer
-		     DW_AT_location [subst {
+		     DW_AT_location {
 			DW_OP_entry_value {
 			    DW_OP_bregx $::dwarf_regnum 0
 			    DW_OP_deref_size 4
 			}
 			DW_OP_stack_value
-		    }] SPECIAL_expr
+		     } SPECIAL_expr
 		}
 	    }
 	}

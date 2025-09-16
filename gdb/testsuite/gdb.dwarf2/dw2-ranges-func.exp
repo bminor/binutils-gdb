@@ -88,7 +88,9 @@ proc do_test {suffix} {
 		    DW_AT_name e
 		    DW_AT_external 1 flag
 		    DW_AT_type :$volatile_label
-		    DW_AT_location [subst {addr $e_var}] SPECIAL_expr
+		    DW_AT_location {
+			DW_OP_addr $e_var
+		    } SPECIAL_expr
 		}
 		subprogram {
 		    DW_AT_external 1 flag

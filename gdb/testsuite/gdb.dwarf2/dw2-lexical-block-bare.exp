@@ -44,9 +44,9 @@ Dwarf::assemble $asm_file {
 			DW_AT_name testvar
 			DW_AT_type :$integer_label
 			DW_AT_external 1 flag
-			DW_AT_location [subst {
+			DW_AT_location {
 			    DW_OP_addr [gdb_target_symbol main]
-			}] SPECIAL_expr
+			} SPECIAL_expr
 		    }
 		}
 	    }

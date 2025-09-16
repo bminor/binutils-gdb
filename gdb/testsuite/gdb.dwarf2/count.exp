@@ -81,8 +81,8 @@ Dwarf::assemble $asm_file {
 	    vla_length_label:
 	    DW_TAG_variable {
 		DW_AT_location {
-		    lit6
-		    stack_value
+		    DW_OP_lit6
+		    DW_OP_stack_value
 		} SPECIAL_expr
 		DW_AT_name "__vla_array_length"
 		DW_AT_type :$long_unsigned_int_label

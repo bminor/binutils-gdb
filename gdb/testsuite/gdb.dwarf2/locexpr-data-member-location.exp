@@ -202,11 +202,12 @@ Dwarf::assemble ${asm_file} {
 		# chosen.
 		DW_TAG_inheritance {
 		    DW_AT_type :$class_A_label
-		    DW_AT_data_member_location [subst {
+		    DW_AT_data_member_location {
 			DW_OP_constu ${::B_a}
 			DW_OP_plus
 			DW_OP_pick 0
-			DW_OP_drop}] SPECIAL_expr
+			DW_OP_drop
+		    } SPECIAL_expr
 		    DW_AT_accessibility 1 DW_FORM_data1
 		}
 		DW_TAG_member {
@@ -230,18 +231,18 @@ Dwarf::assemble ${asm_file} {
 		DW_AT_name "g_A"
 		DW_AT_type :$class_A_label
 		DW_AT_external 1 flag
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_addr [gdb_target_symbol "g_A"]
-		}] SPECIAL_expr
+		} SPECIAL_expr
 	    }
 
 	    DW_TAG_variable {
 		DW_AT_name "g_B"
 		DW_AT_type :$class_B_label
 		DW_AT_external 1 flag
-		DW_AT_location [subst {
+		DW_AT_location {
 		    DW_OP_addr [gdb_target_symbol "g_B"]
-		}] SPECIAL_expr
+		} SPECIAL_expr
 	    }
 
 	    # We can't use MACRO_AT for the definitions of foo and bar
