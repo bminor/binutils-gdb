@@ -58,7 +58,7 @@ proc test_float_rejected {} {
 
 clean_restart
 
-if [set_lang_go] {
+if {[set_lang_go]} {
     test_float_accepted
     test_float_rejected
 } else {
