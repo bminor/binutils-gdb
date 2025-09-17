@@ -71,6 +71,7 @@ gdb_assert {[dict exists [lindex $breakpoints 0] instructionReference]} \
 # slipped in that caused this to be incorrect, so we test both parts
 # here; to test whether a string was given, we have to reach into the
 # TON form.
+# tclint-disable-next-line command-args
 set list_form [namespace eval ton::2list $last_ton]
 set ref [namespace eval ton::2list {
     get $list_form body breakpoints 0 instructionReference

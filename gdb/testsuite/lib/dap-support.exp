@@ -117,6 +117,7 @@ proc dap_to_ton {obj} {
 
 # Format the object OBJ, in TON format, as JSON and send it to gdb.
 proc _dap_send_ton {obj} {
+    # tclint-disable-next-line command-args
     set json [namespace eval ton::2json $obj]
     # FIXME this is wrong for non-ASCII characters.
     set len [string length $json]
@@ -170,7 +171,7 @@ proc _dap_read_json {} {
     }
 
     if {$seen_timeout} {
-	error "timeout reading json header"	
+	error "timeout reading json header"
     }
     if {$seen_eof} {
 	error "eof reading json header"
@@ -200,7 +201,7 @@ proc _dap_read_json {} {
 	}
 
 	if {$seen_timeout} {
-	    error "timeout reading json header"	
+	    error "timeout reading json header"
 	}
 	if {$seen_eof} {
 	    error "eof reading json header"
@@ -211,6 +212,7 @@ proc _dap_read_json {} {
 
     global last_ton
     set last_ton [ton::json2ton $json]
+    # tclint-disable-next-line command-args
     return [namespace eval ton::2dict $last_ton]
 }
 

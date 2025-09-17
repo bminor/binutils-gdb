@@ -30,8 +30,10 @@ if {[dap_initialize] == ""} {
     return
 }
 
-catch "close -i $gdb_spawn_id"
-catch "wait -i $gdb_spawn_id"
+# Expect support is missing ( https://github.com/nmoroze/tclint/issues/118 ).
+# tclint-disable-next-line command-args
+catch {close -i $gdb_spawn_id}
+catch {wait -i $gdb_spawn_id}
 unset gdb_spawn_id
 
 dap_check_log_file
