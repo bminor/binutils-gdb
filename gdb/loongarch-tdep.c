@@ -22,6 +22,7 @@
 #include "dwarf2/frame.h"
 #include "elf-bfd.h"
 #include "extract-store-integer.h"
+#include "frame-base.h"
 #include "frame-unwind.h"
 #include "gdbcore.h"
 #include "linux-record.h"
@@ -786,6 +787,26 @@ static const struct frame_unwind_legacy loongarch_frame_unwind (
   /*.dealloc_cache =*/nullptr,
   /*.prev_arch	   =*/nullptr
 );
+
+/* Return the frame base address of *THIS_FRAME.  */
+
+static CORE_ADDR
+loongarch_frame_base_address (const frame_info_ptr &this_frame, void **this_cache)
+{
+  struct loongarch_frame_cache *cache
+    = loongarch_frame_cache (this_frame, this_cache);
+
+  return cache->prev_sp - cache->framebase_offset;
+}
+
+/* LoongArch default frame base information.  */
+static frame_base loongarch_frame_base =
+{
+  &loongarch_frame_unwind,
+  loongarch_frame_base_address,
+  loongarch_frame_base_address,
+  loongarch_frame_base_address
+};
 
 /* Write the contents of buffer VAL into the general-purpose argument
    register defined by GAR in REGCACHE.  GAR indicates the available
@@ -2206,6 +2227,8 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, loongarch_dwarf2_reg_to_regnum);
   dwarf2_append_unwinders (gdbarch);
   frame_unwind_append_unwinder (gdbarch, &loongarch_frame_unwind);
+
+  frame_base_set_default (gdbarch, &loongarch_frame_base);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
