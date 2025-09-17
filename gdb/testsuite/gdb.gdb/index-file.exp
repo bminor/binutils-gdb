@@ -107,7 +107,7 @@ proc check_symbol_table_usage { filename } {
 	_ _ _ symbol_table_offset shortcut_offset
 
     # The length of the symbol hash table (in entries).
-    set len [expr ($shortcut_offset - $symbol_table_offset) / 8]
+    set len [expr {($shortcut_offset - $symbol_table_offset) / 8}]
 
     # Now walk the hash table and count how many entries are in use.
     set offset $symbol_table_offset
@@ -127,7 +127,7 @@ proc check_symbol_table_usage { filename } {
     close $fp
 
     # Calculate how full the cache is.
-    set pct [expr (100 * double($count)) / $len]
+    set pct [expr {(100 * double($count)) / $len}]
 
     # Write our results out to the gdb.log.
     verbose -log "Hash table size: $len"
@@ -153,7 +153,7 @@ if { $worker_threads > 1 } {
     clean_restart
 
     # Adjust the number of threads to use.
-    set reduced_threads [expr $worker_threads / 2]
+    set reduced_threads [expr {$worker_threads / 2}]
     gdb_test_no_output "maint set worker-threads $reduced_threads"
 
     with_timeout_factor $timeout_factor {
