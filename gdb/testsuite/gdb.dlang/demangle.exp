@@ -197,7 +197,7 @@ proc test_d_demangling {} {
 
 clean_restart
 
-if [set_lang_d] {
+if {[set_lang_d]} {
     gdb_test_no_output "set width 0"
 
     test_d_demangling

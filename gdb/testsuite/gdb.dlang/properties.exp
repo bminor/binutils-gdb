@@ -82,7 +82,7 @@ proc test_d_typeof {} {
 
 clean_restart
 
-if [set_lang_d] {
+if {[set_lang_d]} {
     test_d_sizeof
     test_d_typeof
 } else {

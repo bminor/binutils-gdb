@@ -129,7 +129,7 @@ proc test_d_expressions {} {
 
 clean_restart
 
-if [set_lang_d] {
+if {[set_lang_d]} {
     test_d_integer_literals
     test_d_float_literals
     test_d_expressions
