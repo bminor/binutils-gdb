@@ -428,7 +428,8 @@ void
 compunit_symtab::set_call_site_htab (call_site_htab_t &&call_site_htab)
 {
   gdb_assert (m_call_site_htab == nullptr);
-  m_call_site_htab = new call_site_htab_t (std::move (call_site_htab));
+  m_call_site_htab
+    = std::make_unique<call_site_htab_t> (std::move (call_site_htab));
 }
 
 /* See symtab.h.  */
@@ -513,7 +514,6 @@ compunit_symtab::compunit_symtab (struct objfile *objfile,
 compunit_symtab::~compunit_symtab ()
 {
   this->forget_cached_source_info ();
-  delete m_call_site_htab;
 }
 
 /* The relocated address of the minimal symbol, using the section

@@ -2006,7 +2006,7 @@ struct compunit_symtab : intrusive_list_node<compunit_symtab>
   unsigned int m_epilogue_unwind_valid : 1;
 
   /* struct call_site entries for this compilation unit or NULL.  */
-  call_site_htab_t *m_call_site_htab = nullptr;
+  std::unique_ptr<call_site_htab_t> m_call_site_htab;
 
   /* The macro table for this symtab.  Like the blockvector, this
      is shared between different symtabs in a given compilation unit.
