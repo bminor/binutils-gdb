@@ -1322,8 +1322,8 @@ linux_core_xfer_siginfo (struct gdbarch *gdbarch, struct bfd &cbfd,
 
 typedef int linux_find_memory_region_ftype (ULONGEST vaddr, ULONGEST size,
 					    ULONGEST offset,
-					    int read, int write,
-					    int exec, int modified,
+					    bool read, bool write,
+					    bool exec, bool modified,
 					    bool memory_tagged,
 					    const std::string &filename,
 					    void *data);
@@ -1596,7 +1596,7 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 	{
 	  func (map.start_address, map.end_address - map.start_address,
 		map.offset, map.read, map.write, map.exec,
-		1, /* MODIFIED is true because we want to dump
+		true, /* MODIFIED is true because we want to dump
 		      the mapping.  */
 		map.vmflags.memory_tagging != 0,
 		map.filename, obfd);
@@ -1626,8 +1626,8 @@ struct linux_find_memory_regions_data
 static int
 linux_find_memory_regions_thunk (ULONGEST vaddr, ULONGEST size,
 				 ULONGEST offset,
-				 int read, int write, int exec, int modified,
-				 bool memory_tagged,
+				 bool read, bool write, bool exec,
+				 bool modified, bool memory_tagged,
 				 const std::string &filename, void *arg)
 {
   struct linux_find_memory_regions_data *data
@@ -1683,7 +1683,7 @@ struct linux_make_mappings_data
 static int
 linux_make_mappings_callback (ULONGEST vaddr, ULONGEST size,
 			      ULONGEST offset,
-			      int read, int write, int exec, int modified,
+			      bool read, bool write, bool exec, bool modified,
 			      bool memory_tagged,
 			      const std::string &filename, void *data)
 {

@@ -225,8 +225,8 @@ extern const char *pc_prefix (CORE_ADDR);
    DATA is passed without changes from a caller.  */
 
 typedef int (*find_memory_region_ftype) (CORE_ADDR addr, unsigned long size,
-					 int read, int write, int exec,
-					 int modified, bool memory_tagged,
+					 bool read, bool write, bool exec,
+					 bool modified, bool memory_tagged,
 					 void *data);
 
 /* * Possible lvalue types.  Like enum language, this should be in

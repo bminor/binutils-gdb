@@ -398,8 +398,8 @@ make_output_phdrs (bfd *obfd, asection *osec)
    DATA is 'bfd *' for the core file GDB is creating.  */
 
 static int
-gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
-		       int write, int exec, int modified, bool memory_tagged,
+gcore_create_callback (CORE_ADDR vaddr, unsigned long size, bool read,
+		       bool write, bool exec, bool modified, bool memory_tagged,
 		       void *data)
 {
   bfd *obfd = (bfd *) data;
@@ -409,7 +409,7 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
   /* If the memory segment has no permissions set, ignore it, otherwise
      when we later try to access it for read/write, we'll get an error
      or jam the kernel.  */
-  if (read == 0 && write == 0 && exec == 0 && modified == 0)
+  if (!read && !write && !exec && !modified)
     {
       if (info_verbose)
 	gdb_printf ("Ignore segment, %s bytes at %s\n",
@@ -419,7 +419,7 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
       return 0;
     }
 
-  if (write == 0 && modified == 0 && !solib_keep_data_in_core (vaddr, size))
+  if (!write && !modified && !solib_keep_data_in_core (vaddr, size))
     {
       /* See if this region of memory lies inside a known file on disk.
 	 If so, we can avoid copying its contents by clearing SEC_LOAD.  */
@@ -453,7 +453,7 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
     keep:;
     }
 
-  if (write == 0)
+  if (!write)
     flags |= SEC_READONLY;
 
   if (exec)
@@ -489,8 +489,8 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
 
 static int
 gcore_create_memtag_section_callback (CORE_ADDR vaddr, unsigned long size,
-				      int read, int write, int exec,
-				      int modified, bool memory_tagged,
+				      bool read, bool write, bool exec,
+				      bool modified, bool memory_tagged,
 				      void *data)
 {
   /* Are there memory tags in this particular memory map entry?  */
@@ -548,10 +548,10 @@ objfile_find_memory_regions (struct target_ops *self,
 	    int ret;
 
 	    ret = (*func) (objsec.addr (), size,
-			   1, /* All sections will be readable.  */
+			   true, /* All sections will be readable.  */
 			   (flags & SEC_READONLY) == 0, /* Writable.  */
 			   (flags & SEC_CODE) != 0, /* Executable.  */
-			   1, /* MODIFIED is unknown, pass it as true.  */
+			   true, /* MODIFIED is unknown, pass it as true.  */
 			   false, /* No memory tags in the object file.  */
 			   obfd);
 	    if (ret != 0)
@@ -562,10 +562,10 @@ objfile_find_memory_regions (struct target_ops *self,
   /* Make a stack segment.  */
   if (derive_stack_segment (&temp_bottom, &temp_top))
     (*func) (temp_bottom, temp_top - temp_bottom,
-	     1, /* Stack section will be readable.  */
-	     1, /* Stack section will be writable.  */
-	     0, /* Stack section will not be executable.  */
-	     1, /* Stack section will be modified.  */
+	     true, /* Stack section will be readable.  */
+	     true, /* Stack section will be writable.  */
+	     false, /* Stack section will not be executable.  */
+	     true, /* Stack section will be modified.  */
 	     false, /* No memory tags in the object file.  */
 	     obfd);
 
@@ -573,10 +573,10 @@ objfile_find_memory_regions (struct target_ops *self,
   if (derive_heap_segment (current_program_space->exec_bfd (), &temp_bottom,
 			   &temp_top))
     (*func) (temp_bottom, temp_top - temp_bottom,
-	     1, /* Heap section will be readable.  */
-	     1, /* Heap section will be writable.  */
-	     0, /* Heap section will not be executable.  */
-	     1, /* Heap section will be modified.  */
+	     true, /* Heap section will be readable.  */
+	     true, /* Heap section will be writable.  */
+	     false, /* Heap section will not be executable.  */
+	     true, /* Heap section will be modified.  */
 	     false, /* No memory tags in the object file.  */
 	     obfd);
 

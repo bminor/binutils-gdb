@@ -3168,7 +3168,7 @@ find_memory_regions_callback (struct prmap *map,
 		  (map->pr_mflags & MA_READ) != 0,
 		  (map->pr_mflags & MA_WRITE) != 0,
 		  (map->pr_mflags & MA_EXEC) != 0,
-		  1, /* MODIFIED is unknown, pass it as true.  */
+		  true, /* MODIFIED is unknown, pass it as true.  */
 		  false,
 		  data);
 }

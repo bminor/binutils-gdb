@@ -2623,7 +2623,7 @@ gnu_nat_target::find_memory_regions (find_memory_region_ftype func,
 		     last_protection & VM_PROT_READ,
 		     last_protection & VM_PROT_WRITE,
 		     last_protection & VM_PROT_EXECUTE,
-		     1, /* MODIFIED is unknown, pass it as true.  */
+		     true, /* MODIFIED is unknown, pass it as true.  */
 		     false, /* No memory tags in the object file.  */
 		     data);
 	  last_region_address = region_address;

@@ -188,7 +188,7 @@ fbsd_nat_target::find_memory_regions (find_memory_region_ftype func,
 	 Pass MODIFIED as true, we do not know the real modification state.  */
       func (kve->kve_start, size, kve->kve_protection & KVME_PROT_READ,
 	    kve->kve_protection & KVME_PROT_WRITE,
-	    kve->kve_protection & KVME_PROT_EXEC, 1, false, data);
+	    kve->kve_protection & KVME_PROT_EXEC, true, false, data);
     }
   return 0;
 }
