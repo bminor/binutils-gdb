@@ -3,3 +3,6 @@ include = "\\.py(\\.in)?$"
 
 [tool.pyright]
 typeCheckingMode = "strict"
+
+[tool.isort]
+profile = "black"
