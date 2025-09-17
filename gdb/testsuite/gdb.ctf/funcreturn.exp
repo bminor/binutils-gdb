@@ -15,7 +15,7 @@
 
 require allow_ctf_tests
 
-if [target_info exists no_long_long] {
+if {[target_info exists no_long_long]} {
     set exec_opts [list debug additional_flags=-DNO_LONG_LONG]
 } else {
     set exec_opts [list debug]
@@ -91,7 +91,7 @@ gdb_test "print v_unsigned_long_func" \
     "$decimal = \{unsigned long|long \\(\\)\} 0x\[0-9a-z\]+ <v_unsigned_long_func>.*" \
     "print unsigned long function"
 
-if ![target_info exists no_long_long] {
+if {![target_info exists no_long_long]} {
     gdb_test "print v_long_long_func" \
 	    "$decimal = \{long long \\(\\)\} 0x\[0-9a-z\]+ <v_long_long_func>.*" \
 		"print long long function"
@@ -164,7 +164,7 @@ gdb_test "whatis v_unsigned_long_func" \
     "type = (unsigned (int|long|long int)|long unsigned int) \\($void\\)" \
     "whatis unsigned long function"
 
-if ![target_info exists no_long_long] {
+if {![target_info exists no_long_long]} {
     gdb_test "whatis v_long_long_func" \
 	"type = long long(| int) \\($void\\)" \
 	"whatis long long function"
