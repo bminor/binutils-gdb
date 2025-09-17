@@ -22,7 +22,7 @@ proc do_test {lang} {
 
     standard_testfile
     set exefile $testfile
-    if [info exists compiler_info] {
+    if {[info exists compiler_info]} {
 	# Unsetting compiler_info allows us to switch compilers
 	# used by prepare_for_testing.
         unset compiler_info

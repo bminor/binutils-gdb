@@ -31,7 +31,7 @@ if {[prepare_for_testing "failed to prepare" $execfile \
 gdb_test "skip function dupname" \
 	 {Function dupname will be skipped when stepping\.}
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -63,7 +63,7 @@ gdb_test_no_output "skip delete 1"
 gdb_test "skip file thefile.cc" \
 	 {File thefile\.cc will be skipped when stepping\.}
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

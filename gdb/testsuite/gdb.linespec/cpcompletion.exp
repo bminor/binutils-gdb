@@ -779,7 +779,7 @@ proc test_makem_1 {arglist_list expected_list} {
     send_log "expecting $expected_list\n"
 
     # Do list equality via canonical strings.
-    if {[expr {[list {*}$expected_list] eq [list {*}$result]}]} {
+    if {[string eq $expected_list eq $result]} {
 	pass "makem unit test: $arglist"
     } else {
 	fail "makem unit test: $arglist"

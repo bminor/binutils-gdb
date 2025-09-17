@@ -93,7 +93,7 @@ foreach loc {
     "NS1::NS2::AliasTempl<int>::static_method<int>(NS1::NS2::object*)"
     "NS1::NS2::AliasTempl<int>::static_method<int>(NS1::NS2::object_p)"
 } {
-    if [test_compiler_info gcc*] {
+    if {[test_compiler_info gcc*]} {
 	# While Clang emits "AliasTempl<int>" (etc.) typedefs, GCC
 	# emits "AliasTempl" typedefs with no template parameter info.
 	setup_xfail gcc/95437 *-*-*
@@ -104,7 +104,7 @@ foreach loc {
     # instead of succeeding with e.g., "AliasTempl<int>" preserved in
     # the location text.  If that ever happens, we'll need to update
     # these tests.
-    if [test_compiler_info gcc*] {
+    if {[test_compiler_info gcc*]} {
 	check_setting_bp_fails "b $loc"
     }
 }
