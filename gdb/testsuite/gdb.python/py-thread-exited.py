@@ -26,6 +26,8 @@ def thread_exited_handler(event):
     global threadOneExit, threadTwoExit, mainThreadExit
     print("{}".format(event))
     assert isinstance(event, gdb.ThreadExitedEvent)
+    # Also check the inheritance.
+    assert isinstance(event, gdb.ThreadEvent)
     if threadOneExit == "":
         threadOneExit = "event type: thread-exited. global num: {}".format(
             event.inferior_thread.global_num
