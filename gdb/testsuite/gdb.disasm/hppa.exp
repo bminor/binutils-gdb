@@ -23,7 +23,7 @@ set srcfile ${srcdir}/${subdir}/${testfile}.s
 set binfile ${objdir}/${subdir}/${testfile}
 set comp_output [gdb_compile "${srcfile}" "${binfile}" executable ""]
 if  { $comp_output != "" } {
-    if [ regexp "Opcode not defined - DIAG" $comp_output] {
+    if {[regexp "Opcode not defined - DIAG" $comp_output]} {
 	warning "HP assembler in use--skipping disasm tests"
 	return
     } else {
@@ -686,7 +686,7 @@ proc all_integer_computational_tests { } {
 	}
     }
 
-    set subi_insns [list {subi} {subio} {comiclr} ] 
+    set subi_insns [list {subi} {subio} {comiclr}]
 
     foreach i $subi_insns {
 	send_gdb "x/16i $i"; send_gdb "_tests\n"
@@ -746,7 +746,7 @@ proc all_integer_computational_tests { } {
 	    timeout { fail "(timeout) "shd tests" }
 	}
 
-    set extract_insns1 [list {extru} {extrs} {zdep} {dep} ] 
+    set extract_insns1 [list {extru} {extrs} {zdep} {dep}]
 
     foreach i $extract_insns1 {
 	send_gdb "x/8i $i"; send_gdb "_tests\n"
@@ -766,7 +766,7 @@ proc all_integer_computational_tests { } {
 	}
     }
 
-    set extract_insns2 [list {vextru} {vextrs} {zvdep} {vdep} ] 
+    set extract_insns2 [list {vextru} {vextrs} {zvdep} {vdep}]
 
     foreach i $extract_insns2 {
 	send_gdb "x/8i $i"; send_gdb "_tests\n"
@@ -786,7 +786,7 @@ proc all_integer_computational_tests { } {
 	}
     }
 
-    set extract_insns3 [list {vdepi} {zvdepi} ] 
+    set extract_insns3 [list {vdepi} {zvdepi}]
 
     foreach i $extract_insns3 {
 	send_gdb "x/8i $i"; send_gdb "_tests\n"
@@ -806,7 +806,7 @@ proc all_integer_computational_tests { } {
 	}
     }
 
-    set extract_insns4 [list {depi} {zdepi} ] 
+    set extract_insns4 [list {depi} {zdepi}]
 
     foreach i $extract_insns4 {
 	send_gdb "x/8i $i"; send_gdb "_tests\n"
