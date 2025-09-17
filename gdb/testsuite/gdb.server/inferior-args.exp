@@ -91,7 +91,7 @@ proc do_test_inner { extended_p with_shell_p escape_p arglist re_list } {
     gdb_breakpoint main
     gdb_continue_to_breakpoint main
 
-    set expected_len [expr 1 + [llength $re_list]]
+    set expected_len [expr {1 + [llength $re_list]}]
     gdb_test "print argc" \
 	"\\\$$::decimal = $expected_len" "check argc"
 
@@ -100,7 +100,7 @@ proc do_test_inner { extended_p with_shell_p escape_p arglist re_list } {
 	gdb_test "print argv\[$i\]" \
 	    "\\\$$::decimal = $::hex \"$arg\"" \
 	    "check argv\[$i\]"
-	set i [expr $i + 1]
+	incr i
     }
 }
 
