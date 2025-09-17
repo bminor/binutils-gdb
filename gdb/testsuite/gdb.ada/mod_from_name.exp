@@ -31,7 +31,7 @@ foreach_gnat_encoding scenario flags {all minimal} {
     set bp_location [gdb_get_line_number "START" ${testdir}/foo.adb]
     if {![runto "foo.adb:$bp_location"]} {
 	return
-    } 
+    }
 
     # GNAT 9 and 10 are known to fail.
     if {$scenario == "minimal"

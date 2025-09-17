@@ -30,7 +30,7 @@ runto "foo.adb:$bp_location"
 
 if {[gnat_version_compare <= {4 4}]} {
     # Ada array bounds are missing in older GCCs.
-    setup_xfail *-*-* 
+    setup_xfail *-*-*
 }
 gdb_test "print my_table" \
          "= \\(\\)"

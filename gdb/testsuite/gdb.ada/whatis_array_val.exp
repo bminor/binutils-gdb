@@ -28,7 +28,7 @@ clean_restart ${testfile}
 set bp_location [gdb_get_line_number "STOP" ${testdir}/foo.adb]
 if {![runto "foo.adb:$bp_location"]} {
   return
-} 
+}
 
 # Accept "foo." prefix for older versions of GNAT.
 gdb_test "whatis full" \

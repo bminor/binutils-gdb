@@ -70,7 +70,7 @@ with_test_prefix "with standard max-value size" {
 # Set the max-value-size so we can only print 33 elements.
 set elements 33
 set elem_size [get_valueof "/d" "(Large_1d_Array(1)'Size + 7) / 8" "*unknown*"]
-gdb_test_no_output "set max-value-size [expr $elem_size * $elements]"
+gdb_test_no_output "set max-value-size [expr {$elem_size * $elements}]"
 
 with_test_prefix "with reduced max-value size" {
     # GNAT historically named this type, but as the array type is

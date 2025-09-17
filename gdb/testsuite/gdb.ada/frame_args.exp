@@ -32,7 +32,7 @@ set sp "\[ \t\]*"
 
 if {![runto break_me]} {
   return
-} 
+}
 
 # First, print all the arrays without indexes
 

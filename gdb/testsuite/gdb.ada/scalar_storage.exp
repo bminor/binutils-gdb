@@ -48,7 +48,7 @@ if {![runto "storage.adb:$bp_location"]} {
 set re "value => 126, another_value => 12, color => green"
 
 # This requires a compiler fix that is in GCC 14.
-set have_xfail [expr ![gnat_version_compare >= 14]]
+set have_xfail [expr {![gnat_version_compare >= 14]}]
 set re_color "(red|green|blue|$decimal)"
 set re_xfail \
     "value => $decimal, another_value => $decimal, color => $re_color"

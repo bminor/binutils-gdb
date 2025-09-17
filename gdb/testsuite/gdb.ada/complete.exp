@@ -164,7 +164,7 @@ test_gdb_complete "external_ident" \
                   [multi_line "p external_identical_one" \
                               "p external_identical_two" ]
 
-# Complete on the name of package. 
+# Complete on the name of package.
 test_gdb_complete "pck" \
     [multi_line_with_optional \
 	 "(p pck)?" \

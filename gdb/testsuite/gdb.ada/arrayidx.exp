@@ -34,7 +34,7 @@ runto "p.adb:$bp_location"
 
 gdb_test_no_output "set print array-indexes off"
 
-if $old_gcc {
+if {$old_gcc} {
     setup_xfail "*-*-*"
 }
 gdb_test "print one_two_three" \
@@ -57,21 +57,21 @@ gdb_test "print p_one_two_three" \
          "= \\(false, true, true\\)" \
          "print p_one_two_three, indexes off"
 
-if $old_gcc {
+if {$old_gcc} {
     setup_xfail "*-*-*"
 }
 gdb_test "print few_reps" \
          "= \\(1, 2, 3, 3, 3, 3, 3, 4, 5\\)" \
          "print few_reps, indexes off"
 
-if $old_gcc {
+if {$old_gcc} {
     setup_xfail "*-*-*"
 }
 gdb_test "print many_reps" \
          "= \\(1, 2, 3 <repeats 12 times>, 4, 5\\)" \
          "print many_reps, indexes off"
 
-if $old_gcc {
+if {$old_gcc} {
     setup_xfail "*-*-*"
 }
 gdb_test "print empty" \
@@ -82,7 +82,7 @@ gdb_test "print empty" \
 
 gdb_test_no_output "set print array-indexes on"
 
-if $old_gcc {
+if {$old_gcc} {
     setup_xfail "*-*-*"
 }
 gdb_test "print one_two_three" \
@@ -100,19 +100,19 @@ gdb_test "print u_one_two_three" \
 gdb_test "print p_one_two_three" \
          "= \\(one => false, two => true, three => true\\)"
 
-if $old_gcc {
+if {$old_gcc} {
     setup_xfail "*-*-*"
 }
 gdb_test "print few_reps" \
          "= \\(1 => 1, 2 => 2, 3 => 3, 4 => 3, 5 => 3, 6 => 3, 7 => 3, 8 => 4, 9 => 5\\)"
 
-if $old_gcc {
+if {$old_gcc} {
     setup_xfail "*-*-*"
 }
 gdb_test "print many_reps" \
          "= \\(1 => 1, 2 => 2, 3 => 3 <repeats 12 times>, 15 => 4, 16 => 5\\)"
 
-if $old_gcc {
+if {$old_gcc} {
     setup_xfail "*-*-*"
 }
 gdb_test "print empty" \

@@ -27,7 +27,7 @@ clean_restart ${testfile}
 
 if {![runto pck.adb:20]} {
   return
-} 
+}
 
 gdb_test_no_output "set print frame-arguments all"
 

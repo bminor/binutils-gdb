@@ -28,7 +28,7 @@ clean_restart ${testfile}
 set bp_location [gdb_get_line_number "START" ${testdir}/bar.adb]
 if {![runto "bar.adb:$bp_location"]} {
   return
-} 
+}
 
 gdb_test "print itable'first" \
          "= 2"
