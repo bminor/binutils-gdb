@@ -1,5 +1,5 @@
 # Copyright 1998-2025 Free Software Foundation, Inc.
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
@@ -184,7 +184,7 @@ if {[istarget "*-*-openbsd*"]} {
 # built with different defaults.  So no matter what we do, we lose.  We may as
 # well get out of this test sooner rather than later.
 set dest [target_info name]
-if [board_info $dest exists multilib_flags] {
+if {[board_info $dest exists multilib_flags]} {
 	set multilib_flags [board_info $dest multilib_flags]
 	if { "${multilib_flags}" != "" } {
 	   untested "failed to compile"
@@ -269,16 +269,16 @@ if { [istarget "m6811-*-*"] || [istarget "m6812-*-*"] } {
 }
 
 # Collect some line numbers.
-set line_enter      [expr [gdb_get_line_number "main enter" "asmsrc1.s"] + 1]
-set line_main       [expr [gdb_get_line_number "main start" "asmsrc1.s"] + 1]
-set line_call_foo2  [expr [gdb_get_line_number "call foo2"  "asmsrc1.s"] + 1]
-set line_search_comment [expr [gdb_get_line_number "search" "asmsrc1.s"] + 1]
-set line_foo3       [expr [gdb_get_line_number "foo3 start" "asmsrc1.s"] + 1]
-set line_main_exit  [expr [gdb_get_line_number "main exit"  "asmsrc1.s"] + 1]
-set line_foo2       [expr [gdb_get_line_number "foo2 start" "asmsrc2.s"] + 1]
-set line_call_foo3  [expr [gdb_get_line_number "call foo3"  "asmsrc2.s"] + 1]
-set line_call_foo3_again [expr $line_call_foo3 + 1]
-set line_foo2_leave [expr [gdb_get_line_number "foo2 leave" "asmsrc2.s"] + 1]
+set line_enter      [expr {[gdb_get_line_number "main enter" "asmsrc1.s"] + 1}]
+set line_main       [expr {[gdb_get_line_number "main start" "asmsrc1.s"] + 1}]
+set line_call_foo2  [expr {[gdb_get_line_number "call foo2"  "asmsrc1.s"] + 1}]
+set line_search_comment [expr {[gdb_get_line_number "search" "asmsrc1.s"] + 1}]
+set line_foo3       [expr {[gdb_get_line_number "foo3 start" "asmsrc1.s"] + 1}]
+set line_main_exit  [expr {[gdb_get_line_number "main exit"  "asmsrc1.s"] + 1}]
+set line_foo2       [expr {[gdb_get_line_number "foo2 start" "asmsrc2.s"] + 1}]
+set line_call_foo3  [expr {[gdb_get_line_number "call foo3"  "asmsrc2.s"] + 1}]
+set line_call_foo3_again [expr {$line_call_foo3 + 1}]
+set line_foo2_leave [expr {[gdb_get_line_number "foo2 leave" "asmsrc2.s"] + 1}]
 
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
@@ -346,7 +346,7 @@ gdb_test "f" ".*asmsrc2\[.\]s:$line_foo2.*" "f in foo2"
 # `next' one insn (or macro) to set up our stackframe (for the following bt).
 gdb_test "n" "$line_call_foo3\[ 	\]*.*foo3" "n in foo2"
 
-# See if a simple `bt' prints the right source files and 
+# See if a simple `bt' prints the right source files and
 # doesn't fall off the stack.
 
 gdb_test "bt 10" \
@@ -405,7 +405,7 @@ gdb_test_multiple "info sources" "info sources" {
         set seen_asmsrc_2 1
         exp_continue
     }
-    -re ", " { 
+    -re ", " {
         exp_continue
     }
     -re "$gdb_prompt $" {
@@ -416,7 +416,7 @@ gdb_test_multiple "info sources" "info sources" {
         }
     }
 }
-        
+
 
 # Try 'info line'
 gdb_test "info line" \
