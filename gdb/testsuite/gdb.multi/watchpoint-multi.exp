@@ -38,7 +38,7 @@ gdb_test_no_output "set breakpoint always-inserted on"
 # displaced-stepping is also needed as other GDB sometimes still removes the
 # breakpoints, even with always-inserted on.
 # Without the support this test just is not as thorough as it could be.
-if [support_displaced_stepping] {
+if {[support_displaced_stepping]} {
     gdb_test_no_output "set displaced-stepping on"
 }
 

@@ -25,7 +25,7 @@ require !use_gdb_stub
 
 # The 64-bit compile may succeed for i386-linux, but gdb won't be able
 # to load the file.
-if [istarget "i?86-*linux*"] {
+if {[istarget "i?86-*linux*"]} {
     return
 }
 
@@ -41,7 +41,7 @@ set binfile2 [standard_output_file ${exec2}]
 
 # Build two executables, one for each arch.
 
-if [istarget "s390*-*-*"] {
+if {[istarget "s390*-*-*"]} {
     set march1 "-m64"
     set march2 "-m31"
 } elseif { [istarget "aarch64*-*-*"] } {
@@ -67,7 +67,7 @@ if { [build_executable "failed to prepare" ${exec1} "${srcfile1}" \
 
 set options [list debug]
 
-if [istarget "aarch64*-*-*"] {
+if {[istarget "aarch64*-*-*"]} {
     if {[arm_cc_for_target] != ""} {
 	lappend options "compiler=[arm_cc_for_target]"
     } else {

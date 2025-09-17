@@ -29,7 +29,7 @@ require allow_multi_inferior_tests
 
 require can_spawn_for_attach
 
-if [build_executable "failed to prepare" $testfile $srcfile {debug}] {
+if {[build_executable "failed to prepare" $testfile $srcfile {debug}]} {
     return -1
 }
 
@@ -56,7 +56,7 @@ proc create_inferior {which_inf inf_how} {
 
     # Run to main and delete breakpoints.
     proc my_runto_main {} {
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return 0
 	} else {
 	    # Delete breakpoints otherwise GDB would try to step over
@@ -69,7 +69,7 @@ proc create_inferior {which_inf inf_how} {
     }
 
     if {$inf_how == "run"} {
-	if [my_runto_main] {
+	if {[my_runto_main]} {
 	    global inferior_spawn_id
 	    return $inferior_spawn_id
 	}
@@ -80,7 +80,7 @@ proc create_inferior {which_inf inf_how} {
 	set inf_tty_name $spawn_out(slave,name)
 	gdb_test_no_output "tty $inf_tty_name" "tty TTY"
 
-	if [my_runto_main] {
+	if {[my_runto_main]} {
 	    return $inf_spawn_id
 	}
     } elseif {$inf_how == "attach"} {
