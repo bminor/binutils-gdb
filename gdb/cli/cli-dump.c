@@ -345,7 +345,7 @@ add_dump_command (const char *name,
   struct cmd_list_element *c;
   struct dump_context *d;
 
-  c = add_cmd (name, all_commands, descr, &dump_cmdlist);
+  c = add_cmd (name, no_class, descr, &dump_cmdlist);
   set_cmd_completer (c, deprecated_filename_completer);
   d = XNEW (struct dump_context);
   d->func = func;
@@ -353,7 +353,7 @@ add_dump_command (const char *name,
   c->set_context (d);
   c->func = call_dump_func;
 
-  c = add_cmd (name, all_commands, descr, &append_cmdlist);
+  c = add_cmd (name, no_class, descr, &append_cmdlist);
   set_cmd_completer (c, deprecated_filename_completer);
   d = XNEW (struct dump_context);
   d->func = func;
@@ -587,109 +587,109 @@ Write the value of an expression to a raw binary file.\n\
 Arguments are FILE EXPRESSION.  Writes the value of EXPRESSION to\n\
 the specified FILE in raw target ordered bytes.");
 
-  add_basic_prefix_cmd ("srec", all_commands,
+  add_basic_prefix_cmd ("srec", no_class,
 			_("Write target code/data to an srec file."),
 			&srec_cmdlist,
 			0 /*allow-unknown*/,
 			&dump_cmdlist);
 
-  add_basic_prefix_cmd ("ihex", all_commands,
+  add_basic_prefix_cmd ("ihex", no_class,
 			_("Write target code/data to an intel hex file."),
 			&ihex_cmdlist,
 			0 /*allow-unknown*/,
 			&dump_cmdlist);
 
-  add_basic_prefix_cmd ("verilog", all_commands,
+  add_basic_prefix_cmd ("verilog", no_class,
 			_("Write target code/data to a verilog hex file."),
 			&verilog_cmdlist,
 			0 /*allow-unknown*/,
 			&dump_cmdlist);
 
-  add_basic_prefix_cmd ("tekhex", all_commands,
+  add_basic_prefix_cmd ("tekhex", no_class,
 			_("Write target code/data to a tekhex file."),
 			&tekhex_cmdlist,
 			0 /*allow-unknown*/,
 			&dump_cmdlist);
 
-  add_basic_prefix_cmd ("binary", all_commands,
+  add_basic_prefix_cmd ("binary", no_class,
 			_("Write target code/data to a raw binary file."),
 			&binary_dump_cmdlist,
 			0 /*allow-unknown*/,
 			&dump_cmdlist);
 
-  add_basic_prefix_cmd ("binary", all_commands,
+  add_basic_prefix_cmd ("binary", no_class,
 			_("Append target code/data to a raw binary file."),
 			&binary_append_cmdlist,
 			0 /*allow-unknown*/,
 			&append_cmdlist);
 
-  add_cmd ("memory", all_commands, dump_srec_memory, _("\
+  add_cmd ("memory", no_class, dump_srec_memory, _("\
 Write contents of memory to an srec file.\n\
 Arguments are FILE START STOP.  Writes the contents of memory\n\
 within the range [START .. STOP) to the specified FILE in srec format."),
 	   &srec_cmdlist);
 
-  add_cmd ("value", all_commands, dump_srec_value, _("\
+  add_cmd ("value", no_class, dump_srec_value, _("\
 Write the value of an expression to an srec file.\n\
 Arguments are FILE EXPRESSION.  Writes the value of EXPRESSION\n\
 to the specified FILE in srec format."),
 	   &srec_cmdlist);
 
-  add_cmd ("memory", all_commands, dump_ihex_memory, _("\
+  add_cmd ("memory", no_class, dump_ihex_memory, _("\
 Write contents of memory to an ihex file.\n\
 Arguments are FILE START STOP.  Writes the contents of memory within\n\
 the range [START .. STOP) to the specified FILE in intel hex format."),
 	   &ihex_cmdlist);
 
-  add_cmd ("value", all_commands, dump_ihex_value, _("\
+  add_cmd ("value", no_class, dump_ihex_value, _("\
 Write the value of an expression to an ihex file.\n\
 Arguments are FILE EXPRESSION.  Writes the value of EXPRESSION\n\
 to the specified FILE in intel hex format."),
 	   &ihex_cmdlist);
 
-  add_cmd ("memory", all_commands, dump_verilog_memory, _("\
+  add_cmd ("memory", no_class, dump_verilog_memory, _("\
 Write contents of memory to a verilog hex file.\n\
 Arguments are FILE START STOP.  Writes the contents of memory within\n\
 the range [START .. STOP) to the specified FILE in verilog hex format."),
 	   &verilog_cmdlist);
 
-  add_cmd ("value", all_commands, dump_verilog_value, _("\
+  add_cmd ("value", no_class, dump_verilog_value, _("\
 Write the value of an expression to a verilog hex file.\n\
 Arguments are FILE EXPRESSION.  Writes the value of EXPRESSION\n\
 to the specified FILE in verilog hex format."),
 	   &verilog_cmdlist);
 
-  add_cmd ("memory", all_commands, dump_tekhex_memory, _("\
+  add_cmd ("memory", no_class, dump_tekhex_memory, _("\
 Write contents of memory to a tekhex file.\n\
 Arguments are FILE START STOP.  Writes the contents of memory\n\
 within the range [START .. STOP) to the specified FILE in tekhex format."),
 	   &tekhex_cmdlist);
 
-  add_cmd ("value", all_commands, dump_tekhex_value, _("\
+  add_cmd ("value", no_class, dump_tekhex_value, _("\
 Write the value of an expression to a tekhex file.\n\
 Arguments are FILE EXPRESSION.  Writes the value of EXPRESSION\n\
 to the specified FILE in tekhex format."),
 	   &tekhex_cmdlist);
 
-  add_cmd ("memory", all_commands, dump_binary_memory, _("\
+  add_cmd ("memory", no_class, dump_binary_memory, _("\
 Write contents of memory to a raw binary file.\n\
 Arguments are FILE START STOP.  Writes the contents of memory\n\
 within the range [START .. STOP) to the specified FILE in binary format."),
 	   &binary_dump_cmdlist);
 
-  add_cmd ("value", all_commands, dump_binary_value, _("\
+  add_cmd ("value", no_class, dump_binary_value, _("\
 Write the value of an expression to a raw binary file.\n\
 Arguments are FILE EXPRESSION.  Writes the value of EXPRESSION\n\
 to the specified FILE in raw target ordered bytes."),
 	   &binary_dump_cmdlist);
 
-  add_cmd ("memory", all_commands, append_binary_memory, _("\
+  add_cmd ("memory", no_class, append_binary_memory, _("\
 Append contents of memory to a raw binary file.\n\
 Arguments are FILE START STOP.  Writes the contents of memory within the\n\
 range [START .. STOP) to the specified FILE in raw target ordered bytes."),
 	   &binary_append_cmdlist);
 
-  add_cmd ("value", all_commands, append_binary_value, _("\
+  add_cmd ("value", no_class, append_binary_value, _("\
 Append the value of an expression to a raw binary file.\n\
 Arguments are FILE EXPRESSION.  Writes the value of EXPRESSION\n\
 to the specified FILE in raw target ordered bytes."),

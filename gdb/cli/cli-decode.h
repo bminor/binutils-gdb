@@ -47,7 +47,7 @@ enum cmd_types
 
 struct cmd_list_element
 {
-  cmd_list_element (const char *name_, enum command_class theclass_,
+  cmd_list_element (const char *name_, command_classes theclass_,
 		    const char *doc_)
     : name (name_),
       theclass (theclass_),
@@ -123,8 +123,9 @@ struct cmd_list_element
   /* Name of this command.  */
   const char *name;
 
-  /* Command class; class values are chosen by application program.  */
-  enum command_class theclass;
+  /* Command classes; class values are chosen by application program
+     and are stored as a bitmask.  */
+  command_classes theclass;
 
   /* When 1 indicated that this command is deprecated.  It may be
      removed from gdb's command set in the future.  */
