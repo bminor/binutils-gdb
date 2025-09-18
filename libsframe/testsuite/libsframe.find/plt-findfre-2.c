@@ -105,16 +105,6 @@ void test_plt_findfre (const char suffix, const uint32_t plt_vaddr,
   unsigned int fde_cnt = 0;
   int i;
 
-#define TEST(cond, ...)							\
-  do									\
-    {									\
-      if (cond)								\
-	pass (__VA_ARGS__);						\
-      else								\
-	fail (__VA_ARGS__);						\
-    }									\
-    while (0)
-
   ectx = sframe_encode (SFRAME_VERSION, SFRAME_F_FDE_FUNC_START_PCREL,
 			SFRAME_ABI_S390X_ENDIAN_BIG,
 			SFRAME_CFA_FIXED_FP_INVALID,

@@ -40,16 +40,6 @@ main (void)
   size_t sf_size;
   uint8_t rep_block_size;
 
-#define TEST(name, cond)                                                      \
-  do                                                                          \
-    {                                                                         \
-      if (cond)                                                               \
-	pass (name);                                                          \
-      else                                                                    \
-	fail (name);                                                          \
-    }                                                                         \
-    while (0)
-
   fp = fopen (DATA, "r");
   if (fp == NULL)
     goto setup_fail;
@@ -69,20 +59,20 @@ main (void)
   /* Execute tests.  */
   sf_size = fread (sf_buf, 1, st.st_size, fp);
   fclose (fp);
-  TEST ("frecnt-2: Read data", sf_size != 0);
+  TEST (sf_size != 0, "frecnt-2: Read data");
 
   dctx = sframe_decode (sf_buf, sf_size, &err);
-  TEST ("frecnt-2: Decode setup", dctx != NULL);
+  TEST (dctx != NULL, "frecnt-2: Decode setup");
 
   unsigned int fde_cnt = sframe_decoder_get_num_fidx (dctx);
-  TEST ("frecnt-2: Decode FDE count", fde_cnt == 2);
+  TEST (fde_cnt == 2, "frecnt-2: Decode FDE count");
 
   for (i = 0; i < fde_cnt; ++i)
     {
       err = sframe_decoder_get_funcdesc_v2 (dctx, i, &nfres, &fsize, &fstart,
 					    &finfo, &rep_block_size);
-      TEST ("frecnt-2: Decode get FDE", err == 0);
-      TEST ("frecnt-2: Decode get FRE", nfres == 4);
+      TEST (err == 0, "frecnt-2: Decode get FDE%d", i);
+      TEST (nfres == 4, "frecnt-2: Decode num FREs for FDE%d", i);
     }
 
   free (sf_buf);

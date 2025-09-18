@@ -40,4 +40,14 @@ void wait (void);
 #include <dejagnu.h>
 #undef wait
 
+#define TEST(cond, subname, ...)					\
+  do									\
+    {									\
+      if (cond)								\
+	pass (subname, ##__VA_ARGS__);					\
+      else								\
+	fail (subname, ##__VA_ARGS__);					\
+    }									\
+    while (0)
+
 #endif /* _SFRAME_TEST_H */
