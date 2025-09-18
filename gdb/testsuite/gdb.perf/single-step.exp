@@ -26,7 +26,7 @@ set executable $testfile
 set expfile $testfile.exp
 
 # make check-perf RUNTESTFLAGS='single-step.exp SINGLE_STEP_COUNT=300'
-if ![info exists SINGLE_STEP_COUNT] {
+if {![info exists SINGLE_STEP_COUNT]} {
     set SINGLE_STEP_COUNT 1000
 }
 

@@ -28,7 +28,7 @@ set executable $testfile
 set expfile $testfile.exp
 
 # make check-perf RUNTESTFLAGS='backtrace.exp BACKTRACE_DEPTH=1024'
-if ![info exists BACKTRACE_DEPTH] {
+if {![info exists BACKTRACE_DEPTH]} {
     set BACKTRACE_DEPTH 64
 }
 

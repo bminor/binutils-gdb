@@ -38,7 +38,7 @@ load_lib gen-perf-test.exp
 
 require allow_perf_tests
 
-if ![info exists MONSTER] {
+if {![info exists MONSTER]} {
     set MONSTER "n"
 }
 

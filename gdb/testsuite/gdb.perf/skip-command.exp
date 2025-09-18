@@ -33,10 +33,10 @@ set skip_func_file [standard_output_file $srcfile2]
 set expfile $testfile.exp
 
 # make check-perf RUNTESTFLAGS='skip-command.exp SKIP_STEP_COUNT=1000 ...'
-if ![info exists SKIP_STEP_COUNT] {
+if {![info exists SKIP_STEP_COUNT]} {
     set SKIP_STEP_COUNT 1000
 }
-if ![info exists SKIP_DIRECTIVE_COUNT] {
+if {![info exists SKIP_DIRECTIVE_COUNT]} {
     set SKIP_DIRECTIVE_COUNT 1000
 }
 
@@ -91,7 +91,7 @@ proc write_skip_func_source { file_name func_name_prefix nr_funcs } {
 proc run_skip_bench { kind text } {
     global SKIP_STEP_COUNT SKIP_DIRECTIVE_COUNT
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 

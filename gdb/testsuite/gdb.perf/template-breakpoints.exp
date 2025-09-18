@@ -28,7 +28,7 @@ set executable $testfile
 set expfile $testfile.exp
 
 # make check-perf RUNTESTFLAGS='template-breakpoints.exp EXPANSION_DEPTH=40'
-if ![info exists EXPANSION_DEPTH] {
+if {![info exists EXPANSION_DEPTH]} {
 	set EXPANSION_DEPTH 40
 }
 
