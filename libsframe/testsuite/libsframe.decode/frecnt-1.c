@@ -38,16 +38,6 @@ main (void)
   size_t sf_size;
   uint8_t rep_block_size;
 
-#define TEST(name, cond)                                                      \
-  do                                                                          \
-    {                                                                         \
-      if (cond)                                                               \
-	pass (name);                                                          \
-      else                                                                    \
-	fail (name);                                                          \
-    }                                                                         \
-    while (0)
-
   /* Test Setup.  */
   fp = fopen (DATA, "r");
   if (fp == NULL)
@@ -68,18 +58,18 @@ main (void)
   /* Execute tests.  */
   sf_size = fread (sf_buf, 1, st.st_size, fp);
   fclose (fp);
-  TEST ("frecnt-1: Read data", sf_size != 0);
+  TEST (sf_size != 0, "frecnt-1: Read data");
 
   dctx = sframe_decode (sf_buf, sf_size, &err);
-  TEST ("frecnt-1: Decoder setup", dctx != NULL);
+  TEST (dctx != NULL, "frecnt-1: Decoder setup");
 
   unsigned int fde_cnt = sframe_decoder_get_num_fidx (dctx);
-  TEST ("frecnt-1: Decoder FDE count", fde_cnt == 1);
+  TEST (fde_cnt == 1, "frecnt-1: Decoder FDE count");
 
   err = sframe_decoder_get_funcdesc_v2 (dctx, 0, &nfres, &fsize, &fstart,
 					&finfo, &rep_block_size);
-  TEST ("frecnt-1: Decoder get FDE", err == 0);
-  TEST ("frecnt-1: Decoder FRE count", nfres == 4);
+  TEST (err == 0, "frecnt-1: Decoder get FDE");
+  TEST (nfres == 4, "frecnt-1: Decoder FRE count");
 
   free (sf_buf);
   sf_buf = NULL;

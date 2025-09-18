@@ -130,7 +130,8 @@ add_fde3 (sframe_encoder_ctx *encode, uint32_t start_pc_vaddr,
 }
 
 static
-void test_text_findfre (uint32_t text_vaddr, uint32_t sframe_vaddr)
+void test_text_findfre (const char suffix, uint32_t text_vaddr,
+			uint32_t sframe_vaddr)
 {
   sframe_encoder_ctx *encode;
   sframe_decoder_ctx *dctx;
@@ -147,16 +148,6 @@ void test_text_findfre (uint32_t text_vaddr, uint32_t sframe_vaddr)
   size_t sf_size;
   int err = 0;
 
-#define TEST(name, cond)                                                      \
-  do                                                                          \
-    {                                                                         \
-      if (cond)                                                               \
-	pass (name);                                                          \
-      else                                                                    \
-	fail (name);                                                          \
-    }                                                                         \
-    while (0)
-
   encode = sframe_encode (SFRAME_VERSION,
 			  SFRAME_F_FDE_FUNC_START_PCREL,
 			  SFRAME_ABI_AMD64_ENDIAN_LITTLE,
@@ -167,26 +158,26 @@ void test_text_findfre (uint32_t text_vaddr, uint32_t sframe_vaddr)
   /* Add FDE at index 0.  */
   func1_start_vaddr = text_vaddr;
   err = add_fde1 (encode, func1_start_vaddr, sframe_vaddr, 0, &func1_size);
-  TEST ("findfunc-1: Adding FDE1", err == 0);
+  TEST (err == 0, "findfunc-1%c: Adding FDE1", suffix);
 
   /* Add FDE at index 1.  */
   func2_start_vaddr = func1_start_vaddr + func1_size + 0x10;
   err = add_fde2 (encode, func2_start_vaddr, sframe_vaddr, 1, &func2_size);
-  TEST ("findfunc-1: Adding FDE2", err == 0);
+  TEST (err == 0, "findfunc-1%c: Adding FDE2", suffix);
 
   /* Add FDE at index 2.  */
   func3_start_vaddr = func2_start_vaddr + func2_size + 0x10;
   err = add_fde3 (encode, func3_start_vaddr, sframe_vaddr, 2, &func3_size);
-  TEST ("findfunc-1: Adding FDE3", err == 0);
+  TEST (err == 0, "findfunc-1%c: Adding FDE3", suffix);
 
   fde_cnt = sframe_encoder_get_num_fidx (encode);
-  TEST ("findfunc-1: Test FDE count", fde_cnt == 3);
+  TEST (fde_cnt == 3, "findfunc-1%c: Test FDE count", suffix);
 
   sframe_buf = sframe_encoder_write (encode, &sf_size, &err);
-  TEST ("findfunc-1: Encoder write", err == 0);
+  TEST (err == 0, "findfunc-1%c: Encoder write", suffix);
 
   dctx = sframe_decode (sframe_buf, sf_size, &err);
-  TEST ("findfunc-1: Decoder setup", dctx != NULL);
+  TEST (dctx != NULL, "findfunc-1%c: Decoder setup", suffix);
 
   /* Following negative tests check that libsframe APIs
      (sframe_get_funcdesc_with_addr, sframe_find_fre) work
@@ -195,46 +186,46 @@ void test_text_findfre (uint32_t text_vaddr, uint32_t sframe_vaddr)
   /* Search with PC less than the first FDE's start addr.  */
   lookup_pc = func1_start_vaddr - 0x15 - sframe_vaddr;
   err = sframe_find_fre (dctx, lookup_pc, &frep);
-  TEST ("findfunc-1: test-1: Find FRE for PC not in range",
-	err == SFRAME_ERR);
+  TEST (err == SFRAME_ERR,
+	"findfunc-1%c: test-1: Find FRE for PC not in range", suffix);
 
   /* Search with a PC between func1's last PC and func2's first PC.  */
   lookup_pc = func1_start_vaddr + func1_size + 0x1 - sframe_vaddr,
   err = sframe_find_fre (dctx, lookup_pc, &frep);
-  TEST ("findfunc-1: test-2: Find FRE for PC not in range",
-	err == SFRAME_ERR);
+  TEST (err == SFRAME_ERR,
+	"findfunc-1%c: test-2: Find FRE for PC not in range", suffix);
 
   /* Search for a PC between func2's last PC and func3's first PC.  */
   lookup_pc = func2_start_vaddr + func2_size + 0x3 - sframe_vaddr;
   err = sframe_find_fre (dctx, lookup_pc, &frep);
-  TEST ("findfunc-1: test-3: Find FRE for PC not in range",
-	err == SFRAME_ERR);
+  TEST (err == SFRAME_ERR,
+	"findfunc-1%c: test-3: Find FRE for PC not in range", suffix);
 
   /* Search for a PC beyond the last func, i.e., > func3's last PC.  */
   lookup_pc = func3_start_vaddr + func3_size + 0x10 - sframe_vaddr;
   err = sframe_find_fre (dctx, lookup_pc, &frep);
-  TEST ("findfunc-1: test-4: Find FRE for PC not in range",
-	err == SFRAME_ERR);
+  TEST (err == SFRAME_ERR,
+	"findfunc-1%c: test-4: Find FRE for PC not in range", suffix);
 
   /* And some positive tests... */
 
   /* Find an FRE for PC in FDE1.  */
   lookup_pc = func1_start_vaddr + 0x9 - sframe_vaddr;
   err = sframe_find_fre (dctx, lookup_pc, &frep);
-  TEST ("findfunc-1: Find FRE in FDE1",
-	(err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, &err) == 0x2));
+  TEST ((err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, &err) == 0x2),
+	"findfunc-1%c: Find FRE in FDE1", suffix);
 
   /* Find an FRE for PC in FDE2.  */
   lookup_pc = func2_start_vaddr + 0x11 - sframe_vaddr;
   err = sframe_find_fre (dctx, lookup_pc, &frep);
-  TEST ("findfunc-1: Find FRE in FDE2",
-       (err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, &err) == 0x12));
+  TEST ((err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, &err) == 0x12),
+	"findfunc-1%c: Find FRE in FDE2", suffix);
 
   /* Find an FRE for PC in FDE3.  */
   lookup_pc = func3_start_vaddr + 0x10 - sframe_vaddr;
   err = sframe_find_fre (dctx, lookup_pc, &frep);
-  TEST ("findfunc-1: Find FRE in FDE3",
-	(err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, &err) == 0x18));
+  TEST ((err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, &err) == 0x18),
+	"findfunc-1%c: Find FRE in FDE3", suffix);
 
   sframe_encoder_free (&encode);
   sframe_decoder_free (&dctx);
@@ -246,11 +237,11 @@ int main (void)
   uint32_t text_vaddr = 0x4038b0;
   printf ("Testing with text_vaddr = %#x; sframe_vaddr = %#x\n", text_vaddr,
 	  sframe_vaddr);
-  test_text_findfre (text_vaddr, sframe_vaddr);
+  test_text_findfre ('a', text_vaddr, sframe_vaddr);
 
   sframe_vaddr = 0x4038b0;
   text_vaddr = 0x4b5620;
   printf ("Testing with text_vaddr = %#x; sframe_vaddr = %#x\n", text_vaddr,
 	  sframe_vaddr);
-  test_text_findfre (text_vaddr, sframe_vaddr);
+  test_text_findfre ('b', text_vaddr, sframe_vaddr);
 }

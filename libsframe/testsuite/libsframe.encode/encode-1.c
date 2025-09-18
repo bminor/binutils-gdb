@@ -151,16 +151,6 @@ int main (void)
   unsigned int fde_cnt = 0;
   int match_p = 0;
 
-#define TEST(name, cond)                                                      \
-  do                                                                          \
-    {                                                                         \
-      if (cond)                                                               \
-	pass (name);                                                          \
-      else                                                                    \
-	fail (name);                                                          \
-    }                                                                         \
-    while (0)
-
   sframe_vaddr = 0x4020c8;
   encode = sframe_encode (SFRAME_VERSION,
 			  SFRAME_F_FDE_FUNC_START_PCREL,
@@ -170,28 +160,28 @@ int main (void)
 			  &err);
 
   fde_cnt = sframe_encoder_get_num_fidx (encode);
-  TEST ("encode-1: Encoder FDE count", fde_cnt == 0);
+  TEST (fde_cnt == 0, "encode-1: Encoder FDE count");
 
   err = sframe_encoder_add_fre (encode, 1, &frep);
-  TEST ("encode-1: Encoder update workflow", err == SFRAME_ERR);
+  TEST (err == SFRAME_ERR, "encode-1: Encoder update workflow");
 
   func1_start_vaddr = 0x401106;
   err = add_fde1 (encode, func1_start_vaddr, sframe_vaddr, 0, &func1_size);
-  TEST ("encode-1: Encoder adding FDE1", err == 0);
+  TEST (err == 0, "encode-1: Encoder adding FDE1");
 
   /* Function 2 is placed after 0x0 bytes from the end of Function 1.  */
   func2_start_vaddr = func1_start_vaddr + func1_size + 0x0;
   err = add_fde2 (encode, func2_start_vaddr, sframe_vaddr, 1, &func2_size);
-  TEST ("encode-1: Encoder adding FDE2", err == 0);
+  TEST (err == 0, "encode-1: Encoder adding FDE2");
 
   fde_cnt = sframe_encoder_get_num_fidx (encode);
-  TEST ("encode-1: Encoder FDE count", fde_cnt == 2);
+  TEST (fde_cnt == 2, "encode-1: Encoder FDE count");
 
   sframe_buf = sframe_encoder_write (encode, &sf_size, &err);
-  TEST ("encode-1: Encoder write", err == 0);
+  TEST (err == 0, "encode-1: Encoder write");
 
   match_p = data_match (sframe_buf, sf_size);
-  TEST ("encode-1: Encode buffer match", match_p == 1);
+  TEST (match_p == 1, "encode-1: Encode buffer match");
 
   sframe_encoder_free (&encode);
   return 0;
