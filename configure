@@ -4008,10 +4008,6 @@ case "${target}" in
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
     ;;
-    # This is temporary until we can link against shared libraries
-  powerpcle-*-solaris*)
-    noconfigdirs="$noconfigdirs gdb sim tcl tk itcl"
-    ;;
   powerpc-*-beos*)
     noconfigdirs="$noconfigdirs gdb"
     ;;
