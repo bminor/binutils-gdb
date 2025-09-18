@@ -459,12 +459,16 @@ if { ![info exists NOPIE_CFLAGS] || ![info exists NOPIE_LDFLAGS] } then {
 if { ![info exists DIRECT_EXTERN_ACCESS_CFLAGS] } then {
     set DIRECT_EXTERN_ACCESS_CFLAGS ""
     set NO_DIRECT_EXTERN_ACCESS_CFLAGS ""
-    if [compiler_supports "-mdirect-extern-access"] {
-	set DIRECT_EXTERN_ACCESS_CFLAGS "-mdirect-extern-access"
-	set NO_DIRECT_EXTERN_ACCESS_CFLAGS "-mno-direct-extern-access"
-    } elseif [compiler_supports "-fdirect-access-external-data"] {
-	set DIRECT_EXTERN_ACCESS_CFLAGS "-fdirect-access-external-data"
-	set NO_DIRECT_EXTERN_ACCESS_CFLAGS "-fno-direct-access-external-data"
+    # Exclude LoongArch since -mdirect-extern-access on LoongArch works
+    # only without dynamic linker.
+    if { ![istarget loongarch*-*-*] } {
+	if [compiler_supports "-mdirect-extern-access"] {
+	    set DIRECT_EXTERN_ACCESS_CFLAGS "-mdirect-extern-access"
+	    set NO_DIRECT_EXTERN_ACCESS_CFLAGS "-mno-direct-extern-access"
+	} elseif [compiler_supports "-fdirect-access-external-data"] {
+	    set DIRECT_EXTERN_ACCESS_CFLAGS "-fdirect-access-external-data"
+	    set NO_DIRECT_EXTERN_ACCESS_CFLAGS "-fno-direct-access-external-data"
+	}
     }
 }
 
