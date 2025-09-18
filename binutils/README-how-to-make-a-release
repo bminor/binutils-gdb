@@ -229,12 +229,36 @@ If this is an ODD numbered release:
 ==============================================================================
 ==============================================================================
 
-For the next few weeks, monitor the mailing list for new translations
-and respond to any requests to have patches applied to the branch.
+For the next few weeks, monitor the mailing list for any requests to have
+patches applied to the branch.
 
 Also - expect to receive lots of new/updated translations from the
 Translation Project.  These all need to be checked in to both the
-mainline and the branch.
+mainline and the branch.  Note however, you can do this in bulk:
+
+  wget -r -np -nH -R "latest/*/index.html*" https://translationproject.org -I latest/bfd,latest/binutils,latest/gas,latest/gprof,latest/ld,latest/opcodes
+
+  bin_src=<path-to-binutils-sources>
+
+  cd latest
+  for A in * ; do
+    cd $A ;
+    for B in * ; do
+	if ! [ -f $bin_src/$A/po/$B ] ; then
+	    echo "new file $bin_src/$A/po/$B" ;
+	    cp $B $bin_src/$A/po/$B ;
+	else
+	    diff $B $bin_src/$A/po/$B > /dev/null ;
+	    if [ $? != 0 ] ; then
+		echo "updated $bin_src/$A/po/$B" ;
+	        cp $B $bin_src/$A/po/$B ;
+	    fi ;
+	fi ;
+    done
+    cd ..
+  done
+
+Then just git-add the new files and commit the updated translations.
 
 ==============================================================================
 ==============================================================================
