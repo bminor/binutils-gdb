@@ -25,7 +25,7 @@ require !readnow
 standard_testfile _start.c debug-names.S
 
 set func_info_vars \
-    [get_func_info _start [list debug additional_flags=-nostartfiles]]
+    [get_func_info _start [list debug ldflags=-nostartfiles]]
 
 # Create the DWARF.
 set asm_file [standard_output_file $srcfile2]
@@ -84,7 +84,7 @@ Dwarf::assemble {
 }
 
 if [prepare_for_testing "failed to prepare" $testfile "${asm_file} ${srcfile}" \
-	[list additional_flags=-nostartfiles]] {
+	[list ldflags=-nostartfiles]] {
     return -1
 }
 

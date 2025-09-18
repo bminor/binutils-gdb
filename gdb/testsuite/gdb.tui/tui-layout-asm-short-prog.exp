@@ -24,7 +24,7 @@ set opts {}
 lappend opts debug
 lappend opts additional_flags=-static
 lappend opts additional_flags=-nostdlib
-lappend opts additional_flags=-nostartfiles
+lappend opts ldflags=-nostartfiles
 
 if { [build_executable "failed to prepare" $testfile $srcfile $opts] == -1 } {
     return -1
