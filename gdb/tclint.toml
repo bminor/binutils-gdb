@@ -16,6 +16,7 @@
 # Configuration file for tclint ( https://github.com/nmoroze/tclint ).
 
 exclude = [
+# TODO:
 "gdb/testsuite/boards",
 "gdb/testsuite/config",
 "gdb/testsuite/lib",
@@ -23,7 +24,6 @@ exclude = [
 "gdb/testsuite/gdb.base",
 "gdb/testsuite/gdb.btrace",
 "gdb/testsuite/gdb.cp",
-"gdb/testsuite/gdb.ctf",
 "gdb/testsuite/gdb.dwarf2",
 "gdb/testsuite/gdb.fortran",
 "gdb/testsuite/gdb.guile",
@@ -32,9 +32,10 @@ exclude = [
 "gdb/testsuite/gdb.perf",
 "gdb/testsuite/gdb.python",
 "gdb/testsuite/gdb.reverse",
-"gdb/testsuite/gdb.stabs",
 "gdb/testsuite/gdb.threads",
 "gdb/testsuite/gdb.trace",
+# IGNORE (document reason in trailing comment):
+"gdb/testsuite/gdb.stabs", # To be removed.
 ]
 
 # A maximum line length of 80 is current policy, but it hasn't been too
