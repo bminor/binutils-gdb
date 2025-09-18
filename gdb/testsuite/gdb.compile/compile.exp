@@ -32,7 +32,8 @@ if { $srcfile3 != "" } {
     lappend srcfilesoptions $srcfile3 ${options}
 }
 lappend srcfilesoptions $srcfile4 "nodebug"
-if { [eval build_executable_from_specs ${testfile}.exp $testfile {$options} ${srcfilesoptions}] } {
+if { [build_executable_from_specs $testfile.exp $testfile $options \
+	  {*}$srcfilesoptions] } {
     return -1
 }
 
@@ -53,7 +54,7 @@ gdb_test "compile file -r ${srcdir}/${subdir}/${testfile}-mod.c" \
     "The program must be running for the compile command to work.*" \
     "test compile file command without running inferior"
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -391,7 +392,7 @@ if { [gdb_compile_shlib ${srcdir}/${subdir}/${srcfile2} $libbin {debug}] != ""
 clean_restart $testfile
 gdb_load_shlib $libbin
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

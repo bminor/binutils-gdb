@@ -22,7 +22,6 @@ exclude = [
 "gdb/testsuite/gdb.arch",
 "gdb/testsuite/gdb.base",
 "gdb/testsuite/gdb.btrace",
-"gdb/testsuite/gdb.compile",
 "gdb/testsuite/gdb.cp",
 "gdb/testsuite/gdb.ctf",
 "gdb/testsuite/gdb.dwarf2",

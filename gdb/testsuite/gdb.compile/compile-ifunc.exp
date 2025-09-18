@@ -24,7 +24,7 @@ standard_testfile
 require is_c_compiler_gcc
 
 set flags ""
-if [test_compiler_info gcc*] {
+if {[test_compiler_info gcc*]} {
     set flags additional_flags=-Wno-attribute-alias
 }
 

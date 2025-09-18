@@ -265,7 +265,7 @@ namespace eval ::CompileExpression {
 
 	if {[string match $cmd "print"]} {
 	    if {!$is_explicit} {
-		eval setup_failures_ $fail_print
+		setup_failures_ {*}$fail_print
 		return [compile_command_ "compile print $exp" $result $tst]
 	    }
 	} else {
@@ -274,11 +274,11 @@ namespace eval ::CompileExpression {
 	    } else {
 		set command "compile code $varName_ = $exp"
 	    }
-	    eval setup_failures_ $fail_compile
+	    setup_failures_ {*}$fail_compile
 	    if {![compile_command_ $command "" $tst]} {
 		return 0
 	    }
-	    eval setup_failures_ $fail_value
+	    setup_failures_ {*}$fail_value
 	    gdb_test "p $varName_" "= $result" "result of $tst"
 	}
 	return 1
@@ -292,11 +292,11 @@ namespace eval ::CompileExpression {
     proc setup_failures_ {how args} {
 	switch -nocase $how {
 	    xfail {
-		eval setup_xfail $args
+		setup_xfail {*}$args
 	    }
 
 	    kfail {
-		eval setup_kfail $args
+		setup_kfail {*}$args
 	    }
 
 	    default {

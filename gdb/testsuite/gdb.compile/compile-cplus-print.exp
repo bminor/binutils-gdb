@@ -22,7 +22,7 @@ require is_c_compiler_gcc
 require allow_compile_tests
 
 set options {}
-if [test_compiler_info gcc*] {
+if {[test_compiler_info gcc*]} {
     lappend options additional_flags=-g3
     lappend options additional_flags=-std=gnu++11
     lappend options c++
@@ -30,13 +30,14 @@ if [test_compiler_info gcc*] {
 
 set srcfilesoptions [list ${srcfile} ${options}]
 
-if { [eval build_executable_from_specs ${testfile}.exp $testfile {$options} ${srcfilesoptions}] } {
+if { [build_executable_from_specs $testfile.exp $testfile $options \
+	  {*}$srcfilesoptions] } {
     return -1
 }
 
 clean_restart ${testfile}
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
