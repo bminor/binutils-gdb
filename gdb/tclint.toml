@@ -28,7 +28,6 @@ exclude = [
 "gdb/testsuite/gdb.fortran",
 "gdb/testsuite/gdb.guile",
 "gdb/testsuite/gdb.mi",
-"gdb/testsuite/gdb.opencl",
 "gdb/testsuite/gdb.python",
 "gdb/testsuite/gdb.reverse",
 "gdb/testsuite/gdb.threads",

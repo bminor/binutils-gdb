@@ -58,7 +58,7 @@ set have_cl_khr_fp16 [get_integer_valueof "have_cl_khr_fp16" 0]
 # Sanity checks
 proc check_basic { name type size } {
   gdb_test "ptype ${name}" "type = ${type}16"
-  gdb_test "p sizeof(${name})" " = [expr ${size} * 16]"
+  gdb_test "p sizeof(${name})" " = [expr {${size} * 16}]"
   gdb_test "print/d ${name}" " = \\{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15\\}"
 }
 
@@ -227,40 +227,40 @@ proc check_type { name type alttype } {
 }
 
 proc check_sizeof { name size } {
-  gdb_test "print sizeof (${name}.lo)" " = [expr $size * 8]"
-  gdb_test "print sizeof (${name}.hi)" " = [expr $size * 8]"
-  gdb_test "print sizeof (${name}.even)" " = [expr $size * 8]"
-  gdb_test "print sizeof (${name}.odd)" " = [expr $size * 8]"
+  gdb_test "print sizeof (${name}.lo)" " = [expr {$size * 8}]"
+  gdb_test "print sizeof (${name}.hi)" " = [expr {$size * 8}]"
+  gdb_test "print sizeof (${name}.even)" " = [expr {$size * 8}]"
+  gdb_test "print sizeof (${name}.odd)" " = [expr {$size * 8}]"
 
-  gdb_test "print sizeof (${name}.hi.even)" " = [expr $size * 4]"
-  gdb_test "print sizeof (${name}.odd.odd.lo)" " = [expr $size * 2]"
+  gdb_test "print sizeof (${name}.hi.even)" " = [expr {$size * 4}]"
+  gdb_test "print sizeof (${name}.odd.odd.lo)" " = [expr {$size * 2}]"
   gdb_test "print sizeof (${name}.even.hi.lo.odd)" " = $size"
 
   gdb_test "print sizeof (${name}.x)" " = $size"
-  gdb_test "print sizeof (${name}.xy)" " = [expr $size * 2]"
-  gdb_test "print sizeof (${name}.xyz)" " = [expr $size * 4]"
-  gdb_test "print sizeof (${name}.xyzw)" " = [expr $size * 4]"
+  gdb_test "print sizeof (${name}.xy)" " = [expr {$size * 2}]"
+  gdb_test "print sizeof (${name}.xyz)" " = [expr {$size * 4}]"
+  gdb_test "print sizeof (${name}.xyzw)" " = [expr {$size * 4}]"
 
   gdb_test "print sizeof (${name}.xy.x)" " = $size"
-  gdb_test "print sizeof (${name}.wzyx.yy)" " = [expr $size * 2]"
+  gdb_test "print sizeof (${name}.wzyx.yy)" " = [expr {$size * 2}]"
   gdb_test "print sizeof (${name}.wzyx.yx.x)" " = $size"
   gdb_test "print sizeof (${name}.xyzw.w)" " = $size"
 
   gdb_test "print sizeof (${name}.s0)" " = $size"
-  gdb_test "print sizeof (${name}.s01)" " = [expr $size * 2]"
-  gdb_test "print sizeof (${name}.s012)" " = [expr $size * 4]"
-  gdb_test "print sizeof (${name}.s0123)" " = [expr $size * 4]"
-  gdb_test "print sizeof (${name}.s01234567)" " = [expr $size * 8]"
-  gdb_test "print sizeof (${name}.s0123456789abcdef)" " = [expr $size * 16]"
+  gdb_test "print sizeof (${name}.s01)" " = [expr {$size * 2}]"
+  gdb_test "print sizeof (${name}.s012)" " = [expr {$size * 4}]"
+  gdb_test "print sizeof (${name}.s0123)" " = [expr {$size * 4}]"
+  gdb_test "print sizeof (${name}.s01234567)" " = [expr {$size * 8}]"
+  gdb_test "print sizeof (${name}.s0123456789abcdef)" " = [expr {$size * 16}]"
 
-  gdb_test "print sizeof (${name}.sfedcba98.S0246)" " = [expr $size * 4]"
-  gdb_test "print sizeof (${name}.sfedcba98.S0246.s13)" " = [expr $size * 2]"
+  gdb_test "print sizeof (${name}.sfedcba98.S0246)" " = [expr {$size * 4}]"
+  gdb_test "print sizeof (${name}.sfedcba98.S0246.s13)" " = [expr {$size * 2}]"
   gdb_test "print sizeof (${name}.sfedcba98.S0246.s13.s0)" " = $size"
-  gdb_test "print sizeof (${name}.s0123456789abcdef.s22)" " = [expr $size * 2]"
+  gdb_test "print sizeof (${name}.s0123456789abcdef.s22)" " = [expr {$size * 2}]"
 
-  gdb_test "print sizeof (${name}.hi.s7654.wx)" " = [expr $size * 2]"
-  gdb_test "print sizeof (${name}.s0123456789abcdef.even.lo)" " = [expr $size * 4]"
-  gdb_test "print sizeof (${name}.odd.xyzw.s23)" " = [expr $size * 2]"
+  gdb_test "print sizeof (${name}.hi.s7654.wx)" " = [expr {$size * 2}]"
+  gdb_test "print sizeof (${name}.s0123456789abcdef.even.lo)" " = [expr {$size * 4}]"
+  gdb_test "print sizeof (${name}.odd.xyzw.s23)" " = [expr {$size * 2}]"
   gdb_test "print sizeof (${name}.xyzw.hi.odd)" " = $size"
 }
 
@@ -343,8 +343,8 @@ proc check_access { name } {
 
   # lvalue tests
   for {set i 0} {$i < 16} {incr i} {
-    gdb_test_no_output "set variable ${name}.s[format "%x" $i] = [expr 15 - $i]"
-    gdb_test "print/d ${name}.s[format "%x" $i]" " = [expr 15 - $i]"
+    gdb_test_no_output "set variable ${name}.s[format "%x" $i] = [expr {15 - $i}]"
+    gdb_test "print/d ${name}.s[format "%x" $i]" " = [expr {15 - $i}]"
   }
   gdb_test "print/d ${name}" " = \\{15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0\\}"
 
