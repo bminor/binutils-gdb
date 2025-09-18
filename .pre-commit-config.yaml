@@ -88,3 +88,18 @@ repos:
       verbose: true
       always_run: true
       stages: [commit-msg]
+  - # We'd like to use the official repo, like this:
+    #   repo: https://github.com/nmoroze/tclint
+    #   rev: v0.6.0
+    # but it doesn't have a .pre-commit-hooks.yaml file.
+    # Work around this by using an unoffical repo.  The repo contains a tag
+    # v0.6.0-gdb that adds a .pre-commit-hooks.yaml file to the v0.6.0 release
+    # of the offical repo.  Since we're using an unofficial repo, use the git
+    # SHA instead of the tag.
+    repo: https://github.com/vries/tclint.git
+    rev: 2e6b4510fb3d3d6f8f2609af0f7158fabc0c96e4
+    hooks:
+    - id: tclint
+      args: [--config, gdb/tclint.toml]
+      types_or: [file]
+      files: 'gdb/testsuite/.*\.(exp|tcl)$'

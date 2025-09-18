@@ -1,0 +1,63 @@
+# Copyright 2025 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Configuration file for tclint ( https://github.com/nmoroze/tclint ).
+
+exclude = [
+"gdb/testsuite/boards",
+"gdb/testsuite/config",
+"gdb/testsuite/lib",
+"gdb/testsuite/gdb.arch",
+"gdb/testsuite/gdb.base",
+"gdb/testsuite/gdb.btrace",
+"gdb/testsuite/gdb.compile",
+"gdb/testsuite/gdb.cp",
+"gdb/testsuite/gdb.ctf",
+"gdb/testsuite/gdb.dwarf2",
+"gdb/testsuite/gdb.fortran",
+"gdb/testsuite/gdb.guile",
+"gdb/testsuite/gdb.mi",
+"gdb/testsuite/gdb.opencl",
+"gdb/testsuite/gdb.perf",
+"gdb/testsuite/gdb.python",
+"gdb/testsuite/gdb.reverse",
+"gdb/testsuite/gdb.stabs",
+"gdb/testsuite/gdb.threads",
+"gdb/testsuite/gdb.trace",
+]
+
+# A maximum line length of 80 is current policy, but it hasn't been too
+# strictly enforced.  It's the most frequent and least harmful violation.
+# Ignore this for now.
+ignore = ["line-length"]
+
+extensions = ["exp", "tcl"]
+
+[style]
+# Used by tclfmt.  Doesn't support the mixed TAB and spaces style we use. See
+# this tclint issue ( https://github.com/nmoroze/tclint/issues/109 ).
+indent = 4
+
+# Used by both tclint and tclfmt.  Current policy is 80.
+line-length = 80
+
+# Used by tclfmt.
+max-blank-lines = 1
+
+# Used by tclfmt.  False conflicts with emacs tcl mode.
+indent-namespace-eval = true
+
+# Used by tclfmt.
+spaces-in-braces = false
