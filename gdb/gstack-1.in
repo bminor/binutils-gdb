@@ -64,7 +64,7 @@ function print_version() {
 while getopts hv-: OPT; do
     if [ "$OPT" = "-" ]; then
 	OPT="${OPTARG%%=*}"
-	OPTARG="${OPTARG#'$OPT'}"
+	OPTARG="${OPTARG#"$OPT"}"
 	OPTARG="${OPTARG#=}"
     fi
 

@@ -71,7 +71,7 @@ function print_version() {
 while getopts vhao:g:d:-: OPT; do
     if [ "$OPT" = "-" ]; then
 	OPT="${OPTARG%%=*}"
-	OPTARG="${OPTARG#'$OPT'}"
+	OPTARG="${OPTARG#"$OPT"}"
 	OPTARG="${OPTARG#=}"
     fi
 
