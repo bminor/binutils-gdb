@@ -6051,7 +6051,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  sect_offset line_offset = (sect_offset) attr->as_unsigned ();
 	  line_header_up lh = dwarf_decode_line_header (line_offset, cu,
 							fnd.get_comp_dir ());
-	  if (lh->version == 5 && lh->is_valid_file_index (1))
+	  if (lh->version == 5 && lh->include_dir_at (1) != nullptr)
 	    {
 	      std::string dir = lh->include_dir_at (1);
 	      fnd.set_comp_dir (std::move (dir));
