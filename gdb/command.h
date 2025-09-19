@@ -64,9 +64,10 @@ enum command_class
   class_maintenance = 1 << 12, /* internals */
   class_tui = 1 << 13,         /* text-user-interface */
   class_user = 1 << 14,        /* user-defined */
+  class_essential = 1 << 15,    /* essential */
 
   /* Used for "show" commands that have no corresponding "set" command.  */
-  no_set_class = 1 << 15
+  no_set_class = 1 << 16
 };
 DEF_ENUM_FLAGS_TYPE (enum command_class, command_classes);
 

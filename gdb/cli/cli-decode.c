@@ -1954,7 +1954,10 @@ help_list (struct cmd_list_element *list, const char *cmdtype,
 		styled_string (command_style.style (), cmdtype),
 		prefix);
 
-  bool recurse = (theclass != all_commands) && (theclass != all_classes);
+  /* Don't recurse if theclass is beginner, since the quickstart
+     help is meant to be direct and not include prefix commands.  */
+  bool recurse = (theclass != all_commands) && (theclass != all_classes)
+		 && (theclass != class_essential);
   help_cmd_list (list, theclass, recurse, stream);
 
   if (theclass == all_classes)

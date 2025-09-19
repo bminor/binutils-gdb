@@ -14916,7 +14916,8 @@ This command may be abbreviated \"disable\"."),
 	   &disablelist);
 
   cmd_list_element *delete_cmd
-    = add_prefix_cmd ("delete", class_breakpoint, delete_command, _("\
+    = add_prefix_cmd ("delete", class_breakpoint | class_essential,
+		      delete_command, _("\
 Delete all or some breakpoints.\n\
 Usage: delete [BREAKPOINTNUM]...\n\
 Arguments are breakpoint numbers with spaces in between.\n\
@@ -14949,7 +14950,7 @@ See also the \"delete\" command which clears breakpoints by number."));
   add_com_alias ("cl", clear_cmd, class_breakpoint, 1);
 
   cmd_list_element *break_cmd
-    = add_com ("break", class_breakpoint, break_command, _("\
+    = add_com ("break", class_breakpoint | class_essential, break_command, _("\
 Set breakpoint at specified location.\n"
 BREAK_ARGS_HELP ("break")));
   set_cmd_completer (break_cmd, location_completer);
@@ -15020,7 +15021,7 @@ Options:\n\
 \n\
 A watchpoint stops execution of your program whenever the value of\n\
 an expression changes."), opts);
-  c = add_com ("watch", class_breakpoint, watch_command,
+  c = add_com ("watch", class_breakpoint | class_essential, watch_command,
 	       watch_help.c_str ());
   set_cmd_completer_handle_brkchars (c, watch_command_completer);
 

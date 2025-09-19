@@ -460,7 +460,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
       && cmdtype != class_info && cmdtype != class_breakpoint
       && cmdtype != class_trace && cmdtype != class_obscure
       && cmdtype != class_maintenance && cmdtype != class_user
-      && cmdtype != class_tui)
+      && cmdtype != class_tui && cmdtype != class_essential)
     {
       PyErr_Format (PyExc_RuntimeError, _("Invalid command class argument."));
       return -1;
@@ -621,6 +621,8 @@ gdbpy_initialize_commands ()
       || PyModule_AddIntConstant (gdb_module, "COMMAND_MAINTENANCE",
 				  class_maintenance) < 0
       || PyModule_AddIntConstant (gdb_module, "COMMAND_USER", class_user) < 0
+      || PyModule_AddIntConstant (gdb_module, "COMMAND_ESSENTIAL",
+				  class_essential) < 0
       || PyModule_AddIntConstant (gdb_module, "COMMAND_TUI", class_tui) < 0)
     return -1;
 

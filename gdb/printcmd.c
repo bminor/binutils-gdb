@@ -3231,7 +3231,7 @@ No argument means cancel all automatic-display expressions.\n\
 Do \"info display\" to see current list of code numbers."),
 	   &cmdlist);
 
-  c = add_com ("display", class_vars, display_command, _("\
+  c = add_com ("display", class_vars | class_essential, display_command, _("\
 Print value of expression EXP each time the program stops.\n\
 Usage: display[/FMT] EXP\n\
 /FMT may be used before EXP as in the \"print\" command.\n\
@@ -3345,7 +3345,8 @@ but no count or size letter (see \"x\" command)."),
 					      print_opts);
 
   cmd_list_element *print_cmd
-    = add_com ("print", class_vars, print_command, print_help.c_str ());
+    = add_com ("print", class_vars | class_essential, print_command,
+	       print_help.c_str ());
   set_cmd_completer_handle_brkchars (print_cmd, print_command_completer);
   add_com_alias ("p", print_cmd, class_vars, 1);
   add_com_alias ("inspect", print_cmd, class_vars, 1);

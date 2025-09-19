@@ -102,6 +102,9 @@ struct cmd_list_element
   bool is_prefix () const
   { return this->subcommands != nullptr; }
 
+  bool is_essential () const
+  { return (this->theclass & class_essential) != 0; }
+
   /* Return true if this command is a "command class help" command.  For
      instance, a "stack" dummy command is registered so that one can do
      "help stack" and show help for all commands of the "stack" class.  */

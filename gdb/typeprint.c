@@ -738,7 +738,7 @@ INIT_GDB_FILE (typeprint)
 {
   struct cmd_list_element *c;
 
-  c = add_com ("ptype", class_vars, ptype_command, _("\
+  c = add_com ("ptype", class_vars | class_essential, ptype_command, _("\
 Print definition of type TYPE.\n\
 Usage: ptype[/FLAGS] TYPE | EXPRESSION\n\
 Argument may be any type (for example a type name defined by typedef,\n\

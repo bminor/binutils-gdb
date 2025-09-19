@@ -3270,7 +3270,7 @@ Control remains in the debugger, but when you continue\n\
 execution will resume in the frame above the one now selected.\n\
 If an argument is given, it is an expression for the value to return."));
 
-  add_com ("up", class_stack, up_command, _("\
+  add_com ("up", class_stack | class_essential, up_command, _("\
 Select and print stack frame that called this one.\n\
 An argument says how many frames up to go."));
   add_com ("up-silently", class_support, up_silently_command, _("\
@@ -3278,7 +3278,7 @@ Same as the `up' command, but does not print anything.\n\
 This is useful in command scripts."));
 
   cmd_list_element *down_cmd
-    = add_com ("down", class_stack, down_command, _("\
+    = add_com ("down", class_stack | class_essential, down_command, _("\
 Select and print stack frame called by this one.\n\
 An argument says how many frames down to go."));
   add_com_alias ("do", down_cmd, class_stack, 1);
@@ -3449,7 +3449,7 @@ With a negative COUNT, print outermost -COUNT frames."),
 			       backtrace_opts);
 
   cmd_list_element *backtrace_cmd
-    = add_com ("backtrace", class_stack, backtrace_command,
+    = add_com ("backtrace", class_stack | class_essential, backtrace_command,
 	       backtrace_help.c_str ());
   set_cmd_completer_handle_brkchars (backtrace_cmd, backtrace_command_completer);
 

@@ -55,6 +55,11 @@ info inferiors
   as an additional line under the inferior's table entry in the
   output.
 
+New command class for help
+  The new command class "essential" has been added, which is a set of
+  commands that we, as developers, believe would be close to a minimal
+  set of commands for a new user of GDB.
+
 * Changed remote packets
 
 single-inf-arg in qSupported

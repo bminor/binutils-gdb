@@ -2628,6 +2628,20 @@ INIT_GDB_FILE (cli_cmds)
   /* Define the classes of commands.
      They will appear in the help list in alphabetical order.  */
 
+  add_cmd ("essential", class_essential, _("\
+GDB essential commands.\n\
+Welcome to GDB!  This help text aims to provide a quickstart explanation\n\
+that will allow you to start using GDB.  Feel free to use \"help <cmd>\"\n\
+to get further explanations for any command <cmd>, and check the online\n\
+documentation for in-depth explanations.\n\
+Here are some common GDB behaviors that you can expect, which are\n\
+not tied to any specific command but rather GDB functionality itself:\n\
+\n\
+EXPR is any arbitrary expression valid for the current programming language.\n\
+Pressing <return> with an empty prompt executes the last command again.\n\
+You can use <tab> to complete commands and symbols.  Pressing it twice lists\n\
+all possible completions if more than one is available."),
+	   &cmdlist);
   add_cmd ("internals", class_maintenance, _("\
 Maintenance commands.\n\
 Some gdb commands are provided just for use by gdb maintainers.\n\
@@ -2880,7 +2894,7 @@ and send its output to SHELL_COMMAND."));
   add_com_alias ("|", pipe_cmd, class_support, 0);
 
   cmd_list_element *list_cmd
-    = add_com ("list", class_files, list_command, _("\
+    = add_com ("list", class_files | class_essential, list_command, _("\
 List specified function or line.\n\
 With no argument, lists ten more lines after or around previous listing.\n\
 \"list +\" lists the ten lines following a previous ten-line listing.\n\
@@ -2941,7 +2955,7 @@ Show definitions of non-python/scheme user defined commands.\n\
 Argument is the name of the user defined command.\n\
 With no argument, show definitions of all user defined commands."), &showlist);
   set_cmd_completer (c, show_user_completer);
-  add_com ("apropos", class_support, apropos_command, _("\
+  add_com ("apropos", class_support | class_essential, apropos_command, _("\
 Search for commands matching a REGEXP.\n\
 Usage: apropos [-v] REGEXP\n\
 Flag -v indicates to produce a verbose output, showing full documentation\n\

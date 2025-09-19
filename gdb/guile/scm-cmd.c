@@ -564,6 +564,7 @@ static const scheme_integer_constant command_classes[] =
   { "COMMAND_OBSCURE", class_obscure },
   { "COMMAND_MAINTENANCE", class_maintenance },
   { "COMMAND_USER", class_user },
+  { "COMMAND_ESSENTIAL", class_essential },
 
   END_INTEGER_CONSTANTS
 };

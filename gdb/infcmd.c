@@ -3248,7 +3248,7 @@ Upon return, the value returned is printed and put in the value history."));
   add_com_alias ("fin", finish_cmd, class_run, 1);
 
   cmd_list_element *next_cmd
-    = add_com ("next", class_run, next_command, _("\
+    = add_com ("next", class_run | class_essential, next_command, _("\
 Step program, proceeding through subroutine calls.\n\
 Usage: next [N]\n\
 Unlike \"step\", if the current source line calls a subroutine,\n\
@@ -3257,7 +3257,7 @@ the call, in effect treating it as a single source line."));
   add_com_alias ("n", next_cmd, class_run, 1);
 
   cmd_list_element *step_cmd
-    = add_com ("step", class_run, step_command, _("\
+    = add_com ("step", class_run | class_essential, step_command, _("\
 Step program until it reaches a different source line.\n\
 Usage: step [N]\n\
 Argument N means step N times (or till program stops for another \
@@ -3291,7 +3291,7 @@ for an address to start at."));
   add_com_alias ("j", jump_cmd, class_run, 1);
 
   cmd_list_element *continue_cmd
-    = add_com ("continue", class_run, continue_command, _("\
+    = add_com ("continue", class_run | class_essential, continue_command, _("\
 Continue program being debugged, after signal or breakpoint.\n\
 Usage: continue [N]\n\
 If proceeding from breakpoint, a number N may be used as an argument,\n\
@@ -3312,7 +3312,7 @@ RUN_ARGS_HELP));
   set_cmd_completer (run_cmd, deprecated_filename_completer);
   add_com_alias ("r", run_cmd, class_run, 1);
 
-  c = add_com ("start", class_run, start_command, _("\
+  c = add_com ("start", class_run | class_essential, start_command, _("\
 Start the debugged program stopping at the beginning of the main procedure.\n"
 RUN_ARGS_HELP));
   set_cmd_completer (c, deprecated_filename_completer);

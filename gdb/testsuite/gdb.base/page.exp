@@ -26,6 +26,7 @@ gdb_test_sequence "help" "unpaged help" {
     "aliases -- User-defined aliases of other commands"
     "breakpoints -- Making program stop at certain points"
     "data -- Examining data"
+    "essential -- GDB essential commands"
     "files -- Specifying and examining files"
     "internals -- Maintenance commands"
     "obscure -- Obscure features"
@@ -53,10 +54,10 @@ gdb_expect_list "paged help" \
     "aliases -- User-defined aliases of other commands"
     "breakpoints -- Making program stop at certain points"
     "data -- Examining data"
+    "essential -- GDB essential commands"
     "files -- Specifying and examining files"
     "internals -- Maintenance commands"
     "obscure -- Obscure features"
-    "running -- Running the program"
 }
 gdb_test "q"
 
