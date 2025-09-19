@@ -25,6 +25,7 @@
 #include <tuple>
 #include "gdbsupport/iterator-range.h"
 #include "gdbsupport/thread-pool.h"
+#include "gdbsupport/work-queue.h"
 
 namespace gdb
 {
@@ -59,12 +60,8 @@ parallel_for_each (const RandomIt first, const RandomIt last,
       debug_printf ("Parallel for: batch size: %zu\n", batch_size);
     }
 
-  const size_t n_worker_threads
-    = std::max<size_t> (thread_pool::g_thread_pool->thread_count (), 1);
   std::vector<gdb::future<void>> results;
-
-  /* The next item to hand out.  */
-  std::atomic<RandomIt> next = first;
+  work_queue<RandomIt, batch_size> queue (first, last);
 
   /* The worker thread task.
 
@@ -77,49 +74,32 @@ parallel_for_each (const RandomIt first, const RandomIt last,
      and `args` can be used as-is in the lambda.  */
   auto args_tuple
     = std::forward_as_tuple (std::forward<WorkerArgs> (worker_args)...);
-  auto task = [&next, first, last, n_worker_threads, &args_tuple] ()
+  auto task = [&queue, first, &args_tuple] ()
     {
       /* Instantiate the user-defined worker.  */
       auto worker = std::make_from_tuple<Worker> (args_tuple);
 
       for (;;)
 	{
-	  /* Grab a snapshot of NEXT.  */
-	  auto local_next = next.load ();
-	  gdb_assert (local_next <= last);
+	  const auto batch = queue.pop_batch ();
 
-	  /* Number of remaining items.  */
-	  auto n_remaining = last - local_next;
-	  gdb_assert (n_remaining >= 0);
-
-	  /* Are we done?  */
-	  if (n_remaining == 0)
+	  if (batch.empty ())
 	    break;
-
-	  const auto this_batch_size
-	    = std::min<std::size_t> (batch_size, n_remaining);
-
-	  /* The range to process in this iteration.  */
-	  const auto this_batch_first = local_next;
-	  const auto this_batch_last = local_next + this_batch_size;
-
-	  /* Update NEXT.  If the current value of NEXT doesn't match
-	     LOCAL_NEXT, it means another thread updated it concurrently,
-	     restart.  */
-	  if (!next.compare_exchange_weak (local_next, this_batch_last))
-	    continue;
 
 	  if (parallel_for_each_debug)
 	    debug_printf ("Processing %zu items, range [%zu, %zu[\n",
-			  this_batch_size,
-			  static_cast<size_t> (this_batch_first - first),
-			  static_cast<size_t> (this_batch_last - first));
+			  batch.size (),
+			  batch.begin () - first,
+			  batch.end () - first);
 
-	  worker ({ this_batch_first, this_batch_last });
+	  worker (batch);
 	}
     };
 
   /* Start N_WORKER_THREADS tasks.  */
+  const size_t n_worker_threads
+    = std::max<size_t> (thread_pool::g_thread_pool->thread_count (), 1);
+
   for (int i = 0; i < n_worker_threads; ++i)
     results.push_back (gdb::thread_pool::g_thread_pool->post_task (task));
 
