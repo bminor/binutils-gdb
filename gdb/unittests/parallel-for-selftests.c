@@ -42,7 +42,7 @@ struct save_restore_n_threads
   int n_threads;
 };
 
-using foreach_callback_t = gdb::function_view<void (int *first, int *last)>;
+using foreach_callback_t = gdb::function_view<void (iterator_range<int *> range)>;
 using do_foreach_t = gdb::function_view<void (int *first, int *last,
 					     foreach_callback_t)>;
 
@@ -63,16 +63,16 @@ test_one (do_foreach_t do_foreach, int upper_bound)
   /* The (unfortunate) reason why we don't use std::vector<int>::iterator as
      the parallel-for-each iterator type is that std::atomic won't work with
      that type when building with -D_GLIBCXX_DEBUG.  */
-  do_foreach (input.data (), input.data () + input.size (),
-	      [&] (int *start, int *end)
+  do_foreach (input.data (),  input.data () + input.size (),
+	      [&] (iterator_range<int *> range)
 		{
 		  /* We shouldn't receive empty ranges.  */
-		  SELF_CHECK (start != end);
+		  SELF_CHECK (!range.empty ());
 
 		  std::lock_guard lock (mtx);
 
-		  for (int *i = start; i < end; ++i)
-		    output.emplace_back (*i * 2);
+		  for (int i : range)
+		    output.emplace_back (i * 2);
 		});
 
   /* Verify that each item was processed exactly once.  */
@@ -109,9 +109,9 @@ test_parallel_for_each ()
     {
     }
 
-    void operator() (int *first, int *last)
+    void operator() (iterator_range<int *> range)
     {
-      return m_callback (first, last);
+      return m_callback (range);
     }
 
   private:

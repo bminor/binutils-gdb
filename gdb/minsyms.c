@@ -1412,36 +1412,36 @@ public:
 #endif
   {}
 
-  void operator() (minimal_symbol *start, minimal_symbol *end) noexcept
+  void operator() (iterator_range<minimal_symbol *> msym_range) noexcept
   {
-    for (minimal_symbol *msym = start; msym < end; ++msym)
+    for (minimal_symbol &msym : msym_range)
       {
-	size_t idx = msym - m_msymbols;
-	m_hash_values[idx].name_length = strlen (msym->linkage_name ());
+	size_t idx = &msym - m_msymbols;
+	m_hash_values[idx].name_length = strlen (msym.linkage_name ());
 
-	if (!msym->name_set)
+	if (!msym.name_set)
 	  {
 	    /* This will be freed later, by compute_and_set_names.  */
 	    gdb::unique_xmalloc_ptr<char> demangled_name
-	      = symbol_find_demangled_name (msym, msym->linkage_name ());
-	    msym->set_demangled_name (demangled_name.release (),
+	      = symbol_find_demangled_name (&msym, msym.linkage_name ());
+	    msym.set_demangled_name (demangled_name.release (),
 				      &m_per_bfd->storage_obstack);
-	    msym->name_set = 1;
+	    msym.name_set = 1;
 	  }
 
 	/* This mangled_name_hash computation has to be outside of
 	   the name_set check, or compute_and_set_names below will
 	   be called with an invalid hash value.  */
 	m_hash_values[idx].mangled_name_hash
-	  = fast_hash (msym->linkage_name (), m_hash_values[idx].name_length);
-	m_hash_values[idx].minsym_hash = msymbol_hash (msym->linkage_name ());
+	  = fast_hash (msym.linkage_name (), m_hash_values[idx].name_length);
+	m_hash_values[idx].minsym_hash = msymbol_hash (msym.linkage_name ());
 
 	/* We only use this hash code if the search name differs
 	   from the linkage name.  See the code in
 	   build_minimal_symbol_hash_tables.  */
-	if (msym->search_name () != msym->linkage_name ())
+	if (msym.search_name () != msym.linkage_name ())
 	  m_hash_values[idx].minsym_demangled_hash
-	    = search_name_hash (msym->language (), msym->search_name ());
+	    = search_name_hash (msym.language (), msym.search_name ());
       }
 
     {
@@ -1450,14 +1450,14 @@ public:
 #if CXX_STD_THREAD
       std::lock_guard<std::mutex> guard (m_demangled_mutex);
 #endif
-      for (minimal_symbol *msym = start; msym < end; ++msym)
+      for (minimal_symbol &msym : msym_range)
 	{
-	  size_t idx = msym - m_msymbols;
-	  std::string_view name (msym->linkage_name (),
+	  size_t idx = &msym - m_msymbols;
+	  std::string_view name (msym.linkage_name (),
 				 m_hash_values[idx].name_length);
 	  hashval_t hashval = m_hash_values[idx].mangled_name_hash;
 
-	  msym->compute_and_set_names (name, false, m_per_bfd, hashval);
+	  msym.compute_and_set_names (name, false, m_per_bfd, hashval);
 	}
     }
   }

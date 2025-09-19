@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <atomic>
 #include <tuple>
+#include "gdbsupport/iterator-range.h"
 #include "gdbsupport/thread-pool.h"
 
 namespace gdb
@@ -114,7 +115,7 @@ parallel_for_each (const RandomIt first, const RandomIt last,
 			  static_cast<size_t> (this_batch_first - first),
 			  static_cast<size_t> (this_batch_last - first));
 
-	  worker (this_batch_first, this_batch_last);
+	  worker ({ this_batch_first, this_batch_last });
 	}
     };
 
@@ -138,7 +139,7 @@ sequential_for_each (RandomIt first, RandomIt last, WorkerArgs &&...worker_args)
   if (first == last)
     return;
 
-  Worker (std::forward<WorkerArgs> (worker_args)...) (first, last);
+  Worker (std::forward<WorkerArgs> (worker_args)...) ({ first, last });
 }
 
 }
