@@ -132,6 +132,7 @@ EOF
 	  )
 
 # Run GDB and remove some unwanted noise.
+# shellcheck disable=SC2086
 "$GDB" --quiet -nx $GDBARGS <<EOF |
 set width 0
 set height 0

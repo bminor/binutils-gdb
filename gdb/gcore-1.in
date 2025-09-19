@@ -127,13 +127,13 @@ fi
 
 # Attempt to fetch the absolute path to the gcore script that was
 # called.
-binary_path=`dirname "$0"`
+binary_path=$(dirname "$0")
 
-if test "x$binary_path" = x. ; then
+if test "$binary_path" = . ; then
   # We got "." back as a path.  This means the user executed
   # the gcore script locally (i.e. ./gcore) or called the
   # script via a shell interpreter (i.e. sh gcore).
-  binary_basename=`basename "$0"`
+  binary_basename=$(basename "$0")
 
   # If the gcore script was called like "sh gcore" and the script
   # lives in the current directory, "which" will not give us "gcore".
@@ -147,8 +147,8 @@ if test "x$binary_path" = x. ; then
     # The gcore script was not found in ".", which means the script
     # was called from somewhere else in $PATH by "sh gcore".
     # Extract the correct path now.
-    binary_path_from_env=`which "$0"`
-    binary_path=`dirname "$binary_path_from_env"`
+    binary_path_from_env=$(which "$0")
+    binary_path=$(dirname "$binary_path_from_env")
   fi
 fi
 
@@ -156,7 +156,7 @@ if [ -z "$gdb_binary" ]; then
    gdb_binary="$binary_path/@GDB_TRANSFORM_NAME@"
 fi
 
-gdb_binary_basename=`basename "$gdb_binary"`
+gdb_binary_basename=$(basename "$gdb_binary")
 
 # Check if the GDB binary is in the expected path.  If not, just
 # quit with a message.
