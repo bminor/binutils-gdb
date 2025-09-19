@@ -56,6 +56,10 @@ struct iterator_range
   std::size_t size () const
   { return std::distance (m_begin, m_end); }
 
+  /* Return true if this range is empty.  */
+  bool empty () const
+  { return m_begin == m_end; }
+
 private:
   IteratorType m_begin, m_end;
 };
