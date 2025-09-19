@@ -147,7 +147,7 @@ def _remove_entries(table, *names):
 # specifications and a callback function to do the work of creating
 # the breakpoint.
 @in_gdb_thread
-def _set_breakpoints_callback(kind, specs, creator):
+def _set_breakpoints(kind, specs, creator):
     # Try to reuse existing breakpoints if possible.
     if kind in breakpoint_map:
         saved_map = breakpoint_map[kind]
@@ -254,13 +254,6 @@ def _set_one_breakpoint(*, logMessage=None, **args):
         return gdb.Breakpoint(**args)
 
 
-# Helper function to set ordinary breakpoints according to a list of
-# specifications.
-@in_gdb_thread
-def _set_breakpoints(kind, specs):
-    return _set_breakpoints_callback(kind, specs, _set_one_breakpoint)
-
-
 # A helper function that rewrites a SourceBreakpoint into the internal
 # form passed to the creator.  This function also allows for
 # type-checking of each SourceBreakpoint.
@@ -302,7 +295,7 @@ def set_breakpoint(*, source, breakpoints: Sequence = (), **args):
         # Be sure to include the path in the key, so that we only
         # clear out breakpoints coming from this same source.
         key = "source:" + source["path"]
-        result = _set_breakpoints(key, specs)
+        result = _set_breakpoints(key, specs, _set_one_breakpoint)
     return {
         "breakpoints": result,
     }
@@ -331,7 +324,7 @@ def _rewrite_fn_breakpoint(
 def set_fn_breakpoint(*, breakpoints: Sequence, **args):
     specs = [_rewrite_fn_breakpoint(**bp) for bp in breakpoints]
     return {
-        "breakpoints": _set_breakpoints("function", specs),
+        "breakpoints": _set_breakpoints("function", specs, _set_one_breakpoint),
     }
 
 
@@ -366,7 +359,7 @@ def set_insn_breakpoints(
 ):
     specs = [_rewrite_insn_breakpoint(**bp) for bp in breakpoints]
     return {
-        "breakpoints": _set_breakpoints("instruction", specs),
+        "breakpoints": _set_breakpoints("instruction", specs, _set_one_breakpoint),
     }
 
 
@@ -388,11 +381,6 @@ def _catch_exception(filterId, **args):
             return bp
     # Not a DAPException because this is definitely unexpected.
     raise Exception("Could not find catchpoint after creating")
-
-
-@in_gdb_thread
-def _set_exception_catchpoints(filter_options):
-    return _set_breakpoints_callback("exception", filter_options, _catch_exception)
 
 
 # A helper function that rewrites an ExceptionFilterOptions into the
@@ -458,6 +446,4 @@ def set_exception_breakpoints(
     options = [{"filterId": filter} for filter in filters]
     options.extend(filterOptions)
     options = [_rewrite_exception_breakpoint(**bp) for bp in options]
-    return {
-        "breakpoints": _set_exception_catchpoints(options),
-    }
+    return {"breakpoints": _set_breakpoints("exception", options, _catch_exception)}
