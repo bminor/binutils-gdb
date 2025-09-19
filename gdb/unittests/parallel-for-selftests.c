@@ -60,6 +60,9 @@ test_one (do_foreach_t do_foreach, int upper_bound)
   std::vector<int> output;
   std::mutex mtx;
 
+  /* The (unfortunate) reason why we don't use std::vector<int>::iterator as
+     the parallel-for-each iterator type is that std::atomic won't work with
+     that type when building with -D_GLIBCXX_DEBUG.  */
   do_foreach (input.data (), input.data () + input.size (),
 	      [&] (int *start, int *end)
 		{
@@ -97,12 +100,32 @@ test_one_function (int n_threads, do_foreach_t do_foreach)
 static void
 test_parallel_for_each ()
 {
+  struct test_worker
+  {
+    /* DUMMY is there to test passing multiple arguments to the worker
+       constructor.  */
+    test_worker (foreach_callback_t callback, int dummy)
+      : m_callback (callback)
+    {
+    }
+
+    void operator() (int *first, int *last)
+    {
+      return m_callback (first, last);
+    }
+
+  private:
+    foreach_callback_t m_callback;
+  };
+
   const std::vector<do_foreach_t> for_each_functions
     {
       [] (int *start, int *end, foreach_callback_t callback)
-      { gdb::parallel_for_each<1> (start, end, callback); },
+      { gdb::parallel_for_each<1, int *, test_worker> (start, end, callback,
+						       0); },
       [] (int *start, int *end, foreach_callback_t callback)
-      { gdb::sequential_for_each (start, end, callback);}
+      { gdb::sequential_for_each<int *, test_worker> (start, end, callback,
+						      0); },
     };
 
   int default_thread_count = gdb::thread_pool::g_thread_pool->thread_count ();
