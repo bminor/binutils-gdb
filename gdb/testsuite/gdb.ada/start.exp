@@ -24,7 +24,7 @@ require !use_gdb_stub
 standard_ada_testfile dummy
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable {debug}] != ""} {
-    return -1
+    return
 }
 
 clean_restart ${testfile}
@@ -32,7 +32,7 @@ clean_restart ${testfile}
 # Verify that "start" lands inside the right procedure.
 if { [gdb_start_cmd] < 0 } {
     fail "start failed to land inside the right procedure"
-    return -1
+    return
 }
 
 gdb_test "" \

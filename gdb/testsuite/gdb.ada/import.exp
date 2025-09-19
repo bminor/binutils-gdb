@@ -36,7 +36,7 @@ if {[gdb_compile "${csrcfile}" "${cobject}" object debug] != ""} {
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable \
 	 [list debug additional_flags=-largs \
 	      additional_flags=${cobject} additional_flags=-margs]] != ""} {
-    return -1
+    return
 }
 
 clean_restart ${testfile}

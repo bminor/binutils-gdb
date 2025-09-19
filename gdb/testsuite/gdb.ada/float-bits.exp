@@ -22,7 +22,7 @@ require allow_ada_tests
 standard_ada_testfile prog
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable {debug}] != ""} {
-    return -1
+    return
 }
 
 # Given a floating point EXPRESSION, return the size of the result.

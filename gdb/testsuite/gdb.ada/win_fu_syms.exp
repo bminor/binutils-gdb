@@ -21,7 +21,7 @@ require ada_shared_link
 standard_ada_testfile foo
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug additional_flags=-bargs additional_flags=-shared additional_flags=-margs]] != "" } {
-  return -1
+  return
 }
 
 clean_restart ${testfile}

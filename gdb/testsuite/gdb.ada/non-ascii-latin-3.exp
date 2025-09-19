@@ -29,7 +29,7 @@ standard_ada_testfile prog
 
 set flags [list debug additional_flags=-gnati3]
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable $flags] != ""} {
-    return -1
+    return
 }
 
 # Restart without an executable so that we can set the encoding early.

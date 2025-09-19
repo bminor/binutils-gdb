@@ -29,7 +29,7 @@ if { [ada_fvar_tracking] } {
 }
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable $opts] != ""} {
-  return -1
+  return
 }
 
 clean_restart ${testfile}

@@ -24,7 +24,7 @@ require !use_gdb_stub
 standard_ada_testfile first
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable {debug}] != ""} {
-    return -1
+    return
 }
 
 # Build the second test program
@@ -32,7 +32,7 @@ set srcfile2 ${srcdir}/${subdir}/${testdir}/second.adb
 set binfile2 [standard_output_file second]
 
 if {[gdb_compile_ada "${srcfile2}" "${binfile2}" executable {debug}] != ""} {
-    return -1
+    return
 }
 
 foreach_with_prefix scenario {kill no-kill} {
@@ -41,7 +41,7 @@ foreach_with_prefix scenario {kill no-kill} {
     # Start the program, we should land in the program main procedure
     if {[gdb_start_cmd] < 0} {
 	fail start
-	return -1
+	return
     }
 
     gdb_test "" \

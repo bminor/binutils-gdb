@@ -23,7 +23,7 @@ foreach_gnat_encoding gnat_encodings flags {all minimal} {
     lappend flags debug
 
     if {[gdb_compile_ada "${srcfile}" "${binfile}-${gnat_encodings}" executable $flags] != "" } {
-      return -1
+      return
     }
 
     clean_restart ${testfile}-${gnat_encodings}

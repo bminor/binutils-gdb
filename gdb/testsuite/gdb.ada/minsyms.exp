@@ -20,7 +20,7 @@ require allow_ada_tests
 standard_ada_testfile foo_qb07_057
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable ""] != "" } {
-  return -1
+  return
 }
 
 clean_restart ${testfile}

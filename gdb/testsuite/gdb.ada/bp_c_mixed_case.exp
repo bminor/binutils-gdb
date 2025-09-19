@@ -41,7 +41,7 @@ set options [list debug \
 		 additional_flags=${cobject2} \
 		 additional_flags=-margs]
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable $options] != "" } {
-  return -1
+  return
 }
 
 clean_restart ${testfile}

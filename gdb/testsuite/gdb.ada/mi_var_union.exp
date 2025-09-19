@@ -28,7 +28,7 @@ foreach_gnat_encoding scenario flags {none all minimal} {
     lappend flags debug
 
     if {[gdb_compile_ada "${srcfile}" "${binfile}-${scenario}" executable $flags] != "" } {
-	return -1
+	return
     }
 
     mi_clean_restart $::testfile-$scenario

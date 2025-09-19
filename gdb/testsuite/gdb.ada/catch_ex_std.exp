@@ -28,7 +28,7 @@ set outdir [file dirname $binfile]
 
 # Create the shared library.
 if {[gdb_compile_shlib $srcfile2 $sofile {ada debug}] != ""} {
-    return -1
+    return
 }
 
 # Set linkarg such that the executable can find the shared library.
@@ -56,7 +56,7 @@ foreach option [concat $gnatbind_options $gnatlink_options] {
 
 # Create executable.
 if {[gdb_compile_ada $srcfile $binfile executable $options] != ""} {
-    return -1
+    return
 }
 
 clean_restart ${testfile}

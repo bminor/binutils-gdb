@@ -25,7 +25,7 @@ standard_ada_testfile first
 
 # Build the first test program (note that cygwin needs the $EXEEXT).
 if {[gdb_compile_ada "${srcfile}" "${binfile}$EXEEXT" executable {debug}] != ""} {
-    return -1
+    return
 }
 
 # Build the second test program
@@ -33,7 +33,7 @@ set srcfile2 ${srcdir}/${subdir}/${testdir}/second.adb
 set binfile2 [standard_output_file second$EXEEXT]
 
 if {[gdb_compile_ada "${srcfile2}" "${binfile2}" executable {debug}] != ""} {
-    return -1
+    return
 }
 
 # Start with a fresh gdb.
@@ -52,7 +52,7 @@ gdb_load ${common_binfile}
 # Start the program, we should land in the program main procedure
 if { [gdb_start_cmd] < 0 } {
     fail start
-    return -1
+    return
 }
 
 gdb_test "" \

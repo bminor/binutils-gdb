@@ -20,14 +20,14 @@ require allow_ada_tests
 standard_ada_testfile foo
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug ]] != "" } {
-  return -1
+  return
 }
 
 clean_restart ${testfile}
 
 set bp_location [gdb_get_line_number "STOP" ${testdir}/foo.adb]
 if {![runto "foo.adb:$bp_location"]} {
-  return -1
+  return
 }
 
 gdb_test "print A1(1)" \

@@ -22,7 +22,7 @@ require gnat_runtime_has_debug_info
 standard_ada_testfile foo
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug]] != "" } {
-  return -1
+  return
 }
 
 clean_restart ${testfile}

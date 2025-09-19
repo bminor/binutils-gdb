@@ -26,7 +26,7 @@ standard_ada_testfile main
 setenv LC_ALL C.UTF-8
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable {debug}] != ""} {
-    return -1
+    return
 }
 
 clean_restart ${testfile}

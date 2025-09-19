@@ -23,7 +23,7 @@ load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable debug] != "" } {
-    return -1
+    return
 }
 
 mi_clean_restart $::testfile

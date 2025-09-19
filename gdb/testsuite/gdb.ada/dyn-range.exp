@@ -20,14 +20,14 @@ require allow_ada_tests
 standard_ada_testfile dyn
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable {debug}] != ""} {
-    return -1
+    return
 }
 
 clean_restart ${testfile}
 
 set bp_location [gdb_get_line_number "STOP" ${testdir}/dyn.adb]
 if {![runto "dyn.adb:$bp_location"]} {
-    return -1
+    return
 }
 
 # Accept "dyn." prefix for older versions of GNAT.

@@ -26,7 +26,7 @@ if {[ada_fvar_tracking]} {
 }
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable $flags] != ""} {
-  return -1
+  return
 }
 
 clean_restart ${testfile}

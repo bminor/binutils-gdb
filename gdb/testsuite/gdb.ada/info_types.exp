@@ -18,7 +18,7 @@ require allow_ada_tests
 standard_testfile .c
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
-    return -1
+    return
 }
 
 # Force the language to Ada.  We used a C program because it was trivial

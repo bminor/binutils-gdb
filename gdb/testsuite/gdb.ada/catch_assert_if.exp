@@ -20,7 +20,7 @@ require allow_ada_tests gnat_runtime_has_debug_info
 standard_ada_testfile bla
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug additional_flags=-gnata ]] != "" } {
-   return -1
+   return
 }
 
 clean_restart ${testfile}

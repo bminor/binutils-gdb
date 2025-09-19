@@ -21,7 +21,7 @@ standard_ada_testfile foo
 
 set flags [list debug additional_flags=-gnatW8]
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable $flags] != "" } {
-  return -1
+  return
 }
 
 clean_restart ${testfile}

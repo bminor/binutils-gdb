@@ -35,11 +35,11 @@ set cobject [standard_output_file ${cfile}.o]
 
 if { [gdb_compile "${csrcfile}" "${cobject}" object [list debug]] != "" } {
     untested "failed to compile"
-    return -1
+    return
 }
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug]] != "" } {
     untested "failed to compile"
-    return -1
+    return
 }
 
 clean_restart ${testfile}

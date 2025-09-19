@@ -24,7 +24,7 @@ require allow_ada_tests
 standard_testfile .c
 
 if {[build_executable "failed to prepare" $testfile $srcfile] == -1} {
-    return -1
+    return
 }
 
 # Try this test in both the C and Ada language modes.

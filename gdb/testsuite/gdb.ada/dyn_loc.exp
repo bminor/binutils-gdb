@@ -20,14 +20,14 @@ require allow_ada_tests
 standard_ada_testfile p
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug ]] != "" } {
-  return -1
+  return
 }
 
 clean_restart ${testfile}
 
 set bp_location [gdb_get_line_number "BREAK" ${testdir}/pack.adb]
 if {![runto "pack.adb:$bp_location"]} {
-  return -1
+  return
 }
 
 set eol "\r\n"

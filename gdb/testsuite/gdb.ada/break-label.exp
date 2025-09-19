@@ -20,7 +20,7 @@ require allow_ada_tests
 standard_ada_testfile proc
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable debug] != ""} {
-  return -1
+  return
 }
 
 # Ada is case-insensitive, so both of these should work.

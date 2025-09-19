@@ -29,7 +29,7 @@ if {[gdb_compile_ada $srcdir/$subdir/$testdir/pck.adb \
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable \
 	 {debug no-force}] != ""} {
-    return -1
+    return
 }
 
 clean_restart ${testfile}

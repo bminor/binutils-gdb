@@ -20,7 +20,7 @@ require allow_ada_tests gnat_runtime_has_debug_info
 standard_ada_testfile foo
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug additional_flags=-gnata ]] != "" } {
-  return -1
+  return
 }
 
 # A global variable used to simplify the maintenance of some of
@@ -59,7 +59,7 @@ proc continue_to_exception { exception_name exception_message test } {
 	}
 	timeout {
 	    fail "$test (timeout)"
-	    return -1
+	    return
 	}
     }
 
