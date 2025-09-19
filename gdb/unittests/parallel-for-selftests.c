@@ -42,50 +42,56 @@ struct save_restore_n_threads
   int n_threads;
 };
 
-using foreach_callback_t = gdb::function_view<void (int first, int last)>;
-using do_foreach_t = gdb::function_view<void (int first, int last,
+using foreach_callback_t = gdb::function_view<void (int *first, int *last)>;
+using do_foreach_t = gdb::function_view<void (int *first, int *last,
 					     foreach_callback_t)>;
 
+/* Run one parallel-for-each test on the range [1, UPPER_BOUND) using the
+   parallel-for-each implementation DO_FOREACH.  */
+
 static void
-test_one (int n_threads, do_foreach_t do_foreach)
+test_one (do_foreach_t do_foreach, int upper_bound)
+{
+  std::vector<int> input;
+
+  for (int i = 0; i < upper_bound; ++i)
+    input.emplace_back (i);
+
+  std::vector<int> output;
+  std::mutex mtx;
+
+  do_foreach (input.data (), input.data () + input.size (),
+	      [&] (int *start, int *end)
+		{
+		  /* We shouldn't receive empty ranges.  */
+		  SELF_CHECK (start != end);
+
+		  std::lock_guard lock (mtx);
+
+		  for (int *i = start; i < end; ++i)
+		    output.emplace_back (*i * 2);
+		});
+
+  /* Verify that each item was processed exactly once.  */
+  SELF_CHECK (output.size () == upper_bound);
+  std::sort (output.begin (), output.end ());
+
+  for (int i = 0; i < output.size (); ++i)
+    SELF_CHECK (output[i] == i * 2);
+}
+
+/* Run all tests on the parallel-for-each implementation DO_FOREACH.  */
+
+static void
+test_one_function (int n_threads, do_foreach_t do_foreach)
 {
   save_restore_n_threads saver;
   gdb::thread_pool::g_thread_pool->set_thread_count (n_threads);
 
-  {
-    constexpr int upper_bound = 1000;
-    std::atomic<int> counter (0);
-    do_foreach (0, upper_bound,
-		[&] (int start, int end) { counter += end - start; });
-    SELF_CHECK (counter == upper_bound);
-  }
-
-  {
-    std::atomic<int> counter (0);
-    do_foreach (0, 0, [&] (int start, int end) { counter += end - start; });
-    SELF_CHECK (counter == 0);
-  }
-
-  {
-    /* Check that if there are fewer tasks than threads, then we won't
-       end up with a null result.  */
-    std::vector<std::unique_ptr<int>> intresults;
-    std::atomic<bool> any_empty_tasks (false);
-
-    do_foreach (0, 1,
-		[&] (int start, int end)
-		  {
-		    if (start == end)
-		      any_empty_tasks = true;
-
-		    return std::make_unique<int> (end - start);
-		  });
-
-    SELF_CHECK (!any_empty_tasks);
-    SELF_CHECK (std::all_of (intresults.begin (), intresults.end (),
-			     [] (const std::unique_ptr<int> &entry)
-			       { return entry != nullptr; }));
-  }
+  /* Test with a few arbitrary number of items.  */
+  test_one (do_foreach, 0);
+  test_one (do_foreach, 1);
+  test_one (do_foreach, 1000);
 }
 
 static void
@@ -93,15 +99,17 @@ test_parallel_for_each ()
 {
   const std::vector<do_foreach_t> for_each_functions
     {
-      [] (int start, int end, foreach_callback_t callback)
+      [] (int *start, int *end, foreach_callback_t callback)
       { gdb::parallel_for_each<1> (start, end, callback); },
-      [] (int start, int end, foreach_callback_t callback)
+      [] (int *start, int *end, foreach_callback_t callback)
       { gdb::sequential_for_each (start, end, callback);}
     };
 
-  for (int n_threads : { 0, 1, 3 })
+  int default_thread_count = gdb::thread_pool::g_thread_pool->thread_count ();
+
+  for (int n_threads : { 0, 1, 3, default_thread_count })
     for (const auto &for_each_function : for_each_functions)
-      test_one (n_threads, for_each_function);
+      test_one_function (n_threads, for_each_function);
 }
 
 } /* namespace parallel_for */

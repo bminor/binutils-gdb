@@ -128,7 +128,9 @@ parallel_for_each (RandomIt first, RandomIt last, RangeFunction callback)
 		    (size_t)(last - first));
       debug_printf (_("\n"));
     }
-  callback (first, last);
+
+  if (first != last)
+    callback (first, last);
 
   for (auto &fut : results)
     fut.get ();
@@ -142,7 +144,8 @@ template<class RandomIt, class RangeFunction>
 void
 sequential_for_each (RandomIt first, RandomIt last, RangeFunction callback)
 {
-  callback (first, last);
+  if (first != last)
+    callback (first, last);
 }
 
 }
