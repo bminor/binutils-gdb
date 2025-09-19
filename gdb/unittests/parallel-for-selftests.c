@@ -120,12 +120,33 @@ test_parallel_for_each ()
 
   const std::vector<do_foreach_t> for_each_functions
     {
+      /* Test gdb::parallel_for_each.  */
       [] (int *start, int *end, foreach_callback_t callback)
-      { gdb::parallel_for_each<1, int *, test_worker> (start, end, callback,
-						       0); },
+      { gdb::parallel_for_each<1, int *, test_worker> (start, end, callback, 0); },
+
+      /* Test gdb::parallel_for_each_async.  */
       [] (int *start, int *end, foreach_callback_t callback)
-      { gdb::sequential_for_each<int *, test_worker> (start, end, callback,
-						      0); },
+      {
+	bool done_flag = false;
+	std::condition_variable cv;
+	std::mutex mtx;
+
+	gdb::parallel_for_each_async<1, int *, test_worker> (start, end,
+	  [&mtx, &done_flag, &cv] ()
+	    {
+	      std::lock_guard<std::mutex> lock (mtx);
+	      done_flag = true;
+	      cv.notify_one();
+	    },  callback, 0);
+
+	/* Wait for the async parallel-for to complete.  */
+	std::unique_lock<std::mutex> lock (mtx);
+	cv.wait (lock, [&done_flag] () { return done_flag; });
+      },
+
+      /* Test gdb::sequential_for_each.  */
+      [] (int *start, int *end, foreach_callback_t callback)
+      { gdb::sequential_for_each<int *, test_worker> (start, end, callback, 0); },
     };
 
   int default_thread_count = gdb::thread_pool::g_thread_pool->thread_count ();
