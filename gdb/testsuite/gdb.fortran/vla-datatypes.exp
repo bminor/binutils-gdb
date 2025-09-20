@@ -26,7 +26,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
 # check that all fortran standard datatypes will be
 # handled correctly when using as VLA's
 
-if ![fortran_runto_main] {
+if {![fortran_runto_main]} {
     return -1
 }
 

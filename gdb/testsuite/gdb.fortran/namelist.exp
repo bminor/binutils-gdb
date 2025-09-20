@@ -38,8 +38,8 @@ gdb_continue_to_breakpoint "Display namelist"
 
 # DW_TAG_namelist is supported starting gcc 4.9.
 set supported [expr \
-		   [test_compiler_info {gfortran-*} f90] \
-		   && [gcc_major_version {gfortran-*} f90] >= 4.9]
+		   {[test_compiler_info {gfortran-*} f90]
+		       && [gcc_major_version {gfortran-*} f90] >= 4.9}]
 if { $supported } {
     gdb_test "ptype nml" \
         "type = Type nml\r\n *$int :: a\r\n *$int :: b\r\n *End Type nml"

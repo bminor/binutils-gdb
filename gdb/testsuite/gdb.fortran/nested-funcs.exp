@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # This testcase is supposed to test DWARF static link which is usually
-# used together with nested functions.  
+# used together with nested functions.
 
 require allow_fortran_tests
 

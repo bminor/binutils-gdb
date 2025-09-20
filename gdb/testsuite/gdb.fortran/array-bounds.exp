@@ -34,8 +34,8 @@ if {![fortran_runto_main]} {
 # GCC outputs incorrect range debug info for -m32, gcc PR debug/54934.
 set expect_xfail \
     [expr \
-	 [test_compiler_info {gfortran-*} f90] \
-	 && [is_ilp32_target]]
+	 {[test_compiler_info {gfortran-*} f90]
+	     && [is_ilp32_target]}]
 
 set re_ok [string_to_regexp (4294967296:4294967297)]
 set re_xfail [string_to_regexp (0:1)]

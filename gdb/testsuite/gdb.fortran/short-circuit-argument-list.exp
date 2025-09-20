@@ -48,12 +48,12 @@ reset_called_flags
 # a(x,y) .OR./.AND. a(a,b) correctly.
 foreach_with_prefix truth_table_index {1 2 3 4} {
     gdb_test "p truth_table($truth_table_index, 1) .OR. truth_table($truth_table_index, 2)" \
-	     "[expr $truth_table_index > 1 ? \".TRUE.\" : \".FALSE.\"]"
+	     "[expr {$truth_table_index > 1 ? ".TRUE." : ".FALSE."}]"
 }
 
 foreach_with_prefix truth_table_index {1 2 3 4} {
     gdb_test "p truth_table($truth_table_index, 1) .AND. truth_table($truth_table_index, 2)" \
-	     "[expr $truth_table_index > 3 ? \".TRUE.\" : \".FALSE.\"]"
+	     "[expr {$truth_table_index > 3 ? ".TRUE." : ".FALSE."}]"
 }
 
 # Vary number of function arguments to skip.
@@ -78,14 +78,14 @@ with_test_prefix "nested call not skipped" {
     gdb_test "p function_one_arg(.FALSE. .OR. function_no_arg())" \
 	     " = .TRUE."
     gdb_test "p calls" \
-	     " = \\\( function_no_arg_called = [expr $prime + 1], function_no_arg_false_called = $prime, function_one_arg_called = [expr $prime + 1], function_two_arg_called = $prime, function_array_called = $prime \\\)"
+	     " = \\\( function_no_arg_called = [expr {$prime + 1}], function_no_arg_false_called = $prime, function_one_arg_called = [expr {$prime + 1}], function_two_arg_called = $prime, function_array_called = $prime \\\)"
 }
 
 with_test_prefix "nested call skipped" {
     gdb_test "p function_one_arg(.TRUE. .OR. function_no_arg())" \
 	     " = .TRUE."
     gdb_test "p calls" \
-	     " = \\\( function_no_arg_called = [expr $prime + 1], function_no_arg_false_called = $prime, function_one_arg_called = [expr $prime + 2], function_two_arg_called = $prime, function_array_called = $prime \\\)"
+	     " = \\\( function_no_arg_called = [expr {$prime + 1}], function_no_arg_false_called = $prime, function_one_arg_called = [expr {$prime + 2}], function_two_arg_called = $prime, function_array_called = $prime \\\)"
 }
 
 # Vary number of components in the expression to skip.

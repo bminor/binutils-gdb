@@ -232,7 +232,7 @@ proc test_arithmetic_expressions {} {
     gdb_test "p 6.0 / 3.0"	" = 2"	"real divided by real"
 
     # Test exponentiation with various operands
-    
+
     gdb_test "p 2 ** 3" " = 8" "int powered by int"
     gdb_test "p 2 ** 2 ** 3" " = 256" "combined exponentiation expression"
     gdb_test "p (2 ** 2) ** 3" " = 64" "combined exponentiation expression in specified order"

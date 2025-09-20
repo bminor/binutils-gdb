@@ -25,7 +25,7 @@ if {[prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} \
     return -1
 }
 
-if ![fortran_runto_main] {
+if {![fortran_runto_main]} {
     return -1
 }
 
@@ -53,7 +53,7 @@ gdb_test_multiple $cmd $cmd {
 # slice.
 for { set j 1 } { $j < 6 } { incr j } {
     for { set i 1 } { $i < 6 } { incr i } {
-	set val [expr ((($i - 1) * 2) + (($j - 1) * 20)) + 1]
+	set val [expr {((($i - 1) * 2) + (($j - 1) * 20)) + 1}]
 	gdb_test "print ${varname} ($i,$j)" " = $val"
     }
 }
@@ -106,7 +106,7 @@ gdb_test "print str (26:1:-2)" " = 'zxvtrpnljhfdb'"
 # existing value in memory.
 gdb_test_no_output "set fortran repack-array-slices on"
 set element_size [get_integer_valueof "sizeof (array (1,1))" "unknown"]
-set slice_size [expr $element_size * 4]
+set slice_size [expr {$element_size * 4}]
 gdb_test_no_output "set max-value-size $slice_size"
 gdb_test "print array (1:2, 1:2)" "= \\(\\(1, 2\\) \\(11, 12\\)\\)"
 gdb_test "print array (2:3, 2:3)" "= \\(\\(12, 13\\) \\(22, 23\\)\\)"

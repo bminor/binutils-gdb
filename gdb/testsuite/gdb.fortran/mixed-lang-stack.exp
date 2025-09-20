@@ -45,7 +45,7 @@ proc run_tests { lang } {
 
 	clean_restart ${::testfile}
 
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return -1
 	}
 

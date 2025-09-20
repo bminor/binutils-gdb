@@ -29,7 +29,7 @@ save_vars { GDBFLAGS } {
 
 gdb_test "info main" "simple" "info main prior to start"
 
-if ![fortran_runto_main] {
+if {![fortran_runto_main]} {
     untested "could not run to main"
     return -1
 }

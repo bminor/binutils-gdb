@@ -25,7 +25,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile {debug f90}] } 
 
 # Test automatic language detection before the inferior starts.  It tests the
 # effect of expected:
-# (gdb) show language 
+# (gdb) show language
 # The current source language is "auto; currently fortran".
 gdb_test "p modmany::var_i" " = 14" "stopped language detection"
 
@@ -131,6 +131,6 @@ gdb_test "show language" {The current source language is "(auto; currently )?for
 # gcc-4.4.2: The main program is always $fmain in .symtab so "runto" above
 # works.  But DWARF DW_TAG_subprogram contains the name specified by
 # the "program" Fortran statement.
-if [gdb_breakpoint "module"] {
+if {[gdb_breakpoint "module"]} {
     pass "setting breakpoint at module"
 }

@@ -58,7 +58,7 @@ proc run_test { repack } {
 
     clean_restart ${::testfile}
 
-    if ![fortran_runto_main] {
+    if {![fortran_runto_main]} {
 	return -1
     }
 

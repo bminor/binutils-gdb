@@ -67,7 +67,7 @@ proc find_mangled_name { name } {
 set some_func [find_mangled_name "some_func"]
 set string_func [find_mangled_name "string_func"]
 
-if ![fortran_runto_main] {
+if {![fortran_runto_main]} {
     return -1
 }
 

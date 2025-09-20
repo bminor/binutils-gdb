@@ -17,7 +17,7 @@ load_lib fortran.exp
 
 require allow_fortran_tests
 
-standard_testfile library-module-main.f90 
+standard_testfile library-module-main.f90
 set srclibfile ${testfile}-lib.f90
 set libfile [standard_output_file ${testfile}-lib.so]
 
