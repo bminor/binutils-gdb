@@ -112,7 +112,7 @@ with_test_prefix "return to inlined function" {
 }
 
 #
-# Test FinishBreakpoint with no debug symbol 
+# Test FinishBreakpoint with no debug symbol
 #
 
 with_test_prefix "no debug symbol" {
@@ -140,7 +140,7 @@ with_test_prefix "no debug symbol" {
 }
 
 #
-# Test FinishBreakpoint in function returned by longjmp 
+# Test FinishBreakpoint in function returned by longjmp
 #
 
 with_test_prefix "function returned by longjump" {
@@ -166,7 +166,7 @@ with_test_prefix "function returned by longjump" {
 }
 
 #
-# Test FinishBreakpoint in BP condition evaluation 
+# Test FinishBreakpoint in BP condition evaluation
 # (finish in dummy frame)
 #
 
@@ -194,7 +194,7 @@ with_test_prefix "finish in dummy frame" {
 }
 
 #
-# Test FinishBreakpoint in BP condition evaluation 
+# Test FinishBreakpoint in BP condition evaluation
 # (finish in normal frame)
 #
 

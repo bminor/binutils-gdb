@@ -27,7 +27,7 @@ save_vars { GDBFLAGS } {
     clean_restart $testfile
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -79,7 +79,7 @@ gdb_test "python print(gdb.breakpoints()\[1\].locations\[0\])" \
     "check repr of disabled breakpoint location"
 gdb_continue_to_breakpoint "" ".*25.*"
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

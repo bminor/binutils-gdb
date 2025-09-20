@@ -71,13 +71,13 @@ clean_restart
 
 # Get the name of the binfile on the host; on a remote host this means
 # stripping off any directory prefix.
-if [is_remote host] {
+if {[is_remote host]} {
     set remote_binfile [file tail ${binfile}]
 } else {
     set remote_binfile ${binfile}
 }
 
-if [ishost *-*-mingw*] {
+if {[ishost *-*-mingw*]} {
     set remote_pathsep ";"
 } else {
     set remote_pathsep ":"
@@ -107,7 +107,7 @@ gdb_test "info auto-load python-scripts ${testfile}" "Yes.*${testfile}.py.*"
 gdb_test "info auto-load python-scripts no-script-matches-this" \
   "No auto-load scripts matching no-script-matches-this."
 
-if ![runto_main] {
+if {![runto_main]} {
     return
 }
 

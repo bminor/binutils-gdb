@@ -297,9 +297,9 @@ proc test_value_in_inferior {} {
   gdb_test "print argc" " = $argc_value" "sanity check argc"
   gdb_test "python print (argc_lazy.is_lazy)" "\r\nTrue" \
       "python print (argc_lazy.is_lazy) the second time"
-  gdb_test_no_output "set argc=[expr $argc_value + 1]" "change argc"
+  gdb_test_no_output "set argc=[expr {$argc_value + 1}]" "change argc"
   gdb_test "python print (argc_notlazy)" "\r\n$argc_value"
-  gdb_test "python print (argc_lazy)" "\r\n[expr $argc_value + 1]"
+  gdb_test "python print (argc_lazy)" "\r\n[expr {$argc_value + 1}]"
   gdb_test "python print (argc_lazy.is_lazy)" "False"
 
   # Test string fetches,  both partial and whole.
@@ -598,7 +598,7 @@ proc test_value_from_buffer {} {
   gdb_py_test_silent_cmd "python atpbig=tp.array(3)" "make bigger array type" 0
   gdb_test "python vabig=gdb.Value(b,atpbig)" \
            "ValueError.*: Size of type is larger than that of buffer object\..*" \
-	   "attempt to construct large value with small buffer" 
+	   "attempt to construct large value with small buffer"
   gdb_test "python v=gdb.Value(2048,tp)" \
            "TypeError.*: Object must support the python buffer protocol\..*" \
            "attempt to construct value from buffer with non-buffer object"
@@ -770,7 +770,7 @@ proc test_assign {} {
 proc test_unavailable {} {
     set elem_size [get_valueof "/d" "sizeof(long_array\[0\])" "UNKNOWN" \
 		       "get size of long_array element"]
-    set max [expr $elem_size * 10]
+    set max [expr {$elem_size * 10}]
 
     with_set "print elements" 5 {
 	with_max_value_size $max {
@@ -834,7 +834,7 @@ test_assign
 test_value_bytes
 test_value_after_death
 
-# Test either C or C++ values. 
+# Test either C or C++ values.
 
 test_subscript_regression "${binfile}" "c"
 

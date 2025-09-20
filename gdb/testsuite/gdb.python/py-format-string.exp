@@ -110,7 +110,7 @@ proc get_cut_big_string { max } {
     return "\"${whole_big_string}\""
   }
 
-  set cut_string [string range $whole_big_string 0 [expr $max - 1]]
+  set cut_string [string range $whole_big_string 0 [expr {$max - 1}]]
   return "\"${cut_string}\"..."
 }
 

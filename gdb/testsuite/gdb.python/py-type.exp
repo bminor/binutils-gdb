@@ -33,7 +33,7 @@ proc build_inferior {exefile lang} {
 }
 
 # Restart GDB.
-proc restart_gdb {exefile} { 
+proc restart_gdb {exefile} {
   clean_restart
   gdb_load $exefile
 
@@ -135,7 +135,7 @@ proc test_fields {lang} {
 
     # Test conversion to bool on scalar types
     gdb_test "python print (not not st.type\['a'\].type)" "True"
-  
+
     # Test regression PR python/10805
     gdb_py_test_silent_cmd "print (ar)" "print value(ar)" 1
     gdb_py_test_silent_cmd "python ar = gdb.history (0)" "get value (ar) from history" 1
@@ -254,9 +254,9 @@ proc test_template {} {
 	|| [test_compiler_info {gcc-4-[0-4]-*}]} {
 	set have_older_gcc 1
     }
-    if $have_older_gcc { setup_xfail *-*-* }
+    if {$have_older_gcc} { setup_xfail *-*-* }
     gdb_test "python print (ttype.template_argument(1))" "23"
-    if $have_older_gcc { setup_xfail *-*-* }
+    if {$have_older_gcc} { setup_xfail *-*-* }
     gdb_test "python print (isinstance(ttype.template_argument(1), gdb.Value))" \
 	"True"
 

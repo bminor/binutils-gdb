@@ -24,7 +24,7 @@ require allow_python_tests
 clean_restart
 
 proc py_param_test_maybe_no_output { command pattern args } {
-    if [string length $pattern] {
+    if {[string length $pattern]} {
 	gdb_test $command $pattern $args
     } else {
 	gdb_test_no_output $command $args

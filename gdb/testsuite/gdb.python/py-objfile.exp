@@ -68,7 +68,7 @@ gdb_test "python print (gdb.lookup_objfile (\"${testfile}\").lookup_static_symbo
     "None" "lookup_static_symbol can handle nonexistent symbol"
 
 set binfile_build_id [get_build_id $binfile]
-if [string compare $binfile_build_id ""] {
+if {[string compare $binfile_build_id ""]} {
     verbose -log "binfile_build_id = $binfile_build_id"
     gdb_test "python print (objfile.build_id)" "$binfile_build_id" \
     "Get objfile build id"
@@ -119,7 +119,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile}2 ${srcfile} {nodebug l
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return 0
 }
 
@@ -158,11 +158,11 @@ if { [get_python_valueof "sep_objfile.build_id" "None"] != "None" } {
 # An objfile that was a symlink to a differently named file is still
 # findable with its original name.
 # On Windows we don't have proper symlinks, so skip this.
-if ![ishost *-*-mingw*] {
+if {![ishost *-*-mingw*]} {
     set symlink_binary [standard_output_file "symlink-binary"]
     remote_exec host "rm -f ${symlink_binary}"
     remote_exec host "ln -sf ${testfile} ${symlink_binary}"
-    if [remote_file host exists "${symlink_binary}"] {
+    if {[remote_file host exists "${symlink_binary}"]} {
 	clean_restart
 	gdb_load "${symlink_binary}"
 	gdb_test "python print (gdb.lookup_objfile (\"${symlink_binary}\").filename)" \

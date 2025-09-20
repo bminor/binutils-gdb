@@ -41,7 +41,7 @@ mi_gdb_test "set auto-load safe-path ${remote_python_file}" \
     {.*\^done} \
     "set safe-path"
 
-if [is_remote host] {
+if {[is_remote host]} {
     set filename ${testfile}
     remote_download host ${binfile} ${filename}
 } else {

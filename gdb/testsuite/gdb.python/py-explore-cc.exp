@@ -36,7 +36,7 @@ A = <Enter 0 to explore this base class of type 'A'>.*\
 i = <Enter 1 to explore this field of type 'int'>.*\
 c = <Enter 2 to explore this field of type 'char'>.*"
 
-if ![runto_main] {
+if {![runto_main]} {
    return -1
 }
 

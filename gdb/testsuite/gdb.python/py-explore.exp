@@ -47,7 +47,7 @@ proc array_description { value_name type } {
 
 proc pointer_description { value_name type_name } {
     set type_description "'$value_name' is a pointer to a value of type '$type_name'\.\[\r\n\]+"
-    set prompt "Continue exploring it as a pointer to a single value \[\[\]y/n\[\]\]: " 
+    set prompt "Continue exploring it as a pointer to a single value \[\[\]y/n\[\]\]: "
     return "$type_description$prompt"
 }
 
@@ -75,7 +75,7 @@ proc scalar_value { value_name value } {
 
 set SS_fields [field_values {a = 10} {d = 100[.].*}]
 
-if ![runto_main] {
+if {![runto_main]} {
    return -1
 }
 
@@ -125,7 +125,7 @@ gdb_test_multiple "explore darray_ref" "" {
                                     }
                                 }
                             }
-                        } 
+                        }
                     }
                 }
             }

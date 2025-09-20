@@ -318,7 +318,7 @@ with_test_prefix "large range" {
 
 # For native targets, test a pattern straddling a chunk boundary.
 
-if [isnative] {
+if {[isnative]} {
     with_test_prefix "straddling" {
 	gdb_test_no_output "set *(int32_t*) &search_buf\[${CHUNK_SIZE}-1\] = 0xfdb97531"
 	gdb_test_no_output "py pattern = pack('${python_pack_char}I', 0xfdb97531)"

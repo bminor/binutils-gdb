@@ -75,7 +75,7 @@ proc test_pygments_styling {} {
 	return
     }
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 

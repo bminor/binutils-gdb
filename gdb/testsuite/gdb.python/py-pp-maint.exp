@@ -72,7 +72,7 @@ gdb_test "enable pretty-printer" \
     "second enable of all pretty printers"
 
 gdb_test "disable pretty-printer global lookup_function_lookup_test" \
-    "1 printer disabled.*[expr $num_pp - 1] of $num_pp printers enabled"
+    "1 printer disabled.*[expr {$num_pp - 1}] of $num_pp printers enabled"
 
 gdb_test "disable pretty-printer global pp-test;.*" \
     "[expr {$num_pp - 1}] printers disabled.*0 of $num_pp printers enabled"
@@ -101,10 +101,10 @@ gdb_test "enable pretty-printer global pp-test" \
     "0 printers enabled.*1 of $num_pp printers enabled"
 
 gdb_test "enable pretty-printer global pp-test;.*ss.*" \
-    "2 printers enabled.*[expr $num_pp - 3] of $num_pp printers enabled"
+    "2 printers enabled.*[expr {$num_pp - 3}] of $num_pp printers enabled"
 
 gdb_test "enable pretty-printer global pp-test;.*s.*" \
-    "2 printers enabled.*[expr $num_pp - 1] of $num_pp printers enabled"
+    "2 printers enabled.*[expr {$num_pp - 1}] of $num_pp printers enabled"
 
 gdb_test "enable pretty-printer global pp-test;.*" \
     "1 printer enabled.*$num_pp of $num_pp printers enabled"

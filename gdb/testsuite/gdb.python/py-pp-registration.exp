@@ -29,7 +29,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
 set remote_python_file [gdb_remote_download host \
 			    ${srcdir}/${subdir}/${testfile}.py]
 
-if ![runto_main ] {
+if {![runto_main ]} {
     return -1
 }
 
@@ -40,7 +40,7 @@ proc prepare_test { } {
     clean_restart ${testfile}
 
     set run_to_here [gdb_get_line_number {break to inspect} ${testfile}.c ]
-    if ![runto ${testfile}.c:$run_to_here] {
+    if {![runto ${testfile}.c:$run_to_here]} {
 	return 0
     }
 
@@ -63,7 +63,7 @@ proc test_printers { s_prefix } {
 # Test registration with verbose off.
 
 with_test_prefix "verbose off" {
-    if ![prepare_test] {
+    if {![prepare_test]} {
 	return -1
     }
 
@@ -78,7 +78,7 @@ with_test_prefix "verbose off" {
 # Test registration with verbose on.
 
 with_test_prefix "verbose on" {
-    if ![prepare_test] {
+    if {![prepare_test]} {
 	return -1
     }
 
@@ -95,7 +95,7 @@ with_test_prefix "verbose on" {
 # Exercise the "replace" argument to register_pretty_printer.
 
 with_test_prefix "replace" {
-    if ![prepare_test] {
+    if {![prepare_test]} {
 	return -1
     }
 

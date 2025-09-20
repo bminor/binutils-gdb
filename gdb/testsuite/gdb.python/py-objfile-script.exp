@@ -41,7 +41,7 @@ gdb_load ${binfile}
 # Verify gdb loaded the script.
 gdb_test "info auto-load python-scripts" "Yes.*${testfile}-gdb.py.*"
 
-if ![runto_main] {
+if {![runto_main]} {
     return
 }
 
