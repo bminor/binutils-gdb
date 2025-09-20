@@ -17048,9 +17048,11 @@ anonymous_struct_prefix (struct die_info *die, struct dwarf2_cu *cu)
     return NULL;
 
   attr = dw2_linkage_name_attr (die, cu);
+  if (attr == nullptr)
+    return nullptr;
   const char *attr_name = attr->as_string ();
-  if (attr == NULL || attr_name == NULL)
-    return NULL;
+  if (attr_name == nullptr)
+    return nullptr;
 
   /* dwarf2_name had to be already called.  */
   gdb_assert (attr->canonical_string_p ());
