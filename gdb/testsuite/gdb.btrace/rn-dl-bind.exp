@@ -24,12 +24,12 @@
 require allow_btrace_tests
 
 standard_testfile
-if [prepare_for_testing "failed to prepare" $testfile $srcfile \
-	{debug ldflags=-Wl,-z,lazy}] {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
+	 {debug ldflags=-Wl,-z,lazy}]} {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

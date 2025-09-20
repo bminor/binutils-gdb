@@ -26,7 +26,7 @@ require allow_btrace_tests
 #
 # Luckily, they are similar enough that a single test script can handle
 # both.
-if [info exists COMPILE] {
+if {[info exists COMPILE]} {
     # make check RUNTESTFLAGS="gdb.btrace/stepi.exp COMPILE=1"
     standard_testfile record_goto.c
     lappend opts debug
@@ -41,11 +41,11 @@ if [info exists COMPILE] {
     return -1
 }
 
-if [prepare_for_testing "failed to prepare" $testfile $srcfile {}] {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile {}]} {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

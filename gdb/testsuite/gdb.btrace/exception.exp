@@ -22,12 +22,12 @@ require allow_btrace_tests
 # We expect a specific function call history.  This gets messed up with
 # PIE on 32-bit.
 standard_testfile exception.cc
-if [prepare_for_testing "failed to prepare" $testfile $srcfile \
-	{nopie c++ debug}] {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
+	 {nopie c++ debug}]} {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

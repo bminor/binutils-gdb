@@ -21,7 +21,7 @@ require allow_btrace_ptw_tests allow_python_tests
 
 set opts {}
 
-if [info exists COMPILE] {
+if {[info exists COMPILE]} {
     # make check RUNTESTFLAGS="gdb.btrace/ptwrite.exp COMPILE=1"
     standard_testfile ptwrite.c
     lappend opts debug additional_flags=-mptwrite
@@ -36,7 +36,7 @@ if [info exists COMPILE] {
     return -1
 }
 
-if [prepare_for_testing "failed to prepare" $testfile $srcfile $opts] {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile $opts]} {
     return -1
 }
 

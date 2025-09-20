@@ -25,12 +25,12 @@ standard_testfile
 # PIE on 32-bit.
 #
 # Also discard local symbols.
-if [prepare_for_testing "failed to prepare" $testfile $srcfile \
-	{ldflags=-Wl,-x nopie}] {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
+	 {ldflags=-Wl,-x nopie}]} {
     return -1
 }
 
-if ![runto test] {
+if {![runto test]} {
     return -1
 }
 

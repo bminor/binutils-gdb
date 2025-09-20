@@ -23,7 +23,7 @@ require allow_btrace_tests
 require allow_gdbserver_tests
 
 standard_testfile
-if [prepare_for_testing "failed to prepare" $testfile $srcfile] {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile]} {
     return -1
 }
 

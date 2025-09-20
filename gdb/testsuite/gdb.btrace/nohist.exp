@@ -20,11 +20,11 @@
 require allow_btrace_tests
 
 standard_testfile record_goto.c
-if [prepare_for_testing "failed to prepare" $testfile $srcfile] {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile]} {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
