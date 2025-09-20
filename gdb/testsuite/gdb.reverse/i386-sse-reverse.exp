@@ -43,7 +43,7 @@ set end_sse4_test         [gdb_get_line_number " end sse4_test "]
 
 runto_main
 
-if [supports_process_record] {
+if {[supports_process_record]} {
     # Activate process record/replay
     gdb_test_no_output "record" "turn on process record"
 }

@@ -23,7 +23,7 @@
 # change is printed, since any instruction must have at least a change
 # to the PC.
 
-if ![supports_reverse] {
+if {![supports_reverse]} {
     return
 }
 
@@ -52,7 +52,7 @@ if { ![runto_main] } {
 #confirm that GDB doesn't go crazy if recording isn't enabled
 test_print false "" "print before starting to record"
 
-if ![supports_process_record] {
+if {![supports_process_record]} {
     # No point in testing the rest if we can't record anything
     return
 }

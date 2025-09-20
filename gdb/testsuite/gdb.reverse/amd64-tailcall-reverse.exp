@@ -18,7 +18,7 @@ require supports_reverse
 set opts {}
 standard_testfile .S
 
-if [info exists COMPILE] {
+if {[info exists COMPILE]} {
     # make check RUNTESTFLAGS="gdb.reverse/amd64-tailcall-reverse.exp COMPILE=1"
     standard_testfile
     lappend opts debug optimize=-O2
@@ -30,11 +30,11 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} $opts] } {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
-if [supports_process_record] {
+if {[supports_process_record]} {
     gdb_test_no_output "record"
 }
 

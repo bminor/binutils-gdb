@@ -109,7 +109,7 @@ proc record_full_function {function} {
     gdb_breakpoint $end temporary
     gdb_continue_to_breakpoint "start ${function}_test"
 
-    if [supports_process_record] {
+    if {[supports_process_record]} {
 	# Activate process record/replay.
 	gdb_test_no_output "record" "${function}: turn on process record"
     }

@@ -229,7 +229,7 @@ gdb_test_multiple "stepi" "$test_message" {
 	}
     }
     -re "ENTER CALLEE.*$gdb_prompt $" {
-	send_gdb "stepi\n" 
+	send_gdb "stepi\n"
 	exp_continue
     }
     -re "$pic_thunk_re.*$gdb_prompt $" {

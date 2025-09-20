@@ -44,7 +44,7 @@ if { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable $exec_opt
     untested "failed to compile"
     return -1
 }
-     
+
 # Note: The test previously did "set debug-file-directory" to (try to)
 # ensure the debug info for the dynamic loader and libc weren't found.
 # This doesn't work if the debug info is in the .debug subdirectory.
@@ -58,7 +58,7 @@ gdb_load_shlib $library2
 
 runto_main
 
-if [supports_process_record] {
+if {[supports_process_record]} {
     # Activate process record/replay
     gdb_test_no_output "record" "turn on process record"
 }

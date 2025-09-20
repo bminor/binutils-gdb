@@ -52,7 +52,7 @@ if {![runto_main]} {
     return 0
 }
 
-if [supports_process_record] {
+if {[supports_process_record]} {
     # Activate process record/replay
     gdb_test_no_output "record" "turn on process record"
 }

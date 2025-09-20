@@ -106,7 +106,7 @@ proc test { func testcase_nr } {
 	}
 
 	# Registers contents after each backward single step.
-	for {set i [expr $count - 1]} {$i >= 0} {incr i -1} {
+	for {set i [expr {$count - 1}]} {$i >= 0} {incr i -1} {
 	    gdb_test -nopass "reverse-stepi"
 	    set post_regs($i) [capture_command_output "info all-registers" ""]
 	}

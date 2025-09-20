@@ -41,7 +41,7 @@
 # test only verified the reverse-finish command for a normal call that used
 # the LEP.
 
-if ![supports_reverse] {
+if {![supports_reverse]} {
     return
 }
 
@@ -53,7 +53,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
 
 runto_main
 
-if [supports_process_record] {
+if {[supports_process_record]} {
     # Activate process record/replay.
     gdb_test_no_output "record" "turn on process record for test1"
 }

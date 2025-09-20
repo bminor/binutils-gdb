@@ -30,7 +30,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
 
 runto_main
 
-if [supports_process_record] {
+if {[supports_process_record]} {
     # Activate process record/replay
     gdb_test_no_output "record" "turn on process record"
 }
@@ -191,7 +191,7 @@ gdb_test_multiple "stepi" "$test_message" {
 	}
     }
     -re "ENTER CALLEE.*$gdb_prompt $" {
-	send_gdb "stepi\n" 
+	send_gdb "stepi\n"
 	exp_continue
     }
     -re "$pic_thunk_re.*$gdb_prompt $" {

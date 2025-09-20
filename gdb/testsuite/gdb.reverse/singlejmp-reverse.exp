@@ -18,7 +18,7 @@ require supports_reverse
 standard_testfile ".S" "${gdb_test_file_name}-nodebug.S"
 set executable ${testfile}
 
-if [info exists COMPILE] {
+if {[info exists COMPILE]} {
     # make check RUNTESTFLAGS="gdb.reverse/singlejmp-reverse.exp COMPILE=1"
     if { [build_executable_from_specs ${testfile}.exp $executable {} \
 				      ${testfile}.c {debug optimize=-O2} \
@@ -36,11 +36,11 @@ if [info exists COMPILE] {
 
 clean_restart $executable
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
-if [supports_process_record] {
+if {[supports_process_record]} {
     gdb_test_no_output "record"
 }
 

@@ -27,12 +27,12 @@ if { [prepare_for_testing "failed to prepare" "$testfile" $srcfile] } {
 
 runto_main
 
-if [supports_process_record] {
+if {[supports_process_record]} {
     # Activate process record/replay
     gdb_test_no_output "record" "turn on process record"
 }
 
-# Run until end, then save execution log. 
+# Run until end, then save execution log.
 
 set breakloc [gdb_get_line_number "end of main" "$srcfile"]
 gdb_test "break $breakloc" \

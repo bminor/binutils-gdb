@@ -134,7 +134,7 @@ proc test_one_sig_reverse {prevsig} {
 	    } else {
 		xfail "$testmsg (handled)"
 	    }
-	}	    
+	}
     }
 }
 
@@ -142,12 +142,12 @@ clean_restart $::testfile
 
 runto gen_ABRT
 
-if [supports_process_record] {
+if {[supports_process_record]} {
     # Activate process record/replay
     gdb_test_no_output "record" "turn on process record"
 }
 
-# Run until end, then save execution log. 
+# Run until end, then save execution log.
 
 set breakloc [gdb_get_line_number "end of main" "$srcfile"]
 gdb_test "break $breakloc" \
@@ -299,7 +299,7 @@ gdb_test "continue" \
     "get signal TERM"
 gdb_test "continue" "Breakpoint.*handle_TERM.*" "send signal TERM"
 
-gdb_test "continue" " end of main .*" "continue to sigall exit" 
+gdb_test "continue" " end of main .*" "continue to sigall exit"
 
 foreach sig [lreverse $signals] {
     test_one_sig_reverse $sig
