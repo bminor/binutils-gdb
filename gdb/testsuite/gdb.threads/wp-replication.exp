@@ -126,7 +126,7 @@ gdb_test_no_output "set var test_ready=1" \
       "set var test_ready=1"
 
 # Set the number of expected watchpoint triggers.
-set TRIGGERS [expr "$NR_THREADS * $hwatch_count * $NR_TRIGGERS_PER_THREAD"]
+set TRIGGERS [expr {$NR_THREADS * $hwatch_count * $NR_TRIGGERS_PER_THREAD}]
 
 # Move the threads and hit the watchpoints TRIGGERS times.
 for { set i 1 } { $i <= $TRIGGERS } { incr i } {

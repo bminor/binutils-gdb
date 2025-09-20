@@ -15,16 +15,16 @@
 
 # This file was written by Manoj Iyer. (manjo@austin.ibm.com)
 # Test break points and single step on thread functions.
-# 
+#
 # Test Purpose:
-# - Test that breakpoints, continue in a threaded  application works. 
+# - Test that breakpoints, continue in a threaded  application works.
 #   On powerpc64-unknown-linux-gnu system, running kernel version
 #   2.6.5-7.71-pseries64 this test is known to fail due to kernel bug
 #   in ptrace system call.
 #
 # Test Strategy:
 # - thread_check.c creates 2 threads
-# - start gdb 
+# - start gdb
 # - create 2 breakpoints #1 main() #2 tf() (the thread function)
 # - run gdb till #1 main() breakpoint is reached
 # - continue to breakpoint #2 tf()
@@ -62,7 +62,7 @@ gdb_test "continue" \
      ".*Breakpoint 2,.*tf.*at.*$srcfile:.*" \
      "continue to tf"
 
-#   
+#
 # backtrace from thread function.
 #
 gdb_test "backtrace" \

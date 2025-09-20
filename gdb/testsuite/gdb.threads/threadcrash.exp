@@ -134,7 +134,7 @@ proc do_full_test {} {
 
     set loop_iterations [llength $test_list]
     for {set i 0} {$i < $loop_iterations } {incr i} {
-	set thread_num [expr $loop_iterations - $i]
+	set thread_num [expr {$loop_iterations - $i}]
 
 	set type [lindex $test_list $i]
 	if { $type == 1 } {
@@ -271,8 +271,8 @@ proc_with_prefix test_gcore {} {
 
 standard_testfile
 
-if [prepare_for_testing "failed to prepare" $testfile $srcfile \
-    {debug pthreads}] {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
+	 {debug pthreads}]} {
     return -1
 }
 

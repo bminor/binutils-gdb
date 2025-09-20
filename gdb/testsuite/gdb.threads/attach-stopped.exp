@@ -40,13 +40,13 @@ proc corefunc { threadtype } {
     set test_spawn_id [spawn_wait_for_attach $binfile]
     set testpid [spawn_id_get_pid $test_spawn_id]
 
-    # Stop the program 
+    # Stop the program
     remote_exec build "kill -s STOP ${testpid}"
 
     clean_restart $::testfile
 
     # Verify that we can attach to the stopped process.
-       
+
     set test "$threadtype: attach2 to stopped, after setting file"
     gdb_test_multiple "attach $testpid" "$test" {
 	-re "Attaching to program.*`?$escapedbinfile'?, process $testpid.*$gdb_prompt $" {

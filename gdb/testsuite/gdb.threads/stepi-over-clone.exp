@@ -58,8 +58,8 @@ gdb_test "continue" \
 # Return true if INSN is a syscall instruction.
 
 proc is_syscall_insn { insn } {
-    if [istarget x86_64-*-* ] {
-	return { $insn == "syscall" }
+    if {[istarget x86_64-*-* ]} {
+	return [string equal $insn "syscall"]
     } else {
 	error "port me"
     }
@@ -76,7 +76,7 @@ gdb_test_multiple "disassemble" "" {
     -re "^(?:=>)?\\s+(${hex})\\s+<\\+${decimal}>:\\s+(\[^\r\n\]+)\r\n" {
 	set addr $expect_out(1,string)
 	set insn [string trim $expect_out(2,string)]
-	if [is_syscall_insn $insn] {
+	if {[is_syscall_insn $insn]} {
 	    verbose -log "Found a syscall at: $addr"
 	    lappend syscall_addrs $addr
 	}

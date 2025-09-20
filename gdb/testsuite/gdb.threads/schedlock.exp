@@ -41,7 +41,7 @@ proc get_args { description } {
     global NUM
 
     set pattern "(\[0-9\]+)"
-    for {set i 1} {[expr $i < $NUM]} {incr i} {
+    for {set i 1} {$i < $NUM} {incr i} {
 	append pattern ", (\[0-9\]+)"
     }
 
@@ -51,7 +51,7 @@ proc get_args { description } {
 	    pass $test
 
 	    set result ""
-	    for {set i 1} {[expr $i <= $NUM]} {incr i} {
+	    for {set i 1} {[expr {$i <= $NUM}]} {incr i} {
 		lappend result $expect_out($i,string)
 	    }
 	    return $result
@@ -122,7 +122,7 @@ proc my_continue { msg } {
 proc step_ten_loops { cmd } {
     global gdb_prompt
 
-    for {set i 0} {[expr $i < 10]} {set i [expr $i + 1]} {
+    for {set i 0} {$i < 10} {incr i} {
 	set other_step 0
 	set test "$cmd to increment, $i"
 	gdb_test_multiple $cmd $test {
@@ -183,7 +183,7 @@ my_continue "initial"
 set cont_args [get_args "after initial"]
 
 set bad 0
-for {set i 0} {[expr $i < $NUM]} {set i [expr $i + 1]} {
+for {set i 0} {$i < $NUM} {incr i} {
   if {[lindex $start_args $i] == [lindex $cont_args $i]} {
     incr bad
   }
@@ -233,7 +233,7 @@ proc check_result { cmd before_thread before_args locked } {
 	} else {
 	    if {$i == $before_thread} {
 		if {$cmd == "continue"
-		    || [lindex $before_args $i] == [expr [lindex $after_args $i] - 10]} {
+		    || [lindex $before_args $i] == [lindex $after_args $i] - 10} {
 		    pass "$test"
 		} else {
 		    fail "$test (wrong amount)"

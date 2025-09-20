@@ -52,6 +52,6 @@ gdb_test "break $line_number" \
 gdb_test "continue" \
 	"main .* at .*:.*return 0.*break here to check result.*" \
         "continue to break"
-# This is more of a gcc/glibc test, really. 
+# This is more of a gcc/glibc test, really.
 #
 gdb_test "print result" "3"

@@ -51,7 +51,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads}
 proc test {} {
     global srcfile gdb_prompt
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 

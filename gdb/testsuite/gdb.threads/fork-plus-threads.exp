@@ -76,7 +76,7 @@ proc do_test { detach-on-fork } {
     set saw_cannot_remove_breakpoints 0
     set saw_thread_stopped 0
 
-    set expected_num_inferior_exits [expr ${detach-on-fork} == "off" ? 11 : 1]
+    set expected_num_inferior_exits [expr {${detach-on-fork} == "off" ? 11 : 1}]
 
     # Flags indicating if we have see the exit for each inferior.
     for {set i 1} {$i <= $expected_num_inferior_exits} {incr i} {

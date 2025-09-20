@@ -76,7 +76,7 @@ proc do_test { execr_thread different_text_segments displaced_stepping } {
 
     gdb_test_no_output "set displaced-stepping $displaced_stepping"
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 

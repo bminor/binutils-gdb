@@ -67,11 +67,11 @@ for {set i 0} {$i < 30} {incr i} {
 	# At least one hardware watchpoint was hit.  Check if both were.
 	set string $expect_out(1,string)
 
-	if [regexp "Hardware watchpoint 2: args\\\[0\\\]\[^\r\]*\r\[^\r\]*\r\[^\r\]*Old value = $args_0\[^\r\]*\r\[^\r\]*New value = [expr $args_0+1]\r" $string] {
+	if {[regexp "Hardware watchpoint 2: args\\\[0\\\]\[^\r\]*\r\[^\r\]*\r\[^\r\]*Old value = $args_0\[^\r\]*\r\[^\r\]*New value = [expr {$args_0+1}]\r" $string]} {
 	    incr args_0
 	    incr test_flag_0
 	}
-	if [regexp "Hardware watchpoint 3: args\\\[1\\\]\[^\r\]*\r\[^\r\]*\r\[^\r\]*Old value = $args_1\[^\r\]*\r\[^\r\]*New value = [expr $args_1+1]\r" $string] {
+	if {[regexp "Hardware watchpoint 3: args\\\[1\\\]\[^\r\]*\r\[^\r\]*\r\[^\r\]*Old value = $args_1\[^\r\]*\r\[^\r\]*New value = [expr {$args_1+1}]\r" $string]} {
 	    incr args_1
 	    incr test_flag_1
 	}
@@ -97,7 +97,7 @@ for {set i 0} {$i < 30} {incr i} {
 	    }
 	}
 
-	if [ regexp "$expected_loc" $string ] {
+	if {[ regexp "$expected_loc" $string ]} {
 	    set test_flag 1
 	} else {
 	    fail "threaded watch loop"
@@ -140,23 +140,23 @@ if { $test_flag == 1 } {
 # Verify that we hit first watchpoint in main thread.
 set message "first watchpoint on args\[0\] hit"
 if { $args_0 > 0 } {
-  pass $message 
+  pass $message
 } else {
-  fail $message 
+  fail $message
 }
 
 # Verify that we hit second watchpoint in main thread.
 set message "first watchpoint on args\[1\] hit"
 if { $args_1 > 0 } {
-  pass $message 
+  pass $message
 } else {
-  fail $message 
+  fail $message
 }
 
 # Verify that we hit first watchpoint in child thread.
 set message "watchpoint on args\[0\] hit in thread"
 if { $args_0 > 1 } {
-  pass $message 
+  pass $message
 } else {
   fail $message
 }
@@ -164,9 +164,9 @@ if { $args_0 > 1 } {
 # Verify that we hit second watchpoint in child thread.
 set message "watchpoint on args\[1\] hit in thread"
 if { $args_1 > 1 } {
-  pass $message 
+  pass $message
 } else {
-  fail $message 
+  fail $message
 }
 
 # Verify that all watchpoint hits are accounted for.
@@ -174,12 +174,12 @@ set message "combination of threaded watchpoints = 30"
 if { [target_no_stopped_data] } {
     # See above.  If we allow two watchpoints to be hit at once, we
     # may have more than 30 hits total.
-    set result [expr $args_0 + $args_1 >= 30]
+    set result [expr {$args_0 + $args_1 >= 30}]
 } else {
-    set result [expr $args_0 + $args_1 == 30]
+    set result [expr {$args_0 + $args_1 == 30}]
 }
 if { $result } {
-  pass $message 
+  pass $message
 } else {
-  fail $message 
+  fail $message
 }

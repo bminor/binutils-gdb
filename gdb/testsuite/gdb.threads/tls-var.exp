@@ -27,7 +27,7 @@ if { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${objfile} object {debug}] != "
 
 clean_restart ${executable}
 
-if ![runto_main] {
+if {![runto_main]} {
     return 0
 }
 

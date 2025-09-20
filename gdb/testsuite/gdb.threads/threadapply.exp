@@ -60,7 +60,7 @@ gdb_test "thread apply all backthread" "Thread ..*\\\$\[0-9]+ = 0x14.*Thread ..*
 # Go into the thread_function to check that a simple "thread apply"
 # does not change the selected frame.
 gdb_test "step" "thread_function.*" "step to the thread_function"
-gdb_test "up" ".*in main.*" "go up in the stack frame" 
+gdb_test "up" ".*in main.*" "go up in the stack frame"
 gdb_test "thread apply all print 1"  "Thread ..*\\\$\[0-9]+ = 1.*Thread ..*\\\$\[0-9]+ = 1.*Thread ..*\\\$\[0-9]+ = 1.*Thread ..*\\\$\[0-9]+ = 1.*Thread ..*\\\$\[0-9]+ = 1.*Thread ..*\\\$\[0-9]+ = 1" "run a simple print command on all threads"
 gdb_test "down" "#0.*thread_function.*" "go down and check selected frame"
 
@@ -75,7 +75,7 @@ proc thr_apply_detach {thread_set} {
 
 	clean_restart ${::testfile}
 
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return -1
 	}
 
@@ -104,7 +104,7 @@ proc kill_and_remove_inferior {thread_set} {
 
     # The test starts multiple inferiors, therefore non-extended
     # remote is not supported.
-    if [use_gdb_stub] {
+    if {[use_gdb_stub]} {
 	unsupported "using gdb stub"
 	return
     }

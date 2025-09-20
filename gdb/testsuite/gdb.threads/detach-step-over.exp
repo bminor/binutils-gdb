@@ -229,7 +229,7 @@ proc_with_prefix test_detach_command {condition_eval target_non_stop non_stop di
 
 	    set running_count 0
 	    set interrupted 0
-	    set running_expected [expr ($::n_threads + 1) * 2]
+	    set running_expected [expr {($::n_threads + 1) * 2}]
 	    gdb_test_multiple "info threads" "threads running" {
 		-re "\\(running\\)" {
 		    incr running_count
@@ -357,7 +357,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile $options] == -1}
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

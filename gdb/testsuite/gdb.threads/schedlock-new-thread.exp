@@ -18,7 +18,7 @@
 standard_testfile .c
 
 foreach_with_prefix schedlock {off on} {
-    set sl [expr $schedlock == "on" ? 1 : 0]
+    set sl [expr {$schedlock == "on" ? 1 : 0}]
     if { [build_executable "failed to prepare" $testfile-$sl \
 	      $srcfile \
 	      [list debug pthreads additional_flags=-DSCHEDLOCK=$sl]] \
@@ -30,7 +30,7 @@ foreach_with_prefix schedlock {off on} {
 proc test {non-stop schedlock} {
     save_vars ::GDBFLAGS {
 	append ::GDBFLAGS " -ex \"set non-stop ${non-stop}\""
-	set sl [expr $schedlock == "on" ? 1 : 0]
+	set sl [expr {$schedlock == "on" ? 1 : 0}]
 	clean_restart $::testfile-$sl
     }
 

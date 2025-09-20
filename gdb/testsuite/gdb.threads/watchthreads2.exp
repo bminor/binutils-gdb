@@ -89,7 +89,7 @@ set x_thread_loc "thread_function \\\(arg=.*\\\) at .*watchthreads.c:$x_inc_line
 
 # X is incremented under a mutex, so we should get NR_THREADS * X_INCR_COUNT
 # hits.
-set limit [expr $NR_THREADS*$X_INCR_COUNT]
+set limit [expr {$NR_THREADS*$X_INCR_COUNT}]
 set x_count 0
 set done 0
 
@@ -102,7 +102,7 @@ for {set i 0} {!$done && $i < $limit} {incr i} {
 	-re "(.*Hardware watchpoint.*)$gdb_prompt $" {
 	    set string $expect_out(1,string)
 
-	    if [regexp "Hardware watchpoint 3: x\[^\r\]*\r\[^\r\]*\r\[^\r\]*Old value = $x_count\[^\r\]*\r\[^\r\]*New value = [expr $x_count+1]\r" $string] {
+	    if {[regexp "Hardware watchpoint 3: x\[^\r\]*\r\[^\r\]*\r\[^\r\]*Old value = $x_count\[^\r\]*\r\[^\r\]*New value = [expr {$x_count+1}]\r" $string]} {
 		incr x_count
 		set test_flag 1
 	    } else {

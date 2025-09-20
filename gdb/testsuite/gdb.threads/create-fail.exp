@@ -33,7 +33,7 @@ for {set i 1} {$i <= $iterations} {incr i} {
 
 	clean_restart ${executable}
 
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return -1
 	}
 

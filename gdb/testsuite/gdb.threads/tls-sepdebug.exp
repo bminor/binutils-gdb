@@ -83,7 +83,7 @@ foreach library_path [list $absdir [relative_filename [pwd] $absdir]] \
 
 	gdb_load ${binmainfile}
 
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return
 	}
 

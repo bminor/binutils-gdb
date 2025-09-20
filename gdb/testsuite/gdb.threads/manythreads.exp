@@ -22,7 +22,7 @@ require {!target_info exists gdb,nointerrupts}
 standard_testfile
 
 set opts { debug }
-if [info exists DEBUG] {
+if {[info exists DEBUG]} {
     # make check RUNTESTFLAGS='gdb.threads/manythreads.exp DEBUG=1'
     lappend opts "additional_flags=-DDEBUG"
 }

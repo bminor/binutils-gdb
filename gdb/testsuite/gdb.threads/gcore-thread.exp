@@ -123,7 +123,7 @@ proc load_core { filename } {
     }
 
     # FIXME: now what can we test about the thread state?
-    # We do not know for certain that there should be at least 
+    # We do not know for certain that there should be at least
     # three threads, because who knows what kind of many-to-one
     # mapping various OS's may do?  Let's assume that there must
     # be at least two threads:

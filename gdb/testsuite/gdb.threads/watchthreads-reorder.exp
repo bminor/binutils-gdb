@@ -41,7 +41,7 @@ foreach reorder {0 1} { with_test_prefix "reorder$reorder" {
 
     gdb_test "set can-use-hw-watchpoints 1"
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 
@@ -72,7 +72,7 @@ foreach reorder {0 1} { with_test_prefix "reorder$reorder" {
 	     "Hardware read watchpoint \[0-9\]+: thread\[12\]_rwatch\r\n\r\nValue = 0\r\n0x\[0-9a-f\]+ in thread\[12\]_func .*" \
 	     "continue a"
 
-    if $reorder {
+    if {$reorder} {
 	# GDB orders watchpoints by their addresses so inserting new variables
 	# with lower addresses will shift the former watchpoints to higher
 	# debug registers.

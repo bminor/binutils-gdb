@@ -44,7 +44,7 @@ proc test { update_thread_list always_inserted non_stop } {
     gdb_test_no_output "set non-stop $non_stop"
     gdb_test_no_output "set breakpoint always-inserted $always_inserted"
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 
@@ -152,8 +152,8 @@ proc test { update_thread_list always_inserted non_stop } {
 foreach update_thread_list { true false } {
     foreach always_inserted { "off" "on" } {
 	foreach non_stop { "off" "on" } {
-	    set stop_mode [expr ($non_stop=="off")?"all-stop":"non-stop"]
-	    set update_list_mode [expr ($update_thread_list)?"w/ithr":"wo/ithr"]
+	    set stop_mode [expr {($non_stop=="off")?"all-stop":"non-stop"}]
+	    set update_list_mode [expr {($update_thread_list)?"w/ithr":"wo/ithr"}]
 	    with_test_prefix "$update_list_mode: always-inserted $always_inserted: $stop_mode" {
 		test $update_thread_list $always_inserted $non_stop
 	    }

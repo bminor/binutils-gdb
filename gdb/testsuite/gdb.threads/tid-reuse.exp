@@ -22,7 +22,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile { debug pthreads
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -72,6 +72,6 @@ delete_breakpoints
 gdb_breakpoint "after_reuse_time"
 
 # Higher than what the test program sleeps before exiting.
-set timeout [expr $reuse_time * 2]
+set timeout [expr {$reuse_time * 2}]
 
 gdb_continue_to_breakpoint "after_reuse_time"

@@ -23,7 +23,7 @@ standard_testfile
 proc test {threaded} {
     global testfile srcfile decimal
 
-    with_test_prefix [expr ($threaded)?"threaded":"non-threaded"] {
+    with_test_prefix [expr {($threaded)?"threaded":"non-threaded"}] {
 
 	set options {debug}
 	if {$threaded} {

@@ -38,7 +38,7 @@ proc do_test { displaced with_bp } {
     global gdb_prompt
     global hex
 
-    if ${with_bp} {
+    if {${with_bp}} {
 	set prefix "with thread-specific bp"
     } else {
 	set prefix "no thread-specific bp"
@@ -49,7 +49,7 @@ proc do_test { displaced with_bp } {
 	    with_test_prefix $command {
 		clean_restart $executable
 
-		if ![runto_main] {
+		if {![runto_main]} {
 		    continue
 		}
 
@@ -106,7 +106,7 @@ proc do_test { displaced with_bp } {
 		gdb_test "p watch_me = 0" " = 0" "clear watch_me"
 		gdb_test "watch watch_me" "Hardware watchpoint .*"
 
-		if ${with_bp} {
+		if {${with_bp}} {
 		    gdb_test "b *$after_address_triggers_watch thread 1" \
 			"Breakpoint .*" \
 			"set breakpoint specific to thread 1"

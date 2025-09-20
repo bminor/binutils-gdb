@@ -54,7 +54,7 @@ proc test { non_stop } {
       clean_restart ${::testfile}
     }
 
-    if ![runto setup_done] {
+    if {![runto setup_done]} {
 	return -1
     }
 
@@ -101,7 +101,7 @@ proc test { non_stop } {
 	    #
 	    # Since it's reload_on_run targets that need special care,
 	    # we default to reusing the connection on most targets.
-	    if [target_info exists gdb,do_reload_on_run] {
+	    if {[target_info exists gdb,do_reload_on_run]} {
 		gdb_test "add-inferior -no-connection" "New inferior 2.*"
 	    } else {
 		gdb_test "add-inferior" "New inferior 2.*"
@@ -110,7 +110,7 @@ proc test { non_stop } {
 
 	    gdb_load $binfile
 
-	    if ![runto setup_done] {
+	    if {![runto setup_done]} {
 		return -1
 	    }
 	}
@@ -187,7 +187,7 @@ proc test { non_stop } {
 }
 
 foreach non_stop { "off" "on" } {
-    set stop_mode [expr ($non_stop=="off")?"all-stop":"non-stop"]
+    set stop_mode [expr {($non_stop=="off")?"all-stop":"non-stop"}]
     with_test_prefix "$stop_mode" {
 	test $non_stop
     }

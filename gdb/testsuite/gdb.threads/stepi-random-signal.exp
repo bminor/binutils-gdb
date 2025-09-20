@@ -31,7 +31,7 @@ if { [gdb_compile_pthreads \
 clean_restart $executable
 
 # Start the second thread.
-if ![runto start] {
+if {![runto start]} {
     return -1
 }
 

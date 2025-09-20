@@ -30,7 +30,7 @@ foreach schedlock {"off" "step" "on" } {
     with_test_prefix "schedlock=$schedlock" {
 	clean_restart $::testfile
 
-	if ![runto_main] {
+	if {![runto_main]} {
 	    continue
 	}
 

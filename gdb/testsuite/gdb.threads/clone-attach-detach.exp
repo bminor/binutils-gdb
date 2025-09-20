@@ -19,7 +19,7 @@
 # clone as proxy for when libthread_db is not available.
 
 # This only works on targets with the Linux kernel.
-if ![istarget *-*-linux*] {
+if {![istarget *-*-linux*]} {
     return
 }
 
@@ -27,7 +27,7 @@ require can_spawn_for_attach
 
 standard_testfile
 
-if [prepare_for_testing "failed to prepare" $testfile $srcfile {debug}] {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug}]} {
     return -1
 }
 

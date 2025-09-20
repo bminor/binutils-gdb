@@ -56,7 +56,7 @@ proc get_me_variable {tnum} {
 	    fail "$tnum thread print me"
 	}
 	timeout {
-	    fail "$tnum thread print me (timeout)" 
+	    fail "$tnum thread print me (timeout)"
 	}
     }
     return ${value_of_me}
@@ -116,8 +116,8 @@ proc select_thread {thread} {
 
 ### Do a backtrace for the current thread, and check that the 'spin' routine
 ### is in it. This means we have one of the threads we created, rather
-### than the main thread. Record the thread in the spin_threads 
-### array. Also remember the level of the 'spin' routine in the backtrace, for 
+### than the main thread. Record the thread in the spin_threads
+### array. Also remember the level of the 'spin' routine in the backtrace, for
 ### later use.
 proc check_thread_stack {number spin_threads spin_threads_level} {
     global gdb_prompt
@@ -148,7 +148,7 @@ proc check_thread_stack {number spin_threads spin_threads_level} {
 	 pass "backtrace of thread number $number not relevant"
 	}
 	timeout {
-	    fail "backtrace of thread number $number (timeout)" 
+	    fail "backtrace of thread number $number (timeout)"
 	}
     }
 }
@@ -169,7 +169,7 @@ if {![runto_main]} {
 }
 
 # Set a breakpoint at the "spin" routine to
-# test the thread local's value.  
+# test the thread local's value.
 #
 gdb_test "b [gdb_get_line_number "here we know tls value"]" \
          ".*Breakpoint 2.*tls.*"   "set breakpoint at all threads"
@@ -247,7 +247,7 @@ array set spin_threads_level {}
 unset spin_threads_level
 
 # For each thread check its backtrace to see if it is stopped at the
-# spin routine. 
+# spin routine.
 for {set i 1} {$i <= $no_of_threads} {incr i} {
     check_thread_stack $i spin_threads spin_threads_level
 }
@@ -268,7 +268,7 @@ foreach i [array names spin_threads] {
       # any intermediate point in spin, too, but that is much less
       # likely.
       gdb_test "up $level" ".*spin.*sem_(wait|post).*" "thread $i up"
-      check_thread_local $i 
+      check_thread_local $i
     }
 }
 
@@ -278,7 +278,7 @@ if {$thrs_in_spin == 0} {
 
 gdb_test "continue" ".*Breakpoint 4.*before exit.*" "threads exited"
 
-send_gdb "info thread\n" 
+send_gdb "info thread\n"
 gdb_expect {
     -re ".* 1 *${tdlabel_re}.*2 *${tdlabel_re}.*$gdb_prompt $" {
         fail "too many threads left at end"

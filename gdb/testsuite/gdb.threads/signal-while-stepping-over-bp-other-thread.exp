@@ -51,7 +51,7 @@ proc get_value {var test} {
 
 clean_restart $executable
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

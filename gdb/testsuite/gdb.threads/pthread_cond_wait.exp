@@ -17,7 +17,7 @@
 # bug-gdb@gnu.org
 
 # This file verifies that GDB is able to compute a backtrace for a thread
-# being blocked on a call to pthread_cond_wait(). 
+# being blocked on a call to pthread_cond_wait().
 
 standard_testfile
 
@@ -36,7 +36,7 @@ gdb_test "continue" \
          ".*Breakpoint 2, break_me ().*" \
          "run to break_me"
 
-# 
+#
 # Backtrace all threads, find the one running noreturn, and
 # verify that we are able to get a sensible backtrace, including
 # the frame for the pthread_cond_wait() call.

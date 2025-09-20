@@ -69,7 +69,7 @@ proc test {type symbol} {
 	    # Testcase uses it for the `follow-fork-mode child' type.
 	    gdb_test "handle SIGUSR1 nostop noprint pass" "No\[ \t\]+No\[ \t\]+Yes.*"
 
-	    if ![runto_main] {
+	    if {![runto_main]} {
 		return
 	    }
 
@@ -126,7 +126,7 @@ proc test {type symbol} {
 	    # Testcase uses it for the `follow-fork-mode child' type.
 	    gdb_test "handle SIGUSR1 nostop noprint pass" "No\[ \t\]+No\[ \t\]+Yes.*"
 
-	    if ![runto_main] {
+	    if {![runto_main]} {
 		return
 	    }
 
@@ -165,7 +165,7 @@ proc test {type symbol} {
 test parent FOLLOW_PARENT
 
 # Only GNU/Linux is known to support `set follow-fork-mode child'.
-if [istarget "*-*-linux*"] {
+if {[istarget "*-*-linux*"]} {
     test child FOLLOW_CHILD
 } else {
     untested "${testfile}: child"

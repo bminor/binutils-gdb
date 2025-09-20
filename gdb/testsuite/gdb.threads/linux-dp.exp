@@ -117,7 +117,7 @@ for {set i 0} {$i < 5} {incr i} {
     } else {
 	fail "create philosopher: $i"
     }
-    
+
     set threads_after {}
     gdb_test_multiple "info threads" "info threads after: $i" {
 	-re "info threads\r\n" {
@@ -172,7 +172,7 @@ for {set i 1} {$i <  $nthreads} {incr i} {
     append info_threads_ptn "$i *Thread .*"
 }
 append info_threads_ptn "\[\r\n\]+$gdb_prompt $"
-set info_threads_manager_ptn "[expr $nthreads + 1] *Thread .*$info_threads_ptn"
+set info_threads_manager_ptn "[expr {$nthreads + 1}] *Thread .*$info_threads_ptn"
 
 gdb_test_multiple "info threads" "info threads 2" {
     -re "$info_threads_manager_ptn" {
@@ -241,7 +241,7 @@ for {set i 0} {$only_five > 0 && $i < 10} {incr i} {
 	-re ".*$gdb_prompt $" {
 	    set only_five 0
 	}
-	timeout { 
+	timeout {
 	    set only_five -1
 	}
     }
@@ -331,7 +331,7 @@ set any_interesting 0
 catch {unset seen}
 array set seen {}
 for {set i 1} {$i <= $nthreads} {incr i} {
-    if [check_philosopher_stack $i seen] {
+    if {[check_philosopher_stack $i seen]} {
 	set any_interesting 1
     }
 }

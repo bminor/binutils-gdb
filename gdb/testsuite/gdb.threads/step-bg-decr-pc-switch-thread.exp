@@ -34,7 +34,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads}
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return
 }
 
@@ -55,7 +55,7 @@ gdb_test_no_output "next&" "next& over inf loop"
 set test "switch to main thread"
 gdb_test_multiple "thread 1" $test {
     -re "Cannot execute this command while the target is running.*$gdb_prompt $" {
-	
+
 	# With remote targets, we can't send any other remote packet
 	# until the target stops.  Switching thread wants to ask the
 	# remote side whether the thread is alive.

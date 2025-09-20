@@ -58,7 +58,7 @@ proc corefunc { threadtype executable } {
 		    # nonthreaded:
 		    pass $test
 		    verbose -log "$test succeeded on the attempt # $attempt of $attempts"
-		    set passes [expr $passes + 1]
+		    set passes [expr {$passes + 1}]
 		}
 		-re "Attaching to program.*`?$escapedbinfile'?, process $testpid.*$gdb_prompt $" {
 		    set ok 0
@@ -84,11 +84,11 @@ proc corefunc { threadtype executable } {
 
 		    if { $ok == 0} {
 			# We just lack the luck, we should try it again.
-			set attempt [expr $attempt + 1]
+			set attempt [expr {$attempt + 1}]
 		    } else {
 			pass $test
 			verbose -log "$test succeeded on the attempt # $attempt of $attempts"
-			set passes [expr $passes + 1]
+			set passes [expr {$passes + 1}]
 		    }
 		}
 	    }] != 0 } {

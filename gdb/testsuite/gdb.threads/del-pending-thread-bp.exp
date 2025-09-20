@@ -44,7 +44,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
 
 gdb_locate_shlib $binfile_lib
 
-if ![runto_main] {
+if {![runto_main]} {
     return 0
 }
 

@@ -188,7 +188,7 @@ proc do_detach {multi_process cmd child_exit} {
 	    perror "unhandled command: $cmd"
 	}
     } else {
-	if $is_remote {
+	if {$is_remote} {
 	    set extra "\r\nEnding remote debugging\."
 	} else {
 	    set extra ""
@@ -217,7 +217,7 @@ proc test_detach {multi_process cmd} {
 
 	clean_restart ${::testfile}
 
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return -1
 	}
 
@@ -245,7 +245,7 @@ proc test_detach_watch {wp multi_process cmd} {
 
 	clean_restart ${::testfile}
 
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return -1
 	}
 
@@ -293,7 +293,7 @@ proc test_detach_killed_outside {multi_process cmd} {
 
 	clean_restart ${::testfile}
 
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return -1
 	}
 

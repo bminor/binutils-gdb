@@ -34,7 +34,7 @@ proc do_test { lock_sched nonstop } {
       clean_restart ${executable}
     }
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 

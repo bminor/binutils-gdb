@@ -84,7 +84,7 @@ proc test_one_iteration {} {
 	    exp_continue
 	}
 	-re "$gdb_prompt " {
-	    if ![gdb_assert $saw_continuing $test] {
+	    if {![gdb_assert $saw_continuing $test]} {
 		return 1
 	    }
 	}
@@ -101,7 +101,7 @@ proc test_one_iteration {} {
 	    exp_continue
 	}
 	-re "$gdb_prompt " {
-	    if ![gdb_assert {$running_count == $NUM_THREADS} $test] {
+	    if {![gdb_assert {$running_count == $NUM_THREADS} $test]} {
 		return 1
 	    }
 	}
@@ -151,7 +151,7 @@ proc test_one_iteration {} {
 	    exp_continue
 	}
 	-re "$gdb_prompt " {
-	    if ![gdb_assert {$running_count == 0} $test] {
+	    if {![gdb_assert {$running_count == 0} $test]} {
 		return 1
 	    }
 	}
@@ -174,7 +174,7 @@ proc testdriver {displaced} {
 
     gdb_test_no_output "set displaced-stepping $displaced"
 
-    if ![runto all_started] {
+    if {![runto all_started]} {
 	return
     }
     set break_line [gdb_get_line_number "set breakpoint here"]

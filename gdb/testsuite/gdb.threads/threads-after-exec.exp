@@ -19,11 +19,11 @@
 standard_testfile .c
 
 proc do_test { } {
-    if [prepare_for_testing "failed to prepare" $::testfile $::srcfile {debug pthreads}] {
+    if {[prepare_for_testing "failed to prepare" $::testfile $::srcfile {debug pthreads}]} {
 	return -1
     }
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 

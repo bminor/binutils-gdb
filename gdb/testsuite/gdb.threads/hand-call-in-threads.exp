@@ -74,7 +74,7 @@ gdb_test "show scheduler-locking" ".* locking scheduler .* is \"on\"." "show sch
 # stop without returning.
 
 # Add one for the main thread.
-set total_nr_threads [expr $NR_THREADS + 1]
+set total_nr_threads [expr {$NR_THREADS + 1}]
 
 # Thread numbering in gdb is origin-1, so begin numbering at 1.
 for { set i 1 } { $i <= $total_nr_threads } { incr i } {
