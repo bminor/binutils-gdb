@@ -26,7 +26,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
     return
 }
 
-if ![gdb_guile_runto_main] {
+if {![gdb_guile_runto_main]} {
    return
 }
 
@@ -84,7 +84,7 @@ foreach variation $port_variations {
 # Test read/write of memory ports.
 
 proc test_mem_port_rw { buffered } {
-    if $buffered {
+    if {$buffered} {
 	set mode "r+"
     } else {
 	set mode "r+0"
@@ -115,7 +115,7 @@ proc test_mem_port_rw { buffered } {
 	"define new-value"
     gdb_test "guile (print (put-bytevector rw-mem-port (make-bytevector 1 new-value)))" \
 	"= #<unspecified>"
-    if $buffered {
+    if {$buffered} {
 	# Value shouldn't be in memory yet.
 	gdb_test "guile (print (value=? (parse-and-eval \"*(char*) \$sp\") byte-at-sp))" \
 	    "= #t" \

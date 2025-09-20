@@ -41,7 +41,7 @@ gdb_load ${binfile}
 # Verify gdb loaded the script.
 gdb_test "info auto-load guile-scripts" "Yes.*/${testfile}-gdb.scm.*"
 
-if ![gdb_guile_runto_main] {
+if {![gdb_guile_runto_main]} {
     return
 }
 

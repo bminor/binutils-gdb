@@ -45,7 +45,7 @@ proc restart_gdb {exefile} {
 	return 0
     }
 
-    if ![gdb_guile_runto_main] {
+    if {![gdb_guile_runto_main]} {
 	return 0
     }
     gdb_scm_test_silent_cmd "guile (use-modules (gdb iterator))" \
@@ -275,7 +275,7 @@ proc test_range {} {
 if { [build_inferior "${binfile}" "c"] < 0 } {
     return
 }
-if ![restart_gdb "${binfile}"] {
+if {![restart_gdb "${binfile}"]} {
     return
 }
 
@@ -291,7 +291,7 @@ with_test_prefix "lang_c" {
 if { [build_inferior "${binfile}-cxx" "c++"] < 0 } {
     return
 }
-if ![restart_gdb "${binfile}-cxx"] {
+if {![restart_gdb "${binfile}-cxx"]} {
     return
 }
 

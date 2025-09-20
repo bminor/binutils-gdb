@@ -167,21 +167,21 @@ proc test_value_numeric_ops {} {
 # TCL 8.5 required here.  Use lookup table instead?
 
 proc get_max_int { size } {
-    return [expr "(1 << ($size - 1)) - 1"]
+    return [expr {(1 << ($size - 1)) - 1}]
 }
 
 # Return the min signed int of size SIZE.
 # TCL 8.5 required here.  Use lookup table instead?
 
 proc get_min_int { size } {
-    return [expr "-(1 << ($size - 1))"]
+    return [expr {-(1 << ($size - 1))}]
 }
 
 # Return the max unsigned int of size SIZE.
 # TCL 8.5 required here.  Use lookup table instead?
 
 proc get_max_uint { size } {
-    return [expr "(1 << $size) - 1"]
+    return [expr {(1 << $size) - 1}]
 }
 
 # Helper routine for test_value_numeric_ranges.
@@ -252,7 +252,7 @@ proc test_value_numeric_ranges {} {
 
 proc test_make_pointer_value { size } {
     set max [get_max_uint $size]
-    set max_hex [string repeat "f" [expr "$size / 4"]]
+    set max_hex [string repeat "f" [expr {$size / 4}]]
 
     gdb_test "gu (print (make-value $max #:type void-pointer-type))" \
 	"= 0x$max_hex" "test make-value void* max"
@@ -337,7 +337,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c}]} {
     return
 }
 
-if ![gdb_guile_runto_main] {
+if {![gdb_guile_runto_main]} {
    return
 }
 

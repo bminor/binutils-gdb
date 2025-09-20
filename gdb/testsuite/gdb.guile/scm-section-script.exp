@@ -94,7 +94,7 @@ gdb_test "info auto-load guile-scripts ${testfile}" "Yes.*${testfile}.scm.*"
 gdb_test "info auto-load guile-scripts no-script-matches-this" \
   "No auto-load scripts matching no-script-matches-this."
 
-if ![gdb_guile_runto_main] {
+if {![gdb_guile_runto_main]} {
     return
 }
 

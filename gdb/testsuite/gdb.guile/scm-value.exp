@@ -312,7 +312,7 @@ proc test_subscript_regression {exefile lang} {
     clean_restart
     gdb_load ${exefile}
 
-    if ![gdb_guile_runto_main ] {
+    if {![gdb_guile_runto_main ]} {
 	return
     }
 
@@ -438,7 +438,7 @@ test_value_hash
 
 # The following tests require execution.
 
-if ![gdb_guile_runto_main] {
+if {![gdb_guile_runto_main]} {
     return
 }
 
@@ -447,7 +447,7 @@ test_inferior_function_call
 test_strings
 test_value_after_death
 
-# Test either C or C++ values. 
+# Test either C or C++ values.
 
 test_subscript_regression "${binfile}" "c"
 

@@ -32,7 +32,7 @@ proc_with_prefix test_bkpt_basic { } {
     # Start with a fresh gdb.
     clean_restart ${testfile}
 
-    if ![gdb_guile_runto_main] {
+    if {![gdb_guile_runto_main]} {
 	return
     }
 
@@ -65,7 +65,7 @@ proc_with_prefix test_bkpt_basic { } {
 	"scm-breakpoint\.c:${mult_line}*" \
 	"check multiply breakpoint location"
 
-    # Check hit and ignore counts. 
+    # Check hit and ignore counts.
     gdb_test "guile (print (breakpoint-hit-count mult-bkpt))" \
 	"= 1" "check multiply breakpoint hit count"
     gdb_scm_test_silent_cmd "guile (set-breakpoint-ignore-count! mult-bkpt 4)" \
@@ -105,7 +105,7 @@ proc_with_prefix test_bkpt_deletion { } {
     # Start with a fresh gdb.
     clean_restart ${testfile}
 
-    if ![gdb_guile_runto_main] {
+    if {![gdb_guile_runto_main]} {
 	return
     }
 
@@ -141,7 +141,7 @@ proc_with_prefix test_bkpt_cond_and_cmds { } {
     # Start with a fresh gdb.
     clean_restart ${testfile}
 
-    if ![gdb_guile_runto_main] {
+    if {![gdb_guile_runto_main]} {
 	return
     }
 
@@ -188,7 +188,7 @@ proc_with_prefix test_bkpt_invisible { } {
     # Start with a fresh gdb.
     clean_restart ${testfile}
 
-    if ![gdb_guile_runto_main] {
+    if {![gdb_guile_runto_main]} {
 	return
     }
 
@@ -238,10 +238,10 @@ proc_with_prefix test_watchpoints { } {
     clean_restart ${testfile}
 
     # Disable hardware watchpoints if necessary.
-    if [target_info exists gdb,no_hardware_watchpoints] {
+    if {[target_info exists gdb,no_hardware_watchpoints]} {
 	gdb_test_no_output "set can-use-hw-watchpoints 0" ""
     }
-    if ![gdb_guile_runto_main] {
+    if {![gdb_guile_runto_main]} {
 	return
     }
 
@@ -273,10 +273,10 @@ proc_with_prefix test_bkpt_internal { } {
     clean_restart ${testfile}
 
     # Disable hardware watchpoints if necessary.
-    if [target_info exists gdb,no_hardware_watchpoints] {
+    if {[target_info exists gdb,no_hardware_watchpoints]} {
 	gdb_test_no_output "set can-use-hw-watchpoints 0" ""
     }
-    if ![gdb_guile_runto_main] {
+    if {![gdb_guile_runto_main]} {
 	return
     }
 
@@ -304,10 +304,10 @@ proc_with_prefix test_bkpt_eval_funcs { } {
     clean_restart ${testfile}
 
     # Disable hardware watchpoints if necessary.
-    if [target_info exists gdb,no_hardware_watchpoints] {
+    if {[target_info exists gdb,no_hardware_watchpoints]} {
 	gdb_test_no_output "set can-use-hw-watchpoints 0" ""
     }
-    if ![gdb_guile_runto_main] {
+    if {![gdb_guile_runto_main]} {
 	return
     }
 
@@ -451,7 +451,7 @@ proc_with_prefix test_bkpt_registration {} {
     # Start with a fresh gdb.
     clean_restart ${testfile}
 
-    if ![gdb_guile_runto_main] {
+    if {![gdb_guile_runto_main]} {
 	return
     }
 
@@ -490,7 +490,7 @@ proc_with_prefix test_bkpt_temporary { } {
     # Start with a fresh gdb.
     clean_restart ${testfile}
 
-    if ![gdb_guile_runto_main] {
+    if {![gdb_guile_runto_main]} {
 	return 0
     }
     delete_breakpoints
@@ -556,7 +556,7 @@ proc_with_prefix test_catchpoints {} {
     # Start with a fresh gdb.
     clean_restart ${testfile}
 
-    if ![gdb_guile_runto_main] {
+    if {![gdb_guile_runto_main]} {
 	return
     }
 

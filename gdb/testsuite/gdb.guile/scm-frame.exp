@@ -28,7 +28,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
 
 # The following tests require execution.
 
-if ![gdb_guile_runto_main] {
+if {![gdb_guile_runto_main]} {
     return
 }
 

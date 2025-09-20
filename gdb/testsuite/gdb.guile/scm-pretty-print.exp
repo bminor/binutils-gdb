@@ -36,7 +36,7 @@ proc run_lang_tests {exefile lang} {
 	clean_restart
 	gdb_load $exefile
 
-	if ![gdb_guile_runto_main] {
+	if {![gdb_guile_runto_main]} {
 	    return
 	}
 
@@ -117,7 +117,7 @@ run_lang_tests "${binfile}-cxx" "c++"
 
 clean_restart $::testfile
 
-if ![gdb_guile_runto_main] {
+if {![gdb_guile_runto_main]} {
     return
 }
 

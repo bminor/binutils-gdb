@@ -26,7 +26,6 @@ exclude = [
 "gdb/testsuite/gdb.cp",
 "gdb/testsuite/gdb.dwarf2",
 "gdb/testsuite/gdb.fortran",
-"gdb/testsuite/gdb.guile",
 "gdb/testsuite/gdb.mi",
 "gdb/testsuite/gdb.python",
 "gdb/testsuite/gdb.reverse",

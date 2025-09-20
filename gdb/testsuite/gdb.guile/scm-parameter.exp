@@ -26,7 +26,7 @@ gdb_install_guile_utils
 gdb_install_guile_module
 
 proc scm_param_test_maybe_no_output { command pattern args } {
-    if [string length $pattern] {
+    if {[string length $pattern]} {
 	gdb_test $command $pattern $args
     } else {
 	gdb_test_no_output $command $args
@@ -110,7 +110,7 @@ with_test_prefix "test-enum-param" {
     gdb_test_no_output "set print test-enum-param two"
     gdb_test "show print test-enum-param" "The state of the enum is two." "show new value"
     gdb_test "guile (print (parameter-value test-enum-param))" "two" "enum parameter value, two"
-    gdb_test "set print test-enum-param three" "Undefined item: \"three\".*" "set invalid enum parameter" 
+    gdb_test "set print test-enum-param three" "Undefined item: \"three\".*" "set invalid enum parameter"
 }
 
 # Test integer parameters.
@@ -306,7 +306,7 @@ with_test_prefix "test-file-param" {
     gdb_test_no_output "set test-file-param bar.txt"
     gdb_test "show test-file-param" "The name of the file is bar.txt." "show new value"
     gdb_test "guile (print (parameter-value test-file-param))" "bar.txt" " new parameter value"
-    gdb_test "set test-file-param" "Argument required.*" 
+    gdb_test "set test-file-param" "Argument required.*"
 }
 
 # Test a parameter that is not documented.

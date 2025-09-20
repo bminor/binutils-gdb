@@ -54,7 +54,7 @@ gdb_test "guile (print (symbol-value qq-var))" \
 gdb_test "guile (print (symbol-needs-frame? qq-var))" \
     "= #f" "print whether qq needs a frame"
 
-if ![gdb_guile_runto_main] {
+if {![gdb_guile_runto_main]} {
     return
 }
 
@@ -143,7 +143,7 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}-cxx" executable "
 
 clean_restart ${::testfile}-cxx
 
-if ![gdb_guile_runto_main] {
+if {![gdb_guile_runto_main]} {
     return
 }
 
@@ -172,7 +172,7 @@ gdb_test "guile (print (= (symbol-addr-class cplusfunc) SYMBOL_LOC_BLOCK))" "= #
 # test as it unloads the object file in GDB.
 # Start with a fresh gdb.
 clean_restart ${testfile}
-if ![gdb_guile_runto_main] {
+if {![gdb_guile_runto_main]} {
     return
 }
 
