@@ -906,7 +906,11 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
 			|| BFD_RELOC_LARCH_TLS_DESC_LD == reloc_type
 			|| BFD_RELOC_LARCH_TLS_DESC_CALL == reloc_type
 			|| BFD_RELOC_LARCH_TLS_IE_PC_HI20 == reloc_type
-			|| BFD_RELOC_LARCH_TLS_IE_PC_LO12 == reloc_type))
+			|| BFD_RELOC_LARCH_TLS_IE_PC_LO12 == reloc_type
+			|| BFD_RELOC_LARCH_TLS_DESC_PCADD_HI20 == reloc_type
+			|| BFD_RELOC_LARCH_TLS_DESC_PCADD_LO12 == reloc_type
+			|| BFD_RELOC_LARCH_TLS_IE_PCADD_HI20 == reloc_type
+			|| BFD_RELOC_LARCH_TLS_IE_PCADD_LO12 == reloc_type))
 		{
 		  ip->reloc_info[ip->reloc_num].type = BFD_RELOC_LARCH_RELAX;
 		  ip->reloc_info[ip->reloc_num].value = const_0;
@@ -1450,7 +1454,12 @@ loongarch_assemble_INSNs (char *str, unsigned int expand_from_macro)
       /* Change symbol to .Lpcadd_hi*.  */
       if (expand_from_macro
 	  && the_one.reloc_num > 0
-	  && the_one.reloc_info[0].type == BFD_RELOC_LARCH_PCADD_LO12)
+	  && (the_one.reloc_info[0].type == BFD_RELOC_LARCH_PCADD_LO12
+	      || the_one.reloc_info[0].type == BFD_RELOC_LARCH_GOT_PCADD_LO12
+	      || the_one.reloc_info[0].type == BFD_RELOC_LARCH_TLS_IE_PCADD_LO12
+	      || the_one.reloc_info[0].type == BFD_RELOC_LARCH_TLS_LD_PCADD_LO12
+	      || the_one.reloc_info[0].type == BFD_RELOC_LARCH_TLS_GD_PCADD_LO12
+	      || the_one.reloc_info[0].type == BFD_RELOC_LARCH_TLS_DESC_PCADD_LO12))
 	{
 	  char *name = loongarch_pcadd_hi_label_name (pcadd_hi);
 	  symbolS *s = symbol_find (name);
@@ -1634,13 +1643,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_LARCH_TLS_LE_HI20_R:
     case BFD_RELOC_LARCH_TLS_LE_LO12_R:
     case BFD_RELOC_LARCH_TLS_IE_PCADD_HI20:
-    case BFD_RELOC_LARCH_TLS_IE_PCADD_LO12:
     case BFD_RELOC_LARCH_TLS_LD_PCADD_HI20:
-    case BFD_RELOC_LARCH_TLS_LD_PCADD_LO12:
     case BFD_RELOC_LARCH_TLS_GD_PCADD_HI20:
-    case BFD_RELOC_LARCH_TLS_GD_PCADD_LO12:
     case BFD_RELOC_LARCH_TLS_DESC_PCADD_HI20:
-    case BFD_RELOC_LARCH_TLS_DESC_PCADD_LO12:
       /* Add tls lo (got_lo reloc type).  */
       if (fixP->fx_addsy == NULL)
 	as_bad_where (fixP->fx_file, fixP->fx_line,

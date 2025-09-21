@@ -218,7 +218,11 @@ loongarch_elf_new_section_hook (bfd *abfd, asection *sec)
    || (R_TYPE) == R_LARCH_TLS_DESC_LD	      \
    || (R_TYPE) == R_LARCH_TLS_DESC_CALL	      \
    || (R_TYPE) == R_LARCH_TLS_IE_PC_HI20      \
-   || (R_TYPE) == R_LARCH_TLS_IE_PC_LO12)
+   || (R_TYPE) == R_LARCH_TLS_IE_PC_LO12      \
+   || (R_TYPE) == R_LARCH_TLS_DESC_PCADD_HI20 \
+   || (R_TYPE) == R_LARCH_TLS_DESC_PCADD_LO12 \
+   || (R_TYPE) == R_LARCH_TLS_IE_PCADD_HI20   \
+   || (R_TYPE) == R_LARCH_TLS_IE_PCADD_LO12)
 
 #define IS_OUTDATED_TLS_LE_RELOC(R_TYPE)  \
   ((R_TYPE) == R_LARCH_TLS_LE_HI20	  \
@@ -767,10 +771,14 @@ loongarch_reloc_got_type (unsigned int r_type)
       case R_LARCH_TLS_DESC_PC_LO12:
       case R_LARCH_TLS_DESC_LD:
       case R_LARCH_TLS_DESC_CALL:
+      case R_LARCH_TLS_DESC_PCADD_HI20:
+      case R_LARCH_TLS_DESC_PCADD_LO12:
 	return GOT_TLS_GDESC;
 
       case R_LARCH_TLS_IE_PC_HI20:
       case R_LARCH_TLS_IE_PC_LO12:
+      case R_LARCH_TLS_IE_PCADD_HI20:
+      case R_LARCH_TLS_IE_PCADD_LO12:
 	return GOT_TLS_IE;
 
       default:
@@ -779,27 +787,179 @@ loongarch_reloc_got_type (unsigned int r_type)
   return GOT_UNKNOWN;
 }
 
+typedef struct
+{
+  /* PC value.  */
+  bfd_vma address;
+  /* Relocation value with addend.  */
+  bfd_vma value;
+  unsigned int hi_sym;
+  struct elf_link_hash_entry *h;
+} loongarch_pcrel_hi_reloc;
+
+typedef struct loongarch_pcrel_lo_reloc
+{
+  /* PC value of pcaddu12i.  */
+  bfd_vma address;
+  /* Internal relocation.  */
+  Elf_Internal_Rela *reloc;
+  /* loongarch_elf_relocate_section can only handle an input section at a time,
+     so we can only resolved pcadd_hi20 and pcadd_lo12 in the same section.
+     If these pcrel relocs are not in the same section we should report
+     dangerous relocation errors.  */
+  asection *input_section;
+  struct bfd_link_info *info;
+  reloc_howto_type *howto;
+  bfd_byte *contents;
+  /* The next loongarch_pcrel_lo_reloc.  */
+  struct loongarch_pcrel_lo_reloc *next;
+} loongarch_pcrel_lo_reloc;
+
+typedef struct
+{
+  /* Hash table for loongarch_pcrel_hi_reloc.  */
+  htab_t hi_relocs;
+  /* Linked list for loongarch_pcrel_lo_reloc.  */
+  loongarch_pcrel_lo_reloc *lo_relocs;
+} loongarch_pcrel_relocs;
+
+/* Hash function of the pcrel_hi_reloc hash table.  */
+static hashval_t
+loongarch_pcrel_reloc_hash (const void *entry)
+{
+  const loongarch_pcrel_hi_reloc *e = entry;
+  return (hashval_t)(e->address >> 2);
+}
+
+/* Comparison function of the pcrel_hi_reloc hash table.  */
+static int
+loongarch_pcrel_reloc_eq (const void *entry1, const void *entry2)
+{
+  const loongarch_pcrel_hi_reloc *e1 = entry1, *e2 = entry2;
+  return e1->address == e2->address;
+}
+
+static bool
+loongarch_init_pcrel_relocs (loongarch_pcrel_relocs *p)
+{
+  p->lo_relocs = NULL;
+  p->hi_relocs = htab_create (1024, loongarch_pcrel_reloc_hash,
+			      loongarch_pcrel_reloc_eq, free);
+  return p->hi_relocs != NULL;
+}
+
+static void
+loongarch_free_pcrel_reloc (loongarch_pcrel_relocs *p)
+{
+  loongarch_pcrel_lo_reloc *cur = p->lo_relocs;
+
+  while (cur != NULL)
+    {
+      loongarch_pcrel_lo_reloc *next = cur->next;
+      free (cur);
+      cur = next;
+    }
+  htab_delete (p->hi_relocs);
+}
+
+/* sym only need pass on relax. just pass 0 on relocate sections.  */
+static bool
+loongarch_record_pcrel_hi_reloc (loongarch_pcrel_relocs *p,
+				 bfd_vma addr,
+				 bfd_vma value,
+				 unsigned int sym,
+				 struct elf_link_hash_entry *h)
+{
+  loongarch_pcrel_hi_reloc entry = {addr, value, sym, h};
+  loongarch_pcrel_hi_reloc **slot =
+    (loongarch_pcrel_hi_reloc **)htab_find_slot (p->hi_relocs, &entry, INSERT);
+
+  if (*slot != NULL)
+    _bfd_error_handler (_("duplicate pcrel_hi record"));
+
+  *slot = (loongarch_pcrel_hi_reloc *) bfd_malloc (sizeof (loongarch_pcrel_hi_reloc));
+  if (*slot == NULL)
+    return false;
+  **slot = entry;
+  return true;
+}
+
+static bool
+loongarch_record_pcrel_lo_reloc (loongarch_pcrel_relocs *p,
+				 bfd_vma addr,
+				 Elf_Internal_Rela *reloc,
+				 asection *input_section,
+				 struct bfd_link_info *info,
+				 reloc_howto_type *howto,
+				 bfd_byte *contents)
+{
+  loongarch_pcrel_lo_reloc *entry;
+  entry = (loongarch_pcrel_lo_reloc *) bfd_malloc (sizeof (loongarch_pcrel_lo_reloc));
+  if (entry == NULL)
+    return false;
+  *entry = (loongarch_pcrel_lo_reloc) {addr, reloc, input_section, info,
+				       howto, contents, p->lo_relocs};
+  p->lo_relocs = entry;
+  return true;
+}
+
+static loongarch_pcrel_hi_reloc *
+loongarch_find_pcrel_hi_reloc (loongarch_pcrel_relocs *p, bfd_vma address)
+{
+  loongarch_pcrel_hi_reloc search = {address, 0, 0, NULL};
+  loongarch_pcrel_hi_reloc *entry = htab_find (p->hi_relocs, &search);
+
+  if (entry == NULL)
+    _bfd_error_handler (_("pcrel_lo missing marching pcrel_hi"));
+
+  return entry;
+}
+
 /* Return true if tls type transition can be performed.  */
 static bool
-loongarch_can_trans_tls (bfd *input_bfd,
+loongarch_can_trans_tls (bfd *input_bfd, asection *sec,
+			 const Elf_Internal_Rela *rel,
 			 struct bfd_link_info *info,
 			 struct elf_link_hash_entry *h,
-			 unsigned int r_symndx,
-			 unsigned int r_type)
+			 bfd_vma symval,
+			 loongarch_pcrel_relocs *pcrel_relocs)
 {
   char symbol_tls_type;
   unsigned int reloc_got_type;
+  unsigned long r_type = ELFNN_R_TYPE (rel->r_info);
+  unsigned long r_symndx = ELFNN_R_SYM (rel->r_info);
 
   /* Only TLS DESC/IE in normal code mode will perform type
      transition.  */
   if (! IS_LOONGARCH_TLS_TRANS_RELOC (r_type))
     return false;
 
+  /* Only record hi reloc in loongarch_elf_relax_section.  */
+  if (sec != NULL && pcrel_relocs != NULL
+      && (r_type == R_LARCH_TLS_DESC_PCADD_HI20
+	  || r_type == R_LARCH_TLS_IE_PCADD_HI20))
+    {
+      bfd_vma pc = sec_addr (sec) + rel->r_offset;
+      loongarch_record_pcrel_hi_reloc (pcrel_relocs, pc, 0, r_symndx, h);
+    }
+
   /* Obtaining tls got type here may occur before
      loongarch_elf_record_tls_and_got_reference, so it is necessary
      to ensure that tls got type has been initialized, otherwise it
      is set to GOT_UNKNOWN.  */
   symbol_tls_type = GOT_UNKNOWN;
+
+  /* Only find hi reloc in loongarch_elf_relax_section.  */
+  loongarch_pcrel_hi_reloc *hi;
+  if (sec != NULL && pcrel_relocs != NULL
+      && (r_type == R_LARCH_TLS_DESC_PCADD_LO12
+	  || r_type == R_LARCH_TLS_IE_PCADD_LO12))
+    {
+      hi = loongarch_find_pcrel_hi_reloc(pcrel_relocs, symval);
+      h = hi->h;
+      r_symndx = hi->hi_sym;
+    }
+
   if (_bfd_loongarch_elf_local_got_tls_type (input_bfd) || h)
     symbol_tls_type = _bfd_loongarch_elf_tls_type (input_bfd, h, r_symndx);
 
@@ -838,14 +998,26 @@ loongarch_tls_transition_without_check (struct bfd_link_info *info,
 		? R_LARCH_TLS_LE_LO12
 		: R_LARCH_TLS_IE_PC_LO12);
 
+      case R_LARCH_TLS_DESC_PCADD_HI20:
+	return (local_exec
+		? R_LARCH_TLS_LE_HI20
+		: R_LARCH_TLS_IE_PCADD_HI20);
+
+      case R_LARCH_TLS_DESC_PCADD_LO12:
+	return (local_exec
+		? R_LARCH_TLS_LE_HI20
+		: R_LARCH_TLS_IE_PCADD_LO12);
+
       case R_LARCH_TLS_DESC_LD:
       case R_LARCH_TLS_DESC_CALL:
 	return R_LARCH_NONE;
 
       case R_LARCH_TLS_IE_PC_HI20:
+      case R_LARCH_TLS_IE_PCADD_HI20:
 	return local_exec ? R_LARCH_TLS_LE_HI20 : r_type;
 
       case R_LARCH_TLS_IE_PC_LO12:
+      case R_LARCH_TLS_IE_PCADD_LO12:
 	return local_exec ? R_LARCH_TLS_LE_LO12 : r_type;
 
       default:
@@ -859,10 +1031,10 @@ static unsigned int
 loongarch_tls_transition (bfd *input_bfd,
 			  struct bfd_link_info *info,
 			  struct elf_link_hash_entry *h,
-			  unsigned int r_symndx,
-			  unsigned int r_type)
+			  const Elf_Internal_Rela *rel)
 {
-  if (! loongarch_can_trans_tls (input_bfd, info, h, r_symndx, r_type))
+  unsigned long r_type = ELFNN_R_TYPE (rel->r_info);
+  if (! loongarch_can_trans_tls (input_bfd, NULL, rel, info, h, 0, NULL))
     return r_type;
 
   return loongarch_tls_transition_without_check (info, r_type, h);
@@ -1030,10 +1202,11 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       /* Type transitions are only possible with relocations accompanied
 	 by R_LARCH_RELAX.  */
       bool with_relax_reloc = false;
-      if (rel + 1 != relocs + sec->reloc_count
+      if (IS_LOONGARCH_TLS_TRANS_RELOC (r_type)
+	  && rel + 1 != relocs + sec->reloc_count
 	  && ELFNN_R_TYPE (rel[1].r_info) == R_LARCH_RELAX)
 	{
-	  r_type = loongarch_tls_transition (abfd, info, h, r_symndx, r_type);
+	  r_type = loongarch_tls_transition (abfd, info, h, rel);
 	  with_relax_reloc = true;
 	}
 
@@ -3230,6 +3403,14 @@ loongarch_reloc_is_fatal (struct bfd_link_info *info,
 	relocation += 0x1000;				\
   })
 
+#define RELOCATE_CALC_PCADD_HI20(relocation, pc) 	\
+  ({							\
+    relocation = (relocation) - (pc);			\
+    bfd_vma __lo = (relocation) & ((bfd_vma)0xfff);	\
+    if (__lo > 0x7ff)					\
+	relocation += 0x1000;				\
+  })
+
 /* Handle problems caused by symbol extensions in TLS LE, The processing
    is similar to the macro RELOCATE_CALC_PC32_HI20 method.  */
 #define RELOCATE_TLS_TP32_HI20(relocation)		\
@@ -3290,125 +3471,6 @@ tlsoff (struct bfd_link_info *info, bfd_vma addr)
   return addr - elf_hash_table (info)->tls_sec->vma;
 }
 
-typedef struct
-{
-  /* PC value.  */
-  bfd_vma address;
-  /* Relocation value with addend.  */
-  bfd_vma value;
-} loongarch_pcrel_hi_reloc;
-
-typedef struct loongarch_pcrel_lo_reloc
-{
-  /* PC value of pcaddu12i.  */
-  bfd_vma address;
-  /* Internal relocation.  */
-  Elf_Internal_Rela *reloc;
-  /* loongarch_elf_relocate_section can only handle an input section at a time,
-     so we can only resolved pcadd_hi20 and pcadd_lo12 in the same section. If
-     these pcrel relocs are not in the same section we should report dangerous
-     relocation errors.  */
-  asection *input_section;
-  struct bfd_link_info *info;
-  reloc_howto_type *howto;
-  bfd_byte *contents;
-  /* The next loongarch_pcrel_lo_reloc.  */
-  struct loongarch_pcrel_lo_reloc *next;
-} loongarch_pcrel_lo_reloc;
-
-typedef struct
-{
-  /* Hash table for loongarch_pcrel_hi_reloc.  */
-  htab_t hi_relocs;
-  /* Linked list for loongarch_pcrel_lo_reloc.  */
-  loongarch_pcrel_lo_reloc *lo_relocs;
-} loongarch_pcrel_relocs;
-
-/* Hash function of the pcrel_hi_reloc hash table.  */
-static hashval_t
-loongarch_pcrel_reloc_hash (const void *entry)
-{
-  const loongarch_pcrel_hi_reloc *e = entry;
-  return (hashval_t)(e->address >> 2);
-}
-
-/* Comparison function of the pcrel_hi_reloc hash table.  */
-static int
-loongarch_pcrel_reloc_eq (const void *entry1, const void *entry2)
-{
-  const loongarch_pcrel_hi_reloc *e1 = entry1, *e2 = entry2;
-  return e1->address == e2->address;
-}
-
-static bool
-loongarch_init_pcrel_relocs (loongarch_pcrel_relocs *p)
-{
-  p->lo_relocs = NULL;
-  p->hi_relocs = htab_create (1024, loongarch_pcrel_reloc_hash,
-			      loongarch_pcrel_reloc_eq, free);
-  return p->hi_relocs != NULL;
-}
-
-static void
-loongarch_free_pcrel_reloc (loongarch_pcrel_relocs *p)
-{
-  loongarch_pcrel_lo_reloc *cur = p->lo_relocs;
-
-  while (cur != NULL)
-    {
-      loongarch_pcrel_lo_reloc *next = cur->next;
-      free (cur);
-      cur = next;
-    }
-  htab_delete (p->hi_relocs);
-}
-
-static bool
-loongarch_record_pcrel_hi_reloc (loongarch_pcrel_relocs *p,
-				 bfd_vma addr,
-				 bfd_vma *value)
-{
-  bfd_vma offset = *value - addr;
-  bfd_vma off_lo = offset & (bfd_vma)0xfff;
-  /* If lo12 immediate > 0x7ff, because sign-extend caused by addi.w/ld.w,
-     hi20 immediate need to add 0x1.
-     See RELOCATE_CALC_PC32_HI20(relocation, pc)  */
-  if (off_lo > 0x7ff)
-    offset += 0x1000;
-
-  *value = offset;
-
-  loongarch_pcrel_hi_reloc entry = {addr, offset};
-  loongarch_pcrel_hi_reloc **slot =
-    (loongarch_pcrel_hi_reloc **)htab_find_slot (p->hi_relocs, &entry, INSERT);
-
-  BFD_ASSERT (*slot == NULL);
-  *slot = (loongarch_pcrel_hi_reloc *) bfd_malloc (sizeof (loongarch_pcrel_hi_reloc));
-  if (*slot == NULL)
-    return false;
-  **slot = entry;
-  return true;
-}
-
-static bool
-loongarch_record_pcrel_lo_reloc (loongarch_pcrel_relocs *p,
-				 bfd_vma addr,
-				 Elf_Internal_Rela *reloc,
-				 asection *input_section,
-				 struct bfd_link_info *info,
-				 reloc_howto_type *howto,
-				 bfd_byte *contents)
-{
-  loongarch_pcrel_lo_reloc *entry;
-  entry = (loongarch_pcrel_lo_reloc *) bfd_malloc (sizeof (loongarch_pcrel_lo_reloc));
-  if (entry == NULL)
-    return false;
-  *entry = (loongarch_pcrel_lo_reloc) {addr, reloc, input_section, info,
-				       howto, contents, p->lo_relocs};
-  p->lo_relocs = entry;
-  return true;
-}
-
 static bool
 loongarch_resolve_pcrel_lo_relocs (loongarch_pcrel_relocs *p)
 {
@@ -3416,7 +3478,7 @@ loongarch_resolve_pcrel_lo_relocs (loongarch_pcrel_relocs *p)
   for (r = p->lo_relocs; r != NULL; r = r->next)
     {
       bfd *input_bfd = r->input_section->owner;
-      loongarch_pcrel_hi_reloc search = {r->address, 0};
+      loongarch_pcrel_hi_reloc search = {r->address, 0, 0, NULL};
       loongarch_pcrel_hi_reloc *entry = htab_find (p->hi_relocs, &search);
 
       char *string = NULL;
@@ -3446,7 +3508,6 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 {
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
-  loongarch_pcrel_relocs pcrel_relocs;
   bool fatal = false;
   asection *sreloc = elf_section_data (input_section)->sreloc;
   struct loongarch_elf_link_hash_table *htab = loongarch_elf_hash_table (info);
@@ -3459,6 +3520,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
   asection *got = htab->elf.sgot;
   uint32_t insn;
 
+  loongarch_pcrel_relocs pcrel_relocs;
   if (!loongarch_init_pcrel_relocs (&pcrel_relocs))
     return false;
 
@@ -4447,7 +4509,8 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  else
 	    relocation += rel->r_addend;
 
-	  if (!loongarch_record_pcrel_hi_reloc (&pcrel_relocs, pc, &relocation))
+	  RELOCATE_CALC_PCADD_HI20(relocation, pc);
+	  if (!loongarch_record_pcrel_hi_reloc (&pcrel_relocs, pc, relocation, 0, NULL))
 	    r = bfd_reloc_overflow;
 
 	  if (resolve_pcrel_undef_weak)
@@ -4565,11 +4628,11 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	  if (r_type == R_LARCH_GOT_PC_HI20)
 	    RELOCATE_CALC_PC32_HI20 (relocation, pc);
-
-	  if (r_type == R_LARCH_GOT_PCADD_HI20)
+	  else if (r_type == R_LARCH_GOT_PCADD_HI20)
 	    {
+	      RELOCATE_CALC_PCADD_HI20(relocation, pc);
 	      if (!loongarch_record_pcrel_hi_reloc (&pcrel_relocs, pc,
-						    &relocation))
+						    relocation, 0, NULL))
 		r = bfd_reloc_overflow;
 	    }
 	  break;
@@ -4801,9 +4864,13 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		   || r_type == R_LARCH_TLS_LD_PCADD_HI20
 		   || r_type == R_LARCH_TLS_GD_PCADD_HI20
 		   || r_type == R_LARCH_TLS_DESC_PCADD_HI20)
-	    if (!loongarch_record_pcrel_hi_reloc (&pcrel_relocs, pc,
-						  &relocation))
-	      r = bfd_reloc_overflow;
+
+	    {
+	      RELOCATE_CALC_PCADD_HI20(relocation, pc);
+	      if (!loongarch_record_pcrel_hi_reloc (&pcrel_relocs, pc,
+						    relocation, 0, NULL))
+		r = bfd_reloc_overflow;
+	    }
 	  /* else {} ABS relocations.  */
 	  break;
 
@@ -5360,37 +5427,62 @@ static bool
 loongarch_tls_perform_trans (bfd *abfd, asection *sec,
 			   Elf_Internal_Rela *rel,
 			   struct elf_link_hash_entry *h,
-			   struct bfd_link_info *info)
+			   struct bfd_link_info *info,
+			   bfd_vma symval,
+			   loongarch_pcrel_relocs *pcrel_relocs)
 {
   unsigned long insn;
-  bool local_exec = bfd_link_executable (info)
-		      && LARCH_REF_LOCAL (info, h);
-  bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
+  loongarch_pcrel_hi_reloc *hi;
   unsigned long r_type = ELFNN_R_TYPE (rel->r_info);
   unsigned long r_symndx = ELFNN_R_SYM (rel->r_info);
+  bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
+
+  bool local_exec = bfd_link_executable (info) && LARCH_REF_LOCAL (info, h);
+
+  /* The symbol of the pcadd_lo12 is a local symbol at pcadd_hi20,
+     get the real tls symbol in hi20 relocation.  */
+  if (r_type == R_LARCH_TLS_DESC_PCADD_LO12
+      || r_type == R_LARCH_TLS_IE_PCADD_LO12)
+    {
+      hi = loongarch_find_pcrel_hi_reloc (pcrel_relocs, symval);
+      h = hi->h;
+      local_exec = bfd_link_executable (info) && LARCH_REF_LOCAL (info, h);
+      /* If tls desc/ie relax to tls le, change the symbol of lo12
+	 to the symbol of hi20.  */
+      if (local_exec)
+	r_symndx = hi->hi_sym;
+    }
 
   switch (r_type)
     {
       case R_LARCH_TLS_DESC_PC_HI20:
+      case R_LARCH_TLS_DESC_PCADD_HI20:
 	if (local_exec)
 	  {
 	    /* DESC -> LE relaxation:
 	       pcalau12i $a0,%desc_pc_hi20(var) =>
 	       lu12i.w $a0,%le_hi20(var)  */
 	    bfd_put (32, abfd, LARCH_OP_LU12I_W | LARCH_RD_A0,
-		contents + rel->r_offset);
+			 contents + rel->r_offset);
 	    rel->r_info = ELFNN_R_INFO (r_symndx, R_LARCH_TLS_LE_HI20);
 	  }
 	else
 	  {
 	    /* DESC -> IE relaxation:
 	       pcalau12i $a0,%desc_pc_hi20(var) =>
-	       pcalau12i $a0,%ie_pc_hi20(var)  */
-	    rel->r_info = ELFNN_R_INFO (r_symndx, R_LARCH_TLS_IE_PC_HI20);
+	       pcalau12i $a0,%ie_pc_hi20(var)
+	       or
+	       pcaddu12i $a0,%desc_pcadd_hi20(var) =>
+	       pcaddu12i $a0,%ie_pcadd_hi20(var) */
+	    if (r_type == R_LARCH_TLS_DESC_PC_HI20)
+	      rel->r_info = ELFNN_R_INFO (r_symndx, R_LARCH_TLS_IE_PC_HI20);
+	    else
+	      rel->r_info = ELFNN_R_INFO (r_symndx, R_LARCH_TLS_IE_PCADD_HI20);
 	  }
 	return true;
 
       case R_LARCH_TLS_DESC_PC_LO12:
+      case R_LARCH_TLS_DESC_PCADD_LO12:
 	if (local_exec)
 	  {
 	    /* DESC -> LE relaxation:
@@ -5398,7 +5490,7 @@ loongarch_tls_perform_trans (bfd *abfd, asection *sec,
 	       ori  $a0,$a0,le_lo12(var)  */
 	    insn = LARCH_OP_ORI | LARCH_RD_RJ_A0;
 	    bfd_put (32, abfd, LARCH_OP_ORI | LARCH_RD_RJ_A0,
-		contents + rel->r_offset);
+		     contents + rel->r_offset);
 	    rel->r_info = ELFNN_R_INFO (r_symndx, R_LARCH_TLS_LE_LO12);
 	  }
 	else
@@ -5407,9 +5499,20 @@ loongarch_tls_perform_trans (bfd *abfd, asection *sec,
 	       addi.d $a0,$a0,%desc_pc_lo12(var) =>
 	       ld.d $a0,$a0,%ie_pc_lo12(var)
 	    */
-	    bfd_put (32, abfd, LARCH_OP_LD_D | LARCH_RD_RJ_A0,
-		contents + rel->r_offset);
-	    rel->r_info = ELFNN_R_INFO (r_symndx, R_LARCH_TLS_IE_PC_LO12);
+	    if (r_type == R_LARCH_TLS_DESC_PC_LO12)
+	      {
+		bfd_put (32, abfd, LARCH_OP_LD_D | LARCH_RD_RJ_A0,
+			 contents + rel->r_offset);
+		rel->r_info = ELFNN_R_INFO (r_symndx, R_LARCH_TLS_IE_PC_LO12);
+	      }
+	    else
+	      {
+		/* FIXME: Get insn to see if .d or .w and put insn.  */
+		bfd_put (32, abfd, LARCH_OP_LD_W | LARCH_RD_RJ_A0,
+			 contents + rel->r_offset);
+		rel->r_info = ELFNN_R_INFO (r_symndx,
+					    R_LARCH_TLS_IE_PCADD_LO12);
+	      }
 	  }
 	return true;
 
@@ -5426,6 +5529,7 @@ loongarch_tls_perform_trans (bfd *abfd, asection *sec,
 	return true;
 
       case R_LARCH_TLS_IE_PC_HI20:
+      case R_LARCH_TLS_IE_PCADD_HI20:
 	if (local_exec)
 	  {
 	    /* IE -> LE relaxation:
@@ -5433,12 +5537,13 @@ loongarch_tls_perform_trans (bfd *abfd, asection *sec,
 	       lu12i.w $rd,%le_hi20(var)  */
 	    insn = bfd_getl32 (contents + rel->r_offset);
 	    bfd_put (32, abfd, LARCH_OP_LU12I_W | LARCH_GET_RD(insn),
-		contents + rel->r_offset);
+		     contents + rel->r_offset);
 	    rel->r_info = ELFNN_R_INFO (r_symndx, R_LARCH_TLS_LE_HI20);
 	  }
 	return true;
 
       case R_LARCH_TLS_IE_PC_LO12:
+      case R_LARCH_TLS_IE_PCADD_LO12:
 	if (local_exec)
 	  {
 	    /* IE -> LE relaxation:
@@ -5447,7 +5552,7 @@ loongarch_tls_perform_trans (bfd *abfd, asection *sec,
 	    */
 	    insn = bfd_getl32 (contents + rel->r_offset);
 	    bfd_put (32, abfd, LARCH_OP_ORI | (insn & 0x3ff),
-		contents + rel->r_offset);
+		     contents + rel->r_offset);
 	    rel->r_info = ELFNN_R_INFO (r_symndx, R_LARCH_TLS_LE_LO12);
 	  }
 	return true;
@@ -6029,6 +6134,11 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 						   0, NULL, NULL, NULL)))
     return true;
 
+
+  loongarch_pcrel_relocs pcrel_relocs;
+  if (!loongarch_init_pcrel_relocs (&pcrel_relocs))
+    return false;
+
   /* Estimate the maximum alignment for all output sections once time
      should be enough.  */
   bfd_vma max_alignment = htab->max_alignment;
@@ -6044,11 +6154,19 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 
   htab->pending_delete_ops = pdops;
 
+  /* The section's output_offset need to subtract the bytes of instructions
+     relaxed by the previous sections, so it needs to be updated beforehand.
+     size_input_section already took care of updating it after relaxation,
+     so we additionally update once here.  */
+
+  /* update before tls trans and relax, or may cause same pcadd_hi20 address.  */
+  sec->output_offset = sec->output_section->size;
+
   for (unsigned int i = 0; i < sec->reloc_count; i++)
     {
       char symtype;
-      bfd_vma symval;
       asection *sym_sec;
+      bfd_vma symval = 0;
       bool local_got = false;
       Elf_Internal_Rela *rel = relocs + i;
       struct elf_link_hash_entry *h = NULL;
@@ -6063,11 +6181,24 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	}
 
+      /* Get the local symbol value of PCADD_LO12 to find PCADD_HI20.  */
+      if (r_type == R_LARCH_TLS_IE_PCADD_LO12
+	  || r_type == R_LARCH_TLS_DESC_PCADD_LO12)
+	{
+	  BFD_ASSERT (r_symndx <= symtab_hdr->sh_info);
+	  Elf_Internal_Sym *sym = (Elf_Internal_Sym *)symtab_hdr->contents
+				    + r_symndx;
+	  sym_sec = elf_elfsections (abfd)[sym->st_shndx]->bfd_section;
+	  symval = sym->st_value;
+	  symval += sec_addr (sym_sec);
+	}
+
       /* If the conditions for tls type transition are met, type
 	 transition is performed instead of relax.
 	 During the transition from DESC->IE/LE, there are 2 situations
 	 depending on the different configurations of the relax/norelax
 	 option.
+	 TLS type transition always perform.
 	 If the -relax option is used, the extra nops will be removed,
 	 and this transition is performed in pass 0.
 	 If the --no-relax option is used, nop will be retained, and
@@ -6076,13 +6207,17 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	  && (i + 1 != sec->reloc_count)
 	  && ELFNN_R_TYPE (rel[1].r_info) == R_LARCH_RELAX
 	  && rel->r_offset == rel[1].r_offset
-	  && loongarch_can_trans_tls (abfd, info, h, r_symndx, r_type))
+	  && loongarch_can_trans_tls (abfd, sec, rel, info, h, symval,
+				      &pcrel_relocs))
 	{
-	  loongarch_tls_perform_trans (abfd, sec, rel, h, info);
+	  loongarch_tls_perform_trans (abfd, sec, rel, h, info, symval,
+				       &pcrel_relocs);
 	  r_type = ELFNN_R_TYPE (rel->r_info);
+	  continue;
 	}
 
       relax_func_t relax_func = NULL;
+
       if (is_alignment_pass)
 	{
 	  if (r_type != R_LARCH_ALIGN)
@@ -6279,6 +6414,8 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	loongarch_relax_pcala_addi (abfd, sec, sym_sec, rel, symval,
 				    info, again, max_alignment);
     }
+
+  loongarch_free_pcrel_reloc (&pcrel_relocs);
 
   if (pdops)
     {

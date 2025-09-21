@@ -50,6 +50,7 @@ extern "C"
   #define LARCH_OP_LU12I_W 0x14000000
   #define LARCH_MK_LD_D 0xffc00000
   #define LARCH_OP_LD_D 0x28c00000
+  #define LARCH_OP_LD_W 0x28800000
   #define LARCH_MK_JIRL 0xfc000000
   #define LARCH_OP_JIRL 0x4c000000
   #define LARCH_MK_BCEQZ 0xfc000300
