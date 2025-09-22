@@ -24,6 +24,7 @@ m4_include(config/override.m4)
 m4_include(config/proginstall.m4)
 m4_include(config/elf.m4)
 m4_include(config/ax_cxx_compile_stdcxx.m4)
+m4_include(config/clang-plugin.m4)
 m4_include(config/gcc-plugin.m4)
 m4_include([libtool.m4])
 m4_include([ltoptions.m4])
@@ -3905,18 +3906,30 @@ AC_SUBST(GDCFLAGS)
 GDCFLAGS=${GDCFLAGS-${CFLAGS}}
 AC_SUBST(PKG_CONFIG_PATH)
 
-GCC_PLUGIN_OPTION(PLUGIN_OPTION)
+# Try CLANG_PLUGIN_FILE first since GCC_PLUGIN_OPTION may return the
+# wrong PLUGIN_OPTION with clang.
+CLANG_PLUGIN_FILE(PLUGIN_FILE)
+if test -n "$PLUGIN_FILE"; then
+  PLUGIN_OPTION="--plugin $PLUGIN_FILE"
+else
+  GCC_PLUGIN_OPTION(PLUGIN_OPTION)
+fi
 AR_PLUGIN_OPTION=
+NM_PLUGIN_OPTION=
 RANLIB_PLUGIN_OPTION=
 if test -n "$PLUGIN_OPTION"; then
   if $AR --help 2>&1 | grep -q "\--plugin"; then
     AR_PLUGIN_OPTION="$PLUGIN_OPTION"
+  fi
+  if $NM --help 2>&1 | grep -q "\--plugin"; then
+    NM_PLUGIN_OPTION="$PLUGIN_OPTION"
   fi
   if $RANLIB --help 2>&1 | grep -q "\--plugin"; then
     RANLIB_PLUGIN_OPTION="$PLUGIN_OPTION"
   fi
 fi
 AC_SUBST(AR_PLUGIN_OPTION)
+AC_SUBST(NM_PLUGIN_OPTION)
 AC_SUBST(RANLIB_PLUGIN_OPTION)
 
 # Target tools.
