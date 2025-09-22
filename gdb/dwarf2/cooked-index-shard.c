@@ -224,7 +224,8 @@ cooked_index_shard::finalize (const parent_map_map *parent_maps)
 	}
 
       /* Note that this code must be kept in sync with
-	 language_requires_canonicalization.  */
+	 cooked_index::get_main -- if canonicalization is required
+	 here, then a check might be required there.  */
       gdb_assert (entry->canonical == nullptr);
       if ((entry->flags & IS_LINKAGE) != 0)
 	entry->canonical = entry->name;

@@ -32,19 +32,6 @@
    here, and then these are all waited for before exit proceeds.  */
 static gdb::unordered_set<cooked_index *> active_vectors;
 
-/* Return true if LANG requires canonicalization.  This is used
-   primarily to work around an issue computing the name of "main".
-   This function must be kept in sync with
-   cooked_index_shard::finalize.  */
-
-static bool
-language_requires_canonicalization (enum language lang)
-{
-  return (lang == language_ada
-	  || lang == language_c
-	  || lang == language_cplus);
-}
-
 cooked_index::cooked_index (cooked_index_worker_up &&worker)
   : m_state (std::move (worker))
 {
@@ -201,7 +188,11 @@ cooked_index::get_main () const
 	{
 	  if ((entry->flags & IS_MAIN) != 0)
 	    {
-	      if (!language_requires_canonicalization (entry->lang))
+	      /* This should be kept in sync with
+		 cooked_index_shard::finalize.  Note that there, C
+		 requires canonicalization -- but that is only for
+		 types, 'main' doesn't count.  */
+	      if (entry->lang != language_ada && entry->lang != language_cplus)
 		{
 		  /* There won't be one better than this.  */
 		  return entry;
