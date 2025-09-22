@@ -45,7 +45,7 @@ ctf_struct_member (ctf_dict_t *fp, ctf_lmember_t *dst, const ctf_type_t *tp,
     return -1;					/* errno is set for us.  */
 
   /* Already large.  */
-  if (tp->ctt_size == CTF_LSIZE_SENT)
+  if (tp->ctt_size >= CTF_LSTRUCT_THRESH)
     {
       ctf_lmember_t *lmp = (ctf_lmember_t *) vlen;
 

@@ -141,6 +141,8 @@ proc compile_link_one_host_cc { src output additional_args } {
 #
 #   link:
 #	If set, link the SOURCE together even if only one file is specified.
+#       If "objects", keep the input object files and pass them as additional
+#       arguments to LOOKUP.
 #
 #   link_flags:
 #	If set, extra flags to pass to the linker.
@@ -265,11 +267,14 @@ proc run_lookup_test { name } {
     # Compile the inputs and posibly link them together.
 
     set lookup_output ""
+    set objs {}
     if { [llength $opts(source)] > 0 } {
 	set lookup_flags ""
+	set ld_flags ""
 	if { $run_ld } {
 	    set lookup_output "tmpdir/out.so"
-	    set lookup_flags "-gctf -fPIC $shared $opts(link_flags)"
+	    set lookup_flags "-gctf -fPIC"
+	    set ld_flags "$shared $opts(link_flags)"
 	} else {
 	    set lookup_output "tmpdir/out.o"
 	    set lookup_flags "-gctf -fPIC -c"
@@ -280,19 +285,38 @@ proc run_lookup_test { name } {
 	if [board_info [target_info name] exists ldflags] {
 	    append lookup_flags " [board_info [target_info name] ldflags]"
 	}
-	set src {}
+	set objsrcs {}
+	set local_srcs {}
 	foreach sfile $opts(source) {
+	    set local_src [file join [file dirname $file] $sfile]
+	    lappend local_srcs $local_src
+
 	    if [is_remote host] {
-		lappend src [remote_download host [file join [file dirname $file] $sfile]]
+		set src [remote_download host [file join [file dirname $file] $sfile]]
 	    } else {
-		lappend src [file join [file dirname $file] $sfile]
+		set src [file join [file dirname $file] $sfile]
+	    }
+
+	    if { $opts(link) == "objects" } {
+		set obj "[file rootname $src].o"
+		set comp_output [prune_warnings [run_host_cmd "$CC_FOR_TARGET" "$CFLAGS_FOR_TARGET $lookup_flags $src -c -o $obj"]]
+
+		if { $comp_output != ""} {
+		    send_log "compilation of CTF program $local_src failed with <$comp_output>"
+		    fail $testname
+		    return 0
+		}
+		lappend objsrcs $obj
+		lappend objs $obj
+	    } else {
+		lappend objsrcs $src
 	    }
 	}
 
-	set comp_output [prune_warnings [run_host_cmd "$CC_FOR_TARGET" "$CFLAGS_FOR_TARGET $lookup_flags [concat $src] -o $lookup_output"]]
+	set comp_output [prune_warnings [run_host_cmd "$CC_FOR_TARGET" "$CFLAGS_FOR_TARGET $lookup_flags $ld_flags [concat $objsrcs] -o $lookup_output"]]
 
 	if { $comp_output != ""} {
-	    send_log "compilation of CTF program [concat $src] failed with <$comp_output>"
+	    send_log "compilation of CTF program [concat $local_srcs] failed with <$comp_output>"
 	    fail $testname
 	    return 0
 	}
@@ -306,12 +330,13 @@ proc run_lookup_test { name } {
 	}
     }
 
-    # Invoke the lookup program on the outputs, possibly through the wrapper.
+    # Invoke the lookup program on the outputs, possibly through the wrapper, including all
+    # the object file names if they were filled out.
 
     if { [llength $opts(wrapper)] == 0 } {
-	set results [run_host_cmd tmpdir/lookup $lookup_output]
+	set results [run_host_cmd tmpdir/lookup "$lookup_output $objs"]
     } else {
-	set results [run_host_cmd "$opts(wrapper) tmpdir/lookup" $lookup_output]
+	set results [run_host_cmd "$opts(wrapper) tmpdir/lookup" "$lookup_output $objs"]
     }
 
     if { [regexp {^UNSUPPORTED: (.*)$} $results -> reason] } {
