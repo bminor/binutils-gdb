@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 
 AUTOMAKE_OPTIONS = foreign
-ACLOCAL_AMFLAGS = -I . -I ../.. 
+ACLOCAL_AMFLAGS = -I . -I ../..  -I ../../config
 
 CSOURCES = \
 	gethrtime.c \

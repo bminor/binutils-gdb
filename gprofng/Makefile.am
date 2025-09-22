@@ -16,7 +16,7 @@
 # along with this program; see the file COPYING3.  If not see
 # <http://www.gnu.org/licenses/>.
 
-ACLOCAL_AMFLAGS = -I . -I .. 
+ACLOCAL_AMFLAGS = -I . -I .. -I ../config
 
 AUTOMAKE_OPTIONS = dejagnu foreign
 

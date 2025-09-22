@@ -113,8 +113,10 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../bfd/acinclude.m4 \
 	$(top_srcdir)/../bfd/warning.m4 $(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/../config/bfd64.m4 \
+	$(top_srcdir)/../config/clang-plugin.m4 \
 	$(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/../config/enable.m4 \
+	$(top_srcdir)/../config/gcc-plugin.m4 \
 	$(top_srcdir)/../config/gettext-sister.m4 \
 	$(top_srcdir)/../config/gettext.m4 \
 	$(top_srcdir)/../config/iconv.m4 \
@@ -439,6 +441,7 @@ LIBTOOL = @LIBTOOL@
 # when the linker is configured via the --with-lib-path configure switch.
 LIB_PATH = @LIB_PATH@
 LIPO = @LIPO@
+LLVM_CONFIG = @LLVM_CONFIG@
 LN_S = @LN_S@
 LTLIBICONV = @LTLIBICONV@
 LTLIBINTL = @LTLIBINTL@
