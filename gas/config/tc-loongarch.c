@@ -907,6 +907,8 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
 			|| BFD_RELOC_LARCH_TLS_DESC_CALL == reloc_type
 			|| BFD_RELOC_LARCH_TLS_IE_PC_HI20 == reloc_type
 			|| BFD_RELOC_LARCH_TLS_IE_PC_LO12 == reloc_type
+			|| BFD_RELOC_LARCH_GOT_PCADD_HI20 == reloc_type
+			|| BFD_RELOC_LARCH_GOT_PCADD_LO12 == reloc_type
 			|| BFD_RELOC_LARCH_TLS_DESC_PCADD_HI20 == reloc_type
 			|| BFD_RELOC_LARCH_TLS_DESC_PCADD_LO12 == reloc_type
 			|| BFD_RELOC_LARCH_TLS_IE_PCADD_HI20 == reloc_type
@@ -1293,7 +1295,10 @@ append_fixp_and_insn (struct loongarch_cl_insn *ip)
 	  || BFD_RELOC_LARCH_TLS_LE_HI20 == reloc_info[0].type
 	  || BFD_RELOC_LARCH_TLS_LE_LO12 == reloc_info[0].type
 	  || BFD_RELOC_LARCH_TLS_LE64_LO20 == reloc_info[0].type
-	  || BFD_RELOC_LARCH_TLS_LE64_HI12 == reloc_info[0].type))
+	  || BFD_RELOC_LARCH_TLS_LE64_HI12 == reloc_info[0].type
+	  || BFD_RELOC_LARCH_GOT_PCADD_HI20 == reloc_info[0].type
+	  || BFD_RELOC_LARCH_TLS_IE_PCADD_HI20 == reloc_info[0].type
+	  || BFD_RELOC_LARCH_TLS_DESC_PCADD_HI20 == reloc_info[0].type))
     {
       frag_wane (frag_now);
       frag_new (0);

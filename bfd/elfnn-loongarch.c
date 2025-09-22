@@ -4502,7 +4502,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      || (h && ELF_ST_VISIBILITY (h->other) != STV_DEFAULT))
 	     && is_undefweak);
 	  if (resolve_pcrel_undef_weak)
-	    pc = 0;
+	    relocation = pc; /* Use pc to avoid duplicate pcrel_hi record.  */
 
 	  if (h && h->plt.offset != MINUS_ONE)
 	    relocation = sec_addr (plt) + h->plt.offset;
@@ -5831,7 +5831,11 @@ loongarch_relax_call36 (bfd *abfd, asection *sec, asection *sym_sec,
   return true;
 }
 
-/* Relax pcalau12i,ld.d => pcalau12i,addi.d.  */
+/* pcalau12i $t0, %got_pcala_hi20(a)   -> pcalau12i $t0, %pcala_hi20(a)
+   ld.w/d $t0, $t0, %got_pcala_lo12(a) -> addi.w/d $t0, $t0, %pcala_lo12(a)
+
+   pcaddu12i $t0, %got_pcadd_hi20(a)   -> pcaddu12i $t0, %pcadd_hi20(a)
+   ld.w/d $t0, $t0, %got_pcadd_lo12(a) -> addi.w/d $t0, $t0, %pcadd_lo12(a)  */
 static bool
 loongarch_relax_pcala_ld (bfd *abfd, asection *sec,
 			  asection *sym_sec,
@@ -5841,13 +5845,6 @@ loongarch_relax_pcala_ld (bfd *abfd, asection *sec,
 			  bool *again ATTRIBUTE_UNUSED,
 			  bfd_vma max_alignment)
 {
-  bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
-  Elf_Internal_Rela *rel_lo = rel_hi + 2;
-  uint32_t pca = bfd_get (32, abfd, contents + rel_hi->r_offset);
-  uint32_t ld = bfd_get (32, abfd, contents + rel_lo->r_offset);
-  uint32_t rd = LARCH_GET_RD (pca);
-  uint32_t addi_d = LARCH_OP_ADDI_D;
-
   /* This section's output_offset need to subtract the bytes of instructions
      relaxed by the previous sections, so it needs to be updated beforehand.
      size_input_section already took care of updating it after relaxation,
@@ -5871,22 +5868,46 @@ loongarch_relax_pcala_ld (bfd *abfd, asection *sec,
   else if (symval < pc)
     pc += (max_alignment > 4 ? max_alignment : 0);
 
-  if ((ELFNN_R_TYPE (rel_lo->r_info) != R_LARCH_GOT_PC_LO12)
+  bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
+  Elf_Internal_Rela *rel_lo = rel_hi + 2;
+  uint32_t pca = bfd_get (32, abfd, contents + rel_hi->r_offset);
+  uint32_t ld = bfd_get (32, abfd, contents + rel_lo->r_offset);
+  uint32_t rd = LARCH_GET_RD (pca);
+
+  if ((ELFNN_R_TYPE (rel_lo->r_info) != R_LARCH_GOT_PC_LO12
+	&& ELFNN_R_TYPE (rel_lo->r_info) != R_LARCH_GOT_PCADD_LO12)
       || (LARCH_GET_RD (ld) != rd)
       || (LARCH_GET_RJ (ld) != rd)
-      || !LARCH_INSN_LD_D (ld)
+      || (!LARCH_INSN_LD_D (ld) && !LARCH_INSN_LD_W (ld))
       /* Within +-2G addressing range.  */
       || (bfd_signed_vma)(symval - pc) < (bfd_signed_vma)(int32_t)0x80000000
       || (bfd_signed_vma)(symval - pc) > (bfd_signed_vma)(int32_t)0x7fffffff)
     return false;
 
-  addi_d = addi_d | (rd << 5) | rd;
-  bfd_put (32, abfd, addi_d, contents + rel_lo->r_offset);
+  uint32_t addi;
+  if (LARCH_INSN_LD_D (ld))
+    addi = LARCH_OP_ADDI_D;
+  else
+    addi = LARCH_OP_ADDI_W;
 
-  rel_hi->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel_hi->r_info),
-				 R_LARCH_PCALA_HI20);
-  rel_lo->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel_lo->r_info),
-				 R_LARCH_PCALA_LO12);
+  addi = addi | (rd << 5) | rd;
+  bfd_put (32, abfd, addi, contents + rel_lo->r_offset);
+
+  if (ELFNN_R_TYPE (rel_hi->r_info) == R_LARCH_GOT_PC_HI20)
+    {
+      rel_hi->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel_hi->r_info),
+				     R_LARCH_PCALA_HI20);
+      rel_lo->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel_lo->r_info),
+				     R_LARCH_PCALA_LO12);
+    }
+  else
+    {
+      rel_hi->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel_hi->r_info),
+				     R_LARCH_PCADD_HI20);
+      rel_lo->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel_lo->r_info),
+				     R_LARCH_PCADD_LO12);
+    }
+
   return true;
 }
 
@@ -6232,6 +6253,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	      relax_func = loongarch_relax_pcala_addi;
 	      break;
 	    case R_LARCH_GOT_PC_HI20:
+	    case R_LARCH_GOT_PCADD_HI20:
 	      relax_func = loongarch_relax_pcala_ld;
 	      break;
 	    case R_LARCH_CALL36:
@@ -6261,7 +6283,8 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	      || r_type == R_LARCH_TLS_GD_PC_HI20
 	      || r_type == R_LARCH_TLS_DESC_PC_HI20
 	      || r_type == R_LARCH_PCALA_HI20
-	      || r_type == R_LARCH_GOT_PC_HI20)
+	      || r_type == R_LARCH_GOT_PC_HI20
+	      || r_type == R_LARCH_GOT_PCADD_HI20)
 	    {
 	      if ((i + 2) == sec->reloc_count - 1
 		  || ELFNN_R_TYPE ((rel + 1)->r_info) != R_LARCH_RELAX
@@ -6405,7 +6428,9 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 
       symval += sec_addr (sym_sec);
 
-      if (r_type == R_LARCH_GOT_PC_HI20 && !local_got)
+      if ((r_type == R_LARCH_GOT_PC_HI20
+	    || r_type == R_LARCH_GOT_PCADD_HI20)
+	  && !local_got)
 	continue;
 
       if (relax_func (abfd, sec, sym_sec, rel, symval,
