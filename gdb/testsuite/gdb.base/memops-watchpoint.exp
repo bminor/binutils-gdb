@@ -54,7 +54,7 @@ gdb_test "watch -location c\[28\]" \
 
 proc continue_to_watchpoint {array_re source_function function_re
 			     old_value_re new_value_re} {
-    set thread_prefix_re "(?:Thread $::decimal \[^\r\n\]* hit )?"
+    set thread_prefix_re "(?:Thread $::decimal \[^\r\n\]*hit )?"
 
     set saw_watch_trigger 0
     set saw_function 0
@@ -73,15 +73,15 @@ proc continue_to_watchpoint {array_re source_function function_re
 	    set saw_watch_trigger 1
 	    exp_continue
 	}
-	-re ".*${function_re}.* \\(\\) at .*:$::decimal\r\n" {
+	-re "${function_re}.* \\(\\) at \[^\r\n\]+:${::decimal}(?=\r\n)" {
 	    set saw_function 1
 	    exp_continue
 	}
-	-re ".*${function_re}.* \\(\\) from .*libc\[^\r\n\]+\r\n" {
+	-re "${function_re}.* \\(\\) from \[^\r\n\]+(?=\r\n)" {
 	    set saw_function 1
 	    exp_continue
 	}
-	-re "in \\?\\? \\(\\) from .*libc\[^\r\n\]+\r\n" {
+	-re "in \\?\\? \\(\\) from \[^\r\n\]+(?=\r\n)" {
 	    set is_supported 0
 	    unsupported "symbol for ${source_function} not found"
 	    exp_continue
@@ -96,7 +96,8 @@ proc continue_to_watchpoint {array_re source_function function_re
     }
 }
 
-continue_to_watchpoint "a" "memset" "memset" "104 'h'" "0 '\\\\000'"
+# Note: Some architectures use memmove for memset.
+continue_to_watchpoint "a" "memset" "(memset|memmove)" "104 'h'" "0 '\\\\000'"
 
 # Note: Some architectures use memmove for memcpy.
 continue_to_watchpoint "b" "memcpy" "(memcpy|memmove)" "101 'e'" "114 'r'"
