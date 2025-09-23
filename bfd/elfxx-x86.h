@@ -102,9 +102,6 @@
    header.  */
 #define PLT_SFRAME_FDE_START_OFFSET	sizeof (sframe_header)
 
-#define ABI_64_P(abfd) \
-  (get_elf_backend_data (abfd)->s->elfclass == ELFCLASS64)
-
 /* If ELIMINATE_COPY_RELOCS is non-zero, the linker will try to avoid
    copying dynamic variables from a shared lib into an app's dynbss
    section, and instead use a dynamic relocation to point into the

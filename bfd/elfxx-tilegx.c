@@ -27,9 +27,6 @@
 #include "libiberty.h"
 #include "elfxx-tilegx.h"
 
-#define ABI_64_P(abfd) \
-  (get_elf_backend_data (abfd)->s->elfclass == ELFCLASS64)
-
 #define TILEGX_ELF_WORD_BYTES(htab) \
   ((htab)->bytes_per_word)
 

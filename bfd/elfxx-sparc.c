@@ -37,9 +37,6 @@
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value.  */
 #define MINUS_ONE (~ (bfd_vma) 0)
 
-#define ABI_64_P(abfd) \
-  (get_elf_backend_data (abfd)->s->elfclass == ELFCLASS64)
-
 /* The relocation "howto" table.  */
 
 /* Utility for performing the standard initial work of an instruction

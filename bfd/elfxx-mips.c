@@ -816,10 +816,6 @@ static bfd *reldyn_sorting_bfd;
 #define ABI_N32_P(abfd) \
   ((elf_elfheader (abfd)->e_flags & EF_MIPS_ABI2) != 0)
 
-/* Nonzero if ABFD is using the N64 ABI.  */
-#define ABI_64_P(abfd) \
-  (get_elf_backend_data (abfd)->s->elfclass == ELFCLASS64)
-
 /* Nonzero if ABFD is using NewABI conventions.  */
 #define NEWABI_P(abfd) (ABI_N32_P (abfd) || ABI_64_P (abfd))
 

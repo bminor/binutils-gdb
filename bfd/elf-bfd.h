@@ -1919,6 +1919,9 @@ struct bfd_elf_section_data
 #define get_elf_backend_data(abfd) \
    xvec_get_elf_backend_data ((abfd)->xvec)
 
+#define ABI_64_P(abfd) \
+  (get_elf_backend_data (abfd)->s->elfclass == ELFCLASS64)
+
 /* The least object attributes (within an attributes subsection) known
    for any target.  Some code assumes that the value 0 is not used and
    the field for that attribute can instead be used as a marker to
