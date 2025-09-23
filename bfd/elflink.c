@@ -5096,6 +5096,13 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       if (name == NULL)
 	goto error_free_vers;
 
+      if (name[0] == '\0')
+	{
+	  _bfd_error_handler (_("%pB: corrupt symbol table"), abfd);
+	  bfd_set_error (bfd_error_bad_value);
+	  goto error_free_vers;
+	}
+
       if (isym->st_shndx == SHN_COMMON
 	  && (abfd->flags & BFD_PLUGIN) != 0)
 	{
