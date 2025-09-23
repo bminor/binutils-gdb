@@ -9155,7 +9155,7 @@ struct elf_outext_info
    <binary-operator> := as in C
    <unary-operator> := as in C, plus "0-" for unambiguous negation.  */
 
-static void
+static bool
 set_symbol_value (bfd *bfd_with_globals,
 		  Elf_Internal_Sym *isymbuf,
 		  size_t locsymcount,
@@ -9176,9 +9176,15 @@ set_symbol_value (bfd *bfd_with_globals,
 	     "absolute" section and give it a value.  */
 	  sym->st_shndx = SHN_ABS;
 	  sym->st_value = val;
-	  return;
+	  return true;
 	}
-      BFD_ASSERT (elf_bad_symtab (bfd_with_globals));
+      if (!elf_bad_symtab (bfd_with_globals))
+	{
+	  _bfd_error_handler (_("%pB: corrupt symbol table"),
+			      bfd_with_globals);
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
       extsymoff = 0;
     }
 
@@ -9188,11 +9194,12 @@ set_symbol_value (bfd *bfd_with_globals,
   if (h == NULL)
     {
       /* FIXMEL What should we do ?  */
-      return;
+      return false;
     }
   h->root.type = bfd_link_hash_defined;
   h->root.u.def.value = val;
   h->root.u.def.section = bfd_abs_section_ptr;
+  return true;
 }
 
 static bool
@@ -11890,8 +11897,10 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 		    return false;
 
 		  /* Symbol evaluated OK.  Update to absolute value.  */
-		  set_symbol_value (input_bfd, isymbuf, locsymcount,
-				    r_symndx, val);
+		  if (!set_symbol_value (input_bfd, isymbuf, locsymcount, r_symndx,
+					 val))
+		    return false;
+
 		  continue;
 		}
 
