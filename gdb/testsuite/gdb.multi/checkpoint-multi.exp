@@ -781,7 +781,7 @@ with_test_prefix "background execution" {
 	gdb_test "info checkpoints" \
 	    [multi_line \
 		"$checkpoints_header_re" \
-		"\\* 1\\.0 y +$proc_re +at $::hex,.*" \
+		"\\* 1\\.0 y +$proc_re +at $::hex.*" \
 		"  1\\.1 n +$proc_re +at $::hex, file.*?$hello_c.*?" \
 		"  2\\.0 y +$proc_re +at $::hex, file.*?$goodbye_c.*?" \
 		"  2\\.1 n +$proc_re +at $::hex, file.*?$goodbye_c.*?"]
@@ -792,7 +792,7 @@ with_test_prefix "background execution" {
 	gdb_test "info checkpoints" \
 	    [multi_line \
 		"$checkpoints_header_re" \
-		"  1\\.0 y +$proc_re +at $::hex,.*" \
+		"  1\\.0 y +$proc_re +at $::hex.*" \
 		"  1\\.1 n +$proc_re +at $::hex, file.*?$hello_c.*?" \
 		"  2\\.0 n +$proc_re +at $::hex, file.*?$goodbye_c.*?" \
 		"\\* 2\\.1 y +$proc_re +at $::hex, file.*?$goodbye_c.*?"]
