@@ -3676,7 +3676,8 @@ static int remote_newthread_step (threadref *ref, void *context);
 char *
 remote_target::write_ptid (char *buf, const char *endbuf, ptid_t ptid)
 {
-  int pid, tid;
+  ptid_t::pid_type pid;
+  ptid_t::lwp_type lwp;
 
   if (m_features.remote_multi_process_p ())
     {
@@ -3686,11 +3687,11 @@ remote_target::write_ptid (char *buf, const char *endbuf, ptid_t ptid)
       else
 	buf += xsnprintf (buf, endbuf - buf, "p%x.", pid);
     }
-  tid = ptid.lwp ();
-  if (tid < 0)
-    buf += xsnprintf (buf, endbuf - buf, "-%x", -tid);
+  lwp = ptid.lwp ();
+  if (lwp < 0)
+    buf += xsnprintf (buf, endbuf - buf, "-%lx", -lwp);
   else
-    buf += xsnprintf (buf, endbuf - buf, "%x", tid);
+    buf += xsnprintf (buf, endbuf - buf, "%lx", lwp);
 
   return buf;
 }
@@ -3704,24 +3705,38 @@ read_ptid (const char *buf, const char **obuf)
 {
   const char *p = buf;
   const char *pp;
-  ULONGEST pid = 0, tid = 0;
+  ptid_t::pid_type pid = 0;
+  ptid_t::lwp_type lwp = 0;
+  ULONGEST hex;
 
   if (*p == 'p')
     {
       /* Multi-process ptid.  */
-      pp = unpack_varlen_hex (p + 1, &pid);
-      if (*pp != '.')
-	error (_("invalid remote ptid: %s"), p);
+      pp = unpack_varlen_hex (p + 1, &hex);
+      if ((pp == (p + 1)) || (*pp != '.'))
+	error (_("invalid remote ptid: %s"), buf);
 
-      p = pp;
-      pp = unpack_varlen_hex (p + 1, &tid);
+      pid = (ptid_t::pid_type) (LONGEST) hex;
+      if (hex != ((ULONGEST) pid))
+	error (_("invalid remote ptid: %s"), buf);
+
+      p = pp + 1;
+      pp = unpack_varlen_hex (p, &hex);
+      if (pp == p)
+	error (_("invalid remote ptid: %s"), buf);
+
+      lwp = (ptid_t::lwp_type) (LONGEST) hex;
+      if (hex != ((ULONGEST) lwp))
+	error (_("invalid remote ptid: %s"), buf);
+
       if (obuf)
 	*obuf = pp;
-      return ptid_t (pid, tid);
+
+      return ptid_t (pid, lwp);
     }
 
-  /* No multi-process.  Just a tid.  */
-  pp = unpack_varlen_hex (p, &tid);
+  /* No multi-process.  Just a thread id.  */
+  pp = unpack_varlen_hex (p, &hex);
 
   /* Return null_ptid when no thread id is found.  */
   if (p == pp)
@@ -3730,6 +3745,10 @@ read_ptid (const char *buf, const char **obuf)
 	*obuf = pp;
       return null_ptid;
     }
+
+  lwp = (ptid_t::lwp_type) (LONGEST) hex;
+  if (hex != ((ULONGEST) lwp))
+    error (_("invalid remote ptid: %s"), buf);
 
   /* Since the stub is not sending a process id, default to what's
      current_inferior, unless it doesn't have a PID yet.  If so,
@@ -3743,7 +3762,8 @@ read_ptid (const char *buf, const char **obuf)
 
   if (obuf)
     *obuf = pp;
-  return ptid_t (pid, tid);
+
+  return ptid_t (pid, lwp);
 }
 
 static int
