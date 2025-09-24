@@ -57,7 +57,7 @@ gdb_assert { [string match "|___0x*" $first_line] } \
 
 # Scroll forward a large amount, this should take us to the last
 # instruction in the program.
-Term::command "+ 13"
+Term::command "+ 15"
 Term::check_box_contents "check asm box contents again" 0 0 80 15 \
     [multi_line \
 	 "^___$hex\[^\r\n\]+" \
@@ -65,6 +65,6 @@ Term::check_box_contents "check asm box contents again" 0 0 80 15 \
 
 # Now scroll backward again, we should return to the start of the
 # program.
-Term::command "- 13"
+Term::command "- 15"
 gdb_assert {[string eq "$first_line" [Term::get_line 1]]} \
     "check first line is back"

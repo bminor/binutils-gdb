@@ -20,8 +20,11 @@ _start:
 	.rept 5
 	nop
 	.endr
+
+#ifndef __CYGWIN__
 #ifdef __arm__
 	.section	.note.GNU-stack,"",%progbits
 #else
 	.section	.note.GNU-stack,"",@progbits
+#endif
 #endif
