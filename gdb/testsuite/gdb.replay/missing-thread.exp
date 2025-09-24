@@ -84,7 +84,7 @@ proc_with_prefix record_initial_logfile { log_filename } {
 # the reply from the remote that indicates the thread list.  It is expected
 # that the thread list will contain two threads.
 #
-# Whn DROP_BOTH is true then both threads will be removed from the modified
+# When DROP_BOTH is true then both threads will be removed from the modified
 # line.  Otherwise, only the second thread is removed.
 proc update_replay_log { in_filename out_filename drop_both } {
     # Read IN_FILENAME into a list.

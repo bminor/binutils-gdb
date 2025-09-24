@@ -4252,7 +4252,7 @@ captured_main (int argc, char *argv[])
 	      optind--;
 
 	      /* For required arguments, if we don't have an argument, then
-		 this is an errror, set OPTC to reflect this.  */
+		 this is an error, set OPTC to reflect this.  */
 	      if (longopts[longindex].has_arg == required_argument)
 		optc = ':';
 	    }
