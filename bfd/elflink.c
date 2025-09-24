@@ -14865,7 +14865,7 @@ bfd_elf_gc_record_vtentry (bfd *abfd, asection *sec,
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   unsigned int log_file_align = bed->s->log_file_align;
 
-  if (!h)
+  if (!h || addend > 1u << 28)
     {
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: section '%pA': corrupt VTENTRY entry"),
