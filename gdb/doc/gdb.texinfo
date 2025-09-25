@@ -50809,7 +50809,8 @@ The offset, from the start of the file, of the address area.
 The offset, from the start of the file, of the symbol table.
 
 @item
-The offset, from the start of the file, of the shortcut table.
+The offset, from the start of the file, of the shortcut table.  This
+field was introduced with index version 9.
 
 @item
 The offset, from the start of the file, of the constant pool.
@@ -50901,6 +50902,8 @@ An @code{offset_type} value indicating the offset of the main function's name
 in the constant pool.  This value must be ignored if the value for the language
 of main is zero.
 @end table
+
+This data structure was introduced in index version 9.
 
 @item
 The constant pool.  This is simply a bunch of bytes.  It is organized
