@@ -60,3 +60,49 @@ AC_DEFUN([CLANG_PLUGIN_FILE],[dnl
   fi
   $1="$plugin_file"
 ])
+
+dnl
+dnl
+dnl CLANG_PLUGIN_FILE_FOR_TARGET
+dnl    (SHELL-CODE_HANDLER)
+dnl
+AC_DEFUN([CLANG_PLUGIN_FILE_FOR_TARGET],[dnl
+  AC_CACHE_CHECK([for clang for target], clang_cv_is_clang, [
+    AC_EGREP_CPP(yes, [
+#ifdef __clang__
+  yes
+#endif
+    ], clang_cv_is_clang=yes, clang_cv_is_clang=no)])
+  plugin_file=
+  if test $clang_cv_is_clang = yes; then
+    AC_MSG_CHECKING([for clang plugin file for target])
+    plugin_names="LLVMgold.so"
+    COMPILER_FOR_TARGET="${CC_FOR_TARGET}"
+    dnl Check if the host compiler is used.
+    if test x${COMPILER_FOR_TARGET} = x"\$(CC)"; then
+      COMPILER_FOR_TARGET="$CC"
+    fi
+    for plugin in $plugin_names; do
+      plugin_file=`${COMPILER_FOR_TARGET} ${CFLAGS_FOR_TARGET} --print-file-name $plugin`
+      if test x$plugin_file = x$plugin; then
+	GCC_TARGET_TOOL(llvm-config, LLVM_CONFIG_FOR_TARGET, LLVM_CONFIG)
+	if test "$?" != 0; then
+	  AC_MSG_ERROR([Required target tool 'llvm-config' not found.])
+	fi
+	clang_lib_dir=`$LLVM_CONFIG_FOR_TARGET --libdir`
+	if test -f $clang_lib_dir/$plugin; then
+	  plugin_file=$clang_lib_dir/$plugin
+	fi
+      fi
+      if test x$plugin_file != x$plugin; then
+	break;
+      fi
+      plugin_file=
+    done
+    if test -z $plugin_file; then
+      AC_MSG_ERROR([Couldn't find clang plugin file for $CC_FOR_TARGET.])
+    fi
+    AC_MSG_RESULT($plugin_file)
+  fi
+  $1="$plugin_file"
+])

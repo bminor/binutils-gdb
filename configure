@@ -596,6 +596,10 @@ MAINTAINER_MODE_TRUE
 COMPILER_NM_FOR_TARGET
 COMPILER_LD_FOR_TARGET
 COMPILER_AS_FOR_TARGET
+RANLIB_PLUGIN_OPTION_FOR_TARGET
+NM_PLUGIN_OPTION_FOR_TARGET
+AR_PLUGIN_OPTION_FOR_TARGET
+LLVM_CONFIG_FOR_TARGET
 FLAGS_FOR_TARGET
 RAW_CXX_FOR_TARGET
 WINDMC_FOR_TARGET
@@ -20382,6 +20386,142 @@ fi
 AR_FOR_TARGET=${AR_FOR_TARGET}${extra_arflags_for_target}
 RANLIB_FOR_TARGET=${RANLIB_FOR_TARGET}${extra_ranlibflags_for_target}
 NM_FOR_TARGET=${NM_FOR_TARGET}${extra_nmflags_for_target}
+
+# Try CLANG_PLUGIN_FILE_FOR_TARGET first since GCC_PLUGIN_OPTION_FOR_TARGET
+# may return the wrong PLUGIN_OPTION_FOR_TARGET with clang.
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for clang for target" >&5
+$as_echo_n "checking for clang for target... " >&6; }
+if ${clang_cv_is_clang+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#ifdef __clang__
+  yes
+#endif
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "yes" >/dev/null 2>&1; then :
+  clang_cv_is_clang=yes
+else
+  clang_cv_is_clang=no
+fi
+rm -f conftest*
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $clang_cv_is_clang" >&5
+$as_echo "$clang_cv_is_clang" >&6; }
+  plugin_file=
+  if test $clang_cv_is_clang = yes; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for clang plugin file for target" >&5
+$as_echo_n "checking for clang plugin file for target... " >&6; }
+    plugin_names="LLVMgold.so"
+    COMPILER_FOR_TARGET="${CC_FOR_TARGET}"
+        if test x${COMPILER_FOR_TARGET} = x"\$(CC)"; then
+      COMPILER_FOR_TARGET="$CC"
+    fi
+    for plugin in $plugin_names; do
+      plugin_file=`${COMPILER_FOR_TARGET} ${CFLAGS_FOR_TARGET} --print-file-name $plugin`
+      if test x$plugin_file = x$plugin; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking where to find the target llvm-config" >&5
+$as_echo_n "checking where to find the target llvm-config... " >&6; }
+if test "x${build}" != "x${host}" ; then
+  if expr "x$LLVM_CONFIG_FOR_TARGET" : "x/" > /dev/null; then
+    # We already found the complete path
+    ac_dir=`dirname $LLVM_CONFIG_FOR_TARGET`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed in $ac_dir" >&5
+$as_echo "pre-installed in $ac_dir" >&6; }
+  else
+    # Canadian cross, just use what we found
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed" >&5
+$as_echo "pre-installed" >&6; }
+  fi
+else
+  if expr "x$LLVM_CONFIG_FOR_TARGET" : "x/" > /dev/null; then
+    # We already found the complete path
+    ac_dir=`dirname $LLVM_CONFIG_FOR_TARGET`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed in $ac_dir" >&5
+$as_echo "pre-installed in $ac_dir" >&6; }
+  elif test "x$target" = "x$host"; then
+    # We can use an host tool
+    LLVM_CONFIG_FOR_TARGET='$(LLVM_CONFIG)'
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: host tool" >&5
+$as_echo "host tool" >&6; }
+  else
+    # We need a cross tool
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed" >&5
+$as_echo "pre-installed" >&6; }
+  fi
+fi
+
+	if test "$?" != 0; then
+	  as_fn_error $? "Required target tool 'llvm-config' not found." "$LINENO" 5
+	fi
+	clang_lib_dir=`$LLVM_CONFIG_FOR_TARGET --libdir`
+	if test -f $clang_lib_dir/$plugin; then
+	  plugin_file=$clang_lib_dir/$plugin
+	fi
+      fi
+      if test x$plugin_file != x$plugin; then
+	break;
+      fi
+      plugin_file=
+    done
+    if test -z $plugin_file; then
+      as_fn_error $? "Couldn't find clang plugin file for $CC_FOR_TARGET." "$LINENO" 5
+    fi
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $plugin_file" >&5
+$as_echo "$plugin_file" >&6; }
+  fi
+  PLUGIN_FILE_FOR_TARGET="$plugin_file"
+
+if test -n "$PLUGIN_FILE_FOR_TARGET"; then
+  PLUGIN_OPTION_FOR_TARGET="--plugin $PLUGIN_FILE_FOR_TARGET"
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for -plugin option" >&5
+$as_echo_n "checking for -plugin option... " >&6; }
+
+COMPILER_FOR_TARGET="${CC_FOR_TARGET}"
+if test x${COMPILER_FOR_TARGET} = x"\$(CC)"; then
+  COMPILER_FOR_TARGET="$CC"
+fi
+plugin_names="liblto_plugin.so liblto_plugin-0.dll cyglto_plugin-0.dll"
+plugin_option=
+for plugin in $plugin_names; do
+  plugin_so=`${COMPILER_FOR_TARGET} ${CFLAGS_FOR_TARGET} --print-prog-name $plugin`
+  if test x$plugin_so = x$plugin; then
+    plugin_so=`${COMPILER_FOR_TARGET} ${CFLAGS_FOR_TARGET} --print-file-name $plugin`
+  fi
+  if test x$plugin_so != x$plugin; then
+    plugin_option="--plugin $plugin_so"
+    break
+  fi
+done
+if test -n "$plugin_option"; then
+  PLUGIN_OPTION_FOR_TARGET="$plugin_option"
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $plugin_option" >&5
+$as_echo "$plugin_option" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+fi
+if test -n "$PLUGIN_OPTION_FOR_TARGET"; then
+  AR_PLUGIN_OPTION_FOR_TARGET="$PLUGIN_OPTION_FOR_TARGET"
+  NM_PLUGIN_OPTION_FOR_TARGET="$PLUGIN_OPTION_FOR_TARGET"
+  RANLIB_PLUGIN_OPTION_FOR_TARGET="$PLUGIN_OPTION_FOR_TARGET"
+else
+  AR_PLUGIN_OPTION_FOR_TARGET=
+  NM_PLUGIN_OPTION_FOR_TARGET=
+  RANLIB_PLUGIN_OPTION_FOR_TARGET=
+fi
+
+
+
 
 # When building target libraries, except in a Canadian cross, we use
 # the same toolchain as the compiler we just built.
