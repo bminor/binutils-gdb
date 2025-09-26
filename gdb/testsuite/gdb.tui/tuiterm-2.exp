@@ -152,14 +152,17 @@ with_override Term::accept_gdb_output test_accept_gdb_output {
     }
 }
 
-with_test_prefix "Unrecognized escape sequence" {
-    spawn $srcdir/$subdir/gdb.tcl
-    switch_gdb_spawn_id  $spawn_id
+proc_with_prefix unrecognized_escape_sequence {} {
+    if { [spawn $::srcdir/$::subdir/gdb.tcl] == 0 } {
+	unsupported "cannot spawn gdb.tcl"
+	return
+    }
+    switch_gdb_spawn_id $spawn_id
 
     Term::_setup 4 20
 
-    save_vars timeout {
-	set timeout 1
+    save_vars ::timeout {
+	set ::timeout 1
 
 	set line { 0 0 20 1 }
 
@@ -178,4 +181,9 @@ with_test_prefix "Unrecognized escape sequence" {
 	    "echoed escape sequence"
     }
     Term::dump_screen
+
+    close $spawn_id
+    clear_gdb_spawn_id
 }
+
+unrecognized_escape_sequence
