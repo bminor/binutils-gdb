@@ -172,7 +172,7 @@ with_test_prefix width-auto-detected {
 
 	set test "startup prompt"
 	gdb_test_multiple "" $test {
-	    -re "^$gdb_prompt $" {
+	    -re "^(\033\\\[6n)?$gdb_prompt $" {
 		pass "$test"
 	    }
 	}
