@@ -153,8 +153,8 @@ with_override Term::accept_gdb_output test_accept_gdb_output {
 }
 
 proc_with_prefix unrecognized_escape_sequence {} {
-    if { [spawn $::srcdir/$::subdir/gdb.tcl] == 0 } {
-	unsupported "cannot spawn gdb.tcl"
+    if { [spawn $::srcdir/$::subdir/gdb.sh] == 0 } {
+	unsupported "cannot spawn gdb.sh"
 	return
     }
     switch_gdb_spawn_id $spawn_id

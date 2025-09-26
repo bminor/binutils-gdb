@@ -1,4 +1,4 @@
-#!/usr/bin/env tclsh
+#!/bin/sh
 
 # Copyright 2025 Free Software Foundation, Inc.
 
@@ -15,6 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-puts "foo\033(%5"
+printf "foo\033(%%5"
 
-gets stdin
+read
