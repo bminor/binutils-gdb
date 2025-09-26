@@ -43,7 +43,7 @@ struct external_exec
 
 /* Magic numbers for a.out files.  */
 
-#if ARCH_SIZE==64
+#if defined(ARCH_SIZE) && ARCH_SIZE == 64
 #define OMAGIC 0x1001		/* Code indicating object file.  */
 #define ZMAGIC 0x1002		/* Code indicating demand-paged executable.  */
 #define NMAGIC 0x1003		/* Code indicating pure executable.  */
