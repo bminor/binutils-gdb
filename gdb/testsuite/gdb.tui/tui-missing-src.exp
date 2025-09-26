@@ -27,6 +27,7 @@
 
 # Check if start command is supported.
 require !use_gdb_stub
+require allow_tui_tests
 
 tuiterm_env
 
