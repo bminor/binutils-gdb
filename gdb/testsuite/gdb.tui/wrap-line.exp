@@ -104,29 +104,35 @@ proc test_wrap_cli_tui { auto_detected_width } {
     set re1 "Number of characters gdb thinks are in a line is ($::decimal)\\."
     set re2 \
 	"Number of characters readline reports are in a line is ($::decimal)\\."
+    set re3 \
+	"Readline wrapping mode: (\[a-z\]+) \[\^\r\n]*"
     set cmd "maint info screen"
     set re \
 	[multi_line \
 	     "^$re1" \
 	     $re2 \
-	    ".*"]
+	     ".*" \
+	     $re3]
     gdb_test_multiple $cmd "" {
 	-re -wrap $re {
 	    set gdb_width $expect_out(1,string)
 	    set readline_width $expect_out(2,string)
+	    set wrapping_mode $expect_out(3,string)
 	    pass $gdb_test_name
 	}
     }
 
-    gdb_assert { $gdb_width == $::cols } "width"
+    if { $wrapping_mode == "readline" } {
+	gdb_assert { $gdb_width == $::cols } "width"
 
-    # TERM=ansi, so readline hides the last column.
-    gdb_assert { $gdb_width == [expr $readline_width + 1] }
+	# TERM=ansi, so readline hides the last column.
+	gdb_assert { $gdb_width == [expr $readline_width + 1] }
 
-    with_test_prefix cli {
-	set wrap_width $readline_width
+	with_test_prefix cli {
+	    set wrap_width $readline_width
 
-	test_wrap $wrap_width 0
+	    test_wrap $wrap_width 0
+	}
     }
 
     with_test_prefix tui {
