@@ -22,11 +22,17 @@ require {have_host_locale C.UTF-8}
 
 tuiterm_env
 
+standard_testfile tui-long-line.c
+
+if { [build_executable "failed to prepare" $testfile $srcfile] == -1 } {
+    return
+}
+
 save_vars { env(LC_ALL) } {
     setenv LC_ALL C.UTF-8
 
     # Start terminal.
-    Term::clean_restart 24 80
+    Term::clean_restart 24 80 $testfile
 
     # Start TUI.
     if {![Term::enter_tui]} {
@@ -46,10 +52,9 @@ save_vars { env(LC_ALL) } {
 
     # Send arrow-right.
     send_gdb "\033\[C"
-
-    # We need to the arrow-right to be processed by readline, before we
-    # send the following ^C.  Waiting 1 ms seems to do that.
-    after 1
+    # Wait for arrow-right effect.
+    gdb_assert { [Term::wait_for_region_contents 1 5 78 1 \
+		      [string_to_regexp " ain (void)"]] } "arrow right"
 
     # Send ^C.
     send_gdb "\003"
