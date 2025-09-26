@@ -585,56 +585,54 @@ process_extended_line_op (unsigned char * data,
   return len + header_len;
 }
 
-static const unsigned char *
+static const char *
 fetch_indirect_string (uint64_t offset)
 {
   struct dwarf_section *section = &debug_displays [str].section;
-  const unsigned char * ret;
+  const char *ret;
 
   if (section->start == NULL)
-    return (const unsigned char *) _("<no .debug_str section>");
+    return _("<no .debug_str section>");
 
   if (offset >= section->size)
     {
       warn (_("DW_FORM_strp offset too big: %#" PRIx64 "\n"), offset);
-      return (const unsigned char *) _("<offset is too big>");
+      return _("<offset is too big>");
     }
 
-  ret = section->start + offset;
+  ret = (const char *) (section->start + offset);
   /* Unfortunately we cannot rely upon the .debug_str section ending with a
      NUL byte.  Since our caller is expecting to receive a well formed C
      string we test for the lack of a terminating byte here.  */
-  if (strnlen ((const char *) ret, section->size - offset)
+  if (strnlen (ret, section->size - offset)
       == section->size - offset)
-    ret = (const unsigned char *)
-      _("<no NUL byte at end of .debug_str section>");
+    ret = _("<no NUL byte at end of .debug_str section>");
 
   return ret;
 }
 
-static const unsigned char *
+static const char *
 fetch_indirect_line_string (uint64_t offset)
 {
   struct dwarf_section *section = &debug_displays [line_str].section;
-  const unsigned char * ret;
+  const char *ret;
 
   if (section->start == NULL)
-    return (const unsigned char *) _("<no .debug_line_str section>");
+    return _("<no .debug_line_str section>");
 
   if (offset >= section->size)
     {
       warn (_("DW_FORM_line_strp offset too big: %#" PRIx64 "\n"), offset);
-      return (const unsigned char *) _("<offset is too big>");
+      return _("<offset is too big>");
     }
 
-  ret = section->start + offset;
+  ret = (const char *) (section->start + offset);
   /* Unfortunately we cannot rely upon the .debug_line_str section ending
      with a NUL byte.  Since our caller is expecting to receive a well formed
      C string we test for the lack of a terminating byte here.  */
-  if (strnlen ((const char *) ret, section->size - offset)
+  if (strnlen (ret, section->size - offset)
       == section->size - offset)
-    ret = (const unsigned char *)
-      _("<no NUL byte at end of .debug_line_str section>");
+    ret = _("<no NUL byte at end of .debug_line_str section>");
 
   return ret;
 }
@@ -3059,7 +3057,7 @@ read_and_display_attr_value (unsigned long attribute,
 	    switch (form)
 	      {
 	      case DW_FORM_strp:
-		add_dwo_name ((const char *) fetch_indirect_string (uvalue),
+		add_dwo_name (fetch_indirect_string (uvalue),
 			      cu_offset);
 		break;
 	      case DW_FORM_GNU_strp_alt:
@@ -3092,13 +3090,13 @@ read_and_display_attr_value (unsigned long attribute,
 	    switch (form)
 	      {
 	      case DW_FORM_strp:
-		add_dwo_dir ((const char *) fetch_indirect_string (uvalue), cu_offset);
+		add_dwo_dir (fetch_indirect_string (uvalue), cu_offset);
 		break;
 	      case DW_FORM_GNU_strp_alt:
 		add_dwo_dir (fetch_alt_indirect_string (uvalue), cu_offset);
 		break;
 	      case DW_FORM_line_strp:
-		add_dwo_dir ((const char *) fetch_indirect_line_string (uvalue), cu_offset);
+		add_dwo_dir (fetch_indirect_line_string (uvalue), cu_offset);
 		break;
 	      case DW_FORM_GNU_str_index:
 	      case DW_FORM_strx:
@@ -5114,7 +5112,7 @@ display_debug_lines_raw (struct dwarf_section *  section,
 
 typedef struct
 {
-  char *name;
+  const char *name;
   unsigned int directory_index;
   unsigned int modification_date;
   unsigned int length;
@@ -5142,7 +5140,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
       int i;
       File_Entry *file_table = NULL;
       unsigned int n_files = 0;
-      char **directory_table = NULL;
+      const char **directory_table = NULL;
       unsigned int n_directories = 0;
 
       if (startswith (section->name, ".debug_line.")
@@ -5226,12 +5224,12 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		  return 0;
 		}
 	      else
-		directory_table = (char **)
-		  xcalloc (n_directories, sizeof (unsigned char *));
+		directory_table = (const char **)
+		  xcalloc (n_directories, sizeof (const char *));
 
 	      for (entryi = 0; entryi < n_directories; entryi++)
 		{
-		  char **pathp = &directory_table[entryi];
+		  const char **pathp = &directory_table[entryi];
 
 		  format = format_start;
 		  for (formati = 0; formati < format_count; formati++)
@@ -5258,8 +5256,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 			      SAFE_BYTE_GET (uvalue, data, linfo.li_offset_size,
 					     end);
 			      /* Remove const by the cast.  */
-			      *pathp = (char *)
-				       fetch_indirect_line_string (uvalue);
+			      *pathp = fetch_indirect_line_string (uvalue);
 			      break;
 			    }
 			  break;
@@ -5340,8 +5337,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 			      SAFE_BYTE_GET (uvalue, data, linfo.li_offset_size,
 					     end);
 			      /* Remove const by the cast.  */
-			      file->name = (char *)
-					   fetch_indirect_line_string (uvalue);
+			      file->name = fetch_indirect_line_string (uvalue);
 			      break;
 			    }
 			  break;
@@ -5400,8 +5396,8 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		    }
 
 		  /* Go through the directory table again to save the directories.  */
-		  directory_table = (char **)
-		    xmalloc (n_directories * sizeof (unsigned char *));
+		  directory_table = (const char **)
+		    xmalloc (n_directories * sizeof (const char *));
 
 		  i = 0;
 		  while (*ptr_directory_table != 0)
@@ -6337,7 +6333,6 @@ display_debug_macro (struct dwarf_section *section,
     {
       unsigned int lineno, version, flags;
       unsigned int offset_size;
-      const unsigned char *string;
       uint64_t line_offset = 0, sec_offset = curr - start, offset;
       unsigned char **extended_ops = NULL;
 
@@ -6421,6 +6416,7 @@ display_debug_macro (struct dwarf_section *section,
       while (1)
 	{
 	  unsigned int op;
+	  const char *string;
 
 	  if (curr >= end)
 	    {
@@ -6436,20 +6432,22 @@ display_debug_macro (struct dwarf_section *section,
 	    {
 	    case DW_MACRO_define:
 	      READ_ULEB (lineno, curr, end);
-	      string = curr;
-	      curr += strnlen ((char *) string, end - string);
+	      string = (const char *) curr;
+	      op = strnlen (string, end - curr);
+	      curr += op;
 	      printf (_(" DW_MACRO_define - lineno : %d macro : %*s\n"),
-		      lineno, (int) (curr - string), string);
+		      lineno, (int) op, string);
 	      if (curr < end)
 		curr++;
 	      break;
 
 	    case DW_MACRO_undef:
 	      READ_ULEB (lineno, curr, end);
-	      string = curr;
-	      curr += strnlen ((char *) string, end - string);
+	      string = (const char *) curr;
+	      op = strnlen (string, end - curr);
+	      curr += op;
 	      printf (_(" DW_MACRO_undef - lineno : %d macro : %*s\n"),
-		      lineno, (int) (curr - string), string);
+		      lineno, (int) op, string);
 	      if (curr < end)
 		curr++;
 	      break;
@@ -6537,8 +6535,8 @@ display_debug_macro (struct dwarf_section *section,
 	    case DW_MACRO_undef_strx:
 	      READ_ULEB (lineno, curr, end);
 	      READ_ULEB (offset, curr, end);
-	      string = (const unsigned char *)
-		fetch_indexed_string (offset, NULL, offset_size, is_dwo, 0);
+	      string = fetch_indexed_string (offset, NULL, offset_size,
+					     is_dwo, 0);
 	      if (op == DW_MACRO_define_strx)
 		printf (" DW_MACRO_define_strx ");
 	      else
@@ -8076,7 +8074,7 @@ display_debug_str_offsets (struct dwarf_section *section,
       for (idx = 0; curr < entries_end; idx++)
 	{
 	  uint64_t offset;
-	  const unsigned char * string;
+	  const char *string;
 
 	  if ((size_t) (entries_end - curr) < entry_length)
 	    /* Not enough space to read one entry_length, give up.  */
@@ -8084,8 +8082,8 @@ display_debug_str_offsets (struct dwarf_section *section,
 
 	  SAFE_BYTE_GET_AND_INC (offset, curr, entry_length, entries_end);
 	  if (dwo)
-	    string = (const unsigned char *)
-	      fetch_indexed_string (idx, NULL, entry_length, dwo, debug_str_offsets_hdr_len);
+	    string = fetch_indexed_string (idx, NULL, entry_length, dwo,
+					   debug_str_offsets_hdr_len);
 	  else
 	    string = fetch_indirect_string (offset);
 
