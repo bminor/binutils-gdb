@@ -3122,6 +3122,10 @@ gdb_caching_proc allow_dlmopen_tests {} {
 # Return 1 if we should allow TUI-related tests.
 
 gdb_caching_proc allow_tui_tests {} {
+    if { [istarget *-*-mingw*] } {
+	# Avoid "Cannot enable the TUI when output is not a terminal".
+	return 0
+    }
     set output [remote_exec host $::GDB "$::INTERNAL_GDBFLAGS --configuration"]
     return [expr {[string first "--enable-tui" $output] != -1}]
 }
