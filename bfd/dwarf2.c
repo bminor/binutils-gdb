@@ -5645,7 +5645,7 @@ stash_comp_unit (struct dwarf2_debug *stash, struct dwarf2_debug_file *file)
 	  if (each->arange.high == 0)
 	    {
 	      each->next_unit_without_ranges = file->all_comp_units_without_ranges;
-	      file->all_comp_units_without_ranges = each->next_unit_without_ranges;
+	      file->all_comp_units_without_ranges = each;
 	    }
 
 	  file->info_ptr += length;
