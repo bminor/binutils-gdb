@@ -46,7 +46,7 @@ extern "C" {
 #define NUM_SHDR_ENTRIES(shdr) ((shdr)->sh_entsize > 0 ? (shdr)->sh_size / (shdr)->sh_entsize : 0)
 
 /* If size isn't specified as 64 or 32, NAME macro should fail.  */
-#ifndef NAME
+#if !defined(NAME) && defined(ARCH_SIZE)
 #if ARCH_SIZE == 64
 #define NAME(x, y) x ## 64 ## _ ## y
 #endif
