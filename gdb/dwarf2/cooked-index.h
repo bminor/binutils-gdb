@@ -260,8 +260,8 @@ struct cooked_index_functions : public dwarf2_base_index_functions
 			     bool need_fullname) override
   {
     wait (objfile, true);
-    return (dwarf2_base_index_functions::map_symbol_filenames
-	    (objfile, fun, need_fullname));
+    dwarf2_base_index_functions::map_symbol_filenames (objfile, fun,
+						       need_fullname);
   }
 
   void compute_main_name (struct objfile *objfile) override
