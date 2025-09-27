@@ -161,6 +161,16 @@ program_space::iterate_over_objfiles_in_search_order
 /* See progspace.h.  */
 
 void
+program_space::map_symbol_filenames (symbol_filename_listener fun,
+				     bool need_fullname)
+{
+  for (objfile &objfile : objfiles ())
+    objfile.map_symbol_filenames (fun, need_fullname);
+}
+
+/* See progspace.h.  */
+
+void
 program_space::add_objfile (std::unique_ptr<objfile> &&objfile,
 			    struct objfile *before)
 {

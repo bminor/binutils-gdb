@@ -3755,17 +3755,6 @@ symfile_free_objfile (struct objfile *objfile)
   objfile->pspace ()->remove_target_sections (objfile);
 }
 
-/* Wrapper around the quick_symbol_functions map_symbol_filenames "method".
-   Map function FUN over every file.
-   See quick_symbol_functions.map_symbol_filenames for details.  */
-
-void
-map_symbol_filenames (symbol_filename_listener fun, bool need_fullname)
-{
-  for (objfile &objfile : current_program_space->objfiles ())
-    objfile.map_symbol_filenames (fun, need_fullname);
-}
-
 #if GDB_SELF_TEST
 
 namespace selftests {

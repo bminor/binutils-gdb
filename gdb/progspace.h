@@ -24,6 +24,7 @@
 #include "solib.h"
 #include "target.h"
 #include "gdb_bfd.h"
+#include "quick-symbol.h"
 #include "registry.h"
 #include "gdbsupport/safe-iterator.h"
 #include "gdbsupport/intrusive_list.h"
@@ -223,6 +224,12 @@ struct program_space
   void iterate_over_objfiles_in_search_order
     (iterate_over_objfiles_in_search_order_cb_ftype cb,
      objfile *current_objfile);
+
+  /* Wrapper around the quick_symbol_functions map_symbol_filenames
+     "method".  Map function FUN over every file, in every objfile in
+     this program space.  See
+     quick_symbol_functions.map_symbol_filenames for details.  */
+  void map_symbol_filenames (symbol_filename_listener fun, bool need_fullname);
 
   /* Add OBJFILE to the list of objfiles, putting it just before
      BEFORE.  If BEFORE is nullptr, it will go at the end of the

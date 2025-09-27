@@ -4630,7 +4630,8 @@ info_sources_worker (struct ui_out *uiout,
   if (!group_by_objfile)
     {
       data.reset_output ();
-      map_symbol_filenames (data, true /*need_fullname*/);
+      current_program_space->map_symbol_filenames (data,
+						   true /*need_fullname*/);
     }
 }
 
@@ -6323,7 +6324,7 @@ make_source_files_completion_list (const char *text)
   datum.word = text;
   datum.text_len = text_len;
   datum.list = &list;
-  map_symbol_filenames (datum, false /*need_fullname*/);
+  current_program_space->map_symbol_filenames (datum, false /*need_fullname*/);
 
   return list;
 }
