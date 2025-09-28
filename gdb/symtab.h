@@ -2807,12 +2807,6 @@ bool compare_filenames_for_search (const char *filename,
 bool compare_glob_filenames_for_search (const char *filename,
 					const char *search_name);
 
-bool iterate_over_some_symtabs (const char *name,
-				const char *real_path,
-				struct compunit_symtab *first,
-				struct compunit_symtab *after_last,
-				gdb::function_view<bool (symtab *)> callback);
-
 /* Check in PSPACE for a symtab of a specific name; first in symtabs, then in
    psymtabs.  *If* there is no '/' in the name, a match after a '/' in the
    symtab filename will also work.

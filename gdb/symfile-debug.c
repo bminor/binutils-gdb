@@ -159,6 +159,74 @@ objfile::forget_cached_source_info ()
     iter->forget_cached_source_info (this);
 }
 
+/* Check for a symtab of a specific name by searching some symtabs.
+
+   If NAME is not absolute, then REAL_PATH is NULL
+   If NAME is absolute, then REAL_PATH is the gdb_realpath form of NAME.
+
+   The return value, NAME, REAL_PATH and CALLBACK are identical to the
+   `map_symtabs_matching_filename' method of quick_symbol_functions.
+
+   CUST indicates which compunit symtab to search.  Each symtab within
+   the specified compunit symtab is also searched.  */
+
+static bool
+iterate_over_one_compunit_symtab (const char *name,
+				  const char *real_path,
+				  compunit_symtab *cust,
+				  gdb::function_view<bool (symtab *)> callback)
+{
+  const char *base_name = lbasename (name);
+
+  /* Skip included compunits.  */
+  if (cust->user != nullptr)
+    return false;
+
+  for (symtab *s : cust->filetabs ())
+    {
+      if (compare_filenames_for_search (s->filename, name))
+	{
+	  if (callback (s))
+	    return true;
+	  continue;
+	}
+
+      /* Before we invoke realpath, which can get expensive when many
+	 files are involved, do a quick comparison of the basenames.  */
+      if (! basenames_may_differ
+	  && FILENAME_CMP (base_name, lbasename (s->filename)) != 0)
+	continue;
+
+      if (compare_filenames_for_search (symtab_to_fullname (s), name))
+	{
+	  if (callback (s))
+	    return true;
+	  continue;
+	}
+
+      /* If the user gave us an absolute path, try to find the file in
+	 this symtab and use its absolute path.  */
+      if (real_path != NULL)
+	{
+	  const char *fullname = symtab_to_fullname (s);
+
+	  gdb_assert (IS_ABSOLUTE_PATH (real_path));
+	  gdb_assert (IS_ABSOLUTE_PATH (name));
+	  gdb::unique_xmalloc_ptr<char> fullname_real_path
+	    = gdb_realpath (fullname);
+	  fullname = fullname_real_path.get ();
+	  if (FILENAME_CMP (real_path, fullname) == 0)
+	    {
+	      if (callback (s))
+		return true;
+	      continue;
+	    }
+	}
+    }
+
+  return false;
+}
+
 bool
 objfile::map_symtabs_matching_filename
   (const char *name, const char *real_path,
@@ -172,7 +240,7 @@ objfile::map_symtabs_matching_filename
 		real_path ? real_path : NULL,
 		host_address_to_string (&callback));
 
-  bool retval = true;
+  bool retval = false;
   const char *name_basename = lbasename (name);
 
   auto match_one_filename = [&] (const char *filename, bool basenames)
@@ -187,29 +255,22 @@ objfile::map_symtabs_matching_filename
     return false;
   };
 
-  compunit_symtab *last_made = this->compunit_symtabs;
-
-  auto on_expansion = [&] (compunit_symtab *symtab)
+  auto listener = [&] (compunit_symtab *symtab)
   {
-    /* The callback to iterate_over_some_symtabs returns false to keep
-       going and true to continue, so we have to invert the result
-       here, for search.  */
-    bool result = !iterate_over_some_symtabs (name, real_path,
-					      this->compunit_symtabs,
-					      last_made,
+    /* CALLBACK returns false to keep going and true to continue, so
+       we have to invert the result here, for search.  */
+    return !iterate_over_one_compunit_symtab (name, real_path, symtab,
 					      callback);
-    last_made = this->compunit_symtabs;
-    return result;
   };
 
   for (const auto &iter : qf)
     {
       if (!iter->search (this, match_one_filename, nullptr, nullptr,
-			 on_expansion,
+			 listener,
 			 SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
 			 SEARCH_ALL_DOMAINS))
 	{
-	  retval = false;
+	  retval = true;
 	  break;
 	}
     }
@@ -219,9 +280,7 @@ objfile::map_symtabs_matching_filename
 		"qf->map_symtabs_matching_filename (...) = %d\n",
 		retval);
 
-  /* We must re-invert the return value here to match the caller's
-     expectations.  */
-  return !retval;
+  return retval;
 }
 
 struct compunit_symtab *

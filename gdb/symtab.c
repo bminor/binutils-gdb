@@ -586,82 +586,6 @@ compare_filenames_for_search (const char *filename, const char *search_name)
 	      && STRIP_DRIVE_SPEC (filename) == &filename[len - search_len]));
 }
 
-/* Check for a symtab of a specific name by searching some symtabs.
-   This is a helper function for callbacks of iterate_over_symtabs.
-
-   If NAME is not absolute, then REAL_PATH is NULL
-   If NAME is absolute, then REAL_PATH is the gdb_realpath form of NAME.
-
-   The return value, NAME, REAL_PATH and CALLBACK are identical to the
-   `map_symtabs_matching_filename' method of quick_symbol_functions.
-
-   FIRST and AFTER_LAST indicate the range of compunit symtabs to search.
-   Each symtab within the specified compunit symtab is also searched.
-   AFTER_LAST is one past the last compunit symtab to search; NULL means to
-   search until the end of the list.  */
-
-bool
-iterate_over_some_symtabs (const char *name,
-			   const char *real_path,
-			   struct compunit_symtab *first,
-			   struct compunit_symtab *after_last,
-			   gdb::function_view<bool (symtab *)> callback)
-{
-  struct compunit_symtab *cust;
-  const char* base_name = lbasename (name);
-
-  for (cust = first; cust != NULL && cust != after_last; cust = cust->next)
-    {
-      /* Skip included compunits.  */
-      if (cust->user != nullptr)
-	continue;
-
-      for (symtab *s : cust->filetabs ())
-	{
-	  if (compare_filenames_for_search (s->filename, name))
-	    {
-	      if (callback (s))
-		return true;
-	      continue;
-	    }
-
-	  /* Before we invoke realpath, which can get expensive when many
-	     files are involved, do a quick comparison of the basenames.  */
-	  if (! basenames_may_differ
-	      && FILENAME_CMP (base_name, lbasename (s->filename)) != 0)
-	    continue;
-
-	  if (compare_filenames_for_search (symtab_to_fullname (s), name))
-	    {
-	      if (callback (s))
-		return true;
-	      continue;
-	    }
-
-	  /* If the user gave us an absolute path, try to find the file in
-	     this symtab and use its absolute path.  */
-	  if (real_path != NULL)
-	    {
-	      const char *fullname = symtab_to_fullname (s);
-
-	      gdb_assert (IS_ABSOLUTE_PATH (real_path));
-	      gdb_assert (IS_ABSOLUTE_PATH (name));
-	      gdb::unique_xmalloc_ptr<char> fullname_real_path
-		= gdb_realpath (fullname);
-	      fullname = fullname_real_path.get ();
-	      if (FILENAME_CMP (real_path, fullname) == 0)
-		{
-		  if (callback (s))
-		    return true;
-		  continue;
-		}
-	    }
-	}
-    }
-
-  return false;
-}
-
 /* See symtab.h.  */
 
 void
@@ -679,16 +603,8 @@ iterate_over_symtabs (program_space *pspace, const char *name,
     }
 
   for (objfile &objfile : pspace->objfiles ())
-    if (iterate_over_some_symtabs (name, real_path.get (),
-				   objfile.compunit_symtabs, nullptr,
-				   callback))
-	return;
-
-  /* Same search rules as above apply here, but now we look through the
-     psymtabs.  */
-  for (objfile &objfile : pspace->objfiles ())
     if (objfile.map_symtabs_matching_filename (name, real_path.get (),
-						callback))
+					       callback))
       return;
 }
 
