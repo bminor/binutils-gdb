@@ -350,7 +350,7 @@ NAME(_bfd_elf, core_find_build_id)
     }
 
   elf_swap_ehdr_in (abfd, &x_ehdr, &i_ehdr);
-#if DEBUG
+#if DEBUG & 1
   elf_debug_file (&i_ehdr);
 #endif
 
