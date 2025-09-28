@@ -17,7 +17,8 @@
 
 standard_testfile
 
-if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
+	  {debug pthreads}] } {
     return
 }
 
@@ -25,15 +26,53 @@ if {![runto_main]} {
     return
 }
 
-gdb_test "inferior 1" ".*Switching to inferior 1 .* to thread 1 .*" \
-    "inferior switch is not suppressed"
+delete_breakpoints
+
+gdb_breakpoint [gdb_get_line_number "Break here"]
+gdb_continue_to_breakpoint "threads created"
+
+if {![use_gdb_stub]} {
+    gdb_test "add-inferior -exec $binfile" ".*" \
+	"add a second inferior"
+
+    gdb_test "inferior 2" ".*Switching to inferior 2 .*" \
+	"inferior switch is not suppressed"
+    gdb_test "info breakpoints"
+    gdb_test "info inferiors"
+    gdb_test "info connections"
+    gdb_run_cmd
+    gdb_test_multiple "" "stop at breakpoint in inferior 2" {
+	-wrap -re "Breakpoint ${::decimal}(?:\\.${::decimal})?, main .*" {
+	    pass $gdb_test_name
+	}
+    }
+}
 
 gdb_test_no_output "set suppress-cli-notifications on"
-gdb_test_no_output "inferior 1" "inferior switch is suppressed"
+if {![use_gdb_stub]} {
+    gdb_test_no_output "inferior 1" \
+	"inferior switch is suppressed when changing inferior"
+}
+gdb_test_no_output "inferior 1" \
+    "inferior switch is suppressed when same inferior selected"
 gdb_test_no_output "next" "stepping is suppressed"
+gdb_test_no_output "thread 2" "switch to a new thread"
+gdb_test_no_output "thread 2" "switch to the same thread"
 
 # Now check that suppression can be turned back off.
 gdb_test_no_output "set suppress-cli-notifications off"
-gdb_test "inferior 1" ".*Switching to inferior 1 .* to thread 1 .*" \
-    "inferior switch is not suppressed again"
-gdb_test "next" "return 0;" "stepping is not suppressed"
+gdb_test "thread 1" \
+    [multi_line \
+	 "\\\[Switching to thread 1\[^\r\n\]*\\\]" \
+	 "#0\\s+main\[^\r\n\]+" \
+	 "\[^\r\n\]+Second\\.  \\*/"]
+gdb_test_no_output "set wait_for_gdb = 0" \
+    "set wait_for_gdb in first inferior"
+
+if {![use_gdb_stub]} {
+    gdb_test "inferior 2" ".*Switching to inferior 2 .* to thread 2\\.1 .*" \
+	"inferior switch is not suppressed again"
+    gdb_test "next" ".*Second.*" "stepping is not suppressed"
+    gdb_test_no_output "set wait_for_gdb = 0" \
+	"set wait_for_gdb in second inferior"
+}

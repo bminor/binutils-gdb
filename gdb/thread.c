@@ -1977,21 +1977,10 @@ thread_command (const char *tidstr, int from_tty)
     }
   else
     {
-      ptid_t previous_ptid = inferior_ptid;
-
       thread_select (tidstr, parse_thread_id (tidstr, NULL));
 
-      /* Print if the thread has not changed, otherwise an event will
-	 be sent.  */
-      if (inferior_ptid == previous_ptid)
-	{
-	  print_selected_thread_frame (current_uiout,
-				       USER_SELECTED_THREAD
-				       | USER_SELECTED_FRAME);
-	}
-      else
-	notify_user_selected_context_changed
-	  (USER_SELECTED_THREAD | USER_SELECTED_FRAME);
+      notify_user_selected_context_changed
+	(USER_SELECTED_THREAD | USER_SELECTED_FRAME);
     }
 }
 

@@ -6845,7 +6845,8 @@ notify_normal_stop (bpstat *bs, int print_frame)
 
 /* See infrun.h.  */
 
-void notify_user_selected_context_changed (user_selected_what selection)
+void
+notify_user_selected_context_changed (user_selected_what selection)
 {
   interps_notify_user_selected_context_changed (selection);
   gdb::observers::user_selected_context_changed.notify (selection);

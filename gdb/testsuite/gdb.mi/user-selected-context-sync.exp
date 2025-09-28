@@ -576,10 +576,8 @@ proc_with_prefix test_cli_thread { mode } {
 	    match_re_or_ensure_no_output $mi_re "select thread, event on MI "
 	}
 
-	# Do the 'thread' command to select the same thread.  We shouldn't receive
-	# an event on MI, since we won't actually switch thread.
-
-	set mi_re ""
+	# Do the 'thread' command to select the same thread.  We
+	# should see the same thread events.
 
 	with_spawn_id $gdb_main_spawn_id {
 	    gdb_test "thread 1.2" $cli_re "select thread again"
@@ -587,6 +585,30 @@ proc_with_prefix test_cli_thread { mode } {
 
 	with_spawn_id $mi_spawn_id {
 	    match_re_or_ensure_no_output $mi_re "select thread, event on MI again"
+	}
+
+	# Use the 'frame' command to select frame 1.  In either mode
+	# the current thread is stopped, so this should work.
+	with_spawn_id $gdb_main_spawn_id {
+	    gdb_test "frame 1" [make_cli_re $mode -1 -1 1] \
+		"select frame 1"
+	}
+
+	with_spawn_id $mi_spawn_id {
+	    match_re_or_ensure_no_output [make_mi_re $mode 2 1 event] \
+		"select frame 1, event on MI"
+	}
+
+	# Reselect the current thread.  GDB will switch back to
+	# frame #0, and send CLI and MI notifications.
+	with_spawn_id $gdb_main_spawn_id {
+	    gdb_test "thread 1.2" $cli_re \
+		"select thread again, resetting frame"
+	}
+
+	with_spawn_id $mi_spawn_id {
+	    match_re_or_ensure_no_output $mi_re \
+		"select thread again, resetting frame, event on MI"
 	}
 
 	# Try the 'thread' command without arguments.
@@ -623,10 +645,9 @@ proc_with_prefix test_cli_thread { mode } {
 	    match_re_or_ensure_no_output $mi_re "select thread, event on MI"
 	}
 
-	# Do the 'thread' command to select the third thread again.  Again, we
-	# shouldn't receive an event on MI.
-
-	set mi_re ""
+	# Do the 'thread' command to select the third thread again.
+	# We should get the same thread events again as selecting the
+	# same thread still resets the frame to #0.
 
 	with_spawn_id $gdb_main_spawn_id {
 	    gdb_test "thread 1.3" $cli_re "select thread again"
@@ -634,6 +655,33 @@ proc_with_prefix test_cli_thread { mode } {
 
 	with_spawn_id $mi_spawn_id {
 	    match_re_or_ensure_no_output $mi_re "select thread again, event on MI"
+	}
+
+	# In non-stop mode the current thread is still running, so we
+	# cannot change the selected frame.
+	if { $mode eq "all-stop" } {
+	    # Use the 'frame' command to select frame 1.
+	    with_spawn_id $gdb_main_spawn_id {
+		gdb_test "frame 1" [make_cli_re $mode -1 -1 1] \
+		    "select frame 1"
+	    }
+
+	    with_spawn_id $mi_spawn_id {
+		match_re_or_ensure_no_output [make_mi_re $mode 3 1 event] \
+		    "select frame 1, event on MI"
+	    }
+
+	    # Reselect the current thread.  GDB will switch back to
+	    # frame #0, and send CLI and MI notifications.
+	    with_spawn_id $gdb_main_spawn_id {
+		gdb_test "thread 1.3" $cli_re \
+		    "select thread again, resetting frame"
+	    }
+
+	    with_spawn_id $mi_spawn_id {
+		match_re_or_ensure_no_output $mi_re \
+		    "select thread again, resetting frame, event on MI"
+	    }
 	}
 
 	# Try the 'thread' command without arguments.
@@ -1106,18 +1154,44 @@ proc_with_prefix test_cli_in_mi_thread { mode cli_in_mi_mode } {
 	    match_re_or_ensure_no_output "$cli_re\r\n" "select thread, event on CLI"
 	}
 
-	# Do the 'thread' command to select the same thread.  We shouldn't
-	# receive an event on CLI, since we won't actually switch thread.
-
-	set mi_re [make_cli_in_mi_re $command $cli_in_mi_mode $mode 0 -1 1.2 2 0]
-	set cli_re ""
+	# Do the 'thread' command to select the same thread.  We
+	# should see the same thread events.
 
 	with_spawn_id $mi_spawn_id {
 	    mi_gdb_test $command $mi_re "select thread again"
 	}
 
 	with_spawn_id $gdb_main_spawn_id {
-	    match_re_or_ensure_no_output $cli_re "select thread again, event on CLI"
+	    match_re_or_ensure_no_output "$cli_re\r\n" "select thread again, event on CLI"
+	}
+
+	# In non-stop mode the current thread is still running, so we
+	# cannot change the selected frame.  Use 'frame' command to
+	# select frame 1.
+	set f_command [make_cli_in_mi_command $cli_in_mi_mode "frame 1"]
+	set f_cli_re [make_cli_re $mode -1 -1 1]
+	set f_mi_re [make_cli_in_mi_re $f_command \
+			 $cli_in_mi_mode $mode 1 -1 -1 2 1]
+
+	with_spawn_id $mi_spawn_id {
+	    mi_gdb_test $f_command $f_mi_re "select frame 1"
+	}
+
+	with_spawn_id $gdb_main_spawn_id {
+	    match_re_or_ensure_no_output "$f_cli_re\r\n" \
+		"select frame 1, event on CLI"
+	}
+
+	# Reselect the current thread.  GDB will switch back to
+	# frame #0, and send CLI and MI notifications.
+	with_spawn_id $mi_spawn_id {
+	    mi_gdb_test $command $mi_re \
+		"select thread again, resetting frame"
+	}
+
+	with_spawn_id $gdb_main_spawn_id {
+	    match_re_or_ensure_no_output "$cli_re\r\n" \
+		"select thread again, resetting frame, event on CLI"
 	}
 
 	# Try the 'thread' command without arguments.
@@ -1157,23 +1231,48 @@ proc_with_prefix test_cli_in_mi_thread { mode cli_in_mi_mode } {
 	    match_re_or_ensure_no_output "$cli_re\r\n" "select thread, event on CLI"
 	}
 
-	# Do the 'thread' command to select the third thread again.  Again, we
-	# shouldn't receive an event on MI.
-
-	if { $mode == "all-stop" } {
-	    set mi_re [make_cli_in_mi_re $command $cli_in_mi_mode $mode 0 -1 1.3 3 0]
-	} else {
-	    set mi_re [make_cli_in_mi_re $command $cli_in_mi_mode $mode 0 -1 1.3 3 -1]
-	}
-	set cli_re ""
+	# Do the 'thread' command to select the third thread again.
+	# We should see the same thread events.
 
 	with_spawn_id $mi_spawn_id {
 	    mi_gdb_test $command $mi_re "select thread again"
 	}
 
 	with_spawn_id $gdb_main_spawn_id {
-	    match_re_or_ensure_no_output $cli_re "select thread again, event on CLI"
+	    match_re_or_ensure_no_output "$cli_re\r\n" "select thread again, event on CLI"
 	}
+
+	# In non-stop mode the current thread is now running, so we
+	# cannot switch frames.  In all-stop mode all threads are
+	# stopped, so frame switching is fine.
+	if { $mode eq "all-stop" } {
+	    # Use 'frame' command to select frame 1.
+	    set f_command [make_cli_in_mi_command $cli_in_mi_mode "frame 1"]
+	    set f_cli_re [make_cli_re $mode -1 -1 1]
+	    set f_mi_re [make_cli_in_mi_re $f_command \
+			     $cli_in_mi_mode $mode 1 -1 -1 3 1]
+	    with_spawn_id $mi_spawn_id {
+		mi_gdb_test $f_command $f_mi_re "select frame 1"
+	    }
+
+	    with_spawn_id $gdb_main_spawn_id {
+		match_re_or_ensure_no_output "$f_cli_re\r\n" \
+		    "select frame 1, event on CLI"
+	    }
+
+	    # Reselect the current thread.  GDB will switch back to
+	    # frame #0, and send CLI and MI notifications.
+	    with_spawn_id $mi_spawn_id {
+		mi_gdb_test $command $mi_re \
+		    "select thread again, resetting frame"
+	    }
+
+	    with_spawn_id $gdb_main_spawn_id {
+		match_re_or_ensure_no_output "$cli_re\r\n" \
+		    "select thread again, resetting frame, event on CLI"
+	    }
+	}
+
 
 	# Try the 'thread' command without arguments.
 
