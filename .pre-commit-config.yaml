@@ -41,7 +41,7 @@ minimum_pre_commit_version: 3.2.0
 default_install_hook_types: [pre-commit, commit-msg]
 repos:
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 25.1.0
+    rev: 25.9.0
     hooks:
       - id: black
         types_or: [file]
