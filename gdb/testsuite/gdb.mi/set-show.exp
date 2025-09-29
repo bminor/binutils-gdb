@@ -1,0 +1,51 @@
+# Copyright 2021 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test the -gdb-set and -gdb-show commands.
+
+load_lib mi-support.exp
+set MIFLAGS "-i=mi"
+
+standard_testfile
+
+# Some parameters are per inferior.  The value returned by -gdb-show for them
+# should be dependent on which is the current inferior.
+proc_with_prefix test_per_inferior_parameters { } {
+    mi_clean_restart
+
+    # Add a second inferior right away.
+    mi_gdb_test "-add-inferior" ".*\\^done,inferior=\"i2\"" "add inferior"
+
+    # Set distinct values on each inferior.
+    foreach_with_prefix inf {1 2} {
+	mi_gdb_test "-gdb-set --thread-group i${inf} inferior-tty /inf${inf}-tty" "\\^done" "set inferior-tty"
+	mi_gdb_test "-gdb-set --thread-group i${inf} cwd /inf${inf}-cwd" "\\^done" "set cwd"
+	mi_gdb_test "-gdb-set --thread-group i${inf} args /inf${inf}-args" "\\^done" "set args"
+	mi_gdb_test "-gdb-set --thread-group i${inf} remote exec-file /inf${inf}-ref" "\\^done" "set remote exec-file"
+	# Outputs a warning, ignore it.
+	mi_gdb_test "-gdb-set --thread-group i${inf} tdesc filename /inf${inf}-tf" ".*\\^done" "set tdesc filename"
+    }
+
+    # Check values on each inferior.
+    foreach_with_prefix inf {1 2} {
+	mi_gdb_test "-gdb-show --thread-group i${inf} inferior-tty" "\\^done,value=\"/inf${inf}-tty\"" "show inferior-tty"
+	mi_gdb_test "-gdb-show --thread-group i${inf} cwd" "\\^done,value=\"/inf${inf}-cwd\"" "show cwd"
+	mi_gdb_test "-gdb-show --thread-group i${inf} args" "\\^done,value=\"/inf${inf}-args\"" "show args"
+	mi_gdb_test "-gdb-show --thread-group i${inf} remote exec-file" "\\^done,value=\"/inf${inf}-ref\"" "show remote exec-file"
+	mi_gdb_test "-gdb-show --thread-group i${inf} tdesc filename" "\\^done,value=\"/inf${inf}-tf\"" "show tdesc filename"
+    }
+}
+
+test_per_inferior_parameters

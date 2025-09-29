@@ -223,6 +223,49 @@ with_test_prefix "run control" {
 	"return 0;.*=>.*"
 }
 
+# Some parameters are not global, but per-inferior.  Make sure we save
+# and restore the correct value, based on the current inferior.  If a
+# per-inferior parameter does not provide a getter for the value
+# (depending on the current inferior), the `with` environment will not
+# save (and later restore) the proper value if the last modified
+# inferior is not the current one.
+with_test_prefix "per-inferior parameters" {
+    clean_restart
+
+    # Add a second inferior.
+    gdb_test "add-inferior" "Added inferior 2"
+
+    # Set some parameters on each inferior.
+    foreach_with_prefix inf {1 2} {
+	gdb_test "inferior ${inf}" "Switching to inferior ${inf}.*" \
+	    "switch to inferior ${inf} before set"
+	gdb_test_no_output "set inferior-tty /inf${inf}-tty"
+	gdb_test_no_output "set cwd /inf${inf}-cwd"
+	gdb_test_no_output "set args /inf${inf}-args"
+	gdb_test_no_output "set remote exec-file /inf${inf}-ref"
+	# Outputs a warning, ignore it.
+	gdb_test "set tdesc filename /inf${inf}-tf"
+    }
+
+    gdb_test "inferior 1" "Switching to inferior 1.*" "switch back to inferior 1"
+
+    gdb_test "with inferior-tty tmp-value -- print 1" " = 1"
+    gdb_test "show inferior-tty" "/inf1-tty.*"
+
+    gdb_test "with cwd tmp-value -- print 1" " = 1"
+    gdb_test "show cwd" "/inf1-cwd.*"
+
+    gdb_test "with args tmp-value -- print 1" " = 1"
+    gdb_test "show args" "/inf1-args.*"
+
+    gdb_test "with remote exec-file tmp-value -- print 1" " = 1"
+    gdb_test "show remote exec-file" "/inf1-ref.*"
+
+    # Again, this prints some warnings around the " = 1", ignore them.
+    gdb_test "with tdesc filename tmp-value -- print 1" " = 1.*"
+    gdb_test "show tdesc filename" "/inf1-tf.*"
+}
+
 # Check errors.
 with_test_prefix "errors" {
     gdb_test "with" "Missing arguments\\."

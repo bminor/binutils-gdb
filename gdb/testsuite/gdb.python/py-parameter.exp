@@ -718,6 +718,38 @@ proc_with_prefix test_throwing_parameter { } {
 	"gdb.GdbError does not show Python stack"
 }
 
+# Some parameters are per inferior.  The value returned by gdb.parameter for
+# them should be dependent on which is the current inferior.
+proc_with_prefix test_per_inferior_parameters { } {
+    clean_restart
+
+    # Add a second inferior.
+    gdb_test "add-inferior" "Added inferior 2"
+
+    # Set some parameters on each inferior.
+    foreach_with_prefix inf {1 2} {
+	gdb_test "inferior ${inf}" "Switching to inferior ${inf}.*" \
+	    "switch to inferior ${inf} before show"
+	gdb_test_no_output "set inferior-tty /inf${inf}-tty"
+	gdb_test_no_output "set cwd /inf${inf}-cwd"
+	gdb_test_no_output "set args /inf${inf}-args"
+	gdb_test_no_output "set remote exec-file /inf${inf}-ref"
+	# Outputs a warning, ignore it.
+	gdb_test "set tdesc filename /inf${inf}-tf"
+    }
+
+    # Check the values on each inferior.
+    foreach_with_prefix inf {1 2} {
+	gdb_test "inferior ${inf}" "Switching to inferior ${inf}.*" \
+	    "switch to inferior ${inf} before set"
+	gdb_test "python print(gdb.parameter('inferior-tty'))" "/inf${inf}-tty"
+	gdb_test "python print(gdb.parameter('cwd'))" "/inf${inf}-cwd"
+	gdb_test "python print(gdb.parameter('args'))" "/inf${inf}-args"
+	gdb_test "python print(gdb.parameter('remote exec-file'))" "/inf${inf}-ref"
+	gdb_test "python print(gdb.parameter('tdesc filename'))" "/inf${inf}-tf"
+    }
+}
+
 proc_with_prefix test_language {} {
     gdb_test "python print(gdb.parameter('language'))" "auto" \
 	"print language parameter"
@@ -874,6 +906,7 @@ test_deprecated_api_parameter
 test_gdb_parameter
 test_integer_parameter
 test_throwing_parameter
+test_per_inferior_parameters
 test_language
 test_ambiguous_parameter
 test_unknown_prefix

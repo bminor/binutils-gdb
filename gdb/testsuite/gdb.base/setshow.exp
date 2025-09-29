@@ -515,6 +515,70 @@ proc_with_prefix test_argument_preceded_by_space {} {
     }
 }
 
+# Some settings are per-inferior instead of global.  Verify that we can set
+# and show them correctly, including with the $_gdb_setting and
+# $_gdb_setting_str convenience functions.
+
+proc_with_prefix test_per_inferior_settings {} {
+    clean_restart $::testfile
+
+    # The $_gdb_setting/$_gdb_setting_str tests require running inferiors,
+    # because they allocate memory in the inferiors for the produced values.
+    # Since we need two inferiors for this test, we can't run them with stub
+    # boards (e.g. gdbserver with non-extended remote protocol), since they
+    # can only run one inferior at a time.  We can still run the other tests
+    # with multiple inferiors, they just won't be running inferiors.
+    set run [expr {![use_gdb_stub]}]
+
+    # Add a second inferior.
+    gdb_test "add-inferior -exec $::binfile" "Added inferior 2.*" \
+	"add second inferior"
+
+    # Set some settings on each inferior.
+    foreach_with_prefix inf {1 2} {
+	gdb_test "inferior ${inf}" "Switching to inferior ${inf}.*" \
+	    "switch to inferior ${inf} before set"
+
+	if { $run } {
+	    if {![runto_main]} {
+		fail "could not run to main"
+		return
+	    }
+	}
+
+	gdb_test_no_output "set inferior-tty /inf${inf}-tty"
+	gdb_test_no_output "set cwd /inf${inf}-cwd"
+	gdb_test_no_output "set args /inf${inf}-args"
+	gdb_test_no_output "set remote exec-file /inf${inf}-ref"
+	# Outputs a warning, ignore it.
+	gdb_test "set tdesc filename /inf${inf}-tf"
+    }
+
+    foreach_with_prefix inf {1 2} {
+	gdb_test "inferior ${inf}" "Switching to inferior ${inf}.*" \
+	    "switch to inferior ${inf} before show"
+
+	gdb_test "show inferior-tty" "Terminal for future runs of program being debugged is \"/inf${inf}-tty\"."
+	gdb_test "show cwd" "Current working directory that will be used when starting the inferior is \"/inf${inf}-cwd\"."
+	gdb_test "show args" "Argument list to give program being debugged when it is started is \"/inf${inf}-args\"."
+	gdb_test "show remote exec-file" "The remote exec-file is \"/inf${inf}-ref\"."
+	gdb_test "show tdesc filename" "The target description will be read from \"/inf${inf}-tf\"."
+
+	if { $run } {
+	    gdb_test "print \$_gdb_setting(\"inferior-tty\")" " = \"/inf${inf}-tty\""
+	    gdb_test "print \$_gdb_setting_str(\"inferior-tty\")" " = \"/inf${inf}-tty\""
+	    gdb_test "print \$_gdb_setting(\"cwd\")" " = \"/inf${inf}-cwd\""
+	    gdb_test "print \$_gdb_setting_str(\"cwd\")" " = \"/inf${inf}-cwd\""
+	    gdb_test "print \$_gdb_setting(\"args\")" " = \"/inf${inf}-args\""
+	    gdb_test "print \$_gdb_setting_str(\"args\")" " = \"/inf${inf}-args\""
+	    gdb_test "print \$_gdb_setting(\"remote exec-file\")" " = \"/inf${inf}-ref\""
+	    gdb_test "print \$_gdb_setting_str(\"remote exec-file\")" " = \"/inf${inf}-ref\""
+	    gdb_test "print \$_gdb_setting(\"tdesc filename\")" " = \"/inf${inf}-tf\""
+	    gdb_test "print \$_gdb_setting_str(\"tdesc filename\")" " = \"/inf${inf}-tf\""
+	}
+    }
+}
+
 test_setshow_annotate
 test_setshow_args
 test_setshow_check
@@ -535,3 +599,4 @@ test_setshow_write
 test_show_user
 test_setshow_verbose
 test_argument_preceded_by_space
+test_per_inferior_settings
