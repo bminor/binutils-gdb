@@ -118,7 +118,7 @@ parse_cli_boolean_value (const char *arg)
 
 
 static void
-deprecated_show_value_hack (struct ui_file *ignore_file,
+deprecated_show_value_hack (struct ui_file *file,
 			    int ignore_from_tty,
 			    struct cmd_list_element *c,
 			    const char *value)
@@ -129,7 +129,7 @@ deprecated_show_value_hack (struct ui_file *ignore_file,
 
   /* Print doc minus "Show " at start.  Tell print_doc_line that
      this is for a 'show value' prefix.  */
-  print_doc_line (gdb_stdout, c->doc + 5, true);
+  print_doc_line (file, c->doc + 5, true);
 
   gdb_assert (c->var.has_value ());
 
@@ -138,17 +138,17 @@ deprecated_show_value_hack (struct ui_file *ignore_file,
     case var_string:
     case var_string_noescape:
     case var_enum:
-      gdb_printf ((" is \"%s\".\n"), value);
+      gdb_printf (file, _(" is \"%s\".\n"), value);
       break;
 
     case var_optional_filename:
     case var_filename:
-      gdb_printf ((" is \"%ps\".\n"),
+      gdb_printf (file, _(" is \"%ps\".\n"),
 		  styled_string (file_name_style.style (), value));
       break;
 
     default:
-      gdb_printf ((" is %s.\n"), value);
+      gdb_printf (file, _(" is %s.\n"), value);
       break;
     }
 }
@@ -747,5 +747,3 @@ cmd_show_list (struct cmd_list_element *list, int from_tty)
 	}
     }
 }
-
-
