@@ -453,10 +453,6 @@ get_arch_data (struct gdbarch *gdbarch)
   return result;
 }
 
-/* The string manipulated by the "set tdesc filename ..." command.  */
-
-static std::string tdesc_filename_cmd_string;
-
 /* Fetch the current target's description, and switch the current
    architecture to one which incorporates that description.  */
 
@@ -1208,18 +1204,27 @@ set_tdesc_osabi (struct target_desc *target_desc, enum gdb_osabi osabi)
 static struct cmd_list_element *tdesc_set_cmdlist, *tdesc_show_cmdlist;
 static struct cmd_list_element *tdesc_unset_cmdlist;
 
-/* Helper functions for the CLI commands.  */
+/* Setter for the "tdesc filename" setting.  */
 
 static void
-set_tdesc_filename_cmd (const char *args, int from_tty,
-			struct cmd_list_element *c)
+set_tdesc_filename (const std::string &value)
 {
   target_desc_info *tdesc_info = &current_inferior ()->tdesc_info;
 
-  tdesc_info->filename = tdesc_filename_cmd_string;
+  tdesc_info->filename = value;
 
   target_clear_description ();
   target_find_description ();
+}
+
+/* Getter for the "tdesc filename" setting.  */
+
+static const std::string &
+get_tdesc_filename ()
+{
+  target_desc_info *tdesc_info = &current_inferior ()->tdesc_info;
+
+  return tdesc_info->filename;
 }
 
 static void
@@ -1227,8 +1232,6 @@ show_tdesc_filename_cmd (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c,
 			 const char *value)
 {
-  value = current_inferior ()->tdesc_info.filename.data ();
-
   if (value != NULL && *value != '\0')
     gdb_printf (file,
 		_("The target description will be read from \"%ps\".\n"),
@@ -1896,13 +1899,13 @@ Unset target description specific variables."),
 			0 /* allow-unknown */, &unsetlist);
 
   add_setshow_filename_cmd ("filename", class_obscure,
-			    &tdesc_filename_cmd_string,
 			    _("\
 Set the file to read for an XML target description."), _("\
 Show the file to read for an XML target description."), _("\
 When set, GDB will read the target description from a local\n\
 file instead of querying the remote target."),
-			    set_tdesc_filename_cmd,
+			    set_tdesc_filename,
+			    get_tdesc_filename,
 			    show_tdesc_filename_cmd,
 			    &tdesc_set_cmdlist, &tdesc_show_cmdlist);
 
