@@ -3602,43 +3602,6 @@ find_method (struct linespec_state *self,
 
 
 
-namespace {
-
-/* This function object is a callback for iterate_over_symtabs, used
-   when collecting all matching symtabs.  */
-
-class symtab_collector
-{
-public:
-  symtab_collector () = default;
-
-  DISABLE_COPY_AND_ASSIGN (symtab_collector);
-
-  /* Callable as a symbol_found_callback_ftype callback.  */
-  bool operator () (struct symtab *symtab)
-  {
-    if (m_symtab_table.insert (symtab).second)
-      m_symtabs.push_back (symtab);
-
-    return false;
-  }
-
-  /* Return an rvalue reference to the collected symtabs.  */
-  std::vector<symtab *> &&release_symtabs ()
-  {
-    return std::move (m_symtabs);
-  }
-
-private:
-  /* The result vector of symtabs.  */
-  std::vector<symtab *> m_symtabs;
-
-  /* This is used to ensure the symtabs are unique.  */
-  gdb::unordered_set<const symtab *> m_symtab_table;
-};
-
-} // namespace
-
 /* Given a file name, return a list of all matching symtabs.  If
    SEARCH_PSPACE is not NULL, the search is restricted to just that
    program space.  */
@@ -3647,7 +3610,17 @@ static std::vector<symtab *>
 collect_symtabs_from_filename (const char *file,
 			       struct program_space *search_pspace)
 {
-  symtab_collector collector;
+  /* The result vector of symtabs.  */
+  std::vector<symtab *> symtabs;
+  /* This is used to ensure the symtabs are unique.  */
+  gdb::unordered_set<const symtab *> symtab_table;
+
+  auto collector = [&] (struct symtab *symtab)
+    {
+      if (symtab_table.insert (symtab).second)
+	symtabs.push_back (symtab);
+      return false;
+    };
 
   /* Find that file's data.  */
   if (search_pspace == NULL)
@@ -3663,7 +3636,10 @@ collect_symtabs_from_filename (const char *file,
   else
     iterate_over_symtabs (search_pspace, file, collector);
 
-  return collector.release_symtabs ();
+  /* It is tempting to use the unordered_dense 'extract' method here,
+     and remove the separate vector -- but it's unclear if ordering
+     matters.  */
+  return symtabs;
 }
 
 /* Return all the symtabs associated to the FILENAME.  If SEARCH_PSPACE is
