@@ -111,13 +111,9 @@ static void
 show_inferior_tty_command (struct ui_file *file, int from_tty,
 			   struct cmd_list_element *c, const char *value)
 {
-  /* Note that we ignore the passed-in value in favor of computing it
-     directly.  */
-  const std::string &inferior_tty = current_inferior ()->tty ();
-
   gdb_printf (file,
 	      _("Terminal for future runs of program being debugged "
-		"is \"%s\".\n"), inferior_tty.c_str ());
+		"is \"%s\".\n"), value);
 }
 
 /* Store the new value passed to 'set args'.  */
@@ -142,11 +138,9 @@ static void
 show_args_command (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  /* Ignore the passed in value, pull the argument directly from the
-     inferior.  However, these should always be the same.  */
   gdb_printf (file, _("\
 Argument list to give program being debugged when it is started is \"%s\".\n"),
-	      current_inferior ()->args ().c_str ());
+	      value);
 }
 
 /* See gdbsupport/common-inferior.h.  */
@@ -171,9 +165,7 @@ static void
 show_cwd_command (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
 {
-  const std::string &cwd = current_inferior ()->cwd ();
-
-  if (cwd.empty ())
+  if (strlen (value) == 0)
     gdb_printf (file,
 		_("\
 You have not set the inferior's current working directory.\n\
@@ -183,7 +175,7 @@ server's cwd if remote debugging.\n"));
     gdb_printf (file,
 		_("Current working directory that will be used "
 		  "when starting the inferior is \"%s\".\n"),
-		cwd.c_str ());
+		value);
 }
 
 
