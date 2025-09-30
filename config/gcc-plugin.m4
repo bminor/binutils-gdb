@@ -176,25 +176,35 @@ dnl GCC_PLUGIN_OPTION_FOR_TARGET
 dnl    (SHELL-CODE_HANDLER)
 dnl
 AC_DEFUN([GCC_PLUGIN_OPTION_FOR_TARGET],[dnl
-AC_MSG_CHECKING([for -plugin option])
-
 COMPILER_FOR_TARGET="${CC_FOR_TARGET}"
 dnl Check if the host compiler is used.
 if test x${COMPILER_FOR_TARGET} = x"\$(CC)"; then
   COMPILER_FOR_TARGET="$CC"
 fi
-plugin_names="liblto_plugin.so liblto_plugin-0.dll cyglto_plugin-0.dll"
+saved_CC="$CC"
+CC="$COMPILER_FOR_TARGET"
+AC_CACHE_CHECK([for gcc for target], gcc_target_cv_working, [
+  AC_TRY_COMPILE(
+  [],
+  [],
+  gcc_target_cv_working=yes,
+  gcc_target_cv_working=no)])
+CC="$saved_CC"
+AC_MSG_CHECKING([for -plugin option])
 plugin_option=
-for plugin in $plugin_names; do
-  plugin_so=`${COMPILER_FOR_TARGET} ${CFLAGS_FOR_TARGET} --print-prog-name $plugin`
-  if test x$plugin_so = x$plugin; then
-    plugin_so=`${COMPILER_FOR_TARGET} ${CFLAGS_FOR_TARGET} --print-file-name $plugin`
-  fi
-  if test x$plugin_so != x$plugin; then
-    plugin_option="--plugin $plugin_so"
-    break
-  fi
-done
+if test $gcc_target_cv_working = yes; then
+  plugin_names="liblto_plugin.so liblto_plugin-0.dll cyglto_plugin-0.dll"
+  for plugin in $plugin_names; do
+    plugin_so=`${COMPILER_FOR_TARGET} ${CFLAGS_FOR_TARGET} --print-prog-name $plugin`
+    if test x$plugin_so = x$plugin; then
+      plugin_so=`${COMPILER_FOR_TARGET} ${CFLAGS_FOR_TARGET} --print-file-name $plugin`
+    fi
+    if test x$plugin_so != x$plugin; then
+      plugin_option="--plugin $plugin_so"
+      break
+    fi
+  done
+fi
 if test -n "$plugin_option"; then
   $1="$plugin_option"
   AC_MSG_RESULT($plugin_option)

@@ -20389,41 +20389,49 @@ NM_FOR_TARGET=${NM_FOR_TARGET}${extra_nmflags_for_target}
 
 # Try CLANG_PLUGIN_FILE_FOR_TARGET first since GCC_PLUGIN_OPTION_FOR_TARGET
 # may return the wrong PLUGIN_OPTION_FOR_TARGET with clang.
+  COMPILER_FOR_TARGET="${CC_FOR_TARGET}"
+  if test x${COMPILER_FOR_TARGET} = x"\$(CC)"; then
+    COMPILER_FOR_TARGET="$CC"
+  fi
+  saved_CC="$CC"
+  CC="$COMPILER_FOR_TARGET"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for clang for target" >&5
 $as_echo_n "checking for clang for target... " >&6; }
-if ${clang_cv_is_clang+:} false; then :
+if ${clang_target_cv_working+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-#ifdef __clang__
-  yes
+#ifndef __clang__
+#error Not clang
 #endif
 
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "yes" >/dev/null 2>&1; then :
-  clang_cv_is_clang=yes
-else
-  clang_cv_is_clang=no
-fi
-rm -f conftest*
+int
+main ()
+{
 
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  clang_target_cv_working=yes
+else
+  clang_target_cv_working=no
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $clang_cv_is_clang" >&5
-$as_echo "$clang_cv_is_clang" >&6; }
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $clang_target_cv_working" >&5
+$as_echo "$clang_target_cv_working" >&6; }
+  CC="$saved_CC"
   plugin_file=
-  if test $clang_cv_is_clang = yes; then
+  if test $clang_target_cv_working = yes; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for clang plugin file for target" >&5
 $as_echo_n "checking for clang plugin file for target... " >&6; }
     plugin_names="LLVMgold.so"
-    COMPILER_FOR_TARGET="${CC_FOR_TARGET}"
-        if test x${COMPILER_FOR_TARGET} = x"\$(CC)"; then
-      COMPILER_FOR_TARGET="$CC"
-    fi
-    for plugin in $plugin_names; do
+        for plugin in $plugin_names; do
       plugin_file=`${COMPILER_FOR_TARGET} ${CFLAGS_FOR_TARGET} --print-file-name $plugin`
       if test x$plugin_file = x$plugin; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking where to find the target llvm-config" >&5
@@ -20470,36 +20478,68 @@ fi
       fi
       plugin_file=
     done
-    if test -z $plugin_file; then
-      as_fn_error $? "Couldn't find clang plugin file for $CC_FOR_TARGET." "$LINENO" 5
-    fi
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $plugin_file" >&5
+    if test -n $plugin_file; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $plugin_file" >&5
 $as_echo "$plugin_file" >&6; }
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    fi
   fi
   PLUGIN_FILE_FOR_TARGET="$plugin_file"
 
 if test -n "$PLUGIN_FILE_FOR_TARGET"; then
   PLUGIN_OPTION_FOR_TARGET="--plugin $PLUGIN_FILE_FOR_TARGET"
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for -plugin option" >&5
-$as_echo_n "checking for -plugin option... " >&6; }
-
-COMPILER_FOR_TARGET="${CC_FOR_TARGET}"
+  COMPILER_FOR_TARGET="${CC_FOR_TARGET}"
 if test x${COMPILER_FOR_TARGET} = x"\$(CC)"; then
   COMPILER_FOR_TARGET="$CC"
 fi
-plugin_names="liblto_plugin.so liblto_plugin-0.dll cyglto_plugin-0.dll"
+saved_CC="$CC"
+CC="$COMPILER_FOR_TARGET"
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for gcc for target" >&5
+$as_echo_n "checking for gcc for target... " >&6; }
+if ${gcc_target_cv_working+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gcc_target_cv_working=yes
+else
+  gcc_target_cv_working=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gcc_target_cv_working" >&5
+$as_echo "$gcc_target_cv_working" >&6; }
+CC="$saved_CC"
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for -plugin option" >&5
+$as_echo_n "checking for -plugin option... " >&6; }
 plugin_option=
-for plugin in $plugin_names; do
-  plugin_so=`${COMPILER_FOR_TARGET} ${CFLAGS_FOR_TARGET} --print-prog-name $plugin`
-  if test x$plugin_so = x$plugin; then
-    plugin_so=`${COMPILER_FOR_TARGET} ${CFLAGS_FOR_TARGET} --print-file-name $plugin`
-  fi
-  if test x$plugin_so != x$plugin; then
-    plugin_option="--plugin $plugin_so"
-    break
-  fi
-done
+if test $gcc_target_cv_working = yes; then
+  plugin_names="liblto_plugin.so liblto_plugin-0.dll cyglto_plugin-0.dll"
+  for plugin in $plugin_names; do
+    plugin_so=`${COMPILER_FOR_TARGET} ${CFLAGS_FOR_TARGET} --print-prog-name $plugin`
+    if test x$plugin_so = x$plugin; then
+      plugin_so=`${COMPILER_FOR_TARGET} ${CFLAGS_FOR_TARGET} --print-file-name $plugin`
+    fi
+    if test x$plugin_so != x$plugin; then
+      plugin_option="--plugin $plugin_so"
+      break
+    fi
+  done
+fi
 if test -n "$plugin_option"; then
   PLUGIN_OPTION_FOR_TARGET="$plugin_option"
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $plugin_option" >&5
