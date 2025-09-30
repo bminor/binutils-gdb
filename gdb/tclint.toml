@@ -33,9 +33,39 @@ exclude = [
 # TODO:
 "gdb/testsuite/boards",
 "gdb/testsuite/config",
-"gdb/testsuite/lib",
+"gdb/testsuite/lib/aarch64.exp",
+"gdb/testsuite/lib/aarch64-scalable.exp",
+"gdb/testsuite/lib/ada.exp",
+"gdb/testsuite/lib/cache.exp",
+"gdb/testsuite/lib/check-test-names.exp",
+"gdb/testsuite/lib/completion-support.exp",
+"gdb/testsuite/lib/cp-support.exp",
+"gdb/testsuite/lib/debuginfod-support.exp",
+"gdb/testsuite/lib/d-support.exp",
+"gdb/testsuite/lib/dtrace.exp",
+"gdb/testsuite/lib/dwarf.exp",
+"gdb/testsuite/lib/fortran.exp",
+"gdb/testsuite/lib/future.exp",
+"gdb/testsuite/lib/gdb.exp",
+"gdb/testsuite/lib/gdb-guile.exp",
+"gdb/testsuite/lib/gdbreplay-support.exp",
+"gdb/testsuite/lib/gdbserver-support.exp",
+"gdb/testsuite/lib/gdb-utils.exp",
+"gdb/testsuite/lib/gen-perf-test.exp",
+"gdb/testsuite/lib/go.exp",
+"gdb/testsuite/lib/jit-elf-helpers.exp",
+"gdb/testsuite/lib/mi-support.exp",
+"gdb/testsuite/lib/objc.exp",
+"gdb/testsuite/lib/pascal.exp",
+"gdb/testsuite/lib/perftest.exp",
+"gdb/testsuite/lib/prelink-support.exp",
+"gdb/testsuite/lib/prompt.exp",
+"gdb/testsuite/lib/rust-support.exp",
+"gdb/testsuite/lib/selftest-support.exp",
+"gdb/testsuite/lib/trace-support.exp",
 # IGNORE (document reason in trailing comment):
 "gdb/testsuite/gdb.stabs", # To be removed.
+"gdb/testsuite/lib/ton.tcl", # Imported.
 ]
 
 # A maximum line length of 80 is current policy, but it hasn't been too
