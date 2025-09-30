@@ -400,7 +400,10 @@ case ${generic_target} in
 
   sparc-*-haiku*)			fmt=elf em=haiku ;;
   sparc-*-linux-*)			fmt=elf em=linux ;;
-  sparc-*-solaris*)			fmt=elf em=solaris ;;
+  sparc-*-solaris*)			fmt=elf em=solaris
+    case ${cpu} in
+      sparc)	arch=v8plus-32 ;;
+    esac ;;
   sparc-*-freebsd*)			fmt=elf em=freebsd ;;
   sparc-*-*bsd*)			fmt=elf em=nbsd ;;
 

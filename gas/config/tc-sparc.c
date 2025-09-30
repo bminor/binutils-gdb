@@ -275,8 +275,9 @@ static struct sparc_arch {
   { "v9m",     "v9m", v9,  0, 1, 0, 0 },
   { "v9m8",     "m8", v9,  0, 1, 0, 0 },
 
-  /* This exists to allow configure.tgt to pass one
+  /* These exist to allow configure.tgt to pass one
      value to specify both the default machine and default word size.  */
+  { "v8plus-32", "v9", v9, 32, 0, 0, 0 },
   { "v9-64",   "v9",  v9, 64, 0, 0, 0 },
   { NULL, NULL, v8, 0, 0, 0, 0 }
 };

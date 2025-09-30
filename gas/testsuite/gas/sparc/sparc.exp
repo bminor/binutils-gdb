@@ -159,6 +159,10 @@ if [istarget sparc*-*-*] {
     run_dump_test "pr20732"
 }
 
+if [istarget sparc*-*-solaris2*] {
+    run_dump_test "v8plus"
+}
+
 if [istarget sparc-*-vxworks*] {
     run_dump_test "vxworks-pic"
 }
