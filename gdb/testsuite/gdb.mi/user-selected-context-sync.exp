@@ -113,7 +113,7 @@ proc make_cli_re { mode inf thread frame } {
 	}
 	set thread_re $all_stop_thread_re
 
-	if [thread_is_running $mode $thread] {
+	if {[thread_is_running $mode $thread]} {
 	    set thread_re "$thread_re\\\(running\\\)"
 	}
 

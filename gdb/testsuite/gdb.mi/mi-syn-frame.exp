@@ -91,7 +91,7 @@ mi_gdb_test "409-stack-list-frames 0 0" \
 
 #
 # Call bar() by hand, which should get an exception while running.
-# 
+#
 
 mi_gdb_test "410-data-evaluate-expression bar()" \
   ".*410\\^error,msg=\"The program being debugged was signaled while in a function called from GDB.\\\\nGDB remains in the frame where the signal was received.\\\\nTo change this behavior use \\\\\"set unwind-on-signal on\\\\\".\\\\nEvaluation of the expression containing the function\\\\n\\(bar\\) will be abandoned.\\\\nWhen the function is done executing, GDB will silently stop.\"" \

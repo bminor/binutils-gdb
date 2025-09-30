@@ -91,5 +91,5 @@ mi_gdb_test "220-exec-next" \
 set line [gdb_get_line_number "after-hello"]
 mi_expect_stop "end-stepping-range" "main" "" ".*mi-console.c" $line "" \
     "finished step over hello"
-    
+
 mi_gdb_exit

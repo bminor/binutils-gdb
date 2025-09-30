@@ -42,13 +42,13 @@ proc test_breakpoints_creation_and_listing {} {
     global srcfile
 
     set line_callee4_head  [gdb_get_line_number "callee4 ("]
-    set line_callee4_body  [expr $line_callee4_head + 2]
+    set line_callee4_body  [expr {$line_callee4_head + 2}]
     set line_callee3_head  [gdb_get_line_number "callee3 ("]
-    set line_callee3_body  [expr $line_callee3_head + 2]
+    set line_callee3_body  [expr {$line_callee3_head + 2}]
     set line_callee2_head  [gdb_get_line_number "callee2 ("]
-    set line_callee2_body  [expr $line_callee2_head + 2]
+    set line_callee2_body  [expr {$line_callee2_head + 2}]
     set line_main_head     [gdb_get_line_number "main ("]
-    set line_main_body     [expr $line_main_head + 2]
+    set line_main_body     [expr {$line_main_head + 2}]
 
     # Insert some breakpoints and list them
     # Also, disable some so they do not interfere with other tests
@@ -96,7 +96,7 @@ proc test_breakpoints_creation_and_listing {} {
 
 proc test_running_the_program {} {
     set line_main_head     [gdb_get_line_number "main ("]
-    set line_main_body     [expr $line_main_head + 2]
+    set line_main_body     [expr {$line_main_head + 2}]
 
     # Run the program without args, then specify srgs and rerun the program
     # Tests:
@@ -115,14 +115,14 @@ proc test_controlled_execution {} {
     global hex
 
     set line_callee4_head         [gdb_get_line_number "callee4 ("]
-    set line_callee4_body         [expr $line_callee4_head + 2]
+    set line_callee4_body         [expr {$line_callee4_head + 2}]
     set line_callee3_head         [gdb_get_line_number "callee3 ("]
-    set line_callee3_call         [expr $line_callee3_head + 2]
-    set line_callee3_close_brace  [expr $line_callee3_head + 3]
+    set line_callee3_call         [expr {$line_callee3_head + 2}]
+    set line_callee3_close_brace  [expr {$line_callee3_head + 3}]
     set line_callee1_head         [gdb_get_line_number "callee1 ("]
-    set line_callee1_body         [expr $line_callee1_head + 2]
+    set line_callee1_body         [expr {$line_callee1_head + 2}]
     set line_main_head            [gdb_get_line_number "main ("]
-    set line_main_body            [expr $line_main_head + 2]
+    set line_main_body            [expr {$line_main_head + 2}]
 
     # Continue execution until a breakpoint is reached, step into calls, verifying
     # if the arguments are correctly shown, continue to the end of a called
@@ -133,7 +133,7 @@ proc test_controlled_execution {} {
     # -exec-step
     # -exec-finish
 
-    mi_next_to "main" "" "basics.c" [expr $line_main_body + 1] "next at main"
+    mi_next_to "main" "" "basics.c" [expr {$line_main_body + 1}] "next at main"
 
     # FIXME: A string argument is not printed right; should be fixed and
     #        we should look for the right thing here.

@@ -28,7 +28,7 @@ proc check_mi_thread_command_set {} {
   mi_runto done_making_threads
 
   set thread_list [get_mi_thread_list "in check_mi_thread_command_set"]
-  
+
   mi_gdb_test "-thread-select" \
     {\^error,msg="-thread-select: USAGE: threadnum."} \
     "check_mi_thread_command_set: -thread-select"

@@ -51,7 +51,7 @@ foreach_mi_ui_mode mode {
 	set start_ops ""
     }
 
-    if [mi_gdb_start $start_ops] {
+    if {[mi_gdb_start $start_ops]} {
 	return
     }
 

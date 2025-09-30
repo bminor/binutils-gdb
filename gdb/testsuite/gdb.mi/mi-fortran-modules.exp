@@ -100,7 +100,7 @@ gdb_test_multiple $cmd $test -prompt $mi_gdb_prompt$ {
 	} else {
 	    fail $gdb_test_name
 	}
-    }	
+    }
 }
 
 mi_gdb_test "105-symbol-info-module-functions --name _all" \
@@ -161,5 +161,5 @@ gdb_test_multiple $cmd $test -prompt $mi_gdb_prompt$ {
 	} else {
 	    fail $gdb_test_name
 	}
-    }	
+    }
 }

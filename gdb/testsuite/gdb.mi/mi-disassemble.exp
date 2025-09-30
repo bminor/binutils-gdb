@@ -36,7 +36,7 @@ proc test_disassembly_only {} {
     global decimal
 
     set line_main_head [gdb_get_line_number "main ("]
-    set line_main_body [expr $line_main_head + 2]
+    set line_main_body [expr {$line_main_head + 2}]
 
     # Test disassembly more only for the current function.
     # Tests:
@@ -76,7 +76,7 @@ proc test_disassembly_with_opcodes {} {
     global decimal
 
     set line_main_head [gdb_get_line_number "main ("]
-    set line_main_body [expr $line_main_head + 2]
+    set line_main_body [expr {$line_main_head + 2}]
 
     # Test disassembly with opcodes for the current function.
     # Tests:
@@ -106,7 +106,7 @@ proc test_disassembly_lines_limit {} {
     global decimal
 
     set line_main_head [gdb_get_line_number "main ("]
-    set line_main_body [expr $line_main_head + 2]
+    set line_main_body [expr {$line_main_head + 2}]
 
     # Test disassembly more only for the current function.
     # Tests:
@@ -136,7 +136,7 @@ proc test_disassembly_mixed {} {
     global fullname_syntax
 
     set line_callee2_head       [gdb_get_line_number "callee2 ("]
-    set line_callee2_open_brace [expr $line_callee2_head + 1]
+    set line_callee2_open_brace [expr {$line_callee2_head + 1}]
 
     # Test disassembly more only for the current function.
     # Tests:
@@ -164,7 +164,7 @@ proc test_disassembly_mixed_with_opcodes {} {
     global fullname_syntax
 
     set line_callee2_head       [gdb_get_line_number "callee2 ("]
-    set line_callee2_open_brace [expr $line_callee2_head + 1]
+    set line_callee2_open_brace [expr {$line_callee2_head + 1}]
 
     # Test disassembly mixed with opcodes for the current function.
     # Tests:
@@ -192,8 +192,8 @@ proc test_disassembly_mixed_lines_limit {} {
     global fullname_syntax
 
     set line_main_head       [gdb_get_line_number "main ("]
-    set line_main_open_brace [expr $line_main_head + 1]
-    set line_main_body       [expr $line_main_head + 2]
+    set line_main_open_brace [expr {$line_main_head + 1}]
+    set line_main_body       [expr {$line_main_head + 2}]
 
     # Test disassembly more only for the current function.
     # Tests:
@@ -220,7 +220,7 @@ proc test_disassembly_bogus_args {} {
     global hex
 
     set line_main_head [gdb_get_line_number "main ("]
-    set line_main_body [expr $line_main_head + 2]
+    set line_main_body [expr {$line_main_head + 2}]
 
     # Test that bogus input to disassembly command is rejected.
     # Tests:
@@ -321,7 +321,7 @@ proc test_disassembly_opcode_format {} {
 
 	# Load the actual byte value from memory, and check it matches
 	# the opcode byte reported in the disassembler output.
-	set addr 0x[format %x [expr $longest_insn_addr + $idx]]
+	set addr 0x[format %x [expr {$longest_insn_addr + $idx}]]
 	set actual [format %02x [mi_get_valueof "/x" "*((unsigned char *) $addr)" "XX"]]
 	gdb_assert [string equal $actual "$b"] \
 	    "byte at $addr matches"
@@ -335,7 +335,7 @@ proc test_disassembly_opcode_format {} {
 
     # Figure out an end address at which to stop the disassembly.
     set byte_count [llength $split_bytes]
-    set end_addr 0x[format %x [expr $longest_insn_addr + $byte_count]]
+    set end_addr 0x[format %x [expr {$longest_insn_addr + $byte_count}]]
     set start_addr $longest_insn_addr
 
     verbose -log "Instruction is ${byte_count} bytes, end address ${end_addr}"

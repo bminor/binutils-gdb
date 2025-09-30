@@ -44,7 +44,7 @@ proc test_watchpoint_creation_and_listing {} {
     global hex
 
     set line_callee4_head [gdb_get_line_number "callee4 ("]
-    set line_callee4_body [expr $line_callee4_head + 2]
+    set line_callee4_body [expr {$line_callee4_head + 2}]
 
     # Insert a watchpoint and list
     # Tests:
@@ -68,7 +68,7 @@ proc test_awatch_creation_and_listing {} {
     global hex
 
     set line_main_head [gdb_get_line_number "main ("]
-    set line_main_body [expr $line_main_head + 2]
+    set line_main_body [expr {$line_main_head + 2}]
 
     # Insert an access watchpoint and list it
     # Tests:
@@ -95,7 +95,7 @@ proc test_rwatch_creation_and_listing {} {
     global hex
 
     set line_main_head [gdb_get_line_number "main ("]
-    set line_main_body [expr $line_main_head + 2]
+    set line_main_body [expr {$line_main_head + 2}]
 
     # Insert a read watchpoint and list it.
     # Tests:
@@ -121,9 +121,9 @@ proc test_watchpoint_triggering {} {
 
     set line_callee4_return_0     [gdb_get_line_number "return 0;"]
     set line_callee3_head         [gdb_get_line_number "callee3 ("]
-    set line_callee3_close_brace  [expr $line_callee3_head + 3]
+    set line_callee3_close_brace  [expr {$line_callee3_head + 3}]
 
-    # Continue execution until the watchpoint is reached,  continue again, 
+    # Continue execution until the watchpoint is reached,  continue again,
     # to see the watchpoint go out of scope.
     # Does:
     # -exec-continue (Here wp triggers)
@@ -155,7 +155,7 @@ proc test_watchpoint_all {mi_mode type} {
     } else {
 	set start_ops ""
     }
-    if [mi_clean_restart ${::testfile} $start_ops] {
+    if {[mi_clean_restart ${::testfile} $start_ops]} {
 	return
     }
 

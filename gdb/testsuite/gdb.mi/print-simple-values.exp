@@ -30,11 +30,11 @@ lappend opts debug
 lappend opts c++
 lappend opts additional_flags=-std=c++11
 
-if [build_executable "failed to prepare" $testfile $srcfile $opts] {
+if {[build_executable "failed to prepare" $testfile $srcfile $opts]} {
     return -1
 }
 
-if [mi_clean_restart $::testfile] {
+if {[mi_clean_restart $::testfile]} {
     return
 }
 

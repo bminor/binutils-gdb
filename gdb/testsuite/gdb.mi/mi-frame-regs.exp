@@ -80,7 +80,7 @@ proc_with_prefix do_floating_varobj_test {} {
 	# Run to a breakpoint in each callee function in succession.
 	# Note that we can't use mi_runto because we need the
 	# breakpoint to be persistent, so we can use its address.
-	set bpnum [expr $i + 1]
+	set bpnum [expr {$i + 1}]
 	mi_create_breakpoint \
 	    "basics.c:callee$i" \
 	    "insert breakpoint at basics.c:callee$i" \
@@ -101,7 +101,7 @@ proc_with_prefix do_floating_varobj_test {} {
 	if {$bpaddr == ""} { return }
 
 	# Check that the addresses are the same.
-	gdb_assert [expr $bpaddr == $pcval] "\$pc equals address of breakpoint in callee$i"
+	gdb_assert [expr {$bpaddr == $pcval}] "\$pc equals address of breakpoint in callee$i"
     }
 }
 

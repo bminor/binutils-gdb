@@ -42,11 +42,11 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 mi_clean_restart $::testfile
 mi_runto_main
 
-if [supports_process_record] {
+if {[supports_process_record]} {
     # Activate process record/replay
-    if [mi_gdb_test "-interpreter-exec console record" \
-	    "=record-started,thread-group=\"i1\",method=\"full\"\r\n\\^done" \
-	    "Turn on process record"] {
+    if {[mi_gdb_test "-interpreter-exec console record" \
+	     "=record-started,thread-group=\"i1\",method=\"full\"\r\n\\^done" \
+	     "Turn on process record"]} {
 	warning "Fail to activate process record/replay, tests in this group will not be performed.\n"
 	return -1
     }
@@ -54,20 +54,20 @@ if [supports_process_record] {
 
 # Locate line numbers in basics.c.
 set line_callee4_head  [gdb_get_line_number "callee4 ("]
-set line_callee4_body  [expr $line_callee4_head + 2]
+set line_callee4_body  [expr {$line_callee4_head + 2}]
 set line_callee3_head  [gdb_get_line_number "callee3 ("]
-set line_callee3_body  [expr $line_callee3_head + 2]
-set line_callee3_close [expr $line_callee3_head + 3]
+set line_callee3_body  [expr {$line_callee3_head + 2}]
+set line_callee3_close [expr {$line_callee3_head + 3}]
 set line_callee2_head  [gdb_get_line_number "callee2 ("]
-set line_callee2_body  [expr $line_callee2_head + 2]
-set line_callee2_close [expr $line_callee2_head + 3]
+set line_callee2_body  [expr {$line_callee2_head + 2}]
+set line_callee2_close [expr {$line_callee2_head + 3}]
 set line_callee1_head  [gdb_get_line_number "callee1 ("]
-set line_callee1_body  [expr $line_callee1_head + 2]
-set line_callee1_close [expr $line_callee1_head + 3]
+set line_callee1_body  [expr {$line_callee1_head + 2}]
+set line_callee1_close [expr {$line_callee1_head + 3}]
 set line_callme_head   [gdb_get_line_number "callme"]
-set line_callme_body   [expr $line_callme_head + 2]
+set line_callme_body   [expr {$line_callme_head + 2}]
 set line_main_head     [gdb_get_line_number "main ("]
-set line_main_body     [expr $line_main_head + 2]
+set line_main_body     [expr {$line_main_head + 2}]
 set line_main_hello    [gdb_get_line_number "Hello, World!"]
 set line_main_callme_1 [gdb_get_line_number "callme (1"]
 

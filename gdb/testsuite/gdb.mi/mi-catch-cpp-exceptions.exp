@@ -31,7 +31,7 @@ mi_clean_restart $::testfile
 if {[mi_runto_main] < 0} {
     return -1
 }
-set libstdcxx_probe_tests_supported [expr ![mi_skip_libstdcxx_probe_tests]]
+set libstdcxx_probe_tests_supported [expr {![mi_skip_libstdcxx_probe_tests]}]
 
 # Grab some line numbers we'll need.
 set catch_1_lineno [gdb_get_line_number "Catch 1"]

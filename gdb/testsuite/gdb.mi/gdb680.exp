@@ -30,7 +30,7 @@ proc do_test {count} {
     "-data-list-register-names -1, try $count"
 }
 
-# Tests a bug with ui-out and nested uiout types. When 
+# Tests a bug with ui-out and nested uiout types. When
 # an error is encountered building a nest typed, like
 # lists or tuples, the uiout is not reset to some sane
 # state. As a result, uiout still thinks it is building

@@ -37,10 +37,10 @@ if {[mi_clean_restart $::testfile]} {
 }
 
 set line_callee4_head [gdb_get_line_number "callee4 ("]
-set line_callee4_body [expr $line_callee4_head + 2]
+set line_callee4_body [expr {$line_callee4_head + 2}]
 
 mi_runto callee4
-mi_next_to "callee4" "" "basics.c" [expr $line_callee4_body + 1] "next at callee4"
+mi_next_to "callee4" "" "basics.c" [expr {$line_callee4_body + 1}] "next at callee4"
 
 mi_gdb_test "211-data-evaluate-expression A" "211\\^done,value=\"1\"" "eval A"
 

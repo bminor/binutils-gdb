@@ -37,7 +37,6 @@ exclude = [
 "gdb/testsuite/gdb.arch",
 "gdb/testsuite/gdb.base",
 "gdb/testsuite/gdb.dwarf2",
-"gdb/testsuite/gdb.mi",
 # IGNORE (document reason in trailing comment):
 "gdb/testsuite/gdb.stabs", # To be removed.
 ]

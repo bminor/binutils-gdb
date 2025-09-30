@@ -25,7 +25,7 @@ set MIFLAGS "-i=mi"
 
 standard_testfile .cc
 
-if [build_executable ${testfile}.exp ${binfile} ${srcfile} {debug c++}] {
+if {[build_executable ${testfile}.exp ${binfile} ${srcfile} {debug c++}]} {
     return -1
 }
 

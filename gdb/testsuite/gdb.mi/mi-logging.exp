@@ -19,7 +19,7 @@ set MIFLAGS "-i=mi"
 standard_testfile basics.c
 set opts {debug}
 
-if [build_executable $testfile.exp $testfile $srcfile $opts] {
+if {[build_executable $testfile.exp $testfile $srcfile $opts]} {
     untested "failed to compile"
     return -1
 }
@@ -51,7 +51,7 @@ close $chan
 
 set mi_log_prompt "\[(\]gdb\[)\] \[\r\n\]+"
 
-if [regexp "\\^done\[\r\n\]+$mi_log_prompt\\^running\[\r\n\]+\\*running,thread-id=\"all\"\[\r\n\]+$mi_log_prompt\\*stopped,reason=\"end-stepping-range\",.*\[\r\n\]+$mi_log_prompt\\^running\[\r\n\]+\\*running,thread-id=\"all\"\[\r\n\]+$mi_log_prompt\\*stopped,reason=\"end-stepping-range\",.*\[\r\n\]+$mi_log_prompt" $logcontent] {
+if {[regexp "\\^done\[\r\n\]+$mi_log_prompt\\^running\[\r\n\]+\\*running,thread-id=\"all\"\[\r\n\]+$mi_log_prompt\\*stopped,reason=\"end-stepping-range\",.*\[\r\n\]+$mi_log_prompt\\^running\[\r\n\]+\\*running,thread-id=\"all\"\[\r\n\]+$mi_log_prompt\\*stopped,reason=\"end-stepping-range\",.*\[\r\n\]+$mi_log_prompt" $logcontent]} {
     pass "log file contents"
 } else {
     fail "log file contents"
@@ -74,7 +74,7 @@ set chan [open $milogfile]
 set logcontent [read $chan]
 close $chan
 
-if [regexp "1001\\^done\[\r\n\]+$mi_log_prompt.*1002\\^running\[\r\n\]+\\*running,thread-id=\"all\"\[\r\n\]+$mi_log_prompt\\*stopped,reason=\"end-stepping-range\",.*\[\r\n\]+$mi_log_prompt.*1003\\^running\[\r\n\]+\\*running,thread-id=\"all\"\[\r\n\]+$mi_log_prompt\\*stopped,reason=\"end-stepping-range\",.*\[\r\n\]+$mi_log_prompt" $logcontent] {
+if {[regexp "1001\\^done\[\r\n\]+$mi_log_prompt.*1002\\^running\[\r\n\]+\\*running,thread-id=\"all\"\[\r\n\]+$mi_log_prompt\\*stopped,reason=\"end-stepping-range\",.*\[\r\n\]+$mi_log_prompt.*1003\\^running\[\r\n\]+\\*running,thread-id=\"all\"\[\r\n\]+$mi_log_prompt\\*stopped,reason=\"end-stepping-range\",.*\[\r\n\]+$mi_log_prompt" $logcontent]} {
     pass "redirect log file contents"
 } else {
     fail "redirect log file contents"

@@ -32,17 +32,17 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 
 # Locate line numbers in basics.c.
 set line_callee4_head  [gdb_get_line_number "callee4 ("]
-set line_callee4_body  [expr $line_callee4_head + 2]
+set line_callee4_body  [expr {$line_callee4_head + 2}]
 set line_callee3_head  [gdb_get_line_number "callee3 ("]
-set line_callee3_body  [expr $line_callee3_head + 2]
+set line_callee3_body  [expr {$line_callee3_head + 2}]
 set line_callee2_head  [gdb_get_line_number "callee2 ("]
-set line_callee2_body  [expr $line_callee2_head + 2]
+set line_callee2_body  [expr {$line_callee2_head + 2}]
 set line_callee1_head  [gdb_get_line_number "callee1 ("]
-set line_callee1_body  [expr $line_callee1_head + 2]
+set line_callee1_body  [expr {$line_callee1_head + 2}]
 set line_main_head     [gdb_get_line_number "main ("]
-set line_main_body     [expr $line_main_head + 2]
+set line_main_body     [expr {$line_main_head + 2}]
 set line_callme_head   [gdb_get_line_number "callme ("]
-set line_callme_body   [expr $line_callme_head + 2]
+set line_callme_body   [expr {$line_callme_head + 2}]
 
 set fullname "fullname=\"${fullname_syntax}${srcfile}\""
 
@@ -362,7 +362,7 @@ proc_with_prefix test_forced_conditions {} {
 	"${warning}\\^done" \
 	"invalid condition is forced"
     set args [list -cond "bad == 42" -locations "\\\[$loc\\\]"]
-    set bp [eval mi_make_breakpoint_multi $args]
+    set bp [mi_make_breakpoint_multi {*}$args]
     mi_gdb_test "-break-info 16" \
 	"\\^done,[mi_make_breakpoint_table [list $bp]]" \
 	"invalid condition is defined"
@@ -398,7 +398,7 @@ proc test_break {mi_mode} {
     } else {
 	set start_ops ""
     }
-    if [mi_clean_restart $::testfile $start_ops ] {
+    if {[mi_clean_restart $::testfile $start_ops ]} {
 	return
     }
 

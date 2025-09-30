@@ -129,7 +129,7 @@ mi_continue_dprintf "gdb"
 # The "call" style depends on having I/O functions available, so test.
 set has_stderr_symbol [mi_gdb_is_stderr_available]
 
-if ![target_info exists gdb,noinferiorio] {
+if {![target_info exists gdb,noinferiorio]} {
 
     # Now switch styles and rerun; in the absence of redirection the
     # output should be the same.
@@ -165,7 +165,7 @@ gdb_expect {
     }
 }
 
-if $target_can_dprintf {
+if {$target_can_dprintf} {
     if {[mi_run_cmd] < 0} {
 	# This likely means we failed to use target side commands in
 	# combination with software breakpoints.  IOW, the target
@@ -174,7 +174,7 @@ if $target_can_dprintf {
 	unsupported "send dprintf to target"
     }
 
-    if $target_can_dprintf {
+    if {$target_can_dprintf} {
 	mi_expect_stop ".*" ".*" ".*" ".*" ".*" "" "mi expect stop"
 
 	mi_send_resuming_command "exec-continue" "mi 1st dprintf continue, agent"

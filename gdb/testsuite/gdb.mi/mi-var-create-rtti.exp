@@ -19,7 +19,7 @@ set MIFLAGS "-i=mi"
 standard_testfile .c
 set opts {debug}
 
-if [build_executable $testfile.exp $testfile $srcfile $opts] {
+if {[build_executable $testfile.exp $testfile $srcfile $opts]} {
     return -1
 }
 

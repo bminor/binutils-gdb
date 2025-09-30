@@ -67,7 +67,7 @@ proc test_until {} {
     # after foo is over.
     set line [gdb_get_line_number "at-return"]
     mi_execute_to "exec-until until.c:$line" "location-reached" "main" ""\
-	".*until.c" "([expr $line-2]|[expr $line-1])" ""\
+	".*until.c" "([expr {$line-2}]|[expr {$line-1}])" ""\
         "until after current function"
 }
 

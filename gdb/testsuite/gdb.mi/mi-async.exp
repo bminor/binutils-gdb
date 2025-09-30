@@ -55,8 +55,8 @@ proc linux_async_tests {} {
     global hex
 
     set line_main_head     [gdb_get_line_number "main ("]
-    set line_main_body     [expr $line_main_head + 2]
-    set line_main_next     [expr $line_main_head + 3]
+    set line_main_body     [expr {$line_main_head + 2}]
+    set line_main_next     [expr {$line_main_head + 3}]
 
     mi_send_resuming_command_raw "start" "start: send"
     mi_expect_stop "breakpoint-hit" "main" "" ".*basics.c" "$line_main_body" { "" "disp=\"del\"" } "start: stop"

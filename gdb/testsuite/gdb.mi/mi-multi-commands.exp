@@ -38,7 +38,7 @@ proc run_test { args } {
     global mi_gdb_prompt
     global decimal
 
-    if [mi_clean_restart "" $args] {
+    if {[mi_clean_restart "" $args]} {
 	return
     }
 
@@ -119,7 +119,7 @@ proc run_test { args } {
 	# checking different command lengths.  The actual bug this
 	# test checks for would result in a timeout, so we don't want
 	# to risk lots more timeouts.
-	if { ! [expr $seen_first_message && $seen_second_message ] } {
+	if { ! ($seen_first_message && $seen_second_message) } {
 	    break
 	}
     }

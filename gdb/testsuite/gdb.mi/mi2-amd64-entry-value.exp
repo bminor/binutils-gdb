@@ -19,7 +19,7 @@ set MIFLAGS "-i=mi2"
 standard_testfile .s
 set opts {}
 
-if [info exists COMPILE] {
+if {[info exists COMPILE]} {
     # make check RUNTESTFLAGS="gdb.mi/mi2-amd64-entry-value.exp COMPILE=1"
     set srcfile ${testfile}.c
     lappend opts debug optimize=-O2
@@ -27,7 +27,7 @@ if [info exists COMPILE] {
     require is_x86_64_m64_target
 }
 
-if [build_executable ${testfile}.exp ${binfile} ${srcfile} $opts] {
+if {[build_executable ${testfile}.exp ${binfile} ${srcfile} $opts]} {
     return -1
 }
 

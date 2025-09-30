@@ -24,9 +24,9 @@ set MIFLAGS "-i=mi"
 
 # We need to do things a little differently when using the remote protocol.
 set is_remote \
-    [expr [target_info exists gdb_protocol] \
-	 && ([string equal [target_info gdb_protocol] "remote"] \
-	     || [string equal [target_info gdb_protocol] "extended-remote"])]
+    [expr {[target_info exists gdb_protocol] \
+	       && ([string equal [target_info gdb_protocol] "remote"] \
+		       || [string equal [target_info gdb_protocol] "extended-remote"])}]
 
 standard_testfile
 

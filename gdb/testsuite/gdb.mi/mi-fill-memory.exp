@@ -21,7 +21,7 @@ load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
 standard_testfile "mi-read-memory"
- 
+
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}.c" "${binfile}" executable {debug}] != "" } {
      untested "failed to compile"
      return -1

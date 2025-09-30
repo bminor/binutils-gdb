@@ -33,7 +33,7 @@ if {[mi_clean_restart $::testfile]} {
     return
 }
 
-if ![mi_runto stop_frame] {
+if {![mi_runto stop_frame]} {
     perror "Failed to stop in stop_frame"
     return -1
 }

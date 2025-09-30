@@ -46,7 +46,7 @@ if {[mi_clean_restart $::testfile]} {
     return
 }
 
-if [mi_runto func_nofb_marker] {
+if {[mi_runto func_nofb_marker]} {
     # First try referencing DW_AT_frame_base which is not defined.
     mi_gdb_test "300-stack-list-locals --thread 1 --frame 1 --all-values" \
 	"300\\^done,locals=\\\[\{name=\"func_nofb_var\",value=\"\\\<error reading variable: Could not find the frame base for \\\\\"func_nofb\\\\\"\\\.\\\>\"\},\{name=\"func_nofb_var2\",value=\"\\\<error reading variable: Could not find the frame base for \\\\\"func_nofb\\\\\"\\\.\\\>\"\}\\\].*" \
@@ -60,7 +60,7 @@ if {[mi_clean_restart $::testfile]} {
 
 # And now try referencing DW_AT_frame_base defined using a self-reference
 # (DW_OP_fbreg).
-if [mi_runto func_loopfb_marker] {
+if {[mi_runto func_loopfb_marker]} {
     mi_gdb_test "301-stack-list-locals --thread 1 --frame 1 --all-values" \
 	"301\\^done,locals=\\\[\{name=\"func_loopfb_var\",value=\"\\\<error reading variable: DWARF-2 expression error: Loop detected.*\"\},\{name=\"func_loopfb_var2\",value=\"\\\<error reading variable: DWARF-2 expression error: Loop detected.*\"\}\\\]" \
 	"test func_loopfb_var"

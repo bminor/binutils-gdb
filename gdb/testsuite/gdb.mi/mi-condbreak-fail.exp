@@ -22,7 +22,7 @@ set MIFLAGS "-i=mi"
 
 standard_testfile
 
-if [build_executable ${testfile}.exp ${binfile} ${srcfile}] {
+if {[build_executable ${testfile}.exp ${binfile} ${srcfile}]} {
     return -1
 }
 

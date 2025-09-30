@@ -63,7 +63,7 @@ mi_check_thread_states {"running" "stopped" "stopped"} "thread state, stop 1"
 mi_gdb_test "-thread-select 2" "\\^done.*" "select thread 2"
 mi_create_varobj I_W0 "i" "create varobj in first thread"
 mi_gdb_test "-thread-select 3" "\\^done.*" "select thread 3"
-mi_create_varobj I_W1 "i" "create varobj in second thread" 
+mi_create_varobj I_W1 "i" "create varobj in second thread"
 
 mi_nonstop_resume "exec-continue --thread 2" "resume 1"
 mi_check_thread_states {"running" "running" "stopped"} "thread state, resume 1"
@@ -95,7 +95,7 @@ mi_expect_stop "breakpoint-hit" "break_at_me" "\[^\n\]*" "non-stop.c" "\[0-9\]*"
 mi_expect_stop "breakpoint-hit" "break_at_me" ".*" "non-stop.c" ".*" {"" "disp=\"keep\""} "w1,i2 stop"
 
 # At this point, thread 1 (main) is running, and worker threads are stopped.
-# Check that we can modify breakpoint condition, even when operating on a 
+# Check that we can modify breakpoint condition, even when operating on a
 # running thread.
 mi_gdb_test "-break-condition --thread 1 2 id==1" "\\^done" "set condition, 1"
 

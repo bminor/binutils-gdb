@@ -624,8 +624,8 @@ mi_gdb_test "-var-list-children anone" \
 
 
 # Record fp
-if ![mi_gdb_test "p/x \$fp" ".*($hex).*\\^done" "print FP register"] {
-    set fp $expect_out(3,string) 
+if {![mi_gdb_test "p/x \$fp" ".*($hex).*\\^done" "print FP register"]} {
+    set fp $expect_out(3,string)
 }
 
 mi_continue_to "incr_a"

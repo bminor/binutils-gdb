@@ -45,7 +45,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 # procedures work, so it makes no sense using them here.
 
 gdb_exit
-if [mi_gdb_start separate-inferior-tty] {
+if {[mi_gdb_start separate-inferior-tty]} {
     return
 }
 
@@ -61,9 +61,9 @@ proc test_mi_interpreter_selection {} {
 
     # All this test expects is to get the prompt back
     # with no syntax error message
-    if ![mi_gdb_test "-gdb-version" "~\"GNU gdb.*" "acceptance of MI operations"] {
+    if {![mi_gdb_test "-gdb-version" "~\"GNU gdb.*" "acceptance of MI operations"]} {
 	return 1
-    } 
+    }
 
     note "Skipping all other MI tests."
     return 0
@@ -73,7 +73,7 @@ proc test_exec_and_symbol_mi_operatons {} {
     global mi_gdb_prompt
     global binfile testfile
 
-    if [is_remote host] {
+    if {[is_remote host]} {
 	set filename ${testfile}
 	remote_download host ${binfile} ${filename}
     } else {
@@ -84,8 +84,8 @@ proc test_exec_and_symbol_mi_operatons {} {
     # Tests:
     # -file-exec-and-symbols
 
-    if [mi_gdb_test "-file-exec-and-symbols ${filename}" "\\\^done" \
-       "file-exec-and-symbols operation"] {
+    if {[mi_gdb_test "-file-exec-and-symbols ${filename}" "\\\^done" \
+	     "file-exec-and-symbols operation"]} {
 	note "Skipping all other MI tests."
 	return 0
     }
@@ -144,7 +144,7 @@ proc test_dir_specification {} {
     # Add to the search directories, display, then reset back to default
     # Tests:
     # -environment-directory arg
-    # -environment-directory 
+    # -environment-directory
     # -environment-directory -r
 
     mi_gdb_test "202-environment-directory ${testsubdir}" \
@@ -176,7 +176,7 @@ proc test_cwd_specification {} {
 
     # The canonical name of the working directory may differ on a
     # remote host from that on the build system.
-    if ![is_remote host] {
+    if {![is_remote host]} {
 	mi_gdb_test "206-environment-pwd" \
              "206\\\^done,cwd=\"${escapedobjdir}\"" \
              "environment-pwd operation"
@@ -192,9 +192,9 @@ proc test_path_specification {} {
     global envirodir
     global expect_out
 
-    # Add to the path, display, then reset 
+    # Add to the path, display, then reset
     # Tests:
-    # -environment-path 
+    # -environment-path
     # -environment-path dir1 dir2
     # -environment-path -r dir
     # -environment-path -r
@@ -220,7 +220,7 @@ proc test_path_specification {} {
              "210\\\^done,path=\"$orig_path\"" \
              "environment-path -r operation"
 
-} 
+}
 
 proc test_setshow_inferior_tty {} {
     global mi_gdb_prompt

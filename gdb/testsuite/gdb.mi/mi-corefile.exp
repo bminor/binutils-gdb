@@ -33,7 +33,7 @@ if {$corefile == ""} {
     return 0
 }
 
-if [mi_gdb_start] {
+if {[mi_gdb_start]} {
     return
 }
 

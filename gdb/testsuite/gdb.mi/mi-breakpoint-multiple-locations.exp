@@ -34,7 +34,7 @@ if {[gdb_compile "$srcdir/$subdir/$srcfile" $binfile executable {debug c++}] != 
 
 
 proc make_breakpoints_pattern { expect_fixed_output bp_num loc1_en loc2_en } {
-    if $expect_fixed_output {
+    if {$expect_fixed_output} {
 	return "bkpt=\{number=\"${bp_num}\",type=\"breakpoint\",.*,locations=\\\[\{number=\"${bp_num}\\.1\",enabled=\"${loc1_en}\",.*\},\{number=\"${bp_num}\\.2\",enabled=\"${loc2_en}\",.*\}\\\]\}"
     } else {
 	return "bkpt=\{number=\"${bp_num}\",type=\"breakpoint\",.*\},\{number=\"${bp_num}\\.1\",enabled=\"${loc1_en}\",.*\},\{number=\"${bp_num}\\.2\",enabled=\"${loc2_en}\",.*\}"
@@ -60,7 +60,7 @@ proc do_test { mi_version use_fix_flag expect_fixed_output } {
 
 	    mi_runto_main
 
-	    if $use_fix_flag {
+	    if {$use_fix_flag} {
 		mi_gdb_test "-fix-multi-location-breakpoint-output" "\\^done" \
 		    "send -fix-multi-location-breakpoint-output"
 	    }

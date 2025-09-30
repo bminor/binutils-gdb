@@ -27,8 +27,8 @@ require allow_xml_test
 
 standard_testfile basics.c
 
-if [build_executable "Failed to build $testfile" $testfile $srcfile \
-	debug] {
+if {[build_executable "Failed to build $testfile" $testfile $srcfile \
+	 debug]} {
     return -1;
 }
 

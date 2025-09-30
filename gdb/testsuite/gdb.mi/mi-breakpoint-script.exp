@@ -30,7 +30,7 @@ if {[gdb_compile "$srcdir/$subdir/$srcfile" $binfile executable {debug}] != "" }
 #   script field, else expect it to output the broken pre-mi4 format.
 
 proc make_pattern { expect_fixed_output } {
-    if $expect_fixed_output {
+    if {$expect_fixed_output} {
 	return "bkpt=\{number=\"${::decimal}\",type=\"breakpoint\",.*,script=\\\[\"abc\",\"def\"\\\],.*"
     } else {
 	return "bkpt=\{number=\"${::decimal}\",type=\"breakpoint\",.*,script=\\\{\"abc\",\"def\"\\\},.*"
@@ -54,7 +54,7 @@ proc do_test { mi_version use_fix_flag expect_fixed_output } {
 		mi_clean_restart $::testfile
 	    }
 
-	    if $use_fix_flag {
+	    if {$use_fix_flag} {
 		mi_gdb_test "-fix-breakpoint-script-output" "\\^done" \
 		    "send -fix-multi-location-breakpoint-output"
 	    }

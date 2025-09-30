@@ -105,7 +105,7 @@ mi_expect_stop "breakpoint-hit" "pendfunc1" ".*" ".*" ".*" \
 
 mi_send_resuming_command "exec-continue" "continuing execution to skip conditional bp"
 
-# We should not stop on the conditional breakpoint yet, but we stop on the original bp. 
+# We should not stop on the conditional breakpoint yet, but we stop on the original bp.
 mi_expect_stop "breakpoint-hit" "pendfunc1" ".*" ".*" ".*" \
     { "" "disp=\"keep\"" } \
     "Run till MI pending breakpoint on pendfunc1 a second time"

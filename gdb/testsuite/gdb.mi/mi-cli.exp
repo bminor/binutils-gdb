@@ -59,14 +59,14 @@ mi_gdb_test "-interpreter-exec console \"file $binfile\"" \
 mi_runto_main
 
 set line_main_head    [gdb_get_line_number "main ("]
-set line_main_body    [expr $line_main_head + 2]
+set line_main_body    [expr {$line_main_head + 2}]
 set line_main_hello   [gdb_get_line_number "Hello, World!"]
-set line_main_return  [expr $line_main_hello + 2]
-set line_main_callme_2 [expr $line_main_return + 1]
+set line_main_return  [expr {$line_main_hello + 2}]
+set line_main_callme_2 [expr {$line_main_return + 1}]
 set line_callee4_head [gdb_get_line_number "callee4 ("]
-set line_callee4_body [expr $line_callee4_head + 2]
-set line_callee4_next [expr $line_callee4_body + 1]
-set line_callee4_next_step [expr $line_callee4_next + 3]
+set line_callee4_body [expr {$line_callee4_head + 2}]
+set line_callee4_next [expr {$line_callee4_body + 1}]
+set line_callee4_next_step [expr {$line_callee4_next + 3}]
 
 mi_gdb_test "-interpreter-exec console \"set args foobar\"" \
   ".*=cmd-param-changed,param=\"args\",value=\"foobar\".*\\^done" \
@@ -233,7 +233,7 @@ mi_gdb_test "-interpreter-exec console \"set listsize 10\"" \
   "-interpreter-exec console \"set listsize 10\""
 
 # "list" should show 10 lines centered on where the program stopped.
-set first_list_line [expr $line_main_callme_2 - 5]
+set first_list_line [expr {$line_main_callme_2 - 5}]
 mi_gdb_test "-interpreter-exec console \"list\"" \
     ".*\~\"$first_list_line.*\\^done" \
     "-interpreter-exec console \"list\" at basics.c:\$line_main_callme_2"

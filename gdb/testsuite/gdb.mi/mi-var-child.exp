@@ -667,7 +667,7 @@ mi_varobj_update * {} "update all vars. None changed"
 
 # Step over "struct_declarations.integer = 123;"
 mi_step_to do_children_tests {} ".*${srcfile}" \
-    [expr $line_dct_123 + 1] "step \$line_dct_123 + 1"
+    [expr {$line_dct_123 + 1}] "step \$line_dct_123 + 1"
 
 # Test: c_variable-5.2
 # Desc: check that integer changed
@@ -679,7 +679,7 @@ mi_varobj_update * {struct_declarations.integer} \
 #    bar = 2121;
 #    foo = &bar;
 mi_execute_to "exec-step 3" "end-stepping-range" do_children_tests {} ".*${srcfile}" \
-    [expr $line_dct_123 + 4] {} "step \$line_dct_123 + 4"
+    [expr {$line_dct_123 + 4}] {} "step \$line_dct_123 + 4"
 
 # Test: c_variable-5.3
 # Desc: check that char_ptr changed
@@ -688,7 +688,7 @@ mi_varobj_update * {struct_declarations.char_ptr struct_declarations.char_ptr.\\
 
 # Step over "struct_declarations.int_ptr_ptr = &foo;"
 mi_step_to do_children_tests {} ".*${srcfile}" \
-    [expr $line_dct_123 + 5] "step \$line_dct_123 + 5"
+    [expr {$line_dct_123 + 5}] "step \$line_dct_123 + 5"
 
 # Test: c_variable-5.4
 # Desc: check that int_ptr_ptr and children changed
@@ -702,7 +702,7 @@ mi_varobj_update * {weird->int_ptr_ptr
 
 # Step over "weird->long_array[0] = 1234;"
 mi_step_to do_children_tests {} ".*${srcfile}" \
-    [expr $line_dct_123 + 6] "step \$line_dct_123 + 6"
+    [expr {$line_dct_123 + 6}] "step \$line_dct_123 + 6"
 
 # Test: c_variable-5.5
 # Desc: check that long_array[0] changed
@@ -711,7 +711,7 @@ mi_varobj_update * {struct_declarations.long_array.0} \
 
 # Step over "struct_declarations.long_array[1] = 2345;"
 mi_step_to do_children_tests {} ".*${srcfile}" \
-    [expr $line_dct_123 + 7] "step \$line_dct_123 + 7"
+    [expr {$line_dct_123 + 7}] "step \$line_dct_123 + 7"
 
 # Test: c_variable-5.6
 # Desc: check that long_array[1] changed
@@ -720,7 +720,7 @@ mi_varobj_update * {struct_declarations.long_array.1} \
 
 # Step over "weird->long_array[2] = 3456;"
 mi_step_to do_children_tests {} ".*${srcfile}" \
-    [expr $line_dct_123 + 8] "step \$line_dct_123 + 8"
+    [expr {$line_dct_123 + 8}] "step \$line_dct_123 + 8"
 
 # Test: c_variable-5.7
 # Desc: check that long_array[2] changed
@@ -754,7 +754,7 @@ mi_varobj_update * {struct_declarations.long_array.3
 
 # Step over "weird->func_ptr = nothing";
 mi_step_to do_children_tests {} ".*${srcfile}" \
-    [expr $line_dct_nothing + 1] "step \$line_dct_nothing + 1"
+    [expr {$line_dct_nothing + 1}] "step \$line_dct_nothing + 1"
 
 # Test: c_variable-5.9
 # Desc: check that func_ptr changed
@@ -763,19 +763,19 @@ mi_varobj_update * {struct_declarations.func_ptr} \
 
 # Step over "weird->func_ptr_struct = nothing1"
 mi_step_to do_children_tests {} ".*${srcfile}" \
-    [expr $line_dct_nothing + 2] "step \$line_dct_nothing + 2"
+    [expr {$line_dct_nothing + 2}] "step \$line_dct_nothing + 2"
 mi_varobj_update * {struct_declarations.func_ptr_struct} \
     "update all vars struct_declarations.func_ptr_struct changed"
 
 # Step over "weird->func_ptr_ptr = nothing2"
 mi_step_to do_children_tests {} ".*${srcfile}" \
-    [expr $line_dct_nothing + 3] "step \$line_dct_nothing + 3"
+    [expr {$line_dct_nothing + 3}] "step \$line_dct_nothing + 3"
 mi_varobj_update * {struct_declarations.func_ptr_ptr} \
     "update all vars struct_declarations.func_ptr_ptr changed"
 
 # Step over "struct_declarations.long_array[10] = 3456";
 mi_step_to do_children_tests {} ".*${srcfile}" \
-    [expr $line_dct_nothing + 4] "step \$line_dct_nothing + 4"
+    [expr {$line_dct_nothing + 4}] "step \$line_dct_nothing + 4"
 
 mi_gdb_test "-var-update --no-values *" \
 	"\\^done,changelist=\\\[\{name=\"struct_declarations.long_array.10\",in_scope=\"true\",type_changed=\"false\",has_more=\"0\"\}\\\]" \
@@ -837,7 +837,7 @@ mi_gdb_test "-var-delete weird->int_ptr_ptr" \
 
 set line_dct_snp0 [gdb_get_line_number "psnp = &snp0;"]
 mi_execute_to "exec-step 43" "end-stepping-range" do_children_tests {} ".*${srcfile}" \
-    [expr $line_dct_snp0 + 1] {} "step \$line_dct_snp0 + 1"
+    [expr {$line_dct_snp0 + 1}] {} "step \$line_dct_snp0 + 1"
 
 # Test: c_variable-5.10
 # Desc: create psnp->char_ptr
@@ -987,7 +987,7 @@ mi_create_varobj "psnp->ptrs" "psnp->ptrs" \
 
 # Test: c_variable-5.31
 # Desc: children of psnp->ptrs
-mi_list_varobj_children "psnp->ptrs" {    
+mi_list_varobj_children "psnp->ptrs" {
     {psnp->ptrs.0 0 4 {struct _struct_n_pointer \*}}
     {psnp->ptrs.1 1 4 {struct _struct_n_pointer \*}}
     {psnp->ptrs.2 2 4 {struct _struct_n_pointer \*}}
@@ -1123,7 +1123,7 @@ mi_list_varobj_children "psnp->ptrs.0.next.next.ptrs" {
 
 #  Step over "snp0.char_ptr = &b3;"
 mi_step_to do_children_tests {} ".*${srcfile}" \
-    [expr $line_dct_snp0 + 2] "step \$line_dct_snp0 + 2"
+    [expr {$line_dct_snp0 + 2}] "step \$line_dct_snp0 + 2"
 
 # Test: c_variable-5.47
 # Desc: check that psnp->char_ptr (and [0].char_ptr) changed
@@ -1136,7 +1136,7 @@ mi_varobj_update * {psnp->ptrs.0.char_ptr
 
 #  Step over "snp1.char_ptr = &c3;"
 mi_step_to do_children_tests {} ".*${srcfile}" \
-    [expr $line_dct_snp0 + 3] "step \$line_dct_snp0 + 3"
+    [expr {$line_dct_snp0 + 3}] "step \$line_dct_snp0 + 3"
 
 # Test: c_variable-5.48
 # Desc: check that psnp->next->char_ptr (and [1].char_ptr) changed
@@ -1150,7 +1150,7 @@ mi_varobj_update * {psnp->ptrs.0.next.char_ptr
 
 #  Step over "snp2.char_ptr = &a3;"
 mi_step_to do_children_tests {} ".*${srcfile}" \
-    [expr $line_dct_snp0 + 4] "step \$line_dct_snp0 + 4"
+    [expr {$line_dct_snp0 + 4}] "step \$line_dct_snp0 + 4"
 
 # Test: c_variable-5.49
 # Desc: check that psnp->next->next->char_ptr (and [2].char_ptr) changed
@@ -1160,7 +1160,7 @@ mi_varobj_update * {psnp->ptrs.0.next.next.char_ptr} \
 
 #  Step over "snp0.long_ptr = &y3;"
 mi_step_to do_children_tests {} ".*${srcfile}" \
-    [expr $line_dct_snp0 + 5] "step \$line_dct_snp0 + 5"
+    [expr {$line_dct_snp0 + 5}] "step \$line_dct_snp0 + 5"
 
 # Test: c_variable-5.50
 # Desc: check that psnp->long_ptr (and [0].long_ptr) changed
@@ -1174,7 +1174,7 @@ mi_varobj_update * {psnp->ptrs.0.long_ptr psnp->long_ptr
 
 #  Step over "snp1.long_ptr = &x3;"
 mi_step_to do_children_tests {} ".*${srcfile}" \
-    [expr $line_dct_snp0 + 6] "step \$line_dct_snp0 + 6"
+    [expr {$line_dct_snp0 + 6}] "step \$line_dct_snp0 + 6"
 
 # Test: c_variable-5.51
 # Desc: check that psnp->next->long_ptr (and [1].long_ptr) changed
@@ -1191,7 +1191,7 @@ clear_xfail *-*-*
 
 #  Step over "snp2.long_ptr = &z3;"
 mi_step_to do_children_tests {} ".*${srcfile}" \
-    [expr $line_dct_snp0 + 7] "step \$line_dct_snp0 + 7"
+    [expr {$line_dct_snp0 + 7}] "step \$line_dct_snp0 + 7"
 
 # Test: c_variable-5.52
 # Desc: check that psnp->next->next->long_ptr (and [2].long_ptr) changed

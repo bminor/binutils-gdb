@@ -70,7 +70,9 @@ set cmdnames {
 for {set i 0} {$i < [llength $procs]} {incr i} {
     for {set j 0} {$j < [llength $procs]} {incr j} {
 	with_test_prefix "[lindex $cmdnames $i] first ($i x $j)" {
+	    # tclint-disable-next-line command-args
 	    with_test_prefix "1st" [lindex $procs $i]
+	    # tclint-disable-next-line command-args
 	    with_test_prefix "2nd" [lindex $procs $j]
 	}
     }

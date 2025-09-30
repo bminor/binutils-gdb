@@ -87,7 +87,7 @@ proc test_stack_args_listing {} {
     # -stack-list-arguments 1
     # -stack-list-arguments 1 1 1
     # -stack-list-arguments 1 1 3
-    # -stack-list-arguments 
+    # -stack-list-arguments
     # -stack-list-arguments 1 1 300
     # -stack-list-arguments 2 1 1
     # -stack-list-arguments --simple-values 1 1

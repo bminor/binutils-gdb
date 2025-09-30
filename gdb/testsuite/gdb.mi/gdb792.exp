@@ -36,7 +36,7 @@ mi_create_varobj "var1" "a" "create var for class A"
 
 mi_list_varobj_children "var1" {
     {var1.public public 2}
-    {var1.private private 2} 
+    {var1.private private 2}
     {var1.protected protected 2}
 } "list children of class A"
 
