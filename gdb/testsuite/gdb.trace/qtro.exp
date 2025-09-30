@@ -30,13 +30,13 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug nopie}]} 
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
 # Check whether the target supports tracepoints.
 
-if ![gdb_target_supports_trace] {
+if {![gdb_target_supports_trace]} {
     unsupported "current target does not support trace"
     return -1
 }

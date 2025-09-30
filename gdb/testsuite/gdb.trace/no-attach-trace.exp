@@ -42,7 +42,7 @@ gdb_test "trace main" \
 gdb_test "tstart" "Target returns error code.*\."
 
 with_test_prefix "after tstart" {
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 }

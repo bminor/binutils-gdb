@@ -36,11 +36,11 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
-if ![gdb_target_supports_trace] {
+if {![gdb_target_supports_trace]} {
     unsupported "target does not support trace"
     return -1
 }
@@ -62,7 +62,7 @@ if { [istarget "i\[34567\]86-*-linux*"] || [istarget "x86_64-*-linux*"] } {
 
 # Start with a fresh gdb.
 clean_restart ${testfile}
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -153,7 +153,7 @@ with_test_prefix "iterations equals to counter" {
 
 # Record the hit times of each tracepoint in this array.
 array set tracepoint_hits { }
-for { set i $tpnum } { $i < [expr $tpnum + 2] } { incr i } {
+for { set i $tpnum } { $i < $tpnum + 2 } { incr i } {
   set tracepoint_hits($i) 0
 }
 
@@ -162,7 +162,7 @@ while { 1 } {
    set idx 0
    gdb_test_multiple $test $test {
 	-re "Found trace frame $decimal, tracepoint ($decimal).*\r\n$gdb_prompt $" {
-	    set idx [expr $expect_out(1,string)]
+	    set idx [expr {$expect_out(1,string)}]
 	    incr tracepoint_hits($idx)
 	}
        -re "Target failed to find requested trace frame\..*\r\n$gdb_prompt $" {
@@ -176,7 +176,7 @@ while { 1 } {
 
 # Step 3, check the number of collections on each tracepoint.
 
-for { set i $tpnum } { $i < [expr $tpnum + 2] } { incr i } {
+for { set i $tpnum } { $i < $tpnum + 2 } { incr i } {
 
     if { $tracepoint_hits($i) == $iterations } {
 	pass "tracepoint $i hit $iterations times"

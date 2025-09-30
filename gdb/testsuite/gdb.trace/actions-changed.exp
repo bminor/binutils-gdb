@@ -161,11 +161,11 @@ proc test_actions_changed { } {
 
 clean_restart $testfile
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
-if ![gdb_target_supports_trace] {
+if {![gdb_target_supports_trace]} {
     unsupported "current target does not support trace"
     return -1
 }

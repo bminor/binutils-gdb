@@ -21,11 +21,11 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug nopie}]} 
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
-if ![gdb_target_supports_trace] {
+if {![gdb_target_supports_trace]} {
     unsupported "target does not support trace"
     return -1
 }
@@ -37,7 +37,7 @@ proc set_tracepoint_and_collect { } {
 
     # Start with a fresh gdb.
     clean_restart ${testfile}
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
     gdb_breakpoint "end" qualified

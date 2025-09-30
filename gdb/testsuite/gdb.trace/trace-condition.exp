@@ -25,16 +25,16 @@ set additional_flags [gdb_target_symbol_prefix_flags]
 
 require gdb_trace_common_supports_arch
 
-if [prepare_for_testing "failed to prepare" $executable $srcfile \
-	[list debug $additional_flags]] {
+if {[prepare_for_testing "failed to prepare" $executable $srcfile \
+	 [list debug $additional_flags]]} {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
-if ![gdb_target_supports_trace] {
+if {![gdb_target_supports_trace]} {
     unsupported "target does not support trace"
     return -1
 }
@@ -55,7 +55,7 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 
 clean_restart ${executable}
 
-if ![runto_main] {
+if {![runto_main]} {
     return 0
 }
 
@@ -69,7 +69,7 @@ proc test_tracepoints { trace_command condition num_frames { kfail_proc 0 } } {
 
     clean_restart ${executable}
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return 0
     }
 

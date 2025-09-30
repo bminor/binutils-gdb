@@ -37,12 +37,12 @@ if {$baseline == -1} {
     return
 }
 
-set testline1 [expr $baseline + 4]
-set testline2 [expr $baseline + 5]
-set testline3 [expr $baseline + 6]
-set testline4 [expr $baseline + 7]
-set testline5 [expr $baseline + 8]
-set testline6 [expr $baseline + 9]
+set testline1 [expr {$baseline + 4}]
+set testline2 [expr {$baseline + 5}]
+set testline3 [expr {$baseline + 6}]
+set testline4 [expr {$baseline + 7}]
+set testline5 [expr {$baseline + 8}]
+set testline6 [expr {$baseline + 9}]
 
 #
 # test save-trace command
@@ -53,7 +53,7 @@ set testline6 [expr $baseline + 9]
 gdb_delete_tracepoints
 
 foreach x { 1 2 3 4 5 6 } {
-    set testline [expr \$testline$x]
+    set testline [subst \$testline$x]
     set trcpt [gdb_gettpnum $testline]
     set trcpt$x $trcpt
     gdb_test "passcount $x" \

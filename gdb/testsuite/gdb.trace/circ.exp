@@ -37,7 +37,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug nowarning
 #
 
 # Set a tracepoint on given func.  The tracepoint is set at entry
-# address and not 'after prologue' address because we use 
+# address and not 'after prologue' address because we use
 # 'tfind pc func' to find the corresponding trace frame afterwards,
 # and that looks for entry address.
 proc set_a_tracepoint { func } {

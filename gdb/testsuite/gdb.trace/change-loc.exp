@@ -44,7 +44,7 @@ clean_restart $executable
 gdb_load_shlib $lib_sl1
 gdb_load_shlib $lib_sl2
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -64,7 +64,7 @@ proc tracepoint_change_loc_1 { trace_type } {
 	global gdb_prompt
 
 	clean_restart ${testfile}
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return -1
 	}
 	gdb_test_no_output "delete break 1"
@@ -88,7 +88,7 @@ proc tracepoint_change_loc_1 { trace_type } {
 	set test "set tracepoint on set_tracepoint"
 	gdb_test_multiple "${trace_type} set_tracepoint" $test {
 	    -re "Target returns error code .* too far .*$gdb_prompt $" {
-		if [string equal $trace_type "ftrace"] {
+		if {[string equal $trace_type "ftrace"]} {
 		    # The target was unable to install the fast tracepoint
 		    # (e.g., jump pad too far from tracepoint).
 		    pass "$test (too far)"
@@ -113,7 +113,7 @@ proc tracepoint_change_loc_1 { trace_type } {
 	set test "continue to marker 2"
 	gdb_test_multiple "continue" $test {
 	    -re "Target returns error code .* too far .*$gdb_prompt $" {
-		if [string equal $trace_type "ftrace"] {
+		if {[string equal $trace_type "ftrace"]} {
 		    # Expected if the target was unable to install the
 		    # fast tracepoint (e.g., jump pad too far from
 		    # tracepoint).
@@ -230,7 +230,7 @@ proc tracepoint_change_loc_2 { trace_type } {
 		pass "tstart"
 	    }
 	    -re "Target returns error code .* too far .*$gdb_prompt $" {
-		if [string equal $trace_type "ftrace"] {
+		if {[string equal $trace_type "ftrace"]} {
 		    # The target was unable to install the fast tracepoint
 		    # (e.g., jump pad too far from tracepoint).
 		    pass "$test (too far)"
@@ -291,12 +291,12 @@ proc tracepoint_install_in_trace_disabled { trace_type } {
 	global gdb_prompt
 
 	# This test only makes sense with remote targets.
-	if ![gdb_protocol_is_remote] {
+	if {![gdb_protocol_is_remote]} {
 	    return
 	}
 
 	clean_restart ${testfile}
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return -1
 	}
 

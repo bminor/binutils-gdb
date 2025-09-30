@@ -19,21 +19,21 @@ load_lib "range-stepping-support.exp"
 standard_testfile
 set executable $testfile
 
-if [prepare_for_testing "failed to prepare" $executable $srcfile \
-	{debug nowarnings}] {
+if {[prepare_for_testing "failed to prepare" $executable $srcfile \
+	 {debug nowarnings}]} {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
-if ![gdb_target_supports_trace] {
+if {![gdb_target_supports_trace]} {
     unsupported "target does not support trace"
     return -1
 }
 
-if ![gdb_range_stepping_enabled] {
+if {![gdb_range_stepping_enabled]} {
     unsupported "range stepping not supported by the target"
     return -1
 }
@@ -79,7 +79,7 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 
 clean_restart ${executable}
 
-if ![runto_main] {
+if {![runto_main]} {
     return 0
 }
 

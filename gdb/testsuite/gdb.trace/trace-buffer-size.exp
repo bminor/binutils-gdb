@@ -17,16 +17,16 @@ load_lib "trace-support.exp"
 
 standard_testfile
 
-if [prepare_for_testing "failed to prepare" $testfile $srcfile \
-        {debug nowarnings}] {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
+	 {debug nowarnings}]} {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
-if ![gdb_target_supports_trace] {
+if {![gdb_target_supports_trace]} {
     unsupported "target does not support trace"
     return -1
 }

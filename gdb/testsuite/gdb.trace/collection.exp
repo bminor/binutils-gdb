@@ -23,7 +23,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug nowarning
     return -1
 }
 
-# Tests: 
+# Tests:
 # 1) $args
 # 2) function args by name
 # 3) $locs
@@ -701,7 +701,7 @@ proc gdb_trace_collection_test {} {
     gdb_collect_registers_test "\$$fpreg, \$$spreg, \$$pcreg"
     gdb_collect_globals_test
     gdb_collect_global_in_pieces_test
-    
+
     #
     # Expression tests:
     #
@@ -747,7 +747,7 @@ proc gdb_trace_collection_test {} {
     # x[(y, z)] (tests comma expression) (ditto)
     # cast expr
     # stack data
-    
+
     gdb_collect_expression_test globals_test_func \
 	    "globalstruct.memberi"  "82"     "a.b"
     gdb_collect_expression_test globals_test_func \

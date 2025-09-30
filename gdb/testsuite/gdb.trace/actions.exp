@@ -37,7 +37,7 @@ if {$baseline == -1} {
     return
 }
 
-set testline1 [expr $baseline + 7]
+set testline1 [expr {$baseline + 7}]
 
 #
 # test actions command
@@ -165,8 +165,8 @@ gdb_test_multiple "info tracepoints" "5.5c: verify NO actions for first tracepoi
 
 # 5.6 actions for invalid tracepoint number
 
-gdb_test "actions [expr $trcpt2 + $trcpt3]" \
-    "No tracepoint number [expr $trcpt2 + $trcpt3]." \
+gdb_test "actions [expr {$trcpt2 + $trcpt3}]" \
+    "No tracepoint number [expr {$trcpt2 + $trcpt3}]." \
 			"5.6: actions for invalid tracepoint number"
 
 # 5.7 invalid action (other than 'collect', 'while-stepping' or 'end')
@@ -245,7 +245,7 @@ if {[gdb_test "" "Breakpoint .*" "run to main"] != 0} {
     return -1
 }
 
-if ![gdb_target_supports_trace] {
+if {![gdb_target_supports_trace]} {
     unsupported "target does not support trace"
     return -1
 }

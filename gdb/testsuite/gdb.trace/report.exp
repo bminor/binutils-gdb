@@ -100,7 +100,7 @@ all tests in this module will fail."
 	    untested "couldn't match pattern"
 	    set return_me 1
 all tests in this module will fail."
-    } 
+    }
 }
 
 if {$return_me == 1} {
@@ -288,27 +288,27 @@ proc use_collected_data { data_source } {
 		exp_continue
 	    }
 	    -re "^\[^\r\n\]* line $testline1 .tracepoint .$tdp1\\)\r\n" {
-		set linecount1 [expr $linecount1 + 1]
+		set linecount1 [expr {$linecount1 + 1}]
 		exp_continue
 	    }
 	    -re "^\[^\r\n\]* line $testline2 .tracepoint .$tdp2\\)\r\n" {
-		set linecount2 [expr $linecount2 + 1]
+		set linecount2 [expr {$linecount2 + 1}]
 		exp_continue
 	    }
 	    -re "^\[^\r\n\]* line $testline3 .tracepoint .$tdp3\\)\r\n" {
-		set linecount3 [expr $linecount3 + 1]
+		set linecount3 [expr {$linecount3 + 1}]
 		exp_continue
 	    }
 	    -re "^\[^\r\n\]* line $testline4 .tracepoint .$tdp4\\)\r\n" {
-		set linecount4 [expr $linecount4 + 1]
+		set linecount4 [expr {$linecount4 + 1}]
 		exp_continue
 	    }
 	    -re "^\[^\r\n\]* line $testline5 .tracepoint .$tdp5\\)\r\n" {
-		set linecount5 [expr $linecount5 + 1]
+		set linecount5 [expr {$linecount5 + 1}]
 		exp_continue
 	    }
 	    -re "^\[^\r\n\]* line $testline6 .tracepoint .$tdp6\\)\r\n" {
-		set linecount6 [expr $linecount6 + 1]
+		set linecount6 [expr {$linecount6 + 1}]
 		exp_continue
 	    }
 	    -re "^No trace frame found\r\n$gdb_prompt $" {
@@ -328,7 +328,7 @@ proc use_collected_data { data_source } {
 
 	gdb_test_multiple "while \$trace_frame != -1\n printf \"tracepoint #\%d, FP 0x\%08x, SP 0x\%08x, PC 0x%08x\\n\", \$tracepoint, \$fp, \$sp, \$pc\n tfind tracepoint\n end" "12.2: trace report #2" {
 	    -re "tracepoint #$tdp2, FP $hex, SP $hex, PC $hex" {
-		set linecount2 [expr $linecount2 + 1]
+		set linecount2 [expr {$linecount2 + 1}]
 		exp_continue
 	    }
 	    -re ".*$gdb_prompt $" {
@@ -348,7 +348,7 @@ proc use_collected_data { data_source } {
 
 	gdb_test_multiple "while \$trace_frame != -1\n printf \"TDP #\%d, frame \%d: depth = \%d, q1 = \%d\\n\", \$tracepoint, \$trace_frame, depth, q1\n tfind tracepoint\n end" "12.3: trace report #3" {
 	    -re "TDP #$tdp3, frame $decimal: depth = $decimal, q1 = $decimal" {
-		set linecount3 [expr $linecount3 + 1]
+		set linecount3 [expr {$linecount3 + 1}]
 		exp_continue
 	    }
 	    -re ".*$gdb_prompt $" {
@@ -368,7 +368,7 @@ proc use_collected_data { data_source } {
 
 	gdb_test_multiple "while \$trace_frame != -1\n printf \"TDP #\%d, frame %d: char_test = \%d, long_test = \%d\\n\", \$tracepoint, \$trace_frame, gdb_char_test, gdb_long_test\n tfind tracepoint\n end" "12.4: trace report #4" {
 	    -re "TDP #$tdp6, frame $decimal: char_test = $arg1, long_test = $arg3" {
-		set linecount6 [expr $linecount6 + 1]
+		set linecount6 [expr {$linecount6 + 1}]
 		exp_continue
 	    }
 	    -re ".*$gdb_prompt $" {

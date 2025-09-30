@@ -66,8 +66,8 @@ gdb_test "info tracepoint $asm_test_num" \
     "2.2b: info tracepoint $asm_test_num (gdb_asm_test)"
 
 # 2.3 info tracepoint (invalid tracepoint number)
-gdb_test "info tracepoint [expr $c_test_num + $asm_test_num]" \
-    "No tracepoint matching '[expr $c_test_num + $asm_test_num]'." \
+gdb_test "info tracepoint [expr {$c_test_num + $asm_test_num}]" \
+    "No tracepoint matching '[expr {$c_test_num + $asm_test_num}]'." \
     "2.3: info tracepoint (invalid tracepoint number)"
 
 # 2.4 info tracepoints (list of numbers)

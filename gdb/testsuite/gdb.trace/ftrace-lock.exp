@@ -22,7 +22,7 @@ require gdb_trace_common_supports_arch
 standard_testfile
 
 # make check RUNTESTFLAGS='gdb.trace/ftrace-lock.exp NUM_THREADS=2'
-if ![info exists NUM_THREADS] {
+if {![info exists NUM_THREADS]} {
     set NUM_THREADS 2
 }
 
@@ -37,11 +37,11 @@ with_test_prefix "runtime trace support check" {
 	return
     }
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 
-    if ![gdb_target_supports_trace] {
+    if {![gdb_target_supports_trace]} {
 	unsupported "target does not support trace"
 	return -1
     }
@@ -59,7 +59,7 @@ if { [prepare_for_testing "prepare for testing with libipa" \
     return
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

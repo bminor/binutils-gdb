@@ -37,7 +37,7 @@ if {$baseline == -1} {
     fail "could not find gdb_recursion_test function"
     return
 }
-set testline1 [expr $baseline + 4]
+set testline1 [expr {$baseline + 4}]
 
 #
 # test "delete tracepoints" command
@@ -185,11 +185,11 @@ gdb_test_multiple "delete tracepoint $trcpt1 $trcpt2 $trcpt3" \
 
 gdb_test "info tracepoints" \
     "No tracepoints." \
-			"3.3c: verify delete three tracepoints" 
+			"3.3c: verify delete three tracepoints"
 
 # 3.4 delete invalid tracepoint number
-gdb_test "delete tracepoint [expr $trcpt2 + $trcpt3]" \
-    "No breakpoint number [expr $trcpt2 + $trcpt3]." \
+gdb_test "delete tracepoint [expr {$trcpt2 + $trcpt3}]" \
+    "No breakpoint number [expr {$trcpt2 + $trcpt3}]." \
 			"3.4: delete invalid tracepoint number"
 
 # 3.5 delete tracepoint number zero

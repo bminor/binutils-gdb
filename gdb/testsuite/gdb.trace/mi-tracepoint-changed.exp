@@ -228,11 +228,11 @@ clean_restart $executable
 gdb_load_shlib $lib_sl1
 gdb_load_shlib $lib_sl2
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
-if ![gdb_target_supports_trace] {
+if {![gdb_target_supports_trace]} {
     unsupported "current target does not support trace"
     return -1
 }

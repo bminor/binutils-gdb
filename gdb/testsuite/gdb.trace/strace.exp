@@ -45,7 +45,7 @@ proc strace_remove_socket { action } {
     # Restart with a fresh gdb.
     clean_restart $executable
     gdb_load_shlib $libipa
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 
@@ -130,7 +130,7 @@ proc strace_info_marker { } {
 	# Restart with a fresh gdb.
 	clean_restart $executable
 	gdb_load_shlib $libipa
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return -1
 	}
 
@@ -166,7 +166,7 @@ proc strace_probe_marker { } {
 	# Restart with a fresh gdb.
 	clean_restart $executable
 	gdb_load_shlib $libipa
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return -1
 	}
 
@@ -205,7 +205,7 @@ proc strace_trace_on_same_addr { type } {
 	# Restart with a fresh gdb.
 	clean_restart $executable
 	gdb_load_shlib $libipa
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return -1
 	}
 
@@ -241,7 +241,7 @@ proc strace_trace_on_same_addr { type } {
 		pass $test
 	    }
 	    -re ".*\r\n$gdb_prompt $" {
-		if [string equal $type "ftrace"] {
+		if {[string equal $type "ftrace"]} {
 		    # The instruction may be not long enough to set a fast
 		    # tracepoint.  Skip the rest of this test.
 		    return -1
@@ -256,7 +256,7 @@ proc strace_trace_on_same_addr { type } {
 		pass $test
 	    }
 	    -re ".*\r\n$gdb_prompt $" {
-		if [string equal $type "ftrace"] {
+		if {[string equal $type "ftrace"]} {
 		    # The instruction may be not long enough to set a fast
 		    # tracepoint.  Skip the rest of this test.
 		    return -1
@@ -268,7 +268,7 @@ proc strace_trace_on_same_addr { type } {
 
 	gdb_breakpoint "end" qualified
 
-	if [string equal $type "break"] {
+	if {[string equal $type "break"]} {
 	    gdb_test "continue" "Continuing\\.\[ \r\n\]+Breakpoint.*" \
 		"continue to bar"
 	    gdb_test "continue" "Continuing\\.\[ \r\n\]+Breakpoint.*" \
@@ -308,7 +308,7 @@ proc strace_trace_on_diff_addr { } {
 	# Restart with a fresh gdb.
 	clean_restart $executable
 	gdb_load_shlib $libipa
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return -1
 	}
 
@@ -367,7 +367,7 @@ if { [istarget "x86_64-*-linux*"] || [istarget "i\[34567\]86-*-linux*"] } {
 
 clean_restart $executable
 gdb_load_shlib $libipa
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 if {![gdb_target_supports_trace]} {

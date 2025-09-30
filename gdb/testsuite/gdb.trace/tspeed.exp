@@ -18,7 +18,7 @@ load_lib "trace-support.exp"
 require allow_shlib_tests
 
 # Do not run if gdbserver debug is enabled - the output file is many Gb.
-if [gdbserver_debug_enabled] {
+if {[gdbserver_debug_enabled]} {
     return 0
 }
 
@@ -33,11 +33,11 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile executable $options] != ""
 
 clean_restart ${testfile}
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
-if ![gdb_target_supports_trace] {
+if {![gdb_target_supports_trace]} {
     unsupported "target does not support trace"
     return -1
 }

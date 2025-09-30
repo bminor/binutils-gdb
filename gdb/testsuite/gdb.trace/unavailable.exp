@@ -302,12 +302,12 @@ proc gdb_unavailable_registers_test_1 { } {
 
     # Test reading uncollected pseudo-registers.  The set of which
     # depends on target.
-    if [is_amd64_regs_target] {
+    if {[is_amd64_regs_target]} {
 	# Check the raw register first.
 	test_register_unavailable "\$rax"
 	test_register_unavailable "\$eax"
 	test_register_unavailable "\$ax"
-    } elseif [is_x86_like_target] {
+    } elseif {[is_x86_like_target]} {
 	# Check the raw register first.
 	test_register_unavailable "\$eax"
 	test_register_unavailable "\$ax"

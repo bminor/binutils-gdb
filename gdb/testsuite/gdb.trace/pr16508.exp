@@ -17,16 +17,16 @@ load_lib "trace-support.exp"
 standard_testfile read-memory.c
 set executable $testfile
 
-if [prepare_for_testing "failed to prepare for trace tests" \
-	$executable $srcfile [list debug]] {
+if {[prepare_for_testing "failed to prepare for trace tests" \
+	 $executable $srcfile [list debug]]} {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
-if ![gdb_target_supports_trace] {
+if {![gdb_target_supports_trace]} {
     unsupported "target does not support trace"
     return -1
 }

@@ -36,7 +36,7 @@ if {$baseline == -1} {
     return
 }
 
-set testline1  [expr $baseline + 3]
+set testline1  [expr {$baseline + 3}]
 
 #
 # test "passcount" command
@@ -212,8 +212,8 @@ gdb_test "info tracepoints" \
 
 # 4.8 set passcount for invalid tracepoint
 
-gdb_test "passcount 1 [expr $trcpt2 + $trcpt3]" \
-	"No tracepoint number [expr $trcpt2 + $trcpt3]." \
+gdb_test "passcount 1 [expr {$trcpt2 + $trcpt3}]" \
+	"No tracepoint number [expr {$trcpt2 + $trcpt3}]." \
 	"4.8: invalid tracepoint number in passcount"
 
 # 4.9 help passcount

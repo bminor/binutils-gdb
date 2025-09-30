@@ -32,11 +32,11 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile executable $options] != ""
 
 clean_restart ${testfile}
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
-if ![gdb_target_supports_trace] {
+if {![gdb_target_supports_trace]} {
     unsupported "target does not support trace"
     return -1
 }
@@ -64,7 +64,7 @@ proc test_tracepoint_enable_disable { tracepoint_cmd } {
 
 	set expected 0
 
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return -1
 	}
 

@@ -201,7 +201,7 @@ if {![runto_main]} {
 
 # If there are predefined TSVs, test these predefined TSVs are correctly
 # uploaded.
-if [target_info exists gdb,predefined_tsv] {
+if {[target_info exists gdb,predefined_tsv]} {
     set tsv [target_info gdb,predefined_tsv]
 
     # Test predefined TSVs are uploaded.

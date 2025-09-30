@@ -165,7 +165,7 @@ if  {[gdb_compile [list ${binfile}1.o ${binfile}2.o] \
 
 clean_restart ${testfile}
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -199,11 +199,11 @@ clean_restart $testfile
 
 load_lib "trace-support.exp"
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
-if ![gdb_target_supports_trace] {
+if {![gdb_target_supports_trace]} {
     unsupported "target does not support trace"
     return -1
 }

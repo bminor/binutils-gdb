@@ -23,12 +23,12 @@ set expfile $testfile.exp
 
 require gdb_trace_common_supports_arch
 
-if [prepare_for_testing "failed to prepare" $executable $srcfile \
-	[list debug nowarnings nopie]] {
+if {[prepare_for_testing "failed to prepare" $executable $srcfile \
+	 [list debug nowarnings nopie]]} {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -155,13 +155,13 @@ gdb_test_no_output "tstop" ""
 
 proc gdb_backtrace_tdp_1 { msg } {
     global gdb_prompt
-    
+
     # We are in a trace frame at which we didn't collect anything
     # except $PC.  Therefore we expect to be able to identify stack
     # frame #0, but that's about all.  In particular we do not expect
     # to be able to display the function's arguments or locals, and we
     # do not expect to be able to identify the caller of this function.
-    
+
     gdb_test "backtrace" \
 	"#0\[\t \]+gdb_recursion_test.*depth=.*" \
 	"$msg"

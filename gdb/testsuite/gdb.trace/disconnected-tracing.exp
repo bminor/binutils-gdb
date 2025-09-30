@@ -27,16 +27,16 @@ if { [info proc gdb_reconnect] == "" } {
     return -1
 }
 
-if [prepare_for_testing "failed to prepare" $executable $srcfile \
-        {debug nowarnings}] {
+if {[prepare_for_testing "failed to prepare" $executable $srcfile \
+	 {debug nowarnings}]} {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
-if ![gdb_target_supports_trace] {
+if {![gdb_target_supports_trace]} {
     unsupported "target does not support trace"
     return -1
 }
@@ -51,7 +51,7 @@ proc disconnected_tracing {  } {
 
 	# Start with a fresh gdb.
 	clean_restart ${executable}
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return -1
 	}
 
@@ -113,7 +113,7 @@ proc disconnected_tfind {  } {
 
 	# Start with a fresh gdb.
 	clean_restart ${executable}
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return -1
 	}
 

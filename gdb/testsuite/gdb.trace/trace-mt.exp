@@ -27,11 +27,11 @@ with_test_prefix "runtime trace support check" {
 	return
     }
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 
-    if ![gdb_target_supports_trace] {
+    if {![gdb_target_supports_trace]} {
 	unsupported "target does not support trace"
 	return -1
     }
@@ -47,7 +47,7 @@ proc step_over_tracepoint { testfile trace_type } \
 
     # Make sure inferior is running in all-stop mode.
     gdb_test_no_output "set non-stop 0"
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 
@@ -70,7 +70,7 @@ proc break_trace_same_addr { testfile trace_type option } \
 
     # Start with a fresh gdb.
     clean_restart $testfile
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 
@@ -114,7 +114,7 @@ if { [prepare_for_testing "prepare for testing" $testfile_ipa $srcfile \
     return
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return 0
 }
 

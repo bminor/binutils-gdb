@@ -25,16 +25,16 @@ set additional_flags [gdb_target_symbol_prefix_flags]
 
 require gdb_trace_common_supports_arch
 
-if [prepare_for_testing "failed to prepare" $executable $srcfile \
-	[list debug $additional_flags]] {
+if {[prepare_for_testing "failed to prepare" $executable $srcfile \
+	 [list debug $additional_flags]]} {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
-if ![gdb_target_supports_trace] {
+if {![gdb_target_supports_trace]} {
     unsupported "target does not support trace"
     return -1
 }
@@ -54,7 +54,7 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 }
 clean_restart ${executable}
 
-if ![runto_main] {
+if {![runto_main]} {
     return 0
 }
 
@@ -130,7 +130,7 @@ proc test_fast_tracepoints {} {
 
             set minaddr [exec sh -c "cat /proc/sys/vm/mmap_min_addr"]
 
-            if { [expr $minaddr > 64512] } {
+            if {$minaddr > 64512} {
                 warning "mmap_min_addr > 64512, fast tracepoint will fail"
                 warning "do \"sudo sysctl -w vm.mmap_min_addr=32768\" to adjust"
             }
@@ -190,7 +190,7 @@ proc test_fast_tracepoints {} {
     # fast tracepoints RSP feature, and confirm fast tracepoints
     # can no longer be downloaded.
     set test "fast tracepoint could not be downloaded with the feature disabled"
-    if [gdb_protocol_is_remote] {
+    if {[gdb_protocol_is_remote]} {
         gdb_test "set remote fast-tracepoints-packet off"
 
         gdb_test_multiple "tstart" $test {

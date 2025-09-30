@@ -52,16 +52,16 @@ if {$baseline == -1} {
 # define relative source line numbers:
 # all subsequent line numbers are relative to this first one (baseline)
 
-set testline2  [expr $baseline +  4]
-set testline3  [expr $baseline +  5]
-set testline4  [expr $baseline +  6]
+set testline2  [expr {$baseline +  4}]
+set testline3  [expr {$baseline +  5}]
+set testline4  [expr {$baseline +  6}]
 
 #
 # test passcount command semantics (live test)
 #
 
 ## Set three tracepoints with three different passcounts.
-## Verify that the experiment stops after the one with the 
+## Verify that the experiment stops after the one with the
 ## lowest passcount is hit.
 
 gdb_delete_tracepoints
@@ -125,7 +125,7 @@ with_test_prefix "trace_frame 4" {
 }
 
 ## We should now be at the last frame, because this frame's passcount
-## should have caused collection to stop.  If we do a tfind now, 
+## should have caused collection to stop.  If we do a tfind now,
 ## it should fail.
 
 gdb_test "tfind" "failed to find.*" "4.5: dynamic passcount test"

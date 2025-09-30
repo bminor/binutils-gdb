@@ -75,11 +75,11 @@ if {$baseline == -1} {
     return
 }
 
-set testline1 [expr $baseline + 1]
-set testline2 [expr $baseline + 5]
-set testline3 [expr $baseline + 6]
-set testline4 [expr $baseline + 7]
-set testline5 [expr $baseline + 8]
+set testline1 [expr {$baseline + 1}]
+set testline2 [expr {$baseline + 5}]
+set testline3 [expr {$baseline + 6}]
+set testline4 [expr {$baseline + 7}]
+set testline5 [expr {$baseline + 8}]
 
 #
 # test tfind command
@@ -351,7 +351,7 @@ gdb_test "tfind line NoSuChFiLe.c:$baseline" \
 	"No source file named.*" \
 	"8.27: tfind line in bad source file"
 
-# 8.32 tfind invalid subcommand (tfind foo) 
+# 8.32 tfind invalid subcommand (tfind foo)
 ## check error
 gdb_test "tfind NoSuChOpTiOn 21" \
 	"No symbol.*|\[Ww\]arning.*|\[Ee\]rror.*" \

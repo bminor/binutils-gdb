@@ -78,7 +78,7 @@ proc test_tfind_tfile { } {
 
 # If tracefile is generated successfully, copy tracefile to host and
 # run tests.
-if [generate_tracefile $binfile] {
+if {[generate_tracefile $binfile]} {
     if {!$purely_local} {
 	# Copy tracefile from target to host.
 	remote_download host [remote_upload target tfile-basic.tf] \
@@ -105,11 +105,11 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
 
 clean_restart $executable
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
-if ![gdb_target_supports_trace] {
+if {![gdb_target_supports_trace]} {
     unsupported "current target does not support trace"
     return -1
 }

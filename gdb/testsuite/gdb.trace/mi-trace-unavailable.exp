@@ -21,11 +21,11 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug nopi
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
-if ![gdb_target_supports_trace] {
+if {![gdb_target_supports_trace]} {
     unsupported "current target does not support trace"
     return -1
 }
@@ -129,16 +129,16 @@ proc test_trace_unavailable { data_source } {
 
 	set pcnum -1
 	set gpr0num -1
-	if [is_amd64_regs_target] {
+	if {[is_amd64_regs_target]} {
 	    set pcnum 16
 	    set gpr0num 0
-	} elseif [is_x86_like_target] {
+	} elseif {[is_x86_like_target]} {
 	    set pcnum 8
 	    set gpr0num 0
-	} elseif [is_aarch64_target] {
+	} elseif {[is_aarch64_target]} {
 	    set pcnum 32
 	    set gpr0num 0
-	} elseif [istarget "powerpc*-*-*"] {
+	} elseif {[istarget "powerpc*-*-*"]} {
 	    set pcnum 64
 	    set gpr0num 0
 	} elseif { [istarget "s390*-*-*"] } {
