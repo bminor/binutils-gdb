@@ -761,6 +761,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 
 	  strcpy (cie->augmentation, (char *) buf);
 	  buf = (bfd_byte *) null_byte + 1;
+	  REQUIRE (buf + 1 < end);
 	  this_inf->u.cie.aug_str_len = buf - start - 1;
 	  ENSURE_NO_RELOCS (buf);
 	  if (buf[0] == 'e' && buf[1] == 'h')
