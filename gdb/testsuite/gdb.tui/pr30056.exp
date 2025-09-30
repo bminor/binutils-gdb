@@ -56,7 +56,7 @@ gdb_assert { [Term::wait_for_region_contents 0 $Term::_cur_row $Term::_cols 1 \
 # Send arrow-right.
 send_gdb "\033\[C"
 # Wait for arrow-right effect.
-gdb_assert { [Term::wait_for_region_contents 1 5 78 1 \
+gdb_assert { [Term::wait_for_region_contents 1 1 78 13 \
 		  [string_to_regexp " ain (void)"]] } "arrow right"
 
 # Send ^C.
