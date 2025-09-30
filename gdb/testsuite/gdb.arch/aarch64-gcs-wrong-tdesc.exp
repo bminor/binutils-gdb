@@ -36,7 +36,7 @@ if {[gdb_protocol_is_remote]} {
     return
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return
 }
 

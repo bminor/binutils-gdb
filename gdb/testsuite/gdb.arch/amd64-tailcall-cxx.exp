@@ -16,7 +16,7 @@
 set opts {}
 standard_testfile amd64-tailcall-cxx1.S amd64-tailcall-cxx2.S
 
-if [info exists COMPILE] {
+if {[info exists COMPILE]} {
     # make check RUNTESTFLAGS="gdb.arch/amd64-tailcall-cxx.exp COMPILE=1"
     standard_testfile amd64-tailcall-cxx1.cc amd64-tailcall-cxx2.cc
     lappend opts debug
@@ -30,7 +30,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} "${srcfile} ${srcfile2
     return -1
 }
 
-if ![runto g] {
+if {![runto g]} {
     return -1
 }
 

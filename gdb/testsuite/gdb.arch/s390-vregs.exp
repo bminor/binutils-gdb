@@ -19,7 +19,7 @@ require {is_any_target s390-*-* s390x-*-*}
 
 standard_testfile .S
 
-if [isnative] {
+if {[isnative]} {
     # Create a temporary directory, to take a core dump there later.
     set coredir [standard_output_file ${testfile}.d]
     remote_exec build "rm -rf $coredir"
@@ -31,7 +31,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -71,7 +71,7 @@ gdb_test_multiple "x/i \$pc" "get PC after vector insn" {
     }
 }
 
-if [expr $before_pc + 6 != $after_pc] {
+if {$before_pc + 6 != $after_pc} {
     fail "stepping first vector insn"
 }
 
@@ -93,17 +93,17 @@ set a_low 2
 set b_high 3
 set b_low 5
 
-set a [expr ($a_high << 32) | $a_low]
-set b [expr ($b_high << 32) | $b_low]
+set a [expr {($a_high << 32) | $a_low}]
+set b [expr {($b_high << 32) | $b_low}]
 
 for {set j 0} {$j < 32} {incr j 1} {
-    set i [expr 17 * $j % 32]
+    set i [expr {17 * $j % 32}]
     gdb_test_no_output \
-	"set \$v$i.v2_int64\[0\] = [expr $a * ($i + 1)]" \
+	"set \$v$i.v2_int64\[0\] = [expr {$a * ($i + 1)}]" \
 	"set v$i left"
-    set i [expr 19 * (31 - $j) % 32]
+    set i [expr {19 * (31 - $j) % 32}]
     gdb_test_no_output \
-	"set \$v$i.v2_int64\[1\] = [expr $b * (32 - $i)]" \
+	"set \$v$i.v2_int64\[1\] = [expr {$b * (32 - $i)}]" \
 	"set v$i right"
 }
 
@@ -121,7 +121,7 @@ set vregs [capture_command_output "x/64xg &save_area" ""]
 
 set i 0
 foreach {- left right} [regexp -all -inline -line {^.*:\s+(\w+)\s+(\w+)} $vregs] {
-    if [expr $left != $a * ($i + 1) || $right != $b * (32 - $i)] {
+    if {$left != $a * ($i + 1) || $right != $b * (32 - $i)} {
 	fail "verify \$v$i after set"
     }
     if { $i < 16 } {
@@ -157,10 +157,10 @@ foreach {- r i val} [regexp -all -inline -line \
     if { $r ne "v" } {
 	fail "info registers vector: bad line $j"
     } elseif { $val ne [hex128 \
-			    [expr $a_high * ($i + 1) * $a_high ] \
-			    [expr $a_low * ($i + 1) * $a_low ] \
-			    [expr $b_high * (32 - $i) * $b_high * 32] \
-			    [expr $b_low * (32 - $i) * $b_low * 32] ] } {
+			    [expr {$a_high * ($i + 1) * $a_high }] \
+			    [expr {$a_low * ($i + 1) * $a_low }] \
+			    [expr {$b_high * (32 - $i) * $b_high * 32}] \
+			    [expr {$b_low * (32 - $i) * $b_low * 32}] ] } {
 	fail "compare \$v$i"
     }
     incr j 1

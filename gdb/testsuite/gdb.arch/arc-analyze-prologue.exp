@@ -29,7 +29,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile $options] } {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return 0
 }
 
@@ -85,7 +85,7 @@ proc prologue_test {funcname {savedregs ""} {fp_offset ""} } {
     }
     if { $fp_offset != "" } {
 	set sp [get_integer_valueof \$sp -1 "get value of sp in $funcname"]
-	set fp_val [expr $sp + $fp_offset]
+	set fp_val [expr {$sp + $fp_offset}]
 	set fp_real_val \
 	    [get_integer_valueof \$fp 0 "get value of fp in $funcname"]
 	if { $fp_real_val != $fp_val } {

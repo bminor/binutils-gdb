@@ -32,7 +32,7 @@ if {![runto_main]} {
 # that can be written to the fcsr register.  The two arguments should
 # be the value of each of the two fields within the fcsr register.
 proc merge_fflags_and_frm { fflags_value frm_value } {
-    set fcsr_value 0x[format %x [expr $fflags_value | ($frm_value << 5)]]
+    set fcsr_value 0x[format %x [expr {$fflags_value | ($frm_value << 5)}]]
     return $fcsr_value
 }
 
@@ -48,11 +48,11 @@ proc check_fcsr { fflags_value frm_value frm_string } {
     set frm_str_re [string_to_regexp "$frm_string"]
     set frm_val_re [format %d ${frm_value}]
 
-    set nv [format %d [expr ($fflags_value >> 4) & 0x1]]
-    set dz [format %d [expr ($fflags_value >> 3) & 0x1]]
-    set of [format %d [expr ($fflags_value >> 2) & 0x1]]
-    set uf [format %d [expr ($fflags_value >> 1) & 0x1]]
-    set nx [format %d [expr ($fflags_value >> 0) & 0x1]]
+    set nv [format %d [expr {($fflags_value >> 4) & 0x1}]]
+    set dz [format %d [expr {($fflags_value >> 3) & 0x1}]]
+    set of [format %d [expr {($fflags_value >> 2) & 0x1}]]
+    set uf [format %d [expr {($fflags_value >> 1) & 0x1}]]
+    set nx [format %d [expr {($fflags_value >> 0) & 0x1}]]
 
     set fflags_pattern "NV:${nv} DZ:${dz} OF:${of} UF:${uf} NX:${nx}"
     set frm_pattern "FRM:${frm_val_re} \\\[${frm_str_re}\\\]"

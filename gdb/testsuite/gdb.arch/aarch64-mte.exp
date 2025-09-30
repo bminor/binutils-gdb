@@ -50,7 +50,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -63,7 +63,7 @@ if {![supports_memtag]} {
 
 gdb_breakpoint "access_memory"
 
-if [gdb_continue "access_memory"] {
+if {[gdb_continue "access_memory"]} {
     return -1
 }
 
@@ -104,7 +104,7 @@ with_test_prefix "literals" {
 	    set addr_tagged [get_tagged_ptr $i ${tagged_ptr_addr}]
 	}
 
-	set tag_hexnz [get_hex_tag [expr $i % 16]]
+	set tag_hexnz [get_hex_tag [expr {$i % 16}]]
 	gdb_test "memory-tag print-logical-tag ${addr_tagged}" \
 		 " = 0x${tag_hexnz}" \
 		 "print-logical-tag with tag ${i}"
@@ -124,7 +124,7 @@ with_test_prefix "literals" {
 		 $atag_msg \
 		 "set-allocation-tag with tag ${i}"
 
-	set tag_hexnz [get_hex_tag [expr $i % 16]]
+	set tag_hexnz [get_hex_tag [expr {$i % 16}]]
 	gdb_test "memory-tag print-allocation-tag ${tagged_ptr_addr}" " = 0x${tag_hexnz}" \
 		 "print-allocation-tag with tag ${i}"
     }
@@ -139,7 +139,7 @@ with_test_prefix "literals" {
 		     $atag_msg \
 		     "set-allocation-tag with tag ${i}"
 
-	    set atag_hexnz [get_hex_tag [expr $i % 16]]
+	    set atag_hexnz [get_hex_tag [expr {$i % 16}]]
 
 	    # Validate that the logical tag matches the allocation tag.
 	    with_test_prefix "tag ${i}" {
@@ -152,14 +152,14 @@ with_test_prefix "literals" {
 
 	    # Get a pointer with the logical tag that does not match the
 	    # allocation tag.
-	    set ltag [expr $i + 1]
+	    set ltag [expr {$i + 1}]
 	    with_test_prefix "fetch mismatch tag ${i}" {
 		set addr_tagged [get_tagged_ptr $ltag ${tagged_ptr_addr}]
 	    }
 
 	    # Validate that the logical tag does not match the allocation
 	    # tag.
-	    set ltag_hexnz [get_hex_tag [expr [expr $i + 1]% 16]]
+	    set ltag_hexnz [get_hex_tag [expr {($i + 1) % 16}]]
 	    gdb_test "memory-tag check ${addr_tagged}" \
 		     "Logical tag \\(0x${ltag_hexnz}\\) does not match the allocation tag \\(0x${atag_hexnz}\\) for address $hex\." \
 		     "check mismatch with tag ${i}"
@@ -187,7 +187,7 @@ with_test_prefix "symbolic" {
 			       "update value of symbol ${tagged_ptr_symbol}"
 	}
 
-	set tag_hexnz [get_hex_tag [expr $i % 16]]
+	set tag_hexnz [get_hex_tag [expr {$i % 16}]]
 	gdb_test "memory-tag print-logical-tag ${tagged_ptr_symbol}" \
 		 " = 0x${tag_hexnz}" \
 		 "print-logical-tag with tag ${i}"
@@ -211,7 +211,7 @@ with_test_prefix "symbolic" {
 		 $atag_msg \
 		 "set-allocation-tag with tag ${i}"
 
-	set tag_hexnz [get_hex_tag [expr $i % 16]]
+	set tag_hexnz [get_hex_tag [expr {$i % 16}]]
 	gdb_test "memory-tag print-allocation-tag ${tagged_ptr_symbol}" \
 		 " = 0x${tag_hexnz}" \
 		 "print-allocation-tag with tag ${i}"
@@ -227,7 +227,7 @@ with_test_prefix "symbolic" {
 		     $atag_msg \
 		     "set-allocation-tag with tag ${i}"
 
-	    set atag_hexnz [get_hex_tag [expr $i % 16]]
+	    set atag_hexnz [get_hex_tag [expr {$i % 16}]]
 
 	    # Validate that the logical tag matches the allocation tag.
 	    with_test_prefix "tag ${i}" {
@@ -245,7 +245,7 @@ with_test_prefix "symbolic" {
 
 	    # Get a pointer with the logical tag that does not match the
 	    # allocation tag.
-	    set ltag [expr $i + 1]
+	    set ltag [expr {$i + 1}]
 	    with_test_prefix "fetch mismatch tag ${i}" {
 		set addr_tagged [get_tagged_ptr $ltag ${tagged_ptr_addr}]
 	    }
@@ -257,7 +257,7 @@ with_test_prefix "symbolic" {
 
 	    # Validate that the logical tag does not match the allocation
 	    # tag.
-	    set ltag_hexnz [get_hex_tag [expr [expr $i + 1]% 16]]
+	    set ltag_hexnz [get_hex_tag [expr {($i + 1) % 16}]]
 	    gdb_test "memory-tag check ${tagged_ptr_symbol}" \
 		     "Logical tag \\(0x${ltag_hexnz}\\) does not match the allocation tag \\(0x${atag_hexnz}\\) for address $hex\." \
 		     "check mismatch with tag ${i}"
@@ -281,7 +281,7 @@ with_test_prefix "print command" {
 	return -1
     }
 
-    set atag [expr [expr $ltag + 1] % 16]
+    set atag [expr {($ltag + 1) % 16}]
     set atag_hexnn [get_tag_nn $atag]
 
     gdb_test "memory-tag set-allocation-tag ${tagged_ptr_symbol} 1 ${atag_hexnn}" \
@@ -334,13 +334,13 @@ gdb_test "continue" \
 
 # Restart to execute the async tag fault test.
 with_test_prefix "async" {
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 
     gdb_breakpoint "access_memory"
 
-    if [gdb_continue "access_memory"] {
+    if {[gdb_continue "access_memory"]} {
 	fail "could not run to tagged memory test function"
 	return -1
     }

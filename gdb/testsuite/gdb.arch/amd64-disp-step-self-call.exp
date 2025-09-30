@@ -59,7 +59,7 @@ gdb_test_multiple "x/2i \$pc" "get address of next insn" {
 }
 
 # Clear the slot on the stack and confirm it was set to zero.
-set sp [expr $sp - 0x8]
+set sp [expr {$sp - 0x8}]
 gdb_test_no_output "set {unsigned long long} $sp = 0" \
     "clear stack slot"
 set zero_val 0x[format %016x 0]
@@ -73,7 +73,7 @@ gdb_test "stepi" \
 # Check stack pointer was updated to the expected value.
 set new_sp [get_hexadecimal_valueof "\$sp" "*UNKNOWN*" \
 	       "get stack pointer after step"]
-gdb_assert {[expr $sp == $new_sp]} \
+gdb_assert {[expr {$sp == $new_sp}]} \
     "check stack pointer was updated as expected"
 
 # Check the contents of the stack were updated to the expected value.

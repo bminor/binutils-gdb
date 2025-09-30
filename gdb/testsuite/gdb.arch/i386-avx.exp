@@ -53,7 +53,7 @@ gdb_test "break [gdb_get_line_number "first breakpoint here"]" \
          "set first breakpoint in main"
 gdb_continue_to_breakpoint "continue to first breakpoint in main"
 
-if [is_amd64_regs_target] {
+if {[is_amd64_regs_target]} {
     set nr_regs 16
 } else {
     set nr_regs 8
@@ -79,7 +79,7 @@ gdb_continue_to_breakpoint "continue to second breakpoint in main"
 
 for { set r 0 } { $r < $nr_regs } { incr r } {
     gdb_test "print data\[$r\]" \
-        ".. = \\{f = \\{[expr $r + 10], $r.125, $r.25, $r.375, $r.5, $r.625, $r.75, $r.875\\}\\}.*" \
+        ".. = \\{f = \\{[expr {$r + 10}], $r.125, $r.25, $r.375, $r.5, $r.625, $r.75, $r.875\\}\\}.*" \
         "check contents of data\[$r\]"
 }
 

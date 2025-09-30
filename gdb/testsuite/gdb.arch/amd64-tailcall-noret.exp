@@ -16,7 +16,7 @@
 set opts {}
 standard_testfile .S
 
-if [info exists COMPILE] {
+if {[info exists COMPILE]} {
     # make check RUNTESTFLAGS="gdb.arch/amd64-tailcall-noret.exp COMPILE=1"
     standard_testfile
     lappend opts debug optimize=-O2
@@ -30,7 +30,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} $opts] } {
     return -1
 }
 
-if ![runto noret] {
+if {![runto noret]} {
     return -1
 }
 

@@ -31,7 +31,7 @@ set begin_line [gdb_get_line_number "Break begin"]
 set call1_line [gdb_get_line_number "Break call1"]
 set call2_line [gdb_get_line_number "Break call2"]
 
-if ![runto ${begin_line}] {
+if {![runto ${begin_line}]} {
     return
 }
 
@@ -39,7 +39,7 @@ proc restart_and_run_infcall_call2 {} {
     global binfile call2_line
     clean_restart
     gdb_load $binfile
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
     set inside_infcall_str "The program being debugged stopped while in a function called from GDB"
@@ -82,7 +82,7 @@ with_test_prefix "test return 'above' an inferior call" {
 
 clean_restart
 gdb_load $binfile
-if ![runto ${begin_line}] {
+if {![runto ${begin_line}]} {
     return
 }
 
@@ -114,7 +114,7 @@ with_test_prefix "test return from current frame" {
 
 clean_restart
 gdb_load $binfile
-if ![runto_main] {
+if {![runto_main]} {
     return
 }
 

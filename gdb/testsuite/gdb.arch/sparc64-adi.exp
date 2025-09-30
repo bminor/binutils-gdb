@@ -15,7 +15,7 @@
 
 # This file is part of the gdb testsuite.
 
-# Basic tests of examining/assigning ADI version tags, and reporting 
+# Basic tests of examining/assigning ADI version tags, and reporting
 # precise mismatch.
 
 require {istarget "sparc64*-*-linux*"}

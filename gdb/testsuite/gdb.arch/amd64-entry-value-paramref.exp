@@ -18,7 +18,7 @@ standard_testfile .S .cc
 require is_x86_64_m64_target
 
 # Make .cc available on the host.
-if [is_remote host] {
+if {[is_remote host]} {
     gdb_remote_download host $srcdir/$subdir/$srcfile2
 }
 
@@ -27,7 +27,7 @@ if { [prepare_for_testing_full "failed to prepare" \
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

@@ -23,9 +23,9 @@ require {istarget "powerpc*"} allow_vsx_tests
 standard_testfile
 
 set compile_flags {debug nowarnings quiet}
-if [test_compiler_info gcc*] {
+if {[test_compiler_info gcc*]} {
     set compile_flags "$compile_flags additional_flags=-maltivec additional_flags=-mabi=altivec"
-} elseif [test_compiler_info xlc*] {
+} elseif {[test_compiler_info xlc*]} {
     set compile_flags "$compile_flags additional_flags=-qaltivec"
 } else {
     warning "unknown compiler"

@@ -42,7 +42,7 @@ proc test_sme_registers_sigframe { id_start id_end } {
     }
     set binfile [standard_output_file ${executable}]
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	untested "could not run to main"
 	return -1
     }
@@ -83,16 +83,16 @@ proc test_sme_registers_sigframe { id_start id_end } {
 	    }
 
 	    # Run the program until it has adjusted the svl.
-	    if [gdb_continue_to_breakpoint $sigill_breakpoint] {
+	    if {[gdb_continue_to_breakpoint $sigill_breakpoint]} {
 		return -1
 	    }
 
 	    # Check SVG to make sure it is correct
-	    set expected_svg [expr $svl / 8]
+	    set expected_svg [expr {$svl / 8}]
 	    gdb_test "print \$svg" "= ${expected_svg}"
 
 	    # Check the size of ZA.
-	    set expected_za_size [expr $svl * $svl]
+	    set expected_za_size [expr {$svl * $svl}]
 	    gdb_test "print sizeof \$za" " = $expected_za_size"
 
 	    # Check the value of SVCR.
@@ -134,14 +134,14 @@ proc test_sme_registers_sigframe { id_start id_end } {
 	    gdb_test_no_output "set \$tpidr2=0x0102030405060708"
 
 	    # Run to the illegal instruction.
-	    if [gdb_test "continue" "Continuing\.\r\n\r\nProgram received signal SIGILL, Illegal instruction\..*in main.*"] {
+	    if {[gdb_test "continue" "Continuing\.\r\n\r\nProgram received signal SIGILL, Illegal instruction\..*in main.*"]} {
 		return
 	    }
 
 	    # Skip the illegal instruction.  The signal handler will be called after we continue.
 	    gdb_test_no_output "set \$pc=\$pc+4"
 	    # Continue to the signal handler.
-	    if [gdb_continue_to_breakpoint $handler_breakpoint] {
+	    if {[gdb_continue_to_breakpoint $handler_breakpoint]} {
 		return -1
 	    }
 
@@ -159,7 +159,7 @@ proc test_sme_registers_sigframe { id_start id_end } {
 	    }
 
 	    # Check the size of ZA in the signal frame.
-	    set expected_za_size [expr $svl * $svl]
+	    set expected_za_size [expr {$svl * $svl}]
 	    gdb_test "print sizeof \$za" " = $expected_za_size" "size of za in signal frame"
 
 	    # Check the value of SVCR in the signal frame.
@@ -172,7 +172,7 @@ proc test_sme_registers_sigframe { id_start id_end } {
 	    gdb_test "print/x \$tpidr2" " = 0x102030405060708" "tpidr2 contents from signal frame"
 
 	    # Check the value of SME2 ZT0 in the signal frame.
-	    if [is_sme2_available] {
+	    if {[is_sme2_available]} {
 		# The target supports SME2.
 		set zt_size 64
 		gdb_test "print sizeof \$zt0" " = $zt_size"

@@ -38,7 +38,7 @@ proc test_run {} {
 	    set bp_addr $expect_out(1,string)
 
 	    # Convert to decimal.
-	    set bp_addr [expr $bp_addr]
+	    set bp_addr [expr {$bp_addr}]
 
 	    pass $gdb_test_name
 	}

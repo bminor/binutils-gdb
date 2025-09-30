@@ -31,7 +31,7 @@ if {![runto_main]} {
 # Figure out where the breakpoint will be placed taking account for
 # stack alignment, and allocation of the dummy code area.
 set bp_addr [get_valueof "/x" "\$sp" 0]
-set bp_addr [format 0x%x [expr ($bp_addr & ~0xf) - 0x20]]
+set bp_addr [format 0x%x [expr {($bp_addr & ~0xf) - 0x20}]]
 
 # Fill the region we know will be used as the scratch area with the
 # compressed nop instruction.  If GDB fails to overwrite this with an

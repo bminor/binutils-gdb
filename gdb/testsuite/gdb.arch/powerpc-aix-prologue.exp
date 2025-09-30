@@ -38,7 +38,7 @@ proc insert_breakpoint {function expected_location} {
     global gdb_prompt
     global expect_out
     global hex
-    
+
     set address ""
 
     # Insert a breakpoint using the given function name, and extract

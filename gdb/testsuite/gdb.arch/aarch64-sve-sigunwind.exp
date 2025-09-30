@@ -58,12 +58,12 @@ gdb_test "handle SIGUSR1 nostop" \
 set linespec ${srcfile}:[gdb_get_line_number "Break here."]
 gdb_test_no_output "set args $first_vl $second_vl"
 
-if ![runto ${linespec}] {
+if {![runto ${linespec}]} {
     return
 }
 
-set first_vg [expr $first_vl/8]
-set second_vg [expr $second_vl/8]
+set first_vg [expr {$first_vl/8}]
+set second_vg [expr {$second_vl/8}]
 
 gdb_test "print \$vg" ". = $second_vg" "vg was changed"
 
@@ -77,10 +77,10 @@ for {set row 0} {$row < 32} {incr row} {
 
 for {set row 0} {$row < 16} {incr row} {
     set register_name "\$p${row}"
-    gdb_test "print $register_name" ". = \\{(0, ){[expr $second_vl/8 - 1]}0\\}" \
+    gdb_test "print $register_name" ". = \\{(0, ){[expr {$second_vl/8 - 1}]}0\\}" \
 	"$register_name contents in signal handler"
 }
-gdb_test "print \$ffr" ". = \\{(255, ){[expr $second_vl/8 - 1]}255\\}" \
+gdb_test "print \$ffr" ". = \\{(255, ){[expr {$second_vl/8 - 1}]}255\\}" \
     "ffr contents in signal handler"
 
 gdb_test "frame function main" \
@@ -99,8 +99,8 @@ for {set row 0} {$row < 32} {incr row} {
 
 for {set row 0} {$row < 16} {incr row} {
     set register_name "\$p${row}"
-    gdb_test "print $register_name" ". = \\{(1, ){[expr $first_vl/8 - 1]}1\\}" \
+    gdb_test "print $register_name" ". = \\{(1, ){[expr {$first_vl/8 - 1}]}1\\}" \
 	"$register_name contents were correctly unwound"
 }
-gdb_test "print \$ffr" ". = \\{(255, ){[expr $first_vl/8 - 1]}255\\}" \
+gdb_test "print \$ffr" ". = \\{(255, ){[expr {$first_vl/8 - 1}]}255\\}" \
     "ffr contents were correctly unwound"

@@ -34,7 +34,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -63,8 +63,8 @@ set v [linux_kernel_version]
 if { $v != {} } {
     set have_xfail \
 	[expr \
-	     [version_compare [list 5 14 0] <= $v] \
-	     && [version_compare $v < [list 6 2 0]]]
+	     {[version_compare [list 5 14 0] <= $v] \
+		  && [version_compare $v < [list 6 2 0]]}]
 }
 
 # Test pkru register at startup

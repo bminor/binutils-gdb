@@ -60,8 +60,8 @@ gdb_test_no_output "set print repeats 1" "adjust repeat count"
 # Fetch both the vector length and the streaming vector length the target
 # system is using.  We do not force any vector lengths and do not change
 # it mid-execution.
-set vl [expr [get_valueof "" "\$vg" "0" "fetch value of vl"] * 8]
-set svl [expr [get_valueof "" "\$svg" "0" "fetch value of svl"] * 8]
+set vl [expr {[get_valueof "" "\$vg" "0" "fetch value of vl"] * 8}]
+set svl [expr {[get_valueof "" "\$svg" "0" "fetch value of svl"] * 8}]
 
 # Now we are at the point where we can start checking state and moving the
 # testcase forward.

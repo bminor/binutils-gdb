@@ -35,7 +35,7 @@ if {![runto_main]} {
    return
 }
 
-if [gdb_test "show arch" ".*powerpc:common.*" "checking for PPC arch"] {
+if {[gdb_test "show arch" ".*powerpc:common.*" "checking for PPC arch"]} {
     return -1
 }
 
@@ -50,12 +50,12 @@ gdb_test "info reg dl$i" \
 	 "dl$i\[ \]*1\.2345678910\[ \t\]*\\(raw 0x2205800000000000000000049c5de09c\\)" \
 	 "print dl$i register with the info reg command"
 
-gdb_test "info reg f[expr 2*$i]" \
-	 "f[expr 2*$i]\[ \]*8\.608957309287334e\-145\[ \t\]*\\(raw 0x2205800000000000\\)" \
+gdb_test "info reg f[expr {2*$i}]" \
+	 "f[expr {2*$i}]\[ \]*8\.608957309287334e\-145\[ \t\]*\\(raw 0x2205800000000000\\)" \
 	 "testing lower half of dl$i register"
 
-gdb_test "info reg f[expr 2*$i+1]" \
-	 "f[expr 2*$i+1]\[ \]*9\.7841140127686122e\-314\[ \t\]*\\(raw 0x000000049c5de09c\\)" \
+gdb_test "info reg f[expr {2*$i+1}]" \
+	 "f[expr {2*$i+1}]\[ \]*9\.7841140127686122e\-314\[ \t\]*\\(raw 0x000000049c5de09c\\)" \
 	 "testing upper half of dl$i register"
 
 }

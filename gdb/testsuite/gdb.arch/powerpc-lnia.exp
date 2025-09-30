@@ -82,22 +82,22 @@ set check_r9 [get_hexadecimal_valueof "\$r9" "default0"]
 # Specifically that the values loaded by the lnia instruction
 # reflect the value of the PC as if the instruction was
 # not displaced.
-if [expr $check_r3 + 4 != $check_r4] {
+if {$check_r3 + 4 != $check_r4} {
     fail "unexpected value r3+4 != r4 , r3: $check_r3  r4: $check_r4 "
 }
-if [expr $check_r4 + 4 != $check_r5] {
+if {$check_r4 + 4 != $check_r5} {
     fail "unexpected value r4+4 != r5 , r4: $check_r4  r5: $check_r5 "
 }
-if [expr $check_r5 + 4 != $check_r6] {
+if {$check_r5 + 4 != $check_r6} {
     fail "unexpected value r5+4 != r6 , r5: $check_r5  r6: $check_r6 "
 }
-if [expr $check_r6 + 4 != $check_r7] {
+if {$check_r6 + 4 != $check_r7} {
     fail "unexpected value r6+4 != r7 , r6: $check_r6  r7: $check_r7 "
 }
-if [expr $check_r7 + 4 != $check_r8] {
+if {$check_r7 + 4 != $check_r8} {
     fail "unexpected value r7+4 != r8 , r7: $check_r7  r8: $check_r8 "
 }
-if [expr $check_r8 + 4 != $check_r9] {
+if {$check_r8 + 4 != $check_r9} {
     fail "unexpected value r8+4 != r9 , r8: $check_r8  r9: $check_r9 "
 }
 

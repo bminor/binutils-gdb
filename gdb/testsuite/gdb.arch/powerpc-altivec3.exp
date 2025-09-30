@@ -52,7 +52,7 @@ proc func_check {instr} {
     global func
 
     set test "found: $instr"
-    if [regexp -nocase -line [instr_to_patt $instr] $func] {
+    if {[regexp -nocase -line [instr_to_patt $instr] $func]} {
 	pass $test
     } else {
 	fail $test

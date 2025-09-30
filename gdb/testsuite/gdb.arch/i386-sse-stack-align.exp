@@ -22,7 +22,7 @@ set executable ${testfile}
 set binfile [standard_output_file ${executable}]
 set opts {}
 
-if [info exists COMPILE] {
+if {[info exists COMPILE]} {
     set srcfile ${csrcfile}
     lappend opts debug optimize=-O2 additional_flags=-msse
 }
@@ -53,5 +53,5 @@ foreach i {0 1 2 3 4} {
     if {$args != ""} {
 	set args "$args, "
     }
-    set args "$args[expr $i + 1]"
+    set args "$args[expr {$i + 1}]"
 }

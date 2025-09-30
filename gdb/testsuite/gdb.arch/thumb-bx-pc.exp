@@ -21,7 +21,7 @@ set testfile "thumb-bx-pc"
 set srcfile ${testfile}.S
 set opts {}
 
-if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} $opts] {
+if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile} $opts]} {
     return -1
 }
 

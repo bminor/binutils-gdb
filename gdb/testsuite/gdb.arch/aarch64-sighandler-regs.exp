@@ -32,7 +32,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} ${compile_f
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -91,7 +91,7 @@ gdb_breakpoint [gdb_get_line_number "exit(0)"]
 gdb_continue_to_breakpoint "exit" ".*exit.*"
 
 set handlerframe [get_current_frame_number]
-set mainframe [expr $handlerframe + 2]
+set mainframe [expr {$handlerframe + 2}]
 
 
 # Check register values

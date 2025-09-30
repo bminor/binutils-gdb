@@ -23,7 +23,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile {nodebug}]} {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     untested "could not run to main"
     return -1
 }

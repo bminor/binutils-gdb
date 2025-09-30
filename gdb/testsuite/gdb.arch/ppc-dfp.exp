@@ -20,7 +20,7 @@ require {istarget "powerpc*"}
 
 standard_testfile
 
-if ![test_compiler_info gcc*] {
+if {![test_compiler_info gcc*]} {
     # We use GCC's extended asm syntax
     warning "unknown compiler"
     return -1

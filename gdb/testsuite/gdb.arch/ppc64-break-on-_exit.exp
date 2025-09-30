@@ -26,7 +26,7 @@
 require {istarget "powerpc*"} is_lp64_target
 
 set flags { nodebug }
-if [info exists COMPILE] {
+if {[info exists COMPILE]} {
     standard_testfile .c -main.c
     lappend flags optimize=-O2
     lappend flags additional_flags=-fno-stack-protector

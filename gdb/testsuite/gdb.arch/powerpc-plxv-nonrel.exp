@@ -109,16 +109,16 @@ set vs5_expected 0xa7b7c7d7a6b6c6d6a5b5c5d5a4b4c4d4
 set vs6_expected 0xa9b9c9d9a8b8c8d8a7b7c7d7a6b6c6d6
 set vs7_expected 0xabbbcbdbaabacadaa9b9c9d9a8b8c8d8
 
-if [expr  $check_vs4 != $vs4_expected] {
+if {$check_vs4 != $vs4_expected} {
     fail "unexpected value vs4;  actual:$check_vs4 expected:$vs4_expected"
 }
-if [expr $check_vs5 != $vs5_expected ] {
+if {$check_vs5 != $vs5_expected} {
     fail "unexpected value vs5;   actual:$check_vs5 expected:$vs5_expected"
 }
-if [expr $check_vs6 != $vs6_expected ] {
+if {$check_vs6 != $vs6_expected} {
     fail "unexpected value vs6;   actual:$check_vs6 expected:$vs6_expected"
 }
-if [expr $check_vs7 != $vs7_expected ] {
+if {$check_vs7 != $vs7_expected} {
     fail "unexpected value vs7;   actual:$check_vs7 expected:$vs7_expected"
 }
 

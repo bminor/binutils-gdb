@@ -39,7 +39,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return 0
 }
 
@@ -53,7 +53,7 @@ proc test_branch_insn { test_name } {
 
     # Calculate instruction length, based on ${test_name}_end symbol.
     set end_pc [get_hexadecimal_valueof &${test_name}_end -1]
-    set length [expr $end_pc - $pc]
+    set length [expr {$end_pc - $pc}]
 
     set target_address [get_hexadecimal_valueof &${test_name}_target -1]
 

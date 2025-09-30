@@ -36,7 +36,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} $opts] } {
     return -1
 }
 
-if ![runto breakpt] {
+if {![runto breakpt]} {
     return -1
 }
 
@@ -51,7 +51,7 @@ gdb_test "bt no-filters" "^#0 +$hex in func2 \\(\\)\r\nBacktrace stopped: Cannot
 
 clean_restart ${::testfile}
 
-if ![runto breakpt] {
+if {![runto breakpt]} {
     return -1
 }
 
@@ -65,7 +65,7 @@ gdb_test "interpreter-exec mi \"-stack-info-depth\"" \
 
 clean_restart ${::testfile}
 
-if ![runto breakpt] {
+if {![runto breakpt]} {
     return -1
 }
 

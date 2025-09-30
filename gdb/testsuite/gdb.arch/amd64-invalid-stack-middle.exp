@@ -35,7 +35,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {nopie}] } 
     return -1
 }
 
-if ![runto breakpt] {
+if {![runto breakpt]} {
     return -1
 }
 
@@ -47,7 +47,7 @@ gdb_test "bt" "^#0 +breakpt *\\(\\) \[^\r\n\]*\r\n#1 +0x\[0-9a-f\]+ in func5\[^\
 
 clean_restart ${::testfile}
 
-if ![runto breakpt] {
+if {![runto breakpt]} {
     return -1
 }
 
@@ -61,7 +61,7 @@ gdb_test "interpreter-exec mi \"-stack-info-depth\"" \
 
 clean_restart ${::testfile}
 
-if ![runto breakpt] {
+if {![runto breakpt]} {
     return -1
 }
 

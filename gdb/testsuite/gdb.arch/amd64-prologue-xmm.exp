@@ -20,7 +20,7 @@ set csrcfile [file rootname $srcfile].c
 set csrcfile ${testfile}.c
 set opts {}
 
-if [info exists COMPILE] {
+if {[info exists COMPILE]} {
     # make check RUNTESTFLAGS='gdb.arch/amd64-prologue-xmm.exp COMPILE=1'
     set srcfile ${csrcfile}
     lappend opts debug optimize=-O0
@@ -32,7 +32,7 @@ if {[prepare_for_testing "failed to prepare" ${testfile} $srcfile $opts]} {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

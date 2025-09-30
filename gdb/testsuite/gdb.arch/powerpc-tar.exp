@@ -70,7 +70,7 @@ proc tar_available {} {
 with_test_prefix "check TAR access" {
     clean_restart $::testfile
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 
@@ -86,7 +86,7 @@ with_test_prefix "check TAR access" {
 # Now do the actual test
 clean_restart $::testfile
 
-if ![runto_main] {
+if {![runto_main]} {
     return
 }
 

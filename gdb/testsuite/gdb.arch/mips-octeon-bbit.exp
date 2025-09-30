@@ -4,16 +4,16 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
 
-# Test single-step on bbit.  
+# Test single-step on bbit.
 
 require {istarget "*octeon*"}
 
@@ -48,7 +48,7 @@ proc single_step_until { match } {
     set insn [current_insn]
     set start [timestamp]
     while { $insn != "" && [timestamp] - $start < 3*$timeout } {
-	if [regexp $match $insn] {
+	if {[regexp $match $insn]} {
 	    return 1
 	}
 	if {![single_step]} {
@@ -66,7 +66,7 @@ proc test_bbit { name taken } {
     }
     pass "$name single-step until bbit"
     gdb_test "si" "" "$name single-step on bbit"
-    if [regexp "li\\s+\[sv\]0,$taken" [current_insn]] {
+    if {[regexp "li\\s+\[sv\]0,$taken" [current_insn]]} {
 	pass "$name check insn after bbit"
     } else {
 	send_log "expected: li\\s+\[sv\]0,$taken found [current_insn]\n"

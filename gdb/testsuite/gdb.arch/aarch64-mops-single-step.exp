@@ -71,7 +71,7 @@ proc step_through_sequence { prefix } {
     return 0
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

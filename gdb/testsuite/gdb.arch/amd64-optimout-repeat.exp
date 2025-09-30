@@ -16,7 +16,7 @@
 standard_testfile .S .c
 set opts {}
 
-if [info exists COMPILE] {
+if {[info exists COMPILE]} {
     # make check RUNTESTFLAGS="gdb.arch/amd64-optimout-repeat.exp COMPILE=1"
     set srcfile ${srcfile2}
     lappend opts debug optimize=-O2
@@ -28,7 +28,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} $opts] } {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

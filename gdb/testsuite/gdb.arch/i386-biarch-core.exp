@@ -54,7 +54,7 @@ set corefile [gdb_remote_download host $corefile]
 # First check if this particular GDB supports i386, otherwise we should not
 # expect the i386 core file to be loaded successfully.
 set archs [get_set_option_choices "set architecture" "i386"]
-set supports_arch_i386 [expr [lsearch -exact $archs i386] != -1]
+set supports_arch_i386 [expr {[lsearch -exact $archs i386] != -1}]
 
 # Wrongly built GDB complains by:
 # "..." is not a core dump: File format not recognized

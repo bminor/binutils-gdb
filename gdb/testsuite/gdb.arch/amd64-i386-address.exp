@@ -21,7 +21,7 @@
 require {is_any_target "x86_64-*-*" "i?86-*-*"} is_lp64_target
 require {!istarget "*-*-openbsd*"}
 
-if [prepare_for_testing "failed to prepare" amd64-i386-address amd64-i386-address.S [list debug "additional_flags=-m32 -nostdlib"]] {
+if {[prepare_for_testing "failed to prepare" amd64-i386-address amd64-i386-address.S [list debug "additional_flags=-m32 -nostdlib"]]} {
     return -1
 }
 

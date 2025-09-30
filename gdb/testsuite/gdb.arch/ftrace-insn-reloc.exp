@@ -19,16 +19,16 @@ standard_testfile insn-reloc.c
 # Some targets have leading underscores on assembly symbols.
 set additional_flags [gdb_target_symbol_prefix_flags]
 
-if [prepare_for_testing "failed to prepare" $testfile-no-ipa $srcfile \
-	[list debug $additional_flags]] {
+if {[prepare_for_testing "failed to prepare" $testfile-no-ipa $srcfile \
+	 [list debug $additional_flags]]} {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
-if ![gdb_target_supports_trace] {
+if {![gdb_target_supports_trace]} {
     unsupported "target does not support trace"
     return -1
 }
@@ -48,7 +48,7 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 clean_restart $testfile
 set remote_libipa [gdb_load_shlib $libipa]
 
-if ![runto_main] {
+if {![runto_main]} {
     return 0
 }
 

@@ -34,7 +34,6 @@ exclude = [
 "gdb/testsuite/boards",
 "gdb/testsuite/config",
 "gdb/testsuite/lib",
-"gdb/testsuite/gdb.arch",
 "gdb/testsuite/gdb.base",
 # IGNORE (document reason in trailing comment):
 "gdb/testsuite/gdb.stabs", # To be removed.

@@ -24,7 +24,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
 
 set linespec ${srcfile}:[gdb_get_line_number "break here"]
 
-if ![runto ${linespec}] {
+if {![runto ${linespec}]} {
     return
 }
 
@@ -59,7 +59,7 @@ proc get_register_value {register} {
 
 # The test executable halves the vector length in a loop, so loop along
 # to check it.
-for {set i [get_register_value "vg"]} {$i > 1} {set i [expr $i / 2]} {
+for {set i [get_register_value "vg"]} {$i > 1} {set i [expr {$i / 2}]} {
     set lines_before [count_info_registers]
 
     gdb_test "next" ".*if .res < 0." "step over prctl vg = ${i}"

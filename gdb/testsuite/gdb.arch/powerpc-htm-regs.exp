@@ -159,7 +159,7 @@ gdb_test_no_output "set \$xer = 0xc0000000"
 # FPRs
 gdb_test_no_output "set \$f0 = 0.5"
 for {set i 1} {$i < 32} {incr i 1} {
-    gdb_test_no_output "set \$f$i = \$f[expr $i - 1] + 1.0"
+    gdb_test_no_output "set \$f$i = \$f[expr {$i - 1}] + 1.0"
 }
 
 gdb_test_no_output "set \$fpscr = 0x84005000"
@@ -213,7 +213,7 @@ proc test_register_match {reg_name reg_var_name hex} {
     # In some infrequent cases CXER doesn't match the
     # pre-transactional XER, possibly due to a linux kernel bug.
     set should_xfail 0
-    if [istarget "powerpc*-*-linux*" && reg_name == "cxer"] {
+    if {[istarget "powerpc*-*-linux*" && reg_name == "cxer"]} {
 	set should_xfail 1
     }
 
@@ -268,7 +268,7 @@ test_register_match "ctar" "tar" 1
 
 # Support for writing to the checkpointed registers is not
 # currently available in the gdbserver stub.
-if [target_is_gdbserver] {
+if {[target_is_gdbserver]} {
     unsupported "write to checkpointed registers"
     return
 }
@@ -282,7 +282,7 @@ for {set i 0} {$i < 32} {incr i 1} {
 
 gdb_test_no_output "set \$cf0 = 0.25"
 for {set i 1} {$i < 32} {incr i 1} {
-    gdb_test_no_output "set \$cf$i = \$cf[expr $i - 1] + 1.0"
+    gdb_test_no_output "set \$cf$i = \$cf[expr {$i - 1}] + 1.0"
 }
 
 for {set i 0} {$i < 32} {incr i 1} {

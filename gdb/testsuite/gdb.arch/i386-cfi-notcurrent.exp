@@ -21,11 +21,11 @@ require is_x86_like_target
 set testfile "i386-cfi-notcurrent"
 set srcfile ${testfile}.S
 
-if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {nodebug}] {
+if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {nodebug}]} {
     return -1
 }
 
-if ![runto f] {
+if {![runto f]} {
     return -1
 }
 

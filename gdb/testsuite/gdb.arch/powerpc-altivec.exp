@@ -53,7 +53,7 @@ proc func_check {instr} {
 
     set test "found: '$instr'"
     set peb [instr_to_patt $instr]
-    if [regexp -nocase -line [instr_to_patt $instr] $func] {
+    if {[regexp -nocase -line [instr_to_patt $instr] $func]} {
 	pass $test
     } else {
 	fail $peb

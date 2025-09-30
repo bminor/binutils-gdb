@@ -27,7 +27,7 @@ clean_restart
 gdb_load $binfile
 
 # We need to start the inferior to place the breakpoints in the memory at all.
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -54,7 +54,7 @@ gdb_test_multiple "b bundle" $test {
     }
 }
 
-if ![info exists bpt2address] {
+if {![info exists bpt2address]} {
     return -1
 }
 
@@ -65,7 +65,7 @@ set test "disassembly with breakpoints"
 gdb_test_multiple "disass main" $test {
     -re $match {
     	set got $expect_out(1,string)
-	if [string equal -nocase $orig $got] {
+	if {[string equal -nocase $orig $got]} {
 	    pass $test
 	} else {
 	    fail $test

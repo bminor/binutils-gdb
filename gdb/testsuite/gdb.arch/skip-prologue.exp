@@ -48,7 +48,7 @@ proc do_test { f } {
     }
 
     set test {$bp_addr == $prologue_end_addr}
-    if { [expr $test] } {
+    if {$bp_addr == $prologue_end_addr} {
 	pass $test
     } elseif { $bp_addr < $prologue_end_addr } {
 	# We'll allow this.  For instance, amd64 has a prologue

@@ -37,7 +37,7 @@ proc test_run {} {
     set main_r12 [get_integer_valueof "\$r12" "null"]
     gdb_assert { $main_r12 ne "null" }
 
-    set foo_r12 [expr "$main_r12 + 2"]
+    set foo_r12 [expr {$main_r12 + 2}]
     gdb_test "print \$r12=$foo_r12" "$foo_r12" "Set foo's %r12=$foo_r12"
     gdb_test "up" ".*main.*" "Go up a frame from foo"
     gdb_test "print \$r12" "$main_r12" "foo's %r12 unwound"
@@ -52,7 +52,7 @@ proc offset_test_run {} {
     set old_reg_val [get_integer_valueof "\$r12" "null"]
     gdb_assert { $old_reg_val ne "null" }
 
-    set new_reg_val [expr "$old_reg_val + 3"]
+    set new_reg_val [expr {$old_reg_val + 3}]
     gdb_test "print \$r14=$new_reg_val" "$new_reg_val" "Set %r14=$new_reg_val"
     gdb_test "print \$r13=$new_reg_val" "$new_reg_val" "Set %r13=$new_reg_val"
     gdb_test "print \$r12=$new_reg_val" "$new_reg_val" "Set %r12=$new_reg_val"

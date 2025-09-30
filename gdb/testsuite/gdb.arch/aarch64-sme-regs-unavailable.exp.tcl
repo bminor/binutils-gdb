@@ -26,21 +26,21 @@ load_lib aarch64-scalable.exp
 #
 proc_with_prefix check_regs { vl svl } {
     # Check VG to make sure it is correct
-    set expected_vg [expr $vl / 8]
+    set expected_vg [expr {$vl / 8}]
     gdb_test "print \$vg" "= ${expected_vg}"
 
     # Check SVG to make sure it is correct
-    set expected_svg [expr $svl / 8]
+    set expected_svg [expr {$svl / 8}]
     gdb_test "print \$svg" "= ${expected_svg}"
 
     # Make sure there is no SM or ZA state.
-    if [gdb_test "print \$svcr" "= \\\[ \\\]"] {
+    if {[gdb_test "print \$svcr" "= \\\[ \\\]"]} {
 	fail "incorrect ZA state"
 	return -1
     }
 
     # Check the size of ZA.
-    set expected_za_size [expr $svl * $svl]
+    set expected_za_size [expr {$svl * $svl}]
     gdb_test "print sizeof \$za" " = $expected_za_size"
 
     # Check the size of Z0.
@@ -69,15 +69,15 @@ proc_with_prefix check_regs { vl svl } {
 		}
 	    }
 	}
-	set last_tile [expr $last_tile * 2]
-	set last_slice [expr ($last_slice / 2)]
-	set elements [expr ($elements / 2)]
+	set last_tile [expr {$last_tile * 2}]
+	set last_slice [expr {($last_slice / 2)}]
+	set elements [expr {($elements / 2)}]
     }
 
     # Exercise reading/writing the tile pseudo-registers.
     set last_tile 1
     set elements $svl
-    set expected_size [expr $svl * $svl]
+    set expected_size [expr {$svl * $svl}]
     foreach_with_prefix granularity {"b" "h" "s" "d" "q"} {
 	set pattern [string_to_regexp [2d_array_value_pattern 0 $elements $elements]]
 	for {set tile 0} {$tile < $last_tile} {incr tile} {
@@ -86,13 +86,13 @@ proc_with_prefix check_regs { vl svl } {
 	    gdb_test "print sizeof ${register_name}" " = ${expected_size}"
 	    gdb_test "print ${register_name}" $pattern
 	}
-	set last_tile [expr $last_tile * 2]
-	set expected_size [expr $expected_size / 2]
-	set elements [expr ($elements / 2)]
+	set last_tile [expr {$last_tile * 2}]
+	set expected_size [expr {$expected_size / 2}]
+	set elements [expr {($elements / 2)}]
     }
 
     # Exercise reading from SME2 registers.
-    if [is_sme2_available] {
+    if {[is_sme2_available]} {
 	# The target supports SME2.
 	set zt_size 64
 	gdb_test "print sizeof \$zt0" " = $zt_size"
@@ -128,7 +128,7 @@ proc test_sme_registers_unavailable { id_start id_end } {
 	return -1
     }
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	untested "could not run to main"
 	return -1
     }
@@ -207,8 +207,8 @@ proc test_sme_registers_unavailable { id_start id_end } {
 	    }
 
 	    # Adjust vg and svg.
-	    set vg_value [expr $vl / 8]
-	    set svg_value [expr $svl / 8]
+	    set vg_value [expr {$vl / 8}]
+	    set svg_value [expr {$svl / 8}]
 	    gdb_test_no_output "set \$vg = ${vg_value}"
 	    gdb_test_no_output "set \$svg = ${svg_value}"
 

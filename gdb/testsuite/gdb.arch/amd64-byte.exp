@@ -63,7 +63,7 @@ with_test_prefix "at first bp" {
     }
 
     for { set r 1 } { $r <= 4  } { incr r } {
-	set h [expr $r + 14]
+	set h [expr {$r + 14}]
 	gdb_test "print/x \$$byte_regs($h)" \
 	    ".. = 0x[format %x $r]2" \
 	    "check contents of %$byte_regs($h)"
@@ -85,7 +85,7 @@ with_test_prefix "at second bp" {
     }
 
     for { set r 1 } { $r <= 4  } { incr r } {
-	set h [expr $r + 14]
+	set h [expr {$r + 14}]
 	gdb_test "set var \$$byte_regs($h) = $h" "" "set %$byte_regs($h)"
     }
 }
@@ -101,7 +101,7 @@ with_test_prefix "at third bp" {
     }
 
     for { set r 1 } { $r <= 4  } { incr r } {
-	set h [expr $r + 14]
+	set h [expr {$r + 14}]
 	gdb_test "print \$$byte_regs($h)" \
 	    ".. = $h" \
 	    "check contents of %$byte_regs($h)"

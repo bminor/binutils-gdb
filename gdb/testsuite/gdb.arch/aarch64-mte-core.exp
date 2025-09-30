@@ -67,14 +67,14 @@ proc test_mte_core_file { core_filename mode } {
     # has the expected value, that means the core file was generated correctly
     # and that GDB read the contents correctly.
     for {set i 0} {$i < $nmaps} {incr i} {
-	for {set offset 0} {$offset < $page_size} {set offset [expr $offset + 16]} {
+	for {set offset 0} {$offset < $page_size} {set offset [expr {$offset + 16}]} {
 	    set hex_tag [format "%x" $tag]
 	    gdb_test "memory-tag print-allocation-tag mmap_pointers\[$i\] + $offset" \
 		"= 0x$hex_tag" \
 		"mmap_ponters\[$i\] + $offset contains expected tag"
 	    # Update the expected tag.  The test writes tags in sequential
 	    # order.
-	    set tag [expr ($tag + 1) % 16]
+	    set tag [expr {($tag + 1) % 16}]
 	}
     }
 }
@@ -98,7 +98,7 @@ proc test_mode { mode } {
     }
     set binfile [standard_output_file ${executable}]
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	untested "could not run to main"
 	return -1
     }
