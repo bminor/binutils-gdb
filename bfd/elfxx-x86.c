@@ -2456,6 +2456,8 @@ _bfd_x86_elf_late_size_sections (bfd *output_bfd,
 
   if (htab->elf.sgotplt)
     {
+      asection *eh_frame;
+
       /* Don't allocate .got.plt section if there are no GOT nor PLT
 	 entries and there is no reference to _GLOBAL_OFFSET_TABLE_.  */
       if ((htab->elf.hgot == NULL
@@ -2468,7 +2470,11 @@ _bfd_x86_elf_late_size_sections (bfd *output_bfd,
 	  && (htab->elf.iplt == NULL
 	      || htab->elf.iplt->size == 0)
 	  && (htab->elf.igotplt == NULL
-	      || htab->elf.igotplt->size == 0))
+	      || htab->elf.igotplt->size == 0)
+	  && (!htab->elf.dynamic_sections_created
+	      || (eh_frame = bfd_get_section_by_name (output_bfd,
+						      ".eh_frame")) == NULL
+	      || eh_frame->rawsize == 0))
 	{
 	  htab->elf.sgotplt->size = 0;
 	  /* Solaris requires to keep _GLOBAL_OFFSET_TABLE_ even if it
