@@ -951,6 +951,10 @@ extern void _bfd_x86_elf_link_report_tls_transition_error
    const Elf_Internal_Rela *, const char *, const char *,
    enum elf_x86_tls_error_type);
 
+extern void _bfd_x86_elf_link_report_tls_invalid_section_error
+  (bfd *, asection *, Elf_Internal_Shdr *, struct elf_link_hash_entry *,
+   Elf_Internal_Sym *, reloc_howto_type *);
+
 #define bfd_elf64_mkobject \
   _bfd_x86_elf_mkobject
 #define bfd_elf32_mkobject \
