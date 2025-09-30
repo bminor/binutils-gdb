@@ -25,7 +25,7 @@
 # sure the test still fails:
 #
 # 2002-08-29  Jim Blandy  <jimb@redhat.com>
-# 
+#
 # 	* symtab.c (lookup_symbol_aux): In the cases where we find a
 # 	minimal symbol of an appropriate name and use its address to
 # 	select a symtab to read and search, use `name' (as passed to us)
@@ -35,14 +35,14 @@
 # The original bug was that you'd try to set a breakpoint on a method
 # (e.g., `break s::method1'), and you'd get an error, but if you
 # repeated the command, it would work the second time:
-#   
+#
 #   (gdb) break s::method1
 #   the class s does not have any method named method1
 #   Hint: try 's::method1<TAB> or 's::method1<ESC-?>
 #   (Note leading single quote.)
 #   (gdb) break s::method1
 #   Breakpoint 1 at 0x804841b: file psmang1.cc, line 13.
-#   (gdb) 
+#   (gdb)
 #
 # We observed this bug first using Stabs, and then using Dwarf 2.
 #

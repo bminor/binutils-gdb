@@ -38,7 +38,7 @@ if {![runto 'marker1']} {
 
 gdb_test "up" ".*main.*" "up from marker1 1"
 
-gdb_test "print rrt" " = \\(short( int)? &&\\) @$hex: -1" "print value of rrt" 
+gdb_test "print rrt" " = \\(short( int)? &&\\) @$hex: -1" "print value of rrt"
 
 gdb_test "ptype rrt" "type = short( int)? &&"
 

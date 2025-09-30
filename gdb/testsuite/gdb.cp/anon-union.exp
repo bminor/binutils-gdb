@@ -77,7 +77,7 @@ gdb_test "print foo" \
 # Modify the member just set
 gdb_test_no_output "set var foo.cloth = 35" "set var foo.cloth"
 
-# Now print out anon union again to see if the right member was set 
+# Now print out anon union again to see if the right member was set
 gdb_test "print foo" \
     "\\$\[0-9\]* = \{num1 = \{zero = 0, one = 0\}, \{pebble = 0, x = \{rock = 0, rock2 = 0\}, \{qux = 0, mux = 0\}, boulder = 0\}, \{paper = 35, cloth = 35\}, num2 = \{two = 0, three = 0\}\}" \
     "print foo 3"
@@ -86,7 +86,7 @@ gdb_test "print foo" \
 
 gdb_test "next" "42\[ \t\]*foo.mux = 55;" "next 3"
 
-# Now print out anon union again 
+# Now print out anon union again
 gdb_test "print foo" \
     "\\$\[0-9\]* = \{num1 = \{zero = 0, one = 0\}, \{pebble = 44, x = \{rock = 44, rock2 = 0\}, \{qux = 44, mux = 44\}, boulder = 44\}, \{paper = 35, cloth = 35\}, num2 = \{two = 0, three = 0\}\}" \
     "print foo 4"
@@ -94,7 +94,7 @@ gdb_test "print foo" \
 # Modify the member just set
 gdb_test_no_output "set var foo.pebble = 45" "set var foo.pebble"
 
-# Now print out anon union again to see if the right member was set 
+# Now print out anon union again to see if the right member was set
 gdb_test "print foo" \
     "\\$\[0-9\]* = \{num1 = \{zero = 0, one = 0\}, \{pebble = 45, x = \{rock = 45, rock2 = 0\}, \{qux = 45, mux = 45\}, boulder = 45\}, \{paper = 35, cloth = 35\}, num2 = \{two = 0, three = 0\}\}" \
     "print foo 5"
@@ -102,7 +102,7 @@ gdb_test "print foo" \
 # Modify another member at a different level
 gdb_test_no_output "set var foo.qux = 46" "set var foo.qux"
 
-# Now print out anon union again to see if the right member was set 
+# Now print out anon union again to see if the right member was set
 gdb_test "print foo" \
     "\\$\[0-9\]* = \{num1 = \{zero = 0, one = 0\}, \{pebble = 46, x = \{rock = 46, rock2 = 0\}, \{qux = 46, mux = 46\}, boulder = 46\}, \{paper = 35, cloth = 35\}, num2 = \{two = 0, three = 0\}\}" \
     "print foo 6"
@@ -150,7 +150,7 @@ gdb_test "print w" "\\$\[0-9\]* = 45" "print w 2"
 # See if z shows the same value
 gdb_test "print z" "\\$\[0-9\]* = 45" "print z 2"
 
-# Set the anon union member 
+# Set the anon union member
 gdb_test_no_output "set var z = 27" "set var z"
 
 # See if the change in value is noticed

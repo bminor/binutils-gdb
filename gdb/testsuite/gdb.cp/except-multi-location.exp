@@ -57,7 +57,7 @@ proc test_multi_libstdcpp {static_bin static_lib} {
     gdb_load ${binfile}
     gdb_load_shlib $binfile_lib
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return 0
     }
 

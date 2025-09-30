@@ -174,7 +174,7 @@ gdb_test_multiple "ptype Local" "local out of scope" {
         kfail gdb/825 "Local out of scope"
     }
 }
-        
+
 
 # DTS CLLbs14316 and CLLbs17058
 # coulter - I added a clause for HP's aCC compiler.  We print out the type
@@ -182,7 +182,7 @@ gdb_test_multiple "ptype Local" "local out of scope" {
 #   because of two reasons:
 #   There is a number at the end of InnerLocal4 which should not be there,
 #       DTS CLLbs14316
-#   The line number for the class 
+#   The line number for the class
 # setup_xfail "hppa*-*-*" CLLbs14316
 
 # ---

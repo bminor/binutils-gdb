@@ -70,12 +70,12 @@ gdb_test "print * (B *) a" ".* = {<A> = {a = 42}, b = 1729}" \
 gdb_test "print * b" ".* = {<A> = {a = 42}, b = 1729}" \
     "let compiler cast base class pointer to derived class pointer"
 
-# Check upcasting (it is trivial but still). 
+# Check upcasting (it is trivial but still).
 gdb_test "print * (A *) b" ".* = {a = 42}" \
     "cast derived class pointer to base class pointer"
 
 # Casting References.
-# Check upcasting. 
+# Check upcasting.
 gdb_test "print (A &) br" ".* = .A &.* {a = 42}" \
     "cast derived class reference to base class reference"
 

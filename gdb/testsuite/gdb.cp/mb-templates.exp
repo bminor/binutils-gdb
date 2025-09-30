@@ -61,7 +61,7 @@ gdb_test "break $srcfile:$bp_location" \
 
 gdb_test_no_output {condition $bpnum i==1} \
     "separate condition: set condition"
-    
+
 gdb_run_cmd
 gdb_test "" "Breakpoint $bkptno_num_re,.*foo<int> \\(i=1\\).*" "separate condition: run to breakpoint"
 

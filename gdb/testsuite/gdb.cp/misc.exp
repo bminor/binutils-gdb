@@ -49,12 +49,12 @@ proc test_expr { args } {
     if { [llength $args] % 2 } {
 	warning "an even # of arguments should be passed to test_expr"
     }
-    set last_ent [expr [llength $args] - 1]
+    set last_ent [expr {[llength $args] - 1}]
     set testname [lindex $args $last_ent]
     gdb_test_no_output [lindex $args 0] "$testname, setup"
 
-    for {set x 1} {$x < $last_ent} {set x [expr $x + 2]} {
-	gdb_test [lindex $args $x] [lindex $args [expr $x + 1]] "$testname, [lindex $args $x]"
+    for {set x 1} {$x < $last_ent} {set x [expr {$x + 2}]} {
+	gdb_test [lindex $args $x] [lindex $args [expr {$x + 1}]] "$testname, [lindex $args $x]"
     }
 }
 
@@ -72,7 +72,7 @@ test_expr "set language c++" \
     "print as bool"
 
 # Test bool type printing, etc.
-# Note: Language is already set to C++ above! 
+# Note: Language is already set to C++ above!
 gdb_test "print v_bool" "\\$\[0-9\]* = false" "print a bool var"
 
 # set a bool variable

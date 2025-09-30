@@ -31,7 +31,7 @@ if {[prepare_for_testing "failed to prepare" $testfile \
 }
 
 # Xfail for superfluous DW_TAG_lexical_block, gcc PR debug/55541.
-set have_xfail [expr [test_compiler_info gcc-*] && [gcc_major_version] < 5]
+set have_xfail [expr {[test_compiler_info gcc-*] && [gcc_major_version] < 5}]
 
 gdb_test "ptype Outer::Inner::InnerInner" \
     "type = struct Outer::Inner::InnerInner.*"

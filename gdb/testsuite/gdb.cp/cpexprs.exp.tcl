@@ -130,7 +130,7 @@ set ADDR "0x$HEX+"; # address
 # are (none need character escaping -- "add" will take care of that):
 
 # add name type print_name list
-# NAME,type: value is type of function 
+# NAME,type: value is type of function
 # NAME,print: value is print name of function (careful w/inherited/virtual!)
 # NAME,list: value is comment in source code on first line of function
 #   (without the leading "//")

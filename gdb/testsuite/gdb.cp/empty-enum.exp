@@ -51,7 +51,7 @@ gdb_test "print arg2" " = 4"
 
 
 # Xfail for missing DW_AT_type in DW_TAG_enumeration_type, gcc PR debug/16063.
-set have_xfail [expr [test_compiler_info gcc-*] && [gcc_major_version] < 5]
+set have_xfail [expr {[test_compiler_info gcc-*] && [gcc_major_version] < 5}]
 
 gdb_test_multiple "ptype arg1" "" {
     -re -wrap "type = enum enum1 : unsigned int \\{\\}" {

@@ -25,6 +25,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $testfile.cc {c++ debug}]
 
 gdb_test_no_output "set language c++"
 
-if [gdb_breakpoint "myclass::func"] {
+if {[gdb_breakpoint "myclass::func"]} {
     pass "setting breakpoint at myclass::func"
 }

@@ -125,7 +125,7 @@ if { [test_compiler_info {gcc-[0-3]-*}] ||
 # Xfail for incorrect decl_line on DW_TAG_imported_module,
 # gcc PR debug/108716.
 set have_gcc108716_xfail \
-    [expr [test_compiler_info gcc-*] && [gcc_major_version] < 13]
+    [expr {[test_compiler_info gcc-*] && [gcc_major_version] < 13}]
 
 gdb_test_multiple "print x" "print x, before using statement" {
     -re -wrap "No symbol .x. in current context.*" {

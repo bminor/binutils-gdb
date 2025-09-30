@@ -36,7 +36,7 @@ foreach sym $min_syms {
     set tst "setting breakpoint at '$sym'"
     if {[gdb_breakpoint "'$sym'"]} {
 	pass $tst
-    }    
+    }
 }
 
 

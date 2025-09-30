@@ -19,7 +19,7 @@
 # This file is part of the gdb testsuite
 
 # tests for inheritance, with several derivations types combinations
-# (private, public, protected) 
+# (private, public, protected)
 # classes have simple members and member functions.
 
 set ws "\[\r\n\t \]+"

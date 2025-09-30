@@ -45,7 +45,7 @@ if {![runto_main]} {
 }
 
 get_debug_format
-set non_dwarf [expr ! [test_debug_format "DWARF \[0-9\]"]]
+set non_dwarf [expr {! [test_debug_format "DWARF \[0-9\]"]}]
 
 # First, run to after we've constructed all the objects:
 

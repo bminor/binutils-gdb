@@ -424,7 +424,7 @@ proc test_lookup_operator_functions {} {
 
     # operator[] needs double backslashes, so that a single backslash
     # will be sent to GDB, preventing the square brackets from being
-    # evaluated as a regular expression. 
+    # evaluated as a regular expression.
     info_func "operator\\\[\\\](" "void foo::operator\[\]($dm_type_foo_ref);"
 
     # These are gnarly because they might end with 'static'.
@@ -493,7 +493,7 @@ proc test_paddr_operator_functions {} {
     gdb_test "print &foo::operator new" \
 	" = .* $hex <foo::operator new\\(.*\\)(| static)>"
     gdb_test "print &foo::operator new\[\]" \
-	" = .* $hex <foo::operator new\\\[\\\]\\(.*\\)(| static)>"    
+	" = .* $hex <foo::operator new\\\[\\\]\\(.*\\)(| static)>"
 
     print_addr "foo::operator delete($dm_type_void_star)"
     print_addr "foo::operator delete\[\]($dm_type_void_star)"

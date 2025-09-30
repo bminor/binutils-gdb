@@ -19,7 +19,7 @@ set srcfile expand-sals.cc
 if { [prepare_for_testing "failed to prepare" expand-sals $srcfile {debug c++}] } {
     return -1
 }
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

@@ -39,7 +39,7 @@ require target_can_use_run_cmd
 #
 set main_line 25
 
-# The commands we test here produce many lines of output; disable "press 
+# The commands we test here produce many lines of output; disable "press
 # <return> to continue" prompts.
 gdb_test_no_output "set height 0"
 
@@ -61,7 +61,7 @@ gdb_test "break 25" \
 set old_gdb_prompt $gdb_prompt
 set gdb_prompt "\r\n\032\032pre-prompt\r\n$gdb_prompt \r\n\032\032prompt\r\n"
 
-send_gdb "set annotate 3\n" 
+send_gdb "set annotate 3\n"
 gdb_expect_list "annotation set at level 3" "\r\n$gdb_prompt$" {
     "set annotate 3"
 }
@@ -131,7 +131,7 @@ gdb_expect {
 }
 
 #
-# break at first line of main. 
+# break at first line of main.
 #
 send_gdb "break 22\n"
 gdb_expect_list "break at main" "$gdb_prompt$" {
@@ -158,7 +158,7 @@ gdb_expect_list "second run until main breakpoint" "$gdb_prompt$" {
 }
 
 #
-# set up a watch point on a.x 
+# set up a watch point on a.x
 #
 send_gdb "watch a.x\n"
 gdb_expect_list "set watch on a.x" "$gdb_prompt$" {
@@ -177,12 +177,12 @@ gdb_test_multiple "next" "watch triggered on a.x" {
 }
 
 #
-# send ^C to gdb, so that the quit() function gets called 
+# send ^C to gdb, so that the quit() function gets called
 # and annotate-quit is tested
 # test:
 # annotate-quit
 #
-if ![target_info exists gdb,nointerrupts] {
+if {![target_info exists gdb,nointerrupts]} {
     send_gdb "\003"
     gdb_expect_list "annotate-quit" "$gdb_prompt$" {
 	"\r\n\032\032error-begin\r\n"
@@ -192,9 +192,9 @@ if ![target_info exists gdb,nointerrupts] {
 }
 
 #
-# FIXME: the testsuite does not currently have tests for 
+# FIXME: the testsuite does not currently have tests for
 #        annotate_catchpoints and annotate_function_call
-#        and a few variants of the annotations that are 
+#        and a few variants of the annotations that are
 #        tested (marked by FIXME on the annot?.exp files)
 #
 

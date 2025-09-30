@@ -49,7 +49,7 @@ proc do_exceptprint_tests {prefix output} {
 	do_continue_to_catchpoint "continue to catch"
 	gdb_test "print \$_exception" " = $output" \
 	    "print exception value at catch"
-	
+
 	do_continue_to_catchpoint "continue to rethrow"
 	gdb_test "print \$_exception" " = $output" \
 	    "print exception value at rethrow"

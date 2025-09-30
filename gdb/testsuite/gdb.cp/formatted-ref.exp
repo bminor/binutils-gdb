@@ -15,9 +15,9 @@
 
 # Author: P. N. Hilfinger, AdaCore, Inc.
 
-# This test checks the behavior of formatted print when applied to a 
+# This test checks the behavior of formatted print when applied to a
 # reference value.  The intended behavior is that a formatted print of
-# such a value should display the same value as a plain print, 
+# such a value should display the same value as a plain print,
 # modulo format, of course.  Older versions of GDB would instead print
 # the reference's address value itself when doing a formatted print,
 # rather than printing both that and the dereferenced value.  We also
@@ -44,7 +44,7 @@ proc get_address { var } {
 	-re "\\$\[0-9\]+ = \\(.*\\) (0x\[0-9a-f\]+).*$gdb_prompt $" {
             return $expect_out(1,string)
  	}
-        timeout { 
+        timeout {
 	    perror "couldn't find address of $var"
 	    return ""
         }
@@ -59,7 +59,7 @@ proc test_p_x { var type val addr } {
     gdb_test_multiple $test $test {
         -re "\\$\[0-9\]+ = \\([string_to_regexp $type]\\) @0x\[a-f0-9\]+: [string_to_regexp $val].*$gdb_prompt $" {
 	    pass $test
-	} 
+	}
 	-re "\\$\[0-9\]+ = $addr.*$gdb_prompt $" {
             fail "$test (prints just address)"
         }
@@ -77,7 +77,7 @@ proc test_p_x_addr { var addr } {
     gdb_test_multiple $test $test {
         -re "\\$\[0-9\]+ = $addr.*$gdb_prompt $" {
 	    pass $test
-	} 
+	}
 	-re "\\$\[0-9\]+ = 0x\[a-f0-9+\]+.*$gdb_prompt $" {
             fail "$test (prints unexpected address)"
         }

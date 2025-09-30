@@ -60,7 +60,7 @@ proc build_node {id} {
 	# (the source only uses that at the root struct).
 	# We also don't create nodes not in the source file
 	# (id >= 60).
-	if {[expr {$n % 10}] != 0 && $n < 60} {
+	if {$n % 10 != 0 && $n < 60} {
 	    lappend nodes($id,children) $n
 	}
     }
@@ -96,7 +96,7 @@ proc make_source {} {
     send_log "int\nmain \(\)\n\{\n"
     set plist {}
     for {set i 10} {$i < 60} {incr i} {
-	if {$i > 10 && [expr {$i % 10}] == 0} {
+	if {$i > 10 && $i % 10 == 0} {
 	    incr i
 	    set plist {"S10"}
 	    send_log "\n"

@@ -36,7 +36,7 @@ proc set_demangling_style {style} {
 		fail "$style: set demangle-style"
 		error "set_demangling_style: set style"
 	    }
-	    timeout { 
+	    timeout {
 		fail "$style: set demangle-style (timeout)"
 		error "set_demangling_style: set style"
 	    }
@@ -44,15 +44,15 @@ proc set_demangling_style {style} {
 
     gdb_test_multiple "show demangle-style" \
 	"$style: check demangling style" {
-	    -re "The current C\[+\]+ demangling style is \"$style\".\r\n$gdb_prompt $" { 
+	    -re "The current C\[+\]+ demangling style is \"$style\".\r\n$gdb_prompt $" {
 		pass "$style: check demangling style"
 	    }
 	    -re ".*$gdb_prompt $" {
 		fail "$style: check demangling style"
 		error "set_demangling_style: check style"
 	    }
-	    timeout { 
-		fail "$style: check demangling style (timeout)" 
+	    timeout {
+		fail "$style: check demangling style (timeout)"
 		error "set_demangling_style: check style"
 	    }
 	}
@@ -89,13 +89,13 @@ proc test_demangling_core {tester test result} {
 ### Why don't we just pass the STYLE and NAME as two separate
 ### arguments, or let the style be a global variable?  That would be
 ### cleaner.  However, doing it this way means that:
-### 
+###
 ### 1) the name of the test, as recorded in the summary and log,
 ### appears verbatim in the script, and
-### 
+###
 ### 2) that test names are unique, even though we try to demangle the same
 ### identifiers using several different mangling styles.
-### 
+###
 ### This makes it a lot easier for people tracking down failures to
 ### find the one they care about.
 
@@ -157,14 +157,14 @@ proc test_gnuv3_style_demangling {} {
 }
 
 proc catch_demangling_errors {command} {
-    if {[catch $command result]} {
+    if {[catch {$command} result]} {
 	puts "ERROR: demangle.exp: while running $command: $result"
     }
 }
 
 # Test support for different demangling styles.  Note that this does
 # not depend upon running the test program and does not depend upon
-# gdb being able to lookup any C++ symbols.  It simply calls the 
+# gdb being able to lookup any C++ symbols.  It simply calls the
 # internal demangler with synthesized strings and tests the results.
 
 proc do_tests {} {

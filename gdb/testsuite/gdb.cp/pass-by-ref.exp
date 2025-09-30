@@ -115,7 +115,7 @@ proc generate_member_function { classname signature length state } {
 	    set definition "$classname\:\:$signature
                             {
                               data\[0\] = $CUSTOM;
-                              data\[[expr $length - 1]\] = $CUSTOM;
+                              data\[[expr {$length - 1}]\] = $CUSTOM;
                               tracer = $TRACE;
                             }\n"
 	}
@@ -177,7 +177,7 @@ proc generate_class { classname length states } {
     $classname\:\:$classname (void)
     {
         data\[0\] = $ORIGINAL;
-        data\[[expr $length - 1]\] = $ORIGINAL;
+        data\[[expr {$length - 1}]\] = $ORIGINAL;
     }
 
     $definitions
@@ -398,7 +398,7 @@ proc test_for_class { prefix states cbvfun data_field length} {
 	    gdb_test "print ${name}_var.${data_field}\[0\]" " = $ORIGINAL" \
 		"cbv argument should not change, item 0"
 	    if {$length > 1} {
-		set last_index [expr $length - 1]
+		set last_index [expr {$length - 1}]
 		gdb_test "print ${name}_var.${data_field}\[$last_index\]" \
 		    " = $ORIGINAL" \
 		    "cbv argument should not change, item $last_index"

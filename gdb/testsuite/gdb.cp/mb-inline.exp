@@ -69,7 +69,7 @@ gdb_test_multiple "info break" "disabled breakpoint 1.2" {
 	# will loose.  The heuristic of GDB should be improved.
 	setup_kfail gdb/12924 "*-*-uclinux*"
 	fail "disabled breakpoint 1.2"
-    }    
+    }
 }
 
 # Make sure we can set a breakpoint on a source statement that spans

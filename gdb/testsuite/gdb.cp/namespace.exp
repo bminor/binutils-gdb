@@ -89,10 +89,10 @@ setup_xfail hppa*-*-*11* CLLbs14869
 gdb_test_multiple "info func xyzq" "info func xyzq" {
     -re "All functions.*File.*namespace.cc:\r\n.*\tint AAA::A_xyzq\\(int\\);\r\n.*\tint BBB::B_xyzq\\(int\\);\r\n.*\tchar AAA::xyzq\\(char\\);\r\n.*\tchar BBB::xyzq\\(char\\);\r\n.*\tchar BBB::CCC::xyzq\\(char\\);\r\n.*\tchar BBB::Class::xyzq\\(char\\);\r\n$gdb_prompt $" {
 	pass "info func xyzq"
-    }    
+    }
     -re "All functions.*File.*namespace.cc:\r\n.*\tint AAA::A_xyzq\\(int\\);\r\n.*\tchar AAA::xyzq\\(char\\);\r\n.*\tint BBB::B_xyzq\\(int\\);\r\n.*\tchar BBB::CCC::xyzq\\(char\\);\r\n.*\tchar BBB::Class::xyzq\\(char\\);\r\n.*\tchar BBB::xyzq\\(char\\);\r\n$gdb_prompt $" {
 	pass "info func xyzq"
-    }    
+    }
 }
 
 # Call a function in a namespace
@@ -120,7 +120,7 @@ gdb_test "print 'BBB::CCC::xyzq'('x')" \
 
 gdb_test "print BBB::CCC::xyzq('x')" \
     "\\$\[0-9\]* = 122 'z'"
-       
+
 # Break on a function in a nested namespace
 
 gdb_test "break BBB::CCC::xyzq" \
@@ -153,9 +153,9 @@ gdb_test "whatis ::C::cOtherFileVar" "type = const C::cOtherFileType"
 gdb_test "print C::cOtherFileVar" "\\$\[0-9\].* = 319"
 gdb_test "print ::C::cOtherFileVar" "\\$\[0-9\].* = 319"
 
-if $xfail_class_types { setup_xfail *-*-* }
+if {$xfail_class_types} { setup_xfail *-*-* }
 gdb_test "whatis C::OtherFileClass::cOtherFileClassType" "type = short"
-if $xfail_class_types { setup_xfail *-*-* }
+if {$xfail_class_types} { setup_xfail *-*-* }
 gdb_test "whatis ::C::OtherFileClass::cOtherFileClassType" "type = short"
 gdb_test "print C::OtherFileClass::cOtherFileClassVar" " = 318"
 
@@ -171,8 +171,8 @@ gdb_test_multiple $test $test {
     }
     -re "\\$\[0-9\].* = 318\r\n$gdb_prompt $" {
 	# Do not permit to XFAIL on recent GCCs.
-	if $xfail_class_types {
-	    setup_xfail *-*-* 
+	if {$xfail_class_types} {
+	    setup_xfail *-*-*
 	    fail $test
 	    # Unresolved means human intervention is required to determine
 	    # whether the test passed or failed.  Since the previous test
@@ -226,9 +226,9 @@ gdb_test "ptype C::OtherFileClass" "No symbol \"OtherFileClass\" in namespace \"
 
 # Test class typedefs printing.
 set expect "type = class C::OtherFileClass \{\r\n.*\r\n *typedef short cOtherFileClassType;\r\n *typedef long cOtherFileClassType2;\r\n\}"
-if $xfail_class_types { setup_xfail *-*-* }
+if {$xfail_class_types} { setup_xfail *-*-* }
 gdb_test "ptype OtherFileClass" $expect "ptype OtherFileClass typedefs"
-if $xfail_class_types { setup_xfail *-*-* }
+if {$xfail_class_types} { setup_xfail *-*-* }
 gdb_test "ptype ::C::OtherFileClass" $expect "ptype ::C::OtherFileClass typedefs"
 
 # Some anonymous namespace tests.

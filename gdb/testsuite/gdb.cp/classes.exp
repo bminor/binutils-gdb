@@ -203,7 +203,7 @@ proc test_ptype_class_objects {} {
     #
     # gcc 2.X with stabs (stabs or stabs+?) used to have a problem with
     # static methods whose name is the same as their argument mangling.
- 
+
     cp_test_ptype_class \
 	"class Static" "" "class" "Static" \
 	{
@@ -413,7 +413,7 @@ proc test_ptype_class_objects {} {
 # Test simple access to class members.
 
 proc test_non_inherited_member_access {} {
-    
+
     # Print non-inherited members of g_A.
     gdb_test "print g_A.a" ".* = 1"
     gdb_test "print g_A.x" ".* = 2"

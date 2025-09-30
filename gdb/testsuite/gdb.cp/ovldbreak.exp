@@ -253,7 +253,7 @@ gdb_test "info break" $bptable "breakpoint info, after setting one-by-one"
 # Test choice "cancel".
 # This is copy-and-paste from set_bp_overloaded.
 
-send_gdb "break foo::overload1arg\n" 
+send_gdb "break foo::overload1arg\n"
 gdb_expect {
     -re "$menu_overload1arg" {
         pass "bp menu for foo::overload1arg choice cancel"
@@ -333,7 +333,7 @@ gdb_test "info breakpoints" "No breakpoints, watchpoints, tracepoints, or catchp
 # This is copy-and-paste from set_bp_overloaded.
 
 incr bpnum
-send_gdb "break foo::overload1arg\n" 
+send_gdb "break foo::overload1arg\n"
 gdb_expect {
     -re "$menu_overload1arg" {
         pass "bp menu for foo::overload1arg choice all"
@@ -402,7 +402,7 @@ proc continue_to_bp_overloaded {bpnumber might_fail line argtype argument} {
         }
 
         -re "Continuing.\r\n\r\nBreakpoint $bkptno_num_re, foo::overload1arg \\(this=${hex}, arg=.*\\) at .*$srcfile:$line\r\n$decimal\[\t \]+{ $body }.*$gdb_prompt $" {
-            if $might_kfail {
+            if {$might_kfail} {
                 kfail "c++/8130" "continue to bp overloaded : $argtype"
             } else {
                 fail "continue to bp overloaded : $argtype"

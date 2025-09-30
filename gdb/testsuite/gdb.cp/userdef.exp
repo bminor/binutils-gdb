@@ -32,7 +32,7 @@ if {![runto_main]} {
 }
 
 gdb_test "break marker1" \
-    "Breakpoint .*${srcfile}.*" 
+    "Breakpoint .*${srcfile}.*"
 
 gdb_test "cont" \
     "Break.* marker1(\\(\\)|) \\(\\) at .*:$decimal.*" \
@@ -58,7 +58,7 @@ gdb_test_multiple "frame" "re-selected 'main' frame after inferior call" {
         pass "re-selected 'main' frame after inferior call"
     }
 }
-        
+
 gdb_test "print one - two" "\\\$\[0-9\]* = {x = -2, y = -2}"
 
 gdb_test "print one * two" "\\\$\[0-9\]* = {x = 8, y = 15}"

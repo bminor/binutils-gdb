@@ -63,7 +63,7 @@ with_test_prefix "before starting" {
     do_typeid_tests 0
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

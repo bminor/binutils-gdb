@@ -143,7 +143,7 @@ proc test_template_breakpoints {} {
 		    "constructor breakpoint (bad menu choices)"
 	}
     }
-    
+
     gdb_test_multiple "break T5<int>::~T5" "destructor_breakpoint" {
 	-re "Breakpoint.*at.* file .*${testfile}.cc, line.*$gdb_prompt $"
 	{
@@ -154,7 +154,7 @@ proc test_template_breakpoints {} {
 	    kfail "gdb/8217" "destructor breakpoint"
 	}
     }
-    
+
     gdb_test "break T5<int>::value" \
 	"Breakpoint.*at.* file .*${testfile}.cc, line.*" \
 	"value method breakpoint"
@@ -191,7 +191,7 @@ proc test_template_breakpoints {} {
 proc test_template_calls {} {
     global gdb_prompt
 
-    if [target_info exists gdb,cannot_call_functions] {
+    if {[target_info exists gdb,cannot_call_functions]} {
 	unsupported "this target can not call functions"
 	return
     }
@@ -264,7 +264,7 @@ proc do_tests {} {
     test_template_typedef
     test_template_args
 
-    if [ runto_main] {
+    if {[ runto_main]} {
 	test_template_calls
     }
 }

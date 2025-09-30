@@ -49,7 +49,7 @@ gdb_test "print static_cast<int&&> (global_int)" " = \\(int &&\\) @$hex: 7"
 gdb_test "print static_cast<float&> (global_float)" " = \\(float &\\) @$hex: 3\\.$decimal"
 gdb_test "print static_cast<float&&> (global_float)" " = \\(float &&\\) @$hex: 3\\.$decimal"
 
-set t "print value of f2 on (Child&&) in main" 
+set t "print value of f2 on (Child&&) in main"
 gdb_start_again "marker1 here" $t
 gdb_test "print f2(static_cast<Child&&>(Q))" ".* = 40.*" $t
 

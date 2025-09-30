@@ -24,7 +24,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 
 if {![runto_main]} {
     return
-} 
+}
 
 if {![skip_unwinder_tests]} {
     unsupported "nextoverthrow.exp could not find _Unwind_DebugHook"

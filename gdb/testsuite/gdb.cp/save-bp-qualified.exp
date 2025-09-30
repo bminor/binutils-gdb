@@ -26,7 +26,7 @@ proc restart {} {
 
     clean_restart $testfile
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return 0
     }
     # Delete all breakpoints, watchpoints, tracepoints, and catchpoints so that
@@ -37,7 +37,7 @@ proc restart {} {
 }
 
 with_test_prefix "save" {
-    if ![restart] {
+    if {![restart]} {
 	return -1
     }
 
@@ -55,7 +55,7 @@ with_test_prefix "save" {
 }
 
 with_test_prefix "restore" {
-    if ![restart] {
+    if {![restart]} {
 	return -1
     }
 

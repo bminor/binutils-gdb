@@ -176,7 +176,7 @@ proc test_virtual_calls {} {
     global gdb_prompt
     global nl
 
-    if [target_info exists gdb,cannot_call_functions] {
+    if {[target_info exists gdb,cannot_call_functions]} {
 	unsupported "this target can not call functions"
 	return 0
     }
