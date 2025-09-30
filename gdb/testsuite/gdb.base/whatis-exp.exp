@@ -23,7 +23,7 @@
 # computing the value, but just the type
 # of the result. It goes through the evaluate_subexp_standard
 # with the EVAL_AVOID_SIDE_EFFECTS flag rather than EVAL_NORMAL
-# 
+#
 
 #
 # test running programs

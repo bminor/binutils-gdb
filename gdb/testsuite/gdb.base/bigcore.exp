@@ -28,8 +28,8 @@ require isnative
 # I/O bandwidth.
 
 if { [istarget "*-*-*bsd*"]
-     || [istarget "*-*-solaris*"] 
-     || [istarget "*-*-darwin*"] 
+     || [istarget "*-*-solaris*"]
+     || [istarget "*-*-darwin*"]
      || [istarget "*-*-cygwin*"] } {
     untested "kernel lacks sparse corefile support (PR gdb/1551)"
     return

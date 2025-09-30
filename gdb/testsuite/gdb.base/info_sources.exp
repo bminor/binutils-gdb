@@ -68,7 +68,7 @@ proc test_info_sources {args expect_seen_info_sources \
     }
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

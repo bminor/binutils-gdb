@@ -21,7 +21,7 @@ standard_testfile
 set gcc_compiled [is_c_compiler_gcc]
 
 set compile_flags {debug nowarnings quiet}
-if [support_complex_tests] {
+if {[support_complex_tests]} {
     lappend compile_flags "additional_flags=-DTEST_COMPLEX"
 }
 
@@ -55,7 +55,7 @@ proc_with_prefix integral_args {} {
 
     # Print each arg as a double check to see if we can print
     # them here as well as with backtrace.
-    gdb_test "print c" ".* = 97 'a'" "print c after run to call0a" 
+    gdb_test "print c" ".* = 97 'a'" "print c after run to call0a"
     gdb_test "print s" ".* = 1" "print s after run to call0a"
     gdb_test "print i" ".* = 2" "print i after run to call0a"
     gdb_test "print l " ".* = 3" "print l after run to call0a"
@@ -921,7 +921,7 @@ proc_with_prefix localvars_in_indirect_call { } {
     gdb_breakpoint call0a
     gdb_continue call0a
     delete_breakpoints
-    
+
     # Print each arg as a double check to see if we can print
     # them here as well as with backtrace.
 
@@ -937,9 +937,9 @@ proc_with_prefix localvars_in_indirect_call { } {
 	"#0.*call0a \\(c=97 'a', s=1, i=2, l=3\\).*#1.*main.*" \
 	"backtrace in indirectly called function"
 
-    # 
+    #
     # "finish" brings us back to main.  We then will try to step through
-    # the second indirect call.  
+    # the second indirect call.
     # On some targets (e.g. m68k) gdb will stop from the finish in midline
     # of the first indirect call. This is due to stack adjustment instructions
     # after the indirect call. In these cases we will step till we hit the
@@ -1032,7 +1032,7 @@ proc_with_prefix stepping_over_trampolines { } {
 }
 
 set prev_timeout $timeout
-if [istarget "mips*tx39-*"] {
+if {[istarget "mips*tx39-*"]} {
     set timeout 300
 } else {
     set timeout 60
@@ -1083,7 +1083,7 @@ if {$allow_float_test} {
 }
 
 # Test _Complex type here if supported.
-if [support_complex_tests] {
+if {[support_complex_tests]} {
     complex_args
 
     complex_integral_args

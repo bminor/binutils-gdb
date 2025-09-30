@@ -24,7 +24,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
 
 proc test { prefix body } {
     with_test_prefix $prefix {
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return 0
 	}
 	uplevel 1 $body
@@ -39,7 +39,7 @@ test "next" {
 }
 
 test "infcall" {
-    if ![target_info exists gdb,cannot_call_functions] {
+    if {![target_info exists gdb,cannot_call_functions]} {
 	gdb_test "print func ()" " = 1"  "termios ok"
     } else {
 	unsupported "cannot call functions"

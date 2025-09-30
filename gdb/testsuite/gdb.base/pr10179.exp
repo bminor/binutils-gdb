@@ -22,7 +22,7 @@ if {[build_executable ${testname}.exp $testname $sources {debug}] == -1} {
 
 clean_restart ${testname}
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

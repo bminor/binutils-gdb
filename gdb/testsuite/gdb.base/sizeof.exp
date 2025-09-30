@@ -127,7 +127,7 @@ while { $ok } {
     gdb_expect {
 	-re ".*dump" {
 	    #pass "maint print arch $ok"
-	    #set ok [expr $ok + 1]
+	    #set ok [expr {$ok + 1}]
 	}
 	-re "$gdb_prompt $" {
 	    pass "maint print arch"

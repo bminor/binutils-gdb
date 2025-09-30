@@ -19,7 +19,7 @@ standard_testfile
 
 require {!target_info exists gdb,nosignals}
 
-if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug}] {
+if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug}]} {
     return -1
 }
 

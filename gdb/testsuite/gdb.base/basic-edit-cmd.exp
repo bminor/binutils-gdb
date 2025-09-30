@@ -42,7 +42,7 @@ if {![runto_main]} {
 
 # Are we using DWARF debug format?
 get_debug_format
-set non_dwarf [expr ! [test_debug_format "DWARF \[0-9\]"]]
+set non_dwarf [expr {! [test_debug_format "DWARF \[0-9\]"]}]
 
 # Find line numbers for use in tests.
 set line_0 [gdb_get_line_number "prologue location"]

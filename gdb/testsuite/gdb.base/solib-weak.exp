@@ -69,7 +69,7 @@ proc do_test { lib1opts lib2opts lib1first } {
     set lib1 [standard_output_file ${libfile1}.sl]
     set lib2 [standard_output_file ${libfile2}.sl]
 
-    if $lib1first {
+    if {$lib1first} {
 	set exec_opts [list debug shlib=${lib1} shlib=${lib2}]
 	set expected_file ${libfile1}
     } else {

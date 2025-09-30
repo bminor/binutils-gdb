@@ -24,7 +24,7 @@ if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -43,14 +43,14 @@ if {[istarget "s390*-*-*"]} {
 
 foreach wpsize $sizes {
     for {set wpoffset 0} {$wpoffset < 8 / $wpsize} {incr wpoffset} {
-	set wpstart [expr $wpoffset * $wpsize]
-	set wpend [expr ($wpoffset + 1) * $wpsize]
+	set wpstart [expr {$wpoffset * $wpsize}]
+	set wpend [expr {($wpoffset + 1) * $wpsize}]
 	set wpendaligned $alignedend($wpend)
 	foreach rdsize $sizes {
 	    for {set rdoffset 0} {$rdoffset < 8 / $rdsize} {incr rdoffset} {
-		set rdstart [expr $rdoffset * $rdsize]
-		set rdend [expr ($rdoffset + 1) * $rdsize]
-		set expect_hit [expr max ($wpstart, $rdstart) < min ($wpend, $rdend)]
+		set rdstart [expr {$rdoffset * $rdsize}]
+		set rdend [expr {($rdoffset + 1) * $rdsize}]
+		set expect_hit [expr {max ($wpstart, $rdstart) < min ($wpend, $rdend)}]
 		set test "$rwatch data.u.size$wpsize\[$wpoffset\]"
 		set wpnum ""
 		gdb_test_multiple $test $test {
@@ -88,7 +88,7 @@ foreach wpsize $sizes {
 		    if {$expect_hit == 0 && $rdstart < $wpendaligned} {
 			setup_xfail external/20207 "aarch64*-*-linux*"
 		    }
-		    if {!$expect_hit && [expr max ($wpstart / 8, $rdstart / 8) < min (($wpend + 7) / 8, ($rdend + 7) / 8)]} {
+		    if {!$expect_hit && max ($wpstart / 8, $rdstart / 8) < min (($wpend + 7) / 8, ($rdend + 7) / 8)} {
 			setup_xfail breakpoints/23131 "powerpc*-*-*"
 		    }
 		    fail $test
@@ -139,7 +139,7 @@ foreach_with_prefix wpcount {4 7} {
 	}
     }
     set test "wpcount($wpcount)"
-    if {!$wpoffset_to_wpnum([expr $wpcount - 1])} {
+    if {!$wpoffset_to_wpnum([expr {$wpcount - 1}])} {
 	untested $test
 	continue
     }
@@ -168,7 +168,7 @@ proc size8twice { function cmd offset index } {
 	"Breakpoint $::decimal at $::hex" "$bp_src_string"
 
     # Set a hardware watchpoint.
-    set watch_index [expr $offset + $index]
+    set watch_index [expr {$offset + $index}]
     set test "$cmd data.u.size8twice\[$watch_index\]"
     set wpnum 0
     gdb_test_multiple $test "" {

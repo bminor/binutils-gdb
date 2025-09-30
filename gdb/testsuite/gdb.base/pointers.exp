@@ -19,7 +19,7 @@
 #
 # tests for pointer arithmetic and pointer dereferencing
 # with integer type variables and pointers to integers
-# 
+#
 
 #
 # test running programs
@@ -65,7 +65,7 @@ gdb_test "next " "more_code.*;" "continuing after dummy()"
 #        pass "illegal pointer assignment rejected"
 #      }
 #    -re ".*$gdb_prompt $" { fail "illegal pointer assignment rejected" }
-#    timeout           { fail "(timeout) illegal pointer assignment rejected" }    
+#    timeout           { fail "(timeout) illegal pointer assignment rejected" }
 #  }
 
 
@@ -75,7 +75,7 @@ gdb_test "next " "more_code.*;" "continuing after dummy()"
 #        pass "illegal pointer assignment rejected"
 #      }
 #    -re ".*$gdb_prompt $" { fail "illegal pointer assignment rejected" }
-#    timeout           { fail "(timeout) ilegal pointer assignment rejected" }    
+#    timeout           { fail "(timeout) ilegal pointer assignment rejected" }
 #  }
 
 #send_gdb "print v_unsigned_int_pointer == v_double_pointer\n"
@@ -84,7 +84,7 @@ gdb_test "next " "more_code.*;" "continuing after dummy()"
 #        pass "illegal pointer operation (+) rejected"
 #      }
 #    -re ".*$gdb_prompt $" { fail "illegal pointer operation (+) rejected" }
-#    timeout           { fail "(timeout) illegal pointer operation (+) rejected" }    
+#    timeout           { fail "(timeout) illegal pointer operation (+) rejected" }
 #  }
 
 
@@ -94,7 +94,7 @@ gdb_test "next " "more_code.*;" "continuing after dummy()"
 #        pass "illegal pointer operation (*) rejected"
 #      }
 #    -re ".*$gdb_prompt $" { fail "illegal pointer operation (*) rejected" }
-#    timeout           { fail "(timeout) illegal pointer operation (*) rejected" }    
+#    timeout           { fail "(timeout) illegal pointer operation (*) rejected" }
 #  }
 
 
@@ -104,7 +104,7 @@ gdb_test "next " "more_code.*;" "continuing after dummy()"
 #        pass "ilegal pointer assignment rejected"
 #      }
 #    -re ".*$gdb_prompt $" { fail "illegal pointer assignment rejected" }
-#    timeout           { fail "(timeout) illegal pointer assignment rejected" }    
+#    timeout           { fail "(timeout) illegal pointer assignment rejected" }
 #  }
 
 
@@ -114,7 +114,7 @@ gdb_test "next " "more_code.*;" "continuing after dummy()"
 #        pass "illegal pointer assignment rejected"
 #      }
 #    -re ".*$gdb_prompt $" { fail "illegal pointer assignment rejected" }
-#    timeout           { fail "(timeout) illegal pointer assignment rejected" }    
+#    timeout           { fail "(timeout) illegal pointer assignment rejected" }
 #  }
 
 gdb_test_no_output "set variable v_int_pointer=&v_int_array\[0\]" \
@@ -203,9 +203,9 @@ gdb_test "print *( *(matrix+1) +2)" " = 5" \
 gdb_test "print **ptr_to_ptr_to_float" " = 100" \
     "print through ptr to ptr"
 
-# tests for pointers 
+# tests for pointers
 # with elementary type variables and pointers.
-# 
+#
 
 gdb_test "break marker1" ".*" ""
 gdb_test "cont" "Break.* marker1 \\(\\) at .*:$decimal.*" \
@@ -221,7 +221,7 @@ gdb_test "print *pS" " = -14" "print value of *pS"
 gdb_test_multiple "ptype pS" "ptype pS" {
     -re "type = short \\*.*$gdb_prompt $"  { pass "ptype pS" }
     -re "type = short int \\*.*$gdb_prompt $"  { pass "ptype pS" }
-}    
+}
 
 gdb_test "print *pUS" " = 7" "print value of *pUS"
 

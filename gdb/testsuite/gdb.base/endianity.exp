@@ -16,8 +16,8 @@
 standard_testfile .c
 
 set test_sso [expr \
-		  [supports_scalar_storage_order_attribute] \
-		  && [supports_gnuc]]
+		  {[supports_scalar_storage_order_attribute] \
+		       && [supports_gnuc]}]
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
 	  [list debug additional_flags=-DTEST_SSO=$test_sso]] } {

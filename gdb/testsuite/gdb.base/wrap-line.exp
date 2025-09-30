@@ -30,11 +30,11 @@ proc fill_line { width } {
 
     # Take into account that the prompt also takes space.
     set prefix [string length "(gdb) "]
-    set start [expr $prefix + 1]
+    set start [expr {$prefix + 1}]
 
     # Print chars.
     for { set i $start } { $i <= $width } { incr i } {
-	set c [expr $i % 10]
+	set c [expr {$i % 10}]
 	send_gdb $c
 	append res $c
     }
@@ -93,7 +93,7 @@ proc test_wrap { width_auto_detected } {
     if { $wrap_mode == $wrap_mode_terminal } {
 	gdb_assert { $gdb_width == $readline_width }
     } elseif { $wrap_mode == $wrap_mode_readline } {
-	gdb_assert { $gdb_width == [expr $readline_width + 1] }
+	gdb_assert { $gdb_width == [expr {$readline_width + 1}] }
     } else {
 	set have_wrap 0
     }

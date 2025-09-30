@@ -32,7 +32,7 @@ if {[build_executable $testfile.exp $testfile $srcfile] == -1} {
 # length then lets try to make it longer.
 set binfile_len [string length $binfile]
 if { $binfile_len <= 80 } {
-    set extra_len [expr 80 - $binfile_len + 1]
+    set extra_len [expr {80 - $binfile_len + 1}]
     set extra_str [string repeat "x" $extra_len]
     set new_binfile $binfile$extra_str
     remote_exec build "mv $binfile $new_binfile"

@@ -84,7 +84,7 @@ proc_with_prefix do_attach_failure_tests {} {
 	}
 	-re "Attaching to.*, process .*couldn't open /proc file.*$gdb_prompt $" {
 	    # Response expected from /proc-based systems.
-	    pass "$test" 
+	    pass "$test"
 	}
 	-re "Can't attach to process..*$gdb_prompt $" {
 	    # Response expected on Cygwin
@@ -105,7 +105,7 @@ proc_with_prefix do_attach_failure_tests {} {
 	}
 	-re "Attaching to.*, process .*couldn't open /proc file.*$gdb_prompt $" {
 	    # Response expected from /proc-based systems.
-	    pass "$test" 
+	    pass "$test"
 	}
 	-re "Can't attach to process..*$gdb_prompt $" {
 	    # Response expected on Cygwin
@@ -157,7 +157,7 @@ proc_with_prefix do_attach_failure_tests {} {
 	    pass "$test"
 	}
     }
-    
+
     # Verify that we can't double attach to the process.
 
     set test "first attach"
@@ -242,7 +242,7 @@ proc_with_prefix do_attach_tests {} {
     # (Actually, the test system appears to do this automatically for
     # us.  So, we must also be prepared to be asked if we want to
     # discard an existing set of symbols.)
-    
+
     set test "set file, before attach1"
     gdb_test_multiple "file $binfile" "$test" {
 	-re "Load new symbol table from.*y or n. $" {
@@ -267,25 +267,25 @@ proc_with_prefix do_attach_tests {} {
 
     # Verify that we can "see" the variable "should_exit" in the
     # program, and that it is zero.
-   
+
     gdb_test "print should_exit" " = 0" "after attach1, print should_exit"
 
     # Detach the process.
-   
+
     gdb_test "detach" \
 	"Detaching from program: .*$escapedbinfile, process $testpid\r\n\\\[Inferior $decimal \\(.*\\) detached\\\]" \
 	"attach1 detach"
 
     # Wait a bit for gdb to finish detaching
-    
+
     exec sleep 5
 
     # Purge the symbols from gdb's brain.  (We want to be certain the
     # next attach, which won't be preceded by a "file" command, is
     # really getting the executable file without our help.)
-    
+
     set old_timeout $timeout
-    set timeout 15 
+    set timeout 15
     set test "attach1, purging symbols after detach"
     gdb_test_multiple "file" "$test" {
 	-re "No executable file now.*Discard symbol table.*y or n. $" {
@@ -296,7 +296,7 @@ proc_with_prefix do_attach_tests {} {
 
     # Verify that we can attach to the process just by giving the
     # process ID.
-   
+
     set test "attach2, with no file"
     set found_exec_file 0
     gdb_test_multiple "attach $testpid" "$test" {
@@ -356,7 +356,7 @@ proc_with_prefix do_attach_tests {} {
     # Verify that we can attach to the process, and find its a.out
     # when we're cd'd to some directory that doesn't contain the
     # a.out.  (We use the source path set by the "dir" command.)
-    
+
     gdb_test "dir [standard_output_file {}]" "Source directories searched: .*" \
 	"set source path"
 
@@ -389,7 +389,7 @@ proc_with_prefix do_attach_tests {} {
 	"$test" \
 	"Kill the program being debugged.*y or n. $" \
 	"y"
-    
+
     # Another "don't leave a process around"
     kill_wait_spawned_process $test_spawn_id
 }
@@ -406,7 +406,7 @@ proc_with_prefix do_call_attach_tests {} {
     set testpid [spawn_id_get_pid $test_spawn_id]
 
     # Attach
-   
+
     gdb_test "file $binfile2" ".*" "load file"
     set test "attach call"
     gdb_test_multiple "attach $testpid" "$test" {
@@ -422,7 +422,7 @@ proc_with_prefix do_call_attach_tests {} {
     }
 
     # See if other registers are problems
-    
+
     set test "info other register"
     gdb_test_multiple "i r r3" "$test" {
 	-re "warning: reading register.*$gdb_prompt $" {
@@ -434,12 +434,12 @@ proc_with_prefix do_call_attach_tests {} {
     }
 
     # Get rid of the process
-    
+
     gdb_test "p should_exit = 1"
     gdb_continue_to_end
-   
+
     # Be paranoid
-   
+
     kill_wait_spawned_process $test_spawn_id
 }
 
@@ -591,7 +591,7 @@ proc_with_prefix do_attach_exec_mismatch_handling_tests {} {
 	    gdb_test "y" "Reading symbols from .*attach.*" $gdb_test_name
 	}
     }
-    
+
 
     gdb_test "detach" "Detaching from program: .* detached\\\]" "$test detach attach initial exec-file"
 

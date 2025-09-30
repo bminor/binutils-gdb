@@ -27,7 +27,7 @@ if {[prepare_for_testing_full "failed to prepare" \
 # Problem does not occur otherwise.
 gdb_test_no_output "set can-use-hw-watchpoints 0"
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

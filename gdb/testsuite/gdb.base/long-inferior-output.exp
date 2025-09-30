@@ -32,7 +32,7 @@ require {!target_info exists gdb,noinferiorio}
 
 standard_testfile
 
-if [prepare_for_testing "failed to prepare" $testfile {} {debug}] {
+if {[prepare_for_testing "failed to prepare" $testfile {} {debug}]} {
     return -1
 }
 

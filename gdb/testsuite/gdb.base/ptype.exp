@@ -51,7 +51,7 @@ gdb_test_multiple "ptype red1" "ptype unnamed enumeration member" {
 # Here and elsewhere, we accept
 # "long", "long int", or "int" for long variables (whatis.exp already
 # has an XFAIL for "int" (Sun cc bug), so no need to fail it here).
-gdb_test "ptype struct t_struct" "type = struct t_struct \{.*\[\r\n\]    (unsigned |)char v_char_member;.*\[\r\n\]    (short|short int) v_short_member;.*\[\r\n\]    int v_int_member;.*\[\r\n\]    (long|long int|int) v_long_member;.*\[\r\n\]    float v_float_member;.*\[\r\n\]    double v_double_member;.*\[\r\n\]\}.*" "ptype structure" 
+gdb_test "ptype struct t_struct" "type = struct t_struct \{.*\[\r\n\]    (unsigned |)char v_char_member;.*\[\r\n\]    (short|short int) v_short_member;.*\[\r\n\]    int v_int_member;.*\[\r\n\]    (long|long int|int) v_long_member;.*\[\r\n\]    float v_float_member;.*\[\r\n\]    double v_double_member;.*\[\r\n\]\}.*" "ptype structure"
 
 
 # Test the equivalence between '.' and '->' for struct member references.
@@ -73,30 +73,30 @@ if {[gdb_test "ptype v_t_struct_p->v_float_member" "type = float"] < 0} {
 # IBM's xlc puts out bogus stabs--the stuff field is type 42,
 # which isn't defined.
 
-gdb_test "ptype struct link" "type = struct link \{\[\r\n\]+\[ \t\]+struct link \\*next;\[\r\n\]+\[ \t\]+struct link \\*\\(\\*linkfunc\\)\\((struct link \\*, int|void|)\\);\[\r\n\]+\[ \t\]+struct t_struct stuff.1..2..3.;\[\r\n\]+\}.*" "ptype linked list structure" 
+gdb_test "ptype struct link" "type = struct link \{\[\r\n\]+\[ \t\]+struct link \\*next;\[\r\n\]+\[ \t\]+struct link \\*\\(\\*linkfunc\\)\\((struct link \\*, int|void|)\\);\[\r\n\]+\[ \t\]+struct t_struct stuff.1..2..3.;\[\r\n\]+\}.*" "ptype linked list structure"
 
 #
 # test ptype command with unions
 #
-gdb_test "ptype union t_union" "type = union t_union \{.*\[\r\n\]    (unsigned |)char v_char_member;.*\[\r\n\]    (short|short int) v_short_member;.*\[\r\n\]    int v_int_member;.*\[\r\n\]    (long|long int|int) v_long_member;.*\[\r\n\]    float v_float_member;.*\[\r\n\]    double v_double_member;.*\[\r\n\]\}.*" "ptype union" 
+gdb_test "ptype union t_union" "type = union t_union \{.*\[\r\n\]    (unsigned |)char v_char_member;.*\[\r\n\]    (short|short int) v_short_member;.*\[\r\n\]    int v_int_member;.*\[\r\n\]    (long|long int|int) v_long_member;.*\[\r\n\]    float v_float_member;.*\[\r\n\]    double v_double_member;.*\[\r\n\]\}.*" "ptype union"
 
 # IBM's xlc puts out bogus stabs--the stuff field is type 42,
 # which isn't defined.
-gdb_test "ptype union tu_link" "type = union tu_link \{\[\r\n\]+\[ \t\]+struct link \\*next;\[\r\n\]+\[ \t\]+struct link \\*\\(\\*linkfunc\\)\\((struct link \\*, int|void|)\\);\[\r\n\]+\[ \t\]+struct t_struct stuff.1..2..3.;\[\r\n\]+\}.*" "ptype linked list union" 
+gdb_test "ptype union tu_link" "type = union tu_link \{\[\r\n\]+\[ \t\]+struct link \\*next;\[\r\n\]+\[ \t\]+struct link \\*\\(\\*linkfunc\\)\\((struct link \\*, int|void|)\\);\[\r\n\]+\[ \t\]+struct t_struct stuff.1..2..3.;\[\r\n\]+\}.*" "ptype linked list union"
 
 #
 # test ptype command with enums
 #
 
-gdb_test "ptype primary" "type = enum .red, green, blue.*" "ptype unnamed enumeration" 
+gdb_test "ptype primary" "type = enum .red, green, blue.*" "ptype unnamed enumeration"
 
-gdb_test "ptype enum colors" "type = enum colors \{yellow, purple, pink\}.*" "ptype named enumeration" 
+gdb_test "ptype enum colors" "type = enum colors \{yellow, purple, pink\}.*" "ptype named enumeration"
 
 
 #
 # test ptype command with enums as typedef
 #
-gdb_test "ptype boolean" "type = enum (boolean |)\{FALSE, TRUE\}.*" "ptype unnamed typedef'd enumeration" 
+gdb_test "ptype boolean" "type = enum (boolean |)\{FALSE, TRUE\}.*" "ptype unnamed typedef'd enumeration"
 
 # And check that whatis shows the name, not "enum {...}".
 # This probably fails for all DWARF 1 cases, so assume so for now. -fnf
@@ -132,20 +132,20 @@ gdb_test "ptype enum bvals" "type = enum bvals \{my_false, my_true\}.*" "ptype n
 #
 # test ptype command with out-of-order enum values
 #
-gdb_test "ptype enum misordered" "type = enum misordered \{two = 2, one = 1, zero = 0, three = 3\}.*" "ptype misordered enumeration" 
+gdb_test "ptype enum misordered" "type = enum misordered \{two = 2, one = 1, zero = 0, three = 3\}.*" "ptype misordered enumeration"
 
 #
 # test ptype command with a named enum's value
 #
-gdb_test "ptype three" "type = enum misordered \{two = 2, one = 1, zero = 0, three = 3\}.*" "ptype named enumeration member" 
+gdb_test "ptype three" "type = enum misordered \{two = 2, one = 1, zero = 0, three = 3\}.*" "ptype named enumeration member"
 
-gdb_test "ptype red" "type = enum \{red, green, blue\}.*" "ptype unnamed enumeration member #2" 
+gdb_test "ptype red" "type = enum \{red, green, blue\}.*" "ptype unnamed enumeration member #2"
 
 #
 # test ptype command with basic C types
 #
 # I've commented most of this out because it duplicates tests in whatis.exp.
-# I've just left in a token test or 2 which is designed to test that ptype 
+# I've just left in a token test or 2 which is designed to test that ptype
 # acts like whatis for basic types.  If it is thought to be necessary to
 # test both whatis and ptype for all the types, the tests should be
 # merged into whatis.exp, or else maintenance will be a royal pain -kingdon
@@ -174,7 +174,7 @@ gdb_test "ptype red" "type = enum \{red, green, blue\}.*" "ptype unnamed enumera
 #    timeout		{ fail "(timeout) ptype unsigned char" }
 #}
 
-gdb_test "ptype v_short" "type = short(| int).*" "ptype short" 
+gdb_test "ptype v_short" "type = short(| int).*" "ptype short"
 
 #send "ptype v_signed_short\n"
 #gdb_expect {
@@ -192,7 +192,7 @@ gdb_test "ptype v_short" "type = short(| int).*" "ptype short"
 #}
 
 
-gdb_test "ptype v_int" "type = int.*" "ptype int" 
+gdb_test "ptype v_int" "type = int.*" "ptype int"
 
 #send "ptype v_signed_int\n"
 #gdb_expect {
@@ -306,7 +306,7 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 #send "ptype v_long_array\n"
 #gdb_expect {
-#    -re "type = (long|int|long int) .2..*$gdb_prompt $"	{ 
+#    -re "type = (long|int|long int) .2..*$gdb_prompt $"	{
 #	pass "ptype long array" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype long array" }
 #    timeout		{ fail "(timeout) ptype long array" }
@@ -315,7 +315,7 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 #send "ptype v_signed_long_array\n"
 #gdb_expect {
-#    -re "type = (long|int|long int) .2..*$gdb_prompt $"	{ 
+#    -re "type = (long|int|long int) .2..*$gdb_prompt $"	{
 #	pass "ptype signed long array" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype signed long array" }
 #    timeout		{ fail "(timeout) ptype signed long array" }
@@ -585,7 +585,7 @@ gdb_test "ptype foo" "type = char" "ptype foo typedef after second list of charf
 
 if {[runto_main]} {
 
-  if [target_info exists gdb,cannot_call_functions] {
+  if {[target_info exists gdb,cannot_call_functions]} {
     unsupported "this target can not call functions"
     return
   }

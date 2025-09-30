@@ -20,14 +20,14 @@
 #
 # tests for expressions with struct/array elements and mixed operator types
 # with elementary types
-# 
+#
 
 # By default, the datastructures are allocated on the stack.  For targets
 # with very small stack, that will not work.  In that case, just set
 # storage to `-DSTORAGE=static' which changes the datastructures to be
 # allocated in data segment.
 set storage "-DSTORAGE="
-if [target_info exists gdb,small_stack_section] {
+if {[target_info exists gdb,small_stack_section]} {
     set storage "-DSTORAGE=static"
 }
 

@@ -17,7 +17,7 @@
 
 standard_testfile
 
-if [gdb_protocol_is_native] {
+if {[gdb_protocol_is_native]} {
     unsupported "the native target does not support the load command"
     return
 }
@@ -27,11 +27,11 @@ if [gdb_protocol_is_native] {
 
 set opts {debug nopie}
 
-if [prepare_for_testing "failed to prepare" $testfile $srcfile $opts] {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile $opts]} {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

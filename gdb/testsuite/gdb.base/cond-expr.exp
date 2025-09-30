@@ -18,7 +18,7 @@
 # This file is part of the gdb testsuite
 
 #
-# test of evaluation of conditional expressions, with constants and 
+# test of evaluation of conditional expressions, with constants and
 # variables. Using the print and the whatis command
 # written with the only purpose in mind to cover the holes in the
 # eval.c file

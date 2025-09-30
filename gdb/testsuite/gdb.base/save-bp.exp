@@ -19,7 +19,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} $srcfile] } {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 # Delete all breakpoints, watchpoints, tracepoints, and catchpoints so that
@@ -61,7 +61,7 @@ gdb_test "save breakpoint $bps" "" "save breakpoint bps"
 
 # Now start a new debugger session...
 clean_restart $testfile
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 # Delete all breakpoints, watchpoints, tracepoints, and catchpoints so that

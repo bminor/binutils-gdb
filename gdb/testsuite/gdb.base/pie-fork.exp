@@ -22,7 +22,7 @@ standard_testfile
 
 set opts [list debug pie]
 
-if [build_executable "failed to prepare" $testfile $srcfile $opts] {
+if {[build_executable "failed to prepare" $testfile $srcfile $opts]} {
     return
 }
 
@@ -32,7 +32,7 @@ proc setup_test {detach_on_fork {follow_fork_mode "parent"}} {
     clean_restart
     gdb_load $binfile
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 

@@ -74,7 +74,7 @@ with_test_prefix "with standard max-value size" {
 # Set the max-value-size so we can only print 51 elements.
 set elements 51
 set int_size [get_valueof "/d" "sizeof(large_1d_array\[0\])" "*unknown*"]
-gdb_test_no_output "set max-value-size [expr $int_size * $elements]"
+gdb_test_no_output "set max-value-size [expr {$int_size * $elements}]"
 
 with_test_prefix "with reduced max-value size" {
     gdb_test "print large_1d_array" \

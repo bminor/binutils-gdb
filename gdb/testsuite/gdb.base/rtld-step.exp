@@ -53,7 +53,7 @@ set binfile_rtld [standard_output_file ${rtld_basename}]
 # the flags -static-pie -fPIE were needed for Fedora 35 through Fedora
 # 38.  The source file rtld-step-rtld.c didn't need the _start()
 # function either.  And, better still, it was possible to call
-# printf() to output progress messages in the pretend/fake RTLD. 
+# printf() to output progress messages in the pretend/fake RTLD.
 # Sadly, these output statements had to be removed in order to obtain
 # code which would work on other Linux distributions / releases.
 #

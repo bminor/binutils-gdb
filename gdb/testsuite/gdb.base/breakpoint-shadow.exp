@@ -20,7 +20,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
 }
 
 # We need to start the inferior to place the breakpoints in the memory at all.
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -51,7 +51,7 @@ proc test_disassembly {test} {
     gdb_test_multiple "disass main" $test {
 	-re $match {
 	    set got $expect_out(1,string)
-	    if [string equal -nocase $orig $got] {
+	    if {[string equal -nocase $orig $got]} {
 		pass $test
 	    } else {
 		fail $test

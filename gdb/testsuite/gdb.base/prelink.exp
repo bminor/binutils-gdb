@@ -43,13 +43,13 @@ if {$prelink_args == ""} {
 }
 
 set test "split debug of executable"
-if [gdb_gnu_strip_debug $binfile] {
+if {[gdb_gnu_strip_debug $binfile]} {
     fail $test
 } else {
     pass $test
 }
 
-if ![prelink_yes $prelink_args] {
+if {![prelink_yes $prelink_args]} {
     # Maybe we don't have prelink.
     return -1
 }
@@ -57,10 +57,10 @@ if ![prelink_yes $prelink_args] {
 set found 0
 set coredir "[standard_output_file coredir.[getpid]]"
 file mkdir $coredir
-catch "system \"(cd ${coredir}; ulimit -c unlimited; ${binfile}; true) >/dev/null 2>&1\""
+catch {system "(cd ${coredir}; ulimit -c unlimited; ${binfile}; true) >/dev/null 2>&1"}
 
 foreach i "${coredir}/core ${coredir}/core.coremaker.c ${binfile}.core" {
-    if [remote_file build exists $i] {
+    if {[remote_file build exists $i]} {
 	remote_exec build "mv $i [standard_output_file prelink.core]"
 	set found 1
     }
@@ -85,7 +85,7 @@ if { $found == 0  } {
 }
 
 # Relink $libfile to a different address.
-if ![prelink_yes $prelink_args] {
+if {![prelink_yes $prelink_args]} {
     return -1
 }
 

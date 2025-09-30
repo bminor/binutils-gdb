@@ -1,5 +1,5 @@
 # Copyright 1997-2025 Free Software Foundation, Inc.
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
@@ -64,7 +64,7 @@ proc get_func_address { func func_sym msg } {
     global hexx
 
     set func_addr 0
-    send_gdb "print $func\n" 
+    send_gdb "print $func\n"
     gdb_expect {
 	-re "\\$\[0-9\]+ = $fptrcast (${hexx}) <$func_sym>.*$gdb_prompt $" {
 	    set func_addr $expect_out(1,string)
@@ -99,39 +99,39 @@ if {$data_overlays} {
 # map each overlay successively, and
 # capture the VMA addresses of [foo bar baz grbx foox barx bazx grbxx]
 
-gdb_test "overlay map .ovly0" "" 
+gdb_test "overlay map .ovly0" ""
 gdb_test "overlay list" "Section .ovly0, loaded at.*, mapped at.*" "list ovly0"
 set foo_vma [get_func_address "foo"  "foo"  "foo  runtime address"]
 
-gdb_test "overlay map .ovly1" "" 
+gdb_test "overlay map .ovly1" ""
 gdb_test "overlay list" "Section .ovly1, loaded at.*, mapped at.*" "list ovly1"
 set bar_vma [get_func_address "bar"  "bar"  "bar  runtime address"]
 
-gdb_test "overlay map .ovly2" "" 
+gdb_test "overlay map .ovly2" ""
 gdb_test "overlay list" "Section .ovly2, loaded at.*, mapped at.*" "list ovly2"
 set baz_vma [get_func_address "baz"  "baz"  "baz  runtime address"]
 
-gdb_test "overlay map .ovly3" "" 
+gdb_test "overlay map .ovly3" ""
 gdb_test "overlay list" "Section .ovly3, loaded at.*, mapped at.*" "list ovly3"
 set grbx_vma [get_func_address "grbx" "grbx" "grbx runtime address"]
 
 if {$data_overlays} {
-    gdb_test "overlay map .data00" "" 
+    gdb_test "overlay map .data00" ""
     gdb_test "overlay list" "Section .data00, loaded .*, mapped .*" "list data00"
     gdb_test "print \$foox_vma = &foox" \
 	".* $iptrcast 0x.*"  "foox runtime addr"
 
-    gdb_test "overlay map .data01" "" 
+    gdb_test "overlay map .data01" ""
     gdb_test "overlay list" "Section .data01, loaded .*, mapped .*" "list data01"
     gdb_test "print \$barx_vma = &barx" \
 	".* $iptrcast 0x.*"  "barx runtime addr"
 
-    gdb_test "overlay map .data02" "" 
+    gdb_test "overlay map .data02" ""
     gdb_test "overlay list" "Section .data02, loaded .*, mapped .*" "list data02"
     gdb_test "print \$bazx_vma = &bazx" \
 	".* $iptrcast 0x.*"  "bazx runtime addr"
 
-    gdb_test "overlay map .data03" "" 
+    gdb_test "overlay map .data03" ""
     gdb_test "overlay list" "Section .data03, loaded .*, mapped .*" "list data03"
     gdb_test "print \$grbxx_vma = &grbxx" \
 	".* $iptrcast 0x.*"  "grbxx runtime addr"
@@ -149,7 +149,7 @@ if {$data_overlays} {
     gdb_test "print \$grbxx_lma != \$grbxx_vma" ".* = 1" "grbxx's LMA != VMA"
 }
 
-# Verify that early-mapped overlays have been bumped out 
+# Verify that early-mapped overlays have been bumped out
 # by later-mapped overlays laid over in the same VMA range.
 
 send_gdb "overlay list\n"

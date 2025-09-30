@@ -33,7 +33,7 @@ proc vla_optimized_out {exe_suffix options} {
 	return -1
     }
 
-    if ![runto f1] {
+    if {![runto f1]} {
 	return
     }
 

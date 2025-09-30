@@ -118,7 +118,7 @@ proc check_dso_count { dso num } {
     gdb_test_multiple "info shared" "info shared" {
 	-re "$hex  $hex  \($::decimal\\s+\)\?Yes \[^\r\n\]*$dso\r\n" {
 	    # use longer form so debug remote does not interfere
-	    set count [expr $count + 1]
+	    set count [expr {$count + 1}]
 	    exp_continue
 	}
 	-re "$gdb_prompt " {

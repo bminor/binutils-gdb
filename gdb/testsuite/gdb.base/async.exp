@@ -109,7 +109,7 @@ gdb_test_multiple {x/2i $pc} "$test" {
     }
 }
 set next_insn_is_stmt \
-    [expr [lsearch -regexp $is_stmt 0x0*$next_insn_addr] != -1]
+    [expr {[lsearch -regexp $is_stmt 0x0*$next_insn_addr] != -1}]
 
 if { $next_insn_is_stmt } {
     set prefix ""

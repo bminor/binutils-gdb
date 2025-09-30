@@ -391,7 +391,7 @@ foreach target_charset $charset_subset {
 	set var_name [string tolower "${target_charset}_string"]
 	regsub -all -- "\[^a-z0-9_\]" $var_name "_" var_name
     }
-    
+
     # Compute a regexp matching the results we expect.  This is static,
     # but it's easier than writing it out.
     regsub -all "." "abfnrtv" "(\\\\&|x)" escapes
@@ -492,7 +492,7 @@ foreach target_charset $charset_subset {
         }
     }
 
-    # Try printing a character escape that doesn't exist.  We should 
+    # Try printing a character escape that doesn't exist.  We should
     # get the unescaped character, in the target character set.
     gdb_test "print $L'\\q'" " = \[0-9-\]+ $L'q'" \
              "print escape that doesn't exist in $target_charset"
@@ -549,7 +549,7 @@ if {$wchar_ok} {
 
 set ucs2_ok [expr {[get_sizeof char16_t 99] == 2}]
 
-if ![valid_host_charset "UTF-16"] {
+if {![valid_host_charset "UTF-16"]} {
     verbose -log "Disabling UTF-16 tests."
     set ucs2_ok 0
 }
@@ -640,4 +640,4 @@ foreach name {short int long} {
 }
 
 
-gdb_exit 
+gdb_exit

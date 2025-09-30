@@ -279,7 +279,7 @@ ptype_maybe_prototyped "fffptr" "int (*(*(*)(char))(short int))(long int)" \
 
 if {[runto_main]} {
 
-  if [target_info exists gdb,cannot_call_functions] {
+  if {[target_info exists gdb,cannot_call_functions]} {
     unsupported "this target can not call functions"
     return
   }

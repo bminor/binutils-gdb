@@ -23,7 +23,7 @@
 # operators, or in the non returned part of a (x ? y: z) expression.
 # the part that is not evaluated is parsed and evaluated anyway, but with
 # the EVAL_SKIP flag set
-# 
+#
 # source file "int-type.c"
 #
 

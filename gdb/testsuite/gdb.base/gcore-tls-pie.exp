@@ -33,7 +33,7 @@ set gcorefile ${binfile}.gcore
 
 set strip_program [transform strip]
 remote_file host delete ${stripped_binfile}
-if [run_on_host "strip" "$strip_program" "-g -o ${stripped_binfile} $binfile"] {
+if {[run_on_host "strip" "$strip_program" "-g -o ${stripped_binfile} $binfile"]} {
     return -1
 }
 
@@ -46,7 +46,7 @@ clean_restart
 gdb_load $stripped_binfile
 
 # The binary is stripped of debug info, but not minsyms.
-if ![runto break_here] {
+if {![runto break_here]} {
     return -1
 }
 

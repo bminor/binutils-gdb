@@ -40,7 +40,7 @@ gdb_load $binfile
 
 set solib_name [gdb_load_shlib $solib_name]
 
-if ![runto foo] {
+if {![runto foo]} {
     untested "failed to run to function foo"
     return -1
 }
@@ -148,7 +148,7 @@ proc run_info_sources { extra_args args } {
 	    # Make sure we handle the case where there are no source files
 	    # associated with a particular objfile.
 	    set source_list {}
-	    if [info exists info_sources($objfile)] {
+	    if {[info exists info_sources($objfile)]} {
 		set source_list $info_sources($objfile)
 	    }
 

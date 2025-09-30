@@ -19,12 +19,12 @@ set expfile $testfile.exp
 
 set dp_location [gdb_get_line_number "Set dprintf here"]
 
-if [prepare_for_testing "failed to prepare for dprintf with next" \
-    ${testfile} ${srcfile} {debug}] {
+if {[prepare_for_testing "failed to prepare for dprintf with next" \
+	 ${testfile} ${srcfile} {debug}]} {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

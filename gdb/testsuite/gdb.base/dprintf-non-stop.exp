@@ -16,8 +16,8 @@
 standard_testfile
 set executable ${testfile}
 
-if [build_executable "failed to prepare for dprintf with non-stop" \
-    ${testfile} ${srcfile} {debug}] {
+if {[build_executable "failed to prepare for dprintf with non-stop" \
+	 ${testfile} ${srcfile} {debug}]} {
     return -1
 }
 
@@ -26,7 +26,7 @@ save_vars { GDBFLAGS } {
     clean_restart ${executable}
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

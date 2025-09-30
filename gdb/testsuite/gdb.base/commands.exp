@@ -255,7 +255,7 @@ proc_with_prefix infrun_breakpoint_command_test {} {
     delete_breakpoints
     gdb_test "break factorial if value == 5" "Breakpoint.*at.*"
 
-# infrun_breakpoint_command_test - This test was broken into two parts 
+# infrun_breakpoint_command_test - This test was broken into two parts
 # to get around a synchronization problem in expect.
 # part1: issue the gdb command "commands"
 # part2: send the list of commands
@@ -547,7 +547,7 @@ proc_with_prefix user_defined_command_manyargs_test {} {
 
     set expected "nargs=$nargs:"
     for {set i 1} {$i <= $nargs} {incr i} {
-	append expected " " [expr 2 * $i]
+	append expected " " [expr {2 * $i}]
     }
 
     gdb_test $cmd $expected "execute command"
@@ -658,7 +658,7 @@ proc_with_prefix test_command_prompt_position {} {
 	    gdb_test_multiple "printf \"Now the value is %d\\n\", value" $test {
 		-re "^printf.*value\r\n>$" {
 		    gdb_test_multiple "end" $test {
-			-re "^end\r\n$gdb_prompt $" { 
+			-re "^end\r\n$gdb_prompt $" {
 			    pass $test
 			}
 		    }
@@ -681,7 +681,7 @@ proc_with_prefix deprecated_command_test {} {
     gdb_test "p 5" ".\[0-9\]* = 5.*" "deprecated warning goes away /1/"
 
     gdb_test_no_output "maintenance deprecate p \"new_p\"" "maintenance deprecate p \"new_p\" /2/"
-    gdb_test_no_output "maintenance deprecate print \"new_print\"" 
+    gdb_test_no_output "maintenance deprecate print \"new_print\""
     gdb_test "p 5" \
 	    "Warning: command 'print' \\(p\\) is deprecated.*Use 'new_print'.*" \
 	    "both alias and command are deprecated"
@@ -751,7 +751,7 @@ proc_with_prefix bp_deleted_in_command_test {} {
     # one command that deletes this breakpoint.
     gdb_test "break factorial" \
              "Breakpoint \[0-9\]+ at .*: file .*run.c, line \[0-9\]+\."
-    
+
     gdb_test_multiple "commands" "begin commands" {
       -re "Type commands for breakpoint.*>$" {
           pass "begin commands"

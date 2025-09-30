@@ -68,7 +68,7 @@ proc test {debug} {
 
     test_break "before run"
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 

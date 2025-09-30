@@ -48,21 +48,21 @@ proc fits_in_type { n type_bits type_signedness } {
 
     if { $n < 0} {
 	set n_sign -1
-	set n [expr -$n]
+	set n [expr {-$n}]
     } else {
 	set n_sign 1
     }
 
-    set smax [expr 1 << ($type_bits - 1)];
+    set smax [expr {1 << ($type_bits - 1)}];
     if  { $n_sign == -1 } {
 	# Negative number, signed type.
-	return [expr ($n <= $smax)]
+	return [expr {($n <= $smax)}]
     } elseif { $n_sign == 1 && $type_signed_p } {
 	# Positive number, signed type.
-	return [expr ($n < $smax)]
+	return [expr {($n < $smax)}]
     } elseif { $n_sign == 1 && !$type_signed_p } {
 	# Positive number, unsigned type.
-	return [expr ($n >> $type_bits) == 0]
+	return [expr {($n >> $type_bits) == 0}]
     } else {
 	error "unreachable"
     }
@@ -99,9 +99,9 @@ proc parse_number { lang n } {
     }
 
     global sizeof_long_long sizeof_long sizeof_int
-    set long_long_bits [expr $sizeof_long_long * 8]
-    set long_bits [expr $sizeof_long * 8]
-    set int_bits [expr $sizeof_int * 8]
+    set long_long_bits [expr {$sizeof_long_long * 8}]
+    set long_bits [expr {$sizeof_long * 8}]
+    set int_bits [expr {$sizeof_int * 8}]
 
     if { $lang == "rust" } {
 	if { [fits_in_type $n 32 s] } {
@@ -303,7 +303,7 @@ proc test_parse_numbers {arch} {
 	foreach_with_prefix prefix $prefixes {
 	    foreach baseval $basevals {
 		foreach offset { -2 -1 0 1 2 } {
-		    set dec_val [expr $baseval + $offset]
+		    set dec_val [expr {$baseval + $offset}]
 		    set hex_val [format "0x%llx" $dec_val]
 		    if { $dec_val < 0 } {
 			continue

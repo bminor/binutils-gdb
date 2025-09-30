@@ -33,14 +33,14 @@ set lineno [gdb_get_line_number "multiple locations here"]
 proc_with_prefix until_advance_lineno_from_inlined {cmd} {
     global lineno
 
-    if ![runto test] {
+    if {![runto test]} {
 	return
     }
 
     gdb_breakpoint $lineno
     gdb_continue_to_breakpoint "break here"
 
-    set lineno2 [expr $lineno + 1]
+    set lineno2 [expr {$lineno + 1}]
 
     gdb_test "$cmd $lineno2" \
 	"inline_func .* at .*:$lineno2.*return i.*" \
@@ -53,7 +53,7 @@ proc_with_prefix until_advance_lineno_from_inlined {cmd} {
 proc_with_prefix until_advance_lineno_from_non_inlined {cmd} {
     global lineno
 
-    if ![runto test] {
+    if {![runto test]} {
 	return
     }
 
@@ -68,7 +68,7 @@ proc_with_prefix until_advance_lineno_from_non_inlined {cmd} {
 proc_with_prefix until_advance_inline_func {cmd} {
     global lineno
 
-    if ![runto test] {
+    if {![runto test]} {
 	return
     }
 
@@ -83,7 +83,7 @@ proc_with_prefix until_advance_inline_func {cmd} {
 proc_with_prefix advance_overload {} {
     global lineno
 
-    if ![runto test] {
+    if {![runto test]} {
 	return
     }
 
@@ -117,7 +117,7 @@ proc_with_prefix advance_overload {} {
 proc_with_prefix until_overload {} {
     global lineno
 
-    if ![runto test] {
+    if {![runto test]} {
 	return
     }
 

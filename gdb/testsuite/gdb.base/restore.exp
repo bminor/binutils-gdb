@@ -55,10 +55,10 @@ proc restore_tests { } {
 
             gdb_test "tbreak callee$e" "Temporary breakpoint.*\[0-9\]*\\." \
 		"caller$c calls callee$e; tbreak callee"
-            
+
   	    gdb_test "continue" " callee$e prologue .*/" \
 		"caller$c calls callee$e; continue to callee"
-	    
+
             # Do a forced return from the callee.
 	    set test "caller$c calls callee$e; return callee now"
 
@@ -71,7 +71,7 @@ proc restore_tests { } {
             # Check that the values of the local variables are what
 	    # they should be.
             for {set var 1} {$var <= $c} {incr var} {
-                set expected [expr 0x7eeb + $var]
+                set expected [expr {0x7eeb + $var}]
 		set test "caller$c calls callee$e; return restored l$var to $expected"
 		set pass_pattern " = $expected"
 		set unsupported_pattern " = <optimized out>"

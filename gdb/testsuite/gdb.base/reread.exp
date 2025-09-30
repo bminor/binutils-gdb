@@ -86,7 +86,7 @@ foreach_with_prefix opts { "" "pie" } {
 	# Should see "Breakpoint 1, foo () at reread2.c:9"
 
 	set test "run to foo() second time"
-	if [is_remote target] {
+	if {[is_remote target]} {
 	    unsupported $test
 	} else {
 	    gdb_run_cmd
@@ -97,7 +97,7 @@ foreach_with_prefix opts { "" "pie" } {
 	### Second pass: verify that GDB checks the executable file's
 	### timestamp when the program is *restarted*, not just when it exits.
 
-	if [is_remote target] {
+	if {[is_remote target]} {
 	    unsupported "second pass: GDB should check for changes before running"
 	} else {
 

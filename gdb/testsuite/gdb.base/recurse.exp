@@ -108,10 +108,10 @@ proc recurse_tests {} {
 	# The former version expected the test to return to main().
 	# Now it expects the test to return to main or to stop in the
 	# function's epilogue.
-	# 
+	#
 	# The problem is that gdb needs to (but doesn't) understand
 	# function epilogues in the same way as for prologues.
-	# 
+	#
 	# If there is no hardware watchpoint (such as a x86 debug register),
 	# then watchpoints are done "the hard way" by single-stepping the
 	# target until the value of the watched variable changes.  If you
@@ -119,7 +119,7 @@ proc recurse_tests {} {
 	# When you do that, the "top" stack frame may become partially
 	# deconstructed (as when you pop the frame pointer, for instance),
 	# and from that point on, GDB can no longer make sense of the stack.
-	# 
+	#
 	# A test which stops in the epilogue is trying to determine when GDB
 	# leaves the stack frame in which the watchpoint was created.  It does
 	# this basically by watching for the frame pointer to change.  When
@@ -134,7 +134,7 @@ proc recurse_tests {} {
 # Preserve the old timeout, and set a new one that should be
 # sufficient to avoid timing out during this test.
 set oldtimeout $timeout
-set timeout [expr "$timeout + 60"]
+set timeout [expr {$timeout + 60}]
 verbose "Timeout is now $timeout seconds" 2
 
 recurse_tests

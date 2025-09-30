@@ -42,7 +42,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 # the name of a debuginfo only file. This file will be stored in the
 # gdb.base/ subdirectory.
 
-if [gdb_gnu_strip_debug $binfile$EXEEXT] {
+if {[gdb_gnu_strip_debug $binfile$EXEEXT]} {
     # check that you have a recent version of strip and objcopy installed
     unsupported "cannot produce separate debug info files"
     return -1
@@ -461,7 +461,7 @@ gdb_test "finish 123" \
 
 # Verify that GDB responds gracefully to a request to "finish" from
 # the outermost frame.  On a stub that never exits, this will just
-# run to the stubs routine, so we don't get this error...  Thus the 
+# run to the stubs routine, so we don't get this error...  Thus the
 # second condition.
 #
 
@@ -478,7 +478,7 @@ gdb_test_multiple "finish" "finish from outermost frame disallowed" {
 # Test "next" over recursive function call.
 #
 
-proc test_next_with_recursion {} { 
+proc test_next_with_recursion {} {
     global gdb_prompt
     global decimal
     global binfile
@@ -520,7 +520,7 @@ proc test_next_with_recursion {} {
 
     delete_breakpoints
 
-    if [istarget "mips*tx39-*"] {
+    if {[istarget "mips*tx39-*"]} {
 	set timeout 60
     }
     # We used to set timeout here for all other targets as well.  This
@@ -610,7 +610,7 @@ proc test_different_dir {type test_different_dir xfail} {
 	#
 	# Add a second pass pattern.  The behavior differs here between stabs
 	# and dwarf for one-line functions.  Stabs preserves two line symbols
-	# (one before the prologue and one after) with the same line number, 
+	# (one before the prologue and one after) with the same line number,
 	# but dwarf regards these as duplicates and discards one of them.
 	# Therefore the address after the prologue (where the breakpoint is)
 	# has no exactly matching line symbol, and GDB reports the breakpoint

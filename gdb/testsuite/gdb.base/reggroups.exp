@@ -114,7 +114,7 @@ set reggroups [fetch_reggroups "fetch reggroups"]
 set regcount 0
 foreach reggroup $reggroups {
     set regs [fetch_reggroup_regs $reggroup "fetch reggroup regs $reggroup"]
-    set regcount [expr $regcount + [llength $regs]]
+    set regcount [expr {$regcount + [llength $regs]}]
 }
 
 gdb_assert "[llength $regcount] != 0" "system has reggroup registers"

@@ -48,4 +48,4 @@ if {[runto_main]} {
 
     gdb_test "step" "nothing \\(\\) at.*"
 }
-remote_exec build "rm -f twice.c" 
+remote_exec build "rm -f twice.c"

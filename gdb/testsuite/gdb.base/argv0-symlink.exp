@@ -17,7 +17,7 @@
 # command expanding symlinks in the name of the program being run.
 # This test uses pathnames on build to create symbolic links on host and
 # expects the test program running on target to see those symbolic links.
-# Therefore, it can't work reliably on anything other than configurations 
+# Therefore, it can't work reliably on anything other than configurations
 # where build/host/target are all the same.
 
 require isnative
@@ -47,7 +47,7 @@ with_test_prefix "file symlink" {
 
     clean_restart "$filelink"
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 
@@ -87,7 +87,7 @@ with_test_prefix "dir symlink" {
 
     clean_restart "$dirlink/$filelink"
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 

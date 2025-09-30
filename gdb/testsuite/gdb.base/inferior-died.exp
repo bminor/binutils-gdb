@@ -31,7 +31,7 @@ save_vars { GDBFLAGS } {
 
 gdb_test_no_output "set detach-on-fork off"
 
-if ![runto_main] {
+if {![runto_main]} {
     return
 }
 

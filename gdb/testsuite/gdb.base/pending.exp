@@ -103,8 +103,8 @@ gdb_test "info break" \
 "pending plus real breakpoint info"
 
 
-# 
-# Test not setting a pending breakpoint 
+#
+# Test not setting a pending breakpoint
 #
 gdb_test "break pendfunc2" \
     "" \
@@ -113,7 +113,7 @@ gdb_test "break pendfunc2" \
     "n"
 
 #
-# Add condition to pending breakpoint 
+# Add condition to pending breakpoint
 #
 
 gdb_test_no_output "condition 1 k == 1"

@@ -23,7 +23,7 @@ if {[build_executable "failed to prepare" $testfile $srcfile debug] == -1} {
 }
 
 set file_arg $binfile
-if [is_remote host] {
+if {[is_remote host]} {
   set file_arg [remote_download host $file_arg]
 }
 
@@ -46,11 +46,11 @@ proc spawn_shell {} {
 
     # Try to match:
     #   PS1="gdb-subshell$ "^M
-    #   $ gdb-subshell$ 
+    #   $ gdb-subshell$
     # or:
     #   PS1="gdb-subshell$ "^M
     #   sh-4.4$ PS1="gdb-subshell$ "^M
-    #   gdb-subshell$ 
+    #   gdb-subshell$
     set gotit 0
     set test "spawn shell"
     gdb_expect {
@@ -88,7 +88,7 @@ proc exit_shell {} {
 	    pass "$test"
 	}
     }
-    if ![is_remote host] {
+    if {![is_remote host]} {
 	remote_close host
     }
 }
@@ -131,7 +131,7 @@ proc test_terminal_settings_preserved {} {
     global gdb_prompt
     global shell_prompt_re
 
-    if ![spawn_shell] {
+    if {![spawn_shell]} {
 	return
     }
 
@@ -176,7 +176,7 @@ proc test_terminal_settings_preserved {} {
     }
 
     set test "terminal settings preserved"
-    if $stty_supported {
+    if {$stty_supported} {
 	run_stty "stty after" stty_after
 
 	gdb_assert [string equal $stty_before $stty_after] $test
@@ -224,7 +224,7 @@ proc test_terminal_settings_preserved_after_cli_exit { cmds } {
     global gdb_prompt
     global shell_prompt_re
 
-    if ![spawn_shell] {
+    if {![spawn_shell]} {
 	return
     }
 
@@ -263,7 +263,7 @@ proc test_terminal_settings_preserved_after_cli_exit { cmds } {
     send_quit_command "quit gdb"
 
     set test "terminal settings preserved"
-    if $stty_supported {
+    if {$stty_supported} {
 	run_stty "stty after" stty_after
 
 	gdb_assert [string equal $stty_before $stty_after] $test
@@ -286,11 +286,11 @@ proc test_terminal_settings_preserved_after_sigterm { } {
     # On Windows, GDB's "shell" command spawns cmd.exe, which does not
     # understand PPID.  So we're out of luck even if the test harness
     # uses a remote_exec shell with a working "kill" command.
-    if [ishost *-*-mingw*] {
+    if {[ishost *-*-mingw*]} {
 	return
     }
 
-    if ![spawn_shell] {
+    if {![spawn_shell]} {
 	return
     }
 
@@ -347,13 +347,13 @@ proc test_terminal_settings_preserved_after_sigterm { } {
 	    }
 	}
 
-	if !$gdb_killed {
+	if {!$gdb_killed} {
 	    send_quit_command "quit gdb"
 	}
     }
 
     set test "terminal settings preserved"
-    if $stty_supported {
+    if {$stty_supported} {
 	run_stty "stty after" stty_after
 
 	gdb_assert [string equal $stty_before $stty_after] $test

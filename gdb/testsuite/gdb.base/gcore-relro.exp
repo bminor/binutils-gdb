@@ -38,7 +38,7 @@ with_test_prefix "first session" {
     gdb_load $binfile
     gdb_load_shlib ${binfile_lib}
 
-    if ![runto lib] {
+    if {![runto lib]} {
 	return -1
     }
 

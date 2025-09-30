@@ -29,7 +29,7 @@ clean_restart
 
 #Check that invalid options are rejected.
 foreach x {"-raednow" "readnow" "foo" "-readnow s"} {
-    set word [lindex $x [expr [llength $x]-1]]
+    set word [lindex $x [expr {[llength $x]-1}]]
     gdb_test "add-symbol-file ${binfile} 0 $x" \
 	"Unrecognized argument \"$word\"" \
 	"add-symbol-file: unknown option $word"
@@ -278,7 +278,7 @@ with_test_prefix "functions, 2nd" {
 
 # Re-load the object giving an explicit address for .text
 
-set text [ format "0x%x" [expr ${function_foo_addr} + 0x20000] ]
+set text [ format "0x%x" [expr {${function_foo_addr} + 0x20000}] ]
 clean_restart
 gdb_test "add-symbol-file $binfile -o $offset $text" \
     "Reading symbols from ${binfile}\.\.\.(\r\n$readnow_re)?" \
@@ -295,7 +295,7 @@ with_test_prefix "functions, 3rd" {
 
 # Re-load the object giving an explicit address for .data
 
-set data [ format "0x%x" [expr ${global_foo_addr} + 0x20000] ]
+set data [ format "0x%x" [expr {${global_foo_addr} + 0x20000}] ]
 clean_restart
 gdb_test "add-symbol-file $binfile -o $offset -s .data $data" \
     "Reading symbols from ${binfile}\.\.\.(\r\n$readnow_re)?" \

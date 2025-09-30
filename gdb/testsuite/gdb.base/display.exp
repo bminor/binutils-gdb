@@ -35,7 +35,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
 # Preserve the old timeout, and set a new one that should be
 # sufficient to avoid timing out during this test.
 set oldtimeout $timeout
-set timeout [expr "$timeout + 60"]
+set timeout [expr {$timeout + 60}]
 verbose "Timeout is now $timeout seconds" 2
 
 # use this to debug:
@@ -43,7 +43,7 @@ verbose "Timeout is now $timeout seconds" 2
 
 # Some coverage stuff
 #
-if !$use_gdb_stub {
+if {!$use_gdb_stub} {
     gdb_test "kill" ".*The program is not being run.*"
     gdb_test "detach" ".*"
     gdb_test "run" ".*"

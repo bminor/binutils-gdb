@@ -155,7 +155,7 @@ gdb_test_stdio "" "usage:  factorial <number>" "" "run after setting args to nil
 # work with stub targets, where GDB connects to debug an already started
 # process.
 
-if [use_gdb_stub] {
+if {[use_gdb_stub]} {
     verbose "Skipping rest of a2-run.exp because target is a stub."
     return
 }

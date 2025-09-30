@@ -83,7 +83,7 @@ foreach_with_prefix print_inferior_events { "on" "off" } {
 	    # Always add the "Starting program..." string so that we
 	    # match exactly the lines we want.
 	    set output "Starting program: $binfile\\s*\r\n${thread_db_re}${output}${thread_db_re}${exited_normally_re}"
-	    set i [expr $i + 1]
+	    set i [expr {$i + 1}]
 	    gdb_test "run" $output
 	}
     }

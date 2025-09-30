@@ -73,8 +73,8 @@ proc run_test {megs max_mem} {
 
 	# Do the main part of the test: How much is the memory
 	# usage of GDB going to grow after using the gcore command.
-	set diff_k [expr $mem_after - $mem_before]
-	set diff [expr $diff_k/1024]
+	set diff_k [expr {$mem_after - $mem_before}]
+	set diff [expr {$diff_k/1024}]
 	verbose -log "The gcore command used $diff Mb ($diff_k Kb)"
 	gdb_assert {$diff <= $max_mem} "gdb did not use too much memory"
 

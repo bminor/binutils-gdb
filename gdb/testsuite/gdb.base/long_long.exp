@@ -34,7 +34,7 @@ clean_restart
 gdb_load $binfile
 
 if {![runto known_types]} {
-   return 
+   return
 }
 
 # Detect the size of the target's basic types.
@@ -53,7 +53,7 @@ set sizeof_long_double [get_sizeof "long double" 8]
 proc pat2 { n pats } {
     set i 0
     while { $n > 1 } {
-	set n [expr $n / 2]
+	set n [expr {$n / 2}]
 	incr i
     }
     return [lindex $pats $i]

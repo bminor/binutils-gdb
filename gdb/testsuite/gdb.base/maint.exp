@@ -179,7 +179,7 @@ if { $index_cache_misses == 0 && $using_index_cache } {
     set have_gdb_index 1
 }
 
-set have_psyms [expr ! ( $have_gdb_index || $readnow_p )]
+set have_psyms [expr {! ( $have_gdb_index || $readnow_p )}]
 
 #
 # this command does not produce any output
@@ -223,9 +223,9 @@ gdb_test "maint set per-command off" \
 # The timeout value is raised, because printing all the symbols and
 # statistical information about Cygwin and Windows libraries takes a lot
 # of time.
-if [istarget "*-*-cygwin*"] {
+if {[istarget "*-*-cygwin*"]} {
 	set oldtimeout $timeout
-	set timeout [expr $timeout + 500]
+	set timeout [expr {$timeout + 500}]
 }
 
 set re \
@@ -288,7 +288,7 @@ gdb_test_multiple "$cmd $re" "$cmd" -lbl {
 }
 
 proc maint_pass_if {val name} {
-    if $val { pass $name } else { fail $name }
+    if {$val} { pass $name } else { fail $name }
 }
 
 maint_pass_if $header   "maint print objfiles: header"
@@ -378,7 +378,7 @@ gdb_test_multiple "maint print type argc" $msg {
     }
 }
 
-if [istarget "hppa*-*-11*"] {
+if {[istarget "hppa*-*-11*"]} {
     setup_xfail hppa*-*-*11* CLLbs14860
     gdb_test_multiple "maint print unwind &main" "maint print unwind" {
         -re ".*unwind_table_entry \\($hex\\):\r\n\tregion_start = $hex <main>\r\n\tregion_end = $hex <main\\+\[0-9\]*>\r\n\tflags = Args_stored Save_RP\r\n\tRegion_description = $hex\r\n\tEntry_FR = $hex\r\n\tEntry_GR = $hex\r\n\tTotal_frame_size = $hex\r\n$gdb_prompt $" {
@@ -391,7 +391,7 @@ if [istarget "hppa*-*-11*"] {
 }
 
 set oldtimeout $timeout
-set timeout [expr $timeout + 300]
+set timeout [expr {$timeout + 300}]
 
 set bp_location6 [gdb_get_line_number "set breakpoint 6 here"]
 
@@ -406,7 +406,7 @@ gdb_test_multiple "maint info breakpoints" "maint info breakpoints" {
 
 gdb_test "maint print" \
     "List.*unambiguous\\..*" \
-    "maint print w/o args" 
+    "maint print w/o args"
 
 gdb_test "maint info" \
     "List.*unambiguous\\..*" \
@@ -506,7 +506,7 @@ test_prefix_command_help {"maint" "maintenance"} {
 }
 
 #set oldtimeout $timeout
-#set timeout [expr $timeout + 300]
+#set timeout [expr {$timeout + 300}]
 
 gdb_test_multiple "maint dump-me" "maint dump-me" {
     -re "Should GDB dump core.*\\(y or n\\) $" {
@@ -522,7 +522,7 @@ send_gdb "maint internal-error\n"
 gdb_expect {
     -re "A problem internal to GDB has been detected" {
 	pass "maint internal-error"
-	if [gdb_internal_error_resync] {
+	if {[gdb_internal_error_resync]} {
 	    pass "internal-error resync"
 	} else {
 	    fail "internal-error resync"

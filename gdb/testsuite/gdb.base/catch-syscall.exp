@@ -348,7 +348,7 @@ proc test_catch_syscall_execve {} {
 	# Check for entry/return across the execve, making sure that the
 	# syscall_state isn't lost when turning into a new process.
 	insert_catch_syscall_with_arg "execve"
-	if [check_continue "execve"] {
+	if {[check_continue "execve"]} {
 	    # The check_continue test generates an XFAIL on Powerpc.  In
 	    # that case, gdb is already at main so don't do the continue.
 

@@ -477,7 +477,7 @@ proc test_next_with_recursion {} {
 
     delete_breakpoints
 
-    if [istarget "mips*tx39-*"] {
+    if {[istarget "mips*tx39-*"]} {
 	set timeout 60
     }
     # We used to set timeout here for all other targets as well.  This

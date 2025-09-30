@@ -27,7 +27,7 @@ set srcfile skip-inline.c
 set srcfile1 skip1.c
 
 proc_with_prefix single_step { } {
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 
@@ -43,7 +43,7 @@ proc_with_prefix single_step { } {
 }
 
 proc_with_prefix double_step { } {
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 
@@ -61,7 +61,7 @@ proc_with_prefix double_step { } {
 }
 
 proc_with_prefix triple_step { } {
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 
@@ -75,7 +75,7 @@ proc_with_prefix triple_step { } {
 }
 
 proc_with_prefix skip_current_frame { } {
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 

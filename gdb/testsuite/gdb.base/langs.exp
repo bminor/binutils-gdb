@@ -16,7 +16,7 @@
 
 standard_testfile langs0.c langs1.c langs2.c
 
-if [is_remote host] {
+if {[is_remote host]} {
     remote_download host ${srcdir}/${subdir}/langs1.f
     remote_download host ${srcdir}/${subdir}/langs2.cxx
 }
@@ -88,7 +88,7 @@ if {[runto csub]} {
     gdb_test "show language" "currently $lang\".*" \
 	"show language at main"
 
-    if [target_info exists gdb,noresults] { return }
+    if {[target_info exists gdb,noresults]} { return }
 
     gdb_continue_to_end "first session"
 }
@@ -102,7 +102,7 @@ if {[runto csub]} {
     # Also test warn-language-frame-mismatch.
     gdb_test_no_output "set warn-language-frame-mismatch off"
     gdb_test_no_output "set lang minimal" "set lang to minimal"
-    
+
     gdb_test "print x" " = 5000" "print parameter value"
 
     # Ensure this at least does not crash.

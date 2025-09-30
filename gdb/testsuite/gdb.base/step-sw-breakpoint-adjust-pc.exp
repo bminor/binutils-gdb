@@ -21,7 +21,7 @@
 
 standard_testfile
 
-if [build_executable "failed to build" ${testfile} ${srcfile} {debug}] {
+if {[build_executable "failed to build" ${testfile} ${srcfile} {debug}]} {
     return -1
 }
 
@@ -43,7 +43,7 @@ proc test {non_stop displaced always_inserted} {
     gdb_test_no_output "set displaced-stepping $displaced"
     gdb_test_no_output "set breakpoint always-inserted $always_inserted"
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 

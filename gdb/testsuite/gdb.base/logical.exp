@@ -49,7 +49,7 @@ proc evaluate { vars ops } {
 	set var [lindex $vars $vari]
 	for {set opi 0} {$opi < [llength $ops]} {incr opi} {
 	    set op [lindex [lindex $ops $opi] 0]
-	    set val [lindex [lindex $ops $opi] [expr $vari + 1]]
+	    set val [lindex [lindex $ops $opi] [expr {$vari + 1}]]
 	    gdb_test "print $var, $op" " = $val" "evaluate $op; variables $var; expecting $val"
 	}
     }

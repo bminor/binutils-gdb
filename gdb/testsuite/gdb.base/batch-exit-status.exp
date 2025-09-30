@@ -29,7 +29,7 @@ proc _test_exit_status {expect_status cmdline_opts {re ""}} {
 	return
     }
 
-    set has_re [expr ![string equal $re ""]]
+    set has_re [expr {![string equal $re ""]}]
     if { ! $has_re } {
 	set re "\$FOOBAR^"
     }

@@ -49,8 +49,8 @@ gdb_test_multiple "s" $name \
     -re "hithere2 \\(\\) at.*${libfile}.c:\[0-9\]+\r\n\[0-9\]+.*a = 21;.*$gdb_prompt $"  {
 	pass $name
     }
-    -re "0x\[0-9a-f\]+ in .* \\(\\) from /lib/ld.so.1.*$gdb_prompt $" { 
-	kfail "gdb/1555" $name 
+    -re "0x\[0-9a-f\]+ in .* \\(\\) from /lib/ld.so.1.*$gdb_prompt $" {
+	kfail "gdb/1555" $name
     }
 }
 
@@ -61,8 +61,8 @@ gdb_test_multiple "n" $name \
     -re "\[0-9\]+.*return a;.*$gdb_prompt $" {
 	pass $name
     }
-    -re "Single stepping until exit from function .*, \r\nwhich has no line number information.\r\n\r\n$inferior_exited_re normally.*$gdb_prompt $" { 
-	kfail "gdb/1555" $name 
+    -re "Single stepping until exit from function .*, \r\nwhich has no line number information.\r\n\r\n$inferior_exited_re normally.*$gdb_prompt $" {
+	kfail "gdb/1555" $name
     }
 }
 

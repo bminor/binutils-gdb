@@ -27,11 +27,11 @@ if {![runto_main]} {
 
 set target_char_mask [get_valueof "/u" "a.x\[0]" "255" "get target char mask"]
 set target_char_bit 0
-for {set i $target_char_mask} {$i > 0} {set i [expr $i >> 1]} {
+for {set i $target_char_mask} {$i > 0} {set i [expr {$i >> 1}]} {
     incr target_char_bit
 }
 set target_char_rank -1
-for {set i $target_char_bit} {$i > 0} {set i [expr $i >> 1]} {
+for {set i $target_char_bit} {$i > 0} {set i [expr {$i >> 1}]} {
     incr target_char_rank
 }
 

@@ -21,7 +21,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile}] } {
     return -1
 }
 
-if ![runto breakpt] {
+if {![runto breakpt]} {
     return -1
 }
 
@@ -45,7 +45,7 @@ proc delete_mem {} {
 
 # Make the dcache line size bigger than the pagesize.
 set pagesize [get_integer_valueof "pg_size" -1]
-set linesize [expr $pagesize * 2]
+set linesize [expr {$pagesize * 2}]
 
 gdb_test_no_output "set dcache line-size $linesize" \
     "set dcache line size to twice the pagesize"

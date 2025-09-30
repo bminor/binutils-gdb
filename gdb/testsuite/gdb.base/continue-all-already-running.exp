@@ -25,7 +25,7 @@ save_vars { GDBFLAGS } {
     }
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return
 }
 

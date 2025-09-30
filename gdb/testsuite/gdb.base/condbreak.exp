@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This test was written by Rich Title. 
+# This test was written by Rich Title.
 # Purpose is to test conditional breakpoints.
 # Modeled after "break.exp".
 
@@ -42,7 +42,7 @@ gdb_test "break -q main" \
     "Breakpoint.*at.* file .*$srcfile, line.*" \
     "breakpoint function"
 
-# 
+#
 # test conditional break at function
 #
 gdb_test "break marker1 if 1==1" \
@@ -58,7 +58,7 @@ gdb_test "break $srcfile:$bp_location1 if 1==1" \
 
 gdb_test_no_output "delete 3"
 
-# 
+#
 # test conditional break at function
 #
 gdb_test "break marker1 if (1==1)" \
@@ -139,7 +139,7 @@ gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.
 # user instruction, GDB's search finds the second line entry, decides
 # that the PC is indeed at the beginning of a source line, and doesn't
 # print an address in the breakpoint hit message.
-# 
+#
 # GCC's Dwarf2 writer, on the other hand, squeezes out duplicate line
 # entries, so GDB considers the source line to begin at the start of
 # the function's prologue.  Thus, if the program stops at the

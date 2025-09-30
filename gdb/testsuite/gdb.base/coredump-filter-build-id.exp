@@ -48,7 +48,7 @@ if { ![gdb_gcore_cmd "$corefilename" "save corefile"] } {
 
 # Determine if GDB dumped the mapping containing the build-id.  This
 # is done by invoking an external program (eu-unstrip).
-if { [catch "exec [gdb_find_eu-unstrip] -n --core $corefilename" output] == 0 } {
+if { [catch {exec [gdb_find_eu-unstrip] -n --core $corefilename} output] == 0 } {
     set line [lindex [split $output "\n"] 0]
     set test "gcore dumped mapping with build-id"
 

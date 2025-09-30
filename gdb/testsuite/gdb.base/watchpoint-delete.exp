@@ -22,7 +22,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
 # It is more compatible this way.
 gdb_test_no_output "set can-use-hw-watchpoints 0"
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

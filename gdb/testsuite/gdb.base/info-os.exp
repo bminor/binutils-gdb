@@ -128,7 +128,7 @@ proc expect_multiline { command expect test } {
 	    exp_continue
 	}
 	-re "^$gdb_prompt $" {
-	    if $found {
+	    if {$found} {
 		set ok 1
 	    }
 	    # Exit the loop.

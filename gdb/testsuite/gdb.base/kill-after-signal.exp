@@ -19,13 +19,13 @@ require can_single_step_to_signal_handler
 
 require {!target_info exists gdb,nosignals}
 
-if [prepare_for_testing "failed to prepare" ${testfile}] {
+if {[prepare_for_testing "failed to prepare" ${testfile}]} {
     return -1
 }
 
 gdb_test "handle SIGUSR1 stop print pass" "SIGUSR1\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+Yes\[ \t\]+.*"
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

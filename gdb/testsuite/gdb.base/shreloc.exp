@@ -42,11 +42,11 @@ if {([istarget "*pc-cygwin"] || [istarget "*pc-mingw32"]) } {
     lappend lib_opts "ldflags=-Wl,--image-base,0x04000000"
 }
 
-if [test_compiler_info "xlc-*"] {
+if {[test_compiler_info "xlc-*"]} {
 
-    # IBM's xlc compiler does not add static variables to the ELF symbol 
-    # table by default.  We need this option to make the variables show 
-    # up in "maint print msymbols". 
+    # IBM's xlc compiler does not add static variables to the ELF symbol
+    # table by default.  We need this option to make the variables show
+    # up in "maint print msymbols".
 
     lappend lib_opts "additional_flags=-qstatsym"
 
@@ -194,13 +194,13 @@ proc check_different {var msymfile} {
     return 1
 }
 
-if [is_remote host] {
+if {[is_remote host]} {
     set msymfile shreloc.txt
 } else {
     set msymfile [standard_output_file shreloc.txt]
 }
 
-if [send_gdb_discard "maint print msymbols ${msymfile}"] {
+if {[send_gdb_discard "maint print msymbols ${msymfile}"]} {
     if {[check_different "static_var_\[12\]" "${msymfile}"]} {
 	pass "(msymbol) relocated static vars have different addresses"
     } else {

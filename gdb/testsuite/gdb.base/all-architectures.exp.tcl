@@ -187,7 +187,7 @@ proc gdb_test_no_output_osabi {cmd test} {
 
 set num_slices 8
 set num_archs [llength $supported_archs]
-set archs_per_slice [expr (($num_archs + $num_slices - 1) / $num_slices)]
+set archs_per_slice [expr {(($num_archs + $num_slices - 1) / $num_slices)}]
 
 with_test_prefix "tests" {
     foreach_with_prefix osabi $supported_osabis {
@@ -201,10 +201,10 @@ with_test_prefix "tests" {
 	    incr arch_count
 
 	    # Skip architectures outside our slice.
-	    if {$arch_count < [expr $test_slice * $archs_per_slice]} {
+	    if {$arch_count < $test_slice * $archs_per_slice} {
 		continue
 	    }
-	    if {$arch_count >= [expr ($test_slice + 1) * $archs_per_slice]} {
+	    if {$arch_count >= ($test_slice + 1) * $archs_per_slice} {
 		continue
 	    }
 
@@ -312,7 +312,7 @@ with_test_prefix "tests" {
 		    foreach v $options {
 			with_test_prefix "$var=$v" {
 			    gdb_test_no_output_osabi "$cmd $v" "$cmd"
-			    run_axis $all_axes [expr $cur_axis + 1] $arch
+			    run_axis $all_axes [expr {$cur_axis + 1}] $arch
 			}
 		    }
 		}

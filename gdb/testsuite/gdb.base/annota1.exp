@@ -60,7 +60,7 @@ set old_gdb_prompt $gdb_prompt
 set gdb_prompt "\r\n\032\032pre-prompt\r\n$gdb_prompt \r\n\032\032prompt\r\n"
 
 #
-# Escape all the characters in the path that need it. For instance 
+# Escape all the characters in the path that need it. For instance
 # the directory name could contain '+'.
 #
 set escapedsrcfile [string_to_regexp ${srcdir}/${subdir}/${srcfile}]
@@ -244,7 +244,7 @@ gdb_test_multiple "break handle_USR1" "break handle_USR1" {
 }
 
 #
-# break at printf. When we are stopped at printf, we can test 
+# break at printf. When we are stopped at printf, we can test
 #
 gdb_test_multiple "break printf" "break printf" {
     -re  "\r\n\032\032post-prompt\r\nBreakpoint.*at $hex.*\032\032breakpoints-invalid\r\n.*$gdb_prompt$" {
@@ -336,14 +336,14 @@ gdb_test_multiple "backtrace" "backtrace from shlibrary" {
 
 
 #
-# test printing a frame with some arguments: 
+# test printing a frame with some arguments:
 # annotate-arg-begin
 # annotate-arg-name-end
 # annotate-arg-value
 # annotate-arg-end
 #
 
-if [target_info exists gdb,nosignals] {
+if {[target_info exists gdb,nosignals]} {
     unsupported "send SIGUSR1"
     unsupported "backtrace @ signal handler"
 } else {
@@ -507,10 +507,10 @@ gdb_test_multiple "info inferior 1" "get inferior pid" {
 # annotate-signal-name-end
 # annotate-signal-string
 # annotate-signal-string-end
-# FIXME: annotate-signal not tested (requires that the inferior be 
+# FIXME: annotate-signal not tested (requires that the inferior be
 #                        stopped by a "random" signal)
 
-if [target_info exists gdb,nosignals] {
+if {[target_info exists gdb,nosignals]} {
     unsupported "signal sent"
 } else {
     gdb_test_multiple "signal SIGTRAP" "signal sent" {

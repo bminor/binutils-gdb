@@ -47,7 +47,7 @@ standard_testfile
 proc do_tests {{do_xfail_cast 0} {do_xfail 0} {do_xfail_core_test 0}} {
     clean_restart
     gdb_load $::binfile
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 
@@ -145,12 +145,12 @@ proc do_tests {{do_xfail_cast 0} {do_xfail 0} {do_xfail_core_test 0}} {
 	}
     }
 
-    if $do_xfail {
+    if {$do_xfail} {
 	setup_xfail *-*-*
     }
     gdb_test "print errno" ".* = 42"
 
-    if $do_xfail_cast {
+    if {$do_xfail_cast} {
 	setup_xfail *-*-*
     }
     gdb_test "print (int) errno" ".* = 42"
@@ -173,7 +173,7 @@ proc do_tests {{do_xfail_cast 0} {do_xfail 0} {do_xfail_core_test 0}} {
     gdb_test "print errno" ".* = 36" "print masking errno"
 
     # Finish test early if no core file was made.
-    if !$core_supported {
+    if {!$core_supported} {
 	return
     }
 
@@ -184,7 +184,7 @@ proc do_tests {{do_xfail_cast 0} {do_xfail 0} {do_xfail_core_test 0}} {
     if { $core_loaded == -1 } {
 	return
     }
-    if $do_xfail_core_test {
+    if {$do_xfail_core_test} {
 	setup_xfail *-*-*
     }
     gdb_test "print errno" ".* = 42" "check errno value from corefile"

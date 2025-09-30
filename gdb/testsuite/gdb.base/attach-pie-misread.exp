@@ -39,18 +39,18 @@ proc read_phdr {binfile test} {
     set readelf_program [gdb_find_readelf]
     set command "exec $readelf_program -Wl $binfile"
     verbose -log "command is $command"
-    set result [catch $command output]
+    set result [catch {{*}$command} output]
     verbose -log "result is $result"
     verbose -log "output is $output"
     if {$result != 0} {
 	fail $test
 	return
     }
-    if ![regexp {\nProgram Headers:\n *Type [^\n]* Align\n(.*?)\n\n} $output trash phdr] {
+    if {![regexp {\nProgram Headers:\n *Type [^\n]* Align\n(.*?)\n\n} $output trash phdr]} {
 	fail "$test (no Program Headers)"
 	return
     }
-    if ![regexp -line {^ *DYNAMIC +0x[0-9a-f]+ +(0x[0-9a-f]+) } $phdr trash dynamic_vaddr] {
+    if {![regexp -line {^ *DYNAMIC +0x[0-9a-f]+ +(0x[0-9a-f]+) } $phdr trash dynamic_vaddr]} {
 	fail "$test (no DYNAMIC found)"
 	return
     }
@@ -74,7 +74,7 @@ set phdr [read_phdr $binfile "readelf initial scan"]
 set dynamic_vaddr [lindex $phdr 0]
 set align_max [lindex $phdr 1]
 
-set stub_size [format 0x%x [expr "2 * $align_max - ($dynamic_vaddr & ($align_max - 1))"]]
+set stub_size [format 0x%x [expr {2 * $align_max - ($dynamic_vaddr & ($align_max - 1))}]]
 verbose -log "stub_size is $stub_size"
 
 # On x86_64 it is commonly about 4MB.
@@ -86,7 +86,7 @@ if {$stub_size > 25000000} {
 set test "generate stub"
 set command "exec $binfile $stub_size >$genfile"
 verbose -log "command is $command"
-set result [catch $command output]
+set result [catch {{*}$command} output]
 verbose -log "result is $result"
 verbose -log "output is $output"
 if {$result == 0} {
@@ -109,14 +109,14 @@ file delete -- $genfile
 set phdr [read_phdr $binfile "readelf rebuilt with stub_size"]
 set dynamic_vaddr_prelinkno [lindex $phdr 0]
 
-if ![prelink_yes $prelink_args] {
+if {![prelink_yes $prelink_args]} {
     return -1
 }
 
 set phdr [read_phdr $binfile "readelf with prelink -R"]
 set dynamic_vaddr_prelinkyes [lindex $phdr 0]
 
-set first_offset [format 0x%x [expr $dynamic_vaddr_prelinkyes - $dynamic_vaddr_prelinkno]]
+set first_offset [format 0x%x [expr {$dynamic_vaddr_prelinkyes - $dynamic_vaddr_prelinkno}]]
 verbose -log "first_offset is $first_offset"
 
 set test "first offset is non-zero"
@@ -156,7 +156,7 @@ gdb_expect {
 foreach align_mult {1 2} { with_test_prefix "shift-by-$align_mult" {
 
     # FIXME: We believe there is enough room under FIRST_OFFSET.
-    set shifted_offset [format 0x%x [expr "$first_offset - $align_mult * $align_max"]]
+    set shifted_offset [format 0x%x [expr {$first_offset - $align_mult * $align_max}]]
     verbose -log "shifted_offset is $shifted_offset"
 
     # For normal prelink (prelink_yes call), we need to supply $prelink_args.
@@ -165,7 +165,7 @@ foreach align_mult {1 2} { with_test_prefix "shift-by-$align_mult" {
     # as the libraries would also get relocated.
     set command "exec /usr/sbin/prelink -q -N --no-exec-shield -r $shifted_offset $binfile"
     verbose -log "command is $command"
-    set result [catch $command output]
+    set result [catch {{*}$command} output]
     verbose -log "result is $result"
     verbose -log "output is $output"
 

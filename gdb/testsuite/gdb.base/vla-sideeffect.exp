@@ -22,7 +22,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -31,7 +31,8 @@ gdb_continue_to_breakpoint "vla-filled"
 
 # Check side effects for sizeof argument.
 set sizeof_int [get_sizeof "int" 4]
-set sizeof_vla [ expr "10" * "$sizeof_int" ]
+
+set sizeof_vla [expr {10 * $sizeof_int}]
 
 gdb_test "print sizeof (vla1\[i++\])" " = ${sizeof_int}"
 gdb_test "print i" " = 0" \

@@ -36,7 +36,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} [list $srcfile]] } {
     return -1
 }
 
-if ![runto done] {
+if {![runto done]} {
     return
 }
 

@@ -19,7 +19,7 @@
 # test running programs
 #
 
-if [target_info exists no_long_long] {
+if {[target_info exists no_long_long]} {
     set exec_opts [list debug additional_flags=-DNO_LONG_LONG]
 } else {
     set exec_opts [list debug]
@@ -122,7 +122,7 @@ proc do_test {dir options} {
 	"whatis unsigned long"
 
 
-    if ![target_info exists no_long_long] {
+    if {![target_info exists no_long_long]} {
 	gdb_test "whatis v_unsigned_long_long" \
 	    "type = (unsigned long long|long long unsigned int)" \
 	    "whatis unsigned long long"
@@ -192,7 +192,7 @@ proc do_test {dir options} {
 	"type = (unsigned (int|long|long int)|long unsigned int) \\\[2\\\]" \
 	"whatis unsigned long array"
 
-    if ![target_info exists no_long_long] {
+    if {![target_info exists no_long_long]} {
 	gdb_test "whatis v_unsigned_long_long_array" \
 	    "type = (unsigned long long|long long unsigned int) \\\[2\\\]" \
 	    "whatis unsigned long long array"
@@ -260,7 +260,7 @@ proc do_test {dir options} {
 	"type = (unsigned (int|long|long int)|long unsigned int) \\*" \
 	"whatis unsigned long pointer"
 
-    if ![target_info exists no_long_long] {
+    if {![target_info exists no_long_long]} {
 	gdb_test "whatis v_long_long_pointer" \
 	    "type = long long(| int) \\*" \
 	    "whatis long long pointer"
@@ -464,7 +464,7 @@ proc do_test {dir options} {
 	    "type = (unsigned (int|long|long int)|long unsigned int) \\($void\\)" \
 	    "whatis unsigned long function"
 
-	if ![target_info exists no_long_long] {
+	if {![target_info exists no_long_long]} {
 	    gdb_test "whatis v_long_long_func" \
 		"type = long long(| int) \\($void\\)" \
 		"whatis long long function"

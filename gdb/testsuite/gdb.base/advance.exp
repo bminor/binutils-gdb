@@ -63,7 +63,7 @@ gdb_test "continue" \
 	".*Breakpoint ${decimal}, main.*func3.*break here.*" \
 	"continue to call to func3 in main"
 
-# Verify that "advance <funcname>" when funcname is called as parameter to 
+# Verify that "advance <funcname>" when funcname is called as parameter to
 # another function works.
 #
 gdb_test "advance foo" \

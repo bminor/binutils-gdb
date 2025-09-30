@@ -49,7 +49,7 @@ proc test {cmds_after_kill} {
     clean_restart
     gdb_load $binfile
 
-    if ![runto done] {
+    if {![runto done]} {
 	return
     }
 

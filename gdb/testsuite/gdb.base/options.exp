@@ -208,7 +208,7 @@ proc_with_prefix test-print {{prefix ""}} {
     clean_restart
     gdb_load $binfile
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 
@@ -321,7 +321,7 @@ proc_with_prefix test-backtrace {} {
     clean_restart
     gdb_load $binfile
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 
@@ -1163,7 +1163,7 @@ foreach prefix {
 # Same for "compile print".  Not really a wrapper prefix command like
 # "frame apply", but similar enough that we test pretty much the same
 # things.
-if ![skip_compile_feature_tests] {
+if {![skip_compile_feature_tests]} {
     test-print "compile "
 }
 

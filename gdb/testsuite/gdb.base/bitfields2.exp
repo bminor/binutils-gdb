@@ -13,11 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This file was adapted from bitfields.exp by Paul Hilfinger 
+# This file was adapted from bitfields.exp by Paul Hilfinger
 # (Hilfinger@gnat.com)
 
 #
-# Tests for bit-fields that do not fit in type (unsigned) int, but do fit 
+# Tests for bit-fields that do not fit in type (unsigned) int, but do fit
 # in type (unsigned) long long.  We perform essentially the same tests as
 # in bitfields.c, which considers only bit-fields that are <= 9 bits long.
 #
@@ -33,7 +33,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 set has_signed_bitfields 1
 
 #
-# Continue to expected breakpoint at FUNCTION.  Append TAG to make pass/fail 
+# Continue to expected breakpoint at FUNCTION.  Append TAG to make pass/fail
 # messages (to make them unique).  Suppress tests on failure.
 #
 proc continue_test { function tag } {
@@ -54,7 +54,7 @@ proc start_test { function } {
     gdb_breakpoint $function
     continue_test $function "#0"
 }
-    
+
 
 #
 # Test bitfield locating and uniqueness.

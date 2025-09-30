@@ -23,7 +23,7 @@ if {[build_executable "failed to prepare" $testfile $srcfile debug] == -1} {
 }
 
 set file_arg $binfile
-if [is_remote host] {
+if {[is_remote host]} {
   set file_arg [remote_download host $file_arg]
 }
 
@@ -176,7 +176,7 @@ save_vars { INTERNAL_GDBFLAGS } {
 
     if {[probe_can_run_cmdline] > 0} {
 	test_fg_execution_pagination_return
-	if ![target_info exists gdb,nointerrupts] {
+	if {![target_info exists gdb,nointerrupts]} {
 	    test_fg_execution_pagination_cancel "ctrl-c"
 	}
 	test_fg_execution_pagination_cancel "quit"

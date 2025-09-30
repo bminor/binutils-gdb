@@ -48,8 +48,8 @@ proc test_list_ambiguous_symbol {symbol_line symbol} {
 
     set lineno0 [gdb_get_line_number $symbol_line $srcfile]
     set lineno1 [gdb_get_line_number $symbol_line $srcfile2]
-    set lines0_re [line_range_pattern [expr $lineno0 - 5] [expr $lineno0 + 4]]
-    set lines1_re [line_range_pattern [expr $lineno1 - 5] [expr $lineno1 + 4]]
+    set lines0_re [line_range_pattern [expr {$lineno0 - 5}] [expr {$lineno0 + 4}]]
+    set lines1_re [line_range_pattern [expr {$lineno1 - 5}] [expr {$lineno1 + 4}]]
 
     set any "\[^\r\n\]*"
     set h0_re "file: \"${any}list-ambiguous0.c\", line number: $lineno0, symbol: \"$symbol\""

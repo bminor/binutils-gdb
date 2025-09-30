@@ -30,7 +30,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
 # corruption cannot be tested.  Disable the probes interface.
 gdb_test "maint ignore-probes rtld"
 
-if ![runto_main] {
+if {![runto_main]} {
     return
 }
 

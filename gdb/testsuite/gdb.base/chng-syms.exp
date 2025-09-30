@@ -15,8 +15,8 @@
 
 # Author: Paul N. Hilfinger (Hilfinger@gnat.com)
 
-# Test that GDB cleans up properly after errors that result when a 
-# breakpoint is reset. 
+# Test that GDB cleans up properly after errors that result when a
+# breakpoint is reset.
 
 standard_testfile .c
 
@@ -45,21 +45,21 @@ gdb_test "break stop_here if (var1 == 42)" \
 gdb_run_cmd
 
 expect_to_stop_here "first time"
-    
+
 gdb_continue_to_end "breakpoint first time through"
 
 # Now we recompile the executable, but without a variable named "var1", first
 # waiting to insure that even on fast machines, the file modification times
-# are distinct. This will force GDB to reload the file on the 
-# next "run" command, causing an error when GDB tries to tries to reset 
+# are distinct. This will force GDB to reload the file on the
+# next "run" command, causing an error when GDB tries to tries to reset
 # the breakpoint.
 
 sleep 2
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DVARIABLE=var2}] != "" } {
 
-# Complication: Since GDB generally holds an open file descriptor on the 
-# executable at this point, there are some systems in which the 
-# re-compilation will fail. In such cases, we'll consider the test 
+# Complication: Since GDB generally holds an open file descriptor on the
+# executable at this point, there are some systems in which the
+# re-compilation will fail. In such cases, we'll consider the test
 # (vacuously) passed providing that re-running it succeeds as before.
 
     gdb_run_cmd

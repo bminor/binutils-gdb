@@ -78,7 +78,7 @@ gdb_test_multiple "info line ending-run.c:$break1_line" "" {
 
 gdb_test_multiple "i b" "all set to continue" {
     -re ".* breakpoint .* breakpoint .*$gdb_prompt $" {
-        fail "all set to continue (didn't clear bps)" 
+        fail "all set to continue (didn't clear bps)"
     }
     -re ".*2.*main.*$break2_line.*$gdb_prompt $" {
         pass "all set to continue"
@@ -92,7 +92,7 @@ gdb_test_multiple "i b" "all set to continue" {
 # See if we can step out with control.  The "1 2 3" stuff
 # is output from the program.
 #
-if ![gdb_skip_stdio_test "cont"] {
+if {![gdb_skip_stdio_test "cont"]} {
     gdb_test_stdio "cont" \
 	"1 2 7 14 23 34 47 62 79" \
 	"Breakpoint.*$break2_line.*"
@@ -100,7 +100,7 @@ if ![gdb_skip_stdio_test "cont"] {
     gdb_test "cont" ".*Breakpoint.*$break2_line.*"
 }
 
-if ![gdb_skip_stdio_test "Step to return"] {
+if {![gdb_skip_stdio_test "Step to return"]} {
     gdb_test_stdio "next" \
 	"Goodbye!" \
 	"[expr {$break2_line + 1}].*" \
@@ -129,13 +129,13 @@ gdb_test_multiple "next" "step out of main" {
 	fail "step out of main"
 	gdb_test "n" ".*" ""
     }
-    -re ".*in.*start.*$gdb_prompt $" { 
+    -re ".*in.*start.*$gdb_prompt $" {
 	pass "step out of main"
     }
-    -re ".*in.*bsp_trap.*$gdb_prompt $" { 
+    -re ".*in.*bsp_trap.*$gdb_prompt $" {
 	pass "step out of main"
     }
-    -re ".*in.*init.*$gdb_prompt $" { 
+    -re ".*in.*init.*$gdb_prompt $" {
 	# This is what happens on sparc64-elf ultra.
 	pass "step out of main"
     }
@@ -172,7 +172,7 @@ gdb_test_multiple "next" "step out of main" {
 	# This is what happens on the ARM RVDS runtime
 	pass "step out of main"
     }
-    -re ".*in.*\\\$START\\\$.*from.*dld.sl.*$gdb_prompt $" { 
+    -re ".*in.*\\\$START\\\$.*from.*dld.sl.*$gdb_prompt $" {
 	pass "step out of main"
     }
     -re ".*in __wrap__?main ().*$gdb_prompt $" {
@@ -183,7 +183,7 @@ gdb_test_multiple "next" "step out of main" {
 	# another `next' is necessary.
 	gdb_test "next" ".*in start_l ().*" "step out of main"
     }
-    -re ".*in.*currently asm.*$gdb_prompt $" { 
+    -re ".*in.*currently asm.*$gdb_prompt $" {
         pass "step out of main"
     }
     -re "_*start\[0-9\]* \\(\[^)\]*\\).*$gdb_prompt $" {
@@ -245,7 +245,7 @@ if {!$use_gdb_stub
 		set program_exited_normally 1
 	    }
 	    -re ".*Single.*in exit.*from.*dld.sl.*$gdb_prompt $" {
-		pass "step to end of run" 
+		pass "step to end of run"
 		set program_in_exit 1
 	    }
 	    -re ".*Single.*_int_reset.*$gdb_prompt $" {
@@ -254,7 +254,7 @@ if {!$use_gdb_stub
 		    set program_exited_normally 1
 		}
 	    }
-	}   
+	}
     }
 
     if {$program_in_exit} {
@@ -275,10 +275,10 @@ if {!$use_gdb_stub
 
     set exec_output [remote_exec host "ls core"]
 
-    if [ regexp "core not found" $exec_output]  {
+    if {[ regexp "core not found" $exec_output]} {
 	pass "no core dumped on quit"
     } else {
-	if [ regexp "No such file or directory" $exec_output] {
+	if {[ regexp "No such file or directory" $exec_output]} {
 	    pass "ls: core (No core dumped on quit)"
 	} else {
 	    remote_exec build "rm -f core"

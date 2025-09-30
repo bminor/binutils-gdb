@@ -103,7 +103,7 @@ proc test {always_inserted sw_watchpoint} {
 
 	# We now have the breakpoint instruction stored in 'buffer'.  Poke it
 	# to memory manually.
-	set count [expr $address_after_bp - $address_bp]
+	set count [expr {$address_after_bp - $address_bp}]
 	for {set i 0} {$i < $count} {incr i} {
 	    set test "p /x addr_bp\[$i\] = buffer\[$i\]"
 	    gdb_test_multiple $test $test {
@@ -216,7 +216,7 @@ proc test {always_inserted sw_watchpoint} {
 	gdb_test "next" "after next .*"
     }
 
-    if ![target_info exists gdb,nosignals] {
+    if {![target_info exists gdb,nosignals]} {
 
 	with_test_prefix "continue trips on nested permanent bp" {
 	    delete_breakpoints
@@ -242,7 +242,7 @@ proc test {always_inserted sw_watchpoint} {
 	    gdb_test "p counter" " = 2"
 	}
 
-	if [can_single_step_to_signal_handler] {
+	if {[can_single_step_to_signal_handler]} {
 
 	    with_test_prefix "stepi signal with handler" {
 		delete_breakpoints

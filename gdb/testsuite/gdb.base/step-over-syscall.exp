@@ -227,7 +227,7 @@ proc step_over_syscall { syscall } {
 	    lappend options "pthreads"
 	}
 
-	if [build_executable ${testfile}.exp ${testfile} ${testfile}.c $options] {
+	if {[build_executable ${testfile}.exp ${testfile} ${testfile}.c $options]} {
 	    untested "failed to compile"
 	    return -1
 	}

@@ -21,7 +21,7 @@ if { [prepare_for_testing "failed to prepare" "func-ptr" {func-ptr.c} {debug}] }
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return 0
 }
 

@@ -126,7 +126,7 @@ proc jit_test_reread {standalone change_addr} {
 	# second, gdb might not reload the executable automatically.
 	sleep 1
 
-	if ${change_addr} {
+	if {${change_addr}} {
 	    set options "additional_flags=-DSPACER"
 	    if {$standalone} {
 		gdb_rename_execfile $binfile ${binfile}x
@@ -155,7 +155,7 @@ proc jit_test_reread {standalone change_addr} {
 	    "maint info breakpoints shows jit breakpoint"
     }
 
-    if ${change_addr} {
+    if {${change_addr}} {
 	gdb_assert {$addr_before != $addr_after} "address changed"
     } else {
 	gdb_assert {$addr_before == $addr_after} "address didn't change"
@@ -163,7 +163,7 @@ proc jit_test_reread {standalone change_addr} {
 }
 
 foreach standalone {1 0} {
-    with_test_prefix [expr ($standalone)?"standalone":"shared"] {
+    with_test_prefix [expr {($standalone)?"standalone":"shared"}] {
 	with_test_prefix "change addr" {
 	    jit_test_reread $standalone 1
 	}

@@ -56,7 +56,7 @@ if {[istarget powerpc64-*] && [is_lp64_target]} {
     }
 }
 
-if ![runto "*$entry"] {
+if {![runto "*$entry"]} {
     return
 }
 gdb_test {p/x $pc} " = $entry"

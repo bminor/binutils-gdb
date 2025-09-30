@@ -94,7 +94,7 @@ with_test_prefix "with continue 2" {
     set bpnum [get_integer_valueof "\$bpnum" 0 "get bpnum"]
 
     gdb_test_no_output "cond $bpnum a == 999"
-    
+
     gdb_test "cond $bpnum gibberish" \
 	"No symbol \"gibberish\" in current context." \
 	"attempt a bad condition"

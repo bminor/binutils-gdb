@@ -18,7 +18,7 @@
 # Some targets can't call functions, so don't even bother with this
 # test.
 
-if [target_info exists gdb,cannot_call_functions] {
+if {[target_info exists gdb,cannot_call_functions]} {
     unsupported "this target can not call functions"
     continue
 }
@@ -28,7 +28,7 @@ set float_types { tf td tld }
 set complex_types { tfc tdc tldc }
 
 set compile_flags {debug}
-if [support_complex_tests] {
+if {[support_complex_tests]} {
     lappend compile_flags "additional_flags=-DTEST_COMPLEX"
     lappend compile_flags "additional_flags=-Wno-psabi"
 }
@@ -164,7 +164,7 @@ foreach ta $int_types {
     start_gdb_and_run_tests $lang $ta
 }
 
-if [support_complex_tests] {
+if {[support_complex_tests]} {
     foreach ta $complex_types {
 	start_gdb_and_run_tests $lang $ta
     }

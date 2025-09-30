@@ -23,14 +23,14 @@ require {!target_info exists gdb,skip_huge_test}
 
 standard_testfile .c
 
-set max [expr 2 * 1024 * 1024]
+set max [expr {2 * 1024 * 1024}]
 set min 16
 
 set opts {}
 lappend opts debug
 
 set compilation_succeeded 0
-for { set size $max } { $size >= $min } { set size [expr $size / 2] } {
+for { set size $max } { $size >= $min } { set size [expr {$size / 2}] } {
     set try_opts [concat $opts [list additional_flags=-DCRASH_GDB=$size]]
     if { [build_executable $testfile.exp $testfile $srcfile $try_opts] == -1 } {
 	continue
@@ -84,6 +84,6 @@ save_vars { timeout } {
 	unsupported $test
     } else {
 	# At 56 passes with and without the fix, so use 55.
-	gdb_assert {$space_used < [expr 55 * 4 * $size] } $test
+	gdb_assert {$space_used < [expr {55 * 4 * $size}] } $test
     }
 }

@@ -51,7 +51,7 @@ proc do_test {displaced breakpoint_always_inserted} {
     gdb_test_no_output "set displaced-stepping $displaced"
     gdb_test_no_output "set breakpoint always-inserted $breakpoint_always_inserted"
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 
@@ -59,7 +59,7 @@ proc do_test {displaced breakpoint_always_inserted} {
     # any kind of breakpoint insertion failure.  If we can examine
     # what's at memory address 0, it is possible that we could also
     # execute it.
-    if [is_address_zero_readable] {
+    if {[is_address_zero_readable]} {
 	untested "memory at address 0 is possibly executable"
 	return
     }

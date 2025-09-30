@@ -103,7 +103,7 @@ proc one_jit_test {jit_solibs_target match_str reattach} {
 	gdb_test_no_output "set var argc=$count" "forging argc"
 	gdb_test_no_output "set var argv=fake_argv" "forging argv"
 	for {set i 1} {$i < $count} {incr i} {
-	    set jit_solib_target [lindex $jit_solibs_target [expr $i-1]]
+	    set jit_solib_target [lindex $jit_solibs_target [expr {$i-1}]]
 	    gdb_test_no_output "set var argv\[$i\]=\"${jit_solib_target}\"" \
 		"forging argv\[$i\]"
 	}

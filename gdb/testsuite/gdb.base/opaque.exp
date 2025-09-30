@@ -110,7 +110,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
 # Run to main, where struct foo is incomplete.
-if ![runto_main] {
+if {![runto_main]} {
     return
 }
 
@@ -160,7 +160,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
 # Run to getfoo, where struct foo is complete.
-if ![runto getfoo] {
+if {![runto getfoo]} {
     perror "cannot run to breakpoint at getfoo"
 }
 

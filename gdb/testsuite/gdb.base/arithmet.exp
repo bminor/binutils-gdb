@@ -20,7 +20,7 @@
 #
 # tests for correctness of arithmetic operators, associativity and precedence
 # with integer type variables
-# 
+#
 
 #
 # test running programs
@@ -54,7 +54,7 @@ gdb_test "print x" "14"
 gdb_test "print y"  "2"
 gdb_test "print z"  "2"
 gdb_test "print w"  "3"
- 
+
 gdb_test "print x+y" "16"
 gdb_test "print x-y" "12"
 gdb_test "print x*y" "28"

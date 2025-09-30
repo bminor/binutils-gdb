@@ -25,7 +25,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -139,7 +139,7 @@ proc get_next_insn {} {
 
 set hw_step [probe_target_hardware_step]
 
-if ![get_function_bounds "main" main_lo main_hi] {
+if {![get_function_bounds "main" main_lo main_hi]} {
     # Can't do the following tests if main's bounds are unknown.
     return -1
 }

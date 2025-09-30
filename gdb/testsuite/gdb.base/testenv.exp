@@ -75,7 +75,7 @@ proc find_env {varname} {
 	}
 
 	if {[string match "$varname=*" $var]} {
-	    set from [expr [string first "=" $var] + 1]
+	    set from [expr {[string first "=" $var] + 1}]
 	    set to [string length $var]
 	    return [string range $var $from $to]
 	}
@@ -95,7 +95,7 @@ proc_with_prefix test_set_unset_env {} {
 
     # First test with no TEST_GDB_VAR.
     with_test_prefix "test1" {
-	if ![run_and_count_vars] {
+	if {![run_and_count_vars]} {
 	    return
 	}
 	test_num_test_vars 0 "no TEST_GDB vars"
@@ -106,7 +106,7 @@ proc_with_prefix test_set_unset_env {} {
 	gdb_test_no_output "set env TEST_GDB_VAR1 test1" \
 	    "set TEST_GDB_VAR1"
 
-	if ![run_and_count_vars] {
+	if {![run_and_count_vars]} {
 	    return
 	}
 	test_num_test_vars 1 "one TEST_GDB var"
@@ -117,7 +117,7 @@ proc_with_prefix test_set_unset_env {} {
 	gdb_test_no_output "set env TEST_GDB_VAR2 test2" \
 	    "set TEST_GDB_VAR2"
 
-	if ![run_and_count_vars] {
+	if {![run_and_count_vars]} {
 	    return
 	}
 
@@ -130,7 +130,7 @@ proc_with_prefix test_set_unset_env {} {
 	gdb_test_no_output "unset env TEST_GDB_VAR1" \
 	    "unset TEST_GDB_VAR1"
 
-	if ![run_and_count_vars] {
+	if {![run_and_count_vars]} {
 	    return
 	}
 
@@ -145,7 +145,7 @@ proc_with_prefix test_inherit_env_var {} {
 
     # This test assumes that the build's environ (where dejagnu runs)
     # is the same as the host's (where gdb runs) environ.
-    if [is_remote host] {
+    if {[is_remote host]} {
 	return
     }
 
@@ -159,7 +159,7 @@ proc_with_prefix test_inherit_env_var {} {
 
 	# First test with only inherited TEST_GDB_GLOBAL.
 	with_test_prefix "test1" {
-	    if ![run_and_count_vars] {
+	    if {![run_and_count_vars]} {
 		return
 	    }
 
@@ -179,7 +179,7 @@ proc_with_prefix test_inherit_env_var {} {
 	    gdb_test_no_output "unset env TEST_GDB_GLOBAL" \
 		"unset TEST_GDB_GLOBAL"
 
-	    if ![run_and_count_vars] {
+	    if {![run_and_count_vars]} {
 		return
 	    }
 

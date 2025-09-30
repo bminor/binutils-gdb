@@ -59,7 +59,7 @@ proc do_test {fork_kind exit_kind} {
     with_test_prefix "$fork_kind" {
 	clean_restart $testfile
 
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return -1
 	}
 

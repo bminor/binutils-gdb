@@ -44,14 +44,14 @@ proc set_listsize { arg } {
     global set_listsize_count
 
     incr set_listsize_count
-    if [gdb_test_no_output "set listsize $arg" "setting listsize to $arg #$set_listsize_count"] {
+    if {[gdb_test_no_output "set listsize $arg" "setting listsize to $arg #$set_listsize_count"]} {
 	return 0
     }
     if { $arg == 0 } {
 	set arg "unlimited"
     }
 
-    if [gdb_test "show listsize" "Number of source lines.* is ${arg}.*" "show listsize $arg #$set_listsize_count"] {
+    if {[gdb_test "show listsize" "Number of source lines.* is ${arg}.*" "show listsize $arg #$set_listsize_count"]} {
 	return 0
     }
     return 1
@@ -68,21 +68,21 @@ proc test_listsize {} {
     # Show default size
 
     gdb_test "show listsize" "Number of source lines gdb will list by default is 10.*" "show default list size"
-    
+
     # Show the default lines
 
     gdb_test "list" "(1\[ \t\]+#include \"list0.h\".*7\[ \t\]+x = 0;\r\n.*10\[ \t\]+foo .x\[+)\]+;)" "list default lines around main"
 
     # Ensure we can limit printouts to one line
 
-    if [set_listsize 1] {
+    if {[set_listsize 1]} {
 	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\"" "list line 1 with listsize 1"
 	gdb_test "list 2" "2\[ \t\]+" "list line 2 with listsize 1"
-    }    
+    }
 
     # Try just two lines
-    
-    if [ set_listsize 2 ] {
+
+    if {[ set_listsize 2 ]} {
 	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\"\r\n2\[ \t\]+" "list line 1 with listsize 2"
 	gdb_test "list 2" "1\[ \t\]+#include \"list0.h\"\r\n2\[ \t\]+" "list line 2 with listsize 2"
 	gdb_test "list 3" "2\[ \t\]+\r\n3\[ \t\]+int main \[)(\]+" "list line 3 with listsize 2"
@@ -90,7 +90,7 @@ proc test_listsize {} {
 
     # Try small listsize > 1 that is an odd number
 
-    if [ set_listsize 3 ] {
+    if {[ set_listsize 3 ]} {
 	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\".*3\[ \t\]+int main \[)(\]+" "list line 1 with listsize 3"
 	gdb_test "list 2" "1\[ \t\]+#include \"list0.h\".*3\[ \t\]+int main \[)(\]+" "list line 2 with listsize 3"
 	gdb_test "list 3" "2\[ \t\]+\r\n3\[ \t\]+int main \[(\]+\[)\]+\r\n4\[ \t\]+\{" "list line 3 with listsize 3"
@@ -101,7 +101,7 @@ proc test_listsize {} {
     if {[set_listsize 4]} {
 	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\".*4\[ \t\]+\{" "list line 1 with listsize 4"
 	gdb_test "list 2" "1\[ \t\]+#include \"list0.h\".*4\[ \t\]+\{" "list line 2 with listsize 4"
-	
+
 	gdb_test "list 3" "1\[ \t\]+#include \"list0.h\".*4\[ \t\]+\{" "list line 3 with listsize 4"
 	gdb_test "list 4" "2\[ \t\]+\r\n.*5\[ \t\]+int x;.*" "list line 4 with listsize 4"
     }
@@ -110,7 +110,7 @@ proc test_listsize {} {
 
     if {[set_listsize 100]} {
 	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\".*\r\n${last_line_re}" "list line 1 with listsize 100"
-	
+
 	gdb_test "list 10" "1\[ \t\]+#include \"list0.h\".*\r\n${last_line_re}" "list line 10 with listsize 100"
     }
 
@@ -182,7 +182,7 @@ proc_with_prefix test_list_forward {} {
 # Test that repeating the list linenum command doesn't print the same
 # lines over again.  Note that this test makes sure that the argument
 # linenum is dropped, when we repeat the previous command. 'x/5i $pc'
-# works the same way.  
+# works the same way.
 
 proc_with_prefix test_repeat_list_command {} {
     global last_line_re
@@ -227,8 +227,8 @@ proc test_list_range {} {
 
 #    gdb_test     "list -100,-40" 	"Line number -60 out of range; .*list0.c has 39 lines." "list range; both bounds negative"
 
-    set past_end [expr ${last_line} + 10]
-    set much_past_end [expr ${past_end} + 10]
+    set past_end [expr {${last_line} + 10}]
+    set much_past_end [expr {${past_end} + 10}]
 
     gdb_test "list 30,${past_end}" "30\[ \t\]+foo \(.*\);.*${last_line_re}" "list range; upper bound past EOF"
 
@@ -323,7 +323,7 @@ proc test_list_filename_and_function {} {
     # Test some invalid specs
     # The following test takes the FIXME result on most systems using
     # DWARF.  It fails to notice that main() is not in the file requested.
-   
+
     setup_xfail "*-*-*"
 
 # Does this actually work ANYWHERE?  I believe not, as this is an `aspect' of
@@ -369,7 +369,7 @@ proc test_forward_reverse_search {} {
 	# Test that GDB won't crash if the line being searched is extremely long.
 
 	set oldtimeout $timeout
-	set timeout [expr "$timeout + 300"]
+	set timeout [expr {$timeout + 300}]
 	verbose "Timeout is now $timeout seconds" 2
 	gdb_test "search 1234" ".*1234.*" "search extremely long line (> 5000 chars)"
 	set timeout $oldtimeout

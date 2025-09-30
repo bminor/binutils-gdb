@@ -21,7 +21,7 @@ standard_testfile
 # We still want to test non-prototype functions for now, which is why
 # we disable compilers warning about them.
 set compile_flags {debug additional_flags=-Wno-deprecated-non-prototype}
-if [support_complex_tests] {
+if {[support_complex_tests]} {
     lappend compile_flags "additional_flags=-DTEST_COMPLEX"
 }
 
@@ -132,7 +132,7 @@ proc do_function_calls {prototypes} {
 	gdb_test "p t_int_double(99, 99.0)" " = 1"
     }
 
-    if [support_complex_tests] {
+    if {[support_complex_tests]} {
 	gdb_test "p t_float_complex_values(fc1, fc2)" " = 1"
 	gdb_test "p t_float_complex_values(fc3, fc4)" " = 0"
 
@@ -221,7 +221,7 @@ proc do_function_calls {prototypes} {
 	    "call inferior func with struct - returns double"
     }
 
-    if [support_complex_tests] {
+    if {[support_complex_tests]} {
 
 	gdb_test "p t_structs_fc(struct_val1)" ".*= 3 \\+ 3i" \
 	    "call inferior func with struct - returns float _Complex"
@@ -257,7 +257,7 @@ proc fetch_all_registers {test} {
 	    exp_continue
 	}
 	-re "^bspstore\[ \t\]+\[^\r\n\]+\r\n" {
-	    if [istarget "ia64-*-*"] {
+	    if {[istarget "ia64-*-*"]} {
 		# Filter out bspstore which is specially tied to bsp,
 		# giving spurious differences.
 	    } else {
@@ -266,7 +266,7 @@ proc fetch_all_registers {test} {
 	    exp_continue
 	}
 	-re  "^pstate\[ \t\]+\[^\r\n\]+\r\n" {
-	    if [istarget "sparc64-*-linux-gnu"] {
+	    if {[istarget "sparc64-*-linux-gnu"]} {
 		# Filter out the pstate register, since in sparc64
 		# targets the Linux kernel disables pstate.PEF when
 		# returning from traps, giving spurious differences.
@@ -276,7 +276,7 @@ proc fetch_all_registers {test} {
 	    exp_continue
 	}
 	-re "^last_break\[ \t\]+\[^\r\n\]+\r\n" {
-	    if [istarget "s390*-*-*"] {
+	    if {[istarget "s390*-*-*"]} {
 		# Filter out last_break which is read-only,
 		# giving spurious differences.
 	    } else {
@@ -285,7 +285,7 @@ proc fetch_all_registers {test} {
 	    exp_continue
 	}
 	-re "^\(?:cycle\|instret\)\[ \t\]+\[^\r\n\]+\r\n" {
-	    if [istarget "riscv*-*-*"] {
+	    if {[istarget "riscv*-*-*"]} {
 		# Filter out the cycle counter and instructions
 		# retired counter CSRs which are read-only, giving
 		# spurious differences.
@@ -386,9 +386,9 @@ proc perform_all_tests {prototypes} {
 	"The program being debugged stopped while.*" \
 	"stop at breakpoint in call dummy function"
     gdb_test "continue" "Continuing.*" "continue from call dummy breakpoint"
-    if ![gdb_test "bt 2" \
-	     "#0  main.*" \
-	     "bt after continuing from call dummy breakpoint"] then {
+    if {![gdb_test "bt 2" \
+	      "#0  main.*" \
+	      "bt after continuing from call dummy breakpoint"]} then {
 		 set new_reg_content [fetch_all_registers \
 					  "register contents after stop in call dummy"]
 		 if {$old_reg_content == $new_reg_content} {
@@ -412,9 +412,9 @@ proc perform_all_tests {prototypes} {
     gdb_test "finish" \
 	"Value returned is .* = 9" \
 	"finish from call dummy breakpoint returns correct value"
-    if ![gdb_test "bt 2" \
-	     "#0  main.*" \
-	     "bt after finishing from call dummy breakpoint"] then {
+    if {![gdb_test "bt 2" \
+	      "#0  main.*" \
+	      "bt after finishing from call dummy breakpoint"]} then {
 		 set new_reg_content [fetch_all_registers \
 					  "register contents after finish in call dummy"]
 		 if {$old_reg_content == $new_reg_content} {
@@ -435,11 +435,11 @@ proc perform_all_tests {prototypes} {
     # with a value, make sure we are back at main with the same register contents.
     gdb_test "print add(4,5)" "The program being debugged stopped while.*" \
 	"call function causing a breakpoint and then do a return"
-    if ![gdb_test "return 7" \
-	     "#0  main.*" \
-	     "back at main after return from call dummy breakpoint" \
-	     "Make add return now. .y or n.*" \
-	     "y"] then {
+    if {![gdb_test "return 7" \
+	      "#0  main.*" \
+	      "back at main after return from call dummy breakpoint" \
+	      "Make add return now. .y or n.*" \
+	      "y"]} then {
 		 set new_reg_content [fetch_all_registers \
 					  "register contents after return in call dummy"]
 		 if {$old_reg_content == $new_reg_content} {

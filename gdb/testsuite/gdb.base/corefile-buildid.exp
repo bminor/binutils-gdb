@@ -36,7 +36,7 @@ proc create_core_file { progname } {
     verbose -log "corefile is $corefile"
 
     # Check the corefile has a build-id for the executable.
-    if { [catch "exec [gdb_find_eu-unstrip] -n --core $corefile" output] == 0 } {
+    if { [catch {exec [gdb_find_eu-unstrip] -n --core $corefile} output] == 0 } {
 	set line [lindex [split $output "\n"] 0]
 	set binfile_re (?:[string_to_regexp $progname]|\\\[(?:exe|pie)\\\])
 	if { ![regexp "^${::hex}\\+${::hex} \[a-f0-9\]+@${::hex}.*$binfile_re$" $line] } {

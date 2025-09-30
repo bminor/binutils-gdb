@@ -57,7 +57,7 @@ set bp_disabled_re "warning: Temporarily disabling breakpoints for unloaded shar
 # assuming that GDB has disabled some breakpoints.
 set stop_after_bp_re [multi_line \
 			  "^$::bp_disabled_re" \
-			  "[expr $::bp_line + 1]\\s+assert \\(res == 0\\);"]
+			  "[expr {$::bp_line + 1}]\\s+assert \\(res == 0\\);"]
 
 # Checking that a breakpoint with multiple locations in a shared
 # library only triggers a single breakpoint modified event from

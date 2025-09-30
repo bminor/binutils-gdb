@@ -60,8 +60,8 @@ proc gdb_count_probes { type provider name { object "" }} {
 	}
     }
 
-    if { [expr $no_probes_line && $probe_count > 0] \
-	     || [expr !$no_probes_line && $probe_count == 0] } {
+    if { ($no_probes_line && $probe_count > 0) \
+	     || (!$no_probes_line && $probe_count == 0) } {
 	perror "Mismatch between no probes found line, and probes count"
 	return -1
     }
@@ -74,7 +74,7 @@ proc check_for_usable_xmm0_probe { binfile } {
     set binfile [standard_output_file $binfile]
     set command "exec $readelf_program -n $binfile"
     verbose -log "command is $command"
-    set result [catch $command output]
+    set result [catch {{*}$command} output]
     verbose -log "result is $result"
     verbose -log "output is $output"
 
@@ -89,7 +89,7 @@ proc check_for_usable_xmm0_probe { binfile } {
 
     # First, look for the xmmreg probe, and if we find it, grab the
     # argument string.
-    if ![regexp {\n\s+Provider: test\n\s+Name: xmmreg\n[^\n]+\n\s+Arguments: ([^\n]+)\n} $output ignore arguments] {
+    if {![regexp {\n\s+Provider: test\n\s+Name: xmmreg\n[^\n]+\n\s+Arguments: ([^\n]+)\n} $output ignore arguments]} {
 	verbose -log "APB: Couldn't find probe at all"
 	return false
     }
@@ -98,7 +98,7 @@ proc check_for_usable_xmm0_probe { binfile } {
     verbose -log "APB: arguments: '$arguments'"
 
     # Check the the argument string mentions xmm0.
-    if ![regexp {@%?xmm0} $arguments] {
+    if {![regexp {@%?xmm0} $arguments]} {
 	verbose -log "APB: Prove doesn't use xmm0 register"
 	return false
     }
@@ -133,7 +133,7 @@ proc stap_test {exec_name {args ""}} {
 		"get original address of relocation_marker"]
     }
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 
@@ -159,7 +159,7 @@ proc stap_test {exec_name {args ""}} {
 	    [get_hexadecimal_valueof "&relocation_marker" \
 		 "0" "get revised relocation_marker address"]
 	set relocation_base \
-	   [expr $updated_semaphore_addr_var - $semaphore_addr_var]
+	   [expr {$updated_semaphore_addr_var - $semaphore_addr_var}]
 	if {$relocation_base != 0} {
 	   # Checks that GDB doesn't mistakenly relocate and write to null
 	   # semaphore addresses.  If it were to relocate a zero-valued
@@ -219,7 +219,7 @@ proc stap_test {exec_name {args ""}} {
     "print \$_probe_arg1 for probe ps"
 
     # Check the probe is using the xmm0 register.
-    if [check_for_usable_xmm0_probe $exec_name] {
+    if {[check_for_usable_xmm0_probe $exec_name]} {
 
 	delete_breakpoints
 	if {[runto "-pstap test:xmmreg"]} {

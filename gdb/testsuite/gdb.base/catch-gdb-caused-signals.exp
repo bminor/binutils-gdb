@@ -36,7 +36,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile $flags]} {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -47,7 +47,7 @@ gdb_test "handle SIGILL nostop noprint" \
 
 gdb_test "print return_one()" " = 1"
 
-if ![target_info exists gdb,noinferiorio] {
+if {![target_info exists gdb,noinferiorio]} {
 
     # Clean up the breakpoint state.
     delete_breakpoints

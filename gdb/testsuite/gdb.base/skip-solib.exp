@@ -72,7 +72,7 @@ with_test_prefix "ignoring solib file" {
 	     "Num\\s+Enb\\s+Glob\\s+File\\s+RE\\s+Function\\s*" \
 	     "1\\s+y\\s+n\\s+${srcfile_lib}\\s+n\\s+<none>\\s*"]
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 
@@ -94,7 +94,7 @@ with_test_prefix "ignoring solib function" {
 	"Function multiply will be skipped when stepping\\." \
 	"skip function"
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 

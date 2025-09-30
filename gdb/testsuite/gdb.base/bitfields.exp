@@ -165,7 +165,7 @@ proc bitfield_at_offset {} {
     global srcfile
 
     gdb_breakpoint break5
-    if [gdb_test "cont" "Break.*break5 \\(\\) at .*$srcfile:$decimal.*" "continuing to break5"] {
+    if {[gdb_test "cont" "Break.*break5 \\(\\) at .*$srcfile:$decimal.*" "continuing to break5"]} {
 	return
     }
 

@@ -126,7 +126,7 @@ foreach test_data {{SEGV "Segmentation fault"} \
 		gdb_assert { $saw_fatal_msg }
 		gdb_assert { $saw_bt_start }
 		gdb_assert { $saw_bt_end }
-		gdb_assert { [expr $internal_error_msg_count == 2] }
+		gdb_assert { [expr {$internal_error_msg_count == 2}] }
 	    }
 	    -re "$gdb_prompt $" {
 		# GDB should terminate, we should never get back to

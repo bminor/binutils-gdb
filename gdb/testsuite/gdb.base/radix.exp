@@ -59,20 +59,20 @@ proc test_input_radix { iradix iradixhex iradixoctal } {
     test_one_input $iradix  "-1"          "-1"
 
     # test simple two-digit constants
-    test_one_input $iradix "10"          [expr $iradix]
-    test_one_input $iradix "11"          [expr $iradix + 1]
-    test_one_input $iradix "-10"         [expr 0 - $iradix]
-    test_one_input $iradix "-11"         [expr 0 - $iradix - 1]
+    test_one_input $iradix "10"          [expr {$iradix}]
+    test_one_input $iradix "11"          [expr {$iradix + 1}]
+    test_one_input $iradix "-10"         [expr {0 - $iradix}]
+    test_one_input $iradix "-11"         [expr {0 - $iradix - 1}]
 
     # test simple three-digit constants
-    test_one_input $iradix "100"         [expr $iradix * $iradix]
-    test_one_input $iradix "101"         [expr $iradix * $iradix + 1]
-    test_one_input $iradix "-100"        [expr 0 - $iradix * $iradix]
-    test_one_input $iradix "-101"        [expr 0 - $iradix * $iradix - 1]
+    test_one_input $iradix "100"         [expr {$iradix * $iradix}]
+    test_one_input $iradix "101"         [expr {$iradix * $iradix + 1}]
+    test_one_input $iradix "-100"        [expr {0 - $iradix * $iradix}]
+    test_one_input $iradix "-101"        [expr {0 - $iradix * $iradix - 1}]
 
     # test a five-digit constant
     test_one_input $iradix  "10101"      \
-	[expr $iradix * $iradix * $iradix * $iradix + $iradix * $iradix + 1]
+	[expr {$iradix * $iradix * $iradix * $iradix + $iradix * $iradix + 1}]
 }
 
 test_input_radix 2 "2" "2"

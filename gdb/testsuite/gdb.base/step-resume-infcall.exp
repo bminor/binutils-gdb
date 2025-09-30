@@ -19,7 +19,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} $srcfile] } {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -27,7 +27,7 @@ gdb_test "step" " in-func .*"
 gdb_test "up" " call-func .*"
 gdb_test_no_output {set $b=$pc}
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

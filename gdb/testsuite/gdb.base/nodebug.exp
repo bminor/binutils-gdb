@@ -18,9 +18,9 @@
 
 standard_testfile .c
 
-if [test_compiler_info "xlc-*"] {
+if {[test_compiler_info "xlc-*"]} {
     # By default, IBM'x xlc compiler doesn't add static variables into the symtab.
-    # Use "-qstatsym" to do so. 
+    # Use "-qstatsym" to do so.
     set exec_opts additional_flags=-qstatsym
 } else {
     set exec_opts ""
@@ -42,7 +42,7 @@ gdb_load $binfile
 
 proc nodebug_runto {func} {
     with_test_prefix $func {
-	if ![runto $func] {
+	if {![runto $func]} {
 	    return false
 	}
 	gdb_test_no_output "nosharedlibrary" \
@@ -55,7 +55,7 @@ proc nodebug_runto {func} {
 # require coercion/promotion, both prototyped and unprototyped, both
 # return-type-cast style, and function-pointer-cast styles.
 proc test_call_promotion {} {
-    if [target_info exists gdb,cannot_call_functions] {
+    if {[target_info exists gdb,cannot_call_functions]} {
 	return
     }
 
@@ -86,9 +86,9 @@ proc test_call_promotion {} {
 }
 
 if {[nodebug_runto inner]} {
-    
+
     # Expect to find global/local symbols in each of text/data/bss.
-    
+
     # The exact format for some of this output is not necessarily
     # ideal, particularly interpreting "p top" requires a fair bit of
     # savvy about gdb's workings and the meaning of the "{}"
@@ -100,7 +100,7 @@ if {[nodebug_runto inner]} {
     # to detect that gdb does not know the type, rather than just
     # being told they are ints or functions returning int like old
     # versions of gdb used to do.
-    
+
     # On alpha (and other ecoff systems) the native compilers put
     # out debugging info for non-aggregate return values of functions
     # even without -g, which should be accepted.
@@ -220,7 +220,7 @@ if {[nodebug_runto inner]} {
     # Check that pointer arithmetic works as expected.
     set addr1 [get_hexadecimal_valueof "&dataglobal" "*UNKNOWN*"]
     set addr2 [get_hexadecimal_valueof "(int *) &dataglobal + 1" "*UNKNOWN*"]
-    set offset [expr $addr2 - $addr1]
+    set offset [expr {$addr2 - $addr1}]
     set int_size [get_integer_valueof "sizeof (int)" "*UNKNOWN*"]
     gdb_assert { $offset == $int_size }
 
@@ -271,14 +271,14 @@ if {[nodebug_runto inner]} {
     # ever, why bother with a weaker test?
     #gdb_test "backtrace 10" "#0.*inner.*#1.*#2.*top.*#3.*main.*" \
 	#    "backtrace from inner for externals"
-    
+
     # This test is not as obscure as it might look.  `p getenv ("TERM")'
     # is a real-world example, at least on many systems.
     foreach cmd {"p/c" "ptype" "whatis"} {
 	gdb_test "$cmd array_index(\"abcdef\",2)" \
 	    "'array_index' has unknown return type; cast the call to its declared return type"
     }
-    if [target_info exists gdb,cannot_call_functions] {
+    if {[target_info exists gdb,cannot_call_functions]} {
 	unsupported "p/c (int) array_index(\"abcdef\",2)"
     } else {
 	# We need to up this because this can be really slow on some boards.

@@ -115,7 +115,7 @@ proc args_test { name arglist {re_esc_list {}} {re_no_esc_list {}} } {
 		    set re_list $re_no_esc_list
 		}
 
-		set expected_len [expr 1 + [llength $re_list]]
+		set expected_len [expr {1 + [llength $re_list]}]
 		gdb_test "print argc" \
 		    "\\\$$::decimal = $expected_len" "argc for $name"
 
@@ -144,7 +144,7 @@ proc args_test { name arglist {re_esc_list {}} {re_no_esc_list {}} } {
 		    gdb_test "print argv\[$i\]" \
 			"\\\$$::decimal = $::hex \"$arg\"" \
 			"argv\[$i\] for $name"
-		    set i [expr $i + 1]
+		    set i [expr {$i + 1}]
 		}
 	    }
 	}

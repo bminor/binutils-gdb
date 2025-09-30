@@ -263,7 +263,7 @@ proc_with_prefix test_at_autovars {} {
     set count 0
     while {$count < 100} {
 	gdb_test "print i$count" ".* = $count" ""
-	set count [expr $count+1]
+	set count [expr {$count+1}]
     }
     clear_xfail "*-*-*"
     pass "$count auto variables correctly initialized"
@@ -327,7 +327,7 @@ clean_restart
 gdb_file_cmd $binfile
 
 # Test that variables in various segments print out correctly before
-# the program is run.  
+# the program is run.
 
 # AIX--sections get mapped to the same address so we can't get the right one.
 setup_xfail "rs6000-*-*"

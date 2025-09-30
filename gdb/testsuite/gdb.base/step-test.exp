@@ -33,7 +33,7 @@ if {![runto_main]} {
 
 # Set a breakpoint at line 45, if stepi then finish fails, we would
 # run to the end of the program, which would mess up the rest of the tests.
-  
+
 # Vanilla step/next
 #
 gdb_test "next" ".*${decimal}.*x = 1;.*" "next 1"
@@ -92,10 +92,10 @@ if { [istarget "ia64-*-*"] || [istarget "mips*-*-*"]} {
 ###
 ### The exact regexps used are "$HERE.*$gdb_prompt $"
 ###                        and "$THERE.*$gdb_prompt $"
-### 
+###
 proc test_i {name command here there} {
     global gdb_prompt
-    
+
     set i 0
     gdb_test_multiple "$command" "$name" {
 	-re "$here.*$gdb_prompt $" {
@@ -123,7 +123,7 @@ test_i "stepi to next line" "stepi" \
 # if this passes through a (useless) PLT entry.
 test_i "stepi into function" "stepi" \
        "(.*${decimal}.*callee.*STEPI|.* in callee@plt)" \
-       ".*callee \\(\\) at .*step-test\\.c" 
+       ".*callee \\(\\) at .*step-test\\.c"
 
 # Continue to step until we reach the function's body.  This makes it
 # more likely that we've actually completed the prologue, so "finish"
@@ -134,7 +134,7 @@ test_i "stepi into function's first source line" "stepi" \
 	"(${decimal}.*int callee|$pic_thunk_re)" \
 	".*${decimal}.*myglob.*; return 0;"
 
-# Have to be careful here, if the finish does not work, 
+# Have to be careful here, if the finish does not work,
 # then we may run to the end of the program, which
 # will cause erroneous failures in the rest of the tests
 set test "stepi: finish call"
@@ -143,7 +143,7 @@ gdb_test_multiple "finish" "$test" {
 	pass "$test"
     }
     -re ".*(Program received|$inferior_exited_re).*$gdb_prompt $" {
-	# Oops... We ran to the end of the program...  Better reset     
+	# Oops... We ran to the end of the program...  Better reset
 	if {![runto_main]} {
 	    return 0
 	}

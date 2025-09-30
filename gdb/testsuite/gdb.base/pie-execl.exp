@@ -49,7 +49,7 @@ clean_restart ${executable1}
 
 gdb_test_no_output "set args ${binfile2}" "set args ${binfile2_test_msg}"
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -113,7 +113,7 @@ verbose -log "addr2 is $addr2"
 
 # Ensure we cannot get a false PASS and the inferior has really changed.
 set test "pie_execl_marker address has changed"
-if [string equal $addr1 $addr2] {
+if {[string equal $addr1 $addr2]} {
     fail $test
 } else {
     pass $test

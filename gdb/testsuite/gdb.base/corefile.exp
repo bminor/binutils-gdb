@@ -265,7 +265,7 @@ proc corefile_test_run {} {
 	"run: sanity check we see the core file"
 
     set test "run: with core"
-    if [runto_main] {
+    if {[runto_main]} {
 	pass $test
     } else {
 	fail $test
@@ -327,7 +327,7 @@ proc corefile_test_attach {} {
 	return
     }
 
-    if [can_spawn_for_attach] {
+    if {[can_spawn_for_attach]} {
 	set test "attach: spawn sleep"
 	set res [remote_spawn host "$binfile sleep"]
 	if { $res < 0 || $res == "" } {

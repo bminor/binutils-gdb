@@ -37,7 +37,7 @@ clean_restart
 gdb_load $binfile
 gdb_load_shlib $lib1
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

@@ -49,7 +49,7 @@ gdb_test "skip -rfunction" "Missing value for -rfunction option."
 gdb_test "skip -x" "Invalid skip option: -x"
 gdb_test "skip -rfu foo.* xyzzy" "Invalid argument: xyzzy"
 
-if ![runto_main] {
+if {![runto_main]} {
     return
 }
 
@@ -93,7 +93,7 @@ gdb_test "info skip" \
 # files, so when we step into the first line in main(), we should step
 # right over it and go to the second line of main().
 
-if ![runto_main] {
+if {![runto_main]} {
     return
 }
 
@@ -121,7 +121,7 @@ with_test_prefix "step after deleting 1" {
 		    "4\\s+y\\s+n\\s+<none>\\s+n\\s+baz"] \
 	"info skip (delete 1)"
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 
@@ -164,7 +164,7 @@ with_test_prefix "step after disabling 3" {
 	"3\\s+n\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*" \
 	"info skip shows entry as disabled"
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 
@@ -180,7 +180,7 @@ with_test_prefix "step after enable 3" {
 	"3\\s+y\\s+n\\s+$srcfile1\\s+n\\s+<none>\\s*" \
 	"info skip shows entry as enabled"
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 
@@ -247,7 +247,7 @@ gdb_test "skip -fu baz" "Function baz will be skipped when stepping\."
 gdb_test "skip -rfu ^b.z$" "Function\\(s\\) \\^b\\.z\\$ will be skipped when stepping."
 
 with_test_prefix "step using -fi" {
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 
@@ -257,7 +257,7 @@ with_test_prefix "step using -fi" {
 }
 
 with_test_prefix "step using -gfi" {
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 
@@ -267,7 +267,7 @@ with_test_prefix "step using -gfi" {
 }
 
 with_test_prefix "step using -fu for baz" {
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 
@@ -278,7 +278,7 @@ with_test_prefix "step using -fu for baz" {
 }
 
 with_test_prefix "step using -rfu for baz" {
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 
@@ -293,7 +293,7 @@ with_test_prefix "step using -rfu for baz" {
 with_test_prefix "step using -fi + -fu" {
     gdb_test_no_output "skip delete"
 
-    if ![runto test_skip_file_and_function] {
+    if {![runto test_skip_file_and_function]} {
 	return
     }
 
@@ -311,7 +311,7 @@ with_test_prefix "skip delete completion" {
     global binfile
     clean_restart
     gdb_load $binfile
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 

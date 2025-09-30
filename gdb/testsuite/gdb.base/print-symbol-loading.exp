@@ -39,7 +39,7 @@ clean_restart
 gdb_load $binfile
 gdb_load_shlib ${binfile_lib}
 
-if ![runto lib] {
+if {![runto lib]} {
     return -1
 }
 
@@ -97,7 +97,7 @@ proc test_load_shlib { print_symbol_loading } {
     with_test_prefix "shlib ${print_symbol_loading}" {
 	clean_restart
 	gdb_load $binfile
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return -1
 	}
 

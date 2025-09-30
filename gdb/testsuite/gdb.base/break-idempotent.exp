@@ -165,7 +165,7 @@ foreach_with_prefix pie { "nopie" "pie" } {
 	continue
     }
 
-    if [is_remote host] {
+    if {[is_remote host]} {
 	set arg [remote_download host $binfile]
 	if { $arg == "" } {
 	    untested "download failed"

@@ -29,8 +29,8 @@ if { [build_executable "failed to prepare" $testfile [list $srcfile $srcfile2] \
 #  - the binary already has an index section
 #  - we use the -readnow switch
 set has_index_section [exec_has_index_section $binfile]
-set uses_readnow [expr [string first "-readnow" $GDBFLAGS] != -1]
-set expecting_index_cache_use [expr !$has_index_section && !$uses_readnow]
+set uses_readnow [expr {[string first "-readnow" $GDBFLAGS] != -1}]
+set expecting_index_cache_use [expr {!$has_index_section && !$uses_readnow}]
 
 # List the files in DIR on the host (where GDB-under-test runs).
 # Return a list of two elements:

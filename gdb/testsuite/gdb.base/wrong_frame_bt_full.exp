@@ -42,7 +42,7 @@ if {[gdb_compile \
 
 clean_restart ${main_testfile}
 
-if ![runto opaque_routine] {
+if {![runto opaque_routine]} {
     untested "could not run to opaque_routine"
     return -1
 }

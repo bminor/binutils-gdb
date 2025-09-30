@@ -15,7 +15,7 @@
 
 standard_testfile
 
-if [build_executable ${testfile}.exp $testfile] {
+if {[build_executable ${testfile}.exp $testfile]} {
     return -1
 }
 

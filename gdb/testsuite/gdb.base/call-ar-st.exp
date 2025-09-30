@@ -38,7 +38,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile $flags]} {
 
 
 set oldtimeout $timeout
-set timeout [expr "$timeout + 60"]
+set timeout [expr {$timeout + 60}]
 
 gdb_test_no_output "set print sevenbit-strings"
 gdb_test_no_output "set print address off"
@@ -86,7 +86,7 @@ set array_c_re \
 	 "aZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZ" \
 	 "aZaZaZaZaZaZaZaZaZa"]
 
-if ![gdb_skip_stdio_test "print_char_array(char_array)"] {
+if {![gdb_skip_stdio_test "print_char_array(char_array)"]} {
     gdb_test_stdio "print print_char_array(char_array)" $array_c_re
 }
 
@@ -95,7 +95,7 @@ gdb_test "tbreak $stop_line" \
 "Temporary breakpoint.*file.*$srcfile, line $stop_line.*" \
 "tbreakpoint at tbreak2"
 
-if ![gdb_skip_stdio_test "continue to tbreak2"] {
+if {![gdb_skip_stdio_test "continue to tbreak2"]} {
     set gdb_re \
 	[multi_line \
 	     "main.*at.*:\[0-9\]+" \
@@ -106,7 +106,7 @@ if ![gdb_skip_stdio_test "continue to tbreak2"] {
 }
 
 # I am disabling this test, because it takes too long. I verified by
-# hand that it works, feel free to check for yourself. 
+# hand that it works, feel free to check for yourself.
 #call print_all_arrays(integer_array, char_array, float_array, double_array)
 #send_gdb "print print_all_arrays(integer_array, char_array, float_array, double_array)\n"
 #gdb_expect {
@@ -165,7 +165,7 @@ gdb_test "step" \
     "step inside print_all_arrays"
 
 #step -over
-if ![gdb_skip_stdio_test "next over print_int_array in print_all_arrays"] {
+if {![gdb_skip_stdio_test "next over print_int_array in print_all_arrays"]} {
     set stop_line [gdb_get_line_number "-next1-"]
     gdb_test_stdio "next" \
 	"array_i :" \
@@ -214,7 +214,7 @@ if {$allow_float_test && \
 
 #call sum_array_print(10, *list1, *list2, *list3, *list4)
 
-if ![gdb_skip_stdio_test "print sum_array_print(...)"] {
+if {![gdb_skip_stdio_test "print sum_array_print(...)"]} {
 
     gdb_test_stdio "print sum_array_print(10, *list1, *list2, *list3, *list4)" \
 	[multi_line \
@@ -239,7 +239,7 @@ if ![gdb_skip_stdio_test "print sum_array_print(...)"] {
 
 #step over
 set stop_line [gdb_get_line_number "-next2-"]
-if ![gdb_skip_stdio_test "next to next2"] {
+if {![gdb_skip_stdio_test "next to next2"]} {
     gdb_test_stdio "next" \
 	"BYE BYE FOR NOW" \
 	"$stop_line.*printf\\(.VERY GREEN GRASS.n.\\);.*" \
@@ -250,7 +250,7 @@ if ![gdb_skip_stdio_test "next to next2"] {
 
 #call print_array_rep(\*list1, \*list2, \*list3)
 
-if ![gdb_skip_stdio_test "print print_array_rep(...)"] {
+if {![gdb_skip_stdio_test "print print_array_rep(...)"]} {
     gdb_test_stdio "print print_array_rep(\*list1, \*list2, \*list3)" \
 	"Contents of linked list3:"
 }
@@ -300,7 +300,7 @@ gdb_test "tbreak $stop_line" \
     "Temporary breakpoint.* file .*$srcfile, line $stop_line.*" \
     "tbreakpoint at tbreak6"
 
-if ![gdb_skip_stdio_test "continuing to tbreak6"] {
+if {![gdb_skip_stdio_test "continuing to tbreak6"]} {
     gdb_test_stdio "continue" \
 	"Sum of 4 arrays.*Contents of linked list1.*Contents of two_floats_t" \
 	"main \\(\\) at .*$srcfile:$stop_line.*c = 0.*" \
@@ -309,8 +309,8 @@ if ![gdb_skip_stdio_test "continuing to tbreak6"] {
     gdb_test "continue" ".*" ""
 }
 
-#call print_small_structs(*struct1, *struct2, *struct3, *struct4, 
-#                         *flags, *flags_combo, *three_char, *five_char, 
+#call print_small_structs(*struct1, *struct2, *struct3, *struct4,
+#                         *flags, *flags_combo, *three_char, *five_char,
 #                         *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)
 
 if {$allow_float_test && \
@@ -373,7 +373,7 @@ gdb_test "print compute_with_small_structs(20)" \
     "\[0-9\]+ = void"
 
 
-#call print_ten_doubles(123.456, 123.456, -0.12, -1.23, 343434.8, 89.098, 
+#call print_ten_doubles(123.456, 123.456, -0.12, -1.23, 343434.8, 89.098,
 #                       3.14, -5678.12345, -0.11111111, 216.97065)
 
 if {$allow_float_test && \
@@ -422,8 +422,8 @@ if {$allow_float_test} {
 
 set ws "\[\n\r\t \]+"
 
-#call print_small_structs(struct1, struct2, struct3, struct4, flags, 
-#                         flags_combo, three_char, five_char, int_char_combo, 
+#call print_small_structs(struct1, struct2, struct3, struct4, flags,
+#                         flags_combo, three_char, five_char, int_char_combo,
 #                         d1, d2, d3, f1, f2, f3)
 
 if {$allow_float_test && \
@@ -495,7 +495,7 @@ gdb_test "tbreak $stop_line" \
     "Temporary breakpoint.* file .*$srcfile, line $stop_line.*" \
     "tbreakpoint at tbreak8"
 
-if ![gdb_skip_stdio_test "continuing to tbreak8"] {
+if {![gdb_skip_stdio_test "continuing to tbreak8"]} {
     gdb_test_stdio "continue" \
 	"Contents of two_floats_t:" \
 	".*main \\(\\) at.*$srcfile:$stop_line.*$stop_line.*init_bit_flags_combo\\(flags_combo, \\(unsigned\\)1, \\(unsigned\\)0, .y.,.*" \
@@ -511,7 +511,7 @@ gdb_test "step" \
     "step into init_bit_flags_combo"
 
 #call print_bit_flags_combo(*bit_flags_combo)
-if ![gdb_skip_stdio_test "continuing at step3"] {
+if {![gdb_skip_stdio_test "continuing at step3"]} {
     gdb_test_stdio "print print_bit_flags_combo(*bit_flags_combo)" \
 	"alpha.*gamma.*epsilon.*ch1: y.*ch2: n"
 }
@@ -600,14 +600,14 @@ gdb_test continue "Continuing\\..*main \\(\\) at .*$srcfile:$stop_line\[ \t\n\r\
 
 
 #call sum_struct_print(10, *struct1, *struct2, *struct3, *struct4)
-if ![gdb_skip_stdio_test "print sum_struct_print(...)"] {
+if {![gdb_skip_stdio_test "print sum_struct_print(...)"]} {
     gdb_test_stdio "print sum_struct_print(10,*struct1,*struct2,*struct3,*struct4)" \
 	"Sum of the 4 struct values and seed :\[ \t\n\r\]+218"
 }
 
 
 #call print_struct_rep(*struct1, *struct2, *struct3)
-if ![gdb_skip_stdio_test "print print_struct_rep(...)"] {
+if {![gdb_skip_stdio_test "print print_struct_rep(...)"]} {
     gdb_test_stdio "print print_struct_rep(*struct1, *struct2, *struct3)" \
 	[multi_line \
 	     "Contents of struct1: " \
@@ -622,7 +622,7 @@ if ![gdb_skip_stdio_test "print print_struct_rep(...)"] {
 	    ]
 }
 
-if ![gdb_skip_stdio_test "print print_one_large_struct(...)"] {
+if {![gdb_skip_stdio_test "print print_one_large_struct(...)"]} {
     gdb_test_stdio "print print_one_large_struct(*list1)" \
 	"         4         1"
 }

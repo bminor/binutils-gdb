@@ -36,8 +36,8 @@ proc return_tests { } {
 	    send_gdb "step\n"
 	    exp_continue
 	}
-	-re ".*in main after func1.*$gdb_prompt $" { 
-	    pass "simple return" 
+	-re ".*in main after func1.*$gdb_prompt $" {
+	    pass "simple return"
 	}
     }
 

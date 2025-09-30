@@ -55,7 +55,7 @@ proc test_remove_bp { initial_load } {
 	    gdb_reload
 	}
 
-	if ![runto start] {
+	if {![runto start]} {
 	    return
 	}
 
@@ -86,7 +86,7 @@ proc test_remove_bp { initial_load } {
 	# remove the memory breakpoint afterwards should fail, and GDB
 	# should warn the user about it.
 	set pagesize [get_integer_valueof "pg_size" 0]
-	set align_addr [expr $bp_addr - $bp_addr % $pagesize]
+	set align_addr [expr {$bp_addr - $bp_addr % $pagesize}]
 	set munmap_prototype "int (*) (void *, size_t)"
 	set munmap_expr "(($munmap_prototype) munmap) ($align_addr, $pagesize)"
 

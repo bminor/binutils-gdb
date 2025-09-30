@@ -39,7 +39,7 @@ set n_insns 3
 
 # Extract addresses of a few consecutive instructions.
 set test "get breakpoint addresses"
-if { [gdb_test_multiple "x /[expr $n_insns + 1]i \$pc" $test {
+if { [gdb_test_multiple "x /[expr {$n_insns + 1}]i \$pc" $test {
     -re "=> $hex${up_to_nl}   ($hex)${up_to_nl}   ($hex)${up_to_nl}   ($hex)${up_to_nl}$gdb_prompt $" {
 	for {set i 1} {$i <= $n_insns} {incr i} {
 	    set bp_addrs($i) $expect_out($i,string)

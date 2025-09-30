@@ -21,7 +21,7 @@
 #
 # Compiling lineinc.c with Dwarf 2 macro information will produce
 # something like this:
-# 
+#
 #     $ gcc -g3 lineinc.c -o lineinc
 #     $ readelf -wml lineinc
 #     ...
@@ -33,10 +33,10 @@
 #       4	0	0	0	lineinc3.h
 #     ...
 #     Contents of the .debug_macinfo section:
-#     
+#
 #      DW_MACINFO_start_file - lineno: 0 filenum: 1
 #      DW_MACINFO_define - lineno : 1 macro : __VERSION__ "3.2 20020903 (Red Hat Linux 8.0 3.2-7)"
-#      DW_MACINFO_define - lineno : 2 macro : __USER_LABEL_PREFIX__ 
+#      DW_MACINFO_define - lineno : 2 macro : __USER_LABEL_PREFIX__
 #     ...
 #      DW_MACINFO_define - lineno : 1 macro : __i386__ 1
 #      DW_MACINFO_define - lineno : 1 macro : __tune_i386__ 1
@@ -52,7 +52,7 @@
 #      DW_MACINFO_define - lineno : 2 macro : FOO 3
 #      DW_MACINFO_end_file
 #      DW_MACINFO_end_file
-#     $   
+#     $
 #
 # Note how the inclusions of lineinc1.h and lineinc2.h are both
 # attributed to line 10 of lineinc.c, and the #inclusion of lineinc3.h
@@ -105,7 +105,7 @@ gdb_test_multiple "break -q main" $test_name {
                 exp_continue
             }
             -re "$gdb_prompt" {
-            }                
+            }
             timeout {
                 fail "$test_name (timeout)"
             }

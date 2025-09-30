@@ -31,14 +31,14 @@ set timeout 60
 gdb_test "add-symbol-file" "add-symbol-file takes a file name and an address"
 
 # test append
-gdb_test "append" "List of \"append\" subcommands:.*" 
-gdb_test "append binary" "List of \"append binary\" subcommands:.*" 
-gdb_test "append memory" "Missing filename\." 
-gdb_test "append value"  "Missing filename\." 
-gdb_test "append binary memory" "Missing filename\." 
-gdb_test "append binary value"  "Missing filename\." 
+gdb_test "append" "List of \"append\" subcommands:.*"
+gdb_test "append binary" "List of \"append binary\" subcommands:.*"
+gdb_test "append memory" "Missing filename\."
+gdb_test "append value"  "Missing filename\."
+gdb_test "append binary memory" "Missing filename\."
+gdb_test "append binary value"  "Missing filename\."
 
-if !$use_gdb_stub {
+if {!$use_gdb_stub} {
     gdb_test_multiple "attach" "attach" {
 	-re "Argument required .(process-id|program) to attach.*$gdb_prompt $"\
 	    { pass "attach" }
@@ -59,7 +59,7 @@ if !$use_gdb_stub {
 	gdb_test $i "No default breakpoint address now." "break \"$i\" abbreviation"
     }
 
-    
+
     gdb_test "backtrace" "No stack."
 
     # ba and bac are no longer unique command prefixes. So these tests
@@ -148,21 +148,21 @@ gdb_test "down" "No stack.*"
 #test down-silently
 gdb_test "down-silently" "No stack."
 # test dump
-gdb_test "dump" "List of \"dump\" subcommands:.*" 
-gdb_test "dump binary" "List of \"dump binary\" subcommands:.*" 
-gdb_test "dump ihex" "List of \"dump ihex\" subcommands:.*" 
-gdb_test "dump memory" "Missing filename\." 
-gdb_test "dump srec" "List of \"dump srec\" subcommands:.*" 
-gdb_test "dump tekhex" "List of \"dump tekhex\" subcommands:.*" 
-gdb_test "dump value" "Missing filename\." 
-gdb_test "dump binary memory" "Missing filename\." 
-gdb_test "dump binary value"  "Missing filename\." 
-gdb_test "dump ihex memory" "Missing filename\." 
-gdb_test "dump ihex value"  "Missing filename\." 
-gdb_test "dump srec memory" "Missing filename\." 
-gdb_test "dump srec value"  "Missing filename\." 
-gdb_test "dump tekhex memory" "Missing filename\." 
-gdb_test "dump tekhex value"  "Missing filename\." 
+gdb_test "dump" "List of \"dump\" subcommands:.*"
+gdb_test "dump binary" "List of \"dump binary\" subcommands:.*"
+gdb_test "dump ihex" "List of \"dump ihex\" subcommands:.*"
+gdb_test "dump memory" "Missing filename\."
+gdb_test "dump srec" "List of \"dump srec\" subcommands:.*"
+gdb_test "dump tekhex" "List of \"dump tekhex\" subcommands:.*"
+gdb_test "dump value" "Missing filename\."
+gdb_test "dump binary memory" "Missing filename\."
+gdb_test "dump binary value"  "Missing filename\."
+gdb_test "dump ihex memory" "Missing filename\."
+gdb_test "dump ihex value"  "Missing filename\."
+gdb_test "dump srec memory" "Missing filename\."
+gdb_test "dump srec value"  "Missing filename\."
+gdb_test "dump tekhex memory" "Missing filename\."
+gdb_test "dump tekhex value"  "Missing filename\."
 #test echo
 gdb_test_no_output "echo" "echo"
 #test enable breakpoints delete
@@ -527,7 +527,7 @@ gdb_test "ptype" "The history is empty."
 gdb_test "pwd" "Working directory .*"
 
 #test run "r" abbreviation
-if $use_gdb_stub {
+if {$use_gdb_stub} {
     # Only extended-remote supports "run".
 } else {
     gdb_test_multiple "r" "run \"r\" abbreviation" {
@@ -549,7 +549,7 @@ if $use_gdb_stub {
 }
 
 #test run
-if $use_gdb_stub {
+if {$use_gdb_stub} {
     # Only extended-remote supports "run".
 } else {
     gdb_test_multiple "run" "run" {
@@ -771,7 +771,7 @@ set show_conv_list \
 	{$_linker_namespace_count = 0} \
 	{$_linker_namespace = <error: No registers.>}\
     }
-if [allow_python_tests] {
+if {[allow_python_tests]} {
     append show_conv_list \
 	{
 	    {$_memeq = <internal function _memeq>} \

@@ -29,7 +29,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile $opts] } {
 }
 
 proc finish_pretty { } {
-    if ![runto foo] {
+    if {![runto foo]} {
 	return
     }
     gdb_test_no_output "set print pretty" \

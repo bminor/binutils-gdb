@@ -33,7 +33,7 @@ with_cwd $srcdir {
     }
 }
 
-set result [catch "exec realpath ${srcdir}/${subdir}/${srcfile2}" realsrcfile2]
+set result [catch {exec realpath ${srcdir}/${subdir}/${srcfile2}} realsrcfile2]
 if { $result != 0 || $realsrcfile2 == "" } {
     untested "invalid realpath of ${srcfile2}: result $result output $realsrcfile2"
     return -1

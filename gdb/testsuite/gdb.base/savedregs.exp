@@ -96,7 +96,7 @@ proc process_saved_regs { current inner outer } {
 	}
 	incr level
     }
-    
+
     # Now iterate through the list of OUTER frames checking that the
     # "info frame" output from each still matches what was captured
     # during an early query.  To avoid cascading failures, checking is
@@ -109,7 +109,7 @@ proc process_saved_regs { current inner outer } {
     foreach func $outer {
 	set test [concat "Check $func info frame; stack contains" \
 		      $current $inner $outer]
-	if $ok {
+	if {$ok} {
 	    set ok 0
 	    set pat [string_to_regexp "$saved_regs($func)"]
 	    gdb_test_multiple "info frame $level" "$test" {

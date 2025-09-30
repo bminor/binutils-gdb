@@ -51,6 +51,6 @@ gdb_test "add-symbol-file $binfile 0xffff0000" \
     "add symbol table from file \".*\" at.*\\(y or n\\) " "y"
 
 # Check if we are able to read offset adjusted line information of main
-    
+
 gdb_test "info line main" \
 	"Line.*starts at address 0xffff0000.*and ends at.*"

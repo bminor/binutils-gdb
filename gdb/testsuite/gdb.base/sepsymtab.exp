@@ -25,7 +25,7 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
     return -1
 }
 
-if [gdb_gnu_strip_debug $binfile no-main] {
+if {[gdb_gnu_strip_debug $binfile no-main]} {
     # check that you have a recent version of strip and objcopy installed
     unsupported "cannot produce separate debug info files"
     return -1

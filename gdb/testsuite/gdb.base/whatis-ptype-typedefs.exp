@@ -30,7 +30,7 @@ standard_testfile
 proc prepare {lang} {
     global srcfile testfile
 
-    if [target_info exists no_long_long] {
+    if {[target_info exists no_long_long]} {
 	set options [list debug additional_flags=-DNO_LONG_LONG]
     } else {
 	set options [list debug]

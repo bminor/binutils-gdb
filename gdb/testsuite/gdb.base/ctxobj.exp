@@ -56,7 +56,7 @@ clean_restart $executable
 gdb_load_shlib $libobj1
 gdb_load_shlib $libobj2
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

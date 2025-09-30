@@ -240,7 +240,7 @@ with_test_prefix "run $count" {
     incr count
 }
 
-# See the comments in condbreak.exp for "run until breakpoint at marker1" 
+# See the comments in condbreak.exp for "run until breakpoint at marker1"
 # for an explanation of the xfail below.
 set test "continue to break marker1, 2nd time"
 gdb_test_multiple "continue" "$test" {

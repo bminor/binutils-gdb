@@ -158,7 +158,7 @@ proc valid_addr_p {cmd offset width} {
 	# registers to represent the whole unaligned region.  Breakpoint
 	# addresses must still be aligned though.
 	if {$cmd == "hbreak" } {
-	    if { [expr ($offset) % 4] != 0 } {
+	    if {$offset % 4 != 0} {
 		return 0
 	    }
 	}
@@ -170,20 +170,20 @@ proc valid_addr_p {cmd offset width} {
 	    }
 	} else {
 	    # Watchpoints can be of length 1, 2, 4 or 8 bytes.
-	    if { [expr $width % 2] != 0 } {
+	    if { $width % 2 != 0 } {
 		return 0
 	    }
 	}
 
-	if { [expr ($offset) % 8] == 0 && $width == 8 } {
+	if {$offset % 8 == 0 && $width == 8} {
 	    # If WIDTH is 8 byte, the address should be 8-byte aligned.
 	    return 1
-	} elseif { [expr ($offset) % 4] == 0 } {
+	} elseif {$offset % 4 == 0} {
 	    return 1
-	} elseif { [expr ($offset) % 4] == 2 && $width == 2 } {
+	} elseif {$offset % 4 == 2 && $width == 2} {
 	    # Halfword watchpoints and breakpoints.
 	    return 1
-	} elseif { [expr ($offset) % 4] == 1 && $width == 1 && $cmd != "hbreak" } {
+	} elseif {$offset % 4 == 1 && $width == 1 && $cmd != "hbreak"} {
 	    # Single byte watchpoints.
 	    return 1
 	} else {
@@ -249,7 +249,7 @@ proc run_watchpoints_tests {hw_wp_p} {
 		    for {set x 0} {$x < 4} {incr x} {
 
 			if { ![valid_addr_p $cmd1 $x $width]
-			     || ![valid_addr_p $cmd2 $x+1 $width] } {
+			     || ![valid_addr_p $cmd2 [expr {$x+1}] $width] } {
 			    # Skip tests if requested address or length
 			    # of breakpoint or watchpoint don't meet
 			    # target or kernel requirements.

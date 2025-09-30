@@ -45,11 +45,11 @@ proc test_expr { args } {
     if { [llength $args] % 2 } {
 	warning "an even # of arguments should be passed to test_expr"
     }
-    set last_ent [expr [llength $args] - 1]
+    set last_ent [expr {[llength $args] - 1}]
     set testname [lindex $args $last_ent]
     gdb_test [lindex $args 0] ".*" "$testname, setup"
-    for {set x 1} {$x < $last_ent} {set x [expr $x + 2]} {
-	gdb_test [lindex $args $x] [lindex $args [expr $x + 1]] "$testname, [lindex $args $x]"
+    for {set x 1} {$x < $last_ent} {set x [expr {$x + 2}]} {
+	gdb_test [lindex $args $x] [lindex $args [expr {$x + 1}]] "$testname, [lindex $args $x]"
     }
 }
 #
@@ -224,10 +224,10 @@ gdb_test_multiple "print sizeof (long long) > sizeof (long)" \
 	pass "sizeof (long long) > sizeof (long) (false)"
     }
 }
-if [expr ! $ok] { setup_xfail "*-*-*" }
+if {!$ok} { setup_xfail "*-*-*" }
 gdb_test "print (void*) ((long long) (unsigned long) -1 + 1)" \
 	"warning: value truncated.*" "truncate (void*) 0x00000000ffffffff + 1"
-if [expr ! $ok] { setup_xfail "*-*-*" }
+if {!$ok} { setup_xfail "*-*-*" }
 gdb_test "print (void*) (~((long long)(unsigned long) -1) - 1)" \
 	"warning: value truncated.*" "truncate (void*) 0xffffffff00000000 - 1"
 

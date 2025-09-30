@@ -85,7 +85,7 @@ gdb_test_multiple "end" "end if construct" {
 #
 # info break:
 #
-send_gdb "info break\n" 
+send_gdb "info break\n"
 gdb_expect_list "breakpoint info" "$gdb_prompt$" [concat {
     "\r\n\032\032post-prompt\r\n"
     "Num     Type           Disp Enb Address    +What\r\n" } [list \
@@ -114,7 +114,7 @@ gdb_expect_list "run until main breakpoint" "$gdb_prompt$" [concat {
 # We don't care about the annotated output for this operation, it is the same as
 # the one produced by run above
 #
-send_gdb "next\n" 
+send_gdb "next\n"
 gdb_expect_list "go after array init line" "$gdb_prompt$" {
     "\r\n\032\032post-prompt\r\n"
     "\r\n\032\032starting\r\n"
@@ -183,10 +183,10 @@ gdb_expect_list "backtrace from shlibrary" "$gdb_prompt$" {
 
 
 #
-# test printing a frame with some arguments: 
+# test printing a frame with some arguments:
 #
 
-if [target_info exists gdb,nosignals] {
+if {[target_info exists gdb,nosignals]} {
     unsupported "send SIGUSR1"
     unsupported "backtrace @ signal handler"
 } else {
@@ -345,7 +345,7 @@ gdb_test_multiple "info inferior 1" "$test" {
 
 # Send a signal that is not handled
 
-if [target_info exists gdb,nosignals] {
+if {[target_info exists gdb,nosignals]} {
     unsupported "signal sent"
 } else {
     send_gdb "signal SIGTRAP\n"

@@ -55,23 +55,23 @@ proc initialize {} {
     global decimal
     global srcfile
 
-    if [gdb_test "break marker1" "Breakpoint 1 at $hex: file .*$srcfile, line $decimal.*" "set breakpoint at marker1" ] { 
+    if {[gdb_test "break marker1" "Breakpoint 1 at $hex: file .*$srcfile, line $decimal.*" "set breakpoint at marker1" ]} {
       return 0
     }
 
 
-    if [gdb_test "break marker2" "Breakpoint 2 at $hex: file .*$srcfile, line $decimal.*" "set breakpoint at marker2" ] { 
+    if {[gdb_test "break marker2" "Breakpoint 2 at $hex: file .*$srcfile, line $decimal.*" "set breakpoint at marker2" ]} {
       return 0
     }
 
 
-    if [gdb_test "info break" "1\[ \]*breakpoint.*marker1.*\r\n2\[ \]*breakpoint.*marker2.*" "info break" ] {
+    if {[gdb_test "info break" "1\[ \]*breakpoint.*marker1.*\r\n2\[ \]*breakpoint.*marker2.*" "info break" ]} {
       return 0
     }
 
     gdb_test "watch ival3" ".*\[Ww\]atchpoint 3: ival3.*" "set watchpoint on ival3"
 
-    if [gdb_test "info watch" "3\[ \]*.*watchpoint.*ival3" "watchpoint found in watchpoint/breakpoint table" ] { 
+    if {[gdb_test "info watch" "3\[ \]*.*watchpoint.*ival3" "watchpoint found in watchpoint/breakpoint table" ]} {
       return 0
     }
 
@@ -80,7 +80,7 @@ proc initialize {} {
     # to use it.  This allows the test program to run at full speed until
     # we get to the first marker function.
 
-    if [gdb_test_no_output "disable 3" "disable watchpoint" ] {
+    if {[gdb_test_no_output "disable 3" "disable watchpoint" ]} {
       return 0
     }
 
@@ -99,8 +99,8 @@ proc test_simple_watchpoint {} {
 
     # Ensure that the watchpoint is disabled when we startup.
 
-    if [gdb_test_no_output "disable 3" \
-	    "disable watchpoint in test_simple_watchpoint" ] {
+    if {[gdb_test_no_output "disable 3" \
+	     "disable watchpoint in test_simple_watchpoint" ]} {
       return 0
     }
 
@@ -121,7 +121,7 @@ proc test_simple_watchpoint {} {
 
     # After reaching the marker function, enable the watchpoint.
 
-    if [gdb_test_no_output "enable 3" "enable watchpoint" ] {
+    if {[gdb_test_no_output "enable 3" "enable watchpoint" ]} {
       return
     }
 
@@ -165,7 +165,7 @@ Continuing.*\[Ww\]atchpoint.*ival3.*Old value = -1.*New value = 0.*ival3 = count
 
     # Check that the hit count is reported correctly
     gdb_test "info break" ".*watchpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+ival3\r\n\[ \t]+breakpoint already hit 3 times.*" "watchpoint hit count is 3"
-    
+
     # Continue until the next change, from 2 to 3.
     gdb_test "cont" "Continuing.*\[Ww\]atchpoint.*ival3.*Old value = 2.*New value = 3.*ival3 = count; ival4 = count;.*" "watchpoint hit, fourth time"
 
@@ -188,14 +188,14 @@ Continuing.*\[Ww\]atchpoint.*ival3.*Old value = -1.*New value = 0.*ival3 = count
 
     # Disable the watchpoint so we run at full speed until we exit.
 
-    if [gdb_test_no_output "disable 3" "watchpoint disabled" ] {
+    if {[gdb_test_no_output "disable 3" "watchpoint disabled" ]} {
       return
     }
 
 
     # Run until process exits.
 
-    if [target_info exists gdb,noresults] { return }
+    if {[target_info exists gdb,noresults]} { return }
 
     gdb_continue_to_end "continue to exit in test_simple_watchpoint"
 }
@@ -213,8 +213,8 @@ proc test_disabling_watchpoints {} {
 
     # Ensure that the watchpoint is disabled when we startup.
 
-    if [gdb_test_no_output "disable 3" \
-	    "disable watchpoint in test_disabling_watchpoints" ] {
+    if {[gdb_test_no_output "disable 3" \
+	     "disable watchpoint in test_disabling_watchpoints" ]} {
       return 0
     }
 
@@ -236,7 +236,7 @@ proc test_disabling_watchpoints {} {
 
     # After reaching the marker function, enable the watchpoint.
 
-    if [gdb_test_no_output "enable 3" "watchpoint enabled" ] {
+    if {[gdb_test_no_output "enable 3" "watchpoint enabled" ]} {
       return
     }
 
@@ -245,14 +245,14 @@ proc test_disabling_watchpoints {} {
     # Don't check the old value, because on VxWorks the variable value
     # will not have been reinitialized.
     gdb_test "cont" "Continuing.*\[Ww\]atchpoint.*ival3.*Old value = .*New value = 0.*ival3 = count; ival4 = count;.*" "watchpoint hit in test_disabling_watchpoints, first time"
-    
+
     # Continue until the next change, from 0 to 1.
     gdb_test "cont" "Continuing.*\[Ww\]atchpoint.*ival3.*Old value = 0.*New value = 1.*ival3 = count; ival4 = count;.*" "watchpoint hit in test_disabling_watchpoints, second time"
-    
+
     # Disable the watchpoint but leave breakpoints
 
-    if [gdb_test_no_output "disable 3" \
-	    "disable watchpoint #2 in test_disabling_watchpoints" ] {
+    if {[gdb_test_no_output "disable 3" \
+	     "disable watchpoint #2 in test_disabling_watchpoints" ]} {
       return 0
     }
 
@@ -265,8 +265,8 @@ proc test_disabling_watchpoints {} {
     # Make sure we hit no more watchpoints.
     gdb_test "cont" "Continuing.*Breakpoint.*marker2 \\(\\).*" \
 	"disabled watchpoint skipped"
-    
-    if [target_info exists gdb,noresults] { return }
+
+    if {[target_info exists gdb,noresults]} { return }
 
     gdb_continue_to_end "continue to exit in test_disabling_watchpoints"
 }
@@ -286,7 +286,7 @@ proc test_stepping {} {
 	gdb_test "p func1 ()" "= 73" \
 	    "calling function with watchpoint enabled"
 
-	# 
+	#
 	# "finish" brings us back to main.
 	# On some targets (e.g. alpha) gdb will stop from the finish in midline
 	# of the marker1 call. This is due to register restoring code on
@@ -357,7 +357,7 @@ proc test_watchpoint_triggered_in_syscall {} {
     global gdb_prompt
 
     # These tests won't work without printf support.
-    if [gdb_skip_stdio_test "watchpoints triggered in syscall"] {
+    if {[gdb_skip_stdio_test "watchpoints triggered in syscall"]} {
 	return
     }
     # Run until we get to the first marker function.
@@ -391,10 +391,10 @@ proc test_watchpoint_triggered_in_syscall {} {
 
 	set test "sent 123"
 	gdb_test_multiple "123" $test {
-	    -re ".*\[Ww\]atchpoint.*buf\\\[0\\\].*Old value = 0.*New value = 49\[^\n\]*\n" { set x [expr $x+1] ; exp_continue }
-	    -re ".*\[Ww\]atchpoint.*buf\\\[1\\\].*Old value = 0.*New value = 50\[^\n\]*\n" { set x [expr $x+1] ; exp_continue }
-	    -re ".*\[Ww\]atchpoint.*buf\\\[2\\\].*Old value = 0.*New value = 51\[^\n\]*\n" { set x [expr $x+1] ; exp_continue }
-	    -re ".*\[Ww\]atchpoint.*buf\\\[3\\\].*Old value = 0.*New value = 10\[^\n\]*\n" { set x [expr $x+1] ; exp_continue }
+	    -re ".*\[Ww\]atchpoint.*buf\\\[0\\\].*Old value = 0.*New value = 49\[^\n\]*\n" { set x [expr {$x+1}] ; exp_continue }
+	    -re ".*\[Ww\]atchpoint.*buf\\\[1\\\].*Old value = 0.*New value = 50\[^\n\]*\n" { set x [expr {$x+1}] ; exp_continue }
+	    -re ".*\[Ww\]atchpoint.*buf\\\[2\\\].*Old value = 0.*New value = 51\[^\n\]*\n" { set x [expr {$x+1}] ; exp_continue }
+	    -re ".*\[Ww\]atchpoint.*buf\\\[3\\\].*Old value = 0.*New value = 10\[^\n\]*\n" { set x [expr {$x+1}] ; exp_continue }
 	    -re ".*$gdb_prompt $" { pass $test }
 	}
 
@@ -402,27 +402,27 @@ proc test_watchpoint_triggered_in_syscall {} {
 	# should have printed.
 	set test "print buf\[0\]"
 	gdb_test_multiple $test $test {
-	    -re ".*= 49.*$gdb_prompt $" { set y [expr $y+1]; pass $test }
+	    -re ".*= 49.*$gdb_prompt $" { set y [expr {$y+1}]; pass $test }
 	    -re ".*= 0.*$gdb_prompt $" { $test }
 	}
 	set test "print buf\[1\]"
 	gdb_test_multiple $test $test {
-	    -re ".*= 50.*$gdb_prompt $" { set y [expr $y+1]; pass $test }
+	    -re ".*= 50.*$gdb_prompt $" { set y [expr {$y+1}]; pass $test }
 	    -re ".*= 0.*$gdb_prompt $" { pass $test }
 	}
 	set test "print buf\[2\]"
 	gdb_test_multiple $test $test {
-	    -re ".*= 51.*$gdb_prompt $" { set y [expr $y+1]; pass $test }
+	    -re ".*= 51.*$gdb_prompt $" { set y [expr {$y+1}]; pass $test }
 	    -re ".*= 0.*$gdb_prompt $" { pass $test }
 	}
 	set test "print buf\[3\]"
 	gdb_test_multiple $test $test {
-	    -re ".*= 10.*$gdb_prompt $" { set y [expr $y+1]; pass $test }
+	    -re ".*= 10.*$gdb_prompt $" { set y [expr {$y+1}]; pass $test }
 	    -re ".*= 0.*$gdb_prompt $" { pass $test }
 	}
 
 	# Did we find what we were looking for?  If not, flunk it.
-	if {[expr $x==$y]} { pass $testname } else { fail "$testname (only triggered $x watchpoints, expected $y)"}
+	if {$x==$y} { pass $testname } else { fail "$testname (only triggered $x watchpoints, expected $y)"}
 
 	# Continue until we hit the finishing marker function.
 	# Make sure we hit no more watchpoints.
@@ -432,7 +432,7 @@ proc test_watchpoint_triggered_in_syscall {} {
 	# Disable everything so we can finish the program at full speed
 	gdb_test_no_output "disable" "disable in test_watchpoint_triggered_in_syscall"
 
-	if [target_info exists gdb,noresults] { return }
+	if {[target_info exists gdb,noresults]} { return }
 
 	gdb_continue_to_end "continue to exit in test_watchpoint_triggered_in_syscall"
     }
@@ -567,7 +567,7 @@ proc test_complex_watchpoint {} {
 	# Disable everything so we can finish the program at full speed
 	gdb_test_no_output "disable" "disable in test_complex_watchpoint, second time"
 
-	if [target_info exists gdb,noresults] { return }
+	if {[target_info exists gdb,noresults]} { return }
 
 	gdb_continue_to_end "continue to exit in test_complex_watchpoint"
     }
@@ -941,7 +941,7 @@ proc test_watch_register_location {} {
 # Start with a fresh gdb.
 
 set prev_timeout $timeout
-set timeout 600	
+set timeout 600
 verbose "Timeout now 600 sec.\n"
 
 test_no_hw_watchpoints
@@ -964,7 +964,7 @@ proc do_tests {} {
 
 	test_disabling_watchpoints
 
-	if ![target_info exists gdb,cannot_call_functions] {
+	if {![target_info exists gdb,cannot_call_functions]} {
 	    test_stepping
 	}
     }
@@ -978,9 +978,9 @@ proc do_tests {} {
 	    "disable fast watches, 2"
     }
 
-    # Only enabled for some targets merely because it has not been tested 
+    # Only enabled for some targets merely because it has not been tested
     # elsewhere.
-    # On sparc-sun-sunos4.1.3, GDB was running all the way to the marker4 
+    # On sparc-sun-sunos4.1.3, GDB was running all the way to the marker4
     # breakpoint before stopping for the watchpoint.  I don't know why.
     if {[istarget "hppa*-*-*"]} {
 	test_watchpoint_triggered_in_syscall

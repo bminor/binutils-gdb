@@ -236,7 +236,7 @@ proc cont_out { name args } {
     # Now single step the faulted instrction at that breakpoint.
     gdb_test "stepi" \
 	"Program received signal ${signame}.*pc(\r\n| *)=> [at_segv] .*" \
-	"${name}; stepi fault"    
+	"${name}; stepi fault"
 
     # Clear any breakpoints
     for {set i 0} {$i < [llength $args]} {incr i} {

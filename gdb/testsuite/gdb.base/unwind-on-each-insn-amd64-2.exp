@@ -27,7 +27,7 @@ lappend srcfile_flags nopie
 
 set ldflags $srcfile_flags
 
-if [info exists COMPILE] {
+if {[info exists COMPILE]} {
     # Make sure that we use .eh_frame info, by generating it
     # using -fasynchronous-unwind-tables.
     if { [gdb_can_simple_compile fasynchronous-unwind-tables \

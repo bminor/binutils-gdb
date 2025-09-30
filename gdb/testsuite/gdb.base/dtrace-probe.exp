@@ -21,7 +21,7 @@ proc dtrace_test {} {
     global testfile hex srcfile binfile
 
     standard_testfile
-    
+
     if {[dtrace_build_usdt_test_program] == -1} {
         untested "failed to compile"
         return -1
@@ -29,8 +29,8 @@ proc dtrace_test {} {
 
     clean_restart
     gdb_load $binfile
-    
-    if ![runto_main] {
+
+    if {![runto_main]} {
         return -1
     }
 
@@ -71,7 +71,7 @@ proc dtrace_test {} {
     # test:progress-counter probe.  Set a breakpoint on it and see
     # that it gets reached.
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 

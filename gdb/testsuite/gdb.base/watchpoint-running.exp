@@ -22,7 +22,7 @@ set allow_hw_watchpoint_tests_p [allow_hw_watchpoint_tests]
 
 standard_testfile
 
-if [build_executable "failed to prepare" $testfile $srcfile {debug}] {
+if {[build_executable "failed to prepare" $testfile $srcfile {debug}]} {
     return -1
 }
 
@@ -87,7 +87,7 @@ proc test {stop_mode hw} {
     # sufficient time to ever wrap around.)
     gdb_assert {$val1 != $val2} "values are different"
 
-    set wp_str [expr ($hw)?"Hardware watchpoint":"Watchpoint"]
+    set wp_str [expr {($hw)?"Hardware watchpoint":"Watchpoint"}]
 
     # Now set a watchpoint, while the inferior is running.  Since
     # we're watching a global, and we can read global memory while the
@@ -130,7 +130,7 @@ foreach hw {0 1} {
 	continue
     }
     foreach stop_mode {all-stop non-stop} {
-	set wp_type [expr ($hw)?"hardware":"software"]
+	set wp_type [expr {($hw)?"hardware":"software"}]
 	with_test_prefix "$stop_mode: $wp_type" {
 	    test $stop_mode $hw
 	}

@@ -52,7 +52,7 @@ proc get_new_address { {addresses {}} } {
     set elem [lindex [lsort -integer -decreasing $addresses] 0]
 
     # Return a new address as a hex formatted string.
-    return [format "%#x" [expr $elem + 0x10]]
+    return [format "%#x" [expr {$elem + 0x10}]]
 }
 
 

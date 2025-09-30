@@ -42,7 +42,7 @@ set srcfile ${srcdir}/${subdir}/${testfile}.c
 # Prelink first lib1 at 0x40000000 and lib2 at 0x41000000.
 # During second pass try lib1 at 0x50000000 and lib2 at 0x51000000.
 foreach prelink_lib1 {0x40000000 0x50000000} { with_test_prefix "$prelink_lib1" {
-    set prelink_lib2 [format "0x%x" [expr $prelink_lib1 + 0x01000000]]
+    set prelink_lib2 [format "0x%x" [expr {$prelink_lib1 + 0x01000000}]]
 
     # Library file.
     set binfile_lib1 [standard_output_file ${libname}1-${prelink_lib1}.so]
@@ -64,8 +64,8 @@ foreach prelink_lib1 {0x40000000 0x50000000} { with_test_prefix "$prelink_lib1" 
 	return -1
     }
 
-    if {[catch "exec prelink -N -r ${prelink_lib1} ${binfile_lib1}" output] != 0
-	|| [catch "exec prelink -N -r ${prelink_lib2} ${binfile_lib2}" output] != 0} {
+    if {[catch {exec prelink -N -r ${prelink_lib1} ${binfile_lib1}} output] != 0
+	|| [catch {exec prelink -N -r ${prelink_lib2} ${binfile_lib2}} output] != 0} {
 	# Maybe we don't have prelink.
 	verbose -log "prelink failed: $output"
 	untested "could not prelink ${binfile_lib1_test_msg} or ${binfile_lib2_test_msg}."

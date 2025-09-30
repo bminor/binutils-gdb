@@ -24,7 +24,7 @@ standard_testfile
 
 set testcase "nested-subp3"
 
-if ![support_nested_function_tests] {
+if {![support_nested_function_tests]} {
     untested "compiler does not support nested functions"
     return -1
 }
@@ -49,7 +49,7 @@ if { [gdb_compile "${srcdir}/${subdir}/${testcase}.c" \
 # Run until the variables we are interested in are visible.
 
 clean_restart "${testcase}"
-if ![runto_main] {
+if {![runto_main]} {
     return
 }
 

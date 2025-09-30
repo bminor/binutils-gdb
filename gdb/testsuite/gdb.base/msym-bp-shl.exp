@@ -75,7 +75,7 @@ proc test {debug} {
 	}
     }
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 

@@ -148,7 +148,7 @@ proc test_tab_complete_within_line_multiple { input_line back_count \
 	[join [list \
 		   [string range $input_line 0 end-$back_count] \
 		   ${add_completed_line} \
-		   [string range $input_line end-[expr $back_count - 1] end]] \
+		   [string range $input_line end-[expr {$back_count - 1}] end]] \
 	     ""]
     set expanded_line_re [string_to_regexp $expanded_line]
 
@@ -166,7 +166,7 @@ proc test_tab_complete_within_line_multiple { input_line back_count \
     set after_tab_re "^$input_line_re"
     set after_tab_re "$after_tab_re\\\x08{$back_count}"
     set after_tab_re "$after_tab_re${completion::bell_re}"
-    set tail [string range $input_line end-[expr $back_count - 1] end]
+    set tail [string range $input_line end-[expr {$back_count - 1}] end]
     set after_tab_re "$after_tab_re$add_completed_line_re"
     set after_tab_re "$after_tab_re[string_to_regexp $tail]"
     set after_tab_re "$after_tab_re\\\x08{$back_count}"
@@ -218,7 +218,7 @@ proc test_tab_complete_within_line_unique { input_line back_count insert_str } {
     set re [string_to_regexp $input_line]
     set re $re\\\x08{$back_count}
     set re $re[string_to_regexp $insert_str]
-    set tail [string range $input_line end-[expr $back_count - 1] end]
+    set tail [string range $input_line end-[expr {$back_count - 1}] end]
     set re $re[string_to_regexp $tail]
     set re $re\\\x08{$back_count}
 

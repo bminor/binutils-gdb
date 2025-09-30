@@ -411,7 +411,7 @@ proc_with_prefix test_setshow_print_characters {} {
 proc_with_prefix test_setshow_prompt {} {
     clean_restart
 
-    if [board_info target exists gdb_prompt] {
+    if {[board_info target exists gdb_prompt]} {
 	return
     }
 

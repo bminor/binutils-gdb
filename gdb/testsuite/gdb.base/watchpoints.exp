@@ -94,13 +94,13 @@ with_test_prefix "before inferior start" {
     gdb_test "info break" ".*watchpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+ival1\r\n\[ \t]+breakpoint already hit 3 times.*" "watchpoint ival1 hit count is 3"
     # Disable ival1 watchpoint
     gdb_test_no_output "disable 2" ""
- 
+
     # Continue until the next change, from 1 to 2.
     gdb_test "cont" "Continuing.*\[Ww\]atchpoint.*ival3.*Old value = 1.*New value = 2.*ival3 = count; ival4 = count;.*" "watchpoint hit, third time"
 
     # Check that the hit count is reported correctly
     gdb_test "info break" ".*watchpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+ival3\r\n\[ \t]+breakpoint already hit 3 times.*" "watchpoint hit count is 3"
-    
+
     # Continue until the next change, from 2 to 3.
     gdb_test "cont" "Continuing.*\[Ww\]atchpoint.*ival3.*Old value = 2.*New value = 3.*ival3 = count; ival4 = count;.*" "watchpoint hit, fourth time"
 

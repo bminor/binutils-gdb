@@ -81,7 +81,7 @@ proc_with_prefix do_test {} {
 
     clean_restart $testfile
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 
@@ -184,14 +184,14 @@ proc_with_prefix do_test_invalid_args {} {
 	     "new-ui with bad interpreter name"
 
     # Test that the TUI cannot be used for a new UI.
-    if [allow_tui_tests] {
+    if {[allow_tui_tests]} {
 	gdb_test "new-ui tui $extra_tty_name" \
 	    "interpreter 'tui' cannot be used with a new UI" \
 	    "new-ui with tui"
     }
 
     # Test that we can continue working normally.
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 }

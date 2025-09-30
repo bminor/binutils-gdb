@@ -49,19 +49,19 @@ proc system_debug_get {exec} {
 
     # isfile returns 1 even for symlinks to files.
     set retval $debug_root/$exec_build_id_debug
-    if [file isfile $retval] {
+    if {[file isfile $retval]} {
 	return $retval
     }
     set retval $exec_dir/$debug_base
-    if [file isfile $retval] {
+    if {[file isfile $retval]} {
 	return $retval
     }
     set retval $exec_dir/.debug/$debug_base
-    if [file isfile $retval] {
+    if {[file isfile $retval]} {
 	return $retval
     }
     set retval $debug_root/$exec_dir/$debug_base
-    if [file isfile $retval] {
+    if {[file isfile $retval]} {
 	return $retval
     }
     return ""
@@ -108,7 +108,7 @@ proc strip_debug {dest} {
     set strip_program [transform strip]
     set command "exec $strip_program --strip-debug $dest"
     verbose -log "command is $command"
-    if [catch $command] {
+    if {[catch {{*}$command}]} {
 	fail $test
 	return 0
     } else {
@@ -186,7 +186,7 @@ proc reach_1 {func command displacement} {
 	    }
 	}
     }
-    if ![regexp {^(NONE|FOUND-.*)$} $displacement] {
+    if {![regexp {^(NONE|FOUND-.*)$} $displacement]} {
 	fail $test_displacement
     }
 
@@ -257,7 +257,7 @@ proc test_core {file displacement} {
 		pass $test
 	    }
 	}
-	if ![regexp {^(NONE|FOUND-.*)$} $displacement] {
+	if {![regexp {^(NONE|FOUND-.*)$} $displacement]} {
 	    fail $test_displacement
 	}
 	gdb_test_no_output "set verbose off"
@@ -308,7 +308,7 @@ proc test_attach_gdb {file pid displacement prefix} {
 		pass $test
 	    }
 	}
-	if ![regexp {^(NONE|FOUND-.*)$} $displacement] {
+	if {![regexp {^(NONE|FOUND-.*)$} $displacement]} {
 	    fail $test_displacement
 	}
 	gdb_test_no_output "set verbose off"
@@ -381,7 +381,7 @@ proc test_attach {file displacement {relink_args ""}} {
 	    # `libfunc' is present in the backtrace and therefore the
 	    # displacement has been guessed right.
 
-	    if [prelink$relink $relink_args [file tail $exec]] {
+	    if {[prelink$relink $relink_args [file tail $exec]]} {
 		# /proc/PID/exe cannot be loaded as it is "EXECNAME (deleted)".
 		test_attach_gdb $exec $pid $displacement "attach-relink$relink"
 	    }
@@ -411,7 +411,7 @@ proc test_ld {file ifmain trynosym displacement} {
     # prevents that from happening.  So turn it off.
     gdb_test "set disable-randomization off"
 
-    if $ifmain {
+    if {$ifmain} {
 	gdb_test_no_output "set args segv"
     } else {
 	global binfile_test
@@ -450,7 +450,7 @@ proc test_ld {file ifmain trynosym displacement} {
 	gdb_test_no_output "set verbose on"
     }
 
-    if $ifmain {
+    if {$ifmain} {
 	reach "main" continue "NONE"
 
 	reach "libfunc" continue "NONE"
@@ -467,13 +467,13 @@ proc test_ld {file ifmain trynosym displacement} {
     reach $solib_bp "run" $displacement 2
     gdb_test_no_output "set verbose off"
 
-    if $ifmain {
+    if {$ifmain} {
 	test_core $file $displacement
 
 	test_attach $file $displacement
     }
 
-    if !$trynosym {
+    if {!$trynosym} {
 	return
     }
 
@@ -494,7 +494,7 @@ proc test_ld {file ifmain trynosym displacement} {
 	set escapedfile [string_to_regexp $file]
 	gdb_test "exec-file $file" "exec-file $escapedfile" "load"
 
-	if $ifmain {
+	if {$ifmain} {
 	    reach $solib_bp run $displacement 3
 
 	    set entrynohex ""
@@ -550,7 +550,7 @@ proc test_ld {file ifmain trynosym displacement} {
 		    pass $test
 		}
 	    }
-	    if ![regexp {^(NONE|FOUND-.*)$} $displacement] {
+	    if {![regexp {^(NONE|FOUND-.*)$} $displacement]} {
 		fail $test_displacement
 	    }
 	}
@@ -589,7 +589,7 @@ foreach_with_prefix ldprelink {NO YES} {
 	    file_copy $interp_system $interp
 	    # Never call strip-debug before unprelink:
 	    # prelink: ...: Section .note.gnu.build-id created after prelinking
-	    if ![prelinkNO $interp] {
+	    if {![prelinkNO $interp]} {
 		continue
 	    }
 	    strip_debug $interp
@@ -605,7 +605,7 @@ foreach_with_prefix ldprelink {NO YES} {
 	    set test "eu-unstrip unprelinked:[file tail $interp_system] + [file tail $interp_system_debug] to [file tail $interp]"
 	    set command "exec eu-unstrip -o $interp $interp ${interp}.debug"
 	    verbose -log "command is $command"
-	    if [catch $command] {
+	    if {[catch {{*}$command}]} {
 		setup_xfail *-*-*
 		fail $test
 		continue
@@ -615,7 +615,7 @@ foreach_with_prefix ldprelink {NO YES} {
 	} elseif {$ldsepdebug == "SEP" && $interp_system_debug == ""} {
 	    file_copy $interp_system $interp
 	    # eu-unstrip: DWARF data in '...' not adjusted for prelinking bias; consider prelink -u
-	    if ![prelinkNO $interp] {
+	    if {![prelinkNO $interp]} {
 		continue
 	    }
 	    gdb_gnu_strip_debug $interp
@@ -625,14 +625,14 @@ foreach_with_prefix ldprelink {NO YES} {
 	}
 
 	if {$ldsepdebug == "SEP"} {
-	    if ![prelinkNO "${interp}.debug"] {
+	    if {![prelinkNO "${interp}.debug"]} {
 		continue
 	    }
 	} else {
 	    file delete "${interp}.debug"
 	}
 
-	if ![prelink$ldprelink $interp "[file tail $interp], second time"] {
+	if {![prelink$ldprelink $interp "[file tail $interp], second time"]} {
 	    continue
 	}
 
@@ -647,7 +647,7 @@ foreach_with_prefix ldprelink {NO YES} {
 	}
 	test_ld $interp 0 [expr {$ldsepdebug == "NO"}] $displacement
 
-	if ![file_copy $interp $interp_saved] {
+	if {![file_copy $interp $interp_saved]} {
 	    continue
 	}
 

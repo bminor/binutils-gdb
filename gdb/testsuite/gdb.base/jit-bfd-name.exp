@@ -54,11 +54,11 @@ if { ![runto_main] } {
 
 # Poke desired values directly into inferior instead of using "set
 # args" because "set args" does not work under gdbserver.
-set count [expr [llength $jit_solibs_target] + 1]
+set count [expr {[llength $jit_solibs_target] + 1}]
 gdb_test_no_output "set var argc=$count" "forging argc"
 gdb_test_no_output "set var argv=fake_argv" "forging argv"
 for {set i 1} {$i < $count} {incr i} {
-    set jit_solib_target [lindex $jit_solibs_target [expr $i-1]]
+    set jit_solib_target [lindex $jit_solibs_target [expr {$i-1}]]
     gdb_test_no_output "set var argv\[$i\]=\"${jit_solib_target}\"" \
 	"forging argv\[$i\]"
 }
@@ -124,7 +124,7 @@ set count 0
 foreach addr $symfile_addrs len $symfile_lengths {
     incr count
     set output [standard_output_file "dump-elf-solib.${count}.so"]
-    set end [expr $addr + $len]
+    set end [expr {$addr + $len}]
     gdb_test_no_output "dump binary memory $output $addr $end" \
 	"dump jit solib $count"
 
@@ -141,7 +141,7 @@ foreach addr $symfile_addrs len $symfile_lengths {
     set start [format 0x%x $addr]
 
     # Calculate the end address.
-    set end [format 0x%x [expr $addr + $len]]
+    set end [format 0x%x [expr {$addr + $len}]]
 
     # This is what we expect the address range to look like in the BFD
     # filename.

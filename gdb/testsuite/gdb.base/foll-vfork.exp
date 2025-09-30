@@ -53,7 +53,7 @@ if { [is_remote target] } {
 proc setup_gdb { binfile srcfile } {
     clean_restart $binfile
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -code return
     }
 

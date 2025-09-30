@@ -15,15 +15,15 @@
 
 standard_testfile
 
-if [prepare_for_testing "failed to prepare for testing" \
-    ${testfile} ${srcfile} {debug}] {
+if {[prepare_for_testing "failed to prepare for testing" \
+	 ${testfile} ${srcfile} {debug}]} {
     return -1
 }
 
 # Pretend there's no terminal.
 gdb_test_no_output "set interactive-mode off"
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

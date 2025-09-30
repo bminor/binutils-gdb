@@ -163,7 +163,7 @@ proc run_style_tests { } {
 	    # - 4 leading spaces
 	    # - argv string
 	    # - closing parenthesis
-	    set line_len [expr 4 + $argv_len + 1]
+	    set line_len [expr {4 + $argv_len + 1}]
 
 	    if { $argv == "argv=0x0" && $width >= 27 } {
 		# Embedded target with no argv support.
@@ -847,14 +847,14 @@ proc previous_line_is_ok { str } {
     # Then compare string lengths to get a count of the '\033'
     # charactes present in STR.
     regsub -all "\033" $str {} stripped
-    set count [expr [string length $str] - [string length $stripped]]
+    set count [expr {[string length $str] - [string length $stripped]}]
 
     # If STR switched styles, then it _must_ switch back again,
     # otherwise the pagination prompt will be in the wrong style.
     # This means that there _must_ be an even number of '\033'
     # characters in STR.  If there is not then we switched style, but
     # failed to switch back.
-    if { [expr $count % 2] != 0 } {
+    if {$count % 2 != 0} {
 	return false
     }
 

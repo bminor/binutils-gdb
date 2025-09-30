@@ -16,8 +16,8 @@
 
 standard_testfile symbol-alias.c symbol-alias2.c
 # Clang versions prior to v15 do not emit debug info for aliases.
-set old_clang [expr [test_compiler_info {clang-1[0-4]-*-*}] \
-		 || [test_compiler_info {clang-[1-9]-*}]]
+set old_clang [expr {[test_compiler_info {clang-1[0-4]-*-*}] \
+			 || [test_compiler_info {clang-[1-9]-*}]}]
 
 if { [prepare_for_testing "failed to prepare" ${testfile} [list $srcfile $srcfile2]] } {
     return -1

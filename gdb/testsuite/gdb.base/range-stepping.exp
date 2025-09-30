@@ -22,11 +22,11 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile {debug}] } {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
-if ![gdb_range_stepping_enabled] {
+if {![gdb_range_stepping_enabled]} {
     unsupported "range stepping not supported by the target"
     return -1
 }
@@ -171,7 +171,7 @@ with_test_prefix "loop 2" {
 # Check that range stepping works well even when it is interrupted by
 # ctrl-c.
 
-if ![target_info exists gdb,nointerrupts] {
+if {![target_info exists gdb,nointerrupts]} {
     with_test_prefix "interrupt" {
 	gdb_test_no_output "set debug remote 1"
 

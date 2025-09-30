@@ -17,8 +17,8 @@
 
 standard_testfile
 
-if [build_executable "failed to prepare" \
-    ${testfile} ${srcfile} {debug}] {
+if {[build_executable "failed to prepare" \
+	 ${testfile} ${srcfile} {debug}]} {
     return -1
 }
 
@@ -31,7 +31,7 @@ proc test { style } {
 	clean_restart
 	gdb_load $binfile
 
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return -1
 	}
 

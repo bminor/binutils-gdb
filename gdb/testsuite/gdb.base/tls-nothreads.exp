@@ -20,11 +20,11 @@ standard_testfile
 proc do_tests {force_internal_tls {do_kfail_tls_access 0}} {
     clean_restart
     gdb_load $::binfile
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 
-    if $force_internal_tls {
+    if {$force_internal_tls} {
 	gdb_test_no_output "maint set force-internal-tls-address-lookup on"
     }
 
@@ -44,7 +44,7 @@ proc do_tests {force_internal_tls {do_kfail_tls_access 0}} {
 	# Also turn off do_kfail_tls_access when connected to a
 	# gdbserver and we observe that accessing a TLS variable
 	# works.
-	if [target_is_gdbserver] {
+	if {[target_is_gdbserver]} {
 	    gdb_test_multiple "print tls_tbss_1" "Check TLS accessibility when connected to a gdbserver" {
 		-re -wrap "= 0" {
 		    set do_kfail_tls_access 0
@@ -105,14 +105,14 @@ proc do_tests {force_internal_tls {do_kfail_tls_access 0}} {
 	set binfile_stripped "${::binfile}.stripped"
 	set objcopy [gdb_find_objcopy]
 	set cmd "$objcopy --strip-debug ${::binfile} $binfile_stripped"
-	if ![catch "exec $cmd" cmd_output] {
+	if {![catch {exec {*}$cmd} cmd_output]} {
 	    clean_restart
 	    gdb_load $binfile_stripped
-	    if ![runto_main] {
+	    if {![runto_main]} {
 		return
 	    }
 
-	    if $force_internal_tls {
+	    if {$force_internal_tls} {
 		gdb_test_no_output "maint set force-internal-tls-address-lookup on"
 	    }
 
@@ -153,7 +153,7 @@ proc do_tests {force_internal_tls {do_kfail_tls_access 0}} {
     }
 
     # Finish test early if no core file was made.
-    if !$core_supported {
+    if {!$core_supported} {
 	return
     }
 
@@ -166,7 +166,7 @@ proc do_tests {force_internal_tls {do_kfail_tls_access 0}} {
     }
 
     with_test_prefix "core file" {
-	if $force_internal_tls {
+	if {$force_internal_tls} {
 	    gdb_test_no_output "maint set force-internal-tls-address-lookup on"
 	}
 

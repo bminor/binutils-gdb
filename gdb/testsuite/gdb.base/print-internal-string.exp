@@ -27,7 +27,7 @@ if {![runto_main]} {
     return 0
 }
 
-if [allow_python_tests] {
+if {[allow_python_tests]} {
     # The $_as_string convenience function is implemented in Python.
     gdb_test {printf "%s\n", $_as_string("aabbcc")} "\"aabbcc\""
 
