@@ -64,7 +64,7 @@ while { $test_count < 500 } {
 	   continue
 	}
 
-	if ($found_final_breakpoint) {
+	if {$found_final_breakpoint} {
 	    break
 	}
 

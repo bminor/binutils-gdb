@@ -33,7 +33,7 @@
 # case where DW_AT_entry_pc is not the first instruction of an inlined
 # function, as can be the case in gcc 8.x with the
 # -gstatement-frontiers work in place.
-require {expr ![is_c_compiler_gcc] || [supports_statement_frontiers]}
+require {expr {![is_c_compiler_gcc] || [supports_statement_frontiers]}}
 
 standard_testfile
 

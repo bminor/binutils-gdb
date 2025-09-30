@@ -26,7 +26,7 @@ if { [test_compiler_info gcc-*] } {
     #   cpls-abi-tag.cc:71:26: error:
     #     ‘abi_tag’ attribute applied to non-function ‘s’
     # See gcc PR65046.
-    require {expr [gcc_major_version] >= 5}
+    require {expr {[gcc_major_version] >= 5}}
 }
 
 if {[prepare_for_testing "failed to prepare" $testfile \

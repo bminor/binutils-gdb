@@ -47,7 +47,7 @@ with_test_prefix "replay" {
 	set replay_gettimeofday [capture_command_output "disassemble gettimeofday" ""]
 
 	# the two disassemblies must be identical
-	if ![string compare $live_gettimeofday $replay_gettimeofday]  {
+	if {![string compare $live_gettimeofday $replay_gettimeofday]} {
 		pass "disassemble gettimeofday"
 	} else {
 		fail "disassemble gettimeofday"

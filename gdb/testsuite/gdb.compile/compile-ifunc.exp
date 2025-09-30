@@ -35,7 +35,7 @@ with_test_prefix "nodebug" {
 	return -1
     }
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 
@@ -65,7 +65,7 @@ with_test_prefix "debug" {
 	return -1
     }
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
     # gnu_ifunc (10): error: too many arguments to function 'gnu_ifunc'

@@ -160,7 +160,7 @@ proc_with_prefix no_url { } {
     # Generate a core file and test that GDB cannot find the
     # executable.
     clean_restart ${::testfile}2
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 

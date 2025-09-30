@@ -115,7 +115,7 @@ if { $self_tests_enabled && ![is_remote host] } {
     # initialization order of GDB.
     with_test_prefix "reversed initialization" {
 	save_vars { env(GDB_REVERSE_INIT_FUNCTIONS) } {
-	    if [info exists env(GDB_REVERSE_INIT_FUNCTIONS)] {
+	    if {[info exists env(GDB_REVERSE_INIT_FUNCTIONS)]} {
 		unset env(GDB_REVERSE_INIT_FUNCTIONS)
 	    } else {
 		set env(GDB_REVERSE_INIT_FUNCTIONS) 1

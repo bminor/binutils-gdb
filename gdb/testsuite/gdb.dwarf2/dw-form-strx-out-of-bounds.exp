@@ -24,7 +24,7 @@ require !readnow
 
 set prepare_for_testing_done 0
 source $srcdir/$subdir/dw-form-strx.exp.tcl
-require {expr $prepare_for_testing_done == 1}
+require {expr {$prepare_for_testing_done == 1}}
 
 set re_dwarf_error \
     [string_list_to_regexp \

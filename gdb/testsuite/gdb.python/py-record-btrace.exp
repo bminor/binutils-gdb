@@ -66,8 +66,8 @@ with_test_prefix "prepare record" {
     set v [linux_kernel_version]
     if { $v != {} } {
 	set have_xfail \
-	    [expr [version_compare [list 5 5 0] <= $v] \
-		 && [version_compare $v < [list 6 1 0]]]
+	    [expr {[version_compare [list 5 5 0] <= $v] \
+		       && [version_compare $v < [list 6 1 0]]}]
     }
     set nonl_re \[^\r\n\]
     set xfail_re \

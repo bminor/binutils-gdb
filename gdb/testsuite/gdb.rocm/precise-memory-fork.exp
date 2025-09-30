@@ -30,7 +30,7 @@ if {[prepare_for_testing "failed to prepare $testfile" $testfile $srcfile {debug
 }
 
 with_rocm_gpu_lock {
-    if ![runto_main] {
+    if {![runto_main]} {
 	return
     }
 

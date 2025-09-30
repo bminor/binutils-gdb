@@ -32,7 +32,7 @@ save_vars { GDBFLAGS } {
 	set GDBFLAGS "$GDBFLAGS -ex \"set sysroot\""
     }
 
-    if [prepare_for_testing "failed to prepare" $testfile $srcfile] {
+    if {[prepare_for_testing "failed to prepare" $testfile $srcfile]} {
 	return -1
     }
 }

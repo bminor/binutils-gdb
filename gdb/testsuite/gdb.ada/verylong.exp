@@ -41,7 +41,7 @@ gdb_test_multiple "ptype Long_Long_Long_Integer" "" {
     }
 }
 
-require {expr $lll_int_size == 8 || $lll_int_size == 16}
+require {expr {$lll_int_size == 8 || $lll_int_size == 16}}
 
 gdb_test "print x" " = $max"
 gdb_test "print x / 2" " = [expr {$max / 2}]"

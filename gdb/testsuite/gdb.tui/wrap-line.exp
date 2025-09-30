@@ -165,7 +165,7 @@ with_test_prefix width-hard-coded {
 }
 
 with_test_prefix width-auto-detected {
-    Term::with_tuiterm {*}$dims {
+    Term::with_tuiterm $lines $cols {
 	save_vars { ::INTERNAL_GDBFLAGS } {
 	    # Avoid "set width 0" argument.
 	    set INTERNAL_GDBFLAGS \

@@ -126,7 +126,7 @@ gdb_test "test-cmd 1 2 3" "test-cmd output, arg = 1 2 3"
 with_test_prefix "sepdebug" {
     gdb_exit
 
-    set result [catch "exec eu-strip -g -f ${binfile}.debug ${binfile}" output]
+    set result [catch {exec eu-strip -g -f ${binfile}.debug ${binfile}} output]
     verbose "result is $result"
     verbose "output is $output"
     if {$result != 0 || $output != ""} {

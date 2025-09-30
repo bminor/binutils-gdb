@@ -84,7 +84,7 @@ gdb_test_multiple "ptype foo" "" {
     }
 }
 
-require {expr $cu1_expanded == 1}
+require {expr {$cu1_expanded == 1}}
 
 # Now check that cu2 has an address range starting at main.
 set cu2_blockvector_re \

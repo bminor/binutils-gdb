@@ -53,11 +53,11 @@ if {[istarget "s390*-*-*"]} {
 }
 
 if { $march1 != "" } {
-    require "have_compile_and_link_flag $march1"
+    require {have_compile_and_link_flag $march1}
 }
 
 if { $march2 != "" } {
-    require "have_compile_and_link_flag $march2"
+    require {have_compile_and_link_flag $march2}
 }
 
 if { [build_executable "failed to prepare" ${exec1} "${srcfile1}" \

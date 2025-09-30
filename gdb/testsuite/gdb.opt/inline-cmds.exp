@@ -335,7 +335,7 @@ proc mi_cli_step {cli_output_re message} {
 # command run while the top interpreter is MI results in the expected
 # CLI output sent to MI's console.
 with_test_prefix "mi" {
-    if [mi_gdb_start] {
+    if {[mi_gdb_start]} {
 	return
     }
     mi_gdb_load ${binfile}

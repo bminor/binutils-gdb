@@ -38,7 +38,7 @@ foreach_gnat_encoding scenario flags {all minimal} {
     gdb_test "print good" \
 	"= \\(false <repeats 196 times>\\)" \
 
-    set have_xfail [expr $old_gcc && [string equal "$scenario" "minimal"]]
+    set have_xfail [expr {$old_gcc && [string equal "$scenario" "minimal"]}]
 
     set re "= \\(false <repeats 196 times>\\)"
     set re_xfail "= \\(0 => 0 <repeats 25 times>\\)"

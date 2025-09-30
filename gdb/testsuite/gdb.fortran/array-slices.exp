@@ -132,7 +132,7 @@ proc run_test { repack } {
 		}
 	    }
 
-	    if ($found_final_breakpoint) {
+	    if {$found_final_breakpoint} {
 		break
 	    }
 

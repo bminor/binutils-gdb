@@ -138,8 +138,8 @@ foreach_with_prefix test { exit signal } {
     set func "run_${test}_test"
 
     set executable "$binfile-${test}"
-    if [build_executable "failed to prepare" $executable $srcfile \
-	    [list debug pthreads additional_flags=-D${def}]] {
+    if {[build_executable "failed to prepare" $executable $srcfile \
+	     [list debug pthreads additional_flags=-D${def}]]} {
 	return -1
     }
 

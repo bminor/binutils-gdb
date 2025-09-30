@@ -55,7 +55,7 @@ while { $test_count < 600 } {
 	    }
 	}
 
-	if ($found_dealloc_breakpoint) {
+	if {$found_dealloc_breakpoint} {
 	    break
 	}
 

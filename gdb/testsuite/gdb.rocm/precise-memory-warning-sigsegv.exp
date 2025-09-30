@@ -33,7 +33,7 @@ proc do_test { } {
     gdb_load $::binfile
 
     with_rocm_gpu_lock {
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return
 	}
 

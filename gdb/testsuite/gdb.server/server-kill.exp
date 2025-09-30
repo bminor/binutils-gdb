@@ -82,7 +82,7 @@ proc kill_server {} {
 # Test issuing "tstatus" right after the connection is dropped.
 
 proc_with_prefix test_tstatus {} {
-    if ![prepare] {
+    if {![prepare]} {
 	return
     }
 
@@ -104,7 +104,7 @@ proc_with_prefix test_tstatus {} {
 # is dropped.
 
 proc_with_prefix test_unwind_nosyms {} {
-    if ![prepare] {
+    if {![prepare]} {
 	return
     }
 
@@ -121,7 +121,7 @@ proc_with_prefix test_unwind_nosyms {} {
 # dropped.
 
 proc_with_prefix test_unwind_syms {} {
-    if ![prepare] {
+    if {![prepare]} {
 	return
     }
 
@@ -133,7 +133,7 @@ proc_with_prefix test_unwind_syms {} {
 # Test performing a stepi right after the connection is dropped.
 
 proc_with_prefix test_stepi {} {
-    if ![prepare] {
+    if {![prepare]} {
 	return
     }
 

@@ -21,7 +21,7 @@ require allow_ada_tests
 # declarations only") is required.  The commit makes sure that file-scope
 # function and variable declarations are emitted in dwarf.  This allows the
 # description of imported entries, making them available to the debugger.
-require {expr [gcc_major_version] >= 8}
+require {expr {[gcc_major_version] >= 8}}
 
 standard_ada_testfile prog
 

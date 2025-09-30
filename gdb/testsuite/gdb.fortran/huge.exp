@@ -46,7 +46,7 @@ for { set size [expr {$max}] } { $size >= $min } { set size [expr {$size / 2}] }
     set compilation_succeeded 1
     break
 }
-require {expr $compilation_succeeded}
+require {expr {$compilation_succeeded}}
 
 # Start with a fresh gdb.
 clean_restart ${::testfile}

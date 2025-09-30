@@ -1087,7 +1087,7 @@ proc_with_prefix incomplete-scope-colon {} {
 					  "${explicit_source} -function ${fqc}$prototype${fqc}"] {
 			set complete_line "b $location"
 			set start [string first $range_ss $complete_line]
-			set end [expr ($start + [string length $range_ss])]
+			set end [expr {($start + [string length $range_ss])}]
 			test_complete_prefix_range $complete_line $start $end
 			if {!$skip_check_bp} {
 			    check_bp_locations_match_list "b $location" [list "$prototype"]
@@ -1200,7 +1200,7 @@ proc_with_prefix operator< {} {
 		     "-function $function -label label1"] {
 
 	set cmd "b $location"
-	set input_line [string range $cmd 0 [expr [string length $cmd] - 3]]
+	set input_line [string range $cmd 0 [expr {[string length $cmd] - 3}]]
 
 	test_gdb_complete_unique $input_line $cmd
 	test_gdb_complete_unique $cmd $cmd

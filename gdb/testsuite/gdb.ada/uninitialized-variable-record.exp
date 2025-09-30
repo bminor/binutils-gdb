@@ -91,7 +91,7 @@ for { set i 0 } { $i < 256 } { incr i } {
 	    continue
 	}
 
-	if { [expr $size > $offset_d] } {
+	if {$size > $offset_d} {
 	    # Field d fits in the size.
 	    continue
 	}
@@ -101,7 +101,7 @@ for { set i 0 } { $i < 256 } { incr i } {
     }
 }
 
-require {expr $interesting_discriminator != -1}
+require {expr {$interesting_discriminator != -1}}
 
 foreach lang [gdb_supported_languages] {
     with_test_prefix $lang {

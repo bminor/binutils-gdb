@@ -96,7 +96,7 @@ proc test_re_run {re_run_inf} {
     foreach_with_prefix iter {1 2} {
 	delete_breakpoints
 
-	if ![runto all_started] {
+	if {![runto all_started]} {
 	    return 0
 	}
 

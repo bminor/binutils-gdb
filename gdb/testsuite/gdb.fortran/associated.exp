@@ -50,7 +50,7 @@ while { $test_count < 500 } {
 	    }
 	}
 
-	if ($found_final_breakpoint) {
+	if {$found_final_breakpoint} {
 	    break
 	}
 
