@@ -13,7 +13,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Configuration file for tclint ( https://github.com/nmoroze/tclint ).
+# Configuration file for the tclint and tclfmt tools from the tclint package
+# ( https://github.com/nmoroze/tclint ).
+#
+# Eventually we'd like to move these settings to pyproject.toml, but currently
+# that's not possible.  See this tclint issue (
+# https://github.com/nmoroze/tclint/issues/120 ).
+#
+# Issues related to using the tclint tool in the gdb testsuite:
+# - tclint does not support expect.
+#   https://github.com/nmoroze/tclint/issues/118
+# - tclint doesn't inspect code passed as arguments to gdb testsuite specific
+#   commands like with_test_prefix.
+#   https://github.com/nmoroze/tclint/issues/121
+# - tclint ignores splat ({*}$foo) when checking number of arguments
+#   https://github.com/nmoroze/tclint/issues/122
 
 exclude = [
 # TODO:
