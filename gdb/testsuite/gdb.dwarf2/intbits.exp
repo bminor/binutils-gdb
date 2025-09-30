@@ -25,7 +25,7 @@ standard_testfile .c .S
 set executable ${testfile}
 set asm_file [standard_output_file ${srcfile2}]
 
-if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] {
+if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile}]} {
     return -1
 }
 

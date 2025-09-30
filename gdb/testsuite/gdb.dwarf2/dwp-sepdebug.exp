@@ -18,7 +18,7 @@ standard_testfile
 if { [build_executable ${testfile}.exp ${testfile} ${srcfile}] == -1 } {
     return -1
 }
-if ![remote_file host exists [standard_output_file ${testfile}.dwp]] {
+if {![remote_file host exists [standard_output_file ${testfile}.dwp]]} {
     unsupported "testsuite run does not produce dwp files"
     return 0
 }
@@ -29,7 +29,7 @@ if ![remote_file host exists [standard_output_file ${testfile}.dwp]] {
 # the name of a debuginfo only file. This file will be stored in the
 # gdb.base/ subdirectory.
 
-if [gdb_gnu_strip_debug $binfile$EXEEXT] {
+if {[gdb_gnu_strip_debug $binfile$EXEEXT]} {
     # check that you have a recent version of strip and objcopy installed
     unsupported "cannot produce separate debug info files"
     return -1

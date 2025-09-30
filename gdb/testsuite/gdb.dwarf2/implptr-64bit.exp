@@ -125,11 +125,11 @@ proc test_1 { name dwarf_version offset_size addr_size ref_addr_size two_cu } {
     # 32-bit targets do not support any of the testcases; keep quiet there.
     set opts {quiet}
     set executable ${testfile}-${name}
-    if [prepare_for_testing "failed to prepare" $executable "${asm_file} ${srcfile}" $opts] {
+    if {[prepare_for_testing "failed to prepare" $executable "${asm_file} ${srcfile}" $opts]} {
 	return -1
     }
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 

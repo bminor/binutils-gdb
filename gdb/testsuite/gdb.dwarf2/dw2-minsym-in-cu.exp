@@ -24,8 +24,8 @@ set additional_flags [gdb_target_symbol_prefix_flags_asm]
 
 standard_testfile .S
 
-if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
-	${additional_flags}] {
+if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
+	 ${additional_flags}]} {
     return -1
 }
 

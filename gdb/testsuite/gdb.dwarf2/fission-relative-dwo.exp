@@ -113,7 +113,7 @@ if { [build_executable_and_dwo_files "${testfile}.exp" ${testfile} {nodebug} \
 # Now we can start GDB.
 clean_restart ${testfile}
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

@@ -113,7 +113,7 @@ set struct_s_j_re \
 	 "    int j;" \
 	 "}"]
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

@@ -25,8 +25,8 @@ if { [build_executable "failed to prepare" $testfile $srcfile \
 set host_binfile [gdb_remote_download host $binfile]
 
 set has_index_section [exec_has_index_section $binfile]
-set uses_readnow [expr [string first "-readnow" $GDBFLAGS] != -1]
-set expecting_index_cache_use [expr !$has_index_section && !$uses_readnow]
+set uses_readnow [expr {[string first "-readnow" $GDBFLAGS] != -1}]
+set expecting_index_cache_use [expr {!$has_index_section && !$uses_readnow}]
 
 lassign [remote_exec host mktemp -d] ret cache_dir
 

@@ -183,11 +183,11 @@ Dwarf::assemble $asm_file {
     }
 }
 
-if [prepare_for_testing "failed to prepare" $testfile "${asm_file} ${srcfile} ${srcfile3}" {nodebug}] {
+if {[prepare_for_testing "failed to prepare" $testfile "${asm_file} ${srcfile} ${srcfile3}" {nodebug}]} {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

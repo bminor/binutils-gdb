@@ -47,7 +47,7 @@ if { [is_aarch64_target] } {
 
 standard_testfile symbol_needs_eval.c ${gdb_test_file_name}-dw.S
 
-if [prepare_for_testing "failed to prepare" $testfile $srcfile {debug}] {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug}]} {
     return
 }
 
@@ -107,7 +107,7 @@ if { [prepare_for_testing ${testfile}.exp ${testfile} \
 # so an error should be reported.
 gdb_test "print/d a" "No frame selected." "variable a can't be printed"
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

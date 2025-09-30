@@ -42,7 +42,7 @@ gdb_unload
 set objcopy_program [gdb_find_objcopy]
 set command "$objcopy_program -N block_start -N block_end -N break_at ${binfile} ${binfile_stripped}"
 verbose -log "Executing: $command"
-set result [catch "exec $command" output]
+set result [catch {exec {*}$command} output]
 verbose "result is $result"
 verbose "output is $output"
 if {$result != 0} {
@@ -51,7 +51,7 @@ if {$result != 0} {
 
 gdb_load ${binfile_stripped}
 
-if ![runto "*${break_at}"] {
+if {![runto "*${break_at}"]} {
     return -1
 }
 

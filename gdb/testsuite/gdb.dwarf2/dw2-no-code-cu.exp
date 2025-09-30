@@ -15,7 +15,7 @@
 
 standard_testfile .c main.c
 
-if [prepare_for_testing "failed to prepare" $testfile "$srcfile $srcfile2"] {
+if {[prepare_for_testing "failed to prepare" $testfile "$srcfile $srcfile2"]} {
     return -1
 }
 

@@ -28,7 +28,7 @@ set opts {}
 
 lappend opts nopie
 
-if [info exists COMPILE] {
+if {[info exists COMPILE]} {
     # make check RUNTESTFLAGS='gdb.dwarf2/implptr.exp COMPILE=1 CC_FOR_TARGET=gcc\ -m32'
     set srcfile ${csrcfile}
     lappend opts debug optimize=-O2
@@ -41,7 +41,7 @@ if {[prepare_for_testing "failed to prepare" ${testfile} $srcfile $opts]} {
 # Additional test to verify the referenced CU is not aged out.
 gdb_test_no_output "maintenance set dwarf max-cache-age 0"
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

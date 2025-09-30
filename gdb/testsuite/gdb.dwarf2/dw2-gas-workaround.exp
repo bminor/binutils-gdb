@@ -30,7 +30,7 @@ with_shared_gdb {
 proc line_for { l } {
     global srcfile
     set line [gdb_get_line_number "$l:" $srcfile]
-    return [expr $line + 1]
+    return [expr {$line + 1}]
 }
 
 # A helper proc to create the DWARF assembly for the test.

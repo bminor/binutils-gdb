@@ -15,8 +15,8 @@
 
 standard_testfile .c
 
-if [prepare_for_testing "failed to prepare" $testfile $srcfile \
-	{debug nowarnings}] {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
+	 {debug nowarnings}]} {
     return -1
 }
 

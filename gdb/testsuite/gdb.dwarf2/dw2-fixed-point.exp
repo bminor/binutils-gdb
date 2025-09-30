@@ -117,7 +117,7 @@ if { [prepare_for_testing ${testfile}.exp ${testfile} \
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

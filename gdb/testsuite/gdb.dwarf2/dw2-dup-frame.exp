@@ -26,7 +26,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile {nodebug nopie}
     return -1
 }
 
-if ![runto stop_frame] {
+if {![runto stop_frame]} {
     perror "Failed to stop in stop_frame"
     return -1
 }

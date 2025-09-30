@@ -22,7 +22,7 @@ standard_testfile main.c -dw.S
 
 # We need to know the endianess in order
 # to write some of the debugging info we'd like to generate.
-if [prepare_for_testing "failed to prepare for endianness test" ${testfile} ${srcfile}] {
+if {[prepare_for_testing "failed to prepare for endianness test" ${testfile} ${srcfile}]} {
     return -1
 }
 

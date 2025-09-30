@@ -89,8 +89,8 @@ if {[gdb_compile_shlib $libsrc $lib_so \
 #   Value returned is $1 = (B *) $hex <g_>
 # Note that this compilation is used for all GDB sessions.
 set exec_options [list debug shlib=$lib_so]
-if [prepare_for_testing "failed to prepare" ${testfile} \
-                        ${::srcfile} $exec_options] {
+if {[prepare_for_testing "failed to prepare" ${testfile} \
+	 ${::srcfile} $exec_options]} {
     return -1
 }
 

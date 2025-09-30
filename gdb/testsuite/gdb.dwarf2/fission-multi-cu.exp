@@ -196,16 +196,16 @@ Dwarf::assemble $asm_file_2 {
 # Compile all of the input files, split the DWARF into the .dwo files.
 set obj1 [standard_output_file "${testfile}-1-dw.o"]
 set obj2 [standard_output_file "${testfile}-2-dw.o"]
-if [build_executable_and_dwo_files "$testfile.exp" "${binfile}" {nodebug} \
-	[list $asm_file_1 [list nodebug split-dwo] $obj1] \
-	[list $asm_file_2 [list nodebug split-dwo] $obj2] \
-	[list $srcfile  [list nodebug]]] {
+if {[build_executable_and_dwo_files "$testfile.exp" "${binfile}" {nodebug} \
+	 [list $asm_file_1 [list nodebug split-dwo] $obj1] \
+	 [list $asm_file_2 [list nodebug split-dwo] $obj2] \
+	 [list $srcfile  [list nodebug]]]} {
     return -1
 }
 
 clean_restart $::testfile
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

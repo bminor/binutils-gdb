@@ -59,7 +59,7 @@ proc do_test {cu_lang gdb_lang} {
 	return -1
     }
 
-    if ![runto func] {
+    if {![runto func]} {
 	return -1
     }
 

@@ -173,7 +173,7 @@ proc run_test { goto_main } {
     clean_restart ${::testfile}
 
     if { $goto_main } {
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return -1
 	}
     }

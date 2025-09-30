@@ -113,7 +113,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} \
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -129,7 +129,7 @@ gdb_continue_to_breakpoint "bar2" "\[^\r\n\]*:41\r\n.*"
 gdb_test "n" "foo \\(2\\);" "bar2, 1st next"
 gdb_test "n" "foo \\(4\\);" "bar2, 2nd next"
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

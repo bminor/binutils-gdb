@@ -16,14 +16,14 @@
 standard_testfile
 
 remote_file host delete [standard_output_file ${testfile}.dwp]
-if [remote_file host exists [standard_output_file ${testfile}.dwp]] {
+if {[remote_file host exists [standard_output_file ${testfile}.dwp]]} {
     unsupported "dwp file cannot be deleted"
     return 0
 }
 if { [build_executable ${testfile}.exp ${testfile} ${srcfile}] == -1 } {
     return -1
 }
-if ![remote_file host exists [standard_output_file ${testfile}.dwp]] {
+if {![remote_file host exists [standard_output_file ${testfile}.dwp]]} {
     unsupported "testsuite run does not produce dwp files"
     return 0
 }
@@ -34,11 +34,11 @@ remote_file host delete [standard_output_file ${thelink}]
 remote_file host delete [standard_output_file ${thelink}.dwp]
 # file link is only Tcl 8.4+.
 remote_exec host "ln -sf ${testfile} [standard_output_file $thelink]"
-if ![remote_file host exists [standard_output_file $thelink]] {
+if {![remote_file host exists [standard_output_file $thelink]]} {
     unsupported "host does not support symbolic links (binary symlink is missing)"
     return 0
 }
-if [remote_file host exists [standard_output_file $thelink.dwp]] {
+if {[remote_file host exists [standard_output_file $thelink.dwp]]} {
     unsupported "host does not support symbolic links (we tried to delete a file and it is still there)"
     return 0
 }
@@ -55,11 +55,11 @@ gdb_test "ptype main" $main_type_re "binary symlink, dwp default"
 
 gdb_exit
 remote_exec host "mv -f [standard_output_file ${testfile}.dwp] [standard_output_file ${thelink}.dwp]"
-if [remote_file host exists [standard_output_file ${testfile}.dwp]] {
+if {[remote_file host exists [standard_output_file ${testfile}.dwp]]} {
     unsupported "host does not support symbolic links (binary symlink exists)"
     return 0
 }
-if ![remote_file host exists [standard_output_file ${thelink}.dwp]] {
+if {![remote_file host exists [standard_output_file ${thelink}.dwp]]} {
     unsupported "host does not support symbolic links (dwp symlink is missing)"
     return 0
 }
@@ -125,7 +125,7 @@ remote_exec host "ln -sf ${dwp_dwp_dir}/${dwp_real_dwp} ${dwp_symlink_dir}/${dwp
 
 clean_restart "${dwp_symlink_dir}/${dwp_symlink_binary}"
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

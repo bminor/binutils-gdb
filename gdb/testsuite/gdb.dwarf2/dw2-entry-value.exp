@@ -21,7 +21,7 @@ if { [prepare_for_testing "failed to prepare" "dw2-entry-value" {dw2-entry-value
     return -1
 }
 
-if ![runto f] {
+if {![runto f]} {
     return -1
 }
 

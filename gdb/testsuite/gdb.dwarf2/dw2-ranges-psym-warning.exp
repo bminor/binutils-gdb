@@ -109,7 +109,7 @@ clean_restart
 
 gdb_load_no_complaints $binfile
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -120,7 +120,7 @@ if ![runto_main] {
 # warning: (Internal error: pc 0x555555554619 in read in psymtab,
 #    but not in symtab.)
 # ...
-# (gdb) 
+# (gdb)
 
 gdb_test "break baz" \
     "Breakpoint.*at.*"

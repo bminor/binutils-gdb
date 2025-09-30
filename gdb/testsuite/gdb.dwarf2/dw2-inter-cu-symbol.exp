@@ -77,7 +77,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} \
     return -1
 }
 
-if ![runto main] {
+if {![runto main]} {
     return -1
 }
 

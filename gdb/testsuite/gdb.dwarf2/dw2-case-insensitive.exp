@@ -19,7 +19,7 @@ require dwarf2_support
 
 standard_testfile .c -debug.S
 
-if [is_ilp32_target] {
+if {[is_ilp32_target]} {
     set ptrbits 32
 } else {
     set ptrbits 64

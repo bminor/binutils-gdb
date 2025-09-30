@@ -203,7 +203,7 @@ proc do_test {suffix} {
 	return -1
     }
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 
@@ -234,12 +234,12 @@ proc do_test {suffix} {
 
     with_test_prefix "step-test-2" {
 	clean_restart ${testfile}
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return -1
 	}
 
 	# Note that the RE used for the following test will fail when the
-	# breakpoint has been set on multiple locations. E.g. "(2 locations)". 
+	# breakpoint has been set on multiple locations. E.g. "(2 locations)".
 	# This is intentional since that behavior is one of the bugs that
 	# this test case tests for.
 	gdb_test "break foo" \
@@ -271,7 +271,7 @@ proc do_test {suffix} {
     }
 
     clean_restart ${testfile}
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 
@@ -363,7 +363,7 @@ proc do_test {suffix} {
 
     with_test_prefix "step-test-3" {
 	clean_restart ${testfile}
-	if ![runto_main] {
+	if {![runto_main]} {
 	    return -1
 	}
 
@@ -382,7 +382,7 @@ proc do_test {suffix} {
 	# Tests in the "enable_foo_cold_stepping" section, below, did
 	# not work prior to July, 2019.  They had been disabled via
 	# use of the "enable_foo_cold_stepping" flag.
-	# 
+	#
 	# As noted elsewhere, this test case causes foo_cold,
 	# originally a separate function invoked via a subroutine
 	# call, to be considered as part of foo via use of

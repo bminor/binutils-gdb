@@ -59,8 +59,8 @@ Dwarf::assemble {
     }
 }
 
-if [prepare_for_testing "failed to prepare" $testfile "${asm_file} ${srcfile}" \
-	[list ldflags=-nostartfiles]] {
+if {[prepare_for_testing "failed to prepare" $testfile "${asm_file} ${srcfile}" \
+	 [list ldflags=-nostartfiles]]} {
     return -1
 }
 

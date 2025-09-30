@@ -144,7 +144,7 @@ if {[run_on_host "touch binary" touch $host_binfile_with_index]} {
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 gdb_test "mt print objfiles ${testfile}" \

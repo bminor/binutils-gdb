@@ -83,7 +83,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} \
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -94,7 +94,7 @@ with_test_prefix "ignore-prologue-end" {
     clean_restart $::testfile
     gdb_test_no_output "maintenance set ignore-prologue-end-flag on"
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 

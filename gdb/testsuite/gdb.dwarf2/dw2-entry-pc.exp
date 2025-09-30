@@ -32,7 +32,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} \
     return -1
 }
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 
@@ -60,7 +60,7 @@ foreach var { r1_s r1_e r2_s r2_e r3_s r3_e } {
 # Line on which 'foo' is declared.  Used in generated debug.
 set foo_decl_line [gdb_get_line_number "foo decl line"]
 
-if [is_ilp32_target] {
+if {[is_ilp32_target]} {
     set ptr_type "data4"
 } else {
     set ptr_type "data8"
@@ -87,7 +87,7 @@ proc build_and_runto_main { suffix asm_file } {
 	return false
     }
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return false
     }
 
@@ -244,7 +244,7 @@ proc_with_prefix use_low_high_bounds_with_entry_offset { dwarf_version } {
 
 	declare_labels lines_table
 
-	set foo_offset [expr $::foo_middle_addr - $::foo_start_addr]
+	set foo_offset [expr {$::foo_middle_addr - $::foo_start_addr}]
 
 	cu { version $::dwarf_version } {
 	    compile_unit {
@@ -420,7 +420,7 @@ proc_with_prefix use_ranges_with_entry_offset { dwarf_version } {
 
 	declare_labels lines_table ranges_label
 
-	set foo_offset [expr $::foo_middle_addr - $::r1_s]
+	set foo_offset [expr {$::foo_middle_addr - $::r1_s}]
 
 	cu { version $::dwarf_version } {
 	    compile_unit {

@@ -30,7 +30,7 @@ if {[prepare_for_testing "failed to prepare" ${testfile} $srcfile $opts]} {
     return -1
 }
 
-if ![runto foo] {
+if {![runto foo]} {
     return -1
 }
 

@@ -55,8 +55,8 @@ Dwarf::assemble $asm_file {
     }
 }
 
-if [prepare_for_testing "failed to prepare" $testfile \
-	[list $asm_file $srcfile] {nodebug}] {
+if {[prepare_for_testing "failed to prepare" $testfile \
+	 [list $asm_file $srcfile] {nodebug}]} {
     return -1
 }
 

@@ -51,7 +51,7 @@ proc do_test { test_name lines_version DW_AT_name main_file_idx directories
 	    set ::directories $directories
 	    set ::file_names $file_names
 	    set ::is_64 $is_64
-	    set 32_or_64 [expr $is_64 ? 64 : 32]
+	    set 32_or_64 [expr {$is_64 ? 64 : 32}]
 
 	    set asm_file [standard_output_file ${::testfile}-${test_name}-${32_or_64}.S]
 	    Dwarf::assemble $asm_file {
@@ -149,7 +149,7 @@ proc do_test { test_name lines_version DW_AT_name main_file_idx directories
 		}
 	    }
 
-	    if ![runto_main] {
+	    if {![runto_main]} {
 		return
 	    }
 

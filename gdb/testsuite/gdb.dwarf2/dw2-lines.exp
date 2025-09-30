@@ -33,7 +33,7 @@ with_shared_gdb {
 proc line_for { l } {
     global srcfile
     set line [gdb_get_line_number "$l:" $srcfile]
-    return [expr $line + 1]
+    return [expr {$line + 1}]
 }
 
 # Execute test.
@@ -119,7 +119,7 @@ proc test_1 { _cv _cdw64 _lv _ldw64 {_string_form ""}} {
 	return -1
     }
 
-    if ![runto_main] {
+    if {![runto_main]} {
 	return -1
     }
 
@@ -135,9 +135,9 @@ proc test_1 { _cv _cdw64 _lv _ldw64 {_string_form ""}} {
 # Add unique test prefix.
 proc test { cv cdw64 lv ldw64 {string_form ""}} {
     with_test_prefix cv=$cv {
-	with_test_prefix cdw=[expr $cdw64 ? 64 : 32] {
+	with_test_prefix cdw=[expr {$cdw64 ? 64 : 32}] {
 	    with_test_prefix lv=$lv {
-		with_test_prefix ldw=[expr $ldw64 ? 64 : 32] {
+		with_test_prefix ldw=[expr {$ldw64 ? 64 : 32}] {
 		    if { $string_form == "" } {
 			test_1 $cv $cdw64 $lv $ldw64
 		    } else {

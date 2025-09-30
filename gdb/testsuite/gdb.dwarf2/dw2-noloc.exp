@@ -272,7 +272,7 @@ proc file_symbols {type} {
 
 file_symbols no-run
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

@@ -37,7 +37,7 @@ set asm_file [standard_output_file ${srcfile2}]
 
 # We need to know the size of integer and address types in order
 # to write some of the debugging info we'd like to generate.
-if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug c++}] {
+if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug c++}]} {
     return -1
 }
 

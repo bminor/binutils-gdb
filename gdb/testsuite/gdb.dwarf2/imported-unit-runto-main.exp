@@ -25,7 +25,7 @@ set asm_file [standard_output_file ${srcfile2}]
 
 # We need to know the size of integer types in order to write some of the
 # debugging info we'd like to generate.
-if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] {
+if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile}]} {
     return -1
 }
 

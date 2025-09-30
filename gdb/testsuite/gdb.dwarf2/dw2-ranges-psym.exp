@@ -119,7 +119,7 @@ if { [build_executable "failed to prepare" ${testfile} \
 clean_restart
 gdb_load_no_complaints $binfile
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

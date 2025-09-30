@@ -36,7 +36,7 @@ set asm_file [standard_output_file ${srcfile2}]
 # For that, we ask GDB by debugging our implref-const program.
 # Any program would do, but since we already have implref-const
 # specifically for this testcase, might as well use that.
-if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] {
+if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile}]} {
     return -1
 }
 
@@ -92,12 +92,12 @@ Dwarf::assemble ${asm_file} {
     }
 }
 
-if [prepare_for_testing "failed to prepare" ${executable} [list ${asm_file} ${srcfile}] {}] {
+if {[prepare_for_testing "failed to prepare" ${executable} [list ${asm_file} ${srcfile}] {}]} {
     return -1
 }
 
 # DW_OP_GNU_implicit_pointer implementation requires a valid frame.
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

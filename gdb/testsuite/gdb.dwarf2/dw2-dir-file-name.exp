@@ -449,7 +449,7 @@ remote_exec host "sh -c \"for d in $dircreatelist; do cp ${srcdir}/${subdir}/${s
 
 clean_restart ${testfile}
 
-if ![runto_main] {
+if {![runto_main]} {
     return -1
 }
 

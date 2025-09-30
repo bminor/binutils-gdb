@@ -48,7 +48,7 @@ if { [prepare_for_testing_full "failed to prepare" \
 }
 
 # First try referencing DW_AT_frame_base which is not defined.
-if [runto func_nofb] {
+if {[runto func_nofb]} {
     gdb_test "p func_nofb_var" {Could not find the frame base for "func_nofb".} "func_nofb print"
     gdb_test "bt full" " in main .* main_var = 1" "func_nofb backtrace"
 }
@@ -58,7 +58,7 @@ clean_restart $executable
 
 # And now try referencing DW_AT_frame_base defined using a self-reference
 # (DW_OP_fbreg).
-if [runto func_loopfb] {
+if {[runto func_loopfb]} {
     gdb_test "p func_loopfb_var" "DWARF-2 expression error: Loop detected .*" "func_loopfb print"
     gdb_test "bt full" " in main .* main_var = 1" "func_loopfb backtrace"
 }
