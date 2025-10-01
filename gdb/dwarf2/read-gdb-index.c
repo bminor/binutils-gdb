@@ -262,7 +262,6 @@ mapped_gdb_index::build_name_components (dwarf2_per_objfile *per_objfile)
       std::vector<cooked_index_entry *> these_entries;
       offset_view vec (constant_pool.slice (symbol_vec_index (idx)));
       offset_type vec_len = vec[0];
-      bool global_seen = false;
       for (offset_type vec_idx = 0; vec_idx < vec_len; ++vec_idx)
 	{
 	  offset_type cu_index_and_attrs = vec[vec_idx + 1];
@@ -302,11 +301,6 @@ mapped_gdb_index::build_name_components (dwarf2_per_objfile *per_objfile)
 		tag = (dwarf_tag) DW_TAG_GDB_INDEX_TYPE;
 	      else
 		{
-		  /* Work around gold/15646.  */
-		  if (global_seen)
-		    continue;
-		  global_seen = true;
-
 		  tag = DW_TAG_structure_type;
 		  this_lang = language_cplus;
 		}

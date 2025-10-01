@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2020-2025 Free Software Foundation, Inc.
+   Copyright 2025 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,15 +15,34 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "gold-gdb-index.h"
-
-namespace N1
-{
-  void foo () { C1::baz (); }
-}
+#include "gdb-index-many-types.h"
 
 int
 main ()
 {
+  foo_func_a (0);
+  foo_func_b (0);
+  bar_func_a (0);
+  bar_func_b (0);
+  baz_func_a (0);
+  baz_func_b (0);
   return 0;
+}
+
+void
+foo_func_c (foo_t *obj)
+{
+  (void) obj;
+}
+
+void
+bar_func_c (bar_t *obj)
+{
+  (void) obj;
+}
+
+void
+baz_func_c (baz_t *obj)
+{
+  (void) obj;
 }

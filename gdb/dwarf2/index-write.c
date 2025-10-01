@@ -55,7 +55,7 @@
 #define DW2_GDB_INDEX_SYMBOL_KIND_SET_VALUE(cu_index, value) \
   do { \
     gdb_assert ((value) >= GDB_INDEX_SYMBOL_KIND_TYPE \
-		&& (value) <= GDB_INDEX_SYMBOL_KIND_UNUSED5); \
+		&& (value) < GDB_INDEX_SYMBOL_KIND_UNUSED5); \
     GDB_INDEX_SYMBOL_KIND_SET_VALUE((cu_index), (value)); \
   } while (0)
 
@@ -184,9 +184,8 @@ struct symtab_index_entry
      of this name.  */
   std::vector<offset_type> cu_indices;
 
-  /* Minimize CU_INDICES, sorting them and removing duplicates as
-     appropriate.  */
-  void minimize ();
+  /* Sort CU_INDICES.  */
+  void sort ();
 };
 
 /* The symbol table.  This is a power-of-2-sized hash table.  */
@@ -198,16 +197,16 @@ struct mapped_symtab
   }
 
   /* If there are no elements in the symbol table, then reduce the table
-     size to zero.  Otherwise call symtab_index_entry::minimize each entry
+     size to zero.  Otherwise call symtab_index_entry::sort each entry
      in the symbol table.  */
 
-  void minimize ()
+  void minimize_and_sort ()
   {
     if (m_element_count == 0)
       m_data.resize (0);
 
     for (symtab_index_entry &item : m_data)
-      item.minimize ();
+      item.sort ();
   }
 
   /* Add an entry to SYMTAB.  NAME is the name of the symbol.  CU_INDEX is
@@ -417,68 +416,18 @@ mapped_symtab::add_index_entry (const char *name, int is_static,
 /* See symtab_index_entry.  */
 
 void
-symtab_index_entry::minimize ()
+symtab_index_entry::sort ()
 {
   if (name == nullptr || cu_indices.empty ())
     return;
 
-  /* We sort the indexes in a funny way: GDB_INDEX_SYMBOL_KIND_UNUSED5
-     is always sorted last; then otherwise we sort by numeric value.
-     This ensures that we prefer the definition when both a definition
-     and a declaration (stub type) are seen.  */
+  /* Sort the entries based on the CU offset.  */
   std::sort (cu_indices.begin (), cu_indices.end (),
 	     [] (offset_type vala, offset_type valb)
 	       {
-		 auto kinda = GDB_INDEX_SYMBOL_KIND_VALUE (vala);
-		 auto kindb = GDB_INDEX_SYMBOL_KIND_VALUE (valb);
-		 if (kinda != kindb)
-		   {
-		     /* Declaration sorts last.  */
-		     if (kinda == GDB_INDEX_SYMBOL_KIND_UNUSED5)
-		       return false;
-		     if (kindb == GDB_INDEX_SYMBOL_KIND_UNUSED5)
-		       return true;
-		   }
 		 return vala < valb;
 	       });
   auto from = std::unique (cu_indices.begin (), cu_indices.end ());
-  cu_indices.erase (from, cu_indices.end ());
-
-  /* Rewrite GDB_INDEX_SYMBOL_KIND_UNUSED5.  This ensures that a type
-     declaration will be deleted by the subsequent squashing step, if
-     warranted.  */
-  for (auto &val : cu_indices)
-    {
-      gdb_index_symbol_kind kind = GDB_INDEX_SYMBOL_KIND_VALUE (val);
-      if (kind != GDB_INDEX_SYMBOL_KIND_UNUSED5)
-	continue;
-
-      offset_type newval = 0;
-      DW2_GDB_INDEX_CU_SET_VALUE (newval, GDB_INDEX_CU_VALUE (val));
-      DW2_GDB_INDEX_SYMBOL_STATIC_SET_VALUE
-	(newval, GDB_INDEX_SYMBOL_STATIC_VALUE (val));
-      DW2_GDB_INDEX_SYMBOL_KIND_SET_VALUE (newval,
-					   GDB_INDEX_SYMBOL_KIND_TYPE);
-
-      val = newval;
-    }
-
-  /* We don't want to enter a type more than once, so
-     remove any such duplicates from the list as well.  When doing
-     this, we want to keep the entry from the first CU -- but this is
-     implicit due to the sort.  This choice is done because it's
-     similar to what gdb historically did for partial symbols.  */
-  gdb::unordered_set<offset_type> seen;
-  from = std::remove_if (cu_indices.begin (), cu_indices.end (),
-			 [&] (offset_type val)
-    {
-      gdb_index_symbol_kind kind = GDB_INDEX_SYMBOL_KIND_VALUE (val);
-      if (kind != GDB_INDEX_SYMBOL_KIND_TYPE)
-	return false;
-
-      val &= ~GDB_INDEX_CU_MASK;
-      return !seen.insert (val).second;
-    });
   cu_indices.erase (from, cu_indices.end ());
 }
 
@@ -1307,16 +1256,7 @@ write_cooked_index (cooked_index *table,
 	       || entry->tag == DW_TAG_enumerator)
 	kind = GDB_INDEX_SYMBOL_KIND_VARIABLE;
       else if (tag_is_type (entry->tag))
-	{
-	  /* If we added a type declaration, we want to note this
-	     fact for later, because we don't want a type declaration
-	     to cause the real definition to be omitted from the
-	     index.  GDB_INDEX_SYMBOL_KIND_UNUSED5 is used here, but
-	     rewritten later before the index is written.  */
-	  kind = ((entry->flags & IS_TYPE_DECLARATION) == 0
-		  ? GDB_INDEX_SYMBOL_KIND_TYPE
-		  : GDB_INDEX_SYMBOL_KIND_UNUSED5);
-	}
+	kind = GDB_INDEX_SYMBOL_KIND_TYPE;
       else
 	kind = GDB_INDEX_SYMBOL_KIND_OTHER;
 
@@ -1458,7 +1398,7 @@ write_gdbindex (dwarf2_per_bfd *per_bfd, cooked_index *table,
 
   /* Now that we've processed all symbols we can shrink their cu_indices
      lists.  */
-  symtab.minimize ();
+  symtab.minimize_and_sort ();
 
   data_buf symtab_vec, constant_pool;
 

@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2020-2025 Free Software Foundation, Inc.
+   Copyright 2025 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,9 +15,42 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "gold-gdb-index.h"
+#include "gdb-index-many-types.h"
 
-namespace N1
+typedef struct woof_t
 {
-  void bar () { C1::baz (); }
+  double woof_t_3;
+  double woof_t_4;
+} woof_t;
+
+static void
+woof_func (woof_t *obj)
+{
+  (void) obj;
+}
+
+typedef struct bar_t
+{
+  int bar_t_1;
+  int bar_t_2;
+} bar_t;
+
+void
+bar_func_b (bar_t *obj)
+{
+  woof_func (0);
+  (void) obj;
+}
+
+void
+baz_func_b (baz_t *obj)
+{
+  (void) obj;
+}
+
+void
+foo_func_b (foo_t *obj)
+{
+  woof_func (0);
+  (void) obj;
 }
