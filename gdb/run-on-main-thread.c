@@ -151,7 +151,7 @@ INIT_GDB_FILE (run_on_main_thread)
   add_final_cleanup ([] ()
     {
 #if CXX_STD_THREAD
-      std::lock_guard lock (runnable_mutex);
+      std::lock_guard<std::mutex> lock (runnable_mutex);
 #endif
       runnables.clear ();
     });
