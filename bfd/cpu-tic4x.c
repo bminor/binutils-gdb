@@ -28,15 +28,12 @@ static bool
 tic4x_scan (const struct bfd_arch_info *info,
 	    const char *string)
 {
-  /* Allow strings of form [ti][Cc][34][0-9], let's not be too picky
+  /* Allow strings of form [ti][Cc][34], let's not be too picky
      about strange numbered machines in C3x or C4x series.  */
   if (string[0] == 't' && string[1] == 'i')
     string += 2;
   if (*string == 'C' || *string == 'c')
     string++;
-  if (string[1] < '0' && string[1] > '9')
-    return false;
-
   if (*string == '3')
     return (info->mach == bfd_mach_tic3x);
   else if (*string == '4')
