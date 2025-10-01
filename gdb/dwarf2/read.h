@@ -20,9 +20,6 @@
 #ifndef GDB_DWARF2_READ_H
 #define GDB_DWARF2_READ_H
 
-#if CXX_STD_THREAD
-#include <mutex>
-#endif
 #include <queue>
 #include "dwarf2/abbrev.h"
 #include "dwarf2/unit-head.h"
@@ -32,6 +29,7 @@
 #include "dwarf2/section.h"
 #include "dwarf2/cu.h"
 #include "dwarf2/dwz.h"
+#include "gdbsupport/cxx-thread.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "gdbsupport/function-view.h"
 #include "gdbsupport/packed.h"
@@ -618,10 +616,8 @@ public:
   /* Set of dwo_file objects.  */
   dwo_file_up_set dwo_files;
 
-#if CXX_STD_THREAD
   /* Mutex to synchronize access to DWO_FILES.  */
-  std::mutex dwo_files_lock;
-#endif
+  gdb::mutex dwo_files_lock;
 
   /* The DWP file if there is one, or NULL.  */
   dwp_file_up dwp_file;

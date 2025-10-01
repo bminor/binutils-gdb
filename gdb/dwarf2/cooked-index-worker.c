@@ -132,9 +132,8 @@ bool
 cooked_index_worker::wait (cooked_state desired_state, bool allow_quit)
 {
   bool done;
-#if CXX_STD_THREAD
   {
-    std::unique_lock<std::mutex> lock (m_mutex);
+    gdb::unique_lock<gdb::mutex> lock (m_mutex);
 
     /* This may be called from a non-main thread -- this functionality
        is needed for the index cache -- but in this case we require
@@ -146,7 +145,7 @@ cooked_index_worker::wait (cooked_state desired_state, bool allow_quit)
 	if (allow_quit)
 	  {
 	    std::chrono::milliseconds duration { 15 };
-	    if (m_cond.wait_for (lock, duration) == std::cv_status::timeout)
+	    if (m_cond.wait_for (lock, duration) == gdb::cv_status::timeout)
 	      QUIT;
 	  }
 	else
@@ -154,11 +153,6 @@ cooked_index_worker::wait (cooked_state desired_state, bool allow_quit)
       }
     done = m_state == cooked_state::CACHE_DONE;
   }
-#else
-  /* Without threads, all the work is done immediately on the main
-     thread, and there is never anything to wait for.  */
-  done = desired_state == cooked_state::CACHE_DONE;
-#endif /* CXX_STD_THREAD */
 
   /* Only the main thread is allowed to report complaints and the
      like.  */
@@ -213,15 +207,10 @@ cooked_index_worker::set (cooked_state desired_state)
 {
   gdb_assert (desired_state != cooked_state::INITIAL);
 
-#if CXX_STD_THREAD
-  std::lock_guard<std::mutex> guard (m_mutex);
+  gdb::lock_guard<gdb::mutex> guard (m_mutex);
   gdb_assert (desired_state > m_state);
   m_state = desired_state;
   m_cond.notify_one ();
-#else
-  /* Without threads, all the work is done immediately on the main
-     thread, and there is never anything to do.  */
-#endif /* CXX_STD_THREAD */
 }
 
 /* See cooked-index-worker.h.  */

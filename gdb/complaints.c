@@ -22,11 +22,9 @@
 #include "cli/cli-cmds.h"
 #include "run-on-main-thread.h"
 #include "top.h"
+#include "gdbsupport/cxx-thread.h"
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/unordered_map.h"
-#if CXX_STD_THREAD
-#include <mutex>
-#endif
 
 /* Map format strings to counters.  */
 
@@ -38,9 +36,7 @@ static gdb::unordered_map<const char *, int> counters;
 
 int stop_whining = 0;
 
-#if CXX_STD_THREAD
-static std::mutex complaint_mutex;
-#endif /* CXX_STD_THREAD */
+static gdb::mutex complaint_mutex;
 
 /* See complaints.h.  */
 
@@ -50,9 +46,7 @@ complaint_internal (const char *fmt, ...)
   va_list args;
 
   {
-#if CXX_STD_THREAD
-    std::lock_guard<std::mutex> guard (complaint_mutex);
-#endif
+    gdb::lock_guard<gdb::mutex> guard (complaint_mutex);
     if (++counters[fmt] > stop_whining)
       return;
   }
@@ -126,9 +120,7 @@ re_emit_complaints (const complaint_collection &complaints)
 void
 complaint_interceptor::warn (const char *fmt, va_list args)
 {
-#if CXX_STD_THREAD
-  std::lock_guard<std::mutex> guard (complaint_mutex);
-#endif
+  gdb::lock_guard<gdb::mutex> guard (complaint_mutex);
   g_complaint_interceptor->m_complaints.insert (string_vprintf (fmt, args));
 }
 

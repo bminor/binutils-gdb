@@ -51,12 +51,9 @@
 #include "cli/cli-utils.h"
 #include "gdbsupport/symbol.h"
 #include <algorithm>
+#include "gdbsupport/cxx-thread.h"
 #include "gdbsupport/parallel-for.h"
 #include "inferior.h"
-
-#if CXX_STD_THREAD
-#include <mutex>
-#endif
 
 /* Return true if MINSYM is a cold clone symbol.
    Recognize f.i. these symbols (mangled/demangled):
@@ -1398,18 +1395,13 @@ public:
   minimal_symbol_install_worker
     (minimal_symbol *msymbols,
      gdb::array_view<computed_hash_values> hash_values,
-     objfile_per_bfd_storage *per_bfd
-#if CXX_STD_THREAD
-     , std::mutex &demangled_mutex
-#endif
-    )
+     objfile_per_bfd_storage *per_bfd,
+     gdb::mutex &demangled_mutex)
     : m_time_it ("minsym install worker"),
       m_msymbols (msymbols),
       m_hash_values (hash_values),
-      m_per_bfd (per_bfd)
-#if CXX_STD_THREAD
-      , m_demangled_mutex (demangled_mutex)
-#endif
+      m_per_bfd (per_bfd),
+      m_demangled_mutex (demangled_mutex)
   {}
 
   void operator() (iterator_range<minimal_symbol *> msym_range) noexcept
@@ -1447,9 +1439,7 @@ public:
     {
       /* To limit how long we hold the lock, we only acquire it here
 	 and not while we demangle the names above.  */
-#if CXX_STD_THREAD
-      std::lock_guard<std::mutex> guard (m_demangled_mutex);
-#endif
+      gdb::lock_guard<gdb::mutex> guard (m_demangled_mutex);
       for (minimal_symbol &msym : msym_range)
 	{
 	  size_t idx = &msym - m_msymbols;
@@ -1467,9 +1457,7 @@ private:
   minimal_symbol *m_msymbols;
   gdb::array_view<computed_hash_values> m_hash_values;
   objfile_per_bfd_storage *m_per_bfd;
-#if CXX_STD_THREAD
-  std::mutex &m_demangled_mutex;
-#endif
+  gdb::mutex &m_demangled_mutex;
 };
 
 /* Add the minimal symbols in the existing bunches to the objfile's official
@@ -1549,11 +1537,9 @@ minimal_symbol_reader::install ()
       m_objfile->per_bfd->minimal_symbol_count = mcount;
       m_objfile->per_bfd->msymbols = std::move (msym_holder);
 
-#if CXX_STD_THREAD
       /* Mutex that is used when modifying or accessing the demangled
 	 hash table.  */
-      std::mutex demangled_mutex;
-#endif
+      gdb::mutex demangled_mutex;
 
       std::vector<computed_hash_values> hash_values (mcount);
 
@@ -1562,11 +1548,8 @@ minimal_symbol_reader::install ()
       gdb::parallel_for_each<1000, minimal_symbol *, minimal_symbol_install_worker>
 	(&msymbols[0], &msymbols[mcount], msymbols,
 	 gdb::array_view<computed_hash_values> (hash_values),
-	 m_objfile->per_bfd
-#if CXX_STD_THREAD
-	 , demangled_mutex
-#endif
-	);
+	 m_objfile->per_bfd,
+	 demangled_mutex);
 
       build_minimal_symbol_hash_tables (m_objfile, hash_values);
     }

@@ -604,10 +604,8 @@ struct dwp_file
   dwo_unit_set loaded_cus;
   dwo_unit_set loaded_tus;
 
-#if CXX_STD_THREAD
   /* Mutex to synchronize access to LOADED_CUS and LOADED_TUS.  */
-  std::mutex loaded_cutus_lock;
-#endif
+  gdb::mutex loaded_cutus_lock;
 
   /* Table to map ELF section numbers to their sections.
      This is only needed for the DWP V1 file format.  */
@@ -3326,9 +3324,7 @@ private:
       m_thread_storage.done_reading (m_complaint_handler.release ());
 
       /* Append the results of this worker to the parent instance.  */
-#if CXX_STD_THREAD
-      std::lock_guard<std::mutex> lock (m_parent->m_results_mutex);
-#endif
+      gdb::lock_guard<gdb::mutex> lock (m_parent->m_results_mutex);
       m_parent->m_results.emplace_back (std::move (m_thread_storage));
     }
 
@@ -6317,12 +6313,8 @@ static dwo_file *
 lookup_dwo_file (dwarf2_per_bfd *per_bfd, const char *dwo_name,
 		 const char *comp_dir)
 {
-#if CXX_STD_THREAD
-  std::lock_guard<std::mutex> guard (per_bfd->dwo_files_lock);
-#endif
-
+  gdb::lock_guard<gdb::mutex> guard (per_bfd->dwo_files_lock);
   auto it = per_bfd->dwo_files.find (dwo_file_search {dwo_name, comp_dir});
-
   return it != per_bfd->dwo_files.end () ? it->get() : nullptr;
 }
 
@@ -6337,10 +6329,7 @@ lookup_dwo_file (dwarf2_per_bfd *per_bfd, const char *dwo_name,
 static dwo_file *
 add_dwo_file (dwarf2_per_bfd *per_bfd, dwo_file_up dwo_file)
 {
-#if CXX_STD_THREAD
-  std::lock_guard<std::mutex> lock (per_bfd->dwo_files_lock);
-#endif
-
+  gdb::lock_guard<gdb::mutex> lock (per_bfd->dwo_files_lock);
   return per_bfd->dwo_files.emplace (std::move (dwo_file)).first->get ();
 }
 
@@ -7472,10 +7461,7 @@ lookup_dwo_unit_in_dwp (dwarf2_per_bfd *per_bfd,
     = is_debug_types ? dwp_file->loaded_tus : dwp_file->loaded_cus;
 
   {
-#if CXX_STD_THREAD
-    std::lock_guard<std::mutex> guard (dwp_file->loaded_cutus_lock);
-#endif
-
+    gdb::lock_guard<gdb::mutex> guard (dwp_file->loaded_cutus_lock);
     if (auto it = dwo_unit_set.find (signature);
 	it != dwo_unit_set.end ())
       return it->get ();
@@ -7510,10 +7496,7 @@ lookup_dwo_unit_in_dwp (dwarf2_per_bfd *per_bfd,
 
 	  /* If another thread raced with this one, opening the exact same
 	     DWO unit, then we'll keep that other thread's copy.  */
-#if CXX_STD_THREAD
-	  std::lock_guard<std::mutex> guard (dwp_file->loaded_cutus_lock);
-#endif
-
+	  gdb::lock_guard<gdb::mutex> guard (dwp_file->loaded_cutus_lock);
 	  auto it = dwo_unit_set.emplace (std::move (dwo_unit)).first;
 	  return it->get ();
 	}
@@ -7593,12 +7576,10 @@ try_open_dwop_file (dwarf2_per_bfd *per_bfd, const char *file_name, int is_dwp,
     return NULL;
 
   {
-#if CXX_STD_THREAD
     /* The operations below are not thread-safe, use a lock to synchronize
        concurrent accesses.  */
-    static std::mutex mutex;
-    std::lock_guard<std::mutex> lock (mutex);
-#endif
+    static gdb::mutex mutex;
+    gdb::lock_guard<gdb::mutex> lock (mutex);
 
     if (!bfd_check_format (sym_bfd.get (), bfd_object))
       return NULL;
