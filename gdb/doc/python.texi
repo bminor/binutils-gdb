@@ -5,7 +5,7 @@
 @c Invariant Sections being ``Free Software'' and ``Free Software Needs
 @c Free Documentation'', with the Front-Cover Texts being ``A GNU Manual,''
 @c and with the Back-Cover Texts as in (a) below.
-@c 
+@c
 @c (a) The FSF's Back-Cover Text is: ``You are free to copy and modify
 @c this GNU Manual.  Buying copies from GNU Press supports the FSF in
 @c developing GNU and promoting software freedom.''
@@ -485,7 +485,7 @@ contents are displayed immediately.  @value{GDBN} will flush the
 contents of a stream automatically when it encounters a newline in the
 buffer.  The optional @var{stream} determines the stream to flush.  The
 default stream is @value{GDBN}'s standard output stream.  Possible
-stream values are: 
+stream values are:
 
 @table @code
 @findex STDOUT
@@ -568,7 +568,7 @@ If @var{prompt_hook} is callable, @value{GDBN} will call the method
 assigned to this operation before a prompt is displayed by
 @value{GDBN}.
 
-The parameter @code{current_prompt} contains the current @value{GDBN} 
+The parameter @code{current_prompt} contains the current @value{GDBN}
 prompt.  This method must return a Python string, or @code{None}.  If
 a string is returned, the @value{GDBN} prompt will be set to that
 string.  If @code{None} is returned, @value{GDBN} will continue to use
@@ -955,17 +955,17 @@ it will just return the static type of the value as in @kbd{ptype foo}
 
 @defvar Value.is_lazy
 The value of this read-only boolean attribute is @code{True} if this
-@code{gdb.Value} has not yet been fetched from the inferior.  
-@value{GDBN} does not fetch values until necessary, for efficiency.  
+@code{gdb.Value} has not yet been fetched from the inferior.
+@value{GDBN} does not fetch values until necessary, for efficiency.
 For example:
 
 @smallexample
 myval = gdb.parse_and_eval ('somevar')
 @end smallexample
 
-The value of @code{somevar} is not fetched at this time.  It will be 
+The value of @code{somevar} is not fetched at this time.  It will be
 fetched when the value is needed, or when the @code{fetch_lazy}
-method is invoked.  
+method is invoked.
 @end defvar
 
 @defvar Value.bytes
@@ -1343,7 +1343,7 @@ and encoded until a null of appropriate width is found.
 @end defun
 
 @defun Value.fetch_lazy ()
-If the @code{gdb.Value} object is currently a lazy value 
+If the @code{gdb.Value} object is currently a lazy value
 (@code{gdb.Value.is_lazy} is @code{True}), then the value is
 fetched from the inferior.  Any errors that occur in the process
 will produce a Python exception.
@@ -3387,27 +3387,27 @@ defined as follows:
 class MyClass_geta(gdb.xmethod.XMethod):
     def __init__(self):
         gdb.xmethod.XMethod.__init__(self, 'geta')
- 
+
     def get_worker(self, method_name):
         if method_name == 'geta':
             return MyClassWorker_geta()
- 
- 
+
+
 class MyClass_sum(gdb.xmethod.XMethod):
     def __init__(self):
         gdb.xmethod.XMethod.__init__(self, 'sum')
- 
+
     def get_worker(self, method_name):
         if method_name == 'operator+':
             return MyClassWorker_plus()
- 
- 
+
+
 class MyClassMatcher(gdb.xmethod.XMethodMatcher):
     def __init__(self):
         gdb.xmethod.XMethodMatcher.__init__(self, 'MyClassMatcher')
         # List of methods 'managed' by this matcher
         self.methods = [MyClass_geta(), MyClass_sum()]
- 
+
     def match(self, class_type, method_name):
         if class_type.tag != 'MyClass':
             return None
@@ -3417,7 +3417,7 @@ class MyClassMatcher(gdb.xmethod.XMethodMatcher):
                 worker = method.get_worker(method_name)
                 if worker:
                     workers.append(worker)
- 
+
         return workers
 @end smallexample
 
@@ -3445,18 +3445,18 @@ class MyClassWorker_geta(gdb.xmethod.XMethodWorker):
 
     def get_result_type(self, obj):
         return gdb.lookup_type('int')
- 
+
     def __call__(self, obj):
         return obj['a_']
- 
- 
+
+
 class MyClassWorker_plus(gdb.xmethod.XMethodWorker):
     def get_arg_types(self):
         return gdb.lookup_type('MyClass')
 
     def get_result_type(self, obj):
         return gdb.lookup_type('int')
- 
+
     def __call__(self, obj, other):
         return obj['a_'] + other['a_']
 @end smallexample
@@ -3499,12 +3499,12 @@ class MyTemplate
 public:
   MyTemplate () : dsize_(10), data_ (new T [10]) @{ @}
   ~MyTemplate () @{ delete [] data_; @}
- 
+
   int footprint (void)
   @{
     return sizeof (T) * dsize_ + sizeof (MyTemplate<T>);
   @}
- 
+
 private:
   int dsize_;
   T *data_;
@@ -3530,12 +3530,12 @@ class MyTemplateWorker_footprint(gdb.xmethod.XMethodWorker):
         return (self.class_type.sizeof +
                 obj['dsize_'] *
                 self.class_type.template_argument(0).sizeof)
- 
- 
+
+
 class MyTemplateMatcher_footprint(gdb.xmethod.XMethodMatcher):
     def __init__(self):
         gdb.xmethod.XMethodMatcher.__init__(self, 'MyTemplateMatcher')
- 
+
     def match(self, class_type, method_name):
         if (re.match('MyTemplate<[ \t\n]*[_a-zA-Z][ _a-zA-Z0-9]*>',
                      class_type.tag) and
@@ -3827,7 +3827,7 @@ Emits @code{events.ExitedEvent}, which indicates that the inferior has
 exited.  @code{events.ExitedEvent} has two attributes:
 
 @defvar ExitedEvent.exit_code
-An integer representing the exit code, if available, which the inferior 
+An integer representing the exit code, if available, which the inferior
 has returned.  (The exit code could be unavailable if, for example,
 @value{GDBN} detaches from the inferior.) If the exit code is unavailable,
 the attribute does not exist.
@@ -3882,7 +3882,7 @@ Also emits @code{gdb.BreakpointEvent}, which extends
 been hit, and has the following attributes:
 
 @defvar BreakpointEvent.breakpoints
-A sequence containing references to all the breakpoints (type 
+A sequence containing references to all the breakpoints (type
 @code{gdb.Breakpoint}) that were hit.
 @xref{Breakpoints In Python}, for details of the @code{gdb.Breakpoint} object.
 @end defvar
@@ -5947,7 +5947,7 @@ compatibility.
 This frame is the outermost.
 
 @item gdb.FRAME_UNWIND_UNAVAILABLE
-Cannot unwind further, because that would require knowing the 
+Cannot unwind further, because that would require knowing the
 values of registers or memory that have not been collected.
 
 @item gdb.FRAME_UNWIND_INNER_ID
@@ -7083,22 +7083,22 @@ is not writable.
 
 A finish breakpoint is a temporary breakpoint set at the return address of
 a frame, based on the @code{finish} command.  @code{gdb.FinishBreakpoint}
-extends @code{gdb.Breakpoint}.  The underlying breakpoint will be disabled 
-and deleted when the execution will run out of the breakpoint scope (i.e.@: 
+extends @code{gdb.Breakpoint}.  The underlying breakpoint will be disabled
+and deleted when the execution will run out of the breakpoint scope (i.e.@:
 @code{Breakpoint.stop} or @code{FinishBreakpoint.out_of_scope} triggered).
-Finish breakpoints are thread specific and must be create with the right 
-thread selected.  
- 
+Finish breakpoints are thread specific and must be create with the right
+thread selected.
+
 @defun FinishBreakpoint.__init__ (@r{[}frame@r{]} @r{[}, internal@r{]})
 Create a finish breakpoint at the return address of the @code{gdb.Frame}
 object @var{frame}.  If @var{frame} is not provided, this defaults to the
 newest frame.  The optional @var{internal} argument allows the breakpoint to
-become invisible to the user.  @xref{Breakpoints In Python}, for further 
+become invisible to the user.  @xref{Breakpoints In Python}, for further
 details about this argument.
 @end defun
 
 @defun FinishBreakpoint.out_of_scope (self)
-In some circumstances (e.g.@: @code{longjmp}, C@t{++} exceptions, @value{GDBN} 
+In some circumstances (e.g.@: @code{longjmp}, C@t{++} exceptions, @value{GDBN}
 @code{return} command, @dots{}), a function may not properly terminate, and
 thus never hit the finish breakpoint.  When @value{GDBN} notices such a
 situation, the @code{out_of_scope} callback will be triggered.
@@ -7111,17 +7111,17 @@ class MyFinishBreakpoint (gdb.FinishBreakpoint)
     def stop (self):
         print ("normal finish")
         return True
-    
+
     def out_of_scope ():
         print ("abnormal finish")
-@end smallexample 
+@end smallexample
 @end defun
 
 @defvar FinishBreakpoint.return_value
-When @value{GDBN} is stopped at a finish breakpoint and the frame 
+When @value{GDBN} is stopped at a finish breakpoint and the frame
 used to build the @code{gdb.FinishBreakpoint} object had debug symbols, this
 attribute will contain a @code{gdb.Value} object corresponding to the return
-value of the function.  The value will be @code{None} if the function return 
+value of the function.  The value will be @code{None} if the function return
 type is @code{void} or if the return value was not computable.  This attribute
 is not writable.
 @end defvar
