@@ -178,7 +178,7 @@ dnl
 AC_DEFUN([GCC_PLUGIN_OPTION_FOR_TARGET],[dnl
 COMPILER_FOR_TARGET="${CC_FOR_TARGET}"
 dnl Check if the host compiler is used.
-if test x${COMPILER_FOR_TARGET} = x"\$(CC)"; then
+if test x"${COMPILER_FOR_TARGET}" = x"\$(CC)"; then
   COMPILER_FOR_TARGET="$CC"
 fi
 saved_CC="$CC"
