@@ -5540,20 +5540,22 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	      if (normal_align < common_align)
 		{
 		  /* PR binutils/2735 */
+		  uint64_t c_align = UINT64_C (1) << common_align;
+		  uint64_t n_align = UINT64_C (1) << normal_align;
 		  if (normal_bfd == NULL)
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("warning: alignment %u of common symbol `%s' in %pB is"
-			 " greater than the alignment (%u) of its section %pA"),
-		       1 << common_align, name, common_bfd,
-		       1 << normal_align, h->root.u.def.section);
+		      (_("warning: alignment %" PRIu64 " of common symbol `%s' in %pB is"
+			 " greater than the alignment (%" PRIu64 ") of its section %pA"),
+		       c_align, name, common_bfd,
+		       n_align, h->root.u.def.section);
 		  else
 		    _bfd_error_handler
 		      /* xgettext:c-format */
-		      (_("warning: alignment %u of normal symbol `%s' in %pB"
-			 " is smaller than %u used by the common definition in %pB"),
-		       1 << normal_align, name, normal_bfd,
-		       1 << common_align, common_bfd);
+		      (_("warning: alignment %" PRIu64 " of normal symbol `%s' in %pB"
+			 " is smaller than %" PRIu64 " used by the common definition in %pB"),
+		       n_align, name, normal_bfd,
+		       c_align, common_bfd);
 
 		  /* PR 30499: make sure that users understand that this warning is serious.  */
 		  _bfd_error_handler
