@@ -8080,9 +8080,9 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "a list of SVE predicate registers")				\
     Y(PRED_REG, regno, "SME_Pm", 0, F(FLD_SME_Pm),			\
       "an SVE predicate register")					\
-    Y(PRED_REG, regno, "SME_PNd3", 8 << OPD_F_OD_LSB, F(FLD_SME_PNd3),	\
+    Y(PRED_REG, regno, "SME_PNd3", 0, F(FLD_CONST_1, FLD_SME_PNd3),	\
       "an SVE predicate-as-counter register")				\
-    Y(PRED_REG, regno, "SME_PNg3", 8 << OPD_F_OD_LSB, F(FLD_SVE_Pg3),	\
+    Y(PRED_REG, regno, "SME_PNg3", 0, F(FLD_CONST_1, FLD_SVE_Pg3),	\
       "an SVE predicate-as-counter register")				\
     Y(PRED_REG, regno, "SME_PNn", 0, F(FLD_SVE_Pn),			\
       "an SVE predicate-as-counter register")				\

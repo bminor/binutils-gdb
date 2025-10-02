@@ -104,8 +104,8 @@ aarch64_ins_regno (const aarch64_operand *self, const aarch64_opnd_info *info,
 		   const aarch64_inst *inst ATTRIBUTE_UNUSED,
 		   aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
-  int val = info->reg.regno - get_operand_specific_data (self);
-  insert_field (self->fields[0], code, val, 0);
+  int val = info->reg.regno;
+  insert_all_fields (self, code, val);
   return true;
 }
 
