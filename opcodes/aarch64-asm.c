@@ -313,7 +313,7 @@ aarch64_ins_ldst_elemlist (const aarch64_operand *self ATTRIBUTE_UNUSED,
 			   const aarch64_inst *inst ATTRIBUTE_UNUSED,
 			   aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
-  aarch64_field field = {0, 0};
+  aarch64_field field = AARCH64_FIELD_NIL;
   aarch64_insn QSsize = 0;	/* fields Q:S:size.  */
   aarch64_insn opcodeh2 = 0;	/* opcode<2:1> */
 
@@ -459,7 +459,7 @@ aarch64_ins_advsimd_imm_modified (const aarch64_operand *self ATTRIBUTE_UNUSED,
   uint64_t imm = info->imm.value;
   enum aarch64_modifier_kind kind = info->shifter.kind;
   int amount = info->shifter.amount;
-  aarch64_field field = {0, 0};
+  aarch64_field field = AARCH64_FIELD_NIL;
 
   /* a:b:c:d:e:f:g:h */
   if (!info->imm.is_fp && aarch64_get_qualifier_esize (opnd0_qualifier) == 8)
@@ -1833,7 +1833,7 @@ static void
 encode_asimd_fcvt (aarch64_inst *inst)
 {
   aarch64_insn value;
-  aarch64_field field = {0, 0};
+  aarch64_field field = AARCH64_FIELD_NIL;
   enum aarch64_opnd_qualifier qualifier = AARCH64_OPND_QLF_NIL;
 
   switch (inst->opcode->op)
@@ -1865,7 +1865,7 @@ static void
 encode_asisd_fcvtxn (aarch64_inst *inst)
 {
   aarch64_insn val = 1;
-  aarch64_field field = {0, 0};
+  aarch64_field field = AARCH64_FIELD_NIL;
   assert (inst->operands[0].qualifier == AARCH64_OPND_QLF_S_S);
   gen_sub_field (FLD_size, 0, 1, &field);
   insert_field_2 (&field, &inst->value, val, 0);
@@ -1876,7 +1876,7 @@ static void
 encode_fcvt (aarch64_inst *inst)
 {
   aarch64_insn val;
-  const aarch64_field field = {15, 2};
+  const aarch64_field field = AARCH64_FIELD (15, 2);
 
   /* opc dstsize */
   switch (inst->operands[0].qualifier)
@@ -2096,7 +2096,7 @@ do_special_encoding (struct aarch64_inst *inst)
   if (inst->opcode->flags & F_T)
     {
       int num;	/* num of consecutive '0's on the right side of imm5<3:0>.  */
-      aarch64_field field = {0, 0};
+      aarch64_field field = AARCH64_FIELD_NIL;
       enum aarch64_opnd_qualifier qualifier;
 
       idx = 0;
@@ -2157,7 +2157,7 @@ do_special_encoding (struct aarch64_inst *inst)
     {
       /* e.g. LDRSB <Wt>, [<Xn|SP>, <R><m>{, <extend> {<amount>}}].  */
       enum aarch64_opnd_qualifier qualifier;
-      aarch64_field field = {0, 0};
+      aarch64_field field = AARCH64_FIELD_NIL;
       assert (aarch64_get_operand_class (inst->opcode->operands[0])
 	      == AARCH64_OPND_CLASS_INT_REG);
       gen_sub_field (FLD_opc, 0, 1, &field);

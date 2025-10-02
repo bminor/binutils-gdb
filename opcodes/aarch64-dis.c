@@ -584,7 +584,7 @@ aarch64_ext_ldst_elemlist (const aarch64_operand *self ATTRIBUTE_UNUSED,
 			   const aarch64_inst *inst ATTRIBUTE_UNUSED,
 			   aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
-  aarch64_field field = {0, 0};
+  aarch64_field field = AARCH64_FIELD_NIL;
   aarch64_insn QSsize;		/* fields Q:S:size.  */
   aarch64_insn opcodeh2;	/* opcode<2:1> */
 
@@ -796,7 +796,7 @@ aarch64_ext_advsimd_imm_modified (const aarch64_operand *self ATTRIBUTE_UNUSED,
 {
   uint64_t imm;
   enum aarch64_opnd_qualifier opnd0_qualifier = inst->operands[0].qualifier;
-  aarch64_field field = {0, 0};
+  aarch64_field field = AARCH64_FIELD_NIL;
 
   assert (info->idx == 1);
 
@@ -2599,7 +2599,7 @@ decode_sizeq (aarch64_inst *inst)
 static int
 decode_asimd_fcvt (aarch64_inst *inst)
 {
-  aarch64_field field = {0, 0};
+  aarch64_field field = AARCH64_FIELD_NIL;
   aarch64_insn value;
   enum aarch64_opnd_qualifier qualifier;
 
@@ -2632,7 +2632,7 @@ decode_asimd_fcvt (aarch64_inst *inst)
 static int
 decode_asisd_fcvtxn (aarch64_inst *inst)
 {
-  aarch64_field field = {0, 0};
+  aarch64_field field = AARCH64_FIELD_NIL;
   gen_sub_field (FLD_size, 0, 1, &field);
   if (!extract_field_2 (&field, inst->value, 0))
     return 0;
@@ -2646,7 +2646,7 @@ decode_fcvt (aarch64_inst *inst)
 {
   enum aarch64_opnd_qualifier qualifier;
   aarch64_insn value;
-  const aarch64_field field = {15, 2};
+  const aarch64_field field = AARCH64_FIELD (15, 2);
 
   /* opc dstsize */
   value = extract_field_2 (&field, inst->value, 0);
@@ -2925,7 +2925,7 @@ do_special_decoding (aarch64_inst *inst)
 
   if (inst->opcode->flags & F_LDS_SIZE)
     {
-      aarch64_field field = {0, 0};
+      aarch64_field field = AARCH64_FIELD_NIL;
       assert (aarch64_get_operand_class (inst->opcode->operands[0])
 	      == AARCH64_OPND_CLASS_INT_REG);
       gen_sub_field (FLD_opc, 0, 1, &field);
