@@ -686,7 +686,7 @@ const unsigned arc_num_relaxable_ins = ARRAY_SIZE (arc_relaxable_insns);
 /* Pre-defined "_GLOBAL_OFFSET_TABLE_".  */
 symbolS * GOT_symbol = 0;
 
-/* Set to TRUE when we assemble instructions.  */
+/* Set to TRUE for a special parsing action when assembling instructions.  */
 static bool assembling_insn = false;
 
 /* List with attributes set explicitly.  */
@@ -1275,9 +1275,8 @@ tokenize_arguments (char *str,
 
 	  /* Parse @label.  */
 	  input_line_pointer++;
-	  tok->X_op = O_symbol;
-	  tok->X_md = O_absent;
 	  expression (tok);
+	  tok->X_md = O_absent;
 
 	  if (*input_line_pointer == '@')
 	    parse_reloc_symbol (tok);
@@ -1304,9 +1303,11 @@ tokenize_arguments (char *str,
 	  if ((saw_arg && !saw_comma) || num_args == ntok)
 	    goto err;
 
-	  tok->X_op = O_absent;
-	  tok->X_md = O_absent;
+	  /* Tell arc_parse_name to do its job.  */
+	  assembling_insn = true;
 	  expression (tok);
+	  assembling_insn = false;
+	  tok->X_md = O_absent;
 
 	  /* Legacy: There are cases when we have
 	     identifier@relocation_type, if it is the case parse the
@@ -2522,9 +2523,6 @@ md_assemble (char *str)
   opnamelen = strspn (str, "abcdefghijklmnopqrstuvwxyz_0123456789");
   opname = xmemdup0 (str, opnamelen);
 
-  /* Signalize we are assembling the instructions.  */
-  assembling_insn = true;
-
   /* Tokenize the flags.  */
   if ((nflg = tokenize_flags (str + opnamelen, flags, MAX_INSN_FLGS)) == -1)
     {
@@ -2548,7 +2546,6 @@ md_assemble (char *str)
 
   /* Finish it off.  */
   assemble_tokens (opname, tok, ntok, flags, nflg);
-  assembling_insn = false;
 }
 
 /* Callback to insert a register into the hash table.  */
@@ -3386,9 +3383,8 @@ md_operand (expressionS *expressionP)
   if (*p == '@')
     {
       input_line_pointer++;
-      expressionP->X_op = O_symbol;
-      expressionP->X_md = O_absent;
       expression (expressionP);
+      expressionP->X_md = O_absent;
     }
 }
 
@@ -3404,10 +3400,6 @@ arc_parse_name (const char *name,
   struct symbol *sym;
 
   if (!assembling_insn)
-    return false;
-
-  if (e->X_op == O_symbol
-      && e->X_md == O_absent)
     return false;
 
   sym = str_hash_find (arc_reg_hash, name);
