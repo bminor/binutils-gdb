@@ -5275,13 +5275,7 @@ ppc_function (int ignore ATTRIBUTE_UNUSED)
 
   if (ext_sym != lab_sym)
     {
-      expressionS exp;
-
-      exp.X_op = O_symbol;
-      exp.X_add_symbol = lab_sym;
-      exp.X_op_symbol = NULL;
-      exp.X_add_number = 0;
-      exp.X_unsigned = 0;
+      expressionS exp = { .X_op = O_symbol, .X_add_symbol = lab_sym };
       symbol_set_value_expression (ext_sym, &exp);
     }
 

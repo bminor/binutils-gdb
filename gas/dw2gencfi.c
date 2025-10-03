@@ -1694,12 +1694,11 @@ output_cfi_insn (struct cfi_insn_data *insn)
 	  }
 	else
 	  {
-	    expressionS exp;
-
-	    exp.X_op = O_subtract;
-	    exp.X_add_symbol = to;
-	    exp.X_op_symbol = from;
-	    exp.X_add_number = 0;
+	    expressionS exp = {
+	      .X_op = O_subtract,
+	      .X_add_symbol = to,
+	      .X_op_symbol = from,
+	    };
 
 	    /* The code in ehopt.c expects that one byte of the encoding
 	       is already allocated to the frag.  This comes from the way

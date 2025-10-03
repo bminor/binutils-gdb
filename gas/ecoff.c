@@ -3322,6 +3322,9 @@ ecoff_directive_weakext (int ignore ATTRIBUTE_UNUSED)
       SKIP_WHITESPACE ();
       if (! is_end_of_stmt (*input_line_pointer))
 	{
+#ifdef md_expr_init_rest
+	  md_expr_init_rest (&exp);
+#endif
 	  expression (&exp);
 	  if (exp.X_op != O_symbol)
 	    {
@@ -3480,6 +3483,9 @@ ecoff_stab (int what,
 	  sc = sc_Nil;
 	  st = st_Nil;
 
+#ifdef md_expr_init_rest
+	  md_expr_init_rest (&exp);
+#endif
 	  expression (&exp);
 	  if (exp.X_op == O_constant)
 	    {

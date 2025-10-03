@@ -1795,10 +1795,10 @@ tic54x_field (int ignore ATTRIBUTE_UNUSED)
 	      struct bit_info *bi = XNEW (struct bit_info);
 	      /* We don't know the previous offset at this time, so store the
 		 info we need and figure it out later.  */
-	      expressionS size_exp;
-
-	      size_exp.X_op = O_constant;
-	      size_exp.X_add_number = size;
+	      expressionS size_exp = {
+		.X_op = O_constant,
+		.X_add_number = size
+	      };
 	      bi->seg = now_seg;
 	      bi->type = TYPE_FIELD;
 	      bi->value = value;

@@ -1015,12 +1015,10 @@ obj_coff_val (int ignore ATTRIBUTE_UNUSED)
 	}
       else if (! streq (S_GET_NAME (def_symbol_in_progress), symbol_name))
 	{
-	  expressionS exp;
-
-	  exp.X_op = O_symbol;
-	  exp.X_add_symbol = symbol_find_or_make (symbol_name);
-	  exp.X_op_symbol = NULL;
-	  exp.X_add_number = 0;
+	  expressionS exp = {
+	    .X_op = O_symbol,
+	    .X_add_symbol = symbol_find_or_make (symbol_name)
+	  };
 	  symbol_set_value_expression (def_symbol_in_progress, &exp);
 
 	  /* If the segment is undefined when the forward reference is

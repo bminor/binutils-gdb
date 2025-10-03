@@ -183,12 +183,11 @@ symbol_lookup_or_make (const char *name, bool start)
 symbolS *
 expr_build_uconstant (offsetT value)
 {
-  expressionS e;
-
-  e.X_op = O_constant;
-  e.X_add_number = value;
-  e.X_unsigned = 1;
-  e.X_extrabit = 0;
+  expressionS e = {
+    .X_op = O_constant,
+    .X_add_number = value,
+    .X_unsigned = 1
+  };
   return make_expr_symbol (&e);
 }
 

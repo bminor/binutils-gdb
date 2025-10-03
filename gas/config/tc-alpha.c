@@ -3355,7 +3355,6 @@ add_to_link_pool (symbolS *sym, offsetT addend)
   segment_info_type *seginfo = seg_info (alpha_link_section);
   fixS *fixp;
   symbolS *linksym, *expsym;
-  expressionS e;
 
   basesym = alpha_evax_proc->symbol;
 
@@ -3385,10 +3384,11 @@ add_to_link_pool (symbolS *sym, offsetT addend)
   memset (p, 0, 8);
 
   /* Create a symbol for 'basesym - linksym' (offset of the added entry).  */
-  e.X_op = O_subtract;
-  e.X_add_symbol = linksym;
-  e.X_op_symbol = basesym;
-  e.X_add_number = 0;
+  expressionS e = {
+    .X_op = O_subtract,
+    .X_add_symbol = linksym,
+    .X_op_symbol = basesym
+  };
   expsym = make_expr_symbol (&e);
 
   /* Create a fixup for the entry.  */

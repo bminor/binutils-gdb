@@ -333,6 +333,9 @@ microblaze_s_weakext (int ignore ATTRIBUTE_UNUSED)
 	  SKIP_WHITESPACE ();
 	}
 
+#ifdef md_expr_init_rest
+      md_expr_init_rest (&exp);
+#endif
       expression (&exp);
       if (exp.X_op != O_symbol)
 	{

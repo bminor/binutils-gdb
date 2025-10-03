@@ -421,8 +421,6 @@ sframe_get_fre_offset_size (const struct sframe_row_entry *sframe_fre)
   return fre_offset_size;
 }
 
-#if SFRAME_FRE_TYPE_SELECTION_OPT
-
 /* Create a composite expression CEXP (for SFrame FRE start address) such that:
 
       exp = <val> OP_absent <width>, where,
@@ -441,28 +439,28 @@ create_fre_start_addr_exp (expressionS *cexp, symbolS *fre_pc_begin,
 			   symbolS *fde_start_address,
 			   symbolS *fde_end_address)
 {
-  expressionS val;
-  expressionS width;
-
   /* val expression stores the FDE start address offset from the start PC
      of function.  */
-  val.X_op = O_subtract;
-  val.X_add_symbol = fre_pc_begin;
-  val.X_op_symbol = fde_start_address;
-  val.X_add_number = 0;
+  expressionS val = {
+    .X_op = O_subtract,
+    .X_add_symbol = fre_pc_begin,
+    .X_op_symbol = fde_start_address,
+  };
 
   /* width expressions stores the size of the function.  This is used later
      to determine the number of bytes to be used to encode the FRE start
      address of each FRE of the function.  */
-  width.X_op = O_subtract;
-  width.X_add_symbol = fde_end_address;
-  width.X_op_symbol = fde_start_address;
-  width.X_add_number = 0;
+  expressionS width = {
+    .X_op = O_subtract,
+    .X_add_symbol = fde_end_address,
+    .X_op_symbol = fde_start_address,
+  };
 
-  cexp->X_op = O_absent;
-  cexp->X_add_symbol = make_expr_symbol (&val);
-  cexp->X_op_symbol = make_expr_symbol (&width);
-  cexp->X_add_number = 0;
+  *cexp = (expressionS) {
+    .X_op = O_absent,
+    .X_add_symbol = make_expr_symbol (&val),
+    .X_op_symbol = make_expr_symbol (&width)
+  };
 }
 
 /* Create a composite expression CEXP (for SFrame FDE function info) such that:
@@ -483,24 +481,23 @@ static void
 create_func_info_exp (expressionS *cexp, symbolS *dw_fde_end_addrS,
 		      symbolS *dw_fde_start_addrS, uint8_t func_info)
 {
-  expressionS width;
-  expressionS rest_of_func_info;
+  expressionS width = {
+    .X_op = O_subtract,
+    .X_add_symbol = dw_fde_end_addrS,
+    .X_op_symbol = dw_fde_start_addrS
+  };
 
-  width.X_op = O_subtract;
-  width.X_add_symbol = dw_fde_end_addrS;
-  width.X_op_symbol = dw_fde_start_addrS;
-  width.X_add_number = 0;
+  expressionS rest_of_func_info = {
+    .X_op = O_constant,
+    .X_add_number = func_info
+  };
 
-  rest_of_func_info.X_op = O_constant;
-  rest_of_func_info.X_add_number = func_info;
-
-  cexp->X_op = O_modulus;
-  cexp->X_add_symbol = make_expr_symbol (&rest_of_func_info);
-  cexp->X_op_symbol = make_expr_symbol (&width);
-  cexp->X_add_number = 0;
+  *cexp = (expressionS) {
+    .X_op = O_modulus,
+    .X_add_symbol = make_expr_symbol (&rest_of_func_info),
+    .X_op_symbol = make_expr_symbol (&width)
+  };
 }
-
-#endif
 
 static struct sframe_row_entry*
 sframe_row_entry_new (void)
@@ -564,20 +561,24 @@ output_sframe_row_entry (symbolS *fde_start_addr,
   fre_addr_size = 4; /* 4 bytes by default.   FIXME tie it to fre_type? */
 
   /* SFrame FRE Start Address.  */
-#if SFRAME_FRE_TYPE_SELECTION_OPT
-  create_fre_start_addr_exp (&exp, sframe_fre->pc_begin, fde_start_addr,
-			     fde_end_addr);
-  frag_grow (fre_addr_size);
-  frag_var (rs_sframe, fre_addr_size, 0, 0,
-	    make_expr_symbol (&exp), 0, (char *) frag_now);
-#else
-  gas_assert (fde_end_addr);
-  exp.X_op = O_subtract;
-  exp.X_add_symbol = sframe_fre->pc_begin; /* to.  */
-  exp.X_op_symbol = fde_start_addr; /* from.  */
-  exp.X_add_number = 0;
-  emit_expr (&exp, fre_addr_size);
-#endif
+  if (SFRAME_FRE_TYPE_SELECTION_OPT)
+    {
+      create_fre_start_addr_exp (&exp, sframe_fre->pc_begin, fde_start_addr,
+				 fde_end_addr);
+      frag_grow (fre_addr_size);
+      frag_var (rs_sframe, fre_addr_size, 0, 0,
+		make_expr_symbol (&exp), 0, (char *) frag_now);
+    }
+  else
+    {
+      gas_assert (fde_end_addr);
+      exp = (expressionS) {
+	.X_op = O_subtract,
+	.X_add_symbol = sframe_fre->pc_begin, /* to.  */
+	.X_op_symbol = fde_start_addr /* from.  */
+      };
+      emit_expr (&exp, fre_addr_size);
+    }
 
   /* Create the fre_info using the CFA base register, number of offsets and max
      size of offset in this frame row entry.  */
@@ -668,16 +669,17 @@ output_sframe_funcdesc (symbolS *start_of_fre_section,
   func_info = sframe_set_func_info (SFRAME_FDE_TYPE_PCINC,
 				    SFRAME_FRE_TYPE_ADDR4,
 				    pauth_key);
-#if SFRAME_FRE_TYPE_SELECTION_OPT
-  expressionS cexp;
-  create_func_info_exp (&cexp, dw_fde_end_addrS, dw_fde_start_addrS,
-			func_info);
-  frag_grow (1); /* Size of func info is unsigned char.  */
-  frag_var (rs_sframe, 1, 0, 0, make_expr_symbol (&cexp), 0,
-	    (char *) frag_now);
-#else
-  out_one (func_info);
-#endif
+  if (SFRAME_FRE_TYPE_SELECTION_OPT)
+    {
+      expressionS cexp;
+      create_func_info_exp (&cexp, dw_fde_end_addrS, dw_fde_start_addrS,
+			    func_info);
+      frag_grow (1); /* Size of func info is unsigned char.  */
+      frag_var (rs_sframe, 1, 0, 0, make_expr_symbol (&cexp), 0,
+		(char *) frag_now);
+    }
+  else
+    out_one (func_info);
   out_one (0);
   out_two (0);
 }

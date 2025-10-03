@@ -1957,10 +1957,7 @@ s_mri_common (int small ATTRIBUTE_UNUSED)
 
   if (line_label != NULL)
     {
-      expressionS exp;
-      exp.X_op = O_symbol;
-      exp.X_add_symbol = sym;
-      exp.X_add_number = 0;
+      expressionS exp = { .X_op = O_symbol, .X_add_symbol = sym };
       symbol_set_value_expression (line_label, &exp);
       symbol_set_frag (line_label, &zero_address_frag);
       S_SET_SEGMENT (line_label, expr_section);
@@ -4122,6 +4119,9 @@ pseudo_set (symbolS *symbolP)
 
   know (symbolP);		/* NULL pointer is logic error.  */
 
+#ifdef md_expr_init_rest
+  md_expr_init_rest (&exp);
+#endif
   if (!S_IS_FORWARD_REF (symbolP))
     (void) expression (&exp);
   else
