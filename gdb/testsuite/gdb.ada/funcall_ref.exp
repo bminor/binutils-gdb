@@ -81,7 +81,7 @@ foreach_gnat_encoding scenario flags {all minimal} {
     }
 
     if { $supported == 0 } {
-	return 0
+	return
     }
 
     gdb_test "p get(\"Hello world!\")" \

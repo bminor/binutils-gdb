@@ -41,7 +41,7 @@ set catchpoint_storage_error_msg \
   "Catchpoint $decimal, exception at $hex in foo \\\(\\\).*at .*foo.adb:$decimal$eol$decimal$sp$when Storage_Error =>"
 
 if {![runto_main]} {
-   return 0
+   return
 }
 
 ############################################

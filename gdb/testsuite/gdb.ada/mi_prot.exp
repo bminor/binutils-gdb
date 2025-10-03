@@ -31,7 +31,7 @@ set MIFLAGS "-i=mi"
 mi_clean_restart $::testfile
 
 if {[mi_runto_main] < 0} {
-   return 0
+   return
 }
 
 mi_delete_breakpoints

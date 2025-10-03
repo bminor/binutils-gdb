@@ -29,7 +29,7 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable debug] != "" } {
 mi_clean_restart $::testfile
 
 if {[mi_runto_main] < 0} {
-    return 0
+    return
 }
 
 set bp_location [gdb_get_line_number "STOP" ${testdir}/mi_access.adb]

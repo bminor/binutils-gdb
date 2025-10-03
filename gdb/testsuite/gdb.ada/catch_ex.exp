@@ -41,7 +41,7 @@ set catch_exception_info \
 ####################################
 
 if {![runto_main]} {
-   return 0
+   return
 }
 
 gdb_test "catch exception" \
@@ -79,7 +79,7 @@ gdb_test "continue" \
 #  - continue, the program exits.
 
 if {![runto_main]} {
-   return 0
+   return
 }
 
 gdb_test "catch exception Program_Error" \
@@ -139,7 +139,7 @@ gdb_test "continue" \
 #     the program.
 
 if {![runto_main]} {
-   return 0
+   return
 }
 
 gdb_test "tcatch exception" \

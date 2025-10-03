@@ -35,7 +35,7 @@ if {[mi_clean_restart $::testfile]} {
 ####################################
 
 if {![mi_runto "task_switch.break_me"]} {
-   return 0
+   return
 }
 
 set ada_task_info_hdr \

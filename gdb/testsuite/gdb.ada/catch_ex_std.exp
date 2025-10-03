@@ -66,7 +66,7 @@ clean_restart ${testfile}
 gdb_load_shlib $sofile
 
 if {![runto_main]} {
-   return 0
+   return
 }
 
 gdb_test "catch exception some_kind_of_error" \

@@ -26,7 +26,7 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug ]] != "" }
 clean_restart ${testfile}
 
 if {![runto_main]} {
-   return 0
+   return
 }
 
 # Check that inserting breakpoint on read_small inlined function inserts

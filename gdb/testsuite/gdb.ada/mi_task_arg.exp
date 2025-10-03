@@ -34,7 +34,7 @@ if {[mi_clean_restart $::testfile]} {
 mi_gdb_test "-gdb-set debug-file-directory \"\"" ".*"
 
 if {![mi_runto "task_switch.break_me"]} {
-   return 0
+   return
 }
 
 # Verify that "-stack-list-arguments" does not cause the debugger to

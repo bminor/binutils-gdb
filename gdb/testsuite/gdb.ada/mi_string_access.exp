@@ -32,7 +32,7 @@ foreach_gnat_encoding scenario flags {all minimal} {
     mi_clean_restart $::testfile-$scenario
 
     if {[mi_runto_main] < 0} {
-	return 0
+	return
     }
 
     set bp_location [gdb_get_line_number "STOP" ${testdir}/bar.adb]

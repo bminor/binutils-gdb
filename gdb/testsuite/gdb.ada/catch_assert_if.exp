@@ -35,7 +35,7 @@ set sp "\[ \t\]*"
 #  - continue, the program exits.
 
 if {![runto_main]} {
-   return 0
+   return
 }
 
 gdb_test "catch assert if Global_Var = 2" \
