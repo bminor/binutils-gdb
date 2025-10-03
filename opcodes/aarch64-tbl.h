@@ -7564,11 +7564,14 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "a SIMD vector element limited to V0-V15")			\
     Y(SIMD_ELEMENT, reglane, "Em8", 0, F(FLD_Rm),			\
       "a SIMD vector element limited to V0-V7")				\
-    Y(SIMD_ELEMENT, simple_index, "Em_INDEX1_14", 0, F(FLD_Rm, FLD_imm1_14),	\
+    Y(SIMD_ELEMENT, simple_index, "Em_INDEX1_14", 0,			\
+      F(FLD_imm1_14, FLD_Rm),						\
       "a SIMD vector without a type qualifier encoding a bit index")	\
-    Y(SIMD_ELEMENT, simple_index, "Em_INDEX2_13", 0, F(FLD_Rm, FLD_imm2_13),	\
+    Y(SIMD_ELEMENT, simple_index, "Em_INDEX2_13", 0,			\
+      F(FLD_imm2_13, FLD_Rm),						\
       "a SIMD vector without a type qualifier encoding a bit index")	\
-    Y(SIMD_ELEMENT, simple_index, "Em_INDEX3_12", 0, F(FLD_Rm, FLD_imm3_12),	\
+    Y(SIMD_ELEMENT, simple_index, "Em_INDEX3_12", 0,			\
+      F(FLD_imm3_12, FLD_Rm),						\
       "a SIMD vector without a type qualifier encoding a bit index")	\
     Y(SIMD_REGLIST, reglist, "LVn", 0, F(FLD_Rn),			\
       "a SIMD vector register list")					\
@@ -7988,10 +7991,10 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(SVE_REG, regno, "SVE_Zm_16", 0, F(FLD_SVE_Zm_16),			\
       "an SVE vector register")						\
     Y(SVE_REG, simple_index, "SVE_Zm1_23_INDEX",			\
-      0, F(FLD_SVE_Zm_16, FLD_SVE_i1_23),				\
+      0, F(FLD_SVE_i1_23, FLD_SVE_Zm_16),				\
       "an indexed SVE vector register")					\
     Y(SVE_REG, simple_index, "SVE_Zm2_22_INDEX",			\
-      0, F(FLD_SVE_Zm_16, FLD_SVE_i2),					\
+      0, F(FLD_SVE_i2, FLD_SVE_Zm_16),					\
       "an indexed SVE vector register")					\
     Y(SVE_REG, sve_quad_index, "SVE_Zm3_INDEX",				\
       3 << OPD_F_OD_LSB, F(FLD_SVE_Zm_16),				\
@@ -8000,7 +8003,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       3 << OPD_F_OD_LSB, F(FLD_SVE_i3h2, FLD_SVE_i3l, FLD_SVE_imm3),    \
       "an indexed SVE vector register")					\
     Y(SVE_REG, simple_index, "SVE_Zm3_12_INDEX",			\
-      0, F(FLD_SVE_Zm_16, FLD_SVE_i3h3, FLD_SVE_i3l2),			\
+      0, F(FLD_SVE_i3h3, FLD_SVE_i3l2, FLD_SVE_Zm_16),			\
       "an indexed SVE vector register")					\
     Y(SVE_REG, sve_quad_index, "SVE_Zm3_19_INDEX", 			\
       3 << OPD_F_OD_LSB, F(FLD_imm2_19, FLD_SVE_imm3),			\
@@ -8086,11 +8089,11 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "an SVE predicate-as-counter register")				\
     Y(PRED_REG, regno, "SME_PNn", 0, F(FLD_SVE_Pn),			\
       "an SVE predicate-as-counter register")				\
-    Y(SVE_REG, simple_index, "SME_PNn3_INDEX1", 8 << OPD_F_OD_LSB,	\
-      F(FLD_SME_PNn3, FLD_imm1_8),					\
+    Y(SVE_REG, simple_index, "SME_PNn3_INDEX1", 0,			\
+      F(FLD_imm1_8, FLD_CONST_01, FLD_SME_PNn3),			\
       "an indexed SVE predicate-as-counter register")			\
-    Y(SVE_REG, simple_index, "SME_PNn3_INDEX2", 8 << OPD_F_OD_LSB,	\
-      F(FLD_SME_PNn3, FLD_imm2_8),					\
+    Y(SVE_REG, simple_index, "SME_PNn3_INDEX2", 0,			\
+      F(FLD_imm2_8, FLD_CONST_01, FLD_SME_PNn3),			\
       "an indexed SVE predicate-as-counter register")			\
     Y(SVE_REG, imm, "SME_list_of_64bit_tiles", 0,			\
       F(FLD_SME_zero_mask), "a list of 64-bit ZA element tiles")	\
@@ -8123,71 +8126,73 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(IMMEDIATE, sve_shrimm, "SME_SHRIMM5", 1 << OPD_F_OD_LSB,		\
       F(FLD_SVE_tszh,FLD_SVE_imm5b), "a shift-right immediate operand")	\
     Y(SVE_REG, simple_index, "SME_Zm_INDEX1", 0,			\
-      F(FLD_SME_Zm, FLD_imm1_10), "an indexed SVE vector register")	\
+      F(FLD_imm1_10, FLD_CONST_0, FLD_SME_Zm),				\
+      "an indexed SVE vector register")					\
     Y(SVE_REG, simple_index, "SME_Zm_INDEX2", 0,			\
-      F(FLD_SME_Zm, FLD_imm2_10), "an indexed SVE vector register")	\
+      F(FLD_imm2_10, FLD_CONST_0, FLD_SME_Zm),				\
+      "an indexed SVE vector register")					\
     Y(SVE_REG, simple_index, "SME_Zm_INDEX2_3", 0,			\
-      F(FLD_SME_Zm, FLD_imm1_10, FLD_imm1_3),				\
+      F(FLD_imm1_10, FLD_imm1_3, FLD_CONST_0, FLD_SME_Zm),		\
       "an indexed SVE vector register")					\
     Y(SVE_REG, simple_index, "SME_Zm_INDEX3_1", 0,			\
-      F(FLD_SME_Zm, FLD_imm1_10, FLD_imm2_1),				\
+      F(FLD_imm1_10, FLD_imm2_1, FLD_CONST_0, FLD_SME_Zm),		\
       "an indexed SVE vector register")					\
     Y(SVE_REG, simple_index, "SME_Zm_INDEX3_2", 0,			\
-      F(FLD_SME_Zm, FLD_imm2_10, FLD_imm1_2),				\
+      F(FLD_imm2_10, FLD_imm1_2, FLD_CONST_0, FLD_SME_Zm),		\
       "an indexed SVE vector register")					\
     Y(SVE_REG, simple_index, "SME_Zm_INDEX3_3", 0,			\
-      F(FLD_SME_Zm, FLD_imm2_10, FLD_imm1_3),				\
+      F(FLD_imm2_10, FLD_imm1_3, FLD_CONST_0, FLD_SME_Zm),		\
       "an indexed SVE vector register")					\
     Y(SVE_REG, simple_index, "SME_Zm_INDEX3_10", 0,			\
-      F(FLD_SME_Zm, FLD_imm1_15, FLD_imm2_10),				\
+      F(FLD_imm1_15, FLD_imm2_10, FLD_CONST_0, FLD_SME_Zm),		\
       "an indexed SVE vector register")					\
     Y(SVE_REG, simple_index, "SME_Zm_INDEX4_1", 0,			\
-      F(FLD_SME_Zm, FLD_imm2_10, FLD_imm2_1),				\
+      F(FLD_imm2_10, FLD_imm2_1, FLD_CONST_0, FLD_SME_Zm),		\
       "an indexed SVE vector register")					\
     Y(SVE_REG, simple_index, "SME_Zm_INDEX4_2", 0,			\
-      F(FLD_SME_Zm, FLD_imm2_10, FLD_imm2_2),		\
+      F(FLD_imm2_10, FLD_imm2_2, FLD_CONST_0, FLD_SME_Zm),		\
       "an indexed SVE vector register")					\
     Y(SVE_REG, simple_index, "SME_Zm_INDEX4_3", 0,			\
-      F(FLD_SME_Zm, FLD_imm1_15, FLD_imm2_10, FLD_imm1_3),		\
+      F(FLD_imm1_15, FLD_imm2_10, FLD_imm1_3, FLD_CONST_0, FLD_SME_Zm),	\
       "an indexed SVE vector register")					\
     Y(SVE_REG, simple_index, "SME_Zm_INDEX4_10", 0,			\
-      F(FLD_SME_Zm, FLD_imm1_15, FLD_imm3_10),				\
+      F(FLD_imm1_15, FLD_imm3_10, FLD_CONST_0, FLD_SME_Zm),		\
       "an indexed SVE vector register")					\
     Y(SVE_REG, simple_index, "SME_Zn_INDEX1_16", 0,			\
-      F(FLD_SVE_Zn, FLD_imm1_16), "an indexed SVE vector register")	\
+      F(FLD_imm1_16, FLD_SVE_Zn), "an indexed SVE vector register")	\
     Y(SVE_REG, simple_index, "SME_Zn_INDEX2_15", 0,			\
-      F(FLD_SVE_Zn, FLD_imm2_15), "an indexed SVE vector register")	\
+      F(FLD_imm2_15, FLD_SVE_Zn), "an indexed SVE vector register")	\
     Y(SVE_REG, simple_index, "SME_Zn_INDEX2_16", 0,			\
-      F(FLD_SVE_Zn, FLD_imm2_16), "an indexed SVE vector register")	\
+      F(FLD_imm2_16, FLD_SVE_Zn), "an indexed SVE vector register")	\
     Y(SVE_REG, simple_index, "SME_Zn_INDEX2_19", 0,			\
-      F(FLD_SVE_Zn, FLD_imm2_19), "an indexed SVE vector register")	\
+      F(FLD_imm2_19, FLD_SVE_Zn), "an indexed SVE vector register")	\
     Y(SVE_REG, simple_index, "SME_Zn_INDEX3_14", 0,			\
-      F(FLD_SVE_Zn, FLD_imm3_14), "an indexed SVE vector register")	\
+      F(FLD_imm3_14, FLD_SVE_Zn), "an indexed SVE vector register")	\
     Y(SVE_REG, simple_index, "SME_Zn_INDEX3_15", 0,			\
-      F(FLD_SVE_Zn, FLD_imm3_15), "an indexed SVE vector register")	\
+      F(FLD_imm3_15, FLD_SVE_Zn), "an indexed SVE vector register")	\
     Y(SVE_REG, simple_index, "SME_Zn_INDEX4_14", 0,			\
-      F(FLD_SVE_Zn, FLD_imm4_14), "an indexed SVE vector register")	\
+      F(FLD_imm4_14, FLD_SVE_Zn), "an indexed SVE vector register")	\
     Y(SVE_REG, regno, "SVE_Zn0_INDEX", 0, F(FLD_SVE_Zn),		\
       "an SVE vector register with option zero index")			\
     Y(SVE_REG, simple_index, "SVE_Zn1_17_INDEX", 0,			\
-      F(FLD_SVE_Zn, FLD_imm17_1),					\
+      F(FLD_imm17_1, FLD_SVE_Zn),					\
       "an SVE vector register with optional one bit index")		\
     Y(SVE_REG, simple_index, "SVE_Zn2_18_INDEX", 0,			\
-      F(FLD_SVE_Zn, FLD_imm17_2),					\
+      F(FLD_imm17_2, FLD_SVE_Zn),					\
       "an SVE vector register with optional two bit index")		\
     Y(SVE_REG, simple_index, "SVE_Zn3_22_INDEX", 0,			\
-      F(FLD_SVE_Zn, FLD_SVE_i3h, FLD_imm17_2),				\
+      F(FLD_SVE_i3h, FLD_imm17_2, FLD_SVE_Zn),				\
       "an SVE vector register with optional three bit index")		\
     Y(SVE_REG, regno, "SVE_Zd0_INDEX", 0, F(FLD_SVE_Zd),		\
       "an SVE vector register with option zero index")			\
     Y(SVE_REG, simple_index, "SVE_Zd1_17_INDEX", 0,			\
-      F(FLD_SVE_Zd, FLD_imm17_1),					\
+      F(FLD_imm17_1, FLD_SVE_Zd),					\
       "an SVE vector register with optional one bit index")		\
     Y(SVE_REG, simple_index, "SVE_Zd2_18_INDEX", 0,			\
-      F(FLD_SVE_Zd, FLD_imm17_2),					\
+      F(FLD_imm17_2, FLD_SVE_Zd),					\
       "an SVE vector register with optional two bit index")		\
     Y(SVE_REG, simple_index, "SVE_Zd3_22_INDEX", 0,			\
-      F(FLD_SVE_Zd, FLD_SVE_i3h, FLD_imm17_2),				\
+      F(FLD_SVE_i3h, FLD_imm17_2, FLD_SVE_Zd),				\
       "an SVE vector register with optional three bit index")		\
     Y(IMMEDIATE, imm, "SME_VLxN_10", 0, F(FLD_SME_VL_10),		\
       "VLx2 or VLx4")							\

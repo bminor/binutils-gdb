@@ -228,6 +228,7 @@ const aarch64_field aarch64_fields[] =
     AARCH64_FIELD_NIL,	/* NIL.  */
     AARCH64_FIELD_CONST (0, 1),	/* CONST_0.  */
     AARCH64_FIELD_CONST (0, 2),	/* CONST_00.  */
+    AARCH64_FIELD_CONST (1, 2),	/* CONST_01.  */
     AARCH64_FIELD_CONST (1, 1),	/* CONST_1.  */
     AARCH64_FIELD ( 8, 4), /* CRm: in the system instructions.  */
     AARCH64_FIELD (10, 2), /* CRm_dsb_nxs: 2-bit imm. encoded in CRm<3:2>.  */
@@ -1921,7 +1922,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 
 	case AARCH64_OPND_SME_PNn3_INDEX1:
 	case AARCH64_OPND_SME_PNn3_INDEX2:
-	  size = get_operand_field_width (get_operand_from_code (type), 1);
+	  size = get_operand_field_width (get_operand_from_code (type), 0);
 	  if (!check_reglane (opnd, mismatch_detail, idx, "pn", 8, 15,
 			      0, (1 << size) - 1))
 	    return false;
@@ -1959,7 +1960,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SME_Zm_INDEX4_2:
 	case AARCH64_OPND_SME_Zm_INDEX4_3:
 	case AARCH64_OPND_SME_Zm_INDEX4_10:
-	  size = get_operand_fields_width (get_operand_from_code (type)) - 4;
+	  size = get_operand_fields_width (get_operand_from_code (type)) - 5;
 	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 15,
 			      0, (1 << size) - 1))
 	    return false;

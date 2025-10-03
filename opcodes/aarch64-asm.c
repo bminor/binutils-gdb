@@ -1795,8 +1795,8 @@ aarch64_ins_x0_to_x30 (const aarch64_operand *self,
   return true;
 }
 
-/* Insert an indexed register, with the first field being the register
-   number and the remaining fields being the index.  */
+/* Insert an indexed register, with the last five field bits holding the
+   register number and the remaining bits holding the index.  */
 bool
 aarch64_ins_simple_index (const aarch64_operand *self,
 			  const aarch64_opnd_info *info,
@@ -1804,9 +1804,8 @@ aarch64_ins_simple_index (const aarch64_operand *self,
 			  const aarch64_inst *inst ATTRIBUTE_UNUSED,
 			  aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
-  int bias = get_operand_specific_data (self);
-  insert_field (self->fields[0], code, info->reglane.regno - bias, 0);
-  insert_all_fields_after (self, 1, code, info->reglane.index);
+  unsigned int val = (info->reglane.index << 5) | info->reglane.regno;
+  insert_all_fields (self, code, val);
   return true;
 }
 

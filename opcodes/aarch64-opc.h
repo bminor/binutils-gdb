@@ -32,6 +32,7 @@ enum aarch64_field_kind
   FLD_NIL,
   FLD_CONST_0,
   FLD_CONST_00,
+  FLD_CONST_01,
   FLD_CONST_1,
   FLD_CRm,
   FLD_CRm_dsb_nxs,
@@ -294,9 +295,9 @@ struct aarch64_operand
 
   unsigned int flags;
 
-  /* The associated instruction bit-fields; no operand has more than 4
+  /* The associated instruction bit-fields; no operand has more than 5
      bit-fields */
-  enum aarch64_field_kind fields[5];
+  enum aarch64_field_kind fields[6];
 
   /* Brief description */
   const char *desc;
