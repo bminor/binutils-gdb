@@ -9641,13 +9641,20 @@ show_disassembly_style_sfunc (struct ui_file *file, int from_tty,
   const char *options = get_disassembler_options (gdbarch);
   const char *style = "";
   int len = 0;
-  const char *opt;
+  const char *opt = options;
 
-  FOR_EACH_DISASSEMBLER_OPTION (opt, options)
-    if (startswith (opt, "reg-names-"))
+  if (opt)
+    while (1)
       {
-	style = &opt[strlen ("reg-names-")];
-	len = strcspn (style, ",");
+	const char *opt_end = strchr (opt, ',');
+	if (startswith (opt, "reg-names-"))
+	  {
+	    style = &opt[strlen ("reg-names-")];
+	    len = opt_end ? opt_end - style : 99;
+	  }
+	if (!opt_end)
+	  break;
+	opt = opt_end + 1;
       }
 
   gdb_printf (file, "The disassembly style is \"%.*s\".\n", len, style);

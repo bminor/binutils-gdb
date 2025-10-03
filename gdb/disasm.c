@@ -1269,7 +1269,6 @@ set_disassembler_options (const char *prospective_options)
     = make_unique_xstrdup (prospective_options);
   char *options = remove_whitespace_and_extra_commas
     (prospective_options_local.get ());
-  const char *opt;
 
   /* Allow all architectures, even ones that do not support 'set disassembler',
      to reset their disassembler options to NULL.  */
@@ -1291,9 +1290,13 @@ set_disassembler_options (const char *prospective_options)
   valid_options = &valid_options_and_args->options;
 
   /* Verify we have valid disassembler options.  */
-  FOR_EACH_DISASSEMBLER_OPTION (opt, options)
+  char *opt = options;
+  while (1)
     {
       size_t i;
+      char *opt_end = strchr (opt, ',');
+      if (opt_end)
+	*opt_end = 0;
       for (i = 0; valid_options->name[i] != NULL; i++)
 	if (valid_options->arg != NULL && valid_options->arg[i] != NULL)
 	  {
@@ -1308,8 +1311,7 @@ set_disassembler_options (const char *prospective_options)
 	    if (valid_options->arg[i]->values == NULL)
 	      break;
 	    for (j = 0; valid_options->arg[i]->values[j] != NULL; j++)
-	      if (disassembler_options_cmp
-		    (arg, valid_options->arg[i]->values[j]) == 0)
+	      if (strcmp (arg, valid_options->arg[i]->values[j]) == 0)
 		{
 		  found = true;
 		  break;
@@ -1317,7 +1319,7 @@ set_disassembler_options (const char *prospective_options)
 	    if (found)
 	      break;
 	  }
-	else if (disassembler_options_cmp (opt, valid_options->name[i]) == 0)
+	else if (strcmp (opt, valid_options->name[i]) == 0)
 	  break;
       if (valid_options->name[i] == NULL)
 	{
@@ -1326,6 +1328,10 @@ set_disassembler_options (const char *prospective_options)
 		      opt);
 	  return;
 	}
+      if (!opt_end)
+	break;
+      *opt_end = ',';
+      opt = opt_end + 1;
     }
 
   *disassembler_options = options;
