@@ -31,6 +31,7 @@ enum aarch64_field_kind
 {
   FLD_NIL,
   FLD_CONST_0,
+  FLD_CONST_00,
   FLD_CONST_1,
   FLD_CRm,
   FLD_CRm_dsb_nxs,

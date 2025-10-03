@@ -227,6 +227,7 @@ const aarch64_field aarch64_fields[] =
 {
     AARCH64_FIELD_NIL,	/* NIL.  */
     AARCH64_FIELD_CONST (0, 1),	/* CONST_0.  */
+    AARCH64_FIELD_CONST (0, 2),	/* CONST_00.  */
     AARCH64_FIELD_CONST (1, 1),	/* CONST_1.  */
     AARCH64_FIELD ( 8, 4), /* CRm: in the system instructions.  */
     AARCH64_FIELD (10, 2), /* CRm_dsb_nxs: 2-bit imm. encoded in CRm<3:2>.  */

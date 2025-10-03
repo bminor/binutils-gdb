@@ -8032,24 +8032,24 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(SVE_REGLIST, sve_reglist, "SVE_ZtxN", 0, F(FLD_SVE_Zt),		\
       "a list of SVE vector registers")					\
     Y(SVE_REGLIST, sve_aligned_reglist, "SME_Zdnx2", 2 << OPD_F_OD_LSB,	\
-      F(FLD_SME_Zdn2), "a list of SVE vector registers")		\
+      F(FLD_SME_Zdn2, FLD_CONST_0), "a list of SVE vector registers")	\
     Y(SVE_REGLIST, sve_aligned_reglist, "SME_Zdnx4", 4 << OPD_F_OD_LSB,	\
-      F(FLD_SME_Zdn4), "a list of SVE vector registers")		\
+      F(FLD_SME_Zdn4, FLD_CONST_00), "a list of SVE vector registers")	\
     Y(SVE_REG, regno, "SME_Zm", 0, F(FLD_SME_Zm),			\
       "an SVE vector register")						\
     Y(SVE_REG, regno, "SME_Zm_17", 0, F(FLD_SME_Zm2),			\
       "an SVE vector register")						\
     Y(SVE_REGLIST, sve_aligned_reglist, "SME_Zmx2", 2 << OPD_F_OD_LSB,	\
-      F(FLD_SME_Zm2), "a list of SVE vector registers")			\
+      F(FLD_SME_Zm2, FLD_CONST_0), "a list of SVE vector registers")	\
     Y(SVE_REGLIST, sve_aligned_reglist, "SME_Zmx4", 4 << OPD_F_OD_LSB,	\
-      F(FLD_SME_Zm4), "a list of SVE vector registers")			\
+      F(FLD_SME_Zm4, FLD_CONST_00), "a list of SVE vector registers")	\
     Y(SVE_REGLIST, sve_aligned_reglist, "SME_Znx2", 2 << OPD_F_OD_LSB,	\
-      F(FLD_SME_Zn2), "a list of SVE vector registers")			\
+      F(FLD_SME_Zn2, FLD_CONST_0), "a list of SVE vector registers")	\
     Y(SVE_REGLIST, sve_aligned_reglist, "SME_Znx2_BIT_INDEX",		\
-      2 << OPD_F_OD_LSB, F(FLD_SME_Zn2),				\
+      2 << OPD_F_OD_LSB, F(FLD_SME_Zn2, FLD_CONST_0),			\
       "a list of SVE vector registers")					\
     Y(SVE_REGLIST, sve_aligned_reglist, "SME_Znx4", 4 << OPD_F_OD_LSB,	\
-      F(FLD_SME_Zn4), "a list of SVE vector registers")			\
+      F(FLD_SME_Zn4, FLD_CONST_00), "a list of SVE vector registers")	\
     Y(SVE_REGLIST, sve_strided_reglist, "SME_Ztx2_STRIDED",		\
       2 << OPD_F_OD_LSB, F(FLD_SME_ZtT, FLD_SME_Zt3),			\
       "a list of SVE vector registers")					\
@@ -8075,7 +8075,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       F(FLD_SME_V,FLD_SME_Rv,FLD_imm3_0),				\
       "an SME horizontal or vertical vector access register")		\
     Y(SVE_REGLIST, sve_aligned_reglist, "SME_Pdx2", 2 << OPD_F_OD_LSB,	\
-      F(FLD_SME_Pdx2), "a list of SVE predicate registers")		\
+      F(FLD_SME_Pdx2, FLD_CONST_0), "a list of SVE predicate registers")\
     Y(SVE_REGLIST, sve_reglist, "SME_PdxN", 0, F(FLD_SVE_Pd),		\
       "a list of SVE predicate registers")				\
     Y(PRED_REG, regno, "SME_Pm", 0, F(FLD_SME_Pm),			\

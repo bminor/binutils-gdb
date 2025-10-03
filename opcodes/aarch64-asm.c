@@ -1261,9 +1261,8 @@ aarch64_ins_sve_aligned_reglist (const aarch64_operand *self,
 				 const aarch64_inst *inst ATTRIBUTE_UNUSED,
 				 aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
-  unsigned int num_regs = get_operand_specific_data (self);
   unsigned int val = info->reglist.first_regno;
-  insert_field (self->fields[0], code, val / num_regs, 0);
+  insert_all_fields (self, code, val);
   return true;
 }
 

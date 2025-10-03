@@ -1891,8 +1891,7 @@ aarch64_ext_sve_aligned_reglist (const aarch64_operand *self,
 				 aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
   unsigned int num_regs = get_operand_specific_data (self);
-  unsigned int val = extract_field (self->fields[0], code, 0);
-  info->reglist.first_regno = val * num_regs;
+  info->reglist.first_regno = extract_all_fields (self, code);
   info->reglist.num_regs = num_regs;
   info->reglist.stride = 1;
   return true;
