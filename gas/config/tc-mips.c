@@ -6873,7 +6873,6 @@ fix_loongson2f_jump (struct mips_cl_insn * ip)
       || strcmp (ip->insn_mo->name, "jalr") == 0)
     {
       int sreg;
-      expressionS ep;
 
       if (! mips_opts.at)
         return;
@@ -6882,8 +6881,10 @@ fix_loongson2f_jump (struct mips_cl_insn * ip)
       if (sreg == ZERO || sreg == KT0 || sreg == KT1 || sreg == ATREG)
         return;
 
-      ep.X_op = O_constant;
-      ep.X_add_number = 0xcfff0000;
+      expressionS ep = {
+	.X_op = O_constant,
+	.X_add_number = 0xcfff0000
+      };
       macro_build (&ep, "lui", "t,u", ATREG, BFD_RELOC_HI16);
       ep.X_add_number = 0xffff;
       macro_build (&ep, "ori", "t,r,i", ATREG, ATREG, BFD_RELOC_LO16);
@@ -9531,10 +9532,14 @@ load_register (int reg, expressionS *ep, int dbl)
 	generic_bignum[3] = 0;
       else if (ep->X_add_number > 4)
 	as_bad (_("number larger than 64 bits"));
-      lo32.X_op = O_constant;
-      lo32.X_add_number = generic_bignum[0] + (generic_bignum[1] << 16);
-      hi32.X_op = O_constant;
-      hi32.X_add_number = generic_bignum[2] + (generic_bignum[3] << 16);
+      lo32 = (expressionS) {
+	.X_op = O_constant,
+	.X_add_number = generic_bignum[0] + (generic_bignum[1] << 16)
+      };
+      hi32 = (expressionS) {
+	.X_op = O_constant,
+	.X_add_number = generic_bignum[2] + (generic_bignum[3] << 16)
+      };
     }
 
   if (hi32.X_add_number == 0)
@@ -9581,9 +9586,7 @@ load_register (int reg, expressionS *ep, int dbl)
 	  if ((hi32.X_add_number & ~(offsetT) himask) == 0
 	      && (lo32.X_add_number & ~(offsetT) lomask) == 0)
 	    {
-	      expressionS tmp;
-
-	      tmp.X_op = O_constant;
+	      expressionS tmp = { .X_op = O_constant };
 	      if (shift < 32)
 		tmp.X_add_number = ((hi32.X_add_number << (32 - shift))
 				    | (lo32.X_add_number >> shift));
@@ -9635,12 +9638,9 @@ load_register (int reg, expressionS *ep, int dbl)
 	  shift = COUNT_TOP_ZEROES ((unsigned int) hi32.X_add_number);
 	  if (shift != 0)
 	    {
-	      expressionS tmp;
-
 	      /* This instruction will set the register to be all
                  ones.  */
-	      tmp.X_op = O_constant;
-	      tmp.X_add_number = (offsetT) -1;
+	      expressionS tmp = { .X_op = O_constant, .X_add_number = -1 };
 	      macro_build (&tmp, "addiu", "t,r,j", reg, 0, BFD_RELOC_LO16);
 	      if (bit != 0)
 		{
@@ -9803,7 +9803,7 @@ load_address (int reg, expressionS *ep, int *used_at)
     }
   else if (!mips_big_got)
     {
-      expressionS ex;
+      expressionS ex = *ep;
 
       /* If this is a reference to an external symbol, we want
 	   lw		$reg,<sym>($gp)		(BFD_RELOC_MIPS_GOT16)
@@ -9821,7 +9821,6 @@ load_address (int reg, expressionS *ep, int *used_at)
 	{
 	  if (ep->X_add_number)
 	    {
-	      ex.X_add_number = ep->X_add_number;
 	      ep->X_add_number = 0;
 	      relax_start (ep->X_add_symbol);
 	      macro_build (ep, ADDRESS_LOAD_INSN, "t,o(b)", reg,
@@ -9841,7 +9840,6 @@ load_address (int reg, expressionS *ep, int *used_at)
 	}
       else
 	{
-	  ex.X_add_number = ep->X_add_number;
 	  ep->X_add_number = 0;
 	  macro_build (ep, ADDRESS_LOAD_INSN, "t,o(b)", reg,
 		       BFD_RELOC_MIPS_GOT16, mips_gp_register);
@@ -9864,7 +9862,7 @@ load_address (int reg, expressionS *ep, int *used_at)
     }
   else if (mips_big_got)
     {
-      expressionS ex;
+      expressionS ex = *ep;
 
       /* This is the large GOT case.  If this is a reference to an
 	 external symbol, we want
@@ -9884,7 +9882,6 @@ load_address (int reg, expressionS *ep, int *used_at)
       */
       if (HAVE_NEWABI)
 	{
-	  ex.X_add_number = ep->X_add_number;
 	  ep->X_add_number = 0;
 	  relax_start (ep->X_add_symbol);
 	  macro_build (ep, "lui", LUI_FMT, reg, BFD_RELOC_MIPS_GOT_HI16);
@@ -9911,7 +9908,6 @@ load_address (int reg, expressionS *ep, int *used_at)
 	}
       else
 	{
-	  ex.X_add_number = ep->X_add_number;
 	  ep->X_add_number = 0;
 	  relax_start (ep->X_add_symbol);
 	  macro_build (ep, "lui", LUI_FMT, reg, BFD_RELOC_MIPS_GOT_HI16);
@@ -10001,12 +9997,10 @@ load_got_offset (int dest, expressionS *local)
 static void
 add_got_offset (int dest, expressionS *local)
 {
-  expressionS global;
-
-  global.X_op = O_constant;
-  global.X_op_symbol = NULL;
-  global.X_add_symbol = NULL;
-  global.X_add_number = local->X_add_number;
+  expressionS global = {
+    .X_op = O_constant,
+    .X_add_number = local->X_add_number
+};
 
   relax_start (local->X_add_symbol);
   macro_build (&global, ADDRESS_ADDI_INSN, "t,r,j",
@@ -10019,13 +10013,11 @@ add_got_offset (int dest, expressionS *local)
 static void
 add_got_offset_hilo (int dest, expressionS *local, int tmp)
 {
-  expressionS global;
   int hold_mips_optimize;
-
-  global.X_op = O_constant;
-  global.X_op_symbol = NULL;
-  global.X_add_symbol = NULL;
-  global.X_add_number = local->X_add_number;
+  expressionS global = {
+    .X_op = O_constant,
+    .X_add_number = local->X_add_number
+  };
 
   relax_start (local->X_add_symbol);
   load_register (tmp, &global, HAVE_64BIT_ADDRESSES);
@@ -10079,12 +10071,12 @@ macro_build_branch_likely (const char *br, const char *brneg,
 			   unsigned int sreg, unsigned int treg)
 {
   int noreorder = mips_opts.noreorder;
-  expressionS expr1;
 
   gas_assert (mips_opts.micromips);
   start_noreorder ();
   if (noreorder)
     {
+      expressionS expr1 = { 0 };
       micromips_label_expr (&expr1);
       macro_build (&expr1, brneg, fmt, sreg, treg);
       macro_build (NULL, "nop", "");
@@ -10347,15 +10339,9 @@ macro (struct mips_cl_insn *ip, char *str)
 
   mask = ip->insn_mo->mask;
 
-  label_expr.X_op = O_constant;
-  label_expr.X_op_symbol = NULL;
-  label_expr.X_add_symbol = NULL;
-  label_expr.X_add_number = 0;
+  label_expr = (expressionS) { .X_op = O_constant };
 
-  expr1.X_op = O_constant;
-  expr1.X_op_symbol = NULL;
-  expr1.X_add_symbol = NULL;
-  expr1.X_add_number = 1;
+  expr1 = (expressionS) { .X_op = O_constant, .X_add_number = 1 };
   align = 1;
 
   switch (mask)
@@ -14046,10 +14032,7 @@ mips16_macro (struct mips_cl_insn *ip)
     else
       op[i] = -1;
 
-  expr1.X_op = O_constant;
-  expr1.X_op_symbol = NULL;
-  expr1.X_add_symbol = NULL;
-  expr1.X_add_number = 1;
+  expr1 = (expressionS) { .X_op = O_constant, .X_add_number = 1 };
 
   dbl = 0;
 
@@ -17007,11 +16990,11 @@ s_cpload (int ignore ATTRIBUTE_UNUSED)
      the default instruction sequence.  */
   in_shared = mips_in_shared || HAVE_64BIT_SYMBOLS;
 
-  ex.X_op = O_symbol;
-  ex.X_add_symbol = symbol_find_or_make (in_shared ? "_gp_disp" :
-                                         "__gnu_local_gp");
-  ex.X_op_symbol = NULL;
-  ex.X_add_number = 0;
+  ex = (expressionS) {
+    .X_op = O_symbol,
+    .X_add_symbol = symbol_find_or_make (in_shared ? "_gp_disp"
+					 : "__gnu_local_gp")
+  };
 
   /* In ELF, this symbol is implicitly an STT_OBJECT symbol.  */
   symbol_get_bfdsym (ex.X_add_symbol)->flags |= BSF_OBJECT;
@@ -17113,10 +17096,10 @@ s_cpsetup (int ignore ATTRIBUTE_UNUSED)
   macro_start ();
   if (mips_cpreturn_register == -1)
     {
-      ex_off.X_op = O_constant;
-      ex_off.X_add_symbol = NULL;
-      ex_off.X_op_symbol = NULL;
-      ex_off.X_add_number = mips_cpreturn_offset;
+      ex_off = (expressionS) {
+	.X_op = O_constant,
+	.X_add_number = mips_cpreturn_offset
+      };
 
       macro_build (&ex_off, "sd", "t,o(b)", mips_gp_register,
 		   BFD_RELOC_LO16, SP);
@@ -17139,12 +17122,10 @@ s_cpsetup (int ignore ATTRIBUTE_UNUSED)
     }
   else
     {
-      expressionS ex;
-
-      ex.X_op = O_symbol;
-      ex.X_add_symbol = symbol_find_or_make ("__gnu_local_gp");
-      ex.X_op_symbol = NULL;
-      ex.X_add_number = 0;
+      expressionS ex = {
+	.X_op = O_symbol,
+	.X_add_symbol = symbol_find_or_make ("__gnu_local_gp")
+      };
 
       /* In ELF, this symbol is implicitly an STT_OBJECT symbol.  */
       symbol_get_bfdsym (ex.X_add_symbol)->flags |= BSF_OBJECT;
@@ -17213,10 +17194,10 @@ s_cprestore (int ignore ATTRIBUTE_UNUSED)
   mips_cprestore_offset = get_absolute_expression ();
   mips_cprestore_valid = 1;
 
-  ex.X_op = O_constant;
-  ex.X_add_symbol = NULL;
-  ex.X_op_symbol = NULL;
-  ex.X_add_number = mips_cprestore_offset;
+  ex = (expressionS) {
+    .X_op = O_constant,
+    .X_add_number = mips_cprestore_offset
+  };
 
   mips_mark_labels ();
   mips_assembling_insn = true;
@@ -17265,10 +17246,10 @@ s_cpreturn (int ignore ATTRIBUTE_UNUSED)
   macro_start ();
   if (mips_cpreturn_register == -1)
     {
-      ex.X_op = O_constant;
-      ex.X_add_symbol = NULL;
-      ex.X_op_symbol = NULL;
-      ex.X_add_number = mips_cpreturn_offset;
+      ex = (expressionS) {
+	.X_op = O_constant,
+	.X_add_number = mips_cpreturn_offset
+      };
 
       macro_build (&ex, "ld", "t,o(b)", mips_gp_register, BFD_RELOC_LO16, SP);
     }
