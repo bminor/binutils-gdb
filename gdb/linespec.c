@@ -4059,6 +4059,7 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
 
   CORE_ADDR func_addr;
   bool is_function = msymbol_is_function (objfile, msymbol, &func_addr);
+  obj_section *section = msymbol->obj_section (objfile);
 
   if (is_function)
     {
@@ -4066,7 +4067,15 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
 
       if (msymbol->type () == mst_text_gnu_ifunc
 	  || msymbol->type () == mst_data_gnu_ifunc)
-	want_start_sal = gnu_ifunc_resolve_name (msym_name, &func_addr);
+	{
+	  want_start_sal = gnu_ifunc_resolve_name (msym_name, &func_addr);
+
+	  /* We have found a different pc by resolving the ifunc. The
+	     section from the minsym may not be the same as the ifunc
+	     implementation.  Do not trust it.  */
+	  if (want_start_sal)
+	    section = nullptr;
+	}
       else
 	want_start_sal = true;
     }
@@ -4074,7 +4083,7 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
   symtab_and_line sal;
 
   if (is_function && want_start_sal)
-    sal = find_function_start_sal (func_addr, self->funfirstline);
+    sal = find_function_start_sal (func_addr, section, self->funfirstline);
   else
     {
       sal.objfile = objfile;
@@ -4086,14 +4095,15 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
       else
 	sal.pc = msymbol->value_address (objfile);
       sal.pspace = current_program_space;
-    }
 
-  /* Don't use the section from the msymbol, the code above might have
-     adjusted FUNC_ADDR, in which case the msymbol's section might not be
-     the section containing FUNC_ADDR.  It might not even be in the same
-     objfile.  As the section is primarily to assist with overlay
-     debugging, it should reflect the SAL's pc value.  */
-  sal.section = find_pc_overlay (sal.pc);
+      /* The minsym does not correspond to an ifunc that could be
+	 resolved.  The section from the minsym may thus be trusted,
+	 and cannot be nullptr (since the minsym is from an objfile).
+	 Ensure all resulting sals have a non-null section when
+	 possible.  */
+      gdb_assert (section != nullptr);
+      sal.section = section;
+    }
 
   if (self->maybe_add_address (objfile->pspace (), sal.pc))
     add_sal_to_sals (self, result, sal, msymbol->natural_name (), false);

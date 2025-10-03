@@ -1,0 +1,53 @@
+# Copyright 2025 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test setting a breakpoint on a kernel symbol without debug info,
+# relying on minimal symbols from the ELF.
+
+# A bug occured when GDB did not find the appropriate architecture for
+# breakpoints on minimal symbols. This had the effect that the
+# breakpoint would not be hit on the GPU when no debugging infos are
+# available.
+
+load_lib rocm.exp
+
+standard_testfile .cpp
+
+require allow_hipcc_tests
+
+# Build for hip, explicitly without debug infos
+if {[build_executable "failed to prepare" $testfile $srcfile {hip nodebug}]} {
+    return
+}
+
+clean_restart
+
+with_rocm_gpu_lock {
+    gdb_test "file $::binfile" ".*No debugging symbols.*" "load file"
+
+    if {![runto_main]} {
+	return
+    }
+
+    gdb_test "with breakpoint pending on -- break kern" \
+	"Breakpoint $::decimal \\(kern\\) pending."
+
+    gdb_test "continue" \
+	"Thread $::decimal hit Breakpoint $::decimal, $::hex in kern.*"
+
+    gdb_test "continue" \
+	"Inferior 1 .* exited normally.*" \
+	"continue to end"
+}

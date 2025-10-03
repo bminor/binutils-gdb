@@ -1046,7 +1046,7 @@ elf_gnu_ifunc_resolver_return_stop (code_breakpoint *b)
 
   b->type = bp_breakpoint;
   update_breakpoint_locations (b, current_program_space,
-			       find_function_start_sal (resolved_pc, true),
+			       find_function_start_sal (resolved_pc, nullptr, true),
 			       {});
 }
 
