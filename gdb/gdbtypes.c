@@ -1821,12 +1821,18 @@ lookup_struct_elt (struct type *type, const char *name, int noerr)
 	}
       else if (!t_field_name || *t_field_name == '\0')
 	{
-	  struct_elt elt
-	    = lookup_struct_elt (type->field (i).type (), name, 1);
-	  if (elt.field != NULL)
+	  struct type *field_type = type->field (i).type ();
+	  enum type_code field_code = check_typedef (field_type)->code ();
+
+	  if (field_code == TYPE_CODE_STRUCT || field_code == TYPE_CODE_UNION)
 	    {
-	      elt.offset += type->field (i).loc_bitpos ();
-	      return elt;
+	      struct_elt elt
+		= lookup_struct_elt (type->field (i).type (), name, 1);
+	      if (elt.field != NULL)
+		{
+		  elt.offset += type->field (i).loc_bitpos ();
+		  return elt;
+		}
 	    }
 	}
     }

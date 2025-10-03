@@ -6261,10 +6261,12 @@ ada_is_ignored_field (struct type *type, int field_num)
   {
     const char *name = type->field (field_num).name ();
 
-    /* Anonymous field names should not be printed.
-       brobecker/2007-02-20: I don't think this can actually happen
-       but we don't want to print the value of anonymous fields anyway.  */
-    if (name == NULL)
+    /* Anonymous field names should not be printed.  */
+    if (name == nullptr || name[0] == '\0')
+      return 1;
+
+    /* Skip artificial fields.  */
+    if (type->field (field_num).is_artificial ())
       return 1;
 
     /* Normally, fields whose name start with an underscore ("_")

@@ -1,0 +1,95 @@
+# Copyright 2025 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test that Ada does not display artificial fields.
+
+load_lib dwarf.exp
+
+# This test can only be run on targets which support DWARF-2 and use gas.
+require dwarf2_support
+
+standard_testfile .c -dw.S
+
+# Make some DWARF for the test.
+set asm_file [standard_output_file $srcfile2]
+Dwarf::assemble $asm_file {
+    cu {} {
+	DW_TAG_compile_unit {
+	    DW_AT_language @DW_LANG_Ada95
+	    DW_AT_name fd.adb
+	    DW_AT_comp_dir /tmp
+	} {
+	    declare_labels byte array disc struct
+
+	    byte: DW_TAG_base_type {
+		DW_AT_byte_size 1 DW_FORM_sdata
+		DW_AT_encoding @DW_ATE_unsigned
+		DW_AT_name byte
+	    }
+
+	    struct: DW_TAG_structure_type {
+		DW_AT_name anonfield
+		DW_AT_byte_size 3 DW_FORM_sdata
+	    } {
+		DW_TAG_member {
+		    DW_AT_name one
+		    DW_AT_type :$byte
+		    DW_AT_data_member_location 0 DW_FORM_sdata
+		}
+		DW_TAG_member {
+		    DW_AT_name discr
+		    DW_AT_type :$byte
+		    DW_AT_data_member_location 1 DW_FORM_sdata
+		    DW_AT_artificial 1 DW_FORM_flag
+		}
+		DW_TAG_member {
+		    DW_AT_type :$byte
+		    DW_AT_data_member_location 1 DW_FORM_sdata
+		}
+		DW_TAG_member {
+		    DW_AT_name two
+		    DW_AT_type :$byte
+		    DW_AT_data_member_location 2 DW_FORM_sdata
+		}
+	    }
+
+	    DW_TAG_variable {
+		DW_AT_name "value"
+		DW_AT_type :$struct
+		DW_AT_external 1 DW_FORM_flag
+		DW_AT_location {
+		    DW_OP_addr [gdb_target_symbol "bytes"]
+		} SPECIAL_expr
+	    }
+	}
+    }
+}
+
+if {[prepare_for_testing ${testfile}.exp ${testfile} \
+	 [list $srcfile $asm_file] {nodebug}]} {
+    return
+}
+
+gdb_test_no_output "set language ada"
+
+gdb_test "print value" \
+    [string_to_regexp " = (one => 1, two => 3)"]
+
+gdb_test "ptype value" \
+    [multi_line \
+	 "type = record" \
+	 "    one: byte;" \
+	 "    two: byte;" \
+	 "end record"]
