@@ -39,6 +39,12 @@
    will point to the start of the expression.  */
 #define md_operand(x)
 
+/* X_md is managed by the backend.  */
+#define md_expr_init(exp) \
+  do memset ((exp), 0, offsetof (expressionS, X_md)); while (0)
+#define md_expr_init_rest(exp) \
+  do (exp)->X_md = 0; while (0)
+
 /* This should just call either `number_to_chars_bigendian' or
    `number_to_chars_littleendian', whichever is appropriate.  On
    targets like the MIPS which support options to change the

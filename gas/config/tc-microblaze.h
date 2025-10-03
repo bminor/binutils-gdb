@@ -57,6 +57,12 @@ extern bfd_reloc_code_real_type parse_cons_expression_microblaze
 #define tc_fix_adjustable(X)  tc_microblaze_fix_adjustable(X)
 extern int tc_microblaze_fix_adjustable (struct fix *);
 
+/* X_md is managed by the backend.  */
+#define md_expr_init(exp) \
+  do memset ((exp), 0, offsetof (expressionS, X_md)); while (0)
+#define md_expr_init_rest(exp) \
+  do (exp)->X_md = 0; while (0)
+
 extern const struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table
 
