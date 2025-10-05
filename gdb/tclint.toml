@@ -44,7 +44,6 @@ exclude = [
 "gdb/testsuite/lib/pascal.exp",
 "gdb/testsuite/lib/perftest.exp",
 "gdb/testsuite/lib/prelink-support.exp",
-"gdb/testsuite/lib/selftest-support.exp",
 "gdb/testsuite/lib/trace-support.exp",
 # IGNORE (document reason in trailing comment):
 "gdb/testsuite/gdb.stabs", # To be removed.
