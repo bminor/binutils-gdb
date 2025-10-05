@@ -37,7 +37,7 @@ proc gdb_scm_test_silent_cmd { cmd name {report_pass 1} } {
 	-re "Backtrace.*$gdb_prompt $" { fail $name }
 	-re "ERROR.*$gdb_prompt $"     { fail $name }
 	-re "Undefined command: .*$gdb_prompt $" { fail $name }
-	-re "$gdb_prompt $"            { if $report_pass { pass $name } }
+	-re "$gdb_prompt $"            { if {$report_pass} { pass $name } }
     }
 }
 
@@ -85,7 +85,7 @@ proc gdb_install_guile_module { } {
 # The result is the same as for runto_main.
 
 proc gdb_guile_runto_main { } {
-    if ![runto_main] {
+    if {![runto_main]} {
 	return 0
     }
 

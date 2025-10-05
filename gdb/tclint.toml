@@ -44,7 +44,6 @@ exclude = [
 "gdb/testsuite/lib/fortran.exp",
 "gdb/testsuite/lib/future.exp",
 "gdb/testsuite/lib/gdb.exp",
-"gdb/testsuite/lib/gdb-guile.exp",
 "gdb/testsuite/lib/gdbreplay-support.exp",
 "gdb/testsuite/lib/gdbserver-support.exp",
 "gdb/testsuite/lib/gdb-utils.exp",
