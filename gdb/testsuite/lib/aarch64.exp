@@ -78,7 +78,7 @@ proc initialize_1d_array { name byte elements } {
 	append data $byte
 
 	# If this isn't the last element, add a comma.
-	if {[expr $element + 1] < $elements} {
+	if {$element + 1 < $elements} {
 	    append data ", "
 	}
     }
@@ -101,7 +101,7 @@ proc initialize_2d_array { name byte rows columns } {
     set brace_open "{"
     set brace_close "}"
 
-    if {[expr $rows * $columns] <= 256} {
+    if {$rows * $columns <= 256} {
 	# Build the assignment in a single shot, as we have a maximum of 256
 	# elements.
 	for {set row 0} {$row < $rows} {incr row} {
@@ -111,7 +111,7 @@ proc initialize_2d_array { name byte rows columns } {
 		append data $byte
 
 		# If this isn't the last column, add a comma.
-		if {[expr $column + 1] < $columns} {
+		if {$column + 1 < $columns} {
 		    append data ", "
 		}
 	    }
@@ -119,7 +119,7 @@ proc initialize_2d_array { name byte rows columns } {
 	    append data $brace_close
 
 	    # If this isn't the last row, add a comma.
-	    if {[expr $row + 1] < $rows} {
+	    if {$row + 1 < $rows} {
 		append data ","
 	    }
 	}
