@@ -41,7 +41,8 @@ set ::debug_cp_test_ptype_class false
 proc cp_check_errata { expected_string actual_string errata_table } {
     foreach erratum $errata_table {
 	if { "$expected_string" == [lindex $erratum 0]
-	&&   "$actual_string"   == [lindex $erratum 1] } then {
+	     && "$actual_string" == [lindex $erratum 1] } {
+	    # tclint-disable-next-line command-args
 	    eval [lindex $erratum 2]
 	}
     }
@@ -156,7 +157,7 @@ namespace eval ::cp_support_internal {
 # format of the errata table.  Note: the errata entries are not subject to
 # demangler syntax adjustment, so you have to make a bigger table
 # with lines for each output variation.
-# 
+#
 # IN_PTYPE_ARG are arguments to pass to ptype.  The default is "/r".
 #
 # RECURSIVE_QID is used internally to call this procedure recursively
@@ -231,7 +232,7 @@ namespace eval ::cp_support_internal {
 #   gcc 3.4.1 -gstabs+
 #   gcc HEAD 20040731 -gdwarf-2
 #   gcc HEAD 20040731 -gstabs+
-# 
+#
 # TODO
 #
 # Tagless structs.
@@ -705,7 +706,7 @@ proc cp_test_ptype_class { in_exp in_testname in_key in_tag in_class_table
 
 		# Update the count in list_synth.
 
-		incr synth_count 
+		incr synth_count
 		set synth [list $synth_count $synth_access "$synth_re"]
 		set list_synth [lreplace $list_synth $isynth $isynth $synth]
 
