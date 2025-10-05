@@ -24,19 +24,19 @@
 # Used in many tests, kept here to avoid duplication.
 #
 
-if [is_amd64_regs_target] {
+if {[is_amd64_regs_target]} {
     set fpreg "rbp"
     set spreg "rsp"
     set pcreg "rip"
-} elseif [is_x86_like_target] {
+} elseif {[is_x86_like_target]} {
     set fpreg "ebp"
     set spreg "esp"
     set pcreg "eip"
-} elseif [is_aarch64_target] {
+} elseif {[is_aarch64_target]} {
     set fpreg "x29"
     set spreg "sp"
     set pcreg "pc"
-} elseif [istarget "powerpc*-*-*"] {
+} elseif {[istarget "powerpc*-*-*"]} {
     set fpreg "r31"
     set spreg "r1"
     set pcreg "pc"
@@ -109,7 +109,7 @@ proc gdb_target_supports_trace { } {
 # Procedure: gdb_delete_tracepoints
 # Many of the tests depend on setting tracepoints at various places and
 # running until that tracepoint is reached.  At times, we want to start
-# with a clean slate with respect to tracepoints, so this utility proc 
+# with a clean slate with respect to tracepoints, so this utility proc
 # lets us do this without duplicating this code everywhere.
 #
 
@@ -123,9 +123,9 @@ proc gdb_delete_tracepoints {} {
 	    exp_continue
 	}
 	-re ".*$gdb_prompt $" { # This happens if there were no tracepoints }
-	timeout { 
-	    perror "Delete all tracepoints in delete_tracepoints (timeout)" 
-	    return 
+	timeout {
+	    perror "Delete all tracepoints in delete_tracepoints (timeout)"
+	    return
 	}
     }
     send_gdb "info tracepoints\n"
@@ -174,7 +174,7 @@ proc gdb_trace_setactions_command { actions_command testname tracepoint args } {
 	-re "\(.*\)\[\r\n\]+\[ \t]*>$" {
 	    if { $expected_result != "" } {
 		regsub "^\[^\r\n\]+\[\r\n\]+" "$expect_out(1,string)" "" out
-		if ![regexp $expected_result $out] {
+		if {![regexp $expected_result $out]} {
 		    set passfail "fail"
 		}
 		set expected_result ""
@@ -192,7 +192,7 @@ proc gdb_trace_setactions_command { actions_command testname tracepoint args } {
 	}
 	-re "\(.*\)$gdb_prompt $" {
 	    if { $expected_result != "" } {
-		if ![regexp $expected_result $expect_out(1,string)] {
+		if {![regexp $expected_result $expect_out(1,string)]} {
 		    set passfail "fail"
 		}
 		set expected_result ""
@@ -232,7 +232,7 @@ proc gdb_trace_setcommands { testname tracepoint args } {
 #
 # Procedure: gdb_tfind_test
 #   Find a specified trace frame.
-#   Arguments: 
+#   Arguments:
 #	testname   -- identifying string for pass/fail output
 #	tfind_arg  -- frame (line, PC, etc.) identifier
 #	exp_res    -- Expected result of frame test
@@ -371,9 +371,9 @@ proc gdb_find_recursion_test_baseline { filename } {
 proc allow_in_proc_agent {} {
     global objdir
 
-    if [target_info exists in_proc_agent] {
+    if {[target_info exists in_proc_agent]} {
 	return 1
-    } elseif [file exists "$objdir/../../gdbserver/libinproctrace.so"] {
+    } elseif {[file exists "$objdir/../../gdbserver/libinproctrace.so"]} {
 	return 1
     } else {
 	return 0
@@ -385,7 +385,7 @@ proc allow_in_proc_agent {} {
 proc get_in_proc_agent {} {
     global objdir
 
-    if [target_info exists in_proc_agent] {
+    if {[target_info exists in_proc_agent]} {
 	return [target_info in_proc_agent]
     } else {
 	return $objdir/../../gdbserver/libinproctrace.so
@@ -403,7 +403,7 @@ proc generate_tracefile { binfile } {
 	# Alternatively, load the binary and run it.  If target doesn't
 	# have fileio capabilities, tracefile can't be generated.  Skip
 	# the test.
-	if [target_info exists gdb,nofileio] {
+	if {[target_info exists gdb,nofileio]} {
 	    return 0
 	}
 
