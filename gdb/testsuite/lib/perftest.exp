@@ -90,11 +90,12 @@ namespace eval PerfTest {
     proc assemble {compile startup run} {
 	global GDB_PERFTEST_MODE
 
-	if ![info exists GDB_PERFTEST_MODE] {
+	if {![info exists GDB_PERFTEST_MODE]} {
 	    return
 	}
 
 	if { [string compare $GDB_PERFTEST_MODE "run"] != 0 } {
+	    # tclint-disable-next-line command-args
 	    if { [eval compile {$compile}] } {
 		untested "failed to compile"
 		return
@@ -108,7 +109,8 @@ namespace eval PerfTest {
 
 	verbose -log "PerfTest::assemble, startup ..."
 
-	if [eval startup {$startup}] {
+	# tclint-disable-next-line command-args
+	if {[eval startup {$startup}]} {
 	    fail "startup"
 	    return
 	}
@@ -119,7 +121,8 @@ namespace eval PerfTest {
 
 	verbose -log "PerfTest::assemble, run ..."
 
-	if [eval run {$run}] {
+	# tclint-disable-next-line command-args
+	if {[eval run {$run}]} {
 	    fail "run"
 	}
 
@@ -134,7 +137,7 @@ namespace eval PerfTest {
 proc allow_perf_tests { } {
     global GDB_PERFTEST_MODE
 
-    if [info exists GDB_PERFTEST_MODE] {
+    if {[info exists GDB_PERFTEST_MODE]} {
 	if { "$GDB_PERFTEST_MODE" != "compile"
 	     && "$GDB_PERFTEST_MODE" != "run"
 	     && "$GDB_PERFTEST_MODE" != "both" } {
