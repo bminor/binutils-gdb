@@ -101,6 +101,7 @@ def get_method_matchers_in_loci(loci, locus_re, matcher_re):
         A dict of matching xmethod matchers.  The keys of the dict are the
         filenames of the loci the xmethod matchers belong to.
     """
+    file_style = gdb.Style("filename")
     xm_dict = {}
     for locus in loci:
         if isinstance(locus, gdb.Progspace):
@@ -111,7 +112,12 @@ def get_method_matchers_in_loci(loci, locus_re, matcher_re):
             if not locus_re.match(locus.filename):
                 continue
             locus_type = "objfile"
-        locus_str = "%s %s" % (locus_type, locus.filename)
+        filename = locus.filename
+        if filename is None:
+            filename = "<no-file>"
+        else:
+            filename = file_style.apply(filename)
+        locus_str = "%s %s" % (locus_type, filename)
         xm_dict[locus_str] = [m for m in locus.xmethods if matcher_re.match(m.name)]
     return xm_dict
 

@@ -161,9 +161,15 @@ class InfoPrettyPrinter(gdb.Command):
             name_re,
             subname_re,
         )
+        file_style = gdb.Style("filename")
         cp = gdb.current_progspace()
+        cp_filename = cp.filename
+        if cp_filename is None:
+            cp_filename = "<no-file>"
+        else:
+            cp_filename = file_style.apply(cp_filename)
         self.invoke1(
-            "progspace %s pretty-printers:" % cp.filename,
+            "progspace %s pretty-printers:" % cp_filename,
             cp.pretty_printers,
             "progspace",
             object_re,
@@ -172,7 +178,7 @@ class InfoPrettyPrinter(gdb.Command):
         )
         for objfile in gdb.objfiles():
             self.invoke1(
-                "objfile %s pretty-printers:" % objfile.filename,
+                "objfile %s pretty-printers:" % file_style.apply(objfile.filename),
                 objfile.pretty_printers,
                 objfile.filename,
                 object_re,

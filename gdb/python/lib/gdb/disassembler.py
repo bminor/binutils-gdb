@@ -155,9 +155,21 @@ class maint_info_py_disassemblers_cmd(gdb.Command):
         # Now print the dictionary of registered disassemblers out to
         # the user.
         match_tag = "\t(Matches current architecture)"
-        fmt_len = max(longest_arch_name, len("Architecture"))
-        format_string = "{:" + str(fmt_len) + "s} {:s}"
-        print(format_string.format("Architecture", "Disassember Name"))
+        arch_title = "Architecture"
+        fmt_len = max(longest_arch_name, len(arch_title))
+        format_string = "{:" + str(fmt_len) + "s}  {:s}"
+        padding_string = " " * (fmt_len - len(arch_title))
+        title_style = gdb.Style("title")
+        # We cannot use FORMAT_STRING to layout the title line, as
+        # Python is unable to calculate the length of a styled string.
+        # Instead use PADDING_STRING to manually layout the columns.
+        print(
+            "{:s}{:s}  {:s}".format(
+                title_style.apply(arch_title),
+                padding_string,
+                title_style.apply("Disassember Name"),
+            )
+        )
         for architecture in _disassemblers_dict:
             if architecture is not None:
                 name = _disassemblers_dict[architecture].name
