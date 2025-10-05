@@ -35,7 +35,6 @@ exclude = [
 "gdb/testsuite/config",
 "gdb/testsuite/lib/aarch64.exp",
 "gdb/testsuite/lib/aarch64-scalable.exp",
-"gdb/testsuite/lib/ada.exp",
 "gdb/testsuite/lib/cache.exp",
 "gdb/testsuite/lib/check-test-names.exp",
 "gdb/testsuite/lib/completion-support.exp",

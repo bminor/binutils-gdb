@@ -111,7 +111,7 @@ proc gdb_compile_ada_1 {source dest type options} {
     # gdb_compile to determine whether the build has succeeded or not.
     # We therefore simply check whether the dest file has been created
     # or not. Unless not present, the build has succeeded.
-    if [file exists $dest] { set result "" }
+    if {[file exists $dest]} { set result "" }
     return $result
 }
 
