@@ -33,7 +33,6 @@ exclude = [
 # TODO:
 "gdb/testsuite/boards",
 "gdb/testsuite/config",
-"gdb/testsuite/lib/aarch64-scalable.exp",
 "gdb/testsuite/lib/gdb.exp",
 # IGNORE (document reason in trailing comment):
 "gdb/testsuite/gdb.stabs", # To be removed.
