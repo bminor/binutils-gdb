@@ -35,7 +35,6 @@ exclude = [
 "gdb/testsuite/config",
 "gdb/testsuite/lib/aarch64.exp",
 "gdb/testsuite/lib/aarch64-scalable.exp",
-"gdb/testsuite/lib/dwarf.exp",
 "gdb/testsuite/lib/gdb.exp",
 "gdb/testsuite/lib/mi-support.exp",
 # IGNORE (document reason in trailing comment):

@@ -36,7 +36,7 @@ proc extract_dwo_information { object_file dwo_file } {
     set objcopy [gdb_find_objcopy]
     set command "$objcopy --extract-dwo $object_file $dwo_file"
     verbose -log "Executing $command"
-    set result [catch "exec $command" output]
+    set result [catch {exec {*}$command} output]
     verbose -log "objcopy --extract-dwo output: $output"
     if { $result == 1 } {
 	return -1
@@ -52,7 +52,7 @@ proc strip_dwo_information { filename } {
     set objcopy [gdb_find_objcopy]
     set command "$objcopy --strip-dwo $filename"
     verbose -log "Executing $command"
-    set result [catch "exec $command" output]
+    set result [catch {exec {*}$command} output]
     verbose -log "objcopy --strip-dwo output: $output"
     if { $result == 1 } {
 	return -1
@@ -126,7 +126,7 @@ proc build_executable_and_dwo_files { testname executable options args } {
     }
 
     # Must be run on local host due to use of objcopy.
-    if [is_remote host] {
+    if {[is_remote host]} {
 	return -1
     }
 
@@ -406,7 +406,7 @@ proc function_range { func src {options {debug}} } {
 	    set start $expect_out(1,string)
 	    set end $expect_out(2,string)
 
-	    set func_length [expr $func_length + $end - $start]
+	    set func_length [expr {$func_length + $end - $start}]
 	}
     }
 
@@ -610,6 +610,7 @@ namespace eval Dwarf {
 		# Create two procedures for the tag.  These call
 		# _handle_DW_TAG with the full tag name baked in; this
 		# does all the actual work.
+		# tclint-disable-next-line command-args
 		proc $name {{attrs {}} {children {}}} \
 		    "_handle_DW_TAG $name \$attrs \$children"
 
@@ -622,11 +623,13 @@ namespace eval Dwarf {
 		    error "duplicate proc name: from $name"
 		}
 
+		# tclint-disable-next-line command-args
 		proc $name2 {{attrs {}} {children {}}} \
 		    "_handle_DW_TAG $name \$attrs \$children"
 	    }
 
 	    AT {
+		# tclint-disable-next-line command-args
 		proc $name {value {form {}}} \
 		    "_handle_DW_AT $name \$value \$form"
 	    }
@@ -1187,6 +1190,7 @@ namespace eval Dwarf {
 	    upvar $name label_var
 	    set label_var [new_label $text]
 
+	    # tclint-disable-next-line command-args
 	    proc ${name}: {args} [format {
 		define_label %s
 		uplevel $args
@@ -1802,7 +1806,7 @@ namespace eval Dwarf {
 
 	parse_options {{"is-64" "false"}}
 
-	if [is_64_target] {
+	if {[is_64_target]} {
 	    set _debug_rnglists_addr_size 8
 	} else {
 	    set _debug_rnglists_addr_size 4
@@ -1990,7 +1994,7 @@ namespace eval Dwarf {
 
 	parse_options {{"is-64" "false"}}
 
-	if [is_64_target] {
+	if {[is_64_target]} {
 	    set _debug_loclists_addr_size 8
 	} else {
 	    set _debug_loclists_addr_size 4
@@ -2278,19 +2282,19 @@ namespace eval Dwarf {
 	set flags 0
 
 	if { ${is-64} } {
-	    set flags [expr $flags | 0x1]
+	    set flags [expr {$flags | 0x1}]
 	}
 	variable _mu_offset_size
-	set _mu_offset_size [expr ${is-64} ? 8 : 4]
+	set _mu_offset_size [expr {${is-64} ? 8 : 4}]
 
 	if { ${debug-line-offset-label} != "" } {
-	    set flags [expr $flags | 0x2]
+	    set flags [expr {$flags | 0x2}]
 	}
 
 	_op .byte $flags "flags"
 
 	if { ${debug-line-offset-label} != "" } {
-	    _op_offset [expr ${is-64} ? 8 : 4] ${debug-line-offset-label} \
+	    _op_offset [expr {${is-64} ? 8 : 4}] ${debug-line-offset-label} \
 		"debug_line offset"
 	}
 
@@ -2490,7 +2494,7 @@ namespace eval Dwarf {
 	    lappend _line_include_dirs $dirname
 
 	    if { $Dwarf::_line_unit_version >= 5 } {
-		return [expr [llength $_line_include_dirs] - 1]
+		return [expr {[llength $_line_include_dirs] - 1}]
 	    } else {
 		return [llength $_line_include_dirs]
 	    }
@@ -2503,9 +2507,9 @@ namespace eval Dwarf {
 	    variable _line_file_names
 	    lappend _line_file_names $filename $diridx
 
-	    set nr_filenames [expr [llength $_line_file_names] / 2]
+	    set nr_filenames [expr {[llength $_line_file_names] / 2}]
 	    if { $Dwarf::_line_unit_version >= 5 } {
-		return [expr $nr_filenames - 1]
+		return [expr {$nr_filenames - 1}]
 	    } else {
 		return $nr_filenames
 	    }
@@ -2553,7 +2557,7 @@ namespace eval Dwarf {
 				string_ptr:
 				_op .ascii [_quote $dirname]
 			    }
-			    _op_offset [expr $_line_is_64 ? 8 : 4] $string_ptr
+			    _op_offset [expr {$_line_is_64 ? 8 : 4}] $string_ptr
 			}
 		    }
 		}
@@ -2576,7 +2580,7 @@ namespace eval Dwarf {
 		_op .uleb128 0x0f \
 		    "file_name_entry_format (form: DW_FORM_udata)"
 
-		set nr_files [expr [llength $_line_file_names] / 2]
+		set nr_files [expr {[llength $_line_file_names] / 2}]
 		_op .byte $nr_files "file_names_count"
 
 		foreach { filename diridx } $_line_file_names {
@@ -2590,7 +2594,7 @@ namespace eval Dwarf {
 				string_ptr:
 				_op .ascii [_quote $filename]
 			    }
-			    _op_offset [expr $_line_is_64 ? 8 : 4] $string_ptr
+			    _op_offset [expr {$_line_is_64 ? 8 : 4}] $string_ptr
 			}
 		    }
 		    _op .uleb128 $diridx
@@ -2728,21 +2732,21 @@ namespace eval Dwarf {
 		variable _line
 		_op .byte 3 DW_LNS_advance_line
 		_op .sleb128 ${offset}
-		set _line [expr $_line + $offset]
+		set _line [expr {$_line + $offset}]
 	    }
 
 	    # A pseudo line number program instruction, that can be used instead
 	    # of DW_LNS_advance_line.  Rather than writing:
-	    #   {DW_LNS_advance_line [expr $line1 - 1]}
-	    #   {DW_LNS_advance_line [expr $line2 - $line1]}
-	    #   {DW_LNS_advance_line [expr $line3 - $line2]}
+	    #   {DW_LNS_advance_line [expr {$line1 - 1}]}
+	    #   {DW_LNS_advance_line [expr {$line2 - $line1}]}
+	    #   {DW_LNS_advance_line [expr {$line3 - $line2}]}
 	    # we can just write:
 	    #   {line $line1}
 	    #   {line $line2}
 	    #   {line $line3}
 	    proc line {line} {
 		variable _line
-		set offset [expr $line - $_line]
+		set offset [expr {$line - $_line}]
 		DW_LNS_advance_line $offset
 	    }
 
@@ -2904,12 +2908,12 @@ namespace eval Dwarf {
 	incr offset
 
 	# Padding.
-	set tuple_size [expr 2 * $_addr_size + $_seg_size]
+	set tuple_size [expr {2 * $_addr_size + $_seg_size}]
 	if {$tuple_size == 0} {
 	    set tuple_size 1
 	}
 	while { 1 } {
-	    if { [expr $offset % $tuple_size] == 0 } {
+	    if { $offset % $tuple_size == 0 } {
 		break
 	    }
 	    _op .byte 0 "Pad to $tuple_size byte boundary"
@@ -3069,8 +3073,8 @@ namespace eval Dwarf {
     }
 
     proc _note {type name hexdata} {
-	set namelen [expr [string length $name] + 1]
-	set datalen [expr [string length $hexdata] / 2]
+	set namelen [expr {[string length $name] + 1}]
+	set datalen [expr {[string length $hexdata] / 2}]
 
 	# Name size.
 	_op .4byte $namelen
@@ -3506,6 +3510,7 @@ namespace eval Dwarf {
 	    # Not "uplevel" here, because we want to evaluate in this
 	    # namespace.  This is somewhat bad because it means we can't
 	    # readily refer to outer variables.
+	    # tclint-disable-next-line command-args
 	    eval $body
 	}
 
