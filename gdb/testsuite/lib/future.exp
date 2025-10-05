@@ -27,11 +27,11 @@ proc gdb_find_gnatmake {} {
     set root "$tool_root_dir/gcc"
     set GM ""
 
-    if ![is_remote host] {
+    if {![is_remote host]} {
         set file [lookfor_file $root gnatmake]
         if { $file != "" } {
             set GM "$file -I$root/ada/rts --GCC=$root/xgcc --GNATBIND=$root/gnatbind --GNATLINK=$root/gnatlink -cargs -B$root -largs --GCC=$root/xgcc -margs";
-        }   
+        }
     }
 
     if {$GM == ""} {
@@ -39,7 +39,7 @@ proc gdb_find_gnatmake {} {
     }
 
     return $GM
-}   
+}
 
 proc gdb_find_gdc {} {
     global tool_root_dir
@@ -138,7 +138,7 @@ proc gdb_find_hipcc {} {
 
 proc gdb_find_ldd {} {
     global LDD_FOR_TARGET
-    if [info exists LDD_FOR_TARGET] {
+    if {[info exists LDD_FOR_TARGET]} {
 	set ldd $LDD_FOR_TARGET
     } else {
 	set ldd "ldd"
@@ -148,7 +148,7 @@ proc gdb_find_ldd {} {
 
 proc gdb_find_objcopy {} {
     global OBJCOPY_FOR_TARGET
-    if [info exists OBJCOPY_FOR_TARGET] {
+    if {[info exists OBJCOPY_FOR_TARGET]} {
 	set objcopy $OBJCOPY_FOR_TARGET
     } else {
 	set objcopy [transform objcopy]
@@ -159,7 +159,7 @@ proc gdb_find_objcopy {} {
 # find target objdump
 proc gdb_find_objdump {} {
     global OBJDUMP_FOR_TARGET
-    if [info exists OBJDUMP_FOR_TARGET] {
+    if {[info exists OBJDUMP_FOR_TARGET]} {
 	set objdump $OBJDUMP_FOR_TARGET
     } else {
 	set objdump [transform objdump]
@@ -169,7 +169,7 @@ proc gdb_find_objdump {} {
 
 proc gdb_find_readelf {} {
     global READELF_FOR_TARGET
-    if [info exists READELF_FOR_TARGET] {
+    if {[info exists READELF_FOR_TARGET]} {
 	set readelf $READELF_FOR_TARGET
     } else {
 	set readelf [transform readelf]
@@ -179,7 +179,7 @@ proc gdb_find_readelf {} {
 
 proc gdb_find_eu-unstrip {} {
     global EU_UNSTRIP_FOR_TARGET
-    if [info exists EU_UNSTRIP_FOR_TARGET] {
+    if {[info exists EU_UNSTRIP_FOR_TARGET]} {
 	set eu_unstrip $EU_UNSTRIP_FOR_TARGET
     } else {
 	set eu_unstrip [transform eu-unstrip]
@@ -482,7 +482,7 @@ proc gdb_default_target_compile_1 {source destfile type options} {
 	}
 	if {[isnative]} {
 	    # This is a lose.
-	    catch "glob -nocomplain $tool_root_dir/libstdc++/libstdc++.so* $tool_root_dir/libstdc++/libstdc++.sl" tmp
+	    catch {glob -nocomplain $tool_root_dir/libstdc++/libstdc++.so* $tool_root_dir/libstdc++/libstdc++.sl} tmp
 	    if { ${tmp} != "" } {
 		if {[regexp ".*solaris2.*" $target_triplet]} {
 		    # Solaris 2
