@@ -18,7 +18,7 @@
 # Return true if the debuginfod tests should be run, otherwise, return
 # false.
 proc allow_debuginfod_tests {} {
-    if [is_remote host] {
+    if {[is_remote host]} {
 	return false
     }
 
@@ -189,7 +189,7 @@ proc start_debuginfod { db debugdir } {
 proc stop_debuginfod { } {
     global debuginfod_spawn_id
 
-    if [info exists debuginfod_spawn_id] {
+    if {[info exists debuginfod_spawn_id]} {
 	kill_wait_spawned_process $debuginfod_spawn_id
 	unset debuginfod_spawn_id
     }
