@@ -43,7 +43,6 @@ exclude = [
 "gdb/testsuite/lib/gdbserver-support.exp",
 "gdb/testsuite/lib/gdb-utils.exp",
 "gdb/testsuite/lib/gen-perf-test.exp",
-"gdb/testsuite/lib/jit-elf-helpers.exp",
 "gdb/testsuite/lib/mi-support.exp",
 "gdb/testsuite/lib/objc.exp",
 "gdb/testsuite/lib/pascal.exp",

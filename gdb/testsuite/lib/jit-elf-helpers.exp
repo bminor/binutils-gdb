@@ -91,7 +91,7 @@ proc compile_and_download_n_jit_so {jit_solib_basename jit_solib_srcfile \
 	# do symbol renaming by munging on ELF symbol table, and that
 	# wouldn't work for .debug sections.  Also, output for "info
 	# function" changes when debug info is present.
-	set addr [format 0x%x [expr $jit_load_address + $jit_load_increment * [expr $i-1]]]
+	set addr [format 0x%x [expr {$jit_load_address + $jit_load_increment * ($i - 1)}]]
 
 	# Use "text_segment=..." to ask the linker to relocate everything in the
 	# compiled shared library against a fixed base address.  Combined
