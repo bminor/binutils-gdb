@@ -30,7 +30,7 @@
 #
 #   set_board_info sockethost
 #	The name of the host computer whose socket is being used.
-#	Defaults to "localhost".  Note: old gdbserver requires 
+#	Defaults to "localhost".  Note: old gdbserver requires
 #	that you define this, but libremote/gdbserver does not.
 #
 #   set_board_info gdb,socketport
@@ -126,7 +126,7 @@ proc gdb_target_cmd_ext { targetname serialport {additional_text ""} } {
 
 proc gdb_target_cmd { args } {
     set res [gdb_target_cmd_ext {*}$args]
-    return [expr $res == 0 ? 0 : 1]
+    return [expr {$res == 0 ? 0 : 1}]
 }
 
 # Return a usable port number.
@@ -174,7 +174,7 @@ proc get_portnum {} {
 	    set portnum $initial_portnum
 	}
 
-	set next_portnum [expr $portnum + 1]
+	set next_portnum [expr {$portnum + 1}]
 
 	set fd [open $portnum_file w]
 	puts $fd $next_portnum
@@ -190,11 +190,11 @@ proc find_gdbserver { } {
   global GDB
   global GDBSERVER
 
-  if [info exists GDBSERVER] {
+  if {[info exists GDBSERVER]} {
     return ${GDBSERVER}
   }
 
-  if [target_info exists gdb_server_prog] {
+  if {[target_info exists gdb_server_prog]} {
     return [target_info gdb_server_prog]
   }
 
@@ -315,7 +315,7 @@ proc gdbserver_start { options arguments } {
 	# have the possible connection prefix stripped.  This is
 	# because gdbserver currently doesn't recognize the prefixes.
 	regsub -all "^\(tcp:|udp:|tcp4:|udp4:|tcp6:|udp6:\)" $debughost_tmp "" debughost_gdbserver
-    } elseif [target_info exists sockethost] {
+    } elseif {[target_info exists sockethost]} {
 	set debughost [target_info sockethost]
 	set debughost_gdbserver $debughost
     } else {
@@ -326,19 +326,19 @@ proc gdbserver_start { options arguments } {
     # Some boards use a different value for the port that is passed to
     # gdbserver and the port that is passed to the "target remote" command.
     # One example is the stdio gdbserver support.
-    if [target_info exists gdb,get_remote_address] {
+    if {[target_info exists gdb,get_remote_address]} {
 	set get_remote_address [target_info gdb,get_remote_address]
     } else {
 	set get_remote_address gdbserver_default_get_remote_address
     }
-    if [target_info exists gdbserver,get_comm_port] {
+    if {[target_info exists gdbserver,get_comm_port]} {
 	set get_comm_port [target_info gdbserver,get_comm_port]
     } else {
 	set get_comm_port gdbserver_default_get_comm_port
     }
 
     # Extract the protocol
-    if [target_info exists gdb_protocol] {
+    if {[target_info exists gdb_protocol]} {
 	set protocol [target_info gdb_protocol]
     } else {
 	set protocol "remote"
@@ -362,7 +362,7 @@ proc gdbserver_start { options arguments } {
 	}
 
 	# Enable debug if set.
-	if [gdbserver_debug_enabled] {
+	if {[gdbserver_debug_enabled]} {
 	    global gdbserverdebug
 	    set enabled 0
 	    foreach entry [split $gdbserverdebug ,] {
@@ -490,13 +490,13 @@ proc close_gdbserver {} {
 
     verbose "Quitting GDBserver"
 
-    catch "close -i $server_spawn_id"
+    catch {close -i $server_spawn_id}
 
     # If gdbserver misbehaves, and ignores the close, waiting for it
     # without the -nowait flag will cause testing to hang.  Passing
     # -nowait makes expect tell Tcl to wait for the process in the
     # background.
-    catch "wait -nowait -i $server_spawn_id"
+    catch {wait -nowait -i $server_spawn_id}
     clean_up_spawn_id target $server_spawn_id
     unset server_spawn_id
 }
@@ -710,11 +710,11 @@ proc gdbserver_debug_enabled { } {
     global gdbserverdebug
 
     # If not already read, get the debug setting from environment or board setting.
-    if ![info exists gdbserverdebug] {
+    if {![info exists gdbserverdebug]} {
 	global env
-	if [info exists env(GDBSERVER_DEBUG)] {
+	if {[info exists env(GDBSERVER_DEBUG)]} {
 	    set gdbserverdebug $env(GDBSERVER_DEBUG)
-	} elseif [target_info exists gdbserver,debug] {
+	} elseif {[target_info exists gdbserver,debug]} {
 	    set gdbserverdebug [target_info gdbserver,debug]
 	} else {
 	    return 0
@@ -731,7 +731,7 @@ proc gdbserver_write_cmd_file { cmdline } {
     set logfile [standard_output_file_with_gdb_instance gdbserver.cmd]
     set cmd_file [open $logfile w]
     puts $cmd_file $cmdline
-    catch "close $cmd_file"
+    catch {close $cmd_file}
 }
 
 # Override gdb_debug_init so that we can set replay logging in GDB if required.
@@ -743,7 +743,7 @@ proc gdb_debug_init { } {
     global gdbserverdebug
     global gdb_prompt
 
-    if [gdbserver_debug_enabled] {
+    if {[gdbserver_debug_enabled]} {
       foreach entry [split $gdbserverdebug ,] {
 	if { $entry == "replay" || $entry == "all"} {
 	  set replayfile [standard_output_file_with_gdb_instance gdbserver.replay]
