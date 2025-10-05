@@ -400,7 +400,7 @@ proc index_after {needle haystack} {
     if {$start == -1} {
 	error "could not find \"$needle\" in \"$haystack\""
     }
-    return [expr $start + [string length $needle]]
+    return [expr {$start + [string length $needle]}]
 }
 
 # Create a breakpoint using BREAK_COMMAND, and return the number
