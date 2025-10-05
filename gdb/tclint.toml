@@ -41,7 +41,6 @@ exclude = [
 "gdb/testsuite/lib/gen-perf-test.exp",
 "gdb/testsuite/lib/mi-support.exp",
 "gdb/testsuite/lib/pascal.exp",
-"gdb/testsuite/lib/prelink-support.exp",
 # IGNORE (document reason in trailing comment):
 "gdb/testsuite/gdb.stabs", # To be removed.
 "gdb/testsuite/lib/ton.tcl", # Imported.

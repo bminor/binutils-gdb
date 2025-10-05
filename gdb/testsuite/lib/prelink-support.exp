@@ -27,7 +27,7 @@ proc symlink_resolve {file} {
 	verbose -log "Resolved symlink $file targeting $target as $src2"
 	set file $src2
 
-	set loop [expr $loop + 1]
+	set loop [expr {$loop + 1}]
 	if {$loop > 30} {
 	    fail "looping symlink resolution for $file"
 	    return ""
@@ -49,7 +49,7 @@ proc file_copy {src dest} {
     set test "copy [file tail $src] to [file tail $dest]"
     set command "file copy -force -- $src $dest"
     verbose -log "command is $command"
-    if [catch $command] {
+    if {[catch {{*}$command}]} {
 	fail $test
 	return 0
     } else {
@@ -99,7 +99,7 @@ proc build_executable_own_libs {testname executable sources options {interp ""} 
     set ldd [gdb_find_ldd]
     set command "$ldd $binfile"
     set test "ldd $executable"
-    set result [catch "exec $command" output]
+    set result [catch {exec {*}$command} output]
     verbose -log "result of $command is $result"
     verbose -log "output of $command is $output"
     if {$result != 0 || $output == ""} {
@@ -173,7 +173,7 @@ proc prelink_no {arg {name {}}} {
     set test "unprelink $name"
     set command "exec /usr/sbin/prelink -uN $arg"
     verbose -log "command is $command"
-    set result [catch $command output]
+    set result [catch {{*}$command} output]
     verbose -log "result is $result"
     verbose -log "output is $output"
     if {$result == 1 && [regexp {^(couldn't execute "/usr/sbin/prelink[^\r\n]*": no such file or directory\n?)*$} $output]} {
@@ -182,14 +182,14 @@ proc prelink_no {arg {name {}}} {
 	# have already been prelinked).
 	set test "$test (missing /usr/sbin/prelink)"
 	foreach bin [split $arg] {
-	    if [string match "-*" $bin] {
+	    if {[string match "-*" $bin]} {
 		# Skip prelink options.
 		continue
 	    }
 	    set readelf_program [gdb_find_readelf]
 	    set command "exec $readelf_program -WS $bin"
 	    verbose -log "command is $command"
-	    set result [catch $command output]
+	    set result [catch {{*}$command} output]
 	    verbose -log "result is $result"
 	    verbose -log "output is $output"
 	    if {$result != 0 || [string match {* .gnu.prelink_undo *} $output]} {
@@ -204,7 +204,7 @@ proc prelink_no {arg {name {}}} {
 	verbose -log "$name has been now unprelinked"
 	set command "exec /usr/sbin/prelink -uN $arg"
 	verbose -log "command is $command"
-	set result [catch $command output]
+	set result [catch {{*}$command} output]
 	verbose -log "result is $result"
 	verbose -log "output is $output"
     }
@@ -230,7 +230,7 @@ proc prelink_yes {arg {name ""}} {
     # Try to unprelink it first so that, if it has been already prelinked
     # before, we get a different address now, making the new result unaffected
     # by any previous prelinking.
-    if ![prelink_no $arg "$name pre-unprelink"] {
+    if {![prelink_no $arg "$name pre-unprelink"]} {
 	return 0
     }
 
@@ -251,7 +251,7 @@ proc prelink_yes {arg {name ""}} {
     set command "exec /usr/sbin/prelink -qNR --no-exec-shield $arg"
 
     verbose -log "command is $command"
-    set result [catch $command output]
+    set result [catch {{*}$command} output]
     verbose -log "result is $result"
     verbose -log "output is $output"
     if {$result == 1 && [regexp {^(couldn't execute "/usr/sbin/prelink[^\r\n]*": no such file or directory\n?)*$} $output]} {
