@@ -278,6 +278,7 @@ proc gdb_do_cache {name args} {
 proc gdb_caching_proc {name arglist body} {
     # Define the underlying proc that we'll call.
     set real_name gdb_real__$name
+    # tclint-disable-next-line command-args
     proc $real_name $arglist $body
 
     # Define the advertised proc.
@@ -286,5 +287,6 @@ proc gdb_caching_proc {name arglist body} {
 	lappend caching_proc_body $$arg
     }
     set caching_proc_body [join $caching_proc_body]
+    # tclint-disable-next-line command-args
     proc $name $arglist $caching_proc_body
 }
