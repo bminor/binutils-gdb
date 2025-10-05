@@ -26,9 +26,18 @@ from importlib import reload
 # Note that two indicators are needed here to silence flake8.
 from _gdb import *  # noqa: F401,F403
 from _gdb import (
+    COMMAND_NONE,
+    INTENSITY_BOLD,
+    INTENSITY_DIM,
+    INTENSITY_NORMAL,
+    PARAM_COLOR,
+    PARAM_ENUM,
     STDERR,
     STDOUT,
+    Color,
     Command,
+    Parameter,
+    Style,
     execute,
     flush,
     parameter,
