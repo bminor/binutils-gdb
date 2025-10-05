@@ -45,7 +45,7 @@ proc gdbreplay_write_cmd_file { cmdline } {
     set logfile [standard_output_file_with_gdb_instance gdbreplay.cmd]
     set cmd_file [open $logfile w]
     puts $cmd_file $cmdline
-    catch "close $cmd_file"
+    catch {close $cmd_file}
 }
 
 # Start gdbreplay using REMOTELOG as the log file.  Return a list of
@@ -57,7 +57,7 @@ proc gdbreplay_start { remotelog } {
     set portnum [get_portnum]
 
     # Extract the protocol
-    if [target_info exists gdb_protocol] {
+    if {[target_info exists gdb_protocol]} {
 	set protocol [target_info gdb_protocol]
     } else {
 	set protocol "remote"
