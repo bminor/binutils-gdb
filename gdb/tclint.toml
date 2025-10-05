@@ -40,7 +40,6 @@ exclude = [
 "gdb/testsuite/lib/cp-support.exp",
 "gdb/testsuite/lib/debuginfod-support.exp",
 "gdb/testsuite/lib/d-support.exp",
-"gdb/testsuite/lib/dtrace.exp",
 "gdb/testsuite/lib/dwarf.exp",
 "gdb/testsuite/lib/fortran.exp",
 "gdb/testsuite/lib/future.exp",

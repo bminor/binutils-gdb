@@ -32,7 +32,7 @@
 # This function returns -1 on failure, 0 otherwise
 proc dtrace_build_usdt_test_program {} {
     global testfile hex objdir srcdir srcfile subdir binfile
-    
+
     # Make sure that dtrace is installed, it is the real one (not the
     # script installed by SystemTap, for example) and of the right
     # version (>= 0.4.0).  If it is not then use pdtrace instead.
