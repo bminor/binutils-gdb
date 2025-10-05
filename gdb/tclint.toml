@@ -36,7 +36,6 @@ exclude = [
 "gdb/testsuite/lib/aarch64.exp",
 "gdb/testsuite/lib/aarch64-scalable.exp",
 "gdb/testsuite/lib/gdb.exp",
-"gdb/testsuite/lib/mi-support.exp",
 # IGNORE (document reason in trailing comment):
 "gdb/testsuite/gdb.stabs", # To be removed.
 "gdb/testsuite/lib/ton.tcl", # Imported.
