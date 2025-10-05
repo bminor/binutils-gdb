@@ -47,7 +47,6 @@ exclude = [
 "gdb/testsuite/lib/pascal.exp",
 "gdb/testsuite/lib/perftest.exp",
 "gdb/testsuite/lib/prelink-support.exp",
-"gdb/testsuite/lib/prompt.exp",
 "gdb/testsuite/lib/rust-support.exp",
 "gdb/testsuite/lib/selftest-support.exp",
 "gdb/testsuite/lib/trace-support.exp",

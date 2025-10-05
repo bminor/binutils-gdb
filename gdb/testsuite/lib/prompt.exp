@@ -44,11 +44,11 @@ proc default_prompt_gdb_start { } {
     verbose "Spawning $GDB $INTERNAL_GDBFLAGS $GDBFLAGS"
     gdb_write_cmd_file "$GDB $INTERNAL_GDBFLAGS $GDBFLAGS"
 
-    if [info exists gdb_spawn_id] {
+    if {[info exists gdb_spawn_id]} {
 	return 0
     }
 
-    if ![is_remote host] {
+    if {![is_remote host]} {
 	if {[which $GDB] == 0} {
 	    perror "$GDB does not exist."
 	    exit 1
