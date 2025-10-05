@@ -20,11 +20,12 @@
 # The result is 1 (true) for success, 0 (false) for failure.
 
 proc set_lang_go {} {
-    if [gdb_test_no_output "set language go"] {
+    if {[gdb_test_no_output "set language go"]} {
 	return 0
     }
-    if [gdb_test "show language" ".* source language is \"go\"." \
-	   "set language to \"go\""] {
+    if {[gdb_test "show language" \
+	     [string_to_regexp {The current source language is "go".}] \
+	     {set language to "go"}]} {
 	return 0
     }
     return 1
