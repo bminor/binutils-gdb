@@ -97,7 +97,7 @@ namespace eval ::CheckTestNames {
 	set pos [string first ": " $message]
 	if { $pos > -1 } {
 	    # The '+ 2' is so we skip the ': ' we found above.
-	    return  [string range $message [expr $pos + 2] end]
+	    return  [string range $message [expr {$pos + 2}] end]
 	}
 
 	return $message
@@ -120,11 +120,11 @@ namespace eval ::CheckTestNames {
     proc check { message } {
 	set message [ _strip_status $message ]
 
-	if [ _check_paths $message ] {
+	if {[ _check_paths $message ]} {
 	    clone_output "PATH: $message"
 	}
 
-	if [ _check_duplicates $message ] {
+	if {[ _check_duplicates $message ]} {
 	    clone_output "DUPLICATE: $message"
 	}
 
