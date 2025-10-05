@@ -26,11 +26,11 @@ set pascal_init_done 0
 # Second, environment variable FPC is checked
 # if present, Free Pascal compiler is assumed to be the value of
 # that environment variable.
-# Third, gpc executable is searched using `which gpc`  
-# Lastly, fpc executable is searched using `which fpc` 
+# Third, gpc executable is searched using `which gpc`
+# Lastly, fpc executable is searched using `which fpc`
 # Using environment variable allows to force
 # which compiler is used in testsuite
- 
+
 proc pascal_init {} {
     global pascal_init_done
     gdb_persistent_global pascal_compiler_is_gpc
@@ -38,7 +38,7 @@ proc pascal_init {} {
     gdb_persistent_global gpc_compiler
     gdb_persistent_global fpc_compiler
     global env
- 
+
     if { $pascal_init_done == 1 } {
 	return
     }
@@ -48,7 +48,7 @@ proc pascal_init {} {
     set gpc_compiler [transform gpc]
     set fpc_compiler [transform fpc]
 
-    if ![is_remote host] {
+    if {![is_remote host]} {
 	if { [info exists env(GPC)] } {
 	    set pascal_compiler_is_gpc 1
 	    set gpc_compiler $env(GPC)
@@ -66,7 +66,7 @@ proc pascal_init {} {
 	}
     }
     set pascal_init_done 1
-}   
+}
 
 proc gpc_compile {source destfile type options} {
     global gpc_compiler
@@ -80,21 +80,21 @@ proc gpc_compile {source destfile type options} {
     if { $type == "preprocess" } {
 	append add_flags " -E"
     }
-    
+
     if { $type == "assembly" } {
 	append add_flags " -S"
     }
 
     foreach i $options {
 	if { $i == "debug" } {
-	    if [board_info $dest exists debug_flags] {
+	    if {[board_info $dest exists debug_flags]} {
 		append add_flags " [board_info $dest debug_flags]"
 	    } else {
 		append add_flags " -g"
 	    }
 	}
 	if { $i == "class" } {
-	    if [board_info $dest exists pascal_class_flags] {
+	    if {[board_info $dest exists pascal_class_flags]} {
 		append add_flags " [board_info $dest pascal_class_flags]"
 	    } else {
 		append add_flags " --extended-syntax"
@@ -118,21 +118,21 @@ proc fpc_compile {source destfile type options} {
     if { $type == "preprocess" } {
 	return "Free Pascal can not preprocess"
     }
-    
+
     if { $type == "assembly" } {
 	append add_flags " -al"
     }
 
     foreach i $options {
 	if { $i == "debug" } {
-	    if [board_info $dest exists debug_flags] {
+	    if {[board_info $dest exists debug_flags]} {
 		append add_flags " [board_info $dest debug_flags]"
 	    } else {
 		append add_flags " -g"
 	    }
 	}
 	if { $i == "class" } {
-	    if [board_info $dest exists pascal_class_flags] {
+	    if {[board_info $dest exists pascal_class_flags]} {
 		append add_flags " [board_info $dest pascal_class_flags]"
 	    } else {
 		append add_flags " -Mobjfpc"
@@ -149,7 +149,7 @@ proc gdb_compile_pascal {source destfile type options} {
     global pascal_compiler_is_gpc
     global pascal_compiler_is_fpc
 
-    if { $pascal_init_done == 0 } { 
+    if { $pascal_init_done == 0 } {
 	pascal_init
     }
 
@@ -164,7 +164,7 @@ proc gdb_compile_pascal {source destfile type options} {
 	return "No pascal compiler. Compilation failed."
     }
 
-    if ![file exists $destfile] {
+    if {![file exists $destfile]} {
         unsupported "Pascal compilation failed: $result"
         return "Pascal compilation failed."
     }
@@ -174,11 +174,12 @@ proc gdb_compile_pascal {source destfile type options} {
 # The result is 1 (true) for success, 0 (false) for failure.
 
 proc set_lang_pascal {} {
-    if [gdb_test_no_output "set language pascal"] {
+    if {[gdb_test_no_output "set language pascal"]} {
 	return 0
     }
-    if [gdb_test "show language" ".* source language is \"pascal\"." \
-	   "set language to \"pascal\""] {
+    if {[gdb_test "show language" \
+	     [string_to_regexp {The current source language is "pascal".}] \
+	     {set language to "pascal"}]} {
 	return 0
     }
     return 1
