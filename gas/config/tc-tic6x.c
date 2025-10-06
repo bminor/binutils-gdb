@@ -4625,8 +4625,7 @@ tic6x_start_unwind_section (const segT text_seg, int idx)
   text_name = segment_name (text_seg);
   if (streq (text_name, ".text"))
     text_name = "";
-
-  if (startswith (text_name, ".gnu.linkonce.t."))
+  else if (startswith (text_name, ".gnu.linkonce.t."))
     {
       prefix = prefix_once;
       text_name += strlen (".gnu.linkonce.t.");
