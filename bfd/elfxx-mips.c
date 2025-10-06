@@ -3459,8 +3459,21 @@ mips_elf_count_got_entry (struct bfd_link_info *info,
 					entry->symndx < 0
 					? &entry->d.h->root : NULL);
     }
-  else if (entry->symndx >= 0 || entry->d.h->global_got_area == GGA_NONE)
+  else if (entry->symndx >= 0)
     g->local_gotno += 1;
+  else if (entry->d.h->global_got_area == GGA_NONE)
+    {
+      /* On VxWorks, calls can refer directly to the .got.plt entry,
+	 in which case they won't have an entry in the regular GOT.
+	 This is arranged for in `mips_elf_count_got_symbols' and we
+	 need to refrain from counting these entries for the regular
+	 GOT here.  */
+      if (mips_elf_hash_table (info)->root.target_os != is_vxworks
+	  || entry->d.h->root.dynindx == -1
+	  || !entry->d.h->got_only_for_calls
+	  || entry->d.h->root.plt.plist->mips_offset == MINUS_ONE)
+	g->local_gotno += 1;
+    }
   else
     g->global_gotno += 1;
 }
