@@ -1264,7 +1264,7 @@ static reloc_howto_type elf_mips_howto_table_rela[] =
 
   /* Get the higher value of a 64 bit addend.  */
   HOWTO (R_MIPS_HIGHER,		/* type */
-	 0,			/* rightshift */
+	 32,			/* rightshift */
 	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
@@ -1279,7 +1279,7 @@ static reloc_howto_type elf_mips_howto_table_rela[] =
 
   /* Get the highest value of a 64 bit addend.  */
   HOWTO (R_MIPS_HIGHEST,	/* type */
-	 0,			/* rightshift */
+	 48,			/* rightshift */
 	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
@@ -1294,7 +1294,7 @@ static reloc_howto_type elf_mips_howto_table_rela[] =
 
   /* High 16 bits of displacement in global offset table.  */
   HOWTO (R_MIPS_CALL_HI16,	/* type */
-	 0,			/* rightshift */
+	 16,			/* rightshift */
 	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
