@@ -160,7 +160,7 @@ int main (void)
 			  &err);
 
   fde_cnt = sframe_encoder_get_num_fidx (encode);
-  TEST (fde_cnt == 0, "encode-1: Encoder FDE count");
+  TEST (fde_cnt == 0, "encode-1: Encoder FDE count at init");
 
   err = sframe_encoder_add_fre (encode, 1, &frep);
   TEST (err == SFRAME_ERR, "encode-1: Encoder update workflow");
@@ -175,7 +175,7 @@ int main (void)
   TEST (err == 0, "encode-1: Encoder adding FDE2");
 
   fde_cnt = sframe_encoder_get_num_fidx (encode);
-  TEST (fde_cnt == 2, "encode-1: Encoder FDE count");
+  TEST (fde_cnt == 2, "encode-1: Encoder FDE count post addition");
 
   sframe_buf = sframe_encoder_write (encode, &sf_size, &err);
   TEST (err == 0, "encode-1: Encoder write");
