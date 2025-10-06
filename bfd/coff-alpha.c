@@ -2204,6 +2204,8 @@ alpha_ecoff_get_elt_at_filepos (bfd *archive, file_ptr filepos,
 	  if (left == 0)
 	    break;
 	}
+      if (left != 0)
+	goto error_return;
     }
 
   /* Now the uncompressed file contents are in buf.  */
