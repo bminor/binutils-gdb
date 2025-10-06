@@ -304,7 +304,7 @@ struct vms_private_data_struct
 
   /* Content reading.  */
   asection *image_section;		/* section for image_ptr  */
-  file_ptr image_offset;		/* Offset for image_ptr.  */
+  ufile_ptr image_offset;		/* Offset for image_ptr.  */
 
   struct module *modules;		/* list of all compilation units */
 
