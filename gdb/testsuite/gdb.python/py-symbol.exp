@@ -70,36 +70,14 @@ gdb_test "python print (gdb.lookup_global_symbol('qq').needs_frame)" \
     "print whether qq needs a frame"
 
 # Similarly, test looking up a static symbol before we runto_main.
-set rr_line [gdb_get_line_number "line of rr"]
-set rr_line_alt [gdb_get_line_number "line of other rr" py-symbol-2.c]
 gdb_test "python print (gdb.lookup_global_symbol ('qqrr') is None)" "True" \
     "lookup_global_symbol for static var"
 
-set cmd "python print (gdb.lookup_static_symbol ('rr').line)"
-gdb_test_multiple $cmd "print line number of rr" {
-    -re -wrap "$rr_line" {
-	pass $gdb_test_name
-    }
-    -re -wrap "$rr_line_alt" {
-	if { $readnow_p } {
-	    setup_kfail "symtab/25857" *-*-*
-	}
-	fail $gdb_test_name
-    }
-}
-
-set cmd "python print (gdb.lookup_static_symbol ('rr').value ())"
-gdb_test_multiple $cmd "print value of rr" {
-    -re -wrap "42" {
-	pass $gdb_test_name
-    }
-    -re -wrap "99" {
-	if { $readnow_p } {
-	    setup_kfail "symtab/25857" *-*-*
-	}
-	fail $gdb_test_name
-    }
-}
+# Either "rr" static symbol is a valid result.
+set rr_line_1 [gdb_get_line_number "line of rr"]
+set rr_line_2 [gdb_get_line_number "line of other rr" py-symbol-2.c]
+gdb_test "python print (gdb.lookup_static_symbol ('rr').line)" "($rr_line_1|$rr_line_2)"
+gdb_test "python print (gdb.lookup_static_symbol ('rr').value ())" "(42|99)"
 
 gdb_test "python print (gdb.lookup_static_symbol ('rr').needs_frame)" \
     "False" \
