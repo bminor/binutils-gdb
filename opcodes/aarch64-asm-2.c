@@ -556,7 +556,7 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
     case A64_OPID_d503323f_dsb_BARRIER_DSB_NXS:
       value = A64_OPID_d503323f_dsb_BARRIER_DSB_NXS;
       break;
-    case A64_OPID_d5080000_gsb_GSB:
+    case A64_OPID_d508001f_gsb_GSB:
     case A64_OPID_d5080000_gicr_Rd_GICR:
     case A64_OPID_d5080000_gic_GIC_Rd:
     case A64_OPID_d50b72e0_trcit_Rt:
@@ -870,6 +870,7 @@ aarch64_insert_operand (const aarch64_operand *self,
     case AARCH64_OPND_SVE_Zm3_12_INDEX:
     case AARCH64_OPND_SME_PNn3_INDEX1:
     case AARCH64_OPND_SME_PNn3_INDEX2:
+    case AARCH64_OPND_SME_Zk_INDEX:
     case AARCH64_OPND_SME_Zm_INDEX1:
     case AARCH64_OPND_SME_Zm_INDEX2:
     case AARCH64_OPND_SME_Zm_INDEX2_3:

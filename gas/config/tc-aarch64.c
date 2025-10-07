@@ -6937,6 +6937,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_Zm4_INDEX:
 	case AARCH64_OPND_SVE_Zn_INDEX:
 	case AARCH64_OPND_SVE_Zn_5_INDEX:
+	case AARCH64_OPND_SME_Zk_INDEX:
 	case AARCH64_OPND_SME_Zm_INDEX1:
 	case AARCH64_OPND_SME_Zm_INDEX2:
 	case AARCH64_OPND_SME_Zm_INDEX2_3:
@@ -10893,6 +10894,7 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"sve2p2",		AARCH64_FEATURE (SVE2p2), AARCH64_FEATURE (SVE2p1)},
   {"sme2p2",		AARCH64_FEATURE (SME2p2), AARCH64_FEATURE (SME2p1)},
   {"gcie",		AARCH64_FEATURE (GCIE), AARCH64_NO_FEATURES},
+  {"sme-tmop",		AARCH64_FEATURE (SME_TMOP), AARCH64_FEATURE (SME2)},
   {NULL,		AARCH64_NO_FEATURES, AARCH64_NO_FEATURES},
 };
 

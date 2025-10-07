@@ -1768,6 +1768,10 @@
 {                                                       \
   QLF2(S_B,S_S),                                        \
 }
+#define OP_SVE_HBBU                                     \
+{                                                       \
+  QLF4(S_H,S_B,S_B,NIL),                                \
+}
 #define OP_SVE_HHH                                      \
 {                                                       \
   QLF3(S_H,S_H,S_H),                                    \
@@ -1871,6 +1875,14 @@
   QLF3(W,NIL,S_S),                                      \
   QLF3(X,NIL,S_D),                                      \
 }
+#define OP_SVE_SBBU                                     \
+{                                                       \
+  QLF4(S_S,S_B,S_B,NIL),                                \
+}
+#define OP_SVE_SHHU                                     \
+{                                                       \
+  QLF4(S_S,S_H,S_H,NIL),                                \
+}
 #define OP_SVE_SMD                                      \
 {                                                       \
   QLF3(S_S,P_M,S_D),                                    \
@@ -1918,6 +1930,10 @@
 #define OP_SVE_SS                                       \
 {                                                       \
   QLF2(S_S,S_S),                                        \
+}
+#define OP_SVE_SSSU                                     \
+{                                                       \
+  QLF4(S_S,S_S,S_S,NIL),                                \
 }
 #define OP_SVE_SU                                       \
 {                                                       \
@@ -3011,6 +3027,16 @@ static const aarch64_feature_set aarch64_feature_sve2p2_sme2p2 =
   AARCH64_FEATURE (SVE2p2_SME2p2);
 static const aarch64_feature_set aarch64_feature_gcie =
   AARCH64_FEATURE (GCIE);
+static const aarch64_feature_set aarch64_feature_sme_tmop =
+  AARCH64_FEATURE (SME_TMOP);
+static const aarch64_feature_set aarch64_feature_sme_tmop_b16b16 =
+  AARCH64_FEATURES (2, SME_TMOP, SME_B16B16);
+static const aarch64_feature_set aarch64_feature_sme_tmop_f16f16 =
+  AARCH64_FEATURES (2, SME_TMOP, SME_F16F16);
+static const aarch64_feature_set aarch64_feature_sme_tmop_f8f16 =
+  AARCH64_FEATURES (2, SME_TMOP, SME_F8F16);
+static const aarch64_feature_set aarch64_feature_sme_tmop_f8f32 =
+  AARCH64_FEATURES (2, SME_TMOP, SME_F8F32);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -3122,6 +3148,11 @@ static const aarch64_feature_set aarch64_feature_gcie =
 #define SVE_SME2p2	&aarch64_feature_sve_sme2p2
 #define SVE2p2_SME2p2	&aarch64_feature_sve2p2_sme2p2
 #define GCIE		&aarch64_feature_gcie
+#define SME_TMOP	&aarch64_feature_sme_tmop
+#define SME_TMOP_B16B16	&aarch64_feature_sme_tmop_b16b16
+#define SME_TMOP_F16F16	&aarch64_feature_sme_tmop_f16f16
+#define SME_TMOP_F8F16	&aarch64_feature_sme_tmop_f8f16
+#define SME_TMOP_F8F32	&aarch64_feature_sme_tmop_f8f32
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS | F_INVALID_IMM_SYMS_1, 0, 0, NULL }
@@ -3412,6 +3443,21 @@ static const aarch64_feature_set aarch64_feature_gcie =
     F_STRICT | FLAGS, 0, TIED, NULL }
 #define GCIE_INSN(NAME,OPCODE,MASK,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, ic_system, 0, GCIE, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define SME_TMOP_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, 0, SME_TMOP, OPS, QUALS, \
+    FLAGS | F_STRICT, 0, TIED, NULL }
+#define SME_TMOP_B16B16_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, 0, SME_TMOP_B16B16, OPS, QUALS, \
+    FLAGS | F_STRICT, 0, TIED, NULL }
+#define SME_TMOP_F16F16_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, 0, SME_TMOP_F16F16, OPS, QUALS, \
+    FLAGS | F_STRICT, 0, TIED, NULL }
+#define SME_TMOP_F8F16_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, 0, SME_TMOP_F8F16, OPS, QUALS, \
+    FLAGS | F_STRICT, 0, TIED, NULL }
+#define SME_TMOP_F8F32_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, 0, SME_TMOP_F8F32, OPS, QUALS, \
+    FLAGS | F_STRICT, 0, TIED, NULL }
 
 #define MOPS_CPY_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS) \
   MOPS_INSN (NAME, OPCODE, MASK, 0, \
@@ -7487,6 +7533,21 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   GCIE_INSN ("gicr", 0xd5080000, 0xfff80000, OP2 (Rd, GICR), QL_DST_X, F_ALIAS),
   GCIE_INSN ("gsb", 0xd508001f, 0xfff8001f, OP1 (GSB), QL_IMM_NIL, F_ALIAS),
 
+  /* SME TMOP instructions.  */
+  SME_TMOP_B16B16_INSN ("bftmopa", 0x81600008, 0xffe0e00e, sme_misc, OP4 (SME_ZAda_1b, SME_Znx2, SVE_Zm_16, SME_Zk_INDEX), OP_SVE_HHHU, 0, 0),
+  SME_TMOP_INSN ("bftmopa", 0x81400000, 0xffe0e00c, sme_misc, OP4 (SME_ZAda_2b, SME_Znx2, SVE_Zm_16, SME_Zk_INDEX), OP_SVE_SHHU, 0, 0),
+  SME_TMOP_F16F16_INSN ("ftmopa", 0x81400008, 0xffe0e00e, sme_misc, OP4 (SME_ZAda_1b, SME_Znx2, SVE_Zm_16, SME_Zk_INDEX), OP_SVE_HHHU, 0, 0),
+  SME_TMOP_INSN ("ftmopa", 0x80400000, 0xffe0e00c, sme_misc, OP4 (SME_ZAda_2b, SME_Znx2, SVE_Zm_16, SME_Zk_INDEX), OP_SVE_SSSU, 0, 0),
+  SME_TMOP_INSN ("ftmopa", 0x81600000, 0xffe0e00c, sme_misc, OP4 (SME_ZAda_2b, SME_Znx2, SVE_Zm_16, SME_Zk_INDEX), OP_SVE_SHHU, 0, 0),
+  SME_TMOP_F8F16_INSN ("ftmopa", 0x80600008, 0xffe0e00e, sme_misc, OP4 (SME_ZAda_1b, SME_Znx2, SVE_Zm_16, SME_Zk_INDEX), OP_SVE_HBBU, 0, 0),
+  SME_TMOP_F8F32_INSN ("ftmopa", 0x80600000, 0xffe0e00c, sme_misc, OP4 (SME_ZAda_2b, SME_Znx2, SVE_Zm_16, SME_Zk_INDEX), OP_SVE_SBBU, 0, 0),
+  SME_TMOP_INSN ("stmopa", 0x80408008, 0xffe0e00c, sme_misc, OP4 (SME_ZAda_2b, SME_Znx2, SVE_Zm_16, SME_Zk_INDEX), OP_SVE_SHHU, 0, 0),
+  SME_TMOP_INSN ("stmopa", 0x80408000, 0xffe0e00c, sme_misc, OP4 (SME_ZAda_2b, SME_Znx2, SVE_Zm_16, SME_Zk_INDEX), OP_SVE_SBBU, 0, 0),
+  SME_TMOP_INSN ("sutmopa", 0x80608000, 0xffe0e00c, sme_misc, OP4 (SME_ZAda_2b, SME_Znx2, SVE_Zm_16, SME_Zk_INDEX), OP_SVE_SBBU, 0, 0),
+  SME_TMOP_INSN ("ustmopa", 0x81408000, 0xffe0e00c, sme_misc, OP4 (SME_ZAda_2b, SME_Znx2, SVE_Zm_16, SME_Zk_INDEX), OP_SVE_SBBU, 0, 0),
+  SME_TMOP_INSN ("utmopa", 0x81408008, 0xffe0e00c, sme_misc, OP4 (SME_ZAda_2b, SME_Znx2, SVE_Zm_16, SME_Zk_INDEX), OP_SVE_SHHU, 0, 0),
+  SME_TMOP_INSN ("utmopa", 0x81608000, 0xffe0e00c, sme_misc, OP4 (SME_ZAda_2b, SME_Znx2, SVE_Zm_16, SME_Zk_INDEX), OP_SVE_SBBU, 0, 0),
+
   {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, 0, NULL},
 };
 
@@ -8125,6 +8186,9 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "a shift-right immediate operand")				\
     Y(IMMEDIATE, sve_shrimm, "SME_SHRIMM5", 1 << OPD_F_OD_LSB,		\
       F(FLD_SVE_tszh,FLD_SVE_imm5b), "a shift-right immediate operand")	\
+    Y(SVE_REG, simple_index, "SME_Zk_INDEX", 0,				\
+      F(FLD_imm2_4, FLD_CONST_1, FLD_SVE_i3l2, FLD_CONST_1, FLD_imm2_10),\
+      "an indexed SVE vector register")					\
     Y(SVE_REG, simple_index, "SME_Zm_INDEX1", 0,			\
       F(FLD_imm1_10, FLD_CONST_0, FLD_SME_Zm),				\
       "an indexed SVE vector register")					\

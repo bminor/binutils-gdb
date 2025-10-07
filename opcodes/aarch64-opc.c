@@ -362,6 +362,7 @@ const aarch64_field aarch64_fields[] =
     AARCH64_FIELD ( 0, 2), /* imm2_0: general immediate in bits [1:0].  */
     AARCH64_FIELD ( 1, 2), /* imm2_1: general immediate in bits [2:1].  */
     AARCH64_FIELD ( 2, 2), /* imm2_2: general immediate in bits [3:2].  */
+    AARCH64_FIELD ( 4, 2), /* imm2_4: general immediate in bits [5:4].  */
     AARCH64_FIELD ( 8, 2), /* imm2_8: general immediate in bits [9:8].  */
     AARCH64_FIELD (10, 2), /* imm2_10: 2-bit immediate, bits [11:10] */
     AARCH64_FIELD (12, 2), /* imm2_12: 2-bit immediate, bits [13:12] */
@@ -1964,6 +1965,17 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 15,
 			      0, (1 << size) - 1))
 	    return false;
+	  break;
+
+	case AARCH64_OPND_SME_Zk_INDEX:
+	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 31, 0, 3))
+	    return false;
+	  if ((opnd->reglane.regno & 20) != 20)
+	    {
+	      set_other_error (mismatch_detail, idx,
+			       _("register out of range"));
+	      return false;
+	    }
 	  break;
 
 	case AARCH64_OPND_SME_Zm:
@@ -4387,6 +4399,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_Zm4_11_INDEX:
     case AARCH64_OPND_SVE_Zm4_INDEX:
     case AARCH64_OPND_SVE_Zn_INDEX:
+    case AARCH64_OPND_SME_Zk_INDEX:
     case AARCH64_OPND_SME_Zm_INDEX1:
     case AARCH64_OPND_SME_Zm_INDEX2:
     case AARCH64_OPND_SME_Zm_INDEX2_3:

@@ -253,6 +253,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_PoPS,
   /* GICv5 (Generic Interrupt Controller) CPU Interface Extension.  */
   AARCH64_FEATURE_GCIE,
+  /* SME TMOP instructions.  */
+  AARCH64_FEATURE_SME_TMOP,
 
   /* Virtual features.  These are used to gate instructions that are enabled
      by either of two (or more) sets of command line flags.  */
@@ -899,6 +901,7 @@ enum aarch64_opnd
   AARCH64_OPND_SME_PnT_Wm_imm,      /* SME <Pn>.<T>[<Wm>, #<imm>].  */
   AARCH64_OPND_SME_SHRIMM4,	    /* 4-bit right shift, bits [19:16].  */
   AARCH64_OPND_SME_SHRIMM5,	    /* size + 5-bit right shift, bits [23:22,20:16].  */
+  AARCH64_OPND_SME_Zk_INDEX,	    /* Zk[index], bits [12:10,5:4].  */
   AARCH64_OPND_SME_Zm_INDEX1,	    /* Zn.T[index], bits [19:16,10].  */
   AARCH64_OPND_SME_Zm_INDEX2,	    /* Zn.T[index], bits [19:16,11:10].  */
   AARCH64_OPND_SME_Zm_INDEX2_3,	    /* Zn.T[index], bits [19:16,10,3].  */
