@@ -16,8 +16,6 @@
 
 """GDB commands for working with frame-filters."""
 
-import sys
-
 import gdb
 import gdb.frames
 
