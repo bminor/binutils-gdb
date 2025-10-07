@@ -323,6 +323,8 @@ automatically cause those extensions to be disabled.
  @tab Enable Speculative Store Bypassing Safe state read and write.
 @item @code{ssve-aes} @tab @code{sme2}, @code{sve-aes}
  @tab Enable SVE AES instructions in streaming mode.
+@item @code{ssve-bitperm} @tab @code{sme2}, @code{sve-bitperm}
+ @tab Enable SVE AES instructions in streaming mode.
 @item @code{ssve-fexpa} @tab @code{sme2}
  @tab Enable the SVE FEXPA instruction in streaming mode.
 @item @code{ssve-fp8dot2} @tab @code{sme2}, @code{fp8}
@@ -337,6 +339,8 @@ automatically cause those extensions to be disabled.
  @tab Enable the SVE2 AES and PMULL Extensions.
 @item @code{sve-aes2} @tab
 @tab Enable the SVE-AES2 extension.
+@item @code{sve-bitperm} @tab
+ @tab Enable the SVE2 BITPERM Extension.
 @item @code{sve-b16b16} @tab
 @tab Enable the SVE B16B16 extension.  These instructions also require either @code{+sve2} or @code{+sme2}.
 @item @code{sve-bfscale} @tab
@@ -347,7 +351,7 @@ automatically cause those extensions to be disabled.
  @tab Enable SVE2.
 @item @code{sve2-aes} @tab @code{sve2}, @code{sve-aes}
  @tab Enable the SVE2 AES and PMULL Extensions.
-@item @code{sve2-bitperm} @tab @code{sve2}
+@item @code{sve2-bitperm} @tab @code{sve2}, @code{sve-bitperm}
  @tab Enable the SVE2 BITPERM Extension.
 @item @code{sve2-sha3} @tab @code{sve2}, @code{sha3}
  @tab Enable the SVE2 SHA3 Extension.

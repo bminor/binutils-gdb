@@ -2892,7 +2892,7 @@ static const aarch64_feature_set aarch64_feature_sve2sha3 =
 static const aarch64_feature_set aarch64_feature_sve2sm4 =
   AARCH64_FEATURE (SVE2_SM4);
 static const aarch64_feature_set aarch64_feature_sve2bitperm =
-  AARCH64_FEATURE (SVE2_BITPERM);
+  AARCH64_FEATURE (SVE_BITPERM);
 static const aarch64_feature_set aarch64_feature_sme =
   AARCH64_FEATURE (SME);
 static const aarch64_feature_set aarch64_feature_sme_f64f64 =

@@ -205,6 +205,10 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SVE_AES2,
   /* SSVE_AES extension. */
   AARCH64_FEATURE_SSVE_AES,
+  /* SVE_BITPERM extension. */
+  AARCH64_FEATURE_SVE_BITPERM,
+  /* SSVE_BITPERM extension. */
+  AARCH64_FEATURE_SSVE_BITPERM,
   /* RCPC3 instructions.  */
   AARCH64_FEATURE_RCPC3,
   /* Checked Pointer Arithmetic instructions. */
