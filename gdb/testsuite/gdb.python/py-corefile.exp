@@ -211,8 +211,53 @@ with_test_prefix "test mapped files data" {
 	"Files \[^\r\n\]+-out-1.txt and \[^\r\n\]+-out-2.txt are identical" \
 	"diff input and output one"
 
-    # Check build-ids within the core file mapping data.
-    gdb_test "check-build-ids" "^PASS"
+    # Check build-ids within the core file mapping data.  I'm only
+    # aware of GNU/Linux placing the first page of each mapped ELF
+    # into the generated core file so that the build-id can be found.
+    if {[istarget *-*-linux*]} {
+	set results [list]
+	gdb_test_multiple "show-build-ids" "" {
+	    -re "^show-build-ids\r\n" {
+		exp_continue
+	    }
+	    -re "^Objfile Build-Id\\s+Core File Build-Id\\s+File Name\\s*\r\n" {
+		exp_continue
+	    }
+	    -re "^(\\S+)\\s+(\\S+)\\s+(\[^\r\n\]+)\r\n" {
+		set objfile_build_id $expect_out(1,string)
+		set core_file_build_id $expect_out(2,string)
+		set file_name $expect_out(3,string)
+		lappend results [list $objfile_build_id \
+				      $core_file_build_id \
+				      $file_name]
+		exp_continue
+	    }
+	    -re "^$gdb_prompt " {
+		pass $gdb_test_name
+	    }
+	}
+
+	set bad_count 0
+	foreach entry $results {
+	    set objfile_build_id [lindex $entry 0]
+	    set core_file_build_id [lindex $entry 1]
+	    set file_name [lindex $entry 2]
+	    if { $objfile_build_id ne $core_file_build_id } {
+		if { $core_file_build_id ne "None" } {
+		    verbose -log "Mismatched build-ids $objfile_build_id vs $core_file_build_id for $file_name"
+		    incr bad_count
+		} elseif { [expect_build_id_in_core_file $file_name] } {
+		    verbose -log "Failed to find build-id for $file_name"
+		    incr bad_count
+		} else {
+		    verbose -log "This build-id was likely not in the core file"
+		}
+	    }
+	}
+
+	gdb_assert { $bad_count == 0 } \
+	    "found expected build-ids in core file"
+    }
 
     # Check the is_main_executable flag in the mapping data.
     gdb_test "check-main-executable" "^PASS"

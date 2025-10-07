@@ -78,9 +78,23 @@ class InfoProcPyMappings(gdb.Command):
 InfoProcPyMappings()
 
 
-class CheckBuildIds(gdb.Command):
+# Assume that a core file is currently loaded.
+#
+# Look through all the objfiles for the current inferior, and record
+# any that have a build-id.
+#
+# Then look through the core file mapped files.  Look for entries that
+# correspond with the loaded objfiles.  For these matching entries,
+# capture the build-id extracted from the core file.
+#
+# Finally, print a table with the build-id from the objfile, the
+# build-id from the core file, and the file name.
+#
+# This is then processed from the test script to check the build-ids
+# match.
+class ShowBuildIds(gdb.Command):
     def __init__(self):
-        gdb.Command.__init__(self, "check-build-ids", gdb.COMMAND_DATA)
+        gdb.Command.__init__(self, "show-build-ids", gdb.COMMAND_DATA)
 
     def invoke(self, args, from_tty):
         inf = gdb.selected_inferior()
@@ -88,12 +102,17 @@ class CheckBuildIds(gdb.Command):
 
         path_to_build_id = {}
 
+        # Initial length based on column headings.
+        longest_build_id = 18
+
         for o in objfiles:
-            if not o.is_file or o.build_id is None:
+            if not o.is_file or o.build_id is None or o.owner is not None:
                 continue
             p = pathlib.Path(o.filename).resolve()
             b = o.build_id
-            path_to_build_id[p] = b
+            path_to_build_id[p] = {"objfile": b, "corefile": "missing"}
+            if len(b) > longest_build_id:
+                longest_build_id = len(b)
 
         count = 0
         core_mapped_files = inf.corefile.mapped_files()
@@ -101,16 +120,39 @@ class CheckBuildIds(gdb.Command):
             p = pathlib.Path(m.filename).resolve()
             b = m.build_id
 
+            if b is not None and len(b) > longest_build_id:
+                longest_build_id = len(b)
+
             if p in path_to_build_id:
-                count += 1
-                assert path_to_build_id[p] == b, "build-id mismatch for %s" % p
+                path_to_build_id[p]["corefile"] = b
 
-        assert count > 0, "no mapped files checked"
+        format_str = (
+            "%-" + str(longest_build_id) + "s  %-" + str(longest_build_id) + "s  %s"
+        )
 
-        print("PASS")
+        def make_title(string, length=0):
+            if length > 0:
+                padding_len = length - len(string)
+            else:
+                padding_len = 0
+
+            padding = " " * padding_len
+            style = gdb.Style("title")
+            return style.apply(string) + padding
+
+        print(
+            "%s  %s  %s"
+            % (
+                make_title("Objfile Build-Id", longest_build_id),
+                make_title("Core File Build-Id", longest_build_id),
+                make_title("File Name"),
+            )
+        )
+        for p, b in path_to_build_id.items():
+            print(format_str % (b["objfile"], b["corefile"], p))
 
 
-CheckBuildIds()
+ShowBuildIds()
 
 
 class CheckMainExec(gdb.Command):

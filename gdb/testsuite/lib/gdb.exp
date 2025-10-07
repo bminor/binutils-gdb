@@ -11596,6 +11596,63 @@ proc section_get {exec section} {
     return $retval
 }
 
+# Return true if we expect the build-id from FILENAME to be included
+# in a core file.
+#
+# On GNU/Linux, when creating a core file, the kernel places the first
+# page of an ELF into the core file.  If the build-id is within that
+# page then GDB can find the build-id from the core file.
+#
+# This proc checks that the target is GNU/Linux, and then uses readelf
+# to find the offset of the build-id within the ELF.  If there is a
+# build-id, and it is within the first page, then return true.
+# Otherwise, return false.
+
+proc expect_build_id_in_core_file { filename } {
+    # I'm not sure if other kernels take care to add the first page of
+    # each ELF into the core file.  If they do then this test can be
+    # relaxed.
+    if {![istarget *-*-linux*]} {
+	return false
+    }
+
+    # Use readelf to find the build-id note in FILENAME.
+    set readelf_program [gdb_find_readelf]
+    set cmd [list $readelf_program -WS $filename | grep ".note.gnu.build-id"]
+    set res [catch {exec {*}$cmd} output]
+    verbose -log "running: $cmd"
+    verbose -log "result: $res"
+    verbose -log "output: $output"
+    if { $res != 0 } {
+	return false
+    }
+
+    # Extract the OFFSET from the readelf output.
+    set res [regexp {NOTE[ \t]+([0-9a-f]+)[ \t]+([0-9a-f]+)} \
+		 $output dummy addr offset]
+    if { $res != 1 } {
+	return false
+    }
+
+    # Convert OFFSET to decimal.
+    set offset [expr {[subst 0x$offset + 0]}]
+
+    # Now figure out the page size.  This should be fine for Linux
+    # hosts, see the istarget check above.
+    if {[catch {exec getconf PAGESIZE} page_size]} {
+	# Failed to fetch page size.
+	return false
+    }
+
+    # If the build-id is within the first page, then we expect the
+    # kernel to include it in the core file.  There is actually a
+    # kernel setting (see coredump_filter) that could prevent this,
+    # but the default behaviour is to include the first page of the
+    # ELF, so for now, we just assume this is on.
+    verbose -log "Page size is $page_size, Offset is $offset"
+    return [expr {$offset < $page_size}]
+}
+
 # Return 1 if the compiler supports __builtin_trap, else return 0.
 
 gdb_caching_proc have_builtin_trap {} {
