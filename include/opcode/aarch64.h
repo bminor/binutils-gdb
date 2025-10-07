@@ -253,6 +253,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_PoPS,
   /* GICv5 (Generic Interrupt Controller) CPU Interface Extension.  */
   AARCH64_FEATURE_GCIE,
+  /* SVE FEXPA instruction in streaming mode.  */
+  AARCH64_FEATURE_SSVE_FEXPA,
   /* SME TMOP instructions.  */
   AARCH64_FEATURE_SME_TMOP,
   /* SME MOP4 instructions.  */
@@ -262,6 +264,8 @@ enum aarch64_feature_bit {
      by either of two (or more) sets of command line flags.  */
   /* +sve2 or +ssve-aes */
   AARCH64_FEATURE_SVE2_SSVE_AES,
+  /* +sve or +ssve-fexpa */
+  AARCH64_FEATURE_SVE_SSVE_FEXPA,
   /* +fp8fma+sve or +ssve-fp8fma  */
   AARCH64_FEATURE_FP8FMA_SVE,
   /* +fp8dot4+sve or +ssve-fp8dot4  */

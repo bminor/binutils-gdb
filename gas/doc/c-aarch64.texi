@@ -323,6 +323,8 @@ automatically cause those extensions to be disabled.
  @tab Enable Speculative Store Bypassing Safe state read and write.
 @item @code{ssve-aes} @tab @code{sme2}, @code{sve-aes}
  @tab Enable SVE AES instructions in streaming mode.
+@item @code{ssve-fexpa} @tab @code{sme2}
+ @tab Enable the SVE FEXPA instruction in streaming mode.
 @item @code{ssve-fp8dot2} @tab @code{sme2}, @code{fp8}
  @tab Enable the Streaming SVE FP8 2-way dot product instructions.
 @item @code{ssve-fp8dot4} @tab @code{sme2}, @code{fp8}

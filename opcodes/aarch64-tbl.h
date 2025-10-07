@@ -3031,6 +3031,8 @@ static const aarch64_feature_set aarch64_feature_sve2p2_sme2p2 =
   AARCH64_FEATURE (SVE2p2_SME2p2);
 static const aarch64_feature_set aarch64_feature_gcie =
   AARCH64_FEATURE (GCIE);
+static const aarch64_feature_set aarch64_feature_sve_ssve_fexpa =
+  AARCH64_FEATURE (SVE_SSVE_FEXPA);
 static const aarch64_feature_set aarch64_feature_sme_tmop =
   AARCH64_FEATURE (SME_TMOP);
 static const aarch64_feature_set aarch64_feature_sme_tmop_b16b16 =
@@ -3166,6 +3168,7 @@ static const aarch64_feature_set aarch64_feature_sme_mop4_i16i64 =
 #define SVE_SME2p2	&aarch64_feature_sve_sme2p2
 #define SVE2p2_SME2p2	&aarch64_feature_sve2p2_sme2p2
 #define GCIE		&aarch64_feature_gcie
+#define SVE_SSVE_FEXPA	&aarch64_feature_sve_ssve_fexpa
 #define SME_TMOP	&aarch64_feature_sme_tmop
 #define SME_TMOP_B16B16	&aarch64_feature_sme_tmop_b16b16
 #define SME_TMOP_F16F16	&aarch64_feature_sme_tmop_f16f16
@@ -3468,6 +3471,9 @@ static const aarch64_feature_set aarch64_feature_sme_mop4_i16i64 =
     F_STRICT | FLAGS, 0, TIED, NULL }
 #define GCIE_INSN(NAME,OPCODE,MASK,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, ic_system, 0, GCIE, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define _SVE_SSVE_FEXPA_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, OP, SVE_SSVE_FEXPA, OPS, QUALS, \
+    FLAGS | F_STRICT, 0, TIED, NULL }
 #define SME_TMOP_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, 0, SME_TMOP, OPS, QUALS, \
     FLAGS | F_STRICT, 0, TIED, NULL }
@@ -5248,7 +5254,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   _SVE_INSNC ("fdiv", 0x650d8000, 0xff3fe000, sve_size_hsd, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_VMVV_HSD, 0, C_SCAN_MOVPRFX, 2),
   _SVE_INSNC ("fdivr", 0x650c8000, 0xff3fe000, sve_size_hsd, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_VMVV_HSD, 0, C_SCAN_MOVPRFX, 2),
   _SVE_INSN ("fdup", 0x2539c000, 0xff3fe000, sve_size_hsd, 0, OP2 (SVE_Zd, SVE_FPIMM8), OP_SVE_VU_HSD, F_HAS_ALIAS, 0),
-  _SVE_INSN ("fexpa", 0x0420b800, 0xff3ffc00, sve_size_hsd, 0, OP2 (SVE_Zd, SVE_Zn), OP_SVE_VV_HSD, 0, 0),
+  _SVE_SSVE_FEXPA_INSN ("fexpa", 0x0420b800, 0xff3ffc00, sve_size_hsd, 0, OP2 (SVE_Zd, SVE_Zn), OP_SVE_VV_HSD, 0, 0),
   _SVE_INSNC ("fmad", 0x65208000, 0xff20e000, sve_size_hsd, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zm_5, SVE_Za_16), OP_SVE_VMVV_HSD, 0, C_SCAN_MOVPRFX, 0),
   _SVE_INSNC ("fmax", 0x65068000, 0xff3fe000, sve_size_hsd, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_VMVV_HSD, 0, C_SCAN_MOVPRFX, 2),
   _SVE_INSNC ("fmax", 0x651e8000, 0xff3fe3c0, sve_size_hsd, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_I1_ZERO_ONE), OP_SVE_VMVU_HSD, 0, C_SCAN_MOVPRFX, 2),
