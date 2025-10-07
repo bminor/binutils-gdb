@@ -1283,7 +1283,6 @@ enum err_type
   ERR_OK,
   ERR_UND,
   ERR_UNP,
-  ERR_NYI,
   ERR_VFI,
   ERR_NR_ENTRIES
 };

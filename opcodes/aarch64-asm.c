@@ -2695,7 +2695,6 @@ aarch64_opcode_encode (const aarch64_opcode *opcode,
 	{
 	case ERR_UND:
 	case ERR_UNP:
-	case ERR_NYI:
 	  return false;
 	default:
 	  break;
@@ -2711,7 +2710,6 @@ aarch64_opcode_encode (const aarch64_opcode *opcode,
     {
     case ERR_UND:
     case ERR_UNP:
-    case ERR_NYI:
       return false;
     default:
       break;
