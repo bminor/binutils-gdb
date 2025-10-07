@@ -480,8 +480,8 @@ solib_ops::iterate_over_objfiles_in_search_order
   (iterate_over_objfiles_in_search_order_cb_ftype cb,
    objfile *current_objfile) const
 {
-  for (objfile *objfile : m_pspace->objfiles ())
-    if (cb (objfile))
+  for (objfile &objfile : m_pspace->objfiles ())
+    if (cb (&objfile))
       return;
 }
 
@@ -644,10 +644,10 @@ solib_read_symbols (solib &so, symfile_add_flags flags)
 	{
 	  /* Have we already loaded this shared object?  */
 	  so.objfile = nullptr;
-	  for (objfile *objfile : current_program_space->objfiles ())
-	    if (objfile->addr_low == so.addr_low)
+	  for (objfile &objfile : current_program_space->objfiles ())
+	    if (objfile.addr_low == so.addr_low)
 	      {
-		so.objfile = objfile;
+		so.objfile = &objfile;
 		break;
 	      }
 

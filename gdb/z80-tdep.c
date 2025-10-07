@@ -961,8 +961,8 @@ z80_overlay_update_1 (struct obj_section *osect)
   i = 0;
 
   /* we have interest for sections with same VMA */
-  for (objfile *objfile : current_program_space->objfiles ())
-    for (obj_section &sect : objfile->sections ())
+  for (objfile &objfile : current_program_space->objfiles ())
+    for (obj_section &sect : objfile.sections ())
       if (section_is_overlay (&sect))
 	{
 	  sect.ovly_mapped = (lma == bfd_section_lma (sect.the_bfd_section));
@@ -984,8 +984,8 @@ z80_overlay_update (struct obj_section *osect)
     return;
 
   /* Update all sections, even if only one was requested.  */
-  for (objfile *objfile : current_program_space->objfiles ())
-    for (obj_section &sect : objfile->sections ())
+  for (objfile &objfile : current_program_space->objfiles ())
+    for (obj_section &sect : objfile.sections ())
       {
 	if (!section_is_overlay (&sect))
 	  continue;

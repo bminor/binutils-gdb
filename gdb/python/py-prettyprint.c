@@ -98,9 +98,9 @@ search_pp_list (PyObject *list, PyObject *value)
 static PyObject *
 find_pretty_printer_from_objfiles (PyObject *value)
 {
-  for (objfile *obj : current_program_space->objfiles ())
+  for (objfile &obj : current_program_space->objfiles ())
     {
-      gdbpy_ref<> objf = objfile_to_objfile_object (obj);
+      gdbpy_ref<> objf = objfile_to_objfile_object (&obj);
       if (objf == NULL)
 	{
 	  /* Ignore the error and continue.  */

@@ -431,9 +431,9 @@ pspy_get_objfiles (PyObject *self_, PyObject *args)
 
   if (self->pspace != NULL)
     {
-      for (objfile *objf : self->pspace->objfiles ())
+      for (objfile &objf : self->pspace->objfiles ())
 	{
-	  gdbpy_ref<> item = objfile_to_objfile_object (objf);
+	  gdbpy_ref<> item = objfile_to_objfile_object (&objf);
 
 	  if (item == nullptr
 	      || PyList_Append (list.get (), item.get ()) == -1)

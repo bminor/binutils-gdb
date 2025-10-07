@@ -3687,9 +3687,9 @@ svr4_solib_ops::iterate_over_objfiles_in_search_order
   if (debug_base == 0)
     debug_base = default_debug_base;
 
-  for (objfile *objfile : m_pspace->objfiles ())
+  for (objfile &objfile : m_pspace->objfiles ())
     {
-      if (checked_current_objfile && objfile == current_objfile)
+      if (checked_current_objfile && &objfile == current_objfile)
 	continue;
 
       /* Try to determine the namespace into which objfile was loaded.
@@ -3697,7 +3697,7 @@ svr4_solib_ops::iterate_over_objfiles_in_search_order
 	 If we fail, e.g. for manually added symbol files or for the main
 	 executable, we assume that they were added to the initial
 	 namespace.  */
-      const solib *solib = find_solib_for_objfile (objfile);
+      const solib *solib = find_solib_for_objfile (&objfile);
       CORE_ADDR solib_base = find_debug_base_for_solib (solib);
       if (solib_base == 0)
 	solib_base = default_debug_base;
@@ -3706,7 +3706,7 @@ svr4_solib_ops::iterate_over_objfiles_in_search_order
       if (solib_base != debug_base)
 	continue;
 
-      if (cb (objfile))
+      if (cb (&objfile))
 	return;
     }
 }

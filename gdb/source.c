@@ -354,9 +354,9 @@ select_source_symtab ()
 
   struct symtab *new_symtab = nullptr;
 
-  for (objfile *ofp : current_program_space->objfiles ())
+  for (objfile &ofp : current_program_space->objfiles ())
     {
-      for (compunit_symtab *cu : ofp->compunits ())
+      for (compunit_symtab *cu : ofp.compunits ())
 	{
 	  for (symtab *symtab : cu->filetabs ())
 	    {
@@ -374,9 +374,9 @@ select_source_symtab ()
   if (new_symtab != nullptr)
     return;
 
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile &objfile : current_program_space->objfiles ())
     {
-      symtab *s = objfile->find_last_source_symtab ();
+      symtab *s = objfile.find_last_source_symtab ();
       if (s)
 	new_symtab = s;
     }
@@ -437,8 +437,8 @@ void
 forget_cached_source_info (void)
 {
   for (struct program_space *pspace : program_spaces)
-    for (objfile *objfile : pspace->objfiles ())
-      objfile->forget_cached_source_info ();
+    for (objfile &objfile : pspace->objfiles ())
+      objfile.forget_cached_source_info ();
 
   g_source_cache.clear ();
   last_source_visited = NULL;

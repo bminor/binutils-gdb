@@ -678,16 +678,16 @@ iterate_over_symtabs (program_space *pspace, const char *name,
       gdb_assert (IS_ABSOLUTE_PATH (real_path.get ()));
     }
 
-  for (objfile *objfile : pspace->objfiles ())
+  for (objfile &objfile : pspace->objfiles ())
     if (iterate_over_some_symtabs (name, real_path.get (),
-				   objfile->compunit_symtabs, nullptr,
+				   objfile.compunit_symtabs, nullptr,
 				   callback))
 	return;
 
   /* Same search rules as above apply here, but now we look through the
      psymtabs.  */
-  for (objfile *objfile : pspace->objfiles ())
-    if (objfile->map_symtabs_matching_filename (name, real_path.get (),
+  for (objfile &objfile : pspace->objfiles ())
+    if (objfile.map_symtabs_matching_filename (name, real_path.get (),
 						callback))
       return;
 }
@@ -1204,10 +1204,10 @@ matching_obj_sections (struct obj_section *obj_first,
   /* Otherwise check that they are in corresponding objfiles.  */
 
   struct objfile *obj = NULL;
-  for (objfile *objfile : current_program_space->objfiles ())
-    if (objfile->obfd == first->owner)
+  for (objfile &objfile : current_program_space->objfiles ())
+    if (objfile.obfd == first->owner)
       {
-	obj = objfile;
+	obj = &objfile;
 	break;
       }
   gdb_assert (obj != NULL);
@@ -2713,9 +2713,9 @@ basic_lookup_transparent_type (const char *name, domain_search_flags flags)
   lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
 
   /* Search all the global symbols.  */
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile &objfile : current_program_space->objfiles ())
     {
-      t = basic_lookup_transparent_type_quick (objfile, GLOBAL_BLOCK,
+      t = basic_lookup_transparent_type_quick (&objfile, GLOBAL_BLOCK,
 					       flags, lookup_name);
       if (t)
 	return t;
@@ -2723,9 +2723,9 @@ basic_lookup_transparent_type (const char *name, domain_search_flags flags)
 
   /* Now search the static file-level symbols.  Not strictly correct,
      but more useful than an error.  */
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile &objfile : current_program_space->objfiles ())
     {
-      t = basic_lookup_transparent_type_quick (objfile, STATIC_BLOCK,
+      t = basic_lookup_transparent_type_quick (&objfile, STATIC_BLOCK,
 					       flags, lookup_name);
       if (t)
 	return t;
@@ -2804,9 +2804,9 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
      It also happens for objfiles that have their functions reordered.
      For these, the symtab we are looking for is not necessarily read in.  */
 
-  for (objfile *obj_file : current_program_space->objfiles ())
+  for (objfile &obj_file : current_program_space->objfiles ())
     {
-      for (compunit_symtab *cust : obj_file->compunits ())
+      for (compunit_symtab *cust : obj_file.compunits ())
 	{
 	  const struct blockvector *bv = cust->blockvector ();
 	  const struct block *global_block = bv->global_block ();
@@ -2837,8 +2837,8 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 	     stabs and coff debugging info, we continue on if a psymtab
 	     can't be found.  */
 	  struct compunit_symtab *result
-	    = obj_file->find_pc_sect_compunit_symtab (msymbol, pc,
-						      section, 0);
+	    = obj_file.find_pc_sect_compunit_symtab (msymbol, pc,
+						     section, 0);
 	  if (result != nullptr)
 	    return result;
 
@@ -2853,7 +2853,7 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 		  const struct block *b = bv->block (b_index);
 		  for (struct symbol *sym : block_iterator_range (b))
 		    {
-		      if (matching_obj_sections (sym->obj_section (obj_file),
+		      if (matching_obj_sections (sym->obj_section (&obj_file),
 						 section))
 			{
 			  found_sym = sym;
@@ -2877,10 +2877,10 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 
   /* Not found in symtabs, search the "quick" symtabs (e.g. psymtabs).  */
 
-  for (objfile *objf : current_program_space->objfiles ())
+  for (objfile &objf : current_program_space->objfiles ())
     {
       struct compunit_symtab *result
-	= objf->find_pc_sect_compunit_symtab (msymbol, pc, section, 1);
+	= objf.find_pc_sect_compunit_symtab (msymbol, pc, section, 1);
       if (result != NULL)
 	return result;
     }
@@ -2923,13 +2923,13 @@ find_symbol_at_address (CORE_ADDR address)
       return nullptr;
     };
 
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile &objfile : current_program_space->objfiles ())
     {
       /* If this objfile was read with -readnow, then we need to
 	 search the symtabs directly.  */
-      if ((objfile->flags & OBJF_READNOW) != 0)
+      if ((objfile.flags & OBJF_READNOW) != 0)
 	{
-	  for (compunit_symtab *symtab : objfile->compunits ())
+	  for (compunit_symtab *symtab : objfile.compunits ())
 	    {
 	      struct symbol *sym = search_symtab (symtab, address);
 	      if (sym != nullptr)
@@ -2939,7 +2939,7 @@ find_symbol_at_address (CORE_ADDR address)
       else
 	{
 	  struct compunit_symtab *symtab
-	    = objfile->find_compunit_symtab_by_address (address);
+	    = objfile.find_compunit_symtab_by_address (address);
 	  if (symtab != NULL)
 	    {
 	      struct symbol *sym = search_symtab (symtab, address);
@@ -3366,12 +3366,12 @@ find_line_symtab (symtab *sym_tab, int line, int *index)
       else
 	best = 0;
 
-      for (objfile *objfile : current_program_space->objfiles ())
-	objfile->expand_symtabs_with_fullname (symtab_to_fullname (sym_tab));
+      for (objfile &objfile : current_program_space->objfiles ())
+	objfile.expand_symtabs_with_fullname (symtab_to_fullname (sym_tab));
 
-      for (objfile *objfile : current_program_space->objfiles ())
+      for (objfile &objfile : current_program_space->objfiles ())
 	{
-	  for (compunit_symtab *cu : objfile->compunits ())
+	  for (compunit_symtab *cu : objfile.compunits ())
 	    {
 	      for (symtab *s : cu->filetabs ())
 		{
@@ -4571,19 +4571,19 @@ info_sources_worker (struct ui_out *uiout,
 
   gdb_assert (group_by_objfile || uiout->is_mi_like_p ());
 
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile &objfile : current_program_space->objfiles ())
     {
       if (group_by_objfile)
 	{
 	  output_tuple.emplace (uiout, nullptr);
-	  uiout->field_string ("filename", objfile_name (objfile),
+	  uiout->field_string ("filename", objfile_name (&objfile),
 			       file_name_style.style ());
 	  uiout->text (":\n");
-	  bool debug_fully_readin = !objfile->has_unexpanded_symtabs ();
+	  bool debug_fully_readin = !objfile.has_unexpanded_symtabs ();
 	  if (uiout->is_mi_like_p ())
 	    {
 	      const char *debug_info_state;
-	      if (objfile->has_symbols ())
+	      if (objfile.has_symbols ())
 		{
 		  if (debug_fully_readin)
 		    debug_info_state = "fully-read";
@@ -4599,14 +4599,14 @@ info_sources_worker (struct ui_out *uiout,
 	      if (!debug_fully_readin)
 		uiout->text ("(Full debug information has not yet been read "
 			     "for this file.)\n");
-	      if (!objfile->has_symbols ())
+	      if (!objfile.has_symbols ())
 		uiout->text ("(Objfile has no debug information.)\n");
 	      uiout->text ("\n");
 	    }
 	  sources_list.emplace (uiout, "sources");
 	}
 
-      for (compunit_symtab *cu : objfile->compunits ())
+      for (compunit_symtab *cu : objfile.compunits ())
 	{
 	  for (symtab *s : cu->filetabs ())
 	    {
@@ -4618,7 +4618,7 @@ info_sources_worker (struct ui_out *uiout,
 
       if (group_by_objfile)
 	{
-	  objfile->map_symbol_filenames (data, true /* need_fullname */);
+	  objfile.map_symbol_filenames (data, true /* need_fullname */);
 	  if (data.printed_filename_p ())
 	    uiout->text ("\n\n");
 	  data.reset_output ();
@@ -5034,17 +5034,17 @@ global_symbol_searcher::search () const
 
   bool found_msymbol = false;
   std::set<symbol_search> result_set;
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile &objfile : current_program_space->objfiles ())
     {
       /* Expand symtabs within objfile that possibly contain matching
 	 symbols.  */
-      found_msymbol |= expand_symtabs (objfile, preg);
+      found_msymbol |= expand_symtabs (&objfile, preg);
 
       /* Find matching symbols within OBJFILE and add them in to the
 	 RESULT_SET set.  Use a set here so that we can easily detect
 	 duplicates as we go, and can therefore track how many unique
 	 matches we have found so far.  */
-      if (!add_matching_symbols (objfile, preg, treg, &result_set))
+      if (!add_matching_symbols (&objfile, preg, treg, &result_set))
 	break;
     }
 
@@ -5063,8 +5063,8 @@ global_symbol_searcher::search () const
     {
       gdb_assert ((m_kind & (SEARCH_VAR_DOMAIN | SEARCH_FUNCTION_DOMAIN))
 		  != 0);
-      for (objfile *objfile : current_program_space->objfiles ())
-	if (!add_matching_msymbols (objfile, preg, &result))
+      for (objfile &objfile : current_program_space->objfiles ())
+	if (!add_matching_msymbols (&objfile, preg, &result))
 	  break;
     }
 
@@ -5978,9 +5978,9 @@ default_collect_symbol_completion_matches_break_on
 
   if (code == TYPE_CODE_UNDEF)
     {
-      for (objfile *objfile : current_program_space->objfiles ())
+      for (objfile &objfile : current_program_space->objfiles ())
 	{
-	  for (minimal_symbol *msymbol : objfile->msymbols ())
+	  for (minimal_symbol *msymbol : objfile.msymbols ())
 	    {
 	      QUIT;
 
@@ -5997,11 +5997,11 @@ default_collect_symbol_completion_matches_break_on
     }
 
   /* Add completions for all currently loaded symbol tables.  */
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile &objfile : current_program_space->objfiles ())
     {
       /* Look through the partial symtabs for all symbols which begin by
 	 matching SYM_TEXT.  Expand all CUs that you find to the list.  */
-      objfile->search
+      objfile.search
 	(nullptr, &lookup_name, nullptr,
 	 [&] (compunit_symtab *symtab)
 	   {
@@ -6287,9 +6287,9 @@ make_source_files_completion_list (const char *text)
 
   filename_seen_cache filenames_seen;
 
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile &objfile : current_program_space->objfiles ())
     {
-      for (compunit_symtab *cu : objfile->compunits ())
+      for (compunit_symtab *cu : objfile.compunits ())
 	{
 	  for (symtab *s : cu->filetabs ())
 	    {
@@ -6385,15 +6385,15 @@ find_main_name (void)
      relies on the order of objfile creation -- which still isn't
      guaranteed to get the correct answer, but is just probably more
      accurate.  */
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile &objfile : current_program_space->objfiles ())
     {
-      objfile->compute_main_name ();
+      objfile.compute_main_name ();
 
-      if (objfile->per_bfd->name_of_main != NULL)
+      if (objfile.per_bfd->name_of_main != NULL)
 	{
 	  set_main_name (pspace,
-			 objfile->per_bfd->name_of_main,
-			 objfile->per_bfd->language_of_main);
+			 objfile.per_bfd->name_of_main,
+			 objfile.per_bfd->language_of_main);
 	  return;
 	}
     }

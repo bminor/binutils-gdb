@@ -464,14 +464,14 @@ maintenance_info_sections (const char *arg, int from_tty)
   gdb::option::process_options
     (&arg, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, group);
 
-  for (objfile *ofile : current_program_space->objfiles ())
+  for (objfile &ofile : current_program_space->objfiles ())
     {
-      if (ofile->obfd == current_program_space->exec_bfd ())
-	maint_print_all_sections (_("Exec file: "), ofile->obfd.get (),
-				  ofile, arg);
+      if (ofile.obfd == current_program_space->exec_bfd ())
+	maint_print_all_sections (_("Exec file: "), ofile.obfd.get (),
+				  &ofile, arg);
       else if (opts.all_objects)
-	maint_print_all_sections (_("Object file: "), ofile->obfd.get (),
-				  ofile, arg);
+	maint_print_all_sections (_("Object file: "), ofile.obfd.get (),
+				  &ofile, arg);
     }
 
   if (current_program_space->core_bfd () != nullptr)
@@ -580,8 +580,8 @@ maintenance_translate_address (const char *arg, int from_tty)
       int arg_len = p - arg;
       p = skip_spaces (p + 1);
 
-      for (objfile *objfile : current_program_space->objfiles ())
-	for (obj_section &iter : objfile->sections ())
+      for (objfile &objfile : current_program_space->objfiles ())
+	for (obj_section &iter : objfile.sections ())
 	  {
 	    if (strncmp (iter.the_bfd_section->name, arg, arg_len) == 0)
 	      goto found;
@@ -969,9 +969,9 @@ count_symtabs_and_blocks (int *nr_symtabs_ptr, int *nr_compunit_symtabs_ptr,
      current_program_space may be NULL.  */
   if (current_program_space != NULL)
     {
-      for (objfile *o : current_program_space->objfiles ())
+      for (objfile &o : current_program_space->objfiles ())
 	{
-	  for (compunit_symtab *cu : o->compunits ())
+	  for (compunit_symtab *cu : o.compunits ())
 	    {
 	      ++nr_compunit_symtabs;
 	      nr_blocks += cu->blockvector ()->num_blocks ();

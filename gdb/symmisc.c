@@ -55,25 +55,25 @@ print_objfile_statistics (void)
   int i, linetables, blockvectors;
 
   for (struct program_space *pspace : program_spaces)
-    for (objfile *objfile : pspace->objfiles ())
+    for (objfile &objfile : pspace->objfiles ())
       {
 	QUIT;
-	gdb_printf (_("Statistics for '%s':\n"), objfile_name (objfile));
-	if (OBJSTAT (objfile, n_stabs) > 0)
+	gdb_printf (_("Statistics for '%s':\n"), objfile_name (&objfile));
+	if (OBJSTAT ((&objfile), n_stabs) > 0)
 	  gdb_printf (_("  Number of \"stab\" symbols read: %d\n"),
-		      OBJSTAT (objfile, n_stabs));
-	if (objfile->per_bfd->n_minsyms > 0)
+		      OBJSTAT ((&objfile), n_stabs));
+	if (objfile.per_bfd->n_minsyms > 0)
 	  gdb_printf (_("  Number of \"minimal\" symbols read: %d\n"),
-		      objfile->per_bfd->n_minsyms);
-	if (OBJSTAT (objfile, n_syms) > 0)
+		      objfile.per_bfd->n_minsyms);
+	if (OBJSTAT ((&objfile), n_syms) > 0)
 	  gdb_printf (_("  Number of \"full\" symbols read: %d\n"),
-		      OBJSTAT (objfile, n_syms));
-	if (OBJSTAT (objfile, n_types) > 0)
+		      OBJSTAT ((&objfile), n_syms));
+	if (OBJSTAT ((&objfile), n_types) > 0)
 	  gdb_printf (_("  Number of \"types\" defined: %d\n"),
-		      OBJSTAT (objfile, n_types));
+		      OBJSTAT ((&objfile), n_types));
 
 	i = linetables = 0;
-	for (compunit_symtab *cu : objfile->compunits ())
+	for (compunit_symtab *cu : objfile.compunits ())
 	  {
 	    for (symtab *s : cu->filetabs ())
 	      {
@@ -82,32 +82,32 @@ print_objfile_statistics (void)
 		  linetables++;
 	      }
 	  }
-	blockvectors = std::distance (objfile->compunits ().begin (),
-				      objfile->compunits ().end ());
+	blockvectors = std::distance (objfile.compunits ().begin (),
+				      objfile.compunits ().end ());
 	gdb_printf (_("  Number of symbol tables: %d\n"), i);
 	gdb_printf (_("  Number of symbol tables with line tables: %d\n"),
 		    linetables);
 	gdb_printf (_("  Number of symbol tables with blockvectors: %d\n"),
 		    blockvectors);
 
-	objfile->print_stats (false);
+	objfile.print_stats (false);
 
-	if (OBJSTAT (objfile, sz_strtab) > 0)
+	if (OBJSTAT ((&objfile), sz_strtab) > 0)
 	  gdb_printf (_("  Space used by string tables: %d\n"),
-		      OBJSTAT (objfile, sz_strtab));
+		      OBJSTAT ((&objfile), sz_strtab));
 	gdb_printf (_("  Total memory used for objfile obstack: %s\n"),
 		    pulongest (obstack_memory_used (&objfile
-						    ->objfile_obstack)));
+						    .objfile_obstack)));
 	gdb_printf (_("  Total memory used for BFD obstack: %s\n"),
-		    pulongest (obstack_memory_used (&objfile->per_bfd
+		    pulongest (obstack_memory_used (&objfile.per_bfd
 						    ->storage_obstack)));
 
 	gdb_printf (_("  Total memory used for string cache: %d\n"),
-		    objfile->per_bfd->string_cache.memory_used ());
+		    objfile.per_bfd->string_cache.memory_used ());
 	gdb_printf (_("Byte cache statistics for '%s':\n"),
-		    objfile_name (objfile));
-	objfile->per_bfd->string_cache.print_statistics ("string cache");
-	objfile->print_stats (true);
+		    objfile_name (&objfile));
+	objfile.per_bfd->string_cache.print_statistics ("string cache");
+	objfile.print_stats (true);
       }
 }
 
@@ -451,18 +451,18 @@ maintenance_print_symbols (const char *args, int from_tty)
     {
       int found = 0;
 
-      for (objfile *objfile : current_program_space->objfiles ())
+      for (objfile &objfile : current_program_space->objfiles ())
 	{
 	  int print_for_objfile = 1;
 
 	  if (objfile_arg != NULL)
 	    print_for_objfile
-	      = compare_filenames_for_search (objfile_name (objfile),
+	      = compare_filenames_for_search (objfile_name (&objfile),
 					      objfile_arg);
 	  if (!print_for_objfile)
 	    continue;
 
-	  for (compunit_symtab *cu : objfile->compunits ())
+	  for (compunit_symtab *cu : objfile.compunits ())
 	    {
 	      for (symtab *s : cu->filetabs ())
 		{
@@ -701,12 +701,12 @@ maintenance_print_msymbols (const char *args, int from_tty)
       outfile = &arg_outfile;
     }
 
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile &objfile : current_program_space->objfiles ())
     {
       QUIT;
       if (objfile_arg == NULL
-	  || compare_filenames_for_search (objfile_name (objfile), objfile_arg))
-	dump_msymbols (objfile, outfile);
+	  || compare_filenames_for_search (objfile_name (&objfile), objfile_arg))
+	dump_msymbols (&objfile, outfile);
     }
 }
 
@@ -719,12 +719,12 @@ maintenance_print_objfiles (const char *regexp, int from_tty)
     re_comp (regexp);
 
   for (struct program_space *pspace : program_spaces)
-    for (objfile *objfile : pspace->objfiles ())
+    for (objfile &objfile : pspace->objfiles ())
       {
 	QUIT;
 	if (! regexp
-	    || re_exec (objfile_name (objfile)))
-	  dump_objfile (objfile);
+	    || re_exec (objfile_name (&objfile)))
+	  dump_objfile (&objfile);
       }
 }
 
@@ -739,13 +739,13 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
     re_comp (regexp);
 
   for (struct program_space *pspace : program_spaces)
-    for (objfile *objfile : pspace->objfiles ())
+    for (objfile &objfile : pspace->objfiles ())
       {
 	/* We don't want to print anything for this objfile until we
 	   actually find a symtab whose name matches.  */
 	int printed_objfile_start = 0;
 
-	for (compunit_symtab *cust : objfile->compunits ())
+	for (compunit_symtab *cust : objfile.compunits ())
 	  {
 	    int printed_compunit_symtab_start = 0;
 
@@ -758,10 +758,10 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 		  {
 		    if (! printed_objfile_start)
 		      {
-			gdb_printf ("{ objfile %s ", objfile_name (objfile));
+			gdb_printf ("{ objfile %s ", objfile_name (&objfile));
 			gdb_stdout->wrap_here (2);
 			gdb_printf ("((struct objfile *) %s)\n",
-				    host_address_to_string (objfile));
+				    host_address_to_string (&objfile));
 			printed_objfile_start = 1;
 		      }
 		    if (! printed_compunit_symtab_start)
@@ -844,13 +844,13 @@ static void
 maintenance_check_symtabs (const char *ignore, int from_tty)
 {
   for (struct program_space *pspace : program_spaces)
-    for (objfile *objfile : pspace->objfiles ())
+    for (objfile &objfile : pspace->objfiles ())
       {
 	/* We don't want to print anything for this objfile until we
 	   actually find something worth printing.  */
 	int printed_objfile_start = 0;
 
-	for (compunit_symtab *cust : objfile->compunits ())
+	for (compunit_symtab *cust : objfile.compunits ())
 	  {
 	    int found_something = 0;
 	    struct symtab *symtab = cust->primary_filetab ();
@@ -865,10 +865,10 @@ maintenance_check_symtabs (const char *ignore, int from_tty)
 	      {
 		if (! printed_objfile_start)
 		  {
-		    gdb_printf ("{ objfile %s ", objfile_name (objfile));
+		    gdb_printf ("{ objfile %s ", objfile_name (&objfile));
 		    gdb_stdout->wrap_here (2);
 		    gdb_printf ("((struct objfile *) %s)\n",
-				host_address_to_string (objfile));
+				host_address_to_string (&objfile));
 		    printed_objfile_start = 1;
 		  }
 		gdb_printf ("  { symtab %s\n",
@@ -908,8 +908,8 @@ maintenance_expand_symtabs (const char *args, int from_tty)
   if (regexp == nullptr)
     {
       for (struct program_space *pspace : program_spaces)
-	for (objfile *objfile : pspace->objfiles ())
-	  objfile->expand_all_symtabs ();
+	for (objfile &objfile : pspace->objfiles ())
+	  objfile.expand_all_symtabs ();
 
       return;
     }
@@ -917,8 +917,8 @@ maintenance_expand_symtabs (const char *args, int from_tty)
   re_comp (regexp);
 
   for (struct program_space *pspace : program_spaces)
-    for (objfile *objfile : pspace->objfiles ())
-      objfile->search
+    for (objfile &objfile : pspace->objfiles ())
+      objfile.search
 	([&] (const char *filename, bool basenames)
 	   {
 	     /* KISS: Only apply the regexp to the complete file name.  */
@@ -1028,9 +1028,9 @@ maintenance_info_line_tables (const char *regexp, int from_tty)
     re_comp (regexp);
 
   for (struct program_space *pspace : program_spaces)
-    for (objfile *objfile : pspace->objfiles ())
+    for (objfile &objfile : pspace->objfiles ())
       {
-	for (compunit_symtab *cust : objfile->compunits ())
+	for (compunit_symtab *cust : objfile.compunits ())
 	  {
 	    for (symtab *symtab : cust->filetabs ())
 	      {

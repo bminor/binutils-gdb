@@ -1619,18 +1619,18 @@ set_comp_unit (struct objfile *objfile, struct comp_unit *unit)
 static struct dwarf2_fde *
 dwarf2_frame_find_fde (CORE_ADDR *pc, dwarf2_per_objfile **out_per_objfile)
 {
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile &objfile : current_program_space->objfiles ())
     {
       CORE_ADDR offset;
 
-      if (objfile->obfd == nullptr)
+      if (objfile.obfd == nullptr)
 	continue;
 
-      comp_unit *unit = find_comp_unit (objfile);
+      comp_unit *unit = find_comp_unit (&objfile);
       if (unit == NULL)
 	{
-	  dwarf2_build_frame_info (objfile);
-	  unit = find_comp_unit (objfile);
+	  dwarf2_build_frame_info (&objfile);
+	  unit = find_comp_unit (&objfile);
 	}
       gdb_assert (unit != NULL);
 
@@ -1638,8 +1638,8 @@ dwarf2_frame_find_fde (CORE_ADDR *pc, dwarf2_per_objfile **out_per_objfile)
       if (fde_table->empty ())
 	continue;
 
-      gdb_assert (!objfile->section_offsets.empty ());
-      offset = objfile->text_section_offset ();
+      gdb_assert (!objfile.section_offsets.empty ());
+      offset = objfile.text_section_offset ();
 
       gdb_assert (!fde_table->empty ());
       unrelocated_addr seek_pc = (unrelocated_addr) (*pc - offset);
@@ -1652,7 +1652,7 @@ dwarf2_frame_find_fde (CORE_ADDR *pc, dwarf2_per_objfile **out_per_objfile)
 	{
 	  *pc = (CORE_ADDR) (*it)->initial_location + offset;
 	  if (out_per_objfile != nullptr)
-	    *out_per_objfile = get_dwarf2_per_objfile (objfile);
+	    *out_per_objfile = get_dwarf2_per_objfile (&objfile);
 
 	  return *it;
 	}

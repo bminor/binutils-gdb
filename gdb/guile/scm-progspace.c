@@ -277,11 +277,11 @@ gdbscm_progspace_objfiles (SCM self)
 
   result = SCM_EOL;
 
-  for (objfile *objfile : p_smob->pspace->objfiles ())
+  for (objfile &objfile : p_smob->pspace->objfiles ())
     {
-      if (objfile->separate_debug_objfile_backlink == NULL)
+      if (objfile.separate_debug_objfile_backlink == NULL)
 	{
-	  SCM item = ofscm_scm_from_objfile (objfile);
+	  SCM item = ofscm_scm_from_objfile (&objfile);
 
 	  result = scm_cons (item, result);
 	}

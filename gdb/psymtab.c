@@ -1259,7 +1259,7 @@ maintenance_print_psymbols (const char *args, int from_tty)
     }
 
   found = 0;
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile &objfile : current_program_space->objfiles ())
     {
       int printed_objfile_header = 0;
       int print_for_objfile = 1;
@@ -1267,12 +1267,12 @@ maintenance_print_psymbols (const char *args, int from_tty)
       QUIT;
       if (objfile_arg != NULL)
 	print_for_objfile
-	  = compare_filenames_for_search (objfile_name (objfile),
+	  = compare_filenames_for_search (objfile_name (&objfile),
 					  objfile_arg);
       if (!print_for_objfile)
 	continue;
 
-      for (const auto &iter : objfile->qf)
+      for (const auto &iter : objfile.qf)
 	{
 	  psymbol_functions *psf
 	    = dynamic_cast<psymbol_functions *> (iter.get ());
@@ -1286,22 +1286,22 @@ maintenance_print_psymbols (const char *args, int from_tty)
 	      /* We don't assume each pc has a unique objfile (this is for
 		 debugging).  */
 	      struct partial_symtab *ps
-		= psf->find_pc_sect_psymtab (objfile, pc, section, msymbol);
+		= psf->find_pc_sect_psymtab (&objfile, pc, section, msymbol);
 	      if (ps != NULL)
 		{
 		  if (!printed_objfile_header)
 		    {
 		      outfile->printf ("\nPartial symtabs for objfile %s\n",
-				       objfile_name (objfile));
+				       objfile_name (&objfile));
 		      printed_objfile_header = 1;
 		    }
-		  dump_psymtab (objfile, ps, outfile);
+		  dump_psymtab (&objfile, ps, outfile);
 		  found = 1;
 		}
 	    }
 	  else
 	    {
-	      for (partial_symtab *ps : psf->partial_symbols (objfile))
+	      for (partial_symtab *ps : psf->partial_symbols (&objfile))
 		{
 		  int print_for_source = 0;
 
@@ -1318,10 +1318,10 @@ maintenance_print_psymbols (const char *args, int from_tty)
 		      if (!printed_objfile_header)
 			{
 			  outfile->printf ("\nPartial symtabs for objfile %s\n",
-					   objfile_name (objfile));
+					   objfile_name (&objfile));
 			  printed_objfile_header = 1;
 			}
-		      dump_psymtab (objfile, ps, outfile);
+		      dump_psymtab (&objfile, ps, outfile);
 		    }
 		}
 	    }
@@ -1346,21 +1346,21 @@ maintenance_info_psymtabs (const char *regexp, int from_tty)
     re_comp (regexp);
 
   for (struct program_space *pspace : program_spaces)
-    for (objfile *objfile : pspace->objfiles ())
+    for (objfile &objfile : pspace->objfiles ())
       {
-	struct gdbarch *gdbarch = objfile->arch ();
+	struct gdbarch *gdbarch = objfile.arch ();
 
 	/* We don't want to print anything for this objfile until we
 	   actually find a symtab whose name matches.  */
 	int printed_objfile_start = 0;
 
-	for (const auto &iter : objfile->qf)
+	for (const auto &iter : objfile.qf)
 	  {
 	    psymbol_functions *psf
 	      = dynamic_cast<psymbol_functions *> (iter.get ());
 	    if (psf == nullptr)
 	      continue;
-	    for (partial_symtab *psymtab : psf->partial_symbols (objfile))
+	    for (partial_symtab *psymtab : psf->partial_symbols (&objfile))
 	      {
 		QUIT;
 
@@ -1369,10 +1369,10 @@ maintenance_info_psymtabs (const char *regexp, int from_tty)
 		  {
 		    if (! printed_objfile_start)
 		      {
-			gdb_printf ("{ objfile %s ", objfile_name (objfile));
+			gdb_printf ("{ objfile %s ", objfile_name (&objfile));
 			gdb_stdout->wrap_here (2);
 			gdb_printf ("((struct objfile *) %s)\n",
-				    host_address_to_string (objfile));
+				    host_address_to_string (&objfile));
 			printed_objfile_start = 1;
 		      }
 
@@ -1382,16 +1382,16 @@ maintenance_info_psymtabs (const char *regexp, int from_tty)
 				host_address_to_string (psymtab));
 
 		    gdb_printf ("    readin %s\n",
-				psymtab->readin_p (objfile) ? "yes" : "no");
+				psymtab->readin_p (&objfile) ? "yes" : "no");
 		    gdb_printf ("    fullname %s\n",
 				psymtab->fullname
 				? psymtab->fullname : "(null)");
 		    gdb_printf ("    text addresses ");
 		    gdb_puts (paddress (gdbarch,
-					psymtab->text_low (objfile)));
+					psymtab->text_low (&objfile)));
 		    gdb_printf (" -- ");
 		    gdb_puts (paddress (gdbarch,
-					psymtab->text_high (objfile)));
+					psymtab->text_high (&objfile)));
 		    gdb_printf ("\n");
 		    gdb_printf ("    globals ");
 		    if (!psymtab->global_psymbols.empty ())
@@ -1455,33 +1455,33 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
   const struct blockvector *bv;
   const struct block *b;
 
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile &objfile : current_program_space->objfiles ())
     {
-      for (const auto &iter : objfile->qf)
+      for (const auto &iter : objfile.qf)
 	{
 	  psymbol_functions *psf
 	    = dynamic_cast<psymbol_functions *> (iter.get ());
 	  if (psf == nullptr)
 	    continue;
 
-	  for (partial_symtab *ps : psf->partial_symbols (objfile))
+	  for (partial_symtab *ps : psf->partial_symbols (&objfile))
 	    {
-	      struct gdbarch *gdbarch = objfile->arch ();
+	      struct gdbarch *gdbarch = objfile.arch ();
 
 	      /* We don't call psymtab_to_symtab here because that may cause symtab
 		 expansion.  When debugging a problem it helps if checkers leave
 		 things unchanged.  */
-	      cust = ps->get_compunit_symtab (objfile);
+	      cust = ps->get_compunit_symtab (&objfile);
 
 	      /* First do some checks that don't require the associated symtab.  */
-	      if (ps->text_high (objfile) < ps->text_low (objfile))
+	      if (ps->text_high (&objfile) < ps->text_low (&objfile))
 		{
 		  gdb_printf ("Psymtab ");
 		  gdb_puts (ps->filename);
 		  gdb_printf (" covers bad range ");
-		  gdb_puts (paddress (gdbarch, ps->text_low (objfile)));
+		  gdb_puts (paddress (gdbarch, ps->text_low (&objfile)));
 		  gdb_printf (" - ");
-		  gdb_puts (paddress (gdbarch, ps->text_high (objfile)));
+		  gdb_puts (paddress (gdbarch, ps->text_high (&objfile)));
 		  gdb_printf ("\n");
 		  continue;
 		}
@@ -1529,15 +1529,15 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 		    }
 		}
 	      if (ps->unrelocated_text_high () != unrelocated_addr (0)
-		  && (ps->text_low (objfile) < b->start ()
-		      || ps->text_high (objfile) > b->end ()))
+		  && (ps->text_low (&objfile) < b->start ()
+		      || ps->text_high (&objfile) > b->end ()))
 		{
 		  gdb_printf ("Psymtab ");
 		  gdb_puts (ps->filename);
 		  gdb_printf (" covers ");
-		  gdb_puts (paddress (gdbarch, ps->text_low (objfile)));
+		  gdb_puts (paddress (gdbarch, ps->text_low (&objfile)));
 		  gdb_printf (" - ");
-		  gdb_puts (paddress (gdbarch, ps->text_high (objfile)));
+		  gdb_puts (paddress (gdbarch, ps->text_high (&objfile)));
 		  gdb_printf (" but symtab covers only ");
 		  gdb_puts (paddress (gdbarch, b->start ()));
 		  gdb_printf (" - ");

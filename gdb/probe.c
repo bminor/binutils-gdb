@@ -71,19 +71,19 @@ parse_probes_in_pspace (const static_probe_ops *spops,
 			const char *name,
 			std::vector<symtab_and_line> *result)
 {
-  for (objfile *objfile : search_pspace->objfiles ())
+  for (objfile &objfile : search_pspace->objfiles ())
     {
-      if (!objfile->sf || !objfile->sf->sym_probe_fns)
+      if (!objfile.sf || !objfile.sf->sym_probe_fns)
 	continue;
 
       if (objfile_namestr
-	  && FILENAME_CMP (objfile_name (objfile), objfile_namestr) != 0
-	  && FILENAME_CMP (lbasename (objfile_name (objfile)),
+	  && FILENAME_CMP (objfile_name (&objfile), objfile_namestr) != 0
+	  && FILENAME_CMP (lbasename (objfile_name (&objfile)),
 			   objfile_namestr) != 0)
 	continue;
 
       const std::vector<std::unique_ptr<probe>> &probes
-	= objfile->sf->sym_probe_fns->sym_get_probes (objfile);
+	= objfile.sf->sym_probe_fns->sym_get_probes (&objfile);
 
       for (auto &p : probes)
 	{
@@ -97,12 +97,12 @@ parse_probes_in_pspace (const static_probe_ops *spops,
 	    continue;
 
 	  symtab_and_line sal;
-	  sal.pc = p->get_relocated_address (objfile);
+	  sal.pc = p->get_relocated_address (&objfile);
 	  sal.explicit_pc = 1;
 	  sal.section = find_pc_overlay (sal.pc);
 	  sal.pspace = search_pspace;
 	  sal.prob = p.get ();
-	  sal.objfile = objfile;
+	  sal.objfile = &objfile;
 
 	  result->push_back (std::move (sal));
 	}
@@ -245,19 +245,19 @@ find_probe_by_pc (CORE_ADDR pc)
   result.objfile = NULL;
   result.prob = NULL;
 
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile &objfile : current_program_space->objfiles ())
     {
-      if (!objfile->sf || !objfile->sf->sym_probe_fns
-	  || objfile->sect_index_text == -1)
+      if (!objfile.sf || !objfile.sf->sym_probe_fns
+	  || objfile.sect_index_text == -1)
 	continue;
 
       /* If this proves too inefficient, we can replace with a hash.  */
       const std::vector<std::unique_ptr<probe>> &probes
-	= objfile->sf->sym_probe_fns->sym_get_probes (objfile);
+	= objfile.sf->sym_probe_fns->sym_get_probes (&objfile);
       for (auto &p : probes)
-	if (p->get_relocated_address (objfile) == pc)
+	if (p->get_relocated_address (&objfile) == pc)
 	  {
-	    result.objfile = objfile;
+	    result.objfile = &objfile;
 	    result.prob = p.get ();
 	    return result;
 	  }
@@ -290,19 +290,19 @@ collect_probes (const std::string &objname, const std::string &provider,
     obj_pat.emplace (objname.c_str (), REG_NOSUB,
 		     _("Invalid object file regexp"));
 
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile &objfile : current_program_space->objfiles ())
     {
-      if (! objfile->sf || ! objfile->sf->sym_probe_fns)
+      if (! objfile.sf || ! objfile.sf->sym_probe_fns)
 	continue;
 
       if (obj_pat)
 	{
-	  if (obj_pat->exec (objfile_name (objfile), 0, NULL, 0) != 0)
+	  if (obj_pat->exec (objfile_name (&objfile), 0, NULL, 0) != 0)
 	    continue;
 	}
 
       const std::vector<std::unique_ptr<probe>> &probes
-	= objfile->sf->sym_probe_fns->sym_get_probes (objfile);
+	= objfile.sf->sym_probe_fns->sym_get_probes (&objfile);
 
       for (auto &p : probes)
 	{
@@ -317,7 +317,7 @@ collect_probes (const std::string &objname, const std::string &provider,
 	      && probe_pat->exec (p->get_name ().c_str (), 0, NULL, 0) != 0)
 	    continue;
 
-	  result.emplace_back (p.get (), objfile);
+	  result.emplace_back (p.get (), &objfile);
 	}
     }
 

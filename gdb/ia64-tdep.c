@@ -2861,13 +2861,13 @@ ia64_get_dyn_info_list (unw_addr_space_t as,
   if (!libunwind_is_initialized ())
     return -UNW_ENOINFO;
 
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile &objfile : current_program_space->objfiles ())
     {
       void *buf = NULL;
 
-      text_sec = objfile->sections + SECT_OFF_TEXT (objfile);
+      text_sec = objfile.sections + SECT_OFF_TEXT ((&objfile));
       ip = text_sec->addr ();
-      ret = ia64_find_unwind_table (objfile, ip, &di, &buf);
+      ret = ia64_find_unwind_table (&objfile, ip, &di, &buf);
       if (ret >= 0)
 	{
 	  addr = libunwind_find_dyn_list (as, &di, arg);
@@ -2880,7 +2880,7 @@ ia64_get_dyn_info_list (unw_addr_space_t as,
 		gdb_printf (gdb_stdlog,
 			    "dynamic unwind table in objfile %s "
 			    "at %s (gp=%s)\n",
-			    bfd_get_filename (objfile->obfd),
+			    bfd_get_filename (objfile.obfd),
 			    hex_string (addr), hex_string (di.gp));
 	      *dilap = addr;
 	      return 0;

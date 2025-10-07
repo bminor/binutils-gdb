@@ -30,7 +30,6 @@
 #include "gdbsupport/owning_intrusive_list.h"
 #include "gdbsupport/refcounted-object.h"
 #include "gdbsupport/gdb_ref_ptr.h"
-#include "gdbsupport/reference-to-pointer-iterator.h"
 #include <vector>
 
 struct target_ops;
@@ -185,14 +184,13 @@ struct program_space
      a program space.  */
   ~program_space ();
 
-  using objfiles_iterator
-    = reference_to_pointer_iterator<intrusive_list<objfile>::iterator>;
+  using objfiles_iterator = intrusive_list<objfile>::iterator;
   using objfiles_range = iterator_range<objfiles_iterator>;
 
   /* Return an iterable object that can be used to iterate over all
      objfiles.  The basic use is in a foreach, like:
 
-     for (objfile *objf : pspace->objfiles ()) { ... }  */
+     for (objfile &objf : pspace->objfiles ()) { ... }  */
   objfiles_range objfiles ()
   {
     return objfiles_range (objfiles_iterator (m_objfiles_list.begin ()));
@@ -203,7 +201,7 @@ struct program_space
   /* An iterable object that can be used to iterate over all objfiles.
      The basic use is in a foreach, like:
 
-     for (objfile *objf : pspace->objfiles_safe ()) { ... }
+     for (objfile &objf : pspace->objfiles_safe ()) { ... }
 
      This variant uses a basic_safe_iterator so that objfiles can be
      deleted during iteration.  */

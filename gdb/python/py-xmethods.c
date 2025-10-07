@@ -141,9 +141,9 @@ gdbpy_get_matching_xmethod_workers
   /* Gather debug method matchers registered with the object files.
      This could be done differently by iterating over each objfile's matcher
      list individually, but there's no data yet to show it's needed.  */
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile &objfile : current_program_space->objfiles ())
     {
-      gdbpy_ref<> py_objfile = objfile_to_objfile_object (objfile);
+      gdbpy_ref<> py_objfile = objfile_to_objfile_object (&objfile);
 
       if (py_objfile == NULL)
 	{

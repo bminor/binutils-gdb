@@ -1492,12 +1492,12 @@ info_symbol_command (const char *arg, int from_tty)
     error_no_arg (_("address"));
 
   addr = parse_and_eval_address (arg);
-  for (objfile *objfile : current_program_space->objfiles ())
-    for (obj_section &osect : objfile->sections ())
+  for (objfile &objfile : current_program_space->objfiles ())
+    for (obj_section &osect : objfile.sections ())
       {
 	/* Only process each object file once, even if there's a separate
 	   debug file.  */
-	if (objfile->separate_debug_objfile_backlink)
+	if (objfile.separate_debug_objfile_backlink)
 	  continue;
 
 	sect_addr = overlay_mapped_address (addr, &osect);
@@ -1511,7 +1511,7 @@ info_symbol_command (const char *arg, int from_tty)
 	    const char *loc_string;
 
 	    matches = 1;
-	    offset = sect_addr - msymbol->value_address (objfile);
+	    offset = sect_addr - msymbol->value_address (&objfile);
 	    mapped = section_is_mapped (&osect) ? _("mapped") : _("unmapped");
 	    sec_name = osect.the_bfd_section->name;
 	    msym_name = msymbol->print_name ();

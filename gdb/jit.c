@@ -80,9 +80,9 @@ maint_info_jit_cmd (const char *args, int from_tty)
   std::optional<ui_out_emit_table> table_emitter;
 
   /* Print a line for each JIT-ed objfile.  */
-  for (objfile *obj : inf->pspace->objfiles ())
+  for (objfile &obj : inf->pspace->objfiles ())
     {
-      if (obj->jited_data == nullptr)
+      if (obj.jited_data == nullptr)
 	continue;
 
       if (!printed_header)
@@ -91,7 +91,7 @@ maint_info_jit_cmd (const char *args, int from_tty)
 
 	  /* The +2 allows for the leading '0x', then one character for
 	     every 4-bits.  */
-	  int addr_width = 2 + (gdbarch_ptr_bit (obj->arch ()) / 4);
+	  int addr_width = 2 + (gdbarch_ptr_bit (obj.arch ()) / 4);
 
 	  /* The std::max here selects between the width of an address (as
 	     a string) and the width of the column header string.  */
@@ -109,12 +109,12 @@ maint_info_jit_cmd (const char *args, int from_tty)
 
       ui_out_emit_tuple tuple_emitter (current_uiout, "jit-objfile");
 
-      current_uiout->field_core_addr ("jit_code_entry-address", obj->arch (),
-				      obj->jited_data->addr);
-      current_uiout->field_core_addr ("symfile-address", obj->arch (),
-				      obj->jited_data->symfile_addr);
+      current_uiout->field_core_addr ("jit_code_entry-address", obj.arch (),
+				      obj.jited_data->addr);
+      current_uiout->field_core_addr ("symfile-address", obj.arch (),
+				      obj.jited_data->symfile_addr);
       current_uiout->field_unsigned ("symfile-size",
-				      obj->jited_data->symfile_size);
+				      obj.jited_data->symfile_size);
       current_uiout->text ("\n");
     }
 }
@@ -833,10 +833,10 @@ jit_register_code (struct gdbarch *gdbarch,
 static struct objfile *
 jit_find_objf_with_entry_addr (CORE_ADDR entry_addr)
 {
-  for (objfile *objf : current_program_space->objfiles ())
+  for (objfile &objf : current_program_space->objfiles ())
     {
-      if (objf->jited_data != nullptr && objf->jited_data->addr == entry_addr)
-	return objf;
+      if (objf.jited_data != nullptr && objf.jited_data->addr == entry_addr)
+	return &objf;
     }
 
   return NULL;
@@ -853,9 +853,9 @@ jit_breakpoint_deleted (struct breakpoint *b)
 
   for (bp_location &iter : b->locations ())
     {
-      for (objfile *objf : iter.pspace->objfiles ())
+      for (objfile &objf : iter.pspace->objfiles ())
 	{
-	  jiter_objfile_data *jiter_data = objf->jiter_data.get ();
+	  jiter_objfile_data *jiter_data = objf.jiter_data.get ();
 
 	  if (jiter_data != nullptr
 	      && jiter_data->jit_breakpoint == iter.owner)
@@ -873,44 +873,44 @@ jit_breakpoint_deleted (struct breakpoint *b)
 static void
 jit_breakpoint_re_set_internal (struct gdbarch *gdbarch, program_space *pspace)
 {
-  for (objfile *the_objfile : pspace->objfiles ())
+  for (objfile &the_objfile : pspace->objfiles ())
     {
       /* Skip separate debug objects.  */
-      if (the_objfile->separate_debug_objfile_backlink != nullptr)
+      if (the_objfile.separate_debug_objfile_backlink != nullptr)
 	continue;
 
-      if (the_objfile->skip_jit_symbol_lookup)
+      if (the_objfile.skip_jit_symbol_lookup)
 	continue;
 
       /* Lookup the registration symbol.  If it is missing, then we
 	 assume we are not attached to a JIT.  */
       bound_minimal_symbol reg_symbol
-	= lookup_minimal_symbol_text (pspace, jit_break_name, the_objfile);
+	= lookup_minimal_symbol_text (pspace, jit_break_name, &the_objfile);
       if (reg_symbol.minsym == NULL
 	  || reg_symbol.value_address () == 0)
 	{
 	  /* No need to repeat the lookup the next time.  */
-	  the_objfile->skip_jit_symbol_lookup = true;
+	  the_objfile.skip_jit_symbol_lookup = true;
 	  continue;
 	}
 
       bound_minimal_symbol desc_symbol
 	= lookup_minimal_symbol_linkage (jit_descriptor_name,
-					 the_objfile, true);
+					 &the_objfile, true);
       if (desc_symbol.minsym == NULL
 	  || desc_symbol.value_address () == 0)
 	{
 	  /* No need to repeat the lookup the next time.  */
-	  the_objfile->skip_jit_symbol_lookup = true;
+	  the_objfile.skip_jit_symbol_lookup = true;
 	  continue;
 	}
 
       jiter_objfile_data *objf_data
-	= get_jiter_objfile_data (the_objfile);
+	= get_jiter_objfile_data (&the_objfile);
       objf_data->register_code = reg_symbol.minsym;
       objf_data->descriptor = desc_symbol.minsym;
 
-      CORE_ADDR addr = objf_data->register_code->value_address (the_objfile);
+      CORE_ADDR addr = objf_data->register_code->value_address (&the_objfile);
       jit_debug_printf ("breakpoint_addr = %s", paddress (gdbarch, addr));
 
       /* Check if we need to re-create the breakpoint.  */
@@ -1176,14 +1176,14 @@ jit_inferior_init (inferior *inf)
 
   jit_breakpoint_re_set_internal (gdbarch, pspace);
 
-  for (objfile *jiter : pspace->objfiles ())
+  for (objfile &jiter : pspace->objfiles ())
     {
-      if (jiter->jiter_data == nullptr)
+      if (jiter.jiter_data == nullptr)
 	continue;
 
       /* Read the descriptor so we can check the version number and load
 	 any already JITed functions.  */
-      if (!jit_read_descriptor (gdbarch, &descriptor, jiter))
+      if (!jit_read_descriptor (gdbarch, &descriptor, &jiter))
 	continue;
 
       /* Check that the version number agrees with that we support.  */
@@ -1248,10 +1248,10 @@ jit_breakpoint_re_set (void)
 static void
 jit_inferior_exit_hook (struct inferior *inf)
 {
-  for (objfile *objf : current_program_space->objfiles_safe ())
+  for (objfile &objf : current_program_space->objfiles_safe ())
     {
-      if (objf->jited_data != nullptr && objf->jited_data->addr != 0)
-	objf->unlink ();
+      if (objf.jited_data != nullptr && objf.jited_data->addr != 0)
+	objf.unlink ();
     }
 }
 

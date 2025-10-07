@@ -153,8 +153,8 @@ program_space::iterate_over_objfiles_in_search_order
     return m_solib_ops->iterate_over_objfiles_in_search_order
       (cb, current_objfile);
 
-  for (const auto objfile : this->objfiles ())
-    if (cb (objfile))
+  for (auto &objfile : this->objfiles ())
+    if (cb (&objfile))
       return;
 }
 
@@ -197,13 +197,13 @@ program_space::remove_objfile (struct objfile *objfile)
 struct objfile *
 program_space::objfile_for_address (CORE_ADDR address)
 {
-  for (auto iter : objfiles ())
+  for (auto &iter : objfiles ())
     {
       /* Don't check separate debug objfiles.  */
-      if (iter->separate_debug_objfile_backlink != nullptr)
+      if (iter.separate_debug_objfile_backlink != nullptr)
 	continue;
-      if (is_addr_in_objfile (address, iter))
-	return iter;
+      if (is_addr_in_objfile (address, &iter))
+	return &iter;
     }
   return nullptr;
 }

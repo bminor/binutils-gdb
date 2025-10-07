@@ -52,8 +52,8 @@ set_can_use_agent (const char *args, int from_tty, struct cmd_list_element *c)
     {
       /* Since the setting was off, we may not have observed the objfiles and
 	 therefore not looked up the required symbols.  Do so now.  */
-      for (objfile *objfile : current_program_space->objfiles ())
-	if (agent_look_up_symbols (objfile) == 0)
+      for (objfile &objfile : current_program_space->objfiles ())
+	if (agent_look_up_symbols (&objfile) == 0)
 	  break;
     }
   if (target_use_agent (can_use) == 0)

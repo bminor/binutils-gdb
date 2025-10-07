@@ -487,18 +487,18 @@ find_unwind_entry (CORE_ADDR pc)
       return NULL;
     }
 
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile &objfile : current_program_space->objfiles ())
     {
       struct hppa_unwind_info *ui;
       ui = NULL;
-      struct hppa_objfile_private *priv = hppa_objfile_priv_data.get (objfile);
+      struct hppa_objfile_private *priv = hppa_objfile_priv_data.get (&objfile);
       if (priv)
 	ui = priv->unwind_info;
 
       if (!ui)
 	{
-	  read_unwind_info (objfile);
-	  priv = hppa_objfile_priv_data.get (objfile);
+	  read_unwind_info (&objfile);
+	  priv = hppa_objfile_priv_data.get (&objfile);
 	  if (priv == NULL)
 	    error (_("Internal error reading unwind information."));
 	  ui = priv->unwind_info;

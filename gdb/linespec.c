@@ -1137,7 +1137,7 @@ iterate_over_all_matching_symtabs
 
       set_current_program_space (pspace);
 
-      for (objfile *objfile : pspace->objfiles ())
+      for (objfile &objfile : pspace->objfiles ())
 	{
 	  auto expand_callback = [&] (compunit_symtab *cu)
 	    {
@@ -1170,8 +1170,8 @@ iterate_over_all_matching_symtabs
 	      return true;
 	    };
 
-	  objfile->search (nullptr, &lookup_name, nullptr, expand_callback,
-			   SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK, domain);
+	  objfile.search (nullptr, &lookup_name, nullptr, expand_callback,
+			  SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK, domain);
 	}
     }
 }
@@ -4176,12 +4176,12 @@ search_minsyms_for_name (struct collect_info *info,
 
 	  set_current_program_space (pspace);
 
-	  for (objfile *objfile : pspace->objfiles ())
+	  for (objfile &objfile : pspace->objfiles ())
 	    {
-	      iterate_over_minimal_symbols (objfile, name,
+	      iterate_over_minimal_symbols (&objfile, name,
 					    [&] (struct minimal_symbol *msym)
 					    {
-					      add_minsym (msym, objfile, nullptr,
+					      add_minsym (msym, &objfile, nullptr,
 							  info->state->list_mode,
 							  &minsyms);
 					      return false;

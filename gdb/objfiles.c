@@ -695,8 +695,8 @@ objfile::has_symbols ()
 bool
 have_partial_symbols (program_space *pspace)
 {
-  for (objfile *ofp : pspace->objfiles ())
-    if (ofp->has_partial_symbols ())
+  for (objfile &ofp : pspace->objfiles ())
+    if (ofp.has_partial_symbols ())
       return true;
 
   return false;
@@ -707,8 +707,8 @@ have_partial_symbols (program_space *pspace)
 bool
 have_full_symbols (program_space *pspace)
 {
-  for (objfile *ofp : pspace->objfiles ())
-    if (ofp->has_full_symbols ())
+  for (objfile &ofp : pspace->objfiles ())
+    if (ofp.has_full_symbols ())
       return true;
 
   return false;
@@ -720,13 +720,13 @@ have_full_symbols (program_space *pspace)
 void
 objfile_purge_solibs (program_space *pspace)
 {
-  for (objfile *objf : pspace->objfiles_safe ())
+  for (objfile &objf : pspace->objfiles_safe ())
     {
       /* We assume that the solib package has been purged already, or will
 	 be soon.  */
 
-      if (!(objf->flags & OBJF_USERLOADED) && (objf->flags & OBJF_SHARED))
-	objf->unlink ();
+      if (!(objf.flags & OBJF_USERLOADED) && (objf.flags & OBJF_SHARED))
+	objf.unlink ();
     }
 }
 
@@ -735,8 +735,8 @@ objfile_purge_solibs (program_space *pspace)
 bool
 have_minimal_symbols (program_space *pspace)
 {
-  for (objfile *ofp : pspace->objfiles ())
-    if (ofp->per_bfd->minimal_symbol_count > 0)
+  for (objfile &ofp : pspace->objfiles ())
+    if (ofp.per_bfd->minimal_symbol_count > 0)
       return true;
 
   return false;
@@ -803,10 +803,10 @@ sort_cmp (const struct obj_section *sect1, const obj_section *sect2)
 	{
 	  /* Sort on sequence number of the objfile in the chain.  */
 
-	  for (objfile *objfile : current_program_space->objfiles ())
-	    if (objfile == objfile1)
+	  for (objfile &objfile : current_program_space->objfiles ())
+	    if (&objfile == objfile1)
 	      return true;
-	    else if (objfile == objfile2)
+	    else if (&objfile == objfile2)
 	      return false;
 
 	  /* We should have found one of the objfiles before getting here.  */
@@ -993,9 +993,9 @@ update_section_map (struct program_space *pspace,
   xfree (map);
 
   alloc_size = 0;
-  for (objfile *objfile : pspace->objfiles ())
-    for (obj_section &s : objfile->sections ())
-      if (insert_section_p (objfile->obfd.get (), s.the_bfd_section))
+  for (objfile &objfile : pspace->objfiles ())
+    for (obj_section &s : objfile.sections ())
+      if (insert_section_p (objfile.obfd.get (), s.the_bfd_section))
 	alloc_size += 1;
 
   /* This happens on detach/attach (e.g. in gdb.base/attach.exp).  */
@@ -1009,9 +1009,9 @@ update_section_map (struct program_space *pspace,
   map = XNEWVEC (struct obj_section *, alloc_size);
 
   i = 0;
-  for (objfile *objfile : pspace->objfiles ())
-    for (obj_section &s : objfile->sections ())
-      if (insert_section_p (objfile->obfd.get (), s.the_bfd_section))
+  for (objfile &objfile : pspace->objfiles ())
+    for (obj_section &s : objfile.sections ())
+      if (insert_section_p (objfile.obfd.get (), s.the_bfd_section))
 	map[i++] = &s;
 
   std::sort (map, map + alloc_size, sort_cmp);
@@ -1144,10 +1144,10 @@ bool
 shared_objfile_contains_address_p (struct program_space *pspace,
 				   CORE_ADDR address)
 {
-  for (objfile *objfile : pspace->objfiles ())
+  for (objfile &objfile : pspace->objfiles ())
     {
-      if ((objfile->flags & OBJF_SHARED) != 0
-	  && is_addr_in_objfile (address, objfile))
+      if ((objfile.flags & OBJF_SHARED) != 0
+	  && is_addr_in_objfile (address, &objfile))
 	return true;
     }
 

@@ -1767,19 +1767,19 @@ save_gdb_index_command (const char *args, int from_tty)
   dw_index_kind index_kind
     = (opts.dwarf_5 ? dw_index_kind::DEBUG_NAMES : dw_index_kind::GDB_INDEX);
 
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile &objfile : current_program_space->objfiles ())
     {
       /* If the objfile does not correspond to an actual file, skip it.  */
-      if ((objfile->flags & OBJF_NOT_FILENAME) != 0)
+      if ((objfile.flags & OBJF_NOT_FILENAME) != 0)
 	continue;
 
-      dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
+      dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (&objfile);
 
       if (per_objfile != NULL)
 	{
 	  try
 	    {
-	      const char *basename = lbasename (objfile_name (objfile));
+	      const char *basename = lbasename (objfile_name (&objfile));
 	      const dwz_file *dwz = per_objfile->per_bfd->get_dwz_file ();
 	      const char *dwz_basename = NULL;
 
@@ -1793,7 +1793,7 @@ save_gdb_index_command (const char *args, int from_tty)
 	    {
 	      exception_fprintf (gdb_stderr, except,
 				 _("Error while writing index for `%s': "),
-				 objfile_name (objfile));
+				 objfile_name (&objfile));
 	    }
 	}
 

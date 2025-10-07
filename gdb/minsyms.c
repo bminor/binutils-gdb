@@ -372,23 +372,23 @@ lookup_minimal_symbol (program_space *pspace, const char *name, objfile *objf,
 
   lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
 
-  for (objfile *objfile : pspace->objfiles ())
+  for (objfile &objfile : pspace->objfiles ())
     {
       if (found.external_symbol.minsym != NULL)
 	break;
 
-      if (objf == NULL || objf == objfile
-	  || objf == objfile->separate_debug_objfile_backlink)
+      if (objf == NULL || objf == &objfile
+	  || objf == objfile.separate_debug_objfile_backlink)
 	{
 	  symbol_lookup_debug_printf ("lookup_minimal_symbol (%s, %s, %s, %s)",
 				      host_address_to_string (pspace),
 				      name, sfile != NULL ? sfile : "NULL",
-				      objfile_debug_name (objfile));
+				      objfile_debug_name (&objfile));
 
 	  /* Do two passes: the first over the ordinary hash table,
 	     and the second over the demangled hash table.  */
-	  lookup_minimal_symbol_mangled (name, sfile, objfile,
-					 objfile->per_bfd->msymbol_hash,
+	  lookup_minimal_symbol_mangled (name, sfile, &objfile,
+					 objfile.per_bfd->msymbol_hash,
 					 mangled_hash, mangled_cmp, found);
 
 	  /* If not found, try the demangled hash table.  */
@@ -398,7 +398,7 @@ lookup_minimal_symbol (program_space *pspace, const char *name, objfile *objf,
 		 table (usually just zero or one languages).  */
 	      for (unsigned iter = 0; iter < nr_languages; ++iter)
 		{
-		  if (!objfile->per_bfd->demangled_hash_languages.test (iter))
+		  if (!objfile.per_bfd->demangled_hash_languages.test (iter))
 		    continue;
 		  enum language lang = (enum language) iter;
 
@@ -410,9 +410,9 @@ lookup_minimal_symbol (program_space *pspace, const char *name, objfile *objf,
 		    = language_def (lang)->get_symbol_name_matcher
 							(lookup_name);
 		  struct minimal_symbol **msymbol_demangled_hash
-		    = objfile->per_bfd->msymbol_demangled_hash;
+		    = objfile.per_bfd->msymbol_demangled_hash;
 
-		  lookup_minimal_symbol_demangled (lookup_name, sfile, objfile,
+		  lookup_minimal_symbol_demangled (lookup_name, sfile, &objfile,
 						   msymbol_demangled_hash,
 						   hash, match, found);
 
@@ -587,16 +587,16 @@ bound_minimal_symbol
 lookup_minimal_symbol_linkage (program_space *pspace, const char *name,
 			       bool match_static_type, bool only_main)
 {
-  for (objfile *objfile : pspace->objfiles ())
+  for (objfile &objfile : pspace->objfiles ())
     {
-      if (objfile->separate_debug_objfile_backlink != nullptr)
+      if (objfile.separate_debug_objfile_backlink != nullptr)
 	continue;
 
-      if (only_main && (objfile->flags & OBJF_MAINLINE) == 0)
+      if (only_main && (objfile.flags & OBJF_MAINLINE) == 0)
 	continue;
 
       bound_minimal_symbol minsym
-	= lookup_minimal_symbol_linkage (name, objfile, match_static_type);
+	= lookup_minimal_symbol_linkage (name, &objfile, match_static_type);
       if (minsym.minsym != nullptr)
 	return minsym;
     }
@@ -644,11 +644,11 @@ lookup_minimal_symbol_text (program_space *pspace, const char *name,
 
   if (objf == nullptr)
     {
-      for (objfile *objfile : pspace->objfiles ())
+      for (objfile &objfile : pspace->objfiles ())
 	{
 	  if (found_symbol.minsym != NULL)
 	    break;
-	  search (objfile);
+	  search (&objfile);
 	}
     }
   else
@@ -679,16 +679,16 @@ lookup_minimal_symbol_by_pc_name (CORE_ADDR pc, const char *name,
 
   unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
 
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile &objfile : current_program_space->objfiles ())
     {
-      if (objf == NULL || objf == objfile
-	  || objf == objfile->separate_debug_objfile_backlink)
+      if (objf == NULL || objf == &objfile
+	  || objf == objfile.separate_debug_objfile_backlink)
 	{
-	  for (msymbol = objfile->per_bfd->msymbol_hash[hash];
+	  for (msymbol = objfile.per_bfd->msymbol_hash[hash];
 	       msymbol != NULL;
 	       msymbol = msymbol->hash_next)
 	    {
-	      if (msymbol->value_address (objfile) == pc
+	      if (msymbol->value_address (&objfile) == pc
 		  && strcmp (msymbol->linkage_name (), name) == 0)
 		return msymbol;
 	    }
@@ -1589,9 +1589,9 @@ find_solib_trampoline_target (const frame_info_ptr &frame, CORE_ADDR pc)
 
   if (tsymbol != NULL)
     {
-      for (objfile *objfile : current_program_space->objfiles ())
+      for (objfile &objfile : current_program_space->objfiles ())
 	{
-	  for (minimal_symbol *msymbol : objfile->msymbols ())
+	  for (minimal_symbol *msymbol : objfile.msymbols ())
 	    {
 	      /* Also handle minimal symbols pointing to function
 		 descriptors.  */
@@ -1606,7 +1606,7 @@ find_solib_trampoline_target (const frame_info_ptr &frame, CORE_ADDR pc)
 
 		  /* Ignore data symbols that are not function
 		     descriptors.  */
-		  if (msymbol_is_function (objfile, msymbol, &func))
+		  if (msymbol_is_function (&objfile, msymbol, &func))
 		    return func;
 		}
 	    }

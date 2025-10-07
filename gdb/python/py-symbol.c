@@ -603,7 +603,7 @@ gdbpy_lookup_static_symbols (PyObject *self, PyObject *args, PyObject *kw)
       /* Expand any symtabs that contain potentially matching symbols.  */
       lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
 
-      for (objfile *objfile : current_program_space->objfiles ())
+      for (objfile &objfile : current_program_space->objfiles ())
 	{
 	  auto callback = [&] (compunit_symtab *cust)
 	    {
@@ -632,8 +632,8 @@ gdbpy_lookup_static_symbols (PyObject *self, PyObject *args, PyObject *kw)
 	      return true;
 	    };
 
-	  if (!objfile->search (nullptr, &lookup_name, nullptr, callback,
-				SEARCH_STATIC_BLOCK, flags))
+	  if (!objfile.search (nullptr, &lookup_name, nullptr, callback,
+			       SEARCH_STATIC_BLOCK, flags))
 	    return nullptr;
 	}
     }

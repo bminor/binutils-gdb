@@ -835,17 +835,17 @@ static void
 set_debug_symfile (const char *args, int from_tty, struct cmd_list_element *c)
 {
   for (struct program_space *pspace : program_spaces)
-    for (objfile *objfile : pspace->objfiles ())
+    for (objfile &objfile : pspace->objfiles ())
       {
 	if (debug_symfile)
 	  {
-	    if (!symfile_debug_installed (objfile))
-	      install_symfile_debug_logging (objfile);
+	    if (!symfile_debug_installed (&objfile))
+	      install_symfile_debug_logging (&objfile);
 	  }
 	else
 	  {
-	    if (symfile_debug_installed (objfile))
-	      uninstall_symfile_debug_logging (objfile);
+	    if (symfile_debug_installed (&objfile))
+	      uninstall_symfile_debug_logging (&objfile);
 	  }
       }
 }

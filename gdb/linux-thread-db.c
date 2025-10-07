@@ -1074,17 +1074,17 @@ try_thread_db_load_from_pdir (const char *subdir)
   if (!auto_load_thread_db)
     return false;
 
-  for (objfile *obj : current_program_space->objfiles ())
-    if (libpthread_objfile_p (obj))
+  for (objfile &obj : current_program_space->objfiles ())
+    if (libpthread_objfile_p (&obj))
       {
-	if (try_thread_db_load_from_pdir_1 (obj, subdir))
+	if (try_thread_db_load_from_pdir_1 (&obj, subdir))
 	  return true;
 
 	/* We may have found the separate-debug-info version of
 	   libpthread, and it may live in a directory without a matching
 	   libthread_db.  */
-	if (obj->separate_debug_objfile_backlink != NULL)
-	  return try_thread_db_load_from_pdir_1 (obj->separate_debug_objfile_backlink,
+	if (obj.separate_debug_objfile_backlink != NULL)
+	  return try_thread_db_load_from_pdir_1 (obj.separate_debug_objfile_backlink,
 						 subdir);
 
 	return false;
@@ -1183,8 +1183,8 @@ thread_db_load_search (void)
 static bool
 has_libpthread (void)
 {
-  for (objfile *obj : current_program_space->objfiles ())
-    if (libpthread_objfile_p (obj))
+  for (objfile &obj : current_program_space->objfiles ())
+    if (libpthread_objfile_p (&obj))
       return true;
 
   return false;

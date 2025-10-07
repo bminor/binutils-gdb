@@ -353,9 +353,9 @@ gdbscm_objfiles (void)
 
   result = SCM_EOL;
 
-  for (objfile *objf : current_program_space->objfiles ())
+  for (objfile &objf : current_program_space->objfiles ())
     {
-      SCM item = ofscm_scm_from_objfile (objf);
+      SCM item = ofscm_scm_from_objfile (&objf);
 
       result = scm_cons (item, result);
     }
