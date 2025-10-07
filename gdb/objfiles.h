@@ -382,6 +382,12 @@ struct obj_section
     return bfd_section_vma (this->the_bfd_section) + this->offset ();
   }
 
+  /* As addr, but returns an unrelocated address.  */
+  unrelocated_addr addr_unrel () const
+  {
+    return unrelocated_addr (bfd_section_vma (this->the_bfd_section));
+  }
+
   /* The one-passed-the-end memory address of the section
      (vma + size + offset).  */
   CORE_ADDR endaddr () const
@@ -389,10 +395,22 @@ struct obj_section
     return this->addr () + bfd_section_size (this->the_bfd_section);
   }
 
+  /* As endaddr, but returns an unrelocated address.  */
+  unrelocated_addr endaddr_unrel () const
+  {
+    return this->addr_unrel () + bfd_section_size (this->the_bfd_section);
+  }
+
   /* True if ADDR is in this obj_section, false otherwise.  */
   bool contains (CORE_ADDR addr) const
   {
     return addr >= this->addr () && addr < endaddr ();
+  }
+
+  /* As contains (CORE_ADDR), but for an unrelocated address.  */
+  bool contains (unrelocated_addr addr) const
+  {
+    return addr >= this->addr_unrel () && addr < endaddr_unrel ();
   }
 
   /* BFD section pointer.  This is nullptr if the corresponding BFD section is
