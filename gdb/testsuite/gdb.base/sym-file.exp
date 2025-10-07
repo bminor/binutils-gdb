@@ -71,8 +71,7 @@ gdb_load_shlib ${lib_so}
 proc do_test { remove_expr } {
     global lib_basename lib_syms srcfile srcfile3
 
-    clean_restart
-    gdb_load $::binfile
+    clean_restart $::testfile
 
     if {![runto_main]} {
 	return

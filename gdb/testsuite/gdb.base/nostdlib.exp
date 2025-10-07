@@ -31,7 +31,8 @@ foreach_with_prefix pie { "nopie" "pie" } {
     # OPTS and BINFILE are used by the COMPILE string (defined above)
     # when it is evaluated below.
     set opts [list debug additional_flags=-nostdlib $pie]
-    set binfile [standard_output_file $testfile-$pie]
+    set filename $testfile-$pie
+    set binfile [standard_output_file $filename]
 
     set board [target_info name]
     if {[board_info $board exists mathlib]} {
@@ -51,8 +52,7 @@ foreach_with_prefix pie { "nopie" "pie" } {
 	return -1
     }
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $filename
 
     gdb_breakpoint "*marker"
 

@@ -37,8 +37,7 @@ if { [gdb_compile $compile_name "${binfile}" executable {debug}] != "" } {
     return -1
 }
 
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 set bp_location [gdb_get_line_number "set breakpoint here" $new_srcfile]
 

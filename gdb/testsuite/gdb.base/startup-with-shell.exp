@@ -40,10 +40,9 @@ run_on_host \
 # Initial setup for simple test (wildcard expansion, variable substitution).
 
 proc initial_setup_simple { startup_with_shell run_args } {
-    global hex decimal binfile unique_file
+    global hex decimal unique_file
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     gdb_test_no_output "set startup-with-shell $startup_with_shell"
     gdb_test_no_output "set print characters unlimited"

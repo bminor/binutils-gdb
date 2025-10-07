@@ -56,8 +56,7 @@ proc do_test { action1 action2 } {
 
     save_vars { ::GDBFLAGS } {
 	append ::GDBFLAGS " -ex \"maintenance set target-non-stop on\""
-	clean_restart
-	gdb_load $::binfile
+	clean_restart $::testfile
     }
 
     # Ensure we are at least after the getpid call, should we need it.

@@ -43,8 +43,7 @@ proc test {stop_mode hw} {
 	    # default.
 	    append ::GDBFLAGS " -ex \"maint set target-non-stop on\""
 	}
-	clean_restart
-	gdb_load $::binfile
+	clean_restart $::testfile
     }
 
     gdb_test_no_output "set can-use-hw-watchpoints $hw"

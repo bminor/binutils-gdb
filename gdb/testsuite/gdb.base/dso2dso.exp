@@ -37,25 +37,21 @@ set libdso1 $testfile-dso1
 set srcfile_libdso1 $srcdir/$subdir/$libdso1.c
 set binfile_libdso1 [standard_output_file $libdso1.so]
 
-if { [gdb_compile_shlib $srcfile_libdso2 $binfile_libdso2 \
-	[list debug]] != "" } {
-  untested "failed to compile shared library 2"
-  return -1
+if { [build_executable "build shlib 1" $binfile_libdso1 \
+	  $srcfile_libdso1 {debug shlib}] != 0 } {
+    return
 }
 
-if { [gdb_compile_shlib $srcfile_libdso1 $binfile_libdso1 \
-	[list debug]] != "" } {
-  untested "failed to compile shared library 1"
-  return -1
+if { [build_executable "build shlib 2" $binfile_libdso2 \
+	  $srcfile_libdso2 {debug shlib}] != 0 } {
+    return
 }
 
-if { [gdb_compile $srcdir/$subdir/$srcfile $binfile executable \
-	[list debug shlib=$binfile_libdso2 shlib=$binfile_libdso1]] != "" } {
-  return -1
+if { [prepare_for_testing "prepare" $testfile $srcfile \
+	  [list debug shlib=$binfile_libdso2 shlib=$binfile_libdso1]] != 0 } {
+  return
 }
 
-clean_restart
-gdb_load $binfile
 gdb_load_shlib $binfile_libdso2
 gdb_load_shlib $binfile_libdso1
 

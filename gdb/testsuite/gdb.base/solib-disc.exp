@@ -39,13 +39,14 @@ remote_exec build "rm -f ${binfile}"
 
 set exec_opts [list debug shlib_load additional_flags=-DSHLIB_NAME=\"${lib_dlopen}\"]
 
-if { [gdb_compile_shlib $libsrc $libobj {debug}] != ""
-     || [gdb_compile $execsrc ${binfile} executable $exec_opts] != "" } {
-    return -1
+if { [build_executable "build solib" $libobj $libsrc {debug shlib}] != 0 } {
+    return
 }
 
-clean_restart
-gdb_load $binfile
+if { [prepare_for_testing "prepare" $testfile $execsrc $exec_opts] != 0 } {
+    return
+}
+
 gdb_load_shlib $libobj
 
 if {![runto_main]} {

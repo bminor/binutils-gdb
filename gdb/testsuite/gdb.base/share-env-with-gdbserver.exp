@@ -89,10 +89,9 @@ proc do_prepare_inferior { } {
 #   VAR_NAME_MATCH.  If empty, defaults, to $var_value.
 
 proc do_test { var_value { var_name "" } { var_name_match "" } { var_value_match "" } } {
-    global binfile test_var_name
+    global test_var_name
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     if { $var_name == "" } {
 	set var_name $test_var_name
@@ -145,10 +144,7 @@ with_test_prefix "strange named var" {
 # fashions.
 
 proc test_set_unset_vars { } {
-    global binfile
-
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     with_test_prefix "set 3 environment variables" {
 	# Set some environment variables
@@ -205,10 +201,9 @@ with_test_prefix "test set/unset of vars" {
 # Test that unsetting works.
 
 proc test_unset { } {
-    global hex decimal binfile gdb_prompt
+    global hex decimal gdb_prompt
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     do_prepare_inferior
 
@@ -237,8 +232,7 @@ proc test_unset { } {
 	}
 
 	with_test_prefix "set-then-unset" {
-	    clean_restart
-	    gdb_load $binfile
+	    clean_restart $::testfile
 
 	    # Test if setting and then unsetting $HOME works.
 	    gdb_test_no_output "set environment HOME = test" "set HOME as test"

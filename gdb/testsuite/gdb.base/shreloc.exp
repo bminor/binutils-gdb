@@ -35,7 +35,7 @@ set binfile [standard_output_file $testfile]
 set lib1_sl [standard_output_file shreloc1.sl]
 set lib2_sl [standard_output_file shreloc2.sl]
 
-set lib_opts "debug"
+set lib_opts {debug shlib}
 set exec_opts [list debug shlib=$lib1_sl shlib=$lib2_sl]
 
 if {([istarget "*pc-cygwin"] || [istarget "*pc-mingw32"]) } {
@@ -52,21 +52,18 @@ if {[test_compiler_info "xlc-*"]} {
 
 }
 
-if { [gdb_compile_shlib $lib1src $lib1_sl $lib_opts] != ""} {
-    untested "could not build $lib1_sl."
-    return -1
-} elseif { [gdb_compile_shlib $lib2src $lib2_sl $lib_opts] != ""} {
-    untested "could not build $lib1_s2."
-    return -1
-} elseif { [gdb_compile $srcfile $binfile executable $exec_opts] != ""} {
-    untested "could not build $binfile."
-    return -1
+if { [build_executable "build shlib 1" $lib1_sl $lib1src $lib_opts] != 0} {
+    return
 }
 
-# Start with a fresh gdb.
+if { [build_executable "build shlib " $lib2_sl $lib2src $lib_opts] != 0} {
+    return
+}
 
-clean_restart
-gdb_load $binfile
+if { [prepare_for_testing "prepare" $testfile $srcfile $exec_opts] != 0} {
+    return
+}
+
 gdb_load_shlib $lib1_sl
 gdb_load_shlib $lib2_sl
 

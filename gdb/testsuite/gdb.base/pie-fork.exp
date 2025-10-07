@@ -27,10 +27,7 @@ if {[build_executable "failed to prepare" $testfile $srcfile $opts]} {
 }
 
 proc setup_test {detach_on_fork {follow_fork_mode "parent"}} {
-    global binfile
-
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     if {![runto_main]} {
 	return

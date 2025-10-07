@@ -25,9 +25,8 @@ if { ! [istarget "*-*-linux*"] } {
 standard_testfile attach.c
 set escapedbinfile  [string_to_regexp ${binfile}]
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested "failed to compile"
-     return -1
+if { [prepare_for_testing "prepare" $testfile $srcfile] != 0 } {
+    return
 }
 
 proc do_detach_tests {} {
@@ -41,9 +40,6 @@ proc do_detach_tests {} {
   gdb_test_no_output "set should_exit = 1" "set should_exit, $pass"
   gdb_test "detach" "Detaching from program: .*$escapedbinfile, .*" "detach, $pass"
 }
-
-clean_restart
-gdb_load $binfile
 
 global pass
 set pass "one"

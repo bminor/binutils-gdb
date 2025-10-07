@@ -32,13 +32,9 @@ require {!target_info exists gdb,nosignals}
 
 standard_testfile .c
 
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested "failed to compile"
-    return -1
+if { [prepare_for_testing "prepare" $testfile $srcfile] != 0 } {
+    return
 }
-
-clean_restart
-gdb_load $binfile
 
 #
 # Run to `main' where we begin our tests.

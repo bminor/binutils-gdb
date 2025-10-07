@@ -80,14 +80,9 @@
 
 standard_testfile .c
 
-if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" ${binfile} executable \
-	 {debug macros}] != ""} {
-    untested "failed to compile"
-    return -1
+if { [prepare_for_testing "prepare" $testfile $srcfile {debug macros}] != 0 } {
+    return
 }
-
-clean_restart
-gdb_load $binfile
 
 # Any command that causes GDB to read the debugging info for the
 # lineinc.c compilation unit will do here.

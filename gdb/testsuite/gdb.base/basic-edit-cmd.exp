@@ -68,8 +68,7 @@ save_vars { env(EDITOR) } {
 	"try edit when no symbol file is loaded"
 
     # Now start with a test binary.
-    clean_restart
-    gdb_load $binfile
+    clean_restart $testfile
 
     with_test_prefix "before starting inferior" {
 

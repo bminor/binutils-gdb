@@ -20,9 +20,9 @@
 
 standard_testfile .c
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DVARIABLE=var1}] != "" } {
-    untested "failed to compile"
-    return -1
+if { [prepare_for_testing "prepare" $testfile $srcfile \
+	  {debug additional_flags=-DVARIABLE=var1}] != 0 } {
+    return
 }
 
 set oldtimeout $timeout
@@ -35,9 +35,6 @@ proc expect_to_stop_here { ident } {
 
     gdb_test "" "Breakpoint \[0-9\]*, stop_here .*" "running to stop_here $ident"
 }
-
-clean_restart
-gdb_load $binfile
 
 gdb_test "break stop_here if (var1 == 42)" \
     "Breakpoint.*at.* file .*$srcfile, line.*" \

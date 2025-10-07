@@ -29,8 +29,7 @@ if { [ensure_gdb_index $binfile] == -1 } {
     return -1
 }
 
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 gdb_test "with language ada -- print g_s" \
     " = \\(a => 1, b => 2, c => 3\\)"

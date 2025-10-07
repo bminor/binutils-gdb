@@ -51,10 +51,9 @@ set loc_index(C)    0
 
 proc find_location_contexts { } {
     global loc_name loc_index fill
-    global decimal hex gdb_prompt binfile
+    global decimal hex gdb_prompt
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     if {![runto_main]} {
 	return
@@ -129,10 +128,9 @@ proc check_bp_locations {bpnum states cond {msg ""}} {
 # starting GDB, but before running to main.
 
 proc_with_prefix scenario_1 { start_before } {
-    global warning decimal fill bkptno_num_re binfile
+    global warning decimal fill bkptno_num_re
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     if { $start_before } {
 	if {![runto_main temporary]} {
@@ -242,10 +240,9 @@ proc setup_bps { bpnum1_name bpnum2_name } {
 # starting GDB, but before running to main.
 
 proc_with_prefix scenario_2 { start_before } {
-    global binfile bkptno_num_re
+    global bkptno_num_re
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     if { $start_before } {
 	if {![runto_main temporary]} {
@@ -291,10 +288,9 @@ proc_with_prefix scenario_2 { start_before } {
 # starting GDB, but before running to main.
 
 proc_with_prefix scenario_3 { start_before } {
-    global binfile bkptno_num_re loc_index warning
+    global bkptno_num_re loc_index warning
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     if { $start_before } {
 	if {![runto_main temporary]} {
@@ -369,10 +365,9 @@ proc_with_prefix scenario_3 { start_before } {
 # bother with a run to main in this case.
 
 proc_with_prefix scenario_4 { start_before } {
-    global binfile bkptno_num_re loc_index warning
+    global bkptno_num_re loc_index warning
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     if { $start_before } {
 	if {![runto_main temporary]} {

@@ -17,20 +17,16 @@
 
 
 standard_testfile .c
-# The ${binfile} basename needs to exceed 80 characters (`sizeof (psargs)')
+
+# The executable basename needs to exceed 80 characters (`sizeof (psargs)')
 # plus some additional data to overwrite the stack frame.
 set pattern  01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
-append binfile -${pattern}
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested "failed to compile"
-     return -1
+set filename ${testfile}-${pattern}
+
+if { [prepare_for_testing "prepare" $filename $srcfile] != 0 } {
+    return
 }
-
-# Start with a fresh gdb.
-
-clean_restart
-gdb_load $binfile
 
 gdb_test_no_output "set args ${pattern}"	\
     "set buffer exceeding arguments"

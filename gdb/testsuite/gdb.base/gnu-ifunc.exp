@@ -89,15 +89,14 @@ proc build {resolver_attr resolver_debug final_debug} {
 # ifunc is resolved.  For the description of RESOLVER_ATTR,
 # RESOLVER_DEBUG and FINAL_DEBUG, see the "build" procedure above.
 proc_with_prefix set-break {resolver_attr resolver_debug final_debug} {
-    global binfile libfile lib_so
+    global libfile lib_so
     global hex decimal
     global gdb_prompt
 
     set suffix [make_binsuffix $resolver_attr $resolver_debug $final_debug]
 
     set lib_so [standard_output_file ${libfile}-$suffix.so]
-    clean_restart
-    gdb_load $binfile-$suffix
+    clean_restart $::testfile-$suffix
     gdb_load_shlib ${lib_so}
 
     if {![runto_main]} {
@@ -196,7 +195,7 @@ proc_with_prefix set-break {resolver_attr resolver_debug final_debug} {
 # Misc GNU ifunc tests.  For the description of RESOLVER_ATTR,
 # RESOLVER_DEBUG and FINAL_DEBUG, see the "build" procedure above.
 proc misc_tests {resolver_attr resolver_debug final_debug} {
-    global srcdir subdir srcfile binfile
+    global srcdir subdir srcfile
     global libsrc lib_so libfile
     global exec_opts executable
     global hex gdb_prompt
@@ -224,8 +223,7 @@ proc misc_tests {resolver_attr resolver_debug final_debug} {
 
     # Start with a fresh gdb.
 
-    clean_restart
-    gdb_load $binfile-$suffix
+    clean_restart $::testfile-$suffix
     gdb_load_shlib ${lib_so}
 
     if {![runto_main]} {

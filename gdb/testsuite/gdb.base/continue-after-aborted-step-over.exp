@@ -43,10 +43,9 @@ if {[build_executable "failed to prepare" $testfile $srcfile debug]} {
 # DISPLACED indicates whether to use displaced-stepping.
 proc do_test {displaced breakpoint_always_inserted} {
     global gdb_prompt decimal
-    global srcfile binfile
+    global srcfile
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     gdb_test_no_output "set displaced-stepping $displaced"
     gdb_test_no_output "set breakpoint always-inserted $breakpoint_always_inserted"

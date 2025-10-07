@@ -25,14 +25,13 @@ if {[build_executable "failed to prepare" $testfile $srcfile debug] == -1} {
 # does not cause a pagination prompt.
 
 proc test_ctrlc_while_target_running_does_not_paginate {} {
-    global binfile srcfile
+    global srcfile
     global gdb_prompt
 
     set testline [gdb_get_line_number "after sleep"]
 
     with_test_prefix "ctrlc target running" {
-	clean_restart
-	gdb_load $binfile
+	clean_restart $::testfile
 
 	if {![runto_main]} {
 	    return 0

@@ -30,11 +30,9 @@ set linenum [gdb_get_line_number "set break here"]
 
 proc test {continue_cmd} {
     global gdb_prompt
-    global binfile
     global linenum
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     if {![runto_main]} {
 	return

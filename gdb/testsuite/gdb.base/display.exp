@@ -52,8 +52,7 @@ if {!$use_gdb_stub} {
     gdb_test "kill" ".*" "kill again"
     gdb_test "detach" ".*" "detach again"
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $testfile
 }
 
 # Ok, on to real life

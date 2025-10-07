@@ -34,8 +34,7 @@ if {[build_executable "failed to prepare" $testfile $srcfile debug]} {
 # AFTER_KILL_COND is appended to the breakpoint condition, after "kill
 # -SIGINT $gdb_pid".
 proc test { {after_kill_cond ""} } {
-    clean_restart
-    gdb_load $::binfile
+    clean_restart $::testfile
 
     if {![runto_main]} {
 	return

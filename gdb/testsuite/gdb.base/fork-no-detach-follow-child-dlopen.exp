@@ -41,8 +41,7 @@ if { [build_executable "failed to prepare" ${testfile} ${srcfile} $opts] } {
 }
 
 proc do_test {} {
-    clean_restart
-    gdb_load $::binfile
+    clean_restart $::testfile
     gdb_locate_shlib $::shlib_path
     gdb_test_no_output "set follow-fork-mode child"
     gdb_test_no_output "set detach-on-fork off"

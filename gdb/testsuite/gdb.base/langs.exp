@@ -93,8 +93,7 @@ if {[runto csub]} {
     gdb_continue_to_end "first session"
 }
 
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 # Try exercising the "minimal" language a bit...
 

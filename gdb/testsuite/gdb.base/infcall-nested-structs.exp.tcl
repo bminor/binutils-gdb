@@ -56,9 +56,6 @@ proc I2A { n } {
 proc start_nested_structs_test { lang types } {
     global testfile
     global srcfile
-    global binfile
-    global subdir
-    global srcdir
     global compile_flags
 
     standard_testfile infcall-nested-structs.c
@@ -75,14 +72,10 @@ proc start_nested_structs_test { lang types } {
 	append testfile "-" "$t"
     }
 
-    if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable "${flags}"] != "" } {
-	unresolved "failed to compile"
+    if { [prepare_for_testing "prepare for testing" \
+	      $testfile $srcfile $flags] } {
 	return 0
     }
-
-    # Start with a fresh gdb.
-    clean_restart
-    gdb_load $binfile
 
     # Make certain that the output is consistent
     gdb_test_no_output "set print sevenbit-strings"

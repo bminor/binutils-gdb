@@ -34,8 +34,7 @@ with_test_prefix "exec" {
     gdb_test "p extern_global = 2" " = 2" "modify value"
     gdb_test "p extern_global" " = 2" "value modified"
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $testfile
 
     gdb_test "p extern_global" " = 2" "value modified persisted"
 }
@@ -44,8 +43,7 @@ with_test_prefix "exec" {
 
 # Generate a core file.
 with_test_prefix "gcore" {
-    clean_restart
-    gdb_load $binfile
+    clean_restart $testfile
 
     if {![runto_main]} {
 	return

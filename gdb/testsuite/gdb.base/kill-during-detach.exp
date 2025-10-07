@@ -76,8 +76,7 @@ set checkpoint_line [gdb_get_line_number "Checkpoint here"]
 proc run_test { exit_p checkpoint_p } {
     save_vars { ::GDBFLAGS } {
 	append ::GDBFLAGS " -ex \"set non-stop on\""
-	clean_restart
-	gdb_load $::binfile
+	clean_restart $::testfile
     }
 
     if {![runto_main]} {

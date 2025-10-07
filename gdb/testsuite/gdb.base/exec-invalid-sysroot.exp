@@ -19,31 +19,29 @@
 
 standard_testfile foll-exec.c
 
-global binfile
-set binfile [standard_output_file "foll-exec"]
+set testfile "foll-exec"
+set binfile [standard_output_file $testfile]
 set testfile2 "execd-prog"
 set srcfile2 ${testfile2}.c
 set binfile2 [standard_output_file ${testfile2}]
 
 set compile_options debug
 
-# build the first test case
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" executable $compile_options] != "" } {
-    untested "failed to compile secondary testcase"
-    return -1
+# Build the executable which will be exec'd.
+if { [build_executable "build exec'd file" $testfile2 $srcfile2 $compile_options] != 0 } {
+    return
 }
 
 if { [is_remote target] } {
     gdb_remote_download target $binfile2
 }
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $compile_options] != "" } {
-    untested "failed to compile main testcase"
-    return -1
+# Build the test executable, which performs the exec.
+if { [prepare_for_testing "prepare" $testfile $srcfile $compile_options] != 0 } {
+    return
 }
 
 proc do_exec_sysroot_test {} {
-    global binfile srcfile srcfile2 testfile testfile2
     global gdb_prompt
 
     gdb_test_no_output "set sysroot /a/path/that/does/not/exist"
@@ -68,7 +66,4 @@ proc do_exec_sysroot_test {} {
     }
 }
 
-# Start with a fresh gdb
-clean_restart
-gdb_load $binfile
 do_exec_sysroot_test

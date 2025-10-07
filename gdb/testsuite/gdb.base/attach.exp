@@ -56,8 +56,7 @@ proc_with_prefix do_attach_failure_tests {} {
     global escapedbinfile
     global srcfile
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     # Figure out a regular expression that will match the sysroot,
     # noting that the default sysroot is "target:", and also noting
@@ -216,8 +215,7 @@ proc_with_prefix do_attach_tests {} {
     global timeout
     global decimal
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     # Figure out a regular expression that will match the sysroot,
     # noting that the default sysroot is "target:", and also noting
@@ -521,8 +519,7 @@ proc_with_prefix do_attach_exec_mismatch_handling_tests {} {
     global binfile2
     global binfile3
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     # Start two programs that can be attached to.
     # The first program contains a 'int bidule' variable, the second a 'float bidule'.

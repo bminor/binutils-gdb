@@ -40,17 +40,17 @@ set lib_sl  [standard_output_file $libname]
 set lib_dlopen [shlib_target_file ${libname}]
 set lib_syms [shlib_symbol_file ${libname}]
 
-set lib_opts debug
+set lib_opts {debug shlib}
 set exec_opts [list debug shlib_load additional_flags=-DSHLIB_NAME=\"${lib_dlopen}\"]
 
-if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
-     || [gdb_compile $srcfile $binfile executable $exec_opts] != ""} {
-    untested "failed to compile"
-    return -1
+if { [build_executable "build shlib" $lib_sl $libsrc $lib_opts] != 0 } {
+    return
 }
 
-clean_restart
-gdb_load $binfile
+if { [prepare_for_testing "prepare" $testfile $srcfile $exec_opts] != 0 } {
+    return
+}
+
 gdb_load_shlib $lib_sl
 
 runto_main

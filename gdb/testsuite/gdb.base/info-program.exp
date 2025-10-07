@@ -35,8 +35,7 @@ standard_testfile
 proc do_test { threads non-stop } {
     save_vars { ::GDBFLAGS } {
 	append ::GDBFLAGS " -ex \"set non-stop ${non-stop}\""
-	clean_restart
-	gdb_load $::binfile-$threads
+	clean_restart $::testfile-$threads
     }
 
     gdb_test "info program" \

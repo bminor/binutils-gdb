@@ -528,11 +528,10 @@ proc_with_prefix test-enum {} {
 # string settings tests.
 proc test-string {variant} {
     global gdb_prompt
-    global srcfile binfile
+    global srcfile
 
     # Load symbols for the completion test below.
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     # Use these variables to make sure we don't call the wrong command
     # by mistake.

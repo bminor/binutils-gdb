@@ -60,8 +60,7 @@ gdb_assert { ![string equal $pc unknown] } \
     "check we read the frame's PC"
 
 # Restart and load the Python unwinder script.
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 gdb_test_no_output "source ${remote_python_file}" "load python file"
 
 # Tell the Python unwinder to use the frame-id we cached above.

@@ -26,8 +26,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 }
 
 proc do_test { with_probes } {
-    clean_restart
-    gdb_load $::binfile
+    clean_restart $::testfile
 
     if { !$with_probes } {
 	gdb_test "maint ignore-probes libc ^longjmp$"

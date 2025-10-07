@@ -34,13 +34,9 @@
 
 standard_testfile int-type.c
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug nowarnings}] != "" } {
-     untested "failed to compile"
-     return -1
-    }
-
-clean_restart
-gdb_load $binfile
+if { [prepare_for_testing "prepare" $testfile $srcfile { debug nowarnings }] != 0 } {
+    return
+}
 
 
 if {![runto_main]} {

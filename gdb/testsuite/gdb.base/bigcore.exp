@@ -113,12 +113,11 @@ proc check_heap { dir heap } {
 # The bulk of the testcase.  DUMPER indicates who is supposed to dump
 # the core.  It can be either "kernel", or "gdb".
 proc test {dumper} {
-    global binfile timeout corefile gdb_prompt
+    global timeout corefile gdb_prompt
 
     # Run GDB on the bigcore program up-to where it will dump core.
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
     gdb_test_no_output "set print sevenbit-strings"
     gdb_test_no_output "set width 0"
 

@@ -33,12 +33,11 @@ if {[build_executable "failed to prepare for dprintf-detach" \
 
 proc dprintf_detach_test { breakpoint_always_inserted dprintf_style disconnected_dprintf } {
     set test_prefix "bai=${breakpoint_always_inserted} ds=${dprintf_style} dd=${disconnected_dprintf}"
-    global binfile decimal gdb_prompt escapedbinfile
+    global decimal gdb_prompt escapedbinfile
 
     with_test_prefix "$test_prefix" {
 	# Start with a clean gdb
-	clean_restart
-	gdb_load $binfile
+	clean_restart $::testfile
 
 	gdb_test_no_output "set breakpoint always-inserted ${breakpoint_always_inserted}"
 	gdb_test_no_output "set dprintf-style ${dprintf_style}"
@@ -69,8 +68,7 @@ proc dprintf_detach_test { breakpoint_always_inserted dprintf_style disconnected
 	gdb_exit
 
 	# Check that the process still exists by attaching a new gdb to it.
-	clean_restart
-	gdb_load $binfile
+	clean_restart $::testfile
 	set test "re-attach to inferior"
 	set is_gdbserver [target_is_gdbserver]
 

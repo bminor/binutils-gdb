@@ -21,20 +21,18 @@ set srcfile2 $srcdir/$subdir/$srcfile2
 set lib1src  $srcdir/$subdir/$srcfile3
 set lib1     [standard_output_file symtab-search-order-1.sl]
 
-set lib_opts "debug"
+set lib_opts {debug shlib}
 set exec_opts [list debug shlib=$lib1]
 
-if { [gdb_compile_shlib $lib1src $lib1 $lib_opts] != ""
-     || [gdb_compile [list $srcfile $srcfile2] $binfile executable \
-	     $exec_opts] != ""} {
-    untested "failed to compile"
-    return -1
+if { [build_executable "build shlib" $lib1 $lib1src $lib_opts] != 0 } {
+    return
 }
 
-# Start with a fresh gdb.
+if { [prepare_for_testing "prepare" $testfile [list $srcfile $srcfile2] \
+	  $exec_opts] != 0 } {
+    return
+}
 
-clean_restart
-gdb_load $binfile
 gdb_load_shlib $lib1
 
 if {![runto_main]} {

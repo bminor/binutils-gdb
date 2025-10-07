@@ -16,13 +16,10 @@
 
 standard_testfile .c
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [concat debug additional_flags=-fstack-check nowarnings]] != "" } {
-     untested "failed to compile"
-     return -1
+if { [prepare_for_testing "prepare" $testfile $srcfile \
+	  [list debug additional_flags=-fstack-check nowarnings]] != 0 } {
+    return
 }
-
-clean_restart
-gdb_load $binfile
 
 if {![runto_main]} {
     return 0

@@ -22,10 +22,7 @@ if {[build_executable $testfile.exp $testfile ${srcfile} ${compile_options}] == 
 }
 
 proc test_set_inferior_tty { command } {
-    global binfile
-
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     gdb_test_no_output "$command hello" "set inferior-tty to hello"
     gdb_test "show inferior-tty" \

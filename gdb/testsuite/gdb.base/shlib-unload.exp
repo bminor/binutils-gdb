@@ -69,8 +69,7 @@ proc_with_prefix test_bp_modified_events {} {
 	return
     }
 
-    clean_restart
-    gdb_load $::binfile
+    clean_restart $::testfile
 
     if {![runto_main]} {
 	return
@@ -115,8 +114,7 @@ proc_with_prefix test_bp_modified_events {} {
 # Check that GDB disables dprintf breakpoints within a shared library
 # when the shared library is unloaded.
 proc_with_prefix test_dprintf_after_unload {} {
-    clean_restart
-    gdb_load $::binfile
+    clean_restart $::testfile
 
     if {![runto_main]} {
 	return
@@ -145,8 +143,7 @@ proc_with_prefix test_dprintf_after_unload {} {
 # inferior.  We should not get an error about re-setting the dprintf
 # breakpoint.
 proc_with_prefix test_dprintf_with_rerun {} {
-    clean_restart
-    gdb_load $::binfile
+    clean_restart $::testfile
 
     if {![runto_main]} {
 	return
@@ -241,8 +238,7 @@ proc_with_prefix test_silent_nosharedlib {} {
     }
 
     foreach_with_prefix type { breakpoint dprintf } {
-	clean_restart
-	gdb_load $::binfile
+	clean_restart $::testfile
 
 	if {![runto_main]} {
 	    return

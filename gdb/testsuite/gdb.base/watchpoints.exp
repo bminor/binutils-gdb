@@ -53,8 +53,7 @@ with_test_prefix "before inferior start" {
 
     # This will turn hardware watchpoints back on and delete the watchpoint
     # we just created.
-    clean_restart
-    gdb_load $binfile
+    clean_restart $testfile
 
     # Disable hardware watchpoints if necessary.
     if {!$allow_hw_watchpoint_tests_p} {

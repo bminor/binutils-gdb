@@ -41,10 +41,9 @@ if {[build_executable "failed to prepare" $testfile $srcfile \
 # that are problematic, STUB_SUITABLE is false.
 proc do_test { method startup_with_shell inferior_args expected_results \
 		   stub_suitable } {
-    global binfile hex
+    global hex
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     gdb_test_no_output "set startup-with-shell $startup_with_shell"
 

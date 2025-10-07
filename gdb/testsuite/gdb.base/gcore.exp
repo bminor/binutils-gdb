@@ -58,8 +58,7 @@ if {!$core_supported} {
 }
 
 # Now restart gdb and load the corefile.
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 set core_loaded [gdb_core_cmd "$corefile" "re-load generated corefile"]
 if { $core_loaded == -1 } {

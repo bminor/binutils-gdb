@@ -72,8 +72,7 @@ with_test_prefix "warnings" {
     foreach cmd {"per-command" "per-command time"} {
 	with_test_prefix $cmd {
 	    # GDB only warns once, so restart between commands.
-	    clean_restart
-	    gdb_load $binfile
+	    clean_restart $testfile
 	    gdb_test "mt set $cmd on" "$maybe_per_command_warning"
 	    gdb_test "mt set $cmd off" "command started"
 	    gdb_test_no_output "mt set $cmd on"  \

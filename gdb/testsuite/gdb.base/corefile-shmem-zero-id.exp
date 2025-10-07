@@ -93,8 +93,7 @@ save_vars { env(LD_PRELOAD) env(ASAN_OPTIONS) } {
     # LD_PRELOAD.
     append_environment_default ASAN_OPTIONS verify_asan_link_order 0
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $testfile
 
     # Start GDB with the modified environment, this means that, when
     # using remote targets, gdbserver will also use the preload
@@ -187,8 +186,7 @@ with_timeout_factor 3 {
 
 # Restart GDB.  This time we are _not_ using the preload library.  We
 # no longer need it as we are only analysing the core file now.
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 # Load the core file.
 gdb_test "core-file $corefile" \

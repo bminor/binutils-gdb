@@ -45,10 +45,8 @@ proc get_pc { msg } {
 
 proc test_step_over { displaced } {
     global hex
-    global binfile
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     if {![runto_main]} {
 	return -1

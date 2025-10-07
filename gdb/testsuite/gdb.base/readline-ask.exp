@@ -27,8 +27,7 @@ setenv TERM dumb
 
 # INPUTRC gets reset for the next testfile.
 setenv INPUTRC $inputrc
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 if { ![readline_is_used] } {
     unsupported "completion doesn't work when readline isn't used."

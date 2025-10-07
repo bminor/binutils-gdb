@@ -26,8 +26,10 @@ set lib2obj [standard_output_file "${testfile}2-lib.so"]
 set lib3obj [standard_output_file "${testfile}3-lib.so"]
 
 proc do_tests {force_internal_tls {do_kfail_tls_access 0}} {
-    clean_restart
-    gdb_load $::binfile
+    set filename [file tail $::binfile]
+
+    clean_restart $filename
+
     if {![runto_main]} {
 	return
     }
@@ -129,8 +131,7 @@ proc do_tests {force_internal_tls {do_kfail_tls_access 0}} {
 	return
     }
 
-    clean_restart
-    gdb_load $::binfile
+    clean_restart $filename
 
     set core_loaded [gdb_core_cmd $corefile "load corefile"]
     if { $core_loaded == -1 } {

@@ -40,17 +40,10 @@ if {[support_complex_tests]} {
     lappend flags "additional_flags=-DTEST_COMPLEX"
 }
 
-# build the first test case
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
-	   executable $flags] != "" } {
-     untested "failed to compile"
-     return -1
+if { [prepare_for_testing "prepare" $testfile $srcfile $flags] != 0 } {
+    return
 }
 
-# Start with a fresh gdb.
-
-clean_restart
-gdb_load $binfile
 gdb_test_no_output "set print sevenbit-strings"
 gdb_test_no_output "set print address off"
 gdb_test_no_output "set width 0"

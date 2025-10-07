@@ -19,15 +19,11 @@ if { [is_remote host] } {
 
 standard_testfile .c
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug nowarnings}] != "" } {
-    untested "failed to compile"
-    return -1
-}
-
 set location [gdb_get_line_number "say_hello" "sep-proc.c"]
 
-clean_restart
-gdb_load $binfile
+if { [prepare_for_testing "prepare" $testfile $srcfile {debug nowarnings}] != 0 } {
+    return
+}
 
 # Try to display the source code inside a file which is included by
 # another source file.  The purpose of this test is to verify that
@@ -46,8 +42,7 @@ gdb_test "list sep-proc.c:$location" \
 # Try the same, but this time with a breakpoint.  We need to exit
 # GDB to make sure that we havn't loaded the full symbols yet when
 # we test the breakpoint insertion.
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 set test "breakpoint inside included file"
 gdb_test_multiple "break sep-proc.c:$location" "$test" {

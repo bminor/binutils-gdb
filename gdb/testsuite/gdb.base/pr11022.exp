@@ -17,15 +17,9 @@ require allow_hw_watchpoint_tests
 
 standard_testfile .c
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested "failed to compile"
-     return -1
+if { [prepare_for_testing "prepare" $testfile $srcfile] != 0 } {
+    return
 }
-
-# Start with a fresh gdb.
-
-clean_restart
-gdb_load $binfile
 
 if {![runto_main]} {
     return 0

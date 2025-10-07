@@ -43,8 +43,7 @@ if { ![readline_supports_eof_flag] } {
 # arrived.  If it is then GDB will start displaying extra blank lines
 # after each line of input.
 proc run_test {} {
-    clean_restart
-    gdb_load $::binfile
+    clean_restart $::testfile
 
     gdb_breakpoint main
 

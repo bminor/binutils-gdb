@@ -97,8 +97,7 @@ proc compare_frames {frames} {
 
 proc test {enable} {
 
-    clean_restart
-    gdb_load $::binfile
+    clean_restart $::testfile
 
     gdb_test_no_output "maint frame-unwinder $enable DEBUGINFO"
 

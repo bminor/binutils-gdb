@@ -308,9 +308,8 @@ with_test_prefix "step using -fi + -fu" {
 }
 
 with_test_prefix "skip delete completion" {
-    global binfile
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
+
     if {![runto_main]} {
 	return
     }

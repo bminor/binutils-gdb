@@ -204,9 +204,7 @@ proc_with_prefix test-print {{prefix ""}} {
 	"-vtbl"
     }
 
-    global binfile
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     if {![runto_main]} {
 	return
@@ -317,9 +315,7 @@ proc_with_prefix test-backtrace {} {
 	"backtrace no-fil" \
 	"backtrace no-filters"
 
-    global binfile
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     if {![runto_main]} {
 	return

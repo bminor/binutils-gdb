@@ -22,16 +22,9 @@ require {!target_info exists no_long_long}
 
 standard_testfile .c
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [concat debug nowarnings]] != "" } {
-     untested "failed to compile"
-     return -1
+if { [prepare_for_testing "prepare" $testfile $srcfile {debug nowarnings}] != 0 } {
+    return
 }
-
-# use this to debug:
-#log_user 1
-
-clean_restart
-gdb_load $binfile
 
 if {![runto known_types]} {
    return

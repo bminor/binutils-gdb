@@ -21,21 +21,22 @@ require allow_shlib_tests
 set libname "solib-symbol-lib"
 set srcfile_lib ${srcdir}/${subdir}/${libname}.c
 set binfile_lib [standard_output_file ${libname}.so]
-set lib_flags [list debug ldflags=-Wl,-Bsymbolic]
+set lib_flags [list debug shlib ldflags=-Wl,-Bsymbolic]
 # Binary file.
 set testfile "solib-symbol-main"
 set srcfile ${srcdir}/${subdir}/${testfile}.c
 set binfile [standard_output_file ${testfile}]
 set bin_flags [list debug shlib=${binfile_lib}]
 
-if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib} $lib_flags] != ""
-     || [gdb_compile ${srcfile} ${binfile} executable $bin_flags] != "" } {
-  untested "failed to compile"
-  return -1
+if { [build_executable "build solib" $binfile_lib $srcfile_lib \
+	  $lib_flags] != 0 } {
+    return
 }
 
-clean_restart
-gdb_load $binfile
+if { [prepare_for_testing "prepare" $testfile $srcfile $bin_flags] != 0 } {
+    return
+}
+
 gdb_load_shlib $binfile_lib
 
 # Set a breakpoint in the binary.

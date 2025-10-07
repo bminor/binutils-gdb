@@ -119,8 +119,7 @@ proc test_truncated_comp_dir {} {
 	}
     }
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     if { [ishost *-*-mingw*] } {
 	gdb_test_no_output "set directories \$cdir;\$cwd"

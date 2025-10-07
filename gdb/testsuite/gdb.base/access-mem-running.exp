@@ -25,15 +25,14 @@ if {[build_executable "failed to prepare" $testfile $srcfile {debug}] == -1} {
 # non-stop, or all-stop mode.
 
 proc test { non_stop } {
-    global srcfile binfile
+    global srcfile
     global gdb_prompt
     global GDBFLAGS
     global decimal
 
     save_vars { GDBFLAGS } {
       append GDBFLAGS " -ex \"set non-stop $non_stop\""
-      clean_restart
-      gdb_load $binfile
+      clean_restart $::testfile
     }
 
     if {![runto_main]} {

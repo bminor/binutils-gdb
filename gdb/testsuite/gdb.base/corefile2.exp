@@ -171,8 +171,7 @@ with_test_prefix "renamed binfile" {
 
 # Restart and run to the abort call.
 
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 if {![runto_main]} {
     return
@@ -196,8 +195,7 @@ if {!$core_supported} {
 gdb_test_no_output "maint print core-file-backed-mappings" \
     "maint print core-file-backed-mapping with no core file"
 
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 set core_loaded [gdb_core_cmd "$corefile" "re-load generated corefile"]
 if { $core_loaded == -1 } {

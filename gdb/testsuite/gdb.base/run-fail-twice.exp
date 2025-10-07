@@ -43,8 +43,7 @@ proc test_run {testname} {
 proc_with_prefix test {} {
     global gdb_prompt binfile
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     gdb_test_no_output "set confirm off"
 

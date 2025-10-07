@@ -45,8 +45,7 @@ proc test {} {
 	if {$is_remote} {
 	    append ::GDBFLAGS " -ex \"maint set target-non-stop on\""
 	}
-	clean_restart
-	gdb_load $binfile
+	clean_restart $::testfile
     }
 
     set test_spawn_id [spawn_wait_for_attach $binfile]

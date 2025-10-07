@@ -23,20 +23,15 @@ set is_remote_target [is_remote target]
 standard_testfile -test.c -lib.c
 set solib_name [standard_output_file ${testfile}-lib.so]
 
-if { [gdb_compile_shlib ${srcdir}/${subdir}/${srcfile2} ${solib_name} \
-      {debug}] != "" } {
-    untested "failed to compile shared library"
-    return -1
+
+if { [build_executable "build shlib" $solib_name $srcfile2 {debug shlib}] != 0 } {
+    return
 }
 
-if {[gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable \
-     [list debug shlib=${solib_name} ]] != ""} {
-    untested "failed to compile executable"
-    return -1
+if { [prepare_for_testing "prepare" $testfile $srcfile \
+	  [list debug shlib=${solib_name} ]] != 0} {
+    return
 }
-
-clean_restart
-gdb_load $binfile
 
 set solib_name [gdb_load_shlib $solib_name]
 

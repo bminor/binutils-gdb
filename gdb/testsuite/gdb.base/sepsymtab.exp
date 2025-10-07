@@ -31,8 +31,7 @@ if {[gdb_gnu_strip_debug $binfile no-main]} {
     return -1
 }
 
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 set command "info sym main"
 set command_regex [string_to_regexp $command]

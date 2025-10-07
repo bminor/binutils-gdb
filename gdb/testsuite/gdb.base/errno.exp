@@ -45,8 +45,9 @@
 standard_testfile
 
 proc do_tests {{do_xfail_cast 0} {do_xfail 0} {do_xfail_core_test 0}} {
-    clean_restart
-    gdb_load $::binfile
+    set filename [file tail $::binfile]
+
+    clean_restart $filename
     if {![runto_main]} {
 	return
     }
@@ -177,8 +178,7 @@ proc do_tests {{do_xfail_cast 0} {do_xfail 0} {do_xfail_core_test 0}} {
 	return
     }
 
-    clean_restart
-    gdb_load $::binfile
+    clean_restart $filename
 
     set core_loaded [gdb_core_cmd $corefile "load corefile"]
     if { $core_loaded == -1 } {

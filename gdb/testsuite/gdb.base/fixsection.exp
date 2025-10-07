@@ -22,18 +22,17 @@ set libfile "fixsectshr"
 set libsrc ${srcdir}/${subdir}/${libfile}.c
 set lib_sl [standard_output_file ${libfile}.sl]
 
-set lib_opts [list debug nowarnings]
+set lib_opts [list debug nowarnings shlib]
 set exec_opts [list debug nowarnings shlib=$lib_sl]
 
-if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
-     || [gdb_compile $srcdir/$subdir/$srcfile $binfile \
-	     executable $exec_opts] != ""} {
-    untested "failed to compile"
-    return -1
+if { [build_executable "build shlib" $lib_sl $libsrc $lib_opts] != 0 } {
+    return
 }
 
-clean_restart
-gdb_load $binfile
+if { [prepare_for_testing "prepare" $testfile $srcfile $exec_opts] != 0 } {
+    return
+}
+
 gdb_load_shlib ${lib_sl}
 
 if {![runto_main]} {

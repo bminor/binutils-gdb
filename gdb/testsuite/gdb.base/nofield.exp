@@ -15,16 +15,12 @@
 
 standard_testfile .c
 
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested "failed to compile"
-    return -1
+if { [prepare_for_testing "prepare" $testfile $srcfile] != 0 } {
+    return
 }
 
 set eol "\r\n"
 set sp "\[ \t\]*"
-
-clean_restart
-gdb_load $binfile
 
 gdb_test "ptype struct not_empty" \
 	 "type = struct not_empty {$eol${sp}void \\*e;$eol${sp}void \\*u;$eol}"

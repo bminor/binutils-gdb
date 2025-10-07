@@ -42,12 +42,10 @@ proc get_value {var msg} {
 # and then quits GDB.
 
 proc test {cmds_after_kill} {
-    global binfile
     global gdb_prompt
     global decimal
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     if {![runto done]} {
 	return

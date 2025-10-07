@@ -18,8 +18,10 @@ source $srcdir/$subdir/tls-common.exp.tcl
 standard_testfile
 
 proc do_tests {force_internal_tls {do_kfail_tls_access 0}} {
-    clean_restart
-    gdb_load $::binfile
+    set filename [file tail $::binfile]
+
+    clean_restart $filename
+
     if {![runto_main]} {
 	return
     }
@@ -102,12 +104,12 @@ proc do_tests {force_internal_tls {do_kfail_tls_access 0}} {
     }
 
     with_test_prefix "stripped" {
-	set binfile_stripped "${::binfile}.stripped"
+	set filename_stripped "${filename}.stripped"
+	set binfile_stripped [standard_output_file $filename_stripped]
 	set objcopy [gdb_find_objcopy]
 	set cmd "$objcopy --strip-debug ${::binfile} $binfile_stripped"
 	if {![catch {exec {*}$cmd} cmd_output]} {
-	    clean_restart
-	    gdb_load $binfile_stripped
+	    clean_restart $filename_stripped
 	    if {![runto_main]} {
 		return
 	    }
@@ -157,8 +159,7 @@ proc do_tests {force_internal_tls {do_kfail_tls_access 0}} {
 	return
     }
 
-    clean_restart
-    gdb_load $::binfile
+    clean_restart $filename
 
     set core_loaded [gdb_core_cmd $corefile "load corefile"]
     if { $core_loaded == -1 } {

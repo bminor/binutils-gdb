@@ -26,12 +26,10 @@ if {[build_executable "failed to prepare" $testfile $srcfile debug] == -1} {
 # command without getting caught in pagination.
 
 proc test_bg_execution_pagination_return {} {
-    global binfile
     global decimal
 
     with_test_prefix "paginate" {
-	clean_restart
-	gdb_load $binfile
+	clean_restart $::testfile
 
 	if {![runto_main]} {
 	    return 0

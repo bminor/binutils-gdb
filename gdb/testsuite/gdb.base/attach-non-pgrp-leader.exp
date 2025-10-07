@@ -36,8 +36,7 @@ proc do_test {} {
     # Attach to the parent, run it to a known point, extract the
     # child's PID, and detach.
     with_test_prefix "parent" {
-	clean_restart
-	gdb_load $binfile
+	clean_restart $::testfile
 
 	gdb_test "attach $parent_pid" \
 	    "Attaching to program.*, process $parent_pid.*" \
@@ -57,8 +56,7 @@ proc do_test {} {
 
     # Start over, and attach to the child this time.
     with_test_prefix "child" {
-	clean_restart
-	gdb_load $binfile
+	clean_restart $::testfile
 
 	gdb_test "attach $child_pid" \
 	    "Attaching to program.*, process $child_pid.*" \

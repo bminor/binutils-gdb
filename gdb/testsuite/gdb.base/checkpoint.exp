@@ -290,8 +290,7 @@ gdb_test "restart 10" "has no checkpoints" "no more checkpoint 10"
 # Now let's try setting a large number of checkpoints (>600)
 #
 
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 runto_main
 gdb_breakpoint $break1_loc
@@ -357,8 +356,7 @@ gdb_test "kill" "" "kill all one with many checkpoints" \
 #
 
 with_test_prefix "delete checkpoint 0" {
-    clean_restart
-    gdb_load $binfile
+    clean_restart $testfile
     runto_main
 
     gdb_test "checkpoint" "Checkpoint 1: fork returned pid $decimal\\."

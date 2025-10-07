@@ -25,11 +25,10 @@ if {[build_executable "failed to prepare" \
 set dp_location [gdb_get_line_number "set dprintf here"]
 
 proc test { style } {
-    global gdb_prompt binfile dp_location
+    global gdb_prompt dp_location
 
     with_test_prefix "$style" {
-	clean_restart
-	gdb_load $binfile
+	clean_restart $::testfile
 
 	if {![runto_main]} {
 	    return -1

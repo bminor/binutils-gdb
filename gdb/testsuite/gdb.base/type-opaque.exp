@@ -26,14 +26,15 @@ set execsrc "${srcdir}/${subdir}/${srcfile}"
 
 remote_exec build "rm -f ${binfile}"
 
-if { [gdb_compile_shlib $libsrc $libobj {debug}] != ""
-     || [gdb_compile $execsrc ${binfile} executable \
-	     [list debug shlib=${libobj}]] != "" } {
-    return -1
+if { [build_executable "build shlib" $libobj $libsrc {debug shlib}] != 0 } {
+    return
 }
 
-clean_restart
-gdb_load $binfile
+if { [prepare_for_testing "prepare" $testfile $execsrc \
+	     [list debug shlib=${libobj}]] != 0 } {
+    return
+}
+
 gdb_load_shlib ${libobj}
 
 if {![runto_main]} {

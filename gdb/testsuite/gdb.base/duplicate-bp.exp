@@ -22,10 +22,8 @@ if { [build_executable "failed to prepare" ${testfile}] } {
 # Setup for the test, create COUNT breakpoints at the function BREAKPT.
 proc test_setup { count } {
     global srcfile
-    global binfile
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     if {![runto_main]} {
 	return 0

@@ -22,10 +22,7 @@ if { [build_executable "failed to prepare" $testfile $srcfile debug] } {
 }
 
 proc check_selected_frame_after_bt { bt_cmd stack_pattern } {
-    global binfile
-
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     with_test_prefix $bt_cmd {
 

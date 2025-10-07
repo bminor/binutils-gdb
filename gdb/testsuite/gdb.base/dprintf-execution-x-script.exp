@@ -93,8 +93,7 @@ do_test "" $test
 
 # Restart GDB and 'source' the script; this will (still) run the program
 # due to the 'run' command in the script.
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 do_test "source $x_file" "load and run script using source command"
 
 # This should leave us at the gdb prompt; Run program again using

@@ -25,22 +25,18 @@ require {!target_info exists gdb,cannot_call_functions}
 
 standard_testfile .c
 
+set allow_float_test [allow_float_test]
+
 set flags {}
 lappend flags debug
 lappend flags nowarnings
 lappend_include_file flags $srcdir/lib/unbuffer_output.c
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $flags] != "" } {
-    untested "failed to compile"
-    return -1
+# Build executable, and start GDB.
+if { [prepare_for_testing "prepare" $testfile $srcfile $flags] != 0 } {
+    return
 }
 
-set allow_float_test [allow_float_test]
-
-# Start with a fresh gdb.
-
-clean_restart
-gdb_load $binfile
 gdb_test_no_output "set print sevenbit-strings"
 gdb_test_no_output "set print address off"
 gdb_test_no_output "set width 0"

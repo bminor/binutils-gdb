@@ -30,8 +30,7 @@ if { [do_compile] != "" && [do_compile {-mfloat128}] != "" } {
     return -1
 }
 
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 if {![runto_main]} {
     return

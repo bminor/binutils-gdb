@@ -22,9 +22,10 @@
 
 standard_testfile
 
-set binfile_threads ${binfile}-threads
-set binfile_nothreads ${binfile}-nothreads
+set testfile_threads ${testfile}-threads
+set testfile_nothreads ${testfile}-nothreads
 unset binfile
+unset testfile
 
 # Valid parameter / axis values:
 #
@@ -60,8 +61,7 @@ proc_with_prefix test { non-stop threaded run-or-attach } {
 	    set ::GDBFLAGS "$::GDBFLAGS -ex \"maint set target-non-stop on\""
 	}
 
-	clean_restart
-	gdb_load $::binfile
+	clean_restart $::testfile
     }
 
     if { ![runto_main] } {
@@ -90,7 +90,8 @@ proc_with_prefix test { non-stop threaded run-or-attach } {
 	gdb_run_cmd
 	gdb_test "" "Breakpoint $::decimal, .*main.*" "hit main breakpoint after re-run"
     } elseif { ${run-or-attach} == "attach" } {
-	set test_spawn_id [spawn_wait_for_attach $::binfile]
+	set binfile [standard_output_file $::testfile]
+	set test_spawn_id [spawn_wait_for_attach $binfile]
 	set test_pid [spawn_id_get_pid $test_spawn_id]
 
 	gdb_test_multiple "attach $test_pid" "attach to process" {
@@ -110,12 +111,12 @@ foreach_with_prefix threaded {0 1} {
     set options [list debug additional_flags=-DWITH_THREADS=$threaded \
 		    additional_flags=-std=gnu99]
     if { $threaded } {
-	set binfile $binfile_threads
+	set testfile $testfile_threads
 	lappend options pthreads
     } else {
-	set binfile $binfile_nothreads
+	set testfile $testfile_nothreads
     }
-    if { [build_executable "failed to prepare" ${binfile} ${srcfile} $options] } {
+    if { [build_executable "failed to prepare" ${testfile} ${srcfile} $options] } {
 	continue
     }
 

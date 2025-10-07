@@ -164,8 +164,7 @@ gdb_load_timed $binfile "limit" 0
 # Get the size of random_data table (defaults to 48K).
 set sizeof_random_data [get_sizeof "random_data" 48*1024]
 
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 #
 # Part THREE: Check the upload behavior.

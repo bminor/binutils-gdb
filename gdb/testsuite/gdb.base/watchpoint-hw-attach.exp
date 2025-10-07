@@ -35,8 +35,7 @@ gdb_test "detach" "Detaching from program: .*, process $testpid\r\n\\\[Inferior 
 
 # A clean restart is needed to force the hardware watchpoint setup
 # logic to run post attach rather than post inferior launch.
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 gdb_test "attach $testpid" "Attaching to program: .*, process $testpid.*" "attach twice"
 

@@ -21,17 +21,9 @@ set flags {}
 lappend flags debug
 lappend_include_file flags $srcdir/lib/unbuffer_output.c
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $flags] != "" } {
-     untested "failed to compile"
-     return -1
+if { [prepare_for_testing "prepare" $testfile $srcfile $flags] != 0 } {
+    return
 }
-
-# Start with a fresh gdb
-
-clean_restart
-gdb_load $binfile
-
-global gdb_prompt
 
 # This is a test of gdb's ability to follow the parent, child or both
 # parent and child of multiple Unix fork() system calls.
@@ -104,8 +96,7 @@ proc continue_to_exit_bp_loc {} {
 # parent's branch.
 
 foreach mode { "child" "parent" } {
-    clean_restart
-    gdb_load $binfile
+    clean_restart $testfile
     runto_main
 
     gdb_test_no_output "set follow-fork $mode"
@@ -137,8 +128,7 @@ foreach mode { "child" "parent" } {
 
 # Start with a fresh gdb
 
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 runto_main
 gdb_breakpoint $exit_bp_loc

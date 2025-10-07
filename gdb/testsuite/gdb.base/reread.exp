@@ -106,8 +106,7 @@ foreach_with_prefix opts { "" "pie" } {
 	    gdb_rename_execfile ${binfile1} ${binfile}
 
 	    # Restart GDB entirely.
-	    clean_restart
-	    gdb_load $binfile
+	    clean_restart $testfile
 
 	    # Set a breakpoint on foo and run to it.
 	    gdb_test "break foo" \

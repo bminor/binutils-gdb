@@ -41,13 +41,9 @@ proc print_zero_all { } {
 # this causes addresses to be out of range for IHEX.
 lappend options {nopie}
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable ${options}] != "" } {
-     untested "failed to compile"
-     return -1
+if { [prepare_for_testing "prepare" $testfile $srcfile $options] != 0 } {
+    return
 }
-
-clean_restart
-gdb_load $binfile
 
 gdb_test "dump mem /dev/null 0x10 0x20" "Cannot access memory at address 0x10" \
 	 "inaccessible memory is reported"

@@ -73,8 +73,7 @@ set i 0
 foreach_with_prefix print_inferior_events { "on" "off" } {
     foreach_with_prefix follow_fork_mode { "child" "parent" } {
 	foreach_with_prefix detach_on_fork { "on" "off" } {
-	    clean_restart
-	    gdb_load $binfile
+	    clean_restart $testfile
 	    gdb_test_no_output "set print inferior-events $print_inferior_events"
 	    gdb_test_no_output "set follow-fork-mode $follow_fork_mode"
 	    gdb_test_no_output "set detach-on-fork $detach_on_fork"

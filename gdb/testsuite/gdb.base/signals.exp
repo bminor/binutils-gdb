@@ -58,8 +58,7 @@ proc test_handle_all_print {} {
 }
 test_handle_all_print
 
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 if {[runto_main]} {
 

@@ -43,8 +43,7 @@ if  { [gdb_compile "${srcfile}" "${binfile}" \
 remote_file host delete $srcfile
 
 # Now start GDB, run to main and try to list the source.
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 if {![runto_main]} {
     return 0

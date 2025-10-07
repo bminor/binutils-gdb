@@ -118,8 +118,7 @@ proc do_test {} {
 # "attach".
 
 with_test_prefix "run" {
-    clean_restart
-    gdb_load $binfile
+    clean_restart $testfile
 
     if {![runto_main]} {
 	return -1
@@ -130,8 +129,7 @@ with_test_prefix "run" {
 
 with_test_prefix "attach" {
     if {[can_spawn_for_attach]} {
-	clean_restart
-	gdb_load $binfile
+	clean_restart $testfile
 
 	set test_spawn_id [spawn_wait_for_attach $binfile]
 	set testpid [spawn_id_get_pid $test_spawn_id]

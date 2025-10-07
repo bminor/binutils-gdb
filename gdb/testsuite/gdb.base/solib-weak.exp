@@ -84,8 +84,7 @@ proc do_test { lib1opts lib2opts lib1first } {
     }
 
     with_test_prefix $testopts {
-	clean_restart
-	gdb_load $binfile
+	clean_restart $testfile
 	gdb_load_shlib $lib1
 	gdb_load_shlib $lib2
 

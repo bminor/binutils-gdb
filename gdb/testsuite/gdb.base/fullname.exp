@@ -45,8 +45,7 @@ set line [gdb_get_line_number "set breakpoint 1 here"]
 # Initialize GDB after getting the line number, to make sure
 # symbols aren't loaded.
 
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 set msg "set breakpoint by full path before loading symbols - built absolute"
 if { [gdb_breakpoint [standard_output_file tmp-${srcfile}]:${line} {no-message}] != 0 } {
@@ -71,8 +70,7 @@ if  { [gdb_compile [relative_filename [pwd] [build_standard_output_file tmp-${sr
     return -1
 }
 
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 set msg "set breakpoint by full path before loading symbols - built relative"
 if { [gdb_breakpoint [standard_output_file tmp-${srcfile}]:${line} {no-message}] != 0 } {
@@ -101,8 +99,7 @@ with_cwd [standard_output_file {}] {
     }
 }
 
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 set msg "set breakpoint by full path before loading symbols - built other"
 if { [gdb_breakpoint [standard_output_file tmp-${srcfile}]:${line} {no-message}] != 0 } {

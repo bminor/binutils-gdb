@@ -35,8 +35,7 @@ if { [gdb_compile ${objfile} ${binfile} executable $opts] != "" } {
     return -1
 }
 
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 gdb_load_shlib ${binfile_lib}
 
 if {![runto lib]} {
@@ -92,11 +91,10 @@ test_load_core full
 # Now test the sharedlibrary command.
 
 proc test_load_shlib { print_symbol_loading } {
-    global binfile
     global gdb_prompt
     with_test_prefix "shlib ${print_symbol_loading}" {
-	clean_restart
-	gdb_load $binfile
+	clean_restart $::testfile
+
 	if {![runto_main]} {
 	    return -1
 	}

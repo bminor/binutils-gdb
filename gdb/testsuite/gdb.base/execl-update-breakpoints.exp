@@ -23,8 +23,10 @@ standard_testfile
 # unmapped address in the second binary.
 
 set objfile ${binfile}.o
-set exec1 ${binfile}1
-set exec2 ${binfile}2
+set testfile1 ${testfile}1
+set testfile2 ${testfile}2
+set exec1 [standard_output_file $testfile1]
+set exec2 [standard_output_file $testfile2]
 
 if { [gdb_compile [file join $srcdir $subdir $srcfile] $objfile \
 	  object [list debug]] != "" } {
@@ -41,8 +43,7 @@ if { [gdb_compile $objfile $exec1 executable {debug text_segment=0x1000000}] != 
 # First check whether the address of "main" in exec1 is readable in
 # exec2.  If it is, then skip the test as unsupported.
 
-clean_restart
-gdb_load $exec1
+clean_restart $testfile1
 if {![runto_main]} {
     return -1
 }
@@ -56,8 +57,7 @@ gdb_test_multiple "p/x &main" $test {
     }
 }
 
-clean_restart
-gdb_load $exec2
+clean_restart $testfile2
 if {![runto_main]} {
     return -1
 }
@@ -83,11 +83,9 @@ if {!$cannot_access} {
 # "breakpoint always-inserted" mode.
 
 proc test { always_inserted } {
-    global exec1
     global gdb_prompt
 
-    clean_restart
-    gdb_load $exec1
+    clean_restart $::testfile1
 
     gdb_test_no_output "set breakpoint always-inserted $always_inserted"
 

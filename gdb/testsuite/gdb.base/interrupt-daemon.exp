@@ -27,11 +27,9 @@ if {[build_executable "failed to build" $testfile $srcfile {debug}]} {
 # The test proper.
 
 proc do_test {} {
-    global binfile
     global gdb_prompt
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     gdb_test "set follow-fork-mode child" ".*"
 

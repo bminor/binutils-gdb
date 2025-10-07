@@ -22,13 +22,9 @@ standard_testfile arrayidx.c
 # don't find the $binfile for 'file delete $binfile'.
 append binfile $EXEEXT
 
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested "failed to compile"
-    return -1
+if { [prepare_for_testing "prepare" $testfile $srcfile] != 0 } {
+    return
 }
-
-clean_restart
-gdb_load $binfile
 
 # Sanity-check: Verify that the executable exists. This is just to
 # make sure that, when we verify later that the file does not exist,

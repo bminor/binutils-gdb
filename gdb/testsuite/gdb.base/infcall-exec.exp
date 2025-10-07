@@ -23,21 +23,17 @@ set srcfile2 "${testfile2}.c"
 set binfile2 [standard_output_file $testfile2]
 
 # Build the two executables for the test.
-if {[gdb_compile $srcdir/$subdir/$srcfile $binfile executable debug] != ""} {
-    untested "could not build $binfile"
+if {[build_executable "build exec'd file" $testfile2 $srcfile2] != 0} {
     return -1
 }
-if {[gdb_compile $srcdir/$subdir/$srcfile2 $binfile2 executable debug] != ""} {
-    untested "could not build $binfile2"
+
+if {[prepare_for_testing "prepare" $testfile $srcfile] != 0} {
     return -1
 }
 
 if { [is_remote target] } {
     set binfile2 [gdb_remote_download target $binfile2]
 }
-
-clean_restart
-gdb_load $binfile
 
 if {![runto_main]} {
     return -1

@@ -13,22 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-standard_testfile .c
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested "failed to compile"
-     return -1
-}
-
 # Some targets can't do function calls, so don't even bother with this
 # test.
 require {!target_info exists gdb,cannot_call_functions}
 
-# Start with a fresh gdb.
+standard_testfile .c
 
-clean_restart
-gdb_load $binfile
+if { [prepare_for_testing "prepare" $testfile $srcfile] != 0 } {
+    return
+}
 
 if { ![runto_main] } {
     return 0

@@ -97,8 +97,7 @@ remote_close target
 # Now run the program through gdb, and dump its initial signal actions
 # and mask in "gdb.txt".
 
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 if {![runto_main]} {
     return -1

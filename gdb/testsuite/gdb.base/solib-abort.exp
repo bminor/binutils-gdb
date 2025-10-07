@@ -24,7 +24,7 @@ set srcfile_lib ${srcdir}/${subdir}/${libname}.c
 set binfile_lib [standard_output_file ${libname}.so]
 # Note: no debugging info here, since this will assure that the solib
 # name is printed in the stack trace.
-set lib_flags {}
+set lib_flags {shlib}
 
 # Binary file.
 set testfile "solib-abort"
@@ -32,14 +32,14 @@ set srcfile ${srcdir}/${subdir}/${testfile}.c
 set binfile [standard_output_file ${testfile}]
 set bin_flags [list debug shlib=${binfile_lib}]
 
-if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib} $lib_flags] != ""
-     || [gdb_compile ${srcfile} ${binfile} executable $bin_flags] != "" } {
-  untested "failed to compile"
-  return -1
+if { [build_executable "build solib" $binfile_lib $srcfile_lib \
+	  $lib_flags] != 0 } {
+    return
 }
 
-clean_restart
-gdb_load $binfile
+if { [prepare_for_testing "prepare" $testfile $srcfile $bin_flags] != 0 } {
+    return
+}
 
 if {![runto_main]} {
   return 0

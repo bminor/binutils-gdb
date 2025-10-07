@@ -29,15 +29,13 @@ set linenum_for_user_bp [gdb_get_line_number "break for user-bp test here"]
 set linenum_for_step_resume [gdb_get_line_number "break for step-resume test here"]
 
 proc test {non_stop displaced always_inserted} {
-    global binfile
     global linenum_for_user_bp
     global linenum_for_step_resume
     global GDBFLAGS
 
     save_vars { GDBFLAGS } {
 	set GDBFLAGS "$GDBFLAGS -ex \"set non-stop $non_stop\""
-	clean_restart
-	gdb_load $binfile
+	clean_restart $::testfile
     }
 
     gdb_test_no_output "set displaced-stepping $displaced"

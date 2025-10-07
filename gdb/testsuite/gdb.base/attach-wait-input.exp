@@ -39,12 +39,11 @@ if {[build_executable "failed to build" $testfile $srcfile debug]} {
 
 # Start the program running, and return its PID, ready for attaching.
 
-proc start_program {binfile} {
+proc start_program {testfile} {
     global gdb_prompt
     global decimal
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $testfile
 
     if {![runto setup_done]} {
 	return 0
@@ -74,12 +73,11 @@ proc start_program {binfile} {
 
 proc test { editing } {
     global gdb_prompt
-    global binfile
     global decimal
 
     with_test_prefix "editing $editing" {
 
-	set testpid [start_program $binfile]
+	set testpid [start_program $::testfile]
 	if {$testpid == ""} {
 	    return
 	}

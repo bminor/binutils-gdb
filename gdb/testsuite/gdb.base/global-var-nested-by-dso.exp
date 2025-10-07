@@ -25,25 +25,22 @@ set lib2name $testfile-solib2
 set srcfile_lib2 $srcdir/$subdir/$lib2name.c
 set binfile_lib2 [standard_output_file $lib2name.so]
 
-if { [gdb_compile_shlib $srcfile_lib1 $binfile_lib1 \
-	[list debug]] != "" } {
-  untested "failed to compile shared library 1"
-  return -1
+
+if { [build_executable "build shlib 1" $binfile_lib1 \
+	  $srcfile_lib1  [list debug shlib]] != 0 } {
+  return
 }
 
-if { [gdb_compile_shlib $srcfile_lib2 $binfile_lib2 \
-	[list debug]] != "" } {
-  untested "failed to compile shared library 2"
-  return -1
+if { [build_executable "build shlib 2" $binfile_lib2 \
+	  $srcfile_lib2  [list debug shlib]] != 0 } {
+  return
 }
 
-if { [gdb_compile $srcdir/$subdir/$srcfile $binfile executable \
-	[list debug shlib=$binfile_lib1 shlib=$binfile_lib2]] != "" } {
-  return -1
+if { [prepare_for_testing "prepare" $testfile $srcfile \
+	  [list debug shlib=$binfile_lib1 shlib=$binfile_lib2]] != 0 } {
+  return
 }
 
-clean_restart
-gdb_load $binfile
 gdb_load_shlib $binfile_lib1
 gdb_load_shlib $binfile_lib2
 

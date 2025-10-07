@@ -21,20 +21,17 @@ set libfile "solib1"
 set libsrc  $srcdir/$subdir/$libfile.c
 set lib_sl  [standard_output_file $libfile.sl]
 
-set lib_opts  debug
+set lib_opts  {debug shlib}
 set exec_opts [list debug shlib=$lib_sl]
 
-if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
-     || [gdb_compile $srcdir/$subdir/$srcfile $binfile \
-	     executable $exec_opts] != ""} {
-    untested "failed to compile"
-    return -1
+if { [build_executable "build shlib" $lib_sl $libsrc $lib_opts] != 0 } {
+    return
 }
 
-# Start with a fresh gdb
+if { [prepare_for_testing "prepare" $testfile $srcfile $exec_opts] != 0 } {
+    return
+}
 
-clean_restart
-gdb_load $binfile
 gdb_load_shlib $lib_sl
 
 # This program implicitly loads SOM shared libraries.

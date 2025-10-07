@@ -41,8 +41,7 @@ proc run_test { target_async target_non_stop non_stop unwind } {
 	append ::GDBFLAGS \
 	    " -ex \"maintenance set target-async ${target_async}\""
 
-	clean_restart
-	gdb_load $::binfile
+	clean_restart $::testfile
     }
 
     if {![runto_main]} {

@@ -71,11 +71,9 @@ gdb_test "continue" "At foo entry.*arg=1235, g=2222.*" "2nd dprintf, gdb"
 # Restart GDB and set set up for testing.
 
 proc restart {} {
-    global binfile
     global bp_location1 dp_location1
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     if {![runto_main]} {
 	return -1
@@ -100,7 +98,6 @@ proc test_dprintf {pattern msg} {
 # Test the "call" style.
 
 proc test_call {} {
-    global binfile
     global bp_location1
 
     # Now switch styles and rerun; in the absence of redirection the
@@ -151,7 +148,6 @@ if {![target_info exists gdb,noinferiorio]} {
 # Test the "agent" style.
 
 proc test_agent {} {
-    global binfile
     global gdb_prompt
 
     restart

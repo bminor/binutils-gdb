@@ -125,12 +125,11 @@ if {!$hw_watchpoints_supported} {
 delete_breakpoints
 
 proc test {always_inserted} {
-    global srcfile binfile
+    global srcfile
 
     with_test_prefix "always-inserted $always_inserted" {
 
-	clean_restart
-	gdb_load $binfile
+	clean_restart $::testfile
 
 	if {![runto_main]} {
 	    return

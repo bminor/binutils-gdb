@@ -35,10 +35,9 @@ proc define_hook_stop {commands} {
 # caller's caller directly.
 
 proc setup {commands} {
-    global srcfile binfile
+    global srcfile
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $::testfile
 
     if {![runto_main]} {
 	return -code return

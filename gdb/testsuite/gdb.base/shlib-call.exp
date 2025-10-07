@@ -42,7 +42,7 @@ set lib2src  ${srcdir}/${subdir}/${srcfile3}
 set lib1     [standard_output_file shr1.sl]
 set lib2     [standard_output_file shr2.sl]
 
-set lib_opts "debug"
+set lib_opts {debug shlib}
 
 set exec_opts {}
 lappend exec_opts debug
@@ -50,17 +50,18 @@ lappend exec_opts shlib=$lib1
 lappend exec_opts shlib=$lib2
 lappend_include_file exec_opts $srcdir/lib/unbuffer_output.c
 
-if { [gdb_compile_shlib ${lib1src} ${lib1} $lib_opts] != ""
-     || [gdb_compile_shlib ${lib2src} ${lib2} $lib_opts] != ""
-     || [gdb_compile ${srcfile} ${binfile} executable $exec_opts] != ""} {
-    untested "failed to compile"
-    return -1
+if { [build_executable "build shlib 1" $lib1 $lib1src $lib_opts] != 0 } {
+    return
 }
 
-# Start with a fresh gdb.
+if { [build_executable "build shlib 2" $lib2 $lib2src $lib_opts] != 0 } {
+    return
+}
 
-clean_restart
-gdb_load $binfile
+if { [prepare_for_testing "prepare" $testfile $srcfile $exec_opts] != 0 } {
+    return
+}
+
 gdb_load_shlib $lib1
 gdb_load_shlib $lib2
 
@@ -162,8 +163,7 @@ gdb_test "step" "mainshr1 \\(g=4\\) at.*return 2.g;" \
 
 # Start with a fresh gdb.
 
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 # PR's 16495, 18213
 # test that we can re-set breakpoints in shared libraries

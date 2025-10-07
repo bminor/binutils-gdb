@@ -24,13 +24,11 @@ if {[build_executable "failed to prepare" $testfile $srcfile debug] == -1} {
 # Test paginating while printing about the inferior having exited.
 #
 proc test_paginate_inferior_exited {} {
-    global binfile
     global gdb_prompt pagination_prompt
     global inferior_exited_re
 
     with_test_prefix "paginate" {
-	clean_restart
-	gdb_load $binfile
+	clean_restart $::testfile
 
 	if {![runto_main]} {
 	    return 0

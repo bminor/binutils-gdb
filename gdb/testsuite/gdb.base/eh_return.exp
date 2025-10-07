@@ -71,8 +71,7 @@ if { $address == -1 } {
     return 0
 }
 
-clean_restart
-gdb_load $binfile
+clean_restart $testfile
 
 gdb_assert [gdb_breakpoint "*$address" no-message] "set breakpoint on address"
 

@@ -29,8 +29,7 @@ if { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable {debug}] 
 
 proc_with_prefix test_setshow_annotate {} {
     # Start with a fresh gdb
-    clean_restart
-    gdb_load $::binfile
+    clean_restart $::testfile
 
     if {![runto_main]} {
 	return
@@ -79,8 +78,7 @@ proc_with_prefix test_setshow_annotate {} {
 }
 
 proc_with_prefix test_setshow_args {} {
-    clean_restart
-    gdb_load $::binfile
+    clean_restart $::testfile
 
     if {![runto_main]} {
 	return

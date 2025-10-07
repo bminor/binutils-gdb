@@ -95,8 +95,7 @@ proc quit_with_live_inferior {appear_how extra_inferior quit_how} {
     set test_spawn_id ""
 
     if {$appear_how != "attach-nofile"} {
-	clean_restart
-	gdb_load $binfile
+	clean_restart $testfile
     } else {
 	clean_restart
     }

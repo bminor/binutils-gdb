@@ -18,7 +18,7 @@ load_lib "dtrace.exp"
 # Run the tests.
 # This returns -1 on failure to compile or start, 0 otherwise.
 proc dtrace_test {} {
-    global testfile hex srcfile binfile
+    global testfile hex srcfile
 
     standard_testfile
 
@@ -27,8 +27,7 @@ proc dtrace_test {} {
 	return -1
     }
 
-    clean_restart
-    gdb_load $binfile
+    clean_restart $testfile
 
     if {![runto_main]} {
 	return -1
