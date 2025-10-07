@@ -33,328 +33,328 @@ standard_testfile .c -dbg.S
 #
 
 set assert_tos_non0 {
-    bra 3
-    skip -3
+    DW_OP_bra 3
+    DW_OP_skip -3
 }
 
 set assert_tos_0 [subst {
-    lit0
-    eq
+    DW_OP_lit0
+    DW_OP_eq
     $assert_tos_non0
 }]
 
 set program [subst {
-    lit0
-    nop
+    DW_OP_lit0
+    DW_OP_nop
     $assert_tos_0
-    lit1
-    const1u 1
-    eq
+    DW_OP_lit1
+    DW_OP_const1u 1
+    DW_OP_eq
     $assert_tos_non0
-    lit16
-    const2u 16
-    eq
+    DW_OP_lit16
+    DW_OP_const2u 16
+    DW_OP_eq
     $assert_tos_non0
-    lit31
-    const4u 31
-    ne
+    DW_OP_lit31
+    DW_OP_const4u 31
+    DW_OP_ne
     $assert_tos_0
-    lit1
-    neg
-    const1s -1
-    eq
+    DW_OP_lit1
+    DW_OP_neg
+    DW_OP_const1s -1
+    DW_OP_eq
     $assert_tos_non0
-    lit16
-    neg
-    const2s -16
-    ne
+    DW_OP_lit16
+    DW_OP_neg
+    DW_OP_const2s -16
+    DW_OP_ne
     $assert_tos_0
-    lit31
-    const4s -31
-    neg
-    ne
+    DW_OP_lit31
+    DW_OP_const4s -31
+    DW_OP_neg
+    DW_OP_ne
     $assert_tos_0
-    lit7
-    dup
-    plus_uconst 2
-    lit9
-    eq
+    DW_OP_lit7
+    DW_OP_dup
+    DW_OP_plus_uconst 2
+    DW_OP_lit9
+    DW_OP_eq
     $assert_tos_non0
-    lit7
-    eq
+    DW_OP_lit7
+    DW_OP_eq
     $assert_tos_non0
-    lit20
-    lit1
-    drop
-    lit20
-    eq
+    DW_OP_lit20
+    DW_OP_lit1
+    DW_OP_drop
+    DW_OP_lit20
+    DW_OP_eq
     $assert_tos_non0
-    lit17
-    lit19
-    over
-    lit17
-    eq
+    DW_OP_lit17
+    DW_OP_lit19
+    DW_OP_over
+    DW_OP_lit17
+    DW_OP_eq
     $assert_tos_non0
-    lit19
-    eq
+    DW_OP_lit19
+    DW_OP_eq
     $assert_tos_non0
-    lit17
-    eq
+    DW_OP_lit17
+    DW_OP_eq
     $assert_tos_non0
-    lit1
-    lit2
-    lit3
-    lit4
-    pick 2
-    lit2
-    eq
+    DW_OP_lit1
+    DW_OP_lit2
+    DW_OP_lit3
+    DW_OP_lit4
+    DW_OP_pick 2
+    DW_OP_lit2
+    DW_OP_eq
     $assert_tos_non0
-    lit4
-    eq
+    DW_OP_lit4
+    DW_OP_eq
     $assert_tos_non0
-    lit3
-    eq
+    DW_OP_lit3
+    DW_OP_eq
     $assert_tos_non0
-    pick 0
-    lit2
-    eq
+    DW_OP_pick 0
+    DW_OP_lit2
+    DW_OP_eq
     $assert_tos_non0
-    lit2
-    eq
+    DW_OP_lit2
+    DW_OP_eq
     $assert_tos_non0
-    lit1
-    eq
+    DW_OP_lit1
+    DW_OP_eq
     $assert_tos_non0
-    lit6
-    lit12
-    swap
-    lit6
-    eq
+    DW_OP_lit6
+    DW_OP_lit12
+    DW_OP_swap
+    DW_OP_lit6
+    DW_OP_eq
     $assert_tos_non0
-    lit12
-    eq
+    DW_OP_lit12
+    DW_OP_eq
     $assert_tos_non0
-    lit7
-    lit8
-    lit9
-    rot
-    lit8
-    eq
+    DW_OP_lit7
+    DW_OP_lit8
+    DW_OP_lit9
+    DW_OP_rot
+    DW_OP_lit8
+    DW_OP_eq
     $assert_tos_non0
-    lit7
-    eq
+    DW_OP_lit7
+    DW_OP_eq
     $assert_tos_non0
-    lit9
-    eq
+    DW_OP_lit9
+    DW_OP_eq
     $assert_tos_non0
-    lit7
-    abs
-    lit7
-    eq
+    DW_OP_lit7
+    DW_OP_abs
+    DW_OP_lit7
+    DW_OP_eq
     $assert_tos_non0
-    const1s -123
-    abs
-    const1u 123
-    eq
+    DW_OP_const1s -123
+    DW_OP_abs
+    DW_OP_const1u 123
+    DW_OP_eq
     $assert_tos_non0
-    lit3
-    lit6
-    and
-    lit2
-    eq
+    DW_OP_lit3
+    DW_OP_lit6
+    DW_OP_and
+    DW_OP_lit2
+    DW_OP_eq
     $assert_tos_non0
-    lit3
-    lit6
-    or
-    lit7
-    eq
+    DW_OP_lit3
+    DW_OP_lit6
+    DW_OP_or
+    DW_OP_lit7
+    DW_OP_eq
     $assert_tos_non0
-    lit17
-    lit2
-    minus
-    lit15
-    eq
+    DW_OP_lit17
+    DW_OP_lit2
+    DW_OP_minus
+    DW_OP_lit15
+    DW_OP_eq
     $assert_tos_non0
     # Divide is signed truncating toward zero.
-    const1s -6
-    const1s -2
-    div
-    lit3
-    eq
+    DW_OP_const1s -6
+    DW_OP_const1s -2
+    DW_OP_div
+    DW_OP_lit3
+    DW_OP_eq
     $assert_tos_non0
-    const1s -7
-    const1s 3
-    div
-    const1s -2
-    eq
+    DW_OP_const1s -7
+    DW_OP_const1s 3
+    DW_OP_div
+    DW_OP_const1s -2
+    DW_OP_eq
     $assert_tos_non0
     # Modulo is unsigned.
-    const1s -6
-    const1s -4
-    mod
-    const1s -6
-    eq
+    DW_OP_const1s -6
+    DW_OP_const1s -4
+    DW_OP_mod
+    DW_OP_const1s -6
+    DW_OP_eq
     $assert_tos_non0
-    const1s -6
-    lit4
-    mod
-    lit2
-    eq
+    DW_OP_const1s -6
+    DW_OP_lit4
+    DW_OP_mod
+    DW_OP_lit2
+    DW_OP_eq
     $assert_tos_non0
-    lit6
-    const1s -4
-    mod
-    lit6
-    eq
+    DW_OP_lit6
+    DW_OP_const1s -4
+    DW_OP_mod
+    DW_OP_lit6
+    DW_OP_eq
     $assert_tos_non0
     # Signed modulo can be implemented using 'over over div mul minus'.
-    const1s -6
-    const1s -4
-    over
-    over
-    div
-    mul
-    minus
-    const1s -2
-    eq
+    DW_OP_const1s -6
+    DW_OP_const1s -4
+    DW_OP_over
+    DW_OP_over
+    DW_OP_div
+    DW_OP_mul
+    DW_OP_minus
+    DW_OP_const1s -2
+    DW_OP_eq
     $assert_tos_non0
-    const1s -7
-    lit3
-    over
-    over
-    div
-    mul
-    minus
-    const1s -1
-    eq
+    DW_OP_const1s -7
+    DW_OP_lit3
+    DW_OP_over
+    DW_OP_over
+    DW_OP_div
+    DW_OP_mul
+    DW_OP_minus
+    DW_OP_const1s -1
+    DW_OP_eq
     $assert_tos_non0
-    lit7
-    const1s -3
-    over
-    over
-    div
-    mul
-    minus
-    lit1
-    eq
+    DW_OP_lit7
+    DW_OP_const1s -3
+    DW_OP_over
+    DW_OP_over
+    DW_OP_div
+    DW_OP_mul
+    DW_OP_minus
+    DW_OP_lit1
+    DW_OP_eq
     $assert_tos_non0
-    lit16
-    lit31
-    plus_uconst 1
-    mul
-    const2u 512
-    eq
+    DW_OP_lit16
+    DW_OP_lit31
+    DW_OP_plus_uconst 1
+    DW_OP_mul
+    DW_OP_const2u 512
+    DW_OP_eq
     $assert_tos_non0
-    lit5
-    not
-    lit31
-    and
-    lit26
-    eq
+    DW_OP_lit5
+    DW_OP_not
+    DW_OP_lit31
+    DW_OP_and
+    DW_OP_lit26
+    DW_OP_eq
     $assert_tos_non0
-    lit12
-    lit31
-    plus
-    const1u 43
-    eq
+    DW_OP_lit12
+    DW_OP_lit31
+    DW_OP_plus
+    DW_OP_const1u 43
+    DW_OP_eq
     $assert_tos_non0
-    const1s -6
-    lit2
-    plus
-    const1s -4
-    eq
+    DW_OP_const1s -6
+    DW_OP_lit2
+    DW_OP_plus
+    DW_OP_const1s -4
+    DW_OP_eq
     $assert_tos_non0
-    const1s -6
-    plus_uconst 3
-    const1s -3
-    eq
+    DW_OP_const1s -6
+    DW_OP_plus_uconst 3
+    DW_OP_const1s -3
+    DW_OP_eq
     $assert_tos_non0
-    lit16
-    lit4
-    shl
-    const2u 256
-    eq
+    DW_OP_lit16
+    DW_OP_lit4
+    DW_OP_shl
+    DW_OP_const2u 256
+    DW_OP_eq
     $assert_tos_non0
-    lit16
-    lit3
-    shr
-    lit2
-    eq
+    DW_OP_lit16
+    DW_OP_lit3
+    DW_OP_shr
+    DW_OP_lit2
+    DW_OP_eq
     $assert_tos_non0
-    const1s -16
-    lit3
-    shra
-    const1s -2
-    eq
+    DW_OP_const1s -16
+    DW_OP_lit3
+    DW_OP_shra
+    DW_OP_const1s -2
+    DW_OP_eq
     $assert_tos_non0
-    lit3
-    lit6
-    xor
-    lit5
-    eq
+    DW_OP_lit3
+    DW_OP_lit6
+    DW_OP_xor
+    DW_OP_lit5
+    DW_OP_eq
     $assert_tos_non0
-    lit3
-    lit6
-    le
+    DW_OP_lit3
+    DW_OP_lit6
+    DW_OP_le
     $assert_tos_non0
-    lit3
-    lit3
-    le
+    DW_OP_lit3
+    DW_OP_lit3
+    DW_OP_le
     $assert_tos_non0
-    lit6
-    lit3
-    le
+    DW_OP_lit6
+    DW_OP_lit3
+    DW_OP_le
     $assert_tos_0
-    lit3
-    lit6
-    lt
+    DW_OP_lit3
+    DW_OP_lit6
+    DW_OP_lt
     $assert_tos_non0
-    lit3
-    lit3
-    lt
+    DW_OP_lit3
+    DW_OP_lit3
+    DW_OP_lt
     $assert_tos_0
-    lit6
-    lit3
-    lt
+    DW_OP_lit6
+    DW_OP_lit3
+    DW_OP_lt
     $assert_tos_0
-    lit3
-    lit6
-    ge
+    DW_OP_lit3
+    DW_OP_lit6
+    DW_OP_ge
     $assert_tos_0
-    lit3
-    lit3
-    ge
+    DW_OP_lit3
+    DW_OP_lit3
+    DW_OP_ge
     $assert_tos_non0
-    lit6
-    lit3
-    ge
+    DW_OP_lit6
+    DW_OP_lit3
+    DW_OP_ge
     $assert_tos_non0
-    lit3
-    lit6
-    gt
+    DW_OP_lit3
+    DW_OP_lit6
+    DW_OP_gt
     $assert_tos_0
-    lit3
-    lit3
-    gt
+    DW_OP_lit3
+    DW_OP_lit3
+    DW_OP_gt
     $assert_tos_0
-    lit6
-    lit3
-    gt
+    DW_OP_lit6
+    DW_OP_lit3
+    DW_OP_gt
     $assert_tos_non0
-    const1s -6
-    lit1
-    shr
-    lit0
-    gt
+    DW_OP_const1s -6
+    DW_OP_lit1
+    DW_OP_shr
+    DW_OP_lit0
+    DW_OP_gt
     $assert_tos_non0
-    const1s -6
-    lit1
-    shra
-    lit0
-    lt
+    DW_OP_const1s -6
+    DW_OP_lit1
+    DW_OP_shra
+    DW_OP_lit0
+    DW_OP_lt
     $assert_tos_non0
     # Finally some result.
-    addr ptr
+    DW_OP_addr ptr
 }]
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
