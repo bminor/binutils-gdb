@@ -266,10 +266,12 @@ const aarch64_field aarch64_fields[] =
     AARCH64_FIELD ( 1, 4), /* SME_Zdn2: Z0-Z31, multiple of 2, bits [4:1].  */
     AARCH64_FIELD ( 2, 3), /* SME_Zdn4: Z0-Z31, multiple of 4, bits [4:2].  */
     AARCH64_FIELD (16, 4), /* SME_Zm: Z0-Z15, bits [19:16].  */
+    AARCH64_FIELD (17, 3), /* SME_Zm17_3: Z0-Z15/Z16-Z31, multiple of 2, bits [19:17].  */
     AARCH64_FIELD (17, 4), /* SME_Zm2: Z0-Z31, multiple of 2, bits [20:17].  */
     AARCH64_FIELD (18, 3), /* SME_Zm4: Z0-Z31, multiple of 4, bits [20:18].  */
     AARCH64_FIELD ( 6, 4), /* SME_Zn2: Z0-Z31, multiple of 2, bits [9:6].  */
     AARCH64_FIELD ( 7, 3), /* SME_Zn4: Z0-Z31, multiple of 4, bits [9:7].  */
+    AARCH64_FIELD ( 6, 3), /* SME_Zn6_3: Z0-Z15/Z16-Z31, multiple of 2, bits [8:6].  */
     AARCH64_FIELD ( 4, 1), /* SME_ZtT: upper bit of Zt, bit [4].  */
     AARCH64_FIELD ( 0, 3), /* SME_Zt3: lower 3 bits of Zt, bits [2:0].  */
     AARCH64_FIELD ( 0, 2), /* SME_Zt2: lower 2 bits of Zt, bits [1:0].  */
@@ -1987,6 +1989,24 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    }
 	  break;
 
+	case AARCH64_OPND_SME_Zn_6_3:
+	  if (opnd->reg.regno > 15 || opnd->reg.regno % 2 != 0)
+	    {
+	      set_other_error (mismatch_detail, idx,
+			       _("register out of range"));
+	      return false;
+	    }
+	  break;
+
+	case AARCH64_OPND_SME_Zm_17_3:
+	  if (opnd->reg.regno < 16 || opnd->reg.regno % 2 != 0)
+	    {
+	      set_other_error (mismatch_detail, idx,
+			       _("register out of range"));
+	      return false;
+	    }
+	  break;
+
 	case AARCH64_OPND_SME_PnT_Wm_imm:
 	  size = aarch64_get_qualifier_esize (opnd->qualifier);
 	  max_value = 16 / size - 1;
@@ -2006,6 +2026,8 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SME_Pdx2:
 	case AARCH64_OPND_SME_Zdnx2:
 	case AARCH64_OPND_SME_Zdnx4:
+	case AARCH64_OPND_SME_Znx2_6_3:
+	case AARCH64_OPND_SME_Zmx2_17_3:
 	case AARCH64_OPND_SME_Zmx2:
 	case AARCH64_OPND_SME_Zmx4:
 	case AARCH64_OPND_SME_Znx2:
@@ -2014,7 +2036,11 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  num = get_operand_specific_data (&aarch64_operands[type]);
 	  if (!check_reglist (opnd, mismatch_detail, idx, num, 1))
 	    return false;
-	  if ((opnd->reglist.first_regno % num) != 0)
+	  if (((opnd->reglist.first_regno % num) != 0)
+	      || (type == AARCH64_OPND_SME_Znx2_6_3
+		  && opnd->reglist.first_regno > 15)
+	      || (type == AARCH64_OPND_SME_Zmx2_17_3
+		  && opnd->reglist.first_regno < 16))
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("start register out of range"));
@@ -4366,6 +4392,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_Zt:
     case AARCH64_OPND_SME_Zm:
     case AARCH64_OPND_SME_Zm_17:
+    case AARCH64_OPND_SME_Zn_6_3:
+    case AARCH64_OPND_SME_Zm_17_3:
       if (opnd->qualifier == AARCH64_OPND_QLF_NIL)
        snprintf (buf, size, "%s", style_reg (styler, "z%d", opnd->reg.regno));
       else
@@ -4378,6 +4406,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_ZtxN:
     case AARCH64_OPND_SME_Zdnx2:
     case AARCH64_OPND_SME_Zdnx4:
+    case AARCH64_OPND_SME_Znx2_6_3:
+    case AARCH64_OPND_SME_Zmx2_17_3:
     case AARCH64_OPND_SME_Zmx2:
     case AARCH64_OPND_SME_Zmx4:
     case AARCH64_OPND_SME_Znx2:

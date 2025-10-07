@@ -6864,6 +6864,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_Zt:
 	case AARCH64_OPND_SME_Zm:
 	case AARCH64_OPND_SME_Zm_17:
+	case AARCH64_OPND_SME_Zn_6_3:
+	case AARCH64_OPND_SME_Zm_17_3:
 	  reg_type = REG_TYPE_Z;
 	  goto vector_reg;
 
@@ -7039,6 +7041,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_ZtxN:
 	case AARCH64_OPND_SME_Zdnx2:
 	case AARCH64_OPND_SME_Zdnx4:
+	case AARCH64_OPND_SME_Znx2_6_3:
+	case AARCH64_OPND_SME_Zmx2_17_3:
 	case AARCH64_OPND_SME_Zmx2:
 	case AARCH64_OPND_SME_Zmx4:
 	case AARCH64_OPND_SME_Znx2:
@@ -10895,6 +10899,7 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"sme2p2",		AARCH64_FEATURE (SME2p2), AARCH64_FEATURE (SME2p1)},
   {"gcie",		AARCH64_FEATURE (GCIE), AARCH64_NO_FEATURES},
   {"sme-tmop",		AARCH64_FEATURE (SME_TMOP), AARCH64_FEATURE (SME2)},
+  {"sme-mop4",		AARCH64_FEATURE (SME_MOP4), AARCH64_FEATURE (SME2)},
   {NULL,		AARCH64_NO_FEATURES, AARCH64_NO_FEATURES},
 };
 

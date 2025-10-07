@@ -255,6 +255,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_GCIE,
   /* SME TMOP instructions.  */
   AARCH64_FEATURE_SME_TMOP,
+  /* SME MOP4 instructions.  */
+  AARCH64_FEATURE_SME_MOP4,
 
   /* Virtual features.  These are used to gate instructions that are enabled
      by either of two (or more) sets of command line flags.  */
@@ -863,8 +865,12 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_ZtxN,	/* SVE vector register list in Zt.  */
   AARCH64_OPND_SME_Zdnx2,	/* SVE vector register list from [4:1]*2.  */
   AARCH64_OPND_SME_Zdnx4,	/* SVE vector register list from [4:2]*4.  */
-  AARCH64_OPND_SME_Zm,		/* SVE vector register list in 4-bit Zm.  */
-  AARCH64_OPND_SME_Zm_17,	/* SVE vector register list in [20:17].  */
+  AARCH64_OPND_SME_Zm,		/* SVE vector register in 4-bit Zm.  */
+  AARCH64_OPND_SME_Zm_17,	/* SVE vector register in [20:17].  */
+  AARCH64_OPND_SME_Zn_6_3,	/* SVE vector register in [8:6]*2.  */
+  AARCH64_OPND_SME_Zm_17_3,	/* SVE vector register in [19:17]*2+16.  */
+  AARCH64_OPND_SME_Znx2_6_3,	/* SVE vector register list from [8:6]*2.  */
+  AARCH64_OPND_SME_Zmx2_17_3,	/* SVE vector register list from [19:17]*2+16.  */
   AARCH64_OPND_SME_Zmx2,	/* SVE vector register list from [20:17]*2.  */
   AARCH64_OPND_SME_Zmx4,	/* SVE vector register list from [20:18]*4.  */
   AARCH64_OPND_SME_Znx2,	/* SVE vector register list from [9:6]*2.  */
