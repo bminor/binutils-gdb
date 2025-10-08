@@ -174,10 +174,11 @@ const char *const loongarch_f_cfi_name_alias[32] =
   &LARCH_opts.ase_lp64, 0
 
 #define INSN_LA_PCREL32		    \
-  "pcalau12i %1,%%pc_hi20(%2);"	    \
-  "addi.w %1,%1,%%pc_lo12(%2);",    \
+  "pcaddu12i %1,%%pcadd_hi20(%2);"  \
+  "addi.w %1,%1,%%pcadd_lo12(%2);", \
   &LARCH_opts.ase_ilp32,	    \
   &LARCH_opts.ase_lp64
+
 #define INSN_LA_PCREL64		    \
   "pcalau12i %1,%%pc_hi20(%2);"	    \
   "addi.d %1,%1,%%pc_lo12(%2);",    \
@@ -191,10 +192,11 @@ const char *const loongarch_f_cfi_name_alias[32] =
   &LARCH_opts.ase_lp64, 0
 
 #define INSN_LA_GOT32		    \
-  "pcalau12i %1,%%got_pc_hi20(%2);" \
-  "ld.w %1,%1,%%got_pc_lo12(%2);",  \
+  "pcaddu12i %1,%%got_pcadd_hi20(%2);" \
+  "ld.w %1,%1,%%got_pcadd_lo12(%2);", \
   &LARCH_opts.ase_ilp32,	    \
   &LARCH_opts.ase_lp64
+
 /* got32 abs.  */
 #define INSN_LA_GOT32_ABS	    \
   "lu12i.w %1,%%got_hi20(%2);"	    \
@@ -240,10 +242,11 @@ const char *const loongarch_f_cfi_name_alias[32] =
   &LARCH_opts.ase_lp64, 0
 
 #define INSN_LA_TLS_IE32	    \
-  "pcalau12i %1,%%ie_pc_hi20(%2);"  \
-  "ld.w %1,%1,%%ie_pc_lo12(%2);",   \
+  "pcaddu12i %1,%%ie_pcadd_hi20(%2);" \
+  "ld.w %1,%1,%%ie_pcadd_lo12(%2);", \
   &LARCH_opts.ase_ilp32,	    \
   &LARCH_opts.ase_lp64
+
 /* For ie32 abs.  */
 #define INSN_LA_TLS_IE32_ABS	    \
   "lu12i.w %1,%%ie_hi20(%2);"	    \
@@ -276,10 +279,11 @@ const char *const loongarch_f_cfi_name_alias[32] =
 
 /* For LoongArch32/64 cmode=normal.  */
 #define INSN_LA_TLS_LD32	      \
-  "pcalau12i %1,%%ld_pc_hi20(%2);"    \
-  "addi.w %1,%1,%%got_pc_lo12(%2);",  \
+  "pcaddu12i %1,%%ld_pcadd_hi20(%2);" \
+  "addi.w %1,%1,%%ld_pcadd_lo12(%2);", \
   &LARCH_opts.ase_ilp32,	      \
   &LARCH_opts.ase_lp64
+
 #define INSN_LA_TLS_LD32_ABS	      \
   "lu12i.w %1,%%ld_hi20(%2);"	      \
   "ori %1,%1,%%got_lo12(%2);",	      \
@@ -306,10 +310,11 @@ const char *const loongarch_f_cfi_name_alias[32] =
   &LARCH_opts.ase_gpcr
 
 #define INSN_LA_TLS_GD32	      \
-  "pcalau12i %1,%%gd_pc_hi20(%2);"    \
-  "addi.w %1,%1,%%got_pc_lo12(%2);",  \
+  "pcaddu12i %1,%%gd_pcadd_hi20(%2);" \
+  "addi.w %1,%1,%%gd_pcadd_lo12(%2);", \
   &LARCH_opts.ase_ilp32,	      \
   &LARCH_opts.ase_lp64
+
 #define INSN_LA_TLS_GD32_ABS	      \
   "lu12i.w %1,%%gd_hi20(%2);"	      \
   "ori %1,%1,%%got_lo12(%2);",	      \
@@ -335,20 +340,46 @@ const char *const loongarch_f_cfi_name_alias[32] =
   &LARCH_opts.ase_gabs,		      \
   &LARCH_opts.ase_gpcr
 
-#define INSN_LA_CALL		      \
-  "pcaddu18i $ra,%%call36(%1);"    \
-  "jirl $ra,$ra,0;",    \
+#define INSN_LA_CALL_LA64 \
+  "call36 %1;", \
+  &LARCH_opts.ase_lp64, 0
+
+#define INSN_LA_CALL_LA32 \
+  "call30 %1;", \
+  &LARCH_opts.ase_ilp32, 0
+
+#define INSN_LA_TAIL_LA64 \
+  "tail36 %1,%2;", \
+  &LARCH_opts.ase_lp64, 0
+
+#define INSN_LA_TAIL_LA32 \
+  "tail30 %1,%2;", \
+  &LARCH_opts.ase_ilp32, 0
+
+#define INSN_LA_CALL36 \
+  "pcaddu18i $ra,%%call36(%1);" \
+  "jirl $ra,$ra,0;", \
   0, 0
 
-#define INSN_LA_TAIL		      \
-  "pcaddu18i %1,%%call36(%2);"   \
-  "jirl $zero,%1,0;",   \
+#define INSN_LA_TAIL36 \
+  "pcaddu18i %1,%%call36(%2);" \
+  "jirl $zero,%1,0;", \
+  0, 0
+
+#define INSN_LA_CALL30 \
+  "pcaddu12i $ra,%%call30(%1);" \
+  "jirl $ra,$ra,0;", \
+  0, 0
+
+#define INSN_LA_TAIL30 \
+  "pcaddu12i %1,%%call30(%2);" \
+  "jirl $zero,%1,0;", \
   0, 0
 
 /* For TLS_DESC32 pcrel.  */
 #define INSN_LA_TLS_DESC32		\
-  "pcalau12i $r4,%%desc_pc_hi20(%2);"	\
-  "addi.w $r4,$r4,%%desc_pc_lo12(%2);"	\
+  "pcaddu12i $r4,%%desc_pcadd_hi20(%2);" \
+  "addi.w $r4,$r4,%%desc_pcadd_lo12(%2);" \
   "ld.w $r1,$r4,%%desc_ld(%2);"		\
   "jirl $r1,$r1,%%desc_call(%2);",	\
   &LARCH_opts.ase_ilp32,		\
@@ -440,8 +471,14 @@ static struct loongarch_opcode loongarch_macro_opcodes[] =
   { 0, 0, "la.tls.gd",	"r,l",	  INSN_LA_TLS_GD64_LARGE_ABS,	0 },
   { 0, 0, "la.tls.gd",	"r,l",	  INSN_LA_TLS_GD64,		0 },
   { 0, 0, "la.tls.gd",	"r,r,l",  INSN_LA_TLS_GD64_LARGE_PCREL,	0 },
-  { 0, 0, "call36",	"la",	  INSN_LA_CALL,			0 },
-  { 0, 0, "tail36",	"r,la",	  INSN_LA_TAIL,			0 },
+  { 0, 0, "call",	"la",	  INSN_LA_CALL_LA64,		0 },
+  { 0, 0, "call",	"la",	  INSN_LA_CALL_LA32,		0 },
+  { 0, 0, "tail",	"r,la",	  INSN_LA_TAIL_LA64,		0 },
+  { 0, 0, "tail",	"r,la",	  INSN_LA_TAIL_LA32,		0 },
+  { 0, 0, "call36",	"la",	  INSN_LA_CALL36,		0 },
+  { 0, 0, "tail36",	"r,la",	  INSN_LA_TAIL36,		0 },
+  { 0, 0, "call30",	"la",	  INSN_LA_CALL30,		0 },
+  { 0, 0, "tail30",	"r,la",	  INSN_LA_TAIL30,		0 },
   { 0, 0, "pcaddi",	"r,la",	  "pcaddi %1, %%pcrel_20(%2)",	&LARCH_opts.ase_ilp32, 0, 0 },
   { 0, 0, "la.tls.desc", "r,l",	  INSN_LA_TLS_DESC32_ABS,	0 },
   { 0, 0, "la.tls.desc", "r,l",	  INSN_LA_TLS_DESC32,		0 },
