@@ -301,4 +301,9 @@ struct core_mapped_file
 extern std::vector<core_mapped_file> gdb_read_core_file_mappings
   (struct gdbarch *gdbarch, struct bfd *cbfd);
 
+/* Return the core file bfd for inferior INF, if that inferior has a core
+   file loaded.  Otherwise, return NULL.  */
+
+extern bfd *get_inferior_core_bfd (inferior *inf);
+
 #endif /* GDB_GDBCORE_H */

@@ -128,9 +128,7 @@ gdbpy_core_file_from_inferior (inferior *inf)
   gdb_assert (inf != nullptr);
   gdb_assert (inf->pspace != nullptr);
 
-  program_space *pspace = inf->pspace;
-
-  if (pspace->core_bfd () == nullptr)
+  if (get_inferior_core_bfd (inf) == nullptr)
     return gdbpy_ref<>::new_reference (Py_None);
 
   PyObject *result = (PyObject *) cfpy_inferior_corefile_data_key.get (inf);
@@ -171,9 +169,7 @@ cfpy_corefile_object_is_valid (const corefile_object *obj)
   if (obj->inferior == nullptr)
     return false;
 
-  gdb_assert (obj->inferior->pspace != nullptr);
-
-  return obj->inferior->pspace->core_bfd () != nullptr;
+  return get_inferior_core_bfd (obj->inferior) != nullptr;
 }
 
 /* Require that COREFILE_OBJ be a valid core file.  A valid core file
@@ -200,7 +196,7 @@ cfpy_get_filename (PyObject *self, void *closure)
 
   /* If the program space's core file had been cleared, then this Corefile
      object would have been invalidated.  */
-  bfd *abfd = obj->inferior->pspace->core_bfd ();
+  bfd *abfd = get_inferior_core_bfd (obj->inferior);
   gdb_assert (abfd != nullptr);
 
   return host_string_to_python_string (bfd_get_filename (abfd)).release ();
@@ -247,7 +243,7 @@ cfpy_mapped_files (PyObject *self, PyObject *args)
     {
       mapped_files
 	= gdb_read_core_file_mappings (obj->inferior->arch (),
-				       current_program_space->core_bfd ());
+				       get_inferior_core_bfd (obj->inferior));
     }
   catch (const gdb_exception &except)
     {
@@ -376,12 +372,12 @@ cfpy_repr (PyObject *self)
   if (!cfpy_corefile_object_is_valid (obj))
     return gdb_py_invalid_object_repr (self);
 
-  program_space *pspace = obj->inferior->pspace;
-  gdb_assert (pspace != nullptr);
+  bfd *core_bfd = get_inferior_core_bfd (obj->inferior);
+  gdb_assert (core_bfd != nullptr);
   return PyUnicode_FromFormat ("<%s inferior=%d filename='%s'>",
 			       Py_TYPE (self)->tp_name,
 			       obj->inferior->num,
-			       bfd_get_filename (pspace->core_bfd ()));
+			       bfd_get_filename (core_bfd));
 }
 
 

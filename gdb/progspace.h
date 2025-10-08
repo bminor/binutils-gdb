@@ -292,8 +292,7 @@ struct program_space
     ebfd = std::move (abfd);
   }
 
-  bfd *core_bfd () const
-  { return cbfd.get ();  }
+  bfd *core_bfd () const;
 
   /* Reset saved solib data at the start of an solib event.  This lets
      us properly collect the data when calling solib_add, so it can then
@@ -338,9 +337,6 @@ struct program_space
   gdb_bfd_ref_ptr ebfd;
   /* The last-modified time, from when the exec was brought in.  */
   long ebfd_mtime = 0;
-
-  /* Binary file diddling handle for the core file.  */
-  gdb_bfd_ref_ptr cbfd;
 
   /* The address space attached to this program space.  More than one
      program space may be bound to the same address space.  In the

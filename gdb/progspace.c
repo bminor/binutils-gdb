@@ -436,6 +436,19 @@ update_address_spaces (void)
 
 /* See progspace.h.  */
 
+bfd *
+program_space::core_bfd () const
+{
+  /* This only works because we (currently) never call the core_bfd method
+     on anything other than the current program space.  Don't worry too
+     much, this is a temporary bodge, and will be removed in the next
+     commit.  */
+  gdb_assert (this == current_program_space);
+  return get_inferior_core_bfd (current_inferior ());
+}
+
+/* See progspace.h.  */
+
 void
 program_space::clear_solib_cache ()
 {

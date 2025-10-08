@@ -592,7 +592,7 @@ gdbarch_update_p (inferior *inf, struct gdbarch_info info)
     info.abfd = inf->pspace->exec_bfd ();
 
   if (info.abfd == NULL)
-    info.abfd = inf->pspace->core_bfd ();
+    info.abfd = get_inferior_core_bfd (inf);
 
   /* Check for the current target description.  */
   if (info.target_desc == NULL)
