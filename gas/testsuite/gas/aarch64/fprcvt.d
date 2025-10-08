@@ -1,6 +1,5 @@
 #name: FPRCVT instructions
 #as: -march=armv8-a+fprcvt
-#as: -march=armv9.6-a
 #objdump: -dr
 
 .*:     file format .*
