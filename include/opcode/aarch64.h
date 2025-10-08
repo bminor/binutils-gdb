@@ -477,10 +477,8 @@ static_assert ((AA64_REPLICATE (REP_PLUS, AA64_REPVAL,
 					)
 #define AARCH64_ARCH_V9_6A_FEATURES(X)	(AARCH64_FEATBIT (X, V9_6A)	\
 					 | AARCH64_FEATBIT (X, CMPBR)	\
-					 | AARCH64_FEATBIT (X, FPRCVT)	\
 					 | AARCH64_FEATBIT (X, LSUI)	\
-					 | AARCH64_FEATBIT (X, OCCMO)	\
-					 | AARCH64_FEATBIT (X, SVE2p2))
+					 | AARCH64_FEATBIT (X, OCCMO))
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8A(X)	(AARCH64_FEATBIT (X, V8) \
