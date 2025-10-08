@@ -2488,7 +2488,10 @@ read_abbrev_offset (dwarf2_per_objfile *per_objfile,
   return (sect_offset) read_offset (abfd, info_ptr, offset_size);
 }
 
-/* Add an entry for signature SIG to per_bfd->signatured_types.  */
+/* Add an entry for signature SIG to per_bfd->signatured_types.
+
+   This functions leaves PER_BFD::ALL_UNITS unsorted.  The caller must call
+   finalize_all_units after adding one or more type units.  */
 
 static signatured_type_set::iterator
 add_type_unit (dwarf2_per_bfd *per_bfd, dwarf2_section_info *section,
@@ -2502,17 +2505,7 @@ add_type_unit (dwarf2_per_bfd *per_bfd, dwarf2_section_info *section,
 					 false /* is_dwz */, sig);
   signatured_type *sig_type = sig_type_holder.get ();
 
-  /* Preserve the ordering of per_bfd->all_units.  */
-  auto insert_it
-    = std::lower_bound (per_bfd->all_units.begin (), per_bfd->all_units.end (),
-			sig_type,
-			[] (const dwarf2_per_cu_up &lhs,
-			    const signatured_type *rhs) {
-			  return all_units_less_than (*lhs, { rhs->section,
-							      rhs->sect_off });
-			});
-
-  per_bfd->all_units.emplace (insert_it, sig_type_holder.release ());
+  per_bfd->all_units.emplace_back (sig_type_holder.release ());
   auto emplace_ret = per_bfd->signatured_types.emplace (sig_type);
 
   /* Assert that an insertion took place - that there wasn't a type unit with
@@ -2600,8 +2593,11 @@ lookup_dwo_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
 
   /* If the global table doesn't have an entry for this TU, add one.  */
   if (sig_type_it == per_bfd->signatured_types.end ())
-    sig_type_it = add_type_unit (per_bfd, dwo_entry->section,
-				 dwo_entry->sect_off, dwo_entry->length, sig);
+    {
+      sig_type_it = add_type_unit (per_bfd, dwo_entry->section,
+				   dwo_entry->sect_off, dwo_entry->length, sig);
+      finalize_all_units (per_bfd);
+    }
 
   if ((*sig_type_it)->dwo_unit == nullptr)
     fill_in_sig_entry_from_dwo_entry (per_objfile, *sig_type_it, dwo_entry);
@@ -2643,6 +2639,7 @@ lookup_dwp_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
 
   sig_type_it = add_type_unit (per_bfd, dwo_entry->section,
 			       dwo_entry->sect_off, dwo_entry->length, sig);
+  finalize_all_units (per_bfd);
   fill_in_sig_entry_from_dwo_entry (per_objfile, *sig_type_it, dwo_entry);
 
   return *sig_type_it;
@@ -3598,6 +3595,8 @@ cooked_index_worker_debug_info::process_skeletonless_type_unit
      this TU.  */
   sig_type_it = add_type_unit (per_bfd, dwo_unit->section, dwo_unit->sect_off,
 			       dwo_unit->length, dwo_unit->signature);
+  /* finalize_all_units is called just once by process_skeletonless_type_units
+     after going through all skeletonless type units.  */
   fill_in_sig_entry_from_dwo_entry (per_objfile, *sig_type_it, dwo_unit);
 
   /* This does the job that build_type_psymtabs would have done.  */
@@ -3612,15 +3611,20 @@ cooked_index_worker_debug_info::process_skeletonless_type_units
   (dwarf2_per_objfile *per_objfile, cooked_index_worker_result *storage)
 {
   scoped_time_it time_it ("DWARF skeletonless type units", m_per_command_time);
+  dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
   /* Skeletonless TUs in DWP files without .gdb_index is not supported yet.  */
-  if (per_objfile->per_bfd->dwp_file == nullptr)
-    for (const dwo_file_up &file : per_objfile->per_bfd->dwo_files)
-      for (const dwo_unit_up &unit : file->tus)
-	storage->catch_error ([&] ()
-	  {
-	    process_skeletonless_type_unit (unit.get (), per_objfile, storage);
-	  });
+  if (per_bfd->dwp_file == nullptr)
+    {
+      for (const dwo_file_up &file : per_bfd->dwo_files)
+	for (const dwo_unit_up &unit : file->tus)
+	  storage->catch_error ([&] ()
+	    {
+	      process_skeletonless_type_unit (unit.get (), per_objfile, storage);
+	    });
+
+      finalize_all_units (per_bfd);
+    }
 }
 
 void
