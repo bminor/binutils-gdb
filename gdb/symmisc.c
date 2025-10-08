@@ -73,9 +73,9 @@ print_objfile_statistics (void)
 		      OBJSTAT ((&objfile), n_types));
 
 	i = linetables = 0;
-	for (compunit_symtab *cu : objfile.compunits ())
+	for (compunit_symtab &cu : objfile.compunits ())
 	  {
-	    for (symtab *s : cu->filetabs ())
+	    for (symtab *s : cu.filetabs ())
 	      {
 		i++;
 		if (s->linetable () != NULL)
@@ -123,7 +123,7 @@ dump_objfile (struct objfile *objfile)
   objfile->dump ();
 
   bool symtabs_printed = false;
-  for (compunit_symtab *cu : objfile->compunits ())
+  for (compunit_symtab &cu : objfile->compunits ())
     {
       if (!symtabs_printed)
 	{
@@ -131,7 +131,7 @@ dump_objfile (struct objfile *objfile)
 	  symtabs_printed = true;
 	}
 
-      for (symtab *symtab : cu->filetabs ())
+      for (symtab *symtab : cu.filetabs ())
 	{
 	  gdb_printf ("%s at %s",
 		      symtab_to_filename_for_display (symtab),
@@ -468,9 +468,9 @@ maintenance_print_symbols (const char *args, int from_tty)
 	  if (!print_for_objfile)
 	    continue;
 
-	  for (compunit_symtab *cu : objfile.compunits ())
+	  for (compunit_symtab &cu : objfile.compunits ())
 	    {
-	      for (symtab *s : cu->filetabs ())
+	      for (symtab *s : cu.filetabs ())
 		{
 		  int print_for_source = 0;
 
@@ -751,11 +751,11 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 	   actually find a symtab whose name matches.  */
 	int printed_objfile_start = 0;
 
-	for (compunit_symtab *cust : objfile.compunits ())
+	for (compunit_symtab &cust : objfile.compunits ())
 	  {
 	    int printed_compunit_symtab_start = 0;
 
-	    for (symtab *symtab : cust->filetabs ())
+	    for (symtab *symtab : cust.filetabs ())
 	      {
 		QUIT;
 
@@ -773,32 +773,32 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 		    if (! printed_compunit_symtab_start)
 		      {
 			gdb_printf ("  { ((struct compunit_symtab *) %s)\n",
-				    host_address_to_string (cust));
+				    host_address_to_string (&cust));
 			gdb_printf ("    debugformat %s\n",
-				    cust->debugformat ());
+				    cust.debugformat ());
 			gdb_printf ("    producer %s\n",
-				    (cust->producer () != nullptr
-				     ? cust->producer () : "(null)"));
-			gdb_printf ("    name %s\n", cust->name);
+				    (cust.producer () != nullptr
+				     ? cust.producer () : "(null)"));
+			gdb_printf ("    name %s\n", cust.name);
 			gdb_printf ("    dirname %s\n",
-				    (cust->dirname () != NULL
-				     ? cust->dirname () : "(null)"));
+				    (cust.dirname () != NULL
+				     ? cust.dirname () : "(null)"));
 			gdb_printf ("    blockvector"
 				    " ((struct blockvector *) %s)\n",
 				    host_address_to_string
-				    (cust->blockvector ()));
+				    (cust.blockvector ()));
 			gdb_printf ("    user"
 				    " ((struct compunit_symtab *) %s)\n",
-				    cust->user != nullptr
-				    ? host_address_to_string (cust->user)
+				    cust.user != nullptr
+				    ? host_address_to_string (cust.user)
 				    : "(null)");
-			if (cust->includes != nullptr)
+			if (cust.includes != nullptr)
 			  {
 			    gdb_printf ("    ( includes\n");
 			    for (int i = 0; ; ++i)
 			      {
 				struct compunit_symtab *include
-				  = cust->includes[i];
+				  = cust.includes[i];
 				if (include == nullptr)
 				  break;
 				const char *addr
@@ -856,14 +856,14 @@ maintenance_check_symtabs (const char *ignore, int from_tty)
 	   actually find something worth printing.  */
 	int printed_objfile_start = 0;
 
-	for (compunit_symtab *cust : objfile.compunits ())
+	for (compunit_symtab &cust : objfile.compunits ())
 	  {
 	    int found_something = 0;
-	    struct symtab *symtab = cust->primary_filetab ();
+	    struct symtab *symtab = cust.primary_filetab ();
 
 	    QUIT;
 
-	    if (cust->blockvector () == NULL)
+	    if (cust.blockvector () == NULL)
 	      found_something = 1;
 	    /* Add more checks here.  */
 
@@ -879,7 +879,7 @@ maintenance_check_symtabs (const char *ignore, int from_tty)
 		  }
 		gdb_printf ("  { symtab %s\n",
 			    symtab_to_filename_for_display (symtab));
-		if (cust->blockvector () == NULL)
+		if (cust.blockvector () == NULL)
 		  gdb_printf ("    NULL blockvector\n");
 		gdb_printf ("  }\n");
 	      }
@@ -1036,9 +1036,9 @@ maintenance_info_line_tables (const char *regexp, int from_tty)
   for (struct program_space *pspace : program_spaces)
     for (objfile &objfile : pspace->objfiles ())
       {
-	for (compunit_symtab *cust : objfile.compunits ())
+	for (compunit_symtab &cust : objfile.compunits ())
 	  {
-	    for (symtab *symtab : cust->filetabs ())
+	    for (symtab *symtab : cust.filetabs ())
 	      {
 		QUIT;
 

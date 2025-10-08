@@ -2251,14 +2251,14 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
 
   lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
   best_symbol_tracker accum;
-  for (compunit_symtab *cust : objfile->compunits ())
+  for (compunit_symtab &cust : objfile->compunits ())
     {
       const struct blockvector *bv;
       const struct block *block;
 
-      bv = cust->blockvector ();
+      bv = cust.blockvector ();
       block = bv->block (block_index);
-      if (accum.search (cust, block, lookup_name, domain))
+      if (accum.search (&cust, block, lookup_name, domain))
 	break;
     }
 
@@ -2738,9 +2738,9 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 
   for (objfile &obj_file : current_program_space->objfiles ())
     {
-      for (compunit_symtab *cust : obj_file.compunits ())
+      for (compunit_symtab &cust : obj_file.compunits ())
 	{
-	  const struct blockvector *bv = cust->blockvector ();
+	  const struct blockvector *bv = cust.blockvector ();
 	  const struct block *global_block = bv->global_block ();
 	  CORE_ADDR start = global_block->start ();
 	  CORE_ADDR end = global_block->end ();
@@ -2753,7 +2753,7 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 	      if (bv->map ()->find (pc) == nullptr)
 		continue;
 
-	      return cust;
+	      return &cust;
 	    }
 
 	  CORE_ADDR range = end - start;
@@ -2799,7 +2799,7 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 	    }
 
 	  /* Cust is best found so far, save it.  */
-	  best_cust = cust;
+	  best_cust = &cust;
 	  best_cust_range = range;
 	}
     }
@@ -2861,9 +2861,9 @@ find_symbol_at_address (CORE_ADDR address)
 	 search the symtabs directly.  */
       if ((objfile.flags & OBJF_READNOW) != 0)
 	{
-	  for (compunit_symtab *symtab : objfile.compunits ())
+	  for (compunit_symtab &symtab : objfile.compunits ())
 	    {
-	      struct symbol *sym = search_symtab (symtab, address);
+	      struct symbol *sym = search_symtab (&symtab, address);
 	      if (sym != nullptr)
 		return sym;
 	    }
@@ -3303,9 +3303,9 @@ find_line_symtab (symtab *sym_tab, int line, int *index)
 
       for (objfile &objfile : current_program_space->objfiles ())
 	{
-	  for (compunit_symtab *cu : objfile.compunits ())
+	  for (compunit_symtab &cu : objfile.compunits ())
 	    {
-	      for (symtab *s : cu->filetabs ())
+	      for (symtab *s : cu.filetabs ())
 		{
 		  const struct linetable *l;
 		  int ind;
@@ -4537,9 +4537,9 @@ info_sources_worker (struct ui_out *uiout,
 	  sources_list.emplace (uiout, "sources");
 	}
 
-      for (compunit_symtab *cu : objfile.compunits ())
+      for (compunit_symtab &cu : objfile.compunits ())
 	{
-	  for (symtab *s : cu->filetabs ())
+	  for (symtab *s : cu.filetabs ())
 	    {
 	      const char *file = symtab_to_filename_for_display (s);
 	      const char *fullname = symtab_to_fullname (s);
@@ -4790,9 +4790,9 @@ global_symbol_searcher::add_matching_symbols
   domain_search_flags kind = m_kind;
 
   /* Add matching symbols (if not already present).  */
-  for (compunit_symtab *cust : objfile->compunits ())
+  for (compunit_symtab &cust : objfile->compunits ())
     {
-      const struct blockvector *bv  = cust->blockvector ();
+      const struct blockvector *bv  = cust.blockvector ();
 
       for (block_enum block : { GLOBAL_BLOCK, STATIC_BLOCK })
 	{
@@ -6221,9 +6221,9 @@ make_source_files_completion_list (const char *text)
 
   for (objfile &objfile : current_program_space->objfiles ())
     {
-      for (compunit_symtab *cu : objfile.compunits ())
+      for (compunit_symtab &cu : objfile.compunits ())
 	{
-	  for (symtab *s : cu->filetabs ())
+	  for (symtab *s : cu.filetabs ())
 	    {
 	      if (not_interesting_fname (s->filename))
 		continue;

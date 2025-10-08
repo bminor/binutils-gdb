@@ -152,8 +152,8 @@ objfile::forget_cached_source_info ()
     gdb_printf (gdb_stdlog, "qf->forget_cached_source_info (%s)\n",
 		objfile_debug_name (this));
 
-  for (compunit_symtab *cu : compunits ())
-    cu->forget_cached_source_info ();
+  for (compunit_symtab &cu : compunits ())
+    cu.forget_cached_source_info ();
 
   for (const auto &iter : qf)
     iter->forget_cached_source_info (this);

@@ -34,7 +34,6 @@
 #include <forward_list>
 #include "gdbsupport/unordered_map.h"
 #include "gdbsupport/owning_intrusive_list.h"
-#include "gdbsupport/reference-to-pointer-iterator.h"
 
 struct htab;
 struct objfile_data;
@@ -474,7 +473,7 @@ public:
   program_space *pspace () { return m_pspace; }
 
   using compunit_symtab_iterator
-    = reference_to_pointer_iterator<owning_intrusive_list<compunit_symtab>::iterator>;
+    = owning_intrusive_list<compunit_symtab>::iterator;
   using compunit_symtab_range = iterator_range<compunit_symtab_iterator>;
 
   /* A range adapter that makes it possible to iterate over all

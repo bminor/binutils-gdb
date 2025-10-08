@@ -972,12 +972,12 @@ count_symtabs_and_blocks (int *nr_symtabs_ptr, int *nr_compunit_symtabs_ptr,
     {
       for (objfile &o : current_program_space->objfiles ())
 	{
-	  for (compunit_symtab *cu : o.compunits ())
+	  for (compunit_symtab &cu : o.compunits ())
 	    {
 	      ++nr_compunit_symtabs;
-	      nr_blocks += cu->blockvector ()->num_blocks ();
-	      nr_symtabs += std::distance (cu->filetabs ().begin (),
-					   cu->filetabs ().end ());
+	      nr_blocks += cu.blockvector ()->num_blocks ();
+	      nr_symtabs += std::distance (cu.filetabs ().begin (),
+					   cu.filetabs ().end ());
 	    }
 	}
     }

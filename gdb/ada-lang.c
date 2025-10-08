@@ -5588,10 +5588,10 @@ add_nonlocal_symbols (std::vector<struct block_symbol> &result,
     {
       map_matching_symbols (&objfile, lookup_name, domain, global, data);
 
-      for (compunit_symtab *cu : objfile.compunits ())
+      for (compunit_symtab &cu : objfile.compunits ())
 	{
 	  const struct block *global_block
-	    = cu->blockvector ()->global_block ();
+	    = cu.blockvector ()->global_block ();
 
 	  if (ada_add_block_renamings (result, global_block, lookup_name,
 				       domain))

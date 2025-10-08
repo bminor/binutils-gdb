@@ -356,9 +356,9 @@ select_source_symtab ()
 
   for (objfile &ofp : current_program_space->objfiles ())
     {
-      for (compunit_symtab *cu : ofp.compunits ())
+      for (compunit_symtab &cu : ofp.compunits ())
 	{
-	  for (symtab *symtab : cu->filetabs ())
+	  for (symtab *symtab : cu.filetabs ())
 	    {
 	      const char *name = symtab->filename;
 	      int len = strlen (name);

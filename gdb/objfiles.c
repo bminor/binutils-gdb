@@ -548,9 +548,9 @@ objfile_relocate1 (struct objfile *objfile,
     return 0;
 
   /* OK, get all the symtabs.  */
-  for (compunit_symtab *cust : objfile->compunits ())
+  for (compunit_symtab &cust : objfile->compunits ())
     {
-      struct blockvector *bv = cust->blockvector ();
+      struct blockvector *bv = cust.blockvector ();
       int block_line_section = SECT_OFF_TEXT (objfile);
 
       if (bv->map () != nullptr)
