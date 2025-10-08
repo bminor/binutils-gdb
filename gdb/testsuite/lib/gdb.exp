@@ -11635,7 +11635,7 @@ proc expect_build_id_in_core_file { filename } {
     }
 
     # Convert OFFSET to decimal.
-    set offset [expr {[subst 0x$offset + 0]}]
+    set offset [expr {[subst 0x$offset]}]
 
     # Now figure out the page size.  This should be fine for Linux
     # hosts, see the istarget check above.
