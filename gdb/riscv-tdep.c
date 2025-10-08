@@ -4887,71 +4887,31 @@ equivalent change in the disassembler output."),
 			  &showriscvcmdlist);
 }
 
-/* A wrapper to read register under number regnum to address addr.
-   Returns false if error happened and makes warning.  */
-
-static bool
-try_read (struct regcache *regcache, int regnum, ULONGEST &addr)
-{
-  gdb_assert (regcache != nullptr);
-
-  if (regcache->raw_read (regnum, &addr)
-      != register_status::REG_VALID)
-    {
-      warning (_("Can not read at address %s"), hex_string (addr));
-      return false;
-    }
-  return true;
-}
-
 /* Helper class to record instruction.  */
 
 class riscv_recorded_insn final
 {
-public:
   /* Type for saved register.  */
   using regnum_type = int;
-  /* Type for saved memory.  First is address, second is length.  */
-  using memory_type = std::pair<CORE_ADDR, int>;
 
-  /* Enum class that represents which type does recording belong to.  */
-  enum class record_type
-  {
-    UNKNOWN,
-    ORDINARY,
+  /* Type for memory address.  */
+  using mem_addr = CORE_ADDR;
 
-    /* Corner cases.  */
-    ECALL,
-    EBREAK,
-    SRET,
-    MRET,
-  };
+  /* Type for memory length.  */
+  using mem_len = int;
 
-private:
-  /* Type for set of registers that need to be saved.  */
-  using recorded_regs = std::vector<regnum_type>;
-  /* Type for set of memory records that need to be saved.  */
-  using recorded_mems = std::vector<memory_type>;
+  /* Current regcache.  */
+  struct regcache *m_regcache = nullptr;
 
-  /* Type for memory address, extracted from memory_type.  */
-  using mem_addr = decltype (std::declval<memory_type> ().first);
-  /* Type for memory length, extracted from memory_type.  */
-  using mem_len = decltype (std::declval<memory_type> ().second);
-
-  /* Record type of current instruction.  */
-  record_type m_record_type = record_type::UNKNOWN;
-
-  /* Flag that represents was there an error in current recording.  */
-  bool m_error_occured = false;
-
-  /* Set of registers that need to be recorded.  */
-  recorded_regs m_regs;
-  /* Set of memory chunks that need to be recorded.  */
-  recorded_mems m_mems;
+  /* Current riscv gdbarch.  */
+  struct riscv_gdbarch_tdep *m_gdbarch = nullptr;
 
   /* Width in bytes of the general purpose registers for GDBARCH,
      where recording is happening.  */
   int m_xlen = 0;
+
+  /* Flag that says whether we are in baremetal mode.   */
+  bool m_in_baremetal_mode = false;
 
   /* Helper for decode 16-bit instruction RS1.  */
   static regnum_type
@@ -5009,68 +4969,34 @@ private:
     return (ival >> OP_SH_CSR) & OP_MASK_CSR;
   }
 
-  /* Set any record type.  Always returns true.  */
+  /* Reads register.  Returns false if error happened.  */
   bool
-  set_record_type (record_type type) noexcept
+  read_reg (regnum_type regnum, ULONGEST &addr) noexcept
   {
-    m_record_type = type;
-    return true;
-  }
+    if (m_regcache->raw_read (regnum, &addr) == register_status::REG_VALID)
+      return true;
 
-  /* Set ordinary record type.  Always returns true.  */
-  bool
-  set_ordinary_record_type () noexcept
-  {
-    m_record_type = record_type::ORDINARY;
-    return true;
-  }
-
-  /* Set error happened.  Always returns false.  */
-  bool
-  set_error () noexcept
-  {
-    m_error_occured = true;
+    warning (_("Can not read at address %s"), hex_string (addr));
     return false;
   }
 
-  /* Check if current recording has an error.  */
-  bool
-  has_error () const noexcept
-  {
-    return m_error_occured;
-  }
-
-  /* Reads register.  Sets error and returns false if error happened.  */
-  bool
-  read_reg (struct regcache *regcache, regnum_type reg,
-	    ULONGEST &addr) noexcept
-  {
-    gdb_assert (regcache != nullptr);
-
-    if (!try_read (regcache, reg, addr))
-      return set_error ();
-    return true;
-  }
-
-  /* Save register.  Returns true or aborts if exception happened.  */
+  /* Save register.  Returns false if error happened.  */
   bool
   save_reg (regnum_type regnum) noexcept
   {
-    m_regs.emplace_back (regnum);
-    return true;
+    return (record_full_arch_list_add_reg (m_regcache, regnum) == 0);
   }
 
-  /* Save memory chunk.  Returns true or aborts if exception happened.  */
+  /* Save memory chunk.  Returns false if error happened.  */
   bool
   save_mem (mem_addr addr, mem_len len) noexcept
   {
-    m_mems.emplace_back (addr, len);
-    return true;
+    return (record_full_arch_list_add_mem (addr, len) == 0);
   }
 
   /* Returns true if instruction needs only saving pc.  */
   static bool
-  need_save_pc (ULONGEST ival) noexcept
+  need_save_only_pc (ULONGEST ival) noexcept
   {
     return (is_beq_insn (ival) || is_bne_insn (ival) || is_blt_insn (ival)
 	   || is_bge_insn (ival) || is_bltu_insn (ival) || is_bgeu_insn (ival)
@@ -5079,19 +5005,9 @@ private:
 	   || is_sfence_vma_insn (ival));
   }
 
-  /* Returns true if instruction is classified.  */
-  bool
-  try_save_pc (ULONGEST ival) noexcept
-  {
-    if (!need_save_pc (ival))
-      return false;
-
-    return set_ordinary_record_type ();
-  }
-
   /* Returns true if instruction needs only saving pc and rd.  */
   static bool
-  need_save_pc_rd (ULONGEST ival) noexcept
+  need_save_rd (ULONGEST ival) noexcept
   {
     return (is_lui_insn (ival) || is_auipc_insn (ival) || is_jal_insn (ival)
 	   || is_jalr_insn (ival) || is_lb_insn (ival) || is_lh_insn (ival)
@@ -5126,21 +5042,17 @@ private:
 	   || is_fcvt_lu_d_insn (ival) || is_fmv_x_d_insn (ival));
   }
 
-  /* Returns true if instruction is classified.  This function can set
-     m_error_occured.  */
+  /* Returns true if instruction successfully saved rd.  */
   bool
-  try_save_pc_rd (ULONGEST ival) noexcept
+  try_save_rd (ULONGEST ival) noexcept
   {
-    if (!need_save_pc_rd (ival))
-      return false;
-
-    return (!save_reg (decode_rd (ival)) || set_ordinary_record_type ());
+    return save_reg (decode_rd (ival));;
   }
 
   /* Returns true if instruction needs only saving pc and
      floating point rd.  */
   static bool
-  need_save_pc_fprd (ULONGEST ival) noexcept
+  need_save_fprd (ULONGEST ival) noexcept
   {
     return (is_flw_insn (ival) || is_fmadd_s_insn (ival)
 	   || is_fmsub_s_insn (ival) || is_fnmsub_s_insn (ival)
@@ -5165,45 +5077,35 @@ private:
 	   || is_fcvt_d_lu_insn (ival) || is_fmv_d_x_insn (ival));
   }
 
-  /* Returns true if instruction is classified.  This function can set
-     m_error_occured.  */
+  /* Returns true if instruction successfully saved floating point rd.  */
   bool
-  try_save_pc_fprd (ULONGEST ival) noexcept
+  try_save_fprd (ULONGEST ival) noexcept
   {
-    if (!need_save_pc_fprd (ival))
-      return false;
-
-    return (!save_reg (RISCV_FIRST_FP_REGNUM + decode_rd (ival))
-	   || set_ordinary_record_type ());
+    return save_reg (RISCV_FIRST_FP_REGNUM + decode_rd (ival));
   }
 
   /* Returns true if instruction needs only saving pc, rd and csr.  */
   static bool
-  need_save_pc_rd_csr (ULONGEST ival) noexcept
+  need_save_rd_csr (ULONGEST ival) noexcept
   {
     return (is_csrrw_insn (ival) || is_csrrs_insn (ival) || is_csrrc_insn (ival)
 	   || is_csrrwi_insn (ival) || is_csrrsi_insn (ival)
 	   || is_csrrci_insn (ival));
   }
 
-  /* Returns true if instruction is classified.  This function can set
-     m_error_occured.  */
+  /* Returns true if instruction successfully saved rd and csr.  */
   bool
-  try_save_pc_rd_csr (ULONGEST ival) noexcept
+  try_save_rd_csr (ULONGEST ival) noexcept
   {
-    if (!need_save_pc_rd_csr (ival))
-      return false;
-
-    return (!save_reg (decode_rd (ival))
-	   || !save_reg (RISCV_FIRST_CSR_REGNUM + decode_csr (ival))
-	   || set_ordinary_record_type ());
+    return (save_reg (decode_rd (ival))
+	    && save_reg (RISCV_FIRST_CSR_REGNUM + decode_csr (ival)));
   }
 
   /* Returns the size of the memory chunk that needs to be saved if the
      instruction belongs to the group that needs only saving pc and memory.
      Otherwise returns 0.  */
   static mem_len
-  need_save_pc_mem (ULONGEST ival) noexcept
+  need_save_mem (ULONGEST ival) noexcept
   {
     if (is_sb_insn (ival))
       return 1;
@@ -5216,28 +5118,22 @@ private:
     return 0;
   }
 
-  /* Returns true if instruction is classified.  This function can set
-     m_error_occured.  */
+  /* Returns true if instruction successfully saved memory.  */
   bool
-  try_save_pc_mem (ULONGEST ival, struct regcache *regcache) noexcept
+  try_save_mem (ULONGEST ival, mem_len len) noexcept
   {
-    gdb_assert (regcache != nullptr);
+    mem_addr addr = 0;
+    ULONGEST offset = EXTRACT_STYPE_IMM (ival);
 
-    mem_addr addr = mem_addr{};
-    mem_len len = need_save_pc_mem (ival);
-    if (len <= 0)
-      return false;
-
-    mem_len offset = EXTRACT_STYPE_IMM (ival);
-    return (!read_reg (regcache, decode_rs1 (ival), addr)
-	   || !save_mem (addr + offset, len) || set_ordinary_record_type ());
+    return (read_reg (decode_rs1 (ival), addr)
+	    && save_mem (addr + offset, len));
   }
 
   /* Returns the size of the memory chunk that needs to be saved if the
      instruction belongs to the group that needs only saving pc, rd and memory.
      Otherwise returns 0.  */
   static mem_len
-  need_save_pc_rd_mem (ULONGEST ival) noexcept
+  need_save_rd_mem (ULONGEST ival) noexcept
   {
     if (is_sc_w_insn (ival) || is_amoswap_w_insn (ival)
 	|| is_amoadd_w_insn (ival) || is_amoxor_w_insn (ival)
@@ -5254,58 +5150,68 @@ private:
     return 0;
   }
 
-  /* Returns true if instruction is classified.  This function can set
-     m_error_occured.  */
+  /* Returns true if instruction successfully saved rd and memory.  */
   bool
-  try_save_pc_rd_mem (ULONGEST ival, struct regcache *regcache) noexcept
+  try_save_rd_mem (ULONGEST ival, mem_len len) noexcept
   {
-    gdb_assert (regcache != nullptr);
-
-    mem_len len = need_save_pc_rd_mem (ival);
     mem_addr addr = 0;
-    if (len <= 0)
-      return false;
 
-    return (!read_reg (regcache, decode_rs1 (ival), addr)
-	   || !save_mem (addr, len) || !save_reg (decode_rd (ival))
-	   || set_ordinary_record_type ());
+    return (read_reg (decode_rs1 (ival), addr) && save_mem (addr, len)
+	    && save_reg (decode_rd (ival)));
   }
 
   /* Returns true if instruction is successfully recordered.  The length of
      the instruction must be equal 4 bytes.  */
   bool
-  record_insn_len4 (ULONGEST ival, struct regcache *regcache) noexcept
+  record_insn_len4 (ULONGEST ival) noexcept
   {
-    gdb_assert (regcache != nullptr);
+    mem_len len = 0;
+    ULONGEST reg_val = 0;
 
     if (is_ecall_insn (ival))
       {
-	return set_record_type (record_type::ECALL);
+	/* We are in baremetal mode.  */
+	if (m_in_baremetal_mode)
+	  {
+	    warning (_("Syscall record is not supported"));
+	    return false;
+	  }
+
+	/* We are in linux mode.  */
+	return (read_reg (RISCV_A7_REGNUM, reg_val)
+		&& m_gdbarch->riscv_syscall_record (m_regcache, reg_val) == 0);
       }
 
     if (is_ebreak_insn (ival))
-      {
-	return set_record_type (record_type::EBREAK);
-      }
+      return true;
 
     if (is_sret_insn (ival))
-      {
-	return (!save_reg (RISCV_CSR_SSTATUS_REGNUM)
-	       || !save_reg (RISCV_CSR_MEPC_REGNUM)
-	       || set_record_type (record_type::SRET));
-      }
+      return (save_reg (RISCV_CSR_SSTATUS_REGNUM)
+	      && save_reg (RISCV_CSR_MEPC_REGNUM));
 
     if (is_mret_insn (ival))
-      {
-	return (!save_reg (RISCV_CSR_MSTATUS_REGNUM)
-	       || !save_reg (RISCV_CSR_MEPC_REGNUM)
-	       || set_record_type (record_type::MRET));
-      }
+      return (save_reg (RISCV_CSR_MSTATUS_REGNUM)
+	      && save_reg (RISCV_CSR_MEPC_REGNUM));
 
-    if (try_save_pc (ival) || try_save_pc_rd (ival) || try_save_pc_fprd (ival)
-	|| try_save_pc_rd_csr (ival) || try_save_pc_mem (ival, regcache)
-	|| try_save_pc_rd_mem (ival, regcache))
-      return !has_error ();
+    if (need_save_only_pc (ival))
+      return true;
+
+    if (need_save_rd (ival))
+      return try_save_rd (ival);
+
+    if (need_save_fprd (ival))
+      return try_save_fprd (ival);
+
+    if (need_save_rd_csr (ival))
+      return try_save_rd_csr (ival);
+
+    len = need_save_mem (ival);
+    if (len > 0)
+      return try_save_mem (ival, len);
+
+    len = need_save_rd_mem (ival);
+    if (len > 0)
+      return try_save_rd_mem (ival, len);
 
     warning (_("Currently this instruction with len 4(%s) is unsupported"),
 	     hex_string (ival));
@@ -5315,105 +5221,98 @@ private:
   /* Returns true if instruction is successfully recordered.  The length of
      the instruction must be equal 2 bytes.  */
   bool
-  record_insn_len2 (ULONGEST ival, struct regcache *regcache) noexcept
+  record_insn_len2 (ULONGEST ival) noexcept
   {
-    gdb_assert (regcache != nullptr);
-
-    mem_addr addr = mem_addr{};
+    mem_addr addr = 0;
+    ULONGEST offset = 0;
 
     /* The order here is very important, because
        opcodes of some instructions may be the same.  */
 
     if (is_c_addi4spn_insn (ival) || is_c_lw_insn (ival)
 	|| (m_xlen == 8 && is_c_ld_insn (ival)))
-      return (!save_reg (decode_crs2_short (ival))
-	     || set_ordinary_record_type ());
+      return save_reg (decode_crs2_short (ival));
 
     if (is_c_fld_insn (ival) || (m_xlen == 4 && is_c_flw_insn (ival)))
-      return (!save_reg (RISCV_FIRST_FP_REGNUM + decode_crs2_short (ival))
-	     || set_ordinary_record_type ());
+      return save_reg (RISCV_FIRST_FP_REGNUM + decode_crs2_short (ival));
 
     if (is_c_fsd_insn (ival) || (m_xlen == 8 && is_c_sd_insn (ival)))
       {
-	ULONGEST offset = ULONGEST{EXTRACT_CLTYPE_LD_IMM (ival)};
-	return (!read_reg (regcache, decode_crs1_short (ival), addr)
-	       || !save_mem (addr + offset, 8) || set_ordinary_record_type ());
+	offset = ULONGEST{EXTRACT_CLTYPE_LD_IMM (ival)};
+	return (read_reg (decode_crs1_short (ival), addr)
+		&& save_mem (addr + offset, 8));
       }
 
     if ((m_xlen == 4 && is_c_fsw_insn (ival)) || is_c_sw_insn (ival))
       {
-	ULONGEST offset = ULONGEST{EXTRACT_CLTYPE_LW_IMM (ival)};
-	return (!read_reg (regcache, decode_crs1_short (ival), addr)
-	       || !save_mem (addr + offset, 4) || set_ordinary_record_type ());
+	offset = ULONGEST{EXTRACT_CLTYPE_LW_IMM (ival)};
+	return (read_reg (decode_crs1_short (ival), addr)
+		&& save_mem (addr + offset, 4));
       }
 
     if (is_c_nop_insn (ival))
-      return set_ordinary_record_type ();
+      return true;
 
     if (is_c_addi_insn (ival))
-      return (!save_reg (decode_crs1 (ival)) || set_ordinary_record_type ());
+      return save_reg (decode_crs1 (ival));
 
     if (m_xlen == 4 && is_c_jal_insn (ival))
-      return (!save_reg (RISCV_RA_REGNUM) || set_ordinary_record_type ());
+      return save_reg (RISCV_RA_REGNUM);
 
     if ((m_xlen == 8 && is_c_addiw_insn (ival)) || is_c_li_insn (ival))
-      return (!save_reg (decode_crs1 (ival)) || set_ordinary_record_type ());
+      return save_reg (decode_crs1 (ival));
 
     if (is_c_addi16sp_insn (ival))
-      return (!save_reg (RISCV_SP_REGNUM) || set_ordinary_record_type ());
+      return save_reg (RISCV_SP_REGNUM);
 
     if (is_c_lui_insn (ival))
-      return (!save_reg (decode_crs1 (ival)) || set_ordinary_record_type ());
+      return save_reg (decode_crs1 (ival));
 
     if (is_c_srli_insn (ival) || is_c_srai_insn (ival) || is_c_andi_insn (ival)
 	|| is_c_sub_insn (ival) || is_c_xor_insn (ival) || is_c_or_insn (ival)
 	|| is_c_and_insn (ival) || (m_xlen == 8 && is_c_subw_insn (ival))
 	|| (m_xlen == 8 && is_c_addw_insn (ival)))
-      return (!save_reg (decode_crs1_short (ival))
-	     || set_ordinary_record_type ());
+      return save_reg (decode_crs1_short (ival));
 
     if (is_c_j_insn (ival) || is_c_beqz_insn (ival) || is_c_bnez_insn (ival))
-      return set_ordinary_record_type ();
+      return true;
 
     if (is_c_slli_insn (ival))
-      return (!save_reg (decode_crs1 (ival)) || set_ordinary_record_type ());
+      return save_reg (decode_crs1 (ival));
 
     if (is_c_fldsp_insn (ival) || (m_xlen == 4 && is_c_flwsp_insn (ival)))
-      return (!save_reg (RISCV_FIRST_FP_REGNUM + decode_crs1 (ival))
-	     || set_ordinary_record_type ());
+      return save_reg (RISCV_FIRST_FP_REGNUM + decode_crs1 (ival));
 
     if (is_c_lwsp_insn (ival) || (m_xlen == 8 && is_c_ldsp_insn (ival)))
-      return (!save_reg (decode_crs1 (ival)) || set_ordinary_record_type ());
+      return save_reg (decode_crs1 (ival));
 
     if (is_c_jr_insn (ival))
-      return set_ordinary_record_type ();
+      return true;
 
     if (is_c_mv_insn (ival))
-      return (!save_reg (decode_crs1 (ival)) || set_ordinary_record_type ());
+      return save_reg (decode_crs1 (ival));
 
     if (is_c_ebreak_insn (ival))
-      {
-	return set_record_type (record_type::EBREAK);
-      }
+      return true;
 
     if (is_c_jalr_insn (ival))
-      return (!save_reg (RISCV_RA_REGNUM) || set_ordinary_record_type ());
+      return save_reg (RISCV_RA_REGNUM);
 
     if (is_c_add_insn (ival))
-      return (!save_reg (decode_crs1 (ival)) || set_ordinary_record_type ());
+      return save_reg (decode_crs1 (ival));
 
     if (is_c_fsdsp_insn (ival) || (m_xlen == 8 && is_c_sdsp_insn (ival)))
       {
-	ULONGEST offset = ULONGEST{EXTRACT_CSSTYPE_SDSP_IMM (ival)};
-	return (!read_reg (regcache, RISCV_SP_REGNUM, addr)
-	       || !save_mem (addr + offset, 8) || set_ordinary_record_type ());
+	offset = ULONGEST{EXTRACT_CSSTYPE_SDSP_IMM (ival)};
+	return (read_reg (RISCV_SP_REGNUM, addr)
+		&& save_mem (addr + offset, 8));
       }
 
     if (is_c_swsp_insn (ival) || (m_xlen == 4 && is_c_fswsp_insn (ival)))
       {
-	ULONGEST offset = ULONGEST{EXTRACT_CSSTYPE_SWSP_IMM (ival)};
-	return (!read_reg (regcache, RISCV_SP_REGNUM, addr)
-	       || !save_mem (addr + offset, 4) || set_ordinary_record_type ());
+	offset = ULONGEST{EXTRACT_CSSTYPE_SWSP_IMM (ival)};
+	return (read_reg (RISCV_SP_REGNUM, addr)
+		&& save_mem (addr + offset, 4));
       }
 
     warning (_("Currently this instruction with len 2(%s) is unsupported"),
@@ -5422,11 +5321,6 @@ private:
   }
 
 public:
-  /* Iterator for registers that need to be recorded.  */
-  using regs_iter = recorded_regs::const_iterator;
-  /* Iterator for memory chunks that need to be recorded.  */
-  using mems_iter = recorded_mems::const_iterator;
-
   /* Record instruction at address addr.  Returns false if error happened.  */
   bool
   record (gdbarch *gdbarch, struct regcache *regcache, CORE_ADDR addr) noexcept
@@ -5434,137 +5328,45 @@ public:
     gdb_assert (gdbarch != nullptr);
     gdb_assert (regcache != nullptr);
 
-    int m_length = 0;
-    ULONGEST ival = 0;
+    m_gdbarch = gdbarch_tdep<riscv_gdbarch_tdep> (gdbarch);
+    m_regcache = regcache;
     m_xlen = riscv_isa_xlen (gdbarch);
+    m_in_baremetal_mode = (m_gdbarch->riscv_syscall_record == nullptr);
+
+    int insn_length = 0;
+    ULONGEST ival = 0;
 
     /* Since fetch_instruction can throw an exception,
        it must be wrapped in a try-catch block.  */
     try
       {
-	ival = riscv_insn::fetch_instruction (gdbarch, addr, &m_length);
+	ival = riscv_insn::fetch_instruction (gdbarch, addr, &insn_length);
       }
     catch (const gdb_exception_error &ex)
       {
 	warning ("%s", ex.what ());
 	return false;
       }
+
     if (!save_reg (RISCV_PC_REGNUM))
       return false;
 
-    if (m_length == 4)
-      return record_insn_len4 (ival, regcache);
+    if (insn_length == 2)
+      return record_insn_len2 (ival);
 
-    if (m_length == 2)
-      return record_insn_len2 (ival, regcache);
+    if (insn_length == 4)
+      return record_insn_len4 (ival);
 
     /* 6 bytes or more.  If the instruction is longer than 8 bytes, we don't
        have full instruction bits in ival.  At least, such long instructions
        are not defined yet, so just ignore it.  */
-    gdb_assert (m_length > 0 && m_length % 2 == 0);
+    gdb_assert (insn_length > 0 && insn_length % 2 == 0);
 
     warning (_("Can not record unknown instruction (opcode = %s)"),
 	     hex_string (ival));
     return false;
   }
-
-  /* Get record type of instruction.  */
-  record_type
-  get_record_type () const noexcept
-  {
-    return m_record_type;
-  }
-
-  /* Returns an iterator to the beginning of the registers that need
-     to be saved.  */
-  regs_iter
-  regs_begin () const noexcept
-  {
-    return m_regs.begin ();
-  }
-
-  /* Returns an iterator to the end of the registers that need
-     to be saved.  */
-  regs_iter
-  regs_end () const noexcept
-  {
-    return m_regs.end ();
-  }
-
-  /* Returns an iterator to the beginning of the memory chunks that need
-     to be saved.  */
-  mems_iter
-  mems_begin () const noexcept
-  {
-    return m_mems.begin ();
-  }
-
-  /* Returns an iterator to the end of the memory chunks that need
-     to be saved.  */
-  mems_iter
-  mems_end () const noexcept
-  {
-    return m_mems.end ();
-  }
 };
-
-/* A helper function to record instruction using record API.  */
-
-static int
-riscv_record_insn_details (struct gdbarch *gdbarch, struct regcache *regcache,
-			   const riscv_recorded_insn &insn)
-{
-  gdb_assert (gdbarch != nullptr);
-  gdb_assert (regcache != nullptr);
-
-  riscv_gdbarch_tdep *tdep = gdbarch_tdep<riscv_gdbarch_tdep> (gdbarch);
-  auto regs_begin = insn.regs_begin ();
-  auto regs_end = insn.regs_end ();
-  if (std::any_of (regs_begin,
-		   regs_end,
-		   [&regcache] (auto &&reg_it)
-		   {
-		     return record_full_arch_list_add_reg (regcache, reg_it);
-		   }))
-    return -1;
-
-  auto mems_begin = insn.mems_begin ();
-  auto mems_end = insn.mems_end ();
-  if (std::any_of (mems_begin,
-		   mems_end,
-		   [] (auto &&mem_it)
-		   {
-		     return record_full_arch_list_add_mem (mem_it.first,
-							   mem_it.second);
-		   }))
-    return -1;
-
-  switch (insn.get_record_type ())
-    {
-    case riscv_recorded_insn::record_type::ORDINARY:
-    case riscv_recorded_insn::record_type::EBREAK:
-    case riscv_recorded_insn::record_type::SRET:
-    case riscv_recorded_insn::record_type::MRET:
-      break;
-
-    case riscv_recorded_insn::record_type::ECALL:
-      {
-	if (!tdep->riscv_syscall_record)
-	  {
-	    warning (_("Syscall record is not supported"));
-	    return -1;
-	  }
-	ULONGEST reg_val = ULONGEST{};
-	if (!try_read (regcache, RISCV_A7_REGNUM, reg_val))
-	  return -1;
-	return tdep->riscv_syscall_record (regcache, reg_val);
-      }
-
-    default:
-      return -1;
-    }
-  return 0;
-}
 
 /* Parse the current instruction and record the values of the registers and
    memory that will be changed in current instruction to record_arch_list.
@@ -5581,10 +5383,8 @@ riscv_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   if (!insn.record (gdbarch, regcache, addr))
     return -1;
 
-  int ret_val = riscv_record_insn_details (gdbarch, regcache, insn);
-
   if (record_full_arch_list_add_end ())
     return -1;
 
-  return ret_val;
+  return 0;
 }
