@@ -455,13 +455,23 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
-  cris-*-* | crisv32-*-*)
+  cris-*-*aout*)
     targ_defvec=cris_aout_vec
     targ_selvecs="cris_elf32_us_vec cris_elf32_vec"
-    case "${targ}" in
-	*-*-linux*) ;;
-	*) targ_underscore=yes ;;
-    esac
+    targ_underscore=yes
+    want64=true
+    ;;
+
+  cris-*-linux-* | crisv32-*-linux-*)
+    targ_defvec=cris_elf32_vec
+    targ_selvecs="cris_elf32_us_vec cris_aout_vec"
+    want64=true
+    ;;
+
+  cris-*-* | crisv32-*-*)
+    targ_defvec=cris_elf32_us_vec
+    targ_selvecs="cris_aout_vec cris_elf32_vec"
+    targ_underscore=yes
     want64=true
     ;;
 
