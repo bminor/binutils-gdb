@@ -234,14 +234,12 @@ stylepy_init_from_style_name (PyObject *self, const char *style_name)
 static std::optional<ui_file_style::intensity>
 stylepy_long_to_intensity (long intensity_value)
 {
-  ui_file_style::intensity intensity
-    = static_cast<ui_file_style::intensity> (intensity_value);
-  switch (intensity)
+  switch (intensity_value)
     {
     case ui_file_style::NORMAL:
     case ui_file_style::DIM:
     case ui_file_style::BOLD:
-      break;
+      return static_cast<ui_file_style::intensity> (intensity_value);
 
     default:
       PyErr_Format
@@ -249,8 +247,6 @@ stylepy_long_to_intensity (long intensity_value)
 	 intensity_value);
       return {};
     }
-
-  return intensity;
 }
 
 /* Initialise a gdb.Style object from a foreground and background
