@@ -113,7 +113,7 @@ proc_with_prefix test_exec_and_arg_fetch { packet } {
 
     gdbserver_run "a b c"
 
-    gdb_breakpoint [gdb_get_line_number "Break here"]
+    gdb_breakpoint $::srcfile:[gdb_get_line_number "Break here"]
     gdb_continue_to_breakpoint "run to breakpoint"
 
     # Look in the inferior to check the arguments were passed
