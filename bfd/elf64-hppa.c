@@ -247,6 +247,24 @@ static bool get_stub
 static int elf64_hppa_elf_get_symbol_type
   (Elf_Internal_Sym *, int);
 
+/* Search for the index of a global symbol in it's defining object file.  */
+
+static long
+global_sym_index (struct elf_link_hash_entry *h)
+{
+  struct elf_link_hash_entry **p;
+  bfd *obj;
+
+  BFD_ASSERT (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak);
+
+  obj = h->root.u.def.section->owner;
+  for (p = elf_sym_hashes (obj); *p != h; ++p)
+    continue;
+
+  return p - elf_sym_hashes (obj) + elf_tdata (obj)->symtab_hdr.sh_info;
+}
+
 /* Initialize an entry in the link hash table.  */
 
 static struct bfd_hash_entry *
@@ -641,7 +659,10 @@ elf64_hppa_check_relocs (bfd *abfd,
 
 	  /* PR15323, ref flags aren't set for references in the same
 	     object.  */
-	  hh->eh.ref_regular = 1;
+	  if (!hh->eh.root.linker_def && !hh->eh.root.ldscript_def)
+	    hh->eh.ref_regular = 1;
+	  else
+	    hh = NULL;
 	}
       else
 	hh = NULL;
@@ -744,7 +765,7 @@ elf64_hppa_check_relocs (bfd *abfd,
 	case R_PARISC_LTOFF_FPTR16WF:
 	case R_PARISC_LTOFF_FPTR16DF:
 	  if (bfd_link_pic (info) || maybe_dynamic)
-	    need_entry = (NEED_DLT | NEED_OPD | NEED_PLT);
+	    need_entry = (NEED_DLT | NEED_OPD | NEED_PLT | NEED_DYNREL);
 	  else
 	    need_entry = (NEED_DLT | NEED_OPD | NEED_PLT);
 	  dynrel_type = R_PARISC_FPTR64;
@@ -762,9 +783,7 @@ elf64_hppa_check_relocs (bfd *abfd,
 	/* Add more cases as needed.  */
 	}
 
-      if (!need_entry)
-	continue;
-
+      /* We may need this information later for OPD.  */
       if (hh)
 	{
 	  /* Stash away enough information to be able to find this symbol
@@ -772,6 +791,9 @@ elf64_hppa_check_relocs (bfd *abfd,
 	  hh->owner = abfd;
 	  hh->sym_indx = r_symndx;
 	}
+
+      if (!need_entry)
+	continue;
 
       /* Create what's needed.  */
       if (need_entry & NEED_DLT)
@@ -969,10 +991,14 @@ allocate_global_data_dlt (struct elf_link_hash_entry *eh, void *data)
 	     against it.  */
 	  if (eh->dynindx == -1 && eh->type != STT_PARISC_MILLI)
 	    {
-	      bfd *owner = eh->root.u.def.section->owner;
+	      if (!hh->owner)
+		{
+		  hh->owner = eh->root.u.def.section->owner;
+		  hh->sym_indx = global_sym_index (eh);
+		}
 
 	      if (! (bfd_elf_link_record_local_dynamic_symbol
-		     (x->info, owner, hh->sym_indx)))
+		     (x->info, hh->owner, hh->sym_indx)))
 		return false;
 	    }
 	}
@@ -1050,33 +1076,37 @@ allocate_global_data_opd (struct elf_link_hash_entry *eh, void *data)
     {
       /* We never need an opd entry for a symbol which is not
 	 defined by this output file.  */
-      if (hh && (hh->eh.root.type == bfd_link_hash_undefined
-		 || hh->eh.root.type == bfd_link_hash_undefweak
-		 || hh->eh.root.u.def.section->output_section == NULL))
-	hh->want_opd = 0;
+      if (hh->eh.root.type == bfd_link_hash_undefined
+	  || hh->eh.root.type == bfd_link_hash_undefweak
+	  || hh->eh.root.u.def.section->output_section == NULL)
+	{
+	  hh->want_opd = 0;
+	  return true;
+	}
 
       /* If we are creating a shared library, took the address of a local
 	 function or might export this function from this object file, then
 	 we have to create an opd descriptor.  */
-      else if (bfd_link_pic (x->info)
-	       || hh == NULL
-	       || (hh->eh.dynindx == -1 && hh->eh.type != STT_PARISC_MILLI)
-	       || (hh->eh.root.type == bfd_link_hash_defined
-		   || hh->eh.root.type == bfd_link_hash_defweak))
+      if (bfd_link_pic (x->info)
+	  || (hh->eh.dynindx == -1 && hh->eh.type != STT_PARISC_MILLI)
+	  || hh->eh.root.type == bfd_link_hash_defined
+	  || hh->eh.root.type == bfd_link_hash_defweak)
 	{
 	  /* If we are creating a shared library, then we will have to
 	     create a runtime relocation for the symbol to properly
 	     initialize the .opd entry.  Make sure the symbol gets
 	     added to the dynamic symbol table.  */
-	  if (bfd_link_pic (x->info)
-	      && (hh == NULL || (hh->eh.dynindx == -1)))
+	  if (bfd_link_pic (x->info) && hh->eh.dynindx == -1)
 	    {
-	      bfd *owner;
 	      /* PR 6511: Default to using the dynamic symbol table.  */
-	      owner = (hh->owner ? hh->owner: eh->root.u.def.section->owner);
+	      if (!hh->owner)
+		{
+		  hh->owner = eh->root.u.def.section->owner;
+		  hh->sym_indx = global_sym_index (eh);
+		}
 
 	      if (!bfd_elf_link_record_local_dynamic_symbol
-		    (x->info, owner, hh->sym_indx))
+		    (x->info, hh->owner, hh->sym_indx))
 		return false;
 	    }
 
@@ -1419,15 +1449,18 @@ allocate_dynrel_entries (struct elf_link_hash_entry *eh, void *data)
       if (!shared && rent->type == R_PARISC_FPTR64 && hh->want_opd)
 	continue;
 
-      hppa_info->other_rel_sec->size += sizeof (Elf64_External_Rela);
+      if (!discarded_section (hppa_info->other_rel_sec))
+	hppa_info->other_rel_sec->size += sizeof (Elf64_External_Rela);
 
-      /* Make sure this symbol gets into the dynamic symbol table if it is
-	 not already recorded.  ?!? This should not be in the loop since
-	 the symbol need only be added once.  */
+      /* Make sure this symbol gets into the dynamic symbol table if
+	 it is not already recorded.  */
       if (eh->dynindx == -1 && eh->type != STT_PARISC_MILLI)
-	if (!bfd_elf_link_record_local_dynamic_symbol
-	    (x->info, rent->sec->owner, hh->sym_indx))
-	  return false;
+	{
+	  BFD_ASSERT (rent->sec->owner == hh->owner);
+	  if (!bfd_elf_link_record_local_dynamic_symbol
+		(x->info, hh->owner, hh->sym_indx))
+	    return false;
+	}
     }
 
   /* Take care of the GOT and PLT relocations.  */
@@ -2293,14 +2326,17 @@ elf64_hppa_finalize_dynreloc (struct elf_link_hash_entry *eh,
   if (!dynamic_symbol && !bfd_link_pic (info))
     return true;
 
+  hppa_info = hppa_link_hash_table (info);
+  if (hppa_info == NULL)
+    return false;
+
+  if (discarded_section (hppa_info->other_rel_sec))
+    return true;
+
   if (hh->reloc_entries)
     {
       struct elf64_hppa_dyn_reloc_entry *rent;
       int dynindx;
-
-      hppa_info = hppa_link_hash_table (info);
-      if (hppa_info == NULL)
-	return false;
 
       /* We may need to do a relocation against a local symbol, in
 	 which case we have to look up it's dynamic symbol index off
@@ -3162,7 +3198,7 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
   switch (r_type)
     {
     case R_PARISC_NONE:
-      break;
+      return bfd_reloc_ok;
 
     /* Basic function call support.
 
