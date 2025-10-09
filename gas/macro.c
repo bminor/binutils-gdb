@@ -292,24 +292,25 @@ getstring (size_t idx, sb *in, sb *acc)
 	{
 	  int nest = 0;
 	  idx++;
-	  while (idx < in->len
-		 && (in->ptr[idx] != '>' || nest))
+	  while (idx < in->len)
 	    {
-	      if (in->ptr[idx] == '!')
+	      if (in->ptr[idx] == '!' && idx + 1 < in->len)
+		idx++;
+	      else if (in->ptr[idx] == '>')
 		{
-		  idx++;
-		  sb_add_char (acc, in->ptr[idx++]);
+		  if (nest == 0)
+		    {
+		      idx++;
+		      break;
+		    }
+		  nest--;
 		}
-	      else
-		{
-		  if (in->ptr[idx] == '>')
-		    nest--;
-		  if (in->ptr[idx] == '<')
-		    nest++;
-		  sb_add_char (acc, in->ptr[idx++]);
-		}
+	      else if (in->ptr[idx] == '<')
+		nest++;
+
+	      sb_add_char (acc, in->ptr[idx]);
+	      idx++;
 	    }
-	  idx++;
 	}
       else if (in->ptr[idx] == '"' || in->ptr[idx] == '\'')
 	{
@@ -317,7 +318,6 @@ getstring (size_t idx, sb *in, sb *acc)
 	  int escaped = 0;
 
 	  idx++;
-
 	  while (idx < in->len)
 	    {
 	      if (in->ptr[idx - 1] == '\\')
@@ -325,32 +325,19 @@ getstring (size_t idx, sb *in, sb *acc)
 	      else
 		escaped = 0;
 
-	      if (flag_macro_alternate && in->ptr[idx] == '!')
+	      if (flag_macro_alternate
+		  && in->ptr[idx] == '!' && idx + 1 < in->len)
 		{
-		  idx ++;
-
-		  sb_add_char (acc, in->ptr[idx]);
-
-		  idx ++;
+		  idx++;
 		}
-	      else if (escaped && in->ptr[idx] == tchar)
+	      else if (!escaped && in->ptr[idx] == tchar)
 		{
-		  sb_add_char (acc, tchar);
-		  idx ++;
+		  idx++;
+		  if (idx >= in->len || in->ptr[idx] != tchar)
+		    break;
 		}
-	      else
-		{
-		  if (in->ptr[idx] == tchar)
-		    {
-		      idx ++;
-
-		      if (idx >= in->len || in->ptr[idx] != tchar)
-			break;
-		    }
-
-		  sb_add_char (acc, in->ptr[idx]);
-		  idx ++;
-		}
+	      sb_add_char (acc, in->ptr[idx]);
+	      idx++;
 	    }
 	}
     }
