@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 #   Copyright (C) 2003-2025 Free Software Foundation, Inc.
 
@@ -28,14 +28,15 @@ prefix=core
 
 # When the -a option is present, this may hold additional commands
 # to ensure gdb dumps all mappings (OS dependent).
-dump_all_cmds=()
+use_coredump_filter=
+dump_excluded_mappings=
 
-data_directory_opt=()
+data_directory=
 
 # The GDB binary to run.
 gdb_binary=
 
-function print_usage() {
+print_usage() {
     prefix="Usage: $0"
     padding=$(printf '%*s' ${#prefix})
 
@@ -44,11 +45,11 @@ function print_usage() {
     echo "$padding pid1 [pid2...pidN]"
 }
 
-function print_try_help() {
+print_try_help() {
     echo "Try '$0 --help' for more information."
 }
 
-function print_help() {
+print_help() {
     print_usage
     echo
     echo "Create a core file of a running program using GDB."
@@ -64,7 +65,7 @@ function print_help() {
     echo "                       to GDB."
 }
 
-function print_version() {
+print_version() {
     echo "GNU gcore (${PKGVERSION}) ${VERSION}"
 }
 
@@ -77,10 +78,10 @@ while getopts vhao:g:d:-: OPT; do
 
     case "$OPT" in
         a)
-            case "$OSTYPE" in
-                linux*)
-                    dump_all_cmds=("-ex" "set use-coredump-filter off")
-                    dump_all_cmds+=("-ex" "set dump-excluded-mappings on")
+            case "$(uname -s)" in
+                Linux)
+                    use_coredump_filter="off"
+                    dump_excluded_mappings="on"
                     ;;
             esac
             ;;
@@ -91,7 +92,7 @@ while getopts vhao:g:d:-: OPT; do
             gdb_binary="$OPTARG"
             ;;
         d)
-            data_directory_opt=("--data-directory" "$OPTARG")
+            data_directory="$OPTARG"
             ;;
 	h | help)
 	    print_help
@@ -174,10 +175,11 @@ do
 	# `</dev/null' to avoid touching interactive terminal if it is
 	# available but not accessible as GDB would get stopped on SIGTTIN.
 	"$gdb_binary" </dev/null \
-            "${data_directory_opt[@]}" \
+            ${data_directory:+--data-directory "$data_directory"} \
 	    --nx --batch --readnever -iex 'set debuginfod enabled off' \
 	    -ex "set pagination off" -ex "set height 0" -ex "set width 0" \
-	    "${dump_all_cmds[@]}" \
+            ${use_coredump_filter:+-ex "set use-coredump-filter ${use_coredump_filter}"} \
+	    ${dump_excluded_mappings:+-ex "set dump-excluded-mappings ${dump_excluded_mappings}"} \
 	    -ex "attach $pid" -ex "gcore $prefix.$pid" -ex detach -ex quit
 
 	if [ -r "$prefix.$pid" ] ; then
