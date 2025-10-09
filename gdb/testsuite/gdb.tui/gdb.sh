@@ -17,4 +17,4 @@
 
 printf "foo\033(%%5"
 
-read
+read -r _
