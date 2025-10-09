@@ -3546,11 +3546,10 @@ find_function_start_sal_1 (CORE_ADDR func_addr, obj_section *section,
 /* See symtab.h.  */
 
 symtab_and_line
-find_function_start_sal (CORE_ADDR func_addr, obj_section *section,
-			 bool funfirstline)
+find_function_start_sal (CORE_ADDR func_addr, bool funfirstline)
 {
   symtab_and_line sal
-    = find_function_start_sal_1 (func_addr, section, funfirstline);
+    = find_function_start_sal_1 (func_addr, nullptr, funfirstline);
 
   /* find_function_start_sal_1 does a linetable search, so it finds
      the symtab and linenumber, but not a symbol.  Fill in the

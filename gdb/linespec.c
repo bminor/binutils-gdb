@@ -4074,7 +4074,7 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
   symtab_and_line sal;
 
   if (is_function && want_start_sal)
-    sal = find_function_start_sal (func_addr, NULL, self->funfirstline);
+    sal = find_function_start_sal (func_addr, self->funfirstline);
   else
     {
       sal.objfile = objfile;

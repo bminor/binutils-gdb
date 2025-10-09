@@ -2527,10 +2527,8 @@ extern symtab *find_line_symtab (symtab *sym_tab, int line, int *index);
 extern symtab_and_line find_function_start_sal (symbol *sym, bool
 						funfirstline);
 
-/* Same, but start with a function address/section instead of a
-   symbol.  */
+/* Same, but start with a function address instead of a symbol.  */
 extern symtab_and_line find_function_start_sal (CORE_ADDR func_addr,
-						obj_section *section,
 						bool funfirstline);
 
 extern void skip_prologue_sal (struct symtab_and_line *);
