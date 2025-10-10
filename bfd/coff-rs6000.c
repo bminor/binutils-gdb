@@ -4352,7 +4352,7 @@ xcoff_generate_rtinit  (bfd *abfd, const char *init, const char *fini,
   filehdr.f_symptr = scnhdr.s_relptr + scnhdr.s_nreloc * RELSZ;
 
   bfd_coff_swap_filehdr_out (abfd, &filehdr, filehdr_ext);
-  bfd_coff_swap_scnhdr_out (abfd, &scnhdr, scnhdr_ext);
+  bfd_coff_swap_scnhdr_out (abfd, &scnhdr, scnhdr_ext, NULL);
   bool ret = true;
   if (bfd_write (filehdr_ext, FILHSZ, abfd) != FILHSZ
       || bfd_write (scnhdr_ext, SCNHSZ, abfd) != SCNHSZ

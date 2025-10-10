@@ -1432,7 +1432,7 @@ CODE_FRAGMENT
 .    (bfd *, void *, void *);
 .
 .  unsigned int (*_bfd_coff_swap_scnhdr_out)
-.    (bfd *, void *, void *);
+.    (bfd *, void *, void *, const asection *);
 .
 .  unsigned int _bfd_filhsz;
 .  unsigned int _bfd_aoutsz;
@@ -1560,8 +1560,8 @@ INTERNAL
 .#define bfd_coff_swap_sym_out(abfd, i,o) \
 .  ((coff_backend_info (abfd)->_bfd_coff_swap_sym_out) (abfd, i, o))
 .
-.#define bfd_coff_swap_scnhdr_out(abfd, i,o) \
-.  ((coff_backend_info (abfd)->_bfd_coff_swap_scnhdr_out) (abfd, i, o))
+.#define bfd_coff_swap_scnhdr_out(abfd, i, o, sec) \
+.  ((coff_backend_info (abfd)->_bfd_coff_swap_scnhdr_out) (abfd, i, o, sec))
 .
 .#define bfd_coff_swap_filehdr_out(abfd, i,o) \
 .  ((coff_backend_info (abfd)->_bfd_coff_swap_filehdr_out) (abfd, i, o))
@@ -3811,7 +3811,7 @@ coff_write_object_contents (bfd * abfd)
 	  SCNHDR buff;
 	  bfd_size_type amt = bfd_coff_scnhsz (abfd);
 
-	  if (bfd_coff_swap_scnhdr_out (abfd, &section, &buff) == 0
+	  if (bfd_coff_swap_scnhdr_out (abfd, &section, &buff, current) == 0
 	      || bfd_write (& buff, amt, abfd) != amt)
 	    return false;
 	}
@@ -3937,7 +3937,7 @@ coff_write_object_contents (bfd * abfd)
 	  scnhdr.s_nlnno = current->target_index;
 	  scnhdr.s_flags = STYP_OVRFLO;
 	  amt = bfd_coff_scnhsz (abfd);
-	  if (bfd_coff_swap_scnhdr_out (abfd, &scnhdr, &buff) == 0
+	  if (bfd_coff_swap_scnhdr_out (abfd, &scnhdr, &buff, current) == 0
 	      || bfd_write (& buff, amt, abfd) != amt)
 	    return false;
 	}

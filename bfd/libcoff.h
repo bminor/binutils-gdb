@@ -773,7 +773,7 @@ typedef struct
     (bfd *, void *, void *);
 
   unsigned int (*_bfd_coff_swap_scnhdr_out)
-    (bfd *, void *, void *);
+    (bfd *, void *, void *, const asection *);
 
   unsigned int _bfd_filhsz;
   unsigned int _bfd_aoutsz;
@@ -899,8 +899,8 @@ typedef struct
 #define bfd_coff_swap_sym_out(abfd, i,o) \
   ((coff_backend_info (abfd)->_bfd_coff_swap_sym_out) (abfd, i, o))
 
-#define bfd_coff_swap_scnhdr_out(abfd, i,o) \
-  ((coff_backend_info (abfd)->_bfd_coff_swap_scnhdr_out) (abfd, i, o))
+#define bfd_coff_swap_scnhdr_out(abfd, i, o, sec) \
+  ((coff_backend_info (abfd)->_bfd_coff_swap_scnhdr_out) (abfd, i, o, sec))
 
 #define bfd_coff_swap_filehdr_out(abfd, i,o) \
   ((coff_backend_info (abfd)->_bfd_coff_swap_filehdr_out) (abfd, i, o))

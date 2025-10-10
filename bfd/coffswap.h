@@ -775,7 +775,8 @@ coff_swap_scnhdr_in (bfd * abfd, void * ext, void * in)
 
 ATTRIBUTE_UNUSED
 static unsigned int
-coff_swap_scnhdr_out (bfd * abfd, void * in, void * out)
+coff_swap_scnhdr_out (bfd * abfd, void * in, void * out,
+		      const asection *section ATTRIBUTE_UNUSED)
 {
   struct internal_scnhdr *scnhdr_int = (struct internal_scnhdr *) in;
   SCNHDR *scnhdr_ext = (SCNHDR *) out;

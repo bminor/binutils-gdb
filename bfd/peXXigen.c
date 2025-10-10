@@ -919,7 +919,8 @@ _bfd_XX_only_swap_filehdr_out (bfd * abfd, void * in, void * out)
 }
 
 unsigned int
-_bfd_XXi_swap_scnhdr_out (bfd * abfd, void * in, void * out)
+_bfd_XXi_swap_scnhdr_out (bfd * abfd, void * in, void * out,
+			  const asection *section ATTRIBUTE_UNUSED)
 {
   struct internal_scnhdr *scnhdr_int = (struct internal_scnhdr *) in;
   SCNHDR *scnhdr_ext = (SCNHDR *) out;

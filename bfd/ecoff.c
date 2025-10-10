@@ -2517,7 +2517,7 @@ _bfd_ecoff_write_object_contents (bfd *abfd)
       section.s_flags = ecoff_sec_to_styp_flags (current->name,
 						 current->flags);
 
-      if (bfd_coff_swap_scnhdr_out (abfd, (void *) &section, buff) == 0
+      if (bfd_coff_swap_scnhdr_out (abfd, (void *) &section, buff, current) == 0
 	  || bfd_write (buff, scnhsz, abfd) != scnhsz)
 	goto error_return;
 

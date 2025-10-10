@@ -61,7 +61,7 @@ static bool go32exe_copy_private_bfd_data (bfd *, bfd *);
 /* Defined in coff-go32.c.  */
 bool _bfd_go32_mkobject (bfd *);
 void _bfd_go32_swap_scnhdr_in (bfd *, void *, void *);
-unsigned int _bfd_go32_swap_scnhdr_out (bfd *, void *, void *);
+unsigned int _bfd_go32_swap_scnhdr_out (bfd *, void *, void *, const asection *);
 
 #define COFF_CHECK_FORMAT go32exe_check_format
 #define COFF_WRITE_CONTENTS go32exe_write_object_contents
