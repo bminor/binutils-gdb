@@ -465,7 +465,7 @@ changequote([,])dnl
     powerpc*-*-aix* | rs6000-*-aix*)
 	od_vectors="$od_vectors objdump_private_desc_xcoff"
 	;;
-    *-*-pe* | *-*-cygwin* | *-*-mingw*)
+    *-*-pe* | *-*-cygwin* | *-*-mingw* | *-*-interix*)
 	 od_vectors="$od_vectors objdump_private_desc_pe"
 	 ;;
     *-*-darwin*)
