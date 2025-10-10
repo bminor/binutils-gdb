@@ -1125,7 +1125,8 @@ _bfd_merged_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED, asection **psec,
 	  /* xgettext:c-format */
 	  (_("%pB: access beyond end of merged section (%" PRId64 ")"),
 	   sec->owner, (int64_t) offset);
-      return secinfo->first_str ? sec->size : 0;
+      *psec = sec = secinfo->reprsec;
+      return sec->size;
     }
 
   if (secinfo->fast_state != 2)
