@@ -251,6 +251,7 @@ static const autofilter_entry_type autofilter_symbollist_i386[] =
 #define PE_ARCH_arm	 4
 #define PE_ARCH_arm_wince 5
 #define PE_ARCH_aarch64  6
+#define PE_ARCH_mcore	 7
 
 /* Don't make it constant as underscore mode gets possibly overriden
    by target or -(no-)leading-underscore option.  */
@@ -305,7 +306,6 @@ static pe_details_type pe_detail_list[] =
     true,
     autofilter_symbollist_i386
   },
-#endif
   {
     "pei-shl",
     "pe-shl",
@@ -314,6 +314,26 @@ static pe_details_type pe_detail_list[] =
     PE_ARCH_sh,
     bfd_arch_sh,
     true,
+    autofilter_symbollist_generic
+  },
+  {
+    "pei-mcore-little",
+    "pe-mcore-little",
+    7 /* IMAGE_REL_MCORE_RVA */,
+    ~0, 0, ~0, /* none */
+    PE_ARCH_mcore,
+    bfd_arch_mcore,
+    false,
+    autofilter_symbollist_generic
+  },
+  {
+    "pei-mcore-big",
+    "pe-mcore-big",
+    7 /* IMAGE_REL_MCORE_RVA */,
+    ~0, 0, ~0, /* none */
+    PE_ARCH_mcore,
+    bfd_arch_mcore,
+    false,
     autofilter_symbollist_generic
   },
   {
@@ -347,6 +367,7 @@ static pe_details_type pe_detail_list[] =
     false,
     autofilter_symbollist_generic
   },
+#endif
   {
     "pei-aarch64-little",
     "pe-aarch64-little",
