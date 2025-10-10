@@ -3602,6 +3602,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
     case BFD_RELOC_32:
     case BFD_RELOC_32_PCREL:
+#if defined (OBJ_COFF) && defined (TE_PE)
+    case BFD_RELOC_RVA:
+#endif
       apply_full_field_fix (fixP, buf, val, 4);
       break;
 
