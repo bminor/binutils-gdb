@@ -4111,6 +4111,13 @@ want_disp32 (const insn_template *t)
 		 || t->opcode_modifier.size == SIZE32));
 }
 
+static INLINE bool is_padlock (const insn_template *t)
+{
+  /* (Ab)use the PrefixRepe attribute of PadLock insns as long as no
+     others use it.  */
+  return t->opcode_modifier.prefixok == PrefixRepe;
+}
+
 static int
 intel_float_operand (const char *mnemonic)
 {
@@ -7414,9 +7421,7 @@ i386_assemble (char *line)
   if ((is_any_vex_encoding (&i.tm) && i.tm.opcode_space != SPACE_MAP4)
       || i.tm.operand_types[i.imm_operands].bitfield.class >= RegMMX
       || i.tm.operand_types[i.imm_operands + 1].bitfield.class >= RegMMX
-      /* (Ab)use the PrefixRepe attribute of PadLock insns as long as no
-	 others use it.  */
-      || i.tm.opcode_modifier.prefixok == PrefixRepe)
+      || is_padlock(&i.tm))
     {
       /* Check for data size prefix on VEX/XOP/EVEX encoded, SIMD, and
 	 PadLock insns.  */
@@ -12185,10 +12190,7 @@ add_branch_prefix_frag_p (const struct last_insn *last_insn)
   if (!align_branch_power
       || !align_branch_prefix_size
       || now_seg == absolute_section
-      || is_cpu (&i.tm, CpuPadLock)
-      || is_cpu (&i.tm, CpuPadLockRNG2)
-      || is_cpu (&i.tm, CpuPadLockPHE2)
-      || is_cpu (&i.tm, CpuPadLockXMODX)
+      || is_padlock (&i.tm)
       || !cpu_arch_flags.bitfield.cpui386)
     return 0;
 
@@ -12567,10 +12569,7 @@ output_insn (const struct last_insn *last_insn)
 	      add_prefix (0xf2);
 	      break;
 	    case PREFIX_0XF3:
-	      if ((!is_cpu (&i.tm, CpuPadLock)
-		   && !is_cpu (&i.tm, CpuPadLockRNG2)
-		   && !is_cpu (&i.tm, CpuPadLockPHE2)
-		   && !is_cpu (&i.tm, CpuPadLockXMODX))
+	      if (!is_padlock (&i.tm)
 		  || (i.prefix[REP_PREFIX] != 0xf3))
 		add_prefix (0xf3);
 	      break;
