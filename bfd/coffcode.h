@@ -6057,6 +6057,13 @@ static const bfd_coff_backend_data bigobj_swap_table =
 #define coff_bfd_define_start_stop	    bfd_generic_define_start_stop
 #endif
 
+#ifdef COFF_WITH_PE
+#define PE_EXTRA_S_FLAGS (SEC_CODE | SEC_DATA | SEC_READONLY | SEC_LINK_ONCE \
+			  | SEC_LINK_DUPLICATES)
+#else
+#define PE_EXTRA_S_FLAGS 0
+#endif
+
 #define CREATE_BIG_COFF_TARGET_VEC(VAR, NAME, EXTRA_O_FLAGS, EXTRA_S_FLAGS, UNDER, ALTERNATIVE, SWAP_TABLE)	\
 const bfd_target VAR =							\
 {									\
@@ -6068,7 +6075,8 @@ const bfd_target VAR =							\
   (HAS_RELOC | EXEC_P | HAS_LINENO | HAS_DEBUG |			\
    HAS_SYMS | HAS_LOCALS | WP_TEXT | EXTRA_O_FLAGS),			\
   /* section flags */							\
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | EXTRA_S_FLAGS),\
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | EXTRA_S_FLAGS  \
+   | PE_EXTRA_S_FLAGS),                                                 \
   UNDER,			/* Leading symbol underscore.  */	\
   '/',				/* AR_pad_char.  */			\
   15,				/* AR_max_namelen.  */			\
@@ -6130,7 +6138,8 @@ const bfd_target VAR =							\
   (HAS_RELOC | EXEC_P | HAS_LINENO | HAS_DEBUG |			\
    HAS_SYMS | HAS_LOCALS | WP_TEXT | EXTRA_O_FLAGS),			\
   /* section flags */							\
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | EXTRA_S_FLAGS),\
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | EXTRA_S_FLAGS  \
+   | PE_EXTRA_S_FLAGS),                                                 \
   UNDER,			/* Leading symbol underscore.  */	\
   '/',				/* AR_pad_char.  */			\
   15,				/* AR_max_namelen.  */			\
@@ -6192,7 +6201,8 @@ const bfd_target VAR =							\
   (HAS_RELOC | EXEC_P | HAS_LINENO | HAS_DEBUG |			\
    HAS_SYMS | HAS_LOCALS | WP_TEXT | EXTRA_O_FLAGS),			\
 	/* section flags */						\
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | EXTRA_S_FLAGS),\
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | EXTRA_S_FLAGS  \
+   | PE_EXTRA_S_FLAGS),                                                 \
   UNDER,			/* Leading symbol underscore.  */	\
   '/',				/* AR_pad_char.  */			\
   15,				/* AR_max_namelen.  */			\
