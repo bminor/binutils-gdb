@@ -561,26 +561,18 @@ make_function_type (struct type *type, struct type **typeptr)
   return ntype;
 }
 
-/* Given a type TYPE, return a type of functions that return that type.
-   May need to construct such a type if this is the first use.  */
+/* See gdbtypes.h.  */
 
 struct type *
-lookup_function_type (struct type *type)
+create_function_type (type_allocator &alloc,
+		     struct type *return_type,
+		     int nparams,
+		     struct type **param_types)
 {
-  return make_function_type (type, (struct type **) 0);
-}
-
-/* Given a type TYPE and argument types, return the appropriate
-   function type.  If the final type in PARAM_TYPES is NULL, make a
-   varargs function.  */
-
-struct type *
-lookup_function_type_with_arguments (struct type *type,
-				     int nparams,
-				     struct type **param_types)
-{
-  struct type *fn = make_function_type (type, (struct type **) 0);
+  struct type *fn = alloc.new_type ();
   int i;
+
+  make_function_type (return_type, &fn);
 
   if (nparams > 0)
     {
@@ -606,6 +598,26 @@ lookup_function_type_with_arguments (struct type *type,
     fn->field (i).set_type (param_types[i]);
 
   return fn;
+}
+
+/* See gdbtypes.h.  */
+
+struct type *
+lookup_function_type (struct type *return_type)
+{
+  type_allocator alloc (return_type);
+  return create_function_type (alloc, return_type, 0, nullptr);
+}
+
+/* See gdbtypes.h.  */
+
+struct type *
+lookup_function_type_with_arguments (struct type *return_type,
+				     int nparams,
+				     struct type **param_types)
+{
+  type_allocator alloc (return_type);
+  return create_function_type (alloc, return_type, nparams, param_types);
 }
 
 /* Identify address space identifier by name -- return a

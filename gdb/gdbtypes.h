@@ -2528,11 +2528,25 @@ extern struct type *lookup_pointer_type (struct type *);
 
 extern struct type *make_function_type (struct type *, struct type **);
 
-extern struct type *lookup_function_type (struct type *);
+/* Given a return type and argument types, create new function type.
+   If the final type in PARAM_TYPES is NULL, create a varargs function.
+   New type is allocated using ALLOC.  */
+extern struct type *create_function_type (type_allocator &alloc,
+					  struct type *return_type,
+					  int nparams,
+					  struct type **param_types);
 
-extern struct type *lookup_function_type_with_arguments (struct type *,
-							 int,
-							 struct type **);
+/* Like create_function_type, but allocate the new function type at
+   the same obstack as RETURN_TYPE and with unspecified number of
+   parameters and their types.  */
+extern struct type *lookup_function_type (struct type *return_type);
+
+/* Like create_function_type, but allocate the new function type at
+   the same obstack as RETURN_TYPE.  */
+extern struct type *lookup_function_type_with_arguments
+					(struct type *return_type,
+					 int nparams,
+					 struct type **param_types);
 
 /* Create a range type using ALLOC.
 
