@@ -38,6 +38,8 @@ run_dump_test "section-exclude"
 
 run_dump_test "set"
 
+run_dump_test "reloc"
+
 if { [istarget "aarch64-*-*"] || [istarget "arm*-*-*"] || [istarget "i*86-*-*"]
     || [istarget "x86_64-*-*"] } then {
   run_dump_test "cv_comp"

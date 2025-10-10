@@ -920,7 +920,7 @@ _bfd_XX_only_swap_filehdr_out (bfd * abfd, void * in, void * out)
 
 unsigned int
 _bfd_XXi_swap_scnhdr_out (bfd * abfd, void * in, void * out,
-			  const asection *section ATTRIBUTE_UNUSED)
+			  const asection *section)
 {
   struct internal_scnhdr *scnhdr_int = (struct internal_scnhdr *) in;
   SCNHDR *scnhdr_ext = (SCNHDR *) out;
@@ -989,9 +989,8 @@ _bfd_XXi_swap_scnhdr_out (bfd * abfd, void * in, void * out,
        sections (.idata, .data, .bss, .CRT) must have IMAGE_SCN_MEM_WRITE set
        (this is especially important when dealing with the .idata section since
        the addresses for routines from .dlls must be overwritten).  If .reloc
-       section data is ever generated, we must add IMAGE_SCN_MEM_DISCARDABLE
-       (0x02000000).  Also, the resource data should also be read and
-       writable.  */
+       section data is ever generated, we generally need to add
+       IMAGE_SCN_MEM_DISCARDABLE (0x02000000).  */
 
     /* FIXME: Alignment is also encoded in this field, at least on
        ARM-WINCE.  Although - how do we get the original alignment field
@@ -1037,10 +1036,16 @@ _bfd_XXi_swap_scnhdr_out (bfd * abfd, void * in, void * out,
 	 p++)
       if (memcmp (scnhdr_int->s_name, p->section_name, SCNNMLEN) == 0)
 	{
+	  unsigned long must_have = p->must_have;
+
 	  if (memcmp (scnhdr_int->s_name, ".text", sizeof ".text")
 	      || (bfd_get_file_flags (abfd) & WP_TEXT))
 	    scnhdr_int->s_flags &= ~IMAGE_SCN_MEM_WRITE;
-	  scnhdr_int->s_flags |= p->must_have;
+	  /* Avoid forcing in the discardable flag if the section itself is
+	     allocated.  */
+	  if (section->flags & SEC_ALLOC)
+	    must_have &= ~IMAGE_SCN_MEM_DISCARDABLE;
+	  scnhdr_int->s_flags |= must_have;
 	  break;
 	}
 

@@ -137,6 +137,9 @@ run_dump_test "orphan"
 run_dump_test "orphan_nu"
 
 run_dump_test "reloc"
+run_dump_test "reloc2a"
+run_dump_test "reloc2b"
+run_dump_test "reloc2c"
 
 run_dump_test "weakdef-1"
 
