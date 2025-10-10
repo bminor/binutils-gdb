@@ -663,13 +663,14 @@ enum
   BNDPrefixOk,
 #define PrefixNone		0
 #define PrefixRep		1
-#define PrefixHLERelease	2 /* Okay with an XRELEASE (0xf3) prefix. */
-#define PrefixNoTrack		3
+#define PrefixRepe		2
+#define PrefixHLERelease	3 /* Okay with an XRELEASE (0xf3) prefix. */
+#define PrefixNoTrack		4
   /* Prefixes implying "LOCK okay" must come after Lock. All others have
      to come before.  */
-#define PrefixLock		4
-#define PrefixHLELock		5 /* Okay with a LOCK prefix.  */
-#define PrefixHLEAny		6 /* Okay with or without a LOCK prefix.  */
+#define PrefixLock		5
+#define PrefixHLELock		6 /* Okay with a LOCK prefix.  */
+#define PrefixHLEAny		7 /* Okay with or without a LOCK prefix.  */
   PrefixOk,
   /* opcode is a prefix */
   IsPrefix,

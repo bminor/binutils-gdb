@@ -114,6 +114,7 @@ if [gas_32_check] then {
     run_dump_test "quoted2"
     run_dump_test "unary"
     run_dump_test "padlock"
+    run_list_test "padlock-bad"
     run_dump_test "gmi"
     run_dump_test "padlockrng2"
     run_dump_test "padlockphe2"

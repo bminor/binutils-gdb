@@ -4899,11 +4899,6 @@ check_hle (void)
   switch (i.tm.opcode_modifier.prefixok)
     {
     default:
-      abort ();
-    case PrefixLock:
-    case PrefixNone:
-    case PrefixNoTrack:
-    case PrefixRep:
       as_bad (_("invalid instruction `%s' after `%s'"),
 	      insn_name (&i.tm), i.hle_prefix);
       return 0;
@@ -7372,7 +7367,9 @@ i386_assemble (char *line)
       return;
 
   /* Check if REP prefix is OK.  */
-  if (i.rep_prefix && i.tm.opcode_modifier.prefixok != PrefixRep)
+  if (i.rep_prefix && i.tm.opcode_modifier.prefixok != PrefixRep
+      && (i.prefix[REP_PREFIX] != REPE_PREFIX_OPCODE
+	  || i.tm.opcode_modifier.prefixok != PrefixRepe))
     {
       as_bad (_("invalid instruction `%s' after `%s'"),
 		insn_name (&i.tm), i.rep_prefix);
@@ -7416,9 +7413,13 @@ i386_assemble (char *line)
 
   if ((is_any_vex_encoding (&i.tm) && i.tm.opcode_space != SPACE_MAP4)
       || i.tm.operand_types[i.imm_operands].bitfield.class >= RegMMX
-      || i.tm.operand_types[i.imm_operands + 1].bitfield.class >= RegMMX)
+      || i.tm.operand_types[i.imm_operands + 1].bitfield.class >= RegMMX
+      /* (Ab)use the PrefixRepe attribute of PadLock insns as long as no
+	 others use it.  */
+      || i.tm.opcode_modifier.prefixok == PrefixRepe)
     {
-      /* Check for data size prefix on VEX/XOP/EVEX encoded and SIMD insns.  */
+      /* Check for data size prefix on VEX/XOP/EVEX encoded, SIMD, and
+	 PadLock insns.  */
       if (i.prefix[DATA_PREFIX])
 	{
 	  as_bad (_("data size prefix invalid with `%s'"), insn_name (&i.tm));

@@ -103,6 +103,7 @@
 #define IsStringEsOp1 IsString=IS_STRING_ES_OP1
 
 #define RepPrefixOk      PrefixOk=PrefixRep
+#define RepePrefixOk     PrefixOk=PrefixRepe
 #define LockPrefixOk     PrefixOk=PrefixLock
 #define HLEPrefixAny     PrefixOk=PrefixHLEAny
 #define HLEPrefixLock    PrefixOk=PrefixHLELock
@@ -2122,24 +2123,24 @@ popcnt, 0xf30fb8, POPCNT, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|
 popcnt, 0x88, POPCNT&APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4|NF, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 // VIA PadLock extensions.
-xstore-rng, 0xfa7c0, PadLock, NoSuf|RepPrefixOk, {}
-xcrypt-ecb, 0xf30fa7c8, PadLock, NoSuf|RepPrefixOk, {}
-xcrypt-cbc, 0xf30fa7d0, PadLock, NoSuf|RepPrefixOk, {}
-xcrypt-ctr, 0xf30fa7d8, PadLock, NoSuf|RepPrefixOk, {}
-xcrypt-cfb, 0xf30fa7e0, PadLock, NoSuf|RepPrefixOk, {}
-xcrypt-ofb, 0xf30fa7e8, PadLock, NoSuf|RepPrefixOk, {}
-montmul, 0xf30fa6c0, PadLock, NoSuf|RepPrefixOk, {}
-xsha1, 0xf30fa6c8, PadLock, NoSuf|RepPrefixOk, {}
-xsha256, 0xf30fa6d0, PadLock, NoSuf|RepPrefixOk, {}
+xstore-rng, 0xfa7c0, PadLock, NoSuf|RepePrefixOk, {}
+xcrypt-ecb, 0xf30fa7c8, PadLock, NoSuf|RepePrefixOk, {}
+xcrypt-cbc, 0xf30fa7d0, PadLock, NoSuf|RepePrefixOk, {}
+xcrypt-ctr, 0xf30fa7d8, PadLock, NoSuf|RepePrefixOk, {}
+xcrypt-cfb, 0xf30fa7e0, PadLock, NoSuf|RepePrefixOk, {}
+xcrypt-ofb, 0xf30fa7e8, PadLock, NoSuf|RepePrefixOk, {}
+montmul, 0xf30fa6c0, PadLock, NoSuf|RepePrefixOk, {}
+xsha1, 0xf30fa6c8, PadLock, NoSuf|RepePrefixOk, {}
+xsha256, 0xf30fa6d0, PadLock, NoSuf|RepePrefixOk, {}
 // Aliases without hyphens.
-xstorerng, 0xfa7c0, PadLock, NoSuf|RepPrefixOk, {}
-xcryptecb, 0xf30fa7c8, PadLock, NoSuf|RepPrefixOk, {}
-xcryptcbc, 0xf30fa7d0, PadLock, NoSuf|RepPrefixOk, {}
-xcryptctr, 0xf30fa7d8, PadLock, NoSuf|RepPrefixOk, {}
-xcryptcfb, 0xf30fa7e0, PadLock, NoSuf|RepPrefixOk, {}
-xcryptofb, 0xf30fa7e8, PadLock, NoSuf|RepPrefixOk, {}
+xstorerng, 0xfa7c0, PadLock, NoSuf|RepePrefixOk, {}
+xcryptecb, 0xf30fa7c8, PadLock, NoSuf|RepePrefixOk, {}
+xcryptcbc, 0xf30fa7d0, PadLock, NoSuf|RepePrefixOk, {}
+xcryptctr, 0xf30fa7d8, PadLock, NoSuf|RepePrefixOk, {}
+xcryptcfb, 0xf30fa7e0, PadLock, NoSuf|RepePrefixOk, {}
+xcryptofb, 0xf30fa7e8, PadLock, NoSuf|RepePrefixOk, {}
 // Alias for xstore-rng.
-xstore, 0xfa7c0, PadLock, NoSuf|RepPrefixOk, {}
+xstore, 0xfa7c0, PadLock, NoSuf|RepePrefixOk, {}
 
 // Zhaoxin GMI SM2 instruction
 sm2, 0xf20fa6c0, GMISM2, NoSuf, {}
@@ -2149,15 +2150,15 @@ sm3, 0xf30fa6e8, GMICCS, NoSuf, {}
 sm4, 0xf30fa7f0, GMICCS, NoSuf, {}
 
 // Zhaoxin PadLock RNG2 instruction
-xrng2, 0xf30fa7f8, PadLockRNG2, NoSuf|RepPrefixOk, {}
+xrng2, 0xf30fa7f8, PadLockRNG2, NoSuf|RepePrefixOk, {}
 
 // Zhaoxin PadLock PHE2 instructions
-xsha384, 0xf30fa6d8, PadLockPHE2, NoSuf|RepPrefixOk, {}
-xsha512, 0xf30fa6e0, PadLockPHE2, NoSuf|RepPrefixOk, {}
+xsha384, 0xf30fa6d8, PadLockPHE2, NoSuf|RepePrefixOk, {}
+xsha512, 0xf30fa6e0, PadLockPHE2, NoSuf|RepePrefixOk, {}
 
 // Zhaoxin PadLock XMODX instructions
-montmul2, 0xf30fa6f0, PadLockXMODX, NoSuf|RepPrefixOk, {}
-xmodexp, 0xf30fa6f8, PadLockXMODX, NoSuf|RepPrefixOk, {}
+montmul2, 0xf30fa6f0, PadLockXMODX, NoSuf|RepePrefixOk, {}
+xmodexp, 0xf30fa6f8, PadLockXMODX, NoSuf|RepePrefixOk, {}
 
 // Multy-precision Add Carry, rdseed instructions.
 <adx:pfx, c:66, o:f3>
