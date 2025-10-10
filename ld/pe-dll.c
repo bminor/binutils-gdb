@@ -1081,6 +1081,7 @@ build_filler_bfd (bool include_edata)
       edata_s = bfd_make_section_old_way (filler_bfd, ".edata");
       if (edata_s == NULL
 	  || !bfd_set_section_flags (edata_s, (SEC_HAS_CONTENTS
+					       | SEC_DATA
 					       | SEC_ALLOC
 					       | SEC_LOAD
 					       | SEC_KEEP
@@ -1095,7 +1096,7 @@ build_filler_bfd (bool include_edata)
   reloc_s = bfd_make_section_old_way (filler_bfd, ".reloc");
   if (reloc_s == NULL
       || !bfd_set_section_flags (reloc_s, (SEC_HAS_CONTENTS
-					   | SEC_ALLOC
+					   | SEC_DATA
 					   | SEC_LOAD
 					   | SEC_KEEP
 					   | SEC_IN_MEMORY)))
