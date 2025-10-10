@@ -1003,7 +1003,7 @@ _bfd_XXi_swap_scnhdr_out (bfd * abfd, void * in, void * out,
     }
     pe_required_section_flags;
 
-    pe_required_section_flags known_sections [] =
+    static const pe_required_section_flags known_sections [] =
       {
 	{ ".CRT",   IMAGE_SCN_MEM_READ | IMAGE_SCN_CNT_INITIALIZED_DATA },
 	{ ".arch",  IMAGE_SCN_MEM_READ | IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN_ALIGN_8BYTES },
@@ -1021,7 +1021,7 @@ _bfd_XXi_swap_scnhdr_out (bfd * abfd, void * in, void * out,
 	{ ".xdata", IMAGE_SCN_MEM_READ | IMAGE_SCN_CNT_INITIALIZED_DATA },
       };
 
-    pe_required_section_flags * p;
+    const pe_required_section_flags * p;
 
     /* We have defaulted to adding the IMAGE_SCN_MEM_WRITE flag, but now
        we know exactly what this specific section wants so we remove it
