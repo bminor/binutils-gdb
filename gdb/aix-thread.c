@@ -854,14 +854,14 @@ sync_threadlists (pid_t pid)
        thread exits and gets into a PST_UNKNOWN state.  So this thread
        will not run in the above for loop.  Therefore the below for loop
        is to manually delete such threads.  */
-    for (struct thread_info *it : all_threads_safe ())
+    for (thread_info &it : all_threads_safe ())
       {
-	aix_thread_info *priv = get_aix_thread_info (it);
+	aix_thread_info *priv = get_aix_thread_info (&it);
 	if (in_queue_threads.count (priv->pdtid) == 0
-		&& in_thread_list (proc_target, it->ptid)
-		&& pid == it->ptid.pid ())
+		&& in_thread_list (proc_target, it.ptid)
+		&& pid == it.ptid.pid ())
 	  {
-	    delete_thread (it);
+	    delete_thread (&it);
 	    data->exited_threads.insert (priv->pdtid);
 	  }
       }
