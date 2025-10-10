@@ -1347,6 +1347,11 @@ styp_to_sec_flags (bfd *abfd,
 	  || startswith (name, ".sdata")))
     sec_flags |= SEC_SMALL_DATA;
 
+  /* As there is no internal representation of the "discardable" flag,
+     reflect it by keeping SEC_ALLOC clear.  */
+  if (internal_s->s_flags & IMAGE_SCN_MEM_DISCARDABLE)
+    sec_flags &= ~SEC_ALLOC;
+
 #if defined (COFF_LONG_SECTION_NAMES) && defined (COFF_SUPPORT_GNU_LINKONCE)
   /* As a GNU extension, if the name begins with .gnu.linkonce, we
      only link a single copy of the section.  This is used to support
