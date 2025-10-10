@@ -3738,8 +3738,11 @@ pe_exe_build_sections (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   pe_dll_id_target (bfd_get_target (abfd));
   pe_output_file_set_long_section_names (abfd);
-  build_filler_bfd (0);
-  pe_output_file_set_long_section_names (filler_bfd);
+  if (pe_dll_enable_reloc_section)
+    {
+      build_filler_bfd (false);
+      pe_output_file_set_long_section_names (filler_bfd);
+    }
 }
 
 void
