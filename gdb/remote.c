@@ -1640,30 +1640,44 @@ enum class remote_exec_source
   UNSET_VALUE,
 };
 
-/* Data held per program-space to represent the remote exec-file path.  The
-   first item in the pair is the exec-file path, this is set either by the
-   user with 'set remote exec-file', or automatically by GDB when
-   connecting to a remote target.
+/* Data held per program space for each remote target.  */
 
-   The second item in the pair is an enum flag that indicates where the
-   path value came from, or, when the path is the empty string, what this
-   actually means.  See show_remote_exec_file for details.  */
-using remote_exec_file_info = std::pair<std::string, remote_exec_source>;
+struct remote_per_progspace
+{
+  /* The following represents the remote exec-file filename.  This value
+     can be set directly by the user with 'set remote exec-file', but can
+     also be set automatically when connecting to a remote target.  We
+     track both the filename value, and also the source of this value, as
+     where the value came from determines when the filename value can be
+     auto-generated from other sources, or when a remote target can
+     override the current value.  See show_remote_exec_file for details.  */
+  struct exec_info
+  {
+    /* The 'remote exec-file' filename value.  This will start empty.  This
+       is set either with the 'set remote exec-file' command, or
+       automatically by GDB when connecting to a remote target.  */
+    std::string filename;
+
+    /* An enum that indicates where FILENAME came from, or what an empty
+       VALUE means.  */
+    remote_exec_source source = remote_exec_source::DEFAULT_VALUE;
+  } exec_info;
+};
 
 /* Per-program-space data key.  */
-static const registry<program_space>::key<remote_exec_file_info>
+static const registry<program_space>::key<remote_per_progspace>
   remote_pspace_data;
 
-/* Retrieve the remote_exec_file_info object for PSPACE.  If no such object
-   yet exists then create a new one using the default constructor.  */
+/* Retrieve the remote_per_progspace object for PSPACE.  If no such object
+   yet exists then create a new one using the default constructor and
+   return that.  */
 
-static remote_exec_file_info &
-get_remote_exec_file_info (program_space *pspace)
+static remote_per_progspace &
+get_remote_progspace_info (program_space *pspace)
 {
-  remote_exec_file_info *info = remote_pspace_data.get (pspace);
+  remote_per_progspace *info = remote_pspace_data.get (pspace);
   if (info == nullptr)
-    info = remote_pspace_data.emplace (pspace, "",
-				       remote_exec_source::DEFAULT_VALUE);
+    info = remote_pspace_data.emplace (pspace);
   gdb_assert (info != nullptr);
   return *info;
 }
@@ -1999,21 +2013,22 @@ remote_target::get_remote_state ()
 static const std::string &
 get_remote_exec_file ()
 {
-  const remote_exec_file_info &info
-    = get_remote_exec_file_info (current_program_space);
-  return info.first;
+  const remote_per_progspace &info
+    = get_remote_progspace_info (current_program_space);
+  return info.exec_info.filename;
 }
 
-/* Set the remote exec file for PSPACE.  */
+/* Set the remote exec file for PSPACE.  FILENAME is the new exec file
+   value, and SOURCE describes where FILENAME came from.  */
 
 static void
 set_pspace_remote_exec_file (struct program_space *pspace,
 			     const std::string &filename,
 			     remote_exec_source source)
 {
-  remote_exec_file_info &info = get_remote_exec_file_info (pspace);
-  info.first = filename;
-  info.second = source;
+  remote_per_progspace &info = get_remote_progspace_info (pspace);
+  info.exec_info.filename = filename;
+  info.exec_info.source = source;
 }
 
 /* The "set remote exec-file" callback.  */
@@ -2031,19 +2046,19 @@ static void
 show_remote_exec_file (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *cmd, const char *value)
 {
-  const remote_exec_file_info &info
-    = get_remote_exec_file_info (current_program_space);
+  const struct remote_per_progspace::exec_info &info
+    = get_remote_progspace_info (current_program_space).exec_info;
 
-  if (info.second == remote_exec_source::DEFAULT_VALUE)
+  if (info.source == remote_exec_source::DEFAULT_VALUE)
     gdb_printf (file, _("The remote exec-file is unset, the default "
 			"remote executable will be used.\n"));
-  else if (info.second == remote_exec_source::UNSET_VALUE)
+  else if (info.source == remote_exec_source::UNSET_VALUE)
     gdb_printf (file, _("The remote exec-file is unset, the remote has "
 			"no default executable set.\n"));
   else
     gdb_printf (file, _("The remote exec-file is \"%ps\".\n"),
 		styled_string (file_name_style.style (),
-			       info.first.c_str ()));
+			       info.filename.c_str ()));
 }
 
 static int
@@ -5481,27 +5496,27 @@ remote_target::start_remote_1 (int from_tty, int extended_p)
       current_inferior ()->set_args (exec_and_args.args ());
       if (!exec_and_args.exec ().empty ())
 	{
-	  remote_exec_file_info &info
-	    = get_remote_exec_file_info (current_program_space);
-	  if (info.second == remote_exec_source::VALUE_FROM_GDB
-	      && info.first != exec_and_args.exec ())
+	  struct remote_per_progspace::exec_info &info
+	    = get_remote_progspace_info (current_program_space).exec_info;
+	  if (info.source == remote_exec_source::VALUE_FROM_GDB
+	      && info.filename != exec_and_args.exec ())
 	    warning (_("updating 'remote exec-file' to '%ps' to match "
 		       "remote target"),
 		     styled_string (file_name_style.style (),
 				    exec_and_args.exec ().c_str ()));
-	  info.first = exec_and_args.exec ();
-	  info.second = remote_exec_source::VALUE_FROM_REMOTE;
+	  info.filename = exec_and_args.exec ();
+	  info.source = remote_exec_source::VALUE_FROM_REMOTE;
 	}
     }
   else if (exec_and_args.is_unset ())
     {
-      remote_exec_file_info &info
-	= get_remote_exec_file_info (current_program_space);
-      if (info.second == remote_exec_source::DEFAULT_VALUE
-	  || info.second == remote_exec_source::VALUE_FROM_REMOTE)
+      struct remote_per_progspace::exec_info &info
+	= get_remote_progspace_info (current_program_space).exec_info;
+      if (info.source == remote_exec_source::DEFAULT_VALUE
+	  || info.source == remote_exec_source::VALUE_FROM_REMOTE)
 	{
-	  info.first.clear ();
-	  info.second = remote_exec_source::UNSET_VALUE;
+	  info.filename.clear ();
+	  info.source = remote_exec_source::UNSET_VALUE;
 	}
     }
 
@@ -6490,12 +6505,12 @@ remote_unpush_target (remote_target *target)
 	 assumption is that the user is, or will, be debugging the same
 	 executable again in the future, so clearing an existing value
 	 would be unhelpful.  */
-      remote_exec_file_info &exec_info
-	= get_remote_exec_file_info (inf->pspace);
-      if (exec_info.second == remote_exec_source::UNSET_VALUE)
+      struct remote_per_progspace::exec_info &exec_info
+	= get_remote_progspace_info (inf->pspace).exec_info;
+      if (exec_info.source == remote_exec_source::UNSET_VALUE)
 	{
-	  gdb_assert (exec_info.first.empty ());
-	  exec_info.second = remote_exec_source::DEFAULT_VALUE;
+	  gdb_assert (exec_info.filename.empty ());
+	  exec_info.source = remote_exec_source::DEFAULT_VALUE;
 	}
 
       inf->pop_all_targets_at_and_above (process_stratum);
