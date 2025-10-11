@@ -257,7 +257,7 @@ cannot_register_not (struct gdbarch *gdbarch, int regnum)
    cooked or raw.  */
 
 void
-legacy_virtual_frame_pointer (struct gdbarch *gdbarch, 
+legacy_virtual_frame_pointer (struct gdbarch *gdbarch,
 			      CORE_ADDR pc,
 			      int *frame_regnum,
 			      LONGEST *frame_offset)
@@ -692,7 +692,7 @@ void
 initialize_current_architecture (void)
 {
   arches = gdbarch_printable_names ();
-  
+
   /* Find a default architecture.  */
   if (default_bfd_arch == NULL)
     {
@@ -1538,7 +1538,7 @@ core_file_exec_context::environment () const
 INIT_GDB_FILE (gdbarch_utils)
 {
   add_setshow_enum_cmd ("endian", class_support,
-			endian_enum, &set_endian_string, 
+			endian_enum, &set_endian_string,
 			_("Set endianness of target."),
 			_("Show endianness of target."),
 			NULL, set_endian, show_endian,

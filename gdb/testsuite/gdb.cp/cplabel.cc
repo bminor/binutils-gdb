@@ -75,6 +75,6 @@ int
 main (void)
 {
   foo f;
-  return f.baz (foo::bar () + 3); 
+  return f.baz (foo::bar () + 3);
 }
 

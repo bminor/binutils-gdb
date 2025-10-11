@@ -30,7 +30,7 @@ struct str
 
 int __attribute__ ((noinline))
 foo (int arg)
-{  
+{
   return arg;
 }
 

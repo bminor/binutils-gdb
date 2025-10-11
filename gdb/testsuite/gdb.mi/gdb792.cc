@@ -28,11 +28,11 @@ class A
 		};
 		int x;
 		char buffer[10];
-	
+
 	protected:
 		int y;
 		B b;
-	
+
 	private:
 		float z;
 };

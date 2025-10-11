@@ -59,7 +59,7 @@ range_check;
 extern enum array_ordering
   {
     array_row_major, array_column_major
-  } 
+  }
 array_ordering;
 
 
@@ -703,7 +703,7 @@ extern const char lang_frame_mismatch_warn[];
 
 extern bool warn_frame_lang_mismatch;
 
-/* language_mode == 
+/* language_mode ==
    language_mode_auto:   current_language automatically set upon selection
    of scope (e.g. stack frame)
    language_mode_manual: current_language set only by user.  */
@@ -756,7 +756,7 @@ struct symbol *
 					    const char *name);
 
 
-/* These macros define the behavior of the expression 
+/* These macros define the behavior of the expression
    evaluator.  */
 
 /* Should we range check values against the domain of their type?  */

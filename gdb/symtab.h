@@ -286,7 +286,7 @@ class lookup_name_info final
   }
 
   /* A wrapper for ::split_name (see split-name.h) that splits this
-     name, and that handles any language-specific peculiarities.  */  
+     name, and that handles any language-specific peculiarities.  */
   std::vector<std::string_view> split_name (language lang) const
   {
     if (lang == language_ada)
@@ -922,7 +922,7 @@ constexpr domain_search_flags SEARCH_ALL_DOMAINS
 extern std::string domain_name (domain_search_flags);
 
 /* Convert a symbol domain to search flags.  */
-static inline domain_search_flags 
+static inline domain_search_flags
 to_search_flags (domain_enum domain)
 {
   return domain_search_flags (domain_search_flag (1 << domain));
@@ -1046,7 +1046,7 @@ enum location_class
      The linker might even remove the minimal symbol if the global
      symbol is never referenced, in which case the symbol remains
      unresolved.
-     
+
      GDB would normally find the symbol in the minimal symbol table if it will
      not find it in the full symbol table.  But a reference to an external
      symbol in a local block shadowing other definition requires full symbol
@@ -2053,7 +2053,7 @@ compunit_epilogue_unwind_valid (struct compunit_symtab *cust)
 
 
 /* The virtual function table is now an array of structures which have the
-   form { int16 offset, delta; void *pfn; }. 
+   form { int16 offset, delta; void *pfn; }.
 
    In normal virtual function tables, OFFSET is unused.
    DELTA is the amount which is added to the apparent object's base
@@ -2233,18 +2233,18 @@ extern struct symbol *find_symbol_at_address (CORE_ADDR);
    function (exclusive).  If the optional parameter BLOCK is non-null,
    then set *BLOCK to the address of the block corresponding to the
    function symbol, if such a symbol could be found during the lookup;
-   nullptr is used as a return value for *BLOCK if no block is found. 
+   nullptr is used as a return value for *BLOCK if no block is found.
    This function either succeeds or fails (not halfway succeeds).  If
    it succeeds, it sets *NAME, *ADDRESS, and *ENDADDR to real
    information and returns true.  If it fails, it sets *NAME, *ADDRESS
    and *ENDADDR to zero and returns false.
-   
+
    If the function in question occupies non-contiguous ranges,
    *ADDRESS and *ENDADDR are (subject to the conditions noted above) set
    to the start and end of the range in which PC is found.  Thus
    *ADDRESS <= PC < *ENDADDR with no intervening gaps (in which ranges
    from other functions might be found).
-   
+
    This property allows find_pc_partial_function to be used (as it had
    been prior to the introduction of non-contiguous range support) by
    various tdep files for finding a start address and limit address
@@ -2255,9 +2255,9 @@ extern struct symbol *find_symbol_at_address (CORE_ADDR);
    argument can be made that prologue analysis ought to be performed
    starting from the entry pc even when PC is within some other range.
    This might suggest that *ADDRESS and *ENDADDR ought to be set to the
-   limits of the entry pc range, but that will cause the 
+   limits of the entry pc range, but that will cause the
    *ADDRESS <= PC < *ENDADDR condition to be violated; many of the
-   callers of find_pc_partial_function expect this condition to hold. 
+   callers of find_pc_partial_function expect this condition to hold.
 
    Callers which require the start and/or end addresses for the range
    containing the entry pc should instead call

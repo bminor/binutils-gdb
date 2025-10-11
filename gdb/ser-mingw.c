@@ -432,13 +432,13 @@ select_thread_wait (struct ser_console_state *state)
      the started state, or that we exit this thread.  */
   wait_events[0] = state->start_select;
   wait_events[1] = state->exit_select;
-  if (WaitForMultipleObjects (2, wait_events, FALSE, INFINITE) 
+  if (WaitForMultipleObjects (2, wait_events, FALSE, INFINITE)
       != WAIT_OBJECT_0)
     /* Either the EXIT_SELECT event was signaled (requesting that the
        thread exit) or an error has occurred.  In either case, we exit
        the thread.  */
     ExitThread (0);
-  
+
   /* We are now in the started state.  */
   SetEvent (state->have_started);
 }
@@ -1058,7 +1058,7 @@ gdb_pipe (int pdes[2])
 struct net_windows_state
 {
   struct ser_console_state base;
-  
+
   HANDLE sock_event;
 };
 

@@ -297,7 +297,7 @@ set_parameter_value (parmpy_object *self, PyObject *value)
 	{
 	  cmp = PyObject_IsTrue (value);
 	  if (cmp < 0 )
-	    return -1;	
+	    return -1;
 	  if (cmp == 1)
 	    self->value.autoboolval = AUTO_BOOLEAN_TRUE;
 	  else

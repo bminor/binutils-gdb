@@ -47,12 +47,12 @@
    code can handle both.  */
 
 /* The M7 processor supports an Application Data Integrity (ADI) feature
-   that detects invalid data accesses.  When software allocates memory and 
-   enables ADI on the allocated memory, it chooses a 4-bit version number, 
-   sets the version in the upper 4 bits of the 64-bit pointer to that data, 
-   and stores the 4-bit version in every cacheline of the object.  Hardware 
-   saves the latter in spare bits in the cache and memory hierarchy. On each 
-   load and store, the processor compares the upper 4 VA (virtual address) bits 
+   that detects invalid data accesses.  When software allocates memory and
+   enables ADI on the allocated memory, it chooses a 4-bit version number,
+   sets the version in the upper 4 bits of the 64-bit pointer to that data,
+   and stores the 4-bit version in every cacheline of the object.  Hardware
+   saves the latter in spare bits in the cache and memory hierarchy. On each
+   load and store, the processor compares the upper 4 VA (virtual address) bits
    to the cacheline's version. If there is a mismatch, the processor generates
    a version mismatch trap which can be either precise or disrupting.
    The trap is an error condition which the kernel delivers to the process
@@ -132,7 +132,7 @@ static std::forward_list<sparc64_adi_info> adi_proc_list;
 
 /* Get ADI info for process PID, creating one if it doesn't exist.  */
 
-static sparc64_adi_info * 
+static sparc64_adi_info *
 get_adi_info_proc (pid_t pid)
 {
   auto found = std::find_if (adi_proc_list.begin (), adi_proc_list.end (),
@@ -152,7 +152,7 @@ get_adi_info_proc (pid_t pid)
     }
 }
 
-static adi_stat_t 
+static adi_stat_t
 get_adi_info (pid_t pid)
 {
   sparc64_adi_info *proc;
@@ -176,7 +176,7 @@ sparc64_forget_process (pid_t pid)
     {
       if ((*it).pid == pid)
 	{
-	  if ((*it).stat.tag_fd > 0) 
+	  if ((*it).stat.tag_fd > 0)
 	    target_fileio_close ((*it).stat.tag_fd, &target_errno);
 	  adi_proc_list.erase_after (pit);
 	  break;
@@ -245,7 +245,7 @@ adi_normalize_address (CORE_ADDR addr)
   return addr;
 }
 
-/* Align a normalized address - a VA with bit 59 sign extended into 
+/* Align a normalized address - a VA with bit 59 sign extended into
    ADI bits.  */
 
 static CORE_ADDR
@@ -287,7 +287,7 @@ adi_tag_fd (void)
   char cl_name[MAX_PROC_NAME_SIZE];
   snprintf (cl_name, sizeof(cl_name), "/proc/%ld/adi/tags", (long) pid);
   fileio_error target_errno;
-  proc->stat.tag_fd = target_fileio_open (NULL, cl_name, O_RDWR|O_EXCL, 
+  proc->stat.tag_fd = target_fileio_open (NULL, cl_name, O_RDWR|O_EXCL,
 					  false, 0, &target_errno);
   return proc->stat.tag_fd;
 }

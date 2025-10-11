@@ -37,7 +37,7 @@ vec_func (vector unsigned int a_vec_f,
           vector float h_vec_f,
           vector float i_vec_f,
           vector unsigned int l_vec_f,
-          vector int m_vec_f) 
+          vector int m_vec_f)
 {
   vector int n_vec;
 
@@ -45,7 +45,7 @@ vec_func (vector unsigned int a_vec_f,
   int x,y,z;
   x = 2;
   y = 3;
- 
+
   z = x + y;
   z++;
   n_vec = __ev_and(a_vec_f, b_vec_f);

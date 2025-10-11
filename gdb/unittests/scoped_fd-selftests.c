@@ -74,7 +74,7 @@ test_to_file ()
   SELF_CHECK (sfd.get () >= 0);
 
   unlink (filename);
-  
+
   gdb_file_up file = sfd.to_file ("rw");
   SELF_CHECK (file != nullptr);
   SELF_CHECK (sfd.get () == -1);

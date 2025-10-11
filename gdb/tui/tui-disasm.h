@@ -1,7 +1,7 @@
 /* Disassembly display.
 
    Copyright (C) 1998-2025 Free Software Foundation, Inc.
-   
+
    Contributed by Hewlett-Packard Company.
 
    This file is part of GDB.

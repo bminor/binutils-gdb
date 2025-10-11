@@ -186,7 +186,7 @@ microblaze_alloc_frame_cache (void)
    of "real" code (i.e., the end of the prologue).  */
 
 static CORE_ADDR
-microblaze_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, 
+microblaze_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 			     CORE_ADDR current_pc,
 			     struct microblaze_frame_cache *cache)
 {
@@ -232,8 +232,8 @@ microblaze_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
      current pc, or the end of the function, whichever is first.  */
   stop = (current_pc < func_end ? current_pc : func_end);
 
-  microblaze_debug ("Scanning prologue: name=%s, func_addr=%s, stop=%s\n", 
-		    name, paddress (gdbarch, func_addr), 
+  microblaze_debug ("Scanning prologue: name=%s, func_addr=%s, stop=%s\n",
+		    name, paddress (gdbarch, func_addr),
 		    paddress (gdbarch, stop));
 
   for (addr = func_addr; addr < stop; addr += INST_WORD_SIZE)
@@ -243,7 +243,7 @@ microblaze_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
       microblaze_debug ("%s %08lx\n", paddress (gdbarch, pc), insn);
 
       /* This code is very sensitive to what functions are present in the
-	 prologue.  It assumes that the (addi, addik, swi, sw) can be the 
+	 prologue.  It assumes that the (addi, addik, swi, sw) can be the
 	 only instructions in the prologue.  */
       if (IS_UPDATE_SP(op, rd, ra))
 	{
@@ -291,7 +291,7 @@ microblaze_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 	}
       else if (IS_SETUP_FP(op, ra, rb))
 	{
-	  /* We have a frame pointer.  Note the register which is 
+	  /* We have a frame pointer.  Note the register which is
 	     acting as the frame pointer.  */
 	  cache->fp_regnum = rd;
 	  microblaze_debug ("Found a frame pointer: r%d\n", cache->fp_regnum);
@@ -406,7 +406,7 @@ microblaze_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 	start_pc = sal.end;
     }
 
-  ostart_pc = microblaze_analyze_prologue (gdbarch, func_start, 0xffffffffUL, 
+  ostart_pc = microblaze_analyze_prologue (gdbarch, func_start, 0xffffffffUL,
 					   &cache);
 
   if (ostart_pc > start_pc)
@@ -784,8 +784,8 @@ microblaze_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_type (gdbarch, microblaze_register_type);
 
   /* Register numbers of various important registers.  */
-  set_gdbarch_sp_regnum (gdbarch, MICROBLAZE_SP_REGNUM); 
-  set_gdbarch_pc_regnum (gdbarch, MICROBLAZE_PC_REGNUM); 
+  set_gdbarch_sp_regnum (gdbarch, MICROBLAZE_SP_REGNUM);
+  set_gdbarch_pc_regnum (gdbarch, MICROBLAZE_PC_REGNUM);
 
   /* Map Dwarf2 registers to GDB registers.  */
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, microblaze_dwarf2_reg_to_regnum);

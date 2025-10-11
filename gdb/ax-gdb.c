@@ -303,7 +303,7 @@ gen_traced_pop (struct agent_expr *ax, struct axs_value *value)
 	   larger than will fit in a stack, so just mark it for
 	   collection and be done with it.  */
 	ax_reg_mask (ax, value->u.reg);
-       
+
 	/* But if the register points to a string, assume the value
 	   will fit on the stack and push it anyway.  */
 	if (string_trace)
@@ -1424,7 +1424,7 @@ gen_struct_ref (struct agent_expr *ax, struct axs_value *value,
 
   /* Search through fields and base classes recursively.  */
   found = gen_struct_ref_recursive (ax, value, field, 0, type);
-  
+
   if (!found)
     error (_("Couldn't find member named `%s' in struct/union/class `%s'"),
 	   field, type->name ());
@@ -1457,7 +1457,7 @@ gen_static_field (struct agent_expr *ax, struct axs_value *value,
       if (sym)
 	{
 	  gen_var_ref (ax, value, sym);
-  
+
 	  /* Don't error if the value was optimized out, we may be
 	     scanning all static fields and just want to pass over this
 	     and continue with the rest.  */
@@ -1500,7 +1500,7 @@ gen_struct_elt_for_reference (struct agent_expr *ax, struct axs_value *value,
 	  if (t->field (i).is_packed ())
 	    error (_("pointers to bitfield members not allowed"));
 
-	  /* FIXME we need a way to do "want_address" equivalent */	  
+	  /* FIXME we need a way to do "want_address" equivalent */
 
 	  error (_("Cannot reference non-static field \"%s\""), fieldname);
 	}
@@ -1522,7 +1522,7 @@ gen_namespace_elt (struct agent_expr *ax, struct axs_value *value,
   int found = gen_maybe_namespace_elt (ax, value, curtype, name);
 
   if (!found)
-    error (_("No symbol \"%s\" in namespace \"%s\"."), 
+    error (_("No symbol \"%s\" in namespace \"%s\"."),
 	   name, curtype->name ());
 
   return found;
@@ -2177,7 +2177,7 @@ gen_expr_binop_rest (struct expression *exp,
       gen_binop (ax, value, value1, value2,
 		 aop_bit_or, aop_bit_or, 0, "bitwise or");
       break;
-      
+
     case BINOP_BITWISE_XOR:
       gen_binop (ax, value, value1, value2,
 		 aop_bit_xor, aop_bit_xor, 0, "bitwise exclusive-or");
@@ -2592,7 +2592,7 @@ maint_agent_printf_command (const char *cmdrest, int from_tty)
 
   if (*cmdrest++ != '"')
     error (_("Bad format string, non-terminated '\"'."));
-  
+
   cmdrest = skip_spaces (cmdrest);
 
   if (*cmdrest != ',' && *cmdrest != 0)

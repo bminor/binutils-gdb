@@ -160,7 +160,7 @@ enum explicit_location_match_type
    will quote it.  That's why we switch between
    current_language->word_break_characters () and
    gdb_completer_command_word_break_characters.  I'm not sure when
-   we need this behavior (perhaps for funky characters in C++ 
+   we need this behavior (perhaps for funky characters in C++
    symbols?).  */
 
 /* Variables which are necessary for fancy command line editing.  */
@@ -212,7 +212,7 @@ static const char gdb_completer_file_name_quote_characters[] = "'\"";
    symbols but don't want to complete on anything else either.  */
 
 void
-noop_completer (struct cmd_list_element *ignore, 
+noop_completer (struct cmd_list_element *ignore,
 		completion_tracker &tracker,
 		const char *text, const char *prefix)
 {
@@ -2164,7 +2164,7 @@ complete_line (completion_tracker &tracker,
 /* Complete on command names.  Used by "help".  */
 
 void
-command_completer (struct cmd_list_element *ignore, 
+command_completer (struct cmd_list_element *ignore,
 		   completion_tracker &tracker,
 		   const char *text, const char *word)
 {

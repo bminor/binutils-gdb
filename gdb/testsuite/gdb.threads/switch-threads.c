@@ -40,5 +40,5 @@ int main()
   pthread_create (&thr, NULL, thread_func, NULL);
   pthread_join (thr, &ret);
   for (x = 0; x < 10; x++)
-    foo ();  
+    foo ();
 }

@@ -20,7 +20,7 @@
 
 #include "exclfwd.h"
 
-struct a 
+struct a
 {
   int x, y;
 };

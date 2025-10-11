@@ -192,7 +192,7 @@ main ()
       }
     close (fd);
   }
-  
+
   /* Compute an initial chunk size.  The math is dodgy but it works
      for the moment.  Perhaps there's a constant around somewhere.
      Limit this to max_core_size bytes - no point in trying to

@@ -24,7 +24,7 @@ public:
 
   bool operator== (const Foo &other) { return foo_value == other.foo_value; }
 };
- 
+
 void Foo::set_foo (int value)
 {
   foo_value = value;

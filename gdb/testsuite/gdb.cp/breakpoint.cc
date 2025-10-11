@@ -1,5 +1,5 @@
 /* Code to go along with tests in breakpoint.exp.
-   
+
    Copyright 2004-2025 Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -55,7 +55,7 @@ int main ()
   C1::Nested c1;
 
   c1.foo ();
-  
+
   C1 c2 (2), c3 (3);
   c2.foo ();
   c2.bar ();

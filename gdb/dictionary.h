@@ -1,5 +1,5 @@
 /* Routines for name->symbol lookups in GDB.
-   
+
    Copyright (C) 2003-2025 Free Software Foundation, Inc.
 
    Contributed by David Carlton <carlton@bactrian.org> and by Kealia,
@@ -151,7 +151,7 @@ extern struct symbol *
 /* Advance MITERATOR to point at the next symbol in MDICT whose
    search_name () is NAME, as tested using COMPARE (see
    dict_iter_match_first), or NULL if there are no more such symbols.
-   Don't call this if you've previously received NULL from 
+   Don't call this if you've previously received NULL from
    mdict_iterator_match_first or mdict_iterator_match_next on this
    iteration.  And don't call it unless MITERATOR was created by a
    previous call to mdict_iter_match_first with the same NAME and COMPARE.  */

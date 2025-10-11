@@ -38,7 +38,7 @@ void open_shlib ()
   void (*foo) (int);
 
   handle = dlopen (SHLIB_NAME, RTLD_LAZY);
-  
+
   if (!handle)
     {
 #ifdef __WIN32__

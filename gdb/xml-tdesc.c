@@ -578,7 +578,7 @@ static const struct gdb_xml_element feature_children[] = {
     tdesc_start_union, NULL },
   { "flags", flags_attributes, struct_union_children,
     GDB_XML_EF_OPTIONAL | GDB_XML_EF_REPEATABLE,
-    tdesc_start_flags, NULL },    
+    tdesc_start_flags, NULL },
   { "enum", enum_attributes, enum_children,
     GDB_XML_EF_OPTIONAL | GDB_XML_EF_REPEATABLE,
     tdesc_start_enum, NULL },

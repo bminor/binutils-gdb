@@ -612,7 +612,7 @@ tui_redisplay_readline (void)
     prompt = "";
   else
     prompt = rl_display_prompt;
-  
+
   int c_pos = -1;
   int c_line = -1;
   WINDOW *w = tui_cmd_win ()->handle.get ();
@@ -626,7 +626,7 @@ tui_redisplay_readline (void)
   for (int in = 0; in <= rl_end; in++)
     {
       unsigned char c;
-      
+
       if (in == rl_point)
 	{
 	  getyx (w, c_line, c_pos);

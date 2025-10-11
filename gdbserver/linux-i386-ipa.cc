@@ -131,7 +131,7 @@ initialize_fast_tracepoint_trampoline_buffer (void)
   FILE *f = fopen ("/proc/sys/vm/mmap_min_addr", "r");
 
   if (!f)
-    {    
+    {
       snprintf (buf, sizeof (buf), "mmap_min_addr open failed: %s",
 		safe_strerror (errno));
       set_trampoline_buffer_space (0, 0, buf);
@@ -140,9 +140,9 @@ initialize_fast_tracepoint_trampoline_buffer (void)
 
   if (fgets (buf, IPA_BUFSIZ, f))
     sscanf (buf, "%llu", &mmap_min_addr);
-      
+
   fclose (f);
-      
+
   buffer_size = buffer_end - mmap_min_addr;
 
   if (buffer_size >= min_buffer_size)

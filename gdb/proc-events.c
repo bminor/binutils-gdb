@@ -563,9 +563,9 @@ proc_prettyprint_syscalls (sysset_t *sysset, int verbose)
    other signals second, with signals in each block ordered by their
    numerical values on a typical POSIX platform.  */
 
-static struct trans signal_table[] = 
+static struct trans signal_table[] =
 {
-  { 0,      "<no signal>", "no signal" }, 
+  { 0,      "<no signal>", "no signal" },
 
   /* SIGINT, SIGILL, SIGABRT, SIGFPE, SIGSEGV and SIGTERM
      are ANSI-standard signals and are always available.  */
@@ -717,7 +717,7 @@ proc_prettyfprint_fault (FILE *file, int faultno, int verbose)
 	return;
       }
 
-  fprintf (file, "Unknown hardware fault %d%c", 
+  fprintf (file, "Unknown hardware fault %d%c",
 	   faultno, verbose ? '\n' : ' ');
 }
 

@@ -88,10 +88,10 @@ int main()
      compile it:
 
      warning: the address of 'int foo1_7(bool)' will always evaluate as true
-     
+
   foo1_7 (&foo1_7);		// pointer to boolean
   */
-     
+
   foo1_7 (&A::member_);		// pointer to member to boolean
   foo1_7 (a);			// pointer to boolean
   foo1_7 (fp);			// float to boolean

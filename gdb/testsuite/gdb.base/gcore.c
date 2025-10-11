@@ -27,7 +27,7 @@ static int static_array[4] = {5, 6, 7, 8};
 static int un_initialized_array[4];
 static char *heap_string;
 
-void 
+void
 terminal_func ()
 {
   return;

@@ -207,7 +207,7 @@ enum
   RL78_NUM_PSEUDO_REGS = RL78_NUM_TOTAL_REGS - RL78_NUM_REGS
 };
 
-#define RL78_SP_ADDR 0xffff8 
+#define RL78_SP_ADDR 0xffff8
 
 /* Architecture specific data.  */
 
@@ -306,7 +306,7 @@ rl78_register_type (struct gdbarch *gdbarch, int reg_nr)
 	       && reg_nr <= RL78_BANK3_R7_REGNUM))
     return tdep->rl78_int8;
   else if (reg_nr == RL78_SP_REGNUM
-	   || (RL78_BANK0_RP0_PTR_REGNUM <= reg_nr 
+	   || (RL78_BANK0_RP0_PTR_REGNUM <= reg_nr
 	       && reg_nr <= RL78_BANK3_RP3_PTR_REGNUM))
     return tdep->rl78_data_pointer;
   else
@@ -951,7 +951,7 @@ rl78_analyze_prologue (CORE_ADDR start_pc,
 	       && opc.op[0].reg == RL78_Reg_SP
 	       && opc.op[1].type == RL78_Operand_Register)
 	{
-	  int rsrc = (bank * RL78_REGS_PER_BANK) 
+	  int rsrc = (bank * RL78_REGS_PER_BANK)
 	    + 2 * (opc.op[1].reg - RL78_Reg_AX);
 
 	  reg[RL78_SP_REGNUM] = pv_add_constant (reg[RL78_SP_REGNUM], -1);

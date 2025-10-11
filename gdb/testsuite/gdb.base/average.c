@@ -9,7 +9,7 @@ extern int sum(int *, int, int);
 
 static int my_list[num] = {3,4,2,0,2,1,8,3,6,7};
 
-void print_average(int *list, int low, int high) 
+void print_average(int *list, int low, int high)
     {
         int total = 0, num_elements = 0, average = 0;
         total = sum(list, low, high);

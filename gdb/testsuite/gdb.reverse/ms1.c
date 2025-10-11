@@ -19,7 +19,7 @@
  * Aux function for machine state test.
  */
 
-void 
+void
 hide (int x)
 {
 }

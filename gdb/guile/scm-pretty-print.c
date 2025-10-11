@@ -73,7 +73,7 @@ struct pretty_printer_smob
   /* A procedure called to look up the printer for the given value.
      The procedure is called as (lookup gdb:pretty-printer value).
      The result should either be a gdb:pretty-printer object that will print
-     the value, or #f if the value is not recognized.  */     
+     the value, or #f if the value is not recognized.  */
   SCM lookup;
 
   /* Note: Attaching subprinters to this smob is left to Scheme.  */
@@ -572,7 +572,7 @@ ppscm_pretty_print_one_value (SCM printer, struct value **out_value,
 /* Return the display hint for PRINTER as a Scheme object.
    The caller is responsible for ensuring PRINTER is a
    <gdb:pretty-printer-worker> object.  */
- 
+
 static SCM
 ppscm_get_display_hint_scm (SCM printer)
 {
@@ -678,7 +678,7 @@ ppscm_print_string_repr (SCM printer, enum display_hint hint,
       if (hint == HINT_STRING)
 	{
 	  struct type *type = builtin_type (gdbarch)->builtin_char;
-	  
+
 	  language->printstr (stream, type, (gdb_byte *) string.get (),
 			      length, NULL, 0, options);
 	}

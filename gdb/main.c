@@ -758,7 +758,7 @@ captured_main_1 (struct captured_main_args *context)
 
   /* There will always be an interpreter.  Either the one passed into
      this captured main, or one specified by the user at start up, or
-     the console.  Initialize the interpreter to the one requested by 
+     the console.  Initialize the interpreter to the one requested by
      the application.  */
   interpreter_p = context->interpreter_p;
 

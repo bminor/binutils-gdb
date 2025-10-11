@@ -32,7 +32,7 @@ worker (void *arg)
 {
   int id = *(int *)arg;
   int i = 0;
-  
+
   /* When gdb is running, it sets hidden breakpoints in the thread
      library.  The signals caused by these hidden breakpoints can
      cause system calls such as 'sleep' to return early.  Pay attention

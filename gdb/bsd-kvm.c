@@ -381,7 +381,7 @@ bsd_kvm_add_target (int (*supply_pcb)(struct regcache *, struct pcb *))
   bsd_kvm_supply_pcb = supply_pcb;
 
   add_target (bsd_kvm_target_info, bsd_kvm_target_open);
-  
+
   add_prefix_cmd ("kvm", class_obscure, bsd_kvm_cmd, _("\
 Generic command for manipulating the kernel memory interface."),
 		  &bsd_kvm_cmdlist, 0, &cmdlist);

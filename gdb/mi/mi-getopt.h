@@ -61,8 +61,8 @@ extern int mi_getopt_allow_unknown (const char *prefix, int argc,
 /* mi_valid_noargs determines if ARGC/ARGV are a valid set of
    parameters to satisfy an MI function that is not supposed to
    receive any arguments.
-   
-   An MI function that should not receive arguments can still be 
+
+   An MI function that should not receive arguments can still be
    passed parameters after the special option '--' such as below.
 
    Example: The MI function -exec-run takes no args.
@@ -70,7 +70,7 @@ extern int mi_getopt_allow_unknown (const char *prefix, int argc,
    See PR-783
 
    PREFIX is passed to mi_getopt for an error message.
-    
+
    This function Returns 1 if the parameter pair ARGC/ARGV are valid
    for an MI function that takes no arguments. Otherwise, it returns 0
    and the appropriate error message is displayed by mi_getopt.  */

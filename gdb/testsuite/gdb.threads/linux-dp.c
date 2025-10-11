@@ -69,7 +69,7 @@ shared_printf (char *format, ...)
   va_end (ap);
 }
 
-int 
+int
 shared_random ()
 {
   int result;
@@ -84,7 +84,7 @@ void
 my_usleep (long usecs)
 {
   struct timeval timeout;
-  
+
   timeout.tv_sec = usecs / 1000000;
   timeout.tv_usec = usecs % 1000000;
 
@@ -185,14 +185,14 @@ main (int argc, char **argv)
     philosophers = xmalloc (num_philosophers * sizeof (*philosophers));
 
     pthread_attr_init (&ta);
-    
+
     for (i = 0; i < num_philosophers; i++)
       {
 	numbers[i] = i;
 	/* linuxthreads.exp: create philosopher */
 	pthread_create (&philosophers[i], &ta, philosopher, &numbers[i]);
       }
-    
+
     pthread_attr_destroy (&ta);
   }
 

@@ -1,7 +1,7 @@
 /* Multi-process/thread control defs for GDB, the GNU debugger.
    Copyright (C) 1987-2025 Free Software Foundation, Inc.
    Contributed by Lynx Real-Time Systems, Inc.  Los Gatos, CA.
-   
+
 
    This file is part of GDB.
 
@@ -263,7 +263,7 @@ public:
   void set_running (bool running);
 
   ptid_t ptid;			/* "Actual process id";
-				    In fact, this may be overloaded with 
+				    In fact, this may be overloaded with
 				    kernel thread id, etc.  */
 
   /* Each thread has two GDB IDs.
@@ -627,7 +627,7 @@ extern void init_thread_list (void);
 
 /* Add a thread to the thread list, print a message
    that a new thread is found, and return the pointer to
-   the new thread.  Caller my use this pointer to 
+   the new thread.  Caller my use this pointer to
    initialize the private thread data.  */
 extern struct thread_info *add_thread (process_stratum_target *targ,
 				       ptid_t ptid);

@@ -63,7 +63,7 @@ create_function (void *arg)
   return NULL;
 }
 
-int 
+int
 main (int argc, char **argv)
 {
   pthread_attr_t attr;

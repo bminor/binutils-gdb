@@ -2008,7 +2008,7 @@ rust_parser::parse_path_expr ()
       struct type *type = rust_lookup_type (path.c_str ());
       if (type == nullptr)
 	error (_("Could not find type '%s'"), path.c_str ());
-      
+
       return parse_struct_expr (type);
     }
   else if (current_token == '(')

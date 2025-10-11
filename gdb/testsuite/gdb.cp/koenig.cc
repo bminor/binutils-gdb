@@ -293,7 +293,7 @@ main ()
 
   L::A::B::O labo;
   foo (labo);
-  
+
   M::A ma;
   foo(ma,'a');
   ma.foo('a');

@@ -96,7 +96,7 @@ struct next_fnfieldlist
   struct fn_fieldlist fn_fieldlist;
 };
 
-/* The routines that read and process a complete stabs for a C struct or 
+/* The routines that read and process a complete stabs for a C struct or
    C++ class pass lists of data member fields and lists of member function
    fields in an instance of a field_info structure, as defined below.
    This is part of some reorganization of low level C++ support and is
@@ -428,7 +428,7 @@ dbx_init_float_type (struct objfile *objfile, int bits)
   return type;
 }
 
-/* for all the stabs in a given stab vector, build appropriate types 
+/* for all the stabs in a given stab vector, build appropriate types
    and fix their symbols in given symbol vector.  */
 
 static void
@@ -442,7 +442,7 @@ patch_block_stabs (struct pending *symbols, struct pending_stabs *stabs,
 
   if (stabs)
     {
-      /* for all the stab entries, find their corresponding symbols and 
+      /* for all the stab entries, find their corresponding symbols and
 	 patch their types!  */
 
       for (ii = 0; ii < stabs->count; ++ii)
@@ -709,7 +709,7 @@ stabs_end_psymtab (struct objfile *objfile, psymtab_storage *partial_symtabs,
   return pst;
 }
 
-/* Set namestring based on nlist.  If the string table index is invalid, 
+/* Set namestring based on nlist.  If the string table index is invalid,
    give a fake name, and print a single error message per symbol file read,
    rather than abort the symbol reading or flood the user with messages.  */
 
@@ -726,7 +726,7 @@ set_namestring (struct objfile *objfile, const struct internal_nlist *nlist)
       complaint (_("bad string table offset in symbol %d"),
 		 symnum);
       namestring = "<bad string table offset>";
-    } 
+    }
   else
     namestring = (nlist->n_strx + key->ctx.file_string_table_offset
 		  + DBX_STRINGTAB (objfile));
@@ -1106,7 +1106,7 @@ record_minimal_symbol (minimal_symbol_reader &reader,
     case N_DATA:
       ms_type = mst_file_data;
 
-      /* Check for __DYNAMIC, which is used by Sun shared libraries. 
+      /* Check for __DYNAMIC, which is used by Sun shared libraries.
 	 Record it as global even if it's local, not global, so
 	 lookup_minimal_symbol can find it.  We don't check symbol_leading_char
 	 because for SunOS4 it always is '_'.  */
@@ -1535,7 +1535,7 @@ read_stabs_symtab_1 (minimal_symbol_reader &reader,
 		/* Save the directory name SOs locally, then save it into
 		   the psymtab when it's created below.  */
 		dirname_nso = namestring;
-		continue;		
+		continue;
 	      }
 
 	    /* Some other compilers (C++ ones in particular) emit useless
@@ -2212,7 +2212,7 @@ read_stabs_symtab_1 (minimal_symbol_reader &reader,
 }
 
 /* Scan and build partial symbols for a symbol file.
-   We have been initialized by a call to dbx_symfile_init, which 
+   We have been initialized by a call to dbx_symfile_init, which
    put all the relevant info into a "struct dbx_symfile_info",
    hung off the objfile structure.  */
 
@@ -2982,7 +2982,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 #define VISIBILITY_PUBLIC	'2'	/* Stabs character for public field */
 #define VISIBILITY_IGNORE	'9'	/* Optimized out or zero length */
 
-/* Structure for storing pointers to reference definitions for fast lookup 
+/* Structure for storing pointers to reference definitions for fast lookup
    during "process_later".  */
 
 struct ref_map
@@ -3015,7 +3015,7 @@ stabsread_clear_cache (void)
 }
 
 /* Create array of pointers mapping refids to symbols and stab strings.
-   Add pointers to reference definition symbols and/or their values as we 
+   Add pointers to reference definition symbols and/or their values as we
    find them, using their reference numbers as our index.
    These will be used later when we resolve references.  */
 void
@@ -3032,7 +3032,7 @@ ref_add (int refnum, struct symbol *sym, const char *stabs, CORE_ADDR value)
 
       ref_map = (struct ref_map *)
 	xrealloc (ref_map, REF_MAP_SIZE (ref_chunk + new_chunks));
-      memset (ref_map + ref_chunk * MAX_CHUNK_REFS, 0, 
+      memset (ref_map + ref_chunk * MAX_CHUNK_REFS, 0,
 	      new_chunks * REF_CHUNK_SIZE);
       ref_chunk += new_chunks;
     }
@@ -3075,7 +3075,7 @@ process_reference (const char **string)
   return refnum;
 }
 
-/* If STRING defines a reference, store away a pointer to the reference 
+/* If STRING defines a reference, store away a pointer to the reference
    definition for later use.  Return the reference number.  */
 
 int
@@ -3342,7 +3342,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 		    ind++;
 		    p += 2;
 		  }
-		else if (*p) 
+		else if (*p)
 		  {
 		    string_local[ind] = (gdb_byte) (*p);
 		    ind++;
@@ -3679,7 +3679,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	 will be stored in the VAR_DOMAIN).  If the symbol was indeed
 	 defined as 'Tt' then the STRUCT_DOMAIN symbol will be created
 	 elsewhere, so we don't need to take care of that.
-	 
+
 	 This is important to do, because of forward references:
 	 The cleanup of undefined types stored in undef_types only uses
 	 STRUCT_DOMAIN symbols to perform the replacement.  */
@@ -3791,7 +3791,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	p++;
 
       sym->set_type (read_type (&p, objfile));
- 
+
       /* For a nameless type, we don't want a create a symbol, thus we
 	 did not use `sym'.  Return without further processing.  */
       if (nameless)
@@ -5114,7 +5114,7 @@ read_member_functions (struct stab_field_info *fip, const char **pp,
 		      tmp_sublist = tmp_sublist->next;
 		      continue;
 		    }
-		  
+
 		  destr_fnlist->fn_fieldlist.fn_fields[i++]
 		    = tmp_sublist->fn_field;
 		  if (last_sublist)
@@ -5794,7 +5794,7 @@ attach_fields_to_type (struct stab_field_info *fip, struct type *type,
 
 /* Complain that the compiler has emitted more than one definition for the
    structure type TYPE.  */
-static void 
+static void
 complain_about_struct_wipeout (struct type *type)
 {
   const char *name = "";
@@ -5822,7 +5822,7 @@ complain_about_struct_wipeout (struct type *type)
 
 /* Set the length for all variants of a same main_type, which are
    connected in the closed chain.
-   
+
    This is something that needs to be done when a type is defined *after*
    some cross references to this type have already been read.  Consider
    for instance the following scenario where we have the following two
@@ -5868,7 +5868,7 @@ set_length_in_type_chain (struct type *type)
 
    OBJFILE points to the current objfile from which the stabs information is
    being read.  (Note that it is redundant in that TYPE also contains a pointer
-   to this same objfile, so it might be a good idea to eliminate it.  FIXME). 
+   to this same objfile, so it might be a good idea to eliminate it.  FIXME).
  */
 
 static struct type *
@@ -6824,7 +6824,7 @@ add_undefined_type_1 (struct type *type)
    scope?  */
 /* Add a type to the list of undefined types to be checked through
    once this file has been read in.
-   
+
    In practice, we actually maintain two such lists: The first list
    (UNDEF_TYPES) is used for types whose name has been provided, and
    concerns forward references (eg 'xs' or 'xu' forward references);
@@ -6889,7 +6889,7 @@ cleanup_undefined_types_1 (void)
        1. It is a typedef in the STRUCT domain;
        2. It has the same name, and same type code;
        3. The instance flags are identical.
-     
+
      It is important to check the instance flags, because we have seen
      examples where the debug info contained definitions such as:
 

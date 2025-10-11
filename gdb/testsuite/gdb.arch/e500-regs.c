@@ -14,13 +14,13 @@ vector_fun (vector int a, vector int b)
   c = __ev_and (a, b);
   return c;
 }
- 
+
 int
 main ()
 {
-  vector int y; 
-  vector int x; 
-  vector int z; 
+  vector int y;
+  vector int x;
+  vector int z;
   int a;
 
   /* This line may look unnecessary but we do need it, because we want to
@@ -31,7 +31,7 @@ main ()
   a = 9;
   x = (vector int) __ev_create_s32 (-2, -2);
   y = (vector int) __ev_create_s32 (1, 1);
-	
+
   z = vector_fun (x, y);
 
   return 0;

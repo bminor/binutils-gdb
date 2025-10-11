@@ -74,11 +74,11 @@ f77_get_dynamic_length_of_aggregate (struct type *type)
 
   /* Recursively go all the way down into a possibly multi-dimensional
      F77 array and get the bounds.  For simple arrays, this is pretty
-     easy but when the bounds are dynamic, we must be very careful 
-     to add up all the lengths correctly.  Not doing this right 
+     easy but when the bounds are dynamic, we must be very careful
+     to add up all the lengths correctly.  Not doing this right
      will lead to horrendous-looking arrays in parameter lists.
 
-     This function also works for strings which behave very 
+     This function also works for strings which behave very
      similarly to arrays.  */
 
   if (type->target_type ()->code () == TYPE_CODE_ARRAY
@@ -577,7 +577,7 @@ f_language::value_print_inner (struct value *val, struct ui_file *stream,
 	    }
 	 }
       gdb_printf (stream, " )");
-      break;     
+      break;
 
     case TYPE_CODE_BOOL:
       if (options->format || options->output_format)
@@ -646,7 +646,7 @@ info_common_command_for_block (const struct block *block, const char *comname,
 		      sym->print_name ());
 	else
 	  gdb_printf (_("Contents of blank COMMON block:\n"));
-	
+
 	for (index = 0; index < common->n_entries; index++)
 	  {
 	    struct value *val = NULL;
@@ -672,8 +672,8 @@ info_common_command_for_block (const struct block *block, const char *comname,
       }
 }
 
-/* This function is used to print out the values in a given COMMON 
-   block.  It will always use the most local common block of the 
+/* This function is used to print out the values in a given COMMON
+   block.  It will always use the most local common block of the
    given name.  */
 
 static void
@@ -683,14 +683,14 @@ info_common_command (const char *comname, int from_tty)
   const struct block *block;
   int values_printed = 0;
 
-  /* We have been told to display the contents of F77 COMMON 
-     block supposedly visible in this function.  Let us 
-     first make sure that it is visible and if so, let 
+  /* We have been told to display the contents of F77 COMMON
+     block supposedly visible in this function.  Let us
+     first make sure that it is visible and if so, let
      us display its contents.  */
 
   fi = get_selected_frame (_("No frame selected"));
 
-  /* The following is generally ripped off from stack.c's routine 
+  /* The following is generally ripped off from stack.c's routine
      print_frame_info().  */
 
   block = get_frame_block (fi, 0);

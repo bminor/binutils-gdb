@@ -27,7 +27,7 @@ struct regcache;
 
 typedef void (supply_regset_ftype) (const struct regset *, struct regcache *,
 				    int, const void *, size_t);
-typedef void (collect_regset_ftype) (const struct regset *, 
+typedef void (collect_regset_ftype) (const struct regset *,
 				     const struct regcache *,
 				     int, void *, size_t);
 

@@ -61,7 +61,7 @@
      conversions),
 
      and so on.
-     
+
    To avoid excessive code duplication and maintenance efforts,
    GDB simply requires a capable iconv function.  Users on platforms
    without a suitable iconv can use the GNU iconv library.  */
@@ -80,7 +80,7 @@
 #else
 # define GDB_DEFAULT_HOST_CHARSET "ISO-8859-1"
 #endif
-#define GDB_DEFAULT_TARGET_CHARSET GDB_DEFAULT_HOST_CHARSET 
+#define GDB_DEFAULT_TARGET_CHARSET GDB_DEFAULT_HOST_CHARSET
 #define GDB_DEFAULT_TARGET_WIDE_CHARSET "UTF-32"
 #undef DEFAULT_CHARSET_NAMES
 #define DEFAULT_CHARSET_NAMES GDB_DEFAULT_HOST_CHARSET ,
@@ -255,9 +255,9 @@ show_target_charset_name (struct ui_file *file, int from_tty,
 
 static const char *target_wide_charset_name = "auto";
 static void
-show_target_wide_charset_name (struct ui_file *file, 
+show_target_wide_charset_name (struct ui_file *file,
 			       int from_tty,
-			       struct cmd_list_element *c, 
+			       struct cmd_list_element *c,
 			       const char *value)
 {
   if (!strcmp (value, "auto"))
@@ -363,7 +363,7 @@ validate (struct gdbarch *gdbarch)
 
 /* This is the sfunc for the 'set charset' command.  */
 static void
-set_charset_sfunc (const char *charset, int from_tty, 
+set_charset_sfunc (const char *charset, int from_tty,
 		   struct cmd_list_element *c)
 {
   /* CAREFUL: set the target charset here as well.  */
@@ -398,13 +398,13 @@ set_target_wide_charset_sfunc (const char *charset, int from_tty,
 
 /* sfunc for the 'show charset' command.  */
 static void
-show_charset (struct ui_file *file, int from_tty, 
+show_charset (struct ui_file *file, int from_tty,
 	      struct cmd_list_element *c,
 	      const char *name)
 {
   show_host_charset_name (file, from_tty, c, host_charset_name);
   show_target_charset_name (file, from_tty, c, target_charset_name);
-  show_target_wide_charset_name (file, from_tty, c, 
+  show_target_wide_charset_name (file, from_tty, c,
 				 target_wide_charset_name);
 }
 
@@ -585,7 +585,7 @@ convert_between_encodings (const char *from, const char *to,
 
 
 /* Create a new iterator.  */
-wchar_iterator::wchar_iterator (const gdb_byte *input, size_t bytes, 
+wchar_iterator::wchar_iterator (const gdb_byte *input, size_t bytes,
 				const char *charset, size_t width)
 : m_input (input),
   m_bytes (bytes),
@@ -638,7 +638,7 @@ wchar_iterator::iterate (enum wchar_iterate_result *out_result,
 		 converted a character; if so, return it.  */
 	      if (out_avail < out_request * sizeof (gdb_wchar_t))
 		break;
-	      
+
 	      /* Otherwise skip the first invalid character, and let
 		 the caller know about it.  */
 	      *out_result = wchar_iterate_invalid;

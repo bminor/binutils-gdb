@@ -41,7 +41,7 @@ static int mi_print_value_p (struct varobj *var,
    if the value should be printed.  The PRINT_EXPRESSION parameter
    controls if the expression should be printed.  */
 
-static void 
+static void
 print_varobj (struct varobj *var, enum print_values print_values,
 	      int print_expression)
 {
@@ -56,7 +56,7 @@ print_varobj (struct varobj *var, enum print_values print_values,
       uiout->field_string ("exp", exp);
     }
   uiout->field_signed ("numchild", varobj_get_num_children (var));
-  
+
   if (mi_print_value_p (var, print_values))
     {
       std::string val = varobj_get_value (var);
@@ -114,7 +114,7 @@ mi_cmd_var_create (const char *command, const char *const *argv, int argc)
   if (strcmp (frame, "*") == 0)
     var_type = USE_CURRENT_FRAME;
   else if (strcmp (frame, "@") == 0)
-    var_type = USE_SELECTED_FRAME;  
+    var_type = USE_SELECTED_FRAME;
   else
     {
       var_type = USE_SPECIFIED_FRAME;
@@ -224,13 +224,13 @@ mi_cmd_var_set_format (const char *command, const char *const *argv, int argc)
   var = varobj_get_handle (argv[0]);
 
   format = mi_parse_format (argv[1]);
-  
+
   /* Set the format of VAR to the given format.  */
   varobj_set_display_format (var, format);
 
   /* Report the new current format.  */
   uiout->field_string ("format", varobj_format_string[(int) format]);
- 
+
   /* Report the value in the new format.  */
   std::string val = varobj_get_value (var);
   uiout->field_string ("value", val);
@@ -363,7 +363,7 @@ mi_cmd_var_list_children (const char *command, const char *const *argv,
 			  int argc)
 {
   struct ui_out *uiout = current_uiout;
-  struct varobj *var;  
+  struct varobj *var;
   enum print_values print_values;
   int from, to;
 
@@ -443,7 +443,7 @@ mi_cmd_var_info_path_expression (const char *command, const char *const *argv,
 
   /* Get varobj handle, if a valid var obj name was specified.  */
   var = varobj_get_handle (argv[0]);
-  
+
   const char *path_expr = varobj_get_path_expr (var);
 
   uiout->field_string ("path_expr", path_expr);
@@ -507,7 +507,7 @@ mi_cmd_var_evaluate_expression (const char *command, const char *const *argv,
   int formatFound;
   int oind;
   const char *oarg;
-    
+
   enum opt
   {
     OP_FORMAT
@@ -534,7 +534,7 @@ mi_cmd_var_evaluate_expression (const char *command, const char *const *argv,
 	case OP_FORMAT:
 	  if (formatFound)
 	    error (_("Cannot specify format more than once"));
-   
+
 	  format = mi_parse_format (oarg);
 	  formatFound = 1;
 	  break;
@@ -543,13 +543,13 @@ mi_cmd_var_evaluate_expression (const char *command, const char *const *argv,
 
   if (oind >= argc)
     error (_("Usage: [-f FORMAT] NAME"));
-   
+
   if (oind < argc - 1)
     error (_("Garbage at end of command"));
- 
+
   /* Get varobj handle, if a valid var obj name was specified.  */
   var = varobj_get_handle (argv[oind]);
-   
+
   if (formatFound)
     {
       std::string val = varobj_get_formatted_value (var, format);
@@ -674,7 +674,7 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
   struct ui_out *uiout = current_uiout;
 
   std::vector<varobj_update_result> changes = varobj_update (&var, is_explicit);
-  
+
   for (const varobj_update_result &r : changes)
     {
       int from, to;
@@ -763,7 +763,7 @@ mi_cmd_var_set_update_range (const char *command, const char *const *argv,
 
   if (argc != 3)
     error (_("-var-set-update-range: Usage: VAROBJ FROM TO"));
-  
+
   var = varobj_get_handle (argv[0]);
   from = atoi (argv[1]);
   to = atoi (argv[2]);

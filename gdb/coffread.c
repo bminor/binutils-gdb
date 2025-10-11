@@ -405,7 +405,7 @@ cs_section_address (struct coff_symbol *cs, bfd *abfd)
 
 /* Look up a coff type-number index.  Return the address of the slot
    where the type for that index is stored.
-   The type-number is in INDEX. 
+   The type-number is in INDEX.
 
    This can be used for finding the type associated with that index
    or for associating a new type with the index.  */
@@ -537,7 +537,7 @@ is_import_fixup_symbol (struct coff_symbol *cs,
 static struct minimal_symbol *
 record_minimal_symbol (minimal_symbol_reader &reader,
 		       struct coff_symbol *cs, unrelocated_addr address,
-		       enum minimal_symbol_type type, int section, 
+		       enum minimal_symbol_type type, int section,
 		       struct objfile *objfile)
 {
   /* We don't want TDESC entry points in the minimal symbol table.  */
@@ -706,7 +706,7 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
   file_ptr symtab_offset;
   file_ptr stringtab_offset;
   unsigned int stabstrsize;
-  
+
   info = coff_objfile_data_key.get (objfile);
   symfile_bfd = abfd;		/* Kludge for swap routines.  */
 
@@ -1141,7 +1141,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 	      newobj = push_context (depth, fcn_start_addr);
 	      fcn_cs_saved.c_name = getsymname (&fcn_sym_saved);
 	      newobj->name =
-		process_coff_symbol (&fcn_cs_saved, 
+		process_coff_symbol (&fcn_cs_saved,
 				     &fcn_aux_saved, objfile);
 	    }
 	  else if (strcmp (cs->c_name, ".ef") == 0)
@@ -1732,7 +1732,7 @@ process_coff_symbol (struct coff_symbol *cs,
 		  /* If we are giving a name to a type such as
 		     "pointer to foo" or "function returning foo", we
 		     better not set the TYPE_NAME.  If the program
-		     contains "typedef char *caddr_t;", we don't want 
+		     contains "typedef char *caddr_t;", we don't want
 		     all variables of type char * to print as caddr_t.
 		     This is not just a consequence of GDB's type
 		     management; CC and GCC (at least through version
@@ -1879,9 +1879,9 @@ decode_type (struct coff_symbol *cs, unsigned int c_type,
    return the type that the function returns.  */
 
 static struct type *
-decode_function_type (struct coff_symbol *cs, 
+decode_function_type (struct coff_symbol *cs,
 		      unsigned int c_type,
-		      union internal_auxent *aux, 
+		      union internal_auxent *aux,
 		      struct objfile *objfile)
 {
   if (aux->x_sym.x_tagndx.u32 == 0)
@@ -1894,9 +1894,9 @@ decode_function_type (struct coff_symbol *cs,
 /* Basic C types.  */
 
 static struct type *
-decode_base_type (struct coff_symbol *cs, 
+decode_base_type (struct coff_symbol *cs,
 		  unsigned int c_type,
-		  union internal_auxent *aux, 
+		  union internal_auxent *aux,
 		  struct objfile *objfile)
 {
   struct gdbarch *gdbarch = objfile->arch ();

@@ -167,7 +167,7 @@ extern struct type *register_type (struct gdbarch *gdbarch, int regnum);
 
 /* Return the size of register REGNUM.  All registers should have only
    one size.  */
-   
+
 extern int register_size (struct gdbarch *gdbarch, int regnum);
 
 using register_read_ftype

@@ -682,9 +682,9 @@ stap_check_register_indirection_suffix (struct gdbarch *gdbarch, const char *s,
    RS  = register suffix
    RIP = register indirection prefix
    RIS = register indirection suffix
-   
+
    Then a register operand can be:
-   
+
    [RIP] [RP] REGISTER [RS] [RIS]
 
    This function takes care of a register's indirection, displacement and

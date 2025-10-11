@@ -1,5 +1,5 @@
 /* Code to go along with tests in rtti.exp.
-   
+
    Copyright 2003-2025 Free Software Foundation, Inc.
 
    Contributed by David Carlton <carlton@bactrian.org> and by Kealia,
@@ -23,7 +23,7 @@
 #include "rtti.h"
 
 namespace n2 {
-  
+
   D2::D2(C2 *expr_1, C2 *expr_2)
     : expr_1_(expr_1), expr_2_(expr_2) { }
 

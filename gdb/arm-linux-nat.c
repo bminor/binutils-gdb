@@ -481,7 +481,7 @@ arm_linux_nat_target::store_registers (struct regcache *regcache, int regno)
    thread debugging.  */
 
 void
-fill_gregset (const struct regcache *regcache,	
+fill_gregset (const struct regcache *regcache,
 	      gdb_gregset_t *gregsetp, int regno)
 {
   arm_linux_collect_gregset (NULL, regcache, regno, gregsetp, 0);
@@ -591,7 +591,7 @@ struct arm_linux_hwbp_cap
 #define MAX_WPTS 16
 
 /* Get hold of the Hardware Breakpoint information for the target we are
-   attached to.  Returns NULL if the kernel doesn't support Hardware 
+   attached to.  Returns NULL if the kernel doesn't support Hardware
    breakpoints at all, or a pointer to the information structure.  */
 static const struct arm_linux_hwbp_cap *
 arm_linux_get_hwbp_cap (void)
@@ -710,7 +710,7 @@ struct arm_linux_hw_breakpoint
 /* Structure containing arrays of per process hardware break-/watchpoints
    for caching address and control information.
 
-   The Linux ptrace interface to hardware break-/watch-points presents the 
+   The Linux ptrace interface to hardware break-/watch-points presents the
    values in a vector centred around 0 (which is used fo generic information).
    Positive indices refer to breakpoint addresses/control registers, negative
    indices to watchpoint addresses/control registers.
@@ -722,8 +722,8 @@ struct arm_linux_hw_breakpoint
        ((i << 1) + 1): Address register for breakpoint i.
        ((i << 1) + 2): Control register for breakpoint i.
 
-   This structure is used as a per-thread cache of the state stored by the 
-   kernel, so that we don't need to keep calling into the kernel to find a 
+   This structure is used as a per-thread cache of the state stored by the
+   kernel, so that we don't need to keep calling into the kernel to find a
    free breakpoint.
 
    We treat break-/watch-points with their enable bit clear as being deleted.
@@ -852,16 +852,16 @@ arm_linux_get_debug_reg_state (pid_t pid)
 }
 
 /* Initialize an ARM hardware break-/watch-point control register value.
-   BYTE_ADDRESS_SELECT is the mask of bytes to trigger on; HWBP_TYPE is the 
+   BYTE_ADDRESS_SELECT is the mask of bytes to trigger on; HWBP_TYPE is the
    type of break-/watch-point; ENABLE indicates whether the point is enabled.
    */
-static arm_hwbp_control_t 
+static arm_hwbp_control_t
 arm_hwbp_control_initialize (unsigned byte_address_select,
 			     arm_hwbp_type hwbp_type,
 			     int enable)
 {
   gdb_assert ((byte_address_select & ~0xffU) == 0);
-  gdb_assert (hwbp_type != arm_hwbp_break 
+  gdb_assert (hwbp_type != arm_hwbp_break
 	      || ((byte_address_select & 0xfU) != 0));
 
   return (byte_address_select << 5) | (hwbp_type << 3) | (3 << 1) | enable;
@@ -918,7 +918,7 @@ arm_linux_hw_breakpoint_initialize (struct gdbarch *gdbarch,
 
 /* Get the ARM hardware breakpoint type from the TYPE value we're
    given when asked to set a watchpoint.  */
-static arm_hwbp_type 
+static arm_hwbp_type
 arm_linux_get_hwbp_type (enum target_hw_bp_type type)
 {
   if (type == hw_read)
@@ -945,7 +945,7 @@ arm_linux_hw_watchpoint_initialize (CORE_ADDR addr, int len,
   mask = (1 << len) - 1;
 
   p->address = (unsigned int) addr;
-  p->control = arm_hwbp_control_initialize (mask, 
+  p->control = arm_hwbp_control_initialize (mask,
 					    arm_linux_get_hwbp_type (type), 1);
 }
 
@@ -984,7 +984,7 @@ update_registers_callback (struct lwp_info *lwp, int watch, int index)
 /* Insert the hardware breakpoint (WATCHPOINT = 0) or watchpoint (WATCHPOINT
    =1) BPT for thread TID.  */
 static void
-arm_linux_insert_hw_breakpoint1 (const struct arm_linux_hw_breakpoint* bpt, 
+arm_linux_insert_hw_breakpoint1 (const struct arm_linux_hw_breakpoint* bpt,
 				 int watchpoint)
 {
   int pid;
@@ -1025,7 +1025,7 @@ arm_linux_insert_hw_breakpoint1 (const struct arm_linux_hw_breakpoint* bpt,
 /* Remove the hardware breakpoint (WATCHPOINT = 0) or watchpoint
    (WATCHPOINT = 1) BPT for thread TID.  */
 static void
-arm_linux_remove_hw_breakpoint1 (const struct arm_linux_hw_breakpoint *bpt, 
+arm_linux_remove_hw_breakpoint1 (const struct arm_linux_hw_breakpoint *bpt,
 				 int watchpoint)
 {
   int pid;
@@ -1097,7 +1097,7 @@ arm_linux_nat_target::remove_hw_breakpoint (struct gdbarch *gdbarch,
   return 0;
 }
 
-/* Are we able to use a hardware watchpoint for the LEN bytes starting at 
+/* Are we able to use a hardware watchpoint for the LEN bytes starting at
    ADDR?  */
 int
 arm_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)

@@ -22,9 +22,9 @@
 
 /* Note that the first entry must always be "auto".
    The remaining entries were created by running this script:
-   
+
    iconv -l | sed -e '/[/]...*$/d' -e 's@^\(.*\)//$@"\1", \\@'
-   
+
    .. and then removing the final backslash.  It would be nice to
    separate narrow and wide character sets, but there is no good way
    to do that.  */

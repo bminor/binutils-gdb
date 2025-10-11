@@ -175,7 +175,7 @@ public:
 
   int operator% (base const& o) const { // base::operator%
     return foo_ % o.foo_; }
-  
+
   base operator%= (base const& o) { // base::operator%=
     foo_ %= o.foo_; return *this; }
 
@@ -232,7 +232,7 @@ public:
 
   base operator|= (base const& o) { // base::operator|=
     foo_ |= o.foo_; return *this; }
-  
+
   int operator^ (base const& o) const { // base::operator^
     return foo_ ^ o.foo_; }
 

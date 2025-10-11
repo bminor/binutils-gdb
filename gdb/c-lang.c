@@ -311,7 +311,7 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
 	  if (extract_unsigned_integer (contents + i * width,
 					width, byte_order) == 0)
 	    break;
-  
+
       /* I is now either a user-defined length, the number of non-null
 	 characters, or FETCHLIMIT.  */
       *length = i * width;
@@ -366,7 +366,7 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
 	&& extract_unsigned_integer (buffer->get () + *length - width,
 				     width, byte_order) == 0)
       *length -= width;
-  
+
   /* The read_string function will return the number of bytes read.
      If length returned from read_string was > 0, return the number of
      characters read by dividing the number of bytes by width.  */

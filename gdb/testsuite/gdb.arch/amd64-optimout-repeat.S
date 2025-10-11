@@ -43,7 +43,7 @@ main:
 	# gdb.arch/amd64-optimout-repeat.c:29
 	.loc 1 29 0
 	xorl	%eax, %eax
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE0:

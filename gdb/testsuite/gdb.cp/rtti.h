@@ -1,5 +1,5 @@
 /* Code to go along with tests in rtti.exp.
-   
+
    Copyright 2003-2025 Free Software Foundation, Inc.
 
    Contributed by David Carlton <carlton@bactrian.org> and by Kealia,
@@ -37,7 +37,7 @@ namespace n2 {
   class D2 : public C2{
   public:
     D2(C2 *, C2 *);
-    
+
     C2* expr_1_;
     C2* expr_2_;
   };

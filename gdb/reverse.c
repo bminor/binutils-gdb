@@ -29,7 +29,7 @@
 /* User interface:
    reverse-step, reverse-next etc.  */
 
-/* exec_reverse_once -- accepts an arbitrary gdb command (string), 
+/* exec_reverse_once -- accepts an arbitrary gdb command (string),
    and executes it with exec-direction set to 'reverse'.
 
    Used to implement reverse-next etc. commands.  */

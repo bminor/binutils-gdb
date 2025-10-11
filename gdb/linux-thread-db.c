@@ -516,7 +516,7 @@ thread_db_find_new_threads_silently (thread_info *stopped)
 	 where calls to td_thr_get_info fail with TD_ERR for statically linked
 	 executables if td_thr_get_info is called before glibc has initialized
 	 itself.
-	 
+
 	 If the nptl bug is NOT present in the inferior and still thread_db
 	 reports an error return 1.  It means the inferior has corrupted thread
 	 list and GDB should fall back only to LWPs.

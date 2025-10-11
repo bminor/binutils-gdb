@@ -24,7 +24,7 @@ extern void hide (int);
 /* Test register variable
    Requires -- compiler honors 'register'.  */
 
-void 
+void
 register_state (void)
 {
   register int a = 0;
@@ -88,7 +88,7 @@ module_global_state (void)
 
 /* main test driver */
 
-int 
+int
 main (int argc, char **argv)
 {
   register_state ();	/* begin main */
@@ -96,6 +96,6 @@ main (int argc, char **argv)
   function_static_state ();
   module_static_state ();
   module_global_state ();
-  
+
   return 0;		/* end main */
 }

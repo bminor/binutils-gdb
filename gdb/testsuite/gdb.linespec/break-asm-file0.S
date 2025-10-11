@@ -215,7 +215,7 @@ func:
 	.uleb128	5
 	.byte		2
 	.4byte		.Lfunc_2
-	
+
 	.byte		3	/* DW_LNS_advance_line */
 	.sleb128	1	/* ... to 8 */
 

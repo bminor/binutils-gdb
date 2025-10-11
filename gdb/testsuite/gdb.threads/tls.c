@@ -66,7 +66,7 @@ void print_error ()
     default:
       fprintf (stderr, "Unknown error\n");
       break;
-   } 
+   }
 }
 
 /* Routine for each thread to run, does nothing.  */
@@ -74,7 +74,7 @@ void *spin( void *vp )
 {
     int me = (long) vp;
     int i;
-    
+
     /* Use a_global. */
     a_global++;
 
@@ -113,7 +113,7 @@ void *spin( void *vp )
             continue;
           }
         else
-          {  
+          {
             fprintf (stderr, "th %d wait on sem tell_thread failed\n", me);
             print_error ();
             return NULL;
@@ -145,7 +145,7 @@ do_pass()
         thread_local_val[i] = 0;
         another_thread_local_val[i] = 0;
     }
-   
+
     if (sem_init (&tell_main, 0, 0) == -1)
     {
       fprintf (stderr, "tell_main semaphore init failed\n");
@@ -216,13 +216,13 @@ do_pass()
      {
         err = pthread_join(t[i], NULL );
         if( err != 0 )
-         { 
+         {
            fprintf (stderr, "error in thread %d join\n", i );
          }
     }
 
     i = 10;  /* Null line for setting bpts on. */
-   
+
 }
 
 int

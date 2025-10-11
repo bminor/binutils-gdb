@@ -1,4 +1,4 @@
-/* 
+/*
    Purpose of this test:  to test breakpoints on consecutive instructions.
 */
 

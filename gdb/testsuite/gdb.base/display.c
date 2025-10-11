@@ -22,7 +22,7 @@ int do_loops()
                 sum++; f++; force_mem (&k);
             }
         }
-    } 
+    }
     return i; /* set breakpoint 2 here */
 }
 
@@ -41,7 +41,7 @@ int do_vars()
     for( j = 0; j < LOOP; j++ ) {
         if( p_c[j] == c ) { /* set breakpoint 3 here */
             j++;
-        } 
+        }
         else {
             i++;
         }
@@ -54,6 +54,6 @@ int
 main()
 {
     do_loops();
-    do_vars();    
+    do_vars();
     return 0;
 }

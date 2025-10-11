@@ -305,7 +305,7 @@ varobj_create (const char *objname,
 
       innermost_block_tracker tracker (INNERMOST_BLOCK_FOR_SYMBOLS
 				       | INNERMOST_BLOCK_FOR_REGISTERS);
-      /* Wrap the call to parse expression, so we can 
+      /* Wrap the call to parse expression, so we can
 	 return a sensible error.  */
       try
 	{
@@ -339,7 +339,7 @@ varobj_create (const char *objname,
       /* For a root var, the name and the expr are the same.  */
       var->path_expr = expression;
 
-      /* When the frame is different from the current frame, 
+      /* When the frame is different from the current frame,
 	 we must select the appropriate frame before parsing
 	 the expression, otherwise the value will not be current.
 	 Since select_frame is so benign, just call it for all cases.  */
@@ -355,7 +355,7 @@ varobj_create (const char *objname,
 	  var->root->frame = get_frame_id (fi);
 	  var->root->thread_id = inferior_thread ()->global_num;
 	  old_id = get_frame_id (get_selected_frame (NULL));
-	  select_frame (fi);	 
+	  select_frame (fi);
 	}
 
       /* We definitely need to catch errors here.  If evaluation of
@@ -484,7 +484,7 @@ varobj_set_display_format (struct varobj *var,
 {
   var->format = format;
 
-  if (varobj_value_is_changeable_p (var) 
+  if (varobj_value_is_changeable_p (var)
       && var->value != nullptr && !var->value->lazy ())
     {
       var->print_value = varobj_value_get_print_value (var->value.get (),
@@ -1049,7 +1049,7 @@ install_default_visualizer (struct varobj *var)
 
       if (pretty_printer == Py_None)
 	pretty_printer.reset (nullptr);
-  
+
       install_visualizer (var->dynamic, NULL, pretty_printer.release ());
     }
 }
@@ -1157,7 +1157,7 @@ update_type_if_necessary (struct varobj *var, struct value *new_value)
 
 /* Assign a new value to a variable object.  If INITIAL is true,
    this is the first assignment after the variable object was just
-   created, or changed type.  In that case, just assign the value 
+   created, or changed type.  In that case, just assign the value
    and return false.
    Otherwise, assign the new value, and return true if the value is
    different from the current one, false otherwise.  The comparison is
@@ -1170,7 +1170,7 @@ update_type_if_necessary (struct varobj *var, struct value *new_value)
    take care of releasing it when needed.  */
 static bool
 install_new_value (struct varobj *var, struct value *value, bool initial)
-{ 
+{
   bool changeable;
   bool need_to_fetch;
   bool changed = false;
@@ -1361,7 +1361,7 @@ varobj_set_child_range (struct varobj *var, int from, int to)
   var->to = to;
 }
 
-void 
+void
 varobj_set_visualizer (struct varobj *var, const char *visualizer)
 {
 #if HAVE_PYTHON
@@ -1437,7 +1437,7 @@ varobj_value_has_mutated (const struct varobj *var, struct value *new_value,
    changed.
 
    The IS_EXPLICIT parameter specifies if this call is result
-   of MI request to update this specific variable, or 
+   of MI request to update this specific variable, or
    result of implicit -var-update *.  For implicit request, we don't
    update frozen variables.
 
@@ -1473,7 +1473,7 @@ varobj_update (struct varobj **varp, bool is_explicit)
 
       /* Update the root variable.  value_of_root can return NULL
 	 if the variable is no longer around, i.e. we stepped out of
-	 the frame in which a local existed.  We are letting the 
+	 the frame in which a local existed.  We are letting the
 	 value_of_root variable dispose of the varobj if the type
 	 has changed.  */
       newobj = value_of_root (varp, &type_changed);
@@ -1483,7 +1483,7 @@ varobj_update (struct varobj **varp, bool is_explicit)
       r.type_changed = type_changed;
       if (install_new_value ((*varp), newobj, type_changed))
 	r.changed = true;
-      
+
       if (newobj == NULL)
 	r.status = VAROBJ_NOT_IN_SCOPE;
       r.value_installed = true;
@@ -1676,7 +1676,7 @@ delete_variable_1 (int *delcountp, struct varobj *var, bool only_children_p,
 {
   /* Delete any children of this variable, too.  */
   for (varobj *child : var->children)
-    {   
+    {
       if (!child)
 	continue;
 
@@ -1700,7 +1700,7 @@ delete_variable_1 (int *delcountp, struct varobj *var, bool only_children_p,
     }
 
   /* If this variable has a parent, remove it from its parent's list.  */
-  /* OPTIMIZATION: if the parent of this variable is also being deleted, 
+  /* OPTIMIZATION: if the parent of this variable is also being deleted,
      (as indicated by remove_from_parent_p) we don't bother doing an
      expensive list search to find the element to remove when we are
      discarding the list afterwards.  */
@@ -1934,7 +1934,7 @@ value_of_root_1 (struct varobj **var_handle)
   struct value *new_val = NULL;
   struct varobj *var = *var_handle;
   bool within_scope = false;
-								 
+
   /*  Only root variables can be updated...  */
   if (!is_root_p (var))
     /* Not a root var.  */
@@ -1951,7 +1951,7 @@ value_of_root_1 (struct varobj **var_handle)
 	 created.  Technically, it's possible that the program became
 	 multi-threaded since then, but we don't support such
 	 scenario yet.  */
-      within_scope = check_scope (var);	  
+      within_scope = check_scope (var);
     }
   else
     {
@@ -1988,7 +1988,7 @@ value_of_root_1 (struct varobj **var_handle)
    - *type_changed will be set to 1
    - old varobj will be freed, and new one will be
    created, with the same name.
-   - *var_handle will be set to the new varobj 
+   - *var_handle will be set to the new varobj
    Otherwise, *type_changed will be set to 0.  */
 static struct value *
 value_of_root (struct varobj **var_handle, bool *type_changed)
@@ -2350,7 +2350,7 @@ varobj_re_set_iter (struct varobj *var)
 
 /* See varobj.h.  */
 
-void 
+void
 varobj_re_set (void)
 {
   all_root_varobjs (varobj_re_set_iter);

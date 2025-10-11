@@ -24,7 +24,7 @@ void abort (void);
   volatile uint64_t taken_##BRANCH_IF##_##BIT =				\
     BASE & (~(1ull << BIT)) | ((uint64_t) BRANCH_IF << BIT);		\
   volatile uint64_t not_taken_##BRANCH_IF##_##BIT =			\
-    BASE & (~(1ull << BIT)) | (((uint64_t) !BRANCH_IF) << BIT);  
+    BASE & (~(1ull << BIT)) | (((uint64_t) !BRANCH_IF) << BIT);
 
 DEF_BBIT_TAKEN (0, 10);
 DEF_BBIT_TAKEN (0, 36);

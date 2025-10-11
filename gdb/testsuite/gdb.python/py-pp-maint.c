@@ -81,6 +81,6 @@ main ()
 
   init_flt (&flt, 42, 43);
   init_ss (&ss, 1, 2);
-  
+
   return 0;      /* break to inspect */
 }

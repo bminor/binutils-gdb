@@ -542,7 +542,7 @@ print_variant_clauses (struct type *var_type, struct type *discr_type,
 /* Assuming that field FIELD_NUM of TYPE represents variants whose
    discriminant is contained in OUTER_TYPE, print its components on STREAM.
    LEVEL is the recursion (indentation) level, in case any of the fields
-   themselves have nested structure, and SHOW is the number of levels of 
+   themselves have nested structure, and SHOW is the number of levels of
    internal structure to show (see ada_print_type).  For this purpose,
    fields nested in a variant part are taken to be at the same level as
    the fields immediately outside the variant part.  */
@@ -789,7 +789,7 @@ print_record_field_types (struct type *type, struct type *outer_type,
 					    0, type->num_fields () - 1,
 					    stream, show, level, flags);
 }
-   
+
 
 /* Print record type TYPE on STREAM.  LEVEL is the recursion (indentation)
    level, in case the element type itself has nested structure, and SHOW is
@@ -1040,7 +1040,7 @@ ada_print_type (struct type *type0, const char *varstring,
 	    gdb_printf (stream, ">");
 	  }
 	else if (ada_is_modular_type (type))
-	  gdb_printf (stream, "mod %s", 
+	  gdb_printf (stream, "mod %s",
 		      int_string (ada_modulus (type), 10, 0, 0, 1));
 	else
 	  {

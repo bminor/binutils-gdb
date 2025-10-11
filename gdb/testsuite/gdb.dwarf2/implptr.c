@@ -56,8 +56,8 @@ typedef int *intp;
 typedef intp *intpp;
 typedef intpp *intppp;
 
-int __attribute__ ((noinline, used, noclone)) 
-bar (int i) 
+int __attribute__ ((noinline, used, noclone))
+bar (int i)
 {
   intp j = &i;
   intpp k = &j;

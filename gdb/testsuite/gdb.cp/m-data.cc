@@ -23,10 +23,10 @@ class gnu_obj_2: public virtual gnu_obj_1
 {
 protected:
   antiquities	value_derived;
-      
+
 public:
   gnu_obj_2(antiquities b): gnu_obj_1(oriental, 7), value_derived(b) { }
-}; 
+};
 
 // Test three.
 template<typename T>
@@ -35,10 +35,10 @@ class gnu_obj_3
 protected:
   typedef region antiquities;
   gnu_obj_2<int>   	data;
-      
+
 public:
   gnu_obj_3(antiquities b): data(etruscan) { }
-}; 
+};
 
 int shadow = 0;
 
@@ -59,6 +59,6 @@ int main()
 
   C theC (1);				// breakpoint: first-constructs-done
   theC.marker ();
-  
+
   return shadow;
 }

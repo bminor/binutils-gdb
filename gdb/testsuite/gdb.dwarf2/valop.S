@@ -44,7 +44,7 @@
     }
 
   Then it was compiled with:
-	
+
 	gcc -fvar-tracking{,-assignments} -gdwarf-3
 	-fno-inline{,-functions,-small-functions,-functions-called-once}
 	-O2

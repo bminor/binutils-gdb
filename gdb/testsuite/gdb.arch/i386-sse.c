@@ -86,7 +86,7 @@ main (int argc, char **argv)
            "movaps 96(%0), %%xmm6\n\t"
            "movaps 112(%0), %%xmm7\n\t"
            : /* no output operands */
-           : "r" (data) 
+           : "r" (data)
            : "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
 #ifdef __x86_64__
       asm ("movaps 128(%0), %%xmm8\n\t"
@@ -98,7 +98,7 @@ main (int argc, char **argv)
            "movaps 224(%0), %%xmm14\n\t"
            "movaps 240(%0), %%xmm15\n\t"
            : /* no output operands */
-           : "r" (data) 
+           : "r" (data)
            : "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14", "xmm15");
 #endif
 
@@ -114,7 +114,7 @@ main (int argc, char **argv)
            "movaps %%xmm6, 96(%0)\n\t"
            "movaps %%xmm7, 112(%0)\n\t"
            : /* no output operands */
-           : "r" (data) 
+           : "r" (data)
            : "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
 #ifdef __x86_64__
       asm (
@@ -127,7 +127,7 @@ main (int argc, char **argv)
            "movaps %%xmm14, 224(%0)\n\t"
            "movaps %%xmm15, 240(%0)\n\t"
            : /* no output operands */
-           : "r" (data) 
+           : "r" (data)
            : "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14", "xmm15");
 #endif
 

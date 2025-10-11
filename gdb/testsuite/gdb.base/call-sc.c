@@ -39,7 +39,7 @@ T init = '9';
 
 T fun()
 {
-  return foo;  
+  return foo;
 }
 
 void Fun(T foo)
@@ -69,7 +69,7 @@ int main()
   zed ();
   while (1)
     {
-      L = fun ();	
+      L = fun ();
       zed ();
     }
 

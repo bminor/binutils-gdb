@@ -19,7 +19,7 @@ int
 main (void)
 {
   volatile int i;
-  
+
   i = 1;	/* break-first */
   i = 2;	/* break-second */
 

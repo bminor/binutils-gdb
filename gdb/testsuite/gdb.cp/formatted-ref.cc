@@ -21,7 +21,7 @@ enum Enum1 { Val10=10, Val11, Val12 };
 
 struct Struct1
 {
-      int x, y; 
+      int x, y;
 };
 
 int f1 (Struct1& s, Enum1& e, int& i)
@@ -35,7 +35,7 @@ int i1 = 23;
 
 Enum1 e1 = Val11;
 
-int main(void) 
+int main(void)
 {
 
   f1 (s1, e1, i1);

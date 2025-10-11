@@ -456,7 +456,7 @@ bb_tests
 	bb,>= %r4,5,bb_tests
 	bb,<,n %r4,5,bb_tests
 	bb,>=,n %r4,5,bb_tests
-	
+
 ; Computational instructions
 add_tests
 	add  %r4,%r5,%r6
@@ -1264,7 +1264,7 @@ probe_tests
 	proberi (%sr0,%r5),1,%r7
 	probew (%sr0,%r5),%r6,%r7
 	probewi (%sr0,%r5),1,%r7
-	
+
 lpa_tests
 	lpa %r4(%sr0,%r5),%r6
 	lpa,m %r4(%sr0,%r5),%r6
@@ -1368,7 +1368,7 @@ frnd_tests
 	frnd,quad %fr5,%fr10
 	frnd,sgl %fr20,%fr24
 	frnd,dbl %fr20,%fr24
-	
+
 fcnvff_tests
 	fcnvff,sgl,sgl %fr5,%fr10
 	fcnvff,sgl,dbl %fr5,%fr10
@@ -1639,7 +1639,7 @@ copr_tests
 	copr,4,5,n
 	copr,4,115,n
 
-copr_indexing_load 
+copr_indexing_load
 	cldwx,4 5(0,4),26
 	cldwx,4,s 5(0,4),26
 	cldwx,4,m 5(0,4),26
@@ -1649,7 +1649,7 @@ copr_indexing_load
 	clddx,4,m 5(0,4),26
 	clddx,4,sm 5(0,4),26
 
-copr_indexing_store 
+copr_indexing_store
 	cstwx,4 26,5(0,4)
 	cstwx,4,s 26,5(0,4)
 	cstwx,4,m 26,5(0,4)
@@ -1659,7 +1659,7 @@ copr_indexing_store
 	cstdx,4,m 26,5(0,4)
 	cstdx,4,sm 26,5(0,4)
 
-copr_short_memory 
+copr_short_memory
 	cldws,4 0(0,4),26
 	cldws,4,mb 0(0,4),26
 	cldws,4,ma 0(0,4),26

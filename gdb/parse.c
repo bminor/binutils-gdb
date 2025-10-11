@@ -598,16 +598,16 @@ fits_in_type (int n_sign, const gdb_mpz &n, int type_bits, bool type_signed_p)
   return n < max;
 }
 
-/* This function avoids direct calls to fprintf 
+/* This function avoids direct calls to fprintf
    in the parser generated debug code.  */
 void
 parser_fprintf (FILE *x, const char *y, ...)
-{ 
+{
   va_list args;
 
   va_start (args, y);
   if (x == stderr)
-    gdb_vprintf (gdb_stderr, y, args); 
+    gdb_vprintf (gdb_stderr, y, args);
   else
     {
       gdb_printf (gdb_stderr, " Unknown FILE used.\n");

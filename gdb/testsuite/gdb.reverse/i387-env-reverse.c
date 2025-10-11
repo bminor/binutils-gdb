@@ -4,7 +4,7 @@
 
 
 float no1,no2,no3,no4,no5,no6,no7;
-float result,resultd,resultld; 
+float result,resultd,resultld;
 float *float_memory;
 long double ldx = 88888888888888888888.88, ldy = 9999999999999999999.99;
 double x = 100.345, y = 25.7789;
@@ -18,7 +18,7 @@ void empty_fpu_stack()
        "ffree %st(5) \n\t"
        "ffree %st(6) \n\t"
        "ffree %st(7)");
-}   
+}
 
 /* initialization of floats */
 void init_floats()
@@ -40,10 +40,10 @@ void init_floats()
 int main()
 {
   init_floats();
-  empty_fpu_stack();    /* BEGIN I387-FLOAT-REVERSE */  
-  
+  empty_fpu_stack();    /* BEGIN I387-FLOAT-REVERSE */
+
   asm("nop");   /* TEST ENV */
-  asm ("fsave %0" : "=m"(*float_memory) : );   
+  asm ("fsave %0" : "=m"(*float_memory) : );
   asm ("frstor %0" : : "m"(*float_memory));
   asm ("fstsw %ax");     /* test eax register */
 
@@ -55,6 +55,6 @@ int main()
   asm ("fldln2");
   asm ("fldz");
   asm ("nop");
-  
+
   return 1;             /* END I387-FLOAT-REVERSE */
 }

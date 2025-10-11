@@ -35,7 +35,7 @@ g:
 	# gdb.arch/amd64-tailcall-ret.c:23
 	.loc 1 23 0
 	movl	$2, v(%rip)
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE0:
@@ -82,7 +82,7 @@ main:
 	# gdb.arch/amd64-tailcall-ret.c:39
 	.loc 1 39 0
 	xorl	%eax, %eax
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE2:

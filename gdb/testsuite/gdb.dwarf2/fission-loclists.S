@@ -52,7 +52,7 @@ foo:
 	.loc 1 3 0
 	movl	(%rdi), %eax
 	movl	%eax, v(%rip)
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE0:
@@ -85,7 +85,7 @@ main:
 	xorl	%eax, %eax
 	addq	$8, %rsp
 	.cfi_def_cfa_offset 8
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE1:

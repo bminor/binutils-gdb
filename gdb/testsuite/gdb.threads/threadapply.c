@@ -14,7 +14,7 @@
 
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
    This file is copied from schedlock.c.  */
 
 #include <stdio.h>
@@ -58,9 +58,9 @@ int main() {
 	        all_started = 0;
 	        break;
 	      }
-          }  
+          }
       }
-	
+
     args[i] = 1;
     /* Break here */
     thread_function ((void *) i);

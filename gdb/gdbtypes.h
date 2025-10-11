@@ -995,7 +995,7 @@ struct main_type
      because we can allocate the space for a type before
      we know what to put in it.  */
 
-  union 
+  union
   {
     struct field *fields;
 
@@ -1027,7 +1027,7 @@ struct main_type
 
 struct type
 {
-  /* Get the type code of this type. 
+  /* Get the type code of this type.
 
      Note that the code can be TYPE_CODE_TYPEDEF, so if you want the real
      type, you need to do `check_typedef (type)->code ()`.  */
@@ -1633,7 +1633,7 @@ struct fn_field
   const char *physname;
 
   /* * The function type for the method.
-	       
+
      (This comment used to say "The return value of the method", but
      that's wrong.  The function type is expected here, i.e. something
      with TYPE_CODE_METHOD, and *not* the return-value type).  */
@@ -2199,7 +2199,7 @@ extern const struct builtin_type *builtin_type (struct gdbarch *gdbarch);
 /* * Return the type table for the specified objfile.  */
 
 extern const struct builtin_type *builtin_type (struct objfile *objfile);
- 
+
 /* Explicit floating-point formats.  See "floatformat.h".  */
 extern const struct floatformat *floatformats_ieee_half[BFD_ENDIAN_UNKNOWN];
 extern const struct floatformat *floatformats_ieee_single[BFD_ENDIAN_UNKNOWN];

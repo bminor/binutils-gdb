@@ -537,7 +537,7 @@ gdbscm_symbol_value (SCM self, SCM rest)
 	  if (frame_info == NULL)
 	    error (_("Invalid frame"));
 	}
-      
+
       if (symbol_read_needs_frame (symbol) && frame_info == NULL)
 	error (_("Symbol requires a frame to compute its value"));
 

@@ -118,7 +118,7 @@ parse_phase == 5 && /^#if[ \t]TypeCheck/ {
   # The first args type checking statement; we need to insert our chunk of
   # code that bypasses all the type checks if this is an error return, after
   # which we're done until we get to the next function.  Handily, the size
-  # of mig's Reply structure is also the size of the alternate Request 
+  # of mig's Reply structure is also the size of the alternate Request
   # structure that we want to check for.
   print "\tif (In0P->Head.msgh_size == sizeof (Reply)";
   print "\t    && ! (In0P->Head.msgh_bits & MACH_MSGH_BITS_COMPLEX)";

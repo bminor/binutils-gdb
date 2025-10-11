@@ -52,7 +52,7 @@
 #ifdef HAVE_STRUCT_REG
 typedef struct reg gregset_t;
 typedef struct fpreg fpregset_t;
-#else 
+#else
 typedef struct regs gregset_t;
 typedef struct fp_status fpregset_t;
 #endif

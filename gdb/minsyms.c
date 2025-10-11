@@ -1360,7 +1360,7 @@ struct computed_hash_values
 /* Build (or rebuild) the minimal symbol hash tables.  This is necessary
    after compacting or sorting the table since the entries move around
    thus causing the internal minimal_symbol pointers to become jumbled.  */
-  
+
 static void
 build_minimal_symbol_hash_tables
   (struct objfile *objfile,

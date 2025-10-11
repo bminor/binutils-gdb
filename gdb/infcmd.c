@@ -221,7 +221,7 @@ strip_bg_char (const char *args, int *bg_char_p)
 void
 post_create_inferior (int from_tty, bool set_pspace_solib_ops)
 {
-  /* Be sure we own the terminal in case write operations are performed.  */ 
+  /* Be sure we own the terminal in case write operations are performed.  */
   target_terminal::ours_for_output ();
 
   infrun_debug_show_threads ("threads in the newly created inferior",
@@ -527,7 +527,7 @@ static void
 starti_command (const char *args, int from_tty)
 {
   run_command_1 (args, from_tty, RUN_STOP_AT_FIRST_INSN);
-} 
+}
 
 static bool
 proceed_thread_callback (struct thread_info *thread)
@@ -2047,7 +2047,7 @@ set_environment_command (const char *arg, int from_tty)
   if (p != 0 && val != 0)
     {
       /* We have both a space and an equals.  If the space is before the
-	 equals, walk forward over the spaces til we see a nonspace 
+	 equals, walk forward over the spaces til we see a nonspace
 	 (possibly the equals).  */
       if (p > val)
 	while (*val == ' ')

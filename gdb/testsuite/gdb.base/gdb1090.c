@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
    This file was written by Michael Elizabeth Chastain (mec@shout.net).  */
 
 struct s_2_by_4

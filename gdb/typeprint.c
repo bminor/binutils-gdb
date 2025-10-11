@@ -282,7 +282,7 @@ typedef_hash_table::find_typedef (const struct type_print_options *flags,
 
 
 
-/* Print a description of a type in the format of a 
+/* Print a description of a type in the format of a
    typedef for the current language.
    NEW is the new name for a type TYPE.  */
 
@@ -491,7 +491,7 @@ whatis_exp (const char *exp, int show)
       type_print (real_type, "", gdb_stdout, -1);
       if (! full)
 	gdb_printf (" (incomplete object)");
-      gdb_printf (" */\n");    
+      gdb_printf (" */\n");
     }
 
   current_language->print_type (type, "", gdb_stdout, show, 0, &flags);

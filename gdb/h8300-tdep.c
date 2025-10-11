@@ -151,7 +151,7 @@ h8300_init_frame_cache (struct gdbarch *gdbarch,
    from the register in which it was passed to the stack slot in which
    it really lives.  It is a byte, word, or longword move from an
    argument register to a negative offset from the frame pointer.
-   
+
    CV, 2003-06-16: Or, in optimized code or when the `register' qualifier
    is used, it could be a byte, word or long move to registers r3-r5.  */
 
@@ -597,7 +597,7 @@ h8300_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
    So, for example, on the h8/300s, if a function expects a three-byte
    structure and an int, the structure will go on the stack, and the
    int will go in r2, not r0.
-  
+
    If the function returns an aggregate type (struct, union, or class)
    by value, the caller must allocate space to hold the return value,
    and pass the callee a pointer to this space as an invisible first
@@ -1339,7 +1339,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Frame unwinder.  */
   frame_base_set_default (gdbarch, &h8300_frame_base);
 
-  /* 
+  /*
    * Miscellany
    */
   /* Stack grows up.  */

@@ -412,7 +412,7 @@ print_children (PyObject *printer, const char *hint,
 	    print_stack_unless_memory_error (stream);
 	  /* Set a flag so we can know whether we printed all the
 	     available elements.  */
-	  else	
+	  else
 	    done_flag = 1;
 	  break;
 	}

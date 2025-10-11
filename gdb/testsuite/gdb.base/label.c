@@ -9,7 +9,7 @@ main (int argc, char **argv)
 here:
   printf("not here\n");
   i = 1;
-  
+
 there:
   printf("but here\n");
   if (i == 0)

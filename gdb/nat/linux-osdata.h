@@ -1,5 +1,5 @@
 /* Linux-specific functions to retrieve OS data.
-   
+
    Copyright (C) 2009-2025 Free Software Foundation, Inc.
 
    This file is part of GDB.

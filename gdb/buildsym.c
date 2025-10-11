@@ -323,7 +323,7 @@ buildsym_compunit::finish_block_internal
 
   opblock = NULL;
   for (pblock = m_pending_blocks;
-       pblock && pblock != old_blocks; 
+       pblock && pblock != old_blocks;
        pblock = pblock->next)
     {
       if (pblock->block->superblock () == NULL)

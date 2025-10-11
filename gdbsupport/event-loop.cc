@@ -247,7 +247,7 @@ gdb_do_one_event (int mstimeout)
 
   std::optional<int> timer_id;
 
-  SCOPE_EXIT 
+  SCOPE_EXIT
     {
       if (timer_id.has_value ())
 	delete_timer (*timer_id);
@@ -397,7 +397,7 @@ get_next_file_handler_to_handle_and_advance (void)
   return curr_next;
 }
 
-/* Remove the file descriptor FD from the list of monitored fd's: 
+/* Remove the file descriptor FD from the list of monitored fd's:
    i.e. we don't care anymore about events on the FD.  */
 void
 delete_file_handler (int fd)
@@ -455,7 +455,7 @@ delete_file_handler (int fd)
 	}
     }
 
-  /* Deactivate the file descriptor, by clearing its mask, 
+  /* Deactivate the file descriptor, by clearing its mask,
      so that it will not fire again.  */
 
   file_ptr->mask = 0;

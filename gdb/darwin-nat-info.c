@@ -246,7 +246,7 @@ info_mach_ports_command (const char *args, int from_tty)
 	      gdb_printf (_("%u"), ref);
 	    gdb_printf (_(" refs)"));
 	  }
-      
+
       if (task == task_self ())
 	{
 	  if (port == task_self())
@@ -700,7 +700,7 @@ info_mach_regions_command (const char *args, int from_tty)
   task = get_task_from_args (args);
   if (task == TASK_NULL)
     return;
-  
+
   darwin_debug_regions (task, 0, -1);
 }
 
@@ -712,7 +712,7 @@ info_mach_regions_recurse_command (const char *args, int from_tty)
   task = get_task_from_args (args);
   if (task == TASK_NULL)
     return;
-  
+
   darwin_debug_regions_recurse (task);
 }
 
@@ -828,7 +828,7 @@ info_mach_exceptions_command (const char *args, int from_tty)
       if (inferior_ptid == null_ptid)
 	gdb_printf (_("No inferior running\n"));
       inf = current_inferior ();
-      
+
       darwin_inferior *priv = get_darwin_inferior (inf);
 
       kret = task_get_exception_ports

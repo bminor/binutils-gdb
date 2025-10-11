@@ -418,7 +418,7 @@ typedef struct s
   short s;
   int i;
   long l;
-} SVAL;	
+} SVAL;
 
 void hitbottom ()
 {
@@ -576,7 +576,7 @@ int main ()
 
   call6a (c, s, i, l, f, d, uc, us, ui, ul);
   call7a (c, i, s, l, f, uc, d, us, ul, ui);
-  
+
   /* Test passing structures recursively. */
 
   test_struct_args ();

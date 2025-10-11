@@ -462,7 +462,7 @@ filename_is_in_auto_load_safe_path_vec (const char *filename,
 	pattern = p.get ();
 	break;
       }
-  
+
   if (pattern == NULL)
     {
       if (*filename_realp == NULL)

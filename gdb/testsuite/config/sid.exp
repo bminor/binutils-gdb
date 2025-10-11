@@ -21,10 +21,10 @@ proc sid_start {} {
     case [target_info multilib_flags] in {
 	{ *big-endian* *-EB* *-meb* } { set sidendian "-EB" }
 	{ *little-endian* *-EL* *-mel* } { set sidendian "-EL" }
-	default { 
+	default {
 	    if {[target_info exists sim,defaultendian]} {
-		set sidendian [target_info sim,defaultendian] 
-	    } else { 
+		set sidendian [target_info sim,defaultendian]
+	    } else {
                 # rely on endianness settings in sid configuration defaults
                 set sidendian ""
 	    }
@@ -81,7 +81,7 @@ proc sid_start {} {
 
     # Don't do the following any more; it breaks with "runtest ... < /dev/null"
 #    expect_background {
-#	-re \[^\n\]*\n { 
+#	-re \[^\n\]*\n {
 #	    regsub "\n" $expect_out(buffer) {} msg
 #	    verbose "SID: $msg" 2
 #	}
@@ -147,7 +147,7 @@ proc gdb_target_sid { } {
 	-re "Remote debugging using.*$gdb_prompt"	{
 	    verbose "Set target to sid"
 	}
-	timeout { 
+	timeout {
 	    perror "Couldn't set target for remote simulator."
 	    gdb_exit
 	}

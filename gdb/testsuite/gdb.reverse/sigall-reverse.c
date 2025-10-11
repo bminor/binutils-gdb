@@ -397,7 +397,7 @@ gen_ABRT (void)
 {
   kill (getpid (), SIGABRT);
   return 0;
-}  
+}
 
 int x;
 
@@ -446,7 +446,7 @@ gen_HUP (void)
   handle_HUP (0);
 #endif
 return 0;
-}  
+}
 
 int
 gen_QUIT (void)
@@ -677,7 +677,7 @@ gen_USR2 (void)
   handle_USR2 (0);
 #endif
 return 0;
-}  
+}
 
 int
 gen_PWR (void)

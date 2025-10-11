@@ -188,7 +188,7 @@ field3 = 0x77888877\}" "print struct constant"
 
 	gdb_test "p common0var0" "= 42"
 	# GDB seems to only understand common blocks local to a function.
-	# These variables never get relocated to be relative to the common 
+	# These variables never get relocated to be relative to the common
 	# block.
 	# I'm not sure whether it is valid to have a common block which
 	# is not local to a function.
@@ -203,7 +203,7 @@ proc print_weird_var { var } {
 
 	# Make sure that the variable gets printed out correctly, without
 	# any sort of warning message.
-        gdb_test_multiple "print $var" "variable $var printed property" {  
+        gdb_test_multiple "print $var" "variable $var printed property" {
 		-re "^print $var\r*\n.\[0-9\]* = 42.*$gdb_prompt $" {
 			pass "variable $var printed properly"
 		}

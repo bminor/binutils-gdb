@@ -3947,7 +3947,7 @@ cutu_reader::skip_one_attribute (dwarf_form form, const gdb_byte *info_ptr)
    INFO_PTR should point just after the initial uleb128 of a DIE, and the
    abbrev corresponding to that skipped uleb128 should be passed in
    ABBREV.
-   
+
    If DO_SKIP_CHILDREN is true, or if the DIE has no children, this
    returns a pointer to this DIE's sibling, skipping any children.
    Otherwise, returns a pointer to the DIE's first child.  */
@@ -8802,7 +8802,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 		      struct call_site,
 		      sizeof (*call_site) + sizeof (call_site->parameter[0]) * nparams))
     struct call_site (pc, cu->per_cu, per_objfile);
-  
+
   if (!cu->call_site_htab.emplace (call_site).second)
     {
       complaint (_("Duplicate PC %s for DW_TAG_call_site "

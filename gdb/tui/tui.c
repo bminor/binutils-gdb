@@ -620,12 +620,12 @@ tui_is_window_visible (enum tui_win_type type)
 }
 
 bool
-tui_get_command_dimension (unsigned int *width, 
+tui_get_command_dimension (unsigned int *width,
 			   unsigned int *height)
 {
   if (!tui_active || (tui_cmd_win () == NULL))
     return false;
-  
+
   *width = tui_cmd_win ()->width;
   *height = tui_cmd_win ()->height;
   return true;

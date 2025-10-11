@@ -21,7 +21,7 @@ const DerivedType A<DATA, DerivedType>::DEFAULT_INSTANCE;
 
 class B : public A<int, B>
 {
-    
+
 };
 
 int main()

@@ -52,9 +52,9 @@ memory_fill (char *addr, size_t size, int pattern)
 {
   long *aligned_addr = (long *) addr;
   long i;
-  for (i = 0; i < size / sizeof (long); i += ONEKB) 
-    { 
-      *aligned_addr = pattern; 
+  for (i = 0; i < size / sizeof (long); i += ONEKB)
+    {
+      *aligned_addr = pattern;
       aligned_addr = aligned_addr + ONEKB;
     }
   return (0);
@@ -68,57 +68,57 @@ int main ()
 
   /* Test ISM. */
   int shmid = shmget (IPC_PRIVATE, SHMSIZE, IPC_CREAT | 0666);
-  if (shmid == -1) 
+  if (shmid == -1)
     exit(1);
   char *shmaddr = (char *)shmat (shmid, NULL, 0x666 | SHM_RND);
-  if (shmaddr == (char *)-1) 
-    { 
-      shmctl (shmid, IPC_RMID, NULL); 
+  if (shmaddr == (char *)-1)
+    {
+      shmctl (shmid, IPC_RMID, NULL);
       exit(1);
     }
   /* Enable ADI on ISM segment. */
-  if (mprotect (shmaddr, SHMSIZE, PROT_READ|PROT_WRITE|PROT_ADI)) 
-    { 
-      perror ("mprotect failed"); 
-      goto err_out; 
+  if (mprotect (shmaddr, SHMSIZE, PROT_READ|PROT_WRITE|PROT_ADI))
+    {
+      perror ("mprotect failed");
+      goto err_out;
     }
   if (memory_fill (shmaddr, SHMSIZE, PAT) != 0) /* line breakpoint here */
     {
-      exit(1); 
+      exit(1);
     }
   adi_clr_version (shmaddr, SHMSIZE);
   caddr_t vshmaddr = adi_set_version (shmaddr, SHMSIZE, 0x8);
-  if (vshmaddr == 0) 
+  if (vshmaddr == 0)
     exit(1);
-  /* Test mmap. */ 
+  /* Test mmap. */
   int fd = open ("/dev/zero", O_RDWR);
   if (fd < 0)
     exit(1);
-  char *maddr = (char *)mmap (NULL, MAPSIZE, PROT_READ|PROT_WRITE, 
+  char *maddr = (char *)mmap (NULL, MAPSIZE, PROT_READ|PROT_WRITE,
                               MAP_PRIVATE, fd, 0);
-  if (maddr == (char *)-1) 
-    exit(1); 
+  if (maddr == (char *)-1)
+    exit(1);
   /* Enable ADI. */
-  if (mprotect (shmaddr, MAPSIZE, PROT_READ|PROT_WRITE|PROT_ADI)) 
-    { 
-      perror ("mprotect failed"); 
+  if (mprotect (shmaddr, MAPSIZE, PROT_READ|PROT_WRITE|PROT_ADI))
+    {
+      perror ("mprotect failed");
       goto err_out;
-   
+
     }
-  if (memory_fill (maddr, MAPSIZE, PAT) != 0) 
-    exit(1); 
+  if (memory_fill (maddr, MAPSIZE, PAT) != 0)
+    exit(1);
   caddr_t vmaddr = adi_set_version (maddr, MAPSIZE, 0x8);
 
   /* Test heap. */
   haddr = (char*) memalign (MAPSIZE, MAPSIZE);
   /* Enable ADI. */
-  if (mprotect (shmaddr, MAPSIZE, PROT_READ|PROT_WRITE|PROT_ADI)) 
-    { 
-      perror ("mprotect failed"); 
+  if (mprotect (shmaddr, MAPSIZE, PROT_READ|PROT_WRITE|PROT_ADI))
+    {
+      perror ("mprotect failed");
       goto err_out;
     }
 
-  if (memory_fill (haddr, MAPSIZE, PAT) != 0) 
+  if (memory_fill (haddr, MAPSIZE, PAT) != 0)
     exit(1);
   adi_clr_version (haddr, MAPSIZE);
   /* Set some ADP version number. */
@@ -128,7 +128,7 @@ int main ()
   vaddr2 = adi_clr_version (haddr+64*4, 64*2);
   vaddr3 = adi_set_version (haddr+64*6, 64*2, 0xa);
   vaddr4 = adi_set_version (haddr+64*8, 64*10, 0x3);
-  if (vaddr == 0) 
+  if (vaddr == 0)
     exit(1);
   char *versioned_p = vaddr;
   *versioned_p = 'a';
@@ -136,8 +136,8 @@ int main ()
   *uvp = 'b';		// version mismatch trap
 
   return (0);
-err_out: 
-  if (shmdt ((const void *)shmaddr) != 0) 
+err_out:
+  if (shmdt ((const void *)shmaddr) != 0)
     perror ("Detach failure");
   shmctl (shmid, IPC_RMID, NULL);
   exit (1);

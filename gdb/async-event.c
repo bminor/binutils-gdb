@@ -127,9 +127,9 @@ initialize_async_signal_handlers (void)
 
 /* Create an asynchronous handler, allocating memory for it.
    Return a pointer to the newly created handler.
-   This pointer will be used to invoke the handler by 
+   This pointer will be used to invoke the handler by
    invoke_async_signal_handler.
-   PROC is the function to call with CLIENT_DATA argument 
+   PROC is the function to call with CLIENT_DATA argument
    whenever the handler is invoked.  */
 async_signal_handler *
 create_async_signal_handler (sig_handler_func * proc,

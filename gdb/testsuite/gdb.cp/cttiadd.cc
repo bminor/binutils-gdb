@@ -31,7 +31,7 @@ int main()
   extern void add1();
   extern void subr2();
   extern void subr3();
-  
+
   c = 'a';
   i = 2;
   f = 4.5;

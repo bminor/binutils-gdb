@@ -64,7 +64,7 @@ main (void)
   ss.a = 10;
   ss.d = 100.01;
   ss_t = ss;
-  
+
   su.d = 100.1;
 
   cs.s = ss;

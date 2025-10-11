@@ -9,7 +9,7 @@ void foo ()
 {
 
   void bar ();
-  
+
   static int funclocal = 3;	/* In Data section */
   static int funclocal_bss;	/* In BSS section */
   static const int funclocal_ro = 203;	/* RO Data */
@@ -37,7 +37,7 @@ void init1 ()
 void usestatics1 ()
 {
   void useit1 (const int *val);
-  
+
   useit1 (&filelocal);
   useit1 (&filelocal_bss);
   useit1 (&filelocal_ro);

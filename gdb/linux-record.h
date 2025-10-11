@@ -547,7 +547,7 @@ enum gdb_syscall {
 
 /* Record a linux syscall.  */
 
-extern int record_linux_system_call (enum gdb_syscall num, 
+extern int record_linux_system_call (enum gdb_syscall num,
 				     struct regcache *regcache,
 				     struct linux_record_tdep *tdep);
 

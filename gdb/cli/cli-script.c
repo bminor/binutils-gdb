@@ -931,7 +931,7 @@ line_first_arg (const char *p)
 {
   const char *first_arg = p + find_command_name_length (p);
 
-  return skip_spaces (first_arg); 
+  return skip_spaces (first_arg);
 }
 
 /* Process one input line.  If the command is an "end", return such an
@@ -1383,7 +1383,7 @@ do_define_command (const char *comname, int from_tty,
   const char *comfull;
   int  hook_type      = CMD_NO_HOOK;
   int  hook_name_size = 0;
-   
+
 #define	HOOK_STRING	"hook-"
 #define	HOOK_LEN 5
 #define HOOK_POST_STRING "hookpost-"

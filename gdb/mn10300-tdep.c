@@ -173,7 +173,7 @@ mn10300_store_return_value (struct gdbarch *gdbarch, struct type *type,
 {
   int len = type->length ();
   int reg, regsz;
-  
+
   if (type->code () == TYPE_CODE_PTR)
     reg = 4;
   else
@@ -1132,7 +1132,7 @@ static const struct frame_unwind_legacy mn10300_frame_unwind (
   NORMAL_FRAME,
   FRAME_UNWIND_ARCH,
   default_frame_unwind_stop_reason,
-  mn10300_frame_this_id, 
+  mn10300_frame_this_id,
   mn10300_frame_prev_register,
   NULL,
   default_frame_sniffer
@@ -1153,19 +1153,19 @@ mn10300_frame_unwind_init (struct gdbarch *gdbarch)
  */
 
 static CORE_ADDR
-mn10300_push_dummy_call (struct gdbarch *gdbarch, 
+mn10300_push_dummy_call (struct gdbarch *gdbarch,
 			 struct value *target_func,
 			 struct regcache *regcache,
-			 CORE_ADDR bp_addr, 
+			 CORE_ADDR bp_addr,
 			 int nargs, struct value **args,
-			 CORE_ADDR sp, 
+			 CORE_ADDR sp,
 			 function_call_return_method return_method,
 			 CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   const int push_size = register_size (gdbarch, E_PC_REGNUM);
   int regs_used;
-  int len, arg_len; 
+  int len, arg_len;
   int stack_offset = 0;
   int argnum;
   const gdb_byte *val;
@@ -1224,7 +1224,7 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
 
       while (regs_used < 2 && arg_len > 0)
 	{
-	  regcache_cooked_write_unsigned (regcache, regs_used, 
+	  regcache_cooked_write_unsigned (regcache, regs_used,
 		  extract_unsigned_integer (val, push_size, byte_order));
 	  val += push_size;
 	  arg_len -= push_size;
@@ -1268,14 +1268,14 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
      expected to allocate any additional stack.  On the other hand, if
      the SP values are different, the difference determines the
      additional stack that must be allocated.
-     
+
      Note that we don't update the return value though because that's
      the value of the stack just after pushing the arguments, but prior
      to performing the call.  This value is needed in order to
      construct the frame ID of the dummy call.  */
   {
     CORE_ADDR func_addr = find_function_addr (target_func, NULL);
-    CORE_ADDR unwound_sp 
+    CORE_ADDR unwound_sp
       = gdbarch_unwind_sp (gdbarch, create_new_frame (sp, func_addr));
     if (sp != unwound_sp)
       regcache_cooked_write_unsigned (regcache, E_SP_REGNUM,
@@ -1389,7 +1389,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
 
   /* Stage 2 */
   set_gdbarch_return_value (gdbarch, mn10300_return_value);
-  
+
   /* Stage 3 -- get target calls working.  */
   set_gdbarch_push_dummy_call (gdbarch, mn10300_push_dummy_call);
   /* set_gdbarch_return_value (store, extract) */
@@ -1402,7 +1402,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
 
   return gdbarch;
 }
- 
+
 /* Dump out the mn10300 specific architecture information.  */
 
 static void

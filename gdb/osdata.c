@@ -209,7 +209,7 @@ info_osdata (const char *type)
 
   if (*type == '\0' && nrows == 0)
     error (_("Available types of OS data not reported."));
-  
+
   if (!osdata->items.empty ())
     {
       last = &osdata->items.back ();

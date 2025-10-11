@@ -1914,7 +1914,7 @@ core_target::info_proc_mappings (struct gdbarch *gdbarch)
     }
 }
 
-/* Implement "maintenance print core-file-backed-mappings" command.  
+/* Implement "maintenance print core-file-backed-mappings" command.
 
    If mappings are loaded, the results should be similar to the
    mappings shown by "info proc mappings".  This command is mainly a

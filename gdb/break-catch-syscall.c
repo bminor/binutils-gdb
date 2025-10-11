@@ -413,7 +413,7 @@ catch_syscall_split_args (const char *arg)
 /* Implement the "catch syscall" command.  */
 
 static void
-catch_syscall_command_1 (const char *arg, int from_tty, 
+catch_syscall_command_1 (const char *arg, int from_tty,
 			 struct cmd_list_element *command)
 {
   int tempflag;

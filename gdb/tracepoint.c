@@ -73,7 +73,7 @@
    large.  (400 - 31)/2 == 184 */
 #define MAX_AGENT_EXPR_LEN	184
 
-/* 
+/*
    Tracepoint.c:
 
    This module defines the following debugger commands:
@@ -486,8 +486,8 @@ save_trace_state_variables (struct ui_file *fp)
 /* ACTIONS functions: */
 
 /* The three functions:
-   collect_pseudocommand, 
-   while_stepping_pseudocommand, and 
+   collect_pseudocommand,
+   while_stepping_pseudocommand, and
    end_actions_pseudocommand
    are placeholders for "commands" that are actually ONLY to be used
    within a tracepoint action list.  If the actual function is ever called,
@@ -1170,7 +1170,7 @@ collection_list::stringify ()
       QUIT;			/* Allow user to bail out with ^C.  */
       if (info_verbose)
 	{
-	  gdb_printf ("(%d, %s, %ld)\n", 
+	  gdb_printf ("(%d, %s, %ld)\n",
 		      m_memranges[i].type,
 		      paddress (current_inferior ()->arch (),
 				m_memranges[i].start),
@@ -1638,7 +1638,7 @@ start_tracing (const char *notes)
   /* Send down all the trace state variables too.  */
   for (const trace_state_variable &tsv : tvariables)
     target_download_trace_state_variable (tsv);
-  
+
   /* Tell target to treat text-like sections as transparent.  */
   target_trace_set_readonly_regions ();
   /* Set some mode flags.  */
@@ -1740,7 +1740,7 @@ tstatus_command (const char *args, int from_tty)
 {
   struct trace_status *ts = current_trace_status ();
   int status;
-  
+
   status = target_get_trace_status (ts);
 
   if (status == -1)
@@ -1963,7 +1963,7 @@ trace_status_mi (int on_stop)
 	      stopping_tracepoint = ts->stopping_tracepoint;
 	      break;
 	    }
-	  
+
 	  if (stop_reason)
 	    {
 	      uiout->field_string ("stop-reason", stop_reason);
@@ -2083,7 +2083,7 @@ tfind_1 (enum trace_find_type type, int num,
 
   target_frameno = target_trace_find (type, num, addr1, addr2,
 				      &target_tracept);
-  
+
   if (type == tfind_number
       && num == -1
       && target_frameno == -1)
@@ -2095,12 +2095,12 @@ tfind_1 (enum trace_find_type type, int num,
       /* A request for a non-existent trace frame has failed.
 	 Our response will be different, depending on FROM_TTY:
 
-	 If FROM_TTY is true, meaning that this command was 
+	 If FROM_TTY is true, meaning that this command was
 	 typed interactively by the user, then give an error
 	 and DO NOT change the state of traceframe_number etc.
 
 	 However if FROM_TTY is false, meaning that we're either
-	 in a script, a loop, or a user-defined command, then 
+	 in a script, a loop, or a user-defined command, then
 	 DON'T give an error, but DO change the state of
 	 traceframe_number etc. to invalid.
 
@@ -2112,7 +2112,7 @@ tfind_1 (enum trace_find_type type, int num,
 	 failed WITHOUT aborting.  This allows you to write
 	 scripts that search through the trace buffer until the end,
 	 and then continue on to do something else.  */
-  
+
       if (from_tty)
 	error (_("Target failed to find requested trace frame."));
       else
@@ -2126,7 +2126,7 @@ tfind_1 (enum trace_find_type type, int num,
 #endif
 	}
     }
-  
+
   tp = get_tracepoint_by_number_on_target (target_tracept);
 
   reinit_frame_cache ();
@@ -2203,13 +2203,13 @@ check_trace_running (struct trace_status *status)
     error (_("May not look at trace frames while trace is running."));
 }
 
-/* trace_find_command takes a trace frame number n, 
-   sends "QTFrame:<n>" to the target, 
+/* trace_find_command takes a trace frame number n,
+   sends "QTFrame:<n>" to the target,
    and accepts a reply that may contain several optional pieces
    of information: a frame number, a tracepoint number, and an
    indication of whether this is a trap frame or a stepping frame.
 
-   The minimal response is just "OK" (which indicates that the 
+   The minimal response is just "OK" (which indicates that the
    target does not give us a frame number or a tracepoint number).
    Instead of that, the target may send us a string containing
    any combination of:
@@ -2224,7 +2224,7 @@ tfind_command_1 (const char *args, int from_tty)
   int frameno = -1;
 
   check_trace_running (current_trace_status ());
-  
+
   if (args == 0 || *args == 0)
     { /* TFIND with no args means find NEXT trace frame.  */
       if (traceframe_number == -1)
@@ -2238,7 +2238,7 @@ tfind_command_1 (const char *args, int from_tty)
 	error (_("not debugging trace buffer"));
       else if (from_tty && traceframe_number == 0)
 	error (_("already at start of trace buffer"));
-      
+
       frameno = traceframe_number - 1;
       }
   /* A hack to work around eval's need for fp to have been collected.  */
@@ -2323,7 +2323,7 @@ tfind_tracepoint_command (const char *args, int from_tty)
    This command will take a sourceline for argument, just like BREAK
    or TRACE (ie. anything that "decode_line_1" can handle).
 
-   With no argument, this command will find the next trace frame 
+   With no argument, this command will find the next trace frame
    corresponding to a source line OTHER THAN THE CURRENT ONE.  */
 
 static void

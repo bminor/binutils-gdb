@@ -72,7 +72,7 @@ adjust_value_for_child_access (struct value **value,
     *was_ptr = 0;
 
   *type = check_typedef (*type);
-  
+
   /* The type of value stored in varobj, that is passed
      to us, is already supposed to be
      reference-stripped.  */
@@ -211,7 +211,7 @@ c_number_of_children (const struct varobj *var)
 
 	 We can show char* so we allow it to be dereferenced.  If you decide
 	 to test for it, please mind that a little magic is necessary to
-	 properly identify it: char* has TYPE_CODE == TYPE_CODE_INT and 
+	 properly identify it: char* has TYPE_CODE == TYPE_CODE_INT and
 	 TYPE_NAME == "char".  */
       if (target->code () == TYPE_CODE_FUNC
 	  || target->code () == TYPE_CODE_VOID)
@@ -277,7 +277,7 @@ value_struct_element_index (struct value *value, int type_index)
    information cannot be determined, set *CNAME, *CVALUE, or *CTYPE
    to empty.  */
 
-static void 
+static void
 c_describe_child (const struct varobj *parent, int index,
 		  std::string *cname, struct value **cvalue,
 		  struct type **ctype, std::string *cfull_expression)
@@ -432,7 +432,7 @@ c_path_expr_of_child (const struct varobj *child)
 {
   std::string path_expr;
 
-  c_describe_child (child->parent, child->index, NULL, NULL, NULL, 
+  c_describe_child (child->parent, child->index, NULL, NULL, NULL,
 		    &path_expr);
   return path_expr;
 }
@@ -513,7 +513,7 @@ c_value_of_variable (const struct varobj *var,
 
 	    gdb_assert (varobj_value_is_changeable_p (var));
 	    gdb_assert (!var->value->lazy ());
-	    
+
 	    /* If the specified format is the current one,
 	       we can reuse print_value.  */
 	    if (format == var->format)
@@ -795,7 +795,7 @@ cplus_describe_child (const struct varobj *parent, int index,
 	      const char *ptr = was_ptr ? "*" : "";
 
 	      /* Cast the parent to the base' type.  Note that in gdb,
-		 expression like 
+		 expression like
 			 (Base1)d
 		 will create an lvalue, for all appearances, so we don't
 		 need to use more fancy:
@@ -834,7 +834,7 @@ cplus_describe_child (const struct varobj *parent, int index,
 	 	access = "public";
 	      else if (children[v_private] > 0)
 	 	access = "private";
-	      else 
+	      else
 	 	access = "protected";
 	      break;
 	    case 1:
@@ -867,7 +867,7 @@ cplus_describe_child (const struct varobj *parent, int index,
   else
     {
       c_describe_child (parent, index, cname, cvalue, ctype, cfull_expression);
-    }  
+    }
 }
 
 static std::string
@@ -884,7 +884,7 @@ cplus_path_expr_of_child (const struct varobj *child)
 {
   std::string path_expr;
 
-  cplus_describe_child (child->parent, child->index, NULL, NULL, NULL, 
+  cplus_describe_child (child->parent, child->index, NULL, NULL, NULL,
 			&path_expr);
   return path_expr;
 }

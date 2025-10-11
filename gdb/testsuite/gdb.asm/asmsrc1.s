@@ -5,10 +5,10 @@
 	comment "Be careful about changing this file without also changing"
 	comment "asm-source.exp."
 
-	
+
 	comment	"This file is not linked with crt0."
 	comment	"Provide very simplistic equivalent."
-	
+
 	.global _start
 	gdbasm_declare _start
 	gdbasm_startup

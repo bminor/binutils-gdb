@@ -751,7 +751,7 @@ vlscm_convert_typed_value_from_scheme (const char *func_name,
 					    obj_arg_pos, func_name,
 					    &except_scm, gdbarch);
 	}
-      else if (gdbscm_is_bool (obj)) 
+      else if (gdbscm_is_bool (obj))
 	{
 	  if (type != NULL
 	      && !is_integral_type (type))

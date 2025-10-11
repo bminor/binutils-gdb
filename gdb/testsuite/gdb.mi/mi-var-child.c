@@ -251,7 +251,7 @@ do_children_tests (void)
   struct_declarations.long_array[11] = 5678;
 
   /* Struct/pointer/array tests */
-  a0[0] = '0';  
+  a0[0] = '0';
   a1 = a0;
   a2 = &a1;
   a3 = &a2;
@@ -322,7 +322,7 @@ do_special_tests (void)
   int array[21];
   int a;
 
-  a = 1;   
+  a = 1;
   incr_a(2);
 }
 
@@ -341,12 +341,12 @@ do_child_deletion (void)
     mi_create_varobj S s "create varobj for s"
     mi_list_varobj_children S {{S.a a 0 int} {S.b b 0 int}}	\
        "list children of S"
-    mi_delete_varobj S.a "delete S.a"    
+    mi_delete_varobj S.a "delete S.a"
     mi_delete_varobj S.b "delete S.b"
     mi_delete_varobj S "delete S"
     :*/
   return 99;
-  /*: END: child_deletion :*/  
+  /*: END: child_deletion :*/
 }
 
 int
@@ -360,4 +360,4 @@ main (int argc, char *argv [])
   exit (0);
 }
 
-  
+

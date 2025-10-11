@@ -1,4 +1,4 @@
-/* varargs.c - 
+/* varargs.c -
  * (Added as part of fix for bug 15306 - "call" to varargs functions fails)
  * This program is intended to let me try out "call" to varargs functions
  * with varying numbers of declared args and various argument types.
@@ -80,7 +80,7 @@ test (void)
   dd = 2.0;
   dmax_val = find_max_double(3, 1.0, 4.0, 2.0);
   dmax_val = find_max_double(a, db, dc, dd);
-  
+
   return 0;
 }
 

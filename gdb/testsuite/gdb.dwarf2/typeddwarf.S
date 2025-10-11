@@ -41,7 +41,7 @@ f1:
 	movl	vv, %eax
 	addl	$1, %eax
 	movl	%eax, vv
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	# typeddwarf.c:30
 .LM3:
 	ret
@@ -164,7 +164,7 @@ f2:
 .LM30:
 	addl	$12, %esp
 .LCFI1:
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 .LFE1:
 	.size	f2, .-f2
@@ -183,7 +183,7 @@ f3:
 	movl	vv, %eax
 	addl	$1, %eax
 	movl	%eax, vv
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	# typeddwarf.c:74
 .LM33:
 	ret
@@ -204,7 +204,7 @@ f4:
 	movl	vv, %eax
 	addl	$1, %eax
 	movl	%eax, vv
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	# typeddwarf.c:83
 .LM36:
 	ret
@@ -311,7 +311,7 @@ main:
 .LCFI8:
 	popl	%ebp
 .LCFI9:
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 .LFE4:
 	.size	main, .-main

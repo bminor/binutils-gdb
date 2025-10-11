@@ -95,7 +95,7 @@ mi_getopt_allow_unknown (const char *prefix, int argc,
   return mi_getopt_1 (prefix, argc, argv, opts, oind, oarg, 0);
 }
 
-int 
+int
 mi_valid_noargs (const char *prefix, int argc, const char *const *argv)
 {
   int oind = 0;

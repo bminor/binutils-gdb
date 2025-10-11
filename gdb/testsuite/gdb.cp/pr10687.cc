@@ -1,4 +1,4 @@
-class vec2 
+class vec2
 {
   public:
     vec2() { _v[0] = _v[1] = 0; }
@@ -10,10 +10,10 @@ class vec2
 };
 
 vec2 vec2::axis[2] = { vec2(1,0), vec2(0,1) };
-vec2 vec2::axis6[6] = { 
+vec2 vec2::axis6[6] = {
   vec2(1,0), vec2(0,1),
   vec2(2,0), vec2(0,2),
-  vec2(3,0), vec2(0,3) 
+  vec2(3,0), vec2(0,3)
 };
 
 int main(int argc, char*argv[])

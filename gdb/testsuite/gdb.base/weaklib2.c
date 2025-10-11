@@ -20,12 +20,12 @@
 void bar (void);
 void
 foo (void)
-{ 
+{
   bar ();
-}                                                                                                       
+}
 
 void
 bar (void)
-{ 
+{
   puts ("bar in u2");
-}                                                                                                       
+}

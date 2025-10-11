@@ -49,7 +49,7 @@ main (void)
   int i;
 
   gnu_ifunc_pre ();
-  
+
   i = gnu_ifunc (1);	/* break-at-call */
   assert (i == 2);
 

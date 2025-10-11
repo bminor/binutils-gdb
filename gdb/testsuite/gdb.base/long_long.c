@@ -63,7 +63,7 @@ int known_types()
   /* A union is used here as, hopefully it has well defined packing
      rules.  */
   struct {
-    long long bin, oct, dec, hex;    
+    long long bin, oct, dec, hex;
   } val;
   memset (&val, 0, sizeof val);
 
@@ -94,6 +94,6 @@ int main() {
    pack (ll, sizeof (long long), 2);
 
    known_types();
-   
+
    return 0;
 }

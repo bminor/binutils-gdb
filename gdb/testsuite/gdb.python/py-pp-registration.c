@@ -50,6 +50,6 @@ main ()
 
   init_flt (&flt, 42, 43);
   init_s (&s, 1);
-  
+
   return 0;      /* break to inspect */
 }

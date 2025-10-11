@@ -89,7 +89,7 @@ static mips_linux_nat_target the_mips_linux_nat_target;
 static int have_ptrace_regsets = 1;
 
 /* Map gdb internal register number to ptrace ``address''.
-   These ``addresses'' are normally defined in <asm/ptrace.h>. 
+   These ``addresses'' are normally defined in <asm/ptrace.h>.
 
    ptrace does not provide a way to read (or set) MIPS_PS_REGNUM,
    and there's no point in reading or setting MIPS_ZERO_REGNUM.
@@ -562,7 +562,7 @@ mips_linux_nat_target::can_use_hw_breakpoint (enum bptype type,
     default:
       return 0;
     }
- 
+
   for (i = 0;
        i < mips_linux_watch_get_num_valid (&watch_readback) && cnt;
        i++)

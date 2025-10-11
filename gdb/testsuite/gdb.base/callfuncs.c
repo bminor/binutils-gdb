@@ -266,7 +266,7 @@ cmp10 (i0, i1, i2, i3, i4, i5, i6, i7, i8, i9)
     (i5 == 5) && (i6 == 6) && (i7 == 7) && (i8 == 8) && (i9 == 9);
 }
 
-/* Functions that expect specific values to be passed and return 
+/* Functions that expect specific values to be passed and return
    either 0 or 1, depending upon whether the values were
    passed incorrectly or correctly, respectively. */
 
@@ -335,7 +335,7 @@ long long_arg1, long_arg2;
    There must be one version of "t_float_values" (this one)
    that is not prototyped, and one (if supported) that is (following).
    That way GDB can be tested against both cases.  */
-   
+
 int t_float_values (float_arg1, float_arg2)
 float float_arg1, float_arg2;
 {

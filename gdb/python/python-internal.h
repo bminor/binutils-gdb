@@ -1165,7 +1165,7 @@ gdbpy_type_ready (PyTypeObject *type, PyObject *mod = nullptr)
 # define PyType_Ready POISONED_PyType_Ready
 #endif
 
-/* A class to manage lifecycle of Python objects for objects that are "owned" 
+/* A class to manage lifecycle of Python objects for objects that are "owned"
    by an objfile or a gdbarch.  It keeps track of Python objects and when
    the "owning" object (objfile or gdbarch) is about to be freed, ensures that
    all Python objects "owned" by that object are properly invalidated.
@@ -1175,9 +1175,9 @@ gdbpy_type_ready (PyTypeObject *type, PyObject *mod = nullptr)
    on demand and it is deleted when owning object is about to be freed.
 
    The storage class must provide two member types:
-     
-     * obj_type - the type of Python object whose lifecycle is managed. 
-     * val_type - the type of GDB structure the Python objects are 
+
+     * obj_type - the type of Python object whose lifecycle is managed.
+     * val_type - the type of GDB structure the Python objects are
        representing.
 
    It must also provide following methods:
@@ -1266,9 +1266,9 @@ struct gdbpy_default_invalidator
 };
 
 /* A "storage" implementation suitable for temporary (on-demand) objects.  */
-template <typename P, 
-          typename V, 
-          V* P::*val_slot, 
+template <typename P,
+          typename V,
+          V* P::*val_slot,
 	  typename Invalidator = gdbpy_default_invalidator<P, V, val_slot>>
 class gdbpy_tracking_registry_storage
 {
@@ -1280,7 +1280,7 @@ public:
   {
     gdb_assert (obj != nullptr && obj->*val_slot != nullptr);
 
-    m_objects.insert (obj);    
+    m_objects.insert (obj);
   }
 
   void remove (obj_type *obj)
@@ -1288,7 +1288,7 @@ public:
     gdb_assert (obj != nullptr && obj->*val_slot != nullptr);
     gdb_assert (m_objects.contains (obj));
 
-    m_objects.erase (obj);    
+    m_objects.erase (obj);
   }
 
   ~gdbpy_tracking_registry_storage ()
@@ -1311,9 +1311,9 @@ protected:
    drops all their references the Python object is deallocated and removed
    from storage.
    */
-template <typename P, 
-          typename V, 
-          V* P::*val_slot, 
+template <typename P,
+          typename V,
+          V* P::*val_slot,
 	  typename Invalidator = gdbpy_default_invalidator<P, V, val_slot>>
 class gdbpy_memoizing_registry_storage
 {

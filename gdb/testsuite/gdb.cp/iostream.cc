@@ -1,5 +1,5 @@
 /* Code to go along with tests in rtti.exp.
-   
+
    Copyright 2015-2025 Free Software Foundation, Inc.
 
    This file is part of GDB.

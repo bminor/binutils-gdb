@@ -66,7 +66,7 @@ tui_win_info::refresh_window ()
 
 /* Draw a border around the window.  */
 static void
-box_win (struct tui_win_info *win_info, 
+box_win (struct tui_win_info *win_info,
 	 bool highlight_flag)
 {
   WINDOW *win;
@@ -113,7 +113,7 @@ box_win (struct tui_win_info *win_info,
 void
 tui_unhighlight_win (struct tui_win_info *win_info)
 {
-  if (win_info != NULL 
+  if (win_info != NULL
       && win_info->can_box ()
       && win_info->handle != NULL)
     {

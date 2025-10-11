@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/************************************************************************** 
+/**************************************************************************
  * TESTS :
  *   -- downloading of a rather large executable
- ***************************************************************************/ 
+ ***************************************************************************/
 
 
 /* A large array in .data.  If RLE compression becomes available during
-   downloads, this would have to become a bunch of real random data.  
+   downloads, this would have to become a bunch of real random data.
    Here's a quick way of generating such a bunch:
 
 awk < /dev/null '
@@ -6187,7 +6187,7 @@ unsigned char random_data[RANDOM_DATA_SIZE] = {
 };
 
 int
-main() 
+main()
 {
   long size = sizeof (random_data) / sizeof (random_data[0]);
   printf ("%d\n", random_data [size - 1]);

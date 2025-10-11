@@ -70,16 +70,16 @@ struct SSS
 };
 SSS::SSS (int x, const S& r) : a(x), b(r) { }
 
-class VirtualTest 
-{ 
- private: 
-  int value; 
+class VirtualTest
+{
+ private:
+  int value;
 
- public: 
-  VirtualTest () 
-    { 
+ public:
+  VirtualTest ()
+    {
       value = 1;
-    } 
+    }
 };
 
 class Vbase1 : public virtual VirtualTest { };
@@ -87,21 +87,21 @@ class Vbase2 : public virtual VirtualTest { };
 class Vbase3 : public virtual VirtualTest { };
 
 class Derived : public Vbase1, public Vbase2, public Vbase3
-{ 
- private: 
-  int value; 
-  
+{
+ private:
+  int value;
+
  public:
-  Derived () 
-    { 
-      value = 2; 
+  Derived ()
+    {
+      value = 2;
     }
 };
 
 class Fake
 {
   int sname;
-  
+
  public:
   Fake (const int name = 0):
   sname (name)
@@ -130,7 +130,7 @@ substruct_test (void)
 
   outer.s.a = 3;		/* MI outer breakpoint here */
 
-  return outer;  
+  return outer;
 }
 
 typedef struct string_repr
@@ -321,7 +321,7 @@ main ()
   SSS& ref (sss);
 
   Derived derived;
-  
+
   Fake fake (42);
 #endif
 
@@ -343,7 +343,7 @@ main ()
   nstype.elements[0] = 7;
   nstype.elements[1] = 42;
   nstype.len = 2;
-  
+
   nstype2 = nstype;
 
   eval_sub ();

@@ -211,7 +211,7 @@ struct arch_process_info
 /* Mapping between the general-purpose registers in `struct user'
    format and GDB's register array layout.
    Note that the transfer layout uses 64-bit regs.  */
-static /*const*/ int i386_regmap[] = 
+static /*const*/ int i386_regmap[] =
 {
   RAX * 8, RCX * 8, RDX * 8, RBX * 8,
   RSP * 8, RBP * 8, RSI * 8, RDI * 8,
@@ -264,7 +264,7 @@ static const int x86_64_regmap[] =
 
 /* Mapping between the general-purpose registers in `struct user'
    format and GDB's register array layout.  */
-static /*const*/ int i386_regmap[] = 
+static /*const*/ int i386_regmap[] =
 {
   EAX * 4, ECX * 4, EDX * 4, EBX * 4,
   UESP * 4, EBP * 4, ESI * 4, EDI * 4,

@@ -1472,13 +1472,13 @@ reload_shared_libraries (const char *ignored, int from_tty,
 {
   reload_shared_libraries_1 (from_tty);
 
-  /* Creating inferior hooks here has two purposes.  First, if we reload 
+  /* Creating inferior hooks here has two purposes.  First, if we reload
      shared libraries then the address of solib breakpoint we've computed
      previously might be no longer valid.  For example, if we forgot to set
      solib-absolute-prefix and are setting it right now, then the previous
      breakpoint address is plain wrong.  Second, installing solib hooks
      also implicitly figures were ld.so is and loads symbols for it.
-     Absent this call, if we've just connected to a target and set 
+     Absent this call, if we've just connected to a target and set
      solib-absolute-prefix or solib-search-path, we'll lose all information
      about ld.so.  */
   if (target_has_execution ())

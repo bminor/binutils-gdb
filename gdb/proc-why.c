@@ -42,7 +42,7 @@ struct trans
 
 static struct trans pr_why_table[] =
 {
-  { PR_REQUESTED, "PR_REQUESTED", 
+  { PR_REQUESTED, "PR_REQUESTED",
     "Directed to stop by debugger via P(IO)CSTOP or P(IO)CWSTOP" },
   { PR_SIGNALLED, "PR_SIGNALLED", "Receipt of a traced signal" },
   { PR_SYSENTRY, "PR_SYSENTRY", "Entry to a traced system call" },

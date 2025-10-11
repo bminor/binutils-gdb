@@ -91,7 +91,7 @@ sparc64obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
   /* If the program counter is zero, this is probably a core dump, and
      we can get %pc from the stack.  */
   if (pcb->pcb_pc == 0)
-      read_memory(pcb->pcb_sp + BIAS - 176 + (11 * 8), 
+      read_memory(pcb->pcb_sp + BIAS - 176 + (11 * 8),
 		  (gdb_byte *)&pcb->pcb_pc, sizeof pcb->pcb_pc);
 
   regcache->raw_supply (SPARC_SP_REGNUM, &pcb->pcb_sp);

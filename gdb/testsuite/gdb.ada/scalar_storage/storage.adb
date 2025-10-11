@@ -28,7 +28,7 @@ procedure Storage is
       Another_Value : Another_Range;
       Color : Colors;
    end record;
-   
+
    for Rec use record
       Value at 0 range 0..6;
       Another_Value at 0 range 7..10;

@@ -92,8 +92,8 @@ wait_for_connect (int sock, unsigned int *polls, ULONGEST *out_error)
   struct timeval t;
   int n;
 
-  /* While we wait for the connect to complete, 
-     poll the UI so it can update or the user can 
+  /* While we wait for the connect to complete,
+     poll the UI so it can update or the user can
      interrupt.  */
   if (deprecated_ui_loop_hook && deprecated_ui_loop_hook (0))
     {

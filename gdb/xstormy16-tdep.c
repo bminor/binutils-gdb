@@ -133,18 +133,18 @@ xstormy16_type_is_scalar (struct type *t)
 	  && t->code () != TYPE_CODE_ARRAY);
 }
 
-/* Function: xstormy16_use_struct_convention 
+/* Function: xstormy16_use_struct_convention
    Returns non-zero if the given struct type will be returned using
    a special convention, rather than the normal function return method.
    7sed in the contexts of the "return" command, and of
-   target function calls from the debugger.  */ 
+   target function calls from the debugger.  */
 
 static int
 xstormy16_use_struct_convention (struct type *type)
 {
   return !xstormy16_type_is_scalar (type)
 	 || type->length () > E_MAX_RETTYPE_SIZE_IN_REGS;
-} 
+}
 
 /* Function: xstormy16_extract_return_value
    Find a function's return value in the appropriate registers (in
@@ -163,15 +163,15 @@ xstormy16_extract_return_value (struct type *type, struct regcache *regcache,
 
 /* Function: xstormy16_store_return_value
    Copy the function return value from VALBUF into the
-   proper location for a function return. 
+   proper location for a function return.
    Called only in the context of the "return" command.  */
 
-static void 
+static void
 xstormy16_store_return_value (struct type *type, struct regcache *regcache,
 			      const gdb_byte *valbuf)
 {
   if (type->length () == 1)
-    {    
+    {
       /* Add leading zeros to the value.  */
       gdb_byte buf[xstormy16_reg_size];
       memset (buf, 0, xstormy16_reg_size);
@@ -368,7 +368,7 @@ xstormy16_analyze_prologue (struct gdbarch *gdbarch,
 	;
 
       /* Optional copying of args in r2-r7 to stack.  */
-      /* 72DS HHHH   mov.b (rD, 0xHHHH), r(S-8) 
+      /* 72DS HHHH   mov.b (rD, 0xHHHH), r(S-8)
 	 (bit3 always 1, bit2-0 = reg) */
       /* 73DS HHHH   mov.w (rD, 0xHHHH), r(S-8) */
       else if ((inst & 0xfed8) == 0x72d8 && (inst & 0x0007) >= 2)
@@ -392,11 +392,11 @@ xstormy16_analyze_prologue (struct gdbarch *gdbarch,
 }
 
 /* Function: xstormy16_skip_prologue
-   If the input address is in a function prologue, 
+   If the input address is in a function prologue,
    returns the address of the end of the prologue;
    else returns the input address.
 
-   Note: the input address is likely to be the function start, 
+   Note: the input address is likely to be the function start,
    since this function is mainly used for advancing a breakpoint
    to the first line, or stepping to the first line when we have
    stepped into a function call.  */

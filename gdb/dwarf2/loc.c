@@ -673,7 +673,7 @@ call_site_target::iterate_over_addresses (gdbarch *call_site_gdbarch,
 			 paddress (call_site_gdbarch, call_site->pc ()),
 			 (msym.minsym == NULL ? "???"
 			  : msym.minsym->print_name ()));
-			
+
 	  }
 	if (caller_frame == NULL)
 	  {
@@ -686,7 +686,7 @@ call_site_target::iterate_over_addresses (gdbarch *call_site_gdbarch,
 			 paddress (call_site_gdbarch, call_site->pc ()),
 			 (msym.minsym == NULL ? "???"
 			  : msym.minsym->print_name ()));
-			
+
 	  }
 	caller_arch = get_frame_arch (caller_frame);
 	caller_core_addr_type = builtin_type (caller_arch)->builtin_func_ptr;
@@ -720,7 +720,7 @@ call_site_target::iterate_over_addresses (gdbarch *call_site_gdbarch,
 			 physname, paddress (call_site_gdbarch, call_site->pc ()),
 			 (msym.minsym == NULL ? "???"
 			  : msym.minsym->print_name ()));
-			
+
 	  }
 
 	CORE_ADDR addr = (gdbarch_convert_from_func_ptr_addr
@@ -1237,7 +1237,7 @@ dwarf_expr_reg_to_entry_parameter (const frame_info_ptr &initial_frame,
       throw_error (NO_ENTRY_VALUE_ERROR, _("Cannot find matching parameter "
 					   "at DW_TAG_call_site %s at %s"),
 		   paddress (gdbarch, caller_pc),
-		   msym == NULL ? "???" : msym->print_name ()); 
+		   msym == NULL ? "???" : msym->print_name ());
     }
 
   *per_cu_return = call_site->per_cu;
@@ -2385,14 +2385,14 @@ access_memory (struct gdbarch *arch, struct agent_expr *expr, ULONGEST nbits)
 }
 
 /* Compile a DWARF location expression to an agent expression.
-   
+
    EXPR is the agent expression we are building.
    LOC is the agent value we modify.
    ARCH is the architecture.
    ADDR_SIZE is the size of addresses, in bytes.
    OP_PTR is the start of the location expression.
    OP_END is one past the last byte of the location expression.
-   
+
    This will throw an exception for various kinds of errors -- for
    example, if the expression cannot be compiled, or if the expression
    is invalid.  */
@@ -3217,7 +3217,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
       if (base_data[0] >= DW_OP_breg0 && base_data[0] <= DW_OP_breg31)
 	{
 	  const gdb_byte *buf_end;
-	  
+
 	  frame_reg = base_data[0] - DW_OP_breg0;
 	  buf_end = safe_read_sleb128 (base_data + 1, base_data + base_size,
 				       &base_offset);
@@ -3283,7 +3283,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
       offset = extract_unsigned_integer (data + 1, addr_size,
 					 gdbarch_byte_order (gdbarch));
 
-      gdb_printf (stream, 
+      gdb_printf (stream,
 		  _("a thread-local variable at offset 0x%s "
 		    "in the thread-local storage for `%s'"),
 		  phex_nz (offset, addr_size), objfile_name (objfile));
@@ -3310,7 +3310,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 
       data = safe_read_uleb128 (data + 1, end, &offset);
       offset = (uint64_t) dwarf2_read_addr_index (per_cu, per_objfile, offset);
-      gdb_printf (stream, 
+      gdb_printf (stream,
 		  _("a thread-local variable at offset 0x%s "
 		    "in the thread-local storage for `%s'"),
 		  phex_nz (offset, addr_size), objfile_name (objfile));
@@ -3791,7 +3791,7 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
       if (data < end)
 	{
 	  int empty = data == here;
-	      
+
 	  if (disassemble)
 	    gdb_printf (stream, "   ");
 	  if (data[0] == DW_OP_piece)

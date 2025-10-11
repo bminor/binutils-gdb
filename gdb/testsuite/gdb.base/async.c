@@ -22,7 +22,7 @@ int
 main (void)
 {
  int y, z;
- 
+
  y = 2;
  z = 9;
  y = foo ();

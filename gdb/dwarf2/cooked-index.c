@@ -1,4 +1,4 @@
-/* DIE indexing 
+/* DIE indexing
 
    Copyright (C) 2022-2025 Free Software Foundation, Inc.
 

@@ -3,7 +3,7 @@ namespace mc {
   class Base {
   protected:
     int x;
-    
+
   public:
     Base(void) { x = 2; };
   };
@@ -13,7 +13,7 @@ namespace ph {
   class Middle: public virtual mc::Base {
   protected:
     int y;
-    
+
   public:
     Middle(void): mc::Base() { y = 3; };
 
@@ -26,7 +26,7 @@ namespace ph {
   class Derived: public virtual Middle {
   protected:
     int z;
-    
+
   public:
     Derived(void): Middle() { z = 4; };
 
@@ -53,7 +53,7 @@ class RHA
 {
 public:
   RHA() : mA(0xaaaaaaaa) {}
-  virtual void a() = 0;  
+  virtual void a() = 0;
   int mA;
 };
 

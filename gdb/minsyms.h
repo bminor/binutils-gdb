@@ -101,13 +101,13 @@ class minimal_symbol_reader
 
   /* Record a new minimal symbol.  This is the "full" entry point;
      simpler convenience entry points are also provided below.
-   
+
      This returns a new minimal symbol.  It is ok to modify the returned
      minimal symbol (though generally not necessary).  It is not ok,
      though, to stash the pointer anywhere; as minimal symbols may be
      moved after creation.  The memory for the returned minimal symbol
      is still owned by the minsyms.c code, and should not be freed.
-   
+
      Arguments are:
 
      NAME - the symbol's name
@@ -292,9 +292,9 @@ bound_minimal_symbol lookup_minimal_symbol_by_pc_section
    lookup_msym_prefer prefer = lookup_msym_prefer::TEXT,
    bound_minimal_symbol *previous = nullptr);
 
-/* Backward compatibility: search through the minimal symbol table 
+/* Backward compatibility: search through the minimal symbol table
    for a matching PC (no section given).
-   
+
    This is a wrapper that calls lookup_minimal_symbol_by_pc_section
    with a NULL section argument.  */
 

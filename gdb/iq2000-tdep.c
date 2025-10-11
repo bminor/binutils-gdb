@@ -35,15 +35,15 @@
 
 enum gdb_regnum
 {
-  E_R0_REGNUM,  E_R1_REGNUM,  E_R2_REGNUM,  E_R3_REGNUM, 
-  E_R4_REGNUM,  E_R5_REGNUM,  E_R6_REGNUM,  E_R7_REGNUM, 
-  E_R8_REGNUM,  E_R9_REGNUM,  E_R10_REGNUM, E_R11_REGNUM, 
-  E_R12_REGNUM, E_R13_REGNUM, E_R14_REGNUM, E_R15_REGNUM, 
-  E_R16_REGNUM, E_R17_REGNUM, E_R18_REGNUM, E_R19_REGNUM, 
-  E_R20_REGNUM, E_R21_REGNUM, E_R22_REGNUM, E_R23_REGNUM, 
-  E_R24_REGNUM, E_R25_REGNUM, E_R26_REGNUM, E_R27_REGNUM, 
-  E_R28_REGNUM, E_R29_REGNUM, E_R30_REGNUM, E_R31_REGNUM, 
-  E_PC_REGNUM, 
+  E_R0_REGNUM,  E_R1_REGNUM,  E_R2_REGNUM,  E_R3_REGNUM,
+  E_R4_REGNUM,  E_R5_REGNUM,  E_R6_REGNUM,  E_R7_REGNUM,
+  E_R8_REGNUM,  E_R9_REGNUM,  E_R10_REGNUM, E_R11_REGNUM,
+  E_R12_REGNUM, E_R13_REGNUM, E_R14_REGNUM, E_R15_REGNUM,
+  E_R16_REGNUM, E_R17_REGNUM, E_R18_REGNUM, E_R19_REGNUM,
+  E_R20_REGNUM, E_R21_REGNUM, E_R22_REGNUM, E_R23_REGNUM,
+  E_R24_REGNUM, E_R25_REGNUM, E_R26_REGNUM, E_R27_REGNUM,
+  E_R28_REGNUM, E_R29_REGNUM, E_R30_REGNUM, E_R31_REGNUM,
+  E_PC_REGNUM,
   E_LR_REGNUM        = E_R31_REGNUM, /* Link register.  */
   E_SP_REGNUM        = E_R29_REGNUM, /* Stack pointer.  */
   E_FP_REGNUM        = E_R27_REGNUM, /* Frame pointer.  */
@@ -142,7 +142,7 @@ iq2000_register_name (struct gdbarch *gdbarch, int regnum)
 /* Prologue analysis methods:  */
 
 /* ADDIU insn (001001 rs(5) rt(5) imm(16)).  */
-#define INSN_IS_ADDIU(X)	(((X) & 0xfc000000) == 0x24000000) 
+#define INSN_IS_ADDIU(X)	(((X) & 0xfc000000) == 0x24000000)
 #define ADDIU_REG_SRC(X)	(((X) & 0x03e00000) >> 21)
 #define ADDIU_REG_TGT(X)	(((X) & 0x001f0000) >> 16)
 #define ADDIU_IMMEDIATE(X)	((signed short) ((X) & 0x0000ffff))
@@ -161,7 +161,7 @@ iq2000_register_name (struct gdbarch *gdbarch, int regnum)
 /* Function: find_last_line_symbol
 
    Given an address range, first find a line symbol corresponding to
-   the starting address.  Then find the last line symbol within the 
+   the starting address.  Then find the last line symbol within the
    range that has a line number less than or equal to the first line.
 
    For optimized code with code motion, this finds the last address
@@ -224,10 +224,10 @@ iq2000_scan_prologue (struct gdbarch *gdbarch,
     }
 
   /* Saved registers:
-     We first have to save the saved register's offset, and 
+     We first have to save the saved register's offset, and
      only later do we compute its actual address.  Since the
-     offset can be zero, we must first initialize all the 
-     saved regs to minus one (so we can later distinguish 
+     offset can be zero, we must first initialize all the
+     saved regs to minus one (so we can later distinguish
      between one that's not saved, and one that's saved at zero).  */
   for (srcreg = 0; srcreg < E_NUM_REGS; srcreg ++)
     cache->saved_regs[srcreg] = -1;
@@ -323,11 +323,11 @@ iq2000_init_frame_cache (struct iq2000_frame_cache *cache)
 }
 
 /* Function: iq2000_skip_prologue
-   If the input address is in a function prologue, 
+   If the input address is in a function prologue,
    returns the address of the end of the prologue;
    else returns the input address.
 
-   Note: the input address is likely to be the function start, 
+   Note: the input address is likely to be the function start,
    since this function is mainly used for advancing a breakpoint
    to the first line, or stepping to the first line when we have
    stepped into a function call.  */
@@ -418,7 +418,7 @@ iq2000_frame_this_id (const frame_info_ptr &this_frame, void **this_cache,
 							 this_cache);
 
   /* This marks the outermost frame.  */
-  if (cache->base == 0) 
+  if (cache->base == 0)
     return;
 
   *this_id = frame_id_build (cache->saved_sp, cache->pc);
@@ -443,11 +443,11 @@ iq2000_frame_base_address (const frame_info_ptr &this_frame, void **this_cache)
 
   return cache->base;
 }
-  
+
 static const struct frame_base iq2000_frame_base = {
   &iq2000_frame_unwind,
   iq2000_frame_base_address,
-  iq2000_frame_base_address, 
+  iq2000_frame_base_address,
   iq2000_frame_base_address
 };
 
@@ -475,7 +475,7 @@ iq2000_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 /* Target function return value methods: */
 
 /* Function: store_return_value
-   Copy the function return value from VALBUF into the 
+   Copy the function return value from VALBUF into the
    proper location for a function return.  */
 
 static void
@@ -498,7 +498,7 @@ iq2000_store_return_value (struct type *type, struct regcache *regcache,
     }
 }
 
-/* Function: use_struct_convention 
+/* Function: use_struct_convention
    Returns non-zero if the given struct type will be returned using
    a special convention, rather than the normal function return method.  */
 
@@ -511,7 +511,7 @@ iq2000_use_struct_convention (struct type *type)
 }
 
 /* Function: extract_return_value
-   Copy the function's return value into VALBUF. 
+   Copy the function's return value into VALBUF.
    This function is called only in the context of "target function calls",
    ie. when the debugger forces a function to be called in the child, and
    when the debugger forces a function to return prematurely via the
@@ -525,7 +525,7 @@ iq2000_extract_return_value (struct type *type, struct regcache *regcache,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   /* If the function's return value is 8 bytes or less, it is
-     returned in a register, and if larger than 8 bytes, it is 
+     returned in a register, and if larger than 8 bytes, it is
      returned in a stack location which is pointed to by the same
      register.  */
   int len = type->length ();
@@ -534,7 +534,7 @@ iq2000_extract_return_value (struct type *type, struct regcache *regcache,
     {
       int regno = E_FN_RETURN_REGNUM;
 
-      /* Return values of <= 8 bytes are returned in 
+      /* Return values of <= 8 bytes are returned in
 	 FN_RETURN_REGNUM.  */
       while (len > 0)
 	{
@@ -648,7 +648,7 @@ iq2000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       typelen = type->length ();
       if (typelen <= 4)
 	{
-	  /* Scalars of up to 4 bytes, 
+	  /* Scalars of up to 4 bytes,
 	     structs of up to 4 bytes, and
 	     pointers.  */
 	  if (argreg <= E_LAST_ARGREG)
@@ -658,7 +658,7 @@ iq2000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	}
       else if (typelen == 8 && !iq2000_pass_8bytetype_by_address (type))
 	{
-	  /* long long, 
+	  /* long long,
 	     double, and possibly
 	     structs with a single field of long long or double.  */
 	  if (argreg <= E_LAST_ARGREG - 1)
@@ -733,7 +733,7 @@ iq2000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	}
       else if (typelen == 8 && !iq2000_pass_8bytetype_by_address (type))
 	{
-	  /* (long long), (double), or struct consisting of 
+	  /* (long long), (double), or struct consisting of
 	     a single (long long) or (double).  */
 	  if (argreg <= E_LAST_ARGREG - 1)
 	    {

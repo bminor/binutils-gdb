@@ -159,7 +159,7 @@ void tester ()
   break5 ();
 }
 
-int main () 
+int main ()
 {
   int i;
 

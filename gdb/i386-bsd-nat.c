@@ -269,7 +269,7 @@ INIT_GDB_FILE (i386bsd_nat)
     {
       warning (_("\
 offsetof (struct sigcontext, sc_pc) yields %d instead of %d.\n\
-Please report this to <bug-gdb@gnu.org>."), 
+Please report this to <bug-gdb@gnu.org>."),
 	       offset, SC_PC_OFFSET);
     }
 

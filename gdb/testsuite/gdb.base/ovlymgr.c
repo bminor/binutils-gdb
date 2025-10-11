@@ -22,7 +22,7 @@ static void ovly_copy (unsigned long dst, unsigned long src, long size);
    since libgloss is the one intended to handle low level system issues.
    I would suggest something like _flush_cache to avoid the user's namespace
    but not be completely obscure as other things may need this facility.  */
- 
+
 static void
 FlushCache (void)
 {
@@ -33,7 +33,7 @@ FlushCache (void)
 }
 
 /* _ovly_debug_event:
- * Debuggers may set a breakpoint here, to be notified 
+ * Debuggers may set a breakpoint here, to be notified
  * when the overlay table has been modified.
  */
 static void
@@ -63,8 +63,8 @@ OverlayLoad (unsigned long ovlyno)
     else if (_ovly_table[i][VMA] == _ovly_table[ovlyno][VMA])
       _ovly_table[i][MAPPED] = 0;	/* this one now un-mapped */
 
-  ovly_copy (_ovly_table[ovlyno][VMA], 
-	     _ovly_table[ovlyno][LMA], 
+  ovly_copy (_ovly_table[ovlyno][VMA],
+	     _ovly_table[ovlyno][LMA],
 	     _ovly_table[ovlyno][SIZE]);
 
   FlushCache ();
@@ -77,17 +77,17 @@ OverlayLoad (unsigned long ovlyno)
  * Does NOT mark overlay as "unmapped", therefore may be called
  * more than once for the same mapped overlay.
  */
- 
+
 bool
 OverlayUnload (unsigned long ovlyno)
 {
   if (ovlyno < 0 || ovlyno >= _novlys)
     exit (-1);  /* fail, bad ovly number */
- 
+
   if (!_ovly_table[ovlyno][MAPPED])
     exit (-1);  /* error, can't copy out a segment that's not "in" */
- 
-  ovly_copy (_ovly_table[ovlyno][LMA], 
+
+  ovly_copy (_ovly_table[ovlyno][LMA],
 	     _ovly_table[ovlyno][VMA],
 	     _ovly_table[ovlyno][SIZE]);
 

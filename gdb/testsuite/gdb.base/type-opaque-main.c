@@ -21,23 +21,23 @@ struct struct_libtype_opaque;
 
 struct struct_libtype_empty
   {
-  };    
+  };
 
 struct struct_libtype_filled
   {
     long mainfield_filled;
-  };    
+  };
 
 union union_libtype_opaque;
 
 union union_libtype_empty
   {
-  };    
+  };
 
 union union_libtype_filled
   {
     long mainfield_filled;
-  };    
+  };
 
 int main (void)
 {

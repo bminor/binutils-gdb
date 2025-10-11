@@ -183,7 +183,7 @@ store_register (const struct regcache *regcache, int regno)
 	  unsigned pc_val;
 
 	  regcache->raw_collect (ARM_PC_REGNUM, (char *) &pc_val);
-	  
+
 	  pc_val = gdbarch_addr_bits_remove (gdbarch, pc_val);
 	  inferior_registers.r_pc ^= gdbarch_addr_bits_remove
 				       (gdbarch, inferior_registers.r_pc);
@@ -249,7 +249,7 @@ store_regs (const struct regcache *regcache)
 
       regcache->raw_collect (ARM_PC_REGNUM, (char *) &pc_val);
       regcache->raw_collect (ARM_PS_REGNUM, (char *) &psr_val);
-	  
+
       pc_val = gdbarch_addr_bits_remove (gdbarch, pc_val);
       psr_val ^= gdbarch_addr_bits_remove (gdbarch, psr_val);
 

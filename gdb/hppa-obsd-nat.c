@@ -80,7 +80,7 @@ hppaobsd_supply_gregset (struct regcache *regcache, const void *gregs)
       regcache->raw_supply (HPPA_SR7_REGNUM, regs + 44 * 4);
       regcache->raw_supply (HPPA_CR26_REGNUM, regs + 45 * 4);
       regcache->raw_supply (HPPA_CR27_REGNUM, regs + 46 * 4);
-    } 
+    }
   else
     {
       regcache->raw_supply (HPPA_SAR_REGNUM, regs);

@@ -344,7 +344,7 @@ do_special_tests (void)
   int array[21];
   int a;
 
-  a = 1;   
+  a = 1;
   u.integer = a;
   anonu.a = a;
   s.integer = a;
@@ -366,7 +366,7 @@ void do_frozen_tests ()
   } v1 = {1, {2, 3}};
 
   int v2 = 4;
-  /*: 
+  /*:
     with_test_prefix "create varobj V1 and V2" {
 	mi_create_varobj V1 v1 "create varobj for v1"
 	mi_create_varobj V2 v2 "create varobj for v2"
@@ -388,12 +388,12 @@ void do_frozen_tests ()
     }
   :*/
   v2 = 5;
-  /*: 
+  /*:
     mi_varobj_update * {V2} "update varobjs: V2 changed"
     set_frozen V2 1
   :*/
   v2 = 6;
-  /*: 
+  /*:
     mi_varobj_update * {} "update varobjs: nothing changed"
     mi_check_varobj_value V2 5 "check V2: 5"
     mi_varobj_update V2 {V2} "update V2 explicitly"
@@ -447,8 +447,8 @@ void do_frozen_tests ()
 	mi_check_varobj_value V1.nested.j 11 "check V1.nested.j: 11"
 	mi_check_varobj_value V1.nested.k 12 "check V1.nested.k: 12"
     }
-  :*/    
-  
+  :*/
+
   /*: END: frozen :*/
 }
 
@@ -460,7 +460,7 @@ void do_at_tests_callee ()
      and then try to reevaluate it in other frame without reparsing
      the expression, we will access local variables using DWARF
      location expression from the original frame, and are likely
-     to grab wrong symbol.  To reliably reproduce this bug, we need 
+     to grab wrong symbol.  To reliably reproduce this bug, we need
      to wrap our variable with a bunch of buffers, so that those
      buffers are accessed instead of the real one.  */
   int buffer1 = 10;
@@ -546,7 +546,7 @@ void do_bitfield_tests ()
     mi_check_varobj_value V.sharable 3 "access bitfield"
     :*/
   return;
-  /*: END: bitfield :*/  
+  /*: END: bitfield :*/
 }
 
 void
@@ -663,4 +663,4 @@ main (int argc, char *argv [])
   exit (0);
 }
 
-  
+

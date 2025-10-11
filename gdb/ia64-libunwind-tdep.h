@@ -50,7 +50,7 @@ struct libunwind_descr
 int libunwind_frame_sniffer (const struct frame_unwind *self,
 			     const frame_info_ptr &this_frame,
 			     void **this_cache);
-			  
+
 int libunwind_sigtramp_frame_sniffer (const struct frame_unwind *self,
 				      const frame_info_ptr &this_frame,
 				      void **this_cache);

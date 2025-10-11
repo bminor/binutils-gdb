@@ -1,7 +1,7 @@
 /* The ptid_t type and common functions operating on it.
 
    Copyright (C) 1986-2025 Free Software Foundation, Inc.
-   
+
    This file is part of GDB.
 
    This program is free software; you can redistribute it and/or modify

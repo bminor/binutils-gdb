@@ -59,7 +59,7 @@ int i386_darwin_thread_state_reg_offset[] =
   15 * 4    /* GS */
 };
 
-const int i386_darwin_thread_state_num_regs = 
+const int i386_darwin_thread_state_num_regs =
   ARRAY_SIZE (i386_darwin_thread_state_reg_offset);
 
 /* Assuming THIS_FRAME is a Darwin sigtramp routine, return the
@@ -204,11 +204,11 @@ i386_darwin_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			      arg_type->length ());
 
 	      /* The System V ABI says that:
-		 
+
 		 "An argument's size is increased, if necessary, to make it a
 		 multiple of [32-bit] words.  This may require tail padding,
 		 depending on the size of the argument."
-		 
+
 		 This makes sure the stack stays word-aligned.  */
 	      args_space += align_up (arg_type->length (), 4);
 	    }
@@ -279,7 +279,7 @@ i386_mach_o_osabi_sniffer (bfd *abfd)
 {
   if (!bfd_check_format (abfd, bfd_object))
     return GDB_OSABI_UNKNOWN;
-  
+
   if (bfd_get_arch (abfd) == bfd_arch_i386)
     return GDB_OSABI_DARWIN;
 

@@ -14,7 +14,7 @@
 1) Attempt to create file that already exists - EEXIST
 2) Attempt to open a directory for writing - EISDIR
 3) Pathname does not exist - ENOENT
-4) Open for write but no write permission - EACCES   
+4) Open for write but no write permission - EACCES
 
 read(int fd, void *buf, size_t count);
 1) Read using invalid file descriptor - EBADF
@@ -93,7 +93,7 @@ test_open (void)
   ret = open (OUTDIR FILENAME, O_CREAT | O_TRUNC | O_RDWR, S_IWUSR | S_IRUSR);
   printf ("open 1: ret = %d, errno = %d %s\n", ret, errno,
 	  ret >= 0 ? "OK" : "");
-  
+
   if (ret >= 0)
     close (ret);
   stop ();

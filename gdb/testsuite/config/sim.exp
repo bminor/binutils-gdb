@@ -24,7 +24,7 @@ set_board_info gdb_protocol "sim"
 #
 proc gdb_target_sim { } {
     global gdb_prompt
-    
+
     set target_sim_options "[board_info target gdb,target_sim_options]"
 
     send_gdb "target sim $target_sim_options\n"
@@ -32,7 +32,7 @@ proc gdb_target_sim { } {
 	-re "Connected to the simulator.*$gdb_prompt $"	{
 	    verbose "Set target to sim"
 	}
-	timeout { 
+	timeout {
 	    perror "Couldn't set target for simulator."
 	    return -1
 	}

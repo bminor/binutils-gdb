@@ -651,7 +651,7 @@ mapping_is_anonymous_p (const char *filename)
      be anonymous.  Otherwise, GDB considers this mapping to be a
      file-backed mapping (because there will be a file associated with
      it).
- 
+
      It is worth mentioning that, from all those checks described
      above, the most fragile is the one to see if the file name ends
      with " (deleted)".  This does not necessarily mean that the
@@ -665,7 +665,7 @@ mapping_is_anonymous_p (const char *filename)
      that if the file name ends with " (deleted)", then the mapping is
      indeed anonymous.  FWIW, this is something the Linux kernel could
      do better: expose this information in a more direct way.
- 
+
    - If we see the flag "sh" in the "VmFlags:" field (in
      /proc/PID/smaps), then certainly the memory mapping is shared
      (VM_SHARED).  If we have access to the VmFlags, and we don't see
@@ -1101,12 +1101,12 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 
 /* Implementation of `gdbarch_read_core_file_mappings', as defined in
    gdbarch.h.
-   
+
    This function reads the NT_FILE note (which BFD turns into the
    section ".note.linuxcore.file").  The format of this note / section
    is described as follows in the Linux kernel sources in
    fs/binfmt_elf.c:
-   
+
       long count     -- how many files are mapped
       long page_size -- units for file_ofs
       array of [COUNT] elements of
@@ -1114,14 +1114,14 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 	long end
 	long file_ofs
       followed by COUNT filenames in ASCII: "FILE1" NUL "FILE2" NUL...
-      
+
    CBFD is the BFD of the core file.
 
    PRE_LOOP_CB is the callback function to invoke prior to starting
    the loop which processes individual entries.  This callback will
    only be executed after the note has been examined in enough
    detail to verify that it's not malformed in some way.
-   
+
    LOOP_CB is the callback function that will be executed once
    for each mapping.  */
 
@@ -1737,7 +1737,7 @@ linux_make_mappings_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
   pack_long (buf, long_type, 1);
   obstack_grow (&data_obstack, buf, long_type->length ());
 
-  linux_find_memory_regions_full (gdbarch, 
+  linux_find_memory_regions_full (gdbarch,
 				  dump_note_entry_p,
 				  linux_make_mappings_callback,
 				  &mapping_data);

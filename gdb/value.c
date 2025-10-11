@@ -3734,7 +3734,7 @@ value_from_history_ref (const char *h, const char **endp)
     {
       if (len == 2)
 	{
-	  /* For some bizarre reason, "$$" is equivalent to "$$1", 
+	  /* For some bizarre reason, "$$" is equivalent to "$$1",
 	     rather than to "$$0" as it ought to be!  */
 	  index = -1;
 	  *endp += len;

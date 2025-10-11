@@ -762,7 +762,7 @@ END {
       print "bugs/oks: " bugs "/" oks
       print bugs "/ (" oks "+" legacy "+" deprecated ")"
     }
-    # This value should be as low as possible 
+    # This value should be as low as possible
     print bugs / ( oks + legacy + deprecated )
 }
 ' ${wwwdir}/ari.doc`

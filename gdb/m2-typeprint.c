@@ -578,7 +578,7 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
 	    }
 	  gdb_printf (stream, ";\n");
 	}
-      
+
       gdb_printf (stream, "%*sEND ", level, "");
     }
 }

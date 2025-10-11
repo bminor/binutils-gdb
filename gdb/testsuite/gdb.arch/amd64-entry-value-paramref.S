@@ -46,7 +46,7 @@ _ZL3barRi.constprop.0:
 	# gdb.arch/amd64-entry-value-paramref.cc:25
 	.loc 1 25 0
 	movl	(%rdi), %eax
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	# gdb.arch/amd64-entry-value-paramref.cc:26
 	.loc 1 26 0
 	ret
@@ -82,7 +82,7 @@ main:
 	.loc 1 33 0
 	addq	$16, %rsp
 	.cfi_def_cfa_offset 8
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE1:

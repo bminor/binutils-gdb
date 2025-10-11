@@ -997,7 +997,7 @@ find_canonical_descriptor_in_load_object
       lm->dyn_relocs = (arelent **) xmalloc (storage_needed);
 
       /* Fetch the dynamic relocs.  */
-      lm->dyn_reloc_count 
+      lm->dyn_reloc_count
 	= bfd_canonicalize_dynamic_reloc (abfd, lm->dyn_relocs, lm->dyn_syms);
     }
 

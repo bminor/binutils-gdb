@@ -133,7 +133,7 @@
    Mind you, looking at the wall clock, the same GDB debugging GDB
    showed only marginal speed up (0.780 vs 0.773s).  Seems GDB is too
    busy doing something else :-(
-  
+
 */
 
 namespace gdb {

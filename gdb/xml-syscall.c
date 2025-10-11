@@ -308,7 +308,7 @@ syscall_parse_xml (const char *document, xml_fetch_another fetcher)
 /* Function responsible for initializing the information
    about the syscalls.  It reads the XML file and fills the
    struct syscalls_info with the values.
-   
+
    Returns the struct syscalls_info if the file is valid, NULL otherwise.  */
 static struct syscalls_info *
 xml_init_syscalls_info (const char *filename)

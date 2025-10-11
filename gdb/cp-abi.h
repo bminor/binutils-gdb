@@ -72,7 +72,7 @@ enum dtor_kinds {
      object.  */
   base_object_dtor
 };
-  
+
 /* Return non-zero iff NAME is the mangled name of a destructor.
    Actually, return an `enum dtor_kind' value describing what *kind*
    of destructor it is.  */

@@ -74,7 +74,7 @@
    watchpoints and hardware-accelerated condition evaluation.  */
 #ifndef PPC_PTRACE_GETHWDBGINFO
 
-/* Not having PPC_PTRACE_GETHWDBGINFO defined means that the PowerPC HWDEBUG 
+/* Not having PPC_PTRACE_GETHWDBGINFO defined means that the PowerPC HWDEBUG
    ptrace interface is not present in ptrace.h, so we'll have to pretty much
    include it all here so that the code at least compiles on older systems.  */
 #define PPC_PTRACE_GETHWDBGINFO 0x89
@@ -653,7 +653,7 @@ ppc_register_u_addr (struct gdbarch *gdbarch, int regno)
   int wordsize = sizeof (long);
 
   /* General purpose registers occupy 1 slot each in the buffer.  */
-  if (regno >= tdep->ppc_gp0_regnum 
+  if (regno >= tdep->ppc_gp0_regnum
       && regno < tdep->ppc_gp0_regnum + ppc_num_gprs)
     u_addr = ((regno - tdep->ppc_gp0_regnum + PT_R0) * wordsize);
 
@@ -1110,7 +1110,7 @@ fetch_register (struct regcache *regcache, int tid, int regno)
       size_t padding = (bytes_transferred - register_size (gdbarch, regno));
       regcache->raw_supply (regno, buf + padding);
     }
-  else 
+  else
     internal_error (_("fetch_register: unexpected byte order: %d"),
 		    gdbarch_byte_order (gdbarch));
 }
@@ -1118,7 +1118,7 @@ fetch_register (struct regcache *regcache, int tid, int regno)
 /* This function actually issues the request to ptrace, telling
    it to get all general-purpose registers and put them into the
    specified regset.
-   
+
    If the ptrace request does not exist, this function returns 0
    and properly sets the have_ptrace_* flag.  If the request fails,
    this function calls perror_with_name.  Otherwise, if the request
@@ -1170,7 +1170,7 @@ fetch_gp_regs (struct regcache *regcache, int tid)
 /* This function actually issues the request to ptrace, telling
    it to get all floating-point registers and put them into the
    specified regset.
-   
+
    If the ptrace request does not exist, this function returns 0
    and properly sets the have_ptrace_* flag.  If the request fails,
    this function calls perror_with_name.  Otherwise, if the request
@@ -1211,7 +1211,7 @@ fetch_fp_regs (struct regcache *regcache, int tid)
   if (have_ptrace_getsetfpregs)
     if (fetch_all_fp_regs (regcache, tid))
       return;
- 
+
   /* If we've hit this point, it doesn't really matter which
      architecture we are using.  We just need to read the
      registers in the "old-fashioned way".  */
@@ -1219,7 +1219,7 @@ fetch_fp_regs (struct regcache *regcache, int tid)
     fetch_register (regcache, tid, tdep->ppc_fp0_regnum + i);
 }
 
-static void 
+static void
 fetch_ppc_registers (struct regcache *regcache, int tid)
 {
   struct gdbarch *gdbarch = regcache->arch ();
@@ -1328,7 +1328,7 @@ ppc_linux_nat_target::fetch_registers (struct regcache *regcache, int regno)
 
   if (regno == -1)
     fetch_ppc_registers (regcache, tid);
-  else 
+  else
     fetch_register (regcache, tid, regno);
 }
 
@@ -1647,7 +1647,7 @@ store_register (const struct regcache *regcache, int tid, int regno)
       ptrace (PTRACE_POKEUSER, tid, (PTRACE_TYPE_ARG3) regaddr, l);
       regaddr += sizeof (long);
 
-      if (errno == EIO 
+      if (errno == EIO
 	  && (regno == tdep->ppc_fpscr_regnum
 	      || regno == PPC_ORIG_R3_REGNUM
 	      || regno == PPC_TRAP_REGNUM))
@@ -1670,7 +1670,7 @@ store_register (const struct regcache *regcache, int tid, int regno)
 /* This function actually issues the request to ptrace, telling
    it to store all general-purpose registers present in the specified
    regset.
-   
+
    If the ptrace request does not exist, this function returns 0
    and properly sets the have_ptrace_* flag.  If the request fails,
    this function calls perror_with_name.  Otherwise, if the request
@@ -1732,7 +1732,7 @@ store_gp_regs (const struct regcache *regcache, int tid, int regno)
 /* This function actually issues the request to ptrace, telling
    it to store all floating-point registers present in the specified
    regset.
-   
+
    If the ptrace request does not exist, this function returns 0
    and properly sets the have_ptrace_* flag.  If the request fails,
    this function calls perror_with_name.  Otherwise, if the request
@@ -1796,7 +1796,7 @@ store_ppc_registers (const struct regcache *regcache, int tid)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
- 
+
   store_gp_regs (regcache, tid, -1);
   if (tdep->ppc_fp0_regnum >= 0)
     store_fp_regs (regcache, tid, -1);
@@ -2145,7 +2145,7 @@ ppc_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 	return 0;
     }
   /* addr+len must fall in the 8 byte watchable region for DABR-based
-     processors (i.e., server processors).  Without the new PowerPC HWDEBUG 
+     processors (i.e., server processors).  Without the new PowerPC HWDEBUG
      ptrace interface, DAC-based processors (i.e., embedded processors) will
      use addresses aligned to 4-bytes due to the way the read/write flags are
      passed in the old ptrace interface.  */

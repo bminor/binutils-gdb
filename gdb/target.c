@@ -1289,7 +1289,7 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset,
       try
 	{
 	  CORE_ADDR lm_addr;
-	  
+
 	  /* Fetch the load module address for this objfile.  */
 	  lm_addr = gdbarch_fetch_tls_load_module_address (gdbarch,
 							   objfile);
@@ -3536,7 +3536,7 @@ target_fileio_read_alloc (struct inferior *inf, const char *filename,
 
 /* See target.h.  */
 
-gdb::unique_xmalloc_ptr<char> 
+gdb::unique_xmalloc_ptr<char>
 target_fileio_read_stralloc (struct inferior *inf, const char *filename)
 {
   gdb_byte *buffer;

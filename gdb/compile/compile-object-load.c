@@ -484,7 +484,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
 	     "in compiled module \"%s\"."),
 	   gdb_type_from_ptr->code (), COMPILE_I_EXPR_VAL,
 	   objfile_name (objfile));
-  
+
   retval = gdb_type_from_ptr;
   switch (gdb_type_from_ptr->code ())
     {

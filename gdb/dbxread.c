@@ -17,7 +17,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* This module provides three functions: dbx_symfile_init,
-   which initializes to read a symbol file; dbx_new_init, which 
+   which initializes to read a symbol file; dbx_new_init, which
    discards existing cached information when all symbols are being
    discarded; and dbx_symfile_read, which reads a symbol table
    from a file.
@@ -73,7 +73,7 @@ explicit_lookup_type (int real_filenum, int index)
 #endif
 
 /* Scan and build partial symbols for a symbol file.
-   We have been initialized by a call to dbx_symfile_init, which 
+   We have been initialized by a call to dbx_symfile_init, which
    put all the relevant info into a "struct dbx_symfile_info",
    hung off the objfile structure.  */
 

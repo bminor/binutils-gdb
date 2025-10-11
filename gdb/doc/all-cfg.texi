@@ -1,4 +1,4 @@
-@c GDB MANUAL configuration file.  
+@c GDB MANUAL configuration file.
 @c
 @c Copyright (C) 1993--2025 Free Software Foundation, Inc.
 @c
@@ -10,8 +10,8 @@
 @c
 @c The only automatically-varying variable is the GDB version number,
 @c which the Makefile rewrites based on the VERSION variable from
-@c `../Makefile.in'.  
-@c 
+@c `../Makefile.in'.
+@c
 @c GDB version number is recorded in the variable GDBVN
 @include GDBvn.texi
 @c
@@ -30,7 +30,7 @@
 @c
 @c Name of GDB program.  Used also for (gdb) prompt string.
 @set GDBP gdb
-@c 
+@c
 @c Name of GDB product.  Used in running text.
 @set GDBN @sc{gdb}
 @c
@@ -40,6 +40,6 @@
 @c
 @c Name of GCC product
 @set NGCC @sc{gcc}
-@c 
+@c
 @c Name of GCC program
 @set GCC gcc

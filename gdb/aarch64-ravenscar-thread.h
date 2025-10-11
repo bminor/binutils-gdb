@@ -1,5 +1,5 @@
 /* Ravenscar Aarch64 target support.
- 
+
    Copyright (C) 2017-2025 Free Software Foundation, Inc.
 
    This file is part of GDB.

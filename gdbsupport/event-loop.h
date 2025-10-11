@@ -92,8 +92,8 @@ extern void add_file_handler (int fd, handler_func *proc,
 			      gdb_client_data client_data,
 			      std::string &&name, bool is_ui = false);
 
-extern int create_timer (int milliseconds, 
-			 timer_handler_func *proc, 
+extern int create_timer (int milliseconds,
+			 timer_handler_func *proc,
 			 gdb_client_data client_data);
 extern void delete_timer (int id);
 

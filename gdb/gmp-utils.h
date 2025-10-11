@@ -70,7 +70,7 @@ struct gdb_mpz
     mpz_swap (m_val, from.m_val);
   }
 
-  
+
   gdb_mpz &operator= (const gdb_mpz &from)
   {
     mpz_set (m_val, from.m_val);

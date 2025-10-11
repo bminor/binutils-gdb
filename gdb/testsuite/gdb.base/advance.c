@@ -42,7 +42,7 @@ main ()
   int b, c;
   c = 5;
   b = 3;    /* advance this location */
-    
+
   func (c); /* stop here after leaving current frame */
   marker1 (); /* stop here after leaving current frame */
   func3 (); /* break here */

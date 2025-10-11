@@ -364,7 +364,7 @@ public:
     T1& operator~() const;
 };
 
-void* 
+void*
 T1::operator new(size_t) throw ()
 { return 0; }
 
@@ -459,7 +459,7 @@ public:
     static void* operator new(size_t) throw ();
     static void operator delete(void *pointer);
     int value();
-    
+
     static T X;
     T x;
     int val;
@@ -513,7 +513,7 @@ T5<int> t5i(2);
 T5<int (*)(char, void *)> t5fi1(3);
 T5<int (*)(int, double **, void *)> t5fi2(4);
 
- 
+
 
 
 
@@ -523,7 +523,7 @@ public:
     int (*manage[5])(double,
 		     void *(*malloc)(unsigned size),
 		     void (*free)(void *pointer));
-    int (*device[5])(int open(const char *, unsigned mode, unsigned perms, int extra), 
+    int (*device[5])(int open(const char *, unsigned mode, unsigned perms, int extra),
 		     int *(*read)(int fd, void *place, unsigned size),
 		     int *(*write)(int fd, void *place, unsigned size),
 		     void (*close)(int fd));
@@ -797,7 +797,7 @@ int main()
   int x = fint.foo(33, 47);
   char c = fchar.foo(33, 'x');
   volatile char * cp = fvpchar.foo(33, 0);
-  
+
   int y = dummy<int> (400, 600);
 
   int z = bint.bar(55, 66);
@@ -805,13 +805,13 @@ int main()
 
   c = bazint2.baz(4, 'y');
   c = quxint2.qux(4, 'z');
-  
+
   y = bazint.baz(4,3);
   y = quxint.qux(4, 22);
   y += qux11.qux(4, 22);
 
   y *= gf1(y) - gf2(y);
-  
+
   Spec<int, char> sic;
   Spec<int, int *> siip;
 
@@ -826,13 +826,13 @@ int main()
 
   Garply<Garply<char> > nf;
   nf.x = 31;
-  
+
   x = f.garply (3, 4);
-  
+
   fc = nf.garply (3, fc);
 
   y = x + fc.x;
-  
+
   i=GetMax<int>(x,y);
   n=GetMax<long>(l,m);
 

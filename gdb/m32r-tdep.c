@@ -53,26 +53,26 @@ m32r_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 
 
 /* Breakpoints
- 
+
    The little endian mode of M32R is unique.  In most of architectures,
    two 16-bit instructions, A and B, are placed as the following:
-  
+
    Big endian:
    A0 A1 B0 B1
-  
+
    Little endian:
    A1 A0 B1 B0
-  
+
    In M32R, they are placed like this:
-  
+
    Big endian:
    A0 A1 B0 B1
-  
+
    Little endian:
    B1 B0 A1 A0
-  
+
    This is because M32R always fetches instructions in 32-bit.
-  
+
    The following functions take care of this behavior.  */
 
 static int
@@ -746,7 +746,7 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 }
 
 
-/* Given a return value in `regbuf' with a type `valtype', 
+/* Given a return value in `regbuf' with a type `valtype',
    extract and copy its value into `valbuf'.  */
 
 static void

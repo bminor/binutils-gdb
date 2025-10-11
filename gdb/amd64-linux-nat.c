@@ -111,7 +111,7 @@ amd64_linux_collect_native_gregset (const struct regcache *regcache,
   if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
     {
       /* Sign extend EAX value to avoid potential syscall restart
-	 problems.  
+	 problems.
 
 	 On Linux, when a syscall is interrupted by a signal, the
 	 (kernel function implementing the) syscall may return
@@ -121,7 +121,7 @@ amd64_linux_collect_native_gregset (const struct regcache *regcache,
 	 handler is called, the kernel can then either return -EINTR
 	 or it can cause the syscall to be restarted.  We are
 	 concerned with the latter case here.
-	 
+
 	 On (32-bit) i386, the status (-ERESTARTSYS) is placed in the
 	 EAX register.  When debugging a 32-bit process from a 64-bit
 	 (amd64) GDB, the debugger fetches 64-bit registers even
@@ -138,11 +138,11 @@ amd64_linux_collect_native_gregset (const struct regcache *regcache,
 	 syscall after a signal expects to see a negative value
 	 (specifically -ERESTARTSYS) in the 64-bit RAX register in
 	 order to correctly cause a syscall to be restarted.
-	 
+
 	 The call to amd64_collect_native_gregset, above, is setting
 	 the high 32 bits of RAX (and other registers too) to 0.  For
 	 syscall restart, we need to sign extend EAX so that RAX will
-	 appear as a negative value when EAX is set to -ERESTARTSYS. 
+	 appear as a negative value when EAX is set to -ERESTARTSYS.
 	 This in turn will cause the signal handling code in the
 	 kernel to recognize -ERESTARTSYS which will in turn cause the
 	 syscall to be restarted.
@@ -153,7 +153,7 @@ amd64_linux_collect_native_gregset (const struct regcache *regcache,
 
       if (regnum == -1 || regnum == I386_EAX_REGNUM)
 	{
-	  void *ptr = ((gdb_byte *) gregs 
+	  void *ptr = ((gdb_byte *) gregs
 		       + amd64_linux_gregset32_reg_offset[I386_EAX_REGNUM]);
 
 	  *(int64_t *) ptr = *(int32_t *) ptr;

@@ -49,7 +49,7 @@ foo:
 	movl	vv(%rip), %edx
 	addl	$1, %edx
 	movl	%edx, vv(%rip)
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	# clztest.c:14
 .LM5:
 	ret
@@ -79,7 +79,7 @@ bar:
 	movl	vv(%rip), %edx
 	addl	$1, %edx
 	movl	%edx, vv(%rip)
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	# clztest.c:24
 .LM10:
 	ret
@@ -119,7 +119,7 @@ _start:
 	popq	%rbx
 .LCFI1:
 .LVL10:
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 .LFE2:
 	.size	_start, .-_start

@@ -25,5 +25,5 @@ int main ()
   int a = 40;
 
   STAP_PROBE1 (foo, bar, a);
-  return 0; 
+  return 0;
 }

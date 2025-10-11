@@ -23,7 +23,7 @@ main ()
   char *name = "application";
 
   TEST_TWO_LOCATIONS ();
-  
+
   int i = 0;
   while (i < 10)
     {
@@ -33,6 +33,6 @@ main ()
       else
 	TEST_TWO_LOCATIONS ();
     }
-      
+
   return 0; /* last break here */
 }

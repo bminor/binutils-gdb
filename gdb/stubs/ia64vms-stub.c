@@ -407,7 +407,7 @@ term_fao (const char *str, unsigned int str_len, ...)
 	    term_flush ();
 	}
     }
-      
+
   va_end (vargs);
 }
 
@@ -908,7 +908,7 @@ setreg_callback (pthreadDebugClient_t context,
 }
 
 static int
-output_callback (pthreadDebugClient_t context, 
+output_callback (pthreadDebugClient_t context,
 		 pthreadDebugConstString_t line)
 {
   term_puts (line);
@@ -917,7 +917,7 @@ output_callback (pthreadDebugClient_t context,
 }
 
 static int
-error_callback (pthreadDebugClient_t context, 
+error_callback (pthreadDebugClient_t context,
 		 pthreadDebugConstString_t line)
 {
   term_puts (line);
@@ -1114,7 +1114,7 @@ threads_init (void)
      (int *) &dbgext_func);
   if (!(status & STS$M_SUCCESS))
     LIB$SIGNAL (status);
-  
+
   status = lib$find_image_symbol
     ((void *) &pthread_rtl_desc, (void *) &dbgsymtable_desc,
      (int *) &dbg_symtable);
@@ -1470,7 +1470,7 @@ handle_q_packet (const unsigned char *pkt, unsigned int pktlen)
       unsigned int pos = QSUPPORTED_LEN;
       pthreadDebugThreadInfo_t info;
       int res;
-      
+
       /* Ignore gdb features.  */
       gdb_buf[0] = '$';
       gdb_blen = 1;
@@ -1626,7 +1626,7 @@ handle_packet (unsigned char *pkt, unsigned int len)
 	  int res;
 	  unsigned __int64 val;
 	  pthreadDebugThreadInfo_t info;
-	  
+
 	  pos++;
 	  val = pkt2val (pkt, &pos);
 	  if (pos != len)
@@ -1844,7 +1844,7 @@ handle_packet (unsigned char *pkt, unsigned int len)
 	  int res;
 	  unsigned __int64 val;
 	  unsigned int fthr, thr;
-	  
+
 	  val = pkt2val (pkt, &pos);
 	  /* Default is error (but only after parsing is complete).  */
 	  packet_error (0);
@@ -2371,7 +2371,7 @@ trace_init (void)
 	  sub_desc.dsc$w_length = i - start;
 
 	  for (j = 0; j < NBR_DEBUG_FLAGS; j++)
-	    if (str$case_blind_compare (&sub_desc, 
+	    if (str$case_blind_compare (&sub_desc,
 					(void *)&debug_flags[j].name) == 0)
 	      {
 		debug_flags[j].val++;
@@ -2460,7 +2460,7 @@ stub_start (unsigned __int64 *progxfer, void *cli_util,
 			  imcb->imcb$t_log_image_name + 1,
 			  imcb->imcb$t_log_image_name[0]))
 	has_threads = 1;
-			  
+
       if (trace_images)
 	{
 	  unsigned int j;
@@ -2504,14 +2504,14 @@ stub_start (unsigned __int64 *progxfer, void *cli_util,
 	      term_puts (flags & 0x08000000 ? " Shrd" : "     ");
 	      TERM_FAO (" !XA-!XA!/",
 			ldrisd[j].ldrisd$p_base,
-			(unsigned __int64) ldrisd[j].ldrisd$p_base 
+			(unsigned __int64) ldrisd[j].ldrisd$p_base
 			+ ldrisd[j].ldrisd$i_len - 1);
 	    }
 	  ldrisd = ldrimg->ldrimg$l_dyn_seg;
 	  if (ldrisd)
 	    TERM_FAO ("   dynamic            !XA-!XA!/",
 		      ldrisd->ldrisd$p_base,
-		      (unsigned __int64) ldrisd->ldrisd$p_base 
+		      (unsigned __int64) ldrisd->ldrisd$p_base
 		      + ldrisd->ldrisd$i_len - 1);
 	}
     }
@@ -2549,7 +2549,7 @@ stub_start (unsigned __int64 *progxfer, void *cli_util,
 	0x00, 0x00, 0x04, 0x00 };
     unsigned int entry_prot;
     unsigned int status;
-    
+
     status = page_set_rw (entry_pc, 16, &entry_prot);
 
     if (!(status & STS$M_SUCCESS))
@@ -2564,7 +2564,7 @@ stub_start (unsigned __int64 *progxfer, void *cli_util,
 	else
 	  LIB$SIGNAL (status);
       }
-    
+
     if (entry_pc != 0)
       {
 	ots$move (entry_saved, 16, (void *)entry_pc);

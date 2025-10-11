@@ -130,12 +130,12 @@ write_with_trace (int fd, void *varg, size_t len, char *file, int line)
 	  break;
 
       if (info_verbose)
-	fprintf (procfs_file ? procfs_file : stdout, 
+	fprintf (procfs_file ? procfs_file : stdout,
 		 "%s:%d -- ", file, line);
       switch (opcode) {
       case PCSET:
-	fprintf (procfs_file ? procfs_file : stdout, 
-		 "write (PCSET,   %s) %s\n", 
+	fprintf (procfs_file ? procfs_file : stdout,
+		 "write (PCSET,   %s) %s\n",
 		 arg[1] == PR_FORK  ? "PR_FORK"  :
 		 arg[1] == PR_RLC   ? "PR_RLC"   :
 		 arg[1] == PR_ASYNC ? "PR_ASYNC" :
@@ -143,8 +143,8 @@ write_with_trace (int fd, void *varg, size_t len, char *file, int line)
 		 info_verbose ? rw_table[i].desc : "");
 	break;
       case PCUNSET:
-	fprintf (procfs_file ? procfs_file : stdout, 
-		 "write (PCRESET, %s) %s\n", 
+	fprintf (procfs_file ? procfs_file : stdout,
+		 "write (PCRESET, %s) %s\n",
 		 arg[1] == PR_FORK  ? "PR_FORK"  :
 		 arg[1] == PR_RLC   ? "PR_RLC"   :
 		 arg[1] == PR_ASYNC ? "PR_ASYNC" :
@@ -152,46 +152,46 @@ write_with_trace (int fd, void *varg, size_t len, char *file, int line)
 		 info_verbose ? rw_table[i].desc : "");
 	break;
       case PCSTRACE:
-	fprintf (procfs_file ? procfs_file : stdout, 
+	fprintf (procfs_file ? procfs_file : stdout,
 		 "write (PCSTRACE) ");
 	proc_prettyfprint_signalset (procfs_file ? procfs_file : stdout,
 				     (sigset_t *) &arg[1], 0);
 	break;
       case PCSFAULT:
-	fprintf (procfs_file ? procfs_file : stdout, 
+	fprintf (procfs_file ? procfs_file : stdout,
 		 "write (PCSFAULT) ");
 	proc_prettyfprint_faultset (procfs_file ? procfs_file : stdout,
 				    (fltset_t *) &arg[1], 0);
 	break;
       case PCSENTRY:
-	fprintf (procfs_file ? procfs_file : stdout, 
+	fprintf (procfs_file ? procfs_file : stdout,
 		 "write (PCSENTRY) ");
 	proc_prettyfprint_syscalls (procfs_file ? procfs_file : stdout,
 				    (sysset_t *) &arg[1], 0);
 	break;
       case PCSEXIT:
-	fprintf (procfs_file ? procfs_file : stdout, 
+	fprintf (procfs_file ? procfs_file : stdout,
 		 "write (PCSEXIT) ");
 	proc_prettyfprint_syscalls (procfs_file ? procfs_file : stdout,
 				    (sysset_t *) &arg[1], 0);
 	break;
       case PCSHOLD:
-	fprintf (procfs_file ? procfs_file : stdout, 
+	fprintf (procfs_file ? procfs_file : stdout,
 		 "write (PCSHOLD) ");
 	proc_prettyfprint_signalset (procfs_file ? procfs_file : stdout,
 				     (sigset_t *) &arg[1], 0);
 	break;
       case PCSSIG:
-	fprintf (procfs_file ? procfs_file : stdout, 
+	fprintf (procfs_file ? procfs_file : stdout,
 		 "write (PCSSIG) ");
 	proc_prettyfprint_signal (procfs_file ? procfs_file : stdout,
-				  arg[1] ? ((siginfo_t *) &arg[1])->si_signo 
-					 : 0, 
+				  arg[1] ? ((siginfo_t *) &arg[1])->si_signo
+					 : 0,
 				  0);
 	fprintf (procfs_file ? procfs_file : stdout, "\n");
 	break;
       case PCRUN:
-	fprintf (procfs_file ? procfs_file : stdout, 
+	fprintf (procfs_file ? procfs_file : stdout,
 		 "write (PCRUN) ");
 	if (arg[1] & PRCSIG)
 	  fprintf (procfs_file ? procfs_file : stdout, "clearSig ");
@@ -203,11 +203,11 @@ write_with_trace (int fd, void *varg, size_t len, char *file, int line)
 	  fprintf (procfs_file ? procfs_file : stdout, "syscallAbort ");
 	if (arg[1] & PRSTOP)
 	  fprintf (procfs_file ? procfs_file : stdout, "stopReq ");
-	  
+
 	fprintf (procfs_file ? procfs_file : stdout, "\n");
 	break;
       case PCKILL:
-	fprintf (procfs_file ? procfs_file : stdout, 
+	fprintf (procfs_file ? procfs_file : stdout,
 		 "write (PCKILL) ");
 	proc_prettyfprint_signal (procfs_file ? procfs_file : stdout,
 				  arg[1], 0);
@@ -216,19 +216,19 @@ write_with_trace (int fd, void *varg, size_t len, char *file, int line)
       default:
 	{
 	  if (rw_table[i].name)
-	    fprintf (procfs_file ? procfs_file : stdout, 
-		     "write (%s) %s\n", 
-		     rw_table[i].name, 
+	    fprintf (procfs_file ? procfs_file : stdout,
+		     "write (%s) %s\n",
+		     rw_table[i].name,
 		     info_verbose ? rw_table[i].desc : "");
 	  else
 	    {
 	      if (lseek_offset != -1)
-		fprintf (procfs_file ? procfs_file : stdout, 
-			 "write (<unknown>, %lud bytes at 0x%08lx) \n", 
+		fprintf (procfs_file ? procfs_file : stdout,
+			 "write (<unknown>, %lud bytes at 0x%08lx) \n",
 			 (unsigned long) len, (unsigned long) lseek_offset);
 	      else
-		fprintf (procfs_file ? procfs_file : stdout, 
-			 "write (<unknown>, %lud bytes) \n", 
+		fprintf (procfs_file ? procfs_file : stdout,
+			 "write (<unknown>, %lud bytes) \n",
 			 (unsigned long) len);
 	    }
 	  break;
@@ -241,10 +241,10 @@ write_with_trace (int fd, void *varg, size_t len, char *file, int line)
   ret = write (fd, (void *) arg, len);
   if (procfs_trace && ret != len)
     {
-      fprintf (procfs_file ? procfs_file : stdout, 
+      fprintf (procfs_file ? procfs_file : stdout,
 	       "[write (%s) FAILED! (%s)]\n",
-	       rw_table[i].name != NULL ? 
-	       rw_table[i].name : "<unknown>", 
+	       rw_table[i].name != NULL ?
+	       rw_table[i].name : "<unknown>",
 	       safe_strerror (errno));
       if (procfs_file)
 	fflush (procfs_file);
@@ -265,8 +265,8 @@ lseek_with_trace (int fd, off_t offset, int whence, char *file, int line)
   lseek_offset = ret;
   if (procfs_trace && (ret == -1 || errno != 0))
     {
-      fprintf (procfs_file ? procfs_file : stdout, 
-	       "[lseek (0x%08lx) FAILED! (%s)]\n", 
+      fprintf (procfs_file ? procfs_file : stdout,
+	       "[lseek (0x%08lx) FAILED! (%s)]\n",
 	       (unsigned long) offset, safe_strerror (errno));
       if (procfs_file)
 	fflush (procfs_file);
@@ -286,18 +286,18 @@ open_with_trace (char *filename, int mode, char *file, int line)
   if (procfs_trace)
     {
       if (info_verbose)
-	fprintf (procfs_file ? procfs_file : stdout, 
+	fprintf (procfs_file ? procfs_file : stdout,
 		 "%s:%d -- ", file, line);
 
       if (errno)
 	{
-	  fprintf (procfs_file ? procfs_file : stdout, 
-		   "[open FAILED! (%s) line %d]\\n", 
+	  fprintf (procfs_file ? procfs_file : stdout,
+		   "[open FAILED! (%s) line %d]\\n",
 		   safe_strerror (errno), line);
 	}
       else
 	{
-	  fprintf (procfs_file ? procfs_file : stdout, 
+	  fprintf (procfs_file ? procfs_file : stdout,
 		   "%d = open (%s, ", ret, filename);
 	  if (mode == O_RDONLY)
 	    fprintf (procfs_file ? procfs_file : stdout, "O_RDONLY) %d\n",
@@ -327,13 +327,13 @@ close_with_trace (int fd, char *file, int line)
   if (procfs_trace)
     {
       if (info_verbose)
-	fprintf (procfs_file ? procfs_file : stdout, 
+	fprintf (procfs_file ? procfs_file : stdout,
 		 "%s:%d -- ", file, line);
       if (errno)
-	fprintf (procfs_file ? procfs_file : stdout, 
+	fprintf (procfs_file ? procfs_file : stdout,
 		 "[close FAILED! (%s)]\n", safe_strerror (errno));
       else
-	fprintf (procfs_file ? procfs_file : stdout, 
+	fprintf (procfs_file ? procfs_file : stdout,
 		 "%d = close (%d)\n", ret, fd);
       if (procfs_file)
 	fflush (procfs_file);
@@ -351,9 +351,9 @@ wait_with_trace (int *wstat, char *file, int line)
   if (procfs_trace)
     {
       if (info_verbose)
-	fprintf (procfs_file ? procfs_file : stdout, 
+	fprintf (procfs_file ? procfs_file : stdout,
 		 "%s:%d -- ", file, line);
-      fprintf (procfs_file ? procfs_file : stdout, 
+      fprintf (procfs_file ? procfs_file : stdout,
 	       "wait (line %d) ", line);
       if (procfs_file)
 	fflush (procfs_file);
@@ -363,10 +363,10 @@ wait_with_trace (int *wstat, char *file, int line)
   if (procfs_trace)
     {
       if (errno)
-	fprintf (procfs_file ? procfs_file : stdout, 
+	fprintf (procfs_file ? procfs_file : stdout,
 		 "[wait FAILED! (%s)]\n", safe_strerror (errno));
       else
-	fprintf (procfs_file ? procfs_file : stdout, 
+	fprintf (procfs_file ? procfs_file : stdout,
 		 "returned pid %d, status 0x%x\n", ret, lstat);
       if (procfs_file)
 	fflush (procfs_file);
@@ -384,7 +384,7 @@ procfs_note (const char *msg, const char *file, int line)
   if (procfs_trace)
     {
       if (info_verbose)
-	fprintf (procfs_file ? procfs_file : stdout, 
+	fprintf (procfs_file ? procfs_file : stdout,
 		 "%s:%d -- ", file, line);
       fprintf (procfs_file ? procfs_file : stdout, "%s", msg);
       if (procfs_file)
@@ -402,11 +402,11 @@ proc_prettyfprint_status (long flags, int why, int what, int thread)
 	fprintf (procfs_file ? procfs_file : stdout,
 		 "Thread %d: ", thread);
 
-      proc_prettyfprint_flags (procfs_file ? procfs_file : stdout, 
+      proc_prettyfprint_flags (procfs_file ? procfs_file : stdout,
 			       flags, 0);
 
       if (flags & (PR_STOPPED | PR_ISTOP))
-	proc_prettyfprint_why (procfs_file ? procfs_file : stdout, 
+	proc_prettyfprint_why (procfs_file ? procfs_file : stdout,
 			       why, what, 0);
       if (procfs_file)
 	fflush (procfs_file);

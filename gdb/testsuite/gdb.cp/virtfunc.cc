@@ -29,7 +29,7 @@
 // E : B (V) D C
 //
 
-class VA 
+class VA
 {
 public:
     int va;
@@ -177,7 +177,7 @@ void test_calls()
 
         TEST(pEe->vd(), 282);
         TEST(pEe->fvb(), 311);
-    
+
         TEST(pEe->D::vg(), 102);
 	printf("Did %d tests, of which %d failed.\n", all_count, failed_count);
 }
@@ -191,7 +191,7 @@ int main()
 
     test_calls();
     return 0;
-    
+
 }
 
 int A::f() {return 1;}

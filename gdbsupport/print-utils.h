@@ -78,9 +78,9 @@ extern const char *hex_string_custom (LONGEST num, int width);
 
 /* Convert VAL to a numeral in the given radix.  For
  * radix 10, IS_SIGNED may be true, indicating a signed quantity;
- * otherwise VAL is interpreted as unsigned.  If WIDTH is supplied, 
+ * otherwise VAL is interpreted as unsigned.  If WIDTH is supplied,
  * it is the minimum width (0-padded if needed).  USE_C_FORMAT means
- * to use C format in all cases.  If it is false, then 'x' 
+ * to use C format in all cases.  If it is false, then 'x'
  * and 'o' formats do not include a prefix (0x or leading 0).  */
 
 extern const char *int_string (LONGEST val, int radix, int is_signed, int width,

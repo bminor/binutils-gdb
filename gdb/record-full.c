@@ -104,7 +104,7 @@ struct record_full_reg_entry
 {
   unsigned short num;
   unsigned short len;
-  union 
+  union
   {
     gdb_byte *ptr;
     gdb_byte buf[2 * sizeof (gdb_byte *)];
@@ -142,8 +142,8 @@ enum record_full_type
 
    Each instruction that is added to the execution log is represented
    by a variable number of list elements ('entries').  The instruction
-   will have one "reg" entry for each register that is changed by 
-   executing the instruction (including the PC in every case).  It 
+   will have one "reg" entry for each register that is changed by
+   executing the instruction (including the PC in every case).  It
    will also have one "mem" entry for each memory change.  Finally,
    each instruction will have an "end" entry that separates it from
    the changes associated with the next instruction.  */
@@ -872,7 +872,7 @@ record_full_exec_insn (struct regcache *regcache,
 	      entry->u.mem.mem_entry_not_accessible = 1;
 	    else
 	      {
-		if (target_write_memory (entry->u.mem.addr, 
+		if (target_write_memory (entry->u.mem.addr,
 					 record_full_get_loc (entry),
 					 entry->u.mem.len))
 		  {
@@ -1152,8 +1152,8 @@ record_full_sig_handler (int signo)
    to know about, so the wait method just records them and keeps
    singlestepping.
 
-   In replay mode, this function emulates the recorded execution log, 
-   one instruction at a time (forward or backward), and determines 
+   In replay mode, this function emulates the recorded execution log,
+   one instruction at a time (forward or backward), and determines
    where to stop.  */
 
 static ptid_t
@@ -2019,7 +2019,7 @@ record_full_goto_entry (struct record_full_entry *p)
 
   registers_changed ();
   reinit_frame_cache ();
-  
+
   thread_info *thr = inferior_thread ();
   thr->set_stop_pc (regcache_read_pc (get_thread_regcache (thr)));
   print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
@@ -2319,7 +2319,7 @@ netorder64 (uint64_t input)
 {
   uint64_t ret;
 
-  store_unsigned_integer ((gdb_byte *) &ret, sizeof (ret), 
+  store_unsigned_integer ((gdb_byte *) &ret, sizeof (ret),
 			  BFD_ENDIAN_BIG, input);
   return ret;
 }
@@ -2329,7 +2329,7 @@ netorder32 (uint32_t input)
 {
   uint32_t ret;
 
-  store_unsigned_integer ((gdb_byte *) &ret, sizeof (ret), 
+  store_unsigned_integer ((gdb_byte *) &ret, sizeof (ret),
 			  BFD_ENDIAN_BIG, input);
   return ret;
 }
@@ -2347,7 +2347,7 @@ record_full_restore (struct bfd &cbfd)
 
   /* "record_full_restore" can only be called when record list is empty.  */
   gdb_assert (record_full_first.next == NULL);
- 
+
   if (record_debug)
     gdb_printf (gdb_stdlog, "Restoring recording from core file.\n");
 
@@ -2675,7 +2675,7 @@ record_full_base_target::save_record (const char *recfilename)
 
 	      /* Write memaddr.  */
 	      addr = netorder64 (record_full_list->u.mem.addr);
-	      bfdcore_write (obfd.get (), osec, &addr, 
+	      bfdcore_write (obfd.get (), osec, &addr,
 			     sizeof (addr), &bfd_offset);
 
 	      /* Write memval.  */
@@ -2688,7 +2688,7 @@ record_full_base_target::save_record (const char *recfilename)
 		if (record_debug)
 		  gdb_printf (gdb_stdlog,
 			      "  Writing record_full_end (1 + "
-			      "%lu + %lu bytes)\n", 
+			      "%lu + %lu bytes)\n",
 			      (unsigned long) sizeof (signal),
 			      (unsigned long) sizeof (count));
 		/* Write signal value.  */

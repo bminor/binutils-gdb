@@ -108,7 +108,7 @@ enum thread_control_capabilities
 /* The structure below stores information about a system call.
    It is basically used in the "catch syscall" command, and in
    every function that gives information about a system call.
-   
+
    It's also good to mention that its fields represent everything
    that we currently know about a syscall in GDB.  */
 struct syscall
@@ -392,18 +392,18 @@ typedef void async_callback_ftype (enum inferior_event_type event_type,
 /* These defines are used to mark target_ops methods.  The script
    make-target-delegates scans these and auto-generates the base
    method implementations.  There are four macros that can be used:
-   
+
    1. TARGET_DEFAULT_IGNORE.  There is no argument.  The base method
    does nothing.  This is only valid if the method return type is
    'void'.
-   
+
    2. TARGET_DEFAULT_NORETURN.  The argument is a function call, like
    'tcomplain ()'.  The base method simply makes this call, which is
    assumed not to return.
-   
+
    3. TARGET_DEFAULT_RETURN.  The argument is a C expression.  The
    base method returns this expression's value.
-   
+
    4. TARGET_DEFAULT_FUNC.  The argument is the name of a function.
    make-target-delegates does not generate a base method in this case,
    but instead uses the argument function as the base method.  */

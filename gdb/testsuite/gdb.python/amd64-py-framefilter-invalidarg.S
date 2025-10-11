@@ -46,7 +46,7 @@ main:
 	.loc 1 3 0
 	popq	%rbp
 	.cfi_def_cfa 7, 8
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE0:

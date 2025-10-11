@@ -360,7 +360,7 @@ extern void interps_notify_traceframe_changed (int tfnum, int tpnum);
 extern void interps_notify_tsv_created (const trace_state_variable *tsv);
 
 /* Notify all interpreters that trace state variable TSV was deleted.
-   
+
    If TSV is nullptr, it means that all trace state variables were deleted.  */
 extern void interps_notify_tsv_deleted (const trace_state_variable *tsv);
 

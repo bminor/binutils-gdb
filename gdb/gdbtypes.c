@@ -148,7 +148,7 @@ static bool strict_type_checking = true;
 
 static void
 show_opaque_type_resolution (struct ui_file *file, int from_tty,
-			     struct cmd_list_element *c, 
+			     struct cmd_list_element *c,
 			     const char *value)
 {
   gdb_printf (file, _("Resolution of opaque struct/class/union types "
@@ -162,7 +162,7 @@ static void
 show_overload_debug (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
-  gdb_printf (file, _("Debugging of C++ overloading is %s.\n"), 
+  gdb_printf (file, _("Debugging of C++ overloading is %s.\n"),
 	      value);
 }
 
@@ -377,7 +377,7 @@ make_pointer_type (struct type *type, struct type **typeptr)
   if (ntype)
     {
       if (typeptr == 0)
-	return ntype;		/* Don't care about alloc, 
+	return ntype;		/* Don't care about alloc,
 				   and have new type.  */
       else if (*typeptr == 0)
 	{
@@ -455,7 +455,7 @@ make_reference_type (struct type *type, struct type **typeptr,
   if (ntype)
     {
       if (typeptr == 0)
-	return ntype;		/* Don't care about alloc, 
+	return ntype;		/* Don't care about alloc,
 				   and have new type.  */
       else if (*typeptr == 0)
 	{
@@ -750,8 +750,8 @@ make_type_with_address_space (struct type *type,
    new type we construct.  */
 
 struct type *
-make_cv_type (int cnst, int voltl, 
-	      struct type *type, 
+make_cv_type (int cnst, int voltl,
+	      struct type *type,
 	      struct type **typeptr)
 {
   struct type *ntype;	/* New type */
@@ -782,8 +782,8 @@ make_cv_type (int cnst, int voltl,
 	 name each time you encounter them.  */
       gdb_assert ((*typeptr)->objfile_owner () == type->objfile_owner ());
     }
-  
-  ntype = make_qualified_type (type, new_flags, 
+
+  ntype = make_qualified_type (type, new_flags,
 			       typeptr ? *typeptr : NULL);
 
   if (typeptr != NULL)
@@ -1745,7 +1745,7 @@ lookup_union (const char *name, const struct block *block)
     return t;
 
   /* If we get here, it's not a union.  */
-  error (_("This context has class, struct or enum %s, not a union."), 
+  error (_("This context has class, struct or enum %s, not a union."),
 	 name);
 }
 
@@ -1764,7 +1764,7 @@ lookup_enum (const char *name, const struct block *block)
     }
   if (sym->type ()->code () != TYPE_CODE_ENUM)
     {
-      error (_("This context has class, struct or union %s, not an enum."), 
+      error (_("This context has class, struct or union %s, not an enum."),
 	     name);
     }
   return (sym->type ());
@@ -1774,7 +1774,7 @@ lookup_enum (const char *name, const struct block *block)
    visible in lexical block BLOCK.  */
 
 struct type *
-lookup_template_type (const char *name, struct type *type, 
+lookup_template_type (const char *name, struct type *type,
 		      const struct block *block)
 {
   std::string nam;
@@ -2657,7 +2657,7 @@ compute_variant_fields_inner (struct type *type,
   for (const auto &variant : part.variants)
     compute_variant_fields_recurse (type, addr_stack, variant,
 				    flags, applied_variant == &variant);
-}  
+}
 
 /* Determine which variant fields are available in TYPE.  The enabled
    fields are stored in RESOLVED_TYPE.  ADDR_STACK holds information
@@ -3180,8 +3180,8 @@ check_typedef (struct type *type)
      types, instead of identifying them as stub types in the first
      place.  */
 
-  if (TYPE_IS_OPAQUE (type) 
-      && opaque_type_resolution 
+  if (TYPE_IS_OPAQUE (type)
+      && opaque_type_resolution
       && !currently_reading_symtab)
     {
       const char *name = type->name ();
@@ -3326,7 +3326,7 @@ check_stub_method (struct type *type, int method_id, int signature_id)
     p = NULL;
 
   if (demangled_name == NULL || p == NULL)
-    error (_("Internal: Cannot demangle mangled name `%s'."), 
+    error (_("Internal: Cannot demangle mangled name `%s'."),
 	   mangled_name);
 
   /* Now, read in the parameters that define this type.  */
@@ -4311,7 +4311,7 @@ types_equal (struct type *a, struct type *b)
 
       if (a->num_fields () != b->num_fields ())
 	return false;
-      
+
       if (!types_equal (a->target_type (), b->target_type ()))
 	return false;
 
@@ -5236,7 +5236,7 @@ recursive_dump_type (struct type *type, int spaces)
       struct type **first_dont_print
 	= (struct type **) obstack_base (&dont_print_type_obstack);
 
-      int i = (struct type **) 
+      int i = (struct type **)
 	obstack_next_free (&dont_print_type_obstack) - first_dont_print;
 
       while (--i >= 0)
@@ -5281,7 +5281,7 @@ recursive_dump_type (struct type *type, int spaces)
 	      host_address_to_string (TYPE_REFERENCE_TYPE (type)));
   gdb_printf ("%*stype_chain %s\n", spaces, "",
 	      host_address_to_string (TYPE_CHAIN (type)));
-  gdb_printf ("%*sinstance_flags 0x%x", spaces, "", 
+  gdb_printf ("%*sinstance_flags 0x%x", spaces, "",
 	      (unsigned) type->instance_flags ());
   if (TYPE_CONST (type))
     {

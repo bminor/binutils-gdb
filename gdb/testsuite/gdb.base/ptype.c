@@ -210,7 +210,7 @@ struct highest
 
 /**** Enumerations *******/
 
-enum 
+enum
 /* Work around the bug for compilers which don't put out the right stabs.  */
 #if __GNUC__ < 2 && !defined (_AIX)
 primary1_tag

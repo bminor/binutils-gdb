@@ -19,7 +19,7 @@ class interface
 {
   virtual int do_print3() { return 111111; }
 };
- 
+
 class Obj : virtual public interface
 {
 public:

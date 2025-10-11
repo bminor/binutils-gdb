@@ -56,7 +56,7 @@ struct regcache;
 #define ALPHA_INSN_SIZE	4
 
 /* The alpha has two different virtual pointers for arguments and locals.
-   
+
    The virtual argument pointer is pointing to the bottom of the argument
    transfer area, which is located immediately below the virtual frame
    pointer.  Its size is fixed for the native compiler, it is either zero
@@ -64,7 +64,7 @@ struct regcache;
    gcc uses a variable sized argument transfer area.  As it has
    to stay compatible with the native debugging tools it has to use the same
    virtual argument pointer and adjust the argument offsets accordingly.
-   
+
    The virtual local pointer is localoff bytes below the virtual frame
    pointer, the value of localoff is obtained from the PDR.  */
 #define ALPHA_NUM_ARG_REGS   6

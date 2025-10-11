@@ -321,7 +321,7 @@ mapped_debug_names_reader::scan_entries (uint32_t index,
 					 const gdb_byte *entry)
 {
   std::vector<cooked_index_entry *> these_entries;
-  
+
   while (true)
     {
       std::optional<ULONGEST> parent;

@@ -1,5 +1,5 @@
 /* Target-dependent code for Renesas M32R, for GDB.
- 
+
    Copyright (C) 2004-2025 Free Software Foundation, Inc.
 
    This file is part of GDB.

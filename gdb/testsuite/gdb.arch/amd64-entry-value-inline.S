@@ -37,7 +37,7 @@ fn1:
 	movl	v(%rip), %eax
 	addl	$1, %eax
 	movl	%eax, v(%rip)
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE0:
@@ -109,7 +109,7 @@ fn3:
 	popq	%rbx
 	.cfi_def_cfa_offset 8
 .LVL7:
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE2:
@@ -134,7 +134,7 @@ main:
 	# gdb.arch/amd64-entry-value-inline.c:50
 	.loc 1 50 0
 	xorl	%eax, %eax
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE3:

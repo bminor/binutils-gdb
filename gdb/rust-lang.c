@@ -666,7 +666,7 @@ rust_language::value_print_inner
     case TYPE_CODE_PTR:
       {
 	LONGEST low_bound, high_bound;
-	
+
 	if (type->target_type ()->code () == TYPE_CODE_ARRAY
 	    && rust_u8_type_p (type->target_type ()->target_type ())
 	    && get_array_bounds (type->target_type (), &low_bound,

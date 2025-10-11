@@ -130,7 +130,7 @@ extern unsigned long signal_pid;
 struct client_state
 {
   client_state ():
-    own_buf ((char *) xmalloc (PBUFSIZ + 1)) 
+    own_buf ((char *) xmalloc (PBUFSIZ + 1))
   {}
 
   /* The thread set with an `Hc' packet.  `Hc' is deprecated in favor of

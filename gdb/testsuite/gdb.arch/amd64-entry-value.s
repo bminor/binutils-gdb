@@ -35,7 +35,7 @@ _ZL1eid:
 	# gdb.arch/amd64-entry-value.cc:23
 	.loc 1 23 0
 	movl	$0, _ZL1v(%rip)
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	# gdb.arch/amd64-entry-value.cc:24
 	.loc 1 24 0
 	ret
@@ -105,7 +105,7 @@ _ZL7locexpri:
 # 41 "gdb.arch/amd64-entry-value.cc" 1
 	breakhere_locexpr:
 # 0 "" 2
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	# gdb.arch/amd64-entry-value.cc:42
 	.loc 1 42 0
 #NO_APP
@@ -516,7 +516,7 @@ _ZL5datapv:
 	# gdb.arch/amd64-entry-value.cc:164
 	.loc 1 164 0
 	movl	$_ZZL5datapvE3two, %eax
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE16:
@@ -534,7 +534,7 @@ _ZL11datap_inputPi:
 	# gdb.arch/amd64-entry-value.cc:169
 	.loc 1 169 0
 	addl	$1, (%rdi)
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	# gdb.arch/amd64-entry-value.cc:170
 	.loc 1 170 0
 	ret
@@ -553,7 +553,7 @@ _ZL4datav:
 	# gdb.arch/amd64-entry-value.cc:176
 	.loc 1 176 0
 	movl	$10, %eax
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE18:
@@ -570,7 +570,7 @@ _ZL5data2v:
 	# gdb.arch/amd64-entry-value.cc:182
 	.loc 1 182 0
 	movl	$20, %eax
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE19:
@@ -613,7 +613,7 @@ _ZL9differenti:
 .LCFI5:
 	.cfi_def_cfa_offset 8
 .LVL63:
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE20:
@@ -661,7 +661,7 @@ _ZL8validityii:
 .LCFI7:
 	.cfi_def_cfa_offset 8
 .LVL66:
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE21:
@@ -689,7 +689,7 @@ _ZL7invalidi:
 # 206 "gdb.arch/amd64-entry-value.cc" 1
 	breakhere_invalid:
 # 0 "" 2
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	# gdb.arch/amd64-entry-value.cc:207
 	.loc 1 207 0
 #NO_APP
@@ -831,7 +831,7 @@ main:
 # SUCC: 4 [100.0%]  (fallthru,can_fallthru)
 .LVL86:
 # BLOCK 4 freq:10000 seq:2
-# PRED: 3 [100.0%]  (fallthru,can_fallthru) 5 [100.0%] 
+# PRED: 3 [100.0%]  (fallthru,can_fallthru) 5 [100.0%]
 .L31:
 	# gdb.arch/amd64-entry-value.cc:230
 	.loc 1 230 0
@@ -855,7 +855,7 @@ main:
 .LCFI11:
 	.cfi_def_cfa_offset 8
 .LVL89:
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 .LVL90:
 # BLOCK 5 freq:3900 seq:3
@@ -870,7 +870,7 @@ main:
 	movl	$1, %edi
 	call	_ZL1aid
 .LVL91:
-# SUCC: 4 [100.0%] 
+# SUCC: 4 [100.0%]
 	jmp	.L31
 .LBE6:
 	.cfi_endproc

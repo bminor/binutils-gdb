@@ -468,7 +468,7 @@ c_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
 
 
 void
-c_value_print (struct value *val, struct ui_file *stream, 
+c_value_print (struct value *val, struct ui_file *stream,
 	       const struct value_print_options *options)
 {
   struct type *type, *real_type;
@@ -563,7 +563,7 @@ c_value_print (struct value *val, struct ui_file *stream,
       if (real_type)
 	{
 	  /* We have RTTI information, so use it.  */
-	  val = value_full_object (val, real_type, 
+	  val = value_full_object (val, real_type,
 				   full, top, using_enc);
 	  /* In a destructor we might see a real type that is a
 	     superclass of the object's type.  In this case it is

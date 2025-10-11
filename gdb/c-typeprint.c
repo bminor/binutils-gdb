@@ -337,7 +337,7 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
    On outermost call, SHOW > 0 means should ignore
    any typename for TYPE and show its details.
    SHOW is always zero on recursive calls.
-   
+
    NEED_POST_SPACE is non-zero when a space will be be needed
    between a trailing qualifier and a field, variable, or function
    name.  */
@@ -743,7 +743,7 @@ c_type_print_varspec_suffix (struct type *type,
 	    || type->bounds ()->high.kind () == PROP_LOCLIST)
 	  gdb_printf (stream, "variable length");
 	else if (get_array_bounds (type, &low_bound, &high_bound))
-	  gdb_printf (stream, "%s", 
+	  gdb_printf (stream, "%s",
 		      plongest (high_bound - low_bound + 1));
 	gdb_printf (stream, (is_vector ? ")))" : "]"));
 
@@ -1404,7 +1404,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
       if (type->is_declared_class ())
 	gdb_printf (stream, "class ");
       /* Print the tag name if it exists.
-	 The aCC compiler emits a spurious 
+	 The aCC compiler emits a spurious
 	 "{unnamed struct}"/"{unnamed union}"/"{unnamed enum}"
 	 tag for unnamed struct/union/enum's, which we don't
 	 want to print.  */

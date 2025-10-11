@@ -36,7 +36,7 @@ void subr3()
   unsigned char c;
   int i;
   float f;
-  
+
   c = 'b';
   i = 3;
   f = 6.5;

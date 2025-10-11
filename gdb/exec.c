@@ -1,4 +1,4 @@
-/* Work with executable files, for GDB. 
+/* Work with executable files, for GDB.
 
    Copyright (C) 1988-2025 Free Software Foundation, Inc.
 
@@ -533,7 +533,7 @@ Use the \"file\" or \"exec-file\" command."));
    Note that we have to explicitly ignore additional args, since we can
    be called from file_command(), which also calls symbol_file_command()
    which can take multiple args.
-   
+
    If ARGS is NULL, we just want to close the exec file.  */
 
 static void
@@ -963,8 +963,8 @@ print_section_info (const std::vector<target_section> *t, bfd *abfd)
 		 styled_string (file_name_style.style (),
 				bfd_get_filename (abfd)));
 
-      entry_point = gdbarch_addr_bits_remove (gdbarch, 
-					      bfd_get_start_address (abfd) 
+      entry_point = gdbarch_addr_bits_remove (gdbarch,
+					      bfd_get_start_address (abfd)
 						+ displacement);
       gdb_printf (_("\tEntry point: %s\n"),
 		  paddress (gdbarch, entry_point));

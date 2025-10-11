@@ -25,25 +25,25 @@ void reference_update_tests ()
   x = 567;
   /*: mi_varobj_update RX {RX} "update RX, 2"
       mi_check_varobj_value RX 567 "check RX: expect 567"
-      :*/  
+      :*/
   x = 567;
   /*: mi_varobj_update RX {} "update RX, 3"
       mi_delete_varobj RX "delete RX"
     :*/
   /* Dummy assignment to keep 'x' in scope.  */
-  x = 444;    
+  x = 444;
 
   /*: END: reference_update :*/
 }
 
 struct S { int i; int j; };
 struct S2 : S {};
-        
+
 int base_in_reference_test (S2& s2)
 {
   /*: BEGIN: base_in_reference :*/
   int x = s2.i + s2.j;
-  /*: 
+  /*:
     mi_create_varobj "S2" "s2" "create varobj for s2"
     mi_list_varobj_children "S2" {
        {"S2.S" "S" "1" "S"}
@@ -59,12 +59,12 @@ int base_in_reference_test (S2& s2)
     mi_check_varobj_value "S2.S.public.i" "67" "check S2.S.public.i"
     mi_check_varobj_value "S2.S.public.j" "89" "check S2.S.public.j"
     mi_delete_varobj S2 "delete S2"
-    
+
   :*/
   /*: END: base_in_reference :*/
   return x;
 }
-        
+
 void base_in_reference_test_main ()
 {
   S2 s;
@@ -75,12 +75,12 @@ void base_in_reference_test_main ()
 
 int reference_to_pointer ()
 {
-  /*: BEGIN: reference_to_pointer :*/  
+  /*: BEGIN: reference_to_pointer :*/
   S s, *ptr_s, *& rptr_s = ptr_s;
   s.i = 67;
   s.j = 89;
   ptr_s = &s;
-  /*: 
+  /*:
     mi_create_varobj RPTR rptr_s "create varobj for rptr_s"
 
     mi_list_varobj_children RPTR {{RPTR.public public 2}}	\
@@ -158,7 +158,7 @@ int path_expression ()
        {DP.public public 1}} "list children of DP"
       mi_gdb_test "-var-info-path-expression DP.Base1" \
           "\\^done,path_expr=\"\\(\\*\\(class Base1\\*\\) dp\\)\"" \
-	  "-var-info-path-expression DP.Base1"       
+	  "-var-info-path-expression DP.Base1"
       mi_list_varobj_children DP.public {               \
         {DP.public.i i 0 int}                           \
       } "list children of DP.public"

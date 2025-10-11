@@ -1,12 +1,12 @@
 /* sh-stub.c -- debugging stub for the Renesas-SH.
 
- NOTE!! This code has to be compiled with optimization, otherwise the 
+ NOTE!! This code has to be compiled with optimization, otherwise the
  function inlining which generates the exception handlers won't work.
 
 */
 
 /*   This is originally based on an m68k software stub written by Glenn
-     Engel at HP, but has changed quite a bit. 
+     Engel at HP, but has changed quite a bit.
 
      Modifications for the SH by Ben Lee and Steve Chamberlain
 
@@ -38,7 +38,7 @@
 	'$' or '#'.  If <data> starts with two characters followed by
 	':', then the existing stubs interpret this as a sequence number.
 
-	CSUM1 and CSUM2 are ascii hex representation of an 8-bit 
+	CSUM1 and CSUM2 are ascii hex representation of an 8-bit
 	checksum of <data>, the most significant nibble is sent first.
 	the hex digits 0-9,a-f are used.
 
@@ -138,10 +138,10 @@
 	Responses can be run-length encoded to save space.  A '*' means that
 	the next character is an ASCII encoding giving a repeat count which
 	stands for that many repetitions of the character preceding the '*'.
-	The encoding is n+29, yielding a printable character where n >=3 
-	(which is where rle starts to win).  Don't use an n > 126. 
+	The encoding is n+29, yielding a printable character where n >=3
+	(which is where rle starts to win).  Don't use an n > 126.
 
-	So 
+	So
 	"0* " means the same as "0000".  */
 
 #include <string.h>
@@ -467,11 +467,11 @@ putpacket (char *buffer)
 	  int runlen;
 
 	  /* Do run length encoding */
-	  for (runlen = 0; runlen < 100; runlen ++) 
+	  for (runlen = 0; runlen < 100; runlen ++)
 	    {
-	      if (src[0] != src[runlen]) 
+	      if (src[0] != src[runlen])
 		{
-		  if (runlen > 3) 
+		  if (runlen > 3)
 		    {
 		      int encode;
 		      /* Got a useful amount */
@@ -524,19 +524,19 @@ computeSignal (int exceptionVector)
     {
     case INVALID_INSN_VEC:
       sigval = 4;
-      break;			
+      break;
     case INVALID_SLOT_VEC:
       sigval = 4;
-      break;			
+      break;
     case CPU_BUS_ERROR_VEC:
       sigval = 10;
-      break;			
+      break;
     case DMA_BUS_ERROR_VEC:
       sigval = 10;
-      break;	
+      break;
     case NMI_VEC:
       sigval = 2;
-      break;	
+      break;
 
     case TRAP_VEC:
     case USER_VEC:
@@ -786,7 +786,7 @@ gdb_handle_exception (int exceptionVector)
 }
 
 
-#define GDBCOOKIE 0x5ac 
+#define GDBCOOKIE 0x5ac
 static int ingdbmode;
 /* We've had an exception - choose to go into the monitor or
    the gdb stub */
@@ -795,7 +795,7 @@ void handle_exception(int exceptionVector)
 #ifdef MONITOR
     if (ingdbmode != GDBCOOKIE)
       monitor_handle_exception (exceptionVector);
-    else 
+    else
 #endif
       gdb_handle_exception (exceptionVector);
 
@@ -855,7 +855,7 @@ vec_type;
    or wherever your vbr points. */
 
 const vec_type vectable =
-{ 
+{
   &BINIT,			/* 0: Power-on reset PC */
   init_stack + init_stack_size, /* 1: Power-on reset SP */
   &BINIT,			/* 2: Manual reset PC */
@@ -1206,7 +1206,7 @@ L_sp:    .long _init_stack + 8000");
 	mov.l	@(L_reg, pc), r1
 	bra	restoreRegisters
 	mov.l	r15, @r0				! save __stub_stack
-	
+
 	.align 2
 L_reg:
 	.long	_registers
@@ -1220,7 +1220,7 @@ L_hdl_except:
 static void rr()
 {
 asm("
-	.align 2	
+	.align 2
 	.global _resume
 _resume:
 	mov	r4,r1
@@ -1241,14 +1241,14 @@ restoreRegisters:
 	mov.l	@r1+, r14					! restore R14
 	mov.l	@r1+, r15					! restore programs stack
 	mov.l	@r1+, r0
-	add	#-8, r15					! uncover PC/SR on stack 
+	add	#-8, r15					! uncover PC/SR on stack
 	mov.l	r0, @r15					! restore PC onto stack
 	lds.l	@r1+, pr					! restore PR
-	ldc.l	@r1+, gbr					! restore GBR		
+	ldc.l	@r1+, gbr					! restore GBR
 	ldc.l	@r1+, vbr					! restore VBR
 	lds.l	@r1+, mach					! restore MACH
 	lds.l	@r1+, macl					! restore MACL
-	mov.l	@r1, r0	
+	mov.l	@r1, r0
 	add	#-88, r1					! readjust reg pointer to R1
 	mov.l	r0, @(4, r15)					! restore SR onto stack+4
 	mov.l	r2, @-r15
@@ -1264,15 +1264,15 @@ restoreRegisters:
 }
 
 
-static __inline__ void code_for_catch_exception(int n) 
+static __inline__ void code_for_catch_exception(int n)
 {
-  asm("		.globl	_catch_exception_%O0" : : "i" (n) 				); 
+  asm("		.globl	_catch_exception_%O0" : : "i" (n) 				);
   asm("	_catch_exception_%O0:" :: "i" (n)      						);
 
   asm("		add	#-4, r15 				! reserve spot on stack ");
   asm("		mov.l	r1, @-r15				! push R1		");
 
-  if (n == NMI_VEC) 
+  if (n == NMI_VEC)
     {
       /* Special case for NMI - make sure that they don't nest */
       asm("	mov.l	r0, @-r15					! push R0");
@@ -1472,7 +1472,7 @@ exceptions (void)
 #define	PB1MD0 	0x0004
 #define	PB0MD1 	0x0002
 #define	PB0MD0 	0x0001
-	
+
 #define	PB7MD 	PB7MD1|PB7MD0
 #define	PB6MD 	PB6MD1|PB6MD0
 #define	PB5MD 	PB5MD1|PB5MD0
@@ -1496,7 +1496,7 @@ nop (void)
 {
 
 }
-void 
+void
 init_serial (void)
 {
   int i;
@@ -1535,7 +1535,7 @@ getDebugCharReady (void)
   return SSR1 & SCI_RDRF ;
 }
 
-char 
+char
 getDebugChar (void)
 {
   char ch;
@@ -1555,7 +1555,7 @@ getDebugChar (void)
   return ch;
 }
 
-int 
+int
 putDebugCharReady (void)
 {
   return (SSR1 & SCI_TDRE);
@@ -1574,7 +1574,7 @@ putDebugChar (char ch)
   SSR1 &= ~SCI_TDRE;
 }
 
-void 
+void
 handleError (char theSSR)
 {
   SSR1 &= ~(SCI_ORER | SCI_PER | SCI_FER);

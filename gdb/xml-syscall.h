@@ -24,7 +24,7 @@
 /* Function used to set the name of the file which contains
    information about the system calls present in the current
    architecture.
-   
+
    This function *should* be called before anything else, otherwise
    GDB won't be able to find the correct XML file to open and get
    the syscalls definitions.  */

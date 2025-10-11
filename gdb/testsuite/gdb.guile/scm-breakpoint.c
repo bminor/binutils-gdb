@@ -28,7 +28,7 @@ int multiply (int i)
 
 int add (int i)
 {
-  return i + i; 
+  return i + i;
 }
 
 

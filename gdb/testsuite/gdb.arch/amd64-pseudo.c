@@ -61,7 +61,7 @@ main (int argc, char **argv)
        "mov 16(%0), %%esi\n\t"
        "mov 20(%0), %%edi\n\t"
        : /* no output operands */
-       : "r" (data) 
+       : "r" (data)
        : "eax", "ebx", "ecx", "edx", "esi", "edi");
   asm ("nop"); /* first breakpoint here */
 
@@ -74,7 +74,7 @@ main (int argc, char **argv)
        "mov 48(%0), %%r14d\n\t"
        "mov 52(%0), %%r15d\n\t"
        : /* no output operands */
-       : "r" (data) 
+       : "r" (data)
        : "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15");
 
   asm ("nop" /* second breakpoint here */

@@ -59,7 +59,7 @@ public:
     }
     A::value_type bfoo();
     A::value_type foo();
-    
+
 };
 
 
@@ -76,7 +76,7 @@ public:
     }
     int cfoo();
     int foo();
-    
+
 };
 
 
@@ -93,7 +93,7 @@ public:
     }
     value_type dfoo();
     value_type foo();
-    
+
 };
 
 
@@ -109,7 +109,7 @@ public:
     }
     value_type efoo();
     value_type foo();
-    
+
 };
 
 
@@ -125,7 +125,7 @@ public:
     }
     value_type ffoo();
     value_type foo();
-    
+
 };
 
 class G : private A, public B, protected C {
@@ -143,11 +143,11 @@ public:
         a=15;
         b=16;
         c=17;
-        
+
     }
     int gfoo();
     int foo();
-    
+
 };
 
 class Z : public A
@@ -226,43 +226,43 @@ int G::gfoo() {
 A::value_type A::foo()
 {
     return 7;
-    
+
 }
 
 A::value_type B::foo()
 {
     return 8;
-    
+
 }
 
 A::value_type C::foo()
 {
     return 9;
-    
+
 }
 
 D::value_type D::foo()
 {
     return 10;
-    
+
 }
 
 E::value_type E::foo()
 {
     return 11;
-    
+
 }
 
 F::value_type F::foo()
 {
     return 12;
-    
+
 }
 
 int G::foo()
 {
     return 13;
-    
+
 }
 
 
@@ -285,7 +285,7 @@ int main(void)
     ZZ zz_instance;
 
     marker1(); // marker1-returns-here
-    
+
     a_instance.a = 20; // marker1-returns-here
     a_instance.aa = 21;
     b_instance.b = 22;
@@ -309,5 +309,5 @@ int main(void)
     dobj.doit ();
     foo2 ();
     return 0;
-    
+
 }

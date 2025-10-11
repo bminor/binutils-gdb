@@ -481,7 +481,7 @@ avr_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 	sbiw    r28, <LOCALS_SIZE>
 	out     __SP_H__, r29
 	out     __SP_L__, r28
-	
+
    A interrupt handler prologue looks like this:
 	sei
 	push    __zero_reg__
@@ -498,7 +498,7 @@ avr_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 	sbiw    r28, <LOCALS_SIZE>
 	cli
 	out     __SP_H__, r29
-	sei     
+	sei
 	out     __SP_L__, r28
 
    A `-mcall-prologues' prologue looks like this (Note that the megas use a
@@ -540,7 +540,7 @@ avr_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
 
   /* FIXME: TRoth/2003-06-11: This could be made more efficient by only
      reading in the bytes of the prologue.  The problem is that the figuring
-     out where the end of the prologue is is a bit difficult.  The old code 
+     out where the end of the prologue is is a bit difficult.  The old code
      tried to do that, but failed quite often.  */
   read_memory (pc_beg, prologue, len);
 
@@ -843,7 +843,7 @@ avr_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
 	{
 	  vpc += sizeof (img_sig);
 	}
-      else if (vpc + sizeof (img_int) < len 
+      else if (vpc + sizeof (img_int) < len
 	       && memcmp (prologue + vpc, img_int, sizeof (img_int)) == 0)
 	{
 	  vpc += sizeof (img_int);
@@ -873,7 +873,7 @@ avr_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
       else
 	  break;
     }
-    
+
   return pc_beg + vpc;
 }
 
@@ -898,13 +898,13 @@ avr_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
     trad_frame_saved_reg saved_regs[AVR_NUM_REGS];
 
     info.saved_regs = saved_regs;
-    
+
     /* Need to run the prologue scanner to figure out if the function has a
        prologue and possibly skip over moving arguments passed via registers
        to other registers.  */
-    
+
     prologue_end = avr_scan_prologue (gdbarch, func_addr, func_end, &info);
-    
+
     if (info.prologue_type != AVR_PROLOGUE_NONE)
       return prologue_end;
   }
@@ -1016,10 +1016,10 @@ avr_frame_unwind_cache (const frame_info_ptr &this_frame,
       this_base = get_frame_register_unsigned (this_frame, AVR_FP_REGNUM);
       high_base = get_frame_register_unsigned (this_frame, AVR_FP_REGNUM + 1);
       this_base += (high_base << 8);
-      
+
       /* The FP points at the last saved register.  Adjust the FP back
 	 to before the first saved register giving the SP.  */
-      prev_sp = this_base + info->size; 
+      prev_sp = this_base + info->size;
    }
   else
     {
@@ -1124,7 +1124,7 @@ avr_frame_prev_register (const frame_info_ptr &this_frame,
 
 	     Also, note that the value on the stack is an addr to a word
 	     not a byte, so we will need to multiply it by two at some
-	     point. 
+	     point.
 
 	     And to confuse matters even more, the return address stored
 	     on the stack is in big endian byte order, even though most
@@ -1260,7 +1260,7 @@ pop_stack_item (struct avr_stack_item *si)
    optimization.  I suspect this is a compiler bug.  Arguments of these odd
    sizes are left-justified within the word (as opposed to arguments smaller
    than WORDSIZE bytes, which are right-justified).
- 
+
    If the function is to return an aggregate type such as a struct, the caller
    must allocate space into which the callee will copy the return value.  In
    this case, a pointer to the return value location is passed into the callee
@@ -1469,7 +1469,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch *gdbarch
     = gdbarch_alloc (&info, gdbarch_tdep_up (new avr_gdbarch_tdep));
   avr_gdbarch_tdep *tdep = gdbarch_tdep<avr_gdbarch_tdep> (gdbarch);
-  
+
   tdep->call_length = call_length;
 
   /* Create a type for PC.  We can't use builtin types here, as they may not

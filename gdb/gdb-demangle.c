@@ -115,7 +115,7 @@ set_demangling_command (const char *ignore,
      If we match, update the current demangling style enum.  */
 
   for (dem = libiberty_demanglers, i = 0;
-       dem->demangling_style != unknown_demangling; 
+       dem->demangling_style != unknown_demangling;
        dem++)
     {
       if (strcmp (current_demangling_style_string,
@@ -215,12 +215,12 @@ INIT_GDB_FILE (gdb_demangle)
   /* Fill the demangling_style_names[] array, and set the default
      demangling style chosen at compilation time.  */
   for (ndems = 0;
-       libiberty_demanglers[ndems].demangling_style != unknown_demangling; 
+       libiberty_demanglers[ndems].demangling_style != unknown_demangling;
        ndems++)
     ;
   demangling_style_names = XCNEWVEC (const char *, ndems + 1);
   for (i = 0;
-       libiberty_demanglers[i].demangling_style != unknown_demangling; 
+       libiberty_demanglers[i].demangling_style != unknown_demangling;
        i++)
     {
       demangling_style_names[i]

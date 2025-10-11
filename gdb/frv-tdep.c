@@ -152,7 +152,7 @@ new_variant ()
 
   /* By default, don't supply any general-purpose or floating-point
      register names.  */
-  var->register_names 
+  var->register_names
     = (const char **) xmalloc ((frv_num_regs + frv_num_pseudo_regs)
 			       * sizeof (const char *));
   for (r = 0; r < frv_num_regs + frv_num_pseudo_regs; r++)
@@ -164,7 +164,7 @@ new_variant ()
   var->register_names[pc_regnum] = "pc";
   var->register_names[lr_regnum] = "lr";
   var->register_names[lcr_regnum] = "lcr";
-     
+
   var->register_names[psr_regnum] = "psr";
   var->register_names[ccr_regnum] = "ccr";
   var->register_names[cccr_regnum] = "cccr";
@@ -794,7 +794,7 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 	     sthi GRk, @(fp, s)
 	 P KKKKKK 1010001 000010 SSSSSSSSSSSS = 0x01442000
 	 0 000000 1111111 111111 000000000000 = 0x01fff000
-	     .    .   .    .   .    .   .   . 
+	     .    .   .    .   .    .   .   .
 	 And for 8-bit values, we use STB instructions.
 	     stbi GRk, @(fp, s)
 	 P KKKKKK 1010000 000010 SSSSSSSSSSSS = 0x01402000
@@ -1022,7 +1022,7 @@ frv_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   /* In PIC code, GR15 may be loaded from some offset off of FP prior
      to the call instruction.
-     
+
      Skip over this instruction if present.  It won't be present in
      non-PIC code, and even in PIC code, it might not be present.
      (This is due to the fact that GR15, the FDPIC register, already

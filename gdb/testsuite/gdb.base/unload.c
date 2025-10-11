@@ -41,7 +41,7 @@ int main()
   const char *msg;
 
   handle = dlopen (SHLIB_NAME, RTLD_LAZY);
-  
+
   if (!handle)
     {
       fprintf (stderr, "%s\n", dlerror ());
@@ -68,7 +68,7 @@ int main()
   /* The second library should share the same memory address.  */
 
   handle = dlopen (SHLIB_NAME2, RTLD_LAZY);
-  
+
   if (!handle)
     {
       fprintf (stderr, "%s\n", dlerror ());

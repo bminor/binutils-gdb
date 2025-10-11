@@ -213,7 +213,7 @@ inclusion_depth (struct macro_source_file *file)
    sources, where all the #included files have been substituted into
    their places.  */
 static int
-compare_locations (struct macro_source_file *file1, int line1, 
+compare_locations (struct macro_source_file *file1, int line1,
 		   struct macro_source_file *file2, int line2)
 {
   /* We want to treat positions in an #included file as coming *after*
@@ -615,7 +615,7 @@ macro_tree_delete_value (void *untyped_definition)
 	macro_bcache_free (t, (char *) d->argv[i]);
       macro_bcache_free (t, (char **) d->argv);
     }
-  
+
   macro_bcache_free (t, (char *) d->replacement);
   macro_free (d, t);
 }
@@ -650,7 +650,7 @@ find_definition (const char *name,
 	 use that.  */
       splay_tree_node pred = splay_tree_predecessor (t->definitions,
 						     (splay_tree_key) &query);
-     
+
       if (pred)
 	{
 	  /* Make sure this predecessor actually has the right name.
@@ -1042,7 +1042,7 @@ new_macro_table (struct obstack *obstack, gdb::bcache *b,
 		     ((splay_tree_allocate_fn) macro_alloc),
 		     ((splay_tree_deallocate_fn) macro_free),
 		     t));
-  
+
   return t;
 }
 

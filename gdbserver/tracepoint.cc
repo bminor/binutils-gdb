@@ -2850,7 +2850,7 @@ have_fast_tracepoint_trampoline_buffer (char *buf)
     {
       internal_error ("error extracting trampoline_buffer_end");
     }
-  
+
   if (buf)
     {
       buf[0] = '\0';

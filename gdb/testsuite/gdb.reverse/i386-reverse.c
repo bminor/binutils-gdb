@@ -17,7 +17,7 @@
 
 /* Architecture tests for intel i386 platform.  */
 
-void 
+void
 inc_dec_tests (void)
 {
   asm ("inc %eax");
@@ -38,7 +38,7 @@ inc_dec_tests (void)
   asm ("dec %edi");
 } /* end inc_dec_tests */
 
-int 
+int
 main ()
 {
   inc_dec_tests ();

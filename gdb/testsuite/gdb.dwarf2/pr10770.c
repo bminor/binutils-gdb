@@ -329,7 +329,7 @@ __attribute__((noinline)) static void doit ()
 }
 
 int main()
-{ 
+{
   doit ();
   abort ();
 }

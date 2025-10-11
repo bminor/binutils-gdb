@@ -1,4 +1,4 @@
-/* Main function for CLI gdb.  
+/* Main function for CLI gdb.
    Copyright (C) 2002-2025 Free Software Foundation, Inc.
 
    This file is part of GDB.

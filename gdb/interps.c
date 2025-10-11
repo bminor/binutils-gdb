@@ -254,7 +254,7 @@ command_interp (void)
     return current_ui->current_interpreter;
 }
 
-/* interp_exec - This executes COMMAND_STR in the current 
+/* interp_exec - This executes COMMAND_STR in the current
    interpreter.  */
 
 void

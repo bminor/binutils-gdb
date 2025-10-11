@@ -18,8 +18,8 @@
 # a different host.
 
 #
-# This module to be used for testing gdb with a "gdbserver" 
-# built either from libremote or from gdb/gdbserver.  
+# This module to be used for testing gdb with a "gdbserver"
+# built either from libremote or from gdb/gdbserver.
 #
 
 #
@@ -45,7 +45,7 @@
 #	'O' packet.  This means that tests involving printf will
 #	fail unles you set this varibale in your baseboard
 #	configuration file.
-#   
+#
 #   set_board_info gdb,no_hardware_watchpoints 1
 #	Unles you have a gdbserver that supports hardware watchpoints.
 #	FIXME: gdb should detect if the target doesn't support them,
@@ -57,7 +57,7 @@
 #
 #   set_board_info sockethost
 #	The name of the host computer whose socket is being used.
-#	Defaults to "localhost".  Note: old gdbserver requires 
+#	Defaults to "localhost".  Note: old gdbserver requires
 #	that you define this, but libremote/gdbserver does not.
 #
 #   set_board_info gdb,socketport

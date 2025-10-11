@@ -17,7 +17,7 @@ main (int argc, char **argv, char **envp)
 
 #ifdef FAKEARGV
     printf ("%d\n", factorial (1)); /* commands.exp: hw local_var out of scope */
-#else    
+#else
     if (argc != 2) {
 	printf ("usage:  factorial <number>\n");
 	return 1;

@@ -287,7 +287,7 @@ bit_tests:
 	btst 0x7ffefdfc,r2
 
 
-	
+
 dsp_add_tests:
 	add_add r4,r1,r2,r3
 	add_add r4,r1,2,r3

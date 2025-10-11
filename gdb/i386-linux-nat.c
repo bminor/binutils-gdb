@@ -105,7 +105,7 @@ fetch_register (struct regcache *regcache, int regno)
   val = ptrace (PTRACE_PEEKUSER, tid,
 		i386_linux_gregset_reg_offset[regno], 0);
   if (errno != 0)
-    error (_("Couldn't read register %s (#%d): %s."), 
+    error (_("Couldn't read register %s (#%d): %s."),
 	   gdbarch_register_name (regcache->arch (), regno),
 	   regno, safe_strerror (errno));
 
@@ -221,7 +221,7 @@ store_regs (const struct regcache *regcache, int tid, int regno)
     perror_with_name (_("Couldn't get registers"));
 
   fill_gregset (regcache, &regs, regno);
-  
+
   if (ptrace (PTRACE_SETREGS, tid, 0, (int) &regs) < 0)
     perror_with_name (_("Couldn't write registers"));
 }
@@ -239,7 +239,7 @@ static void store_regs (const struct regcache *regcache, int tid, int regno) {}
 /* Fill GDB's register array with the floating-point register values in
    *FPREGSETP.  */
 
-void 
+void
 supply_fpregset (struct regcache *regcache, const elf_fpregset_t *fpregsetp)
 {
   i387_supply_fsave (regcache, -1, fpregsetp);
@@ -401,7 +401,7 @@ store_fpxregs (const struct regcache *regcache, int tid, int regno)
 
   if (have_ptrace_getfpxregs == TRIBOOL_FALSE)
     return 0;
-  
+
   if (ptrace (PTRACE_GETFPXREGS, tid, 0, &fpxregs) == -1)
     {
       if (errno == EIO)

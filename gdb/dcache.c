@@ -391,7 +391,7 @@ dcache_alloc (DCACHE *dcache, CORE_ADDR addr)
 }
 
 /* Using the data cache DCACHE, store in *PTR the contents of the byte at
-   address ADDR in the remote machine.  
+   address ADDR in the remote machine.
 
    Returns 1 for success, 0 for error.  */
 
@@ -571,7 +571,7 @@ dcache_print_line (DCACHE *dcache, int index)
       gdb_printf (_("No such cache line exists.\n"));
       return;
     }
-    
+
   db = (struct dcache_block *) n->value;
 
   gdb_printf (_("Line %d: address %s [%d hits]\n"),

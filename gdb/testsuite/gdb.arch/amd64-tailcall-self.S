@@ -40,7 +40,7 @@ b:
 # PRED: ENTRY [100.0%]  (FALLTHRU)
 	# amd64-tailcall-self.c:2
 	.loc 1 2 0
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE0:
@@ -66,7 +66,7 @@ c:
 	# amd64-tailcall-self.c:8
 	.loc 1 8 0
 	leal	1(%rdi), %eax
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	# amd64-tailcall-self.c:9
 	.loc 1 9 0
 	ret
@@ -133,7 +133,7 @@ a:
 # BLOCK 6 freq:721 seq:4
 # PRED: 4 [80.1%]  (CAN_FALLTHRU)
 .L3:
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE2:
@@ -163,7 +163,7 @@ main:
 	# amd64-tailcall-self.c:23
 	.loc 1 23 0
 	xorl	%eax, %eax
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE3:

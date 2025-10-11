@@ -573,7 +573,7 @@ add_set_language_command ()
    any non-NULL struct language_defn.skip_trampoline() functions.
    Return the result from the first that returns non-zero, or 0 if all
    `fail'.  */
-CORE_ADDR 
+CORE_ADDR
 skip_language_trampoline (const frame_info_ptr &frame, CORE_ADDR pc)
 {
   for (const auto &lang : language_defn::languages)

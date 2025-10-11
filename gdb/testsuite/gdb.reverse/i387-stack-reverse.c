@@ -12,18 +12,18 @@ void empty_fpu_stack()
        "ffree %st(5) \n\t"
        "ffree %st(6) \n\t"
        "ffree %st(7)");
-}   
+}
 
 /* tests floating point arithmetic */
 void test_arith_floats()
 {
-  
+
 }
 
 int main()
 {
   empty_fpu_stack();    /* BEGIN I387-FLOAT-REVERSE */
-  
+
   asm ("fld1");   /* test st0 register */
   asm ("fldl2t"); /* test st0, st1 */
   asm ("fldl2e"); /* test st0, st1, st2 */
@@ -33,6 +33,6 @@ int main()
   asm ("fldz");   /* test st0, st1, st2, st3, st4, st5, st6 */
   asm ("fld1");   /* test st0, st1, st2, st3, st4, st5, st6, st7 */
   asm ("nop");
-  
+
   return 1;             /* END I387-FLOAT-REVERSE */
 }

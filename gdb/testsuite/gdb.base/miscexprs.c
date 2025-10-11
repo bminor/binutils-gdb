@@ -1,7 +1,7 @@
 void
 marker1 ()
 {
-   
+
 }
 
 int
@@ -38,7 +38,7 @@ main ()
   dbig.d[202] = 9.99999999;
   sbig.s[90] = 255;
   lbig.l[333] = 999999999;
-    
+
   marker1 ();
   return 0;
 }

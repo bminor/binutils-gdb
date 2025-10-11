@@ -16,7 +16,7 @@ char * str_func1(char *s1)
 }
 
 char * str_func(
-char * s1, 
+char * s1,
 char * s2,
 char * s3,
 char * s4,

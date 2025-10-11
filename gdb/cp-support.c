@@ -706,7 +706,7 @@ mangled_name_to_comp (const char *mangled_name, int options,
 							       options);
   if (demangled_name == NULL)
    return NULL;
-  
+
   /* If we could demangle the name, parse it to build the component
      tree.  */
   std::unique_ptr<demangle_parse_info> info

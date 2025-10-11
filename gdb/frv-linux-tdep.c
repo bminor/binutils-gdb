@@ -202,7 +202,7 @@ frv_linux_sigcontext_reg_addr (const frame_info_ptr &this_frame, int regno,
 	  /* For a realtime sigtramp frame, SP + 12 contains a pointer
 	     to a ucontext struct.  The ucontext struct contains a
 	     sigcontext struct starting 24 bytes in.  (The offset of
-	     uc_mcontext within struct ucontext is derived as follows: 
+	     uc_mcontext within struct ucontext is derived as follows:
 	     stack_t is a 12-byte struct and struct sigcontext is
 	     8-byte aligned.  This gives an offset of 8 + 12 + 4 (for
 	     padding) = 24.)  */
@@ -245,7 +245,7 @@ frv_linux_sigcontext_reg_addr (const frame_info_ptr &this_frame, int regno,
       return sc_addr + 48;
     case iacc0l_regnum :
       return sc_addr + 52;
-    default : 
+    default :
       if (first_gpr_regnum <= regno && regno <= last_gpr_regnum)
 	return sc_addr + 56 + 4 * (regno - first_gpr_regnum);
       else if (first_fpr_regnum <= regno && regno <= last_fpr_regnum)
@@ -409,7 +409,7 @@ static const struct regcache_map_entry frv_linux_fpregmap[] =
 
 /* Unpack an frv_elf_gregset_t into GDB's register cache.  */
 
-static void 
+static void
 frv_linux_supply_gregset (const struct regset *regset,
 			  struct regcache *regcache,
 			  int regnum, const void *gregs, size_t len)
@@ -460,7 +460,7 @@ frv_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   linux_init_abi (info, gdbarch, 0);
 
   /* Set the sigtramp frame sniffer.  */
-  frame_unwind_append_unwinder (gdbarch, &frv_linux_sigtramp_frame_unwind); 
+  frame_unwind_append_unwinder (gdbarch, &frv_linux_sigtramp_frame_unwind);
 
   set_gdbarch_iterate_over_regset_sections
     (gdbarch, frv_linux_iterate_over_regset_sections);

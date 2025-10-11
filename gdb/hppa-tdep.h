@@ -94,7 +94,7 @@ struct hppa_gdbarch_tdep : gdbarch_tdep_base
      system.  */
   int is_elf = 0;
 
-  /* Given a function address, try to find the global pointer for the 
+  /* Given a function address, try to find the global pointer for the
      corresponding shared object.  */
   CORE_ADDR (*find_global_pointer) (struct gdbarch *, struct value *) = nullptr;
 
@@ -174,7 +174,7 @@ struct unwind_table_entry
   };
 
 /* HP linkers also generate unwinds for various linker-generated stubs.
-   GDB reads in the stubs from the $UNWIND_END$ subspace, then 
+   GDB reads in the stubs from the $UNWIND_END$ subspace, then
    "converts" them into normal unwind entries using some of the reserved
    fields to store the stub type.  */
 

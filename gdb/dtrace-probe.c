@@ -241,21 +241,21 @@ struct dtrace_dof_hdr
   /* Identification bytes (see above). */
   uint8_t dofh_ident[16];
   /* File attribute flags (if any). */
-  uint32_t dofh_flags;   
+  uint32_t dofh_flags;
   /* Size of file header in bytes. */
-  uint32_t dofh_hdrsize; 
+  uint32_t dofh_hdrsize;
   /* Size of section header in bytes. */
-  uint32_t dofh_secsize; 
+  uint32_t dofh_secsize;
   /* Number of section headers. */
-  uint32_t dofh_secnum;  
+  uint32_t dofh_secnum;
   /* File offset of section headers. */
-  uint64_t dofh_secoff;  
+  uint64_t dofh_secoff;
   /* File size of loadable portion. */
-  uint64_t dofh_loadsz;  
+  uint64_t dofh_loadsz;
   /* File size of entire DOF file. */
-  uint64_t dofh_filesz;  
+  uint64_t dofh_filesz;
   /* Reserved for future use. */
-  uint64_t dofh_pad;     
+  uint64_t dofh_pad;
 };
 
 /* A DOF section, whose contents depend on its type.  The several
@@ -267,15 +267,15 @@ struct dtrace_dof_sect
   /* Section type (see the define above). */
   uint32_t dofs_type;
   /* Section data memory alignment. */
-  uint32_t dofs_align; 
+  uint32_t dofs_align;
   /* Section flags (if any). */
-  uint32_t dofs_flags; 
+  uint32_t dofs_flags;
   /* Size of section entry (if table). */
   uint32_t dofs_entsize;
   /* DOF + offset points to the section data. */
   uint64_t dofs_offset;
   /* Size of section data in bytes.  */
-  uint64_t dofs_size;  
+  uint64_t dofs_size;
 };
 
 /* A DOF provider, which is the provider of a probe.  */
@@ -283,19 +283,19 @@ struct dtrace_dof_sect
 struct dtrace_dof_provider
 {
   /* Link to a DTRACE_DOF_SECT_TYPE_STRTAB section. */
-  uint32_t dofpv_strtab; 
+  uint32_t dofpv_strtab;
   /* Link to a DTRACE_DOF_SECT_TYPE_PROBES section. */
-  uint32_t dofpv_probes; 
+  uint32_t dofpv_probes;
   /* Link to a DTRACE_DOF_SECT_TYPE_PRARGS section. */
-  uint32_t dofpv_prargs; 
+  uint32_t dofpv_prargs;
   /* Link to a DTRACE_DOF_SECT_TYPE_PROFFS section. */
-  uint32_t dofpv_proffs; 
+  uint32_t dofpv_proffs;
   /* Provider name string. */
-  uint32_t dofpv_name;   
+  uint32_t dofpv_name;
   /* Provider attributes. */
   uint32_t dofpv_provattr;
   /* Module attributes. */
-  uint32_t dofpv_modattr; 
+  uint32_t dofpv_modattr;
   /* Function attributes. */
   uint32_t dofpv_funcattr;
   /* Name attributes. */
@@ -315,33 +315,33 @@ struct dtrace_dof_provider
 struct dtrace_dof_probe
 {
   /* Probe base address or offset. */
-  uint64_t dofpr_addr;   
+  uint64_t dofpr_addr;
   /* Probe function string. */
-  uint32_t dofpr_func;   
+  uint32_t dofpr_func;
   /* Probe name string. */
-  uint32_t dofpr_name;   
+  uint32_t dofpr_name;
   /* Native argument type strings. */
-  uint32_t dofpr_nargv;  
+  uint32_t dofpr_nargv;
   /* Translated argument type strings. */
-  uint32_t dofpr_xargv;  
+  uint32_t dofpr_xargv;
   /* Index of first argument mapping. */
-  uint32_t dofpr_argidx; 
+  uint32_t dofpr_argidx;
   /* Index of first offset entry. */
-  uint32_t dofpr_offidx; 
+  uint32_t dofpr_offidx;
   /* Native argument count. */
-  uint8_t  dofpr_nargc;  
+  uint8_t  dofpr_nargc;
   /* Translated argument count. */
-  uint8_t  dofpr_xargc;  
+  uint8_t  dofpr_xargc;
   /* Number of offset entries for probe. */
-  uint16_t dofpr_noffs;  
+  uint16_t dofpr_noffs;
   /* Index of first is-enabled offset. */
   uint32_t dofpr_enoffidx;
   /* Number of is-enabled offsets. */
   uint16_t dofpr_nenoffs;
   /* Reserved for future use. */
-  uint16_t dofpr_pad1;   
+  uint16_t dofpr_pad1;
   /* Reserved for future use. */
-  uint32_t dofpr_pad2;   
+  uint32_t dofpr_pad2;
 };
 
 /* DOF supports two different encodings: MSB (big-endian) and LSB
@@ -605,7 +605,7 @@ dtrace_process_dof (asection *sect, struct objfile *objfile,
       }
 
   return;
-	  
+
  invalid_dof_data:
   complaint (_("skipping section '%s' which does not contain valid DOF data."),
 	     sect->name);

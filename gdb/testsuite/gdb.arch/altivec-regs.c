@@ -11,13 +11,13 @@ vector_fun (volatile vector unsigned int a, volatile vector unsigned int b)
   c = vec_add (a, b);
   return c;
 }
- 
+
 int
 main ()
 {
-  vector unsigned int y; 
-  vector unsigned int x; 
-  vector unsigned int z; 
+  vector unsigned int y;
+  vector unsigned int x;
+  vector unsigned int z;
   int a = 0;
 
   #ifdef _AIX
@@ -34,7 +34,7 @@ main ()
   a = 9; /* start here */
   x = ((vector unsigned int) vec_splat_u8 (-2));
   y = ((vector unsigned int) vec_splat_u8 (1));
-	
+
   z = vector_fun (x, y);
   x = vec_sld (x,y,2);
 

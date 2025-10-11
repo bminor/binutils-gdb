@@ -61,7 +61,7 @@
 
 /* Register information.  */
 
-static const char * const amd64_register_names[] = 
+static const char * const amd64_register_names[] =
 {
   "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp", "rsp",
 
@@ -79,7 +79,7 @@ static const char * const amd64_register_names[] =
   "mxcsr",
 };
 
-static const char * const amd64_ymm_names[] = 
+static const char * const amd64_ymm_names[] =
 {
   "ymm0", "ymm1", "ymm2", "ymm3",
   "ymm4", "ymm5", "ymm6", "ymm7",
@@ -95,7 +95,7 @@ static const char * const amd64_ymm_avx512_names[] =
   "ymm28", "ymm29", "ymm30", "ymm31"
 };
 
-static const char * const amd64_ymmh_names[] = 
+static const char * const amd64_ymmh_names[] =
 {
   "ymm0h", "ymm1h", "ymm2h", "ymm3h",
   "ymm4h", "ymm5h", "ymm6h", "ymm7h",
@@ -329,7 +329,7 @@ static const char * const amd64_byte_names[] =
 
 static const char * const amd64_word_names[] =
 {
-  "ax", "bx", "cx", "dx", "si", "di", "bp", "", 
+  "ax", "bx", "cx", "dx", "si", "di", "bp", "",
   "r8w", "r9w", "r10w", "r11w", "r12w", "r13w", "r14w", "r15w"
 };
 
@@ -337,7 +337,7 @@ static const char * const amd64_word_names[] =
 
 static const char * const amd64_dword_names[] =
 {
-  "eax", "ebx", "ecx", "edx", "esi", "edi", "ebp", "esp", 
+  "eax", "ebx", "ecx", "edx", "esi", "edi", "ebp", "esp",
   "r8d", "r9d", "r10d", "r11d", "r12d", "r13d", "r14d", "r15d",
   "eip"
 };
@@ -1021,7 +1021,7 @@ if (return_method == return_method_struct)
      containing ellipsis (...) in the declaration) %al is used as
      hidden argument to specify the number of SSE registers used.  */
   regcache_raw_write_unsigned (regcache, AMD64_RAX_REGNUM, sse_reg);
-  return sp; 
+  return sp;
 }
 
 static CORE_ADDR
@@ -2213,7 +2213,7 @@ amd64_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
 		pushq -8(%reg)
 
      "andq $-XXX, %rsp" can be either 4 bytes or 7 bytes:
-     
+
 	0x48 0x83 0xe4 0xf0			andq $-16, %rsp
 	0x48 0x81 0xe4 0x00 0xff 0xff 0xff	andq $-256, %rsp
    */
@@ -2279,7 +2279,7 @@ amd64_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
       /* MOD must be binary 10 and R/M must be binary 100.  */
       if ((buf[offset + 2] & 0xc7) != 0x44)
 	return pc;
-      
+
       /* REG has register number.  */
       r = (buf[offset + 2] >> 3) & 7;
 
@@ -2345,7 +2345,7 @@ amd64_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
 
 static CORE_ADDR
 amd64_x32_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
-			       struct amd64_frame_cache *cache) 
+			       struct amd64_frame_cache *cache)
 {
   /* There are 2 code sequences to re-align stack before the frame
      gets set up:
@@ -2377,12 +2377,12 @@ amd64_x32_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
 		[addr32] pushq -8(%reg)
 
      "andq $-XXX, %rsp" can be either 4 bytes or 7 bytes:
-     
+
 	0x48 0x83 0xe4 0xf0			andq $-16, %rsp
 	0x48 0x81 0xe4 0x00 0xff 0xff 0xff	andq $-256, %rsp
 
      "andl $-XXX, %esp" can be either 3 bytes or 6 bytes:
-     
+
 	0x83 0xe4 0xf0			andl $-16, %esp
 	0x81 0xe4 0x00 0xff 0xff 0xff	andl $-256, %esp
    */
@@ -2454,7 +2454,7 @@ amd64_x32_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
       /* MOD must be binary 10 and R/M must be binary 100.  */
       if ((buf[offset + 2] & 0xc7) != 0x44)
 	return pc;
-      
+
       /* REG has register number.  */
       r = (buf[offset + 2] >> 3) & 7;
 
@@ -3379,7 +3379,7 @@ static const struct frame_unwind_legacy amd64_epilogue_frame_unwind (
   amd64_epilogue_frame_unwind_stop_reason,
   amd64_epilogue_frame_this_id,
   amd64_frame_prev_register,
-  NULL, 
+  NULL,
   amd64_epilogue_frame_sniffer
 );
 

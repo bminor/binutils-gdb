@@ -35,7 +35,7 @@ e:
 	# gdb.mi/mi2-amd64-entry-value.c:23
 	.loc 1 23 0
 	movl	$0, v(%rip)
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	# gdb.mi/mi2-amd64-entry-value.c:24
 	.loc 1 24 0
 	ret
@@ -54,7 +54,7 @@ data:
 	# gdb.mi/mi2-amd64-entry-value.c:30
 	.loc 1 30 0
 	movl	$10, %eax
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE1:
@@ -71,7 +71,7 @@ data2:
 	# gdb.mi/mi2-amd64-entry-value.c:36
 	.loc 1 36 0
 	movl	$20, %eax
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE2:
@@ -114,7 +114,7 @@ different:
 .LCFI1:
 	.cfi_def_cfa_offset 8
 .LVL4:
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE3:
@@ -162,7 +162,7 @@ validity:
 .LCFI3:
 	.cfi_def_cfa_offset 8
 .LVL7:
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE4:
@@ -190,7 +190,7 @@ invalid:
 # 60 "gdb.mi/mi2-amd64-entry-value.c" 1
 	breakhere_invalid:
 # 0 "" 2
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	# gdb.mi/mi2-amd64-entry-value.c:61
 	.loc 1 61 0
 #NO_APP
@@ -233,7 +233,7 @@ main:
 	.loc 1 70 0
 	xorl	%eax, %eax
 	.p2align 4,,1
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE6:

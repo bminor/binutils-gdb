@@ -295,7 +295,7 @@ static int amd64_linux_sc_reg_offset[] =
 static int
 amd64_linux_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 				 const struct reggroup *group)
-{ 
+{
   if (regnum == AMD64_LINUX_ORIG_RAX_REGNUM)
     return (group == system_reggroup
 	    || group == save_reggroup
@@ -370,8 +370,8 @@ amd64_all_but_ip_registers_record (struct regcache *regcache)
   return 0;
 }
 
-/* amd64_canonicalize_syscall maps from the native amd64 Linux set 
-   of syscall ids into a canonical set of syscall ids used by 
+/* amd64_canonicalize_syscall maps from the native amd64 Linux set
+   of syscall ids into a canonical set of syscall ids used by
    process record.  */
 
 static enum gdb_syscall
@@ -1521,7 +1521,7 @@ amd64_linux_syscall_record_common (struct regcache *regcache,
     {
       gdb_printf (gdb_stderr,
 		  _("Process record and replay target doesn't "
-		    "support syscall number %s\n"), 
+		    "support syscall number %s\n"),
 		  pulongest (syscall_native));
       return -1;
     }
@@ -1752,7 +1752,7 @@ amd64_dtrace_probe_is_enabled (struct gdbarch *gdbarch, CORE_ADDR addr)
 
      Note that ADDR is offset 3 bytes from the beginning of these
      sequences.  */
-  
+
   read_code (addr - 3, buf, 5);
   return (memcmp (buf, amd64_dtrace_disabled_probe_sequence_1, 5) != 0
 	  && memcmp (buf, amd64_dtrace_disabled_probe_sequence_2, 5) != 0);

@@ -537,7 +537,7 @@ bkscm_print_block_syms_progress_smob (SCM self, SCM port,
 	  {
 	    struct compunit_symtab *cust;
 
-	    gdbscm_printf (port, " %s", 
+	    gdbscm_printf (port, " %s",
 			   i_smob->iter.which == GLOBAL_BLOCK
 			   ? "global" : "static");
 	    if (i_smob->iter.idx != -1)

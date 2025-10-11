@@ -624,7 +624,7 @@ remote_fileio_func_write (remote_target *remote, char *buf)
       return;
     }
   length = (size_t) num;
-    
+
   buffer = (gdb_byte *) xmalloc (length);
   if (target_read_memory (ptrval, buffer, length) != 0)
     {
@@ -707,7 +707,7 @@ remote_fileio_func_lseek (remote_target *remote, char *buf)
       remote_fileio_reply (remote, -1, FILEIO_EINVAL);
       return;
     }
-  
+
   ret = lseek (fd, offset, flag);
 
   if (ret == (off_t) -1)
@@ -731,14 +731,14 @@ remote_fileio_func_rename (remote_target *remote, char *buf)
       remote_fileio_ioerror (remote);
       return;
     }
-  
+
   /* 2. Parameter: Ptr to newpath / length incl. trailing zero */
   if (remote_fileio_extract_ptr_w_len (&buf, &new_ptr, &new_len))
     {
       remote_fileio_ioerror (remote);
       return;
     }
-  
+
   /* Request oldpath using 'm' packet */
   oldpath = (char *) alloca (old_len);
   if (target_read_memory (old_ptr, (gdb_byte *) oldpath, old_len) != 0)
@@ -746,7 +746,7 @@ remote_fileio_func_rename (remote_target *remote, char *buf)
       remote_fileio_ioerror (remote);
       return;
     }
-  
+
   /* Request newpath using 'm' packet */
   newpath = (char *) alloca (new_len);
   if (target_read_memory (new_ptr, (gdb_byte *) newpath, new_len) != 0)
@@ -754,7 +754,7 @@ remote_fileio_func_rename (remote_target *remote, char *buf)
       remote_fileio_ioerror (remote);
       return;
     }
-  
+
   /* Only operate on regular files and directories.  */
   of = stat (oldpath, &ost);
   nf = stat (newpath, &nst);
@@ -872,7 +872,7 @@ remote_fileio_func_stat (remote_target *remote, char *buf)
       return;
     }
   statptr = (CORE_ADDR) lnum;
-  
+
   /* Request pathname using 'm' packet */
   pathname = (char *) alloca (namelength);
   if (target_read_memory (nameptr, (gdb_byte *) pathname, namelength) != 0)
@@ -1078,7 +1078,7 @@ remote_fileio_func_system (remote_target *remote, char *buf)
 	  return;
 	}
     }
-  
+
   /* Check if system(3) has been explicitly allowed using the
      `set remote system-call-allowed 1' command.  If length is 0,
      indicating a NULL parameter to the system call, return zero to

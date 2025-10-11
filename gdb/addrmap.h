@@ -200,7 +200,7 @@ private:
      transition at address T if T-1 and T map to different objects.
 
      Any addresses below the first node map to NULL.  (Unlike
-     fixed maps, we have no entry at (CORE_ADDR) 0; it doesn't 
+     fixed maps, we have no entry at (CORE_ADDR) 0; it doesn't
      simplify enough.)
 
      The last region is assumed to end at CORE_ADDR_MAX.

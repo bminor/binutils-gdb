@@ -448,7 +448,7 @@ static const char *
 ada_unqualified_name (const char *decoded_name)
 {
   const char *result;
-  
+
   /* If the decoded name starts with '<', it means that the encoded
      name does not follow standard naming conventions, and thus that
      it is not your typical Ada symbol name.  Trying to unqualify it
@@ -1445,7 +1445,7 @@ ada_decode (const char *encoded, bool wrap, bool translate)
 	  && c_isdigit (encoded [i+4]))
 	{
 	  int k = i + 5;
-	  
+
 	  while (k < len0 && c_isdigit (encoded[k]))
 	    k++;  /* Skip any extra digit.  */
 
@@ -1641,7 +1641,7 @@ ada_decode_tests ()
 /* Table for keeping permanent unique copies of decoded names.  Once
    allocated, names in this table are never released.  While this is a
    storage leak, it should not be significant unless there are massive
-   changes in the set of decoded names in successive versions of a 
+   changes in the set of decoded names in successive versions of a
    symbol table loaded during a single session.  */
 static gdb::string_set decoded_names_store;
 
@@ -2104,7 +2104,7 @@ desc_arity (struct type *type)
   return 0;
 }
 
-/* Non-zero iff TYPE is a simple array type (not a pointer to one) or 
+/* Non-zero iff TYPE is a simple array type (not a pointer to one) or
    an array descriptor type (representing an unconstrained array
    type).  */
 
@@ -2826,7 +2826,7 @@ ada_unpack_from_contents (const gdb_byte *src, int bit_offset, int bit_size,
    proceeding for BIT_SIZE bits.  If OBJ is an lval in memory, then
    assigning through the result will set the field fetched from.
    VALADDR is ignored unless OBJ is NULL, in which case,
-   VALADDR+OFFSET must address the start of storage containing the 
+   VALADDR+OFFSET must address the start of storage containing the
    packed value.  The value returned  in this case is never an lval.
    Assumes 0 <= BIT_OFFSET < HOST_CHAR_BIT.  */
 
@@ -4351,19 +4351,19 @@ possible_user_operator_p (enum exp_opcode op, struct value *args[])
 
 				/* Renaming */
 
-/* NOTES: 
+/* NOTES:
 
    1. In the following, we assume that a renaming type's name may
       have an ___XD suffix.  It would be nice if this went away at some
       point.
-   2. We handle both the (old) purely type-based representation of 
+   2. We handle both the (old) purely type-based representation of
       renamings and the (new) variable-based encoding.  At some point,
-      it is devoutly to be hoped that the former goes away 
+      it is devoutly to be hoped that the former goes away
       (FIXME: hilfinger-2007-07-09).
    3. Subprogram renamings are not implemented, although the XRS
       suffix is recognized (FIXME: hilfinger-2007-07-09).  */
 
-/* If SYM encodes a renaming, 
+/* If SYM encodes a renaming,
 
        <renaming> renames <renamed entity>,
 
@@ -4384,7 +4384,7 @@ possible_user_operator_p (enum exp_opcode op, struct value *args[])
 
 enum ada_renaming_category
 ada_parse_renaming (struct symbol *sym,
-		    const char **renamed_entity, int *len, 
+		    const char **renamed_entity, int *len,
 		    const char **renaming_expr)
 {
   enum ada_renaming_category kind;
@@ -4851,7 +4851,7 @@ standard_lookup (const char *name, const struct block *block,
 
 
 /* Non-zero iff there is at least one non-function/non-enumeral symbol
-   in the symbol fields of SYMS.  We treat enumerals as functions, 
+   in the symbol fields of SYMS.  We treat enumerals as functions,
    since they contend in overloading in the same way.  */
 static int
 is_nonfunction (const std::vector<struct block_symbol> &syms)
@@ -5167,7 +5167,7 @@ remove_extra_symbols (std::vector<struct block_symbol> &syms)
 		remove_p = true;
 	    }
 	}
-      
+
       /* Two functions with the same block are identical.  */
 
       else if (syms[i].symbol->loc_class () == LOC_BLOCK)
@@ -5298,14 +5298,14 @@ old_renaming_is_invisible (const struct symbol *sym, const char *function_name)
    remove from the SYMS list renaming symbols that should be visible
    from CURRENT_BLOCK.  However, there does not seem be a 100% reliable
    method with the current information available.  The implementation
-   below has a couple of limitations (FIXME: brobecker-2003-05-12):  
-   
+   below has a couple of limitations (FIXME: brobecker-2003-05-12):
+
       - When the user tries to print a rename in a function while there
 	is another rename entity defined in a package:  Normally, the
 	rename in the function has precedence over the rename in the
 	package, so the latter should be removed from the list.  This is
 	currently not the case.
-	
+
       - This function will incorrectly remove valid renames if
 	the CURRENT_BLOCK corresponds to a function which symbol name
 	has been changed by an "Export" pragma.  As a consequence,
@@ -5454,7 +5454,7 @@ match_data::operator() (struct block_symbol *bsym)
       found_sym = false;
       arg_sym = NULL;
     }
-  else 
+  else
     {
       if (sym->loc_class () == LOC_UNRESOLVED)
 	return true;
@@ -5683,7 +5683,7 @@ ada_add_all_symbols (std::vector<struct block_symbol> &result,
     *made_global_lookup_p = 1;
 
   /* Search symbols from all global blocks.  */
- 
+
   add_nonlocal_symbols (result, lookup_name, domain, 1);
 
   /* Now add symbols from all per-file blocks if we've gotten no hits
@@ -5815,7 +5815,7 @@ is_name_suffix (const char *str)
       while (c_isdigit (str[0]))
 	str += 1;
     }
-  
+
   /* [.$][0-9]+ */
 
   if (str[0] == '.' || str[0] == '$')
@@ -6911,19 +6911,19 @@ ada_value_primitive_field (struct value *arg1, int offset, int fieldno,
     return arg1->primitive_field (offset, fieldno, arg_type);
 }
 
-/* Find field with name NAME in object of type TYPE.  If found, 
+/* Find field with name NAME in object of type TYPE.  If found,
    set the following for each argument that is non-null:
-    - *FIELD_TYPE_P to the field's type; 
-    - *BYTE_OFFSET_P to OFFSET + the byte offset of the field within 
+    - *FIELD_TYPE_P to the field's type;
+    - *BYTE_OFFSET_P to OFFSET + the byte offset of the field within
       an object of that type;
-    - *BIT_OFFSET_P to the bit offset modulo byte size of the field; 
-    - *BIT_SIZE_P to its size in bits if the field is packed, and 
+    - *BIT_OFFSET_P to the bit offset modulo byte size of the field;
+    - *BIT_SIZE_P to its size in bits if the field is packed, and
       0 otherwise;
    If INDEX_P is non-null, increment *INDEX_P by the number of source-visible
    fields up to but not including the desired field, or by the total
    number of fields if not found.   A NULL value of NAME never
    matches; the function just counts visible fields in this case.
-   
+
    Notice that we need to handle when a tagged record hierarchy
    has some components with the same name, like in this scenario:
 
@@ -7050,7 +7050,7 @@ find_struct_field (const char *name, struct type *type, int offset,
 	}
       else if (ada_is_variant_part (type, i))
 	{
-	  /* PNH: Wait.  Do we ever execute this section, or is ARG always of 
+	  /* PNH: Wait.  Do we ever execute this section, or is ARG always of
 	     fixed type?? */
 	  int j;
 	  struct type *field_type
@@ -7264,7 +7264,7 @@ type_as_string (struct type *type)
    Matches any field whose name has NAME as a prefix, possibly
    followed by "___".
 
-   TYPE can be either a struct or union.  If REFOK, TYPE may also 
+   TYPE can be either a struct or union.  If REFOK, TYPE may also
    be a (pointer or reference)+ to a struct or union, and the
    ultimate target type will be searched.
 
@@ -8428,13 +8428,13 @@ to_fixed_array_type (struct type *type0, struct value *dval,
    DVAL describes a record containing any discriminants used in TYPE0,
    and may be NULL if there are none, or if the object of type TYPE at
    ADDRESS or in VALADDR contains these discriminants.
-   
+
    If CHECK_TAG is not null, in the case of tagged types, this function
    attempts to locate the object's tag and use it to compute the actual
    type.  However, when ADDRESS is null, we cannot use it to determine the
    location of the tag, and therefore compute the tagged type's actual type.
    So we return the tagged type without consulting the tag.  */
-   
+
 static struct type *
 ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
 		   CORE_ADDR address, struct value *dval, int check_tag)
@@ -8885,7 +8885,7 @@ ada_is_character_type (struct type *type)
      and don't check any further.  */
   if (type->code () == TYPE_CODE_CHAR)
     return true;
-  
+
   /* Otherwise, assume it's a character type iff it is a discrete type
      with a known character type name.  */
   name = ada_type_name (type);
@@ -9815,7 +9815,7 @@ aggregate_assigner::add_interval (LONGEST from, LONGEST to)
     else if (to < indices[i])
       break;
   }
-	
+
   indices.resize (indices.size () + 2);
   for (j = indices.size () - 1; j >= i + 2; j -= 1)
     indices[j] = indices[j - 2];
@@ -10486,7 +10486,7 @@ ada_unop_atr (struct expression *exp, enum noside noside, enum exp_opcode op,
 	default:
 	  error (_("unexpected attribute encountered"));
 	case OP_ATR_FIRST:
-	  return value_from_longest 
+	  return value_from_longest
 	    (range_type, ada_discrete_type_low_bound (range_type));
 	case OP_ATR_LAST:
 	  return value_from_longest
@@ -11962,7 +11962,7 @@ ada_find_printable_frame (const frame_info_ptr &initial_fi)
 /* Assuming that the inferior just triggered an unhandled exception
    catchpoint, return the address in inferior memory where the name
    of the exception is stored.
-   
+
    Return zero if the address could not be computed.  */
 
 static CORE_ADDR
@@ -11990,7 +11990,7 @@ ada_unhandled_exception_name_addr_from_raise (void)
   fi = get_current_frame ();
   for (frame_level = 0; frame_level < 3; frame_level += 1)
     if (fi != NULL)
-      fi = get_prev_frame (fi); 
+      fi = get_prev_frame (fi);
 
   while (fi != NULL)
     {
@@ -12459,7 +12459,7 @@ ada_catchpoint::print_it (const bpstat *bs) const
 
 bool
 ada_catchpoint::print_one (const bp_location **last_loc) const
-{ 
+{
   struct ui_out *uiout = current_uiout;
   struct value_print_options opts;
 
@@ -12481,13 +12481,13 @@ ada_catchpoint::print_one (const bp_location **last_loc) const
 	  }
 	else
 	  uiout->field_string ("what", "all Ada exceptions");
-	
+
 	break;
 
       case ada_catch_exception_unhandled:
 	uiout->field_string ("what", "unhandled Ada exceptions");
 	break;
-      
+
       case ada_catch_handlers:
 	if (!m_excep_string.empty ())
 	  {
@@ -12603,7 +12603,7 @@ is_ada_exception_catchpoint (breakpoint *bp)
   return dynamic_cast<ada_catchpoint *> (bp) != nullptr;
 }
 
-/* Split the arguments specified in a "catch exception" command.  
+/* Split the arguments specified in a "catch exception" command.
    Set EX to the appropriate catchpoint type.
    Set EXCEP_STRING to the name of the specific exception if
    specified by the user.

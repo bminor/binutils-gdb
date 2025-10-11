@@ -81,7 +81,7 @@ pipe_open (struct serial *scb, const char *name)
      fork() due to the fact that autoconf will ``#define vfork fork''
      on certain platforms.  */
   pid = vfork ();
-  
+
   /* Error.  */
   if (pid == -1)
     {

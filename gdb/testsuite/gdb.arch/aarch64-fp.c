@@ -24,7 +24,7 @@ main (void)
                  0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x2e, 0x2f};
   long val;
   void *addr;
-    
+
   addr = &buf0[0];
   __asm __volatile ("ldr %x0, [%1]\n\t"
 		    "ldr q0, [%x0]"
@@ -38,7 +38,7 @@ main (void)
 		    : "=r" (val)
 		    : "r" (&addr)
 		    : "q1" );
-  
+
   return 1;
 }
 

@@ -79,7 +79,7 @@ _.stapsdt.base: .space 1
 	movl	$0, %eax
 	popq	%rbp
 	.cfi_def_cfa 7, 8
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE0:

@@ -507,7 +507,7 @@ static const struct ppc_insn_pattern ppc64_standard_linkage12[] =
 	10000388:   7d 69 03 a6     mtctr   r11
 	1000038c:   e8 42 80 80     ld      r2,-32640(r2)
 	10000390:   28 22 00 00     cmpldi  r2,0
-	10000394:   4c e2 04 20     bnectr+ 
+	10000394:   4c e2 04 20     bnectr+
 	10000398:   48 00 03 a0     b       10000738 <printf@plt>
 
    - But since this is the first time that PLT entry has been used, it
@@ -754,7 +754,7 @@ ppc64_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
   /* Check if ADDR points to a function descriptor.  */
   if (s && strcmp (s->the_bfd_section->name, ".opd") == 0)
     {
-      /* There may be relocations that need to be applied to the .opd 
+      /* There may be relocations that need to be applied to the .opd
 	 section.  Unfortunately, this function may be called at a time
 	 where these relocations have not yet been performed -- this can
 	 happen for example shortly after a library has been loaded with

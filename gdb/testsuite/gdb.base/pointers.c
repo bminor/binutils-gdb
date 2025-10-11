@@ -90,7 +90,7 @@ int main ()
 {
   void dummy();
   int more_code();
-  
+
   dummy();
 
   more_code ();
@@ -100,29 +100,29 @@ int main ()
   usevar (&y);
 
   return 0;
-  
+
 }
 
 void dummy()
 {
-    
-  
+
+
   v_char = 0;
   v_signed_char = 1;
   v_unsigned_char = 2;
 
   v_short = 3;
   v_signed_short = 4;
-  v_unsigned_short = 5;    
+  v_unsigned_short = 5;
 
   v_int = 6;
   v_signed_int = 7;
-  v_unsigned_int = 8;    
+  v_unsigned_int = 8;
 
   v_long = 9;
   v_signed_long = 10;
-  v_unsigned_long = 11;    
-  
+  v_unsigned_long = 11;
+
   v_float = 100.0;
   v_double = 200.0;
 
@@ -148,8 +148,8 @@ void dummy()
   v_double_pointer = &v_double;
 
   ptr_to_ptr_to_float = &v_float_pointer;
-  
-  
+
+
   v_char_array[0] = v_char;
   v_signed_char_array[0] = v_signed_char;
   v_unsigned_char_array[0] = v_unsigned_char;
@@ -160,7 +160,7 @@ void dummy()
 
   v_int_array[0] = v_int;
   v_int_array[1] = v_int * 3;
-  
+
   v_signed_int_array[0] = v_signed_int;
   v_unsigned_int_array[0] = v_unsigned_int;
 
@@ -215,7 +215,7 @@ int more_code()
     pUL = &UL;
     pF = &F;
     pD = &D;
-    
+
     marker1();
     return 0;
 }

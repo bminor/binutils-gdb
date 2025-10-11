@@ -48,7 +48,7 @@ bCC_tests:
 	blt bCC_tests
 	bhi bCC_tests
 	bcc bCC_tests
-	bls bCC_tests	
+	bls bCC_tests
 	bcs bCC_tests
 	bvc bCC_tests
 	bvs bCC_tests
@@ -81,7 +81,7 @@ cmp_tests:
 	cmp 256,a2
 	cmp 131071,a1
 
-	
+
 extend_tests:
 	ext d1
 	extb d2
@@ -103,7 +103,7 @@ extended_tests:
 	sat16 d2,d3
 	sat24 d3,d2
 	bsch d1,d2
-	
+
 logical_tests:
 	and d1,d2
 	and 127,d2
@@ -129,7 +129,7 @@ loop_tests:
 	llt
 	lhi
 	lcc
-	lls	
+	lls
 	lcs
 	lra
 	setlb

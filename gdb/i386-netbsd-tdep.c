@@ -368,7 +368,7 @@ i386nbsd_sigtramp_cache_init (const struct tramp_frame *self,
 }
 
 
-static void 
+static void
 i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);

@@ -839,7 +839,7 @@ remove_inferior_command (const char *args, int from_tty)
 	  warning (_("Can not remove current inferior %d."), num);
 	  continue;
 	}
-    
+
       if (inf->pid != 0)
 	{
 	  warning (_("Can not remove active inferior %d."), num);

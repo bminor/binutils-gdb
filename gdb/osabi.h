@@ -1,6 +1,6 @@
 /* OS ABI variant handling for GDB.
    Copyright (C) 2001-2025 Free Software Foundation, Inc.
-   
+
    This file is part of GDB.
 
    This program is free software; you can redistribute it and/or modify

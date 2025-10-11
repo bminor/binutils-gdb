@@ -167,7 +167,7 @@ set_logging_on (const char *args, int from_tty)
   handle_redirections (from_tty);
 }
 
-static void 
+static void
 set_logging_off (const char *args, int from_tty)
 {
   if (saved_filename.empty ())

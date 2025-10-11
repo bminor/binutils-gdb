@@ -101,7 +101,7 @@ class wchar_iterator
   ~wchar_iterator ();
 
   /* Perform a single iteration of a wchar_t iterator.
-   
+
      Returns the number of characters converted.  A negative result
      means that EOF has been reached.  A positive result indicates the
      number of valid wchar_ts in the result; *OUT_CHARS is updated to
@@ -120,7 +120,7 @@ class wchar_iterator
 
      wchar_iterate_incomplete means that an incomplete character was
      seen at the end of the input sequence.
-   
+
      wchar_iterate_eof means that all bytes were successfully
      converted.  The other output arguments are not set.  */
   int iterate (enum wchar_iterate_result *out_result, gdb_wchar_t **out_chars,

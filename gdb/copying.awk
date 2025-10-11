@@ -22,7 +22,7 @@ NR == 1,/^[ 	]*15\. Disclaimer of Warranty\.[ 	]*$/	{
 	    {
 	      printf "  gdb_printf (\"\\n\");\n";
 	    }
-	  else if ($0 !~ /^[ 	]*15\. Disclaimer of Warranty\.[ 	]*$/) 
+	  else if ($0 !~ /^[ 	]*15\. Disclaimer of Warranty\.[ 	]*$/)
 	    {
 	      printf "  gdb_printf (\"";
 	      for (i = 1; i < NF; i++)
@@ -37,8 +37,8 @@ NR == 1,/^[ 	]*15\. Disclaimer of Warranty\.[ 	]*$/	{
 	  print "show_warranty_command (const char *ignore, int from_tty)";
 	  print "{";
 	}
-/^[ 	]*15\. Disclaimer of Warranty\.[ 	]*$/, /^[ 	]*END OF TERMS AND CONDITIONS[ 	]*$/{  
-	  if (! ($0 ~ /^[ 	]*END OF TERMS AND CONDITIONS[ 	]*$/)) 
+/^[ 	]*15\. Disclaimer of Warranty\.[ 	]*$/, /^[ 	]*END OF TERMS AND CONDITIONS[ 	]*$/{
+	  if (! ($0 ~ /^[ 	]*END OF TERMS AND CONDITIONS[ 	]*$/))
 	    {
 	      printf "  gdb_printf (\"";
 	      for (i = 1; i < NF; i++)

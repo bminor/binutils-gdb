@@ -104,7 +104,7 @@ main (void)
   volatile unsigned long valve = 2000;
   volatile float vacuity = 3.0;
   volatile double vertigo = 10.3;
-    
+
   /* pointers to volatile variables */
 
   volatile char           * vampire = &vox;
@@ -176,17 +176,17 @@ main (void)
 
   const char                       * const volatile cove = &laconic;
   const unsigned char              * const volatile cavity = &laggard;
-    
+
   /* const volatile pointers to volatile vars */
 
   volatile char                    * const volatile vagus = &vox;
   volatile unsigned char           * const volatile vagrancy = &victuals;
-    
+
   /* const volatile pointers to const volatile */
 
   const volatile char              * const volatile vagary = &victor;
   const volatile unsigned char     * const volatile vendor = &vicar;
-  
+
   /* const volatile arrays */
   const volatile char vindictive[2] = {victor, victor};
   const volatile unsigned char vegetation[2] = {vicar, vicar};
@@ -206,7 +206,7 @@ main (void)
   volatile signed char & remuneration = lemonade;
   */
   marker1 ();
-    
+
 
   return 0;
 }

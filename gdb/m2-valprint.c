@@ -174,7 +174,7 @@ m2_print_unbounded_array (struct value *value,
 		       addr);
   len = unpack_field_as_long (type, valaddr, 1);
 
-  gdb_printf (stream, "{");  
+  gdb_printf (stream, "{");
   m2_print_array_contents (val, stream, recurse, options, len);
   gdb_printf (stream, ", HIGH = %d}", (int) len);
 }
@@ -216,7 +216,7 @@ print_unpacked_pointer (struct type *type,
       return val_print_string (type->target_type (), NULL, addr, -1,
 			       stream, options);
     }
-  
+
   return 0;
 }
 
@@ -234,7 +234,7 @@ print_variable_at_address (struct type *type,
   gdb_printf (stream, "[");
   gdb_puts (paddress (gdbarch, addr), stream);
   gdb_printf (stream, "] : ");
-  
+
   if (elttype->code () != TYPE_CODE_UNDEF)
     {
       struct value *deref_val =

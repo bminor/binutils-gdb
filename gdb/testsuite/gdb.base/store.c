@@ -279,13 +279,13 @@ main ()
   wack_struct_2 ();
   wack_struct_3 ();
   wack_struct_4 ();
-  
+
   /* These calls are for up frame.  */
   wack_struct_1 ();
   wack_struct_2 ();
   wack_struct_3 ();
   wack_struct_4 ();
-  
+
   wack_field_1 ();
   wack_field_2 ();
   wack_field_3 ();

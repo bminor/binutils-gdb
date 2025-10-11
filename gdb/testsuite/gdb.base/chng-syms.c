@@ -1,6 +1,6 @@
 /*
- *   Test that GDB cleans up properly after errors that result when a 
- * breakpoint is reset. 
+ *   Test that GDB cleans up properly after errors that result when a
+ * breakpoint is reset.
  */
 
 /* VARIABLE is a macro defined on the compiler command line. */

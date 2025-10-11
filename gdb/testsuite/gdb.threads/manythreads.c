@@ -1,7 +1,7 @@
 /* Manythreads test program.
    Copyright 2004-2025 Free Software Foundation, Inc.
 
-   Written by Jeff Johnston <jjohnstn@redhat.com> 
+   Written by Jeff Johnston <jjohnstn@redhat.com>
    Contributed by Red Hat
 
    This file is part of GDB.
@@ -37,7 +37,7 @@ thread_function (void *arg)
   return NULL;
 }
 
-int 
+int
 main (int argc, char **argv)
 {
   pthread_attr_t attr;
@@ -53,7 +53,7 @@ main (int argc, char **argv)
 
   /* Create a ton of quick-executing threads, then wait for them to
      complete.  */
-  for (i = 0; i < 1000; ++i) 
+  for (i = 0; i < 1000; ++i)
     {
       for (j = 0; j < 256; ++j)
 	{

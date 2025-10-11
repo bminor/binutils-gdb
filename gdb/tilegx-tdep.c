@@ -456,9 +456,9 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
 		    = (unsigned) reverse_frame[operands[1]].value;
 
 		  cache->saved_regs[saved_register].set_addr (saved_address);
-		} 
+		}
 	      else if (cache
-		       && (operands[0] == TILEGX_SP_REGNUM) 
+		       && (operands[0] == TILEGX_SP_REGNUM)
 		       && (operands[1] == TILEGX_LR_REGNUM))
 		lr_saved_on_stack_p = 1;
 	      break;

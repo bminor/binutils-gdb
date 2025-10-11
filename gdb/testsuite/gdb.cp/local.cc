@@ -1,13 +1,13 @@
 // Tests for local types
 
 void marker1 (void)
-{ 
+{
 }
 
 void marker2 (void)
 {
 }
-  
+
 int foobar (int x)
 {
   class Local {
@@ -34,9 +34,9 @@ int foobar (int x)
 int main()
 {
   int c;
-  
+
   c = foobar (31);
-  
+
  { // inner block
    class InnerLocal {
    public:

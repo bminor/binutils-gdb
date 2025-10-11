@@ -348,7 +348,7 @@ ada_get_task_number (thread_info *thread)
 
 /* Return the task number of the task running in inferior INF which
    matches TASK_ID , or zero if the task could not be found.  */
- 
+
 static int
 get_task_number_from_id (CORE_ADDR task_id, struct inferior *inf)
 {
@@ -1324,7 +1324,7 @@ info_task (struct ui_out *uiout, const char *taskno_str, struct inferior *inf)
 /* If ARG is empty or null, then print a list of all Ada tasks.
    Otherwise, print detailed information about the task whose ID
    is ARG.
-   
+
    Does nothing if the program doesn't use Ada tasking.  */
 
 static void
@@ -1377,7 +1377,7 @@ task_command_1 (const char *taskno_str, int from_tty, struct inferior *inf)
   if (!ada_task_is_alive (task_info))
     error (_("Cannot switch to task %s: Task is no longer running"),
 	   task_to_str (taskno, task_info).c_str ());
-   
+
   /* On some platforms, the thread list is not updated until the user
      performs a thread-related operation (by using the "info threads"
      command, for instance).  So this thread list may not be up to date

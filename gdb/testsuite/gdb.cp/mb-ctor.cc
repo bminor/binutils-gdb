@@ -1,7 +1,7 @@
 
 #include <stdio.h>
 
-class Base 
+class Base
 {
 public:
   Base(int k);

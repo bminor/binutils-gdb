@@ -141,7 +141,7 @@ get_user_print_options (struct value_print_options *opts)
    pretty-formatting disabled.  */
 void
 get_no_prettyformat_print_options (struct value_print_options *opts)
-{  
+{
   *opts = user_print_options;
   opts->prettyformat = Val_no_prettyformat;
 }
@@ -1381,15 +1381,15 @@ value_print_scalar_formatted (struct value *val,
 }
 
 /* Print a number according to FORMAT which is one of d,u,x,o,b,h,w,g.
-   The raison d'etre of this function is to consolidate printing of 
-   LONG_LONG's into this one function.  The format chars b,h,w,g are 
+   The raison d'etre of this function is to consolidate printing of
+   LONG_LONG's into this one function.  The format chars b,h,w,g are
    from print_scalar_formatted().  Numbers are printed using C
    format.
 
-   USE_C_FORMAT means to use C format in all cases.  Without it, 
+   USE_C_FORMAT means to use C format in all cases.  Without it,
    'o' and 'x' format do not include the standard C radix prefix
-   (leading 0 or 0x). 
-   
+   (leading 0 or 0x).
+
    Hilfinger/2004-09-09: USE_C_FORMAT was originally called USE_LOCAL
    and was intended to request formatting according to the current
    language and would be used for most integers that GDB prints.  The
@@ -1426,7 +1426,7 @@ print_longest (struct ui_file *stream, int format, int use_c_format,
       val = int_string (val_long, 8, 0, 0, use_c_format); break;
     default:
       internal_error (_("failed internal consistency check"));
-    } 
+    }
   gdb_puts (val, stream);
 }
 
@@ -1991,14 +1991,14 @@ print_function_pointer_address (const struct value_print_options *options,
 
 /* Print on STREAM using the given OPTIONS the index for the element
    at INDEX of an array whose index type is INDEX_TYPE.  */
-    
-void  
+
+void
 maybe_print_array_index (struct type *index_type, LONGEST index,
 			 struct ui_file *stream,
 			 const struct value_print_options *options)
 {
   if (!options->print_array_indexes)
-    return; 
+    return;
 
   current_language->print_array_index (index_type, index, stream, options);
 }
@@ -2601,8 +2601,8 @@ print_converted_chars_to_obstack (struct obstack *obstack,
    omitted.  */
 
 void
-generic_printstr (struct ui_file *stream, struct type *type, 
-		  const gdb_byte *string, unsigned int length, 
+generic_printstr (struct ui_file *stream, struct type *type,
+		  const gdb_byte *string, unsigned int length,
 		  const char *encoding, int force_ellipses,
 		  int quote_char, int c_style_terminator,
 		  const struct value_print_options *options)

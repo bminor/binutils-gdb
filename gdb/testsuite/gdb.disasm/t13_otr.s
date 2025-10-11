@@ -8,21 +8,21 @@ lab_12:
 	.org 0x1234
 	.global	_start
 _start:
-    bra 0x12+.+2                  ;4012 
-    brn 0x12+.+2                  ;4112 
-    bhi 0x12+.+2                  ;4212 
-    bls 0x12+.+2                  ;4312 
-    bcc 0x12+.+2                  ;4412 
-    bcs 0x12+.+2                  ;4512 
-    bne 0x12+.+2                  ;4612 
-    beq 0x12+.+2                  ;4712 
-    bvc 0x12+.+2                  ;4812 
-    bvs 0x12+.+2                  ;4912 
-    bpl 0x12+.+2                  ;4a12 
-    bmi 0x12+.+2                  ;4b12 
-    bge 0x12+.+2                  ;4c12 
-    blt 0x12+.+2                  ;4d12 
-    bgt 0x12+.+2                  ;4e12 
+    bra 0x12+.+2                  ;4012
+    brn 0x12+.+2                  ;4112
+    bhi 0x12+.+2                  ;4212
+    bls 0x12+.+2                  ;4312
+    bcc 0x12+.+2                  ;4412
+    bcs 0x12+.+2                  ;4512
+    bne 0x12+.+2                  ;4612
+    beq 0x12+.+2                  ;4712
+    bvc 0x12+.+2                  ;4812
+    bvs 0x12+.+2                  ;4912
+    bpl 0x12+.+2                  ;4a12
+    bmi 0x12+.+2                  ;4b12
+    bge 0x12+.+2                  ;4c12
+    blt 0x12+.+2                  ;4d12
+    bgt 0x12+.+2                  ;4e12
     ble 0x12+.+2                  ;4f12
 
     bra 0x1234+.+4                ;58001234
@@ -73,86 +73,86 @@ _start:
     bsr/bs #0x7,@0xffff9abc:16,0x1234+.+8   ;6a109abc5cf01234
     bsr/bs #0x7,@0x12345678:32,0x1234+.+0xa ;6a30123456785cf01234
 
-    bra r2l.b          ;5925 
-    bra r2.w           ;5926 
-    bra er2.l          ;5927 
+    bra r2l.b          ;5925
+    bra r2.w           ;5926
+    bra er2.l          ;5927
 
     bsr 0x12+.+2       ;5512
     bsr 0x1234+.+4     ;5c001234
-    bsr r2l.b          ;5d25 
-    bsr r2.w           ;5d26 
-    bsr er2.l          ;5d27 
+    bsr r2l.b          ;5d25
+    bsr r2.w           ;5d26
+    bsr er2.l          ;5d27
 
-    jmp @er2             ;5920     
+    jmp @er2             ;5920
     jmp @0x123456:24     ;5a123456
     jmp @0x12345678:32   ;590812345678
     jmp @@0x12           ;5b12
     jmp @@0x234          ;598d
 
-    jsr @er2             ;5d20 
+    jsr @er2             ;5d20
     jsr @0x123456:24     ;5e123456
     jsr @0x12345678:32   ;5d0812345678
     jsr @@0x12           ;5f12
     jsr @@0x234          ;5d8d
 
-    rts                      ;5470     
+    rts                      ;5470
     rts/l  er3               ;5403
     rts/l  er1-er2           ;5412
     rts/l  er2-er4           ;5424
     rts/l  er3-er6           ;5436
 
-    trapa #0x3               ;5730 
+    trapa #0x3               ;5730
 
-    rte                      ;5670     
+    rte                      ;5670
     rte/l  er3               ;5603
     rte/l  er1-er2           ;5612
     rte/l  er2-er4           ;5624
     rte/l  er3-er6           ;5636
 
-    ldc.b #0x12:8,ccr        ;0712 
-    ldc.b r3h,ccr            ;0303 
-    ldc.w @er3,ccr           ;01406930 
-    ldc.w @er3+,ccr          ;01406d30 
+    ldc.b #0x12:8,ccr        ;0712
+    ldc.b r3h,ccr            ;0303
+    ldc.w @er3,ccr           ;01406930
+    ldc.w @er3+,ccr          ;01406d30
     ldc.w @(0x1234:16,er3),ccr        ;01406f301234
     ldc.w @(0x12345678:32,er3),ccr    ;014078306b2012345678
     ldc.w @0x1234:16,ccr              ;01406b001234
     ldc.w @0x12345678:32,ccr          ;01406b2012345678
 
-    ldc.b #0x12:8,exr        ;01410712 
-    ldc.b r3h,exr            ;0313 
-    ldc.w @er3,exr           ;01416930 
-    ldc.w @er3+,exr          ;01416d30 
+    ldc.b #0x12:8,exr        ;01410712
+    ldc.b r3h,exr            ;0313
+    ldc.w @er3,exr           ;01416930
+    ldc.w @er3+,exr          ;01416d30
     ldc.w @(0x1234:16,er3),exr        ;01416f301234
-    ldc.w @(0x12345678:32,er3),exr    ;014178306b2012345678    
+    ldc.w @(0x12345678:32,er3),exr    ;014178306b2012345678
     ldc.w @0x1234:16,exr              ;01416b001234
     ldc.w @0x12345678:32,exr          ;01416b2012345678
 
-    stc.b ccr,r1h            ;0201 
-    stc.w ccr,@er1           ;01406990 
-    stc.w ccr,@-er1          ;01406d90 
+    stc.b ccr,r1h            ;0201
+    stc.w ccr,@er1           ;01406990
+    stc.w ccr,@-er1          ;01406d90
     stc.w ccr,@(0x1234:16,er1)       ;01406f901234
     stc.w ccr,@(0x12345678:32,er1)   ;014078106ba012345678
     stc.w ccr,@0x1234:16             ;01406b801234
     stc.w ccr,@0x12345678:32         ;01406ba012345678
 
-    stc.b exr,r1h            ;0211 
-    stc.w exr,@er1           ;01416990 
-    stc.w exr,@-er1          ;01416d90 
+    stc.b exr,r1h            ;0211
+    stc.w exr,@er1           ;01416990
+    stc.w exr,@-er1          ;01416d90
     stc.w exr,@(0x1234:16,er1)       ;01416f901234
     stc.w exr,@(0x12345678:32,er1)   ;014178106ba012345678
     stc.w exr,@0x1234:16             ;01416b801234
     stc.w exr,@0x12345678:32         ;01416ba012345678
 
-    orc.b #0x12:8,ccr          ;0412 
-    orc.b #0x12:8,exr          ;01410412 
+    orc.b #0x12:8,ccr          ;0412
+    orc.b #0x12:8,exr          ;01410412
 
-    xorc.b #0x12:8,ccr         ;0512 
-    xorc.b #0x12:8,exr         ;01410512 
+    xorc.b #0x12:8,ccr         ;0512
+    xorc.b #0x12:8,exr         ;01410512
 
-    andc.b #0x12:8,ccr         ;0612 
-    andc.b #0x12:8,exr         ;01410612 
+    andc.b #0x12:8,ccr         ;0612
+    andc.b #0x12:8,exr         ;01410612
 
-    sleep                      ;0180 
+    sleep                      ;0180
 
     nop                        ;0000
 

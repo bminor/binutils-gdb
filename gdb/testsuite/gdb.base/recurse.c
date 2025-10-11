@@ -1,4 +1,4 @@
-/* Trivial code used to test watchpoints in recursive code and 
+/* Trivial code used to test watchpoints in recursive code and
    auto-deletion of watchpoints as they go out of scope.  */
 
 static int

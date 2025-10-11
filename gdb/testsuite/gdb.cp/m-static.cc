@@ -51,10 +51,10 @@ class gnu_obj_2: public virtual gnu_obj_1
 {
 public:
   static antiquities	value_derived;
-      
+
 public:
   gnu_obj_2(antiquities b): gnu_obj_1(oriental, 7) { }
-}; 
+};
 
 template<typename T>
 typename gnu_obj_2<T>::antiquities gnu_obj_2<T>::value_derived = etruscan;
@@ -66,10 +66,10 @@ class gnu_obj_3
 public:
   typedef region antiquities;
   static gnu_obj_2<int> data;
-      
+
 public:
   gnu_obj_3(antiquities b) { }
-}; 
+};
 
 template<typename T>
 gnu_obj_2<int> gnu_obj_3<T>::data(etruscan);

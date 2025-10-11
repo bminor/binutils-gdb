@@ -177,7 +177,7 @@ int main ()
 
   a.j = 121;
   a.jj = 1331;
-  
+
   int k;
 
   a_p = &a;
@@ -228,7 +228,7 @@ int main ()
   k = (a.**pmf_p)(5);
 
   k = a.*pmi;
-  
+
 
   k = a.bar(2);
 
@@ -237,6 +237,6 @@ int main ()
   B b;
 
   k += b.s;
-  
+
   return 0;
 }

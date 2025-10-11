@@ -19,7 +19,7 @@ int main2(void);
 
 void marker1 (void)
 {
-    
+
 }
 
 
@@ -88,5 +88,5 @@ int main2(void)
     I = f();
 
     return 0;
-    
+
 }

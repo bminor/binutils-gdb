@@ -44,7 +44,7 @@ bCC_tests:
 	blt bCC_tests
 	bhi bCC_tests
 	bcc bCC_tests
-	bls bCC_tests	
+	bls bCC_tests
 	bcs bCC_tests
 	bvc bCC_tests
 	bvs bCC_tests
@@ -61,7 +61,7 @@ bCCx_tests:
 	bltx bCCx_tests
 	bhix bCCx_tests
 	bccx bCCx_tests
-	blsx bCCx_tests	
+	blsx bCCx_tests
 	bcsx bCCx_tests
 	bvcx bCCx_tests
 	bvsx bCCx_tests
@@ -91,7 +91,7 @@ extend_tests:
 	extxu d3
 	extxb d2
 	extxbu d1
-	
+
 logical_tests:
 	and d1,d2
 	and 127,d2

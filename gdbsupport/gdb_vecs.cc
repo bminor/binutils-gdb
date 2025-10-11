@@ -59,7 +59,7 @@ std::vector<gdb::unique_xmalloc_ptr<char>>
 delim_string_to_char_ptr_vec (const char *str, char delimiter)
 {
   std::vector<gdb::unique_xmalloc_ptr<char>> retval;
-  
+
   delim_string_to_char_ptr_vec_append (&retval, str, delimiter);
 
   return retval;
@@ -80,7 +80,7 @@ std::vector<gdb::unique_xmalloc_ptr<char>>
 dirnames_to_char_ptr_vec (const char *dirnames)
 {
   std::vector<gdb::unique_xmalloc_ptr<char>> retval;
-  
+
   dirnames_to_char_ptr_vec_append (&retval, dirnames);
 
   return retval;

@@ -22,7 +22,7 @@
 /* From proc-why.c */
 
 /*
- * Pretty-print functions for /proc data 
+ * Pretty-print functions for /proc data
  */
 
 extern void proc_prettyprint_why (unsigned long why, unsigned long what,
@@ -56,7 +56,7 @@ extern void proc_prettyfprint_signal (FILE *file, int signo, int verbose);
 extern void proc_prettyfprint_flags (FILE *file, unsigned long flags,
 				     int verbose);
 
-extern void proc_prettyfprint_why (FILE *file, unsigned long why, 
+extern void proc_prettyfprint_why (FILE *file, unsigned long why,
 				   unsigned long what, int verbose);
 
 extern void proc_prettyfprint_fault (FILE *file, int faultno, int verbose);

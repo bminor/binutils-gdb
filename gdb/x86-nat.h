@@ -31,7 +31,7 @@
 
 /* Use this function to set x86_dr_low debug_register_length field
    rather than setting it directly to check that the length is only
-   set once.  It also enables the 'maint set/show show-debug-regs' 
+   set once.  It also enables the 'maint set/show show-debug-regs'
    command.  */
 
 extern void x86_set_debug_register_length (int len);

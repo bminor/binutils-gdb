@@ -61,7 +61,7 @@ mi_cmd_env_pwd (const char *command, const char *const *argv, int argc)
 
   if (argc > 0)
     error (_("-environment-pwd: No arguments allowed"));
-	  
+
   gdb::unique_xmalloc_ptr<char> cwd (getcwd (NULL, 0));
   if (cwd == NULL)
     error (_("-environment-pwd: error finding name of working directory: %s"),
@@ -77,7 +77,7 @@ mi_cmd_env_cd (const char *command, const char *const *argv, int argc)
 {
   if (argc == 0 || argc > 1)
     error (_("-environment-cd: Usage DIRECTORY"));
-	  
+
   env_execute_cli_command ("cd", argv[0]);
 }
 
@@ -87,7 +87,7 @@ env_mod_path (const char *dirname, std::string &which_path)
   if (dirname == 0 || dirname[0] == '\0')
     return;
 
-  /* Call add_path with last arg 0 to indicate not to parse for 
+  /* Call add_path with last arg 0 to indicate not to parse for
      separator characters.  */
   add_path (dirname, which_path, 0);
 }

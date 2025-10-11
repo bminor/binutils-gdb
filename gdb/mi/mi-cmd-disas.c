@@ -38,7 +38,7 @@
    disassemble the function that contains that line.
    HOW_MANY: Number of disassembly lines to display. With source, it
    is the number of disassembly lines only, not counting the source
-   lines.  
+   lines.
 
    always required:
 

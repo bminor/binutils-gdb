@@ -243,7 +243,7 @@ stscm_scm_from_symtab (struct symtab *symtab)
   st_smob = (symtab_smob *) SCM_SMOB_DATA (st_scm);
   st_smob->symtab = symtab;
   gdbscm_fill_eqable_gsmob_ptr_slot (slot, &st_smob->base);
- 
+
   return st_scm;
 }
 

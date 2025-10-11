@@ -118,7 +118,7 @@ operations.
 There are no instructions to perform side effects on the running
 program, or call the program's functions; we assume that these
 expressions are only used for unobtrusive debugging, not for patching
-the running code.  
+the running code.
 
 Most bytecode instructions do not distinguish between the various sizes
 of values, and operate on full-width values; the upper bits of the

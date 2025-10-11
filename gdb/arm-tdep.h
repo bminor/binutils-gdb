@@ -36,7 +36,7 @@ extern bool arm_apcs_32;
 
 #include <vector>
 
-/* Number of machine registers.  The only define actually required 
+/* Number of machine registers.  The only define actually required
    is gdbarch_num_regs.  The other definitions are used for documentation
    purposes and code readability.  */
 /* For 26 bit ARM code, a fake copy of the PC is placed in register 25 (PS)
@@ -52,11 +52,11 @@ extern bool arm_apcs_32;
 /* Type of floating-point code in use by inferior.  There are really 3 models
    that are traditionally supported (plus the endianness issue), but gcc can
    only generate 2 of those.  The third is APCS_FLOAT, where arguments to
-   functions are passed in floating-point registers.  
+   functions are passed in floating-point registers.
 
-   In addition to the traditional models, VFP adds two more. 
+   In addition to the traditional models, VFP adds two more.
 
-   If you update this enum, don't forget to update fp_model_strings in 
+   If you update this enum, don't forget to update fp_model_strings in
    arm-tdep.c.  */
 
 enum arm_float_model
@@ -306,7 +306,7 @@ extern int arm_psr_thumb_bit (struct gdbarch *);
    instruction?  */
 extern int arm_pc_is_thumb (struct gdbarch *, CORE_ADDR);
 
-extern int arm_process_record (struct gdbarch *gdbarch, 
+extern int arm_process_record (struct gdbarch *gdbarch,
 			       struct regcache *regcache, CORE_ADDR addr);
 /* Functions exported from arm-bsd-tdep.h.  */
 

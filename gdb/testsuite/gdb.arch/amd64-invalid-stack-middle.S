@@ -18,7 +18,7 @@
 /* This file is compiled from gdb.arch/amd64-invalid-stack-middle.c
    using: 'gcc -g -O0 -S -dA' and gcc version '4.7.2'.
    Changes were then made to the CFI entry for func2.  */
-        
+
 	.file	"amd64-invalid-stack-middle.c"
 	.text
 .Ltext0:
@@ -39,7 +39,7 @@ breakpt:
 	.loc 1 27 0
 	popq	%rbp
 .LCFI2:
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 .LFE0:
 	.size	breakpt, .-breakpt
@@ -63,7 +63,7 @@ func5:
 	.loc 1 33 0
 	popq	%rbp
 .LCFI5:
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 .LFE1:
 	.size	func5, .-func5
@@ -87,7 +87,7 @@ func4:
 	.loc 1 39 0
 	popq	%rbp
 .LCFI8:
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 .LFE2:
 	.size	func4, .-func4
@@ -111,7 +111,7 @@ func3:
 	.loc 1 45 0
 	popq	%rbp
 .LCFI11:
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 .LFE3:
 	.size	func3, .-func3
@@ -137,7 +137,7 @@ func2:
 	.loc 1 51 0
 	leave
 .LCFI14:
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 .LFE4:
 	.size	func2, .-func2
@@ -164,7 +164,7 @@ func1:
 	.loc 1 57 0
 	leave
 .LCFI17:
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 .LFE5:
 	.size	func1, .-func1
@@ -252,7 +252,7 @@ make_invalid_ptr:
 	.loc 1 78 0
 	leave
 .LCFI20:
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 .LFE6:
 	.size	make_invalid_ptr, .-make_invalid_ptr
@@ -285,7 +285,7 @@ main:
 	.loc 1 89 0
 	leave
 .LCFI23:
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 .LFE7:
 	.size	main, .-main

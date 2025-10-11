@@ -285,7 +285,7 @@ alpha_mdebug_frame_prev_register (const frame_info_ptr &this_frame,
      the correct place.  */
   if (regnum == ALPHA_PC_REGNUM)
     regnum = PROC_PC_REG (info->proc_desc);
-  
+
   return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
 }
 

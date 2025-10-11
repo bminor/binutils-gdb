@@ -153,7 +153,7 @@ rs6000_aix_supply_vsxregset (const struct regset *regset, struct regcache *regca
     {
       int i, offset = 0;
 
-      for (i = tdep->ppc_vsr0_upper_regnum; i < tdep->ppc_vsr0_upper_regnum 
+      for (i = tdep->ppc_vsr0_upper_regnum; i < tdep->ppc_vsr0_upper_regnum
 						     + 32; i++, offset += 8)
 	ppc_supply_reg (regcache, i, (const gdb_byte *) vsxregs, offset, 8);
 
@@ -544,17 +544,17 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
    return_val example( float, int);
 
-   eabi: 
+   eabi:
    float in fp0, int in r3
    offset of stack on overflow 8/16
    for varargs, must go by type.
    power open:
    float in r3&r4, int in r5
-   offset of stack on overflow different 
-   both: 
+   offset of stack on overflow different
+   both:
    return in r3 or f0.  If no float, must study how gcc emulates floats;
    pay attention to arg promotion.
-   User may have to cast\args to handle promotion correctly 
+   User may have to cast\args to handle promotion correctly
    since gdb won't know if prototype supplied or not.  */
 
   for (argno = 0, argbytes = 0; argno < nargs && ii < 8; ++ii)
@@ -641,7 +641,7 @@ ran_out_of_registers_for_arguments:
   /* Stack pointer must be quadword aligned.  */
   sp &= -16;
 
-  /* If there are more arguments, allocate space for them in 
+  /* If there are more arguments, allocate space for them in
      the stack, then push them starting from the ninth one.  */
 
   if ((argno < nargs) || argbytes)
@@ -675,7 +675,7 @@ ran_out_of_registers_for_arguments:
       regcache_raw_write_signed (regcache,
 				 gdbarch_sp_regnum (gdbarch), sp);
 
-      /* If the last argument copied into the registers didn't fit there 
+      /* If the last argument copied into the registers didn't fit there
 	 completely, push the rest of it into stack.  */
 
       if (argbytes)
@@ -1025,7 +1025,7 @@ rs6000_software_single_step (struct regcache *regcache)
   std::vector<CORE_ADDR> next_pcs = ppc_deal_with_atomic_sequence (regcache);
   if (!next_pcs.empty ())
     return next_pcs;
-  
+
   /* Here 0xfc000000 is the opcode mask to detect a P10 prefix instruction.  */
   if ((insn & 0xfc000000) == 1 << 26)
     breaks[0] = loc + 2 * PPC_INSN_SIZE;

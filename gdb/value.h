@@ -167,7 +167,7 @@ public:
 					       type *type = nullptr);
 
   /* Same as `allocate_register_lazy`, but make the value non-lazy.
-  
+
      The caller is responsible for filling the value's contents.  */
   static struct value *allocate_register (const frame_info_ptr &next_frame,
 					  int regnum, type *type = nullptr);

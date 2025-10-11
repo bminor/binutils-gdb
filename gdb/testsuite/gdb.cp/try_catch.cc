@@ -42,9 +42,9 @@ class gnu_obj_2: public virtual gnu_obj_1
 {
 public:
   antiquities	value_derived;
-  
+
   gnu_obj_2(antiquities b): gnu_obj_1(oriental, 7), value_derived(b) { }
-}; 
+};
 
 // Test three.
 template<typename T>
@@ -53,9 +53,9 @@ class gnu_obj_3
 public:
   typedef region antiquities;
   gnu_obj_2<int>   	data;
-      
+
   gnu_obj_3(antiquities b): data(etruscan) { }
-}; 
+};
 
 int main()
 {
@@ -77,7 +77,7 @@ int main()
       if (obj.value != egyptian)	// marker 1-catch
 	test &= false;
       if (obj.key2 != 4589)
-	test &= false;     
+	test &= false;
     }
   catch (...)
     {
@@ -103,7 +103,7 @@ int main()
 	      if (obj.value != egyptian) // marker 2-catch
 		test &= false;
 	      if (obj.key2 != 4589)
-		test &= false;     
+		test &= false;
 	    }
 	}
       catch (gnu_obj_1& obj)
@@ -112,7 +112,7 @@ int main()
 	  if (obj.value != egyptian)
 	    test &= false;
 	  if (obj.key2 != 4589)
-	    test &= false;     
+	    test &= false;
 	}
     }
   catch (...)

@@ -35,7 +35,7 @@ typedef struct TEST_STRUCT {
 
 typedef int test_array [4];
 
-/* 
+/*
  * Global variables to be collected
  */
 
@@ -61,7 +61,7 @@ struct global_pieces {
  * Additional globals used in arithmetic tests
  */
 
-signed char  c0,  c1,  c2,  c3,  c4,  c5,  c6,  c7, 
+signed char  c0,  c1,  c2,  c3,  c4,  c5,  c6,  c7,
              c8,  c9,  c10, c11, c12, c13, c14, c15, cminus;
 signed short s0,  s1,  s2,  s3,  s4,  s5,  s6,  s7,
              s8,  s9,  s10, s11, s12, s13, s14, s15, sminus;
@@ -101,7 +101,7 @@ int args_test_func (argc, argi, argf, argd, argstruct, argarray)
 int argstruct_test_func (argstruct)
      test_struct argstruct;
 {
-  return (int) argstruct.memberc + argstruct.memberi + 
+  return (int) argstruct.memberc + argstruct.memberi +
                  argstruct.memberf + argstruct.memberd;
 }
 

@@ -66,7 +66,7 @@ show_inaccessible_by_default (struct ui_file *file, int from_tty,
 			"be treated as inaccessible.\n"));
   else
     gdb_printf (file, _("Unknown memory addresses "
-			"will be treated as RAM.\n"));          
+			"will be treated as RAM.\n"));
 }
 
 /* This function should be called before any command which would
@@ -184,7 +184,7 @@ lookup_mem_region (CORE_ADDR addr)
 
   /* Either find memory range containing ADDR, or set LO and HI
      to the nearest boundaries of an existing memory range.
-     
+
      If we ever want to support a huge list of memory regions, this
      check should be replaced with a binary search (probably using
      VEC_lower_bound).  */
@@ -216,8 +216,8 @@ lookup_mem_region (CORE_ADDR addr)
   region.lo = lo;
   region.hi = hi;
 
-  /* When no memory map is defined at all, we always return 
-     'default_mem_attrib', so that we do not make all memory 
+  /* When no memory map is defined at all, we always return
+     'default_mem_attrib', so that we do not make all memory
      inaccessible for targets that don't provide a memory map.  */
   if (inaccessible_by_default && !mem_region_list->empty ())
     region.attrib = mem_attrib::unknown ();
@@ -376,7 +376,7 @@ info_mem_command (const char *args, int from_tty)
 	tmp = hex_string_custom (m.lo, 8);
       else
 	tmp = hex_string_custom (m.lo, 16);
-      
+
       gdb_printf ("%s ", tmp);
 
       if (gdbarch_addr_bit (current_inferior ()->arch ()) <= 32)

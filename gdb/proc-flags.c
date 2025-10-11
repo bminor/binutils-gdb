@@ -20,7 +20,7 @@
 
 /*
  * Pretty-print the prstatus flags.
- * 
+ *
  * Arguments: unsigned long flags, int verbose
  *
  */

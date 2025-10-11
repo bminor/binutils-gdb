@@ -188,7 +188,7 @@ cmd_list_element::command_components () const
 
    Add this command to command list *LIST.
 
-   Returns a pointer to the added command (not necessarily the head 
+   Returns a pointer to the added command (not necessarily the head
    of *LIST).  */
 
 static struct cmd_list_element *
@@ -2526,23 +2526,23 @@ lookup_cmd_exact (const char *name,
    deprecated and a warning message should be generated.  This
    function decodes TEXT and potentially generates a warning message
    as outlined below.
-   
+
    Example for 'set endian big' which has a fictitious alias 'seb'.
-   
+
    If alias wasn't used in TEXT, and the command is deprecated:
-   "warning: 'set endian big' is deprecated." 
-   
+   "warning: 'set endian big' is deprecated."
+
    If alias was used, and only the alias is deprecated:
    "warning: 'seb' an alias for the command 'set endian big' is deprecated."
-   
+
    If alias was used and command is deprecated (regardless of whether
    the alias itself is deprecated:
-   
+
    "warning: 'set endian big' (seb) is deprecated."
 
    After the message has been sent, clear the appropriate flags in the
    command and/or the alias so the user is no longer bothered.
-   
+
 */
 void
 deprecated_cmd_warning (const char *text, struct cmd_list_element *list)

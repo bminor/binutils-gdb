@@ -677,7 +677,7 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
 
   is_full_physname_constructor = is_constructor_name (physname);
 
-  is_constructor = is_full_physname_constructor 
+  is_constructor = is_full_physname_constructor
     || (newname && strcmp (field_name, newname) == 0);
 
   if (!is_destructor)
@@ -2141,7 +2141,7 @@ lookup_local_symbol (const char *name,
     return {};
 
   const char *scope = block->scope ();
-  
+
   while (!block->is_global_block () && !block->is_static_block ())
     {
       struct symbol *sym = lookup_symbol_in_block (name, match_type,
@@ -2761,7 +2761,7 @@ find_compunit_symtab_for_pc_sect (CORE_ADDR pc, struct obj_section *section)
 	      && range >= best_cust_range)
 	    /* Cust doesn't have a smaller range than best_cust, skip it.  */
 	    continue;
-	
+
 	  /* For an objfile that has its functions reordered,
 	     find_pc_psymtab will find the proper partial symbol table
 	     and we simply return its corresponding symtab.  */
@@ -3309,7 +3309,7 @@ find_line_symtab (symtab *sym_tab, int line, int *index)
 		    continue;
 		  if (FILENAME_CMP (symtab_to_fullname (sym_tab),
 				    symtab_to_fullname (s)) != 0)
-		    continue;	
+		    continue;
 		  l = s->linetable ();
 		  ind = find_line_common (l, line, &exact, 0);
 		  if (ind >= 0)

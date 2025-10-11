@@ -26,7 +26,7 @@ int foo (int i)
 }
 
 extern "C" int bar (int k, unsigned long eharg, int flag);
-    
+
 int bar (int k, unsigned long eharg, int flag)
 {
   return 1;
@@ -47,7 +47,7 @@ int main()
   catch (int x) {
     catcher (x);
   }
-  
+
   try {
     try {
       j = foo (20);
@@ -61,6 +61,6 @@ int main()
     catcher (y);
   }
 
-  // Not caught 
+  // Not caught
   foo (20);
 }

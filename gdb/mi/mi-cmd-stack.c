@@ -400,9 +400,9 @@ mi_cmd_stack_list_args (const char *command, const char *const *argv, int argc)
     }
 }
 
-/* Print a list of the local variables (including arguments) for the 
+/* Print a list of the local variables (including arguments) for the
    current frame.  ARGC must be 1 and ARGV[0] specify if only the names,
-   or both names and values of the variables must be printed.  See 
+   or both names and values of the variables must be printed.  See
    parse_print_value for possible values.  */
 
 void

@@ -43,7 +43,7 @@ proc gdb_target_cmd { targetname serialport } {
 		verbose "Set target to $targetname"
 		return 0
 	    }
-	    -re "Connected to.*$gdb_prompt" { 
+	    -re "Connected to.*$gdb_prompt" {
 		verbose "Set target to $targetname"
 		return 0
 	    }
@@ -120,7 +120,7 @@ proc gdb_target_monitor { exec_file } {
 
 proc gdb_target_exec { } {
     gdb_test "target exec" "No executable file now." "" ".*Kill it.*y or n.*" "y"
-    
+
 }
 #
 # gdb_load -- load a file into the debugger.

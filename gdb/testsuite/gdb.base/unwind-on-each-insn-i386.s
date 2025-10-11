@@ -22,7 +22,7 @@ foo:
 	popl	%ebp
 	.cfi_restore 5
 #	.cfi_def_cfa 4, 4
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE0:
@@ -52,7 +52,7 @@ bar:
 	leave
 	.cfi_restore 5
 #	.cfi_def_cfa 4, 4
-# SUCC: EXIT [100.0%] 
+# SUCC: EXIT [100.0%]
 	ret
 	.cfi_endproc
 .LFE1:

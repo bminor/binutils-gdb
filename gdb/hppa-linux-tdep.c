@@ -113,15 +113,15 @@ insns_match_pattern (struct gdbarch *gdbarch, CORE_ADDR pc,
 /* Signal frames.  */
 
 /* (This is derived from MD_FALLBACK_FRAME_STATE_FOR in gcc.)
- 
+
    Unfortunately, because of various bugs and changes to the kernel,
    we have several cases to deal with.
 
-   In 2.4, the signal trampoline is 4 bytes, and pc should point directly at 
+   In 2.4, the signal trampoline is 4 bytes, and pc should point directly at
    the beginning of the trampoline and struct rt_sigframe.
 
    In <= 2.6.5-rc2-pa3, the signal trampoline is 9 bytes, and pc points at
-   the 4th word in the trampoline structure.  This is wrong, it should point 
+   the 4th word in the trampoline structure.  This is wrong, it should point
    at the 5th word.  This is fixed in 2.6.5-rc2-pa4.
 
    To detect these cases, we first take pc, align it to 64-bytes
@@ -150,7 +150,7 @@ hppa_linux_sigtramp_find_sigcontext (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   /* rt_sigreturn trampoline:
      3419000x ldi 0, %r25 or ldi 1, %r25   (x = 0 or 2)
-     3414015a ldi __NR_rt_sigreturn, %r20 
+     3414015a ldi __NR_rt_sigreturn, %r20
      e4008200 be,l 0x100(%sr2, %r0), %sr0, %r31
      08000240 nop  */
 
@@ -168,7 +168,7 @@ hppa_linux_sigtramp_find_sigcontext (struct gdbarch *gdbarch, CORE_ADDR pc)
     {
       if (insns_match_pattern (gdbarch, pc, hppa_sigtramp, dummy))
 	{
-	  /* sigaltstack case: we have no way of knowing which offset to 
+	  /* sigaltstack case: we have no way of knowing which offset to
 	     use in this case; default to new kernel handling.  If this is
 	     wrong the unwinding will fail.  */
 	  attempt = 2;
@@ -180,7 +180,7 @@ hppa_linux_sigtramp_find_sigcontext (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   /* sp + sfoffs[try] points to a struct rt_sigframe, which contains
      a struct siginfo and a struct ucontext.  struct ucontext contains
-     a struct sigcontext.  Return an offset to this sigcontext here.  Too 
+     a struct sigcontext.  Return an offset to this sigcontext here.  Too
      bad we cannot include system specific headers :-(.
      sizeof(struct siginfo) == 128
      offsetof(struct ucontext, uc_mcontext) == 24.  */
@@ -213,10 +213,10 @@ hppa_linux_sigtramp_frame_unwind_cache (const frame_info_ptr &this_frame,
   scptr = hppa_linux_sigtramp_find_sigcontext (gdbarch, pc);
 
   /* structure of struct sigcontext:
-   
+
      struct sigcontext {
 	unsigned long sc_flags;
-	unsigned long sc_gr[32]; 
+	unsigned long sc_gr[32];
 	unsigned long long sc_fr[32];
 	unsigned long sc_iasq[2];
 	unsigned long sc_iaoq[2];
@@ -337,7 +337,7 @@ hppa_linux_find_global_pointer (struct gdbarch *gdbarch,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct obj_section *faddr_sect;
   CORE_ADDR faddr;
-  
+
   faddr = value_as_address (function);
 
   /* Is this a plabel? If so, dereference it to get the gp value.  */
@@ -353,8 +353,8 @@ hppa_linux_find_global_pointer (struct gdbarch *gdbarch,
 	return extract_unsigned_integer (buf, sizeof (buf), byte_order);
     }
 
-  /* If the address is in the plt section, then the real function hasn't 
-     yet been fixed up by the linker so we cannot determine the gp of 
+  /* If the address is in the plt section, then the real function hasn't
+     yet been fixed up by the linker so we cannot determine the gp of
      that function.  */
   if (in_plt_section (faddr))
     return 0;

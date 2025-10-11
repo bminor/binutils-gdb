@@ -89,14 +89,14 @@ enum xtensa_target_flags_t
 
 /*  Mask.  */
 
-typedef struct 
+typedef struct
 {
   int reg_num;
   int bit_start;
   int bit_size;
 } xtensa_reg_mask_t;
 
-typedef struct 
+typedef struct
 {
   int count;
   xtensa_reg_mask_t *mask;
@@ -105,7 +105,7 @@ typedef struct
 
 /*  Xtensa register representation.  */
 
-typedef struct 
+typedef struct
 {
   const char *name;            	/* Register name.  */
   int offset;             	/* Offset.  */
@@ -244,9 +244,9 @@ struct xtensa_gdbarch_tdep : gdbarch_tdep_base
 
 #define WB_SHIFT	  2
 
-/* We assign fixed numbers to the registers of the "current" window 
-   (i.e., relative to WB).  The registers get remapped via the reg_map 
-   data structure to their corresponding register in the AR register 
+/* We assign fixed numbers to the registers of the "current" window
+   (i.e., relative to WB).  The registers get remapped via the reg_map
+   data structure to their corresponding register in the AR register
    file (see xtensa-tdep.c).  */
 
 #endif /* GDB_XTENSA_TDEP_H */

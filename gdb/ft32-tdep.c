@@ -180,9 +180,9 @@ ft32_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
      is the address of __prolog_$rN.
      __prolog_$rN pushes registers from 13 through n inclusive.
      So for example CALL __prolog_$r15 is equivalent to:
-       PUSH $r13 
-       PUSH $r14 
-       PUSH $r15 
+       PUSH $r13
+       PUSH $r14
+       PUSH $r15
      Note that PROLOGS[0] through PROLOGS[12] are unused.  */
   CORE_ADDR prologs[32];
 

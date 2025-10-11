@@ -1162,7 +1162,7 @@ dwarf2_frame_prev_register (const frame_info_ptr &this_frame, void **this_cache,
   if (cache->tailcall_cache)
     {
       struct value *val;
-      
+
       val = dwarf2_tailcall_prev_register_first (this_frame,
 						 &cache->tailcall_cache,
 						 regnum);
@@ -1447,7 +1447,7 @@ static const registry<objfile>::key<comp_unit> dwarf2_frame_objfile_data;
    way.  Several "pointer encodings" are supported.  The encoding
    that's used for a particular FDE is determined by the 'R'
    augmentation in the associated CIE.  The argument of this
-   augmentation is a single byte.  
+   augmentation is a single byte.
 
    The address can be encoded as 2 bytes, 4 bytes, 8 bytes, or as a
    LEB128.  This is encoded in bits 0, 1 and 2.  Bit 3 encodes whether
@@ -2034,7 +2034,7 @@ decode_frame_entry (struct gdbarch *gdbarch,
 
 	 This becomes a problem when you have some other producer that
 	 creates frame sections that are not as strictly aligned.  That
-	 produces a hole in the frame info that gets filled by the 
+	 produces a hole in the frame info that gets filled by the
 	 linker with zeros.
 
 	 The GCC behavior is arguably a bug, but it's effectively now

@@ -147,10 +147,10 @@ static int pdc_symbol_addrs (pthdb_user_t, pthdb_symbol_t *, int);
 static int pdc_read_data (pthdb_user_t, void *, pthdb_addr_t, size_t);
 static int pdc_write_data (pthdb_user_t, void *, pthdb_addr_t, size_t);
 static int pdc_read_regs (pthdb_user_t user, pthdb_tid_t tid,
-			  unsigned long long flags, 
+			  unsigned long long flags,
 			  pthdb_context_t *context);
 static int pdc_write_regs (pthdb_user_t user, pthdb_tid_t tid,
-			   unsigned long long flags, 
+			   unsigned long long flags,
 			   pthdb_context_t *context);
 static int pdc_alloc (pthdb_user_t, size_t, void **);
 static int pdc_realloc (pthdb_user_t, void *, size_t, void **);
@@ -300,7 +300,7 @@ ptrace_check (int req, int id, int ret)
       if (ret == -1 && errno == EPERM)
 	{
 	  if (debug_aix_thread)
-	    gdb_printf (gdb_stdlog, 
+	    gdb_printf (gdb_stdlog,
 			"ptrace (%d, %d) = %d (errno = %d)\n",
 			req, id, ret, errno);
 	  return ret == -1 ? 0 : 1;
@@ -353,7 +353,7 @@ static int
 ptrace32 (int req, int id, addr_ptr addr, int data, int *buf)
 {
   errno = 0;
-  return ptrace_check (req, id, 
+  return ptrace_check (req, id,
 		       ptrace (req, id, addr, data, buf));
 }
 
@@ -388,7 +388,7 @@ pdc_symbol_addrs (pthdb_user_t user_current_pid, pthdb_symbol_t *symbols, int co
     {
       name = symbols[i].name;
       if (debug_aix_thread)
-	gdb_printf (gdb_stdlog, 
+	gdb_printf (gdb_stdlog,
 		    "  symbols[%d].name = \"%s\"\n", i, name);
 
       if (!*name)
@@ -417,7 +417,7 @@ pdc_symbol_addrs (pthdb_user_t user_current_pid, pthdb_symbol_t *symbols, int co
 /* Read registers call back function should be able to read the
    context information of a debuggee kernel thread from an active
    process or from a core file.  The information should be formatted
-   in context64 form for both 32-bit and 64-bit process.  
+   in context64 form for both 32-bit and 64-bit process.
    If successful return 0, else non-zero is returned.  */
 
 static int
@@ -450,7 +450,7 @@ pdc_read_regs (pthdb_user_t user_current_pid,
     {
       if (data->arch64)
 	{
-	  if (!ptrace64aix (PTT_READ_GPRS, tid, 
+	  if (!ptrace64aix (PTT_READ_GPRS, tid,
 			    (unsigned long) gprs64, 0, NULL))
 	    memset (gprs64, 0, sizeof (gprs64));
 	  memcpy (context->gpr, gprs64, sizeof(gprs64));
@@ -476,7 +476,7 @@ pdc_read_regs (pthdb_user_t user_current_pid,
     {
       if (data->arch64)
 	{
-	  if (!ptrace64aix (PTT_READ_SPRS, tid, 
+	  if (!ptrace64aix (PTT_READ_SPRS, tid,
 			    (unsigned long) &sprs64, 0, NULL))
 	    memset (&sprs64, 0, sizeof (sprs64));
 	  memcpy (&context->msr, &sprs64, sizeof(sprs64));
@@ -487,7 +487,7 @@ pdc_read_regs (pthdb_user_t user_current_pid,
 	    memset (&sprs32, 0, sizeof (sprs32));
 	  memcpy (&context->msr, &sprs32, sizeof(sprs32));
 	}
-    }  
+    }
 
   /* vector registers.  */
   __vmx_context_t vmx;
@@ -536,7 +536,7 @@ pdc_write_regs (pthdb_user_t user_current_pid,
 		pthdb_tid_t tid,
 		unsigned long long flags,
 		pthdb_context_t *context)
-{ 
+{
   /* This function doesn't appear to be used, so we could probably
      just return 0 here.  HOWEVER, if it is not defined, the OS will
      complain and several thread debug functions will fail.  In case
@@ -555,7 +555,7 @@ pdc_write_regs (pthdb_user_t user_current_pid,
   if (flags & PTHDB_FLAG_GPRS)
     {
       if (data->arch64)
-	ptrace64aix (PTT_WRITE_GPRS, tid, 
+	ptrace64aix (PTT_WRITE_GPRS, tid,
 		     (unsigned long) context->gpr, 0, NULL);
       else
 	ptrace32 (PTT_WRITE_GPRS, tid, (uintptr_t) context->gpr, 0, NULL);
@@ -572,7 +572,7 @@ pdc_write_regs (pthdb_user_t user_current_pid,
     {
       if (data->arch64)
 	{
-	  ptrace64aix (PTT_WRITE_SPRS, tid, 
+	  ptrace64aix (PTT_WRITE_SPRS, tid,
 		       (unsigned long) &context->msr, 0, NULL);
 	}
       else
@@ -670,7 +670,7 @@ pdc_alloc (pthdb_user_t user_current_pid, size_t len, void **bufp)
 		user_current_pid, len, (long) bufp);
   *bufp = xmalloc (len);
   if (debug_aix_thread)
-    gdb_printf (gdb_stdlog, 
+    gdb_printf (gdb_stdlog,
 		"  malloc returned 0x%lx\n", (long) *bufp);
 
   /* Note: xmalloc() can't return 0; therefore PDC_FAILURE will never
@@ -692,7 +692,7 @@ pdc_realloc (pthdb_user_t user_current_pid, void *buf, size_t len, void **bufp)
 		user_current_pid, (long) buf, len, (long) bufp);
   *bufp = xrealloc (buf, len);
   if (debug_aix_thread)
-    gdb_printf (gdb_stdlog, 
+    gdb_printf (gdb_stdlog,
 		"  realloc returned 0x%lx\n", (long) *bufp);
   return *bufp ? PDC_SUCCESS : PDC_FAILURE;
 }
@@ -704,7 +704,7 @@ static int
 pdc_dealloc (pthdb_user_t user_current_pid, void *buf)
 {
   if (debug_aix_thread)
-    gdb_printf (gdb_stdlog, 
+    gdb_printf (gdb_stdlog,
 		"pdc_free (user_current_pid = %ld, buf = 0x%lx)\n", user_current_pid,
 		(long) buf);
   xfree (buf);
@@ -1127,7 +1127,7 @@ aix_thread_target::wait (ptid_t ptid, struct target_waitstatus *status,
 
 /* Supply AIX altivec registers, both 64 and 32 bit.  */
 
-static void 
+static void
 supply_altivec_regs (struct regcache *regcache, __vmx_context_t vmx)
 {
   ppc_gdbarch_tdep *tdep
@@ -1275,7 +1275,7 @@ fetch_regs_user_thread (struct regcache *regcache, pthdb_pthread_t pdtid)
   data = get_thread_data_helper_for_ptid (inferior_ptid);
 
   if (debug_aix_thread)
-    gdb_printf (gdb_stdlog, 
+    gdb_printf (gdb_stdlog,
 		"fetch_regs_user_thread %lx\n", (long) pdtid);
   status = pthdb_pthread_context (data->pd_session, pdtid, &ctx);
   if (status != PTHDB_SUCCESS)
@@ -1354,7 +1354,7 @@ fetch_regs_kernel_thread (struct regcache *regcache, int regno,
     {
       if (data->arch64)
 	{
-	  if (!ptrace64aix (PTT_READ_GPRS, tid, 
+	  if (!ptrace64aix (PTT_READ_GPRS, tid,
 			    (unsigned long) gprs64, 0, NULL))
 	    memset (gprs64, 0, sizeof (gprs64));
 	  supply_gprs64 (regcache, gprs64);
@@ -1418,7 +1418,7 @@ fetch_regs_kernel_thread (struct regcache *regcache, int regno,
     {
       if (data->arch64)
 	{
-	  if (!ptrace64aix (PTT_READ_SPRS, tid, 
+	  if (!ptrace64aix (PTT_READ_SPRS, tid,
 			    (unsigned long) &sprs64, 0, NULL))
 	    memset (&sprs64, 0, sizeof (sprs64));
 	  supply_sprs64 (regcache, sprs64.pt_iar, sprs64.pt_msr,
@@ -1517,7 +1517,7 @@ fill_gprs64 (const struct regcache *regcache, uint64_t *vals)
       regcache->raw_collect (tdep->ppc_gp0_regnum + regno, vals + regno);
 }
 
-static void 
+static void
 fill_gprs32 (const struct regcache *regcache, uint32_t *vals)
 {
   ppc_gdbarch_tdep *tdep
@@ -1641,7 +1641,7 @@ store_regs_user_thread (const struct regcache *regcache, pthdb_pthread_t pdtid)
   __vsx_context_t  vsx;
 
   if (debug_aix_thread)
-    gdb_printf (gdb_stdlog, 
+    gdb_printf (gdb_stdlog,
 		"store_regs_user_thread %lx\n", (long) pdtid);
 
   /* Retrieve the thread's current context for its non-register
@@ -1768,7 +1768,7 @@ store_regs_kernel_thread (const struct regcache *regcache, int regno,
   data = get_thread_data_helper_for_ptid (regcache->ptid ());
 
   if (debug_aix_thread)
-    gdb_printf (gdb_stdlog, 
+    gdb_printf (gdb_stdlog,
 		"store_regs_kernel_thread tid=%lx regno=%d\n",
 		(long) tid, regno);
 
@@ -1813,12 +1813,12 @@ store_regs_kernel_thread (const struct regcache *regcache, int regno,
       if (data->arch64)
 	{
 	  /* Pre-fetch: some registers won't be in the cache.  */
-	  ptrace64aix (PTT_READ_SPRS, tid, 
+	  ptrace64aix (PTT_READ_SPRS, tid,
 		       (unsigned long) &sprs64, 0, NULL);
 	  fill_sprs64 (regcache, &sprs64.pt_iar, &sprs64.pt_msr,
 		       &sprs64.pt_cr, &sprs64.pt_lr, &sprs64.pt_ctr,
 		       &sprs64.pt_xer, &sprs64.pt_fpscr);
-	  ptrace64aix (PTT_WRITE_SPRS, tid, 
+	  ptrace64aix (PTT_WRITE_SPRS, tid,
 		       (unsigned long) &sprs64, 0, NULL);
 	}
       else
@@ -1856,7 +1856,7 @@ store_regs_kernel_thread (const struct regcache *regcache, int regno,
 	  ptrace32 (PTT_WRITE_SPRS, tid, (uintptr_t) &sprs32, 0, NULL);
 	}
     }
-    
+
     /* Vector registers.  */
     if (tdep->ppc_vr0_regnum != -1 && tdep->ppc_vrsave_regnum != -1
 	&& (regno == -1 || (regno >= tdep->ppc_vr0_regnum

@@ -57,13 +57,13 @@ namespace eval ton {
     namespace export json2ton
 
     variable version 0.4
-    
+
 }
 proc ton::json2ton json {
     # Parse JSON string json
     #
     # return: TON
-    
+
     set i [trr $json [string length $json]]
     if {!$i} {return ""}
     lassign [jscan $json $i] i ton
@@ -75,7 +75,7 @@ proc ton::json2ton json {
 proc ton::trr {s i} {
     # Trim righthand whitespace on the first i characters of s.
     # return: number of remaining characters in s
-    
+
     while {[set j $i] &&
 	   ([string is space [set c [string index $s [incr i -1]]]]
 	    || $c eq "\n")} {}
@@ -115,7 +115,7 @@ proc ton::num {json i c d} {
     # return list:
     # - remaining string length
     # - TON of number
-    
+
     set float [expr {$c eq "."}]
     for {set j $i} {$i} {incr i -1} {
 	if {[string match $d [set c [string index $json $i-1]]]} break
@@ -152,7 +152,7 @@ proc ton::str {json i} {
     # return list:
     # - remaining string length
     # - TON of string
-    
+
     for {set j $i} {$i} {incr i -1} {
 	set i [string last \" $json $i]
 	if {[string index $json $i-1] ne "\\"} break
@@ -167,7 +167,7 @@ proc ton::arr {json i} {
     # return list:
     # - remaining string length
     # - TON of array
-    
+
     set i [trr $json $i]
     if {!$i} {
 	error "json string invalid:0: exhausted while parsing array."
@@ -224,7 +224,7 @@ proc ton::obj {json i} {
 	    set i [trr $json $i]
 	    continue
 	} elseif {$c eq "\{"} break
-	error "json string invalid:$i: parsing object."	
+	error "json string invalid:$i: parsing object."
     }
     lappend r o
     return [list $i [join [lreverse $r]]]

@@ -60,7 +60,7 @@ static const char sh_cc_gcc[] = "gcc";
 static const char sh_cc_renesas[] = "renesas";
 static const char *const sh_cc_enum[] = {
   sh_cc_gcc,
-  sh_cc_renesas, 
+  sh_cc_renesas,
   NULL
 };
 
@@ -759,7 +759,7 @@ sh_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
    the return value from foo() will be in memory, not
    in R0, because there is no 3-byte integer type.
 
-   Similarly, in 
+   Similarly, in
 
    struct s { char c[2]; } wibble;
    struct s foo(void) {  return wibble; }
@@ -833,16 +833,16 @@ sh_frame_align (struct gdbarch *ignore, CORE_ADDR sp)
    manner, but using FP registers instead of GP registers.
 
    Arguments that are smaller than 4 bytes will still take up a whole
-   register or a whole 32-bit word on the stack, and will be 
+   register or a whole 32-bit word on the stack, and will be
    right-justified in the register or the stack word.  This includes
    chars, shorts, and small aggregate types.
 
-   Arguments that are larger than 4 bytes may be split between two or 
+   Arguments that are larger than 4 bytes may be split between two or
    more registers.  If there are not enough registers free, an argument
    may be passed partly in a register (or registers), and partly on the
    stack.  This includes doubles, long longs, and larger aggregates.
-   As far as I know, there is no upper limit to the size of aggregates 
-   that will be passed in this way; in other words, the convention of 
+   As far as I know, there is no upper limit to the size of aggregates
+   that will be passed in this way; in other words, the convention of
    passing a pointer to a large aggregate instead of a copy is not used.
 
    MVS: The above appears to be true for the SH variants that do not
@@ -851,24 +851,24 @@ sh_frame_align (struct gdbarch *ignore, CORE_ADDR sp)
    if it is larger than 16 bytes (four GP registers).
 
    An exceptional case exists for struct arguments (and possibly other
-   aggregates such as arrays) if the size is larger than 4 bytes but 
-   not a multiple of 4 bytes.  In this case the argument is never split 
+   aggregates such as arrays) if the size is larger than 4 bytes but
+   not a multiple of 4 bytes.  In this case the argument is never split
    between the registers and the stack, but instead is copied in its
-   entirety onto the stack, AND also copied into as many registers as 
-   there is room for.  In other words, space in registers permitting, 
+   entirety onto the stack, AND also copied into as many registers as
+   there is room for.  In other words, space in registers permitting,
    two copies of the same argument are passed in.  As far as I can tell,
-   only the one on the stack is used, although that may be a function 
+   only the one on the stack is used, although that may be a function
    of the level of compiler optimization.  I suspect this is a compiler
-   bug.  Arguments of these odd sizes are left-justified within the 
-   word (as opposed to arguments smaller than 4 bytes, which are 
+   bug.  Arguments of these odd sizes are left-justified within the
+   word (as opposed to arguments smaller than 4 bytes, which are
    right-justified).
 
-   If the function is to return an aggregate type such as a struct, it 
-   is either returned in the normal return value register R0 (if its 
+   If the function is to return an aggregate type such as a struct, it
+   is either returned in the normal return value register R0 (if its
    size is no greater than one byte), or else the caller must allocate
    space into which the callee will copy the return value (if the size
-   is greater than one byte).  In this case, a pointer to the return 
-   value location is passed into the callee in register R2, which does 
+   is greater than one byte).  In this case, a pointer to the return
+   value location is passed into the callee in register R2, which does
    not displace any of the other arguments passed in via registers R4
    to R7.  */
 
@@ -917,7 +917,7 @@ sh_init_flt_argreg (void)
 
 /* This function returns the next register to use for float arg passing.
    It returns either a valid value between FLOAT_ARG0_REGNUM and
-   FLOAT_ARGLAST_REGNUM if a register is available, otherwise it returns 
+   FLOAT_ARGLAST_REGNUM if a register is available, otherwise it returns
    FLOAT_ARGLAST_REGNUM + 1 to indicate that no register is available.
 
    Note that register number 0 in flt_argreg_array corresponds with the
@@ -1508,9 +1508,9 @@ sh_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 /* On the sh4, the DRi pseudo registers are problematic if the target
    is little endian.  When the user writes one of those registers, for
    instance with 'set var $dr0=1', we want the double to be stored
-   like this: 
-   fr0 = 0x00 0x00 0xf0 0x3f 
-   fr1 = 0x00 0x00 0x00 0x00 
+   like this:
+   fr0 = 0x00 0x00 0xf0 0x3f
+   fr1 = 0x00 0x00 0x00 0x00
 
    This corresponds to little endian byte order & big endian word
    order.  However if we let gdb write the register w/o conversion, it
@@ -1518,7 +1518,7 @@ sh_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
    fr0 = 0x00 0x00 0x00 0x00
    fr1 = 0x00 0x00 0xf0 0x3f
    because it will consider fr0 and fr1 as a single LE stretch of memory.
-   
+
    To achieve what we want we must force gdb to store things in
    floatformat_ieee_double_littlebyte_bigword (which is defined in
    include/floatformat.h and libiberty/floatformat.c.
@@ -2403,7 +2403,7 @@ INIT_GDB_FILE (sh_tdep)
 			  _("SH specific commands."),
 			  &setshcmdlist, &showshcmdlist,
 			  &setlist, &showlist);
-  
+
   add_setshow_enum_cmd ("calling-convention", class_vars, sh_cc_enum,
 			&sh_active_calling_convention,
 			_("Set calling convention used when calling target "

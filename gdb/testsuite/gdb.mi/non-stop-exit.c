@@ -47,7 +47,7 @@ main ()
 
   for (i = 0; i < NTHREADS; ++i)
     {
-      pthread_join (thread_id[i], NULL); 
+      pthread_join (thread_id[i], NULL);
     }
 
   return 0;

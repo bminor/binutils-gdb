@@ -366,11 +366,11 @@ handle_gnu_v3_exceptions (int tempflag, std::string &&except_rx,
 
 /* Look for an "if" token in *STRING.  The "if" token must be preceded
    by whitespace.
-   
+
    If there is any non-whitespace text between *STRING and the "if"
    token, then it is returned in a newly-xmalloc'd string.  Otherwise,
    this returns NULL.
-   
+
    STRING is updated to point to the "if" token, if it exists, or to
    the end of the string.  */
 

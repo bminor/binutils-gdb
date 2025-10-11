@@ -141,7 +141,7 @@ find_symbol_for_pc_sect (CORE_ADDR pc, struct obj_section *section)
 }
 
 /* Return the function containing pc value PC.
-   Returns 0 if function is not known.  
+   Returns 0 if function is not known.
    Backward compatibility, no section */
 
 struct symbol *

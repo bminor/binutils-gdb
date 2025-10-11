@@ -31,7 +31,7 @@ load_lib remote.exp
 set gdb_prompt "\\(gdb\\)"
 
 #
-# gdb_load -- load a file into the GDB. 
+# gdb_load -- load a file into the GDB.
 #             Returns a 0 if there was an error,
 #                       1 if it load successfully.
 #
@@ -87,14 +87,14 @@ proc gdb_load { arg } {
 		send_user "Set target to $targetname\n"
 	    }
 	}
-	 timeout { 
+	 timeout {
 	    perror "Couldn't set SLITE target."
 	    set timeout 10
 	    verbose "Timeout is now $timeout seconds" 2
 	    return -1
 	}
     }
-    
+
     if [target_info exists gdb_load_offset] {
 	set offset "[target_info gdb_load_offset]"
     } else {

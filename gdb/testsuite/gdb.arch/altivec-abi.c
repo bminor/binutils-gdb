@@ -15,7 +15,7 @@ vector unsigned int       vuint_d = {0,0,0,0};
 vector char               vchar_d = {'z','z','z','z','z','z','z','z','z','z','z','z','z','z','z','z'};
 vector unsigned char     vuchar_d = {'Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z'};
 vector float             vfloat_d = {1.0, 1.0, 1.0, 1.0};
-    
+
 struct test_vec_struct
 {
    vector signed short vshort1;
@@ -45,7 +45,7 @@ array_of_vector_func (vector signed short *matrix)
    matrix[0]  = vec_add (matrix[0], matrix[1]);
    matrix[2]  = vec_add (matrix[2], matrix[3]);
 }
- 
+
 vector int
 vec_func (vector short vshort_f,             /* goes in v2 */
           vector unsigned short vushort_f,   /* goes in v3 */
@@ -89,7 +89,7 @@ void marker(void) {};
 
 int
 main (void)
-{ 
+{
   vector int result = {-1,-1,-1,-1};
   vector short x = {1,2,3,4,5,6,7,8};
   vector int y = {12, 22, 32, 42};
@@ -104,11 +104,11 @@ main (void)
   vector char a_d = {'q','q','q','q','q','q','q','q','q','q','q','q','q','q','q','q'};
   vector float b_d = {5.0, 5.0, 5.0, 5.0};
   vector float c_d = {3.0, 3.0, 3.0, 3.0};
-  
+
   int var_int = 44;
   short var_short = 3;
   struct test_vec_struct vect_struct;
-  
+
   vect_struct.vshort1 = (vector signed short){1, 2, 3, 4, 5, 6, 7, 8};
   vect_struct.vshort2 = (vector signed short){11, 12, 13, 14, 15, 16, 17, 18};
   vect_struct.vshort3 = (vector signed short){21, 22, 23, 24, 25, 26, 27, 28};

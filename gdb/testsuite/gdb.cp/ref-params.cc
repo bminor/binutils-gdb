@@ -60,7 +60,7 @@ int mf2(MultiChild& C)
   return mf1(C);
 }
 
-int main(void) 
+int main(void)
 {
   Child Q(42);
   Child& QR = Q;

@@ -311,7 +311,7 @@ addrmap_fixed::addrmap_fixed (struct obstack *obstack,
   transitions[0].addr = 0;
   transitions[0].value = NULL;
 
-  /* Copy all entries from the splay tree to the array, in order 
+  /* Copy all entries from the splay tree to the array, in order
      of increasing address.  */
   mut->foreach ([&] (CORE_ADDR start, const void *obj)
     {

@@ -41,7 +41,7 @@ enum mem_access_width
 };
 
 /* The set of all attributes that can be set for a memory region.
-  
+
    This structure was created so that memory attributes can be passed
    to target_ functions without exposing the details of memory region
    list, which would be necessary if these fields were simply added to
@@ -49,8 +49,8 @@ enum mem_access_width
 
    FIXME: It would be useful if there was a mechanism for targets to
    add their own attributes.  For example, the number of wait states.  */
- 
-struct mem_attrib 
+
+struct mem_attrib
 {
   static mem_attrib unknown ()
   {
@@ -68,10 +68,10 @@ struct mem_attrib
 
   /* enables hardware breakpoints */
   int hwbreak = 0;
-  
+
   /* enables host-side caching of memory region data */
   int cache = 0;
-  
+
   /* Enables memory verification.  After a write, memory is re-read
      to verify that the write was successful.  */
   int verify = 0;
@@ -80,7 +80,7 @@ struct mem_attrib
   int blocksize = -1;
 };
 
-struct mem_region 
+struct mem_region
 {
   /* Create a mem_region with default attributes.  */
 
@@ -110,7 +110,7 @@ struct mem_region
 
   /* Lowest address in the region.  */
   CORE_ADDR lo;
-  /* Address past the highest address of the region. 
+  /* Address past the highest address of the region.
      If 0, upper bound is "infinity".  */
   CORE_ADDR hi;
 

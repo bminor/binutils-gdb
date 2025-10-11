@@ -28,15 +28,15 @@ main:
 	add     sp, sp, #4
 	mov	r7, sp
 
-	
-	/* Test call and return */	
+
+	/* Test call and return */
 	.global test_call
 test_call:
 	bl test_call_subr
         .global test_ret_end
 test_ret_end:
 	nop			@ Location test_ret_end
-	
+
 	/* Test branch */
 	bl test_branch
 
@@ -73,7 +73,7 @@ test_ret_end:
 #endif
 
 	bl test_pop_pc
-	
+
 	/* Test str in ARM mode and Thumb-2 */
 #if !defined(__thumb__)
 	bl test_str_pc
@@ -89,7 +89,7 @@ test_ret_end:
 	movs 	r0, #0
 	pop	{r7, pc}
 	.size main, .-main
-	
+
 	.global test_call_subr
 #if defined (__thumb__)
 	.code   16
@@ -106,7 +106,7 @@ test_ret:
         bx lr
 	.size test_call_subr, .-test_call_subr
 
-	
+
 	.global test_branch
 #if defined (__thumb__)
 	.code   16
@@ -153,7 +153,7 @@ test_ldm_stm_pc_ret:
 	.word	test_ldm_stm_pc_ret
 	.size test_ldm_stm_pc, .-test_ldm_stm_pc
 #endif
-	
+
 #if !defined (__thumb__) || defined(__thumb2__)
 	.global test_ldr_literal
 	.type test_ldr_literal, %function
@@ -296,7 +296,7 @@ test_pop_pc_3_start:
 	push    {r1} /* Push the right address so that PC will get it.  */
 	/* Push the wrong address so r0-r7 will get the wrong a	ddress.  If PC
 	is set from any of them, we can get a FAIL.  */
-	push	{r2} 
+	push	{r2}
 	push	{r2}
 	push	{r2}
 	push	{r2}
@@ -329,7 +329,7 @@ test_pop_pc_3_right:
 	.global test_pop_pc_3_wrong
 test_pop_pc_3_wrong:
 	b	test_pop_pc_ret /* wrong */
-	
+
 	.align  2
 .L1_right:
 	.word   test_pop_pc_1_right

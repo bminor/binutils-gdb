@@ -53,9 +53,9 @@ struct objc_object {
 };
 
 struct objc_class {
-  CORE_ADDR isa; 
-  CORE_ADDR super_class; 
-  CORE_ADDR name;               
+  CORE_ADDR isa;
+  CORE_ADDR super_class;
+  CORE_ADDR name;
   long version;
   long info;
   long instance_size;
@@ -93,7 +93,7 @@ lookup_struct_typedef (const char *name, const struct block *block, int noerr)
     {
       if (noerr)
 	return 0;
-      else 
+      else
 	error (_("No struct type named %s."), name);
     }
   if (sym->type ()->code () != TYPE_CODE_STRUCT)
@@ -101,13 +101,13 @@ lookup_struct_typedef (const char *name, const struct block *block, int noerr)
       if (noerr)
 	return 0;
       else
-	error (_("This context has class, union or enum %s, not a struct."), 
+	error (_("This context has class, union or enum %s, not a struct."),
 	       name);
     }
   return sym;
 }
 
-CORE_ADDR 
+CORE_ADDR
 lookup_objc_class (struct gdbarch *gdbarch, const char *classname)
 {
   struct type *char_type = builtin_type (gdbarch)->builtin_char;
@@ -162,13 +162,13 @@ lookup_child_selector (struct gdbarch *gdbarch, const char *selname)
       return 0;
     }
 
-  selstring = value_coerce_array (value_string (selname, 
+  selstring = value_coerce_array (value_string (selname,
 						strlen (selname) + 1,
 						char_type));
   return value_as_long (call_function_by_hand (function, NULL, selstring));
 }
 
-struct value * 
+struct value *
 value_nsstring (struct gdbarch *gdbarch, const char *ptr, int len)
 {
   struct type *char_type = builtin_type (gdbarch)->builtin_char;
@@ -203,9 +203,9 @@ value_nsstring (struct gdbarch *gdbarch, const char *ptr, int len)
 	= find_function_in_inferior("+[NSString stringWithCString:]", NULL);
       type = builtin_type (gdbarch)->builtin_long;
 
-      stringValue[0] = value_from_longest 
+      stringValue[0] = value_from_longest
 	(type, lookup_objc_class (gdbarch, "NSString"));
-      stringValue[1] = value_from_longest 
+      stringValue[1] = value_from_longest
 	(type, lookup_child_selector (gdbarch, "stringWithCString:"));
       nsstringValue = call_function_by_hand(function, NULL, stringValue);
     }
@@ -552,7 +552,7 @@ compare_selectors (const void *a, const void *b)
  * Implements the "Info selectors" command.  Takes an optional regexp
  * arg.  Lists all objective c selectors that match the regexp.  Works
  * by grepping through all symbols for objective c methods.  Output list
- * is sorted and uniqued. 
+ * is sorted and uniqued.
  */
 
 static void
@@ -623,10 +623,10 @@ info_selectors_command (const char *regexp, int from_tty)
 		  continue;
 		}
 	      if (regexp == NULL || re_exec(++name) != 0)
-		{ 
+		{
 		  const char *mystart = name;
 		  const char *myend   = strchr (mystart, ']');
-	      
+
 		  if (myend && (myend - mystart > maxlen))
 		    maxlen = myend - mystart;	/* Get longest selector.  */
 		  matches++;
@@ -636,7 +636,7 @@ info_selectors_command (const char *regexp, int from_tty)
     }
   if (matches)
     {
-      gdb_printf (_("Selectors matching \"%s\":\n\n"), 
+      gdb_printf (_("Selectors matching \"%s\":\n\n"),
 		  regexp ? regexp : "*");
 
       sym_arr = XALLOCAVEC (struct symbol *, matches);
@@ -662,7 +662,7 @@ info_selectors_command (const char *regexp, int from_tty)
 	    }
 	}
 
-      qsort (sym_arr, matches, sizeof (struct minimal_symbol *), 
+      qsort (sym_arr, matches, sizeof (struct minimal_symbol *),
 	     compare_selectors);
       /* Prevent compare on first iteration.  */
       asel[0] = 0;
@@ -694,7 +694,7 @@ info_selectors_command (const char *regexp, int from_tty)
  * Function: compare_classes (const void *, const void *)
  *
  * Comparison function for use with qsort.  Arguments are symbols or
- * msymbols Compares class part of objc method name alphabetically. 
+ * msymbols Compares class part of objc method name alphabetically.
  */
 
 static int
@@ -717,7 +717,7 @@ compare_classes (const void *a, const void *b)
  * Lists all objective c classes that match the optional regexp.
  * Works by grepping through the list of objective c methods.  List will
  * be sorted and uniqued (since one class may have many methods).
- * BUGS: will not list a class that has no methods. 
+ * BUGS: will not list a class that has no methods.
  */
 
 static void
@@ -765,11 +765,11 @@ info_classes_command (const char *regexp, int from_tty)
 	      (name[0] == '-' || name[0] == '+') &&
 	      name[1] == '[')			/* Got a method name.  */
 	    if (regexp == NULL || re_exec(name+2) != 0)
-	      { 
+	      {
 		/* Compute length of classname part.  */
 		const char *mystart = name + 2;
 		const char *myend   = strchr (mystart, ' ');
-	    
+
 		if (myend && (myend - mystart > maxlen))
 		  maxlen = myend - mystart;
 		matches++;
@@ -778,7 +778,7 @@ info_classes_command (const char *regexp, int from_tty)
     }
   if (matches)
     {
-      gdb_printf (_("Classes matching \"%s\":\n\n"), 
+      gdb_printf (_("Classes matching \"%s\":\n\n"),
 		  regexp ? regexp : "*");
       sym_arr = XALLOCAVEC (struct symbol *, matches);
       matches = 0;
@@ -796,7 +796,7 @@ info_classes_command (const char *regexp, int from_tty)
 	    }
 	}
 
-      qsort (sym_arr, matches, sizeof (struct minimal_symbol *), 
+      qsort (sym_arr, matches, sizeof (struct minimal_symbol *),
 	     compare_classes);
       /* Prevent compare on first iteration.  */
       aclass[0] = 0;
@@ -823,7 +823,7 @@ info_classes_command (const char *regexp, int from_tty)
     gdb_printf (_("No classes matching \"%s\"\n"), regexp ? regexp : "*");
 }
 
-static char * 
+static char *
 parse_selector (char *method, char **selector)
 {
   char *s1 = NULL;
@@ -837,13 +837,13 @@ parse_selector (char *method, char **selector)
   s1 = method;
 
   s1 = skip_spaces (s1);
-  if (*s1 == '\'') 
+  if (*s1 == '\'')
     {
       found_quote = 1;
       s1++;
     }
   s1 = skip_spaces (s1);
-   
+
   nselector = s1;
   s2 = s1;
 
@@ -864,7 +864,7 @@ parse_selector (char *method, char **selector)
   s2 = skip_spaces (s2);
   if (found_quote)
     {
-      if (*s2 == '\'') 
+      if (*s2 == '\'')
 	s2++;
       s2 = skip_spaces (s2);
     }
@@ -875,7 +875,7 @@ parse_selector (char *method, char **selector)
   return s2;
 }
 
-static char * 
+static char *
 parse_method (char *method, char *type, char **theclass,
 	      char **category, char **selector)
 {
@@ -892,17 +892,17 @@ parse_method (char *method, char *type, char **theclass,
   gdb_assert (theclass != NULL);
   gdb_assert (category != NULL);
   gdb_assert (selector != NULL);
-  
+
   s1 = method;
 
   s1 = skip_spaces (s1);
-  if (*s1 == '\'') 
+  if (*s1 == '\'')
     {
       found_quote = 1;
       s1++;
     }
   s1 = skip_spaces (s1);
-  
+
   if ((s1[0] == '+') || (s1[0] == '-'))
     ntype = *s1++;
 
@@ -915,10 +915,10 @@ parse_method (char *method, char *type, char **theclass,
   nclass = s1;
   while (c_isalnum (*s1) || (*s1 == '_'))
     s1++;
-  
+
   s2 = s1;
   s2 = skip_spaces (s2);
-  
+
   if (*s2 == '(')
     {
       s2++;
@@ -953,7 +953,7 @@ parse_method (char *method, char *type, char **theclass,
   s2 = skip_spaces (s2);
   if (found_quote)
     {
-      if (*s2 != '\'') 
+      if (*s2 != '\'')
 	return NULL;
       s2++;
       s2 = skip_spaces (s2);
@@ -972,7 +972,7 @@ parse_method (char *method, char *type, char **theclass,
 }
 
 static void
-find_methods (char type, const char *theclass, const char *category, 
+find_methods (char type, const char *theclass, const char *category,
 	      const char *selector,
 	      std::vector<const char *> *symbol_names)
 {
@@ -1039,11 +1039,11 @@ find_methods (char type, const char *theclass, const char *category,
 	      && ((nclass == NULL) || (strcmp (theclass, nclass) != 0)))
 	    continue;
 
-	  if ((category != NULL) && 
+	  if ((category != NULL) &&
 	      ((ncategory == NULL) || (strcmp (category, ncategory) != 0)))
 	    continue;
 
-	  if ((selector != NULL) && 
+	  if ((selector != NULL) &&
 	      ((nselector == NULL) || (strcmp (selector, nselector) != 0)))
 	    continue;
 
@@ -1071,7 +1071,7 @@ uniquify_strings (std::vector<const char *> *strings)
 		  strings->end ());
 }
 
-/* 
+/*
  * Function: find_imps (const char *selector, struct symbol **sym_arr)
  *
  * Input:  a string representing a selector
@@ -1140,14 +1140,14 @@ find_imps (const char *method, std::vector<const char *> *symbol_names)
       struct symbol *sym = lookup_symbol (selector, NULL, SEARCH_VFT,
 					  0).symbol;
 
-      if (sym != NULL) 
+      if (sym != NULL)
 	symbol_names->push_back (sym->natural_name ());
       else
 	{
 	  bound_minimal_symbol msym
 	    = lookup_minimal_symbol (current_program_space, selector);
 
-	  if (msym.minsym != NULL) 
+	  if (msym.minsym != NULL)
 	    symbol_names->push_back (msym.minsym->natural_name ());
 	}
     }
@@ -1157,7 +1157,7 @@ find_imps (const char *method, std::vector<const char *> *symbol_names)
   return method + (tmp - buf);
 }
 
-static void 
+static void
 print_object_command (const char *args, int from_tty)
 {
   struct value *object, *function, *description;
@@ -1240,7 +1240,7 @@ static struct objc_methcall methcalls[] = {
  * case the functions have moved for some reason.
  */
 
-static void 
+static void
 find_objc_msgsend (void)
 {
   unsigned int i;
@@ -1256,10 +1256,10 @@ find_objc_msgsend (void)
 					methcalls[i].name + 1);
 	}
       if (func.minsym == NULL)
-	{ 
+	{
 	  methcalls[i].begin = 0;
 	  methcalls[i].end = 0;
-	  continue; 
+	  continue;
 	}
 
       methcalls[i].begin = func.value_address ();
@@ -1282,9 +1282,9 @@ find_objc_msgsend (void)
  * dependent modules.
  */
 
-static int 
+static int
 find_objc_msgcall_submethod (int (*f) (CORE_ADDR, CORE_ADDR *),
-			     CORE_ADDR pc, 
+			     CORE_ADDR pc,
 			     CORE_ADDR *new_pc)
 {
   try
@@ -1302,7 +1302,7 @@ find_objc_msgcall_submethod (int (*f) (CORE_ADDR, CORE_ADDR *),
   return 0;
 }
 
-int 
+int
 find_objc_msgcall (CORE_ADDR pc, CORE_ADDR *new_pc)
 {
   unsigned int i;
@@ -1313,13 +1313,13 @@ find_objc_msgcall (CORE_ADDR pc, CORE_ADDR *new_pc)
       *new_pc = 0;
     }
 
-  for (i = 0; i < nmethcalls; i++) 
-    if ((pc >= methcalls[i].begin) && (pc < methcalls[i].end)) 
+  for (i = 0; i < nmethcalls; i++)
+    if ((pc >= methcalls[i].begin) && (pc < methcalls[i].end))
       {
-	if (methcalls[i].stop_at != NULL) 
-	  return find_objc_msgcall_submethod (methcalls[i].stop_at, 
+	if (methcalls[i].stop_at != NULL)
+	  return find_objc_msgcall_submethod (methcalls[i].stop_at,
 					      pc, new_pc);
-	else 
+	else
 	  return 0;
       }
 
@@ -1338,7 +1338,7 @@ INIT_GDB_FILE (objc_language)
   add_com_alias ("po", print_object_cmd, class_vars, 1);
 }
 
-static void 
+static void
 read_objc_method (struct gdbarch *gdbarch, CORE_ADDR addr,
 		  struct objc_method *method)
 {
@@ -1357,15 +1357,15 @@ read_objc_methlist_nmethods (struct gdbarch *gdbarch, CORE_ADDR addr)
   return read_memory_unsigned_integer (addr + 4, 4, byte_order);
 }
 
-static void 
+static void
 read_objc_methlist_method (struct gdbarch *gdbarch, CORE_ADDR addr,
 			   unsigned long num, struct objc_method *method)
 {
   gdb_assert (num < read_objc_methlist_nmethods (gdbarch, addr));
   read_objc_method (gdbarch, addr + 8 + (12 * num), method);
 }
-  
-static void 
+
+static void
 read_objc_object (struct gdbarch *gdbarch, CORE_ADDR addr,
 		  struct objc_object *object)
 {
@@ -1374,7 +1374,7 @@ read_objc_object (struct gdbarch *gdbarch, CORE_ADDR addr,
   object->isa = read_memory_unsigned_integer (addr, 4, byte_order);
 }
 
-static void 
+static void
 read_objc_super (struct gdbarch *gdbarch, CORE_ADDR addr,
 		 struct objc_super *super)
 {
@@ -1384,7 +1384,7 @@ read_objc_super (struct gdbarch *gdbarch, CORE_ADDR addr,
   super->theclass = read_memory_unsigned_integer (addr + 4, 4, byte_order);
 };
 
-static void 
+static void
 read_objc_class (struct gdbarch *gdbarch, CORE_ADDR addr,
 		 struct objc_class *theclass)
 {
@@ -1410,7 +1410,7 @@ find_implementation_from_class (struct gdbarch *gdbarch,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR subclass = theclass;
 
-  while (subclass != 0) 
+  while (subclass != 0)
     {
 
       struct objc_class class_str;
@@ -1418,27 +1418,27 @@ find_implementation_from_class (struct gdbarch *gdbarch,
 
       read_objc_class (gdbarch, subclass, &class_str);
 
-      for (;;) 
+      for (;;)
 	{
 	  CORE_ADDR mlist;
 	  unsigned long nmethods;
 	  unsigned long i;
-      
-	  mlist = read_memory_unsigned_integer (class_str.methods + 
+
+	  mlist = read_memory_unsigned_integer (class_str.methods +
 						(4 * mlistnum),
 						4, byte_order);
-	  if (mlist == 0) 
+	  if (mlist == 0)
 	    break;
 
 	  nmethods = read_objc_methlist_nmethods (gdbarch, mlist);
 
-	  for (i = 0; i < nmethods; i++) 
+	  for (i = 0; i < nmethods; i++)
 	    {
 	      struct objc_method meth_str;
 
 	      read_objc_methlist_method (gdbarch, mlist, i, &meth_str);
 
-	      if (meth_str.name == sel) 
+	      if (meth_str.name == sel)
 		/* FIXME: hppa arch was doing a pointer dereference
 		   here.  There needs to be a better way to do that.  */
 		return meth_str.imp;
@@ -1529,7 +1529,7 @@ resolve_msgsend_super (CORE_ADDR pc, CORE_ADDR *new_pc)
   read_objc_super (gdbarch, super, &sstr);
   if (sstr.theclass == 0)
     return 0;
-  
+
   res = find_implementation_from_class (gdbarch, sstr.theclass, sel);
   if (new_pc != 0)
     *new_pc = res;
@@ -1557,7 +1557,7 @@ resolve_msgsend_super_stret (CORE_ADDR pc, CORE_ADDR *new_pc)
   read_objc_super (gdbarch, super, &sstr);
   if (sstr.theclass == 0)
     return 0;
-  
+
   res = find_implementation_from_class (gdbarch, sstr.theclass, sel);
   if (new_pc != 0)
     *new_pc = res;

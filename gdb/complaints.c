@@ -182,7 +182,7 @@ test_complaints ()
 
 INIT_GDB_FILE (complaints)
 {
-  add_setshow_zinteger_cmd ("complaints", class_support, 
+  add_setshow_zinteger_cmd ("complaints", class_support,
 			    &stop_whining, _("\
 Set max number of complaints about incorrect symbols."), _("\
 Show max number of complaints about incorrect symbols."), NULL,

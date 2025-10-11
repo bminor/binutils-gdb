@@ -531,7 +531,7 @@ relocate_one_symbol (struct symbol *sym, struct objfile *objfile,
    Return non-zero iff any change happened.  */
 
 static int
-objfile_relocate1 (struct objfile *objfile, 
+objfile_relocate1 (struct objfile *objfile,
 		   const section_offsets &new_offsets)
 {
   section_offsets delta (objfile->section_offsets.size ());

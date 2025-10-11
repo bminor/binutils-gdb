@@ -73,7 +73,7 @@ int main (int argc, char **argv)
   double double_resultval;
   int i;
 
-  /* A "test load" that will insure that the function really returns 
+  /* A "test load" that will insure that the function really returns
      a ${type} (as opposed to just a truncated or part of a ${type}).  */
   for (i = 0; i < sizeof (testval.ffff); i++)
     testval.ffff[i] = 0xff;
@@ -102,9 +102,9 @@ int main (int argc, char **argv)
      throughout the value, so we'll still detect truncated values.  */
 
   testval.float_testval = 2.7182818284590452354;/* long_long_checkpoint */
-  float_resultval     = float_func ();		
+  float_resultval     = float_func ();
   testval.double_testval = 3.14159265358979323846; /* float_checkpoint */
-  double_resultval    = double_func ();		
+  double_resultval    = double_func ();
   main_test = 1;				/* double_checkpoint */
   return 0;
 }

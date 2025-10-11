@@ -352,7 +352,7 @@ tailcall_frame_sniffer (const struct frame_unwind *self,
    chain to create.  Keep TAILCALL_CACHEP NULL if it did not find any chain,
    initialize it otherwise.  No tail call chain is created if there are no
    unambiguous virtual tail call frames to report.
-   
+
    ENTRY_CFA_SP_OFFSETP is NULL if no special SP handling is possible,
    otherwise *ENTRY_CFA_SP_OFFSETP is the number of bytes to subtract from tail
    call frames frame base to get the SP value there - to simulate return

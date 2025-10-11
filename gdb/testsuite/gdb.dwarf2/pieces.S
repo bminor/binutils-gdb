@@ -17,7 +17,7 @@
 /* This was compiled with a version of gcc modified to emit better
    debuginfo for SRA'd structures.  See:
 	http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43983
-	
+
     The original program is "pieces.c", in this directory.
 */
 

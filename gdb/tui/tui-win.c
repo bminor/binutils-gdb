@@ -56,8 +56,8 @@ static void tui_scroll_forward_command (const char *, int);
 static void tui_scroll_backward_command (const char *, int);
 static void tui_scroll_left_command (const char *, int);
 static void tui_scroll_right_command (const char *, int);
-static void parse_scrolling_args (const char *, 
-				  struct tui_win_info **, 
+static void parse_scrolling_args (const char *,
+				  struct tui_win_info **,
 				  int *);
 
 
@@ -145,7 +145,7 @@ static const char *tui_active_border_mode = "bold-standout";
 static void
 show_tui_active_border_mode (struct ui_file *file,
 			     int from_tty,
-			     struct cmd_list_element *c, 
+			     struct cmd_list_element *c,
 			     const char *value)
 {
   gdb_printf (file, _("\
@@ -155,9 +155,9 @@ The attribute mode to use for the active TUI window border is \"%s\".\n"),
 
 static const char *tui_border_mode = "normal";
 static void
-show_tui_border_mode (struct ui_file *file, 
+show_tui_border_mode (struct ui_file *file,
 		      int from_tty,
-		      struct cmd_list_element *c, 
+		      struct cmd_list_element *c,
 		      const char *value)
 {
   gdb_printf (file, _("\
@@ -167,9 +167,9 @@ The attribute mode to use for the TUI window borders is \"%s\".\n"),
 
 static const char *tui_border_kind = "acs";
 static void
-show_tui_border_kind (struct ui_file *file, 
+show_tui_border_kind (struct ui_file *file,
 		      int from_tty,
-		      struct cmd_list_element *c, 
+		      struct cmd_list_element *c,
 		      const char *value)
 {
   gdb_printf (file, _("The kind of border for TUI windows is \"%s\".\n"),
@@ -499,7 +499,7 @@ tui_resize_all (void)
     {
 #ifdef HAVE_RESIZE_TERM
       resize_term (screenheight, screenwidth);
-#endif      
+#endif
       /* Turn keypad off while we resize.  */
       keypad (tui_cmd_win ()->handle.get (), FALSE);
       tui_update_gdb_sizes ();
@@ -1023,7 +1023,7 @@ tui_win_info::max_width () const
 }
 
 static void
-parse_scrolling_args (const char *arg, 
+parse_scrolling_args (const char *arg,
 		      struct tui_win_info **win_to_scroll,
 		      int *num_to_scroll)
 {

@@ -159,7 +159,7 @@ frame_unwind_trampoline::sniff (const frame_info_ptr &this_frame,
   CORE_ADDR func;
   struct tramp_frame_cache *tramp_cache;
 
-  /* tausq/2004-12-12: We used to assume if pc has a name or is in a valid 
+  /* tausq/2004-12-12: We used to assume if pc has a name or is in a valid
      section, then this is not a trampoline.  However, this assumption is
      false on HPUX which has a signal trampoline that has a name; it can
      also be false when using an alternative signal stack.  */

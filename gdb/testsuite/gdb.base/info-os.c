@@ -117,14 +117,14 @@ main (void)
   /* Lock the mutex to prevent the new thread from finishing immediately.  */
   pthread_mutex_lock (&mutex);
   pthread_create (&thread, NULL, thread_proc, 0);
- 
+
   sock = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP);
   if (sock < 0)
     {
       printf ("Cannot create socket.\n");
       return 1;
     }
- 
+
   sock_addr.sin_family = AF_INET;
   sock_addr.sin_port = 0; /* Bind to a free port.  */
   sock_addr.sin_addr.s_addr = htonl (INADDR_ANY);

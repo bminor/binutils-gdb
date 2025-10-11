@@ -64,7 +64,7 @@ bcache::expand_hash_table ()
 {
   /* A table of good hash table sizes.  Whenever we grow, we pick the
      next larger size from this table.  sizes[i] is close to 1 << (i+10),
-     so we roughly double the table size each time.  After we fall off 
+     so we roughly double the table size each time.  After we fall off
      the end of this table, we just double.  Don't laugh --- there have
      been executables sighted with a gigabyte of debug info.  */
   static const unsigned long sizes[] = {
@@ -282,7 +282,7 @@ bcache::print_statistics (const char *type)
 	if (s)
 	  {
 	    occupied_buckets++;
-	    
+
 	    while (s)
 	      {
 		gdb_assert (b < m_num_buckets);
@@ -343,7 +343,7 @@ bcache::print_statistics (const char *type)
     gdb_printf ("%ld\n", m_unique_size / m_unique_count);
   else
     /* i18n: "Average entry size: (not applicable)".  */
-    gdb_printf (_("(not applicable)\n"));    
+    gdb_printf (_("(not applicable)\n"));
   gdb_printf (_("    Median entry size:  %d\n"), median_entry_size);
   gdb_printf ("\n");
 
@@ -356,7 +356,7 @@ Total memory used by bcache, including overhead: %ld\n"),
   print_percentage (m_total_size - m_structure_size, m_total_size);
   gdb_printf ("\n");
 
-  gdb_printf (_("    Hash table size:           %3d\n"), 
+  gdb_printf (_("    Hash table size:           %3d\n"),
 	      m_num_buckets);
   gdb_printf (_("    Hash table expands:        %lu\n"),
 	      m_expand_count);
@@ -374,7 +374,7 @@ Total memory used by bcache, including overhead: %ld\n"),
   else
     /* i18n: "Average hash chain length: (not applicable)".  */
     gdb_printf (_("(not applicable)\n"));
-  gdb_printf (_("    Maximum hash chain length: %3d\n"), 
+  gdb_printf (_("    Maximum hash chain length: %3d\n"),
 	      max_chain_length);
   gdb_printf ("\n");
 }

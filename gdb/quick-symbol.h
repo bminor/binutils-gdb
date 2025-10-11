@@ -186,7 +186,7 @@ struct quick_symbol_functions
 
   /* Call FUN for every file defined in OBJFILE whose symtab is
      not already read in.
-     
+
      FUN is passed the file's FILENAME and the file's FULLNAME (if need_fullname
      is true).  */
   virtual void map_symbol_filenames (objfile *objfile,

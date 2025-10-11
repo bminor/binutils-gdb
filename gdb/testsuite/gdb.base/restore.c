@@ -25,7 +25,7 @@
    in this file.  If people modify the functions manually, instead of
    changing this expression and re-running it, then evaluating this
    expression could wipe out their work, so you probably shouldn't
-   re-run it.  But I leave it here for reference. 
+   re-run it.  But I leave it here for reference.
 
    (defun callee (n) (format "callee%d" n))
    (defun caller (n) (format "caller%d" n))
@@ -42,7 +42,7 @@
        (while (<= j n)
 	 (insert "  register int " (local j)
                  " = increment (" previous  ");")
-	 (if first-end 
+	 (if first-end
 	   (progn
              (insert "  /" "* " first-end " prologue *" "/")
              (setq first-end nil)))
@@ -86,7 +86,7 @@
 	     (insert "  register int n;\n")
 	     (let ((j 0))
 	       (while (<= j limit)
-	         (insert "  n = " (callee j) " (" 
+	         (insert "  n = " (callee j) " ("
                          (if (> j 0) "n + " "")
 		         last ");\n")
 	         (setq j (1+ j)))))

@@ -145,7 +145,7 @@ convert_buffer_and_type_to_value (PyObject *obj, struct type *type,
   Py_buffer_up buffer_up;
   Py_buffer py_buf;
 
-  if (PyObject_CheckBuffer (obj) 
+  if (PyObject_CheckBuffer (obj)
       && PyObject_GetBuffer (obj, &py_buf, PyBUF_SIMPLE) == 0)
     {
       /* Got a buffer, py_buf, out of obj.  Cause it to be released
