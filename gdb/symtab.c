@@ -3683,16 +3683,6 @@ skip_prologue_using_linetable (CORE_ADDR func_addr)
 void
 skip_prologue_sal (struct symtab_and_line *sal)
 {
-  struct symbol *sym;
-  struct symtab_and_line start_sal;
-  CORE_ADDR pc, saved_pc;
-  struct obj_section *section;
-  const char *name;
-  struct objfile *objfile;
-  struct gdbarch *gdbarch;
-  const struct block *b, *function_block;
-  int force_skip, skip;
-
   /* Do not change the SAL if PC was specified explicitly.  */
   if (sal->explicit_pc)
     return;
@@ -3710,7 +3700,12 @@ skip_prologue_sal (struct symtab_and_line *sal)
 
   switch_to_program_space_and_thread (sal->pspace);
 
-  sym = find_pc_sect_function (sal->pc, sal->section);
+  symbol *sym = find_pc_sect_function (sal->pc, sal->section);
+  objfile *objfile;
+  CORE_ADDR pc;
+  obj_section *section;
+  const char *name;
+
   if (sym != NULL)
     {
       objfile = sym->objfile ();
@@ -3732,15 +3727,15 @@ skip_prologue_sal (struct symtab_and_line *sal)
       name = msymbol.minsym->linkage_name ();
     }
 
-  gdbarch = objfile->arch ();
+  gdbarch *gdbarch = objfile->arch ();
 
   /* Process the prologue in two passes.  In the first pass try to skip the
      prologue (SKIP is true) and verify there is a real need for it (indicated
      by FORCE_SKIP).  If no such reason was found run a second pass where the
      prologue is not skipped (SKIP is false).  */
 
-  skip = 1;
-  force_skip = 1;
+  int skip = 1;
+  int force_skip = 1;
 
   /* Be conservative - allow direct PC (without skipping prologue) only if we
      have proven the CU (Compilation Unit) supports it.  sal->SYMTAB does not
@@ -3749,7 +3744,9 @@ skip_prologue_sal (struct symtab_and_line *sal)
       && sym->symtab ()->compunit ()->locations_valid ())
     force_skip = 0;
 
-  saved_pc = pc;
+  symtab_and_line start_sal;
+  CORE_ADDR saved_pc = pc;
+
   do
     {
       pc = saved_pc;
@@ -3844,16 +3841,16 @@ skip_prologue_sal (struct symtab_and_line *sal)
 
   /* Check if we are now inside an inlined function.  If we can,
      use the call site of the function instead.  */
-  b = block_for_pc_sect (sal->pc, sal->section);
-  function_block = NULL;
-  while (b != NULL)
-    {
-      if (b->function () != NULL && b->inlined_p ())
-	function_block = b;
-      else if (b->function () != NULL)
-	break;
-      b = b->superblock ();
-    }
+  const block *function_block = nullptr;
+
+  for (const block *b = block_for_pc_sect (sal->pc, sal->section);
+       b != nullptr;
+       b = b->superblock ())
+    if (b->function () != NULL && b->inlined_p ())
+      function_block = b;
+    else if (b->function () != NULL)
+      break;
+
   if (function_block != NULL
       && function_block->function ()->line () != 0)
     {
