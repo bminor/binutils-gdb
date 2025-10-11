@@ -2904,14 +2904,7 @@ find_symbol_at_address (CORE_ADDR address)
 struct symtab_and_line
 find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 {
-  struct compunit_symtab *cust;
-  const linetable *l;
-  int len;
-  const linetable_entry *item;
-  const struct blockvector *bv;
-
   /* Info on best line seen so far, and where it starts, and its file.  */
-
   const linetable_entry *best = NULL;
   CORE_ADDR best_end = 0;
   struct symtab *best_symtab = 0;
@@ -3034,7 +3027,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
   symtab_and_line val;
   val.pspace = current_program_space;
 
-  cust = find_pc_sect_compunit_symtab (pc, section);
+  compunit_symtab *cust = find_pc_sect_compunit_symtab (pc, section);
   if (cust == NULL)
     {
       /* If no symbol information, return previous pc.  */
@@ -3044,7 +3037,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
       return val;
     }
 
-  bv = cust->blockvector ();
+  const blockvector *bv = cust->blockvector ();
   struct objfile *objfile = cust->objfile ();
 
   /* Look at all the symtabs that share this blockvector.
@@ -3054,10 +3047,11 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
   for (symtab *iter_s : cust->filetabs ())
     {
       /* Find the best line in this symtab.  */
-      l = iter_s->linetable ();
+      const linetable *l = iter_s->linetable ();
       if (!l)
 	continue;
-      len = l->nitems;
+
+      int len = l->nitems;
       if (len <= 0)
 	{
 	  /* I think len can be zero if the symtab lacks line numbers
@@ -3068,7 +3062,8 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	}
 
       prev = NULL;
-      item = l->item;		/* Get first line info.  */
+      /* Get first line info.  */
+      const linetable_entry *item = l->item;
 
       /* Is this file's first line closer than the first lines of other files?
 	 If so, record this file, and its first line, as best alternate.  */
