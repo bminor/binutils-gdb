@@ -49789,8 +49789,8 @@ it should contain registers @code{ZA}, @code{SVG} and @code{SVCR}.
 @itemize @minus
 
 @item
-@code{ZA} is a register represented by a vector of @var{svl}x@var{svl}
-bytes.  @xref{svl}.
+@code{ZA} is a register represented by a 2-dimensional array of bytes, with each
+dimension having size @var{svl}.  @xref{svl}.
 
 @item
 @code{SVG} is a 64-bit register containing the value of @var{svg}.  @xref{svg}.
