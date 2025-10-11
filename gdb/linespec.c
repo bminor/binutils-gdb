@@ -395,8 +395,8 @@ static struct line_offset
      linespec_parse_variable (struct linespec_state *self,
 			      const char *variable);
 
-static bool symbol_to_sal (struct symtab_and_line *result,
-			   bool funfirstline, struct symbol *sym);
+static std::optional<symtab_and_line> symbol_to_sal (bool funfirstline,
+						     symbol *sym);
 
 static void add_matching_symbols_to_info (const char *name,
 					  symbol_name_match_type name_match_type,
@@ -2183,16 +2183,15 @@ convert_linespec_to_sals (struct linespec_state *state, linespec *ls)
   if (!ls->labels.label_symbols.empty ())
     {
       /* We have just a bunch of functions/methods or labels.  */
-      struct symtab_and_line sal;
-
       for (const auto &sym : ls->labels.label_symbols)
 	{
 	  struct program_space *pspace
 	    = sym.symbol->symtab ()->compunit ()->objfile ()->pspace ();
+	  std::optional<symtab_and_line> sal
+	    = symbol_to_sal (state->funfirstline, sym.symbol);
 
-	  if (symbol_to_sal (&sal, state->funfirstline, sym.symbol)
-	      && state->maybe_add_address (pspace, sal.pc))
-	    add_sal_to_sals (state, sals, sal,
+	  if (sal.has_value () && state->maybe_add_address (pspace, sal->pc))
+	    add_sal_to_sals (state, sals, *sal,
 			     sym.symbol->natural_name (), false);
 	}
     }
@@ -2254,10 +2253,12 @@ convert_linespec_to_sals (struct linespec_state *state, linespec *ls)
 
 	      if (!found_ifunc)
 		{
-		  symtab_and_line sal;
-		  if (symbol_to_sal (&sal, state->funfirstline, sym.symbol)
-		      && state->maybe_add_address (pspace, sal.pc))
-		    add_sal_to_sals (state, sals, sal,
+		  std::optional<symtab_and_line> sal
+		    = symbol_to_sal (state->funfirstline, sym.symbol);
+
+		  if (sal.has_value ()
+		      && state->maybe_add_address (pspace, sal->pc))
+		    add_sal_to_sals (state, sals, *sal,
 				     sym.symbol->natural_name (), false);
 		}
 	    }
@@ -4290,27 +4291,23 @@ add_matching_symbols_to_info (const char *name,
 /* Now come some functions that are called from multiple places within
    decode_line_1.  */
 
-static bool
-symbol_to_sal (struct symtab_and_line *result,
-	       bool funfirstline, struct symbol *sym)
+static std::optional<symtab_and_line>
+symbol_to_sal (bool funfirstline, symbol *sym)
 {
   if (sym->loc_class () == LOC_BLOCK)
-    {
-      *result = find_function_start_sal (sym, funfirstline);
-      return true;
-    }
+    return find_function_start_sal (sym, funfirstline);
   else
     {
       if (sym->loc_class () == LOC_LABEL && sym->value_address () != 0)
 	{
-	  *result = {};
-	  result->symtab = sym->symtab ();
-	  result->symbol = sym;
-	  result->line = sym->line ();
-	  result->pc = sym->value_address ();
-	  result->pspace = result->symtab->compunit ()->objfile ()->pspace ();
-	  result->explicit_pc = 1;
-	  return true;
+	  symtab_and_line result;
+	  result.symtab = sym->symtab ();
+	  result.symbol = sym;
+	  result.line = sym->line ();
+	  result.pc = sym->value_address ();
+	  result.pspace = result.symtab->compunit ()->objfile ()->pspace ();
+	  result.explicit_pc = 1;
+	  return result;
 	}
       else if (funfirstline)
 	{
@@ -4319,17 +4316,17 @@ symbol_to_sal (struct symtab_and_line *result,
       else if (sym->line () != 0)
 	{
 	  /* We know its line number.  */
-	  *result = {};
-	  result->symtab = sym->symtab ();
-	  result->symbol = sym;
-	  result->line = sym->line ();
-	  result->pc = sym->value_address ();
-	  result->pspace = result->symtab->compunit ()->objfile ()->pspace ();
-	  return true;
+	  symtab_and_line result;
+	  result.symtab = sym->symtab ();
+	  result.symbol = sym;
+	  result.line = sym->line ();
+	  result.pc = sym->value_address ();
+	  result.pspace = result.symtab->compunit ()->objfile ()->pspace ();
+	  return result;
 	}
     }
 
-  return false;
+  return std::nullopt;
 }
 
 linespec_result::~linespec_result ()
