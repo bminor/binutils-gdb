@@ -31,8 +31,6 @@
 #include <list>
 #include <sys/types.h>
 #include <fcntl.h>
-#include "gdbcore.h"
-#include "gdbsupport/gdb_regex.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "annotate.h"
