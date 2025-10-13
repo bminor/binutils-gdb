@@ -251,7 +251,6 @@ enum
   PE_ARCH_none,
   PE_ARCH_i386,
   PE_ARCH_sh,
-  PE_ARCH_mips,
   PE_ARCH_arm,
   PE_ARCH_arm_wince,
   PE_ARCH_aarch64,
@@ -338,16 +337,6 @@ static pe_details_type pe_detail_list[] =
     ~0, 0, ~0, /* none */
     PE_ARCH_mcore,
     bfd_arch_mcore,
-    false,
-    autofilter_symbollist_generic
-  },
-  {
-    "pei-mips",
-    "pe-mips",
-    34 /* MIPS_R_RVA */,
-    ~0, 0, ~0, /* none */
-    PE_ARCH_mips,
-    bfd_arch_mips,
     false,
     autofilter_symbollist_generic
   },
@@ -1729,15 +1718,6 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 		      reloc_data[total_relocs].type = IMAGE_REL_BASED_LOW;
 		      total_relocs++;
 		      break;
-		    case BITS_AND_SHIFT (16, 16):
-		      reloc_data[total_relocs].type = IMAGE_REL_BASED_HIGHADJ;
-		      /* FIXME: we can't know the symbol's right value
-			 yet, but we probably can safely assume that
-			 CE will relocate us in 64k blocks, so leaving
-			 it zero is safe.  */
-		      reloc_data[total_relocs].extra = 0;
-		      total_relocs++;
-		      break;
 		    case BITS_AND_SHIFT (26, 2):
 		      reloc_data[total_relocs].type =
                         IMAGE_REL_BASED_ARM_MOV32;
@@ -1791,9 +1771,6 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 	}
 
       reloc_sz += 2;
-
-      if (reloc_data[i].type == IMAGE_REL_BASED_HIGHADJ)
-	reloc_sz += 2;
     }
 
   reloc_sz = (reloc_sz + 3) & ~3;	/* 4-byte align.  */
@@ -2340,18 +2317,6 @@ static const unsigned char jmp_sh_bytes[] =
   0x01, 0xd0, 0x02, 0x60, 0x2b, 0x40, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-/* _function:
-	lui	$t0,<high:__imp_function>
-	lw	$t0,<low:__imp_function>
-	jr	$t0
-	nop                              */
-
-static const unsigned char jmp_mips_bytes[] =
-{
-  0x00, 0x00, 0x08, 0x3c,  0x00, 0x00, 0x08, 0x8d,
-  0x08, 0x00, 0x00, 0x01,  0x00, 0x00, 0x00, 0x00
-};
-
 static const unsigned char jmp_arm_bytes[] =
 {
   0x00, 0xc0, 0x9f, 0xe5,	/* ldr  ip, [pc] */
@@ -2413,10 +2378,6 @@ make_one (def_file_export *exp, bfd *parent, bool include_jmp_stub)
 	case PE_ARCH_sh:
 	  jmp_bytes = jmp_sh_bytes;
 	  jmp_byte_count = sizeof (jmp_sh_bytes);
-	  break;
-	case PE_ARCH_mips:
-	  jmp_bytes = jmp_mips_bytes;
-	  jmp_byte_count = sizeof (jmp_mips_bytes);
 	  break;
 	case PE_ARCH_arm:
 	case PE_ARCH_arm_wince:
@@ -2503,11 +2464,6 @@ make_one (def_file_export *exp, bfd *parent, bool include_jmp_stub)
 	  break;
 	case PE_ARCH_sh:
 	  quick_reloc (abfd, 8, BFD_RELOC_32, 2);
-	  break;
-	case PE_ARCH_mips:
-	  quick_reloc (abfd, 0, BFD_RELOC_HI16_S, 2);
-	  quick_reloc (abfd, 0, BFD_RELOC_LO16, 0); /* MIPS_R_PAIR */
-	  quick_reloc (abfd, 4, BFD_RELOC_LO16, 2);
 	  break;
 	case PE_ARCH_arm:
 	case PE_ARCH_arm_wince:
