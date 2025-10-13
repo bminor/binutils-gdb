@@ -11,8 +11,10 @@ it also contains an upload script used to install tarballs on the GNU
 FTP server.
 
 Make sure that you have upload authority on sourceware and fencepost.
-See the maintain.texi file for details on how to obtain these
-permissions.
+See the <gnulib>/doc/maintain.texi file for details on how to obtain
+these permissions or:
+
+  https://www.gnu.org/prep/maintain/html_node/Automated-FTP-Uploads.html
 
 Note - when performing a release it is helpful to edit this document
 as you go, updating the example commands so that they are ready for
