@@ -2104,19 +2104,20 @@ gdb_read_core_file_mappings (struct gdbarch *gdbarch, struct bfd *cbfd)
   /* A map entry used while building RESULTS.  */
   struct map_entry
   {
-    explicit map_entry (core_mapped_file *ptr)
-      : file_data (ptr)
+    explicit map_entry (size_t idx)
+      : file_data_index (idx),
+	ignore_build_id_p (false)
     { /* Nothing.  */ }
 
     /* Points to an entry in RESULTS, this allows entries to be quickly
        looked up and updated as new mappings are read.  */
-    core_mapped_file *file_data = nullptr;
+    size_t file_data_index;
 
     /* If true then we have seen multiple different build-ids associated
        with the filename of FILE_DATA.  The FILE_DATA->build_id field will
        have been set to nullptr, and we should not set FILE_DATA->build_id
        in future.  */
-    bool ignore_build_id_p = false;
+    bool ignore_build_id_p;
   };
 
   /* All files mapped into the core file.  The key is the filename.  */
@@ -2155,8 +2156,9 @@ gdb_read_core_file_mappings (struct gdbarch *gdbarch, struct bfd *cbfd)
 	    results.emplace_back ();
 
 	    /* The entry to be added to the lookup map.  */
-	    map_entry entry (&results.back ());
-	    entry.file_data->filename = filename;
+	    map_entry entry (std::distance (&results.front (),
+					    &results.back ()));
+	    results[entry.file_data_index].filename = filename;
 
 	    /* Add entry to the quick lookup map and update ITER.  */
 	    auto inserted_result
@@ -2165,7 +2167,7 @@ gdb_read_core_file_mappings (struct gdbarch *gdbarch, struct bfd *cbfd)
 	    iter = inserted_result.first;
 	  }
 
-	core_mapped_file &file_data = *iter->second.file_data;
+	core_mapped_file &file_data = results[iter->second.file_data_index];
 	bool &ignore_build_id_p = iter->second.ignore_build_id_p;
 
 	file_data.regions.emplace_back (start, end, file_ofs);
