@@ -82,6 +82,9 @@ if {[prepare_for_testing_full "build exec which loads the shared library" \
     return
 }
 
+require {expect_build_id_in_core_file $binfile2}
+require {expect_build_id_in_core_file $library_filename}
+
 if {![runto_main]} {
     return
 }

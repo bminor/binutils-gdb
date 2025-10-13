@@ -96,6 +96,10 @@ if { [build_executable "build executable" ${binfile} ${srcfile2} \
     return
 }
 
+require {expect_build_id_in_core_file $library_1_filename}
+require {expect_build_id_in_core_file $library_2_filename}
+require {expect_build_id_in_core_file $binfile}
+
 # If the board file is automatically splitting the debug information
 # into a separate file (e.g. the cc-with-gnu-debuglink.exp board) then
 # this test isn't going to work.

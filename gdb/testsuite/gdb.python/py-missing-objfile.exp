@@ -183,6 +183,11 @@ with_test_prefix "no objfiles available" {
     check_loaded_debug false false
 }
 
+# The following tests assume that the build-ids of binfile and libfile can be
+# found in the core file.
+require {expect_build_id_in_core_file $binfile}
+require {expect_build_id_in_core_file $libfile}
+
 with_test_prefix "all objfiles available" {
     # Another sanity check that GDB can find the files via the
     # debug-file-directory.
