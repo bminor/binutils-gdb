@@ -58,7 +58,7 @@ proc_with_prefix record_initial_logfile {} {
 
     # Connect to gdbserver.
     if {![gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport] == 0} {
-	unsupported "$testfile (couldn't start gdbserver)"
+	unsupported "couldn't start gdbserver"
 	return
     }
 
@@ -84,7 +84,7 @@ proc_with_prefix replay_without_error {} {
 
     # Connect to gdbreplay.
     if {![gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport] == 0} {
-	unsupported "$testfile (couldn't start gdbreplay)"
+	unsupported "couldn't start gdbreplay"
 	return
     }
     gdb_breakpoint main
