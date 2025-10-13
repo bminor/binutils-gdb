@@ -245,13 +245,18 @@ static const autofilter_entry_type autofilter_symbollist_i386[] =
   { NULL, 0 }
 };
 
-#define PE_ARCH_i386	 1
-#define PE_ARCH_sh	 2
-#define PE_ARCH_mips	 3
-#define PE_ARCH_arm	 4
-#define PE_ARCH_arm_wince 5
-#define PE_ARCH_aarch64  6
-#define PE_ARCH_mcore	 7
+/* Internal identification of PE architectures.  */
+enum
+{
+  PE_ARCH_none,
+  PE_ARCH_i386,
+  PE_ARCH_sh,
+  PE_ARCH_mips,
+  PE_ARCH_arm,
+  PE_ARCH_arm_wince,
+  PE_ARCH_aarch64,
+  PE_ARCH_mcore,
+};
 
 /* Don't make it constant as underscore mode gets possibly overriden
    by target or -(no-)leading-underscore option.  */
