@@ -48,26 +48,52 @@ set src_line_nr [gdb_get_line_number $src_line]
 set run_re \
     "\\\[Inferior $decimal \\\(process $decimal\\\) exited normally\\]"
 
-if { [info exists USE_TUI] && $USE_TUI == 0 } {
+with_test_prefix cli {
+    set re_kfail \
+	"[string_to_regexp fbsd-nat.c]:$decimal: internal-error: wait_1: "
+    set re_quit [string_to_regexp "Quit this debugging session? (y or n) "]
+    set re_core_file [string_to_regexp "Create a core file of GDB? (y or n) "]
     clean_restart $testfile
     gdb_test "core-file $core" $src_line "load corefile"
-    gdb_test "run" $run_re "run until the end"
-    return
+    set ok 0
+    gdb_test_multiple "run" "run until the end" {
+	-early -re $re_kfail {
+	    kfail tdep/33176 $gdb_test_name
+	    # Get back gdb prompt.
+	    gdb_expect {
+		-re ($re_quit|$re_core_file) {
+		    send_gdb "n\n"
+		    exp_continue
+		}
+		-re "$gdb_prompt " {
+		}
+	    }
+	}
+	-re -wrap $run_re {
+	    set ok 1
+	    pass $gdb_test_name
+	}
+    }
+    if {!$ok} {
+	return
+    }
 }
 
-Term::clean_restart 24 80 $testfile
-if {![Term::enter_tui]} {
-    unsupported "TUI not supported"
-    return
+with_test_prefix tui {
+    Term::clean_restart 24 80 $testfile
+    if {![Term::enter_tui]} {
+	unsupported "TUI not supported"
+	return
+    }
+
+    set text [Term::get_all_lines]
+    gdb_assert {![string match "No Source Available" $text]} \
+	"initial source listing"
+
+    send_gdb "core-file $core\n"
+    Term::wait_for "Program terminated"
+    Term::check_contents "load corefile" "$src_line_nr *$src_line.*$gdb_prompt .*"
+
+    Term::command "run"
+    Term::check_contents "run until the end" $run_re
 }
-
-set text [Term::get_all_lines]
-gdb_assert {![string match "No Source Available" $text]} \
-    "initial source listing"
-
-send_gdb "core-file $core\n"
-Term::wait_for "Program terminated"
-Term::check_contents "load corefile" "$src_line_nr *$src_line.*$gdb_prompt .*"
-
-Term::command "run"
-Term::check_contents "run until the end" $run_re
