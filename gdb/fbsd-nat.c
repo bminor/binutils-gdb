@@ -1207,16 +1207,16 @@ fbsd_nat_target::resume_one_process (ptid_t ptid, int step,
     {
       /* If ptid is a specific LWP, suspend all other LWPs in the
 	 process, otherwise resume all LWPs in the process..  */
-      if (!ptid.lwp_p() || tp->ptid.lwp () == ptid.lwp ())
+      if (!ptid.lwp_p () || tp.ptid.lwp () == ptid.lwp ())
 	{
-	  if (ptrace (PT_RESUME, tp->ptid.lwp (), NULL, 0) == -1)
+	  if (ptrace (PT_RESUME, tp.ptid.lwp (), NULL, 0) == -1)
 	    perror_with_name (("ptrace (PT_RESUME)"));
-	  low_prepare_to_resume (tp);
+	  low_prepare_to_resume (&tp);
 	  fbsd_inf->running_lwps++;
 	}
       else
 	{
-	  if (ptrace (PT_SUSPEND, tp->ptid.lwp (), NULL, 0) == -1)
+	  if (ptrace (PT_SUSPEND, tp.ptid.lwp (), NULL, 0) == -1)
 	    perror_with_name (("ptrace (PT_SUSPEND)"));
 	}
     }
@@ -1888,7 +1888,7 @@ fbsd_nat_target::detach_fork_children (inferior *inf)
   /* Detach any child processes associated with pending fork events in
      threads belonging to this process.  */
   for (thread_info &tp : inf->non_exited_threads ())
-    detach_fork_children (tp);
+    detach_fork_children (&tp);
 
   /* Unwind state associated with any pending events.  Reset
      fbsd_inf->resumed_lwps so that take_pending_event will harvest
