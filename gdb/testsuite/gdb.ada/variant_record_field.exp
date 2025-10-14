@@ -46,7 +46,7 @@ gdb_test_multiple "$test" "$test" {
 	pass $test
     }
     -re "\\(kind => five, i => <error reading variable: access outside bounds of object>" {
-	if { [gcc_major_version] <= 14 } {
+	if { [gnat_version_compare < 15] } {
 	    setup_xfail *-*-*
 	}
 	fail $test
