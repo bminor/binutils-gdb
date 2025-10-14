@@ -2890,10 +2890,21 @@ resolve_dynamic_type_internal (struct type *type,
     return type;
 
   std::optional<CORE_ADDR> type_length;
+  dynamic_prop_node_kind type_kind = DYN_PROP_BYTE_SIZE;
   prop = type->dyn_prop (DYN_PROP_BYTE_SIZE);
-  if (prop != NULL
+  if (prop != nullptr
       && dwarf2_evaluate_property (prop, frame, addr_stack, &value))
     type_length = value;
+  else
+    {
+      prop = type->dyn_prop (DYN_PROP_BIT_SIZE);
+      if (prop != nullptr
+	  && dwarf2_evaluate_property (prop, frame, addr_stack, &value))
+	{
+	  type_kind = DYN_PROP_BIT_SIZE;
+	  type_length = align_up (value, 8) / 8;
+	}
+    }
 
   if (type->code () == TYPE_CODE_TYPEDEF)
     {
@@ -2969,7 +2980,7 @@ resolve_dynamic_type_internal (struct type *type,
   if (type_length.has_value ())
     {
       resolved_type->set_length (*type_length);
-      resolved_type->remove_dyn_prop (DYN_PROP_BYTE_SIZE);
+      resolved_type->remove_dyn_prop (type_kind);
     }
 
   /* Resolve data_location attribute.  */

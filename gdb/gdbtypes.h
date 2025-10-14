@@ -133,8 +133,9 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
   ((t)->dyn_prop (DYN_PROP_VARIANT_PARTS) != nullptr)
 
 /* * True if this type has a dynamic length.  */
-#define TYPE_HAS_DYNAMIC_LENGTH(t) \
-  ((t)->dyn_prop (DYN_PROP_BYTE_SIZE) != nullptr)
+#define TYPE_HAS_DYNAMIC_LENGTH(t)			\
+  (((t)->dyn_prop (DYN_PROP_BYTE_SIZE) != nullptr)	\
+   || ((t)->dyn_prop (DYN_PROP_BIT_SIZE) != nullptr))
 
 /* * Instruction-space delimited type.  This is for Harvard architectures
    which have separate instruction and data address spaces (and perhaps
@@ -456,6 +457,9 @@ enum dynamic_prop_node_kind
 
   /* A property holding the size of the type.  */
   DYN_PROP_BYTE_SIZE,
+
+  /* A property holding the size of the type, in bits.  */
+  DYN_PROP_BIT_SIZE,
 };
 
 /* * List for dynamic type attributes.  */

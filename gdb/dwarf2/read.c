@@ -11193,7 +11193,27 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
   else
-    type->set_length (0);
+    {
+      attr = dwarf2_attr (die, DW_AT_bit_size, cu);
+      if (attr != nullptr)
+	{
+	  if (attr->form_is_constant ())
+	    {
+	      ULONGEST len = attr->unsigned_constant ().value_or (0);
+	      type->set_length (align_up (len, 8) / 8);
+	    }
+	  else
+	    {
+	      struct dynamic_prop prop;
+	      if (attr_to_dynamic_prop (attr, die, cu, &prop, cu->addr_type ()))
+		type->add_dyn_prop (DYN_PROP_BIT_SIZE, prop);
+
+	      type->set_length (0);
+	    }
+	}
+      else
+	type->set_length (0);
+    }
 
   maybe_set_alignment (cu, die, type);
 
