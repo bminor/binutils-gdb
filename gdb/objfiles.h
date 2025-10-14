@@ -719,11 +719,6 @@ private:
   program_space *m_pspace;
 
 public:
-  /* List of compunits.
-     These are used to do symbol lookups and file/line-number lookups.  */
-
-  owning_intrusive_list<compunit_symtab> compunit_symtabs;
-
   /* The object file's BFD.  Can be null if the objfile contains only
      minimal symbols (e.g. the run time common symbols for SunOS4) or
      if the objfile is a dynamic objfile (e.g. created by JIT reader
@@ -750,6 +745,11 @@ public:
      table from this object file.  */
 
   auto_obstack objfile_obstack;
+
+  /* List of compunits.
+     These are used to do symbol lookups and file/line-number lookups.  */
+
+  owning_intrusive_list<compunit_symtab> compunit_symtabs;
 
   /* Structure which keeps track of functions that manipulate objfile's
      of the same type as this objfile.  I.e. the function to read partial

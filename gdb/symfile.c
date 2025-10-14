@@ -2581,6 +2581,8 @@ reread_symbols (int from_tty)
 	    error (_("Can't read symbols from %s: %s."), objfile_name (&objfile),
 		   bfd_errmsg (bfd_get_error ()));
 
+	  objfile.compunit_symtabs.clear ();
+
 	  /* NB: after this call to obstack_free, objfiles_changed
 	     will need to be called (see discussion below).  */
 	  obstack_free (&objfile.objfile_obstack, 0);
@@ -2590,7 +2592,6 @@ reread_symbols (int from_tty)
 	  objfile.sect_index_data = -1;
 	  objfile.sect_index_rodata = -1;
 	  objfile.sect_index_text = -1;
-	  objfile.compunit_symtabs.clear ();
 	  objfile.template_symbols = NULL;
 	  objfile.static_links.clear ();
 
