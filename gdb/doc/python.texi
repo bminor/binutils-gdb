@@ -76,7 +76,7 @@ If given an argument, the @code{python} command will evaluate the
 argument as a Python command.  For example:
 
 @smallexample
-(@value{GDBP}) python print 23
+(@value{GDBP}) python print(23)
 23
 @end smallexample
 
@@ -88,7 +88,7 @@ containing @code{end}.  For example:
 
 @smallexample
 (@value{GDBP}) python
->print 23
+>print(23)
 >end
 23
 @end smallexample
@@ -756,7 +756,7 @@ depends on @code{set python print-stack} (@pxref{Python Commands}).
 Example:
 
 @smallexample
-(@value{GDBP}) python print foo
+(@value{GDBP}) python print(foo)
 Traceback (most recent call last):
   File "<string>", line 1, in <module>
 NameError: name 'foo' is not defined
@@ -1945,7 +1945,7 @@ settings.  During a @code{print} or other operation, the values will
 reflect any flags that are temporarily in effect.
 
 @smallexample
-(gdb) python print (gdb.print_options ()['max_elements'])
+(gdb) python print(gdb.print_options ()['max_elements'])
 200
 @end smallexample
 @end defun
@@ -4652,7 +4652,7 @@ Arguments are separated by spaces and may be quoted.
 Example:
 
 @smallexample
-print gdb.string_to_argv ("1 2\ \\\"3 '4 \"5' \"6 '7\"")
+print(gdb.string_to_argv ("1 2\ \\\"3 '4 \"5' \"6 '7\""))
 ['1', '2 "3', '4 "5', "6 '7"]
 @end smallexample
 
@@ -5981,7 +5981,7 @@ Two @code{gdb.Frame} objects can be compared for equality with the @code{==}
 operator, like:
 
 @smallexample
-(@value{GDBP}) python print gdb.newest_frame() == gdb.selected_frame ()
+(@value{GDBP}) python print(gdb.newest_frame() == gdb.selected_frame ())
 True
 @end smallexample
 
@@ -9129,7 +9129,7 @@ Then in gdb:
 (gdb) start
 (gdb) python import gdb.types
 (gdb) python foo_ref = gdb.parse_and_eval("foo_ref")
-(gdb) python print gdb.types.get_basic_type(foo_ref.type)
+(gdb) python print(gdb.types.get_basic_type(foo_ref.type))
 int
 @end smallexample
 
@@ -9162,9 +9162,9 @@ Then in @value{GDBN}:
 @smallexample
 (@value{GDBP}) python import gdb.types
 (@value{GDBP}) python struct_a = gdb.lookup_type("struct A")
-(@value{GDBP}) python print struct_a.keys ()
+(@value{GDBP}) python print(struct_a.keys ())
 @{['a', '']@}
-(@value{GDBP}) python print [k for k,v in gdb.types.deep_items(struct_a)]
+(@value{GDBP}) python print([k for k,v in gdb.types.deep_items(struct_a)])
 @{['a', 'b0', 'b1']@}
 @end smallexample
 
