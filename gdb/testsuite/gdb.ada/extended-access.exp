@@ -21,9 +21,17 @@ if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile}]} {
     return
 }
 
+# For riscv64-linux, we need to run to main, or the_array.p_array will still
+# be nullptr.
+if {![runto "main"]} {
+  return
+}
+
 # The test case is written in C, because it was easy to make the
 # required type there without requiring a new version of GNAT.
-gdb_test_no_output "set lang ada"
+gdb_test "set lang ada" \
+    [string_to_regexp \
+	 "Warning: the current language does not match this frame."]
 
 gdb_test "print the_array.all" \
     [string_to_regexp " = (93 => 23, 24, 25, 26, 27)"]
