@@ -652,12 +652,18 @@ output_sframe_funcdesc (symbolS *start_of_fre_section,
 				  sfde_func_size));
 
   /* Offset to the first frame row entry.  */
-  exp.X_op = O_subtract;
-  exp.X_add_symbol = fre_symbol; /* Minuend.  */
-  exp.X_op_symbol = start_of_fre_section; /* Subtrahend.  */
-  exp.X_add_number = 0;
-  emit_expr (&exp, sizeof_member (sframe_func_desc_entry,
-				  sfde_func_start_fre_off));
+  if (sframe_fde->num_fres == 0)
+    /* For FDEs without any FREs, set sfde_func_start_fre_off to zero.  */
+    out_four (0);
+  else
+    {
+      exp.X_op = O_subtract;
+      exp.X_add_symbol = fre_symbol; /* Minuend.  */
+      exp.X_op_symbol = start_of_fre_section; /* Subtrahend.  */
+      exp.X_add_number = 0;
+      emit_expr (&exp, sizeof_member (sframe_func_desc_entry,
+				      sfde_func_start_fre_off));
+    }
 
   /* Number of FREs.  */
   out_four (sframe_fde->num_fres);

@@ -1882,7 +1882,7 @@ sframe_encoder_write_sframe (sframe_encoder_ctx *encoder)
      - buffers must be malloc'd by the caller.  */
   if ((contents == NULL) || (buf_size < hdr_size))
     return sframe_set_errno (&err, SFRAME_ERR_BUF_INVAL);
-  if (fr_info == NULL)
+  if (ehp->sfh_num_fres > 0 && fr_info == NULL)
     return sframe_set_errno (&err, SFRAME_ERR_FRE_INVAL);
 
   /* Write out the FRE table first.
@@ -1904,6 +1904,13 @@ sframe_encoder_write_sframe (sframe_encoder_ctx *encoder)
       fdep = &fd_info->entry[i];
       fre_type = sframe_get_fre_type (fdep);
       num_fres = fdep->sfde_func_num_fres;
+
+      /* For FDEs without any FREs, set sfde_func_start_fre_off to zero.  */
+      if (num_fres == 0)
+	fdep->sfde_func_start_fre_off = 0;
+
+      if (num_fres > 0 && fr_info == NULL)
+	return sframe_set_errno (&err, SFRAME_ERR_FRE_INVAL);
 
       for (j = 0; j < num_fres; j++)
 	{
