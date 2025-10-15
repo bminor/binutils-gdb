@@ -230,6 +230,12 @@ extern bool
 sframe_fre_get_ra_mangled_p (sframe_decoder_ctx *dctx,
 			     sframe_frame_row_entry *fre, int *errp);
 
+/* Get whether the RA is undefined (i.e. outermost frame).  */
+
+bool
+sframe_fre_get_ra_undefined_p (const sframe_decoder_ctx *dctx ATTRIBUTE_UNUSED,
+			       const sframe_frame_row_entry *fre, int *errp);
+
 /* The SFrame Encoder.  */
 
 /* Create an encoder context with the given SFrame format version VER, FLAGS

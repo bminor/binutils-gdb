@@ -41,3 +41,8 @@ LIBSFRAME_2.0 {
   local:
     *;
 } LIBSFRAME_0.0;
+
+LIBSFRAME_2.1 {
+  global:
+    sframe_fre_get_ra_undefined_p;
+} LIBSFRAME_2.0;

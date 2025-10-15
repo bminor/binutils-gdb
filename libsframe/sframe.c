@@ -131,6 +131,12 @@ sframe_get_fre_ra_mangled_p (uint8_t fre_info)
   return SFRAME_V1_FRE_MANGLED_RA_P (fre_info);
 }
 
+static bool
+sframe_get_fre_ra_undefined_p (uint8_t fre_info)
+{
+  return SFRAME_V1_FRE_OFFSET_COUNT (fre_info) == 0;
+}
+
 /* Access functions for info from function descriptor entry.  */
 
 static uint32_t
@@ -775,6 +781,18 @@ sframe_fre_get_ra_mangled_p (sframe_decoder_ctx *dctx ATTRIBUTE_UNUSED,
     return sframe_set_errno (errp, SFRAME_ERR_FRE_INVAL);
 
   return sframe_get_fre_ra_mangled_p (fre->fre_info);
+}
+
+/* Get whether the RA is undefined (i.e. outermost frame).  */
+
+bool
+sframe_fre_get_ra_undefined_p (const sframe_decoder_ctx *dctx ATTRIBUTE_UNUSED,
+			       const sframe_frame_row_entry *fre, int *errp)
+{
+  if (fre == NULL || !sframe_fre_sanity_check_p (fre))
+    return sframe_set_errno (errp, SFRAME_ERR_FRE_INVAL);
+
+  return sframe_get_fre_ra_undefined_p (fre->fre_info);
 }
 
 static int
