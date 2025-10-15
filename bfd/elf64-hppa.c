@@ -1079,7 +1079,7 @@ allocate_global_data_opd (struct elf_link_hash_entry *eh, void *data)
   struct elf64_hppa_link_hash_entry *hh = hppa_elf_hash_entry (eh);
   struct elf64_hppa_allocate_data *x = (struct elf64_hppa_allocate_data *)data;
 
-  if (hh && hh->want_opd)
+  if (hh->want_opd)
     {
       /* We never need an opd entry for a symbol which is not
 	 defined by this output file.  */
@@ -2230,11 +2230,7 @@ elf64_hppa_finalize_dlt (struct elf_link_hash_entry *eh, void *data)
   sdlt = hppa_info->dlt_sec;
   sdltrel = hppa_info->dlt_rel_sec;
 
-  /* H/DYN_H may refer to a local variable and we know it's
-     address, so there is no need to create a relocation.  Just install
-     the proper value into the DLT, note this shortcut can not be
-     skipped when building a shared library.  */
-  if (! bfd_link_pic (info) && hh && hh->want_dlt)
+  if (! bfd_link_pic (info) && hh->want_dlt)
     {
       bfd_vma value;
 
