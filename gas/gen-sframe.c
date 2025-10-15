@@ -164,6 +164,7 @@ sframe_fre_set_ra_track (struct sframe_row_entry *fre, offsetT ra_offset)
 {
   fre->ra_loc = SFRAME_FRE_ELEM_LOC_STACK;
   fre->ra_offset = ra_offset;
+  fre->ra_undefined_p = false;
   fre->merge_candidate = false;
 }
 
@@ -511,6 +512,8 @@ sframe_row_entry_new (void)
      initialize it in sframe_row_entry_initialize () with the sticky
      bit if set.  */
   fre->mangled_ra_p = false;
+  /* Reset the RA undefined status by to zero by default.  */
+  fre->ra_undefined_p = false;
 
   return fre;
 }
@@ -552,6 +555,7 @@ output_sframe_row_entry (symbolS *fde_start_addr,
   unsigned int fre_num_offsets;
   unsigned int fre_offset_size;
   unsigned int fre_base_reg;
+  bool fre_mangled_ra_p;
   expressionS exp;
   unsigned int fre_addr_size;
 
@@ -581,13 +585,29 @@ output_sframe_row_entry (symbolS *fde_start_addr,
     }
 
   /* Create the fre_info using the CFA base register, number of offsets and max
-     size of offset in this frame row entry.  */
-  fre_base_reg = get_fre_base_reg_id (sframe_fre);
-  fre_num_offsets = get_fre_num_offsets (sframe_fre);
-  fre_offset_size = sframe_get_fre_offset_size (sframe_fre);
+     size of offset in this frame row entry.  Represent RA undefined as FRE
+     without any offsets and all FRE info word fields zeroed.  */
+  if (sframe_fre->ra_undefined_p)
+    {
+      fre_base_reg = 0;
+      fre_num_offsets = 0;
+      fre_offset_size = 0;
+      fre_mangled_ra_p = 0;
+    }
+  else
+    {
+      fre_base_reg = get_fre_base_reg_id (sframe_fre);
+      fre_num_offsets = get_fre_num_offsets (sframe_fre);
+      fre_offset_size = sframe_get_fre_offset_size (sframe_fre);
+      fre_mangled_ra_p = sframe_fre->mangled_ra_p;
+    }
   fre_info = sframe_set_fre_info (fre_base_reg, fre_num_offsets,
-				  fre_offset_size, sframe_fre->mangled_ra_p);
+				  fre_offset_size, fre_mangled_ra_p);
   out_one (fre_info);
+
+  /* Represent RA undefined as FRE without any offsets.  */
+  if (sframe_fre->ra_undefined_p)
+    return;
 
   idx = sframe_fre_offset_func_map_index (fre_offset_size);
   gas_assert (idx < SFRAME_FRE_OFFSET_FUNC_MAP_INDEX_MAX);
@@ -944,6 +964,10 @@ sframe_row_entry_initialize (struct sframe_row_entry *cur_fre,
   /* Treat RA mangling as a sticky bit.  It retains its value until another
      .cfi_negate_ra_state is seen.  */
   cur_fre->mangled_ra_p = prev_fre->mangled_ra_p;
+  /* Treat RA undefined as a sticky bit.  It retains its value until a
+     .cfi_offset RA, .cfi_register RA, .cfi_restore RA, or .cfi_same_value RA
+     is seen.  */
+  cur_fre->ra_undefined_p = prev_fre->ra_undefined_p;
 }
 
 /* Return SFrame register name for SP, FP, and RA, or NULL if other.  */
@@ -1319,6 +1343,7 @@ sframe_xlate_do_restore (struct sframe_xlate_ctx *xlate_ctx,
       gas_assert (cur_fre);
       cur_fre->ra_loc = cie_fre->ra_loc;
       cur_fre->ra_offset = cie_fre->ra_offset;
+      cur_fre->ra_undefined_p = cie_fre->ra_undefined_p;
       cur_fre->merge_candidate = false;
     }
   return SFRAME_XLATE_OK;
@@ -1665,9 +1690,15 @@ sframe_xlate_do_cfi_escape (const struct sframe_xlate_ctx *xlate_ctx,
 /* Translate DW_CFA_undefined into SFrame context.
 
    DW_CFA_undefined op indicates that from now on, the previous value of
-   register can’t be restored anymore.  In SFrame stack trace, we cannot
-   represent such a semantic.  So, we skip generating an SFrame FDE for this,
-   when a register of interest is used with DW_CFA_undefined.
+   register can’t be restored anymore.  In DWARF, for the return address (RA)
+   register, this indicates to an unwinder that there is no return address
+   and the unwind is complete.
+
+   In SFrame, represent the use of the RA register with DW_CFA_undefined as
+   SFrame FRE without any offsets.  Stack tracers can use this as indication
+   that an outermost frame has been reached and the stack trace is complete.
+   The use of other registers of interest with  DW_CFA_undefined cannot be
+   represented in SFrame.  Therefore skip generating an SFrame FDE.
 
    Return SFRAME_XLATE_OK if success.  */
 
@@ -1676,15 +1707,24 @@ sframe_xlate_do_cfi_undefined (const struct sframe_xlate_ctx *xlate_ctx ATTRIBUT
 			       const struct cfi_insn_data *cfi_insn)
 {
   if (cfi_insn->u.r == SFRAME_CFA_FP_REG
-      || cfi_insn->u.r == SFRAME_CFA_RA_REG
       || cfi_insn->u.r == SFRAME_CFA_SP_REG)
     {
       as_warn (_("no SFrame FDE emitted; %s reg %u in .cfi_undefined"),
 	       sframe_register_name (cfi_insn->u.r), cfi_insn->u.r);
       return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
     }
+  else if (cfi_insn->u.r == SFRAME_CFA_RA_REG)
+    {
+      /* Represent RA undefined (i.e. outermost frame) as FRE without any
+	 offsets.  */
+      struct sframe_row_entry *cur_fre = xlate_ctx->cur_fre;
 
-  /* Safe to skip.  */
+      gas_assert (cur_fre);
+      /* Set RA undefined status bit.  */
+      cur_fre->ra_undefined_p = true;
+      cur_fre->merge_candidate = false;
+    }
+
   return SFRAME_XLATE_OK;
 }
 
@@ -1732,6 +1772,7 @@ sframe_xlate_do_same_value (const struct sframe_xlate_ctx *xlate_ctx,
     {
       cur_fre->ra_loc = SFRAME_FRE_ELEM_LOC_REG;
       cur_fre->ra_offset = 0;
+      cur_fre->ra_undefined_p = false;
       cur_fre->merge_candidate = false;
     }
   else if (cfi_insn->u.r == SFRAME_CFA_FP_REG)

@@ -287,6 +287,7 @@ typedef struct sframe_fre_info
 #define SFRAME_V1_FRE_OFFSET_COUNT(data)	  (((data) >> 1) & 0xf)
 #define SFRAME_V1_FRE_OFFSET_SIZE(data)		  (((data) >> 5) & 0x3)
 #define SFRAME_V1_FRE_MANGLED_RA_P(data)	  (((data) >> 7) & 0x1)
+#define SFRAME_V2_FRE_RA_UNDEFINED_P(data)	  (SFRAME_V1_FRE_OFFSET_COUNT (data) == 0)
 
 /* SFrame Frame Row Entry definitions.
 

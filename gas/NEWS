@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Emit an SFrame FRE with zero offsets to convey an undefined return address
+  in the SFrame stack trace format.
+
 * ELF targets can now have section entity size specified for arbitrary
   sections, using the new attribute letter 'E'.
 

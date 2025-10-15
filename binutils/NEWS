@@ -1,5 +1,10 @@
 -*- text -*-
 
+* SFrame stack trace format now represents an undefined return address as
+  an SFrame FRE without any offsets.  libsframe provides a new API to test
+  for RA undefined, which is used when dumping SFrame information (e.g. using
+  objdump and readelf) to show such FREs as "RA undefined".
+
 * Add --got-contents option to readelf to display the contents of
   Global Offset Table (GOT) sections.
 

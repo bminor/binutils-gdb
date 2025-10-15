@@ -134,7 +134,7 @@ sframe_get_fre_ra_mangled_p (uint8_t fre_info)
 static bool
 sframe_get_fre_ra_undefined_p (uint8_t fre_info)
 {
-  return SFRAME_V1_FRE_OFFSET_COUNT (fre_info) == 0;
+  return SFRAME_V2_FRE_RA_UNDEFINED_P (fre_info);
 }
 
 /* Access functions for info from function descriptor entry.  */
@@ -729,7 +729,8 @@ sframe_fre_get_fp_offset (sframe_decoder_ctx *dctx,
   int8_t fp_offset = sframe_decoder_get_fixed_fp_offset (dctx);
   /* If the FP offset is not being tracked, return the fixed FP offset
      from the SFrame header.  */
-  if (fp_offset != SFRAME_CFA_FIXED_FP_INVALID)
+  if (fp_offset != SFRAME_CFA_FIXED_FP_INVALID
+      && !sframe_get_fre_ra_undefined_p (fre->fre_info))
     {
       if (errp)
 	*errp = 0;
@@ -760,7 +761,8 @@ sframe_fre_get_ra_offset (sframe_decoder_ctx *dctx,
   int8_t ra_offset = sframe_decoder_get_fixed_ra_offset (dctx);
   /* If the RA offset was not being tracked, return the fixed RA offset
      from the SFrame header.  */
-  if (ra_offset != SFRAME_CFA_FIXED_RA_INVALID)
+  if (ra_offset != SFRAME_CFA_FIXED_RA_INVALID
+      && !sframe_get_fre_ra_undefined_p (fre->fre_info))
     {
       if (errp)
 	*errp = 0;

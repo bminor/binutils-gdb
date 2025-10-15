@@ -65,6 +65,9 @@ struct sframe_row_entry
   /* Whether the return address is mangled with pauth code.  */
   bool mangled_ra_p;
 
+  /* Whether RA is undefined.  */
+  bool ra_undefined_p;
+
   /* Track CFA base (architectural) register ID.  */
   unsigned int cfa_base_reg;
   /* Offset from the CFA base register for recovering CFA.  */

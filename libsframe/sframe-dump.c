@@ -130,6 +130,7 @@ dump_sframe_func_with_fres (sframe_decoder_ctx *sfd_ctx,
   uint64_t func_start_pc_vma = 0;
   uint64_t fre_start_pc_vma = 0;
   const char *base_reg_str[] = {"fp", "sp"};
+  bool ra_undefined_p = false;
   int32_t cfa_offset = 0;
   int32_t fp_offset = 0;
   int32_t ra_offset = 0;
@@ -180,15 +181,25 @@ dump_sframe_func_with_fres (sframe_decoder_ctx *sfd_ctx,
 			  : func_start_pc_vma + fre.fre_start_addr);
 
       /* FIXME - fixup the err caching in array.
-	 assert no error for base reg id.  */
+	 assert no error for base reg id and RA undefined.  */
       base_reg_id = sframe_fre_get_base_reg_id (&fre, &err[0]);
+      ra_undefined_p = sframe_fre_get_ra_undefined_p (sfd_ctx, &fre, &err[0]);
       cfa_offset = sframe_fre_get_cfa_offset (sfd_ctx, &fre, &err[0]);
       fp_offset = sframe_fre_get_fp_offset (sfd_ctx, &fre, &err[1]);
       ra_offset = sframe_fre_get_ra_offset (sfd_ctx, &fre, &err[2]);
 
-      /* Dump CFA info.  */
+      /* Dump VMA.  */
       printf ("\n");
       printf ("    %016"PRIx64, fre_start_pc_vma);
+
+      /* Dump RA undefined (FRE without any offsets).  */
+      if (ra_undefined_p)
+	{
+	  printf ("  RA undefined");
+	  continue;
+	}
+
+      /* Dump CFA info.  */
       sprintf (temp, "%s+%d", base_reg_str[base_reg_id], cfa_offset);
       printf ("  %-10s", temp);
 

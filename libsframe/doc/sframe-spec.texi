@@ -171,6 +171,11 @@ by CFA offset alignment factor and then revert CFA offset adjustment).
  @end itemize
 @item
 [Errata 1] An ELF SFrame section has the type SHT_GNU_SFRAME.
+@item
+[Errata 2] An SFrame FRE info word offset count of zero indicates that the
+return address (RA) is undefined for the range of PCs covered by the SFrame FRE.
+A stack tracer may use this as indication that an outermost frame has been
+reached and the stack trace is complete.
 @end itemize
 
 SFrame version 1 is now obsolete and should not be used.
@@ -777,7 +782,10 @@ SFRAME_FRE_OFFSET_4B.
 @item 1-4
 @tab @code{fre_offset_count}
 @tab A max value of 15 is allowed.  Typically, a value of upto 3 is sufficient
-for most ABIs to track all three of CFA, FP and RA.
+for most ABIs to track all three of CFA, FP and RA.  A value of zero indicates
+that the return address (RA) is undefined.  A stack tracer may use this as
+indication that an outermost frame has been reached and the stack trace is
+complete.
 
 @item 0
 @tab @code{fre_cfa_base_reg_id}
