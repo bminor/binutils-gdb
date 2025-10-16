@@ -4108,7 +4108,7 @@ find_function_alias_target (bound_minimal_symbol msymbol)
   if (!msymbol_is_function (msymbol.objfile, msymbol.minsym, &func_addr))
     return NULL;
 
-  symbol *sym = find_pc_function (func_addr);
+  symbol *sym = find_symbol_for_pc (func_addr);
   if (sym != NULL
       && sym->loc_class () == LOC_BLOCK
       && sym->value_block ()->entry_pc () == func_addr)

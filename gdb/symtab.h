@@ -2206,7 +2206,7 @@ extern struct type *lookup_enum (const char *, const struct block *);
    return value will not be an inlined function; the containing
    function will be returned instead.  */
 
-extern struct symbol *find_pc_function (CORE_ADDR);
+extern struct symbol *find_symbol_for_pc (CORE_ADDR);
 
 /* lookup the function corresponding to the address and section.  The
    return value will not be an inlined function; the containing

@@ -251,7 +251,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
     {
       if ((pc = get_frame_pc_if_available (frame)))
 	{
-	  struct symbol *function = find_pc_function (*pc);
+	  struct symbol *function = find_symbol_for_pc (*pc);
 	  if (function != nullptr)
 	    {
 	      struct type *ret_type =

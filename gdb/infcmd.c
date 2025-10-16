@@ -743,7 +743,7 @@ set_step_frame (thread_info *tp)
   set_step_info (tp, frame, sal);
 
   CORE_ADDR pc = get_frame_pc (frame);
-  tp->control.step_start_function = find_pc_function (pc);
+  tp->control.step_start_function = find_symbol_for_pc (pc);
 }
 
 /* Step until outside of current statement.  */
@@ -1352,7 +1352,7 @@ until_next_command (int from_tty)
      not).  */
 
   pc = get_frame_pc (frame);
-  func = find_pc_function (pc);
+  func = find_symbol_for_pc (pc);
 
   if (!func)
     {
@@ -1834,7 +1834,7 @@ finish_command (const char *arg, int from_tty)
 
   /* Find the function we will return from.  */
   frame_info_ptr callee_frame = get_selected_frame (nullptr);
-  sm->function = find_pc_function (get_frame_pc (callee_frame));
+  sm->function = find_symbol_for_pc (get_frame_pc (callee_frame));
   sm->return_buf = 0;    /* Initialize buffer address is not available.  */
 
   /* Determine the return convention.  If it is RETURN_VALUE_STRUCT_CONVENTION,

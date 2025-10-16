@@ -145,7 +145,7 @@ find_pc_sect_function (CORE_ADDR pc, struct obj_section *section)
    Backward compatibility, no section */
 
 struct symbol *
-find_pc_function (CORE_ADDR pc)
+find_symbol_for_pc (CORE_ADDR pc)
 {
   return find_pc_sect_function (pc, find_pc_mapped_section (pc));
 }
@@ -419,7 +419,7 @@ find_function_entry_range_from_pc (CORE_ADDR pc, const char **name,
 struct type *
 find_function_type (CORE_ADDR pc)
 {
-  struct symbol *sym = find_pc_function (pc);
+  struct symbol *sym = find_symbol_for_pc (pc);
 
   if (sym != NULL && sym->value_block ()->entry_pc () == pc)
     return sym->type ();

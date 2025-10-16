@@ -904,7 +904,7 @@ frv_fdpic_find_canonical_descriptor (CORE_ADDR entry_point)
   /* Attempt to find the name of the function.  If the name is available,
      it'll be used as an aid in finding matching functions in the dynamic
      symbol table.  */
-  sym = find_pc_function (entry_point);
+  sym = find_symbol_for_pc (entry_point);
   if (sym == 0)
     name = 0;
   else

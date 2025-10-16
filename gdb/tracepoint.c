@@ -217,7 +217,7 @@ set_traceframe_context (const frame_info_ptr &trace_frame)
       && (trace_pc = get_frame_pc_if_available (trace_frame)))
     {
       traceframe_sal = find_pc_line (*trace_pc, 0);
-      traceframe_fun = find_pc_function (*trace_pc);
+      traceframe_fun = find_symbol_for_pc (*trace_pc);
 
       /* Save linenumber as "$trace_line", a debugger variable visible to
 	 users.  */

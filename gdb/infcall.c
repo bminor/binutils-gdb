@@ -480,7 +480,7 @@ static const char *
 get_function_name (CORE_ADDR funaddr, char *buf, int buf_size)
 {
   {
-    struct symbol *symbol = find_pc_function (funaddr);
+    struct symbol *symbol = find_symbol_for_pc (funaddr);
 
     if (symbol)
       return symbol->print_name ();
