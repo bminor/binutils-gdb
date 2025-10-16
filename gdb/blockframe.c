@@ -131,7 +131,7 @@ get_frame_function (const frame_info_ptr &frame)
    Returns 0 if function is not known.  */
 
 struct symbol *
-find_pc_sect_function (CORE_ADDR pc, struct obj_section *section)
+find_symbol_for_pc_sect (CORE_ADDR pc, struct obj_section *section)
 {
   const struct block *b = block_for_pc_sect (pc, section);
 
@@ -147,7 +147,7 @@ find_pc_sect_function (CORE_ADDR pc, struct obj_section *section)
 struct symbol *
 find_symbol_for_pc (CORE_ADDR pc)
 {
-  return find_pc_sect_function (pc, find_pc_mapped_section (pc));
+  return find_symbol_for_pc_sect (pc, find_pc_mapped_section (pc));
 }
 
 /* See symtab.h.  */
@@ -249,7 +249,7 @@ find_pc_partial_function_sym (CORE_ADDR pc,
 	 address of the function.  This will happen when the function
 	 has more than one range and the entry pc is not within the
 	 lowest range of addresses.  */
-      f = find_pc_sect_function (mapped_pc, section);
+      f = find_symbol_for_pc_sect (mapped_pc, section);
       if (f != NULL
 	  && (msymbol.minsym == NULL
 	      || (f->value_block ()->entry_pc ()

@@ -3618,7 +3618,7 @@ print_one_static_tracepoint_marker (int count,
   uiout->field_core_addr ("addr", marker.gdbarch, marker.address);
 
   sal = find_pc_line (marker.address, 0);
-  sym = find_pc_sect_function (marker.address, NULL);
+  sym = find_symbol_for_pc_sect (marker.address, NULL);
   if (sym)
     {
       uiout->text ("in ");

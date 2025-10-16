@@ -3700,7 +3700,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
 
   switch_to_program_space_and_thread (sal->pspace);
 
-  symbol *sym = find_pc_sect_function (sal->pc, sal->section);
+  symbol *sym = find_symbol_for_pc_sect (sal->pc, sal->section);
   objfile *objfile;
   CORE_ADDR pc;
   obj_section *section;

@@ -636,7 +636,7 @@ build_address_symbolic (struct gdbarch *gdbarch,
      symbols anyway).  */
   bound_minimal_symbol msymbol
     = lookup_minimal_symbol_by_pc_section (addr, section);
-  symbol = find_pc_sect_function (addr, section);
+  symbol = find_symbol_for_pc_sect (addr, section);
 
   if (symbol)
     {
