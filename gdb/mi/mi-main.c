@@ -2355,7 +2355,7 @@ mi_cmd_trace_find (const char *command, const char *const *argv, int argc)
 	error (_("Could not find the specified line"));
 
       CORE_ADDR start_pc, end_pc;
-      if (sal.line > 0 && find_line_pc_range (sal, &start_pc, &end_pc))
+      if (sal.line > 0 && find_pc_range_for_sal (sal, &start_pc, &end_pc))
 	tfind_1 (tfind_range, 0, start_pc, end_pc - 1, 0);
       else
 	error (_("Could not find the specified line"));

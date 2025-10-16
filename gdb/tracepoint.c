@@ -2347,7 +2347,7 @@ tfind_line_command (const char *args, int from_tty)
     error (_("No line number information available."));
 
   CORE_ADDR start_pc, end_pc;
-  if (sal.line > 0 && find_line_pc_range (sal, &start_pc, &end_pc))
+  if (sal.line > 0 && find_pc_range_for_sal (sal, &start_pc, &end_pc))
     {
       if (start_pc == end_pc)
 	{
@@ -2362,7 +2362,7 @@ tfind_line_command (const char *args, int from_tty)
 	  gdb_printf (" but contains no code.\n");
 	  sal = find_sal_for_pc (start_pc, 0);
 	  if (sal.line > 0
-	      && find_line_pc_range (sal, &start_pc, &end_pc)
+	      && find_pc_range_for_sal (sal, &start_pc, &end_pc)
 	      && start_pc != end_pc)
 	    gdb_printf ("Attempting to find line %ps instead.\n",
 			styled_string (line_number_style.style (),

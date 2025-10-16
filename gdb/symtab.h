@@ -2434,10 +2434,10 @@ extern struct symtab *find_symtab_for_pc (CORE_ADDR);
 
 /* Given a symtab and line number, return the pc there.  */
 
-extern bool find_line_pc (struct symtab *, int, CORE_ADDR *);
+extern bool find_pc_for_line (struct symtab *, int, CORE_ADDR *);
 
-extern bool find_line_pc_range (struct symtab_and_line, CORE_ADDR *,
-				CORE_ADDR *);
+extern bool find_pc_range_for_sal (struct symtab_and_line, CORE_ADDR *,
+				   CORE_ADDR *);
 
 extern void resolve_sal_pc (struct symtab_and_line *);
 

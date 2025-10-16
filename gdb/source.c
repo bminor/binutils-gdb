@@ -1574,7 +1574,7 @@ info_line_command (const char *arg, int from_tty)
 	  gdb_printf ("\n");
 	}
       else if (sal.line > 0
-	       && find_line_pc_range (sal, &start_pc, &end_pc))
+	       && find_pc_range_for_sal (sal, &start_pc, &end_pc))
 	{
 	  gdbarch *gdbarch = sal.symtab->compunit ()->objfile ()->arch ();
 

@@ -3390,7 +3390,7 @@ find_pcs_for_symtab_line (struct symtab *symtab, int line,
    The source file is specified with a struct symtab.  */
 
 bool
-find_line_pc (struct symtab *symtab, int line, CORE_ADDR *pc)
+find_pc_for_line (struct symtab *symtab, int line, CORE_ADDR *pc)
 {
   const struct linetable *l;
   int ind;
@@ -3417,14 +3417,14 @@ find_line_pc (struct symtab *symtab, int line, CORE_ADDR *pc)
    Returns false if could not find the specified line.  */
 
 bool
-find_line_pc_range (struct symtab_and_line sal, CORE_ADDR *startptr,
+find_pc_range_for_sal (struct symtab_and_line sal, CORE_ADDR *startptr,
 		    CORE_ADDR *endptr)
 {
   CORE_ADDR startaddr;
   struct symtab_and_line found_sal;
 
   startaddr = sal.pc;
-  if (startaddr == 0 && !find_line_pc (sal.symtab, sal.line, &startaddr))
+  if (startaddr == 0 && !find_pc_for_line (sal.symtab, sal.line, &startaddr))
     return false;
 
   /* This whole function is based on address.  For example, if line 10 has

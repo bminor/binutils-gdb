@@ -9482,7 +9482,7 @@ resolve_sal_pc (struct symtab_and_line *sal)
 
   if (sal->pc == 0 && sal->symtab != NULL)
     {
-      if (!find_line_pc (sal->symtab, sal->line, &pc))
+      if (!find_pc_for_line (sal->symtab, sal->line, &pc))
 	error (_("No line %d in file \"%s\"."),
 	       sal->line, symtab_to_filename_for_display (sal->symtab));
       sal->pc = pc;
@@ -9735,11 +9735,11 @@ find_breakpoint_range_end (struct symtab_and_line sal)
       int ret;
       CORE_ADDR start;
 
-      ret = find_line_pc_range (sal, &start, &end);
+      ret = find_pc_range_for_sal (sal, &start, &end);
       if (!ret)
 	error (_("Could not find location of the end of the range."));
 
-      /* find_line_pc_range returns the start of the next line.  */
+      /* find_pc_range_for_sal returns the start of the next line.  */
       end--;
     }
 
@@ -12851,7 +12851,7 @@ update_static_tracepoint (tracepoint *tp, struct symtab_and_line sal)
 
   pc = sal.pc;
   if (sal.line)
-    find_line_pc (sal.symtab, sal.line, &pc);
+    find_pc_for_line (sal.symtab, sal.line, &pc);
 
   if (target_static_tracepoint_marker_at (pc, &marker))
     {

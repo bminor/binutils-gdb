@@ -172,7 +172,7 @@ tui_source_window::do_scroll_vertical (int num_to_scroll)
 	line_no = m_start_line_or_addr.u.line_no;
 
       cursal.line = line_no;
-      find_line_pc (cursal.symtab, cursal.line, &cursal.pc);
+      find_pc_for_line (cursal.symtab, cursal.line, &cursal.pc);
       for (struct tui_source_window_base *win_info : tui_source_windows ())
 	win_info->update_source_window_as_is (arch, cursal);
     }
@@ -238,7 +238,7 @@ tui_source_window::display_start_addr (struct gdbarch **gdbarch_p,
   symtab_and_line cursal = get_current_source_symtab_and_line (current_program_space);
 
   *gdbarch_p = m_gdbarch;
-  find_line_pc (cursal.symtab, m_start_line_or_addr.u.line_no, addr_p);
+  find_pc_for_line (cursal.symtab, m_start_line_or_addr.u.line_no, addr_p);
 }
 
 /* See tui-winsource.h.  */
