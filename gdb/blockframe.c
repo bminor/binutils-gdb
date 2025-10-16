@@ -236,7 +236,7 @@ find_pc_partial_function_sym (CORE_ADDR pc,
     goto return_cached_value;
 
   msymbol = lookup_minimal_symbol_by_pc_section (mapped_pc, section);
-  compunit_symtab = find_pc_sect_compunit_symtab (mapped_pc, section);
+  compunit_symtab = find_compunit_symtab_for_pc_sect (mapped_pc, section);
 
   if (compunit_symtab != NULL)
     {

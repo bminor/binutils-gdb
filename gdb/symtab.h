@@ -2313,7 +2313,7 @@ extern struct compunit_symtab *find_compunit_symtab_for_pc (CORE_ADDR);
 /* lookup full symbol table by address and section.  */
 
 extern struct compunit_symtab *
-  find_pc_sect_compunit_symtab (CORE_ADDR, struct obj_section *);
+  find_compunit_symtab_for_pc_sect (CORE_ADDR, struct obj_section *);
 
 extern bool find_pc_line_pc_range (CORE_ADDR, CORE_ADDR *, CORE_ADDR *);
 

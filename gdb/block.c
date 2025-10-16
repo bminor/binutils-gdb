@@ -183,7 +183,7 @@ blockvector_for_pc_sect (CORE_ADDR pc, struct obj_section *section,
   if (cust == NULL)
     {
       /* First search all symtabs for one whose file contains our pc */
-      cust = find_pc_sect_compunit_symtab (pc, section);
+      cust = find_compunit_symtab_for_pc_sect (pc, section);
       if (cust == NULL)
 	return 0;
     }

@@ -2706,7 +2706,7 @@ iterate_over_symbols_terminated
    This will read in debug info as necessary.  */
 
 struct compunit_symtab *
-find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
+find_compunit_symtab_for_pc_sect (CORE_ADDR pc, struct obj_section *section)
 {
   struct compunit_symtab *best_cust = NULL;
   CORE_ADDR best_cust_range = 0;
@@ -2827,7 +2827,7 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 struct compunit_symtab *
 find_compunit_symtab_for_pc (CORE_ADDR pc)
 {
-  return find_pc_sect_compunit_symtab (pc, find_pc_mapped_section (pc));
+  return find_compunit_symtab_for_pc_sect (pc, find_pc_mapped_section (pc));
 }
 
 /* See symtab.h.  */
@@ -3027,7 +3027,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
   symtab_and_line val;
   val.pspace = current_program_space;
 
-  compunit_symtab *cust = find_pc_sect_compunit_symtab (pc, section);
+  compunit_symtab *cust = find_compunit_symtab_for_pc_sect (pc, section);
   if (cust == NULL)
     {
       /* If no symbol information, return previous pc.  */
