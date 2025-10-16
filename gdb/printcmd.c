@@ -719,7 +719,7 @@ build_address_symbolic (struct gdbarch *gdbarch,
     {
       struct symtab_and_line sal;
 
-      sal = find_pc_sect_line (addr, section, 0);
+      sal = find_sal_for_pc_sect (addr, section, 0);
 
       if (sal.symtab)
 	{
@@ -815,7 +815,7 @@ find_instruction_backward (struct gdbarch *gdbarch, CORE_ADDR addr,
   do
     {
       pcs.clear ();
-      sal = find_pc_sect_line (loop_start, NULL, 1);
+      sal = find_sal_for_pc_sect (loop_start, NULL, 1);
       if (sal.line <= 0)
 	{
 	  /* We reach here when line info is not available.  In this case,

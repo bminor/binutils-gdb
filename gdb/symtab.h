@@ -2409,8 +2409,8 @@ extern struct symtab_and_line find_sal_for_pc (CORE_ADDR, int);
 
 /* Same function, but specify a section as well as an address.  */
 
-extern struct symtab_and_line find_pc_sect_line (CORE_ADDR,
-						 struct obj_section *, int);
+extern struct symtab_and_line find_sal_for_pc_sect (CORE_ADDR,
+						    obj_section *, int);
 
 /* Given PC, and assuming it is part of a range of addresses that is part of
    a line, go back through the linetable and find the starting PC of that

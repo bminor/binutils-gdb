@@ -2902,7 +2902,7 @@ find_symbol_at_address (CORE_ADDR address)
    symtab.  */
 
 struct symtab_and_line
-find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
+find_sal_for_pc_sect (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 {
   /* Info on best line seen so far, and where it starts, and its file.  */
   const linetable_entry *best = NULL;
@@ -3017,7 +3017,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	       should occur, we'd like to know about it, so error out,
 	       fatally.  */
 	    if (mfunsym.value_address () == pc)
-	      internal_error (_("Infinite recursion detected in find_pc_sect_line;"
+	      internal_error (_("Infinite recursion detected in find_sal_for_pc_sect;"
 		  "please file a bug report"));
 
 	    return find_sal_for_pc (mfunsym.value_address (), 0);
@@ -3181,14 +3181,14 @@ find_sal_for_pc (CORE_ADDR pc, int notcurrent)
 
   section = find_pc_overlay (pc);
   if (!pc_in_unmapped_range (pc, section))
-    return find_pc_sect_line (pc, section, notcurrent);
+    return find_sal_for_pc_sect (pc, section, notcurrent);
 
   /* If the original PC was an unmapped address then we translate this to a
      mapped address in order to lookup the sal.  However, as the user
      passed us an unmapped address it makes more sense to return a result
      that has the pc and end fields translated to unmapped addresses.  */
   pc = overlay_mapped_address (pc, section);
-  symtab_and_line sal = find_pc_sect_line (pc, section, notcurrent);
+  symtab_and_line sal = find_sal_for_pc_sect (pc, section, notcurrent);
   sal.pc = overlay_unmapped_address (sal.pc, section);
   sal.end = overlay_unmapped_address (sal.end, section);
   return sal;
@@ -3434,7 +3434,7 @@ find_line_pc_range (struct symtab_and_line sal, CORE_ADDR *startptr,
      This also insures that we never give a range like "starts at 0x134
      and ends at 0x12c".  */
 
-  found_sal = find_pc_sect_line (startaddr, sal.section, 0);
+  found_sal = find_sal_for_pc_sect (startaddr, sal.section, 0);
   if (found_sal.line != sal.line)
     {
       /* The specified line (sal) has zero bytes.  */
@@ -3522,7 +3522,7 @@ static symtab_and_line
 find_function_start_sal_1 (CORE_ADDR func_addr, obj_section *section,
 			   bool funfirstline)
 {
-  symtab_and_line sal = find_pc_sect_line (func_addr, section, 0);
+  symtab_and_line sal = find_sal_for_pc_sect (func_addr, section, 0);
 
   if (funfirstline && sal.symtab != NULL
       && (sal.symtab->compunit ()->locations_valid ()
@@ -3760,7 +3760,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
 	  if (linetable_pc)
 	    {
 	      pc = *linetable_pc;
-	      start_sal = find_pc_sect_line (pc, section, 0);
+	      start_sal = find_sal_for_pc_sect (pc, section, 0);
 	      force_skip = 1;
 	      continue;
 	    }
@@ -3782,7 +3782,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
       pc = overlay_mapped_address (pc, section);
 
       /* Calculate line number.  */
-      start_sal = find_pc_sect_line (pc, section, 0);
+      start_sal = find_sal_for_pc_sect (pc, section, 0);
 
       /* Check if gdbarch_skip_prologue left us in mid-line, and the next
 	 line is still part of the same function.  */
@@ -3795,7 +3795,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
 	  /* First pc of next line */
 	  pc = start_sal.end;
 	  /* Recalculate the line number (might not be N+1).  */
-	  start_sal = find_pc_sect_line (pc, section, 0);
+	  start_sal = find_sal_for_pc_sect (pc, section, 0);
 	}
 
       /* On targets with executable formats that don't have a concept of
@@ -3807,7 +3807,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
 	{
 	  pc = gdbarch_skip_main_prologue (gdbarch, pc);
 	  /* Recalculate the line number (might not be N+1).  */
-	  start_sal = find_pc_sect_line (pc, section, 0);
+	  start_sal = find_sal_for_pc_sect (pc, section, 0);
 	  force_skip = 1;
 	}
     }
@@ -3825,7 +3825,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
     {
       pc = skip_prologue_using_lineinfo (pc, sym->symtab ());
       /* Recalculate the line number.  */
-      start_sal = find_pc_sect_line (pc, section, 0);
+      start_sal = find_sal_for_pc_sect (pc, section, 0);
     }
 
   /* If we're already past the prologue, leave SAL unchanged.  Otherwise

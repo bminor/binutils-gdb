@@ -2784,14 +2784,14 @@ amd64_skip_xmm_prologue (CORE_ADDR pc, CORE_ADDR start_pc)
   if (pc == start_pc)
     return pc;
 
-  start_pc_sal = find_pc_sect_line (start_pc, NULL, 0);
+  start_pc_sal = find_sal_for_pc_sect (start_pc, NULL, 0);
   if (start_pc_sal.symtab == NULL
       || producer_is_gcc_ge_4 (start_pc_sal.symtab->compunit ()
 			       ->producer ()) < 6
       || start_pc_sal.pc != start_pc || pc >= start_pc_sal.end)
     return pc;
 
-  next_sal = find_pc_sect_line (start_pc_sal.end, NULL, 0);
+  next_sal = find_sal_for_pc_sect (start_pc_sal.end, NULL, 0);
   if (next_sal.line != start_pc_sal.line)
     return pc;
 

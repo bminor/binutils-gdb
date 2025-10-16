@@ -4113,7 +4113,7 @@ add_minsym (struct minimal_symbol *minsym, struct objfile *objfile,
       CORE_ADDR func_addr;
       if (msymbol_is_function (objfile, minsym, &func_addr))
 	{
-	  symtab_and_line sal = find_pc_sect_line (func_addr, NULL, 0);
+	  symtab_and_line sal = find_sal_for_pc_sect (func_addr, NULL, 0);
 
 	  if (symtab != sal.symtab)
 	    return;
