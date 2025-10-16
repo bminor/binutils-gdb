@@ -1093,7 +1093,7 @@ jump_command (const char *arg, int from_tty)
 
   /* See if we are trying to jump to another function.  */
   fn = get_frame_function (get_current_frame ());
-  sfn = find_pc_sect_containing_function (sal.pc,
+  sfn = find_symbol_for_pc_sect_maybe_inline (sal.pc,
 					  find_pc_mapped_section (sal.pc));
   if (fn != nullptr && sfn != fn)
     {

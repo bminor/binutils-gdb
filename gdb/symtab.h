@@ -2218,7 +2218,7 @@ extern struct symbol *find_symbol_for_pc_sect (CORE_ADDR, struct obj_section *);
    section.  The return value will be the closest enclosing function,
    which might be an inline function.  */
 
-extern struct symbol *find_pc_sect_containing_function
+extern struct symbol *find_symbol_for_pc_sect_maybe_inline
   (CORE_ADDR pc, struct obj_section *section);
 
 /* Find the symbol at the given address.  Returns NULL if no symbol

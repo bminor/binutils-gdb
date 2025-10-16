@@ -2165,7 +2165,7 @@ convert_address_location_to_sals (struct linespec_state *self,
   sal.pc = address;
   sal.section = find_pc_overlay (address);
   sal.explicit_pc = 1;
-  sal.symbol = find_pc_sect_containing_function (sal.pc, sal.section);
+  sal.symbol = find_symbol_for_pc_sect_maybe_inline (sal.pc, sal.section);
 
   std::vector<symtab_and_line> sals;
   add_sal_to_sals (self, sals, sal, core_addr_to_string (address), true);

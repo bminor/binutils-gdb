@@ -153,7 +153,7 @@ find_symbol_for_pc (CORE_ADDR pc)
 /* See symtab.h.  */
 
 struct symbol *
-find_pc_sect_containing_function (CORE_ADDR pc, struct obj_section *section)
+find_symbol_for_pc_sect_maybe_inline (CORE_ADDR pc, struct obj_section *section)
 {
   const block *bl = block_for_pc_sect (pc, section);
 

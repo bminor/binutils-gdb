@@ -3565,7 +3565,7 @@ find_function_start_sal (CORE_ADDR func_addr, bool funfirstline)
   /* find_function_start_sal_1 does a linetable search, so it finds
      the symtab and linenumber, but not a symbol.  Fill in the
      function symbol too.  */
-  sal.symbol = find_pc_sect_containing_function (sal.pc, sal.section);
+  sal.symbol = find_symbol_for_pc_sect_maybe_inline (sal.pc, sal.section);
 
   return sal;
 }
