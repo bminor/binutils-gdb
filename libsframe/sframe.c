@@ -198,13 +198,30 @@ flip_header (sframe_header *sfheader)
   swap_thing (sfheader->sfh_freoff);
 }
 
-static void
-flip_fde (sframe_func_desc_entry *fdep)
+/* Endian flip the SFrame FDE at BUF, given the SFrame version VER.  Update
+   the FDE_SIZE to the size of the SFrame FDE flipped.
+
+   Return SFRAME_ERR if any error.  If error code is returned, the flipped FDEP
+   should not be used.  */
+
+static int
+flip_fde (char *buf, uint8_t ver, size_t *fde_size)
 {
-  swap_thing (fdep->sfde_func_start_address);
-  swap_thing (fdep->sfde_func_size);
-  swap_thing (fdep->sfde_func_start_fre_off);
-  swap_thing (fdep->sfde_func_num_fres);
+
+  if (ver == SFRAME_VERSION_2)
+    {
+      sframe_func_desc_entry_v2 *fdep = (sframe_func_desc_entry_v2 *) buf;
+      swap_thing (fdep->sfde_func_start_address);
+      swap_thing (fdep->sfde_func_size);
+      swap_thing (fdep->sfde_func_start_fre_off);
+      swap_thing (fdep->sfde_func_num_fres);
+
+      *fde_size = sizeof (sframe_func_desc_entry_v2);
+    }
+  else
+    return SFRAME_ERR; /* No other versions are possible ATM.  */
+
+  return 0;
 }
 
 /* Check if SFrame header has valid data.  */
@@ -428,6 +445,30 @@ sframe_fre_check_range_p (sframe_decoder_ctx *dctx, uint32_t func_idx,
   return (start_ip_offset <= pc_offset) && (end_ip_offset >= pc_offset);
 }
 
+/* Read the on-disk SFrame FDE of SFrame version VER from location BUF.
+
+   Return SFRAME_ERR if any error.  If error code is returned, the read values
+   should not be used.  */
+
+static int
+sframe_decode_fde (const char *buf, uint8_t ver, uint32_t *num_fres,
+		   uint32_t *fre_type, uint32_t *fre_offset, size_t *fde_size)
+{
+  if (ver == SFRAME_VERSION_2)
+    {
+      sframe_func_desc_entry_v2 *fdep = (sframe_func_desc_entry_v2 *) buf;
+      *num_fres = fdep->sfde_func_num_fres;
+      *fre_type = sframe_get_fre_type (fdep);
+      *fre_offset = fdep->sfde_func_start_fre_off;
+
+      *fde_size = sizeof (sframe_func_desc_entry_v2);
+    }
+  else
+    return SFRAME_ERR;
+
+  return 0;
+}
+
 static int
 flip_fre (char *fp, uint32_t fre_type, size_t *fre_size)
 {
@@ -477,14 +518,15 @@ flip_sframe (char *frame_buf, size_t buf_size, uint32_t to_foreign)
 {
   unsigned int i, j, prev_frep_index;
   const sframe_header *ihp;
+  uint8_t ver;
   char *fdes;
+  char *fres;
   char *fp = NULL;
-  sframe_func_desc_entry *fdep;
   unsigned int num_fdes = 0;
-  unsigned int num_fres = 0;
+  uint32_t num_fres = 0;
   uint32_t fre_type = 0;
   uint32_t fre_offset = 0;
-  size_t esz = 0;
+  size_t esz = 0, fsz = 0;
   size_t hdrsz = 0;
   int err = 0;
   /* For error checking.  */
@@ -500,35 +542,31 @@ flip_sframe (char *frame_buf, size_t buf_size, uint32_t to_foreign)
      FDEs and the first FDE in the buffer.  */
   hdrsz = sframe_get_hdr_size (ihp);
   num_fdes = ihp->sfh_num_fdes;
+  ver = ihp->sfh_preamble.sfp_version;
   fdes = frame_buf + hdrsz + ihp->sfh_fdeoff;
-  fdep = (sframe_func_desc_entry *)fdes;
+  fres = frame_buf + hdrsz + ihp->sfh_freoff;
 
   j = 0;
   prev_frep_index = 0;
-  for (i = 0; i < num_fdes; fdep++, i++)
+  for (i = 0; i < num_fdes; fdes += fsz, i++)
     {
-      if ((char*)fdep >= (frame_buf + buf_size))
+      if (fdes >= frame_buf + buf_size)
 	goto bad;
 
-      if (to_foreign)
-	{
-	  num_fres = fdep->sfde_func_num_fres;
-	  fre_type = sframe_get_fre_type (fdep);
-	  fre_offset = fdep->sfde_func_start_fre_off;
-	}
+      if (to_foreign && sframe_decode_fde (fdes, ver, &num_fres, &fre_type,
+					   &fre_offset, &fsz))
+	goto bad;
 
-      flip_fde (fdep);
-      bytes_flipped += sizeof (sframe_func_desc_entry);
+      if (flip_fde (fdes, ver, &fsz))
+	goto bad;
 
-      if (!to_foreign)
-	{
-	  num_fres = fdep->sfde_func_num_fres;
-	  fre_type = sframe_get_fre_type (fdep);
-	  fre_offset = fdep->sfde_func_start_fre_off;
-	}
+      bytes_flipped += fsz;
 
-      fp = frame_buf + hdrsz + ihp->sfh_freoff;
-      fp += fre_offset;
+      if (!to_foreign && sframe_decode_fde (fdes, ver, &num_fres, &fre_type,
+					    &fre_offset, &fsz))
+	goto bad;
+
+      fp = fres + fre_offset;
       for (; j < prev_frep_index + num_fres; j++)
 	{
 	  if (flip_fre (fp, fre_type, &esz))
