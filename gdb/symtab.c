@@ -2825,7 +2825,7 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
    Backward compatibility, no section.  */
 
 struct compunit_symtab *
-find_pc_compunit_symtab (CORE_ADDR pc)
+find_compunit_symtab_for_pc (CORE_ADDR pc)
 {
   return find_pc_sect_compunit_symtab (pc, find_pc_mapped_section (pc));
 }
@@ -4755,7 +4755,7 @@ global_symbol_searcher::expand_symtabs
 		     msymbols to the results list, and that requires that
 		     the symbols tables are expanded.  */
 		  if ((kind & SEARCH_FUNCTION_DOMAIN) != 0
-		      ? (find_pc_compunit_symtab
+		      ? (find_compunit_symtab_for_pc
 			 (msymbol->value_address (objfile)) == NULL)
 		      : (lookup_symbol_in_objfile_from_linkage_name
 			 (objfile, msymbol->linkage_name (),
@@ -4875,7 +4875,7 @@ global_symbol_searcher::add_matching_msymbols
 	      /* For functions we can do a quick check of whether the
 		 symbol might be found via find_pc_symtab.  */
 	      if ((kind & SEARCH_FUNCTION_DOMAIN) == 0
-		  || (find_pc_compunit_symtab
+		  || (find_compunit_symtab_for_pc
 		      (msymbol->value_address (objfile)) == NULL))
 		{
 		  if (lookup_symbol_in_objfile_from_linkage_name

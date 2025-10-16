@@ -2308,7 +2308,7 @@ extern void clear_pc_function_cache (void);
 
 /* lookup full symbol table by address.  */
 
-extern struct compunit_symtab *find_pc_compunit_symtab (CORE_ADDR);
+extern struct compunit_symtab *find_compunit_symtab_for_pc (CORE_ADDR);
 
 /* lookup full symbol table by address and section.  */
 

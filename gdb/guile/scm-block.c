@@ -676,7 +676,7 @@ gdbscm_lookup_block (SCM pc_scm)
   gdbscm_gdb_exception exc {};
   try
     {
-      cust = find_pc_compunit_symtab (pc);
+      cust = find_compunit_symtab_for_pc (pc);
 
       if (cust != NULL && cust->objfile () != NULL)
 	block = block_for_pc (pc);

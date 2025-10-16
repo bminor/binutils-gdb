@@ -740,7 +740,7 @@ dwarf2_frame_find_quirks (struct dwarf2_frame_state *fs,
 {
   struct compunit_symtab *cust;
 
-  cust = find_pc_compunit_symtab (fs->pc);
+  cust = find_compunit_symtab_for_pc (fs->pc);
   if (cust == NULL)
     return;
 
