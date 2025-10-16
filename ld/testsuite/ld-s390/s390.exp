@@ -50,12 +50,12 @@ set s390tests {
       {objdump -sj.got tlsbin.sd} {objdump -sj.tdata tlsbin.td}}
      "tlsbin"}
     {"GOT: symbol address load from got to larl"
-     "-shared -melf_s390 --hash-style=sysv --version-script=gotreloc-1.ver" ""
+     "-shared -melf_s390 --hash-style=sysv --version-script=gotreloc-1.ver --emit-relocs" ""
      "-m31" {gotreloc-1.s}
      {{objdump -dzrj.text gotreloc_31-1.dd}}
      "gotreloc_31-1"}
     {"GOT: no-pie symbol address load from got to larl"
-     "-shared -melf_s390 --no-pie --hash-style=sysv --version-script=gotreloc-1.ver" ""
+     "-shared -melf_s390 --no-pie --hash-style=sysv --version-script=gotreloc-1.ver --emit-relocs" ""
      "-m31" {gotreloc-1.s}
      {{objdump -dzrj.text gotreloc_31-no-pie-1.dd}}
      "gotreloc_31-1"}
@@ -88,17 +88,17 @@ set s390xtests {
       {objdump -sj.got tlsbin_64.sd} {objdump -sj.tdata tlsbin_64.td}}
      "tlsbin_64"}
     {"GOT: norelro symbol address load from got to larl"
-     "-shared -melf64_s390 -z norelro --hash-style=sysv --version-script=gotreloc-1.ver" ""
+     "-shared -melf64_s390 -z norelro --hash-style=sysv --version-script=gotreloc-1.ver --emit-relocs" ""
      "-m64" {gotreloc-1.s}
      {{objdump -dzrj.text gotreloc_64-norelro-1.dd}}
      "gotreloc_64-1"}
     {"GOT: relro symbol address load from got to larl"
-     "-shared -melf64_s390 -z relro --hash-style=sysv --version-script=gotreloc-1.ver" ""
+     "-shared -melf64_s390 -z relro --hash-style=sysv --version-script=gotreloc-1.ver --emit-relocs" ""
      "-m64" {gotreloc-1.s}
      {{objdump -dzrj.text gotreloc_64-relro-1.dd}}
      "gotreloc_64-1"}
     {"GOT: no-pie symbol address load from got to larl"
-     "-shared -melf64_s390 --no-pie --hash-style=sysv --version-script=gotreloc-1.ver" ""
+     "-shared -melf64_s390 --no-pie --hash-style=sysv --version-script=gotreloc-1.ver --emit-relocs" ""
      "-m64" {gotreloc-1.s}
      {{objdump -dzrj.text gotreloc_64-no-pie-1.dd}}
      "gotreloc_64-1"}
@@ -108,10 +108,10 @@ set s390xtests {
      {{objdump "-dzrj.text --stop-address=16" pltoffset-1.dd}}
      "pltoffset-1"}
     {"WEAKUNDEF1: overflow test (PC32DBL)"
-     "-m elf64_s390 -dT 8GB.ld --no-error-rwx-segments" "" "-m64" {weakundef-1.s}
+     "-m elf64_s390 -dT 8GB.ld --emit-relocs --no-error-rwx-segments" "" "-m64" {weakundef-1.s}
      {{objdump "-dzrj.text" weakundef-1.dd}} "weakundef-1"}
     {"WEAKUNDEF2: overflow test (PLT32DBL)"
-     "-m elf64_s390 -dT 8GB.ld --no-error-rwx-segments -no-pie" "" "-m64" {weakundef-2.s}
+     "-m elf64_s390 -dT 8GB.ld --emit-relocs --no-error-rwx-segments -no-pie" "" "-m64" {weakundef-2.s}
      {{objdump "-dzrj.text" weakundef-2.dd}} "weakundef-2"}
     {"Helper shared library (PLT test)"
      "-shared -m elf64_s390" "" "-m64" {pltlib.s}
