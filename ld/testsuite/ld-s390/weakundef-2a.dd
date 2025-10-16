@@ -1,4 +1,4 @@
-tmpdir/weakundef-2:     file format elf64-s390
+tmpdir/weakundef-2a:     file format elf64-s390
 
 Disassembly of section .text:
 

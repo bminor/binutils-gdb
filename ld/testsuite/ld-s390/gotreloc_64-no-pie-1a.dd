@@ -1,4 +1,4 @@
-tmpdir/gotreloc_64-1:     file format elf64-s390
+tmpdir/gotreloc_64-1a:     file format elf64-s390
 
 Disassembly of section .text:
 
