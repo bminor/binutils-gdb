@@ -227,6 +227,18 @@ typedef struct sframe_func_desc_entry_v2
 #define SFRAME_V1_FUNC_INFO_UPDATE_PAUTH_KEY(pauth_key, fde_info) \
   ((((pauth_key) & 0x1) << 5) | ((fde_info) & 0xdf))
 
+/* SFrame V2 has similar SFrame FDE representation as SFrame V1.  */
+
+#define SFRAME_V2_FUNC_INFO(fde_type, fre_enc_type) \
+  (SFRAME_V1_FUNC_INFO (fde_type, fre_enc_type))
+
+#define SFRAME_V2_FUNC_FRE_TYPE(data)    (SFRAME_V1_FUNC_FRE_TYPE (data))
+#define SFRAME_V2_FUNC_FDE_TYPE(data)    (SFRAME_V1_FUNC_FDE_TYPE (data))
+#define SFRAME_V2_FUNC_PAUTH_KEY(data)   (SFRAME_V1_FUNC_PAUTH_KEY (data))
+
+#define SFRAME_V2_FUNC_INFO_UPDATE_PAUTH_KEY(pauth_key, fde_info) \
+  SFRAME_V1_FUNC_INFO_UPDATE_PAUTH_KEY (pauth_key, fde_info)
+
 /* Size of stack frame offsets in an SFrame Frame Row Entry.  A single
    SFrame FRE has all offsets of the same size.  Offset size may vary
    across frame row entries.  */
