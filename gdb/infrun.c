@@ -7969,7 +7969,7 @@ process_event_stop_test (struct execution_control_state *ecs)
       {
 	struct symtab_and_line tmp_sal;
 
-	tmp_sal = find_pc_line (ecs->stop_func_start, 0);
+	tmp_sal = find_sal_for_pc (ecs->stop_func_start, 0);
 	if (tmp_sal.line != 0
 	    && !function_name_is_marked_for_skip (ecs->stop_func_name,
 						  tmp_sal)
@@ -8058,7 +8058,7 @@ process_event_stop_test (struct execution_control_state *ecs)
      stack of inlined frames, even if GDB actually believes that it is in a
      more outer frame.  This is checked for below by calls to
      inline_skipped_frames.  */
-  stop_pc_sal = find_pc_line (ecs->event_thread->stop_pc (), 0);
+  stop_pc_sal = find_sal_for_pc (ecs->event_thread->stop_pc (), 0);
 
   /* NOTE: tausq/2004-05-24: This if block used to be done before all
      the trampoline processing logic, however, there are some trampolines 
@@ -8676,7 +8676,7 @@ handle_step_into_function (struct gdbarch *gdbarch,
     ecs->stop_func_start
       = gdbarch_skip_prologue_noexcept (gdbarch, ecs->stop_func_start);
 
-  symtab_and_line stop_func_sal = find_pc_line (ecs->stop_func_start, 0);
+  symtab_and_line stop_func_sal = find_sal_for_pc (ecs->stop_func_start, 0);
   /* Use the step_resume_break to step until the end of the prologue,
      even if that involves jumps (as it seems to on the vax under
      4.2).  */
@@ -8755,7 +8755,7 @@ handle_step_into_function_backward (struct gdbarch *gdbarch,
     ecs->stop_func_start
       = gdbarch_skip_prologue_noexcept (gdbarch, ecs->stop_func_start);
 
-  stop_func_sal = find_pc_line (ecs->event_thread->stop_pc (), 0);
+  stop_func_sal = find_sal_for_pc (ecs->event_thread->stop_pc (), 0);
 
   /* OK, we're just going to keep stepping here.  */
   if (stop_func_sal.pc == ecs->event_thread->stop_pc ())

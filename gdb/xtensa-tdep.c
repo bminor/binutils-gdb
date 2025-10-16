@@ -2378,7 +2378,7 @@ call0_analyze_prologue (struct gdbarch *gdbarch,
   end_pc = 0;
 
   /* Find out, if we have an information about the prologue from DWARF.  */
-  prologue_sal = find_pc_line (start, 0);
+  prologue_sal = find_sal_for_pc (start, 0);
   if (prologue_sal.line != 0) /* Found debug info.  */
     body_pc = prologue_sal.end;
 
@@ -3000,7 +3000,7 @@ xtensa_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 
  /* Try to find first body line from debug info.  */
 
-  prologue_sal = find_pc_line (start_pc, 0);
+  prologue_sal = find_sal_for_pc (start_pc, 0);
   if (prologue_sal.line != 0) /* Found debug info.  */
     {
       /* In Call0,  it is possible to have a function with only one instruction

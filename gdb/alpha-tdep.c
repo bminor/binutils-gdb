@@ -637,7 +637,7 @@ alpha_after_prologue (CORE_ADDR pc)
   if (!find_pc_partial_function (pc, NULL, &func_addr, &func_end))
     return 0;
 
-  sal = find_pc_line (func_addr, 0);
+  sal = find_sal_for_pc (func_addr, 0);
   if (sal.end < func_end)
     return sal.end;
 

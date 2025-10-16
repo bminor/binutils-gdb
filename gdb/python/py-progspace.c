@@ -559,7 +559,7 @@ pspy_find_pc_line (PyObject *o, PyObject *args)
 
       set_current_program_space (self->pspace);
 
-      sal = find_pc_line (pc, 0);
+      sal = find_sal_for_pc (pc, 0);
       result = symtab_and_line_to_sal_object (sal);
     }
   catch (const gdb_exception &except)

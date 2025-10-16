@@ -904,7 +904,7 @@ print_checkpoints (struct ui_out *uiout, inferior *req_inf, fork_info *req_fi)
 		   : fi.pc);
 	      uiout->field_core_addr ("addr", get_current_arch (), pc);
 
-	      symtab_and_line sal = find_pc_line (pc, 0);
+	      symtab_and_line sal = find_sal_for_pc (pc, 0);
 	      if (sal.symtab)
 		{
 		  uiout->text (", file ");

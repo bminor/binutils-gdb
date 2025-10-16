@@ -125,7 +125,7 @@ save_bookmark_command (const char *args, int from_tty)
   bookmark &b = all_bookmarks.emplace_back ();
   b.number = ++bookmark_count;
   b.pc = regcache_read_pc (regcache);
-  b.sal = find_pc_line (b.pc, 0);
+  b.sal = find_sal_for_pc (b.pc, 0);
   b.sal.pspace = get_frame_program_space (get_current_frame ());
   b.opaque_data.reset (bookmark_id);
 

@@ -1827,8 +1827,8 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	     associated with the prologue.  */
 	  if ((pc - orig_pc) > 8)
 	    {
-	      struct symtab_and_line prologue_sal = find_pc_line (orig_pc, 0);
-	      struct symtab_and_line this_sal = find_pc_line (pc, 0);
+	      struct symtab_and_line prologue_sal = find_sal_for_pc (orig_pc, 0);
+	      struct symtab_and_line this_sal = find_sal_for_pc (pc, 0);
 
 	      if ((prologue_sal.line == 0)
 		  || (prologue_sal.line != this_sal.line))

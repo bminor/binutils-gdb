@@ -1283,7 +1283,7 @@ refine_prologue_limit (CORE_ADDR pc, CORE_ADDR lim_pc, int *trust_limit)
   /* Start off not trusting the limit.  */
   *trust_limit = 0;
 
-  prologue_sal = find_pc_line (pc, 0);
+  prologue_sal = find_sal_for_pc (pc, 0);
   if (prologue_sal.line != 0)
     {
       int i;
@@ -1302,7 +1302,7 @@ refine_prologue_limit (CORE_ADDR pc, CORE_ADDR lim_pc, int *trust_limit)
 	{
 	  struct symtab_and_line sal;
 
-	  sal = find_pc_line (addr, 0);
+	  sal = find_sal_for_pc (addr, 0);
 	  if (sal.line == 0)
 	    break;
 	  if (sal.line <= prologue_sal.line 

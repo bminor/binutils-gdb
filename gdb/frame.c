@@ -2916,7 +2916,7 @@ find_frame_sal (const frame_info_ptr &frame)
     return {};
 
   notcurrent = (*pc != get_frame_address_in_block (frame));
-  return find_pc_line (*pc, notcurrent);
+  return find_sal_for_pc (*pc, notcurrent);
 }
 
 /* Per "frame.h", return the ``address'' of the frame.  Code should

@@ -467,7 +467,7 @@ or1k_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 
       if (0 != prologue_end)
 	{
-	  struct symtab_and_line prologue_sal = find_pc_line (start_pc, 0);
+	  struct symtab_and_line prologue_sal = find_sal_for_pc (start_pc, 0);
 	  struct compunit_symtab *compunit
 	    = prologue_sal.symtab->compunit ();
 	  const char *debug_format = compunit->debugformat ();

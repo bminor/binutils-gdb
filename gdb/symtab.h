@@ -2405,7 +2405,7 @@ struct symtab_and_line
 /* Given a pc value, return line number it is in.  Second arg nonzero means
    if pc is on the boundary use the previous statement's line number.  */
 
-extern struct symtab_and_line find_pc_line (CORE_ADDR, int);
+extern struct symtab_and_line find_sal_for_pc (CORE_ADDR, int);
 
 /* Same function, but specify a section as well as an address.  */
 
@@ -2428,7 +2428,7 @@ extern struct symtab_and_line find_pc_sect_line (CORE_ADDR,
 
 extern std::optional<CORE_ADDR> find_line_range_start (CORE_ADDR pc);
 
-/* Wrapper around find_pc_line to just return the symtab.  */
+/* Wrapper around find_sal_for_pc to just return the symtab.  */
 
 extern struct symtab *find_pc_line_symtab (CORE_ADDR);
 

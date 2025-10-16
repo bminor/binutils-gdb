@@ -3504,7 +3504,7 @@ c_parse (struct parser_state *par_state)
 
   if (par_state->expression_context_block)
     macro_scope
-      = sal_macro_scope (find_pc_line (par_state->expression_context_pc, 0));
+      = sal_macro_scope (find_sal_for_pc (par_state->expression_context_pc, 0));
   else
     macro_scope = default_macro_scope ();
   if (!macro_scope.is_valid ())

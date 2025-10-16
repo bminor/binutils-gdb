@@ -986,7 +986,7 @@ frv_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
     {
       struct symtab_and_line sal;
 
-      sal = find_pc_line (func_addr, 0);
+      sal = find_sal_for_pc (func_addr, 0);
 
       if (sal.line != 0 && sal.end < func_end)
 	{

@@ -3020,7 +3020,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	      internal_error (_("Infinite recursion detected in find_pc_sect_line;"
 		  "please file a bug report"));
 
-	    return find_pc_line (mfunsym.value_address (), 0);
+	    return find_sal_for_pc (mfunsym.value_address (), 0);
 	  }
       }
 
@@ -3175,7 +3175,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 /* Backward compatibility (no section).  */
 
 struct symtab_and_line
-find_pc_line (CORE_ADDR pc, int notcurrent)
+find_sal_for_pc (CORE_ADDR pc, int notcurrent)
 {
   struct obj_section *section;
 
@@ -3213,12 +3213,12 @@ sal_line_symtab_matches_p (const symtab_and_line &sal1,
 std::optional<CORE_ADDR>
 find_line_range_start (CORE_ADDR pc)
 {
-  struct symtab_and_line current_sal = find_pc_line (pc, 0);
+  struct symtab_and_line current_sal = find_sal_for_pc (pc, 0);
 
   if (current_sal.line == 0)
     return {};
 
-  struct symtab_and_line prev_sal = find_pc_line (current_sal.pc - 1, 0);
+  struct symtab_and_line prev_sal = find_sal_for_pc (current_sal.pc - 1, 0);
 
   /* If the previous entry is for a different line, that means we are already
      at the entry with the start PC for this line.  */
@@ -3233,7 +3233,7 @@ find_line_range_start (CORE_ADDR pc)
     {
       prev_pc = prev_sal.pc;
 
-      prev_sal = find_pc_line (prev_pc - 1, 0);
+      prev_sal = find_sal_for_pc (prev_pc - 1, 0);
 
       /* Did we notice a line change?  If so, we are done searching.  */
       if (!sal_line_symtab_matches_p (prev_sal, current_sal))
@@ -3250,9 +3250,9 @@ find_pc_line_symtab (CORE_ADDR pc)
 {
   struct symtab_and_line sal;
 
-  /* This always passes zero for NOTCURRENT to find_pc_line.
+  /* This always passes zero for NOTCURRENT to find_sal_for_pc.
      There are currently no callers that ever pass non-zero.  */
-  sal = find_pc_line (pc, 0);
+  sal = find_sal_for_pc (pc, 0);
   return sal.symtab;
 }
 
@@ -3509,7 +3509,7 @@ find_line_pc_range_for_pc (CORE_ADDR pc, CORE_ADDR *startptr, CORE_ADDR *endptr)
 {
   struct symtab_and_line sal;
 
-  sal = find_pc_line (pc, 0);
+  sal = find_sal_for_pc (pc, 0);
   *startptr = sal.pc;
   *endptr = sal.end;
   return sal.symtab != 0;
@@ -3642,7 +3642,7 @@ skip_prologue_using_linetable (CORE_ADDR func_addr)
   if (!find_pc_partial_function (func_addr, nullptr, &start_pc, &end_pc))
     return {};
 
-  const struct symtab_and_line prologue_sal = find_pc_line (start_pc, 0);
+  const struct symtab_and_line prologue_sal = find_sal_for_pc (start_pc, 0);
   if (prologue_sal.symtab != nullptr
       && prologue_sal.symtab->language () != language_asm)
     {
@@ -3888,7 +3888,7 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
   find_pc_partial_function (func_addr, NULL, &start_pc, &end_pc);
   start_pc += gdbarch_deprecated_function_start_offset (gdbarch);
 
-  prologue_sal = find_pc_line (start_pc, 0);
+  prologue_sal = find_sal_for_pc (start_pc, 0);
   if (prologue_sal.line != 0)
     {
       /* For languages other than assembly, treat two consecutive line
@@ -3927,7 +3927,7 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
 	{
 	  struct symtab_and_line sal;
 
-	  sal = find_pc_line (prologue_sal.end, 0);
+	  sal = find_sal_for_pc (prologue_sal.end, 0);
 	  if (sal.line == 0)
 	    break;
 	  /* Assume that a consecutive SAL for the same (or larger)
@@ -3994,10 +3994,10 @@ find_epilogue_using_linetable (CORE_ADDR func_addr)
      The lines of a function can be described by several line tables in case
      there are different files involved.  There's a corner case where a
      function epilogue is in a different file than a function start, and using
-     start_pc as argument to find_pc_line will mean we won't find the
+     start_pc as argument to find_sal_for_pc will mean we won't find the
      epilogue.  Instead, use "end_pc - 1" to maximize our chances of picking
      the line table containing an epilogue.  */
-  const struct symtab_and_line sal = find_pc_line (end_pc - 1, 0);
+  const struct symtab_and_line sal = find_sal_for_pc (end_pc - 1, 0);
   if (sal.symtab != nullptr && sal.symtab->language () != language_asm)
     {
       struct objfile *objfile = sal.symtab->compunit ()->objfile ();
@@ -4032,7 +4032,7 @@ find_epilogue_using_linetable (CORE_ADDR func_addr)
 	     This can happen when the linetable doesn't describe the full
 	     extent of the function.  This can be triggered with:
 	     - compiler-generated debug info, in the cornercase that the pc
-	       with which we call find_pc_line resides in a different file
+	       with which we call find_sal_for_pc resides in a different file
 	       than unrel_end, or
 	     - invalid dwarf assembly debug info.
 	     In the former case, there's no point in iterating further, simply

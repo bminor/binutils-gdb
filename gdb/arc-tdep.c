@@ -1663,7 +1663,7 @@ arc_make_frame_cache (const frame_info_ptr &this_frame)
   CORE_ADDR entrypoint, prologue_end;
   if (find_pc_partial_function (block_addr, NULL, &entrypoint, &prologue_end))
     {
-      struct symtab_and_line sal = find_pc_line (entrypoint, 0);
+      struct symtab_and_line sal = find_sal_for_pc (entrypoint, 0);
       CORE_ADDR prev_pc = get_frame_pc (this_frame);
       if (sal.line == 0)
 	/* No line info so use current PC.  */

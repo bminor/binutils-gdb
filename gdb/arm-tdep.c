@@ -2238,7 +2238,7 @@ arm_scan_prologue (const frame_info_ptr &this_frame,
       /* One way to find the end of the prologue (which works well
 	 for unoptimized code) is to do the following:
 
-	    struct symtab_and_line sal = find_pc_line (prologue_start, 0);
+	    struct symtab_and_line sal = find_sal_for_pc (prologue_start, 0);
 
 	    if (sal.line == 0)
 	      prologue_end = prev_pc;

@@ -170,7 +170,7 @@ iq2000_register_name (struct gdbarch *gdbarch, int regnum)
 static struct symtab_and_line
 find_last_line_symbol (CORE_ADDR start, CORE_ADDR end, int notcurrent)
 {
-  struct symtab_and_line sal = find_pc_line (start, notcurrent);
+  struct symtab_and_line sal = find_sal_for_pc (start, notcurrent);
   struct symtab_and_line best_sal = sal;
 
   if (sal.pc == 0 || sal.line == 0 || sal.end == 0)
@@ -180,7 +180,7 @@ find_last_line_symbol (CORE_ADDR start, CORE_ADDR end, int notcurrent)
     {
       if (sal.line && sal.line <= best_sal.line)
 	best_sal = sal;
-      sal = find_pc_line (sal.end, notcurrent);
+      sal = find_sal_for_pc (sal.end, notcurrent);
     }
   while (sal.pc && sal.pc < end);
 
@@ -343,7 +343,7 @@ iq2000_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       struct iq2000_frame_cache cache;
 
       /* Found a function.  */
-      sal = find_pc_line (func_addr, 0);
+      sal = find_sal_for_pc (func_addr, 0);
       if (sal.end && sal.end < func_end)
 	/* Found a line number, use it as end of prologue.  */
 	return sal.end;

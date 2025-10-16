@@ -1035,7 +1035,7 @@ arm_linux_copy_svc (struct gdbarch *gdbarch, struct regcache *regs,
       gdb_assert (inferior_thread ()->control.step_resume_breakpoint
 		  == NULL);
 
-      sal = find_pc_line (return_to, 0);
+      sal = find_sal_for_pc (return_to, 0);
       sal.pc = return_to;
       sal.section = find_pc_overlay (return_to);
       sal.explicit_pc = 1;

@@ -8537,7 +8537,7 @@ set_momentary_breakpoint_at_pc (struct gdbarch *gdbarch, CORE_ADDR pc,
 {
   struct symtab_and_line sal;
 
-  sal = find_pc_line (pc, 0);
+  sal = find_sal_for_pc (pc, 0);
   sal.pc = pc;
   sal.section = find_pc_overlay (pc);
   sal.explicit_pc = 1;
@@ -9009,11 +9009,11 @@ parse_breakpoint_sals (location_spec *locspec,
 		 corresponding to the last call to print_frame_info.
 		 Be sure to reinitialize LINE with NOTCURRENT == 0
 		 as the breakpoint line number is inappropriate otherwise.
-		 find_pc_line would adjust PC, re-set it back.  */
+		 find_sal_for_pc would adjust PC, re-set it back.  */
 	      symtab_and_line sal = get_last_displayed_sal ();
 	      CORE_ADDR pc = sal.pc;
 
-	      sal = find_pc_line (pc, 0);
+	      sal = find_sal_for_pc (pc, 0);
 
 	      /* "break" without arguments is equivalent to "break *PC"
 		 where PC is the last displayed codepoint's address.  So
@@ -9131,7 +9131,7 @@ decode_static_tracepoint_spec (const char **arg_p)
 
   for (const static_tracepoint_marker &marker : markers)
     {
-      symtab_and_line sal = find_pc_line (marker.address, 0);
+      symtab_and_line sal = find_sal_for_pc (marker.address, 0);
       sal.pc = marker.address;
       sals.push_back (sal);
    }
@@ -10979,7 +10979,7 @@ until_break_command (const char *arg, int from_tty, int anywhere)
       struct symtab_and_line sal2;
       struct gdbarch *caller_gdbarch;
 
-      sal2 = find_pc_line (frame_unwind_caller_pc (frame), 0);
+      sal2 = find_sal_for_pc (frame_unwind_caller_pc (frame), 0);
       sal2.pc = frame_unwind_caller_pc (frame);
       caller_gdbarch = frame_unwind_caller_arch (frame);
 
@@ -12890,7 +12890,7 @@ update_static_tracepoint (tracepoint *tp, struct symtab_and_line sal)
 		     "found at previous line number"),
 		   tp->number, tp->static_trace_marker_id.c_str ());
 
-	  symtab_and_line sal2 = find_pc_line (tpmarker->address, 0);
+	  symtab_and_line sal2 = find_sal_for_pc (tpmarker->address, 0);
 	  sym = find_symbol_for_pc_sect (tpmarker->address, NULL);
 	  uiout->text ("Now in ");
 	  if (sym)
@@ -13989,7 +13989,7 @@ insert_single_step_breakpoint (struct gdbarch *gdbarch,
 	= add_to_breakpoint_chain (std::move (b));
     }
 
-  sal = find_pc_line (pc, 0);
+  sal = find_sal_for_pc (pc, 0);
   sal.pc = pc;
   sal.section = find_pc_overlay (pc);
   sal.explicit_pc = 1;

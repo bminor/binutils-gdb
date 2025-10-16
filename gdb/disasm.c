@@ -594,7 +594,7 @@ do_mixed_source_and_assembly_deprecated
     {
       mle[newlines].line = le[i].line;
       mle[newlines].start_pc = le[i].pc (objfile);
-      sal = find_pc_line (le[i].pc (objfile), 0);
+      sal = find_sal_for_pc (le[i].pc (objfile), 0);
       mle[newlines].end_pc = sal.end;
       newlines++;
     }
@@ -712,7 +712,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
 
   /* The prologue may be empty, but there may still be a line number entry
      for the opening brace which is distinct from the first line of code.
-     If the prologue has been eliminated find_pc_line may return the source
+     If the prologue has been eliminated find_sal_for_pc may return the source
      line after the opening brace.  We still want to print this opening brace.
      first_le is used to implement this.  */
 
@@ -733,7 +733,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
       struct symtab_and_line sal;
       int length;
 
-      sal = find_pc_line (pc, 0);
+      sal = find_sal_for_pc (pc, 0);
       length = gdb_insn_length (gdbarch, pc);
       pc += length;
 
@@ -782,7 +782,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
       int end_preceding_line_to_display = 0;
       int new_source_line = 0;
 
-      sal = find_pc_line (pc, 0);
+      sal = find_sal_for_pc (pc, 0);
 
       if (sal.symtab != last_symtab)
 	{

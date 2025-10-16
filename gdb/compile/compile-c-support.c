@@ -188,7 +188,7 @@ write_macro_definitions (const struct block *block, CORE_ADDR pc,
   macro_scope scope;
 
   if (block != NULL)
-    scope = sal_macro_scope (find_pc_line (pc, 0));
+    scope = sal_macro_scope (find_sal_for_pc (pc, 0));
   else
     scope = default_macro_scope ();
   if (!scope.is_valid ())

@@ -592,7 +592,7 @@ gdbscm_find_pc_line (SCM pc_scm)
     {
       CORE_ADDR pc = (CORE_ADDR) pc_ull;
 
-      sal = find_pc_line (pc, 0);
+      sal = find_sal_for_pc (pc, 0);
     }
   catch (const gdb_exception &except)
     {

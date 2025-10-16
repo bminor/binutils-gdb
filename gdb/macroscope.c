@@ -102,7 +102,7 @@ default_macro_scope ()
   /* If there's a selected frame, use its PC.  */
   frame = deprecated_safe_get_selected_frame ();
   if (frame && (pc = get_frame_pc_if_available (frame)))
-    sal = find_pc_line (*pc, 0);
+    sal = find_sal_for_pc (*pc, 0);
 
   /* Fall back to the current listing position.  */
   else

@@ -213,7 +213,7 @@ recpy_bt_insn_sal (PyObject *self, void *closure)
 
   try
     {
-      result = symtab_and_line_to_sal_object (find_pc_line (insn->pc, 0));
+      result = symtab_and_line_to_sal_object (find_sal_for_pc (insn->pc, 0));
     }
   catch (const gdb_exception &except)
     {

@@ -1048,7 +1048,7 @@ sparc64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
      using the debugging information.  */
   if (find_pc_partial_function (start_pc, NULL, &func_start, &func_end))
     {
-      sal = find_pc_line (func_start, 0);
+      sal = find_sal_for_pc (func_start, 0);
 
       if (sal.end < func_end
 	  && start_pc <= sal.end)

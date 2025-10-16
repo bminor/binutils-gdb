@@ -1312,7 +1312,7 @@ list_command (const char *arg, int from_tty)
 		 selected frame, and finding the line associated to it.  */
 	      frame_info_ptr frame = get_selected_frame (nullptr);
 	      CORE_ADDR curr_pc = get_frame_pc (frame);
-	      cursal = find_pc_line (curr_pc, 0);
+	      cursal = find_sal_for_pc (curr_pc, 0);
 
 	      if (cursal.symtab == nullptr)
 		error

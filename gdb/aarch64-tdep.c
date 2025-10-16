@@ -1026,7 +1026,7 @@ aarch64_scan_prologue (const frame_info_ptr &this_frame,
   if (find_pc_partial_function (block_addr, NULL, &prologue_start,
 				&prologue_end))
     {
-      struct symtab_and_line sal = find_pc_line (prologue_start, 0);
+      struct symtab_and_line sal = find_sal_for_pc (prologue_start, 0);
 
       if (sal.line == 0)
 	{

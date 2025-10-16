@@ -1774,7 +1774,7 @@ after_prologue (CORE_ADDR pc)
     return 0;
 
   /* Get the line associated with FUNC_ADDR.  */
-  sal = find_pc_line (func_addr, 0);
+  sal = find_sal_for_pc (func_addr, 0);
 
   /* There are only two cases to consider.  First, the end of the source line
      is within the function bounds.  In that case we return the end of the

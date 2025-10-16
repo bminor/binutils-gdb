@@ -216,7 +216,7 @@ set_traceframe_context (const frame_info_ptr &trace_frame)
   if (trace_frame != NULL
       && (trace_pc = get_frame_pc_if_available (trace_frame)))
     {
-      traceframe_sal = find_pc_line (*trace_pc, 0);
+      traceframe_sal = find_sal_for_pc (*trace_pc, 0);
       traceframe_fun = find_symbol_for_pc (*trace_pc);
 
       /* Save linenumber as "$trace_line", a debugger variable visible to
@@ -2334,7 +2334,7 @@ tfind_line_command (const char *args, int from_tty)
   symtab_and_line sal;
   if (args == 0 || *args == 0)
     {
-      sal = find_pc_line (get_frame_pc (get_current_frame ()), 0);
+      sal = find_sal_for_pc (get_frame_pc (get_current_frame ()), 0);
     }
   else
     {
@@ -2360,7 +2360,7 @@ tfind_line_command (const char *args, int from_tty)
 	  print_address (get_current_arch (), start_pc, gdb_stdout);
 	  gdb_stdout->wrap_here (2);
 	  gdb_printf (" but contains no code.\n");
-	  sal = find_pc_line (start_pc, 0);
+	  sal = find_sal_for_pc (start_pc, 0);
 	  if (sal.line > 0
 	      && find_line_pc_range (sal, &start_pc, &end_pc)
 	      && start_pc != end_pc)
@@ -3617,7 +3617,7 @@ print_one_static_tracepoint_marker (int count,
 
   uiout->field_core_addr ("addr", marker.gdbarch, marker.address);
 
-  sal = find_pc_line (marker.address, 0);
+  sal = find_sal_for_pc (marker.address, 0);
   sym = find_symbol_for_pc_sect (marker.address, NULL);
   if (sym)
     {

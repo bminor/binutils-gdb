@@ -536,7 +536,7 @@ h8300_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       struct h8300_frame_cache cache;
 
       /* Found a function.  */
-      sal = find_pc_line (func_addr, 0);
+      sal = find_sal_for_pc (func_addr, 0);
       if (sal.end && sal.end < func_end)
 	/* Found a line number, use it as end of prologue.  */
 	return sal.end;
