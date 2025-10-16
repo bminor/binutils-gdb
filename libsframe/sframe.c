@@ -290,7 +290,7 @@ sframe_fre_start_addr_size (uint32_t fre_type)
 /* Check if the FREP has valid data.  */
 
 static bool
-sframe_fre_sanity_check_p (sframe_frame_row_entry *frep)
+sframe_fre_sanity_check_p (const sframe_frame_row_entry *frep)
 {
   uint8_t offset_size, offset_cnt;
   uint8_t fre_info;
