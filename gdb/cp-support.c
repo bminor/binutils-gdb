@@ -165,7 +165,7 @@ inspect_type (struct demangle_parse_info *info,
 	{
 	  const char *new_name = (*finder) (otype, data);
 
-	  if (new_name != NULL)
+	  if (new_name != nullptr && strcmp (new_name, name) != 0)
 	    {
 	      ret_comp->u.s_name.s = new_name;
 	      ret_comp->u.s_name.len = strlen (new_name);
@@ -378,9 +378,10 @@ replace_typedefs_qualified_name (struct demangle_parse_info *info,
 	  struct demangle_component newobj;
 
 	  buf.write (d_left (comp)->u.s_name.s, d_left (comp)->u.s_name.len);
-	  newobj.type = DEMANGLE_COMPONENT_NAME;
-	  newobj.u.s_name.s = obstack_strdup (&info->obstack, buf.string ());
-	  newobj.u.s_name.len = buf.size ();
+	  cplus_demangle_fill_name (&newobj,
+				    obstack_strdup (&info->obstack,
+						    buf.string ()),
+				    buf.size ());
 	  if (inspect_type (info, &newobj, finder, data))
 	    {
 	      char *s;
