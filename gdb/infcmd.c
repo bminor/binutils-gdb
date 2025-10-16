@@ -964,9 +964,9 @@ prepare_one_step (thread_info *tp, struct step_command_fsm *sm)
 	    }
 
 	  pc = get_frame_pc (frame);
-	  find_pc_line_pc_range (pc,
-				 &tp->control.step_range_start,
-				 &tp->control.step_range_end);
+	  find_line_pc_range_for_pc (pc,
+				     &tp->control.step_range_start,
+				     &tp->control.step_range_end);
 
 	  if (execution_direction == EXEC_REVERSE)
 	    {

@@ -2315,7 +2315,7 @@ extern struct compunit_symtab *find_compunit_symtab_for_pc (CORE_ADDR);
 extern struct compunit_symtab *
   find_compunit_symtab_for_pc_sect (CORE_ADDR, struct obj_section *);
 
-extern bool find_pc_line_pc_range (CORE_ADDR, CORE_ADDR *, CORE_ADDR *);
+extern bool find_line_pc_range_for_pc (CORE_ADDR, CORE_ADDR *, CORE_ADDR *);
 
 extern void reread_symbols (int from_tty);
 

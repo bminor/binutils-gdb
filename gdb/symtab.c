@@ -3505,7 +3505,7 @@ find_line_common (const linetable *l, int lineno,
 }
 
 bool
-find_pc_line_pc_range (CORE_ADDR pc, CORE_ADDR *startptr, CORE_ADDR *endptr)
+find_line_pc_range_for_pc (CORE_ADDR pc, CORE_ADDR *startptr, CORE_ADDR *endptr)
 {
   struct symtab_and_line sal;
 
