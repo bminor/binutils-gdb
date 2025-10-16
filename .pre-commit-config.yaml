@@ -89,6 +89,14 @@ repos:
       verbose: true
       always_run: true
       stages: [commit-msg]
+    - id: check-gnu-style
+      name: check-gnu-style
+      language: script
+      entry: gdb/contrib/check-gnu-style-pre-commit.sh
+      files: '^(gdb(support|server)?)/.*\.(c|h|cc)$'
+      exclude: '.*/testsuite/.*'
+      verbose: true
+      stages: [pre-commit]
   - repo: https://github.com/nmoroze/tclint
     rev: v0.6.1
     hooks:
