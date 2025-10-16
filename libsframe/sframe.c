@@ -103,6 +103,51 @@ sframe_ret_set_errno (int *errp, int error)
   return NULL;
 }
 
+/* Allocate space for NUM_FDES number of SFrame FDEs of type
+   sframe_func_desc_entry.  This is version-unaware because this pertains to
+   libsframe's internal in-memory representation of SFrame FDE.  */
+
+static int
+sframe_fde_tbl_alloc (sf_fde_tbl **fde_tbl, unsigned int num_fdes)
+{
+  size_t fidx_size = num_fdes * sizeof (sframe_func_desc_entry);
+  size_t fd_tbl_sz = (sizeof (sf_fde_tbl) + fidx_size);
+
+  *fde_tbl = malloc (fd_tbl_sz);
+  if (*fde_tbl == NULL)
+    return SFRAME_ERR;
+
+  (*fde_tbl)->alloced = num_fdes;
+
+  return 0;
+}
+
+/* Initialize libsframe's internal representation of SFrame FDEs.  */
+
+static int
+sframe_fde_tbl_init (sf_fde_tbl *fde_tbl, const char *fde_buf,
+		     size_t *fidx_size, unsigned int num_fdes, uint8_t ver)
+{
+  /* sframe_func_desc_entry is the same type as the latest SFrame FDE V2
+     definition (currently sframe_func_desc_entry_v2).  */
+  if (ver == SFRAME_VERSION_2 && SFRAME_VERSION == SFRAME_VERSION_2)
+    {
+      *fidx_size = num_fdes * sizeof (sframe_func_desc_entry_v2);
+      memcpy (fde_tbl->entry, fde_buf, *fidx_size);
+      fde_tbl->count = num_fdes;
+    }
+  /* If ver is not the latest, read buffer manually and upgrade from
+     sframe_func_desc_entry_v2 to populate the sf_fde_tbl entries.  */
+  else
+    {
+      /* Not possible ATM.  */
+      *fidx_size = 0;
+      return SFRAME_ERR;
+    }
+
+  return 0;
+}
+
 /* Get the SFrame header size.  */
 
 static uint32_t
@@ -396,10 +441,11 @@ sframe_decoder_get_funcdesc_at_index (sframe_decoder_ctx *ctx,
   num_fdes = sframe_decoder_get_num_fidx (ctx);
   if (num_fdes == 0
       || func_idx >= num_fdes
-      || ctx->sfd_funcdesc == NULL)
+      || ctx->sfd_funcdesc == NULL
+      || ctx->sfd_funcdesc->count <= func_idx)
     return sframe_ret_set_errno (&err, SFRAME_ERR_DCTX_INVAL);
 
-  fdep = &ctx->sfd_funcdesc[func_idx];
+  fdep = &ctx->sfd_funcdesc->entry[func_idx];
   return fdep;
 }
 
@@ -421,7 +467,8 @@ sframe_decoder_get_secrel_func_start_addr (sframe_decoder_ctx *dctx,
   if (err)
     return 0;
 
-  int32_t func_start_addr = dctx->sfd_funcdesc[func_idx].sfde_func_start_address;
+  const sframe_func_desc_entry *fdep = &dctx->sfd_funcdesc->entry[func_idx];
+  int32_t func_start_addr = fdep->sfde_func_start_address;
 
   return func_start_addr + offsetof_fde_in_sec;
 }
@@ -442,7 +489,7 @@ sframe_fre_check_range_p (sframe_decoder_ctx *dctx, uint32_t func_idx,
   uint32_t pc_offset;
   bool mask_p;
 
-  fdep = &dctx->sfd_funcdesc[func_idx];
+  fdep = &dctx->sfd_funcdesc->entry[func_idx];
   func_start_addr = sframe_decoder_get_secrel_func_start_addr (dctx, func_idx);
   fde_type = sframe_get_fde_type (fdep);
   mask_p = (fde_type == SFRAME_FDE_TYPE_PCMASK);
@@ -969,7 +1016,7 @@ sframe_decode (const char *sf_buf, size_t sf_size, int *errp)
   char *frame_buf;
   char *tempbuf = NULL;
 
-  int fidx_size;
+  size_t fidx_size;
   uint32_t fre_bytes;
   int foreign_endian = 0;
 
@@ -1042,17 +1089,21 @@ sframe_decode (const char *sf_buf, size_t sf_size, int *errp)
   frame_buf += hdrsz;
 
   /* Handle the SFrame Function Descriptor Entry section.  */
-  fidx_size = dhp->sfh_num_fdes * sizeof (sframe_func_desc_entry);
-  dctx->sfd_funcdesc = malloc (fidx_size);
-  if (dctx->sfd_funcdesc == NULL)
+  if (sframe_fde_tbl_alloc (&dctx->sfd_funcdesc, dhp->sfh_num_fdes))
     {
       sframe_ret_set_errno (errp, SFRAME_ERR_NOMEM);
       goto decode_fail_free;
     }
-  /* SFrame FDEs are at an offset of sfh_fdeoff from SFrame header end.  */
-  memcpy (dctx->sfd_funcdesc, frame_buf + dhp->sfh_fdeoff, fidx_size);
 
-  debug_printf ("%u total fidx size\n", fidx_size);
+  /* SFrame FDEs are at an offset of sfh_fdeoff from SFrame header end.  */
+  if (sframe_fde_tbl_init (dctx->sfd_funcdesc, frame_buf + dhp->sfh_fdeoff,
+			   &fidx_size, dhp->sfh_num_fdes, sfp->sfp_version))
+    {
+      sframe_ret_set_errno (errp, SFRAME_ERR_BUF_INVAL);
+      goto decode_fail_free;
+    }
+
+  debug_printf ("%lu total fidx size\n", fidx_size);
 
   /* Handle the SFrame Frame Row Entry section.  */
   dctx->sfd_fres = (char *) malloc (dhp->sfh_fre_len);
@@ -1177,7 +1228,7 @@ sframe_get_funcdesc_with_addr_internal (sframe_decoder_ctx *ctx, int32_t addr,
     return sframe_ret_set_errno (errp, SFRAME_ERR_FDE_NOTSORTED);
 
   /* Do the binary search.  */
-  fdp = (sframe_func_desc_entry *) ctx->sfd_funcdesc;
+  fdp = (sframe_func_desc_entry *) ctx->sfd_funcdesc->entry;
   low = 0;
   high = dhp->sfh_num_fdes - 1;
   while (low <= high)
