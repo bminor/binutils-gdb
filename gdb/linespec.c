@@ -2164,6 +2164,10 @@ convert_address_location_to_sals (struct linespec_state *self,
   symtab_and_line sal = find_sal_for_pc (address, 0);
   sal.pc = address;
   sal.section = find_pc_overlay (address);
+
+  if (sal.section == nullptr)
+    sal.section = find_pc_section (address);
+
   sal.explicit_pc = 1;
   sal.symbol = find_symbol_for_pc_sect_maybe_inline (sal.pc, sal.section);
 

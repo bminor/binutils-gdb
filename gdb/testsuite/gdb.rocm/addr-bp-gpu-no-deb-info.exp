@@ -1,0 +1,68 @@
+# Copyright 2025 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test setting a breakpoint by address on a GPU code object compiled without
+# debug information while focussing on a CPU thread.
+
+load_lib rocm.exp
+
+standard_testfile .cpp
+
+require allow_hipcc_tests
+
+if {[build_executable "failed to prepare" $testfile $srcfile {hip}]} {
+    return
+}
+
+clean_restart $::testfile
+
+# We may have multiple GPUs, resulting in many possible locations. This is
+# needed to ensure we get a single address to break on.
+gdb_test_no_output "set environment ROCR_VISIBLE_DEVICES=1"
+
+# Make the HIP runtime load all the GPU code objects during initialization.
+gdb_test_no_output "set environment HIP_ENABLE_DEFERRED_LOADING=0"
+
+with_rocm_gpu_lock {
+    if { ![runto_main] } {
+	return
+    }
+
+    # Create the breakpoint by name to have GDB resolve the symbol address.
+    set bp_addr 0
+    gdb_test_multiple "b kern" "" {
+	-re -wrap "Breakpoint $::decimal at ($::hex)" {
+	    set bp_addr $expect_out(1,string)
+	    pass $gdb_test_name
+	}
+    }
+
+    # Ensure current focus is on a host thread.
+    gdb_assert {[get_integer_valueof "\$_thread" 0] == 1} \
+	"selected host thread"
+
+    # Remove this breakpoint...
+    gdb_test_no_output "delete \$bpnum"
+
+    # ...and re-create it by address.
+    gdb_breakpoint "*$bp_addr"
+
+    gdb_continue_to_breakpoint "breakpoint by address"
+    gdb_assert {[get_valueof "/x" "\$pc" 0] == $bp_addr} \
+	"stopped at breakpoint"
+
+    gdb_continue_to_end "" continue 1
+}
+
