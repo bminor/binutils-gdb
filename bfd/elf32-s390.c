@@ -2059,6 +2059,7 @@ elf_s390_relocate_section (bfd *output_bfd,
       int tls_type;
       asection *base_got = htab->elf.sgot;
       bool resolved_to_zero;
+      bool relax;
 
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type == (int) R_390_GNU_VTINHERIT
@@ -2153,6 +2154,11 @@ elf_s390_relocate_section (bfd *output_bfd,
 
       resolved_to_zero = (h != NULL
 			  && UNDEFWEAK_NO_DYNAMIC_RELOC (info, h));
+
+      /* Rewrite instructions and related relocations if (1) relaxation
+	 disabled by default, (2) enabled by target, or (3) enabled by
+	 user.  Suppress rewriting if linker option --no-relax is used.  */
+      relax = info->disable_target_specific_optimizations <= 1;
 
       switch (r_type)
 	{
@@ -2261,8 +2267,9 @@ elf_s390_relocate_section (bfd *output_bfd,
 		      h->got.offset |= 1;
 		    }
 
-		  if ((h->def_regular
-		       && SYMBOL_REFERENCES_LOCAL (info, h))
+		  if (relax
+		      && h->def_regular
+		      && SYMBOL_REFERENCES_LOCAL (info, h)
 		      /* lrl rx,sym@GOTENT -> larl rx, sym */
 		      && ((r_type == R_390_GOTENT
 			   && (bfd_get_16 (input_bfd,

@@ -2296,6 +2296,7 @@ elf_s390_relocate_section (bfd *output_bfd,
       bfd_reloc_status_type r;
       int tls_type;
       bool resolved_to_zero;
+      bool relax;
 
       r_type = ELF64_R_TYPE (rel->r_info);
       if (r_type == (int) R_390_GNU_VTINHERIT
@@ -2394,6 +2395,11 @@ elf_s390_relocate_section (bfd *output_bfd,
 
       resolved_to_zero = (h != NULL
 			  && UNDEFWEAK_NO_DYNAMIC_RELOC (info, h));
+
+      /* Rewrite instructions and related relocations if (1) relaxation
+	 disabled by default, (2) enabled by target, or (3) enabled by
+	 user.  Suppress rewriting if linker option --no-relax is used.  */
+      relax = info->disable_target_specific_optimizations <= 1;
 
       switch (r_type)
 	{
@@ -2517,7 +2523,8 @@ elf_s390_relocate_section (bfd *output_bfd,
 		     reference using larl we have to make sure that
 		     the symbol is 1. properly aligned and 2. it is no
 		     ABS symbol or will become one.  */
-		  if (h->def_regular
+		  if (relax
+		      && h->def_regular
 		      && SYMBOL_REFERENCES_LOCAL (info, h)
 		      /* lgrl rx,sym@GOTENT -> larl rx, sym */
 		      && ((r_type == R_390_GOTENT
@@ -2667,7 +2674,8 @@ elf_s390_relocate_section (bfd *output_bfd,
 		 either a load address of 0 or a trapping insn.
 		 This prevents the PLT32DBL relocation from overflowing in
 		 case the binary will be loaded at 4GB or more.  */
-	      if (h->root.type == bfd_link_hash_undefweak
+	      if (relax
+		  && h->root.type == bfd_link_hash_undefweak
 		  && !h->root.linker_def
 		  && (bfd_link_executable (info)
 		      || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
@@ -2782,7 +2790,8 @@ elf_s390_relocate_section (bfd *output_bfd,
 	     either a load address of 0, a NOP, or a trapping insn.
 	     This prevents the PC32DBL relocation from overflowing in
 	     case the binary will be loaded at 4GB or more.  */
-	  if (h != NULL
+	  if (relax
+	      && h != NULL
 	      && h->root.type == bfd_link_hash_undefweak
 	      && !h->root.linker_def
 	      && (bfd_link_executable (info)
