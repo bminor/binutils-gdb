@@ -447,7 +447,7 @@ maintenance_print_symbols (const char *args, int from_tty)
   if (address_arg != NULL)
     {
       CORE_ADDR pc = parse_and_eval_address (address_arg);
-      struct symtab *s = find_pc_line_symtab (pc);
+      struct symtab *s = find_symtab_for_pc (pc);
 
       if (s == NULL)
 	error (_("No symtab for address: %s"), address_arg);

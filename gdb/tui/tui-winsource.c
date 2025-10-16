@@ -55,7 +55,7 @@ tui_display_main ()
 	  tui_batch_rendering defer;
 
 	  tui_update_source_windows_with_addr (gdbarch, addr);
-	  struct symtab *s = find_pc_line_symtab (addr);
+	  struct symtab *s = find_symtab_for_pc (addr);
 	  tui_location.set_location (s);
 	}
     }

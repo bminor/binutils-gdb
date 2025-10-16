@@ -2430,7 +2430,7 @@ extern std::optional<CORE_ADDR> find_line_range_start (CORE_ADDR pc);
 
 /* Wrapper around find_sal_for_pc to just return the symtab.  */
 
-extern struct symtab *find_pc_line_symtab (CORE_ADDR);
+extern struct symtab *find_symtab_for_pc (CORE_ADDR);
 
 /* Given a symtab and line number, return the pc there.  */
 

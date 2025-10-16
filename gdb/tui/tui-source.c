@@ -157,7 +157,7 @@ tui_source_window::do_scroll_vertical (int num_to_scroll)
       if (cursal.symtab == NULL)
 	{
 	  frame_info_ptr fi = get_selected_frame (NULL);
-	  s = find_pc_line_symtab (get_frame_pc (fi));
+	  s = find_symtab_for_pc (get_frame_pc (fi));
 	  arch = get_frame_arch (fi);
 	}
       else

@@ -3246,7 +3246,7 @@ find_line_range_start (CORE_ADDR pc)
 /* See symtab.h.  */
 
 struct symtab *
-find_pc_line_symtab (CORE_ADDR pc)
+find_symtab_for_pc (CORE_ADDR pc)
 {
   struct symtab_and_line sal;
 

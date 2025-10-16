@@ -1150,7 +1150,7 @@ gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
   int nlines = -1;
 
   /* Assume symtab is valid for whole PC range.  */
-  symtab = find_pc_line_symtab (low);
+  symtab = find_symtab_for_pc (low);
 
   if (symtab != NULL && symtab->linetable () != NULL)
     nlines = symtab->linetable ()->nitems;
