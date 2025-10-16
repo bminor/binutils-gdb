@@ -598,17 +598,25 @@ read_ptid (const char *buf, const char **obuf)
   return ptid_t (pid, tid);
 }
 
-/* Write COUNT bytes in BUF to the client.
-   The result is the number of bytes written or -1 if error.
-   This may return less than COUNT.  */
+/* Write COUNT bytes in BUF to the client.  Returns true if all bytes
+   were written, false (with errno set) if not.  */
 
-static int
-write_prim (const void *buf, int count)
+static bool
+write_prim (const char *buf, int count)
 {
-  if (remote_connection_is_stdio ())
-    return write (fileno (stdout), buf, count);
-  else
-    return write (remote_desc, buf, count);
+  while (count > 0)
+    {
+      int written;
+      if (remote_connection_is_stdio ())
+	written = write (fileno (stdout), buf, count);
+      else
+	written = write (remote_desc, buf, count);
+      if (written < 0)
+	return false;
+      buf += written;
+      count -= written;
+    }
+  return true;
 }
 
 /* Read COUNT bytes from the client and store in BUF.
@@ -664,7 +672,7 @@ putpkt_binary_1 (char *buf, int cnt, int is_notif)
 
   do
     {
-      if (write_prim (buf2, p - buf2) != p - buf2)
+      if (!write_prim (buf2, p - buf2))
 	{
 	  perror ("putpkt(write)");
 	  free (buf2);
@@ -980,7 +988,7 @@ getpkt (char *buf)
 
       fprintf (stderr, "Bad checksum, sentsum=0x%x, csum=0x%x, buf=%s\n",
 	       (c1 << 4) + c2, csum, buf);
-      if (write_prim ("-", 1) != 1)
+      if (!write_prim ("-", 1))
 	return -1;
     }
 
@@ -988,7 +996,7 @@ getpkt (char *buf)
     {
       remote_debug_printf ("getpkt (\"%s\");  [sending ack]", buf);
 
-      if (write_prim ("+", 1) != 1)
+      if (!write_prim ("+", 1))
 	return -1;
 
       remote_debug_printf ("[sent ack]");
