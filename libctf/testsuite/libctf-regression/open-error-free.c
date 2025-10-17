@@ -1,6 +1,5 @@
 /* Make sure that, on error, an opened dict is properly freed.  */
 
-#define _GNU_SOURCE 1
 #include "config.h"
 #include <dlfcn.h>
 #include <stdio.h>
