@@ -424,6 +424,10 @@ struct blockvector
     : m_blocks (nblocks, nullptr)
   {}
 
+  ~blockvector ();
+
+  DISABLE_COPY_AND_ASSIGN (blockvector);
+
   /* Return a view on the blocks of this blockvector.  */
   gdb::array_view<struct block *> blocks ()
   {

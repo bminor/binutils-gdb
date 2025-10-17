@@ -842,6 +842,12 @@ blockvector::append_block (struct block *block)
   m_blocks.push_back (block);
 }
 
+blockvector::~blockvector ()
+{
+  for (struct block *bl : m_blocks)
+    mdict_free (bl->multidict ());
+}
+
 /* Implement 'maint info blocks' command.  If passed an argument then
    print a list of all blocks at the given address.  With no arguments
    then list all blocks at the current address of the current inferior.  */
