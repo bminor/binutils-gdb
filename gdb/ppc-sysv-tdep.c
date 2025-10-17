@@ -2059,26 +2059,13 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
 
-  /* Small character arrays are returned, right justified, in r3.  */
-  if (tdep->elf_abi == POWERPC_ELF_V1
-      && valtype->code () == TYPE_CODE_ARRAY
-      && !valtype->is_vector ()
-      && valtype->length () <= 8
-      && (valtype->target_type ()->code () == TYPE_CODE_INT
-	  || valtype->target_type ()->code () == TYPE_CODE_CHAR)
-      && valtype->target_type ()->length () == 1)
-    {
-      int regnum = tdep->ppc_gp0_regnum + 3;
-      int offset = (register_size (gdbarch, regnum) - valtype->length ());
-
-      if (writebuf != NULL)
-	regcache->cooked_write_part (regnum, offset, valtype->length (),
-				     writebuf);
-      if (readbuf != NULL)
-	regcache->cooked_read_part (regnum, offset, valtype->length (),
-				    readbuf);
-      return RETURN_VALUE_REGISTER_CONVENTION;
-    }
+  /* Small character arrays are returned, right justified, in r3, according to
+     the v1 ELF ABI spec [1].  But GCC doesn't implement this (PR gcc/122282),
+     so we treat this as an ABI spec bug, and use
+     RETURN_VALUE_STRUCT_CONVENTION.  We don't handle this case explicly, but
+     let it be handled by the default return.
+     [1] https://refspecs.linuxfoundation.org/ELF/ppc64/PPC-elf64abi-1.9.html.
+  */
 
   /* In the ELFv2 ABI, homogeneous floating-point or vector
      aggregates are returned in registers.  */
