@@ -353,9 +353,6 @@ private:
 
   void watch_main_source_file_lossage ();
 
-  struct compunit_symtab *end_compunit_symtab_with_blockvector
-    (struct block *static_block, int expandable);
-
   /* The objfile we're reading debug info from.  */
   struct objfile *m_objfile;
 

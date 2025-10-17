@@ -818,13 +818,14 @@ buildsym_compunit::end_compunit_symtab_get_static_block (CORE_ADDR end_addr,
     }
 }
 
-/* Subroutine of end_compunit_symtab_from_static_block to simplify it.
-   Handle the "have blockvector" case.
-   See end_compunit_symtab_from_static_block for a description of the
-   arguments.  */
+/* Implementation of the second part of end_compunit_symtab.  Pass STATIC_BLOCK
+   as value returned by end_compunit_symtab_get_static_block.
+
+   If EXPANDABLE is non-zero the GLOBAL_BLOCK dictionary is made
+   expandable.  */
 
 struct compunit_symtab *
-buildsym_compunit::end_compunit_symtab_with_blockvector
+buildsym_compunit::end_compunit_symtab_from_static_block
   (struct block *static_block, int expandable)
 {
   struct compunit_symtab *cu = m_compunit_symtab;
@@ -832,7 +833,20 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
   struct subfile *subfile;
   CORE_ADDR end_addr;
 
-  gdb_assert (static_block != NULL);
+  if (static_block == nullptr)
+    {
+      /* Handle the "no blockvector" case.
+	 When this happens there is nothing to record, so there's nothing
+	 to do: memory will be freed up later.
+
+	 Note: We won't be adding a compunit to the objfile's list of
+	 compunits, so there's nothing to unchain.  However, since each symtab
+	 is added to the objfile's obstack we can't free that space.
+	 We could do better, but this is believed to be a sufficiently rare
+	 event.  */
+      return nullptr;
+    }
+
   gdb_assert (m_subfiles != NULL);
 
   end_addr = static_block->end ();
@@ -961,37 +975,6 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
   cu->set_blockvector (std::move (blockvector));
 
   add_compunit_symtab_to_objfile (std::move (m_owned_compunit_symtab));
-
-  return cu;
-}
-
-/* Implementation of the second part of end_compunit_symtab.  Pass STATIC_BLOCK
-   as value returned by end_compunit_symtab_get_static_block.
-
-   If EXPANDABLE is non-zero the GLOBAL_BLOCK dictionary is made
-   expandable.  */
-
-struct compunit_symtab *
-buildsym_compunit::end_compunit_symtab_from_static_block
-  (struct block *static_block, int expandable)
-{
-  struct compunit_symtab *cu;
-
-  if (static_block == NULL)
-    {
-      /* Handle the "no blockvector" case.
-	 When this happens there is nothing to record, so there's nothing
-	 to do: memory will be freed up later.
-
-	 Note: We won't be adding a compunit to the objfile's list of
-	 compunits, so there's nothing to unchain.  However, since each symtab
-	 is added to the objfile's obstack we can't free that space.
-	 We could do better, but this is believed to be a sufficiently rare
-	 event.  */
-      cu = NULL;
-    }
-  else
-    cu = end_compunit_symtab_with_blockvector (static_block, expandable);
 
   return cu;
 }
