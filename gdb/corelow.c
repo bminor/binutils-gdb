@@ -1055,9 +1055,11 @@ core_target_open (const char *arg, int from_tty)
   /* Own the target until it is successfully pushed.  */
   target_ops_up target_holder (target);
 
-  validate_files ();
-
   current_inferior ()->push_target (std::move (target_holder));
+
+  /* Validate files after pushing the core_target, this allows the
+     validate_files function to see the newly loaded core file.  */
+  validate_files ();
 
   switch_to_no_thread ();
 

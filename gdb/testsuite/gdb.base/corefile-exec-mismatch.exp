@@ -1,0 +1,188 @@
+# Copyright 2025 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test that when loading a core file, if the current executable
+# doesn't match the expected executable for this core file, then GDB
+# should give a warning.
+#
+# We only check the build-id based verification as the name only based
+# verification relies on the name held in the PRPSINFO note, which is
+# only 80 characters long, as a result, when running the testsuite,
+# this string usually only holds the path to the testsuite build
+# directory, which might be the same for every core file created.
+#
+# In addition, as the check is in a similar area of GDB, we check that
+# if the executable is newer than the core file, GDB gives a warning.
+
+# The core file management in this script only works if the host
+# machine is local.
+require {!is_remote host}
+
+standard_testfile .c
+
+# Build an executable with a build id.
+if { [build_executable "build" $testfile $srcfile \
+	  { debug build-id additional_flags=-DGEN_CORE } ] } {
+    return
+}
+
+# Build an alternative executable.  This is different than
+# TESTFILE, and so has a different build-id.
+set alt_testfile "alt-with-build-id"
+set alt_binfile [standard_output_file $alt_testfile]
+if { [build_executable "build" $alt_testfile $srcfile \
+	  { debug build-id } ] } {
+    return
+}
+
+# Do we expect the build-id for BINFILE to appear in a core file
+# generated from BINFILE?  If not then this test isn't going to
+# work.
+if { ![expect_build_id_in_core_file $binfile] } {
+    unsupported "build-id will not appear in core file"
+    return
+}
+
+# Create a core file by running BINFILE.
+set corefile [core_find $binfile {}]
+if {$corefile == ""} {
+    untested "unable to create corefile"
+    return
+}
+
+# Start GDB using a completely different executable (than was used
+# to generate the core file); this has a different filename and
+# build-id.
+clean_restart $alt_testfile
+
+# Load the core file.  GDB should warn because the build-id of the
+# executable doesn't match the expected build-id pulled from the
+# core file.
+set saw_mismatch_warning false
+gdb_test_multiple "core $corefile" "load core file, different exec name" {
+    -re "^core \[^\r\n\]+\r\n" {
+	exp_continue
+    }
+    -re "^warning: core file may not match specified executable file\\.\r\n" {
+	set saw_mismatch_warning true
+	exp_continue
+    }
+    -re "^$gdb_prompt $" {
+	gdb_assert { $saw_mismatch_warning } $gdb_test_name
+    }
+    -re "^\[^\r\n\]*\r\n" {
+	exp_continue
+    }
+}
+
+# Cleanup before the next test.
+unset saw_mismatch_warning
+gdb_exit
+
+# Touch TESTFILE (via its full filename) so that it is newer than
+# the core file.
+sleep 1
+remote_exec host "touch ${binfile}"
+
+# Start GDB using the correct executable, but this file is newer than
+# the core file, we expect GDB to warn about this.
+clean_restart $testfile
+
+# Load the core file.  GDB should warn that the executable is
+# newer than the core file.
+#
+# NOTE: In this case the build-ids match, so maybe GDB should
+# ignore the fact that the core file is older than the executable?
+# If we every make that change to GDB, and this test starts to
+# fail, then the test should be updated to build executables
+# without build-ids so that this warning is still tested.
+#
+# The reason I didn't do this initially is that, if there are any
+# build-ids in the core file, from any shared library at all, then
+# GDB will use this as "the" build-id for the core file, and
+# compare this to the build-id of the executable.  I say GDB here,
+# but some of this logic is in BFD.  Anyway, if GDB thinks that
+# the core file has a build-id, but the executable doesn't, then
+# GDB gives the generic "core file may not match specified
+# executable file" warning instead of the "exec file is newer than
+# core file" warning, which is what we want.
+#
+# For now then, I just check for the age based warning when we
+# also have full build-ids.
+set saw_age_warning false
+gdb_test_multiple "core $corefile" "load core file, exec is newer" {
+    -re "^core \[^\r\n\]+\r\n" {
+	exp_continue
+    }
+    -re "^warning: exec file is newer than core file\\.\r\n" {
+	set saw_age_warning true
+	exp_continue
+    }
+    -re "^$gdb_prompt $" {
+	gdb_assert { $saw_age_warning } $gdb_test_name
+    }
+    -re "^\[^\r\n\]*\r\n" {
+	exp_continue
+    }
+}
+
+# Cleanup before the next test.
+unset saw_age_warning
+gdb_exit
+
+# Replace BINFILE with ALT_BINFILE, a file with a different
+# build-id.
+remote_exec host "mv $binfile ${binfile}-hidden"
+remote_exec host "cp $alt_binfile $binfile"
+
+# Ensure COREFILE is newer than BINFILE.
+sleep 1
+remote_exec host "touch ${corefile}"
+
+# Start GDB using the filename that now points to the replacement
+# file.
+clean_restart $testfile
+
+# Load the core file.  GDB should use the build-id to warn the
+# user that the executable doesn't match the core file.  We'll
+# also get a warning that the build-id of the executable doesn't
+# match while processing the mapped file information in the core
+# file.
+set saw_mismatch_warning false
+set saw_build_id_warning false
+gdb_test_multiple "core $corefile" "load core file, same exec name" {
+    -re "^core \[^\r\n\]+\r\n" {
+	exp_continue
+    }
+    -re "^warning: File [string_to_regexp $binfile] doesn't match build-id from core-file during file-backed mapping processing" {
+	set saw_build_id_warning true
+	exp_continue
+    }
+    -re "^warning: core file may not match specified executable file\\.\r\n" {
+	set saw_mismatch_warning true
+	exp_continue
+    }
+    -re "^$gdb_prompt $" {
+	gdb_assert { $saw_mismatch_warning \
+			 && $saw_build_id_warning } $gdb_test_name
+    }
+    -re "^\[^\r\n\]*\r\n" {
+	exp_continue
+    }
+}
+
+unset saw_mismatch_warning
+unset saw_build_id_warning
+gdb_exit
