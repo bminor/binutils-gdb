@@ -2432,7 +2432,17 @@ gdbpy_gdb_exiting (int exit_code)
     gdbpy_print_stack ();
 }
 
-#if PY_VERSION_HEX < 0x030a0000
+/* Use PyConfig mechanisms for Python 3.9 and newer.
+
+   We used to do this for 3.10 and newer to avoid Py_SetProgramName
+   deprecation in 3.11.
+
+   With 3.9 and the py_initialize_catch_abort approach, we run into a problem
+   where exit is called instead of abort, making gdb exit (possibly
+   https://github.com/python/cpython/issues/107827).  Using the PyConfig
+   mechanism (available starting 3.8) fixes that.  Todo: see if we have the
+   same problem for 3.8, and if we can apply the same fix.  */
+#if PY_VERSION_HEX < 0x03090000
 /* Signal handler to convert a SIGABRT into an exception.  */
 
 static void
@@ -2484,7 +2494,8 @@ py_initialize ()
        ? AUTO_BOOLEAN_TRUE
        : AUTO_BOOLEAN_FALSE);
 
-#if PY_VERSION_HEX < 0x030a0000
+/* Use PyConfig mechanisms for Python 3.9 and newer.  */
+#if PY_VERSION_HEX < 0x03090000
   /* Python documentation indicates that the memory given
      to Py_SetProgramName cannot be freed.  However, it seems that
      at least Python 3.7.4 Py_SetProgramName takes a copy of the
@@ -2525,9 +2536,8 @@ py_initialize ()
   }
 #endif
 
-  /* Py_SetProgramName was deprecated in Python 3.11.  Use PyConfig
-     mechanisms for Python 3.10 and newer.  */
-#if PY_VERSION_HEX < 0x030a0000
+/* Use PyConfig mechanisms for Python 3.9 and newer.  */
+#if PY_VERSION_HEX < 0x03090000
   /* Note that Py_SetProgramName expects the string it is passed to
      remain alive for the duration of the program's execution, so
      it is not freed after this call.  */
