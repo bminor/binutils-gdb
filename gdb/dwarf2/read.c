@@ -4870,7 +4870,8 @@ process_full_comp_unit (dwarf2_cu *cu)
 
   addr = per_objfile->relocate (highpc);
   static_block
-    = cu->get_builder ()->end_compunit_symtab_get_static_block (addr, 0, 1);
+    = cu->get_builder ()->end_compunit_symtab_get_static_block (addr, false,
+								true);
 
   /* If the comp unit has DW_AT_ranges, it may have discontiguous ranges.
      Also, DW_AT_ranges may record ranges not belonging to any child DIEs
@@ -4880,7 +4881,7 @@ process_full_comp_unit (dwarf2_cu *cu)
   dwarf2_record_block_ranges (cu->dies, static_block, cu);
 
   cust = cu->get_builder ()->end_compunit_symtab_from_static_block
-    (static_block, 0);
+    (static_block, false);
 
   if (cust != NULL)
     {

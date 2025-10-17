@@ -195,7 +195,7 @@ buildsym_compunit::finish_block_internal
      struct pending_block *old_blocks,
      const struct dynamic_prop *static_link,
      CORE_ADDR start, CORE_ADDR end,
-     int is_global, int expandable)
+     bool is_global, bool expandable)
 {
   struct gdbarch *gdbarch = m_objfile->arch ();
   struct pending *next, *next1;
@@ -381,7 +381,8 @@ buildsym_compunit::finish_block (struct symbol *symbol,
 				 CORE_ADDR start, CORE_ADDR end)
 {
   return finish_block_internal (symbol, &m_local_symbols,
-				old_blocks, static_link, start, end, 0, 0);
+				old_blocks, static_link, start, end, false,
+				false);
 }
 
 /* Record that the range of addresses from START to END_INCLUSIVE
@@ -739,16 +740,16 @@ buildsym_compunit::watch_main_source_file_lossage ()
    END_ADDR is the same as for end_compunit_symtab: the address of the end of
    the file's text.
 
-   If EXPANDABLE is non-zero the STATIC_BLOCK dictionary is made
+   If EXPANDABLE is true the STATIC_BLOCK dictionary is made
    expandable.
 
-   If REQUIRED is non-zero, then a symtab is created even if it does
+   If REQUIRED is true, then a symtab is created even if it does
    not contain any symbols.  */
 
 struct block *
 buildsym_compunit::end_compunit_symtab_get_static_block (CORE_ADDR end_addr,
-							 int expandable,
-							 int required)
+							 bool expandable,
+							 bool required)
 {
   /* Finish the lexical context of the last function in the file; pop
      the context stack.  */
@@ -814,19 +815,19 @@ buildsym_compunit::end_compunit_symtab_get_static_block (CORE_ADDR end_addr,
       /* Define the STATIC_BLOCK.  */
       return finish_block_internal (NULL, get_file_symbols (), NULL, NULL,
 				    m_last_source_start_addr,
-				    end_addr, 0, expandable);
+				    end_addr, false, expandable);
     }
 }
 
 /* Implementation of the second part of end_compunit_symtab.  Pass STATIC_BLOCK
    as value returned by end_compunit_symtab_get_static_block.
 
-   If EXPANDABLE is non-zero the GLOBAL_BLOCK dictionary is made
+   If EXPANDABLE is true the GLOBAL_BLOCK dictionary is made
    expandable.  */
 
 struct compunit_symtab *
 buildsym_compunit::end_compunit_symtab_from_static_block
-  (struct block *static_block, int expandable)
+  (struct block *static_block, bool expandable)
 {
   struct compunit_symtab *cu = m_compunit_symtab;
   std::unique_ptr<blockvector> blockvector;
@@ -854,7 +855,7 @@ buildsym_compunit::end_compunit_symtab_from_static_block
   /* Create the GLOBAL_BLOCK and build the blockvector.  */
   finish_block_internal (NULL, get_global_symbols (), NULL, NULL,
 			 m_last_source_start_addr, end_addr,
-			 1, expandable);
+			 true, expandable);
   blockvector = make_blockvector ();
 
   /* Read the line table if it has to be read separately.
@@ -1003,8 +1004,8 @@ buildsym_compunit::end_compunit_symtab (CORE_ADDR end_addr)
 {
   struct block *static_block;
 
-  static_block = end_compunit_symtab_get_static_block (end_addr, 0, 0);
-  return end_compunit_symtab_from_static_block (static_block, 0);
+  static_block = end_compunit_symtab_get_static_block (end_addr, false, false);
+  return end_compunit_symtab_from_static_block (static_block, false);
 }
 
 /* Same as end_compunit_symtab except create a symtab that can be later added
@@ -1015,8 +1016,8 @@ buildsym_compunit::end_expandable_symtab (CORE_ADDR end_addr)
 {
   struct block *static_block;
 
-  static_block = end_compunit_symtab_get_static_block (end_addr, 1, 0);
-  return end_compunit_symtab_from_static_block (static_block, 1);
+  static_block = end_compunit_symtab_get_static_block (end_addr, true, false);
+  return end_compunit_symtab_from_static_block (static_block, true);
 }
 
 /* Subroutine of augment_type_symtab to simplify it.
