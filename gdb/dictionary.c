@@ -911,6 +911,9 @@ struct multidictionary
   /* The number of language dictionaries currently allocated.
      Only used for expandable dictionaries.  */
   unsigned short n_allocated_dictionaries;
+
+  /* The type of dictionary.  */
+  enum dict_type type;
 };
 
 /* A helper function to collate symbols on the pending list by language.  */
@@ -948,6 +951,7 @@ mdict_create_hashed (struct obstack *obstack,
   retval->dictionaries
     = XOBNEWVEC (obstack, struct dictionary *, nsyms.size ());
   retval->n_allocated_dictionaries = nsyms.size ();
+  retval->type = DICT_HASHED;
 
   int idx = 0;
   for (const auto &[language, symlist] : nsyms)
@@ -969,6 +973,7 @@ mdict_create_hashed_expandable (enum language language)
   retval->n_allocated_dictionaries = 1;
   retval->dictionaries = XNEW (struct dictionary *);
   retval->dictionaries[0] = dict_create_hashed_expandable (language);
+  retval->type = DICT_HASHED_EXPANDABLE;
 
   return retval;
 }
@@ -988,6 +993,7 @@ mdict_create_linear (struct obstack *obstack,
   retval->dictionaries
     = XOBNEWVEC (obstack, struct dictionary *, nsyms.size ());
   retval->n_allocated_dictionaries = nsyms.size ();
+  retval->type = DICT_LINEAR;
 
   int idx = 0;
   for (const auto &[language, symlist] : nsyms)
@@ -1009,6 +1015,7 @@ mdict_create_linear_expandable (enum language language)
   retval->n_allocated_dictionaries = 1;
   retval->dictionaries = XNEW (struct dictionary *);
   retval->dictionaries[0] = dict_create_linear_expandable (language);
+  retval->type = DICT_LINEAR_EXPANDABLE;
 
   return retval;
 }
@@ -1018,15 +1025,12 @@ mdict_create_linear_expandable (enum language language)
 void
 mdict_free (struct multidictionary *mdict)
 {
-  /* Grab the type of dictionary being used.  */
-  enum dict_type type = mdict->dictionaries[0]->vector->type;
-
   /* Loop over all dictionaries and free them.  */
   for (unsigned short idx = 0; idx < mdict->n_allocated_dictionaries; ++idx)
     dict_free (mdict->dictionaries[idx]);
 
   /* Free the dictionary list, if needed.  */
-  switch (type)
+  switch (mdict->type)
     {
     case DICT_HASHED:
     case DICT_LINEAR:
@@ -1036,6 +1040,7 @@ mdict_free (struct multidictionary *mdict)
     case DICT_HASHED_EXPANDABLE:
     case DICT_LINEAR_EXPANDABLE:
       xfree (mdict->dictionaries);
+      xfree (mdict);
       break;
     }
 }
@@ -1067,10 +1072,7 @@ create_new_language_dictionary (struct multidictionary *mdict,
 {
   struct dictionary *retval = nullptr;
 
-  /* We use the first dictionary entry to decide what create function
-     to call.  Not optimal but sufficient.  */
-  gdb_assert (mdict->dictionaries[0] != nullptr);
-  switch (mdict->dictionaries[0]->vector->type)
+  switch (mdict->type)
     {
     case DICT_HASHED:
     case DICT_LINEAR:
