@@ -19,8 +19,14 @@ require allow_ada_tests
 
 standard_ada_testfile proc
 
-if { [gdb_compile_ada $srcfile $binfile executable debug] != "" } {
-  return -1
+set opts {}
+lappend opts debug
+if { [ada_fvar_tracking] } {
+    lappend opts "additional_flags=-fvar-tracking"
+}
+
+if { [gdb_compile_ada $srcfile $binfile executable $opts] != "" } {
+  return
 }
 
 clean_restart $testfile
@@ -31,9 +37,13 @@ runto "proc.adb:$bp_location"
 gdb_test "print Value.Name(My_Value)" \
     { = "abcd"}
 
-# Step into the function.
-gdb_test "step 2" \
-    "return Of_Value;"
+# Step into the function.  Don't do this by stepping, but by setting a
+# breakpoint and continuing to it, to avoid the problem that varying line info
+# may require us to step a different amount of times to land at the same
+# location.
+set bp_location_2 [gdb_get_line_number "STOP" $testdir/value.adb]
+gdb_breakpoint value.adb:$bp_location_2
+gdb_continue_to_breakpoint "STOP"
 
 # and finish.
 gdb_test "finish" \

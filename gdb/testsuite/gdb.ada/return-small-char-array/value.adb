@@ -16,6 +16,6 @@
 package body Value is
   function Name (Of_Value : T) return T is
   begin
-    return Of_Value;
+    return Of_Value; -- STOP
   end Name;
 end Value;
