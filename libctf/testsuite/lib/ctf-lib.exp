@@ -298,7 +298,7 @@ proc run_lookup_test { name } {
 	    }
 
 	    if { $opts(link) == "objects" } {
-		set obj "[file rootname $src].o"
+		set obj "tmpdir/[file rootname [file tail $src]].o"
 		set comp_output [prune_warnings [run_host_cmd "$CC_FOR_TARGET" "$CFLAGS_FOR_TARGET $lookup_flags $src -c -o $obj"]]
 
 		if { $comp_output != ""} {
