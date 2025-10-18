@@ -428,8 +428,9 @@ void
 compunit_symtab::set_call_site_htab (call_site_htab_t &&call_site_htab)
 {
   gdb_assert (m_call_site_htab == nullptr);
-  m_call_site_htab
-    = std::make_unique<call_site_htab_t> (std::move (call_site_htab));
+  if (!call_site_htab.empty ())
+    m_call_site_htab
+      = std::make_unique<call_site_htab_t> (std::move (call_site_htab));
 }
 
 /* See symtab.h.  */
