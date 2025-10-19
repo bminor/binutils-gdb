@@ -191,8 +191,12 @@ cooked_index::get_main () const
 	      /* This should be kept in sync with
 		 cooked_index_shard::finalize.  Note that there, C
 		 requires canonicalization -- but that is only for
-		 types, 'main' doesn't count.  */
-	      if (entry->lang != language_ada && entry->lang != language_cplus)
+		 types, 'main' doesn't count.  Similarly, C++ requires
+		 canonicalization, but again "main" is an
+		 exception.  */
+	      if ((entry->lang != language_ada
+		   && entry->lang != language_cplus)
+		  || strcmp (entry->name, "main") == 0)
 		{
 		  /* There won't be one better than this.  */
 		  return entry;

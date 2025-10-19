@@ -18,11 +18,14 @@ require {expr {[gcc_major_version] >= 14}}
 
 standard_testfile .c -2.c
 
-proc do_tests { dwarf_version dwarf_bits strict_dwarf } {
+proc do_tests { lang dwarf_version dwarf_bits strict_dwarf } {
     set opts {}
     lappend opts debug
     lappend opts quiet
     lappend opts additional_flags=-gsplit-dwarf
+    if {$lang == "c++"} {
+	lappend opts "additional_flags=-x c++"
+    }
     lappend opts macros
 
     if { $dwarf_bits == 64 } {
@@ -66,14 +69,16 @@ proc do_tests { dwarf_version dwarf_bits strict_dwarf } {
     gdb_test "info macro FOURTH" "#define FOURTH 4"
 }
 
-foreach_with_prefix dwarf_version {4 5} {
-    if { $dwarf_version == 4 && [gcc_major_version] < 15 } {
-	# Gcc does not contain fix for PR debug/115066.
-	continue
-    }
-    foreach_with_prefix dwarf_bits {32 64} {
-	foreach_with_prefix strict_dwarf {0 1} {
-	    do_tests $dwarf_version $dwarf_bits $strict_dwarf
+foreach_with_prefix lang {c c++} {
+    foreach_with_prefix dwarf_version {4 5} {
+	if { $dwarf_version == 4 && [gcc_major_version] < 15 } {
+	    # Gcc does not contain fix for PR debug/115066.
+	    continue
+	}
+	foreach_with_prefix dwarf_bits {32 64} {
+	    foreach_with_prefix strict_dwarf {0 1} {
+		do_tests $lang $dwarf_version $dwarf_bits $strict_dwarf
+	    }
 	}
     }
 }
