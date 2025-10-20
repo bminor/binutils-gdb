@@ -1077,7 +1077,7 @@ AC_ARG_ENABLE([py-limited-api],
 	      [GDB_CHECK_YES_NO_VAL([$enableval], [--enable-py-limited-api])],
 	      [enable_py_limited_api=no])
 
-if test "$enable_py_limited_api" == yes; then
+if test "$enable_py_limited_api" = yes; then
   # The minimal Python limited API version is currently set to 3.11 for the
   # support of PyBuffer_FillInfo and PyBuffer_Release.
   # The choice of the minimal version for the Python limited API won't be frozen
