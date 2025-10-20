@@ -570,6 +570,12 @@ static bool write_debugging_info (bfd *, void *, long *, asymbol ***);
 static const char *lookup_sym_redefinition (const char *);
 static const char *find_section_rename (const char *, flagword *);
 
+#ifdef HAVE_ZSTD
+#define ZSTD_OPT "|zstd"
+#else
+#define ZSTD_OPT ""
+#endif
+
 ATTRIBUTE_NORETURN static void
 copy_usage (FILE *stream, int exit_status)
 {
@@ -692,8 +698,8 @@ copy_usage (FILE *stream, int exit_status)
                                    <commit>\n\
      --subsystem <name>[:<version>]\n\
                                    Set PE subsystem to <name> [& <version>]\n\
-     --compress-debug-sections[={none|zlib|zlib-gnu|zlib-gabi|zstd}]\n\
-				   Compress DWARF debug sections\n\
+     --compress-debug-sections[={none|zlib|zlib-gnu|zlib-gabi" ZSTD_OPT "}]\n\
+                                   Compress DWARF debug sections\n\
      --decompress-debug-sections   Decompress DWARF debug sections using zlib\n\
      --elf-stt-common=[yes|no]     Generate ELF common symbols with STT_COMMON\n\
                                      type\n\
