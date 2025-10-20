@@ -183,7 +183,7 @@ typedef struct sframe_header
 #define SFRAME_AARCH64_PAUTH_KEY_A    0 /* Key A.  */
 #define SFRAME_AARCH64_PAUTH_KEY_B    1 /* Key B.  */
 
-typedef struct sframe_func_desc_entry
+typedef struct sframe_func_desc_entry_v2
 {
   /* Function start address.  Encoded as a signed offset, relative to the
      beginning of the current FDE.  */
@@ -210,7 +210,9 @@ typedef struct sframe_func_desc_entry
      SFRAME_FDE_TYPE_PCMASK.  */
   uint8_t sfde_func_rep_size;
   uint16_t sfde_func_padding2;
-} ATTRIBUTE_PACKED sframe_func_desc_entry;
+} ATTRIBUTE_PACKED sframe_func_desc_entry_v2;
+
+typedef sframe_func_desc_entry_v2 sframe_func_desc_entry;
 
 /* Macros to compose and decompose function info in FDE.  */
 
