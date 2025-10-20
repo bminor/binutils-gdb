@@ -2965,7 +2965,7 @@ find_sal_for_pc_sect (CORE_ADDR pc, struct obj_section *section, int notcurrent)
    * rather than the stub address.
    *
    * Assumptions being made about the minimal symbol table:
-   *   1. lookup_minimal_symbol_by_pc() will return a trampoline only
+   *   1. lookup_minimal_symbol_by_pc_section() will return a trampoline only
    *      if we're really in the trampoline.s If we're beyond it (say
    *      we're in "foo" in the above example), it'll have a closer
    *      symbol (the "foo" text symbol for example) and will not
@@ -2976,7 +2976,7 @@ find_sal_for_pc_sect (CORE_ADDR pc, struct obj_section *section, int notcurrent)
    *      check for the address being the same, to avoid an
    *      infinite recursion.
    */
-  bound_minimal_symbol msymbol = lookup_minimal_symbol_by_pc (pc);
+  bound_minimal_symbol msymbol = lookup_minimal_symbol_by_pc_section (pc, section);
   if (msymbol.minsym != NULL)
     if (msymbol.minsym->type () == mst_solib_trampoline)
       {
