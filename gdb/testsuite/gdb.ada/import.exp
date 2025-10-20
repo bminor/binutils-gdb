@@ -21,7 +21,7 @@ require allow_ada_tests
 # declarations only") is required.  The commit makes sure that file-scope
 # function and variable declarations are emitted in dwarf.  This allows the
 # description of imported entries, making them available to the debugger.
-require {expr {[gcc_major_version] >= 8}}
+require {gnat_version_compare >= 8}
 
 standard_ada_testfile prog
 
@@ -81,7 +81,7 @@ gdb_test "print copy" " = 42"
 # (without pinpointing it to a specific gcc PR or commit).
 foreach func {"pkg.imported_func_ada" "imported_func"} {
     clean_restart $testfile
-    if { [gcc_major_version] < 10 } {
+    if { [gnat_version_compare < 10] } {
 	setup_xfail *-*-*
     }
     gdb_breakpoint $func message

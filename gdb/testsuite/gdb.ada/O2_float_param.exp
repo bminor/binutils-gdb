@@ -21,7 +21,7 @@ standard_ada_testfile foo
 
 set have_xfail 0
 if {[is_aarch64_target]} {
-    if { [gcc_major_version] <= 8 } {
+    if { [gnat_version_compare < 9] } {
        set have_xfail 1
     }
 }

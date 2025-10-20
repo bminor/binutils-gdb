@@ -18,7 +18,7 @@ load_lib "ada.exp"
 require allow_ada_tests
 
 # GCC 12 has the needed fix.
-require {expr {[gcc_major_version] >= 12}}
+require {gnat_version_compare >= 12}
 
 standard_ada_testfile p
 
