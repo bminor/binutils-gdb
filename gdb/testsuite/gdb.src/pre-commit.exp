@@ -22,15 +22,17 @@ if {![file isdirectory $repodir/.git]} {
     return
 }
 
-cd $repodir
+with_cwd $repodir {
 
-set result [remote_exec build "pre-commit --version"]
-set status [lindex $result 0]
-if {$status != 0} {
-    unsupported "pre-commit missing or broken"
-    return
+    set result [remote_exec build "pre-commit --version"]
+    set status [lindex $result 0]
+    if {$status != 0} {
+	unsupported "pre-commit missing or broken"
+	return
+    }
+
+    set result [remote_exec build "pre-commit run --all-files -v"]
+    set status [lindex $result 0]
+    gdb_assert {$status == 0} "pre-commit checks"
+
 }
-
-set result [remote_exec build "pre-commit run --all-files -v"]
-set status [lindex $result 0]
-gdb_assert {$status == 0} "pre-commit checks"
