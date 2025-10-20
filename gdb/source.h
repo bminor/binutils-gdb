@@ -124,12 +124,9 @@ extern symtab_and_line get_current_source_symtab_and_line
    we have without erroring out or trying to get a default.  */
 extern void set_default_source_symtab_and_line (void);
 
-/* Return the current default file for listing and next line to list
-   (the returned sal pc and end fields are not valid.)
-   and set the current default to whatever is in SAL.
-   NOTE: The returned sal pc and end fields are not valid.  */
-extern symtab_and_line set_current_source_symtab_and_line
-  (const symtab_and_line &sal);
+/* Set the current default file for listing and next line to list to whatever is
+   in SAL.  */
+extern void set_current_source_symtab_and_line (const symtab_and_line &sal);
 
 /* Reset any information stored about a default file and line to print.  */
 extern void clear_current_source_symtab_and_line (program_space *pspace);

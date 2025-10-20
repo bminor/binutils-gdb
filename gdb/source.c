@@ -269,30 +269,15 @@ set_default_source_symtab_and_line (void)
     select_source_symtab ();
 }
 
-/* Return the current default file for listing and next line to list
-   (the returned sal pc and end fields are not valid.)
-   and set the current default to whatever is in SAL.
-   NOTE: The returned sal pc and end fields are not valid.  */
+/* See source.h.  */
 
-struct symtab_and_line
+void
 set_current_source_symtab_and_line (const symtab_and_line &sal)
 {
-  symtab_and_line cursal;
-
-  current_source_location *loc = get_source_location (sal.pspace);
-
-  cursal.pspace = sal.pspace;
-  cursal.symtab = loc->symtab ();
-  cursal.line = loc->line ();
-  cursal.pc = 0;
-  cursal.end = 0;
-
-  loc->set (sal.symtab, sal.line);
+  get_source_location (sal.pspace)->set (sal.symtab, sal.line);
 
   /* Force the next "list" to center around the current line.  */
   clear_lines_listed_range ();
-
-  return cursal;
 }
 
 /* Reset any information stored about a default file and line to print.  */
