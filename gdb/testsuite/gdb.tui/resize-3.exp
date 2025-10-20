@@ -69,5 +69,5 @@ with_test_prefix "after resize" {
 	"No Assembly message is not displayed" \
 	"No Assembly Available"
     Term::check_contents "Assembler for foo is shown" \
-	"$hex\\s+<foo"
+	[subst -nobackslashes -nocommands {$hex\s+<(\.)?foo}]
 }
