@@ -555,7 +555,7 @@ _bfd_elf_parse_eh_frame_entry (struct bfd_link_info *info,
   if (r_symndx == STN_UNDEF)
     return false;
 
-  text_sec = _bfd_elf_section_for_symbol (cookie, r_symndx, false);
+  text_sec = _bfd_elf_section_for_symbol (cookie, r_symndx);
 
   if (text_sec == NULL)
     return false;

@@ -142,8 +142,7 @@ get_ext_sym_hash_from_cookie (struct elf_reloc_cookie *cookie, unsigned long r_s
 
 asection *
 _bfd_elf_section_for_symbol (struct elf_reloc_cookie *cookie,
-			     unsigned long r_symndx,
-			     bool discard)
+			     unsigned long r_symndx)
 {
   struct elf_link_hash_entry *h;
 
@@ -151,28 +150,15 @@ _bfd_elf_section_for_symbol (struct elf_reloc_cookie *cookie,
   
   if (h != NULL)
     {
-      if ((h->root.type == bfd_link_hash_defined
-	   || h->root.type == bfd_link_hash_defweak)
-	   && discarded_section (h->root.u.def.section))
+      if (h->root.type == bfd_link_hash_defined
+	  || h->root.type == bfd_link_hash_defweak)
 	return h->root.u.def.section;
       else
 	return NULL;
     }
 
-  /* It's not a relocation against a global symbol,
-     but it could be a relocation against a local
-     symbol for a discarded section.  */
-  asection *isec;
-  Elf_Internal_Sym *isym;
-
-  /* Need to: get the symbol; get the section.  */
-  isym = &cookie->locsyms[r_symndx];
-  isec = bfd_section_from_elf_index (cookie->abfd, isym->st_shndx);
-  if (isec != NULL
-      && discard ? discarded_section (isec) : 1)
-    return isec;
-
-  return NULL;
+  Elf_Internal_Sym *isym = &cookie->locsyms[r_symndx];
+  return bfd_section_from_elf_index (cookie->abfd, isym->st_shndx);
 }
 
 /* Define a symbol in a dynamic linkage section.  */

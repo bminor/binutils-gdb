@@ -2612,7 +2612,7 @@ extern bool _bfd_elf_create_dynamic_sections
 extern bool _bfd_elf_create_got_section
   (bfd *, struct bfd_link_info *);
 extern asection *_bfd_elf_section_for_symbol
-  (struct elf_reloc_cookie *, unsigned long, bool);
+  (struct elf_reloc_cookie *, unsigned long);
 extern struct elf_link_hash_entry *_bfd_elf_define_linkage_sym
   (bfd *, struct bfd_link_info *, asection *, const char *);
 extern void _bfd_elf_init_1_index_section
