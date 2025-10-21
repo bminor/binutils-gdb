@@ -21,6 +21,22 @@
 #include "host-defs.h"
 #include "gdbsupport/gdb-xfree.h"
 
+/* When compiling for the in-process agent, we can't use c-ctype.h,
+   because (1) libinproctrace.so doesn't link against gnulib and (2)
+   some versions of clang won't inline all the functions.  So,
+   redefine them here.  */
+#ifdef IN_PROCESS_AGENT
+#include <ctype.h>
+#undef c_isspace
+#define c_isspace(X) (isspace (X))
+#undef c_isalnum
+#define c_isalnum(X) (isalnum (X))
+#undef c_isdigit
+#define c_isdigit(X) (isdigit (X))
+#undef c_tolower
+#define c_tolower(X) (tolower (X))
+#endif /* IN_PROCESS_AGENT */
+
 void *
 xzalloc (size_t size)
 {
