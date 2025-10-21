@@ -90,8 +90,6 @@
 
 static_assert (PY_VERSION_HEX >= 0x03040000);
 
-#define Py_TPFLAGS_CHECKTYPES 0
-
 /* If Python.h does not define WITH_THREAD, then the various
    GIL-related functions will not be defined.  However,
    PyGILState_STATE will be.  */
