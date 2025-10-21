@@ -53,8 +53,8 @@ evpy_add_attribute (PyObject *event, const char *name, PyObject *attr)
 
 /* Initialize the Python event code.  */
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_event (void)
+static int
+gdbpy_initialize_event ()
 {
   return gdbpy_type_ready (&event_object_type);
 }

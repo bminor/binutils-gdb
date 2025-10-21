@@ -55,8 +55,7 @@ struct gdbpy_tui_window
   bool is_valid () const;
 };
 
-extern PyTypeObject gdbpy_tui_window_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("gdbpy_tui_window");
+extern PyTypeObject gdbpy_tui_window_object_type;
 
 /* A TUI window written in Python.  */
 
@@ -646,7 +645,7 @@ gdbpy_tui_enabled (bool state)
 
 /* Initialize this module.  */
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
+static int
 gdbpy_initialize_tui ()
 {
 #ifdef TUI

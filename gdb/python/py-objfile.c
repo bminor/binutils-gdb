@@ -53,8 +53,7 @@ struct objfile_object
   PyObject *xmethods;
 };
 
-extern PyTypeObject objfile_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("objfile_object");
+extern PyTypeObject objfile_object_type;
 
 /* Clear the OBJFILE pointer in an Objfile object and remove the
    reference.  */
@@ -704,8 +703,8 @@ objfile_to_objfile_object (struct objfile *objfile)
   return gdbpy_ref<>::new_reference (result);
 }
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_objfile (void)
+static int
+gdbpy_initialize_objfile ()
 {
   return gdbpy_type_ready (&objfile_object_type);
 }

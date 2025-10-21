@@ -27,8 +27,7 @@
 #include "expression.h"
 #include "language.h"
 
-extern PyTypeObject fnpy_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("PyObject");
+extern PyTypeObject fnpy_object_type;
 
 
 
@@ -135,8 +134,8 @@ fnpy_init (PyObject *self, PyObject *args, PyObject *kwds)
 
 /* Initialize internal function support.  */
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_functions (void)
+static int
+gdbpy_initialize_functions ()
 {
   fnpy_object_type.tp_new = PyType_GenericNew;
   return gdbpy_type_ready (&fnpy_object_type);

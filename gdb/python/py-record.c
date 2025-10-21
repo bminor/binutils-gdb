@@ -607,8 +607,8 @@ static gdb_PyGetSetDef recpy_aux_getset[] = {
 
 /* Sets up the record API in the gdb module.  */
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_record (void)
+static int
+gdbpy_initialize_record ()
 {
   recpy_record_type.tp_new = PyType_GenericNew;
   recpy_record_type.tp_flags = Py_TPFLAGS_DEFAULT;

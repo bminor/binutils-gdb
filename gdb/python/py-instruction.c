@@ -80,8 +80,8 @@ py_insn_get_insn_type ()
 
 /* Sets up the gdb.Instruction type.  */
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_instruction (void)
+static int
+gdbpy_initialize_instruction ()
 {
   if (py_insn_get_insn_type () == nullptr)
     return -1;

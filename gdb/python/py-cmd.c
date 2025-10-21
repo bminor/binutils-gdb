@@ -65,8 +65,7 @@ struct cmdpy_object
   struct cmd_list_element *sub_list;
 };
 
-extern PyTypeObject cmdpy_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("cmdpy_object");
+extern PyTypeObject cmdpy_object_type;
 
 /* Constants used by this module.  */
 static PyObject *invoke_cst;
@@ -595,8 +594,8 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 
 /* Initialize the 'commands' code.  */
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_commands (void)
+static int
+gdbpy_initialize_commands ()
 {
   int i;
 

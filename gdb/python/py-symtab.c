@@ -30,8 +30,7 @@ struct symtab_object {
   struct symtab *symtab;
 };
 
-extern PyTypeObject symtab_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("symtab_object");
+extern PyTypeObject symtab_object_type;
 static const gdbpy_registry<gdbpy_memoizing_registry_storage<symtab_object,
   symtab, &symtab_object::symtab>> stpy_registry;
 
@@ -74,8 +73,7 @@ struct salpy_invalidator
   }
 };
 
-extern PyTypeObject sal_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("sal_object");
+extern PyTypeObject sal_object_type;
 static const gdbpy_registry<gdbpy_tracking_registry_storage<sal_object,
   symtab_and_line, &sal_object::sal, salpy_invalidator>> salpy_registry;
 
@@ -423,8 +421,8 @@ symtab_object_to_symtab (PyObject *obj)
   return ((symtab_object *) obj)->symtab;
 }
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_symtabs (void)
+static int
+gdbpy_initialize_symtabs ()
 {
   symtab_object_type.tp_new = PyType_GenericNew;
   if (gdbpy_type_ready (&symtab_object_type) < 0)

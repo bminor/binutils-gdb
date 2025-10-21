@@ -987,8 +987,8 @@ static PyMappingMethods btpy_list_mapping_methods =
 
 /* Sets up the btrace record API.  */
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_btrace (void)
+static int
+gdbpy_initialize_btrace ()
 {
   btpy_list_type.tp_new = PyType_GenericNew;
   btpy_list_type.tp_flags = Py_TPFLAGS_DEFAULT;

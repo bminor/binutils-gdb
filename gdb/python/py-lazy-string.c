@@ -52,8 +52,7 @@ struct lazy_string_object {
   PyObject *type;
 };
 
-extern PyTypeObject lazy_string_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("lazy_string_object");
+extern PyTypeObject lazy_string_object_type;
 
 static PyObject *
 stpy_get_address (PyObject *self, void *closure)
@@ -242,8 +241,8 @@ gdbpy_create_lazy_string_object (CORE_ADDR address, long length,
   return (PyObject *) str_obj;
 }
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_lazy_string (void)
+static int
+gdbpy_initialize_lazy_string ()
 {
   return gdbpy_type_ready (&lazy_string_object_type);
 }

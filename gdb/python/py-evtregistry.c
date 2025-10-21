@@ -22,8 +22,7 @@
 
 events_object gdb_py_events;
 
-extern PyTypeObject eventregistry_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("eventregistry_object");
+extern PyTypeObject eventregistry_object_type;
 
 /* Implementation of EventRegistry.connect () -> NULL.
    Add FUNCTION to the list of listeners.  */
@@ -101,8 +100,8 @@ evregpy_dealloc (PyObject *self)
 
 /* Initialize the Python event registry code.  */
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_eventregistry (void)
+static int
+gdbpy_initialize_eventregistry ()
 {
   return gdbpy_type_ready (&eventregistry_object_type);
 }

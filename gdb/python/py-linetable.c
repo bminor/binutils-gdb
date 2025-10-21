@@ -27,8 +27,7 @@ struct linetable_entry_object {
   CORE_ADDR pc;
 };
 
-extern PyTypeObject linetable_entry_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("linetable_entry_object");
+extern PyTypeObject linetable_entry_object_type;
 
 struct linetable_object {
   PyObject_HEAD
@@ -38,8 +37,7 @@ struct linetable_object {
   PyObject *symtab;
 };
 
-extern PyTypeObject linetable_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("linetable_object");
+extern PyTypeObject linetable_object_type;
 
 struct ltpy_iterator_object {
   PyObject_HEAD
@@ -51,8 +49,7 @@ struct ltpy_iterator_object {
   PyObject *source;
 };
 
-extern PyTypeObject ltpy_iterator_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("ltpy_iterator_object");
+extern PyTypeObject ltpy_iterator_object_type;
 
 /* Internal helper function to extract gdb.Symtab from a gdb.LineTable
    object.  */
@@ -284,8 +281,8 @@ ltpy_dealloc (PyObject *self)
 /* Initialize LineTable, LineTableEntry and LineTableIterator
    objects.  */
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_linetable (void)
+static int
+gdbpy_initialize_linetable ()
 {
   if (gdbpy_type_ready (&linetable_object_type) < 0)
     return -1;

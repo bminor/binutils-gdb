@@ -51,8 +51,7 @@ struct inferior_object
   PyObject *dict;
 };
 
-extern PyTypeObject inferior_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("inferior_object");
+extern PyTypeObject inferior_object_type;
 
 /* Deleter to clean up when an inferior is removed.  */
 struct infpy_deleter
@@ -1022,8 +1021,8 @@ gdbpy_selected_inferior (PyObject *self, PyObject *args)
 	  inferior_to_inferior_object (current_inferior ()).release ());
 }
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_inferior (void)
+static int
+gdbpy_initialize_inferior ()
 {
   if (gdbpy_type_ready (&inferior_object_type) < 0)
     return -1;

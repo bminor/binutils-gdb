@@ -56,8 +56,8 @@ info_auto_load_python_scripts (const char *pattern, int from_tty)
 			  &extension_language_python);
 }
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_auto_load (void)
+static int
+gdbpy_initialize_auto_load ()
 {
   add_setshow_boolean_cmd ("python-scripts", class_support,
 			   &auto_load_python_scripts, _("\

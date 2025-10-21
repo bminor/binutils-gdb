@@ -34,8 +34,7 @@ struct type_object
   struct type *type;
 };
 
-extern PyTypeObject type_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("type_object");
+extern PyTypeObject type_object_type;
 
 /* A Field object.  */
 struct field_object
@@ -46,8 +45,7 @@ struct field_object
   PyObject *dict;
 };
 
-extern PyTypeObject field_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("field_object");
+extern PyTypeObject field_object_type;
 
 /* A type iterator object.  */
 struct typy_iterator_object {
@@ -60,8 +58,7 @@ struct typy_iterator_object {
   type_object *source;
 };
 
-extern PyTypeObject type_iterator_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("typy_iterator_object");
+extern PyTypeObject type_iterator_object_type;
 
 /* This is used to initialize various gdb.TYPE_ constants.  */
 struct pyty_code
@@ -1511,8 +1508,8 @@ gdbpy_lookup_type (PyObject *self, PyObject *args, PyObject *kw)
   return type_to_type_object (type);
 }
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_types (void)
+static int
+gdbpy_initialize_types ()
 {
   if (gdbpy_type_ready (&type_object_type) < 0)
     return -1;

@@ -598,8 +598,8 @@ python_xmethod_worker::python_xmethod_worker (PyObject *py_worker,
   Py_INCREF (this_type);
 }
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_xmethods (void)
+static int
+gdbpy_initialize_xmethods ()
 {
   py_match_method_name = PyUnicode_FromString (match_method_name);
   if (py_match_method_name == NULL)

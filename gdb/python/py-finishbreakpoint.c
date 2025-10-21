@@ -61,8 +61,7 @@ struct finish_breakpoint_object
   struct frame_id initiating_frame;
 };
 
-extern PyTypeObject finish_breakpoint_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("finish_breakpoint_object");
+extern PyTypeObject finish_breakpoint_object_type;
 
 /* Python function to get the 'return_value' attribute of
    FinishBreakpoint.  */
@@ -433,8 +432,8 @@ bpfinishpy_handle_exit (struct inferior *inf)
 
 /* Initialize the Python finish breakpoint code.  */
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_finishbreakpoints (void)
+static int
+gdbpy_initialize_finishbreakpoints ()
 {
   if (!gdbpy_breakpoint_init_breakpoint_type ())
     return -1;

@@ -72,8 +72,7 @@ struct block_syms_iterator_object {
       }									\
   } while (0)
 
-extern PyTypeObject block_syms_iterator_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("block_syms_iterator_object");
+extern PyTypeObject block_syms_iterator_object_type;
 static const registry<objfile>::key<htab, htab_deleter>
      blpy_objfile_data_key;
 
@@ -523,8 +522,8 @@ blpy_richcompare (PyObject *self, PyObject *other, int op)
   return PyBool_FromLong (equal == expected);
 }
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_blocks (void)
+static int
+gdbpy_initialize_blocks ()
 {
   block_object_type.tp_new = PyType_GenericNew;
   if (gdbpy_type_ready (&block_object_type) < 0)

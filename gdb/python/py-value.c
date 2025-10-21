@@ -2244,8 +2244,8 @@ gdbpy_is_value_object (PyObject *obj)
   return PyObject_TypeCheck (obj, &value_object_type);
 }
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_values (void)
+static int
+gdbpy_initialize_values ()
 {
   return gdbpy_type_ready (&value_object_type);
 }

@@ -42,8 +42,7 @@ static const registry<gdbarch>::key<PyObject, gdb::noop_deleter<PyObject>>
       }								\
   } while (0)
 
-extern PyTypeObject arch_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("arch_object");
+extern PyTypeObject arch_object_type;
 
 /* Associates an arch_object with GDBARCH as gdbarch_data via the gdbarch
    post init registration mechanism (gdbarch_data_register_post_init).  */
@@ -368,8 +367,8 @@ gdbpy_all_architecture_names (PyObject *self, PyObject *args)
 
 /* Initializes the Architecture class in the gdb module.  */
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_arch (void)
+static int
+gdbpy_initialize_arch ()
 {
   arch_object_type.tp_new = PyType_GenericNew;
   return gdbpy_type_ready (&arch_object_type);

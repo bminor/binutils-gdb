@@ -35,8 +35,7 @@
 #include "linespec.h"
 #include "gdbsupport/common-utils.h"
 
-extern PyTypeObject breakpoint_location_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("breakpoint_location_object");
+extern PyTypeObject breakpoint_location_object_type;
 
 struct gdbpy_breakpoint_location_object
 {
@@ -1353,8 +1352,8 @@ gdbpy_breakpoint_modified (struct breakpoint *b)
 
 
 /* Initialize the Python breakpoint code.  */
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_breakpoints (void)
+static int
+gdbpy_initialize_breakpoints ()
 {
   int i;
 
@@ -1389,7 +1388,7 @@ gdbpy_initialize_breakpoints (void)
 
 /* Initialize the Python BreakpointLocation code.  */
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
+static int
 gdbpy_initialize_breakpoint_locations ()
 {
   return gdbpy_type_ready (&breakpoint_location_object_type);

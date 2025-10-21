@@ -44,11 +44,9 @@ struct connection_object
   struct process_stratum_target *target;
 };
 
-extern PyTypeObject connection_object_type
-  CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("connection_object");
+extern PyTypeObject connection_object_type;
 
-extern PyTypeObject remote_connection_object_type
-  CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("remote_connection_object");
+extern PyTypeObject remote_connection_object_type;
 
 /* Require that CONNECTION be valid.  */
 #define CONNPY_REQUIRE_VALID(connection)			\
@@ -283,8 +281,8 @@ connpy_get_connection_details (PyObject *self, void *closure)
 
 /* Python specific initialization for this file.  */
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_connection (void)
+static int
+gdbpy_initialize_connection ()
 {
   if (gdbpy_type_ready (&connection_object_type) < 0)
     return -1;

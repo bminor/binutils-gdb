@@ -165,8 +165,7 @@ private:
 
 using mi_command_py_up = std::unique_ptr<mi_command_py>;
 
-extern PyTypeObject micmdpy_object_type
-	CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("micmdpy_object");
+extern PyTypeObject micmdpy_object_type;
 
 /* Holds a Python object containing the string 'invoke'.  */
 
@@ -443,7 +442,7 @@ micmdpy_dealloc (PyObject *obj)
 
 /* Python initialization for the MI commands components.  */
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
+static int
 gdbpy_initialize_micommands ()
 {
   micmdpy_object_type.tp_new = PyType_GenericNew;

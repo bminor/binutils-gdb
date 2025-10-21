@@ -52,8 +52,7 @@ struct disasm_info_object
   struct disasm_info_object *next;
 };
 
-extern PyTypeObject disasm_info_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("disasm_info_object");
+extern PyTypeObject disasm_info_object_type;
 
 /* Implement gdb.disassembler.DisassembleAddressPart type.  An object of
    this type represents a small part of a disassembled instruction; a part
@@ -74,8 +73,7 @@ struct disasm_addr_part_object
   struct gdbarch *gdbarch;
 };
 
-extern PyTypeObject disasm_addr_part_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("disasm_addr_part_object");
+extern PyTypeObject disasm_addr_part_object_type;
 
 /* Implement gdb.disassembler.DisassembleTextPart type.  An object of
    this type represents a small part of a disassembled instruction; a part
@@ -92,11 +90,9 @@ struct disasm_text_part_object
   enum disassembler_style style;
 };
 
-extern PyTypeObject disasm_text_part_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("disasm_text_part_object");
+extern PyTypeObject disasm_text_part_object_type;
 
-extern PyTypeObject disasm_part_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("PyObject");
+extern PyTypeObject disasm_part_object_type;
 
 /* Implement gdb.disassembler.DisassemblerResult type, an object that holds
    the result of calling the disassembler.  This is mostly the length of
@@ -115,8 +111,7 @@ struct disasm_result_object
   std::vector<gdbpy_ref<>> *parts;
 };
 
-extern PyTypeObject disasm_result_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("disasm_result_object");
+extern PyTypeObject disasm_result_object_type;
 
 /* When this is false we fast path out of gdbpy_print_insn, which should
    keep the performance impact of the Python disassembler down.  This is
@@ -1627,7 +1622,7 @@ static struct PyModuleDef python_disassembler_module_def =
 
 /* Called to initialize the Python structures in this file.  */
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
+static int
 gdbpy_initialize_disasm ()
 {
   /* Create the _gdb.disassembler module, and add it to the _gdb module.  */

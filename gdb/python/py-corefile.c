@@ -47,8 +47,7 @@ struct corefile_object
   PyObject *mapped_files;
 };
 
-extern PyTypeObject corefile_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("corefile_object");
+extern PyTypeObject corefile_object_type;
 
 /* A gdb.CorefileMapped object.  */
 
@@ -73,8 +72,7 @@ struct corefile_mapped_file_object
   bool is_main_exec_p;
 };
 
-extern PyTypeObject corefile_mapped_file_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("corefile_mapped_file_object");
+extern PyTypeObject corefile_mapped_file_object_type;
 
 /* A gdb.CorefileMappedFileRegion object.  */
 
@@ -91,8 +89,7 @@ struct corefile_mapped_file_region_object
   ULONGEST file_offset;
 };
 
-extern PyTypeObject corefile_mapped_file_region_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("corefile_mapped_file_region_object");
+extern PyTypeObject corefile_mapped_file_region_object_type;
 
 /* Clear the inferior pointer in a Corefile object OBJ when an inferior is
    deleted.  */

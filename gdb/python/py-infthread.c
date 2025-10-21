@@ -21,8 +21,7 @@
 #include "inferior.h"
 #include "python-internal.h"
 
-extern PyTypeObject thread_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("thread_object");
+extern PyTypeObject thread_object_type;
 
 /* Require that INFERIOR be a valid inferior ID.  */
 #define THPY_REQUIRE_VALID(Thread)				\
@@ -404,8 +403,8 @@ gdbpy_selected_thread (PyObject *self, PyObject *args)
   Py_RETURN_NONE;
 }
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_thread (void)
+static int
+gdbpy_initialize_thread ()
 {
   return gdbpy_type_ready (&thread_object_type);
 }

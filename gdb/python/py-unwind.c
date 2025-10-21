@@ -133,11 +133,9 @@ struct cached_frame_info
   cached_reg_t reg[0];
 };
 
-extern PyTypeObject pending_frame_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("pending_frame_object");
+extern PyTypeObject pending_frame_object_type;
 
-extern PyTypeObject unwind_info_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("unwind_info_object");
+extern PyTypeObject unwind_info_object_type;
 
 /* An enum returned by pyuw_object_attribute_to_pointer, a function which
    is used to extract an attribute from a Python object.  */
@@ -1017,8 +1015,8 @@ pyuw_on_new_gdbarch (gdbarch *newarch)
 
 /* Initialize unwind machinery.  */
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_unwind (void)
+static int
+gdbpy_initialize_unwind ()
 {
   gdb::observers::new_architecture.attach (pyuw_on_new_gdbarch, "py-unwind");
 

@@ -46,8 +46,7 @@ struct register_descriptor_iterator_object {
   struct gdbarch *gdbarch;
 };
 
-extern PyTypeObject register_descriptor_iterator_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("register_descriptor_iterator_object");
+extern PyTypeObject register_descriptor_iterator_object_type;
 
 /* A register descriptor.  */
 struct register_descriptor_object {
@@ -60,8 +59,7 @@ struct register_descriptor_object {
   struct gdbarch *gdbarch;
 };
 
-extern PyTypeObject register_descriptor_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("register_descriptor_object");
+extern PyTypeObject register_descriptor_object_type;
 
 /* Structure for iterator over register groups.  */
 struct reggroup_iterator_object {
@@ -74,8 +72,7 @@ struct reggroup_iterator_object {
   struct gdbarch *gdbarch;
 };
 
-extern PyTypeObject reggroup_iterator_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("reggroup_iterator_object");
+extern PyTypeObject reggroup_iterator_object_type;
 
 /* A register group object.  */
 struct reggroup_object {
@@ -85,8 +82,7 @@ struct reggroup_object {
   const struct reggroup *reggroup;
 };
 
-extern PyTypeObject reggroup_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("reggroup_object");
+extern PyTypeObject reggroup_object_type;
 
 /* Return a gdb.RegisterGroup object wrapping REGGROUP.  The register
    group objects are cached, and the same Python object will always be
@@ -425,7 +421,7 @@ gdbpy_parse_register_id (struct gdbarch *gdbarch, PyObject *pyo_reg_id,
 
 /* Initializes the new Python classes from this file in the gdb module.  */
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
+static int
 gdbpy_initialize_registers ()
 {
   register_descriptor_object_type.tp_new = PyType_GenericNew;

@@ -59,8 +59,7 @@ struct pspace_object
   PyObject *missing_file_handlers;
 };
 
-extern PyTypeObject pspace_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("pspace_object");
+extern PyTypeObject pspace_object_type;
 
 /* Clear the PSPACE pointer in a Pspace object and remove the reference.  */
 struct pspace_deleter
@@ -737,8 +736,8 @@ gdbpy_free_program_space_event (program_space *pspace)
   gdbpy_program_space_event (pspace, false);
 }
 
-static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-gdbpy_initialize_pspace (void)
+static int
+gdbpy_initialize_pspace ()
 {
   gdb::observers::executable_changed.attach (gdbpy_executable_changed,
 					     "py-progspace");

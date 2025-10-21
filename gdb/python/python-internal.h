@@ -24,34 +24,6 @@
 #include "extension-priv.h"
 #include "registry.h"
 
-/* These WITH_* macros are defined by the CPython API checker that
-   comes with the Python plugin for GCC.  See:
-   https://gcc-python-plugin.readthedocs.org/en/latest/cpychecker.html
-   The checker defines a WITH_ macro for each attribute it
-   exposes.  Note that we intentionally do not use
-   'cpychecker_returns_borrowed_ref' -- that idiom is forbidden in
-   gdb.  */
-
-#ifdef WITH_CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF_ATTRIBUTE
-#define CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF(ARG)		\
-  __attribute__ ((cpychecker_type_object_for_typedef (ARG)))
-#else
-#define CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF(ARG)
-#endif
-
-#ifdef WITH_CPYCHECKER_SETS_EXCEPTION_ATTRIBUTE
-#define CPYCHECKER_SETS_EXCEPTION __attribute__ ((cpychecker_sets_exception))
-#else
-#define CPYCHECKER_SETS_EXCEPTION
-#endif
-
-#ifdef WITH_CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION_ATTRIBUTE
-#define CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION		\
-  __attribute__ ((cpychecker_negative_result_sets_exception))
-#else
-#define CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
-#endif
-
 /* /usr/include/features.h on linux systems will define _POSIX_C_SOURCE
    if it sees _GNU_SOURCE (which config.h will define).
    pyconfig.h defines _POSIX_C_SOURCE to a different value than
@@ -349,20 +321,13 @@ extern int gdb_python_initialized;
 
 extern PyObject *gdb_module;
 extern PyObject *gdb_python_module;
-extern PyTypeObject value_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("value_object");
-extern PyTypeObject block_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF("block_object");
-extern PyTypeObject symbol_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("symbol_object");
-extern PyTypeObject event_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
-extern PyTypeObject breakpoint_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("breakpoint_object");
-extern PyTypeObject frame_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("frame_object");
-extern PyTypeObject thread_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("thread_object");
+extern PyTypeObject value_object_type;
+extern PyTypeObject block_object_type;
+extern PyTypeObject symbol_object_type;
+extern PyTypeObject event_object_type;
+extern PyTypeObject breakpoint_object_type;
+extern PyTypeObject frame_object_type;
+extern PyTypeObject thread_object_type;
 
 /* Ensure that breakpoint_object_type is initialized and return true.  If
    breakpoint_object_type can't be initialized then set a suitable Python
@@ -1004,8 +969,7 @@ extern PyObject *gdbpy_gdb_error;
 extern PyObject *gdbpy_gdb_memory_error;
 extern PyObject *gdbpy_gdberror_exc;
 
-extern void gdbpy_convert_exception (const struct gdb_exception &)
-    CPYCHECKER_SETS_EXCEPTION;
+extern void gdbpy_convert_exception (const struct gdb_exception &);
 
  /* Use this in a 'catch' block to convert the exception E to a Python
     exception and return value VAL to signal that an exception occurred.
@@ -1019,8 +983,7 @@ gdbpy_handle_gdb_exception (T val, const gdb_exception &e)
   return val;
 }
 
-int get_addr_from_python (PyObject *obj, CORE_ADDR *addr)
-    CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int get_addr_from_python (PyObject *obj, CORE_ADDR *addr);
 
 gdbpy_ref<> gdb_py_object_from_longest (LONGEST l);
 gdbpy_ref<> gdb_py_object_from_ulongest (ULONGEST l);
@@ -1029,8 +992,7 @@ int gdb_py_int_as_long (PyObject *, long *);
 PyObject *gdb_py_generic_dict (PyObject *self, void *closure);
 
 int gdb_pymodule_addobject (PyObject *module, const char *name,
-			    PyObject *object)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+			    PyObject *object);
 
 
 /* Return a Python string (str) object that represents SELF.  SELF can be
