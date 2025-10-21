@@ -119,6 +119,10 @@ typedef struct ctf_link_sym
    the only likely case.)  */
 #define CTF_LINK_NO_FILTER_REPORTED_SYMS 0x10
 
+/* Dedup all archives but the first added against the first added.  */
+
+#define CTF_LINK_DEDUP_AGAINST_FIRST 0x20
+
 /* Symbolic names for CTF sections.  */
 
 typedef enum ctf_sect_names
@@ -1213,6 +1217,19 @@ typedef int ctf_link_variable_filter_f (ctf_dict_t *, const char *, ctf_id_t,
 					void *);
 extern int ctf_link_set_variable_filter (ctf_dict_t *,
 					 ctf_link_variable_filter_f *, void *);
+
+/* Hash caching.  This is useful if you're repeatedly deduplicating against the
+   same set of objects from the same inputs, and don't want to spend time
+   re-hashing them over and over again.  The cache contains elements for
+   every type in the link.  Must be called after ctf_link_add_ctf; ctf_link
+   need not be called.  */
+
+extern int ctf_link_hash_cache_save (ctf_dict_t *, const char *cache);
+
+/* Load a saved hash.  Cached inputs will not be rehashed: the cache will be
+   used instead.  */
+
+extern int ctf_link_hash_cache_load (ctf_dict_t *, const char *cache);
 
 /* Turn debugging off and on, and get its value.  This is the same as setting
    LIBCTF_DEBUG in the environment.  */
