@@ -1,0 +1,100 @@
+# Test for archive handling.
+# Copyright (C) 2025 Free Software Foundation, Inc.
+#
+# This file is part of the GNU Binutils.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; see the file COPYING3. If not,
+# see <http://www.gnu.org/licenses/>.
+#
+
+remote_file host delete \
+    "tmpdir/ab.a" "tmpdir/cd.a" "tmpdir/abt.a" "tmpdir/cdt.a"
+
+run_ld_link_tests {
+    {"First regular archive create"     ""   "" "" {a.s b.s} {} "ab.a"  }
+    {"Second regular archive create"    ""   "" "" {c.s d.s} {} "cd.a"  }
+    {"First thin archive create"        "T"  "" "" {a.s b.s} {} "abt.a" }
+    {"Second thin archive create"       "T"  "" "" {c.s d.s} {} "cdt.a" }
+}
+
+set old_ldflags $LDFLAGS
+
+# Prevent our otherwise unused data symbols from being GC'd on XCOFF targets.
+if { [is_xcoff_format] } {
+    append LDFLAGS " -bexpall"
+}
+
+# For MS-DOS there's no way to keep symbols, so just check for success.
+run_ld_link_tests [list \
+    [list "Regular archive link" \
+	"-e ff" "tmpdir/ab.a" \
+	"" {abc.s} \
+	[expr { [istarget "*-*-msdos"] ? {} : {{nm "" abc.nd}} }] \
+	"abc" \
+    ] \
+]
+setup_xfail "binutils/33484" "alpha*-*-linux*ecoff*" "alpha*-*-osf*"
+setup_xfail "binutils/33485" "cris-*-*aout*" "i\[3-7\]86-*-bsd*" \
+    "i\[3-7\]86-*-msdos*" "pdp11-*-*"
+run_ld_link_tests [list \
+    [list "Thin archive link" \
+	"-e ff" "tmpdir/abt.a" \
+	"" {abc.s} \
+	[expr { [istarget "*-*-msdos"] ? {} : {{nm "" abc.nd}} }] \
+	"abtc" \
+    ] \
+]
+run_ld_link_tests [list \
+    [list "Regular archive plus regular link" \
+	"-e ff" "tmpdir/ab.a tmpdir/cd.a" \
+	"" {abcde.s} \
+	[expr { [istarget "*-*-msdos"] ? {} : {{nm "" abcde.nd}} }] \
+	"abcde" \
+    ] \
+]
+setup_xfail "binutils/33484" "alpha*-*-linux*ecoff*" "alpha*-*-osf*"
+setup_xfail "binutils/33485" "cris-*-*aout*" "i\[3-7\]86-*-bsd*" \
+    "i\[3-7\]86-*-msdos*" "pdp11-*-*"
+run_ld_link_tests [list \
+    [list "Regular archive plus thin link" \
+	"-e ff" "tmpdir/ab.a tmpdir/cdt.a" \
+	"" {abcde.s} \
+	[expr { [istarget "*-*-msdos"] ? {} : {{nm "" abcde.nd}} }] \
+	"abcdte" \
+    ] \
+]
+setup_xfail "binutils/33484" "alpha*-*-linux*ecoff*" "alpha*-*-osf*"
+setup_xfail "binutils/33485" "cris-*-*aout*" "i\[3-7\]86-*-bsd*" \
+    "i\[3-7\]86-*-msdos*" "pdp11-*-*"
+run_ld_link_tests [list \
+    [list "Thin archive plus regular link" \
+	"-e ff" "tmpdir/abt.a tmpdir/cd.a" \
+	"" {abcde.s} \
+	[expr { [istarget "*-*-msdos"] ? {} : {{nm "" abcde.nd}} }] \
+	"abtcde" \
+    ] \
+]
+setup_xfail "binutils/33484" "alpha*-*-linux*ecoff*" "alpha*-*-osf*"
+setup_xfail "binutils/33485" "cris-*-*aout*" "i\[3-7\]86-*-bsd*" \
+    "i\[3-7\]86-*-msdos*" "pdp11-*-*"
+run_ld_link_tests [list \
+    [list "Thin archive plus thin link" \
+	"-e ff" "tmpdir/abt.a tmpdir/cdt.a" \
+	"" {abcde.s} \
+	[expr { [istarget "*-*-msdos"] ? {} : {{nm "" abcde.nd}} }] \
+	"abtcdte" \
+    ] \
+]
+
+set LDFLAGS $old_ldflags
