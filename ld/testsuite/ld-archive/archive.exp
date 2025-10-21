@@ -19,13 +19,16 @@
 #
 
 remote_file host delete \
-    "tmpdir/ab.a" "tmpdir/cd.a" "tmpdir/abt.a" "tmpdir/cdt.a"
+    "tmpdir/ab.a" "tmpdir/cd.a" "tmpdir/abt.a" "tmpdir/cdt.a" \
+    "tmpdir/abn.a" "tmpdir/abnt.a"
 
 run_ld_link_tests {
     {"First regular archive create"     ""   "" "" {a.s b.s} {} "ab.a"  }
     {"Second regular archive create"    ""   "" "" {c.s d.s} {} "cd.a"  }
     {"First thin archive create"        "T"  "" "" {a.s b.s} {} "abt.a" }
     {"Second thin archive create"       "T"  "" "" {c.s d.s} {} "cdt.a" }
+    {"Regular archive w/o index create" "S"  "" "" {a.s b.s} {} "abn.a" }
+    {"Thin archive w/o index create"    "ST" "" "" {a.s b.s} {} "abnt.a"}
 }
 
 set old_ldflags $LDFLAGS
@@ -98,3 +101,23 @@ run_ld_link_tests [list \
 ]
 
 set LDFLAGS $old_ldflags
+
+# XCOFF targets currently accept archives w/o index.
+if { [is_xcoff_format] } {
+    return
+}
+
+run_ld_link_tests [list \
+    [list "Regular archive w/o index link" \
+	"-e ff" "tmpdir/abn.a" \
+	"" {abc.s} \
+	{{ld abc.ed}} \
+	"abnc" \
+    ] \
+    [list "Thin archive w/o index link" \
+	"-e ff" "tmpdir/abnt.a" \
+	"" {abc.s} \
+	{{ld abct.ed}} \
+	"abnct" \
+    ] \
+]
