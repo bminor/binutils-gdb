@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # pyright: strict
 
-# Copyright 2024 Free Software Foundation, Inc.
+# Copyright 2024, 2025 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -195,7 +195,7 @@ class DWARFAttribute:
             dwarf_operations dictionary, and replaced with their names where
             applicable.
         """
-        s = lbrace
+        s = ""
         if isinstance(self.name, int):
             s += "DW_AT_" + hex(self.name)
         else:
@@ -207,7 +207,6 @@ class DWARFAttribute:
         if self.form not in [None, "DW_FORM_ref4", "DW_FORM_ref_addr"]:
             s += " " + self.form
 
-        s += rbrace
         return indent(s, indent_count)
 
 
