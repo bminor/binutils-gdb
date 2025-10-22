@@ -6586,6 +6586,18 @@ symbol::get_maybe_copied_address () const
 
 /* See symtab.h.  */
 
+const block *
+symbol::value_block () const
+{
+  if (const symbol_block_ops *block_ops = this->block_ops ();
+      block_ops != nullptr && block_ops->get_block_value != nullptr)
+    return block_ops->get_block_value (this);
+
+  return m_value.block;
+}
+
+/* See symtab.h.  */
+
 CORE_ADDR
 minimal_symbol::get_maybe_copied_address (objfile *objf) const
 {

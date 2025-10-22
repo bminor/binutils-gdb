@@ -1565,16 +1565,6 @@ struct block_symbol
 
 #define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value
 
-inline const block *
-symbol::value_block () const
-{
-  if (const symbol_block_ops *block_ops = this->block_ops ();
-      block_ops != nullptr && block_ops->get_block_value != nullptr)
-    return block_ops->get_block_value (this);
-
-  return m_value.block;
-}
-
 extern int register_symbol_computed_impl (location_class,
 					  const struct symbol_computed_ops *);
 
