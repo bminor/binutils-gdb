@@ -53,7 +53,7 @@ set testline6 [expr {$baseline + 9}]
 gdb_delete_tracepoints
 
 foreach x { 1 2 3 4 5 6 } {
-    set testline [subst \$testline$x]
+    set testline [subst_vars \$testline$x]
     set trcpt [gdb_gettpnum $testline]
     set trcpt$x $trcpt
     gdb_test "passcount $x" \

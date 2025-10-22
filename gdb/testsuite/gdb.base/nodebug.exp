@@ -145,9 +145,9 @@ if {[nodebug_runto inner]} {
 	    set whatis_re [lindex $lang_line 2]
 	    set ptype_re [lindex $lang_line 3]
 
-	    set print_re [subst "$print_re"]
-	    set whatis_re [subst "$whatis_re"]
-	    set ptype_re [subst "$ptype_re"]
+	    set print_re [subst_vars "$print_re"]
+	    set whatis_re [subst_vars "$whatis_re"]
+	    set ptype_re [subst_vars "$ptype_re"]
 
 	    with_test_prefix "$lang" {
 		gdb_test_no_output "set language $lang"
@@ -205,9 +205,9 @@ if {[nodebug_runto inner]} {
     } {
 	set exp [lindex $line 0]
 	# Expand variables.
-	set fmt [subst -nobackslashes [lindex $line 1]]
-	set print [subst  -nobackslashes [lindex $line 2]]
-	set whatis [subst -nobackslashes [lindex $line 3]]
+	set fmt [subst_vars [lindex $line 1]]
+	set print [subst_vars [lindex $line 2]]
+	set whatis [subst_vars [lindex $line 3]]
 	if {$fmt == ""} {
 	    gdb_test "p $exp" $print
 	} else {

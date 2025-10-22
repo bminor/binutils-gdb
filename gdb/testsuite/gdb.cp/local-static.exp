@@ -170,10 +170,10 @@ proc do_test {lang} {
 	set scope [lindex $scope_line 0]
 
 	set print_quoted_re [lindex $scope_line 2]
-	set print_quoted_re [uplevel 1 "subst -nobackslashes -nocommands \"$print_quoted_re\""]
+	set print_quoted_re [uplevel 1 "subst_vars \"$print_quoted_re\""]
 
 	set print_unquoted_re [lindex $scope_line 3]
-	set print_unquoted_re [uplevel 1 "subst -nobackslashes -nocommands \"$print_unquoted_re\""]
+	set print_unquoted_re [uplevel 1 "subst_vars \"$print_unquoted_re\""]
 
 	gdb_test "print '${scope}'" $print_quoted_re
 

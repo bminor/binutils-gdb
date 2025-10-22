@@ -37,13 +37,13 @@ set assert_tos_non0 {
     DW_OP_skip -3
 }
 
-set assert_tos_0 [subst {
+set assert_tos_0 [subst_vars {
     DW_OP_lit0
     DW_OP_eq
     $assert_tos_non0
 }]
 
-set program [subst {
+set program [subst_vars {
     DW_OP_lit0
     DW_OP_nop
     $assert_tos_0

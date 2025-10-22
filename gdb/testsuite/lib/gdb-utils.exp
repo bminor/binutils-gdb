@@ -246,3 +246,9 @@ proc with_lock { lock_file body } {
 	return -code $code $result
     }
 }
+
+# Alias for subst -nobackslashes -nocommands.
+
+proc subst_vars { str } {
+    tailcall subst -nobackslashes -nocommands $str
+}

@@ -223,7 +223,7 @@ foreach item $all_anon_corefiles {
 # Generate corefiles for the "anon" case.
 foreach item $all_anon_corefiles {
     with_test_prefix "saving corefile for [lindex $item 0]" {
-	do_save_core [lindex $item 1] [subst [lindex $item 2]] [lindex $item 6]
+	do_save_core [lindex $item 1] [subst_vars [lindex $item 2]] [lindex $item 6]
     }
 }
 
@@ -235,12 +235,12 @@ clean_restart $testfile
 
 foreach item $all_anon_corefiles {
     with_test_prefix "loading and testing corefile for [lindex $item 0]" {
-	do_load_and_test_core [subst [lindex $item 2]] [lindex $item 3] \
+	do_load_and_test_core [subst_vars [lindex $item 2]] [lindex $item 3] \
 	    [lindex $item 4] [lindex $item 5] [lindex $item 6]
     }
 
     with_test_prefix "disassembling function main for [lindex $item 0]" {
-	test_disasm [subst [lindex $item 2]] $main_addr 0
+	test_disasm [subst_vars [lindex $item 2]] $main_addr 0
     }
 }
 

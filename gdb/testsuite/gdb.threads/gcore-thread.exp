@@ -143,7 +143,7 @@ proc load_core { filename } {
 }
 
 foreach name { corefile core0file } {
-    set filename [subst $$name]
+    set filename [subst_vars $$name]
     if { $filename == "" } {
 	continue
     }

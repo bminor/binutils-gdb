@@ -191,7 +191,7 @@ proc do_test { type {clang 0}} {
 	    gdb_test "ptype '$ctype'" \
 		"type = $ctype"
 
-	    set type_size [subst \$::${type_id}_size]
+	    set type_size [subst_vars \$::${type_id}_size]
 
 	    gdb_test "p sizeof ('$type')" \
 		" = $type_size"
