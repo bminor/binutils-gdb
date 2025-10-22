@@ -622,7 +622,7 @@ def main(argv):
     except IndexError:
         print("Usage:", file=sys.stderr)
         print("python ./asm_to_dwarf_assembler.py <path/to/elf/file>", file=sys.stderr)
-        sys.exit(errno.EOPNOTSUP)
+        sys.exit(errno.EOPNOTSUPP)
 
     try:
         with open(filename, "rb") as elf_file:
