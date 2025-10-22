@@ -173,3 +173,79 @@
 - file:ctf-open-compat.c :: Read-side compatibility for CTFv1/2/3. Still to
   be implemented/revised for v4, won't even compile. The new implementation
   will be very different and much simpler than what we have now.
+
+* Some example code flows
+
+** Opening a CTF dict with ctf_open (old archive format, or a single dict)
+
+We start in [[ctf-open-bfd.c]]. ctf_open -> ctf_fdopen, which opens it with BFD
+and then calls -> ctf_bfdopen, which digs out the CTF or BTF section and
+calls -> ctf_bfdopen_ctfsect, which fishes out the associated string and
+symbol table sections and finally calls -> [[ctf-archive.c]]:ctf_arc_bufopen.
+
+If the section is a single dict, this calls [[ctf-open.c]]:ctf_bufopen directly
+and wraps it up in a ctf_archive, but otherwise this calls ->
+ctf_new_archive_internal, which makes the struct ctf_archive_t to track
+things, possibly endian-flips and range-checks the archive header... and
+then you have a ctf_archive_t you can dig around in.  The ELF string and
+symbol table sections are stashed away in the ctf_archive_t and are
+automatically used when opening the archive members.
+
+** Opening a CTF archive member with ctf_dict_open
+
+This one, despite the name, is in [[ctf-archive.c]] because it relates to
+opening an *archive member*.  It retrieves the string and symbol tables from
+the archive and calls -> ctf_dict_open_sections (which takes explicit tables
+instead).
+
+ctf_dict_open_sections either just returns a dict (if this "archive" is
+actually a wrapper around a single dict), or calls ->
+ctf_dict_open_internal, which bsearches for the member by name and calls ->
+ctf_dict_open_by_offset with the corresponding archive offset. This finally
+fishes out some buffers containing CTF, string and symbol table data and
+calls -> [[ctf-open.c]]:ctf_bufopen.
+
+ctf_bufopen is an enormously complex monster which spends nearly 400 lines
+range-checking the dict and figuring out whether it's BTF or CTF and which
+version of CTF it is; then it decompresses it if the CTF flags indicate it's
+compressed (we will have to add code to check the section name and
+decompress it if it's in a .zBTF section too), pretends it's CTF from now on
+so that we don't need separate code paths for BTF and CTF any more, then
+allocates a ctf_dict_t for it, makes a start at populating it, then calls ->
+init_static_types.
+
+We have to traverse the dict's type section twice.  First, init_static_types
+scans it to figure out how many types there are and of which kind (with
+special cases for forwards), so we can accurately size name tables and other
+hashtabs; then we call -> init_static_types_names.
+
+This is a a separate function because child dicts call
+init_static_types_names not from init_static_types, but rather later, once
+ctf_import is called and we have a parent dict: before that, we can't even
+look up strings, so populating name tables is impossible. This function
+itself is cut in two because we want to keep track of enums while the
+function runs, but it has multiple exit points: so init_static_types_names
+is a wrapper which does allocation and calls
+-> init_static_types_names_internal.
+
+Finally, init_static_types_names_internal can do string lookups and populate
+name tables, with various quality-of-life wrinkles: bitfields get "the least
+bitfieldy" type, CTF floats take precedence over BTF floats... we also build
+the core ctf_txlate type ID -> index lookup table at this stage, and track
+anything else that needs looking up during initial opening at this stage: in
+particular pointers get tracked by the type they're pointed to, for
+ctf_type_pointer, and we keep track of all enums we see.
+
+In a *third* pass, we work over all the enums we've seen and track their
+enumerators via [[ctf-create.c:ctf_track_enumerator]], which is used to ensure
+that you can't add enumerators that already exist.
+
+Finally (!) we work over all the datasecs and take note of all their
+variables, so we can go from variable to datasec easily.
+
+Back in ctf_bufopen, there's two last things to do, calling -> init_symtab
+to work over the symtypetabs and build the ctf_xslate lookup table, and
+calling -> ctf_set_ctl_hashes to build a set of hardwired lookup tables that
+tells ctf_lookup_by_name which name table to look in for particular type
+prefixes (e.g. when you look up "struct foo", look for foo in the
+ctf_structs name table).
