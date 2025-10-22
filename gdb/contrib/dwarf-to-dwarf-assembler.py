@@ -53,6 +53,7 @@ from typing import Annotated, Optional
 from elftools.dwarf.compileunit import CompileUnit as RawCompileUnit
 from elftools.dwarf.die import DIE as RawDIE
 from elftools.dwarf.die import AttributeValue
+from elftools.dwarf.enums import ENUM_DW_ATE, ENUM_DW_LANG
 from elftools.elf.elffile import ELFFile
 
 logger = getLogger(__file__)
@@ -68,6 +69,10 @@ EXPR_ATTRIBUTE_FORMS = [
     "DW_FORM_block4",
 ]
 
+# Map from language number to name.
+LANG_NAME = {v: k for k, v in ENUM_DW_LANG.items()}
+# Map from encoding number to name.
+ATE_NAME = {v: k for k, v in ENUM_DW_ATE.items()}
 
 # Workaround for my editor not to freak out over unclosed braces.
 lbrace, rbrace = "{", "}"
@@ -201,11 +206,17 @@ class DWARFAttribute:
         else:
             s += self.name
         s += " "
-        s += self._format_value(offset_die_lookup)
 
-        # Only explicitly state form if it's not a reference.
-        if self.form not in [None, "DW_FORM_ref4", "DW_FORM_ref_addr"]:
-            s += " " + self.form
+        if self.name == "DW_AT_language" and isinstance(self.value, int):
+            s += "@" + LANG_NAME[self.value]
+        elif self.name == "DW_AT_encoding" and isinstance(self.value, int):
+            s += "@" + ATE_NAME[self.value]
+        else:
+            s += self._format_value(offset_die_lookup)
+
+            # Only explicitly state form if it's not a reference.
+            if self.form not in [None, "DW_FORM_ref4", "DW_FORM_ref_addr"]:
+                s += " " + self.form
 
         return indent(s, indent_count)
 
