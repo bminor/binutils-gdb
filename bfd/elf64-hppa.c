@@ -3555,7 +3555,7 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 		 + hppa_info->dlt_sec->output_offset
 		 + hppa_info->dlt_sec->output_section->vma);
 	value -= _bfd_get_gp_value (output_bfd);
-	bfd_put_32 (input_bfd, value, hit_data);
+	bfd_put_32 (output_bfd, value, hit_data);
 	return bfd_reloc_ok;
       }
 
@@ -3597,16 +3597,16 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 		 + hppa_info->dlt_sec->output_offset
 		 + hppa_info->dlt_sec->output_section->vma);
 	value -= _bfd_get_gp_value (output_bfd);
-	bfd_put_64 (input_bfd, value, hit_data);
+	bfd_put_64 (output_bfd, value, hit_data);
 	return bfd_reloc_ok;
       }
 
     case R_PARISC_DIR32:
-      bfd_put_32 (input_bfd, value + addend, hit_data);
+      bfd_put_32 (output_bfd, value + addend, hit_data);
       return bfd_reloc_ok;
 
     case R_PARISC_DIR64:
-      bfd_put_64 (input_bfd, value + addend, hit_data);
+      bfd_put_64 (output_bfd, value + addend, hit_data);
       return bfd_reloc_ok;
 
     case R_PARISC_GPREL64:
@@ -3614,7 +3614,7 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 	 relative address.  */
       value -= _bfd_get_gp_value (output_bfd);
 
-      bfd_put_64 (input_bfd, value + addend, hit_data);
+      bfd_put_64 (output_bfd, value + addend, hit_data);
       return bfd_reloc_ok;
 
     case R_PARISC_LTOFF64:
@@ -3627,7 +3627,7 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 	       + hppa_info->dlt_sec->output_section->vma);
       value -= _bfd_get_gp_value (output_bfd);
 
-      bfd_put_64 (input_bfd, value + addend, hit_data);
+      bfd_put_64 (output_bfd, value + addend, hit_data);
       return bfd_reloc_ok;
 
     case R_PARISC_PCREL32:
@@ -3645,7 +3645,7 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 
 	value += addend;
 	value -= 8;
-	bfd_put_32 (input_bfd, value, hit_data);
+	bfd_put_32 (output_bfd, value, hit_data);
 	return bfd_reloc_ok;
       }
 
@@ -3664,7 +3664,7 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 
 	value += addend;
 	value -= 8;
-	bfd_put_64 (input_bfd, value, hit_data);
+	bfd_put_64 (output_bfd, value, hit_data);
 	return bfd_reloc_ok;
       }
 
@@ -3718,14 +3718,14 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 	  /* We want the address of the symbol.  */
 	  value += addend;
 
-	bfd_put_64 (input_bfd, value, hit_data);
+	bfd_put_64 (output_bfd, value, hit_data);
 	return bfd_reloc_ok;
       }
 
     case R_PARISC_SECREL32:
       if (sym_sec && sym_sec->output_section)
 	value -= sym_sec->output_section->vma;
-      bfd_put_32 (input_bfd, value + addend, hit_data);
+      bfd_put_32 (output_bfd, value + addend, hit_data);
       return bfd_reloc_ok;
 
     case R_PARISC_SEGREL32:
@@ -3751,9 +3751,9 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 	  value -= hppa_info->data_segment_base;
 
 	if (r_type == R_PARISC_SEGREL32)
-	  bfd_put_32 (input_bfd, value, hit_data);
+	  bfd_put_32 (output_bfd, value, hit_data);
 	else
-	  bfd_put_64 (input_bfd, value, hit_data);
+	  bfd_put_64 (output_bfd, value, hit_data);
 	return bfd_reloc_ok;
       }
 
@@ -3763,7 +3763,7 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
     }
 
   /* Update the instruction word.  */
-  bfd_put_32 (input_bfd, (bfd_vma) insn, hit_data);
+  bfd_put_32 (output_bfd, (bfd_vma) insn, hit_data);
   return bfd_reloc_ok;
 }
 
