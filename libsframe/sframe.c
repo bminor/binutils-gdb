@@ -26,6 +26,8 @@
 #include "sframe-impl.h"
 #include "swap.h"
 
+typedef sframe_func_desc_entry_v2 sframe_func_desc_entry;
+
 struct sf_fde_tbl
 {
   unsigned int count;
