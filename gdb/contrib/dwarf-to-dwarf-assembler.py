@@ -196,7 +196,11 @@ class DWARFAttribute:
             applicable.
         """
         s = lbrace
-        s += self.name + " "
+        if isinstance(self.name, int):
+            s += "DW_AT_" + hex(self.name)
+        else:
+            s += self.name
+        s += " "
         s += self._format_value(offset_die_lookup)
 
         # Only explicitly state form if it's not a reference.
