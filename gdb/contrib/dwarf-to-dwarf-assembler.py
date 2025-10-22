@@ -624,7 +624,7 @@ def main(argv):
         filename = argv[1]
     except IndexError:
         print("Usage:", file=sys.stderr)
-        print("python ./asm_to_dwarf_assembler.py <path/to/elf/file>", file=sys.stderr)
+        print("python ./dwarf-to-dwarf-assembler.py FILE", file=sys.stderr)
         sys.exit(errno.EOPNOTSUPP)
 
     try:
