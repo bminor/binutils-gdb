@@ -1,0 +1,182 @@
+* Audit of non-used functions in libctf
+
+Not includine new functions added for CTFv4, many of which are unused outside
+the deduplicator simply because they're too new to have any users, and other
+things under a year old, ditto:
+
+In order of likely desirability of removal, least desirable at the top.  I
+have not looked at ctf_add_*() because these are *obviously* necessary, with
+a bit of redundancy around struct/union/sized/etc, which is already covered
+in the APIReview. One or two are still unused because it so happens that
+DTrace, the only creator of dynamic dicts right now, doesn't include some
+things in the D type system: I don't think that's enough reason to remove
+them.
+
+ctf_snapshot, ctf_rollback: used only by old dwarf2ctf, and by the inside of
+ctf-create.c itself: but dtrace uses deprecated functions that turn into
+calls to both of these (ctf_update / ctf_discard), and should be rejigged to
+use these instead. (Easy.)
+
+CTF_LINK_NONDEDUP (flag): zero overhead, possibly worth keeping simply
+because it provides an option to add a "fast path" in future.
+
+ctf_fdopen: necessary component of ctf_open, we could hide it but someone
+would probably ask for it again. If you have an interface that takes a
+filename, you should have another that takes an fd...
+
+ctf_next_create / ctf_next_copy: useful mostly for people creating new _next
+iterators: currently no such exist outside of libctf, so there are no
+external users. There are *many* internal ones, and they are one interface
+with ctf_next_t, the _next iterators, and ctf_next_destroy, all of which do
+have external users.
+
+ctf_arc_lookup_symbol_name: No external users (!!), but libabigail has a
+slow inefficient reimplementation of it and should be using it instead.
+Will submit a patch.
+
+ctf_arc_flush_caches: No external users, not surprisingly since it's tied to
+ctf_arc_lookup_symbol_name. Removal means people cannot flush the cache of
+open dicts, even if they want to, which seems iffy.
+
+ctf_func_info / ctf_func_args: amazingly, unused: libabigail is implementing
+its own halfassed copy again. Will fix.
+
+ctf_lookup_enumerator / ctf_arc_lookup_enumerator_next: strange, these were
+added for drgn at their request!  maybe it just hasn't added a use of it
+yet. Very new, so it's not surprising there aren't other users. Does
+something you cannot otherwise do.
+
+ctf_lookup_enumerator_next: used only by the testsuite.  Should at least be
+marked as deprecated: it's only useful for dicts built using older versions
+of libctf (and BTF!) in which duplicate enumerators with the same name are
+allowed in the same dict. Very new, ditto.
+
+ctf_type_next: Remarkably, no users outside the testsuite. Cannot drop,
+ctf_type_iter is externally used and I'm trying to stick to the rule that we
+always have a _next if we have an _iter, to encourage people to migrate (and
+it's slowly working, _next is catching on).
+
+ctf_variable_next: Ditto.
+
+ctf_parent_dict: unused, but only because DTrace is calling its deprecated
+equivalent. Keep.
+
+ctf_dict_open: Ditto.
+
+ctf_dict_open_sections: no external users. Would anyone ever want to open an
+archive while handing it explicit sections that are not pulled out of an
+object file? Feels a bit unlikely. We could at least hide it until someone
+asks for it, but there are other very similar "open taking sections"
+functions like ctf_bufopen which *are* in use, so it feels risky...
+
+ctf_get_arc: no users, but provides info not otherwise available ("I have a
+dict, tell me what archive it came from so I can call the archive
+functions") which means people don't need to drag an archive around. Perhaps
+too new for people to have noticed it?
+
+ctf_getmodel: ditto: ctf_setmodel is used by DTrace. I hate the whole model
+concept and hope we can drop the lot.
+
+ctf_parent_name_set: unused, could drop it but that would make it hard to
+hand-construct dicts with ctf_create, that ctf_open can then open.
+
+ctf_write_mem: used inside ctf_link_write, could in theory drop it but that
+would make it hard to write out CTF dicts to memory buffers, which feels
+like a capability it would be unwise to drop. However... are callers ever
+going to want to write out single dicts at all? Maybe we can just say that
+they can write out archives, and emit a single dict for them if the archive
+has only one member? That would let us drop ctf_write* as a whole!
+
+ctf_arc_write: unused, but used by ctf_link and I really don't think we want to
+drop the ability to write these out (DTrace will start using them if we make the
+change mentioned above.)
+
+ctf_arc_write_fd: unused, but see ctf_fdopen above.
+
+ctf_link_add_cu_mapping: Used... but if we end up sticking with "one module at a
+time" (ugh), it will probably be unnecessary and the code that supports it
+(quite a lot in ctf-link) can go. I would be sad to see it leave :(
+
+ctf_link_set_memb_name_changer: will be unused once we migrate fully to BTF for
+kernel stuff (it's used to rename kernel modules from "foo.o" to "foo.ctf".)
+Fix DTrace and drop this facility.
+
+ctf_link_set_variable_filter: unused, *but* pahole filters out boring
+variables. We probably should do so as well, which means pahole will likely end
+up calling this.
+
+ctf_getdebug: ctf_setdebug is killingly useful for debugging, but I'm tempted
+to say that no external program has any business changing its behaviour if
+libctf has debugging turned on.
+
+ctf_getdatasect/getsymsect/getstrsect: no users, there to support the
+general rule that if you construct a CTF dict based on something (the three
+sections they can load) you should be able to get it out again. I have used
+ctf_getsymsect in the past in dtrace, and expect to need it again if we gain
+userspace CTF support. We could easily turn it into one function with an
+enum argument or something.  If CTFv4 ends up with no ELF string section tie
+(as seems likely), ctf_getstrsect may become semi-obsolescent and for CTFv3
+and below only: another reason to fuse them.
+
+ctf_sect_size: similarly only there for completeness, no users: without it
+you cannot e.g. call ctf_getdatasect and then know how big the results are.
+Could easily be fused with ctf_get*sect somehow into one big function that
+returns a section and its size in one go.
+
+ctf_symsect_endianness: only internal users: could hide it, but if we do,
+getting the symsect might be not terribly useful? I'm not sure.
+ctf_arc_symsect_endianness is used by readelf.
+
+ctf_type_iter_all: removal/augmentation of ctf_type_iter already planned.
+
+ctf_archive_count: used by the libctf testsuite, so has to be a public
+symbol, but could be moved into a non-installed header. Feels like something
+people might want to know anyway?
+
+ctf_archive_raw_iter: No users, lets you do things that are otherwise
+impossible (returning raw archive data without ctf_opening it, for archiving
+tools).  Could easily be moved into a separate header, but we already ruled
+out splitting up ctf-api.h into headers for different use cases.
+
+ctf_simple_open: used by the testsuite, probably not useful elsewhere: could
+move to a non-public header.
+
+ctf_parent_name: used in DTrace, objdump and readelf, but every use is
+working around the clunkiness of ctf_import: when we drop that, we can drop
+this too.
+
+ctf_ref: Lets you grab dicts returned by iterators and export them from the
+loop. No users, because now that open dicts are cached by ctf_archive_next()
+and the caller must close them, you can just export them from the loop
+without calling this at all. Drop.
+
+ctf_type_ischild: Not used outside libctf: it's literally just
+!ctf_type_isparent(), so maybe we can drop it and turn it into an internal
+convenience inline.
+
+ctf_type_aname_raw: No users! Likely redundant, callers can just do
+strdup (ctf_type_name_raw()), and do.
+
+ctf_compress_write: no users, rationalization with ctf_write planned.
+
+ctf_type_lname: No users! DIE DIE DIE
+
+ctf_import: widely used, DIE DIE DIE.
+
+ctf_file_close: deprecated, the only user is in ctfarchive in UEK*. Move
+relevant UEK versions to use ctf_dict_close instead, then drop! (They'll have to
+change a bit to allow for the CTFv4 API changes regardless, so this is easy.)
+
+ctf_parent_file: deprecated. No users outside DTrace. Drop (changing uses to
+ctf_parent_dict).
+
+ctf_arc_open_by_name_sections: deprecated, no users left, drop.
+
+ctf_update, ctf_discard: see ctf_snapshot above. Lots of users in DTrace,
+almost all of which are unnecessary because they date back to the days when
+you had to call ctf_update to see new types you added at all. DIE DIE DIE.
+
+ctf_gzwrite: unused, forces a dependency on <zlib.h>, broken for years and
+nobody noticed, writes something that needs special attention to open, has had
+bugs all of its own, has tests just to make sure those bugs are gone, KILL IT
+WITH FIRE.
