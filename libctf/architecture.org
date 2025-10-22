@@ -1,0 +1,175 @@
+* libctf architecture
+
+** File organization
+
+*** Headers
+
+- file:../include/ctf-api.h :: Public API.
+
+- file:../include/ctf.h :: Data structures for CTF, BTF (all structures and #defines
+  renamed so as not to collide with the canonical btf.h).
+
+- file:ctf-impl.h :: internal implementation header: everything common to more than
+  one place.  Important or widely-used structure definitions: ctf_dtdef
+  (in-memory representation); ctf_dedup (deduplicator state); ctf_dict (the CTF
+  dictionary itself, a giant bag of bits that should be sliced up more).
+
+- file:ctf-inlines.h :: a few inline definitions of heavily-used things for speed
+  (mostly important for deduplication).
+
+- file:ctf-intl.h / file:ctf-decls.h / file:ctf-endian.h / file:elf.h /
+  file:swap.h / file:ctf-qsort_r.c / file:ctf-port.c :: Minor headers and
+  compatibility code separate from [[ctf-impl.h]] to help out Autoconfery.
+
+- file:ctf-ref.h :: The ctf ref-handling functions: these will go seriously
+  wrong if called from anywhere but [[ctf-serialize.c]] or [[ctf-string.c]], so
+  they're separated out to make it hard to call by accident from anywhere
+  else.
+
+- file:ctf-sha1.h :: See [[ctf-sha1.c]] below.
+
+*** Source files
+
+**** Opening, querying and lookup
+
+- file:ctf-api.c :: Dict-wide API stuff like ctf_set_errno,
+  ctf_dict_set_flag, and the err_warn machinery.
+
+- file:ctf-open.c :: Handles opening current-version CTF and BTF from memory
+  buffers, importing children into parents (an operation that is likely to
+  become automatic in future), and provides a bunch of low-level accessor
+  functions for the very guts of individual type sections, for all file
+  format versions.  (This last bit is likely to move away soon.)
+
+  Opens single dicts only: does not understand archives.
+
+- file:ctf-open-bfd.c :: Handles opening CTF and BTF from ELF objects,
+  calling on BFD to do it.  Linked into libctf.so but not libctf-nobfd.so.
+  This file will always be GPL even when libctf moves to LGPL.  Internally
+  calls on functions in [[ctf-archive.c]], not [[ctf-open.c]], because ELF objects
+  can contain entire archives of CTF, not just single dicts.
+
+- file:ctf-types.c :: Type querying and type-graph chasing functions,
+  largely public API, ctf_type_* and the like. Mostly implemented in terms
+  of [[ctf_lookup.c]]:ctf_lookup_by_id and an internal function ctf_vlen.
+  Also contains core functions to map from type IDs to internal array
+  indexes in the dict and vice versa: possibly these should move to
+  [[ctf-open.c]].
+
+  Also contains type printing code and the like.
+
+- file:ctf-lookup.c :: A bit of a grab-bag, this does the very lowest-level
+  internal by-type-ID lookup (ctf_lookup_by_id), lookup of types by any
+  means other than type ID (e.g. ctf_lookup_by_name,
+  ctf_lookup_by_kind), and lookup of things that aren't types at all
+  (ctf_lookup_by_symbol, and functions relating to symbols, like
+  ctf_func_args).
+
+- file:ctf-decl.c :: Code decrypting the C declarator syntax: an
+  implementation detail of [[ctf-types.c]]:ctf_type_aname.
+
+- file:ctf-dump.c :: The type dumper, emitting a string describing a dict,
+  with some callbacks to let you format it.  No archive support: this is
+  done by the caller (usually trivial).
+
+- file:ctf-archive.c :: Code both reading and writing the CTF archive format
+  (or, shortly, formats).
+
+**** Dict creation and writeout
+
+- file:ctf-create.c :: Everything related to creating single dicts (not
+  archives). All the ctf_add_* functions, ctf_create, snapshots, DTDs,
+  type ID assignment... but 95% ctf_add_*.
+
+  Produces a hash table full of ctf_dtdef_t, each of which is a bunch of
+  bookkeeping and a dtd_buf which is valid CTF/BTF which could be written
+  straight out to the type section (plus some pointers into it).
+
+- file:ctf-string.c :: String addition and within-dict deduplication (but
+  the cross-dict deduplicator is a function in [[ctf-dedup.c]].  Abstracts away
+  the concept of holding references to strings which cause them to be
+  emitted into the CTF strtab, the ability to set the value of a reference
+  at a later date (to bind a strtab offset into all the places that refer to
+  a string), external strings in ELF file strtabs which cause the
+  corresponding string not to be emitted into the CTF strtab even if it's
+  referenced...
+
+  Some of the external string stuff may go away in future if (as seems
+  likely) CTF moves to a model where the symtypetabs are in a different ELF
+  section and just refer to ELF symbol names directly, and CTF (like BTF)
+  refers to hardly anything like that so doesn't need special "look it up in
+  the ELF strtab" stuff anymore.  But even then we'll need to remember which
+  ELF strings exist and what their offsets are...
+
+- file:ctf-serialize.c :: Writeout of CTF and BTF dicts, emitting BTF unless
+  LIBCTF_BTM_* says otherwise, allowing BTF writeout to fail if particular
+  prohibited type kinds are found.
+
+  The first of the more intricate files in libctf.  We have to handle
+  writing out CTF, BTF, the fact that type IDs and strtab offsets both
+  change while doing the writeout (we use refs -- see above -- to both
+  strings and type IDs to do this, so that once we figure out some final ID,
+  one function call suffices to update all the places that reference it).
+  We have to handle the problem that child dicts' IDs can't be known at all
+  until the parent's are known, and that the size of the string table and
+  thus all the string offsets can't be known until the strtab has been
+  deduplicated, which requires all the children of a given parent dict to
+  have been emitted at least far enough to have a strtab to deduplicate...
+
+  We have to go through all the type DTDs and take note of all the string
+  and type refs in them, figure out if they can be shrunk to a smaller
+  representation, and if so do it as they are written out; usually the
+  larger representation is CTF-only, so this too can force the writing of
+  CTF or cause emission failure if BTF emission is required.  The underlying
+  question of "can we shrink this type down" is handled by
+  ctf_prefix_elidable.
+
+  Also emits the symtypetabs, but this code will need some changes for the
+  new world in which symtypetabs are in a distinct ELF section and it's
+  harder to drop variables if a corresponding symbol also exists (we'll
+  probably have the symbol point to the variable instead, or have them both
+  point at the same thing: the first is more truthful, the second more
+  backward-compatible with existing users: maybe the file format should do
+  the first but the API chase the variable down to its type for you).
+
+- file:ctf-archive.c :: Code both reading and writing the CTF archive format
+  (or, shortly, formats).
+
+**** Deduplication and linking
+
+- file:ctf-dedup.c :: The type table and string table deduplicator.
+  Understands nothing outside those two sections, but does know what parents
+  and children are.  A huge comment at the top breaks down its internal
+  structure.  Purely internal API.
+
+- file:ctf-link.c :: The external, publically-visible ctf_link* interface;
+  handles calling the deduplicator, cu-mapping, accumulating the linker's
+  symbols and strings and binding them to CTF types, (in v3) variable
+  section linking (needs fixing for v4), etc etc. Probably the ugliest thing
+  in libctf because it's a big ball of glue between the ELF world and the
+  world of pure types floating in the type table void. I need to go through
+  it at some point and see which bits can be simplified away in the BTF
+  world (about 300 lines have already caught my eye).
+
+**** Internal data structures
+
+- file:ctf-hash.c :: The ctf_dynhash and ctf_dynset implementations.  Just
+  a wrapper around libiberty hashtab right now, this could in theory change
+  for performance.  Both are used very *very* heavily by the deduplicator:
+  having billions of hashtab elements is quite possible.
+
+- file:ctf-util.c :: List functions, string functions, ctf_next_*, the
+  underlying ref machinery used for string and type refs (see above):
+  low-level utility functions.
+
+- file:ctf-error.c :: The guts of ctf_errmsg and ctf_errno.  Needs to be
+  in a separate file due to macro evil.
+
+- file:ctf-sha1.c :: A tiny wrapper around libiberty's SHA-1 implementation.
+  Used by [[ctf-dedup.c]].
+
+*** Unrevised
+
+- file:ctf-open-compat.c :: Read-side compatibility for CTFv1/2/3. Still to
+  be implemented/revised for v4, won't even compile. The new implementation
+  will be very different and much simpler than what we have now.
