@@ -3700,20 +3700,6 @@ add_line (struct linetable *lt, int lineno, CORE_ADDR adr, int last)
 
 /* Sorting and reordering procedures.  */
 
-/* Blocks with a smaller low bound should come first.  */
-
-static bool
-block_is_less_than (const struct block *b1, const struct block *b2)
-{
-  CORE_ADDR start1 = b1->start ();
-  CORE_ADDR start2 = b2->start ();
-
-  if (start1 != start2)
-    return start1 < start2;
-
-  return (b2->end ()) < (b1->end ());
-}
-
 /* Sort the blocks of a symtab S.
    Reorder the blocks in the blockvector by code-address,
    as required by some MI search routines.  */
@@ -3745,8 +3731,8 @@ sort_blocks (struct symtab *s)
     {
       gdb::array_view<block *> blocks_view = bv->blocks ();
 
-      std::sort (blocks_view.begin () + FIRST_LOCAL_BLOCK,
-		 blocks_view.end (), block_is_less_than);
+      std::stable_sort (blocks_view.begin () + FIRST_LOCAL_BLOCK,
+			blocks_view.end (), blockvector::block_less_than);
     }
 
   {
