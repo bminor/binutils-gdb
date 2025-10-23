@@ -777,8 +777,7 @@ openp (const char *path, openp_flags opts, const char *string,
        const char *cwd)
 {
   int fd;
-  char *filename;
-  int alloclen;
+  std::string filename;
   /* The errno set for the last name we tried to open (and
      failed).  */
   int last_errno = 0;
@@ -812,16 +811,14 @@ openp (const char *path, openp_flags opts, const char *string,
 
       if (is_regular_file (string, &reg_file_errno))
 	{
-	  filename = (char *) alloca (strlen (string) + 1);
-	  strcpy (filename, string);
-	  fd = gdb_open_cloexec (filename, mode, 0).release ();
+	  filename = string;
+	  fd = gdb_open_cloexec (filename.c_str (), mode, 0).release ();
 	  if (fd >= 0)
 	    goto done;
 	  last_errno = errno;
 	}
       else
 	{
-	  filename = NULL;
 	  fd = -1;
 	  last_errno = reg_file_errno;
 	}
@@ -835,9 +832,6 @@ openp (const char *path, openp_flags opts, const char *string,
   /* Remove characters from the start of PATH that we don't need when PATH
      is appended to a directory name.  */
   string = prepare_path_for_appending (string);
-
-  alloclen = strlen (path) + strlen (string) + 2;
-  filename = (char *) alloca (alloclen);
   fd = -1;
   last_errno = ENOENT;
 
@@ -846,46 +840,20 @@ openp (const char *path, openp_flags opts, const char *string,
   for (const gdb::unique_xmalloc_ptr<char> &dir_up : dir_vec)
     {
       char *dir = dir_up.get ();
-      size_t len = strlen (dir);
       int reg_file_errno;
 
       if (strcmp (dir, "$cwd") == 0)
 	{
 	  /* Name is $cwd -- insert current directory name instead.  */
-	  int newlen;
-
-	  /* First, realloc the filename buffer if too short.  */
-	  len = strlen (cwd);
-	  newlen = len + strlen (string) + 2;
-	  if (newlen > alloclen)
-	    {
-	      alloclen = newlen;
-	      filename = (char *) alloca (alloclen);
-	    }
-	  strcpy (filename, cwd);
+	  filename = cwd;
 	}
-      else if (strchr(dir, '~'))
+      else if (strchr (dir, '~'))
 	{
-	 /* See whether we need to expand the tilde.  */
-	  int newlen;
-
-	  gdb::unique_xmalloc_ptr<char> tilde_expanded (tilde_expand (dir));
-
-	  /* First, realloc the filename buffer if too short.  */
-	  len = strlen (tilde_expanded.get ());
-	  newlen = len + strlen (string) + 2;
-	  if (newlen > alloclen)
-	    {
-	      alloclen = newlen;
-	      filename = (char *) alloca (alloclen);
-	    }
-	  strcpy (filename, tilde_expanded.get ());
+	  /* See whether we need to expand the tilde.  */
+	  filename = gdb::unique_xmalloc_ptr<char> (tilde_expand (dir)).get ();
 	}
       else
 	{
-	  /* Normal file name in path -- just use it.  */
-	  strcpy (filename, dir);
-
 	  /* Don't search $cdir.  It's also a magic path like $cwd, but we
 	     don't have enough information to expand it.  The user *could*
 	     have an actual directory named '$cdir' but handling that would
@@ -895,16 +863,19 @@ openp (const char *path, openp_flags opts, const char *string,
 	     $cdir must have already been expanded to the correct value.  */
 	  if (strcmp (dir, "$cdir") == 0)
 	    continue;
+
+	  /* Normal file name in path -- just use it.  */
+	  filename = dir;
 	}
 
       /* Remove trailing slashes.  */
-      while (len > 0 && IS_DIR_SEPARATOR (filename[len - 1]))
-	filename[--len] = 0;
+      while (!filename.empty () && IS_DIR_SEPARATOR (filename.back ()))
+	filename.pop_back ();
 
-      strcat (filename + len, SLASH_STRING);
-      strcat (filename, string);
+      filename += SLASH_STRING;
+      filename += string;
 
-      if (is_regular_file (filename, &reg_file_errno))
+      if (is_regular_file (filename.c_str (), &reg_file_errno))
 	{
 	  fd = gdb_open_cloexec (filename, mode, 0).release ();
 	  if (fd >= 0)
@@ -922,10 +893,10 @@ done:
       if (fd < 0)
 	filename_opened->reset (NULL);
       else if ((opts & OPF_RETURN_REALPATH) != 0)
-	*filename_opened = gdb_realpath (filename);
+	*filename_opened = gdb_realpath (filename.c_str ());
       else
 	*filename_opened
-	  = make_unique_xstrdup (gdb_abspath (filename, cwd).c_str ());
+	  = make_unique_xstrdup (gdb_abspath (filename.c_str (), cwd).c_str ());
     }
 
   errno = last_errno;
