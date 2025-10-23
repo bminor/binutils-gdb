@@ -79,38 +79,38 @@ namespace detail
    Those are used to generate the constructor.  */
 
 template<typename Function, Function *function, typename Signature>
-struct forward_scope_exit;
+struct forward_scope_exit_policy;
 
 template<typename Function, Function *function,
 	 typename Res, typename... Args>
-class forward_scope_exit<Function, function, Res (Args...)>
-  : public scope_exit_base<forward_scope_exit<Function,
-					      function,
-					      Res (Args...)>>
+class forward_scope_exit_policy<Function, function, Res (Args...)>
 {
-  /* For access to on_exit().  */
-  friend scope_exit_base<forward_scope_exit<Function,
-					    function,
-					    Res (Args...)>>;
-
 public:
-  explicit forward_scope_exit (Args ...args)
+  explicit forward_scope_exit_policy (Args ...args)
     : m_bind_function (function, args...)
   {
     /* Nothing.  */
   }
 
-private:
+  DISABLE_COPY_AND_ASSIGN (forward_scope_exit_policy);
+
   void on_exit ()
   {
     m_bind_function ();
   }
 
+private:
   /* The function and the arguments passed to the ctor, all packed in
      a std::bind.  */
   decltype (std::bind (function, std::declval<Args> ()...))
     m_bind_function;
 };
+
+template<typename Function, Function *function,
+	 typename Res, typename... Args>
+using forward_scope_exit
+	= scope_exit_base<forward_scope_exit_policy<Function,
+						    function, Res, Args...>>;
 
 } /* namespace detail */
 
