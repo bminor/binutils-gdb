@@ -3183,7 +3183,7 @@ gdb_print_filename (char *to_print, char *full_pathname, int prefix_bytes,
 		    const struct match_list_displayer *displayer)
 {
   int printed_len, extension_char, slen, tlen;
-  char *s, c, *new_full_pathname;
+  char c, *new_full_pathname;
   const char *dn;
   extern int _rl_complete_mark_directories;
 
@@ -3220,7 +3220,7 @@ gdb_print_filename (char *to_print, char *full_pathname, int prefix_bytes,
 	    dn = "/";		/* don't turn /// into // */
 	  else
 	    dn = full_pathname;
-	  s = tilde_expand (dn);
+	  char *s = gdb_rl_tilde_expand (dn).release ();
 	  if (rl_directory_completion_hook)
 	    (*rl_directory_completion_hook) (&s);
 
@@ -3245,20 +3245,22 @@ gdb_print_filename (char *to_print, char *full_pathname, int prefix_bytes,
 
 	  xfree (new_full_pathname);
 	  to_print[-1] = c;
+
+	  xfree (s);
 	}
       else
 	{
-	  s = tilde_expand (full_pathname);
+	  gdb::unique_xmalloc_ptr<char> s
+	    = gdb_rl_tilde_expand (full_pathname);
 #if defined (VISIBLE_STATS)
 	  if (rl_visible_stats)
 	    extension_char = stat_char (s);
 	  else
 #endif
-	    if (gdb_path_isdir (s))
+	    if (gdb_path_isdir (s.get ()))
 	      extension_char = '/';
 	}
 
-      xfree (s);
       if (extension_char)
 	{
 	  displayer->putch (displayer, extension_char);

@@ -39,7 +39,6 @@
 #include "build-id.h"
 
 #include <fcntl.h>
-#include "readline/tilde.h"
 #include "gdbcore.h"
 
 #include <sys/stat.h>
@@ -558,7 +557,8 @@ exec_file_command (const char *args, int from_tty)
       if (*argv == NULL)
 	error (_("No executable file name was specified"));
 
-      gdb::unique_xmalloc_ptr<char> filename (tilde_expand (*argv));
+      gdb::unique_xmalloc_ptr<char> filename
+	= gdb_rl_tilde_expand (*argv);
       exec_file_attach (filename.get (), from_tty);
     }
   else

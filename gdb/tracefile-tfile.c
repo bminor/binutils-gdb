@@ -19,7 +19,6 @@
 
 #include "extract-store-integer.h"
 #include "tracefile.h"
-#include "readline/tilde.h"
 #include "gdbsupport/filestuff.h"
 #include "gdbsupport/rsp-low.h"
 #include "regcache.h"
@@ -121,7 +120,7 @@ tfile_start (struct trace_file_writer *self, const char *filename)
   struct tfile_trace_file_writer *writer
     = (struct tfile_trace_file_writer *) self;
 
-  writer->pathname = tilde_expand (filename);
+  writer->pathname = gdb_rl_tilde_expand (filename).release ();
   writer->fp = gdb_fopen_cloexec (writer->pathname, "wb").release ();
   if (writer->fp == NULL)
     error (_("Unable to open file '%s' for saving trace data (%s)"),

@@ -39,7 +39,6 @@
 #include "filenames.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "completer.h"
-#include "readline/tilde.h"
 #include "block.h"
 #include "observable.h"
 #include "exec.h"
@@ -1685,7 +1684,8 @@ symfile_bfd_open (const char *name)
   gdb::unique_xmalloc_ptr<char> absolute_name;
   if (!is_target_filename (name))
     {
-      gdb::unique_xmalloc_ptr<char> expanded_name (tilde_expand (name));
+      gdb::unique_xmalloc_ptr<char> expanded_name
+	= gdb_rl_tilde_expand (name);
 
       /* Look down path for it, allocate 2nd new malloc'd copy.  */
       desc = openp (getenv ("PATH"),
@@ -2005,7 +2005,8 @@ generic_load (const char *args, int from_tty)
 
   gdb_argv argv (args);
 
-  gdb::unique_xmalloc_ptr<char> filename (tilde_expand (argv[0]));
+  gdb::unique_xmalloc_ptr<char> filename
+    = gdb_rl_tilde_expand (argv[0]);
 
   if (argv[1] != NULL)
     {
@@ -2222,7 +2223,7 @@ add_symbol_file_command (const char *args, int from_tty)
 	  if (filename == NULL)
 	    {
 	      /* First non-option argument is always the filename.  */
-	      filename.reset (tilde_expand (arg));
+	      filename = gdb_rl_tilde_expand (arg);
 	    }
 	  else if (!seen_addr)
 	    {

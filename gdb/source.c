@@ -39,7 +39,6 @@
 #include "filenames.h"
 #include "completer.h"
 #include "ui-out.h"
-#include "readline/tilde.h"
 #include "gdbsupport/enum-flags.h"
 #include "gdbsupport/scoped_fd.h"
 #include <algorithm>
@@ -564,8 +563,7 @@ add_path (const char *dirname, char **which_path, int parse_separators)
       if (name[0] == '\0')
 	goto skip_dup;
       if (name[0] == '~')
-	new_name_holder
-	  = gdb::unique_xmalloc_ptr<char[]> (tilde_expand (name)).get ();
+	new_name_holder = gdb_rl_tilde_expand (name).get ();
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM
       else if (IS_ABSOLUTE_PATH (name) && p == name + 2) /* "d:" => "d:." */
 	new_name_holder = std::string (name) + ".";
@@ -850,7 +848,7 @@ openp (const char *path, openp_flags opts, const char *string,
       else if (strchr (dir, '~'))
 	{
 	  /* See whether we need to expand the tilde.  */
-	  filename = gdb::unique_xmalloc_ptr<char> (tilde_expand (dir)).get ();
+	  filename = gdb_rl_tilde_expand (dir).get ();
 	}
       else
 	{

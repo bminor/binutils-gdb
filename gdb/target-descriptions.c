@@ -34,7 +34,6 @@
 #include "inferior.h"
 #include <algorithm>
 #include "completer.h"
-#include "readline/tilde.h"
 #include "cli/cli-style.h"
 
 /* Types.  */
@@ -1860,7 +1859,7 @@ maintenance_check_xml_descriptions (const char *dir, int from_tty)
   if (dir == NULL)
     error (_("Missing dir name"));
 
-  gdb::unique_xmalloc_ptr<char> dir1 (tilde_expand (dir));
+  gdb::unique_xmalloc_ptr<char> dir1 = gdb_rl_tilde_expand (dir);
   std::string feature_dir (dir1.get ());
   unsigned int failed = 0;
 

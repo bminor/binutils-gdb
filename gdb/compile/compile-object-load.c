@@ -22,7 +22,6 @@
 #include "command.h"
 #include "objfiles.h"
 #include "gdbcore.h"
-#include "readline/tilde.h"
 #include "bfdlink.h"
 #include "cli/cli-cmds.h"
 #include "regcache.h"
@@ -613,7 +612,7 @@ compile_object_load (const compile_file_names &file_names,
   struct type *expect_return_type;
 
   gdb::unique_xmalloc_ptr<char> filename
-    (tilde_expand (file_names.object_file ()));
+    = gdb_rl_tilde_expand (file_names.object_file ());
 
   gdb_bfd_ref_ptr abfd (gdb_bfd_open (filename.get (), gnutarget));
   if (abfd == NULL)

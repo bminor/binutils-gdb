@@ -24,7 +24,6 @@
 #include "value.h"
 #include "completer.h"
 #include "target.h"
-#include "readline/tilde.h"
 #include "gdbcore.h"
 #include "cli/cli-utils.h"
 #include "gdb_bfd.h"
@@ -77,7 +76,7 @@ scan_filename (const char **cmd, const char *defname)
     }
   gdb_assert (filename != NULL);
 
-  return gdb::unique_xmalloc_ptr<char> (tilde_expand (filename.get ()));
+  return gdb_rl_tilde_expand (filename.get ());
 }
 
 static gdb_bfd_ref_ptr

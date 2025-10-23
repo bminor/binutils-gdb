@@ -38,7 +38,6 @@
 #include "filenames.h"
 #include "exec.h"
 #include "observable.h"
-#include "readline/tilde.h"
 #include "solib.h"
 #include "interps.h"
 #include "filesystem.h"
@@ -500,7 +499,8 @@ solib_ops::iterate_over_objfiles_in_search_order
 static int
 solib_map_sections (solib &so)
 {
-  gdb::unique_xmalloc_ptr<char> filename (tilde_expand (so.name.c_str ()));
+  gdb::unique_xmalloc_ptr<char> filename
+    = gdb_rl_tilde_expand (so.name.c_str ());
   gdb_bfd_ref_ptr abfd (so.ops ().bfd_open (filename.get ()));
 
   /* If we have a core target then the core target might have some helpful
@@ -1418,8 +1418,8 @@ reload_shared_libraries_1 (int from_tty)
       if (from_tty)
 	add_flags |= SYMFILE_VERBOSE;
 
-      gdb::unique_xmalloc_ptr<char> filename (
-	tilde_expand (so.original_name.c_str ()));
+      gdb::unique_xmalloc_ptr<char> filename
+	= gdb_rl_tilde_expand (so.original_name.c_str ());
 
       gdb_bfd_ref_ptr abfd = so.ops ().bfd_open (filename.get ());
       if (abfd != NULL)

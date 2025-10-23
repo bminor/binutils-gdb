@@ -40,7 +40,6 @@
 #include "gdbsupport/gdb-dlfcn.h"
 #include <sys/stat.h>
 #include "gdb_bfd.h"
-#include "readline/tilde.h"
 #include "completer.h"
 #include <forward_list>
 
@@ -179,7 +178,8 @@ jit_reader_load_command (const char *args, int from_tty)
 {
   if (args == NULL)
     error (_("No reader name provided."));
-  gdb::unique_xmalloc_ptr<char> file (tilde_expand (args));
+  gdb::unique_xmalloc_ptr<char> file
+    = gdb_rl_tilde_expand (args);
 
   if (loaded_jit_reader != NULL)
     error (_("JIT reader already loaded.  Run jit-reader-unload first."));

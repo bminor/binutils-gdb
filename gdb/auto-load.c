@@ -30,7 +30,6 @@
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-setshow.h"
-#include "readline/tilde.h"
 #include "completer.h"
 #include "fnmatch.h"
 #include "top.h"
@@ -269,7 +268,8 @@ auto_load_safe_path_vec_update (void)
   for (size_t i = 0; i < len; i++)
     {
       gdb::unique_xmalloc_ptr<char> &in_vec = auto_load_safe_path_vec[i];
-      gdb::unique_xmalloc_ptr<char> expanded (tilde_expand (in_vec.get ()));
+      gdb::unique_xmalloc_ptr<char> expanded
+	= gdb_rl_tilde_expand (in_vec.get ());
       gdb::unique_xmalloc_ptr<char> real_path = gdb_realpath (expanded.get ());
 
       /* Ensure the current entry is at least tilde_expand-ed.  ORIGINAL makes

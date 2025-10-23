@@ -37,7 +37,6 @@
 #include "typeprint.h"
 #include "cli/cli-cmds.h"
 #include "source.h"
-#include "readline/tilde.h"
 #include <cli/cli-style.h>
 #include "gdbsupport/buildargv.h"
 
@@ -435,7 +434,7 @@ maintenance_print_symbols (const char *args, int from_tty)
       if (argv[outfile_idx + 1] != NULL)
 	error (_("Junk at end of command"));
       gdb::unique_xmalloc_ptr<char> outfile_name
-	(tilde_expand (argv[outfile_idx]));
+	= gdb_rl_tilde_expand (argv[outfile_idx]);
       if (!arg_outfile.open (outfile_name.get (), FOPEN_WT))
 	perror_with_name (outfile_name.get ());
       outfile = &arg_outfile;
@@ -698,7 +697,7 @@ maintenance_print_msymbols (const char *args, int from_tty)
       if (argv[outfile_idx + 1] != NULL)
 	error (_("Junk at end of command"));
       gdb::unique_xmalloc_ptr<char> outfile_name
-	(tilde_expand (argv[outfile_idx]));
+	= gdb_rl_tilde_expand (argv[outfile_idx]);
       if (!arg_outfile.open (outfile_name.get (), FOPEN_WT))
 	perror_with_name (outfile_name.get ());
       outfile = &arg_outfile;

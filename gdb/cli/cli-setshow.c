@@ -15,7 +15,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "readline/tilde.h"
 #include "value.h"
 #include "arch-utils.h"
 #include "observable.h"
@@ -385,7 +384,7 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
       [[fallthrough]];
     case var_optional_filename:
       {
-	char *val = NULL;
+	gdb::unique_xmalloc_ptr<char> val;
 
 	if (*arg != '\0')
 	  {
@@ -397,14 +396,13 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	    gdb::unique_xmalloc_ptr<char> copy
 	      = make_unique_xstrndup (arg, ptr + 1 - arg);
 
-	    val = tilde_expand (copy.get ());
+	    val = gdb_rl_tilde_expand (copy.get ());
 	  }
 	else
-	  val = xstrdup ("");
+	  val = make_unique_xstrdup ("");
 
 	option_changed
-	  = c->var->set<std::string> (std::string (val));
-	xfree (val);
+	  = c->var->set<std::string> (std::string (val.get ()));
       }
       break;
     case var_boolean:

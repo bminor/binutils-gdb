@@ -19,7 +19,6 @@
 
 #include "arch-utils.h"
 #include "exceptions.h"
-#include "readline/tilde.h"
 #include "completer.h"
 #include "target.h"
 #include "gdbsupport/gdb_wait.h"
@@ -520,7 +519,7 @@ cd_command (const char *dir, int from_tty)
   dont_repeat ();
 
   gdb::unique_xmalloc_ptr<char> dir_holder
-    (tilde_expand (dir != NULL ? dir : "~"));
+    = gdb_rl_tilde_expand (dir != NULL ? dir : "~");
   dir = dir_holder.get ();
 
   if (chdir (dir) < 0)
@@ -638,7 +637,8 @@ find_and_open_script (const char *script_file, int search_path)
   openp_flags search_flags = OPF_TRY_CWD_FIRST | OPF_RETURN_REALPATH;
   std::optional<open_script> opened;
 
-  gdb::unique_xmalloc_ptr<char> file (tilde_expand (script_file));
+  gdb::unique_xmalloc_ptr<char> file
+    = gdb_rl_tilde_expand (script_file);
 
   if (search_path)
     search_flags |= OPF_SEARCH_IN_PATH;

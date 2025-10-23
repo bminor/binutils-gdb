@@ -27,7 +27,6 @@
 #include "value.h"
 #include "language.h"
 #include "gdbsupport/event-loop.h"
-#include "readline/tilde.h"
 #include "python.h"
 #include "extension-priv.h"
 #include "cli/cli-utils.h"
