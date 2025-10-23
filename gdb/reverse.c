@@ -44,7 +44,8 @@ exec_reverse_once (const char *cmd, const char *args, int from_tty)
 	   cmd);
 
   if (!target_can_execute_reverse ())
-    error (_("Target %s does not support this command."), target_shortname ());
+    error (_("Reverse execution is not currently supported.\n"
+	     "You may need to record the execution first."));
 
   std::string reverse_command = string_printf ("%s %s", cmd, args ? args : "");
   scoped_restore restore_exec_dir
