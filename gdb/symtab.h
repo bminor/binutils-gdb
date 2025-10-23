@@ -2802,7 +2802,7 @@ bool compare_glob_filenames_for_search (const char *filename,
 void iterate_over_symtabs (program_space *pspace, const char *name,
 			   gdb::function_view<bool (symtab *)> callback);
 
-std::vector<CORE_ADDR> find_pcs_for_symtab_line
+std::vector<const linetable_entry *> find_linetable_entries_for_symtab_line
     (struct symtab *symtab, int line, const linetable_entry **best_entry);
 
 /* Prototype for callbacks for LA_ITERATE_OVER_SYMBOLS.  The callback

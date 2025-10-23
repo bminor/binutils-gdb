@@ -3343,13 +3343,12 @@ done:
    exactly match LINE.  Returns an empty vector if there are no exact
    matches, but updates BEST_ITEM in this case.  */
 
-std::vector<CORE_ADDR>
-find_pcs_for_symtab_line (struct symtab *symtab, int line,
-			  const linetable_entry **best_item)
+std::vector<const linetable_entry *>
+find_linetable_entries_for_symtab_line (struct symtab *symtab, int line,
+					const linetable_entry **best_item)
 {
   int start = 0;
-  std::vector<CORE_ADDR> result;
-  struct objfile *objfile = symtab->compunit ()->objfile ();
+  std::vector<const linetable_entry *> result;
 
   /* First, collect all the PCs that are at this line.  */
   while (1)
@@ -3373,7 +3372,7 @@ find_pcs_for_symtab_line (struct symtab *symtab, int line,
 	  break;
 	}
 
-      result.push_back (symtab->linetable ()->item[idx].pc (objfile));
+      result.push_back (&symtab->linetable ()->item[idx]);
       start = idx + 1;
     }
 
