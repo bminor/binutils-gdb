@@ -1420,12 +1420,15 @@ value::address () const
 {
   if (m_lval != lval_memory)
     return 0;
+
   if (m_parent != NULL)
     return m_parent->address () + m_offset;
-  if (NULL != type ()->dyn_prop (DYN_PROP_DATA_LOCATION))
+
+  if (dynamic_prop *dyn_prop = type ()->dyn_prop (DYN_PROP_DATA_LOCATION);
+      dyn_prop != nullptr)
     {
-      gdb_assert (type ()->dyn_prop (DYN_PROP_DATA_LOCATION)->is_constant ());
-      return TYPE_DATA_LOCATION_ADDR (type ());
+      gdb_assert (dyn_prop->is_constant ());
+      return dyn_prop->const_val ();
     }
 
   return m_location.address + m_offset;
@@ -1658,15 +1661,15 @@ value::set_component_location (const struct value *whole)
   /* If the WHOLE value has a dynamically resolved location property then
      update the address of the COMPONENT.  */
   type = whole->type ();
-  if (NULL != type->dyn_prop (DYN_PROP_DATA_LOCATION)
-      && type->dyn_prop (DYN_PROP_DATA_LOCATION)->is_constant ())
-    set_address (TYPE_DATA_LOCATION_ADDR (type));
+  if (dynamic_prop *dyn_prop = type->dyn_prop (DYN_PROP_DATA_LOCATION);
+      dyn_prop != nullptr && dyn_prop->is_constant ())
+    set_address (dyn_prop->const_val ());
 
   /* Similarly, if the COMPONENT value has a dynamically resolved location
      property then update its address.  */
   type = this->type ();
-  if (NULL != type->dyn_prop (DYN_PROP_DATA_LOCATION)
-      && type->dyn_prop (DYN_PROP_DATA_LOCATION)->is_constant ())
+  if (dynamic_prop *dyn_prop = type->dyn_prop (DYN_PROP_DATA_LOCATION);
+      dyn_prop != nullptr && dyn_prop->is_constant ())
     {
       /* If the COMPONENT has a dynamic location, and is an
 	 lval_internalvar_component, then we change it to a lval_memory.
@@ -1692,7 +1695,8 @@ value::set_component_location (const struct value *whole)
 	}
       else
 	gdb_assert (this->lval () == lval_memory);
-      set_address (TYPE_DATA_LOCATION_ADDR (type));
+
+      set_address (dyn_prop->const_val ());
     }
 }
 
@@ -3683,9 +3687,12 @@ value_from_contents_and_address (struct type *type,
     v = value::allocate_lazy (resolved_type);
   else
     v = value_from_contents (resolved_type, valaddr);
-  if (resolved_type_no_typedef->dyn_prop (DYN_PROP_DATA_LOCATION) != NULL
-      && resolved_type_no_typedef->dyn_prop (DYN_PROP_DATA_LOCATION)->is_constant ())
-    address = TYPE_DATA_LOCATION_ADDR (resolved_type_no_typedef);
+
+  if (dynamic_prop *dyn_prop
+	= resolved_type_no_typedef->dyn_prop (DYN_PROP_DATA_LOCATION);
+      dyn_prop != nullptr && dyn_prop->is_constant ())
+    address = dyn_prop->const_val ();
+
   v->set_lval (lval_memory);
   v->set_address (address);
   return v;

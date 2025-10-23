@@ -1931,10 +1931,6 @@ extern unsigned type_align (struct type *);
    space in struct type.  */
 extern bool set_type_align (struct type *, ULONGEST);
 
-/* Property accessors for the type data location.  */
-#define TYPE_DATA_LOCATION_ADDR(thistype) \
-  ((thistype)->dyn_prop (DYN_PROP_DATA_LOCATION)->const_val ())
-
 /* C++ */
 
 #define TYPE_SELF_TYPE(thistype) internal_type_self_type (thistype)
