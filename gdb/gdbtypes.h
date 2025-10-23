@@ -1932,24 +1932,12 @@ extern unsigned type_align (struct type *);
 extern bool set_type_align (struct type *, ULONGEST);
 
 /* Property accessors for the type data location.  */
-#define TYPE_DATA_LOCATION(thistype) \
-  ((thistype)->dyn_prop (DYN_PROP_DATA_LOCATION))
 #define TYPE_DATA_LOCATION_BATON(thistype) \
-  TYPE_DATA_LOCATION (thistype)->data.baton
+  ((thistype)->dyn_prop (DYN_PROP_DATA_LOCATION)->data.baton)
 #define TYPE_DATA_LOCATION_ADDR(thistype) \
-  (TYPE_DATA_LOCATION (thistype)->const_val ())
+  ((thistype)->dyn_prop (DYN_PROP_DATA_LOCATION)->const_val ())
 #define TYPE_DATA_LOCATION_KIND(thistype) \
-  (TYPE_DATA_LOCATION (thistype)->kind ())
-#define TYPE_DYNAMIC_LENGTH(thistype) \
-  ((thistype)->dyn_prop (DYN_PROP_BYTE_SIZE))
-
-/* Property accessors for the type allocated/associated.  */
-#define TYPE_ALLOCATED_PROP(thistype) \
-  ((thistype)->dyn_prop (DYN_PROP_ALLOCATED))
-#define TYPE_ASSOCIATED_PROP(thistype) \
-  ((thistype)->dyn_prop (DYN_PROP_ASSOCIATED))
-#define TYPE_RANK_PROP(thistype) \
-  ((thistype)->dyn_prop (DYN_PROP_RANK))
+  ((thistype)->dyn_prop (DYN_PROP_DATA_LOCATION)->kind ())
 
 /* C++ */
 

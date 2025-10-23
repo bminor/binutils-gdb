@@ -1422,9 +1422,9 @@ value::address () const
     return 0;
   if (m_parent != NULL)
     return m_parent->address () + m_offset;
-  if (NULL != TYPE_DATA_LOCATION (type ()))
+  if (NULL != type ()->dyn_prop (DYN_PROP_DATA_LOCATION))
     {
-      gdb_assert (TYPE_DATA_LOCATION (type ())->is_constant ());
+      gdb_assert (type ()->dyn_prop (DYN_PROP_DATA_LOCATION)->is_constant ());
       return TYPE_DATA_LOCATION_ADDR (type ());
     }
 
@@ -1658,15 +1658,15 @@ value::set_component_location (const struct value *whole)
   /* If the WHOLE value has a dynamically resolved location property then
      update the address of the COMPONENT.  */
   type = whole->type ();
-  if (NULL != TYPE_DATA_LOCATION (type)
-      && TYPE_DATA_LOCATION (type)->is_constant ())
+  if (NULL != type->dyn_prop (DYN_PROP_DATA_LOCATION)
+      && type->dyn_prop (DYN_PROP_DATA_LOCATION)->is_constant ())
     set_address (TYPE_DATA_LOCATION_ADDR (type));
 
   /* Similarly, if the COMPONENT value has a dynamically resolved location
      property then update its address.  */
   type = this->type ();
-  if (NULL != TYPE_DATA_LOCATION (type)
-      && TYPE_DATA_LOCATION (type)->is_constant ())
+  if (NULL != type->dyn_prop (DYN_PROP_DATA_LOCATION)
+      && type->dyn_prop (DYN_PROP_DATA_LOCATION)->is_constant ())
     {
       /* If the COMPONENT has a dynamic location, and is an
 	 lval_internalvar_component, then we change it to a lval_memory.
@@ -3107,13 +3107,13 @@ value::primitive_field (LONGEST offset, int fieldno, struct type *arg_type)
       v->set_offset (this->offset ());
       v->set_embedded_offset (offset + embedded_offset () + boffset);
     }
-  else if (NULL != TYPE_DATA_LOCATION (type))
+  else if (NULL != type->dyn_prop (DYN_PROP_DATA_LOCATION))
     {
       /* Field is a dynamic data member.  */
 
       gdb_assert (0 == offset);
       /* We expect an already resolved data location.  */
-      gdb_assert (TYPE_DATA_LOCATION (type)->is_constant ());
+      gdb_assert (type->dyn_prop (DYN_PROP_DATA_LOCATION)->is_constant ());
       /* For dynamic data types defer memory allocation
 	 until we actual access the value.  */
       v = value::allocate_lazy (type);
@@ -3683,8 +3683,8 @@ value_from_contents_and_address (struct type *type,
     v = value::allocate_lazy (resolved_type);
   else
     v = value_from_contents (resolved_type, valaddr);
-  if (TYPE_DATA_LOCATION (resolved_type_no_typedef) != NULL
-      && TYPE_DATA_LOCATION (resolved_type_no_typedef)->is_constant ())
+  if (resolved_type_no_typedef->dyn_prop (DYN_PROP_DATA_LOCATION) != NULL
+      && resolved_type_no_typedef->dyn_prop (DYN_PROP_DATA_LOCATION)->is_constant ())
     address = TYPE_DATA_LOCATION_ADDR (resolved_type_no_typedef);
   v->set_lval (lval_memory);
   v->set_address (address);

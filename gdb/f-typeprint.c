@@ -173,12 +173,12 @@ f_language::f_type_print_varspec_suffix (struct type *type,
 	print_rank_only = true;
       else if (type_not_allocated (type))
 	print_rank_only = true;
-      else if ((TYPE_ASSOCIATED_PROP (type)
-		&& !TYPE_ASSOCIATED_PROP (type)->is_constant ())
-	       || (TYPE_ALLOCATED_PROP (type)
-		   && !TYPE_ALLOCATED_PROP (type)->is_constant ())
-	       || (TYPE_DATA_LOCATION (type)
-		   && !TYPE_DATA_LOCATION (type)->is_constant ()))
+      else if ((type->dyn_prop (DYN_PROP_ASSOCIATED)
+		&& !type->dyn_prop (DYN_PROP_ASSOCIATED)->is_constant ())
+	       || (type->dyn_prop (DYN_PROP_ALLOCATED)
+		   && !type->dyn_prop (DYN_PROP_ALLOCATED)->is_constant ())
+	       || (type->dyn_prop (DYN_PROP_DATA_LOCATION)
+		   && !type->dyn_prop (DYN_PROP_DATA_LOCATION)->is_constant ()))
 	{
 	  /* This case exist when we ptype a typename which has the dynamic
 	     properties but cannot be resolved as there is no object.  */
