@@ -5432,11 +5432,25 @@ struct match_data
 
   bool operator() (struct block_symbol *bsym);
 
+  void finish (const block *block);
+
   struct objfile *objfile = nullptr;
   std::vector<struct block_symbol> *resultp;
   struct symbol *arg_sym = nullptr;
   bool found_sym = false;
 };
+
+/* Finish iteration over one block.  If a symbol hasn't been found
+   already, add 'arg_sym' to the list of symbols.  */
+
+void
+match_data::finish (const block *block)
+{
+  if (!found_sym && arg_sym != nullptr)
+    add_defn_to_vec (*resultp, arg_sym, block);
+  found_sym = false;
+  arg_sym = nullptr;
+}
 
 /* A callback for add_nonlocal_symbols that adds symbol, found in
    BSYM, to a list of symbols.  */
@@ -5447,25 +5461,16 @@ match_data::operator() (struct block_symbol *bsym)
   const struct block *block = bsym->block;
   struct symbol *sym = bsym->symbol;
 
-  if (sym == NULL)
-    {
-      if (!found_sym && arg_sym != NULL)
-	add_defn_to_vec (*resultp, arg_sym, block);
-      found_sym = false;
-      arg_sym = NULL;
-    }
+  if (sym->loc_class () == LOC_UNRESOLVED)
+    return true;
+  else if (sym->is_argument ())
+    arg_sym = sym;
   else
     {
-      if (sym->loc_class () == LOC_UNRESOLVED)
-	return true;
-      else if (sym->is_argument ())
-	arg_sym = sym;
-      else
-	{
-	  found_sym = true;
-	  add_defn_to_vec (*resultp, sym, block);
-	}
+      found_sym = true;
+      add_defn_to_vec (*resultp, sym, block);
     }
+
   return true;
 }
 
@@ -5561,8 +5566,12 @@ map_matching_symbols (struct objfile *objfile,
     {
       const struct block *block
 	= symtab->blockvector ()->block (block_kind);
-      return iterate_over_symbols_terminated (block, lookup_name,
-					      domain, data);
+      /* match_data::operator() always returns true; we ignore the
+	 result but assert just to be future-proof.  */
+      bool result = iterate_over_symbols (block, lookup_name, domain, data);
+      gdb_assert (result);
+      data.finish (block);
+      return true;
     };
 
   objfile->search (nullptr, &lookup_name, nullptr, callback,

@@ -2826,16 +2826,6 @@ bool iterate_over_symbols (const struct block *block,
 			   const domain_search_flags domain,
 			   gdb::function_view<symbol_found_callback_ftype> callback);
 
-/* Like iterate_over_symbols, but if all calls to CALLBACK return
-   true, then calls CALLBACK one additional time with a block_symbol
-   that has a valid block but a NULL symbol.  */
-
-bool iterate_over_symbols_terminated
-  (const struct block *block,
-   const lookup_name_info &name,
-   const domain_search_flags domain,
-   gdb::function_view<symbol_found_callback_ftype> callback);
-
 /* Storage type used by demangle_for_lookup.  demangle_for_lookup
    either returns a const char * pointer that points to either of the
    fields of this type, or a pointer to the input NAME.  This is done
