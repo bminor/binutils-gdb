@@ -119,7 +119,8 @@ block::inlined_p () const
 }
 
 /* A helper function that checks whether PC is in the blockvector BL.
-   It returns the containing block if there is one, or else NULL.  */
+   It returns the innermost lexical block containing the specified pc 
+   if there is one, or else NULL.  */
 
 static const struct block *
 find_block_in_blockvector (const struct blockvector *bl, CORE_ADDR pc)
@@ -811,9 +812,33 @@ make_blockranges (struct objfile *objfile,
 
 /* See block.h.  */
 
+bool
+blockvector::block_less_than (const struct block *b1, const struct block *b2)
+{
+  /* Blocks with lower start address must come before blocks with higher start
+     address.  If two blocks start at the same address,  enclosing block 
+     should come before nested blocks.  Function find_block_in_blockvector() 
+     depends on this ordering, allowing it to use binary search to find 
+     inner-most block for given address.  */
+  CORE_ADDR start1 = b1->start ();
+  CORE_ADDR start2 = b2->start ();
+
+  if (start1 != start2)
+    return start1 < start2;
+
+  return (b1->end () > b2->end ());
+}
+
+/* See block.h.  */
+
 void
 blockvector::append_block (struct block *block)
 {
+  gdb_assert ((num_blocks () == GLOBAL_BLOCK && block->is_global_block ())
+	      || (num_blocks () == STATIC_BLOCK && block->is_static_block ())
+	      || (num_blocks () >= FIRST_LOCAL_BLOCK
+		  && !block_less_than (block, m_blocks.back ())));
+
   m_blocks.push_back (block);
 }
 

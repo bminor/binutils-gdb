@@ -490,6 +490,10 @@ struct blockvector
   void set_map (addrmap_fixed *map)
   { m_map = map; }
 
+  /* Block comparison function.  Returns true if B1 must be ordered before 
+     B2 in a blockvector, false otherwise.  */
+  static bool block_less_than (const struct block *b1, const struct block *b2);
+
   /* Append BLOCK at the end of blockvector.  The caller has to make sure that
      blocks are appended in correct order.  */
   void append_block (struct block *block);
