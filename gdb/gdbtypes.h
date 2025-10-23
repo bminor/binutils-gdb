@@ -1934,8 +1934,6 @@ extern bool set_type_align (struct type *, ULONGEST);
 /* Property accessors for the type data location.  */
 #define TYPE_DATA_LOCATION_ADDR(thistype) \
   ((thistype)->dyn_prop (DYN_PROP_DATA_LOCATION)->const_val ())
-#define TYPE_DATA_LOCATION_KIND(thistype) \
-  ((thistype)->dyn_prop (DYN_PROP_DATA_LOCATION)->kind ())
 
 /* C++ */
 

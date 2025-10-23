@@ -2072,9 +2072,10 @@ is_dynamic_type_internal (struct type *type, bool top_level)
      but it makes sense in this context, because the point is to determine
      whether any part of the type needs to be resolved before it can
      be exploited.  */
-  if (type->dyn_prop (DYN_PROP_DATA_LOCATION) != NULL
-      && (TYPE_DATA_LOCATION_KIND (type) == PROP_LOCEXPR
-	  || TYPE_DATA_LOCATION_KIND (type) == PROP_LOCLIST))
+  if (dynamic_prop *dyn_prop = type->dyn_prop (DYN_PROP_DATA_LOCATION);
+      (dyn_prop != nullptr
+       && (dyn_prop->kind () == PROP_LOCEXPR
+	   || dyn_prop->kind () == PROP_LOCLIST)))
     return true;
 
   if (type->dyn_prop (DYN_PROP_ASSOCIATED))
