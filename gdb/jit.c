@@ -517,9 +517,7 @@ jit_symtab_close_impl (struct gdb_symbol_callbacks *cb,
 static void
 finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 {
-  size_t blockvector_size;
   CORE_ADDR begin, end;
-  struct blockvector *bv;
 
   int actual_nblocks = FIRST_LOCAL_BLOCK + stab->nblocks;
 
@@ -554,18 +552,12 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       filetab->set_linetable (new_table);
     }
 
-  blockvector_size = (sizeof (struct blockvector)
-		      + (actual_nblocks - 1) * sizeof (struct block *));
-  bv = (struct blockvector *) obstack_alloc (&objfile->objfile_obstack,
-					     blockvector_size);
-  cust->set_blockvector (bv);
-
+  auto bv = std::make_unique<blockvector> (actual_nblocks);
+  
   /* At the end of this function, (begin, end) will contain the PC range this
      entire blockvector spans.  */
-  bv->set_map (nullptr);
   begin = stab->blocks.front ().begin;
   end = stab->blocks.front ().end;
-  bv->set_num_blocks (actual_nblocks);
 
   /* First run over all the gdb_block objects, creating a real block
      object for each.  Simultaneously, keep setting the real_block
@@ -649,6 +641,9 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 	  gdb_block_iter.real_block->set_superblock (bv->static_block ());
 	}
     }
+
+  /* Move just built blockvector over to CUST.  */
+  cust->set_blockvector (std::move (bv));
 }
 
 /* Called when closing a gdb_objfile.  Converts OBJ to a proper

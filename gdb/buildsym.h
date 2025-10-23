@@ -349,7 +349,7 @@ private:
 				       CORE_ADDR start, CORE_ADDR end,
 				       int is_global, int expandable);
 
-  struct blockvector *make_blockvector ();
+  std::unique_ptr<blockvector> make_blockvector ();
 
   void watch_main_source_file_lossage ();
 

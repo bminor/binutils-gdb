@@ -409,11 +409,11 @@ buildsym_compunit::record_block_range (struct block *block,
   m_pending_addrmap.set_empty (start, end_inclusive, block);
 }
 
-struct blockvector *
+std::unique_ptr<struct blockvector>
 buildsym_compunit::make_blockvector ()
 {
   struct pending_block *next;
-  struct blockvector *blockvector;
+  std::unique_ptr<struct blockvector> blockvector;
   int i;
 
   /* Count the length of the list of blocks.  */
@@ -422,10 +422,7 @@ buildsym_compunit::make_blockvector ()
     {
     }
 
-  blockvector = (struct blockvector *)
-    obstack_alloc (&m_objfile->objfile_obstack,
-		   (sizeof (struct blockvector)
-		    + (i - 1) * sizeof (struct block *)));
+  blockvector = std::make_unique<struct blockvector> (i);
 
   /* Copy the blocks into the blockvector.  This is done in reverse
      order, which happens to put the blocks into the proper order
@@ -831,7 +828,7 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
   (struct block *static_block, int expandable)
 {
   struct compunit_symtab *cu = m_compunit_symtab;
-  struct blockvector *blockvector;
+  std::unique_ptr<blockvector> blockvector;
   struct subfile *subfile;
   CORE_ADDR end_addr;
 
@@ -930,7 +927,6 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
   /* Similarly for the producer.  */
   cu->set_producer (m_producer);
 
-  cu->set_blockvector (blockvector);
   blockvector->global_block ()->set_compunit (cu);
 
   cu->set_macro_table (release_macros ());
@@ -961,6 +957,8 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
 	    sym->set_symtab (symtab);
       }
   }
+
+  cu->set_blockvector (std::move (blockvector));
 
   add_compunit_symtab_to_objfile (std::move (m_owned_compunit_symtab));
 

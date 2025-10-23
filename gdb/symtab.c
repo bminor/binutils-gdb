@@ -425,6 +425,16 @@ compunit_symtab::find_call_site (CORE_ADDR pc) const
 /* See symtab.h.  */
 
 void
+compunit_symtab::set_blockvector
+  (std::unique_ptr<struct blockvector> blockvector)
+{
+  gdb_assert (m_blockvector == nullptr);
+  m_blockvector = std::move (blockvector);
+}
+
+/* See symtab.h.  */
+
+void
 compunit_symtab::set_call_site_htab (call_site_htab_t &&call_site_htab)
 {
   gdb_assert (m_call_site_htab == nullptr);

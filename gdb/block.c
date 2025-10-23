@@ -809,6 +809,14 @@ make_blockranges (struct objfile *objfile,
   return blr;
 }
 
+/* See block.h.  */
+
+void
+blockvector::append_block (struct block *block)
+{
+  m_blocks.push_back (block);
+}
+
 /* Implement 'maint info blocks' command.  If passed an argument then
    print a list of all blocks at the given address.  With no arguments
    then list all blocks at the current address of the current inferior.  */

@@ -1895,19 +1895,17 @@ struct compunit_symtab : intrusive_list_node<compunit_symtab>
 
   struct blockvector *blockvector ()
   {
-    return m_blockvector;
+    return m_blockvector.get ();
   }
 
   const struct blockvector *blockvector () const
   {
-    return m_blockvector;
+    return m_blockvector.get ();
   }
 
-  void set_blockvector (struct blockvector *blockvector)
-  {
-    m_blockvector = blockvector;
-  }
-
+  /* Set m_blockvector.  */
+  void set_blockvector (std::unique_ptr<struct blockvector> blockvector);
+  
   bool locations_valid () const
   {
     return m_locations_valid;
@@ -1994,7 +1992,7 @@ struct compunit_symtab : intrusive_list_node<compunit_symtab>
 
   /* List of all symbol scope blocks for this symtab.  It is shared among
      all symtabs in a given compilation unit.  */
-  struct blockvector *m_blockvector = nullptr;
+  std::unique_ptr<struct blockvector> m_blockvector;
 
   /* Symtab has been compiled with both optimizations and debug info so that
      GDB may stop skipping prologues as variables locations are valid already
