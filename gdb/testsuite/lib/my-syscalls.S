@@ -63,6 +63,17 @@ NAME:				;\
 NAME ## _syscall:		;\
 	svc #0
 
+#elif defined(__loongarch64)
+
+#define SYSCALL(NAME, NR)	\
+.global NAME			;\
+NAME:				;\
+        li.w	$a7, NR		;\
+	/* a0, a1 and a2 already contain the right arguments.  */ \
+NAME ## _syscall:		;\
+        syscall 0		;\
+        ret
+
 #else
 # error "Unsupported architecture"
 #endif
