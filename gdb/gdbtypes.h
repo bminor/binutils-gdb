@@ -1932,8 +1932,6 @@ extern unsigned type_align (struct type *);
 extern bool set_type_align (struct type *, ULONGEST);
 
 /* Property accessors for the type data location.  */
-#define TYPE_DATA_LOCATION_BATON(thistype) \
-  ((thistype)->dyn_prop (DYN_PROP_DATA_LOCATION)->data.baton)
 #define TYPE_DATA_LOCATION_ADDR(thistype) \
   ((thistype)->dyn_prop (DYN_PROP_DATA_LOCATION)->const_val ())
 #define TYPE_DATA_LOCATION_KIND(thistype) \
