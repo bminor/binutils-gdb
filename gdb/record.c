@@ -156,6 +156,12 @@ record_stop (struct target_ops *t)
 {
   DEBUG ("stop %s", t->shortname ());
 
+  /* Force the execution direction to forward.  If the user had it
+     set to reverse when stopping recording, 'reverse-next' would
+     say the direction is reversed, but the inferior would move
+     forward, and there'd be no way to reconcile those.  */
+  execution_direction = EXEC_FORWARD;
+
   return t->stop_recording ();
 }
 
