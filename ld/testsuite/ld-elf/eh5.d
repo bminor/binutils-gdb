@@ -5,6 +5,8 @@
 #readelf: -wf
 #target: [check_as_cfi]
 #xfail: alpha-*-*ecoff tile*-*-* visium-*-*
+# PR ld/25802
+#xfail: sparcv9-*-solaris2*
 
 Contents of the .eh_frame section:
 
