@@ -87,15 +87,6 @@ outermost_context_p ()
 
 /* See buildsym.h.  */
 
-int
-get_context_stack_depth ()
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  return buildsym_compunit->get_context_stack_depth ();
-}
-
-/* See buildsym.h.  */
-
 struct subfile *
 get_current_subfile ()
 {

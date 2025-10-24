@@ -130,10 +130,6 @@ extern CORE_ADDR get_last_source_start_addr ();
 
 extern bool outermost_context_p ();
 
-/* Return the context stack depth.  */
-
-extern int get_context_stack_depth ();
-
 /* Return the current subfile.  */
 
 extern struct subfile *get_current_subfile ();

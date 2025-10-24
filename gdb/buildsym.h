@@ -287,11 +287,6 @@ struct buildsym_compunit
     return &m_context_stack.back ();
   }
 
-  int get_context_stack_depth () const
-  {
-    return m_context_stack.size ();
-  }
-
   struct subfile *get_current_subfile ()
   {
     return m_current_subfile;
