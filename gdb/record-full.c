@@ -297,7 +297,7 @@ public:
 static const target_info record_full_core_target_info = {
   "record-core",
   record_longname,
-  record_doc,
+  N_("Load a saved execution log, allowing replaying the last instructions."),
 };
 
 class record_full_core_target final : public record_full_base_target
