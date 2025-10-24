@@ -691,7 +691,7 @@ extern bfd_reloc_status_type _bfd_clear_contents
 /* Register a SEC_MERGE section as a candidate for merging.  */
 
 extern bool _bfd_add_merge_section
-  (bfd *, void **, asection *, void **) ATTRIBUTE_HIDDEN;
+  (bfd *, void **, asection *) ATTRIBUTE_HIDDEN;
 
 /* Attempt to merge SEC_MERGE sections.  */
 
@@ -702,7 +702,7 @@ extern bool _bfd_merge_sections
 /* Write out a merged section.  */
 
 extern bool _bfd_write_merged_section
-  (bfd *, asection *, void *) ATTRIBUTE_HIDDEN;
+  (bfd *, asection *) ATTRIBUTE_HIDDEN;
 
 /* Find an offset within a modified SEC_MERGE section.  */
 

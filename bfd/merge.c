@@ -132,8 +132,6 @@ struct sec_merge_sec_info
   struct sec_merge_sec_info *next;
   /* The corresponding section.  */
   asection *sec;
-  /* Pointer to merge_info pointing to us.  */
-  void **psecinfo;
   /* The merge entity this is a part of.  */
   struct sec_merge_info *sinfo;
   /* The section associated with sinfo (i.e. the representative section).
@@ -611,8 +609,7 @@ sec_merge_emit (bfd *abfd, struct sec_merge_sec_info *secinfo,
    This function is called for all non-dynamic SEC_MERGE input sections.  */
 
 bool
-_bfd_add_merge_section (bfd *abfd, void **psinfo, asection *sec,
-			void **psecinfo)
+_bfd_add_merge_section (bfd *abfd, void **psinfo, asection *sec)
 {
   struct sec_merge_info *sinfo;
   struct sec_merge_sec_info *secinfo;
@@ -671,12 +668,11 @@ _bfd_add_merge_section (bfd *abfd, void **psinfo, asection *sec,
 
   /* Initialize the descriptor for this input section.  */
 
-  *psecinfo = secinfo = bfd_zalloc (abfd, sizeof (*secinfo));
-  if (*psecinfo == NULL)
+  sec->sec_info = secinfo = bfd_zalloc (abfd, sizeof (*secinfo));
+  if (sec->sec_info == NULL)
     goto error_return;
 
   secinfo->sec = sec;
-  secinfo->psecinfo = psecinfo;
 
   /* Search for a matching output merged section.  */
   for (sinfo = (struct sec_merge_info *) *psinfo; sinfo; sinfo = sinfo->next)
@@ -710,10 +706,12 @@ _bfd_add_merge_section (bfd *abfd, void **psinfo, asection *sec,
   secinfo->sinfo = sinfo;
   secinfo->reprsec = sinfo->chain->sec;
 
+  sec->sec_info_type = SEC_INFO_TYPE_MERGE;
+
   return true;
 
  error_return:
-  *psecinfo = NULL;
+  sec->sec_info = NULL;
   return false;
 }
 
@@ -997,7 +995,7 @@ _bfd_merge_sections (bfd *abfd,
 	if (secinfo->sec->flags & SEC_EXCLUDE
 	    || !record_section (sinfo, secinfo))
 	  {
-	    *secinfo->psecinfo = NULL;
+	    secinfo->sec->sec_info = NULL;
 	    if (remove_hook)
 	      (*remove_hook) (abfd, secinfo->sec);
 	  }
@@ -1061,14 +1059,12 @@ _bfd_merge_sections (bfd *abfd,
 /* Write out the merged section.  */
 
 bool
-_bfd_write_merged_section (bfd *output_bfd, asection *sec, void *psecinfo)
+_bfd_write_merged_section (bfd *output_bfd, asection *sec)
 {
-  struct sec_merge_sec_info *secinfo;
+  struct sec_merge_sec_info *secinfo = sec->sec_info;
   file_ptr pos;
   unsigned char *contents;
   Elf_Internal_Shdr *hdr;
-
-  secinfo = (struct sec_merge_sec_info *) psecinfo;
 
   if (!secinfo)
     return false;

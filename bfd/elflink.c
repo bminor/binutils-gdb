@@ -8192,15 +8192,11 @@ _bfd_elf_merge_sections (bfd *obfd, struct bfd_link_info *info)
 	    == get_elf_backend_data (obfd)->s->elfclass))
       for (sec = ibfd->sections; sec != NULL; sec = sec->next)
 	if ((sec->flags & SEC_MERGE) != 0
-	    && !bfd_is_abs_section (sec->output_section))
-	  {
-	    if (! _bfd_add_merge_section (obfd,
-					  &info->hash->merge_info,
-					  sec, &sec->sec_info))
+	    && !bfd_is_abs_section (sec->output_section)
+	    && !_bfd_add_merge_section (obfd,
+					&info->hash->merge_info,
+					sec))
 	      return false;
-	    else if (sec->sec_info)
-	      sec->sec_info_type = SEC_INFO_TYPE_MERGE;
-	  }
 
   if (info->hash->merge_info != NULL)
     return _bfd_merge_sections (obfd, info, info->hash->merge_info,
@@ -12229,7 +12225,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	    return false;
 	  break;
 	case SEC_INFO_TYPE_MERGE:
-	  if (! _bfd_write_merged_section (output_bfd, o, o->sec_info))
+	  if (! _bfd_write_merged_section (output_bfd, o))
 	    return false;
 	  break;
 	case SEC_INFO_TYPE_EH_FRAME:
