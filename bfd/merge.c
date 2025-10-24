@@ -1090,7 +1090,7 @@ _bfd_write_merged_section (bfd *output_bfd, asection *sec)
   struct sec_merge_sec_info *secinfo = sec->sec_info;
   file_ptr pos;
   unsigned char *contents;
-  Elf_Internal_Shdr *hdr;
+  Elf_Internal_Shdr *hdr = NULL;
 
   if (!secinfo)
     return false;
@@ -1099,8 +1099,9 @@ _bfd_write_merged_section (bfd *output_bfd, asection *sec)
     return true;
 
   /* FIXME: octets_per_byte.  */
-  hdr = &elf_section_data (sec->output_section)->this_hdr;
-  if (hdr->sh_offset == (file_ptr) -1)
+  if (bfd_get_flavour (output_bfd) == bfd_target_elf_flavour)
+    hdr = &elf_section_data (sec->output_section)->this_hdr;
+  if (hdr != NULL && hdr->sh_offset == (file_ptr) -1)
     {
       /* We must compress this section.  Write output to the
 	 buffer.  */

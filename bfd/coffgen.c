@@ -1259,9 +1259,17 @@ coff_write_alien_symbol (bfd *abfd,
     }
   else
     {
+      asection *isec = symbol->section;
+
       native->u.syment.n_scnum = output_section->target_index;
-      native->u.syment.n_value = (symbol->value
-				  + symbol->section->output_offset);
+      native->u.syment.n_value = symbol->value;
+
+      if (isec->sec_info_type == SEC_INFO_TYPE_MERGE
+	  && !(symbol->flags & (BSF_SECTION_SYM | BSF_MERGE_RESOLVED)))
+	native->u.syment.n_value =
+	  _bfd_merged_section_offset (abfd, &isec, symbol->value);
+
+      native->u.syment.n_value += isec->output_offset;
       if (! obj_pe (abfd))
 	native->u.syment.n_value += output_section->vma;
 

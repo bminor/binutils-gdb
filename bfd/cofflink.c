@@ -2608,13 +2608,18 @@ _bfd_coff_write_global_sym (struct bfd_hash_entry *bh, void *data)
       {
 	asection *sec;
 
-	sec = h->root.u.def.section->output_section;
+	sec = h->root.u.def.section;
+	isym.n_value = h->root.u.def.value;
+	if (sec->sec_info_type == SEC_INFO_TYPE_MERGE)
+	  isym.n_value =
+	    _bfd_merged_section_offset (output_bfd, &sec, isym.n_value);
+	isym.n_value += sec->output_offset;
+
+	sec = sec->output_section;
 	if (bfd_is_abs_section (sec))
 	  isym.n_scnum = N_ABS;
 	else
 	  isym.n_scnum = sec->target_index;
-	isym.n_value = (h->root.u.def.value
-			+ h->root.u.def.section->output_offset);
 	if (! obj_pe (flaginfo->output_bfd))
 	  isym.n_value += sec->vma;
 #ifdef BFD64
