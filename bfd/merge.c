@@ -608,7 +608,7 @@ sec_merge_emit (bfd *abfd, struct sec_merge_sec_info *secinfo,
 /* Register a SEC_MERGE section as a candidate for merging.
    This function is called for all non-dynamic SEC_MERGE input sections.  */
 
-bool
+static bool
 _bfd_add_merge_section (bfd *abfd, void **psinfo, asection *sec)
 {
   struct sec_merge_info *sinfo;
@@ -973,11 +973,10 @@ merge_strings (struct sec_merge_info *sinfo)
 /* This function is called once after all SEC_MERGE sections are registered
    with _bfd_merge_section.  */
 
-bool
-_bfd_merge_sections (bfd *abfd,
-		     struct bfd_link_info *info ATTRIBUTE_UNUSED,
-		     void *xsinfo,
-		     void (*remove_hook) (bfd *, asection *))
+static bool
+merge_sections (bfd *abfd,
+		struct bfd_link_info *info ATTRIBUTE_UNUSED,
+		void *xsinfo)
 {
   struct sec_merge_info *sinfo;
 
@@ -995,9 +994,9 @@ _bfd_merge_sections (bfd *abfd,
 	if (secinfo->sec->flags & SEC_EXCLUDE
 	    || !record_section (sinfo, secinfo))
 	  {
+	    BFD_ASSERT (secinfo->sec->sec_info_type == SEC_INFO_TYPE_MERGE);
 	    secinfo->sec->sec_info = NULL;
-	    if (remove_hook)
-	      (*remove_hook) (abfd, secinfo->sec);
+	    secinfo->sec->sec_info_type = SEC_INFO_TYPE_NONE;
 	  }
 	else if (align)
 	  {
@@ -1054,6 +1053,30 @@ _bfd_merge_sections (bfd *abfd,
     }
 
   return true;
+}
+
+/* Finish SEC_MERGE section merging.  */
+
+bool
+_bfd_merge_sections (bfd *obfd, struct bfd_link_info *info)
+{
+  const bfd *ibfd;
+  asection *sec;
+
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
+    if ((ibfd->flags & DYNAMIC) == 0)
+      for (sec = ibfd->sections; sec != NULL; sec = sec->next)
+	if ((sec->flags & SEC_MERGE) != 0
+	    && !bfd_is_abs_section (sec->output_section)
+	    && !_bfd_add_merge_section (obfd,
+					&info->hash->merge_info,
+					sec))
+	      return false;
+
+  if (info->hash->merge_info == NULL)
+    return true;
+
+  return merge_sections (obfd, info, info->hash->merge_info);
 }
 
 /* Write out the merged section.  */

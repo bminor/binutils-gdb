@@ -1190,6 +1190,9 @@ typedef struct bfd_symbol
   /* This section symbol should be included in the symbol table.  */
 #define BSF_SECTION_SYM_USED    (1 << 24)
 
+  /* This symbol underwent section merge resolution.  */
+#define BSF_MERGE_RESOLVED      (1 << 25)
+
   flagword flags;
 
   /* A pointer to the section to which this symbol is

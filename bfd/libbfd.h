@@ -694,16 +694,10 @@ extern bfd_reloc_status_type _bfd_relocate_contents
 extern bfd_reloc_status_type _bfd_clear_contents
   (reloc_howto_type *, bfd *, asection *, bfd_byte *, bfd_vma) ATTRIBUTE_HIDDEN;
 
-/* Register a SEC_MERGE section as a candidate for merging.  */
-
-extern bool _bfd_add_merge_section
-  (bfd *, void **, asection *) ATTRIBUTE_HIDDEN;
-
 /* Attempt to merge SEC_MERGE sections.  */
 
 extern bool _bfd_merge_sections
-  (bfd *, struct bfd_link_info *, void *, void (*) (bfd *, asection *))
-  ATTRIBUTE_HIDDEN;
+  (bfd *, struct bfd_link_info *) ATTRIBUTE_HIDDEN;
 
 /* Write out a merged section.  */
 

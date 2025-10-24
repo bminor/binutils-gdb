@@ -8158,46 +8158,6 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
   return true;
 }
 
-/* Make sure sec_info_type is cleared if sec_info is cleared too.  */
-
-static void
-merge_sections_remove_hook (bfd *abfd ATTRIBUTE_UNUSED,
-			    asection *sec)
-{
-  BFD_ASSERT (sec->sec_info_type == SEC_INFO_TYPE_MERGE);
-  sec->sec_info_type = SEC_INFO_TYPE_NONE;
-}
-
-/* Finish SHF_MERGE section merging.  */
-
-bool
-_bfd_elf_merge_sections (bfd *obfd, struct bfd_link_info *info)
-{
-  bfd *ibfd;
-  asection *sec;
-
-  if (ENABLE_CHECKING && !is_elf_hash_table (info->hash))
-    abort ();
-
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
-    if ((ibfd->flags & DYNAMIC) == 0
-	&& bfd_get_flavour (ibfd) == bfd_target_elf_flavour
-	&& (elf_elfheader (ibfd)->e_ident[EI_CLASS]
-	    == get_elf_backend_data (obfd)->s->elfclass))
-      for (sec = ibfd->sections; sec != NULL; sec = sec->next)
-	if ((sec->flags & SEC_MERGE) != 0
-	    && !bfd_is_abs_section (sec->output_section)
-	    && !_bfd_add_merge_section (obfd,
-					&info->hash->merge_info,
-					sec))
-	      return false;
-
-  if (info->hash->merge_info != NULL)
-    return _bfd_merge_sections (obfd, info, info->hash->merge_info,
-				merge_sections_remove_hook);
-  return true;
-}
-
 /* Create an entry in an ELF linker hash table.  */
 
 struct bfd_hash_entry *

@@ -8554,12 +8554,30 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 	      r = bfd_reloc_ok;
 	    }
 	  else
-	    r = bfd_perform_relocation (input_bfd,
-					*parent,
-					data,
-					input_section,
-					relocatable ? abfd : NULL,
-					&error_message);
+	    {
+	      if ((symbol->flags & BSF_SECTION_SYM)
+		  && symbol->section->sec_info_type == SEC_INFO_TYPE_MERGE
+		  /* This, while apparently necessary, feels bogus.  */
+		  && !(symbol->section->flags & SEC_DEBUGGING))
+		{
+		  asection *sec = symbol->section;
+
+		  (*parent)->addend =
+		    _bfd_merged_section_offset (abfd, &sec, (*parent)->addend);
+		  /* We may not change symbol->section, so the output_offset
+		     adjustment done in bfd_perform_relocation() needs taking
+		     care of (and compensating) here.  */
+		  (*parent)->addend +=
+		    sec->output_offset - symbol->section->output_offset;
+		}
+
+	      r = bfd_perform_relocation (input_bfd,
+					  *parent,
+					  data,
+					  input_section,
+					  relocatable ? abfd : NULL,
+					  &error_message);
+	    }
 
 	  if (relocatable)
 	    {

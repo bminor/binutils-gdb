@@ -281,7 +281,7 @@
 #define bfd_elfNN_bfd_final_link	bfd_elf_final_link
 #endif
 #ifndef bfd_elfNN_bfd_merge_sections
-#define bfd_elfNN_bfd_merge_sections	_bfd_elf_merge_sections
+#define bfd_elfNN_bfd_merge_sections	_bfd_merge_sections
 #endif
 #else /* ! defined (elf_backend_relocate_section) */
 /* If no backend relocate_section routine, use the generic linker.

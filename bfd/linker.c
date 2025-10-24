@@ -2310,7 +2310,9 @@ _bfd_generic_link_output_symbols (bfd *output_bfd,
    hash table entry.  */
 
 static void
-set_symbol_from_hash (asymbol *sym, struct bfd_link_hash_entry *h)
+set_symbol_from_hash (bfd *output_bfd,
+		      asymbol *sym,
+		      struct bfd_link_hash_entry *h)
 {
   switch (h->type)
     {
@@ -2341,13 +2343,26 @@ set_symbol_from_hash (asymbol *sym, struct bfd_link_hash_entry *h)
       sym->flags |= BSF_WEAK;
       break;
     case bfd_link_hash_defined:
+      sym->flags |= BSF_GLOBAL;
       sym->section = h->u.def.section;
       sym->value = h->u.def.value;
+      if (sym->section->sec_info_type == SEC_INFO_TYPE_MERGE)
+	{
+	  sym->value =
+	    _bfd_merged_section_offset (output_bfd, &sym->section, sym->value);
+	  sym->flags |= BSF_MERGE_RESOLVED;
+	}
       break;
     case bfd_link_hash_defweak:
       sym->flags |= BSF_WEAK;
       sym->section = h->u.def.section;
       sym->value = h->u.def.value;
+      if (sym->section->sec_info_type == SEC_INFO_TYPE_MERGE)
+	{
+	  sym->value =
+	    _bfd_merged_section_offset (output_bfd, &sym->section, sym->value);
+	  sym->flags |= BSF_MERGE_RESOLVED;
+	}
       break;
     case bfd_link_hash_common:
       sym->value = h->u.c.size;
@@ -2402,7 +2417,7 @@ _bfd_generic_link_write_global_symbol (struct generic_link_hash_entry *h,
       sym->flags = 0;
     }
 
-  set_symbol_from_hash (sym, &h->root);
+  set_symbol_from_hash (wginfo->output_bfd, sym, &h->root);
 
   sym->flags |= BSF_GLOBAL;
 
@@ -2690,7 +2705,7 @@ default_indirect_link_order (bfd *output_bfd,
       for (; sympp < symppend; sympp++)
 	{
 	  asymbol *sym;
-	  struct bfd_link_hash_entry *h;
+	  struct bfd_link_hash_entry *h = NULL;
 
 	  sym = *sympp;
 
@@ -2716,9 +2731,22 @@ default_indirect_link_order (bfd *output_bfd,
 					  bfd_asymbol_name (sym),
 					  false, false, true);
 	      if (h != NULL)
-		set_symbol_from_hash (sym, h);
+		set_symbol_from_hash (output_bfd, sym, h);
+	    }
+
+	  if (h == NULL
+	      && sym->section->sec_info_type == SEC_INFO_TYPE_MERGE
+	      && !(sym->flags & (BSF_SECTION_SYM | BSF_MERGE_RESOLVED)))
+	    {
+	      sym->value = _bfd_merged_section_offset (output_bfd,
+						       &sym->section,
+						       sym->value);
+	      sym->flags |= BSF_MERGE_RESOLVED;
 	    }
 	}
+
+      if (input_section->sec_info_type == SEC_INFO_TYPE_MERGE)
+	return _bfd_write_merged_section (output_bfd, input_section);
     }
 
   if ((output_section->flags & (SEC_GROUP | SEC_LINKER_CREATED)) == SEC_GROUP

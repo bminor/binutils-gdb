@@ -2363,8 +2363,6 @@ extern bool _bfd_elf_link_hash_table_init
    unsigned int);
 extern bool _bfd_elf_slurp_version_tables
   (bfd *, bool);
-extern bool _bfd_elf_merge_sections
-  (bfd *, struct bfd_link_info *);
 extern bool _bfd_elf_match_sections_by_type
   (bfd *, const asection *, bfd *, const asection *);
 extern bool bfd_elf_is_group_section
