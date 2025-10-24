@@ -9123,10 +9123,7 @@ set_symbol_value (bfd *bfd_with_globals,
      to "defined" and give it a value.  */
   h = get_link_hash_entry (elf_sym_hashes (bfd_with_globals), symidx, extsymoff);
   if (h == NULL)
-    {
-      /* FIXMEL What should we do ?  */
-      return false;
-    }
+    return false;
   h->root.type = bfd_link_hash_defined;
   h->root.u.def.value = val;
   h->root.u.def.section = bfd_abs_section_ptr;
