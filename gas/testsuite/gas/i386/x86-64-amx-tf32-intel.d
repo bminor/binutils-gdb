@@ -10,6 +10,4 @@ Disassembly of section \.text:
 [a-f0-9]+ <_intel>:
 \s*[a-f0-9]+:\s*c4 e2 59 48 f5\s+tmmultf32ps tmm6,tmm5,tmm4
 \s*[a-f0-9]+:\s*c4 e2 71 48 da\s+tmmultf32ps tmm3,tmm2,tmm1
-\s*[a-f0-9]+:\s*c4 e2 58 48 f5\s+ttmmultf32ps tmm6,tmm5,tmm4
-\s*[a-f0-9]+:\s*c4 e2 70 48 da\s+ttmmultf32ps tmm3,tmm2,tmm1
 #pass

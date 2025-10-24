@@ -10,7 +10,4 @@ Disassembly of section \.text:
 \s*[a-f0-9]+:\s*c4 e2 71 48 d1\s+tmmultf32ps %tmm1/\(bad\),%tmm1/\(bad\),%tmm2
 \s*[a-f0-9]+:\s*c4 e2 69 48 c9\s+tmmultf32ps %tmm2,%tmm1/\(bad\),%tmm1/\(bad\)
 \s*[a-f0-9]+:\s*c4 e2 71 48 ca\s+tmmultf32ps %tmm1/\(bad\),%tmm2,%tmm1\/\(bad\)
-\s*[a-f0-9]+:\s*c4 e2 70 48 d1\s+ttmmultf32ps %tmm1/\(bad\),%tmm1/\(bad\),%tmm2
-\s*[a-f0-9]+:\s*c4 e2 68 48 c9\s+ttmmultf32ps %tmm2,%tmm1/\(bad\),%tmm1/\(bad\)
-\s*[a-f0-9]+:\s*c4 e2 70 48 ca\s+ttmmultf32ps %tmm1/\(bad\),%tmm2,%tmm1/\(bad\)
 #pass
