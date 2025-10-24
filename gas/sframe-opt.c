@@ -96,6 +96,7 @@ sframe_convert_frag (fragS *frag)
   offsetT rest_of_data;
   uint8_t fde_type, fre_type;
   uint8_t pauth_key;
+  bool signal_p;
 
   expressionS *exp;
   symbolS *dataS;
@@ -118,6 +119,7 @@ sframe_convert_frag (fragS *frag)
       rest_of_data = (symbol_get_value_expression(dataS))->X_add_number;
       fde_type = SFRAME_V2_FUNC_FDE_TYPE (rest_of_data);
       pauth_key = SFRAME_V2_FUNC_PAUTH_KEY (rest_of_data);
+      signal_p = SFRAME_V3_FUNC_SIGNAL_P (rest_of_data);
       gas_assert (fde_type == SFRAME_FDE_TYPE_PCINC);
 
       /* Calculate the applicable fre_type.  */
@@ -133,6 +135,7 @@ sframe_convert_frag (fragS *frag)
       /* Create the new function info.  */
       value = SFRAME_V2_FUNC_INFO (fde_type, fre_type);
       value = SFRAME_V2_FUNC_INFO_UPDATE_PAUTH_KEY (pauth_key, value);
+      value = SFRAME_V3_FUNC_INFO_UPDATE_SIGNAL_P (signal_p, value);
 
       frag->fr_literal[frag->fr_fix] = value;
     }

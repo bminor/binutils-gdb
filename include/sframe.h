@@ -256,12 +256,13 @@ typedef struct sframe_func_desc_entry_v3
      - 4-bits: Identify the FRE type used for the function.
      - 1-bit: Identify the FDE type of the function - mask or inc.
      - 1-bit: PAC authorization A/B key (aarch64).
-     - 2-bits: Unused.
-     --------------------------------------------------------------------------
-     |     Unused    |  PAC auth A/B key (aarch64) |  FDE type |   FRE type   |
-     |               |     Unused (amd64, s390x)   |           |              |
-     --------------------------------------------------------------------------
-     8               6                             5           4              0     */
+     - 1-bits: Unused.
+     - 1-bit: Signal frame.
+     ---------------------------------------------------------------------------------
+     | Signal |   Unused    |  PAC auth A/B key (aarch64) |  FDE type |   FRE type   |
+     | frame  |             |        Unused (amd64)       |           |              |
+     ---------------------------------------------------------------------------------
+     8        7             6                             5           4              0     */
   uint8_t sfde_func_info;
   /* Size of the block of repeating insns.  Used for SFrame FDEs of type
      SFRAME_FDE_TYPE_PCMASK.  */
@@ -276,9 +277,13 @@ typedef struct sframe_func_desc_entry_v3
 #define SFRAME_V3_FUNC_FRE_TYPE(data)	  (SFRAME_V2_FUNC_FRE_TYPE (data))
 #define SFRAME_V3_FUNC_FDE_TYPE(data)	  (SFRAME_V2_FUNC_FDE_TYPE (data))
 #define SFRAME_V3_FUNC_PAUTH_KEY(data)	  (SFRAME_V2_FUNC_PAUTH_KEY (data))
+#define SFRAME_V3_FUNC_SIGNAL_P(data)     (((data) >> 7) & 0x1)
 
 #define SFRAME_V3_FUNC_INFO_UPDATE_PAUTH_KEY(pauth_key, fde_info) \
   SFRAME_V2_FUNC_INFO_UPDATE_PAUTH_KEY (pauth_key, fde_info)
+
+#define SFRAME_V3_FUNC_INFO_UPDATE_SIGNAL_P(signal_p, fde_info)  \
+  ((((signal_p) & 0x1) << 7) | ((fde_info) & 0x7f))
 
 /* Size of stack frame offsets in an SFrame Frame Row Entry.  A single
    SFrame FRE has all offsets of the same size.  Offset size may vary
