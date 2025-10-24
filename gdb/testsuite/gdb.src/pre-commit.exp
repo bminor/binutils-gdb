@@ -17,7 +17,7 @@
 
 set repodir $srcdir/../..
 
-if {![file isdirectory $repodir/.git]} {
+if {![file exists $repodir/.git]} {
     unsupported "Not in a git repository"
     return
 }
