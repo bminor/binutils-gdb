@@ -280,9 +280,8 @@
 #ifndef bfd_elfNN_bfd_final_link
 #define bfd_elfNN_bfd_final_link	bfd_elf_final_link
 #endif
-#ifndef bfd_elfNN_bfd_merge_sections
-#define bfd_elfNN_bfd_merge_sections	_bfd_merge_sections
-#endif
+#undef TARGET_MERGE_SECTIONS
+#define TARGET_MERGE_SECTIONS true
 #else /* ! defined (elf_backend_relocate_section) */
 /* If no backend relocate_section routine, use the generic linker.
    Note - this will prevent the port from being able to use some of
@@ -305,9 +304,6 @@
 #endif
 #ifndef bfd_elfNN_bfd_final_link
 #define bfd_elfNN_bfd_final_link	_bfd_generic_final_link
-#endif
-#ifndef bfd_elfNN_bfd_merge_sections
-#define bfd_elfNN_bfd_merge_sections	bfd_generic_merge_sections
 #endif
 #endif /* ! defined (elf_backend_relocate_section) */
 
@@ -1027,6 +1023,7 @@ const bfd_target TARGET_BIG_SYM =
 
   /* TRUE if unused section symbols should be kept.  */
   TARGET_KEEP_UNUSED_SECTION_SYMBOLS,
+  TARGET_MERGE_SECTIONS,
 
   /* Routines to byte-swap various sized integers from the data sections */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
@@ -1132,6 +1129,7 @@ const bfd_target TARGET_LITTLE_SYM =
 
   /* TRUE if unused section symbols should be kept.  */
   TARGET_KEEP_UNUSED_SECTION_SYMBOLS,
+  TARGET_MERGE_SECTIONS,
 
   /* Routines to byte-swap various sized integers from the data sections */
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,

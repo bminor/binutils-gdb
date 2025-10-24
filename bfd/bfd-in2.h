@@ -2708,9 +2708,6 @@ bool bfd_set_private_flags (bfd *abfd, flagword flags);
 #define bfd_lookup_section_flags(link_info, flag_info, section) \
        BFD_SEND (abfd, _bfd_lookup_section_flags, (link_info, flag_info, section))
 
-#define bfd_merge_sections(abfd, link_info) \
-       BFD_SEND (abfd, _bfd_merge_sections, (abfd, link_info))
-
 #define bfd_is_group_section(abfd, sec) \
        BFD_SEND (abfd, _bfd_is_group_section, (abfd, sec))
 
@@ -7525,6 +7522,11 @@ struct stab_info
 #define TARGET_KEEP_UNUSED_SECTION_SYMBOLS true
 #endif
 
+/* Define to TRUE if section merging is supported by the backend.  */
+#ifndef TARGET_MERGE_SECTIONS
+#define TARGET_MERGE_SECTIONS false
+#endif
+
 enum bfd_flavour
 {
   /* N.B. Update bfd_flavour_name if you change this.  */
@@ -7593,6 +7595,9 @@ typedef struct bfd_target
 
  /* TRUE if unused section symbols should be kept.  */
   bool keep_unused_section_symbols;
+
+  /* TRUE if section merging is supported by the backend.  */
+  bool merge_sections;
 
   /* Entries for byte swapping for data. These are different from the
      other entry points, since they don't take a BFD as the first argument.
@@ -7831,7 +7836,6 @@ typedef struct bfd_target
   NAME##_bfd_link_check_relocs, \
   NAME##_bfd_gc_sections, \
   NAME##_bfd_lookup_section_flags, \
-  NAME##_bfd_merge_sections, \
   NAME##_bfd_is_group_section, \
   NAME##_bfd_group_name, \
   NAME##_bfd_discard_group, \
@@ -7886,9 +7890,6 @@ typedef struct bfd_target
   /* Sets the bitmask of allowed and disallowed section flags.  */
   bool (*_bfd_lookup_section_flags) (struct bfd_link_info *,
 				     struct flag_info *, asection *);
-
-  /* Attempt to merge SEC_MERGE sections.  */
-  bool (*_bfd_merge_sections) (bfd *, struct bfd_link_info *);
 
   /* Is this section a member of a group?  */
   bool (*_bfd_is_group_section) (bfd *, const struct bfd_section *);

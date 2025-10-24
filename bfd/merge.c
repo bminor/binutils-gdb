@@ -874,7 +874,7 @@ is_suffix (const struct sec_merge_hash_entry *A,
 		 B->str, B->len) == 0;
 }
 
-/* This is a helper function for _bfd_merge_sections.  It attempts to
+/* This is a helper function for bfd_merge_sections.  It attempts to
    merge strings matching suffixes of longer strings.  */
 static struct sec_merge_sec_info *
 merge_strings (struct sec_merge_info *sinfo)
@@ -1058,10 +1058,13 @@ merge_sections (bfd *abfd,
 /* Finish SEC_MERGE section merging.  */
 
 bool
-_bfd_merge_sections (bfd *obfd, struct bfd_link_info *info)
+bfd_merge_sections (bfd *obfd, struct bfd_link_info *info)
 {
   const bfd *ibfd;
   asection *sec;
+
+  if (!obfd->xvec->merge_sections)
+    return true;
 
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
     if ((ibfd->flags & DYNAMIC) == 0)

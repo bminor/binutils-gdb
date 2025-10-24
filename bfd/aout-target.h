@@ -495,9 +495,6 @@ MY_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 #ifndef MY_bfd_lookup_section_flags
 #define MY_bfd_lookup_section_flags bfd_generic_lookup_section_flags
 #endif
-#ifndef MY_bfd_merge_sections
-#define MY_bfd_merge_sections bfd_generic_merge_sections
-#endif
 #ifndef MY_bfd_is_group_section
 #define MY_bfd_is_group_section bfd_generic_is_group_section
 #endif
@@ -648,6 +645,7 @@ const bfd_target MY (vec) =
   15,				/* AR_max_namelen.  */
   0,				/* match priority.  */
   TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */
+  TARGET_MERGE_SECTIONS,
 #ifdef TARGET_IS_BIG_ENDIAN_P
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
      bfd_getb32, bfd_getb_signed_32, bfd_putb32,

@@ -8428,26 +8428,6 @@ bfd_generic_lookup_section_flags (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 
 /*
 INTERNAL_FUNCTION
-	bfd_generic_merge_sections
-
-SYNOPSIS
-	bool bfd_generic_merge_sections
-	  (bfd *, struct bfd_link_info *);
-
-DESCRIPTION
-	Provides default handling for SEC_MERGE section merging for back ends
-	which don't have SEC_MERGE support -- i.e., does nothing.
-*/
-
-bool
-bfd_generic_merge_sections (bfd *abfd ATTRIBUTE_UNUSED,
-			    struct bfd_link_info *link_info ATTRIBUTE_UNUSED)
-{
-  return true;
-}
-
-/*
-INTERNAL_FUNCTION
 	bfd_generic_get_relocated_section_contents
 
 SYNOPSIS

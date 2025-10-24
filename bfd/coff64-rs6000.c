@@ -2568,6 +2568,7 @@ const bfd_target rs6000_xcoff64_vec =
     15,				/* ar_max_namelen */
     0,				/* match priority.  */
     TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */
+    TARGET_MERGE_SECTIONS,
 
     /* data */
     bfd_getb64,
@@ -2685,7 +2686,6 @@ const bfd_target rs6000_xcoff64_vec =
     _bfd_generic_link_check_relocs,
     bfd_generic_gc_sections,
     bfd_generic_lookup_section_flags,
-    bfd_generic_merge_sections,
     bfd_generic_is_group_section,
     bfd_generic_group_name,
     bfd_generic_discard_group,
@@ -2838,6 +2838,7 @@ const bfd_target rs6000_xcoff64_aix_vec =
     15,				/* ar_max_namelen */
     0,				/* match priority.  */
     TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */
+    TARGET_MERGE_SECTIONS,
 
     /* data */
     bfd_getb64,
@@ -2955,7 +2956,6 @@ const bfd_target rs6000_xcoff64_aix_vec =
     _bfd_generic_link_check_relocs,
     bfd_generic_gc_sections,
     bfd_generic_lookup_section_flags,
-    bfd_generic_merge_sections,
     bfd_generic_is_group_section,
     bfd_generic_group_name,
     bfd_generic_discard_group,

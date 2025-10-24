@@ -489,7 +489,6 @@ extern bool _bfd_nolink_bfd_relax_section
 #define _bfd_nolink_bfd_gc_sections _bfd_bool_bfd_link_false_error
 extern bool _bfd_nolink_bfd_lookup_section_flags
   (struct bfd_link_info *, struct flag_info *, asection *) ATTRIBUTE_HIDDEN;
-#define _bfd_nolink_bfd_merge_sections _bfd_bool_bfd_link_false_error
 extern bool _bfd_nolink_bfd_is_group_section
   (bfd *, const asection *) ATTRIBUTE_HIDDEN;
 extern const char *_bfd_nolink_bfd_group_name
@@ -687,11 +686,6 @@ extern bfd_reloc_status_type _bfd_relocate_contents
 /* Clear a given location using a given howto.  */
 extern bfd_reloc_status_type _bfd_clear_contents
   (reloc_howto_type *, bfd *, asection *, bfd_byte *, bfd_vma) ATTRIBUTE_HIDDEN;
-
-/* Attempt to merge SEC_MERGE sections.  */
-
-extern bool _bfd_merge_sections
-  (bfd *, struct bfd_link_info *) ATTRIBUTE_HIDDEN;
 
 /* Write out a merged section.  */
 

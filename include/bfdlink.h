@@ -1017,6 +1017,9 @@ struct bfd_link_order_reloc
 /* Allocate a new link_order for a section.  */
 extern struct bfd_link_order *bfd_new_link_order (bfd *, asection *);
 
+/* Attempt to merge SEC_MERGE sections.  */
+extern bool bfd_merge_sections (bfd *, struct bfd_link_info *);
+
 struct bfd_section_already_linked;
 
 extern bool bfd_section_already_linked_table_init (void);

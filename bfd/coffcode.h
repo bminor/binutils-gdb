@@ -6024,10 +6024,6 @@ static const bfd_coff_backend_data bigobj_swap_table =
 #define coff_bfd_lookup_section_flags	    bfd_generic_lookup_section_flags
 #endif
 
-#ifndef coff_bfd_merge_sections
-#define coff_bfd_merge_sections		    bfd_generic_merge_sections
-#endif
-
 #ifndef coff_bfd_is_group_section
 #define coff_bfd_is_group_section	    bfd_generic_is_group_section
 #endif
@@ -6082,6 +6078,7 @@ const bfd_target VAR =							\
   15,				/* AR_max_namelen.  */			\
   0,				/* match priority.  */			\
   TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */ \
+  TARGET_MERGE_SECTIONS,						\
 									\
   /* Data conversion functions.  */					\
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,				\
@@ -6145,6 +6142,7 @@ const bfd_target VAR =							\
   15,				/* AR_max_namelen.  */			\
   0,				/* match priority.  */			\
   TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */ \
+  TARGET_MERGE_SECTIONS,						\
 									\
   /* Data conversion functions.  */					\
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,				\
@@ -6208,6 +6206,7 @@ const bfd_target VAR =							\
   15,				/* AR_max_namelen.  */			\
   0,				/* match priority.  */			\
   TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */ \
+  TARGET_MERGE_SECTIONS,						\
 									\
   /* Data conversion functions.  */					\
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,				\

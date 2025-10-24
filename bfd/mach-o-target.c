@@ -48,7 +48,6 @@
 #define bfd_mach_o_get_section_contents		      _bfd_generic_get_section_contents
 #define bfd_mach_o_bfd_gc_sections		      bfd_generic_gc_sections
 #define bfd_mach_o_bfd_lookup_section_flags	      bfd_generic_lookup_section_flags
-#define bfd_mach_o_bfd_merge_sections		      bfd_generic_merge_sections
 #define bfd_mach_o_bfd_is_group_section		      bfd_generic_is_group_section
 #define bfd_mach_o_bfd_group_name		      bfd_generic_group_name
 #define bfd_mach_o_bfd_discard_group		      bfd_generic_discard_group
@@ -135,6 +134,7 @@ const bfd_target TARGET_NAME =
   16,				/* ar_max_namelen.  */
   TARGET_PRIORITY,	/* match priority.  */
   TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */
+  TARGET_MERGE_SECTIONS,
 
 #if TARGET_BIG_ENDIAN
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
