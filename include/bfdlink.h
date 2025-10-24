@@ -214,6 +214,10 @@ struct bfd_link_hash_table
   struct bfd_link_hash_entry *undefs_tail;
   /* Function to free the hash table on closing BFD.  */
   void (*hash_table_free) (bfd *);
+
+  /* A pointer to information used to merge SEC_MERGE sections.  */
+  void *merge_info;
+
   /* The type of the link hash table.  */
   enum bfd_link_hash_table_type type;
 };

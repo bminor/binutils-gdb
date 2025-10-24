@@ -8201,15 +8201,15 @@ _bfd_elf_merge_sections (bfd *obfd, struct bfd_link_info *info)
 
 	    secdata = elf_section_data (sec);
 	    if (! _bfd_add_merge_section (obfd,
-					  &elf_hash_table (info)->merge_info,
+					  &info->hash->merge_info,
 					  sec, &secdata->sec_info))
 	      return false;
 	    else if (secdata->sec_info)
 	      sec->sec_info_type = SEC_INFO_TYPE_MERGE;
 	  }
 
-  if (elf_hash_table (info)->merge_info != NULL)
-    return _bfd_merge_sections (obfd, info, elf_hash_table (info)->merge_info,
+  if (info->hash->merge_info != NULL)
+    return _bfd_merge_sections (obfd, info, info->hash->merge_info,
 				merge_sections_remove_hook);
   return true;
 }
@@ -8449,7 +8449,6 @@ _bfd_elf_link_hash_table_free (bfd *obfd)
   htab = (struct elf_link_hash_table *) obfd->link.hash;
   if (htab->dynstr != NULL)
     _bfd_elf_strtab_free (htab->dynstr);
-  _bfd_merge_sections_free (htab->merge_info);
   /* NB: htab->dynamic->contents is always allocated by bfd_realloc.  */
   if (htab->dynamic != NULL)
     {

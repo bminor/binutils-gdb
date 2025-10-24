@@ -492,6 +492,7 @@ _bfd_link_hash_table_init
     {
       /* Arrange for destruction of this hash table on closing ABFD.  */
       table->hash_table_free = _bfd_generic_link_hash_table_free;
+      table->merge_info = NULL;
       abfd->link.hash = table;
       abfd->is_linker_output = true;
     }
@@ -809,6 +810,7 @@ _bfd_generic_link_hash_table_free (bfd *obfd)
 
   BFD_ASSERT (obfd->is_linker_output && obfd->link.hash);
   ret = (struct generic_link_hash_table *) obfd->link.hash;
+  _bfd_merge_sections_free (ret->root.merge_info);
   bfd_hash_table_free (&ret->root.table);
   free (ret);
   obfd->link.hash = NULL;

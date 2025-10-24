@@ -710,9 +710,6 @@ struct elf_link_hash_table
   /* The __ehdr_start symbol.  */
   struct elf_link_hash_entry *hehdr_start;
 
-  /* A pointer to information used to merge SEC_MERGE sections.  */
-  void *merge_info;
-
   /* Used to link stabs in sections.  */
   struct stab_info stab_info;
 
