@@ -3438,7 +3438,6 @@ _bfd_elf_link_sec_merge_syms (struct elf_link_hash_entry *h, void *data)
       h->root.u.def.value =
 	_bfd_merged_section_offset (output_bfd,
 				    &h->root.u.def.section,
-				    sec->sec_info,
 				    h->root.u.def.value);
     }
 
@@ -11485,9 +11484,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	  else if (isec->sec_info_type == SEC_INFO_TYPE_MERGE
 		   && ELF_ST_TYPE (isym->st_info) != STT_SECTION)
 	    isym->st_value =
-	      _bfd_merged_section_offset (output_bfd, &isec,
-					  isec->sec_info,
-					  isym->st_value);
+	      _bfd_merged_section_offset (output_bfd, &isec, isym->st_value);
 	}
 
       *ppsection = isec;

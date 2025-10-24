@@ -4546,10 +4546,10 @@ mips_elf_resolve_got_page_ref (void **refp, void *data)
       if (sec->flags & SEC_MERGE)
 	{
 	  if (ELF_ST_TYPE (isym->st_info) == STT_SECTION)
-	    addend = _bfd_merged_section_offset (ref->u.abfd, &sec, sec->sec_info,
+	    addend = _bfd_merged_section_offset (ref->u.abfd, &sec,
 						 isym->st_value + ref->addend);
 	  else
-	    addend = _bfd_merged_section_offset (ref->u.abfd, &sec, sec->sec_info,
+	    addend = _bfd_merged_section_offset (ref->u.abfd, &sec,
 						 isym->st_value) + ref->addend;
 	}
       else

@@ -707,7 +707,7 @@ extern bool _bfd_write_merged_section
 /* Find an offset within a modified SEC_MERGE section.  */
 
 extern bfd_vma _bfd_merged_section_offset
-  (bfd *, asection **, void *, bfd_vma) ATTRIBUTE_HIDDEN;
+  (bfd *, asection **, bfd_vma) ATTRIBUTE_HIDDEN;
 
 /* Tidy up when done.  */
 

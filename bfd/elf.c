@@ -13259,7 +13259,7 @@ _bfd_elf_rela_local_sym (bfd *abfd,
       && sec->sec_info_type == SEC_INFO_TYPE_MERGE)
     {
       rel->r_addend =
-	_bfd_merged_section_offset (abfd, psec, sec->sec_info,
+	_bfd_merged_section_offset (abfd, psec,
 				    sym->st_value + rel->r_addend);
       if (sec != *psec)
 	{
@@ -13289,7 +13289,7 @@ _bfd_elf_rel_local_sym (bfd *abfd,
   if (sec->sec_info_type != SEC_INFO_TYPE_MERGE)
     return sym->st_value + addend;
 
-  return _bfd_merged_section_offset (abfd, psec, sec->sec_info,
+  return _bfd_merged_section_offset (abfd, psec,
 				     sym->st_value + addend);
 }
 

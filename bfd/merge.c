@@ -1104,12 +1104,10 @@ _bfd_write_merged_section (bfd *output_bfd, asection *sec)
 
 bfd_vma
 _bfd_merged_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED, asection **psec,
-			    void *psecinfo, bfd_vma offset)
+			    bfd_vma offset)
 {
-  struct sec_merge_sec_info *secinfo;
   asection *sec = *psec;
-
-  secinfo = (struct sec_merge_sec_info *) psecinfo;
+  struct sec_merge_sec_info *secinfo = sec->sec_info;
 
   if (!secinfo)
     return offset;

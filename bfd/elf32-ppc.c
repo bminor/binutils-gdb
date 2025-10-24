@@ -6382,8 +6382,7 @@ ppc_elf_relax_section (bfd *abfd,
 		toff += irel->r_addend;
 
 	      toff
-		= _bfd_merged_section_offset (abfd, &tsec, tsec->sec_info,
-					      toff);
+		= _bfd_merged_section_offset (abfd, &tsec, toff);
 
 	      if (sym_type != STT_SECTION
 		  && r_type != R_PPC_PLTREL24)
