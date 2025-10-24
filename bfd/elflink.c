@@ -6113,15 +6113,10 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		&& (!stab->name[5] ||
 		    (stab->name[5] == '.' && ISDIGIT (stab->name[6])))
 		&& (stab->flags & SEC_MERGE) == 0
-		&& !bfd_is_abs_section (stab->output_section))
-	      {
-		if (! _bfd_link_section_stabs (abfd, &htab->stab_info, stab,
-					       stabstr, &stab->sec_info,
-					       &string_offset))
-		  goto error_return;
-		if (stab->sec_info)
-		  stab->sec_info_type = SEC_INFO_TYPE_STABS;
-	    }
+		&& !bfd_is_abs_section (stab->output_section)
+		&& !_bfd_link_section_stabs (abfd, &htab->stab_info, stab,
+					     stabstr, &string_offset))
+	      goto error_return;
 	}
     }
 
@@ -12217,8 +12212,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	case SEC_INFO_TYPE_STABS:
 	  if (! (_bfd_write_section_stabs
 		 (output_bfd,
-		  &elf_hash_table (flinfo->info)->stab_info,
-		  o, &o->sec_info, contents)))
+		  &elf_hash_table (flinfo->info)->stab_info, o, contents)))
 	    return false;
 	  break;
 	case SEC_INFO_TYPE_MERGE:
@@ -15204,7 +15198,7 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 	  if (!init_reloc_cookie_for_section (&cookie, info, i, false))
 	    return -1;
 
-	  if (_bfd_discard_section_stabs (abfd, i, i->sec_info,
+	  if (_bfd_discard_section_stabs (abfd, i,
 					  bfd_elf_reloc_symbol_deleted_p,
 					  &cookie))
 	    changed = 1;

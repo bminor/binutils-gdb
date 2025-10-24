@@ -54,8 +54,6 @@ struct coff_section_tdata
   /* Optional information about a COMDAT entry; NULL if not COMDAT. */
   struct coff_comdat_info *comdat;
   int line_base;
-  /* A pointer used for .stab linking optimizations.  */
-  void * stab_info;
   /* Available for individual backends.  */
   void * tdata;
 };

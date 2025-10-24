@@ -3705,18 +3705,18 @@ bool _bfd_unrecognized_reloc
 
 /* Extracted from stabs.c.  */
 bool _bfd_link_section_stabs
-   (bfd *, struct stab_info *, asection *, asection *, void **,
+   (bfd *, struct stab_info *, asection *, asection *,
     bfd_size_type *) ATTRIBUTE_HIDDEN;
 
 bool _bfd_discard_section_stabs
-   (bfd *, asection *, void *, bool (*) (bfd_vma, void *), void *) ATTRIBUTE_HIDDEN;
+   (bfd *, asection *, bool (*) (bfd_vma, void *), void *) ATTRIBUTE_HIDDEN;
 
 bool _bfd_write_section_stabs
-   (bfd *, struct stab_info *, asection *, void **, bfd_byte *) ATTRIBUTE_HIDDEN;
+   (bfd *, struct stab_info *, asection *, bfd_byte *) ATTRIBUTE_HIDDEN;
 
 bool _bfd_write_stab_strings (bfd *, struct stab_info *) ATTRIBUTE_HIDDEN;
 
-bfd_vma _bfd_stab_section_offset (asection *, void *, bfd_vma) ATTRIBUTE_HIDDEN;
+bfd_vma _bfd_stab_section_offset (asection *, bfd_vma) ATTRIBUTE_HIDDEN;
 
 /* Extracted from targets.c.  */
 #ifdef __cplusplus

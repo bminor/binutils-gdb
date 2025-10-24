@@ -13308,7 +13308,7 @@ _bfd_elf_section_offset (bfd *abfd,
   switch (sec->sec_info_type)
     {
     case SEC_INFO_TYPE_STABS:
-      return _bfd_stab_section_offset (sec, sec->sec_info, offset);
+      return _bfd_stab_section_offset (sec, offset);
 
     case SEC_INFO_TYPE_EH_FRAME:
       return _bfd_elf_eh_frame_section_offset (abfd, info, sec, offset);

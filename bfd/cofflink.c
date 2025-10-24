@@ -584,23 +584,11 @@ coff_link_add_symbols (bfd *abfd,
 		    || (stab->name[5] == '.' && ISDIGIT (stab->name[6]))))
 	    {
 	      struct coff_link_hash_table *table;
-	      struct coff_section_tdata *secdata
-		= coff_section_data (abfd, stab);
-
-	      if (secdata == NULL)
-		{
-		  amt = sizeof (struct coff_section_tdata);
-		  stab->used_by_bfd = bfd_zalloc (abfd, amt);
-		  if (stab->used_by_bfd == NULL)
-		    goto error_return;
-		  secdata = coff_section_data (abfd, stab);
-		}
 
 	      table = coff_hash_table (info);
 
 	      if (! _bfd_link_section_stabs (abfd, &table->stab_info,
 					     stab, stabstr,
-					     &secdata->stab_info,
 					     &string_offset))
 		goto error_return;
 	    }
@@ -2541,7 +2529,7 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *flaginfo, bfd *input_bfd)
 	}
 
       /* Write out the modified section contents.  */
-      if (secdata == NULL || secdata->stab_info == NULL)
+      if (o->sec_info_type != SEC_INFO_TYPE_STABS)
 	{
 	  file_ptr loc = (o->output_offset
 			  * bfd_octets_per_byte (output_bfd, o));
@@ -2553,7 +2541,7 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *flaginfo, bfd *input_bfd)
 	{
 	  if (! (_bfd_write_section_stabs
 		 (output_bfd, &coff_hash_table (flaginfo->info)->stab_info,
-		  o, &secdata->stab_info, contents)))
+		  o, contents)))
 	    return false;
 	}
     }

@@ -176,7 +176,6 @@ _bfd_link_section_stabs (bfd *abfd,
 			 struct stab_info *sinfo,
 			 asection *stabsec,
 			 asection *stabstrsec,
-			 void * *psecinfo,
 			 bfd_size_type *pstring_offset)
 {
   bool first;
@@ -242,11 +241,12 @@ _bfd_link_section_stabs (bfd *abfd,
 
   amt = sizeof (struct stab_section_info);
   amt += (count - 1) * sizeof (bfd_size_type);
-  *psecinfo = bfd_alloc (abfd, amt);
-  if (*psecinfo == NULL)
+  secinfo = bfd_alloc (abfd, amt);
+  if (secinfo == NULL)
     goto error_return;
 
-  secinfo = (struct stab_section_info *) *psecinfo;
+  stabsec->sec_info = secinfo;
+  stabsec->sec_info_type = SEC_INFO_TYPE_STABS;
   secinfo->excls = NULL;
   stabsec->rawsize = stabsec->size;
   secinfo->cumulative_skips = NULL;
@@ -546,7 +546,6 @@ DESCRIPTION
 bool
 _bfd_discard_section_stabs (bfd *abfd,
 			    asection *stabsec,
-			    void * psecinfo,
 			    bool (*reloc_symbol_deleted_p) (bfd_vma, void *),
 			    void * cookie)
 {
@@ -576,11 +575,11 @@ _bfd_discard_section_stabs (bfd *abfd,
   /* We should have initialized our data in _bfd_link_section_stabs.
      If there was some bizarre error reading the string sections, though,
      we might not have.  Bail rather than asserting.  */
-  if (psecinfo == NULL)
+  if (stabsec->sec_info_type != SEC_INFO_TYPE_STABS)
     return false;
 
   count = stabsec->rawsize / STABSIZE;
-  secinfo = (struct stab_section_info *) psecinfo;
+  secinfo = stabsec->sec_info;
 
   /* Read the stabs information from abfd.  */
   if (!bfd_malloc_and_get_section (abfd, stabsec, &stabbuf))
@@ -705,17 +704,14 @@ bool
 _bfd_write_section_stabs (bfd *output_bfd,
 			  struct stab_info *sinfo,
 			  asection *stabsec,
-			  void * *psecinfo,
 			  bfd_byte *contents)
 {
-  struct stab_section_info *secinfo;
+  struct stab_section_info *secinfo = stabsec->sec_info;
   struct stab_excl_list *e;
   bfd_byte *sym, *tosym, *symend;
   bfd_size_type *pstridx;
 
-  secinfo = (struct stab_section_info *) *psecinfo;
-
-  if (secinfo == NULL)
+  if (stabsec->sec_info_type != SEC_INFO_TYPE_STABS)
     return bfd_set_section_contents (output_bfd, stabsec->output_section,
 				     contents, stabsec->output_offset,
 				     stabsec->size);
@@ -823,14 +819,11 @@ DESCRIPTION
 
 bfd_vma
 _bfd_stab_section_offset (asection *stabsec,
-			  void * psecinfo,
 			  bfd_vma offset)
 {
-  struct stab_section_info *secinfo;
+  struct stab_section_info *secinfo = stabsec->sec_info;
 
-  secinfo = (struct stab_section_info *) psecinfo;
-
-  if (secinfo == NULL)
+  if (stabsec->sec_info_type != SEC_INFO_TYPE_STABS)
     return offset;
 
   if (offset >= stabsec->rawsize)
