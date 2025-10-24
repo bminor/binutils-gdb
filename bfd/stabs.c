@@ -163,7 +163,7 @@ INTERNAL_FUNCTION
 
 SYNOPSIS
 	bool _bfd_link_section_stabs
-	  (bfd *, struct stab_info *, asection *, asection *, void **,
+	  (bfd *, struct stab_info *, asection *, asection *,
 	   bfd_size_type *);
 
 DESCRIPTION
@@ -534,7 +534,7 @@ INTERNAL_FUNCTION
 
 SYNOPSIS
 	bool _bfd_discard_section_stabs
-	  (bfd *, asection *, void *, bool (*) (bfd_vma, void *), void *);
+	  (bfd *, asection *, bool (*) (bfd_vma, void *), void *);
 
 DESCRIPTION
 	This function is called for each input file before the stab
@@ -693,7 +693,7 @@ INTERNAL_FUNCTION
 
 SYNOPSIS
 	bool _bfd_write_section_stabs
-	  (bfd *, struct stab_info *, asection *, void **, bfd_byte *);
+	  (bfd *, struct stab_info *, asection *, bfd_byte *);
 
 DESCRIPTION
 	Write out the stab section.  This is called with the relocated
@@ -809,7 +809,7 @@ INTERNAL_FUNCTION
 	_bfd_stab_section_offset
 
 SYNOPSIS
-	bfd_vma _bfd_stab_section_offset (asection *, void *, bfd_vma);
+	bfd_vma _bfd_stab_section_offset (asection *, bfd_vma);
 
 DESCRIPTION
 	Adjust an address in the .stab section.  Given OFFSET within

@@ -839,7 +839,7 @@ typedef struct bfd_section
      regions is enabled.  */
   struct bfd_section *already_assigned;
 
-  /* A pointer used for various section optimizations.  .sec_info_type
+  /* A pointer used for various section optimizations.  sec_info_type
      qualifies which one it is.  */
   void *sec_info;
 

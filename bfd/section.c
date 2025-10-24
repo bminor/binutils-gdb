@@ -566,7 +566,7 @@ CODE_FRAGMENT
 .  struct bfd_section *already_assigned;
 .
 .  {* A pointer used for various section optimizations.  sec_info_type
-´.     qualifies which one it is.  *}
+.     qualifies which one it is.  *}
 .  void *sec_info;
 .
 .  {* Explicitly specified section type, if non-zero.  *}
