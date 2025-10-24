@@ -557,8 +557,7 @@ elfNN_ia64_relax_section (bfd *abfd, asection *sec,
 	   if (symtype == STT_SECTION)
 	     toff += irel->r_addend;
 
-	   toff = _bfd_merged_section_offset (abfd, &tsec,
-					      elf_section_data (tsec)->sec_info,
+	   toff = _bfd_merged_section_offset (abfd, &tsec, tsec->sec_info,
 					      toff);
 
 	   if (symtype != STT_SECTION)
@@ -3868,8 +3867,7 @@ elfNN_ia64_relocate_section (bfd *output_bfd,
 		      msec = sym_sec;
 		      dynent->addend =
 			_bfd_merged_section_offset (output_bfd, &msec,
-						    elf_section_data (msec)->
-						    sec_info,
+						    msec->sec_info,
 						    sym->st_value
 						    + dynent->addend);
 		      dynent->addend -= sym->st_value;

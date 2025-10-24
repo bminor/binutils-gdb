@@ -566,7 +566,7 @@ _bfd_elf_parse_eh_frame_entry (struct bfd_link_info *info,
     sec->flags |= SEC_EXCLUDE;
 
   sec->sec_info_type = SEC_INFO_TYPE_EH_FRAME_ENTRY;
-  elf_section_data (sec)->sec_info = text_sec;
+  sec->sec_info = text_sec;
   bfd_elf_record_eh_frame_entry (hdr_info, sec);
   return true;
 }
@@ -1046,7 +1046,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
   BFD_ASSERT (sec_info->count == num_entries);
   BFD_ASSERT (cie_count == num_cies);
 
-  elf_section_data (sec)->sec_info = sec_info;
+  sec->sec_info = sec_info;
   sec->sec_info_type = SEC_INFO_TYPE_EH_FRAME;
   if (!bfd_link_relocatable (info))
     {
@@ -1078,10 +1078,10 @@ cmp_eh_frame_hdr (const void *a, const void *b)
   asection *sec;
 
   sec = *(asection *const *)a;
-  sec = (asection *) elf_section_data (sec)->sec_info;
+  sec = sec->sec_info;
   text_a = sec->output_section->vma + sec->output_offset;
   sec = *(asection *const *)b;
-  sec = (asection *) elf_section_data (sec)->sec_info;
+  sec = sec->sec_info;
   text_b = sec->output_section->vma + sec->output_offset;
 
   if (text_a < text_b)
@@ -1105,10 +1105,10 @@ add_eh_frame_hdr_terminator (asection *sec,
     {
       /* See if there is a gap (presumably a text section without unwind info)
 	 between these two entries.  */
-      text_sec = (asection *) elf_section_data (sec)->sec_info;
+      text_sec = sec->sec_info;
       end = text_sec->output_section->vma + text_sec->output_offset
 	    + text_sec->size;
-      text_sec = (asection *) elf_section_data (next)->sec_info;
+      text_sec = next->sec_info;
       next_start = text_sec->output_section->vma + text_sec->output_offset;
       if (end == next_start)
 	return;
@@ -1343,8 +1343,7 @@ find_merged_cie (bfd *abfd, struct bfd_link_info *info, asection *sec,
 static bfd_signed_vma
 offset_adjust (bfd_vma offset, const asection *sec)
 {
-  struct eh_frame_sec_info *sec_info
-    = (struct eh_frame_sec_info *) elf_section_data (sec)->sec_info;
+  struct eh_frame_sec_info *sec_info = sec->sec_info;
   unsigned int lo, hi, mid;
   struct eh_cie_fde *ent = NULL;
   bfd_signed_vma delta;
@@ -1436,7 +1435,7 @@ _bfd_elf_adjust_eh_frame_global_symbol (struct elf_link_hash_entry *h,
 
   sym_sec = h->root.u.def.section;
   if (sym_sec->sec_info_type != SEC_INFO_TYPE_EH_FRAME
-      || elf_section_data (sym_sec)->sec_info == NULL)
+      || sym_sec->sec_info == NULL)
     return true;
 
   delta = offset_adjust (h->root.u.def.value, sym_sec);
@@ -1496,7 +1495,7 @@ _bfd_elf_discard_section_eh_frame
   if (sec->sec_info_type != SEC_INFO_TYPE_EH_FRAME)
     return false;
 
-  sec_info = (struct eh_frame_sec_info *) elf_section_data (sec)->sec_info;
+  sec_info = sec->sec_info;
   if (sec_info == NULL)
     return false;
 
@@ -1771,7 +1770,7 @@ _bfd_elf_eh_frame_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   if (sec->sec_info_type != SEC_INFO_TYPE_EH_FRAME)
     return offset;
-  sec_info = (struct eh_frame_sec_info *) elf_section_data (sec)->sec_info;
+  sec_info = sec->sec_info;
 
   if (offset >= sec->rawsize)
     return offset - sec->rawsize + sec->size;
@@ -1854,7 +1853,7 @@ _bfd_elf_write_section_eh_frame_entry (bfd *abfd, struct bfd_link_info *info,
   bfd_vma addr;
   bfd_vma last_addr;
   bfd_vma offset;
-  asection *text_sec = (asection *) elf_section_data (sec)->sec_info;
+  asection *text_sec = sec->sec_info;
 
   if (!sec->rawsize)
     sec->rawsize = sec->size;
@@ -1946,7 +1945,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	      ->elf_backend_eh_frame_address_size (abfd, sec));
   BFD_ASSERT (ptr_size != 0);
 
-  sec_info = (struct eh_frame_sec_info *) elf_section_data (sec)->sec_info;
+  sec_info = sec->sec_info;
   htab = elf_hash_table (info);
   hdr_info = &htab->eh_info;
 

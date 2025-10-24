@@ -1891,8 +1891,7 @@ rl78_offset_for_reloc (bfd *			abfd,
 	      if ((ssec->flags & SEC_MERGE)
 		  && ssec->sec_info_type == SEC_INFO_TYPE_MERGE)
 		symval = _bfd_merged_section_offset (abfd, & ssec,
-						     elf_section_data (ssec)->sec_info,
-						     symval);
+						     ssec->sec_info, symval);
 	    }
 
 	  /* Now make the offset relative to where the linker is putting it.  */

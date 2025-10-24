@@ -3393,7 +3393,7 @@ mn10300_elf_relax_section (bfd *abfd,
 		symval += irel->r_addend;
 
 	      symval = _bfd_merged_section_offset (abfd, & sym_sec,
-						   elf_section_data (sym_sec)->sec_info,
+						   sym_sec->sec_info,
 						   symval);
 
 	      if (ELF_ST_TYPE (isym->st_info) != STT_SECTION)

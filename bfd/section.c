@@ -565,6 +565,10 @@ CODE_FRAGMENT
 .     regions is enabled.  *}
 .  struct bfd_section *already_assigned;
 .
+.  {* A pointer used for various section optimizations.  sec_info_type
+´.     qualifies which one it is.  *}
+.  void *sec_info;
+.
 .  {* Explicitly specified section type, if non-zero.  *}
 .  unsigned int type;
 .
@@ -747,8 +751,8 @@ INTERNAL
 .  {* symbol,                                                        *}	\
 .     (struct bfd_symbol *) SYM,					\
 .									\
-.  {* map_head, map_tail, already_assigned, type                     *}	\
-.     { NULL }, { NULL }, NULL,             0				\
+.  {* map_head, map_tail, already_assigned, sec_info, type           *}	\
+.     { NULL }, { NULL }, NULL,             NULL,     0			\
 .									\
 .  }
 .

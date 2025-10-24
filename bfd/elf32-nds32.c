@@ -7489,7 +7489,7 @@ calculate_offset (bfd *abfd, asection *sec, Elf_Internal_Rela *irel,
 	{
 	  sym_sec = h->root.u.def.section;
 	  symval = _bfd_merged_section_offset (abfd, &sym_sec,
-					       elf_section_data (sym_sec)->sec_info,
+					       sym_sec->sec_info,
 					       h->root.u.def.value);
 	  symval = symval + sym_sec->output_section->vma
 		   + sym_sec->output_offset;
@@ -8629,13 +8629,11 @@ nds32_elf_rela_local_sym (bfd *abfd, Elf_Internal_Sym *sym,
     {
       if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
 	rel->r_addend =
-	  _bfd_merged_section_offset (abfd, psec,
-				      elf_section_data (sec)->sec_info,
+	  _bfd_merged_section_offset (abfd, psec, sec->sec_info,
 				      sym->st_value + rel->r_addend);
       else
 	rel->r_addend =
-	  _bfd_merged_section_offset (abfd, psec,
-				      elf_section_data (sec)->sec_info,
+	  _bfd_merged_section_offset (abfd, psec, sec->sec_info,
 				      sym->st_value) + rel->r_addend;
 
       if (sec != *psec)
@@ -8708,8 +8706,9 @@ calculate_memory_address (bfd *abfd, Elf_Internal_Rela *irel,
       if (h->root.u.def.section->flags & SEC_MERGE)
 	{
 	  sym_sec = h->root.u.def.section;
-	  symval = _bfd_merged_section_offset (abfd, &sym_sec, elf_section_data
-					       (sym_sec)->sec_info, h->root.u.def.value);
+	  symval = _bfd_merged_section_offset (abfd, &sym_sec,
+					       sym_sec->sec_info,
+					       h->root.u.def.value);
 	  symval = symval + sym_sec->output_section->vma
 		   + sym_sec->output_offset;
 	}

@@ -249,7 +249,7 @@ _bfd_elf_parse_sframe (bfd *abfd,
       goto fail_no_free;
     }
 
-  elf_section_data (sec)->sec_info = sfd_info;
+  sec->sec_info = sfd_info;
   sec->sec_info_type = SEC_INFO_TYPE_SFRAME;
 
   goto success;
@@ -288,7 +288,7 @@ _bfd_elf_discard_section_sframe
      .rela.sframe get updated ?.  */
   keep = false;
 
-  sfd_info = (struct sframe_dec_info *) elf_section_data (sec)->sec_info;
+  sfd_info = sec->sec_info;
 
   /* Skip checking for the linker created .sframe sections
      (for PLT sections).  */
@@ -360,7 +360,7 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
   if (sec->sec_info_type != SEC_INFO_TYPE_SFRAME)
     return false;
 
-  sfd_info = (struct sframe_dec_info *) elf_section_data (sec)->sec_info;
+  sfd_info = sec->sec_info;
   sfd_ctx = sfd_info->sfd_ctx;
 
   htab = elf_hash_table (info);
@@ -600,7 +600,7 @@ _bfd_elf_sframe_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (sec->sec_info_type != SEC_INFO_TYPE_SFRAME)
     return offset;
 
-  sfd_info = elf_section_data (sec)->sec_info;
+  sfd_info = sec->sec_info;
   sfd_ctx = sfd_info->sfd_ctx;
   sfd_num_fdes = sframe_decoder_get_num_fidx (sfd_ctx);
 

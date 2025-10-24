@@ -3694,8 +3694,8 @@ bool _bfd_unrecognized_reloc
   /* symbol,                                                        */ \
      (struct bfd_symbol *) SYM,                                        \
 								       \
-  /* map_head, map_tail, already_assigned, type                     */ \
-     { NULL }, { NULL }, NULL,             0                           \
+  /* map_head, map_tail, already_assigned, sec_info, type           */ \
+     { NULL }, { NULL }, NULL,             NULL,     0                 \
 								       \
   }
 

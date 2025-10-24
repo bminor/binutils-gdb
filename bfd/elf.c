@@ -10234,8 +10234,7 @@ _bfd_elf_free_cached_info (bfd *abfd)
 	  elf_section_data (sec)->relocs = NULL;
 	  if (sec->sec_info_type == SEC_INFO_TYPE_EH_FRAME)
 	    {
-	      struct eh_frame_sec_info *sec_info
-		= elf_section_data (sec)->sec_info;
+	      struct eh_frame_sec_info *sec_info = sec->sec_info;
 	      free (sec_info->cies);
 	    }
 	}
@@ -13260,8 +13259,7 @@ _bfd_elf_rela_local_sym (bfd *abfd,
       && sec->sec_info_type == SEC_INFO_TYPE_MERGE)
     {
       rel->r_addend =
-	_bfd_merged_section_offset (abfd, psec,
-				    elf_section_data (sec)->sec_info,
+	_bfd_merged_section_offset (abfd, psec, sec->sec_info,
 				    sym->st_value + rel->r_addend);
       if (sec != *psec)
 	{
@@ -13291,8 +13289,7 @@ _bfd_elf_rel_local_sym (bfd *abfd,
   if (sec->sec_info_type != SEC_INFO_TYPE_MERGE)
     return sym->st_value + addend;
 
-  return _bfd_merged_section_offset (abfd, psec,
-				     elf_section_data (sec)->sec_info,
+  return _bfd_merged_section_offset (abfd, psec, sec->sec_info,
 				     sym->st_value + addend);
 }
 
@@ -13311,8 +13308,8 @@ _bfd_elf_section_offset (bfd *abfd,
   switch (sec->sec_info_type)
     {
     case SEC_INFO_TYPE_STABS:
-      return _bfd_stab_section_offset (sec, elf_section_data (sec)->sec_info,
-				       offset);
+      return _bfd_stab_section_offset (sec, sec->sec_info, offset);
+
     case SEC_INFO_TYPE_EH_FRAME:
       return _bfd_elf_eh_frame_section_offset (abfd, info, sec, offset);
 
@@ -13740,7 +13737,7 @@ _bfd_elf_slurp_secondary_reloc_section (bfd *       abfd,
 
 	  free (native_relocs);
 	  /* Store the internal relocs.  */
-	  elf_section_data (relsec)->sec_info = internal_relocs;
+	  relsec->sec_info = internal_relocs;
 	}
     }
 
@@ -13773,9 +13770,8 @@ _bfd_elf_copy_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUSED,
   if (osec == NULL)
     return false;
 
-  esd = elf_section_data (osec);
-  BFD_ASSERT (esd->sec_info == NULL);
-  esd->sec_info = elf_section_data (isec)->sec_info;
+  BFD_ASSERT (osec->sec_info == NULL);
+  osec->sec_info = isec->sec_info;
   osection->sh_type = SHT_RELA;
   osection->sh_link = elf_onesymtab (obfd);
   if (osection->sh_link == 0)
@@ -13944,7 +13940,7 @@ _bfd_elf_write_secondary_reloc_section (bfd *abfd, asection *sec)
 	  last_sym = NULL;
 	  last_sym_idx = 0;
 	  dst_rela = hdr->contents;
-	  src_irel = (arelent *) esd->sec_info;
+	  src_irel = sec->sec_info;
 	  if (src_irel == NULL)
 	    {
 	      _bfd_error_handler

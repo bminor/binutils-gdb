@@ -1893,9 +1893,6 @@ struct bfd_elf_section_data
      FIXME: In the future it might be better to change this into a list
      of secondary reloc sections, making lookup easier and faster.  */
   bool has_secondary_relocs;
-
-  /* A pointer used for various section optimizations.  */
-  void *sec_info;
 };
 
 #define elf_section_data(sec) ((struct bfd_elf_section_data*)(sec)->used_by_bfd)

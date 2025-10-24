@@ -5622,8 +5622,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	     symval += rel->r_addend;
 
 	   symval = _bfd_merged_section_offset (abfd, &sym_sec,
-						elf_section_data (sym_sec)->sec_info,
-						symval);
+						sym_sec->sec_info, symval);
 
 	   if (symtype != STT_SECTION)
 	     symval += rel->r_addend;

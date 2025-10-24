@@ -4545,14 +4545,11 @@ mips_elf_resolve_got_page_ref (void **refp, void *data)
 	 specifies the offset _from_ the first byte.  */
       if (sec->flags & SEC_MERGE)
 	{
-	  void *secinfo;
-
-	  secinfo = elf_section_data (sec)->sec_info;
 	  if (ELF_ST_TYPE (isym->st_info) == STT_SECTION)
-	    addend = _bfd_merged_section_offset (ref->u.abfd, &sec, secinfo,
+	    addend = _bfd_merged_section_offset (ref->u.abfd, &sec, sec->sec_info,
 						 isym->st_value + ref->addend);
 	  else
-	    addend = _bfd_merged_section_offset (ref->u.abfd, &sec, secinfo,
+	    addend = _bfd_merged_section_offset (ref->u.abfd, &sec, sec->sec_info,
 						 isym->st_value) + ref->addend;
 	}
       else

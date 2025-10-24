@@ -6115,14 +6115,14 @@ ppc_elf_relax_section (bfd *abfd,
   if (htab->params->ppc476_workaround
       || htab->params->pic_fixup > 0)
     {
-      if (elf_section_data (isec)->sec_info == NULL)
+      if (isec->sec_info == NULL)
 	{
-	  elf_section_data (isec)->sec_info
+	  isec->sec_info
 	    = bfd_zalloc (abfd, sizeof (struct ppc_elf_relax_info));
-	  if (elf_section_data (isec)->sec_info == NULL)
+	  if (isec->sec_info == NULL)
 	    return false;
 	}
-      relax_info = elf_section_data (isec)->sec_info;
+      relax_info = isec->sec_info;
       trampbase -= relax_info->workaround_size;
     }
 
@@ -6382,8 +6382,7 @@ ppc_elf_relax_section (bfd *abfd,
 		toff += irel->r_addend;
 
 	      toff
-		= _bfd_merged_section_offset (abfd, &tsec,
-					      elf_section_data (tsec)->sec_info,
+		= _bfd_merged_section_offset (abfd, &tsec, tsec->sec_info,
 					      toff);
 
 	      if (sym_type != STT_SECTION
@@ -7019,7 +7018,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		    && !strcmp (input_section->output_section->name,
 				".tls_vars"));
   if (input_section->sec_info_type == SEC_INFO_TYPE_TARGET)
-    relax_info = elf_section_data (input_section)->sec_info;
+    relax_info = input_section->sec_info;
   rel = wrel = relocs;
   relend = relocs + input_section->reloc_count;
   for (; rel < relend; wrel++, rel++)

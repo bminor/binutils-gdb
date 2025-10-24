@@ -3472,8 +3472,7 @@ elf64_ia64_relocate_section (bfd *output_bfd,
 		      msec = sym_sec;
 		      dynent->addend =
 			_bfd_merged_section_offset (output_bfd, &msec,
-						    elf_section_data (msec)->
-						    sec_info,
+						    msec->sec_info,
 						    sym->st_value
 						    + dynent->addend);
 		      dynent->addend -= sym->st_value;
