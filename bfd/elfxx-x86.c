@@ -1906,7 +1906,7 @@ _bfd_x86_elf_create_sframe_plt (bfd *output_bfd,
       break;
     }
 
-  *ectx = sframe_encode (SFRAME_VERSION_2,
+  *ectx = sframe_encode (SFRAME_VERSION_3,
 			 SFRAME_F_FDE_FUNC_START_PCREL,
 			 SFRAME_ABI_AMD64_ENDIAN_LITTLE,
 			 SFRAME_CFA_FIXED_FP_INVALID,

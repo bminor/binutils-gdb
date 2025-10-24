@@ -141,14 +141,13 @@ static int
 sframe_fde_tbl_init (sf_fde_tbl *fde_tbl, const char *fde_buf,
 		     size_t *fidx_size, unsigned int num_fdes, uint8_t ver)
 {
-  sframe_func_desc_entry_v2 *fdep = NULL;
-
-  if (ver == SFRAME_VERSION_2 && SFRAME_VERSION == SFRAME_VERSION_2)
+  if (ver == SFRAME_VERSION_3 && SFRAME_VERSION == SFRAME_VERSION_3)
     {
-      *fidx_size = num_fdes * sizeof (sframe_func_desc_entry_int);
+      *fidx_size = num_fdes * sizeof (sframe_func_desc_entry_v3);
       for (unsigned int i = 0; i < num_fdes; i++)
 	{
-	  fdep = (sframe_func_desc_entry_v2 *)fde_buf + i;
+	  const sframe_func_desc_entry_v3 *fdep
+	    = (sframe_func_desc_entry_v3 *)fde_buf + i;
 	  fde_tbl->entry[i].func_start_pc_offset = fdep->sfde_func_start_address;
 	  fde_tbl->entry[i].func_size = fdep->sfde_func_size;
 	  fde_tbl->entry[i].func_start_fre_off = fdep->sfde_func_start_fre_off;
@@ -160,6 +159,23 @@ sframe_fde_tbl_init (sf_fde_tbl *fde_tbl, const char *fde_buf,
     }
   /* If ver is not the latest, read buffer manually and upgrade from
      sframe_func_desc_entry_v2 to populate the sf_fde_tbl entries.  */
+  else if (ver == SFRAME_VERSION_2 && SFRAME_VERSION == SFRAME_VERSION_3)
+    {
+      *fidx_size = num_fdes * sizeof (sframe_func_desc_entry_v2);
+      for (unsigned int i = 0; i < num_fdes; i++)
+	{
+	  const sframe_func_desc_entry_v2 *fdep
+	    = (sframe_func_desc_entry_v2 *)fde_buf + i;
+	  fde_tbl->entry[i].func_start_pc_offset
+	    = fdep->sfde_func_start_address;
+	  fde_tbl->entry[i].func_size = fdep->sfde_func_size;
+	  fde_tbl->entry[i].func_start_fre_off = fdep->sfde_func_start_fre_off;
+	  fde_tbl->entry[i].func_num_fres = fdep->sfde_func_num_fres;
+	  fde_tbl->entry[i].func_info = fdep->sfde_func_info;
+	  fde_tbl->entry[i].func_rep_size = fdep->sfde_func_rep_size;
+	}
+      fde_tbl->count = num_fdes;
+    }
   else
     {
       /* Not possible ATM.  */
@@ -291,8 +307,17 @@ flip_header (char *buf, uint8_t ver ATTRIBUTE_UNUSED)
 static int
 flip_fde (char *buf, size_t buf_size, uint8_t ver, size_t *fde_size)
 {
+  if (ver == SFRAME_VERSION_3)
+    {
+      sframe_func_desc_entry_v3 *fdep = (sframe_func_desc_entry_v3 *) buf;
+      swap_thing (fdep->sfde_func_start_address);
+      swap_thing (fdep->sfde_func_size);
+      swap_thing (fdep->sfde_func_start_fre_off);
+      swap_thing (fdep->sfde_func_num_fres);
 
-  if (ver == SFRAME_VERSION_2)
+      *fde_size = sizeof (sframe_func_desc_entry_v3);
+    }
+  else if (ver == SFRAME_VERSION_2)
     {
       if (buf_size < sizeof (sframe_func_desc_entry_v2))
 	return SFRAME_ERR;
@@ -319,7 +344,8 @@ sframe_header_sanity_check_p (const sframe_header *hp)
   /* Check preamble is valid.  */
   if (hp->sfh_preamble.sfp_magic != SFRAME_MAGIC
       || (hp->sfh_preamble.sfp_version != SFRAME_VERSION_1
-	  && hp->sfh_preamble.sfp_version != SFRAME_VERSION_2)
+	  && hp->sfh_preamble.sfp_version != SFRAME_VERSION_2
+	  && hp->sfh_preamble.sfp_version != SFRAME_VERSION_3)
       || (hp->sfh_preamble.sfp_flags & ~SFRAME_V2_F_ALL_FLAGS))
     return false;
 
@@ -546,7 +572,19 @@ sframe_decode_fde (const char *buf, size_t buf_size, uint8_t ver,
 		   uint32_t *num_fres, uint32_t *fre_type,
 		   uint32_t *fre_offset, size_t *fde_size)
 {
-  if (ver == SFRAME_VERSION_2)
+  if (ver == SFRAME_VERSION_3)
+    {
+      if (buf_size < sizeof (sframe_func_desc_entry_v3))
+	return SFRAME_ERR;
+
+      sframe_func_desc_entry_v3 *fdep = (sframe_func_desc_entry_v3 *) buf;
+      *num_fres = fdep->sfde_func_num_fres;
+      *fre_type = SFRAME_V3_FDE_FRE_TYPE (fdep->sfde_func_info);
+      *fre_offset = fdep->sfde_func_start_fre_off;
+
+      *fde_size = sizeof (sframe_func_desc_entry_v3);
+    }
+  else if (ver == SFRAME_VERSION_2)
     {
       if (buf_size < sizeof (sframe_func_desc_entry_v2))
 	return SFRAME_ERR;
@@ -1288,9 +1326,18 @@ sframe_decoder_get_offsetof_fde_start_addr (const sframe_decoder_ctx *dctx,
   else if (errp)
     *errp = 0;
 
-  return (sframe_decoder_get_hdr_size (dctx)
-	  + func_idx * sizeof (sframe_func_desc_entry_v2)
-	  + offsetof (sframe_func_desc_entry_v2, sfde_func_start_address));
+  if (sframe_decoder_get_version (dctx) == SFRAME_VERSION_3)
+    return (sframe_decoder_get_hdr_size (dctx)
+	    + func_idx * sizeof (sframe_func_desc_entry_v3)
+	    + offsetof (sframe_func_desc_entry_v3, sfde_func_start_address));
+  else if (sframe_decoder_get_version (dctx) == SFRAME_VERSION_2)
+    return (sframe_decoder_get_hdr_size (dctx)
+	    + func_idx * sizeof (sframe_func_desc_entry_v2)
+	    + offsetof (sframe_func_desc_entry_v2, sfde_func_start_address));
+  else
+    sframe_ret_set_errno (errp, SFRAME_ERR_INVAL);
+
+  return 0;
 }
 
 /* Find the function descriptor entry starting which contains the specified
@@ -1694,8 +1741,8 @@ sframe_encoder_get_offsetof_fde_start_addr (sframe_encoder_ctx *ectx,
     *errp = 0;
 
   return (sframe_encoder_get_hdr_size (ectx)
-	  + func_idx * sizeof (sframe_func_desc_entry_v2)
-	  + offsetof (sframe_func_desc_entry_v2, sfde_func_start_address));
+	  + func_idx * sizeof (sframe_func_desc_entry_v3)
+	  + offsetof (sframe_func_desc_entry_v3, sfde_func_start_address));
 }
 
 /* Add an SFrame FRE to function at FUNC_IDX'th function descriptor entry in
@@ -2011,7 +2058,7 @@ sframe_encoder_write_fde (const sframe_header *sfhp ATTRIBUTE_UNUSED,
 			  char *contents, sframe_func_desc_entry_int *fde,
 			  size_t *fde_write_size)
 {
-  sframe_func_desc_entry_v2 *fdep = (sframe_func_desc_entry_v2 *)contents;
+  sframe_func_desc_entry_v3 *fdep = (sframe_func_desc_entry_v3 *)contents;
 
   fdep->sfde_func_start_address = (int32_t)fde->func_start_pc_offset;
   fdep->sfde_func_size = fde->func_size;
@@ -2021,7 +2068,7 @@ sframe_encoder_write_fde (const sframe_header *sfhp ATTRIBUTE_UNUSED,
   fdep->sfde_func_rep_size = fde->func_rep_size;
   fdep->sfde_func_padding2 = 0;
 
-  *fde_write_size = sizeof (sframe_func_desc_entry_v2);
+  *fde_write_size = sizeof (sframe_func_desc_entry_v3);
 
   return 0;
 }
@@ -2053,7 +2100,7 @@ sframe_encoder_write_sframe (sframe_encoder_ctx *ectx, bool sort_fde_p)
   contents = ectx->sfe_data;
   buf_size = ectx->sfe_data_size;
   num_fdes = sframe_encoder_get_num_fidx (ectx);
-  all_fdes_size = num_fdes * sizeof (sframe_func_desc_entry_v2);
+  all_fdes_size = num_fdes * sizeof (sframe_func_desc_entry_v3);
   ehp = sframe_encoder_get_header (ectx);
   hdr_size = sframe_get_hdr_size (ehp);
 
@@ -2160,7 +2207,7 @@ sframe_encoder_write (sframe_encoder_ctx *ectx, size_t *encoded_size,
 
   ehp = sframe_encoder_get_header (ectx);
   hdrsize = sframe_get_hdr_size (ehp);
-  fsz = sframe_encoder_get_num_fidx (ectx) * sizeof (sframe_func_desc_entry_v2);
+  fsz = sframe_encoder_get_num_fidx (ectx) * sizeof (sframe_func_desc_entry_v3);
   fresz = ectx->sfe_fre_nbytes;
 
   /* Encoder writes out data in the latest SFrame format version.  */

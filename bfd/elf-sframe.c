@@ -25,7 +25,7 @@
 #include "sframe-api.h"
 #include "sframe-internal.h"
 
-typedef sframe_func_desc_entry_v2 sframe_func_desc_entry;
+typedef sframe_func_desc_entry_v3 sframe_func_desc_entry;
 
 /* Return TRUE if the function has been marked for deletion during the linking
    process.  */
@@ -409,7 +409,7 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
 	 SFRAME_V2_GNU_AS_LD_ENCODING_FLAGS, it is enforced that the provided
 	 input sections also have this flag set.  */
       tflags |= SFRAME_F_FDE_FUNC_START_PCREL;
-      htab->sfe_info.sfe_ctx = sframe_encode (SFRAME_VERSION_2,
+      htab->sfe_info.sfe_ctx = sframe_encode (SFRAME_VERSION_3,
 					      tflags, /* SFrame flags.  */
 					      sfd_ctx_abi_arch,
 					      sfd_ctx_fixed_fp_offset,
@@ -451,7 +451,7 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
   /* Check that all .sframe sections being linked have the same version.  */
   dctx_version = sframe_decoder_get_version (sfd_ctx);
   ectx_version = sframe_encoder_get_version (sfe_ctx);
-  if (dctx_version != SFRAME_VERSION_2 || dctx_version != ectx_version)
+  if (dctx_version != SFRAME_VERSION_3 || dctx_version != ectx_version)
     {
       _bfd_error_handler
 	(_("input SFrame sections with different format versions prevent"

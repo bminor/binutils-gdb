@@ -90,7 +90,8 @@ dump_sframe_header (const sframe_decoder_ctx *sfd_ctx)
   const char *version_names[]
     = { "NULL",
 	"SFRAME_VERSION_1",
-	"SFRAME_VERSION_2" };
+	"SFRAME_VERSION_2",
+	"SFRAME_VERSION_3" };
 
   ver = sframe_decoder_get_version (sfd_ctx);
   if (ver <= SFRAME_VERSION)
@@ -268,12 +269,12 @@ dump_sframe_functions (const sframe_decoder_ctx *sfd_ctx, uint64_t sec_addr)
 void
 dump_sframe (const sframe_decoder_ctx *sfd_ctx, uint64_t sec_addr)
 {
-  uint8_t ver;
-
   dump_sframe_header (sfd_ctx);
 
-  ver = sframe_decoder_get_version (sfd_ctx);
-  if (ver == SFRAME_VERSION)
+  uint8_t ver = sframe_decoder_get_version (sfd_ctx);
+  /* Although newer gas and ld do not generate SFrame V2, continue to support
+     textual dump of SFrame V2 sections ATM.  */
+  if (ver == SFRAME_VERSION_3 || ver == SFRAME_VERSION_2)
     dump_sframe_functions (sfd_ctx, sec_addr);
   else
     printf ("\n No further information can be displayed.  %s",
