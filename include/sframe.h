@@ -256,12 +256,13 @@ typedef struct sframe_func_desc_entry_v3
      - 4-bits: Identify the FRE type used for the function.
      - 1-bit: Identify the PC type of the function - mask or inc.
      - 1-bit: PAC authorization A/B key (aarch64).
-     - 2-bits: Unused.
-     ------------------------------------------------------------------------
-     |     Unused    |  PAC auth A/B key (aarch64) |   FDE   |   FRE Type   |
-     |               |     Unused (amd64, s390x)   | PC Type |              |
-     ------------------------------------------------------------------------
-     8               6                             5         4              0     */
+     - 1-bits: Unused.
+     - 1-bit: Signal frame.
+     -------------------------------------------------------------------------------
+     | Signal |   Unused    |  PAC auth A/B key (aarch64) |   FDE   |   FRE Type   |
+     | frame  |             |        Unused (amd64)       | PC Type |              |
+     -------------------------------------------------------------------------------
+     8        7             6                             5         4              0     */
   uint8_t sfde_func_info;
   /* Size of the block of repeating insns.  Used for SFrame FDEs of type
      SFRAME_FDE_TYPE_PCMASK.  */
@@ -274,9 +275,13 @@ typedef struct sframe_func_desc_entry_v3
 #define SFRAME_V3_FDE_FRE_TYPE(info)          (SFRAME_V2_FUNC_FRE_TYPE (info))
 #define SFRAME_V3_FDE_PC_TYPE(info)           (SFRAME_V2_FUNC_PC_TYPE (info))
 #define SFRAME_V3_AARCH64_FDE_PAUTH_KEY(info) (SFRAME_V2_FUNC_PAUTH_KEY (info))
+#define SFRAME_V3_FDE_SIGNAL_P(info)           (((info) >> 7) & 0x1)
 
 #define SFRAME_V3_FDE_UPDATE_PAUTH_KEY(pauth_key, info) \
   SFRAME_V2_FUNC_INFO_UPDATE_PAUTH_KEY (pauth_key, info)
+
+#define SFRAME_V3_FDE_UPDATE_SIGNAL_P(signal_p, info)  \
+  ((((signal_p) & 0x1) << 7) | ((info) & 0x7f))
 
 /* Size of stack frame offsets in an SFrame Frame Row Entry.  A single
    SFrame FRE has all offsets of the same size.  Offset size may vary

@@ -116,6 +116,13 @@ get_dw_fde_pauth_b_key_p (const struct fde_entry *dw_fde ATTRIBUTE_UNUSED)
 #endif
 }
 
+/* Get whether signal frame.  */
+static bool
+get_dw_fde_signal_p (const struct fde_entry *dw_fde)
+{
+  return (dw_fde->signal_frame == 1);
+}
+
 /* SFrame Frame Row Entry (FRE) related functions.  */
 
 static void
@@ -294,14 +301,16 @@ sframe_v1_set_fre_info (unsigned int cfa_base_reg, unsigned int num_offsets,
   return fre_info;
 }
 
-/* SFrame (SFRAME_VERSION_1) set function info.  */
+/* SFrame (SFRAME_VERSION_3) set function info.  */
+
 static unsigned char
-sframe_v1_set_func_info (unsigned int fde_type, unsigned int fre_type,
-			 unsigned int pauth_key)
+sframe_v3_set_func_info (unsigned int fde_pc_type, unsigned int fre_type,
+			 unsigned int pauth_key, bool signal_p)
 {
   unsigned char func_info;
-  func_info = SFRAME_V1_FUNC_INFO (fde_type, fre_type);
-  func_info = SFRAME_V1_FUNC_INFO_UPDATE_PAUTH_KEY (pauth_key, func_info);
+  func_info = SFRAME_V3_FDE_FUNC_INFO (fde_pc_type, fre_type);
+  func_info = SFRAME_V3_FDE_UPDATE_PAUTH_KEY (pauth_key, func_info);
+  func_info = SFRAME_V3_FDE_UPDATE_SIGNAL_P (signal_p, func_info);
   return func_info;
 }
 
@@ -317,7 +326,7 @@ sframe_set_version (uint32_t sframe_version ATTRIBUTE_UNUSED)
 
   sframe_ver_ops.set_fre_info = sframe_v1_set_fre_info;
 
-  sframe_ver_ops.set_func_info = sframe_v1_set_func_info;
+  sframe_ver_ops.set_func_info = sframe_v3_set_func_info;
 }
 
 /* SFrame set FRE info.  */
@@ -334,9 +343,10 @@ sframe_set_fre_info (unsigned int cfa_base_reg, unsigned int num_offsets,
 
 static unsigned char
 sframe_set_func_info (unsigned int fde_type, unsigned int fre_type,
-		      unsigned int pauth_key)
+		      unsigned int pauth_key, bool signal_p)
 {
-  return sframe_ver_ops.set_func_info (fde_type, fre_type, pauth_key);
+  return sframe_ver_ops.set_func_info (fde_type, fre_type, pauth_key,
+				       signal_p);
 }
 
 /* Get the number of SFrame FDEs for the current file.  */
@@ -690,6 +700,7 @@ output_sframe_funcdesc (symbolS *start_of_fre_section,
   expressionS exp;
   symbolS *dw_fde_start_addrS, *dw_fde_end_addrS;
   unsigned int pauth_key;
+  bool signal_p;
 
   dw_fde_start_addrS = get_dw_fde_start_addrS (sframe_fde->dw_fde);
   dw_fde_end_addrS = get_dw_fde_end_addrS (sframe_fde->dw_fde);
@@ -733,9 +744,10 @@ output_sframe_funcdesc (symbolS *start_of_fre_section,
   unsigned char func_info;
   pauth_key = (get_dw_fde_pauth_b_key_p (sframe_fde->dw_fde)
 	       ? SFRAME_AARCH64_PAUTH_KEY_B : SFRAME_AARCH64_PAUTH_KEY_A);
+  signal_p = get_dw_fde_signal_p (sframe_fde->dw_fde);
   func_info = sframe_set_func_info (SFRAME_FDE_TYPE_PCINC,
 				    SFRAME_FRE_TYPE_ADDR4,
-				    pauth_key);
+				    pauth_key, signal_p);
   if (SFRAME_FRE_TYPE_SELECTION_OPT)
     {
       expressionS cexp;

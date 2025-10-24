@@ -169,25 +169,32 @@ dump_sframe_func_with_fres (const sframe_decoder_ctx *sfd_ctx,
 								     funcidx,
 								     NULL);
 
-  /* Mark FDEs with [m] where the FRE start address is interpreted as a
-     mask.  */
-  int pc_mask_p
-    = (SFRAME_V2_FUNC_PC_TYPE (func_info) == SFRAME_FDE_TYPE_PCMASK);
-  const char *fde_type_marker = (pc_mask_p ? "[m]" : "   ");
+  /* Gather all FDE attributes.  */
+  char attrs[16] = {0};
+  bool fde_signal_p = SFRAME_V3_FDE_SIGNAL_P (func_info);
+  sprintf (attrs, fde_signal_p ? "S" : "");
 
   printf ("\n    func idx [%d]: pc = 0x%"PRIx64 ", size = %d bytes",
 	  funcidx,
 	  func_start_pc_vma,
 	  func_size);
+  /* Print attributes if they exist.  */
+  if (attrs[0])
+    printf (", attr = \"%s\"", attrs);
 
   if (is_sframe_abi_arch_aarch64 (sfd_ctx)
       && (SFRAME_V2_FUNC_PAUTH_KEY (func_info) == SFRAME_AARCH64_PAUTH_KEY_B))
     printf (", pauth = B key");
 
-  char temp[100];
-
+  /* Mark FDEs with [m] where the FRE start address is interpreted as a
+     mask.  */
+  int pc_mask_p
+    = (SFRAME_V2_FUNC_PC_TYPE (func_info) == SFRAME_FDE_TYPE_PCMASK);
+  const char *pc_mask_marker = (pc_mask_p ? "[m]" : "   ");
   printf ("\n    %-7s%-8s %-10s%-10s%-13s",
-	  "STARTPC", fde_type_marker, "CFA", "FP", "RA");
+	  "STARTPC", pc_mask_marker, "CFA", "FP", "RA");
+
+  char temp[100] = {0};
   for (j = 0; j < num_fres; j++)
     {
       sframe_decoder_get_fre (sfd_ctx, funcidx, j, &fre);
