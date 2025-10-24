@@ -90,7 +90,8 @@ dump_sframe_header (const sframe_decoder_ctx *sfd_ctx)
   const char *version_names[]
     = { "NULL",
 	"SFRAME_VERSION_1",
-	"SFRAME_VERSION_2" };
+	"SFRAME_VERSION_2",
+	"SFRAME_VERSION_3" };
 
   ver = sframe_decoder_get_version (sfd_ctx);
   if (ver <= SFRAME_VERSION)

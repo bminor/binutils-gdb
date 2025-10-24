@@ -1595,7 +1595,7 @@ _bfd_s390_elf_create_sframe_plt (struct bfd_link_info *info)
   num_pltn_fres = htab->sframe_plt->pltn_num_fres;
   num_pltn_entries = (dpltsec->size - plt0_entry_size) / plt_entry_size;
 
-  *ectx = sframe_encode (SFRAME_VERSION_2,
+  *ectx = sframe_encode (SFRAME_VERSION_3,
 			 SFRAME_F_FDE_FUNC_START_PCREL,
 			 SFRAME_ABI_S390X_ENDIAN_BIG,
 			 SFRAME_CFA_FIXED_FP_INVALID,

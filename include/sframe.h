@@ -74,10 +74,11 @@ extern "C"
 /* SFrame format versions.  */
 #define SFRAME_VERSION_1	1
 #define SFRAME_VERSION_2	2
+#define SFRAME_VERSION_3        3
 /* SFrame magic number.  */
 #define SFRAME_MAGIC		0xdee2
 /* Current version of SFrame format.  */
-#define SFRAME_VERSION	SFRAME_VERSION_2
+#define SFRAME_VERSION	SFRAME_VERSION_3
 
 /* Various flags for SFrame.  */
 
@@ -238,6 +239,47 @@ typedef struct sframe_func_desc_entry_v2
 
 #define SFRAME_V2_FUNC_INFO_UPDATE_PAUTH_KEY(pauth_key, fde_info) \
   SFRAME_V1_FUNC_INFO_UPDATE_PAUTH_KEY (pauth_key, fde_info)
+
+typedef struct sframe_func_desc_entry_v3
+{
+  /* Function start address.  Encoded as a signed offset, relative to the
+     beginning of the current FDE.  */
+  int32_t sfde_func_start_address;
+  /* Size of the function in bytes.  */
+  uint32_t sfde_func_size;
+  /* Offset of the first SFrame Frame Row Entry of the function, relative to the
+     beginning of the SFrame Frame Row Entry sub-section.  */
+  uint32_t sfde_func_start_fre_off;
+  /* Number of frame row entries for the function.  */
+  uint32_t sfde_func_num_fres;
+  /* Additional information for stack tracing from the function:
+     - 4-bits: Identify the FRE type used for the function.
+     - 1-bit: Identify the FDE type of the function - mask or inc.
+     - 1-bit: PAC authorization A/B key (aarch64).
+     - 2-bits: Unused.
+     --------------------------------------------------------------------------
+     |     Unused    |  PAC auth A/B key (aarch64) |  FDE type |   FRE type   |
+     |               |     Unused (amd64, s390x)   |           |              |
+     --------------------------------------------------------------------------
+     8               6                             5           4              0     */
+  uint8_t sfde_func_info;
+  /* Size of the block of repeating insns.  Used for SFrame FDEs of type
+     SFRAME_FDE_TYPE_PCMASK.  */
+  uint8_t sfde_func_rep_size;
+  uint16_t sfde_func_padding2;
+} ATTRIBUTE_PACKED sframe_func_desc_entry_v3;
+
+/* SFrame V3 FDE.  TBD comment.  */
+
+#define SFRAME_V3_FUNC_INFO(fde_type, fre_enc_type) \
+  (SFRAME_V2_FUNC_INFO (fde_type, fre_enc_type))
+
+#define SFRAME_V3_FUNC_FRE_TYPE(data)	  (SFRAME_V2_FUNC_FRE_TYPE (data))
+#define SFRAME_V3_FUNC_FDE_TYPE(data)	  (SFRAME_V2_FUNC_FDE_TYPE (data))
+#define SFRAME_V3_FUNC_PAUTH_KEY(data)	  (SFRAME_V2_FUNC_PAUTH_KEY (data))
+
+#define SFRAME_V3_FUNC_INFO_UPDATE_PAUTH_KEY(pauth_key, fde_info) \
+  SFRAME_V2_FUNC_INFO_UPDATE_PAUTH_KEY (pauth_key, fde_info)
 
 /* Size of stack frame offsets in an SFrame Frame Row Entry.  A single
    SFrame FRE has all offsets of the same size.  Offset size may vary

@@ -54,8 +54,8 @@
 # define SFRAME_FRE_TYPE_SELECTION_OPT 1
 #endif
 
-/* gas emits SFrame Version 2 only at this time.  */
-typedef sframe_func_desc_entry_v2 sframe_func_desc_entry;
+/* gas emits SFrame Version 3 only at this time.  */
+typedef sframe_func_desc_entry_v3 sframe_func_desc_entry;
 
 /* List of SFrame FDE entries.  */
 
@@ -310,10 +310,10 @@ sframe_v1_set_func_info (unsigned int fde_type, unsigned int fre_type,
 static void
 sframe_set_version (uint32_t sframe_version ATTRIBUTE_UNUSED)
 {
-  sframe_ver_ops.format_version = SFRAME_VERSION_2;
+  sframe_ver_ops.format_version = SFRAME_VERSION_3;
 
-  /* These operations remain the same for SFRAME_VERSION_2 as fre_info and
-     func_info have not changed from SFRAME_VERSION_1.  */
+  /* These operations remain the same for SFRAME_VERSION_3 as fre_info and
+     func_info have not changed from SFRAME_VERSION_2 and SFRAME_VERSION_1.  */
 
   sframe_ver_ops.set_fre_info = sframe_v1_set_fre_info;
 
@@ -2103,7 +2103,7 @@ output_sframe (segT sframe_seg)
   (void) sframe_seg;
 
   /* Setup the version specific access functions.  */
-  sframe_set_version (SFRAME_VERSION_2);
+  sframe_set_version (SFRAME_VERSION_3);
 
   /* Process all fdes and create SFrame stack trace information.  */
   create_sframe_all ();
