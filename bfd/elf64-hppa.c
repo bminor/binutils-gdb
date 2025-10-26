@@ -661,8 +661,6 @@ elf64_hppa_check_relocs (bfd *abfd,
 	     object.  */
 	  if (!hh->eh.root.linker_def && !hh->eh.root.ldscript_def)
 	    hh->eh.ref_regular = 1;
-	  else
-	    hh = NULL;
 	}
       else
 	hh = NULL;
