@@ -39,6 +39,10 @@ extern const bfd_target hppa_elf64_linux_vec;
 
 #define ELF_DYNAMIC_INTERPRETER "/usr/lib/pa20_64/dld.sl"
 
+/* Use dot prefix code for EPLT relocations.  Breaks symbol version
+   support but helps in debugging .rela.opd section.  */
+#define USE_DOT_ELPT_PREFIX	0
+
 /* The stub is supposed to load the target address and target's DP
    value out of the PLT, then do an external branch to the target
    address.
@@ -136,6 +140,9 @@ struct elf64_hppa_link_hash_table
 
   bfd_vma text_segment_base;
   bfd_vma data_segment_base;
+
+  /* Hash entry for __text_seg.  */
+  struct elf_link_hash_entry *text_segment;
 
   /* We build tables to map from an input section back to its
      symbol index.  This is the BFD for which we currently have
@@ -1076,6 +1083,11 @@ allocate_global_data_opd (struct elf_link_hash_entry *eh, void *data)
 {
   struct elf64_hppa_link_hash_entry *hh = hppa_elf_hash_entry (eh);
   struct elf64_hppa_allocate_data *x = (struct elf64_hppa_allocate_data *)data;
+  struct elf64_hppa_link_hash_table *hppa_info;
+
+  hppa_info = hppa_link_hash_table (x->info);
+  if (hppa_info == NULL)
+    return false;
 
   if (hh->want_opd)
     {
@@ -1120,7 +1132,7 @@ allocate_global_data_opd (struct elf_link_hash_entry *eh, void *data)
 	     in dynamic relocs.  But name munging does make the result
 	     much easier to debug.  ie, the EPLT reloc will reference
 	     a symbol like .foobar, instead of .text + offset.  */
-	  if (bfd_link_pic (x->info) && eh)
+	  if (USE_DOT_ELPT_PREFIX && bfd_link_pic (x->info))
 	    {
 	      char *new_name;
 	      struct elf_link_hash_entry *nh;
@@ -1137,7 +1149,35 @@ allocate_global_data_opd (struct elf_link_hash_entry *eh, void *data)
 
 	      if (! bfd_elf_link_record_dynamic_symbol (x->info, nh))
 		return false;
-	     }
+	    }
+
+	  /* Add __text_seg symbol to dynamic table.  */
+	  if (!USE_DOT_ELPT_PREFIX
+	      && bfd_link_pic (x->info)
+	      && !hppa_info->text_segment)
+	    {
+	      struct elf_link_hash_entry *nh;
+
+	      nh = elf_link_hash_lookup (elf_hash_table (x->info),
+					 "__text_seg", true, false, false);
+	      if (nh != NULL)
+		{
+		  asection *s;
+
+		  s = bfd_get_section_by_name (x->info->output_bfd,
+					       ".dynamic");
+
+		  nh->type = STT_SECTION;
+		  nh->root.type = bfd_link_hash_defined;
+		  nh->root.u.def.value = 0;
+		  nh->root.u.def.section = s;
+		  nh->forced_local = 1;
+		  nh->other = STV_DEFAULT;
+		  bfd_elf_link_record_dynamic_symbol (x->info, nh);
+		  hppa_info->text_segment = nh;
+		}
+	    }
+
 	  hh->opd_offset = x->ofs;
 	  x->ofs += OPD_ENTRY_SIZE;
 	}
@@ -2134,7 +2174,7 @@ elf64_hppa_finalize_opd (struct elf_link_hash_entry *eh, void *data)
   /* If we are generating a shared library, we must generate EPLT relocations
      for each entry in the .opd, even for static functions (they may have
      had their address taken).  */
-  if (bfd_link_pic (info) && hh->want_opd)
+  if (bfd_link_pic (info) && hh && hh->want_opd)
     {
       Elf_Internal_Rela rel;
       bfd_byte *loc;
@@ -2154,6 +2194,7 @@ elf64_hppa_finalize_opd (struct elf_link_hash_entry *eh, void *data)
 	 .opd entry for this symbol.  */
       rel.r_offset = (hh->opd_offset + sopd->output_offset
 		      + sopd->output_section->vma);
+      rel.r_addend = 0;
 
       /* If H is non-null, then we have an external symbol.
 
@@ -2179,10 +2220,13 @@ elf64_hppa_finalize_opd (struct elf_link_hash_entry *eh, void *data)
 	 function can not be directly referenced outside of its shared
 	 library.
 
+	 The downside of using dot prefixes is it breaks symbol version
+	 support.  Thus, we don't use it by default.
+
 	 We do have to play similar games for FPTR relocations in shared
 	 libraries, including those for static symbols.  See the FPTR
 	 handling in elf64_hppa_finalize_dynreloc.  */
-      if (eh)
+      if (USE_DOT_ELPT_PREFIX)
 	{
 	  char *new_name;
 	  struct elf_link_hash_entry *nh;
@@ -2198,8 +2242,29 @@ elf64_hppa_finalize_opd (struct elf_link_hash_entry *eh, void *data)
 	    dynindx = nh->dynindx;
 	  free (new_name);
 	}
+      else
+	{
+	  bfd_vma value, value2;
 
-      rel.r_addend = 0;
+	  /* First compute the address of this symbol.  */
+	  value = (eh->root.u.def.value
+		   + eh->root.u.def.section->output_section->vma
+		   + eh->root.u.def.section->output_offset);
+
+	  /* Compute the base address of the segmentwith this symbol.  */
+	  value2 = hppa_info->text_segment_base;
+
+	  /* Compute the difference between the symbol and the
+	     test segment base address.  */
+	  value -= value2;
+
+	  /* The result becomes the addend of the relocation.  */
+	  rel.r_addend += value;
+
+	  dynindx = hppa_info->text_segment->dynindx;
+	}
+
+      BFD_ASSERT (dynindx != -1);
       rel.r_info = ELF64_R_INFO (dynindx, R_PARISC_EPLT);
 
       loc = sopdrel->contents;
@@ -2467,8 +2532,8 @@ elf64_hppa_finish_dynamic_sections (bfd *output_bfd,
 			  elf64_hppa_finalize_dynreloc,
 			  info);
 
-  /* Finalize the contents of the .dlt section.  */
   dynobj = elf_hash_table (info)->dynobj;
+
   /* Finalize the contents of the .dlt section.  */
   elf_link_hash_traverse (elf_hash_table (info),
 			  elf64_hppa_finalize_dlt,
@@ -3183,6 +3248,12 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
   if (hppa_info == NULL)
     return bfd_reloc_notsupported;
 
+  /* Initialize the segment base values.  Needed for EPLT and SEGREL
+     relocations.  */
+  if (hppa_info->text_segment_base == (bfd_vma) -1)
+    bfd_map_over_sections (output_bfd, elf_hppa_record_segment_addrs,
+			   hppa_info);
+
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   local_offsets = elf_local_got_offsets (input_bfd);
   insn = bfd_get_32 (input_bfd, hit_data);
@@ -3729,12 +3800,6 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
     case R_PARISC_SEGREL32:
     case R_PARISC_SEGREL64:
       {
-	/* If this is the first SEGREL relocation, then initialize
-	   the segment base values.  */
-	if (hppa_info->text_segment_base == (bfd_vma) -1)
-	  bfd_map_over_sections (output_bfd, elf_hppa_record_segment_addrs,
-				 hppa_info);
-
 	/* VALUE holds the absolute address.  We want to include the
 	   addend, then turn it into a segment relative address.
 
