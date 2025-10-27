@@ -3740,6 +3740,12 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
     case R_PARISC_FPTR64:
       {
 	bfd_vma off;
+	bfd_vma relocation = value;
+	asection *sopd;
+	asection *sopdrel;
+
+	sopd = hppa_info->opd_sec;
+	sopdrel = hppa_info->opd_rel_sec;
 
 	/* We may still need to create the FPTR itself if it was for
 	   a local symbol.  */
@@ -3766,13 +3772,12 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 		memset (hppa_info->opd_sec->contents + off, 0, 16);
 
 		/* The next word is the address of the function.  */
-		bfd_put_64 (hppa_info->opd_sec->owner, value + addend,
-			    (hppa_info->opd_sec->contents + off + 16));
+		bfd_put_64 (sopd->owner, value + addend,
+			    (sopd->contents + off + 16));
 
 		/* The last word is our local __gp value.  */
 		value = _bfd_get_gp_value (info->output_bfd);
-		bfd_put_64 (hppa_info->opd_sec->owner, value,
-			    hppa_info->opd_sec->contents + off + 24);
+		bfd_put_64 (sopd->owner, value, sopd->contents + off + 24);
 	      }
 	  }
 	else
@@ -3780,14 +3785,55 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 
 	if (hh == NULL || hh->want_opd)
 	  /* We want the value of the OPD offset for this symbol.  */
-	  value = (off
-		   + hppa_info->opd_sec->output_offset
-		   + hppa_info->opd_sec->output_section->vma);
+	  value = off + sopd->output_offset + sopd->output_section->vma;
 	else
 	  /* We want the address of the symbol.  */
 	  value += addend;
 
 	bfd_put_64 (output_bfd, value, hit_data);
+
+	/* If we are generating a shared library, we must generate an
+	   EPLT relocation for the symbol.  */
+	if (hh == NULL && bfd_link_pic (info))
+	  {
+	    Elf_Internal_Rela rela;
+	    bfd_byte *loc, *locend;
+	    int dynindx;
+
+	    /* The offset of this relocation is the absolute address
+	       of the .opd entry for this symbol.  */
+	    rela.r_offset = (off + sopd->output_offset
+			     + sopd->output_section->vma);
+
+	    /* Compute the difference between the symbol address
+	       and the test segment base address.  */
+	    value = relocation + addend - hppa_info->text_segment_base;
+
+	    /* The result becomes the addend of the relocation.  */
+	    rela.r_addend = value;
+
+	    /* Ugh, the EPLT relocations must be unique!  */
+	    locend = (sopdrel->contents
+		      + sopdrel->reloc_count * sizeof (Elf64_External_Rela));
+	    for (loc = sopdrel->contents; loc < locend;
+		 loc += sizeof (Elf64_External_Rela))
+	      {
+		Elf_Internal_Rela rela1;
+
+		bfd_elf64_swap_reloca_in (info->output_bfd, loc, &rela1);
+		if (rela.r_addend == rela1.r_addend)
+		  return bfd_reloc_ok;
+	      }
+
+	    dynindx = hppa_info->text_segment->dynindx;
+	    BFD_ASSERT (dynindx != -1);
+	    rela.r_info = ELF64_R_INFO (dynindx, R_PARISC_EPLT);
+
+	    loc = sopdrel->contents;
+	    loc += sopdrel->reloc_count++ * sizeof (Elf64_External_Rela);
+	    bfd_elf64_swap_reloca_out (info->output_bfd, &rela, loc);
+	  }
+
 	return bfd_reloc_ok;
       }
 
