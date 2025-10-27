@@ -39,10 +39,6 @@ extern const bfd_target hppa_elf64_linux_vec;
 
 #define ELF_DYNAMIC_INTERPRETER "/usr/lib/pa20_64/dld.sl"
 
-/* Use dot prefix code for EPLT relocations.  Breaks symbol version
-   support but helps in debugging .rela.opd section.  */
-#define USE_DOT_ELPT_PREFIX	0
-
 /* The stub is supposed to load the target address and target's DP
    value out of the PLT, then do an external branch to the target
    address.
@@ -1127,34 +1123,8 @@ allocate_global_data_opd (struct elf_link_hash_entry *eh, void *data)
 		return false;
 	    }
 
-	  /* This may not be necessary or desirable anymore now that
-	     we have some support for dealing with section symbols
-	     in dynamic relocs.  But name munging does make the result
-	     much easier to debug.  ie, the EPLT reloc will reference
-	     a symbol like .foobar, instead of .text + offset.  */
-	  if (USE_DOT_ELPT_PREFIX && bfd_link_pic (x->info))
-	    {
-	      char *new_name;
-	      struct elf_link_hash_entry *nh;
-
-	      new_name = concat (".", eh->root.root.string, NULL);
-
-	      nh = elf_link_hash_lookup (elf_hash_table (x->info),
-					 new_name, true, true, true);
-
-	      free (new_name);
-	      nh->root.type = eh->root.type;
-	      nh->root.u.def.value = eh->root.u.def.value;
-	      nh->root.u.def.section = eh->root.u.def.section;
-
-	      if (! bfd_elf_link_record_dynamic_symbol (x->info, nh))
-		return false;
-	    }
-
 	  /* Add __text_seg symbol to dynamic table.  */
-	  if (!USE_DOT_ELPT_PREFIX
-	      && bfd_link_pic (x->info)
-	      && !hppa_info->text_segment)
+	  if (bfd_link_pic (x->info) && !hppa_info->text_segment)
 	    {
 	      struct elf_link_hash_entry *nh;
 
@@ -2171,24 +2141,15 @@ elf64_hppa_finalize_opd (struct elf_link_hash_entry *eh, void *data)
       bfd_put_64 (sopd->owner, value, sopd->contents + hh->opd_offset + 24);
     }
 
-  /* If we are generating a shared library, we must generate EPLT relocations
-     for each entry in the .opd, even for static functions (they may have
-     had their address taken).  */
+  /* If we are generating a shared library, we must generate EPLT
+     relocations for each entry in the .opd.  Here we handle EPLT
+     relocations for global symbols.  */
   if (bfd_link_pic (info) && hh && hh->want_opd)
     {
+      bfd_vma value, value2;
       Elf_Internal_Rela rel;
       bfd_byte *loc;
       int dynindx;
-
-      /* We may need to do a relocation against a local symbol, in
-	 which case we have to look up it's dynamic symbol index off
-	 the local symbol hash table.  */
-      if (eh->dynindx != -1)
-	dynindx = eh->dynindx;
-      else
-	dynindx
-	  = _bfd_elf_link_lookup_local_dynindx (info, hh->owner,
-						hh->sym_indx);
 
       /* The offset of this relocation is the absolute address of the
 	 .opd entry for this symbol.  */
@@ -2206,64 +2167,25 @@ elf64_hppa_finalize_opd (struct elf_link_hash_entry *eh, void *data)
 
 	 Thus, we can not use that dynamic symbol for the EPLT relocation
 	 (if we did, the data in the .opd would reference itself rather
-	 than the actual address of the function).  Instead we have to use
-	 a new dynamic symbol which has the same value as the original global
-	 function symbol.
+	 than the actual address of the function).  To resolve this issue,
+	 we use offsets relative to the local section symbol __text_seg.  */
 
-	 We prefix the original symbol with a "." and use the new symbol in
-	 the EPLT relocation.  This new symbol has already been recorded in
-	 the symbol table, we just have to look it up and use it.
+      /* First compute the address of this symbol.  */
+      value = (eh->root.u.def.value
+	       + eh->root.u.def.section->output_section->vma
+	       + eh->root.u.def.section->output_offset);
 
-	 We do not have such problems with static functions because we do
-	 not make their addresses in the dynamic symbol table point to
-	 the .opd entry.  Ultimately this should be safe since a static
-	 function can not be directly referenced outside of its shared
-	 library.
+      /* Compute the base address of the segment with this symbol.  */
+      value2 = hppa_info->text_segment_base;
 
-	 The downside of using dot prefixes is it breaks symbol version
-	 support.  Thus, we don't use it by default.
+      /* Compute the difference between the symbol and the text segment
+	 base address.  */
+      value -= value2;
 
-	 We do have to play similar games for FPTR relocations in shared
-	 libraries, including those for static symbols.  See the FPTR
-	 handling in elf64_hppa_finalize_dynreloc.  */
-      if (USE_DOT_ELPT_PREFIX)
-	{
-	  char *new_name;
-	  struct elf_link_hash_entry *nh;
+      /* The result becomes the addend of the relocation.  */
+      rel.r_addend += value;
 
-	  new_name = concat (".", eh->root.root.string, NULL);
-
-	  nh = elf_link_hash_lookup (elf_hash_table (info),
-				     new_name, true, true, false);
-
-	  /* All we really want from the new symbol is its dynamic
-	     symbol index.  */
-	  if (nh)
-	    dynindx = nh->dynindx;
-	  free (new_name);
-	}
-      else
-	{
-	  bfd_vma value, value2;
-
-	  /* First compute the address of this symbol.  */
-	  value = (eh->root.u.def.value
-		   + eh->root.u.def.section->output_section->vma
-		   + eh->root.u.def.section->output_offset);
-
-	  /* Compute the base address of the segmentwith this symbol.  */
-	  value2 = hppa_info->text_segment_base;
-
-	  /* Compute the difference between the symbol and the
-	     test segment base address.  */
-	  value -= value2;
-
-	  /* The result becomes the addend of the relocation.  */
-	  rel.r_addend += value;
-
-	  dynindx = hppa_info->text_segment->dynindx;
-	}
-
+      dynindx = hppa_info->text_segment->dynindx;
       BFD_ASSERT (dynindx != -1);
       rel.r_info = ELF64_R_INFO (dynindx, R_PARISC_EPLT);
 
