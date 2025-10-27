@@ -18,7 +18,7 @@
 #ifndef GDBSUPPORT_UNORDERED_SET_H
 #define GDBSUPPORT_UNORDERED_SET_H
 
-#include "unordered_dense.h"
+#include "unordered_dense/unordered_dense.h"
 
 namespace gdb
 {
