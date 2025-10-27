@@ -245,7 +245,7 @@ void
 rocm_solib_ops::relocate_section_addresses (solib &so,
 					    struct target_section *sec) const
 {
-  if (!is_amdgpu_arch (gdbarch_from_bfd (so.abfd.get ())))
+  if (!is_amdgpu_arch (so.abfd.get ()))
     {
       m_host_ops->relocate_section_addresses (so, sec);
       return;
@@ -728,8 +728,7 @@ rocm_solib_ops::bfd_open (const char *pathname) const
 	}
     }
 
-  gdb_assert (gdbarch_from_bfd (abfd.get ()) != nullptr);
-  gdb_assert (is_amdgpu_arch (gdbarch_from_bfd (abfd.get ())));
+  gdb_assert (is_amdgpu_arch (abfd.get ()));
 
   return abfd;
 }

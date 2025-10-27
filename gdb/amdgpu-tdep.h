@@ -84,7 +84,12 @@ struct amdgpu_gdbarch_tdep : gdbarch_tdep_base
 };
 
 /* Return true if GDBARCH is of an AMDGPU architecture.  */
+
 bool is_amdgpu_arch (struct gdbarch *gdbarch);
+
+/* Return true if ABFD is of an AMDGPU architecture.  */
+
+bool is_amdgpu_arch (bfd *abfd);
 
 /* Return the amdgpu-specific data associated to ARCH.  */
 
