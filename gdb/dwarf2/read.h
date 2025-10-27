@@ -187,12 +187,11 @@ public:
      any of the current compilation units are processed.  */
   packed<bool, 1> queued;
 
-  /* True if HEADER has been read in.
-
-     Don't access this field directly.  It should be private, but we can't make
-     it private at the moment.  */
+private:
+  /* True if HEADER has been read in.  */
   mutable packed<bool, 1> m_header_read_in;
 
+public:
   /* True if we've tried to read the file table.  There will be no
      point in trying to read it again next time.  */
   packed<bool, 1> files_read;
@@ -229,15 +228,14 @@ public:
   /* Backlink to the owner of this.  */
   dwarf2_per_bfd *per_bfd;
 
+private:
   /* DWARF header of this unit.  Note that dwarf2_cu reads its own version of
      the header, which may differ from this one, since it may pass
      rch_kind::TYPE to read_unit_head, whereas for dwarf2_per_cu we always pass
-     ruh_kind::COMPILE.
-
-     Don't access this field directly, use the get_header method instead.  It
-     should be private, but we can't make it private at the moment.  */
+     ruh_kind::COMPILE.  */
   mutable unit_head m_header;
 
+public:
   /* The file and directory for this CU.  This is cached so that we
      don't need to re-examine the DWO in some situations.  This may be
      nullptr, depending on the CU; for example a partial unit won't
