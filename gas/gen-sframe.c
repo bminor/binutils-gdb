@@ -701,7 +701,7 @@ output_sframe_funcdesc (symbolS *start_of_fre_section,
   exp.X_op_symbol = symbol_temp_new_now (); /* from location.  */
   exp.X_add_number = 0;
   emit_expr (&exp, sizeof_member (sframe_func_desc_entry,
-				  sfde_func_start_address));
+				  sfde_func_start_offset));
 
   /* Size of the function in bytes.  */
   exp.X_op = O_subtract;

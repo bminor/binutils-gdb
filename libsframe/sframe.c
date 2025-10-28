@@ -148,7 +148,7 @@ sframe_fde_tbl_init (sf_fde_tbl *fde_tbl, const char *fde_buf,
 	{
 	  const sframe_func_desc_entry_v3 *fdep
 	    = (sframe_func_desc_entry_v3 *)fde_buf + i;
-	  fde_tbl->entry[i].func_start_pc_offset = fdep->sfde_func_start_address;
+	  fde_tbl->entry[i].func_start_pc_offset = fdep->sfde_func_start_offset;
 	  fde_tbl->entry[i].func_size = fdep->sfde_func_size;
 	  fde_tbl->entry[i].func_start_fre_off = fdep->sfde_func_start_fre_off;
 	  fde_tbl->entry[i].func_num_fres = fdep->sfde_func_num_fres;
@@ -310,7 +310,7 @@ flip_fde (char *buf, size_t buf_size, uint8_t ver, size_t *fde_size)
   if (ver == SFRAME_VERSION_3)
     {
       sframe_func_desc_entry_v3 *fdep = (sframe_func_desc_entry_v3 *) buf;
-      swap_thing (fdep->sfde_func_start_address);
+      swap_thing (fdep->sfde_func_start_offset);
       swap_thing (fdep->sfde_func_size);
       swap_thing (fdep->sfde_func_start_fre_off);
       swap_thing (fdep->sfde_func_num_fres);
@@ -508,7 +508,7 @@ sframe_decoder_get_funcdesc_at_index (const sframe_decoder_ctx *ctx,
 
    If FUNC_IDX is not a valid index in the given decoder object, returns 0.  */
 
-static int32_t
+static int64_t
 sframe_decoder_get_secrel_func_start_addr (const sframe_decoder_ctx *dctx,
 					   uint32_t func_idx)
 {
@@ -520,7 +520,7 @@ sframe_decoder_get_secrel_func_start_addr (const sframe_decoder_ctx *dctx,
     return 0;
 
   const sframe_func_desc_entry_int *fdep = &dctx->sfd_funcdesc->entry[func_idx];
-  int32_t func_start_pc_offset = fdep->func_start_pc_offset;
+  int64_t func_start_pc_offset = fdep->func_start_pc_offset;
 
   return func_start_pc_offset + offsetof_fde_in_sec;
 }
@@ -532,10 +532,10 @@ sframe_decoder_get_secrel_func_start_addr (const sframe_decoder_ctx *dctx,
 static bool
 sframe_fre_check_range_p (const sframe_decoder_ctx *dctx, uint32_t func_idx,
 			  uint32_t start_ip_offset, uint32_t end_ip_offset,
-			  int32_t pc)
+			  int64_t pc)
 {
   sframe_func_desc_entry_int *fdep;
-  int32_t func_start_pc_offset;
+  int64_t func_start_pc_offset;
   uint8_t rep_block_size;
   uint32_t pc_type;
   uint32_t pc_offset;
@@ -1329,7 +1329,7 @@ sframe_decoder_get_offsetof_fde_start_addr (const sframe_decoder_ctx *dctx,
   if (sframe_decoder_get_version (dctx) == SFRAME_VERSION_3)
     return (sframe_decoder_get_hdr_size (dctx)
 	    + func_idx * sizeof (sframe_func_desc_entry_v3)
-	    + offsetof (sframe_func_desc_entry_v3, sfde_func_start_address));
+	    + offsetof (sframe_func_desc_entry_v3, sfde_func_start_offset));
   else if (sframe_decoder_get_version (dctx) == SFRAME_VERSION_2)
     return (sframe_decoder_get_hdr_size (dctx)
 	    + func_idx * sizeof (sframe_func_desc_entry_v2)
@@ -1345,7 +1345,7 @@ sframe_decoder_get_offsetof_fde_start_addr (const sframe_decoder_ctx *dctx,
 
 static sframe_func_desc_entry_int *
 sframe_get_funcdesc_with_addr_internal (const sframe_decoder_ctx *ctx,
-					int32_t addr, int *errp,
+					int64_t addr, int *errp,
 					uint32_t *func_idx)
 {
   sframe_func_desc_entry_int *fdp;
@@ -1421,14 +1421,14 @@ sframe_fre_get_end_ip_offset (sframe_func_desc_entry_int *fdep, unsigned int i,
    SFRAME_ERR if failure.  */
 
 int
-sframe_find_fre (const sframe_decoder_ctx *ctx, int32_t pc,
+sframe_find_fre (const sframe_decoder_ctx *ctx, int64_t pc,
 		 sframe_frame_row_entry *frep)
 {
   sframe_frame_row_entry cur_fre;
   sframe_func_desc_entry_int *fdep;
   uint32_t func_idx;
   uint32_t fre_type, i;
-  int32_t func_start_pc_offset;
+  int64_t func_start_pc_offset;
   uint32_t start_ip_offset, end_ip_offset;
   const char *fres;
   size_t size = 0;
@@ -1779,7 +1779,7 @@ sframe_encoder_get_offsetof_fde_start_addr (sframe_encoder_ctx *ectx,
 
   return (sframe_encoder_get_hdr_size (ectx)
 	  + func_idx * sizeof (sframe_func_desc_entry_v3)
-	  + offsetof (sframe_func_desc_entry_v3, sfde_func_start_address));
+	  + offsetof (sframe_func_desc_entry_v3, sfde_func_start_offset));
 }
 
 /* Add an SFrame FRE to function at FUNC_IDX'th function descriptor entry in
@@ -1866,7 +1866,7 @@ bad:
 
 static int
 sframe_encoder_add_funcdesc_internal (sframe_encoder_ctx *ectx,
-				      int32_t start_addr,
+				      int64_t start_addr,
 				      uint32_t func_size)
 {
   sframe_header *ehp;
@@ -1937,7 +1937,7 @@ bad:
    FUNC_SIZE to the encoder context ECTX.  */
 
 int
-sframe_encoder_add_funcdesc (sframe_encoder_ctx *ectx, int32_t start_pc_offset,
+sframe_encoder_add_funcdesc (sframe_encoder_ctx *ectx, int64_t start_pc_offset,
 			     uint32_t func_size)
 {
   int err = 0;
@@ -2128,7 +2128,7 @@ sframe_encoder_write_fde (const sframe_header *sfhp ATTRIBUTE_UNUSED,
 {
   sframe_func_desc_entry_v3 *fdep = (sframe_func_desc_entry_v3 *)contents;
 
-  fdep->sfde_func_start_address = (int32_t)fde->func_start_pc_offset;
+  fdep->sfde_func_start_offset = fde->func_start_pc_offset;
   fdep->sfde_func_size = fde->func_size;
   fdep->sfde_func_start_fre_off = fde->func_start_fre_off;
   fdep->sfde_func_num_fres = (uint16_t)fde->func_num_fres;

@@ -162,12 +162,12 @@ sframe_read_value (bfd *abfd, bfd_byte *contents, unsigned int offset,
 		   unsigned int width)
 {
   BFD_ASSERT (contents && offset);
-  /* Supporting the usecase of reading only the 4-byte relocated
-     value (signed offset for func start addr) for now.  */
-  BFD_ASSERT (width == 4);
+  /* ATM, for SFrame, the sole usecase is of reading only the 8-byte relocated
+     value (signed offset for func start addr).  */
+  BFD_ASSERT (width == 8);
   /* FIXME endianness ?? */
   unsigned char *buf = contents + offset;
-  bfd_vma value = bfd_get_signed_32 (abfd, buf);
+  bfd_vma value = bfd_get_signed_64 (abfd, buf);
   return value;
 }
 
@@ -479,11 +479,12 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
 
   uint32_t num_fidx = sframe_decoder_get_num_fidx (sfd_ctx);
   uint32_t num_enc_fidx = sframe_encoder_get_num_fidx (sfe_ctx);
+  uint8_t reloc_size = 8;
 
   for (i = 0; i < num_fidx; i++)
     {
       unsigned int num_fres = 0;
-      int32_t func_start_addr;
+      int64_t func_start_addr;
       bfd_vma address;
       uint32_t func_size = 0;
       unsigned char func_info = 0;
@@ -492,7 +493,7 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
       unsigned int pltn_r_offset = 0;
       uint8_t rep_block_size = 0;
 
-      if (!sframe_decoder_get_funcdesc_v2 (sfd_ctx, i, &num_fres, &func_size,
+      if (!sframe_decoder_get_funcdesc_v3 (sfd_ctx, i, &num_fres, &func_size,
 					   &func_start_addr, &func_info,
 					   &rep_block_size))
 	{
@@ -536,10 +537,11 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
 		}
 
 	      /* Get the SFrame FDE function start address after relocation.  */
-	      address = sframe_read_value (abfd, contents, r_offset, 4);
+	      address = sframe_read_value (abfd, contents, r_offset,
+					   reloc_size);
 	      if (pltn_reloc_by_hand)
-		address += sframe_read_value (abfd, contents,
-					      pltn_r_offset, 4);
+		address += sframe_read_value (abfd, contents, pltn_r_offset,
+					      reloc_size);
 	      address += (sec->output_offset + r_offset);
 	      /* SFrame FDE function start address is an offset from the
 		 sfde_func_start_address field to the start PC.  The
@@ -558,7 +560,7 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
 	    }
 
 	  /* Update the encoder context with updated content.  */
-	  int err = sframe_encoder_add_funcdesc_v2 (sfe_ctx, func_start_addr,
+	  int err = sframe_encoder_add_funcdesc_v3 (sfe_ctx, func_start_addr,
 						    func_size, func_info,
 						    rep_block_size, num_fres);
 	  cur_fidx++;

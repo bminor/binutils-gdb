@@ -125,7 +125,6 @@ dump_sframe_func_with_fres (const sframe_decoder_ctx *sfd_ctx,
   uint32_t j = 0;
   uint32_t num_fres = 0;
   uint32_t func_size = 0;
-  int32_t func_start_address = 0;
   unsigned char func_info = 0;
   uint8_t rep_block_size = 0;
 
@@ -141,15 +140,30 @@ dump_sframe_func_with_fres (const sframe_decoder_ctx *sfd_ctx,
 
   sframe_frame_row_entry fre;
 
+  uint8_t ver = sframe_decoder_get_version (sfd_ctx);
+  sframe_assert (ver == SFRAME_VERSION_3 || ver == SFRAME_VERSION_2);
   /* Get the SFrame function descriptor.  */
-  sframe_decoder_get_funcdesc_v2 (sfd_ctx, funcidx, &num_fres,
-				  &func_size, &func_start_address,
-				  &func_info, &rep_block_size);
+  if (ver == SFRAME_VERSION_3)
+    {
+      int64_t func_start_addr = 0;
+      sframe_decoder_get_funcdesc_v3 (sfd_ctx, funcidx, &num_fres,
+				      &func_size, &func_start_addr,
+				      &func_info, &rep_block_size);
+      func_start_pc_vma = func_start_addr + sec_addr;
+    }
+  else
+    {
+      int32_t func_start_addr = 0;
+      sframe_decoder_get_funcdesc_v2 (sfd_ctx, funcidx, &num_fres, &func_size,
+				      &func_start_addr, &func_info,
+				      &rep_block_size);
+      func_start_pc_vma = func_start_addr + sec_addr;
+    }
+
 /* Calculate the virtual memory address for function start pc.  Some older
    SFrame V2 sections in ET_DYN or ET_EXEC may still have the
    SFRAME_F_FDE_FUNC_START_PCREL flag unset, and hence may be using the
    old encoding.  Continue to support dumping the sections at least.  */
-  func_start_pc_vma = func_start_address + sec_addr;
   if (sframe_decoder_get_flags (sfd_ctx) & SFRAME_F_FDE_FUNC_START_PCREL)
     func_start_pc_vma += sframe_decoder_get_offsetof_fde_start_addr (sfd_ctx,
 								     funcidx,

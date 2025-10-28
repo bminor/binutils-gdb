@@ -242,9 +242,9 @@ typedef struct sframe_func_desc_entry_v2
 
 typedef struct sframe_func_desc_entry_v3
 {
-  /* Function start address.  Encoded as a signed offset, relative to the
-     beginning of the current FDE.  */
-  int32_t sfde_func_start_address;
+  /* Offset to the function start address.  Encoded as a signed offset,
+     relative to the beginning of the current FDE.  */
+  int64_t sfde_func_start_offset;
   /* Size of the function in bytes.  */
   uint32_t sfde_func_size;
   /* Offset of the first SFrame Frame Row Entry of the function, relative to the
