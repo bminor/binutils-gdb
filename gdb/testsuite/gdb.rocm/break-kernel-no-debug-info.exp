@@ -16,7 +16,7 @@
 # Test setting a breakpoint on a kernel symbol without debug info,
 # relying on minimal symbols from the ELF.
 
-# A bug occured when GDB did not find the appropriate architecture for
+# A bug occurred when GDB did not find the appropriate architecture for
 # breakpoints on minimal symbols. This had the effect that the
 # breakpoint would not be hit on the GPU when no debugging infos are
 # available.
