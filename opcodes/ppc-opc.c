@@ -8935,6 +8935,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"lxvb16x",	X(31,876),	XX1_MASK,    PPCVSX3,	0,		{XT6, RA0, RB}},
 
+{"lxvpb32x",	X(31,877),	X_MASK,      FUTURE,	0,		{XTP, RA0, RB}},
+
 {"tabortdci.",	XRC(31,878,1),	X_MASK,	     PPCHTM,	0,		{TO, RA, HTM_SI}},
 
 {"rmieg",	X(31,882),	XRTRA_MASK,  POWER9,	0,		{RB}},
@@ -9072,6 +9074,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"divwo.",	XO(31,491,1,1),	XO_MASK,     PPC,	0,		{RT, RA, RB}},
 
 {"stxvb16x",	X(31,1004),	XX1_MASK,    PPCVSX3,	0,		{XS6, RA0, RB}},
+
+{"stxvpb32x",	X(31,1005),	X_MASK,      FUTURE,	0,		{XSP, RA0, RB}},
 
 {"trechkpt.",	XRC(31,1006,1),	XRTRARB_MASK,PPCHTM,	0,		{0}},
 

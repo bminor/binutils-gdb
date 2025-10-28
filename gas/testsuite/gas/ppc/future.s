@@ -78,4 +78,6 @@ _start:
 	vupkint8tobf16 15, 25, 1
 	vupkint4tofp32 16, 24, 7
 	vupkint8tofp32 17, 23, 3
+	lxvpb32x 34, 18, 19
+	stxvpb32x 34, 20, 21
 

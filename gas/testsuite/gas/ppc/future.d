@@ -104,4 +104,6 @@ Disassembly of section \.text:
 .*:	(83 c9 e3 11|11 e3 c9 83) 	vupkint8tobf16 v15,v25,1
 .*:	(83 c1 17 12|12 17 c1 83) 	vupkint4tofp32 v16,v24,7
 .*:	(83 b9 2f 12|12 2f b9 83) 	vupkint8tofp32 v17,v23,3
+.*:	(da 9e 72 7c|7c 72 9e da) 	lxvpb32x vs34,r18,r19
+.*:	(da af 74 7c|7c 74 af da) 	stxvpb32x vs34,r20,r21
 #pass
