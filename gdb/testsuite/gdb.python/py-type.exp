@@ -392,6 +392,12 @@ if { [build_inferior "${binfile}" "c"] == 0 } {
       test_type_equality
       test_type_identity
   }
+
+  gdb_test "python print(gdb.lookup_type('int').const().volatile())" \
+    "const volatile int"
+  gdb_test "python print(gdb.lookup_type('int').volatile().const())" \
+    "const volatile int" \
+    "volatile const int"
 }
 
 # Perform C++ Tests.
