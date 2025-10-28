@@ -157,7 +157,7 @@ sframe_decoder_get_fixed_ra_offset (const sframe_decoder_ctx *dctx);
    SFRAME_ERR if failure.  */
 
 extern int
-sframe_find_fre (const sframe_decoder_ctx *ctx, int32_t pc,
+sframe_find_fre (const sframe_decoder_ctx *ctx, int64_t pc,
 		 sframe_frame_row_entry *frep);
 
 /* Get the FRE_IDX'th FRE of the function at FUNC_IDX'th function
@@ -293,7 +293,7 @@ sframe_encoder_add_fre (sframe_encoder_ctx *ectx,
    the encoder context ECTX.  */
 extern int
 sframe_encoder_add_funcdesc (sframe_encoder_ctx *ectx,
-			     int32_t start_addr,
+			     int64_t start_addr,
 			     uint32_t func_size);
 
 /* Add a new SFrame function descriptor entry with START_ADDR, FUNC_SIZE,

@@ -18,8 +18,8 @@
 #include "sframe-test.h"
 
 static int
-add_plt_fde1 (sframe_encoder_ctx *ectx, uint32_t plt_vaddr,
-	      uint32_t sframe_vaddr, int idx)
+add_plt_fde1 (sframe_encoder_ctx *ectx, int64_t plt_vaddr,
+	      int64_t sframe_vaddr, int idx)
 {
   /* A contiguous block containing 3 FREs.  The start_ip_offset must remain
      less than 16 bytes.  */
@@ -34,11 +34,11 @@ add_plt_fde1 (sframe_encoder_ctx *ectx, uint32_t plt_vaddr,
 						     SFRAME_FDE_TYPE_PCMASK);
   uint32_t offsetof_fde_in_sec
     = sframe_encoder_get_offsetof_fde_start_addr (ectx, idx, NULL);
-  int32_t func_start_addr = (plt_vaddr
+  int64_t func_start_addr = (plt_vaddr
 			     - (sframe_vaddr + offsetof_fde_in_sec));
 
   /* 5 pltN entries of 16 bytes each.  */
-  int err = sframe_encoder_add_funcdesc_v2 (ectx, func_start_addr,
+  int err = sframe_encoder_add_funcdesc_v3 (ectx, func_start_addr,
 					    16 * 5 /* func size in bytes.  */,
 					    finfo,
 					    16 /* rep block size in bytes.  */,
@@ -54,8 +54,8 @@ add_plt_fde1 (sframe_encoder_ctx *ectx, uint32_t plt_vaddr,
 }
 
 static
-void test_plt_findfre (const char suffix, uint32_t plt_vaddr,
-		       uint32_t sframe_vaddr)
+void test_plt_findfre (const char suffix, int64_t plt_vaddr,
+		       int64_t sframe_vaddr)
 {
   sframe_encoder_ctx *ectx;
   sframe_decoder_ctx *dctx;
@@ -123,15 +123,15 @@ void test_plt_findfre (const char suffix, uint32_t plt_vaddr,
 
 int main (void)
 {
-  uint32_t sframe_vaddr = 0x402220;
-  uint32_t plt_vaddr = 0x401020;
-  printf ("Testing with plt_vaddr = %#x; sframe_vaddr = %#x\n", plt_vaddr,
+  int64_t sframe_vaddr = 0x402220;
+  int64_t plt_vaddr = 0x401020;
+  printf ("Testing with plt_vaddr = %#lx; sframe_vaddr = %#lx\n", plt_vaddr,
 	  sframe_vaddr);
   test_plt_findfre ('a', plt_vaddr, sframe_vaddr);
 
   sframe_vaddr = 0x401020;
   plt_vaddr = 0x402220;
-  printf ("Testing with plt_vaddr = %#x; sframe_vaddr = %#x\n", plt_vaddr,
+  printf ("Testing with plt_vaddr = %#lx; sframe_vaddr = %#lx\n", plt_vaddr,
 	  sframe_vaddr);
   test_plt_findfre ('b', plt_vaddr, sframe_vaddr);
 }
