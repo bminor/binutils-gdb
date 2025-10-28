@@ -1326,8 +1326,13 @@ plugin_object_p (bfd *ibfd, bool known_used)
 #endif
 
       /* If plugin didn't claim the file, we don't need the dummy bfd.
-	 Can't avoid speculatively creating it, alas.  */
-      ibfd->plugin_format = bfd_plugin_no;
+	 Can't avoid speculatively creating it, alas.  NB: Set input
+	 plugin_format to bfd_plugin_no only if known_used is set or
+	 the LDPT_REGISTER_CLAIM_FILE_HOOK_V2 linker plugin hook is
+	 unused since the V2 linker plugin hook doesn't claim the
+	 offload IR if known_used is unset.  */
+      if (known_used || !claim_file_handler_v2)
+	ibfd->plugin_format = bfd_plugin_no;
       bfd_close_all_done (abfd);
       return NULL;
     }
