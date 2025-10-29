@@ -21,7 +21,7 @@ import gdb
 # src/gdb/testsuite/gdb.python/__pycache__/gdb_leak_detector.cpython-<n>.pyc.
 sys.dont_write_bytecode = True
 
-import gdb_leak_detector
+import gdb_leak_detector  # noqa: E402
 
 
 class color_leak_detector(gdb_leak_detector.gdb_leak_detector):

@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import gdb
+import gdb.types
 
 
 class StringRecognizer(object):
@@ -56,7 +57,5 @@ class OtherTypePrinter(object):
     def instantiate(self):
         return OtherRecognizer()
 
-
-import gdb.types
 
 gdb.types.register_type_printer(gdb.objfiles()[0], OtherTypePrinter())
