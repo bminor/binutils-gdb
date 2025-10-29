@@ -11139,34 +11139,53 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	{
 	  Elf_Internal_Versym iversym;
 	  Elf_External_Versym *eversym;
+	  bool noversion = false;
 
 	  if (!h->def_regular && !ELF_COMMON_DEF_P (h))
 	    {
 	      if (h->verinfo.verdef == NULL
 		  || (elf_dyn_lib_class (h->verinfo.verdef->vd_bfd)
 		      & (DYN_AS_NEEDED | DYN_DT_NEEDED | DYN_NO_NEEDED)))
-		iversym.vs_vers = 1;
+		{
+		  iversym.vs_vers = 1;
+		  if (strchr (h->root.root.string, ELF_VER_CHR) == NULL)
+		    /* Referenced symbol without ELF_VER_CHR has no
+		       version.  */
+		    noversion = true;
+		}
 	      else
 		iversym.vs_vers = h->verinfo.verdef->vd_exp_refno + 1;
 	    }
 	  else
 	    {
 	      if (h->verinfo.vertree == NULL)
-		iversym.vs_vers = 1;
+		{
+		  iversym.vs_vers = 1;
+		  if (elf_tdata (flinfo->output_bfd)->cverdefs == 0)
+		    /* Defined symbol has no version if there is no
+		       linker version script.  */
+		    noversion = true;
+		}
 	      else
 		iversym.vs_vers = h->verinfo.vertree->vernum + 1;
 	      if (flinfo->info->create_default_symver)
 		iversym.vs_vers++;
 	    }
 
-	  /* Turn on VERSYM_HIDDEN only if the hidden versioned symbol is
-	     defined locally.  */
-	  if (h->versioned == versioned_hidden && h->def_regular)
-	    iversym.vs_vers |= VERSYM_HIDDEN;
+	  /* Don't set its DT_VERSYM entry for unversioned symbol.  */
+	  if (!noversion)
+	    {
+	      /* Turn on VERSYM_HIDDEN only if the hidden versioned
+		 symbol is defined locally.  */
+	      if (h->versioned == versioned_hidden && h->def_regular)
+		iversym.vs_vers |= VERSYM_HIDDEN;
 
-	  eversym = (Elf_External_Versym *) flinfo->symver_sec->contents;
-	  eversym += h->dynindx;
-	  _bfd_elf_swap_versym_out (flinfo->output_bfd, &iversym, eversym);
+	      eversym
+		= (Elf_External_Versym *) flinfo->symver_sec->contents;
+	      eversym += h->dynindx;
+	      _bfd_elf_swap_versym_out (flinfo->output_bfd, &iversym,
+					eversym);
+	    }
 	}
     }
 
