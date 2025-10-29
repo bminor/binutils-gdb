@@ -64,7 +64,7 @@ class TestDisassembler(Disassembler):
     def __init__(self):
         super().__init__("TestDisassembler")
         self.__info = None
-        if current_pc == None:
+        if current_pc is None:
             raise gdb.GdbError("no current_pc set")
 
     def __call__(self, info):
