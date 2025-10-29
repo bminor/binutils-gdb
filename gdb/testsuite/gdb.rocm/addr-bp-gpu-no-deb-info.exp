@@ -28,9 +28,10 @@ if {[build_executable "failed to prepare" $testfile $srcfile {hip}]} {
 
 clean_restart $::testfile
 
-# We may have multiple GPUs, resulting in many possible locations. This is
-# needed to ensure we get a single address to break on.
-gdb_test_no_output "set environment ROCR_VISIBLE_DEVICES=1"
+# We may have multiple GPUs, resulting in many possible locations.  This is
+# needed to ensure we get a single address to break on, so make device 0 the
+# only visible one.
+gdb_test_no_output "set environment ROCR_VISIBLE_DEVICES=0"
 
 # Make the HIP runtime load all the GPU code objects during initialization.
 gdb_test_no_output "set environment HIP_ENABLE_DEFERRED_LOADING=0"
