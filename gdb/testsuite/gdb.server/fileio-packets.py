@@ -64,8 +64,7 @@ def decode_stat_reply(buf, byteorder="big"):
         or buf[3] != ord(";")
         or len(buf) != 68
     ):
-        l = len(buf)
-        print(f"decode_stat_reply failed: {buf}\t(length = {l})")
+        print(f"decode_stat_reply failed: {buf}\t(length = {len(buf)})")
         return None
 
     # Discard the 'F40;' prefix.  The rest is the 64 bytes of data to
