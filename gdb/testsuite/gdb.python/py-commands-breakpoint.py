@@ -34,10 +34,10 @@ class PyCommandsBreakpoint(gdb.Breakpoint):
 
     def __setattr__(self, name, value):
         if name == "commands":
-            l = ["python PyCommandsBreakpoint.run_py_commands(%d)" % self.number]
+            cmds = ["python PyCommandsBreakpoint.run_py_commands(%d)" % self.number]
             if value != "":
-                l.append(value)
-            value = "\n".join(l)
+                cmds.append(value)
+            value = "\n".join(cmds)
 
         super().__setattr__(name, value)
 
