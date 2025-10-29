@@ -41,10 +41,10 @@ handler_last_filename = None
 # A helper function that makes some assertions about the arguments
 # passed to a MissingObjfileHandler.__call__() method.
 def check_args(pspace, buildid, filename):
-    assert type(filename) == str
+    assert type(filename) is str
     assert filename != ""
-    assert type(pspace) == gdb.Progspace
-    assert type(buildid) == str
+    assert type(pspace) is gdb.Progspace
+    assert type(buildid) is str
     assert buildid != ""
 
 

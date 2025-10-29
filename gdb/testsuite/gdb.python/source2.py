@@ -16,6 +16,6 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Make sure __file__ is defined.
-assert type(__file__) == str
+assert type(__file__) is str
 
 print("y%ss" % "e")
