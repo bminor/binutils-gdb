@@ -1,0 +1,65 @@
+# Copyright 2025 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Compile a single CU containing a type and a typedef with the same
+# name (think C's "typedef struct foo { ... } foo;").  Check that
+# 'info types' shows both types.
+
+standard_testfile
+
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
+    return
+}
+
+# Line numbers needed by the test.
+set struct_foo_lineno [gdb_get_line_number "struct foo defined here"]
+set typedef_foo_lineno [gdb_get_line_number "typedef foo defined here"]
+set struct_bar_lineno [gdb_get_line_number "struct bar defined here"]
+set typedef_bar_lineno [gdb_get_line_number "typedef bar defined here"]
+set baz_lineno [gdb_get_line_number "baz defined here"]
+
+# Check that the expected two types show up in global SRCFILE.
+proc check_types { testname } {
+    gdb_test "info types foo" \
+	[multi_line \
+	     "File (?:\[^\r\n\]+/)?[string_to_regexp $::srcfile]:" \
+	     "${::struct_foo_lineno}:\\s+struct foo;" \
+	     "${::typedef_foo_lineno}:\\s+typedef struct foo foo;"] \
+	"$testname, check foo"
+
+    gdb_test "info types bar" \
+	[multi_line \
+	     "File (?:\[^\r\n\]+/)?[string_to_regexp $::srcfile]:" \
+	     "${::struct_bar_lineno}:\\s+struct bar;" \
+	     "${::typedef_bar_lineno}:\\s+typedef struct foo bar;"] \
+	"$testname, check bar"
+
+    gdb_test "info types baz" \
+	[multi_line \
+	     "File (?:\[^\r\n\]+/)?[string_to_regexp $::srcfile]:" \
+	     "${::baz_lineno}:\\s+struct baz;" \
+	     "${::baz_lineno}:\\s+typedef struct baz baz;"] \
+	"$testname, check baz"
+}
+
+check_types "before inferior is started"
+
+clean_restart $testfile
+
+if {![runto_main]} {
+    return
+}
+
+check_types "after starting the inferior"

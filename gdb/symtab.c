@@ -4635,7 +4635,50 @@ symbol_search::compare_search_syms (const symbol_search &sym_a,
   if (sym_a.block != sym_b.block)
     return sym_a.block - sym_b.block;
 
-  return strcmp (sym_a.symbol->print_name (), sym_b.symbol->print_name ());
+  c = strcmp (sym_a.symbol->print_name (), sym_b.symbol->print_name ());
+
+  if (c != 0)
+    return c;
+
+  /* These two symbols have the same name.  It is possible, with types,
+     that we can see two symbols with the same name, but different types,
+     consider in C: 'typedef struct foo { ... } foo;' which creates a
+     'struct foo' type and a 'foo' typedef type.  For now this is the only
+     case we handle.  In all other cases, we treat symbols with the same
+     name as being the same.
+
+
+     First, check the types, if they are the same, then consider these
+     symbols as the same.  */
+  if (sym_a.symbol->type ()->code () == sym_b.symbol->type ()->code ())
+    return 0;
+
+  /* The types are different, but if neither is a typedef then we still
+     consider these symbols as the same.  */
+  if (sym_a.symbol->type ()->code () != TYPE_CODE_TYPEDEF
+      && sym_b.symbol->type ()->code () != TYPE_CODE_TYPEDEF)
+    return 0;
+
+  /* The symbols have different types, and one is a typedef.  They cannot
+     both be typedefs or we'd have taken the "types are the same" exit path
+     above.  If the two types are defined on different lines then order by
+     line number.  As line numbers are unsigned, don't subtract one from
+     the other in order to avoid underflow.  */
+  if (sym_a.symbol->line () != sym_b.symbol->line ())
+    return (sym_a.symbol->line () > sym_b.symbol->line () ? 1 : -1);
+
+  /* The symbols have different types, and one is a typedef, but both
+     symbols are defined on the same line.  For example:
+
+     typedef struct foo { int a; } foo;
+
+     In this case we sort the typedef after the non-typedef.  This is an
+     arbitrary decision, but I think looks slightly nicer in the 'info
+     types' output; first we get the type, then the typedef.  */
+  if (sym_a.symbol->type ()->code () == TYPE_CODE_TYPEDEF)
+    return 1;
+  else
+    return -1;
 }
 
 /* Returns true if the type_name of symbol_type of SYM matches TREG.

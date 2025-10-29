@@ -90,6 +90,7 @@ proc run_test { lang } {
 		 "28:\[\t \]+typedef struct baz_t baz;" \
 		 "31:\[\t \]+typedef struct baz_t \\* baz_ptr;" \
 		 "21:\[\t \]+struct baz_t;" \
+		 "27:\[\t \]+typedef struct baz_t baz_t;" \
 		 "\[\t \]+double" \
 		 "33:\[\t \]+enum enum_t;" \
 		 "\[\t \]+float" \
