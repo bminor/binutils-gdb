@@ -52,7 +52,7 @@ class TestUnwinder(Unwinder):
         if stack_adjust is None:
             raise gdb.GdbError("invalid stack_adjust")
 
-        if not stop_at_level in [1, 3, 5]:
+        if stop_at_level not in [1, 3, 5]:
             raise gdb.GdbError("invalid stop_at_level")
 
         sp_desc = pending_frame.architecture().registers().find("sp")

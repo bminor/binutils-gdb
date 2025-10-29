@@ -65,7 +65,7 @@ def run_send_packet_test():
     # find them, mark the ones we do find.
     for thr in threads_xml:
         id = thr.get("id")
-        if not id in all_threads:
+        if id not in all_threads:
             raise "found unexpected thread in remote thread list"
         else:
             all_threads[id] = True
