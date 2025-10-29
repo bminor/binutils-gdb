@@ -17,7 +17,7 @@
 # Efficient handling of this case is important, and not just for typos.
 # Sometimes the debug info for the needed object isn't present.
 
-from perftest import measure, perftest, utils
+from perftest import perftest, utils
 
 
 class NullLookup(perftest.TestCaseWithBasicMeasurements):

@@ -13,12 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import itertools
 
 # This file is part of the GDB testsuite.  It tests Python-based
 # frame-filters.
 import gdb
-from gdb.FrameDecorator import FrameDecorator
 
 
 class FrameObjFile:

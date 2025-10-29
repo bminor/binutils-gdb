@@ -16,8 +16,6 @@
 # This file is part of the GDB testsuite.  It tests python pretty
 # printer registration.
 
-import re
-
 import gdb.printing
 import gdb.types
 

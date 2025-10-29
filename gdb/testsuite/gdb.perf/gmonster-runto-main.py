@@ -15,7 +15,7 @@
 
 # Measure performance of running to main.
 
-from perftest import measure, perftest, utils
+from perftest import perftest, utils
 
 
 class GmonsterRuntoMain(perftest.TestCaseWithBasicMeasurements):

@@ -16,7 +16,7 @@
 # This test case is to test the speed of GDB when it is handling the
 # shared libraries of inferior are loaded and unloaded.
 
-from perftest import measure, perftest
+from perftest import perftest
 
 import gdb
 

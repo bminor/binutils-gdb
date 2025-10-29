@@ -18,7 +18,6 @@
 
 # Test a printer with a bad children iterator.
 
-import re
 
 import gdb.printing
 
