@@ -59,7 +59,7 @@ class dummy_unwinder(Unwinder):
         try:
             for r in self.get_regs(pending_frame):
                 v = pending_frame.read_register(r).cast(self.void_ptr_t)
-        except:
+        except Exception:
             print("Dummy unwinder, exception")
             raise
 

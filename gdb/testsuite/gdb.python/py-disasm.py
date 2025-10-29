@@ -357,7 +357,7 @@ class GlobalCachingDisassembler(TestDisassembler):
                 raise gdb.GdbError("DisassembleInfo.address is still valid")
             except RuntimeError as e:
                 assert str(e) == "DisassembleInfo is no longer valid."
-            except:
+            except Exception:
                 raise gdb.GdbError(
                     "DisassembleInfo.address raised an unexpected exception"
                 )
@@ -367,7 +367,7 @@ class GlobalCachingDisassembler(TestDisassembler):
                 raise gdb.GdbError("DisassembleInfo.architecture is still valid")
             except RuntimeError as e:
                 assert str(e) == "DisassembleInfo is no longer valid."
-            except:
+            except Exception:
                 raise gdb.GdbError(
                     "DisassembleInfo.architecture raised an unexpected exception"
                 )
@@ -377,7 +377,7 @@ class GlobalCachingDisassembler(TestDisassembler):
                 raise gdb.GdbError("DisassembleInfo.read is still valid")
             except RuntimeError as e:
                 assert str(e) == "DisassembleInfo is no longer valid."
-            except:
+            except Exception:
                 raise gdb.GdbError(
                     "DisassembleInfo.read raised an unexpected exception"
                 )

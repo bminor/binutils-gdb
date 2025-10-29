@@ -144,7 +144,7 @@ def run_set_global_var_test():
         res = conn.send_packet("X%x,4:\xff\xff\xff\xff" % addr)
     except UnicodeError:
         saw_error = True
-    except:
+    except Exception:
         assert False
 
     assert saw_error

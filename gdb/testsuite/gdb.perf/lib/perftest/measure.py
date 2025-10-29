@@ -158,7 +158,7 @@ class MeasurementVmSize(Measurement):
             t = open(file_path)
             v = t.read()
             t.close()
-        except:
+        except Exception:
             return 0
         i = v.index(key)
         v = v[i:].split(None, 3)

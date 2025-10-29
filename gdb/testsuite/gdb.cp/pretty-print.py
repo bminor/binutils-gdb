@@ -49,7 +49,7 @@ class FilteringTypePrinter(object):
 
                 try:
                     self._type_obj = gdb.lookup_type(self.name).strip_typedefs()
-                except:
+                except Exception:
                     pass
 
             if self._type_obj is None:
