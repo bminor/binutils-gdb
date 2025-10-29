@@ -60,7 +60,6 @@ class break_unwinding(Unwinder):
         if str(func) != "break_bt_here":
             return None
 
-        global break_bt_here_frame_id
         if break_bt_here_frame_id is None:
             return None
 

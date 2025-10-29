@@ -24,7 +24,6 @@ bp_modified_counts = {}
 # Record breakpoint modification events into the global
 # bp_modified_counts dictionary.
 def bp_modified(bp):
-    global bp_modified_counts
     if bp.number not in bp_modified_counts:
         bp_modified_counts[bp.number] = 1
     else:

@@ -38,7 +38,6 @@ class handler(MissingDebugHandler):
         self._mode = Mode.RETURN_NONE
 
     def __call__(self, objfile):
-        global handler_call_log
         handler_call_log.append(self.name)
         self._call_count += 1
         if self._mode == Mode.RETURN_NONE:
@@ -95,7 +94,6 @@ class exception_handler(MissingDebugHandler):
         self.exception_type = None
 
     def __call__(self, objfile):
-        global handler_call_log
         handler_call_log.append(self.name)
         assert self.exception_type is not None
         raise self.exception_type("message")
@@ -103,7 +101,6 @@ class exception_handler(MissingDebugHandler):
 
 class log_handler(MissingDebugHandler):
     def __call__(self, objfile):
-        global handler_call_log
         handler_call_log.append(self.name)
         return None
 

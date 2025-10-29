@@ -65,7 +65,7 @@ class handler(MissingObjfileHandler):
         self._mode = Mode.RETURN_NONE
 
     def __call__(self, pspace, buildid, filename):
-        global handler_call_log, handler_last_buildid, handler_last_filename
+        global handler_last_buildid, handler_last_filename
         check_args(pspace, buildid, filename)
         handler_call_log.append(self.name)
         handler_last_buildid = buildid
@@ -135,7 +135,6 @@ class exception_handler(MissingObjfileHandler):
         self.exception_type = None
 
     def __call__(self, pspace, buildid, filename):
-        global handler_call_log
         check_args(pspace, buildid, filename)
         handler_call_log.append(self.name)
         assert self.exception_type is not None
@@ -148,7 +147,6 @@ class exception_handler(MissingObjfileHandler):
 # then be checked from the test script.
 class log_handler(MissingObjfileHandler):
     def __call__(self, pspace, buildid, filename):
-        global handler_call_log
         check_args(pspace, buildid, filename)
         handler_call_log.append(self.name)
         return None

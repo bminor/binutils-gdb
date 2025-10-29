@@ -62,16 +62,12 @@ class TestDisassembler(Disassembler):
     disassembly wrapping for the global CURRENT_PC."""
 
     def __init__(self):
-        global current_pc
-
         super().__init__("TestDisassembler")
         self.__info = None
         if current_pc == None:
             raise gdb.GdbError("no current_pc set")
 
     def __call__(self, info):
-        global current_pc
-
         if info.address != current_pc:
             return None
         self.__info = info
@@ -618,8 +614,6 @@ class Build_Result_Using_All_Parts(TestDisassembler):
     text and address parts."""
 
     def disassemble(self, info):
-        global current_pc
-
         parts = []
         parts.append(info.text_part(gdb.disassembler.STYLE_MNEMONIC, "fake"))
         parts.append(info.text_part(gdb.disassembler.STYLE_TEXT, "\t"))
@@ -852,7 +846,6 @@ class InvalidDisassembleInfo(gdb.disassembler.DisassembleInfo):
 
     @property
     def address(self):
-        global current_pc
         return current_pc
 
     @property

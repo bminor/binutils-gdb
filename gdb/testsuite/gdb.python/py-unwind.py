@@ -106,7 +106,6 @@ class TestUnwinder(Unwinder):
             unwind_info.add_saved_register(value=previous_ip, register="rip")
             unwind_info.add_saved_register(register="rsp", value=previous_sp)
 
-            global add_saved_register_errors
             try:
                 unwind_info.add_saved_register("nosuchregister", previous_sp)
             except ValueError as ve:
@@ -230,7 +229,6 @@ def capture_all_frame_information():
 # Assert that every entry in the global ALL_FRAME_INFORMATION list was
 # matched by the validating_unwinder.
 def check_all_frame_information_matched():
-    global all_frame_information
     for entry in all_frame_information:
         assert entry["matched"]
 
@@ -245,8 +243,6 @@ class validating_unwinder(Unwinder):
     def __call__(self, pending_frame):
         info = capture_frame_information(pending_frame)
         level = info["level"]
-
-        global all_frame_information
         old_info = all_frame_information[level]
 
         assert old_info is not None

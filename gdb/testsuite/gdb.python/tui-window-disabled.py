@@ -46,9 +46,6 @@ class EventWindow:
         self._win.write("Hello world...")
 
     def close(self):
-        global cleanup_properly
-        global titles_at_the_close
-
         # Ensure that window properties can be read within the close method.
         titles_at_the_close[self._win.title] = dict(
             width=self._win.width, height=self._win.height
@@ -70,9 +67,6 @@ class EventWindow:
             self._exit_listener = None
 
     def _event(self, type, event):
-        global perform_valid_check
-        global update_title
-
         self._count += 1
         self._events.insert(0, type)
         if not perform_valid_check or self._win.is_valid():

@@ -46,9 +46,6 @@ class TestUnwinder(Unwinder):
         Unwinder.__init__(self, "stop at level")
 
     def __call__(self, pending_frame):
-        global stop_at_level
-        global stack_adjust
-
         if stop_at_level is None or pending_frame.level() != stop_at_level:
             return None
 
