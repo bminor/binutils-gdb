@@ -1602,3 +1602,40 @@ proc objcopy_tek2bin {} {
 }
 
 objcopy_tek2bin
+
+# Test objcopy -I binary and --binary-symbol-prefix
+
+proc binary_symbol {name file args symbol} {
+    global OBJCOPY
+    global NM
+    global NMFLAGS
+
+    set test "binary symbol ($name)"
+
+    # detect a valid target, take the first supported
+    set target [lindex [split [binutils_run $OBJCOPY "--info"] \n] 1]
+
+    set out tmpdir/binary_symbol.o
+    set got [binutils_run $OBJCOPY "-I binary -O $target $args $file $out"]
+
+    set expected [list "${symbol}_end" "${symbol}_size" "${symbol}_start"]
+
+    set exec_output [binutils_run $NM "-a $NMFLAGS $out"]
+    set exec_output [prune_warnings $exec_output]
+    set actual {}
+    while {[regexp {^[0-9a-fA-F]+?[ ]+[TtDdA] ([0-9a-zA-Z_]+)[\r\n]+(.*)$} ${exec_output} all s rest]} {
+	set actual [concat $actual $s]
+	set exec_output $rest
+    }
+
+    if {[lsort $expected] ne [lsort $actual]} {
+	send_log "expected: $expected, actual: $actual\n"
+	fail $test
+	return
+    }
+
+    pass $test
+}
+
+binary_symbol implicit $srcdir/$subdir/version.s "" _binary_[regsub -all {[^0-9a-zA-Z]} $srcdir/$subdir/version.s _]
+binary_symbol explicit $srcdir/$subdir/version.s "--binary-symbol-prefix symbol1" symbol1

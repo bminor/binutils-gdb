@@ -334,6 +334,7 @@ enum command_line_switch
   OPTION_HEAP,
   OPTION_IMAGE_BASE,
   OPTION_IMPURE,
+  OPTION_BINARY_SYMBOL_PREFIX,
   OPTION_INTERLEAVE_WIDTH,
   OPTION_KEEPGLOBAL_SYMBOLS,
   OPTION_KEEP_FILE_SYMBOLS,
@@ -465,6 +466,7 @@ static struct option copy_options[] =
   {"info", no_argument, 0, OPTION_FORMATS_INFO},
   {"input-format", required_argument, 0, 'I'}, /* Obsolete */
   {"input-target", required_argument, 0, 'I'},
+  {"binary-symbol-prefix", required_argument, 0, OPTION_BINARY_SYMBOL_PREFIX},
   {"interleave", optional_argument, 0, 'i'},
   {"interleave-width", required_argument, 0, OPTION_INTERLEAVE_WIDTH},
   {"keep-file-symbols", no_argument, 0, OPTION_KEEP_FILE_SYMBOLS},
@@ -539,6 +541,11 @@ extern char *program_name;
 #ifndef is_strip
 extern int is_strip;
 #endif
+
+/* The symbol prefix of a binary input blob.
+ * <p>_start, <p>_end, <p>_size
+ */
+extern char *bfd_binary_symbol_prefix;
 
 /* The maximum length of an S record.  This variable is defined in srec.c
    and can be modified by the --srec-len parameter.  */
@@ -678,6 +685,9 @@ copy_usage (FILE *stream, int exit_status)
      --globalize-symbols <file>    --globalize-symbol for all in <file>\n\
      --keep-global-symbols <file>  -G for all symbols listed in <file>\n\
      --weaken-symbols <file>       -W for all symbols listed in <file>\n\
+     --binary-symbol-prefix <prefix>\n\
+                                    Use <prefix> as the base symbol name for the input file\n\
+                                     (default: derived from file name)\n\
      --add-symbol <name>=[<section>:]<value>[,<flags>]  Add a symbol\n\
      --alt-machine-code <index>    Use the target's <index>'th alternative machine\n\
      --writable-text               Mark the output text as writable\n\
@@ -5393,6 +5403,10 @@ copy_main (int argc, char *argv[])
 	case 'I':
 	case 's':		/* "source" - 'I' is preferred */
 	  input_target = optarg;
+	  break;
+
+	case OPTION_BINARY_SYMBOL_PREFIX:
+	  bfd_binary_symbol_prefix = optarg;
 	  break;
 
 	case 'O':

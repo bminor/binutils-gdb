@@ -1315,6 +1315,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--keep-global-symbols=}@var{filename}]
         [@option{--localize-symbols=}@var{filename}]
         [@option{--weaken-symbols=}@var{filename}]
+        [@option{--binary-symbol-prefix}@var{string}]
         [@option{--add-symbol} @var{name}=[@var{section}:]@var{value}[,@var{flags}]]
         [@option{--alt-machine-code=}@var{index}]
         [@option{--prefix-symbols=}@var{string}]
@@ -1553,6 +1554,20 @@ given more than once.  Note - unique symbols are not converted.
 @item -W @var{symbolname}
 @itemx --weaken-symbol=@var{symbolname}
 Make symbol @var{symbolname} weak. This option may be given more than once.
+
+@item --binary-symbol-prefix=@var{string}
+When used with @option{--input-target=binary}, sets @var{string} as the
+base name for the symbols generated for the input file.  These symbols are:
+
+@example
+@var{string}_start
+@var{string}_end
+@var{string}_size
+@end example
+
+By default, the binary input handler derives the prefix symbol name from a
+mangled version of the input file name and _binary prefix.  This option
+allows specifying it explicitly.
 
 @item --globalize-symbol=@var{symbolname}
 Give symbol @var{symbolname} global scoping so that it is visible

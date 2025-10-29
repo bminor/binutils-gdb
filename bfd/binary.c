@@ -41,6 +41,8 @@
    a start symbol, an end symbol, and an absolute length symbol.  */
 #define BIN_SYMS 3
 
+char *bfd_binary_symbol_prefix = NULL;
+
 /* Create a binary object.  Invoked via bfd_set_format.  */
 
 static bool
@@ -122,18 +124,25 @@ static char *
 mangle_name (bfd *abfd, char *suffix)
 {
   bfd_size_type size;
+  const char *prefix;
+  const char *prefix_amend = "";
   char *buf;
   char *p;
 
-  size = (strlen (bfd_get_filename (abfd))
-	  + strlen (suffix)
-	  + sizeof "_binary__");
+  prefix = bfd_binary_symbol_prefix;
+  if (prefix == NULL)
+    {
+      prefix = "_binary_";
+      prefix_amend = bfd_get_filename (abfd);
+    }
+
+  size = strlen (prefix) + strlen (prefix_amend) + strlen (suffix) + 2;
 
   buf = (char *) bfd_alloc (abfd, size);
   if (buf == NULL)
     return "";
 
-  sprintf (buf, "_binary_%s_%s", bfd_get_filename (abfd), suffix);
+  sprintf (buf, "%s%s_%s", prefix, prefix_amend, suffix);
 
   /* Change any non-alphanumeric characters to underscores.  */
   for (p = buf; *p; p++)
