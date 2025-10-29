@@ -1692,10 +1692,10 @@ thread_info_from_private_thread_info (darwin_thread_info *pti)
 {
   for (struct thread_info &it : all_threads ())
     {
-      darwin_thread_info *iter_pti = get_darwin_thread_info (it);
+      darwin_thread_info *iter_pti = get_darwin_thread_info (&it);
 
       if (iter_pti->gdb_port == pti->gdb_port)
-	return it;
+	return &it;
     }
 
   gdb_assert_not_reached ("did not find gdb thread for darwin thread");
