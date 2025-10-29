@@ -58,7 +58,7 @@ class dummy_unwinder(Unwinder):
         to see if the unwinder should claim it, which is never does."""
         try:
             for r in self.get_regs(pending_frame):
-                v = pending_frame.read_register(r).cast(self.void_ptr_t)
+                pending_frame.read_register(r).cast(self.void_ptr_t)
         except Exception:
             print("Dummy unwinder, exception")
             raise

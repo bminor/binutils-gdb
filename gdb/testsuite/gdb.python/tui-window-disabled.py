@@ -77,7 +77,6 @@ class EventWindow:
 
     def render(self):
         self._win.erase()
-        w = self._win.width
         h = self._win.height
         for i in range(min(h, len(self._events))):
             self._win.write(self._events[i] + "\n")

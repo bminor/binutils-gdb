@@ -33,7 +33,6 @@ class BadChildrenContainerPrinter1(object):
 
     @staticmethod
     def _bad_iterator(pointer, len):
-        start = pointer
         end = pointer + len
         while pointer != end:
             yield "intentional violation of children iterator protocol"
@@ -54,7 +53,6 @@ class BadChildrenContainerPrinter2(object):
 
     @staticmethod
     def _bad_iterator(pointer, len):
-        start = pointer
         end = pointer + len
         while pointer != end:
             # The first argument is supposed to be a string.

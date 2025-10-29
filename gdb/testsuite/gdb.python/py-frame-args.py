@@ -23,7 +23,6 @@ class pp_s(object):
         self.val = val
 
     def to_string(self):
-        m = self.val["m"]
         return "m=<" + str(self.val["m"]) + ">"
 
 

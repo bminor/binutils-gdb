@@ -39,9 +39,7 @@ def builtin_disassemble_wrapper(info):
 
 def check_building_disassemble_result():
     """Check that we can create DisassembleResult objects correctly."""
-
-    result = gdb.disassembler.DisassemblerResult()
-
+    gdb.disassembler.DisassemblerResult()
     print("PASS")
 
 
@@ -230,7 +228,7 @@ class GdbErrorLateDisassembler(TestDisassembler):
     """Raise a GdbError after calling the builtin disassembler."""
 
     def disassemble(self, info):
-        result = builtin_disassemble_wrapper(info)
+        builtin_disassemble_wrapper(info)
         raise gdb.GdbError("GdbError after builtin disassembler")
 
 
@@ -238,7 +236,7 @@ class RuntimeErrorLateDisassembler(TestDisassembler):
     """Raise a RuntimeError after calling the builtin disassembler."""
 
     def disassemble(self, info):
-        result = builtin_disassemble_wrapper(info)
+        builtin_disassemble_wrapper(info)
         raise RuntimeError("RuntimeError after builtin disassembler")
 
 
@@ -261,7 +259,7 @@ class MemoryErrorLateDisassembler(TestDisassembler):
     before we return a result."""
 
     def disassemble(self, info):
-        result = builtin_disassemble_wrapper(info)
+        builtin_disassemble_wrapper(info)
         # The following read will throw an error.
         info.read_memory(1, -info.address - 1)
         return DisassemblerResult(1, "BAD")
@@ -273,7 +271,7 @@ class RethrowMemoryErrorDisassembler(TestDisassembler):
     def disassemble(self, info):
         try:
             info.read_memory(1, -info.address - 1)
-        except gdb.MemoryError as e:
+        except gdb.MemoryError:
             raise gdb.MemoryError("cannot read code at address -1")
         return DisassemblerResult(1, "BAD")
 
@@ -353,7 +351,7 @@ class GlobalCachingDisassembler(TestDisassembler):
             assert isinstance(info, gdb.disassembler.DisassembleInfo)
             assert not info.is_valid()
             try:
-                val = info.address
+                info.address
                 raise gdb.GdbError("DisassembleInfo.address is still valid")
             except RuntimeError as e:
                 assert str(e) == "DisassembleInfo is no longer valid."
@@ -363,7 +361,7 @@ class GlobalCachingDisassembler(TestDisassembler):
                 )
 
             try:
-                val = info.architecture
+                info.architecture
                 raise gdb.GdbError("DisassembleInfo.architecture is still valid")
             except RuntimeError as e:
                 assert str(e) == "DisassembleInfo is no longer valid."
@@ -373,7 +371,7 @@ class GlobalCachingDisassembler(TestDisassembler):
                 )
 
             try:
-                val = info.read_memory(1, 0)
+                info.read_memory(1, 0)
                 raise gdb.GdbError("DisassembleInfo.read is still valid")
             except RuntimeError as e:
                 assert str(e) == "DisassembleInfo is no longer valid."
@@ -542,32 +540,28 @@ class ErrorCreatingTextPart_NoArgs(TestDisassembler):
     """Try to create a DisassemblerTextPart with no arguments."""
 
     def disassemble(self, info):
-        part = info.text_part()
-        return None
+        info.text_part()
 
 
 class ErrorCreatingAddressPart_NoArgs(TestDisassembler):
     """Try to create a DisassemblerAddressPart with no arguments."""
 
     def disassemble(self, info):
-        part = info.address_part()
-        return None
+        info.address_part()
 
 
 class ErrorCreatingTextPart_NoString(TestDisassembler):
     """Try to create a DisassemblerTextPart with no string argument."""
 
     def disassemble(self, info):
-        part = info.text_part(gdb.disassembler.STYLE_TEXT)
-        return None
+        info.text_part(gdb.disassembler.STYLE_TEXT)
 
 
 class ErrorCreatingTextPart_NoStyle(TestDisassembler):
     """Try to create a DisassemblerTextPart with no string argument."""
 
     def disassemble(self, info):
-        part = info.text_part(string="abc")
-        return None
+        info.text_part(string="abc")
 
 
 class ErrorCreatingTextPart_StringAndParts(TestDisassembler):
@@ -771,8 +765,8 @@ class AnalyzingDisassembler(Disassembler):
                 idx > 0
                 and idx != nop_idx
                 and not is_nop(self._pass_1_insn[idx])
-                and self._pass_1_length[idx] > self._pass_1_length[nop_idx]
-                and self._pass_1_length[idx] % self._pass_1_length[nop_idx] == 0
+                and self._pass_1_length[idx] > nop_length
+                and self._pass_1_length[idx] % nop_length == 0
             ):
                 replace_idx = idx
                 break
@@ -786,7 +780,7 @@ class AnalyzingDisassembler(Disassembler):
                     idx > 0
                     and idx != nop_idx
                     and not is_nop(self._pass_1_insn[idx])
-                    and self._pass_1_length[idx] == self._pass_1_length[nop_idx]
+                    and self._pass_1_length[idx] == nop_length
                 ):
                     replace_idx = idx
                     break
@@ -807,7 +801,7 @@ class AnalyzingDisassembler(Disassembler):
         # is a copy of _pass_1_insn, but replace the instruction we
         # identified above with a series of 'nop' instructions.
         self._check = list(self._pass_1_insn)
-        nop_count = int(self._pass_1_length[replace_idx] / self._pass_1_length[nop_idx])
+        nop_count = int(self._pass_1_length[replace_idx] / nop_length)
         nop_insn = self._pass_1_insn[nop_idx]
         nops = [nop_insn] * nop_count
         self._check[replace_idx : (replace_idx + 1)] = nops

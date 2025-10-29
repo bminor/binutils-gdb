@@ -54,14 +54,9 @@ def info_connections():
         print(fmt % (prefix, c.num, make_target_connection_string(c), c.description))
 
 
-def inf_num(i):
-    return i.num
-
-
 # Print information about each inferior, and the connection it is
 # using.
 def info_inferiors():
-    all_inferiors = sorted(gdb.inferiors(), key=inf_num)
     for i in gdb.inferiors():
         print(
             "Inferior %d, Connection #%d: %s"
