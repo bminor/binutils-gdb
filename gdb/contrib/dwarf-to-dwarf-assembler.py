@@ -43,8 +43,6 @@ import errno
 import re
 import sys
 from copy import copy
-from dataclasses import dataclass
-from datetime import datetime
 from functools import cache
 from io import BytesIO, IOBase
 from logging import getLogger
