@@ -33,6 +33,5 @@ class GmonsterRuntoMain(perftest.TestCaseWithBasicMeasurements):
             utils.select_file(this_run_binfile)
             iteration = 5
             while iteration > 0:
-                func = lambda: utils.runto_main()
-                self.measure.measure(func, run)
+                self.measure.measure(lambda: utils.runto_main(), run)
                 iteration -= 1

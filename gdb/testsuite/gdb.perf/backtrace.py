@@ -45,8 +45,6 @@ class BackTrace(perftest.TestCaseWithBasicMeasurements):
             gdb.execute(line_size_command)
             gdb.execute(size_command)
 
-            func = lambda: self._do_test()
-
-            self.measure.measure(func, line_size)
+            self.measure.measure(self._do_test, line_size)
 
             line_size *= 2

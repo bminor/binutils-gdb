@@ -32,5 +32,6 @@ class TemplateBreakpoints(perftest.TestCaseWithBasicMeasurements):
 
     def execute_test(self):
         for bpcount in range(1, 10):
-            tfunc = lambda bound_bpcount=bpcount: self._do_test(bound_bpcount)
-            self.measure.measure(tfunc, bpcount)
+            self.measure.measure(
+                lambda bound_bpcount=bpcount: self._do_test(bound_bpcount), bpcount
+            )

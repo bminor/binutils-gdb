@@ -39,6 +39,7 @@ class NullLookup(perftest.TestCaseWithBasicMeasurements):
             iteration = 5
             while iteration > 0:
                 utils.safe_execute("mt flush symbol-cache")
-                func = lambda: utils.safe_execute("p symbol_not_found")
-                self.measure.measure(func, run)
+                self.measure.measure(
+                    lambda: utils.safe_execute("p symbol_not_found"), run
+                )
                 iteration -= 1

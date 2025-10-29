@@ -33,5 +33,4 @@ class SkipCommand(perftest.TestCaseWithBasicMeasurements):
 
     def execute_test(self):
         for i in range(1, 5):
-            func = lambda: self._run(i * self.step)
-            self.measure.measure(func, i * self.step)
+            self.measure.measure(lambda: self._run(i * self.step), i * self.step)
