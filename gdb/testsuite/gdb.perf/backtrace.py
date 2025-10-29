@@ -15,6 +15,8 @@
 
 from perftest import perftest
 
+import gdb
+
 
 class BackTrace(perftest.TestCaseWithBasicMeasurements):
     def __init__(self, depth):

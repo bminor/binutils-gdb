@@ -17,6 +17,8 @@
 
 import re
 
+import gdb
+
 
 class pp_ss:
     def __init__(self, val):

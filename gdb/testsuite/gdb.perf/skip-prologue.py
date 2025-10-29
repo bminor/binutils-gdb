@@ -18,6 +18,8 @@
 
 from perftest import perftest
 
+import gdb
+
 
 class SkipPrologue(perftest.TestCaseWithBasicMeasurements):
     def __init__(self, count):

@@ -16,6 +16,8 @@
 # This file is part of the GDB testsuite.  It tests python Finish
 # Breakpoints.
 
+import gdb
+
 
 class ExceptionFinishBreakpoint(gdb.FinishBreakpoint):
     def __init__(self, frame):

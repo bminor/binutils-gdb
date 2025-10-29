@@ -17,6 +17,8 @@
 
 import os
 
+import gdb
+
 if "ENV_PREFIX" in os.environ:
     gdb.execute("set sysroot %s" % os.environ["ENV_PREFIX"])
 

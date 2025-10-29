@@ -15,6 +15,8 @@
 
 from perftest import perftest
 
+import gdb
+
 
 class SkipCommand(perftest.TestCaseWithBasicMeasurements):
     def __init__(self, name, step):

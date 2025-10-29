@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import gdb
+
 # Breakpoint modification events will be recorded in this dictionary.
 # The keys are the b/p numbers, and the values are the number of
 # modification events seen.

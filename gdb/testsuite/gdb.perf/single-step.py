@@ -15,6 +15,8 @@
 
 from perftest import perftest
 
+import gdb
+
 
 class SingleStep(perftest.TestCaseWithBasicMeasurements):
     def __init__(self, step):

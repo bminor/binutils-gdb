@@ -17,6 +17,9 @@
 # Breakpoints.
 
 
+import gdb
+
+
 class MyFinishBreakpoint(gdb.FinishBreakpoint):
     def __init__(self, val, frame):
         gdb.FinishBreakpoint.__init__(self, frame)

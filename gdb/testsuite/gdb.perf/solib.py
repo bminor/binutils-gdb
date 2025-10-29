@@ -18,6 +18,8 @@
 
 from perftest import measure, perftest
 
+import gdb
+
 
 class SolibLoadUnload1(perftest.TestCaseWithBasicMeasurements):
     def __init__(self, solib_count, measure_load):

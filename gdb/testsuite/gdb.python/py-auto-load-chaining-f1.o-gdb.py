@@ -18,6 +18,8 @@
 
 import re
 
+import gdb
+
 print("Entering f1.o auto-load script")
 
 print("Current objfile is: %s" % gdb.current_objfile().filename)

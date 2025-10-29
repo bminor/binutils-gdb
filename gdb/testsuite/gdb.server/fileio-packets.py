@@ -16,6 +16,8 @@
 import os
 import stat
 
+import gdb
+
 
 # Hex encode INPUT_STRING in the same way that GDB does.  Each
 # character in INPUT_STRING is expanded to its two digit hex

@@ -16,6 +16,8 @@
 # This script is auto-loaded when the py-auto-load-chaining-f2.o
 # object is loaded.
 
+import gdb
+
 print("Entering f2.o auto-load script")
 
 print("Current objfile is: %s" % gdb.current_objfile().filename)

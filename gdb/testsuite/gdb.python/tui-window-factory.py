@@ -14,6 +14,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+import gdb
+
+
 class TestWindow:
     def __init__(self, tui_win, msg):
         self.msg = msg
