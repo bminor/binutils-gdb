@@ -901,6 +901,8 @@ struct elf_reloc_cookie
 {
   bfd *abfd;
   Elf_Internal_Rela *rels, *rel, *relend;
+  /* Number of symbols in .symtab.  */
+  unsigned int num_sym;
   /* Number of symbols that may be local syms (all when bad_symtab).  */
   unsigned int locsymcount;
   /* Symbol index of first possible global sym (0 when bad_symtab).  */
@@ -3172,7 +3174,7 @@ extern void _bfd_elf_link_munmap_section_contents
   (asection *);
 
 extern struct elf_link_hash_entry * _bfd_elf_get_link_hash_entry
-  (struct elf_link_hash_entry **, unsigned int, unsigned int);
+  (struct elf_link_hash_entry **, unsigned int, unsigned int, unsigned int);
 extern asection *_bfd_get_local_sym_section
   (struct elf_reloc_cookie *, unsigned int);
 

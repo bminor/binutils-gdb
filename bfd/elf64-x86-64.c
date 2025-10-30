@@ -2616,7 +2616,8 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 	{
 	  isym = NULL;
 	  h = _bfd_elf_get_link_hash_entry (sym_hashes, r_symndx,
-					    symtab_hdr->sh_info);
+					    symtab_hdr->sh_info,
+					    NUM_SHDR_ENTRIES (symtab_hdr));
 	}
 
       /* Check invalid x32 relocations.  */

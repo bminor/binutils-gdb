@@ -11641,6 +11641,9 @@ use_global_in_relocs (struct ppc_link_hash_table *htab,
       if (hashes == NULL)
 	return false;
       elf_sym_hashes (htab->params->stub_bfd) = hashes;
+      Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (htab->params->stub_bfd);
+      symtab_hdr->sh_entsize = sizeof (Elf64_External_Sym);
+      symtab_hdr->sh_size = (htab->stub_globals + 1) * symtab_hdr->sh_entsize;
       htab->stub_globals = 1;
     }
   symndx = htab->stub_globals++;

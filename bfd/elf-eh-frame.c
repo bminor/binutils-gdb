@@ -1256,6 +1256,8 @@ find_merged_cie (bfd *abfd, struct bfd_link_info *info, asection *sec,
 #endif
 	r_symndx = ELF32_R_SYM (rel->r_info);
 
+      if (r_symndx > cookie->num_sym)
+	return cie_inf;
       h = NULL;
       if (r_symndx >= cookie->extsymoff)
 	h = elf_sym_hashes (cookie->abfd)[r_symndx - cookie->extsymoff];
