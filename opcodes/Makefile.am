@@ -583,7 +583,8 @@ s390-mkopc.o: s390-mkopc.c $(INCDIR)/opcode/s390.h
 	$(AM_V_CC)$(COMPILE_FOR_BUILD) -c $(srcdir)/s390-mkopc.c
 
 s390-opc.tab: s390-mkopc$(EXEEXT_FOR_BUILD) s390-opc.txt
-	$(AM_V_GEN)./s390-mkopc$(EXEEXT_FOR_BUILD) < $(srcdir)/s390-opc.txt > s390-opc.tab
+	$(AM_V_GEN)./s390-mkopc$(EXEEXT_FOR_BUILD) < $(srcdir)/s390-opc.txt > s390-opc.tab.tmp
+	$(AM_V_at)$(am__mv) s390-opc.tab.tmp s390-opc.tab
 
 s390-opc.lo: s390-opc.tab
 
