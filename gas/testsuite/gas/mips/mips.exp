@@ -573,6 +573,12 @@ if { [istarget mips*-*-vxworks*] } {
 	"MIPS invalid PIC option in VxWorks PIC"
     run_list_test "option-pic-vxworks-2" "-mvxworks-pic" \
 	"MIPS invalid switch to SVR4 PIC from VxWorks PIC"
+
+    run_dump_test "vxworks-mips-hilo"
+    run_dump_test "vxworks-mips16-hilo"
+    run_dump_test "vxworks-mips16e2-hilo"
+    run_dump_test "vxworks-micromips-hilo"
+    run_dump_test "vxworks-pcrel-hilo"
 } elseif { [istarget mips*-*-*] } {
     set addr32 [expr [istarget mipstx39*-*-*] || [istarget mips-*-linux*] || [istarget mipsel-*-linux*] \
 		     || [istarget mipsisa32*-*-linux*]]

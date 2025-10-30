@@ -492,7 +492,11 @@ static int mips_32bitmode = 0;
 #define HAVE_64BIT_OBJECTS (mips_abi == N64_ABI)
 
 /* True if relocations are stored in-place.  */
+#ifdef TE_VXWORKS
+#define HAVE_IN_PLACE_ADDENDS 0
+#else
 #define HAVE_IN_PLACE_ADDENDS (!HAVE_NEWABI)
+#endif
 
 /* The ABI-derived address size.  */
 #define HAVE_64BIT_ADDRESSES \

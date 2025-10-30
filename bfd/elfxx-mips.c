@@ -10524,9 +10524,8 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       struct elf_link_hash_entry *h;
       bool rel_reloc;
 
-      rel_reloc = (NEWABI_P (input_bfd)
-		   && mips_elf_rel_relocation_p (input_bfd, input_section,
-						 relocs, rel));
+      rel_reloc = mips_elf_rel_relocation_p (input_bfd, input_section,
+					     relocs, rel);
       /* Find the relocation howto for this relocation.  */
       howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd, r_type, !rel_reloc);
 
