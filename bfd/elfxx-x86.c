@@ -966,7 +966,8 @@ _bfd_x86_elf_check_relocs (bfd *abfd,
 	  goto error_return;
 	}
 
-      h = _bfd_elf_get_link_hash_entry (sym_hashes, r_symndx, symtab_hdr);
+      h = _bfd_elf_get_link_hash_entry (sym_hashes, r_symndx,
+					symtab_hdr->sh_info);
 
       if (X86_NEED_DYNAMIC_RELOC_TYPE_P (is_x86_64, r_type)
 	  && NEED_DYNAMIC_RELOCATION_P (is_x86_64, info, true, h, sec,
@@ -1194,7 +1195,8 @@ _bfd_x86_elf_link_relax_section (bfd *abfd ATTRIBUTE_UNUSED,
       else
 	{
 	  /* Get H and SEC for GENERATE_DYNAMIC_RELOCATION_P below.  */
-	  h = _bfd_elf_get_link_hash_entry (sym_hashes, r_symndx, symtab_hdr);
+	  h = _bfd_elf_get_link_hash_entry (sym_hashes, r_symndx,
+					    symtab_hdr->sh_info);
 	  if (h == NULL)
 	    {
 	      /* FIXMEL: Issue an error message ?  */

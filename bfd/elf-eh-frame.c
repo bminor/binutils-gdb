@@ -1238,6 +1238,7 @@ find_merged_cie (bfd *abfd, struct bfd_link_info *info, asection *sec,
 
   if (cie->per_encoding != DW_EH_PE_omit)
     {
+      struct elf_link_hash_entry *h;
       bool per_binds_local;
 
       /* Work out the address of personality routine, or at least
@@ -1254,14 +1255,13 @@ find_merged_cie (bfd *abfd, struct bfd_link_info *info, asection *sec,
       else
 #endif
 	r_symndx = ELF32_R_SYM (rel->r_info);
-      if (r_symndx >= cookie->locsymcount
-	  || ELF_ST_BIND (cookie->locsyms[r_symndx].st_info) != STB_LOCAL)
+
+      h = NULL;
+      if (r_symndx >= cookie->extsymoff)
+	h = elf_sym_hashes (cookie->abfd)[r_symndx - cookie->extsymoff];
+
+      if (h != NULL)
 	{
-	  struct elf_link_hash_entry *h;
-
-	  r_symndx -= cookie->extsymoff;
-	  h = cookie->sym_hashes[r_symndx];
-
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
