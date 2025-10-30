@@ -4353,6 +4353,28 @@ lo16_reloc_p (bfd_reloc_code_real_type reloc)
 }
 
 static inline bool
+tls_hi16_reloc_p (bfd_reloc_code_real_type reloc)
+{
+  return (reloc == BFD_RELOC_MIPS_TLS_DTPREL_HI16
+	  || reloc == BFD_RELOC_MIPS_TLS_TPREL_HI16
+	  || reloc == BFD_RELOC_MIPS16_TLS_DTPREL_HI16
+	  || reloc == BFD_RELOC_MIPS16_TLS_TPREL_HI16
+	  || reloc == BFD_RELOC_MICROMIPS_TLS_DTPREL_HI16
+	  || reloc == BFD_RELOC_MICROMIPS_TLS_TPREL_HI16);
+}
+
+static inline bool
+tls_lo16_reloc_p (bfd_reloc_code_real_type reloc)
+{
+  return (reloc == BFD_RELOC_MIPS_TLS_DTPREL_LO16
+	  || reloc == BFD_RELOC_MIPS_TLS_TPREL_LO16
+	  || reloc == BFD_RELOC_MIPS16_TLS_DTPREL_LO16
+	  || reloc == BFD_RELOC_MIPS16_TLS_TPREL_LO16
+	  || reloc == BFD_RELOC_MICROMIPS_TLS_DTPREL_LO16
+	  || reloc == BFD_RELOC_MICROMIPS_TLS_TPREL_LO16);
+}
+
+static inline bool
 jalr_reloc_p (bfd_reloc_code_real_type reloc)
 {
   return reloc == BFD_RELOC_MIPS_JALR || reloc == BFD_RELOC_MICROMIPS_JALR;
@@ -4403,6 +4425,7 @@ reloc_needs_lo_p (bfd_reloc_code_real_type reloc)
 {
   return (HAVE_IN_PLACE_ADDENDS
 	  && (hi16_reloc_p (reloc)
+	      || tls_hi16_reloc_p (reloc)
 	      /* VxWorks R_MIPS_GOT16 relocs never need a matching %lo();
 		 all GOT16 relocations evaluate to "G".  */
 	      || (got16_reloc_p (reloc) && mips_pic != VXWORKS_PIC)));
@@ -4414,10 +4437,34 @@ reloc_needs_lo_p (bfd_reloc_code_real_type reloc)
 static inline bfd_reloc_code_real_type
 matching_lo_reloc (bfd_reloc_code_real_type reloc)
 {
-  return (mips16_reloc_p (reloc) ? BFD_RELOC_MIPS16_LO16
-	  : micromips_reloc_p (reloc) ? BFD_RELOC_MICROMIPS_LO16
-	  : reloc == BFD_RELOC_HI16_S_PCREL ? BFD_RELOC_LO16_PCREL
-	  : BFD_RELOC_LO16);
+  switch (reloc)
+    {
+    case BFD_RELOC_HI16_S:
+    case BFD_RELOC_MIPS_GOT16:
+      return BFD_RELOC_LO16;
+    case BFD_RELOC_HI16_S_PCREL:
+      return BFD_RELOC_LO16_PCREL;
+    case BFD_RELOC_MIPS_TLS_DTPREL_HI16:
+      return BFD_RELOC_MIPS_TLS_DTPREL_LO16;
+    case BFD_RELOC_MIPS_TLS_TPREL_HI16:
+      return BFD_RELOC_MIPS_TLS_TPREL_LO16;
+    case BFD_RELOC_MIPS16_HI16_S:
+    case BFD_RELOC_MIPS16_GOT16:
+      return BFD_RELOC_MIPS16_LO16;
+    case BFD_RELOC_MIPS16_TLS_DTPREL_HI16:
+      return BFD_RELOC_MIPS16_TLS_DTPREL_LO16;
+    case BFD_RELOC_MIPS16_TLS_TPREL_HI16:
+      return BFD_RELOC_MIPS16_TLS_TPREL_LO16;
+    case BFD_RELOC_MICROMIPS_HI16_S:
+    case BFD_RELOC_MICROMIPS_GOT16:
+      return BFD_RELOC_MICROMIPS_LO16;
+    case BFD_RELOC_MICROMIPS_TLS_DTPREL_HI16:
+      return BFD_RELOC_MICROMIPS_TLS_DTPREL_LO16;
+    case BFD_RELOC_MICROMIPS_TLS_TPREL_HI16:
+      return BFD_RELOC_MICROMIPS_TLS_TPREL_LO16;
+    default:
+      abort ();
+    }
 }
 
 /* Return true if the given fixup is followed by a matching R_MIPS_LO16
@@ -7942,6 +7989,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      || reloc_type[0] == BFD_RELOC_MIPS_16
 	      || reloc_type[0] == BFD_RELOC_MIPS_RELGOT
 	      || reloc_type[0] == BFD_RELOC_MIPS16_GPREL
+	      || tls_hi16_reloc_p (reloc_type[0])
+	      || tls_lo16_reloc_p (reloc_type[0])
 	      || hi16_reloc_p (reloc_type[0])
 	      || lo16_reloc_p (reloc_type[0])))
 	ip->fixp[0]->fx_no_overflow = 1;
@@ -18304,6 +18353,7 @@ mips_fix_adjustable (fixS *fixp)
      this, it seems better not to force the issue, and instead keep the
      original symbol.  This will work with either linker behavior.  */
   if ((lo16_reloc_p (fixp->fx_r_type)
+       || tls_lo16_reloc_p (fixp->fx_r_type)
        || reloc_needs_lo_p (fixp->fx_r_type))
       && HAVE_IN_PLACE_ADDENDS
       && (S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_MERGE) != 0)

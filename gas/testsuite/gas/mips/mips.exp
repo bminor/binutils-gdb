@@ -1057,6 +1057,8 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "mips16e2-hilo-n32"
     }
     run_dump_test "mips16-hilo-match"
+    run_dump_test "mips16-tls-hilo-match"
+    run_dump_test "mips16-tls-hilo-addend"
     run_dump_test "mips16-reloc-error"
     run_dump_test "mips16e2-reloc-error"
     run_dump_test "mips16-reg-error"
@@ -1655,6 +1657,8 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "micromips-hilo-n64"
     }
     run_dump_test "micromips-hilo-match"
+    run_dump_test "micromips-tls-hilo-match"
+    run_dump_test "micromips-tls-hilo-addend"
 
     run_dump_test_arches "mcu"		[mips_arch_list_matching mips32r2 \
 					    !octeon]
