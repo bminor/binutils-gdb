@@ -3745,6 +3745,7 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 	    Elf_Internal_Rela rela;
 	    bfd_byte *loc, *locend;
 	    int dynindx;
+	    asection *sec;
 
 	    /* The offset of this relocation is the absolute address
 	       of the .opd entry for this symbol.  */
@@ -3753,7 +3754,8 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 
 	    /* Compute the difference between the symbol address
 	       and the test segment base address.  */
-	    value = relocation + addend - hppa_info->text_segment_base;
+	    sec = hppa_info->text_segment->root.u.def.section;
+	    value = (relocation + addend - sec->output_section->vma);
 
 	    /* The result becomes the addend of the relocation.  */
 	    rela.r_addend = value;
