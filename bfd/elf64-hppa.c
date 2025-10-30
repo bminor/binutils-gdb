@@ -137,8 +137,9 @@ struct elf64_hppa_link_hash_table
   bfd_vma text_segment_base;
   bfd_vma data_segment_base;
 
-  /* Hash entry for __text_seg.  */
+  /* Hash entries for __text_seg and __data_seg.  */
   struct elf_link_hash_entry *text_segment;
+  struct elf_link_hash_entry *data_segment;
 
   /* We build tables to map from an input section back to its
      symbol index.  This is the BFD for which we currently have
@@ -1123,31 +1124,6 @@ allocate_global_data_opd (struct elf_link_hash_entry *eh, void *data)
 		return false;
 	    }
 
-	  /* Add __text_seg symbol to dynamic table.  */
-	  if (bfd_link_pic (x->info) && !hppa_info->text_segment)
-	    {
-	      struct elf_link_hash_entry *nh;
-
-	      nh = elf_link_hash_lookup (elf_hash_table (x->info),
-					 "__text_seg", true, false, false);
-	      if (nh != NULL)
-		{
-		  asection *s;
-
-		  s = bfd_get_section_by_name (x->info->output_bfd,
-					       ".dynamic");
-
-		  nh->type = STT_SECTION;
-		  nh->root.type = bfd_link_hash_defined;
-		  nh->root.u.def.value = 0;
-		  nh->root.u.def.section = s;
-		  nh->forced_local = 1;
-		  nh->other = STV_DEFAULT;
-		  bfd_elf_link_record_dynamic_symbol (x->info, nh);
-		  hppa_info->text_segment = nh;
-		}
-	    }
-
 	  hh->opd_offset = x->ofs;
 	  x->ofs += OPD_ENTRY_SIZE;
 	}
@@ -1730,6 +1706,54 @@ elf64_hppa_late_size_sections (bfd *output_bfd, struct bfd_link_info *info)
 	      else
 		*local_opd = (bfd_vma) -1;
 	    }
+	}
+    }
+
+  /* Add __text_seg section symbol to dynamic table.  */
+  if (bfd_link_pic (info) && !hppa_info->text_segment)
+    {
+      struct elf_link_hash_entry *nh;
+
+      nh = elf_link_hash_lookup (elf_hash_table (info),
+				 "__text_seg", true, false, false);
+      if (nh != NULL)
+	{
+	  asection *s;
+
+	  s = bfd_get_section_by_name (info->output_bfd, ".dynamic");
+
+	  nh->type = STT_SECTION;
+	  nh->root.type = bfd_link_hash_defined;
+	  nh->root.u.def.value = 0;
+	  nh->root.u.def.section = s;
+	  nh->forced_local = 1;
+	  nh->other = STV_DEFAULT;
+	  bfd_elf_link_record_dynamic_symbol (info, nh);
+	  hppa_info->text_segment = nh;
+	}
+    }
+
+  /* Add __data_seg section symbol to dynamic table.  */
+  if (bfd_link_pic (info) && !hppa_info->data_segment)
+    {
+      struct elf_link_hash_entry *nh;
+
+      nh = elf_link_hash_lookup (elf_hash_table (info),
+				 "__data_seg", true, false, false);
+      if (nh != NULL)
+	{
+	  asection *s;
+
+	  s = bfd_get_section_by_name (info->output_bfd, ".data");
+
+	  nh->type = STT_SECTION;
+	  nh->root.type = bfd_link_hash_defined;
+	  nh->root.u.def.value = 0;
+	  nh->root.u.def.section = s;
+	  nh->forced_local = 1;
+	  nh->other = STV_DEFAULT;
+	  bfd_elf_link_record_dynamic_symbol (info, nh);
+	  hppa_info->data_segment = nh;
 	}
     }
 
