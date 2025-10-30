@@ -2174,6 +2174,7 @@ elf64_hppa_finalize_opd (struct elf_link_hash_entry *eh, void *data)
       Elf_Internal_Rela rel;
       bfd_byte *loc;
       int dynindx;
+      asection *sec;
 
       /* The offset of this relocation is the absolute address of the
 	 .opd entry for this symbol.  */
@@ -2200,7 +2201,8 @@ elf64_hppa_finalize_opd (struct elf_link_hash_entry *eh, void *data)
 	       + eh->root.u.def.section->output_offset);
 
       /* Compute the base address of the segment with this symbol.  */
-      value2 = hppa_info->text_segment_base;
+      sec = hppa_info->text_segment->root.u.def.section;
+      value2 = sec->output_section->vma;
 
       /* Compute the difference between the symbol and the text segment
 	 base address.  */
