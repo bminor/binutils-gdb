@@ -899,14 +899,13 @@ enum elf_reloc_type_class {
 
 struct elf_reloc_cookie
 {
-  Elf_Internal_Rela *rels, *rel, *relend;
-  Elf_Internal_Sym *locsyms;
   bfd *abfd;
-  size_t locsymcount;
-  size_t extsymoff;
-  struct elf_link_hash_entry **sym_hashes;
+  Elf_Internal_Rela *rels, *rel, *relend;
+  /* Number of symbols that may be local syms (all when bad_symtab).  */
+  unsigned int locsymcount;
+  /* Symbol index of first possible global sym (0 when bad_symtab).  */
+  unsigned int extsymoff;
   int r_sym_shift;
-  bool bad_symtab;
 };
 
 /* The level of IRIX compatibility we're striving for.  */
@@ -2105,6 +2104,9 @@ struct elf_obj_tdata
      minus the sh_info field of the symbol table header.  */
   struct elf_link_hash_entry **sym_hashes;
 
+  /* Section indices of local symbols, used by gc-sections.  */
+  unsigned int *loc_shndx;
+
   /* Track usage and final offsets of GOT entries for local symbols.
      This array is indexed by symbol index.  Elements are used
      identically to "got" in struct elf_link_hash_entry.  */
@@ -2244,6 +2246,7 @@ struct elf_obj_tdata
 #define elf_gp(bfd)		(elf_tdata(bfd) -> gp)
 #define elf_gp_size(bfd)	(elf_tdata(bfd) -> gp_size)
 #define elf_sym_hashes(bfd)	(elf_tdata(bfd) -> sym_hashes)
+#define elf_loc_shndx(bfd)	(elf_tdata(bfd) -> loc_shndx)
 #define elf_local_got_refcounts(bfd) (elf_tdata(bfd) -> local_got.refcounts)
 #define elf_local_got_offsets(bfd) (elf_tdata(bfd) -> local_got.offsets)
 #define elf_local_got_ents(bfd) (elf_tdata(bfd) -> local_got.ents)
@@ -3170,6 +3173,8 @@ extern void _bfd_elf_link_munmap_section_contents
 
 extern struct elf_link_hash_entry * _bfd_elf_get_link_hash_entry
   (struct elf_link_hash_entry **, unsigned int, unsigned int);
+extern asection *_bfd_get_local_sym_section
+  (struct elf_reloc_cookie *, unsigned int);
 
 /* Large common section.  */
 extern asection _bfd_elf_large_com_section;

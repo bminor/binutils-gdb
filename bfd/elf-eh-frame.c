@@ -1271,11 +1271,7 @@ find_merged_cie (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	}
       else
 	{
-	  Elf_Internal_Sym *sym;
-	  asection *sym_sec;
-
-	  sym = &cookie->locsyms[r_symndx];
-	  sym_sec = bfd_section_from_elf_index (abfd, sym->st_shndx);
+	  asection *sym_sec = _bfd_get_local_sym_section (cookie, r_symndx);
 	  if (sym_sec == NULL)
 	    return cie_inf;
 
@@ -1444,35 +1440,54 @@ _bfd_elf_adjust_eh_frame_global_symbol (struct elf_link_hash_entry *h,
   return true;
 }
 
-/* The same for all local symbols defined in .eh_frame.  Returns true
-   if any symbol was changed.  */
+/* The same for all local symbols defined in .eh_frame.  Returns the
+   local symbols if any symbol was changed.  */
 
-static int
+static Elf_Internal_Sym *
 adjust_eh_frame_local_symbols (const asection *sec,
 			       struct elf_reloc_cookie *cookie)
 {
-  int adjusted = 0;
+  bfd *abfd = cookie->abfd;
+  unsigned int *loc_shndx = elf_loc_shndx (abfd);
+  unsigned int shndx = elf_section_data (sec)->this_idx;
 
-  if (cookie->locsymcount > 1)
+  if (loc_shndx != NULL)
     {
-      unsigned int shndx = elf_section_data (sec)->this_idx;
-      Elf_Internal_Sym *end_sym = cookie->locsyms + cookie->locsymcount;
-      Elf_Internal_Sym *sym;
+      unsigned int i;
 
-      for (sym = cookie->locsyms + 1; sym < end_sym; ++sym)
-	if (sym->st_info <= ELF_ST_INFO (STB_LOCAL, STT_OBJECT)
-	    && sym->st_shndx == shndx)
-	  {
-	    bfd_signed_vma delta = offset_adjust (sym->st_value, sec);
-
-	    if (delta != 0)
-	      {
-		adjusted = 1;
-		sym->st_value += delta;
-	      }
-	  }
+      for (i = 1; i < cookie->locsymcount; i++)
+	if (loc_shndx[i] == shndx)
+	  break;
+      if (i >= cookie->locsymcount)
+	return NULL;
     }
-  return adjusted;
+
+  Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (abfd);
+  Elf_Internal_Sym *locsyms = bfd_elf_get_elf_syms (abfd, symtab_hdr,
+						    cookie->locsymcount, 0,
+						    NULL, NULL, NULL);
+  if (locsyms == NULL)
+    return NULL;
+
+  bool adjusted = false;
+  Elf_Internal_Sym *sym;
+  Elf_Internal_Sym *end_sym = locsyms + cookie->locsymcount;
+  for (sym = locsyms + 1; sym < end_sym; ++sym)
+    if (sym->st_info <= ELF_ST_INFO (STB_LOCAL, STT_OBJECT)
+	&& sym->st_shndx == shndx)
+      {
+	bfd_signed_vma delta = offset_adjust (sym->st_value, sec);
+
+	if (delta != 0)
+	  {
+	    adjusted = true;
+	    sym->st_value += delta;
+	  }
+      }
+  if (adjusted)
+    return locsyms;
+  free (locsyms);
+  return NULL;
 }
 
 /* This function is called for each input file before the .eh_frame
@@ -1610,10 +1625,14 @@ _bfd_elf_discard_section_eh_frame
   if (sec->size != sec->rawsize)
     changed = 1;
 
-  if (changed && adjust_eh_frame_local_symbols (sec, cookie))
+  if (changed)
     {
-      Elf_Internal_Shdr *symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-      symtab_hdr->contents = (unsigned char *) cookie->locsyms;
+      Elf_Internal_Sym *locsyms = adjust_eh_frame_local_symbols (sec, cookie);
+      if (locsyms != NULL)
+	{
+	  Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (abfd);
+	  symtab_hdr->contents = (unsigned char *) locsyms;
+	}
     }
   return changed;
 }

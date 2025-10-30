@@ -6069,15 +6069,22 @@ ppc64_elf_gc_mark_hook (asection *sec,
   else
     {
       struct _opd_sec_data *opd;
-      Elf_Internal_Sym *sym = &cookie->locsyms[symndx];
 
-      rsec = bfd_section_from_elf_index (sec->owner, sym->st_shndx);
+      rsec = _bfd_get_local_sym_section (cookie, symndx);
       opd = get_opd_info (rsec);
       if (opd != NULL && opd->func_sec != NULL)
 	{
 	  rsec->gc_mark = 1;
 
-	  rsec = opd->func_sec[OPD_NDX (sym->st_value + cookie->rel->r_addend)];
+	  struct ppc_link_hash_table *htab = ppc_hash_table (info);
+	  Elf_Internal_Sym *sym
+	    = bfd_sym_from_r_symndx (&htab->elf.sym_cache, cookie->abfd,
+				     symndx);
+	  if (sym)
+	    {
+	      bfd_vma addr = sym->st_value + cookie->rel->r_addend;
+	      rsec = opd->func_sec[OPD_NDX (addr)];
+	    }
 	}
     }
 
