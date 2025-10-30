@@ -5996,9 +5996,9 @@ ppc64_elf_gc_mark_dynamic_ref (struct elf_link_hash_entry *h, void *inf)
 static asection *
 ppc64_elf_gc_mark_hook (asection *sec,
 			struct bfd_link_info *info,
-			Elf_Internal_Rela *rel,
+			struct elf_reloc_cookie *cookie,
 			struct elf_link_hash_entry *h,
-			Elf_Internal_Sym *sym)
+			unsigned int symndx)
 {
   asection *rsec;
 
@@ -6013,7 +6013,7 @@ ppc64_elf_gc_mark_hook (asection *sec,
       enum elf_ppc64_reloc_type r_type;
       struct ppc_link_hash_entry *eh, *fh, *fdh;
 
-      r_type = ELF64_R_TYPE (rel->r_info);
+      r_type = ELF64_R_TYPE (cookie->rel->r_info);
       switch (r_type)
 	{
 	case R_PPC64_GNU_VTINHERIT:
@@ -6062,13 +6062,14 @@ ppc64_elf_gc_mark_hook (asection *sec,
 	      break;
 
 	    default:
-	      return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+	      return _bfd_elf_gc_mark_hook (sec, info, cookie, h, symndx);
 	    }
 	}
     }
   else
     {
       struct _opd_sec_data *opd;
+      Elf_Internal_Sym *sym = &cookie->locsyms[symndx];
 
       rsec = bfd_section_from_elf_index (sec->owner, sym->st_shndx);
       opd = get_opd_info (rsec);
@@ -6076,7 +6077,7 @@ ppc64_elf_gc_mark_hook (asection *sec,
 	{
 	  rsec->gc_mark = 1;
 
-	  rsec = opd->func_sec[OPD_NDX (sym->st_value + rel->r_addend)];
+	  rsec = opd->func_sec[OPD_NDX (sym->st_value + cookie->rel->r_addend)];
 	}
     }
 

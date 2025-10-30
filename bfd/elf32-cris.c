@@ -2439,11 +2439,11 @@ elf_cris_finish_dynamic_sections (bfd *output_bfd,
 static asection *
 cris_elf_gc_mark_hook (asection *sec,
 		       struct bfd_link_info *info,
-		       Elf_Internal_Rela *rel,
+		       struct elf_reloc_cookie *cookie,
 		       struct elf_link_hash_entry *h,
-		       Elf_Internal_Sym *sym)
+		       unsigned int symndx)
 {
-  enum elf_cris_reloc_type r_type = ELF32_R_TYPE (rel->r_info);
+  enum elf_cris_reloc_type r_type = ELF32_R_TYPE (cookie->rel->r_info);
   if (h != NULL)
     switch (r_type)
       {
@@ -2455,7 +2455,7 @@ cris_elf_gc_mark_hook (asection *sec,
 	break;
       }
 
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+  return _bfd_elf_gc_mark_hook (sec, info, cookie, h, symndx);
 }
 
 /* The elf_backend_plt_sym_val hook function.  */

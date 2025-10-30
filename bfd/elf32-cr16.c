@@ -2173,16 +2173,6 @@ elf32_cr16_relax_section (bfd *abfd, asection *sec,
   return false;
 }
 
-static asection *
-elf32_cr16_gc_mark_hook (asection *sec,
-			 struct bfd_link_info *info,
-			 Elf_Internal_Rela *rel,
-			 struct elf_link_hash_entry *h,
-			 Elf_Internal_Sym *sym)
-{
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
-}
-
 /* Create dynamic sections when linking against a dynamic object.  */
 
 static bool
@@ -2821,7 +2811,6 @@ _bfd_cr16_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSE
 #define bfd_elf32_bfd_relax_section	  elf32_cr16_relax_section
 #define bfd_elf32_bfd_get_relocated_section_contents \
 				elf32_cr16_get_relocated_section_contents
-#define elf_backend_gc_mark_hook	  elf32_cr16_gc_mark_hook
 #define elf_backend_can_gc_sections	  1
 #define elf_backend_rela_normal		  1
 #define elf_backend_check_relocs	  cr16_elf_check_relocs

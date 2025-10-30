@@ -69,9 +69,9 @@ tilegx_elf_relocate_section (bfd *, struct bfd_link_info *,
 extern asection *
 tilegx_elf_gc_mark_hook (asection *,
 			 struct bfd_link_info *,
-			 Elf_Internal_Rela *,
+			 struct elf_reloc_cookie *,
 			 struct elf_link_hash_entry *,
-			 Elf_Internal_Sym *);
+			 unsigned int);
 
 extern bfd_vma
 tilegx_elf_plt_sym_val (bfd_vma, const asection *, const arelent *);

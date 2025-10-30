@@ -1826,12 +1826,12 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 asection *
 _bfd_sparc_elf_gc_mark_hook (asection *sec,
 			     struct bfd_link_info *info,
-			     Elf_Internal_Rela *rel,
+			     struct elf_reloc_cookie *cookie,
 			     struct elf_link_hash_entry *h,
-			     Elf_Internal_Sym *sym)
+			     unsigned int symndx)
 {
   if (h != NULL)
-    switch (SPARC_ELF_R_TYPE (rel->r_info))
+    switch (SPARC_ELF_R_TYPE (cookie->rel->r_info))
       {
       case R_SPARC_GNU_VTINHERIT:
       case R_SPARC_GNU_VTENTRY:
@@ -1840,7 +1840,7 @@ _bfd_sparc_elf_gc_mark_hook (asection *sec,
 
   if (!bfd_link_executable (info))
     {
-      switch (SPARC_ELF_R_TYPE (rel->r_info))
+      switch (SPARC_ELF_R_TYPE (cookie->rel->r_info))
 	{
 	case R_SPARC_TLS_GD_CALL:
 	case R_SPARC_TLS_LDM_CALL:
@@ -1855,11 +1855,11 @@ _bfd_sparc_elf_gc_mark_hook (asection *sec,
 	  h->mark = 1;
 	  if (h->is_weakalias)
 	    weakdef (h)->mark = 1;
-	  sym = NULL;
+	  symndx = 0;
 	}
     }
 
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+  return _bfd_elf_gc_mark_hook (sec, info, cookie, h, symndx);
 }
 
 static Elf_Internal_Rela *

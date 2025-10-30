@@ -3863,19 +3863,19 @@ s3_bfd_score_elf_ignore_discarded_relocs (asection *sec)
 static asection *
 s3_bfd_score_elf_gc_mark_hook (asection *sec,
 			       struct bfd_link_info *info,
-			       Elf_Internal_Rela *rel,
+			       struct elf_reloc_cookie *cookie,
 			       struct elf_link_hash_entry *h,
-			       Elf_Internal_Sym *sym)
+			       unsigned int symndx)
 {
   if (h != NULL)
-    switch (ELF32_R_TYPE (rel->r_info))
+    switch (ELF32_R_TYPE (cookie->rel->r_info))
       {
       case R_SCORE_GNU_VTINHERIT:
       case R_SCORE_GNU_VTENTRY:
 	return NULL;
       }
 
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+  return _bfd_elf_gc_mark_hook (sec, info, cookie, h, symndx);
 }
 
 /* Support for core dump NOTE sections.  */
@@ -4300,14 +4300,14 @@ _bfd_score_elf_ignore_discarded_relocs (asection *sec)
 static asection *
 _bfd_score_elf_gc_mark_hook (asection *sec,
 			     struct bfd_link_info *info,
-			     Elf_Internal_Rela *rel,
+			     struct elf_reloc_cookie *cookie,
 			     struct elf_link_hash_entry *h,
-			     Elf_Internal_Sym *sym)
+			     unsigned int symndx)
 {
   if (bfd_get_mach (info->input_bfds) == bfd_mach_score3)
-    return s3_bfd_score_elf_gc_mark_hook (sec, info, rel, h, sym);
+    return s3_bfd_score_elf_gc_mark_hook (sec, info, cookie, h, symndx);
   else
-    return s7_bfd_score_elf_gc_mark_hook (sec, info, rel, h, sym);
+    return s7_bfd_score_elf_gc_mark_hook (sec, info, cookie, h, symndx);
 }
 
 static bool

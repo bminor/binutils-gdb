@@ -1996,12 +1996,12 @@ elf64_alpha_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 static asection *
 elf64_alpha_gc_mark_hook (asection *sec, struct bfd_link_info *info,
-			  Elf_Internal_Rela *rel,
-			  struct elf_link_hash_entry *h, Elf_Internal_Sym *sym)
+			  struct elf_reloc_cookie *cookie,
+			  struct elf_link_hash_entry *h, unsigned int symndx)
 {
   /* These relocations don't really reference a symbol.  Instead we store
      extra data in their addend slot.  Ignore the symbol.  */
-  switch (ELF64_R_TYPE (rel->r_info))
+  switch (ELF64_R_TYPE (cookie->rel->r_info))
     {
     case R_ALPHA_LITUSE:
     case R_ALPHA_GPDISP:
@@ -2009,7 +2009,7 @@ elf64_alpha_gc_mark_hook (asection *sec, struct bfd_link_info *info,
       return NULL;
     }
 
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+  return _bfd_elf_gc_mark_hook (sec, info, cookie, h, symndx);
 }
 
 /* Adjust a symbol defined by a dynamic object and referenced by a

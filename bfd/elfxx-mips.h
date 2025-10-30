@@ -91,8 +91,8 @@ extern int _bfd_mips_elf_additional_program_headers
 extern bool _bfd_mips_elf_modify_segment_map
   (bfd *, struct bfd_link_info *);
 extern asection * _bfd_mips_elf_gc_mark_hook
-  (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
-   struct elf_link_hash_entry *, Elf_Internal_Sym *);
+  (asection *, struct bfd_link_info *, struct elf_reloc_cookie *,
+   struct elf_link_hash_entry *, unsigned int);
 extern void _bfd_mips_elf_copy_indirect_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *,
    struct elf_link_hash_entry *);

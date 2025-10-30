@@ -121,9 +121,9 @@ s7_bfd_score_elf_ignore_discarded_relocs (asection *);
 extern asection *
 s7_bfd_score_elf_gc_mark_hook (asection *,
 			       struct bfd_link_info *,
-			       Elf_Internal_Rela *,
+			       struct elf_reloc_cookie *,
 			       struct elf_link_hash_entry *,
-			       Elf_Internal_Sym *);
+			       unsigned int);
 
 extern bool
 s7_bfd_score_elf_grok_prstatus (bfd *, Elf_Internal_Note *);

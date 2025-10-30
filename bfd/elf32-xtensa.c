@@ -1322,9 +1322,9 @@ elf_xtensa_hide_symbol (struct bfd_link_info *info,
 static asection *
 elf_xtensa_gc_mark_hook (asection *sec,
 			 struct bfd_link_info *info,
-			 Elf_Internal_Rela *rel,
+			 struct elf_reloc_cookie *cookie,
 			 struct elf_link_hash_entry *h,
-			 Elf_Internal_Sym *sym)
+			 unsigned int symndx)
 {
   /* Property sections are marked "KEEP" in the linker scripts, but they
      should not cause other sections to be marked.  (This approach relies
@@ -1340,14 +1340,14 @@ elf_xtensa_gc_mark_hook (asection *sec,
     return NULL;
 
   if (h != NULL)
-    switch (ELF32_R_TYPE (rel->r_info))
+    switch (ELF32_R_TYPE (cookie->rel->r_info))
       {
       case R_XTENSA_GNU_VTINHERIT:
       case R_XTENSA_GNU_VTENTRY:
 	return NULL;
       }
 
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+  return _bfd_elf_gc_mark_hook (sec, info, cookie, h, symndx);
 }
 
 

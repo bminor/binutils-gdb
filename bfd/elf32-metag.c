@@ -3222,19 +3222,19 @@ elf_metag_finish_dynamic_sections (bfd *output_bfd,
 static asection *
 elf_metag_gc_mark_hook (asection *sec,
 			struct bfd_link_info *info,
-			Elf_Internal_Rela *rela,
+			struct elf_reloc_cookie *cookie,
 			struct elf_link_hash_entry *hh,
-			Elf_Internal_Sym *sym)
+			unsigned int symndx)
 {
   if (hh != NULL)
-    switch ((unsigned int) ELF32_R_TYPE (rela->r_info))
+    switch (ELF32_R_TYPE (cookie->rel->r_info))
       {
       case R_METAG_GNU_VTINHERIT:
       case R_METAG_GNU_VTENTRY:
 	return NULL;
       }
 
-  return _bfd_elf_gc_mark_hook (sec, info, rela, hh, sym);
+  return _bfd_elf_gc_mark_hook (sec, info, cookie, hh, symndx);
 }
 
 /* Determine the type of stub needed, if any, for a call.  */

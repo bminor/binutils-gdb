@@ -13949,12 +13949,15 @@ fini_reloc_cookie_for_section (struct elf_reloc_cookie *cookie,
 asection *
 _bfd_elf_gc_mark_hook (asection *sec,
 		       struct bfd_link_info *info ATTRIBUTE_UNUSED,
-		       Elf_Internal_Rela *rel ATTRIBUTE_UNUSED,
+		       struct elf_reloc_cookie *cookie,
 		       struct elf_link_hash_entry *h,
-		       Elf_Internal_Sym *sym)
+		       unsigned int symndx)
 {
   if (h == NULL)
-    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
+    {
+      Elf_Internal_Sym *sym = &cookie->locsyms[symndx];
+      return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
+    }
 
   switch (h->root.type)
     {
@@ -13975,9 +13978,9 @@ _bfd_elf_gc_mark_hook (asection *sec,
 static asection *
 elf_gc_mark_debug_section (asection *sec ATTRIBUTE_UNUSED,
 			   struct bfd_link_info *info ATTRIBUTE_UNUSED,
-			   Elf_Internal_Rela *rel ATTRIBUTE_UNUSED,
+			   struct elf_reloc_cookie *cookie,
 			   struct elf_link_hash_entry *h,
-			   Elf_Internal_Sym *sym)
+			   unsigned int symndx)
 {
   if (h != NULL)
     {
@@ -13990,6 +13993,7 @@ elf_gc_mark_debug_section (asection *sec ATTRIBUTE_UNUSED,
   else
     {
       /* Return the local debug definition section.  */
+      Elf_Internal_Sym *sym = &cookie->locsyms[symndx];
       asection *isec = bfd_section_from_elf_index (sec->owner,
 						   sym->st_shndx);
       if (isec != NULL && (isec->flags & SEC_DEBUGGING) != 0)
@@ -14024,8 +14028,7 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
       if (r_symndx >= cookie->locsymcount)
 	return NULL;
 
-      return (*gc_mark_hook) (sec, info, cookie->rel, NULL,
-			      &cookie->locsyms[r_symndx]);
+      return (*gc_mark_hook) (sec, info, cookie, NULL, r_symndx);
     }
 
   bool was_marked = h->mark;
@@ -14058,7 +14061,7 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
 	}
     }
 
-  return (*gc_mark_hook) (sec, info, cookie->rel, h, NULL);
+  return (*gc_mark_hook) (sec, info, cookie, h, 0);
 }
 
 /* COOKIE->rel describes a relocation against section SEC, which is

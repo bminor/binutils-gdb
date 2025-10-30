@@ -311,19 +311,6 @@ moxie_elf_relocate_section (bfd *output_bfd,
   return true;
 }
 
-/* Return the section that should be marked against GC for a given
-   relocation.  */
-
-static asection *
-moxie_elf_gc_mark_hook (asection *sec,
-			struct bfd_link_info *info,
-			Elf_Internal_Rela *rel,
-			struct elf_link_hash_entry *h,
-			Elf_Internal_Sym *sym)
-{
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
-}
-
 /* Look through the relocs for a section during the first phase.
    Since we don't do .gots or .plts, we just need to consider the
    virtual table relocs for gc.  */
@@ -379,7 +366,6 @@ moxie_elf_check_relocs (bfd *abfd,
 #define elf_info_to_howto_rel			NULL
 #define elf_info_to_howto			moxie_info_to_howto_rela
 #define elf_backend_relocate_section		moxie_elf_relocate_section
-#define elf_backend_gc_mark_hook		moxie_elf_gc_mark_hook
 #define elf_backend_check_relocs		moxie_elf_check_relocs
 
 #define elf_backend_can_gc_sections		1

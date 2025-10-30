@@ -6932,11 +6932,12 @@ nds32_elf_action_discarded (asection *sec)
 
 static asection *
 nds32_elf_gc_mark_hook (asection *sec, struct bfd_link_info *info,
-			Elf_Internal_Rela *rel, struct elf_link_hash_entry *h,
-			Elf_Internal_Sym *sym)
+			struct elf_reloc_cookie *cookie,
+			struct elf_link_hash_entry *h,
+			unsigned int symndx)
 {
   if (h != NULL)
-    switch (ELF32_R_TYPE (rel->r_info))
+    switch (ELF32_R_TYPE (cookie->rel->r_info))
       {
       case R_NDS32_GNU_VTINHERIT:
       case R_NDS32_GNU_VTENTRY:
@@ -6945,7 +6946,7 @@ nds32_elf_gc_mark_hook (asection *sec, struct bfd_link_info *info,
 	return NULL;
       }
 
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+  return _bfd_elf_gc_mark_hook (sec, info, cookie, h, symndx);
 }
 
 static enum elf_nds32_tls_type

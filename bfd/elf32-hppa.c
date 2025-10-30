@@ -1508,19 +1508,19 @@ elf32_hppa_check_relocs (bfd *abfd,
 static asection *
 elf32_hppa_gc_mark_hook (asection *sec,
 			 struct bfd_link_info *info,
-			 Elf_Internal_Rela *rela,
+			 struct elf_reloc_cookie *cookie,
 			 struct elf_link_hash_entry *hh,
-			 Elf_Internal_Sym *sym)
+			 unsigned int symndx)
 {
   if (hh != NULL)
-    switch ((unsigned int) ELF32_R_TYPE (rela->r_info))
+    switch (ELF32_R_TYPE (cookie->rel->r_info))
       {
       case R_PARISC_GNU_VTINHERIT:
       case R_PARISC_GNU_VTENTRY:
 	return NULL;
       }
 
-  return _bfd_elf_gc_mark_hook (sec, info, rela, hh, sym);
+  return _bfd_elf_gc_mark_hook (sec, info, cookie, hh, symndx);
 }
 
 /* Support for core dump NOTE sections.  */

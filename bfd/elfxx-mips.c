@@ -12988,21 +12988,21 @@ _bfd_mips_elf_modify_segment_map (bfd *abfd,
 asection *
 _bfd_mips_elf_gc_mark_hook (asection *sec,
 			    struct bfd_link_info *info,
-			    Elf_Internal_Rela *rel,
+			    struct elf_reloc_cookie *cookie,
 			    struct elf_link_hash_entry *h,
-			    Elf_Internal_Sym *sym)
+			    unsigned int symndx)
 {
   /* ??? Do mips16 stub sections need to be handled special?  */
 
   if (h != NULL)
-    switch (ELF_R_TYPE (sec->owner, rel->r_info))
+    switch (ELF_R_TYPE (sec->owner, cookie->rel->r_info))
       {
       case R_MIPS_GNU_VTINHERIT:
       case R_MIPS_GNU_VTENTRY:
 	return NULL;
       }
 
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+  return _bfd_elf_gc_mark_hook (sec, info, cookie, h, symndx);
 }
 
 /* Prevent .MIPS.abiflags from being discarded with --gc-sections.  */

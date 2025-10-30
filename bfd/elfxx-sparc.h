@@ -107,9 +107,8 @@ extern bool _bfd_sparc_elf_check_relocs
   (bfd *, struct bfd_link_info *,
    asection *, const Elf_Internal_Rela *);
 extern asection *_bfd_sparc_elf_gc_mark_hook
-  (asection *, struct bfd_link_info *,
-   Elf_Internal_Rela *, struct elf_link_hash_entry *,
-   Elf_Internal_Sym *);
+  (asection *, struct bfd_link_info *, struct elf_reloc_cookie *,
+   struct elf_link_hash_entry *, unsigned int);
 extern bool _bfd_sparc_elf_adjust_dynamic_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *);
 extern bool _bfd_sparc_elf_omit_section_dynsym
