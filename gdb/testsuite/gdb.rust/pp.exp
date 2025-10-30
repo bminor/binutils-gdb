@@ -22,7 +22,7 @@ require {can_compile rust}
 
 standard_testfile .rs
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug rust}]} {
-    return -1
+    return
 }
 
 set remote_python_file [gdb_remote_download host \
@@ -32,7 +32,7 @@ gdb_test_no_output "source ${remote_python_file}" "load python file"
 set line [gdb_get_line_number "set breakpoint here"]
 if {![runto ${srcfile}:$line]} {
     untested "could not run to breakpoint"
-    return -1
+    return
 }
 
 gdb_test "print outer" " = pp::Outer \\(x\\(5\\)\\)"

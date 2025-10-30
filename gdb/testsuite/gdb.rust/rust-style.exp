@@ -23,13 +23,13 @@ with_ansi_styling_terminal {
     standard_testfile .rs
     if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
 	     {debug rust}]} {
-	return -1
+	return
     }
 
     set line [gdb_get_line_number "breakpoint"]
     if {![runto ${srcfile}:$line]} {
 	untested "could not run to breakpoint"
-	return -1
+	return
     }
 
     set vfield [style value variable]

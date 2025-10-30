@@ -25,13 +25,13 @@ require !use_gdb_stub
 
 standard_testfile simple.rs
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug rust}]} {
-    return -1
+    return
 }
 
 # Verify that "start" lands inside the right procedure.
 if {[gdb_start_cmd] < 0} {
     unsupported "start failed"
-    return -1
+    return
 }
 
 gdb_test "" \

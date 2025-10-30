@@ -22,18 +22,18 @@ require {can_compile rust}
 set v [split [rust_compiler_version] .]
 if {[lindex $v 0] == 1 && [lindex $v 1] < 43} {
     untested "128-bit ints require rust 1.43 or greater"
-    return -1
+    return
 }
 
 standard_testfile .rs
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug rust}]} {
-    return -1
+    return
 }
 
 set line [gdb_get_line_number "BREAK"]
 if {![runto ${srcfile}:$line]} {
     untested "could not run to breakpoint"
-    return -1
+    return
 }
 
 gdb_test "print x" " = 340282366920938463463374607431768211455"
