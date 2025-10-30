@@ -5742,6 +5742,13 @@ stop_all_threads (const char *reason, inferior *inf)
 	      if (!target_is_non_stop_p ())
 		continue;
 
+	      /* If this thread is being replayed by the record-full
+		 subsystem, there won't be any need to manually stop
+		 the thread, since recording already serializes them,
+		 making them execute one at a time.  */
+	      if (target_record_is_replaying (t.ptid))
+		continue;
+
 	      if (t.executing ())
 		{
 		  /* If already stopping, don't request a stop again.
