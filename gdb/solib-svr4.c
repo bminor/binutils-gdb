@@ -3631,9 +3631,6 @@ find_debug_base_for_solib (const solib *solib)
   /* This is always called for solibs with an associated objfile.  */
   gdb_assert (solib->objfile != nullptr);
 
-  svr4_info *info = get_svr4_info (solib->objfile->pspace ());
-  gdb_assert (info != nullptr);
-
   auto &lm_info = get_lm_info_svr4 (*solib);
 
   return lm_info.debug_base;
