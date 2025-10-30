@@ -1613,10 +1613,12 @@ proc binary_symbol {name file args symbol} {
     set test "binary symbol ($name)"
 
     # detect a valid target, take the first supported
-    set target [lindex [split [binutils_run $OBJCOPY "--info"] \n] 1]
+    set inf [split [binutils_run $OBJCOPY "--info"] \n]
+    set target [lindex $inf 1]
+    set arch [string trim [lindex $inf 3]]
 
-    set out tmpdir/binary_symbol.o
-    set got [binutils_run $OBJCOPY "-I binary -O $target $args $file $out"]
+    set out tmpdir/binary_${name}.o
+    set got [binutils_run $OBJCOPY "-I binary -B $arch -O $target $args $file $out"]
 
     set expected [list "${symbol}_end" "${symbol}_size" "${symbol}_start"]
 
