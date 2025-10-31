@@ -488,20 +488,20 @@ skiplist_entry::do_skip_file_p (const symtab_and_line &function_sal) const
   if (debug_skip)
     gdb_printf (gdb_stdlog,
 		"skip: checking if file %s matches non-glob %s...",
-		function_sal.symtab->filename, m_file.c_str ());
+		function_sal.symtab->filename (), m_file.c_str ());
 
   bool result;
 
   /* Check first sole SYMTAB->FILENAME.  It may not be a substring of
      symtab_to_fullname as it may contain "./" etc.  */
-  if (compare_filenames_for_search (function_sal.symtab->filename,
+  if (compare_filenames_for_search (function_sal.symtab->filename (),
 				    m_file.c_str ()))
     result = true;
 
   /* Before we invoke realpath, which can get expensive when many
      files are involved, do a quick comparison of the basenames.  */
   else if (!basenames_may_differ
-	   && filename_cmp (lbasename (function_sal.symtab->filename),
+	   && filename_cmp (lbasename (function_sal.symtab->filename ()),
 			    lbasename (m_file.c_str ())) != 0)
     result = false;
   else
@@ -524,13 +524,13 @@ skiplist_entry::do_skip_gfile_p (const symtab_and_line &function_sal) const
   if (debug_skip)
     gdb_printf (gdb_stdlog,
 		"skip: checking if file %s matches glob %s...",
-		function_sal.symtab->filename, m_file.c_str ());
+		function_sal.symtab->filename (), m_file.c_str ());
 
   bool result;
 
   /* Check first sole SYMTAB->FILENAME.  It may not be a substring of
      symtab_to_fullname as it may contain "./" etc.  */
-  if (gdb_filename_fnmatch (m_file.c_str (), function_sal.symtab->filename,
+  if (gdb_filename_fnmatch (m_file.c_str (), function_sal.symtab->filename (),
 			    FNM_NOESCAPE) == 0)
     result = true;
 
@@ -541,7 +541,7 @@ skiplist_entry::do_skip_gfile_p (const symtab_and_line &function_sal) const
      isn't much of a win.  Oh well.  */
   else if (!basenames_may_differ
       && gdb_filename_fnmatch (lbasename (m_file.c_str ()),
-			       lbasename (function_sal.symtab->filename),
+			       lbasename (function_sal.symtab->filename ()),
 			       FNM_NOESCAPE) != 0)
     result = false;
   else

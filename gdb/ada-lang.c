@@ -3519,8 +3519,8 @@ sort_choices (std::vector<struct block_symbol> &syms)
 	       if (!b.symbol->is_objfile_owned ())
 		 return true;
 
-	       const char *fna = a.symbol->symtab ()->filename;
-	       const char *fnb = b.symbol->symtab ()->filename;
+	       const char *fna = a.symbol->symtab ()->filename ();
+	       const char *fnb = b.symbol->symtab ()->filename ();
 
 	       /* First sort by basename.  This is done because,
 		  depending on how GNAT was invoked, different sources
@@ -11927,7 +11927,7 @@ is_known_support_routine (const frame_info_ptr &frame)
   for (i = 0; known_runtime_file_name_patterns[i] != NULL; i += 1)
     {
       re_comp (known_runtime_file_name_patterns[i]);
-      if (re_exec (lbasename (sal.symtab->filename)))
+      if (re_exec (lbasename (sal.symtab->filename ())))
 	return 1;
       if (sal.symtab->compunit ()->objfile () != NULL
 	  && re_exec (objfile_name (sal.symtab->compunit ()->objfile ())))

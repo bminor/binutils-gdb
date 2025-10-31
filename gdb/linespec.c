@@ -2005,7 +2005,7 @@ create_sals_line_offset (struct linespec_state *self,
       set_default_source_symtab_and_line ();
       initialize_defaults (&self->default_symtab, &self->default_line);
       ls->file_symtabs
-	= collect_symtabs_from_filename (self->default_symtab->filename,
+	= collect_symtabs_from_filename (self->default_symtab->filename (),
 					 self->search_pspace);
       use_default = true;
     }
@@ -2291,7 +2291,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec *ls)
 	/* Make sure we have a filename for canonicalization.  */
 	if (ls->explicit_loc.source_filename == NULL)
 	  {
-	    const char *filename = state->default_symtab->filename;
+	    const char *filename = state->default_symtab->filename ();
 
 	    /* It may be more appropriate to keep DEFAULT_SYMTAB in its symtab
 	       form so that displaying SOURCE_FILENAME can follow the current

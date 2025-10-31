@@ -184,7 +184,7 @@ iterate_over_one_compunit_symtab (const char *name,
 
   for (symtab *s : cust->filetabs ())
     {
-      if (compare_filenames_for_search (s->filename, name))
+      if (compare_filenames_for_search (s->filename (), name))
 	{
 	  if (callback (s))
 	    return true;
@@ -194,7 +194,7 @@ iterate_over_one_compunit_symtab (const char *name,
       /* Before we invoke realpath, which can get expensive when many
 	 files are involved, do a quick comparison of the basenames.  */
       if (! basenames_may_differ
-	  && FILENAME_CMP (base_name, lbasename (s->filename)) != 0)
+	  && FILENAME_CMP (base_name, lbasename (s->filename ())) != 0)
 	continue;
 
       if (compare_filenames_for_search (symtab_to_fullname (s), name))

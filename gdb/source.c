@@ -342,7 +342,7 @@ select_source_symtab ()
 	{
 	  for (symtab *symtab : cu.filetabs ())
 	    {
-	      const char *name = symtab->filename;
+	      const char *name = symtab->filename ();
 	      int len = strlen (name);
 
 	      if (!(len > 2 && (strcmp (&name[len - 2], ".h") == 0
@@ -683,7 +683,7 @@ info_source_command (const char *ignore, int from_tty)
     }
 
   cust = s->compunit ();
-  gdb_printf (_("Current source file is %s\n"), s->filename);
+  gdb_printf (_("Current source file is %s\n"), s->filename ());
   if (s->compunit ()->dirname () != NULL)
     gdb_printf (_("Compilation directory is %s\n"), s->compunit ()->dirname ());
   if (s->fullname () != nullptr)
@@ -1119,7 +1119,8 @@ open_source_file (struct symtab *s)
     return scoped_fd (-EINVAL);
 
   gdb::unique_xmalloc_ptr<char> fullname = s->release_fullname ();
-  scoped_fd fd = find_and_open_source (s->filename, s->compunit ()->dirname (),
+  scoped_fd fd = find_and_open_source (s->filename (),
+				       s->compunit ()->dirname (),
 				       &fullname);
 
   if (fd.get () < 0)
@@ -1129,13 +1130,13 @@ open_source_file (struct symtab *s)
 	  const objfile *ofp = s->compunit ()->objfile ();
 
 	  std::string srcpath;
-	  if (IS_ABSOLUTE_PATH (s->filename))
-	    srcpath = s->filename;
+	  if (IS_ABSOLUTE_PATH (s->filename ()))
+	    srcpath = s->filename ();
 	  else if (s->compunit ()->dirname () != nullptr)
 	    {
 	      srcpath = s->compunit ()->dirname ();
 	      srcpath += SLASH_STRING;
-	      srcpath += s->filename;
+	      srcpath += s->filename ();
 	    }
 
 	  const struct bfd_build_id *build_id
@@ -1220,11 +1221,11 @@ symtab_to_fullname (struct symtab *s)
 	     should report the pathname where GDB tried to find the file.  */
 
 	  if (s->compunit ()->dirname () == nullptr
-	      || IS_ABSOLUTE_PATH (s->filename))
-	    fullname.reset (xstrdup (s->filename));
+	      || IS_ABSOLUTE_PATH (s->filename ()))
+	    fullname.reset (xstrdup (s->filename ()));
 	  else
 	    fullname.reset (concat (s->compunit ()->dirname (), SLASH_STRING,
-				    s->filename, (char *) NULL));
+				    s->filename (), (char *) NULL));
 
 	  s->set_fullname (rewrite_source_path (fullname.get ()));
 	  if (s->fullname () == nullptr)
@@ -1241,11 +1242,11 @@ const char *
 symtab_to_filename_for_display (struct symtab *symtab)
 {
   if (filename_display_string == filename_display_basename)
-    return lbasename (symtab->filename);
+    return lbasename (symtab->filename ());
   else if (filename_display_string == filename_display_absolute)
     return symtab_to_fullname (symtab);
   else if (filename_display_string == filename_display_relative)
-    return symtab->filename;
+    return symtab->filename ();
   else
     internal_error (_("invalid filename_display_string"));
 }

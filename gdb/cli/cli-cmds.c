@@ -2228,7 +2228,7 @@ cmp_symtabs (const symtab_and_line &sala, const symtab_and_line &salb)
 	return r;
     }
 
-  r = filename_cmp (sala.symtab->filename, salb.symtab->filename);
+  r = filename_cmp (sala.symtab->filename (), salb.symtab->filename ());
   if (r)
     return r;
 

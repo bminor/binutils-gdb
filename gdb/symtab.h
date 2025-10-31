@@ -1698,14 +1698,21 @@ typedef std::vector<CORE_ADDR> section_offsets;
 
 struct symtab
 {
+  symtab (struct compunit_symtab *cust, const char *filename,
+	  const char *filename_for_id, enum language language)
+    : m_filename (filename),
+      m_filename_for_id (filename_for_id),
+      m_compunit (cust),
+      m_language (language)
+  {
+    gdb_assert (m_filename != nullptr);
+    gdb_assert (m_filename_for_id != nullptr);
+    gdb_assert (m_compunit != nullptr);
+  }
+
   struct compunit_symtab *compunit () const
   {
     return m_compunit;
-  }
-
-  void set_compunit (struct compunit_symtab *compunit)
-  {
-    m_compunit = compunit;
   }
 
   const struct linetable *linetable () const
@@ -1749,16 +1756,24 @@ struct symtab
     m_fullname = name.release ();
   }
 
+  const char *filename () const
+  { return m_filename; }
+
+  const char *filename_for_id () const
+  { return m_filename_for_id; }
+
   /* Unordered chain of all filetabs in the compunit,  with the exception
      that the "main" source file is the first entry in the list.  */
 
-  struct symtab *next;
+  struct symtab *next = nullptr;
+
+private:
 
   /* Name of this source file, in a form appropriate to print to the user.
 
-     This pointer is never nullptr.  */
+     This pointer is never nullptr and is set from the constructor.  */
 
-  const char *filename;
+  const char *m_filename;
 
   /* Filename for this source file, used as an identifier to link with
      related objects such as associated macro_source_file objects.  It must
@@ -1767,28 +1782,29 @@ struct symtab
      follow that rule, or another form of the same file name, this is up to
      the specific debug info reader.
 
-     This pointer is never nullptr.*/
-  const char *filename_for_id;
+     This pointer is never nullptr, and is set from the constructor.  */
+  const char *m_filename_for_id;
 
-private:
+  /* Backlink to containing compunit symtab.
 
-  /* Backlink to containing compunit symtab.  */
+     This pointer is never nullptr, and is set from the constructor.  */
 
   struct compunit_symtab *m_compunit;
 
   /* Table mapping core addresses to line numbers for this file.
      Can be NULL if none.  Never shared between different symtabs.  */
 
-  const struct linetable *m_linetable;
+  const struct linetable *m_linetable = nullptr;
 
-  /* Language of this source file.  */
+  /* Language of this source file.  This is set in the object
+     constructor.  */
 
   enum language m_language;
 
   /* Full name of file as found by searching the source path.
      NULL if not yet known.  */
 
-  char *m_fullname;
+  char *m_fullname = nullptr;
 };
 
 /* A range adapter to allowing iterating over all the file tables in a list.  */

@@ -4842,7 +4842,7 @@ set_step_info (thread_info *tp, const frame_info_ptr &frame,
 
   infrun_debug_printf
     ("symtab = %s, line = %d, step_frame_id = %s, step_stack_frame_id = %s",
-     tp->current_symtab != nullptr ? tp->current_symtab->filename : "<null>",
+     tp->current_symtab != nullptr ? tp->current_symtab->filename () : "<null>",
      tp->current_line,
      tp->control.step_frame_id.to_string ().c_str (),
      tp->control.step_stack_frame_id.to_string ().c_str ());

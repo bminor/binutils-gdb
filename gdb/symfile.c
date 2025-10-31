@@ -2830,11 +2830,11 @@ allocate_symtab (struct compunit_symtab *cust, const char *filename,
 {
   struct objfile *objfile = cust->objfile ();
   struct symtab *symtab
-    = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct symtab);
-
-  symtab->filename = objfile->intern (filename);
-  symtab->filename_for_id = objfile->intern (filename_for_id);
-  symtab->set_language (deduce_language_from_filename (filename));
+    = obstack_new<struct symtab> (&objfile->objfile_obstack,
+				  cust,
+				  objfile->intern (filename),
+				  objfile->intern (filename_for_id),
+				  deduce_language_from_filename (filename));
 
   /* This can be very verbose with lots of headers.
      Only print at higher debug levels.  */
@@ -2859,9 +2859,6 @@ allocate_symtab (struct compunit_symtab *cust, const char *filename,
 
   /* Add it to CUST's list of symtabs.  */
   cust->add_filetab (symtab);
-
-  /* Backlink to the containing compunit symtab.  */
-  symtab->set_compunit (cust);
 
   return symtab;
 }

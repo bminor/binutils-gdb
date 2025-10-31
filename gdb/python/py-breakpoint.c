@@ -1644,7 +1644,7 @@ bploc_filepath (struct symtab *bploc_symtab)
     {
     }
 
-  return host_string_to_python_string (bploc_symtab->filename);
+  return host_string_to_python_string (bploc_symtab->filename ());
 }
 
 /* Python function to get the source file name path and line number
@@ -1763,7 +1763,7 @@ bplocpy_repr (PyObject *py_self)
 			  paddress (self->bp_loc->owner->gdbarch,
 				    self->bp_loc->requested_address));
   if (self->bp_loc->symtab != nullptr)
-    str += string_printf (" source=%s:%d", self->bp_loc->symtab->filename,
+    str += string_printf (" source=%s:%d", self->bp_loc->symtab->filename (),
 			  self->bp_loc->line_number);
 
   const auto fn_name = self->bp_loc->function_name.get ();

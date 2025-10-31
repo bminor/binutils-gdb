@@ -3309,7 +3309,7 @@ find_line_symtab (symtab *sym_tab, int line, int *index)
 		  const struct linetable *l;
 		  int ind;
 
-		  if (FILENAME_CMP (sym_tab->filename, s->filename) != 0)
+		  if (FILENAME_CMP (sym_tab->filename (), s->filename ()) != 0)
 		    continue;
 		  if (FILENAME_CMP (symtab_to_fullname (sym_tab),
 				    symtab_to_fullname (s)) != 0)
@@ -4627,8 +4627,8 @@ symbol_search::compare_search_syms (const symbol_search &sym_a,
 {
   int c;
 
-  c = FILENAME_CMP (sym_a.symbol->symtab ()->filename,
-		    sym_b.symbol->symtab ()->filename);
+  c = FILENAME_CMP (sym_a.symbol->symtab ()->filename (),
+		    sym_b.symbol->symtab ()->filename ());
   if (c != 0)
     return c;
 
@@ -4802,9 +4802,9 @@ global_symbol_searcher::add_matching_symbols
 	      /* Check first sole REAL_SYMTAB->FILENAME.  It does
 		 not need to be a substring of symtab_to_fullname as
 		 it may contain "./" etc.  */
-	      if (!(file_matches (real_symtab->filename, m_filenames, false)
+	      if (!(file_matches (real_symtab->filename (), m_filenames, false)
 		    || ((basenames_may_differ
-			 || file_matches (lbasename (real_symtab->filename),
+			 || file_matches (lbasename (real_symtab->filename ()),
 					  m_filenames, true))
 			&& file_matches (symtab_to_fullname (real_symtab),
 					 m_filenames, false))))
@@ -6220,14 +6220,14 @@ make_source_files_completion_list (const char *text)
 	{
 	  for (symtab *s : cu.filetabs ())
 	    {
-	      if (not_interesting_fname (s->filename))
+	      if (not_interesting_fname (s->filename ()))
 		continue;
-	      if (!filenames_seen.seen (s->filename)
-		  && filename_ncmp (s->filename, text, text_len) == 0)
+	      if (!filenames_seen.seen (s->filename ())
+		  && filename_ncmp (s->filename (), text, text_len) == 0)
 		{
 		  /* This file matches for a completion; add it to the current
 		     list of matches.  */
-		  add_filename_to_list (s->filename, text, text, &list);
+		  add_filename_to_list (s->filename (), text, text, &list);
 		}
 	      else
 		{
@@ -6235,8 +6235,8 @@ make_source_files_completion_list (const char *text)
 		     debug info records leading directories, but not the other
 		     way around.  This is what subroutines of breakpoint
 		     command do when they parse file names.  */
-		  base_name = lbasename (s->filename);
-		  if (base_name != s->filename
+		  base_name = lbasename (s->filename ());
+		  if (base_name != s->filename ()
 		      && !filenames_seen.seen (base_name)
 		      && filename_ncmp (base_name, text, text_len) == 0)
 		    add_filename_to_list (base_name, text, text, &list);
