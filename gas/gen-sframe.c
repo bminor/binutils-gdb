@@ -941,6 +941,17 @@ sframe_xlate_ctx_finalize (struct sframe_xlate_ctx *xlate_ctx,
   sframe_fde->num_fres = xlate_ctx->num_xlate_fres;
 }
 
+/* Get the current CFA base register from the scratchpad FRE (cur_fre).
+   NB: this may return a value of SFRAME_FRE_REG_INVALID.  */
+
+static unsigned int
+sframe_xlate_ctx_get_cur_cfa_reg (const struct sframe_xlate_ctx *xlate_ctx)
+{
+  gas_assert (xlate_ctx && xlate_ctx->cur_fre);
+
+  return xlate_ctx->cur_fre->cfa_base_reg;
+}
+
 /* Add the given FRE in the list of frame row entries in the given FDE
    translation context.  */
 
@@ -1139,13 +1150,13 @@ sframe_xlate_do_def_cfa_offset (struct sframe_xlate_ctx *xlate_ctx,
      being interpreted.  This FRE eventually gets linked in into the
      list of FREs for the specific function.  */
   struct sframe_row_entry *cur_fre = xlate_ctx->cur_fre;
+  unsigned int cur_cfa_reg = sframe_xlate_ctx_get_cur_cfa_reg (xlate_ctx);
 
   gas_assert (cur_fre);
   /*  Define the current CFA rule to use the provided offset (but to keep
       the old register).  However, if the old register is not FP/SP,
       skip creating SFrame stack trace info for the function.  */
-  if ((cur_fre->cfa_base_reg == SFRAME_CFA_FP_REG)
-      || (cur_fre->cfa_base_reg == SFRAME_CFA_SP_REG))
+  if (cur_cfa_reg == SFRAME_CFA_FP_REG || cur_cfa_reg == SFRAME_CFA_SP_REG)
     {
       if (sframe_fre_stack_offset_bound_p (cfi_insn->u.i, true))
 	{
@@ -1506,7 +1517,7 @@ sframe_xlate_do_escape_expr (const struct sframe_xlate_ctx *xlate_ctx,
 
   if (reg == SFRAME_CFA_SP_REG || reg == SFRAME_CFA_FP_REG
       || (sframe_ra_tracking_p () && reg == SFRAME_CFA_RA_REG)
-      || reg == xlate_ctx->cur_fre->cfa_base_reg)
+      || reg == sframe_xlate_ctx_get_cur_cfa_reg (xlate_ctx))
     {
       as_warn (_("no SFrame FDE emitted; "
 		 ".cfi_escape DW_CFA_expression with %s reg %u"),
@@ -1643,7 +1654,8 @@ sframe_xlate_do_escape_gnu_args_size (const struct sframe_xlate_ctx *xlate_ctx,
   struct sframe_row_entry *cur_fre = xlate_ctx->cur_fre;
   gas_assert (cur_fre);
  /* If CFA is FP based, safe to skip.  */
-  if (offset == 0 || cur_fre->cfa_base_reg == SFRAME_CFA_FP_REG)
+  if (offset == 0
+      || sframe_xlate_ctx_get_cur_cfa_reg (xlate_ctx) == SFRAME_CFA_FP_REG)
     return SFRAME_XLATE_OK;
 
 warn_and_exit:
