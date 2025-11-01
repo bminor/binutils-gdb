@@ -181,21 +181,37 @@ need_swapping (int endian)
   return 0;
 }
 
-/* Flip the endianness of the SFrame header.  */
+/* Flip the endianness of the SFrame header starting at BUF.
+   VER is the version of the SFrame data in the buffer.
 
-static void
-flip_header (sframe_header *sfheader)
+   Returns SFRAME_ERR if any error.  If error code is returned, the flipped
+   header should not be used.  */
+
+static int
+flip_header (char *buf, uint8_t ver ATTRIBUTE_UNUSED)
 {
-  swap_thing (sfheader->sfh_preamble.sfp_magic);
-  swap_thing (sfheader->sfh_preamble.sfp_version);
-  swap_thing (sfheader->sfh_preamble.sfp_flags);
-  swap_thing (sfheader->sfh_cfa_fixed_fp_offset);
-  swap_thing (sfheader->sfh_cfa_fixed_ra_offset);
-  swap_thing (sfheader->sfh_num_fdes);
-  swap_thing (sfheader->sfh_num_fres);
-  swap_thing (sfheader->sfh_fre_len);
-  swap_thing (sfheader->sfh_fdeoff);
-  swap_thing (sfheader->sfh_freoff);
+  /* SFrame header binary format has remained the same in SFRAME_VERSION_1,
+     SFRAME_VERSION_2.  */
+  sframe_header *sfh = (sframe_header *) buf;
+  swap_thing (sfh->sfh_preamble.sfp_magic);
+  swap_thing (sfh->sfh_preamble.sfp_version);
+  swap_thing (sfh->sfh_preamble.sfp_flags);
+  swap_thing (sfh->sfh_abi_arch);
+  swap_thing (sfh->sfh_cfa_fixed_fp_offset);
+  swap_thing (sfh->sfh_cfa_fixed_ra_offset);
+  swap_thing (sfh->sfh_auxhdr_len);
+  swap_thing (sfh->sfh_num_fdes);
+  swap_thing (sfh->sfh_num_fres);
+  swap_thing (sfh->sfh_fre_len);
+  swap_thing (sfh->sfh_fdeoff);
+  swap_thing (sfh->sfh_freoff);
+
+  /* Alert for missing functionatlity.  Auxiliary header, if present, needs to
+     flipped based on per abi/arch semantics.  */
+  if (sfh->sfh_auxhdr_len)
+    return SFRAME_ERR;
+
+  return 0;
 }
 
 /* Endian flip the SFrame FDE at BUF (buffer size provided in BUF_SIZE), given
@@ -1004,15 +1020,19 @@ sframe_decode (const char *sf_buf, size_t sf_size, int *errp)
 	return sframe_ret_set_errno (errp, SFRAME_ERR_NOMEM);
       memcpy (tempbuf, sf_buf, sf_size);
 
-      /* Flip the header.  */
-      sframe_header *ihp = (sframe_header *) tempbuf;
-      flip_header (ihp);
+      /* Flip the header first.  */
+      if (flip_header (tempbuf, sfp->sfp_version))
+	{
+	  sframe_ret_set_errno (errp, SFRAME_ERR_BUF_INVAL);
+	  goto decode_fail_free;
+	}
       /* Flip the rest of the SFrame section data buffer.  */
       if (flip_sframe (tempbuf, sf_size, 0))
 	{
-	  free (tempbuf);
-	  return sframe_ret_set_errno (errp, SFRAME_ERR_BUF_INVAL);
+	  sframe_ret_set_errno (errp, SFRAME_ERR_BUF_INVAL);
+	  goto decode_fail_free;
 	}
+
       frame_buf = tempbuf;
       /* This buffer is malloc'd when endian flipping the contents of the input
 	 buffer are needed.  Keep a reference to it so it can be free'd up
@@ -2036,6 +2056,10 @@ sframe_encoder_write (sframe_encoder_ctx *encoder,
     * sizeof (sframe_func_desc_entry);
   fresz = encoder->sfe_fre_nbytes;
 
+  /* Encoder writes out data in the latest SFrame format version.  */
+  if (sframe_encoder_get_version (encoder) != SFRAME_VERSION)
+    return sframe_ret_set_errno (errp, SFRAME_ERR_VERSION_INVAL);
+
   /* The total size of buffer is the sum of header, SFrame Function Descriptor
      Entries section and the FRE section.  */
   bufsize = hdrsize + fsz + fresz;
@@ -2062,7 +2086,8 @@ sframe_encoder_write (sframe_encoder_ctx *encoder,
     {
       if (flip_sframe (encoder->sfe_data, bufsize, 1))
 	return sframe_ret_set_errno (errp, SFRAME_ERR_BUF_INVAL);
-      flip_header ((sframe_header*)encoder->sfe_data);
+      if (flip_header (encoder->sfe_data, SFRAME_VERSION))
+	return sframe_ret_set_errno (errp, SFRAME_ERR_BUF_INVAL);
     }
 
   *encoded_size = bufsize;
