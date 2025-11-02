@@ -158,22 +158,22 @@ d_lookup_symbol (const struct language_defn *langdef,
   return sym;
 }
 
-/* Look up NAME in the D module MODULE.  Other arguments are as in
+/* Look up NAME in the D module MOD.  Other arguments are as in
    d_lookup_symbol_nonlocal.  If SEARCH is non-zero, search through
    base classes for a matching symbol.  */
 
 static struct block_symbol
-d_lookup_symbol_in_module (const char *module, const char *name,
+d_lookup_symbol_in_module (const char *mod, const char *name,
 			   const struct block *block,
 			   const domain_search_flags domain, int search)
 {
   char *concatenated_name = NULL;
 
-  if (module[0] != '\0')
+  if (mod[0] != '\0')
     {
       concatenated_name
-	= (char *) alloca (strlen (module) + strlen (name) + 2);
-      strcpy (concatenated_name, module);
+	= (char *) alloca (strlen (mod) + strlen (name) + 2);
+      strcpy (concatenated_name, mod);
       strcat (concatenated_name, ".");
       strcat (concatenated_name, name);
       name = concatenated_name;
@@ -200,7 +200,7 @@ lookup_module_scope (const struct language_defn *langdef,
 		     const domain_search_flags domain, const char *scope,
 		     int scope_len)
 {
-  char *module;
+  char *mod;
 
   if (scope[scope_len] != '\0')
     {
@@ -233,11 +233,10 @@ lookup_module_scope (const struct language_defn *langdef,
   if (scope_len == 0 && strchr (name, '.') == NULL)
     return d_lookup_symbol (langdef, name, block, domain, 1);
 
-  module = (char *) alloca (scope_len + 1);
-  strncpy (module, scope, scope_len);
-  module[scope_len] = '\0';
-  return d_lookup_symbol_in_module (module, name,
-				    block, domain, 1);
+  mod = (char *) alloca (scope_len + 1);
+  strncpy (mod, scope, scope_len);
+  mod[scope_len] = '\0';
+  return d_lookup_symbol_in_module (mod, name, block, domain, 1);
 }
 
 /* Search through the base classes of PARENT_TYPE for a symbol named

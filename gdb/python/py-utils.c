@@ -331,12 +331,12 @@ gdb_py_generic_dict (PyObject *self, void *closure)
    OBJECT.  */
 
 int
-gdb_pymodule_addobject (PyObject *module, const char *name, PyObject *object)
+gdb_pymodule_addobject (PyObject *mod, const char *name, PyObject *object)
 {
   int result;
 
   Py_INCREF (object);
-  result = PyModule_AddObject (module, name, object);
+  result = PyModule_AddObject (mod, name, object);
   if (result < 0)
     Py_DECREF (object);
   return result;

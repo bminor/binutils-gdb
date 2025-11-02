@@ -991,7 +991,7 @@ int gdb_py_int_as_long (PyObject *, long *);
 
 PyObject *gdb_py_generic_dict (PyObject *self, void *closure);
 
-int gdb_pymodule_addobject (PyObject *module, const char *name,
+int gdb_pymodule_addobject (PyObject *mod, const char *name,
 			    PyObject *object);
 
 

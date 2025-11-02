@@ -43,7 +43,7 @@ add_new_registry (eventregistry_object **registryp, const char *name)
   if (*registryp == NULL)
     return -1;
 
-  return gdb_pymodule_addobject (gdb_py_events.module,
+  return gdb_pymodule_addobject (gdb_py_events.mod,
 				 name,
 				 (PyObject *)(*registryp));
 }
@@ -54,8 +54,8 @@ add_new_registry (eventregistry_object **registryp, const char *name)
 PyMODINIT_FUNC
 gdbpy_events_mod_func ()
 {
-  gdb_py_events.module = PyModule_Create (&EventModuleDef);
-  if (gdb_py_events.module == nullptr)
+  gdb_py_events.mod = PyModule_Create (&EventModuleDef);
+  if (gdb_py_events.mod == nullptr)
     return nullptr;
 
 #define GDB_PY_DEFINE_EVENT(name)					\
@@ -64,5 +64,5 @@ gdbpy_events_mod_func ()
 #include "py-all-events.def"
 #undef GDB_PY_DEFINE_EVENT
 
-  return gdb_py_events.module;
+  return gdb_py_events.mod;
 }

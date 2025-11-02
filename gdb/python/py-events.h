@@ -44,7 +44,7 @@ struct events_object
 #include "py-all-events.def"
 #undef GDB_PY_DEFINE_EVENT
 
-  PyObject *module;
+  PyObject *mod;
 
 };
 

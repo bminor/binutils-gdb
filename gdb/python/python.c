@@ -1309,17 +1309,17 @@ gdbpy_colorize (const std::string &filename, const std::string &contents,
 
   gdbpy_enter enter_py;
 
-  gdbpy_ref<> module (PyImport_ImportModule ("gdb.styling"));
-  if (module == nullptr)
+  gdbpy_ref<> mod (PyImport_ImportModule ("gdb.styling"));
+  if (mod == nullptr)
     {
       gdbpy_print_stack ();
       return {};
     }
 
-  if (!PyObject_HasAttrString (module.get (), "colorize"))
+  if (!PyObject_HasAttrString (mod.get (), "colorize"))
     return {};
 
-  gdbpy_ref<> hook (PyObject_GetAttrString (module.get (), "colorize"));
+  gdbpy_ref<> hook (PyObject_GetAttrString (mod.get (), "colorize"));
   if (hook == nullptr)
     {
       gdbpy_print_stack ();
@@ -1394,17 +1394,17 @@ gdbpy_colorize_disasm (const std::string &content, gdbarch *gdbarch)
 
   gdbpy_enter enter_py;
 
-  gdbpy_ref<> module (PyImport_ImportModule ("gdb.styling"));
-  if (module == nullptr)
+  gdbpy_ref<> mod (PyImport_ImportModule ("gdb.styling"));
+  if (mod == nullptr)
     {
       gdbpy_print_stack ();
       return {};
     }
 
-  if (!PyObject_HasAttrString (module.get (), "colorize_disasm"))
+  if (!PyObject_HasAttrString (mod.get (), "colorize_disasm"))
     return {};
 
-  gdbpy_ref<> hook (PyObject_GetAttrString (module.get (),
+  gdbpy_ref<> hook (PyObject_GetAttrString (mod.get (),
 					    "colorize_disasm"));
   if (hook == nullptr)
     {

@@ -866,7 +866,7 @@ recpy_call_filter (const uint64_t payload, std::optional<uint64_t> ip,
 static PyObject *
 get_ptwrite_filter ()
 {
-  gdbpy_ref<> module (PyImport_ImportModule ("gdb.ptwrite"));
+  gdbpy_ref<> mod (PyImport_ImportModule ("gdb.ptwrite"));
 
   if (PyErr_Occurred ())
   {
@@ -875,7 +875,7 @@ get_ptwrite_filter ()
   }
 
   /* We need to keep the reference count.  */
-  gdbpy_ref<> ptw_filter (gdbpy_call_method (module.get (), "get_filter"));
+  gdbpy_ref<> ptw_filter (gdbpy_call_method (mod.get (), "get_filter"));
 
   if (PyErr_Occurred ())
     {

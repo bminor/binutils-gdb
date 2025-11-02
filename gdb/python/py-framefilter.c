@@ -1092,11 +1092,11 @@ bootstrap_python_frame_filters (const frame_info_ptr &frame,
   if (frame_obj == NULL)
     return NULL;
 
-  gdbpy_ref<> module (PyImport_ImportModule ("gdb.frames"));
-  if (module == NULL)
+  gdbpy_ref<> mod (PyImport_ImportModule ("gdb.frames"));
+  if (mod == NULL)
     return NULL;
 
-  gdbpy_ref<> sort_func (PyObject_GetAttrString (module.get (),
+  gdbpy_ref<> sort_func (PyObject_GetAttrString (mod.get (),
 						 "execute_frame_filters"));
   if (sort_func == NULL)
     return NULL;

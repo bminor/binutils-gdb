@@ -33,7 +33,7 @@ struct do_module_cleanup
 {
   do_module_cleanup (int *ptr, compile_module_up &&mod)
     : executedp (ptr),
-      module (std::move (mod))
+      mod (std::move (mod))
   {
   }
 
@@ -44,7 +44,7 @@ struct do_module_cleanup
   int *executedp;
 
   /* The compile module.  */
-  compile_module_up module;
+  compile_module_up mod;
 };
 
 /* Cleanup everything after the inferior function dummy frame gets
@@ -62,23 +62,23 @@ do_module_cleanup (void *arg, int registers_valid)
 
       /* This code cannot be in compile_object_run as OUT_VALUE_TYPE
 	 no longer exists there.  */
-      if (data->module->scope == COMPILE_I_PRINT_ADDRESS_SCOPE
-	  || data->module->scope == COMPILE_I_PRINT_VALUE_SCOPE)
+      if (data->mod->scope == COMPILE_I_PRINT_ADDRESS_SCOPE
+	  || data->mod->scope == COMPILE_I_PRINT_VALUE_SCOPE)
 	{
 	  struct value *addr_value;
 	  struct type *ptr_type
-	    = lookup_pointer_type (data->module->out_value_type);
+	    = lookup_pointer_type (data->mod->out_value_type);
 
 	  addr_value = value_from_pointer (ptr_type,
-					   data->module->out_value_addr);
+					   data->mod->out_value_addr);
 
 	  /* SCOPE_DATA would be stale unless EXECUTEDP != NULL.  */
 	  compile_print_value (value_ind (addr_value),
-			       data->module->scope_data);
+			       data->mod->scope_data);
 	}
     }
 
-  objfile *objfile = data->module->objfile;
+  objfile *objfile = data->mod->objfile;
   gdb_assert (objfile != nullptr);
 
   /* We have to make a copy of the name so that we can unlink the
@@ -92,7 +92,7 @@ do_module_cleanup (void *arg, int registers_valid)
   clear_symtab_users (0);
 
   /* Delete the .c file.  */
-  unlink (data->module->source_file.c_str ());
+  unlink (data->mod->source_file.c_str ());
 
   /* Delete the .o file.  */
   unlink (objfile_name_s.c_str ());
@@ -117,16 +117,16 @@ create_copied_type_recursive (objfile *objfile, type *func_type)
    longer touch MODULE's memory after this function has been called.  */
 
 void
-compile_object_run (compile_module_up &&module)
+compile_object_run (compile_module_up &&mod)
 {
   struct value *func_val;
   struct do_module_cleanup *data;
   int dtor_found, executed = 0;
-  struct symbol *func_sym = module->func_sym;
-  CORE_ADDR regs_addr = module->regs_addr;
-  struct objfile *objfile = module->objfile;
+  struct symbol *func_sym = mod->func_sym;
+  CORE_ADDR regs_addr = mod->regs_addr;
+  struct objfile *objfile = mod->objfile;
 
-  data = new struct do_module_cleanup (&executed, std::move (module));
+  data = new struct do_module_cleanup (&executed, std::move (mod));
 
   try
     {
@@ -153,10 +153,10 @@ compile_object_run (compile_module_up &&module)
 	}
       if (func_type->num_fields () >= 2)
 	{
-	  gdb_assert (data->module->out_value_addr != 0);
+	  gdb_assert (data->mod->out_value_addr != 0);
 	  vargs[current_arg] = value_from_pointer
 	       (func_type->field (current_arg).type (),
-		data->module->out_value_addr);
+		data->mod->out_value_addr);
 	  ++current_arg;
 	}
       gdb_assert (current_arg == func_type->num_fields ());

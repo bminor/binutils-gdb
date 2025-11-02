@@ -19,6 +19,6 @@
 
 #include "compile-object-load.h"
 
-extern void compile_object_run (compile_module_up &&module);
+extern void compile_object_run (compile_module_up &&mod);
 
 #endif /* GDB_COMPILE_COMPILE_OBJECT_RUN_H */
