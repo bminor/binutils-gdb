@@ -5345,7 +5345,7 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
       RTYPE2HOWTO (cache_ptr, &dst);
 #endif	/* RELOC_PROCESSING */
 
-      if (cache_ptr->howto == NULL)
+      if (cache_ptr->howto == NULL || cache_ptr->howto->name == NULL)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
