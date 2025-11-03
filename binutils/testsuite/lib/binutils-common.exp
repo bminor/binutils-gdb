@@ -1824,21 +1824,20 @@ if { [isnative] } then {
 	    set CLANG_FOR_TARGET clang
 	}
     }
-    if [info exists CLANG_FOR_TARGET] then {
-	set llvm_plug_so [string trim [exec $CLANG_FOR_TARGET -print-file-name=LLVMgold.so]]
-	if { $llvm_plug_so ne "LLVMgold.so" } then {
-	    set llvm_plug_opt "--plugin $llvm_plug_so"
-	}
-
-	if { $llvm_plug_opt eq "" } then {
-	    # If it is still blank, try llvm-config --libdir.  Clang
-	    # searches CLANG_INSTALL_LIBDIR_BASENAME which corresponds
-	    # to this.
-	    catch "exec llvm-config --libdir" got
-	    if {[file isdirectory $got] \
-		&& [file isfile $got/LLVMgold.so]} then {
-		set llvm_plug_opt "--plugin $got/LLVMgold.so"
-	    }
+}
+if [info exists CLANG_FOR_TARGET] then {
+    set llvm_plug_so [string trim [exec $CLANG_FOR_TARGET -print-file-name=LLVMgold.so]]
+    if { $llvm_plug_so ne "LLVMgold.so" } then {
+	set llvm_plug_opt "--plugin $llvm_plug_so"
+    }
+    if { $llvm_plug_opt eq "" && [isnative] } then {
+	# If it is still blank, try llvm-config --libdir.  Clang
+	# searches CLANG_INSTALL_LIBDIR_BASENAME which corresponds
+	# to this.
+	catch "exec llvm-config --libdir" got
+	if {[file isdirectory $got] \
+	    && [file isfile $got/LLVMgold.so]} then {
+	    set llvm_plug_opt "--plugin $got/LLVMgold.so"
 	}
     }
 }
