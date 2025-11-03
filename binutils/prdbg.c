@@ -2449,7 +2449,6 @@ tg_tag_type (void *p, const char *name, unsigned int id,
       t = "union class ";
       break;
     default:
-      abort ();
       return false;
     }
 
