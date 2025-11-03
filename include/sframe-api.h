@@ -169,17 +169,6 @@ sframe_decoder_get_fre (sframe_decoder_ctx *ctx,
 			unsigned int fre_idx,
 			sframe_frame_row_entry *fre);
 
-/* Get the data (NUM_FRES, FUNC_START_ADDRESS) from the function
-   descriptor entry at index I'th in the decoder CTX.  If failed,
-   return error code.  */
-extern int
-sframe_decoder_get_funcdesc (sframe_decoder_ctx *ctx,
-			     unsigned int i,
-			     uint32_t *num_fres,
-			     uint32_t *func_size,
-			     int32_t *func_start_address,
-			     unsigned char *func_info);
-
 /* Get the data (NUM_FRES, FUNC_SIZE, FUNC_START_ADDRESS, FUNC_INFO,
    REP_BLOCK_SIZE) from the function descriptor entry at index I'th
    in the decoder CTX.  If failed, return error code.

@@ -20,7 +20,6 @@ LIBSFRAME_2.0 {
     sframe_decoder_get_fixed_ra_offset;
     sframe_find_fre;
     sframe_decoder_get_num_fidx;
-    sframe_decoder_get_funcdesc;
     sframe_decoder_get_funcdesc_v2;
     sframe_decoder_get_fre;
     sframe_encode;
