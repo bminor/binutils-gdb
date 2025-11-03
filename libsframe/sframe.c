@@ -1438,40 +1438,6 @@ sframe_decoder_get_num_fidx (sframe_decoder_ctx *ctx)
   return num_fdes;
 }
 
-/* Get the data (NUM_FRES, FUNC_START_ADDRESS) from the function
-   descriptor entry at index I'th in the decoder CTX.  If failed,
-   return error code.  */
-/* FIXME - consolidate the args and return a
-   sframe_func_desc_index_elem rather?  */
-
-int
-sframe_decoder_get_funcdesc (sframe_decoder_ctx *ctx,
-			     unsigned int i,
-			     uint32_t *num_fres,
-			     uint32_t *func_size,
-			     int32_t *func_start_address,
-			     unsigned char *func_info)
-{
-  sframe_func_desc_entry_int *fdp;
-  int err = 0;
-
-  if (ctx == NULL || func_start_address == NULL || num_fres == NULL
-      || func_size == NULL)
-    return sframe_set_errno (&err, SFRAME_ERR_INVAL);
-
-  fdp = sframe_decoder_get_funcdesc_at_index (ctx, i);
-
-  if (fdp == NULL)
-    return sframe_set_errno (&err, SFRAME_ERR_FDE_NOTFOUND);
-
-  *num_fres = fdp->func_num_fres;
-  *func_start_address = fdp->func_start_pc_offset;
-  *func_size = fdp->func_size;
-  *func_info = fdp->func_info;
-
-  return 0;
-}
-
 int
 sframe_decoder_get_funcdesc_v2 (sframe_decoder_ctx *dctx,
 				unsigned int i,
