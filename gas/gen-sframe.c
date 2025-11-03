@@ -504,9 +504,9 @@ static struct sframe_row_entry*
 sframe_row_entry_new (void)
 {
   struct sframe_row_entry *fre = XCNEW (struct sframe_row_entry);
-  /* Reset cfa_base_reg to -1.  A value of 0 will imply some valid register
-     for the supported arches.  */
-  fre->cfa_base_reg = SFRAME_FRE_BASE_REG_INVAL;
+  /* Reset cfa_base_reg to SFRAME_FRE_REG_INVALID.  A value of 0 may imply a
+     valid register for a supported arch.  */
+  fre->cfa_base_reg = SFRAME_FRE_REG_INVALID;
   fre->merge_candidate = true;
   /* Reset the mangled RA status bit to zero by default.  We will
      initialize it in sframe_row_entry_initialize () with the sticky
