@@ -2141,8 +2141,8 @@ struct builtin_type
      explicitly said that pointers to functions and pointers to data
      are not interconvertible --- that is, you can't cast a function
      pointer to void * and back, and expect to get the same value.
-     However, all function pointer types are interconvertible, so void
-     (*) () can server as a generic function pointer.  */
+     However, all function pointer types are interconvertible, so
+     `void (*) ()` can serve as a generic function pointer.  */
 
   struct type *builtin_func_ptr = nullptr;
 
