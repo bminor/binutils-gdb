@@ -126,6 +126,7 @@ dump_sframe_func_with_fres (sframe_decoder_ctx *sfd_ctx,
   uint32_t func_size = 0;
   int32_t func_start_address = 0;
   unsigned char func_info = 0;
+  uint8_t rep_block_size = 0;
 
   uint64_t func_start_pc_vma = 0;
   uint64_t fre_start_pc_vma = 0;
@@ -140,8 +141,9 @@ dump_sframe_func_with_fres (sframe_decoder_ctx *sfd_ctx,
   sframe_frame_row_entry fre;
 
   /* Get the SFrame function descriptor.  */
-  sframe_decoder_get_funcdesc (sfd_ctx, funcidx, &num_fres,
-			       &func_size, &func_start_address, &func_info);
+  sframe_decoder_get_funcdesc_v2 (sfd_ctx, funcidx, &num_fres,
+				  &func_size, &func_start_address,
+				  &func_info, &rep_block_size);
 /* Calculate the virtual memory address for function start pc.  Some older
    SFrame V2 sections in ET_DYN or ET_EXEC may still have the
    SFRAME_F_FDE_FUNC_START_PCREL flag unset, and hence may be using the
