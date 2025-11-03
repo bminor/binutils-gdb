@@ -395,7 +395,7 @@ const ctf_preamble_t *
 ctf_arc_bufpreamble (const ctf_sect_t *ctfsect)
 {
   if (ctfsect->cts_data != NULL
-      && ctfsect->cts_size > sizeof (uint64_t)
+      && ctfsect->cts_size >= sizeof (struct ctf_archive)
       && (le64toh ((*(uint64_t *) ctfsect->cts_data)) == CTFA_MAGIC))
     {
       struct ctf_archive *arc = (struct ctf_archive *) ctfsect->cts_data;
@@ -418,7 +418,7 @@ ctf_arc_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   ctf_dict_t *fp = NULL;
 
   if (ctfsect->cts_data != NULL
-      && ctfsect->cts_size > sizeof (uint64_t)
+      && ctfsect->cts_size >= sizeof (struct ctf_archive)
       && (le64toh ((*(uint64_t *) ctfsect->cts_data)) == CTFA_MAGIC))
     {
       /* The archive is mmappable, so this operation is trivial.
