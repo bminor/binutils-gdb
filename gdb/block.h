@@ -512,6 +512,8 @@ private:
   std::vector<struct block *> m_blocks;
 };
 
+using blockvector_up = std::unique_ptr<blockvector>;
+
 extern const struct blockvector *blockvector_for_pc (CORE_ADDR,
 					       const struct block **);
 

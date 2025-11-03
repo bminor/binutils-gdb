@@ -830,7 +830,6 @@ buildsym_compunit::end_compunit_symtab_from_static_block
   (struct block *static_block, bool expandable)
 {
   struct compunit_symtab *cu = m_compunit_symtab;
-  std::unique_ptr<blockvector> blockvector;
   struct subfile *subfile;
   CORE_ADDR end_addr;
 
@@ -856,7 +855,7 @@ buildsym_compunit::end_compunit_symtab_from_static_block
   finish_block_internal (NULL, get_global_symbols (), NULL, NULL,
 			 m_last_source_start_addr, end_addr,
 			 true, expandable);
-  blockvector = make_blockvector ();
+  blockvector_up blockvector = make_blockvector ();
 
   /* Read the line table if it has to be read separately.
      This is only used by xcoffread.c.  */

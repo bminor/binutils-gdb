@@ -19,6 +19,7 @@
 #ifndef GDB_BUILDSYM_H
 #define GDB_BUILDSYM_H
 
+#include "block.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "symtab.h"
 #include "addrmap.h"
@@ -344,7 +345,7 @@ private:
 				       CORE_ADDR start, CORE_ADDR end,
 				       bool is_global, bool expandable);
 
-  std::unique_ptr<blockvector> make_blockvector ();
+  blockvector_up make_blockvector ();
 
   void watch_main_source_file_lossage ();
 
