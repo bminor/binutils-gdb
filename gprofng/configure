@@ -7649,7 +7649,6 @@ fi
 if test -z "${AR}"; then
   as_fn_error $? "Required archive tool 'ar' not found on PATH." "$LINENO" 5
 fi
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for -plugin option" >&5
 $as_echo_n "checking for -plugin option... " >&6; }
 plugin_names="liblto_plugin.so liblto_plugin-0.dll cyglto_plugin-0.dll"
@@ -12627,7 +12626,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12630 "configure"
+#line 12629 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12733,7 +12732,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12736 "configure"
+#line 12735 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
