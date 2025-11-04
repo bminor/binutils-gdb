@@ -1,0 +1,64 @@
+# Copyright 2025 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Proper handling of multiple breakpoints on one line.
+
+require allow_dap_tests
+
+load_lib dap-support.exp
+
+standard_testfile
+
+if {[build_executable ${testfile}.exp $testfile] == -1} {
+    return
+}
+
+if {[dap_initialize] == ""} {
+    return
+}
+
+set launch_id [dap_launch $testfile]
+
+set line [gdb_get_line_number "STOP"]
+set extra [gdb_get_line_number "EXTRA"]
+dap_check_request_and_response "set two breakpoints by line number" \
+    setBreakpoints \
+    [format {o source [o path [%s]] \
+		 breakpoints [a [o line [i %d]] [o line [i %d]] [o line [i %d]]]} \
+	 [list s $srcfile] $line $line $extra]
+
+dap_check_request_and_response "configurationDone" configurationDone
+
+dap_check_response "launch response" launch $launch_id
+
+dap_wait_for_event_and_check "inferior started" thread "body reason" started
+
+dap_wait_for_event_and_check "stopped at breakpoint" stopped \
+    "body reason" breakpoint
+
+# Now clear the breakpoints on the "STOP" line, leaving just the
+# "EXTRA" one.
+dap_check_request_and_response "clear most breakpoints" \
+    setBreakpoints \
+    [format {o source [o path [%s]] breakpoints [a [o line [i %d]]]} \
+	 [list s $srcfile] $extra]
+
+dap_check_request_and_response "continue" continue \
+    {o threadId [i 1]}
+
+# Check that the breakpoint did not cause a stop.
+dap_wait_for_event_and_check "inferior exited" exited
+
+dap_shutdown
