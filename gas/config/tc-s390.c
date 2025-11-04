@@ -2592,14 +2592,24 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  fixP->fx_pcrel_adjust = 3;
 	  fixP->fx_r_type = BFD_RELOC_390_PC24DBL;
 	}
-      else if (operand->bits == 32 && operand->shift == 16
-	       && (operand->flags & S390_OPERAND_PCREL))
+      else if (operand->bits == 32 && operand->shift == 16)
 	{
 	  fixP->fx_size = 4;
 	  fixP->fx_where += 2;
-	  fixP->fx_offset += 2;
-	  fixP->fx_pcrel_adjust = 2;
-	  fixP->fx_r_type = BFD_RELOC_390_PC32DBL;
+	  if (operand->flags & S390_OPERAND_PCREL)
+	    {
+	      fixP->fx_offset += 2;
+	      fixP->fx_pcrel_adjust = 2;
+	      fixP->fx_r_type = BFD_RELOC_390_PC32DBL;
+	    }
+	  else if (fixP->fx_pcrel)
+	    {
+	      fixP->fx_offset += 2;
+	      fixP->fx_pcrel_adjust = 2;
+	      fixP->fx_r_type = BFD_RELOC_32_PCREL;
+	    }
+	  else
+	    fixP->fx_r_type = BFD_RELOC_32;
 	}
       else
 	{
