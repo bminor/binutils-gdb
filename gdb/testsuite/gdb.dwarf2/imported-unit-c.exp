@@ -1,4 +1,5 @@
 load_lib dwarf.exp
+load_lib gdb-python.exp
 
 # This test can only be run on targets which support DWARF-2 and use gas.
 require dwarf2_support
@@ -34,6 +35,26 @@ Dwarf::assemble $asm_file {
 		DW_AT_name inty
 		DW_AT_type :$int_label
 	    }
+	    DW_TAG_typedef {
+		DW_AT_name inty_1
+		DW_AT_type :$int2_label
+	    }
+	    DW_TAG_typedef {
+		DW_AT_name inty_2
+		DW_AT_type :$int2_label
+	    }
+	    DW_TAG_typedef {
+		DW_AT_name inty_3
+		DW_AT_type :$int2_label
+	    }
+	    DW_TAG_typedef {
+		DW_AT_name inty_4
+		DW_AT_type :$int2_label
+	    }
+	    DW_TAG_typedef {
+		DW_AT_name inty_5
+		DW_AT_type :$int2_label
+	    }
 	}
     }
 
@@ -50,6 +71,26 @@ Dwarf::assemble $asm_file {
 	    }
 	    DW_TAG_typedef {
 		DW_AT_name inty
+		DW_AT_type :$int2_label
+	    }
+	    DW_TAG_typedef {
+		DW_AT_name inty_1
+		DW_AT_type :$int2_label
+	    }
+	    DW_TAG_typedef {
+		DW_AT_name inty_2
+		DW_AT_type :$int2_label
+	    }
+	    DW_TAG_typedef {
+		DW_AT_name inty_3
+		DW_AT_type :$int2_label
+	    }
+	    DW_TAG_typedef {
+		DW_AT_name inty_4
+		DW_AT_type :$int2_label
+	    }
+	    DW_TAG_typedef {
+		DW_AT_name inty_5
 		DW_AT_type :$int2_label
 	    }
 	}
@@ -96,13 +137,32 @@ if { [prepare_for_testing "failed to prepare" ${testfile} \
     return -1
 }
 
+# If Python testing is enabled then try printing the global and static
+# blocks for the current frame, which is in function FUNC.
+proc test_python_block_printing { func } {
+    if {![allow_python_tests]} {
+	return
+    }
+
+    gdb_test "python print(gdb.selected_frame().block().static_block)" \
+	[string_to_regexp "<gdb.Block <anonymous> {}>"] \
+	"print static block in $func"
+    gdb_test "python print(gdb.selected_frame().block().global_block)" \
+	[string_to_regexp "<gdb.Block <anonymous> {$func}>"] \
+	"print global block in $func"
+}
+
 if {![runto_main]} {
     return -1
 }
 
 gdb_test "ptype inty" "type = int" "ptype in main"
 
+test_python_block_printing main
+
 gdb_breakpoint "foo"
 gdb_continue_to_breakpoint "continue to breakpoint for foo"
 
 gdb_test "ptype inty" "type = unsigned int" "ptype in foo"
+
+test_python_block_printing foo

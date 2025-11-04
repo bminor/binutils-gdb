@@ -470,7 +470,13 @@ blpy_repr (PyObject *self)
   unsigned int written_symbols = 0;
   const int len = mdict_size (block->multidict ());
   static constexpr int SYMBOLS_TO_SHOW = 5;
-  for (struct symbol *symbol : block_iterator_range (block))
+
+  /* Don't use block_iterator_range here as that will find symbols through
+     included symtabs (for global and static blocks), while LEN only counts
+     symbols that are actually in BLOCK itself.  As this is really only for
+     basic debug to allow blocks to be identified, we limit ourselves to
+     just printing the symbols that are actually in BLOCK.  */
+  for (struct symbol *symbol : block->multidict_symbols ())
     {
       if (written_symbols == SYMBOLS_TO_SHOW)
 	{
