@@ -1358,8 +1358,8 @@ allocate_dynrel_entries (struct elf_link_hash_entry *eh, void *data)
   for (rent = hh->reloc_entries; rent; rent = rent->next)
     {
       /* Allocate one iff we are building a shared library, the relocation
-	 isn't a R_PARISC_FPTR64, or we don't want an opd entry.  */
-      if (!shared && rent->type == R_PARISC_FPTR64 && hh->want_opd)
+	 isn't a R_PARISC_FPTR64, and we want an opd entry.  */
+      if (!shared && rent->type == R_PARISC_FPTR64 && !hh->want_opd)
 	continue;
 
       if (!discarded_section (hppa_info->other_rel_sec))
@@ -2132,7 +2132,7 @@ elf64_hppa_finalize_opd (struct elf_link_hash_entry *eh, void *data)
 
       /* Compute the base address of the segment with this symbol.  */
       sec = hppa_info->text_hash_entry->root.u.def.section;
-      value2 = sec->output_section->vma;
+      value2 = sec->output_offset + sec->output_section->vma;
 
       /* Compute the difference between the symbol and the text segment
 	 base address.  */
@@ -2226,13 +2226,13 @@ elf64_hppa_finalize_dlt (struct elf_link_hash_entry *eh, void *data)
 	  if (eh->root.u.def.section->flags & SEC_READONLY)
 	    {
 	      sec = hppa_info->text_hash_entry->root.u.def.section;
-	      value2 = sec->output_section->vma;
+	      value2 = sec->output_offset + sec->output_section->vma;
 	      dynindx = hppa_info->text_hash_entry->dynindx;
 	    }
 	  else
 	    {
 	      sec = hppa_info->data_hash_entry->root.u.def.section;
-	      value2 = sec->output_section->vma;
+	      value2 = sec->output_offset + sec->output_section->vma;
 	      dynindx = hppa_info->data_hash_entry->dynindx;
 	    }
 	  rel.r_addend = value - value2;
@@ -2295,9 +2295,9 @@ elf64_hppa_finalize_dynreloc (struct elf_link_hash_entry *eh,
 	  bfd_byte *loc;
 
 	  /* Allocate one iff we are building a shared library, the relocation
-	     isn't a R_PARISC_FPTR64, or we don't want an opd entry.  */
+	     isn't a R_PARISC_FPTR64, or we want an opd entry.  */
 	  if (!bfd_link_pic (info)
-	      && rent->type == R_PARISC_FPTR64 && hh->want_opd)
+	      && rent->type == R_PARISC_FPTR64 && !hh->want_opd)
 	    continue;
 
 	  /* Create a dynamic relocation for this entry.
@@ -2333,10 +2333,10 @@ elf64_hppa_finalize_dynreloc (struct elf_link_hash_entry *eh,
 	      asection *sec;
 	      bfd_vma value, value2;
 
-	      /* First compute the address of the opd entry for this symbol.  */
-	      value = (hh->opd_offset
-		       + hppa_info->opd_sec->output_section->vma
-		       + hppa_info->opd_sec->output_offset);
+	      /* Compute the address of the symbol.  */
+	      value = (eh->root.u.def.value
+		       + eh->root.u.def.section->output_section->vma
+		       + eh->root.u.def.section->output_offset);
 
 	      if (hh->eh.dynindx != -1)
 		{
@@ -2346,13 +2346,13 @@ elf64_hppa_finalize_dynreloc (struct elf_link_hash_entry *eh,
 	      else if (rent->sec->flags & SEC_READONLY)
 		{
 		  sec = hppa_info->text_hash_entry->root.u.def.section;
-		  value2 = sec->output_section->vma;
+		  value2 = sec->output_offset + sec->output_section->vma;
 		  dynindx = hppa_info->text_hash_entry->dynindx;
 		}
 	      else
 		{
 		  sec = hppa_info->data_hash_entry->root.u.def.section;
-		  value2 = sec->output_section->vma;
+		  value2 = sec->output_offset + sec->output_section->vma;
 		  dynindx = hppa_info->data_hash_entry->dynindx;
 		}
 
@@ -2375,13 +2375,13 @@ elf64_hppa_finalize_dynreloc (struct elf_link_hash_entry *eh,
 	      if (eh->root.u.def.section->flags & SEC_READONLY)
 		{
 		  sec = hppa_info->text_hash_entry->root.u.def.section;
-		  value2 = sec->output_section->vma;
+		  value2 = sec->output_offset + sec->output_section->vma;
 		  dynindx = hppa_info->text_hash_entry->dynindx;
 		}
 	      else
 		{
 		  sec = hppa_info->data_hash_entry->root.u.def.section;
-		  value2 = sec->output_section->vma;
+		  value2 = sec->output_offset + sec->output_section->vma;
 		  dynindx = hppa_info->data_hash_entry->dynindx;
 		}
 	      rel.r_addend = value - value2 + rent->addend;
@@ -3403,11 +3403,11 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 		    dynindx = hppa_info->data_hash_entry->dynindx;
 		  }
 
-		/* Adjust the value with the difference between the
+		/* Adjust the addend with the difference between the
 		   symbol's address and the base segment's address.  */
-		value += (relocation + addend
-			  - sec->output_offset
-			  - sec->output_section->vma);
+		value = (relocation + addend
+			 - sec->output_offset
+			 - sec->output_section->vma);
 
 		/* The result becomes the addend of the relocation.  */
 		rela.r_addend = value;
@@ -3505,11 +3505,11 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 		dynindx = hppa_info->data_hash_entry->dynindx;
 	      }
 
-	    /* Adjust value using the difference of the symbol's
+	    /* Adjust addend using the difference of the symbol's
 	       location and the section symbol's address.  */
-	    value += (relocation + addend
-		      - sec->output_offset
-		      - sec->output_section->vma);
+	    value = (relocation + addend
+		     - sec->output_offset
+		     - sec->output_section->vma);
 
 	    /* The result becomes the addend of the relocation.  */
 	    rela.r_addend = value;
@@ -3850,9 +3850,9 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 
 	    /* Compute the difference between the symbol's address
 	       and the base segment's address.  */
-	    value += (relocation + addend
-		      - sec->output_offset
-		      - sec->output_section->vma);
+	    value = (relocation + addend
+		     - sec->output_offset
+		     - sec->output_section->vma);
 
 	    /* The result becomes the addend of the relocation.  */
 	    rela.r_addend = value;
