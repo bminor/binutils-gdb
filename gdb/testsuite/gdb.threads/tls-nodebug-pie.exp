@@ -26,4 +26,4 @@ if {![runto_main]} {
 }
 
 # Formerly: Cannot access memory at address 0xffffef7c0698
-gdb_test "p (int) thread_local" " = 42" "thread local storage"
+gdb_test "p (int) thread_local_var" " = 42" "thread local storage"

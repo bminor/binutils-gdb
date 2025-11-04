@@ -2,7 +2,7 @@
 
 #include <pthread.h>
 
-__thread int thread_local = 42;
+__thread int thread_local_var = 42;
 
 int main(void)
 {
