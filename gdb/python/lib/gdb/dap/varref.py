@@ -21,7 +21,7 @@ import gdb
 import gdb.printing
 
 from .server import client_bool_capability
-from .startup import DAPException, in_gdb_thread
+from .startup import DAPException, in_gdb_thread, log
 
 # A list of all the variable references created during this pause.
 all_variables = []
@@ -226,6 +226,11 @@ class VariableReference(BaseReference):
                 num_children = self._printer.num_children()
             if num_children is None:
                 num_children = len(self.cache_children())
+            elif num_children < 0:
+                # It doesn't make sense to have a negative number of
+                # children.
+                log("pretty printer returned negative children")
+                num_children = 0
             self.count = num_children
         return self.count
 
