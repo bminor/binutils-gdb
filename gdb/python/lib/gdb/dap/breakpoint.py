@@ -95,7 +95,7 @@ gdb.events.breakpoint_deleted.connect(_bp_deleted)
 # as a key, and the gdb.Breakpoint itself as a value.  This is used to
 # implement the clearing behavior specified by the protocol, while
 # allowing for reuse when a breakpoint can be kept.
-breakpoint_map = {}
+_breakpoint_map = {}
 
 
 @in_gdb_thread
@@ -149,11 +149,11 @@ def _remove_entries(table, *names):
 @in_gdb_thread
 def _set_breakpoints(kind, specs, creator):
     # Try to reuse existing breakpoints if possible.
-    if kind in breakpoint_map:
-        saved_map = breakpoint_map[kind]
+    if kind in _breakpoint_map:
+        saved_map = _breakpoint_map[kind]
     else:
         saved_map = {}
-    breakpoint_map[kind] = {}
+    _breakpoint_map[kind] = {}
     result = []
     with suppress_new_breakpoint_event():
         for spec in specs:
@@ -184,7 +184,7 @@ def _set_breakpoints(kind, specs, creator):
                     )
 
                 # Reaching this spot means success.
-                breakpoint_map[kind][keyspec] = bp
+                _breakpoint_map[kind][keyspec] = bp
                 result.append(_breakpoint_descriptor(bp))
             # Exceptions other than gdb.error are possible here.
             except Exception as e:
