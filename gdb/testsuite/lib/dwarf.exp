@@ -1015,7 +1015,6 @@ namespace eval Dwarf {
 
     proc _handle_DW_TAG {tag_name {attrs {}} {children {}}} {
 	variable _abbrev_section
-	variable _abbrev_num
 	variable _constants
 
 	set has_children [expr {[string length $children] > 0}]
