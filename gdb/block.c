@@ -151,14 +151,6 @@ blockvector_for_pc_sect (CORE_ADDR pc, struct obj_section *section,
   return bl;
 }
 
-/* Return true if the blockvector BV contains PC, false otherwise.  */
-
-int
-blockvector_contains_pc (const struct blockvector *bv, CORE_ADDR pc)
-{
-  return bv->lookup (pc) != nullptr;
-}
-
 /* Return call_site for specified PC in GDBARCH.  PC must match exactly, it
    must be the next instruction after call (or after tail call jump).  Throw
    NO_ENTRY_VALUE_ERROR otherwise.  This function never returns NULL.  */
@@ -838,6 +830,14 @@ blockvector::lookup (CORE_ADDR addr) const
     }
 
   return NULL;
+}
+
+/* See block.h.  */
+
+bool
+blockvector::contains (CORE_ADDR addr) const
+{
+  return lookup (addr) != nullptr;
 }
 
 blockvector::~blockvector ()

@@ -2133,8 +2133,7 @@ recursively_find_pc_sect_compunit_symtab (struct compunit_symtab *cust,
 {
   int i;
 
-  if (cust->blockvector () != nullptr
-      && blockvector_contains_pc (cust->blockvector (), pc))
+  if (cust->blockvector () != nullptr && cust->blockvector ()->contains (pc))
     return cust;
 
   if (cust->includes == NULL)
