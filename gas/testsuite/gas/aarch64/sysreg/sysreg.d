@@ -38,7 +38,7 @@ Disassembly of section \.text:
 .*:	d53f0f00 	mrs	x0, s3_7_c0_c15_0
 .*:	d5184b00 	msr	s3_0_c4_c11_0, x0
 .*:	d5384b00 	mrs	x0, s3_0_c4_c11_0
-.*:	d5110300 	msr	trcstatr, x0
+.*:	d5110300 	msr	trcstatr, x0  // note: writing to a read-only register
 .*:	d5310300 	mrs	x0, trcstatr
 .*:	d53804e0 	mrs	x0, id_aa64fpfr0_el1
 .*:	d5380440 	mrs	x0, id_aa64pfr2_el1

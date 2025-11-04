@@ -52,8 +52,8 @@ static bfd_vma last_mapping_addr = 0;
 
 /* Other options */
 static int no_aliases = 0;	/* If set disassemble as most general inst.  */
-static int no_notes = 1;	/* If set do not print disassemble notes in the
-				  output as comments.  */
+static int no_notes = 0;	/* If set do not print disassemble notes in the
+				   output as comments.  */
 
 /* Currently active instruction sequence.  */
 static aarch64_instr_sequence insn_sequence;
