@@ -19533,6 +19533,10 @@ The task has been created and is being made runnable.
 @item Selective Wait
 The task is waiting in a selective wait statement.
 
+@item Suspension object sleep
+The task is waiting in a call to @code{Suspend_Until_True} on a suspension
+object.
+
 @item Accepting RV with @var{taskno}
 The task is accepting a rendez-vous with the task @var{taskno}.
 
