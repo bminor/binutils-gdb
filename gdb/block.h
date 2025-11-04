@@ -502,6 +502,10 @@ struct blockvector
      blocks are appended in correct order.  */
   void append_block (struct block *block);
 
+  /* Lookup the innermost lexical block containing ADDR.  Returns the block
+     if there is one, NULL otherwise.  */
+  const struct block *lookup (CORE_ADDR addr) const;
+
 private:
   /* An address map mapping addresses to blocks in this blockvector.
      This pointer is zero if the blocks' start and end addresses are

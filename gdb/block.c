@@ -118,56 +118,6 @@ block::inlined_p () const
   return function () != nullptr && function ()->is_inlined ();
 }
 
-/* A helper function that checks whether PC is in the blockvector BL.
-   It returns the innermost lexical block containing the specified pc 
-   if there is one, or else NULL.  */
-
-static const struct block *
-find_block_in_blockvector (const struct blockvector *bl, CORE_ADDR pc)
-{
-  const struct block *b;
-  int bot, top, half;
-
-  /* If we have an addrmap mapping code addresses to blocks, then use
-     that.  */
-  if (bl->map ())
-    return (const struct block *) bl->map ()->find (pc);
-
-  /* Otherwise, use binary search to find the last block that starts
-     before PC.
-     Note: GLOBAL_BLOCK is block 0, STATIC_BLOCK is block 1.
-     They both have the same START,END values.
-     Historically this code would choose STATIC_BLOCK over GLOBAL_BLOCK but the
-     fact that this choice was made was subtle, now we make it explicit.  */
-  gdb_assert (bl->blocks ().size () >= 2);
-  bot = STATIC_BLOCK;
-  top = bl->blocks ().size ();
-
-  while (top - bot > 1)
-    {
-      half = (top - bot + 1) >> 1;
-      b = bl->block (bot + half);
-      if (b->start () <= pc)
-	bot += half;
-      else
-	top = bot + half;
-    }
-
-  /* Now search backward for a block that ends after PC.  */
-
-  while (bot >= STATIC_BLOCK)
-    {
-      b = bl->block (bot);
-      if (!(b->start () <= pc))
-	return NULL;
-      if (b->end () > pc)
-	return b;
-      bot--;
-    }
-
-  return NULL;
-}
-
 /* Return the blockvector immediately containing the innermost lexical
    block containing the specified pc value and section, or 0 if there
    is none.  PBLOCK is a pointer to the block.  If PBLOCK is NULL, we
@@ -192,7 +142,7 @@ blockvector_for_pc_sect (CORE_ADDR pc, struct obj_section *section,
   bl = cust->blockvector ();
 
   /* Then search that symtab for the smallest block that wins.  */
-  b = find_block_in_blockvector (bl, pc);
+  b = bl->lookup (pc);
   if (b == NULL)
     return NULL;
 
@@ -206,7 +156,7 @@ blockvector_for_pc_sect (CORE_ADDR pc, struct obj_section *section,
 int
 blockvector_contains_pc (const struct blockvector *bv, CORE_ADDR pc)
 {
-  return find_block_in_blockvector (bv, pc) != NULL;
+  return bv->lookup (pc) != nullptr;
 }
 
 /* Return call_site for specified PC in GDBARCH.  PC must match exactly, it
@@ -816,9 +766,9 @@ bool
 blockvector::block_less_than (const struct block *b1, const struct block *b2)
 {
   /* Blocks with lower start address must come before blocks with higher start
-     address.  If two blocks start at the same address,  enclosing block 
-     should come before nested blocks.  Function find_block_in_blockvector() 
-     depends on this ordering, allowing it to use binary search to find 
+     address.  If two blocks start at the same address,  enclosing block
+     should come before nested blocks.  Method blockvector::lookup()
+     depends on this ordering, allowing it to use binary search to find
      inner-most block for given address.  */
   CORE_ADDR start1 = b1->start ();
   CORE_ADDR start2 = b2->start ();
@@ -840,6 +790,54 @@ blockvector::append_block (struct block *block)
 		  && !block_less_than (block, m_blocks.back ())));
 
   m_blocks.push_back (block);
+}
+
+/* See block.h.  */
+
+const struct block *
+blockvector::lookup (CORE_ADDR addr) const
+{
+  const struct block *b;
+  int bot, top, half;
+
+  /* If we have an addrmap mapping code addresses to blocks, then use
+     that.  */
+  if (map ())
+    return (const struct block *) map ()->find (addr);
+
+  /* Otherwise, use binary search to find the last block that starts
+     before PC.
+     Note: GLOBAL_BLOCK is block 0, STATIC_BLOCK is block 1.
+     They both have the same START,END values.
+     Historically this code would choose STATIC_BLOCK over GLOBAL_BLOCK but the
+     fact that this choice was made was subtle, now we make it explicit.  */
+  gdb_assert (blocks ().size () >= 2);
+  bot = STATIC_BLOCK;
+  top = blocks ().size ();
+
+  while (top - bot > 1)
+    {
+      half = (top - bot + 1) >> 1;
+      b = block (bot + half);
+      if (b->start () <= addr)
+	bot += half;
+      else
+	top = bot + half;
+    }
+
+  /* Now search backward for a block that ends after PC.  */
+
+  while (bot >= STATIC_BLOCK)
+    {
+      b = block (bot);
+      if (!(b->start () <= addr))
+	return NULL;
+      if (b->end () > addr)
+	return b;
+      bot--;
+    }
+
+  return NULL;
 }
 
 blockvector::~blockvector ()
