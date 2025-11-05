@@ -103,10 +103,10 @@ sframe_calc_fre_type (size_t func_size);
 
 /* The SFrame Decoder.  */
 
-/* Decode the specified SFrame buffer CF_BUF of size CF_SIZE and return the
+/* Decode the specified SFrame buffer SF_BUF of size SF_SIZE and return the
    new SFrame decoder context.  Sets ERRP for the caller if any error.  */
 extern sframe_decoder_ctx *
-sframe_decode (const char *cf_buf, size_t cf_size, int *errp);
+sframe_decode (const char *sf_buf, size_t sf_size, int *errp);
 
 /* Free the decoder context.  */
 extern void
