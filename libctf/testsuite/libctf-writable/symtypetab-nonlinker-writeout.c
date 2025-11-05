@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int
+static ctf_ret_t
 report_sym (ctf_dict_t *fp, ctf_link_sym_t *sym, const char *name,
 	    uint32_t idx, uint32_t st_type)
 {

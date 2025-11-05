@@ -90,7 +90,7 @@ ctf_version (int ctf_version_, size_t btf_hdr_len, ctf_btf_mode_t btf_mode)
    return NULL for the benefit of the caller.  */
 
 void *
-ctf_set_open_errno (int *errp, int error)
+ctf_set_open_errno (ctf_error_t *errp, ctf_error_t error)
 {
   if (errp != NULL)
     *errp = error;
@@ -100,8 +100,8 @@ ctf_set_open_errno (int *errp, int error)
 /* See ctf-inlines.h.  */
 
 #ifdef ENABLE_LIBCTF_HASH_DEBUGGING
-int
-ctf_set_errno (ctf_dict_t *fp, int err)
+ctf_ret_t
+ctf_set_errno (ctf_dict_t *fp, ctf_error_t err)
 {
   fp->ctf_errno = err;
   /* Don't rely on CTF_ERR here as it will not properly sign extend on 64-bit
@@ -110,7 +110,7 @@ ctf_set_errno (ctf_dict_t *fp, int err)
 }
 
 ctf_id_t
-ctf_set_typed_errno (ctf_dict_t *fp, int err)
+ctf_set_typed_errno (ctf_dict_t *fp, ctf_error_t err)
 {
   fp->ctf_errno = err;
   return CTF_ERR;
@@ -121,7 +121,7 @@ ctf_set_typed_errno (ctf_dict_t *fp, int err)
    errors here, to make it easier to determine programmatically which flags are
    valid.  */
 
-int
+ctf_ret_t
 ctf_dict_set_flag (ctf_dict_t *fp, uint64_t flag, int set)
 {
   if (set < 0 || set > 1)
@@ -141,7 +141,7 @@ ctf_dict_set_flag (ctf_dict_t *fp, uint64_t flag, int set)
   return 0;
 }
 
-int
+ctf_bool_t
 ctf_dict_get_flag (ctf_dict_t *fp, uint64_t flag)
 {
   switch (flag)
@@ -165,17 +165,17 @@ libctf_init_debug (void)
     }
 }
 
-void ctf_setdebug (int debug)
+void ctf_setdebug (ctf_bool_t debug)
 {
   /* Ensure that libctf_init_debug() has been called, so that we don't get our
      debugging-on-or-off smashed by the next call.  */
 
   libctf_init_debug();
-  _libctf_debug = debug;
+  _libctf_debug = (debug != 0);
   ctf_dprintf ("CTF debugging set to %i\n", debug);
 }
 
-int ctf_getdebug (void)
+ctf_bool_t ctf_getdebug (void)
 {
   return _libctf_debug;
 }
@@ -203,7 +203,7 @@ static ctf_list_t open_errors;
    debug stream instead of that recorded on fp.  */
 _libctf_printflike_ (4, 5)
 void
-ctf_err_warn (ctf_dict_t *fp, int is_warning, int err,
+ctf_err_warn (ctf_dict_t *fp, int is_warning, ctf_error_t err,
 	      const char *format, ...)
 {
   va_list alist;
@@ -283,7 +283,7 @@ ctf_err_copy (ctf_dict_t *dest, ctf_dict_t *src)
 
 char *
 ctf_errwarning_next (ctf_dict_t *fp, ctf_next_t **it, int *is_warning,
-		     int *errp)
+		     ctf_error_t *errp)
 {
   ctf_next_t *i = *it;
   char *ret;

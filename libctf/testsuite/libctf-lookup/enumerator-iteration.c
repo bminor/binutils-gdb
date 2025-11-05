@@ -73,7 +73,7 @@ main (int argc, char *argv[])
     {
       char *foo;
       int dynadd2_value;
-      int old_dynadd2_flag;
+      ctf_bool_t old_dynadd2_flag;
 
       /* Make sure that getting and setting a garbage flag, and setting one to a
 	 garbage value, fails properly.  */

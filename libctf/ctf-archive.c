@@ -44,20 +44,20 @@ static off_t arc_write_one (int fd, const void *item, size_t size, int align);
 static int ctf_arc_value_write (int fd, const void *, size_t, uint64_t *start_off);
 static int ctf_arc_flip_modents (ctf_archive_modent_t *modent, uint64_t els,
 		      unsigned char *ents, uint64_t base, size_t arc_len,
-		      int *errp);
+		      ctf_error_t *errp);
 static int ctf_arc_range_check_hdr (struct ctf_archive_internal *arci, size_t,
-				    int *errp);
+				    ctf_error_t *errp);
 static int ctf_arc_range_check_modents (ctf_archive_modent_t *modent,
 					struct ctf_archive *arc_hdr,
 					unsigned char *arc_bytes,
 					uint64_t contents_base,
 					size_t contents_els, size_t arc_len,
-					int fixup_v1, int *errp);
+					int fixup_v1, ctf_error_t *errp);
 static ctf_dict_t *ctf_dict_open_by_offset (const struct ctf_archive_internal *,
 					    const ctf_sect_t *symsect,
 					    const ctf_sect_t *strsect,
 					    size_t offset,
-					    int little_endian_symtab, int *errp);
+					    int little_endian_symtab, ctf_error_t *errp);
 static int sort_modent_by_name (const void *one, const void *two, void *n);
 static void ctf_arc_close_internal (struct ctf_archive *arc);
 static void *arc_mmap_header (int fd, size_t headersz);
@@ -66,7 +66,7 @@ static int arc_mmap_writeout (int fd, void *header, size_t headersz,
 			      const char **errmsg);
 static int arc_mmap_unmap (void *header, size_t headersz, const char **errmsg);
 static int ctf_arc_import_parent (const struct ctf_archive_internal *arci,
-				  ctf_dict_t *fp, int *errp);
+				  ctf_dict_t *fp, ctf_error_t *errp);
 
 /* Flag to indicate "symbol not present" in ctf_archive_internal.ctfi_symdicts
    and ctfi_symnamedicts.  Never initialized.  */
@@ -81,13 +81,13 @@ static ctf_dict_t enosym;
 
    Updates the first dict in the archive with the errno value.  */
 
-static int
+static ctf_error_t
 ctf_arc_preserialize (ctf_dict_t **ctf_dicts, ssize_t ctf_dict_cnt,
 		      size_t threshold)
 {
   uint64_t old_parent_strlen, all_strlens = 0;
   ssize_t i;
-  int err;
+  ctf_error_t err;
 
   ctf_dprintf ("Preserializing dicts.\n");
 
@@ -137,7 +137,7 @@ ctf_arc_preserialize (ctf_dict_t **ctf_dicts, ssize_t ctf_dict_cnt,
    the names array, which must have CTF_DICTS entries.
 
    Returns 0 on success, or an errno, or an ECTF_* value.  */
-int
+ctf_error_t
 ctf_arc_write_fd (int fd, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
 		  const char **names, size_t threshold)
 {
@@ -151,7 +151,7 @@ ctf_arc_write_fd (int fd, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
   char *nametbl = NULL;		/* The name table.  */
   int multiple_parents = 0;
   const char *known_parent = NULL;
-  int err;
+  ctf_error_t err;
   size_t prop_off = 0;
   ctf_archive_modent_t *modent;
 
@@ -358,11 +358,11 @@ err:
    If the filename is NULL, create a temporary file and return a pointer to it.
 
    Returns 0 on success, or an errno, or an ECTF_* value.  */
-int
+ctf_error_t
 ctf_arc_write (const char *file, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
 	       const char **names, size_t threshold)
 {
-  int err;
+  ctf_error_t err;
   int fd;
 
   if ((fd = open (file, O_RDWR | O_CREAT | O_TRUNC | O_CLOEXEC, 0666)) < 0)
@@ -525,7 +525,7 @@ search_modent_by_name (const void *key, const void *ent, void *arg)
 
 static int
 ctf_arc_flip_archive (struct ctf_archive_internal *arci, size_t arc_len,
-		      int *errp)
+		      ctf_error_t *errp)
 {
   struct ctf_archive *hdr = arci->ctfi_hdr;
   int needs_flipping = 0;
@@ -590,7 +590,7 @@ ctf_arc_flip_archive (struct ctf_archive_internal *arci, size_t arc_len,
 static int
 ctf_arc_flip_modents (ctf_archive_modent_t *modent, uint64_t els,
 		      unsigned char *ents, uint64_t base, size_t arc_len,
-		      int *errp)
+		      ctf_error_t *errp)
 {
   uint64_t i;
 
@@ -624,7 +624,7 @@ ctf_arc_flip_modents (ctf_archive_modent_t *modent, uint64_t els,
 
 static int
 ctf_arc_range_check_hdr (struct ctf_archive_internal *arci, size_t arc_len,
-			 int *errp)
+			 ctf_error_t *errp)
 {
   const char *err;
   uint64_t ndict_end, nprop_end;
@@ -707,7 +707,7 @@ ctf_arc_range_check_hdr (struct ctf_archive_internal *arci, size_t arc_len,
 
 static int
 ctf_arc_range_check (struct ctf_archive_internal *arci, size_t arc_len,
-		     int *errp)
+		     ctf_error_t *errp)
 {
   unsigned char *arc_bytes = arci->ctfi_archive;
   ctf_archive_modent_t *modents;
@@ -773,7 +773,7 @@ ctf_arc_range_check_modents (ctf_archive_modent_t *modent,
 			     struct ctf_archive *arc_hdr,
 			     unsigned char *arc_bytes,
 			     uint64_t contents_base, size_t contents_els,
-			     size_t arc_len, int fixup_v1, int *errp)
+			     size_t arc_len, int fixup_v1, ctf_error_t *errp)
 {
   uint64_t i;
   char *names = (char *) arc_bytes + arc_hdr->names;
@@ -859,7 +859,7 @@ ctf_new_archive_internal (int is_archive, int is_v1, int unmap_on_close,
 			  struct ctf_archive *arc, size_t arc_len,
 			  ctf_dict_t *fp, const ctf_sect_t *symsect,
 			  const ctf_sect_t *strsect,
-			  int *errp)
+			  ctf_error_t *errp)
 {
   struct ctf_archive_internal *arci = NULL;
 
@@ -985,7 +985,7 @@ ctf_arc_bufpreamble_v1 (const ctf_sect_t *ctfsect)
    error in *err (if not NULL).  */
 ctf_archive_t *
 ctf_arc_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
-		 const ctf_sect_t *strsect, int *errp)
+		 const ctf_sect_t *strsect, ctf_error_t *errp)
 {
   struct ctf_archive *arc = NULL;
   int is_archive, is_v1 = 0;
@@ -1030,7 +1030,7 @@ ctf_arc_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
    NULL and an error in *err (if not NULL).  Only archives are supported,
    not dicts (because our only caller already handles those itself).  */
 struct ctf_archive_internal *
-ctf_arc_open_internal (const char *filename, int *errp)
+ctf_arc_open_internal (const char *filename, ctf_error_t *errp)
 {
   const char *errmsg;
   int fd, is_v1 = 0;
@@ -1135,7 +1135,7 @@ ctf_dict_open_internal (const struct ctf_archive_internal *arci,
 			const ctf_sect_t *symsect,
 			const ctf_sect_t *strsect,
 			const char *name, int little_endian_symtab,
-			int *errp)
+			ctf_error_t *errp)
 {
   ctf_archive_modent_t *modent;
 
@@ -1175,7 +1175,7 @@ ctf_dict_open_sections (const struct ctf_archive_internal *arci,
 			const ctf_sect_t *symsect,
 			const ctf_sect_t *strsect,
 			const char *name,
-			int *errp)
+			ctf_error_t *errp)
 {
   if (errp)
     *errp = 0;
@@ -1216,7 +1216,8 @@ ctf_dict_open_sections (const struct ctf_archive_internal *arci,
 
    Public entry point.  */
 ctf_dict_t *
-ctf_dict_open (const struct ctf_archive_internal *arci, const char *name, int *errp)
+ctf_dict_open (const struct ctf_archive_internal *arci, const char *name,
+	       ctf_error_t *errp)
 {
   const ctf_sect_t *symsect = &arci->ctfi_symsect;
   const ctf_sect_t *strsect = &arci->ctfi_strsect;
@@ -1239,7 +1240,8 @@ ctf_cached_dict_close (void *fp)
    ctfi_dicts.  If this is the first cached dict, designate it the
    crossdict_cache.  */
 static ctf_dict_t *
-ctf_dict_open_cached (struct ctf_archive_internal *arci, const char *name, int *errp)
+ctf_dict_open_cached (struct ctf_archive_internal *arci, const char *name,
+		      ctf_error_t *errp)
 {
   ctf_dict_t *fp;
   char *dupname = NULL;
@@ -1315,7 +1317,7 @@ ctf_dict_open_by_offset (const struct ctf_archive_internal *arci,
 			 const ctf_sect_t *symsect,
 			 const ctf_sect_t *strsect, size_t offset,
 			 int little_endian_symtab,
-			 int *errp)
+			 ctf_error_t *errp)
 {
   ctf_sect_t ctfsect;
   ctf_dict_t *fp;
@@ -1346,7 +1348,7 @@ ctf_dict_t *
 ctf_arc_open_by_name (const ctf_archive_t *arci, const char *name,
 		      int *errp)
 {
-  return ctf_dict_open (arci, name, errp);
+  return ctf_dict_open (arci, name, (ctf_error_t *) errp);
 }
 
 ctf_dict_t *
@@ -1356,7 +1358,7 @@ ctf_arc_open_by_name_sections (const struct ctf_archive_internal *arci,
 			       const char *name,
 			       int *errp)
 {
-  return ctf_dict_open_sections (arci, symsect, strsect, name, errp);
+  return ctf_dict_open_sections (arci, symsect, strsect, name, (ctf_error_t *) errp);
 }
 
 /* Get a property value from the shared properties table of an archive,
@@ -1407,11 +1409,11 @@ ctf_arc_get_property (const struct ctf_archive_internal *arci, const char *prop)
    people useful dicts to start with.  */
 static int
 ctf_arc_import_parent (const struct ctf_archive_internal *arci, ctf_dict_t *fp,
-		       int *errp)
+		       ctf_error_t *errp)
 {
   if ((fp->ctf_flags & LCTF_CHILD) && !fp->ctf_parent)
     {
-      int err = 0;
+      ctf_error_t err = 0;
       ctf_dict_t *parent;
       const char *parent_name = fp->ctf_parent_name;
 
@@ -1475,7 +1477,7 @@ ctf_archive_count (const struct ctf_archive_internal *arci)
 
 static ctf_dict_t *
 ctf_arc_lookup_sym_or_name (struct ctf_archive_internal *arci, unsigned long symidx,
-			    const char *symname, ctf_id_t *typep, int *errp)
+			    const char *symname, ctf_id_t *typep, ctf_error_t *errp)
 {
   ctf_dict_t *fp;
   void *fpkey;
@@ -1586,8 +1588,8 @@ ctf_arc_lookup_sym_or_name (struct ctf_archive_internal *arci, unsigned long sym
      if our caller doesn't, to be able to distinguish no-error end-of-iteration
      from open errors.  */
 
-  int local_err;
-  int *local_errp;
+  ctf_error_t local_err;
+  ctf_error_t *local_errp;
   ctf_next_t *i = NULL;
   const char *name;
 
@@ -1665,7 +1667,7 @@ ctf_arc_lookup_sym_or_name (struct ctf_archive_internal *arci, unsigned long sym
 /* The public API for looking up a symbol by index.  */
 ctf_dict_t *
 ctf_arc_lookup_symbol (struct ctf_archive_internal *arci, unsigned long symidx,
-		       ctf_id_t *typep, int *errp)
+		       ctf_id_t *typep, ctf_error_t *errp)
 {
   return ctf_arc_lookup_sym_or_name (arci, symidx, NULL, typep, errp);
 }
@@ -1674,7 +1676,7 @@ ctf_arc_lookup_symbol (struct ctf_archive_internal *arci, unsigned long symidx,
 
 ctf_dict_t *
 ctf_arc_lookup_symbol_name (struct ctf_archive_internal *arci, const char *symname,
-			    ctf_id_t *typep, int *errp)
+			    ctf_id_t *typep, ctf_error_t *errp)
 {
   return ctf_arc_lookup_sym_or_name (arci, 0, symname, typep, errp);
 }
@@ -1689,12 +1691,12 @@ ctf_id_t
 ctf_arc_lookup_enumerator_next (struct ctf_archive_internal *arci,
 				const char *name, ctf_next_t **it,
 				int64_t *enum_value, ctf_dict_t **dict,
-				int *errp)
+				ctf_error_t *errp)
 {
   ctf_next_t *i = *it;
   ctf_id_t type;
   int opened_this_time = 0;
-  int err;
+  ctf_error_t err;
 
   /* We have two nested iterators in here: ctn_next tracks archives, while
      within it ctn_next_inner tracks enumerators within an archive.  We
@@ -1835,7 +1837,7 @@ ctf_archive_iter (const struct ctf_archive_internal *arci,
   ctf_next_t *i = NULL;
   ctf_dict_t *fp;
   const char *name;
-  int err = 0;
+  ctf_error_t err = 0;
 
   while ((fp = ctf_archive_next (arci, &i, &name, 0, &err)) != NULL)
     {
@@ -1868,7 +1870,7 @@ ctf_archive_iter (const struct ctf_archive_internal *arci,
 
 ctf_dict_t *
 ctf_archive_next (const struct ctf_archive_internal *arci, ctf_next_t **it,
-		  const char **name, int skip_parent, int *errp)
+		  const char **name, int skip_parent, ctf_error_t *errp)
 {
   ctf_dict_t *f;
   ctf_next_t *i = *it;

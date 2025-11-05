@@ -153,7 +153,7 @@ dtd_crash (enum crash_method method, int parent_bigger)
 	ar.ctr_index = ptype;
 	ar.ctr_nelems = 5;
 
-	if ((stype = ctf_add_array (pfp, CTF_ADD_ROOT, &ar)) == CTF_ERR)
+	if ((stype = ctf_add_array (pfp, CTF_ADD_ROOT, &ar)) < 0)
 	  goto create_child;
 
 	if (ctf_set_array (cfp, stype, &ar) == CTF_ERR)

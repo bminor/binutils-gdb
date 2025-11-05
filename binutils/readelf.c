@@ -17359,7 +17359,7 @@ dump_ctf_errs (ctf_dict_t *fp)
   ctf_next_t *it = NULL;
   char *errtext;
   int is_warning;
-  int err;
+  ctf_error_t err;
 
   /* Dump accumulated errors and warnings.  */
   while ((errtext = ctf_errwarning_next (fp, &it, &is_warning, &err)) != NULL)
@@ -17437,7 +17437,7 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
   ctf_next_t *i = NULL;
   const char *name;
   size_t member = 0;
-  int err;
+  ctf_error_t err;
   bool ret = false;
 
   shdr_to_ctf_sect (&ctfsect, section, filedata);

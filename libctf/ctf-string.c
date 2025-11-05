@@ -657,7 +657,7 @@ ctf_str_write_strtab (ctf_dict_t *fp)
   ctf_next_t *it = NULL;
   size_t i;
   void *v;
-  int err;
+  ctf_error_t err;
   int new_strtab = 0;
   uint32_t prov_offset;
 

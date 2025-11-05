@@ -87,7 +87,7 @@ ctf_link_input_close (void *input)
 
 /* Like ctf_link_add_ctf, below, but with no error-checking, so it can be called
    in the middle of an ongoing link.  */
-static int
+static ctf_ret_t
 ctf_link_add_ctf_internal (ctf_dict_t *fp, ctf_archive_t *ctf,
 			   ctf_dict_t *fp_input, const char *name)
 {
@@ -160,7 +160,7 @@ ctf_link_add_ctf_internal (ctf_dict_t *fp, ctf_archive_t *ctf,
    different dicts with the same NAME add all the dicts with unique NAMEs
    derived from NAME.  */
 
-int
+ctf_ret_t
 ctf_link_add_ctf (ctf_dict_t *fp, ctf_archive_t *ctf, const char *name)
 {
   if (!name)
@@ -196,7 +196,7 @@ static ssize_t
 ctf_link_lazy_open (ctf_dict_t *fp, ctf_link_input_t *input)
 {
   size_t count;
-  int err;
+  ctf_error_t err;
 
   if (input->clin_arc)
     return ctf_archive_count (input->clin_arc);
@@ -293,7 +293,7 @@ ctf_create_per_cu (ctf_dict_t *fp, ctf_dict_t *input, const char *cu_name)
   if ((cu_fp = ctf_dynhash_lookup (fp->ctf_link_outputs, ctf_name)) == NULL
       || (input && cu_fp->ctf_link_in_out != fp))
     {
-      int err;
+      ctf_error_t err;
 
       if ((cu_fp = ctf_create (&err)) == NULL)
 	{
@@ -341,10 +341,10 @@ ctf_create_per_cu (ctf_dict_t *fp, ctf_dict_t *input, const char *cu_name)
    unconditionally into the shared parent dict, and are hidden (marked conflicting) if
    they clash, rather than being moved into child dicts.  */
 
-int
+ctf_ret_t
 ctf_link_add_cu_mapping (ctf_dict_t *fp, const char *from, const char *to)
 {
-  int err;
+  ctf_error_t err;
   char *f = NULL, *t = NULL, *existing;
   ctf_dynhash_t *one_out;
 
@@ -456,7 +456,7 @@ ctf_link_set_memb_name_changer (ctf_dict_t *fp,
 /* Set a function which is used to filter out unwanted variables from the link.
 
    UPTODO: call this somewhere (ctf-dedup, probably). */
-int
+ctf_bool_t
 ctf_link_set_variable_filter (ctf_dict_t *fp, ctf_link_variable_filter_f *filter,
 			      void *arg)
 {
@@ -525,7 +525,7 @@ ctf_link_deduplicating_count_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
   ctf_link_input_t *one_input = NULL;
   const char *one_name = NULL;
   ssize_t count = 0, narcs = 0;
-  int err;
+  ctf_error_t err;
 
   if (cu_names)
     inputs = cu_names;
@@ -616,7 +616,7 @@ ctf_link_deduplicating_open_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
   ctf_dict_t **dedup_inputs = NULL;
   ctf_dict_t **walk;
   uint32_t *parents_ = NULL;
-  int err;
+  ctf_error_t err;
 
   if (cu_names)
     inputs = cu_names;
@@ -776,7 +776,7 @@ ctf_link_deduplicating_close_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
 {
   ctf_next_t *it = NULL;
   void *name;
-  int err;
+  ctf_error_t err;
   ssize_t i;
 
   /* This is the inverse of ctf_link_deduplicating_open_inputs: so first, close
@@ -970,7 +970,7 @@ static int
 ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
 {
   ctf_next_t *i = NULL;
-  int err;
+  ctf_error_t err;
   void *out_cu;
   void *in_cus;
 
@@ -1022,7 +1022,7 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
       if (only_input && ninputs == 1)
 	{
 	  ctf_next_t *ai = NULL;
-	  int err;
+	  ctf_error_t err;
 
 	  /* We can abuse an archive iterator to get the only member cheaply, no
 	     matter what its name.  */
@@ -1197,7 +1197,7 @@ ctf_link_empty_outputs (ctf_dict_t *fp)
 {
   ctf_next_t *i = NULL;
   void *v;
-  int err;
+  ctf_error_t err;
 
   ctf_dynhash_empty (fp->ctf_link_outputs);
 
@@ -1345,10 +1345,10 @@ ctf_link_deduplicating (ctf_dict_t *fp)
 
 /* Merge types and variable sections in all dicts added to the link together.
    The result of any previous link is discarded.  */
-int
+ctf_ret_t
 ctf_link (ctf_dict_t *fp, int flags)
 {
-  int err;
+  ctf_error_t err;
   int oldflags = fp->ctf_flags;
 
   fp->ctf_link_flags = flags;
@@ -1409,7 +1409,7 @@ typedef struct ctf_link_out_string_cb_arg
 {
   const char *str;
   uint32_t offset;
-  int err;
+  ctf_error_t err;
 } ctf_link_out_string_cb_arg_t;
 
 /* Intern a string in the string table of an output per-CU CTF file.  */
@@ -1432,13 +1432,13 @@ ctf_link_intern_extern_string (void *key _libctf_unused_, void *value,
    If ctf_link is also called, it must be called first if you want the new CTF
    files ctf_link can create to get their strings dedupped against the ELF
    strtab properly.  */
-int
+ctf_ret_t
 ctf_link_add_strtab (ctf_dict_t *fp, ctf_link_strtab_string_f *add_string,
 		     void *arg)
 {
   const char *str;
   uint32_t offset;
-  int err = 0;
+  ctf_error_t err = 0;
 
   if (fp->ctf_stypes > 0)
     return ctf_set_errno (fp, ECTF_RDONLY);
@@ -1466,7 +1466,7 @@ ctf_link_add_strtab (ctf_dict_t *fp, ctf_link_strtab_string_f *add_string,
   if (err)
     ctf_set_errno (fp, err);
 
-  return -err;
+  return -1;
 }
 
 /* Inform the ctf-link machinery of a new symbol in the target symbol table
@@ -1474,7 +1474,7 @@ ctf_link_add_strtab (ctf_dict_t *fp, ctf_link_strtab_string_f *add_string,
    is in agreement with ctf_bfdopen_ctfsect).  May be called either before or
    after ctf_link_add_strtab.  As with that function, must be called on a dict which
    has not yet been serialized.  */
-int
+ctf_ret_t
 ctf_link_add_linker_symbol (ctf_dict_t *fp, ctf_link_sym_t *sym)
 {
   ctf_in_flight_dynsym_t *cid;
@@ -1523,12 +1523,12 @@ ctf_link_add_linker_symbol (ctf_dict_t *fp, ctf_link_sym_t *sym)
    since the ordering info does not include type IDs, lookups may return nothing
    until such IDs are added by calls to ctf_add_*_sym.  Must be called after
    ctf_link_add_strtab and ctf_link_add_linker_symbol.  */
-int
+ctf_ret_t
 ctf_link_shuffle_syms (ctf_dict_t *fp)
 {
   ctf_in_flight_dynsym_t *did, *nid;
   ctf_next_t *i = NULL;
-  int err = ENOMEM;
+  ctf_error_t err = ENOMEM;
   void *name_, *sym_;
 
   if (fp->ctf_stypes > 0)
@@ -1547,7 +1547,7 @@ ctf_link_shuffle_syms (ctf_dict_t *fp)
       if (!fp->ctf_dynsyms)
 	{
 	  ctf_set_errno (fp, ENOMEM);
-	  return -ENOMEM;
+	  return -1;
 	}
     }
 
@@ -1571,7 +1571,7 @@ ctf_link_shuffle_syms (ctf_dict_t *fp)
 	  did->cid_sym.st_name = ctf_strraw (fp, off);
 	  did->cid_sym.st_nameidx_set = 0;
 	  if (!ctf_assert (fp, did->cid_sym.st_name != NULL))
-	    return -ECTF_INTERNAL;		/* errno is set for us.  */
+	    return -1;				/* errno is set for us.  */
 	}
 
       /* The symbol might have turned out to be nameless, so we have to recheck
@@ -1650,7 +1650,7 @@ ctf_link_shuffle_syms (ctf_dict_t *fp)
   fp->ctf_dynsymidx = NULL;
   fp->ctf_dynsymmax = 0;
   ctf_set_errno (fp, err);
-  return -err;
+  return -1;
 }
 
 /* Convert a 32-bit ELF symbol to a ctf_link_sym_t.  */
@@ -1853,7 +1853,7 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold, int *is_btf)
   ctf_dict_t **files;
   FILE *f = NULL;
   ssize_t i;
-  int err;
+  ctf_error_t err;
   long fsize;
   const char *errloc;
   unsigned char *buf = NULL;

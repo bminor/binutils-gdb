@@ -97,7 +97,7 @@ ctf_decl_push (ctf_decl_t *cd, ctf_dict_t *fp, ctf_id_t type)
   switch (kind)
     {
     case CTF_K_ARRAY:
-      (void) ctf_array_info (fp, type, &ar);
+      ctf_array_info (fp, type, &ar);
       ctf_decl_push (cd, fp, ar.ctr_contents);
       n = ar.ctr_nelems;
       prec = CTF_PREC_ARRAY;

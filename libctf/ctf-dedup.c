@@ -667,7 +667,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
   char hashbuf[CTF_SHA1_SIZE];
   const char *hval = NULL;
   const char *whaterr;
-  int err = 0;
+  ctf_error_t err = 0;
   int64_t component_idx = -1;
 
   /* "citer" is for types that reference only one other type: "citers" can store
@@ -1103,7 +1103,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	int64_t val;
 	const char *ename;
 	ssize_t size;
-	int enum_unsigned = ctf_enum_unsigned (input, type);
+	ctf_bool_t enum_unsigned = ctf_enum_unsigned (input, type);
 
 	ctf_get_ctt_size (input, tp, &size, NULL);
 	ctf_dedup_sha1_add (&hash, &size, sizeof (size_t), "enum size", depth);
@@ -1132,7 +1132,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	ctf_id_t membtype;
 	ssize_t size;
 	int bit_width;
-	int is_bitfield;
+	ctf_bool_t is_bitfield;
 
 	ctf_get_ctt_size (input, tp, &size, NULL);
 	ctf_dedup_sha1_add (&hash, &size, sizeof (ssize_t), "struct size",
@@ -1591,7 +1591,7 @@ ctf_dedup_populate_mappings (ctf_dict_t *fp, ctf_dict_t *input _libctf_unused_,
     /* Verify that all types with this hash are of the same kind, and that the
        first TU a type was seen in never falls.  */
 
-    int err;
+    ctf_error_t err;
     const void *one_id;
     ctf_next_t *i = NULL;
     int orig_kind = ctf_type_kind_unsliced (input, type);
@@ -1728,7 +1728,7 @@ static int
 ctf_dedup_hash_type_fini (ctf_dict_t *fp)
 {
   ctf_next_t *i = NULL;
-  int err;
+  ctf_error_t err;
   void *hval, *root_visible;
 
   /* Clean up cd_nonroot_consistency.  We only care now about types we are sure
@@ -1838,7 +1838,7 @@ ctf_dedup_mark_conflicting_hash_citers (ctf_dict_t *fp, ctf_dict_t **inputs,
   ctf_next_t *i = NULL;
   const void *k;
   ctf_dynset_t *citers;
-  int err;
+  ctf_error_t err;
 
   /* If any types cite this type, mark them conflicted too.  */
   if ((citers = ctf_dynhash_lookup (d->cd_citers, hval)) == NULL)
@@ -1984,7 +1984,7 @@ ctf_dedup_detect_name_ambiguity (ctf_dict_t *fp, ctf_dict_t **inputs)
   ctf_next_t *i = NULL;
   void *k;
   void *v;
-  int err;
+  ctf_error_t err;
   const char *whaterr;
 
   /* Go through cd_name_counts for all CTF namespaces in turn.  */
@@ -2369,7 +2369,7 @@ ctf_dedup_multiple_input_dicts (ctf_dict_t *output, ctf_dict_t **inputs,
   const char *decorated;
   int fwdkind;
   int multiple = 0;
-  int err;
+  ctf_error_t err;
 
   type_ids = ctf_dynhash_lookup (d->cd_output_mapping, hval);
   if (!ctf_assert (output, type_ids))
@@ -2453,7 +2453,7 @@ ctf_dedup_conflictify_unshared (ctf_dict_t *output, ctf_dict_t **inputs)
 {
   ctf_dedup_t *d = &output->ctf_dedup;
   ctf_next_t *i = NULL;
-  int err;
+  ctf_error_t err;
   const void *k;
   ctf_dynset_t *to_mark = NULL;
 
@@ -2908,7 +2908,7 @@ ctf_dedup_rwalk_output_mapping (ctf_dict_t *output, ctf_dict_t **inputs,
 {
   ctf_dedup_t *d = &output->ctf_dedup;
   ctf_next_t *i = NULL;
-  int err;
+  ctf_error_t err;
   int visited = 1;
   ctf_dynset_t *type_ids;
   void *id;
@@ -3071,7 +3071,7 @@ ctf_dedup_walk_output_mapping (ctf_dict_t *output, ctf_dict_t **inputs,
   ctf_dynset_t *already_visited;
   ctf_next_t *i = NULL;
   ctf_sort_om_cb_arg_t sort_arg;
-  int err;
+  ctf_error_t err;
   void *k;
 
   if ((already_visited = ctf_dynset_create (htab_hash_string,
@@ -3377,7 +3377,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	target = input->ctf_dedup.cd_output;
       else
 	{
-	  int err;
+	  ctf_error_t err;
 
 	  if ((target = ctf_create (&err)) == NULL)
 	    {
@@ -3776,7 +3776,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
       {
 	ssize_t size = ctf_type_size (input, type);
 	void *out_id;
-	int is_bitfield;
+	ctf_bool_t is_bitfield;
 
 	/* Insert the structure itself, so other types can refer to it.  */
 
@@ -3989,7 +3989,7 @@ ctf_dedup_emit_struct_members (ctf_dict_t *output, ctf_dict_t **inputs,
   ctf_dedup_t *d = &output->ctf_dedup;
   ctf_next_t *i = NULL;
   void *input_id, *target_id;
-  int err;
+  ctf_error_t err;
   ctf_dict_t *err_fp, *input_fp;
   int input_num;
   ctf_id_t err_type;
@@ -4088,7 +4088,7 @@ ctf_dedup_emit_decl_tags (ctf_dict_t *output, ctf_dict_t **inputs)
   ctf_dedup_t *d = &output->ctf_dedup;
   ctf_next_t *i = NULL;
   void *input_id, *struct_id;
-  int err;
+  ctf_error_t err;
   ctf_dict_t *err_fp, *input_fp;
   int input_num;
   ctf_id_t err_type;
@@ -4129,8 +4129,9 @@ ctf_dedup_emit_decl_tags (ctf_dict_t *output, ctf_dict_t **inputs)
       err_fp = input_fp;
       err_type = input_type;
 
-      if ((isroot = !ctf_type_conflicting (input_fp, input_type, NULL)) < 0)
+      if ((isroot = ctf_type_conflicting (input_fp, input_type, NULL)) < 0)
 	goto err_input;
+      isroot = !isroot;
 
       if (ctf_decl_tag (input_fp, input_type, &component_idx) == CTF_ERR)
 	goto err_input;

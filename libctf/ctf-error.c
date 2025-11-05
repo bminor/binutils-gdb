@@ -64,7 +64,7 @@ _CTF_ERRORS
   };
 
 const char *
-ctf_errmsg (int error)
+ctf_errmsg (ctf_error_t error)
 {
   const char *str;
 
@@ -76,7 +76,7 @@ ctf_errmsg (int error)
   return (str ? gettext (str) : _("Unknown error"));
 }
 
-int
+ctf_error_t
 ctf_errno (ctf_dict_t * fp)
 {
   return fp->ctf_errno;

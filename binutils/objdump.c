@@ -4806,7 +4806,7 @@ dump_ctf_errs (ctf_dict_t *fp)
   ctf_next_t *it = NULL;
   char *errtext;
   int is_warning;
-  int err;
+  ctf_error_t err;
 
   /* Dump accumulated errors and warnings.  */
   while ((errtext = ctf_errwarning_next (fp, &it, &is_warning, &err)) != NULL)
@@ -4887,7 +4887,7 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name,
   const char *name;
   size_t member = 0;
   int try_defaults = 0;
-  int err;
+  ctf_error_t err;
 
   if (sect_name == NULL)
     {

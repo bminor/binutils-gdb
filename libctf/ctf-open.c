@@ -413,7 +413,7 @@ static const ctf_dictops_t ctf_dictops[] = {
    If init_symtab works on one call, it cannot fail on future calls to the same
    fp: ctf_symsect_endianness relies on this.  */
 
-static int
+static ctf_error_t
 init_symtab (ctf_dict_t *fp, const ctf_header_t *hp, const ctf_sect_t *sp)
 {
   const unsigned char *symp;
@@ -559,7 +559,7 @@ ctf_set_base (ctf_dict_t *fp, const ctf_header_t *hp, unsigned char *base)
     ctf_dprintf ("ctf_set_base: parent name %s\n", fp->ctf_parent_name);
 }
 
-static int
+static ctf_error_t
 init_static_types_names (ctf_dict_t *fp, ctf_header_t *cth, int is_btf);
 
 /* Populate statically-defined types (those loaded from a saved buffer).
@@ -574,7 +574,7 @@ init_static_types_names (ctf_dict_t *fp, ctf_header_t *cth, int is_btf);
    This is a wrapper to simplify memory allocation on error in the _internal
    function that does all the actual work.  */
 
-static int
+static ctf_error_t
 init_static_types (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
 {
   const ctf_type_t *tbuf;
@@ -602,7 +602,7 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
   if (fp->ctf_version < CTF_VERSION_4)
     {
 #if 0
-      int err;
+      ctf_error_t err;
 
       if ((err = upgrade_types (fp, cth)) != 0)
 	return err;				/* Upgrade failed.  */
@@ -782,17 +782,17 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
   return init_static_types_names (fp, cth, is_btf);
 }
 
-static int
+static ctf_error_t
 init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 				  ctf_dynset_t *all_enums);
 
 /* A wrapper to simplify memory allocation.  */
 
-static int
+static ctf_error_t
 init_static_types_names (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
 {
   ctf_dynset_t *all_enums;
-  int err;
+  ctf_error_t err;
 
   if ((all_enums = ctf_dynset_create (htab_hash_pointer, htab_eq_pointer,
 				      NULL)) == NULL)
@@ -803,7 +803,7 @@ init_static_types_names (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
   return err;
 }
 
-static int
+static ctf_error_t
 init_void (ctf_dict_t *fp);
 
 /* Initialize the parts of the CTF dict whose initialization depends on name or
@@ -814,7 +814,7 @@ init_void (ctf_dict_t *fp);
    As a function largely called at open time, this function does not reliably
    set the ctf_errno, but instead returns a positive error code.  */
 
-static int
+static ctf_error_t
 init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 				  ctf_dynset_t *all_enums)
 {
@@ -826,7 +826,8 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 
   ctf_next_t *i = NULL;
   void *k;
-  int err;
+  ctf_error_t err;
+  ctf_ret_t hash_err;
 
   /* See init_static_types.  */
   int child = (cth->cth_parent_name != 0
@@ -906,11 +907,11 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 		    && (existing_en.cte_offset != 0
 			|| existing_en.cte_bits < this_en.cte_bits)))
 	      {
-		err = ctf_dynhash_insert_type (fp, fp->ctf_names,
-					       ctf_index_to_type (fp, id),
-					       suffix->ctt_name);
-		if (err != 0)
-		  return err * -1;
+		hash_err = ctf_dynhash_insert_type (fp, fp->ctf_names,
+						    ctf_index_to_type (fp, id),
+						    suffix->ctt_name);
+		if (hash_err != 0)
+		  return hash_err * -1;
 	      }
 	    break;
 	  }
@@ -928,11 +929,11 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 		&& ctf_type_kind (fp, existing) == CTF_K_FLOAT)
 	      break;
 
-	    err = ctf_dynhash_insert_type (fp, fp->ctf_names,
-					   ctf_index_to_type (fp, id),
-					   suffix->ctt_name);
-	    if (err != 0)
-	      return err * -1;
+	    hash_err = ctf_dynhash_insert_type (fp, fp->ctf_names,
+						ctf_index_to_type (fp, id),
+						suffix->ctt_name);
+	    if (hash_err != 0)
+	      return hash_err * -1;
 	    break;
 	  }
 
@@ -950,23 +951,23 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 	  if (!isroot)
 	    break;
 
-	  err = ctf_dynhash_insert_type (fp, fp->ctf_names,
-					 ctf_index_to_type (fp, id),
-					 suffix->ctt_name);
-	  if (err != 0)
-	    return err * -1;
+	  hash_err = ctf_dynhash_insert_type (fp, fp->ctf_names,
+					      ctf_index_to_type (fp, id),
+					      suffix->ctt_name);
+	  if (hash_err != 0)
+	    return hash_err * -1;
 	  break;
 
 	case CTF_K_STRUCT:
 	  if (!isroot)
 	    break;
 
-	  err = ctf_dynhash_insert_type (fp, fp->ctf_structs,
-					 ctf_index_to_type (fp, id),
-					 suffix->ctt_name);
+	  hash_err = ctf_dynhash_insert_type (fp, fp->ctf_structs,
+					      ctf_index_to_type (fp, id),
+					      suffix->ctt_name);
 
-	  if (err != 0)
-	    return err * -1;
+	  if (hash_err != 0)
+	    return hash_err * -1;
 
 	  break;
 
@@ -974,12 +975,12 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 	  if (!isroot)
 	    break;
 
-	  err = ctf_dynhash_insert_type (fp, fp->ctf_unions,
-					 ctf_index_to_type (fp, id),
-					 suffix->ctt_name);
+	  hash_err = ctf_dynhash_insert_type (fp, fp->ctf_unions,
+					      ctf_index_to_type (fp, id),
+					      suffix->ctt_name);
 
-	  if (err != 0)
-	    return err * -1;
+	  if (hash_err != 0)
+	    return hash_err * -1;
 	  break;
 
 	case CTF_K_ENUM:
@@ -994,21 +995,21 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 					    name) != 0)
 	      break;
 
-	    err = ctf_dynhash_insert_type (fp, fp->ctf_enums,
-					   ctf_index_to_type (fp, id),
-					   suffix->ctt_name);
+	    hash_err = ctf_dynhash_insert_type (fp, fp->ctf_enums,
+						ctf_index_to_type (fp, id),
+						suffix->ctt_name);
 
-	    if (err != 0)
-	      return err * -1;
+	    if (hash_err != 0)
+	      return hash_err * -1;
 
 	    /* Remember all non-forward enums for later rescanning.  */
 
 	    if (vlen != 0)
 	      {
-		err = ctf_dynset_insert (all_enums, (void *) (ptrdiff_t)
-					 ctf_index_to_type (fp, id));
-		if (err != 0)
-		  return err * -1;
+		hash_err = ctf_dynset_insert (all_enums, (void *) (ptrdiff_t)
+					      ctf_index_to_type (fp, id));
+		if (hash_err != 0)
+		  return hash_err * -1;
 	      }
 	    break;
 	  }
@@ -1017,33 +1018,33 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 	  if (!isroot)
 	    break;
 
-	  err = ctf_dynhash_insert_type (fp, fp->ctf_names,
-					 ctf_index_to_type (fp, id),
-					 suffix->ctt_name);
-	  if (err != 0)
-	    return err * -1;
+	  hash_err = ctf_dynhash_insert_type (fp, fp->ctf_names,
+					      ctf_index_to_type (fp, id),
+					      suffix->ctt_name);
+	  if (hash_err != 0)
+	    return hash_err * -1;
 	  break;
 
 	case CTF_K_VAR:
 	  if (!isroot)
 	    break;
 
-	  err = ctf_dynhash_insert_type (fp, fp->ctf_names,
-					 ctf_index_to_type (fp, id),
-					 suffix->ctt_name);
-	  if (err != 0)
-	    return err * -1;
+	  hash_err = ctf_dynhash_insert_type (fp, fp->ctf_names,
+					      ctf_index_to_type (fp, id),
+					      suffix->ctt_name);
+	  if (hash_err != 0)
+	    return hash_err * -1;
 	  break;
 
 	case CTF_K_DATASEC:
 	  if (!isroot)
 	    break;
 
-	  err = ctf_dynhash_insert_type (fp, fp->ctf_datasecs,
-					 ctf_index_to_type (fp, id),
-					 suffix->ctt_name);
-	  if (err != 0)
-	    return err * -1;
+	  hash_err = ctf_dynhash_insert_type (fp, fp->ctf_datasecs,
+					      ctf_index_to_type (fp, id),
+					      suffix->ctt_name);
+	  if (hash_err != 0)
+	    return hash_err * -1;
 
 	  break;
 
@@ -1077,10 +1078,10 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 	       name is not already present.  */
 	    if (ctf_dynhash_lookup_type (h, name) == 0)
 	      {
-		err = ctf_dynhash_insert_type (fp, h, ctf_index_to_type (fp, id),
-					       suffix->ctt_name);
-		if (err != 0)
-		  return err * -1;
+		hash_err = ctf_dynhash_insert_type (fp, h, ctf_index_to_type (fp, id),
+						    suffix->ctt_name);
+		if (hash_err != 0)
+		  return hash_err * -1;
 	      }
 	    break;
 	  }
@@ -1107,7 +1108,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 
   ctf_dprintf ("%u total types processed\n", id - 1);
 
-  if ((err = init_void (fp) < 0))
+  if ((err = init_void (fp) != 0))
     return err;
 
   /* In the third pass, we traverse the enums we spotted earlier and track all
@@ -1196,7 +1197,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
    As an initialization function, this returns a positive error code, or
    zero.  */
 
-static int
+static ctf_error_t
 init_void (ctf_dict_t *fp)
 {
   ctf_id_t void_type;
@@ -1239,7 +1240,7 @@ init_void (ctf_dict_t *fp)
 
 /* Flip the endianness of the CTF header.  */
 
-int
+ctf_ret_t
 ctf_flip_header (void *cthp, int is_btf, int ctf_version)
 {
   ctf_header_t *cth = (ctf_header_t *) cthp;
@@ -1274,12 +1275,12 @@ ctf_flip_header (void *cthp, int is_btf, int ctf_version)
       case CTF_VERSION_1_UPGRADED_3:
       case CTF_VERSION_2:
 	ctf_err_warn (NULL, 0, ECTF_INTERNAL, "Implementation of backward-compatible CTF reading still underway\n");
-	return -ECTF_INTERNAL;
+	return -1;
 /*	ctf_flip_header_v2 (h2p); */
       break;
       case CTF_VERSION_3:
 	ctf_err_warn (NULL, 0, ECTF_INTERNAL, "Implementation of backward-compatible CTF reading still underway\n");
-	return -ECTF_INTERNAL;
+	return -1;
 
 /*	ctf_flip_header_v3 (h3p); */
       }
@@ -1322,7 +1323,7 @@ flip_objts (void *start, size_t len)
 /* Flip the endianness of the type section, a tagged array of ctf_type followed
    by variable data (which may itself be a ctf_type for prefixed kinds).  */
 
-static int
+static ctf_error_t
 flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
 {
   ctf_type_t *t = start;
@@ -1559,7 +1560,7 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
 /* Flip the endianness of BUF, given the offsets in the (native-endianness) CTH.
    If TO_FOREIGN is set, flip to foreign-endianness; if not, flip away.  */
 
-int
+ctf_error_t
 ctf_flip (ctf_dict_t *fp, ctf_header_t *cth, unsigned char *buf,
 	  int is_btf, int to_foreign)
 {
@@ -1608,7 +1609,7 @@ ctf_dict_t *ctf_simple_open (const char *ctfsect, size_t ctfsect_size,
 			     const char *symsect, size_t symsect_size,
 			     size_t symsect_entsize,
 			     const char *strsect, size_t strsect_size,
-			     int *errp)
+			     ctf_error_t *errp)
 {
   ctf_sect_t skeleton;
 
@@ -1655,7 +1656,7 @@ ctf_dict_t *ctf_simple_open (const char *ctfsect, size_t ctfsect_size,
 
 ctf_dict_t *
 ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
-	     const ctf_sect_t *strsect, int *errp)
+	     const ctf_sect_t *strsect, ctf_error_t *errp)
 {
   const ctf_preamble_v3_t *pp;
   const ctf_btf_preamble_t *bp;
@@ -1681,7 +1682,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   const char *desc;
   int foreign_endian = 0;
-  int err;
+  ctf_error_t err;
 
   libctf_init_debug();
 
@@ -2581,7 +2582,7 @@ ctf_parent_name (ctf_dict_t *fp)
 
 /* Set the parent name.  It is an error to call this routine without calling
    ctf_import() at some point.  */
-int
+ctf_ret_t
 ctf_parent_name_set (ctf_dict_t *fp, const char *name)
 {
   if (fp->ctf_dyn_parent_name != NULL)
@@ -2602,7 +2603,7 @@ ctf_cuname (ctf_dict_t *fp)
 }
 
 /* Set the compilation unit name.  */
-int
+ctf_ret_t
 ctf_cuname_set (ctf_dict_t *fp, const char *name)
 {
   if (fp->ctf_dyn_cu_name != NULL)
@@ -2614,10 +2615,11 @@ ctf_cuname_set (ctf_dict_t *fp, const char *name)
   return 0;
 }
 
-static int
+static ctf_ret_t
 ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
 {
-  int err;
+  ctf_ret_t err;
+  ctf_error_t ctf_err;
   int no_strings = fp->ctf_flags & LCTF_NO_STR;
   int old_flags = fp->ctf_flags;
   ctf_dict_t *old_parent = fp->ctf_parent;
@@ -2732,8 +2734,8 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
   fp->ctf_flags |= LCTF_CHILD;
   fp->ctf_flags &= ~LCTF_NO_STR;
 
-  if (no_strings && (err = init_static_types_names (fp, fp->ctf_header,
-						    fp->ctf_opened_btf) < 0))
+  if (no_strings && (ctf_err = init_static_types_names (fp, fp->ctf_header,
+							fp->ctf_opened_btf) != 0))
     {
       /* Undo everything other than cache flushing.  */
 
@@ -2745,7 +2747,7 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
       if (fp->ctf_parent_unreffed)
 	old_parent->ctf_refcnt++;
 
-      return (ctf_set_errno (fp, err));		/* errno is set for us.  */
+      return (ctf_set_errno (fp, ctf_err));	/* errno is set for us.  */
     }
 
   /* Failure can now no longer happen, so we can close the old parent (which may
@@ -2768,7 +2770,7 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
 
    You can call this with a parent of NULL as many times as you like (but
    it doesn't do much).  */
-int
+ctf_ret_t
 ctf_import (ctf_dict_t *fp, ctf_dict_t *pfp)
 {
   return ctf_import_internal (fp, pfp, 0);
@@ -2778,14 +2780,14 @@ ctf_import (ctf_dict_t *fp, ctf_dict_t *pfp)
    or close it at any point: as a result it can go away at any time and the
    caller must do all freeing itself.  Used internally to avoid refcount
    loops.  */
-int
+ctf_ret_t
 ctf_import_unref (ctf_dict_t *fp, ctf_dict_t *pfp)
 {
   return ctf_import_internal (fp, pfp, 1);
 }
 
 /* Set the data model constant for the CTF dict.  */
-int
+ctf_ret_t
 ctf_setmodel (ctf_dict_t *fp, int model)
 {
   const ctf_dmodel_t *dp;

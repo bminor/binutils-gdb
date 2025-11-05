@@ -49,6 +49,21 @@ typedef struct ctf_dict ctf_dict_t;
 typedef struct ctf_archive_internal ctf_archive_t;
 typedef unsigned long ctf_id_t;
 
+/* This typedef indicates that a function returns zero or negative on error. */
+typedef int ctf_ret_t;
+
+/* This typedef indicates that a function return 0 or 1, or negative on error.  */
+typedef int ctf_bool_t;
+
+/* This typedef indiicates that a function returns a CTF error code, or an errno
+   value, or zero, on error (or takes one).  C can make this an enum type: C++
+   must resort to int, because the type includes many values not in the enum
+   (all valid errnos, for instance).  */
+
+#ifdef __cplusplus
+typedef int ctf_error_t;
+#endif
+
 /* This opaque definition allows libctf to accept BFD data structures without
    importing all the BFD noise into users' namespaces.  */
 
@@ -274,6 +289,11 @@ typedef struct ctf_snapshot_id
 
 #define	ECTF_BASE	1000	/* Base value for libctf errnos.  */
 
+/* Despite being an enum, this is a superset of errno, and all values are
+   potentially valid.  */
+#ifndef __cplusplus
+typedef
+#endif
 enum
   {
 #define _CTF_FIRST(NAME, STR) NAME = ECTF_BASE
@@ -281,7 +301,11 @@ enum
 _CTF_ERRORS
 #undef _CTF_ITEM
 #undef _CTF_FIRST
+#ifdef __cplusplus
   };
+#else
+  } ctf_error_t;
+#endif
 
 #define ECTF_NERR (ECTF_TOOLARGE - ECTF_BASE + 1) /* Count of CTF errors.  */
 
@@ -379,19 +403,19 @@ extern ctf_next_t *ctf_next_copy (ctf_next_t *);
    libctf-nobfd flavour of the library.  If you want to provide the CTF section
    yourself, you can do that with ctf_bfdopen_ctfsect.  */
 
-extern ctf_archive_t *ctf_bfdopen (struct bfd *, int *);
+extern ctf_archive_t *ctf_bfdopen (struct bfd *, ctf_error_t *);
 extern ctf_archive_t *ctf_bfdopen_ctfsect (struct bfd *, const ctf_sect_t *,
-					   int *);
+					   ctf_error_t *);
 extern ctf_archive_t *ctf_fdopen (int fd, const char *filename,
-				  const char *target, int *errp);
+				  const char *target, ctf_error_t *);
 extern ctf_archive_t *ctf_open (const char *filename,
-				const char *target, int *errp);
+				const char *target, ctf_error_t *);
 extern void ctf_close (ctf_archive_t *);
 
 /* Set or unset dict-wide boolean flags, and get the value of these flags.  */
 
-extern int ctf_dict_set_flag (ctf_dict_t *, uint64_t flag, int set);
-extern int ctf_dict_get_flag (ctf_dict_t *, uint64_t flag);
+extern ctf_ret_t ctf_dict_set_flag (ctf_dict_t *, uint64_t flag, int set);
+extern ctf_bool_t ctf_dict_get_flag (ctf_dict_t *, uint64_t flag);
 
 /* Return the data, symbol, or string sections used by a given CTF dict.  */
 extern ctf_sect_t ctf_getdatasect (const ctf_dict_t *);
@@ -424,11 +448,11 @@ extern void ctf_arc_symsect_endianness (ctf_archive_t *, int little_endian);
    Like many other convenient opening functions, ctf_arc_open needs BFD and is
    not available in libctf-nobfd.  */
 
-extern ctf_archive_t *ctf_arc_open (const char *, int *);
+extern ctf_archive_t *ctf_arc_open (const char *, ctf_error_t *);
 extern ctf_archive_t *ctf_arc_bufopen (const ctf_sect_t *ctfsect,
 				       const ctf_sect_t *symsect,
 				       const ctf_sect_t *strsect,
-				       int *);
+				       ctf_error_t *);
 extern void ctf_arc_close (ctf_archive_t *);
 
 /* Get the archive a given dictionary came from (if any).  */
@@ -451,11 +475,11 @@ extern size_t ctf_archive_count (const ctf_archive_t *);
    functions instead.)  */
 
 extern ctf_dict_t *ctf_dict_open (const ctf_archive_t *,
-				  const char *, int *);
+				  const char *, ctf_error_t *);
 extern ctf_dict_t *ctf_dict_open_sections (const ctf_archive_t *,
 					   const ctf_sect_t *symsect,
 					   const ctf_sect_t *strsect,
-					   const char *, int *);
+					   const char *, ctf_error_t *);
 
 /* Look up symbols' types in archives by index or name, returning the dict
    and optionally type ID in which the type is found.  Lookup results are
@@ -464,10 +488,10 @@ extern ctf_dict_t *ctf_dict_open_sections (const ctf_archive_t *,
 
 extern ctf_dict_t *ctf_arc_lookup_symbol (ctf_archive_t *,
 					  unsigned long symidx,
-					  ctf_id_t *, int *errp);
+					  ctf_id_t *, ctf_error_t *errp);
 extern ctf_dict_t *ctf_arc_lookup_symbol_name (ctf_archive_t *,
 					       const char *name,
-					       ctf_id_t *, int *errp);
+					       ctf_id_t *, ctf_error_t *errp);
 extern void ctf_arc_flush_caches (ctf_archive_t *);
 
 /* The next functions return or close real CTF files, or write out CTF
@@ -479,10 +503,10 @@ extern ctf_dict_t *ctf_simple_open (const char *ctfsect, size_t ctfsect_size,
 				    const char *symsect, size_t symsect_size,
 				    size_t symsect_entsize,
 				    const char *strsect, size_t strsect_size,
-				    int *errp);
+				    ctf_error_t *errp);
 extern ctf_dict_t *ctf_bufopen (const ctf_sect_t *ctfsect,
 				const ctf_sect_t *symsect,
-				const ctf_sect_t *strsect, int *);
+				const ctf_sect_t *strsect, ctf_error_t *);
 extern void ctf_ref (ctf_dict_t *);
 extern void ctf_dict_close (ctf_dict_t *);
 
@@ -499,18 +523,18 @@ extern void ctf_dict_close (ctf_dict_t *);
 extern const char *ctf_cuname (ctf_dict_t *);
 extern ctf_dict_t *ctf_parent_dict (ctf_dict_t *);
 extern const char *ctf_parent_name (ctf_dict_t *);
-extern int ctf_type_isparent (const ctf_dict_t *, ctf_id_t);
-extern int ctf_type_ischild (const ctf_dict_t *, ctf_id_t);
-extern int ctf_import (ctf_dict_t *child, ctf_dict_t *parent);
+extern ctf_bool_t ctf_type_isparent (const ctf_dict_t *, ctf_id_t);
+extern ctf_bool_t ctf_type_ischild (const ctf_dict_t *, ctf_id_t);
+extern ctf_ret_t ctf_import (ctf_dict_t *child, ctf_dict_t *parent);
 
 /* Set these names (used when creating dicts).  */
 
-extern int ctf_cuname_set (ctf_dict_t *, const char *);
-extern int ctf_parent_name_set (ctf_dict_t *, const char *);
+extern ctf_ret_t ctf_cuname_set (ctf_dict_t *, const char *);
+extern ctf_ret_t ctf_parent_name_set (ctf_dict_t *, const char *);
 
 /* Set and get the CTF data model (see above).  */
 
-extern int ctf_setmodel (ctf_dict_t *, int);
+extern ctf_ret_t ctf_setmodel (ctf_dict_t *, int);
 extern int ctf_getmodel (ctf_dict_t *);
 
 /* CTF dicts can carry a single (in-memory-only) non-persistent pointer to
@@ -536,8 +560,8 @@ extern void *ctf_getspecific (ctf_dict_t *);
     - Functions returning a pointer are in error if their return value ==
       NULL.  */
 
-extern int ctf_errno (ctf_dict_t *);
-extern const char *ctf_errmsg (int);
+extern ctf_error_t ctf_errno (ctf_dict_t *);
+extern const char *ctf_errmsg (ctf_error_t);
 
 /* BTF/CTF writeout version info.
 
@@ -724,7 +748,7 @@ extern int ctf_type_kind_forwarded (ctf_dict_t *, ctf_id_t);
    passed-in type (which may be a null string if the cuname is not known, or if
    this is not a conflicting type).  */
 
-extern int ctf_type_conflicting (ctf_dict_t *, ctf_id_t, const char **cuname);
+extern ctf_bool_t ctf_type_conflicting (ctf_dict_t *, ctf_id_t, const char **cuname);
 
 /* Return the type a pointer, typedef, cvr-qual, or slice refers to, or return
    an ECTF_NOTREF error otherwise.  ctf_type_kind pretends that slices are
@@ -738,7 +762,7 @@ extern ctf_id_t ctf_type_reference (ctf_dict_t *, ctf_id_t);
 /* Return the encoding of a given type.  No attempt is made to resolve the
    type first, so passing in typedefs etc will yield an error.  */
 
-extern int ctf_type_encoding (ctf_dict_t *, ctf_id_t, ctf_encoding_t *);
+extern ctf_ret_t ctf_type_encoding (ctf_dict_t *, ctf_id_t, ctf_encoding_t *);
 
 /* Given a type, return some other type that is a pointer to this type (if any
    exists), or return ECTF_NOTYPE otherwise.  If non exists, try resolving away
@@ -750,7 +774,7 @@ extern ctf_id_t ctf_type_pointer (ctf_dict_t *, ctf_id_t);
 
 /* Return 1 if two types are assignment-compatible.  */
 
-extern int ctf_type_compat (ctf_dict_t *, ctf_id_t, ctf_dict_t *, ctf_id_t);
+extern ctf_bool_t ctf_type_compat (ctf_dict_t *, ctf_id_t, ctf_dict_t *, ctf_id_t);
 
 /* Recursively visit the members of any type, calling the ctf_visit_f for each.  */
 
@@ -766,27 +790,27 @@ extern int ctf_type_cmp (ctf_dict_t *, ctf_id_t, ctf_dict_t *, ctf_id_t);
    enumerators have the same value, the first with that value is returned.  */
 
 extern const char *ctf_enum_name (ctf_dict_t *, ctf_id_t, int64_t);
-extern int ctf_enum_value (ctf_dict_t *, ctf_id_t, const char *, int64_t *);
-extern int ctf_enum_unsigned_value (ctf_dict_t *, ctf_id_t, const char *, uint64_t *);
+extern ctf_ret_t ctf_enum_value (ctf_dict_t *, ctf_id_t, const char *, int64_t *);
+extern ctf_ret_t ctf_enum_unsigned_value (ctf_dict_t *, ctf_id_t, const char *, uint64_t *);
 
 /* Return 1 if this enum's contents are unsigned, so you can tell which of the
    above functions to use.  */
 
-extern int ctf_enum_unsigned (ctf_dict_t *, ctf_id_t);
+extern ctf_bool_t ctf_enum_unsigned (ctf_dict_t *, ctf_id_t);
 
 /* Return nonzero if this struct or union uses bitfield encoding.  */
 
-extern int ctf_struct_bitfield (ctf_dict_t *, ctf_id_t);
+extern ctf_bool_t ctf_struct_bitfield (ctf_dict_t *, ctf_id_t);
 
 /* Get the size and member type of an array.  */
 
-extern int ctf_array_info (ctf_dict_t *, ctf_id_t, ctf_arinfo_t *);
+extern ctf_ret_t ctf_array_info (ctf_dict_t *, ctf_id_t, ctf_arinfo_t *);
 
 /* Get info on specific named members of structs or unions, and count the number
    of members in a struct, union, or enum.  */
 
-extern int ctf_member_info (ctf_dict_t *, ctf_id_t, const char *,
-			    ctf_membinfo_t *);
+extern ctf_ret_t ctf_member_info (ctf_dict_t *, ctf_id_t, const char *,
+				  ctf_membinfo_t *);
 extern ssize_t ctf_member_count (ctf_dict_t *, ctf_id_t);
 
 /* Search a datasec for a variable covering a given offset.
@@ -857,7 +881,7 @@ extern ctf_id_t ctf_lookup_enumerator_next (ctf_dict_t *, const char *name,
 
 extern ctf_id_t ctf_arc_lookup_enumerator_next (ctf_archive_t *, const char *name,
 						ctf_next_t **, int64_t *enum_value,
-						ctf_dict_t **dict, int *errp);
+						ctf_dict_t **dict, ctf_error_t *errp);
 
 /* Iterate over all types in a dict.  ctf_type_iter_all recurses over all types:
    ctf_type_iter recurses only over types with user-visible names (for which
@@ -904,7 +928,7 @@ extern ctf_id_t ctf_tag_next (ctf_dict_t *, const char *tag, ctf_next_t **);
 extern int ctf_archive_iter (const ctf_archive_t *, ctf_archive_member_f *,
 			     void *);
 extern ctf_dict_t *ctf_archive_next (const ctf_archive_t *, ctf_next_t **,
-				     const char **, int skip_parent, int *errp);
+				     const char **, int skip_parent, ctf_error_t *errp);
 
 /* Pass the raw content of each archive member in turn to
    ctf_archive_raw_member_f.
@@ -936,13 +960,13 @@ extern size_t ctf_sect_size (ctf_dict_t *, ctf_sect_names_t sect);
    the error/warning list, in order of emission.  Errors and warnings are popped
    after return: the caller must free the returned error-text pointer.  */
 extern char *ctf_errwarning_next (ctf_dict_t *, ctf_next_t **,
-				  int *is_warning, int *errp);
+				  int *is_warning, ctf_error_t *errp);
 
 /* Creation.  */
 
 /* Create a new, empty dict.  If creation fails, return NULL and put a CTF error
-   code in the passed-in int (if set).  */
-extern ctf_dict_t *ctf_create (int *);
+   code in the passed-in ctf_error_t (if set).  */
+extern ctf_dict_t *ctf_create (ctf_error_t *);
 
 /* Add specific types to a dict.  You can add new types to any dict, but you can
    only add members to types that have been added since this dict was read in
@@ -1029,7 +1053,7 @@ extern ctf_id_t ctf_add_volatile (ctf_dict_t *, uint32_t, ctf_id_t);
 /* Add an enumerator to an enum or enum64.  If the enum is non-root, so are all
    the constants added to it by ctf_add_enumerator.  */
 
-extern int ctf_add_enumerator (ctf_dict_t *, ctf_id_t, const char *, int64_t);
+extern ctf_ret_t ctf_add_enumerator (ctf_dict_t *, ctf_id_t, const char *, int64_t);
 
 /* Add a member to a struct or union, either at the next available offset (with
    suitable padding for the alignment) or at a specific offset, and possibly
@@ -1038,16 +1062,16 @@ extern int ctf_add_enumerator (ctf_dict_t *, ctf_id_t, const char *, int64_t);
    with a nonzero bit_width will fail unless the struct was created with
    CTF_ADD_STRUCT_BITFIELDS.  */
 
-extern int ctf_add_member (ctf_dict_t *, ctf_id_t, const char *, ctf_id_t);
-extern int ctf_add_member_offset (ctf_dict_t *, ctf_id_t, const char *,
-				  ctf_id_t, unsigned long);
-extern int ctf_add_member_encoded (ctf_dict_t *, ctf_id_t, const char *,
-				   ctf_id_t, unsigned long,
-				   const ctf_encoding_t);
-extern int ctf_add_member_bitfield (ctf_dict_t *, ctf_id_t souid,
-                                    const char *, ctf_id_t type,
-                                    unsigned long bit_offset,
-                                    int bit_width);
+extern ctf_ret_t ctf_add_member (ctf_dict_t *, ctf_id_t, const char *, ctf_id_t);
+extern ctf_ret_t ctf_add_member_offset (ctf_dict_t *, ctf_id_t, const char *,
+					ctf_id_t, unsigned long);
+extern ctf_ret_t ctf_add_member_encoded (ctf_dict_t *, ctf_id_t, const char *,
+					 ctf_id_t, unsigned long,
+					 const ctf_encoding_t);
+extern ctf_ret_t ctf_add_member_bitfield (ctf_dict_t *, ctf_id_t souid,
+					  const char *, ctf_id_t type,
+					  unsigned long bit_offset,
+					  int bit_width);
 
 /* ctf_add_variable adds variables to no datasec at all;
    ctf_add_section_variable adds them to the given datasec, or to no datasec at
@@ -1062,20 +1086,20 @@ extern ctf_id_t ctf_add_section_variable (ctf_dict_t *, uint32_t,
 
 /* Set the size and member and index types of an array.  */
 
-extern int ctf_set_array (ctf_dict_t *, ctf_id_t, const ctf_arinfo_t *);
+extern ctf_ret_t ctf_set_array (ctf_dict_t *, ctf_id_t, const ctf_arinfo_t *);
 
 /* Mark a type as conflicting, residing in some other translation unit with a
    given name.  The type is hidden from all name lookups, just like
    CTF_ADD_NONROOT.  */
 
-extern int ctf_set_conflicting (ctf_dict_t *, ctf_id_t, const char *);
+extern ctf_ret_t ctf_set_conflicting (ctf_dict_t *, ctf_id_t, const char *);
 
 /* Add a function or object symbol type with a particular name, without saying
    anything about the actual symbol index.  (The linker will then associate them
    with actual symbol indexes using the ctf_link functions below.)  */
 
-extern int ctf_add_objt_sym (ctf_dict_t *, const char *, ctf_id_t);
-extern int ctf_add_func_sym (ctf_dict_t *, const char *, ctf_id_t);
+extern ctf_ret_t ctf_add_objt_sym (ctf_dict_t *, const char *, ctf_id_t);
+extern ctf_ret_t ctf_add_func_sym (ctf_dict_t *, const char *, ctf_id_t);
 
 /* Snapshot/rollback.  Call ctf_update to snapshot the state of a dict:
   a later call to ctf_discard then deletes all types added since (but not new
@@ -1083,10 +1107,10 @@ extern int ctf_add_func_sym (ctf_dict_t *, const char *, ctf_id_t);
   one of these IDs to ctf_rollback to discard all types added since the
   corresponding call to ctf_snapshot.  */
 
-extern int ctf_update (ctf_dict_t *);
+extern ctf_ret_t ctf_update (ctf_dict_t *);
 extern ctf_snapshot_id_t ctf_snapshot (ctf_dict_t *);
-extern int ctf_rollback (ctf_dict_t *, ctf_snapshot_id_t);
-extern int ctf_discard (ctf_dict_t *);
+extern ctf_ret_t ctf_rollback (ctf_dict_t *, ctf_snapshot_id_t);
+extern ctf_ret_t ctf_discard (ctf_dict_t *);
 
 /* Dict writeout.  See ctf_version().
 
@@ -1107,15 +1131,16 @@ extern unsigned char *ctf_write_mem (ctf_dict_t *, size_t *, size_t threshold);
 /* Create a CTF archive named FILE from CTF_DICTS inputs with NAMES (or write it
    to the passed-in fd).  */
 
-extern int ctf_arc_write (const char *file, ctf_dict_t **ctf_dicts, size_t,
-			  const char **names, size_t);
-extern int ctf_arc_write_fd (int, ctf_dict_t **, size_t, const char **,
-			     size_t);
+extern ctf_error_t ctf_arc_write (const char *file, ctf_dict_t **ctf_dicts, size_t,
+				  const char **names, size_t);
+extern ctf_error_t ctf_arc_write_fd (int, ctf_dict_t **, size_t, const char **,
+				     size_t);
 
 /* Prohibit writeout of this type kind: attempts to write it out cause
    an ECTF_KIND_PROHIBITED error.  */
 
-extern int ctf_write_suppress_kind (ctf_dict_t *fp, int kind, int prohibited);
+extern ctf_ret_t ctf_write_suppress_kind (ctf_dict_t *fp, int kind,
+					  int prohibited);
 
 /* Linking.  These functions are used by ld to link .ctf sections in input
    object files into a single .ctf section which is an archive possibly
@@ -1135,12 +1160,12 @@ extern int ctf_write_suppress_kind (ctf_dict_t *fp, int kind, int prohibited);
 
    The NAME need not be unique (but usually is).  */
 
-extern int ctf_link_add_ctf (ctf_dict_t *, ctf_archive_t *, const char *name);
+extern ctf_ret_t ctf_link_add_ctf (ctf_dict_t *, ctf_archive_t *, const char *name);
 
 /* Do the deduplicating link, filling the dict with types.  The FLAGS are the
    CTF_LINK_* flags above.  */
 
-extern int ctf_link (ctf_dict_t *, int flags);
+extern ctf_ret_t ctf_link (ctf_dict_t *, int flags);
 
 /* Symtab linker handling, called after ctf_link to set up the symbol type
    information used by ctf_*_lookup_symbol.  Optional.  */
@@ -1149,26 +1174,26 @@ extern int ctf_link (ctf_dict_t *, int flags);
    ADD_STRING to add each string and its corresponding offset in turn.  */
 
 typedef const char *ctf_link_strtab_string_f (uint32_t *offset, void *arg);
-extern int ctf_link_add_strtab (ctf_dict_t *,
-				ctf_link_strtab_string_f *add_string, void *);
+extern ctf_ret_t ctf_link_add_strtab (ctf_dict_t *,
+				      ctf_link_strtab_string_f *add_string, void *);
 
 /* Note that a given symbol will be public with a given set of properties.
    If the symbol has been added with that name via ctf_add_{func,objt}_sym,
    this symbol type will end up in the symtypetabs and can be looked up via
    ctf_*_lookup_symbol after the dict is read back in.  */
 
-extern int ctf_link_add_linker_symbol (ctf_dict_t *, ctf_link_sym_t *);
+extern ctf_ret_t ctf_link_add_linker_symbol (ctf_dict_t *, ctf_link_sym_t *);
 
 /* Impose an ordering on symbols, as defined by the strtab and symbol
    added by earlier calls to the above two functions.  Optional.  */
 
-extern int ctf_link_shuffle_syms (ctf_dict_t *);
+extern ctf_ret_t ctf_link_shuffle_syms (ctf_dict_t *);
 
 /* Determine the file format of the dict that will be written out after the
    calls above is compatible with pure BTF or would require CTF.  (Other things
    may nonetheless require CTF, in particular, compression.)  */
 
-extern int ctf_link_output_is_btf (ctf_dict_t *);
+extern ctf_ret_t ctf_link_output_is_btf (ctf_dict_t *);
 
 /* Return the serialized form of this ctf_linked dict as a new
    dynamically-allocated string, compressed if size over THRESHOLD.
@@ -1197,8 +1222,8 @@ extern unsigned char *ctf_link_write (ctf_dict_t *, size_t *size,
    unconditionally into the shared parent dict, and are hidden (marked
    conflicting) if they clash, rather than being moved into child dicts.  */
 
-extern int ctf_link_add_cu_mapping (ctf_dict_t *, const char *from,
-				    const char *to);
+extern ctf_ret_t ctf_link_add_cu_mapping (ctf_dict_t *, const char *from,
+					  const char *to);
 
 /* Allow CTF archive names to be tweaked at the last minute before writeout.
    Unlike cu-mappings, this cannot transform names so that they collide: it's
@@ -1213,10 +1238,10 @@ extern void ctf_link_set_memb_name_changer
    symbols) cause the CTF string table to grow to hold their names.  The
    variable filter should return nonzero if a variable should not appear in the
    output.  */
-typedef int ctf_link_variable_filter_f (ctf_dict_t *, const char *, ctf_id_t,
-					void *);
-extern int ctf_link_set_variable_filter (ctf_dict_t *,
-					 ctf_link_variable_filter_f *, void *);
+typedef ctf_bool_t ctf_link_variable_filter_f (ctf_dict_t *, const char *, ctf_id_t,
+					       void *);
+extern ctf_bool_t ctf_link_set_variable_filter (ctf_dict_t *,
+						ctf_link_variable_filter_f *, void *);
 
 /* Hash caching.  This is useful if you're repeatedly deduplicating against the
    same set of objects from the same inputs, and don't want to spend time
@@ -1233,8 +1258,8 @@ extern int ctf_link_hash_cache_load (ctf_dict_t *, const char *cache);
 
 /* Turn debugging off and on, and get its value.  This is the same as setting
    LIBCTF_DEBUG in the environment.  */
-extern void ctf_setdebug (int debug);
-extern int ctf_getdebug (void);
+extern void ctf_setdebug (ctf_bool_t debug);
+extern ctf_bool_t ctf_getdebug (void);
 
 /* Deprecated aliases for existing functions and types.  */
 

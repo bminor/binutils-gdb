@@ -47,7 +47,7 @@ ctf_bfdclose (struct ctf_archive_internal *arci)
 /* Open a CTF file given the specified BFD.  */
 
 ctf_archive_t *
-ctf_bfdopen (struct bfd *abfd, int *errp)
+ctf_bfdopen (struct bfd *abfd, ctf_error_t *errp)
 {
   ctf_archive_t *arc;
   asection *ctf_asect;
@@ -91,7 +91,7 @@ ctf_bfdopen (struct bfd *abfd, int *errp)
 
 ctf_archive_t *
 ctf_bfdopen_ctfsect (struct bfd *abfd _libctf_unused_,
-		     const ctf_sect_t *ctfsect, int *errp)
+		     const ctf_sect_t *ctfsect, ctf_error_t *errp)
 {
   ctf_archive_t *arci;
   ctf_sect_t *symsectp = NULL;
@@ -260,7 +260,7 @@ err: _libctf_unused_;
    TARGET, if non-NULL, should be the name of a suitable BFD target.  */
 
 ctf_archive_t *
-ctf_fdopen (int fd, const char *filename, const char *target, int *errp)
+ctf_fdopen (int fd, const char *filename, const char *target, ctf_error_t *errp)
 {
   ctf_archive_t *arci;
   bfd *abfd;
@@ -367,7 +367,7 @@ ctf_fdopen (int fd, const char *filename, const char *target, int *errp)
    wrapper around ctf_fdopen() for callers.  */
 
 ctf_archive_t *
-ctf_open (const char *filename, const char *target, int *errp)
+ctf_open (const char *filename, const char *target, ctf_error_t *errp)
 {
   ctf_archive_t *arc;
   int fd;
@@ -388,7 +388,7 @@ ctf_open (const char *filename, const char *target, int *errp)
    NULL and an error in *err.  Despite the fact that this uses CTF archives, it
    must be in this file to avoid dragging in BFD into non-BFD-using programs.  */
 ctf_archive_t *
-ctf_arc_open (const char *filename, int *errp)
+ctf_arc_open (const char *filename, ctf_error_t *errp)
 {
   return ctf_open (filename, NULL, errp);
 }

@@ -167,7 +167,7 @@ symtypetab_density (ctf_dict_t *fp, ctf_dict_t *symfp, ctf_dynhash_t *symhash,
   const void *name;
   const void *ctf_sym;
   ctf_dynhash_t *linker_known = NULL;
-  int err;
+  ctf_error_t err;
   int beyond_max = 0;
 
   *count = 0;
@@ -624,7 +624,7 @@ ctf_emit_symtypetab_sects (ctf_dict_t *fp, emit_symtypetab_state_t *s,
   unsigned char *t = *tptr;
   size_t nsymtypes = 0;
   const char **sym_name_order = NULL;
-  int err;
+  ctf_error_t err;
 
   /* Sort the linker's symbols into name order if need be.  */
 
@@ -764,7 +764,7 @@ symerr:
 
 /* Kind suppression.  */
 
-int
+ctf_ret_t
 ctf_write_suppress_kind (ctf_dict_t *fp, int kind, int prohibited)
 {
   ctf_dynset_t *set;
@@ -843,7 +843,7 @@ ctf_type_sect_is_btf (ctf_dict_t *fp, int force_ctf)
   ctf_next_t *i = NULL;
   ctf_next_t *prohibit_i = NULL;
   void *pkind;
-  int err;
+  ctf_error_t err;
 
   /* Verify prohibitions.  Do this first, for a fast return if a kind is
      prohibited.  */
@@ -1847,7 +1847,7 @@ ctf_write_thresholded (ctf_dict_t *fp, int fd, size_t threshold)
   size_t tmp;
   ssize_t buf_len;
   ssize_t len;
-  int err = 0;
+  ctf_error_t err = 0;
 
   if ((buf = ctf_write_mem (fp, &tmp, threshold)) == NULL)
     return -1;					/* errno is set for us.  */

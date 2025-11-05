@@ -1446,7 +1446,7 @@ elfctf_build_psymtabs (struct objfile *of)
 {
   struct ctf_per_tu_data pcu;
   bfd *abfd = of->obfd.get ();
-  int err;
+  ctf_error_t err;
 
   ctf_archive_t *arc = ctf_bfdopen (abfd, &err);
   if (arc == nullptr)

@@ -493,7 +493,7 @@ struct ctf_dict
   uint32_t ctf_refcnt;		  /* Reference count (for parent links).  */
   uint32_t ctf_flags;		  /* Libctf flags (see below).  */
   uint32_t ctf_max_children;	  /* Max number of child dicts.  */
-  int ctf_errno;		  /* Error code for most recent error.  */
+  ctf_error_t ctf_errno;	  /* Error code for most recent error.  */
   int ctf_version;		  /* CTF data version.  */
   ctf_dynhash_t *ctf_dthash;	  /* Hash of dynamic type definitions.  */
   ctf_list_t ctf_dtdefs;	  /* List of dynamic type definitions.  */
@@ -685,8 +685,8 @@ extern ctf_id_t ctf_symbol_next_static (ctf_dict_t *, ctf_next_t **,
 					const char **, int);
 
 extern int ctf_symtab_skippable (ctf_link_sym_t *sym);
-extern int ctf_add_funcobjt_sym (ctf_dict_t *, int is_function,
-				 const char *, ctf_id_t);
+extern ctf_ret_t ctf_add_funcobjt_sym (ctf_dict_t *, int is_function,
+				       const char *, ctf_id_t);
 
 extern ctf_dict_t *ctf_get_dict (const ctf_dict_t *fp, ctf_id_t type);
 
@@ -730,7 +730,7 @@ extern int ctf_dynhash_insert (ctf_dynhash_t *, void *, void *);
 extern void ctf_dynhash_remove (ctf_dynhash_t *, const void *);
 extern size_t ctf_dynhash_elements (const ctf_dynhash_t *);
 extern void ctf_dynhash_empty (ctf_dynhash_t *);
-extern int ctf_dynhash_insert_type (ctf_dict_t *, ctf_dynhash_t *, uint32_t, uint32_t);
+extern ctf_ret_t ctf_dynhash_insert_type (ctf_dict_t *, ctf_dynhash_t *, uint32_t, uint32_t);
 extern ctf_id_t ctf_dynhash_lookup_type (ctf_dynhash_t *, const char *);
 extern void *ctf_dynhash_lookup (ctf_dynhash_t *, const void *);
 extern int ctf_dynhash_lookup_kv (ctf_dynhash_t *, const void *key,
@@ -744,12 +744,12 @@ extern void *ctf_dynhash_iter_find (ctf_dynhash_t *, ctf_hash_iter_find_f,
 extern int ctf_dynhash_sort_by_name (const ctf_next_hkv_t *,
 				     const ctf_next_hkv_t *,
 				     void * _libctf_unused_);
-extern int ctf_dynhash_next (const ctf_dynhash_t *, ctf_next_t **,
-			     void **key, void **value);
-extern int ctf_dynhash_next_sorted (const ctf_dynhash_t *, ctf_next_t **,
-				    void **key, void **value, ctf_hash_sort_f,
-				    void *);
-extern int ctf_dynhash_next_remove (ctf_next_t * const *);
+extern ctf_error_t ctf_dynhash_next (const ctf_dynhash_t *, ctf_next_t **,
+				     void **key, void **value);
+extern ctf_error_t ctf_dynhash_next_sorted (const ctf_dynhash_t *, ctf_next_t **,
+					    void **key, void **value,
+					    ctf_hash_sort_f, void *);
+extern ctf_error_t ctf_dynhash_next_remove (ctf_next_t * const *);
 
 extern ctf_dynset_t *ctf_dynset_create (htab_hash, htab_eq, ctf_hash_free_fun);
 extern int ctf_dynset_insert (ctf_dynset_t *, void *);
@@ -760,7 +760,8 @@ extern void ctf_dynset_destroy_arg (ctf_dynset_t *, void *unused);
 extern void *ctf_dynset_lookup (ctf_dynset_t *, const void *);
 extern int ctf_dynset_exists (ctf_dynset_t *, const void *key,
 			      const void **orig_key);
-extern int ctf_dynset_next (const ctf_dynset_t *, ctf_next_t **, void **key);
+extern ctf_error_t ctf_dynset_next (const ctf_dynset_t *, ctf_next_t **,
+				    void **key);
 extern void *ctf_dynset_lookup_any (ctf_dynset_t *);
 
 extern void ctf_sha1_init (ctf_sha1_t *);
@@ -785,12 +786,12 @@ extern ctf_id_t ctf_add_encoded (ctf_dict_t *, uint32_t, const char *,
 				 const ctf_encoding_t *, uint32_t kind);
 extern ctf_id_t ctf_add_reftype (ctf_dict_t *, uint32_t, ctf_id_t,
 				 uint32_t kind);
-extern int ctf_add_funcobjt_sym_forced (ctf_dict_t *, int is_function,
-					const char *, ctf_id_t);
+extern ctf_ret_t ctf_add_funcobjt_sym_forced (ctf_dict_t *, int is_function,
+					      const char *, ctf_id_t);
 
 extern int ctf_insert_type_decl_tag (ctf_dict_t *, ctf_id_t, const char *,
 				     int kind);
-extern int ctf_track_enumerator (ctf_dict_t *, ctf_id_t, const char *);
+extern ctf_ret_t ctf_track_enumerator (ctf_dict_t *, ctf_id_t, const char *);
 
 extern int ctf_dedup_atoms_init (ctf_dict_t *);
 extern int ctf_dedup (ctf_dict_t *, ctf_dict_t **, uint32_t ninputs,
@@ -831,15 +832,15 @@ extern struct ctf_archive_internal *
 ctf_new_archive_internal (int is_archive, int is_v1, int unmap_on_close,
 			  struct ctf_archive *, size_t,
 			  ctf_dict_t *, const ctf_sect_t *symsect,
-			  const ctf_sect_t *strsect, int *errp);
-extern struct ctf_archive_internal *ctf_arc_open_internal (const char *, int *);
+			  const ctf_sect_t *strsect, ctf_error_t *errp);
+extern struct ctf_archive_internal *ctf_arc_open_internal (const char *, ctf_error_t *);
 extern const ctf_preamble_t *ctf_arc_bufpreamble_v1 (const ctf_sect_t *);
-extern void *ctf_set_open_errno (int *, int);
-extern int ctf_flip_header (void *, int, int);
-extern int ctf_flip (ctf_dict_t *, ctf_header_t *, unsigned char *,
-		     int is_btf, int to_foreign);
+extern void *ctf_set_open_errno (ctf_error_t *, ctf_error_t);
+extern ctf_ret_t ctf_flip_header (void *, int, int);
+extern ctf_error_t ctf_flip (ctf_dict_t *, ctf_header_t *, unsigned char *,
+			     int is_btf, int to_foreign);
 
-extern int ctf_import_unref (ctf_dict_t *fp, ctf_dict_t *pfp);
+extern ctf_ret_t ctf_import_unref (ctf_dict_t *fp, ctf_dict_t *pfp);
 
 extern int ctf_write_thresholded (ctf_dict_t *fp, int fd, size_t threshold);
 
@@ -868,7 +869,7 @@ extern void ctf_dprintf (const char *, ...);
 extern void libctf_init_debug (void);
 
 _libctf_printflike_ (4, 5)
-extern void ctf_err_warn (ctf_dict_t *, int is_warning, int err,
+extern void ctf_err_warn (ctf_dict_t *, int is_warning, ctf_error_t err,
 			  const char *, ...);
 extern void ctf_err_warn_to_open (ctf_dict_t *);
 extern void ctf_err_copy (ctf_dict_t *dest, ctf_dict_t *src);

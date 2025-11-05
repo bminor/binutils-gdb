@@ -55,7 +55,7 @@ ctf_dynhash_cnext_sorted (const ctf_dynhash_t *h, ctf_next_t **i, const void **k
 				  sort_fun, sort_arg);
 }
 
-static inline int
+static inline ctf_error_t
 ctf_dynhash_cnext (const ctf_dynhash_t *h, ctf_next_t **it,
 		  const void **key, const void **value)
 {
@@ -68,13 +68,13 @@ ctf_dynhash_cinsert (ctf_dynhash_t *h, const void *k, const void *v)
   return ctf_dynhash_insert (h, (void *) k, (void *) v);
 }
 
-static inline int
+static inline ctf_error_t
 ctf_dynset_cnext (const ctf_dynset_t *h, ctf_next_t **it, const void **key)
 {
   return ctf_dynset_next (h, it, (void **) key);
 }
 
-static inline int
+static inline ctf_error_t
 ctf_dynset_cinsert (ctf_dynset_t *h, const void *k)
 {
   return ctf_dynset_insert (h, (void *) k);
@@ -94,8 +94,8 @@ ctf_assert_internal (ctf_dict_t *fp, const char *file, size_t line,
    setting of any error anywhere by the library.  */
 
 #ifndef ENABLE_LIBCTF_HASH_DEBUGGING
-static inline int
-ctf_set_errno (ctf_dict_t *fp, int err)
+static inline ctf_ret_t
+ctf_set_errno (ctf_dict_t *fp, ctf_error_t err)
 {
   fp->ctf_errno = err;
   /* Don't rely on CTF_ERR here as it will not properly sign extend on 64-bit
@@ -104,14 +104,14 @@ ctf_set_errno (ctf_dict_t *fp, int err)
 }
 
 static inline ctf_id_t
-ctf_set_typed_errno (ctf_dict_t *fp, int err)
+ctf_set_typed_errno (ctf_dict_t *fp, ctf_error_t err)
 {
   fp->ctf_errno = err;
   return CTF_ERR;
 }
 #else
-extern int ctf_set_errno (ctf_dict_t *fp, int err);
-extern ctf_id_t ctf_set_typed_errno (ctf_dict_t *fp, int err);
+extern ctf_ret_t ctf_set_errno (ctf_dict_t *fp, ctf_error_t err);
+extern ctf_id_t ctf_set_typed_errno (ctf_dict_t *fp, ctf_error_t err);
 #endif
 
 #ifdef	__cplusplus

@@ -3792,7 +3792,7 @@ lang_ctf_errs_warnings (ctf_dict_t *fp)
   ctf_next_t *i = NULL;
   char *text;
   int is_warning;
-  int err;
+  ctf_error_t err;
 
   while ((text = ctf_errwarning_next (fp, &i, &is_warning, &err)) != NULL)
     {
@@ -3823,7 +3823,7 @@ ldlang_open_ctf (void)
   int all_btf = 1;
   int picked_ctf = 0;
   int picked_btf = 0;
-  int err;
+  ctf_error_t err;
 
   if (link_info.ctf_disabled)
     return;

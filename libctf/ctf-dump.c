@@ -207,7 +207,7 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
 
       if (nonroot_trailer[0] != 0)
 	{
-	  int conflicting;
+	  ctf_bool_t conflicting;
 	  const char *conflicting_cu;
 
 	  if ((conflicting = ctf_type_conflicting (fp, id, &conflicting_cu)) < 0)

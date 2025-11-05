@@ -523,7 +523,7 @@ ctf_dynhash_iter_remove (ctf_dynhash_t *hp, ctf_hash_iter_remove_f fun,
    incredibly clunky, and nearly all error-handling ends up stuffing the result
    of this into some sort of errno or ctf_errno, which is invariably
    positive.  So doing this simplifies essentially all callers.  */
-int
+ctf_error_t
 ctf_dynhash_next (const ctf_dynhash_t *h, ctf_next_t **it, void **key, void **value)
 {
   ctf_next_t *i = *it;
@@ -593,7 +593,7 @@ ctf_dynhash_next (const ctf_dynhash_t *h, ctf_next_t **it, void **key, void **va
    Returns ECTF_NEXT_END if this is impossible (already removed, iterator not
    initialized, iterator off the end).  */
 
-int
+ctf_error_t
 ctf_dynhash_next_remove (ctf_next_t * const *it)
 {
   ctf_next_t *i = *it;
@@ -626,7 +626,7 @@ ctf_dynhash_sort_by_name (const ctf_next_hkv_t *one, const ctf_next_hkv_t *two,
    Sort keys before iterating over them using the SORT_FUN and SORT_ARG.
 
    If SORT_FUN is null, thunks to ctf_dynhash_next.  */
-int
+ctf_error_t
 ctf_dynhash_next_sorted (const ctf_dynhash_t *h, ctf_next_t **it, void **key,
 			 void **value, ctf_hash_sort_f sort_fun, void *sort_arg)
 {
@@ -854,7 +854,7 @@ ctf_dynset_lookup_any (ctf_dynset_t *hp)
 /* Traverse a dynset in arbitrary order, in _next iterator form.
 
    Otherwise, just like ctf_dynhash_next.  */
-int
+ctf_error_t
 ctf_dynset_next (const ctf_dynset_t *hp, ctf_next_t **it, void **key)
 {
   struct htab *htab = (struct htab *) hp;
@@ -921,12 +921,12 @@ ctf_dynset_next (const ctf_dynset_t *hp, ctf_next_t **it, void **key)
 
 /* Helper functions for insertion/removal of types.  */
 
-int
+ctf_ret_t
 ctf_dynhash_insert_type (ctf_dict_t *fp, ctf_dynhash_t *hp, uint32_t type,
 			 uint32_t name)
 {
   const char *str;
-  int err;
+  ctf_error_t err;
 
   if (type == 0)
     return EINVAL;

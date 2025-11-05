@@ -28,7 +28,7 @@
 /* Determine whether a type is a parent or a child.  Bad IDs are not
    diagnosed!  */
 
-int
+ctf_bool_t
 ctf_type_isparent (const ctf_dict_t *fp, ctf_id_t id)
 {
   /* All types visible in the parent are parent types, by definition.  */
@@ -59,7 +59,7 @@ ctf_type_isparent (const ctf_dict_t *fp, ctf_id_t id)
   return 0;
 }
 
-int
+ctf_bool_t
 ctf_type_ischild (const ctf_dict_t *fp, ctf_id_t id)
 {
   return (!ctf_type_isparent (fp, id));
@@ -638,7 +638,7 @@ ctf_type_next (ctf_dict_t *fp, ctf_next_t **it, int *flag, int want_hidden)
 	}
 
       if (flag)
-	*flag = LCTF_INFO_ISROOT (fp, tp->ctt_info);
+	*flag = !LCTF_INFO_ISROOT (fp, tp->ctt_info);
       return ctf_index_to_type (fp, i->i.ctn_idx++);
     }
   ctf_next_destroy (i);
@@ -1685,7 +1685,7 @@ ctf_type_kind_forwarded (ctf_dict_t *fp, ctf_id_t type)
    unit for the passed-in type (which may be a null string if the cuname is not
    known).  */
 
-int
+ctf_bool_t
 ctf_type_conflicting (ctf_dict_t *fp, ctf_id_t type, const char **cuname)
 {
   ctf_dict_t *ofp = fp;
@@ -1920,7 +1920,7 @@ ctf_type_pointer (ctf_dict_t *fp, ctf_id_t type)
 
 /* Return the encoding for the specified INTEGER, FLOAT, or ENUM.  */
 
-int
+ctf_ret_t
 ctf_type_encoding (ctf_dict_t *fp, ctf_id_t type, ctf_encoding_t *ep)
 {
   ctf_dict_t *ofp = fp;
@@ -2023,7 +2023,7 @@ ctf_type_cmp (ctf_dict_t *lfp, ctf_id_t ltype, ctf_dict_t *rfp,
    enums / forward declarations) if they have the same name and (for structs /
    unions) member count.  */
 
-int
+ctf_bool_t
 ctf_type_compat (ctf_dict_t *lfp, ctf_id_t ltype,
 		 ctf_dict_t *rfp, ctf_id_t rtype)
 {
@@ -2107,7 +2107,7 @@ ctf_type_compat (ctf_dict_t *lfp, ctf_id_t ltype,
     case CTF_K_ENUM64:
     case CTF_K_ENUM:
       {
-	int lencoded, rencoded;
+	ctf_ret_t lencoded, rencoded;
 	lencoded = ctf_type_encoding (lfp, ltype, &le);
 	rencoded = ctf_type_encoding (rfp, rtype, &re);
 
@@ -2149,7 +2149,7 @@ ctf_member_count (ctf_dict_t *fp, ctf_id_t type)
 
 /* Return the type and offset for a given member of a STRUCT or UNION.  */
 
-int
+ctf_ret_t
 ctf_member_info (ctf_dict_t *fp, ctf_id_t type, const char *name,
 		 ctf_membinfo_t *mip)
 {
@@ -2240,7 +2240,7 @@ ctf_member_info (ctf_dict_t *fp, ctf_id_t type, const char *name,
 
 /* Return the array type, index, and size information for the specified ARRAY.  */
 
-int
+ctf_ret_t
 ctf_array_info (ctf_dict_t *fp, ctf_id_t type, ctf_arinfo_t *arp)
 {
   ctf_dict_t *ofp = fp;
@@ -2327,7 +2327,7 @@ ctf_enum_name (ctf_dict_t *fp, ctf_id_t type, int64_t value)
 /* Convert the specified enum tag name to the corresponding value, if a
    matching name can be found.  Otherwise CTF_ERR is returned.  */
 
-int
+ctf_ret_t
 ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int64_t *valp)
 {
   ctf_dict_t *ofp = fp;
@@ -2384,10 +2384,10 @@ ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int64_t *valp)
 }
 
 /* Like ctf_enum_value, but returns an unsigned int64_t instead.  */
-int
+ctf_ret_t
 ctf_enum_unsigned_value (ctf_dict_t *fp, ctf_id_t type, const char *name, uint64_t *valp)
 {
-  int ret;
+  ctf_ret_t ret;
   int64_t retval;
 
   ret = ctf_enum_value (fp, type, name, &retval);
@@ -2396,7 +2396,7 @@ ctf_enum_unsigned_value (ctf_dict_t *fp, ctf_id_t type, const char *name, uint64
 }
 
 /* Determine whether an enum's values are signed.  */
-int
+ctf_bool_t
 ctf_enum_unsigned (ctf_dict_t *fp, ctf_id_t type)
 {
   int kind;
@@ -2415,7 +2415,7 @@ ctf_enum_unsigned (ctf_dict_t *fp, ctf_id_t type)
 }
 
 /* Return nonzero if this struct or union uses bitfield encoding.  */
-int
+ctf_bool_t
 ctf_struct_bitfield (ctf_dict_t * fp, ctf_id_t type)
 {
   int kind;
