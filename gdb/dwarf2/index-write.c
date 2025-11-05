@@ -1161,7 +1161,7 @@ check_dwarf64_offsets (dwarf2_per_bfd *per_bfd)
 {
   for (const auto &per_cu : per_bfd->all_units)
     {
-      if (to_underlying (per_cu->sect_off)
+      if (to_underlying (per_cu->sect_off ())
 	  >= (static_cast<uint64_t> (1) << 32))
 	return true;
     }
@@ -1370,7 +1370,7 @@ get_unit_lists (const dwarf2_per_bfd &per_bfd)
       comp_units.emplace_back (unit.get ());
 
   auto by_sect_off = [] (const dwarf2_per_cu *lhs, const dwarf2_per_cu *rhs)
-		       { return lhs->sect_off < rhs->sect_off; };
+		       { return lhs->sect_off () < rhs->sect_off (); };
 
   /* Sort both lists, even though it is technically not always required:
 
@@ -1419,9 +1419,9 @@ write_gdbindex (dwarf2_per_bfd *per_bfd, cooked_index *table,
       /* The all_units list contains CUs read from the objfile as well as
 	 from the eventual dwz file.  We need to place the entry in the
 	 corresponding index.  */
-      data_buf &cu_list = per_cu->is_dwz ? dwz_cu_list : objfile_cu_list;
+      data_buf &cu_list = per_cu->is_dwz () ? dwz_cu_list : objfile_cu_list;
       cu_list.append_uint (8, BFD_ENDIAN_LITTLE,
-			   to_underlying (per_cu->sect_off));
+			   to_underlying (per_cu->sect_off ()));
       cu_list.append_uint (8, BFD_ENDIAN_LITTLE, per_cu->length ());
       ++counter;
     }
@@ -1435,10 +1435,10 @@ write_gdbindex (dwarf2_per_bfd *per_bfd, cooked_index *table,
       gdb_assert (insertpair.second);
 
       /* See enhancement PR symtab/30838.  */
-      gdb_assert (!sig_type->is_dwz);
+      gdb_assert (!sig_type->is_dwz ());
 
       types_cu_list.append_uint (8, BFD_ENDIAN_LITTLE,
-				 to_underlying (sig_type->sect_off));
+				 to_underlying (sig_type->sect_off ()));
       types_cu_list.append_uint (8, BFD_ENDIAN_LITTLE,
 				 to_underlying (sig_type->type_offset_in_tu));
       types_cu_list.append_uint (8, BFD_ENDIAN_LITTLE, sig_type->signature);
@@ -1498,7 +1498,7 @@ write_debug_names (dwarf2_per_bfd *per_bfd, cooked_index *table,
       nametable.add_cu (per_cu, comp_unit_counter);
       comp_unit_list.append_uint (nametable.dwarf5_offset_size (),
 				  dwarf5_byte_order,
-				  to_underlying (per_cu->sect_off));
+				  to_underlying (per_cu->sect_off ()));
       comp_unit_counter++;
     }
 
@@ -1510,7 +1510,7 @@ write_debug_names (dwarf2_per_bfd *per_bfd, cooked_index *table,
       nametable.add_cu (per_cu, type_unit_counter);
       type_unit_list.append_uint (nametable.dwarf5_offset_size (),
 				  dwarf5_byte_order,
-				  to_underlying (per_cu->sect_off));
+				  to_underlying (per_cu->sect_off ()));
       type_unit_counter++;
     }
 

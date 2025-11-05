@@ -46,11 +46,11 @@ read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 	 way of ignoring .debug_types -- and possibly seeing a
 	 duplicate section offset -- entirely.  The same applies to
 	 units coming from a dwz file.  */
-      if (per_cu->is_debug_types || per_cu->is_dwz)
+      if (per_cu->is_debug_types || per_cu->is_dwz ())
 	continue;
 
       const auto insertpair
-	= debug_info_offset_to_per_cu.emplace (per_cu->sect_off,
+	= debug_info_offset_to_per_cu.emplace (per_cu->sect_off (),
 					       per_cu.get ());
 
       /* Assume no duplicate offsets in all_units.  */

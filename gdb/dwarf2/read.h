@@ -117,10 +117,10 @@ struct dwarf2_per_cu
      known, and may be set later using the set_length method.  */
   dwarf2_per_cu (dwarf2_per_bfd *per_bfd, dwarf2_section_info *section,
 		 sect_offset sect_off, unsigned int length, bool is_dwz)
-    : sect_off (sect_off),
+    : m_sect_off (sect_off),
       m_length (length),
       is_debug_types (false),
-      is_dwz (is_dwz),
+      m_is_dwz (is_dwz),
       reading_dwo_directly (false),
       tu_read (false),
       lto_artificial (false),
@@ -128,21 +128,21 @@ struct dwarf2_per_cu
       m_header_read_in (false),
       files_read (false),
       scanned (false),
-      section (section),
-      per_bfd (per_bfd)
+      m_section (section),
+      m_per_bfd (per_bfd)
   {
     gdb_assert (per_bfd != nullptr);
     gdb_assert (section != nullptr);
   }
 
+private:
   /* The start offset and length of this compilation unit.
      NOTE: Unlike comp_unit_head.length, this length includes
      initial_length_size.
      If the DIE refers to a DWO file, this is always of the original die,
      not the DWO file.  */
-  sect_offset sect_off;
+  sect_offset m_sect_off;
 
-private:
   unsigned int m_length = 0;
 
 public:
@@ -151,9 +151,11 @@ public:
      this is non-zero.  */
   unsigned int is_debug_types : 1;
 
+private:
   /* Non-zero if this CU is from the .dwz file.  */
-  unsigned int is_dwz : 1;
+  unsigned int m_is_dwz : 1;
 
+public:
   /* Non-zero if reading a TU directly from a DWO file, bypassing the stub.
      This flag is only valid if is_debug_types is true.
      We can't read a CU directly from a DWO file: There are required
@@ -220,15 +222,15 @@ public:
   /* Our index in the unshared "symtabs" vector.  */
   unsigned index = 0;
 
+private:
   /* The section this CU/TU lives in.
      If the DIE refers to a DWO file, this is always the original die,
      not the DWO file.  */
-  struct dwarf2_section_info *section = nullptr;
+  dwarf2_section_info *m_section;
 
   /* Backlink to the owner of this.  */
-  dwarf2_per_bfd *per_bfd;
+  dwarf2_per_bfd *m_per_bfd;
 
-private:
   /* DWARF header of this unit.  Note that dwarf2_cu reads its own version of
      the header, which may differ from this one, since it may pass
      rch_kind::TYPE to read_unit_head, whereas for dwarf2_per_cu we always pass
@@ -263,6 +265,18 @@ public:
      indices so we only pay a price for gold generated indices.
      http://sourceware.org/bugzilla/show_bug.cgi?id=15021.  */
   std::vector<dwarf2_per_cu *> imported_symtabs;
+
+  dwarf2_per_bfd *per_bfd () const
+  { return m_per_bfd; }
+
+  dwarf2_section_info *section () const
+  { return m_section; }
+
+  sect_offset sect_off () const
+  { return m_sect_off; }
+
+  bool is_dwz () const
+  { return m_is_dwz; }
 
   /* Get the header of this per_cu, reading it if necessary.  */
   const unit_head *get_header () const;

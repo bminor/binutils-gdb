@@ -333,7 +333,7 @@ mapped_gdb_index::build_name_components (dwarf2_per_objfile *per_objfile)
 	    }
 
 	  /* Note that this assumes the final component ends in \0.  */
-	  cooked_index_entry *entry = result.add (per_cu->sect_off, tag,
+	  cooked_index_entry *entry = result.add (per_cu->sect_off (), tag,
 						  flags, this_lang,
 						  components.back ().data (),
 						  nullptr, per_cu);
