@@ -1014,11 +1014,7 @@ extern const struct bfd_iovec _bfd_memory_iovec;
 struct orl             /* Output ranlib.  */
 {
   char **name;         /* Symbol name.  */
-  union
-  {
-    file_ptr pos;
-    bfd *abfd;
-  } u;                 /* bfd* or file position.  */
+  bfd *abfd;           /* Containing BFD.  */
   int namidx;          /* Index into string table.  */
 };
 

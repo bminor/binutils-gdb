@@ -226,7 +226,7 @@ _bfd_archive_64_bit_write_armap (bfd *arch,
 	 the object file's address in the archive.  */
 
       for (;
-	   count < symbol_count && map[count].u.abfd == current;
+	   count < symbol_count && map[count].abfd == current;
 	   count++)
 	{
 	  bfd_putb64 ((bfd_vma) archive_member_file_ptr, buf);

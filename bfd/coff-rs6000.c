@@ -1929,7 +1929,7 @@ xcoff_write_armap_old (bfd *abfd, unsigned int elength ATTRIBUTE_UNUSED,
   i = 0;
   archive_iterator_begin (&iterator, abfd);
   while (i < orl_count && archive_iterator_next (&iterator))
-    while (map[i].u.abfd == iterator.current.member)
+    while (map[i].abfd == iterator.current.member)
       {
 	H_PUT_32 (abfd, iterator.current.offset, buf);
 	if (bfd_write (buf, 4, abfd) != 4)
@@ -2054,7 +2054,7 @@ xcoff_write_armap_big (bfd *abfd, unsigned int elength ATTRIBUTE_UNUSED,
        current_bfd = current_bfd->archive_next)
     {
       arch_info = bfd_get_arch_info (current_bfd);
-      while (map[i].u.abfd == current_bfd)
+      while (map[i].abfd == current_bfd)
 	{
 	  string_length = strlen (*map[i].name) + 1;
 	  if (arch_info->bits_per_address == 64)
@@ -2151,7 +2151,7 @@ xcoff_write_armap_big (bfd *abfd, unsigned int elength ATTRIBUTE_UNUSED,
       while (i < orl_count && archive_iterator_next (&iterator))
 	{
 	  arch_info = bfd_get_arch_info (iterator.current.member);
-	  while (map[i].u.abfd == iterator.current.member)
+	  while (map[i].abfd == iterator.current.member)
 	    {
 	      if (arch_info->bits_per_address == 32)
 		{
@@ -2169,7 +2169,7 @@ xcoff_write_armap_big (bfd *abfd, unsigned int elength ATTRIBUTE_UNUSED,
 	   current_bfd = current_bfd->archive_next)
 	{
 	  arch_info = bfd_get_arch_info (current_bfd);
-	  while (map[i].u.abfd == current_bfd)
+	  while (map[i].abfd == current_bfd)
 	    {
 	      if (arch_info->bits_per_address == 32)
 		{
@@ -2235,7 +2235,7 @@ xcoff_write_armap_big (bfd *abfd, unsigned int elength ATTRIBUTE_UNUSED,
       while (i < orl_count && archive_iterator_next (&iterator))
 	{
 	  arch_info = bfd_get_arch_info (iterator.current.member);
-	  while (map[i].u.abfd == iterator.current.member)
+	  while (map[i].abfd == iterator.current.member)
 	    {
 	      if (arch_info->bits_per_address == 64)
 		{
@@ -2253,7 +2253,7 @@ xcoff_write_armap_big (bfd *abfd, unsigned int elength ATTRIBUTE_UNUSED,
 	   current_bfd = current_bfd->archive_next)
 	{
 	  arch_info = bfd_get_arch_info (current_bfd);
-	  while (map[i].u.abfd == current_bfd)
+	  while (map[i].abfd == current_bfd)
 	    {
 	      if (arch_info->bits_per_address == 64)
 		{

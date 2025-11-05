@@ -168,11 +168,7 @@ INTERNAL
 .struct orl		{* Output ranlib.  *}
 .{
 .  char **name;		{* Symbol name.  *}
-.  union
-.  {
-.    file_ptr pos;
-.    bfd *abfd;
-.  } u;			{* bfd* or file position.  *}
+.  bfd *abfd;		{* Containing BFD.  *}
 .  int namidx;		{* Index into string table.  *}
 .};
 .
@@ -2434,7 +2430,7 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
 		      if (*(map[orl_count].name) == NULL)
 			goto error_return;
 		      strcpy (*(map[orl_count].name), syms[src_count]->name);
-		      map[orl_count].u.abfd = current;
+		      map[orl_count].abfd = current;
 		      map[orl_count].namidx = stridx;
 
 		      stridx += namelen + 1;
@@ -2500,7 +2496,7 @@ _bfd_bsd_write_armap (bfd *arch,
     {
       unsigned int offset;
 
-      if (map[count].u.abfd != last_elt)
+      if (map[count].abfd != last_elt)
 	{
 	  do
 	    {
@@ -2511,7 +2507,7 @@ _bfd_bsd_write_armap (bfd *arch,
 	      firstreal += firstreal % 2;
 	      current = current->archive_next;
 	    }
-	  while (current != map[count].u.abfd);
+	  while (current != map[count].abfd);
 	}
 
       /* The archive file format only has 4 bytes to store the offset
@@ -2576,7 +2572,7 @@ _bfd_bsd_write_armap (bfd *arch,
       unsigned int offset;
       bfd_byte buf[BSD_SYMDEF_SIZE];
 
-      if (map[count].u.abfd != last_elt)
+      if (map[count].abfd != last_elt)
 	{
 	  do
 	    {
@@ -2587,7 +2583,7 @@ _bfd_bsd_write_armap (bfd *arch,
 	      firstreal += firstreal % 2;
 	      current = current->archive_next;
 	    }
-	  while (current != map[count].u.abfd);
+	  while (current != map[count].abfd);
 	}
 
       /* The archive file format only has 4 bytes to store the offset
@@ -2744,7 +2740,7 @@ _bfd_coff_write_armap (bfd *arch,
       /* For each symbol which is used defined in this object, write
 	 out the object file's address in the archive.  */
 
-      while (count < symbol_count && map[count].u.abfd == current)
+      while (count < symbol_count && map[count].abfd == current)
 	{
 	  unsigned int offset = (unsigned int) archive_member_file_ptr;
 
@@ -2802,7 +2798,7 @@ _bfd_coff_write_armap (bfd *arch,
       /* For each symbol which is used defined in this object, write
 	 out the object file's address in the archive.  */
 
-      while (count < symbol_count && map[count].u.abfd == current)
+      while (count < symbol_count && map[count].abfd == current)
 	{
 	  unsigned int offset = (unsigned int) archive_member_file_ptr;
 

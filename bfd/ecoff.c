@@ -3174,7 +3174,7 @@ _bfd_ecoff_write_armap (bfd *abfd,
 
       /* Advance firstreal to the file position of this archive
 	 element.  */
-      if (map[i].u.abfd != last_elt)
+      if (map[i].abfd != last_elt)
 	{
 	  do
 	    {
@@ -3182,7 +3182,7 @@ _bfd_ecoff_write_armap (bfd *abfd,
 	      firstreal += firstreal % 2;
 	      current = current->archive_next;
 	    }
-	  while (current != map[i].u.abfd);
+	  while (current != map[i].abfd);
 	}
 
       last_elt = current;
