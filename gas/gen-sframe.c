@@ -147,6 +147,24 @@ sframe_fre_get_cfa_offset (const struct sframe_row_entry * fre)
   return offset;
 }
 
+/* All stack offsets in SFrame stack trace format must be representable as a
+   1-byte (SFRAME_FRE_OFFSET_1B), 2-byte (SFRAME_FRE_OFFSET_2B) or 4-byte
+   (SFRAME_FRE_OFFSET_4B) value.
+
+   At the moment, sanity check on CFA offset (only) is performed to address PR
+   gas/33277.  Arguably, such updates to ra_offset or fp_offset will only
+   follow after updates to cfa_offset in a real-world, useful program.  */
+
+static bool
+sframe_fre_stack_offset_bound_p (offsetT offset, bool cfa_reg_p)
+{
+  /* For s390x, CFA offset is adjusted to enable 8-bit offsets.  */
+  if (cfa_reg_p && sframe_get_abi_arch () == SFRAME_ABI_S390X_ENDIAN_BIG)
+    offset = SFRAME_V2_S390X_CFA_OFFSET_ENCODE (offset);
+
+  return (offset >= INT32_MIN && offset <= INT32_MAX);
+}
+
 static void
 sframe_fre_set_cfa_offset (struct sframe_row_entry *fre,
 			   offsetT cfa_offset)
@@ -1059,9 +1077,18 @@ sframe_xlate_do_def_cfa (struct sframe_xlate_ctx *xlate_ctx,
 	       cfi_insn->u.ri.reg);
       return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
     }
-  sframe_fre_set_cfa_base_reg (cur_fre, cfi_insn->u.ri.reg);
-  sframe_fre_set_cfa_offset (cur_fre, cfi_insn->u.ri.offset);
-  cur_fre->merge_candidate = false;
+  else if (sframe_fre_stack_offset_bound_p (cfi_insn->u.ri.offset, true))
+    {
+      sframe_fre_set_cfa_base_reg (cur_fre, cfi_insn->u.ri.reg);
+      sframe_fre_set_cfa_offset (cur_fre, cfi_insn->u.ri.offset);
+      cur_fre->merge_candidate = false;
+    }
+  else
+    {
+      as_warn (_("no SFrame FDE emitted; "
+		 ".cfi_def_cfa with unsupported offset value"));
+      return SFRAME_XLATE_ERR_NOTREPRESENTED;
+    }
 
   return SFRAME_XLATE_OK;
 }
@@ -1117,8 +1144,17 @@ sframe_xlate_do_def_cfa_offset (struct sframe_xlate_ctx *xlate_ctx,
   if ((cur_fre->cfa_base_reg == SFRAME_CFA_FP_REG)
       || (cur_fre->cfa_base_reg == SFRAME_CFA_SP_REG))
     {
-      sframe_fre_set_cfa_offset (cur_fre, cfi_insn->u.i);
-      cur_fre->merge_candidate = false;
+      if (sframe_fre_stack_offset_bound_p (cfi_insn->u.i, true))
+	{
+	  sframe_fre_set_cfa_offset (cur_fre, cfi_insn->u.i);
+	  cur_fre->merge_candidate = false;
+	}
+      else
+	{
+	  as_warn (_("no SFrame FDE emitted; "
+		     ".cfi_def_cfa_offset with unsupported offset value"));
+	  return SFRAME_XLATE_ERR_NOTREPRESENTED;
+	}
     }
   else
     {
