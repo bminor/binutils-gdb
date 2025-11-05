@@ -596,8 +596,10 @@ public:
 
   std::vector<dwarf2_section_info> types;
 
-  /* Table of all the compilation units.  This is used to locate
-     the target compilation unit of a particular reference.  */
+  /* Table of all compilation and type units.
+
+     The order of this vector matters, because it is used to locate targets of
+     DW_FORM_ref_addr attributes (reference by section offset).  */
   std::vector<dwarf2_per_cu_up> all_units;
 
   /* Number of compilation and type units in the ALL_UNITS vector.  */
