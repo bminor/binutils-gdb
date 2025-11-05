@@ -1785,7 +1785,9 @@ struct aarch64_opnd_info
 	  /* The encoding of the system register.  */
 	  aarch64_insn value;
 
-	  /* The system register flags.  */
+	  /* The system register flags.  During assembly this contains the
+	     flags from aarch64-sys-regs.def.  During disassembly this stores
+	     either F_REG_READ or F_REG_WRITE, depending upon the opcode.  */
 	  uint32_t flags;
 	} sysreg;
 
