@@ -183,7 +183,7 @@ struct ctf_per_tu_data
 
 /* Local function prototypes */
 
-static int ctf_add_type_cb (ctf_id_t tid, void *arg);
+static int ctf_add_type_cb (ctf_dict_t *fp, ctf_id_t tid, void *arg);
 
 static struct type *read_array_type (struct ctf_context *cp, ctf_id_t tid);
 
@@ -244,27 +244,11 @@ fetch_tid_type (struct ctf_context *ccp, ctf_id_t tid)
   typ = get_tid_type (of, tid);
   if (typ == nullptr)
     {
-      ctf_add_type_cb (tid, ccp);
+      ctf_add_type_cb (ccp->dict, tid, ccp);
       typ = get_tid_type (of, tid);
     }
 
   return typ;
-}
-
-/* Return the size of storage in bits for INTEGER, FLOAT, or ENUM.  */
-
-static int
-get_bitsize (ctf_dict_t *dict, ctf_id_t tid, uint32_t kind)
-{
-  ctf_encoding_t cet;
-
-  if ((kind == CTF_K_INTEGER || kind == CTF_K_ENUM
-      || kind == CTF_K_FLOAT)
-      && ctf_type_reference (dict, tid) != CTF_ERR
-      && ctf_type_encoding (dict, tid, &cet) != CTF_ERR)
-    return cet.cte_bits;
-
-  return 0;
 }
 
 /* Set SYM's address, with NAME, from its minimal symbol entry.  */
@@ -332,9 +316,11 @@ ctf_init_float_type (struct objfile *objfile,
    and ARG contains the ctf_field_info.  */
 
 static int
-ctf_add_member_cb (const char *name,
+ctf_add_member_cb (ctf_dict_t *unused,
+		   const char *name,
 		   ctf_id_t tid,
 		   unsigned long offset,
+		   int bit_width,
 		   void *arg)
 {
   struct ctf_field_info *fip = (struct ctf_field_info *) arg;
@@ -365,7 +351,7 @@ ctf_add_member_cb (const char *name,
 
   fp->set_type (t);
   fp->set_loc_bitpos (offset / TARGET_CHAR_BIT);
-  fp->set_bitsize (get_bitsize (ccp->dict, tid, kind));
+  fp->set_bitsize (bit_width);
 
   fip->fields.emplace_back (new_field);
 
@@ -376,7 +362,7 @@ ctf_add_member_cb (const char *name,
    ARG contains the ctf_field_info.  */
 
 static int
-ctf_add_enum_member_cb (const char *name, int enum_value, void *arg)
+ctf_add_enum_member_cb (const char *name, int64_t enum_value, void *arg)
 {
   struct ctf_field_info *fip = (struct ctf_field_info *) arg;
   struct ctf_nextfield new_field;
@@ -983,7 +969,7 @@ read_type_record (struct ctf_context *ccp, ctf_id_t tid)
 /* Callback to add type TID to the symbol table.  */
 
 static int
-ctf_add_type_cb (ctf_id_t tid, void *arg)
+ctf_add_type_cb (ctf_dict_t *fp, ctf_id_t tid, void *arg)
 {
   struct ctf_context *ccp = (struct ctf_context *) arg;
   struct type *type;
@@ -1048,7 +1034,7 @@ ctf_add_type_cb (ctf_id_t tid, void *arg)
 /* Callback to add variable NAME with TID to the symbol table.  */
 
 static int
-ctf_add_var_cb (const char *name, ctf_id_t id, void *arg)
+ctf_add_var_cb (ctf_dict_t *fp, const char *name, ctf_id_t id, void *arg)
 {
   struct ctf_context *ccp = (struct ctf_context *) arg;
   struct symbol *sym = nullptr;
@@ -1147,7 +1133,7 @@ get_objfile_text_range (struct objfile *of, size_t *tsize)
 static void
 ctf_psymtab_add_enums (struct ctf_context *ccp, ctf_id_t tid)
 {
-  int val;
+  int64_t val;
   const char *ename;
   ctf_next_t *i = nullptr;
 
@@ -1318,7 +1304,7 @@ create_partial_symtab (const char *name,
 /* Callback to add type TID to partial symbol table.  */
 
 static int
-ctf_psymtab_type_cb (ctf_id_t tid, void *arg)
+ctf_psymtab_type_cb (ctf_dict_t *fp, ctf_id_t tid, void *arg)
 {
   struct ctf_context *ccp;
   uint32_t kind;
@@ -1372,7 +1358,7 @@ ctf_psymtab_type_cb (ctf_id_t tid, void *arg)
 /* Callback to add variable NAME with ID to partial symbol table.  */
 
 static int
-ctf_psymtab_var_cb (const char *name, ctf_id_t id, void *arg)
+ctf_psymtab_var_cb (ctf_dict_t *fp, const char *name, ctf_id_t id, void *arg)
 {
   struct ctf_context *ccp = (struct ctf_context *) arg;
 
