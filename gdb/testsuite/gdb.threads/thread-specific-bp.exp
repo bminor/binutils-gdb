@@ -95,12 +95,21 @@ proc check_thread_specific_breakpoint {non_stop} {
 		  "-" \
 		  "thread 2 no longer in the thread list\\."]]
 
-    gdb_test_multiple "$cmd" "continue to end" {
-	-re "$\r\n${gdb_prompt} .*${msg_re}\r\n" {
+    set test "continue to end"
+    set try_again 0
+    gdb_test_multiple $cmd $test -no-prompt-anchor {
+	-re -wrap "\r\n${msg_re}(?=\r\n).*" {
 	    pass $gdb_test_name
 	}
-	-re "\r\n${msg_re}\r\n.*$gdb_prompt " {
-	    pass $gdb_test_name
+	-re -wrap "" {
+	    set try_again 1
+	}
+    }
+    if { $try_again } {
+	gdb_test_multiple "" $test {
+	    -re "\r\n${msg_re}(?=\r\n)" {
+		pass $gdb_test_name
+	    }
 	}
     }
 
