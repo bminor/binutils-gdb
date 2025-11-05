@@ -4996,56 +4996,62 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 
     case AARCH64_OPND_SYSREG:
     case AARCH64_OPND_SYSREG128:
-      for (i = 0; aarch64_sys_regs[i].name; ++i)
-	{
-	  const aarch64_sys_reg *sr = aarch64_sys_regs + i;
+      {
+	int min_mismatch = 999;
+	int best_index = -1;
+	uint32_t op_flags = opnd->sysreg.flags;
+	for (i = 0; aarch64_sys_regs[i].name; ++i)
+	  {
+	    const aarch64_sys_reg *sr = aarch64_sys_regs + i;
 
-	  bool exact_match
-	    = (!(sr->flags & (F_REG_READ | F_REG_WRITE))
-	    || (sr->flags & opnd->sysreg.flags) == opnd->sysreg.flags)
-	    && AARCH64_CPU_HAS_ALL_FEATURES (features, sr->features);
+	    if (!(aarch64_sys_regs[i].value == opnd->sysreg.value)
+		|| aarch64_sys_reg_deprecated_p (aarch64_sys_regs[i].flags)
+		| aarch64_sys_reg_alias_p (aarch64_sys_regs[i].flags))
+	      continue;
 
-	  /* Try and find an exact match, But if that fails, return the first
-	     partial match that was found.  */
-	  if (aarch64_sys_regs[i].value == opnd->sysreg.value
-	      && ! aarch64_sys_reg_deprecated_p (aarch64_sys_regs[i].flags)
-	      && ! aarch64_sys_reg_alias_p (aarch64_sys_regs[i].flags)
-	      && (name == NULL || exact_match))
-	    {
-	      name = aarch64_sys_regs[i].name;
-	      if (exact_match)
-		{
-		  if (notes)
-		    *notes = NULL;
+	    int mismatch_score = 0;
+	    if (!AARCH64_CPU_HAS_ALL_FEATURES (features, sr->features))
+	      mismatch_score += 1;
+	    /* This read/write check only works during disassembly.  During
+	       assembly the value of op_flags was copied from sr->flags.  */
+	    if (((sr->flags & F_REG_READ) && (op_flags & F_REG_WRITE))
+		|| ((sr->flags & F_REG_WRITE) && (op_flags & F_REG_READ)))
+	      mismatch_score += 2;
+
+	    if (mismatch_score < min_mismatch)
+	      {
+		min_mismatch = mismatch_score;
+		best_index = i;
+		if (mismatch_score == 0)
 		  break;
-		}
+	      }
+	  }
+	if (best_index == -1)
+	  {
+	    /* Use encoding-based name for unrecognised system register.  */
+	    unsigned int value = opnd->sysreg.value;
+	    snprintf (buf, size, "%s",
+		      style_reg (styler, "s%u_%u_c%u_c%u_%u",
+				 (value >> 14) & 0x3, (value >> 11) & 0x7,
+				 (value >> 7) & 0xf, (value >> 3) & 0xf,
+				 value & 0x7));
+	  }
+	else
+	  {
+	    const aarch64_sys_reg *sr = aarch64_sys_regs + best_index;
+	    snprintf (buf, size, "%s", style_reg (styler, sr->name));
 
-	      /* If we didn't match exactly, that means the presense of a flag
-		 indicates what we didn't want for this instruction.  e.g. If
-		 F_REG_READ is there, that means we were looking for a write
-		 register.  See aarch64_ext_sysreg.  */
-	      if (aarch64_sys_regs[i].flags & F_REG_WRITE
-		  && !(opnd->sysreg.flags & F_REG_WRITE))
-		*notes = _("reading from a write-only register");
-	      else if (aarch64_sys_regs[i].flags & F_REG_READ
-		       && !(opnd->sysreg.flags & F_REG_READ))
-		*notes = _("writing to a read-only register");
-	    }
-	}
-
-      if (name)
-	snprintf (buf, size, "%s", style_reg (styler, name));
-      else
-	{
-	  /* Implementation defined system register.  */
-	  unsigned int value = opnd->sysreg.value;
-	  snprintf (buf, size, "%s",
-		    style_reg (styler, "s%u_%u_c%u_c%u_%u",
-			       (value >> 14) & 0x3, (value >> 11) & 0x7,
-			       (value >> 7) & 0xf, (value >> 3) & 0xf,
-			       value & 0x7));
-	}
-      break;
+	    /* Add a note if we violated read/write constraints.  */
+	    if (notes && min_mismatch)
+	      {
+		if ((sr->flags & F_REG_READ) && (op_flags & F_REG_WRITE))
+		  *notes = _("writing to a read-only register");
+		else if ((sr->flags & F_REG_WRITE) && (op_flags & F_REG_READ))
+		  *notes = _("reading from a write-only register");
+	      }
+	  }
+	break;
+      }
 
     case AARCH64_OPND_PSTATEFIELD:
       for (i = 0; aarch64_pstatefields[i].name; ++i)
