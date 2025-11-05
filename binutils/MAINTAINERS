@@ -87,6 +87,8 @@ responsibility among the other maintainers.
   FRV		   Alexandre Oliva <aoliva@sourceware.org>
   GOLD		   Ian Lance Taylor <iant@google.com>
   GOLD		   Cary Coutant <ccoutant@gmail.com>
+  gprofng	   Claudiu Zissulescu <claziss@gmail.com>
+  gprofng	   Jose E. Marchesi <jemarch@gnu.org>
   HPPA		   Dave Anglin <dave.anglin@bell.net>
   HPPA elf64	   Jeff Law <law@redhat.com> [Basic maintainance only]
   ix86		   H.J. Lu <hjl.tools@gmail.com>
