@@ -3128,6 +3128,15 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zabha";
     case INSN_CLASS_ZACAS:
       return "zacas";
+    case INSN_CLASS_ZABHA_AND_ZACAS:
+      if (!riscv_subset_supports (rps, "zabha"))
+	{
+	  if (!riscv_subset_supports (rps, "zacas"))
+	    return _ ("zabha' and `zacas");
+	  else
+	    return "zabha";
+	}
+      return "zacas";
     case INSN_CLASS_ZALRSC:
       return "zalrsc";
     case INSN_CLASS_ZAWRS:
@@ -3341,8 +3350,18 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "xtheadvdot";
     case INSN_CLASS_XTHEADZVAMO:
       return "xtheadzvamo";
+    case INSN_CLASS_XVENTANACONDOPS:
+      return "xventanacondops";
+    case INSN_CLASS_XSFVCP:
+      return "xsfvcp";
     case INSN_CLASS_XSFCEASE:
       return "xsfcease";
+    case INSN_CLASS_XSFVQMACCQOQ:
+      return "xsfvqmaccqoq";
+    case INSN_CLASS_XSFVQMACCDOD:
+      return "xsfvqmaccdod";
+    case INSN_CLASS_XSFVFNRCLIPXFQF:
+      return "xsfvfnrclipxfqf";
     default:
       rps->error_handler
         (_("internal: unreachable INSN_CLASS_*"));
