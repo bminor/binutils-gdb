@@ -2891,7 +2891,7 @@ ctf_add_type (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type)
   if ((src_fp->ctf_flags & LCTF_NO_STR) || (dst_fp->ctf_flags & LCTF_NO_STR)
       || ((src_fp->ctf_flags & LCTF_CHILD) && (src_fp->ctf_parent == NULL))
       || ((dst_fp->ctf_flags & LCTF_CHILD) && (dst_fp->ctf_parent == NULL)))
-    return (ctf_set_errno (dst_fp, ECTF_NOPARENT));
+    return (ctf_set_typed_errno (dst_fp, ECTF_NOPARENT));
 
   if (!src_fp->ctf_add_processing)
     src_fp->ctf_add_processing = ctf_dynhash_create (ctf_hash_integer,
