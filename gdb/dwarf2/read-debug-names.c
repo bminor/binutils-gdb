@@ -478,7 +478,7 @@ build_and_check_tu_list_from_debug_names (dwarf2_per_objfile *per_objfile,
       dwarf2_per_cu *per_cu = dwarf2_find_unit ({ section, sect_off },
 						per_bfd);
 
-      if (per_cu == nullptr || !per_cu->is_debug_types)
+      if (per_cu == nullptr || !per_cu->is_debug_types ())
 	{
 	  warning (_("Section .debug_names has incorrect entry in TU table,"
 		     " ignoring .debug_names."));
@@ -733,7 +733,7 @@ build_and_check_cu_list_from_debug_names (dwarf2_per_bfd *per_bfd,
       /* Find the matching dwarf2_per_cu.  */
       dwarf2_per_cu *per_cu = dwarf2_find_unit ({ &section, sect_off }, per_bfd);
 
-      if (per_cu == nullptr || per_cu->is_debug_types)
+      if (per_cu == nullptr || per_cu->is_debug_types ())
 	{
 	  warning (_("Section .debug_names has incorrect entry in CU table,"
 		     " ignoring .debug_names."));

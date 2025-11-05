@@ -762,7 +762,7 @@ public:
 
 	for (const cooked_index_entry *entry : these_entries)
 	  {
-	    unit_kind kind = (entry->per_cu->is_debug_types
+	    unit_kind kind = (entry->per_cu->is_debug_types ()
 			      ? unit_kind::tu
 			      : unit_kind::cu);
 	    /* Some Ada parentage is synthesized by the reader and so
@@ -1363,7 +1363,7 @@ get_unit_lists (const dwarf2_per_bfd &per_bfd)
   std::vector<const signatured_type *> type_units;
 
   for (const auto &unit : per_bfd.all_units)
-    if (unit->is_debug_types)
+    if (unit->is_debug_types ())
       type_units.emplace_back (static_cast<const signatured_type *>
 			       (unit.get ()));
     else

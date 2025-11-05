@@ -1030,7 +1030,7 @@ dwarf2_queue_item::~dwarf2_queue_item ()
 void
 dwarf2_per_cu_deleter::operator() (dwarf2_per_cu *data)
 {
-  if (data->is_debug_types)
+  if (data->is_debug_types ())
     delete static_cast<signatured_type *> (data);
   else
     delete data;
@@ -1600,7 +1600,7 @@ static dwarf2_cu *
 load_cu (dwarf2_per_cu *per_cu, dwarf2_per_objfile *per_objfile,
 	 bool skip_partial)
 {
-  if (per_cu->is_debug_types)
+  if (per_cu->is_debug_types ())
     load_full_type_unit (per_cu, per_objfile);
   else
     load_full_comp_unit (per_cu, per_objfile, skip_partial, language_minimal);
@@ -1637,7 +1637,7 @@ dw2_do_instantiate_symtab (dwarf2_per_cu *per_cu,
 	/* If we just loaded a CU from a DWO, and we're working with an index
 	   that may badly handle TUs, load all the TUs in that DWO as well.
 	   http://sourceware.org/bugzilla/show_bug.cgi?id=15021  */
-	if (!per_cu->is_debug_types
+	if (!per_cu->is_debug_types ()
 	    && cu != NULL
 	    && cu->dwo_unit != NULL
 	    && per_objfile->per_bfd->index_table != NULL
@@ -1784,7 +1784,7 @@ dw2_get_file_names_reader (dwarf2_cu *cu, die_info *comp_unit_die)
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
-  gdb_assert (! this_cu->is_debug_types);
+  gdb_assert (!this_cu->is_debug_types ());
 
   this_cu->files_read = true;
   /* Our callers never want to match partial units -- instead they
@@ -1867,7 +1867,7 @@ static struct quick_file_names *
 dw2_get_file_names (dwarf2_per_cu *this_cu, dwarf2_per_objfile *per_objfile)
 {
   /* This should never be called for TUs.  */
-  gdb_assert (! this_cu->is_debug_types);
+  gdb_assert (!this_cu->is_debug_types ());
 
   if (this_cu->files_read)
     return this_cu->file_names;
@@ -2050,7 +2050,7 @@ dw_search_file_matcher
     {
       QUIT;
 
-      if (per_cu->is_debug_types)
+      if (per_cu->is_debug_types ())
 	{
 	  cus_to_skip.set (per_cu->index, true);
 	  continue;
@@ -2206,7 +2206,7 @@ dwarf2_base_index_functions::map_symbol_filenames (objfile *objfile,
 
   for (const auto &per_cu : per_objfile->per_bfd->all_units)
     {
-      if (!per_cu->is_debug_types
+      if (!per_cu->is_debug_types ()
 	  && per_objfile->symtab_set_p (per_cu.get ()))
 	{
 	  if (per_cu->file_names != nullptr)
@@ -2217,7 +2217,7 @@ dwarf2_base_index_functions::map_symbol_filenames (objfile *objfile,
   for (dwarf2_per_cu *per_cu : all_units_range (per_objfile->per_bfd))
     {
       /* We only need to look at symtabs not already expanded.  */
-      if (per_cu->is_debug_types || per_objfile->symtab_set_p (per_cu))
+      if (per_cu->is_debug_types () || per_objfile->symtab_set_p (per_cu))
 	continue;
 
       if (per_cu->fnd != nullptr)
@@ -2750,7 +2750,7 @@ cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
     {
       /* For TUs in DWO files, the DW_AT_stmt_list attribute lives in the
 	 DWO file.  */
-      if (!per_cu->is_debug_types)
+      if (!per_cu->is_debug_types ())
 	push_back (dwarf2_attr (stub_comp_unit_die, DW_AT_stmt_list, cu));
       push_back (dwarf2_attr (stub_comp_unit_die, DW_AT_low_pc, cu));
       push_back (dwarf2_attr (stub_comp_unit_die, DW_AT_high_pc, cu));
@@ -2791,7 +2791,7 @@ cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
   const gdb_byte *begin_info_ptr = m_info_ptr;
   dwo_abbrev_section = &dwo_unit->dwo_file->sections.abbrev;
 
-  if (per_cu->is_debug_types)
+  if (per_cu->is_debug_types ())
     {
       signatured_type *sig_type = (struct signatured_type *) per_cu;
 
@@ -2890,7 +2890,7 @@ cutu_reader::lookup_dwo_unit (dwarf2_cu *cu, die_info *comp_unit_die,
 
   comp_dir = dwarf2_string_attr (comp_unit_die, DW_AT_comp_dir, cu);
 
-  if (per_cu->is_debug_types)
+  if (per_cu->is_debug_types ())
     dwo_unit = lookup_dwo_type_unit (cu, dwo_name, comp_dir);
   else
     {
@@ -2922,7 +2922,7 @@ cutu_reader::init_tu_and_read_dwo_dies (dwarf2_per_cu *this_cu,
 
   /* Verify we can do the following downcast, and that we have the
      data we need.  */
-  gdb_assert (this_cu->is_debug_types && this_cu->reading_dwo_directly);
+  gdb_assert (this_cu->is_debug_types () && this_cu->reading_dwo_directly);
   sig_type = (struct signatured_type *) this_cu;
   gdb_assert (sig_type->dwo_unit != NULL);
 
@@ -2984,7 +2984,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu &this_cu,
 
   if (dwarf_die_debug)
     gdb_printf (gdb_stdlog, "Reading %s unit at offset %s\n",
-		this_cu.is_debug_types ? "type" : "comp",
+		this_cu.is_debug_types () ? "type" : "comp",
 		sect_offset_str (this_cu.sect_off ()));
 
   /* If we're reading a TU directly from a DWO file, including a virtual DWO
@@ -2992,7 +2992,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu &this_cu,
   if (this_cu.reading_dwo_directly)
     {
       /* Narrow down the scope of possibilities to have to understand.  */
-      gdb_assert (this_cu.is_debug_types);
+      gdb_assert (this_cu.is_debug_types ());
       gdb_assert (abbrev_table == NULL);
       init_tu_and_read_dwo_dies (&this_cu, &per_objfile, existing_cu,
 				 pretend_language);
@@ -3044,7 +3044,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu &this_cu,
     }
   else
     {
-      if (this_cu.is_debug_types)
+      if (this_cu.is_debug_types ())
 	{
 	  m_info_ptr = read_and_check_unit_head (&cu->header, section,
 						 abbrev_section, m_info_ptr,
@@ -3188,7 +3188,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu &this_cu,
 
   if (dwarf_die_debug)
     gdb_printf (gdb_stdlog, "Reading %s unit at offset %s\n",
-		this_cu.is_debug_types ? "type" : "comp",
+		this_cu.is_debug_types () ? "type" : "comp",
 		sect_offset_str (this_cu.sect_off ()));
 
   gdb_assert (per_objfile.get_cu (&this_cu) == nullptr);
@@ -3204,7 +3204,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu &this_cu,
   const gdb_byte *begin_info_ptr = m_info_ptr;
   m_info_ptr = read_and_check_unit_head (&m_new_cu->header, section,
 					 abbrev_section, m_info_ptr,
-					 (this_cu.is_debug_types
+					 (this_cu.is_debug_types ()
 					  ? ruh_kind::TYPE
 					  : ruh_kind::COMPILE));
 
@@ -3450,7 +3450,7 @@ cooked_index_worker_debug_info::process_unit
   if (reader->is_dummy ())
     return;
 
-  if (this_cu->is_debug_types)
+  if (this_cu->is_debug_types ())
     process_type_unit (reader, storage);
   else if (reader->top_level_die ()->tag != DW_TAG_partial_unit)
     {
@@ -3472,7 +3472,7 @@ cooked_index_worker_debug_info::process_type_unit
   dwarf2_per_cu *per_cu = cu->per_cu;
   die_info *type_unit_die = reader->top_level_die ();
 
-  gdb_assert (per_cu->is_debug_types);
+  gdb_assert (per_cu->is_debug_types ());
 
   if (! type_unit_die->has_children)
     return;
@@ -3537,7 +3537,7 @@ cooked_index_worker_debug_info::process_type_units
   sorted_by_abbrev.reserve (per_objfile->per_bfd->num_type_units);
 
   for (const auto &cu : per_objfile->per_bfd->all_units)
-    if (cu->is_debug_types)
+    if (cu->is_debug_types ())
       {
 	auto sig_type = static_cast<signatured_type *> (cu.get ());
 	sect_offset abbrev_offset
@@ -3812,7 +3812,7 @@ cutu_reader::peek_die_abbrev (const gdb_byte *info_ptr,
       error (_(DWARF_ERROR_PREFIX
 	       "Could not find abbrev number %d in %s at offset %s"
 	       " [in module %s]"),
-	     abbrev_number, m_cu->per_cu->is_debug_types ? "TU" : "CU",
+	     abbrev_number, m_cu->per_cu->is_debug_types () ? "TU" : "CU",
 	     sect_offset_str (m_cu->header.sect_off),
 	     bfd_get_filename (m_abfd));
     }
@@ -4128,7 +4128,7 @@ process_queue (dwarf2_per_objfile *per_objfile)
 	      char buf[100];
 	      std::optional<chr::time_point<chr::steady_clock>> start_time;
 
-	      if (per_cu->is_debug_types)
+	      if (per_cu->is_debug_types ())
 		{
 		  struct signatured_type *sig_type =
 		    (struct signatured_type *) per_cu;
@@ -4155,7 +4155,7 @@ process_queue (dwarf2_per_objfile *per_objfile)
 
 	      ++expanded_count;
 
-	      if (per_cu->is_debug_types)
+	      if (per_cu->is_debug_types ())
 		process_full_type_unit (cu);
 	      else
 		process_full_comp_unit (cu);
@@ -4186,7 +4186,7 @@ static void
 load_full_comp_unit (dwarf2_per_cu *this_cu, dwarf2_per_objfile *per_objfile,
 		     bool skip_partial, enum language pretend_language)
 {
-  gdb_assert (! this_cu->is_debug_types);
+  gdb_assert (!this_cu->is_debug_types ());
   gdb_assert (per_objfile->get_cu (this_cu) == nullptr);
 
   cutu_reader reader (*this_cu, *per_objfile, nullptr, nullptr, skip_partial,
@@ -4737,7 +4737,7 @@ recursively_compute_inclusions
     {
       /* If this is a type unit only add its symbol table if we haven't
 	 seen it yet (type unit per_cu's can share symtabs).  */
-      if (per_cu->is_debug_types)
+      if (per_cu->is_debug_types ())
 	{
 	  if (bool inserted = all_type_symtabs.insert (cust).second;
 	      inserted)
@@ -4768,7 +4768,7 @@ static void
 compute_compunit_symtab_includes (dwarf2_per_cu *per_cu,
 				  dwarf2_per_objfile *per_objfile)
 {
-  gdb_assert (! per_cu->is_debug_types);
+  gdb_assert (!per_cu->is_debug_types ());
 
   if (!per_cu->imported_symtabs.empty ())
     {
@@ -4807,7 +4807,7 @@ process_cu_includes (dwarf2_per_objfile *per_objfile)
 {
   for (dwarf2_per_cu *iter : per_objfile->per_bfd->just_read_cus)
     {
-      if (! iter->is_debug_types)
+      if (!iter->is_debug_types ())
 	compute_compunit_symtab_includes (iter, per_objfile);
     }
 
@@ -4937,7 +4937,7 @@ process_full_type_unit (dwarf2_cu *cu)
   struct compunit_symtab *cust;
   struct signatured_type *sig_type;
 
-  gdb_assert (cu->per_cu->is_debug_types);
+  gdb_assert (cu->per_cu->is_debug_types ());
   sig_type = (struct signatured_type *) cu->per_cu;
 
   /* Clear the list here in case something was left over.  */
@@ -5016,7 +5016,7 @@ process_imported_unit_die (struct die_info *die, struct dwarf2_cu *cu)
   struct attribute *attr;
 
   /* For now we don't handle imported units in type units.  */
-  if (cu->per_cu->is_debug_types)
+  if (cu->per_cu->is_debug_types ())
     {
       error (_(DWARF_ERROR_PREFIX
 	       "DW_TAG_imported_unit is not supported in type units"
@@ -5980,7 +5980,7 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
   void **slot;
   int decode_mapping;
 
-  gdb_assert (! cu->per_cu->is_debug_types);
+  gdb_assert (!cu->per_cu->is_debug_types ());
 
   attr = dwarf2_attr (die, DW_AT_stmt_list, cu);
   if (attr == NULL || !attr->form_is_unsigned ())
@@ -6174,7 +6174,7 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
   unsigned int i;
   struct signatured_type *sig_type;
 
-  gdb_assert (per_cu->is_debug_types);
+  gdb_assert (per_cu->is_debug_types ());
   sig_type = (struct signatured_type *) per_cu;
 
   attr = dwarf2_attr (die, DW_AT_stmt_list, this);
@@ -8147,7 +8147,7 @@ dwo_unit *
 cutu_reader::lookup_dwo_comp_unit (dwarf2_cu *cu, const char *dwo_name,
 				   const char *comp_dir, ULONGEST signature)
 {
-  gdb_assert (!cu->per_cu->is_debug_types);
+  gdb_assert (!cu->per_cu->is_debug_types ());
 
   return lookup_dwo_cutu (cu, dwo_name, comp_dir, signature, 0);
 }
@@ -8159,7 +8159,7 @@ dwo_unit *
 cutu_reader::lookup_dwo_type_unit (dwarf2_cu *cu, const char *dwo_name,
 				   const char *comp_dir)
 {
-  gdb_assert (cu->per_cu->is_debug_types);
+  gdb_assert (cu->per_cu->is_debug_types ());
 
   signatured_type *sig_type = (signatured_type *) cu->per_cu;
 
@@ -8199,7 +8199,7 @@ queue_and_load_all_dwo_tus (dwarf2_cu *cu)
   struct dwo_file *dwo_file;
 
   gdb_assert (cu != nullptr);
-  gdb_assert (!cu->per_cu->is_debug_types);
+  gdb_assert (!cu->per_cu->is_debug_types ());
   gdb_assert (cu->per_objfile->per_bfd->dwp_file == nullptr);
 
   dwo_unit = cu->dwo_unit;
@@ -11899,7 +11899,7 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
      actually available.  Note that we do not want to do this for all
      enums which are just declarations, because C++0x allows forward
      enum declarations.  */
-  if (cu->per_cu->is_debug_types
+  if (cu->per_cu->is_debug_types ()
       && die_is_declaration (die, cu))
     {
       struct signatured_type *sig_type;
@@ -15824,7 +15824,7 @@ get_debug_line_section (struct dwarf2_cu *cu)
 
   /* For TUs in DWO files, the DW_AT_stmt_list attribute lives in the
      DWO file.  */
-  if (cu->dwo_unit && cu->per_cu->is_debug_types)
+  if (cu->dwo_unit && cu->per_cu->is_debug_types ())
     section = &cu->dwo_unit->dwo_file->sections.line;
   else if (cu->per_cu->is_dwz ())
     section = &per_objfile->per_bfd->get_dwz_file (true)->line;
@@ -15855,7 +15855,7 @@ dwarf_decode_line_header (sect_offset sect_off, struct dwarf2_cu *cu,
   section->read (per_objfile->objfile);
   if (section->buffer == NULL)
     {
-      if (cu->dwo_unit && cu->per_cu->is_debug_types)
+      if (cu->dwo_unit && cu->per_cu->is_debug_types ())
 	complaint (_("missing .debug_line.dwo section"));
       else
 	complaint (_("missing .debug_line section"));
@@ -17516,7 +17516,7 @@ follow_die_offset (const section_and_offset &target, dwarf2_cu **ref_cu)
 			     (target.section == &source_cu->section ()
 			      && source_cu->header.offset_in_unit_p (target.offset)));
 
-  if (source_cu->per_cu->is_debug_types)
+  if (source_cu->per_cu->is_debug_types ())
     {
       /* .debug_types CUs cannot reference anything outside their CU.
 	 If they need to, they have to reference a signatured type via
@@ -18062,7 +18062,7 @@ load_full_type_unit (dwarf2_per_cu *per_cu, dwarf2_per_objfile *per_objfile)
 
   /* We have the per_cu, but we need the signatured_type.
      Fortunately this is an easy translation.  */
-  gdb_assert (per_cu->is_debug_types);
+  gdb_assert (per_cu->is_debug_types ());
   sig_type = (struct signatured_type *) per_cu;
 
   gdb_assert (per_objfile->get_cu (per_cu) == nullptr);
@@ -18080,7 +18080,7 @@ static void
 read_signatured_type (signatured_type *sig_type,
 		      dwarf2_per_objfile *per_objfile)
 {
-  gdb_assert (sig_type->is_debug_types);
+  gdb_assert (sig_type->is_debug_types ());
   gdb_assert (per_objfile->get_cu (sig_type) == nullptr);
 
   cutu_reader reader (*sig_type, *per_objfile, nullptr, nullptr, false,

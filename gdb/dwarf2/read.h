@@ -116,10 +116,11 @@ struct dwarf2_per_cu
   /* LENGTH is the length of the unit.  If the value is 0, it means it is not
      known, and may be set later using the set_length method.  */
   dwarf2_per_cu (dwarf2_per_bfd *per_bfd, dwarf2_section_info *section,
-		 sect_offset sect_off, unsigned int length, bool is_dwz)
+		 sect_offset sect_off, unsigned int length, bool is_dwz,
+		 bool is_debug_types = false)
     : m_sect_off (sect_off),
       m_length (length),
-      is_debug_types (false),
+      m_is_debug_types (is_debug_types),
       m_is_dwz (is_dwz),
       reading_dwo_directly (false),
       tu_read (false),
@@ -145,13 +146,12 @@ private:
 
   unsigned int m_length = 0;
 
-public:
+private:
   /* Non-zero if this CU is from .debug_types.
      Struct dwarf2_per_cu is contained in struct signatured_type iff
      this is non-zero.  */
-  unsigned int is_debug_types : 1;
+  unsigned int m_is_debug_types : 1;
 
-private:
   /* Non-zero if this CU is from the .dwz file.  */
   unsigned int m_is_dwz : 1;
 
@@ -265,6 +265,9 @@ public:
      indices so we only pay a price for gold generated indices.
      http://sourceware.org/bugzilla/show_bug.cgi?id=15021.  */
   std::vector<dwarf2_per_cu *> imported_symtabs;
+
+  bool is_debug_types () const
+  { return m_is_debug_types; }
 
   dwarf2_per_bfd *per_bfd () const
   { return m_per_bfd; }
@@ -386,11 +389,9 @@ struct signatured_type : public dwarf2_per_cu
   signatured_type (dwarf2_per_bfd *per_bfd, dwarf2_section_info *section,
 		   sect_offset sect_off, unsigned int length, bool is_dwz,
 		   ULONGEST signature)
-    : dwarf2_per_cu (per_bfd, section, sect_off, length, is_dwz),
+    : dwarf2_per_cu (per_bfd, section, sect_off, length, is_dwz, true),
       signature (signature)
-  {
-    this->is_debug_types = true;
-  }
+  {}
 
   /* The type's signature.  */
   ULONGEST signature;
