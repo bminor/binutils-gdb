@@ -172,7 +172,7 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 		 int *bit_width, int flags)
 {
   ctf_dict_t *ofp = fp;
-  uint32_t kind;
+  ctf_kind_t kind;
   ssize_t offset;
   size_t nmemb;
   unsigned char *vlen;
@@ -370,7 +370,7 @@ ctf_enum_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 	       int64_t *val)
 {
   ctf_dict_t *ofp = fp;
-  uint32_t kind;
+  ctf_kind_t kind;
   const char *name;
   ctf_next_t *i = *it;
   ctf_error_t err;
@@ -550,7 +550,7 @@ ctf_type_next (ctf_dict_t *fp, ctf_next_t **it, int *flag, int want_hidden)
    of a single parent.  */
 
 ctf_id_t
-ctf_type_kind_next (ctf_dict_t *fp, ctf_next_t **it, int kind)
+ctf_type_kind_next (ctf_dict_t *fp, ctf_next_t **it, ctf_kind_t kind)
 {
   ctf_next_t *i = *it;
   ctf_error_t err;
@@ -897,7 +897,7 @@ ctf_get_dict (const ctf_dict_t *fp, ctf_id_t type)
 /* Look up a name in the given name table, in the appropriate hash given the
    kind of the identifier.  The name is a raw, undecorated identifier.  */
 
-ctf_id_t ctf_lookup_by_rawname (ctf_dict_t *fp, int kind, const char *name)
+ctf_id_t ctf_lookup_by_rawname (ctf_dict_t *fp, ctf_kind_t kind, const char *name)
 {
   return (ctf_id_t) (uintptr_t)
     ctf_dynhash_lookup (ctf_name_table (fp, kind), name);
@@ -1164,6 +1164,13 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 		ctf_decl_sprintf (&cd, _("(nonrepresentable type %s)"),
 				  name);
 	      break;
+	    /* CTF_K_SLICE has no print representation: see ctf_decl_push().  */
+	    case CTF_K_SLICE:
+	    /* CTF_K_BIG and CTF_K_CONFLICTING cannot appear and have no print
+	       representation.  */
+	    case CTF_K_BIG:
+	    case CTF_K_CONFLICTING:
+	      break;
 	    }
 
 	  k = cdp->cd_kind;
@@ -1354,7 +1361,7 @@ ctf_type_align (ctf_dict_t *fp, ctf_id_t type)
 {
   const ctf_type_t *tp;
   ctf_dict_t *ofp = fp;
-  int kind;
+  ctf_kind_t kind;
 
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
     return -1;			/* errno is set for us.  */
@@ -1416,7 +1423,7 @@ ctf_type_align (ctf_dict_t *fp, ctf_id_t type)
    Pretend that all forwards are of type CTF_K_FORWARD, for ease of
    use and compatibility.  */
 
-int
+ctf_kind_t
 ctf_type_kind_unsliced_tp (ctf_dict_t *fp, const ctf_type_t *tp)
 {
   if (LCTF_KIND (fp, tp) == CTF_K_ENUM
@@ -1429,10 +1436,10 @@ ctf_type_kind_unsliced_tp (ctf_dict_t *fp, const ctf_type_t *tp)
 /* Return the kind (CTF_K_* constant) for the specified type pointer.
    Slices are considered to be of the same kind as the type sliced.  */
 
-int
+ctf_kind_t
 ctf_type_kind_tp (ctf_dict_t *fp, const ctf_type_t *tp)
 {
-  int kind;
+  ctf_kind_t kind;
 
   if ((kind = ctf_type_kind_unsliced_tp (fp, tp)) < 0)
     return -1;			/* errno is set for us.  */
@@ -1453,10 +1460,10 @@ ctf_type_kind_tp (ctf_dict_t *fp, const ctf_type_t *tp)
 
 /* Return the kind of this type pointer, except, for forwards, return the kind
    of thing this is a forward to.  */
-int
+ctf_kind_t
 ctf_type_kind_forwarded_tp (ctf_dict_t *fp, const ctf_type_t *tp)
 {
-  int kind;
+  ctf_kind_t kind;
 
   if ((kind = ctf_type_kind_tp (fp, tp)) < 0)
     return -1;			/* errno is set for us.  */
@@ -1479,7 +1486,7 @@ ctf_type_kind_forwarded_tp (ctf_dict_t *fp, const ctf_type_t *tp)
    Pretend that all forwards are of type CTF_K_FORWARD, for ease of
    use and compatibility.  */
 
-int
+ctf_kind_t
 ctf_type_kind_unsliced (ctf_dict_t *fp, ctf_id_t type)
 {
   const ctf_type_t *tp;
@@ -1493,10 +1500,10 @@ ctf_type_kind_unsliced (ctf_dict_t *fp, ctf_id_t type)
 /* Return the kind (CTF_K_* constant) for the specified type ID.
    Slices are considered to be of the same kind as the type sliced.  */
 
-int
+ctf_kind_t
 ctf_type_kind (ctf_dict_t *fp, ctf_id_t type)
 {
-  int kind;
+  ctf_kind_t kind;
 
   if ((kind = ctf_type_kind_unsliced (fp, type)) < 0)
     return -1;
@@ -1513,10 +1520,10 @@ ctf_type_kind (ctf_dict_t *fp, ctf_id_t type)
 
 /* Return the kind of this type, except, for forwards, return the kind of thing
    this is a forward to.  */
-int
+ctf_kind_t
 ctf_type_kind_forwarded (ctf_dict_t *fp, ctf_id_t type)
 {
-  int ret;
+  ctf_kind_t ret;
   ctf_dict_t *ofp = fp;
   const ctf_type_t *tp, *suffix;
 
@@ -1643,7 +1650,7 @@ ctf_decl_tag (ctf_dict_t *fp, ctf_id_t decl_tag, int64_t *component_idx)
 ctf_id_t
 ctf_tag (ctf_dict_t *fp, ctf_id_t tag)
 {
-  int kind = ctf_type_kind (fp, tag);
+  ctf_kind_t kind = ctf_type_kind (fp, tag);
   int64_t component_idx;
   ctf_id_t ref;
 
@@ -1876,7 +1883,7 @@ ctf_type_compat (ctf_dict_t *lfp, ctf_id_t ltype,
   const ctf_type_t *ltp, *rtp;
   ctf_encoding_t le, re;
   ctf_arinfo_t la, ra;
-  int lkind, rkind;
+  ctf_kind_t lkind, rkind;
   int same_names = 0;
 
   if (lfp->ctf_flags & LCTF_NO_STR)
@@ -1977,7 +1984,7 @@ ctf_member_count (ctf_dict_t *fp, ctf_id_t type)
 {
   ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
-  uint32_t kind;
+  ctf_kind_t kind;
 
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
     return -1;			/* errno is set for us.  */
@@ -2004,7 +2011,8 @@ ctf_member_info (ctf_dict_t *fp, ctf_id_t type, const char *name,
   int big = 0;
   size_t total_offset = 0;
   unsigned char *vlen;
-  uint32_t kind, i = 0;
+  ctf_kind_t kind;
+  uint32_t i = 0;
   size_t n;
 
   if (fp->ctf_flags & LCTF_NO_STR)
@@ -2119,7 +2127,7 @@ ctf_enum_name (ctf_dict_t *fp, ctf_id_t type, int64_t value)
   ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
   unsigned char *vlen;
-  int kind;
+  ctf_kind_t kind;
   size_t n;
 
   if (fp->ctf_flags & LCTF_NO_STR)
@@ -2179,7 +2187,7 @@ ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int64_t *valp)
   ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
   unsigned char *vlen;
-  int kind;
+  ctf_kind_t kind;
   size_t n;
 
   if (fp->ctf_flags & LCTF_NO_STR)
@@ -2245,7 +2253,7 @@ ctf_enum_unsigned_value (ctf_dict_t *fp, ctf_id_t type, const char *name, uint64
 ctf_bool_t
 ctf_enum_unsigned (ctf_dict_t *fp, ctf_id_t type)
 {
-  int kind;
+  ctf_kind_t kind;
   const ctf_type_t *tp;		/* The suffixed kind, if prefixed */
 
   if ((kind = ctf_type_kind (fp, type)) < 0)
@@ -2264,7 +2272,7 @@ ctf_enum_unsigned (ctf_dict_t *fp, ctf_id_t type)
 ctf_bool_t
 ctf_struct_bitfield (ctf_dict_t * fp, ctf_id_t type)
 {
-  int kind;
+  ctf_kind_t kind;
   const ctf_type_t *tp;		/* The suffixed kind, if prefixed */
 
   if ((kind = ctf_type_kind (fp, type)) < 0)
@@ -2287,7 +2295,7 @@ ctf_func_type_info (ctf_dict_t *fp, ctf_id_t type, ctf_funcinfo_t *fip)
 {
   ctf_dict_t *ofp = fp;
   const ctf_type_t *tp, *suffix;
-  uint32_t kind;
+  ctf_kind_t kind;
   unsigned char *vlen;
   const ctf_param_t *args;
 
@@ -2393,8 +2401,7 @@ ctf_type_linkage (ctf_dict_t *fp, ctf_id_t type)
   const ctf_type_t *suffix;
   unsigned char *vlen;
   ctf_linkage_t *l;
-
-  int kind;
+  ctf_kind_t kind;
 
   if ((tp = ctf_lookup_by_id (&fp, type, &suffix)) == NULL)
     return -1;			/* errno is set for us.  */
@@ -2532,7 +2539,7 @@ ctf_type_rvisit (ctf_dict_t *fp, ctf_id_t type, ctf_visit_f *func,
 {
   ctf_id_t otype = type;
   int nonrepresentable = 0;
-  uint32_t kind;
+  ctf_kind_t kind;
   ctf_next_t *it = NULL;
   ctf_id_t membtype;
   ssize_t this_offset;

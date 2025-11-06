@@ -450,7 +450,7 @@ intern (ctf_dict_t *fp, char *atom)
    while allowing for the four C namespaces (normal, struct, union, enum).
    Return a pointer into the cd_decorated_names atoms table.  */
 static const char *
-ctf_decorate_type_name (ctf_dict_t *fp, const char *name, int kind)
+ctf_decorate_type_name (ctf_dict_t *fp, const char *name, ctf_kind_t kind)
 {
   ctf_dedup_t *d = &fp->ctf_dedup;
   const char *ret;
@@ -593,7 +593,7 @@ ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
 /* Determine whether this type is being hashed as a stub (in which case it is
    unsafe to cache it).  */
 static int
-ctf_dedup_is_stub (const char *name, int kind, int fwdkind, int flags)
+ctf_dedup_is_stub (const char *name, ctf_kind_t kind, ctf_kind_t fwdkind, int flags)
 {
   /* We can cache all types unless we are recursing to children and are hashing
      in a tagged struct, union or forward, all of which are replaced with their
@@ -647,7 +647,7 @@ static const char *
 ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 		      int input_num, ctf_id_t type, void *type_id,
 		      const ctf_type_t *tp, const char *name,
-		      const char *decorated, int kind, int flags,
+		      const char *decorated, ctf_kind_t kind, int flags,
 		      unsigned long depth,
 		      int (*populate_fun) (ctf_dict_t *fp,
 					   ctf_dict_t *input,
@@ -668,6 +668,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
   const char *whaterr;
   ctf_error_t err = 0;
   int64_t component_idx = -1;
+  uint32_t ukind = (uint32_t) kind;
 
   /* "citer" is for types that reference only one other type: "citers" can store
      many of them, but is more expensive to both populate and traverse.  */
@@ -773,6 +774,9 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
     case CTF_K_RESTRICT:
     case CTF_K_SLICE:
       name = NULL;
+      break;
+    default:;
+      /* No need to annul anything else.  */
     }
 
   /* Mix in invariant stuff, transforming the type kind if needed.  Note that
@@ -793,7 +797,8 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
   ctf_sha1_init (&hash);
   if (name)
     ctf_dedup_sha1_add (&hash, name, strlen (name) + 1, "name", depth);
-  ctf_dedup_sha1_add (&hash, &kind, sizeof (uint32_t), "kind", depth);
+  /* Force the kind hash to rely on an arch-independent, explicitly-sized type.  */
+  ctf_dedup_sha1_add (&hash, &ukind, sizeof (ukind), "kind", depth);
 
   /* Hash content of this type.  */
   switch (kind)
@@ -803,10 +808,10 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
       break;
     case CTF_K_FORWARD:
       {
-	int fwdkind = ctf_type_kind_forwarded_tp (input, tp);
+	uint32_t ufwdkind = ctf_type_kind_forwarded_tp (input, tp);
 
 	/* Add the forwarded kind.  */
-	ctf_dedup_sha1_add (&hash, &fwdkind, sizeof (fwdkind), "forwarded kind",
+	ctf_dedup_sha1_add (&hash, &ufwdkind, sizeof (ufwdkind), "forwarded kind",
 			    depth);
 	break;
       }
@@ -881,7 +886,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 
       if (kind == CTF_K_DECL_TAG && component_idx > -1)
 	{
-	  int child_kind = ctf_type_kind (input, child_type);
+	  ctf_kind_t child_kind = ctf_type_kind (input, child_type);
 
 	  if (child_kind == CTF_K_STRUCT || child_kind == CTF_K_UNION)
 	    {
@@ -1402,7 +1407,7 @@ ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
   const char *name;
   const char *whaterr;
   const char *decorated = NULL;
-  uint32_t kind, fwdkind;
+  ctf_kind_t kind, fwdkind;
   int isroot;
 
   depth++;
@@ -1541,7 +1546,7 @@ ctf_dedup_populate_mappings (ctf_dict_t *fp, ctf_dict_t *input _libctf_unused_,
   ctf_dedup_t *d = &fp->ctf_dedup;
   ctf_dynset_t *type_ids;
   void *root_visible;
-  int kind;
+  ctf_kind_t kind;
 
 #ifdef ENABLE_LIBCTF_HASH_DEBUGGING
   ctf_dprintf ("Hash %s, %s, into output mapping for %i/%lx @ %s\n",
@@ -1594,7 +1599,7 @@ ctf_dedup_populate_mappings (ctf_dict_t *fp, ctf_dict_t *input _libctf_unused_,
     ctf_error_t err;
     const void *one_id;
     ctf_next_t *i = NULL;
-    int orig_kind = ctf_type_kind_unsliced (input, type);
+    ctf_kind_t orig_kind = ctf_type_kind_unsliced (input, type);
     int orig_first_tu;
 
     orig_first_tu = CTF_DEDUP_GID_TO_INPUT
@@ -1791,7 +1796,7 @@ ctf_dedup_count_name (ctf_dict_t *fp, const char *name, void *id)
 
 /* Look up a type kind from the output mapping, given a type hash value.
    Optionally return its GID as well.  */
-static int
+static ctf_kind_t
 ctf_dedup_hash_kind_gid (ctf_dict_t *fp, ctf_dict_t **inputs, const char *hash,
 			 void **gid)
 {
@@ -1884,7 +1889,7 @@ ctf_dedup_mark_conflicting_hash (ctf_dict_t *fp, ctf_dict_t **inputs,
 {
   ctf_dedup_t *d = &fp->ctf_dedup;
   const char *name;
-  int kind;
+  ctf_kind_t kind;
   void *id;
   ctf_dict_t *input;
 
@@ -1953,7 +1958,7 @@ static int
 ctf_dedup_count_types (void *key_, void *value _libctf_unused_, void *arg_)
 {
   const char *hval = (const char *) key_;
-  int kind;
+  ctf_kind_t kind;
   ctf_dedup_type_counter_t *arg = (ctf_dedup_type_counter_t *) arg_;
 
   kind = ctf_dedup_hash_kind_gid (arg->fp, arg->inputs, hval, NULL);
@@ -2025,7 +2030,7 @@ ctf_dedup_detect_name_ambiguity (ctf_dict_t *fp, ctf_dict_t **inputs)
 		  const char *hval = (const char *) hval_;
 		  ctf_dynset_t *type_ids;
 		  void *id;
-		  int kind;
+		  ctf_kind_t kind;
 
 		  /* Dig through the types in this hash to find the non-forwards
 		     and mark them ambiguous.  */
@@ -2371,7 +2376,7 @@ ctf_dedup_multiple_input_dicts (ctf_dict_t *output, ctf_dict_t **inputs,
   ctf_id_t input_id;
   const char *name;
   const char *decorated;
-  int fwdkind;
+  ctf_kind_t fwdkind;
   int multiple = 0;
   ctf_error_t err;
 
@@ -2647,7 +2652,7 @@ ctf_dedup (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
 static int
 ctf_dedup_member_decl_tag (ctf_dict_t *fp, ctf_id_t type)
 {
-  int ref_kind = ctf_type_kind (fp, ctf_type_reference (fp, type));
+  ctf_kind_t ref_kind = ctf_type_kind (fp, ctf_type_reference (fp, type));
 
   if (ref_kind == CTF_K_STRUCT || ref_kind == CTF_K_UNION)
     {
@@ -3142,8 +3147,7 @@ ctf_dedup_maybe_synthesize_forward (ctf_dict_t *output, ctf_dict_t *target,
 {
   ctf_dedup_t *od = &output->ctf_dedup;
   ctf_dedup_t *td = &target->ctf_dedup;
-  int kind;
-  int fwdkind;
+  ctf_kind_t kind, fwdkind;
   const char *name = ctf_type_name_raw (input, id);
   const char *decorated;
   void *v;
@@ -3330,7 +3334,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 		     void *arg)
 {
   ctf_dedup_t *d = &output->ctf_dedup;
-  int kind = ctf_type_kind_unsliced (input, type);
+  ctf_kind_t kind = ctf_type_kind_unsliced (input, type);
   const char *name;
   ctf_dict_t *target = output;
   ctf_dict_t *real_input;

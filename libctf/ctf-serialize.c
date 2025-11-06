@@ -769,7 +769,7 @@ symerr:
 /* Kind suppression.  */
 
 ctf_ret_t
-ctf_write_suppress_kind (ctf_dict_t *fp, int kind, int prohibited)
+ctf_write_suppress_kind (ctf_dict_t *fp, ctf_kind_t kind, int prohibited)
 {
   ctf_dynset_t *set;
 
@@ -793,7 +793,7 @@ ctf_write_suppress_kind (ctf_dict_t *fp, int kind, int prohibited)
 	fp->ctf_write_suppressions = set;
     }
 
-  if ((ctf_dynset_cinsert (set, (const void *) (uintptr_t) kind)) < 0)
+  if ((ctf_dynset_cinsert (set, (const void *) (ctf_kind_t) kind)) < 0)
     return (ctf_set_errno (fp, errno));
 
   return 0;
@@ -808,7 +808,7 @@ static int
 ctf_prefix_elidable (ctf_dict_t *fp, uint32_t kind, ctf_dtdef_t *dtd,
 		     ctf_type_t *prefix)
 {
-  int prefix_kind = LCTF_INFO_UNPREFIXED_KIND (fp, prefix->ctt_info);
+  ctf_kind_t prefix_kind = LCTF_INFO_UNPREFIXED_KIND (fp, prefix->ctt_info);
 
   if ((prefix_kind == CTF_K_BIG) && prefix->ctt_size == 0
       && LCTF_INFO_UNPREFIXED_VLEN (fp, prefix->ctt_info) == 0)
@@ -857,7 +857,7 @@ ctf_type_sect_is_btf (ctf_dict_t *fp, int force_ctf)
       while ((err = ctf_dynset_next (fp->ctf_write_prohibitions,
 				     &prohibit_i, &pkind)) == 0)
 	{
-	  int kind = (uintptr_t) pkind;
+	  ctf_kind_t kind = (ctf_kind_t) pkind;
 
 	  if (ctf_type_kind_next (fp, &i, kind) != CTF_ERR)
 	    {
@@ -889,8 +889,8 @@ ctf_type_sect_is_btf (ctf_dict_t *fp, int force_ctf)
        dtd != NULL; dtd = ctf_list_next (dtd))
     {
       ctf_type_t *tp = dtd->dtd_buf;
-      uint32_t kind = LCTF_KIND (fp, dtd->dtd_buf);
-      uint32_t prefix_kind;
+      ctf_kind_t kind = LCTF_KIND (fp, dtd->dtd_buf);
+      ctf_kind_t prefix_kind;
 
       /* Any un-suppressed prefixes other than an empty/redundant CTF_K_BIG must
 	 be CTF. (Redundant CTF_K_BIGs will be elided instead.)  */
@@ -901,7 +901,7 @@ ctf_type_sect_is_btf (ctf_dict_t *fp, int force_ctf)
 	  if (!ctf_prefix_elidable (fp, kind, dtd, tp))
 	    if (!fp->ctf_write_suppressions
 		|| ctf_dynset_lookup (fp->ctf_write_suppressions,
-				      (const void *) (uintptr_t) prefix_kind) == NULL)
+				      (const void *) (ctf_kind_t) prefix_kind) == NULL)
 	    return 0;
 
 	  tp++;
@@ -912,7 +912,7 @@ ctf_type_sect_is_btf (ctf_dict_t *fp, int force_ctf)
 
       if (fp->ctf_write_suppressions
 	  && ctf_dynset_lookup (fp->ctf_write_suppressions,
-				(const void *) (uintptr_t) kind))
+				(const void *) (ctf_kind_t) kind))
 	continue;
 
       if (kind == CTF_K_FLOAT || kind == CTF_K_SLICE)
@@ -937,8 +937,8 @@ ctf_type_sect_size (ctf_dict_t *fp)
   for (dtd = ctf_list_next (&fp->ctf_dtdefs);
        dtd != NULL; dtd = ctf_list_next (dtd))
     {
-      uint32_t kind = LCTF_KIND (fp, dtd->dtd_buf);
-      uint32_t prefix_kind;
+      ctf_kind_t kind = LCTF_KIND (fp, dtd->dtd_buf);
+      ctf_kind_t prefix_kind;
       ctf_type_t *tp = dtd->dtd_buf;
 
       /* Check for suppressions: a suppression consumes precisely one ctf_type_t
@@ -953,7 +953,7 @@ ctf_type_sect_size (ctf_dict_t *fp)
 	    {
 	      if (!ctf_prefix_elidable (fp, kind, dtd, tp)
 		  && (ctf_dynset_lookup (fp->ctf_write_suppressions,
-					 (const void *) (uintptr_t) prefix_kind) != NULL))
+					 (const void *) (ctf_kind_t) prefix_kind) != NULL))
 		{
 		  type_size += sizeof (ctf_type_t);
 		  suppress = 1;
@@ -1006,8 +1006,8 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr,
   for (dtd = ctf_list_next (&fp->ctf_dtdefs);
        dtd != NULL; dtd = ctf_list_next (dtd), id++)
     {
-      uint32_t prefix_kind;
-      uint32_t kind = LCTF_KIND (fp, dtd->dtd_buf);
+      ctf_kind_t prefix_kind;
+      ctf_kind_t kind = LCTF_KIND (fp, dtd->dtd_buf);
       size_t vlen = LCTF_VLEN (fp, dtd->dtd_buf);
       ctf_type_t *tp = dtd->dtd_buf;
       ctf_type_t *copied;
@@ -1037,7 +1037,7 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr,
 
 	  if (!fp->ctf_write_suppressions
 	      || ctf_dynset_lookup (fp->ctf_write_suppressions,
-				    (const void *) (uintptr_t) prefix_kind) == NULL)
+				    (const void *) (ctf_kind_t) prefix_kind) == NULL)
 	    {
 	      if (_libctf_btf_mode == LIBCTF_BTM_BTF)
 		{
@@ -1056,7 +1056,7 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr,
 
       if (fp->ctf_write_suppressions
 	  && ctf_dynset_lookup (fp->ctf_write_suppressions,
-				(const void *) (uintptr_t) kind) != NULL)
+				(const void *) (ctf_kind_t) kind) != NULL)
 	suppress = 1;
 
       if (suppress)
@@ -1150,6 +1150,22 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr,
 	case CTF_K_VAR:
 	  if (ctf_type_add_ref (fp, &copied->ctt_type) < 0)
 	    return -1;				/* errno is set for us.  */
+	  break;
+
+	/* These kinds have no strings or type IDs in them, and so don't need
+	   any special treatment.  */
+	case CTF_K_INTEGER:
+	case CTF_K_FORWARD:
+	case CTF_K_FLOAT:
+	case CTF_K_BTF_FLOAT:
+	case CTF_K_UNKNOWN:
+	  break;
+
+	/* These kinds are prefixes, and cannot appear here.  */
+	case CTF_K_BIG:
+	case CTF_K_CONFLICTING:
+	  ctf_err_warn (fp, 1, ECTF_INTERNAL, "type %lx: prefix type found during serialization",
+			id);
 	  break;
 
 	case CTF_K_SLICE:

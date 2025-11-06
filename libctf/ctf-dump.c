@@ -97,7 +97,7 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
     {
       ctf_encoding_t ep;
       ctf_arinfo_t ar;
-      int kind, unsliced_kind;
+      ctf_kind_t kind, unsliced_kind;
       ssize_t size, align;
       const char *nonroot_leader = "";
       const char *nonroot_trailer = "";

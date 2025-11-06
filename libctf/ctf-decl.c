@@ -76,7 +76,8 @@ ctf_decl_push (ctf_decl_t *cd, ctf_dict_t *fp, ctf_id_t type)
 {
   ctf_decl_node_t *cdp;
   ctf_decl_prec_t prec;
-  uint32_t kind, n = 1;
+  ctf_kind_t kind;
+  uint32_t n = 1;
   int is_qual = 0;
 
   const ctf_type_t *tp, *suffix;

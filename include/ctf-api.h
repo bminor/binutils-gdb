@@ -644,7 +644,7 @@ extern ctf_id_t ctf_lookup_enumerator (ctf_dict_t *, const char *,
    CTF_K_TYPE_TAG and CTF_K_DECL_TAG, since they may be associated with many
    types: use ctf_tag_next. */
 
-extern ctf_id_t ctf_lookup_by_kind (ctf_dict_t *, int kind, const char *);
+extern ctf_id_t ctf_lookup_by_kind (ctf_dict_t *, ctf_kind_t kind, const char *);
 
 /* Type lookup functions.  */
 
@@ -707,13 +707,13 @@ extern ssize_t ctf_type_align (ctf_dict_t *, ctf_id_t);
    CTFv4 note: forwards to enums also return CTF_K_FORWARD, even though they
    are encoded differently.  */
 
-extern int ctf_type_kind (ctf_dict_t *, ctf_id_t);
+extern ctf_kind_t ctf_type_kind (ctf_dict_t *, ctf_id_t);
 
 /* Return the kind of a type (CTF_K_* constant).  Slices are considered to be
    the kind they are a slice of; forwards are considered to be the kind they are
    a forward of.  */
 
-extern int ctf_type_kind_forwarded (ctf_dict_t *, ctf_id_t);
+extern ctf_kind_t ctf_type_kind_forwarded (ctf_dict_t *, ctf_id_t);
 
 /* Return nonzero if this type is conflicting, zero if it's not, < 0 on error; if
    CUNAME is set, set it to the name of the conflicting compilation unit for the
@@ -866,7 +866,7 @@ extern ctf_id_t ctf_arc_lookup_enumerator_next (ctf_archive_t *, const char *nam
 
 extern ctf_id_t ctf_type_next (ctf_dict_t *, ctf_next_t **,
 			       int *flag, int want_hidden);
-extern ctf_id_t ctf_type_kind_next (ctf_dict_t *, ctf_next_t **, int kind);
+extern ctf_id_t ctf_type_kind_next (ctf_dict_t *, ctf_next_t **, ctf_kind_t kind);
 extern ctf_id_t ctf_variable_next (ctf_dict_t *, ctf_next_t **,
 				   const char **);
 extern ctf_id_t ctf_datasec_var_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
@@ -957,7 +957,7 @@ extern ctf_id_t ctf_add_btf_float (ctf_dict_t *, uint32_t,
 extern ctf_id_t ctf_add_float (ctf_dict_t *, uint32_t,
 			       const char *, const ctf_encoding_t *);
 extern ctf_id_t ctf_add_forward (ctf_dict_t *, uint32_t, const char *,
-				 uint32_t);
+				 ctf_kind_t);
 extern ctf_id_t ctf_add_integer (ctf_dict_t *, uint32_t, const char *,
 				 const ctf_encoding_t *);
 
@@ -1100,7 +1100,7 @@ extern ctf_error_t ctf_arc_write_fd (int, ctf_dict_t **, size_t, const char **,
 /* Prohibit writeout of this type kind: attempts to write it out cause
    an ECTF_KIND_PROHIBITED error.  */
 
-extern ctf_ret_t ctf_write_suppress_kind (ctf_dict_t *fp, int kind,
+extern ctf_ret_t ctf_write_suppress_kind (ctf_dict_t *fp, ctf_kind_t kind,
 					  int prohibited);
 
 /* Linking.  These functions are used by ld to link .ctf sections in input

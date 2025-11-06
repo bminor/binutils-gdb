@@ -428,9 +428,9 @@ ctf_lookup_by_id (ctf_dict_t **fpp, ctf_id_t type, const ctf_type_t **suffix)
 
 /* Find a given prefix in some type, if any.  */
 const ctf_type_t *
-ctf_find_prefix (ctf_dict_t *fp, const ctf_type_t *tp, int kind)
+ctf_find_prefix (ctf_dict_t *fp, const ctf_type_t *tp, ctf_kind_t kind)
 {
-  uint32_t kind_ = kind;
+  ctf_kind_t kind_ = kind;
 
   while (LCTF_IS_PREFIXED_INFO (tp->ctt_info)
 	 && CTF_INFO_KIND (tp->ctt_info) != kind_)
@@ -452,7 +452,7 @@ typedef struct ctf_lookup_idx_key
 /* Look up some kind of thing in the name tables.  */
 
 ctf_id_t
-ctf_lookup_by_kind (ctf_dict_t *fp, int kind, const char *name)
+ctf_lookup_by_kind (ctf_dict_t *fp, ctf_kind_t kind, const char *name)
 {
   ctf_id_t type;
 
@@ -581,7 +581,7 @@ ctf_lookup_enumerator_next (ctf_dict_t *fp, const char *name,
 	{
 	  const ctf_type_t *tp;
 	  ctf_dtdef_t *dtd;
-	  int kind;
+	  ctf_kind_t kind;
 	  unsigned char *vlen;
 
 	  /* It's a shame we can't use ctf_type_kind_next here, but we're

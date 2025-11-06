@@ -40,8 +40,8 @@ ctf_get_ctt_size (const ctf_dict_t *fp,
   return (fp->ctf_dictops->ctfo_get_ctt_size (fp, tp, sizep, incrementp));
 }
 
-static inline int
-ctf_forwardable_kind (int kind)
+static inline ctf_kind_t
+ctf_forwardable_kind (ctf_kind_t kind)
 {
   return (kind == CTF_K_STRUCT || kind == CTF_K_UNION || kind == CTF_K_ENUM);
 }

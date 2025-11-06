@@ -252,7 +252,7 @@ get_ctt_size_v4 (const ctf_dict_t *fp _libctf_unused_, const ctf_type_t *tp,
 }
 
 static ssize_t
-get_vbytes_old (ctf_dict_t *fp, unsigned short kind, size_t vlen)
+get_vbytes_old (ctf_dict_t *fp, uint32_t kind, size_t vlen)
 {
   switch (kind)
     {
@@ -281,7 +281,7 @@ get_vbytes_old (ctf_dict_t *fp, unsigned short kind, size_t vlen)
 static ssize_t
 get_vbytes_v1 (ctf_dict_t *fp, const ctf_type_t *tp, ssize_t size)
 {
-  unsigned short kind = CTF_V1_INFO_KIND (tp->ctt_info);
+  uint32_t kind = CTF_V1_INFO_KIND (tp->ctt_info);
   size_t vlen = CTF_V1_INFO_VLEN (tp->ctt_info);
 
   switch (kind)
@@ -304,7 +304,7 @@ get_vbytes_v1 (ctf_dict_t *fp, const ctf_type_t *tp, ssize_t size)
 static ssize_t
 get_vbytes_v2 (ctf_dict_t *fp, const ctf_type_t *tp, ssize_t size)
 {
-  unsigned short kind = CTF_V2_INFO_KIND (tp->ctt_info);
+  uint32_t kind = CTF_V2_INFO_KIND (tp->ctt_info);
   size_t vlen = CTF_V2_INFO_VLEN (tp->ctt_info);
 
   switch (kind)
@@ -328,7 +328,7 @@ static ssize_t
 get_vbytes_v4 (ctf_dict_t *fp, const ctf_type_t *tp,
 	       ssize_t size _libctf_unused_)
 {
-  unsigned short kind = LCTF_KIND (fp, tp);
+  uint32_t kind = LCTF_KIND (fp, tp);
   ssize_t vlen = LCTF_VLEN (fp, tp);
 
   switch (kind)
@@ -627,7 +627,7 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
 
   for (tp = tbuf; tp < tend; typemax++)
     {
-      unsigned short kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info);
+      ctf_kind_t kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info);
       size_t vlen = LCTF_VLEN (fp, tp);
       int nonroot = 0;
       ssize_t size, increment, vbytes;
@@ -848,7 +848,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 
   for (id = 1, tp = tbuf; tp < tend; xp++, id++)
     {
-      unsigned short kind = LCTF_KIND (fp, tp);
+      ctf_kind_t kind = LCTF_KIND (fp, tp);
       unsigned short isroot = LCTF_INFO_ISROOT (fp, tp->ctt_info);
       size_t vlen = LCTF_VLEN (fp, tp);
       ssize_t size, increment, vbytes;
@@ -1334,8 +1334,8 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
 
   while ((uintptr_t) t < ((uintptr_t) start) + len)
     {
-      uint32_t kind;
-      uint32_t raw_kind;
+      ctf_kind_t kind;
+      ctf_kind_t raw_kind;
       uint32_t vlen;
       size_t vbytes;
       ctf_type_t *tprefixed;

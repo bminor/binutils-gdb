@@ -523,76 +523,81 @@ union
    CTF_INFO_VLEN() will extract the number of elements in the list, and
    the type of each element is shown in the comments below.  */
 
-#define CTF_V3_K_UNKNOWN 0	/* Unknown type (used for padding and
+typedef enum ctf_v3_kind
+  {
+    CTF_V3_K_UNKNOWN  = 0,	/* Unknown type (used for padding and
 				   unrepresentable types).  */
-#define CTF_V3_K_INTEGER 1	/* Variant data is CTF_INT_DATA (see below).  */
-#define CTF_V3_K_FLOAT   2	/* Variant data is CTF_FP_DATA (see below).  */
-#define CTF_V3_K_POINTER 3	/* ctt_type is referenced type.  */
-#define CTF_V3_K_ARRAY   4	/* Variant data is single ctf_array_t.  */
-#define CTF_V3_K_FUNCTION 5	/* ctt_type is return type, variant data is
+    CTF_V3_K_INTEGER  = 1,	/* Variant data is CTF_INT_DATA (see below).  */
+    CTF_V3_K_FLOAT    = 2,	/* Variant data is CTF_FP_DATA (see below).  */
+    CTF_V3_K_POINTER  = 3,	/* ctt_type is referenced type.  */
+    CTF_V3_K_ARRAY    = 4,	/* Variant data is single ctf_array_t.  */
+    CTF_V3_K_FUNCTION = 5,	/* ctt_type is return type, variant data is
 				   list of argument types (unsigned short's for v1,
 				   uint32_t's for v2).  */
-#define CTF_V3_K_STRUCT  6	/* Variant data is list of ctf_member_t's.  */
-#define CTF_V3_K_UNION   7	/* Variant data is list of ctf_member_t's.  */
-#define CTF_V3_K_ENUM    8	/* Variant data is list of ctf_enum_t's.  */
-#define CTF_V3_K_FORWARD 9	/* No additional data; ctt_name is tag.  */
-#define CTF_V3_K_TYPEDEF 10	/* ctt_type is referenced type.  */
-#define CTF_V3_K_VOLATILE 11	/* ctt_type is base type.  */
-#define CTF_V3_K_CONST   12	/* ctt_type is base type.  */
-#define CTF_V3_K_RESTRICT 13	/* ctt_type is base type.  */
-#define CTF_V3_K_SLICE   14	/* Variant data is a ctf_slice_t.  */
+    CTF_V3_K_STRUCT   = 6,	/* Variant data is list of ctf_member_t's.  */
+    CTF_V3_K_UNION    = 7,	/* Variant data is list of ctf_member_t's.  */
+    CTF_V3_K_ENUM     = 8,	/* Variant data is list of ctf_enum_t's.  */
+    CTF_V3_K_FORWARD  = 9,	/* No additional data; ctt_name is tag.  */
+    CTF_V3_K_TYPEDEF  = 10,	/* ctt_type is referenced type.  */
+    CTF_V3_K_VOLATILE = 11,	/* ctt_type is base type.  */
+    CTF_V3_K_CONST    = 12,	/* ctt_type is base type.  */
+    CTF_V3_K_RESTRICT = 13,	/* ctt_type is base type.  */
+    CTF_V3_K_SLICE    = 14,	/* Variant data is a ctf_slice_t.  */
 
-#define CTF_V3_K_MAX	14	/* Maximum possible (V3) CTF_K_* value.  */
+    CTF_V3_K_MAX      = 14	/* Maximum possible (V3) CTF_K_* value.  */
+  } ctf_v3_kind_t;
 
 /* Values for CTF_TYPE_KIND() for BTF, shared by CTFv4.  Kind names as unchanged
    as possible, since they are user-exposed, but their values all differ.  */
 
-#define CTF_K_UNKNOWN  0	/* Unknown type (used for padding and
-				   unrepresentable and suppressed types).  */
-#define CTF_K_INTEGER  1	/* Variant data is CTF_INT_DATA (see below).  */
-#define CTF_K_POINTER  2	/* ctt_type is referenced type.  */
-#define CTF_K_ARRAY    3	/* Variant data is single ctf_array_t.  */
-#define CTF_K_STRUCT   4	/* Variant data is list of ctf_member_t's;
-				   kind_flag 1 if bitfields present.  */
-#define CTF_K_UNION    5	/* Ditto.  */
-#define CTF_K_ENUM     6	/* Variant data is list of ctf_enum_t's: if 0,
-				   this is a forward.  kflag 1 is signed.  */
-#define CTF_K_FORWARD  7	/* No additional data; kind_flag 1 for unions.  */
-#define CTF_K_TYPEDEF  8	/* ctt_type is referenced type.  */
-#define CTF_K_VOLATILE 9	/* ctt_type is base type.  */
-#define CTF_K_CONST    10	/* ctt_type is base type.  */
-#define CTF_K_RESTRICT 11	/* ctt_type is base type.  */
-#define CTF_K_FUNC_LINKAGE 12	/* Literal vlen field is ctf_linkage_t.ctl.linkage;
-				   ctt_type is CTF_K_FUNCTION.  Named.  */
-#define CTF_K_FUNCTION 13	/* ctt_type is return type, variant data is
-				   list of ctf_param_t.  Unnamed.  */
-#define CTF_K_VAR      14	/* Variable.  ctt_type is variable type.
-				   Variant data is ctf_linkage_t.  */
-#define CTF_K_DATASEC  15	/* Variant data is list of ctf_var_secinfo_t.  */
-#define CTF_K_BTF_FLOAT 16	/* No data beyond a size.  */
-#define CTF_K_DECL_TAG 17	/* ctt_type is referenced type.  Variant data is
-				   ctf_decl_tag_t.  */
-#define CTF_K_TYPE_TAG 18	/* ctt_type is referenced type.  */
-#define CTF_K_ENUM64  19	/* Variant data is list of ctf_enum64_t.  kflag
-				   1 is signed.  */
+typedef enum ctf_kind
+  {
+    CTF_K_UNKNOWN  = 0,	/* Unknown type (used for padding and
+			   unrepresentable and suppressed types).  */
+    CTF_K_INTEGER  = 1,	/* Variant data is CTF_INT_DATA (see below).  */
+    CTF_K_POINTER  = 2,	/* ctt_type is referenced type.  */
+    CTF_K_ARRAY    = 3,	/* Variant data is single ctf_array_t.  */
+    CTF_K_STRUCT   = 4,	/* Variant data is list of ctf_member_t's;
+			   kind_flag 1 if bitfields present.  */
+    CTF_K_UNION    = 5,	/* Ditto.  */
+    CTF_K_ENUM     = 6,	/* Variant data is list of ctf_enum_t's: if 0,
+			   this is a forward.  kflag 1 is signed.  */
+    CTF_K_FORWARD  = 7,	/* No additional data; kind_flag 1 for unions.  */
+    CTF_K_TYPEDEF  = 8,	/* ctt_type is referenced type.  */
+    CTF_K_VOLATILE = 9,	/* ctt_type is base type.  */
+    CTF_K_CONST    = 10, /* ctt_type is base type.  */
+    CTF_K_RESTRICT = 11, /* ctt_type is base type.  */
+    CTF_K_FUNC_LINKAGE = 12, /* Literal vlen field is ctf_linkage_t.ctl.linkage;
+				ctt_type is CTF_K_FUNCTION.  Named.  */
+    CTF_K_FUNCTION = 13, /* ctt_type is return type, variant data is
+			    list of ctf_param_t.  Unnamed.  */
+    CTF_K_VAR      = 14, /* Variable.  ctt_type is variable type.
+			    Variant data is ctf_linkage_t.  */
+    CTF_K_DATASEC  = 15, /* Variant data is list of ctf_var_secinfo_t.  */
+    CTF_K_BTF_FLOAT = 16,/* No data beyond a size.  */
+    CTF_K_DECL_TAG = 17, /* ctt_type is referenced type.  Variant data is
+			    ctf_decl_tag_t.  */
+    CTF_K_TYPE_TAG = 18, /* ctt_type is referenced type.  */
+    CTF_K_ENUM64 = 19,	 /* Variant data is list of ctf_enum64_t.  kflag
+			    1 is signed.  */
 
 /* Values for CTF_TYPE_KIND() for CTFv4.  Count down from the top of the ID
    space, */
 
-#define CTF_K_FLOAT   31	/* Variant data is a CTF_FP_* value.  */
-#define CTF_K_SLICE   30	/* Variant data is a ctf_slice_t.  */
-#define CTF_K_BIG     29	/* Prefix type.
-				   vlen is high 16 bits of type vlen;
-				   size is high 32 bits of type size.  */
-#define CTF_K_CONFLICTING 28	/* Prefix type.  Name is disambiguator for
+    CTF_K_FLOAT  = 31,	/* Variant data is a CTF_FP_* value.  */
+    CTF_K_SLICE  = 30,	/* Variant data is a ctf_slice_t.  */
+    CTF_K_BIG    = 29,	/* Prefix type.
+			   vlen is high 16 bits of type vlen;
+			   size is high 32 bits of type size.  */
+    CTF_K_CONFLICTING = 28,	/* Prefix type.  Name is disambiguator for
 				   conflicting type (e.g. translation unit
 				   name).
 
 				   If a type is both CONFLICTING and BIG,
 				   CONFLICTING will always prefix BIG.  */
-#define CTF_BTF_K_MAX	19	/* Maximum possible (V4) BTF_K_* value.  */
-#define CTF_K_MAX	31	/* Maximum possible (V4) CTF_K_* value.  */
-
+    CTF_BTF_K_MAX = 19,	/* Maximum possible (V4) BTF_K_* value.  */
+    CTF_K_MAX    = 31	/* Maximum possible (V4) CTF_K_* value.  */
+  } ctf_kind_t;
 
 #define CTF_PREFIX_KIND(kind) ((kind) == CTF_K_BIG || (kind) == CTF_K_CONFLICTING)
 

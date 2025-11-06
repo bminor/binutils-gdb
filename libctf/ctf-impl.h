@@ -166,7 +166,7 @@ typedef struct ctf_decl_node
 {
   ctf_list_t cd_list;		/* Linked list pointers.  */
   ctf_id_t cd_type;		/* Type identifier.  */
-  uint32_t cd_kind;		/* Type kind.  */
+  ctf_kind_t cd_kind;		/* Type kind.  */
   uint32_t cd_n;		/* Type dimension if array.  */
 } ctf_decl_node_t;
 
@@ -673,15 +673,15 @@ extern ctf_id_t ctf_index_to_type (const ctf_dict_t *, uint32_t);
 #define LCTF_NO_TYPE		0x0010	/* No type additions possible.  */
 #define LCTF_PRESERIALIZED	0x0020  /* Already serialized all but the strtab.  */
 
-extern ctf_dynhash_t *ctf_name_table (ctf_dict_t *, int);
+extern ctf_dynhash_t *ctf_name_table (ctf_dict_t *, ctf_kind_t);
 extern const ctf_type_t *ctf_lookup_by_id (ctf_dict_t **, ctf_id_t,
 					   const ctf_type_t **suffix);
 extern const ctf_type_t *ctf_find_prefix (ctf_dict_t *, const ctf_type_t *,
-					  int kind);
+					  ctf_kind_t kind);
 extern ctf_id_t ctf_lookup_by_sym_or_name (ctf_dict_t *, unsigned long symidx,
 					   const char *symname, int try_parent,
 					   int is_function);
-extern ctf_id_t ctf_lookup_by_rawname (ctf_dict_t *, int, const char *);
+extern ctf_id_t ctf_lookup_by_rawname (ctf_dict_t *, ctf_kind_t, const char *);
 extern ctf_id_t ctf_lookup_by_symbol (ctf_dict_t *, unsigned long);
 extern ctf_id_t ctf_lookup_by_symbol_name (ctf_dict_t *, const char *);
 
@@ -782,20 +782,20 @@ extern void ctf_list_delete (ctf_list_t *, void *);
 extern void ctf_list_splice (ctf_list_t *, ctf_list_t *);
 extern int ctf_list_empty_p (ctf_list_t *lp);
 
-extern int ctf_dtd_insert (ctf_dict_t *, ctf_dtdef_t *, int flag, int kind);
+extern int ctf_dtd_insert (ctf_dict_t *, ctf_dtdef_t *, int flag, ctf_kind_t kind);
 extern void ctf_dtd_delete (ctf_dict_t *, ctf_dtdef_t *);
 extern ctf_dtdef_t *ctf_dtd_lookup (const ctf_dict_t *, ctf_id_t);
 extern ctf_dtdef_t *ctf_dynamic_type (const ctf_dict_t *, ctf_id_t);
 
 extern ctf_id_t ctf_add_encoded (ctf_dict_t *, uint32_t, const char *,
-				 const ctf_encoding_t *, uint32_t kind);
+				 const ctf_encoding_t *, ctf_kind_t kind);
 extern ctf_id_t ctf_add_reftype (ctf_dict_t *, uint32_t, ctf_id_t,
-				 uint32_t kind);
+				 ctf_kind_t kind);
 extern ctf_ret_t ctf_add_funcobjt_sym_forced (ctf_dict_t *, int is_function,
 					      const char *, ctf_id_t);
 
 extern int ctf_insert_type_decl_tag (ctf_dict_t *, ctf_id_t, const char *,
-				     int kind);
+				     ctf_kind_t kind);
 extern ctf_ret_t ctf_track_enumerator (ctf_dict_t *, ctf_id_t, const char *);
 
 extern int ctf_dedup_atoms_init (ctf_dict_t *);
@@ -860,10 +860,10 @@ extern char *ctf_str_append_noerr (char *, const char *);
 
 extern ctf_id_t ctf_type_resolve_unsliced (ctf_dict_t *, ctf_id_t);
 extern ctf_id_t ctf_type_resolve_nonrepresentable (ctf_dict_t *, ctf_id_t, int allow_zero);
-extern int ctf_type_kind_unsliced (ctf_dict_t *, ctf_id_t);
-extern int ctf_type_kind_unsliced_tp (ctf_dict_t *, const ctf_type_t *);
-extern int ctf_type_kind_tp (ctf_dict_t *, const ctf_type_t *);
-extern int ctf_type_kind_forwarded_tp (ctf_dict_t *, const ctf_type_t *);
+extern ctf_kind_t ctf_type_kind_unsliced (ctf_dict_t *, ctf_id_t);
+extern ctf_kind_t ctf_type_kind_unsliced_tp (ctf_dict_t *, const ctf_type_t *);
+extern ctf_kind_t ctf_type_kind_tp (ctf_dict_t *, const ctf_type_t *);
+extern ctf_kind_t ctf_type_kind_forwarded_tp (ctf_dict_t *, const ctf_type_t *);
 extern ssize_t ctf_type_align_natural (ctf_dict_t *fp, ctf_id_t prev_type,
 				       ctf_id_t type, ssize_t bit_offset);
 extern ctf_var_secinfo_t *ctf_datasec_entry (ctf_dict_t *, ctf_id_t,

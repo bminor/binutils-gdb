@@ -1,4 +1,4 @@
-/* Opening CTF files: back-compatibility.
+kind/* Opening CTF files: back-compatibility.
    (TODO: not yet implemented, not yet tied in to build system.)
    Copyright (C) 2019-2025 Free Software Foundation, Inc.
 
@@ -121,7 +121,7 @@ upgrade_types_v1 (ctf_dict_t *fp, ctf_header_t *cth)
   for (tp = tbuf; tp < tend;
        tp = (ctf_type_v1_t *) ((uintptr_t) tp + increment + vbytes))
     {
-      unsigned short kind = CTF_V1_INFO_KIND (tp->ctt_info);
+      ctf_kind_t kind = CTF_V1_INFO_KIND (tp->ctt_info);
       unsigned long vlen = CTF_V1_INFO_VLEN (tp->ctt_info);
 
       size = get_ctt_size_v1 (fp, (const ctf_type_t *) tp, NULL, &increment);
@@ -175,7 +175,7 @@ upgrade_types_v1 (ctf_dict_t *fp, ctf_header_t *cth)
        tp = (ctf_type_v1_t *) ((uintptr_t) tp + increment + vbytes),
        t2p = (ctf_type_t *) ((uintptr_t) t2p + v2increment + v2bytes))
     {
-      unsigned short kind = CTF_V1_INFO_KIND (tp->ctt_info);
+      ctf_kind_t kind = CTF_V1_INFO_KIND (tp->ctt_info);
       int isroot = CTF_V1_INFO_ISROOT (tp->ctt_info);
       unsigned long vlen = CTF_V1_INFO_VLEN (tp->ctt_info);
       ssize_t v2size;
@@ -355,7 +355,7 @@ flip_types_v3 (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
 
   while ((uintptr_t) t < ((uintptr_t) start) + len)
     {
-      uint32_t kind;
+      ctf_kind_t kind;
       size_t size;
       uint32_t vlen;
       size_t vbytes;
