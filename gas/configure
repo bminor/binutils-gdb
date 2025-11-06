@@ -818,7 +818,6 @@ enable_targets
 enable_checking
 enable_compressed_debug_sections
 enable_default_compressed_debug_sections_algorithm
-enable_x86_relax_relocations
 enable_x86_tls_check
 enable_elf_stt_common
 enable_default_sframe
@@ -1494,8 +1493,6 @@ Optional Features:
   --enable-default-compressed-debug-sections-algorithm={zlib,zstd}
                           Default compression algorithm for
                           --enable-compressed-debug-sections.
-  --enable-x86-relax-relocations
-                          generate x86 relax relocations by default
   --enable-x86-tls-check  check x86 TLS relocation by default
   --enable-elf-stt-common generate ELF common symbols with STT_COMMON type by
                           default
@@ -11153,7 +11150,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11156 "configure"
+#line 11153 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11259,7 +11256,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11262 "configure"
+#line 11259 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11942,17 +11939,6 @@ if test "${enable_default_compressed_debug_sections_algorithm+set}" = set; then 
 esac
 fi
 
-# PR gas/19520
-# Decide if x86 assembler should generate relax relocations.
-ac_default_x86_relax_relocations=unset
-# Provide a configure time option to override our default.
-# Check whether --enable-x86_relax_relocations was given.
-if test "${enable_x86_relax_relocations+set}" = set; then :
-  enableval=$enable_x86_relax_relocations; case "${enableval}" in
-  no)  ac_default_x86_relax_relocations=0 ;;
-esac
-fi
-
 # PR gas/32022
 # Decide if x86 assembler should check TLS relocation.
 ac_default_x86_tls_check=unset
@@ -12540,17 +12526,6 @@ $as_echo "#define STRICTCOFF 1" >>confdefs.h
 	fi
 	;;
 
-      i386-*-solaris2 \
-      | x86_64-*-solaris2 \
-      | i386-*-solaris2.[0-9] \
-      | i386-*-solaris2.1[01] \
-      | x86_64-*-solaris2.1[01])
-	if test ${this_target} = $target \
-	   && test ${ac_default_x86_relax_relocations} = unset; then
-	  ac_default_x86_relax_relocations=0
-	fi
-	;;
-
       microblaze*)
         ;;
 
@@ -13070,15 +13045,6 @@ $as_echo "$with_priv_spec" >&6; }
     emulations="$emulations $emulation"
 
 done
-
-if test ${ac_default_x86_relax_relocations} = unset; then
-  ac_default_x86_relax_relocations=1
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define DEFAULT_GENERATE_X86_RELAX_RELOCATIONS $ac_default_x86_relax_relocations
-_ACEOF
-
 
 if test ${ac_default_x86_tls_check} = unset; then
   ac_default_x86_tls_check=1

@@ -750,6 +750,15 @@ lfence_before_ret;
 
 /* 1 if the assembler should generate relax relocations.  */
 
+#ifdef TE_SOLARIS
+/* PR gas/19520: The Solaris/x86 linker cannot handle relax relocations
+   before Solaris 11.4 which cannot easily be detected in cross
+   configurations.  */
+#define DEFAULT_GENERATE_X86_RELAX_RELOCATIONS 0
+#else
+#define DEFAULT_GENERATE_X86_RELAX_RELOCATIONS 1
+#endif
+
 static int generate_relax_relocations
   = DEFAULT_GENERATE_X86_RELAX_RELOCATIONS;
 

@@ -478,8 +478,7 @@ relocations, R_386_GOT32X, in 32-bit mode, or R_X86_64_GOTPCRELX and
 R_X86_64_REX_GOTPCRELX, in 64-bit mode.
 @option{-mrelax-relocations=@var{yes}} will generate relax relocations.
 @option{-mrelax-relocations=@var{no}} will not generate relax
-relocations.  The default can be controlled by a configure option
-@option{--enable-x86-relax-relocations}.
+relocations.
 
 @cindex @samp{-mtls-check=} option, i386
 @cindex @samp{-mtls-check=} option, x86-64
