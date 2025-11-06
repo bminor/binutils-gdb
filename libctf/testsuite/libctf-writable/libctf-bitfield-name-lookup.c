@@ -1,7 +1,7 @@
 /* Verify that name lookup of basic types including old-style bitfield types
    yields the non-bitfield.  */
 
-#include <ctf-api.h>
+#include <ctf-test-api.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>

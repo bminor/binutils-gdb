@@ -4,7 +4,7 @@
    set of symbols reported (if any).  Also a test of dynamic dict sym
    iteration.  */
 
-#include <ctf-api.h>
+#include <ctf-test-api.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

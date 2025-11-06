@@ -456,9 +456,8 @@ extern size_t ctf_archive_count (const ctf_archive_t *);
    was opened, this can be used to override that choice).  The dict
    should be closed with ctf_dict_close() when done.
 
-   (The low-level functions ctf_simple_open and ctf_bufopen return
-   ctf_dict_t's directly, and cannot be used on CTF archives: use these
-   functions instead.)  */
+   (The low-level function ctf_bufopen returns ctf_dict_t's directly, and cannot
+   be used on CTF archives.)  */
 
 extern ctf_dict_t *ctf_dict_open (const ctf_archive_t *,
 				  const char *, ctf_error_t *);
@@ -485,11 +484,6 @@ extern void ctf_arc_flush_caches (ctf_archive_t *);
    ctf_dict_open_sections, they can be passed symbol and string table
    sections.  */
 
-extern ctf_dict_t *ctf_simple_open (const char *ctfsect, size_t ctfsect_size,
-				    const char *symsect, size_t symsect_size,
-				    size_t symsect_entsize,
-				    const char *strsect, size_t strsect_size,
-				    ctf_error_t *errp);
 extern ctf_dict_t *ctf_bufopen (const ctf_sect_t *ctfsect,
 				const ctf_sect_t *symsect,
 				const ctf_sect_t *strsect, ctf_error_t *);

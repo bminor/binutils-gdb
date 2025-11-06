@@ -24,6 +24,7 @@
 #include <errno.h>
 #include "ctf-decls.h"
 #include <ctf-api.h>
+#include <ctf-test-api.h>
 #include "ctf-sha1.h"
 #include <sys/types.h>
 #include <stdlib.h>

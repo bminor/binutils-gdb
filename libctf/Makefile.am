@@ -123,6 +123,6 @@ EXTRA_DEJAGNU_SITE_CONFIG = development.exp
 
 DISTCLEANFILES += site.exp development.exp
 
-EXTRA_DIST = libtool-version libctf.ver
+EXTRA_DIST = libtool-version libctf.ver $(INCDIR)/ctf-test-api.h
 
 include doc/local.mk

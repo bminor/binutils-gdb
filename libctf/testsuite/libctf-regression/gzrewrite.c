@@ -1,7 +1,7 @@
 /* Make sure that you can modify then ctf_gzwrite() a dict
    and it changes after modification.  */
 
-#include <ctf-api.h>
+#include <ctf-test-api.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>

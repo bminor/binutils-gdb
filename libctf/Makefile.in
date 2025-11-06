@@ -644,7 +644,7 @@ CC_FOR_TARGET = ` \
 # development.sh is used to determine -Werror default.
 CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh
 EXTRA_DEJAGNU_SITE_CONFIG = development.exp
-EXTRA_DIST = libtool-version libctf.ver
+EXTRA_DIST = libtool-version libctf.ver $(INCDIR)/ctf-test-api.h
 @BUILD_INFO_TRUE@AM_MAKEINFOFLAGS = --no-split
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive

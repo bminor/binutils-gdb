@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctf-api.h>
+#include <ctf-test-api.h>
 #include <ctf.h>
 
 #ifdef HAVE_VALGRIND_VALGRIND_H

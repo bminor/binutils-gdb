@@ -1,6 +1,6 @@
 /* Test parent / child ID assignment.  */
 
-#include <ctf-api.h>
+#include <ctf-test-api.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
