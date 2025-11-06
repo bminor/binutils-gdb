@@ -528,6 +528,7 @@ ctf_dynhash_next (const ctf_dynhash_t *h, ctf_next_t **it, void **key, void **va
 {
   ctf_next_t *i = *it;
   ctf_helem_t *slot;
+  ctf_error_t err;
 
   if (!i)
     {
@@ -551,13 +552,22 @@ ctf_dynhash_next (const ctf_dynhash_t *h, ctf_next_t **it, void **key, void **va
     }
 
   if ((void (*) (void)) ctf_dynhash_next != i->ctn_iter_fun)
-    return ECTF_NEXT_WRONGFUN;
+    {
+      err = ECTF_NEXT_WRONGFUN;
+      goto end;
+    }
 
   if (h != i->cu.ctn_h)
-    return ECTF_NEXT_WRONGFP;
+    {
+      err = ECTF_NEXT_WRONGFP;
+      goto end;
+    }
 
   if (i->ctn_n == i->ctn_size)
-    goto hash_end;
+    {
+      err = ECTF_NEXT_END;
+      goto end;
+    }
 
   while (i->ctn_n < i->ctn_size
 	 && (*i->u.ctn_hash_slot == HTAB_EMPTY_ENTRY
@@ -568,7 +578,10 @@ ctf_dynhash_next (const ctf_dynhash_t *h, ctf_next_t **it, void **key, void **va
     }
 
   if (i->ctn_n == i->ctn_size)
-    goto hash_end;
+    {
+      err = ECTF_NEXT_END;
+      goto end;
+    }
 
   slot = *i->u.ctn_hash_slot;
 
@@ -582,16 +595,16 @@ ctf_dynhash_next (const ctf_dynhash_t *h, ctf_next_t **it, void **key, void **va
 
   return 0;
 
- hash_end:
+ end:
   ctf_next_destroy (i);
   *it = NULL;
-  return ECTF_NEXT_END;
+  return err;
 }
 
 /* Remove the entry most recently returned by ctf_dynhash_next.
 
    Returns ECTF_NEXT_END if this is impossible (already removed, iterator not
-   initialized, iterator off the end).  */
+   initialized, iterator off the end or errored).  */
 
 ctf_error_t
 ctf_dynhash_next_remove (ctf_next_t * const *it)
@@ -631,6 +644,7 @@ ctf_dynhash_next_sorted (const ctf_dynhash_t *h, ctf_next_t **it, void **key,
 			 void **value, ctf_hash_sort_f sort_fun, void *sort_arg)
 {
   ctf_next_t *i = *it;
+  ctf_error_t err;
 
   if (sort_fun == NULL)
     return ctf_dynhash_next (h, it, key, value);
@@ -640,7 +654,6 @@ ctf_dynhash_next_sorted (const ctf_dynhash_t *h, ctf_next_t **it, void **key,
       size_t els = ctf_dynhash_elements (h);
       ctf_next_t *accum_i = NULL;
       void *key, *value;
-      int err;
       ctf_next_hkv_t *walk;
 
       if (((ssize_t) els) < 0)
@@ -681,16 +694,21 @@ ctf_dynhash_next_sorted (const ctf_dynhash_t *h, ctf_next_t **it, void **key,
     }
 
   if ((void (*) (void)) ctf_dynhash_next_sorted != i->ctn_iter_fun)
-    return ECTF_NEXT_WRONGFUN;
+    {
+      err = ECTF_NEXT_WRONGFUN;
+      goto end;
+    }
 
   if (h != i->cu.ctn_h)
-    return ECTF_NEXT_WRONGFP;
+    {
+      err = ECTF_NEXT_WRONGFP;
+      goto end;
+    }
 
   if (i->ctn_n == i->ctn_size)
     {
-      ctf_next_destroy (i);
-      *it = NULL;
-      return ECTF_NEXT_END;
+      err = ECTF_NEXT_END;
+      goto end;
     }
 
   if (key)
@@ -699,6 +717,11 @@ ctf_dynhash_next_sorted (const ctf_dynhash_t *h, ctf_next_t **it, void **key,
     *value = i->u.ctn_sorted_hkv[i->ctn_n].hkv_value;
   i->ctn_n++;
   return 0;
+
+ end:
+  ctf_next_destroy (i);
+  *it = NULL;
+  return err;
 }
 
 void
@@ -860,6 +883,7 @@ ctf_dynset_next (const ctf_dynset_t *hp, ctf_next_t **it, void **key)
   struct htab *htab = (struct htab *) hp;
   ctf_next_t *i = *it;
   void *slot;
+  ctf_error_t err;
 
   if (!i)
     {
@@ -884,13 +908,22 @@ ctf_dynset_next (const ctf_dynset_t *hp, ctf_next_t **it, void **key)
     }
 
   if ((void (*) (void)) ctf_dynset_next != i->ctn_iter_fun)
-    return ECTF_NEXT_WRONGFUN;
+    {
+      err = ECTF_NEXT_WRONGFUN;
+      goto end;
+    }
 
   if (hp != i->cu.ctn_s)
-    return ECTF_NEXT_WRONGFP;
+    {
+      err = ECTF_NEXT_WRONGFP;
+      goto end;
+    }
 
   if (i->ctn_n == i->ctn_size)
-    goto set_end;
+    {
+      err = ECTF_NEXT_END;
+      goto end;
+    }
 
   while (i->ctn_n < i->ctn_size
 	 && (*i->u.ctn_hash_slot == HTAB_EMPTY_ENTRY
@@ -901,7 +934,10 @@ ctf_dynset_next (const ctf_dynset_t *hp, ctf_next_t **it, void **key)
     }
 
   if (i->ctn_n == i->ctn_size)
-    goto set_end;
+    {
+      err = ECTF_NEXT_END;
+      goto end;
+    }
 
   slot = *i->u.ctn_hash_slot;
 
@@ -913,10 +949,10 @@ ctf_dynset_next (const ctf_dynset_t *hp, ctf_next_t **it, void **key)
 
   return 0;
 
- set_end:
+ end:
   ctf_next_destroy (i);
   *it = NULL;
-  return ECTF_NEXT_END;
+  return err;
 }
 
 /* Helper functions for insertion/removal of types.  */

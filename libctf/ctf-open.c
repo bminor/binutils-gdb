@@ -1162,7 +1162,11 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 				    (void *) (ptrdiff_t) var_type,
 				    (void *) (ptrdiff_t) type);
 	  if (err != 0)
-	    return err * -1;
+	    {
+	      ctf_next_destroy (i);
+	      ctf_next_destroy (i_sec);
+	      return err * -1;
+	    }
 	}
       if (ctf_errno (fp) != ECTF_NEXT_END)
 	{

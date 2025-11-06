@@ -534,6 +534,7 @@ ctf_lookup_enumerator_next (ctf_dict_t *fp, const char *name,
 {
   ctf_next_t *i = *it;
   int found = 0;
+  ctf_error_t err;
 
   if (fp->ctf_flags & LCTF_NO_STR)
     return (ctf_set_typed_errno (fp, ECTF_NOPARENT));
@@ -558,10 +559,16 @@ ctf_lookup_enumerator_next (ctf_dict_t *fp, const char *name,
     }
 
   if ((void (*) (void)) ctf_lookup_enumerator_next != i->ctn_iter_fun)
-    return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFUN));
+    {
+      err = ECTF_NEXT_WRONGFUN;
+      goto end;
+    }
 
   if (fp != i->cu.ctn_fp)
-    return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFP));
+    {
+      err = ECTF_NEXT_WRONGFP;
+      goto end;
+    }
 
   do
     {
@@ -590,13 +597,15 @@ ctf_lookup_enumerator_next (ctf_dict_t *fp, const char *name,
 	      /* Conveniently, when the iterator over all types is done, so is the
 		 iteration as a whole: so we can just pass all errors from the
 		 internal iterator straight back out..  */
-	      ctf_next_destroy (i);
-	      *it = NULL;
-	      return CTF_ERR;			/* errno is set for us.  */
+	      err = ctf_errno (fp);
+	      goto end;
 	    }
 
 	  if ((tp = ctf_lookup_by_id (&fp, i->i.ctn_type, &i->ctn_tp)) == NULL)
-	    return CTF_ERR;			/* errno is set for us.  */
+	    {
+	      err = ctf_errno (fp);
+	      goto end;
+	    }
 	  i->ctn_n = LCTF_VLEN (fp, tp);
 
 	  if ((dtd = ctf_dynamic_type (fp, i->i.ctn_type)) != NULL)
@@ -645,6 +654,12 @@ ctf_lookup_enumerator_next (ctf_dict_t *fp, const char *name,
   while (!found);
 
   return i->i.ctn_type;
+
+ end:
+  ctf_set_errno (fp, err);
+  ctf_next_destroy (i);
+  *it = NULL;
+  return CTF_ERR;
 }
 
 typedef struct ctf_symidx_sort_arg_cb
@@ -940,10 +955,16 @@ ctf_symbol_next (ctf_dict_t *fp, ctf_next_t **it, const char **name,
     }
 
   if ((void (*) (void)) ctf_symbol_next != i->ctn_iter_fun)
-    return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFUN));
+    {
+      err = ECTF_NEXT_WRONGFUN;
+      goto end;
+    }
 
   if (fp != i->cu.ctn_fp)
-    return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFP));
+    {
+      err = ECTF_NEXT_WRONGFP;
+      goto end;
+    }
 
   /* Check the dynamic set of names first, to allow previously-written names
      to be replaced with dynamic ones (there is still no way to remove them,
@@ -965,11 +986,7 @@ ctf_symbol_next (ctf_dict_t *fp, ctf_next_t **it, const char **name,
 
       /* This covers errors and also end-of-iteration.  */
       if (err != 0)
-	{
-	  ctf_next_destroy (i);
-	  *it = NULL;
-	  return ctf_set_typed_errno (fp, err);
-	}
+	goto end;
 
       *name = dyn_name;
       sym = (ctf_id_t) (uintptr_t) dyn_value;
@@ -979,6 +996,11 @@ ctf_symbol_next (ctf_dict_t *fp, ctf_next_t **it, const char **name,
     }
 
   return ctf_symbol_next_static (fp, it, name, functions);
+
+ end:
+  ctf_next_destroy (i);
+  *it = NULL;
+  return (ctf_set_typed_errno (fp, err));
 }
 
 /* ctf_symbol_next, but only for static symbols.  Mostly an internal
@@ -992,6 +1014,7 @@ ctf_symbol_next_static (ctf_dict_t *fp, ctf_next_t **it, const char **name,
   ctf_next_t *i = *it;
   ctf_dynhash_t *dynh = functions ? fp->ctf_funchash : fp->ctf_objthash;
   size_t dyn_els = dynh ? ctf_dynhash_elements (dynh) : 0;
+  ctf_error_t err;
 
   /* Only relevant for direct internal-to-library calls, not via
      ctf_symbol_next (but important then).  */
@@ -1008,10 +1031,16 @@ ctf_symbol_next_static (ctf_dict_t *fp, ctf_next_t **it, const char **name,
     }
 
   if ((void (*) (void)) ctf_symbol_next != i->ctn_iter_fun)
-    return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFUN));
+    {
+      err = ECTF_NEXT_WRONGFUN;
+      goto end;
+    }
 
   if (fp != i->cu.ctn_fp)
-    return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFP));
+    {
+      err = ECTF_NEXT_WRONGFP;
+      goto end;
+    }
 
   /* TODO: Indexed after non-indexed portions?  */
 
@@ -1037,7 +1066,10 @@ ctf_symbol_next_static (ctf_dict_t *fp, ctf_next_t **it, const char **name,
       do
 	{
 	  if (i->ctn_n - dyn_els >= len)
-	    goto end;
+	    {
+	      err = ECTF_NEXT_END;
+	      goto end;
+	    }
 
 	  *name = ctf_strptr (fp, idx[i->ctn_n - dyn_els]);
 	  sym = tab[i->ctn_n - dyn_els];
@@ -1077,7 +1109,10 @@ ctf_symbol_next_static (ctf_dict_t *fp, ctf_next_t **it, const char **name,
 	}
 
       if (i->ctn_n - dyn_els >= fp->ctf_nsyms)
-	goto end;
+	{
+	  err = ECTF_NEXT_END;
+	  goto end;
+	}
 
       *name = ctf_lookup_symbol_name (fp, i->ctn_n - dyn_els);
       i->ctn_n++;
@@ -1088,7 +1123,7 @@ ctf_symbol_next_static (ctf_dict_t *fp, ctf_next_t **it, const char **name,
  end:
   ctf_next_destroy (i);
   *it = NULL;
-  return (ctf_set_typed_errno (fp, ECTF_NEXT_END));
+  return (ctf_set_typed_errno (fp, err));
 }
 
 /* A bsearch function for function and object index names.  */

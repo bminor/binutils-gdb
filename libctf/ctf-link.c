@@ -688,6 +688,7 @@ ctf_link_deduplicating_open_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
 	  if (one_fp->ctf_flags & LCTF_CHILD && one_fp->ctf_parent == NULL)
 	    {
 	      ctf_next_destroy (i);
+	      ctf_next_destroy (j);
 	      ctf_set_errno (fp, ECTF_NOPARENT);
 	      ctf_err_warn (fp, 0, 0, _("cannot open linker inputs"));
 	      goto reported_err;
@@ -716,6 +717,7 @@ ctf_link_deduplicating_open_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
 
 	  if (!ctf_assert (fp, one_fp->ctf_parent == parent_fp))
 	    {
+	      ctf_next_destroy (j);
 	      ctf_next_destroy (i);
 	      goto err;				/* errno is set for us. */
 	    }
@@ -854,12 +856,12 @@ ctf_link_deduplicating_one_symtypetab (ctf_dict_t *fp, ctf_dict_t *input,
       /* Look in the parent first.  */
 
       if ((dst_type = ctf_dedup_type_mapping (fp, input, type)) == CTF_ERR)
-	return -1;				/* errno is set for us.  */
+	goto err;				/* errno is set for us.  */
 
       if (dst_type != 0)
 	{
 	  if (!ctf_assert (fp, ctf_type_isparent (fp, dst_type)))
-	    return -1;				/* errno is set for us.  */
+	    goto err;				/* errno is set for us.  */
 
 	  sym = check_sym (fp, name, dst_type, functions);
 
@@ -871,7 +873,7 @@ ctf_link_deduplicating_one_symtypetab (ctf_dict_t *fp, ctf_dict_t *input,
 	    {
 	      if (ctf_add_funcobjt_sym (fp, functions,
 					name, dst_type) < 0)
-		return -1; 			/* errno is set for us.  */
+		goto err; 			/* errno is set for us.  */
 	      continue;
 	    }
 	}
@@ -890,14 +892,14 @@ ctf_link_deduplicating_one_symtypetab (ctf_dict_t *fp, ctf_dict_t *input,
 	}
 
       if ((per_cu_out_fp = ctf_create_per_cu (fp, input, NULL)) == NULL)
-	return -1;				/* errno is set for us.  */
+	goto err;				/* errno is set for us.  */
 
       /* If the type was not found, check for it in the child too.  */
       if (dst_type == 0)
 	{
 	  if ((dst_type = ctf_dedup_type_mapping (per_cu_out_fp,
 						  input, type)) == CTF_ERR)
-	    return -1;				/* errno is set for us.  */
+	    goto err;				/* errno is set for us.  */
 
 	  if (dst_type == 0)
 	    {
@@ -919,11 +921,12 @@ ctf_link_deduplicating_one_symtypetab (ctf_dict_t *fp, ctf_dict_t *input,
 	{
 	  if (ctf_add_funcobjt_sym (per_cu_out_fp, functions,
 				    name, dst_type) < 0)
-	    return -1;				/* errno is set for us.  */
+	    goto err;				/* errno is set for us.  */
 	}
       else
 	{
 	  /* Perhaps this should be an assertion failure.  */
+	  ctf_next_destroy (it);
 	  ctf_err_warn (fp, 0, ECTF_DUPLICATE,
 			_("symbol %s in input file %s found conflicting "
 			  "even when trying in per-CU dict."), name,
@@ -941,6 +944,10 @@ ctf_link_deduplicating_one_symtypetab (ctf_dict_t *fp, ctf_dict_t *input,
     }
 
   return 0;
+
+ err:
+  ctf_next_destroy (it);
+  return -1;					/* errno is set for us.  */
 }
 
 /* Do a deduplicating link of the function info and data objects

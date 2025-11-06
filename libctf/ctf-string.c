@@ -768,6 +768,12 @@ ctf_str_write_strtab (ctf_dict_t *fp)
 
       sorttab[i++] = atom;
     }
+  if (err != ECTF_NEXT_END)
+    {
+      ctf_dprintf ("ctf_str_write_strtab: error sorting strtab entries: %s\n",
+		   ctf_errmsg (err));
+      goto err_sorttab;
+    }
 
   qsort (sorttab, strtab_count, sizeof (ctf_str_atom_t *),
 	 ctf_str_sort_strtab);
@@ -870,6 +876,7 @@ ctf_str_write_strtab (ctf_dict_t *fp)
  err_sorttab:
   free (sorttab);
  err_strtab:
+  ctf_next_destroy (it);
   free (strtab);
   return NULL;
 }

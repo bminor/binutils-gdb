@@ -289,6 +289,7 @@ ctf_errwarning_next (ctf_dict_t *fp, ctf_next_t **it, int *is_warning,
   char *ret;
   ctf_list_t *errlist;
   ctf_err_warning_t *cew;
+  ctf_error_t err;
 
   if (fp)
     errlist = &fp->ctf_errs_warnings;
@@ -313,33 +314,22 @@ ctf_errwarning_next (ctf_dict_t *fp, ctf_next_t **it, int *is_warning,
 
   if ((void (*) (void)) ctf_errwarning_next != i->ctn_iter_fun)
     {
-      if (errp)
-	*errp = ECTF_NEXT_WRONGFUN;
-      else if (fp)
-	ctf_set_errno (fp, ECTF_NEXT_WRONGFUN);
-      return NULL;
+      err = ECTF_NEXT_WRONGFUN;
+      goto end;
     }
 
   if (fp != i->cu.ctn_fp)
     {
-      if (errp)
-	*errp = ECTF_NEXT_WRONGFP;
-      else if (fp)
-	ctf_set_errno (fp, ECTF_NEXT_WRONGFP);
-      return NULL;
+      err = ECTF_NEXT_WRONGFP;
+      goto end;
     }
 
   cew = ctf_list_next (errlist);
 
   if (!cew)
     {
-      ctf_next_destroy (i);
-      *it = NULL;
-      if (errp)
-	*errp = ECTF_NEXT_END;
-      else if (fp)
-	ctf_set_errno (fp, ECTF_NEXT_END);
-      return NULL;
+      err = ECTF_NEXT_END;
+      goto end;
     }
 
   if (is_warning)
@@ -348,6 +338,15 @@ ctf_errwarning_next (ctf_dict_t *fp, ctf_next_t **it, int *is_warning,
   ctf_list_delete (errlist, cew);
   free (cew);
   return ret;
+
+ end:
+  ctf_next_destroy (i);
+  *it = NULL;
+  if (errp)
+    *errp = err;
+  else if (fp)
+    ctf_set_errno (fp, err);
+  return NULL;
 }
 
 void

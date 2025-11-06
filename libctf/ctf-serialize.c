@@ -211,7 +211,11 @@ symtypetab_density (ctf_dict_t *fp, ctf_dict_t *symfp, ctf_dynhash_t *symhash,
 	  /* This should only be true briefly before all the names are
 	     finalized, long before we get this far.  */
 	  if (!ctf_assert (fp, !sym->st_nameidx_set))
-	    return -1;				/* errno is set for us.  */
+	    {
+	      ctf_dynhash_destroy (linker_known);
+	      ctf_next_destroy (i);
+	      return -1;			/* errno is set for us.  */
+	    }
 
 	  if (ctf_dynhash_cinsert (linker_known, name, ctf_sym) < 0)
 	    {
@@ -1460,7 +1464,10 @@ ctf_preserialize (ctf_dict_t *fp, int force_ctf)
 					    sym_functions)) != CTF_ERR)
 	if ((ctf_add_funcobjt_sym_forced (fp, sym_functions, sym_name, sym)) < 0)
 	  if (ctf_errno (fp) != ECTF_DUPLICATE)
-	    return -1;				/* errno is set for us.  */
+	    {
+	      ctf_next_destroy (it);
+	      return -1;			/* errno is set for us.  */
+	    }
 
       if (ctf_errno (fp) != ECTF_NEXT_END)
 	return -1;				/* errno is set for us.  */

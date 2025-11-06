@@ -611,6 +611,9 @@ ctf_dump_objts (ctf_dict_t *fp, ctf_dump_state_t *state, int functions)
       ctf_next_destroy (i);
       return -1;
     }
+  if (ctf_errno (fp) != ECTF_NEXT_END)
+    ctf_err_warn (fp, 1, ctf_errno (fp), _("cannot iterate over symbols\n"));
+
   return 0;
 }
 
@@ -1009,7 +1012,10 @@ ctf_dump (ctf_dict_t *fp, ctf_dump_state_t **statep, ctf_sect_names_t sect,
 	    while ((type = ctf_type_next (fp, &it, &hidden, 1)) != CTF_ERR)
 	      {
 		if (ctf_dump_type (fp, type, hidden, state) < 0)
-		  goto err;			/* errno is set for us.  */
+		  {
+		    ctf_next_destroy (it);
+		    goto err;			/* errno is set for us.  */
+		  }
 	      }
 	    if (ctf_errno (fp) != ECTF_NEXT_END)
 	      goto err;				/* errno is set for us.  */

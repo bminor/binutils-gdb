@@ -550,7 +550,6 @@ ctf_dedup_track_var (ctf_dict_t *fp, ctf_dict_t *input, int input_num,
     }
   if (ctf_errno (input) != ECTF_NEXT_END)
     {
-      ctf_next_destroy (it);
       ctf_err_warn (fp, 0, ctf_errno (input),
 		    _("iteration failure tracking datasec vars"));
       return ctf_set_typed_errno (fp, ctf_errno (input));
@@ -1117,7 +1116,6 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	  }
 	if (ctf_errno (input) != ECTF_NEXT_END)
 	  {
-	    ctf_next_destroy (i);
 	    whaterr = N_("error doing enum member iteration");
 	    goto input_err;
 	  }
@@ -1329,12 +1327,12 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	  citer = (const char *) k;
 
 	  if ((citer_hashes = make_set_element (d->cd_citers, citer)) == NULL)
-	    goto oom;
+	    goto itoom;
 
 	  if (ctf_dynset_exists (citer_hashes, hval, NULL))
 	    continue;
 	  if (ctf_dynset_cinsert (citer_hashes, hval) < 0)
-	    goto oom;
+	      goto itoom;
 	}
       if (err != ECTF_NEXT_END)
 	goto err;
@@ -1353,6 +1351,8 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 			      "kind %i"), ctf_link_input_name (input),
 		input_num, gettext (whaterr), type, kind);
   return NULL;
+ itoom:
+  ctf_next_destroy (i);
  oom:
   ctf_set_errno (fp, errno);
   ctf_err_warn (fp, 0, 0, _("%s (%i): %s: during type hashing for type %lx, "
@@ -1620,7 +1620,10 @@ ctf_dedup_populate_mappings (ctf_dict_t *fp, ctf_dict_t *input _libctf_unused_,
 			  ctf_link_input_name (input), orig_kind);
 	    if (!ctf_assert (fp, ctf_type_kind_unsliced (foo, bar)
 			     == orig_kind))
-	      return -1;
+	      {
+		ctf_next_destroy (i);
+		return -1;
+	      }
 	  }
       }
     if (err != ECTF_NEXT_END)
@@ -2173,6 +2176,7 @@ ctf_dedup_detect_name_ambiguity (ctf_dict_t *fp, ctf_dict_t **inputs)
   return -1;					/* errno is set for us.  */
 
  iterr:
+  ctf_next_destroy (i);
   ctf_err_warn (fp, 0, err, _("iteration failed: %s"), gettext (whaterr));
   return ctf_set_errno (fp, err);
 
@@ -2578,7 +2582,6 @@ ctf_dedup (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
 	}
       if (ctf_errno (inputs[i]) != ECTF_NEXT_END)
 	{
-	  ctf_next_destroy (it);
 	  ctf_set_errno (output, ctf_errno (inputs[i]));
 	  ctf_err_warn (output, 0, 0, _("iteration failure "
 					"tracking datasec membership"));
@@ -2603,7 +2606,6 @@ ctf_dedup (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
 	}
       if (ctf_errno (inputs[i]) != ECTF_NEXT_END)
 	{
-	  ctf_next_destroy (it);
 	  ctf_set_errno (output, ctf_errno (inputs[i]));
 	  ctf_err_warn (output, 0, 0, _("iteration failure "
 					"computing type hashes"));
@@ -2622,7 +2624,7 @@ ctf_dedup (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
 
   ctf_dprintf ("Detecting type name ambiguity\n");
   if (ctf_dedup_detect_name_ambiguity (output, inputs) < 0)
-      goto err;					/* errno is set for us.  */
+    goto err;					/* errno is set for us.  */
 
   /* If the link mode is CTF_LINK_SHARE_DUPLICATED, we change any unconflicting
      types whose output mapping references only one input dict into a
@@ -4276,7 +4278,7 @@ int
 ctf_dedup_strings (ctf_dict_t *fp)
 {
   ctf_dynhash_t *str_counts;
-  int err;
+  ctf_error_t err;
   ctf_next_t *i = NULL;
   void *dict;
 
@@ -4326,6 +4328,7 @@ ctf_dedup_strings (ctf_dict_t *fp)
 	  if ((err = ctf_dynhash_insert (str_counts, atom->csa_str, (void *) count)) < 0)
 	    {
 	      ctf_set_errno (fp, -err);
+	      ctf_next_destroy (i);
 	      ctf_next_destroy (j);
 	      goto err;
 	    }
