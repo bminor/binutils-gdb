@@ -183,12 +183,15 @@ with_test_prefix "repeat" {
     gdb_load $binfile
 
     # "with" with no command reinvokes the previous command.
+
+    # Test after a "no repeat" command (which "delete" is).
+    gdb_test "delete 9999" "No breakpoint number 9999\\."
     gdb_test "with language ada" \
 	"No previous command to relaunch" \
 	"reinvoke with no previous command to relaunch"
 
+    # Test after a repeatable command.
     gdb_test "print g_s" " = {a = 1, b = 2, c = 3}"
-
     gdb_test "with language ada" \
 	" = \\(a => 1, b => 2, c => 3\\)" \
 	"reinvoke with language"
