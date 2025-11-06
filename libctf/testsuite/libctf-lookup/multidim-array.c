@@ -50,12 +50,17 @@ main (int argc, char *argv[])
   if (!flagged)
     {
       ctf_arinfo_t ar;
+      ctf_dict_t *sym_fp;
 
-      if ((type = ctf_lookup_by_symbol_name (fp, "a")) == CTF_ERR)
-	goto unexpected;
+      if ((sym_fp = ctf_arc_lookup_symbol_name (ctf, "a", &type, &err)) == NULL)
+	goto unexpected_err;
 
       if (ctf_array_info (fp, type, &ar) < 0)
-	goto unexpected;
+	{
+	  ctf_dict_close (sym_fp);
+	  goto unexpected;
+	}
+      ctf_dict_close (sym_fp);
 
       if (ar.ctr_nelems == 3)
 	{
@@ -101,8 +106,10 @@ open_err:
   return 1;
 
 unexpected:
+  err = ctf_errno (fp);
+unexpected_err:
   fprintf (stderr,
 	   "Cannot look up symbol to determine compiler bugginess: %s\n",
-	   ctf_errmsg (ctf_errno (fp)));
+	   ctf_errmsg (err));
   return 1;
 }

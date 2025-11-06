@@ -19,6 +19,17 @@ report_sym (ctf_dict_t *fp, ctf_link_sym_t *sym, const char *name,
   return ctf_link_add_linker_symbol (fp, sym);
 }
 
+static ctf_id_t
+lookup_symbol (ctf_dict_t *fp, const char *name, ctf_error_t *errp)
+{
+  ctf_id_t type;
+
+  if (ctf_arc_lookup_symbol_name (ctf_dict_arc (fp, 0), name, &type
+				  errp) == NULL)
+    return CTF_ERR;
+  return type;
+}
+
 static void
 try_maybe_reporting (int report)
 {
@@ -32,7 +43,7 @@ try_maybe_reporting (int report)
   const char *symname;
   unsigned char *buf;
   size_t bufsiz;
-  int err;
+  ctf_error_t err;
 
   if ((fp = ctf_create (&err)) == NULL)
     goto create_err;
@@ -100,17 +111,17 @@ try_maybe_reporting (int report)
 
   /* Look up all the symbols by name and make sure that works.  */
 
-  if (ctf_lookup_by_symbol_name (fp, "data_a") != base2)
+  if (lookup_symbol (fp, "data_a", &err) != base2)
     goto lookup_syms_err;
-  if (ctf_lookup_by_symbol_name (fp, "data_b") != base3)
+  if (lookup_symbol (fp, "data_b", &err) != base3)
     goto lookup_syms_err;
-  if (ctf_lookup_by_symbol_name (fp, "data_c") != base)
+  if (lookup_symbol (fp, "data_c", &err) != base)
     goto lookup_syms_err;
-  if (ctf_lookup_by_symbol_name (fp, "func_a") != func2)
+  if (lookup_symbol (fp, "func_a", &err) != func2)
     goto lookup_syms_err;
-  if (ctf_lookup_by_symbol_name (fp, "func_b") != func3)
+  if (lookup_symbol (fp, "func_b", &err) != func3)
     goto lookup_syms_err;
-  if (ctf_lookup_by_symbol_name (fp, "func_c") != func)
+  if (lookup_symbol (fp, "func_c", &err) != func)
     goto lookup_syms_err;
 
   /* Possibly report some but not all of the symbols, as if we are a linker (no
@@ -139,17 +150,17 @@ try_maybe_reporting (int report)
 
       /* Look up all the symbols by name now we have reported symbols.  */
 
-      if (ctf_lookup_by_symbol_name (fp, "data_a") != base2)
+      if (lookup_symbol (fp, "data_a", &err) != base2)
 	goto lookup_syms_err;
-      if (ctf_lookup_by_symbol_name (fp, "data_b") != base3)
+      if (lookup_symbol (fp, "data_b", &err) != base3)
 	goto lookup_syms_err;
-      if (ctf_lookup_by_symbol_name (fp, "data_c") != base)
+      if (lookup_symbol (fp, "data_c", &err) != base)
 	goto lookup_syms_err;
-      if (ctf_lookup_by_symbol_name (fp, "func_a") != func2)
+      if (lookup_symbol (fp, "func_a", &err) != func2)
 	goto lookup_syms_err;
-      if (ctf_lookup_by_symbol_name (fp, "func_b") != func3)
+      if (lookup_symbol (fp, "func_b", &err) != func3)
 	goto lookup_syms_err;
-      if (ctf_lookup_by_symbol_name (fp, "func_c") != func)
+      if (lookup_symbol (fp, "func_c", &err) != func)
 	goto lookup_syms_err;
     }
 
@@ -238,7 +249,7 @@ try_maybe_reporting (int report)
   exit (1);
  lookup_syms_err:
   fprintf (stderr, "Explicit lookup of symbols by name failed: %s\n",
-	   ctf_errmsg (ctf_errno (fp)));
+	   ctf_errmsg (err));
   exit (1);
  expected_compar_err:
   fprintf (stderr, "Non-dynamic iteration comparison failure: %s "

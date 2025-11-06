@@ -56,10 +56,8 @@ LIBCTF_2.0 {
 	ctf_func_type_arg_names;
 
 	ctf_lookup_by_name;
-	ctf_lookup_by_symbol;
 	ctf_lookup_by_kind;
 	ctf_symbol_next;
-	ctf_lookup_by_symbol_name;
 	ctf_arc_lookup_symbol;
 	ctf_arc_lookup_symbol_name;
 

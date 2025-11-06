@@ -682,6 +682,9 @@ extern ctf_id_t ctf_lookup_by_sym_or_name (ctf_dict_t *, unsigned long symidx,
 					   const char *symname, int try_parent,
 					   int is_function);
 extern ctf_id_t ctf_lookup_by_rawname (ctf_dict_t *, int, const char *);
+extern ctf_id_t ctf_lookup_by_symbol (ctf_dict_t *, unsigned long);
+extern ctf_id_t ctf_lookup_by_symbol_name (ctf_dict_t *, const char *);
+
 extern void ctf_set_ctl_hashes (ctf_dict_t *);
 extern ctf_id_t ctf_symbol_next_static (ctf_dict_t *, ctf_next_t **,
 					const char **, int);

@@ -129,8 +129,8 @@ main (int argc, char *argv[])
   if (ctf_type_reference (fp_b, ptrtype) != type)
     fprintf (stderr, "Look up of newly-added type in serialized dict yields ID %lx, expected %lx\n", ctf_type_reference (fp_b, ptrtype), type);
 
-  if (ctf_lookup_by_symbol_name (fp_b, "an_int") == CTF_ERR)
-    fprintf (stderr, "Lookup of symbol an_int failed: %s\n", ctf_errmsg (ctf_errno (fp_b)));
+  if (ctf_arc_lookup_symbol_name (ctf_dict_arc (fp_b, 0), "an_int", NULL, &err) == NULL)
+    fprintf (stderr, "Lookup of symbol an_int failed: %s\n", ctf_errmsg (err));
 
   ctf_dict_close (fp);
   ctf_close (ctf);

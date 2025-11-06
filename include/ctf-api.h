@@ -596,13 +596,6 @@ extern int ctf_func_type_arg_names (ctf_dict_t *, ctf_id_t, uint32_t,
 
 extern int ctf_type_linkage (ctf_dict_t *, ctf_id_t);
 
-/* Look up function or data symbols by name and return their CTF type ID,
-  if any.  (For both function symbols and data symbols that are function
-  pointers, the types are of kind CTF_K_FUNCTION.)  */
-
-extern ctf_id_t ctf_lookup_by_symbol (ctf_dict_t *, unsigned long);
-extern ctf_id_t ctf_lookup_by_symbol_name (ctf_dict_t *, const char *);
-
 /* Traverse all (function or data) symbols in a dict, one by one, and return the
    type of each and (if NAME is non-NULL) optionally its name.  */
 

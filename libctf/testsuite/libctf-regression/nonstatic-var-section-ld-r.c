@@ -41,8 +41,7 @@ main (int argc, char *argv[])
     printf ("bar is of type %lx\n", bar_type);
 
   /* Traverse the entire data object section and make sure it contains entries
-     for both foo and bar.  (This is pure laziness: the section is small and
-     ctf_lookup_by_symbol_name does not yet exist.)  */
+     for both foo and bar.  */
   while ((sym_type = ctf_symbol_next (fp, &i, &name, 0)) != CTF_ERR)
     {
       if (!name)

@@ -40,8 +40,7 @@ main (int argc, char *argv[])
     printf ("bar is of type %lx\n", bar_type);
 
   /* Traverse the entire data object section and make sure it contains an entry
-     for bar alone.  (This is pure laziness: the section is small and
-     ctf_lookup_by_symbol_name does not yet exist.)  */
+     for bar alone.  */
   while ((sym_type = ctf_symbol_next (fp, &i, &name, 0)) != CTF_ERR)
     {
       if (!name)
