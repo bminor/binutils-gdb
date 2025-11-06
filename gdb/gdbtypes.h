@@ -2315,6 +2315,11 @@ public:
      if type-smashing was selected at construction.  */
   type *new_type (enum type_code code, int bit, const char *name);
 
+  /* Create a copy of TYPE on the desired obstack.  This is
+     incompatible with the "SMASH" kind; this is verified using an
+     assert.  */
+  type *copy_type (const type *type);
+
   /* Return the architecture associated with this allocator.  This
      comes from whatever object was supplied to the constructor.  */
   gdbarch *arch ();
@@ -2838,6 +2843,10 @@ using copied_types_hash_t = gdb::unordered_map<type *, type *>;
 
 extern struct type *copy_type_recursive (struct type *type,
 					 copied_types_hash_t &copied_types);
+
+/* Make a copy of the given TYPE, except that the pointer & reference
+   types are not preserved.  The new type is allocated using the same
+   storage as TYPE.  */
 
 extern struct type *copy_type (const struct type *type);
 

@@ -12232,8 +12232,8 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
      arrays with unspecified length.  */
   if (die->child == NULL)
     {
-      index_type = builtin_type (objfile)->builtin_int;
       type_allocator alloc (objfile, cu->lang ());
+      index_type = alloc.copy_type (builtin_type (objfile)->builtin_int);
       range_type = create_static_range_type (alloc, index_type, 0, -1);
       type = create_array_type_with_stride (alloc, element_type, range_type,
 					    byte_stride_prop, bit_stride);
@@ -12577,7 +12577,9 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
 	    }
 	}
 
-      sym = new_symbol (die, builtin_type (objfile)->builtin_void, cu);
+      type_allocator alloc (objfile, cu->lang ());
+      type *void_type = alloc.copy_type (builtin_type (objfile)->builtin_void);
+      sym = new_symbol (die, void_type, cu);
       sym->set_value_common_block (common_block);
     }
 }
@@ -13124,6 +13126,8 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  LONGEST sz = len->unsigned_constant ().value_or (0);
 	  prop_type = objfile_int_type (objfile, sz, true);
+	  type_allocator alloc (objfile, cu->lang ());
+	  prop_type = alloc.copy_type (prop_type);
 	}
       else
 	{
@@ -13156,8 +13160,8 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
       length = 1;
     }
 
-  index_type = builtin_type (objfile)->builtin_int;
   type_allocator alloc (objfile, cu->lang ());
+  index_type = alloc.copy_type (builtin_type (objfile)->builtin_int);
   if (length_is_constant)
     range_type = create_static_range_type (alloc, index_type, 1, length);
   else
@@ -13279,7 +13283,9 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 
   if (die->child != NULL)
     {
-      struct type *void_type = builtin_type (objfile)->builtin_void;
+      type_allocator alloc (objfile, cu->lang ());
+      struct type *void_type
+	= alloc.copy_type (builtin_type (objfile)->builtin_void);
       int nparams, iparams;
 
       /* Count the number of parameters.
@@ -13726,14 +13732,12 @@ dwarf2_init_integer_type (struct dwarf2_cu *cu, int bits, int unsigned_p,
   /* Versions of Intel's C Compiler generate an integer type called "void"
      instead of using DW_TAG_unspecified_type.  This has been seen on
      at least versions 14, 17, and 18.  */
+  type_allocator alloc (objfile, cu->lang ());
   if (bits == 0 && cu->producer_is_icc () && name != nullptr
       && strcmp (name, "void") == 0)
-    type = builtin_type (objfile)->builtin_void;
+    type = alloc.copy_type (builtin_type (objfile)->builtin_void);
   else
-    {
-      type_allocator alloc (objfile, cu->lang ());
-      type = init_integer_type (alloc, bits, unsigned_p, name);
-    }
+    type = init_integer_type (alloc, bits, unsigned_p, name);
 
   return type;
 }
@@ -16225,19 +16229,24 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
       switch (die->tag)
 	{
 	case DW_TAG_label:
-	  attr = dwarf2_attr (die, DW_AT_low_pc, cu);
-	  if (attr != nullptr)
-	    {
-	      CORE_ADDR addr = per_objfile->relocate (attr->as_address ());
-	      sym->set_section_index (SECT_OFF_TEXT (objfile));
-	      sym->set_value_address (addr);
-	      sym->set_loc_class_index (LOC_LABEL);
-	    }
-	  else
-	    sym->set_loc_class_index (LOC_OPTIMIZED_OUT);
-	  sym->set_type (builtin_type (objfile)->builtin_core_addr);
-	  sym->set_domain (LABEL_DOMAIN);
-	  list_to_add = cu->list_in_scope;
+	  {
+	    attr = dwarf2_attr (die, DW_AT_low_pc, cu);
+	    if (attr != nullptr)
+	      {
+		CORE_ADDR addr = per_objfile->relocate (attr->as_address ());
+		sym->set_section_index (SECT_OFF_TEXT (objfile));
+		sym->set_value_address (addr);
+		sym->set_loc_class_index (LOC_LABEL);
+	      }
+	    else
+	      sym->set_loc_class_index (LOC_OPTIMIZED_OUT);
+	    type_allocator alloc (objfile, cu->lang ());
+	    struct type *addr_type
+	      = alloc.copy_type (builtin_type (objfile)->builtin_core_addr);
+	    sym->set_type (addr_type);
+	    sym->set_domain (LABEL_DOMAIN);
+	    list_to_add = cu->list_in_scope;
+	  }
 	  break;
 	case DW_TAG_entry_point:
 	  /* SYMBOL_BLOCK_VALUE (sym) will be filled in later by
@@ -16318,7 +16327,12 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	     variables with missing type entries.  Change the
 	     misleading `void' type to something sensible.  */
 	  if (sym->type ()->code () == TYPE_CODE_VOID)
-	    sym->set_type (builtin_type (objfile)->builtin_int);
+	    {
+	      type_allocator alloc (objfile, cu->lang ());
+	      struct type *int_type
+		= alloc.copy_type (builtin_type (objfile)->builtin_int);
+	      sym->set_type (int_type);
+	    }
 
 	  attr = dwarf2_attr (die, DW_AT_const_value, cu);
 	  /* In the case of DW_TAG_member, we should only be called for
@@ -16777,7 +16791,8 @@ die_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       struct objfile *objfile = cu->per_objfile->objfile;
       /* A missing DW_AT_type represents a void type.  */
-      return builtin_type (objfile)->builtin_void;
+      type_allocator alloc (objfile, cu->lang ());
+      return alloc.copy_type (builtin_type (objfile)->builtin_void);
     }
 
   return lookup_die_type (die, type_attr, cu);

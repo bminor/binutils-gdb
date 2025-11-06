@@ -5673,27 +5673,41 @@ copy_type_recursive (struct type *type, copied_types_hash_t &copied_types)
   return new_type;
 }
 
-/* Make a copy of the given TYPE, except that the pointer & reference
-   types are not preserved.  */
+/* See gdbtypes.h.  */
 
 struct type *
-copy_type (const struct type *type)
+type_allocator::copy_type (const struct type *type)
 {
-  struct type *new_type = type_allocator (type).new_type ();
+  struct type *new_type = this->new_type ();
   new_type->set_instance_flags (type->instance_flags ());
   new_type->set_length (type->length ());
   memcpy (TYPE_MAIN_TYPE (new_type), TYPE_MAIN_TYPE (type),
 	  sizeof (struct main_type));
+
+  /* This might have been overwritten by the memcpy.  */
+  if (m_is_objfile)
+    new_type->set_owner (m_data.objfile);
+  else
+    new_type->set_owner (m_data.gdbarch);
+
   if (type->main_type->dyn_prop_list != NULL)
     {
-      struct obstack *storage = (type->is_objfile_owned ()
-				 ? &type->objfile_owner ()->objfile_obstack
-				 : gdbarch_obstack (type->arch_owner ()));
+      struct obstack *storage = (new_type->is_objfile_owned ()
+				 ? &new_type->objfile_owner ()->objfile_obstack
+				 : gdbarch_obstack (new_type->arch_owner ()));
       new_type->main_type->dyn_prop_list
 	= copy_dynamic_prop_list (storage, type->main_type->dyn_prop_list);
     }
 
   return new_type;
+}
+
+/* See gdbtypes.h.  */
+
+struct type *
+copy_type (const struct type *type)
+{
+  return type_allocator (type).copy_type (type);
 }
 
 /* Helper functions to initialize architecture-specific types.  */
