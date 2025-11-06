@@ -64,11 +64,9 @@ LIBCTF_2.0 {
 	ctf_lookup_variable;
 
 	ctf_type_resolve;
-	ctf_type_lname;
-	ctf_type_name;
+	ctf_type_sname;
 	ctf_type_name_raw;
 	ctf_type_aname;
-	ctf_type_aname_raw;
 	ctf_type_size;
 	ctf_type_align;
 	ctf_type_kind;

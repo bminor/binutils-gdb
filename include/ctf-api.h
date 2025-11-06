@@ -34,6 +34,14 @@ extern "C"
 {
 #endif
 
+#ifndef __attribute__deprecated__
+# ifdef __GNUC__
+#  define __attribute__deprecated__(x) __attribute__((__deprecated__(x)))
+# else
+#  define __attribute__deprecated__(x)
+# endif
+#endif
+
 /* Version of the libctf API.  */
 
 #define LIBCTF_API_VERSION 2
@@ -662,26 +670,17 @@ extern ctf_id_t ctf_type_resolve (ctf_dict_t *, ctf_id_t);
 
 extern char *ctf_type_aname (ctf_dict_t *, ctf_id_t);
 
-/* As above, but with no cvr-quals.  */
-
-extern char *ctf_type_aname_raw (ctf_dict_t *, ctf_id_t);
-
 /* A raw name that is owned by the ctf_dict_t and will live as long as it
    does.  Do not change the value this function returns!  */
 
 extern const char *ctf_type_name_raw (ctf_dict_t *, ctf_id_t);
 
-/* Like ctf_type_aname, but print the string into the passed buffer, truncating
-   if necessary and setting ECTF_NAMELEN on the errno: return the actual number
-   of bytes needed (not including the trailing \0).  Consider using
-   ctf_type_aname instead.  */
+/* Like ctf_type_aname, but print the string into the passed buffer.  If longer
+   than LEN, return NULL, set ECTF_NAMELEN on the errno, and put the actual
+   number of bytes needed into LEN.  Consider using ctf_type_aname instead.  */
 
-extern ssize_t ctf_type_lname (ctf_dict_t *, ctf_id_t, char *, size_t);
-
-/* Like ctf_type_lname, but return the string, or NULL if truncated.
-   Consider using ctf_type_aname instead.  */
-
-extern char *ctf_type_name (ctf_dict_t *, ctf_id_t, char *, size_t);
+__attribute__deprecated__ ("consider using ctf_type_aname instead")
+extern char *ctf_type_sname (ctf_dict_t *, ctf_id_t, char *, size_t *);
 
 /* Retrieve raw (BTF or CTF-format) type data for the type with a given ID.
    The vlen follows the record returned in the usual way for a type.

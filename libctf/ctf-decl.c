@@ -19,7 +19,7 @@
 
 /* CTF Declaration Stack
 
-   In order to implement ctf_type_name(), we must convert a type graph back
+   In order to implement ctf_type_*name*(), we must convert a type graph back
    into a C type declaration.  Unfortunately, a type graph represents a storage
    class ordering of the type whereas a type declaration must obey the C rules
    for operator precedence, and the two orderings are frequently in conflict.

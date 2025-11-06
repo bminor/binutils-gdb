@@ -15,6 +15,7 @@ main (int argc, char *argv[])
   size_t foo_size;
   int err;
   char name[64];
+  size_t len;
 
   /* Adding things after serialization should not corrupt names created before
      serialization.  */
@@ -29,16 +30,23 @@ main (int argc, char *argv[])
     goto write_err;
   free (foo);
 
-  if (ctf_type_name (fp, zygal, name, sizeof (name)) == NULL)
-    fprintf (stderr, "Can't get name of zygal: %s\n", ctf_errmsg (ctf_errno (fp)));
+  len = sizeof (name);
+  if (ctf_type_sname (fp, zygal, name, &len) == NULL)
+    {
+      fprintf (stderr, "Can't get name of zygal: %s\n", ctf_errmsg (ctf_errno (fp)));
+      exit (1);
+    }
   else
     printf ("zygal's name is %s\n", name);
 
   if ((autoschediastic = ctf_add_enum (fp, CTF_ADD_ROOT, "autoschediastic")) == CTF_ERR)
     goto add_err;
 
-  if (ctf_type_name (fp, zygal, name, sizeof (name)) == NULL)
-    fprintf (stderr, "Can't get name of zygal: %s\n", ctf_errmsg (ctf_errno (fp)));
+  if (ctf_type_sname (fp, zygal, name, &len) == NULL)
+    {
+      fprintf (stderr, "Can't get name of zygal: %s\n", ctf_errmsg (ctf_errno (fp)));
+      exit (1);
+    }
   else
     printf ("zygal's name is %s\n", name);
 
@@ -47,13 +55,19 @@ main (int argc, char *argv[])
     goto write_err;
   free (foo);
 
-  if (ctf_type_name (fp, zygal, name, sizeof (name)) == NULL)
-    fprintf (stderr, "Can't get name of zygal: %s\n", ctf_errmsg (ctf_errno (fp)));
+  if (ctf_type_sname (fp, zygal, name, &len) == NULL)
+    {
+      fprintf (stderr, "Can't get name of zygal: %s\n", ctf_errmsg (ctf_errno (fp)));
+      exit (1);
+    }
   else
     printf ("zygal's name is %s\n", name);
 
-  if (ctf_type_name (fp, autoschediastic, name, sizeof (name)) == NULL)
-    fprintf (stderr, "Can't get name of autoschediastic: %s\n", ctf_errmsg (ctf_errno (fp)));
+  if (ctf_type_sname (fp, autoschediastic, name, &len) == NULL)
+    {
+      fprintf (stderr, "Can't get name of autoschediastic: %s\n", ctf_errmsg (ctf_errno (fp)));
+      exit (1);
+    }
   else
     printf ("autoschediastic's name is %s after serialization\n", name);
 
@@ -67,13 +81,19 @@ main (int argc, char *argv[])
   if (ctf_rollback (fp, snap) < 0)
     goto roll_err;
 
-  if (ctf_type_name (fp, zygal, name, sizeof (name)) == NULL)
-    fprintf (stderr, "Can't get name of zygal: %s\n", ctf_errmsg (ctf_errno (fp)));
+  if (ctf_type_sname (fp, zygal, name, &len) == NULL)
+    {
+      fprintf (stderr, "Can't get name of zygal: %s\n", ctf_errmsg (ctf_errno (fp)));
+      exit (1);
+    }
   else
     printf ("zygal's name is %s after first rollback\n", name);
 
-  if (ctf_type_name (fp, autoschediastic, name, sizeof (name)) == NULL)
-    fprintf (stderr, "Can't get name of autoschediastic: %s\n", ctf_errmsg (ctf_errno (fp)));
+  if (ctf_type_sname (fp, autoschediastic, name, &len) == NULL)
+    {
+      fprintf (stderr, "Can't get name of autoschediastic: %s\n", ctf_errmsg (ctf_errno (fp)));
+      exit (1);
+    }
   else
     printf ("autoschediastic's name is %s after first rollback\n", name);
 

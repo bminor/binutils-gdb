@@ -1182,36 +1182,35 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
   return buf;
 }
 
-/* Lookup the given type ID and print a string name for it into buf.  Return
-   the actual number of bytes (not including \0) needed to format the name.  */
+/* Lookup the given type ID and print a string name for it into buf.  If buf
+   is too small, return NULL: the ECTF_NAMELEN error is set on 'fp' for us.
+   len is reset to the actual length of the string in this case.  */
 
-ssize_t
-ctf_type_lname (ctf_dict_t *fp, ctf_id_t type, char *buf, size_t len)
+char *
+ctf_type_sname (ctf_dict_t *fp, ctf_id_t type, char *buf, size_t *len)
 {
   char *str = ctf_type_aname (fp, type);
   size_t slen;
 
-  if (str == NULL)
-    return -1;			/* errno is set for us.  */
+  if (str == NULL || len == NULL)
+    {
+      free (str);
+      return NULL;		/* errno is set for us.  */
+    }
 
   slen = strlen (str);
-  snprintf (buf, len, "%s", str);
+
+  if (slen >= *len)
+    {
+      free (str);
+      ctf_set_errno (fp, ECTF_NAMELEN);
+      *len = slen;
+      return NULL;
+    }
+
+  snprintf (buf, *len, "%s", str);
   free (str);
-
-  if (slen >= len)
-    (void) ctf_set_errno (fp, ECTF_NAMELEN);
-
-  return slen;
-}
-
-/* Lookup the given type ID and print a string name for it into buf.  If buf
-   is too small, return NULL: the ECTF_NAMELEN error is set on 'fp' for us.  */
-
-char *
-ctf_type_name (ctf_dict_t *fp, ctf_id_t type, char *buf, size_t len)
-{
-  ssize_t rv = ctf_type_lname (fp, type, buf, len);
-  return (rv >= 0 && (size_t) rv < len ? buf : NULL);
+  return buf;
 }
 
 /* Lookup the given type ID and return its raw, unadorned, undecorated name.
@@ -1238,20 +1237,6 @@ ctf_type_name_raw (ctf_dict_t *fp, ctf_id_t type)
     return "";
 
   return ctf_strraw (fp, tp->ctt_name);
-}
-
-/* Lookup the given type ID and return its raw, unadorned, undecorated name as a
-   new dynamically-allocated string.  */
-
-char *
-ctf_type_aname_raw (ctf_dict_t *fp, ctf_id_t type)
-{
-  const char *name = ctf_type_name_raw (fp, type);
-
-  if (name != NULL)
-    return strdup (name);
-
-  return NULL;
 }
 
 /* Resolve the type down to a base type node, and then return the size
