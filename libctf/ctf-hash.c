@@ -598,11 +598,11 @@ ctf_dynhash_next_remove (ctf_next_t * const *it)
 {
   ctf_next_t *i = *it;
 
-  if ((void (*) (void)) ctf_dynhash_next != i->ctn_iter_fun)
-    return ECTF_NEXT_WRONGFUN;
-
   if (!i)
     return ECTF_NEXT_END;
+
+  if ((void (*) (void)) ctf_dynhash_next != i->ctn_iter_fun)
+    return ECTF_NEXT_WRONGFUN;
 
   if (i->ctn_n == 0)
     return ECTF_NEXT_END;
