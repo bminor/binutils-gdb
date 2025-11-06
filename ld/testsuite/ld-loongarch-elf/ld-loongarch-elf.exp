@@ -58,6 +58,10 @@ if [istarget "loongarch32-*-*"] {
     run_dump_test "macro_op_32"
     run_dump_test "syscall"
     run_dump_test "disas-jirl-32"
+    run_dump_test "la32"
+    if [check_shared_lib_support] {
+      run_dump_test "desc-ie"
+    }
 }
 
 if [istarget "loongarch64-*-*"] {

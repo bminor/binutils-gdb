@@ -111,7 +111,7 @@ set link_tests [list \
 run_ld_link_tests $link_tests
 
 
-
+if [istarget "loongarch64-*-*"] {
 set link_tests_libc [list \
   [list \
     "$testname readelf -s/-r nopic-global-so" \
@@ -208,6 +208,6 @@ set link_exec_tests [list \
 #   8:linker warning (optional)
 #   9:ld trailing options, placed after object files (optional)
 run_ld_link_exec_tests $link_exec_tests
-
+}
 
 #set verbose  old_verbose
