@@ -1771,7 +1771,7 @@ ctf_arc_lookup_enumerator_next (struct ctf_archive_internal *arci,
      refcnt: the caller is going to close it and has no idea that we didn't
      open it this time round.  */
   if (!opened_this_time)
-    ctf_ref (*dict);
+    (*dict)->ctf_refcnt++;
 
   return type;
 

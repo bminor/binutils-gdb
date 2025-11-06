@@ -487,7 +487,6 @@ extern void ctf_arc_flush_caches (ctf_archive_t *);
 extern ctf_dict_t *ctf_bufopen (const ctf_sect_t *ctfsect,
 				const ctf_sect_t *symsect,
 				const ctf_sect_t *strsect, ctf_error_t *);
-extern void ctf_ref (ctf_dict_t *);
 extern void ctf_dict_close (ctf_dict_t *);
 
 /* CTF dicts may be in a parent/child relationship, where the child dicts

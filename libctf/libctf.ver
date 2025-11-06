@@ -26,7 +26,6 @@ LIBCTF_2.0 {
 	ctf_simple_open;
 	ctf_create;
 	ctf_close;
-	ctf_ref;
 	ctf_dict_close;
 	ctf_file_close;
 

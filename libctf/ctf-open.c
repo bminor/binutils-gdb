@@ -2315,17 +2315,6 @@ bad:
   return NULL;
 }
 
-/* Bump the refcount on the specified CTF dict, to allow export of ctf_dict_t's
-   from iterators that open and close the ctf_dict_t around the loop.  (This
-   does not extend their lifetime beyond that of the ctf_archive_t in which they
-   are contained.)  */
-
-void
-ctf_ref (ctf_dict_t *fp)
-{
-  fp->ctf_refcnt++;
-}
-
 /* Close the specified CTF dict and free associated data structures.  Note that
    ctf_dict_close() is a reference counted operation: if the specified file is
    the parent of other active dict, its reference count will be greater than one
