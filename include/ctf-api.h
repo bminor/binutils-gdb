@@ -152,6 +152,14 @@ typedef enum ctf_sect_names
    CTF_SECT_STR
   } ctf_sect_names_t;
 
+/* Symbolic names for ELF sections associated with CTF.  */
+typedef enum ctf_elfsect_names
+  {
+    CTF_ELF_SECT,				/* The .ctf section.  */
+    CTF_ELF_SYMSECT,				/* The associated symtab.  */
+    CTF_ELF_STRSECT,				/* The ELF string table.  */
+  } ctf_elfsect_names_t;
+
 /* Encoding information for integers, floating-point values, and certain other
    intrinsics can be obtained by calling ctf_type_encoding, below.  The flags
    field will contain values appropriate for the type defined in <ctf.h>.
@@ -407,6 +415,7 @@ extern ctf_bool_t ctf_dict_get_flag (ctf_dict_t *, uint64_t flag);
 extern ctf_sect_t ctf_getdatasect (const ctf_dict_t *);
 extern ctf_sect_t ctf_getsymsect (const ctf_dict_t *);
 extern ctf_sect_t ctf_getstrsect (const ctf_dict_t *);
+extern ctf_sect_t ctf_elf_sect (const ctf_dict_t *, ctf_elfsect_names_t sect);
 
 /* Set the endianness of the symbol section, which may be different from
    the endianness of the CTF dict. Done for you by ctf_open and ctf_fdopen,

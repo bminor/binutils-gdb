@@ -2464,27 +2464,30 @@ ctf_get_arc (const ctf_dict_t *fp)
   return fp->ctf_archive;
 }
 
-/* Return the ctfsect out of the core ctf_impl.  Useful for freeing the
-   ctfsect's data * after ctf_dict_close(), which is why we return the actual
-   structure, not a pointer to it, since that is likely to become a pointer to
-   freed data before the return value is used under the expected use case of
-   ctf_getsect()/ ctf_dict_close()/free().  */
-ctf_sect_t
-ctf_getdatasect (const ctf_dict_t *fp)
-{
-  return fp->ctf_data;
-}
+/* Return various ELF sections related to CTF.  Potentially useful for freeing
+   the ctfsect's data * after ctf_dict_close(), which is why we return the
+   actual structure, not a pointer to it, since that is likely to become a
+   pointer to freed data before the return value is used under the expected use
+   case of ctf_elf_sect()/ctf_dict_close()/free().
+
+   On error, returns an all-NULL section as if there was nothing opened.  */
 
 ctf_sect_t
-ctf_getsymsect (const ctf_dict_t *fp)
+ctf_elf_sect (const ctf_dict_t *fp, ctf_elfsect_names_t sect)
 {
-  return fp->ctf_ext_symtab;
-}
+  ctf_sect_t error = { "ERROR", NULL, 0, 0 };
 
-ctf_sect_t
-ctf_getstrsect (const ctf_dict_t *fp)
-{
-  return fp->ctf_ext_strtab;
+  switch (sect)
+    {
+    case CTF_ELF_SECT:
+      return fp->ctf_data;
+    case CTF_ELF_SYMSECT:
+      return fp->ctf_ext_symtab;
+    case CTF_ELF_STRSECT:
+      return fp->ctf_ext_strtab;
+    default:
+      return error;
+    }
 }
 
 /* Set the endianness of the symbol table attached to FP.  */

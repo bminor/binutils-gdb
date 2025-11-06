@@ -160,9 +160,7 @@ LIBCTF_2.0 {
 	ctf_compress_write;
 	ctf_write_suppress_kind;
 	ctf_sect_size;
-	ctf_getdatasect;
-	ctf_getsymsect;
-	ctf_getstrsect;
+	ctf_get_elf_sect;
 	ctf_symsect_endianness;
 	ctf_arc_symsect_endianness;
 
