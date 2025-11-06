@@ -2411,6 +2411,7 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 
   const char *name;
   uint32_t kind, forward_kind, flag, bitfields;
+  uint32_t isroot;
   size_t vlen;
 
   const ctf_type_t *src_prefix, *src_tp, *dst_prefix;
@@ -2429,7 +2430,8 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 
   name = ctf_strptr (src_fp, src_tp->ctt_name);
   kind = ctf_type_kind (src_fp, src_type);
-  flag = LCTF_INFO_ISROOT (src_fp, src_prefix->ctt_info);
+  isroot = LCTF_INFO_ISROOT (src_fp, src_prefix->ctt_info);
+  flag = isroot ? CTF_ADD_ROOT : CTF_ADD_NONROOT;
   bitfields = CTF_INFO_KFLAG (src_tp->ctt_info);
   vlen = LCTF_VLEN (src_fp, src_prefix);
 
@@ -2472,7 +2474,7 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
      scope), look up the name in the destination dictionary and verify that it is
      of the same kind before we do anything else.  */
 
-  if (flag && name[0] != '\0'
+  if (isroot && name[0] != '\0'
       && (tmp = ctf_lookup_by_rawname (dst_fp, forward_kind, name)) != 0)
     {
       dst_type = tmp;
