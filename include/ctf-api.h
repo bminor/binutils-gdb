@@ -347,8 +347,6 @@ _CTF_ERRORS
 typedef int ctf_visit_f (ctf_dict_t *, const char *name, ctf_id_t type,
 			 size_t offset, int bit_width, int depth,
 			 void *arg);
-typedef int ctf_archive_raw_member_f (const char *name, const void *content,
-				      size_t len, void *arg);
 typedef char *ctf_dump_decorate_f (ctf_sect_names_t sect,
 				   char *line, void *arg);
 
@@ -904,19 +902,20 @@ extern ctf_id_t ctf_tag_next (ctf_dict_t *, const char *tag, ctf_next_t **);
    returned).  */
 
 extern ctf_dict_t *ctf_archive_next (const ctf_archive_t *, ctf_next_t **,
-				     const char **, int skip_parent, ctf_error_t *errp);
+				     const char **, int skip_parent,
+				     ctf_error_t *errp);
 
-/* Pass the raw content of each archive member in turn to
-   ctf_archive_raw_member_f.
+/* Iterate over raw archives, returning the name of each member and optionally
+   its content and length.
 
    This function alone does not currently operate on CTF files masquerading as
    archives, and returns -EINVAL: the raw data is no longer available.  It is
    expected to be used only by archiving tools, in any case, which have no need
-   to deal with non-archives at all.  (There is currently no _next analogue of
-   this function.)  */
+   to deal with non-archives at all.  */
 
-extern int ctf_archive_raw_iter (const ctf_archive_t *,
-				 ctf_archive_raw_member_f *, void *);
+extern const char *ctf_archive_raw_next (const ctf_archive_t *,
+					 ctf_next_t **, const void **contents,
+					 size_t *len, ctf_error_t *errp);
 
 /* Dump the contents of a section in a CTF dict.  STATE is an
    iterator which should be a pointer to a variable set to NULL.  The decorator

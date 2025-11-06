@@ -1792,40 +1792,78 @@ ctf_arc_lookup_enumerator_next (struct ctf_archive_internal *arci,
 /* Raw iteration over all CTF files in an archive: public entry point.
 
    Returns -EINVAL if not supported for this sort of archive.  */
-int
-ctf_archive_raw_iter (const struct ctf_archive_internal *arci,
-		      ctf_archive_raw_member_f * func, void *data)
+
+const char *
+ctf_archive_raw_next (const struct ctf_archive_internal *arci, ctf_next_t **it,
+		      const void **contents, size_t *len, ctf_error_t *errp)
 {
-  int rc;
-  size_t i;
+  ctf_next_t *i = *it;
+  size_t name_off, contents_off;
+  const void *local_contents;
   ctf_archive_modent_t *modent;
   const char *nametbl;
 
   if (!arci->ctfi_is_archive || !arci->ctfi_archive)
-    return -EINVAL;				/* Not supported.  */
+    {
+      if (errp)
+	*errp = EINVAL;
+      return NULL;				/* Not supported.  */
+    }
+
+  if (!i)
+    {
+      if ((i = ctf_next_create()) == NULL)
+	{
+	  if (errp)
+	    *errp = ENOMEM;
+	  return NULL;
+	}
+      i->cu.ctn_arc = arci;
+      i->ctn_iter_fun = (void (*) (void)) ctf_archive_raw_next;
+      i->ctn_size = arci->ctfi_hdr->ndicts;
+      i->ctn_n = 0;
+      *it = i;
+    }
+
+  if ((void (*) (void)) ctf_archive_raw_next != i->ctn_iter_fun)
+    {
+      if (errp)
+	*errp = ECTF_NEXT_WRONGFUN;
+      return NULL;
+    }
+
+  if (arci != i->cu.ctn_arc)
+    {
+      if (errp)
+	*errp = ECTF_NEXT_WRONGFP;
+      return NULL;
+    }
+
+  if (i->ctn_n >= arci->ctfi_hdr->ndicts)
+    {
+      ctf_next_destroy (i);
+      *it = NULL;
+      if (errp)
+	*errp = ECTF_NEXT_END;
+      return NULL;
+    }
 
   modent = (ctf_archive_modent_t *) (arci->ctfi_archive
 				     + arci->ctfi_hdr->modents);
   nametbl = (const char *) arci->ctfi_archive + arci->ctfi_hdr->names;
 
-  for (i = 0; i < arci->ctfi_hdr->ndicts; i++)
-    {
-      const char *name;
-      unsigned char *content;
-      size_t name_off, content_off, content_size;
+  name_off = modent[i->ctn_n].name;
+  contents_off = modent[i->ctn_n].contents;
 
-      name_off = modent[i].name;
-      content_off = modent[i].contents;
+  local_contents = arci->ctfi_archive + arci->ctfi_hdr->ctfs + contents_off;
+  if (contents)
+    *contents = local_contents;
+  if (len)
+    *len = *((uint64_t *) local_contents);
 
-      name = &nametbl[name_off];
-      content = arci->ctfi_archive + arci->ctfi_hdr->ctfs + content_off;
-      content_size = *((uint64_t *) content);
+  i->ctn_n++;
 
-      if ((rc = func (name, (void *) (content + sizeof (uint64_t)),
-		      content_size, data)) != 0)
-	return rc;
-    }
-  return 0;
+  return &nametbl[name_off];
 }
 
 /* Iterate over all CTF files in an archive, returning each dict in turn as a

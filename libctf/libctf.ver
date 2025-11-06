@@ -176,7 +176,7 @@ LIBCTF_2.0 {
 	ctf_arc_open_by_name_sections;
 	ctf_archive_count;
 	ctf_archive_next;
-	ctf_archive_raw_iter;
+	ctf_archive_raw_next;
 	ctf_get_arc;
 	ctf_arc_flush_caches;
 
