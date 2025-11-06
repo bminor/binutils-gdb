@@ -14074,7 +14074,7 @@ process_version_sections (Filedata * filedata)
 			  while (ivn.vn_next);
 			}
 
-		      if (data[cnt + j] != 0x8001
+		      if (data[cnt + j] != (VERSYM_HIDDEN | VERSYM_BASE)
 			  && filedata->version_info[DT_VERSIONTAGIDX (DT_VERDEF)])
 			{
 			  Elf_Internal_Verdef ivd;
@@ -14500,6 +14500,10 @@ get_symbol_version_string (Filedata *filedata,
   *sym_info = (vers_data & VERSYM_HIDDEN) != 0 ? symbol_hidden : symbol_public;
   max_vd_ndx = 0;
 
+  /* Return the empty string for the base version.  */
+  if ((vers_data & VERSYM_VERSION) == VERSYM_BASE)
+    return "";
+
   /* Usually we'd only see verdef for defined symbols, and verneed for
      undefined symbols.  However, symbols defined by the linker in
      .dynbss for variables copied from a shared library in order to
@@ -14510,7 +14514,7 @@ get_symbol_version_string (Filedata *filedata,
      verneed.  .dynbss might not be mapped to a SHT_NOBITS section.  */
 
   if (psym->st_shndx != SHN_UNDEF
-      && vers_data != 0x8001
+      && vers_data != (VERSYM_HIDDEN | VERSYM_BASE)
       && filedata->version_info[DT_VERSIONTAGIDX (DT_VERDEF)])
     {
       Elf_Internal_Verdef ivd;

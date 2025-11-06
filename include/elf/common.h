@@ -1377,6 +1377,11 @@
 
 #define VERSYM_HIDDEN		0x8000
 
+/* This flag appears in a Versym structure.  It means that the symbol
+   is the base version.  */
+
+#define VERSYM_BASE		0x0001
+
 /* This is the mask for the rest of the Versym information.  */
 
 #define VERSYM_VERSION		0x7fff
