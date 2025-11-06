@@ -161,7 +161,6 @@ LIBCTF_2.0 {
 	ctf_write_suppress_kind;
 	ctf_sect_size;
 	ctf_get_elf_sect;
-	ctf_symsect_endianness;
 	ctf_arc_symsect_endianness;
 
 	ctf_arc_write;
@@ -172,7 +171,7 @@ LIBCTF_2.0 {
 	ctf_archive_count;
 	ctf_archive_next;
 	ctf_archive_raw_next;
-	ctf_get_arc;
+	ctf_dict_arc;
 	ctf_arc_flush_caches;
 
 	ctf_dump;

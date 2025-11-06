@@ -422,7 +422,6 @@ extern ctf_sect_t ctf_elf_sect (const ctf_dict_t *, ctf_elfsect_names_t sect);
    but direct calls to ctf_bufopen etc with symbol sections provided must
    do so explicitly.  */
 
-extern void ctf_symsect_endianness (ctf_dict_t *, int little_endian);
 extern void ctf_arc_symsect_endianness (ctf_archive_t *, int little_endian);
 
 /* Open CTF archives from files or raw section data, and close them again.
@@ -450,9 +449,11 @@ extern ctf_archive_t *ctf_arc_bufopen (const ctf_sect_t *ctfsect,
 				       ctf_error_t *);
 extern void ctf_arc_close (ctf_archive_t *);
 
-/* Get the archive a given dictionary came from (if any).  */
+/* Get the CTF archive from which this ctf_dict_t is derived.  If it's not, make
+   one.  If FREEABLE is set, return an archive it is safe for the user to free,
+   or NULL.  If unset, will only return NULL on out-of-memory errors.  */
 
-extern ctf_archive_t *ctf_get_arc (const ctf_dict_t *);
+extern ctf_archive_t *ctf_dict_arc (ctf_dict_t *, ctf_bool_t freeable);
 
 /* Return the number of members in an archive.  */
 

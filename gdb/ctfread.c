@@ -106,7 +106,7 @@ ctf_dict_info::~ctf_dict_info ()
   if (dict == nullptr)
     return;
 
-  ctf_archive_t *arc = ctf_get_arc (dict);
+  ctf_archive_t *arc = ctf_dict_arc (dict, 1);
   ctf_dict_close (dict);
   ctf_close (arc);
 }

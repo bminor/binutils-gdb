@@ -2348,6 +2348,12 @@ ctf_dict_close (ctf_dict_t *fp)
   free (fp->ctf_dyn_cu_name);
   free (fp->ctf_dyn_parent_name);
 
+  if (fp->ctf_archive && fp->ctf_archive->ctfi_free_on_dict_close)
+    {
+      free (fp->ctf_archive);
+      fp->ctf_archive = NULL;
+    }
+
   /* DTD deletion must happen before the parent is deleted, since deleting the
      parent erases all its types and strings and makes type and string lookups
      impossible from then on.  */
@@ -2457,11 +2463,38 @@ ctf_close (ctf_archive_t *arc)
   ctf_arc_close (arc);
 }
 
-/* Get the CTF archive from which this ctf_dict_t is derived.  */
+/* Get the CTF archive from which this ctf_dict_t is derived.  If it's not, make
+   one.  If FREEABLE is set, return an archive it is safe for the user to free,
+   or NULL.  If unset, will only return NULL on out-of-memory errors.  */
 ctf_archive_t *
-ctf_get_arc (const ctf_dict_t *fp)
+ctf_dict_arc (ctf_dict_t *fp, ctf_bool_t freeable)
 {
-  return fp->ctf_archive;
+  struct ctf_archive_internal *arci;
+
+  if (fp->ctf_archive)
+    {
+      if (freeable && fp->ctf_archive->ctfi_free_on_dict_close)
+	return NULL;
+
+      return fp->ctf_archive;
+    }
+
+  if ((arci = calloc (1, sizeof (struct ctf_archive_internal))) == NULL)
+    {
+      ctf_set_errno (fp, ENOMEM);
+      return NULL;
+    }
+
+  arci->ctfi_dict = fp;
+  memcpy (&arci->ctfi_symsect, &fp->ctf_ext_symtab, sizeof (ctf_sect_t));
+  memcpy (&arci->ctfi_strsect, &fp->ctf_ext_strtab, sizeof (ctf_sect_t));
+
+  arci->ctfi_free_symsect = 0;
+  arci->ctfi_free_strsect = 0;
+  arci->ctfi_free_on_dict_close = 1;
+  arci->ctfi_symsect_little_endian = fp->ctf_symsect_little_endian;
+
+  return arci;
 }
 
 /* Return various ELF sections related to CTF.  Potentially useful for freeing
@@ -2497,6 +2530,11 @@ ctf_symsect_endianness (ctf_dict_t *fp, int little_endian)
   int old_endianness = fp->ctf_symsect_little_endian;
 
   fp->ctf_symsect_little_endian = !!little_endian;
+
+  /* Propagate to the archive iff it's a wrapper for this dict alone.  */
+
+  if (fp->ctf_archive && !fp->ctf_archive->ctfi_is_archive)
+    fp->ctf_archive->ctfi_symsect_little_endian = fp->ctf_symsect_little_endian;
 
   /* If we already have a symtab translation table, we need to repopulate it if
      our idea of the endianness has changed.  */
