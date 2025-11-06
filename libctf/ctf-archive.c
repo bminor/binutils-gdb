@@ -1167,18 +1167,21 @@ ctf_dict_open_internal (const struct ctf_archive_internal *arci,
 /* Return the ctf_dict_t with the given name, or NULL if none, setting 'err' if
    non-NULL.  A name of NULL means to open the default file.
 
-   Use the specified string and symbol table sections.
-
    Public entry point.  */
 ctf_dict_t *
-ctf_dict_open_sections (const struct ctf_archive_internal *arci,
-			const ctf_sect_t *symsect,
-			const ctf_sect_t *strsect,
-			const char *name,
-			ctf_error_t *errp)
+ctf_dict_open (const struct ctf_archive_internal *arci, const char *name,
+	       ctf_error_t *errp)
 {
+  const ctf_sect_t *symsect = &arci->ctfi_symsect;
+  const ctf_sect_t *strsect = &arci->ctfi_strsect;
+
   if (errp)
     *errp = 0;
+
+  if (symsect->cts_name == NULL)
+    symsect = NULL;
+  if (strsect->cts_name == NULL)
+    strsect = NULL;
 
   if (arci->ctfi_is_archive)
     {
@@ -1209,25 +1212,6 @@ ctf_dict_open_sections (const struct ctf_archive_internal *arci,
   /* Bump the refcount so that the user can ctf_dict_close() it.  */
   arci->ctfi_dict->ctf_refcnt++;
   return arci->ctfi_dict;
-}
-
-/* Return the ctf_dict_t with the given name, or NULL if none, setting 'err' if
-   non-NULL.  A name of NULL means to open the default file.
-
-   Public entry point.  */
-ctf_dict_t *
-ctf_dict_open (const struct ctf_archive_internal *arci, const char *name,
-	       ctf_error_t *errp)
-{
-  const ctf_sect_t *symsect = &arci->ctfi_symsect;
-  const ctf_sect_t *strsect = &arci->ctfi_strsect;
-
-  if (symsect->cts_name == NULL)
-    symsect = NULL;
-  if (strsect->cts_name == NULL)
-    strsect = NULL;
-
-  return ctf_dict_open_sections (arci, symsect, strsect, name, errp);
 }
 
 static void
@@ -1349,16 +1333,6 @@ ctf_arc_open_by_name (const ctf_archive_t *arci, const char *name,
 		      int *errp)
 {
   return ctf_dict_open (arci, name, (ctf_error_t *) errp);
-}
-
-ctf_dict_t *
-ctf_arc_open_by_name_sections (const struct ctf_archive_internal *arci,
-			       const ctf_sect_t *symsect,
-			       const ctf_sect_t *strsect,
-			       const char *name,
-			       int *errp)
-{
-  return ctf_dict_open_sections (arci, symsect, strsect, name, (ctf_error_t *) errp);
 }
 
 /* Get a property value from the shared properties table of an archive,

@@ -21,7 +21,6 @@ LIBCTF_2.0 {
 	/* In libctf and libctf-nobfd.  */
 
 	ctf_dict_open;
-	ctf_dict_open_sections;
 	ctf_bufopen;
 	ctf_simple_open;
 	ctf_create;
@@ -172,7 +171,6 @@ LIBCTF_2.0 {
 	ctf_arc_bufopen;
 	ctf_arc_close;
 	ctf_arc_open_by_name;
-	ctf_arc_open_by_name_sections;
 	ctf_archive_count;
 	ctf_archive_next;
 	ctf_archive_raw_next;

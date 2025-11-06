@@ -449,22 +449,14 @@ extern ctf_archive_t *ctf_get_arc (const ctf_dict_t *);
 
 extern size_t ctf_archive_count (const ctf_archive_t *);
 
-/* Open a dictionary with a given name, given a CTF archive and
-   optionally symbol and string table sections to accompany it (if the
-   archive was oriiginally opened from an ELF file via ctf_open*, or
-   if string or symbol tables were explicitly passed when the archive
-   was opened, this can be used to override that choice).  The dict
-   should be closed with ctf_dict_close() when done.
+/* Open a dictionary with a given name, given a CTF archive.  The dict should be
+   closed with ctf_dict_close() when done.
 
    (The low-level function ctf_bufopen returns ctf_dict_t's directly, and cannot
    be used on CTF archives.)  */
 
 extern ctf_dict_t *ctf_dict_open (const ctf_archive_t *,
 				  const char *, ctf_error_t *);
-extern ctf_dict_t *ctf_dict_open_sections (const ctf_archive_t *,
-					   const ctf_sect_t *symsect,
-					   const ctf_sect_t *strsect,
-					   const char *, ctf_error_t *);
 
 /* Look up symbols' types in archives by index or name, returning the dict
    and optionally type ID in which the type is found.  Lookup results are
@@ -479,10 +471,9 @@ extern ctf_dict_t *ctf_arc_lookup_symbol_name (ctf_archive_t *,
 					       ctf_id_t *, ctf_error_t *errp);
 extern void ctf_arc_flush_caches (ctf_archive_t *);
 
-/* The next functions return or close real CTF files, or write out CTF
-   archives, not archives or ELF files containing CTF content.  As with
-   ctf_dict_open_sections, they can be passed symbol and string table
-   sections.  */
+/* The next functions return or close real CTF files, or write out CTF archives,
+   not archives or ELF files containing CTF content.  They can be passed symbol
+   and string table sections if need be.  */
 
 extern ctf_dict_t *ctf_bufopen (const ctf_sect_t *ctfsect,
 				const ctf_sect_t *symsect,
@@ -1237,10 +1228,6 @@ extern void ctf_file_close (ctf_file_t *);
 extern ctf_dict_t *ctf_parent_file (ctf_dict_t *);
 extern ctf_dict_t *ctf_arc_open_by_name (const ctf_archive_t *,
 					 const char *, int *);
-extern ctf_dict_t *ctf_arc_open_by_name_sections (const ctf_archive_t *arc,
-						  const ctf_sect_t *symsect,
-						  const ctf_sect_t *strsect,
-						  const char *name, int *errp);
 
 /* Deprecated witeout function to write out a gzip-compressed dict.  Unlike all
    the other writeout functions, this even compresses the header (it has to,
