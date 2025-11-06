@@ -2,13 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static int
-print_enum (const char *name, int val, void *unused)
-{
-  printf ("iter test: %s has value %i\n", name, val);
-  return 0;
-}
-
 int
 main (int argc, char *argv[])
 {
@@ -48,9 +41,6 @@ main (int argc, char *argv[])
   if ((type = ctf_lookup_by_name (fp, "enum ie") ) == CTF_ERR)
     goto err;
 
-  if ((ctf_enum_iter (fp, type, print_enum, NULL)) < 0)
-    goto ierr;
-
   while ((name = ctf_enum_next (fp, type, &i, &val)) != NULL)
     {
       printf ("next test: %s has value %i\n", name, val);
@@ -69,10 +59,7 @@ main (int argc, char *argv[])
  err:
   fprintf (stderr, "Lookup failed: %s\n", ctf_errmsg (ctf_errno (fp)));
   return 1;
- ierr:
-  fprintf (stderr, "_iter iteration failed: %s\n", ctf_errmsg (ctf_errno (fp)));
-  return 1;
  nerr:
-  fprintf (stderr, "_next iteration failed: %s\n", ctf_errmsg (ctf_errno (fp)));
+  fprintf (stderr, "iteration failed: %s\n", ctf_errmsg (ctf_errno (fp)));
   return 1;
 }

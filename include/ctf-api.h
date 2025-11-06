@@ -347,18 +347,6 @@ _CTF_ERRORS
 typedef int ctf_visit_f (ctf_dict_t *, const char *name, ctf_id_t type,
 			 size_t offset, int bit_width, int depth,
 			 void *arg);
-typedef int ctf_member_f (ctf_dict_t *, const char *name, ctf_id_t membtype,
-			  size_t offset, int bit_width, void *arg);
-typedef int ctf_enum_f (const char *name, int64_t val, void *arg);
-typedef int ctf_unsigned_enum_f (const char *name, uint64_t val, void *arg);
-typedef int ctf_variable_f (ctf_dict_t *, const char *name, ctf_id_t type,
-			    void *arg);
-typedef int ctf_datasec_var_f (ctf_dict_t *fp, ctf_id_t type, size_t offset,
-			       size_t datasec_size, void *arg);
-typedef int ctf_type_f (ctf_dict_t *, ctf_id_t type, void *arg);
-typedef int ctf_type_all_f (ctf_dict_t *, ctf_id_t type, int flag, void *arg);
-typedef int ctf_type_kind_f (ctf_dict_t *, ctf_id_t type, int kind, void *arg);
-typedef int ctf_archive_member_f (ctf_dict_t *fp, const char *name, void *arg);
 typedef int ctf_archive_raw_member_f (const char *name, const void *content,
 				      size_t len, void *arg);
 typedef char *ctf_dump_decorate_f (ctf_sect_names_t sect,
@@ -845,14 +833,12 @@ extern ctf_id_t ctf_decl_tag (ctf_dict_t *, ctf_id_t decl_tag,
    the members of unnamed structs nested within this struct as if they were
    direct members, if CTF_MN_RECURSE is passed in the flags.  */
 
-extern int ctf_member_iter (ctf_dict_t *, ctf_id_t, ctf_member_f *, void *);
 extern ssize_t ctf_member_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
 				const char **name, ctf_id_t *membtype,
 				int *bit_width, int flags);
 
-/* Return all enumeration constants in a given enum type.  The return value, and
-   VAL argument, may need to be cast to uint64_t: see ctf_enum_unsigned().  */
-extern int64_t ctf_enum_iter (ctf_dict_t *, ctf_id_t, ctf_enum_f *, void *);
+/* Return all enumeration constants in a given enum type.  The VAL argument may
+   need to be cast to uint64_t: see ctf_enum_unsigned(). */
 extern const char *ctf_enum_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
 				  int64_t *);
 
@@ -883,50 +869,40 @@ extern ctf_id_t ctf_arc_lookup_enumerator_next (ctf_archive_t *, const char *nam
 						ctf_next_t **, int64_t *enum_value,
 						ctf_dict_t **dict, ctf_error_t *errp);
 
-/* Iterate over all types in a dict.  ctf_type_iter_all recurses over all types:
-   ctf_type_iter recurses only over types with user-visible names (for which
-   CTF_ADD_ROOT was passed).  All such types are returned, even if they are
-   things like pointers that intrinsically have no name: this is the only effect
-   of CTF_ADD_ROOT for such types.  ctf_type_next allows you to choose whether
-   to see non-root types or not with the want_hidden arg: if set, the flag (if
-   passed) returns the non-root state of each type in turn.  Types in parent
-   dictionaries are not returned.
+/* Iterate over all types, kinds, variables, or datasecs in a dict.
+   ctf_type_next returns all types in a dict in turn, allowing you to choose
+   whether to see conflicting types or not with the want_hidden arg: if set, the
+   flag (if passed) returns the conflicting state of each type in turn.  Types
+   in parent dictionaries are not returned.  Note that this is the opposite of
+   the convention in the old API: a true value for the flag argument used to
+   mean it is visible; now it means it is conflicting.
 
    These days, even variables are included in the things returned by ctf_type*()
    (type kind CTF_K_VAR).  */
 
-extern int ctf_type_iter (ctf_dict_t *, ctf_type_f *, void *);
-extern int ctf_type_iter_all (ctf_dict_t *, ctf_type_all_f *, void *);
-extern int ctf_type_kind_iter (ctf_dict_t *, int kind, ctf_type_kind_f *, void *);
 extern ctf_id_t ctf_type_next (ctf_dict_t *, ctf_next_t **,
 			       int *flag, int want_hidden);
 extern ctf_id_t ctf_type_kind_next (ctf_dict_t *, ctf_next_t **, int kind);
-
-extern int ctf_variable_iter (ctf_dict_t *, ctf_variable_f *, void *);
 extern ctf_id_t ctf_variable_next (ctf_dict_t *, ctf_next_t **,
 				   const char **);
-
-extern int ctf_datasec_var_iter (ctf_dict_t *, ctf_id_t, ctf_datasec_var_f *,
-				 void *);
 extern ctf_id_t ctf_datasec_var_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
 				      size_t *size, size_t *offset);
 
 /* Iterate over all tags with the given TAG, returning the ID of each tag.  */
 extern ctf_id_t ctf_tag_next (ctf_dict_t *, const char *tag, ctf_next_t **);
 
-/* ctf_archive_iter and ctf_archive_next open each member dict for you,
-   automatically importing any parent dict as usual: ctf_archive_iter closes the
-   dict on return from ctf_archive_member_f, but for ctf_archive_next the caller
-   must close each dict returned.  If skip_parent is set, the parent dict is
-   skipped on the basis that it's already been seen in every child dict (but if
-   no child dicts exist, this will lead to nothing being returned).
+/* ctf_archive_next opens each member dict for you, automatically importing any
+   parent dict as usual: the caller must close each dict returned once done with
+   it, though it may outlive the loop until the archive is closed; the cost of
+   opening is amortized so that repeated calls cost almost nothing.  If
+   skip_parent is set, the parent dict is skipped on the basis that it's already
+   been seen in every child dict (but if no child dicts exist, this will lead to
+   nothing being returned).
 
-   If an open fails, ctf_archive_iter returns -1 early (losing the error), but
-   ctf_archive_next both passes back the error in the passed errp and allows you
-   to iterate past errors (until the usual ECTF_NEXT_END is returned).  */
+   If an open fails, ctf_archive_next both passes back the error in the passed
+   errp and allows you to iterate past errors (until the usual ECTF_NEXT_END is
+   returned).  */
 
-extern int ctf_archive_iter (const ctf_archive_t *, ctf_archive_member_f *,
-			     void *);
 extern ctf_dict_t *ctf_archive_next (const ctf_archive_t *, ctf_next_t **,
 				     const char **, int skip_parent, ctf_error_t *errp);
 

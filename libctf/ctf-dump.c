@@ -692,6 +692,11 @@ ctf_dump_datasecs (ctf_dict_t *fp, ctf_dump_state_t *arg)
 
   while ((type = ctf_type_kind_next (fp, &next, CTF_K_DATASEC)) != CTF_ERR)
     {
+      ctf_next_t *next_var = NULL;
+      ctf_id_t var_type;
+      size_t size;
+      size_t offset;
+
       /* Dump DATASEC name.  */
 
       if (asprintf (&str, "%sSection %s:\n\n", first ? "" : "\n",
@@ -702,12 +707,28 @@ ctf_dump_datasecs (ctf_dict_t *fp, ctf_dump_state_t *arg)
       first = 0;
 
       /* Dump all variables in the datasec.  */
-      if (ctf_datasec_var_iter (fp, type, ctf_dump_var, state) < 0)
-        goto err;
+
+      while ((var_type = ctf_datasec_var_next (fp, type, &next_var, &size,
+					       &offset)) != CTF_ERR)
+	{
+	  if (ctf_dump_var (fp, type, offset, size, state) < 0)
+	    {
+	      ctf_err_warn (fp, 1, 0, _("cannot dump var %s (%lx) in datasec %s (%lx)\n"),
+			    ctf_type_name_raw (fp, var_type), var_type,
+			    ctf_type_name_raw (fp, type), type);
+	      goto err;
+	    }
+	}
+      if (ctf_errno (fp) != ECTF_NEXT_END)
+	{
+	  ctf_err_warn (fp, 1, 0, _("cannot iterate over vars in datasec %s (%lx)\n"),
+			ctf_type_name_raw (fp, type), type);
+	  goto err;
+	}
     }
   if (ctf_errno (fp) != ECTF_NEXT_END)
     {
-      ctf_err_warn (fp, 1, ctf_errno (fp), _("cannot visit datasecs\n"));
+      ctf_err_warn (fp, 1, ctf_errno (fp), _("cannot iterate over datasecs\n"));
       goto err;
     }
 
@@ -789,12 +810,16 @@ type_hex_digits (ctf_id_t id)
 
 /* Dump a single type into the cds_items.  */
 static int
-ctf_dump_type (ctf_dict_t *fp, ctf_id_t id, int flag, void *arg)
+ctf_dump_type (ctf_dict_t *fp, ctf_id_t id, int hidden,
+	       ctf_dump_state_t *state)
 {
   char *str;
   char *indent;
-  ctf_dump_state_t *state = arg;
+  int flag = CTF_ADD_ROOT;
   ctf_dump_membstate_t membstate = { &str, NULL };
+
+  if (hidden)
+    flag = CTF_ADD_NONROOT;
 
   /* Indent neatly.  */
   if (asprintf (&indent, "    %*s", type_hex_digits (id), "") < 0)
@@ -976,9 +1001,20 @@ ctf_dump (ctf_dict_t *fp, ctf_dump_state_t **statep, ctf_sect_names_t sect,
 	    goto err;			/* errno is set for us.  */
 	  break;
 	case CTF_SECT_TYPE:
-	  if (ctf_type_iter_all (fp, ctf_dump_type, state) < 0)
-	    goto err;			/* errno is set for us.  */
-	  break;
+	  {
+	    ctf_next_t *it = NULL;
+	    ctf_id_t type;
+	    int hidden;
+
+	    while ((type = ctf_type_next (fp, &it, &hidden, 1)) != CTF_ERR)
+	      {
+		if (ctf_dump_type (fp, type, hidden, state) < 0)
+		  goto err;			/* errno is set for us.  */
+	      }
+	    if (ctf_errno (fp) != ECTF_NEXT_END)
+	      goto err;				/* errno is set for us.  */
+	    break;
+	  }
 	case CTF_SECT_STR:
 	  ctf_dump_str (fp, state);
 	  break;

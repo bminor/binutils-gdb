@@ -162,34 +162,6 @@ ctf_vlen (ctf_dict_t *fp, ctf_id_t type, const ctf_type_t *tp, size_t *vlen_len)
     }
 }
 
-/* Iterate over the members of a STRUCT or UNION.  We pass the name, member
-   type, and offset of each member to the specified callback function.  */
-
-int
-ctf_member_iter (ctf_dict_t *fp, ctf_id_t type, ctf_member_f *func, void *arg)
-{
-  ctf_next_t *i = NULL;
-  ssize_t offset;
-  int bit_width;
-  const char *name;
-  ctf_id_t membtype;
-
-  while ((offset = ctf_member_next (fp, type, &i, &name, &membtype,
-				    &bit_width, 0)) >= 0)
-    {
-      int rc;
-      if ((rc = func (fp, name, membtype, offset, bit_width, arg)) != 0)
-	{
-	  ctf_next_destroy (i);
-	  return rc;
-	}
-    }
-  if (ctf_errno (fp) != ECTF_NEXT_END)
-    return -1;					/* errno is set for us.  */
-
-  return 0;
-}
-
 /* Iterate over the members of a STRUCT or UNION, returning each member's
    offset and optionally name and member type in turn.  On end-of-iteration,
    returns -1.  If FLAGS is CTF_MN_RECURSE, recurse into unnamed members.  */
@@ -371,31 +343,6 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
   return ctf_set_errno (ofp, ECTF_NEXT_END);
 }
 
-/* Iterate over the members of an ENUM.  We pass the string name and associated
-   integer value of each enum element to the specified callback function.  */
-
-int64_t
-ctf_enum_iter (ctf_dict_t *fp, ctf_id_t type, ctf_enum_f *func, void *arg)
-{
-  ctf_next_t *i = NULL;
-  const char *name;
-  int64_t val;
-
-  while ((name = ctf_enum_next (fp, type, &i, &val)) != NULL)
-    {
-      int rc;
-      if ((rc = func (name, val, arg)) != 0)
-	{
-	  ctf_next_destroy (i);
-	  return rc;
-	}
-    }
-  if (ctf_errno (fp) != ECTF_NEXT_END)
-    return -1;					/* errno is set for us.  */
-
-  return 0;
-}
-
 /* Iterate over the members of an enum TYPE, returning each enumerand's NAME or
    NULL at end of iteration or error, and optionally passing back the
    enumerand's integer VALue.  */
@@ -498,98 +445,6 @@ ctf_enum_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
   *it = NULL;
   ctf_set_errno (ofp, ECTF_NEXT_END);
   return NULL;
-}
-
-/* Iterate over every root (user-visible) type in the given CTF dict.  We pass
-   the type ID of each type to the specified callback function.
-
-   Does not traverse parent types: you have to do that explicitly.  This is by
-   design, to avoid traversing them more than once if traversing many children
-   of a single parent.  */
-
-int
-ctf_type_iter (ctf_dict_t *fp, ctf_type_f *func, void *arg)
-{
-  ctf_next_t *i = NULL;
-  ctf_id_t type;
-
-  while ((type = ctf_type_next (fp, &i, NULL, 0)) != CTF_ERR)
-    {
-      int rc;
-      if ((rc = func (fp, type, arg)) != 0)
-	{
-	  ctf_next_destroy (i);
-	  return rc;
-	}
-    }
-  if (ctf_errno (fp) != ECTF_NEXT_END)
-    return -1;					/* errno is set for us.  */
-
-  return 0;
-}
-
-/* Iterate over every type in the given CTF dict, user-visible or not.  We pass
-   the type ID of each type to the specified callback function.
-
-   Does not traverse parent types: you have to do that explicitly.  This is by
-   design, to avoid traversing them more than once if traversing many children
-  of a single parent.  */
-
-int
-ctf_type_iter_all (ctf_dict_t *fp, ctf_type_all_f *func, void *arg)
-{
-  ctf_next_t *i = NULL;
-  ctf_id_t type;
-  int flag;
-
-  while ((type = ctf_type_next (fp, &i, &flag, 1)) != CTF_ERR)
-    {
-      int rc;
-      if ((rc = func (fp, type, flag, arg)) != 0)
-	{
-	  ctf_next_destroy (i);
-	  return rc;
-	}
-    }
-  if (ctf_errno (fp) != ECTF_NEXT_END)
-    return -1;					/* errno is set for us.  */
-
-  return 0;
-}
-
-/* Iterate over every type of the given kind in the given CTF dict.
-   We pass the type ID of each type to the specified callback function.
-
-   Types returned may be prefixed (but this is normally invisible): you can also
-   specifically traverse prefixed types by asking for CTF_K_BIG or CTF_K_HIDDEN.
-   In this case, the kind of the type returned will be different (the kind
-   prefixed).  Using CTF_K_BIG may have unexpected results if types have been
-   added to this dict since it was opened, since types are only 'unbiggened'
-   upon being written out.
-
-   Does not traverse parent types: you have to do that explicitly.  This is by
-   design, to avoid traversing them more than once if traversing many children
-   of a single parent.  */
-
-int
-ctf_type_kind_iter (ctf_dict_t *fp, int kind, ctf_type_kind_f *func, void *arg)
-{
-  ctf_next_t *i = NULL;
-  ctf_id_t type;
-
-  while ((type = ctf_type_kind_next (fp, &i, kind)) != CTF_ERR)
-    {
-      int rc;
-      if ((rc = func (fp, type, kind, arg)) != 0)
-	{
-	  ctf_next_destroy (i);
-	  return rc;
-	}
-    }
-  if (ctf_errno (fp) != ECTF_NEXT_END)
-    return -1;					/* errno is set for us.  */
-
-  return 0;
 }
 
 /* Iterate over every type in the given CTF dict, optionally including
@@ -700,31 +555,6 @@ ctf_type_kind_next (ctf_dict_t *fp, ctf_next_t **it, int kind)
   return ctf_set_typed_errno (fp, ECTF_NEXT_END);
 }
 
-/* Iterate over every variable in the given CTF dict, in arbitrary order.
-   We pass the name of each variable to the specified callback function.  */
-
-int
-ctf_variable_iter (ctf_dict_t *fp, ctf_variable_f *func, void *arg)
-{
-  ctf_next_t *i = NULL;
-  ctf_id_t type;
-  const char *name;
-
-  while ((type = ctf_variable_next (fp, &i, &name)) != CTF_ERR)
-    {
-      int rc;
-      if ((rc = func (fp, name, type, arg)) != 0)
-	{
-	  ctf_next_destroy (i);
-	  return rc;
-	}
-    }
-  if (ctf_errno (fp) != ECTF_NEXT_END)
-    return -1;					/* errno is set for us.  */
-
-  return 0;
-}
-
 /* Iterate over every variable in the given CTF dict, in arbitrary order,
    returning the name and type of each variable in turn.  The name argument is
    not optional.  Returns CTF_ERR on end of iteration or error.  */
@@ -777,33 +607,6 @@ end:
   ctf_next_destroy (i);
   *it = NULL;
   return ctf_set_typed_errno (fp, err);
-}
-
-/* Iterate over every variable in the given DATASEC, in arbitrary order.  We
-   pass the type ID, datasec-recorded size (usually 0), and offset of each
-   variable to the specified callback function.  */
-
-int
-ctf_datasec_var_iter (ctf_dict_t *fp, ctf_id_t datasec,
-		      ctf_datasec_var_f *func, void *arg)
-{
-  ctf_next_t *i = NULL;
-  ctf_id_t type;
-  size_t size, offset;
-
-  while ((type = ctf_datasec_var_next (fp, datasec, &i, &size, &offset)) != CTF_ERR)
-    {
-      int rc;
-      if ((rc = func (fp, type, offset, size, arg)) != 0)
-	{
-	  ctf_next_destroy (i);
-	  return rc;
-	}
-    }
-  if (ctf_errno (fp) != ECTF_NEXT_END)
-    return -1;					/* errno is set for us.  */
-
-  return 0;
 }
 
 /* Iterate over every variable in the given CTF datasec, in arbitrary order,

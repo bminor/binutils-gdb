@@ -1828,37 +1828,6 @@ ctf_archive_raw_iter (const struct ctf_archive_internal *arci,
   return 0;
 }
 
-/* Iterate over all CTF files in an archive: public entry point.  We pass all
-   CTF files in turn to the specified callback function.  */
-int
-ctf_archive_iter (const struct ctf_archive_internal *arci,
-		  ctf_archive_member_f *func, void *data)
-{
-  ctf_next_t *i = NULL;
-  ctf_dict_t *fp;
-  const char *name;
-  ctf_error_t err = 0;
-
-  while ((fp = ctf_archive_next (arci, &i, &name, 0, &err)) != NULL)
-    {
-      int rc;
-
-      if ((rc = func (fp, name, data)) != 0)
-	{
-	  ctf_dict_close (fp);
-	  ctf_next_destroy (i);
-	  return rc;
-	}
-      ctf_dict_close (fp);
-    }
-  if (err != ECTF_NEXT_END && err != 0)
-    {
-      ctf_next_destroy (i);
-      return -1;
-    }
-  return 0;
-}
-
 /* Iterate over all CTF files in an archive, returning each dict in turn as a
    ctf_dict_t, and NULL on error or end of iteration.  It is the caller's
    responsibility to close it.  Parent dicts may be skipped.

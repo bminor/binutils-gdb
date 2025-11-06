@@ -103,17 +103,10 @@ LIBCTF_2.0 {
 	ctf_lookup_enumerator_next;
 	ctf_arc_lookup_enumerator_next;
 
-	ctf_member_iter;
-	ctf_enum_iter;
 	ctf_enum_next;
-	ctf_type_iter;
 	ctf_type_next;
-	ctf_type_iter_all;
-	ctf_type_kind_iter;
 	ctf_type_kind_next;
-	ctf_variable_iter;
 	ctf_variable_next;
-	ctf_datasec_iter;
 	ctf_datasec_next;
 	ctf_tag_next;
 
@@ -182,7 +175,6 @@ LIBCTF_2.0 {
 	ctf_arc_open_by_name;
 	ctf_arc_open_by_name_sections;
 	ctf_archive_count;
-	ctf_archive_iter;
 	ctf_archive_next;
 	ctf_archive_raw_iter;
 	ctf_get_arc;
