@@ -951,7 +951,7 @@ ctf_dump (ctf_dict_t *fp, ctf_dump_state_t **statep, ctf_sect_names_t sect,
       if ((*statep = malloc (sizeof (struct ctf_dump_state))) == NULL)
 	{
 	  ctf_set_errno (fp, ENOMEM);
-	  goto end;
+	  goto err;
 	}
       state = *statep;
 
@@ -965,26 +965,26 @@ ctf_dump (ctf_dict_t *fp, ctf_dump_state_t **statep, ctf_sect_names_t sect,
 	  break;
 	case CTF_SECT_OBJT:
 	  if (ctf_dump_objts (fp, state, 0) < 0)
-	    goto end;			/* errno is set for us.  */
+	    goto err;			/* errno is set for us.  */
 	  break;
 	case CTF_SECT_FUNC:
 	  if (ctf_dump_objts (fp, state, 1) < 0)
-	    goto end;			/* errno is set for us.  */
+	    goto err;			/* errno is set for us.  */
 	  break;
 	case CTF_SECT_VAR:
 	  if (ctf_dump_datasecs (fp, state) < 0)
-	    goto end;			/* errno is set for us.  */
+	    goto err;			/* errno is set for us.  */
 	  break;
 	case CTF_SECT_TYPE:
 	  if (ctf_type_iter_all (fp, ctf_dump_type, state) < 0)
-	    goto end;			/* errno is set for us.  */
+	    goto err;			/* errno is set for us.  */
 	  break;
 	case CTF_SECT_STR:
 	  ctf_dump_str (fp, state);
 	  break;
 	default:
 	  ctf_set_errno (fp, ECTF_DUMPSECTUNKNOWN);
-	  goto end;
+	  goto err;
 	}
     }
   else
@@ -994,7 +994,7 @@ ctf_dump (ctf_dict_t *fp, ctf_dump_state_t **statep, ctf_sect_names_t sect,
       if (state->cds_sect != sect)
 	{
 	  ctf_set_errno (fp, ECTF_DUMPSECTCHANGED);
-	  goto end;
+	  goto err;
 	}
     }
 
@@ -1056,9 +1056,10 @@ ctf_dump (ctf_dict_t *fp, ctf_dump_state_t **statep, ctf_sect_names_t sect,
   return str;
 
  end:
+  ctf_set_errno (fp, 0);
+ err:
   ctf_dump_free (state);
   free (state);
-  ctf_set_errno (fp, 0);
   *statep = NULL;
   return NULL;
 }
