@@ -541,8 +541,9 @@ if { ![prepare_for_testing "failed to prepare" $testfile $srcfile "$compile_flag
     perform_all_tests 1
 }
 
-if { ![prepare_for_testing "failed to prepare" $testfile $srcfile "$compile_flags additional_flags=-DNO_PROTOTYPES"] } {
-    with_test_prefix "noproto" {
+with_test_prefix "noproto" {
+    if { ![prepare_for_testing "failed to prepare" $testfile $srcfile \
+	       "$compile_flags additional_flags=-DNO_PROTOTYPES"] } {
 	perform_all_tests 0
     }
 }
