@@ -1116,7 +1116,7 @@ sframe_decode (const char *sf_buf, size_t sf_size, int *errp)
       goto decode_fail_free;
     }
 
-  debug_printf ("%lu total fidx size\n", fidx_size);
+  debug_printf ("%zu total fidx size\n", fidx_size);
 
   /* Handle the SFrame Frame Row Entry section.  */
   dctx->sfd_fres = (char *) malloc (dhp->sfh_fre_len);
