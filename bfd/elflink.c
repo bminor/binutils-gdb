@@ -15620,7 +15620,7 @@ _bfd_elf_copy_link_hash_symbol_type (bfd *abfd,
 /* Append a RELA relocation REL to section S in BFD.  */
 
 void
-elf_append_rela (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
+_bfd_elf_append_rela (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   bfd_byte *loc = s->contents + (s->reloc_count++ * bed->s->sizeof_rela);
@@ -15631,7 +15631,7 @@ elf_append_rela (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
 /* Append a REL relocation REL to section S in BFD.  */
 
 void
-elf_append_rel (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
+_bfd_elf_append_rel (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   bfd_byte *loc = s->contents + (s->reloc_count++ * bed->s->sizeof_rel);

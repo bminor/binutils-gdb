@@ -2408,7 +2408,7 @@ elfNN_kvx_final_link_relocate (reloc_howto_type *howto,
 		  outrel.r_offset = got_entry_addr;
 		  outrel.r_info = ELFNN_R_INFO (0, R_KVX_RELATIVE);
 		  outrel.r_addend = value;
-		  elf_append_rela (output_bfd, s, &outrel);
+		  _bfd_elf_append_rela (output_bfd, s, &outrel);
 		}
 
 	      symbol_got_offset_mark (input_bfd, h, r_symndx);

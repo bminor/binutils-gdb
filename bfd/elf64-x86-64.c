@@ -3566,7 +3566,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		    sreloc = htab->elf.srelgot;
 		  else
 		    sreloc = htab->elf.irelplt;
-		  elf_append_rela (output_bfd, sreloc, &outrel);
+		  _bfd_elf_append_rela (output_bfd, sreloc, &outrel);
 
 		  /* If this reloc is against an external symbol, we
 		     do not want to fiddle with the addend.  Otherwise,
@@ -3721,7 +3721,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		  (info, input_section, h, sym, "R_X86_64_RELATIVE",
 		   &outrel);
 
-	      elf_append_rela (output_bfd, s, &outrel);
+	      _bfd_elf_append_rela (output_bfd, s, &outrel);
 	    }
 
 	  if (off >= (bfd_vma) -2)
@@ -4138,7 +4138,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		      (info, input_section, h, sym,
 		       relative_reloc_name, &outrel);
 
-		  elf_append_rela (output_bfd, sreloc, &outrel);
+		  _bfd_elf_append_rela (output_bfd, sreloc, &outrel);
 		}
 
 	      /* If this reloc is against an external symbol, we do
@@ -4659,7 +4659,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		    outrel.r_addend = relocation - _bfd_x86_elf_dtpoff_base (info);
 		  else
 		    outrel.r_addend = 0;
-		  elf_append_rela (output_bfd, sreloc, &outrel);
+		  _bfd_elf_append_rela (output_bfd, sreloc, &outrel);
 		}
 
 	      sreloc = htab->elf.srelgot;
@@ -4681,7 +4681,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		outrel.r_addend = relocation - _bfd_x86_elf_dtpoff_base (info);
 	      outrel.r_info = htab->r_info (indx, dr_type);
 
-	      elf_append_rela (output_bfd, sreloc, &outrel);
+	      _bfd_elf_append_rela (output_bfd, sreloc, &outrel);
 
 	      if (GOT_TLS_GD_P (tls_type))
 		{
@@ -4699,8 +4699,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		      outrel.r_info = htab->r_info (indx,
 						    R_X86_64_DTPOFF64);
 		      outrel.r_offset += GOT_ENTRY_SIZE;
-		      elf_append_rela (output_bfd, sreloc,
-						&outrel);
+		      _bfd_elf_append_rela (output_bfd, sreloc, &outrel);
 		    }
 		}
 
@@ -5003,8 +5002,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 			  htab->elf.sgot->contents + off + GOT_ENTRY_SIZE);
 	      outrel.r_info = htab->r_info (0, R_X86_64_DTPMOD64);
 	      outrel.r_addend = 0;
-	      elf_append_rela (output_bfd, htab->elf.srelgot,
-					&outrel);
+	      _bfd_elf_append_rela (output_bfd, htab->elf.srelgot, &outrel);
 	      htab->tls_ld_or_ldm_got.offset |= 1;
 	    }
 	  relocation = htab->elf.sgot->output_section->vma
@@ -5539,7 +5537,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	    _bfd_x86_elf_link_report_relative_reloc
 	      (info, relgot, h, sym, relative_reloc_name, &rela);
 
-	  elf_append_rela (output_bfd, relgot, &rela);
+	  _bfd_elf_append_rela (output_bfd, relgot, &rela);
 	}
     }
 
@@ -5560,7 +5558,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	s = htab->elf.sreldynrelro;
       else
 	s = htab->elf.srelbss;
-      elf_append_rela (output_bfd, s, &rela);
+      _bfd_elf_append_rela (output_bfd, s, &rela);
     }
 
   return true;

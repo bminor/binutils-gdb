@@ -5825,7 +5825,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 		}
 
 	      sreloc = globals->root.irelifunc;
-	      elf_append_rela (output_bfd, sreloc, &outrel);
+	      _bfd_elf_append_rela (output_bfd, sreloc, &outrel);
 
 	      /* If this reloc is against an external symbol, we
 		 do not want to fiddle with the addend.  Otherwise,
@@ -6290,7 +6290,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	  outrel.r_offset = got_entry_addr;
 	  outrel.r_info = ELFNN_R_INFO (0, AARCH64_R (RELATIVE));
 	  outrel.r_addend = orig_value;
-	  elf_append_rela (output_bfd, s, &outrel);
+	  _bfd_elf_append_rela (output_bfd, s, &outrel);
 	}
       break;
 

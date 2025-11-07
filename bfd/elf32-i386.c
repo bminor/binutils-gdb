@@ -2547,7 +2547,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		    sreloc = htab->elf.srelgot;
 		  else
 		    sreloc = htab->elf.irelplt;
-		  elf_append_rel (output_bfd, sreloc, &outrel);
+		  _bfd_elf_append_rel (output_bfd, sreloc, &outrel);
 
 		  /* If this reloc is against an external symbol, we
 		     do not want to fiddle with the addend.  Otherwise,
@@ -2666,7 +2666,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  (info, input_section, h, sym, "R_386_RELATIVE",
 		   &outrel);
 
-	      elf_append_rel (output_bfd, s, &outrel);
+	      _bfd_elf_append_rel (output_bfd, s, &outrel);
 	    }
 
 	  if (off >= (bfd_vma) -2)
@@ -2898,7 +2898,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		      goto check_relocation_error;
 		    }
 
-		  elf_append_rel (output_bfd, sreloc, &outrel);
+		  _bfd_elf_append_rel (output_bfd, sreloc, &outrel);
 		}
 
 	      /* If this reloc is against an external symbol, we do
@@ -2929,7 +2929,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      sreloc = elf_section_data (input_section)->sreloc;
 	      if (sreloc == NULL)
 		abort ();
-	      elf_append_rel (output_bfd, sreloc, &outrel);
+	      _bfd_elf_append_rel (output_bfd, sreloc, &outrel);
 	    }
 	  /* Fall through */
 
@@ -3192,7 +3192,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 				     + offplt
 				     + htab->sgotplt_jump_table_size);
 		  sreloc = htab->rel_tls_desc;
-		  elf_append_rel (output_bfd, sreloc, &outrel);
+		  _bfd_elf_append_rel (output_bfd, sreloc, &outrel);
 		  if (indx == 0)
 		    {
 		      BFD_ASSERT (! unresolved_reloc);
@@ -3236,7 +3236,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 			    htab->elf.sgot->contents + off);
 	      outrel.r_info = ELF32_R_INFO (indx, dr_type);
 
-	      elf_append_rel (output_bfd, sreloc, &outrel);
+	      _bfd_elf_append_rel (output_bfd, sreloc, &outrel);
 
 	      if (GOT_TLS_GD_P (tls_type))
 		{
@@ -3254,7 +3254,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		      outrel.r_info = ELF32_R_INFO (indx,
 						    R_386_TLS_DTPOFF32);
 		      outrel.r_offset += 4;
-		      elf_append_rel (output_bfd, sreloc, &outrel);
+		      _bfd_elf_append_rel (output_bfd, sreloc, &outrel);
 		    }
 		}
 	      else if (tls_type == GOT_TLS_IE_BOTH)
@@ -3266,7 +3266,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 			      htab->elf.sgot->contents + off + 4);
 		  outrel.r_info = ELF32_R_INFO (indx, R_386_TLS_TPOFF);
 		  outrel.r_offset += 4;
-		  elf_append_rel (output_bfd, sreloc, &outrel);
+		  _bfd_elf_append_rel (output_bfd, sreloc, &outrel);
 		}
 
 	    dr_done:
@@ -3492,7 +3492,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      bfd_put_32 (output_bfd, 0,
 			  htab->elf.sgot->contents + off + 4);
 	      outrel.r_info = ELF32_R_INFO (0, R_386_TLS_DTPMOD32);
-	      elf_append_rel (output_bfd, htab->elf.srelgot, &outrel);
+	      _bfd_elf_append_rel (output_bfd, htab->elf.srelgot, &outrel);
 	      htab->tls_ld_or_ldm_got.offset |= 1;
 	    }
 	  relocation = htab->elf.sgot->output_section->vma
@@ -3532,7 +3532,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      sreloc = elf_section_data (input_section)->sreloc;
 	      if (sreloc == NULL)
 		abort ();
-	      elf_append_rel (output_bfd, sreloc, &outrel);
+	      _bfd_elf_append_rel (output_bfd, sreloc, &outrel);
 	      if (indx)
 		continue;
 	      else if (r_type == R_386_TLS_LE_32)
@@ -4026,7 +4026,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 	    _bfd_x86_elf_link_report_relative_reloc
 	      (info, relgot, h, sym, relative_reloc_name, &rel);
 
-	  elf_append_rel (output_bfd, relgot, &rel);
+	  _bfd_elf_append_rel (output_bfd, relgot, &rel);
 	}
     }
 
@@ -4046,7 +4046,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 	s = htab->elf.sreldynrelro;
       else
 	s = htab->elf.srelbss;
-      elf_append_rel (output_bfd, s, &rel);
+      _bfd_elf_append_rel (output_bfd, s, &rel);
     }
 
   return true;

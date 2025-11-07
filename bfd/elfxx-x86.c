@@ -731,7 +731,7 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
       ret->relative_r_type = R_X86_64_RELATIVE;
       ret->relative_r_name = "R_X86_64_RELATIVE";
       ret->ax_register = "RAX";
-      ret->elf_append_reloc = elf_append_rela;
+      ret->elf_append_reloc = _bfd_elf_append_rela;
       ret->elf_write_addend_in_got = _bfd_elf64_write_addend;
     }
   if (ABI_64_P (abfd))
@@ -763,7 +763,7 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
 	  ret->relative_r_type = R_386_RELATIVE;
 	  ret->relative_r_name = "R_386_RELATIVE";
 	  ret->ax_register = "EAX";
-	  ret->elf_append_reloc = elf_append_rel;
+	  ret->elf_append_reloc = _bfd_elf_append_rel;
 	  ret->elf_write_addend = _bfd_elf32_write_addend;
 	  ret->elf_write_addend_in_got = _bfd_elf32_write_addend;
 	  ret->dynamic_interpreter = ELF32_DYNAMIC_INTERPRETER;

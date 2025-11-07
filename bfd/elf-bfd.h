@@ -3177,8 +3177,10 @@ extern bool _bfd_elf_allocate_ifunc_dyn_relocs
    struct elf_dyn_relocs **, unsigned int, unsigned int,
    unsigned int, bool) ATTRIBUTE_HIDDEN;
 
-extern void elf_append_rela (bfd *, asection *, Elf_Internal_Rela *);
-extern void elf_append_rel (bfd *, asection *, Elf_Internal_Rela *);
+extern void _bfd_elf_append_rela
+  (bfd *, asection *, Elf_Internal_Rela *) ATTRIBUTE_HIDDEN;
+extern void _bfd_elf_append_rel
+  (bfd *, asection *, Elf_Internal_Rela *) ATTRIBUTE_HIDDEN;
 
 extern bfd_vma elf64_r_info (bfd_vma, bfd_vma);
 extern bfd_vma elf64_r_sym (bfd_vma);

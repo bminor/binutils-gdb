@@ -2906,7 +2906,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 		    }
 
 		  sreloc = htab->elf.irelifunc;
-		  elf_append_rela (output_bfd, sreloc, &outrel);
+		  _bfd_elf_append_rela (output_bfd, sreloc, &outrel);
 
 		  /* If this reloc is against an external symbol, we
 		     do not want to fiddle with the addend.  Otherwise,
