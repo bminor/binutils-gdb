@@ -340,7 +340,7 @@
 #endif
 
 #ifndef bfd_elfNN_print_symbol
-#define bfd_elfNN_print_symbol bfd_elf_print_symbol
+#define bfd_elfNN_print_symbol _bfd_elf_print_symbol
 #endif
 
 #ifndef elf_symbol_leading_char

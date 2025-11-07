@@ -2316,8 +2316,8 @@ extern bool _bfd_elf_print_private_bfd_data
   (bfd *, void *) ATTRIBUTE_HIDDEN;
 const char * _bfd_elf_get_symbol_version_string
   (bfd *, asymbol *, bool, bool *) ATTRIBUTE_HIDDEN;
-extern void bfd_elf_print_symbol
-  (bfd *, void *, asymbol *, bfd_print_symbol_type);
+extern void _bfd_elf_print_symbol
+  (bfd *, void *, asymbol *, bfd_print_symbol_type) ATTRIBUTE_HIDDEN;
 
 extern unsigned int _bfd_elf_eh_frame_address_size
   (bfd *, const asection *) ATTRIBUTE_HIDDEN;

@@ -2397,10 +2397,10 @@ _bfd_elf_get_symbol_version_string (bfd *abfd, asymbol *symbol,
 /* Display ELF-specific fields of a symbol.  */
 
 void
-bfd_elf_print_symbol (bfd *abfd,
-		      void *filep,
-		      asymbol *symbol,
-		      bfd_print_symbol_type how)
+_bfd_elf_print_symbol (bfd *abfd,
+		       void *filep,
+		       asymbol *symbol,
+		       bfd_print_symbol_type how)
 {
   FILE *file = (FILE *) filep;
   const char *symname = (symbol->name != bfd_symbol_error_name
