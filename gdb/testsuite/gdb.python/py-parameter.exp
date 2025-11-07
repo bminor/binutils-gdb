@@ -724,7 +724,7 @@ proc_with_prefix test_per_inferior_parameters { } {
     clean_restart
 
     # Add a second inferior.
-    gdb_test "add-inferior" "Added inferior 2"
+    gdb_test "add-inferior" "Added inferior 2.*"
 
     # Set some parameters on each inferior.
     foreach_with_prefix inf {1 2} {
