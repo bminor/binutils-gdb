@@ -26,7 +26,7 @@ proc_with_prefix test_per_inferior_parameters { } {
     mi_clean_restart
 
     # Add a second inferior right away.
-    mi_gdb_test "-add-inferior" ".*\\^done,inferior=\"i2\"" "add inferior"
+    mi_gdb_test "-add-inferior" ".*\\^done,inferior=\"i2\".*" "add inferior"
 
     # Set distinct values on each inferior.
     foreach_with_prefix inf {1 2} {
