@@ -3134,7 +3134,8 @@ extern bool _bfd_elf_merge_unknown_attribute_list
   (bfd *, bfd *) ATTRIBUTE_HIDDEN;
 extern Elf_Internal_Shdr *_bfd_elf_single_rel_hdr
   (asection *sec);
-extern bool elf_read_notes (bfd *, file_ptr, bfd_size_type, size_t);
+extern bool _bfd_elf_read_notes
+  (bfd *, file_ptr, bfd_size_type, size_t) ATTRIBUTE_HIDDEN;
 
 extern bool _bfd_elf_parse_gnu_properties
   (bfd *, Elf_Internal_Note *) ATTRIBUTE_HIDDEN;

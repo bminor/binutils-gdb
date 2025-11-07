@@ -381,8 +381,8 @@ NAME(_bfd_elf, core_find_build_id)
 
       if (i_phdr->p_type == PT_NOTE && i_phdr->p_filesz > 0)
 	{
-	  elf_read_notes (abfd, offset + i_phdr->p_offset,
-			  i_phdr->p_filesz, i_phdr->p_align);
+	  _bfd_elf_read_notes (abfd, offset + i_phdr->p_offset,
+			       i_phdr->p_filesz, i_phdr->p_align);
 
 	  /* Make sure ABFD returns to processing the program headers.  */
 	  if (bfd_seek (abfd,

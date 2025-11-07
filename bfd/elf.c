@@ -3483,8 +3483,8 @@ bfd_section_from_phdr (bfd *abfd, Elf_Internal_Phdr *hdr, int hdr_index)
     case PT_NOTE:
       if (! _bfd_elf_make_section_from_phdr (abfd, hdr, hdr_index, "note"))
 	return false;
-      if (! elf_read_notes (abfd, hdr->p_offset, hdr->p_filesz,
-			    hdr->p_align))
+      if (! _bfd_elf_read_notes (abfd, hdr->p_offset, hdr->p_filesz,
+				 hdr->p_align))
 	return false;
       return true;
 
@@ -13157,8 +13157,8 @@ elf_parse_notes (bfd *abfd, char *buf, size_t size, file_ptr offset,
 }
 
 bool
-elf_read_notes (bfd *abfd, file_ptr offset, bfd_size_type size,
-		size_t align)
+_bfd_elf_read_notes (bfd *abfd, file_ptr offset, bfd_size_type size,
+		     size_t align)
 {
   char *buf;
 
