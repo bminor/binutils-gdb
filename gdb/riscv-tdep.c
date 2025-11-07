@@ -5001,11 +5001,19 @@ class riscv_recorded_insn final
 	   || is_bge_insn (ival) || is_bltu_insn (ival) || is_bgeu_insn (ival)
 	   || is_fence_insn (ival) || is_pause_insn (ival)
 	   || is_fence_i_insn (ival) || is_wfi_insn (ival)
-	   || is_sfence_vma_insn (ival));
+	   || is_sfence_vma_insn (ival) || is_fence_tso_insn (ival)
+	   /* svinval  */
+	   || is_sfence_inval_ir_insn (ival) || is_sfence_w_inval_insn (ival)
+	   || is_sinval_vma_insn (ival) || is_hinval_gvma_insn (ival)
+	   || is_hinval_vvma_insn (ival) || is_hfence_gvma_insn (ival)
+	   || is_hfence_vvma_insn (ival)
+	   /* zihintntl  */
+	   || is_ntl_p1_insn (ival) || is_ntl_pall_insn (ival)
+	   || is_ntl_s1_insn (ival) || is_ntl_all_insn (ival));
   }
 
   /* Returns true if instruction needs only saving pc and rd.  */
-  static bool
+  bool
   need_save_rd (ULONGEST ival) noexcept
   {
     return (is_lui_insn (ival) || is_auipc_insn (ival) || is_jal_insn (ival)
@@ -5038,7 +5046,47 @@ class riscv_recorded_insn final
 	   || is_flt_d_insn (ival) || is_fle_d_insn (ival)
 	   || is_fclass_d_insn (ival) || is_fcvt_w_d_insn (ival)
 	   || is_fcvt_wu_d_insn (ival) || is_fcvt_l_d_insn (ival)
-	   || is_fcvt_lu_d_insn (ival) || is_fmv_x_d_insn (ival));
+	   || is_fcvt_lu_d_insn (ival) || is_fmv_x_d_insn (ival)
+	   /* zicond  */
+	   || is_czero_eqz_insn (ival) || is_czero_nez_insn (ival)
+	   /* bitmanip  */
+	   || (m_xlen == 8 && is_add_uw_insn (ival)) || is_andn_insn (ival)
+	   || is_bclr_insn (ival) || (m_xlen == 8 && is_bclri_insn (ival))
+	   || (m_xlen == 4 && is_bclri_rv32_insn (ival)) || is_bext_insn (ival)
+	   || (m_xlen == 8 && is_bexti_insn (ival))
+	   || (m_xlen == 4 && is_bexti_rv32_insn (ival)) || is_binv_insn (ival)
+	   || (m_xlen == 8 && is_binvi_insn (ival))
+	   || (m_xlen == 4 && is_binvi_rv32_insn (ival))
+	   || is_brev8_insn (ival) || is_bset_insn (ival)
+	   || (m_xlen == 8 && is_bseti_insn (ival))
+	   || (m_xlen == 4 && is_bseti_rv32_insn (ival))
+	   || is_clmul_insn (ival) || is_clmulh_insn (ival)
+	   || is_clmulr_insn (ival) || is_clz_insn (ival)
+	   || (m_xlen == 8 && is_clzw_insn (ival)) || is_cpop_insn (ival)
+	   || (m_xlen == 8 && is_cpopw_insn (ival)) || is_ctz_insn (ival)
+	   || (m_xlen == 8 && is_ctzw_insn (ival)) || is_max_insn (ival)
+	   || is_maxu_insn (ival) || is_min_insn (ival) || is_minu_insn (ival)
+	   || is_orc_b_insn (ival) || is_orn_insn (ival) || is_pack_insn (ival)
+	   || is_packh_insn (ival) || (m_xlen == 8 && is_packw_insn (ival))
+	   || (m_xlen == 8 && is_rev8_insn (ival))
+	   || (m_xlen == 4 && is_rev8_rv32_insn (ival)) || is_rol_insn (ival)
+	   || (m_xlen == 8 && is_rolw_insn (ival)) || is_ror_insn (ival)
+	   || (m_xlen == 8 && is_rori_insn (ival))
+	   || (m_xlen == 4 && is_rori_rv32_insn (ival))
+	   || (m_xlen == 8 && is_roriw_insn (ival))
+	   || (m_xlen == 8 && is_rorw_insn (ival)) || is_sext_b_insn (ival)
+	   || is_sext_h_insn (ival) || is_sh1add_insn (ival)
+	   || (m_xlen == 8 && is_sh1add_uw_insn (ival))
+	   || is_sh2add_insn (ival)
+	   || (m_xlen == 8 && is_sh2add_uw_insn (ival))
+	   || is_sh3add_insn (ival)
+	   || (m_xlen == 8 && is_sh3add_uw_insn (ival))
+	   || (m_xlen == 8 && is_slli_uw_insn (ival))
+	   || (m_xlen == 4 && is_unzip_insn (ival)) || is_xnor_insn (ival)
+	   || is_xperm4_insn (ival) || is_xperm8_insn (ival)
+	   || is_zext_h_insn (ival)
+	   || (m_xlen == 4 && is_zext_h_rv32_insn (ival))
+	   || (m_xlen == 4 && is_zip_insn (ival)));
   }
 
   /* Returns true if instruction successfully saved rd.  */
@@ -5313,6 +5361,35 @@ class riscv_recorded_insn final
 	return (read_reg (RISCV_SP_REGNUM, addr)
 		&& save_mem (addr + offset, 4));
       }
+
+    /* c.zihintntl  */
+    if (is_c_ntl_p1_insn (ival) || is_c_ntl_pall_insn (ival)
+	|| is_c_ntl_s1_insn (ival) || is_c_ntl_all_insn (ival))
+      return true;
+
+    /* c.bitmanip  */
+    if (is_c_lbu_insn (ival) || is_c_lhu_insn (ival) || is_c_lh_insn (ival))
+      return save_reg (decode_crs2_short (ival));
+
+    if (is_c_sb_insn (ival))
+      {
+	offset = ULONGEST{EXTRACT_ZCB_BYTE_UIMM (ival)};
+	return (read_reg (decode_crs1_short (ival), addr)
+		&& save_mem (addr + offset, 1));
+      }
+
+    if (is_c_sh_insn (ival))
+      {
+	offset = ULONGEST{EXTRACT_ZCB_HALFWORD_UIMM (ival)};
+	return (read_reg (decode_crs1_short (ival), addr)
+		&& save_mem (addr + offset, 2));
+      }
+
+    if (is_c_zext_b_insn (ival) || is_c_sext_b_insn (ival)
+       || is_c_zext_h_insn (ival) || is_c_sext_h_insn (ival)
+       || is_c_not_insn (ival) || is_c_mul_insn (ival)
+       || (m_xlen == 8 && is_c_zext_w_insn (ival)))
+      return save_reg (decode_crs1_short (ival));
 
     warning (_("Currently this instruction with len 2(%s) is unsupported"),
 	     hex_string (ival));
