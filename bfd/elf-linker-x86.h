@@ -108,5 +108,5 @@ struct elf_linker_x86_params
   char call_nop_byte;
 };
 
-extern void _bfd_elf_linker_x86_set_options
+extern void bfd_elf_linker_x86_set_options
   (struct bfd_link_info *, struct elf_linker_x86_params *);

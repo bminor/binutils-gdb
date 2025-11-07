@@ -4975,8 +4975,8 @@ _bfd_x86_elf_link_fixup_gnu_properties
 }
 
 void
-_bfd_elf_linker_x86_set_options (struct bfd_link_info * info,
-				 struct elf_linker_x86_params *params)
+bfd_elf_linker_x86_set_options (struct bfd_link_info *info,
+				struct elf_linker_x86_params *params)
 {
   const struct elf_backend_data *bed
     = get_elf_backend_data (info->output_bfd);
