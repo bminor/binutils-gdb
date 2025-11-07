@@ -273,6 +273,7 @@ format.c
 genlink.h
 go32stub.h
 hash.c
+hidden.h
 hpux-core.c
 i386aout.c
 i386bsd.c

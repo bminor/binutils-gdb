@@ -31,15 +31,8 @@
 #ifndef _LIBBFD_H
 #define _LIBBFD_H 1
 
-#ifndef ATTRIBUTE_HIDDEN
-#if HAVE_HIDDEN
-#define ATTRIBUTE_HIDDEN __attribute__ ((__visibility__ ("hidden")))
-#else
-#define ATTRIBUTE_HIDDEN
-#endif
-#endif
-
 #include "hashtab.h"
+#include "hidden.h"
 
 #ifdef __cplusplus
 extern "C" {

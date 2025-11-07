@@ -1176,7 +1176,7 @@ SOURCE_HFILES = \
 	elf-linux-core.h elf-s390.h elf-vxworks.h \
 	elfxx-aarch64.h elfxx-ia64.h elfxx-mips.h elfxx-riscv.h \
 	elfxx-sparc.h elfxx-tilegx.h elfxx-x86.h elfxx-loongarch.h \
-	genlink.h go32stub.h \
+	genlink.h go32stub.h hidden.h \
 	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h \
 	libpei.h libxcoff.h \
 	mach-o.h \
