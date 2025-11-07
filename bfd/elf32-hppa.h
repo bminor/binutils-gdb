@@ -62,7 +62,7 @@ bool elf32_hppa_build_stubs
 elf_hppa_reloc_type elf32_hppa_reloc_final_type
   (bfd *, elf_hppa_reloc_type, int, unsigned int);
 
-extern elf_hppa_reloc_type ** _bfd_elf32_hppa_gen_reloc_type
+extern elf_hppa_reloc_type **bfd_elf32_hppa_gen_reloc_type
   (bfd *, elf_hppa_reloc_type, int, unsigned int, int, asymbol *);
 
 /* Define groups of basic relocations.  FIXME:  These should

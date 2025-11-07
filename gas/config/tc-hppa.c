@@ -54,10 +54,10 @@ typedef elf_symbol_type obj_symbol_type;
 
 #if TARGET_ARCH_SIZE == 64
 /* How to generate a relocation.  */
-#define hppa_gen_reloc_type _bfd_elf64_hppa_gen_reloc_type
+#define hppa_gen_reloc_type bfd_elf64_hppa_gen_reloc_type
 #define elf_hppa_reloc_final_type elf64_hppa_reloc_final_type
 #else
-#define hppa_gen_reloc_type _bfd_elf32_hppa_gen_reloc_type
+#define hppa_gen_reloc_type bfd_elf32_hppa_gen_reloc_type
 #define elf_hppa_reloc_final_type elf32_hppa_reloc_final_type
 #endif
 
