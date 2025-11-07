@@ -4332,7 +4332,7 @@ elf_s390_create_dynamic_sections (bfd *dynobj,
    ARCH_SIZE/8 to 4? This breaks the 64 bit dynamic linker and
    this is the only reason for the s390_elf64_size_info structure.  */
 
-const struct elf_size_info s390_elf64_size_info =
+static const struct elf_size_info s390_elf64_size_info =
 {
   sizeof (Elf64_External_Ehdr),
   sizeof (Elf64_External_Phdr),

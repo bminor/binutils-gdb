@@ -4687,7 +4687,7 @@ static const struct ecoff_debug_swap mips_elf64_ecoff_debug_swap =
    standard ELF.  This structure is used to redirect the relocation
    handling routines.  */
 
-const struct elf_size_info mips_elf64_size_info =
+static const struct elf_size_info mips_elf64_size_info =
 {
   sizeof (Elf64_External_Ehdr),
   sizeof (Elf64_External_Phdr),

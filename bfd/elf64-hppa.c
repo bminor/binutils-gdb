@@ -4099,7 +4099,7 @@ static const struct bfd_elf_special_section elf64_hppa_special_sections[] =
 
 /* The hash bucket size is the standard one, namely 4.  */
 
-const struct elf_size_info hppa64_elf_size_info =
+static const struct elf_size_info hppa64_elf_size_info =
 {
   sizeof (Elf64_External_Ehdr),
   sizeof (Elf64_External_Phdr),

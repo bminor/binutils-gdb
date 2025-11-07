@@ -808,7 +808,7 @@
   (ELF_ARCH == bfd_arch_unknown ? 2 : ELF_OSABI == ELFOSABI_NONE ? 1 : 0)
 #endif
 
-extern const struct elf_size_info _bfd_elfNN_size_info;
+extern const struct elf_size_info _bfd_elfNN_size_info ATTRIBUTE_HIDDEN;
 
 static const struct elf_backend_data elfNN_bed =
 {

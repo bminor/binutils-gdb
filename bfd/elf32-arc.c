@@ -2842,7 +2842,7 @@ elf32_arc_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
     }
 }
 
-const struct elf_size_info arc_elf32_size_info =
+static const struct elf_size_info arc_elf32_size_info =
 {
   sizeof (Elf32_External_Ehdr),
   sizeof (Elf32_External_Phdr),

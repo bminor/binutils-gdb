@@ -10612,7 +10612,7 @@ elfNN_aarch64_merge_gnu_properties (struct bfd_link_info *info,
 /* We use this so we can override certain functions
    (though currently we don't).  */
 
-const struct elf_size_info elfNN_aarch64_size_info =
+static const struct elf_size_info elfNN_aarch64_size_info =
 {
   sizeof (ElfNN_External_Ehdr),
   sizeof (ElfNN_External_Phdr),

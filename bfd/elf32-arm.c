@@ -19770,7 +19770,7 @@ elf32_arm_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 }
 
 /* We use this to override swap_symbol_in and swap_symbol_out.  */
-const struct elf_size_info elf32_arm_size_info =
+static const struct elf_size_info elf32_arm_size_info =
 {
   sizeof (Elf32_External_Ehdr),
   sizeof (Elf32_External_Phdr),

@@ -849,7 +849,7 @@ elf64_sparc_reloc_type_class (const struct bfd_link_info *info,
    ELF64_R_TYPE_DATA field.  This structure is used to redirect the
    relocation handling routines.  */
 
-const struct elf_size_info elf64_sparc_size_info =
+static const struct elf_size_info elf64_sparc_size_info =
 {
   sizeof (Elf64_External_Ehdr),
   sizeof (Elf64_External_Phdr),
