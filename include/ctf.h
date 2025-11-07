@@ -778,25 +778,28 @@ typedef struct ctf_var_secinfo
 } ctf_var_secinfo_t;
 
 /* Linkages, aligned with enum btf_func_linkage.  */
-#define CTF_VAR_STATIC 0
-#define CTF_VAR_GLOBAL_ALLOCATED 1
-#define CTF_VAR_GLOBAL_EXTERN 2
+typedef enum ctf_linkages
+  {
+    CTF_VAR_STATIC = 0,
+    CTF_VAR_GLOBAL_ALLOCATED = 1,
+    CTF_VAR_GLOBAL_EXTERN = 2,
 
-#define CTF_FUNC_STATIC 0
-#define CTF_FUNC_GLOBAL 1
-#define CTF_FUNC_EXTERN 2
+    CTF_FUNC_STATIC = 0,
+    CTF_FUNC_GLOBAL = 1,
+    CTF_FUNC_EXTERN = 2,
 
-/* Kind-independent linkage constants.  Values must match those above.  */
-#define CTF_LINKAGE_STATIC 0
-#define CTF_LINKAGE_GLOBAL 1
-#define CTF_LINKAGE_EXTERN 2
+    /* Kind-independent linkage constants.  Values must match those above.  */
+    CTF_LINKAGE_STATIC = 0,
+    CTF_LINKAGE_GLOBAL = 1,
+    CTF_LINKAGE_EXTERN = 2
+  } ctf_linkages_t;
 
 /* Linkage of a CTF_K_FUNC_LINKAGE and CTF_K_VAR (holds CTF_FUNC_*
    or CTF_VAR_*, depending; CTF_K_FUNC_LINKAGE is literally just
    the ctl_linkage field, stuffed into the vlen).  */
 typedef struct ctf_linkage
 {
-  uint32_t ctl_linkage;
+  uint32_t ctl_linkage;		/* Convertible into a ctf_linkage_t.  */
 } ctf_linkage_t;
 
 /* Parameter data for CTF_K_FUNCTION.  Aligned with btf_param.  */

@@ -606,7 +606,7 @@ extern int ctf_func_type_arg_names (ctf_dict_t *, ctf_id_t, uint32_t,
 
 /* Get the linkage of a CTF_K_FUNC_LINKAGE or variable.  */
 
-extern int ctf_type_linkage (ctf_dict_t *, ctf_id_t);
+extern ctf_linkages_t ctf_type_linkage (ctf_dict_t *, ctf_id_t);
 
 /* Traverse all (function or data) symbols in a dict, one by one, and return the
    type of each and (if NAME is non-NULL) optionally its name.  */
@@ -972,7 +972,8 @@ extern ctf_id_t ctf_add_function (ctf_dict_t *, uint32_t,
 				  const ctf_funcinfo_t *, const ctf_id_t *,
 				  const char **arg_names);
 extern ctf_id_t ctf_add_function_linkage (ctf_dict_t *, uint32_t,
-					  ctf_id_t, const char *, int linkage);
+					  ctf_id_t, const char *,
+					  ctf_linkages_t linkage);
 
 /* Add a "slice", which wraps some integral type and changes its encoding
    (useful for bitfields, etc).  In most respects slices are treated the same
@@ -1042,11 +1043,11 @@ extern ctf_ret_t ctf_add_member_bitfield (ctf_dict_t *, ctf_id_t souid,
    ctf_add_section_variable adds them to the given datasec, or to no datasec at
    all if the datasec is NULL.  */
 
-extern ctf_id_t ctf_add_variable (ctf_dict_t *, const char *, int linkage,
-				  ctf_id_t);
+extern ctf_id_t ctf_add_variable (ctf_dict_t *, const char *,
+				  ctf_linkages_t linkage, ctf_id_t);
 extern ctf_id_t ctf_add_section_variable (ctf_dict_t *, uint32_t,
 					  const char *datasec, const char *name,
-					  int linkage, ctf_id_t type,
+					  ctf_linkages_t linkage, ctf_id_t type,
 					  size_t size, size_t offset);
 
 /* Set the size and member and index types of an array.  */

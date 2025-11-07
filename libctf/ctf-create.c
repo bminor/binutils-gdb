@@ -1150,7 +1150,8 @@ ctf_add_function (ctf_dict_t *fp, uint32_t flag,
 
 ctf_id_t
 ctf_add_function_linkage (ctf_dict_t *fp, uint32_t flag,
-			  ctf_id_t ref, const char *name, int linkage)
+			  ctf_id_t ref, const char *name,
+			  ctf_linkages_t linkage)
 {
   ctf_dtdef_t *dtd;
   ctf_dict_t *tmp = fp;
@@ -1158,7 +1159,7 @@ ctf_add_function_linkage (ctf_dict_t *fp, uint32_t flag,
   if (ref == CTF_ERR || ref > CTF_MAX_TYPE)
     return (ctf_set_typed_errno (fp, EINVAL));
 
-  if (linkage < 0 || linkage > 2)
+  if (linkage < 0 || linkage > 2) /* Min/max of ctf_linkages_t.  */
     return (ctf_set_typed_errno (fp, ECTF_LINKAGE));
 
   if (ref != 0 && ctf_lookup_by_id (&tmp, ref, NULL) == NULL)
@@ -1917,7 +1918,8 @@ ctf_add_datasec (ctf_dict_t *fp, uint32_t flag, const char *datasec)
 }
 
 ctf_id_t
-ctf_add_variable (ctf_dict_t *fp, const char *name, int linkage, ctf_id_t ref)
+ctf_add_variable (ctf_dict_t *fp, const char *name, ctf_linkages_t linkage,
+		  ctf_id_t ref)
 {
   return ctf_add_section_variable (fp, CTF_ADD_ROOT, NULL, name, linkage, ref,
 				   0, (unsigned long) -1);
@@ -1929,8 +1931,8 @@ ctf_add_variable (ctf_dict_t *fp, const char *name, int linkage, ctf_id_t ref)
    from the type" and is the common case.  */
 ctf_id_t
 ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
-			  const char *name, int linkage, ctf_id_t type,
-			  size_t size, size_t offset)
+			  const char *name, ctf_linkages_t linkage,
+			  ctf_id_t type, size_t size, size_t offset)
 {
   ctf_dtdef_t *sec_dtd = NULL;
   ctf_dtdef_t *var_dtd = NULL;
@@ -1953,7 +1955,7 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
   if (name == NULL || name[0] == '\0')
     return (ctf_set_typed_errno (fp, ECTF_NONAME));
 
-  if (linkage < 0 || linkage > 2)
+  if (linkage < 0 || linkage > 2)		/* Min/max of ctf_linkages_t.  */
     return (ctf_set_typed_errno (fp, ECTF_LINKAGE));
 
   if (flag == CTF_ADD_ROOT && ctf_lookup_by_rawname (fp, CTF_K_VAR, name) != 0)

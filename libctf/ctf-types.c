@@ -2394,7 +2394,7 @@ ctf_func_type_arg_names (ctf_dict_t *fp, ctf_id_t type, uint32_t argc,
 
 /* Get the linkage of a CTF_K_FUNC_LINKAGE or variable.  */
 
-int
+ctf_linkages_t
 ctf_type_linkage (ctf_dict_t *fp, ctf_id_t type)
 {
   const ctf_type_t *tp;
