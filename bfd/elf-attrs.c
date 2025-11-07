@@ -309,7 +309,7 @@ bfd_elf_add_obj_attr_int (bfd *abfd, int vendor, unsigned int tag, unsigned int 
   attr = elf_new_obj_attr (abfd, vendor, tag);
   if (attr != NULL)
     {
-      attr->type = _bfd_elf_obj_attrs_arg_type (abfd, vendor, tag);
+      attr->type = bfd_elf_obj_attrs_arg_type (abfd, vendor, tag);
       attr->i = i;
     }
   return attr;
@@ -352,7 +352,7 @@ elf_add_obj_attr_string (bfd *abfd, int vendor, unsigned int tag,
   attr = elf_new_obj_attr (abfd, vendor, tag);
   if (attr != NULL)
     {
-      attr->type = _bfd_elf_obj_attrs_arg_type (abfd, vendor, tag);
+      attr->type = bfd_elf_obj_attrs_arg_type (abfd, vendor, tag);
       attr->s = elf_attr_strdup (abfd, s, end);
       if (attr->s == NULL)
 	return NULL;
@@ -377,7 +377,7 @@ elf_add_obj_attr_int_string (bfd *abfd, int vendor, unsigned int tag,
   attr = elf_new_obj_attr (abfd, vendor, tag);
   if (attr != NULL)
     {
-      attr->type = _bfd_elf_obj_attrs_arg_type (abfd, vendor, tag);
+      attr->type = bfd_elf_obj_attrs_arg_type (abfd, vendor, tag);
       attr->i = i;
       attr->s = elf_attr_strdup (abfd, s, end);
       if (attr->s == NULL)
@@ -474,7 +474,7 @@ gnu_obj_attrs_arg_type (unsigned int tag)
 
 /* Determine what arguments an attribute tag takes.  */
 int
-_bfd_elf_obj_attrs_arg_type (bfd *abfd, int vendor, unsigned int tag)
+bfd_elf_obj_attrs_arg_type (bfd *abfd, int vendor, unsigned int tag)
 {
   switch (vendor)
     {
@@ -565,7 +565,7 @@ bfd_elf_parse_attr_section_v1 (bfd *abfd, bfd_byte *p, bfd_byte *p_end)
 		  bool ok = false;
 
 		  tag = _bfd_safe_read_leb128 (abfd, &p, false, end);
-		  type = _bfd_elf_obj_attrs_arg_type (abfd, vendor, tag);
+		  type = bfd_elf_obj_attrs_arg_type (abfd, vendor, tag);
 		  switch (type & (ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_STR_VAL))
 		    {
 		    case ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_STR_VAL:

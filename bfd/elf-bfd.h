@@ -3122,7 +3122,7 @@ extern char *_bfd_elf_attr_strdup
   (bfd *, const char *) ATTRIBUTE_HIDDEN;
 extern void _bfd_elf_copy_obj_attributes
   (bfd *, bfd *) ATTRIBUTE_HIDDEN;
-extern int _bfd_elf_obj_attrs_arg_type
+extern int bfd_elf_obj_attrs_arg_type
   (bfd *, int, unsigned int);
 extern void _bfd_elf_parse_attributes
   (bfd *, Elf_Internal_Shdr *) ATTRIBUTE_HIDDEN;

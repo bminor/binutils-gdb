@@ -2193,7 +2193,7 @@ obj_elf_vendor_attribute (int vendor)
       free (name);
     }
 
-  type = _bfd_elf_obj_attrs_arg_type (stdoutput, vendor, tag);
+  type = bfd_elf_obj_attrs_arg_type (stdoutput, vendor, tag);
 
   if (skip_past_comma (&input_line_pointer) == -1)
     goto bad;
