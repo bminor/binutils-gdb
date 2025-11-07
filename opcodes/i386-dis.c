@@ -4514,7 +4514,7 @@ static const struct dis386 x86_64_table[][2] = {
 
   /* X86_64_D6 */
   {
-    { Bad_Opcode },
+    { "salc", { XX }, 0 },
     { "udb", { XX }, 0 },
   },
 

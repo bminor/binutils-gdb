@@ -586,6 +586,7 @@ foo:
  test   (%eax),%ebx
 
  int1
+ salc
 
  cmovpe  0x90909090(%eax),%edx
  cmovpo 0x90909090(%eax),%edx
