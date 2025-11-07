@@ -6568,7 +6568,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
    is no defined method for detecting such files, so we have to
    use heuristics instead.  */
 
-static bool
+bool
 is_debuginfo_file (bfd *abfd)
 {
   if (abfd == NULL || bfd_get_flavour (abfd) != bfd_target_elf_flavour)

@@ -3187,6 +3187,9 @@ extern bfd_vma elf64_r_sym (bfd_vma);
 extern bfd_vma elf32_r_info (bfd_vma, bfd_vma);
 extern bfd_vma elf32_r_sym (bfd_vma);
 
+extern bool is_debuginfo_file (bfd *);
+
+
 extern bool _bfd_elf_init_secondary_reloc_section
   (bfd *, Elf_Internal_Shdr *, const char *, unsigned int) ATTRIBUTE_HIDDEN;
 extern bool _bfd_elf_slurp_secondary_reloc_section
