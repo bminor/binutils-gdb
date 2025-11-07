@@ -5085,9 +5085,9 @@ elf_modify_segment_map (bfd *abfd,
    NEED_LAYOUT if the section layout is changed.  */
 
 bool
-_bfd_elf_map_sections_to_segments (bfd *abfd,
-				   struct bfd_link_info *info,
-				   bool *need_layout)
+bfd_elf_map_sections_to_segments (bfd *abfd,
+				  struct bfd_link_info *info,
+				  bool *need_layout)
 {
   unsigned int count;
   struct elf_segment_map *m;
@@ -5906,7 +5906,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
   unsigned int opb = bfd_octets_per_byte (abfd, NULL);
 
   if (link_info == NULL
-      && !_bfd_elf_map_sections_to_segments (abfd, link_info, NULL))
+      && !bfd_elf_map_sections_to_segments (abfd, link_info, NULL))
     return false;
 
   alloc = 0;

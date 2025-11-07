@@ -2381,7 +2381,7 @@ extern bool _bfd_elf_link_hash_table_init
    unsigned int) ATTRIBUTE_HIDDEN;
 extern bool _bfd_elf_slurp_version_tables
   (bfd *, bool) ATTRIBUTE_HIDDEN;
-extern bool _bfd_elf_match_sections_by_type
+extern bool bfd_elf_match_sections_by_type
   (bfd *, const asection *, bfd *, const asection *);
 extern bool bfd_elf_is_group_section
   (bfd *, const struct bfd_section *);
@@ -2399,7 +2399,7 @@ extern asection *_bfd_elf_check_kept_section
 extern void _bfd_elf_copy_link_hash_symbol_type
   (bfd *, struct bfd_link_hash_entry *, struct bfd_link_hash_entry *)
   ATTRIBUTE_HIDDEN;
-extern bool _bfd_elf_size_group_sections
+extern bool bfd_elf_size_group_sections
   (struct bfd_link_info *);
 extern bool _bfd_elf_fixup_group_sections
   (bfd *, asection *) ATTRIBUTE_HIDDEN;
@@ -2516,11 +2516,11 @@ extern void _bfd_elf_strtab_restore
   (struct elf_strtab_hash *, void *) ATTRIBUTE_HIDDEN;
 extern bfd_size_type _bfd_elf_strtab_size
   (struct elf_strtab_hash *) ATTRIBUTE_HIDDEN;
-extern bfd_size_type _bfd_elf_strtab_len
+extern bfd_size_type bfd_elf_strtab_len
   (struct elf_strtab_hash *);
 extern bfd_size_type _bfd_elf_strtab_offset
   (struct elf_strtab_hash *, size_t) ATTRIBUTE_HIDDEN;
-extern const char * _bfd_elf_strtab_str
+extern const char *bfd_elf_strtab_str
   (struct elf_strtab_hash *, size_t idx, bfd_size_type *offset);
 extern bool _bfd_elf_strtab_emit
   (bfd *, struct elf_strtab_hash *) ATTRIBUTE_HIDDEN;
@@ -2622,7 +2622,7 @@ extern int bfd_elf_discard_info
   (bfd *, struct bfd_link_info *);
 extern unsigned int _bfd_elf_default_action_discarded
   (struct bfd_section *) ATTRIBUTE_HIDDEN;
-extern struct bfd_section *_bfd_elf_tls_setup
+extern struct bfd_section *bfd_elf_tls_setup
   (bfd *, struct bfd_link_info *);
 
 extern bool _bfd_elf_link_create_dynamic_sections
@@ -2895,7 +2895,7 @@ extern bool bfd_elf_reloc_symbol_deleted_p
 extern struct elf_segment_map * _bfd_elf_make_dynamic_segment
   (bfd *, asection *) ATTRIBUTE_HIDDEN;
 
-extern bool _bfd_elf_map_sections_to_segments
+extern bool bfd_elf_map_sections_to_segments
   (bfd *, struct bfd_link_info *, bool *);
 
 extern bool _bfd_elf_is_function_type

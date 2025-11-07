@@ -4354,7 +4354,7 @@ ppc_elf_tls_setup (bfd *obfd, struct bfd_link_info *info)
       elf_section_flags (htab->elf.splt->output_section) = SHF_ALLOC + SHF_WRITE;
     }
 
-  return _bfd_elf_tls_setup (obfd, info);
+  return bfd_elf_tls_setup (obfd, info);
 }
 
 /* Return TRUE iff REL is a branch reloc with a global symbol matching

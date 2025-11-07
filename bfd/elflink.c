@@ -3617,7 +3617,7 @@ _bfd_elf_symbol_refs_local_p (struct elf_link_hash_entry *h,
    aligned.  Returns the first TLS output section.  */
 
 struct bfd_section *
-_bfd_elf_tls_setup (bfd *obfd, struct bfd_link_info *info)
+bfd_elf_tls_setup (bfd *obfd, struct bfd_link_info *info)
 {
   struct bfd_section *sec, *tls;
   unsigned int align = 0;
@@ -3910,8 +3910,7 @@ _bfd_elf_strip_zero_sized_dynamic_sections (struct bfd_link_info *info)
     {
       /* Regenerate program headers.  */
       elf_seg_map (info->output_bfd) = NULL;
-      return _bfd_elf_map_sections_to_segments (info->output_bfd, info,
-						NULL);
+      return bfd_elf_map_sections_to_segments (info->output_bfd, info, NULL);
     }
 
   return true;
@@ -6797,7 +6796,7 @@ compute_bucket_count (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 /* Size any SHT_GROUP section for ld -r.  */
 
 bool
-_bfd_elf_size_group_sections (struct bfd_link_info *info)
+bfd_elf_size_group_sections (struct bfd_link_info *info)
 {
   bfd *ibfd;
   asection *s;
@@ -7429,7 +7428,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
     }
 
   if (bfd_link_relocatable (info)
-      && !_bfd_elf_size_group_sections (info))
+      && !bfd_elf_size_group_sections (info))
     return false;
 
   /* Determine any GNU_STACK segment requirements, after the backend
@@ -8971,8 +8970,8 @@ bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2,
 /* Return TRUE if 2 section types are compatible.  */
 
 bool
-_bfd_elf_match_sections_by_type (bfd *abfd, const asection *asec,
-				 bfd *bbfd, const asection *bsec)
+bfd_elf_match_sections_by_type (bfd *abfd, const asection *asec,
+				bfd *bbfd, const asection *bsec)
 {
   if (asec == NULL
       || bsec == NULL

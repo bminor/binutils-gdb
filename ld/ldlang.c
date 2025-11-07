@@ -6536,7 +6536,7 @@ lang_size_sections_1
   return dot;
 }
 
-/* Callback routine that is used in _bfd_elf_map_sections_to_segments.
+/* Callback routine that is used in bfd_elf_map_sections_to_segments.
    The BFD library has set NEW_SEGMENT to TRUE iff it thinks that
    CURRENT_SECTION and PREVIOUS_SECTION ought to be placed into different
    segments.  We are allowed an opportunity to override this decision.  */
