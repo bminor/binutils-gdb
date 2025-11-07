@@ -527,7 +527,7 @@ struct ctf_dict
 
   /* CTF linker flags.  Set on the parent output dict (the one passed to
      ctf_link).  Only respected when LCTF_LINKING set in ctf_flags.  */
-  int ctf_link_flags;
+  ctf_link_flags_t ctf_link_flags;
 
   /* Allow the caller to change the name of link archive members.  */
   ctf_link_memb_name_changer_f *ctf_link_memb_name_changer;

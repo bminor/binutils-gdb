@@ -116,35 +116,39 @@ typedef struct ctf_link_sym
 
 /* Flags applying to this specific link.  */
 
-/* Share all types that are not in conflict.  The default.  */
-#define CTF_LINK_SHARE_UNCONFLICTED 0x0
+typedef enum ctf_link_flags
+  {
+    /* Share all types that are not in conflict.  The default.  */
+    CTF_LINK_SHARE_UNCONFLICTED = 0x0,
 
-/* Share only types that are used by multiple inputs.  */
-#define CTF_LINK_SHARE_DUPLICATED 0x1
+    /* Share only types that are used by multiple inputs.  */
+    CTF_LINK_SHARE_DUPLICATED = 0x1,
 
-/* Do a nondeduplicating link, or otherwise deduplicate "less hard", trading off
-   CTF output size for link time.  */
-#define CTF_LINK_NONDEDUP 0x2
+    /* Do a nondeduplicating link, or otherwise deduplicate "less hard", trading
+       off CTF output size for link time.  */
+    CTF_LINK_NONDEDUP = 0x2,
 
-/* Create empty outputs for all registered CU mappings even if no types are
-   emitted into them.  */
-#define CTF_LINK_EMPTY_CU_MAPPINGS 0x4
+    /* Create empty outputs for all registered CU mappings even if no types are
+       emitted into them.  */
+    CTF_LINK_EMPTY_CU_MAPPINGS = 0x4,
 
-/* Omit the content of the variables section.  */
-#define CTF_LINK_OMIT_VARIABLES_SECTION 0x8
+    /* Omit the content of the variables section.  */
+    CTF_LINK_OMIT_VARIABLES_SECTION = 0x8,
 
-/* If *unset*, filter out entries corresponding to linker-reported symbols
-   from the variable section, and filter out all entries with no linker-reported
-   symbols from the data object and function info sections: if set, do no
-   filtering and leave all entries in place.  (This is a negative-sense flag
-   because it is rare to want symbols the linker has not reported as present to
-   stick around in the symtypetab sections nonetheless: relocatable links are
-   the only likely case.)  */
-#define CTF_LINK_NO_FILTER_REPORTED_SYMS 0x10
+    /* If *unset*, filter out entries corresponding to linker-reported symbols
+       from the variable section, and filter out all entries with no
+       linker-reported symbols from the data object and function info sections:
+       if set, do no filtering and leave all entries in place.  (This is a
+       negative-sense flag because it is rare to want symbols the linker has not
+       reported as present to stick around in the symtypetab sections
+       nonetheless: relocatable links are the only likely case.)  */
 
-/* Dedup all archives but the first added against the first added.  */
+    CTF_LINK_NO_FILTER_REPORTED_SYMS = 0x10,
 
-#define CTF_LINK_DEDUP_AGAINST_FIRST 0x20
+    /* Dedup all archives but the first added against the first added.  */
+
+    CTF_LINK_DEDUP_AGAINST_FIRST = 0x20
+  } ctf_link_flags_t;
 
 /* Symbolic names for CTF sections.  */
 
@@ -1126,7 +1130,7 @@ extern ctf_ret_t ctf_link_add_ctf (ctf_dict_t *, ctf_archive_t *, const char *na
 /* Do the deduplicating link, filling the dict with types.  The FLAGS are the
    CTF_LINK_* flags above.  */
 
-extern ctf_ret_t ctf_link (ctf_dict_t *, int flags);
+extern ctf_ret_t ctf_link (ctf_dict_t *, ctf_link_flags_t flags);
 
 /* Symtab linker handling, called after ctf_link to set up the symbol type
    information used by ctf_*_lookup_symbol.  Optional.  */

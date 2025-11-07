@@ -1353,7 +1353,7 @@ ctf_link_deduplicating (ctf_dict_t *fp)
 /* Merge types and variable sections in all dicts added to the link together.
    The result of any previous link is discarded.  */
 ctf_ret_t
-ctf_link (ctf_dict_t *fp, int flags)
+ctf_link (ctf_dict_t *fp, ctf_link_flags_t flags)
 {
   ctf_error_t err;
   int oldflags = fp->ctf_flags;
