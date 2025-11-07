@@ -158,6 +158,20 @@ set s390xtests {
      "-m elf64_s390" "" "-m64" {pr32969a.s pr32969c.s pr32969b.s}
      {{objdump "-dzrj.text" pr32969_64-2.dd}}
      "pr32969_64-2"}
+    {"Build pr33141a.o"
+     "" "" "-m64" { pr33141a.s }}
+    {"Build pr33141b.so"
+     "-m elf64_s390 -shared" "" "-m64" { pr33141b.s }
+     {}
+     "pr33141b.so"}
+    {"Build pr33141"
+     "-m elf64_s390 -pie -z notext tmpdir/pr33141a.o tmpdir/pr33141b.so" "" "-m64" {}
+     {{readelf {-rW} pr33141.rd}}
+     "pr33141"}
+    {"Build pr33141.so"
+     "-m elf64_s390 -shared -Bsymbolic -z notext" "" "-m64" { pr33141a.s }
+     {{readelf {-rW} pr33141.rd}}
+     "pr33141.so"}
 }
 
 if { [istarget "s390-*-*"] || [istarget "s390x-*-*"] } {

@@ -2973,8 +2973,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 			   || r_type == R_390_PC32
 			   || r_type == R_390_PC32DBL
 			   || r_type == R_390_PC64
-			   || !bfd_link_pic (info)
-			   || !SYMBOLIC_BIND (info, h)
+			   || !(bfd_link_executable (info) || SYMBOLIC_BIND (info, h))
 			   || !h->def_regular))
 		{
 		  outrel.r_info = ELF64_R_INFO (h->dynindx, r_type);
