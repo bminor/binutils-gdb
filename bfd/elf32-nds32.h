@@ -90,14 +90,18 @@ struct section_id_list_t
 };
 
 extern struct section_id_list_t *elf32_nds32_lookup_section_id
-  (int, struct section_id_list_t **);
-extern int elf32_nds32_check_relax_group (bfd *, asection *);
-extern int elf32_nds32_unify_relax_group (bfd *, asection *);
-extern int nds32_elf_unify_tls_model (bfd *, asection *, bfd_byte *,
-				      struct bfd_link_info *);
+  (int, struct section_id_list_t **) ATTRIBUTE_HIDDEN;
+extern int elf32_nds32_check_relax_group
+  (bfd *, asection *) ATTRIBUTE_HIDDEN;
+extern int elf32_nds32_unify_relax_group
+  (bfd *, asection *) ATTRIBUTE_HIDDEN;
+extern int nds32_elf_unify_tls_model
+  (bfd *, asection *, bfd_byte *, struct bfd_link_info *) ATTRIBUTE_HIDDEN;
 
-extern int	   nds32_convert_32_to_16 (bfd *, uint32_t, uint16_t *, int *);
-extern int	   nds32_convert_16_to_32 (bfd *, uint16_t, uint32_t *);
+extern int nds32_convert_32_to_16
+  (bfd *, uint32_t, uint16_t *, int *) ATTRIBUTE_HIDDEN;
+extern int nds32_convert_16_to_32
+  (bfd *, uint16_t, uint32_t *) ATTRIBUTE_HIDDEN;
 extern void	   bfd_elf32_nds32_set_target_option (struct bfd_link_info *,
 						      int, int, FILE *,
 						      int, int, int);
