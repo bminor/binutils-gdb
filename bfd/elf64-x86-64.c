@@ -1961,7 +1961,7 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
       else if (isym->st_shndx == SHN_COMMON)
 	tsec = bfd_com_section_ptr;
       else if (isym->st_shndx == SHN_X86_64_LCOMMON)
-	tsec = &_bfd_elf_large_com_section;
+	tsec = &bfd_elf_large_com_section;
       else
 	tsec = bfd_section_from_elf_index (abfd, isym->st_shndx);
     }
@@ -6055,7 +6055,7 @@ static bool
 elf_x86_64_elf_section_from_bfd_section (bfd *abfd ATTRIBUTE_UNUSED,
 					 asection *sec, int *index_return)
 {
-  if (sec == &_bfd_elf_large_com_section)
+  if (sec == &bfd_elf_large_com_section)
     {
       *index_return = SHN_X86_64_LCOMMON;
       return true;
@@ -6074,7 +6074,7 @@ elf_x86_64_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
   switch (elfsym->internal_elf_sym.st_shndx)
     {
     case SHN_X86_64_LCOMMON:
-      asym->section = &_bfd_elf_large_com_section;
+      asym->section = &bfd_elf_large_com_section;
       asym->value = elfsym->internal_elf_sym.st_size;
       /* Common symbol doesn't set BSF_GLOBAL.  */
       asym->flags &= ~BSF_GLOBAL;
@@ -6104,7 +6104,7 @@ elf_x86_64_common_section (asection *sec)
   if ((elf_section_flags (sec) & SHF_X86_64_LARGE) == 0)
     return bfd_com_section_ptr;
   else
-    return &_bfd_elf_large_com_section;
+    return &bfd_elf_large_com_section;
 }
 
 static bool

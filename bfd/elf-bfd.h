@@ -3222,8 +3222,8 @@ extern struct elf_link_hash_entry * _bfd_elf_get_link_hash_entry
 extern asection *_bfd_get_local_sym_section
   (struct elf_reloc_cookie *, unsigned int) ATTRIBUTE_HIDDEN;
 
-/* Large common section.  */
-extern asection _bfd_elf_large_com_section;
+/* Large common section (x86 only).  */
+extern asection bfd_elf_large_com_section;
 
 /* Hash for local symbol with the first section id, ID, in the input
    file and the local symbol index, SYM.  */

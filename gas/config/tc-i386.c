@@ -18761,7 +18761,7 @@ handle_large_common (int small ATTRIBUTE_UNUSED)
 	  subseg_set (seg, subseg);
 	}
 
-      elf_com_section_ptr = &_bfd_elf_large_com_section;
+      elf_com_section_ptr = &bfd_elf_large_com_section;
       bss_section = lbss_section;
 
       s_comm_internal (0, elf_common_parse);

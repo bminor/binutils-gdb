@@ -29,6 +29,14 @@
 #define ELF64_DYNAMIC_INTERPRETER "/lib/ld64.so.1"
 #define ELFX32_DYNAMIC_INTERPRETER "/lib/ldx32.so.1"
 
+/* ??? This repeats *COM* id of zero.  sec->id is supposed to be unique,
+   but current usage would allow all of _bfd_std_section to be zero.  */
+static const asymbol lcomm_sym
+  = GLOBAL_SYM_INIT ("LARGE_COMMON", &bfd_elf_large_com_section);
+asection bfd_elf_large_com_section
+  = BFD_FAKE_SECTION (bfd_elf_large_com_section, &lcomm_sym,
+		      "LARGE_COMMON", 0, SEC_IS_COMMON);
+
 bool
 _bfd_x86_elf_mkobject (bfd *abfd)
 {
@@ -1179,7 +1187,7 @@ _bfd_x86_elf_link_relax_section (bfd *abfd ATTRIBUTE_UNUSED,
 	    case SHN_X86_64_LCOMMON:
 	      if (!is_x86_64)
 		abort ();
-	      sec = &_bfd_elf_large_com_section;
+	      sec = &bfd_elf_large_com_section;
 	      break;
 	    default:
 	      sec = bfd_section_from_elf_index (abfd, isym->st_shndx);
