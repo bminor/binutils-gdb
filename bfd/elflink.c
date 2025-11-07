@@ -332,7 +332,7 @@ _bfd_elf_link_create_dynstrtab (bfd *abfd, struct bfd_link_info *info)
    actual contents and size of these sections later.  */
 
 bool
-_bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
+bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 {
   flagword flags;
   asection *s;
@@ -3960,7 +3960,7 @@ bfd_elf_add_dt_needed_tag (bfd *abfd, struct bfd_link_info *info)
 	  }
     }
 
-  if (!_bfd_elf_link_create_dynamic_sections (hash_table->dynobj, info))
+  if (!bfd_elf_link_create_dynamic_sections (hash_table->dynobj, info))
     return -1;
 
   if (!_bfd_elf_add_dynamic_entry (info, DT_NEEDED, strindex))
@@ -4577,7 +4577,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  && info->output_bfd->xvec == abfd->xvec
 	  && !htab->dynamic_sections_created)
 	{
-	  if (! _bfd_elf_link_create_dynamic_sections (abfd, info))
+	  if (!bfd_elf_link_create_dynamic_sections (abfd, info))
 	    goto error_return;
 	}
     }
@@ -4798,7 +4798,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       /* Create dynamic sections for backends that require that be done
 	 before setup_gnu_properties.  */
       if (add_needed
-	  && !_bfd_elf_link_create_dynamic_sections (abfd, info))
+	  && !bfd_elf_link_create_dynamic_sections (abfd, info))
 	return false;
 
       /* Save the DT_AUDIT entry for the linker emulation code. */
@@ -5739,7 +5739,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
 		  /* Create dynamic sections for backends that require
 		     that be done before setup_gnu_properties.  */
-		  if (!_bfd_elf_link_create_dynamic_sections (abfd, info))
+		  if (!bfd_elf_link_create_dynamic_sections (abfd, info))
 		    goto error_free_vers;
 		  add_needed = true;
 		}
@@ -11711,7 +11711,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 
       if ((o->flags & SEC_LINKER_CREATED) != 0)
 	{
-	  /* Section was created by _bfd_elf_link_create_dynamic_sections
+	  /* Section was created by bfd_elf_link_create_dynamic_sections()
 	     or somesuch.  */
 	  continue;
 	}
@@ -13778,7 +13778,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	  if ((o->flags & SEC_LINKER_CREATED) == 0)
 	    {
 	      /* At this point, we are only interested in sections
-		 created by _bfd_elf_link_create_dynamic_sections.  */
+		 created by bfd_elf_link_create_dynamic_sections().  */
 	      continue;
 	    }
 	  if (htab->stab_info.stabstr == o)
