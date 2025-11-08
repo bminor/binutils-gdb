@@ -1662,55 +1662,22 @@ struct btrace_frame_cache
   /* The thread.  */
   struct thread_info *tp;
 
-  /* The frame info.  */
-  frame_info *frame;
-
   /* The branch trace function segment.  */
   const struct btrace_function *bfun;
 };
 
 /* A struct btrace_frame_cache hash table indexed by NEXT.  */
 
-static htab_t bfcache;
-
-/* hash_f for htab_create_alloc of bfcache.  */
-
-static hashval_t
-bfcache_hash (const void *arg)
-{
-  const struct btrace_frame_cache *cache
-    = (const struct btrace_frame_cache *) arg;
-
-  return htab_hash_pointer (cache->frame);
-}
-
-/* eq_f for htab_create_alloc of bfcache.  */
-
-static int
-bfcache_eq (const void *arg1, const void *arg2)
-{
-  const struct btrace_frame_cache *cache1
-    = (const struct btrace_frame_cache *) arg1;
-  const struct btrace_frame_cache *cache2
-    = (const struct btrace_frame_cache *) arg2;
-
-  return cache1->frame == cache2->frame;
-}
+static gdb::unordered_map<frame_info *, btrace_frame_cache *> bfcache;
 
 /* Create a new btrace frame cache.  */
 
 static struct btrace_frame_cache *
 bfcache_new (const frame_info_ptr &frame)
 {
-  struct btrace_frame_cache *cache;
-  void **slot;
-
-  cache = FRAME_OBSTACK_ZALLOC (struct btrace_frame_cache);
-  cache->frame = frame.get ();
-
-  slot = htab_find_slot (bfcache, cache, INSERT);
-  gdb_assert (*slot == NULL);
-  *slot = cache;
+  struct btrace_frame_cache *cache
+    = FRAME_OBSTACK_ZALLOC (struct btrace_frame_cache);
+  bfcache.emplace (frame.get (), cache);
 
   return cache;
 }
@@ -1720,18 +1687,10 @@ bfcache_new (const frame_info_ptr &frame)
 static const struct btrace_function *
 btrace_get_frame_function (const frame_info_ptr &frame)
 {
-  const struct btrace_frame_cache *cache;
-  struct btrace_frame_cache pattern;
-  void **slot;
-
-  pattern.frame = frame.get ();
-
-  slot = htab_find_slot (bfcache, &pattern, NO_INSERT);
-  if (slot == NULL)
-    return NULL;
-
-  cache = (const struct btrace_frame_cache *) *slot;
-  return cache->bfun;
+  auto iter = bfcache.find (frame.get ());
+  if (iter == bfcache.end ())
+    return nullptr;
+  return iter->second->bfun;
 }
 
 /* Implement stop_reason method for record_btrace_frame_unwind.  */
@@ -1928,15 +1887,7 @@ record_btrace_tailcall_frame_sniffer (const struct frame_unwind *self,
 static void
 record_btrace_frame_dealloc_cache (frame_info *self, void *this_cache)
 {
-  struct btrace_frame_cache *cache;
-  void **slot;
-
-  cache = (struct btrace_frame_cache *) this_cache;
-
-  slot = htab_find_slot (bfcache, cache, NO_INSERT);
-  gdb_assert (slot != NULL);
-
-  htab_remove_elt (bfcache, cache);
+  bfcache.erase (self);
 }
 
 /* btrace recording does not store previous memory content, neither the stack
@@ -3326,9 +3277,6 @@ effect on an active recording."),
 			   &show_record_btrace_pt_cmdlist);
 
   add_target (record_btrace_target_info, record_btrace_target_open);
-
-  bfcache = htab_create_alloc (50, bfcache_hash, bfcache_eq, NULL,
-			       xcalloc, xfree);
 
   record_btrace_conf.bts.size = 64 * 1024;
   record_btrace_conf.pt.size = 16 * 1024;
