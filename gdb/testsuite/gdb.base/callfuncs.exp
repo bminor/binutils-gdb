@@ -18,9 +18,19 @@
 
 standard_testfile
 
+set compile_flags {}
+lappend compile_flags debug
+
 # We still want to test non-prototype functions for now, which is why
 # we disable compilers warning about them.
-set compile_flags {debug additional_flags=-Wno-deprecated-non-prototype}
+lappend compile_flags additional_flags=-Wno-deprecated-non-prototype
+
+if {[have_compile_flag -std=c99]} {
+    # Gcc 15 defaults to c23, which no longer supports unprototyped functions.
+    # Use a c dialect that does support this.
+    lappend compile_flags additional_flags=-std=c99
+}
+
 if {[support_complex_tests]} {
     lappend compile_flags "additional_flags=-DTEST_COMPLEX"
 }
