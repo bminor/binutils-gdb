@@ -1042,9 +1042,6 @@ extern ctf_ret_t ctf_add_enumerator (ctf_dict_t *, ctf_id_t, const char *, int64
 extern ctf_ret_t ctf_add_member (ctf_dict_t *, ctf_id_t, const char *, ctf_id_t);
 extern ctf_ret_t ctf_add_member_offset (ctf_dict_t *, ctf_id_t, const char *,
 					ctf_id_t, unsigned long);
-extern ctf_ret_t ctf_add_member_encoded (ctf_dict_t *, ctf_id_t, const char *,
-					 ctf_id_t, unsigned long,
-					 const ctf_encoding_t);
 extern ctf_ret_t ctf_add_member_bitfield (ctf_dict_t *, ctf_id_t souid,
 					  const char *, ctf_id_t type,
 					  unsigned long bit_offset,

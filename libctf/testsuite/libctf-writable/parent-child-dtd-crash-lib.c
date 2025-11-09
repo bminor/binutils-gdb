@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum crash_method { ADD_STRUCT, ADD_UNION, ADD_MEMBER_OFFSET, ADD_MEMBER_ENCODED, ADD_ENUM, ADD_ENUMERATOR, SET_ARRAY };
+enum crash_method { ADD_STRUCT, ADD_UNION, ADD_MEMBER_OFFSET, ADD_ENUM, ADD_ENUMERATOR, SET_ARRAY };
 
 void
 dtd_crash (enum crash_method method, int parent_bigger)
@@ -131,16 +131,6 @@ dtd_crash (enum crash_method method, int parent_bigger)
 	goto create_parent;
 
       if (ctf_add_enumerator (cfp, stype, "FOO", 0) == CTF_ERR)
-	goto create_child;
-      break;
-
-      /* This tries to look up the member type we're adding, and goes wrong
-	 if the struct is in the child and the member type is in the parent.  */
-    case ADD_MEMBER_ENCODED:
-      if ((stype = ctf_add_struct (cfp, CTF_ADD_ROOT, "foo", 0, 0, 0)) == CTF_ERR)
-	goto create_child;
-
-      if (ctf_add_member_encoded (cfp, stype, "cmember", ptype, 5, e) == CTF_ERR)
 	goto create_child;
       break;
 

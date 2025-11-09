@@ -1854,38 +1854,6 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 }
 
 ctf_ret_t
-ctf_add_member_encoded (ctf_dict_t *fp, ctf_id_t souid, const char *name,
-			ctf_id_t type, unsigned long bit_offset,
-			const ctf_encoding_t encoding)
-{
-  ctf_dtdef_t *dtd = ctf_dtd_lookup (fp, type);
-  ctf_kind_t kind;
-  ctf_id_t otype = type;
-
-  if (dtd == NULL)
-    return (ctf_set_errno (fp, ECTF_BADID));
-
-  kind = LCTF_KIND (fp, dtd->dtd_buf);
-
-  if ((kind != CTF_K_INTEGER) && (kind != CTF_K_FLOAT) && (kind != CTF_K_ENUM))
-    return (ctf_set_errno (fp, ECTF_NOTINTFP));
-
-  /* Create a slice if need be.  */
-
-  if (encoding.cte_offset != 0 ||
-      encoding.cte_format != 0 ||
-      (encoding.cte_bits != 0 && CTF_INFO_KFLAG (dtd->dtd_data->ctt_info) == 0))
-    {
-      if ((type = ctf_add_slice (fp, CTF_ADD_NONROOT, otype, &encoding)) == CTF_ERR)
-	return -1;			/* errno is set for us.  */
-    }
-  else
-    type = otype;
-
-  return ctf_add_member_bitfield (fp, souid, name, type, bit_offset, 0);
-}
-
-ctf_ret_t
 ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 		       ctf_id_t type, unsigned long bit_offset)
 {
