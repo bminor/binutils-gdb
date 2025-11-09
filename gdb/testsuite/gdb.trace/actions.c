@@ -136,9 +136,7 @@ static void end ()	/* called after everything else */
 }
 
 int
-main (argc, argv, envp)
-     int argc;
-     char *argv[], **envp;
+main (int argc, char *argv[], char **envp)
 {
   int i;
   unsigned long myparms[10];
