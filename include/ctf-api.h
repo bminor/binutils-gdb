@@ -223,6 +223,13 @@ typedef struct ctf_snapshot_id
    a straight integral -1 also use ctf_errno.  */
 #define	CTF_ERR	((ctf_id_t) -1L)
 
+/* Likewise, for return from ctf_member_next.  */
+#define CTF_MEMBER_ERR ((size_t) -1L)
+
+/* Likewise, for size_t offset *inputs* which can also be 'next available member'
+   (for documentation purposes).  */
+#define CTF_NEXT_MEMBER ((size_t) -1L)
+
 /* This macro holds information about all the available ctf errors.
    It is used to form both an enum holding all the error constants,
    and also the error strings themselves.  To use, define _CTF_FIRST
@@ -818,11 +825,12 @@ extern ctf_id_t ctf_decl_tag (ctf_dict_t *, ctf_id_t decl_tag,
 
 /* ctf_member_next is a _next-style iterator that can additionally traverse into
    the members of unnamed structs nested within this struct as if they were
-   direct members, if CTF_MN_RECURSE is passed in the flags.  */
+   direct members, if CTF_MN_RECURSE is passed in the flags.  Returns
+   CTF_MEMBER_ERR on end-of-iteration or error.  */
 
-extern ssize_t ctf_member_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
-				const char **name, ctf_id_t *membtype,
-				int *bit_width, int flags);
+extern size_t ctf_member_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
+			       const char **name, ctf_id_t *membtype,
+			       int *bit_width, int flags);
 
 /* Return all enumeration constants in a given enum type.  The VAL argument may
    need to be cast to uint64_t: see ctf_enum_unsigned(). */
@@ -1032,20 +1040,18 @@ extern ctf_id_t ctf_add_volatile (ctf_dict_t *, uint32_t, ctf_id_t);
 
 extern ctf_ret_t ctf_add_enumerator (ctf_dict_t *, ctf_id_t, const char *, int64_t);
 
-/* Add a member to a struct or union, either at the next available offset (with
-   suitable padding for the alignment) or at a specific offset, and possibly
-   with a specific encoding (creating a slice for you).  Offsets need not be
-   unique, but must be added in ascending order.  ctf_add_member_bitfield
-   with a nonzero bit_width will fail unless the struct was created with
-   CTF_STRUCT_BITFIELD.  */
+/* Add a member to a struct or union at the given OFFSET in bits
+   (CTF_NEXT_MEMBER (-1) means "at the next available place, with suitable
+   padding for the alignment", everything else is an unsigned size_t).  Offsets
+   need not be unique, but must be added in ascending order (excepting
+   CTF_NEXT_MEMBER).  ctf_add_member_bitfield with a nonzero bit_width will fail
+   unless the struct was created with CTF_STRUCT_BITFIELD.  */
 
-extern ctf_ret_t ctf_add_member (ctf_dict_t *, ctf_id_t, const char *, ctf_id_t);
-extern ctf_ret_t ctf_add_member_offset (ctf_dict_t *, ctf_id_t, const char *,
-					ctf_id_t, unsigned long);
+extern ctf_ret_t ctf_add_member (ctf_dict_t *, ctf_id_t, const char *, ctf_id_t,
+				 size_t bit_offset);
 extern ctf_ret_t ctf_add_member_bitfield (ctf_dict_t *, ctf_id_t souid,
 					  const char *, ctf_id_t type,
-					  unsigned long bit_offset,
-					  int bit_width);
+					  size_t bit_offset, int bit_width);
 
 /* ctf_add_variable adds variables to no datasec at all;
    ctf_add_section_variable adds them to the given datasec, or to no datasec at

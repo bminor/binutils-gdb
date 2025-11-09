@@ -115,10 +115,10 @@ dtd_crash (enum crash_method method, int parent_bigger)
 	if ((ctype = ctf_add_integer (cfp, CTF_ADD_NONROOT, "xyzzy", &e)) == CTF_ERR)
 	  goto create_child;
 
-	if (ctf_add_member_offset (cfp, stype, "member", ptype, 5) == CTF_ERR)
+	if (ctf_add_member (cfp, stype, "member", ptype, 5) == CTF_ERR)
 	  goto create_child;
 
-	if (ctf_add_member_offset (cfp, stype, "xyzzy", ctype, 4) != CTF_ERR)
+	if (ctf_add_member (cfp, stype, "xyzzy", ctype, 4) != CTF_ERR)
 	  fprintf (stderr, "Addition of child type to parent via child unexpectedly succeeded\n");
 	else if (ctf_errno (cfp) == 0)
 	  fprintf (stderr, "got error from ctype addition to parent struct, but no error found on child\n");

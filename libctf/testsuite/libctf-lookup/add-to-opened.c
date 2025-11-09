@@ -91,7 +91,7 @@ main (int argc, char *argv[])
   if ((type = ctf_lookup_by_name (fp, "struct a_struct")) == CTF_ERR)
     fprintf (stderr, "Lookup of struct a_struct failed: %s\n", ctf_errmsg (ctf_errno (fp)));
 
-  if (ctf_add_member (fp, type, "wombat", 0) == 0)
+  if (ctf_add_member (fp, type, "wombat", 0, CTF_NEXT_MEMBER) == 0)
     fprintf (stderr, "allowed to add member to struct existing in readonly portion\n");
 
   if (ctf_errno (fp) != ECTF_RDONLY)

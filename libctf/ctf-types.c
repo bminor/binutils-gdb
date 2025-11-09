@@ -162,18 +162,19 @@ ctf_vlen (ctf_dict_t *fp, ctf_id_t type, const ctf_type_t *tp, size_t *vlen_len)
     }
 }
 
-/* Iterate over the members of a STRUCT or UNION, returning each member's
-   offset and optionally name and member type in turn.  On end-of-iteration,
-   returns -1.  If FLAGS is CTF_MN_RECURSE, recurse into unnamed members.  */
+/* Iterate over the members of a STRUCT or UNION, returning each member's offset
+   and optionally name and member type in turn.  On end-of-iteration, returns -1
+   cast to a size_t.  If FLAGS is CTF_MN_RECURSE, recurse into unnamed
+   members.  */
 
-ssize_t
+size_t
 ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 		 const char **name, ctf_id_t *membtype,
 		 int *bit_width, int flags)
 {
   ctf_dict_t *ofp = fp;
   ctf_kind_t kind;
-  ssize_t offset;
+  size_t offset;
   size_t nmemb;
   unsigned char *vlen;
   ctf_next_t *i = *it;
@@ -196,10 +197,16 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
       kind = LCTF_KIND (fp, tp);
 
       if (kind != CTF_K_STRUCT && kind != CTF_K_UNION)
-	return (ctf_set_errno (ofp, ECTF_NOTSOU));
+	{
+	  ctf_set_errno (ofp, ECTF_NOTSOU);
+	  return CTF_MEMBER_ERR;
+	}
 
       if ((i = ctf_next_create ()) == NULL)
-	return ctf_set_errno (ofp, ENOMEM);
+	{
+	  ctf_set_errno (ofp, ENOMEM);
+	  return CTF_MEMBER_ERR;
+	}
 
       i->ctn_tp = tp;
       i->cu.ctn_fp = ofp;
@@ -330,11 +337,11 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
   /* Traversing a sub-struct?  Just return it, with the offset adjusted.  */
   else
     {
-      ssize_t ret = ctf_member_next (fp, i->i.ctn_type, &i->ctn_next, name,
-				     membtype, bit_width, flags);
+      size_t ret = ctf_member_next (fp, i->i.ctn_type, &i->ctn_next, name,
+				    membtype, bit_width, flags);
 
-      if (ret >= 0)
-	return ret + i->ctn_increment;
+      if (ret != CTF_MEMBER_ERR)
+	return ret + (size_t) i->ctn_increment;
 
       if (ctf_errno (fp) != ECTF_NEXT_END)
 	{
@@ -358,7 +365,8 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
  end:
   ctf_next_destroy (i);
   *it = NULL;
-  return ctf_set_errno (ofp, err);
+  ctf_set_errno (ofp, err);
+  return CTF_MEMBER_ERR;
 }
 
 /* Iterate over the members of an enum TYPE, returning each enumerand's NAME or
@@ -1680,7 +1688,7 @@ ctf_tag (ctf_dict_t *fp, ctf_id_t tag)
 	int64_t j = 0;
 	ctf_id_t type;
 
-	while (ctf_member_next (fp, ref, &i, NULL, &type, NULL, 0) >= 0)
+	while (ctf_member_next (fp, ref, &i, NULL, &type, NULL, 0) != CTF_MEMBER_ERR)
 	  {
 	    if (j++ == component_idx)
 	      {
@@ -2542,7 +2550,7 @@ ctf_type_rvisit (ctf_dict_t *fp, ctf_id_t type, ctf_visit_f *func,
   ctf_kind_t kind;
   ctf_next_t *it = NULL;
   ctf_id_t membtype;
-  ssize_t this_offset;
+  size_t this_offset;
   int this_bit_width;
   int rc;
 
@@ -2566,7 +2574,7 @@ ctf_type_rvisit (ctf_dict_t *fp, ctf_id_t type, ctf_visit_f *func,
     return 0;
 
   while ((this_offset = ctf_member_next (fp, type, &it, &name, &membtype,
-					 &this_bit_width, 0)) >= 0)
+					 &this_bit_width, 0)) != CTF_MEMBER_ERR)
     {
       if ((rc = ctf_type_rvisit (fp, membtype, func, arg, name,
 				 offset + this_offset, this_bit_width,

@@ -25,7 +25,7 @@ main (int argc, char *argv[])
   ctf_next_t *i = NULL;
   const char *name;
   ctf_id_t membtype;
-  ssize_t offset;
+  size_t offset;
   int icount = 0;
   int err;
 
@@ -49,7 +49,7 @@ main (int argc, char *argv[])
     goto ierr;
 
   while ((offset = ctf_member_next (fp, type, &i, &name, &membtype,
-				    CTF_MN_RECURSE)) >= 0)
+				    CTF_MN_RECURSE)) != CTF_MEMBER_ERR)
     {
       ctf_membinfo_t memb;
       char *type_name = ctf_type_aname (fp, membtype);
@@ -80,7 +80,8 @@ main (int argc, char *argv[])
 
   /* Now make sure the count of members does not include any recursive
      members.  */
-  while ((offset = ctf_member_next (fp, type, &i, &name, &membtype, 0)) >= 0)
+  while ((offset = ctf_member_next (fp, type, &i, &name, &membtype,
+				    0)) != CTF_MEMBER_ERR)
     icount++;
 
   if (ctf_errno (fp) != ECTF_NEXT_END)

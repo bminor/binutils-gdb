@@ -15,7 +15,7 @@ main (int argc, char *argv[])
   ctf_id_t itype = 0, stype = 0;
   ctf_encoding_t encoding = {0};
   ctf_membinfo_t mi;
-  ssize_t ret;
+  size_t ret;
   int err;
 
   if ((fp = ctf_create (&err)) == NULL)
@@ -42,7 +42,7 @@ main (int argc, char *argv[])
     fprintf (stderr, "cannot add int: %s\n", ctf_errmsg (ctf_errno (fp)));
   else if ((stype = ctf_add_struct (fp, CTF_ADD_ROOT, "foo", 0, 0, 0)) == CTF_ERR)
     fprintf (stderr, "cannot add struct: %s\n", ctf_errmsg (ctf_errno (fp)));
-  else if (ctf_add_member (fp, stype, "bar", itype) < 0)
+  else if (ctf_add_member (fp, stype, "bar", itype, CTF_NEXT_MEMBER) < 0)
     fprintf (stderr, "cannot add member: %s\n", ctf_errmsg (ctf_errno (fp)));
 
   if (ctf_member_info (fp, stype, "bar", &mi) < 0)
@@ -51,7 +51,7 @@ main (int argc, char *argv[])
   /* Iteration should never produce an offset bigger than the offset just returned,
      and should quickly terminate.  */
 
-  while ((ret = ctf_member_next (fp, stype, &i, NULL, NULL, 0)) >= 0) {
+  while ((ret = ctf_member_next (fp, stype, &i, NULL, NULL, 0)) != CTF_MEMBER_ERR) {
     if (ret > mi.ctm_offset)
       fprintf (stderr, "ssize_t return: unexpected offset: %zi\n", ret);
     if (boom++ > 1000)

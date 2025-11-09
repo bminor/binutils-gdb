@@ -1130,7 +1130,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
     case CTF_K_STRUCT:
     case CTF_K_UNION:
       {
-	ssize_t offset;
+	size_t offset;
 	const char *mname;
 	ctf_id_t membtype;
 	ssize_t size;
@@ -1150,7 +1150,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 			    "struct/union bitfieldness", depth);
 
 	while ((offset = ctf_member_next (input, type, &i, &mname, &membtype,
-					  &bit_width, 0)) >= 0)
+					  &bit_width, 0)) != CTF_MEMBER_ERR)
 	  {
 	    if (mname == NULL)
 	      mname = "";
@@ -4006,7 +4006,7 @@ ctf_dedup_emit_struct_members (ctf_dict_t *output, ctf_dict_t **inputs,
       ctf_id_t input_type, target_type;
       const char *name;
       ctf_id_t membtype;
-      ssize_t offset;
+      size_t offset;
       int width;
 
       input_num = CTF_DEDUP_GID_TO_INPUT (input_id);
@@ -4031,7 +4031,7 @@ ctf_dedup_emit_struct_members (ctf_dict_t *output, ctf_dict_t **inputs,
       target_type = CTF_DEDUP_GID_TO_TYPE (target_id);
 
       while ((offset = ctf_member_next (input_fp, input_type, &j, &name,
-					&membtype, &width, 0)) >= 0)
+					&membtype, &width, 0)) != CTF_MEMBER_ERR)
 	{
 	  err_fp = target;
 	  err_type = target_type;

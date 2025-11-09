@@ -12,9 +12,9 @@ static int
 offsets_ascending (ctf_dict_t *fp, ctf_id_t type)
 {
   ctf_next_t *it = NULL;
-  ssize_t offset, last_offset = 0;
+  size_t offset, last_offset = 0;
 
-  while ((offset = ctf_member_next (fp, type, &it, NULL, NULL, 0)) >= 0)
+  while ((offset = ctf_member_next (fp, type, &it, NULL, NULL, 0)) != CTF_MEMBER_ERR)
     {
       if (offset < last_offset)
 	return 0;

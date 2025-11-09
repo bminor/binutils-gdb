@@ -136,7 +136,6 @@ LIBCTF_2.0 {
 
 	ctf_add_enumerator;
 	ctf_add_member;
-	ctf_add_member_offset;
 	ctf_add_member_bitfield;
 
 	ctf_set_array;
