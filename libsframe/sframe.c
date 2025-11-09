@@ -603,7 +603,8 @@ flip_sframe (char *frame_buf, size_t buf_size, uint32_t to_foreign)
   size_t hdrsz = 0;
   int err = 0;
   /* For error checking.  */
-  size_t bytes_flipped = 0;
+  size_t fde_bytes_flipped = 0;
+  size_t fre_bytes_flipped = 0;
 
   /* Header must be in host endianness at this time.  */
   ihp = (sframe_header *)frame_buf;
@@ -635,7 +636,7 @@ flip_sframe (char *frame_buf, size_t buf_size, uint32_t to_foreign)
       if (flip_fde (fdes, buf_end - fdes, ver, &fsz))
 	goto bad;
 
-      bytes_flipped += fsz;
+      fde_bytes_flipped += fsz;
 
       if (!to_foreign && sframe_decode_fde (fdes, fdes - buf_end, ver,
 					    &num_fres, &fre_type, &fre_offset,
@@ -647,7 +648,7 @@ flip_sframe (char *frame_buf, size_t buf_size, uint32_t to_foreign)
 	{
 	  if (flip_fre (fp, fre_type, &esz))
 	    goto bad;
-	  bytes_flipped += esz;
+	  fre_bytes_flipped += esz;
 
 	  if (esz == 0 || esz > buf_size)
 	    goto bad;
@@ -655,11 +656,18 @@ flip_sframe (char *frame_buf, size_t buf_size, uint32_t to_foreign)
 	}
       prev_frep_index = j;
     }
-  /* All FDEs and FREs must have been endian flipped by now.  */
-  if ((j != ihp->sfh_num_fres) || (bytes_flipped > (buf_size - hdrsz)))
+
+  /* All FDEs must have been endian flipped by now.  */
+  if (i != num_fdes || fde_bytes_flipped > ihp->sfh_freoff - ihp->sfh_fdeoff)
     goto bad;
+
+  /* All FREs must have been endian flipped by now.  */
+  if (j != ihp->sfh_num_fres || fre_bytes_flipped > ihp->sfh_fre_len)
+    goto bad;
+
   /* Optional trailing section padding.  */
-  for (fp = frame_buf + hdrsz + bytes_flipped; fp < frame_buf + buf_size; fp++)
+  size_t frame_size = hdrsz + ihp->sfh_freoff + fre_bytes_flipped;
+  for (fp = frame_buf + frame_size; fp < frame_buf + buf_size; fp++)
     if (*fp != '\0')
       goto bad;
 
