@@ -244,73 +244,75 @@ extern sframe_encoder_ctx *
 sframe_encode (uint8_t ver, uint8_t flags, uint8_t abi_arch,
 	       int8_t fixed_fp_offset, int8_t fixed_ra_offset, int *errp);
 
-/* Free the encoder context.  */
+/* Free the encoder context ECTXP.  */
 extern void
-sframe_encoder_free (sframe_encoder_ctx **encoder);
+sframe_encoder_free (sframe_encoder_ctx **ectxp);
 
-/* Get the size of the SFrame header from the encoder ctx ENCODER.  */
+/* Get the size of the SFrame header from the encoder context ECTX.  */
 extern unsigned int
-sframe_encoder_get_hdr_size (sframe_encoder_ctx *encoder);
+sframe_encoder_get_hdr_size (sframe_encoder_ctx *ectx);
 
-/* Get the abi/arch info from the SFrame encoder context CTX.  */
+/* Get the SFrame abi/arch info from the encoder context ECTX.  */
 extern uint8_t
-sframe_encoder_get_abi_arch (sframe_encoder_ctx *encoder);
+sframe_encoder_get_abi_arch (sframe_encoder_ctx *ectx);
 
-/* Get the format version from the SFrame encoder context ENCODER.  */
+/* Get the SFrame format version from the encoder context ECTX.  */
 extern uint8_t
-sframe_encoder_get_version (sframe_encoder_ctx *encoder);
+sframe_encoder_get_version (sframe_encoder_ctx *ectx);
 
-/* Get the section flags from the SFrame encoder context ENCODER.  */
+/* Get the SFrame flags from the encoder context ECTX.  */
 extern uint8_t
-sframe_encoder_get_flags (sframe_encoder_ctx *encoder);
+sframe_encoder_get_flags (sframe_encoder_ctx *ectx);
 
 /* Get the offset of the sfde_func_start_address field (from the start of the
    on-disk layout of the SFrame section) of the FDE at FUNC_IDX in the encoder
-   context ENCODER.
+   context ECTX.
 
    If FUNC_IDX is more than the number of SFrame FDEs in the section, sets
    error code in ERRP, but returns the (hypothetical) offset.  This is useful
    for the linker when arranging input FDEs into the output section to be
    emitted.  */
 uint32_t
-sframe_encoder_get_offsetof_fde_start_addr (sframe_encoder_ctx *encoder,
+sframe_encoder_get_offsetof_fde_start_addr (sframe_encoder_ctx *ectx,
 					    uint32_t func_idx, int *errp);
 
-/* Return the number of function descriptor entries in the SFrame encoder
-   ENCODER.  */
+/* Return the number of SFrame function descriptor entries in the encoder
+   context ECTX.  */
 extern uint32_t
-sframe_encoder_get_num_fidx (sframe_encoder_ctx *encoder);
+sframe_encoder_get_num_fidx (sframe_encoder_ctx *ectx);
 
-/* Add an FRE to function at FUNC_IDX'th function descriptor index entry in
-   the encoder context.  */
+/* Add an SFrame FRE to function at FUNC_IDX'th function descriptor entry in
+   the encoder context ECTX.  */
 extern int
-sframe_encoder_add_fre (sframe_encoder_ctx *encoder,
+sframe_encoder_add_fre (sframe_encoder_ctx *ectx,
 			unsigned int func_idx,
 			sframe_frame_row_entry *frep);
 
-/* Add a new function descriptor entry with START_ADDR, FUNC_SIZE and NUM_FRES
-   to the encoder.  */
+/* Add a new SFrame function descriptor entry with START_ADDR, FUNC_SIZE and
+   FUNC_INFO to the encoder context ECTX.  */
 extern int
-sframe_encoder_add_funcdesc (sframe_encoder_ctx *encoder,
+sframe_encoder_add_funcdesc (sframe_encoder_ctx *ectx,
 			     int32_t start_addr,
 			     uint32_t func_size,
 			     unsigned char func_info,
 			     uint32_t num_fres);
 
-/* Add a new function descriptor entry with START_ADDR, FUNC_SIZE, FUNC_INFO
-   and REP_BLOCK_SIZE to the encoder.  */
+/* Add a new SFrame function descriptor entry with START_ADDR, FUNC_SIZE,
+   FUNC_INFO and REP_BLOCK_SIZE to the encoder context ECTX.  This API is valid
+   only for SFrame format version 2.  */
 extern int
-sframe_encoder_add_funcdesc_v2 (sframe_encoder_ctx *encoder,
+sframe_encoder_add_funcdesc_v2 (sframe_encoder_ctx *ectx,
 				int32_t start_addr,
 				uint32_t func_size,
 				unsigned char func_info,
 				uint8_t rep_block_size,
 				uint32_t num_fres);
 
-/* Serialize the contents of the encoder and return the buffer.  ENCODED_SIZE
-   is updated to the size of the buffer.  Sets ERRP if failure.  */
+/* Serialize the contents of the encoder context ECTX and return the buffer.
+   ENCODED_SIZE is updated to the size of the buffer.
+   Sets ERRP if failure.  */
 extern char  *
-sframe_encoder_write (sframe_encoder_ctx *encoder,
+sframe_encoder_write (sframe_encoder_ctx *ectx,
 		      size_t *encoded_size, int *errp);
 
 #ifdef	__cplusplus
