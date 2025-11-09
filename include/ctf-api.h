@@ -348,7 +348,6 @@ _CTF_ERRORS
 
 #define	CTF_ADD_NONROOT	0	/* Type only visible in nested scope.  */
 #define	CTF_ADD_ROOT	1	/* Type visible at top-level scope.  */
-#define CTF_ADD_STRUCT_BITFIELDS 2 /* Struct/union field-level bitfields */
 
 /* Flags for ctf_member_next.  */
 
@@ -995,19 +994,31 @@ extern ctf_id_t ctf_add_decl_type_tag (ctf_dict_t *, uint32_t, ctf_id_t, const c
 extern ctf_id_t ctf_add_decl_tag (ctf_dict_t *, uint32_t, ctf_id_t, const char *,
 				  int component_idx);
 
-/* Struct and union addition.  Straight addition uses possibly-confusing rules
-   to guess the final size of the struct/union given its members: to explicitly
-   state the size of the struct or union (to report compiler-generated padding,
-   etc) use the _sized variants.  The FLAG parameter can take the value
-   CTF_ADD_STRUCT_BITFIELDS, indicating that bitfields can be directly added
-   to this struct via ctf_add_member_bitfield.  */
+/* Struct and union addition.  STRUCT_UNION_UNKNOWN can be CTF_K_STRUCT,
+   CTF_K_UNION, or CTF_K_UNKNOWN (0) to mean "guess and do the right thing",
+   which for now simply adds a struct, but in future may extend to emit a struct
+   if the members (once added) don't overlap, and otherwise transform it into a
+   union.
 
-extern ctf_id_t ctf_add_struct (ctf_dict_t *, uint32_t flag, const char *);
-extern ctf_id_t ctf_add_union (ctf_dict_t *, uint32_t flag, const char *);
-extern ctf_id_t ctf_add_struct_sized (ctf_dict_t *, uint32_t flag, const char *,
-				      size_t);
-extern ctf_id_t ctf_add_union_sized (ctf_dict_t *, uint32_t flag, const char *,
-				     size_t);
+   If BITFIELD is CTF_STRUCT_BITFIELD this is a bitfield-capable struct:
+   otherwise it is not so capable.  (In future libctf may learn to promote such
+   structs to bitfield-capable structs if bitfields are later added to them, but
+   for now adding bitfields to such structs is an error.)
+
+   The size of the struct starts at the specified SIZE, and grows on demand if
+   members are added with higher (offset + size).  This allows the explicit
+   specification of padding, while still prohibiting structures smaller than
+   the members they contain.  */
+
+typedef enum ctf_bitfield
+  {
+    CTF_STRUCT_NORMAL = 0,
+    CTF_STRUCT_BITFIELD = 1
+  } ctf_bitfield_t;
+
+extern ctf_id_t ctf_add_struct (ctf_dict_t *, uint32_t flag, const char *name,
+				ctf_kind_t struct_union_unknown,
+				ctf_bitfield_t bitfield, size_t size);
 
 /* Note that CTF cannot encode a given type.  This usually returns an
    ECTF_NONREPRESENTABLE error when queried.  Mostly useful for struct members,
@@ -1026,7 +1037,7 @@ extern ctf_ret_t ctf_add_enumerator (ctf_dict_t *, ctf_id_t, const char *, int64
    with a specific encoding (creating a slice for you).  Offsets need not be
    unique, but must be added in ascending order.  ctf_add_member_bitfield
    with a nonzero bit_width will fail unless the struct was created with
-   CTF_ADD_STRUCT_BITFIELDS.  */
+   CTF_STRUCT_BITFIELD.  */
 
 extern ctf_ret_t ctf_add_member (ctf_dict_t *, ctf_id_t, const char *, ctf_id_t);
 extern ctf_ret_t ctf_add_member_offset (ctf_dict_t *, ctf_id_t, const char *,

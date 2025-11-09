@@ -80,14 +80,14 @@ dtd_crash (enum crash_method method, int parent_bigger)
       /* These try to replace a forward, and should not do so if we're
 	 adding in the child and it's in the parent.  */
     case ADD_STRUCT:
-      if ((stype = ctf_add_struct_sized (cfp, CTF_ADD_ROOT, "foo", 1024)) == CTF_ERR)
+      if ((stype = ctf_add_struct (cfp, CTF_ADD_ROOT, "foo", CTF_K_STRUCT, 0, 1024)) == CTF_ERR)
 	goto create_child;
       if (stype == ftype)
 	fprintf (stderr, "Forward-promotion spotted!\n");
       break;
 
     case ADD_UNION:
-      if ((stype = ctf_add_union_sized (cfp, CTF_ADD_ROOT, "foo", 1024)) == CTF_ERR)
+      if ((stype = ctf_add_struct (cfp, CTF_ADD_ROOT, "foo", CTF_K_UNION, 0, 1024)) == CTF_ERR)
 	goto create_child;
       if (stype == ftype)
 	fprintf (stderr, "Forward-promotion spotted!\n");
@@ -109,7 +109,7 @@ dtd_crash (enum crash_method method, int parent_bigger)
       {
 	ctf_id_t ctype;
 
-	if ((stype = ctf_add_struct (pfp, CTF_ADD_ROOT, "bar")) == CTF_ERR)
+	if ((stype = ctf_add_struct (pfp, CTF_ADD_ROOT, "bar", 0, 0, 0)) == CTF_ERR)
 	  goto create_child;
 
 	if ((ctype = ctf_add_integer (cfp, CTF_ADD_NONROOT, "xyzzy", &e)) == CTF_ERR)
@@ -137,7 +137,7 @@ dtd_crash (enum crash_method method, int parent_bigger)
       /* This tries to look up the member type we're adding, and goes wrong
 	 if the struct is in the child and the member type is in the parent.  */
     case ADD_MEMBER_ENCODED:
-      if ((stype = ctf_add_struct (cfp, CTF_ADD_ROOT, "foo")) == CTF_ERR)
+      if ((stype = ctf_add_struct (cfp, CTF_ADD_ROOT, "foo", 0, 0, 0)) == CTF_ERR)
 	goto create_child;
 
       if (ctf_add_member_encoded (cfp, stype, "cmember", ptype, 5, e) == CTF_ERR)

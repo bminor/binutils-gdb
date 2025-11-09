@@ -118,7 +118,7 @@
    We have to do *something* about potential cycles in the type graph.  We'd
    like to avoid emitting forwards in the final output if possible, because
    forwards aren't much use: they have no members.  We are mostly saved from
-   needing to worry about this at emission time by ctf_add_struct*()
+   needing to worry about this at emission time by ctf_add_struct()
    automatically replacing newly-created forwards when the real struct/union
    comes along.  So we only have to avoid getting stuck in cycles during the
    hashing phase, while also not confusing types that cite members that are
@@ -3793,13 +3793,8 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	if (is_bitfield < 0 || size < 0)
 	  goto err_input;
 
-	if (is_bitfield)
-	  isroot |= CTF_ADD_STRUCT_BITFIELDS;
-
-	if (kind == CTF_K_STRUCT)
-	  new_type = ctf_add_struct_sized (target, isroot, name, size);
-	else
-	  new_type = ctf_add_union_sized (target, isroot, name, size);
+	new_type = ctf_add_struct (target, isroot, name, kind, is_bitfield,
+				   size);
 
 	if (new_type == CTF_ERR)
 	  goto err_target;

@@ -130,9 +130,6 @@ LIBCTF_2.0 {
 	ctf_add_section_variable;
 	ctf_add_slice;
 	ctf_add_struct;
-	ctf_add_union;
-	ctf_add_struct_sized;
-	ctf_add_union_sized;
 	ctf_add_unknown;
 	ctf_add_variable;
 	ctf_add_volatile;

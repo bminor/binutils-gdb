@@ -40,7 +40,7 @@ main (int argc, char *argv[])
 
   if ((itype = ctf_add_integer (fp, CTF_ADD_ROOT, "int", &encoding)) == CTF_ERR)
     fprintf (stderr, "cannot add int: %s\n", ctf_errmsg (ctf_errno (fp)));
-  else if ((stype = ctf_add_struct (fp, CTF_ADD_ROOT, "foo")) == CTF_ERR)
+  else if ((stype = ctf_add_struct (fp, CTF_ADD_ROOT, "foo", 0, 0, 0)) == CTF_ERR)
     fprintf (stderr, "cannot add struct: %s\n", ctf_errmsg (ctf_errno (fp)));
   else if (ctf_add_member (fp, stype, "bar", itype) < 0)
     fprintf (stderr, "cannot add member: %s\n", ctf_errmsg (ctf_errno (fp)));

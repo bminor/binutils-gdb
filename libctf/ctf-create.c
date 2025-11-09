@@ -1178,23 +1178,49 @@ ctf_add_function_linkage (ctf_dict_t *fp, uint32_t flag,
   return dtd->dtd_type;
 }
 
-static ctf_id_t
-ctf_add_sou_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
-		   size_t size, ctf_kind_t kind)
+ctf_id_t
+ctf_add_struct (ctf_dict_t *fp, uint32_t flag, const char *name,
+		ctf_kind_t struct_union_unknown, ctf_bitfield_t bitfield,
+		size_t size)
 {
   ctf_dtdef_t *dtd;
   ctf_type_t *prefix;
   ctf_id_t type = 0;
   uint32_t idx;
   size_t initial_vbytes = sizeof (ctf_member_t) * INITIAL_VLEN;
-  int root_flag = flag & (~CTF_ADD_STRUCT_BITFIELDS);
+  int kind_flag = (bitfield == CTF_STRUCT_BITFIELD);
 
   if (fp->ctf_flags & LCTF_NO_STR)
     return (ctf_set_errno (fp, ECTF_NOPARENT));
 
+  if (struct_union_unknown != CTF_K_UNKNOWN
+      && struct_union_unknown != CTF_K_STRUCT
+      && struct_union_unknown != CTF_K_UNION)
+    {
+      ctf_err_warn (fp, 0, ECTF_NOTSOU, "ctf_add_sou_sized: struct %s "
+		    "kind must be one of CTF_K_STRUCT, UNION or UNKNOWN, "
+		    "not %i\n", name ? name : "(unnamed)",
+		    struct_union_unknown);
+      return ctf_set_typed_errno (fp, ECTF_NOTSOU);
+    }
+
+  /* For now, "unknown" == "struct".  */
+  if (struct_union_unknown == CTF_K_UNKNOWN)
+    struct_union_unknown = CTF_K_STRUCT;
+
+  if (bitfield != CTF_STRUCT_NORMAL
+      && bitfield != CTF_STRUCT_BITFIELD)
+    {
+      ctf_err_warn (fp, 0, ECTF_NOTSOU, "ctf_add_sou_sized: struct %s "
+		    "bitfieldness must be one of CTF_STRUCT_NORMAL or "
+		    "CTF_STRUCT_BITFIELD, not %i\n",
+		    name ? name : "(unnamed)", bitfield);
+      return ctf_set_typed_errno (fp, ECTF_NOTSOU);
+    }
+
   /* Promote root-visible forwards to structs/unions.  */
-  if (name != NULL && root_flag == CTF_ADD_ROOT)
-    type = ctf_lookup_by_rawname (fp, kind, name);
+  if (name != NULL && flag == CTF_ADD_ROOT)
+    type = ctf_lookup_by_rawname (fp, struct_union_unknown, name);
 
   if (type > 0)
     idx = ctf_type_to_index (fp, type);
@@ -1210,42 +1236,16 @@ ctf_add_sou_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
       if ((prefix = ctf_add_prefix (fp, dtd, initial_vbytes)) == NULL)
 	return CTF_ERR;				/* errno is set for us.  */
     }
-  else if ((dtd = ctf_add_generic (fp, root_flag, name, kind, 1, 0,
-				   initial_vbytes, &prefix)) == NULL)
+  else if ((dtd = ctf_add_generic (fp, flag, name, struct_union_unknown,
+				   1, 0, initial_vbytes, &prefix)) == NULL)
     return CTF_ERR;				/* errno is set for us.  */
 
   prefix->ctt_info = CTF_TYPE_INFO (CTF_K_BIG, 0, 0);
-  dtd->dtd_data->ctt_info = CTF_TYPE_INFO (kind, !!(flag & CTF_ADD_STRUCT_BITFIELDS), 0);
+  dtd->dtd_data->ctt_info = CTF_TYPE_INFO (struct_union_unknown, kind_flag, 0);
   prefix->ctt_size = CTF_SIZE_TO_LSIZE_HI (size);
   dtd->dtd_data->ctt_size = CTF_SIZE_TO_LSIZE_LO (size);
 
   return dtd->dtd_type;
-}
-
-ctf_id_t
-ctf_add_struct_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
-		      size_t size)
-{
-  return ctf_add_sou_sized (fp, flag, name, size, CTF_K_STRUCT);
-}
-
-ctf_id_t
-ctf_add_struct (ctf_dict_t *fp, uint32_t flag, const char *name)
-{
-  return (ctf_add_struct_sized (fp, flag, name, 0));
-}
-
-ctf_id_t
-ctf_add_union_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
-		     size_t size)
-{
-  return ctf_add_sou_sized (fp, flag, name, size, CTF_K_UNION);
-}
-
-ctf_id_t
-ctf_add_union (ctf_dict_t *fp, uint32_t flag, const char *name)
-{
-  return (ctf_add_union_sized (fp, flag, name, 0));
 }
 
 static ctf_id_t
@@ -2783,9 +2783,8 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 	    break;
 	  }
 
-	dst_type = ctf_add_struct_sized (dst_fp, flag
-					 | (bitfields ? CTF_ADD_STRUCT_BITFIELDS : 0),
-					 name, ctf_type_size (src_fp, src_type));
+	dst_type = ctf_add_struct (dst_fp, flag, name, kind, bitfields,
+				   ctf_type_size (src_fp, src_type));
 	if (dst_type == CTF_ERR)
 	  return CTF_ERR;			/* errno is set for us.  */
 
