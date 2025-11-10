@@ -38,7 +38,7 @@ proc check_core_file {core_filename saved_pl3_ssp} {
 
     # Check the value of ssp in the core file.
     gdb_test "print/x \$pl3_ssp" "\\$\[0-9\]+ = $saved_pl3_ssp" \
-	"pl3_ssp contents from core file $saved_pl3_ssp"
+	"pl3_ssp contents from core file"
 }
 
 save_vars { ::env(GLIBC_TUNABLES) } {
