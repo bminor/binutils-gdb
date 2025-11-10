@@ -13,7 +13,7 @@ main (int argc, char *argv[])
   ctf_id_t type, tmp;
   ctf_next_t *i = NULL;
   const char *name;
-  int val;
+  ctf_enum_value_t val;
 
   if (argc != 2)
     {
@@ -31,7 +31,10 @@ main (int argc, char *argv[])
 
   while ((name = ctf_enum_next (fp, type, &i, &val)) != NULL)
     {
-      printf ("%s has value %i\n", name, val);
+      if (val.encoding.cte_format & CTF_INT_SIGNED)
+	printf ("%s has value %lli\n", name, val.val);
+      else
+	printf ("%s has value %llu\n", name, val.uval);
     }
   if (ctf_errno (fp) != ECTF_NEXT_END)
     goto nerr;

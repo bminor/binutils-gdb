@@ -1661,8 +1661,8 @@ ctf_arc_lookup_symbol_name (struct ctf_archive_internal *arci, const char *symna
 ctf_id_t
 ctf_arc_lookup_enumerator_next (struct ctf_archive_internal *arci,
 				const char *name, ctf_next_t **it,
-				int64_t *enum_value, ctf_dict_t **dict,
-				ctf_error_t *errp)
+				ctf_enum_value_t *enum_value,
+				ctf_dict_t **dict, ctf_error_t *errp)
 {
   ctf_next_t *i = *it;
   ctf_id_t type;

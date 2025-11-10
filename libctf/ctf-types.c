@@ -375,13 +375,14 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 
 const char *
 ctf_enum_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
-	       int64_t *val)
+	       ctf_enum_value_t *valp)
 {
   ctf_dict_t *ofp = fp;
   ctf_kind_t kind;
   const char *name;
   ctf_next_t *i = *it;
   ctf_error_t err;
+  ctf_enum_value_t val;
 
   if (fp->ctf_flags & LCTF_NO_STR)
     {
@@ -421,7 +422,7 @@ ctf_enum_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 
       if (kind == CTF_K_ENUM)
 	i->u.ctn_en = (const ctf_enum_t *) en;
-      else /* CTF_K_ENUM64 */
+      else
 	i->u.ctn_en64 = (const ctf_enum64_t *) en;
 
       *it = i;
@@ -452,20 +453,21 @@ ctf_enum_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
       goto end;
     }
 
+  /* ctf_enum_t and ctf_enum64_t have the name in common, and ctn_en and
+     ctn_en64 are in a union.  */
+  name = ctf_strptr (fp, i->u.ctn_en->cte_name);
+  if (ctf_enum_value (fp, type, name, &val) < 0)
+    {
+      err = ctf_errno (fp);
+      goto end;
+    }
+  if (valp)
+    *valp = val;
+
   if (ctf_type_kind (fp, type) == CTF_K_ENUM)
-    {
-      name = ctf_strptr (fp, i->u.ctn_en->cte_name);
-      if (val)
-	*val = i->u.ctn_en->cte_value;
-      i->u.ctn_en++;
-    }
+    i->u.ctn_en++;
   else
-    {
-      name = ctf_strptr (fp, i->u.ctn_en64->cte_name);
-      if (val)
-	*val = ((uint64_t) i->u.ctn_en64->cte_val_high) << 32 | (i->u.ctn_en64->cte_val_low);
-      i->u.ctn_en64++;
-    }
+    i->u.ctn_en64++;
   i->ctn_n--;
 
   return name;
@@ -2130,7 +2132,7 @@ ctf_array_info (ctf_dict_t *fp, ctf_id_t type, ctf_arinfo_t *arp)
    matching name can be found.  Otherwise NULL is returned.  */
 
 const char *
-ctf_enum_name (ctf_dict_t *fp, ctf_id_t type, int64_t value)
+ctf_enum_name (ctf_dict_t *fp, ctf_id_t type, ctf_enum_value_t value)
 {
   ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
@@ -2165,7 +2167,7 @@ ctf_enum_name (ctf_dict_t *fp, ctf_id_t type, int64_t value)
 
       for (; n != 0; n--, ep++)
 	{
-	  if (ep->cte_value == value)
+	  if (ep->cte_value == value.uval)
 	    return (ctf_strptr (fp, ep->cte_name));
 	}
     }
@@ -2175,10 +2177,20 @@ ctf_enum_name (ctf_dict_t *fp, ctf_id_t type, int64_t value)
 
       for (; n != 0; n--, ep++)
 	{
-	  int64_t this_value = ((uint64_t) ep->cte_val_high << 32) | (ep->cte_val_low);
+	  if (value.encoding.cte_format & CTF_INT_SIGNED)
+	    {
+	      int64_t this_value = ((uint64_t) ep->cte_val_high << 32) | (ep->cte_val_low);
 
-	  if (this_value == value)
-	    return (ctf_strptr (fp, ep->cte_name));
+	      if (this_value == value.val)
+		return (ctf_strptr (fp, ep->cte_name));
+	    }
+	  else
+	    {
+	      uint64_t this_value = ((uint64_t) ep->cte_val_high << 32) | (ep->cte_val_low);
+
+	      if (this_value == value.uval)
+		return (ctf_strptr (fp, ep->cte_name));
+	    }
 	}
     }
 
@@ -2190,7 +2202,8 @@ ctf_enum_name (ctf_dict_t *fp, ctf_id_t type, int64_t value)
    matching name can be found.  Otherwise CTF_ERR is returned.  */
 
 ctf_ret_t
-ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int64_t *valp)
+ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name,
+		ctf_enum_value_t *valp)
 {
   ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
@@ -2213,6 +2226,10 @@ ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int64_t *valp)
 
   vlen = ctf_vlen (fp, type, tp, &n);
 
+  if (valp != NULL)
+    if (ctf_type_encoding (fp, type, &valp->encoding) < 0)
+      return -1;		/* errno is set for us.  */
+
   if (kind == CTF_K_ENUM)
     {
       const ctf_enum_t *ep = (const ctf_enum_t *) vlen;
@@ -2222,7 +2239,7 @@ ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int64_t *valp)
 	  if (strcmp (ctf_strptr (fp, ep->cte_name), name) == 0)
 	    {
 	      if (valp != NULL)
-		*valp = ep->cte_value;
+		valp->uval = ep->cte_value;
 	      return 0;
 	    }
 	}
@@ -2236,7 +2253,7 @@ ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int64_t *valp)
 	  if (strcmp (ctf_strptr (fp, ep->cte_name), name) == 0)
 	    {
 	      if (valp != NULL)
-		*valp = ((uint64_t) ep->cte_val_high << 32) | ep->cte_val_low;
+		valp->uval = ((uint64_t) ep->cte_val_high << 32) | ep->cte_val_low;
 	      return 0;
 	    }
 	}
@@ -2245,19 +2262,7 @@ ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int64_t *valp)
   return ctf_set_errno (ofp, ECTF_NOENUMNAM);
 }
 
-/* Like ctf_enum_value, but returns an unsigned int64_t instead.  */
-ctf_ret_t
-ctf_enum_unsigned_value (ctf_dict_t *fp, ctf_id_t type, const char *name, uint64_t *valp)
-{
-  ctf_ret_t ret;
-  int64_t retval;
-
-  ret = ctf_enum_value (fp, type, name, &retval);
-  *valp = (uint64_t) retval;
-  return ret;
-}
-
-/* Determine whether an enum's values are signed.  */
+/* Determine whether an enum's values are signed.  Private interface.  */
 ctf_bool_t
 ctf_enum_unsigned (ctf_dict_t *fp, ctf_id_t type)
 {

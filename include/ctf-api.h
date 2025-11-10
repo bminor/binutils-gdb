@@ -210,6 +210,28 @@ typedef struct ctf_funcinfo
   uint32_t ctc_flags;		/* Function attributes (see below).  */
 } ctf_funcinfo_t;
 
+typedef struct ctf_enum_value	/* The value of an enumerator.  Can just be
+				   cast to an int/int64 if you like. */
+{
+#if !defined (__GNUC__) || !defined __STDC_VERSION__ || __STDC_VERSION__ < 201112L
+#ifdef __GNUC__
+  __extension__
+#endif
+  union
+    {
+      int64_t val;
+      uint64_t uval;
+    };
+#else
+  union
+    {
+      int64_t val;
+      uint64_t uval;
+    } val;
+#endif
+  ctf_encoding_t encoding;
+} ctf_enum_value_t;
+
 typedef struct ctf_snapshot_id
 {
   unsigned long dtd_id;		/* Highest DTD ID at time of snapshot.  */
@@ -646,7 +668,7 @@ extern ctf_id_t ctf_lookup_variable (ctf_dict_t *, const char *);
    an enum in the child.  */
 
 extern ctf_id_t ctf_lookup_enumerator (ctf_dict_t *, const char *,
-				       int64_t *enum_value);
+				       ctf_enum_value_t *enum_value);
 
 /* Look up a type of a given kind by name.  This serves to look up kinds in
    their own namespaces which do not have explicit lookup functions above:
@@ -771,14 +793,9 @@ extern int ctf_type_cmp (ctf_dict_t *, ctf_id_t, ctf_dict_t *, ctf_id_t);
 /* Get the name of an enumerator given its value, or vice versa.  If many
    enumerators have the same value, the first with that value is returned.  */
 
-extern const char *ctf_enum_name (ctf_dict_t *, ctf_id_t, int64_t);
-extern ctf_ret_t ctf_enum_value (ctf_dict_t *, ctf_id_t, const char *, int64_t *);
-extern ctf_ret_t ctf_enum_unsigned_value (ctf_dict_t *, ctf_id_t, const char *, uint64_t *);
-
-/* Return 1 if this enum's contents are unsigned, so you can tell which of the
-   above functions to use.  */
-
-extern ctf_bool_t ctf_enum_unsigned (ctf_dict_t *, ctf_id_t);
+extern const char *ctf_enum_name (ctf_dict_t *, ctf_id_t, ctf_enum_value_t);
+extern ctf_ret_t ctf_enum_value (ctf_dict_t *, ctf_id_t, const char *,
+				 ctf_enum_value_t *);
 
 /* Return nonzero if this struct or union uses bitfield encoding.  */
 
@@ -832,10 +849,9 @@ extern size_t ctf_member_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
 			       const char **name, ctf_id_t *membtype,
 			       int *bit_width, int flags);
 
-/* Return all enumeration constants in a given enum type.  The VAL argument may
-   need to be cast to uint64_t: see ctf_enum_unsigned(). */
+/* Return all enumeration constants in a given enum type.  */
 extern const char *ctf_enum_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
-				  int64_t *);
+				  ctf_enum_value_t *);
 
 /* Return all enumeration constants with a given name in a given dict, similar
    to ctf_lookup_enumerator above but capable of returning multiple values.
@@ -848,7 +864,8 @@ extern const char *ctf_enum_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
    well-defined.  */
 
 extern ctf_id_t ctf_lookup_enumerator_next (ctf_dict_t *, const char *name,
-					    ctf_next_t **, int64_t *enum_value);
+					    ctf_next_t **,
+					    ctf_enum_value_t *enum_value);
 
 /* Likewise, across all dicts in an archive (parent first).  The DICT and ERRP
    arguments are not optional: without the forer you can't tell which dict the
@@ -861,7 +878,8 @@ extern ctf_id_t ctf_lookup_enumerator_next (ctf_dict_t *, const char *name,
    itself).  */
 
 extern ctf_id_t ctf_arc_lookup_enumerator_next (ctf_archive_t *, const char *name,
-						ctf_next_t **, int64_t *enum_value,
+						ctf_next_t **,
+						ctf_enum_value_t *enum_value,
 						ctf_dict_t **dict, ctf_error_t *errp);
 
 /* Iterate over all types, kinds, variables, or datasecs in a dict.

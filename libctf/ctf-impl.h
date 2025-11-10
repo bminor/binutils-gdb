@@ -797,6 +797,7 @@ extern ctf_ret_t ctf_add_funcobjt_sym_forced (ctf_dict_t *, int is_function,
 extern int ctf_insert_type_decl_tag (ctf_dict_t *, ctf_id_t, const char *,
 				     ctf_kind_t kind);
 extern ctf_ret_t ctf_track_enumerator (ctf_dict_t *, ctf_id_t, const char *);
+extern ctf_bool_t ctf_enum_unsigned (ctf_dict_t *, ctf_id_t);
 
 extern int ctf_dedup_atoms_init (ctf_dict_t *);
 extern int ctf_dedup (ctf_dict_t *, ctf_dict_t **, uint32_t ninputs,

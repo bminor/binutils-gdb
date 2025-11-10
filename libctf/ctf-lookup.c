@@ -486,10 +486,10 @@ ctf_lookup_variable (ctf_dict_t *fp, const char *name)
    an enum in the child..  */
 
 ctf_id_t
-ctf_lookup_enumerator (ctf_dict_t *fp, const char *name, int64_t *enum_value)
+ctf_lookup_enumerator (ctf_dict_t *fp, const char *name, ctf_enum_value_t *enum_value)
 {
   ctf_id_t type;
-  int64_t enum_int_value;
+  ctf_enum_value_t val;
 
   if (fp->ctf_flags & LCTF_NO_STR)
     return (ctf_set_typed_errno (fp, ECTF_NOPARENT));
@@ -516,9 +516,9 @@ ctf_lookup_enumerator (ctf_dict_t *fp, const char *name, int64_t *enum_value)
   if (enum_value == NULL)
     return type;
 
-  if (ctf_enum_value (fp, type, name, &enum_int_value) < 0)
+  if (ctf_enum_value (fp, type, name, &val) < 0)
     return CTF_ERR;
-  *enum_value = enum_int_value;
+  *enum_value = val;
 
   return type;
 }
@@ -530,7 +530,7 @@ ctf_lookup_enumerator (ctf_dict_t *fp, const char *name, int64_t *enum_value)
 
 ctf_id_t
 ctf_lookup_enumerator_next (ctf_dict_t *fp, const char *name,
-			    ctf_next_t **it, int64_t *val)
+			    ctf_next_t **it, ctf_enum_value_t *valp)
 {
   ctf_next_t *i = *it;
   int found = 0;
@@ -625,21 +625,24 @@ ctf_lookup_enumerator_next (ctf_dict_t *fp, const char *name,
       if (LCTF_KIND (fp, i->ctn_tp) == CTF_K_ENUM64)
 	is_enum64 = 1;
 
-      if (is_enum64)
-	  this_name = ctf_strptr (fp, i->u.ctn_en64->cte_name);
-	else
-	  this_name = ctf_strptr (fp, i->u.ctn_en->cte_name);
+      /* ctf_enum_t and ctf_enum64_t have the name in common, and ctn_en and
+	 ctn_en64 are in a union.  */
+      this_name = ctf_strptr (fp, i->u.ctn_en->cte_name);
 
       i->ctn_n--;
 
       if (strcmp (name, this_name) == 0)
 	{
-	  if (val)
+	  if (valp)
 	    {
-	      if (is_enum64)
-		*val = ((uint64_t) i->u.ctn_en64->cte_val_high) << 32 | (i->u.ctn_en64->cte_val_low);
-	      else
-		*val = i->u.ctn_en->cte_value;
+	      ctf_enum_value_t val;
+
+	      if (ctf_enum_value (fp, i->i.ctn_type, this_name, &val) < 0)
+		{
+		  err = ctf_errno (fp);
+		  goto end;
+		}
+	      *valp = val;
 	    }
 	  found = 1;
 
@@ -649,7 +652,10 @@ ctf_lookup_enumerator_next (ctf_dict_t *fp, const char *name,
 	  i->ctn_n = 0;
 	}
 
-      i->u.ctn_en++;
+      if (is_enum64)
+	i->u.ctn_en64++;
+      else
+	i->u.ctn_en++;
     }
   while (!found);
 

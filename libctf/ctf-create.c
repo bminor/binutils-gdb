@@ -2157,8 +2157,7 @@ enumcmp (ctf_dict_t *fp, ctf_id_t type, ctf_bundle_t *ctb, ctf_dict_t *err_fp)
 {
   ctf_next_t *i = NULL;
   const char *name;
-  int64_t value;
-  int64_t bvalue;
+  ctf_enum_value_t value, bvalue;
 
   while ((name = ctf_enum_next (fp, type, &i, &value)) != NULL)
     {
@@ -2169,12 +2168,23 @@ enumcmp (ctf_dict_t *fp, ctf_id_t type, ctf_bundle_t *ctb, ctf_dict_t *err_fp)
 			_("conflict due to enum %s iteration error"), name);
 	  return 1;
 	}
-      if (value != bvalue)
+      if (memcmp (&value.encoding, &bvalue.encoding, sizeof (ctf_encoding_t)) != 0)
+	{
+	  ctf_next_destroy (i);
+	  ctf_err_warn (err_fp, 1, ECTF_CONFLICT,
+			_("conflict due to enum encoding change: %s versus %s"),
+			value.encoding.cte_format & CTF_INT_SIGNED
+			? "signed" : "unsigned",
+			bvalue.encoding.cte_format & CTF_INT_SIGNED
+			? "signed" : "unsigned");
+	  return 1;
+	}
+      if (value.val != bvalue.val)
 	{
 	  ctf_next_destroy (i);
 	  ctf_err_warn (err_fp, 1, ECTF_CONFLICT,
 			_("conflict due to enum value change: %li versus %li"),
-			value, bvalue);
+			value.val, bvalue.uval);
 	  return 1;
 	}
     }
@@ -2776,7 +2786,7 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 	  ctf_snapshot_id_t snap = ctf_snapshot (dst_fp);
 	  ctf_next_t *it = NULL;
 	  const char *enum_name;
-	  int64_t value;
+	  ctf_enum_value_t value;
 
 	  if (ctf_type_encoding (src_fp, src_type, &src_en) != 0)
 	    return (ctf_set_typed_errno (dst_fp, ctf_errno (src_fp)));
@@ -2788,7 +2798,7 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 	  while ((enum_name = ctf_enum_next (src_fp, src_type,
 					     &it, &value)) != NULL)
 	    {
-	      if (ctf_add_enumerator (dst_fp, dst_type, enum_name, value) < 0)
+	      if (ctf_add_enumerator (dst_fp, dst_type, enum_name, value.val) < 0)
 		goto enum_err;
 	    }
 	  if (ctf_errno (src_fp) != ECTF_NEXT_END)

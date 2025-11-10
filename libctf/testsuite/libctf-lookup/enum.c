@@ -10,7 +10,7 @@ main (int argc, char *argv[])
   ctf_id_t type;
   const char *name;
   ctf_next_t *i = NULL;
-  int val;
+  ctf_enum_value_t val;
   int err;
 
   if (argc != 2)
@@ -30,8 +30,10 @@ main (int argc, char *argv[])
     goto err;
   if (ctf_enum_value (fp, type, "ENUMSAMPLE_1", &val) < 0)
     goto err;
-  printf ("Enum e enumerand ENUMSAMPLE_1 has value %i\n", val);
+  printf ("Enum e enumerand ENUMSAMPLE_1 has value %i\n", val.val);
 
+  val.val = 1;
+  val.encoding = {0};
   if ((name = ctf_enum_name (fp, type, 1)) == NULL)
     goto err;
   printf ("Enum e enumerand %s has value 1\n", name);
@@ -43,7 +45,7 @@ main (int argc, char *argv[])
 
   while ((name = ctf_enum_next (fp, type, &i, &val)) != NULL)
     {
-      printf ("next test: %s has value %i\n", name, val);
+      printf ("next test: %s has value %i\n", name, val.val);
     }
   if (ctf_errno (fp) != ECTF_NEXT_END)
     goto nerr;

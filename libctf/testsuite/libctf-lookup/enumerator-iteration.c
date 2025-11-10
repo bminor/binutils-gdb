@@ -16,7 +16,7 @@ print_constants (ctf_archive_t *ctf, const char *name)
   int err;
   ctf_dict_t *fp;
   ctf_id_t type;
-  int64_t val;
+  ctf_enum_value_t val;
 
   while ((type = ctf_arc_lookup_enumerator_next (ctf, name, &i,
 						 &val, &fp, &err)) != CTF_ERR)
@@ -24,7 +24,7 @@ print_constants (ctf_archive_t *ctf, const char *name)
       char *foo;
 
       printf ("%s in %s has value %li\n", name,
-	      foo = ctf_type_aname (fp, type), (long int) val);
+	      foo = ctf_type_aname (fp, type), val.val);
       free (foo);
 
       ctf_dict_close (fp);
@@ -44,7 +44,7 @@ main (int argc, char *argv[])
   int err;
   ctf_id_t type;
   ctf_next_t *i = NULL;
-  int64_t val;
+  ctf_enum_value_t val;
   int counter = 0;
 
   if (argc != 2)
@@ -92,7 +92,7 @@ main (int argc, char *argv[])
 	goto set_flag_err;
 
       printf ("IENUMSAMPLE2_2 in %s has value %li\n",
-	      foo = ctf_type_aname (fp, type), (long int) val);
+	      foo = ctf_type_aname (fp, type), val.val);
       free (foo);
 
       if ((type = ctf_add_enum (fp, CTF_ADD_ROOT, "ie3", 0, 0)) == CTF_ERR)
@@ -158,7 +158,7 @@ main (int argc, char *argv[])
 
       if (ctf_lookup_enumerator (fp, "DYNADD", &val) == CTF_ERR)
 	goto enumerator_lookup_err;
-      printf ("direct lookup: DYNADD value: %i\n", (int) val);
+      printf ("direct lookup: DYNADD value: %i\n", val.val);
 
       if ((err = ctf_lookup_enumerator (fp, "DYNADD2", &val)) >= 0 ||
 	  ctf_errno (fp) != ECTF_DUPLICATE)
@@ -172,7 +172,7 @@ main (int argc, char *argv[])
 	    {
 	      char *foo;
 	      printf ("direct lookup: hidden lookup did not return ECTF_NOENUMNAM but rather %li in %s\n",
-		      (long int) val, foo = ctf_type_aname (fp, type));
+		      val.val, foo = ctf_type_aname (fp, type));
 	      free (foo);
 	    }
 	  else

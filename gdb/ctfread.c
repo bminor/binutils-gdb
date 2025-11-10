@@ -679,14 +679,14 @@ process_enum_type (struct ctf_context *ccp, ctf_id_t tid)
   struct ctf_field_info fi;
   ctf_next_t *it = NULL;
   const char *name;
-  int64_t value;
+  ctf_enum_value_t value;
 
   type = read_enum_type (ccp, tid);
 
   fi.cur_context = ccp;
   fi.ptype = type;
   while ((name = ctf_enum_next (ccp->dict, tid, &it, &value)) != NULL)
-    ctf_add_enum_member_cb (name, value, &fi);
+    ctf_add_enum_member_cb (name, value.val, &fi);
 
   if (ctf_errno (ccp->dict) != ECTF_NEXT_END)
     complaint (_("ctf_enum_next process_enum_type failed - %s"),
@@ -1146,11 +1146,10 @@ get_objfile_text_range (struct objfile *of, size_t *tsize)
 static void
 ctf_psymtab_add_enums (struct ctf_context *ccp, ctf_id_t tid)
 {
-  int64_t val;
   const char *ename;
   ctf_next_t *i = nullptr;
 
-  while ((ename = ctf_enum_next (ccp->dict, tid, &i, &val)) != nullptr)
+  while ((ename = ctf_enum_next (ccp->dict, tid, &i, NULL)) != nullptr)
     {
       ccp->pst->add_psymbol (ename, true,
 			     VAR_DOMAIN, LOC_CONST, -1,

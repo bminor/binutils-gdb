@@ -1104,7 +1104,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
     case CTF_K_ENUM:
     case CTF_K_ENUM64:
       {
-	int64_t val;
+	ctf_enum_value_t val;
 	const char *ename;
 	ssize_t size;
 	ctf_bool_t enum_unsigned = ctf_enum_unsigned (input, type);
@@ -1117,7 +1117,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	  {
 	    ctf_dedup_sha1_add (&hash, ename, strlen (ename) + 1, "enumerator",
 				depth);
-	    ctf_dedup_sha1_add (&hash, &val, sizeof (val), "enumerand", depth);
+	    ctf_dedup_sha1_add (&hash, &val, sizeof (val.val), "enumerand", depth);
 	  }
 	if (ctf_errno (input) != ECTF_NEXT_END)
 	  {
@@ -3558,7 +3558,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
     case CTF_K_ENUM:
     case CTF_K_ENUM64:
       {
-	int64_t val;
+	ctf_enum_value_t val;
 	ctf_encoding_t en;
 	errtype = _("enum");
 
@@ -3568,7 +3568,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	if (isroot && cu_mapping_phase == 2)
 	  {
 	    const char *enumerand;
-	    while ((enumerand = ctf_enum_next (input, type, &i, &val)) != NULL)
+	    while ((enumerand = ctf_enum_next (input, type, &i, NULL)) != NULL)
 	      {
 		if (is_conflicting && name
 		    && ctf_dynhash_lookup (target->ctf_names, enumerand) != NULL)
@@ -3593,7 +3593,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 
 	while ((name = ctf_enum_next (input, type, &i, &val)) != NULL)
 	  {
-	    if (ctf_add_enumerator (target, new_type, name, val) < 0)
+	    if (ctf_add_enumerator (target, new_type, name, val.val) < 0)
 	      {
 		ctf_err_warn (target, 0, ctf_errno (target),
 			      _("%s (%i): cannot add enumeration value %s "

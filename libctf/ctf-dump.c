@@ -862,7 +862,7 @@ ctf_dump_type (ctf_dict_t *fp, ctf_id_t id, int hidden,
       int i = 0;
       const char *enumerand;
       char *bit;
-      int64_t value;
+      ctf_enum_value_t value;
 
       while ((enumerand = ctf_enum_next (fp, id,
 					 &it, &value)) != NULL)
@@ -875,10 +875,10 @@ ctf_dump_type (ctf_dict_t *fp, ctf_id_t id, int hidden,
 
 	  str = str_append (str, indent);
 
-	  if (!ctf_enum_unsigned (fp, id))
-	    ret = asprintf (&bit, "%s: %" PRIi64 "\n", enumerand, value);
+	  if (value.encoding.cte_format & CTF_INT_SIGNED)
+	    ret = asprintf (&bit, "%s: %" PRIi64 "\n", enumerand, value.val);
 	  else
-	    ret = asprintf (&bit, "%s: %" PRIu64 "\n", enumerand, (uint64_t) value);
+	    ret = asprintf (&bit, "%s: %" PRIu64 "\n", enumerand, value.uval);
 
 	  if (ret < 0)
 	    {
