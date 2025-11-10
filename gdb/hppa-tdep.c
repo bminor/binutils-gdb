@@ -33,6 +33,8 @@
 #include "trad-frame.h"
 #include "frame-unwind.h"
 #include "frame-base.h"
+#include "remote.h"
+#include "target-descriptions.h"
 
 #include "gdbcore.h"
 #include "cli/cli-cmds.h"
@@ -42,6 +44,14 @@
 #include <algorithm>
 
 static bool hppa_debug = false;
+
+/* Properties (for struct target_desc) describing the g/G packet
+   layout.  */
+#define PROPERTY_GP32 "internal: transfers-32bit-registers"
+#define PROPERTY_GP64 "internal: transfers-64bit-registers"
+
+static target_desc_up hppa_tdesc32;
+static target_desc_up hppa_tdesc64;
 
 /* Some local constants.  */
 static const int hppa32_num_regs = 128;
@@ -2978,6 +2988,19 @@ hppa_skip_trampoline_code (const frame_info_ptr &frame, CORE_ADDR pc)
 
    -- chastain 2003-12-18  */
 
+static void
+hppa_register_g_packet_guesses (struct gdbarch *gdbarch)
+{
+  /* If the size matches the set of 32-bit or 64-bit integer registers,
+     assume that's what we've got.  */
+  register_remote_g_packet_guess (gdbarch, hppa32_num_regs * 4,
+				  hppa_tdesc32.get ());
+  register_remote_g_packet_guess (gdbarch, hppa64_num_regs * 8,
+				  hppa_tdesc64.get ());
+
+  /* Otherwise we don't have a useful guess.  */
+}
+
 static struct gdbarch *
 hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
@@ -2991,14 +3014,33 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     = gdbarch_alloc (&info, gdbarch_tdep_up (new hppa_gdbarch_tdep));
   hppa_gdbarch_tdep *tdep = gdbarch_tdep<hppa_gdbarch_tdep> (gdbarch);
 
-  /* Determine from the bfd_arch_info structure if we are dealing with
-     a 32 or 64 bits architecture.  If the bfd_arch_info is not available,
-     then default to a 32bit machine.  */
-  if (info.bfd_arch_info != NULL)
-    tdep->bytes_per_address =
-      info.bfd_arch_info->bits_per_address / info.bfd_arch_info->bits_per_byte;
+  /* Determine from the target description if we are dealing with
+     a 32 or 64 bits architecture.  If the target description is not
+     available, then check whether bfd_arch_info could be used.
+     Otherwise default to a 32-bit machine.
+  */
+  if (info.target_desc != nullptr)
+    {
+      if (tdesc_property (info.target_desc, PROPERTY_GP64) != nullptr)
+	tdep->bytes_per_address = 8;
+      else if (tdesc_property (info.target_desc, PROPERTY_GP32) != nullptr)
+	tdep->bytes_per_address = 4;
+      else
+	{
+	  warning (_("The target returned a target description but this GDB "
+		     "doesn't support target descriptions for the HP/PA"
+		     "architecture.  Assuming standard 32-bit register"
+		     "layout."));
+	  tdep->bytes_per_address = 4;
+	}
+    }
+  else if (info.bfd_arch_info != nullptr)
+      tdep->bytes_per_address =
+	info.bfd_arch_info->bits_per_address / info.bfd_arch_info->bits_per_byte;
   else
     tdep->bytes_per_address = 4;
+
+  hppa_register_g_packet_guesses (gdbarch);
 
   tdep->find_global_pointer = hppa_find_global_pointer;
 
@@ -3122,6 +3164,11 @@ hppa_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 INIT_GDB_FILE (hppa_tdep)
 {
   gdbarch_register (bfd_arch_hppa, hppa_gdbarch_init, hppa_dump_tdep);
+  hppa_tdesc32 = allocate_target_description ();
+  set_tdesc_property (hppa_tdesc32.get(), PROPERTY_GP32, "");
+
+  hppa_tdesc64 = allocate_target_description ();
+  set_tdesc_property (hppa_tdesc64.get(), PROPERTY_GP64, "");
 
   add_cmd ("unwind", class_maintenance, unwind_command,
 	   _("Print unwind table entry at given address."),
