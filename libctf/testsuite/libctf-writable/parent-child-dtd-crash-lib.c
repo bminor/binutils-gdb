@@ -146,7 +146,7 @@ dtd_crash (enum crash_method method, int parent_bigger)
 	if ((stype = ctf_add_array (pfp, CTF_ADD_ROOT, &ar)) < 0)
 	  goto create_child;
 
-	if (ctf_set_array (cfp, stype, &ar) == CTF_ERR)
+	if (ctf_array_set_info (cfp, stype, &ar) == CTF_ERR)
 	  goto create_child;
 	break;
       }

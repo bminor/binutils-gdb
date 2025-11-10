@@ -121,7 +121,7 @@ main (int argc, char *argv[])
   if ((type = ctf_type_reference (fp, type)) == CTF_ERR)
     fprintf (stderr, "Lookup of type reffed by an_array failed: %s\n", ctf_errmsg (ctf_errno (fp)));
 
-  if (ctf_set_array (fp, type, &ar) == 0)
+  if (ctf_array_set_info (fp, type, &ar) == 0)
     fprintf (stderr, "allowed to set array in readonly portion\n");
 
   if (ctf_errno (fp) != ECTF_RDONLY)

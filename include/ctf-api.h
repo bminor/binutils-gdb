@@ -1066,7 +1066,7 @@ extern ctf_id_t ctf_add_section_variable (ctf_dict_t *, uint32_t,
 
 /* Set the size and member and index types of an array.  */
 
-extern ctf_ret_t ctf_set_array (ctf_dict_t *, ctf_id_t, const ctf_arinfo_t *);
+extern ctf_ret_t ctf_array_set_info (ctf_dict_t *, ctf_id_t, const ctf_arinfo_t *);
 
 /* Mark a type as conflicting, residing in some other translation unit with a
    given name.  The type is hidden from all name lookups, just like

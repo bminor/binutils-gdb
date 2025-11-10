@@ -138,7 +138,7 @@ LIBCTF_2.0 {
 	ctf_add_member;
 	ctf_add_member_bitfield;
 
-	ctf_set_array;
+	ctf_array_set_info;
 	ctf_set_conflicting;
 
 	ctf_update;

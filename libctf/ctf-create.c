@@ -898,7 +898,7 @@ ctf_add_array (ctf_dict_t *fp, uint32_t flag, const ctf_arinfo_t *arp)
 }
 
 ctf_ret_t
-ctf_set_array (ctf_dict_t *fp, ctf_id_t type, const ctf_arinfo_t *arp)
+ctf_array_set_info (ctf_dict_t *fp, ctf_id_t type, const ctf_arinfo_t *arp)
 {
   ctf_dict_t *ofp = fp;
   ctf_dtdef_t *dtd;
@@ -911,7 +911,7 @@ ctf_set_array (ctf_dict_t *fp, ctf_id_t type, const ctf_arinfo_t *arp)
   idx = ctf_type_to_index (fp, type);
   dtd = ctf_dtd_lookup (fp, type);
 
-  /* You can only call ctf_set_array on a type you have added, not a
+  /* You can only call ctf_array_set_info on a type you have added, not a
      type that was read in via ctf_open.  */
   if (idx < fp->ctf_stypes)
     return (ctf_set_errno (ofp, ECTF_RDONLY));
