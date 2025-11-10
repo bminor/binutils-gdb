@@ -128,7 +128,9 @@ proc fpc_compile {source destfile type options} {
 	    if {[board_info $dest exists debug_flags]} {
 		append add_flags " [board_info $dest debug_flags]"
 	    } else {
-		append add_flags " -g"
+		# GDB no longer supports STABS, so force DWARF debug info.
+		# Use v2 assuming support is more mature than later versions.
+		append add_flags " -g -gw2"
 	    }
 	}
 	if { $i == "class" } {
