@@ -35,7 +35,6 @@ LIBCTF_2.0 {
 	ctf_parent_name_set;
 	ctf_parent_dict;
 	ctf_type_isparent;
-	ctf_type_ischild;
 
 	ctf_import;
 	ctf_setmodel;

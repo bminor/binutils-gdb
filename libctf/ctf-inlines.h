@@ -90,6 +90,12 @@ ctf_assert_internal (ctf_dict_t *fp, const char *file, size_t line,
   return expr;
 }
 
+static inline ctf_bool_t
+ctf_type_ischild (const ctf_dict_t *fp, ctf_id_t id)
+{
+  return (!ctf_type_isparent (fp, id));
+}
+
 /* Un-inline these functions if debugging, so you can drop breakpoints on the
    setting of any error anywhere by the library.  */
 

@@ -536,6 +536,9 @@ extern void ctf_dict_close (ctf_dict_t *);
    up already, but if opening via raw low-level calls, you need to figure
    out which dict is the parent and set it on the child via ctf_import().
 
+   To determine whether a CTF type is in a child, use !ctf_type_isparent().
+   (ctf_type_isparent cannot fail.)
+
    Almost all operations other than ctf_import and ctf_close do not work on
    child dicts that have not yet had ctf_import called on them; in particular,
    name lookups and type lookup in general are broken, as is type addition.  */
@@ -544,7 +547,6 @@ extern const char *ctf_cuname (ctf_dict_t *);
 extern ctf_dict_t *ctf_parent_dict (ctf_dict_t *);
 extern const char *ctf_parent_name (ctf_dict_t *);
 extern ctf_bool_t ctf_type_isparent (const ctf_dict_t *, ctf_id_t);
-extern ctf_bool_t ctf_type_ischild (const ctf_dict_t *, ctf_id_t);
 extern ctf_ret_t ctf_import (ctf_dict_t *child, ctf_dict_t *parent);
 
 /* Set these names (used when creating dicts).  */

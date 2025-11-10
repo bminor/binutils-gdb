@@ -59,12 +59,6 @@ ctf_type_isparent (const ctf_dict_t *fp, ctf_id_t id)
   return 0;
 }
 
-ctf_bool_t
-ctf_type_ischild (const ctf_dict_t *fp, ctf_id_t id)
-{
-  return (!ctf_type_isparent (fp, id));
-}
-
 /* Get the index in the internal type array (or otherwise) for a given type ID.
    Only ever called on the right dictionary for the type, and can fail otherwise.
    If called on an invalid type, may return an index that does not correspond to
