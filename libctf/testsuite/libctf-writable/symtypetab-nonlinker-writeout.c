@@ -37,7 +37,6 @@ try_maybe_reporting (int report)
   ctf_id_t func, func2, func3, base, base2, base3;
   ctf_encoding_t e = { CTF_INT_SIGNED, 0, sizeof (long) };
   ctf_id_t dummy = 0;
-  ctf_funcinfo_t fi;
   ctf_next_t *i = NULL;
   ctf_id_t symtype;
   const char *symname;
@@ -60,9 +59,9 @@ try_maybe_reporting (int report)
   fi.ctc_return = base;
   fi.ctc_argc = 0;
   fi.ctc_flags = 0;
-  if (((func = ctf_add_function (fp, CTF_ADD_ROOT, &fi, &dummy)) == CTF_ERR) ||
-      ((func2 = ctf_add_function (fp, CTF_ADD_ROOT, &fi, &dummy)) == CTF_ERR) ||
-      ((func3 = ctf_add_function (fp, CTF_ADD_ROOT, &fi, &dummy)) == CTF_ERR))
+  if (((func = ctf_add_function (fp, CTF_ADD_ROOT, base, 0, &dummy, 0)) == CTF_ERR) ||
+      ((func2 = ctf_add_function (fp, CTF_ADD_ROOT, base, 0, &dummy, 0)) == CTF_ERR) ||
+      ((func3 = ctf_add_function (fp, CTF_ADD_ROOT, base, 0, &dummy, 0)) == CTF_ERR))
     goto create_types_err;
 
   /* Add some function and data symbols.  We intentionally add the symbols in

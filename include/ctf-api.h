@@ -203,13 +203,6 @@ typedef struct ctf_arinfo
   size_t ctr_nelems;		/* Number of elements.  */
 } ctf_arinfo_t;
 
-typedef struct ctf_funcinfo
-{
-  ctf_id_t ctc_return;		/* Function return type.  */
-  size_t ctc_argc;		/* Number of typed arguments to function.  */
-  uint32_t ctc_flags;		/* Function attributes (see below).  */
-} ctf_funcinfo_t;
-
 typedef struct ctf_enum_value	/* The value of an enumerator.  Can just be
 				   cast to an int/int64 if you like. */
 {
@@ -238,7 +231,10 @@ typedef struct ctf_snapshot_id
   unsigned long snapshot_id;	/* Snapshot id at time of snapshot.  */
 } ctf_snapshot_id_t;
 
-#define	CTF_FUNC_VARARG	0x1	/* Function arguments end with varargs.  */
+typedef enum ctf_func_type_flags
+  {
+    CTF_FUNC_VARARG = 0x1	/* Function arguments end with varargs.  */
+  } ctf_func_type_flags_t;
 
 /* Functions that return a ctf_id_t use the following value to indicate failure.
    ctf_errno can be used to obtain an error code.  Functions that return
@@ -621,21 +617,19 @@ typedef enum ctf_btf_mode
 extern int ctf_version (int ctf_version_, size_t btf_hdr_len,
 			ctf_btf_mode_t btf_mode);
 
-/* Given a symbol table index corresponding to a function symbol, return info on
-   the type of a given function's arguments or return value, or its parameter
-   names.  Vararg functions have a final arg with CTF_FUNC_VARARG on in
-   ctc_flags.  */
+/* Given a type ID relating to a function type or function linkage type, return
+   an array of arg types, and optionally in the RET argument the return type
+   too.  Vararg functions set CTF_FUNC_VARARG in the optional FLAG argument. The
+   NARGS arg gives the length of the array (optional because it will always
+   have the same value when you call both ctf_func_type and ctf_func_arg_names,
+   so you only need to get it from one of them).  */
 
-extern int ctf_func_info (ctf_dict_t *, unsigned long, ctf_funcinfo_t *);
-extern int ctf_func_args (ctf_dict_t *, unsigned long, uint32_t, ctf_id_t *);
-extern int ctf_func_arg_names (ctf_dict_t *, unsigned long, uint32_t, const char **);
+extern ctf_id_t *ctf_func_type (ctf_dict_t *, ctf_id_t, ctf_id_t *ret_type,
+			 	ctf_func_type_flags_t *flags, size_t *nargs);
 
-/* As above, but for CTF_K_FUNCTION or CTF_K_FUNC_LINKAGE types in CTF dicts.  */
+/* Likewise, for the argument names.  */
 
-extern int ctf_func_type_info (ctf_dict_t *, ctf_id_t, ctf_funcinfo_t *);
-extern int ctf_func_type_args (ctf_dict_t *, ctf_id_t, uint32_t, ctf_id_t *);
-extern int ctf_func_type_arg_names (ctf_dict_t *, ctf_id_t, uint32_t,
-				    const char **);
+extern const char **ctf_func_arg_names (ctf_dict_t *, ctf_id_t, size_t *nargs);
 
 /* Get the linkage of a CTF_K_FUNC_LINKAGE or variable.  */
 
@@ -1005,9 +999,12 @@ extern ctf_id_t ctf_add_integer (ctf_dict_t *, uint32_t, const char *,
 /* ctf_add_function adds an unnamed function with a bundle of arguments and a
    return type.  ctf_add_function_linkage provides a function with a name
    and linkage, which is one of the CTF_FUNC_LINKAGE_* constants.  */
-extern ctf_id_t ctf_add_function (ctf_dict_t *, uint32_t,
-				  const ctf_funcinfo_t *, const ctf_id_t *,
-				  const char **arg_names);
+
+extern ctf_id_t ctf_add_function (ctf_dict_t *fp, uint32_t flag,
+				  ctf_id_t ret_type, ctf_func_type_flags_t flags,
+				  const ctf_id_t *argv, const char **arg_names,
+				  size_t nargs);
+
 extern ctf_id_t ctf_add_function_linkage (ctf_dict_t *, uint32_t,
 					  ctf_id_t, const char *,
 					  ctf_linkages_t linkage);

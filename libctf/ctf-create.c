@@ -1027,12 +1027,15 @@ ctf_add_tag (ctf_dict_t *fp, uint32_t flag, ctf_id_t type, const char *tag,
 
 	case CTF_K_FUNCTION:
 	  {
-	    ctf_funcinfo_t fi;
+	    ctf_id_t *args;
+	    size_t nargs;
 
-	    if (ctf_func_type_info (fp, func_type, &fi) < 0)
+	    if ((args = ctf_func_type (fp, func_type, NULL, NULL,
+				       &nargs)) == NULL)
 	      return -1;	/* errno is set for us.  */
+	    free (args);
 
-	    if ((size_t) component_idx >= fi.ctc_argc)
+	    if ((size_t) component_idx >= nargs)
 	      return (ctf_set_typed_errno (fp, ECTF_BADCOMPONENT));
 
 	    break;
@@ -1087,9 +1090,9 @@ ctf_add_decl_tag (ctf_dict_t *fp, uint32_t flag, ctf_id_t type, const char *tag,
 }
 
 ctf_id_t
-ctf_add_function (ctf_dict_t *fp, uint32_t flag,
-		  const ctf_funcinfo_t *ctc, const ctf_id_t *argv,
-		  const char **arg_names)
+ctf_add_function (ctf_dict_t *fp, uint32_t flag, ctf_id_t ret_type,
+		  ctf_func_type_flags_t flags, const ctf_id_t *argv,
+		  const char **arg_names, size_t nargs)
 {
   ctf_dtdef_t *dtd;
   uint32_t vlen;
@@ -1097,24 +1100,23 @@ ctf_add_function (ctf_dict_t *fp, uint32_t flag,
   ctf_dict_t *tmp = fp;
   size_t i;
 
-  if (ctc == NULL || (ctc->ctc_flags & ~CTF_FUNC_VARARG) != 0
-      || (ctc->ctc_argc != 0 && argv == NULL))
+  if ((flags & ~CTF_FUNC_VARARG) != 0 || (nargs != 0 && argv == NULL))
     return (ctf_set_typed_errno (fp, EINVAL));
 
-  vlen = ctc->ctc_argc;
+  vlen = nargs;
 
   /* UPTODO: CTF_K_BIG prefix for big functions?  */
   if (vlen > 0xffff)
     return (ctf_set_typed_errno (fp, EOVERFLOW));
 
-  if (ctc->ctc_flags & CTF_FUNC_VARARG)
+  if (flags & CTF_FUNC_VARARG)
     vlen++;	       /* Add trailing zero to indicate varargs (see below).  */
 
-  if (ctc->ctc_return != 0
-      && ctf_lookup_by_id (&tmp, ctc->ctc_return, NULL) == NULL)
+  if (ret_type != 0
+      && ctf_lookup_by_id (&tmp, ret_type, NULL) == NULL)
     return CTF_ERR;				/* errno is set for us.  */
 
-  for (i = 0; i < ctc->ctc_argc; i++)
+  for (i = 0; i < nargs; i++)
     {
       tmp = fp;
       if (argv[i] != 0 && ctf_lookup_by_id (&tmp, argv[i], NULL) == NULL)
@@ -1130,16 +1132,16 @@ ctf_add_function (ctf_dict_t *fp, uint32_t flag,
 
   vdat = (ctf_param_t *) dtd->dtd_vlen;
 
-  for (i = 0; i < ctc->ctc_argc; i++)
+  for (i = 0; i < nargs; i++)
     {
       vdat[i].cfp_name = ctf_str_add (fp, arg_names[i]);
       vdat[i].cfp_type = (uint32_t) argv[i];
     }
 
   dtd->dtd_data->ctt_info = CTF_TYPE_INFO (CTF_K_FUNCTION, 0, vlen);
-  dtd->dtd_data->ctt_type = (uint32_t) ctc->ctc_return;
+  dtd->dtd_data->ctt_type = (uint32_t) ret_type;
 
-  if (ctc->ctc_flags & CTF_FUNC_VARARG)
+  if (flags & CTF_FUNC_VARARG)
     {
       vdat[vlen - 1].cfp_type = 0;   /* Add trailing zero to indicate varargs.  */
       vdat[vlen - 1].cfp_name = 0;
@@ -2606,34 +2608,25 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
     /* UPTODO: FUNC_LINKAGE, DATASEC, VAR, *TAG */
     case CTF_K_FUNCTION:
       {
-	ctf_funcinfo_t fi;
+	ctf_func_type_flags_t flags;
+	ctf_id_t ret;
 	ctf_id_t *argv;
+	size_t nargs;
 	const char **arg_names;
 	size_t i;
 
-	if (ctf_func_type_info (src_fp, src_type, &fi) < 0)
+	if ((argv = ctf_func_type (src_fp, src_type, &ret, &flags, &nargs)) == NULL)
 	  return CTF_ERR;			/* errno is set for us. */
 
-	fi.ctc_return = ctf_add_type_internal (dst_fp, src_fp,
-					       src_tp->ctt_type,
-					       proc_tracking_fp);
+	ret = ctf_add_type_internal (dst_fp, src_fp, ret, proc_tracking_fp);
 
-	if (fi.ctc_return == CTF_ERR)
-	  return CTF_ERR;			/* errno is set for us.  */
-
-	if ((argv = calloc (fi.ctc_argc, sizeof (ctf_id_t *))) == NULL)
-	  {
-	    ctf_set_errno (src_fp, errno);
-	    return CTF_ERR;
-	  }
-
-	if (ctf_func_type_args (src_fp, src_type, fi.ctc_argc, argv) < 0)
+	if (ret == CTF_ERR)
 	  {
 	    free (argv);
-	    return CTF_ERR;			/* errno is set for us. */
+	    return CTF_ERR;			/* errno is set for us.  */
 	  }
 
-	for (i = 0; i < fi.ctc_argc; i++)
+	for (i = 0; i < nargs; i++)
 	  {
 	    argv[i] = ctf_add_type_internal (dst_fp, src_fp,
 					     argv[i],
@@ -2645,22 +2638,14 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 	      }
 	  }
 
-	if ((arg_names = calloc (fi.ctc_argc, sizeof (const char **))) == NULL)
+	if ((arg_names = ctf_func_arg_names (src_fp, src_type, NULL)) == NULL)
 	  {
 	    free (argv);
-	    free (arg_names);
 	    return CTF_ERR;			/* errno is set for us. */
 	  }
 
-	if (ctf_func_type_arg_names (src_fp, src_type, fi.ctc_argc,
-				     arg_names) < 0)
-	  {
-	    free (argv);
-	    free (arg_names);
-	    return CTF_ERR;			/* errno is set for us. */
-	  }
-
-	dst_type = ctf_add_function (dst_fp, flag, &fi, argv, arg_names);
+	dst_type = ctf_add_function (dst_fp, flag, ret, flags, argv, arg_names,
+				     nargs);
 	free (argv);
 	free (arg_names);
 	break;

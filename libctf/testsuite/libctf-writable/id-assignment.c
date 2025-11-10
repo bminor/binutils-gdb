@@ -23,9 +23,7 @@ test (int empty_parent, int unserialized_parent)
   ctf_id_t first_child_type = 1;
   ctf_membinfo_t memb;
   ctf_arinfo_t ar;
-  ctf_funcinfo_t func;
-  ctf_funcinfo_t pfunc, cfunc;
-  ctf_id_t args[2], pargs[2], cargs[2];
+  ctf_id_t args[2];
 
   printf ("Testing with %s, %s parent\n", empty_parent ? "empty" : "nonempty",
 	  unserialized_parent ? "unserialized" : "serialized");
@@ -90,13 +88,10 @@ test (int empty_parent, int unserialized_parent)
 	goto parent_add_err;
       first_child_type++;
 
-      func.ctc_argc = 2;
-      func.ctc_flags = 0;
-      func.ctc_return = pprovint;
       args[0] = pptr;
       args[1] = parray;
 
-      if ((pfunction = ctf_add_function (parent, CTF_ADD_ROOT, &func, args)) == CTF_ERR)
+      if ((pfunction = ctf_add_function (parent, CTF_ADD_ROOT, pprovint, 0, args, 2)) == CTF_ERR)
 	goto parent_add_err;
       first_child_type++;
     }
@@ -152,13 +147,10 @@ test (int empty_parent, int unserialized_parent)
       if (ctf_add_member (child, ctype2, "pfunc", pfunction, CTF_NEXT_MEMBER) < 0)
 	goto child_add_memb_err;
 
-      func.ctc_argc = 2;
-      func.ctc_flags = 0;
-      func.ctc_return = pprovint;
       args[0] = pptr;
       args[1] = parray;
 
-      if ((cfunction = ctf_add_function (parent, CTF_ADD_ROOT, &func, args)) == CTF_ERR)
+      if ((cfunction = ctf_add_function (parent, CTF_ADD_ROOT, pprovint, 0, args, 2)) == CTF_ERR)
 	goto child_add_err;
       first_child_type++;
 
@@ -341,6 +333,11 @@ test (int empty_parent, int unserialized_parent)
 
   if (!empty_parent)
     {
+      size_t pnargs, cnargs;
+      ctf_func_type_flags_t pflags, cflags;
+      ctf_id_t pret, cret;
+      ctf_id_t *pargs, *cargs;
+
       if (ctf_member_info (child, ctype2, "a", &memb) < 0)
 	goto memb_err;
 
@@ -397,37 +394,28 @@ test (int empty_parent, int unserialized_parent)
 	goto func_err;
       cfunction = memb.ctm_type;
 
-      if (ctf_func_type_info (child, pfunction, &pfunc) < 0 ||
-	  ctf_func_type_info (child, cfunction, &cfunc) < 0)
+      if ((pargs = ctf_func_type (child, pfunction, &pret, &pflags, &pnargs)) == NULL
+	  || (cargs = ctf_func_type (child, cfunction, &cret, &cflags, &cnargs)) == NULL)
 	{
-	  fprintf (stderr, "func info lookup failed: %s\n", ctf_errmsg (ctf_errno (child)));
+	  fprintf (stderr, "func arg lookup failed: %s\n", ctf_errmsg (ctf_errno (child)));
 	  exit (1);
 	}
 
-      if (memcmp (&pfunc, &cfunc, sizeof (pfunc)) != 0)
+      if (pnargs != cnargs || pflags != cflags || pret != cret)
 	{
 	  fprintf (stderr, "parent and child funcs differ\n");
 	  exit (1);
 	}
 
-      if (ctf_type_kind (child, pfunc.ctc_return) != CTF_K_INTEGER)
+      if (ctf_type_kind (child, pret) != CTF_K_INTEGER)
 	{
 	  fprintf (stderr, "func return type lookup yielded kind %x, not %x\n", ctf_type_kind (child, pfunc.ctc_return), CTF_K_INTEGER);
 	  exit (1);
 	}
 
-      /* This isn't a type ID, so we're not really expecting problems here, but if
-	 there are problems, rather an error message than a buffer overrun.  */
-      if (pfunc.ctc_argc != 2)
+      if (pnargs != 2 || cnargs != 2)
 	{
-	  fprintf (stderr, "func has %i args, not 2\n", pfunc.ctc_argc);
-	  exit (1);
-	}
-
-      if (ctf_func_type_args (child, pfunction, pfunc.ctc_argc, pargs) < 0 ||
-	  ctf_func_type_args (child, cfunction, cfunc.ctc_argc, cargs) < 0)
-	{
-	  fprintf (stderr, "func arg lookup failed: %s\n", ctf_errmsg (ctf_errno (child)));
+	  fprintf (stderr, "funcs have (%i, %i) args, not 2\n", pnargs, cnargs);
 	  exit (1);
 	}
 

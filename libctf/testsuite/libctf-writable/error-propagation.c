@@ -62,7 +62,6 @@ int main (void)
   ctf_encoding_t long_encoding = { CTF_INT_SIGNED, 0, sizeof (long) };
   ctf_encoding_t void_encoding = { CTF_INT_SIGNED, 0, 0 };
   ctf_encoding_t foo;
-  ctf_funcinfo_t fi;
   ctf_id_t bar;
   int err;
 
@@ -145,21 +144,14 @@ int main (void)
   if (ctf_add_variable (parent, "base", base) < 0)
     goto child_err;
 
-  fi.ctc_return = void_id;
-  fi.ctc_argc = 0;
-  fi.ctc_flags = 0;
-  if ((function = ctf_add_function (child, CTF_ADD_ROOT, &fi, NULL)) == CTF_ERR)
+  if ((function = ctf_add_function (child, CTF_ADD_ROOT, void_id, NULL, NULL, 0)) == CTF_ERR)
     goto child_err;
 
-  desc = "func info lookup of non-function";
-  if ((ctf_func_type_info (child, base, &fi)) != CTF_ERR)
+  desc = "func type lookup of non-function";
+  if ((bar = ctf_func_type (child, base, NULL, NULL, NULL)) != CTF_ERR)
     no_prop_err ();
   check_prop_err (child, parent, ECTF_NOTFUNC);
-
-  desc = "func args lookup of non-function";
-  if ((ctf_func_type_args (child, base, 0, &bar)) != CTF_ERR)
-    no_prop_err ();
-  check_prop_err (child, parent, ECTF_NOTFUNC);
+  free (bar);
 
   /* Swap the insides of "parent" and "wrong" so we get a parent dict with
      different types than it had.  */
@@ -182,15 +174,11 @@ int main (void)
     no_prop_err ();
   check_prop_err (child, parent, ECTF_NONREPRESENTABLE);
 
-  desc = "func info lookup of nonrepresentable function";
-  if ((ctf_func_type_info (child, base, &fi)) != CTF_ERR)
+  desc = "func lookup of nonrepresentable function";
+  if ((bar = ctf_func_type_args (child, base, NULL, NULL, NULL)) != CTF_ERR)
     no_prop_err ();
   check_prop_err (child, parent, ECTF_NONREPRESENTABLE);
-
-  desc = "func args lookup of nonrepresentable function";
-  if ((ctf_func_type_args (child, base, 0, &bar)) != CTF_ERR)
-    no_prop_err ();
-  check_prop_err (child, parent, ECTF_NONREPRESENTABLE);
+  free (bar);
 
   desc = "child slice addition";
   if ((slice = ctf_add_slice (child, CTF_ADD_ROOT, base, &foo)) != CTF_ERR)

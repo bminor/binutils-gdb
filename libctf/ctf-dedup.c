@@ -989,64 +989,42 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
       }
     case CTF_K_FUNCTION:
       {
-	ctf_funcinfo_t fi;
+	ctf_id_t ret;
 	ctf_id_t *args;
+	size_t nargs;
+	ctf_func_type_flags_t func_flags;
 	const char **arg_names;
 	uint32_t j;
 
-	if (ctf_func_type_info (input, type, &fi) < 0)
+	if ((args = ctf_func_type (input, type, &ret, &func_flags,
+				   &nargs)) == NULL)
 	  {
-	    whaterr = N_("error getting func type info");
-	    goto input_err;
-	  }
-
-	if ((hval = ctf_dedup_hash_type (fp, input, inputs, input_num,
-					 fi.ctc_return, flags, depth,
-					 populate_fun)) == NULL)
-	  {
-	    whaterr = N_("error getting func return type");
-	    goto err;
-	  }
-	ctf_dedup_sha1_add (&hash, hval, strlen (hval) + 1, "func return",
-			    depth);
-	ctf_dedup_sha1_add (&hash, &fi.ctc_argc, sizeof (fi.ctc_argc),
-			    "func argc", depth);
-	ctf_dedup_sha1_add (&hash, &fi.ctc_flags, sizeof (fi.ctc_flags),
-			    "func flags", depth);
-	ADD_CITER (citers, hval);
-
-	if ((args = calloc (fi.ctc_argc, sizeof (ctf_id_t))) == NULL)
-	  {
-	    err = ENOMEM;
-	    whaterr = N_("error doing memory allocation");
-	    goto err;
-	  }
-
-	if ((args = calloc (fi.ctc_argc, sizeof (ctf_id_t))) == NULL)
-	  {
-	    err = ENOMEM;
-	    whaterr = N_("error doing memory allocation");
-	    goto err;
-	  }
-
-	if ((arg_names = calloc (fi.ctc_argc, sizeof (const char **))) == NULL)
-	  {
-	    free (args);
-	    err = ENOMEM;
-	    whaterr = N_("error doing memory allocation");
-	    goto err;
-	  }
-
-	if ((ctf_func_type_args (input, type, fi.ctc_argc, args) < 0)
-	    || (ctf_func_type_arg_names (input, type, fi.ctc_argc, arg_names) < 0))
-	  {
-	    free (args);
-	    free (arg_names);
 	    whaterr = N_("error getting func arg info");
 	    goto input_err;
 	  }
 
-	for (j = 0; j < fi.ctc_argc; j++)
+	if ((hval = ctf_dedup_hash_type (fp, input, inputs, input_num,
+					 ret, flags, depth,
+					 populate_fun)) == NULL)
+	  {
+	    whaterr = N_("error hashing func return type");
+	    goto err;
+	  }
+	ctf_dedup_sha1_add (&hash, hval, strlen (hval) + 1, "func return",
+			    depth);
+	ctf_dedup_sha1_add (&hash, &nargs, sizeof (nargs), "func nargs", depth);
+	ctf_dedup_sha1_add (&hash, &func_flags, sizeof (func_flags),
+			    "func flags", depth);
+	ADD_CITER (citers, hval);
+
+	if ((arg_names = ctf_func_arg_names (input, type, NULL)) == NULL)
+	  {
+	    free (args);
+	    whaterr = N_("error getting func arg names");
+	    goto input_err;
+	  }
+
+	for (j = 0; j < nargs; j++)
 	  {
 	    ctf_dedup_sha1_add (&hash, arg_names[j], strlen (arg_names[j]) + 1,
 				"func arg name", depth);
@@ -2829,33 +2807,20 @@ ctf_dedup_rwalk_one_output_mapping (ctf_dict_t *output,
 
     case CTF_K_FUNCTION:
       {
-	ctf_funcinfo_t fi;
+	size_t nargs;
+	ctf_id_t func_ret;
 	ctf_id_t *args;
 	uint32_t j;
 
-	if (ctf_func_type_info (fp, type, &fi) < 0)
+	if ((args = ctf_func_type (fp, type, &func_ret, NULL, &nargs)) == NULL)
 	  {
-	    whaterr = N_("error during func type info lookup");
+	    whaterr = N_("error during func args lookup");
 	    goto err_msg;
 	  }
 
-	CTF_TYPE_WALK (fi.ctc_return, err,
-		       N_("error during func return type walk"));
+	CTF_TYPE_WALK (func_ret, err, N_("error during func return type walk"));
 
-	if ((args = calloc (fi.ctc_argc, sizeof (ctf_id_t))) == NULL)
-	  {
-	    whaterr = N_("error doing memory allocation");
-	    goto err_msg;
-	  }
-
-	if (ctf_func_type_args (fp, type, fi.ctc_argc, args) < 0)
-	  {
-	    whaterr = N_("error doing func arg type lookup");
-	    free (args);
-	    goto err_msg;
-	  }
-
-	for (j = 0; j < fi.ctc_argc; j++)
+	for (j = 0; j < nargs; j++)
 	  CTF_TYPE_WALK (args[j], err_free_args,
 			 N_("error during func arg type walk"));
 	free (args);
@@ -3710,59 +3675,47 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 
     case CTF_K_FUNCTION:
       {
-	ctf_funcinfo_t fi;
+	size_t nargs;
+	ctf_id_t ret;
 	ctf_id_t *args;
+	ctf_func_type_flags_t func_flags;
 	const char **arg_names;
 	uint32_t j;
 
 	errtype = _("function");
-	if (ctf_func_type_info (input, type, &fi) < 0)
+	if ((args = ctf_func_type (input, type, &ret, &func_flags,
+				   &nargs)) == NULL)
 	  goto err_input;
 
-	fi.ctc_return = ctf_dedup_id_to_target (output, target, inputs, ninputs,
-						parents, input, input_num,
-						fi.ctc_return);
-	if (fi.ctc_return == CTF_ERR)
-	  goto err_input;
-
-	if ((args = calloc (fi.ctc_argc, sizeof (ctf_id_t))) == NULL)
-	  {
-	    ctf_set_errno (input, ENOMEM);
-	    goto err_input;
-	  }
-
-	errtype = _("function args");
-	if (ctf_func_type_args (input, type, fi.ctc_argc, args) < 0)
+	ret = ctf_dedup_id_to_target (output, target, inputs, ninputs,
+				      parents, input, input_num, ret);
+	if (ret == CTF_ERR)
 	  {
 	    free (args);
 	    goto err_input;
 	  }
 
-	for (j = 0; j < fi.ctc_argc; j++)
+	for (j = 0; j < nargs; j++)
 	  {
 	    args[j] = ctf_dedup_id_to_target (output, target, inputs, ninputs,
 					      parents, input, input_num,
 					      args[j]);
 	    if (args[j] == CTF_ERR)
-	      goto err_input;
-	  }
-
-	if ((arg_names = calloc (fi.ctc_argc, sizeof (const char **))) == NULL)
-	  {
-	    ctf_set_errno (input, ENOMEM);
-	    goto err_input;
+	      {
+		free (args);
+		goto err_input;
+	      }
 	  }
 
 	errtype = _("function arg names");
-	if (ctf_func_type_arg_names (input, type, fi.ctc_argc, arg_names) < 0)
+	if ((arg_names = ctf_func_arg_names (input, type, NULL)) == NULL)
 	  {
 	    free (args);
-	    free (arg_names);
 	    goto err_input;
 	  }
 
-	if ((new_type = ctf_add_function (target, isroot,
-					  &fi, args, arg_names)) == CTF_ERR)
+	if ((new_type = ctf_add_function (target, isroot, ret, func_flags, args,
+					  arg_names, nargs)) == CTF_ERR)
 	  {
 	    free (args);
 	    free (arg_names);

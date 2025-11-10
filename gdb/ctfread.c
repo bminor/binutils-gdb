@@ -603,34 +603,31 @@ read_func_kind_type (struct ctf_context *ccp, ctf_id_t tid)
   struct objfile *of = ccp->of;
   ctf_dict_t *dict = ccp->dict;
   struct type *type, *rettype, *atype;
-  ctf_funcinfo_t cfi;
-  uint32_t argc;
+  ctf_func_type_flags_t cflags;
+  ctf_id_t cret;
+  ctf_id_t *argv;
+  size_t argc;
 
   type = type_allocator (of, language_c).new_type ();
 
   type->set_code (TYPE_CODE_FUNC);
-  if (ctf_func_type_info (dict, tid, &cfi) < 0)
+  if ((argv = ctf_func_type (dict, tid, &cret, &cflags, &argc)) == NULL)
     {
       const char *fname = ctf_type_name_raw (dict, tid);
       error (_("Error getting function type info: %s"),
 	     fname == nullptr ? "noname" : fname);
     }
-  rettype = fetch_tid_type (ccp, cfi.ctc_return);
+  rettype = fetch_tid_type (ccp, cret);
   type->set_target_type (rettype);
   set_type_align (type, ctf_type_align (dict, tid));
 
   /* Set up function's arguments.  */
-  argc = cfi.ctc_argc;
   type->set_num_fields (argc);
-  if ((cfi.ctc_flags & CTF_FUNC_VARARG) != 0)
+  if ((cflags & CTF_FUNC_VARARG) != 0)
     type->set_has_varargs (true);
 
   if (argc != 0)
     {
-      std::vector<ctf_id_t> argv (argc);
-      if (ctf_func_type_args (dict, tid, argc, argv.data ()) == CTF_ERR)
-	return nullptr;
-
       type->alloc_fields (argc);
       struct type *void_type = builtin_type (of)->builtin_void;
       /* If failed to find the argument type, fill it with void_type.  */
@@ -643,7 +640,7 @@ read_func_kind_type (struct ctf_context *ccp, ctf_id_t tid)
 	    type->field (iparam).set_type (void_type);
 	}
     }
-
+  free (argv);
   return set_tid_type (of, tid, type);
 }
 
