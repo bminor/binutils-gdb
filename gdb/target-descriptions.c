@@ -26,11 +26,9 @@
 #include "reggroups.h"
 #include "target.h"
 #include "target-descriptions.h"
-#include "xml-support.h"
 #include "xml-tdesc.h"
 #include "osabi.h"
 
-#include "gdbsupport/gdb_obstack.h"
 #include "inferior.h"
 #include <algorithm>
 #include "completer.h"
