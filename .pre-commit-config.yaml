@@ -103,7 +103,6 @@ repos:
       entry: gdb/contrib/check-whitespace-pre-commit.sh
       files: '^(gdb(support|server)?)/.*$'
       pass_filenames: true
-      verbose: true
       stages: [pre-commit]
   - repo: https://github.com/nmoroze/tclint
     rev: v0.6.1
