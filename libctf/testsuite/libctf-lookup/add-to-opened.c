@@ -64,7 +64,7 @@ main (int argc, char *argv[])
   if (ctf_errno (fp) != ECTF_RDONLY)
     fprintf (stderr, "unexpected error %s attempting to add union in readonly portion\n", ctf_errmsg (ctf_errno (fp)));
 
-  if (ctf_add_enum (fp, CTF_ADD_ROOT, "an_enum") == 0)
+  if (ctf_add_enum (fp, CTF_ADD_ROOT, "an_enum", 0, 0) == 0)
     fprintf (stderr, "allowed to add enum existing in readonly portion\n");
 
   if (ctf_errno (fp) != ECTF_RDONLY)
@@ -82,7 +82,7 @@ main (int argc, char *argv[])
   if (ctf_errno (fp) != ECTF_RDONLY)
     fprintf (stderr, "unexpected error %s attempting to promote union forward in readonly portion\n", ctf_errmsg (ctf_errno (fp)));
 
-  if (ctf_add_enum (fp, CTF_ADD_ROOT, "enum_forward") == 0)
+  if (ctf_add_enum (fp, CTF_ADD_ROOT, "enum_forward", 0, 0) == 0)
     fprintf (stderr, "allowed to promote enum forward existing in readonly portion\n");
 
   if (ctf_errno (fp) != ECTF_RDONLY)

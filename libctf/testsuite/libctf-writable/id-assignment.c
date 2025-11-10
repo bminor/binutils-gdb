@@ -101,7 +101,7 @@ test (int empty_parent, int unserialized_parent)
       first_child_type++;
     }
 
-  if ((ctype = ctf_add_enum (child, CTF_ADD_ROOT, "wombat")) == CTF_ERR)
+  if ((ctype = ctf_add_enum (child, CTF_ADD_ROOT, "wombat", 0, 0)) == CTF_ERR)
     goto child_add_err;
 
   if ((ctype2 = ctf_add_struct (child, CTF_ADD_ROOT, "foo", 0, 0, 0)) == CTF_ERR)

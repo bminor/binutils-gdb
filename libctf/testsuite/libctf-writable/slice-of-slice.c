@@ -23,7 +23,7 @@ int main (void)
       return 1;
     }
 
-  if ((base = ctf_add_enum_encoded (fp, CTF_ADD_ROOT, "enom", &long_encoding))
+  if ((base = ctf_add_enum (fp, CTF_ADD_ROOT, "enom", 0, &long_encoding))
       == CTF_ERR)
     goto err;
 

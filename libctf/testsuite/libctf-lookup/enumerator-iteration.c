@@ -95,7 +95,7 @@ main (int argc, char *argv[])
 	      foo = ctf_type_aname (fp, type), (long int) val);
       free (foo);
 
-      if ((type = ctf_add_enum (fp, CTF_ADD_ROOT, "ie3")) == CTF_ERR)
+      if ((type = ctf_add_enum (fp, CTF_ADD_ROOT, "ie3", 0, 0)) == CTF_ERR)
 	goto enum_add_err;
 
       if (ctf_add_enumerator (fp, type, "DYNADD", counter += 10) < 0)
@@ -137,7 +137,7 @@ main (int argc, char *argv[])
 	  || ctf_errno (fp) != ECTF_DUPLICATE)
 	fprintf (stderr, "Duplicate enumerator addition did not fail as it ought to\n");
 
-      if ((type = ctf_add_enum (fp, CTF_ADD_NONROOT, "ie4_hidden")) == CTF_ERR)
+      if ((type = ctf_add_enum (fp, CTF_ADD_NONROOT, "ie4_hidden", 0, 0)) == CTF_ERR)
 	goto enum_add_err;
 
       if (ctf_add_enumerator (fp, type, "DYNADD3", counter += 10) < 0)
@@ -145,7 +145,7 @@ main (int argc, char *argv[])
       if (ctf_add_enumerator (fp, type, "DYNADD4", counter += 10) < 0)
 	goto enumerator_add_err;
 
-      if ((type = ctf_add_enum (fp, CTF_ADD_NONROOT, "ie3_hidden")) == CTF_ERR)
+      if ((type = ctf_add_enum (fp, CTF_ADD_NONROOT, "ie3_hidden", 0, 0)) == CTF_ERR)
 	goto enum_add_err;
 
       if (ctf_add_enumerator (fp, type, "DYNADD", counter += 10) < 0)

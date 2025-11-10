@@ -22,7 +22,7 @@ main (int argc, char *argv[])
   if ((root = ctf_add_forward (fp, CTF_ADD_ROOT, "foo", CTF_K_ENUM)) == CTF_ERR)
     goto add_err;
 
-  if ((nonroot = ctf_add_enum (fp, CTF_ADD_NONROOT, "foo")) == CTF_ERR)
+  if ((nonroot = ctf_add_enum (fp, CTF_ADD_NONROOT, "foo", 0, 0)) == CTF_ERR)
     goto add_err;
 
   if (nonroot == root)

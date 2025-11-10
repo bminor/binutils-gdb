@@ -3587,11 +3587,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	if (ctf_type_encoding (input, type, &en) < 0)
 	  goto err_input;
 
-	if (kind == CTF_K_ENUM)
-	  new_type = ctf_add_enum_encoded (target, isroot, name, &en);
-	else
-	  new_type = ctf_add_enum64_encoded (target, isroot, name, &en);
-
+	new_type = ctf_add_enum (target, isroot, name, kind, &en);
 	if (new_type == CTF_ERR)
 	  goto err_input;				/* errno is set for us.  */
 

@@ -951,18 +951,20 @@ extern ctf_id_t ctf_add_array (ctf_dict_t *, uint32_t,
 			       const ctf_arinfo_t *);
 extern ctf_id_t ctf_add_const (ctf_dict_t *, uint32_t, ctf_id_t);
 
-/* enums are created signed by default.  If you want an unsigned enum,
-   use ctf_add_enum_encoded() with an encoding of 0 (CTF_INT_SIGNED and
-   everything else off).  This will not create a slice, unlike all other
-   uses of ctf_add_enum_encoded(), and the result is still representable
-   as BTF.  */
+/* enums are created signed by default: an encoding of NULL is permitted and
+   means "use the default".  If you want an unsigned enum, use
+   ctf_add_enum_encoded() with an encoding of 0 (CTF_INT_SIGNED and everything
+   else off).  This will not create a slice, unlike all other uses of
+   ctf_add_enum_encoded(), and the result is still representable as BTF.
 
-extern ctf_id_t ctf_add_enum64_encoded (ctf_dict_t *, uint32_t, const char *,
-					const ctf_encoding_t *);
-extern ctf_id_t ctf_add_enum64 (ctf_dict_t *, uint32_t, const char *);
-extern ctf_id_t ctf_add_enum_encoded (ctf_dict_t *, uint32_t, const char *,
-				      const ctf_encoding_t *);
-extern ctf_id_t ctf_add_enum (ctf_dict_t *, uint32_t, const char *);
+   ENUM_64_UNKNOWN can be CTF_K_ENUM, CTF_K_ENUM64, or CTF_K_UNKNOWN (0), which
+   for now simply means an enum64, but may in future mean to use whichever is
+   appropriate.  */
+
+extern ctf_id_t ctf_add_enum (ctf_dict_t *, uint32_t, const char *,
+			      ctf_kind_t enum_64_unknown,
+			      const ctf_encoding_t *);
+
 extern ctf_id_t ctf_add_btf_float (ctf_dict_t *, uint32_t,
 				   const char *, const ctf_encoding_t *);
 extern ctf_id_t ctf_add_float (ctf_dict_t *, uint32_t,

@@ -94,7 +94,7 @@ dtd_crash (enum crash_method method, int parent_bigger)
       break;
 
     case ADD_ENUM:
-      if ((stype = ctf_add_enum (cfp, CTF_ADD_ROOT, "foo")) == CTF_ERR)
+      if ((stype = ctf_add_enum (cfp, CTF_ADD_ROOT, "foo", 0, 0)) == CTF_ERR)
 	goto create_child;
       if (stype == ftype)
 	fprintf (stderr, "Forward-promotion spotted!\n");
@@ -127,7 +127,7 @@ dtd_crash (enum crash_method method, int parent_bigger)
       }
 
     case ADD_ENUMERATOR:
-      if ((stype = ctf_add_enum (pfp, CTF_ADD_ROOT, "bar")) == CTF_ERR)
+      if ((stype = ctf_add_enum (pfp, CTF_ADD_ROOT, "bar", 0, 0)) == CTF_ERR)
 	goto create_parent;
 
       if (ctf_add_enumerator (cfp, stype, "FOO", 0) == CTF_ERR)

@@ -1248,17 +1248,31 @@ ctf_add_struct (ctf_dict_t *fp, uint32_t flag, const char *name,
   return dtd->dtd_type;
 }
 
-static ctf_id_t
-ctf_add_enum_internal (ctf_dict_t *fp, uint32_t flag, const char *name,
-		       ctf_kind_t kind, int is_signed)
+ctf_id_t
+ctf_add_enum (ctf_dict_t *fp, uint32_t flag, const char *name,
+	      ctf_kind_t enum_64_unknown, const ctf_encoding_t *ep)
 {
   ctf_dtdef_t *dtd;
   ctf_id_t type = 0;
   size_t initial_vbytes;
   ctf_type_t *prefix;
+  ctf_kind_t kind = enum_64_unknown;
+  int is_signed = 1;
 
-  if (!ctf_assert (fp, kind == CTF_K_ENUM || kind == CTF_K_ENUM64))
-    return -1;			/* errno is set for us. */
+  if (kind == CTF_K_UNKNOWN)
+    kind = CTF_K_ENUM64;
+
+  if (kind != CTF_K_ENUM && kind != CTF_K_ENUM64)
+    {
+      ctf_err_warn (fp, 0, ECTF_NOTENUM, "ctf_add_enum: enum %s "
+		    "kind must be one of CTF_K_ENUM, ENUM64 or UNKNOWN, "
+		    "not %i\n", name ? name : "(unnamed)",
+		    enum_64_unknown);
+      return ctf_set_typed_errno (fp, ECTF_NOTENUM);
+    }
+
+  if (ep)
+    is_signed = ((ep->cte_format & CTF_INT_SIGNED) != 0);
 
   if (kind == CTF_K_ENUM)
     initial_vbytes = sizeof (ctf_enum_t) * INITIAL_VLEN;
@@ -1295,72 +1309,20 @@ ctf_add_enum_internal (ctf_dict_t *fp, uint32_t flag, const char *name,
   else
     dtd->dtd_data->ctt_size = 8;
 
-  return dtd->dtd_type;
-}
+  if (!ep)
+    return dtd->dtd_type;
 
-ctf_id_t
-ctf_add_enum (ctf_dict_t *fp, uint32_t flag, const char *name)
-{
-  return ctf_add_enum_internal (fp, flag, name, CTF_K_ENUM, 1);
-}
-
-ctf_id_t
-ctf_add_enum64 (ctf_dict_t *fp, uint32_t flag, const char *name)
-{
-  return ctf_add_enum_internal (fp, flag, name, CTF_K_ENUM64, 1);
-}
-
-static ctf_id_t
-ctf_add_enum_encoded_internal (ctf_dict_t *fp, uint32_t flag, const char *name,
-			       ctf_kind_t kind, const ctf_encoding_t *ep)
-{
-  ctf_id_t type = 0;
-  int is_signed = ((ep->cte_format & CTF_INT_SIGNED) != 0);
-
-  /* First, create the enum if need be, using most of the same machinery as
-     ctf_add_enum(), to ensure that we do not allow things past that are not
-     enums or forwards to them.  (This includes other slices: you cannot slice a
-     slice, which would be a useless thing to do anyway.)  */
-
-  if (name != NULL && flag == CTF_ADD_ROOT)
-    type = ctf_lookup_by_rawname (fp, CTF_K_ENUM, name);
-
-  if (type != 0)
-    {
-      if ((ctf_type_kind (fp, type) != CTF_K_FORWARD) &&
-	  (ctf_type_kind_unsliced (fp, type) != CTF_K_ENUM) &&
-	  (ctf_type_kind_unsliced (fp, type) != CTF_K_ENUM64))
-	return (ctf_set_typed_errno (fp, ECTF_NOTINTFP));
-    }
-  else if ((type = ctf_add_enum_internal (fp, flag, name, kind, is_signed))
-	   == CTF_ERR)
-    return CTF_ERR;		/* errno is set for us.  */
-
-  /* If this is just changing the signedness of the enum, we don't need a
-     slice.  */
+  /* Encoding support.  If this is just changing the signedness of the enum, we
+     don't need a slice.  */
 
   if ((ep->cte_format & ~CTF_INT_SIGNED) == 0
       && ep->cte_bits == 0
       && ep->cte_offset == 0)
-    return type;
+    return dtd->dtd_type;
 
   /* Now attach a suitable slice to it.  */
 
   return ctf_add_slice (fp, flag, type, ep);
-}
-
-ctf_id_t
-ctf_add_enum_encoded (ctf_dict_t *fp, uint32_t flag, const char *name,
-		      const ctf_encoding_t *ep)
-{
-  return ctf_add_enum_encoded_internal (fp, flag, name, CTF_K_ENUM, ep);
-}
-
-ctf_id_t
-ctf_add_enum64_encoded (ctf_dict_t *fp, uint32_t flag, const char *name,
-			const ctf_encoding_t *ep)
-{
-  return ctf_add_enum_encoded_internal (fp, flag, name, CTF_K_ENUM64, ep);
 }
 
 ctf_id_t
@@ -2816,10 +2778,10 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 	  const char *enum_name;
 	  int64_t value;
 
-	  if (src_type == CTF_K_ENUM)
-	    dst_type = ctf_add_enum (dst_fp, flag, name);
-	  else
-	    dst_type = ctf_add_enum64 (dst_fp, flag, name);
+	  if (ctf_type_encoding (src_fp, src_type, &src_en) != 0)
+	    return (ctf_set_typed_errno (dst_fp, ctf_errno (src_fp)));
+
+	  dst_type = ctf_add_enum (dst_fp, flag, name, kind, &src_en);
 	  if (dst_type == CTF_ERR)
 	    goto enum_err;
 
