@@ -667,12 +667,10 @@ loongarch_frame_cache_1 (const frame_info_ptr &this_frame,
 static struct loongarch_frame_cache *
 loongarch_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
-  struct loongarch_frame_cache *cache;
-
   if (*this_cache != NULL)
     return (struct loongarch_frame_cache *) *this_cache;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct loongarch_frame_cache);
+  auto *cache = frame_obstack_zalloc<struct loongarch_frame_cache> ();
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
   *this_cache = cache;
 

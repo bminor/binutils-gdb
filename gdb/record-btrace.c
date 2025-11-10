@@ -1675,10 +1675,8 @@ static gdb::unordered_map<frame_info *, btrace_frame_cache *> bfcache;
 static struct btrace_frame_cache *
 bfcache_new (const frame_info_ptr &frame)
 {
-  struct btrace_frame_cache *cache
-    = FRAME_OBSTACK_ZALLOC (struct btrace_frame_cache);
+  auto *cache = frame_obstack_zalloc<btrace_frame_cache> ();
   bfcache.emplace (frame.get (), cache);
-
   return cache;
 }
 

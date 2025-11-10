@@ -863,8 +863,7 @@ amdgpu_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
   if (*this_cache != nullptr)
     return (struct amdgpu_frame_cache *) *this_cache;
 
-  struct amdgpu_frame_cache *cache
-    = FRAME_OBSTACK_ZALLOC (struct amdgpu_frame_cache);
+  auto *cache = frame_obstack_zalloc<struct amdgpu_frame_cache> ();
   (*this_cache) = cache;
 
   cache->pc = get_frame_func (this_frame);

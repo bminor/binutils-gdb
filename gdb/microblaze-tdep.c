@@ -135,9 +135,7 @@ typedef BP_MANIPULATION (microblaze_break_insn) microblaze_breakpoint;
 static struct microblaze_frame_cache *
 microblaze_alloc_frame_cache (void)
 {
-  struct microblaze_frame_cache *cache;
-
-  cache = FRAME_OBSTACK_ZALLOC (struct microblaze_frame_cache);
+  auto *cache = frame_obstack_zalloc<microblaze_frame_cache> ();
 
   /* Base address.  */
   cache->base = 0;

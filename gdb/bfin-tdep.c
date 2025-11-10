@@ -265,10 +265,9 @@ struct bfin_frame_cache
 static struct bfin_frame_cache *
 bfin_alloc_frame_cache (void)
 {
-  struct bfin_frame_cache *cache;
   int i;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct bfin_frame_cache);
+  auto *cache = frame_obstack_zalloc<bfin_frame_cache> ();
 
   /* Base address.  */
   cache->base = 0;

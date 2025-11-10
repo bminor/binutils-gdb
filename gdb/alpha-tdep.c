@@ -855,12 +855,10 @@ static struct alpha_sigtramp_unwind_cache *
 alpha_sigtramp_frame_unwind_cache (const frame_info_ptr &this_frame,
 				   void **this_prologue_cache)
 {
-  struct alpha_sigtramp_unwind_cache *info;
-
   if (*this_prologue_cache)
     return (struct alpha_sigtramp_unwind_cache *) *this_prologue_cache;
 
-  info = FRAME_OBSTACK_ZALLOC (struct alpha_sigtramp_unwind_cache);
+  auto *info = frame_obstack_zalloc<alpha_sigtramp_unwind_cache> ();
   *this_prologue_cache = info;
 
   gdbarch *arch = get_frame_arch (this_frame);
@@ -1207,7 +1205,6 @@ alpha_heuristic_frame_unwind_cache (const frame_info_ptr &this_frame,
 				    CORE_ADDR start_pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct alpha_heuristic_unwind_cache *info;
   ULONGEST val;
   CORE_ADDR limit_pc, cur_pc;
   int frame_reg, frame_size, return_reg, reg;
@@ -1215,7 +1212,7 @@ alpha_heuristic_frame_unwind_cache (const frame_info_ptr &this_frame,
   if (*this_prologue_cache)
     return (struct alpha_heuristic_unwind_cache *) *this_prologue_cache;
 
-  info = FRAME_OBSTACK_ZALLOC (struct alpha_heuristic_unwind_cache);
+  auto *info = frame_obstack_zalloc<alpha_heuristic_unwind_cache> ();
   *this_prologue_cache = info;
   info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 

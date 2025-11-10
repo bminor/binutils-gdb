@@ -381,12 +381,11 @@ tic6x_frame_unwind_cache (const frame_info_ptr &this_frame,
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR current_pc;
-  struct tic6x_unwind_cache *cache;
 
   if (*this_prologue_cache)
     return (struct tic6x_unwind_cache *) *this_prologue_cache;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct tic6x_unwind_cache);
+  auto *cache = frame_obstack_zalloc<tic6x_unwind_cache> ();
   (*this_prologue_cache) = cache;
 
   cache->return_regnum = TIC6X_RA_REGNUM;
@@ -475,9 +474,7 @@ static const struct frame_base tic6x_frame_base =
 static struct tic6x_unwind_cache *
 tic6x_make_stub_cache (const frame_info_ptr &this_frame)
 {
-  struct tic6x_unwind_cache *cache;
-
-  cache = FRAME_OBSTACK_ZALLOC (struct tic6x_unwind_cache);
+  auto *cache = frame_obstack_zalloc<tic6x_unwind_cache> ();
 
   cache->return_regnum = TIC6X_RA_REGNUM;
 

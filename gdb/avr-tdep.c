@@ -985,14 +985,13 @@ avr_frame_unwind_cache (const frame_info_ptr &this_frame,
   CORE_ADDR start_pc, current_pc;
   ULONGEST prev_sp;
   ULONGEST this_base;
-  struct avr_unwind_cache *info;
   struct gdbarch *gdbarch;
   int i;
 
   if (*this_prologue_cache)
     return (struct avr_unwind_cache *) *this_prologue_cache;
 
-  info = FRAME_OBSTACK_ZALLOC (struct avr_unwind_cache);
+  auto *info = frame_obstack_zalloc<avr_unwind_cache> ();
   *this_prologue_cache = info;
   info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 

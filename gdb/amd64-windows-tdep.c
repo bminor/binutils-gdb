@@ -1084,7 +1084,6 @@ amd64_windows_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct amd64_windows_frame_cache *cache;
   std::array<gdb_byte, 8> buf;
   CORE_ADDR pc;
   CORE_ADDR unwind_info = 0;
@@ -1092,7 +1091,7 @@ amd64_windows_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
   if (*this_cache)
     return (struct amd64_windows_frame_cache *) *this_cache;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct amd64_windows_frame_cache);
+  auto *cache = frame_obstack_zalloc<struct amd64_windows_frame_cache> ();
   *this_cache = cache;
 
   /* Get current PC and SP.  */

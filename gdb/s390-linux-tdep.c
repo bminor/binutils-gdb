@@ -396,7 +396,6 @@ s390_sigtramp_frame_unwind_cache (const frame_info_ptr &this_frame,
   s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct s390_sigtramp_unwind_cache *info;
   ULONGEST this_sp, prev_sp;
   CORE_ADDR next_ra, next_cfa, sigreg_ptr, sigreg_high_off;
   int i;
@@ -404,7 +403,7 @@ s390_sigtramp_frame_unwind_cache (const frame_info_ptr &this_frame,
   if (*this_prologue_cache)
     return (struct s390_sigtramp_unwind_cache *) *this_prologue_cache;
 
-  info = FRAME_OBSTACK_ZALLOC (struct s390_sigtramp_unwind_cache);
+  auto *info = frame_obstack_zalloc<s390_sigtramp_unwind_cache> ();
   *this_prologue_cache = info;
   info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 

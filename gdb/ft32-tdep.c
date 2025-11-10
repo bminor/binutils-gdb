@@ -437,10 +437,9 @@ ft32_return_value (struct gdbarch *gdbarch, struct value *function,
 static struct ft32_frame_cache *
 ft32_alloc_frame_cache (void)
 {
-  struct ft32_frame_cache *cache;
   int i;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct ft32_frame_cache);
+  auto *cache = frame_obstack_zalloc<ft32_frame_cache> ();
 
   for (i = 0; i < FT32_NUM_REGS; ++i)
     cache->saved_regs[i] = REG_UNAVAIL;

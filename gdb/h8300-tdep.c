@@ -407,14 +407,13 @@ static struct h8300_frame_cache *
 h8300_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct h8300_frame_cache *cache;
   int i;
   CORE_ADDR current_pc;
 
   if (*this_cache)
     return (struct h8300_frame_cache *) *this_cache;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct h8300_frame_cache);
+  auto *cache = frame_obstack_zalloc<struct h8300_frame_cache> ();
   h8300_init_frame_cache (gdbarch, cache);
   *this_cache = cache;
 

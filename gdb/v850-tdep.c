@@ -1214,9 +1214,7 @@ v850_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 static struct v850_frame_cache *
 v850_alloc_frame_cache (const frame_info_ptr &this_frame)
 {
-  struct v850_frame_cache *cache;
-
-  cache = FRAME_OBSTACK_ZALLOC (struct v850_frame_cache);
+  auto *cache = frame_obstack_zalloc<v850_frame_cache> ();
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   /* Base address.  */

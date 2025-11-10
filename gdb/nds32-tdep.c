@@ -551,10 +551,9 @@ struct nds32_frame_cache
 static struct nds32_frame_cache *
 nds32_alloc_frame_cache (void)
 {
-  struct nds32_frame_cache *cache;
   int i;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct nds32_frame_cache);
+  auto *cache = frame_obstack_zalloc<nds32_frame_cache> ();
 
   /* Initialize fp_offset to check if FP is set in prologue.  */
   cache->fp_offset = INVALID_OFFSET;

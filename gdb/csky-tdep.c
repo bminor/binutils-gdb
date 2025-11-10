@@ -2066,7 +2066,6 @@ static struct csky_unwind_cache *
 csky_frame_unwind_cache (const frame_info_ptr &this_frame)
 {
   CORE_ADDR prologue_start, prologue_end, func_end, prev_pc, block_addr;
-  struct csky_unwind_cache *cache;
   const struct block *bl;
   unsigned long func_size = 0;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -2075,7 +2074,7 @@ csky_frame_unwind_cache (const frame_info_ptr &this_frame)
   /* Default lr type is r15.  */
   lr_type_t lr_type = LR_TYPE_R15;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct csky_unwind_cache);
+  auto *cache = frame_obstack_zalloc<csky_unwind_cache> ();
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   /* Assume there is no frame until proven otherwise.  */
@@ -2243,9 +2242,7 @@ csky_stub_unwind_sniffer (const struct frame_unwind *self,
 static struct csky_unwind_cache *
 csky_make_stub_cache (const frame_info_ptr &this_frame)
 {
-  struct csky_unwind_cache *cache;
-
-  cache = FRAME_OBSTACK_ZALLOC (struct csky_unwind_cache);
+  auto *cache = frame_obstack_zalloc<struct csky_unwind_cache> ();
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
   cache->prev_sp = get_frame_register_unsigned (this_frame, CSKY_SP_REGNUM);
 

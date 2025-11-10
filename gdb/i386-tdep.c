@@ -1030,10 +1030,9 @@ struct i386_frame_cache
 static struct i386_frame_cache *
 i386_alloc_frame_cache (void)
 {
-  struct i386_frame_cache *cache;
   int i;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct i386_frame_cache);
+  auto *cache = frame_obstack_zalloc<i386_frame_cache> ();
 
   /* Base address.  */
   cache->base_p = 0;

@@ -187,7 +187,6 @@ static struct alpha_mdebug_unwind_cache *
 alpha_mdebug_frame_unwind_cache (const frame_info_ptr &this_frame,
 				 void **this_prologue_cache)
 {
-  struct alpha_mdebug_unwind_cache *info;
   struct mdebug_extra_func_info *proc_desc;
   ULONGEST vfp;
   CORE_ADDR pc, reg_position;
@@ -197,7 +196,7 @@ alpha_mdebug_frame_unwind_cache (const frame_info_ptr &this_frame,
   if (*this_prologue_cache)
     return (struct alpha_mdebug_unwind_cache *) *this_prologue_cache;
 
-  info = FRAME_OBSTACK_ZALLOC (struct alpha_mdebug_unwind_cache);
+  auto *info = frame_obstack_zalloc<alpha_mdebug_unwind_cache> ();
   *this_prologue_cache = info;
   pc = get_frame_address_in_block (this_frame);
 

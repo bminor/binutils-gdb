@@ -780,14 +780,13 @@ m68hc11_frame_unwind_cache (const frame_info_ptr &this_frame,
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   ULONGEST prev_sp;
   ULONGEST this_base;
-  struct m68hc11_unwind_cache *info;
   CORE_ADDR current_pc;
   int i;
 
   if ((*this_prologue_cache))
     return (struct m68hc11_unwind_cache *) (*this_prologue_cache);
 
-  info = FRAME_OBSTACK_ZALLOC (struct m68hc11_unwind_cache);
+  auto *info = frame_obstack_zalloc<m68hc11_unwind_cache> ();
   (*this_prologue_cache) = info;
   info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 

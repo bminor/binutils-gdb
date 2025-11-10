@@ -1657,7 +1657,7 @@ create_sentinel_frame (program_space *pspace, address_space *aspace,
 		       regcache *regcache, CORE_ADDR stack_addr,
 		       CORE_ADDR code_addr)
 {
-  frame_info *frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
+  frame_info *frame = frame_obstack_zalloc<frame_info> ();
 
   frame->level = -1;
   frame->pspace = pspace;
@@ -2055,7 +2055,7 @@ create_new_frame (frame_id id)
   if (frame != nullptr)
     return frame;
 
-  frame_info *fi = FRAME_OBSTACK_ZALLOC (struct frame_info);
+  frame_info *fi = frame_obstack_zalloc<frame_info> ();
 
   fi->next = create_sentinel_frame (current_program_space,
 				    current_inferior ()->aspace.get (),
@@ -2571,7 +2571,7 @@ get_prev_frame_raw (const frame_info_ptr &this_frame)
      quickly reclaimed when the frame cache is flushed, and the `we've
      been here before' check above will stop repeated memory
      allocation calls.  */
-  prev_frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
+  prev_frame = frame_obstack_zalloc<frame_info> ();
   prev_frame->level = this_frame->level + 1;
 
   /* For now, assume we don't have frame chains crossing address

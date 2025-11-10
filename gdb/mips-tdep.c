@@ -2866,11 +2866,10 @@ static struct mips_frame_cache *
 mips_insn16_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct mips_frame_cache *cache;
 
   if ((*this_cache) != NULL)
     return (struct mips_frame_cache *) (*this_cache);
-  cache = FRAME_OBSTACK_ZALLOC (struct mips_frame_cache);
+  auto *cache = frame_obstack_zalloc<mips_frame_cache> ();
   (*this_cache) = cache;
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
@@ -3300,12 +3299,11 @@ static struct mips_frame_cache *
 mips_micro_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct mips_frame_cache *cache;
 
   if ((*this_cache) != NULL)
     return (struct mips_frame_cache *) (*this_cache);
 
-  cache = FRAME_OBSTACK_ZALLOC (struct mips_frame_cache);
+  auto *cache = frame_obstack_zalloc<mips_frame_cache> ();
   (*this_cache) = cache;
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
@@ -3681,12 +3679,11 @@ static struct mips_frame_cache *
 mips_insn32_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct mips_frame_cache *cache;
 
   if ((*this_cache) != NULL)
     return (struct mips_frame_cache *) (*this_cache);
 
-  cache = FRAME_OBSTACK_ZALLOC (struct mips_frame_cache);
+  auto *cache = frame_obstack_zalloc<mips_frame_cache> ();
   (*this_cache) = cache;
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 

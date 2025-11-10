@@ -836,13 +836,12 @@ static struct tilegx_frame_cache *
 tilegx_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct tilegx_frame_cache *cache;
   CORE_ADDR current_pc;
 
   if (*this_cache)
     return (struct tilegx_frame_cache *) *this_cache;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct tilegx_frame_cache);
+  auto *cache = frame_obstack_zalloc<struct tilegx_frame_cache> ();
   *this_cache = cache;
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
   cache->base = 0;

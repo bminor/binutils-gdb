@@ -1387,7 +1387,7 @@ cygwin_sigwrapper_frame_unwind::sniff (const frame_info_ptr &this_frame,
 
   frame_debug_printf ("sigstackptroffset=%x", tlsoffset);
 
-  auto *cache = FRAME_OBSTACK_ZALLOC (struct cygwin_sigwrapper_frame_cache);
+  auto *cache = frame_obstack_zalloc<struct cygwin_sigwrapper_frame_cache> ();
   cache->tlsoffset = tlsoffset;
 
   *this_cache = cache;

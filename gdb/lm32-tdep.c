@@ -384,13 +384,12 @@ lm32_frame_cache (const frame_info_ptr &this_frame, void **this_prologue_cache)
   CORE_ADDR current_pc;
   ULONGEST prev_sp;
   ULONGEST this_base;
-  struct lm32_frame_cache *info;
   int i;
 
   if ((*this_prologue_cache))
     return (struct lm32_frame_cache *) (*this_prologue_cache);
 
-  info = FRAME_OBSTACK_ZALLOC (struct lm32_frame_cache);
+  auto *info = frame_obstack_zalloc<struct lm32_frame_cache> ();
   (*this_prologue_cache) = info;
   info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 

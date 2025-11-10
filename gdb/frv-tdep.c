@@ -1088,12 +1088,11 @@ frv_frame_unwind_cache (const frame_info_ptr &this_frame,
 			 void **this_prologue_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct frv_unwind_cache *info;
 
   if ((*this_prologue_cache))
     return (struct frv_unwind_cache *) (*this_prologue_cache);
 
-  info = FRAME_OBSTACK_ZALLOC (struct frv_unwind_cache);
+  auto *info = frame_obstack_zalloc<frv_unwind_cache> ();
   (*this_prologue_cache) = info;
   info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 

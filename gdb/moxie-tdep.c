@@ -496,10 +496,9 @@ moxie_return_value (struct gdbarch *gdbarch, struct value *function,
 static struct moxie_frame_cache *
 moxie_alloc_frame_cache (void)
 {
-  struct moxie_frame_cache *cache;
   int i;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct moxie_frame_cache);
+  auto *cache = frame_obstack_zalloc<moxie_frame_cache> ();
 
   cache->base = 0;
   cache->saved_sp = 0;

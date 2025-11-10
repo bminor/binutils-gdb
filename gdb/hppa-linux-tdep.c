@@ -198,14 +198,13 @@ hppa_linux_sigtramp_frame_unwind_cache (const frame_info_ptr &this_frame,
 					void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct hppa_linux_sigtramp_unwind_cache *info;
   CORE_ADDR pc, scptr;
   int i;
 
   if (*this_cache)
     return (struct hppa_linux_sigtramp_unwind_cache *) *this_cache;
 
-  info = FRAME_OBSTACK_ZALLOC (struct hppa_linux_sigtramp_unwind_cache);
+  auto *info = frame_obstack_zalloc<hppa_linux_sigtramp_unwind_cache> ();
   *this_cache = info;
   info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 

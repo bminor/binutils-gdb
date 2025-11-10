@@ -634,10 +634,9 @@ struct m68k_frame_cache
 static struct m68k_frame_cache *
 m68k_alloc_frame_cache (void)
 {
-  struct m68k_frame_cache *cache;
   int i;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct m68k_frame_cache);
+  auto *cache = frame_obstack_zalloc<m68k_frame_cache> ();
 
   /* Base address.  */
   cache->base = 0;

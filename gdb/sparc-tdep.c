@@ -751,9 +751,7 @@ typedef BP_MANIPULATION (sparc_break_insn) sparc_breakpoint;
 static struct sparc_frame_cache *
 sparc_alloc_frame_cache (void)
 {
-  struct sparc_frame_cache *cache;
-
-  cache = FRAME_OBSTACK_ZALLOC (struct sparc_frame_cache);
+  auto *cache = frame_obstack_zalloc<struct sparc_frame_cache> ();
 
   /* Base address.  */
   cache->base = 0;

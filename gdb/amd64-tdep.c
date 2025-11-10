@@ -2155,9 +2155,7 @@ amd64_init_frame_cache (struct amd64_frame_cache *cache)
 static struct amd64_frame_cache *
 amd64_alloc_frame_cache (void)
 {
-  struct amd64_frame_cache *cache;
-
-  cache = FRAME_OBSTACK_ZALLOC (struct amd64_frame_cache);
+  auto *cache = frame_obstack_zalloc<struct amd64_frame_cache> ();
   amd64_init_frame_cache (cache);
   return cache;
 }

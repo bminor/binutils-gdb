@@ -1102,12 +1102,10 @@ aarch64_make_prologue_cache_1 (const frame_info_ptr &this_frame,
 static struct aarch64_prologue_cache *
 aarch64_make_prologue_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
-  struct aarch64_prologue_cache *cache;
-
   if (*this_cache != NULL)
     return (struct aarch64_prologue_cache *) *this_cache;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct aarch64_prologue_cache);
+  auto *cache = frame_obstack_zalloc<aarch64_prologue_cache> ();
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
   *this_cache = cache;
 
@@ -1236,12 +1234,10 @@ static const frame_unwind_legacy aarch64_prologue_unwind (
 static struct aarch64_prologue_cache *
 aarch64_make_stub_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
-  struct aarch64_prologue_cache *cache;
-
   if (*this_cache != NULL)
     return (struct aarch64_prologue_cache *) *this_cache;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct aarch64_prologue_cache);
+  auto *cache = frame_obstack_zalloc<aarch64_prologue_cache> ();
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
   *this_cache = cache;
 

@@ -227,13 +227,12 @@ static struct m32r_frame_cache *
 m32r_linux_sigtramp_frame_cache (const frame_info_ptr &this_frame,
 				 void **this_cache)
 {
-  struct m32r_frame_cache *cache;
   CORE_ADDR sigcontext_addr, addr;
   int regnum;
 
   if ((*this_cache) != NULL)
     return (struct m32r_frame_cache *) (*this_cache);
-  cache = FRAME_OBSTACK_ZALLOC (struct m32r_frame_cache);
+  auto *cache = frame_obstack_zalloc<m32r_frame_cache> ();
   (*this_cache) = cache;
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 

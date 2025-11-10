@@ -1867,7 +1867,7 @@ m32c_analyze_frame_prologue (const frame_info_ptr &this_frame,
       if (! func_start)
 	stop_addr = func_start;
 
-      *this_prologue_cache = FRAME_OBSTACK_ZALLOC (struct m32c_prologue);
+      *this_prologue_cache = frame_obstack_zalloc<m32c_prologue> ();
       m32c_analyze_prologue (get_frame_arch (this_frame),
 			     func_start, stop_addr,
 			     (struct m32c_prologue *) *this_prologue_cache);

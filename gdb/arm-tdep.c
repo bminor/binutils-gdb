@@ -2309,10 +2309,9 @@ static struct arm_prologue_cache *
 arm_make_prologue_cache (const frame_info_ptr &this_frame)
 {
   int reg;
-  struct arm_prologue_cache *cache;
   CORE_ADDR unwound_fp, prev_sp;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct arm_prologue_cache);
+  auto *cache = frame_obstack_zalloc<arm_prologue_cache> ();
   arm_cache_init (cache, this_frame);
 
   arm_scan_prologue (this_frame, cache);
@@ -2796,8 +2795,7 @@ arm_exidx_fill_cache (const frame_info_ptr &this_frame, gdb_byte *entry)
   CORE_ADDR vsp = 0;
   int vsp_valid = 0;
 
-  struct arm_prologue_cache *cache;
-  cache = FRAME_OBSTACK_ZALLOC (struct arm_prologue_cache);
+  auto *cache = frame_obstack_zalloc<arm_prologue_cache> ();
   arm_cache_init (cache, this_frame);
 
   for (;;)
@@ -3199,10 +3197,9 @@ struct frame_unwind_legacy arm_exidx_unwind (
 static struct arm_prologue_cache *
 arm_make_epilogue_frame_cache (const frame_info_ptr &this_frame)
 {
-  struct arm_prologue_cache *cache;
   int reg;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct arm_prologue_cache);
+  auto *cache = frame_obstack_zalloc<arm_prologue_cache> ();
   arm_cache_init (cache, this_frame);
 
   /* Still rely on the offset calculated from prologue.  */
@@ -3367,9 +3364,7 @@ arm_skip_bx_reg (const frame_info_ptr &frame, CORE_ADDR pc)
 static struct arm_prologue_cache *
 arm_make_stub_cache (const frame_info_ptr &this_frame)
 {
-  struct arm_prologue_cache *cache;
-
-  cache = FRAME_OBSTACK_ZALLOC (struct arm_prologue_cache);
+  auto *cache = frame_obstack_zalloc<arm_prologue_cache> ();
   arm_cache_init (cache, this_frame);
 
   arm_gdbarch_tdep *tdep
@@ -3445,9 +3440,8 @@ arm_m_exception_cache (const frame_info_ptr &this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
-  struct arm_prologue_cache *cache;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct arm_prologue_cache);
+  auto *cache = frame_obstack_zalloc<arm_prologue_cache> ();
   arm_cache_init (cache, this_frame);
 
   /* ARMv7-M Architecture Reference "B1.5.6 Exception entry behavior"

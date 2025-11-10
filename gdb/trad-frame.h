@@ -117,7 +117,7 @@ struct trad_frame_saved_reg
   void set_value_bytes (gdb::array_view<const gdb_byte> bytes)
   {
     /* Allocate the space and copy the data bytes.  */
-    gdb_byte *data = FRAME_OBSTACK_CALLOC (bytes.size (), gdb_byte);
+    auto *data = frame_obstack_calloc<gdb_byte> (bytes.size ());
     memcpy (data, bytes.data (), bytes.size ());
 
     m_kind = trad_frame_saved_reg_kind::VALUE_BYTES;

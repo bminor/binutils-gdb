@@ -1049,7 +1049,7 @@ mn10300_analyze_frame_prologue (const frame_info_ptr &this_frame,
     {
       CORE_ADDR func_start, stop_addr;
 
-      *this_prologue_cache = FRAME_OBSTACK_ZALLOC (struct mn10300_prologue);
+      *this_prologue_cache = frame_obstack_zalloc<mn10300_prologue> ();
 
       func_start = get_frame_func (this_frame);
       stop_addr = get_frame_pc (this_frame);

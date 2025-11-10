@@ -103,7 +103,7 @@ extern CORE_ADDR default_unwind_sp (struct gdbarch *gdbarch,
 
    THIS_PROLOGUE_CACHE can be used to share any prolog analysis data
    with the other unwind methods.  Memory for that cache should be
-   allocated using FRAME_OBSTACK_ZALLOC().  */
+   allocated using frame_obstack_zalloc.  */
 
 typedef void (frame_this_id_ftype) (const frame_info_ptr &this_frame,
 				    void **this_prologue_cache,
@@ -138,7 +138,7 @@ typedef void (frame_this_id_ftype) (const frame_info_ptr &this_frame,
 
    THIS_PROLOGUE_CACHE can be used to share any prolog analysis data
    with the other unwind methods.  Memory for that cache should be
-   allocated using FRAME_OBSTACK_ZALLOC().  */
+   allocated using frame_obstack_zalloc.  */
 
 typedef value *(frame_prev_register_ftype) (const frame_info_ptr &this_frame,
 					    void **this_prologue_cache,

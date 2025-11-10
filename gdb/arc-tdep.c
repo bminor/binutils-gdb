@@ -1688,9 +1688,8 @@ arc_make_frame_cache (const frame_info_ptr &this_frame)
     }
 
   /* Allocate new frame cache instance and space for saved register info.
-     FRAME_OBSTACK_ZALLOC will initialize fields to zeroes.  */
-  struct arc_frame_cache *cache
-    = FRAME_OBSTACK_ZALLOC (struct arc_frame_cache);
+     frame_obstack_zalloc will initialize fields to zeroes.  */
+  auto *cache = frame_obstack_zalloc<arc_frame_cache> ();
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   arc_analyze_prologue (gdbarch, entrypoint, prologue_end, cache);
@@ -1824,7 +1823,7 @@ arc_make_sigtramp_frame_cache (const frame_info_ptr &this_frame)
   arc_gdbarch_tdep *tdep = gdbarch_tdep<arc_gdbarch_tdep> (arch);
 
   /* Allocate new frame cache instance and space for saved register info.  */
-  struct arc_frame_cache *cache = FRAME_OBSTACK_ZALLOC (struct arc_frame_cache);
+  auto *cache = frame_obstack_zalloc<arc_frame_cache> ();
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   /* Get the stack pointer and use it as the frame base.  */

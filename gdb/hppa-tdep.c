@@ -1864,7 +1864,6 @@ hppa_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
-  struct hppa_frame_cache *cache;
   long saved_gr_mask;
   long saved_fr_mask;
   long frame_size;
@@ -1884,7 +1883,7 @@ hppa_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 		    paddress (gdbarch, ((struct hppa_frame_cache *)*this_cache)->base));
       return (struct hppa_frame_cache *) (*this_cache);
     }
-  cache = FRAME_OBSTACK_ZALLOC (struct hppa_frame_cache);
+  auto *cache = frame_obstack_zalloc<struct hppa_frame_cache> ();
   (*this_cache) = cache;
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
@@ -2316,7 +2315,6 @@ hppa_fallback_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct hppa_frame_cache *cache;
   unsigned int frame_size = 0;
   int found_rp = 0;
   CORE_ADDR start_pc;
@@ -2326,7 +2324,7 @@ hppa_fallback_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 		"{ hppa_fallback_frame_cache (frame=%d) -> ",
 		frame_relative_level (this_frame));
 
-  cache = FRAME_OBSTACK_ZALLOC (struct hppa_frame_cache);
+  auto *cache = frame_obstack_zalloc<struct hppa_frame_cache> ();
   (*this_cache) = cache;
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
@@ -2427,12 +2425,10 @@ static struct hppa_stub_unwind_cache *
 hppa_stub_frame_unwind_cache (const frame_info_ptr &this_frame,
 			      void **this_cache)
 {
-  struct hppa_stub_unwind_cache *info;
-
   if (*this_cache)
     return (struct hppa_stub_unwind_cache *) *this_cache;
 
-  info = FRAME_OBSTACK_ZALLOC (struct hppa_stub_unwind_cache);
+  auto *info = frame_obstack_zalloc<hppa_stub_unwind_cache> ();
   *this_cache = info;
   info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 

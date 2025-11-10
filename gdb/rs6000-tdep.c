@@ -3618,7 +3618,6 @@ struct rs6000_frame_cache
 static struct rs6000_frame_cache *
 rs6000_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
-  struct rs6000_frame_cache *cache;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -3628,7 +3627,7 @@ rs6000_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 
   if ((*this_cache) != NULL)
     return (struct rs6000_frame_cache *) (*this_cache);
-  cache = FRAME_OBSTACK_ZALLOC (struct rs6000_frame_cache);
+  auto *cache = frame_obstack_zalloc<struct rs6000_frame_cache> ();
   (*this_cache) = cache;
   cache->pc = 0;
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
@@ -3854,7 +3853,6 @@ static const struct frame_unwind_legacy rs6000_frame_unwind (
 static struct rs6000_frame_cache *
 rs6000_epilogue_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
-  struct rs6000_frame_cache *cache;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
   struct rs6000_framedata fdata;
@@ -3863,7 +3861,7 @@ rs6000_epilogue_frame_cache (const frame_info_ptr &this_frame, void **this_cache
   if (*this_cache)
     return (struct rs6000_frame_cache *) *this_cache;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct rs6000_frame_cache);
+  auto *cache = frame_obstack_zalloc<struct rs6000_frame_cache> ();
   (*this_cache) = cache;
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 

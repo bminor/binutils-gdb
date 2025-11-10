@@ -361,14 +361,13 @@ static struct iq2000_frame_cache *
 iq2000_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct iq2000_frame_cache *cache;
   CORE_ADDR current_pc;
   int i;
 
   if (*this_cache)
     return (struct iq2000_frame_cache *) *this_cache;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct iq2000_frame_cache);
+  auto *cache = frame_obstack_zalloc<struct iq2000_frame_cache> ();
   iq2000_init_frame_cache (cache);
   *this_cache = cache;
 

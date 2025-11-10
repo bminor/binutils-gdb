@@ -38,9 +38,7 @@ struct trad_frame_cache
 struct trad_frame_cache *
 trad_frame_cache_zalloc (const frame_info_ptr &this_frame)
 {
-  struct trad_frame_cache *this_trad_cache;
-
-  this_trad_cache = FRAME_OBSTACK_ZALLOC (struct trad_frame_cache);
+  auto *this_trad_cache = frame_obstack_zalloc<trad_frame_cache> ();
   this_trad_cache->prev_regs = trad_frame_alloc_saved_regs (this_frame);
   this_trad_cache->this_frame = this_frame;
   return this_trad_cache;
@@ -64,8 +62,7 @@ trad_frame_alloc_saved_regs (struct gdbarch *gdbarch)
   static_assert (std::is_trivially_constructible<trad_frame_saved_reg>::value);
 
   int numregs = gdbarch_num_cooked_regs (gdbarch);
-  trad_frame_saved_reg *this_saved_regs
-    = FRAME_OBSTACK_CALLOC (numregs, trad_frame_saved_reg);
+  auto *this_saved_regs = frame_obstack_calloc<trad_frame_saved_reg> (numregs);
 
   /* For backwards compatibility, initialize all the register values to
      REALREG, with register 0 stored in 0, register 1 stored in 1 and so

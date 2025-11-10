@@ -823,10 +823,24 @@ enum print_what
    allocate memory using this method.  */
 
 extern void *frame_obstack_zalloc (unsigned long size);
-#define FRAME_OBSTACK_ZALLOC(TYPE) \
-  ((TYPE *) frame_obstack_zalloc (sizeof (TYPE)))
-#define FRAME_OBSTACK_CALLOC(NUMBER,TYPE) \
-  ((TYPE *) frame_obstack_zalloc ((NUMBER) * sizeof (TYPE)))
+
+/* Allocate one instance of T using frame_obstack_zalloc.  */
+
+template <typename T>
+T *
+frame_obstack_zalloc ()
+{
+  return static_cast<T *> (frame_obstack_zalloc (sizeof (T)));
+}
+
+/* Allocate N instances of T using frame_obstack_zalloc.  */
+
+template <typename T>
+T *
+frame_obstack_calloc (int n)
+{
+  return static_cast<T *> (frame_obstack_zalloc (n * sizeof (T)));
+}
 
 class readonly_detached_regcache;
 /* Create a regcache, and copy the frame's registers into it.  */

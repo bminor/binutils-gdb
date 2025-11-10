@@ -2720,12 +2720,10 @@ static struct s390_unwind_cache *
 s390_frame_unwind_cache (const frame_info_ptr &this_frame,
 			 void **this_prologue_cache)
 {
-  struct s390_unwind_cache *info;
-
   if (*this_prologue_cache)
     return (struct s390_unwind_cache *) *this_prologue_cache;
 
-  info = FRAME_OBSTACK_ZALLOC (struct s390_unwind_cache);
+  auto *info = frame_obstack_zalloc<s390_unwind_cache> ();
   *this_prologue_cache = info;
   info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
   info->func = -1;
@@ -2812,13 +2810,12 @@ s390_stub_frame_unwind_cache (const frame_info_ptr &this_frame,
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
-  struct s390_stub_unwind_cache *info;
   ULONGEST reg;
 
   if (*this_prologue_cache)
     return (struct s390_stub_unwind_cache *) *this_prologue_cache;
 
-  info = FRAME_OBSTACK_ZALLOC (struct s390_stub_unwind_cache);
+  auto *info = frame_obstack_zalloc<s390_stub_unwind_cache> ();
   *this_prologue_cache = info;
   info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 

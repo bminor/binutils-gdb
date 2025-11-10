@@ -3828,14 +3828,13 @@ static struct riscv_unwind_cache *
 riscv_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
   CORE_ADDR pc, start_addr;
-  struct riscv_unwind_cache *cache;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   int numregs, regno;
 
   if ((*this_cache) != NULL)
     return (struct riscv_unwind_cache *) *this_cache;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct riscv_unwind_cache);
+  auto *cache = frame_obstack_zalloc<riscv_unwind_cache> ();
   cache->regs = trad_frame_alloc_saved_regs (this_frame);
   (*this_cache) = cache;
 

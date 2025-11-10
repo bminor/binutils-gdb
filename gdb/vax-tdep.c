@@ -305,7 +305,6 @@ struct vax_frame_cache
 static struct vax_frame_cache *
 vax_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 {
-  struct vax_frame_cache *cache;
   CORE_ADDR addr;
   ULONGEST mask;
   int regnum;
@@ -314,7 +313,7 @@ vax_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
     return (struct vax_frame_cache *) *this_cache;
 
   /* Allocate a new cache.  */
-  cache = FRAME_OBSTACK_ZALLOC (struct vax_frame_cache);
+  auto *cache = frame_obstack_zalloc<struct vax_frame_cache> ();
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   /* The frame pointer is used as the base for the frame.  */

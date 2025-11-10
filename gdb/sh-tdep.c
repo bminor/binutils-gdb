@@ -1821,10 +1821,9 @@ sh_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 static struct sh_frame_cache *
 sh_alloc_frame_cache (void)
 {
-  struct sh_frame_cache *cache;
   int i;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct sh_frame_cache);
+  auto *cache = frame_obstack_zalloc<sh_frame_cache> ();
 
   /* Base address.  */
   cache->base = 0;

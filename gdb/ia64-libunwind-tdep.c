@@ -158,7 +158,6 @@ libunwind_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
   unw_addr_space_t as;
   unw_word_t fp;
   unw_regnum_t uw_sp_regnum;
-  struct libunwind_frame_cache *cache;
   struct libunwind_descr *descr;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   int ret;
@@ -167,7 +166,7 @@ libunwind_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
     return (struct libunwind_frame_cache *) *this_cache;
 
   /* Allocate a new cache.  */
-  cache = FRAME_OBSTACK_ZALLOC (struct libunwind_frame_cache);
+  auto *cache = frame_obstack_zalloc<libunwind_frame_cache> ();
 
   cache->func_addr = get_frame_func (this_frame);
   if (cache->func_addr == 0)

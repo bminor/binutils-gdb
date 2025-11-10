@@ -975,12 +975,11 @@ typedef struct xtensa_frame_cache
 static struct xtensa_frame_cache *
 xtensa_alloc_frame_cache (int windowed)
 {
-  xtensa_frame_cache_t *cache;
   int i;
 
   DEBUGTRACE ("xtensa_alloc_frame_cache ()\n");
 
-  cache = FRAME_OBSTACK_ZALLOC (xtensa_frame_cache_t);
+  auto *cache = frame_obstack_zalloc<xtensa_frame_cache_t> ();
 
   cache->base = 0;
   cache->pc = 0;

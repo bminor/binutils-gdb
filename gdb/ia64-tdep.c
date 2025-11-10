@@ -1336,10 +1336,9 @@ refine_prologue_limit (CORE_ADDR pc, CORE_ADDR lim_pc, int *trust_limit)
 static struct ia64_frame_cache *
 ia64_alloc_frame_cache (void)
 {
-  struct ia64_frame_cache *cache;
   int i;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct ia64_frame_cache);
+  auto *cache = frame_obstack_zalloc<ia64_frame_cache> ();
 
   /* Base address.  */
   cache->base = 0;

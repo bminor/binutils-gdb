@@ -315,9 +315,7 @@ dummy_frame_sniffer (const struct frame_unwind *self,
 	{
 	  if (dummy_frame_id_eq (&dummyframe->id, &dummy_id))
 	    {
-	      struct dummy_frame_cache *cache;
-
-	      cache = FRAME_OBSTACK_ZALLOC (struct dummy_frame_cache);
+	      auto *cache = frame_obstack_zalloc<dummy_frame_cache> ();
 	      cache->prev_regcache = get_infcall_suspend_state_regcache
 						   (dummyframe->caller_state);
 	      cache->this_id = this_id;

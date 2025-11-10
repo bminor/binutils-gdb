@@ -636,10 +636,9 @@ xstormy16_address_to_pointer (struct gdbarch *gdbarch,
 static struct xstormy16_frame_cache *
 xstormy16_alloc_frame_cache (void)
 {
-  struct xstormy16_frame_cache *cache;
   int i;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct xstormy16_frame_cache);
+  auto *cache = frame_obstack_zalloc<xstormy16_frame_cache> ();
 
   cache->base = 0;
   cache->saved_sp = 0;
