@@ -59,15 +59,19 @@ struct ctf_dynhash
      Everything from this point on is allocated only if we have at least one
      freeing function defined.  */
 
-#ifdef __GNUC__
+#if defined (__GNUC__) || (defined __STDC_VERSION__ && __STDC_VERSION__ >= 201112L)
+#if defined (__GNUC__)
   __extension__
+#endif
   union
   {
     ctf_hash_free_fun key_free_;
     ctf_hash_free_arg_fun key_arg_free_;
   };
 
+#if defined (__GNUC__)
   __extension__
+#endif
   union
   {
     ctf_hash_free_fun value_free_;
