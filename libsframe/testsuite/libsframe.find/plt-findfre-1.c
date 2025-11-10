@@ -41,6 +41,7 @@ add_plt_fde1 (sframe_encoder_ctx *ectx, int64_t plt_vaddr,
   int err = sframe_encoder_add_funcdesc_v3 (ectx, func_start_addr,
 					    16 * 5 /* func size in bytes.  */,
 					    finfo,
+					    0, /* func_info2.  */
 					    16 /* rep block size in bytes.  */,
 					    PLT1_NUM_FRES);
   if (err == -1)

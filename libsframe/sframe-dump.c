@@ -172,7 +172,8 @@ dump_sframe_func_with_fres (const sframe_decoder_ctx *sfd_ctx,
       int64_t func_start_addr = 0;
       sframe_decoder_get_funcdesc_v3 (sfd_ctx, funcidx, &num_fres,
 				      &func_size, &func_start_addr,
-				      &func_info, &rep_block_size);
+				      &func_info, NULL,
+				      &rep_block_size);
       func_start_pc_vma = func_start_addr + sec_addr;
     }
   else

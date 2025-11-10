@@ -48,6 +48,7 @@ add_plt0_fde (sframe_encoder_ctx *ectx, int64_t plt_vaddr,
   int err = sframe_encoder_add_funcdesc_v3 (ectx, func_start_addr,
 					    PLT_SIZE /* func size.  */,
 					    finfo,
+					    0, /* func_info2.  */
 					    0 /* rep block size.  */,
 					    1 /* num FREs.  */);
   if (err == -1)
@@ -81,6 +82,7 @@ add_pltn_fde (sframe_encoder_ctx *ectx, int64_t plt_vaddr,
   int err = sframe_encoder_add_funcdesc_v3 (ectx, func_start_addr,
 					    5 * PLT_SIZE /* func size.  */,
 					    finfo,
+					    0, /* func_info2.  */
 					    PLT_SIZE /* rep block size.  */,
 					    1 /* num FREs.  */);
   if (err == -1)
