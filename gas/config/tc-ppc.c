@@ -3648,7 +3648,7 @@ md_assemble (char *str)
 
 		case BFD_RELOC_PPC_TLS:
 		case BFD_RELOC_PPC64_TLS_PCREL:
-		  if (!_bfd_elf_ppc_at_tls_transform (opcode->opcode, 0))
+		  if (!bfd_elf_ppc_at_tls_transform (opcode->opcode, 0))
 		    as_bad (_("@tls may not be used with \"%s\" operands"),
 			    opcode->name);
 		  else if (operand->shift != 11)

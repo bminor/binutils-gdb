@@ -6819,7 +6819,7 @@ is_static_defined (struct elf_link_hash_entry *h)
    REG is non-zero only match an insn with RB or RA equal to REG.  */
 
 unsigned int
-_bfd_elf_ppc_at_tls_transform (unsigned int insn, unsigned int reg)
+bfd_elf_ppc_at_tls_transform (unsigned int insn, unsigned int reg)
 {
   unsigned int rtra;
 
@@ -7169,7 +7169,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      bfd_vma insn;
 
 	      insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
-	      insn = _bfd_elf_ppc_at_tls_transform (insn, 2);
+	      insn = bfd_elf_ppc_at_tls_transform (insn, 2);
 	      if (insn == 0)
 		abort ();
 	      bfd_put_32 (input_bfd, insn, contents + rel->r_offset);

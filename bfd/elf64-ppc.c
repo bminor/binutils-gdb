@@ -15925,7 +15925,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      && offset_in_range (input_section, rel->r_offset & ~3, 4))
 	    {
 	      insn = bfd_get_32 (input_bfd, contents + (rel->r_offset & ~3));
-	      insn = _bfd_elf_ppc_at_tls_transform (insn, 13);
+	      insn = bfd_elf_ppc_at_tls_transform (insn, 13);
 	      if (insn == 0)
 		break;
 	      if ((rel->r_offset & 3) == 0)

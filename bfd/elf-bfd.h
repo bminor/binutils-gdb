@@ -2916,8 +2916,8 @@ extern Elf_Internal_Phdr * _bfd_elf_find_segment_containing_section
   (bfd * abfd, asection * section) ATTRIBUTE_HIDDEN;
 
 /* PowerPC @tls opcode transform/validate.  */
-extern unsigned int _bfd_elf_ppc_at_tls_transform
-  (unsigned int, unsigned int) ATTRIBUTE_HIDDEN;
+extern unsigned int bfd_elf_ppc_at_tls_transform
+  (unsigned int, unsigned int);
 /* PowerPC @tprel opcode transform/validate.  */
 extern unsigned int _bfd_elf_ppc_at_tprel_transform
   (unsigned int, unsigned int) ATTRIBUTE_HIDDEN;
