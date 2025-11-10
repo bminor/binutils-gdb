@@ -5303,7 +5303,7 @@ Displays the contents of the file's dynamic section, if it has one.
 @item -V
 @itemx --version-info
 @cindex ELF version sections information
-Displays the contents of the version sections in the file, it they
+Displays the contents of the version sections in the file, if they
 exist.
 
 @item -A
