@@ -122,7 +122,7 @@ ctf_set_typed_errno (ctf_dict_t *fp, ctf_error_t err)
    valid.  */
 
 ctf_ret_t
-ctf_dict_set_flag (ctf_dict_t *fp, uint64_t flag, int set)
+ctf_dict_set_flag (ctf_dict_t *fp, ctf_dict_flags_t flag, int set)
 {
   if (set < 0 || set > 1)
     return (ctf_set_errno (fp, ECTF_BADFLAG));
@@ -142,7 +142,7 @@ ctf_dict_set_flag (ctf_dict_t *fp, uint64_t flag, int set)
 }
 
 ctf_bool_t
-ctf_dict_get_flag (ctf_dict_t *fp, uint64_t flag)
+ctf_dict_flag (ctf_dict_t *fp, ctf_dict_flags_t flag)
 {
   switch (flag)
     {

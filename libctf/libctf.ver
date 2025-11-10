@@ -180,7 +180,7 @@ LIBCTF_2.0 {
 	ctf_add_func_sym;
 
 	ctf_dict_set_flag;
-	ctf_dict_get_flag;
+	ctf_dict_flag;
 
 	ctf_fdopen;                             /* libctf only.  */
 	ctf_open;                               /* libctf only.  */

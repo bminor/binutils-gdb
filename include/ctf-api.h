@@ -386,7 +386,10 @@ _CTF_ERRORS
 
 /* If set, duplicate enumerators in a single dict fail with ECTF_DUPLICATE.  */
 
-#define CTF_STRICT_NO_DUP_ENUMERATORS	0x1
+typedef enum ctf_dict_flags
+  {
+    CTF_STRICT_NO_DUP_ENUMERATORS = 0x1
+  } ctf_dict_flags_t;
 
 /* These typedefs are used to define the signature for callback functions that
    can be used with the iteration and visit functions below.  There is also a
@@ -448,8 +451,8 @@ extern void ctf_close (ctf_archive_t *);
 
 /* Set or unset dict-wide boolean flags, and get the value of these flags.  */
 
-extern ctf_ret_t ctf_dict_set_flag (ctf_dict_t *, uint64_t flag, int set);
-extern ctf_bool_t ctf_dict_get_flag (ctf_dict_t *, uint64_t flag);
+extern ctf_ret_t ctf_dict_set_flag (ctf_dict_t *, ctf_dict_flags_t flag, int set);
+extern ctf_bool_t ctf_dict_flag (ctf_dict_t *, ctf_dict_flags_t flag);
 
 /* Return the data, symbol, or string sections used by a given CTF dict.  */
 extern ctf_sect_t ctf_getdatasect (const ctf_dict_t *);

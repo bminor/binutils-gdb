@@ -84,7 +84,7 @@ main (int argc, char *argv[])
       if (ctf_dict_set_flag (fp, 0, 1) >= 0 || ctf_errno (fp) != ECTF_BADFLAG)
 	fprintf (stderr, "Invalid flag setting did not fail as it ought to\n");
 
-      if (ctf_dict_get_flag (fp, 0) >= 0 || ctf_errno (fp) != ECTF_BADFLAG)
+      if (ctf_dict_flag (fp, 0) >= 0 || ctf_errno (fp) != ECTF_BADFLAG)
 	fprintf (stderr, "Invalid flag getting did not fail as it ought to\n");
 
       /* Set it strict for now.  */
@@ -119,7 +119,7 @@ main (int argc, char *argv[])
 
       /* Flip the strict flag and try again.  This time, it should succeed.  */
 
-      if ((old_dynadd2_flag = ctf_dict_get_flag (fp, CTF_STRICT_NO_DUP_ENUMERATORS)) < 0)
+      if ((old_dynadd2_flag = ctf_dict_flag (fp, CTF_STRICT_NO_DUP_ENUMERATORS)) < 0)
 	goto get_flag_err;
 
       if (ctf_dict_set_flag (fp, CTF_STRICT_NO_DUP_ENUMERATORS, 0) < 0)
@@ -220,7 +220,7 @@ main (int argc, char *argv[])
 	   ctf_cuname (fp) ? ctf_cuname (fp) : "(null: parent)", ctf_errmsg (ctf_errno (fp)));
   return 1;
  get_flag_err:
-  fprintf (stderr, "ctf_dict_get_flag failed: %s\n", ctf_errmsg (ctf_errno (fp)));
+  fprintf (stderr, "ctf_dict_flag failed: %s\n", ctf_errmsg (ctf_errno (fp)));
   return 1;
  set_flag_err:
   fprintf (stderr, "ctf_dict_set_flag failed: %s\n", ctf_errmsg (ctf_errno (fp)));
