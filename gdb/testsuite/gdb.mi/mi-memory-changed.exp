@@ -75,5 +75,6 @@ gdb_expect {
 
 regsub ^0x0* $main_addr "" main_addr
 mi_gdb_test "set var *(unsigned int *) 0x${main_addr} = ${main_insn}" \
-    ".*=memory-changed,thread-group=\"i${decimal}\".addr=\"0x0*${main_addr}\",len=\"0x4\",type=\"code\".*\\^done"
+    ".*=memory-changed,thread-group=\"i${decimal}\".addr=\"0x0*${main_addr}\",len=\"0x4\",type=\"code\".*\\^done" \
+    {set var *(unsigned int *) 0x${main_addr} = ${main_insn}}
 mi_gdb_exit
