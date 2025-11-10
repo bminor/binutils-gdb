@@ -1072,7 +1072,7 @@ extern ctf_ret_t ctf_array_set_info (ctf_dict_t *, ctf_id_t, const ctf_arinfo_t 
    given name.  The type is hidden from all name lookups, just like
    CTF_ADD_NONROOT.  */
 
-extern ctf_ret_t ctf_set_conflicting (ctf_dict_t *, ctf_id_t, const char *);
+extern ctf_ret_t ctf_type_set_conflicting (ctf_dict_t *, ctf_id_t, const char *);
 
 /* Add a function or object symbol type with a particular name, without saying
    anything about the actual symbol index.  (The linker will then associate them

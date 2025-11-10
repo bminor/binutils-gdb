@@ -3952,7 +3952,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
   /* If this type is meant to be marked conflicting in this dict rather than
      moved into a child, mark it, and note which CU it came from.  */
   if (new_type != 0 && mark_type_conflicting)
-    if (ctf_set_conflicting (target, new_type, ctf_cuname (input)) < 0)
+    if (ctf_type_set_conflicting (target, new_type, ctf_cuname (input)) < 0)
       goto err_target;
 
   return 0;
