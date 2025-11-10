@@ -34,11 +34,11 @@ extern "C"
 {
 #endif
 
-#ifndef __attribute__deprecated__
-# ifdef __GNUC__
-#  define __attribute__deprecated__(x) __attribute__((__deprecated__(x)))
+#ifndef __libctf_attribute_deprecated__
+# if defined (__GNUC__) && !defined(IN_LIBCTF)
+#  define __libctf_attribute_deprecated__(x) __attribute__((__deprecated__(x)))
 # else
-#  define __attribute__deprecated__(x)
+#  define __libctf_attribute_deprecated__(x)
 # endif
 #endif
 
@@ -711,7 +711,7 @@ extern const char *ctf_type_name_raw (ctf_dict_t *, ctf_id_t);
    than LEN, return NULL, set ECTF_NAMELEN on the errno, and put the actual
    number of bytes needed into LEN.  Consider using ctf_type_aname instead.  */
 
-__attribute__deprecated__ ("consider using ctf_type_aname instead")
+__libctf_attribute_deprecated__ ("consider using ctf_type_aname instead")
 extern char *ctf_type_sname (ctf_dict_t *, ctf_id_t, char *, size_t *);
 
 /* Retrieve raw (BTF or CTF-format) type data for the type with a given ID.
@@ -861,8 +861,13 @@ extern const char *ctf_enum_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
 
    There is nothing preventing NAME from being changed by the caller in the
    middle of iteration: the results might be slightly confusing, but they are
-   well-defined.  */
+   well-defined.
 
+   This function is only useful for dicts containing multiple enumerators with
+   the same name.  These things are not valid C, and as of 2024 the deduplicator
+   will not produce them; so this function is somewhat deprecated.  */
+
+__libctf_attribute_deprecated__("consider using ctf_lookup_enumerator instead")
 extern ctf_id_t ctf_lookup_enumerator_next (ctf_dict_t *, const char *name,
 					    ctf_next_t **,
 					    ctf_enum_value_t *enum_value);
