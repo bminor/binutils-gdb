@@ -2293,12 +2293,12 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   if (symsect != NULL)
     {
       if (symsect->cts_entsize == sizeof (Elf64_Sym))
-	(void) ctf_setmodel (fp, CTF_MODEL_LP64);
+	ctf_dict_set_model (fp, CTF_MODEL_LP64);
       else
-	(void) ctf_setmodel (fp, CTF_MODEL_ILP32);
+	ctf_dict_set_model (fp, CTF_MODEL_ILP32);
     }
   else
-    (void) ctf_setmodel (fp, CTF_MODEL_NATIVE);
+    ctf_dict_set_model (fp, CTF_MODEL_NATIVE);
 
   fp->ctf_refcnt = 1;
   return fp;
@@ -2595,21 +2595,14 @@ ctf_sect_size (ctf_dict_t *fp, ctf_sect_names_t sect)
 /* Return the CTF handle for the parent CTF dict, if one exists.  Otherwise
    return NULL to indicate this dict has no imported parent.  */
 ctf_dict_t *
-ctf_parent_dict (ctf_dict_t *fp)
+ctf_dict_parent (ctf_dict_t *fp)
 {
   return fp->ctf_parent;
 }
 
-/* Backward compatibility.  */
-ctf_dict_t *
-ctf_parent_file (ctf_dict_t *fp)
-{
-  return ctf_parent_dict (fp);
-}
-
 /* Return the name of the parent CTF dict, if one exists, or NULL otherwise.  */
 const char *
-ctf_parent_name (ctf_dict_t *fp)
+ctf_dict_parent_name (ctf_dict_t *fp)
 {
   return fp->ctf_parent_name;
 }
@@ -2617,7 +2610,7 @@ ctf_parent_name (ctf_dict_t *fp)
 /* Set the parent name.  It is an error to call this routine without calling
    ctf_import() at some point.  */
 ctf_ret_t
-ctf_parent_name_set (ctf_dict_t *fp, const char *name)
+ctf_dict_set_parent_name (ctf_dict_t *fp, const char *name)
 {
   if (fp->ctf_dyn_parent_name != NULL)
     free (fp->ctf_dyn_parent_name);
@@ -2631,14 +2624,14 @@ ctf_parent_name_set (ctf_dict_t *fp, const char *name)
 /* Return the name of the compilation unit this CTF file applies to.  Usually
    non-NULL only for non-parent dicts.  */
 const char *
-ctf_cuname (ctf_dict_t *fp)
+ctf_dict_cuname (ctf_dict_t *fp)
 {
   return fp->ctf_cu_name;
 }
 
 /* Set the compilation unit name.  */
 ctf_ret_t
-ctf_cuname_set (ctf_dict_t *fp, const char *name)
+ctf_dict_set_cuname (ctf_dict_t *fp, const char *name)
 {
   if (fp->ctf_dyn_cu_name != NULL)
     free (fp->ctf_dyn_cu_name);
@@ -2745,7 +2738,7 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
   fp->ctf_pptrtab_typemax = 0;
 
   if (fp->ctf_parent_name == NULL)
-    if ((err = ctf_parent_name_set (fp, "PARENT")) < 0)
+    if ((err = ctf_dict_set_parent_name (fp, "PARENT")) < 0)
       return err;				/* errno is set for us.  */
 
   if (!unreffed)
@@ -2822,7 +2815,7 @@ ctf_import_unref (ctf_dict_t *fp, ctf_dict_t *pfp)
 
 /* Set the data model constant for the CTF dict.  */
 ctf_ret_t
-ctf_setmodel (ctf_dict_t *fp, int model)
+ctf_dict_set_model (ctf_dict_t *fp, ctf_model_t model)
 {
   const ctf_dmodel_t *dp;
 
@@ -2839,8 +2832,8 @@ ctf_setmodel (ctf_dict_t *fp, int model)
 }
 
 /* Return the data model constant for the CTF dict.  */
-int
-ctf_getmodel (ctf_dict_t *fp)
+ctf_model_t
+ctf_dict_model (ctf_dict_t *fp)
 {
   return fp->ctf_dmodel->ctd_code;
 }
@@ -2848,14 +2841,14 @@ ctf_getmodel (ctf_dict_t *fp)
 /* The caller can hang an arbitrary pointer off each ctf_dict_t using this
    function.  */
 void
-ctf_setspecific (ctf_dict_t *fp, void *data)
+ctf_dict_specific_set (ctf_dict_t *fp, void *data)
 {
   fp->ctf_specific = data;
 }
 
 /* Retrieve the arbitrary pointer again.  */
 void *
-ctf_getspecific (ctf_dict_t *fp)
+ctf_dict_specific (ctf_dict_t *fp)
 {
   return fp->ctf_specific;
 }

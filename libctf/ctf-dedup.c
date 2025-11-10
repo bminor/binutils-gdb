@@ -3334,8 +3334,8 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
      output that is its parent.  */
   is_conflicting = ctf_dynset_exists (d->cd_conflicting_types, hval, NULL);
 
-  if (cu_mapping_phase == 2 && ctf_cuname (input) != NULL
-      && strcmp (ctf_cuname (input), "") == 0)
+  if (cu_mapping_phase == 2 && ctf_dict_cuname (input) != NULL
+      && strcmp (ctf_dict_cuname (input), "") == 0)
     parent_cu_mapped = 1;
 
   if (is_conflicting && cu_mapping_phase != 1 && !parent_cu_mapped)
@@ -3360,11 +3360,11 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 
 	  target->ctf_flags |= LCTF_STRICT_NO_DUP_ENUMERATORS;
 	  ctf_import_unref (target, output);
-	  if (ctf_cuname (input) != NULL)
-	    ctf_cuname_set (target, ctf_cuname (input));
+	  if (ctf_dict_cuname (input) != NULL)
+	    ctf_dict_set_cuname (target, ctf_dict_cuname (input));
 	  else
-	    ctf_cuname_set (target, "unnamed-CU");
-	  ctf_parent_name_set (target, _CTF_SECTION);
+	    ctf_dict_set_cuname (target, "unnamed-CU");
+	  ctf_dict_set_parent_name (target, _CTF_SECTION);
 
 	  input->ctf_dedup.cd_output = target;
 	  input->ctf_link_in_out = target;
@@ -3473,8 +3473,9 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 		  {
 		    ctf_dprintf ("%s, kind %i, hval %s: conflicting type marked as "
 				 "non-root because of pre-existing type %s/%lx, "
-				 "kind %i.\n", name, kind, hval, ctf_cuname (target),
-				 maybe_dup, ctf_type_kind (target, maybe_dup));
+				 "kind %i.\n", name, kind, hval,
+				 ctf_dict_cuname (target), maybe_dup,
+				 ctf_type_kind (target, maybe_dup));
 		    isroot = 0;
 		    mark_type_conflicting = 1;
 		  }
@@ -3901,7 +3902,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
   /* If this type is meant to be marked conflicting in this dict rather than
      moved into a child, mark it, and note which CU it came from.  */
   if (new_type != 0 && mark_type_conflicting)
-    if (ctf_type_set_conflicting (target, new_type, ctf_cuname (input)) < 0)
+    if (ctf_type_set_conflicting (target, new_type, ctf_dict_cuname (input)) < 0)
       goto err_target;
 
   return 0;

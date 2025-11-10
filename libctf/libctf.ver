@@ -28,20 +28,19 @@ LIBCTF_2.0 {
 	ctf_dict_close;
 	ctf_file_close;
 
-	ctf_cuname;
-	ctf_cuname_set;
-	ctf_parent_file;
-	ctf_parent_name;
-	ctf_parent_name_set;
-	ctf_parent_dict;
+	ctf_dict_cuname;
+	ctf_dict_set_cuname;
+	ctf_dict_parent_name;
+	ctf_dict_set_parent_name;
+	ctf_dict_parent;
 	ctf_type_isparent;
 
 	ctf_import;
-	ctf_setmodel;
-	ctf_getmodel;
+	ctf_dict_set_model;
+	ctf_dict_model;
 
-	ctf_setspecific;
-	ctf_getspecific;
+	ctf_dict_set_specific;
+	ctf_dict_specific;
 
 	ctf_errno;
 	ctf_errmsg;

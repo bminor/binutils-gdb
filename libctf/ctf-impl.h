@@ -120,7 +120,7 @@ typedef struct ctf_strs_writable
 typedef struct ctf_dmodel
 {
   const char *ctd_name;		/* Data model name.  */
-  int ctd_code;			/* Data model code.  */
+  ctf_model_t ctd_code;		/* Data model code.  */
   size_t ctd_pointer;		/* Size of void * in bytes.  */
   size_t ctd_char;		/* Size of char in bytes.  */
   size_t ctd_short;		/* Size of short in bytes.  */
@@ -552,7 +552,7 @@ struct ctf_dict
 
   char *ctf_tmp_typeslice;	  /* Storage for slicing up type names.  */
   size_t ctf_tmp_typeslicelen;	  /* Size of the typeslice.  */
-  void *ctf_specific;		  /* Data for ctf_get/setspecific().  */
+  void *ctf_specific;		  /* Data for ctf_dict_specific*().  */
 };
 
 /* An abstraction over both a ctf_dict_t and a ctf_archive_t.  */

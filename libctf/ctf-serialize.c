@@ -1393,7 +1393,7 @@ ctf_preserialize (ctf_dict_t *fp, int force_ctf)
   emit_symtypetab_state_t symstate;
   memset (&symstate, 0, sizeof (emit_symtypetab_state_t));
 
-  ctf_dprintf ("Preserializing dict for %s\n", ctf_cuname (fp));
+  ctf_dprintf ("Preserializing dict for %s\n", ctf_dict_cuname (fp));
 
   if (fp->ctf_flags & LCTF_NO_STR)
     return (ctf_set_errno (fp, ECTF_NOPARENT));
@@ -1674,7 +1674,7 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz, int force_ctf)
   if ((fp->ctf_flags & LCTF_LINKING) && fp->ctf_parent)
     fp->ctf_header->cth_parent_strlen = fp->ctf_parent->ctf_str[CTF_STRTAB_0].cts_len;
 
-  ctf_dprintf ("Writing strtab for %s\n", ctf_cuname (fp));
+  ctf_dprintf ("Writing strtab for %s\n", ctf_dict_cuname (fp));
   strtab = ctf_str_write_strtab (fp);
 
   if (strtab == NULL)

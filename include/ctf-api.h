@@ -356,13 +356,16 @@ _CTF_ERRORS
 
 /* The CTF data model is inferred to be the caller's data model or the data
    model of the given object, unless ctf_setmodel is explicitly called.  */
-#define	CTF_MODEL_ILP32 1	/* Object data model is ILP32.  */
-#define	CTF_MODEL_LP64  2	/* Object data model is LP64.  */
+typedef enum ctf_model
+  {
+    CTF_MODEL_ILP32 = 1,	/* Object data model is ILP32.  */
+    CTF_MODEL_LP64 = 2,		/* Object data model is LP64.  */
 #ifdef _LP64
-# define CTF_MODEL_NATIVE CTF_MODEL_LP64
+    CTF_MODEL_NATIVE = CTF_MODEL_LP64
 #else
-# define CTF_MODEL_NATIVE CTF_MODEL_ILP32
+    CTF_MODEL_NATIVE = CTF_MODEL_ILP32
 #endif
+  } ctf_model_t;
 
 /* Dynamic CTF containers can be created using ctf_create.  The ctf_add_*
    routines can be used to add new definitions to the dynamic container.  New
@@ -542,28 +545,28 @@ extern void ctf_dict_close (ctf_dict_t *);
    child dicts that have not yet had ctf_import called on them; in particular,
    name lookups and type lookup in general are broken, as is type addition.  */
 
-extern const char *ctf_cuname (ctf_dict_t *);
-extern ctf_dict_t *ctf_parent_dict (ctf_dict_t *);
-extern const char *ctf_parent_name (ctf_dict_t *);
+extern const char *ctf_dict_cuname (ctf_dict_t *);
+extern ctf_dict_t *ctf_dict_parent (ctf_dict_t *);
+extern const char *ctf_dict_parent_name (ctf_dict_t *);
 extern ctf_bool_t ctf_type_isparent (const ctf_dict_t *, ctf_id_t);
 extern ctf_ret_t ctf_import (ctf_dict_t *child, ctf_dict_t *parent);
 
 /* Set these names (used when creating dicts).  */
 
-extern ctf_ret_t ctf_cuname_set (ctf_dict_t *, const char *);
-extern ctf_ret_t ctf_parent_name_set (ctf_dict_t *, const char *);
+extern ctf_ret_t ctf_dict_set_cuname (ctf_dict_t *, const char *);
+extern ctf_ret_t ctf_dict_set_parent_name (ctf_dict_t *, const char *);
 
 /* Set and get the CTF data model (see above).  */
 
-extern ctf_ret_t ctf_setmodel (ctf_dict_t *, int);
-extern int ctf_getmodel (ctf_dict_t *);
+extern ctf_ret_t ctf_dict_set_model (ctf_dict_t *, ctf_model_t);
+extern ctf_model_t ctf_dict_model (ctf_dict_t *);
 
 /* CTF dicts can carry a single (in-memory-only) non-persistent pointer to
    arbitrary data.  No meaning is attached to this data and the dict does
    not own it: nothing is done to it when the dict is closed.  */
 
-extern void ctf_setspecific (ctf_dict_t *, void *);
-extern void *ctf_getspecific (ctf_dict_t *);
+extern void ctf_dict_specific_set (ctf_dict_t *, void *);
+extern void *ctf_dict_specific (ctf_dict_t *);
 
 /* Error handling.  ctf dicts carry a system errno value or one of the
    CTF_ERRORS above, which are returned via ctf_errno.  The return value of
@@ -1273,7 +1276,6 @@ extern ctf_bool_t ctf_getdebug (void);
 struct ctf_file;
 typedef struct ctf_dict ctf_file_t;
 extern void ctf_file_close (ctf_file_t *);
-extern ctf_dict_t *ctf_parent_file (ctf_dict_t *);
 extern ctf_dict_t *ctf_arc_open_by_name (const ctf_archive_t *,
 					 const char *, int *);
 

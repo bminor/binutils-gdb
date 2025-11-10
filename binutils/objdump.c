@@ -4842,7 +4842,7 @@ dump_ctf_archive_member (ctf_dict_t *ctf, const char *name, ctf_dict_t *parent,
   if (strcmp (name, ".ctf") != 0 || member != 0)
     printf (_("\nCTF archive member: %s:\n"), sanitize_string (name));
 
-  if (ctf_parent_name (ctf) != NULL)
+  if (ctf_dict_parent_name (ctf) != NULL)
     ctf_import (ctf, parent);
 
   for (i = 0, thing = things; *thing[0]; thing++, i++)

@@ -209,15 +209,18 @@ main (int argc, char *argv[])
   return 1;
  enum_add_err:
   fprintf (stderr, "Cannot add enum to dict \"%s\": %s\n",
-	   ctf_cuname (fp) ? ctf_cuname (fp) : "(null: parent)", ctf_errmsg (ctf_errno (fp)));
+	   ctf_dict_cuname (fp) ? ctf_dict_cuname (fp) : "(null: parent)",
+	   ctf_errmsg (ctf_errno (fp)));
   return 1;
  enumerator_add_err:
   fprintf (stderr, "Cannot add enumerator to dict \"%s\": %s\n",
-	   ctf_cuname (fp) ? ctf_cuname (fp) : "(null: parent)", ctf_errmsg (ctf_errno (fp)));
+	   ctf_dict_cuname (fp) ? ctf_dict_cuname (fp) : "(null: parent)",
+	   ctf_errmsg (ctf_errno (fp)));
   return 1;
  enumerator_lookup_err:
   fprintf (stderr, "Cannot look up enumerator in dict \"%s\": %s\n",
-	   ctf_cuname (fp) ? ctf_cuname (fp) : "(null: parent)", ctf_errmsg (ctf_errno (fp)));
+	   ctf_dict_cuname (fp) ? ctf_dict_cuname (fp) : "(null: parent)",
+	   ctf_errmsg (ctf_errno (fp)));
   return 1;
  get_flag_err:
   fprintf (stderr, "ctf_dict_flag failed: %s\n", ctf_errmsg (ctf_errno (fp)));
