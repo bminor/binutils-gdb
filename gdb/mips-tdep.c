@@ -209,8 +209,8 @@ static unsigned int mips_debug = 0;
 #define PROPERTY_GP32 "internal: transfers-32bit-registers"
 #define PROPERTY_GP64 "internal: transfers-64bit-registers"
 
-struct target_desc *mips_tdesc_gp32;
-struct target_desc *mips_tdesc_gp64;
+target_desc_up mips_tdesc_gp32;
+target_desc_up mips_tdesc_gp64;
 
 /* The current set of options to be passed to the disassembler.  */
 static std::string mips_disassembler_options;
@@ -8057,14 +8057,14 @@ mips_register_g_packet_guesses (struct gdbarch *gdbarch)
 {
   /* If the size matches the set of 32-bit or 64-bit integer registers,
      assume that's what we've got.  */
-  register_remote_g_packet_guess (gdbarch, 38 * 4, mips_tdesc_gp32);
-  register_remote_g_packet_guess (gdbarch, 38 * 8, mips_tdesc_gp64);
+  register_remote_g_packet_guess (gdbarch, 38 * 4, mips_tdesc_gp32.get ());
+  register_remote_g_packet_guess (gdbarch, 38 * 8, mips_tdesc_gp64.get ());
 
   /* If the size matches the full set of registers GDB traditionally
      knows about, including floating point, for either 32-bit or
      64-bit, assume that's what we've got.  */
-  register_remote_g_packet_guess (gdbarch, 90 * 4, mips_tdesc_gp32);
-  register_remote_g_packet_guess (gdbarch, 90 * 8, mips_tdesc_gp64);
+  register_remote_g_packet_guess (gdbarch, 90 * 4, mips_tdesc_gp32.get ());
+  register_remote_g_packet_guess (gdbarch, 90 * 8, mips_tdesc_gp64.get ());
 
   /* Otherwise we don't have a useful guess.  */
 }
@@ -8985,11 +8985,11 @@ INIT_GDB_FILE (mips_tdep)
 
   /* Create feature sets with the appropriate properties.  The values
      are not important.  */
-  mips_tdesc_gp32 = allocate_target_description ().release ();
-  set_tdesc_property (mips_tdesc_gp32, PROPERTY_GP32, "");
+  mips_tdesc_gp32 = allocate_target_description ();
+  set_tdesc_property (mips_tdesc_gp32.get (), PROPERTY_GP32, "");
 
-  mips_tdesc_gp64 = allocate_target_description ().release ();
-  set_tdesc_property (mips_tdesc_gp64, PROPERTY_GP64, "");
+  mips_tdesc_gp64 = allocate_target_description ();
+  set_tdesc_property (mips_tdesc_gp64.get (), PROPERTY_GP64, "");
 
   /* Add root prefix command for all "set mips"/"show mips" commands.  */
   add_setshow_prefix_cmd ("mips", no_class,

@@ -20,6 +20,7 @@
 #ifndef GDB_MIPS_TDEP_H
 #define GDB_MIPS_TDEP_H
 
+#include "gdbsupport/tdesc.h"
 #include "objfiles.h"
 #include "gdbarch.h"
 
@@ -190,8 +191,8 @@ extern void mips_write_pc (struct regcache *regcache, CORE_ADDR pc);
 
 /* Target descriptions which only indicate the size of general
    registers.  */
-extern struct target_desc *mips_tdesc_gp32;
-extern struct target_desc *mips_tdesc_gp64;
+extern target_desc_up mips_tdesc_gp32;
+extern target_desc_up mips_tdesc_gp64;
 
 /* Return non-zero if PC is in a MIPS SVR4 lazy binding stub section.  */
 

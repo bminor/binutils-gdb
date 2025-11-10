@@ -565,10 +565,10 @@ mips_linux_core_read_description (struct gdbarch *gdbarch,
   switch (bfd_section_size (section))
     {
     case sizeof (mips_elf_gregset_t):
-      return mips_tdesc_gp32;
+      return mips_tdesc_gp32.get ();
 
     case sizeof (mips64_elf_gregset_t):
-      return mips_tdesc_gp64;
+      return mips_tdesc_gp64.get ();
 
     default:
       return NULL;
