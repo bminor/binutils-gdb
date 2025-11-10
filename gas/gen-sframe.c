@@ -1322,11 +1322,11 @@ s390_sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx,
      numbers, as offsets from CFA are always a multiple of -8 on s390x.  */
   if (cfi_insn->u.rr.reg1 == SFRAME_CFA_FP_REG)
     sframe_fre_set_fp_track (cur_fre,
-			     SFRAME_V2_S390X_OFFSET_ENCODE_REGNUM (cfi_insn->u.rr.reg2));
+			     SFRAME_V3_S390X_OFFSET_ENCODE_REGNUM (cfi_insn->u.rr.reg2));
   else if (sframe_ra_tracking_p ()
 	   && cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG)
     sframe_fre_set_ra_track (cur_fre,
-			     SFRAME_V2_S390X_OFFSET_ENCODE_REGNUM (cfi_insn->u.rr.reg2));
+			     SFRAME_V3_S390X_OFFSET_ENCODE_REGNUM (cfi_insn->u.rr.reg2));
 
   return SFRAME_XLATE_OK;
 }

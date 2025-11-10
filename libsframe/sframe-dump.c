@@ -46,6 +46,30 @@ is_sframe_abi_arch_s390x (const sframe_decoder_ctx *sfd_ctx)
   return sframe_decoder_get_abi_arch (sfd_ctx) == SFRAME_ABI_S390X_ENDIAN_BIG;
 }
 
+static bool
+sframe_s390x_offset_regnum_p (int32_t offset, uint8_t ver)
+{
+  if (ver == SFRAME_VERSION_2)
+    return SFRAME_V2_S390X_OFFSET_IS_REGNUM (offset);
+  else if (ver == SFRAME_VERSION_3)
+    return SFRAME_V3_S390X_OFFSET_IS_REGNUM (offset);
+  else
+    /* No other version is supported yet.  */
+    sframe_assert (false);
+}
+
+static int
+sframe_s390x_offset_decode_regnum (int32_t offset, uint8_t ver)
+{
+  if (ver == SFRAME_VERSION_2)
+    return SFRAME_V2_S390X_OFFSET_DECODE_REGNUM (offset);
+  else if (ver == SFRAME_VERSION_3)
+    return SFRAME_V3_S390X_OFFSET_DECODE_REGNUM (offset);
+  else
+    /* No other version is supported yet.  */
+    sframe_assert (false);
+}
+
 static void
 dump_sframe_header_flags (const sframe_decoder_ctx *sfd_ctx)
 {
@@ -230,8 +254,9 @@ dump_sframe_func_with_fres (const sframe_decoder_ctx *sfd_ctx,
       if (err[1] == 0)
 	{
 	  if (is_sframe_abi_arch_s390x (sfd_ctx)
-	      && SFRAME_V2_S390X_OFFSET_IS_REGNUM (fp_offset))
-	    sprintf (temp, "r%d", SFRAME_V2_S390X_OFFSET_DECODE_REGNUM (fp_offset));
+	      && sframe_s390x_offset_regnum_p (fp_offset, ver))
+	    sprintf (temp, "r%d",
+		     sframe_s390x_offset_decode_regnum (fp_offset, ver));
 	  else
 	    sprintf (temp, "c%+d", fp_offset);
 	}
@@ -252,8 +277,9 @@ dump_sframe_func_with_fres (const sframe_decoder_ctx *sfd_ctx,
       else if (err[2] == 0)
 	{
 	  if (is_sframe_abi_arch_s390x (sfd_ctx)
-	      && SFRAME_V2_S390X_OFFSET_IS_REGNUM (ra_offset))
-	    sprintf (temp, "r%d", SFRAME_V2_S390X_OFFSET_DECODE_REGNUM (ra_offset));
+	      && sframe_s390x_offset_regnum_p (ra_offset, ver))
+	    sprintf (temp, "r%d",
+		     sframe_s390x_offset_decode_regnum (ra_offset, ver));
 	  else
 	    sprintf (temp, "c%+d", ra_offset);
 	}
