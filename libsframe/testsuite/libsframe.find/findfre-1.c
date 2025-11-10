@@ -40,7 +40,7 @@ add_fde1 (sframe_encoder_ctx *encode, int64_t start_pc_vaddr,
   unsigned char finfo = sframe_fde_create_func_info (SFRAME_FRE_TYPE_ADDR1,
 						     SFRAME_FDE_TYPE_PCINC);
   int err = sframe_encoder_add_funcdesc_v3 (encode, func1_start_addr,
-					    *func_size, finfo, 0,
+					    *func_size, finfo, 0, 0,
 					    FDE1_NUM_FRES);
   if (err == -1)
     return err;
@@ -75,7 +75,7 @@ add_fde2 (sframe_encoder_ctx *encode, int64_t start_pc_vaddr,
   unsigned char finfo = sframe_fde_create_func_info (SFRAME_FRE_TYPE_ADDR1,
 						     SFRAME_FDE_TYPE_PCINC);
   int err = sframe_encoder_add_funcdesc_v3 (encode, func2_start_addr,
-					    *func_size, finfo, 0,
+					    *func_size, finfo, 0, 0,
 					    FDE2_NUM_FRES);
   if (err == -1)
     return err;

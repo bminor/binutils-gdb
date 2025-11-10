@@ -488,6 +488,7 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
       bfd_vma address;
       uint32_t func_size = 0;
       unsigned char func_info = 0;
+      unsigned char func_info2 = 0;
       unsigned int r_offset = 0;
       bool pltn_reloc_by_hand = false;
       unsigned int pltn_r_offset = 0;
@@ -495,7 +496,7 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
 
       if (!sframe_decoder_get_funcdesc_v3 (sfd_ctx, i, &num_fres, &func_size,
 					   &func_start_addr, &func_info,
-					   &rep_block_size))
+					   &func_info2, &rep_block_size))
 	{
 	  /* If function belongs to a deleted section, skip editing the
 	     function descriptor entry.  */
@@ -562,7 +563,8 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
 	  /* Update the encoder context with updated content.  */
 	  int err = sframe_encoder_add_funcdesc_v3 (sfe_ctx, func_start_addr,
 						    func_size, func_info,
-						    rep_block_size, num_fres);
+						    func_info2, rep_block_size,
+						    num_fres);
 	  cur_fidx++;
 	  BFD_ASSERT (!err);
 	}

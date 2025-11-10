@@ -182,7 +182,7 @@ sframe_decoder_get_funcdesc_v2 (const sframe_decoder_ctx *ctx,
 				unsigned char *func_info,
 				uint8_t *rep_block_size);
 
-/* Get the data (NUM_FRES, FUNC_SIZE, START_PC_OFFSET, FUNC_INFO,
+/* Get the data (NUM_FRES, FUNC_SIZE, START_PC_OFFSET, FUNC_INFO, FUNC_INFO2,
    REP_BLOCK_SIZE) from the SFrame function descriptor entry at the I'th index
    in the decoder object DCTX.  Return SFRAME_ERR on failure.  */
 extern int
@@ -192,6 +192,7 @@ sframe_decoder_get_funcdesc_v3 (const sframe_decoder_ctx *dctx,
 				uint32_t *func_size,
 				int64_t *start_pc_offset,
 				unsigned char *func_info,
+				unsigned char *func_info2,
 				uint8_t *rep_block_size);
 
 /* SFrame textual dump.  */
@@ -308,13 +309,14 @@ sframe_encoder_add_funcdesc_v2 (sframe_encoder_ctx *ectx,
 				uint32_t num_fres);
 
 /* Add a new SFrame function descriptor entry with START_PC_OFFSET, FUNC_SIZE,
-   FUNC_INFO and REP_BLOCK_SIZE to the encoder context ECTX.  Return error
-   code on failure.  */
+   FUNC_INFO, FUNC_INFO2 and REP_BLOCK_SIZE to the encoder context ECTX.
+   Return error code on failure.  */
 extern int
 sframe_encoder_add_funcdesc_v3 (sframe_encoder_ctx *ectx,
 				int64_t start_pc_offset,
 				uint32_t func_size,
 				unsigned char func_info,
+				unsigned char func_info2,
 				uint8_t rep_block_size,
 				uint32_t num_fres);
 

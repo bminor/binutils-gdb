@@ -34,6 +34,7 @@ typedef struct sframe_func_desc_entry_int
   uint32_t func_start_fre_off;
   uint32_t func_num_fres;
   uint8_t func_info;
+  uint8_t func_info2;
   uint8_t func_rep_size;
 } sframe_func_desc_entry_int;
 
@@ -153,6 +154,7 @@ sframe_fde_tbl_init (sf_fde_tbl *fde_tbl, const char *fde_buf,
 	  fde_tbl->entry[i].func_start_fre_off = fdep->sfde_func_start_fre_off;
 	  fde_tbl->entry[i].func_num_fres = fdep->sfde_func_num_fres;
 	  fde_tbl->entry[i].func_info = fdep->sfde_func_info;
+	  fde_tbl->entry[i].func_info2 = fdep->sfde_func_info2;
 	  fde_tbl->entry[i].func_rep_size = fdep->sfde_func_rep_size;
 	}
       fde_tbl->count = num_fdes;
@@ -172,6 +174,7 @@ sframe_fde_tbl_init (sf_fde_tbl *fde_tbl, const char *fde_buf,
 	  fde_tbl->entry[i].func_start_fre_off = fdep->sfde_func_start_fre_off;
 	  fde_tbl->entry[i].func_num_fres = fdep->sfde_func_num_fres;
 	  fde_tbl->entry[i].func_info = fdep->sfde_func_info;
+	  fde_tbl->entry[i].func_info2 = 0;
 	  fde_tbl->entry[i].func_rep_size = fdep->sfde_func_rep_size;
 	}
       fde_tbl->count = num_fdes;
@@ -1528,6 +1531,7 @@ sframe_decoder_get_funcdesc_v3 (const sframe_decoder_ctx *dctx,
 				uint32_t *func_size,
 				int64_t *start_pc_offset,
 				unsigned char *func_info,
+				unsigned char *func_info2,
 				uint8_t *rep_block_size)
 {
   int err = 0;
@@ -1547,6 +1551,8 @@ sframe_decoder_get_funcdesc_v3 (const sframe_decoder_ctx *dctx,
     *func_size = fdp->func_size;
   if (func_info)
     *func_info = fdp->func_info;
+  if (func_info2)
+    *func_info2 = fdp->func_info2;
   if (rep_block_size)
     *rep_block_size = fdp->func_rep_size;
 
@@ -1979,14 +1985,15 @@ sframe_encoder_add_funcdesc_v2 (sframe_encoder_ctx *ectx,
 }
 
 /* Add a new SFrame function descriptor entry with START_PC_OFFSET, FUNC_SIZE,
-   FUNC_INFO and REP_BLOCK_SIZE to the encoder context ECTX.  Return error
-   code on failure.  */
+   FUNC_INFO, FUNC_INFO2 and REP_BLOCK_SIZE to the encoder context ECTX.
+   Return error code on failure.  */
 
 int
 sframe_encoder_add_funcdesc_v3 (sframe_encoder_ctx *ectx,
 				int64_t start_pc_offset,
 				uint32_t func_size,
 				unsigned char func_info,
+				unsigned char func_info2,
 				uint8_t rep_block_size,
 				uint32_t num_fres ATTRIBUTE_UNUSED)
 {
@@ -2004,6 +2011,7 @@ sframe_encoder_add_funcdesc_v3 (sframe_encoder_ctx *ectx,
 
   sf_fde_tbl *fd_info = ectx->sfe_funcdesc;
   fd_info->entry[fd_info->count-1].func_info = func_info;
+  fd_info->entry[fd_info->count-1].func_info2 = func_info2;
   fd_info->entry[fd_info->count-1].func_rep_size = rep_block_size;
 
   return 0;
@@ -2133,6 +2141,7 @@ sframe_encoder_write_fde (const sframe_header *sfhp ATTRIBUTE_UNUSED,
   fdep->sfde_func_start_fre_off = fde->func_start_fre_off;
   fdep->sfde_func_num_fres = (uint16_t)fde->func_num_fres;
   fdep->sfde_func_info = fde->func_info;
+  fdep->sfde_func_info2 = fde->func_info2;
   fdep->sfde_func_rep_size = fde->func_rep_size;
 
   *fde_write_size = sizeof (sframe_func_desc_entry_v3);

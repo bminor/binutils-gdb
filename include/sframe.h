@@ -264,6 +264,13 @@ typedef struct sframe_func_desc_entry_v3
      -------------------------------------------------------------------------------
      8        7             6                             5         4              0     */
   uint8_t sfde_func_info;
+  /* Additional information for stack tracing from the function:
+     - 8-bits: Unused.
+     -------------------------------------------------------------------------
+     |                            Unused                                     |
+     -------------------------------------------------------------------------
+     8        7         6                  5           4              0     */
+  uint8_t sfde_func_info2;
   /* Size of the block of repeating insns.  Used for SFrame FDEs of type
      SFRAME_FDE_TYPE_PCMASK.  */
   uint8_t sfde_func_rep_size;
