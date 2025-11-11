@@ -35,7 +35,7 @@ check()
     fi
 }
 
-check ver_test_4.syms "t1_2\$"
+check ver_test_4.syms "t1_2@\$"
 check ver_test_4.syms "t1_2@@VER2"
 check ver_test_4.syms "t2_2@VER1"
 check ver_test_4.syms "t2_2@@VER2"
