@@ -66,7 +66,8 @@ typedef int ctf_bool_t;
 /* This typedef indiicates that a function returns a CTF error code, or an errno
    value, or zero, on error (or takes one).  C can make this an enum type: C++
    must resort to int, because the type includes many values not in the enum
-   (all valid errnos, for instance).  */
+   (all valid errnos, for instance).  Similar patterns are seen for many flags
+   enums below, because we want to be able to pass 0 to mean "no flags set".  */
 
 #ifdef __cplusplus
 typedef int ctf_error_t;
@@ -116,7 +117,10 @@ typedef struct ctf_link_sym
 
 /* Flags applying to this specific link.  */
 
-typedef enum ctf_link_flags
+#ifndef __cplusplus
+typedef
+#endif
+enum ctf_link_flags
   {
     /* Share all types that are not in conflict.  The default.  */
     CTF_LINK_SHARE_UNCONFLICTED = 0x0,
@@ -148,7 +152,13 @@ typedef enum ctf_link_flags
     /* Dedup all archives but the first added against the first added.  */
 
     CTF_LINK_DEDUP_AGAINST_FIRST = 0x20
+
+#ifndef __cplusplus
   } ctf_link_flags_t;
+#else
+  };
+typedef int ctf_link_flags_t;
+#endif
 
 /* Symbolic names for CTF sections.  */
 
@@ -231,10 +241,18 @@ typedef struct ctf_snapshot_id
   unsigned long snapshot_id;	/* Snapshot id at time of snapshot.  */
 } ctf_snapshot_id_t;
 
-typedef enum ctf_func_type_flags
+#ifndef __cplusplus
+typedef
+#endif
+enum ctf_func_type_flags
   {
     CTF_FUNC_VARARG = 0x1	/* Function arguments end with varargs.  */
+#ifndef __cplusplus
   } ctf_func_type_flags_t;
+#else
+  };
+typedef int ctf_func_type_flags_t;
+#endif
 
 /* Functions that return a ctf_id_t use the following value to indicate failure.
    ctf_errno can be used to obtain an error code.  Functions that return
@@ -346,10 +364,10 @@ enum
 _CTF_ERRORS
 #undef _CTF_ITEM
 #undef _CTF_FIRST
-#ifdef __cplusplus
-  };
-#else
+#ifndef __cplusplus
   } ctf_error_t;
+#else
+  };
 #endif
 
 #define ECTF_NERR (ECTF_TOOLARGE - ECTF_BASE + 1) /* Count of CTF errors.  */
@@ -1041,11 +1059,19 @@ extern ctf_id_t ctf_add_decl_tag (ctf_dict_t *, uint32_t, ctf_id_t, const char *
    specification of padding, while still prohibiting structures smaller than
    the members they contain.  */
 
-typedef enum ctf_bitfield
+#ifndef __cplusplus
+typedef
+#endif
+enum ctf_bitfield
   {
     CTF_STRUCT_NORMAL = 0,
     CTF_STRUCT_BITFIELD = 1
+#ifndef __cplusplus
   } ctf_bitfield_t;
+#else
+  };
+typedef int ctf_bitfield_t;
+#endif
 
 extern ctf_id_t ctf_add_struct (ctf_dict_t *, uint32_t flag, const char *name,
 				ctf_kind_t struct_union_unknown,

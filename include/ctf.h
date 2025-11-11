@@ -560,7 +560,10 @@ typedef enum ctf_v3_kind
 /* Values for CTF_TYPE_KIND() for BTF, shared by CTFv4.  Kind names as unchanged
    as possible, since they are user-exposed, but their values all differ.  */
 
-typedef enum ctf_kind
+#ifndef __cplusplus
+typedef
+#endif
+enum ctf_kind
   {
     CTF_K_UNKNOWN  = 0,	/* Unknown type (used for padding and
 			   unrepresentable and suppressed types).  */
@@ -607,7 +610,12 @@ typedef enum ctf_kind
 				   CONFLICTING will always prefix BIG.  */
     CTF_BTF_K_MAX = 19,	/* Maximum possible (V4) BTF_K_* value.  */
     CTF_K_MAX    = 31	/* Maximum possible (V4) CTF_K_* value.  */
+#ifndef __cplusplus
   } ctf_kind_t;
+#else
+  };
+typedef int ctf_kind_t;
+#endif
 
 #define CTF_PREFIX_KIND(kind) ((kind) == CTF_K_BIG || (kind) == CTF_K_CONFLICTING)
 
