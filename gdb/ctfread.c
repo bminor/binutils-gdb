@@ -1215,7 +1215,6 @@ ctf_psymtab::expand_psymtab (struct objfile *objfile)
   struct ctf_context *ccp;
   ctf_next_t *it = NULL;
   ctf_id_t type;
-  const char *name;
 
   gdb_assert (!readin);
 
@@ -1230,11 +1229,14 @@ ctf_psymtab::expand_psymtab (struct objfile *objfile)
 	       ctf_errmsg (ctf_errno (ccp->dict)));
 
   /* Iterate over entries in variable info section.  */
-  while ((type = ctf_variable_next (ccp->dict, &it, &name)) != CTF_ERR)
-    ctf_add_var_cb (ccp->dict, name, type, ccp);
+  while ((type = ctf_type_kind_next (ccp->dict, &it, CTF_K_VAR)) != CTF_ERR)
+    {
+      const char *name = ctf_type_name_raw (ccp->dict, type);
+      ctf_add_var_cb (ccp->dict, name, type, ccp);
+    }
 
   if (ctf_errno (ccp->dict) != ECTF_NEXT_END)
-    complaint (_("ctf_variable_next psymtab_to_symtab failed - %s"),
+    complaint (_("ctf_type_kind_next (variables) psymtab_to_symtab failed - %s"),
 	       ctf_errmsg (ctf_errno (ccp->dict)));
 
   /* Add entries in data objects and function info sections.  */
@@ -1396,7 +1398,6 @@ scan_partial_symbols (ctf_dict_t *dict, psymtab_storage *partial_symtabs,
   bool isparent = false;
   ctf_next_t *it = NULL;
   ctf_id_t type;
-  const char *name;
 
   if (strcmp (fname, ".ctf") == 0)
     {
@@ -1418,11 +1419,14 @@ scan_partial_symbols (ctf_dict_t *dict, psymtab_storage *partial_symtabs,
     complaint (_("ctf_type_next scan_partial_symbols failed - %s"),
 	       ctf_errmsg (ctf_errno (dict)));
 
-  while ((type = ctf_variable_next (dict, &it, &name)) != CTF_ERR)
-    ctf_psymtab_var_cb (dict, name, type, ccx);
+  while ((type = ctf_type_kind_next (dict, &it, CTF_K_VAR)) != CTF_ERR)
+    {
+      const char *name = ctf_type_name_raw (dict, type);
+      ctf_psymtab_var_cb (dict, name, type, ccx);
+    }
 
   if (ctf_errno (dict) != ECTF_NEXT_END)
-    complaint (_("ctf_variable_next scan_partial_symbols failed - %s"),
+    complaint (_("ctf_type_kind_next (variables) scan_partial_symbols failed - %s"),
 	       ctf_errmsg (ctf_errno (dict)));
 
   /* Scan CTF object and function sections which correspond to each

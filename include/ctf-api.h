@@ -634,7 +634,12 @@ extern ctf_id_t *ctf_func_type (ctf_dict_t *, ctf_id_t, ctf_id_t *ret_type,
 
 extern const char **ctf_func_arg_names (ctf_dict_t *, ctf_id_t, size_t *nargs);
 
-/* Get the linkage of a CTF_K_FUNC_LINKAGE or variable.  */
+/* Get the linkage of a CTF_K_FUNC_LINKAGE or variable.  Variables are name ->
+   type mappings with no specific relationship to a symbol table.  Before
+   linking, everything with types in the symbol table will be in the variable
+   table as well; after linking, only those typed functions and data objects
+   that are not asssigned to symbols by the linker are left in the variable
+   table here.*/
 
 extern ctf_linkages_t ctf_type_linkage (ctf_dict_t *, ctf_id_t);
 
@@ -644,23 +649,13 @@ extern ctf_linkages_t ctf_type_linkage (ctf_dict_t *, ctf_id_t);
 extern ctf_id_t ctf_symbol_next (ctf_dict_t *, ctf_next_t **,
 				 const char **name, int functions);
 
-/* Look up a type or variable by name: some simple C type parsing is done, but
-   this is by no means comprehensive.  Structures, unions and enums need "struct
-   ", "union " or "enum " on the front, as usual in C.  Some prefixes not seen
-   in C exist as well: datasecs use "datasec ". */
+/* Look up an identifier (type or variable) by name: some simple C type parsing
+   is done, but this is by no means comprehensive.  Structures, unions and enums
+   are in different namespaces, as in C, so need "struct ", "union " or "enum "
+   on the front.  Some prefixes not seen in C exist as well: datasecs use
+   "datasec ". */
 
 extern ctf_id_t ctf_lookup_by_name (ctf_dict_t *, const char *);
-
-/* Look up a variable, which is a name -> type mapping with no specific
-   relationship to a symbol table.  Before linking, everything with types in the
-   symbol table will be in the variable table as well; after linking, only those
-   typed functions and data objects that are not asssigned to symbols by the
-   linker are left in the variable table here.
-
-   Note: this looks up a variable's *type*, not the variable itself.
-   For that, use ctf_lookup_by_kind, below.  */
-
-extern ctf_id_t ctf_lookup_variable (ctf_dict_t *, const char *);
 
 /* Look up a single enumerator by enumeration constant name.  Returns the ID of
    the enum it is contained within and optionally its value.  Error out with
@@ -672,9 +667,9 @@ extern ctf_id_t ctf_lookup_variable (ctf_dict_t *, const char *);
 extern ctf_id_t ctf_lookup_enumerator (ctf_dict_t *, const char *,
 				       ctf_enum_value_t *enum_value);
 
-/* Look up a type of a given kind by name.  This serves to look up kinds in
-   their own namespaces which do not have explicit lookup functions above:
-   datasecs.  The only kinds you can't look up with this function are
+/* Look up an identifier of a given kind by name.  This serves to look up kinds
+   in their own namespaces which do not have explicit lookup functions above:
+   variables, datasecs.  The only kinds you can't look up with this function are
    CTF_K_TYPE_TAG and CTF_K_DECL_TAG, since they may be associated with many
    types: use ctf_tag_next. */
 
@@ -889,13 +884,13 @@ extern ctf_id_t ctf_arc_lookup_enumerator_next (ctf_archive_t *, const char *nam
 						ctf_enum_value_t *enum_value,
 						ctf_dict_t **dict, ctf_error_t *errp);
 
-/* Iterate over all types, kinds, variables, or datasecs in a dict.
-   ctf_type_next returns all types in a dict in turn, allowing you to choose
-   whether to see conflicting types or not with the want_hidden arg: if set, the
-   flag (if passed) returns the conflicting state of each type in turn.  Types
-   in parent dictionaries are not returned.  Note that this is the opposite of
-   the convention in the old API: a true value for the flag argument used to
-   mean it is visible; now it means it is conflicting.
+/* Iterate over all types, kinds or datasecs in a dict.  ctf_type_next returns
+   all types in a dict in turn, allowing you to choose whether to see
+   conflicting types or not with the want_hidden arg: if set, the flag (if
+   passed) returns the conflicting state of each type in turn.  Types in parent
+   dictionaries are not returned.  Note that this is the opposite of the
+   convention in the old API: a true value for the flag argument used to mean it
+   is visible; now it means it is conflicting.
 
    These days, even variables are included in the things returned by ctf_type*()
    (type kind CTF_K_VAR).  */
@@ -903,8 +898,6 @@ extern ctf_id_t ctf_arc_lookup_enumerator_next (ctf_archive_t *, const char *nam
 extern ctf_id_t ctf_type_next (ctf_dict_t *, ctf_next_t **,
 			       int *flag, int want_hidden);
 extern ctf_id_t ctf_type_kind_next (ctf_dict_t *, ctf_next_t **, ctf_kind_t kind);
-extern ctf_id_t ctf_variable_next (ctf_dict_t *, ctf_next_t **,
-				   const char **);
 extern ctf_id_t ctf_datasec_var_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
 				      size_t *size, size_t *offset);
 

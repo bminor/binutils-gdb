@@ -55,8 +55,6 @@ LIBCTF_2.0 {
 	ctf_arc_lookup_symbol;
 	ctf_arc_lookup_symbol_name;
 
-	ctf_lookup_variable;
-
 	ctf_type_resolve;
 	ctf_type_sname;
 	ctf_type_name_raw;
@@ -92,7 +90,6 @@ LIBCTF_2.0 {
 	ctf_enum_next;
 	ctf_type_next;
 	ctf_type_kind_next;
-	ctf_variable_next;
 	ctf_datasec_next;
 	ctf_tag_next;
 

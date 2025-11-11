@@ -605,60 +605,6 @@ ctf_type_kind_next (ctf_dict_t *fp, ctf_next_t **it, ctf_kind_t kind)
   return ctf_set_typed_errno (fp, err);
 }
 
-/* Iterate over every variable in the given CTF dict, in arbitrary order,
-   returning the name and type of each variable in turn.  The name argument is
-   not optional.  Returns CTF_ERR on end of iteration or error.  */
-
-ctf_id_t
-ctf_variable_next (ctf_dict_t *fp, ctf_next_t **it, const char **name)
-{
-  ctf_next_t *i = *it;
-  ctf_id_t id;
-  ctf_error_t err;
-
-  /* (No need for a LCTF_NO_STR check: checking for a missing parent covers more
-     cases, and we need to do that anyway.)  */
-
-  if ((fp->ctf_flags & LCTF_CHILD) && (fp->ctf_parent == NULL))
-    return (ctf_set_typed_errno (fp, ECTF_NOPARENT));
-
-  if (!i)
-    {
-      if ((i = ctf_next_create ()) == NULL)
-	return ctf_set_typed_errno (fp, ENOMEM);
-
-      i->cu.ctn_fp = fp;
-      i->ctn_iter_fun = (void (*) (void)) ctf_variable_next;
-      i->ctn_next = NULL;
-      *it = i;
-    }
-
-  if ((void (*) (void)) ctf_variable_next != i->ctn_iter_fun)
-    {
-      err = ECTF_NEXT_WRONGFUN;
-      goto end;
-    }
-
-  if (fp != i->cu.ctn_fp)
-    {
-      err = ECTF_NEXT_WRONGFP;
-      goto end;
-    }
-
-  if ((id = ctf_type_kind_next (fp, &i->ctn_next, CTF_K_VAR)) != CTF_ERR)
-    {
-      if (name)
-	*name = ctf_type_name_raw (fp, id);
-      return id;
-    }
-  err = ctf_errno (fp);
-  /* Fall through.  */
-end:
-  ctf_next_destroy (i);
-  *it = NULL;
-  return ctf_set_typed_errno (fp, err);
-}
-
 /* Iterate over every variable in the given CTF datasec, in arbitrary order,
    returning the name and type of each variable in turn.  Returns CTF_ERR on end
    of iteration or error.

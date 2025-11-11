@@ -471,13 +471,6 @@ ctf_lookup_by_kind (ctf_dict_t *fp, ctf_kind_t kind, const char *name)
   return ctf_set_typed_errno (fp, ECTF_NOTYPE);
 }
 
-/* Look up a variable by name, in this dict or the parent.  */
-ctf_id_t
-ctf_lookup_variable (ctf_dict_t *fp, const char *name)
-{
-  return ctf_lookup_by_kind (fp, CTF_K_VAR, name);
-}
-
 /* Look up a single enumerator by enumeration constant name.  Returns the ID of
    the enum it is contained within and optionally its value.  Error out with
    ECTF_DUPLICATE if multiple exist (which can happen in some older dicts).  See
