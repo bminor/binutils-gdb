@@ -1202,7 +1202,7 @@ extern ctf_ret_t ctf_write_suppress_kind (ctf_dict_t *fp, ctf_kind_t kind,
 
    The NAME need not be unique (but usually is).  */
 
-extern ctf_ret_t ctf_link_add_ctf (ctf_dict_t *, ctf_archive_t *, const char *name);
+extern ctf_ret_t ctf_link_add (ctf_dict_t *, ctf_archive_t *, const char *name);
 
 /* Do the deduplicating link, filling the dict with types.  The FLAGS are the
    CTF_LINK_* flags above.  */
@@ -1287,9 +1287,9 @@ extern ctf_bool_t ctf_link_set_variable_filter (ctf_dict_t *,
 
 /* Hash caching.  This is useful if you're repeatedly deduplicating against the
    same set of objects from the same inputs, and don't want to spend time
-   re-hashing them over and over again.  The cache contains elements for
-   every type in the link.  Must be called after ctf_link_add_ctf; ctf_link
-   need not be called.  */
+   re-hashing them over and over again.  The cache contains elements for every
+   type in the link.  Must be called after ctf_link_add; ctf_link need not be
+   called.  */
 
 extern int ctf_link_hash_cache_save (ctf_dict_t *, const char *cache);
 

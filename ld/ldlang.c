@@ -3968,7 +3968,7 @@ lang_merge_ctf (void)
 	continue;
 
       /* Takes ownership of file->the_ctf.  */
-      if (ctf_link_add_ctf (ctf_output, file->the_ctf, file->filename) < 0)
+      if (ctf_link_add (ctf_output, file->the_ctf, file->filename) < 0)
 	{
 	  einfo (_("%P: warning: CTF section in %pB cannot be linked: `%s'\n"),
 		 file->the_bfd, ctf_errmsg (ctf_errno (ctf_output)));

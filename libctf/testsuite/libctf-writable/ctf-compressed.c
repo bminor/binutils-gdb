@@ -30,11 +30,6 @@ main (int argc, char *argv[])
      https://github.com/msys2/MINGW-packages/issues/18878).  Simply skip for
      now.  */
 
-#ifdef __MINGW32__
-  printf ("UNSUPPORTED: platform bug breaks ctf_link\n");
-  return 0;
-#else
-
   if ((fp = ctf_create (&err)) == NULL)
     goto create_err;
 
@@ -59,7 +54,7 @@ main (int argc, char *argv[])
     }
 
   /* Write them out and read them back in, to turn them into archives.
-     This would be unnecessary if ctf_link_add() were public :( */
+     This would be unnecessary if ctf_link_add_internal() were public :( */
   if ((buf1 = ctf_write_mem (in1, &buf1_sz, -1)) == NULL)
     {
       fprintf (stderr, "Cannot serialize: %s\n", ctf_errmsg (ctf_errno (in1)));
@@ -90,8 +85,8 @@ main (int argc, char *argv[])
 
   /* Link them together.  */
 
-  if (ctf_link_add_ctf (fp, arc1, "a") < 0 ||
-      ctf_link_add_ctf (fp, arc2, "b") < 0)
+  if (ctf_link_add (fp, arc1, "a") < 0 ||
+      ctf_link_add (fp, arc2, "b") < 0)
     goto link_err;
 
   if (ctf_link (fp, 0) < 0)
@@ -158,5 +153,4 @@ main (int argc, char *argv[])
  link_err:
   fprintf (stderr, "Cannot link: %s\n", ctf_errmsg (ctf_errno (fp)));
   return 1;
-#endif
 }

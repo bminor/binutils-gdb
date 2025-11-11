@@ -23,7 +23,7 @@
 
 /* CTF linking consists of adding CTF archives full of content to be merged into
    this one to the current file (which must be writable) by calling
-   ctf_link_add_ctf.  Once this is done, a call to ctf_link will merge the type
+   ctf_link_add.  Once this is done, a call to ctf_link will merge the type
    tables together, generating new CTF files as needed, with this one as a
    parent, to contain types from the inputs which conflict.  ctf_link_add_strtab
    takes a callback which provides string/offset pairs to be added to the
@@ -85,11 +85,11 @@ ctf_link_input_close (void *input)
   free (i);
 }
 
-/* Like ctf_link_add_ctf, below, but with no error-checking, so it can be called
+/* Like ctf_link_add, below, but with no error-checking, so it can be called
    in the middle of an ongoing link.  */
 static ctf_ret_t
-ctf_link_add_ctf_internal (ctf_dict_t *fp, ctf_archive_t *ctf,
-			   ctf_dict_t *fp_input, const char *name)
+ctf_link_add_internal (ctf_dict_t *fp, ctf_archive_t *ctf,
+		       ctf_dict_t *fp_input, const char *name)
 {
   int existing = 0;
   ctf_link_input_t *input;
@@ -161,7 +161,7 @@ ctf_link_add_ctf_internal (ctf_dict_t *fp, ctf_archive_t *ctf,
    derived from NAME.  */
 
 ctf_ret_t
-ctf_link_add_ctf (ctf_dict_t *fp, ctf_archive_t *ctf, const char *name)
+ctf_link_add (ctf_dict_t *fp, ctf_archive_t *ctf, const char *name)
 {
   if (!name)
     return (ctf_set_errno (fp, EINVAL));
@@ -185,7 +185,7 @@ ctf_link_add_ctf (ctf_dict_t *fp, ctf_archive_t *ctf, const char *name)
     return (ctf_set_errno (fp, ECTF_NEEDSBFD));
 #endif
 
-  return ctf_link_add_ctf_internal (fp, ctf, NULL, name);
+  return ctf_link_add_internal (fp, ctf, NULL, name);
 }
 
 /* Lazily open a CTF archive for linking, if not already open.
@@ -204,7 +204,7 @@ ctf_link_lazy_open (ctf_dict_t *fp, ctf_link_input_t *input)
   if (input->clin_fp)
     return 1;
 
-  /* See ctf_link_add_ctf.  */
+  /* See ctf_link_add.  */
 #if NOBFD
   ctf_err_warn (fp, 0, ECTF_NEEDSBFD, _("cannot open %s lazily"),
 		input->clin_filename);
@@ -630,7 +630,7 @@ ctf_link_deduplicating_open_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
   walk = dedup_inputs;
 
   /* Counting done: push every input into the array, in the order they were
-     passed to ctf_link_add_ctf (and ultimately ld).  */
+     passed to ctf_link_add (and ultimately ld).  */
 
   sort_arg.is_cu_mapped = (cu_names != NULL);
   sort_arg.fp = fp;
@@ -1055,9 +1055,9 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
 		 dicts. */
 
 	      ctf_dict_set_cuname (only_input->clin_fp, out_name);
-	      if (ctf_link_add_ctf_internal (fp, only_input->clin_arc,
-					     only_input->clin_fp,
-					     out_name) < 0)
+	      if (ctf_link_add_internal (fp, only_input->clin_arc,
+					 only_input->clin_fp,
+					 out_name) < 0)
 		{
 		  ctf_err_warn (fp, 0, 0, _("cannot add intermediate files "
 					    "to link"));
@@ -1157,8 +1157,8 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
 	  goto err_outputs;
 	}
 
-      if (ctf_link_add_ctf_internal (fp, in_arc, NULL,
-				     ctf_dict_cuname (outputs[0])) < 0)
+      if (ctf_link_add_internal (fp, in_arc, NULL,
+				 ctf_dict_cuname (outputs[0])) < 0)
 	{
 	  ctf_err_warn (fp, 0, 0, _("cannot add intermediate files to link"));
 	  goto err_outputs;

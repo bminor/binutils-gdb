@@ -38,8 +38,8 @@ main (int argc, char *argv[])
       return 1;
     }
 
-  /* Write it out and read it back in, to turn it into an archive.
-     This would be unnecessary if ctf_link_add() were public :( */
+  /* Write it out and read it back in, to turn it into an archive.  This would
+     be unnecessary if ctf_link_add_internal() were public :( */
   if ((buf1 = ctf_write_mem (in1, &buf1_sz, -1)) == NULL)
     {
       fprintf (stderr, "Cannot serialize: %s\n", ctf_errmsg (ctf_errno (in1)));
