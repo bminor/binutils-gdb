@@ -1296,10 +1296,9 @@ extern int ctf_link_hash_cache_save (ctf_dict_t *, const char *cache);
 
 extern int ctf_link_hash_cache_load (ctf_dict_t *, const char *cache);
 
-/* Turn debugging off and on, and get its value.  This is the same as setting
-   LIBCTF_DEBUG in the environment.  */
+/* Turn debugging off and on.  This is the same as setting LIBCTF_DEBUG in the
+   environment.  Useful for conditional debugging.  */
 extern void ctf_setdebug (ctf_bool_t debug);
-extern ctf_bool_t ctf_getdebug (void);
 
 /* Deprecated aliases for existing functions and types.  */
 

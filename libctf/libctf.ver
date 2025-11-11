@@ -154,7 +154,6 @@ LIBCTF_2.0 {
 	ctf_dump;
 
 	ctf_setdebug;
-	ctf_getdebug;
 	ctf_errwarning_next;
 
 	ctf_link_add_ctf;

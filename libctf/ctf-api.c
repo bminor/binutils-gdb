@@ -175,11 +175,6 @@ void ctf_setdebug (ctf_bool_t debug)
   ctf_dprintf ("CTF debugging set to %i\n", debug);
 }
 
-ctf_bool_t ctf_getdebug (void)
-{
-  return _libctf_debug;
-}
-
 _libctf_printflike_ (1, 2)
 void ctf_dprintf (const char *format, ...)
 {
