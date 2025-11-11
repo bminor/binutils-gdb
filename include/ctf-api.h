@@ -1310,14 +1310,6 @@ extern void ctf_file_close (ctf_file_t *);
 extern ctf_dict_t *ctf_arc_open_by_name (const ctf_archive_t *,
 					 const char *, int *);
 
-/* Deprecated witeout function to write out a gzip-compressed dict.  Unlike all
-   the other writeout functions, this even compresses the header (it has to,
-   since it's passed a gzFile), so the caller must also decompress it, since
-   ctf_open() etc cannot tell it is a CTF dict or how large it is before
-   decompression.  */
-
-extern int ctf_gzwrite (ctf_dict_t *fp, gzFile fd);
-
 #ifdef	__cplusplus
 }
 #endif

@@ -131,7 +131,6 @@ LIBCTF_2.0 {
 	ctf_rollback;
 	ctf_write;
 	ctf_write_mem;
-	ctf_gzwrite;
 	ctf_compress_write;
 	ctf_write_suppress_kind;
 	ctf_sect_size;

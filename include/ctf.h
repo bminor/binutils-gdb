@@ -253,10 +253,10 @@ typedef struct ctf_header
 
 /* v1 upgraded to v2/v3 is not quite the same as the native form, because the
    boundary between parent and child types is different but not recorded
-   anywhere, and you can write it out again via ctf_compress_write(), so we must
-   track whether the thing was originally v1 or not.  If we were writing the
-   header from scratch, we would add a *pair* of version number fields to allow
-   for this, but this will do for now.  (A flag will not do, because we need to
+   anywhere, and you can write it out again via ctf_write*(), so we must track
+   whether the thing was originally v1 or not.  If we were writing the header
+   from scratch, we would add a *pair* of version number fields to allow for
+   this, but this will do for now.  (A flag will not do, because we need to
    encode both the version we came from and the version we went to, not just "we
    were upgraded".)
 

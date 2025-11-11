@@ -1719,40 +1719,6 @@ err:
 
 /* File writing.  */
 
-/* Write the compressed CTF data stream to the specified gzFile descriptor.  The
-   whole stream is compressed, and cannot be read by CTF opening functions in
-   this library until it is decompressed.  (The functions below this one leave
-   the header uncompressed, and the CTF opening functions work on them without
-   manual decompression.)
-
-   No support for (testing-only) endian-flipping or pure BTF writing.  */
-int
-ctf_gzwrite (ctf_dict_t *fp, gzFile fd)
-{
-  unsigned char *buf;
-  unsigned char *p;
-  size_t bufsiz;
-  size_t len, written = 0;
-
-  if ((buf = ctf_serialize (fp, &bufsiz, 1)) == NULL)
-    return -1;					/* errno is set for us.  */
-
-  p = buf;
-  while (written < bufsiz)
-    {
-      if ((len = gzwrite (fd, p, bufsiz - written)) <= 0)
-	{
-	  free (buf);
-	  return (ctf_set_errno (fp, errno));
-	}
-      written += len;
-      p += len;
-    }
-
-  free (buf);
-  return 0;
-}
-
 /* Optionally compress the specified CTF data stream and return it as a new
    dynamically-allocated string.  Possibly write it with reversed
    endianness.  */
