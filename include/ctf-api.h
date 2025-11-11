@@ -1039,6 +1039,7 @@ extern ctf_id_t ctf_add_function_linkage (ctf_dict_t *, uint32_t,
    kind as the type they wrap: only ctf_type_reference can see the difference,
    returning the wrapped type.  */
 
+__libctf_attribute_deprecated__("slices are deprecated: use bitfield-capable structs")
 extern ctf_id_t ctf_add_slice (ctf_dict_t *, uint32_t, ctf_id_t, const ctf_encoding_t *);
 extern ctf_id_t ctf_add_pointer (ctf_dict_t *, uint32_t, ctf_id_t);
 extern ctf_id_t ctf_add_type (ctf_dict_t *, ctf_dict_t *, ctf_id_t);
