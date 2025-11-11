@@ -10439,14 +10439,16 @@ static const gdb::array_view<variant_part> create_variant_parts
    the variant to fill in.  OBSTACK is where any needed allocations
    will be done.  OFFSET_MAP holds the mapping from section offsets to
    fields for the type.  FI describes the fields of the type we're
-   processing.  FIELD is the variant field we're converting.  */
+   processing.  FIELD is the variant field we're converting.  IS_UNSIGNED
+   contains the signedness of the discriminant.  */
 
 static void
 create_one_variant (variant &result, struct obstack *obstack,
 		    const offset_map_type &offset_map,
-		    struct field_info *fi, const variant_field &field)
+		    struct field_info *fi, const variant_field &field,
+		    bool is_unsigned)
 {
-  result.discriminants = convert_variant_range (obstack, field, false);
+  result.discriminants = convert_variant_range (obstack, field, is_unsigned);
   result.first_field = field.first_field + fi->baseclasses.size ();
   result.last_field = field.last_field + fi->baseclasses.size ();
   result.parts = create_variant_parts (obstack, offset_map, fi,
@@ -10485,7 +10487,7 @@ create_one_variant_part (variant_part &result,
   variant *output = new (obstack) variant[n];
   for (size_t i = 0; i < n; ++i)
     create_one_variant (output[i], obstack, offset_map, fi,
-			builder.variants[i]);
+			builder.variants[i], result.is_unsigned);
 
   result.variants = gdb::array_view<variant> (output, n);
 }
