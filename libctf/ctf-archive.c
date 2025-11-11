@@ -1327,14 +1327,6 @@ ctf_dict_open_by_offset (const struct ctf_archive_internal *arci,
   return fp;
 }
 
-/* Backward compatibility.  */
-ctf_dict_t *
-ctf_arc_open_by_name (const ctf_archive_t *arci, const char *name,
-		      int *errp)
-{
-  return ctf_dict_open (arci, name, (ctf_error_t *) errp);
-}
-
 /* Get a property value from the shared properties table of an archive,
    given a name, or NULL.  */
 

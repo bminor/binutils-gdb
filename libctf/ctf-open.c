@@ -2452,13 +2452,6 @@ ctf_dict_close (ctf_dict_t *fp)
   free (fp);
 }
 
-/* Backward compatibility.  */
-void
-ctf_file_close (ctf_file_t *fp)
-{
-  ctf_dict_close (fp);
-}
-
 /* The converse of ctf_open().  ctf_open() disguises whatever it opens as an
    archive, so closing one is just like closing an archive.  */
 void

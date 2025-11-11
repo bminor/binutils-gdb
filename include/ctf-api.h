@@ -1302,13 +1302,9 @@ extern int ctf_link_hash_cache_load (ctf_dict_t *, const char *cache);
    environment.  Useful for conditional debugging.  */
 extern void ctf_setdebug (ctf_bool_t debug);
 
-/* Deprecated aliases for existing functions and types.  */
+/* Deprecated aliases for existing types.  */
 
-struct ctf_file;
 typedef struct ctf_dict ctf_file_t;
-extern void ctf_file_close (ctf_file_t *);
-extern ctf_dict_t *ctf_arc_open_by_name (const ctf_archive_t *,
-					 const char *, int *);
 
 #ifdef	__cplusplus
 }

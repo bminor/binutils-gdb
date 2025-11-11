@@ -26,7 +26,6 @@ LIBCTF_2.0 {
 	ctf_create;
 	ctf_close;
 	ctf_dict_close;
-	ctf_file_close;
 
 	ctf_dict_cuname;
 	ctf_dict_set_cuname;
@@ -141,7 +140,6 @@ LIBCTF_2.0 {
 	ctf_arc_write_fd;
 	ctf_arc_bufopen;
 	ctf_arc_close;
-	ctf_arc_open_by_name;
 	ctf_archive_count;
 	ctf_archive_next;
 	ctf_archive_raw_next;
