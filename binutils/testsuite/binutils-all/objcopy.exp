@@ -1605,10 +1605,11 @@ objcopy_tek2bin
 
 # Test objcopy -I binary and --binary-symbol-prefix
 
-proc binary_symbol {name file args symbol} {
+proc binary_symbol {name file args sym_prefix} {
     global OBJCOPY
     global NM
     global NMFLAGS
+    global binutils_run_status
 
     set test "binary symbol ($name)"
 
@@ -1619,25 +1620,28 @@ proc binary_symbol {name file args symbol} {
 
     set out tmpdir/binary_${name}.o
     set got [binutils_run $OBJCOPY "-I binary -B $arch -O $target $args $file $out"]
-
-    set expected [list "${symbol}_end" "${symbol}_size" "${symbol}_start"]
-
-    set exec_output [binutils_run $NM "-a $NMFLAGS $out"]
-    set exec_output [prune_warnings $exec_output]
-    set actual {}
-    while {[regexp {^[0-9a-fA-F]+?[ ]+[TtDdA] ([0-9a-zA-Z_]+)[\r\n]+(.*)$} ${exec_output} all s rest]} {
-	set actual [concat $actual $s]
-	set exec_output $rest
-    }
-
-    if {[lsort $expected] ne [lsort $actual]} {
-	send_log "expected: $expected, actual: $actual\n"
+    if { $binutils_run_status != 0 || ![string equal "" $got] } {
 	fail $test
 	return
+    }
+
+    set got [binutils_run $NM "-a $NMFLAGS $out"]
+    if { $binutils_run_status != 0 } {
+	fail $test
+	return
+    }
+
+    foreach sym [list "start" "end" "size"] {
+	set exp "^\[0-9a-fA-F\]+ +\[TtDdA\] +${sym_prefix}_${sym}$"
+	if ![regexp -line $exp $got] {
+	    send_log "failed to match: $exp\n"
+	    fail $test
+	    return
+	}
     }
 
     pass $test
 }
 
-binary_symbol implicit $srcdir/$subdir/version.s "" _binary_[regsub -all {[^0-9a-zA-Z]} $srcdir/$subdir/version.s _]
+binary_symbol implicit $srcdir/$subdir/version.s "" _binary_.*[regsub -all {[^0-9a-zA-Z]} $subdir/version.s _]
 binary_symbol explicit $srcdir/$subdir/version.s "--binary-symbol-prefix symbol1" symbol1
