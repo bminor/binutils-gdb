@@ -164,7 +164,7 @@ ctf_vlen (ctf_dict_t *fp, ctf_id_t type, const ctf_type_t *tp, size_t *vlen_len)
 size_t
 ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 		 const char **name, ctf_id_t *membtype,
-		 int *bit_width, int flags)
+		 int *bit_width, ctf_member_next_flags_t flags)
 {
   ctf_dict_t *ofp = fp;
   ctf_kind_t kind;

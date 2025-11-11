@@ -397,7 +397,18 @@ typedef enum ctf_model
 
 /* Flags for ctf_member_next.  */
 
-#define CTF_MN_RECURSE 0x1	/* Recurse into unnamed members.  */
+#ifndef __cplusplus
+typedef
+#endif
+enum ctf_member_next_flags
+  {
+    CTF_MN_RECURSE = 0x1	/* Recurse into unnamed members.  */
+#ifndef __cplusplus
+  } ctf_member_next_flags_t;
+#else
+  };
+typedef int ctf_member_next_flags_t;
+#endif
 
 /* Flags for ctf_dict_set_flag.  */
 
@@ -862,7 +873,7 @@ extern ctf_id_t ctf_decl_tag (ctf_dict_t *, ctf_id_t decl_tag,
 
 extern size_t ctf_member_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
 			       const char **name, ctf_id_t *membtype,
-			       int *bit_width, int flags);
+			       int *bit_width, ctf_member_next_flags_t flags);
 
 /* Return all enumeration constants in a given enum type.  */
 extern const char *ctf_enum_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
