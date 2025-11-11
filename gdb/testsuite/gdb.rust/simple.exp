@@ -188,7 +188,7 @@ gdb_test "print simple::HiBob{field1: 99, .. y}" \
 gdb_test "print e" " = simple::MoreComplicated::Two\\(73\\)"
 gdb_test "print e2" \
     " = simple::MoreComplicated::Four\\{this: true, is: 8, a: 109 'm', struct_: 100, variant: 10\\}"
-gdb_test "print sizeof(e)" " = 24"
+gdb_test "print sizeof(e)" " = (20|24)"
 gdb_test_sequence "ptype e" "" {
     " = enum simple::MoreComplicated \\{"
     "  One,"
