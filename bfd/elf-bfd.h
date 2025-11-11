@@ -2039,8 +2039,8 @@ struct output_elf_obj_tdata
      created.  */
   asection *sframe;
 
-  /* Holds the build attributes section if it exists.  */
-  asection *obj_build_attributes;
+  /* Holds the object attributes section if it exists.  */
+  asection *obj_object_attributes;
 
   /* Used to determine if the e_flags field has been initialized */
   bool flags_init;
@@ -2229,8 +2229,8 @@ struct elf_obj_tdata
 #define elf_next_file_pos(bfd)	(elf_tdata(bfd) -> o->next_file_pos)
 #define elf_stack_flags(bfd)	(elf_tdata(bfd) -> o->stack_flags)
 #define elf_sframe(bfd)		(elf_tdata(bfd) -> o->sframe)
-#define elf_obj_build_attributes(bfd) \
-				(elf_tdata(bfd) -> o->obj_build_attributes)
+#define elf_obj_object_attributes(bfd) \
+				(elf_tdata(bfd) -> o->obj_object_attributes)
 #define elf_shstrtab(bfd)	(elf_tdata(bfd) -> o->strtab_ptr)
 #define elf_onesymtab(bfd)	(elf_tdata(bfd) -> symtab_section)
 #define elf_symtab_shndx_list(bfd)	(elf_tdata(bfd) -> symtab_shndx_list)

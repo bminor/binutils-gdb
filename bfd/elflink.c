@@ -12715,7 +12715,7 @@ _bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	     _bfd_elf_compute_section_file_positions.  */
 	  bfd_set_section_size (o, attr_size);
 	  if (attr_size > 0)
-	    elf_obj_build_attributes (abfd) = o;
+	    elf_obj_object_attributes (abfd) = o;
 	  else
 	    remove_section = true;
 	}
@@ -13830,7 +13830,7 @@ _bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   if (! _bfd_elf_write_section_sframe (abfd, info))
     goto error_return;
 
-  if (! _bfd_elf_write_section_build_attributes (abfd, info))
+  if (! _bfd_elf_write_section_object_attributes (abfd, info))
     goto error_ret2;
 
   if (info->callbacks->emit_ctf)

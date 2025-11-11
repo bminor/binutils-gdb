@@ -818,10 +818,10 @@ _bfd_elf_merge_unknown_attribute_list (bfd *ibfd, bfd *obfd)
   return result;
 }
 
-bool _bfd_elf_write_section_build_attributes (bfd *abfd,
-					      struct bfd_link_info *info ATTRIBUTE_UNUSED)
+bool _bfd_elf_write_section_object_attributes
+  (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
-  asection *sec = elf_obj_build_attributes (abfd);
+  asection *sec = elf_obj_object_attributes (abfd);
 
   if (sec == NULL)
     return true;
