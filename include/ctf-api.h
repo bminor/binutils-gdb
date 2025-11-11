@@ -675,8 +675,14 @@ extern ctf_linkages_t ctf_type_linkage (ctf_dict_t *, ctf_id_t);
 /* Traverse all (function or data) symbols in a dict, one by one, and return the
    type of each and (if NAME is non-NULL) optionally its name.  */
 
+typedef enum ctf_funcobjt
+  {
+    CTF_STT_OBJT = 0,
+    CTF_STT_FUNC = 1
+  } ctf_funcobjt_t;
+
 extern ctf_id_t ctf_symbol_next (ctf_dict_t *, ctf_next_t **,
-				 const char **name, int functions);
+				 const char **name, ctf_funcobjt_t functions);
 
 /* Look up an identifier (type or variable) by name: some simple C type parsing
    is done, but this is by no means comprehensive.  Structures, unions and enums
@@ -1139,8 +1145,8 @@ extern ctf_ret_t ctf_type_set_conflicting (ctf_dict_t *, ctf_id_t, const char *)
    anything about the actual symbol index.  (The linker will then associate them
    with actual symbol indexes using the ctf_link functions below.)  */
 
-extern ctf_ret_t ctf_add_objt_sym (ctf_dict_t *, const char *, ctf_id_t);
-extern ctf_ret_t ctf_add_func_sym (ctf_dict_t *, const char *, ctf_id_t);
+extern ctf_ret_t ctf_add_funcobjt_sym (ctf_dict_t *fp, ctf_funcobjt_t function,
+				       const char *name, ctf_id_t id);
 
 /* Snapshot/rollback.  Call ctf_update to snapshot the state of a dict:
   a later call to ctf_discard then deletes all types added since (but not new
@@ -1219,7 +1225,7 @@ extern ctf_ret_t ctf_link_add_strtab (ctf_dict_t *,
 				      ctf_link_strtab_string_f *add_string, void *);
 
 /* Note that a given symbol will be public with a given set of properties.
-   If the symbol has been added with that name via ctf_add_{func,objt}_sym,
+   If the symbol has been added with that name via ctf_add_funcobjt_sym,
    this symbol type will end up in the symtypetabs and can be looked up via
    ctf_*_lookup_symbol after the dict is read back in.  */
 

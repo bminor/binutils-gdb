@@ -167,8 +167,7 @@ LIBCTF_2.0 {
 	ctf_link_write;
 
 	ctf_link_add_linker_symbol;
-	ctf_add_objt_sym;
-	ctf_add_func_sym;
+	ctf_add_funcobjt_sym;
 
 	ctf_dict_set_flag;
 	ctf_dict_flag;

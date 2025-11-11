@@ -567,7 +567,7 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
 /* Dump all the object or function entries into the cds_items.  */
 
 static int
-ctf_dump_objts (ctf_dict_t *fp, ctf_dump_state_t *state, int functions)
+ctf_dump_objts (ctf_dict_t *fp, ctf_dump_state_t *state, ctf_funcobjt_t functions)
 {
   const char *name;
   ctf_id_t id;
@@ -992,11 +992,11 @@ ctf_dump (ctf_dict_t *fp, ctf_dump_state_t **statep, ctf_sect_names_t sect,
 	  ctf_dump_header (fp, state);
 	  break;
 	case CTF_SECT_OBJT:
-	  if (ctf_dump_objts (fp, state, 0) < 0)
+	  if (ctf_dump_objts (fp, state, CTF_STT_OBJT) < 0)
 	    goto err;			/* errno is set for us.  */
 	  break;
 	case CTF_SECT_FUNC:
-	  if (ctf_dump_objts (fp, state, 1) < 0)
+	  if (ctf_dump_objts (fp, state, CTF_STT_FUNC) < 0)
 	    goto err;			/* errno is set for us.  */
 	  break;
 	case CTF_SECT_VAR:

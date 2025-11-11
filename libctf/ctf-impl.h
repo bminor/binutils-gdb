@@ -687,11 +687,9 @@ extern ctf_id_t ctf_lookup_by_symbol_name (ctf_dict_t *, const char *);
 
 extern void ctf_set_ctl_hashes (ctf_dict_t *);
 extern ctf_id_t ctf_symbol_next_static (ctf_dict_t *, ctf_next_t **,
-					const char **, int);
+					const char **, ctf_funcobjt_t);
 
 extern int ctf_symtab_skippable (ctf_link_sym_t *sym);
-extern ctf_ret_t ctf_add_funcobjt_sym (ctf_dict_t *, int is_function,
-				       const char *, ctf_id_t);
 
 extern ctf_dict_t *ctf_get_dict (const ctf_dict_t *fp, ctf_id_t type);
 

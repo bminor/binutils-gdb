@@ -2056,26 +2056,14 @@ ctf_add_funcobjt_sym_forced (ctf_dict_t *fp, int is_function, const char *name, 
 }
 
 ctf_ret_t
-ctf_add_funcobjt_sym (ctf_dict_t *fp, int is_function, const char *name, ctf_id_t id)
+ctf_add_funcobjt_sym (ctf_dict_t *fp, ctf_funcobjt_t function, const char *name, ctf_id_t id)
 {
-  if (ctf_lookup_by_sym_or_name (fp, 0, name, 0, is_function) != CTF_ERR)
+  if (ctf_lookup_by_sym_or_name (fp, 0, name, 0, function) != CTF_ERR)
     return (ctf_set_errno (fp, ECTF_DUPLICATE));
 
   fp->ctf_serialize.cs_initialized = 0;
 
-  return ctf_add_funcobjt_sym_forced (fp, is_function, name, id);
-}
-
-ctf_ret_t
-ctf_add_objt_sym (ctf_dict_t *fp, const char *name, ctf_id_t id)
-{
-  return (ctf_add_funcobjt_sym (fp, 0, name, id));
-}
-
-ctf_ret_t
-ctf_add_func_sym (ctf_dict_t *fp, const char *name, ctf_id_t id)
-{
-  return (ctf_add_funcobjt_sym (fp, 1, name, id));
+  return ctf_add_funcobjt_sym_forced (fp, function, name, id);
 }
 
 /* Sort function used by ctf_datasec_sort.  */

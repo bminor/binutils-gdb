@@ -1085,7 +1085,7 @@ ctf_add_var_cb (ctf_dict_t *fp, const char *name, ctf_id_t id,
    by FUNCTIONS.  */
 
 static void
-add_stt_entries (struct ctf_context *ccp, int functions)
+add_stt_entries (struct ctf_context *ccp, ctf_funcobjt_t functions)
 {
   ctf_next_t *i = nullptr;
   const char *tname;
@@ -1114,7 +1114,7 @@ add_stt_entries (struct ctf_context *ccp, int functions)
 static void
 add_stt_obj (struct ctf_context *ccp)
 {
-  add_stt_entries (ccp, 0);
+  add_stt_entries (ccp, CTF_STT_OBJT);
 }
 
 /* Add entries in function info section.  */
@@ -1122,7 +1122,7 @@ add_stt_obj (struct ctf_context *ccp)
 static void
 add_stt_func (struct ctf_context *ccp)
 {
-  add_stt_entries (ccp, 1);
+  add_stt_entries (ccp, CTF_STT_FUNC);
 }
 
 /* Get text section base for OBJFILE, TSIZE contains the size.  */
@@ -1164,7 +1164,7 @@ ctf_psymtab_add_enums (struct ctf_context *ccp, ctf_id_t tid)
 
 static void
 ctf_psymtab_add_stt_entries (ctf_dict_t *dict, ctf_psymtab *pst,
-			     struct objfile *of, int functions)
+			     struct objfile *of, ctf_funcobjt_t functions)
 {
   ctf_next_t *i = nullptr;
   ctf_id_t tid;
@@ -1195,7 +1195,7 @@ static void
 ctf_psymtab_add_stt_obj (ctf_dict_t *dict, ctf_psymtab *pst,
 			 struct objfile *of)
 {
-  ctf_psymtab_add_stt_entries (dict, pst, of, 0);
+  ctf_psymtab_add_stt_entries (dict, pst, of, CTF_STT_OBJT);
 }
 
 /* Add entries in function info section to psymtab.  */
@@ -1204,7 +1204,7 @@ static void
 ctf_psymtab_add_stt_func (ctf_dict_t *dict, ctf_psymtab *pst,
 			  struct objfile *of)
 {
-  ctf_psymtab_add_stt_entries (dict, pst, of, 1);
+  ctf_psymtab_add_stt_entries (dict, pst, of, CTF_STT_FUNC);
 }
 
 /* Read in full symbols for PST, and anything it depends on.  */

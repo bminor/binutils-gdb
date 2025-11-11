@@ -68,14 +68,14 @@ try_maybe_reporting (int report)
      near-inverse order by symbol name, so that we can tell whether the
      (necessarily indexed) section was sorted (since the sort is always in
      lexicographical sort ordef by name).  */
-  if ((ctf_add_objt_sym (fp, "data_c", base) < 0) ||
-      (ctf_add_objt_sym (fp, "data_a", base2) < 0) ||
-      (ctf_add_objt_sym (fp, "data_b", base3) < 0))
+  if ((ctf_add_funcobjt_sym (fp, CTF_STT_OBJT, "data_c", base) < 0) ||
+      (ctf_add_funcobjt_sym (fp, CTF_STT_OBJT, "data_a", base2) < 0) ||
+      (ctf_add_funcobjt_sym (fp, CTF_STT_OBJT, "data_b", base3) < 0))
     goto create_syms_err;
 
-  if ((ctf_add_func_sym (fp, "func_c", func) < 0) ||
-      (ctf_add_func_sym (fp, "func_a", func2) < 0) ||
-      (ctf_add_func_sym (fp, "func_b", func3) < 0))
+  if ((ctf_add_funcobjt_sym (fp, CTF_STT_FUNC, "func_c", func) < 0) ||
+      (ctf_add_funcobjt_sym (fp, CTF_STT_FUNC, "func_a", func2) < 0) ||
+      (ctf_add_funcobjt_sym (fp, CTF_STT_FUNC, "func_b", func3) < 0))
     goto create_syms_err;
 
   /* Make sure we can iterate over them in a dynamic dict and that they have the

@@ -921,7 +921,7 @@ oom:
 
 ctf_id_t
 ctf_symbol_next_static (ctf_dict_t *fp, ctf_next_t **it, const char **name,
-			int functions);
+			ctf_funcobjt_t functions);
 
 /* Iterate over all symbols with types: if FUNC, function symbols,
    otherwise, data symbols.  The name argument is not optional.  The return
@@ -933,7 +933,7 @@ ctf_symbol_next_static (ctf_dict_t *fp, ctf_next_t **it, const char **name,
 
 ctf_id_t
 ctf_symbol_next (ctf_dict_t *fp, ctf_next_t **it, const char **name,
-		 int functions)
+		 ctf_funcobjt_t functions)
 {
   ctf_id_t sym = CTF_ERR;
   ctf_next_t *i = *it;
@@ -1007,7 +1007,7 @@ ctf_symbol_next (ctf_dict_t *fp, ctf_next_t **it, const char **name,
    serialization.  */
 ctf_id_t
 ctf_symbol_next_static (ctf_dict_t *fp, ctf_next_t **it, const char **name,
-			int functions)
+			ctf_funcobjt_t functions)
 {
   ctf_id_t sym = CTF_ERR;
   ctf_next_t *i = *it;
@@ -1142,7 +1142,7 @@ ctf_lookup_idx_name (const void *key_, const void *idx_)
 
 static ctf_id_t
 ctf_try_lookup_indexed (ctf_dict_t *fp, unsigned long symidx,
-			const char *symname, int is_function)
+			const char *symname, ctf_funcobjt_t functions)
 {
   struct ctf_header *hp = fp->ctf_header;
   uint32_t *symtypetab;
@@ -1166,7 +1166,7 @@ ctf_try_lookup_indexed (ctf_dict_t *fp, unsigned long symidx,
   if (symname[0] == '\0')
     return CTF_ERR;					/* errno is set for us.  */
 
-  if (is_function)
+  if (functions)
     {
       if (!fp->ctf_funcidx_sxlate)
 	{
