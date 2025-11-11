@@ -313,7 +313,6 @@ typedef int ctf_func_type_flags_t;
   _CTF_ITEM (ECTF_FULL, "CTF container is full.") \
   _CTF_ITEM (ECTF_DUPLICATE, "Duplicate member, enumerator, datasec, or variable name.") \
   _CTF_ITEM (ECTF_CONFLICT, "Conflicting type is already defined.") \
-  _CTF_ITEM (ECTF_OVERROLLBACK, "Attempt to roll back past a ctf_update.") \
   _CTF_ITEM (ECTF_COMPRESS, "Failed to compress CTF data.") \
   _CTF_ITEM (ECTF_ARCREATE, "Error creating CTF archive.") \
   _CTF_ITEM (ECTF_ARNNAME, "Name not found in CTF archive.") \
@@ -1148,16 +1147,12 @@ extern ctf_ret_t ctf_type_set_conflicting (ctf_dict_t *, ctf_id_t, const char *)
 extern ctf_ret_t ctf_add_funcobjt_sym (ctf_dict_t *fp, ctf_funcobjt_t function,
 				       const char *name, ctf_id_t id);
 
-/* Snapshot/rollback.  Call ctf_update to snapshot the state of a dict:
-  a later call to ctf_discard then deletes all types added since (but not new
-  members, enumerands etc).  Call ctf_snapshot to return a snapshot ID: pass
+/* Snapshot/rollback.  Call ctf_snapshot to return a snapshot ID: pass
   one of these IDs to ctf_rollback to discard all types added since the
   corresponding call to ctf_snapshot.  */
 
-extern ctf_ret_t ctf_update (ctf_dict_t *);
 extern ctf_snapshot_id_t ctf_snapshot (ctf_dict_t *);
 extern ctf_ret_t ctf_rollback (ctf_dict_t *, ctf_snapshot_id_t);
-extern ctf_ret_t ctf_discard (ctf_dict_t *);
 
 /* Dict writeout.  See ctf_version().
 

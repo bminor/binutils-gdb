@@ -226,8 +226,6 @@ ctf_create (ctf_error_t *errp)
   fp->ctf_names = names;
   fp->ctf_datasecs = datasecs;
   fp->ctf_tags = tags;
-  fp->ctf_dtoldid = 0;
-  fp->ctf_snapshot_lu = 0;
 
   /* Make sure the ptrtab starts out at a reasonable size.  */
 
@@ -249,14 +247,6 @@ ctf_create (ctf_error_t *errp)
   ctf_dynhash_destroy (datasecs);
   ctf_dynhash_destroy (tags);
   return NULL;
-}
-
-/* Compatibility: just update the threshold for ctf_discard.  */
-ctf_ret_t
-ctf_update (ctf_dict_t *fp)
-{
-  fp->ctf_dtoldid = fp->ctf_typemax;
-  return 0;
 }
 
 ctf_dynhash_t *
@@ -400,20 +390,6 @@ ctf_static_type (const ctf_dict_t *fp, ctf_id_t type)
   return ((unsigned long) idx <= fp->ctf_stypes);
 }
 
-/* Discard all of the dynamic type definitions that have been added to the dict
-   since the last call to ctf_update().  We locate such types by scanning the
-   dtd list and deleting elements that have indexes greater than ctf_dtoldid,
-   which is set by ctf_update(), above.  */
-ctf_ret_t
-ctf_discard (ctf_dict_t *fp)
-{
-  ctf_snapshot_id_t last_update =
-    { fp->ctf_dtoldid,
-      fp->ctf_snapshot_lu + 1 };
-
-  return (ctf_rollback (fp, last_update));
-}
-
 ctf_snapshot_id_t
 ctf_snapshot (ctf_dict_t *fp)
 {
@@ -434,9 +410,6 @@ ctf_rollback (ctf_dict_t *fp, ctf_snapshot_id_t id)
 
   if (id.snapshot_id < fp->ctf_stypes)
     return (ctf_set_errno (fp, ECTF_RDONLY));
-
-  if (fp->ctf_snapshot_lu >= id.snapshot_id)
-    return (ctf_set_errno (fp, ECTF_OVERROLLBACK));
 
   for (dtd = ctf_list_next (&fp->ctf_dtdefs); dtd != NULL; dtd = ntd)
     {

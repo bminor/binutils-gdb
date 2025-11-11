@@ -127,8 +127,6 @@ LIBCTF_2.0 {
 	ctf_array_set_info;
 	ctf_type_set_conflicting;
 
-	ctf_update;
-	ctf_discard;
 	ctf_snapshot;
 	ctf_rollback;
 	ctf_write;

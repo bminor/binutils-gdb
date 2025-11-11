@@ -498,9 +498,7 @@ struct ctf_dict
   int ctf_version;		  /* CTF data version.  */
   ctf_dynhash_t *ctf_dthash;	  /* Hash of dynamic type definitions.  */
   ctf_list_t ctf_dtdefs;	  /* List of dynamic type definitions.  */
-  unsigned long ctf_dtoldid;	  /* Oldest id that has been committed.  */
-  unsigned long ctf_snapshots;	  /* ctf_snapshot() plus ctf_update() count.  */
-  unsigned long ctf_snapshot_lu;  /* ctf_snapshot() call count at last update.  */
+  unsigned long ctf_snapshots;	  /* ctf_snapshot() call count.  */
   ctf_archive_t *ctf_archive;	  /* Archive this ctf_dict_t came from.  */
   ctf_list_t ctf_errs_warnings;	  /* CTF errors and warnings.  */
   ctf_dynhash_t *ctf_link_inputs; /* Inputs to this link.  */
