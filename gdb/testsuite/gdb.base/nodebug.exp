@@ -26,7 +26,7 @@ if {[have_compile_flag -std=c99]} {
 }
 
 if {[test_compiler_info "xlc-*"]} {
-    # By default, IBM'x xlc compiler doesn't add static variables into the symtab.
+    # By default, IBM's xlc compiler doesn't add static variables into the symtab.
     # Use "-qstatsym" to do so.
     lappend exec_opts additional_flags=-qstatsym
 }
