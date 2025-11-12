@@ -366,6 +366,26 @@ block::static_link () const
   return (struct dynamic_prop *) objfile_lookup_static_link (objfile, this);
 }
 
+/* See block.h.  */
+
+void
+block::relocate (struct objfile *objfile, const section_offsets &offsets)
+{
+  int block_line_section = SECT_OFF_TEXT (objfile);
+
+  set_start (start () + offsets[block_line_section]);
+  set_end (end () + offsets[block_line_section]);
+
+  for (blockrange &r : ranges ())
+    {
+      r.set_start (r.start () + offsets[block_line_section]);
+      r.set_end (r.end () + offsets[block_line_section]);
+    }
+
+  for (struct symbol *sym : multidict_symbols ())
+    sym->relocate (offsets);
+}
+
 /* Initialize a block iterator, either to iterate over a single block,
    or, for static and global blocks, all the included symtabs as
    well.  */
@@ -863,6 +883,21 @@ blockvector::~blockvector ()
 {
   for (struct block *bl : m_blocks)
     mdict_free (bl->multidict ());
+}
+
+/* See block.h.  */
+
+void
+blockvector::relocate (struct objfile *objfile,
+		       const section_offsets &offsets)
+{
+  int block_line_section = SECT_OFF_TEXT (objfile);
+
+  if (m_map != nullptr)
+    m_map->relocate (offsets[block_line_section]);
+
+  for (struct block *b : m_blocks)
+    b->relocate (objfile, offsets);
 }
 
 /* Implement 'maint info blocks' command.  If passed an argument then

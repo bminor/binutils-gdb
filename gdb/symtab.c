@@ -6610,6 +6610,16 @@ symbol::value_block () const
 
 /* See symtab.h.  */
 
+void
+symbol::relocate (const section_offsets &delta)
+{
+  if ((loc_class () == LOC_LABEL || loc_class () == LOC_STATIC)
+      && section_index () >= 0)
+    set_value_address (value_address () + delta[section_index ()]);
+}
+
+/* See symtab.h.  */
+
 CORE_ADDR
 minimal_symbol::get_maybe_copied_address (objfile *objf) const
 {

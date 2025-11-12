@@ -1458,6 +1458,10 @@ struct symbol : public general_symbol_info, public allocate_on_obstack<symbol>
 
   void set_symtab (struct symtab *symtab);
 
+  /* Relocate this symbol.  OFFSETS is the relocation offsets to use.  */
+
+  void relocate (const section_offsets &offsets);
+
   /* Data type of value */
 
   struct type *m_type = nullptr;
@@ -1674,13 +1678,6 @@ struct linetable
      committee tells us how to do it, we can probably go along).  */
   struct linetable_entry item[1];
 };
-
-/* How to relocate the symbols from each section in a symbol file.
-   The ordering and meaning of the offsets is file-type-dependent;
-   typically it is indexed by section numbers or symbol types or
-   something like that.  */
-
-typedef std::vector<CORE_ADDR> section_offsets;
 
 /* Each source file or header is represented by a struct symtab.
    The name "symtab" is historical, another name for it is "filetab".

@@ -315,6 +315,11 @@ struct block : public allocate_on_obstack<block>
 
   bool contains (const struct block *a, bool allow_nested = false) const;
 
+  /* Relocate this block and all contained blocks.  OBJFILE is the
+     objfile holding this block, and OFFSETS is the relocation offsets
+     to use.  */
+  void relocate (struct objfile *objfile, const section_offsets &offsets);
+
 private:
 
   /* Return the default entry-pc of this block.  The default is the address
@@ -482,10 +487,6 @@ struct blockvector
   const struct block *static_block () const
   { return this->block (STATIC_BLOCK); }
 
-  /* Return the address -> block map of this blockvector.  */
-  addrmap_fixed *map ()
-  { return m_map; }
-
   /* Const version of the above.  */
   const addrmap_fixed *map () const
   { return m_map; }
@@ -512,6 +513,11 @@ struct blockvector
   /* Return symbol at ADDR or NULL if no symbol is found.  Only exact matches
      for ADDR are considered.  */
   struct symbol *symbol_at_address (CORE_ADDR addr) const;
+
+  /* Relocate this blockvector and all contained blocks.  OBJFILE is
+     the objfile holding this blockvector, and OFFSETS is the
+     relocation offsets to use.  */
+  void relocate (struct objfile *objfile, const section_offsets &offsets);
 
 private:
   /* An address map mapping addresses to blocks in this blockvector.
