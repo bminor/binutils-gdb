@@ -18,12 +18,17 @@
 
 standard_testfile .c
 
+set exec_opts {}
+if {[have_compile_flag -std=c99]} {
+    # Gcc 15 defaults to c23, which no longer supports unprototyped functions.
+    # Use a c dialect that does support this.
+    lappend exec_opts additional_flags=-std=c99
+}
+
 if {[test_compiler_info "xlc-*"]} {
     # By default, IBM'x xlc compiler doesn't add static variables into the symtab.
     # Use "-qstatsym" to do so.
-    set exec_opts additional_flags=-qstatsym
-} else {
-    set exec_opts ""
+    lappend exec_opts additional_flags=-qstatsym
 }
 
 if  { [gdb_compile $srcdir/$subdir/$srcfile $binfile executable $exec_opts] != "" } {
