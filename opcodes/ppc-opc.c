@@ -7658,6 +7658,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"tlbiel",	X(31,274),	X_MASK|1<<20,POWER9,	0,		{RB, RSO, RIC, PRS, X_R}},
 {"tlbiel",	X(31,274),	XRTLRA_MASK, POWER4,	POWER9|PPC476,	{RB, LOPT}},
 
+{"mtlpl",	X(31,275),	XRA_MASK,    FUTURE,	0,		{RB, RS}},
 {"mfapidi",	X(31,275),	X_MASK,	     BOOKE,	E500|TITAN,	{RT, RA}},
 
 {"lqarx",	X(31,276),  XEH_MASK|Q_MASK, POWER8,	0,		{RTQ, RAX, RBX, EH}},

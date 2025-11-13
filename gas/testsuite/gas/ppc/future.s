@@ -82,4 +82,5 @@ _start:
 	stxvpb32x 34, 20, 21
 	ccmclean
 	ccmrl
+	mtlpl 4, 2
 

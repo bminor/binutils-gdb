@@ -108,4 +108,5 @@ Disassembly of section \.text:
 .*:	(da af 74 7c|7c 74 af da) 	stxvpb32x vs34,r20,r21
 .*:	(4c 06 00 7c|7c 00 06 4c) 	ccmclean
 .*:	(cc 06 00 7c|7c 00 06 cc) 	ccmrl
+.*:	(26 22 40 7c|7c 40 22 26) 	mtlpl   r4,r2
 #pass
