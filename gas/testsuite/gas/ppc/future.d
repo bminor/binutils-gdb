@@ -106,4 +106,6 @@ Disassembly of section \.text:
 .*:	(83 b9 2f 12|12 2f b9 83) 	vupkint8tofp32 v17,v23,3
 .*:	(da 9e 72 7c|7c 72 9e da) 	lxvpb32x vs34,r18,r19
 .*:	(da af 74 7c|7c 74 af da) 	stxvpb32x vs34,r20,r21
+.*:	(4c 06 00 7c|7c 00 06 4c) 	ccmclean
+.*:	(cc 06 00 7c|7c 00 06 cc) 	ccmrl
 #pass

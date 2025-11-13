@@ -80,4 +80,6 @@ _start:
 	vupkint8tofp32 17, 23, 3
 	lxvpb32x 34, 18, 19
 	stxvpb32x 34, 20, 21
+	ccmclean
+	ccmrl
 

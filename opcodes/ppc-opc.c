@@ -8869,6 +8869,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"lfddx",	X(31,803),	X_MASK,	     E500MC,	0,		{FRT, RA, RB}},
 
 {"lvtrxl",	X(31,805),	X_MASK,	     E6500,	0,		{VD, RA0, RB}},
+{"ccmclean",	X(31,806),	XRTRARB_MASK,FUTURE,	0,		{0}},
 {"stvepx",	X(31,807),	X_MASK,	     E6500,	0,		{VS, RA0, RB}},
 {"lvrxl",	X(31,807),	X_MASK,	     CELL,	0,		{VD, RA0, RB}},
 
@@ -8932,6 +8933,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"divso",	XO(31,363,1,0),	XO_MASK,     M601,	0,		{RT, RA, RB}},
 {"divso.",	XO(31,363,1,1),	XO_MASK,     M601,	0,		{RT, RA, RB}},
+
+{"ccmrl",	X(31,870),	XRTRARB_MASK,FUTURE,	0,		{0}},
 
 {"lxvb16x",	X(31,876),	XX1_MASK,    PPCVSX3,	0,		{XT6, RA0, RB}},
 
