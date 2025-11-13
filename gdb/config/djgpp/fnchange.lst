@@ -355,12 +355,6 @@
 @V@/gdb/regformats/rs6000/powerpc-isa205-vsx64l.dat @V@/gdb/regformats/rs6000/ppciv64l.dat
 @V@/gdb/regformats/rs6000/powerpc-vsx32l.dat @V@/gdb/regformats/rs6000/ppc-v32l.dat
 @V@/gdb/regformats/rs6000/powerpc-vsx64l.dat @V@/gdb/regformats/rs6000/ppc-v64l.dat
-@V@/gdb/regformats/tic6x-c62x.dat @V@/gdb/regformats/c6x-62x.dat
-@V@/gdb/regformats/tic6x-c64x.dat @V@/gdb/regformats/c6x-64x.dat
-@V@/gdb/regformats/tic6x-c64xp.dat @V@/gdb/regformats/c6xc64xp.dat
-@V@/gdb/regformats/tic6x-c62x-linux.dat @V@/gdb/regformats/c6x-62xl.dat
-@V@/gdb/regformats/tic6x-c64x-linux.dat @V@/gdb/regformats/c6x-64xl.dat
-@V@/gdb/regformats/tic6x-c64xp-linux.dat @V@/gdb/regformats/c6x64xpl.dat
 @V@/gdb/remote-e7000.c @V@/gdb/rmt-e7000.c
 @V@/gdb/remote-est.c @V@/gdb/rmt-est.c
 @V@/gdb/remote-mips.c @V@/gdb/rmt-mips.c

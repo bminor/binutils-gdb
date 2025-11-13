@@ -359,14 +359,7 @@ case "${gdbserver_host}" in
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
 			;;
-  tic6x-*-uclinux)	if $development; then
-			  srv_regobj="tic6x-c64xp-linux.o"
-			  srv_regobj="${srv_regobj} tic6x-c64x-linux.o"
-			  srv_regobj="${srv_regobj} tic6x-c62x-linux.o"
-                        else
-			  srv_regobj=""
-                        fi
-			srv_tgtobj="$srv_linux_obj linux-tic6x-low.o"
+  tic6x-*-uclinux)	srv_tgtobj="$srv_linux_obj linux-tic6x-low.o"
 			srv_tgtobj="${srv_tgtobj} arch/tic6x.o"
 			srv_linux_regsets=yes
 			srv_linux_usrregs=yes
