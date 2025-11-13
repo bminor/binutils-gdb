@@ -101,8 +101,9 @@ OUTPUTS = $(patsubst %,$(outdir)/%.dat,$(WHICH))
 # to make on the command line.
 XMLTOC = \
 	alpha.xml \
-	microblaze-with-stack-protect.xml \
 	microblaze.xml \
+	microblaze-linux.xml \
+	microblaze-with-stack-protect.xml \
 	mips-dsp-linux.xml \
 	mips-linux.xml \
 	mips64-dsp-linux.xml \
