@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import gdb
+
 
 class TypeViewer(gdb.Command):
     """A command which takes a string and looks up types with that name.
@@ -44,7 +46,7 @@ class TypeViewer(gdb.Command):
                         if len(fields) > 0:
                             fields = fields + " "
                         fields = fields + "%s %s;" % (str(f.type), f.name)
-                except:
+                except Exception:
                     pass
                 fields = fields + " }"
 
