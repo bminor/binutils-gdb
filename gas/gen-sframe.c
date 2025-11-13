@@ -567,6 +567,49 @@ sframe_fde_free (struct sframe_func_entry *sframe_fde)
   XDELETE (sframe_fde);
 }
 
+/* Output the varlen data (SFrame FRE stack offsets) for SFrame FRE object
+   SFRAME_FRE of the SFrame FDE object SFRAME_FDE.  Each emitted entry is of
+   size FRE_OFFSET_SIZE.  Write out the offsets in order - CFA, RA, FP.  */
+
+static unsigned int
+output_sframe_row_entry_offsets (const struct sframe_func_entry *sframe_fde ATTRIBUTE_UNUSED,
+				 const struct sframe_row_entry *sframe_fre,
+				 unsigned int fre_offset_size)
+
+{
+  unsigned int fre_write_offsets = 0;
+
+  unsigned int idx = sframe_fre_offset_func_map_index (fre_offset_size);
+  gas_assert (idx < SFRAME_FRE_OFFSET_FUNC_MAP_INDEX_MAX);
+
+  /* Write out the offsets in order - cfa, bp, ra.  */
+  fre_offset_func_map[idx].out_func (sframe_fre->cfa_offset);
+  fre_write_offsets++;
+
+  if (sframe_ra_tracking_p ())
+    {
+      if (sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
+	{
+	  fre_offset_func_map[idx].out_func (sframe_fre->ra_offset);
+	  fre_write_offsets++;
+	}
+      /* For s390x write padding RA offset, if FP without RA saved.  */
+      else if (sframe_get_abi_arch () == SFRAME_ABI_S390X_ENDIAN_BIG
+	       && sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
+	{
+	  fre_offset_func_map[idx].out_func (SFRAME_FRE_RA_OFFSET_INVALID);
+	  fre_write_offsets++;
+	}
+    }
+  if (sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
+    {
+      fre_offset_func_map[idx].out_func (sframe_fre->bp_offset);
+      fre_write_offsets++;
+    }
+
+  return fre_write_offsets;
+}
+
 static void
 output_sframe_row_entry (const struct sframe_func_entry *sframe_fde,
 			 const struct sframe_row_entry *sframe_fre)
@@ -579,7 +622,6 @@ output_sframe_row_entry (const struct sframe_func_entry *sframe_fde,
   expressionS exp;
   unsigned int fre_addr_size;
 
-  unsigned int idx = 0;
   unsigned int fre_write_offsets = 0;
   symbolS *fde_start_addr = get_dw_fde_start_addrS (sframe_fde->dw_fde);
   symbolS *fde_end_addr = get_dw_fde_end_addrS (sframe_fde->dw_fde);
@@ -631,34 +673,8 @@ output_sframe_row_entry (const struct sframe_func_entry *sframe_fde,
   if (sframe_fre->ra_undefined_p)
     return;
 
-  idx = sframe_fre_offset_func_map_index (fre_offset_size);
-  gas_assert (idx < SFRAME_FRE_OFFSET_FUNC_MAP_INDEX_MAX);
-
-  /* Write out the offsets in order - cfa, bp, ra.  */
-  fre_offset_func_map[idx].out_func (sframe_fre->cfa_offset);
-  fre_write_offsets++;
-
-  if (sframe_ra_tracking_p ())
-    {
-      if (sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
-	{
-	  fre_offset_func_map[idx].out_func (sframe_fre->ra_offset);
-	  fre_write_offsets++;
-	}
-      /* For s390x write padding RA offset, if FP without RA saved.  */
-      else if (sframe_get_abi_arch () == SFRAME_ABI_S390X_ENDIAN_BIG
-	       && sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
-	{
-	  fre_offset_func_map[idx].out_func (SFRAME_FRE_RA_OFFSET_INVALID);
-	  fre_write_offsets++;
-	}
-    }
-  if (sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
-    {
-      fre_offset_func_map[idx].out_func (sframe_fre->bp_offset);
-      fre_write_offsets++;
-    }
-
+  fre_write_offsets = output_sframe_row_entry_offsets (sframe_fde, sframe_fre,
+						       fre_offset_size);
   /* Check if the expected number offsets have been written out
      in this FRE.  */
   gas_assert (fre_write_offsets == fre_num_offsets);
