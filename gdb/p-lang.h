@@ -154,6 +154,9 @@ public:
   bool range_checking_on_by_default () const override
   { return true; }
 
+  enum case_sensitivity case_sensitivity () const override
+  { return case_sensitive_off; }
+
 private:
 
   /* Print the character C on STREAM as part of the contents of a literal
