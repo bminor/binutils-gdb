@@ -21,6 +21,7 @@
 #include "arch/amd64-linux-tdesc.h"
 #include "arch/amd64.h"
 #include "arch/x86-linux-tdesc-features.h"
+#include "gdbsupport/unordered_map.h"
 
 
 /* See arch/amd64-linux-tdesc.h.  */
@@ -29,7 +30,7 @@ const struct target_desc *
 amd64_linux_read_description (uint64_t xstate_bv, bool is_x32)
 {
   /* The type used for the amd64 and x32 target description caches.  */
-  using tdesc_cache_type = std::unordered_map<uint64_t, const target_desc_up>;
+  using tdesc_cache_type = gdb::unordered_map<uint64_t, target_desc_up>;
 
   /* Caches for the previously seen amd64 and x32 target descriptions,
      indexed by the xstate_bv value that created the target

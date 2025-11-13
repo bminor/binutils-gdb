@@ -66,7 +66,7 @@
 #define HA_MAX_NUM_FLDS		4
 
 /* All possible aarch64 target descriptors.  */
-static std::unordered_map <aarch64_features, target_desc *> tdesc_aarch64_map;
+static gdb::unordered_map <aarch64_features, target_desc *> tdesc_aarch64_map;
 
 /* The standard register names, and all the valid aliases for them.
    We're not adding fp here, that name is already taken, see

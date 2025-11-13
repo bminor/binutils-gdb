@@ -62,7 +62,6 @@
 #include "user-regs.h"
 #include "expression.h"
 #include <algorithm>
-#include <unordered_set>
 #include "producer.h"
 #include "infcall.h"
 #include "maint.h"
@@ -4206,7 +4205,7 @@ static std::string
 i386_stap_adjust_register (struct gdbarch *gdbarch, struct stap_parse_info *p,
 			   const std::string &regname, int regnum)
 {
-  static const std::unordered_set<std::string> reg_assoc
+  static const gdb::unordered_set<std::string> reg_assoc
     = { "ax", "bx", "cx", "dx",
 	"si", "di", "bp", "sp" };
 

@@ -3758,7 +3758,7 @@ svr4_solib_ops::get_solibs_in_ns (int nsid) const
      faster, and to be able to remove SOs from the map, to avoid
      returning the dynamic linker multiple times.  */
   CORE_ADDR debug_base = info->namespace_id[nsid];
-  std::unordered_map<std::string, const lm_info_svr4 *> namespace_solibs;
+  gdb::unordered_map<std::string, const lm_info_svr4 *> namespace_solibs;
   for (svr4_so &so : info->solib_lists[debug_base])
     namespace_solibs[so.name] = so.lm_info.get ();
 

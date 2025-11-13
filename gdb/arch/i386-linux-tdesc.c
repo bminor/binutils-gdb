@@ -21,6 +21,7 @@
 #include "arch/i386-linux-tdesc.h"
 #include "arch/i386.h"
 #include "arch/x86-linux-tdesc-features.h"
+#include "gdbsupport/unordered_map.h"
 
 /* See arch/i386-linux-tdesc.h.  */
 
@@ -31,7 +32,7 @@ i386_linux_read_description (uint64_t xstate_bv)
      xstate_bv value that created the target description.  This
      needs to be static within this function to ensure it is initialised
      before first use.  */
-  static std::unordered_map<uint64_t, const target_desc_up> i386_tdesc_cache;
+  static gdb::unordered_map<uint64_t, target_desc_up> i386_tdesc_cache;
 
   /* Only some bits are checked when creating a tdesc, but the
      XSTATE_BV value contains other feature bits that are not relevant

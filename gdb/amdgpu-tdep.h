@@ -23,9 +23,8 @@
 #include "gdbarch.h"
 
 #include <amd-dbgapi/amd-dbgapi.h>
-#include <unordered_map>
 
-/* Provide std::unordered_map::Hash for amd_dbgapi_register_id_t.  */
+/* Provide gdb::unordered_map::Hash for amd_dbgapi_register_id_t.  */
 struct register_id_hash
 {
   size_t
@@ -35,7 +34,7 @@ struct register_id_hash
   }
 };
 
-/* Provide std::unordered_map::Equal for amd_dbgapi_register_id_t.  */
+/* Provide gdb::unordered_map::Equal for amd_dbgapi_register_id_t.  */
 struct register_id_equal_to
 {
   bool
@@ -74,12 +73,12 @@ struct amdgpu_gdbarch_tdep : gdbarch_tdep_base
   std::vector<int> dwarf_regnum_to_gdb_regnum;
 
   /* A map of gdb regnums keyed by they equivalent register_id.  */
-  std::unordered_map<amd_dbgapi_register_id_t, int, register_id_hash,
+  gdb::unordered_map<amd_dbgapi_register_id_t, int, register_id_hash,
 		     register_id_equal_to>
     regnum_map;
 
   /* A map of register_class_ids keyed by their name.  */
-  std::unordered_map<std::string, amd_dbgapi_register_class_id_t>
+  gdb::unordered_map<std::string, amd_dbgapi_register_class_id_t>
     register_class_map;
 };
 

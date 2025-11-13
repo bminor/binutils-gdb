@@ -32,8 +32,6 @@
 #include "solib-svr4.h"
 #include "symfile.h"
 
-#include <unordered_map>
-
 namespace {
 
 /* Per inferior cache of opened file descriptors.  */
@@ -60,15 +58,19 @@ struct rocm_solib_fd_cache
 private:
   struct refcnt_fd
   {
-    DISABLE_COPY_AND_ASSIGN (refcnt_fd);
     refcnt_fd (int fd, int refcnt) : fd (fd), refcnt (refcnt) {}
+
+    DISABLE_COPY_AND_ASSIGN (refcnt_fd);
+
+    refcnt_fd (refcnt_fd &&) = default;
+    refcnt_fd &operator=(refcnt_fd &&other) = default;
 
     int fd = -1;
     int refcnt = 0;
   };
 
   inferior *m_inferior;
-  std::unordered_map<std::string, refcnt_fd> m_cache;
+  gdb::unordered_map<std::string, refcnt_fd> m_cache;
 };
 
 int
@@ -101,7 +103,7 @@ rocm_solib_fd_cache::open (const std::string &filename,
 int
 rocm_solib_fd_cache::close (int fd, fileio_error *target_errno)
 {
-  using cache_val = std::unordered_map<std::string, refcnt_fd>::value_type;
+  using cache_val = gdb::unordered_map<std::string, refcnt_fd>::value_type;
   auto it
     = std::find_if (m_cache.begin (), m_cache.end (),
 		    [fd](const cache_val &s) { return s.second.fd == fd; });
@@ -544,7 +546,7 @@ rocm_bfd_iovec_open (bfd *abfd, inferior *inferior)
     tokens.emplace_back (uri.substr (last));
 
   /* Create a tag-value map from the tokenized query/fragment.  */
-  std::unordered_map<std::string_view, std::string_view,
+  gdb::unordered_map<std::string_view, std::string_view,
 		     gdb::string_view_hash> params;
   for (std::string_view token : tokens)
     {

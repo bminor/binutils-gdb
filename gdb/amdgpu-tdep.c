@@ -356,7 +356,7 @@ using amd_dbgapi_register_type_enum_up
 
 /* Map type lookup names to types.  */
 using amd_dbgapi_register_type_map
-  = std::unordered_map<std::string, amd_dbgapi_register_type_up>;
+  = gdb::unordered_map<std::string, amd_dbgapi_register_type_up>;
 
 /* Parse S as a ULONGEST, raise an error on overflow.  */
 

@@ -21,8 +21,6 @@
 #include "cli/cli-cmds.h"
 #include "inferior.h"
 
-#include <unordered_map>
-
 /* Support for hardware watchpoints and breakpoints using the x86
    debug registers.
 
@@ -42,7 +40,7 @@ struct x86_dr_low_type x86_dr_low;
    need to keep track of processes that aren't bound to any inferior
    (e.g., fork children, checkpoints).  */
 
-static std::unordered_map<pid_t,
+static gdb::unordered_map<pid_t,
 			  struct x86_debug_reg_state> x86_debug_process_state;
 
 /* See x86-nat.h.  */
