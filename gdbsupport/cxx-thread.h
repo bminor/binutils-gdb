@@ -178,10 +178,11 @@ public:
   }
 
   future () = default;
+
+  DISABLE_COPY_AND_ASSIGN (future);
+
   future (future &&other) = default;
-  future (const future &other) = delete;
   future &operator= (future &&other) = default;
-  future &operator= (const future &other) = delete;
 
   void wait () const { }
 

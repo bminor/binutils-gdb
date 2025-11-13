@@ -72,10 +72,6 @@ public:
   void enable () { m_enabled = true; };
   void disable () { m_enabled = false; };
 
-  /* Disable copy.  */
-  skiplist_entry (const skiplist_entry &) = delete;
-  void operator= (const skiplist_entry &) = delete;
-
 private:
   /* Key that grants access to the constructor.  */
   struct private_key {};
@@ -86,6 +82,9 @@ public:
   skiplist_entry (bool file_is_glob, std::string &&file,
 		  bool function_is_regexp, std::string &&function,
 		  private_key);
+
+  /* Disable copy.  */
+  DISABLE_COPY_AND_ASSIGN (skiplist_entry);
 
 private:
   /* Return true if we're stopped at a file to be skipped.  */

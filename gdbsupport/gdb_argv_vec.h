@@ -48,14 +48,14 @@ public:
     /* Nothing.  */
   }
 
+  /* Don't currently support copying the strings from OTHER.  */
+  DISABLE_COPY_AND_ASSIGN (argv_vec);
+
   /* Move the owned strings from OTHER.  */
   argv_vec (argv_vec &&other)
   {
     this->m_args = std::move (other.m_args);
   }
-
-  /* Don't currently support copying the strings from OTHER.  */
-  argv_vec (const argv_vec &other) = delete;
 
   /* Move elements from OTHER.  Free currently owned strings.  */
   argv_vec &operator= (argv_vec &&other)
@@ -64,9 +64,6 @@ public:
     this->m_args = std::move (other.m_args);
     return *this;
   }
-
-  /* Don't currently support copying the strings from OTHER.  */
-  argv_vec &operator= (const argv_vec &other) = delete;
 
   /* Release the owned strings.  */
   ~argv_vec ()

@@ -307,13 +307,12 @@ class ui_out
       m_uiout->do_progress_start ();
     }
 
+    DISABLE_COPY_AND_ASSIGN (progress_update);
+
     ~progress_update ()
     {
       m_uiout->do_progress_end ();
     }
-
-    progress_update (const progress_update &) = delete;
-    progress_update &operator= (const progress_update &) = delete;
 
     /* Emit some progress for this progress meter.  Includes current
        amount of progress made and total amount in the display.  */
@@ -445,8 +444,7 @@ public:
     m_uiout->table_end ();
   }
 
-  ui_out_emit_table (const ui_out_emit_table &) = delete;
-  ui_out_emit_table &operator= (const ui_out_emit_table &) = delete;
+  DISABLE_COPY_AND_ASSIGN (ui_out_emit_table);
 
 private:
 
@@ -471,8 +469,7 @@ public:
     m_uiout->redirect (NULL);
   }
 
-  ui_out_redirect_pop (const ui_out_redirect_pop &) = delete;
-  ui_out_redirect_pop &operator= (const ui_out_redirect_pop &) = delete;
+  DISABLE_COPY_AND_ASSIGN (ui_out_redirect_pop);
 
 private:
   struct ui_out *m_uiout;

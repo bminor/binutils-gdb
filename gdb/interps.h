@@ -232,13 +232,12 @@ public:
   {
   }
 
+  DISABLE_COPY_AND_ASSIGN (scoped_restore_interp);
+
   ~scoped_restore_interp ()
   {
     set_interp (m_interp->name ());
   }
-
-  scoped_restore_interp (const scoped_restore_interp &) = delete;
-  scoped_restore_interp &operator= (const scoped_restore_interp &) = delete;
 
 private:
 

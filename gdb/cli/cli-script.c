@@ -360,13 +360,12 @@ public:
   {
   }
 
+  DISABLE_COPY_AND_ASSIGN (scoped_restore_hook_in);
+
   ~scoped_restore_hook_in ()
   {
     m_cmd->hook_in = 0;
   }
-
-  scoped_restore_hook_in (const scoped_restore_hook_in &) = delete;
-  scoped_restore_hook_in &operator= (const scoped_restore_hook_in &) = delete;
 
 private:
 

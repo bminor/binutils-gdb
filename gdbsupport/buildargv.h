@@ -52,8 +52,7 @@ public:
   {
   }
 
-  gdb_argv (const gdb_argv &) = delete;
-  gdb_argv &operator= (const gdb_argv &) = delete;
+  DISABLE_COPY_AND_ASSIGN (gdb_argv);
 
   gdb_argv &operator= (gdb_argv &&other)
   {

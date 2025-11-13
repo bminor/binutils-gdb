@@ -341,10 +341,9 @@ struct target_desc : tdesc_element
   target_desc ()
   {}
 
-  virtual ~target_desc () = default;
+  DISABLE_COPY_AND_ASSIGN (target_desc);
 
-  target_desc (const target_desc &) = delete;
-  void operator= (const target_desc &) = delete;
+  virtual ~target_desc () = default;
 
   /* The architecture reported by the target, if any.  */
   const struct bfd_arch_info *arch = NULL;

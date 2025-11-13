@@ -836,6 +836,8 @@ public:
   /* Set the current language as well.  */
   explicit scoped_restore_current_language (enum language lang);
 
+  DISABLE_COPY_AND_ASSIGN (scoped_restore_current_language);
+
   ~scoped_restore_current_language ();
 
   scoped_restore_current_language (scoped_restore_current_language &&other)
@@ -844,11 +846,6 @@ public:
     m_fun = other.m_fun;
     other.dont_restore ();
   }
-
-  scoped_restore_current_language (const scoped_restore_current_language &)
-      = delete;
-  scoped_restore_current_language &operator=
-      (const scoped_restore_current_language &) = delete;
 
   /* Cancel restoring on scope exit.  */
   void dont_restore ()
