@@ -568,8 +568,7 @@ sframe_fde_free (struct sframe_func_entry *sframe_fde)
 }
 
 static void
-output_sframe_row_entry (symbolS *fde_start_addr,
-			 symbolS *fde_end_addr,
+output_sframe_row_entry (const struct sframe_func_entry *sframe_fde,
 			 const struct sframe_row_entry *sframe_fre)
 {
   unsigned char fre_info;
@@ -582,6 +581,8 @@ output_sframe_row_entry (symbolS *fde_start_addr,
 
   unsigned int idx = 0;
   unsigned int fre_write_offsets = 0;
+  symbolS *fde_start_addr = get_dw_fde_start_addrS (sframe_fde->dw_fde);
+  symbolS *fde_end_addr = get_dw_fde_end_addrS (sframe_fde->dw_fde);
 
   fre_addr_size = 4; /* 4 bytes by default.   FIXME tie it to fre_type? */
 
@@ -851,9 +852,7 @@ output_sframe_internal (void)
 	   sframe_fre;
 	   sframe_fre = sframe_fre->next)
 	{
-	  output_sframe_row_entry (get_dw_fde_start_addrS (sframe_fde->dw_fde),
-				   get_dw_fde_end_addrS (sframe_fde->dw_fde),
-				   sframe_fre);
+	  output_sframe_row_entry (sframe_fde, sframe_fre);
 	}
       i++;
       sframe_fde_next = sframe_fde->next;
