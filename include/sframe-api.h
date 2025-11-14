@@ -114,19 +114,19 @@ sframe_decoder_free (sframe_decoder_ctx **dctx);
 
 /* Get the size of the SFrame header from the decoder context DCTX.  */
 extern unsigned int
-sframe_decoder_get_hdr_size (sframe_decoder_ctx *dctx);
+sframe_decoder_get_hdr_size (const sframe_decoder_ctx *dctx);
 
 /* Get the SFrame's abi/arch info.  */
 extern uint8_t
-sframe_decoder_get_abi_arch (sframe_decoder_ctx *dctx);
+sframe_decoder_get_abi_arch (const sframe_decoder_ctx *dctx);
 
 /* Get the format version from the SFrame decoder context DCTX.  */
 extern uint8_t
-sframe_decoder_get_version (sframe_decoder_ctx *dctx);
+sframe_decoder_get_version (const sframe_decoder_ctx *dctx);
 
 /* Get the section flags from the SFrame decoder context DCTX.  */
 extern uint8_t
-sframe_decoder_get_flags (sframe_decoder_ctx *dctx);
+sframe_decoder_get_flags (const sframe_decoder_ctx *dctx);
 
 /* Get the offset of the sfde_func_start_address field (from the start of the
    on-disk layout of the SFrame section) of the FDE at FUNC_IDX in the decoder
@@ -137,34 +137,34 @@ sframe_decoder_get_flags (sframe_decoder_ctx *dctx);
    for the linker when arranging input FDEs into the output section to be
    emitted.  */
 uint32_t
-sframe_decoder_get_offsetof_fde_start_addr (sframe_decoder_ctx *dctx,
+sframe_decoder_get_offsetof_fde_start_addr (const sframe_decoder_ctx *dctx,
 					    uint32_t func_idx, int *errp);
 
 /* Return the number of function descriptor entries in the SFrame decoder
    DCTX.  */
 extern uint32_t
-sframe_decoder_get_num_fidx (sframe_decoder_ctx *dctx);
+sframe_decoder_get_num_fidx (const sframe_decoder_ctx *dctx);
 
 /* Get the fixed FP offset from the decoder context DCTX.  */
 extern int8_t
-sframe_decoder_get_fixed_fp_offset (sframe_decoder_ctx *dctx);
+sframe_decoder_get_fixed_fp_offset (const sframe_decoder_ctx *dctx);
 
 /* Get the fixed RA offset from the decoder context DCTX.  */
 extern int8_t
-sframe_decoder_get_fixed_ra_offset (sframe_decoder_ctx *dctx);
+sframe_decoder_get_fixed_ra_offset (const sframe_decoder_ctx *dctx);
 
 /* Find the SFrame Frame Row Entry which contains the PC.  Returns
    SFRAME_ERR if failure.  */
 
 extern int
-sframe_find_fre (sframe_decoder_ctx *ctx, int32_t pc,
+sframe_find_fre (const sframe_decoder_ctx *ctx, int32_t pc,
 		 sframe_frame_row_entry *frep);
 
 /* Get the FRE_IDX'th FRE of the function at FUNC_IDX'th function
    index entry in the SFrame decoder CTX.  Returns error code as
    applicable.  */
 extern int
-sframe_decoder_get_fre (sframe_decoder_ctx *ctx,
+sframe_decoder_get_fre (const sframe_decoder_ctx *ctx,
 			unsigned int func_idx,
 			unsigned int fre_idx,
 			sframe_frame_row_entry *fre);
@@ -174,7 +174,7 @@ sframe_decoder_get_fre (sframe_decoder_ctx *ctx,
    in the decoder CTX.  If failed, return error code.
    This API is only available from SFRAME_VERSION_2.  */
 extern int
-sframe_decoder_get_funcdesc_v2 (sframe_decoder_ctx *ctx,
+sframe_decoder_get_funcdesc_v2 (const sframe_decoder_ctx *ctx,
 				unsigned int i,
 				uint32_t *num_fres,
 				uint32_t *func_size,
@@ -184,24 +184,24 @@ sframe_decoder_get_funcdesc_v2 (sframe_decoder_ctx *ctx,
 
 /* SFrame textual dump.  */
 extern void
-dump_sframe (sframe_decoder_ctx *decoder, uint64_t addr);
+dump_sframe (const sframe_decoder_ctx *decoder, uint64_t addr);
 
 /* Get the base reg id from the FRE info.  Sets errp if fails.  */
 extern uint8_t
-sframe_fre_get_base_reg_id (sframe_frame_row_entry *fre, int *errp);
+sframe_fre_get_base_reg_id (const sframe_frame_row_entry *fre, int *errp);
 
 /* Get the CFA offset from the FRE.  If the offset is invalid, sets errp.  */
 extern int32_t
-sframe_fre_get_cfa_offset (sframe_decoder_ctx *dtcx,
-			   sframe_frame_row_entry *fre, int *errp);
+sframe_fre_get_cfa_offset (const sframe_decoder_ctx *dtcx,
+			   const sframe_frame_row_entry *fre, int *errp);
 
 /* Get the FP offset from the FRE.  If the offset is invalid, sets errp.
 
    For s390x the offset may be an encoded register number, indicated by
    LSB set to one, which is only valid in the topmost frame.  */
 extern int32_t
-sframe_fre_get_fp_offset (sframe_decoder_ctx *dctx,
-			  sframe_frame_row_entry *fre, int *errp);
+sframe_fre_get_fp_offset (const sframe_decoder_ctx *dctx,
+			  const sframe_frame_row_entry *fre, int *errp);
 
 /* Get the RA offset from the FRE.  If the offset is invalid, sets errp.
 
@@ -210,14 +210,14 @@ sframe_fre_get_fp_offset (sframe_decoder_ctx *dctx,
    For s390x the offset may be an encoded register number, indicated by
    LSB set to one, which is only valid in the topmost frame.  */
 extern int32_t
-sframe_fre_get_ra_offset (sframe_decoder_ctx *dctx,
-			  sframe_frame_row_entry *fre, int *errp);
+sframe_fre_get_ra_offset (const sframe_decoder_ctx *dctx,
+			  const sframe_frame_row_entry *fre, int *errp);
 
 /* Get whether the RA is mangled.  */
 
 extern bool
-sframe_fre_get_ra_mangled_p (sframe_decoder_ctx *dctx,
-			     sframe_frame_row_entry *fre, int *errp);
+sframe_fre_get_ra_mangled_p (const sframe_decoder_ctx *dctx,
+			     const sframe_frame_row_entry *fre, int *errp);
 
 /* Get whether the RA is undefined (i.e. outermost frame).  */
 
