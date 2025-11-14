@@ -1343,6 +1343,25 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "n32-consec"
     }
 
+    # Tests assembling named registers based on ABI setting.
+    run_dump_test "gpr-asm-names-32"
+    run_dump_test "gpr-asm-names-o64"
+    if $has_newabi {
+	run_dump_test "gpr-asm-names-n32"
+	run_dump_test "gpr-asm-names-64"
+    }
+    run_dump_test "gpr-asm-names-eabi32"
+    run_dump_test "gpr-asm-names-eabi64"
+
+    run_dump_test "fpr-asm-names-32"
+    run_dump_test "fpr-asm-names-o64"
+    if $has_newabi {
+	run_dump_test "fpr-asm-names-n32"
+	run_dump_test "fpr-asm-names-64"
+    }
+    run_dump_test "fpr-asm-names-eabi32"
+    run_dump_test "fpr-asm-names-eabi64"
+
     # tests of objdump's ability to disassemble the move mnemonic
     run_dump_test_arches "move"	[mips_arch_list_matching mips64 !micromips]
     run_dump_test_arches "micromips32-move" [mips_arch_list_matching micromips]

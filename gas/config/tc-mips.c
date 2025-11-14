@@ -2797,7 +2797,8 @@ struct regname {
     {"$cc6",	RTYPE_FCC | RTYPE_CCC | 6}, \
     {"$cc7",	RTYPE_FCC | RTYPE_CCC | 7}
 
-#define N32N64_SYMBOLIC_REGISTER_NAMES \
+/* ABI-specific symbolic register names.  */
+#define NEWABI_SYMBOLIC_REGISTER_NAMES \
     {"$a4",	RTYPE_GP | 8},  \
     {"$a5",	RTYPE_GP | 9},  \
     {"$a6",	RTYPE_GP | 10}, \
@@ -2811,7 +2812,7 @@ struct regname {
     {"$t2",	RTYPE_GP | 14}, \
     {"$t3",	RTYPE_GP | 15}
 
-#define O32_SYMBOLIC_REGISTER_NAMES \
+#define OLDABI_SYMBOLIC_REGISTER_NAMES \
     {"$t0",	RTYPE_GP | 8},  \
     {"$t1",	RTYPE_GP | 9},  \
     {"$t2",	RTYPE_GP | 10}, \
@@ -2824,6 +2825,210 @@ struct regname {
     {"$ta1",	RTYPE_GP | 13}, /* alias for $t5 */ \
     {"$ta2",	RTYPE_GP | 14}, /* alias for $t6 */ \
     {"$ta3",	RTYPE_GP | 15}  /* alias for $t7 */
+
+#define O32_SYMBOLIC_FPU_REGISTER_NAMES \
+    {"$fv0",	RTYPE_FPU | 0},	 \
+    {"$fv0f",	RTYPE_FPU | 1},  \
+    {"$fv1",	RTYPE_FPU | 2},  \
+    {"$fv1f",	RTYPE_FPU | 3},  \
+    {"$ft0",	RTYPE_FPU | 4},  \
+    {"$ft0f",	RTYPE_FPU | 5},  \
+    {"$ft1",	RTYPE_FPU | 6},  \
+    {"$ft1f",	RTYPE_FPU | 7},  \
+    {"$ft2",	RTYPE_FPU | 8},  \
+    {"$ft2f",	RTYPE_FPU | 9},  \
+    {"$ft3",	RTYPE_FPU | 10}, \
+    {"$ft3f",	RTYPE_FPU | 11}, \
+    {"$fa0",	RTYPE_FPU | 12}, \
+    {"$fa0f",	RTYPE_FPU | 13}, \
+    {"$fa1",	RTYPE_FPU | 14}, \
+    {"$fa1f",	RTYPE_FPU | 15}, \
+    {"$ft4",	RTYPE_FPU | 16}, \
+    {"$ft4f",	RTYPE_FPU | 17}, \
+    {"$ft5",	RTYPE_FPU | 18}, \
+    {"$ft5f",	RTYPE_FPU | 19}, \
+    {"$fs0",	RTYPE_FPU | 20}, \
+    {"$fs0f",	RTYPE_FPU | 21}, \
+    {"$fs1",	RTYPE_FPU | 22}, \
+    {"$fs1f",	RTYPE_FPU | 23}, \
+    {"$fs2",	RTYPE_FPU | 24}, \
+    {"$fs2f",	RTYPE_FPU | 25}, \
+    {"$fs3",	RTYPE_FPU | 26}, \
+    {"$fs3f",	RTYPE_FPU | 27}, \
+    {"$fs4",	RTYPE_FPU | 28}, \
+    {"$fs4f",	RTYPE_FPU | 29}, \
+    {"$fs5",	RTYPE_FPU | 30}, \
+    {"$fs5f",	RTYPE_FPU | 31}
+
+#define O64_SYMBOLIC_FPU_REGISTER_NAMES \
+    {"$fv0",	RTYPE_FPU | 0},	 \
+    {"$fv1",	RTYPE_FPU | 1},  \
+    {"$ft0",	RTYPE_FPU | 2},  \
+    {"$ft1",	RTYPE_FPU | 3},  \
+    {"$ft2",	RTYPE_FPU | 4},  \
+    {"$ft3",	RTYPE_FPU | 5},  \
+    {"$ft4",	RTYPE_FPU | 6},  \
+    {"$ft5",	RTYPE_FPU | 7},  \
+    {"$ft6",	RTYPE_FPU | 8},  \
+    {"$ft7",	RTYPE_FPU | 9},  \
+    {"$ft8",	RTYPE_FPU | 10}, \
+    {"$ft9",	RTYPE_FPU | 11}, \
+    {"$fa0",	RTYPE_FPU | 12}, \
+    {"$fa1",	RTYPE_FPU | 13}, \
+    {"$ft10",	RTYPE_FPU | 14}, \
+    {"$ft11",	RTYPE_FPU | 15}, \
+    {"$ft12",	RTYPE_FPU | 16}, \
+    {"$ft13",	RTYPE_FPU | 17}, \
+    {"$ft14",	RTYPE_FPU | 18}, \
+    {"$ft15",	RTYPE_FPU | 19}, \
+    {"$fs0",	RTYPE_FPU | 20}, \
+    {"$fs1",	RTYPE_FPU | 21}, \
+    {"$fs2",	RTYPE_FPU | 22}, \
+    {"$fs3",	RTYPE_FPU | 23}, \
+    {"$fs4",	RTYPE_FPU | 24}, \
+    {"$fs5",	RTYPE_FPU | 25}, \
+    {"$fs6",	RTYPE_FPU | 26}, \
+    {"$fs7",	RTYPE_FPU | 27}, \
+    {"$fs8",	RTYPE_FPU | 28}, \
+    {"$fs9",	RTYPE_FPU | 29}, \
+    {"$fs10",	RTYPE_FPU | 30}, \
+    {"$fs11",	RTYPE_FPU | 31}
+
+#define N32_SYMBOLIC_FPU_REGISTER_NAMES \
+    {"$fv0",	RTYPE_FPU | 0},	 \
+    {"$ft14",	RTYPE_FPU | 1},  \
+    {"$fv1",	RTYPE_FPU | 2},  \
+    {"$ft15",	RTYPE_FPU | 3},  \
+    {"$ft0",	RTYPE_FPU | 4},  \
+    {"$ft1",	RTYPE_FPU | 5},  \
+    {"$ft2",	RTYPE_FPU | 6},  \
+    {"$ft3",	RTYPE_FPU | 7},  \
+    {"$ft4",	RTYPE_FPU | 8},  \
+    {"$ft5",	RTYPE_FPU | 9},  \
+    {"$ft6",	RTYPE_FPU | 10}, \
+    {"$ft7",	RTYPE_FPU | 11}, \
+    {"$fa0",	RTYPE_FPU | 12}, \
+    {"$fa1",	RTYPE_FPU | 13}, \
+    {"$fa2",	RTYPE_FPU | 14}, \
+    {"$fa3",	RTYPE_FPU | 15}, \
+    {"$fa4",	RTYPE_FPU | 16}, \
+    {"$fa5",	RTYPE_FPU | 17}, \
+    {"$fa6",	RTYPE_FPU | 18}, \
+    {"$fa7",	RTYPE_FPU | 19}, \
+    {"$fs0",	RTYPE_FPU | 20}, \
+    {"$ft8",	RTYPE_FPU | 21}, \
+    {"$fs1",	RTYPE_FPU | 22}, \
+    {"$ft9",	RTYPE_FPU | 23}, \
+    {"$fs2",	RTYPE_FPU | 24}, \
+    {"$ft10",	RTYPE_FPU | 25}, \
+    {"$fs3",	RTYPE_FPU | 26}, \
+    {"$ft11",	RTYPE_FPU | 27}, \
+    {"$fs4",	RTYPE_FPU | 28}, \
+    {"$ft12",	RTYPE_FPU | 29}, \
+    {"$fs5",	RTYPE_FPU | 30}, \
+    {"$ft13",	RTYPE_FPU | 31}
+
+#define N64_SYMBOLIC_FPU_REGISTER_NAMES \
+    {"$fv0",	RTYPE_FPU | 0},	 \
+    {"$ft12",	RTYPE_FPU | 1},  \
+    {"$fv1",	RTYPE_FPU | 2},  \
+    {"$ft13",	RTYPE_FPU | 3},  \
+    {"$ft0",	RTYPE_FPU | 4},  \
+    {"$ft1",	RTYPE_FPU | 5},  \
+    {"$ft2",	RTYPE_FPU | 6},  \
+    {"$ft3",	RTYPE_FPU | 7},  \
+    {"$ft4",	RTYPE_FPU | 8},  \
+    {"$ft5",	RTYPE_FPU | 9},  \
+    {"$ft6",	RTYPE_FPU | 10}, \
+    {"$ft7",	RTYPE_FPU | 11}, \
+    {"$fa0",	RTYPE_FPU | 12}, \
+    {"$fa1",	RTYPE_FPU | 13}, \
+    {"$fa2",	RTYPE_FPU | 14}, \
+    {"$fa3",	RTYPE_FPU | 15}, \
+    {"$fa4",	RTYPE_FPU | 16}, \
+    {"$fa5",	RTYPE_FPU | 17}, \
+    {"$fa6",	RTYPE_FPU | 18}, \
+    {"$fa7",	RTYPE_FPU | 19}, \
+    {"$ft8",	RTYPE_FPU | 20}, \
+    {"$ft9",	RTYPE_FPU | 21}, \
+    {"$ft10",	RTYPE_FPU | 22}, \
+    {"$ft11",	RTYPE_FPU | 23}, \
+    {"$fs0",	RTYPE_FPU | 24}, \
+    {"$fs1",	RTYPE_FPU | 25}, \
+    {"$fs2",	RTYPE_FPU | 26}, \
+    {"$fs3",	RTYPE_FPU | 27}, \
+    {"$fs4",	RTYPE_FPU | 28}, \
+    {"$fs5",	RTYPE_FPU | 29}, \
+    {"$fs6",	RTYPE_FPU | 30}, \
+    {"$fs7",	RTYPE_FPU | 31}
+
+#define EABI32_SYMBOLIC_FPU_REGISTER_NAMES \
+    {"$fv0",	RTYPE_FPU | 0},	 \
+    {"$fv0f",	RTYPE_FPU | 1},  \
+    {"$fv1",	RTYPE_FPU | 2},  \
+    {"$fv1f",	RTYPE_FPU | 3},  \
+    {"$ft0",	RTYPE_FPU | 4},  \
+    {"$ft0f",	RTYPE_FPU | 5},  \
+    {"$ft1",	RTYPE_FPU | 6},  \
+    {"$ft1f",	RTYPE_FPU | 7},  \
+    {"$ft2",	RTYPE_FPU | 8},  \
+    {"$ft2f",	RTYPE_FPU | 9},  \
+    {"$ft3",	RTYPE_FPU | 10}, \
+    {"$ft3f",	RTYPE_FPU | 11}, \
+    {"$fa0",	RTYPE_FPU | 12}, \
+    {"$fa0f",	RTYPE_FPU | 13}, \
+    {"$fa1",	RTYPE_FPU | 14}, \
+    {"$fa1f",	RTYPE_FPU | 15}, \
+    {"$fa2",	RTYPE_FPU | 16}, \
+    {"$fa2f",	RTYPE_FPU | 17}, \
+    {"$fa3",	RTYPE_FPU | 18}, \
+    {"$fa3f",	RTYPE_FPU | 19}, \
+    {"$fs0",	RTYPE_FPU | 20}, \
+    {"$fs0f",	RTYPE_FPU | 21}, \
+    {"$fs1",	RTYPE_FPU | 22}, \
+    {"$fs1f",	RTYPE_FPU | 23}, \
+    {"$fs2",	RTYPE_FPU | 24}, \
+    {"$fs2f",	RTYPE_FPU | 25}, \
+    {"$fs3",	RTYPE_FPU | 26}, \
+    {"$fs3f",	RTYPE_FPU | 27}, \
+    {"$fs4",	RTYPE_FPU | 28}, \
+    {"$fs4f",	RTYPE_FPU | 29}, \
+    {"$fs5",	RTYPE_FPU | 30}, \
+    {"$fs5f",	RTYPE_FPU | 31}
+
+#define EABI64_SYMBOLIC_FPU_REGISTER_NAMES \
+    {"$fv0",	RTYPE_FPU | 0},	 \
+    {"$fv1",	RTYPE_FPU | 1},  \
+    {"$ft0",	RTYPE_FPU | 2},  \
+    {"$ft1",	RTYPE_FPU | 3},  \
+    {"$ft2",	RTYPE_FPU | 4},  \
+    {"$ft3",	RTYPE_FPU | 5},  \
+    {"$ft4",	RTYPE_FPU | 6},  \
+    {"$ft5",	RTYPE_FPU | 7},  \
+    {"$ft6",	RTYPE_FPU | 8},  \
+    {"$ft7",	RTYPE_FPU | 9},  \
+    {"$ft8",	RTYPE_FPU | 10}, \
+    {"$ft9",	RTYPE_FPU | 11}, \
+    {"$fa0",	RTYPE_FPU | 12}, \
+    {"$fa1",	RTYPE_FPU | 13}, \
+    {"$fa2",	RTYPE_FPU | 14}, \
+    {"$fa3",	RTYPE_FPU | 15}, \
+    {"$fa4",	RTYPE_FPU | 16}, \
+    {"$fa5",	RTYPE_FPU | 17}, \
+    {"$fa6",	RTYPE_FPU | 18}, \
+    {"$fa7",	RTYPE_FPU | 19}, \
+    {"$fs0",	RTYPE_FPU | 20}, \
+    {"$fs1",	RTYPE_FPU | 21}, \
+    {"$fs2",	RTYPE_FPU | 22}, \
+    {"$fs3",	RTYPE_FPU | 23}, \
+    {"$fs4",	RTYPE_FPU | 24}, \
+    {"$fs5",	RTYPE_FPU | 25}, \
+    {"$fs6",	RTYPE_FPU | 26}, \
+    {"$fs7",	RTYPE_FPU | 27}, \
+    {"$fs8",	RTYPE_FPU | 28}, \
+    {"$fs9",	RTYPE_FPU | 29}, \
+    {"$fs10",	RTYPE_FPU | 30}, \
+    {"$fs11",	RTYPE_FPU | 31}
 
 /* Remaining symbolic register names.  */
 #define SYMBOLIC_REGISTER_NAMES \
@@ -2934,12 +3139,38 @@ static const struct regname reg_names[] = {
 };
 
 static const struct regname reg_names_o32[] = {
-  O32_SYMBOLIC_REGISTER_NAMES,
+  OLDABI_SYMBOLIC_REGISTER_NAMES,
+  O32_SYMBOLIC_FPU_REGISTER_NAMES,
   {0, 0}
 };
 
-static const struct regname reg_names_n32n64[] = {
-  N32N64_SYMBOLIC_REGISTER_NAMES,
+static const struct regname reg_names_o64[] = {
+  OLDABI_SYMBOLIC_REGISTER_NAMES,
+  O64_SYMBOLIC_FPU_REGISTER_NAMES,
+  {0, 0}
+};
+
+static const struct regname reg_names_n32[] = {
+  NEWABI_SYMBOLIC_REGISTER_NAMES,
+  N32_SYMBOLIC_FPU_REGISTER_NAMES,
+  {0, 0}
+};
+
+static const struct regname reg_names_n64[] = {
+  NEWABI_SYMBOLIC_REGISTER_NAMES,
+  N64_SYMBOLIC_FPU_REGISTER_NAMES,
+  {0, 0}
+};
+
+static const struct regname reg_names_eabi32[] = {
+  NEWABI_SYMBOLIC_REGISTER_NAMES,
+  EABI32_SYMBOLIC_FPU_REGISTER_NAMES,
+  {0, 0}
+};
+
+static const struct regname reg_names_eabi64[] = {
+  NEWABI_SYMBOLIC_REGISTER_NAMES,
+  EABI64_SYMBOLIC_FPU_REGISTER_NAMES,
   {0, 0}
 };
 
@@ -3684,6 +3915,7 @@ md_begin (void)
 {
   int i = 0;
   int broken = 0;
+  const struct regname *abi_reg_names;
 
   if (mips_pic != NO_PIC)
     {
@@ -3807,16 +4039,35 @@ md_begin (void)
     symbol_table_insert (symbol_new (reg_names[i].name, reg_section,
 				     &zero_address_frag,
 				     reg_names[i].num));
-  if (HAVE_NEWABI)
-    for (i = 0; reg_names_n32n64[i].name; i++)
-      symbol_table_insert (symbol_new (reg_names_n32n64[i].name, reg_section,
-				       &zero_address_frag,
-				       reg_names_n32n64[i].num));
-  else
-    for (i = 0; reg_names_o32[i].name; i++)
-      symbol_table_insert (symbol_new (reg_names_o32[i].name, reg_section,
-				       &zero_address_frag,
-				       reg_names_o32[i].num));
+
+  switch (mips_abi)
+    {
+    case NO_ABI:
+    case O32_ABI:
+    default:
+      abi_reg_names = reg_names_o32;
+      break;
+    case O64_ABI:
+      abi_reg_names = reg_names_o64;
+      break;
+    case N32_ABI:
+      abi_reg_names = reg_names_n32;
+      break;
+    case N64_ABI:
+      abi_reg_names = reg_names_n64;
+      break;
+    case EABI_ABI:
+      if (file_mips_opts.gp == 64)
+	abi_reg_names = reg_names_eabi64;
+      else
+	abi_reg_names = reg_names_eabi32;
+      break;
+    }
+
+  for (i = 0; abi_reg_names[i].name; i++)
+    symbol_table_insert (symbol_new (abi_reg_names[i].name, reg_section,
+				     &zero_address_frag,
+				     abi_reg_names[i].num));
 
   for (i = 0; i < 32; i++)
     {
