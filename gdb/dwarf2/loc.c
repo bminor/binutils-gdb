@@ -1867,21 +1867,19 @@ dwarf2_get_symbol_read_needs (gdb::array_view<const gdb_byte> expr,
   std::vector<const gdb_byte *> ops_to_visit;
 
   /* Operations already visited.  */
-  gdb::unordered_set<const gdb_byte *> visited_ops;
+  std::vector<bool> visited_ops (expr.size (), false);
 
   /* Insert OP in OPS_TO_VISIT if it is within the expression's range and
      hasn't been visited yet.  */
-  auto insert_in_ops_to_visit
-    = [expr_end, &visited_ops, &ops_to_visit] (const gdb_byte *op_ptr)
-      {
-	if (op_ptr >= expr_end)
-	  return;
+  auto insert_in_ops_to_visit = [&] (const gdb_byte *op_ptr)
+    {
+      size_t off = op_ptr - expr.data ();
 
-	if (visited_ops.find (op_ptr) != visited_ops.end ())
-	  return;
+      if (off >= expr.size () || visited_ops[off])
+	return;
 
-	ops_to_visit.push_back (op_ptr);
-      };
+      ops_to_visit.push_back (op_ptr);
+    };
 
   /* Expressions can invoke other expressions with DW_OP_call*.  Protect against
      a loop of calls.  */
@@ -1892,17 +1890,24 @@ dwarf2_get_symbol_read_needs (gdb::array_view<const gdb_byte> expr,
 
   depth++;
 
-  /* Initialize the to-visit list with the first operation.  */
-  insert_in_ops_to_visit (&expr[0]);
-
-  while (!ops_to_visit.empty ())
+  const gdb_byte *op_ptr = &expr[0];
+  while (op_ptr != nullptr || !ops_to_visit.empty ())
     {
-      /* Pop one op to visit, mark it as visited.  */
-      const gdb_byte *op_ptr = ops_to_visit.back ();
-      ops_to_visit.pop_back ();
-      if (visited_ops.find (op_ptr) != visited_ops.end ())
-	continue;
-      visited_ops.insert (op_ptr);
+      /* If the previous operation fell through, just keep going.
+	 Otherwise pop the next op to visit.  */
+      if (op_ptr == nullptr)
+	{
+	  op_ptr = ops_to_visit.back ();
+	  ops_to_visit.pop_back ();
+	}
+
+      size_t pc = op_ptr - expr.data ();
+      if (visited_ops[pc])
+	{
+	  op_ptr = nullptr;
+	  continue;
+	}
+      visited_ops[pc] = true;
 
       dwarf_location_atom op = (dwarf_location_atom) *op_ptr;
 
@@ -2153,8 +2158,7 @@ dwarf2_get_symbol_read_needs (gdb::array_view<const gdb_byte> expr,
 	    op_ptr += 2;
 
 	    insert_in_ops_to_visit (op_ptr + offset);
-	    insert_in_ops_to_visit (op_ptr);
-	    continue;
+	    break;
 	  }
 
 	case DW_OP_call2:
@@ -2267,7 +2271,9 @@ dwarf2_get_symbol_read_needs (gdb::array_view<const gdb_byte> expr,
       if (symbol_needs == SYMBOL_NEEDS_FRAME)
 	break;
 
-      insert_in_ops_to_visit (op_ptr);
+      /* Don't run off the end.  */
+      if (op_ptr >= expr_end)
+	op_ptr = nullptr;
     }
 
   return symbol_needs;
