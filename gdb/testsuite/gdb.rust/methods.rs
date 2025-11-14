@@ -33,6 +33,16 @@ impl Whatever for i32 {
     }
 }
 
+// On i686-linux, for hasMethods::take the rust compiler generates code
+// similar to what a c compiler generates for:
+//   int foo (int val) { return val; }
+// but gdb calls it as if it were:
+//   void foo (int *res, int *val) { *res = *val; }
+// By default, the rust compiler is free to optimize functions and data
+// layout, so use repr(C) and extern "C" to force the compiler to present a
+// C-like interface.
+
+#[repr(C)]
 pub struct HasMethods {
     value: i32
 }
@@ -47,7 +57,7 @@ impl HasMethods {
         self
     }
 
-    pub fn take(self) -> HasMethods {
+    pub extern "C" fn take(self) -> HasMethods {
         self
     }
 }

@@ -17,11 +17,14 @@
 #![allow(unused_variables)]
 #![allow(unused_assignments)]
 
+// Use repr(C) and extern "C" to force the compiler to present a
+// C-like interface, facilitating inferior calls.
 
+#[repr(C)]
 #[derive(Clone, Copy)]
 struct Hold<T>(T);
 
-pub fn identity<T>(x: T) -> T { x }
+pub extern "C" fn identity<T>(x: T) -> T { x }
 
 fn dowhatever() { () }
 
