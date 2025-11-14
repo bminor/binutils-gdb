@@ -2238,17 +2238,16 @@ objc_msgcall_operation::evaluate (struct type *expect_type,
     sub_no_side = EVAL_AVOID_SIDE_EFFECTS;
   else
     sub_no_side = noside;
-  std::vector<operation_up> &args = std::get<2> (m_storage);
-  value **argvec = XALLOCAVEC (struct value *, args.size () + 2);
-  argvec[0] = nullptr;
-  argvec[1] = nullptr;
-  for (int i = 0; i < args.size (); ++i)
-    argvec[i + 2] = args[i]->evaluate_with_coercion (exp, sub_no_side);
 
-  return eval_op_objc_msgcall (expect_type, exp, noside, std::
-			       get<0> (m_storage), target,
-			       gdb::make_array_view (argvec,
-						     args.size () + 2));
+  std::vector<operation_up> &args = std::get<2> (m_storage);
+  std::vector<value *> argvec;
+  argvec.push_back (nullptr);
+  argvec.push_back (nullptr);
+  for (const operation_up &iter : args)
+    argvec.push_back (iter->evaluate_with_coercion (exp, sub_no_side));
+
+  return eval_op_objc_msgcall (expect_type, exp, noside,
+			       std::get<0> (m_storage), target, argvec);
 }
 
 value *
