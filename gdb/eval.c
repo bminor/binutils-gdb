@@ -1909,12 +1909,76 @@ eval_binop_assign_modify (struct type *expect_type, struct expression *exp,
   return value_assign (arg1, arg2);
 }
 
-/* Note that ARGS needs 2 empty slots up front.  */
+/* Helper function for MULTI_SUBSCRIPT.  */
+
 static struct value *
-eval_op_objc_msgcall (struct type *expect_type, struct expression *exp,
-		      enum noside noside, CORE_ADDR selector,
-		      value *target, gdb::array_view<value *> args)
+eval_multi_subscript (struct type *expect_type, struct expression *exp,
+		      enum noside noside, value *arg1,
+		      gdb::array_view<value *> args)
 {
+  for (value *arg2 : args)
+    {
+      if (binop_user_defined_p (MULTI_SUBSCRIPT, arg1, arg2))
+	{
+	  arg1 = value_x_binop (arg1, arg2, MULTI_SUBSCRIPT, OP_NULL, noside);
+	}
+      else
+	{
+	  arg1 = coerce_ref (arg1);
+	  struct type *type = check_typedef (arg1->type ());
+
+	  switch (type->code ())
+	    {
+	    case TYPE_CODE_PTR:
+	    case TYPE_CODE_ARRAY:
+	    case TYPE_CODE_STRING:
+	      arg1 = value_subscript (arg1, value_as_long (arg2));
+	      break;
+
+	    default:
+	      if (type->name ())
+		error (_("cannot subscript something of type `%s'"),
+		       type->name ());
+	      else
+		error (_("cannot subscript requested type"));
+	    }
+	}
+    }
+  return (arg1);
+}
+
+namespace expr
+{
+
+value *
+objc_msgcall_operation::evaluate (struct type *expect_type,
+				  struct expression *exp,
+				  enum noside noside)
+{
+  enum noside sub_no_side = EVAL_NORMAL;
+  struct type *selector_type = builtin_type (exp->gdbarch)->builtin_data_ptr;
+
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    sub_no_side = EVAL_NORMAL;
+  else
+    sub_no_side = noside;
+  value *target
+    = std::get<1> (m_storage)->evaluate (selector_type, exp, sub_no_side);
+
+  if (value_as_long (target) == 0)
+    sub_no_side = EVAL_AVOID_SIDE_EFFECTS;
+  else
+    sub_no_side = noside;
+
+  std::vector<operation_up> &ops = std::get<2> (m_storage);
+  std::vector<value *> args;
+  args.push_back (nullptr);
+  args.push_back (nullptr);
+  for (const operation_up &iter : ops)
+    args.push_back (iter->evaluate_with_coercion (exp, sub_no_side));
+
+  CORE_ADDR selector = std::get<0> (m_storage);
+
   CORE_ADDR responds_selector = 0;
   CORE_ADDR method_selector = 0;
 
@@ -1927,8 +1991,6 @@ eval_op_objc_msgcall (struct type *expect_type, struct expression *exp,
   struct value *method = NULL;
   struct value *called_method = NULL;
 
-  struct type *selector_type = NULL;
-  struct type *long_type;
   struct type *type;
 
   struct value *ret = NULL;
@@ -1936,8 +1998,7 @@ eval_op_objc_msgcall (struct type *expect_type, struct expression *exp,
 
   value *argvec[5];
 
-  long_type = builtin_type (exp->gdbarch)->builtin_long;
-  selector_type = builtin_type (exp->gdbarch)->builtin_data_ptr;
+  struct type *long_type = builtin_type (exp->gdbarch)->builtin_long;
 
   if (value_as_long (target) == 0)
     return value_from_longest (long_type, 0);
@@ -2176,78 +2237,6 @@ eval_op_objc_msgcall (struct type *expect_type, struct expression *exp,
     }
 
   return call_function_by_hand (called_method, NULL, args);
-}
-
-/* Helper function for MULTI_SUBSCRIPT.  */
-
-static struct value *
-eval_multi_subscript (struct type *expect_type, struct expression *exp,
-		      enum noside noside, value *arg1,
-		      gdb::array_view<value *> args)
-{
-  for (value *arg2 : args)
-    {
-      if (binop_user_defined_p (MULTI_SUBSCRIPT, arg1, arg2))
-	{
-	  arg1 = value_x_binop (arg1, arg2, MULTI_SUBSCRIPT, OP_NULL, noside);
-	}
-      else
-	{
-	  arg1 = coerce_ref (arg1);
-	  struct type *type = check_typedef (arg1->type ());
-
-	  switch (type->code ())
-	    {
-	    case TYPE_CODE_PTR:
-	    case TYPE_CODE_ARRAY:
-	    case TYPE_CODE_STRING:
-	      arg1 = value_subscript (arg1, value_as_long (arg2));
-	      break;
-
-	    default:
-	      if (type->name ())
-		error (_("cannot subscript something of type `%s'"),
-		       type->name ());
-	      else
-		error (_("cannot subscript requested type"));
-	    }
-	}
-    }
-  return (arg1);
-}
-
-namespace expr
-{
-
-value *
-objc_msgcall_operation::evaluate (struct type *expect_type,
-				  struct expression *exp,
-				  enum noside noside)
-{
-  enum noside sub_no_side = EVAL_NORMAL;
-  struct type *selector_type = builtin_type (exp->gdbarch)->builtin_data_ptr;
-
-  if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    sub_no_side = EVAL_NORMAL;
-  else
-    sub_no_side = noside;
-  value *target
-    = std::get<1> (m_storage)->evaluate (selector_type, exp, sub_no_side);
-
-  if (value_as_long (target) == 0)
-    sub_no_side = EVAL_AVOID_SIDE_EFFECTS;
-  else
-    sub_no_side = noside;
-
-  std::vector<operation_up> &ops = std::get<2> (m_storage);
-  std::vector<value *> args;
-  args.push_back (nullptr);
-  args.push_back (nullptr);
-  for (const operation_up &iter : ops)
-    args.push_back (iter->evaluate_with_coercion (exp, sub_no_side));
-
-  return eval_op_objc_msgcall (expect_type, exp, noside,
-			       std::get<0> (m_storage), target, args);
 }
 
 value *
