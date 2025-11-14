@@ -2992,7 +2992,7 @@ elf_hppa_final_link (bfd *abfd, struct bfd_link_info *info)
 			  info);
 
   /* Invoke the regular ELF backend linker to do all the work.  */
-  if (!bfd_elf_final_link (abfd, info))
+  if (!_bfd_elf_final_link (abfd, info))
     return false;
 
   elf_link_hash_traverse (elf_hash_table (info),

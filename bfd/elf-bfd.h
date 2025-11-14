@@ -2843,8 +2843,8 @@ extern bfd_reloc_status_type _bfd_elf_rel_vtable_reloc_fn
   (bfd *, arelent *, struct bfd_symbol *, void *,
    asection *, bfd *, char **) ATTRIBUTE_HIDDEN;
 
-extern bool bfd_elf_final_link
-  (bfd *, struct bfd_link_info *);
+extern bool _bfd_elf_final_link
+  (bfd *, struct bfd_link_info *) ATTRIBUTE_HIDDEN;
 
 extern void _bfd_elf_gc_keep
   (struct bfd_link_info *info) ATTRIBUTE_HIDDEN;
@@ -2886,8 +2886,8 @@ extern bool _bfd_elf_gc_mark_extra_sections
 extern bool bfd_elf_gc_common_finalize_got_offsets
   (bfd *, struct bfd_link_info *);
 
-extern bool bfd_elf_gc_common_final_link
-  (bfd *, struct bfd_link_info *);
+extern bool _bfd_elf_gc_common_final_link
+  (bfd *, struct bfd_link_info *) ATTRIBUTE_HIDDEN;
 
 extern bool bfd_elf_reloc_symbol_deleted_p
   (bfd_vma, void *);

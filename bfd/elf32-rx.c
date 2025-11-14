@@ -3684,7 +3684,7 @@ rx_final_link (bfd * abfd, struct bfd_link_info * info)
 	}
     }
 
-  return bfd_elf_final_link (abfd, info);
+  return _bfd_elf_final_link (abfd, info);
 }
 
 static bool

@@ -15504,7 +15504,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* Invoke the regular ELF backend linker to do all the work.  */
-  if (!bfd_elf_final_link (abfd, info))
+  if (!_bfd_elf_final_link (abfd, info))
     return false;
 
   /* Now write out the computed sections.  */

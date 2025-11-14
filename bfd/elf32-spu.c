@@ -3428,7 +3428,7 @@ struct _mos_param {
 
 /* Set linker_mark and gc_mark on any sections that we will put in
    overlays.  These flags are used by the generic ELF linker, but we
-   won't be continuing on to bfd_elf_final_link so it is OK to use
+   won't be continuing on to _bfd_elf_final_link() so it is OK to use
    them.  linker_mark is clear before we get here.  Set segment_mark
    on sections that are part of a pasted function (excluding the last
    section).
@@ -4744,7 +4744,7 @@ spu_elf_final_link (bfd *output_bfd, struct bfd_link_info *info)
   if (!spu_elf_build_stubs (info))
     info->callbacks->fatal (_("%P: can not build overlay stubs: %E\n"));
 
-  return bfd_elf_final_link (output_bfd, info);
+  return _bfd_elf_final_link (output_bfd, info);
 }
 
 /* Called when not normally emitting relocs, ie. !bfd_link_relocatable (info)

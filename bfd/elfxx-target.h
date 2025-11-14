@@ -278,7 +278,7 @@
 #define bfd_elfNN_bfd_define_start_stop bfd_elf_define_start_stop
 #endif
 #ifndef bfd_elfNN_bfd_final_link
-#define bfd_elfNN_bfd_final_link	bfd_elf_final_link
+#define bfd_elfNN_bfd_final_link	_bfd_elf_final_link
 #endif
 #undef TARGET_MERGE_SECTIONS
 #define TARGET_MERGE_SECTIONS true

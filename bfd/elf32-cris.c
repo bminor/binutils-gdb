@@ -4100,8 +4100,7 @@ elf_cris_got_elt_size (bfd *abfd ATTRIBUTE_UNUSED,
 	elf_cris_finish_dynamic_sections
 #define elf_backend_create_dynamic_sections \
 	_bfd_elf_create_dynamic_sections
-#define bfd_elf32_bfd_final_link \
-	bfd_elf_gc_common_final_link
+#define bfd_elf32_bfd_final_link		_bfd_elf_gc_common_final_link
 #define elf_backend_hide_symbol			elf_cris_hide_symbol
 #define elf_backend_reloc_type_class		elf_cris_reloc_type_class
 

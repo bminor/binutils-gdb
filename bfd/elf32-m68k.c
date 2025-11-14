@@ -4629,7 +4629,7 @@ elf_m68k_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 					_bfd_elf_create_dynamic_sections
 #define bfd_elf32_bfd_link_hash_table_create \
 					elf_m68k_link_hash_table_create
-#define bfd_elf32_bfd_final_link	bfd_elf_final_link
+#define bfd_elf32_bfd_final_link	_bfd_elf_final_link
 
 #define elf_backend_check_relocs	elf_m68k_check_relocs
 #define elf_backend_early_size_sections \

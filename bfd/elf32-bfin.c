@@ -5425,7 +5425,7 @@ struct bfd_elf_special_section const elf32_bfin_special_sections[] =
 					_bfd_elf_create_dynamic_sections
 #define bfd_elf32_bfd_link_hash_table_create \
 					bfin_link_hash_table_create
-#define bfd_elf32_bfd_final_link	bfd_elf_gc_common_final_link
+#define bfd_elf32_bfd_final_link	_bfd_elf_gc_common_final_link
 
 #define elf_backend_check_relocs	bfin_check_relocs
 #define elf_backend_adjust_dynamic_symbol \

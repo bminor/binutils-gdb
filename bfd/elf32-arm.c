@@ -13693,7 +13693,7 @@ elf32_arm_final_link (bfd *abfd, struct bfd_link_info *info)
     return false;
 
   /* Invoke the regular ELF backend linker to do all the work.  */
-  if (!bfd_elf_final_link (abfd, info))
+  if (!_bfd_elf_final_link (abfd, info))
     return false;
 
   /* Process stub sections (eg BE8 encoding, ...).  */

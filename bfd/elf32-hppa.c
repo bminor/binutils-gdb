@@ -3043,7 +3043,7 @@ elf32_hppa_final_link (bfd *abfd, struct bfd_link_info *info)
   struct stat buf;
 
   /* Invoke the regular ELF linker to do all the work.  */
-  if (!bfd_elf_final_link (abfd, info))
+  if (!_bfd_elf_final_link (abfd, info))
     return false;
 
   /* If we're producing a final executable, sort the contents of the

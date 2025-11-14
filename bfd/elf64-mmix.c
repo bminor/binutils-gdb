@@ -2216,7 +2216,7 @@ mmix_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  if (! bfd_elf_final_link (abfd, info))
+  if (! _bfd_elf_final_link (abfd, info))
     return false;
 
   /* Since this section is marked SEC_LINKER_CREATED, it isn't output by

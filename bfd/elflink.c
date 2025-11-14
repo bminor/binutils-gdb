@@ -12616,7 +12616,7 @@ elf_final_link_free (bfd *obfd, struct elf_final_link_info *flinfo)
 /* Do the final step of an ELF link.  */
 
 bool
-bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
+_bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 {
   bool dynamic;
   bool emit_relocs;
@@ -15066,13 +15066,13 @@ bfd_elf_gc_common_finalize_got_offsets (bfd *abfd,
    got entry reference counting is enabled.  */
 
 bool
-bfd_elf_gc_common_final_link (bfd *abfd, struct bfd_link_info *info)
+_bfd_elf_gc_common_final_link (bfd *abfd, struct bfd_link_info *info)
 {
   if (!bfd_elf_gc_common_finalize_got_offsets (abfd, info))
     return false;
 
   /* Invoke the regular ELF backend linker to do all the work.  */
-  return bfd_elf_final_link (abfd, info);
+  return _bfd_elf_final_link (abfd, info);
 }
 
 bool
