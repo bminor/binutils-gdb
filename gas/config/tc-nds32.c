@@ -6483,9 +6483,11 @@ md_assemble (char *str)
     }
   else if (!relaxing && enable_16bit && (optimize || optimize_for_space)
 	   && ((!fld && !verbatim && insn.opcode->isize == 4
-		&& nds32_convert_32_to_16 (stdoutput, insn.insn, &insn_16, NULL))
+		&& bfd_elf_nds32_convert_32_to_16 (stdoutput, insn.insn,
+						   &insn_16, NULL))
 	       || (insn.opcode->isize == 2
-		   && nds32_convert_16_to_32 (stdoutput, insn.insn, NULL))))
+		   && bfd_elf_nds32_convert_16_to_32 (stdoutput, insn.insn,
+						      NULL))))
     {
       /* Record this one is relaxable.  */
       expressionS *pexp = insn.info;
@@ -7073,7 +7075,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec, fragS *fragP)
       if (fragP->tc_frag_data.flag & NDS32_FRAG_RELAXED)
 	{
 	  insn_16 = fragP->tc_frag_data.insn;
-	  nds32_convert_16_to_32 (stdoutput, insn_16, &insn);
+	  bfd_elf_nds32_convert_16_to_32 (stdoutput, insn_16, &insn);
 	  fr_buffer = fragP->fr_literal + fr_where;
 	  fragP->fr_fix += 2;
 	  exp.X_op = O_symbol;
@@ -7089,7 +7091,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec, fragS *fragP)
       if (fragP->tc_frag_data.opcode->isize == 2)
 	{
 	  insn_16 = fragP->tc_frag_data.insn;
-	  nds32_convert_16_to_32 (stdoutput, insn_16, &insn);
+	  bfd_elf_nds32_convert_16_to_32 (stdoutput, insn_16, &insn);
 	}
       else
 	insn = fragP->tc_frag_data.insn;

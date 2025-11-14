@@ -98,10 +98,10 @@ extern int elf32_nds32_unify_relax_group
 extern int nds32_elf_unify_tls_model
   (bfd *, asection *, bfd_byte *, struct bfd_link_info *) ATTRIBUTE_HIDDEN;
 
-extern int nds32_convert_32_to_16
-  (bfd *, uint32_t, uint16_t *, int *) ATTRIBUTE_HIDDEN;
-extern int nds32_convert_16_to_32
-  (bfd *, uint16_t, uint32_t *) ATTRIBUTE_HIDDEN;
+extern int bfd_elf_nds32_convert_32_to_16
+  (bfd *, uint32_t, uint16_t *, int *);
+extern int bfd_elf_nds32_convert_16_to_32
+  (bfd *, uint16_t, uint32_t *);
 extern void	   bfd_elf32_nds32_set_target_option (struct bfd_link_info *,
 						      int, int, FILE *,
 						      int, int, int);

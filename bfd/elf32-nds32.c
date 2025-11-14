@@ -7728,8 +7728,8 @@ nds32_convert_32_to_16_alu2 (bfd *abfd, uint32_t insn, uint16_t *pinsn16,
 }
 
 int
-nds32_convert_32_to_16 (bfd *abfd, uint32_t insn, uint16_t *pinsn16,
-			int *pinsn_type)
+bfd_elf_nds32_convert_32_to_16 (bfd *abfd, uint32_t insn, uint16_t *pinsn16,
+				int *pinsn_type)
 {
   int op6;
   uint16_t insn16 = 0;
@@ -8236,7 +8236,7 @@ special_convert_32_to_16 (unsigned long insn, uint16_t *pinsn16,
    Return non-zero on successful.  Otherwise 0 is returned.  */
 
 int
-nds32_convert_16_to_32 (bfd *abfd, uint16_t insn16, uint32_t *pinsn)
+bfd_elf_nds32_convert_16_to_32 (bfd *abfd, uint16_t insn16, uint32_t *pinsn)
 {
   uint32_t insn = 0xffffffff;
   unsigned long mach = bfd_get_mach (abfd);
@@ -8772,7 +8772,7 @@ is_convert_32_to_16 (bfd *abfd, asection *sec,
     return false;
   insn = bfd_getb32 (contents + offset);
 
-  if (nds32_convert_32_to_16 (abfd, insn, insn16, NULL))
+  if (bfd_elf_nds32_convert_32_to_16 (abfd, insn, insn16, NULL))
     convert_type = NORMAL_32_TO_16;
   else if (special_convert_32_to_16 (insn, insn16, reloc))
     convert_type = SPECIAL_32_TO_16;
