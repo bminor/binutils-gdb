@@ -1756,12 +1756,7 @@ Versions::symbol_section_contents(const Symbol_table* symtab,
       unsigned int version_index;
       const char* version = (*p)->version();
       if (version == NULL)
-	{
-	  if ((*p)->is_defined() && !(*p)->is_from_dynobj())
-	    version_index = elfcpp::VER_NDX_GLOBAL;
-	  else
-	    version_index = elfcpp::VER_NDX_LOCAL;
-	}
+	version_index = elfcpp::VER_NDX_LOCAL;
       else if (version[0] == '\0')
         version_index = elfcpp::VER_NDX_GLOBAL;
       else

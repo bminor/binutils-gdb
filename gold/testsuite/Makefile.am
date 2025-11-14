@@ -2002,6 +2002,17 @@ ver_test_pr31830_lto_b.syms: ver_test_pr31830_lto_b.so
 ver_test_pr31830_lto_b.so: gcctestdir/ld $(srcdir)/ver_test_pr31830_lto.c $(srcdir)/ver_test_pr31830.script
 	$(LINK) -Bgcctestdir/ -shared -o $@ -O2 -fPIC -flto-partition=max -flto=2 $(srcdir)/ver_test_pr31830_lto.c -Wl,--version-script,$(srcdir)/ver_test_pr31830.script
 
+check_SCRIPTS += ver_test_pr33577.sh
+check_DATA += ver_test_pr33577a.syms ver_test_pr33577b.syms
+ver_test_pr33577a.syms: ver_test_pr33577.so
+	$(TEST_READELF) --dyn-syms -W $< >$@
+ver_test_pr33577.so: gcctestdir/ld $(srcdir)/ver_test_pr33577a.c
+	$(LINK) -Bgcctestdir/ -shared -o $@ -O2 -fPIC $(srcdir)/ver_test_pr33577a.c
+ver_test_pr33577b.syms: ver_test_pr33577
+	$(TEST_READELF) --dyn-syms -W $< >$@
+ver_test_pr33577: gcctestdir/ld $(srcdir)/ver_test_pr33577b.c ver_test_pr33577.so
+	$(LINK) -Bgcctestdir/ -o $@ -O2 $(srcdir)/ver_test_pr33577b.c ver_test_pr33577.so
+
 check_SCRIPTS += weak_as_needed.sh
 check_DATA += weak_as_needed.stdout
 weak_as_needed.stdout: weak_as_needed_a.so

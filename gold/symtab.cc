@@ -1632,24 +1632,15 @@ Symbol_table::add_from_dynobj(
 	  bool hidden = (v & elfcpp::VERSYM_HIDDEN) != 0;
 	  v &= elfcpp::VERSYM_VERSION;
 
-	  // The Sun documentation says that V can be VER_NDX_LOCAL,
-	  // or VER_NDX_GLOBAL, or a version index.  The meaning of
-	  // VER_NDX_LOCAL is defined as "Symbol has local scope."
-	  // The old GNU linker will happily generate VER_NDX_LOCAL
-	  // for an undefined symbol.  I don't know what the Sun
-	  // linker will generate.
-
-	  if (v == static_cast<unsigned int>(elfcpp::VER_NDX_LOCAL)
-	      && st_shndx != elfcpp::SHN_UNDEF)
-	    {
-	      // This symbol should not be visible outside the object.
-	      continue;
-	    }
-
 	  // At this point we are definitely going to add this symbol.
 	  Stringpool::Key name_key;
 	  name = this->namepool_.add(name, true, &name_key);
 
+	  // The Sun documentation says that V can be VER_NDX_LOCAL,
+	  // or VER_NDX_GLOBAL, or a version index.  The meaning of
+	  // VER_NDX_LOCAL means that symbol is a local dynamic symbol
+	  // or an unversioned global/weak symbol which is defined or
+	  // undefined.
 	  if (v == static_cast<unsigned int>(elfcpp::VER_NDX_LOCAL)
 	      || v == static_cast<unsigned int>(elfcpp::VER_NDX_GLOBAL))
 	    {

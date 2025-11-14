@@ -1,9 +1,8 @@
 #!/bin/sh
 
-# ver_test_14.sh -- a test case for version scripts
+# ver_test_pr33577.sh -- a test case for unversioned symbols.
 
-# Copyright (C) 2018-2025 Free Software Foundation, Inc.
-# Written by Cary Coutant <ccoutant@gmail.com>.
+# Copyright (C) 2025 Free Software Foundation, Inc.
 
 # This file is part of gold.
 
@@ -22,6 +21,11 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
+# This test verifies that linker-generated symbols (e.g., _end)
+# get correct version information even in the presence of
+# a shared library that provides those symbols with different
+# versions.
+
 check()
 {
     if ! grep -q "$2" "$1"
@@ -35,23 +39,9 @@ check()
     fi
 }
 
-check_missing()
-{
-    if grep -q "$2" "$1"
-    then
-	echo "Found unexpected symbol in $1:"
-	echo "   $2"
-	echo ""
-	echo "Actual output below:"
-	cat "$1"
-	exit 1
-    fi
-}
-
-check ver_test_14.syms "V1 *\(0x[0-9a-f][048c]\)\? t2()$"
-check ver_test_14.syms "V1 *\(0x[0-9a-f][048c]\)\? t3()$"
-check ver_test_14.syms "V1 *\(0x[0-9a-f][048c]\)\? t4()$"
-check ver_test_14.syms "t4_2a$"
-check_missing ver_test_14.syms "Base *\(0x[0-9a-f][048c]\)\? t4_2a$"
+check ver_test_pr33577a.syms "bar$"
+check ver_test_pr33577a.syms "foo$"
+check ver_test_pr33577b.syms "bar$"
+check ver_test_pr33577b.syms "foo$"
 
 exit 0
