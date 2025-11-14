@@ -1631,8 +1631,11 @@ proc binary_symbol {name file args sym_prefix} {
 	return
     }
 
-    foreach sym [list "start" "end" "size"] {
-	set exp "^\[0-9a-fA-F\]+ +\[TtDdA\] +${sym_prefix}_${sym}$"
+    set syms [list {D start} {D end} {A size}]
+    foreach e $syms {
+	set typ [lindex $e 0]
+	set sym [lindex $e 1]
+	set exp "^\[0-9a-fA-F\]+ +${typ} +${sym_prefix}_${sym}$"
 	if ![regexp -line $exp $got] {
 	    send_log "failed to match: $exp\n"
 	    fail $test
