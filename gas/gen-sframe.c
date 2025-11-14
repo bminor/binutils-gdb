@@ -1281,7 +1281,7 @@ sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx,
      instruction can be safely skipped without sacrificing the asynchronicity of
      stack trace information.  */
   if (cfi_insn->u.rr.reg1 == SFRAME_CFA_FP_REG
-      || (sframe_ra_tracking_p () && cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG)
+      || cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG
       /* Ignore SP reg, as it can be recovered from the CFA tracking info.  */
       )
     {
