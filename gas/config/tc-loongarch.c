@@ -1530,7 +1530,7 @@ static void fix_reloc_insn (fixS *fixP, bfd_vma reloc_val, char *buf)
 
   insn = bfd_getl32 (buf);
 
-  if (!loongarch_adjust_reloc_bitsfield (NULL, howto, &reloc_val))
+  if (!bfd_elf_loongarch_adjust_reloc_bitsfield (NULL, howto, &reloc_val))
     as_bad_where (fixP->fx_file, fixP->fx_line, "Reloc overflow");
 
   insn = (insn & (insn_t)howto->src_mask)
@@ -1832,12 +1832,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_LARCH_ADD_ULEB128:  */
     case BFD_RELOC_LARCH_SUB_ULEB128:
       {
-	unsigned int len = 0;
-	len = loongarch_get_uleb128_length ((bfd_byte *)buf);
-	bfd_byte *endp = (bfd_byte*) buf + len -1;
 	/* Clean the uleb128 value to 0. Do not reduce the length.  */
-	memset (buf, 0x80, len - 1);
-	*endp = 0;
+	for (bfd_byte *ptr = (bfd_byte *)buf; *ptr &= 0x80; ++ptr)
+	  /* Nothing.  */;
 	break;
       }
 

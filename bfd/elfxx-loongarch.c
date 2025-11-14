@@ -1943,8 +1943,8 @@ loongarch_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 bfd_reloc_code_real_type
-loongarch_larch_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
-				   const char *l_r_name)
+bfd_elf_loongarch_larch_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+					   const char *l_r_name)
 {
   for (size_t i = 0; i < ARRAY_SIZE (loongarch_howto_table); i++)
     {
@@ -2081,8 +2081,8 @@ reloc_unsign_bits (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val)
 }
 
 bool
-loongarch_adjust_reloc_bitsfield (bfd *abfd, reloc_howto_type *howto,
-				  bfd_vma *fix_val)
+bfd_elf_loongarch_adjust_reloc_bitsfield (bfd *abfd, reloc_howto_type *howto,
+					  bfd_vma *fix_val)
 {
   BFD_ASSERT (((loongarch_reloc_howto_type *)howto)->adjust_reloc_bits);
   return ((loongarch_reloc_howto_type *)
@@ -2222,11 +2222,4 @@ loongarch_write_unsigned_leb128 (bfd_byte *p, unsigned int len, bfd_vma value)
     }
   while (len);
   return p;
-}
-
-int loongarch_get_uleb128_length (bfd_byte *buf)
-{
-  unsigned int len = 0;
-  _bfd_read_unsigned_leb128 (NULL, buf, &len);
-  return len;
 }

@@ -2758,7 +2758,7 @@ loongarch_reloc_rewrite_imm_insn (const Elf_Internal_Rela *rel,
 {
   /* Adjust the immediate based on alignment and
      its position in the instruction.  */
-  if (!loongarch_adjust_reloc_bitsfield (input_bfd, howto, &reloc_val))
+  if (!bfd_elf_loongarch_adjust_reloc_bitsfield (input_bfd, howto, &reloc_val))
     return bfd_reloc_overflow;
 
   int bits = bfd_get_reloc_size (howto) * 8;
