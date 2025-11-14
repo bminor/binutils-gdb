@@ -1902,7 +1902,8 @@ dwarf2_get_symbol_read_needs (gdb::array_view<const gdb_byte> expr,
       /* Pop one op to visit, mark it as visited.  */
       const gdb_byte *op_ptr = ops_to_visit.back ();
       ops_to_visit.pop_back ();
-      gdb_assert (visited_ops.find (op_ptr) == visited_ops.end ());
+      if (visited_ops.find (op_ptr) != visited_ops.end ())
+	continue;
       visited_ops.insert (op_ptr);
 
       dwarf_location_atom op = (dwarf_location_atom) *op_ptr;
