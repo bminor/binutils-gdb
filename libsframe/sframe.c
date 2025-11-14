@@ -457,7 +457,7 @@ sframe_fre_entry_size (sframe_frame_row_entry *frep, uint32_t fre_type)
    context CTX.  */
 
 static sframe_func_desc_entry_int *
-sframe_decoder_get_funcdesc_at_index (sframe_decoder_ctx *ctx,
+sframe_decoder_get_funcdesc_at_index (const sframe_decoder_ctx *ctx,
 				      uint32_t func_idx)
 {
   sframe_func_desc_entry_int *fdep;
@@ -483,7 +483,7 @@ sframe_decoder_get_funcdesc_at_index (sframe_decoder_ctx *ctx,
    If FUNC_IDX is not a valid index in the given decoder object, returns 0.  */
 
 static int32_t
-sframe_decoder_get_secrel_func_start_addr (sframe_decoder_ctx *dctx,
+sframe_decoder_get_secrel_func_start_addr (const sframe_decoder_ctx *dctx,
 					   uint32_t func_idx)
 {
   int err = 0;
@@ -504,7 +504,7 @@ sframe_decoder_get_secrel_func_start_addr (sframe_decoder_ctx *dctx,
    information for the PC.  */
 
 static bool
-sframe_fre_check_range_p (sframe_decoder_ctx *dctx, uint32_t func_idx,
+sframe_fre_check_range_p (const sframe_decoder_ctx *dctx, uint32_t func_idx,
 			  uint32_t start_ip_offset, uint32_t end_ip_offset,
 			  int32_t pc)
 {
@@ -756,10 +756,10 @@ bad:
 
 /* Get SFrame header from the given decoder context DCTX.  */
 
-static sframe_header *
-sframe_decoder_get_header (sframe_decoder_ctx *dctx)
+static const sframe_header *
+sframe_decoder_get_header (const sframe_decoder_ctx *dctx)
 {
-  sframe_header *hp = NULL;
+  const sframe_header *hp = NULL;
   if (dctx != NULL)
     hp = &dctx->sfd_header;
   return hp;
@@ -783,7 +783,7 @@ fde_func (const void *p1, const void *p2)
 /* Get IDX'th offset from FRE.  Set errp as applicable.  */
 
 static int32_t
-sframe_get_fre_offset (sframe_frame_row_entry *fre, int idx, int *errp)
+sframe_get_fre_offset (const sframe_frame_row_entry *fre, int idx, int *errp)
 {
   uint8_t offset_cnt, offset_size;
 
@@ -886,7 +886,7 @@ sframe_calc_fre_type (size_t func_size)
 /* Get the base reg id from the FRE info.  Set errp if failure.  */
 
 uint8_t
-sframe_fre_get_base_reg_id (sframe_frame_row_entry *fre, int *errp)
+sframe_fre_get_base_reg_id (const sframe_frame_row_entry *fre, int *errp)
 {
   if (fre == NULL)
     return sframe_set_errno (errp, SFRAME_ERR_FRE_INVAL);
@@ -898,8 +898,8 @@ sframe_fre_get_base_reg_id (sframe_frame_row_entry *fre, int *errp)
 /* Get the CFA offset from the FRE.  If the offset is invalid, sets errp.  */
 
 int32_t
-sframe_fre_get_cfa_offset (sframe_decoder_ctx *dctx,
-			   sframe_frame_row_entry *fre, int *errp)
+sframe_fre_get_cfa_offset (const sframe_decoder_ctx *dctx,
+			   const sframe_frame_row_entry *fre, int *errp)
 {
   int err;
   int32_t offset = sframe_get_fre_offset (fre, SFRAME_FRE_CFA_OFFSET_IDX, &err);
@@ -919,8 +919,8 @@ sframe_fre_get_cfa_offset (sframe_decoder_ctx *dctx,
    LSB set to one, which is only valid in the topmost frame.  */
 
 int32_t
-sframe_fre_get_fp_offset (sframe_decoder_ctx *dctx,
-			  sframe_frame_row_entry *fre, int *errp)
+sframe_fre_get_fp_offset (const sframe_decoder_ctx *dctx,
+			  const sframe_frame_row_entry *fre, int *errp)
 {
   uint32_t fp_offset_idx = 0;
   int8_t fp_offset = sframe_decoder_get_fixed_fp_offset (dctx);
@@ -952,8 +952,8 @@ sframe_fre_get_fp_offset (sframe_decoder_ctx *dctx,
    LSB set to one, which is only valid in the topmost frame.  */
 
 int32_t
-sframe_fre_get_ra_offset (sframe_decoder_ctx *dctx,
-			  sframe_frame_row_entry *fre, int *errp)
+sframe_fre_get_ra_offset (const sframe_decoder_ctx *dctx,
+			  const sframe_frame_row_entry *fre, int *errp)
 {
   int8_t ra_offset = sframe_decoder_get_fixed_ra_offset (dctx);
   /* If the RA offset was not being tracked, return the fixed RA offset
@@ -973,8 +973,8 @@ sframe_fre_get_ra_offset (sframe_decoder_ctx *dctx,
 /* Get whether the RA is mangled.  */
 
 bool
-sframe_fre_get_ra_mangled_p (sframe_decoder_ctx *dctx ATTRIBUTE_UNUSED,
-			     sframe_frame_row_entry *fre, int *errp)
+sframe_fre_get_ra_mangled_p (const sframe_decoder_ctx *dctx ATTRIBUTE_UNUSED,
+			     const sframe_frame_row_entry *fre, int *errp)
 {
   if (fre == NULL || !sframe_fre_sanity_check_p (fre))
     return sframe_set_errno (errp, SFRAME_ERR_FRE_INVAL);
@@ -1221,7 +1221,7 @@ decode_fail_free:
 /* Get the size of the SFrame header from the decoder context CTX.  */
 
 unsigned int
-sframe_decoder_get_hdr_size (sframe_decoder_ctx *ctx)
+sframe_decoder_get_hdr_size (const sframe_decoder_ctx *ctx)
 {
   const sframe_header *dhp = sframe_decoder_get_header (ctx);
   return sframe_get_hdr_size (dhp);
@@ -1230,7 +1230,7 @@ sframe_decoder_get_hdr_size (sframe_decoder_ctx *ctx)
 /* Get the SFrame's abi/arch info given the decoder context DCTX.  */
 
 uint8_t
-sframe_decoder_get_abi_arch (sframe_decoder_ctx *dctx)
+sframe_decoder_get_abi_arch (const sframe_decoder_ctx *dctx)
 {
   const sframe_header *dhp = sframe_decoder_get_header (dctx);
   return dhp->sfh_abi_arch;
@@ -1239,7 +1239,7 @@ sframe_decoder_get_abi_arch (sframe_decoder_ctx *dctx)
 /* Get the format version from the SFrame decoder context DCTX.  */
 
 uint8_t
-sframe_decoder_get_version (sframe_decoder_ctx *dctx)
+sframe_decoder_get_version (const sframe_decoder_ctx *dctx)
 {
   const sframe_header *dhp = sframe_decoder_get_header (dctx);
   return dhp->sfh_preamble.sfp_version;
@@ -1248,7 +1248,7 @@ sframe_decoder_get_version (sframe_decoder_ctx *dctx)
 /* Get the section flags from the SFrame decoder context DCTX.  */
 
 uint8_t
-sframe_decoder_get_flags (sframe_decoder_ctx *dctx)
+sframe_decoder_get_flags (const sframe_decoder_ctx *dctx)
 {
   const sframe_header *dhp = sframe_decoder_get_header (dctx);
   return dhp->sfh_preamble.sfp_flags;
@@ -1256,7 +1256,7 @@ sframe_decoder_get_flags (sframe_decoder_ctx *dctx)
 
 /* Get the SFrame's fixed FP offset given the decoder context CTX.  */
 int8_t
-sframe_decoder_get_fixed_fp_offset (sframe_decoder_ctx *ctx)
+sframe_decoder_get_fixed_fp_offset (const sframe_decoder_ctx *ctx)
 {
   const sframe_header *dhp = sframe_decoder_get_header (ctx);
   return dhp->sfh_cfa_fixed_fp_offset;
@@ -1264,7 +1264,7 @@ sframe_decoder_get_fixed_fp_offset (sframe_decoder_ctx *ctx)
 
 /* Get the SFrame's fixed RA offset given the decoder context CTX.  */
 int8_t
-sframe_decoder_get_fixed_ra_offset (sframe_decoder_ctx *ctx)
+sframe_decoder_get_fixed_ra_offset (const sframe_decoder_ctx *ctx)
 {
   const sframe_header *dhp = sframe_decoder_get_header (ctx);
   return dhp->sfh_cfa_fixed_ra_offset;
@@ -1280,7 +1280,7 @@ sframe_decoder_get_fixed_ra_offset (sframe_decoder_ctx *ctx)
    emitted.  */
 
 uint32_t
-sframe_decoder_get_offsetof_fde_start_addr (sframe_decoder_ctx *dctx,
+sframe_decoder_get_offsetof_fde_start_addr (const sframe_decoder_ctx *dctx,
 					    uint32_t func_idx, int *errp)
 {
   if (func_idx >= sframe_decoder_get_num_fidx (dctx))
@@ -1297,8 +1297,9 @@ sframe_decoder_get_offsetof_fde_start_addr (sframe_decoder_ctx *dctx,
    address ADDR.  */
 
 static sframe_func_desc_entry_int *
-sframe_get_funcdesc_with_addr_internal (sframe_decoder_ctx *ctx, int32_t addr,
-					int *errp, uint32_t *func_idx)
+sframe_get_funcdesc_with_addr_internal (const sframe_decoder_ctx *ctx,
+					int32_t addr, int *errp,
+					uint32_t *func_idx)
 {
   sframe_func_desc_entry_int *fdp;
   int low, high;
@@ -1373,7 +1374,7 @@ sframe_fre_get_end_ip_offset (sframe_func_desc_entry_int *fdep, unsigned int i,
    SFRAME_ERR if failure.  */
 
 int
-sframe_find_fre (sframe_decoder_ctx *ctx, int32_t pc,
+sframe_find_fre (const sframe_decoder_ctx *ctx, int32_t pc,
 		 sframe_frame_row_entry *frep)
 {
   sframe_frame_row_entry cur_fre;
@@ -1429,7 +1430,7 @@ sframe_find_fre (sframe_decoder_ctx *ctx, int32_t pc,
    DCTX.  */
 
 uint32_t
-sframe_decoder_get_num_fidx (sframe_decoder_ctx *ctx)
+sframe_decoder_get_num_fidx (const sframe_decoder_ctx *ctx)
 {
   uint32_t num_fdes = 0;
   const sframe_header *dhp = sframe_decoder_get_header (ctx);
@@ -1439,7 +1440,7 @@ sframe_decoder_get_num_fidx (sframe_decoder_ctx *ctx)
 }
 
 int
-sframe_decoder_get_funcdesc_v2 (sframe_decoder_ctx *dctx,
+sframe_decoder_get_funcdesc_v2 (const sframe_decoder_ctx *dctx,
 				unsigned int i,
 				uint32_t *num_fres,
 				uint32_t *func_size,
@@ -1473,7 +1474,7 @@ sframe_decoder_get_funcdesc_v2 (sframe_decoder_ctx *dctx,
    applicable.  */
 
 int
-sframe_decoder_get_fre (sframe_decoder_ctx *ctx,
+sframe_decoder_get_fre (const sframe_decoder_ctx *ctx,
 			unsigned int func_idx,
 			unsigned int fre_idx,
 			sframe_frame_row_entry *fre)

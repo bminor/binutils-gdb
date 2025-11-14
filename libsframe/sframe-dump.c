@@ -26,7 +26,7 @@
 /* Return TRUE if the SFrame section is associated with the aarch64 ABIs.  */
 
 static bool
-is_sframe_abi_arch_aarch64 (sframe_decoder_ctx *sfd_ctx)
+is_sframe_abi_arch_aarch64 (const sframe_decoder_ctx *sfd_ctx)
 {
   bool aarch64_p = false;
 
@@ -41,13 +41,13 @@ is_sframe_abi_arch_aarch64 (sframe_decoder_ctx *sfd_ctx)
 /* Return TRUE if the SFrame section is associated with the s390x ABI.  */
 
 static bool
-is_sframe_abi_arch_s390x (sframe_decoder_ctx *sfd_ctx)
+is_sframe_abi_arch_s390x (const sframe_decoder_ctx *sfd_ctx)
 {
   return sframe_decoder_get_abi_arch (sfd_ctx) == SFRAME_ABI_S390X_ENDIAN_BIG;
 }
 
 static void
-dump_sframe_header_flags (sframe_decoder_ctx *sfd_ctx)
+dump_sframe_header_flags (const sframe_decoder_ctx *sfd_ctx)
 {
   uint8_t flags;
   const char *prefix = "Flags: ";
@@ -78,7 +78,7 @@ dump_sframe_header_flags (sframe_decoder_ctx *sfd_ctx)
 }
 
 static void
-dump_sframe_header (sframe_decoder_ctx *sfd_ctx)
+dump_sframe_header (const sframe_decoder_ctx *sfd_ctx)
 {
   uint8_t ver;
   const char *ver_str = NULL;
@@ -117,7 +117,7 @@ dump_sframe_header (sframe_decoder_ctx *sfd_ctx)
 }
 
 static void
-dump_sframe_func_with_fres (sframe_decoder_ctx *sfd_ctx,
+dump_sframe_func_with_fres (const sframe_decoder_ctx *sfd_ctx,
 			    unsigned int funcidx,
 			    uint64_t sec_addr)
 {
@@ -249,7 +249,7 @@ dump_sframe_func_with_fres (sframe_decoder_ctx *sfd_ctx,
 }
 
 static void
-dump_sframe_functions (sframe_decoder_ctx *sfd_ctx, uint64_t sec_addr)
+dump_sframe_functions (const sframe_decoder_ctx *sfd_ctx, uint64_t sec_addr)
 {
   uint32_t i;
   uint32_t num_fdes;
@@ -266,7 +266,7 @@ dump_sframe_functions (sframe_decoder_ctx *sfd_ctx, uint64_t sec_addr)
 }
 
 void
-dump_sframe (sframe_decoder_ctx *sfd_ctx, uint64_t sec_addr)
+dump_sframe (const sframe_decoder_ctx *sfd_ctx, uint64_t sec_addr)
 {
   uint8_t ver;
 
