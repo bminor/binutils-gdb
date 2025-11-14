@@ -653,7 +653,7 @@ struct elf_s390_link_hash_entry
 #define GOT_NORMAL	1
 #define GOT_TLS_GD	2
 #define GOT_TLS_IE	3
-#define GOT_TLS_IE_NLT	3
+#define GOT_TLS_IE_NLT	4	/* Initial Exec, no literal pool entry.  */
   unsigned char tls_type;
 
   /* For pointer equality reasons we might need to change the symbol
