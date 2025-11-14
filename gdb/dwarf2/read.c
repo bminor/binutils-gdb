@@ -916,6 +916,9 @@ static const char *dwarf2_physname (const char *name, struct die_info *die,
 static struct die_info *dwarf2_extension (struct die_info *die,
 					  struct dwarf2_cu **);
 
+static die_info *follow_die_offset (const section_and_offset &target,
+				    dwarf2_cu **ref_cu);
+
 static struct die_info *follow_die_ref_or_sig (struct die_info *,
 					       const struct attribute *,
 					       struct dwarf2_cu **);
@@ -12738,6 +12741,75 @@ namespace_name (struct die_info *die, int *is_anonymous, struct dwarf2_cu *cu)
   return name;
 }
 
+/* A convenience structure that holds a CU and a DIE.  */
+
+struct cu_die_pair
+{
+  die_info *die;
+  dwarf2_cu *cu;
+
+  /* Return true if this object holds a valid DIE.  */
+  bool valid () const
+  {
+    return die != nullptr;
+  }
+
+  /* Compare two cu_die_pair objects.  */
+  bool operator!= (const cu_die_pair &other) const
+  {
+    return die != other.die || cu != other.cu;
+  }
+};
+
+/* Follow the DW_AT_type reference, if any, from ORIG.  The return
+   value will be valid only when DW_AT_type exists.  In other cases,
+   including when the incoming ORIG is not valid, an invalid
+   cu_die_pair is returned.  */
+
+static cu_die_pair
+follow_type (cu_die_pair orig)
+{
+  /* This simplifies the caller a little.  */
+  if (!orig.valid ())
+    return {};
+
+  attribute *type_attr = dwarf2_attr (orig.die, DW_AT_type, orig.cu);
+  if (type_attr == nullptr || !type_attr->form_is_ref ())
+    return {};
+
+  cu_die_pair result = orig;
+  sect_offset sect_off = type_attr->get_ref_die_offset ();
+  const dwarf2_section_info &section = get_section_for_ref (*type_attr,
+							    orig.cu);
+  result.die = follow_die_offset ({ &section, sect_off }, &result.cu);
+
+  /* Note that we do not check for DW_TAG_pointer_type here.  GNAT, at
+     least, will emit recursive pointers that "indirect" via typedefs,
+     so checkpoint purely for pointer types would not find these.  */
+  return result;
+}
+
+/* Return true if DIE is a self-referential pointer type; false
+   otherwise.  CU is the origin of DIE.  */
+
+static bool
+is_recursive_pointer (die_info *die, dwarf2_cu *cu)
+{
+  cu_die_pair tortoise { die, cu };
+  gdb_assert (tortoise.valid ());
+  cu_die_pair hare = follow_type (tortoise);
+
+  while (tortoise != hare)
+    {
+      tortoise = follow_type (tortoise);
+      hare = follow_type (follow_type (hare));
+      if (!tortoise.valid () || !hare.valid ())
+	return false;
+    }
+
+  return true;
+}
+
 /* Extract all information from a DW_TAG_pointer_type DIE and add to
    the user defined type vector.  */
 
@@ -12752,7 +12824,17 @@ read_tag_pointer_type (struct die_info *die, struct dwarf2_cu *cu)
   int byte_size;
   struct type *target_type;
 
-  target_type = die_type (die, cu);
+  /* In Ada, it's possible to create a self-referential pointer type.
+     These aren't useful, but nevertheless we take care to avoid a gdb
+     crash in this situation.  Instead just turn these into a
+     pointer-to-void.  */
+  if (is_recursive_pointer (die, cu))
+    {
+      type_allocator alloc (cu->per_objfile->objfile, cu->lang ());
+      target_type = alloc.new_type (TYPE_CODE_VOID, 0, nullptr);
+    }
+  else
+    target_type = die_type (die, cu);
 
   /* The die_type call above may have already set the type for this DIE.  */
   type = get_die_type (die, cu);
