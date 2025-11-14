@@ -1325,7 +1325,7 @@ elf_s390_check_relocs (bfd *abfd,
 	      if (ELF64_R_TYPE (rel->r_info) == R_390_PC16
 		  || ELF64_R_TYPE (rel->r_info) == R_390_PC12DBL
 		  || ELF64_R_TYPE (rel->r_info) == R_390_PC16DBL
-		  || ELF64_R_TYPE (rel->r_info) == R_390_PC16DBL
+		  || ELF64_R_TYPE (rel->r_info) == R_390_PC24DBL
 		  || ELF64_R_TYPE (rel->r_info) == R_390_PC32
 		  || ELF64_R_TYPE (rel->r_info) == R_390_PC32DBL
 		  || ELF64_R_TYPE (rel->r_info) == R_390_PC64)
