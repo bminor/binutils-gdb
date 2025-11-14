@@ -2239,15 +2239,15 @@ objc_msgcall_operation::evaluate (struct type *expect_type,
   else
     sub_no_side = noside;
 
-  std::vector<operation_up> &args = std::get<2> (m_storage);
-  std::vector<value *> argvec;
-  argvec.push_back (nullptr);
-  argvec.push_back (nullptr);
-  for (const operation_up &iter : args)
-    argvec.push_back (iter->evaluate_with_coercion (exp, sub_no_side));
+  std::vector<operation_up> &ops = std::get<2> (m_storage);
+  std::vector<value *> args;
+  args.push_back (nullptr);
+  args.push_back (nullptr);
+  for (const operation_up &iter : ops)
+    args.push_back (iter->evaluate_with_coercion (exp, sub_no_side));
 
   return eval_op_objc_msgcall (expect_type, exp, noside,
-			       std::get<0> (m_storage), target, argvec);
+			       std::get<0> (m_storage), target, args);
 }
 
 value *
