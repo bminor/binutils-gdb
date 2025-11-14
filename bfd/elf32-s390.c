@@ -1624,9 +1624,9 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
       elf_s390_adjust_gotplt((struct elf_s390_link_hash_entry *) h);
     }
 
-  /* If R_390_TLS_{IE32,GOTIE32,GOTIE12,IEENT} symbol is now local to
+  /* If R_390_TLS_{IE32,GOTIE32,GOTIE12,GOTIE20,IEENT} symbol is now local to
      the binary, we can optimize a bit. IE32 and GOTIE32 get converted
-     to R_390_TLS_LE32 requiring no TLS entry. For GOTIE12 and IEENT
+     to R_390_TLS_LE32 requiring no TLS entry. For GOTIE12, GOTIE20, and IEENT
      we can save the dynamic TLS relocation.  */
   if (h->got.refcount > 0
       && !bfd_link_pic (info)
