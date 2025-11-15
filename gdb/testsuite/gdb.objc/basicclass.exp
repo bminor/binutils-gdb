@@ -21,8 +21,9 @@ standard_testfile .m
 # Objective-C program compilation isn't standard. We need to figure out
 # which libraries to link in. Most of the time it uses pthread
 #
-if {[gdb_compile_objc "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug ]] != "" } {
-  return -1
+if {[gdb_compile_objc "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
+	 executable {debug}] != ""} {
+    return
 }
 
 #
@@ -147,7 +148,7 @@ gdb_test "break hiddenMethod" \
 #
 gdb_test continue \
     "Continuing\\..*Breakpoint \[0-9\]+, -.BasicClass\\(Private\\) hiddenMethod. \\(self=.*, _cmd=.*\\) at .*$srcfile:61.*" \
-     "continue until category method"
+    "continue until category method"
 
 #
 # Test calling Objective-C methods

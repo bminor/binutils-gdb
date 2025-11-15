@@ -23,8 +23,9 @@ standard_testfile .m
 # Objective-C program compilation isn't standard. We need to figure out
 # which libraries to link in. Most of the time it uses pthread
 #
-if {[gdb_compile_objc "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug ]] != "" } {
-  return -1
+if {[gdb_compile_objc "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable \
+	 {debug}] != ""} {
+    return
 }
 
 proc do_objc_tests {} {
@@ -40,8 +41,7 @@ gdb_test_no_output "set multiple-symbols ask"
 # Break on multiply defined method (PR objc/1236)
 #
 set name "break on multiply defined method"
-gdb_test_multiple "break multipleDef" $name \
-{
+gdb_test_multiple "break multipleDef" $name {
     -re "\\\[0\\\] cancel\r\n\\\[1\\\] all\r\n\\\[2\\\] .*${srcfile}:-.Decode multipleDef.\r\n\\\[3\\\] .*${srcfile}:multipleDef\r\n> $" {
 	send_gdb "3\n"
 	exp_continue
@@ -52,8 +52,7 @@ gdb_test_multiple "break multipleDef" $name \
 
 set name "continue after break on multiply defined symbol"
 gdb_run_cmd
-gdb_test_multiple "" $name \
-{
+gdb_test_multiple "" $name {
     -re "Breakpoint \[0-9\]+, multipleDef \\\(\\\) at .*\r\n$gdb_prompt $" {
 	pass $name
     }

@@ -23,8 +23,9 @@ standard_testfile .m
 # Objective-C program compilation isn't standard. We need to figure out
 # which libraries to link in. Most of the time it uses pthread
 #
-if {[gdb_compile_objc "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list ] ] != "" } {
-  return -1
+if {[gdb_compile_objc "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
+	 executable {}] != ""} {
+    return
 }
 
 proc do_objc_tests {} {
@@ -42,8 +43,7 @@ gdb_test "set breakpoint pending off" "" "set breakpoint pending"
 # Break on multiply defined non-debuggable symbol (PR objc/1236)
 #
 set name "break on non-debuggable method"
-gdb_test_multiple "break someMethod" $name \
-{
+gdb_test_multiple "break someMethod" $name {
     -re "\\\[0\\\] cancel\r\n\\\[1\\\] all\r\n\\\[2\\\]\[ \]+-.NonDebug someMethod.*\\\[3\\\]\[ \]+-.NonDebug2 someMethod.*" {
 	send_gdb "2\n"
 	exp_continue
