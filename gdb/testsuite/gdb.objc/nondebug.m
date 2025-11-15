@@ -1,11 +1,11 @@
 #include <stdio.h>
-#include <objc/Object.h>
+#include <Foundation/NSObject.h>
 
-@interface NonDebug: Object
+@interface NonDebug: NSObject
 {
 }
 @end
-@interface NonDebug2: Object
+@interface NonDebug2: NSObject
 {
 }
 @end

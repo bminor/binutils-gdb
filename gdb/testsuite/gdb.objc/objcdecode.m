@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include <objc/Object.h>
+#include <Foundation/NSObject.h>
 
-@interface Decode: Object
+@interface Decode: NSObject
 {
 }
 - multipleDef;
@@ -43,7 +43,7 @@ const char *_NSPrintForDebugger(id object)
 {
   /* This is not really what _NSPrintForDebugger should do, but it
      is a simple test if gdb can call this function */
-  if (object && [object respondsTo: @selector(myDescription)])
+  if (object)
     return [object myDescription];
 
   return NULL;

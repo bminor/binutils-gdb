@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include <objc/Object.h>
+#include <Foundation/NSObject.h>
 
-@interface BasicClass: Object
+@interface BasicClass: NSObject
 {
   id object;
 }
@@ -75,7 +75,7 @@ const char *_NSPrintForDebugger(id object)
 {
   /* This is not really what _NSPrintForDebugger should do, but it
      is a simple test if gdb can call this function */
-  if (object && [object respondsTo: @selector(myDescription)])
+  if (object)
     return [object myDescription];
 
   return NULL;

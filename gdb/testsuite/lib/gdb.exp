@@ -6950,15 +6950,11 @@ proc gdb_compile_shlib_pthreads {sources dest options} {
 proc gdb_compile_objc {source dest type options} {
     set built_binfile 0
     set why_msg "unrecognized error"
-    foreach lib {-lobjc -lpthreads -lpthread -lthread solaris} {
+    set base_libs {-lgnustep-base -lobjc}
+    foreach lib {-lpthreads -lpthread -lthread "-lpthread -lposix4"} {
 	# This kind of wipes out whatever libs the caller may have
-	# set.  Or maybe theirs will override ours.  How infelicitous.
-	if { $lib == "solaris" } {
-	    set lib "-lpthread -lposix4"
-	}
-	if { $lib != "-lobjc" } {
-	  set lib "-lobjc $lib"
-	}
+	# set.	Or maybe theirs will override ours.  How infelicitous.
+	set lib "$base_libs $lib"
 	set options_with_lib [concat $options [list libs=$lib quiet]]
 	set ccout [gdb_compile $source $dest $type $options_with_lib]
 	switch -regexp -- $ccout {
