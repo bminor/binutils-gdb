@@ -89,36 +89,36 @@ do_objc_tests
 gdb_test "set breakpoint pending off" "" "set breakpoint pending"
 
 gdb_test "break doIt" \
-    "Breakpoint.*at.* file .*$srcfile, line.29.*" \
+    "Breakpoint.*at.* file .*$srcfile, line $decimal.*" \
     "breakpoint method"
 
 gdb_test "break takeArg:" \
-    "Breakpoint.*at.* file .*$srcfile, line.34.*" \
+    "Breakpoint.*at.* file .*$srcfile, line $decimal.*" \
     "breakpoint method with colon"
 
 gdb_test "break newWithArg:" \
-    "Breakpoint.*at.* file .*$srcfile, line.22.*" \
+    "Breakpoint.*at.* file .*$srcfile, line $decimal.*" \
     "breakpoint class method with colon"
 
 #
 # Continue until breakpoint (test re-setting breakpoint)
 #
 gdb_test continue \
-    "Continuing\\..*Breakpoint \[0-9\]+, -.BasicClass takeArg:. \\(self=.*, _cmd=.*, arg=.*\\) at .*$srcfile:34.*" \
+    "Continuing\\..*Breakpoint \[0-9\]+, -.BasicClass takeArg:. \\(self=.*, _cmd=.*, arg=.*\\) at .*$srcfile:$decimal.*" \
     "continue until method breakpoint"
 
 #
 # Test resetting breakpoints when re-running program
 #
 gdb_run_cmd
-gdb_test "" "Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:.*" "resetting breakpoints when rerunning"
+gdb_test "" "Breakpoint .+,.*main .*argc.*argv.* at .*$srcfile:.*" "resetting breakpoints when rerunning"
 
 #
 # Continue until breakpoint (test re-setting breakpoint)
 #
 gdb_test continue \
-    "Continuing\\..*Breakpoint \[0-9\]+, -.BasicClass takeArg:. \\(self=.*, _cmd=.*, arg=.*\\) at .*$srcfile:34.*" \
-    "continue until method breakpoint"
+    "Continuing\\..*Breakpoint .+, -.BasicClass takeArg:. \\(self=.*, _cmd=.*, arg=.*\\) at .*$srcfile:$decimal.*" \
+    "continue until method breakpoint again"
 
 #
 # Test printing objects
@@ -139,7 +139,7 @@ gdb_test "print \*self" \
 # Break in a category
 #
 gdb_test "break hiddenMethod" \
-    "Breakpoint.*at.* file .*$srcfile, line.61." \
+    "Breakpoint.*at.* file .*$srcfile, line $decimal." \
     "breakpoint in category method"
 
 
@@ -147,7 +147,7 @@ gdb_test "break hiddenMethod" \
 # Continue until breakpoint (test re-setting category breakpoint)
 #
 gdb_test continue \
-    "Continuing\\..*Breakpoint \[0-9\]+, -.BasicClass\\(Private\\) hiddenMethod. \\(self=.*, _cmd=.*\\) at .*$srcfile:61.*" \
+    "Continuing\\..*Breakpoint \[0-9\]+, -.BasicClass\\(Private\\) hiddenMethod. \\(self=.*, _cmd=.*\\) at .*$srcfile:$decimal.*" \
     "continue until category method"
 
 #
