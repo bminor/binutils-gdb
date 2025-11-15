@@ -1356,12 +1356,49 @@ list_command (const char *arg, int from_tty)
   std::vector<symtab_and_line> sals;
   symtab_and_line sal, sal_end;
   bool dummy_beg = false;
+  bool linenum_beg = false;
 
-  const char *arg1 = arg;
+  const char *arg1 = skip_spaces (arg);
   if (*arg1 == ',')
     dummy_beg = true;
   else
     {
+      /* Are we looking at a number?  */
+      char *end_ptr;
+      long int lineno = strtol (arg1, &end_ptr, 10);
+
+      /* If END_PTR is different to ARG1 then strtol parsed something, but
+	 strtol will accept numbers with a '+' or '-' prefix, which we
+	 don't want to handle here, hence the c_isdigit check.  */
+      if (end_ptr != arg1 && c_isdigit (*arg1))
+	{
+	  /* Some digits were found.  */
+	  end_ptr = skip_spaces (end_ptr);
+
+	  /* Check for valid line format or for an invalid line number.  */
+	  if (*end_ptr != '\0' && *end_ptr != ',')
+	    error (_("Junk at end of line specification: %s"), end_ptr);
+
+	  if (*end_ptr == '\0')
+	    {
+	      /* Ensure LINENO isn't going to overflow when we convert it
+		 to an integer below.  */
+	      if (lineno >= INT_MAX || lineno <= INT_MIN)
+		error (_("Line number %.*s out of range"),
+		       (int) (end_ptr - arg1), arg1);
+
+	      /* We only have a line number.  */
+	      set_default_source_symtab_and_line ();
+	      symtab_and_line cursal
+		= get_current_source_symtab_and_line (current_program_space);
+	      cursal.line = static_cast<int> (lineno);
+	      list_around_line (nullptr, cursal);
+	      return;
+	    }
+
+	  linenum_beg = true;
+	}
+
       location_spec_up locspec
 	= string_to_location_spec (&arg1, current_language);
 
@@ -1384,12 +1421,6 @@ list_command (const char *arg, int from_tty)
 
       sal = sals[0];
     }
-
-  /* Record whether the BEG arg is all digits.  */
-
-  const char *p;
-  for (p = arg; p != arg1 && *p >= '0' && *p <= '9'; p++);
-  bool linenum_beg = (p == arg1);
 
   /* Save the range of the first argument, in case we need to let the
      user know it was ambiguous.  */
@@ -1491,7 +1522,7 @@ list_command (const char *arg, int from_tty)
      imply a symtab, it must be an undebuggable symbol which means no
      source code.  */
 
-  if (!linenum_beg && sal.symtab == nullptr)
+  if (!dummy_beg && !linenum_beg && sal.symtab == nullptr)
     error (_("No line number known for %s."), arg);
 
   /* If this command is repeated with RET,
