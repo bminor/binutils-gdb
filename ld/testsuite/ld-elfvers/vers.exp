@@ -1018,3 +1018,99 @@ build_vers_lib_pic "vers31" vers31.c vers31 "" vers31.map vers31.ver vers31.dsym
 # Test #32 -- linker --defsym
 build_vers_lib_pic "vers32a" vers32a.c vers32a "" vers32.map vers32a.ver vers32a.dsym ""
 build_vers_lib_pic_flags "vers32b" vers32b.c vers32b "vers32a.so" vers32.map vers32b.ver vers32b.dsym "" "--defsym foo=0"
+
+if [check_compiler_available] {
+    run_cc_link_tests [list \
+	[list \
+	    "Build pr33577-unversioned.so" \
+	    "-shared -Wl,-soname,libpr33577.so" \
+	    "-fPIC" \
+	    { pr33577-unversioned.c } \
+	    {{readelf {--dyn-syms -W} pr33577-unversioned.rd}} \
+	    "libpr33577-unversioned.so" \
+	] \
+	[list \
+	    "Build pr33577-versioned.so" \
+	    "-shared -Wl,-soname,libpr33577.so,--version-script=pr33577.map" \
+	    "-fPIC" \
+	    { pr33577-versioned.c } \
+	    {{readelf {--dyn-syms -W} pr33577-versioned.rd}} \
+	    "libpr33577-versioned.so" \
+	] \
+    ]
+
+    set cmd "cp tmpdir/libpr33577-unversioned.so tmpdir/libpr33577.so"
+    send_log "$cmd\n"
+    remote_exec host "$cmd"
+
+    run_cc_link_tests [list \
+	[list \
+	    "Build pr33577a with tmpdir/libpr33577-unversioned.so" \
+	    "" \
+	    "" \
+	    { pr33577a.c } \
+	    "" \
+	    "pr33577a" \
+	    "c" \
+	    "tmpdir/libpr33577.so" \
+	] \
+    ]
+
+    if [isnative] {
+	run_ld_link_exec_tests [list \
+	    [list \
+		"Run pr33577a with tmpdir/libpr33577-unversioned.so" \
+		"-Wl,-R,tmpdir" \
+		"" \
+		{ pr33577a.c } \
+		"pr33577a" \
+		"pass.out" \
+		"" \
+		"c" \
+		"" \
+		"tmpdir/libpr33577.so" \
+	    ] \
+	] \
+    }
+
+    set cmd "cp tmpdir/libpr33577-versioned.so tmpdir/libpr33577.so"
+    send_log "$cmd\n"
+    remote_exec host "$cmd"
+
+    run_cc_link_tests [list \
+	[list \
+	    "Build pr33577b with tmpdir/libpr33577-versioned.so" \
+	    "-Wl,-R,tmpdir" \
+	    "" \
+	    { pr33577b.c } \
+	    "" \
+	    "pr33577b" \
+	    "c" \
+	    "tmpdir/libpr33577.so" \
+	] \
+    ]
+
+    if [isnative] {
+	set test_name "Run pr33577a with tmpdir/libpr33577-versioned.so"
+	set cmd tmpdir/pr33577a
+	send_log "$cmd\n"
+	set got [remote_exec host "$cmd"]
+	if { [lindex $got 0] == 0 && [regexp "PASS" [lindex $got 1]] } then {
+	    pass "$test_name"
+	} else {
+	    send_log "$got\n"
+	    fail "$test_name"
+	}
+
+	set test_name "Run pr33577b with tmpdir/libpr33577-versioned.so"
+	set cmd tmpdir/pr33577b
+	send_log "$cmd\n"
+	set got [remote_exec host "$cmd"]
+	if { [lindex $got 0] == 0 && [regexp "PASS" [lindex $got 1]] } then {
+	    pass "$test_name"
+	} else {
+	    send_log "$got\n"
+	    fail "$test_name"
+	}
+    }
+}
