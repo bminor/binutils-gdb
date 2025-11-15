@@ -935,6 +935,14 @@ run_cc_link_tests [list \
 	{} \
 	"pr31482d-no-lto.a" \
     ] \
+    [list \
+	"Build pr21086" \
+	"-static -Wl,--dynamic-list=pr21086.list" \
+	"" \
+	{pr21086.c} \
+	{{readelf -d pr21086.rd}} \
+	"pr21086" \
+    ] \
 ]
 
 # pr19073.s uses .set, which has a different meaning on alpha.
