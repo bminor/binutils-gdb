@@ -709,7 +709,7 @@ set build_tests {
    "-r -nostdlib" ""
    {pr14862-1.c} {} "libpr14862-1.o"}
   {"Build libpr14862.so"
-   "-shared -Wl,--version-script=pr11138-1.map" "-fPIC"
+   "-shared -Wl,--version-script=pr14862.map" "-fPIC"
    {pr14862-2.c} {} "libpr14862.so"}
   {"Build libneeded1b.so"
    "-shared" "-fPIC"
