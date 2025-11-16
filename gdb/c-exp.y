@@ -3167,8 +3167,8 @@ classify_name (struct parser_state *par_state, const struct block *block,
 	  struct symbol *sym;
 
 	  yylval.theclass.theclass = Class;
-	  sym = lookup_struct_typedef (copy.c_str (),
-				       par_state->expression_context_block, 1);
+	  sym = lookup_struct_noerr (copy.c_str (),
+				     par_state->expression_context_block);
 	  if (sym)
 	    yylval.theclass.type = sym->type ();
 	  return CLASSNAME;

@@ -79,31 +79,14 @@ struct objc_method {
 static const registry<objfile>::key<unsigned int> objc_objfile_data;
 
 /* Lookup a structure type named "struct NAME", visible in lexical
-   block BLOCK.  If NOERR is nonzero, return zero if NAME is not
-   suitably defined.  */
+   block BLOCK.  Return nullptr if no such type is found.  */
 
 struct symbol *
-lookup_struct_typedef (const char *name, const struct block *block, int noerr)
+lookup_struct_noerr (const char *name, const struct block *block)
 {
-  struct symbol *sym;
-
-  sym = lookup_symbol (name, block, SEARCH_STRUCT_DOMAIN, 0).symbol;
-
-  if (sym == NULL)
-    {
-      if (noerr)
-	return 0;
-      else
-	error (_("No struct type named %s."), name);
-    }
-  if (sym->type ()->code () != TYPE_CODE_STRUCT)
-    {
-      if (noerr)
-	return 0;
-      else
-	error (_("This context has class, union or enum %s, not a struct."),
-	       name);
-    }
+  symbol *sym = lookup_symbol (name, block, SEARCH_STRUCT_DOMAIN, 0).symbol;
+  if (sym == nullptr || sym->type ()->code () != TYPE_CODE_STRUCT)
+    return nullptr;
   return sym;
 }
 
@@ -212,9 +195,9 @@ value_nsstring (struct gdbarch *gdbarch, const char *ptr, int len)
   else
     error (_("NSString: internal error -- no way to create new NSString"));
 
-  sym = lookup_struct_typedef("NSString", 0, 1);
+  sym = lookup_struct_noerr ("NSString", 0);
   if (sym == NULL)
-    sym = lookup_struct_typedef("NXString", 0, 1);
+    sym = lookup_struct_noerr ("NXString", 0);
   if (sym == NULL)
     type = builtin_type (gdbarch)->builtin_data_ptr;
   else

@@ -44,8 +44,7 @@ extern void start_msglist (void);
 extern void add_msglist (struct stoken *str, int addcolon);
 extern int end_msglist (struct parser_state *);
 
-struct symbol *lookup_struct_typedef (const char *name,
-				      const struct block *block,
-				      int noerr);
+struct symbol *lookup_struct_noerr (const char *name,
+				    const struct block *block);
 
 #endif /* GDB_OBJC_LANG_H */
