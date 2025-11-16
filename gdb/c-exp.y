@@ -224,7 +224,7 @@ static void c_print_token (FILE *file, int type, YYSTYPE value);
 
 %token <tsval> STRING
 %token <tsval> NSSTRING		/* ObjC Foundation "NSString" literal */
-%token SELECTOR			/* ObjC "@selector" pseudo-operator   */
+%token <sval> SELECTOR		/* ObjC "@selector" pseudo-operator   */
 %token <tsval> CHAR
 %token <ssym> NAME /* BLOCKNAME defined below to give it higher precedence. */
 %token <ssym> UNKNOWN_CPP_NAME
@@ -918,10 +918,10 @@ exp	:	DOLLAR_VARIABLE
 			}
 	;
 
-exp	:	SELECTOR '(' name ')'
+exp	:	SELECTOR
 			{
 			  pstate->push_new<objc_selector_operation>
-			    (copy_name ($3));
+			    (copy_name ($1));
 			}
 	;
 
@@ -2664,6 +2664,43 @@ static bool last_was_structop;
 /* Depth of parentheses.  */
 static int paren_depth;
 
+/* Lex an Objective-C @selector.  Return true if lexed.  In this case,
+   sets the resulting token and updates the lex pointer.  Otherwise
+   returns false and updates nothing.  */
+
+static bool
+lex_selector (const char **lex_ptr, struct stoken *token)
+{
+  const char *p = *lex_ptr;
+
+  if (!startswith (p, "selector"))
+    return false;
+
+  p += strlen ("selector");
+  p = skip_spaces (p);
+  if (*p != '(')
+    return false;
+  ++p;
+
+  /* The selector name matches [A-Za-z0-9:_-]+.  We could probably be
+     a bit more refined but meh.  */
+  const char *start = p;
+  while (c_isalnum (*p) || *p == ':' || *p == '_' || *p == '-')
+    ++p;
+  if (p == start)
+    return false;
+  const char *end = p;
+
+  p = skip_spaces (p);
+  if (*p != ')')
+    return false;
+  ++p;
+
+  *lex_ptr = p;
+  *token = { start, (int) (end - start) };
+  return true;
+}
+
 /* Read one token, getting characters through lexptr.  */
 
 static int
@@ -2872,12 +2909,11 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 
 	if (par_state->language ()->la_language == language_objc)
 	  {
-	    size_t len = strlen ("selector");
-
-	    if (strncmp (p, "selector", len) == 0
-		&& (p[len] == '\0' || c_isspace (p[len])))
+	    struct stoken sel_token;
+	    if (lex_selector (&p, &sel_token))
 	      {
-		pstate->lexptr = p + len;
+		pstate->lexptr = p;
+		yylval.sval = sel_token;
 		return SELECTOR;
 	      }
 	    else if (*p == '"')
@@ -3556,6 +3592,7 @@ c_print_token (FILE *file, int type, YYSTYPE value)
 
     case NSSTRING:
     case DOLLAR_VARIABLE:
+    case SELECTOR:
       parser_fprintf (file, "sval<%s>", copy_name (value.sval).c_str ());
       break;
 
