@@ -23,10 +23,6 @@
 #include "expop.h"
 #include "objc-lang.h"
 
-extern struct value *eval_op_objc_selector (struct type *expect_type,
-					    struct expression *exp,
-					    enum noside noside,
-					    const char *sel);
 extern struct value *opencl_value_cast (struct type *type, struct value *arg);
 extern struct value *eval_opencl_assign (struct type *expect_type,
 					 struct expression *exp,
@@ -72,11 +68,7 @@ public:
 
   value *evaluate (struct type *expect_type,
 		   struct expression *exp,
-		   enum noside noside) override
-  {
-    const std::string &str = std::get<0> (m_storage);
-    return value_nsstring (exp->gdbarch, str.c_str (), str.size () + 1);
-  }
+		   enum noside noside) override;
 
   enum exp_opcode opcode () const override
   { return OP_OBJC_NSSTRING; }
@@ -91,11 +83,7 @@ public:
 
   value *evaluate (struct type *expect_type,
 		   struct expression *exp,
-		   enum noside noside) override
-  {
-    return eval_op_objc_selector (expect_type, exp, noside,
-				  std::get<0> (m_storage).c_str ());
-  }
+		   enum noside noside) override;
 
   enum exp_opcode opcode () const override
   { return OP_OBJC_SELECTOR; }

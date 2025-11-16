@@ -151,9 +151,17 @@ lookup_child_selector (struct gdbarch *gdbarch, const char *selname)
   return value_as_long (call_function_by_hand (function, NULL, selstring));
 }
 
-struct value *
-value_nsstring (struct gdbarch *gdbarch, const char *ptr, int len)
+namespace expr
 {
+
+struct value *
+objc_nsstring_operation::evaluate (struct type *expect_type,
+				   struct expression *exp,
+				   enum noside noside)
+{
+  const std::string &str = std::get<0> (m_storage);
+  struct gdbarch *gdbarch = exp->gdbarch;
+
   struct type *char_type = builtin_type (gdbarch)->builtin_char;
   struct value *stringValue[3];
   struct value *function, *nsstringValue;
@@ -163,8 +171,8 @@ value_nsstring (struct gdbarch *gdbarch, const char *ptr, int len)
   if (!target_has_execution ())
     return 0;		/* Can't call into inferior to create NSString.  */
 
-  stringValue[2] = value_string(ptr, len, char_type);
-  stringValue[2] = value_coerce_array(stringValue[2]);
+  stringValue[2] = value_string (str.c_str (), str.size () + 1, char_type);
+  stringValue[2] = value_coerce_array (stringValue[2]);
   /* _NSNewStringFromCString replaces "istr" after Lantern2A.  */
   if (lookup_minimal_symbol (current_program_space,
 			     "_NSNewStringFromCString").minsym != nullptr)
@@ -206,6 +214,8 @@ value_nsstring (struct gdbarch *gdbarch, const char *ptr, int len)
   nsstringValue->deprecated_set_type (type);
   return nsstringValue;
 }
+
+} /* namespace expr */
 
 /* Class representing the Objective-C language.  */
 

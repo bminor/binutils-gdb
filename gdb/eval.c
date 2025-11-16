@@ -1185,19 +1185,18 @@ ternop_slice_operation::evaluate (struct type *expect_type,
   return value_slice (array, lowbound, upperbound - lowbound + 1);
 }
 
-} /* namespace expr */
-
-/* Helper function that implements the body of OP_OBJC_SELECTOR.  */
-
 struct value *
-eval_op_objc_selector (struct type *expect_type, struct expression *exp,
-		       enum noside noside,
-		       const char *sel)
+objc_selector_operation::evaluate (struct type *expect_type,
+				   struct expression *exp,
+				   enum noside noside)
 {
+  const char *sel = std::get<0> (m_storage).c_str ();
   struct type *selector_type = builtin_type (exp->gdbarch)->builtin_data_ptr;
   return value_from_longest (selector_type,
 			     lookup_child_selector (exp->gdbarch, sel));
 }
+
+} /* namespace expr */
 
 /* A helper function for STRUCTOP_STRUCT.  */
 
