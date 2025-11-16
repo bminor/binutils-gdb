@@ -223,7 +223,7 @@ static void c_print_token (FILE *file, int type, YYSTYPE value);
    nonterminal "name", which matches either NAME or TYPENAME.  */
 
 %token <tsval> STRING
-%token <sval> NSSTRING		/* ObjC Foundation "NSString" literal */
+%token <tsval> NSSTRING		/* ObjC Foundation "NSString" literal */
 %token SELECTOR			/* ObjC "@selector" pseudo-operator   */
 %token <tsval> CHAR
 %token <ssym> NAME /* BLOCKNAME defined below to give it higher precedence. */
@@ -1030,12 +1030,12 @@ exp	:	string_exp
 			}
 	;
 
-exp     :	NSSTRING	/* ObjC NextStep NSString constant
-				 * of the form '@' '"' string '"'.
-				 */
+exp     :	NSSTRING
 			{
+			  /* ObjC NextStep NSString constant of the
+			     form '@' '"' string '"'.  */
 			  pstate->push_new<objc_nsstring_operation>
-			    (copy_name ($1));
+			    (std::string ($1.ptr, $1.length));
 			}
 	;
 

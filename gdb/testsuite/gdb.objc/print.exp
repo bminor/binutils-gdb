@@ -62,6 +62,10 @@ clean_restart
 if { [set_lang_objc] } {
     test_float_accepted
     test_float_rejected
+
+    gdb_test {print @"hi"} \
+	"evaluation of this expression requires the target program to be active" \
+	"simple nsstring"
 } else {
     warning "Objective-c print tests suppressed"
 }

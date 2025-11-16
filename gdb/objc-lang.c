@@ -169,7 +169,8 @@ objc_nsstring_operation::evaluate (struct type *expect_type,
   struct type *type;
 
   if (!target_has_execution ())
-    return 0;		/* Can't call into inferior to create NSString.  */
+    error (_("evaluation of this expression "
+	     "requires the target program to be active"));
 
   stringValue[2] = value_string (str.c_str (), str.size () + 1, char_type);
   stringValue[2] = value_coerce_array (stringValue[2]);
