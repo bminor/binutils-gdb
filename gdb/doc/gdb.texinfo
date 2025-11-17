@@ -27152,6 +27152,27 @@ Program received signal SIGSEGV, Segmentation fault
 Guarded Control Stack error.
 @end smallexample
 
+@subsubsection AArch64 Floating Point Mode Register
+@cindex floating point mode register, AArch64
+@cindex FPMR, AArch64
+
+When @value{GDBN} is debugging the AArch64 architecture and the Floating Point
+Mode Register (@acronym{FPMR}) is available, then @value{GDBN} will make the
+@code{fpmr} available.  This register determines the behavior of @code{FP8}
+instructions.
+
+To aid debugging, @value{GDBN} interprets the mode or value of each field in
+@code{fpmr}.
+
+@smallexample
+p $fpmr
+$1 = [ F8S1=E5M2 F8S2=E5M2 F8D=E5M2 OSM=Inf OSC=Inf/NaN LSCALE=0 NSCALE=0 LSCALE2=0 ]
+@end smallexample
+
+For more information about @acronym{FPMR}, please refer to the official
+@uref{https://developer.arm.com/documentation/ddi0601/latest,ignored,
+architecture registers documentation}.
+
 @node x86
 @subsection x86
 
@@ -49893,6 +49914,57 @@ documentation} in the Linux kernel.
 
 Extra registers are allowed in these features, but they will not affect
 @value{GDBN}.
+
+@subsubsection AArch64 FPMR feature
+
+The @samp{org.gnu.gdb.aarch64.fpmr} optional feature was introduced so
+@value{GDBN} could detect support for the Floating Point Mode Register
+extension.  If present, this feature must have the following register:
+
+@itemize @minus
+@item
+@samp{fpmr}, the floating point mode register.  It is represented as
+if it were a 64-bit register with a custom flags type.
+@end itemize
+
+The custom flags type allows @value{GDBN} to print a human-friendly
+representation of the contents of @code{fpmr} should contain:
+
+@itemize @minus
+
+@item
+@code{F8S1}, which is either @code{E5M2} or @code{E4M3}
+
+@item
+@code{F8S2}, which is either @code{E5M2} or @code{E4M3}
+
+@item
+@code{F8D}, which is either @code{E5M2} or @code{E4M3}
+
+@item
+@code{OSM}, which is either @code{Inf} or @code{MaxNormal}
+
+@item
+@code{OSC}, which is either @code{Inf/NaN} or @code{MaxNormal}
+
+@item
+@code{LSCALE}, which is a 7-bit unsigned value
+
+@item
+@code{NSCALE}, which is actually an 8-bit signed value but represented as an
+8-bit unsigned value
+
+@item
+@code{LSCALE2}, which is a 6-bit unsigned value
+
+@end itemize
+
+Extra registers are allowed in this feature, but they will not affect
+@value{GDBN}.
+
+For more information about @acronym{FPMR}, please refer to the official
+@uref{https://developer.arm.com/documentation/ddi0601/latest,ignored,
+architecture registers documentation}.
 
 @node Alpha Features
 @subsection Alpha Features
