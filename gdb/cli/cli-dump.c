@@ -577,15 +577,15 @@ INIT_GDB_FILE (cli_dump)
 			0/*allow-unknown*/,
 			&cmdlist);
 
-  add_dump_command ("memory", dump_memory_command, "\
+  add_dump_command ("memory", dump_memory_command, _("\
 Write contents of memory to a raw binary file.\n\
 Arguments are FILE START STOP.  Writes the contents of memory within the\n\
-range [START .. STOP) to the specified FILE in raw target ordered bytes.");
+range [START .. STOP) to the specified FILE in raw target ordered bytes."));
 
-  add_dump_command ("value", dump_value_command, "\
+  add_dump_command ("value", dump_value_command, _("\
 Write the value of an expression to a raw binary file.\n\
 Arguments are FILE EXPRESSION.  Writes the value of EXPRESSION to\n\
-the specified FILE in raw target ordered bytes.");
+the specified FILE in raw target ordered bytes."));
 
   add_basic_prefix_cmd ("srec", no_class,
 			_("Write target code/data to an srec file."),
