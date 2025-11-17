@@ -25,10 +25,10 @@
    4.x return -1.  If it is GCC 5.x or higher return INT_MAX.  */
 extern int producer_is_gcc_ge_4 (const char *producer);
 
-/* Returns nonzero if the given PRODUCER string is GCC and sets the MAJOR
-   and MINOR versions when not NULL.  Returns zero if the given PRODUCER
+/* Return true if the given PRODUCER string is GCC and sets the MAJOR
+   and MINOR versions when not NULL.  Return false if the given PRODUCER
    is NULL or it isn't GCC.  */
-extern int producer_is_gcc (const char *producer, int *major, int *minor);
+extern bool producer_is_gcc (const char *producer, int *major, int *minor);
 
 /* Returns nonzero if the given PRODUCER string is GAS and sets the MAJOR
    and MINOR versions when not NULL.  Returns zero if the given PRODUCER

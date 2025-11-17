@@ -39,7 +39,7 @@ producer_is_gcc_ge_4 (const char *producer)
 
 /* See producer.h.  */
 
-int
+bool
 producer_is_gcc (const char *producer, int *major, int *minor)
 {
   const char *cs;
@@ -58,7 +58,7 @@ producer_is_gcc (const char *producer, int *major, int *minor)
 
       /* Bail out for GNU AS.  */
       if (startswith (cs, "AS "))
-	return 0;
+	return false;
 
       /* Skip any identifier after "GNU " - such as "C11" "C++" or "Java".
 	 A full producer string might look like:
@@ -71,11 +71,11 @@ producer_is_gcc (const char *producer, int *major, int *minor)
       if (*cs && c_isspace (*cs))
 	cs++;
       if (sscanf (cs, "%d.%d", major, minor) == 2)
-	return 1;
+	return true;
     }
 
   /* Not recognized as GCC.  */
-  return 0;
+  return false;
 }
 
 /* See producer.h.  */
