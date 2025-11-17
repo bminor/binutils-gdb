@@ -1635,6 +1635,23 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 	}
     }
 
+  if (tdep->has_fpmr ())
+    {
+      const struct regcache_map_entry fpmr_regmap[] =
+	{
+	  { 1, tdep->fpmr_regnum, sizeof (uint64_t) },
+	  { 0 }
+	};
+
+      const struct regset aarch64_linux_fpmr_regset =
+	{
+	  fpmr_regmap, regcache_supply_regset, regcache_collect_regset
+	};
+
+      cb (".reg-aarch-fpmr", sizeof (uint64_t), sizeof (uint64_t),
+	  &aarch64_linux_fpmr_regset, "FPMR", cb_data);
+    }
+
   if (tdep->has_pauth ())
     {
       /* Create this on the fly in order to handle the variable location.  */
