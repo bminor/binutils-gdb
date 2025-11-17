@@ -237,10 +237,9 @@ producer_parsing_tests ()
   }
 
   {
-    static const char extern_f_14_0[] = "\
-Intel(R) Fortran Intel(R) 64 Compiler XE for applications running on \
-Intel(R) 64, \
-Version 14.0.1.074 Build 20130716";
+    static const char extern_f_14_0[]
+      = ("Intel(R) Fortran Intel(R) 64 Compiler XE for applications running on"
+	 " Intel(R) 64,	Version 14.0.1.074 Build 20130716");
 
     int major = 0, minor = 0;
     SELF_CHECK (producer_is_icc (extern_f_14_0, &major, &minor)
@@ -249,10 +248,9 @@ Version 14.0.1.074 Build 20130716";
   }
 
   {
-    static const char intern_f_14[] = "\
-Intel(R) Fortran Intel(R) 64 Compiler XE for applications running on \
-Intel(R) 64, \
-Version 14.0";
+    static const char intern_f_14[]
+      = ("Intel(R) Fortran Intel(R) 64 Compiler XE for applications running on"
+	 " Intel(R) 64, Version 14.0");
 
     int major = 0, minor = 0;
     SELF_CHECK (producer_is_icc (intern_f_14, &major, &minor)
@@ -261,10 +259,9 @@ Version 14.0";
   }
 
   {
-    static const char intern_c_14[] = "\
-Intel(R) C++ Intel(R) 64 Compiler XE for applications running on \
-Intel(R) 64, \
-Version 14.0";
+    static const char intern_c_14[]
+      = ("Intel(R) C++ Intel(R) 64 Compiler XE for applications running on"
+	 " Intel(R) 64, Version 14.0");
     int major = 0, minor = 0;
     SELF_CHECK (producer_is_icc (intern_c_14, &major, &minor)
 		&& major == 14 && minor == 0);
@@ -272,10 +269,9 @@ Version 14.0";
   }
 
   {
-    static const char intern_c_18[] = "\
-Intel(R) C++ Intel(R) 64 Compiler for applications running on \
-Intel(R) 64, \
-Version 18.0 Beta";
+    static const char intern_c_18[]
+      = ("Intel(R) C++ Intel(R) 64 Compiler for applications running on"
+	 " Intel(R) 64, Version 18.0 Beta");
     int major = 0, minor = 0;
     SELF_CHECK (producer_is_icc (intern_c_18, &major, &minor)
 		&& major == 18 && minor == 0);
