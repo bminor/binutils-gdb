@@ -1071,11 +1071,16 @@ add_sal_to_sals (struct linespec_state *self,
 		 const symtab_and_line &sal,
 		 const char *symname, bool literal_canonical)
 {
-  /* We don't want two SALs with the same PC from the
-     same program space.  */
-  for (const auto &s : sals)
-    if (sal.pc == s.pc && sal.pspace == s.pspace)
-     return;
+  /* We don't want two SALs with the same PC from the same program space.
+     However, for the 'list' command we force the pc value to be 0, and in
+     this case we do want to see all SALs.  See decode_digits_list_mode
+     for where the 0 originates from.  */
+  if (sal.pc != 0)
+    {
+      for (const auto &s : sals)
+	if (sal.pc == s.pc && sal.pspace == s.pspace)
+	  return;
+    }
 
   sals.push_back (sal);
 
