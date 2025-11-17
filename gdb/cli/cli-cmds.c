@@ -2182,6 +2182,14 @@ print_sal_location (const symtab_and_line &sal)
   const char *sym_name = NULL;
   if (sal.symbol != NULL)
     sym_name = sal.symbol->print_name ();
+  else if (CORE_ADDR line_pc;
+	   find_pc_for_line (sal.symtab, sal.line, &line_pc))
+    {
+      struct symbol *sym = find_symbol_for_pc (line_pc);
+      if (sym != nullptr)
+	sym_name = sym->print_name ();
+    }
+
   gdb_printf (_("file: \"%ps\", line number: %ps, symbol: \"%s\"\n"),
 	      styled_string (file_name_style.style (),
 			     symtab_to_filename_for_display (sal.symtab)),

@@ -97,13 +97,13 @@ set last_linenum [expr {$linenum + 4}]
 # List using FILE:LINE for a filename that is ambiguous.
 gdb_test "list foo.c:$linenum" \
     [multi_line \
-	 "file: \"\[^\r\n\]+/a/foo.c\", line number: $linenum, symbol: \"\[^\r\n\]+\"" \
+	 "file: \"\[^\r\n\]+/a/foo.c\", line number: $linenum, symbol: \"get_value_common\"" \
 	 "$first_linenum\\s+\[^\r\n\]+" \
 	 ".*" \
 	 "$linenum\\s+[string_to_regexp {return 3;	/* List this line.  */}]" \
 	 ".*" \
 	 "$last_linenum\\s+\[^\r\n\]+" \
-	 "file: \"\[^\r\n\]+/b/foo.c\", line number: $linenum, symbol: \"\[^\r\n\]+\"" \
+	 "file: \"\[^\r\n\]+/b/foo.c\", line number: $linenum, symbol: \"get_value_common\"" \
 	 "$first_linenum\\s+\[^\r\n\]+" \
 	 ".*" \
 	 "$linenum\\s+[string_to_regexp {return -3;	/* List this line.  */}]" \
