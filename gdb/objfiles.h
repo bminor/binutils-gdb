@@ -640,7 +640,7 @@ public:
   void compute_main_name ();
 
   /* See quick_symbol_functions.  */
-  struct compunit_symtab *find_compunit_symtab_by_address (CORE_ADDR address);
+  struct symbol *find_symbol_by_address (CORE_ADDR address);
 
   /* See quick_symbol_functions.  */
   enum language lookup_global_symbol_language (const char *name,

@@ -196,7 +196,7 @@ struct cooked_index_functions : public dwarf2_base_index_functions
     return table;
   }
 
-  struct compunit_symtab *find_compunit_symtab_by_address
+  struct symbol *find_symbol_by_address
     (struct objfile *objfile, CORE_ADDR address) override;
 
   bool has_unexpanded_symtabs (struct objfile *objfile) override

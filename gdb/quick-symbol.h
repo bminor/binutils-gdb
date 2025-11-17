@@ -176,12 +176,10 @@ struct quick_symbol_functions
     (struct objfile *objfile, bound_minimal_symbol msymbol, CORE_ADDR pc,
      struct obj_section *section, int warn_if_readin) = 0;
 
-  /* Return the comp unit from OBJFILE that contains a symbol at
-     ADDRESS.  Return NULL if there is no such comp unit.  Unlike
-     find_pc_sect_compunit_symtab, any sort of symbol (not just text
-     symbols) can be considered, and only exact address matches are
-     considered.  */
-  virtual struct compunit_symtab *find_compunit_symtab_by_address
+  /* Return the symbol from OBJFILE at ADDRESS.  Return NULL if there is
+     no such symbol.  Any sort of symbol (not just text symbols) can be
+     considered, and only exact address matches are considered.  */
+  virtual struct symbol *find_symbol_by_address
     (struct objfile *objfile, CORE_ADDR address) = 0;
 
   /* Call FUN for every file defined in OBJFILE whose symtab is

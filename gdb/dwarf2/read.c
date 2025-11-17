@@ -14556,8 +14556,8 @@ cutu_reader::read_toplevel_die (gdb::array_view<attribute *> extra_attrs)
   return die;
 }
 
-struct compunit_symtab *
-cooked_index_functions::find_compunit_symtab_by_address
+struct symbol *
+cooked_index_functions::find_symbol_by_address
      (struct objfile *objfile, CORE_ADDR address)
 {
   if (objfile->sect_index_data == -1)
@@ -14572,7 +14572,9 @@ cooked_index_functions::find_compunit_symtab_by_address
   if (per_cu == nullptr)
     return nullptr;
 
-  return dw2_instantiate_symtab (per_cu, per_objfile, false);
+  struct compunit_symtab *cu = dw2_instantiate_symtab (per_cu, per_objfile,
+						       false);
+  return cu->symbol_at_address (address);
 }
 
 bool

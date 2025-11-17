@@ -642,7 +642,7 @@ struct psymbol_functions : public quick_symbol_functions
     (struct objfile *objfile, bound_minimal_symbol msymbol, CORE_ADDR pc,
      struct obj_section *section, int warn_if_readin) override;
 
-  struct compunit_symtab *find_compunit_symtab_by_address
+  struct symbol *find_symbol_by_address
     (struct objfile *objfile, CORE_ADDR address) override
   {
     return nullptr;

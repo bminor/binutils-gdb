@@ -2855,14 +2855,9 @@ find_symbol_at_address (CORE_ADDR address)
 	}
       else
 	{
-	  struct compunit_symtab *symtab
-	    = objfile.find_compunit_symtab_by_address (address);
-	  if (symtab != NULL)
-	    {
-	      struct symbol *sym = symtab->symbol_at_address (address);
-	      if (sym != nullptr)
-		return sym;
-	    }
+	  struct symbol *sym = objfile.find_symbol_by_address (address);
+	  if (sym != nullptr)
+	    return sym;
 	}
     }
 

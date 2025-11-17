@@ -480,28 +480,28 @@ objfile::compute_main_name ()
     iter->compute_main_name (this);
 }
 
-struct compunit_symtab *
-objfile::find_compunit_symtab_by_address (CORE_ADDR address)
+struct symbol *
+objfile::find_symbol_by_address (CORE_ADDR address)
 {
   if (debug_symfile)
     gdb_printf (gdb_stdlog,
-		"qf->find_compunit_symtab_by_address (%s, %s)\n",
+		"qf->find_symbol_by_address (%s, %s)\n",
 		objfile_debug_name (this),
 		hex_string (address));
 
-  struct compunit_symtab *result = NULL;
+  struct symbol *result = NULL;
   for (const auto &iter : qf)
     {
-      result = iter->find_compunit_symtab_by_address (this, address);
+      result = iter->find_symbol_by_address (this, address);
       if (result != nullptr)
 	break;
     }
 
   if (debug_symfile)
     gdb_printf (gdb_stdlog,
-		"qf->find_compunit_symtab_by_address (...) = %s\n",
+		"qf->find_symbol_by_address (...) = %s\n",
 		result
-		? debug_symtab_name (result->primary_filetab ())
+		? result->print_name ()
 		: "NULL");
 
   return result;
