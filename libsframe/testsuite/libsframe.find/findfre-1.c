@@ -132,31 +132,31 @@ void test_text_findfre (const char suffix, int64_t text_vaddr,
   /* Find the third FRE in first FDE.  */
   lookup_pc = func1_start_vaddr + 0x15 - sframe_vaddr;
   err = sframe_find_fre (dctx, lookup_pc, &frep);
-  TEST ((err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, &err) == 0x3),
+  TEST ((err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, 0, &err) == 0x3),
 	"findfre-1%c: Find third FRE", suffix);
 
   /* Find an FRE for PC at the end of range covered by FRE.  */
   lookup_pc = func1_start_vaddr + 0x9 - sframe_vaddr;
   err = sframe_find_fre (dctx, lookup_pc, &frep);
-  TEST ((err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, &err) == 0x2),
+  TEST ((err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, 0, &err) == 0x2),
 	"findfre-1%c: Find FRE for last PC covered by FRE", suffix);
 
   /* Find the last FRE in first FDE.  */
   lookup_pc = func1_start_vaddr + 0x39 - sframe_vaddr;
   err = sframe_find_fre (dctx, lookup_pc, &frep);
-  TEST ((err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, &err) == 0x8),
+  TEST ((err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, 0, &err) == 0x8),
 	"findfre-1%c: Find last FRE", suffix);
 
   /* Find the second FRE in second FDE.  */
   lookup_pc = func2_start_vaddr + 0x11 - sframe_vaddr;
   err = sframe_find_fre (dctx, lookup_pc, &frep);
-  TEST ((err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, &err) == 0x12),
+  TEST ((err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, 0, &err) == 0x12),
 	"findfre-1%c: Find second FRE", suffix);
 
   /* Find the first FRE in second FDE.  */
   lookup_pc = func2_start_vaddr + 0x0 - sframe_vaddr;
   err = sframe_find_fre (dctx, lookup_pc, &frep);
-  TEST ((err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, &err) == 0x10),
+  TEST ((err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, 0, &err) == 0x10),
 	"findfre-1%c: Find first FRE", suffix);
 
   /* Find FRE for PC out of range.  Expect error code.  */
