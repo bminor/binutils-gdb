@@ -758,7 +758,7 @@ x86_64-*-gnu*)
 	;;
 xtensa*-*-*linux*)
 	# Target: GNU/Linux Xtensa
-	gdb_target_obs="xtensa-linux-tdep.o symfile-mem.o linux-tdep.o"
+	gdb_target_obs="xtensa-linux-tdep.o symfile-mem.o linux-tdep.o solib-svr4-linux.o"
 	;;
 z80*)
 	# Target: Z80
