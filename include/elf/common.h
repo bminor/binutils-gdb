@@ -755,6 +755,8 @@
 					/*   Note: name must be "LINUX".  */
 #define NT_ARM_ZT       0x40d           /* AArch64 SME2 ZT registers.  */
 					/*   Note: name must be "LINUX".  */
+#define NT_ARM_FPMR     0x40e           /* AArch64 FPMR.  */
+					/*   Note: name must be "LINUX".  */
 #define NT_ARM_GCS	0x410		/* AArch64 Guarded Control Stack
 					   registers.  */
 					/*   Note  name must be "LINUX".  */

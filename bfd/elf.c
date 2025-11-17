@@ -61,6 +61,7 @@ SECTION
 #define NOTE_NAME_LINUX    "LINUX"
 
 /* Names of a pseudo-section which represent core notes.  */
+#define NOTE_PSEUDO_SECTION_AARCH_FPMR		".reg-aarch-fpmr"
 #define NOTE_PSEUDO_SECTION_AARCH_GCS		".reg-aarch-gcs"
 #define NOTE_PSEUDO_SECTION_AARCH_HW_BREAK	".reg-aarch-hw-break"
 #define NOTE_PSEUDO_SECTION_AARCH_HW_WATCH	".reg-aarch-hw-watch"
@@ -10731,6 +10732,15 @@ elfcore_grok_aarch_gcs (bfd *abfd, Elf_Internal_Note *note)
   return elfcore_make_note_pseudosection (abfd, NOTE_PSEUDO_SECTION_AARCH_GCS, note);
 }
 
+/* Convert NOTE into the appropriate note pseudo-section for the AArch64 FPMR.
+ * Return TRUE if successful, otherwise return FALSE.  */
+
+static bool
+elfcore_grok_aarch_fpmr (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, NOTE_PSEUDO_SECTION_AARCH_FPMR, note);
+}
+
 static bool
 elfcore_grok_arc_v2 (bfd *abfd, Elf_Internal_Note *note)
 {
@@ -11164,6 +11174,7 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
 	{
 	case NT_386_TLS:	return elfcore_grok_i386_tls (abfd, note);
 	case NT_ARC_V2:		return elfcore_grok_arc_v2 (abfd, note);
+	case NT_ARM_FPMR:	return elfcore_grok_aarch_fpmr (abfd, note);
 	case NT_ARM_GCS:	return elfcore_grok_aarch_gcs (abfd, note);
 	case NT_ARM_HW_BREAK:	return elfcore_grok_aarch_hw_break (abfd, note);
 	case NT_ARM_HW_WATCH:	return elfcore_grok_aarch_hw_watch (abfd, note);
@@ -12877,6 +12888,22 @@ elfcore_write_aarch_gcs (bfd *abfd, char *buf, int *bufsiz,
 			     aarch_gcs, size);
 }
 
+/* Write the buffer of FPMR value in AARCH_FPMR (length SIZE) into
+   the note buffer BUF and update *BUFSIZ.  ABFD is the bfd the note is being
+   written into.  Return a pointer to the new start of the note buffer, to
+   replace BUF which may no longer be valid.  */
+
+char *
+elfcore_write_aarch_fpmr (bfd *abfd,
+			char *buf,
+			int *bufsiz,
+			const void *aarch_fpmr,
+			int size)
+{
+  return elfcore_write_note (abfd, buf, bufsiz,
+			     NOTE_NAME_LINUX, NT_ARM_FPMR, aarch_fpmr, size);
+}
+
 char *
 elfcore_write_arc_v2 (bfd *abfd,
 		      char *buf,
@@ -12983,6 +13010,7 @@ elfcore_write_register_note (bfd *abfd,
     }
   note_writers [] =
     {
+      { NOTE_PSEUDO_SECTION_AARCH_FPMR,       elfcore_write_aarch_fpmr},
       { NOTE_PSEUDO_SECTION_AARCH_GCS,        elfcore_write_aarch_gcs},
       { NOTE_PSEUDO_SECTION_AARCH_HW_BREAK,   elfcore_write_aarch_hw_break},
       { NOTE_PSEUDO_SECTION_AARCH_HW_WATCH,   elfcore_write_aarch_hw_watch},
