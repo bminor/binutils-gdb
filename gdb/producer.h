@@ -30,8 +30,8 @@ extern int producer_is_gcc_ge_4 (const char *producer);
    is NULL or it isn't GCC.  */
 extern bool producer_is_gcc (const char *producer, int *major, int *minor);
 
-/* Returns nonzero if the given PRODUCER string is GAS and sets the MAJOR
-   and MINOR versions when not NULL.  Returns zero if the given PRODUCER
+/* Return true if the given PRODUCER string is GAS and sets the MAJOR
+   and MINOR versions when not NULL.  Returns false if the given PRODUCER
    is NULL or it isn't GAS.  */
 bool producer_is_gas (const char *producer, int *major, int *minor);
 
