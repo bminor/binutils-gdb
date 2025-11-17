@@ -1955,7 +1955,7 @@ ppc_linux_nat_target::read_description ()
       struct gdb_evrregset_t evrregset;
 
       if (ptrace (PTRACE_GETEVRREGS, tid, 0, &evrregset) >= 0)
-	return tdesc_powerpc_e500l;
+	return tdesc_powerpc_e500l.get ();
 
       /* EIO means that the PTRACE_GETEVRREGS request isn't supported.
 	 Anything else needs to be reported.  */

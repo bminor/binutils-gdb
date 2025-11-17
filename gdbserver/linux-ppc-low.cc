@@ -884,9 +884,9 @@ ppc_target::low_arch_setup ()
   features.wordsize = ppc_linux_target_wordsize (tid);
 
   if (features.wordsize == 4)
-      tdesc = tdesc_powerpc_32l;
+      tdesc = tdesc_powerpc_32l.get ();
   else
-      tdesc = tdesc_powerpc_64l;
+      tdesc = tdesc_powerpc_64l.get ();
 
   current_process ()->tdesc = tdesc;
 
@@ -932,7 +932,7 @@ ppc_target::low_arch_setup ()
      Set the low target's regmap field as appropriately.  */
 #ifndef __powerpc64__
   if (ppc_hwcap & PPC_FEATURE_HAS_SPE)
-    tdesc = tdesc_powerpc_e500l;
+    tdesc = tdesc_powerpc_e500l.get ();
 
   if (!ppc_regmap_adjusted)
     {
@@ -3397,45 +3397,45 @@ ppc_target::get_ipa_tdesc_idx ()
   const target_desc *tdesc = current_process ()->tdesc;
 
 #ifdef __powerpc64__
-  if (tdesc == tdesc_powerpc_64l)
+  if (tdesc == tdesc_powerpc_64l.get ())
     return PPC_TDESC_BASE;
-  if (tdesc == tdesc_powerpc_altivec64l)
+  if (tdesc == tdesc_powerpc_altivec64l.get ())
     return PPC_TDESC_ALTIVEC;
-  if (tdesc == tdesc_powerpc_vsx64l)
+  if (tdesc == tdesc_powerpc_vsx64l.get ())
     return PPC_TDESC_VSX;
-  if (tdesc == tdesc_powerpc_isa205_64l)
+  if (tdesc == tdesc_powerpc_isa205_64l.get ())
     return PPC_TDESC_ISA205;
-  if (tdesc == tdesc_powerpc_isa205_altivec64l)
+  if (tdesc == tdesc_powerpc_isa205_altivec64l.get ())
     return PPC_TDESC_ISA205_ALTIVEC;
-  if (tdesc == tdesc_powerpc_isa205_vsx64l)
+  if (tdesc == tdesc_powerpc_isa205_vsx64l.get ())
     return PPC_TDESC_ISA205_VSX;
-  if (tdesc == tdesc_powerpc_isa205_ppr_dscr_vsx64l)
+  if (tdesc == tdesc_powerpc_isa205_ppr_dscr_vsx64l.get ())
     return PPC_TDESC_ISA205_PPR_DSCR_VSX;
-  if (tdesc == tdesc_powerpc_isa207_vsx64l)
+  if (tdesc == tdesc_powerpc_isa207_vsx64l.get ())
     return PPC_TDESC_ISA207_VSX;
-  if (tdesc == tdesc_powerpc_isa207_htm_vsx64l)
+  if (tdesc == tdesc_powerpc_isa207_htm_vsx64l.get ())
     return PPC_TDESC_ISA207_HTM_VSX;
 #endif
 
-  if (tdesc == tdesc_powerpc_32l)
+  if (tdesc == tdesc_powerpc_32l.get ())
     return PPC_TDESC_BASE;
-  if (tdesc == tdesc_powerpc_altivec32l)
+  if (tdesc == tdesc_powerpc_altivec32l.get ())
     return PPC_TDESC_ALTIVEC;
-  if (tdesc == tdesc_powerpc_vsx32l)
+  if (tdesc == tdesc_powerpc_vsx32l.get ())
     return PPC_TDESC_VSX;
-  if (tdesc == tdesc_powerpc_isa205_32l)
+  if (tdesc == tdesc_powerpc_isa205_32l.get ())
     return PPC_TDESC_ISA205;
-  if (tdesc == tdesc_powerpc_isa205_altivec32l)
+  if (tdesc == tdesc_powerpc_isa205_altivec32l.get ())
     return PPC_TDESC_ISA205_ALTIVEC;
-  if (tdesc == tdesc_powerpc_isa205_vsx32l)
+  if (tdesc == tdesc_powerpc_isa205_vsx32l.get ())
     return PPC_TDESC_ISA205_VSX;
-  if (tdesc == tdesc_powerpc_isa205_ppr_dscr_vsx32l)
+  if (tdesc == tdesc_powerpc_isa205_ppr_dscr_vsx32l.get ())
     return PPC_TDESC_ISA205_PPR_DSCR_VSX;
-  if (tdesc == tdesc_powerpc_isa207_vsx32l)
+  if (tdesc == tdesc_powerpc_isa207_vsx32l.get ())
     return PPC_TDESC_ISA207_VSX;
-  if (tdesc == tdesc_powerpc_isa207_htm_vsx32l)
+  if (tdesc == tdesc_powerpc_isa207_htm_vsx32l.get ())
     return PPC_TDESC_ISA207_HTM_VSX;
-  if (tdesc == tdesc_powerpc_e500l)
+  if (tdesc == tdesc_powerpc_e500l.get ())
     return PPC_TDESC_E500;
 
   return 0;

@@ -4,7 +4,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-const struct target_desc *tdesc_powerpc_isa205_ppr_dscr_vsx64l;
+const_target_desc_up tdesc_powerpc_isa205_ppr_dscr_vsx64l;
 static void
 initialize_tdesc_powerpc_isa205_ppr_dscr_vsx64l (void)
 {
@@ -195,5 +195,5 @@ initialize_tdesc_powerpc_isa205_ppr_dscr_vsx64l (void)
   feature = tdesc_create_feature (result.get (), "org.gnu.gdb.power.dscr");
   tdesc_create_reg (feature, "dscr", 140, 1, NULL, 64, "uint64");
 
-  tdesc_powerpc_isa205_ppr_dscr_vsx64l = result.release ();
+  tdesc_powerpc_isa205_ppr_dscr_vsx64l = std::move (result);
 }

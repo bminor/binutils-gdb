@@ -322,12 +322,14 @@ typedef std::unique_ptr<tdesc_feature> tdesc_feature_up;
 
 struct target_desc_deleter
 {
-  void operator() (struct target_desc *desc) const;
+  void operator() (const target_desc *desc) const;
 };
 
 /* A unique pointer specialization that holds a target_desc.  */
 
-typedef std::unique_ptr<target_desc, target_desc_deleter> target_desc_up;
+using target_desc_up = std::unique_ptr<target_desc, target_desc_deleter>;
+using const_target_desc_up
+  = std::unique_ptr<const target_desc, target_desc_deleter>;
 
 /* Allocate a new target_desc.  */
 target_desc_up allocate_target_description (void);

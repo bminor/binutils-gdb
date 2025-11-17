@@ -35,7 +35,8 @@ aarch64_linux_read_description (const aarch64_features &features)
      this function as the in-process-agent calls this function from a
      constructor function, when globals might not yet have been
      initialised.  */
-  static gdb::unordered_map<aarch64_features, target_desc *> tdesc_aarch64_map;
+  static gdb::unordered_map<aarch64_features, const_target_desc_up>
+    tdesc_aarch64_map;
 
   if (features.vq > AARCH64_MAX_SVE_VQ)
     error (_("VQ is %" PRIu64 ", maximum supported value is %d"), features.vq,
@@ -46,11 +47,11 @@ aarch64_linux_read_description (const aarch64_features &features)
 	   features.svq,
 	   AARCH64_MAX_SVE_VQ);
 
-  struct target_desc *tdesc = tdesc_aarch64_map[features];
+  const_target_desc_up &tdesc = tdesc_aarch64_map[features];
 
-  if (tdesc == NULL)
+  if (tdesc == nullptr)
     {
-      tdesc = aarch64_create_target_description (features);
+      target_desc_up new_tdesc = aarch64_create_target_description (features);
 
       /* Configure the expedited registers.  Calling init_target_desc takes
 	 a copy of all the strings pointed to by expedited_registers so this
@@ -67,11 +68,11 @@ aarch64_linux_read_description (const aarch64_features &features)
 
       expedited_registers.push_back (nullptr);
 
-      init_target_desc (tdesc, (const char **) expedited_registers.data (),
+      init_target_desc (new_tdesc.get (), (const char **) expedited_registers.data (),
 			GDB_OSABI_LINUX);
 
-      tdesc_aarch64_map[features] = tdesc;
+      tdesc = std::move (new_tdesc);
     }
 
-  return tdesc;
+  return tdesc.get ();
 }

@@ -30,7 +30,7 @@ const struct target_desc *
 amd64_linux_read_description (uint64_t xstate_bv, bool is_x32)
 {
   /* The type used for the amd64 and x32 target description caches.  */
-  using tdesc_cache_type = gdb::unordered_map<uint64_t, target_desc_up>;
+  using tdesc_cache_type = gdb::unordered_map<uint64_t, const_target_desc_up>;
 
   /* Caches for the previously seen amd64 and x32 target descriptions,
      indexed by the xstate_bv value that created the target
@@ -50,19 +50,18 @@ amd64_linux_read_description (uint64_t xstate_bv, bool is_x32)
     ? x86_linux_x32_xstate_bv_feature_mask ()
     : x86_linux_amd64_xstate_bv_feature_mask ();
 
-  const auto it = tdesc_cache.find (xstate_bv);
-  if (it != tdesc_cache.end ())
-    return it->second.get ();
+  const_target_desc_up &tdesc = tdesc_cache[xstate_bv];
+  if (tdesc != nullptr)
+    return tdesc.get ();
 
   /* Create the previously unseen target description.  */
-  target_desc_up tdesc (amd64_create_target_description (xstate_bv, is_x32,
-							 true, true));
-  x86_linux_post_init_tdesc (tdesc.get (), true);
+  target_desc_up new_tdesc
+    = amd64_create_target_description (xstate_bv, is_x32, true, true);
+  x86_linux_post_init_tdesc (new_tdesc.get (), true);
 
   /* Add to the cache, and return a pointer borrowed from the
      target_desc_up.  This is safe as the cache (and the pointers contained
      within it) are not deleted until GDB exits.  */
-  target_desc *ptr = tdesc.get ();
-  tdesc_cache.emplace (xstate_bv, std::move (tdesc));
-  return ptr;
+  tdesc = std::move (new_tdesc);
+  return tdesc.get ();
 }

@@ -18,6 +18,8 @@
 #ifndef GDB_ARCH_TIC6X_H
 #define GDB_ARCH_TIC6X_H
 
+#include "gdbsupport/tdesc.h"
+
 enum c6x_feature
 {
   C6X_CORE,
@@ -26,6 +28,6 @@ enum c6x_feature
   C6X_LAST,
 };
 
-target_desc *tic6x_create_target_description (enum c6x_feature feature);
+target_desc_up tic6x_create_target_description (c6x_feature feature);
 
 #endif /* GDB_ARCH_TIC6X_H */

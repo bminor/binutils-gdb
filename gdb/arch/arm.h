@@ -238,10 +238,11 @@ unsigned long shifted_reg_val (reg_buffer_common *regcache,
 
 /* Create an Arm target description with the given FP hardware type.  */
 
-target_desc *arm_create_target_description (arm_fp_type fp_type, bool tls);
+target_desc_up arm_create_target_description (arm_fp_type fp_type, bool tls);
 
 /* Create an Arm M-profile target description with the given hardware type.  */
 
-target_desc *arm_create_mprofile_target_description (arm_m_profile_type m_type);
+target_desc_up arm_create_mprofile_target_description
+  (arm_m_profile_type m_type);
 
 #endif /* GDB_ARCH_ARM_H */

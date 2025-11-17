@@ -20,6 +20,7 @@
 #define GDBSERVER_WIN32_LOW_H
 
 #include <windows.h>
+#include "gdbsupport/tdesc.h"
 #include "nat/windows-nat.h"
 #include "gdbsupport/osabi.h"
 
@@ -27,9 +28,9 @@ struct target_desc;
 
 /* The inferior's target description.  This is a global because the
    Windows ports support neither bi-arch nor multi-process.  */
-extern const struct target_desc *win32_tdesc;
+extern const_target_desc_up win32_tdesc;
 #ifdef __x86_64__
-extern const struct target_desc *wow64_win32_tdesc;
+extern const_target_desc_up wow64_win32_tdesc;
 #endif
 
 #ifdef __CYGWIN__

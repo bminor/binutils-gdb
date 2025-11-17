@@ -32,7 +32,7 @@
 
 /* See arch/aarch64.h.  */
 
-target_desc *
+target_desc_up
 aarch64_create_target_description (const aarch64_features &features)
 {
   target_desc_up tdesc = allocate_target_description ();
@@ -77,7 +77,7 @@ aarch64_create_target_description (const aarch64_features &features)
   if (features.fpmr)
     regnum = create_feature_aarch64_fpmr (tdesc.get (), regnum);
 
-  return tdesc.release ();
+  return tdesc;
 }
 
 /* See arch/aarch64.h.  */

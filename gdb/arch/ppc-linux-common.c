@@ -50,34 +50,34 @@ ppc_linux_match_description (struct ppc_linux_features features)
   if (features.wordsize == 8)
     {
       if (features.vsx)
-	tdesc = (features.htm? tdesc_powerpc_isa207_htm_vsx64l
-		 : features.isa207? tdesc_powerpc_isa207_vsx64l
-		 : features.ppr_dscr? tdesc_powerpc_isa205_ppr_dscr_vsx64l
-		 : features.isa205? tdesc_powerpc_isa205_vsx64l
-		 : tdesc_powerpc_vsx64l);
+	tdesc = (features.htm ? tdesc_powerpc_isa207_htm_vsx64l
+		 : features.isa207 ? tdesc_powerpc_isa207_vsx64l
+		 : features.ppr_dscr ? tdesc_powerpc_isa205_ppr_dscr_vsx64l
+		 : features.isa205 ? tdesc_powerpc_isa205_vsx64l
+		 : tdesc_powerpc_vsx64l).get ();
       else if (features.altivec)
-	tdesc = (features.isa205? tdesc_powerpc_isa205_altivec64l
-		 : tdesc_powerpc_altivec64l);
+	tdesc = (features.isa205 ? tdesc_powerpc_isa205_altivec64l
+		 : tdesc_powerpc_altivec64l).get ();
       else
-	tdesc = (features.isa205? tdesc_powerpc_isa205_64l
-		 : tdesc_powerpc_64l);
+	tdesc = (features.isa205 ? tdesc_powerpc_isa205_64l
+		 : tdesc_powerpc_64l).get ();
     }
   else
     {
       gdb_assert (features.wordsize == 4);
 
       if (features.vsx)
-	tdesc = (features.htm? tdesc_powerpc_isa207_htm_vsx32l
-		 : features.isa207? tdesc_powerpc_isa207_vsx32l
-		 : features.ppr_dscr? tdesc_powerpc_isa205_ppr_dscr_vsx32l
-		 : features.isa205? tdesc_powerpc_isa205_vsx32l
-		 : tdesc_powerpc_vsx32l);
+	tdesc = (features.htm ? tdesc_powerpc_isa207_htm_vsx32l
+		 : features.isa207 ? tdesc_powerpc_isa207_vsx32l
+		 : features.ppr_dscr ? tdesc_powerpc_isa205_ppr_dscr_vsx32l
+		 : features.isa205 ? tdesc_powerpc_isa205_vsx32l
+		 : tdesc_powerpc_vsx32l).get ();
       else if (features.altivec)
-	tdesc = (features.isa205? tdesc_powerpc_isa205_altivec32l
-		 : tdesc_powerpc_altivec32l);
+	tdesc = (features.isa205 ? tdesc_powerpc_isa205_altivec32l
+		 : tdesc_powerpc_altivec32l).get ();
       else
-	tdesc = (features.isa205? tdesc_powerpc_isa205_32l
-		 : tdesc_powerpc_32l);
+	tdesc = (features.isa205 ? tdesc_powerpc_isa205_32l
+		 : tdesc_powerpc_32l).get ();
     }
 
   gdb_assert (tdesc != NULL);

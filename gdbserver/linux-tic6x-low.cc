@@ -209,17 +209,18 @@ static struct usrregs_info tic6x_usrregs_info =
 static const struct target_desc *
 tic6x_read_description (enum c6x_feature feature)
 {
-  static target_desc *tdescs[C6X_LAST] = { };
-  struct target_desc **tdesc = &tdescs[feature];
+  static const_target_desc_up tdescs[C6X_LAST];
+  const_target_desc_up &tdesc = &tdescs[feature];
 
-  if (*tdesc == NULL)
+  if (tdesc == nullptr)
     {
-      *tdesc = tic6x_create_target_description (feature);
+      target_desc_up new_tdesc = tic6x_create_target_description (feature);
       static const char *expedite_regs[] = { "A15", "PC", NULL };
-      init_target_desc (*tdesc, expedite_regs, GDB_OSABI_LINUX);
+      init_target_desc (new_tdesc.get (), expedite_regs, GDB_OSABI_LINUX);
+      tdesc = std::move (new_tdesc);
     }
 
-  return *tdesc;
+  return tdesc->get ();
 }
 
 bool

@@ -4,7 +4,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-const struct target_desc *tdesc_mips64_linux;
+const_target_desc_up tdesc_mips64_linux;
 static void
 initialize_tdesc_mips64_linux (void)
 {
@@ -96,5 +96,5 @@ initialize_tdesc_mips64_linux (void)
   feature = tdesc_create_feature (result.get (), "org.gnu.gdb.mips.linux");
   tdesc_create_reg (feature, "restart", 72, 1, "system", 64, "int");
 
-  tdesc_mips64_linux = result.release ();
+  tdesc_mips64_linux = std::move (result);
 }

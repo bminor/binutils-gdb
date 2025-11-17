@@ -4,7 +4,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-const struct target_desc *tdesc_powerpc_7400;
+const_target_desc_up tdesc_powerpc_7400;
 static void
 initialize_tdesc_powerpc_7400 (void)
 {
@@ -199,5 +199,5 @@ initialize_tdesc_powerpc_7400 (void)
   tdesc_create_reg (feature, "vscr", 151, 1, "vector", 32, "int");
   tdesc_create_reg (feature, "vrsave", 152, 1, "vector", 32, "int");
 
-  tdesc_powerpc_7400 = result.release ();
+  tdesc_powerpc_7400 = std::move (result);
 }

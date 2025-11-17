@@ -109,7 +109,7 @@ namespace std
 
 /* Create the aarch64 target description.  */
 
-target_desc *
+target_desc_up
   aarch64_create_target_description (const aarch64_features &features);
 
 /* Given a pointer value POINTER and a MASK of non-address bits, remove the

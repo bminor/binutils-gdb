@@ -358,10 +358,10 @@ s390_core_read_description (struct gdbarch *gdbarch,
 		vx ? tdesc_s390_vx_linux64 :
 		te ? tdesc_s390_te_linux64 :
 		v2 ? tdesc_s390_linux64v2 :
-		v1 ? tdesc_s390_linux64v1 : tdesc_s390_linux64);
+		v1 ? tdesc_s390_linux64v1 : tdesc_s390_linux64).get ();
       else
 	return (v2 ? tdesc_s390_linux32v2 :
-		v1 ? tdesc_s390_linux32v1 : tdesc_s390_linux32);
+		v1 ? tdesc_s390_linux32v1 : tdesc_s390_linux32).get ();
 
     case s390x_sizeof_gregset:
       return (gs ? tdesc_s390x_gs_linux64 :
@@ -369,7 +369,7 @@ s390_core_read_description (struct gdbarch *gdbarch,
 	      vx ? tdesc_s390x_vx_linux64 :
 	      te ? tdesc_s390x_te_linux64 :
 	      v2 ? tdesc_s390x_linux64v2 :
-	      v1 ? tdesc_s390x_linux64v1 : tdesc_s390x_linux64);
+	      v1 ? tdesc_s390x_linux64v1 : tdesc_s390x_linux64).get ();
 
     default:
       return NULL;

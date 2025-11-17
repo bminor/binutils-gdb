@@ -23,26 +23,26 @@
 #include <inttypes.h>
 
 /* All possible Arm target descriptors.  */
-static struct target_desc *tdesc_arm_list[ARM_FP_TYPE_INVALID];
+static const_target_desc_up tdesc_arm_list[ARM_FP_TYPE_INVALID];
 
 /* See linux-arm-tdesc.h.  */
 
 const target_desc *
 arm_linux_read_description (arm_fp_type fp_type)
 {
-  struct target_desc *tdesc = tdesc_arm_list[fp_type];
+  const_target_desc_up &tdesc = tdesc_arm_list[fp_type];
 
   if (tdesc == nullptr)
     {
-      tdesc = arm_create_target_description (fp_type, false);
+      target_desc_up new_tdesc = arm_create_target_description (fp_type, false);
 
       static const char *expedite_regs[] = { "r11", "sp", "pc", 0 };
-      init_target_desc (tdesc, expedite_regs, GDB_OSABI_LINUX);
+      init_target_desc (new_tdesc.get (), expedite_regs, GDB_OSABI_LINUX);
 
-      tdesc_arm_list[fp_type] = tdesc;
+      tdesc = std::move (new_tdesc);
     }
 
-  return tdesc;
+  return tdesc.get ();
 }
 
 /* See linux-arm-tdesc.h.  */
@@ -56,7 +56,7 @@ arm_linux_get_tdesc_fp_type (const target_desc *tdesc)
      is ok, because tdesc must be one of the initialised ones.  */
   for (int i = ARM_FP_TYPE_NONE; i < ARM_FP_TYPE_INVALID; i++)
     {
-      if (tdesc == tdesc_arm_list[i])
+      if (tdesc == tdesc_arm_list[i].get ())
 	return (arm_fp_type) i;
     }
 

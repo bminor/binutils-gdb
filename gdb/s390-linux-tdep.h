@@ -20,6 +20,8 @@
 #ifndef GDB_S390_LINUX_TDEP_H
 #define GDB_S390_LINUX_TDEP_H
 
+#include "gdbsupport/tdesc.h"
+
 #define S390_IS_GREGSET_REGNUM(i)					\
   (((i) >= S390_PSWM_REGNUM && (i) <= S390_A15_REGNUM)			\
    || ((i) >= S390_R0_UPPER_REGNUM && (i) <= S390_R15_UPPER_REGNUM)	\
@@ -48,20 +50,20 @@ extern const struct regset s390_gs_regset;
 extern const struct regset s390_gsbc_regset;
 
 /* GNU/Linux target descriptions.  */
-extern const struct target_desc *tdesc_s390_linux32v1;
-extern const struct target_desc *tdesc_s390_linux32v2;
-extern const struct target_desc *tdesc_s390_linux64;
-extern const struct target_desc *tdesc_s390_linux64v1;
-extern const struct target_desc *tdesc_s390_linux64v2;
-extern const struct target_desc *tdesc_s390_te_linux64;
-extern const struct target_desc *tdesc_s390_vx_linux64;
-extern const struct target_desc *tdesc_s390_tevx_linux64;
-extern const struct target_desc *tdesc_s390_gs_linux64;
-extern const struct target_desc *tdesc_s390x_linux64v1;
-extern const struct target_desc *tdesc_s390x_linux64v2;
-extern const struct target_desc *tdesc_s390x_te_linux64;
-extern const struct target_desc *tdesc_s390x_vx_linux64;
-extern const struct target_desc *tdesc_s390x_tevx_linux64;
-extern const struct target_desc *tdesc_s390x_gs_linux64;
+extern const_target_desc_up tdesc_s390_linux32v1;
+extern const_target_desc_up tdesc_s390_linux32v2;
+extern const_target_desc_up tdesc_s390_linux64;
+extern const_target_desc_up tdesc_s390_linux64v1;
+extern const_target_desc_up tdesc_s390_linux64v2;
+extern const_target_desc_up tdesc_s390_te_linux64;
+extern const_target_desc_up tdesc_s390_vx_linux64;
+extern const_target_desc_up tdesc_s390_tevx_linux64;
+extern const_target_desc_up tdesc_s390_gs_linux64;
+extern const_target_desc_up tdesc_s390x_linux64v1;
+extern const_target_desc_up tdesc_s390x_linux64v2;
+extern const_target_desc_up tdesc_s390x_te_linux64;
+extern const_target_desc_up tdesc_s390x_vx_linux64;
+extern const_target_desc_up tdesc_s390x_tevx_linux64;
+extern const_target_desc_up tdesc_s390x_gs_linux64;
 
 #endif /* GDB_S390_LINUX_TDEP_H */

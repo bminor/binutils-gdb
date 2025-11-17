@@ -94,13 +94,12 @@ netbsd_aarch64_target::get_regs_info ()
 void
 netbsd_aarch64_target::low_arch_setup ()
 {
-  target_desc *tdesc
-    = aarch64_create_target_description ({});
+  target_desc_up tdesc = aarch64_create_target_description ({});
 
   static const char *expedite_regs_aarch64[] = { "x29", "sp", "pc", NULL };
-  init_target_desc (tdesc, expedite_regs_aarch64, GDB_OSABI_NETBSD);
+  init_target_desc (tdesc.get (), expedite_regs_aarch64, GDB_OSABI_NETBSD);
 
-  current_process ()->tdesc = tdesc;
+  current_process ()->tdesc = tdesc.release ();
 }
 
 /* The singleton target ops object.  */

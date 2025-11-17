@@ -975,7 +975,7 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   if (tdesc == NULL)
-      tdesc = tdesc_rx;
+    tdesc = tdesc_rx.get ();
 
   /* Check any target description for validity.  */
   if (tdesc_has_registers (tdesc))

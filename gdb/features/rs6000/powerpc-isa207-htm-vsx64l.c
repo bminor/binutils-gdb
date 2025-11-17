@@ -4,7 +4,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-const struct target_desc *tdesc_powerpc_isa207_htm_vsx64l;
+const_target_desc_up tdesc_powerpc_isa207_htm_vsx64l;
 static void
 initialize_tdesc_powerpc_isa207_htm_vsx64l (void)
 {
@@ -391,5 +391,5 @@ initialize_tdesc_powerpc_isa207_htm_vsx64l (void)
   feature = tdesc_create_feature (result.get (), "org.gnu.gdb.power.htm.tar");
   tdesc_create_reg (feature, "ctar", 290, 0, NULL, 64, "uint64");
 
-  tdesc_powerpc_isa207_htm_vsx64l = result.release ();
+  tdesc_powerpc_isa207_htm_vsx64l = std::move (result);
 }

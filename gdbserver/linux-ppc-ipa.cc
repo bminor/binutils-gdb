@@ -177,51 +177,51 @@ get_ipa_tdesc (int idx)
     {
 #ifdef __powerpc64__
     case PPC_TDESC_BASE:
-      return tdesc_powerpc_64l;
+      return tdesc_powerpc_64l.get ();
     case PPC_TDESC_ALTIVEC:
-      return tdesc_powerpc_altivec64l;
+      return tdesc_powerpc_altivec64l.get ();
     case PPC_TDESC_VSX:
-      return tdesc_powerpc_vsx64l;
+      return tdesc_powerpc_vsx64l.get ();
     case PPC_TDESC_ISA205:
-      return tdesc_powerpc_isa205_64l;
+      return tdesc_powerpc_isa205_64l.get ();
     case PPC_TDESC_ISA205_ALTIVEC:
-      return tdesc_powerpc_isa205_altivec64l;
+      return tdesc_powerpc_isa205_altivec64l.get ();
     case PPC_TDESC_ISA205_VSX:
-      return tdesc_powerpc_isa205_vsx64l;
+      return tdesc_powerpc_isa205_vsx64l.get ();
     case PPC_TDESC_ISA205_PPR_DSCR_VSX:
-      return tdesc_powerpc_isa205_ppr_dscr_vsx64l;
+      return tdesc_powerpc_isa205_ppr_dscr_vsx64l.get ();
     case PPC_TDESC_ISA207_VSX:
-      return tdesc_powerpc_isa207_vsx64l;
+      return tdesc_powerpc_isa207_vsx64l.get ();
     case PPC_TDESC_ISA207_HTM_VSX:
-      return tdesc_powerpc_isa207_htm_vsx64l;
+      return tdesc_powerpc_isa207_htm_vsx64l.get ();
 #else
     case PPC_TDESC_BASE:
-      return tdesc_powerpc_32l;
+      return tdesc_powerpc_32l.get ();
     case PPC_TDESC_ALTIVEC:
-      return tdesc_powerpc_altivec32l;
+      return tdesc_powerpc_altivec32l.get ();
     case PPC_TDESC_VSX:
-      return tdesc_powerpc_vsx32l;
+      return tdesc_powerpc_vsx32l.get ();
     case PPC_TDESC_ISA205:
-      return tdesc_powerpc_isa205_32l;
+      return tdesc_powerpc_isa205_32l.get ();
     case PPC_TDESC_ISA205_ALTIVEC:
-      return tdesc_powerpc_isa205_altivec32l;
+      return tdesc_powerpc_isa205_altivec32l.get ();
     case PPC_TDESC_ISA205_VSX:
-      return tdesc_powerpc_isa205_vsx32l;
+      return tdesc_powerpc_isa205_vsx32l.get ();
     case PPC_TDESC_ISA205_PPR_DSCR_VSX:
-      return tdesc_powerpc_isa205_ppr_dscr_vsx32l;
+      return tdesc_powerpc_isa205_ppr_dscr_vsx32l.get ();
     case PPC_TDESC_ISA207_VSX:
-      return tdesc_powerpc_isa207_vsx32l;
+      return tdesc_powerpc_isa207_vsx32l.get ();
     case PPC_TDESC_ISA207_HTM_VSX:
-      return tdesc_powerpc_isa207_htm_vsx32l;
+      return tdesc_powerpc_isa207_htm_vsx32l.get ();
     case PPC_TDESC_E500:
-      return tdesc_powerpc_e500l;
+      return tdesc_powerpc_e500l.get ();
 #endif
     default:
       internal_error ("unknown ipa tdesc index: %d", idx);
 #ifdef __powerpc64__
-      return tdesc_powerpc_64l;
+      return tdesc_powerpc_64l.get ();
 #else
-      return tdesc_powerpc_32l;
+      return tdesc_powerpc_32l.get ();
 #endif
     }
 }

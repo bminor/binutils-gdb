@@ -4,7 +4,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-const struct target_desc *tdesc_powerpc_isa205_altivec64l;
+const_target_desc_up tdesc_powerpc_isa205_altivec64l;
 static void
 initialize_tdesc_powerpc_isa205_altivec64l (void)
 {
@@ -155,5 +155,5 @@ initialize_tdesc_powerpc_isa205_altivec64l (void)
   tdesc_create_reg (feature, "vscr", 105, 1, "vector", 32, "int");
   tdesc_create_reg (feature, "vrsave", 106, 1, "vector", 32, "int");
 
-  tdesc_powerpc_isa205_altivec64l = result.release ();
+  tdesc_powerpc_isa205_altivec64l = std::move (result);
 }

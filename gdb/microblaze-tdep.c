@@ -711,11 +711,11 @@ microblaze_register_g_packet_guesses (struct gdbarch *gdbarch)
 {
   register_remote_g_packet_guess (gdbarch,
 				  4 * MICROBLAZE_NUM_CORE_REGS,
-				  tdesc_microblaze);
+				  tdesc_microblaze.get ());
 
   register_remote_g_packet_guess (gdbarch,
 				  4 * MICROBLAZE_NUM_REGS,
-				  tdesc_microblaze_with_stack_protect);
+				  tdesc_microblaze_with_stack_protect.get ());
 }
 
 static struct gdbarch *
@@ -729,7 +729,7 @@ microblaze_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (arches != NULL)
     return arches->gdbarch;
   if (tdesc == NULL)
-    tdesc = tdesc_microblaze;
+    tdesc = tdesc_microblaze.get ();
 
   /* Check any target description for validity.  */
   if (tdesc_has_registers (tdesc))

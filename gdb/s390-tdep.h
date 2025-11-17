@@ -20,6 +20,7 @@
 #ifndef GDB_S390_TDEP_H
 #define GDB_S390_TDEP_H
 
+#include "gdbsupport/tdesc.h"
 #include "prologue-value.h"
 #include "gdbarch.h"
 
@@ -320,7 +321,7 @@ extern struct value *s390_trad_frame_prev_register
     (const frame_info_ptr &this_frame, struct trad_frame_saved_reg saved_regs[],
      int regnum);
 
-extern const struct target_desc *tdesc_s390_linux32;
-extern const struct target_desc *tdesc_s390x_linux64;
+extern const_target_desc_up tdesc_s390_linux32;
+extern const_target_desc_up tdesc_s390x_linux64;
 
 #endif /* GDB_S390_TDEP_H */

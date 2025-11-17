@@ -541,21 +541,21 @@ static const unsigned char i386_win32_breakpoint = 0xcc;
 static void
 i386_arch_setup (void)
 {
-  struct target_desc *tdesc;
+ target_desc_up tdesc;
 
 #ifdef __x86_64__
   tdesc = amd64_create_target_description (X86_XSTATE_SSE_MASK, false,
 					   false, false);
-  init_target_desc (tdesc, amd64_expedite_regs, WINDOWS_OSABI);
-  win32_tdesc = tdesc;
+  init_target_desc (tdesc.get (), amd64_expedite_regs, WINDOWS_OSABI);
+  win32_tdesc = std::move (tdesc);
 #endif
 
   tdesc = i386_create_target_description (X86_XSTATE_SSE_MASK, false, false);
-  init_target_desc (tdesc, i386_expedite_regs, WINDOWS_OSABI);
+  init_target_desc (tdesc.get (), i386_expedite_regs, WINDOWS_OSABI);
 #ifdef __x86_64__
-  wow64_win32_tdesc = tdesc;
+  wow64_win32_tdesc = std::move (tdesc);
 #else
-  win32_tdesc = tdesc;
+  win32_tdesc = std::move (tdesc);
 #endif
 }
 

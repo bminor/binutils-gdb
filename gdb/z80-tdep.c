@@ -1085,8 +1085,10 @@ z80_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   const struct target_desc *tdesc = info.target_desc;
 
   if (!tdesc_has_registers (tdesc))
-    /* Pick a default target description.  */
-    tdesc = tdesc_z80;
+    {
+      /* Pick a default target description.  */
+      tdesc = tdesc_z80.get ();
+    }
 
   /* Check any target description for validity.  */
   if (tdesc_has_registers (tdesc))

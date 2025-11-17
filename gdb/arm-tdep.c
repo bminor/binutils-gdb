@@ -240,8 +240,8 @@ static const char **valid_disassembly_styles;
 static const char *disassembly_style;
 
 /* All possible arm target descriptors.  */
-static struct target_desc *tdesc_arm_list[ARM_FP_TYPE_INVALID][2];
-static struct target_desc *tdesc_arm_mprofile_list[ARM_M_TYPE_INVALID];
+static const_target_desc_up tdesc_arm_list[ARM_FP_TYPE_INVALID][2];
+static const_target_desc_up tdesc_arm_mprofile_list[ARM_M_TYPE_INVALID];
 
 /* This is used to keep the bfd arch_info in sync with the disassembly
    style.  */
@@ -14961,15 +14961,12 @@ arm_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 const target_desc *
 arm_read_description (arm_fp_type fp_type, bool tls)
 {
-  struct target_desc *tdesc = tdesc_arm_list[fp_type][tls];
+  const_target_desc_up &tdesc = tdesc_arm_list[fp_type][tls];
 
   if (tdesc == nullptr)
-    {
-      tdesc = arm_create_target_description (fp_type, tls);
-      tdesc_arm_list[fp_type][tls] = tdesc;
-    }
+    tdesc = arm_create_target_description (fp_type, tls);
 
-  return tdesc;
+  return tdesc.get ();
 }
 
 /* See arm-tdep.h.  */
@@ -14977,13 +14974,10 @@ arm_read_description (arm_fp_type fp_type, bool tls)
 const target_desc *
 arm_read_mprofile_description (arm_m_profile_type m_type)
 {
-  struct target_desc *tdesc = tdesc_arm_mprofile_list[m_type];
+  const_target_desc_up &tdesc = tdesc_arm_mprofile_list[m_type];
 
   if (tdesc == nullptr)
-    {
-      tdesc = arm_create_mprofile_target_description (m_type);
-      tdesc_arm_mprofile_list[m_type] = tdesc;
-    }
+    tdesc = arm_create_mprofile_target_description (m_type);
 
-  return tdesc;
+  return tdesc.get ();
 }

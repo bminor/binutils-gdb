@@ -34,7 +34,7 @@
 
 /* See arch/amd64.h.  */
 
-target_desc *
+target_desc_up
 amd64_create_target_description (uint64_t xstate_bv, bool is_x32,
 				 bool is_linux, bool segments)
 {
@@ -78,5 +78,5 @@ amd64_create_target_description (uint64_t xstate_bv, bool is_x32,
 	regnum = create_feature_i386_32bit_ssp (tdesc.get (), regnum);
     }
 
-  return tdesc.release ();
+  return tdesc;
 }

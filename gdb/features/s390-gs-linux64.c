@@ -4,7 +4,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-const struct target_desc *tdesc_s390_gs_linux64;
+const_target_desc_up tdesc_s390_gs_linux64;
 static void
 initialize_tdesc_s390_gs_linux64 (void)
 {
@@ -196,5 +196,5 @@ initialize_tdesc_s390_gs_linux64 (void)
   tdesc_create_reg (feature, "bc_gssm", 126, 1, "gs", 64, "uint64");
   tdesc_create_reg (feature, "bc_gsepla", 127, 1, "gs", 64, "data_ptr");
 
-  tdesc_s390_gs_linux64 = result.release ();
+  tdesc_s390_gs_linux64 = std::move (result);
 }

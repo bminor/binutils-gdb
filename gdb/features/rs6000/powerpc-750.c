@@ -4,7 +4,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-const struct target_desc *tdesc_powerpc_750;
+const_target_desc_up tdesc_powerpc_750;
 static void
 initialize_tdesc_powerpc_750 (void)
 {
@@ -160,5 +160,5 @@ initialize_tdesc_powerpc_750 (void)
   tdesc_create_reg (feature, "thrm2", 141, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "thrm3", 142, 1, NULL, 32, "int");
 
-  tdesc_powerpc_750 = result.release ();
+  tdesc_powerpc_750 = std::move (result);
 }

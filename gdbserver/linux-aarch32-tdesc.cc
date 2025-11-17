@@ -22,7 +22,7 @@
 #include "arch/aarch32.h"
 #include <inttypes.h>
 
-static struct target_desc *tdesc_aarch32;
+static const_target_desc_up tdesc_aarch32;
 
 /* See linux-aarch32-tdesc.h.  */
 
@@ -31,12 +31,13 @@ aarch32_linux_read_description ()
 {
   if (tdesc_aarch32 == nullptr)
     {
-      tdesc_aarch32 = aarch32_create_target_description (false);
+      target_desc_up new_tdesc = aarch32_create_target_description (false);
 
       static const char *expedite_regs[] = { "r11", "sp", "pc", 0 };
-      init_target_desc (tdesc_aarch32, expedite_regs, GDB_OSABI_LINUX);
+      init_target_desc (new_tdesc.get (), expedite_regs, GDB_OSABI_LINUX);
+      tdesc_aarch32 = std::move (new_tdesc);
     }
-  return tdesc_aarch32;
+  return tdesc_aarch32.get ();
 }
 
 /* See linux-aarch32-tdesc.h.  */
@@ -45,5 +46,5 @@ bool
 is_aarch32_linux_description (const target_desc *tdesc)
 {
   gdb_assert (tdesc != nullptr);
-  return tdesc == tdesc_aarch32;
+  return tdesc == tdesc_aarch32.get ();
 }

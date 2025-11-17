@@ -25,7 +25,7 @@
 
 /* Create tic6x target descriptions according to FEATURE.  */
 
-target_desc *
+target_desc_up
 tic6x_create_target_description (enum c6x_feature feature)
 {
   target_desc_up tdesc = allocate_target_description ();
@@ -43,5 +43,5 @@ tic6x_create_target_description (enum c6x_feature feature)
   if (feature == C6X_C6XP)
     regnum = create_feature_tic6x_c6xp (tdesc.get (), regnum);
 
-  return tdesc.release ();
+  return tdesc;
 }

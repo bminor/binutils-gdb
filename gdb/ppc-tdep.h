@@ -21,6 +21,7 @@
 #define GDB_PPC_TDEP_H
 
 #include "gdbarch.h"
+#include "gdbsupport/tdesc.h"
 
 struct gdbarch;
 class frame_info_ptr;
@@ -452,10 +453,10 @@ struct ppc_inferior_data
 
 extern ppc_inferior_data * get_ppc_per_inferior (inferior *inf);
 
-extern const struct target_desc *tdesc_powerpc_vsx64l;
-extern const struct target_desc *tdesc_powerpc_vsx64;
-extern const struct target_desc *tdesc_powerpc_vsx32;
-extern const struct target_desc *tdesc_powerpc_altivec64;
-extern const struct target_desc *tdesc_powerpc_altivec32;
+extern const_target_desc_up tdesc_powerpc_vsx64l;
+extern const_target_desc_up tdesc_powerpc_vsx64;
+extern const_target_desc_up tdesc_powerpc_vsx32;
+extern const_target_desc_up tdesc_powerpc_altivec64;
+extern const_target_desc_up tdesc_powerpc_altivec32;
 
 #endif /* GDB_PPC_TDEP_H */

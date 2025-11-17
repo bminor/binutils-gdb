@@ -7392,9 +7392,9 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (!tdesc_has_registers (tdesc))
     {
       if (info.bfd_arch_info->mach == bfd_mach_s390_31)
-	tdesc = tdesc_s390_linux32;
+	tdesc = tdesc_s390_linux32.get ();
       else
-	tdesc = tdesc_s390x_linux64;
+	tdesc = tdesc_s390x_linux64.get ();
     }
   tdep->tdesc = tdesc;
 

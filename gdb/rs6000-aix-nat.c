@@ -689,16 +689,16 @@ rs6000_nat_target::read_description ()
    if (ARCH64())
      {
        if (__power_vsx ())
-	 return tdesc_powerpc_vsx64;
+	 return tdesc_powerpc_vsx64.get ();
        else if (__power_vmx ())
-	 return tdesc_powerpc_altivec64;
+	 return tdesc_powerpc_altivec64.get ();
      }
    else
      {
        if (__power_vsx ())
-	 return tdesc_powerpc_vsx32;
+	 return tdesc_powerpc_vsx32.get ();
        else if (__power_vmx ())
-	 return tdesc_powerpc_altivec32;
+	 return tdesc_powerpc_altivec32.get ();
      }
    return NULL;
 }

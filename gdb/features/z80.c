@@ -4,7 +4,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-const struct target_desc *tdesc_z80;
+const_target_desc_up tdesc_z80;
 static void
 initialize_tdesc_z80 (void)
 {
@@ -39,5 +39,5 @@ initialize_tdesc_z80 (void)
   tdesc_create_reg (feature, "hl'", 11, 1, NULL, 16, "data_ptr");
   tdesc_create_reg (feature, "ir", 12, 1, NULL, 16, "uint16");
 
-  tdesc_z80 = result.release ();
+  tdesc_z80 = std::move (result);
 }

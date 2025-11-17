@@ -4,7 +4,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-const struct target_desc *tdesc_sparc32_solaris;
+const_target_desc_up tdesc_sparc32_solaris;
 static void
 initialize_tdesc_sparc32_solaris (void)
 {
@@ -93,5 +93,5 @@ initialize_tdesc_sparc32_solaris (void)
   tdesc_create_reg (feature, "f30", 62, 1, NULL, 32, "ieee_single");
   tdesc_create_reg (feature, "f31", 63, 1, NULL, 32, "ieee_single");
 
-  tdesc_sparc32_solaris = result.release ();
+  tdesc_sparc32_solaris = std::move (result);
 }

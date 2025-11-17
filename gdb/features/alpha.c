@@ -4,7 +4,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-const struct target_desc *tdesc_alpha;
+const_target_desc_up tdesc_alpha;
 static void
 initialize_tdesc_alpha (void)
 {
@@ -107,5 +107,5 @@ initialize_tdesc_alpha (void)
   tdesc_create_reg (feature, "", 65, 0, NULL, 64, "int64");
   tdesc_create_reg (feature, "unique", 66, 1, "system", 64, "int64");
 
-  tdesc_alpha = result.release ();
+  tdesc_alpha = std::move (result);
 }

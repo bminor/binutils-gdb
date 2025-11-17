@@ -20,6 +20,8 @@
 #ifndef GDB_MIPS_LINUX_TDEP_H
 #define GDB_MIPS_LINUX_TDEP_H
 
+#include "gdbsupport/tdesc.h"
+
 /* Copied from <asm/elf.h>.  */
 #define ELF_NGREG       45
 #define ELF_NFPREG      33
@@ -108,9 +110,9 @@ enum {
 int mips_linux_restart_reg_p (struct gdbarch *gdbarch);
 
 /* Target descriptions.  */
-extern const struct target_desc *tdesc_mips_linux;
-extern const struct target_desc *tdesc_mips64_linux;
-extern const struct target_desc *tdesc_mips_dsp_linux;
-extern const struct target_desc *tdesc_mips64_dsp_linux;
+extern const_target_desc_up tdesc_mips_linux;
+extern const_target_desc_up tdesc_mips64_linux;
+extern const_target_desc_up tdesc_mips_dsp_linux;
+extern const_target_desc_up tdesc_mips64_dsp_linux;
 
 #endif /* GDB_MIPS_LINUX_TDEP_H */

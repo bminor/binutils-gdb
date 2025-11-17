@@ -103,7 +103,7 @@ arc_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
   linux_set_pc_32bit (regcache, pc);
 }
 
-static const struct target_desc *
+static const_target_desc_up
 arc_linux_read_description (void)
 {
 #ifdef __ARC700__
@@ -116,13 +116,13 @@ arc_linux_read_description (void)
   static const char *expedite_regs[] = { "sp", "status32", nullptr };
   init_target_desc (tdesc.get (), expedite_regs, GDB_OSABI_LINUX);
 
-  return tdesc.release ();
+  return tdesc;
 }
 
 void
 arc_target::low_arch_setup ()
 {
-  current_process ()->tdesc = arc_linux_read_description ();
+  current_process ()->tdesc = arc_linux_read_description ().release ();
 }
 
 bool

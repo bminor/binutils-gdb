@@ -4,7 +4,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-const struct target_desc *tdesc_rx;
+const_target_desc_up tdesc_rx;
 static void
 initialize_tdesc_rx (void)
 {
@@ -75,5 +75,5 @@ initialize_tdesc_rx (void)
   tdesc_create_reg (feature, "fpsw", 24, 1, NULL, 32, "fpsw_flags");
   tdesc_create_reg (feature, "acc", 25, 1, NULL, 64, "uint64");
 
-  tdesc_rx = result.release ();
+  tdesc_rx = std::move (result);
 }

@@ -459,7 +459,8 @@ mips_linux_nat_target::read_description ()
     {
       /* Assume no DSP if there is no inferior to inspect with ptrace.  */
       if (inferior_ptid == null_ptid)
-	return _MIPS_SIM == _ABIO32 ? tdesc_mips_linux : tdesc_mips64_linux;
+	return (_MIPS_SIM == _ABIO32
+		? tdesc_mips_linux : tdesc_mips64_linux).get ();
 
       int tid = get_ptrace_pid (inferior_ptid);
 
@@ -482,9 +483,9 @@ mips_linux_nat_target::read_description ()
   /* Report that target registers are a size we know for sure
      that we can get from ptrace.  */
   if (_MIPS_SIM == _ABIO32)
-    return have_dsp ? tdesc_mips_dsp_linux : tdesc_mips_linux;
+    return (have_dsp ? tdesc_mips_dsp_linux : tdesc_mips_linux).get ();
   else
-    return have_dsp ? tdesc_mips64_dsp_linux : tdesc_mips64_linux;
+    return (have_dsp ? tdesc_mips64_dsp_linux : tdesc_mips64_linux).get ();
 }
 
 /* -1 if the kernel and/or CPU do not support watch registers.

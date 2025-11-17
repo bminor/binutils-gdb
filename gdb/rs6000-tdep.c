@@ -3525,7 +3525,7 @@ struct ppc_variant
     unsigned long mach;
 
     /* Target description for this variant.  */
-    const struct target_desc **tdesc;
+    const_target_desc_up *tdesc;
   };
 
 static const ppc_variant variants[] =
@@ -7676,7 +7676,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       if (!v)
 	return NULL;
 
-      tdesc = *v->tdesc;
+      tdesc = v->tdesc->get ();
     }
 
   gdb_assert (tdesc_has_registers (tdesc));

@@ -4,7 +4,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-const struct target_desc *tdesc_microblaze;
+const_target_desc_up tdesc_microblaze;
 static void
 initialize_tdesc_microblaze (void)
 {
@@ -70,5 +70,5 @@ initialize_tdesc_microblaze (void)
   tdesc_create_reg (feature, "rtlblo", 55, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "rtlbhi", 56, 1, NULL, 32, "int");
 
-  tdesc_microblaze = result.release ();
+  tdesc_microblaze = std::move (result);
 }

@@ -1134,7 +1134,7 @@ allocate_target_description (void)
 /* See gdbsupport/tdesc.h.  */
 
 void
-target_desc_deleter::operator() (struct target_desc *target_desc) const
+target_desc_deleter::operator() (const target_desc *target_desc) const
 {
   delete target_desc;
 }
@@ -1292,7 +1292,7 @@ public:
     gdb_printf ("#include \"target-descriptions.h\"\n");
     gdb_printf ("\n");
 
-    gdb_printf ("const struct target_desc *tdesc_%s;\n", m_function);
+    gdb_printf ("const_target_desc_up tdesc_%s;\n", m_function);
     gdb_printf ("static void\n");
     gdb_printf ("initialize_tdesc_%s (void)\n", m_function);
     gdb_printf ("{\n");
@@ -1340,7 +1340,7 @@ public:
 
   void visit_post (const target_desc *e) override
   {
-    gdb_printf ("\n  tdesc_%s = result.release ();\n", m_function);
+    gdb_printf ("\n  tdesc_%s = std::move (result);\n", m_function);
     gdb_printf ("}\n");
   }
 

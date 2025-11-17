@@ -3716,21 +3716,20 @@ amd64_x32_none_init_abi (gdbarch_info info, gdbarch *arch)
 const struct target_desc *
 amd64_target_description (uint64_t xstate_bv, bool segments)
 {
-  static target_desc *amd64_tdescs \
+  static const_target_desc_up amd64_tdescs \
     [2/*AVX*/][2/*AVX512*/][2/*PKRU*/][2/*CET_U*/][2/*segments*/] = {};
-  target_desc **tdesc;
+  const_target_desc_up &tdesc
+    = amd64_tdescs[(xstate_bv & X86_XSTATE_AVX) ? 1 : 0]
+		  [(xstate_bv & X86_XSTATE_AVX512) ? 1 : 0]
+		  [(xstate_bv & X86_XSTATE_PKRU) ? 1 : 0]
+		  [(xstate_bv & X86_XSTATE_CET_U) ? 1 : 0]
+		  [segments ? 1 : 0];
 
-  tdesc = &amd64_tdescs[(xstate_bv & X86_XSTATE_AVX) ? 1 : 0]
-    [(xstate_bv & X86_XSTATE_AVX512) ? 1 : 0]
-    [(xstate_bv & X86_XSTATE_PKRU) ? 1 : 0]
-    [(xstate_bv & X86_XSTATE_CET_U) ? 1 : 0]
-    [segments ? 1 : 0];
+  if (tdesc == nullptr)
+    tdesc = amd64_create_target_description (xstate_bv, false,
+					     false, segments);
 
-  if (*tdesc == NULL)
-    *tdesc = amd64_create_target_description (xstate_bv, false,
-					      false, segments);
-
-  return *tdesc;
+  return tdesc.get ();
 }
 
 #if GDB_SELF_TEST

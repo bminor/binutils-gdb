@@ -1702,7 +1702,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return arches->gdbarch;
 
   if (tdesc == nullptr)
-    tdesc = tdesc_alpha;
+    tdesc = tdesc_alpha.get ();
 
   /* Validate target description.  */
   if (tdesc_has_registers (tdesc))

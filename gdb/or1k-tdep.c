@@ -1234,7 +1234,7 @@ or1k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   if (!tdesc_has_registers (info.target_desc))
     /* Pick a default target description.  */
-    tdesc = tdesc_or1k;
+    tdesc = tdesc_or1k.get ();
 
   /* Check any target description for validity.  */
   if (tdesc_has_registers (tdesc))

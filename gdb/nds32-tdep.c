@@ -1974,7 +1974,7 @@ nds32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return best_arch->gdbarch;
 
   if (!tdesc_has_registers (tdesc))
-    tdesc = tdesc_nds32;
+    tdesc = tdesc_nds32.get ();
 
   tdesc_data = tdesc_data_alloc ();
 

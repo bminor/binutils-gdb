@@ -470,13 +470,13 @@ ppc_aix_core_read_description (struct gdbarch *gdbarch,
     arch64 = 1;
 
   if (vsx && arch64)
-    return tdesc_powerpc_vsx64;
+    return tdesc_powerpc_vsx64.get ();
   else if (vsx && !arch64)
-    return tdesc_powerpc_vsx32;
+    return tdesc_powerpc_vsx32.get ();
   else if (altivec && arch64)
-    return tdesc_powerpc_altivec64;
+    return tdesc_powerpc_altivec64.get ();
   else if (altivec && !arch64)
-    return tdesc_powerpc_altivec32;
+    return tdesc_powerpc_altivec32.get ();
 
   return NULL;
 }

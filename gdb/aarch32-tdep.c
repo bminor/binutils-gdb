@@ -20,20 +20,17 @@
 #include "gdbsupport/common-regcache.h"
 #include "arch/aarch32.h"
 
-static struct target_desc *tdesc_aarch32_list[2];
+static const_target_desc_up tdesc_aarch32_list[2];
 
 /* See aarch32-tdep.h.  */
 
 const target_desc *
 aarch32_read_description (bool tls)
 {
-  struct target_desc *tdesc = tdesc_aarch32_list[tls];
+  const_target_desc_up &tdesc = tdesc_aarch32_list[tls];
 
   if (tdesc == nullptr)
-    {
-      tdesc = aarch32_create_target_description (tls);
-      tdesc_aarch32_list[tls] = tdesc;
-    }
+    tdesc = aarch32_create_target_description (tls);
 
-  return tdesc;
+  return tdesc.get ();
 }

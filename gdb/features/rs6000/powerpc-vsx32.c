@@ -4,7 +4,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-const struct target_desc *tdesc_powerpc_vsx32;
+const_target_desc_up tdesc_powerpc_vsx32;
 static void
 initialize_tdesc_powerpc_vsx32 (void)
 {
@@ -185,5 +185,5 @@ initialize_tdesc_powerpc_vsx32 (void)
   tdesc_create_reg (feature, "vs30h", 135, 1, NULL, 64, "uint64");
   tdesc_create_reg (feature, "vs31h", 136, 1, NULL, 64, "uint64");
 
-  tdesc_powerpc_vsx32 = result.release ();
+  tdesc_powerpc_vsx32 = std::move (result);
 }

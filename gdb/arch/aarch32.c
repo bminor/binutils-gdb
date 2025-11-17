@@ -23,7 +23,7 @@
 
 /* See aarch32.h.  */
 
-target_desc *
+target_desc_up
 aarch32_create_target_description (bool tls)
 {
   target_desc_up tdesc = allocate_target_description ();
@@ -41,5 +41,5 @@ aarch32_create_target_description (bool tls)
   if (tls)
     regnum = create_feature_arm_arm_tls (tdesc.get (), regnum);
 
-  return tdesc.release ();
+  return tdesc;
 }

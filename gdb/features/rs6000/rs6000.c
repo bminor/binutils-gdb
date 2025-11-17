@@ -4,7 +4,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-const struct target_desc *tdesc_rs6000;
+const_target_desc_up tdesc_rs6000;
 static void
 initialize_tdesc_rs6000 (void)
 {
@@ -89,5 +89,5 @@ initialize_tdesc_rs6000 (void)
   tdesc_create_reg (feature, "f31", 63, 1, NULL, 64, "ieee_double");
   tdesc_create_reg (feature, "fpscr", 71, 1, "float", 32, "int");
 
-  tdesc_rs6000 = result.release ();
+  tdesc_rs6000 = std::move (result);
 }
