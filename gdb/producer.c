@@ -42,40 +42,38 @@ producer_is_gcc_ge_4 (const char *producer)
 bool
 producer_is_gcc (const char *producer, int *major, int *minor)
 {
-  const char *cs;
+  if (producer == nullptr)
+    return false;
 
-  if (producer != nullptr && startswith (producer, "GNU "))
-    {
-      int maj, min;
+  const char gnu_prefix[] = "GNU ";
+  if (!startswith (producer, gnu_prefix))
+    return false;
 
-      if (major == nullptr)
-	major = &maj;
-      if (minor == nullptr)
-	minor = &min;
+  /* Skip "GNU " prefix.  */
+  const char *cs = &producer[strlen (gnu_prefix)];
 
-      /* Skip GNU.  */
-      cs = &producer[strlen ("GNU ")];
+  /* Bail out for "GNU AS ".  */
+  if (startswith (cs, "AS "))
+    return false;
 
-      /* Bail out for GNU AS.  */
-      if (startswith (cs, "AS "))
-	return false;
+  /* Skip any identifier after "GNU " - such as "C11" "C++" or "Java".
+     A full producer string might look like:
+     "GNU C 4.7.2"
+     "GNU Fortran 4.8.2 20140120 (Red Hat 4.8.2-16) -mtune=generic ..."
+     "GNU C++14 5.0.0 20150123 (experimental)".  */
+  while (*cs && !c_isspace (*cs))
+    cs++;
+  if (*cs && c_isspace (*cs))
+    cs++;
 
-      /* Skip any identifier after "GNU " - such as "C11" "C++" or "Java".
-	 A full producer string might look like:
-	 "GNU C 4.7.2"
-	 "GNU Fortran 4.8.2 20140120 (Red Hat 4.8.2-16) -mtune=generic ..."
-	 "GNU C++14 5.0.0 20150123 (experimental)"
-      */
-      while (*cs && !c_isspace (*cs))
-	cs++;
-      if (*cs && c_isspace (*cs))
-	cs++;
-      if (sscanf (cs, "%d.%d", major, minor) == 2)
-	return true;
-    }
+  int maj, min;
+  if (major == nullptr)
+    major = &maj;
+  if (minor == nullptr)
+    minor = &min;
+  int matches = sscanf (cs, "%d.%d", major, minor);
 
-  /* Not recognized as GCC.  */
-  return false;
+  return matches == 2;
 }
 
 /* See producer.h.  */
@@ -177,23 +175,24 @@ producer_is_llvm (const char *producer)
 bool
 producer_is_clang (const char *producer, int *major, int *minor)
 {
-  if (producer != nullptr && startswith (producer, "clang version "))
-    {
-      int maj, min;
-      if (major == nullptr)
-	major = &maj;
-      if (minor == nullptr)
-	minor = &min;
+  if (producer == nullptr)
+    return false;
 
-      /* The full producer string will look something like
-	 "clang version XX.X.X ..."
-	 So we can safely ignore all characters before the first digit.  */
-      const char *cs = producer + strlen ("clang version ");
+  const char clang_prefix[] = "clang version ";
+  if (!startswith (producer, clang_prefix))
+    return false;
 
-      if (sscanf (cs, "%d.%d", major, minor) == 2)
-	return true;
-    }
-  return false;
+  /* Skip "clang version " prefix.  */
+  const char *cs = producer + strlen (clang_prefix);
+
+  int maj, min;
+  if (major == nullptr)
+    major = &maj;
+  if (minor == nullptr)
+    minor = &min;
+  int matches = sscanf (cs, "%d.%d", major, minor);
+
+  return matches == 2;
 }
 
 /* See producer.h.  */
