@@ -26,20 +26,20 @@
 extern int producer_is_gcc_ge_4 (const char *producer);
 
 /* Return true if the given PRODUCER string is GCC and sets the MAJOR
-   and MINOR versions when not NULL.  Return false if the given PRODUCER
-   is NULL or it isn't GCC.  */
+   and MINOR versions when not nullptr.  Return false if the given PRODUCER
+   is nullptr or it isn't GCC.  */
 extern bool producer_is_gcc (const char *producer, int *major, int *minor);
 
 /* Return true if the given PRODUCER string is GAS and sets the MAJOR
-   and MINOR versions when not NULL.  Returns false if the given PRODUCER
-   is NULL or it isn't GAS.  */
+   and MINOR versions when not nullptr.  Returns false if the given PRODUCER
+   is nullptr or it isn't GAS.  */
 bool producer_is_gas (const char *producer, int *major, int *minor);
 
 /* Check for Intel compilers >= 19.0.  */
 extern bool producer_is_icc_ge_19 (const char *producer);
 
 /* Returns true if the given PRODUCER string is Intel or false
-   otherwise.  Sets the MAJOR and MINOR versions when not NULL.  */
+   otherwise.  Sets the MAJOR and MINOR versions when not nullptr.  */
 extern bool producer_is_icc (const char *producer, int *major, int *minor);
 
 /* Returns true if the given PRODUCER string is LLVM (clang/flang) or
@@ -47,7 +47,7 @@ extern bool producer_is_icc (const char *producer, int *major, int *minor);
 extern bool producer_is_llvm (const char *producer);
 
 /* Returns true if the given PRODUCER string is clang, false otherwise.
-   Sets MAJOR and MINOR accordingly, if not NULL.  */
+   Sets MAJOR and MINOR accordingly, if not nullptr.  */
 extern bool producer_is_clang (const char *producer, int *major, int *minor);
 
 /* Return true if the supplied producer string matches the ARM

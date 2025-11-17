@@ -44,13 +44,13 @@ producer_is_gcc (const char *producer, int *major, int *minor)
 {
   const char *cs;
 
-  if (producer != NULL && startswith (producer, "GNU "))
+  if (producer != nullptr && startswith (producer, "GNU "))
     {
       int maj, min;
 
-      if (major == NULL)
+      if (major == nullptr)
 	major = &maj;
-      if (minor == NULL)
+      if (minor == nullptr)
 	minor = &min;
 
       /* Skip GNU.  */
@@ -167,8 +167,9 @@ producer_is_icc (const char *producer, int *major, int *minor)
 bool
 producer_is_llvm (const char *producer)
 {
-  return ((producer != NULL) && (startswith (producer, "clang ")
-				 || startswith (producer, " F90 Flang ")));
+  return ((producer != nullptr)
+	  && (startswith (producer, "clang ")
+	      || startswith (producer, " F90 Flang ")));
 }
 
 /* See producer.h.  */
@@ -209,7 +210,7 @@ producer_is_realview (const char *producer)
     "ARM C/C++ Compiler, RVCT"
   };
 
-  if (producer == NULL)
+  if (producer == nullptr)
     return false;
 
   for (const char *ident : arm_idents)
@@ -283,7 +284,7 @@ Version 18.0 Beta";
 
   {
     static const char gnu[] = "GNU C 4.7.2";
-    SELF_CHECK (!producer_is_icc (gnu, NULL, NULL));
+    SELF_CHECK (!producer_is_icc (gnu, nullptr, nullptr));
 
     int major = 0, minor = 0;
     SELF_CHECK (producer_is_gcc (gnu, &major, &minor)
@@ -293,7 +294,7 @@ Version 18.0 Beta";
   {
     static const char gnu_exp[] = "GNU C++14 5.0.0 20150123 (experimental)";
     int major = 0, minor = 0;
-    SELF_CHECK (!producer_is_icc (gnu_exp, NULL, NULL));
+    SELF_CHECK (!producer_is_icc (gnu_exp, nullptr, nullptr));
     SELF_CHECK (producer_is_gcc (gnu_exp, &major, &minor)
 		&& major == 5 && minor == 0);
   }
@@ -301,7 +302,7 @@ Version 18.0 Beta";
   {
     static const char clang_llvm_exp[] = "clang version 12.0.0 (CLANG: bld#8)";
     int major = 0, minor = 0;
-    SELF_CHECK (!producer_is_icc (clang_llvm_exp, NULL, NULL));
+    SELF_CHECK (!producer_is_icc (clang_llvm_exp, nullptr, nullptr));
     SELF_CHECK (!producer_is_gcc (clang_llvm_exp, &major, &minor));
     SELF_CHECK (producer_is_llvm (clang_llvm_exp));
   }
@@ -309,7 +310,7 @@ Version 18.0 Beta";
   {
     static const char flang_llvm_exp[] = " F90 Flang - 1.5 2017-05-01";
     int major = 0, minor = 0;
-    SELF_CHECK (!producer_is_icc (flang_llvm_exp, NULL, NULL));
+    SELF_CHECK (!producer_is_icc (flang_llvm_exp, nullptr, nullptr));
     SELF_CHECK (!producer_is_gcc (flang_llvm_exp, &major, &minor));
     SELF_CHECK (producer_is_llvm (flang_llvm_exp));
   }
