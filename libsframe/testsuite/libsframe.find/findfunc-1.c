@@ -212,19 +212,19 @@ void test_text_findfre (const char suffix, int64_t text_vaddr,
   /* Find an FRE for PC in FDE1.  */
   lookup_pc = func1_start_vaddr + 0x9 - sframe_vaddr;
   err = sframe_find_fre (dctx, lookup_pc, &frep);
-  TEST ((err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, &err) == 0x2),
+  TEST ((err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, 0, &err) == 0x2),
 	"findfunc-1%c: Find FRE in FDE1", suffix);
 
   /* Find an FRE for PC in FDE2.  */
   lookup_pc = func2_start_vaddr + 0x11 - sframe_vaddr;
   err = sframe_find_fre (dctx, lookup_pc, &frep);
-  TEST ((err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, &err) == 0x12),
+  TEST ((err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, 0, &err) == 0x12),
 	"findfunc-1%c: Find FRE in FDE2", suffix);
 
   /* Find an FRE for PC in FDE3.  */
   lookup_pc = func3_start_vaddr + 0x10 - sframe_vaddr;
   err = sframe_find_fre (dctx, lookup_pc, &frep);
-  TEST ((err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, &err) == 0x18),
+  TEST ((err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, 0, &err) == 0x18),
 	"findfunc-1%c: Find FRE in FDE3", suffix);
 
   sframe_encoder_free (&encode);

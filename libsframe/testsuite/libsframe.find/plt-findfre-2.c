@@ -134,12 +134,12 @@ void test_plt_findfre (const char suffix, const int64_t plt_vaddr,
 
   /* Find the only FRE in PLT0 at offset 0.  */
   err = sframe_find_fre (dctx, (plt_vaddr + 0 - sframe_vaddr), &frep);
-  TEST (err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, &err) == 160 + PLT0_CFA_OFFSET_MAGIC,
+  TEST (err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, 0, &err) == 160 + PLT0_CFA_OFFSET_MAGIC,
 	"plt-findfre-2%c: Find only FRE in PLT0 at offset 0", suffix);
 
   /* Find the only FRE in PLT0 at offset PLT_SIZE-1.  */
   err = sframe_find_fre (dctx, (plt_vaddr + (PLT_SIZE-1) - sframe_vaddr), &frep);
-  TEST (err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, &err) == 160 + PLT0_CFA_OFFSET_MAGIC,
+  TEST (err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, 0, &err) == 160 + PLT0_CFA_OFFSET_MAGIC,
 	"plt-findfre-2%c: Find only FRE in PLT0 at offset PLT_SIZE-1", suffix);
 
   /* Find the only FRE in PLT1-5 at offset 0 and PLT_SIZE-1.  */
@@ -147,12 +147,12 @@ void test_plt_findfre (const char suffix, const int64_t plt_vaddr,
     {
       /* Find the only FRE in PLTN at offset 0.  */
       err = sframe_find_fre (dctx, (plt_vaddr + i * PLT_SIZE + 0 - sframe_vaddr), &frep);
-      TEST (err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, &err) == 160 + PLTN_CFA_OFFSET_MAGIC,
+      TEST (err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, 0, &err) == 160 + PLTN_CFA_OFFSET_MAGIC,
 	    "plt-findfre-2%c: Find only FRE in PLT%d at offset 0", suffix, i);
 
       /* Find the only FRE in PLTN at offset 31.  */
       err = sframe_find_fre (dctx, (plt_vaddr + i * PLT_SIZE + (PLT_SIZE-1) - sframe_vaddr), &frep);
-      TEST (err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, &err) == 160 + PLTN_CFA_OFFSET_MAGIC,
+      TEST (err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, 0, &err) == 160 + PLTN_CFA_OFFSET_MAGIC,
 	    "plt-findfre-2%c: Find only FRE in PLT%d at offset PLT_SIZE-1", suffix, i);
     }
 

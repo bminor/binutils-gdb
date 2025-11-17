@@ -31,7 +31,7 @@ extern "C"
 typedef struct sframe_decoder_ctx sframe_decoder_ctx;
 typedef struct sframe_encoder_ctx sframe_encoder_ctx;
 
-#define MAX_NUM_STACK_OFFSETS	3
+#define MAX_NUM_STACK_OFFSETS	6
 
 #define MAX_OFFSET_BYTES  \
   ((SFRAME_FRE_OFFSET_4B * 2 * MAX_NUM_STACK_OFFSETS))
@@ -199,6 +199,9 @@ sframe_decoder_get_funcdesc_v3 (const sframe_decoder_ctx *dctx,
 extern void
 dump_sframe (const sframe_decoder_ctx *decoder, uint64_t addr);
 
+extern int32_t
+sframe_get_fre_offset (const sframe_frame_row_entry *fre, int idx, int *errp);
+
 /* Get the base reg id from the FRE info.  Sets errp if fails.  */
 extern uint8_t
 sframe_fre_get_base_reg_id (const sframe_frame_row_entry *fre, int *errp);
@@ -206,7 +209,9 @@ sframe_fre_get_base_reg_id (const sframe_frame_row_entry *fre, int *errp);
 /* Get the CFA offset from the FRE.  If the offset is invalid, sets errp.  */
 extern int32_t
 sframe_fre_get_cfa_offset (const sframe_decoder_ctx *dtcx,
-			   const sframe_frame_row_entry *fre, int *errp);
+			   const sframe_frame_row_entry *fre,
+			   uint32_t fde_type,
+			   int *errp);
 
 /* Get the FP offset from the FRE.  If the offset is invalid, sets errp.
 
@@ -214,7 +219,9 @@ sframe_fre_get_cfa_offset (const sframe_decoder_ctx *dtcx,
    LSB set to one, which is only valid in the topmost frame.  */
 extern int32_t
 sframe_fre_get_fp_offset (const sframe_decoder_ctx *dctx,
-			  const sframe_frame_row_entry *fre, int *errp);
+			  const sframe_frame_row_entry *fre,
+			  uint32_t fde_type,
+			  int *errp);
 
 /* Get the RA offset from the FRE.  If the offset is invalid, sets errp.
 
@@ -224,7 +231,9 @@ sframe_fre_get_fp_offset (const sframe_decoder_ctx *dctx,
    LSB set to one, which is only valid in the topmost frame.  */
 extern int32_t
 sframe_fre_get_ra_offset (const sframe_decoder_ctx *dctx,
-			  const sframe_frame_row_entry *fre, int *errp);
+			  const sframe_frame_row_entry *fre,
+			  uint32_t fde_type,
+			  int *errp);
 
 /* Get whether the RA is mangled.  */
 

@@ -232,9 +232,9 @@ dump_sframe_func_with_fres (const sframe_decoder_ctx *sfd_ctx,
 	 assert no error for base reg id and RA undefined.  */
       base_reg_id = sframe_fre_get_base_reg_id (&fre, &err[0]);
       ra_undefined_p = sframe_fre_get_ra_undefined_p (sfd_ctx, &fre, &err[0]);
-      cfa_offset = sframe_fre_get_cfa_offset (sfd_ctx, &fre, &err[0]);
-      fp_offset = sframe_fre_get_fp_offset (sfd_ctx, &fre, &err[1]);
-      ra_offset = sframe_fre_get_ra_offset (sfd_ctx, &fre, &err[2]);
+      cfa_offset = sframe_fre_get_cfa_offset (sfd_ctx, &fre, 0, &err[0]);
+      fp_offset = sframe_fre_get_fp_offset (sfd_ctx, &fre, 0, &err[1]);
+      ra_offset = sframe_fre_get_ra_offset (sfd_ctx, &fre, 0, &err[2]);
 
       /* Dump VMA.  */
       printf ("\n");

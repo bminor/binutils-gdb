@@ -821,7 +821,7 @@ fde_func (const void *p1, const void *p2)
 
 /* Get IDX'th offset from FRE.  Set errp as applicable.  */
 
-static int32_t
+int32_t
 sframe_get_fre_offset (const sframe_frame_row_entry *fre, int idx, int *errp)
 {
   uint8_t offset_cnt, offset_size;
@@ -938,13 +938,18 @@ sframe_fre_get_base_reg_id (const sframe_frame_row_entry *fre, int *errp)
 
 int32_t
 sframe_fre_get_cfa_offset (const sframe_decoder_ctx *dctx,
-			   const sframe_frame_row_entry *fre, int *errp)
+			   const sframe_frame_row_entry *fre,
+			   uint32_t fde_type,
+			   int *errp)
 {
   int err;
-  int32_t offset = sframe_get_fre_offset (fre, SFRAME_FRE_CFA_OFFSET_IDX, &err);
+  bool flex_p = (fde_type == SFRAME_FDE_TYPE_FLEX_TOPMOST_FRAME);
+  uint32_t idx = flex_p ? 1 : 0;
+  int32_t offset = sframe_get_fre_offset (fre, idx, &err);
 
   /* For s390x undo adjustment of CFA offset (to enable 8-bit offsets).  */
-  if (!err && sframe_decoder_get_abi_arch (dctx) == SFRAME_ABI_S390X_ENDIAN_BIG)
+  if (!err && !flex_p
+      && sframe_decoder_get_abi_arch (dctx) == SFRAME_ABI_S390X_ENDIAN_BIG)
     offset = SFRAME_V2_S390X_CFA_OFFSET_DECODE (offset);
 
   if (errp)
@@ -959,13 +964,17 @@ sframe_fre_get_cfa_offset (const sframe_decoder_ctx *dctx,
 
 int32_t
 sframe_fre_get_fp_offset (const sframe_decoder_ctx *dctx,
-			  const sframe_frame_row_entry *fre, int *errp)
+			  const sframe_frame_row_entry *fre,
+			  uint32_t fde_type,
+			  int *errp)
 {
   uint32_t fp_offset_idx = 0;
+  bool flex_p = (fde_type == SFRAME_FDE_TYPE_FLEX_TOPMOST_FRAME);
+
   int8_t fp_offset = sframe_decoder_get_fixed_fp_offset (dctx);
   /* If the FP offset is not being tracked, return the fixed FP offset
      from the SFrame header.  */
-  if (fp_offset != SFRAME_CFA_FIXED_FP_INVALID
+  if (!flex_p && fp_offset != SFRAME_CFA_FIXED_FP_INVALID
       && !sframe_get_fre_ra_undefined_p (fre->fre_info))
     {
       if (errp)
@@ -980,6 +989,8 @@ sframe_fre_get_fp_offset (const sframe_decoder_ctx *dctx,
 		    != SFRAME_CFA_FIXED_RA_INVALID)
 		   ? SFRAME_FRE_RA_OFFSET_IDX
 		   : SFRAME_FRE_FP_OFFSET_IDX);
+  fp_offset_idx = flex_p ? SFRAME_FRE_FP_OFFSET_IDX * 2 + 1 : fp_offset_idx;
+
   return sframe_get_fre_offset (fre, fp_offset_idx, errp);
 }
 
@@ -992,12 +1003,17 @@ sframe_fre_get_fp_offset (const sframe_decoder_ctx *dctx,
 
 int32_t
 sframe_fre_get_ra_offset (const sframe_decoder_ctx *dctx,
-			  const sframe_frame_row_entry *fre, int *errp)
+			  const sframe_frame_row_entry *fre,
+			  uint32_t fde_type,
+			  int *errp)
 {
+  uint32_t ra_offset_idx = 0;
   int8_t ra_offset = sframe_decoder_get_fixed_ra_offset (dctx);
+  bool flex_p = (fde_type == SFRAME_FDE_TYPE_FLEX_TOPMOST_FRAME);
+
   /* If the RA offset was not being tracked, return the fixed RA offset
      from the SFrame header.  */
-  if (ra_offset != SFRAME_CFA_FIXED_RA_INVALID
+  if (!flex_p && ra_offset != SFRAME_CFA_FIXED_RA_INVALID
       && !sframe_get_fre_ra_undefined_p (fre->fre_info))
     {
       if (errp)
@@ -1006,7 +1022,10 @@ sframe_fre_get_ra_offset (const sframe_decoder_ctx *dctx,
     }
 
   /* Otherwise, get the RA offset from the FRE.  */
-  return sframe_get_fre_offset (fre, SFRAME_FRE_RA_OFFSET_IDX, errp);
+  ra_offset_idx = (flex_p
+		   ? SFRAME_FRE_RA_OFFSET_IDX * 2 + 1
+		   : SFRAME_FRE_RA_OFFSET_IDX);
+  return sframe_get_fre_offset (fre, ra_offset_idx, errp);
 }
 
 /* Get whether the RA is mangled.  */
