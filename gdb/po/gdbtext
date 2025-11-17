@@ -31,7 +31,7 @@ done | ${xgettext} \
     --files-from=- \
     --force-po \
     --debug \
-    --language=c \
+    --language=c++ \
     --keyword=_ \
     --keyword=N_ \
     ${__directories} \
