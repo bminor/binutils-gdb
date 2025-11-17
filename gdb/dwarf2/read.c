@@ -1560,6 +1560,19 @@ struct readnow_functions : public dwarf2_base_index_functions
       }
     return true;
   }
+
+  struct symbol *find_symbol_by_address (struct objfile *objfile,
+					 CORE_ADDR address) override
+  {
+    for (compunit_symtab &symtab : objfile->compunits ())
+      {
+	struct symbol *sym = symtab.symbol_at_address (address);
+	if (sym != nullptr)
+	  return sym;
+      }
+
+    return nullptr;
+  }
 };
 
 /* See read.h.  */

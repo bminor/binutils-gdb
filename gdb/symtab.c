@@ -2841,24 +2841,9 @@ find_symbol_at_address (CORE_ADDR address)
 {
   for (objfile &objfile : current_program_space->objfiles ())
     {
-      /* If this objfile was read with -readnow, then we need to
-	 search the symtabs directly.  */
-      if ((objfile.flags & OBJF_READNOW) != 0)
-	{
-	  for (compunit_symtab &symtab : objfile.compunits ())
-	    {
-	      struct symbol *sym
-		= symtab.symbol_at_address (address);
-	      if (sym != nullptr)
-		return sym;
-	    }
-	}
-      else
-	{
-	  struct symbol *sym = objfile.find_symbol_by_address (address);
-	  if (sym != nullptr)
-	    return sym;
-	}
+      struct symbol *sym = objfile.find_symbol_by_address (address);
+      if (sym != nullptr)
+	return sym;
     }
 
   return NULL;
