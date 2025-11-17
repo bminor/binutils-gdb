@@ -43,8 +43,10 @@
 /* Workaround to resolve conflicting declarations of termios
    in <asm/termbits.h> and <termios.h>.  */
 #  define termios asmtermios
+#  define tcflag_t asmtcflag_t
 #  include <asm/termbits.h>
 #  undef termios
+#  undef tcflag_t
 #endif
 
 #ifdef HAVE_TERMIOS_H
