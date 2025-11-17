@@ -4140,6 +4140,10 @@ aarch64_features_from_target_desc (const struct target_desc *tdesc)
   features.gcs_linux = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.gcs.linux")
 			!= nullptr);
 
+  /* Check for FPMR feature.  */
+  features.fpmr = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.fpmr")
+		   != nullptr);
+
   return features;
 }
 
@@ -4550,6 +4554,16 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       num_pseudo_regs += 32;	/* add the Bn scalar register pseudos */
     }
 
+  int fpmr_regnum = -1;
+  const struct tdesc_feature *feature_fpmr
+      = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.fpmr");
+  if (feature_fpmr != nullptr)
+    {
+      fpmr_regnum = num_regs++;
+      valid_p &= tdesc_numbered_register (feature_fpmr, tdesc_data.get (),
+					  fpmr_regnum, "fpmr");
+    }
+
   int first_sme_regnum = -1;
   int first_sme2_regnum = -1;
   int first_sme_pseudo_regnum = -1;
@@ -4749,6 +4763,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->tls_register_count = tls_register_count;
   tdep->gcs_reg_base = first_gcs_regnum;
   tdep->gcs_linux_reg_base = first_gcs_linux_regnum;
+  tdep->fpmr_regnum = fpmr_regnum;
 
   /* Set the SME register set details.  The pseudo-registers will be adjusted
      later.  */

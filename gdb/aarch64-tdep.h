@@ -207,6 +207,15 @@ struct aarch64_gdbarch_tdep : gdbarch_tdep_base
   {
     return gcs_linux_reg_base != -1;
   }
+
+  /* First FPMR register.  This is -1 if FPMR is not supported.  */
+  int fpmr_regnum = -1;
+
+  bool
+  has_fpmr () const
+  {
+    return fpmr_regnum != -1;
+  }
 };
 
 const target_desc *aarch64_read_description (const aarch64_features &features);

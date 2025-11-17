@@ -34,6 +34,7 @@ struct aarch64_features
   uint64_t vq = 0;
   bool pauth = false;
   bool mte = false;
+  bool fpmr = false;
 
   /* A positive TLS value indicates the number of TLS registers available.  */
   uint8_t tls = 0;
@@ -68,7 +69,8 @@ inline bool operator==(const aarch64_features &lhs, const aarch64_features &rhs)
     && lhs.svq == rhs.svq
     && lhs.sme2 == rhs.sme2
     && lhs.gcs == rhs.gcs
-    && lhs.gcs_linux == rhs.gcs_linux;
+    && lhs.gcs_linux == rhs.gcs_linux
+    && lhs.fpmr == rhs.fpmr;
 }
 
 namespace std
@@ -98,6 +100,8 @@ namespace std
       h = h << 1 | features.gcs;
       h = h << 1 | features.gcs_linux;
 
+      /* FPMR feature.  */
+      h = h << 1 | features.fpmr;
       return h;
     }
   };
@@ -241,5 +245,10 @@ enum aarch64_regnum
 
 /* Size of the SME2 ZT0 register in bytes.  */
 #define AARCH64_SME2_ZT0_SIZE 64
+
+/* Feature check for Floating Point Mode Register.  */
+#ifndef HWCAP2_FPMR
+#define HWCAP2_FPMR (1ULL << 48)
+#endif /* HWCAP2_FPMR */
 
 #endif /* GDB_ARCH_AARCH64_H */

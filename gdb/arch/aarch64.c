@@ -20,6 +20,7 @@
 
 #include "../features/aarch64-core.c"
 #include "../features/aarch64-fpu.c"
+#include "../features/aarch64-fpmr.c"
 #include "../features/aarch64-sve.c"
 #include "../features/aarch64-pauth.c"
 #include "../features/aarch64-mte.c"
@@ -72,6 +73,9 @@ aarch64_create_target_description (const aarch64_features &features)
 
   if (features.gcs_linux)
     regnum = create_feature_aarch64_gcs_linux (tdesc.get (), regnum);
+
+  if (features.fpmr)
+    regnum = create_feature_aarch64_fpmr (tdesc.get (), regnum);
 
   return tdesc.release ();
 }

@@ -604,6 +604,48 @@ store_gcsregs_to_thread (regcache *regcache)
     perror_with_name (_("Unable to store GCS registers"));
 }
 
+/* Fill GDB's REGCACHE with the FPMR register set content from the
+   thread associated with REGCACHE.  */
+
+static void
+fetch_fpmr_from_thread (struct regcache *regcache)
+{
+  aarch64_gdbarch_tdep *tdep
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
+
+    int tid = regcache->ptid ().lwp ();
+
+    struct iovec iov;
+    uint64_t val;
+    iov.iov_base = &val;
+    iov.iov_len = sizeof (val);
+
+    if (ptrace (PTRACE_GETREGSET, tid, NT_ARM_FPMR, &iov) < 0)
+      perror_with_name (_("Unable to fetch FPMR register set"));
+    regcache->raw_supply (tdep->fpmr_regnum, &val);
+}
+
+/* Store the NT_ARM_FPMR register set contents from GDB's REGCACHE to the
+    thread associated with REGCACHE.  */
+
+static void
+store_fpmr_to_thread (struct regcache *regcache)
+{
+  aarch64_gdbarch_tdep *tdep
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
+
+  int tid = regcache->ptid ().lwp ();
+
+  struct iovec iov;
+  uint64_t val;
+  iov.iov_base = &val;
+  iov.iov_len = sizeof (val);
+
+  regcache->raw_collect (tdep->fpmr_regnum, (char *) &val);
+  if (ptrace (PTRACE_SETREGSET, tid, NT_ARM_FPMR, &iov) < 0)
+    perror_with_name (_("Unable to store FPMR register set"));
+}
+
 /* The AArch64 version of the "fetch_registers" target_ops method.  Fetch
    REGNO from the target and place the result into REGCACHE.  */
 
@@ -642,6 +684,9 @@ aarch64_fetch_registers (struct regcache *regcache, int regno)
 
       if (tdep->has_gcs_linux ())
 	fetch_gcsregs_from_thread (regcache);
+
+      if (tdep->has_fpmr ())
+	fetch_fpmr_from_thread (regcache);
     }
   /* General purpose register?  */
   else if (regno < AARCH64_V0_REGNUM)
@@ -679,6 +724,9 @@ aarch64_fetch_registers (struct regcache *regcache, int regno)
 	   && (regno == tdep->gcs_reg_base || regno == tdep->gcs_linux_reg_base
 	       || regno == tdep->gcs_linux_reg_base + 1))
     fetch_gcsregs_from_thread (regcache);
+  /* FPMR?  */
+  else if (tdep->has_fpmr () && (regno == tdep->fpmr_regnum))
+    fetch_fpmr_from_thread (regcache);
 }
 
 /* A version of the "fetch_registers" target_ops method used when running
@@ -753,6 +801,9 @@ aarch64_store_registers (struct regcache *regcache, int regno)
 
       if (tdep->has_gcs_linux ())
 	store_gcsregs_to_thread (regcache);
+
+      if (tdep->has_fpmr ())
+	store_fpmr_to_thread (regcache);
     }
   /* General purpose register?  */
   else if (regno < AARCH64_V0_REGNUM)
@@ -784,6 +835,9 @@ aarch64_store_registers (struct regcache *regcache, int regno)
 	   && (regno == tdep->gcs_reg_base || regno == tdep->gcs_linux_reg_base
 	       || regno == tdep->gcs_linux_reg_base + 1))
     store_gcsregs_to_thread (regcache);
+  /* FPMR?  */
+  else if (tdep->has_fpmr () && regno == tdep->fpmr_regnum)
+    store_fpmr_to_thread (regcache);
 
   /* PAuth registers are read-only.  */
 }
@@ -968,6 +1022,9 @@ aarch64_linux_nat_target::read_description ()
   /* Check for SME2 support.  */
   if ((hwcap2 & HWCAP2_SME2) || (hwcap2 & HWCAP2_SME2P1))
     features.sme2 = supports_zt_registers (tid);
+
+  /* Check for FPMR.  */
+  features.fpmr = hwcap2 & HWCAP2_FPMR;
 
   return aarch64_read_description (features);
 }

@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<!-- Copyright (C) 2025 Free Software Foundation, Inc.
+
+     Copying and distribution of this file, with or without modification,
+     are permitted in any medium without royalty provided the copyright
+     notice and this notice are preserved.  -->
+
+<!DOCTYPE feature SYSTEM "gdb-target.dtd">
+<feature name="org.gnu.gdb.aarch64.fpmr">
+
+  <!-- FP8 format for F8S1, F8S2 and F8D fields.  This is either E5M2 or
+       E4M3.  -->
+  <enum id="fp8_fmt" size="3">
+    <evalue name="E5M2" value="0"/>
+    <evalue name="E4M3" value="1"/>
+  </enum>
+
+  <!-- Overflow saturation for FP8 convert instructions.  Specifies the result
+       when a floating-point overflow exception is detected.  -->
+  <enum id="osc" size="1">
+    <!-- Infinity or NaN is generated.  -->
+    <evalue name="Inf/NaN" value="0"/>
+    <!-- Maximum normal number is generated.  -->
+    <evalue name="MaxNormal" value="1"/>
+  </enum>
+
+  <!-- Overflow saturation for FP8 multiplication instructions.  Specifies the
+       result when a floating-point overflow exception is detected.  -->
+    <enum id="osm" size="1">
+    <!-- Infinity generated.  -->
+    <evalue name="Inf" value="0"/>
+    <!-- Maximum normal number is generated.  -->
+    <evalue name="MaxNormal" value="1"/>
+  </enum>
+
+  <flags id="fpmr_flags" size="8">
+    <!-- SRC1 Format.  -->
+    <field name="F8S1" start="0" end="2" type="fp8_fmt"/>
+    <!-- SRC2 Format.  -->
+    <field name="F8S2" start="3" end="5" type="fp8_fmt"/>
+    <!-- F8D Format.  -->
+    <field name="F8D" start="6" end="8" type="fp8_fmt"/>
+    <!-- OSM.  -->
+    <field name="OSM" start="14" end="14" type="osm"/>
+    <!-- OSC.  -->
+    <field name="OSC" start="15" end="15" type="osc"/>
+    <!-- LSCALE.  -->
+    <field name="LSCALE" start="16" end="22"/>
+    <!-- NSCALE.  -->
+    <field name="NSCALE" start="24" end="31" type="int8"/>
+    <!-- LSCALE2.  -->
+    <field name="LSCALE2" start="32" end="37"/>
+  </flags>
+
+  <reg name="fpmr" bitsize="64" type="fpmr_flags"/>
+
+</feature>

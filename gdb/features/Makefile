@@ -202,6 +202,7 @@ $(outdir)/%.dat: %.xml number-regs.xsl sort-regs.xsl gdbserver-regs.xsl
 # For targets with feature based target descriptions,
 # the set of xml files we'll generate .c files for GDB from.
 FEATURE_XMLFILES = aarch64-core.xml \
+	aarch64-fpmr.xml \
 	aarch64-fpu.xml \
 	aarch64-pauth.xml \
 	aarch64-mte.xml \
