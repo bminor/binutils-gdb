@@ -636,9 +636,9 @@ mips_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 static int
 write_watchpoint_regs (void)
 {
-  for (const lwp_info *lp : all_lwps ())
+  for (const lwp_info &lp : all_lwps ())
     {
-      int tid = lp->ptid.lwp ();
+      int tid = lp.ptid.lwp ();
       if (ptrace (PTRACE_SET_WATCH_REGS, tid, &watch_mirror, NULL) == -1)
 	perror_with_name (_("Couldn't write debug register"));
     }
