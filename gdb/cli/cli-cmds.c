@@ -1477,14 +1477,22 @@ list_command (const char *arg, int from_tty)
       gdbarch = sal.symtab->compunit ()->objfile ()->arch ();
       sym = find_symbol_for_pc (sal.pc);
       if (sym)
-	gdb_printf ("%s is in %s (%s:%d).\n",
-		    paddress (gdbarch, sal.pc),
+	gdb_printf ("%ps is in %s (%ps:%ps).\n",
+		    styled_string (address_style.style (),
+				   paddress (gdbarch, sal.pc)),
 		    sym->print_name (),
-		    symtab_to_filename_for_display (sal.symtab), sal.line);
+		    styled_string (file_name_style.style (),
+				   symtab_to_filename_for_display (sal.symtab)),
+		    styled_string (line_number_style.style (),
+				   pulongest (sal.line)));
       else
-	gdb_printf ("%s is at %s:%d.\n",
-		    paddress (gdbarch, sal.pc),
-		    symtab_to_filename_for_display (sal.symtab), sal.line);
+	gdb_printf ("%ps is at %ps:%ps.\n",
+		    styled_string (address_style.style (),
+				   paddress (gdbarch, sal.pc)),
+		    styled_string (file_name_style.style (),
+				   symtab_to_filename_for_display (sal.symtab)),
+		    styled_string (line_number_style.style (),
+				   pulongest (sal.line)));
     }
 
   /* If line was not specified by just a line number, and it does not
@@ -2174,8 +2182,9 @@ print_sal_location (const symtab_and_line &sal)
   const char *sym_name = NULL;
   if (sal.symbol != NULL)
     sym_name = sal.symbol->print_name ();
-  gdb_printf (_("file: \"%s\", line number: %ps, symbol: \"%s\"\n"),
-	      symtab_to_filename_for_display (sal.symtab),
+  gdb_printf (_("file: \"%ps\", line number: %ps, symbol: \"%s\"\n"),
+	      styled_string (file_name_style.style (),
+			     symtab_to_filename_for_display (sal.symtab)),
 	      styled_string (line_number_style.style (),
 			     pulongest (sal.line)),
 	      sym_name != NULL ? sym_name : "???");
