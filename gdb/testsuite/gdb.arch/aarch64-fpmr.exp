@@ -1,0 +1,99 @@
+# Copyright 2023-2025 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+
+# Exercise reading/writing FPMR when it is present.
+
+require is_aarch64_target
+require allow_aarch64_fpmr_tests
+
+standard_testfile
+if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile}]} {
+    return -1
+}
+
+if {![runto_main]} {
+    return -1
+}
+
+gdb_test_multiple "info register \$fpmr" "Test FPMR SRC1 E5M2" {
+    -re ".*\r\n.*\[ \
+	F8S1=E5M2 \
+	F8S2=E5M2 \
+	F8D=E5M2 \
+	OSM=Inf \
+	OSC=Inf/NaN \
+	LSCALE=0 \
+	NSCALE=0 \
+	LSCALE2=0 \]" {
+	pass "FPMR SRC1 matches E5M2"
+    }
+}
+
+set breakpoints \
+    [list \
+	"SRC1" \
+	"SRC2" \
+	"DST" \
+	"OSM" \
+	"OSC" \
+	"LSCALE" \
+	"NSCALE" \
+	"LSCALE2"]
+
+set reg_values \
+    [list \
+	".*\r\n.*\[ F8S1=E4M3 F8S2=E5M2 F8D=E5M2 OSM=Inf OSC=Inf/NaN LSCALE=0 NSCALE=0 LSCALE2=0 \]" \
+	".*\r\n.*\[ F8S1=E4M3 F8S2=E4M3 F8D=E5M2 OSM=Inf OSC=Inf/NaN LSCALE=0 NSCALE=0 LSCALE2=0 \]" \
+	".*\r\n.*\[ F8S1=E4M3 F8S2=E4M3 F8D=E4M3 OSM=Inf OSC=Inf/NaN LSCALE=0 NSCALE=0 LSCALE2=0 \]" \
+	".*\r\n.*\[ F8S1=E4M3 F8S2=E4M3 F8D=E4M3 OSM=MaxNormal OSC=Inf/NaN LSCALE=0 NSCALE=0 LSCALE2=0 \]" \
+	".*\r\n.*\[ F8S1=E4M3 F8S2=E4M3 F8D=E4M3 OSM=MaxNormal OSC=MaxNormal LSCALE=0 NSCALE=0 LSCALE2=0 \]" \
+	".*\r\n.*\[ F8S1=E4M3 F8S2=E4M3 F8D=E4M3 OSM=MaxNormal OSC=MaxNormal LSCALE=127 NSCALE=0 LSCALE2=0 \]" \
+	".*\r\n.*\[ F8S1=E4M3 F8S2=E4M3 F8D=E4M3 OSM=MaxNormal OSC=MaxNormal LSCALE=127 NSCALE=255 LSCALE2=0 \]" \
+	".*\r\n.*\[ F8S1=E4M3 F8S2=E4M3 F8D=E4M3 OSM=MaxNormal OSC=MaxNormal LSCALE=127 NSCALE=255 LSCALE2=63 \]"]
+
+set pass_messages \
+    [list \
+	"FPMR SRC1 matches E4M3" \
+	"FPMR SRC2 matches E4M3" \
+	"FPMR DST matches E4M3" \
+	"FPMR OSM matches MaxNormal" \
+	"FPMR OSC matches MaxNormal" \
+	"FPMR LSCALE matches" \
+	"FPMR NSCALE matches" \
+	"FPMR LSCALE2 matches"]
+
+for {set i 0} {$i < 8} {incr i} {
+    set bp [lindex $breakpoints $i]
+    gdb_breakpoint [gdb_get_line_number $bp]
+    gdb_continue_to_breakpoint $bp
+
+    gdb_test_multiple "info register \$fpmr" "" {
+	-re [lindex $reg_values $i] {
+	    pass [lindex $pass_messages $i]
+	}
+    }
+}
+
+gdb_test_multiple "set \$fpmr=0x0" "" {
+    -re ".*\r\n.*\[ F8S1=E5M2 F8S2=E5M2 F8D=E5M2 OSM=Inf OSC=Inf/NaN LSCALE=0 NSCALE=0 LSCALE2=0 \]" {
+	pass "Reset FPMR to 0 from GDB"
+    }
+}
+
+gdb_test_multiple "set \$fpmr=0x3f007f4008" "" {
+    -re ".*\r\n.*\[ F8S1=E5M2 F8S2=E4M3 F8D=E5M2 OSM=MaxNormal OSC=Inf/NaN LSCALE=127 NSCALE=0 LSCALE2=63 \]" {
+	pass "Write to FPMR from GDB"
+    }
+}

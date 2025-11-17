@@ -1,0 +1,74 @@
+# Copyright 2018-2025 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# This file is part of the gdb testsuite.
+#
+# Test FPMR register set is properly preserved when unwinding sighandler frames.
+
+require is_aarch64_target
+require allow_aarch64_fpmr_tests
+
+standard_testfile
+if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile}]} {
+    return -1
+}
+
+if {![runto_main]} {
+    return -1
+}
+
+set reg_main_value "0x3fff7fc049"
+set reg_handler_value "0xff008041"
+
+proc check_fpmr {value} {
+    gdb_test "print /x \$fpmr" ".* = {?$value}?" \
+	     "check register \$fpmr has value $value"
+}
+
+# Run until end of signal handler.
+
+gdb_test "continue" "Continuing.*Program received signal SIGILL.*" \
+	 "continue until signal"
+
+gdb_breakpoint [gdb_get_line_number "exit (0)"]
+gdb_continue_to_breakpoint "exit" ".*exit.*"
+
+set handlerframe [get_current_frame_number]
+set mainframe [expr {$handlerframe + 2}]
+
+# Check register values.
+
+with_test_prefix "handler frame 1st" {
+  check_fpmr $reg_handler_value
+}
+
+# Switch to the frame for main (), and check register values.
+
+gdb_test "frame $mainframe" "#$mainframe.*main ().*" \
+	 "set to main frame"
+
+with_test_prefix "main frame" {
+  check_fpmr $reg_main_value
+}
+
+# Switch back to the signal handler frame, and check register values.
+
+gdb_test "frame $handlerframe" \
+	 "#$handlerframe.*handler \\\(sig=4\\\).*" \
+	 "set to signal handler frame"
+
+with_test_prefix "handler frame 2nd" {
+  check_fpmr $reg_handler_value
+}

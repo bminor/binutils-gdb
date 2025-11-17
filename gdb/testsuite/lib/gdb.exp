@@ -5207,6 +5207,72 @@ proc aarch64_supports_sme_svl { length } {
     return 1
 }
 
+# Run a test on the target to see if it supports the AArch64 FPMR feature.
+# Return 1 if so, 0 if it does not.  Note this causes a restart of GDB.
+
+gdb_caching_proc allow_aarch64_fpmr_tests {} {
+    global srcdir subdir gdb_prompt inferior_exited_re
+
+    set me "allow_aarch64_fpmr_tests"
+
+    if { ![is_aarch64_target]} {
+	return 0
+    }
+
+    set compile_flags "{additional_flags=-march=armv8-a}"
+
+    # Compile a test program reading FPMR.
+    set src {
+	int main() {
+	    asm volatile ("mrs x0, fpmr");
+	    return 0;
+	}
+    }
+    if {![gdb_simple_compile $me $src executable $compile_flags]} {
+	# Try again, but with a raw hex instruction so we don't rely on
+	# assembler support for FPMR.
+
+	set compile_flags "{additional_flags=-march=armv8-a}"
+
+	# Compile a test program reading FPMR.
+	set src {
+	    int main() {
+		asm volatile (".word 0xD53B4440");
+		return 0;
+	    }
+	}
+
+	if {![gdb_simple_compile $me $src executable $compile_flags]} {
+	    return 0
+	}
+    }
+
+    # Compilation succeeded so now run it via gdb.
+    clean_restart
+    gdb_load $obj
+    gdb_run_cmd
+
+    gdb_expect {
+	-re ".*Illegal instruction.*${gdb_prompt} $" {
+	    verbose -log "\n$me fpmr support not detected"
+	    set allow_fpmr_tests 0
+	}
+	-re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+	    verbose -log "\n$me: fpmr support detected"
+	    set allow_fpmr_tests 1
+	}
+	default {
+	  warning "\n$me: default case taken"
+	    set allow_fpmr_tests 0
+	}
+    }
+    gdb_exit
+    remote_file build delete $obj
+
+    verbose "$me:  returning $allow_fpmr_tests" 2
+    return $allow_fpmr_tests
+}
+
 # Run a test on the target to see if it supports AArch64 MOPS (Memory
 # Operations) extensions.  Return 1 if so, 0 if it does not.  Note this
 # causes a restart of GDB.
