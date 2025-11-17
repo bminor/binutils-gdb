@@ -396,7 +396,7 @@ mapped_debug_names_reader::scan_all_names ()
 
 	  if (parent_it == entry_pool_offsets_to_entries.cend ())
 	    {
-	      complaint (_ ("Parent entry not found for .debug_names entry"));
+	      complaint (_("Parent entry not found for .debug_names entry"));
 	      continue;
 	    }
 

@@ -260,7 +260,7 @@ set_default_source_symtab_and_line (void)
 {
   if (!have_full_symbols (current_program_space)
       && !have_partial_symbols (current_program_space))
-    error (_ ("No symbol table is loaded.  Use the \"file\" command."));
+    error (_("No symbol table is loaded.  Use the \"file\" command."));
 
   /* Pull in a current source symtab if necessary.  */
   current_source_location *loc = get_source_location (current_program_space);

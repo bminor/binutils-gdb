@@ -1306,10 +1306,10 @@ check_pid_namespace_match (inferior *inf)
 	 libthread_db.  */
       if (!linux_ns_same (inf->pid, LINUX_NS_PID))
 	{
-	  warning (_ ("Target and debugger are in different PID "
-		      "namespaces; thread lists and other data are "
-		      "likely unreliable.  "
-		      "Connect to gdbserver inside the container."));
+	  warning (_("Target and debugger are in different PID "
+		     "namespaces; thread lists and other data are "
+		     "likely unreliable.  "
+		     "Connect to gdbserver inside the container."));
 	}
     }
 }

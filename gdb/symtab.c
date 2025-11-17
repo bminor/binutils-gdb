@@ -4537,7 +4537,7 @@ info_sources_command (const char *args, int from_tty)
 {
   if (!have_full_symbols (current_program_space)
       && !have_partial_symbols (current_program_space))
-    error (_ ("No symbol table is loaded.  Use the \"file\" command."));
+    error (_("No symbol table is loaded.  Use the \"file\" command."));
 
   filename_partial_match_opts match_opts;
   auto group = make_info_sources_options_def_group (&match_opts);

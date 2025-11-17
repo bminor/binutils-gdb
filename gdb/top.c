@@ -1575,7 +1575,7 @@ This GDB was configured as follows:\n\
 "), DEBUGDIR, DEBUGDIR_RELOCATABLE ? " (relocatable)" : "");
 
 #ifdef ADDITIONAL_DEBUG_DIRS
-  gdb_printf (stream, _ ("\
+  gdb_printf (stream, _("\
 	     --with-additional-debug-dirs=%s\n\
 "), ADDITIONAL_DEBUG_DIRS);
 #endif

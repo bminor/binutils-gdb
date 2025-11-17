@@ -515,7 +515,7 @@ riscv_linux_get_syscall_number (struct gdbarch *gdbarch, thread_info *thread)
   if (regcache->cooked_read (RISCV_A7_REGNUM, &ret)
       != register_status::REG_VALID)
     {
-      warning (_ ("Can not read a7 register"));
+      warning (_("Can not read a7 register"));
       return -1;
     }
 

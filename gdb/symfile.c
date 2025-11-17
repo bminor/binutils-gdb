@@ -1059,7 +1059,7 @@ symbol_file_add_with_addrs (const gdb_bfd_ref_ptr &abfd, const char *name,
 	  || ((have_full_symbols (current_program_space)
 	       || have_partial_symbols (current_program_space))
 	      && mainline))
-      && !query (_ ("Load new symbol table from \"%s\"? "), name))
+      && !query (_("Load new symbol table from \"%s\"? "), name))
     error (_("Not confirmed."));
 
   if (mainline)
