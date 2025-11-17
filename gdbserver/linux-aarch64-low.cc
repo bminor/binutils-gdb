@@ -248,6 +248,26 @@ aarch64_store_fpregset (struct regcache *regcache, const void *buf)
   supply_register (regcache, AARCH64_FPCR_REGNUM, &regset->fpcr);
 }
 
+/* Fill BUF with the FPMR register set from the regcache.  */
+
+static void
+aarch64_fill_fpmr_regset (struct regcache *regcache, void *buf)
+{
+  uint64_t *fpmr = (uint64_t *) buf;
+  int fpmr_regnum = find_regno (regcache->tdesc, "fpmr");
+  collect_register (regcache, fpmr_regnum, fpmr);
+}
+
+/* Store the FPMR register set to regcache.  */
+
+static void
+aarch64_store_fpmr_regset (struct regcache *regcache, const void *buf)
+{
+  uint64_t *fpmr = (uint64_t *) buf;
+  int fpmr_regnum = find_regno (regcache->tdesc, "fpmr");
+  supply_register (regcache, fpmr_regnum, fpmr);
+}
+
 /* Store the pauth registers to regcache.  */
 
 static void
@@ -879,6 +899,10 @@ static struct regset_info aarch64_regsets[] =
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_TAGGED_ADDR_CTRL,
     0, OPTIONAL_REGS,
     aarch64_fill_mteregset, aarch64_store_mteregset },
+  /* Floating Point Mode Register (FPMR).  */
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_FPMR,
+    0, OPTIONAL_REGS,
+    aarch64_fill_fpmr_regset, aarch64_store_fpmr_regset },
   /* TLS register.  */
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_TLS,
     0, OPTIONAL_REGS,
@@ -954,6 +978,10 @@ aarch64_adjust_register_sets (const struct aarch64_features &features)
 	  if (features.gcs_linux)
 	    regset->size = sizeof (user_gcs);
 	  break;
+	case NT_ARM_FPMR:
+	  if (features.fpmr)
+	    regset->size = sizeof (uint64_t);
+	  break;
 	default:
 	  gdb_assert_not_reached ("Unknown register set found.");
 	}
@@ -986,6 +1014,7 @@ aarch64_target::low_arch_setup ()
       features.mte = linux_get_hwcap2 (pid, 8) & HWCAP2_MTE;
       features.tls = aarch64_tls_register_count (tid);
       features.gcs = features.gcs_linux = linux_get_hwcap (pid, 8) & HWCAP_GCS;
+      features.fpmr = linux_get_hwcap2 (pid, 8) & HWCAP2_FPMR;
 
       /* Scalable Matrix Extension feature and size check.  */
       if (linux_get_hwcap2 (pid, 8) & HWCAP2_SME)
