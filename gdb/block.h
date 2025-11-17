@@ -509,6 +509,10 @@ struct blockvector
   /* Return true if the blockvector contains ADDR, false otherwise.  */
   bool contains (CORE_ADDR addr) const;
 
+  /* Return symbol at ADDR or NULL if no symbol is found.  Only exact matches
+     for ADDR are considered.  */
+  struct symbol *symbol_at_address (CORE_ADDR addr) const;
+
 private:
   /* An address map mapping addresses to blocks in this blockvector.
      This pointer is zero if the blocks' start and end addresses are

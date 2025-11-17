@@ -1963,6 +1963,10 @@ struct compunit_symtab : intrusive_list_node<compunit_symtab>
   /* Clear any cached source file names.  */
   void forget_cached_source_info ();
 
+  /* Return symbol at ADDR or NULL if no symbol is found.  Only exact matches
+     for ADDR are considered.  */
+  struct symbol *symbol_at_address (CORE_ADDR addr) const;
+
   /* Object file from which this symtab information was read.  */
   struct objfile *m_objfile;
 

@@ -840,6 +840,25 @@ blockvector::contains (CORE_ADDR addr) const
   return lookup (addr) != nullptr;
 }
 
+/* See block.h.  */
+
+struct symbol *
+blockvector::symbol_at_address (CORE_ADDR addr) const
+{
+  for (int i = GLOBAL_BLOCK; i <= STATIC_BLOCK; ++i)
+    {
+      const struct block *b = block (i);
+
+      for (struct symbol *sym : block_iterator_range (b))
+	{
+	  if (sym->loc_class () == LOC_STATIC && sym->value_address () == addr)
+	    return sym;
+	}
+    }
+
+  return nullptr;
+}
+
 blockvector::~blockvector ()
 {
   for (struct block *bl : m_blocks)
