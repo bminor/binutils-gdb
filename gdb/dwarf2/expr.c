@@ -865,12 +865,12 @@ dwarf_expr_context::read_mem (gdb_byte *buf, CORE_ADDR addr,
   /* Prefer the passed-in memory, if it exists.  */
   if (this->m_addr_info != nullptr)
     {
-      CORE_ADDR offset = addr - this->m_addr_info->addr;
-
-      if (offset < this->m_addr_info->valaddr.size ()
-	  && offset + length <= this->m_addr_info->valaddr.size ())
+      if (addr >= this->m_addr_info->addr
+	  && addr + length <= (this->m_addr_info->addr
+			       + this->m_addr_info->valaddr.size ()))
 	{
-	  memcpy (buf, this->m_addr_info->valaddr.data (), length);
+	  CORE_ADDR offset = addr - this->m_addr_info->addr;
+	  memcpy (buf, this->m_addr_info->valaddr.data () + offset, length);
 	  return;
 	}
     }
