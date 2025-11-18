@@ -576,7 +576,8 @@ ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name,
      in the non-dynamic portion.  Two exceptions: type and decl tags,
      whose identifier tables are unusual (duplicates are expected).  */
 
-  if (flag == CTF_ADD_ROOT && name != NULL && name[0] != '\0'
+  if ((flag == CTF_ADD_ROOT || !fp->ctf_add_conflicting)
+      && name != NULL && name[0] != '\0'
       && kind != CTF_K_TYPE_TAG && kind != CTF_K_DECL_TAG)
     {
       ctf_id_t existing;
@@ -603,8 +604,8 @@ ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name,
   dtd->dtd_buf_size = vbytes + vbytes_extra + sizeof (ctf_type_t);
   dtd->dtd_vlen_size = vbytes;
 
-  /* The non-root flag is implemented via prefixes.  */
-  if (flag == CTF_ADD_NONROOT)
+  /* Conflicting types are implemented via prefixes.  */
+  if (flag == CTF_ADD_NONROOT || fp->ctf_add_conflicting)
     dtd->dtd_buf_size += sizeof (ctf_type_t);
 
   if (prefixes)
@@ -621,10 +622,14 @@ ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name,
   /* Populate a conflicting type kind if need be.  This has vlen-in-bytes filled
      in if small enough to fit, to help prefix-unaware clients skip the prefix
      easily, but the vlen is otherwise redundant (and not used by libctf).  */
-  if (flag == CTF_ADD_NONROOT)
-    dtd->dtd_buf->ctt_info = CTF_TYPE_INFO (CTF_K_CONFLICTING, 0,
-					    dtd->dtd_vlen_size < 65536
-					    ? dtd->dtd_vlen_size : 0);
+  if (fp->ctf_add_conflicting)
+    {
+      dtd->dtd_buf->ctt_info = CTF_TYPE_INFO (CTF_K_CONFLICTING, 0,
+					      dtd->dtd_vlen_size < 65536
+					      ? dtd->dtd_vlen_size : 0);
+      if (fp->ctf_add_conflicting)
+	dtd->dtd_buf->ctt_name = ctf_str_add (fp, fp->ctf_add_conflicting);
+    }
 
   dtd->dtd_data->ctt_name = ctf_str_add (fp, name);
   dtd->dtd_type = type;
@@ -639,8 +644,10 @@ ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name,
      return a pointer to the non-root CONFLICTING header.  */
 
   if (typep)
-    *typep = dtd->dtd_buf + (flag == CTF_ADD_NONROOT);
+    *typep = dtd->dtd_buf + (flag == CTF_ADD_NONROOT
+			     || fp->ctf_add_conflicting != NULL);
 
+  fp->ctf_add_conflicting = NULL;
   fp->ctf_serialize.cs_initialized = 0;
 
   return dtd;
@@ -910,7 +917,10 @@ ctf_array_set_info (ctf_dict_t *fp, ctf_id_t type, const ctf_arinfo_t *arp)
   return 0;
 }
 
-/* Set this type as conflicting in compilation unit CUNAME.  */
+/* Set this type as conflicting in compilation unit CUNAME.  If TYPE is
+   zero, set the next type to be added to conflicting instead.  If TYPE is
+   zero and CUNAME is NULL, reverse the effect of a previous zero-TYPE
+   call.  */
 ctf_ret_t
 ctf_type_set_conflicting (ctf_dict_t *fp, ctf_id_t type, const char *cuname)
 {
@@ -918,6 +928,26 @@ ctf_type_set_conflicting (ctf_dict_t *fp, ctf_id_t type, const char *cuname)
   ctf_dtdef_t *dtd;
   ctf_type_t *prefix;
   uint32_t idx;
+
+  /* Next type we add will be conflicting.  Intern the cuname and remember
+     it.  If cuname is NULL, the next type will not be conflicting after
+     all (resetting the flag).  */
+  if (type == 0)
+    {
+      if (cuname)
+	{
+	  uint32_t cu_ref = ctf_str_add (fp, cuname);
+
+	  fp->ctf_add_conflicting = ctf_strraw (fp, cu_ref);
+	}
+      else
+	fp->ctf_add_conflicting = NULL;
+
+      return 0;
+    }
+
+  if (cuname == NULL)
+    cuname = "";
 
   if (ctf_lookup_by_id (&fp, type, NULL) == NULL)
     return -1;				/* errno is set for us.  */

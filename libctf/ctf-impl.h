@@ -484,6 +484,7 @@ struct ctf_dict
   uint32_t ctf_provtypemax;	  /* Latest valid provisional type ID.
 				     Counts down.  Parent only.  */
   uint32_t ctf_nprovtypes;	  /* Number of provisional types (convenience).  */
+  const char *ctf_add_conflicting; /* cuname of next-added conflicting type.  */
   const ctf_dmodel_t *ctf_dmodel; /* Data model pointer (see above).  */
   const char *ctf_cu_name;	  /* Compilation unit name (if any).  */
   char *ctf_dyn_cu_name;	  /* Dynamically allocated name of CU.  */

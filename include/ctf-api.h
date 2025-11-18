@@ -1134,11 +1134,17 @@ extern ctf_id_t ctf_add_section_variable (ctf_dict_t *, uint32_t,
 
 extern ctf_ret_t ctf_array_set_info (ctf_dict_t *, ctf_id_t, const ctf_arinfo_t *);
 
-/* Mark a type as conflicting, residing in some other translation unit with a
-   given name.  The type is hidden from all name lookups, just like
-   CTF_ADD_NONROOT.  */
+/* Mark a type as conflicting, residing in some other translation unit with
+   a given name (optional).  The type is hidden from all name lookups.  If
+   the type ID is zero, the next call to any ctf_add_* function that ends up
+   adding a type will add that type as conflicting as it is added (and not
+   check for name conflicts: all ctf_add* calls that add a new type clear
+   this flag when the type is successfully added, as does calling this
+   function with a type ID of zero and a NULL cuname. This is the equivalent
+   of the old CTF_ADD_NONROOT.  */
 
-extern ctf_ret_t ctf_type_set_conflicting (ctf_dict_t *, ctf_id_t, const char *);
+extern ctf_ret_t ctf_type_set_conflicting (ctf_dict_t *, ctf_id_t type,
+					   const char *cuname);
 
 /* Add a function or object symbol type with a particular name, without saying
    anything about the actual symbol index.  (The linker will then associate them
