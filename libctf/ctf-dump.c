@@ -99,15 +99,20 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
       ctf_arinfo_t ar;
       ctf_kind_t kind, unsliced_kind;
       ssize_t size, align;
-      const char *nonroot_leader = "";
-      const char *nonroot_trailer = "";
+      const char *conflicting_leader = "";
+      const char *conflicting_trailer = "";
+      const char *conflicting_cu;
+      ctf_bool_t conflicting;
       const char *idstr = "";
 
       id = new_id;
-      if (!(flag & CTF_ADD_ROOT))
+      if ((conflicting = ctf_type_conflicting (fp, id, &conflicting_cu)) < 0)
+	goto err;
+
+      if (conflicting)
 	{
-	  nonroot_leader = "{";
-	  nonroot_trailer = "}";
+	  conflicting_leader = "{";
+	  conflicting_trailer = "}";
 	}
 
       buf = ctf_type_aname (fp, id);
@@ -125,7 +130,7 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
 
       if (flag & CTF_FT_ID)
 	idstr = "ID ";
-      if (asprintf (&bit, "%s%s0x%lx: (kind %i) ", nonroot_leader, idstr,
+      if (asprintf (&bit, "%s%s0x%lx: (kind %i) ", conflicting_leader, idstr,
 		    id, ctf_type_kind (fp, id)) < 0)
 	goto oom;
       str = str_append (str, bit);
@@ -205,19 +210,14 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
 	  bit = NULL;
 	}
 
-      if (nonroot_trailer[0] != 0)
+      if (conflicting)
 	{
-	  ctf_bool_t conflicting;
-	  const char *conflicting_cu;
-
-	  if ((conflicting = ctf_type_conflicting (fp, id, &conflicting_cu)) < 0)
-	    goto oom;
-	  if (conflicting && conflicting_cu[0] != 0)
+	  if (conflicting_cu[0] != 0)
 	    {
 	      str = str_append (str, ": conflicting in ");
 	      str = str_append (str, conflicting_cu);
 	    }
-	  str = str_append (str, nonroot_trailer);
+	  str = str_append (str, conflicting_trailer);
 	}
 
       /* Just exit after one iteration if we are not showing the types this type
@@ -594,8 +594,7 @@ ctf_dump_objts (ctf_dict_t *fp, ctf_dump_state_t *state, ctf_funcobjt_t function
       else
 	str = xstrdup ("");
 
-      if ((typestr = ctf_dump_format_type (fp, id, CTF_ADD_ROOT
-					   | CTF_FT_REFS)) == NULL)
+      if ((typestr = ctf_dump_format_type (fp, id, CTF_FT_REFS)) == NULL)
 	{
 	  ctf_dump_append (fp, state, str);
 	  continue;				/* Swallow the error.  */
@@ -664,8 +663,7 @@ ctf_dump_var (ctf_dict_t *fp, ctf_id_t type,
       return 0;
     }
 
-  if ((typestr = ctf_dump_format_type (fp, type, CTF_ADD_ROOT
-				       | CTF_FT_REFS)) == NULL)
+  if ((typestr = ctf_dump_format_type (fp, type, CTF_FT_REFS)) == NULL)
     {
       free (str);
       return 0;					/* Swallow the error.  */
@@ -761,7 +759,7 @@ ctf_dump_member (ctf_dict_t *fp, const char *name, ctf_id_t id,
   *state->cdm_str = str_append (*state->cdm_str, bit);
   free (bit);
 
-  if ((typestr = ctf_dump_format_type (fp, id, CTF_ADD_ROOT | CTF_FT_BITFIELD
+  if ((typestr = ctf_dump_format_type (fp, id,  CTF_FT_BITFIELD
 				       | CTF_FT_ID)) == NULL)
     return -1;				/* errno is set for us.  */
 
@@ -813,23 +811,18 @@ type_hex_digits (ctf_id_t id)
 
 /* Dump a single type into the cds_items.  */
 static int
-ctf_dump_type (ctf_dict_t *fp, ctf_id_t id, int hidden,
-	       ctf_dump_state_t *state)
+ctf_dump_type (ctf_dict_t *fp, ctf_id_t id, ctf_dump_state_t *state)
 {
   char *str;
   char *indent;
-  int flag = CTF_ADD_ROOT;
   ctf_dump_membstate_t membstate = { &str, NULL };
-
-  if (hidden)
-    flag = CTF_ADD_NONROOT;
 
   /* Indent neatly.  */
   if (asprintf (&indent, "    %*s", type_hex_digits (id), "") < 0)
     return (ctf_set_errno (fp, ENOMEM));
 
   /* Dump the type itself.  */
-  if ((str = ctf_dump_format_type (fp, id, flag | CTF_FT_REFS)) == NULL)
+  if ((str = ctf_dump_format_type (fp, id, CTF_FT_REFS)) == NULL)
     goto err;
   str = str_append (str, "\n");
 
@@ -944,7 +937,7 @@ ctf_dump_str (ctf_dict_t *fp, ctf_dump_state_t *state)
   return 0;
 }
 
-/* Dump a particular section of a CTF file, in textual form.  Call with a
+/* Dump a= particular section of a CTF file, in textual form.  Call with a
    pointer to a NULL STATE: each call emits a dynamically allocated string
    containing a description of one entity in the specified section, in order.
    Only the first call (with a NULL state) may vary SECT.  Once the CTF section
@@ -1007,11 +1000,10 @@ ctf_dump (ctf_dict_t *fp, ctf_dump_state_t **statep, ctf_sect_names_t sect,
 	  {
 	    ctf_next_t *it = NULL;
 	    ctf_id_t type;
-	    int hidden;
 
-	    while ((type = ctf_type_next (fp, &it, &hidden, 1)) != CTF_ERR)
+	    while ((type = ctf_type_next (fp, &it, NULL, 1)) != CTF_ERR)
 	      {
-		if (ctf_dump_type (fp, type, hidden, state) < 0)
+		if (ctf_dump_type (fp, type, state) < 0)
 		  {
 		    ctf_next_destroy (it);
 		    goto err;			/* errno is set for us.  */

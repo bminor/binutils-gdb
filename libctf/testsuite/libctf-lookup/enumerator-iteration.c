@@ -95,7 +95,7 @@ main (int argc, char *argv[])
 	      foo = ctf_type_aname (fp, type), val.val);
       free (foo);
 
-      if ((type = ctf_add_enum (fp, CTF_ADD_ROOT, "ie3", 0, 0)) == CTF_ERR)
+      if ((type = ctf_add_enum (fp, "ie3", 0, 0)) == CTF_ERR)
 	goto enum_add_err;
 
       if (ctf_add_enumerator (fp, type, "DYNADD", counter += 10) < 0)
@@ -128,7 +128,8 @@ main (int argc, char *argv[])
       if (ctf_add_enumerator (fp, type, "DYNADD2", dynadd2_value) < 0)
 	goto enumerator_add_err;
 
-      /* Flip it again and try *again*.  This time it should fail again.  */
+      /* Flip it again and try *again*.  This time it should fail again, unless
+	 we're adding a type we know is conflicting.  */
 
       if (ctf_dict_set_flag (fp, CTF_STRICT_NO_DUP_ENUMERATORS, old_dynadd2_flag) < 0)
 	goto set_flag_err;
@@ -137,7 +138,8 @@ main (int argc, char *argv[])
 	  || ctf_errno (fp) != ECTF_DUPLICATE)
 	fprintf (stderr, "Duplicate enumerator addition did not fail as it ought to\n");
 
-      if ((type = ctf_add_enum (fp, CTF_ADD_NONROOT, "ie4_hidden", 0, 0)) == CTF_ERR)
+      if (ctf_type_set_conflicting (fp, 0, "") < 0
+	  || (type = ctf_add_enum (fp, "ie4_hidden", 0, 0)) == CTF_ERR)
 	goto enum_add_err;
 
       if (ctf_add_enumerator (fp, type, "DYNADD3", counter += 10) < 0)
@@ -145,7 +147,8 @@ main (int argc, char *argv[])
       if (ctf_add_enumerator (fp, type, "DYNADD4", counter += 10) < 0)
 	goto enumerator_add_err;
 
-      if ((type = ctf_add_enum (fp, CTF_ADD_NONROOT, "ie3_hidden", 0, 0)) == CTF_ERR)
+      if (ctf_type_set_conflicting (fp, 0, "") < 0
+	  || (type = ctf_add_enum (fp, "ie3_hidden", 0, 0)) == CTF_ERR)
 	goto enum_add_err;
 
       if (ctf_add_enumerator (fp, type, "DYNADD", counter += 10) < 0)

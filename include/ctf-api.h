@@ -385,16 +385,6 @@ typedef enum ctf_model
 #endif
   } ctf_model_t;
 
-/* Dynamic CTF containers can be created using ctf_create.  The ctf_add_*
-   routines can be used to add new definitions to the dynamic container.  New
-   types are labeled as root or non-root to determine whether they are visible
-   at the top-level program scope when subsequently doing a lookup.
-   (Identifiers contained within non-root types, like enumeration constants, are
-   also not visible.)  */
-
-#define	CTF_ADD_NONROOT	0	/* Type only visible in nested scope.  */
-#define	CTF_ADD_ROOT	1	/* Type visible at top-level scope.  */
-
 /* Flags for ctf_member_next.  */
 
 #ifndef __cplusplus
@@ -418,10 +408,6 @@ typedef enum ctf_dict_flags
   {
     CTF_STRICT_NO_DUP_ENUMERATORS = 0x1
   } ctf_dict_flags_t;
-
-/* These typedefs are used to define the signature for callback functions that
-   can be used with the iteration and visit functions below.  There is also a
-   family of iteration functions that do not require callbacks.  */
 
 typedef int ctf_visit_f (ctf_dict_t *, const char *name, ctf_id_t type,
 			 size_t offset, int bit_width, int depth,
@@ -921,17 +907,17 @@ extern ctf_id_t ctf_arc_lookup_enumerator_next (ctf_archive_t *, const char *nam
 
 /* Iterate over all types, kinds or datasecs in a dict.  ctf_type_next returns
    all types in a dict in turn, allowing you to choose whether to see
-   conflicting types or not with the want_hidden arg: if set, the flag (if
-   passed) returns the conflicting state of each type in turn.  Types in parent
-   dictionaries are not returned.  Note that this is the opposite of the
-   convention in the old API: a true value for the flag argument used to mean it
-   is visible; now it means it is conflicting.
+   conflicting types or not with the want_hidden arg: if set, the
+   CONFLICTING arg (if passed) returns the conflicting state of each type in
+   turn.  Types in parent dictionaries are not returned.  Note that this is
+   the opposite of the convention in the old API: a true value for the flag
+   argument used to mean it is visible; now it means it is conflicting.
 
    These days, even variables are included in the things returned by ctf_type*()
    (type kind CTF_K_VAR).  */
 
 extern ctf_id_t ctf_type_next (ctf_dict_t *, ctf_next_t **,
-			       int *flag, int want_hidden);
+			       int *conflicting, int want_hidden);
 extern ctf_id_t ctf_type_kind_next (ctf_dict_t *, ctf_next_t **, ctf_kind_t kind);
 extern ctf_id_t ctf_datasec_var_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
 				      size_t *size, size_t *offset);
@@ -996,12 +982,9 @@ extern ctf_dict_t *ctf_create (ctf_error_t *);
 /* Add specific types to a dict.  You can add new types to any dict, but you can
    only add members to types that have been added since this dict was read in
    (you cannot read in a dict, look up a type in it, then add members to
-   it).  All adding functions take a uint32_t CTF_ADD_ROOT / CTF_ADD_NONROOT
-   flag to indicate whether this type should be visible to name lookups via
-   ctf_lookup_by_name et al.  */
+   it).  */
 
-extern ctf_id_t ctf_add_array (ctf_dict_t *, uint32_t,
-			       const ctf_arinfo_t *);
+extern ctf_id_t ctf_add_array (ctf_dict_t *, const ctf_arinfo_t *);
 
 /* enums are created signed by default: an encoding of NULL is permitted and
    means "use the default".  If you want an unsigned enum, use
@@ -1013,30 +996,28 @@ extern ctf_id_t ctf_add_array (ctf_dict_t *, uint32_t,
    for now simply means an enum64, but may in future mean to use whichever is
    appropriate.  */
 
-extern ctf_id_t ctf_add_enum (ctf_dict_t *, uint32_t, const char *,
+extern ctf_id_t ctf_add_enum (ctf_dict_t *, const char *,
 			      ctf_kind_t enum_64_unknown,
 			      const ctf_encoding_t *);
 
-extern ctf_id_t ctf_add_btf_float (ctf_dict_t *, uint32_t,
-				   const char *, const ctf_encoding_t *);
-extern ctf_id_t ctf_add_float (ctf_dict_t *, uint32_t,
-			       const char *, const ctf_encoding_t *);
-extern ctf_id_t ctf_add_forward (ctf_dict_t *, uint32_t, const char *,
-				 ctf_kind_t);
-extern ctf_id_t ctf_add_integer (ctf_dict_t *, uint32_t, const char *,
+extern ctf_id_t ctf_add_btf_float (ctf_dict_t *, const char *,
+				   const ctf_encoding_t *);
+extern ctf_id_t ctf_add_float (ctf_dict_t *, const char *,
+			       const ctf_encoding_t *);
+extern ctf_id_t ctf_add_forward (ctf_dict_t *, const char *, ctf_kind_t);
+extern ctf_id_t ctf_add_integer (ctf_dict_t *, const char *,
 				 const ctf_encoding_t *);
 
 /* ctf_add_function adds an unnamed function with a bundle of arguments and a
    return type.  ctf_add_function_linkage provides a function with a name
    and linkage, which is one of the CTF_FUNC_LINKAGE_* constants.  */
 
-extern ctf_id_t ctf_add_function (ctf_dict_t *fp, uint32_t flag,
-				  ctf_id_t ret_type, ctf_func_type_flags_t flags,
+extern ctf_id_t ctf_add_function (ctf_dict_t *fp, ctf_id_t ret_type,
+				  ctf_func_type_flags_t flags,
 				  const ctf_id_t *argv, const char **arg_names,
 				  size_t nargs);
 
-extern ctf_id_t ctf_add_function_linkage (ctf_dict_t *, uint32_t,
-					  ctf_id_t, const char *,
+extern ctf_id_t ctf_add_function_linkage (ctf_dict_t *, ctf_id_t, const char *,
 					  ctf_linkages_t linkage);
 
 /* Add a "slice", which wraps some integral type and changes its encoding
@@ -1045,18 +1026,17 @@ extern ctf_id_t ctf_add_function_linkage (ctf_dict_t *, uint32_t,
    returning the wrapped type.  */
 
 __libctf_attribute_deprecated__("slices are deprecated: use bitfield-capable structs")
-extern ctf_id_t ctf_add_slice (ctf_dict_t *, uint32_t, ctf_id_t, const ctf_encoding_t *);
-extern ctf_id_t ctf_add_pointer (ctf_dict_t *, uint32_t, ctf_id_t);
+extern ctf_id_t ctf_add_slice (ctf_dict_t *, ctf_id_t, const ctf_encoding_t *);
+extern ctf_id_t ctf_add_pointer (ctf_dict_t *, ctf_id_t);
 extern ctf_id_t ctf_add_type (ctf_dict_t *, ctf_dict_t *, ctf_id_t);
-extern ctf_id_t ctf_add_typedef (ctf_dict_t *, uint32_t, const char *,
-				 ctf_id_t);
+extern ctf_id_t ctf_add_typedef (ctf_dict_t *, const char *, ctf_id_t);
 
 /* Add type and decl tags to whole types or (for decl tags) specific
    components of types (parameter count for functions, member count for structs
    and unions).  */
-extern ctf_id_t ctf_add_type_tag (ctf_dict_t *, uint32_t, ctf_id_t, const char *);
-extern ctf_id_t ctf_add_decl_type_tag (ctf_dict_t *, uint32_t, ctf_id_t, const char *);
-extern ctf_id_t ctf_add_decl_tag (ctf_dict_t *, uint32_t, ctf_id_t, const char *,
+extern ctf_id_t ctf_add_type_tag (ctf_dict_t *, ctf_id_t, const char *);
+extern ctf_id_t ctf_add_decl_type_tag (ctf_dict_t *, ctf_id_t, const char *);
+extern ctf_id_t ctf_add_decl_tag (ctf_dict_t *, ctf_id_t, const char *,
 				  int component_idx);
 
 /* Struct and union addition.  STRUCT_UNION_UNKNOWN can be CTF_K_STRUCT,
@@ -1089,7 +1069,7 @@ enum ctf_bitfield
 typedef int ctf_bitfield_t;
 #endif
 
-extern ctf_id_t ctf_add_struct (ctf_dict_t *, uint32_t flag, const char *name,
+extern ctf_id_t ctf_add_struct (ctf_dict_t *, const char *name,
 				ctf_kind_t struct_union_unknown,
 				ctf_bitfield_t bitfield, size_t size);
 
@@ -1097,10 +1077,11 @@ extern ctf_id_t ctf_add_struct (ctf_dict_t *, uint32_t flag, const char *name,
    ECTF_NONREPRESENTABLE error when queried.  Mostly useful for struct members,
    variables, etc, to point to.  */
 
-extern ctf_id_t ctf_add_unknown (ctf_dict_t *, uint32_t, const char *);
+extern ctf_id_t ctf_add_unknown (ctf_dict_t *, const char *);
 
-/* Add an enumerator to an enum or enum64.  If the enum is non-root, so are all
-   the constants added to it by ctf_add_enumerator.  */
+/* Add an enumerator to an enum or enum64.  If the enum is conflicting, all the
+   constants added to it by ctf_add_enumerator are also not visible and can
+   repeat.  */
 
 extern ctf_ret_t ctf_add_enumerator (ctf_dict_t *, ctf_id_t, const char *, int64_t);
 
@@ -1117,7 +1098,7 @@ extern ctf_ret_t ctf_add_member_bitfield (ctf_dict_t *, ctf_id_t souid,
 					  const char *, ctf_id_t type,
 					  size_t bit_offset, int bit_width);
 
-extern ctf_id_t ctf_add_qualifier (ctf_dict_t *, uint32_t, ctf_kind_t cvr_qual, ctf_id_t);
+extern ctf_id_t ctf_add_qualifier (ctf_dict_t *, ctf_kind_t cvr_qual, ctf_id_t);
 
 /* ctf_add_variable adds variables to no datasec at all;
    ctf_add_section_variable adds them to the given datasec, or to no datasec at
@@ -1125,8 +1106,8 @@ extern ctf_id_t ctf_add_qualifier (ctf_dict_t *, uint32_t, ctf_kind_t cvr_qual, 
 
 extern ctf_id_t ctf_add_variable (ctf_dict_t *, const char *,
 				  ctf_linkages_t linkage, ctf_id_t);
-extern ctf_id_t ctf_add_section_variable (ctf_dict_t *, uint32_t,
-					  const char *datasec, const char *name,
+extern ctf_id_t ctf_add_section_variable (ctf_dict_t *, const char *datasec,
+					  const char *name,
 					  ctf_linkages_t linkage, ctf_id_t type,
 					  size_t size, size_t offset);
 

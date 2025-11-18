@@ -32,7 +32,14 @@ main (int argc, char *argv[])
 
   /* A non-root addition. */
 
-  if ((ctf_add_integer (in1, CTF_ADD_NONROOT, "foo", &encoding)) == CTF_ERR)
+  if ((ctf_type_set_conflicting (in1, 0, "")) < 0)
+    {
+      fprintf (stderr, "Cannot mark conflcting: %s\n",
+	       ctf_errmsg (ctf_errno (in1)));
+      return 1;
+    }
+
+  if ((ctf_add_integer (in1, "foo", &encoding)) == CTF_ERR)
     {
       fprintf (stderr, "Cannot add: %s\n", ctf_errmsg (ctf_errno (in1)));
       return 1;

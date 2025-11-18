@@ -40,49 +40,49 @@ main (int argc, char *argv[])
   /* Check that various modifications to already-written types
      are prohibited.  */
 
-  if (ctf_add_integer (fp, CTF_ADD_ROOT, "int", &en) == 0)
+  if (ctf_add_integer (fp, "int", &en) == 0)
     fprintf (stderr, "allowed to add integer existing in readonly portion\n");
 
   if (ctf_errno (fp) != ECTF_RDONLY)
     fprintf (stderr, "unexpected error %s attempting to add integer in readonly portion\n", ctf_errmsg (ctf_errno (fp)));
 
-  if (ctf_add_typedef (fp, CTF_ADD_ROOT, "a_typedef", 0) == 0)
+  if (ctf_add_typedef (fp, "a_typedef", 0) == 0)
     fprintf (stderr, "allowed to add typedef existing in readonly portion\n");
 
   if (ctf_errno (fp) != ECTF_RDONLY)
     fprintf (stderr, "unexpected error %s attempting to add typedef in readonly portion\n", ctf_errmsg (ctf_errno (fp)));
 
-  if (ctf_add_struct (fp, CTF_ADD_ROOT, "a_struct", 0, 0, 0) == 0)
+  if (ctf_add_struct (fp, "a_struct", 0, 0, 0) == 0)
     fprintf (stderr, "allowed to add struct existing in readonly portion\n");
 
   if (ctf_errno (fp) != ECTF_RDONLY)
     fprintf (stderr, "unexpected error %s attempting to add struct in readonly portion\n", ctf_errmsg (ctf_errno (fp)));
 
-  if (ctf_add_struct (fp, CTF_ADD_ROOT, "a_union", CTF_K_UNION, 0, 0) == 0)
+  if (ctf_add_struct (fp, "a_union", CTF_K_UNION, 0, 0) == 0)
     fprintf (stderr, "allowed to add union existing in readonly portion\n");
 
   if (ctf_errno (fp) != ECTF_RDONLY)
     fprintf (stderr, "unexpected error %s attempting to add union in readonly portion\n", ctf_errmsg (ctf_errno (fp)));
 
-  if (ctf_add_enum (fp, CTF_ADD_ROOT, "an_enum", 0, 0) == 0)
+  if (ctf_add_enum (fp, "an_enum", 0, 0) == 0)
     fprintf (stderr, "allowed to add enum existing in readonly portion\n");
 
   if (ctf_errno (fp) != ECTF_RDONLY)
     fprintf (stderr, "unexpected error %s attempting to add enum in readonly portion\n", ctf_errmsg (ctf_errno (fp)));
 
-  if (ctf_add_struct (fp, CTF_ADD_ROOT, "struct_forward", 0, 0, 0) == 0)
+  if (ctf_add_struct (fp, "struct_forward", 0, 0, 0) == 0)
     fprintf (stderr, "allowed to promote struct forward existing in readonly portion\n");
 
   if (ctf_errno (fp) != ECTF_RDONLY)
     fprintf (stderr, "unexpected error %s attempting to promote struct forward in readonly portion\n", ctf_errmsg (ctf_errno (fp)));
 
-  if (ctf_add_struct (fp, CTF_ADD_ROOT, "union_forward", CTF_K_UNION, 0, 0) == 0)
+  if (ctf_add_struct (fp, "union_forward", CTF_K_UNION, 0, 0) == 0)
     fprintf (stderr, "allowed to promote union forward existing in readonly portion\n");
 
   if (ctf_errno (fp) != ECTF_RDONLY)
     fprintf (stderr, "unexpected error %s attempting to promote union forward in readonly portion\n", ctf_errmsg (ctf_errno (fp)));
 
-  if (ctf_add_enum (fp, CTF_ADD_ROOT, "enum_forward", 0, 0) == 0)
+  if (ctf_add_enum (fp, "enum_forward", 0, 0) == 0)
     fprintf (stderr, "allowed to promote enum forward existing in readonly portion\n");
 
   if (ctf_errno (fp) != ECTF_RDONLY)
@@ -136,7 +136,7 @@ main (int argc, char *argv[])
   if ((type = ctf_lookup_by_name (fp, "struct a_struct")) == CTF_ERR)
     fprintf (stderr, "Lookup of struct a_struct failed: %s\n", ctf_errmsg (ctf_errno (fp)));
 
-  if ((ptrtype = ctf_add_pointer (fp, CTF_ADD_ROOT, type)) == CTF_ERR)
+  if ((ptrtype = ctf_add_pointer (fp, type)) == CTF_ERR)
     fprintf (stderr, "Cannot add pointer to ctf_opened dict: %s\n", ctf_errmsg (ctf_errno (fp)));
 
   if (ctf_type_reference (fp, ptrtype) == CTF_ERR)

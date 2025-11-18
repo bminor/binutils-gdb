@@ -38,7 +38,7 @@ test (int empty_parent, int unserialized_parent)
      nonempty stypes range).  */
   if (!empty_parent)
     {
-      if ((pint = ctf_add_integer (parent, CTF_ADD_ROOT, "int", &encoding)) == CTF_ERR)
+      if ((pint = ctf_add_integer (parent, "int", &encoding)) == CTF_ERR)
 	goto parent_add_err;
       first_child_type++;
     }
@@ -72,11 +72,11 @@ test (int empty_parent, int unserialized_parent)
 
   if (!empty_parent)
     {
-      if ((pprovint = ctf_add_integer (parent, CTF_ADD_ROOT, "provint", &encoding)) == CTF_ERR)
+      if ((pprovint = ctf_add_integer (parent, "provint", &encoding)) == CTF_ERR)
 	goto parent_add_err;
       first_child_type++;
 
-      if ((pptr = ctf_add_pointer (parent, CTF_ADD_ROOT, pint)) == CTF_ERR)
+      if ((pptr = ctf_add_pointer (parent, pint)) == CTF_ERR)
 	goto parent_add_err;
       first_child_type++;
 
@@ -84,22 +84,22 @@ test (int empty_parent, int unserialized_parent)
       ar.ctr_index = pint;
       ar.ctr_nelems = 666;
 
-      if ((parray = ctf_add_array (parent, CTF_ADD_ROOT, &ar)) == CTF_ERR)
+      if ((parray = ctf_add_array (parent, &ar)) == CTF_ERR)
 	goto parent_add_err;
       first_child_type++;
 
       args[0] = pptr;
       args[1] = parray;
 
-      if ((pfunction = ctf_add_function (parent, CTF_ADD_ROOT, pprovint, 0, args, 2)) == CTF_ERR)
+      if ((pfunction = ctf_add_function (parent, pprovint, 0, args, 2)) == CTF_ERR)
 	goto parent_add_err;
       first_child_type++;
     }
 
-  if ((ctype = ctf_add_enum (child, CTF_ADD_ROOT, "wombat", 0, 0)) == CTF_ERR)
+  if ((ctype = ctf_add_enum (child, "wombat", 0, 0)) == CTF_ERR)
     goto child_add_err;
 
-  if ((ctype2 = ctf_add_struct (child, CTF_ADD_ROOT, "foo", 0, 0, 0)) == CTF_ERR)
+  if ((ctype2 = ctf_add_struct (child, "foo", 0, 0, 0)) == CTF_ERR)
     goto child_add_err;
 
   if (ctf_add_member (child, ctype2, "wombat_member", ctype, CTF_NEXT_MEMBER) < 0)
@@ -117,7 +117,7 @@ test (int empty_parent, int unserialized_parent)
       if (ctf_add_member (child, ctype2, "b", pptr, CTF_NEXT_MEMBER) < 0)
 	goto child_add_memb_err;
 
-      if ((cself = ctf_add_pointer (child, CTF_ADD_ROOT, ctype2)) == CTF_ERR)
+      if ((cself = ctf_add_pointer (child, ctype2)) == CTF_ERR)
 	goto child_add_err;
 
       if (ctf_add_member (child, ctype2, "self", cself, CTF_NEXT_MEMBER) < 0)
@@ -135,10 +135,10 @@ test (int empty_parent, int unserialized_parent)
       /* Add an instance of every other serialized type-referencing type,
 	 referencing a type provisional in the parent.  */
 
-      if (ctf_add_typedef (child, CTF_ADD_ROOT, "td", parray) == CTF_ERR)
+      if (ctf_add_typedef (child, "td", parray) == CTF_ERR)
 	goto child_add_err;
 
-      if ((cslice = ctf_add_slice (child, CTF_ADD_ROOT, pprovint, &slice_encoding)) == CTF_ERR)
+      if ((cslice = ctf_add_slice (child, pprovint, &slice_encoding)) == CTF_ERR)
 	goto child_add_err;
 	   
       if (ctf_add_member (child, ctype2, "c", cslice, CTF_NEXT_MEMBER) < 0)
@@ -150,7 +150,7 @@ test (int empty_parent, int unserialized_parent)
       args[0] = pptr;
       args[1] = parray;
 
-      if ((cfunction = ctf_add_function (parent, CTF_ADD_ROOT, pprovint, 0, args, 2)) == CTF_ERR)
+      if ((cfunction = ctf_add_function (parent, pprovint, 0, args, 2)) == CTF_ERR)
 	goto child_add_err;
       first_child_type++;
 

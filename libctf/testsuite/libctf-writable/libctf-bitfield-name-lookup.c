@@ -43,12 +43,12 @@ int bitfieldery (int count, int up, int pos)
       if (i == pos)
 	{
 	  err = "populating with basic type";
-	  if (ctf_add_integer (dict, CTF_ADD_ROOT, "int", &basic) < 0)
+	  if (ctf_add_integer (dict, "int", &basic) < 0)
 	    goto err;
 	}
 
       err = "populating";
-      if (ctf_add_integer (dict, CTF_ADD_ROOT, "int", &en) < 0)
+      if (ctf_add_integer (dict, "int", &en) < 0)
 	goto err;
 
       en.cte_bits += up ? 1 : -1;
@@ -62,7 +62,7 @@ int bitfieldery (int count, int up, int pos)
   if (i == pos)
     {
       err = "populating with basic type";
-      if (ctf_add_integer (dict, CTF_ADD_ROOT, "int", &basic) < 0)
+      if (ctf_add_integer (dict, "int", &basic) < 0)
 	goto err;
     }
 

@@ -779,12 +779,11 @@ extern void ctf_list_delete (ctf_list_t *, void *);
 extern void ctf_list_splice (ctf_list_t *, ctf_list_t *);
 extern int ctf_list_empty_p (ctf_list_t *lp);
 
-extern int ctf_dtd_insert (ctf_dict_t *, ctf_dtdef_t *, int flag, ctf_kind_t kind);
 extern void ctf_dtd_delete (ctf_dict_t *, ctf_dtdef_t *);
 extern ctf_dtdef_t *ctf_dtd_lookup (const ctf_dict_t *, ctf_id_t);
 extern ctf_dtdef_t *ctf_dynamic_type (const ctf_dict_t *, ctf_id_t);
 
-extern ctf_id_t ctf_add_encoded (ctf_dict_t *, uint32_t, const char *,
+extern ctf_id_t ctf_add_encoded (ctf_dict_t *, const char *,
 				 const ctf_encoding_t *, ctf_kind_t kind);
 extern ctf_ret_t ctf_add_funcobjt_sym_forced (ctf_dict_t *, int is_function,
 					      const char *, ctf_id_t);

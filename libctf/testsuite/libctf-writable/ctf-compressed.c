@@ -41,13 +41,13 @@ main (int argc, char *argv[])
 
   /* Force a conflict to get an archive created.  */
 
-  if ((ctf_add_integer (in1, CTF_ADD_ROOT, "foo", &encoding)) == CTF_ERR)
+  if ((ctf_add_integer (in1, "foo", &encoding)) == CTF_ERR)
     {
       fprintf (stderr, "Cannot add: %s\n", ctf_errmsg (ctf_errno (in1)));
       return 1;
     }
 
-  if ((ctf_add_integer (in2, CTF_ADD_ROOT, "foo", &encoding2)) == CTF_ERR)
+  if ((ctf_add_integer (in2, "foo", &encoding2)) == CTF_ERR)
     {
       fprintf (stderr, "Cannot add: %s\n", ctf_errmsg (ctf_errno (in2)));
       return 1;

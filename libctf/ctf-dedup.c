@@ -3139,7 +3139,7 @@ ctf_dedup_maybe_synthesize_forward (ctf_dict_t *output, ctf_dict_t *target,
   if (!ctf_dynhash_lookup_kv (td->cd_output_emission_conflicted_forwards,
 			      decorated, NULL, &v))
     {
-      if ((emitted_forward = ctf_add_forward (target, CTF_ADD_ROOT, name,
+      if ((emitted_forward = ctf_add_forward (target, name,
 					      fwdkind)) == CTF_ERR)
 	return ctf_set_typed_errno (output, ctf_errno (target));
 
@@ -3308,7 +3308,6 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
   int output_num = (uint32_t) -1;		/* 'shared' */
   int cu_mapping_phase = *(int *)arg;
   int parent_cu_mapped = 0;
-  int isroot = 1;
   int is_conflicting;
   const char *conflicting_cuname = NULL;
 
@@ -3447,14 +3446,12 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	       possible, but we do not guarantee which one.  */
       if (ctf_dynhash_lookup (d->cd_nonroot_consistency, hval))
 	{
-	  isroot = 0;
 	  conflicting_cuname = ctf_dict_cuname (input);
 	  ctf_type_conflicting (input, type, &conflicting_cuname);
 	}
       break;
     case 1: /* cu-mapped link.  Never root-visible, no explicit conflict
 	       marking.  */
-      isroot = 0;
       conflicting_cuname = "";
       break;
     case 2: /* Final phase of cu-mapped link.  */
@@ -3464,10 +3461,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	     dict (which must necessarily contain the non-conflicting type as
 	     well).  */
 	  if (parent_cu_mapped)
-	    {
-	      isroot = 0;
-	      conflicting_cuname = ctf_dict_cuname (input);
-	    }
+	    conflicting_cuname = ctf_dict_cuname (input);
 	  else
 	    /* Non-root if already present (multiple conflicting types mapped
 	       into the same child dict).  */
@@ -3480,7 +3474,6 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 				 "kind %i.\n", name, kind, hval,
 				 ctf_dict_cuname (target), maybe_dup,
 				 ctf_type_kind (target, maybe_dup));
-		    isroot = 0;
 		    conflicting_cuname = ctf_dict_cuname (input);
 		  }
 	      }
@@ -3507,7 +3500,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
       /* These are types that CTF cannot encode, marked as such by the
 	 compiler.  */
       errtype = _("unknown type");
-      if ((new_type = ctf_add_unknown (target, isroot, name)) == CTF_ERR)
+      if ((new_type = ctf_add_unknown (target, name)) == CTF_ERR)
 	goto err_target;
       break;
     case CTF_K_FORWARD:
@@ -3515,7 +3508,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	 and will be replaced with such a type if it appears later.  */
 
       errtype = _("forward");
-      if ((new_type = ctf_add_forward (target, isroot, name,
+      if ((new_type = ctf_add_forward (target, name,
 				       ctf_type_kind_forwarded (input, type)))
 	  == CTF_ERR)
 	goto err_target;
@@ -3527,7 +3520,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
       errtype = _("float/int");
       if (ctf_type_encoding (input, type, &ep) < 0)
 	goto err_input;				/* errno is set for us.  */
-      if ((new_type = ctf_add_encoded (target, isroot, name, &ep, kind))
+      if ((new_type = ctf_add_encoded (target, name, &ep, kind))
 	  == CTF_ERR)
 	goto err_target;
       break;
@@ -3542,7 +3535,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	/* Check enumerands for duplication and nonrootify if clashing: this is
 	   an extension of the isroot check above.  */
 
-	if (isroot && cu_mapping_phase == 2)
+	if (!is_conflicting && cu_mapping_phase == 2)
 	  {
 	    const char *enumerand;
 	    while ((enumerand = ctf_enum_next (input, type, &i, NULL)) != NULL)
@@ -3556,7 +3549,6 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 		    if (ctf_type_set_conflicting (target, 0,
 						  ctf_dict_cuname (input)) < 0)
 		      goto err_target;
-		    isroot = 0;
 		  }
 	      }
 	    if (ctf_errno (input) != ECTF_NEXT_END)
@@ -3566,7 +3558,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	if (ctf_type_encoding (input, type, &en) < 0)
 	  goto err_input;
 
-	new_type = ctf_add_enum (target, isroot, name, kind, &en);
+	new_type = ctf_add_enum (target, name, kind, &en);
 	if (new_type == CTF_ERR)
 	  goto err_input;				/* errno is set for us.  */
 
@@ -3597,7 +3589,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 					 ref)) == CTF_ERR)
 	goto err_input;				/* errno is set for us.  */
 
-      if ((new_type = ctf_add_typedef (target, isroot, name, ref)) == CTF_ERR)
+      if ((new_type = ctf_add_typedef (target, name, ref)) == CTF_ERR)
 	goto err_target;			/* errno is set for us.  */
       break;
 
@@ -3616,13 +3608,13 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
       if (kind == CTF_K_POINTER)
 	{
 	  errtype = _("pointer");
-	  if ((new_type = ctf_add_pointer (target, isroot, ref)) == CTF_ERR)
+	  if ((new_type = ctf_add_pointer (target, ref)) == CTF_ERR)
 	    goto err_target;			/* errno is set for us.  */
 	}
       else
 	{
 	  errtype = _("cvr-qual");
-	  if ((new_type = ctf_add_qualifier (target, isroot, kind, ref)) == CTF_ERR)
+	  if ((new_type = ctf_add_qualifier (target, kind, ref)) == CTF_ERR)
 	    goto err_target;			/* errno is set for us.  */
 	}
       break;
@@ -3636,7 +3628,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 					 ref)) == CTF_ERR)
 	goto err_input;				/* errno is set for us.  */
 
-      if ((new_type = ctf_add_type_tag (target, isroot, ref, name)) == CTF_ERR)
+      if ((new_type = ctf_add_type_tag (target, ref, name)) == CTF_ERR)
 	goto err_target;			/* errno is set for us.  */
       break;
 
@@ -3652,7 +3644,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 					 ref)) == CTF_ERR)
 	goto err_input;
 
-      if ((new_type = ctf_add_slice (target, isroot, ref, &ep)) == CTF_ERR)
+      if ((new_type = ctf_add_slice (target, ref, &ep)) == CTF_ERR)
 	goto err_target;
       break;
 
@@ -3674,7 +3666,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	if (ar.ctr_contents == CTF_ERR || ar.ctr_index == CTF_ERR)
 	  goto err_input;
 
-	if ((new_type = ctf_add_array (target, isroot, &ar)) == CTF_ERR)
+	if ((new_type = ctf_add_array (target, &ar)) == CTF_ERR)
 	  goto err_target;
 
 	break;
@@ -3692,7 +3684,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
       if ((linkage = ctf_dedup_best_linkage (output, input, type, hval)) < 0)
 	goto err_input;
 
-      if ((new_type = ctf_add_function_linkage (target, isroot, ref, name,
+      if ((new_type = ctf_add_function_linkage (target, ref, name,
 						linkage)) == CTF_ERR)
 	goto err_target;			/* errno is set for us.  */
       break;
@@ -3738,7 +3730,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	    goto err_input;
 	  }
 
-	if ((new_type = ctf_add_function (target, isroot, ret, func_flags, args,
+	if ((new_type = ctf_add_function (target, ret, func_flags, args,
 					  arg_names, nargs)) == CTF_ERR)
 	  {
 	    free (args);
@@ -3766,8 +3758,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	if (is_bitfield < 0 || size < 0)
 	  goto err_input;
 
-	new_type = ctf_add_struct (target, isroot, name, kind, is_bitfield,
-				   size);
+	new_type = ctf_add_struct (target, name, kind, is_bitfield, size);
 
 	if (new_type == CTF_ERR)
 	  goto err_target;
@@ -3823,8 +3814,8 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	if (ctf_decl_tag (input, type, &component_idx) == CTF_ERR)
 	  goto err_input;
 
-	if ((new_type = ctf_add_decl_tag (target, isroot, ref,
-					  name, component_idx)) == CTF_ERR)
+	if ((new_type = ctf_add_decl_tag (target, ref, name,
+					  component_idx)) == CTF_ERR)
 	  goto err_target;			/* errno is set for us.  */
 
 	break;
@@ -3875,8 +3866,8 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 					   ref)) == CTF_ERR)
 	  goto err_input;			/* errno is set for us.  */
 
-	if ((new_type = ctf_add_section_variable (target, isroot, datasec_name,
-						  name, linkage, ref,
+	if ((new_type = ctf_add_section_variable (target, datasec_name, name,
+						  linkage, ref,
 						  entry->cvs_size,
 						  entry->cvs_offset)) == CTF_ERR)
 	  goto err_target;			/* errno is set for us.  */
@@ -4062,16 +4053,16 @@ ctf_dedup_emit_decl_tags (ctf_dict_t *output, ctf_dict_t **inputs)
   ctf_dict_t *err_fp, *input_fp;
   int input_num;
   ctf_id_t err_type;
+  ctf_dict_t *target = NULL;
 
   while ((err = ctf_dynhash_next (d->cd_emission_struct_decl_tags, &i,
 				  &input_id, &struct_id)) == 0)
     {
-      ctf_dict_t *target;
       uint32_t target_num;
       ctf_id_t input_type, struct_type, new_type;
       const char *name;
       int64_t component_idx;
-      int isroot;
+      ctf_bool_t conflicting;
       const char *hval;
 
       input_num = CTF_DEDUP_GID_TO_INPUT (input_id);
@@ -4099,9 +4090,8 @@ ctf_dedup_emit_decl_tags (ctf_dict_t *output, ctf_dict_t **inputs)
       err_fp = input_fp;
       err_type = input_type;
 
-      if ((isroot = ctf_type_conflicting (input_fp, input_type, NULL)) < 0)
+      if ((conflicting = ctf_type_conflicting (input_fp, input_type, NULL)) < 0)
 	goto err_input;
-      isroot = !isroot;
 
       if (ctf_decl_tag (input_fp, input_type, &component_idx) == CTF_ERR)
 	goto err_input;
@@ -4109,9 +4099,14 @@ ctf_dedup_emit_decl_tags (ctf_dict_t *output, ctf_dict_t **inputs)
       if ((name = ctf_type_name_raw (input_fp, input_type)) == NULL)
 	goto err_input;
 
-      if ((new_type = ctf_add_decl_tag (target, isroot ? CTF_ADD_ROOT
-					: CTF_ADD_NONROOT,
-					struct_type, name,
+      if (conflicting && ctf_type_set_conflicting (target, 0, "") < 0)
+	{
+	  err_fp = target;
+	  err_type = struct_type;
+	  goto err_target;
+	}
+
+      if ((new_type = ctf_add_decl_tag (target, struct_type, name,
 					component_idx)) == CTF_ERR)
 	{
 	  err_fp = target;
@@ -4153,6 +4148,8 @@ ctf_dedup_emit_decl_tags (ctf_dict_t *output, ctf_dict_t **inputs)
   return ctf_set_errno (output, ctf_errno (err_fp));
 
  err_target:
+  if (target)
+    ctf_type_set_conflicting (target, 0, NULL);
   ctf_next_destroy (i);
   ctf_err_warn (output, 0, ctf_errno (err_fp),
 		_("%s (%i): error emitting decl tag for structure type %lx"),

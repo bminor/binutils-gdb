@@ -96,7 +96,7 @@ main (int argc, char *argv[])
   if ((type = ctf_lookup_by_name (fp, "struct a_struct")) == CTF_ERR)
     fprintf (stderr, "Lookup of struct a_struct failed: %s\n", ctf_errmsg (ctf_errno (fp)));
 
-  if ((ptrtype = ctf_add_pointer (fp, CTF_ADD_ROOT, type)) == CTF_ERR)
+  if ((ptrtype = ctf_add_pointer (fp, type)) == CTF_ERR)
     fprintf (stderr, "Cannot add pointer to ctf_opened dict: %s\n", ctf_errmsg (ctf_errno (fp)));
 
   unlink ("tmpdir/two");

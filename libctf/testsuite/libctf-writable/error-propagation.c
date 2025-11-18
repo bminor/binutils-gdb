@@ -94,57 +94,57 @@ int main (void)
      the wrong one, and "void" in the parent is an unknown type in the wrong
      one.  */
 
-  if ((ctf_add_unknown (parent, CTF_ADD_ROOT, "spacer")) /* 1 */
+  if ((ctf_add_unknown (parent, "spacer")) /* 1 */
       == CTF_ERR)
     goto parent_err;
 
-  if ((ctf_add_unknown (parent, CTF_ADD_ROOT, "spacer2")) /* 2 */
+  if ((ctf_add_unknown (parent, "spacer2")) /* 2 */
       == CTF_ERR)
     goto parent_err;
 
-  if ((void_id = ctf_add_integer (parent, CTF_ADD_ROOT, "void", &void_encoding)) /* 3 */
+  if ((void_id = ctf_add_integer (parent, "void", &void_encoding)) /* 3 */
       == CTF_ERR)
     goto parent_err;
 
-  if ((base = ctf_add_integer (parent, CTF_ADD_ROOT, "long int", &long_encoding)) /* 4 */
+  if ((base = ctf_add_integer (parent, "long int", &long_encoding)) /* 4 */
       == CTF_ERR)
     goto parent_err;
 
-  if ((ptr = ctf_add_pointer (parent, CTF_ADD_ROOT, void_id)) /* 5 */
+  if ((ptr = ctf_add_pointer (parent, void_id)) /* 5 */
       == CTF_ERR)
     goto parent_err;
 
-  if ((ctf_add_integer (wrong, CTF_ADD_ROOT, "long int", &long_encoding)) /* 1 */
+  if ((ctf_add_integer (wrong, "long int", &long_encoding)) /* 1 */
       == CTF_ERR)
     goto parent_err;
 
-  if ((wrong_id = ctf_add_integer (wrong, CTF_ADD_ROOT, "void", &void_encoding)) /* 2 */
+  if ((wrong_id = ctf_add_integer (wrong, "void", &void_encoding)) /* 2 */
       == CTF_ERR)
     goto parent_err;
 
-  if ((ptr = ctf_add_pointer (wrong, CTF_ADD_ROOT, wrong_id)) /* 3 */
+  if ((ptr = ctf_add_pointer (wrong, wrong_id)) /* 3 */
       == CTF_ERR)
     goto parent_err;
   
-  if ((ctf_add_unknown (wrong, CTF_ADD_ROOT, "spacer")) /* 4 */
+  if ((ctf_add_unknown (wrong, "spacer")) /* 4 */
       == CTF_ERR)
     goto parent_err;
 
-  if ((ctf_add_unknown (wrong, CTF_ADD_ROOT, "spacer2")) /* 5 */
+  if ((ctf_add_unknown (wrong, "spacer2")) /* 5 */
       == CTF_ERR)
     goto parent_err;
 
   foo.cte_format = 0;
   foo.cte_bits = 4;
   foo.cte_offset = 4;
-  if ((slice = ctf_add_slice (child, CTF_ADD_ROOT, base, &foo)) == CTF_ERR)
+  if ((slice = ctf_add_slice (child, base, &foo)) == CTF_ERR)
     goto parent_err;
 
   /* Same name as a type: no change in strtab.strlen.  */
   if (ctf_add_variable (parent, "base", base) < 0)
     goto child_err;
 
-  if ((function = ctf_add_function (child, CTF_ADD_ROOT, void_id, NULL, NULL, 0)) == CTF_ERR)
+  if ((function = ctf_add_function (child, void_id, NULL, NULL, 0)) == CTF_ERR)
     goto child_err;
 
   desc = "func type lookup of non-function";
@@ -181,7 +181,7 @@ int main (void)
   free (bar);
 
   desc = "child slice addition";
-  if ((slice = ctf_add_slice (child, CTF_ADD_ROOT, base, &foo)) != CTF_ERR)
+  if ((slice = ctf_add_slice (child, base, &foo)) != CTF_ERR)
     no_prop_err ();
   check_prop_err (child, parent, ECTF_NONREPRESENTABLE);
 

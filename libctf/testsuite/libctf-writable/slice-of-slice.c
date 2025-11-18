@@ -23,7 +23,7 @@ int main (void)
       return 1;
     }
 
-  if ((base = ctf_add_enum (fp, CTF_ADD_ROOT, "enom", 0, &long_encoding))
+  if ((base = ctf_add_enum (fp, "enom", 0, &long_encoding))
       == CTF_ERR)
     goto err;
 
@@ -34,12 +34,12 @@ int main (void)
   foo.cte_format = 0;
   foo.cte_bits = 4;
   foo.cte_offset = 4;
-  if ((slice = ctf_add_slice (fp, CTF_ADD_ROOT, base, &foo)) == CTF_ERR)
+  if ((slice = ctf_add_slice (fp, base, &foo)) == CTF_ERR)
     goto err;
 
   foo.cte_bits = 6;
   foo.cte_offset = 2;
-  if ((slice2 = ctf_add_slice (fp, CTF_ADD_ROOT, slice, &foo)) == CTF_ERR)
+  if ((slice2 = ctf_add_slice (fp, slice, &foo)) == CTF_ERR)
     goto err;
 
   if (ctf_add_variable (fp, "foo", slice) < 0)

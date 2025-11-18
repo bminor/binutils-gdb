@@ -51,17 +51,17 @@ try_maybe_reporting (int report)
      identical types so we can distinguish between distinct func / data symbols
      later on.  */
 
-  if (((base = ctf_add_integer (fp, CTF_ADD_ROOT, "long int", &e)) == CTF_ERR) ||
-      ((base2 = ctf_add_integer (fp, CTF_ADD_ROOT, "long int", &e)) == CTF_ERR) ||
-      ((base3 = ctf_add_integer (fp, CTF_ADD_ROOT, "long int", &e)) == CTF_ERR))
+  if (((base = ctf_add_integer (fp, "long int", &e)) == CTF_ERR) ||
+      ((base2 = ctf_add_integer (fp, "long int", &e)) == CTF_ERR) ||
+      ((base3 = ctf_add_integer (fp, "long int", &e)) == CTF_ERR))
       goto create_types_err;
 
   fi.ctc_return = base;
   fi.ctc_argc = 0;
   fi.ctc_flags = 0;
-  if (((func = ctf_add_function (fp, CTF_ADD_ROOT, base, 0, &dummy, 0)) == CTF_ERR) ||
-      ((func2 = ctf_add_function (fp, CTF_ADD_ROOT, base, 0, &dummy, 0)) == CTF_ERR) ||
-      ((func3 = ctf_add_function (fp, CTF_ADD_ROOT, base, 0, &dummy, 0)) == CTF_ERR))
+  if (((func = ctf_add_function (fp, base, 0, &dummy, 0)) == CTF_ERR) ||
+      ((func2 = ctf_add_function (fp, base, 0, &dummy, 0)) == CTF_ERR) ||
+      ((func3 = ctf_add_function (fp, base, 0, &dummy, 0)) == CTF_ERR))
     goto create_types_err;
 
   /* Add some function and data symbols.  We intentionally add the symbols in

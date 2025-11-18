@@ -23,7 +23,7 @@ main (int argc, char *argv[])
   if ((fp = ctf_create (&err)) == NULL)
     goto create_err;
 
-  if ((zygal = ctf_add_struct (fp, CTF_ADD_ROOT, "zygal", 0, 0, 0)) == CTF_ERR)
+  if ((zygal = ctf_add_struct (fp, "zygal", 0, 0, 0)) == CTF_ERR)
     goto add_err;
 
   if ((foo = ctf_write_mem (fp, &foo_size, 4096)) == NULL)
@@ -39,8 +39,7 @@ main (int argc, char *argv[])
   else
     printf ("zygal's name is %s\n", name);
 
-  if ((autoschediastic = ctf_add_enum (fp, CTF_ADD_ROOT, "autoschediastic",
-				       0, 0)) == CTF_ERR)
+  if ((autoschediastic = ctf_add_enum (fp, "autoschediastic", 0, 0)) == CTF_ERR)
     goto add_err;
 
   if (ctf_type_sname (fp, zygal, name, &len) == NULL)

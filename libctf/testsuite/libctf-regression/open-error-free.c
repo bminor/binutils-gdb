@@ -129,12 +129,12 @@ int main (void)
   /* Define an integer, then a pile of unconnected pointers to it, just to
      use up space..  */
 
-  if ((type = ctf_add_integer (fp, CTF_ADD_ROOT, "long", &e)) == CTF_ERR)
+  if ((type = ctf_add_integer (fp, "long", &e)) == CTF_ERR)
     goto err;
 
   for (i = 0; i < 100; i++)
     {
-      if (ctf_add_pointer (fp, CTF_ADD_ROOT, type) == CTF_ERR)
+      if (ctf_add_pointer (fp, type) == CTF_ERR)
 	goto err;
     }
 

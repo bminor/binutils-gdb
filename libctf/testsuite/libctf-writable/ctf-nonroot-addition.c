@@ -19,10 +19,13 @@ main (int argc, char *argv[])
       return 1;
     }
 
-  if ((root = ctf_add_forward (fp, CTF_ADD_ROOT, "foo", CTF_K_ENUM)) == CTF_ERR)
+  if ((root = ctf_add_forward (fp, "foo", CTF_K_ENUM)) == CTF_ERR)
     goto add_err;
 
-  if ((nonroot = ctf_add_enum (fp, CTF_ADD_NONROOT, "foo", 0, 0)) == CTF_ERR)
+  if (ctf_type_set_conflicting (fp, 0, "") < 0)
+    goto conflict_err;
+
+  if ((nonroot = ctf_add_enum (fp, "foo", 0, 0)) == CTF_ERR)
     goto add_err;
 
   if (nonroot == root)
@@ -32,6 +35,10 @@ main (int argc, char *argv[])
 
   ctf_dict_close (fp);
   return 0;
+
+ conflict_err:
+  fprintf (stderr, "Cannot set conflicting: %s\n", ctf_errmsg (ctf_errno (fp)));
+  return 1;
 
  add_err:
   fprintf (stderr, "Cannot add: %s\n", ctf_errmsg (ctf_errno (fp)));

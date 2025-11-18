@@ -26,13 +26,13 @@ main (int argc, char *argv[])
      another pair of types we will chain to later: these end up before the
      pptrtab lazy-update watermark.  */
 
-  if ((base = ctf_add_integer (pfp, CTF_ADD_ROOT, "int", &encoding)) == CTF_ERR)
+  if ((base = ctf_add_integer (pfp, "int", &encoding)) == CTF_ERR)
     goto create_parent;
 
-  if ((base2 = ctf_add_integer (pfp, CTF_ADD_ROOT, "long int", &encoding2)) == CTF_ERR)
+  if ((base2 = ctf_add_integer (pfp, "long int", &encoding2)) == CTF_ERR)
     goto create_parent;
 
-  if ((ptr = ctf_add_pointer (cfp, CTF_ADD_ROOT, base)) == CTF_ERR)
+  if ((ptr = ctf_add_pointer (cfp, base)) == CTF_ERR)
     goto create_child;
 
   if ((type = ctf_lookup_by_name (cfp, "int *") ) == CTF_ERR)
@@ -50,7 +50,7 @@ main (int argc, char *argv[])
 
   /* Add another pointer to the same type in the parent and try a lookup.  */
 
-  if ((ptr = ctf_add_pointer (pfp, CTF_ADD_ROOT, base2)) == CTF_ERR)
+  if ((ptr = ctf_add_pointer (pfp, base2)) == CTF_ERR)
     goto create_parent;
 
   if ((type = ctf_lookup_by_name (cfp, "long int *") ) == CTF_ERR)
@@ -71,7 +71,7 @@ main (int argc, char *argv[])
 
   /* Add another pointer to the same type in the child and try a lookup.  */
 
-  if ((ptr = ctf_add_pointer (cfp, CTF_ADD_ROOT, base2)) == CTF_ERR)
+  if ((ptr = ctf_add_pointer (cfp, base2)) == CTF_ERR)
     goto create_child;
 
   if ((type = ctf_lookup_by_name (cfp, "long int *") ) == CTF_ERR)

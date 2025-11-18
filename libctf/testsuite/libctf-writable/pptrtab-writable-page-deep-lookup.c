@@ -18,11 +18,13 @@ main (void)
   if ((pfp = ctf_create (&err)) == NULL)
     goto create_err;
 
-  if ((ptype = ctf_add_integer (pfp, CTF_ADD_NONROOT, "blah", &e)) == CTF_ERR)
+  if (ctf_type_set_conflicting (pfp, 0, "") < 0
+      || (ptype = ctf_add_integer (pfp, "blah", &e)) == CTF_ERR)
     goto create_parent;
 
   for (i = 0; i < 4096; i++)
-    if ((foo = ctf_add_pointer (pfp, CTF_ADD_NONROOT, ptype)) == CTF_ERR)
+    if (ctf_type_set_conflicting (pfp, 0, "") < 0
+	|| (foo = ctf_add_pointer (pfp, ptype)) == CTF_ERR)
       goto create_parent;
 
   if ((cfp = ctf_create (&err)) == NULL)
@@ -31,10 +33,10 @@ main (void)
   if (ctf_import (cfp, pfp) < 0)
     goto create_child;
 
-  if ((ptype = ctf_add_integer (pfp, CTF_ADD_ROOT, "foo", &e)) == CTF_ERR)
+  if ((ptype = ctf_add_integer (pfp, "foo", &e)) == CTF_ERR)
     goto create_parent;
 
-  if ((ptrtype = ctf_add_pointer (pfp, CTF_ADD_ROOT, ptype)) == CTF_ERR)
+  if ((ptrtype = ctf_add_pointer (pfp, ptype)) == CTF_ERR)
     goto create_parent;
 
   if ((type = ctf_lookup_by_name (cfp, "*foo")) != CTF_ERR)

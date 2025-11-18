@@ -26,15 +26,18 @@ dtd_crash (enum crash_method method, int parent_bigger)
 
   if (parent_bigger)
     {
-      if ((foo = ctf_add_integer (pfp, CTF_ADD_NONROOT, "blah", &e)) == CTF_ERR)
+      if (ctf_type_set_conflicting (pfp, 0, "") < 0
+	  || (foo = ctf_add_integer (pfp, "blah", &e)) == CTF_ERR)
 	goto create_parent;
 
       for (i = 0; i < 4096; i++)
-	if (ctf_add_pointer (pfp, CTF_ADD_NONROOT, foo) == CTF_ERR)
-	  goto create_parent;
+      if (ctf_type_set_conflicting (pfp, 0, "") < 0
+	  || (ctf_add_pointer (pfp, foo) == CTF_ERR))
+	goto create_parent;
     }
 
-  if ((ptype = ctf_add_integer (pfp, CTF_ADD_NONROOT, "int", &e)) == CTF_ERR)
+  if (ctf_type_set_conflicting (pfp, 0, "") < 0
+      || (ptype = ctf_add_integer (pfp, "int", &e)) == CTF_ERR)
     goto create_parent;
 
   /* Add a forward to a struct, union, or enum (depending on the method) in
@@ -56,7 +59,7 @@ dtd_crash (enum crash_method method, int parent_bigger)
       break;
     }
 
-  if ((ftype = ctf_add_forward (pfp, CTF_ADD_ROOT, "foo", forward_kind)) == CTF_ERR)
+  if ((ftype = ctf_add_forward (pfp, "foo", forward_kind)) == CTF_ERR)
     goto create_parent;
 
   if ((cfp = ctf_create (&err)) == NULL)
@@ -67,11 +70,13 @@ dtd_crash (enum crash_method method, int parent_bigger)
 
   if (!parent_bigger)
     {
-      if ((foo = ctf_add_integer (pfp, CTF_ADD_NONROOT, "blah", &e)) == CTF_ERR)
+      if (ctf_type_set_conflicting (pfp, 0, "") < 0
+	  || (foo = ctf_add_integer (pfp, "blah", &e)) == CTF_ERR)
 	goto create_parent;
 
       for (i = 0; i < 4096; i++)
-	if (ctf_add_pointer (pfp, CTF_ADD_NONROOT, foo) == CTF_ERR)
+      if (ctf_type_set_conflicting (pfp, 0, "") < 0
+	  || (ctf_add_pointer (pfp, foo) == CTF_ERR))
 	  goto create_parent;
     }
 
@@ -80,21 +85,21 @@ dtd_crash (enum crash_method method, int parent_bigger)
       /* These try to replace a forward, and should not do so if we're
 	 adding in the child and it's in the parent.  */
     case ADD_STRUCT:
-      if ((stype = ctf_add_struct (cfp, CTF_ADD_ROOT, "foo", CTF_K_STRUCT, 0, 1024)) == CTF_ERR)
+      if ((stype = ctf_add_struct (cfp, "foo", CTF_K_STRUCT, 0, 1024)) == CTF_ERR)
 	goto create_child;
       if (stype == ftype)
 	fprintf (stderr, "Forward-promotion spotted!\n");
       break;
 
     case ADD_UNION:
-      if ((stype = ctf_add_struct (cfp, CTF_ADD_ROOT, "foo", CTF_K_UNION, 0, 1024)) == CTF_ERR)
+      if ((stype = ctf_add_struct (cfp, "foo", CTF_K_UNION, 0, 1024)) == CTF_ERR)
 	goto create_child;
       if (stype == ftype)
 	fprintf (stderr, "Forward-promotion spotted!\n");
       break;
 
     case ADD_ENUM:
-      if ((stype = ctf_add_enum (cfp, CTF_ADD_ROOT, "foo", 0, 0)) == CTF_ERR)
+      if ((stype = ctf_add_enum (cfp, "foo", 0, 0)) == CTF_ERR)
 	goto create_child;
       if (stype == ftype)
 	fprintf (stderr, "Forward-promotion spotted!\n");
@@ -109,10 +114,11 @@ dtd_crash (enum crash_method method, int parent_bigger)
       {
 	ctf_id_t ctype;
 
-	if ((stype = ctf_add_struct (pfp, CTF_ADD_ROOT, "bar", 0, 0, 0)) == CTF_ERR)
+	if ((stype = ctf_add_struct (pfp, "bar", 0, 0, 0)) == CTF_ERR)
 	  goto create_child;
 
-	if ((ctype = ctf_add_integer (cfp, CTF_ADD_NONROOT, "xyzzy", &e)) == CTF_ERR)
+	if (ctf_type_set_conflicting (cfp, 0, "") < 0
+	    || (ctype = ctf_add_integer (cfp, "xyzzy", &e)) == CTF_ERR)
 	  goto create_child;
 
 	if (ctf_add_member (cfp, stype, "member", ptype, 5) == CTF_ERR)
@@ -127,7 +133,7 @@ dtd_crash (enum crash_method method, int parent_bigger)
       }
 
     case ADD_ENUMERATOR:
-      if ((stype = ctf_add_enum (pfp, CTF_ADD_ROOT, "bar", 0, 0)) == CTF_ERR)
+      if ((stype = ctf_add_enum (pfp, "bar", 0, 0)) == CTF_ERR)
 	goto create_parent;
 
       if (ctf_add_enumerator (cfp, stype, "FOO", 0) == CTF_ERR)
@@ -143,7 +149,7 @@ dtd_crash (enum crash_method method, int parent_bigger)
 	ar.ctr_index = ptype;
 	ar.ctr_nelems = 5;
 
-	if ((stype = ctf_add_array (pfp, CTF_ADD_ROOT, &ar)) < 0)
+	if ((stype = ctf_add_array (pfp, &ar)) < 0)
 	  goto create_child;
 
 	if (ctf_array_set_info (cfp, stype, &ar) == CTF_ERR)
