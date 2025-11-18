@@ -1,0 +1,170 @@
+# Copyright 2025 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test casting some values to a type with dynamic properties.
+
+load_lib dwarf.exp
+
+require dwarf2_support
+
+standard_testfile .c -dw.S
+
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
+    return
+}
+
+set asm_file [standard_output_file $srcfile2]
+Dwarf::assemble $asm_file {
+    cu {version 5} {
+	DW_TAG_compile_unit {
+	    DW_AT_language @DW_LANG_Fortran95
+	    DW_AT_name     FOO.F90
+	    DW_AT_comp_dir /tmp
+	} {
+	    set ptr_size [get_sizeof "void *" -1]
+
+	    # int
+	    declare_labels int_type_label
+	    int_type_label: DW_TAG_base_type {
+		DW_AT_name int
+		DW_AT_byte_size 4 DW_FORM_udata
+		DW_AT_encoding @DW_ATE_signed
+	    }
+
+	    # char
+	    declare_labels char_type_label
+	    char_type_label: DW_TAG_base_type {
+		DW_AT_name char
+		DW_AT_byte_size 1 DW_FORM_udata
+		DW_AT_encoding @DW_ATE_signed
+	    }
+
+	    # uintptr_t
+	    declare_labels uintptr_type_label
+	    uintptr_type_label: DW_TAG_base_type {
+		DW_AT_name uintptr_t
+		DW_AT_byte_size $ptr_size DW_FORM_udata
+		DW_AT_encoding @DW_ATE_signed
+	    }
+
+	    # Array type.
+	    declare_labels array_type_label
+	    array_type_label: DW_TAG_array_type {
+		DW_AT_type :$uintptr_type_label
+		DW_AT_data_location {
+		    DW_OP_push_object_address
+		    DW_OP_deref
+		} SPECIAL_expr
+		DW_AT_associated {
+		    DW_OP_push_object_address
+		    DW_OP_deref
+		    DW_OP_lit0
+		    DW_OP_ne
+		} SPECIAL_expr
+	    } {
+		DW_TAG_subrange_type {
+		    DW_AT_type :$uintptr_type_label
+		    DW_AT_count {
+			DW_OP_push_object_address
+			DW_OP_plus_uconst $ptr_size
+			DW_OP_deref
+		    } SPECIAL_expr
+		    DW_AT_lower_bound {
+			DW_OP_push_object_address
+			DW_OP_plus_uconst [expr {$ptr_size * 2}]
+			DW_OP_deref
+		    } SPECIAL_expr
+		}
+	    }
+
+	    # Structure type with the array type as a member.
+	    declare_labels outer_type_label
+	    set sizeof_outer_type [expr {6 * $ptr_size}]
+	    outer_type_label: DW_TAG_structure_type {
+		DW_AT_name outer_type
+		DW_AT_byte_size $sizeof_outer_type DW_FORM_udata
+	    } {
+		DW_TAG_member {
+		    DW_AT_name assoc
+		    DW_AT_type :$array_type_label
+		    DW_AT_data_member_location 0 DW_FORM_udata
+		}
+
+		DW_TAG_member {
+		    DW_AT_name non_assoc
+		    DW_AT_type :$array_type_label
+		    DW_AT_data_member_location [expr {$ptr_size * 3}] DW_FORM_udata
+		}
+	    }
+
+	    # Structure instance.
+	    DW_TAG_variable {
+		DW_AT_name g_outer
+		DW_AT_type :$outer_type_label
+		DW_AT_location {
+		    DW_OP_addr [gdb_target_symbol g_outer_var]
+		} SPECIAL_expr
+	    }
+	}
+    }
+}
+
+if { [prepare_for_testing "failed to prepare" ${testfile} \
+	  [list $srcfile $asm_file] {nodebug}] } {
+    return
+}
+
+if {![runto_main]} {
+    return
+}
+
+# Generate a comma-separated sequence of numbers from LOW to HIGH (inclusive).
+#
+# For example
+#
+#   make_num_sequence 10 12
+#
+# returns
+#
+#   10, 11, 12
+proc make_num_sequence { low high } {
+    set nums {}
+
+    for {set x $low} {$x <= $high} {incr x} {
+	lappend nums $x
+    }
+
+    return [join $nums ", "]
+}
+
+set one_to_one_hundred [make_num_sequence 1 100]
+
+# Set the language to Fortran, to enable support for dynamic array types.
+gdb_test_no_output "set language fortran"
+
+# Verify normal operation.
+gdb_test "p g_outer" " = \\( assoc = \\($one_to_one_hundred\\), non_assoc = <not associated> \\)"
+gdb_test "p g_outer%assoc" " = \\($one_to_one_hundred\\)"
+gdb_test "p g_outer%non_assoc" " = <not associated>"
+gdb_test "ptype g_outer%assoc" " = uintptr_t \\(6:105\\)"
+gdb_test "ptype g_outer%non_assoc" " = uintptr_t \\(:\\)"
+
+# Cast g_outer_var (a minimal symbol) to outer_type.  This would trigger an
+# assert.
+gdb_test "p (outer_type) g_outer_var" " = \\( assoc = \\($one_to_one_hundred\\), non_assoc = <not associated> \\)"
+gdb_test "p ((outer_type) g_outer_var)%assoc" "= \\($one_to_one_hundred\\)"
+gdb_test "p ((outer_type) g_outer_var)%non_assoc" " = <not associated>"
+gdb_test "ptype ((outer_type) g_outer_var)%assoc" " = uintptr_t \\(6:105\\)"
+gdb_test "ptype ((outer_type) g_outer_var)%non_assoc" " = uintptr_t \\(:\\)"

@@ -1671,31 +1671,22 @@ value::set_component_location (const struct value *whole)
   if (dynamic_prop *dyn_prop = type->dyn_prop (DYN_PROP_DATA_LOCATION);
       dyn_prop != nullptr && dyn_prop->is_constant ())
     {
-      /* If the COMPONENT has a dynamic location, and is an
-	 lval_internalvar_component, then we change it to a lval_memory.
+      /* If the COMPONENT has a dynamic location, force it to have lval_memory.
 
-	 Usually a component of an internalvar is created non-lazy, and has
-	 its content immediately copied from the parent internalvar.
-	 However, for components with a dynamic location, the content of
-	 the component is not contained within the parent, but is instead
-	 accessed indirectly.  Further, the component will be created as a
-	 lazy value.
+	 The data location, obtained by evaluating the DYN_PROP_DATA_LOCATION
+	 property (typically a DWARF DW_AT_data_location attribute), isn't
+	 related to the location of the object.  Even if the object is, let's
+	 say, a register, evaluating DYN_PROP_DATA_LOCATION yields a different
+	 location.  At the moment, we assume that it yields a memory location.
+	 But in theory, a DW_AT_data_location attribute could yield any kind of
+	 location.
 
-	 By changing the type of the component to lval_memory we ensure
-	 that value_fetch_lazy can successfully load the component.
-
-	 This solution isn't ideal, but a real fix would require values to
-	 carry around both the parent value contents, and the contents of
-	 any dynamic fields within the parent.  This is a substantial
-	 change to how values work in GDB.  */
-      if (this->lval () == lval_internalvar_component)
-	{
-	  gdb_assert (lazy ());
-	  m_lval = lval_memory;
-	}
-      else
-	gdb_assert (this->lval () == lval_memory);
-
+	 Even in the case of internalvars, only the content of the object itself
+	 is copied to the internalvar.  If the object has a DYN_PROP_DATA_LOCATION
+	 property pointing outside the object, that data isn't captured in the
+	 internalvar.  */
+      gdb_assert (lazy ());
+      m_lval = lval_memory;
       set_address (dyn_prop->const_val ());
     }
 }
