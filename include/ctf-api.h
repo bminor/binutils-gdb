@@ -298,6 +298,7 @@ typedef int ctf_func_type_flags_t;
   _CTF_ITEM (ECTF_NOTINTFP, "Type is not an integer, float, or enum.") \
   _CTF_ITEM (ECTF_NOTARRAY, "Type is not an array.") \
   _CTF_ITEM (ECTF_NOTREF, "Type does not reference another type.") \
+  _CTF_ITEM (ECTF_NOTQUAL, "Type is not a cvr-qual.") \
   _CTF_ITEM (ECTF_NAMELEN, "Buffer is too small to hold type name.") \
   _CTF_ITEM (ECTF_NOTYPE, "No type found corresponding to name.") \
   _CTF_ITEM (ECTF_SYNTAX, "Syntax error in type name.") \
@@ -1001,7 +1002,6 @@ extern ctf_dict_t *ctf_create (ctf_error_t *);
 
 extern ctf_id_t ctf_add_array (ctf_dict_t *, uint32_t,
 			       const ctf_arinfo_t *);
-extern ctf_id_t ctf_add_const (ctf_dict_t *, uint32_t, ctf_id_t);
 
 /* enums are created signed by default: an encoding of NULL is permitted and
    means "use the default".  If you want an unsigned enum, use
@@ -1050,7 +1050,6 @@ extern ctf_id_t ctf_add_pointer (ctf_dict_t *, uint32_t, ctf_id_t);
 extern ctf_id_t ctf_add_type (ctf_dict_t *, ctf_dict_t *, ctf_id_t);
 extern ctf_id_t ctf_add_typedef (ctf_dict_t *, uint32_t, const char *,
 				 ctf_id_t);
-extern ctf_id_t ctf_add_restrict (ctf_dict_t *, uint32_t, ctf_id_t);
 
 /* Add type and decl tags to whole types or (for decl tags) specific
    components of types (parameter count for functions, member count for structs
@@ -1099,7 +1098,6 @@ extern ctf_id_t ctf_add_struct (ctf_dict_t *, uint32_t flag, const char *name,
    variables, etc, to point to.  */
 
 extern ctf_id_t ctf_add_unknown (ctf_dict_t *, uint32_t, const char *);
-extern ctf_id_t ctf_add_volatile (ctf_dict_t *, uint32_t, ctf_id_t);
 
 /* Add an enumerator to an enum or enum64.  If the enum is non-root, so are all
    the constants added to it by ctf_add_enumerator.  */
@@ -1118,6 +1116,8 @@ extern ctf_ret_t ctf_add_member (ctf_dict_t *, ctf_id_t, const char *, ctf_id_t,
 extern ctf_ret_t ctf_add_member_bitfield (ctf_dict_t *, ctf_id_t souid,
 					  const char *, ctf_id_t type,
 					  size_t bit_offset, int bit_width);
+
+extern ctf_id_t ctf_add_qualifier (ctf_dict_t *, uint32_t, ctf_kind_t cvr_qual, ctf_id_t);
 
 /* ctf_add_variable adds variables to no datasec at all;
    ctf_add_section_variable adds them to the given datasec, or to no datasec at

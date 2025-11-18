@@ -709,21 +709,18 @@ ctf_add_encoded (ctf_dict_t *fp, uint32_t flag,
   return dtd->dtd_type;
 }
 
-ctf_id_t
-ctf_add_reftype (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref, ctf_kind_t kind)
+static ctf_id_t
+ctf_add_reftype (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref, ctf_kind_t kind,
+		 ctf_dict_t **reffp)
 {
+  ctf_dict_t *tmp = fp;
   ctf_dtdef_t *dtd;
-  ctf_dict_t *typedict = fp;
-  ctf_dict_t *refdict = fp;
-  int child = fp->ctf_flags & LCTF_CHILD;
-  uint32_t type_idx;
-  uint32_t ref_idx;
+
+  if (ref != 0 && ctf_lookup_by_id (&tmp, ref, NULL) == NULL)
+    return CTF_ERR;		/* errno is set for us.  */
 
   if (ref == CTF_ERR || ref > CTF_MAX_TYPE)
     return (ctf_set_typed_errno (fp, EINVAL));
-
-  if (ref != 0 && ctf_lookup_by_id (&refdict, ref, NULL) == NULL)
-    return CTF_ERR;		/* errno is set for us.  */
 
   if ((dtd = ctf_add_generic (fp, flag, NULL, kind, 0, 0, 0, NULL)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
@@ -731,23 +728,8 @@ ctf_add_reftype (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref, ctf_kind_t kind)
   dtd->dtd_data->ctt_info = CTF_TYPE_INFO (kind, 0, 0);
   dtd->dtd_data->ctt_type = (uint32_t) ref;
 
-  if (kind != CTF_K_POINTER)
-    return dtd->dtd_type;
-
-  /* If we are adding a pointer, update the ptrtab, pointing at this type from
-     the type it points to.  Note that ctf_typemax is at this point one higher
-     than we want to check against, because it's just been incremented for the
-     addition of this type.  The pptrtab is lazily-updated as needed, so is not
-     touched here.  */
-
-  typedict = ctf_get_dict (fp, dtd->dtd_type);
-
-  type_idx = ctf_type_to_index (typedict, dtd->dtd_type);
-  ref_idx = ctf_type_to_index (refdict, ref);
-
-  if (ctf_type_ischild (fp, ref) == child
-      && ref_idx < fp->ctf_typemax)
-    fp->ctf_ptrtab[ref_idx] = type_idx;
+  if (reffp)
+    *reffp = tmp;
 
   return dtd->dtd_type;
 }
@@ -827,7 +809,34 @@ ctf_add_btf_float (ctf_dict_t *fp, uint32_t flag,
 ctf_id_t
 ctf_add_pointer (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref)
 {
-  return (ctf_add_reftype (fp, flag, ref, CTF_K_POINTER));
+  int child = fp->ctf_flags & LCTF_CHILD;
+
+  ctf_dict_t *typedict = fp;
+  ctf_dict_t *refdict;
+  ctf_id_t type;
+  uint32_t type_idx;
+  uint32_t ref_idx;
+
+  if ((type = ctf_add_reftype (fp, flag, ref,
+			       CTF_K_POINTER, &refdict)) == CTF_ERR)
+    return CTF_ERR;			/* errno is set for us.  */
+
+  /* Update the ptrtab, pointing at this type from the type it points to.
+     Note that ctf_typemax is at this point one higher than we want to check
+     against, because it's just been incremented for the addition of this
+     type.  The pptrtab is lazily-updated as needed, so is not touched
+     here.  */
+
+  typedict = ctf_get_dict (fp, type);
+
+  type_idx = ctf_type_to_index (typedict, type);
+  ref_idx = ctf_type_to_index (refdict, ref);
+
+  if (ctf_type_ischild (fp, ref) == child
+      && ref_idx < fp->ctf_typemax)
+    fp->ctf_ptrtab[ref_idx] = type_idx;
+
+  return type;
 }
 
 ctf_id_t
@@ -1404,21 +1413,17 @@ ctf_add_typedef (ctf_dict_t *fp, uint32_t flag, const char *name,
 }
 
 ctf_id_t
-ctf_add_volatile (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref)
+ctf_add_qualifier (ctf_dict_t *fp, uint32_t flag, ctf_kind_t cvr_qual,
+		   ctf_id_t ref)
 {
-  return (ctf_add_reftype (fp, flag, ref, CTF_K_VOLATILE));
-}
-
-ctf_id_t
-ctf_add_const (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref)
-{
-  return (ctf_add_reftype (fp, flag, ref, CTF_K_CONST));
-}
-
-ctf_id_t
-ctf_add_restrict (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref)
-{
-  return (ctf_add_reftype (fp, flag, ref, CTF_K_RESTRICT));
+  if (cvr_qual != CTF_K_CONST && cvr_qual != CTF_K_VOLATILE && cvr_qual != CTF_K_RESTRICT)
+    {
+      ctf_err_warn (fp, 0, ECTF_NOTENUM, _("ctf_add_qualifier: kind %i is "
+					   "not CTF_K_CONST, CTF_K_VOLATILE "
+					   "or CTF_K_RESTRICT.\n"), cvr_qual);
+      return ctf_set_typed_errno (fp, ECTF_NOTQUAL);
+    }
+  return (ctf_add_reftype (fp, flag, ref, cvr_qual, NULL));
 }
 
 ctf_ret_t
@@ -2527,7 +2532,10 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
       if (src_type == CTF_ERR)
 	return CTF_ERR;				/* errno is set for us.  */
 
-      dst_type = ctf_add_reftype (dst_fp, flag, src_type, kind);
+      if (kind == CTF_K_POINTER)
+	dst_type = ctf_add_pointer (dst_fp, flag, src_type);
+      else
+	dst_type = ctf_add_qualifier (dst_fp, flag, kind, src_type);
       break;
 
     case CTF_K_ARRAY:

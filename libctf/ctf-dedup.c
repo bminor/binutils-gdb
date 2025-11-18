@@ -3599,9 +3599,19 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 					 parents, input, input_num,
 					 ref)) == CTF_ERR)
 	goto err_input;				/* errno is set for us.  */
-
-      if ((new_type = ctf_add_reftype (target, isroot, ref, kind)) == CTF_ERR)
-	goto err_target;			/* errno is set for us.  */
+      
+      if (kind == CTF_K_POINTER)
+	{
+	  errtype = _("pointer");
+	  if ((new_type = ctf_add_pointer (target, isroot, ref)) == CTF_ERR)
+	    goto err_target;			/* errno is set for us.  */
+	}
+      else
+	{
+	  errtype = _("cvr-qual");
+	  if ((new_type = ctf_add_qualifier (target, isroot, kind, ref)) == CTF_ERR)
+	    goto err_target;			/* errno is set for us.  */
+	}
       break;
 
     case CTF_K_TYPE_TAG:

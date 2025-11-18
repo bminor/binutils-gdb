@@ -785,8 +785,6 @@ extern ctf_dtdef_t *ctf_dynamic_type (const ctf_dict_t *, ctf_id_t);
 
 extern ctf_id_t ctf_add_encoded (ctf_dict_t *, uint32_t, const char *,
 				 const ctf_encoding_t *, ctf_kind_t kind);
-extern ctf_id_t ctf_add_reftype (ctf_dict_t *, uint32_t, ctf_id_t,
-				 ctf_kind_t kind);
 extern ctf_ret_t ctf_add_funcobjt_sym_forced (ctf_dict_t *, int is_function,
 					      const char *, ctf_id_t);
 
