@@ -636,8 +636,11 @@ value_cast (struct type *type, struct value *arg2)
 	return value_cast_pointers (to_type, arg2, 0);
 
       arg2 = arg2->copy ();
-      arg2->deprecated_set_type (to_type);
-      arg2->set_enclosing_type (to_type);
+
+      struct type *resolved_type
+	= resolve_dynamic_type (to_type, arg2->contents (), arg2->address ());
+      arg2->deprecated_set_type (resolved_type);
+      arg2->set_enclosing_type (resolved_type);
       arg2->set_pointed_to_offset (0);	/* pai: chk_val */
       return arg2;
     }

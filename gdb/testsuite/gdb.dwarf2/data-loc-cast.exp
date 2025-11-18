@@ -117,6 +117,26 @@ Dwarf::assemble $asm_file {
 		    DW_OP_addr [gdb_target_symbol g_outer_var]
 		} SPECIAL_expr
 	    }
+
+	    # char[sizeof(outer_type)]
+	    declare_labels char_array_type_label
+	    char_array_type_label: DW_TAG_array_type {
+		DW_AT_type :$char_type_label
+	    } {
+		DW_TAG_subrange_type {
+		    DW_AT_type :$int_type_label
+		    DW_AT_count $sizeof_outer_type DW_FORM_udata
+		}
+	    }
+
+	    # A view over "g_outer", typed as a char buffer.
+	    DW_TAG_variable {
+		DW_AT_name g_outer_as_char_array
+		DW_AT_type :$char_array_type_label
+		DW_AT_location {
+		    DW_OP_addr [gdb_target_symbol g_outer_var]
+		} SPECIAL_expr
+	    }
 	}
     }
 }
@@ -168,3 +188,12 @@ gdb_test "p ((outer_type) g_outer_var)%assoc" "= \\($one_to_one_hundred\\)"
 gdb_test "p ((outer_type) g_outer_var)%non_assoc" " = <not associated>"
 gdb_test "ptype ((outer_type) g_outer_var)%assoc" " = uintptr_t \\(6:105\\)"
 gdb_test "ptype ((outer_type) g_outer_var)%non_assoc" " = uintptr_t \\(:\\)"
+
+# Cast to outer_type something with the same size as outer_type.  The code path
+# taken by this would miss resolving the dynamic type, causing an assert when
+# trying to print the resulting value.
+gdb_test "p (outer_type) g_outer_as_char_array" " = \\( assoc = \\($one_to_one_hundred\\), non_assoc = <not associated> \\)"
+gdb_test "p ((outer_type) g_outer_as_char_array)%assoc" "= \\($one_to_one_hundred\\)"
+gdb_test "p ((outer_type) g_outer_as_char_array)%non_assoc" " = <not associated>"
+gdb_test "ptype ((outer_type) g_outer_as_char_array)%assoc" " = uintptr_t \\(6:105\\)"
+gdb_test "ptype ((outer_type) g_outer_as_char_array)%non_assoc" " = uintptr_t \\(:\\)"
