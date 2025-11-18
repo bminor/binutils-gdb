@@ -349,7 +349,7 @@ typedef struct ctf_dedup
      hash.  */
   ctf_dynhash_t *cd_output_mapping_guard;
 
-  /* Maps from type hash values to an indication of their nonroot flag.  0 means
+  /* Maps from type hash values to an indication of their root-visibility.  0 means
      all root-visible; 1 means non-root-visible; 2 means a mixture.  All values
      other than 1 are deleted after hashing.  */
   ctf_dynhash_t *cd_nonroot_consistency;
