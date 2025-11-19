@@ -148,6 +148,7 @@ LIBCTF_2.0 {
 
 	ctf_setdebug;
 	ctf_errwarning_next;
+	ctf_errwarning_remove;
 
 	ctf_link_add;
 	ctf_link_add_cu_mapping;

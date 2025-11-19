@@ -368,6 +368,33 @@ ctf_errwarning_next (ctf_dict_t *fp, ctf_next_t **it, int *is_warning,
   return NULL;
 }
 
+/* Remove the most recent instance of some error (that you have already
+   handled and do not want reported) from the errwarning stream.  If no
+   such error exists, does nothing.  */
+
+void
+ctf_errwarning_remove (ctf_dict_t *fp, int err)
+{
+  ctf_list_t *errlist;
+  ctf_err_warning_t *cew;
+
+  if (fp)
+    errlist = &fp->ctf_errs_warnings;
+  else
+    errlist = &open_errors;
+
+  for (cew = ctf_list_prev (errlist); cew != NULL; cew = ctf_list_prev (cew))
+    {
+      if (cew->cew_err == err)
+	{
+	  ctf_list_delete (errlist, cew);
+	  free (cew->cew_text);
+	  free (cew);
+	  return;
+	}
+    }
+}
+
 void
 ctf_assert_fail_internal (ctf_dict_t *fp, const char *file, size_t line,
 			  const char *exprstr)

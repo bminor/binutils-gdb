@@ -973,6 +973,11 @@ extern size_t ctf_sect_size (ctf_dict_t *, ctf_sect_names_t sect);
 extern char *ctf_errwarning_next (ctf_dict_t *, ctf_next_t **,
 				  int *is_warning, ctf_error_t *errp);
 
+/* Remove the most recent instance of some error (that you have already
+   handled and do not want reported) from the errwarning stream.  If no
+   such error exists, does nothing.  */
+extern void ctf_errwarning_remove (ctf_dict_t *, int err);
+
 /* Creation.  */
 
 /* Create a new, empty dict.  If creation fails, return NULL and put a CTF error
