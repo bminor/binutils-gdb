@@ -640,7 +640,8 @@ add_data_symbol (SYMR *sh, union aux_ext *ax, int bigend,
 
 static int
 parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
-	      const section_offsets &section_offsets, struct objfile *objfile)
+	      gdb::array_view<const CORE_ADDR> section_offsets,
+	      struct objfile *objfile)
 {
   struct gdbarch *gdbarch = objfile->arch ();
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
@@ -2125,7 +2126,8 @@ parse_procedure (PDR *pr, struct compunit_symtab *search_symtab,
    This routine clobbers top_stack->cur_block and ->cur_st.  */
 
 static void
-parse_external (EXTR *es, int bigend, const section_offsets &section_offsets,
+parse_external (EXTR *es, int bigend,
+		gdb::array_view<const CORE_ADDR> section_offsets,
 		struct objfile *objfile)
 {
   union aux_ext *ax;
@@ -3193,7 +3195,7 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
   FDR *fh;
   struct linetable *lines;
   CORE_ADDR lowest_pdr_addr = 0;
-  const section_offsets &section_offsets = objfile->section_offsets;
+  gdb::array_view<const CORE_ADDR> section_offsets (objfile->section_offsets);
 
   if (pst->readin)
     return;

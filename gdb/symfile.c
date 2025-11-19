@@ -327,7 +327,7 @@ init_objfile_sect_indices (struct objfile *objfile)
    the user did not provide an offset.  */
 
 static void
-place_section (bfd *abfd, asection *sect, section_offsets &offsets,
+place_section (bfd *abfd, asection *sect, std::vector<CORE_ADDR> &offsets,
 	       CORE_ADDR &lowest)
 {
   CORE_ADDR start_addr;
@@ -391,7 +391,7 @@ place_section (bfd *abfd, asection *sect, section_offsets &offsets,
    filled-in) by addr_info_make_relative into SECTION_OFFSETS.  */
 
 void
-relative_addr_info_to_section_offsets (section_offsets &section_offsets,
+relative_addr_info_to_section_offsets (std::vector<CORE_ADDR> &section_offsets,
 				       const section_addr_info &addrs)
 {
   int i;
@@ -636,7 +636,7 @@ default_symfile_offsets (struct objfile *objfile,
 
       if (cur_sec == NULL)
 	{
-	  section_offsets &offsets = objfile->section_offsets;
+	  std::vector<CORE_ADDR> &offsets = objfile->section_offsets;
 
 	  /* Pick non-overlapping offsets for sections the user did not
 	     place explicitly.  */
@@ -2135,7 +2135,7 @@ set_objfile_default_section_offset (struct objfile *objf,
 				    CORE_ADDR offset)
 {
   /* Add OFFSET to all sections by default.  */
-  section_offsets offsets (objf->section_offsets.size (), offset);
+  std::vector<CORE_ADDR> offsets (objf->section_offsets.size (), offset);
 
   /* Create sorted lists of all sections in ADDRS as well as all
      sections in OBJF.  */
@@ -3643,7 +3643,7 @@ get_symfile_segment_data (bfd *abfd)
 int
 symfile_map_offsets_to_segments (bfd *abfd,
 				 const struct symfile_segment_data *data,
-				 section_offsets &offsets,
+				 std::vector<CORE_ADDR> &offsets,
 				 int num_segment_bases,
 				 const CORE_ADDR *segment_bases)
 {

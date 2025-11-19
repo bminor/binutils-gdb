@@ -411,8 +411,4 @@ DEF_ENUM_FLAGS_TYPE (enum user_selected_what_flag, user_selected_what);
   extern void _initialize_ ## NAME (); \
   void _initialize_ ## NAME ()
 
-/* How to relocate the symbols from each section in a symbol file.
-   This is indexed by section numbers.  */
-typedef std::vector<CORE_ADDR> section_offsets;
-
 #endif /* GDB_DEFS_H */

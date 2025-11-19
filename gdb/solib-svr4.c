@@ -3291,8 +3291,8 @@ svr4_relocate_main_executable (void)
   objfile *objf = current_program_space->symfile_object_file;
   if (objf)
     {
-      section_offsets new_offsets (objf->section_offsets.size (),
-				   displacement);
+      std::vector<CORE_ADDR> new_offsets (objf->section_offsets.size (),
+					  displacement);
       objfile_relocate (objf, new_offsets);
     }
   else if (current_program_space->exec_bfd ())

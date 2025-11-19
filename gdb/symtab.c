@@ -6611,7 +6611,7 @@ symbol::value_block () const
 /* See symtab.h.  */
 
 void
-symbol::relocate (const section_offsets &delta)
+symbol::relocate (gdb::array_view<const CORE_ADDR> delta)
 {
   if ((loc_class () == LOC_LABEL || loc_class () == LOC_STATIC)
       && section_index () >= 0)

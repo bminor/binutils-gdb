@@ -514,9 +514,9 @@ objfile::~objfile ()
 
 static int
 objfile_relocate1 (struct objfile *objfile,
-		   const section_offsets &new_offsets)
+		   gdb::array_view<const CORE_ADDR> new_offsets)
 {
-  section_offsets delta (objfile->section_offsets.size ());
+  std::vector<CORE_ADDR> delta (objfile->section_offsets.size ());
 
   int something_changed = 0;
 
@@ -567,7 +567,7 @@ objfile_relocate1 (struct objfile *objfile,
 
 void
 objfile_relocate (struct objfile *objfile,
-		  const section_offsets &new_offsets)
+		  gdb::array_view<const CORE_ADDR> new_offsets)
 {
   int changed = 0;
 
@@ -588,7 +588,7 @@ objfile_relocate (struct objfile *objfile,
 
       gdb_assert (debug_objfile->section_offsets.size ()
 		  == gdb_bfd_count_sections (debug_objfile->obfd.get ()));
-      section_offsets new_debug_offsets
+      std::vector<CORE_ADDR> new_debug_offsets
 	(debug_objfile->section_offsets.size ());
       relative_addr_info_to_section_offsets (new_debug_offsets, objfile_addrs);
 
@@ -607,7 +607,7 @@ objfile_relocate (struct objfile *objfile,
 static int
 objfile_rebase1 (struct objfile *objfile, CORE_ADDR slide)
 {
-  section_offsets new_offsets (objfile->section_offsets.size (), slide);
+  std::vector<CORE_ADDR> new_offsets (objfile->section_offsets.size (), slide);
   return objfile_relocate1 (objfile, new_offsets);
 }
 

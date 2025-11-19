@@ -772,7 +772,7 @@ public:
      minimal symbols) which have been read have been relocated by this
      much.  Symbols which are yet to be read need to be relocated by it.  */
 
-  ::section_offsets section_offsets;
+  std::vector<CORE_ADDR> section_offsets;
 
   /* Indexes in the section_offsets array.  These are initialized by the
      *_symfile_offsets() family of functions (som_symfile_offsets,
@@ -918,7 +918,8 @@ extern void build_objfile_section_table (struct objfile *);
 
 extern void free_objfile_separate_debug (struct objfile *);
 
-extern void objfile_relocate (struct objfile *, const section_offsets &);
+extern void objfile_relocate (struct objfile *,
+			      gdb::array_view<const CORE_ADDR>);
 extern void objfile_rebase (struct objfile *, CORE_ADDR);
 
 /* Return true if any objfile of PSPACE has partial symbols.  */

@@ -4930,7 +4930,7 @@ remote_target::get_offsets ()
     warning (_("Target reported unsupported offsets: %s"), buf);
 
   objfile *objf = current_program_space->symfile_object_file;
-  section_offsets offs = objf->section_offsets;
+  std::vector<CORE_ADDR> offs = objf->section_offsets;
 
   symfile_segment_data_up data = get_symfile_segment_data (objf->obfd.get ());
   do_segments = (data != NULL);

@@ -816,7 +816,7 @@ dsbt_relocate_main_executable (void)
   info->main_executable_lm_info = new lm_info_dsbt (ldm);
 
   objfile *objf = current_program_space->symfile_object_file;
-  section_offsets new_offsets (objf->section_offsets.size ());
+  std::vector<CORE_ADDR> new_offsets (objf->section_offsets.size ());
   changed = 0;
 
   for (obj_section &osect : objf->sections ())

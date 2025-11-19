@@ -380,13 +380,13 @@ aix_solib_ops::relocate_section_addresses (solib &so,
 /* Compute and return the OBJFILE's section_offset array, using
    the associated loader info (INFO).  */
 
-static section_offsets
+static std::vector<CORE_ADDR>
 solib_aix_get_section_offsets (struct objfile *objfile,
 			       lm_info_aix *info)
 {
   bfd *abfd = objfile->obfd.get ();
 
-  section_offsets offsets (objfile->section_offsets.size ());
+  std::vector<CORE_ADDR> offsets (objfile->section_offsets.size ());
 
   /* .text */
 
@@ -451,8 +451,8 @@ aix_solib_ops::create_inferior_hook (int from_tty) const
   if (current_program_space->symfile_object_file != NULL)
     {
       objfile *objf = current_program_space->symfile_object_file;
-      section_offsets offsets = solib_aix_get_section_offsets (objf,
-							       &exec_info);
+      std::vector<CORE_ADDR> offsets
+	= solib_aix_get_section_offsets (objf, &exec_info);
 
       objfile_relocate (objf, offsets);
     }

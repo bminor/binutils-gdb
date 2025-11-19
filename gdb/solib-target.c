@@ -42,7 +42,7 @@ struct lm_info_target final : public lm_info
 
   /* The cached offsets for each section of this shared library,
      determined from SEGMENT_BASES, or SECTION_BASES.  */
-  section_offsets offsets;
+  std::vector<CORE_ADDR> offsets;
 };
 
 using lm_info_target_up = std::unique_ptr<lm_info_target>;

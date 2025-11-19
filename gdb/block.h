@@ -318,7 +318,8 @@ struct block : public allocate_on_obstack<block>
   /* Relocate this block and all contained blocks.  OBJFILE is the
      objfile holding this block, and OFFSETS is the relocation offsets
      to use.  */
-  void relocate (struct objfile *objfile, const section_offsets &offsets);
+  void relocate (struct objfile *objfile,
+		 gdb::array_view<const CORE_ADDR> offsets);
 
 private:
 
@@ -517,7 +518,8 @@ struct blockvector
   /* Relocate this blockvector and all contained blocks.  OBJFILE is
      the objfile holding this blockvector, and OFFSETS is the
      relocation offsets to use.  */
-  void relocate (struct objfile *objfile, const section_offsets &offsets);
+  void relocate (struct objfile *objfile,
+		 gdb::array_view<const CORE_ADDR> offsets);
 
 private:
   /* An address map mapping addresses to blocks in this blockvector.

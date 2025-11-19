@@ -1460,7 +1460,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack<symbol>
 
   /* Relocate this symbol.  OFFSETS is the relocation offsets to use.  */
 
-  void relocate (const section_offsets &offsets);
+  void relocate (gdb::array_view<const CORE_ADDR> offsets);
 
   /* Data type of value */
 
