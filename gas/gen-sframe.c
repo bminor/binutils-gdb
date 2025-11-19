@@ -233,6 +233,22 @@ get_offset_size_in_bytes (offsetT value)
   return size;
 }
 
+/* Given an unsigned item, return the size in bytes needed to represent it.  */
+
+static unsigned int
+get_data_size_in_bytes (unsigned int value)
+{
+  unsigned int size = 0;
+
+  if (value <= VALUE_8BIT + 1)
+    size = 1;
+  else if (value <= VALUE_16BIT + 1)
+    size = 2;
+  else
+    size = 4;
+
+  return size;
+}
 #define SFRAME_FRE_OFFSET_FUNC_MAP_INDEX_1B  0 /* SFRAME_FRE_OFFSET_1B.  */
 #define SFRAME_FRE_OFFSET_FUNC_MAP_INDEX_2B  1 /* SFRAME_FRE_OFFSET_2B.  */
 #define SFRAME_FRE_OFFSET_FUNC_MAP_INDEX_4B  2 /* SFRAME_FRE_OFFSET_4B.  */
@@ -380,19 +396,36 @@ get_fre_base_reg_id (const struct sframe_row_entry *sframe_fre)
 /* Get number of offsets necessary for the SFrame Frame Row Entry.  */
 
 static unsigned int
-get_fre_num_offsets (const struct sframe_row_entry *sframe_fre)
+get_fre_num_offsets (const struct sframe_row_entry *sframe_fre,
+		     bool flex_p)
 {
-  /* Atleast 1 must always be present (to recover CFA).  */
-  unsigned int fre_num_offsets = 1;
+  /* For SFRAME_FDE_TYPE_FLEX FDE type, each entity (CFA, FP, RA) may carry up
+     to two offsets.  */
+  unsigned int count = flex_p ? 2 : 1;
 
-  if (sframe_fre->fp_loc == SFRAME_FRE_ELEM_LOC_STACK)
+  /* CFA offset (or offsets when flex_p) must always be present.  */
+  unsigned int fre_num_offsets = count;
+
+  /* For flexible frames encoding, there will be two offsets for RA (if RA is
+     being tracked).  1 padding offset otherwise.  */
+  if (flex_p)
+    {
+     if (sframe_fre->ra_loc != SFRAME_FRE_ELEM_LOC_NONE)
+       fre_num_offsets += count;
+     else if (sframe_fre->fp_loc != SFRAME_FRE_ELEM_LOC_NONE)
+       fre_num_offsets += 1;
+    }
+  else if (sframe_ra_tracking_p ()
+	   && (sframe_fre->ra_loc != SFRAME_FRE_ELEM_LOC_NONE
+	       /* For s390x account padding RA offset, if FP without RA
+		  saved.  */
+	       || (sframe_get_abi_arch () == SFRAME_ABI_S390X_ENDIAN_BIG
+		   && sframe_fre->fp_loc != SFRAME_FRE_ELEM_LOC_NONE)))
     fre_num_offsets++;
-  if (sframe_ra_tracking_p ()
-      && (sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK
-	  /* For s390x account padding RA offset, if FP without RA saved.  */
-	  || (sframe_get_abi_arch () == SFRAME_ABI_S390X_ENDIAN_BIG
-	      && sframe_fre->fp_loc == SFRAME_FRE_ELEM_LOC_STACK)))
-    fre_num_offsets++;
+
+  if (sframe_fre->fp_loc != SFRAME_FRE_ELEM_LOC_NONE)
+    fre_num_offsets += count;
+
   return fre_num_offsets;
 }
 
@@ -400,7 +433,8 @@ get_fre_num_offsets (const struct sframe_row_entry *sframe_fre)
    SFrame frame row entry.  */
 
 static unsigned int
-sframe_get_fre_offset_size (const struct sframe_row_entry *sframe_fre)
+sframe_get_fre_offset_size (const struct sframe_row_entry *sframe_fre,
+			    bool flex_p)
 {
   unsigned int max_offset_size = 0;
   unsigned int cfa_offset_size = 0;
@@ -429,6 +463,32 @@ sframe_get_fre_offset_size (const struct sframe_row_entry *sframe_fre)
     max_offset_size = fp_offset_size;
   if (ra_offset_size > max_offset_size)
     max_offset_size = ra_offset_size;
+
+  /* If flex FDE, account for reg data too.  */
+  if (flex_p)
+    {
+      bool reg_p = (sframe_fre->cfa_base_reg != SFRAME_FRE_REG_INVALID);
+      unsigned int data
+	= SFRAME_V3_FLEX_FDE_REG_ENCODE (sframe_fre->cfa_base_reg,
+					 sframe_fre->cfa_deref_p, reg_p);
+      unsigned int data_size = get_data_size_in_bytes (data);
+      if (data_size > max_offset_size)
+	max_offset_size = data_size;
+
+      reg_p = (sframe_fre->fp_loc == SFRAME_FRE_ELEM_LOC_REG);
+      data = SFRAME_V3_FLEX_FDE_REG_ENCODE (sframe_fre->fp_reg,
+					    sframe_fre->fp_deref_p, reg_p);
+      data_size = get_data_size_in_bytes (data);
+      if (data_size > max_offset_size)
+	max_offset_size = data_size;
+
+      reg_p = (sframe_fre->ra_loc != SFRAME_FRE_ELEM_LOC_REG);
+      data = SFRAME_V3_FLEX_FDE_REG_ENCODE (sframe_fre->ra_reg,
+					    sframe_fre->ra_deref_p, reg_p);
+      data_size = get_data_size_in_bytes (data);
+      if (data_size > max_offset_size)
+	max_offset_size = data_size;
+    }
 
   gas_assert (max_offset_size);
 
@@ -539,6 +599,7 @@ sframe_row_entry_new (void)
      valid register for a supported arch.  */
   fre->cfa_base_reg = SFRAME_FRE_REG_INVALID;
   fre->fp_reg = SFRAME_FRE_REG_INVALID;
+  fre->ra_reg = SFRAME_FRE_REG_INVALID;
   fre->merge_candidate = true;
   /* Reset the mangled RA status bit to zero by default.  We will
      initialize it in sframe_row_entry_initialize () with the sticky
@@ -588,39 +649,98 @@ sframe_fde_free (struct sframe_func_entry *sframe_fde)
    size FRE_OFFSET_SIZE.  Write out the offsets in order - CFA, RA, FP.  */
 
 static unsigned int
-output_sframe_row_entry_offsets (const struct sframe_func_entry *sframe_fde ATTRIBUTE_UNUSED,
+output_sframe_row_entry_offsets (const struct sframe_func_entry *sframe_fde,
 				 const struct sframe_row_entry *sframe_fre,
 				 unsigned int fre_offset_size)
-
 {
   unsigned int fre_write_offsets = 0;
 
   unsigned int idx = sframe_fre_offset_func_map_index (fre_offset_size);
   gas_assert (idx < SFRAME_FRE_OFFSET_FUNC_MAP_INDEX_MAX);
 
-  /* Write out the offsets in order - cfa, fp, ra.  */
-  fre_offset_func_map[idx].out_func (sframe_fre->cfa_offset);
-  fre_write_offsets++;
-
-  if (sframe_ra_tracking_p ())
+  if (sframe_fde->fde_flex_p)
     {
-      if (sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
+      /* SFrame FDE of type SFRAME_FDE_TYPE_FLEX.  */
+      /* Output CFA related FRE offsets.  */
+      uint32_t reg_data
+	= SFRAME_V3_FLEX_FDE_REG_ENCODE (sframe_fre->cfa_base_reg,
+					 sframe_fre->cfa_deref_p,
+					 1 /* reg_p.  */);
+      offsetT offset_data = sframe_fre->cfa_offset;
+      fre_offset_func_map[idx].out_func (reg_data);
+      fre_offset_func_map[idx].out_func (offset_data);
+      fre_write_offsets += 2;
+
+      /* Not expected.  Flexible Topmost Frame FDEs are not implemented ATM
+	 for ABIs other than SFRAME_ABI_AMD64_ENDIAN_LITTLE.  If need arises,
+	 the implementation may be added later as it will be backwards
+	 compatible to add a new FDE type for those ABIs.  */
+      if (sframe_ra_tracking_p ())
+	gas_assert (false);
+
+      /* RA tracking enabled or not, emit two offsets for RA.
+	 Aside, emitting SFRAME_FRE_RA_OFFSET_INVALID is equivalent to emitting
+	 SFRAME_V3_FLEX_FDE_REG_ENCODE (0, 0, 0).  */
+      bool reg_p = false;
+      if (sframe_fre->ra_loc != SFRAME_FRE_ELEM_LOC_NONE)
 	{
-	  fre_offset_func_map[idx].out_func (sframe_fre->ra_offset);
-	  fre_write_offsets++;
+	  /* Output RA related FRE offsets.  */
+	  reg_p = sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_REG;
+	  reg_data = SFRAME_V3_FLEX_FDE_REG_ENCODE (sframe_fre->ra_reg,
+						    sframe_fre->ra_deref_p,
+						    reg_p);
+	  offset_data = sframe_fre->ra_offset;
+	  fre_offset_func_map[idx].out_func (reg_data);
+	  fre_offset_func_map[idx].out_func (offset_data);
+	  fre_write_offsets += 2;
 	}
-      /* For s390x write padding RA offset, if FP without RA saved.  */
-      else if (sframe_get_abi_arch () == SFRAME_ABI_S390X_ENDIAN_BIG
-	       && sframe_fre->fp_loc == SFRAME_FRE_ELEM_LOC_STACK)
+      /* Emit RA padding if there are more offsets to follow.  */
+      else if (sframe_fre->fp_loc != SFRAME_FRE_ELEM_LOC_NONE)
 	{
 	  fre_offset_func_map[idx].out_func (SFRAME_FRE_RA_OFFSET_INVALID);
-	  fre_write_offsets++;
+	  fre_write_offsets += 1;
+	}
+
+      if (sframe_fre->fp_loc != SFRAME_FRE_ELEM_LOC_NONE)
+	{
+	  /* Output FP related FRE offsets.  */
+	  reg_p = sframe_fre->fp_loc == SFRAME_FRE_ELEM_LOC_REG;
+	  reg_data = SFRAME_V3_FLEX_FDE_REG_ENCODE (sframe_fre->fp_reg,
+						    sframe_fre->fp_deref_p,
+						    reg_p);
+	  offset_data = sframe_fre->fp_offset;
+	  fre_offset_func_map[idx].out_func (reg_data);
+	  fre_offset_func_map[idx].out_func (offset_data);
+	  fre_write_offsets += 2;
 	}
     }
-  if (sframe_fre->fp_loc == SFRAME_FRE_ELEM_LOC_STACK)
+  else
     {
-      fre_offset_func_map[idx].out_func (sframe_fre->fp_offset);
+      /* SFrame FDE of type SFRAME_FDE_TYPE_DEFAULT.  */
+      /* Output CFA related FRE offsets.  */
+      fre_offset_func_map[idx].out_func (sframe_fre->cfa_offset);
       fre_write_offsets++;
+
+      if (sframe_ra_tracking_p ())
+	{
+	  if (sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
+	    {
+	      fre_offset_func_map[idx].out_func (sframe_fre->ra_offset);
+	      fre_write_offsets++;
+	    }
+	  /* For s390x write padding RA offset, if FP without RA saved.  */
+	  else if (sframe_get_abi_arch () == SFRAME_ABI_S390X_ENDIAN_BIG
+		   && sframe_fre->fp_loc == SFRAME_FRE_ELEM_LOC_STACK)
+	    {
+	      fre_offset_func_map[idx].out_func (SFRAME_FRE_RA_OFFSET_INVALID);
+	      fre_write_offsets++;
+	    }
+	}
+      if (sframe_fre->fp_loc == SFRAME_FRE_ELEM_LOC_STACK)
+	{
+	  fre_offset_func_map[idx].out_func (sframe_fre->fp_offset);
+	  fre_write_offsets++;
+	}
     }
 
   return fre_write_offsets;
@@ -677,8 +797,10 @@ output_sframe_row_entry (const struct sframe_func_entry *sframe_fde,
   else
     {
       fre_base_reg = get_fre_base_reg_id (sframe_fre);
-      fre_num_offsets = get_fre_num_offsets (sframe_fre);
-      fre_offset_size = sframe_get_fre_offset_size (sframe_fre);
+      fre_num_offsets = get_fre_num_offsets (sframe_fre,
+					     sframe_fde->fde_flex_p);
+      fre_offset_size = sframe_get_fre_offset_size (sframe_fre,
+						    sframe_fde->fde_flex_p);
       fre_mangled_ra_p = sframe_fre->mangled_ra_p;
     }
   fre_info = sframe_set_fre_info (fre_base_reg, fre_num_offsets,
@@ -764,7 +886,12 @@ output_sframe_funcdesc (symbolS *start_of_fre_section,
     }
   else
     out_one (func_info);
-  out_one (0);
+
+  uint8_t finfo2 = 0;
+  if (sframe_fde->fde_flex_p)
+    finfo2 = SFRAME_V3_SET_FDE_TYPE (finfo2, SFRAME_FDE_TYPE_FLEX);
+  out_one (finfo2);
+
   out_one (0);
 }
 
@@ -948,6 +1075,7 @@ static void
 sframe_xlate_ctx_init (struct sframe_xlate_ctx *xlate_ctx)
 {
   xlate_ctx->dw_fde = NULL;
+  xlate_ctx->flex_p = false;
   xlate_ctx->first_fre = NULL;
   xlate_ctx->last_fre = NULL;
   xlate_ctx->cur_fre = NULL;
@@ -974,6 +1102,7 @@ sframe_xlate_ctx_finalize (struct sframe_xlate_ctx *xlate_ctx,
 			   struct sframe_func_entry *sframe_fde)
 {
   sframe_fde->dw_fde = xlate_ctx->dw_fde;
+  sframe_fde->fde_flex_p = xlate_ctx->flex_p;
   sframe_fde->sframe_fres = xlate_ctx->first_fre;
   sframe_fde->num_fres = xlate_ctx->num_xlate_fres;
   /* remember_fre is cloned copy of the applicable fre (where necessary).
@@ -1030,10 +1159,13 @@ sframe_row_entry_initialize (struct sframe_row_entry *cur_fre,
   gas_assert (prev_fre);
   cur_fre->cfa_base_reg = prev_fre->cfa_base_reg;
   cur_fre->cfa_offset = prev_fre->cfa_offset;
+  cur_fre->cfa_deref_p = prev_fre->cfa_deref_p;
   cur_fre->fp_loc = prev_fre->fp_loc;
   cur_fre->fp_reg = prev_fre->fp_reg;
   cur_fre->fp_offset = prev_fre->fp_offset;
+  cur_fre->fp_deref_p = prev_fre->fp_deref_p;
   cur_fre->ra_loc = prev_fre->ra_loc;
+  cur_fre->ra_reg = prev_fre->ra_reg;
   cur_fre->ra_offset = prev_fre->ra_offset;
   /* Treat RA mangling as a sticky bit.  It retains its value until another
      .cfi_negate_ra_state is seen.  */

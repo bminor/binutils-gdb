@@ -79,17 +79,27 @@ struct sframe_row_entry
   unsigned int cfa_base_reg;
   /* Offset from the CFA base register for recovering CFA.  */
   offsetT cfa_offset;
+  /* Whether CFA recovery needs dereferencing.  This is tracked for
+     SFRAME_FDE_TYPE_FLEX FDE type.  */
+  bool cfa_deref_p;
 
   /* Track FP location.  Specify whether it is in register or memory.  */
-  unsigned int fp_reg;
   unsigned int fp_loc;
+  unsigned int fp_reg;
   /* If the FP is stashed on stack, note the offset.  */
   offsetT fp_offset;
+  /* Whether FP recovery needs dereferencing.  This is tracked for
+     SFRAME_FDE_TYPE_FLEX FDE type.  */
+  bool fp_deref_p;
 
   /* Track RA location.  Specify whether it is in register or memory.  */
   unsigned int ra_loc;
+  unsigned int ra_reg;
   /* If RA is stashed on stack, note the offset.  */
   offsetT ra_offset;
+  /* Whether RA recovery needs dereferencing.  This is tracked for FDE type
+     SFRAME_FDE_TYPE_FLEX.  */
+  bool ra_deref_p;
 };
 
 /* SFrame Function Description Entry.  */
@@ -103,6 +113,8 @@ struct sframe_func_entry
      like the start_address and the segment is made available via this
      member.  */
   const struct fde_entry *dw_fde;
+  /* Whether the current FDE will use SFRAME_FDE_TYPE_FLEX representation.  */
+  bool fde_flex_p;
 
   /* Reference to the first FRE for this function.  */
   struct sframe_row_entry *sframe_fres;
@@ -132,6 +144,10 @@ struct sframe_xlate_ctx
   struct sframe_row_entry *cur_fre;
   /* Remember FRE for an eventual restore.  */
   struct sframe_row_entry *remember_fre;
+
+  /* Whether the current FRE requires a more flexible frame encoding, hence
+     needing SFRAME_FDE_TYPE_FLEX FDE type.  */
+  bool flex_p;
 
   unsigned num_xlate_fres;
 };
