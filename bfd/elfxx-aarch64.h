@@ -251,11 +251,11 @@ _bfd_aarch64_elf_merge_gnu_properties (struct bfd_link_info *, bfd *,
 				       uint32_t) ATTRIBUTE_HIDDEN;
 
 extern void
-_bfd_aarch64_elf_check_bti_report (struct bfd_link_info *, bfd *)
+_bfd_aarch64_elf_check_bti_report (const struct bfd_link_info *, const bfd *)
   ATTRIBUTE_HIDDEN;
 
 extern void
-_bfd_aarch64_elf_check_gcs_report (struct bfd_link_info *, bfd *)
+_bfd_aarch64_elf_check_gcs_report (const struct bfd_link_info *, const bfd *)
   ATTRIBUTE_HIDDEN;
 
 extern void

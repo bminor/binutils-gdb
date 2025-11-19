@@ -1098,7 +1098,8 @@ _bfd_aarch64_elf_link_fixup_gnu_properties
 
 /* Check AArch64 BTI report.  */
 void
-_bfd_aarch64_elf_check_bti_report (struct bfd_link_info *info, bfd *ebfd)
+_bfd_aarch64_elf_check_bti_report (const struct bfd_link_info *info,
+				   const bfd *abfd)
 {
   struct elf_aarch64_obj_tdata *tdata = elf_aarch64_tdata (info->output_bfd);
 
@@ -1117,14 +1118,16 @@ _bfd_aarch64_elf_check_bti_report (struct bfd_link_info *info, bfd *ebfd)
     : _("%X%pB: error: BTI is required by -z force-bti, but this input object "
 	"file lacks the necessary property note.\n");
 
-  info->callbacks->einfo (msg, ebfd);
+  info->callbacks->einfo (msg, abfd);
 }
 
+/* Check AArch64 GCS report.  */
 void
-_bfd_aarch64_elf_check_gcs_report (struct bfd_link_info *info, bfd *ebfd)
+_bfd_aarch64_elf_check_gcs_report (const struct bfd_link_info *info,
+				   const bfd *abfd)
 {
   struct elf_aarch64_obj_tdata *tdata = elf_aarch64_tdata (info->output_bfd);
-  bool dynamic_obj = (ebfd->flags & DYNAMIC) != 0;
+  bool dynamic_obj = (abfd->flags & DYNAMIC) != 0;
 
   if (dynamic_obj)
     {
@@ -1161,5 +1164,5 @@ _bfd_aarch64_elf_check_gcs_report (struct bfd_link_info *info, bfd *ebfd)
       : _("%X%pB: error: GCS is required by -z gcs, but this input object file "
 	  "lacks the necessary property note.\n");
 
-  info->callbacks->einfo (msg, ebfd);
+  info->callbacks->einfo (msg, abfd);
 }
