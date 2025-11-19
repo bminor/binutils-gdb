@@ -281,11 +281,11 @@ const struct frame_unwind_legacy inline_frame_unwind (
   inline_frame_sniffer
 );
 
-/* Return non-zero if BLOCK, an inlined function block containing PC,
+/* Return true if BLOCK, an inlined function block containing PC,
    has a group of contiguous instructions starting at PC (but not
    before it).  */
 
-static int
+static bool
 block_starting_point_at (CORE_ADDR pc, const struct block *block)
 {
   const struct blockvector *bv;
@@ -293,19 +293,19 @@ block_starting_point_at (CORE_ADDR pc, const struct block *block)
 
   bv = blockvector_for_pc (pc, NULL);
   if (bv->map () == nullptr)
-    return 0;
+    return false;
 
   new_block = (const struct block *) bv->map ()->find (pc - 1);
   if (new_block == NULL)
-    return 1;
+    return true;
 
   if (new_block == block || block->contains (new_block))
-    return 0;
+    return false;
 
   /* The immediately preceding address belongs to a different block,
      which is not a child of this one.  Treat this as an entrance into
      BLOCK.  */
-  return 1;
+  return true;
 }
 
 /* Loop over the stop chain and determine if execution stopped in an
