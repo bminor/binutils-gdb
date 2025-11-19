@@ -283,19 +283,13 @@ const struct frame_unwind_legacy inline_frame_unwind (
 
 /* Return true if BLOCK, an inlined function block containing PC,
    has a group of contiguous instructions starting at PC (but not
-   before it).  */
+   before it).  BV is the blockvector holding BLOCK.  */
 
 static bool
-block_starting_point_at (CORE_ADDR pc, const struct block *block)
+block_starting_point_at (const blockvector *bv, CORE_ADDR pc,
+			 const struct block *block)
 {
-  const struct blockvector *bv;
-  const struct block *new_block;
-
-  bv = blockvector_for_pc (pc, NULL);
-  if (bv->map () == nullptr)
-    return false;
-
-  new_block = (const struct block *) bv->map ()->find (pc - 1);
+  const struct block *new_block = bv->lookup (pc - 1);
   if (new_block == NULL)
     return true;
 
@@ -361,8 +355,9 @@ gather_inline_frames (CORE_ADDR this_pc)
   /* Build the list of inline frames starting at THIS_PC.  After the loop,
      CUR_BLOCK is expected to point at the first function symbol (inlined or
      not) "containing" the inline frames starting at THIS_PC.  */
-  const block *cur_block = block_for_pc (this_pc);
-  if (cur_block == nullptr)
+  const block *cur_block;
+  const blockvector *bv = blockvector_for_pc (this_pc, &cur_block);
+  if (bv == nullptr)
     return {};
 
   std::vector<const symbol *> function_symbols;
@@ -375,7 +370,7 @@ gather_inline_frames (CORE_ADDR this_pc)
 	  /* See comments in inline_frame_this_id about this use
 	     of BLOCK_ENTRY_PC.  */
 	  if (cur_block->entry_pc () == this_pc
-	      || block_starting_point_at (this_pc, cur_block))
+	      || block_starting_point_at (bv, this_pc, cur_block))
 	    function_symbols.push_back (cur_block->function ());
 	  else
 	    break;
