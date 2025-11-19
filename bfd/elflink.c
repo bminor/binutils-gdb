@@ -11158,13 +11158,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	  else
 	    {
 	      if (h->verinfo.vertree == NULL)
-		{
-		  iversym.vs_vers = 1;
-		  if (elf_tdata (flinfo->output_bfd)->cverdefs == 0)
-		    /* Defined symbol has no version if there is no
-		       linker version script.  */
-		    noversion = true;
-		}
+		iversym.vs_vers = 1;
 	      else
 		iversym.vs_vers = h->verinfo.vertree->vernum + 1;
 	      if (flinfo->info->create_default_symver)
