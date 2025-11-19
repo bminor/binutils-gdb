@@ -2703,7 +2703,8 @@ clean-po:
 $(PACKAGE).pot: po/$(PACKAGE).pot
 po/$(PACKAGE).pot: force
 	-test -d po || mkdir po
-	sh -e $(srcdir)/po/gdbtext $(XGETTEXT) $(PACKAGE) . $(srcdir)
+	sh -e $(srcdir)/po/gdbtext $(XGETTEXT) $(PACKAGE) . $(srcdir) \
+	  $(srcdir)/../gdbsupport $(srcdir)/../gdbserver
 
 
 #
