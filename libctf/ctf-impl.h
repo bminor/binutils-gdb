@@ -204,6 +204,7 @@ typedef struct ctf_err_warning
 {
   ctf_list_t cew_list;		/* List forward/back pointers.  */
   int cew_is_warning;		/* 1 if warning, 0 if error.  */
+  int cew_err;			/* Error code (if any).  */
   char *cew_text;		/* Error/warning text.  */
 } ctf_err_warning_t;
 

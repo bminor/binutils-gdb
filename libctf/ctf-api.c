@@ -213,6 +213,7 @@ ctf_err_warn (ctf_dict_t *fp, int is_warning, ctf_error_t err,
     return;
 
   cew->cew_is_warning = is_warning;
+  cew->cew_err = (err != 0 || !fp) ? err : ctf_errno (fp);
   va_start (alist, format);
   if (vasprintf (&cew->cew_text, format, alist) < 0)
     {
@@ -277,19 +278,25 @@ ctf_err_copy (ctf_dict_t *dest, ctf_dict_t *src)
 
 /* Error-warning reporting: an 'iterator' that returns errors and warnings from
    the error/warning list, in order of emission.  Errors and warnings are popped
-   after return: the caller must free the returned error-text pointer.
+   after return: the caller must free the returned error-text pointer.  The
+   optional errp argument is overwritten with the associated error code, if
+   non-NULL: it is also used to report errors with this function itself.
 
    An fp of NULL returns CTF-open-time errors from the open_errors variable
    above.
 
    The treatment of errors from this function itself is somewhat unusual: it
    will often be called on an error path, so we don't want to overwrite the
-   ctf_errno unless we have no choice.  So, like ctf_bufopen et al, this
-   function takes an errp pointer where errors are reported.  The pointer is
-   optional: if not set, errors are reported via the fp (if non-NULL).  Calls
-   with neither fp nor errp set are mildly problematic because there is no clear
-   way to report end-of-iteration: you just have to assume that a NULL return
-   means the end, and not an iterator error.  */
+   ctf_errno unless we have no choice.  So the errp argument is preferentially
+   used to store errors, if it is provided.  The pointer is optional: if not
+   set, errors are reported via the fp (if non-NULL).  Calls with neither fp nor
+   errp set are mildly problematic because there is no clear way to report
+   end-of-iteration: you just have to assume that a NULL return means the end,
+   and not an iterator error.
+
+   ERRP is also used to report the error code associated with a reported
+   error; error returns from this function always return NULL and set ERRP;
+   non-error returns never return NULL.  */
 
 char *
 ctf_errwarning_next (ctf_dict_t *fp, ctf_next_t **it, int *is_warning,
@@ -344,6 +351,8 @@ ctf_errwarning_next (ctf_dict_t *fp, ctf_next_t **it, int *is_warning,
 
   if (is_warning)
     *is_warning = cew->cew_is_warning;
+  if (errp)
+    *errp = cew->cew_err;
   ret = cew->cew_text;
   ctf_list_delete (errlist, cew);
   free (cew);
