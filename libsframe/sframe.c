@@ -1732,12 +1732,13 @@ sframe_encoder_add_fre (sframe_encoder_ctx *ectx,
       fre_tbl_sz = (sizeof (sf_fre_tbl)
 		    + ((fre_tbl->alloced + number_of_entries)
 		       * sizeof (sframe_frame_row_entry)));
-      fre_tbl = realloc (fre_tbl, fre_tbl_sz);
-      if (fre_tbl == NULL)
+      sf_fre_tbl *tmp = realloc (fre_tbl, fre_tbl_sz);
+      if (tmp == NULL)
 	{
 	  sframe_set_errno (&err, SFRAME_ERR_NOMEM);
 	  goto bad;		/* OOM.  */
 	}
+      fre_tbl = tmp;
 
       memset (&fre_tbl->entry[fre_tbl->alloced], 0,
 	      number_of_entries * sizeof (sframe_frame_row_entry));
@@ -1817,12 +1818,13 @@ sframe_encoder_add_funcdesc_internal (sframe_encoder_ctx *ectx,
       fd_tbl_sz = (sizeof (sf_fde_tbl)
 		   + ((fd_info->alloced + number_of_entries)
 		      * sizeof (sframe_func_desc_entry_int)));
-      fd_info = realloc (fd_info, fd_tbl_sz);
-      if (fd_info == NULL)
+      sf_fde_tbl *tmp = realloc (fd_info, fd_tbl_sz);
+      if (tmp == NULL)
 	{
 	  sframe_set_errno (&err, SFRAME_ERR_NOMEM);
 	  goto bad;		/* OOM.  */
 	}
+      fd_info = tmp;
 
       memset (&fd_info->entry[fd_info->alloced], 0,
 	      number_of_entries * sizeof (sframe_func_desc_entry_int));
