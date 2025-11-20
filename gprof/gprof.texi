@@ -429,6 +429,10 @@ to interpret the information in it.  The @code{gprof} program prints a
 flat profile and a call graph on standard output.  Typically you would
 redirect the output of @code{gprof} into a file with @samp{>}.
 
+Note that @code{gprofng}, a more modern profiler which is also part of
+binutils, can also read gmon files and provides more functionality
+than @code{gprof}.
+
 You run @code{gprof} like this:
 
 @smallexample
