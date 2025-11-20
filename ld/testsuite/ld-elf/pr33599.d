@@ -5,7 +5,7 @@
 
 Symbol table '\.dynsym' contains [0-9]+ entries:
 #...
- +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +OBJECT +GLOBAL +DEFAULT +[0-9]+ +bar@@
+ +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +OBJECT +GLOBAL +DEFAULT +[0-9]+ +bar
 #...
  +[0-9]+: +[0-9a-f]+ +[0-9a-f]+ +OBJECT +GLOBAL +DEFAULT +[0-9]+ +foo@
 #pass
