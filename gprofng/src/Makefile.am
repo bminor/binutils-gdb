@@ -87,6 +87,13 @@ CCSOURCES = \
 	UserLabel.cc \
 	util.cc \
 	Dbe.cc \
+	gmon_io.cc \
+	gmon_basic_blocks.cc \
+	gmon_call_graph.cc \
+	gmon_hist.cc \
+	gmon_symtab.cc \
+	gmon_cg_arcs.cc \
+	gmon_corefile.cc \
 	$(NULL)
 
 CSOURCES = \
@@ -154,7 +161,7 @@ dbe_DATA = $(srcdir)/gprofng.rc
 
 
 bin_PROGRAMS = gprofng-archive gprofng-collect-app gprofng \
-	gprofng-display-text gprofng-display-src
+	gprofng-display-text gprofng-display-src gprofng-gmon
 
 gprofng_archive_SOURCES = gp-archive.cc ArchiveExp.cc
 gprofng_archive_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK) $(ZLIB)
@@ -170,6 +177,9 @@ gprofng_display_src_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK) $(ZLIB)
 
 gprofng_display_text_SOURCES = gp-display-text.cc ipc.cc ipcio.cc
 gprofng_display_text_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK) $(ZLIB)
+
+gprofng_gmon_SOURCES = gp-gmon.cc
+gprofng_gmon_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK) $(ZLIB)
 
 # Distribution involves building the binaries to generate the manpage,
 # so ensure that the necessary libraries are built at dist time.

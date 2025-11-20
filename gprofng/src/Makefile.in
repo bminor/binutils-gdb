@@ -110,7 +110,7 @@ host_triplet = @host@
 target_triplet = @target@
 bin_PROGRAMS = gprofng-archive$(EXEEXT) gprofng-collect-app$(EXEEXT) \
 	gprofng$(EXEEXT) gprofng-display-text$(EXEEXT) \
-	gprofng-display-src$(EXEEXT)
+	gprofng-display-src$(EXEEXT) gprofng-gmon$(EXEEXT)
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/clang-plugin.m4 \
@@ -181,7 +181,9 @@ am__objects_1 = Application.lo BaseMetric.lo BaseMetricTreeNode.lo \
 	SAXParserFactory.lo Sample.lo Settings.lo SourceFile.lo \
 	Stabs.lo Stats_data.lo StringBuilder.lo Symbol.lo Table.lo \
 	QLParser.tab.lo dbe_collctrl.lo i18n.lo parse.lo UserLabel.lo \
-	util.lo Dbe.lo
+	util.lo Dbe.lo gmon_io.lo gmon_basic_blocks.lo \
+	gmon_call_graph.lo gmon_hist.lo gmon_symtab.lo gmon_cg_arcs.lo \
+	gmon_corefile.lo
 am__objects_2 = dbe_hwcdrv.lo dbe_hwcfuncs.lo dbe_hwctable.lo \
 	gethrtime.lo
 am_libgprofng_la_OBJECTS = $(am__objects_1) $(am__objects_2)
@@ -217,6 +219,10 @@ am_gprofng_display_text_OBJECTS = gp-display-text.$(OBJEXT) \
 gprofng_display_text_OBJECTS = $(am_gprofng_display_text_OBJECTS)
 gprofng_display_text_DEPENDENCIES = $(LIBGPROFNG) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am_gprofng_gmon_OBJECTS = gp-gmon.$(OBJEXT)
+gprofng_gmon_OBJECTS = $(am_gprofng_gmon_OBJECTS)
+gprofng_gmon_DEPENDENCIES = $(LIBGPROFNG) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -271,10 +277,12 @@ am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
 SOURCES = $(libgprofng_la_SOURCES) $(gprofng_SOURCES) \
 	$(gprofng_archive_SOURCES) $(gprofng_collect_app_SOURCES) \
-	$(gprofng_display_src_SOURCES) $(gprofng_display_text_SOURCES)
+	$(gprofng_display_src_SOURCES) $(gprofng_display_text_SOURCES) \
+	$(gprofng_gmon_SOURCES)
 DIST_SOURCES = $(libgprofng_la_SOURCES) $(gprofng_SOURCES) \
 	$(gprofng_archive_SOURCES) $(gprofng_collect_app_SOURCES) \
-	$(gprofng_display_src_SOURCES) $(gprofng_display_text_SOURCES)
+	$(gprofng_display_src_SOURCES) $(gprofng_display_text_SOURCES) \
+	$(gprofng_gmon_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -435,6 +443,7 @@ pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
+runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -520,6 +529,13 @@ CCSOURCES = \
 	UserLabel.cc \
 	util.cc \
 	Dbe.cc \
+	gmon_io.cc \
+	gmon_basic_blocks.cc \
+	gmon_call_graph.cc \
+	gmon_hist.cc \
+	gmon_symtab.cc \
+	gmon_cg_arcs.cc \
+	gmon_corefile.cc \
 	$(NULL)
 
 CSOURCES = \
@@ -575,6 +591,8 @@ gprofng_display_src_SOURCES = gp-display-src.cc
 gprofng_display_src_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK) $(ZLIB)
 gprofng_display_text_SOURCES = gp-display-text.cc ipc.cc ipcio.cc
 gprofng_display_text_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK) $(ZLIB)
+gprofng_gmon_SOURCES = gp-gmon.cc
+gprofng_gmon_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK) $(ZLIB)
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -717,6 +735,10 @@ gprofng-display-text$(EXEEXT): $(gprofng_display_text_OBJECTS) $(gprofng_display
 	@rm -f gprofng-display-text$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(gprofng_display_text_OBJECTS) $(gprofng_display_text_LDADD) $(LIBS)
 
+gprofng-gmon$(EXEEXT): $(gprofng_gmon_OBJECTS) $(gprofng_gmon_DEPENDENCIES) $(EXTRA_gprofng_gmon_DEPENDENCIES) 
+	@rm -f gprofng-gmon$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(gprofng_gmon_OBJECTS) $(gprofng_gmon_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -795,10 +817,18 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbe_hwctable.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/envsets.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gethrtime.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gmon_basic_blocks.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gmon_call_graph.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gmon_cg_arcs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gmon_corefile.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gmon_hist.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gmon_io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gmon_symtab.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gp-archive.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gp-collect-app.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gp-display-src.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gp-display-text.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gp-gmon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gprofng.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/i18n.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipc.Po@am__quote@
