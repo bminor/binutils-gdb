@@ -25,6 +25,7 @@ LIBSFRAME_3.0 {
     sframe_decoder_get_funcdesc_v2;
     sframe_decoder_get_funcdesc_v3;
     sframe_decoder_get_fre;
+    sframe_decoder_get_fres_buf;
     sframe_encode;
     sframe_encoder_free;
     sframe_encoder_get_flags;
@@ -37,6 +38,7 @@ LIBSFRAME_3.0 {
     sframe_encoder_add_funcdesc;
     sframe_encoder_add_funcdesc_v2;
     sframe_encoder_add_funcdesc_v3;
+    sframe_encoder_add_fres_buf;
     sframe_encoder_write;
     dump_sframe;
     sframe_errmsg;

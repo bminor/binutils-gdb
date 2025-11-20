@@ -169,6 +169,19 @@ sframe_decoder_get_fre (const sframe_decoder_ctx *ctx,
 			unsigned int fre_idx,
 			sframe_frame_row_entry *fre);
 
+/* Get the SFrame FRE data of the function at FUNC_IDX'th function index entry
+   in the SFrame decoder DCTX.  The reference to the buffer is returned in
+   FRES_BUF with FRES_BUF_SIZE indicating the size of the buffer.  The number
+   of FREs in the buffer are NUM_FRES.  In SFrame V3, this buffer also contains
+   the FDE attr data before the actual SFrame FREs.  Returns SFRAME_ERR in case
+   of error.  */
+extern int
+sframe_decoder_get_fres_buf (const sframe_decoder_ctx *dctx,
+			     uint32_t func_idx,
+			     char **fres_buf,
+			     size_t *fres_buf_size,
+			     uint32_t *num_fres);
+
 /* Get the data (NUM_FRES, FUNC_SIZE, FUNC_START_ADDRESS, FUNC_INFO,
    REP_BLOCK_SIZE) from the function descriptor entry at index I'th
    in the decoder CTX.  If failed, return error code.
@@ -298,6 +311,16 @@ extern int
 sframe_encoder_add_fre (sframe_encoder_ctx *ectx,
 			unsigned int func_idx,
 			sframe_frame_row_entry *frep);
+
+/* Add SFrame FRE data given in the buffer FRES_BUF of size FRES_BUF_SIZE (for
+   function at index FUNC_IDX) to the encoder context ECTX.  The number of FREs
+   in the buffer are NUM_FRES.  */
+int
+sframe_encoder_add_fres_buf (sframe_encoder_ctx *ectx,
+			     unsigned int func_idx,
+			     uint32_t num_fres,
+			     const char *fres_buf,
+			     size_t fres_buf_size);
 
 /* Add a new SFrame function descriptor entry with START_ADDR and FUNC_SIZE to
    the encoder context ECTX.  */
