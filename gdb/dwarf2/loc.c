@@ -45,6 +45,7 @@
 #include <vector>
 #include "gdbsupport/underlying.h"
 #include "gdbsupport/byte-vector.h"
+#include "gdbsupport/selftest.h"
 #include "extract-store-integer.h"
 
 static struct value *dwarf2_evaluate_loc_desc_full
@@ -4155,6 +4156,28 @@ const struct symbol_computed_ops dwarf2_loclist_funcs = {
   loclist_generate_c_location
 };
 
+#if GDB_SELF_TEST
+namespace selftests {
+
+static void
+test_dwarf2_get_symbol_read_needs ()
+{
+  /* This would cause an internal error.  */
+  gdb_byte expr[] = {
+    DW_OP_lit0,
+    DW_OP_lit1,
+    DW_OP_bra, 0, 0,
+    DW_OP_stack_value,
+  };
+  symbol_needs_kind needs
+    = dwarf2_get_symbol_read_needs (expr, nullptr, nullptr, BFD_ENDIAN_LITTLE,
+				    4, 4);
+  SELF_CHECK (needs == SYMBOL_NEEDS_NONE);
+}
+
+} /* namespace selftests */
+#endif /* GDB_SELF_TEST */
+
 INIT_GDB_FILE (dwarf2loc)
 {
   add_setshow_zuinteger_cmd ("entry-values", class_maintenance,
@@ -4181,4 +4204,9 @@ conversational style, when possible."),
 			   show_dwarf_always_disassemble,
 			   &set_dwarf_cmdlist,
 			   &show_dwarf_cmdlist);
+
+#if GDB_SELF_TEST
+  selftests::register_test ("dwarf2_get_symbol_read_needs",
+			    selftests::test_dwarf2_get_symbol_read_needs);
+#endif /* GDB_SELF_TEST */
 }
