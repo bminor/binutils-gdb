@@ -796,9 +796,9 @@ bfd_plugin_bfd_copy_private_section_data (bfd *ibfd ATTRIBUTE_UNUSED,
 
 static bool
 bfd_plugin_bfd_copy_private_symbol_data (bfd *ibfd ATTRIBUTE_UNUSED,
-					 asymbol *isymbol ATTRIBUTE_UNUSED,
+					 asymbol **isymbol ATTRIBUTE_UNUSED,
 					 bfd *obfd ATTRIBUTE_UNUSED,
-					 asymbol *osymbol ATTRIBUTE_UNUSED)
+					 asymbol **osymbol ATTRIBUTE_UNUSED)
 {
   BFD_ASSERT (0);
   return true;

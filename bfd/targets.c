@@ -308,8 +308,8 @@ BFD_JUMP_TABLE macros.
 .					   struct bfd_link_info *);
 .  {* Called to copy BFD private symbol data from one symbol
 .     to another.  *}
-.  bool (*_bfd_copy_private_symbol_data) (bfd *, asymbol *,
-.					  bfd *, asymbol *);
+.  bool (*_bfd_copy_private_symbol_data) (bfd *, asymbol **,
+.					  bfd *, asymbol **);
 .  {* Called to copy BFD private header data from one object file
 .     to another.  *}
 .  bool (*_bfd_copy_private_header_data) (bfd *, bfd *);

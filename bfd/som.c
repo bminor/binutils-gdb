@@ -5345,9 +5345,9 @@ som_new_section_hook (bfd *abfd, asection *newsect)
 
 static bool
 som_bfd_copy_private_symbol_data (bfd *ibfd,
-				  asymbol *isymbol,
+				  asymbol **isymbol,
 				  bfd *obfd ATTRIBUTE_UNUSED,
-				  asymbol *osymbol)
+				  asymbol **osymbol)
 {
   /* One day we may try to grok other private data.  */
   if (ibfd->xvec->flavour != bfd_target_som_flavour)
@@ -5355,8 +5355,8 @@ som_bfd_copy_private_symbol_data (bfd *ibfd,
 
   /* The only private information we need to copy is the argument relocation
      bits.  */
-  struct som_symbol *input_symbol = (struct som_symbol *) isymbol;
-  struct som_symbol *output_symbol = (struct som_symbol *) osymbol;
+  struct som_symbol *input_symbol = (struct som_symbol *) *isymbol;
+  struct som_symbol *output_symbol = (struct som_symbol *) *osymbol;
   output_symbol->tc_data.ap.hppa_arg_reloc =
     input_symbol->tc_data.ap.hppa_arg_reloc;
 

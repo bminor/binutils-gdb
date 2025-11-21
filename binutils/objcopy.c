@@ -3392,7 +3392,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
     }
 
   for (long s = 0; s < symcount; s++)
-    if (!bfd_copy_private_symbol_data (ibfd, osympp[s], obfd, osympp[s]))
+    if (!bfd_copy_private_symbol_data (ibfd, osympp + s, obfd, osympp + s))
       goto fail;
 
   if (dhandle != NULL)

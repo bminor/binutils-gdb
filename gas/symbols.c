@@ -791,8 +791,8 @@ symbol_clone (symbolS *orgsymP, int replace)
   bsymnew->name = bsymorg->name;
   bsymnew->flags = bsymorg->flags & ~BSF_SECTION_SYM;
   bsymnew->section = bsymorg->section;
-  bfd_copy_private_symbol_data (bfd_asymbol_bfd (bsymorg), bsymorg,
-				bfd_asymbol_bfd (bsymnew), bsymnew);
+  bfd_copy_private_symbol_data (bfd_asymbol_bfd (bsymorg), &orgsymP->bsym,
+				bfd_asymbol_bfd (bsymnew), &newsymP->bsym);
 
 #ifdef obj_symbol_clone_hook
   obj_symbol_clone_hook (newsymP, orgsymP);

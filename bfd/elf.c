@@ -8685,15 +8685,15 @@ _bfd_elf_copy_private_header_data (bfd *ibfd, bfd *obfd)
 
 bool
 _bfd_elf_copy_private_symbol_data (bfd *ibfd,
-				   asymbol *isymarg,
+				   asymbol **isymarg,
 				   bfd *obfd ATTRIBUTE_UNUSED,
-				   asymbol *osymarg)
+				   asymbol **osymarg)
 {
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
     return true;
 
-  elf_symbol_type *isym = elf_symbol_from (isymarg);
-  elf_symbol_type *osym = elf_symbol_from (osymarg);
+  elf_symbol_type *isym = elf_symbol_from (*isymarg);
+  elf_symbol_type *osym = elf_symbol_from (*osymarg);
   if (isym != NULL
       && isym->internal_elf_sym.st_shndx != 0
       && osym != NULL

@@ -113,9 +113,9 @@ _bfd_bool_bfd_asection_bfd_asection_true (bfd *ibfd ATTRIBUTE_UNUSED,
 
 bool
 _bfd_bool_bfd_asymbol_bfd_asymbol_true (bfd *ibfd ATTRIBUTE_UNUSED,
-					asymbol *isym ATTRIBUTE_UNUSED,
+					asymbol **isym ATTRIBUTE_UNUSED,
 					bfd *obfd ATTRIBUTE_UNUSED,
-					asymbol *osym ATTRIBUTE_UNUSED)
+					asymbol **osym ATTRIBUTE_UNUSED)
 {
   return true;
 }

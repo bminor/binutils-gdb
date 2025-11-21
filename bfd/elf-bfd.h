@@ -2406,7 +2406,7 @@ extern bool _bfd_elf_fixup_group_sections
 extern bool _bfd_elf_copy_private_header_data
   (bfd *, bfd *) ATTRIBUTE_HIDDEN;
 extern bool _bfd_elf_copy_private_symbol_data
-  (bfd *, asymbol *, bfd *, asymbol *) ATTRIBUTE_HIDDEN;
+  (bfd *, asymbol **, bfd *, asymbol **) ATTRIBUTE_HIDDEN;
 extern bool _bfd_elf_copy_private_section_data
   (bfd *, asection *, bfd *, asection *, struct bfd_link_info *)
   ATTRIBUTE_HIDDEN;

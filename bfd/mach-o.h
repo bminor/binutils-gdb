@@ -688,8 +688,8 @@ int bfd_mach_o_lookup_command (bfd *, bfd_mach_o_load_command_type,
 			       bfd_mach_o_load_command **);
 bool bfd_mach_o_new_section_hook (bfd *, asection *);
 bool bfd_mach_o_write_contents (bfd *);
-bool bfd_mach_o_bfd_copy_private_symbol_data (bfd *, asymbol *,
-					      bfd *, asymbol *);
+bool bfd_mach_o_bfd_copy_private_symbol_data (bfd *, asymbol **,
+					      bfd *, asymbol **);
 bool bfd_mach_o_bfd_copy_private_section_data (bfd *, asection *,
 					       bfd *, asection *,
 					       struct bfd_link_info *);

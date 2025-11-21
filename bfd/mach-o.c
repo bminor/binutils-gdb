@@ -562,15 +562,15 @@ bfd_mach_o_append_command (bfd *abfd, bfd_mach_o_load_command *cmd)
 
 bool
 bfd_mach_o_bfd_copy_private_symbol_data (bfd *ibfd,
-					 asymbol *isymbol,
+					 asymbol **isymbol,
 					 bfd *obfd ATTRIBUTE_UNUSED,
-					 asymbol *osymbol)
+					 asymbol **osymbol)
 {
   if (ibfd->xvec->flavour != bfd_target_mach_o_flavour)
     return true;
 
-  bfd_mach_o_asymbol *os = (bfd_mach_o_asymbol *) osymbol;
-  bfd_mach_o_asymbol *is = (bfd_mach_o_asymbol *) isymbol;
+  bfd_mach_o_asymbol *os = (bfd_mach_o_asymbol *) *osymbol;
+  bfd_mach_o_asymbol *is = (bfd_mach_o_asymbol *) *isymbol;
   os->n_type = is->n_type;
   os->n_sect = is->n_sect;
   os->n_desc = is->n_desc;
