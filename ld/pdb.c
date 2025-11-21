@@ -1946,8 +1946,7 @@ handle_debugs_section (asection *s, bfd *mod, struct string_table *strings,
 
       syment_count = obj_raw_syment_count (mod);
 
-      relocs =
-	_bfd_coff_read_internal_relocs (mod, s, false, NULL, true, NULL);
+      relocs = bfd_coff_read_internal_relocs (mod, s, false, NULL, true, NULL);
 
       symbols = xmalloc (sizeof (struct internal_syment) * syment_count);
       sectlist = xmalloc (sizeof (asection *) * syment_count);

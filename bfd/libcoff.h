@@ -626,7 +626,7 @@ extern bool _bfd_coff_link_add_symbols
   (bfd *, struct bfd_link_info *) ATTRIBUTE_HIDDEN;
 extern bool _bfd_coff_final_link
   (bfd *, struct bfd_link_info *) ATTRIBUTE_HIDDEN;
-extern struct internal_reloc *_bfd_coff_read_internal_relocs
+extern struct internal_reloc *bfd_coff_read_internal_relocs
   (bfd *, asection *, bool, bfd_byte *, bool,
    struct internal_reloc *);
 extern bool _bfd_coff_generic_relocate_section

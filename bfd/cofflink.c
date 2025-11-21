@@ -1377,7 +1377,7 @@ mark_relocs (struct coff_final_link_info *flaginfo, bfd *input_bfd)
 	continue;
 
       /* Read in the relocs.  */
-      internal_relocs = _bfd_coff_read_internal_relocs
+      internal_relocs = bfd_coff_read_internal_relocs
 	(input_bfd, a, false,
 	 flaginfo->external_relocs,
 	 bfd_link_relocatable (flaginfo->info),
@@ -2391,7 +2391,7 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *flaginfo, bfd *input_bfd)
 
 	  /* Read in the relocs.  */
 	  target_index = o->output_section->target_index;
-	  internal_relocs = (_bfd_coff_read_internal_relocs
+	  internal_relocs = (bfd_coff_read_internal_relocs
 			     (input_bfd, o, false, flaginfo->external_relocs,
 			      bfd_link_relocatable (flaginfo->info),
 			      (bfd_link_relocatable (flaginfo->info)

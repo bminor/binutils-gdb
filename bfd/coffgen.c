@@ -596,12 +596,12 @@ _bfd_coff_internal_syment_name (bfd *abfd,
    value must be INTERNAL_RELOCS.  The function returns NULL on error.  */
 
 struct internal_reloc *
-_bfd_coff_read_internal_relocs (bfd *abfd,
-				asection *sec,
-				bool cache,
-				bfd_byte *external_relocs,
-				bool require_internal,
-				struct internal_reloc *internal_relocs)
+bfd_coff_read_internal_relocs (bfd *abfd,
+			       asection *sec,
+			       bool cache,
+			       bfd_byte *external_relocs,
+			       bool require_internal,
+			       struct internal_reloc *internal_relocs)
 {
   bfd_size_type relsz;
   bfd_byte *free_external = NULL;
@@ -2872,8 +2872,8 @@ init_reloc_cookie_rels (struct coff_reloc_cookie *cookie,
       return true;
     }
 
-  cookie->rels = _bfd_coff_read_internal_relocs (abfd, sec, false, NULL,
-						 0, NULL);
+  cookie->rels = bfd_coff_read_internal_relocs (abfd, sec, false, NULL,
+						false, NULL);
 
   if (cookie->rels == NULL)
     return false;

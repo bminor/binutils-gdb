@@ -2060,7 +2060,7 @@ bfd_arm_process_before_allocation (bfd *		   abfd,
 
       /* Load the relocs.  */
       /* FIXME: there may be a storage leak here.  */
-      i = _bfd_coff_read_internal_relocs (abfd, sec, 1, 0, 0, 0);
+      i = bfd_coff_read_internal_relocs (abfd, sec, true, NULL, false, NULL);
 
       BFD_ASSERT (i != 0);
 

@@ -731,10 +731,9 @@ sh_relax_section (bfd *abfd,
 	return false;
     }
 
-  internal_relocs = (_bfd_coff_read_internal_relocs
+  internal_relocs = (bfd_coff_read_internal_relocs
 		     (abfd, sec, link_info->keep_memory,
-		      (bfd_byte *) NULL, false,
-		      (struct internal_reloc *) NULL));
+		      NULL, false, NULL));
   if (internal_relocs == NULL)
     goto error_return;
 
@@ -1374,9 +1373,8 @@ sh_relax_delete_bytes (bfd *abfd,
       /* We always cache the relocs.  Perhaps, if info->keep_memory is
 	 FALSE, we should free them, if we are permitted to, when we
 	 leave sh_coff_relax_section.  */
-      internal_relocs = (_bfd_coff_read_internal_relocs
-			 (abfd, o, true, (bfd_byte *) NULL, false,
-			  (struct internal_reloc *) NULL));
+      internal_relocs = (bfd_coff_read_internal_relocs
+			 (abfd, o, true, NULL, false, NULL));
       if (internal_relocs == NULL)
 	return false;
 
@@ -2940,9 +2938,8 @@ sh_coff_get_relocated_section_contents (bfd *output_bfd,
       if (! _bfd_coff_get_external_symbols (input_bfd))
 	goto error_return;
 
-      internal_relocs = (_bfd_coff_read_internal_relocs
-			 (input_bfd, input_section, false, (bfd_byte *) NULL,
-			  false, (struct internal_reloc *) NULL));
+      internal_relocs = (bfd_coff_read_internal_relocs
+			 (input_bfd, input_section, false, NULL, false, NULL));
       if (internal_relocs == NULL)
 	goto error_return;
 
