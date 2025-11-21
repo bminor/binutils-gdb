@@ -21,25 +21,22 @@ load_lib dwarf.exp
 # This test can only be run on targets which support DWARF-2 and use gas.
 require dwarf2_support
 
-standard_testfile .c -dw.S -dwo.S
+standard_testfile .c -dw.S
 
-set main_asm_file [standard_output_file $srcfile2]
-set dwo_asm_file [standard_output_file $srcfile3]
+set asm_file [standard_output_file $srcfile2]
 
-# Debug info in the main file.
-Dwarf::assemble $main_asm_file {
+Dwarf::assemble $asm_file {
+    # In the main file.
     cu {
 	version 5
 	dwo_id 0xF00D
     } {
 	compile_unit {
-	    DW_AT_dwo_name ${::gdb_test_file_name}.dwo DW_FORM_strp
+	    DW_AT_dwo_name ${::gdb_test_file_name}-dw.dwo DW_FORM_strp
 	} {}
     }
-}
 
-# Debug info in the DWO file.
-Dwarf::assemble $dwo_asm_file {
+    # In the .dwo file.
     tu {
 	fission 1
 	version 5
@@ -79,20 +76,11 @@ Dwarf::assemble $dwo_asm_file {
     }
 }
 
-# Build main file.
-if { [build_executable "${testfile}.exp" $binfile \
-	[list ${srcfile} ${main_asm_file}] {nodebug}] } {
+set obj [standard_output_file "${testfile}-dw.o"]
+if {[build_executable_and_dwo_files "$testfile.exp" "${binfile}" {} \
+	 [list $asm_file {nodebug split-dwo} $obj] \
+	 [list $srcfile  {nodebug}]]} {
     return
-}
-
-# Build DWO file.
-set dwo_file [standard_output_file ${testfile}.dwo]
-if { [gdb_compile_shlib $dwo_asm_file $dwo_file nodebug] != "" } {
-    return
-}
-
-if { [is_remote host] } {
-    gdb_remote_download host $dwo_file
 }
 
 clean_restart ${testfile}
