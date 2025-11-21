@@ -2856,6 +2856,14 @@ cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
       dwo_unit->length = cu->header.get_length_with_initial ();
     }
 
+  /* Record some information found in the header.  This will be needed when
+     evaluating DWARF expressions in the context of this unit, for instance.  */
+  per_cu->set_addr_size (cu->header.addr_size);
+  per_cu->set_offset_size (cu->header.offset_size);
+  per_cu->set_ref_addr_size (cu->header.version == 2
+			     ? cu->header.addr_size
+			     : cu->header.offset_size);
+
   dwo_abbrev_section->read (objfile);
   m_dwo_abbrev_table
     = abbrev_table::read (dwo_abbrev_section, cu->header.abbrev_sect_off);
@@ -3099,6 +3107,15 @@ cutu_reader::cutu_reader (dwarf2_per_cu &this_cu,
 	  gdb_assert (this_cu.sect_off () == cu->header.sect_off);
 	  this_cu.set_length (cu->header.get_length_with_initial ());
 	}
+
+	/* Record some information found in the header.  This will be needed
+	   when evaluating DWARF expressions in the context of this unit, for
+	   instance.  */
+	this_cu.set_addr_size (cu->header.addr_size);
+	this_cu.set_offset_size (cu->header.offset_size);
+	this_cu.set_ref_addr_size (cu->header.version == 2
+				   ? cu->header.addr_size
+				   : cu->header.offset_size);
     }
 
   /* Skip dummy compilation units.  */
@@ -18638,53 +18655,6 @@ dwarf2_symbol_mark_computed (const struct attribute *attr, struct symbol *sym,
 			      : dwarf2_locexpr_index));
       SYMBOL_LOCATION_BATON (sym) = baton;
     }
-}
-
-/* See read.h.  */
-
-const unit_head *
-dwarf2_per_cu::get_header () const
-{
-  if (!m_header_read_in)
-    {
-      const gdb_byte *info_ptr
-	= this->section ()->buffer + to_underlying (this->sect_off ());
-
-      read_unit_head (&m_header, info_ptr, this->section (), ruh_kind::COMPILE);
-
-      m_header_read_in = true;
-    }
-
-  return &m_header;
-}
-
-/* See read.h.  */
-
-int
-dwarf2_per_cu::addr_size () const
-{
-  return this->get_header ()->addr_size;
-}
-
-/* See read.h.  */
-
-int
-dwarf2_per_cu::offset_size () const
-{
-  return this->get_header ()->offset_size;
-}
-
-/* See read.h.  */
-
-int
-dwarf2_per_cu::ref_addr_size () const
-{
-  const unit_head *header = this->get_header ();
-
-  if (header->version == 2)
-    return header->addr_size;
-  else
-    return header->offset_size;
 }
 
 /* See read.h.  */

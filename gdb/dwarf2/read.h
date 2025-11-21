@@ -126,7 +126,6 @@ struct dwarf2_per_cu
       tu_read (false),
       lto_artificial (false),
       queued (false),
-      m_header_read_in (false),
       files_read (false),
       scanned (false),
       m_section (section),
@@ -189,11 +188,6 @@ public:
      any of the current compilation units are processed.  */
   packed<bool, 1> queued;
 
-private:
-  /* True if HEADER has been read in.  */
-  mutable packed<bool, 1> m_header_read_in;
-
-public:
   /* True if we've tried to read the file table.  There will be no
      point in trying to read it again next time.  */
   packed<bool, 1> files_read;
@@ -219,6 +213,14 @@ public:
      not.  */
   std::atomic<bool> scanned;
 
+private:
+  /* Sizes for an address, an offset, and a section offset.  These fields are
+     set by cutu_reader when the unit is read.  */
+  std::uint8_t m_addr_size = 0;
+  std::uint8_t m_offset_size = 0;
+  std::uint8_t m_ref_addr_size = 0;
+
+public:
   /* Our index in the unshared "symtabs" vector.  */
   unsigned index = 0;
 
@@ -230,12 +232,6 @@ private:
 
   /* Backlink to the owner of this.  */
   dwarf2_per_bfd *m_per_bfd;
-
-  /* DWARF header of this unit.  Note that dwarf2_cu reads its own version of
-     the header, which may differ from this one, since it may pass
-     rch_kind::TYPE to read_unit_head, whereas for dwarf2_per_cu we always pass
-     ruh_kind::COMPILE.  */
-  mutable unit_head m_header;
 
 public:
   /* The file and directory for this CU.  This is cached so that we
@@ -281,20 +277,44 @@ public:
   bool is_dwz () const
   { return m_is_dwz; }
 
-  /* Get the header of this per_cu, reading it if necessary.  */
-  const unit_head *get_header () const;
-
   /* Return the address size given in the compilation unit header for
      this CU.  */
-  int addr_size () const;
+  std::uint8_t addr_size () const
+  {
+    gdb_assert (m_addr_size != 0);
+    return m_addr_size;
+  }
+
+  /* Set the address size given in the compilation unit header for
+     this CU.  */
+  void set_addr_size (std::uint8_t addr_size)
+  { m_addr_size = addr_size; }
 
   /* Return the offset size given in the compilation unit header for
      this CU.  */
-  int offset_size () const;
+  std::uint8_t offset_size () const
+  {
+    gdb_assert (m_offset_size != 0);
+    return m_offset_size;
+  }
+
+  /* Set the offset size given in the compilation unit header for
+     this CU.  */
+  void set_offset_size (std::uint8_t offset_size)
+  { m_offset_size = offset_size; }
 
   /* Return the DW_FORM_ref_addr size given in the compilation unit
      header for this CU.  */
-  int ref_addr_size () const;
+  std::uint8_t ref_addr_size () const
+  {
+    gdb_assert (m_ref_addr_size != 0);
+    return m_ref_addr_size;
+  }
+
+  /* Return the DW_FORM_ref_addr size given in the compilation unit
+     header for this CU.  */
+  void set_ref_addr_size (std::uint8_t ref_addr_size)
+  { m_ref_addr_size = ref_addr_size; }
 
   /* Return length of this CU.  */
   unsigned int length () const
