@@ -3890,12 +3890,7 @@ cutu_reader::skip_one_attribute (dwarf_form form, const gdb_byte *info_ptr)
   switch (form)
     {
     case DW_FORM_ref_addr:
-      /* In DWARF 2, DW_FORM_ref_addr is address sized; in DWARF 3
-	       and later it is offset sized.  */
-      if (m_cu->header.version == 2)
-	return info_ptr + m_cu->header.addr_size;
-      else
-	return info_ptr + m_cu->header.offset_size;
+      return info_ptr + m_cu->per_cu->ref_addr_size ();
 
     case DW_FORM_GNU_ref_alt:
       return info_ptr + m_cu->header.offset_size;
