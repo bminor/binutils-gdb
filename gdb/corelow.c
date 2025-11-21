@@ -1107,7 +1107,7 @@ core_target_open (const char *arg, int from_tty)
       thread_info *thread = first_thread_of_inferior (inf);
 
       if (thread == NULL)
-	thread = add_thread_silent (target, ptid_t (CORELOW_PID));
+	thread = add_thread_silent (target, ptid_t (inf->pid));
 
       switch_to_thread (thread);
     }
