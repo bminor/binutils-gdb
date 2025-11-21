@@ -4351,7 +4351,9 @@ som_bfd_derive_misc_symbol_info (bfd *abfd ATTRIBUTE_UNUSED,
 
      The behavior of these flags is not well documentmented, so there
      may be bugs and some surprising interactions with other flags.  */
-  if (som_section_data (sym->section)
+  if (sym->section->owner != NULL
+      && sym->section->owner->xvec->flavour == bfd_target_som_flavour
+      && som_section_data (sym->section)
       && som_section_data (sym->section)->subspace_dict
       && info->symbol_scope == SS_UNIVERSAL
       && (info->symbol_type == ST_ENTRY
@@ -5349,9 +5351,17 @@ som_bfd_copy_private_symbol_data (bfd *ibfd,
 				  bfd *obfd ATTRIBUTE_UNUSED,
 				  asymbol **osymbol)
 {
-  /* One day we may try to grok other private data.  */
   if (ibfd->xvec->flavour != bfd_target_som_flavour)
-    return false;
+    {
+      /* The som backend makes use of som specific symbol fields
+	 when outputting symbols.  */
+      asymbol *osym = som_make_empty_symbol (obfd);
+      if (osym == NULL)
+	return false;
+      memcpy (osym, *isymbol, sizeof (*osym));
+      osym->the_bfd = obfd;
+      return true;
+    }
 
   /* The only private information we need to copy is the argument relocation
      bits.  */
