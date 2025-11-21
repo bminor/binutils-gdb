@@ -986,6 +986,13 @@ static void queue_comp_unit (dwarf2_per_cu *per_cu,
 
 static void process_queue (dwarf2_per_objfile *per_objfile);
 
+static bool dw2_search_one (dwarf2_per_cu *per_cu,
+			    dwarf2_per_objfile *per_objfile,
+			    auto_bool_vector &cus_to_skip,
+			    search_symtabs_file_matcher file_matcher,
+			    search_symtabs_expansion_listener listener,
+			    search_symtabs_lang_matcher lang_matcher);
+
 /* Class, the destructor of which frees all allocated queue entries.  This
    will only have work to do if an error was thrown while processing the
    dwarf.  If no error was thrown then the queue entries should have all
@@ -2007,9 +2014,10 @@ dwarf2_base_index_functions::expand_all_symtabs (struct objfile *objfile)
     }
 }
 
-/* See read.h.  */
+/* If FILE_MATCHER is NULL and if CUS_TO_SKIP does not include the
+   CU's index, expand the CU and call LISTENER on it.  */
 
-bool
+static bool
 dw2_search_one
   (dwarf2_per_cu *per_cu,
    dwarf2_per_objfile *per_objfile,
