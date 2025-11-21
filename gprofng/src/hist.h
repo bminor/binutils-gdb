@@ -30,9 +30,8 @@ typedef struct histogram
   int *sample;           /* Histogram samples (shorts in the file!).  */
 } histogram;
 
-extern long hz;
-
-extern void hist_read_rec        (FILE *, const char *);
-extern void hist_assign_samples  (void);
+extern void hist_read_rec        (FILE *, const char *, const char *);
+extern void hist_assign_samples  (const char *);
+extern long hist_get_hz  (void);
 
 #endif /* hist_h */

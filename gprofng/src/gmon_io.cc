@@ -54,7 +54,6 @@ enum gmon_ptr_signedness {
   ptr_unsigned
 };
 
-static enum gmon_ptr_size gmon_get_ptr_size (void);
 static enum gmon_ptr_signedness gmon_get_ptr_signedness (void);
 
 static int gmon_io_read_64 (FILE *, uint64_t *);
@@ -63,7 +62,7 @@ int gmon_input = 0;
 int gmon_file_version = 0;	/* 0 == old (non-versioned) file format.  */
 
 static enum gmon_ptr_size
-gmon_get_ptr_size (void)
+gmon_get_ptr_size (const char *whoami)
 {
   int size;
 
@@ -124,12 +123,12 @@ gmon_io_read_64 (FILE *ifp, uint64_t *valp)
 }
 
 int
-gmon_io_read_vma (FILE *ifp, bfd_vma *valp)
+gmon_io_read_vma (FILE *ifp, bfd_vma *valp, const char *whoami)
 {
   unsigned int val32;
   uint64_t val64;
 
-  switch (gmon_get_ptr_size ())
+  switch (gmon_get_ptr_size (whoami))
     {
     case ptr_32bit:
       if (gmon_io_read_32 (ifp, &val32))
@@ -161,7 +160,8 @@ gmon_io_read (FILE *ifp, char *buf, size_t n)
 }
 
 int
-gmon_out_read (const char *filename, File_Format file_format)
+gmon_out_read (const char *filename,
+	       File_Format file_format, const char *whoami)
 {
   FILE *ifp;
   struct gmon_hdr ghdr;
@@ -221,19 +221,19 @@ gmon_out_read (const char *filename, File_Format file_format)
 	    case GMON_TAG_TIME_HIST:
 	      ++nhist;
 	      gmon_input |= INPUT_HISTOGRAM;
-	      hist_read_rec (ifp, filename);
+	      hist_read_rec (ifp, filename, whoami);
 	      break;
 
 	    case GMON_TAG_CG_ARC:
 	      ++narcs;
 	      gmon_input |= INPUT_CALL_GRAPH;
-	      cg_read_rec (ifp, filename);
+	      cg_read_rec (ifp, filename, whoami);
 	      break;
 
 	    case GMON_TAG_BB_COUNT:
 	      ++nbbs;
 	      gmon_input |= INPUT_BB_COUNTS;
-	      bb_read_rec (ifp, filename, false);
+	      bb_read_rec (ifp, filename, false, whoami);
 	      break;
 
 	    default:

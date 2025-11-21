@@ -105,9 +105,6 @@ typedef struct ClockPacket
   int       nticks;     /* number of ticks in that state */
 } ClockPacket;
 
-const char *whoami;
-long hz = HZ_WRONG;
-
 static unsigned long *pc_array = NULL;
 static char *base_folder;
 static DFN_Stack *dfn_stack = NULL;
@@ -226,10 +223,10 @@ dfn (Sym *parent)
    Mimimc a stack trace using a DF algorithm.  */
 
 static int
-cg_traverse_arcs (void)
+cg_traverse_arcs (const char *whoami)
 {
   Sym *sym;
-  Sym_Table *symtab = get_symtab ();
+  Sym_Table *symtab = get_symtab (whoami);
 
   for (sym = symtab->base; sym < symtab->limit; sym++)
     {
@@ -451,6 +448,7 @@ gen_gmon_log (void)
 
   logx = fopen (new_file_path, "w");
 
+  long hz = hist_get_hz ();
   int gmon_interval = (hz == HZ_WRONG ? 1000 : hz * 100);
 
   fprintf (logx, "<profile name=\"%s\" ptimer=\"%d\" numstates=\"%d\">\n",
@@ -658,20 +656,20 @@ er_gmon::start (int argc, char *argv[])
     }
 
   /* Read the elf syms and the gmon file.  */
-  if (core_init (a_out_name) < 0)
+  if (core_init (a_out_name, whoami) < 0)
     {
       cc->remove_exp_dir ();
       exit (1);
     }
-  if (gmon_out_read (gmon_name, FF_AUTO) < 0)
+  if (gmon_out_read (gmon_name, FF_AUTO, whoami) < 0)
     {
       cc->remove_exp_dir ();
       exit (1);
     }
 
   /* Process the gmon file, and output the gprofng project files.  */
-  hist_assign_samples ();
-  cg_traverse_arcs ();
+  hist_assign_samples (whoami);
+  cg_traverse_arcs (whoami);
   gen_gmon_map (a_out_name);
   gen_gmon_log ();
 }

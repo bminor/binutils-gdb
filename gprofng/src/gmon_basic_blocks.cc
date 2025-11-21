@@ -51,7 +51,8 @@ fskip_string (FILE *fp)
    of file IFP and is provided for formatting error-messages only.  */
 
 void
-bb_read_rec (FILE *ifp, const char *filename, bool line_granularity)
+bb_read_rec (FILE *ifp, const char *filename,
+	     bool line_granularity, const char *whoami)
 {
   unsigned int nblocks, b;
   bfd_vma addr, ncalls;
@@ -65,7 +66,7 @@ bb_read_rec (FILE *ifp, const char *filename, bool line_granularity)
       done (1);
     }
 
-  symtab = get_symtab ();
+  symtab = get_symtab (whoami);
 
   nblocks = bfd_get_32 (core_bfd, (bfd_byte *) & nblocks);
   if (gmon_file_version == 0)
@@ -89,8 +90,8 @@ bb_read_rec (FILE *ifp, const char *filename, bool line_granularity)
 	      done (1);
 	    }
 	}
-      else if (gmon_io_read_vma (ifp, &addr)
-	       || gmon_io_read_vma (ifp, &ncalls))
+      else if (gmon_io_read_vma (ifp, &addr, whoami)
+	       || gmon_io_read_vma (ifp, &ncalls, whoami))
 	{
 	  perror (filename);
 	  done (1);

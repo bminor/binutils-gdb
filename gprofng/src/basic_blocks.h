@@ -25,6 +25,6 @@
 
 /* Read a basic-block record from file IFP.  FILENAME is the name of
    file IFP and is provided for formatting error-messages only.  */
-extern void bb_read_rec (FILE *, const char *, bool);
+extern void bb_read_rec (FILE *, const char *, bool, const char *);
 
 #endif /* basic_blocks_h */

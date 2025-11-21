@@ -63,7 +63,7 @@ static bool get_src_info
 
 
 int
-core_init (const char * aout_name)
+core_init (const char * aout_name, const char *whoami)
 {
   int core_sym_bytes;
   asymbol *synthsyms;
@@ -331,7 +331,7 @@ source_file_lookup_path (const char *path)
    One symbol per function is entered.  */
 
 static void
-core_create_function_syms (void)
+core_create_function_syms (const char *whoami)
 {
   int cxxclass;
   long i;
@@ -486,7 +486,7 @@ core_create_function_syms (void)
 /* Initialize the symbol table.  */
 
 void
-symtab_init (void)
+symtab_init (const char *whoami)
 {
-  core_create_function_syms ();
+  core_create_function_syms (whoami);
 }

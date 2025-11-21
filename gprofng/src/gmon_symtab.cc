@@ -44,12 +44,12 @@ get_symtab_direct (void)
    initialized yet.  */
 
 Sym_Table *
-get_symtab (void)
+get_symtab (const char *whoami)
 {
   static Sym_Table *symtab_p;
   if (!symtab_p)
     {
-      symtab_init ();
+      symtab_init (whoami);
 
       symtab_p = &symtab;
     }

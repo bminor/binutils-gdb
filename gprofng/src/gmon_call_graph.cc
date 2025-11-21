@@ -31,11 +31,12 @@
 #include "gmon_out.h"
 
 void
-cg_tally (bfd_vma from_pc, bfd_vma self_pc, unsigned long count)
+cg_tally (bfd_vma from_pc, bfd_vma self_pc,
+	  unsigned long count, const char *whoami)
 {
   Sym *parent;
   Sym *child;
-  Sym_Table *symtab = get_symtab ();
+  Sym_Table *symtab = get_symtab (whoami);
 
   parent = sym_lookup (symtab, from_pc);
   child = sym_lookup (symtab, self_pc);
@@ -68,13 +69,13 @@ cg_tally (bfd_vma from_pc, bfd_vma self_pc, unsigned long count)
    formatting error-messages only.  */
 
 void
-cg_read_rec (FILE *ifp, const char *filename)
+cg_read_rec (FILE *ifp, const char *filename, const char *whoami)
 {
   bfd_vma from_pc, self_pc;
   unsigned int count;
 
-  if (gmon_io_read_vma (ifp, &from_pc)
-      || gmon_io_read_vma (ifp, &self_pc)
+  if (gmon_io_read_vma (ifp, &from_pc, whoami)
+      || gmon_io_read_vma (ifp, &self_pc, whoami)
       || gmon_io_read_32 (ifp, &count))
     {
       fprintf (stderr, "%s: %s: unexpected end of file\n",
@@ -87,5 +88,5 @@ cg_read_rec (FILE *ifp, const char *filename)
 	       (unsigned long) from_pc, (unsigned long) self_pc,
 	       (unsigned long) count));
   /* Add this arc:  */
-  cg_tally (from_pc, self_pc, count);
+  cg_tally (from_pc, self_pc, count, whoami);
 }

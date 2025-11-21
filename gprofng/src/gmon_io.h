@@ -37,10 +37,10 @@ File_Format;
 extern int gmon_input;          /* What input did we see?  */
 extern int gmon_file_version;   /* File version are we dealing with.  */
 
-extern int gmon_io_read_vma (FILE *ifp, bfd_vma *valp);
+extern int gmon_io_read_vma (FILE *ifp, bfd_vma *valp, const char *whoami);
 extern int gmon_io_read_32 (FILE *ifp, unsigned int *valp);
 extern int gmon_io_read (FILE *ifp, char *buf, size_t n);
 
-extern int gmon_out_read   (const char *, File_Format);
+extern int gmon_out_read (const char *, File_Format, const char *);
 
 #endif /* gmon_io_h */

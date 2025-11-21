@@ -38,7 +38,7 @@ extern void print_name (Sym * self);
 typedef unsigned char UNIT[2];	/* unit of profiling */
 #define UNITS_TO_CODE (offset_to_code / sizeof(UNIT))
 
-static void scale_and_align_entries (void);
+static long hz = 0;
 
 /* Given a range of addresses for a symbol, find a histogram record
    that intersects with this range, and clips the range to that
@@ -47,7 +47,8 @@ static void scale_and_align_entries (void);
    If no intersection is found, *P_LOWPC and *P_HIGHPC will be set to
    one unspecified value.  If more that one intersection is found,
    an error is emitted.  */
-static void hist_clip_symbol_address (bfd_vma *p_lowpc, bfd_vma *p_highpc);
+static void hist_clip_symbol_address (bfd_vma *p_lowpc,
+				      bfd_vma *p_highpc, const char *whoami);
 
 
 /* Declarations of automatically generated functions to output blurbs.  */
@@ -100,15 +101,15 @@ SItab[] =
 static void
 read_histogram_header (histogram *record,
 		       FILE *ifp, const char *filename,
-		       int first)
+		       int first, const char *whoami)
 {
   unsigned int profrate;
   char n_hist_dimension[15];
   char n_hist_dimension_abbrev;
   double n_hist_scale;
 
-  if (gmon_io_read_vma (ifp, &record->lowpc)
-      || gmon_io_read_vma (ifp, &record->highpc)
+  if (gmon_io_read_vma (ifp, &record->lowpc, whoami)
+      || gmon_io_read_vma (ifp, &record->highpc, whoami)
       || gmon_io_read_32 (ifp, &record->num_bins)
       || gmon_io_read_32 (ifp, &profrate)
       || gmon_io_read (ifp, n_hist_dimension, 15)
@@ -177,7 +178,7 @@ read_histogram_header (histogram *record,
    is provided for formatting error messages only.  */
 
 void
-hist_read_rec (FILE * ifp, const char *filename)
+hist_read_rec (FILE * ifp, const char *filename, const char *whoami)
 {
   bfd_vma lowpc, highpc;
   histogram n_record;
@@ -186,7 +187,7 @@ hist_read_rec (FILE * ifp, const char *filename)
 
   /* 1. Read the header and see if there's existing record for the
      same address range and that there are no overlapping records.  */
-  read_histogram_header (&n_record, ifp, filename, num_histograms == 0);
+  read_histogram_header (&n_record, ifp, filename, num_histograms == 0, whoami);
 
   existing_record = find_histogram (n_record.lowpc, n_record.highpc);
   if (existing_record)
@@ -199,7 +200,7 @@ hist_read_rec (FILE * ifp, const char *filename)
 	 record, it's an error.  */
       lowpc = n_record.lowpc;
       highpc = n_record.highpc;
-      hist_clip_symbol_address (&lowpc, &highpc);
+      hist_clip_symbol_address (&lowpc, &highpc, whoami);
       if (lowpc != highpc)
 	{
 	  fprintf (stderr,
@@ -259,12 +260,12 @@ hist_read_rec (FILE * ifp, const char *filename)
    next bin.  */
 
 static void
-scale_and_align_entries (void)
+scale_and_align_entries (const char *whoami)
 {
   Sym *sym;
   bfd_vma bin_of_entry;
   bfd_vma bin_of_code;
-  Sym_Table *symtab = get_symtab ();
+  Sym_Table *symtab = get_symtab (whoami);
 
   for (sym = symtab->base; sym < symtab->limit; sym++)
     {
@@ -329,7 +330,7 @@ scale_and_align_entries (void)
    cases, above).  */
 
 static void
-hist_assign_samples_1 (histogram *r)
+hist_assign_samples_1 (histogram *r, const char *whoami)
 {
   bfd_vma bin_low_pc, bin_high_pc;
   bfd_vma sym_low_pc, sym_high_pc;
@@ -337,7 +338,7 @@ hist_assign_samples_1 (histogram *r)
   unsigned int bin_count;
   unsigned int i, j, k;
   double count_time, credit;
-  Sym_Table *symtab = get_symtab ();
+  Sym_Table *symtab = get_symtab (whoami);
 
   bfd_vma lowpc = r->lowpc / sizeof (UNIT);
 
@@ -403,14 +404,14 @@ hist_assign_samples_1 (histogram *r)
 
 /* Calls 'hist_assign_samples_1' for all histogram records read so far. */
 void
-hist_assign_samples (void)
+hist_assign_samples (const char *whoami)
 {
   unsigned i;
 
-  scale_and_align_entries ();
+  scale_and_align_entries (whoami);
 
   for (i = 0; i < num_histograms; ++i)
-    hist_assign_samples_1 (&histograms[i]);
+    hist_assign_samples_1 (&histograms[i], whoami);
 
 }
 
@@ -421,8 +422,9 @@ hist_assign_samples (void)
 #define max(a,b) (((a)>(b)) ? (a) : (b))
 #endif
 
-void
-hist_clip_symbol_address (bfd_vma *p_lowpc, bfd_vma *p_highpc)
+static void
+hist_clip_symbol_address (bfd_vma *p_lowpc,
+			  bfd_vma *p_highpc, const char *whoami)
 {
   unsigned i;
   int found = 0;
@@ -487,4 +489,11 @@ find_histogram_for_pc (bfd_vma pc)
 	return &histograms[i];
     }
   return 0;
+}
+
+/* Return the profile rate in hz. */
+long
+hist_get_hz (void)
+{
+  return hz;
 }

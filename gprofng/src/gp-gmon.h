@@ -18,5 +18,4 @@
 #define MAX(a,b)        ((a) > (b) ? (a) : (b))
 #endif
 
-extern const char *whoami;
 #endif /* gp_gmon_h */

@@ -112,7 +112,7 @@ typedef struct
   }
 Sym_Table;
 
-extern Sym_Table *get_symtab (void);
+extern Sym_Table *get_symtab (const char *);
 extern Sym_Table *get_symtab_direct (void);
 
 extern void sym_init        (Sym *);

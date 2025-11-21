@@ -22,12 +22,12 @@
 #ifndef call_graph_h
 #define call_graph_h
 
-extern void cg_tally (bfd_vma, bfd_vma, unsigned long);
+extern void cg_tally (bfd_vma, bfd_vma, unsigned long, const char *);
 
 /* Read a record from file IFP describing an arc in the function
    call-graph and the count of how many times the arc has been
    traversed.  FILENAME is the name of file IFP and is provided for
    formatting error-messages only.  */
-extern void cg_read_rec (FILE *, const char *);
+extern void cg_read_rec (FILE *, const char *, const char *);
 
 #endif /* call_graph_h */

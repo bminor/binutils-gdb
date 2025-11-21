@@ -35,7 +35,7 @@ extern void * core_text_space;    /* Text space of a.out in core.  */
 extern int offset_to_code;        /* Offset (in bytes) of code from entry
                                      address of routine.  */
 
-extern int core_init (const char *);
-extern void symtab_init (void);
+extern int core_init (const char *, const char *);
+extern void symtab_init (const char *);
 
 #endif /* corefile_h */
