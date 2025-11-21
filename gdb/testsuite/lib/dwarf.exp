@@ -1078,6 +1078,8 @@ namespace eval Dwarf {
 	parse_options {
 	    { flags "" }
 	    { type "" }
+	    { group_signature "" }
+	    { linkage "" }
 	}
 
 	if { $name == ".debug_str" } {
@@ -1099,6 +1101,14 @@ namespace eval Dwarf {
 	    }
 
 	    append directive ", %$type"
+	}
+
+	if { $group_signature != "" } {
+	    append directive ", $group_signature"
+	}
+
+	if { $linkage != "" } {
+	    append directive ", $linkage"
 	}
 
 	_emit "        $directive"
@@ -1721,7 +1731,13 @@ namespace eval Dwarf {
 	    set _abbrev_section "$_abbrev_section.dwo"
 	}
 
-	_section $section
+	# The specific format of the signature is arbitrary.
+	_section $section {
+	    flags G
+	    type progbits
+	    group_signature sig.$signature
+	    linkage comdat
+	}
 
 	set cu_num [incr _cu_count]
 
