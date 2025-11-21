@@ -1074,17 +1074,34 @@ namespace eval Dwarf {
 	}
     }
 
-    proc _section {name {flags ""} {type ""}} {
-	if {$name == ".debug_str"} {
-	    # Hard-code this because it's always desirable.
-	    _emit "        .section $name, \"MS\", %progbits, 1"
-	} elseif {$flags == "" && $type == ""} {
-	    _emit "        .section $name"
-	} elseif {$type == ""} {
-	    _emit "        .section $name, \"$flags\""
-	} else {
-	    _emit "        .section $name, \"$flags\", %$type"
+    proc _section {name {options {}}} {
+	parse_options {
+	    { flags "" }
+	    { type "" }
 	}
+
+	if { $name == ".debug_str" } {
+	    # Hard-code this because it's always desirable.
+	    _emit "        .section .debug_str, \"MS\", %progbits, 1"
+	    return
+	}
+
+	set directive ".section $name"
+
+	if { $flags != "" } {
+	    append directive ",\"$flags\""
+	}
+
+	if { $type != "" } {
+	    # Can't specify a type without flags.
+	    if { $flags == "" } {
+		append directive ", \"\""
+	    }
+
+	    append directive ", %$type"
+	}
+
+	_emit "        $directive"
     }
 
     # SECTION_SPEC is a list of arguments to _section.
@@ -3176,7 +3193,10 @@ namespace eval Dwarf {
 
     # Emit a note section holding the given build-id.
     proc build_id {buildid} {
-	_defer_output {.note.gnu.build-id a note} {
+	_defer_output {.note.gnu.build-id {
+			   flags a
+			   type note
+		       }} {
 	    # From elf/common.h.
 	    set NT_GNU_BUILD_ID 3
 
@@ -3610,7 +3630,9 @@ namespace eval Dwarf {
 
 	_write_deferred_output
 
-	_section .note.GNU-stack "" progbits
+	_section .note.GNU-stack {
+	    type progbits
+	}
 
 	if { $file_id == "" } {
 	    catch {close $_output_file}
