@@ -59,9 +59,8 @@ dwarf2_cu::dwarf2_cu (dwarf2_per_cu *per_cu, dwarf2_per_objfile *per_objfile)
 struct type *
 dwarf2_cu::addr_sized_int_type (bool unsigned_p) const
 {
-  int addr_size = this->per_cu->addr_size ();
   struct type *result = objfile_int_type (this->per_objfile->objfile,
-					  addr_size, unsigned_p);
+					  this->header.addr_size, unsigned_p);
   type_allocator alloc (per_objfile->objfile, lang ());
   return alloc.copy_type (result);
 }
@@ -124,9 +123,8 @@ dwarf2_cu::addr_type () const
   struct objfile *objfile = this->per_objfile->objfile;
   struct type *void_type = builtin_type (objfile)->builtin_void;
   struct type *addr_type = lookup_pointer_type (void_type);
-  int addr_size = this->per_cu->addr_size ();
 
-  if (addr_type->length () == addr_size)
+  if (addr_type->length () == this->header.addr_size)
     return addr_type;
 
   addr_type = addr_sized_int_type (addr_type->is_unsigned ());
