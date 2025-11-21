@@ -7255,8 +7255,6 @@ display_loclists_unit_header (struct dwarf_section *  section,
   bool is_64bit;
   uint32_t i;
 
-  printf (_("Table at Offset %#" PRIx64 "\n"), header_offset);
-
   SAFE_BYTE_GET_AND_INC (length, start, 4, end);
   if (length == 0xffffffff)
     {
@@ -7265,6 +7263,11 @@ display_loclists_unit_header (struct dwarf_section *  section,
     }
   else
     is_64bit = false;
+  if (length < 8)
+    return (uint64_t) -1;
+
+  printf (_("Table at Offset %#" PRIx64 "\n"), header_offset);
+  header_offset = start - section->start;
 
   SAFE_BYTE_GET_AND_INC (version, start, 2, end);
   SAFE_BYTE_GET_AND_INC (address_size, start, 1, end);
@@ -7277,15 +7280,21 @@ display_loclists_unit_header (struct dwarf_section *  section,
   printf (_("  Segment size:    %u\n"), segment_selector_size);
   printf (_("  Offset entries:  %u\n"), *offset_count);
 
+  if (length > section->size - header_offset)
+    length = section->size - header_offset;
+
   if (segment_selector_size != 0)
     {
       warn (_("The %s section contains an "
 	      "unsupported segment selector size: %d.\n"),
 	    section->name, segment_selector_size);
-      return (uint64_t)-1;
+      return (uint64_t) -1;
     }
 
-  if ( *offset_count)
+  uint64_t max_off_count = length >> (is_64bit ? 3 : 2);
+  if (*offset_count > max_off_count)
+    *offset_count = max_off_count;
+  if (*offset_count)
     {
       printf (_("\n   Offset Entries starting at %#tx:\n"),
 	      start - section->start);
@@ -7302,8 +7311,7 @@ display_loclists_unit_header (struct dwarf_section *  section,
   putchar ('\n');
   *loclists_start = start;
 
-  /* The length field doesn't include the length field itself.  */
-  return header_offset + length + (is_64bit ? 12 : 4);
+  return header_offset + length;
 }
 
 static int
