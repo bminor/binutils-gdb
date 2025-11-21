@@ -8280,7 +8280,7 @@ display_debug_rnglists_list (unsigned char * start,
   return start;
 }
 
-static int
+static bool
 display_debug_rnglists_unit_header (struct dwarf_section *  section,
 				    uint64_t *              unit_offset,
 				    unsigned char *         poffset_size)
@@ -8288,7 +8288,8 @@ display_debug_rnglists_unit_header (struct dwarf_section *  section,
   uint64_t        start_offset = *unit_offset;
   unsigned char * p = section->start + start_offset;
   unsigned char * finish = section->start + section->size;
-  uint64_t        initial_length;
+  unsigned char * hdr;
+  uint64_t        length;
   unsigned char   segment_selector_size;
   unsigned int    offset_entry_count;
   unsigned int    i;
@@ -8297,49 +8298,39 @@ display_debug_rnglists_unit_header (struct dwarf_section *  section,
   unsigned char   offset_size;
 
   /* Get and check the length of the block.  */
-  SAFE_BYTE_GET_AND_INC (initial_length, p, 4, finish);
+  SAFE_BYTE_GET_AND_INC (length, p, 4, finish);
 
-  if (initial_length == 0xffffffff)
+  if (length == 0xffffffff)
     {
       /* This section is 64-bit DWARF 3.  */
-      SAFE_BYTE_GET_AND_INC (initial_length, p, 8, finish);
+      SAFE_BYTE_GET_AND_INC (length, p, 8, finish);
       *poffset_size = offset_size = 8;
     }
   else
     *poffset_size = offset_size = 4;
 
-  if (initial_length > (size_t) (finish - p))
-    {
-      /* If the length field has a relocation against it, then we should
-	 not complain if it is inaccurate (and probably negative).
-	 It is copied from .debug_line handling code.  */
-      if (reloc_at (section, (p - section->start) - offset_size))
-	initial_length = finish - p;
-      else
-	{
-	  warn (_("The length field (%#" PRIx64
-		  ") in the debug_rnglists header is wrong"
-		  " - the section is too small\n"),
-		initial_length);
-	  return 0;
-	}
-    }
-
-  /* Report the next unit offset to the caller.  */
-  *unit_offset = (p - section->start) + initial_length;
+  if (length < 8)
+    return false;
 
   /* Get the other fields in the header.  */
+  hdr = p;
   SAFE_BYTE_GET_AND_INC (version, p, 2, finish);
   SAFE_BYTE_GET_AND_INC (address_size, p, 1, finish);
   SAFE_BYTE_GET_AND_INC (segment_selector_size, p, 1, finish);
   SAFE_BYTE_GET_AND_INC (offset_entry_count, p, 4, finish);
 
   printf (_(" Table at Offset: %#" PRIx64 ":\n"), start_offset);
-  printf (_("  Length:          %#" PRIx64 "\n"), initial_length);
+  printf (_("  Length:          %#" PRIx64 "\n"), length);
   printf (_("  DWARF version:   %u\n"), version);
   printf (_("  Address size:    %u\n"), address_size);
   printf (_("  Segment size:    %u\n"), segment_selector_size);
   printf (_("  Offset entries:  %u\n"), offset_entry_count);
+
+  if (length > (size_t) (finish - hdr))
+    length = finish - hdr;
+
+  /* Report the next unit offset to the caller.  */
+  *unit_offset = (hdr - section->start) + length;
 
   /* Check the fields.  */
   if (segment_selector_size != 0)
@@ -8347,16 +8338,19 @@ display_debug_rnglists_unit_header (struct dwarf_section *  section,
       warn (_("The %s section contains "
 	      "unsupported segment selector size: %d.\n"),
 	    section->name, segment_selector_size);
-      return 0;
+      return false;
     }
 
   if (version < 5)
     {
       warn (_("Only DWARF version 5+ debug_rnglists info "
 	      "is currently supported.\n"));
-      return 0;
+      return false;
     }
 
+  uint64_t max_off_count = (length - 8) / offset_size;
+  if (offset_entry_count > max_off_count)
+    offset_entry_count = max_off_count;
   if (offset_entry_count != 0)
     {
       printf (_("\n   Offsets starting at %#tx:\n"), p - section->start);
@@ -8370,7 +8364,7 @@ display_debug_rnglists_unit_header (struct dwarf_section *  section,
 	}
     }
 
-  return 1;
+  return true;
 }
 
 static bool
@@ -8402,6 +8396,7 @@ display_debug_ranges (struct dwarf_section *section,
   uint64_t last_offset = 0;
   uint64_t next_rnglists_cu_offset = 0;
   unsigned char offset_size;
+  bool ok_header = true;
 
   if (bytes == 0)
     {
@@ -8491,8 +8486,12 @@ display_debug_ranges (struct dwarf_section *section,
       /* If we've moved on to the next compile unit in the rnglists section - dump the unit header(s).  */
       if (is_rnglists && next_rnglists_cu_offset < offset)
 	{
-	  while (next_rnglists_cu_offset < offset)
-	    display_debug_rnglists_unit_header (section, &next_rnglists_cu_offset, &offset_size);
+	  while (ok_header && next_rnglists_cu_offset < offset)
+	    ok_header = display_debug_rnglists_unit_header (section,
+							    &next_rnglists_cu_offset,
+							    &offset_size);
+	  if (!ok_header)
+	    break;
 	  printf (_("    Offset   Begin    End\n"));
 	}
 
@@ -8546,10 +8545,12 @@ display_debug_ranges (struct dwarf_section *section,
     }
 
   /* Display trailing empty (or unreferenced) compile units, if any.  */
-  if (is_rnglists)
+  if (is_rnglists && ok_header)
     while (next_rnglists_cu_offset < section->size)
-      display_debug_rnglists_unit_header (section, &next_rnglists_cu_offset, &offset_size);
-
+      if (!display_debug_rnglists_unit_header (section,
+					       &next_rnglists_cu_offset,
+					       &offset_size))
+	break;
   putchar ('\n');
 
   free (range_entries);
