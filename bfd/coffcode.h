@@ -6017,7 +6017,7 @@ static const bfd_coff_backend_data bigobj_swap_table =
 #endif
 
 #ifndef coff_bfd_gc_sections
-#define coff_bfd_gc_sections		    bfd_coff_gc_sections
+#define coff_bfd_gc_sections		    _bfd_coff_gc_sections
 #endif
 
 #ifndef coff_bfd_lookup_section_flags
@@ -6029,7 +6029,7 @@ static const bfd_coff_backend_data bigobj_swap_table =
 #endif
 
 #ifndef coff_bfd_group_name
-#define coff_bfd_group_name		    bfd_coff_group_name
+#define coff_bfd_group_name		    _bfd_coff_group_name
 #endif
 
 #ifndef coff_bfd_discard_group

@@ -3246,7 +3246,7 @@ _bfd_coff_gc_keep (struct bfd_link_info *info)
 /* Do mark and sweep of unused sections.  */
 
 bool
-bfd_coff_gc_sections (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
+_bfd_coff_gc_sections (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 {
   bfd *sub;
 
@@ -3296,7 +3296,7 @@ bfd_coff_gc_sections (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 /* Return name used to identify a comdat group.  */
 
 const char *
-bfd_coff_group_name (bfd *abfd, const asection *sec)
+_bfd_coff_group_name (bfd *abfd, const asection *sec)
 {
   struct coff_comdat_info *ci = bfd_coff_get_comdat_section (abfd, sec);
   if (ci != NULL)

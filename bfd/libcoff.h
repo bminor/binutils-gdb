@@ -645,10 +645,10 @@ extern bool _bfd_coff_link_input_bfd
 extern bool _bfd_coff_reloc_link_order
   (bfd *, struct coff_final_link_info *, asection *,
    struct bfd_link_order *) ATTRIBUTE_HIDDEN;
-extern bool bfd_coff_gc_sections
-  (bfd *, struct bfd_link_info *);
-extern const char *bfd_coff_group_name
-  (bfd *, const asection *);
+extern bool _bfd_coff_gc_sections
+  (bfd *, struct bfd_link_info *) ATTRIBUTE_HIDDEN;
+extern const char *_bfd_coff_group_name
+  (bfd *, const asection *) ATTRIBUTE_HIDDEN;
 
 /* Functions in xcofflink.c.  */
 
