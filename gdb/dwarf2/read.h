@@ -136,13 +136,26 @@ struct dwarf2_per_cu
   }
 
 private:
-  /* The start offset and length of this compilation unit.
-     NOTE: Unlike comp_unit_head.length, this length includes
-     initial_length_size.
-     If the DIE refers to a DWO file, this is always of the original die,
-     not the DWO file.  */
+  /* The start offset of this unit.
+
+     If the unit is located in a DWO file, and has a corresponding skeleton
+     unit in the main file, this is the offset of the skeleton unit in its
+     containing section in the main file.
+
+     If the unit is located in a DWO file, but has no corresponding skeleton
+     unit in the main file, this is the offset of the unit in its containing
+     section in the DWO file.  */
   sect_offset m_sect_off;
 
+  /* The length of this unit.
+
+     If the unit is located in a DWO file, and has a corresponding skeleton unit
+     in the main file, this is the length of the skeleton unit in the main file.
+
+     If the unit is located in a DWO file, but has no corresponding skeleton
+     unit in the main file, this is the length of the unit in the DWO file.
+
+     Unlike unit_head::m_length, this length includes initial_length_size.  */
   unsigned int m_length = 0;
 
 private:
@@ -225,9 +238,15 @@ public:
   unsigned index = 0;
 
 private:
-  /* The section this CU/TU lives in.
-     If the DIE refers to a DWO file, this is always the original die,
-     not the DWO file.  */
+  /* The section this unit lives in.
+
+     If the unit is located in a DWO file, and has a corresponding skeleton unit
+     in the main file, this is the section of the skeleton unit in the main
+     file.
+
+     If the unit is located in a DWO file, but has no corresponding skeleton
+     unit in the main file, this is the section of the unit in the DWO
+     file.  */
   dwarf2_section_info *m_section;
 
   /* Backlink to the owner of this.  */
