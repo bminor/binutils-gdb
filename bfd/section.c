@@ -1669,11 +1669,6 @@ bfd_malloc_and_get_section (bfd *abfd, sec_ptr sec, bfd_byte **buf)
 FUNCTION
 	bfd_copy_private_section_data
 
-SYNOPSIS
-	bool bfd_copy_private_section_data
-	  (bfd *ibfd, asection *isec, bfd *obfd, asection *osec,
-	   struct bfd_link_info *link_info);
-
 DESCRIPTION
 	Copy private section information from @var{isec} in the BFD
 	@var{ibfd} to the section @var{osec} in the BFD @var{obfd}.

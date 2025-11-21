@@ -5476,7 +5476,7 @@ ppc64_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   if ((ibfd->flags & BFD_LINKER_CREATED) != 0)
     return true;
 
-  if (!is_ppc64_elf (ibfd) || !is_ppc64_elf (obfd))
+  if (!is_ppc64_elf (ibfd))
     return true;
 
   if (!_bfd_generic_verify_endian_match (ibfd, info))

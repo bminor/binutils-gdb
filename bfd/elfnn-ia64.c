@@ -4704,7 +4704,7 @@ elfNN_ia64_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   if ((ibfd->flags & DYNAMIC) != 0)
     return true;
 
-  if (!is_ia64_elf (ibfd) || !is_ia64_elf (obfd))
+  if (!is_ia64_elf (ibfd))
     return true;
 
   in_flags  = elf_elfheader (ibfd)->e_flags;

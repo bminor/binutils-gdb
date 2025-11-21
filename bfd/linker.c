@@ -3502,10 +3502,6 @@ _bfd_generic_link_check_relocs (bfd *abfd ATTRIBUTE_UNUSED,
 FUNCTION
 	bfd_merge_private_bfd_data
 
-SYNOPSIS
-	bool bfd_merge_private_bfd_data
-	  (bfd *ibfd, struct bfd_link_info *info);
-
 DESCRIPTION
 	Merge private BFD information from the BFD @var{ibfd} to the
 	the output file BFD when linking.  Return <<TRUE>> on success,

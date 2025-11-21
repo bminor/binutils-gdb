@@ -3004,8 +3004,7 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
   bfd_size_type size;
 
   /* One day we may try to grok other private data.  */
-  if (ibfd->xvec->flavour != bfd_target_coff_flavour
-      || obfd->xvec->flavour != bfd_target_coff_flavour)
+  if (ibfd->xvec->flavour != bfd_target_coff_flavour)
     return true;
 
   ipe = pe_data (ibfd);
@@ -3131,8 +3130,7 @@ _bfd_XX_bfd_copy_private_section_data (bfd *ibfd,
 				       struct bfd_link_info *link_info)
 {
   if (link_info != NULL
-      || bfd_get_flavour (ibfd) != bfd_target_coff_flavour
-      || bfd_get_flavour (obfd) != bfd_target_coff_flavour)
+      || bfd_get_flavour (ibfd) != bfd_target_coff_flavour)
     return true;
 
   if (coff_section_data (ibfd, isec) != NULL

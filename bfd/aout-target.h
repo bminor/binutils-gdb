@@ -218,8 +218,7 @@ MY_bfd_copy_private_section_data (bfd *ibfd,
 				  struct bfd_link_info *link_info)
 {
   if (link_info == NULL
-      && bfd_get_flavour (ibfd) == bfd_target_aout_flavour
-      && bfd_get_flavour (obfd) == bfd_target_aout_flavour)
+      && bfd_get_flavour (ibfd) == bfd_target_aout_flavour)
     obj_aout_subformat (obfd) = obj_aout_subformat (ibfd);
   return true;
 }

@@ -5346,19 +5346,17 @@ som_new_section_hook (bfd *abfd, asection *newsect)
 static bool
 som_bfd_copy_private_symbol_data (bfd *ibfd,
 				  asymbol *isymbol,
-				  bfd *obfd,
+				  bfd *obfd ATTRIBUTE_UNUSED,
 				  asymbol *osymbol)
 {
-  struct som_symbol *input_symbol = (struct som_symbol *) isymbol;
-  struct som_symbol *output_symbol = (struct som_symbol *) osymbol;
-
   /* One day we may try to grok other private data.  */
-  if (ibfd->xvec->flavour != bfd_target_som_flavour
-      || obfd->xvec->flavour != bfd_target_som_flavour)
+  if (ibfd->xvec->flavour != bfd_target_som_flavour)
     return false;
 
   /* The only private information we need to copy is the argument relocation
      bits.  */
+  struct som_symbol *input_symbol = (struct som_symbol *) isymbol;
+  struct som_symbol *output_symbol = (struct som_symbol *) osymbol;
   output_symbol->tc_data.ap.hppa_arg_reloc =
     input_symbol->tc_data.ap.hppa_arg_reloc;
 
@@ -5378,7 +5376,6 @@ som_bfd_copy_private_section_data (bfd *ibfd,
   /* One day we may try to grok other private data.  */
   if (link_info != NULL
       || ibfd->xvec->flavour != bfd_target_som_flavour
-      || obfd->xvec->flavour != bfd_target_som_flavour
       || (!som_is_space (isection) && !som_is_subspace (isection)))
     return true;
 
@@ -5417,8 +5414,7 @@ static bool
 som_bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
   /* One day we may try to grok other private data.  */
-  if (ibfd->xvec->flavour != bfd_target_som_flavour
-      || obfd->xvec->flavour != bfd_target_som_flavour)
+  if (ibfd->xvec->flavour != bfd_target_som_flavour)
     return true;
 
   /* Allocate some memory to hold the data we need.  */

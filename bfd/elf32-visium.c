@@ -743,8 +743,7 @@ visium_elf_set_private_flags (bfd *abfd, flagword flags)
 static bool
 visium_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
     return true;
 
   BFD_ASSERT (!elf_flags_init (obfd)
@@ -778,6 +777,9 @@ visium_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   const char *mcm = "mcm";
   const char *mcm24 = "mcm24";
   const char *gr6 = "gr6";
+
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
+    return true;
 
   new_flags = elf_elfheader (ibfd)->e_flags;
   old_flags = elf_elfheader (obfd)->e_flags;

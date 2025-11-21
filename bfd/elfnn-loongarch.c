@@ -529,7 +529,7 @@ elfNN_loongarch_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   flagword in_flags = elf_elfheader (ibfd)->e_flags;
   flagword out_flags = elf_elfheader (obfd)->e_flags;
 
-  if (!is_loongarch_elf (ibfd) || !is_loongarch_elf (obfd))
+  if (!is_loongarch_elf (ibfd))
     return true;
 
   if (strcmp (bfd_get_target (ibfd), bfd_get_target (obfd)) != 0)

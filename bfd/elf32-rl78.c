@@ -1186,6 +1186,9 @@ rl78_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   flagword old_flags;
   bool error = false;
 
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
+    return true;
+
   new_flags = elf_elfheader (ibfd)->e_flags;
   old_flags = elf_elfheader (obfd)->e_flags;
 

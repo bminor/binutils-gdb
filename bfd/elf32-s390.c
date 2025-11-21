@@ -3884,7 +3884,7 @@ elf32_s390_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
   bfd *obfd = info->output_bfd;
 
-  if (!is_s390_elf (ibfd) || !is_s390_elf (obfd))
+  if (!is_s390_elf (ibfd))
     return true;
 
   if (!elf_s390_merge_obj_attributes (ibfd, info))

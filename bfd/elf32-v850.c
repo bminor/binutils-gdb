@@ -2458,7 +2458,8 @@ v850_elf_copy_notes (bfd *ibfd, bfd *obfd)
       bfd_byte * icont;
       bfd_byte * ocont;
 
-      if ((icont = elf_section_data (inotes)->this_hdr.contents) == NULL)
+      if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+	  || (icont = elf_section_data (inotes)->this_hdr.contents) == NULL)
 	BFD_ASSERT (bfd_malloc_and_get_section (ibfd, inotes, & icont));
 
       if ((ocont = elf_section_data (onotes)->this_hdr.contents) == NULL)
@@ -2786,8 +2787,7 @@ v850_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   flagword in_flags;
   bool result = true;
 
-  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
     return true;
 
   result &= v850_elf_merge_notes (ibfd, obfd);

@@ -1190,8 +1190,7 @@ elf32_m68k_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   flagword in_isa;
   const bfd_arch_info_type *arch_info;
 
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
     /* PR 24523: For non-ELF files do not try to merge any private
        data, but also do not prevent the link from succeeding.  */
     return true;

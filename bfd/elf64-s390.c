@@ -4188,7 +4188,7 @@ elf_s390_plt_sym_val (bfd_vma i, const asection *plt,
 static bool
 elf64_s390_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 {
-  if (!is_s390_elf (ibfd) || !is_s390_elf (info->output_bfd))
+  if (!is_s390_elf (ibfd))
     return true;
 
   return elf_s390_merge_obj_attributes (ibfd, info);

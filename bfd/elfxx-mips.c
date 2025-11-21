@@ -15987,7 +15987,7 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
       return false;
     }
 
-  if (!is_mips_elf (ibfd) || !is_mips_elf (obfd))
+  if (!is_mips_elf (ibfd))
     return true;
 
   in_tdata = mips_elf_tdata (ibfd);

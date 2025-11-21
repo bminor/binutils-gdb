@@ -4380,7 +4380,7 @@ _bfd_riscv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   bfd *obfd = info->output_bfd;
   flagword new_flags, old_flags;
 
-  if (!is_riscv_elf (ibfd) || !is_riscv_elf (obfd))
+  if (!is_riscv_elf (ibfd))
     return true;
 
   if (strcmp (bfd_get_target (ibfd), bfd_get_target (obfd)) != 0)

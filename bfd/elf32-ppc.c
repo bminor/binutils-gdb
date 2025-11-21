@@ -3765,7 +3765,7 @@ ppc_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   flagword new_flags;
   bool error;
 
-  if (!is_ppc_elf (ibfd) || !is_ppc_elf (obfd))
+  if (!is_ppc_elf (ibfd))
     return true;
 
   /* Check if we have the same endianness.  */

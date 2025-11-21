@@ -2193,8 +2193,7 @@ coff_arm_merge_private_bfd_data (bfd * ibfd, struct bfd_link_info *info)
   /* If the two formats are different we cannot merge anything.
      This is not an error, since it is permissable to change the
      input and output formats.  */
-  if (   ibfd->xvec->flavour != bfd_target_coff_flavour
-      || obfd->xvec->flavour != bfd_target_coff_flavour)
+  if (ibfd->xvec->flavour != bfd_target_coff_flavour)
     return true;
 
   /* Determine what should happen if the input ARM architecture

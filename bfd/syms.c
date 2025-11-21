@@ -796,10 +796,6 @@ bfd_symbol_info (asymbol *symbol, symbol_info *ret)
 FUNCTION
 	bfd_copy_private_symbol_data
 
-SYNOPSIS
-	bool bfd_copy_private_symbol_data
-	  (bfd *ibfd, asymbol *isym, bfd *obfd, asymbol *osym);
-
 DESCRIPTION
 	Copy private symbol information from @var{isym} in the BFD
 	@var{ibfd} to the symbol @var{osym} in the BFD @var{obfd}.

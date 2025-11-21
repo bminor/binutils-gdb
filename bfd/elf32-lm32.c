@@ -2332,15 +2332,13 @@ lm32_elf_fdpic_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
   unsigned i;
 
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
     return true;
 
   if (! _bfd_elf_copy_private_bfd_data (ibfd, obfd))
     return false;
 
-  if (! elf_tdata (ibfd) || ! elf_tdata (ibfd)->phdr
-      || ! elf_tdata (obfd) || ! elf_tdata (obfd)->phdr)
+  if (! elf_tdata (ibfd)->phdr || ! elf_tdata (obfd)->phdr)
     return true;
 
   /* Copy the stack size.  */

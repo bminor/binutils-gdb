@@ -13886,7 +13886,7 @@ elf32_arm_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
   flagword in_flags;
   flagword out_flags;
 
-  if (! is_arm_elf (ibfd) || ! is_arm_elf (obfd))
+  if (! is_arm_elf (ibfd))
     return true;
 
   in_flags  = elf_elfheader (ibfd)->e_flags;
@@ -20412,7 +20412,7 @@ elf32_arm_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   if (! _bfd_generic_verify_endian_match (ibfd, info))
     return false;
 
-  if (! is_arm_elf (ibfd) || ! is_arm_elf (obfd))
+  if (! is_arm_elf (ibfd))
     return true;
 
   if (!elf32_arm_merge_eabi_attributes (ibfd, info))

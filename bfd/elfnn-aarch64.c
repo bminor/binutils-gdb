@@ -7499,7 +7499,7 @@ elfNN_aarch64_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   if (!_bfd_generic_verify_endian_match (ibfd, info))
     return false;
 
-  if (!is_aarch64_elf (ibfd) || !is_aarch64_elf (obfd))
+  if (!is_aarch64_elf (ibfd))
     return true;
 
   /* The input BFD must have had its flags initialised.  */

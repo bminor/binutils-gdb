@@ -1045,10 +1045,6 @@ bool bfd_get_section_contents
 bool bfd_malloc_and_get_section
    (bfd *abfd, asection *section, bfd_byte **buf);
 
-bool bfd_copy_private_section_data
-   (bfd *ibfd, asection *isec, bfd *obfd, asection *osec,
-    struct bfd_link_info *link_info);
-
 #define bfd_copy_private_section_data(ibfd, isec, obfd, osec, link_info) \
        BFD_SEND (obfd, _bfd_copy_private_section_data, \
 		 (ibfd, isec, obfd, osec, link_info))
@@ -1271,9 +1267,6 @@ int bfd_decode_symclass (asymbol *symbol);
 bool bfd_is_undefined_symclass (int symclass);
 
 void bfd_symbol_info (asymbol *symbol, symbol_info *ret);
-
-bool bfd_copy_private_symbol_data
-   (bfd *ibfd, asymbol *isym, bfd *obfd, asymbol *osym);
 
 #define bfd_copy_private_symbol_data(ibfd, isymbol, obfd, osymbol) \
        BFD_SEND (obfd, _bfd_copy_private_symbol_data, \
@@ -2995,9 +2988,6 @@ bool bfd_link_check_relocs
 
 bool _bfd_generic_link_check_relocs
    (bfd *abfd, struct bfd_link_info *info);
-
-bool bfd_merge_private_bfd_data
-   (bfd *ibfd, struct bfd_link_info *info);
 
 #define bfd_merge_private_bfd_data(ibfd, info) \
        BFD_SEND ((info)->output_bfd, _bfd_merge_private_bfd_data, \

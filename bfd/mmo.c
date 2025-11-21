@@ -610,8 +610,7 @@ mmo_ignore_symbol_consistency (bfd *abfd)
 static bool
 mmo_bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
-  if (bfd_get_flavour (ibfd) != bfd_target_mmo_flavour
-      || bfd_get_flavour (obfd) != bfd_target_mmo_flavour)
+  if (bfd_get_flavour (ibfd) != bfd_target_mmo_flavour)
     return true;
 
   /* Copy the time the copied-from file was created.  If people want the

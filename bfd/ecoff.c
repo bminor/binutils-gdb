@@ -1835,8 +1835,6 @@ _bfd_ecoff_find_nearest_line (bfd *abfd,
 bool
 _bfd_ecoff_bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
-  struct ecoff_debug_info *iinfo = &ecoff_data (ibfd)->debug_info;
-  struct ecoff_debug_info *oinfo = &ecoff_data (obfd)->debug_info;
   int i;
   asymbol **sym_ptr_ptr;
   size_t c;
@@ -1844,8 +1842,7 @@ _bfd_ecoff_bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 
   /* We only want to copy information over if both BFD's use ECOFF
      format.  */
-  if (bfd_get_flavour (ibfd) != bfd_target_ecoff_flavour
-      || bfd_get_flavour (obfd) != bfd_target_ecoff_flavour)
+  if (bfd_get_flavour (ibfd) != bfd_target_ecoff_flavour)
     return true;
 
   /* Copy the GP value and the register masks.  */
@@ -1856,6 +1853,8 @@ _bfd_ecoff_bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
     ecoff_data (obfd)->cprmask[i] = ecoff_data (ibfd)->cprmask[i];
 
   /* Copy the version stamp.  */
+  struct ecoff_debug_info *iinfo = &ecoff_data (ibfd)->debug_info;
+  struct ecoff_debug_info *oinfo = &ecoff_data (obfd)->debug_info;
   oinfo->symbolic_header.vstamp = iinfo->symbolic_header.vstamp;
 
   /* If there are no symbols, don't copy any debugging information.  */

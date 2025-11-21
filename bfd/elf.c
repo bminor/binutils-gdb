@@ -1379,14 +1379,12 @@ copy_special_section_fields (const bfd *ibfd,
 bool
 _bfd_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
-  const Elf_Internal_Shdr **iheaders
-    = (const Elf_Internal_Shdr **) elf_elfsections (ibfd);
-  Elf_Internal_Shdr **oheaders = elf_elfsections (obfd);
+  const Elf_Internal_Shdr **iheaders;
+  Elf_Internal_Shdr **oheaders;
   const struct elf_backend_data *bed;
   unsigned int i;
 
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-    || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
     return true;
 
   if (!elf_flags_init (obfd))
@@ -1409,6 +1407,8 @@ _bfd_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
   /* Copy object attributes.  */
   _bfd_elf_copy_obj_attributes (ibfd, obfd);
 
+  iheaders = (const Elf_Internal_Shdr **) elf_elfsections (ibfd);
+  oheaders = elf_elfsections (obfd);
   if (iheaders == NULL || oheaders == NULL)
     return true;
 
@@ -8315,10 +8315,6 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
   bfd_vma maxpagesize;
 
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return true;
-
   if (elf_tdata (ibfd)->phdr == NULL)
     return true;
 
@@ -8452,12 +8448,11 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 bool
 _bfd_elf_copy_private_section_data (bfd *ibfd,
 				    asection *isec,
-				    bfd *obfd,
+				    bfd *obfd ATTRIBUTE_UNUSED,
 				    asection *osec,
 				    struct bfd_link_info *link_info)
 {
-  if (ibfd->xvec->flavour != bfd_target_elf_flavour
-      || obfd->xvec->flavour != bfd_target_elf_flavour)
+  if (ibfd->xvec->flavour != bfd_target_elf_flavour)
     return true;
 
   Elf_Internal_Shdr *ihdr = &elf_section_data (isec)->this_hdr;
@@ -8659,8 +8654,7 @@ _bfd_elf_fixup_group_sections (bfd *ibfd, asection *discarded)
 bool
 _bfd_elf_copy_private_header_data (bfd *ibfd, bfd *obfd)
 {
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
     return true;
 
   /* Copy over private BFD data if it has not already been copied.
@@ -8692,18 +8686,14 @@ _bfd_elf_copy_private_header_data (bfd *ibfd, bfd *obfd)
 bool
 _bfd_elf_copy_private_symbol_data (bfd *ibfd,
 				   asymbol *isymarg,
-				   bfd *obfd,
+				   bfd *obfd ATTRIBUTE_UNUSED,
 				   asymbol *osymarg)
 {
-  elf_symbol_type *isym, *osym;
-
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
     return true;
 
-  isym = elf_symbol_from (isymarg);
-  osym = elf_symbol_from (osymarg);
-
+  elf_symbol_type *isym = elf_symbol_from (isymarg);
+  elf_symbol_type *osym = elf_symbol_from (osymarg);
   if (isym != NULL
       && isym->internal_elf_sym.st_shndx != 0
       && osym != NULL

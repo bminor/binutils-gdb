@@ -5797,7 +5797,7 @@ sh_elf_get_flags_from_mach (unsigned long mach)
 static bool
 sh_elf_copy_private_data (bfd * ibfd, bfd * obfd)
 {
-  if (! is_sh_elf (ibfd) || ! is_sh_elf (obfd))
+  if (! is_sh_elf (ibfd))
     return true;
 
   if (! _bfd_elf_copy_private_bfd_data (ibfd, obfd))
@@ -5884,7 +5884,7 @@ sh_elf_merge_private_data (bfd *ibfd, struct bfd_link_info *info)
   if ((ibfd->flags & DYNAMIC) != 0)
     return true;
 
-  if (! is_sh_elf (ibfd) || ! is_sh_elf (obfd))
+  if (! is_sh_elf (ibfd))
     return true;
 
   if (! elf_flags_init (obfd))
