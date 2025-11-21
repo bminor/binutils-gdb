@@ -87,7 +87,8 @@ proc_with_prefix test_tls_reg_availability {} {
 
 	set new_val_str "{$val0, $val1, $val2, $val3}"
 
-	gdb_test_no_output "set \$i386_tls_gdt_1 = $new_val_str"
+	gdb_test_no_output "set \$i386_tls_gdt_1 = $new_val_str" \
+	    "set value of \$i386_tls_gdt_1 register"
 	set re [string_to_regexp $new_val_str]
 	gdb_test "print /x \$i386_tls_gdt_1" " = $re"
     }
