@@ -119,7 +119,7 @@ typedef struct CollectorUtilFuncs
 extern CollectorUtilFuncs __collector_util_funcs;
 extern int __collector_dlsym_guard;
 
-#define CALL_UTIL(x) __collector_util_funcs.x
+#define CALL_UTIL(x) (__collector_util_funcs.x)
 
 /* The following constants define the meaning of the "void *arg"
  * argument of getFrameInfo().
