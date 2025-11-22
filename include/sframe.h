@@ -261,8 +261,12 @@ typedef struct sframe_func_desc_entry_v3
   /* Offset of the first SFrame Frame Row Entry of the function, relative to the
      beginning of the SFrame Frame Row Entry sub-section.  */
   uint32_t sfde_func_start_fre_off;
+} ATTRIBUTE_PACKED sframe_func_desc_entry_v3;
+
+typedef struct sframe_func_desc_attr_v3
+{
   /* Number of frame row entries for the function.  */
-  uint16_t sfde_func_num_fres;
+  uint16_t sfda_func_num_fres;
   /* Additional information for stack tracing from the function:
      - 4-bits: Identify the FRE type used for the function.
      - 1-bit: Identify the FDE type of the function - mask or inc.
@@ -274,7 +278,7 @@ typedef struct sframe_func_desc_entry_v3
      | frame  |             |        Unused (amd64)       |           |              |
      ---------------------------------------------------------------------------------
      8        7             6                             5           4              0     */
-  uint8_t sfde_func_info;
+  uint8_t sfda_func_info;
   /* Additional information for stack tracing from the function:
      - 4-bits: ABI/arch specific FDE types.
      - 4-bits: Unused.
@@ -283,11 +287,11 @@ typedef struct sframe_func_desc_entry_v3
      |                                                        |  FDE Type    |
      -------------------------------------------------------------------------
      8        7         6                         5           4              0     */
-  uint8_t sfde_func_info2;
+  uint8_t sfda_func_info2;
   /* Size of the block of repeating insns.  Used for SFrame FDEs of type
      SFRAME_FDE_TYPE_PCMASK.  */
-  uint8_t sfde_func_rep_size;
-} ATTRIBUTE_PACKED sframe_func_desc_entry_v3;
+  uint8_t sfda_func_rep_size;
+} ATTRIBUTE_PACKED sframe_func_desc_attr_v3;
 
 /* SFrame V3 FDE.  TBD comment.  */
 
