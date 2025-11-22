@@ -1428,6 +1428,7 @@ scan_filtered_symbols (bfd *abfd, void *minisyms, long symcount,
       if (*symbol_name
 	  && *symbol_name == bfd_get_symbol_leading_char (abfd))
 	++symbol_name;
+      symbol_name = xstrdup (symbol_name);
 
       def_exports (symbol_name , 0, -1, 0, 0,
 		   ! (sym->flags & BSF_FUNCTION), 0, NULL);
