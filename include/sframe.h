@@ -272,7 +272,7 @@ typedef struct sframe_func_desc_entry_v2
    matching FRE.  */
 #define SFRAME_V3_FDE_PCTYPE_MASK  SFRAME_FDE_TYPE_PCMASK
 
-typedef struct sframe_func_desc_entry_v3
+typedef struct sframe_func_desc_idx_v3
 {
   /* Offset to the function start address.  Encoded as a signed offset,
      relative to the beginning of the current FDE.  */
@@ -282,8 +282,12 @@ typedef struct sframe_func_desc_entry_v3
   /* Offset of the first SFrame Frame Row Entry of the function, relative to the
      beginning of the SFrame Frame Row Entry sub-section.  */
   uint32_t sfde_func_start_fre_off;
+} ATTRIBUTE_PACKED sframe_func_desc_idx_v3;
+
+typedef struct sframe_func_desc_attr_v3
+{
   /* Number of frame row entries for the function.  */
-  uint16_t sfde_func_num_fres;
+  uint16_t sfda_func_num_fres;
   /* Additional information for stack tracing from the function:
      - 4-bits: Identify the FRE type used for the function.
      - 1-bit: Identify the PC type of the function - mask or inc.
@@ -295,7 +299,7 @@ typedef struct sframe_func_desc_entry_v3
      | frame  |             |        Unused (amd64)       | PC Type |              |
      -------------------------------------------------------------------------------
      8        7             6                             5         4              0     */
-  uint8_t sfde_func_info;
+  uint8_t sfda_func_info;
   /* Additional information for stack tracing from the function:
      - 5-bits: FDE type.
      - 3-bits: Unused.
@@ -304,11 +308,11 @@ typedef struct sframe_func_desc_entry_v3
      |                                            |             |
      ------------------------------------------------------------
      8        7         6                         5             0     */
-  uint8_t sfde_func_info2;
+  uint8_t sfda_func_info2;
   /* Size of the block of repeating insns.  Used for SFrame FDEs of type
      SFRAME_V3_FDE_PCTYPE_MASK.  */
-  uint8_t sfde_func_rep_size;
-} ATTRIBUTE_PACKED sframe_func_desc_entry_v3;
+  uint8_t sfda_func_rep_size;
+} ATTRIBUTE_PACKED sframe_func_desc_attr_v3;
 
 #define SFRAME_V3_FDE_FUNC_INFO(fde_pc_type, fre_type) \
   (SFRAME_V2_FUNC_INFO (fde_pc_type, fre_type))

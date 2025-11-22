@@ -56,7 +56,7 @@
 #endif
 
 /* gas emits SFrame Version 3 only at this time.  */
-typedef sframe_func_desc_entry_v3 sframe_func_desc_entry;
+typedef sframe_func_desc_idx_v3 sframe_func_desc_entry;
 
 /* List of SFrame FDE entries.  */
 
@@ -820,8 +820,6 @@ output_sframe_funcdesc (symbolS *start_of_fre_section,
 {
   expressionS exp;
   symbolS *dw_fde_start_addrS, *dw_fde_end_addrS;
-  unsigned int pauth_key;
-  bool signal_p;
 
   dw_fde_start_addrS = get_dw_fde_start_addrS (sframe_fde->dw_fde);
   dw_fde_end_addrS = get_dw_fde_end_addrS (sframe_fde->dw_fde);
@@ -843,19 +841,24 @@ output_sframe_funcdesc (symbolS *start_of_fre_section,
   emit_expr (&exp, sizeof_member (sframe_func_desc_entry,
 				  sfde_func_size));
 
-  /* Offset to the first frame row entry.  */
-  if (sframe_fde->num_fres == 0)
-    /* For FDEs without any FREs, set sfde_func_start_fre_off to zero.  */
-    out_four (0);
-  else
-    {
-      exp.X_op = O_subtract;
-      exp.X_add_symbol = fre_symbol; /* Minuend.  */
-      exp.X_op_symbol = start_of_fre_section; /* Subtrahend.  */
-      exp.X_add_number = 0;
-      emit_expr (&exp, sizeof_member (sframe_func_desc_entry,
-				      sfde_func_start_fre_off));
-    }
+  /* Offset to the function data (attribtues, FREs) in the FRE subsection.  */
+  exp.X_op = O_subtract;
+  exp.X_add_symbol = fre_symbol; /* Minuend.  */
+  exp.X_op_symbol = start_of_fre_section; /* Subtrahend.  */
+  exp.X_add_number = 0;
+  emit_expr (&exp, sizeof_member (sframe_func_desc_entry,
+				  sfde_func_start_fre_off));
+}
+
+static void
+output_sframe_func_desc_attr (const struct sframe_func_entry *sframe_fde)
+{
+  symbolS *dw_fde_start_addrS, *dw_fde_end_addrS;
+  unsigned int pauth_key;
+  bool signal_p;
+
+  dw_fde_start_addrS = get_dw_fde_start_addrS (sframe_fde->dw_fde);
+  dw_fde_end_addrS = get_dw_fde_end_addrS (sframe_fde->dw_fde);
 
   /* Number of FREs must fit uint16_t.  */
   gas_assert (sframe_fde->num_fres <= UINT16_MAX);
@@ -1005,6 +1008,9 @@ output_sframe_internal (void)
   for (sframe_fde = all_sframe_fdes; sframe_fde; sframe_fde = sframe_fde_next)
     {
       symbol_set_value_now (fde_fre_symbols[i]);
+
+      output_sframe_func_desc_attr (sframe_fde);
+
       for (sframe_fre = sframe_fde->sframe_fres;
 	   sframe_fre;
 	   sframe_fre = sframe_fre->next)
