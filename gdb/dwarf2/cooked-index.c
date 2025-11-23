@@ -90,7 +90,7 @@ cooked_index::set_contents ()
     {
       auto this_shard = shard.get ();
       const parent_map_map *parent_maps = m_state->get_parent_map_map ();
-      finalizers.add_task ([=] ()
+      finalizers.add_task ([this, this_shard, parent_maps] ()
 	{
 	  scoped_time_it time_it ("DWARF finalize worker",
 				  m_state->m_per_command_time);
