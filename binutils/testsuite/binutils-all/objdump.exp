@@ -595,7 +595,7 @@ if { ![is_elf_format] } then {
        send_log "\n"
     }
 
-    set got [remote_exec host "tail -n +4 tmpdir/objdump.out" "" "/dev/null" "tmpdir/objdump.tail"]
+    set got [remote_exec host {sed -e 1,3d tmpdir/objdump.out} {} /dev/null tmpdir/objdump.tail]
     set output [remote_upload host tmpdir/objdump.tail]
 
     if ![file size $output] then {
