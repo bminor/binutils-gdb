@@ -54,7 +54,7 @@ proc test_fields {lang} {
 
     # .fields() of a typedef should still return the underlying field list
     gdb_test "python print (len(gdb.parse_and_eval('ts').type.fields()))" "2" \
-        "$lang typedef field list"
+	"$lang typedef field list"
 
     if {$lang == "c++"} {
       # Test usage with a class
@@ -145,9 +145,9 @@ proc test_fields {lang} {
 
     # Test gdb.Type.array.
     gdb_test "python print (ar\[0\].cast(ar\[0\].type.array(1)))" \
-        ".1, 2." "cast to array with one argument"
+	".1, 2." "cast to array with one argument"
     gdb_test "python print (ar\[0\].cast(ar\[0\].type.array(0, 1)))" \
-        ".1, 2." "cast to array with two arguments"
+	".1, 2." "cast to array with two arguments"
 
     gdb_test "python print (ar\[0\].type == ar\[0\].type)" "True"
 

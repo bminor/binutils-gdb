@@ -27,10 +27,10 @@ clean_restart
 gdb_load $binfile
 
 gdb_test "ptype struct not_empty" \
-         "type = struct not_empty {$eol${sp}void \\*e;$eol${sp}void \\*u;$eol}"
+	 "type = struct not_empty {$eol${sp}void \\*e;$eol${sp}void \\*u;$eol}"
 
 gdb_test "ptype struct empty" \
-         "type = struct empty {$eol$sp<no data fields>$eol}"
+	 "type = struct empty {$eol$sp<no data fields>$eol}"
 
 gdb_test "ptype union empty_union" \
-         "type = union empty_union {$eol$sp<no data fields>$eol}"
+	 "type = union empty_union {$eol$sp<no data fields>$eol}"

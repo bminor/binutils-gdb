@@ -193,17 +193,17 @@ namespace P {
   public:
     int operator== (int)
       {
-        return 24;
+	return 24;
       }
 
     int operator== (float)
       {
-        return 25;
+	return 25;
       }
 
     int operator+ (float)
       {
-        return 26;
+	return 26;
       }
 
   };
@@ -322,7 +322,7 @@ main ()
   r.rfoo();
 
   return first (0, c) + foo (eo) +
-         foo (eo, eo) + foo (eo, eo, 1)  +
-         foo (fo, eo) + foo (1  ,fo, eo) +
-         foo (go, fo, eo);
+	 foo (eo, eo) + foo (eo, eo, 1)  +
+	 foo (fo, eo) + foo (1  ,fo, eo) +
+	 foo (go, fo, eo);
 }

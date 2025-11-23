@@ -15,9 +15,9 @@
 #      include <alloca.h>
 #      define HAVE_STACK_ALLOCA 1
 #      ifdef __STDC__
-         void *alloca ();
+	 void *alloca ();
 #      else
-         char *alloca ();
+	 char *alloca ();
 #      endif /* __STDC__ */
 #    endif /* sparc */
 #  endif /* Not AIX */

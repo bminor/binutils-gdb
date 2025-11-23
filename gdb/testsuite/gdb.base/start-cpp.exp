@@ -39,5 +39,5 @@ if { [gdb_start_cmd] < 0 } {
 }
 
 gdb_test "" \
-         "Temporary breakpoint $decimal at $hex: file.*main \\(\\) at .*start-cpp.cc:.*" \
-         "start"
+	 "Temporary breakpoint $decimal at $hex: file.*main \\(\\) at .*start-cpp.cc:.*" \
+	 "start"

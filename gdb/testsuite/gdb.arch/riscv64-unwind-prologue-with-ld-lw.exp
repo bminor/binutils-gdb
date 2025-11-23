@@ -33,9 +33,9 @@ gdb_breakpoint "bar"
 gdb_continue_to_breakpoint "bar"
 gdb_test "bt" \
     [multi_line \
-         "#0\[ \t\]*$hex in bar \\\(\\\)" \
-         "#1\[ \t\]*$hex in foo \\\(\\\)" \
-         "#2\[ \t\]*$hex in main \\\(\\\)"] \
+	 "#0\[ \t\]*$hex in bar \\\(\\\)" \
+	 "#1\[ \t\]*$hex in foo \\\(\\\)" \
+	 "#2\[ \t\]*$hex in main \\\(\\\)"] \
     "Backtrace to the main frame"
 gdb_test "finish" "foo \\\(\\\)" "finish bar"
 gdb_test "finish" "main \\\(\\\)" "finish foo"

@@ -38,8 +38,8 @@ if { [gdb_breakpoint ${srcfile}:${bp_location2}] } {
 }
 
 gdb_test "cont" \
-         "Breakpoint .*:${bp_location1}.*" \
-         "Going to first breakpoint"
+	 "Breakpoint .*:${bp_location1}.*" \
+	 "Going to first breakpoint"
 gdb_test "print st" \
 	 ".* = ''.*" \
 	 "empty string check"

@@ -54,7 +54,7 @@ while {$more} {
 	-i $inferior_spawn_id
 	-ex "this is line number $i" {
 	    incr i
-           if {$i != $expected_lines} {
+	   if {$i != $expected_lines} {
 		set more 1
 	    }
 	}

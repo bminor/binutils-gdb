@@ -18,23 +18,23 @@ public:
     y++; // marker1
 
       {
-        int x = 44;
-        y++; // marker2
+	int x = 44;
+	y++; // marker2
 
-          {
-            int x = 55;
-            y++; // marker3
+	  {
+	    int x = 55;
+	    y++; // marker3
 
-              {
-                using namespace A;
-                y++; // marker4
+	      {
+		using namespace A;
+		y++; // marker4
 
-                {
-                  using A::x;
-                  y++; // marker5
-                }
-              }
-          }
+		{
+		  using A::x;
+		  y++; // marker5
+		}
+	      }
+	  }
       }
     return 0;
   }

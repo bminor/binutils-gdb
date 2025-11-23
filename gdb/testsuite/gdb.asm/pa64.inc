@@ -43,4 +43,3 @@
 \name:
 	.long	\value
 	.endm
-

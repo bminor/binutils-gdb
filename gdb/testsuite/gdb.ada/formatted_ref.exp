@@ -41,8 +41,8 @@ proc get_address { var } {
 
     gdb_test_multiple "print $var'access" "address of $var" {
 	-re "\\$\[0-9\]+ = \\(.*\\) (0x\[0-9a-f\]+).*$gdb_prompt $" {
-            return $expect_out(1,string)
-        }
+	    return $expect_out(1,string)
+	}
     }
     return ""
 }
@@ -52,15 +52,15 @@ proc test_p_x { var val addr } {
 
     set test "print/x $var"
     gdb_test_multiple "$test" $test {
-        -re "\\$\[0-9\]+ = [string_to_regexp $val].*$gdb_prompt $" {
+	-re "\\$\[0-9\]+ = [string_to_regexp $val].*$gdb_prompt $" {
 	    pass $test
 	}
 	-re "\\$\[0-9\]+ = $addr.*$gdb_prompt $" {
-            fail "$test (prints just address)"
-        }
+	    fail "$test (prints just address)"
+	}
 	-re "\\$\[0-9\]+ = 0x\[a-f0-9\]+.*$gdb_prompt $" {
-            fail "$test (prints unexpected address)"
-        }
+	    fail "$test (prints unexpected address)"
+	}
     }
     return 0
 }

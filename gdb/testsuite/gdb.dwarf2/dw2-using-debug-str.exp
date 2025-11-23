@@ -149,24 +149,24 @@ set dwarf_error "DWARF Error: DW_FORM_strp used without required section"
 # behavior).
 set pattern1 \
     [multi_line \
-         $line1 \
-         $dwarf_error \
-        "\\(No debugging symbols \[^\r\n\]+\\)"]
+	 $line1 \
+	 $dwarf_error \
+	"\\(No debugging symbols \[^\r\n\]+\\)"]
 
 # This pattern is hit when GDB does use -readnow (e.g. running with
 # --target_board=readnow).
 set pattern2 \
     [multi_line \
-        $line1 \
-        "Expanding full symbols from \[^\r\n\]+" \
-        $dwarf_error]
+	$line1 \
+	"Expanding full symbols from \[^\r\n\]+" \
+	$dwarf_error]
 
 # This pattern is hit when gcc adds an index (e.g. running with
 # --target_board=cc-with-gdb-index).
 set pattern3 \
     [multi_line \
-        $line1 \
-        $dwarf_error]
+	$line1 \
+	$dwarf_error]
 
 # Load the executable, we expect an error from the DWARF parser.
 gdb_test "file $binfile_no_debug_str" "($pattern1|$pattern2|$pattern3)" \

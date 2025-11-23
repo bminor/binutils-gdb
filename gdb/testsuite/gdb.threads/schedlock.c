@@ -38,7 +38,7 @@ int main() {
       {
 	args[i] = 1;
 	res = pthread_create(&threads[i - 1],
-		             NULL,
+			     NULL,
 			     thread_function,
 			     (void *) i);
       }
@@ -85,4 +85,3 @@ void *thread_function(void *arg) {
 
     pthread_exit(NULL);
 }
-

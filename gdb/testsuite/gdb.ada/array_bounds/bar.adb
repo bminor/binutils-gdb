@@ -24,4 +24,3 @@ begin
    Table (Zero) := 5;  --  START
    ITable (3) := 10;
 end Bar;
-

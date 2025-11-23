@@ -38,17 +38,17 @@ with_test_prefix "before inferior start" {
     # hardware watchpoint.
     gdb_test_no_output "set can-use-hw-watchpoints 0" ""
     gdb_test "watch ival1" "Watchpoint \[0-9\]+: ival1" \
-        "create watchpoint"
+	"create watchpoint"
 
     # The next tests are written to match the current state of gdb: access
     # and read watchpoints require hardware watchpoint support, with this
     # turned off these can't be created.
     gdb_test "awatch ival1" \
-        "Can't set read/access watchpoint when hardware watchpoints are disabled." \
-        "create access watchpoint"
+	"Can't set read/access watchpoint when hardware watchpoints are disabled." \
+	"create access watchpoint"
     gdb_test "rwatch ival1" \
-        "Can't set read/access watchpoint when hardware watchpoints are disabled." \
-        "create read watchpoint"
+	"Can't set read/access watchpoint when hardware watchpoints are disabled." \
+	"create read watchpoint"
 }
 
     # This will turn hardware watchpoints back on and delete the watchpoint
@@ -58,7 +58,7 @@ with_test_prefix "before inferior start" {
 
     # Disable hardware watchpoints if necessary.
     if {!$allow_hw_watchpoint_tests_p} {
-        gdb_test_no_output "set can-use-hw-watchpoints 0" ""
+	gdb_test_no_output "set can-use-hw-watchpoints 0" ""
     }
 
     runto_main

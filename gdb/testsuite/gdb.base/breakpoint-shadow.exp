@@ -34,7 +34,7 @@ set match "\nDump of assembler code for function main:\r\n(.*)End of assembler d
 set test "disassembly without breakpoints"
 gdb_test_multiple "disass main" $test {
     -re $match {
-    	set orig $expect_out(1,string)
+	set orig $expect_out(1,string)
 	pass $test
     }
 }

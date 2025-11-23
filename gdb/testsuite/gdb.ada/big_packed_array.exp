@@ -45,14 +45,14 @@ foreach_gnat_encoding scenario flags {all minimal} {
     set re_xfail2 "= \\(0 => 0 <repeats 24 times>, ($decimal)\\)"
     gdb_test_multiple "print bad" "" {
        -re -wrap $re  {
-           pass $gdb_test_name
+	   pass $gdb_test_name
        }
        -re -wrap $re_xfail {
-           if { $have_xfail } {
-               # gcc/101643
-               setup_xfail *-*-*
-           }
-           fail $gdb_test_name
+	   if { $have_xfail } {
+	       # gcc/101643
+	       setup_xfail *-*-*
+	   }
+	   fail $gdb_test_name
        }
        -re -wrap $re_xfail2 {
 	   set last $expect_out(1,string)
@@ -61,12 +61,12 @@ foreach_gnat_encoding scenario flags {all minimal} {
 	   } else {
 	       set mask 0xf0
 	   }
-           if { $have_xfail && [string is integer $last] \
+	   if { $have_xfail && [string is integer $last] \
 		    && [expr ($last & $mask) == 0] } {
-               # gcc/101643
-               setup_xfail *-*-*
-           }
-           fail $gdb_test_name
+	       # gcc/101643
+	       setup_xfail *-*-*
+	   }
+	   fail $gdb_test_name
        }
     }
 }

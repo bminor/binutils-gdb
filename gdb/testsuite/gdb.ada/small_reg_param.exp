@@ -40,4 +40,3 @@ gdb_test "continue" \
 # And just to make sure, we also verify that the parameter value
 # is correct when we print it manually.
 gdb_test "print w" " = 50"
-

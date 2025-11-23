@@ -175,16 +175,16 @@ proc simultaneous_pair { sec1 sec2 } {
 
     send_gdb "overlay list\n"
     gdb_expect {
-        -re ".*[string_to_regexp $sec1], " { set seen_sec1 1; exp_continue }
-        -re ".*[string_to_regexp $sec2], " { set seen_sec2 1; exp_continue }
-        -re ".*$gdb_prompt $" {
-            if {$seen_sec1 && $seen_sec2} {
-                pass "$pairname"
-            } else {
-                fail "$pairname"
-            }
-        }
-        timeout { fail "(timeout) $pairname" }
+	-re ".*[string_to_regexp $sec1], " { set seen_sec1 1; exp_continue }
+	-re ".*[string_to_regexp $sec2], " { set seen_sec2 1; exp_continue }
+	-re ".*$gdb_prompt $" {
+	    if {$seen_sec1 && $seen_sec2} {
+		pass "$pairname"
+	    } else {
+		fail "$pairname"
+	    }
+	}
+	timeout { fail "(timeout) $pairname" }
     }
 }
 
@@ -265,4 +265,3 @@ gdb_expect {
     -re ".*$gdb_prompt $"			     { fail   "BT grbx" }
     timeout				     { fail "(timeout) BT grbx" }
 }
-

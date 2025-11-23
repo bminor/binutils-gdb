@@ -51,9 +51,9 @@ proc test_histsize_history_setting { histsize size { env_var "GDBHISTSIZE" } } {
 		gdb_test_no_output "show commands"
 	    } elseif { $size != "1" } {
 		gdb_test "show commands" \
-		         "    .  show history size\r\n    .  show commands"
+			 "    .  show history size\r\n    .  show commands"
 	    }
-        }
+	}
     }
 }
 

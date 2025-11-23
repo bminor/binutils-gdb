@@ -81,7 +81,7 @@ void *spin( void *vp )
     a_thread_local = 0;
     K::another_thread_local = me;
     for( i = 0; i <= me; i++ ) {
-        a_thread_local += i;
+	a_thread_local += i;
     }
 
     another_thread_local_val[me] = K::another_thread_local;
@@ -89,9 +89,9 @@ void *spin( void *vp )
 
     if (sem_post (&tell_main) == -1)
      {
-        fprintf (stderr, "th %d post on sem tell_main failed\n", me);
-        print_error ();
-        return NULL;
+	fprintf (stderr, "th %d post on sem tell_main failed\n", me);
+	print_error ();
+	return NULL;
      }
 #ifdef START_DEBUG
     fprintf (stderr, "th %d post on tell main\n", me);
@@ -100,24 +100,24 @@ void *spin( void *vp )
     while (1)
       {
 #ifdef START_DEBUG
-        fprintf (stderr, "th %d start wait on tell_thread\n", me);
+	fprintf (stderr, "th %d start wait on tell_thread\n", me);
 #endif
-        if (sem_wait (&tell_thread) == 0)
-          break;
+	if (sem_wait (&tell_thread) == 0)
+	  break;
 
-        if (errno == EINTR)
-          {
+	if (errno == EINTR)
+	  {
 #ifdef START_DEBUG
-            fprintf (stderr, "th %d wait tell_thread got EINTR, rewaiting\n", me);
+	    fprintf (stderr, "th %d wait tell_thread got EINTR, rewaiting\n", me);
 #endif
-            continue;
-          }
-        else
-          {
-            fprintf (stderr, "th %d wait on sem tell_thread failed\n", me);
-            print_error ();
-            return NULL;
-         }
+	    continue;
+	  }
+	else
+	  {
+	    fprintf (stderr, "th %d wait on sem tell_thread failed\n", me);
+	    print_error ();
+	    return NULL;
+	 }
       }
 
 #ifdef START_DEBUG
@@ -142,8 +142,8 @@ do_pass()
 
     for( i = 0; i < N_THREADS; i++)
     {
-        thread_local_val[i] = 0;
-        another_thread_local_val[i] = 0;
+	thread_local_val[i] = 0;
+	another_thread_local_val[i] = 0;
     }
 
     if (sem_init (&tell_main, 0, 0) == -1)
@@ -161,36 +161,36 @@ do_pass()
     /* Start N_THREADS threads, then join them so that they are terminated.  */
     for( i = 0; i < N_THREADS; i++ )
      {
-        err = pthread_create( &t[i], NULL, spin, (void *) (long) i );
-        if( err != 0 ) {
-            fprintf(stderr, "Error in thread %d create\n", i );
-        }
+	err = pthread_create( &t[i], NULL, spin, (void *) (long) i );
+	if( err != 0 ) {
+	    fprintf(stderr, "Error in thread %d create\n", i );
+	}
      }
 
     for( i = 0; i < N_THREADS; i++ )
       {
-        while (1)
-          {
+	while (1)
+	  {
 #ifdef START_DEBUG
-            fprintf (stderr, "main %d start wait on tell_main\n", i);
+	    fprintf (stderr, "main %d start wait on tell_main\n", i);
 #endif
-            if (sem_wait (&tell_main) == 0)
-              break;
+	    if (sem_wait (&tell_main) == 0)
+	      break;
 
-            if (errno == EINTR)
-              {
+	    if (errno == EINTR)
+	      {
 #ifdef START_DEBUG
-                fprintf (stderr, "main %d wait tell_main got EINTR, rewaiting\n", i);
+		fprintf (stderr, "main %d wait tell_main got EINTR, rewaiting\n", i);
 #endif
-                continue;
-              }
-            else
-              {
-                fprintf (stderr, "main %d wait on sem tell_main failed\n", i);
-                print_error ();
-                return;
-              }
-            }
+		continue;
+	      }
+	    else
+	      {
+		fprintf (stderr, "main %d wait on sem tell_main failed\n", i);
+		print_error ();
+		return;
+	      }
+	    }
        }
 
 #ifdef START_DEBUG
@@ -202,11 +202,11 @@ do_pass()
     for( i = 0; i < N_THREADS; i++ )
      {
        if (sem_post (&tell_thread) == -1)
-        {
-           fprintf (stderr, "main %d post on sem tell_thread failed\n", i);
-           print_error ();
-           return;
-        }
+	{
+	   fprintf (stderr, "main %d post on sem tell_thread failed\n", i);
+	   print_error ();
+	   return;
+	}
 #ifdef START_DEBUG
       fprintf (stderr, "main %d post on tell_thread\n", i);
 #endif
@@ -214,11 +214,11 @@ do_pass()
 
     for( i = 0; i < N_THREADS; i++ )
      {
-        err = pthread_join(t[i], NULL );
-        if( err != 0 )
-         {
-           fprintf (stderr, "error in thread %d join\n", i );
-         }
+	err = pthread_join(t[i], NULL );
+	if( err != 0 )
+	 {
+	   fprintf (stderr, "error in thread %d join\n", i );
+	 }
     }
 
     i = 10;  /* Null line for setting bpts on. */

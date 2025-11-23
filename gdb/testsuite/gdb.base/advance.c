@@ -49,4 +49,3 @@ main ()
   result = bar (b + foo (c));
   return 0; /* advance malformed */
 }
-

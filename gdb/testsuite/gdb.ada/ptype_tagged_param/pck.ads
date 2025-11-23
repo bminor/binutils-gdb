@@ -26,4 +26,3 @@ package Pck is
    function Area (C : in Circle) return Integer;
 
 end Pck;
-

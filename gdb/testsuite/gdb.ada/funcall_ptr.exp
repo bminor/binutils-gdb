@@ -29,7 +29,7 @@ set bp_location [gdb_get_line_number "BREAK" ${testdir}/foo.adb]
 runto "foo.adb:$bp_location"
 
 gdb_test "print pck.ga" " = \\(access integer\\) 0x0" \
-         "Check that initial value of GA is null"
+	 "Check that initial value of GA is null"
 
 gdb_test_no_output "call pck.p(0x1234)"
 
@@ -39,4 +39,4 @@ gdb_test_no_output "call pck.p(0x1234)"
 # procedure hence should be 0x1234 after the call above.
 
 gdb_test "print pck.ga" " = \\(access integer\\) 0x1234" \
-         "Check that value of GA is 0x1234"
+	 "Check that value of GA is 0x1234"

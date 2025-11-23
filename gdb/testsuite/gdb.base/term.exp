@@ -49,18 +49,18 @@ proc compare_gdb_and_inferior_settings { t } {
 
     gdb_test "info terminal" \
     [multi_line "Inferior's terminal status .currently saved by GDB.:" \
-                "File descriptor flags = .*" \
-                "Process group = $decimal" \
-                "c_iflag = ${termios(c_iflag)}, c_oflag = ${termios(c_oflag)}," \
-                "c_cflag = ${termios(c_cflag)}, c_lflag = ${termios(c_lflag)}.*" ]
+		"File descriptor flags = .*" \
+		"Process group = $decimal" \
+		"c_iflag = ${termios(c_iflag)}, c_oflag = ${termios(c_oflag)}," \
+		"c_cflag = ${termios(c_cflag)}, c_lflag = ${termios(c_lflag)}.*" ]
 }
 
 if {[target_info gdb_protocol] == ""} {
     # Record the initial terminal settings.  Verify that GDB's version of the
     # inferior's terminal settings is right.
     with_test_prefix "initial" {
-        array set termios1 [read_term_settings_from_inferior]
-        compare_gdb_and_inferior_settings [array get termios1]
+	array set termios1 [read_term_settings_from_inferior]
+	compare_gdb_and_inferior_settings [array get termios1]
     }
 
     # Continue until after the inferior removes ECHO from its terminal settings.
@@ -69,12 +69,12 @@ if {[target_info gdb_protocol] == ""} {
     # After the inferior has changed its terminal settings, check that GDB's
     # saved version reflects the new settings correctly.
     with_test_prefix "post tcsetattr" {
-        array set termios2 [read_term_settings_from_inferior]
-        compare_gdb_and_inferior_settings [array get termios2]
+	array set termios2 [read_term_settings_from_inferior]
+	compare_gdb_and_inferior_settings [array get termios2]
 
-        # Make sure that the current settings are different than the initial
-        # settings... otherwise this test is meaningless.
-        gdb_assert {${termios1(c_lflag)} != ${termios2(c_lflag)}}
+	# Make sure that the current settings are different than the initial
+	# settings... otherwise this test is meaningless.
+	gdb_assert {${termios1(c_lflag)} != ${termios2(c_lflag)}}
     }
 
     # Continue again...
@@ -83,12 +83,12 @@ if {[target_info gdb_protocol] == ""} {
     # ... and verify again, to validate that when resuming, GDB restored the
     # inferior's terminal settings correctly.
     with_test_prefix "after last resume" {
-        array set termios3 [read_term_settings_from_inferior]
-        compare_gdb_and_inferior_settings [array get termios3]
-        gdb_assert {${termios2(c_iflag)} == ${termios3(c_iflag)}}
-        gdb_assert {${termios2(c_oflag)} == ${termios3(c_oflag)}}
-        gdb_assert {${termios2(c_cflag)} == ${termios3(c_cflag)}}
-        gdb_assert {${termios2(c_lflag)} == ${termios3(c_lflag)}}
+	array set termios3 [read_term_settings_from_inferior]
+	compare_gdb_and_inferior_settings [array get termios3]
+	gdb_assert {${termios2(c_iflag)} == ${termios3(c_iflag)}}
+	gdb_assert {${termios2(c_oflag)} == ${termios3(c_oflag)}}
+	gdb_assert {${termios2(c_cflag)} == ${termios3(c_cflag)}}
+	gdb_assert {${termios2(c_lflag)} == ${termios3(c_lflag)}}
     }
 } else {
     # While only native targets save terminal status, we still test

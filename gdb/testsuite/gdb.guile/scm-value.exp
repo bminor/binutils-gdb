@@ -409,7 +409,7 @@ proc test_value_hash {} {
 	"(define one (make-value 1))" "" \
 	"(define two (make-value 2))" "" \
 	"(define three (make-value 3))" "" \
-        "(define vdict (make-hash-table 5))" "" \
+	"(define vdict (make-hash-table 5))" "" \
 	"(hash-set! vdict one \"one str\")" "" \
 	"(hash-set! vdict two \"two str\")" "" \
 	"(hash-set! vdict three \"three str\")" "" \

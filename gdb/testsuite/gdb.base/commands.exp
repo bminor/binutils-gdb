@@ -580,10 +580,10 @@ proc_with_prefix watchpoint_command_test {} {
     set wp_id -1
 
     gdb_test_multiple "watch local_var" "watch local_var" {
-        -re "\[Ww\]atchpoint (\[0-9\]*): local_var.*$gdb_prompt $" {
-            set wp_id $expect_out(1,string)
-            pass "watch local_var"
-        }
+	-re "\[Ww\]atchpoint (\[0-9\]*): local_var.*$gdb_prompt $" {
+	    set wp_id $expect_out(1,string)
+	    pass "watch local_var"
+	}
     }
 
     if {$wp_id == -1} {return}
@@ -672,7 +672,7 @@ proc_with_prefix test_command_prompt_position {} {
 
 proc_with_prefix deprecated_command_test {} {
     gdb_test "maintenance deprecate blah" "Can't find command.*" \
-          "tried to deprecate non-existing command"
+	  "tried to deprecate non-existing command"
 
     gdb_test_no_output "maintenance deprecate p \"new_p\"" "maintenance deprecate p \"new_p\" /1/"
     gdb_test "p 5" \
@@ -750,31 +750,31 @@ proc_with_prefix bp_deleted_in_command_test {} {
     # Create a breakpoint, and associate a command-list to it, with
     # one command that deletes this breakpoint.
     gdb_test "break factorial" \
-             "Breakpoint \[0-9\]+ at .*: file .*run.c, line \[0-9\]+\."
+	     "Breakpoint \[0-9\]+ at .*: file .*run.c, line \[0-9\]+\."
 
     gdb_test_multiple "commands" "begin commands" {
       -re "Type commands for breakpoint.*>$" {
-          pass "begin commands"
+	  pass "begin commands"
       }
     }
     gdb_test_multiple "silent" "add silent command" {
-        -re ">$" {
+	-re ">$" {
 	    pass "add silent command"
 	}
     }
     gdb_test_multiple "clear factorial" "add clear command" {
-        -re ">$" {
+	-re ">$" {
 	    pass "add clear command"
 	}
     }
     gdb_test_multiple "printf \"factorial command-list executed\\n\"" \
 	"add printf command" {
-        -re ">$" {
+	-re ">$" {
 	    pass "add printf command"
 	}
     }
     gdb_test_multiple "cont" "add cont command" {
-        -re ">$" {
+	-re ">$" {
 	    pass "add cont command"
 	}
     }

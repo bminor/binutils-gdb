@@ -61,11 +61,11 @@ proc gdb_range_stepping_enabled { } {
     set command "set range-stepping on"
     set message "probe range-stepping support"
     gdb_test_multiple $command $message {
-        -re "Range stepping is not supported.*\r\n$gdb_prompt $" {
+	-re "Range stepping is not supported.*\r\n$gdb_prompt $" {
 	    pass $message
 	    return 0
 	}
-        -re "^$command\r\n$gdb_prompt $" {
+	-re "^$command\r\n$gdb_prompt $" {
 	    pass $message
 	    return 1
 	}

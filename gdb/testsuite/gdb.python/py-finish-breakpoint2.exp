@@ -41,7 +41,7 @@ gdb_breakpoint [gdb_get_line_number "Break before exception"]
 gdb_breakpoint [gdb_get_line_number "Break after exception 2"]
 
 gdb_test "source $pyfile" ".*Python script imported.*" \
-         "import python scripts"
+	 "import python scripts"
 
 gdb_breakpoint "throw_exception_1"
 

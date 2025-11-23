@@ -28,11 +28,10 @@ clean_restart ${testfile}
 set test "ptype pck.data_flag"
 gdb_test_multiple "$test" $test {
     -re "type = \\(one, two, three\\).*$gdb_prompt $" {
-        pass $test
-        }
+	pass $test
+	}
     -re "type = \\(\\).*$gdb_prompt $" {
-        # This is a known compiler problem with Stabs.
-        xfail $test
-        }
+	# This is a known compiler problem with Stabs.
+	xfail $test
+	}
 }
-

@@ -113,12 +113,12 @@ proc run_tests { lang types } {
     global gdb_prompt
 
     foreach {name} {struct_01_01 struct_01_02 struct_01_03 struct_01_04
-                    struct_02_01 struct_02_02 struct_02_03 struct_02_04
-                    struct_04_01 struct_04_02 struct_04_03 struct_04_04
-                    struct_05_01 struct_05_02 struct_05_03 struct_05_04
-                    struct_static_02_01 struct_static_02_02 struct_static_02_03 struct_static_02_04
-                    struct_static_04_01 struct_static_04_02 struct_static_04_03 struct_static_04_04
-                    struct_static_06_01 struct_static_06_02 struct_static_06_03 struct_static_06_04} {
+		    struct_02_01 struct_02_02 struct_02_03 struct_02_04
+		    struct_04_01 struct_04_02 struct_04_03 struct_04_04
+		    struct_05_01 struct_05_02 struct_05_03 struct_05_04
+		    struct_static_02_01 struct_static_02_02 struct_static_02_03 struct_static_02_04
+		    struct_static_04_01 struct_static_04_02 struct_static_04_03 struct_static_04_04
+		    struct_static_06_01 struct_static_06_02 struct_static_06_03 struct_static_06_04} {
 
 	# Only run static member tests on C++
 	if { $lang == "c" && [regexp "static" $name match] } {

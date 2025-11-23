@@ -70,4 +70,3 @@ if {[mi_clean_restart $::testfile]} {
 check_mi_thread_command_set
 
 mi_gdb_exit
-

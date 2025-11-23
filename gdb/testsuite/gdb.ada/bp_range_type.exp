@@ -28,12 +28,12 @@ clean_restart ${testfile}
 set bp_location [gdb_get_line_number "STOP" ${testdir}/foo.adb]
 
 gdb_test "break foo.adb:$bp_location if small_value > 20" \
-         "Breakpoint $decimal at $hex: file .*foo.adb, line $decimal\\."
+	 "Breakpoint $decimal at $hex: file .*foo.adb, line $decimal\\."
 
 gdb_run_cmd
 gdb_test "" \
-         "Breakpoint $decimal, foo \\(\\).*" \
-         "run to breakpoint"
+	 "Breakpoint $decimal, foo \\(\\).*" \
+	 "run to breakpoint"
 
 # Verify that we stopped at the correct iteration.
 gdb_test "print small_value" " = 25"

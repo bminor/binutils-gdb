@@ -120,14 +120,14 @@ int marker1 ()
   int total = 0;
     {
       int b = 1;
-        {
-          using namespace A;
-          int c = 2;
-            {
-              int d = 3;
-              total = _a + b + c + d + marker2 (); // marker1 stop
-            }
-        }
+	{
+	  using namespace A;
+	  int c = 2;
+	    {
+	      int d = 3;
+	      total = _a + b + c + d + marker2 (); // marker1 stop
+	    }
+	}
     }
   return marker2 () + total;
 }

@@ -71,21 +71,21 @@ gdb_test "define nextwhere" \
 send_gdb "define nextwhere\n"
 gdb_expect {
   -re "Redefine command \"nextwhere\".*y or n. $"\
-          {send_gdb "y\n"
-           gdb_expect {
-             -re "Type commands for definition of \"nextwhere\".\r\nEnd with a line saying just \"end\".\r\n>$"\
-                     {send_gdb "bt\nnext\nend\n"
-                      gdb_expect {
-                        -re "$gdb_prompt $"\
-                                {pass "redefine user command: nextwhere"}
-                        timeout {fail "(timeout) redefine user command: nextwhere"}
-                      }
-                     }
-             timeout {fail "(timeout) redefine user command: nextwhere"}
-           }
-          }
+	  {send_gdb "y\n"
+	   gdb_expect {
+	     -re "Type commands for definition of \"nextwhere\".\r\nEnd with a line saying just \"end\".\r\n>$"\
+		     {send_gdb "bt\nnext\nend\n"
+		      gdb_expect {
+			-re "$gdb_prompt $"\
+				{pass "redefine user command: nextwhere"}
+			timeout {fail "(timeout) redefine user command: nextwhere"}
+		      }
+		     }
+	     timeout {fail "(timeout) redefine user command: nextwhere"}
+	   }
+	  }
   -re "$gdb_prompt $"\
-          {fail "redefine user command: nextwhere"}
+	  {fail "redefine user command: nextwhere"}
   timeout {fail "(timeout) redefine user command: nextwhere"}
 }
 
@@ -165,10 +165,10 @@ gdb_test_multiple "define ifnospace" "define user command: ifnospace" \
   -re "Type commands for definition of \"ifnospace\".\r\nEnd with a line saying just \"end\".\r\n>$" \
     {
       gdb_test_multiple "if(3<4)\nprint \"hi there\\n\"\nend\nend" "send body of ifnospace"  \
-        {
-         -re "$gdb_prompt $"\
-                 {pass "define user command: ifnospace"}
-        }
+	{
+	 -re "$gdb_prompt $"\
+		 {pass "define user command: ifnospace"}
+	}
     }
 }
 
@@ -214,10 +214,10 @@ gdb_test_multiple "define whilenospace" "define user command: whilenospace" \
   -re "Type commands for definition of \"whilenospace\".\r\nEnd with a line saying just \"end\".\r\n>$" \
     {
       gdb_test_multiple "set \$i=1\nwhile(\$i<2)\nset \$i=2\nprint \"hi there\\n\"\nend\nend" "send body of whilenospace" \
-         {
-           -re "$gdb_prompt $" \
-                   {pass "define user command: whilenospace"}
-         }
+	 {
+	   -re "$gdb_prompt $" \
+		   {pass "define user command: whilenospace"}
+	 }
     }
 }
 
@@ -259,23 +259,23 @@ gdb_test "define hook-bar" \
 send_gdb "define hook-bar\n"
 gdb_expect {
   -re "warning: Your new `hook-bar' command does not hook any existing command.\r\nProceed.*y or n. $"\
-          {send_gdb "y\n"
-           gdb_expect {
-             -re "Type commands for definition of \"hook-bar\".\r\nEnd with a line saying just \"end\".\r\n>$"\
-                     {send_gdb "nextwhere\nend\n"
-                      gdb_expect {
-                        -re "$gdb_prompt $"\
-                                {pass "define hook undefined command: bar"}
-                        timeout {fail "(timeout) define hook undefined command: bar"}
-                      }
-                     }
-             -re "$gdb_prompt $"\
-                     {fail "define hook undefined command: bar"}
-             timeout {fail "(timeout) define hook undefined command: bar"}
-           }
-          }
+	  {send_gdb "y\n"
+	   gdb_expect {
+	     -re "Type commands for definition of \"hook-bar\".\r\nEnd with a line saying just \"end\".\r\n>$"\
+		     {send_gdb "nextwhere\nend\n"
+		      gdb_expect {
+			-re "$gdb_prompt $"\
+				{pass "define hook undefined command: bar"}
+			timeout {fail "(timeout) define hook undefined command: bar"}
+		      }
+		     }
+	     -re "$gdb_prompt $"\
+		     {fail "define hook undefined command: bar"}
+	     timeout {fail "(timeout) define hook undefined command: bar"}
+	   }
+	  }
   -re "$gdb_prompt $"\
-          {fail "define hook undefined command: bar"}
+	  {fail "define hook undefined command: bar"}
   timeout {fail "(timeout) define hook undefined command: bar"}
 }
 

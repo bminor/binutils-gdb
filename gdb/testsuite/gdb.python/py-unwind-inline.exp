@@ -37,7 +37,7 @@ set pyfile [gdb_remote_download host ${srcdir}/${subdir}/${testfile}.py]
 gdb_breakpoint "foo"
 
 gdb_test "source ${pyfile}" "Python script imported" \
-        "import python scripts"
+	"import python scripts"
 
 gdb_continue_to_breakpoint "foo"
 

@@ -51,7 +51,7 @@ if { $kind == "obj" } {
 set pyfile [gdb_remote_download host ${srcdir}/${subdir}/py-disasm.py]
 
 gdb_test "source ${pyfile}" "Python script imported" \
-         "import python scripts"
+	 "import python scripts"
 
 set line [gdb_get_line_number "Break here."]
 

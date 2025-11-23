@@ -22,4 +22,3 @@ main (void)
 {
   return aaa;
 }
-

@@ -96,8 +96,8 @@ main ()
 			"wa" (vec_xb) );
   /* Use the older instruction name for backward compatibility */
   __asm__ __volatile__ ("pmxvi8ger4spp  6, %x0, %x1, 11, 13, 5"
-                                :: "wa" (vec_xa), "wa" (vec_xb) );
+				:: "wa" (vec_xa), "wa" (vec_xb) );
   __asm__ __volatile__ ("pmxvf32gerpp  7, %x0, %x1, 11, 13"
-                                :: "wa" (vec_xa), "wa" (vec_xb) );
+				:: "wa" (vec_xa), "wa" (vec_xb) );
   ra = 0;                               /* stop 4 */
 }

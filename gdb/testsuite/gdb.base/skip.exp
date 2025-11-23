@@ -337,4 +337,3 @@ with_test_prefix "skip delete completion" {
     test_gdb_complete_none "skip delete a1"
     test_gdb_complete_none "skip delete 2-33"
 }
-

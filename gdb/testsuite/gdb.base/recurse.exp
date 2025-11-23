@@ -142,4 +142,3 @@ recurse_tests
 # Restore the preserved old timeout value.
 set timeout $oldtimeout
 verbose "Timeout is now $timeout seconds" 2
-

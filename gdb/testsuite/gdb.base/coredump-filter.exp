@@ -39,7 +39,7 @@ proc do_save_core { filter_flag core dump_excluded } {
 
     # Enable dumping of excluded mappings (i.e. VM_DONTDUMP).
     if { $dump_excluded == 1 } {
-        gdb_test_no_output "set dump-excluded-mappings on"
+	gdb_test_no_output "set dump-excluded-mappings on"
     }
 
     # Generate a corefile.
@@ -47,7 +47,7 @@ proc do_save_core { filter_flag core dump_excluded } {
 
     # Restore original status.
     if { $dump_excluded == 1 } {
-        gdb_test_no_output "set dump-excluded-mappings off"
+	gdb_test_no_output "set dump-excluded-mappings off"
     }
 }
 
@@ -62,13 +62,13 @@ proc do_load_and_test_core { core var working_var working_value dump_excluded } 
 
     # Access the memory the addresses point to.
     if { $dump_excluded == 0 } {
-        gdb_test "print/x *(char *) $coredump_var_addr($var)" "\(\\\$$decimal = <error: \)?Cannot access memory at address $hex\(>\)?" \
+	gdb_test "print/x *(char *) $coredump_var_addr($var)" "\(\\\$$decimal = <error: \)?Cannot access memory at address $hex\(>\)?" \
 	    "printing $var when core is loaded (should not work)"
-        gdb_test "print/x *(char *) $coredump_var_addr($working_var)" " = $working_value.*" \
+	gdb_test "print/x *(char *) $coredump_var_addr($working_var)" " = $working_value.*" \
 	    "print/x *$working_var ( = $working_value)"
     } else {
-        # Check if VM_DONTDUMP mappings are present in the core file.
-        gdb_test "print/x *(char *) $coredump_var_addr($var)" " = $working_value.*" \
+	# Check if VM_DONTDUMP mappings are present in the core file.
+	gdb_test "print/x *(char *) $coredump_var_addr($var)" " = $working_value.*" \
 	    "print/x *$var ( = $working_value)"
     }
 }

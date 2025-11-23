@@ -35,15 +35,15 @@ if {$main_addr == 0 || $dummy_3_addr == 0 || $dummy_3_addr <= $main_addr} {
 
 gdb_test_multiple "disassemble /m ${main_addr},${dummy_3_addr}" "disassemble address range with source" {
     -re "Dump of assembler code from ${main_addr} to ${dummy_3_addr}:\r\nEnd of assembler dump\." {
-        fail "no output from the disassemble command"
+	fail "no output from the disassemble command"
     }
     -re "Line number 0 out of range;.* has $decimal lines\." {
-        fail "the disassemble command failed"
+	fail "the disassemble command failed"
     }
     -re "Dump of assembler code from ${main_addr} to ${dummy_3_addr}:\r\n.*main.*End of assembler dump\." {
-        pass "disassemble command returned some output"
+	pass "disassemble command returned some output"
     }
     -re ".*$gdb_prompt $" {
-        fail "unexpected output from disassemble command"
+	fail "unexpected output from disassemble command"
     }
 }

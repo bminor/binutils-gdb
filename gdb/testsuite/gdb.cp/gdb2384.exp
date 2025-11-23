@@ -73,4 +73,3 @@ gdb_continue_to_breakpoint "run to 'Second breakpoint', second time"
 gdb_test "print d2.meth ()" \
     ".*24.*" \
     "gdb2384 at 'Second breakpoint'"
-

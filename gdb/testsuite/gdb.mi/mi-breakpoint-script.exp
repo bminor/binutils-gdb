@@ -59,14 +59,14 @@ proc do_test { mi_version use_fix_flag expect_fixed_output } {
 		    "send -fix-multi-location-breakpoint-output"
 	    }
 
-            # Create a breakpoint.
+	    # Create a breakpoint.
 	    mi_gdb_test "-break-insert main" ".*" "add breakpoint on main"
 
-            set pattern [make_pattern $expect_fixed_output]
+	    set pattern [make_pattern $expect_fixed_output]
 
-            # Add commands.  Use the CLI command, so we can verify the
-            # =breakpoint-modified output.
-            mi_gdb_test "commands\nabc\ndef\nend" ".*=breakpoint-modified,$pattern\r\n\\^done" "add breakpoint commands"
+	    # Add commands.  Use the CLI command, so we can verify the
+	    # =breakpoint-modified output.
+	    mi_gdb_test "commands\nabc\ndef\nend" ".*=breakpoint-modified,$pattern\r\n\\^done" "add breakpoint commands"
 
 	    # Check the -break-info output.
 	    mi_gdb_test "-break-info" \

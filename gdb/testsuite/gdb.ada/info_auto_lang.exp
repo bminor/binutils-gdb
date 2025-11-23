@@ -160,4 +160,3 @@ foreach_with_prefix language_choice { "auto" "ada" "c" } {
 	}
     }
 }
-

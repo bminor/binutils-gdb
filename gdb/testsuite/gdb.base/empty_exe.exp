@@ -19,7 +19,7 @@ gdb_start
 # Make sure that the "file" command rejects an empty filename,
 # rather than crash.
 gdb_test "file ''" \
-         ": No such file or directory\\."
+	 ": No such file or directory\\."
 
 # And to make extra sure that GDB is still alive, do a quick
 # sanity check.

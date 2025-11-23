@@ -241,7 +241,7 @@ with_test_prefix "handler installs lib objfile" {
     remote_exec host \
 	"mkdir -p $debugdir_no_lib/[file dirname $build_id_filename]"
     gdb_test_no_output "python handler_obj.set_mode(Mode.RETURN_TRUE, \
-    	\"$hidden_libfile\", \"$debugdir_no_lib/$build_id_filename\")" \
+	\"$hidden_libfile\", \"$debugdir_no_lib/$build_id_filename\")" \
 	"configure handler"
 
     load_core_file

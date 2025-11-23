@@ -61,4 +61,3 @@ gdb_test "info source" \
 	 "Producer is \[^\n\r\]+" \
 	 "Compiled with DWARF $decimal debugging format." \
 	 "Does not include preprocessor macro info." ]
-

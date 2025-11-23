@@ -243,5 +243,3 @@ gdb_test "print /r ss" " = {a = {a = 1, b = $hex}, b = {a = 2, b = $hex}}"
 gdb_test "with print raw-values off -- print /r ss" " = {a = {a = 1, b = $hex}, b = {a = 2, b = $hex}}"
 
 gdb_test "print -raw-values off -- /r ss" " = {a = {a = 1, b = $hex}, b = {a = 2, b = $hex}}"
-
-

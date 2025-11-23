@@ -39,7 +39,7 @@ if { [is_remote target] } {
 runto_main
 
 gdb_test "b [gdb_get_line_number "breakpoint here"]" \
-         ".*Breakpoint .*execl.*" "set breakpoint at execl"
+	 ".*Breakpoint .*execl.*" "set breakpoint at execl"
 
 gdb_test "continue" ".*breakpoint here.*" "continue to exec"
 

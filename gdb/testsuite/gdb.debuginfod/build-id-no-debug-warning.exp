@@ -153,4 +153,3 @@ with_debuginfod_env $cache {
 stop_debuginfod
 # Spare debug files may confuse testsuite runs in the future.
 remote_exec build "rm -f $debugfile"
-

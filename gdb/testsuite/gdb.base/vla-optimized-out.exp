@@ -89,4 +89,3 @@ foreach {test_prefix options} $test_matrix {
 	vla_optimized_out $test_prefix $options
     }
 }
-

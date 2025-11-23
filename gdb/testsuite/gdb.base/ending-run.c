@@ -23,10 +23,10 @@ int main()
     p = (int *) malloc( 4 );
 
     for (i = 1; i < 10; i++)
-        {
-            printf( "%d ", callee( i ));
-            fflush (stdout);
-        }
+	{
+	    printf( "%d ", callee( i ));
+	    fflush (stdout);
+	}
     printf( " Goodbye!\n" ); fflush (stdout); /* -break2- */
     return 0;
 }

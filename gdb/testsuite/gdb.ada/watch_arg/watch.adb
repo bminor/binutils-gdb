@@ -29,4 +29,3 @@ begin
    Foo (X);
    X := 2;  -- BREAK2
 end Watch;
-

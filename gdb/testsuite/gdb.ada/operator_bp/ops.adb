@@ -135,6 +135,3 @@ package body Ops is
    end Dummy;
 
 end Ops;
-
-
-

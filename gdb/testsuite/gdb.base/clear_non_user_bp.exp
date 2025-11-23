@@ -69,4 +69,3 @@ gdb_test "clear *$bp_addr" \
 gdb_test "maint info break $bp_num" \
     "$bp_num.*$bp_addr.*" \
     "maint info breakpoint \$bp_num after clear"
-

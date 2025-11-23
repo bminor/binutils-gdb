@@ -128,4 +128,3 @@ gdb_test "maint agent-eval gdb_long_test >= gdb_short_test" ""
 gdb_test "maint agent-eval &gdb_long_test == &gdb_short_test" ".*equal.*end.*"
 
 gdb_test "maint agent-eval &gdb_long_test < &gdb_short_test" ""
-

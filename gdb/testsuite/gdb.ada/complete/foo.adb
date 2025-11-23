@@ -26,4 +26,3 @@ begin
    Aux_Pck.Ambiguous_Proc;
    Pck.Ambiguous_Func;
 end Foo;
-

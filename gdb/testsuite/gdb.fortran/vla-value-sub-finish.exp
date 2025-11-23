@@ -52,4 +52,3 @@ gdb_test "p sub_arr1(5, 7)" " = 5" "sub_arr1(5, 7) after finish"
 gdb_test "p sub_arr1(1, 1)" " = 30" "sub_arr1(1, 1) after finish"
 gdb_test "p sub_arr2(1, 1, 1)" " = 30" "sub_arr2(1, 1, 1) after finish"
 gdb_test "p sub_arr2(2, 1, 1)" " = 20" "sub_arr2(2, 1, 1) after finish"
-

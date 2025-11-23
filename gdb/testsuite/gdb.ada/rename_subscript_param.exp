@@ -31,18 +31,18 @@ set bp_location [gdb_get_line_number "BREAK" ${testdir}/pkg.adb]
 runto "pkg.adb:$bp_location"
 
 gdb_test "print rename_subscript_param_b" \
-         " = false" \
-         "print rename_subscript_param_b before changing its value"
+	 " = false" \
+	 "print rename_subscript_param_b before changing its value"
 
 set bp_location [gdb_get_line_number "Do_Nothing" ${testdir}/pkg.adb]
 gdb_test "break pkg.adb:$bp_location" \
-         "Breakpoint \[0-9\]+ at.*: file .*pkg.adb, line \[0-9\]+." \
-         "insert second breakpoint in pkg.adb"
+	 "Breakpoint \[0-9\]+ at.*: file .*pkg.adb, line \[0-9\]+." \
+	 "insert second breakpoint in pkg.adb"
 
 gdb_test "cont" \
-         "Breakpoint \[0-9\]+, pkg.flip \\(.*" \
-         "Continuing to breakpoint on call to Do_Nothing"
+	 "Breakpoint \[0-9\]+, pkg.flip \\(.*" \
+	 "Continuing to breakpoint on call to Do_Nothing"
 
 gdb_test "print rename_subscript_param_b" \
-         " = true" \
-         "print rename_subscript_param_b after changing its value"
+	 " = true" \
+	 "print rename_subscript_param_b after changing its value"

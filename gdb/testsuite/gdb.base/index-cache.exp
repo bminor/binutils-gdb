@@ -117,12 +117,12 @@ proc_with_prefix test_basic_stuff { } {
 	"index-cache is now enabled"
 
     with_test_prefix "deprecated commands" {
-        gdb_test "set index-cache off" ".*is deprecated.*" "disable index cache"
+	gdb_test "set index-cache off" ".*is deprecated.*" "disable index cache"
 	gdb_test \
 	    "show index-cache enabled" \
 	    "The index cache is off." \
 	    "index-cache is now disabled"
-        gdb_test "set index-cache on" ".*is deprecated.*" "enable index cache"
+	gdb_test "set index-cache on" ".*is deprecated.*" "enable index cache"
 	gdb_test \
 	    "show index-cache enabled" \
 	    "The index cache is on." \

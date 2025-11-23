@@ -511,9 +511,9 @@ proc test_enums {} {
     # ptype on the enum member
 
     gdb_test_multiple "ptype obj_with_enum.priv_enum" "ptype obj_with_enum.priv_enum" {
-        -re "type = enum ClassWithEnum::PrivEnum (: unsigned (int|short|char) )?\{ ?(ClassWithEnum::)?red, (ClassWithEnum::)?green, (ClassWithEnum::)?blue, (ClassWithEnum::)?yellow = 42 ?\}$nl$gdb_prompt $" {
+	-re "type = enum ClassWithEnum::PrivEnum (: unsigned (int|short|char) )?\{ ?(ClassWithEnum::)?red, (ClassWithEnum::)?green, (ClassWithEnum::)?blue, (ClassWithEnum::)?yellow = 42 ?\}$nl$gdb_prompt $" {
 	    pass "ptype obj_with_enum.priv_enum"
-        }
+	}
 	-re "type = enum PrivEnum \{ ?(ClassWithEnum::)?red, (ClassWithEnum::)?green, (ClassWithEnum::)?blue, (ClassWithEnum::)?yellow = 42 ?\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2

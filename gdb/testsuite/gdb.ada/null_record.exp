@@ -29,5 +29,5 @@ set bp_location [gdb_get_line_number "START" ${testdir}/null_record.adb]
 runto "null_record.adb:$bp_location"
 
 gdb_test "ptype empty" \
-         "type = record null; end record" \
-         "ptype on null record"
+	 "type = record null; end record" \
+	 "ptype on null record"

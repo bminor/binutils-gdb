@@ -78,57 +78,57 @@ main (int argc, char **argv)
   if (have_sse ())
     {
       asm ("movaps 0(%0), %%xmm0\n\t"
-           "movaps 16(%0), %%xmm1\n\t"
-           "movaps 32(%0), %%xmm2\n\t"
-           "movaps 48(%0), %%xmm3\n\t"
-           "movaps 64(%0), %%xmm4\n\t"
-           "movaps 80(%0), %%xmm5\n\t"
-           "movaps 96(%0), %%xmm6\n\t"
-           "movaps 112(%0), %%xmm7\n\t"
-           : /* no output operands */
-           : "r" (data)
-           : "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
+	   "movaps 16(%0), %%xmm1\n\t"
+	   "movaps 32(%0), %%xmm2\n\t"
+	   "movaps 48(%0), %%xmm3\n\t"
+	   "movaps 64(%0), %%xmm4\n\t"
+	   "movaps 80(%0), %%xmm5\n\t"
+	   "movaps 96(%0), %%xmm6\n\t"
+	   "movaps 112(%0), %%xmm7\n\t"
+	   : /* no output operands */
+	   : "r" (data)
+	   : "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
 #ifdef __x86_64__
       asm ("movaps 128(%0), %%xmm8\n\t"
-           "movaps 144(%0), %%xmm9\n\t"
-           "movaps 160(%0), %%xmm10\n\t"
-           "movaps 176(%0), %%xmm11\n\t"
-           "movaps 192(%0), %%xmm12\n\t"
-           "movaps 208(%0), %%xmm13\n\t"
-           "movaps 224(%0), %%xmm14\n\t"
-           "movaps 240(%0), %%xmm15\n\t"
-           : /* no output operands */
-           : "r" (data)
-           : "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14", "xmm15");
+	   "movaps 144(%0), %%xmm9\n\t"
+	   "movaps 160(%0), %%xmm10\n\t"
+	   "movaps 176(%0), %%xmm11\n\t"
+	   "movaps 192(%0), %%xmm12\n\t"
+	   "movaps 208(%0), %%xmm13\n\t"
+	   "movaps 224(%0), %%xmm14\n\t"
+	   "movaps 240(%0), %%xmm15\n\t"
+	   : /* no output operands */
+	   : "r" (data)
+	   : "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14", "xmm15");
 #endif
 
       asm ("nop"); /* first breakpoint here */
 
       asm (
-           "movaps %%xmm0, 0(%0)\n\t"
-           "movaps %%xmm1, 16(%0)\n\t"
-           "movaps %%xmm2, 32(%0)\n\t"
-           "movaps %%xmm3, 48(%0)\n\t"
-           "movaps %%xmm4, 64(%0)\n\t"
-           "movaps %%xmm5, 80(%0)\n\t"
-           "movaps %%xmm6, 96(%0)\n\t"
-           "movaps %%xmm7, 112(%0)\n\t"
-           : /* no output operands */
-           : "r" (data)
-           : "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
+	   "movaps %%xmm0, 0(%0)\n\t"
+	   "movaps %%xmm1, 16(%0)\n\t"
+	   "movaps %%xmm2, 32(%0)\n\t"
+	   "movaps %%xmm3, 48(%0)\n\t"
+	   "movaps %%xmm4, 64(%0)\n\t"
+	   "movaps %%xmm5, 80(%0)\n\t"
+	   "movaps %%xmm6, 96(%0)\n\t"
+	   "movaps %%xmm7, 112(%0)\n\t"
+	   : /* no output operands */
+	   : "r" (data)
+	   : "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
 #ifdef __x86_64__
       asm (
-           "movaps %%xmm8, 128(%0)\n\t"
-           "movaps %%xmm9, 144(%0)\n\t"
-           "movaps %%xmm10, 160(%0)\n\t"
-           "movaps %%xmm11, 176(%0)\n\t"
-           "movaps %%xmm12, 192(%0)\n\t"
-           "movaps %%xmm13, 208(%0)\n\t"
-           "movaps %%xmm14, 224(%0)\n\t"
-           "movaps %%xmm15, 240(%0)\n\t"
-           : /* no output operands */
-           : "r" (data)
-           : "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14", "xmm15");
+	   "movaps %%xmm8, 128(%0)\n\t"
+	   "movaps %%xmm9, 144(%0)\n\t"
+	   "movaps %%xmm10, 160(%0)\n\t"
+	   "movaps %%xmm11, 176(%0)\n\t"
+	   "movaps %%xmm12, 192(%0)\n\t"
+	   "movaps %%xmm13, 208(%0)\n\t"
+	   "movaps %%xmm14, 224(%0)\n\t"
+	   "movaps %%xmm15, 240(%0)\n\t"
+	   : /* no output operands */
+	   : "r" (data)
+	   : "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14", "xmm15");
 #endif
 
       puts ("Bye!"); /* second breakpoint here */

@@ -35,7 +35,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
 set pyfile [gdb_remote_download host ${srcdir}/${subdir}/${testfile}.py]
 
 gdb_test "source ${pyfile}" "Python script imported" \
-         "import python scripts"
+	 "import python scripts"
 
 # The following tests require execution.
 

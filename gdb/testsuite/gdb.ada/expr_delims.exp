@@ -36,32 +36,32 @@ gdb_run_cmd
 gdb_test "" "Breakpoint $decimal, foo \\(\\).*" \
     "run to foo"
 gdb_test "continue" \
-         "Continuing\\..*Breakpoint $decimal, foo \\(\\).*"
+	 "Continuing\\..*Breakpoint $decimal, foo \\(\\).*"
 
 # Make sure that "thread" may be used as a variable without being mistaken
 # for an expression delimiter.
 gdb_test "print thread" \
-         "= 1" \
-         "print variable 'thread'"
+	 "= 1" \
+	 "print variable 'thread'"
 
 gdb_test_no_output "delete 1"
 
 gdb_test "watch thread" \
-         ".*atchpoint \[0-9\]+: thread" \
-         "set plain watchpoint on variable 'thread'"
+	 ".*atchpoint \[0-9\]+: thread" \
+	 "set plain watchpoint on variable 'thread'"
 
 # Make sure that 'if' when followed by an expression beginning
 # with 'i' works.
 gdb_test "watch thread if i = 2" \
-         ".*atchpoint \[0-9\]+: thread" \
-         "set conditional watchpoint."
+	 ".*atchpoint \[0-9\]+: thread" \
+	 "set conditional watchpoint."
 
 gdb_test "info break" \
-         ".*${ws}.*atchpoint${ws}keep${ws}y${ws}thread${ws}.*atchpoint${ws}keep${ws}y${ws}thread${ws}stop only if i = 2" \
-         "check that watchpoint is set correctly."
+	 ".*${ws}.*atchpoint${ws}keep${ws}y${ws}thread${ws}.*atchpoint${ws}keep${ws}y${ws}thread${ws}stop only if i = 2" \
+	 "check that watchpoint is set correctly."
 
 # Check for right error when using both 'if' and 'thread' clauses.
 
 gdb_test "break foo.adb:$bp_location if thread = 10 thread 999" \
-         ".*Unknown thread 999\\." \
-         "combination of 'if' and 'thread' delimiters."
+	 ".*Unknown thread 999\\." \
+	 "combination of 'if' and 'thread' delimiters."

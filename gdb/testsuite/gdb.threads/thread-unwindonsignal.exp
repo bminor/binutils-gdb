@@ -35,15 +35,15 @@ if { ![runto_main] } {
 }
 
 gdb_test "break all_threads_running" \
-         "Breakpoint 2 at .*: file .*${srcfile}, line .*" \
-         "breakpoint on all_threads_running"
+	 "Breakpoint 2 at .*: file .*${srcfile}, line .*" \
+	 "breakpoint on all_threads_running"
 
 # Run the program and make sure GDB reports that we stopped after
 # hitting breakpoint 2 in all_threads_running().
 
 gdb_test "continue" \
-         ".*Breakpoint 2, all_threads_running ().*" \
-         "run to all_threads_running"
+	 ".*Breakpoint 2, all_threads_running ().*" \
+	 "run to all_threads_running"
 
 # NOTE: Don't turn on scheduler-locking here.
 # We want the main thread (hand_call_with_signal) and

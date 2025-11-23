@@ -118,7 +118,7 @@ mmapdata ()
 
   /* Create yet another region which is allocated, but not written to.  */
   buf3 = mmap (NULL, MAPSIZE, PROT_READ | PROT_WRITE,
-               MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+	       MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
   if (buf3 == (char *) -1)
     {
       perror ("mmap failed");

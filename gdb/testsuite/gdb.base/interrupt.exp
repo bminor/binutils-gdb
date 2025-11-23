@@ -154,7 +154,7 @@ if {![file exists $binfile]} {
 	    }
 	}
 
- 	if { ! [target_info exists gdb,nosignals] } {
+	if { ! [target_info exists gdb,nosignals] } {
 	    # Wait until the program is in the read system call again.
 	    sleep 2
 

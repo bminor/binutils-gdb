@@ -49,8 +49,8 @@ if {![runto_main]} {
 }
 
 gdb_test "break [gdb_get_line_number "first breakpoint here"]" \
-         "Breakpoint .* at .*i386-avx.c.*" \
-         "set first breakpoint in main"
+	 "Breakpoint .* at .*i386-avx.c.*" \
+	 "set first breakpoint in main"
 gdb_continue_to_breakpoint "continue to first breakpoint in main"
 
 if {[is_amd64_regs_target]} {
@@ -61,11 +61,11 @@ if {[is_amd64_regs_target]} {
 
 for { set r 0 } { $r < $nr_regs } { incr r } {
     gdb_test "print \$ymm$r.v8_float" \
-        ".. = \\{$r, $r.125, $r.25, $r.375, $r.5, $r.625, $r.75, $r.875\\}.*" \
-        "check float contents of %ymm$r"
+	".. = \\{$r, $r.125, $r.25, $r.375, $r.5, $r.625, $r.75, $r.875\\}.*" \
+	"check float contents of %ymm$r"
     gdb_test "print \$ymm$r.v32_int8" \
-        ".. = \\{(-?\[0-9\]+, ){31}-?\[0-9\]+\\}.*" \
-        "check int8 contents of %ymm$r"
+	".. = \\{(-?\[0-9\]+, ){31}-?\[0-9\]+\\}.*" \
+	"check int8 contents of %ymm$r"
 }
 
 for { set r 0 } { $r < $nr_regs } { incr r } {
@@ -73,14 +73,14 @@ for { set r 0 } { $r < $nr_regs } { incr r } {
 }
 
 gdb_test "break [gdb_get_line_number "second breakpoint here"]" \
-         "Breakpoint .* at .*i386-avx.c.*" \
-         "set second breakpoint in main"
+	 "Breakpoint .* at .*i386-avx.c.*" \
+	 "set second breakpoint in main"
 gdb_continue_to_breakpoint "continue to second breakpoint in main"
 
 for { set r 0 } { $r < $nr_regs } { incr r } {
     gdb_test "print data\[$r\]" \
-        ".. = \\{f = \\{[expr {$r + 10}], $r.125, $r.25, $r.375, $r.5, $r.625, $r.75, $r.875\\}\\}.*" \
-        "check contents of data\[$r\]"
+	".. = \\{f = \\{[expr {$r + 10}], $r.125, $r.25, $r.375, $r.5, $r.625, $r.75, $r.875\\}\\}.*" \
+	"check contents of data\[$r\]"
 }
 
 # If testing with a remote protocol target, check that we can

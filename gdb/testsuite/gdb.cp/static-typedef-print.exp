@@ -26,5 +26,5 @@ if {![runto_main]} {
 }
 
 gdb_test "print a" \
-         "static INSTANCE = <same as static member of an already seen type>}}.*" \
-         "print static member"
+	 "static INSTANCE = <same as static member of an already seen type>}}.*" \
+	 "print static member"

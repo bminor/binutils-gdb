@@ -23,4 +23,3 @@
       print *, 'bounds of foo - ', lb, ':', ub
       stop
       end
-

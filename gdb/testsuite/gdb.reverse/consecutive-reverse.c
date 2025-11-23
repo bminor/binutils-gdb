@@ -32,4 +32,3 @@ main()
 {
   foo ();
 } /* end of main */
-

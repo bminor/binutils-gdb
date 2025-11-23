@@ -217,19 +217,19 @@ mi_gdb_test "-var-delete foo" \
 mi_create_varobj weird weird "create local variable weird"
 
 mi_list_varobj_children weird {
-        {weird.integer integer 0 int}
-        {weird.character character 0 char}
-        {weird.char_ptr char_ptr 1 "char \\*"}
-        {weird.long_int long_int 0 "long"}
-        {weird.int_ptr_ptr int_ptr_ptr 1 "int \\*\\*"}
-        {weird.long_array long_array 10 "long \\[10\\]"}
-        {weird.func_ptr func_ptr 0 "void \\(\\*\\)\\((void)?\\)"}
-        {weird.func_ptr_struct func_ptr_struct 0 \
-                 "struct _struct_decl \\(\\*\\)(\\(int, char \\*, long\\))?"}
-        {weird.func_ptr_ptr func_ptr_ptr 0 \
-                 "struct _struct_decl \\*\\(\\*\\)\\((int, char \\*, long)?\\)"}
-        {weird.u1 u1 4 "union \\{\\.\\.\\.\\}"}
-        {weird.s2 s2 4 "struct \\{\\.\\.\\.\\}"}
+	{weird.integer integer 0 int}
+	{weird.character character 0 char}
+	{weird.char_ptr char_ptr 1 "char \\*"}
+	{weird.long_int long_int 0 "long"}
+	{weird.int_ptr_ptr int_ptr_ptr 1 "int \\*\\*"}
+	{weird.long_array long_array 10 "long \\[10\\]"}
+	{weird.func_ptr func_ptr 0 "void \\(\\*\\)\\((void)?\\)"}
+	{weird.func_ptr_struct func_ptr_struct 0 \
+		 "struct _struct_decl \\(\\*\\)(\\(int, char \\*, long\\))?"}
+	{weird.func_ptr_ptr func_ptr_ptr 0 \
+		 "struct _struct_decl \\*\\(\\*\\)\\((int, char \\*, long)?\\)"}
+	{weird.u1 u1 4 "union \\{\\.\\.\\.\\}"}
+	{weird.s2 s2 4 "struct \\{\\.\\.\\.\\}"}
 } "get children local variable weird"
 
 
@@ -429,8 +429,8 @@ mi_gdb_test "-var-info-num-children u" \
 # Test: c_variable-7.15
 # Desc: children of u
 mi_list_varobj_children u {
-        {u.integer integer 0 int}
-        {u.char_ptr char_ptr 1 {char \*}}
+	{u.integer integer 0 int}
+	{u.char_ptr char_ptr 1 {char \*}}
 } "get children of u"
 
 # Test: c_variable-7.20
@@ -464,9 +464,9 @@ mi_gdb_test "-var-info-num-children anonu" \
 # Test: c_variable-7.25
 # Desc: children of anonu
 mi_list_varobj_children "anonu" {
-        {anonu.a a 0 int}
-        {anonu.b b 0 char}
-        {anonu.c c 0 "long"}
+	{anonu.a a 0 int}
+	{anonu.b b 0 char}
+	{anonu.c c 0 "long"}
 } "get children of anonu"
 
 # Test: c_variable-7.30
@@ -501,12 +501,12 @@ mi_gdb_test "-var-info-num-children s" \
 # Test: c_variable-7.35
 # Desc: children of s
 mi_list_varobj_children s {
-        {s.integer integer 0 int}
-        {s.unsigned_integer unsigned_integer 0 "unsigned int"}
-        {s.character character 0 char}
-        {s.signed_character signed_character 0 "signed char"}
-        {s.char_ptr char_ptr 1 {char \*}}
-        {s.array_of_10 array_of_10 10 {int \[10\]}}
+	{s.integer integer 0 int}
+	{s.unsigned_integer unsigned_integer 0 "unsigned int"}
+	{s.character character 0 char}
+	{s.signed_character signed_character 0 "signed char"}
+	{s.char_ptr char_ptr 1 {char \*}}
+	{s.array_of_10 array_of_10 10 {int \[10\]}}
 } "get children of s"
 #} {integer unsigned_integer character signed_character char_ptr array_of_10}
 
@@ -541,9 +541,9 @@ mi_gdb_test "-var-info-num-children anons" \
 # Test: c_variable-7.45
 # Desc: children of anons
 mi_list_varobj_children anons {
-        {anons.a a 0 int}
-        {anons.b b 0 char}
-        {anons.c c 0 "long"}
+	{anons.a a 0 int}
+	{anons.b b 0 char}
+	{anons.c c 0 "long"}
 } "get children of anons"
 
 # Test: c_variable-7.50

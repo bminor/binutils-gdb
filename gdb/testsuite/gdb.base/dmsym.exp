@@ -24,8 +24,8 @@ set testfile dmsym_main
 set dmsym_o [standard_output_file dmsym.o]
 
 if {[gdb_compile "${srcdir}/${subdir}/dmsym.c" \
-                 $dmsym_o \
-                 object {}] != ""} {
+		 $dmsym_o \
+		 object {}] != ""} {
   untested "failed to compile object file"
   return -1
 }
@@ -51,13 +51,13 @@ set addr "0x\[0-9a-zA-Z\]+"
 # should not be used for breakpoint purposes.
 
 gdb_test "break test_minsym" \
-         "Breakpoint $num at $addr.: file .*dmsym_main\\.c, line $num\\."
+	 "Breakpoint $num at $addr.: file .*dmsym_main\\.c, line $num\\."
 
 # However, verify that the `info line' command, on the other hand,
 # finds both locations.
 
 gdb_test "info line test_minsym" \
-         "Line $num of \".*dmsym_main\\.c\" .*\r\nNo line number information available for address $addr <test_minsym>"
+	 "Line $num of \".*dmsym_main\\.c\" .*\r\nNo line number information available for address $addr <test_minsym>"
 
 # Now, run the program until we get past the call to test_minsym.
 # Except when using hardware breakpoints, inferior behavior is going
@@ -68,11 +68,11 @@ gdb_breakpoint dmsym_main.c:[gdb_get_line_number "BREAK" dmsym_main.c]
 
 gdb_run_cmd
 gdb_test "" \
-         "Breakpoint $num, test_minsym \\(\\) at.*" \
-         "run until breakpoint at BREAK"
+	 "Breakpoint $num, test_minsym \\(\\) at.*" \
+	 "run until breakpoint at BREAK"
 
 gdb_test "continue" \
-         "Breakpoint $num, main \\(\\) at.*"
+	 "Breakpoint $num, main \\(\\) at.*"
 
 gdb_test "print val" \
-         " = 124"
+	 " = 124"

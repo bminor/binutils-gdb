@@ -203,4 +203,3 @@ with_test_prefix "with parenthesis" {
     # 1 3 4
     gdb_test "print (x == y) < z" "$true" "print value of (x==y)<z"
 }
-

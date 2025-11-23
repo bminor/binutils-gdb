@@ -22,12 +22,11 @@
 	comment "exit (0)"
 	.macro gdbasm_exit0
 	mov.w #0, r1
-       	mov.b #1, r0l
+	mov.b #1, r0l
 	ste.b r0l,0xe0000
 	.endm
 
 	comment "crt0 startup"
 	.macro gdbasm_startup
-     	ldc #0xfc00, sp
+	ldc #0xfc00, sp
 	.endm
-

@@ -181,8 +181,8 @@ proc build_executable_and_dwo_files { testname executable options args } {
 
     set ret [$func $objects "${binfile}" executable $options]
     if  { $ret != "" } {
-        untested $testname
-        return -1
+	untested $testname
+	return -1
     }
 
     return 0

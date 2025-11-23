@@ -55,18 +55,18 @@ main (void)
       '---'---'---'---'---'---.
       |       |       |       |  <- line alignment
        ^^^^^^^         ^^^^^^^
-          |               |
-          + line1         + line2
+	  |               |
+	  + line1         + line2
 
      Or:
 
       .---.---.---.---.---.---.
       | U | M | U | U | M | U |
       '---'---'---'---'---'---.
-          |       |       |      <- line alignment
-           ^^^^^^^ ^^^^^^^
-              |       |
-        line1 +       + line2
+	  |       |       |      <- line alignment
+	   ^^^^^^^ ^^^^^^^
+	      |       |
+	line1 +       + line2
 
     Note we really want to test that dcache behaves correctly when
     reading a cache line fails.  We're just using unmapped memory as

@@ -42,12 +42,12 @@ proc get_address { var } {
 
     gdb_test_multiple "print &$var" "find address of $var" {
 	-re "\\$\[0-9\]+ = \\(.*\\) (0x\[0-9a-f\]+).*$gdb_prompt $" {
-            return $expect_out(1,string)
- 	}
-        timeout {
+	    return $expect_out(1,string)
+	}
+	timeout {
 	    perror "couldn't find address of $var"
 	    return ""
-        }
+	}
     }
     return ""
 }
@@ -57,15 +57,15 @@ proc test_p_x { var type val addr } {
 
     set test "print/x $var"
     gdb_test_multiple $test $test {
-        -re "\\$\[0-9\]+ = \\([string_to_regexp $type]\\) @0x\[a-f0-9\]+: [string_to_regexp $val].*$gdb_prompt $" {
+	-re "\\$\[0-9\]+ = \\([string_to_regexp $type]\\) @0x\[a-f0-9\]+: [string_to_regexp $val].*$gdb_prompt $" {
 	    pass $test
 	}
 	-re "\\$\[0-9\]+ = $addr.*$gdb_prompt $" {
-            fail "$test (prints just address)"
-        }
+	    fail "$test (prints just address)"
+	}
 	-re "\\$\[0-9\]+ = 0x\[a-f0-9\]+.*$gdb_prompt $" {
-            fail "$test (prints unexpected address)"
-        }
+	    fail "$test (prints unexpected address)"
+	}
     }
     return 0
 }
@@ -75,12 +75,12 @@ proc test_p_x_addr { var addr } {
 
     set test "print/x &$var"
     gdb_test_multiple $test $test {
-        -re "\\$\[0-9\]+ = $addr.*$gdb_prompt $" {
+	-re "\\$\[0-9\]+ = $addr.*$gdb_prompt $" {
 	    pass $test
 	}
 	-re "\\$\[0-9\]+ = 0x\[a-f0-9+\]+.*$gdb_prompt $" {
-            fail "$test (prints unexpected address)"
-        }
+	    fail "$test (prints unexpected address)"
+	}
     }
     return 0
 }
@@ -90,7 +90,7 @@ proc test_p_x_ref_addr { var addr } {
 
     set test "print/x *(&(&$var))"
     gdb_test_multiple $test $test {
-        -re "\\$\[0-9\]+ = $addr.*$gdb_prompt $" {
+	-re "\\$\[0-9\]+ = $addr.*$gdb_prompt $" {
 	    pass $test
 	}
 	-re "Attempt to take address of value not located in memory.*$gdb_prompt $" {
@@ -99,8 +99,8 @@ proc test_p_x_ref_addr { var addr } {
 	    pass $test
 	}
 	-re "\\$\[0-9\]+ = 0x\[a-f0-9+\]+.*$gdb_prompt $" {
-            fail "$test (prints unexpected address)"
-        }
+	    fail "$test (prints unexpected address)"
+	}
     }
     return 0
 }

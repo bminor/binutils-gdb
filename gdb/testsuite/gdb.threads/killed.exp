@@ -71,16 +71,16 @@ gdb_test "" "" "run program to completion"
 send_gdb "quit\n"
 gdb_expect {
     -re "Quit anyway\\? \\(y or n\\) $" {
-        send_gdb "y\n"
-        exp_continue
+	send_gdb "y\n"
+	exp_continue
     }
     eof {
-        pass "GDB exits after multi-threaded program exits messily"
+	pass "GDB exits after multi-threaded program exits messily"
     }
     -re "Cannot find thread ${decimal}: generic error\[\r\n\]*$gdb_prompt $" {
-        kfail "gdb/568" "GDB exits after multi-threaded program exits messily"
+	kfail "gdb/568" "GDB exits after multi-threaded program exits messily"
     }
     timeout {
-        fail "GDB exits after multi-threaded program exits messily (timeout)"
+	fail "GDB exits after multi-threaded program exits messily (timeout)"
     }
 }

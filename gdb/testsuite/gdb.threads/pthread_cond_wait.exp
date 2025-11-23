@@ -30,11 +30,11 @@ runto_main
 
 gdb_test "break break_me" \
     "Breakpoint 2 at .*: file .*${srcfile}, line .*" \
-         "breakpoint on break_me"
+	 "breakpoint on break_me"
 
 gdb_test "continue" \
-         ".*Breakpoint 2, break_me ().*" \
-         "run to break_me"
+	 ".*Breakpoint 2, break_me ().*" \
+	 "run to break_me"
 
 #
 # Backtrace all threads, find the one running noreturn, and
@@ -61,4 +61,3 @@ set btb "\[^\r\n\]+\[\r\n\]+\#${decimal}\[ \t\]+${hex} (\\\[PAC\\\] )?in "
 gdb_test "thread apply all backtrace" \
     "pthread_cond_wait${btb}cond_wait${btb}noreturn${btb}forever_pthread.*" \
     "backtrace in blocked thread"
-

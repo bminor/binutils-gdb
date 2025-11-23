@@ -38,16 +38,15 @@ set test_name "multiple matches for symbol integervar"
 gdb_test_multiple "print integervar" "$test_name" \
 {
       -re "$menu" {
-          pass "$test_name"
+	  pass "$test_name"
       }
 
       default {
-          fail "$test_name"
+	  fail "$test_name"
       }
 }
 
 # Select the first choice from the multiple-choice menu above.
 gdb_test "1" \
-         "= 48" \
-         "select first choice from multiple-choice menu"
-
+	 "= 48" \
+	 "select first choice from multiple-choice menu"

@@ -66,4 +66,3 @@ with_rocm_gpu_lock {
 
     gdb_continue_to_end "" continue 1
 }
-

@@ -177,8 +177,8 @@ proc stap_test {exec_name {args ""}} {
     gdb_test "print \$_probe_arg0 == x" " = 1" \
     "check \$_probe_arg0 for probe user"
     gdb_test "print \$_probe_arg1" \
-    	"Invalid probe argument 1 -- probe has 1 arguments available" \
-    	"check \$_probe_arg1 for probe user"
+	"Invalid probe argument 1 -- probe has 1 arguments available" \
+	"check \$_probe_arg1 for probe user"
 
     # Set a breakpoint with multiple probe locations.
     gdb_test "break -pstap test:two" \
@@ -267,8 +267,8 @@ proc stap_test_no_debuginfo {exec_name {args ""}} {
     gdb_test "print \$_probe_arg0 == 23" " = 1" \
     "check \$_probe_arg0 for probe user"
     gdb_test "print \$_probe_arg1" \
-    	"Invalid probe argument 1 -- probe has 1 arguments available" \
-    	"check \$_probe_arg1 for probe user"
+	"Invalid probe argument 1 -- probe has 1 arguments available" \
+	"check \$_probe_arg1 for probe user"
 
     # Set a breakpoint with multiple probe locations.
     # In this scenario, we may expect more than 2 locations because of

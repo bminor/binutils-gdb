@@ -19,4 +19,3 @@ int main ()
   stop_here ();
   exit (0);
 }
-

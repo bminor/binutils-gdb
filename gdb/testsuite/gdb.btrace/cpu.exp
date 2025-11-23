@@ -20,23 +20,23 @@ gdb_start
 proc test_good { arg } {
     gdb_test_no_output "set record btrace cpu $arg" "set cpu $arg"
     gdb_test "show record btrace cpu" "btrace cpu is '$arg'\." \
-        "show cpu $arg"
+	"show cpu $arg"
 }
 
 proc test_bad { arg current } {
     gdb_test "set record btrace cpu $arg" \
-        "Bad format\.  See \"help set record btrace cpu\"\." \
-        "set cpu $arg"
+	"Bad format\.  See \"help set record btrace cpu\"\." \
+	"set cpu $arg"
     gdb_test "show record btrace cpu" "btrace cpu is '$current'\." \
-        "show cpu $arg"
+	"show cpu $arg"
 }
 
 proc test_junk { arg junk current } {
     gdb_test "set record btrace cpu $arg" \
-        "Trailing junk: '$junk'\." \
-        "set cpu $arg"
+	"Trailing junk: '$junk'\." \
+	"set cpu $arg"
     gdb_test "show record btrace cpu" "btrace cpu is '$current'\." \
-        "show cpu $arg"
+	"show cpu $arg"
 }
 
 gdb_test "show record btrace cpu" "btrace cpu is 'auto'\." "default cpu"

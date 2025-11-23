@@ -35,10 +35,9 @@ if {[mi_clean_restart $::testfile]} {
 # First, verify that the debugger correctly advertises support
 # for the --start option of the -exec-run command.
 mi_gdb_test "-list-features" \
-            "\\^done,features=\\\[.*\"exec-run-start-option\".*\\\]" \
-            "-list-features includes \"exec-run-start-option\""
+	    "\\^done,features=\\\[.*\"exec-run-start-option\".*\\\]" \
+	    "-list-features includes \"exec-run-start-option\""
 
 mi_run_cmd "--start"
 mi_expect_stop "breakpoint-hit" "main" "" ".*mi-start.c" "$decimal" \
 { "" "disp=\"del\"" } "run to main"
-

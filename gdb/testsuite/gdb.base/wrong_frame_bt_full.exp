@@ -26,8 +26,8 @@ set opaque_testfile wrong_frame_bt_full-opaque
 set opaque_objfile [standard_output_file "$opaque_testfile.o"]
 
 if {[gdb_compile "${srcdir}/${subdir}/$opaque_testfile.c" \
-                 $opaque_objfile \
-                 object {}] != ""} {
+		 $opaque_objfile \
+		 object {}] != ""} {
   untested "failed to compile"
   return -1
 }

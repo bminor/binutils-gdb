@@ -244,7 +244,7 @@ proc do_function_calls {prototypes} {
     }
 
     gdb_test "p t_structs_a(struct_val1)" "= (.unsigned char .. )?<.*buf.*> \"foo\"" \
-    	"call inferior func with struct - returns char *"
+	"call inferior func with struct - returns char *"
 
     # Restore default value.
     gdb_test_no_output "set unwind-on-signal off"

@@ -56,4 +56,3 @@ mi_gdb_test "-ada-task-info" \
 mi_gdb_test "-ada-task-info 3" \
   "\\^done,tasks={nr_rows=\"1\",nr_cols=\"8\",$ada_task_info_hdr,body=\\\[$task_3\\\]}" \
   "-ada-task-info 3"
-

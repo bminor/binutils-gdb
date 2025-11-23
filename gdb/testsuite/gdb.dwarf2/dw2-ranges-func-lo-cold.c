@@ -79,4 +79,3 @@ main (void)
   asm ("main_label2: .globl main_label2");
   return 0;					/* main return */
 }						/* main end */
-

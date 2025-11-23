@@ -29,37 +29,37 @@ if {![runto break_me]} {
 # Test with "print frame-arguments" set to "all"
 
 gdb_test_no_output "set print frame-arguments all" \
-         "set print frame-arguments all"
+	 "set print frame-arguments all"
 gdb_test "frame 1" \
-         ".*in call_me \\(i=3, f=5, s=({a = 3, b = 5}|<optimized out>), ss=0x\[0-9a-f\]\+, u=({.*}|<optimized out>), e=green\\) at .*frame-args\\.c:.*" \
-         "frame 1 with print frame-arguments set to all"
+	 ".*in call_me \\(i=3, f=5, s=({a = 3, b = 5}|<optimized out>), ss=0x\[0-9a-f\]\+, u=({.*}|<optimized out>), e=green\\) at .*frame-args\\.c:.*" \
+	 "frame 1 with print frame-arguments set to all"
 
 # Test with "print frame-arguments" set to "scalars"
 
 gdb_test_no_output "set print frame-arguments scalars" \
-         "set print frame-arguments scalars"
+	 "set print frame-arguments scalars"
 gdb_test "frame 1" \
-         ".*in call_me \\(i=3, f=5, s=\\.\\.\\., ss=0x\[0-9a-f\]\+, u=\\.\\.\\., e=green\\) at .*frame-args\\.c:.*" \
-         "frame 1 with print frame-arguments set to scalars"
+	 ".*in call_me \\(i=3, f=5, s=\\.\\.\\., ss=0x\[0-9a-f\]\+, u=\\.\\.\\., e=green\\) at .*frame-args\\.c:.*" \
+	 "frame 1 with print frame-arguments set to scalars"
 
 # Test with "print frame-arguments" set to "none"
 
 gdb_test_no_output "set print frame-arguments none" \
-         "set print frame-arguments none"
+	 "set print frame-arguments none"
 gdb_test "frame 1" \
-         ".*in call_me \\(i=\\.\\.\\., f=\\.\\.\\., s=\\.\\.\\., ss=\\.\\.\\., u=\\.\\.\\., e=\\.\\.\\.\\) at .*frame-args\\.c:.*" \
-         "frame 1 with print frame-arguments set to none"
+	 ".*in call_me \\(i=\\.\\.\\., f=\\.\\.\\., s=\\.\\.\\., ss=\\.\\.\\., u=\\.\\.\\., e=\\.\\.\\.\\) at .*frame-args\\.c:.*" \
+	 "frame 1 with print frame-arguments set to none"
 
 # Test with "print frame-arguments" set to "presence"
 
 gdb_test_no_output "set print frame-arguments presence" \
-         "set print frame-arguments presence"
+	 "set print frame-arguments presence"
 gdb_test "frame 1" \
-         ".*in call_me \\(\\.\\.\\.\\) at .*frame-args\\.c:.*" \
-         "frame 1 with print frame-arguments set to presence"
+	 ".*in call_me \\(\\.\\.\\.\\) at .*frame-args\\.c:.*" \
+	 "frame 1 with print frame-arguments set to presence"
 gdb_test "frame 2" \
-         ".*in main \\(\\) at .*frame-args\\.c:.*" \
-         "frame 2 (no args) with print frame-arguments set to presence"
+	 ".*in main \\(\\) at .*frame-args\\.c:.*" \
+	 "frame 2 (no args) with print frame-arguments set to presence"
 
 
 # Test with "print frame-info" set to "location-and-address"

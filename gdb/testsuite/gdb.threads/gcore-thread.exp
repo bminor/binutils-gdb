@@ -36,7 +36,7 @@ if {[istarget "*-*-linux"]} {
 set opts [list debug]
 if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${objfile}" object $opts] != ""
     || ([gdb_compile_pthreads "${objfile}" "${binfile}" executable [concat $opts {ldflags=-Wl,-z,norelro}] ] != ""
-        && [gdb_compile_pthreads "${objfile}" "${binfile}" executable $opts] != "") } {
+	&& [gdb_compile_pthreads "${objfile}" "${binfile}" executable $opts] != "") } {
     return -1
 }
 

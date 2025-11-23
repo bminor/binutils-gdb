@@ -34,10 +34,10 @@ switch -glob -- [istarget] {
     }
     "arm*-*-*" {
 	set regdir "arm/"
-        set core-regs {arm-core.xml}
+	set core-regs {arm-core.xml}
     }
     "*m68k-*-*" {
-        set core-regs {m68k-core.xml}
+	set core-regs {m68k-core.xml}
     }
     "mips*-*-*" {
 	set core-regs {mips-cpu.xml mips-cp0.xml mips-fpu.xml mips-dsp.xml}
@@ -57,12 +57,12 @@ switch -glob -- [istarget] {
     }
     "sparc-*-*" {
 	set regdir "sparc/"
-        set core-regs {sparc32-cpu.xml sparc32-fpu.xml sparc32-cp0.xml}
+	set core-regs {sparc32-cpu.xml sparc32-fpu.xml sparc32-cp0.xml}
     }
     "sparc64-*-*" {
 	set architecture "sparc:v9"
 	set regdir "sparc/"
-        set core-regs {sparc64-cpu.xml sparc64-fpu.xml sparc64-cp0.xml}
+	set core-regs {sparc64-cpu.xml sparc64-fpu.xml sparc64-cp0.xml}
     }
     "tic6x-*-*" {
 	set core-regs {tic6x-core.xml}
@@ -70,12 +70,12 @@ switch -glob -- [istarget] {
     "i?86-*-*" {
 	set architecture "i386"
 	set regdir "i386/"
-        set core-regs {32bit-core.xml 32bit-sse.xml}
+	set core-regs {32bit-core.xml 32bit-sse.xml}
     }
     "x86_64-*-*" {
 	set architecture "i386:x86-64"
 	set regdir "i386/"
-        set core-regs {64bit-core.xml 64bit-sse.xml}
+	set core-regs {64bit-core.xml 64bit-sse.xml}
     }
     "riscv64*-*-*" {
        set architecture "riscv:rv64"

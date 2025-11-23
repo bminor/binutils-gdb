@@ -19,4 +19,3 @@ struct A {
   struct B *b;
   struct A *next;
 };
-

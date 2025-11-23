@@ -26,10 +26,10 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug ]] != "" }
 clean_restart ${testfile}
 
 gdb_test "break nested_sub" \
-         "Breakpoint $decimal at $hex: file .*foo.adb, line $decimal\\."
+	 "Breakpoint $decimal at $hex: file .*foo.adb, line $decimal\\."
 
 gdb_test "break do_nothing" \
-         "Breakpoint $decimal at $hex: file .*pck.adb, line $decimal\\."
+	 "Breakpoint $decimal at $hex: file .*pck.adb, line $decimal\\."
 
 # Run the program. Make sure the program runs until it hits
 # the first breakpoint inside nested_sub.

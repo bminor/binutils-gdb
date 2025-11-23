@@ -18,6 +18,6 @@ int main (int argc, char ** argv)
   printf ("foll-exec is about to execl(crashme)...\n");
 
   execl (prog,
-         prog,
-         (char *)0);
+	 prog,
+	 (char *)0);
 }

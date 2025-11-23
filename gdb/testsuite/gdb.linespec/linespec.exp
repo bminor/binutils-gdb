@@ -49,12 +49,12 @@ if { [is_remote host] } {
     untested "breakpoints using dir/file:line"
 } else {
     gdb_test "break one/thefile.cc:$l1" \
-        "Breakpoint $decimal at $hex: file .*thefile.cc, line $l1." \
-        "single-location break using dir/file:line"
+	"Breakpoint $decimal at $hex: file .*thefile.cc, line $l1." \
+	"single-location break using dir/file:line"
 
     gdb_test "clear one/thefile.cc:$l1" \
-        "Deleted breakpoint $decimal *" \
-        "clear breakpoint using dir/file:line"
+	"Deleted breakpoint $decimal *" \
+	"clear breakpoint using dir/file:line"
 
     if { [readline_is_used] } {
 	# There are functions named 'twodup' in both source files.

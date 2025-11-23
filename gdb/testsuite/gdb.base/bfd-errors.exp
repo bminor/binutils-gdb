@@ -152,7 +152,7 @@ clean_restart
 # Count number of distinct BFD error messages via 'bfd_error_count'
 # array while using add-symbol-file to "load" the shared library.
 gdb_test_multiple "add-symbol-file -readnow $binfile_lib" \
-                  "load library with add-symbol-file" {
+		  "load library with add-symbol-file" {
     -re "add symbol table from file.*\(y or n\)" {
 	send_gdb "y\n" answer
 	exp_continue

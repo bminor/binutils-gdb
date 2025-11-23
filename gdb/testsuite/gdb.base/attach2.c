@@ -18,7 +18,7 @@ int main ()
   /* Cannot sleep a very long time, as attach.exp assumes the
      process will exit before the standard GDB timeout.  */
   sleep( 10 ); /* System call causes register fetch to fail */
-               /* This is a known HPUX "feature"            */
+	       /* This is a known HPUX "feature"            */
   while (! should_exit)
     {
       local_i++;

@@ -112,8 +112,8 @@ gdb_test "show frame-filter priority global Elider" \
 gdb_test_no_output  "set frame-filter priority global Elider 1000" \
     "set frame-filter priotiy global Elider 1000"
 gdb_test "show frame-filter priority global Elider" \
-        "Priority of filter 'Elider' in list 'global' is: 1000" \
-        "show frame-filter priority global Elider after setting"
+	"Priority of filter 'Elider' in list 'global' is: 1000" \
+	"show frame-filter priority global Elider after setting"
 gdb_test "info frame-filter" \
     ".*1000.*Yes.*Elider.*100.*Yes.*Reverse.*10.*.*No.*Object.*1.*" \
     "info frame filter after setting priority"

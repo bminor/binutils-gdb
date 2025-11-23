@@ -30,7 +30,7 @@ Dwarf::assemble $asm_file {
 	    DW_AT_language @DW_LANG_C
 	    DW_AT_name symtab-producer-dw.c
 	    DW_AT_comp_dir /tmp
-        } {
+	} {
 	    declare_labels integer_label
 
 	    integer_label: DW_TAG_base_type {
@@ -52,7 +52,7 @@ Dwarf::assemble $asm_file {
 	    DW_AT_language @DW_LANG_C
 	    DW_AT_name symtab-producer2-dw.c
 	    DW_AT_comp_dir /tmp
-        } {
+	} {
 	    declare_labels integer_label
 
 	    integer_label: DW_TAG_base_type {

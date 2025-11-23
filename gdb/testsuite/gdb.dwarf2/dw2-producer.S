@@ -144,7 +144,7 @@ func_cu1:
 	.byte		1			/* Minimum insn length */
 	.byte		1			/* default_is_stmt */
 	.byte		1			/* line_base */
- 	.byte		1			/* line_range */
+	.byte		1			/* line_range */
 	.byte		0x10			/* opcode_base */
 
 	/* Standard lengths */

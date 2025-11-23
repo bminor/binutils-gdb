@@ -27,4 +27,3 @@ main ()
 {
   return foo ();
 }
-

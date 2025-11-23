@@ -70,7 +70,7 @@ Dwarf::assemble $asm_file {
 			DW_AT_abstract_origin %$doit_self_label
 		    }
 		}
-	        DW_TAG_variable {
+		DW_TAG_variable {
 		    DW_AT_abstract_origin %$foo_label
 		    DW_AT_location 4 data1
 		}

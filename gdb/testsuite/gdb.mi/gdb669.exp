@@ -40,4 +40,3 @@ for {set i 0} {$i < 4} {incr i} {
 }
 
 mi_gdb_exit
-

@@ -29,5 +29,4 @@ gdb_test "set lang ada" ""
 set eol "\r\n"
 
 gdb_test "info types new_integer_type" \
-         "All types matching regular expression \"new_integer_type\":${eol}${eol}File .*info_types.c:${eol}.*\tint"
-
+	 "All types matching regular expression \"new_integer_type\":${eol}${eol}File .*info_types.c:${eol}.*\tint"

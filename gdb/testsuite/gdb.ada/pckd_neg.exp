@@ -29,16 +29,16 @@ set bp_location [gdb_get_line_number "STOP" ${testdir}/foo_o508_021.adb]
 runto "foo_o508_021.adb:$bp_location"
 
 gdb_test "print SSA" \
-         "= \\(-1, 2, -3, 4\\)"
+	 "= \\(-1, 2, -3, 4\\)"
 
 gdb_test "print SSA(1)" \
-         "= -1"
+	 "= -1"
 
 gdb_test "print SSA(2)" \
-         "= 2"
+	 "= 2"
 
 gdb_test "print SSA(3)" \
-         "= -3"
+	 "= -3"
 
 gdb_test "print SSA(4)" \
-         "= 4"
+	 "= 4"

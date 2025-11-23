@@ -23,24 +23,24 @@ proc dtrace_test {} {
     standard_testfile
 
     if {[dtrace_build_usdt_test_program] == -1} {
-        untested "failed to compile"
-        return -1
+	untested "failed to compile"
+	return -1
     }
 
     clean_restart
     gdb_load $binfile
 
     if {![runto_main]} {
-        return -1
+	return -1
     }
 
     gdb_test "print \$_probe_argc" "No probe at PC $hex" \
-        "check argument not at probe point"
+	"check argument not at probe point"
 
     # Test the 'info probes' command.
     gdb_test "info probes dtrace" \
-        "test *progress-counter *$hex +no.*test *two-locations *$hex +always.*test *two-locations *$hex +always.*" \
-        "info probes dtrace"
+	"test *progress-counter *$hex +no.*test *two-locations *$hex +always.*test *two-locations *$hex +always.*" \
+	"info probes dtrace"
 
     # Disabling the probe test:two-locations shall have no effect,
     # since no is-enabled probes are defined for it in the object
@@ -85,17 +85,17 @@ proc dtrace_test {} {
 
     # Test probe arguments.
     gdb_test "print \$_probe_argc" " = 2" \
-        "print \$_probe_argc for probe progress-counter"
+	"print \$_probe_argc for probe progress-counter"
     gdb_test "print \$_probe_arg0" \
-        " = $hex \"application\"" \
-        "print \$_probe_arg0 for probe progress-counter"
+	" = $hex \"application\"" \
+	"print \$_probe_arg0 for probe progress-counter"
     gdb_test "print \$_probe_arg1" " = 1" \
-        "print \$_probe_arg1 for probe progress-counter"
+	"print \$_probe_arg1 for probe progress-counter"
 
     # Set a breakpoint with multiple probe locations.
     gdb_test "break -pdtrace test:two-locations" \
-        "Breakpoint \[0-9\]+ at $hex.*2 locations.*" \
-        "set multi-location probe breakpoint (probe two-locations)"
+	"Breakpoint \[0-9\]+ at $hex.*2 locations.*" \
+	"set multi-location probe breakpoint (probe two-locations)"
 
     return 0
 }

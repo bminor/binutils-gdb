@@ -56,7 +56,7 @@ proc test_body { detached } {
     set res [remote_spawn target "$binfile $detached \"$gcore_cmd\" $corefile"]
     if { ![gdb_assert { ![expr {$res < 0 || $res == ""}] } \
 	"spawned gcore"] } {
-            return
+	    return
 	}
 
     set saw_corefile_created false

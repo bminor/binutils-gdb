@@ -47,7 +47,7 @@ proc test_bp { loc msg } {
 }
 
 set all_linespecs { "pck.dummy_task" "dummy_task"
-                    "pck.adb:pck.dummy_task" "pck.adb:dummy_task"}
+		    "pck.adb:pck.dummy_task" "pck.adb:dummy_task"}
 
 # First, test the linespecs when the associated symtab hasn't been
 # expanded yet.

@@ -198,7 +198,7 @@ proc ton::obj {json i} {
 
     set i [trr $json $i]
     if {!$i} {
-    	error "json string invalid:0: exhausted while parsing object."
+	error "json string invalid:0: exhausted while parsing object."
     }
     if {[string index $json $i-1] eq "\{"} {
 	return [list [incr i -1] o]

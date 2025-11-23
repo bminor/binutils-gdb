@@ -411,7 +411,7 @@ with_test_prefix "with_hex_default" {
   # Test setting default display to hex
   gdb_test_no_output "set print type hex on"
   gdb_test "show print type hex" \
-           "Display of struct members offsets and sizes in hexadecimal is on"
+	   "Display of struct members offsets and sizes in hexadecimal is on"
 
   # test "ptype /o" is now equivalent to "ptype /ox"
   gdb_test "ptype /o struct abc" \

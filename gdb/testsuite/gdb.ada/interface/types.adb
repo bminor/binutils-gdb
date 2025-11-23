@@ -26,4 +26,3 @@ package body Types is
    end Do_Nothing;
 
 end Types;
-

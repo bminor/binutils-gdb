@@ -40,4 +40,3 @@ if {[test_compiler_info {gcc-[0-3]-*}]
     setup_xfail *-*-*
 }
 gdb_test "p b" "{<A<int, B>> = {<ATB<int>> = {data = 0}, static DEFAULT_INSTANCE = <optimized out>}, <No data fields>}"
-

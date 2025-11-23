@@ -44,8 +44,8 @@ if {![runto_main]} {
 }
 
 gdb_test "break thread_started" \
-         "Breakpoint 2 at .*: file .*${srcfile}, line .*" \
-         "breakpoint on thread_started"
+	 "Breakpoint 2 at .*: file .*${srcfile}, line .*" \
+	 "breakpoint on thread_started"
 
 # Run the program until all threads have hit thread_started.
 # We use this as the vehicle to determine when gdb is aware

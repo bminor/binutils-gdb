@@ -72,4 +72,3 @@ delete_breakpoints
 gdb_test "until marker3" \
 	"($hex in |)main.*argc.*argv.*envp.*at.*${srcfile}:($bp_location20.*marker2 \\(43\\)|$bp_location21.*marker3 \\(.stack., .trace.\\)).*" \
 	"until func, not called by current frame"
-

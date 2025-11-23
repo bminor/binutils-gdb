@@ -20,4 +20,3 @@ procedure Null_Record is
 begin
    Do_Nothing (E);  -- START
 end Null_Record;
-

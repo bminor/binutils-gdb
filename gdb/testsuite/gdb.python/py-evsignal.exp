@@ -39,9 +39,9 @@ gdb_test_no_output "set non-stop on"
 gdb_run_cmd
 gdb_test_multiple "" "signal Thread 3"  {
     -re "event type: stop\r\nstop reason: signal\r\nstop signal: SIGUSR1\r\nthread num: 3\r\nevent type: stop\r\n.*$gdb_prompt $" {
-        pass "thread 3 was signaled"
+	pass "thread 3 was signaled"
     }
     -re "The target does not support running in non-stop mode"  {
-        unsupported "non-stop mode is unsupported"
+	unsupported "non-stop mode is unsupported"
     }
 }

@@ -33,8 +33,8 @@ static void
 bad_layout(void **variable_ptr, void *fp)
 {
   fprintf (stderr, "First variable should be allocated one word below "
-           "the frame.  Got variable's address %p, frame at %p instead.\n",
-           variable_ptr, fp);
+	   "the frame.  Got variable's address %p, frame at %p instead.\n",
+	   variable_ptr, fp);
   abort();
 }
 

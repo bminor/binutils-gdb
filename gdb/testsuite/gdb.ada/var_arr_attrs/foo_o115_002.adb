@@ -22,4 +22,3 @@ begin
    Do_Nothing (My_Object'Address);             -- STOP
    Do_Nothing (My_Small_Object'Address);
 end Foo_O115_002;
-

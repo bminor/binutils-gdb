@@ -457,28 +457,28 @@ proc test_complex_watchpoint {} {
 	gdb_test "cont" "Continuing.*Breakpoint.*marker5 \\(\\).*" \
 	    "did not trigger wrong watchpoint"
 
-        # Test watches of things declared locally in a function.
-        # In particular, test that a watch of stack-based things
-        # is deleted when the stack-based things go out of scope.
-        #
+	# Test watches of things declared locally in a function.
+	# In particular, test that a watch of stack-based things
+	# is deleted when the stack-based things go out of scope.
+	#
 	gdb_test_no_output "disable" "disable in test_complex_watchpoint, first time"
-        gdb_test "break marker6" ".*Breakpoint.*"
-        gdb_test "cont" "Continuing.*Breakpoint.*marker6 \\(\\).*" \
-            "continue to marker6"
+	gdb_test "break marker6" ".*Breakpoint.*"
+	gdb_test "cont" "Continuing.*Breakpoint.*marker6 \\(\\).*" \
+	    "continue to marker6"
 	gdb_breakpoint [gdb_get_line_number "func2 breakpoint here"]
 	gdb_continue_to_breakpoint "func2 breakpoint here, first time"
 
-        # Test a watch of a single stack-based variable, whose scope
-        # is the function we're now in.  This should auto-delete when
-        # execution exits the scope of the watchpoint.
-        #
+	# Test a watch of a single stack-based variable, whose scope
+	# is the function we're now in.  This should auto-delete when
+	# execution exits the scope of the watchpoint.
+	#
 	gdb_test "watch local_a" \
 	    "^(?:Hardware w|W)atchpoint $::decimal: local_a" \
 	    "set local watch"
-        gdb_test "cont" "\[Ww\]atchpoint.*local_a.*" "trigger local watch"
+	gdb_test "cont" "\[Ww\]atchpoint.*local_a.*" "trigger local watch"
 
 	set test "self-delete local watch"
-        gdb_test_multiple "cont" $test {
+	gdb_test_multiple "cont" $test {
 	    -re "Continuing.*\[Ww\]atchpoint .* deleted because the program has left the block in.*which its expression is valid.*\r\n$gdb_prompt $" {
 		pass $test
 	    }
@@ -498,43 +498,43 @@ proc test_complex_watchpoint {} {
 	}
 
 	gdb_continue_to_breakpoint "func2 breakpoint here, second time"
-        # We should be in "func2" again now.  Test a watch of an
-        # expression which includes both a stack-based local and
-        # something whose scope is larger than this invocation
-        # of "func2".  This should also auto-delete.
-        #
+	# We should be in "func2" again now.  Test a watch of an
+	# expression which includes both a stack-based local and
+	# something whose scope is larger than this invocation
+	# of "func2".  This should also auto-delete.
+	#
 	gdb_test "watch local_a + ival5" \
 	    "^(?:Hardware w|W)atchpoint $::decimal: local_a . ival5" \
 	    "set partially local watch"
-        gdb_test "cont" "Continuing.*\[Ww\]atchpoint .*: local_a . ival5.*" \
-                 "trigger1 partially local watch"
-        gdb_test "cont" "Continuing.*\[Ww\]atchpoint .*: local_a . ival5.*" \
-                 "trigger2 partially local watch"
-        gdb_test "cont" "Continuing.*\[Ww\]atchpoint .* deleted because the program has left the block in.*which its expression is valid.*" \
-                 "self-delete partially local watch"
+	gdb_test "cont" "Continuing.*\[Ww\]atchpoint .*: local_a . ival5.*" \
+		 "trigger1 partially local watch"
+	gdb_test "cont" "Continuing.*\[Ww\]atchpoint .*: local_a . ival5.*" \
+		 "trigger2 partially local watch"
+	gdb_test "cont" "Continuing.*\[Ww\]atchpoint .* deleted because the program has left the block in.*which its expression is valid.*" \
+		 "self-delete partially local watch"
 
-        # We should be in "func2" again now.  Test a watch of a
-        # static (non-stack-based) local.  Since this has scope
-        # across any invocations of "func2", it should not auto-
-        # delete.
-        #
+	# We should be in "func2" again now.  Test a watch of a
+	# static (non-stack-based) local.  Since this has scope
+	# across any invocations of "func2", it should not auto-
+	# delete.
+	#
 	gdb_continue_to_breakpoint "func2 breakpoint here, third time"
 	gdb_test "watch static_b" \
 	    "^(?:Hardware w|W)atchpoint $::decimal: static_b" \
-                 "set static local watch"
-        gdb_test "cont" "Continuing.*\[Ww\]atchpoint .*: static_b.*" \
-                 "trigger static local watch"
-        gdb_test "cont" "Continuing.*marker6 \\(\\).*" \
-                 "continue after trigger static local watch"
-        gdb_test "info break" ".*watchpoint.*static_b.*" \
-                 "static local watch did not self-delete"
+		 "set static local watch"
+	gdb_test "cont" "Continuing.*\[Ww\]atchpoint .*: static_b.*" \
+		 "trigger static local watch"
+	gdb_test "cont" "Continuing.*marker6 \\(\\).*" \
+		 "continue after trigger static local watch"
+	gdb_test "info break" ".*watchpoint.*static_b.*" \
+		 "static local watch did not self-delete"
 
-        # We should be in "recurser" now.  Test a watch of a stack-
-        # based local.  Symbols mentioned in a watchpoint are bound
-        # at watchpoint-creation.  Thus, a watch of a stack-based
-        # local to a recursing function should be bound only to that
-        # one invocation, and should not trigger for other invocations.
-        #
+	# We should be in "recurser" now.  Test a watch of a stack-
+	# based local.  Symbols mentioned in a watchpoint are bound
+	# at watchpoint-creation.  Thus, a watch of a stack-based
+	# local to a recursing function should be bound only to that
+	# one invocation, and should not trigger for other invocations.
+	#
 	with_test_prefix "local_x" {
 	    gdb_test "tbreak recurser" ".*breakpoint.*"
 	    gdb_test "cont" "Continuing.*recurser.*"
@@ -548,8 +548,8 @@ proc test_complex_watchpoint {} {
 		"self-delete local watch in recursive call"
 	}
 
-        # Repeat the preceding test, but this time use "recurser::local_x" as
-        # the variable to track.
+	# Repeat the preceding test, but this time use "recurser::local_x" as
+	# the variable to track.
 	with_test_prefix "recurser::local_x" {
 	    gdb_test "cont" "Continuing.*marker6.*" "continue to marker6"
 	    gdb_test "tbreak recurser" ".*breakpoint.*"
@@ -661,8 +661,8 @@ proc test_wide_location_1 {} {
     # Platforms where the target can't watch such a large region
     # should clear hw_expected below.
     if { $no_hw || !$allow_hw_watchpoint_tests_p
-         || [istarget arm*-*-*]
-         || ([istarget powerpc*-*-*] && ![is_lp64_target])} {
+	 || [istarget arm*-*-*]
+	 || ([istarget powerpc*-*-*] && ![is_lp64_target])} {
 	set hw_expected 0
     } else {
 	set hw_expected 1
@@ -709,8 +709,8 @@ proc test_wide_location_2 {} {
     # Platforms where the target can't watch such a large region
     # should clear hw_expected below.
     if { $no_hw || !$allow_hw_watchpoint_tests_p
-         || [istarget arm*-*-*]
-         || [istarget powerpc*-*-*]} {
+	 || [istarget arm*-*-*]
+	 || [istarget powerpc*-*-*]} {
 	set hw_expected 0
     } else {
 	set hw_expected 1
@@ -855,7 +855,7 @@ proc test_no_hw_watchpoints {} {
 
     gdb_test "watch ival3 if  count > 1  thread 1 " \
 	"watch ival3 if  count > 1  thread 1 \r\nWatchpoint \[0-9\]*: ival3.*" \
-         "set slow condition watch w/thread"
+	 "set slow condition watch w/thread"
 
     gdb_test_no_output "delete \$bpnum" "delete watch w/condition and thread"
 
@@ -872,7 +872,7 @@ proc test_no_hw_watchpoints {} {
 
     # Re-enable hardware watchpoints if necessary.
     if {$allow_hw_watchpoint_tests_p} {
-        gdb_test_no_output "set can-use-hw-watchpoints 1" ""
+	gdb_test_no_output "set can-use-hw-watchpoints 1" ""
     }
 }
 

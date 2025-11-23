@@ -42,7 +42,7 @@ int main() {
       {
 	args[i] = 1; /* Init value.  */
 	res = pthread_create(&threads[i],
-		             NULL,
+			     NULL,
 			     thread_function,
 			     (void *) i);
       }
@@ -51,14 +51,14 @@ int main() {
     while (!all_started)
       {
 	all_started = 1;
-        for (i = 0; i < NUM; i++)
-          {
-            if (args[i] == 1)
+	for (i = 0; i < NUM; i++)
+	  {
+	    if (args[i] == 1)
 	      {
-	        all_started = 0;
-	        break;
+		all_started = 0;
+		break;
 	      }
-          }
+	  }
       }
 
     args[i] = 1;
@@ -75,4 +75,3 @@ void *thread_function(void *arg) {
     (*myp) ++;  /* Increment so parent knows child started.  */
     pthread_barrier_wait(&mybarrier);
 }
-

@@ -34,5 +34,5 @@ if {![runto bar]} {
 }
 
 gdb_test "bt" \
-         "#0\[ \t\]*$hex in bar.*\r\n#1\[ \t\]*$hex in foo.*\r\n#2\[ \t\]*$hex in main.*" \
-         "Backtrace to the main frame"
+	 "#0\[ \t\]*$hex in bar.*\r\n#1\[ \t\]*$hex in foo.*\r\n#2\[ \t\]*$hex in main.*" \
+	 "Backtrace to the main frame"

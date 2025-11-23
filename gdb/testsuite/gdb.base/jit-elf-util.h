@@ -70,7 +70,7 @@ load_symbol (void *addr, const char *sym_name)
 	    {
 	      const char *s = strtab + p->st_name;
 	      if (strcmp (s, sym_name) == 0)
-	        return (void *) p->st_value;
+		return (void *) p->st_value;
 	    }
 	}
     }
@@ -101,7 +101,7 @@ load_elf (const char *libname, size_t *size, void *load_addr)
     }
 
   void *addr = mmap (load_addr, st.st_size,
-  		     PROT_READ | PROT_WRITE | PROT_EXEC,
+		     PROT_READ | PROT_WRITE | PROT_EXEC,
 		     load_addr != NULL ? MAP_PRIVATE | MAP_FIXED : MAP_PRIVATE,
 		     fd, 0);
   close (fd);

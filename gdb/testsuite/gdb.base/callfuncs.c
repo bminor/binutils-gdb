@@ -609,7 +609,7 @@ int (*func_arg2) PARAMS ((int));
 #endif
 {
   return ((*func_arg1) (5,5)  == (*func_val1) (5,5)
-          && (*func_arg2) (6) == (*func_val2) (6));
+	  && (*func_arg2) (6) == (*func_val2) (6));
 }
 
 #ifdef PROTOTYPES

@@ -31,53 +31,53 @@ set obj_include -I[host_standard_output_file {}]
 
 switch -glob -- [istarget] {
     "alpha*-*-*" {
-        set asm-arch alpha
+	set asm-arch alpha
 	# ??? Won't work with ecoff systems like Tru64, but then we also
 	# don't have any other -g flag that creates mdebug output.
-        set asm-flags "-no-mdebug -I${srcdir}/${subdir} $obj_include"
+	set asm-flags "-no-mdebug -I${srcdir}/${subdir} $obj_include"
 	set debug-flags "-gdwarf-2"
     }
     "arm*-*-*" {
-        set asm-arch arm
+	set asm-arch arm
     }
     "aarch64*-*-*" {
 	set asm-arch aarch64
     }
     "bfin-*-*" {
-        set asm-arch bfin
+	set asm-arch bfin
     }
     "frv-*-*" {
 	set asm-arch frv
     }
     "s390-*-*" {
-        set asm-arch s390
+	set asm-arch s390
     }
     "s390x-*-*" {
-        set asm-arch s390x
+	set asm-arch s390x
     }
     "x86_64-*-*" {
-        set asm-arch x86_64
+	set asm-arch x86_64
 	set debug-flags "-gdwarf-2"
     }
     "i\[3456\]86-*-*" {
-        set asm-arch i386
+	set asm-arch i386
     }
     "lm32-*" {
-        set asm-arch lm32
+	set asm-arch lm32
     }
     "m32r*-linux*" {
-        set asm-arch m32r-linux
+	set asm-arch m32r-linux
     }
     "m32c-*-*" {
-        set asm-arch m32c
+	set asm-arch m32c
     }
     "m32r*-*" {
-        set asm-arch m32r
-        append link-flags "--whole-archive -lgloss --no-whole-archive"
+	set asm-arch m32r
+	append link-flags "--whole-archive -lgloss --no-whole-archive"
     }
     "m6811-*-*" {
-        set asm-arch m68hc11
-        set asm-flags "-mshort-double -m68hc11 --no-warn -I${srcdir}/${subdir} $obj_include"
+	set asm-arch m68hc11
+	set asm-flags "-mshort-double -m68hc11 --no-warn -I${srcdir}/${subdir} $obj_include"
 	set debug-flags "-gdwarf-2"
 	# This asm test is specific and uses the linker directly.
 	# We must not use the target board linker script defined for other
@@ -87,8 +87,8 @@ switch -glob -- [istarget] {
 	unset_board_info "ldscript"
     }
     "m6812-*-*" {
-        set asm-arch m68hc11
-        set asm-flags "-mshort-double -m68hc12 --no-warn -I${srcdir}/${subdir} $obj_include"
+	set asm-arch m68hc11
+	set asm-flags "-mshort-double -m68hc12 --no-warn -I${srcdir}/${subdir} $obj_include"
 	set debug-flags "-gdwarf-2"
 	# This asm test is specific and uses the linker directly.
 	# We must not use the target board linker script defined for other
@@ -98,65 +98,65 @@ switch -glob -- [istarget] {
 	set_board_info ldscript ""
     }
     "mips*-*" {
-        set asm-arch mips
+	set asm-arch mips
     }
     "powerpc64le-*" {
-        set asm-arch powerpc64le
-        set asm-flags "-a64 -I${srcdir}/${subdir} $obj_include"
-        append link-flags " -m elf64lppc"
+	set asm-arch powerpc64le
+	set asm-flags "-a64 -I${srcdir}/${subdir} $obj_include"
+	append link-flags " -m elf64lppc"
     }
     "powerpc*-*" {
-        if { [is_lp64_target] } {
-            set asm-arch powerpc64
-            set asm-flags "-a64 -I${srcdir}/${subdir} $obj_include"
-            append link-flags " -m elf64ppc"
-        } else {
-            set asm-arch powerpc
-            set asm-flags "-a32 -I${srcdir}/${subdir} $obj_include"
-            append link-flags " -m elf32ppc"
-        }
+	if { [is_lp64_target] } {
+	    set asm-arch powerpc64
+	    set asm-flags "-a64 -I${srcdir}/${subdir} $obj_include"
+	    append link-flags " -m elf64ppc"
+	} else {
+	    set asm-arch powerpc
+	    set asm-flags "-a32 -I${srcdir}/${subdir} $obj_include"
+	    append link-flags " -m elf32ppc"
+	}
     }
     "sh*-*-*" {
-        set asm-arch sh
+	set asm-arch sh
 	set debug-flags "-gdwarf-2"
     }
     "sparc-*-*" {
-        set asm-arch sparc
+	set asm-arch sparc
     }
     "sparc64-*-*" {
-        set asm-arch sparc64
-        set asm-flags "-xarch=v9 -I${srcdir}/${subdir} $obj_include"
+	set asm-arch sparc64
+	set asm-flags "-xarch=v9 -I${srcdir}/${subdir} $obj_include"
 	set debug-flags "-gdwarf-2"
     }
     "xstormy16-*-*" {
-        set asm-arch xstormy16
+	set asm-arch xstormy16
 	set debug-flags "-gdwarf-2"
     }
     "v850-*-*" {
-        set asm-arch v850
-        set gdb_wrapper_initialized 1
+	set asm-arch v850
+	set gdb_wrapper_initialized 1
     }
     "m68k-*-*" {
-        set asm-arch m68k
+	set asm-arch m68k
     }
     "ia64-*-*" {
-        set asm-arch ia64
+	set asm-arch ia64
 	set debug-flags "-gdwarf-2"
     }
     "iq2000-*-*" {
-    	set asm-arch iq2000
+	set asm-arch iq2000
     }
     "hppa*-linux-*" {
-        set asm-arch pa
+	set asm-arch pa
 	set debug-flags "-gdwarf-2"
     }
     "hppa-*-openbsd*" {
-        set asm-arch pa
+	set asm-arch pa
 	set debug-flags "-gdwarf-2"
     }
     "h83*-*" {
 	set asm-arch h8300
-        set debug-flags "-gdwarf-2"
+	set debug-flags "-gdwarf-2"
     }
 }
 
@@ -317,17 +317,17 @@ gdb_test_multiple "info target" "info target" {
 set entry_symbol ""
 gdb_test_multiple "info symbol 0x$entry_point" "info symbol" {
     -re "info symbol 0x$entry_point\[\r\n\]+(\[^\r\n\]*) in section .*$gdb_prompt $" {
-        # We match the echoed `info symbol' command here, to help us
-        # reliably identify the beginning of the start symbol in the
-        # command's output.  You might think we could just use '^' to
-        # start matching at the beginning of the line, but
-        # unfortunately, in Expect, '^' matches the beginning of the
-        # input that hasn't been matched by any expect clause yet.  If
-        # every expect clause consumes a complete line, along with its
-        # terminating CR/LF, this is equivalent to the beginning of a
-        # line.  But expect clauses that end with `.*' will consume as
-        # much as happened to arrive from the TTY --- exactly where
-        # they leave you depends on inter-process timing.  :(
+	# We match the echoed `info symbol' command here, to help us
+	# reliably identify the beginning of the start symbol in the
+	# command's output.  You might think we could just use '^' to
+	# start matching at the beginning of the line, but
+	# unfortunately, in Expect, '^' matches the beginning of the
+	# input that hasn't been matched by any expect clause yet.  If
+	# every expect clause consumes a complete line, along with its
+	# terminating CR/LF, this is equivalent to the beginning of a
+	# line.  But expect clauses that end with `.*' will consume as
+	# much as happened to arrive from the TTY --- exactly where
+	# they leave you depends on inter-process timing.  :(
 	set entry_symbol $expect_out(1,string)
 	pass "info symbol"
     }
@@ -377,11 +377,11 @@ gdb_test "info source" \
 # again as well as the statement after.
 gdb_test_multiple "finish" "finish from foo3" {
     -re "Run till exit from.*\[\r\n\]$line_call_foo3\[ \t\]+gdbasm_call foo3.*$gdb_prompt $" {
-        pass "finish from foo3"
-        gdb_test "s" ".*" "s after finish"
+	pass "finish from foo3"
+	gdb_test "s" ".*" "s after finish"
     }
     -re "Run till exit from.*\[\r\n\]$line_call_foo3_again\[ \t\]+gdbasm_call foo3.*$gdb_prompt $" {
-        pass "finish from foo3"
+	pass "finish from foo3"
     }
 }
 
@@ -398,22 +398,22 @@ set seen_asmsrc_1 0
 set seen_asmsrc_2 0
 gdb_test_multiple "info sources" "info sources" {
     -re "^\[^,\]*asmsrc1.s(, |\[\r\n\]+)" {
-        set seen_asmsrc_1 1
-        exp_continue
+	set seen_asmsrc_1 1
+	exp_continue
     }
     -re "^\[^,\]*asmsrc2.s(, |\[\r\n\]+)" {
-        set seen_asmsrc_2 1
-        exp_continue
+	set seen_asmsrc_2 1
+	exp_continue
     }
     -re ", " {
-        exp_continue
+	exp_continue
     }
     -re "$gdb_prompt $" {
-        if {$seen_asmsrc_1 && $seen_asmsrc_2} {
-            pass "info sources"
-        } else {
-            fail "info sources"
-        }
+	if {$seen_asmsrc_1 && $seen_asmsrc_2} {
+	    pass "info sources"
+	} else {
+	    fail "info sources"
+	}
     }
 }
 
@@ -430,15 +430,15 @@ gdb_test "next" "$line_foo2_leave\[ \t\]+gdbasm_leave" "next over foo3"
 # line again or the statement after, depending on the architecture.
 gdb_test_multiple "return" "return from foo2" {
     -re "Make (foo2|selected stack frame) return now\\? .y or n. " {
-        send_gdb "y\n"
-        exp_continue
+	send_gdb "y\n"
+	exp_continue
     }
     -re "\#0.*main .*$line_call_foo2\[ \t\]+gdbasm_call foo2.*$gdb_prompt $" {
-        pass "return from foo2"
-        gdb_test "s" ".*" "s after return"
+	pass "return from foo2"
+	gdb_test "s" ".*" "s after return"
     }
     -re "\#0.*main .*$line_main_exit\[ \t\]+gdbasm_exit0.*$gdb_prompt $" {
-        pass "return from foo2"
+	pass "return from foo2"
     }
 }
 

@@ -85,9 +85,9 @@ gdb_test "return 35" \
        "Not confirmed" \
        "return 35" \
        [multi_line \
-           "Function 'foo' does not follow the target calling convention\\." \
-           "If you continue, setting the return value will probably lead to unpredictable behaviors\\." \
-           "Make foo return now\\? \\(y or n\\) $"] \
+	   "Function 'foo' does not follow the target calling convention\\." \
+	   "If you continue, setting the return value will probably lead to unpredictable behaviors\\." \
+	   "Make foo return now\\? \\(y or n\\) $"] \
        "n"
 
 gdb_test "finish" [multi_line \

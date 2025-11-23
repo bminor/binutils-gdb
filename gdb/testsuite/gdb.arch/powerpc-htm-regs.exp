@@ -323,4 +323,3 @@ with_test_prefix "after transaction failure" {
 	test_register_match "vs$i.uint128" "cvs$i" 1
     }
 }
-

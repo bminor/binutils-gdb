@@ -50,25 +50,25 @@ gdb_test "break $line_number" \
 	"break in thread function"
 gdb_test "continue" \
 	"tls_ptr .* at .*:.*break here to check result.*" \
-        "continue to break in tls_ptr called by main"
+	"continue to break in tls_ptr called by main"
 gdb_test "print so_extern == &so_extern" \
-         " = 1" \
-        "check so_extern address in main"
+	 " = 1" \
+	"check so_extern address in main"
 gdb_test "continue" \
 	"tls_ptr .* at .*:.*break here to check result.*" \
-        "continue to break in a thread"
+	"continue to break in a thread"
 gdb_test "print so_extern == &so_extern" \
-         " = 1" \
-        "check so_extern address"
+	 " = 1" \
+	"check so_extern address"
 gdb_test "continue" \
 	"tls_ptr .* at .*:.*break here to check result.*" \
-        "continue to break in the other thread"
+	"continue to break in the other thread"
 gdb_test "print so_extern == &so_extern" \
-         " = 1" \
-        "check so_extern address in other thread"
+	 " = 1" \
+	"check so_extern address in other thread"
 gdb_test "continue" \
 	"tls_ptr .* at .*:.*break here to check result.*" \
-        "continue to break in tls_ptr called at end of main"
+	"continue to break in tls_ptr called at end of main"
 gdb_test "print so_extern == &so_extern" \
-         " = 1" \
-        "check so_extern address at end of main"
+	 " = 1" \
+	"check so_extern address at end of main"

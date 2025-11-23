@@ -28,16 +28,16 @@ vector int m_vec_d = {0, 0};
 
 vector int
 vec_func (vector unsigned int a_vec_f,
-          vector int b_vec_f,
-          vector float c_vec_f,
-          vector unsigned int d_vec_f,
-          vector int e_vec_f,
-          vector unsigned short f_vec_f,
-          vector short g_vec_f,
-          vector float h_vec_f,
-          vector float i_vec_f,
-          vector unsigned int l_vec_f,
-          vector int m_vec_f)
+	  vector int b_vec_f,
+	  vector float c_vec_f,
+	  vector unsigned int d_vec_f,
+	  vector int e_vec_f,
+	  vector unsigned short f_vec_f,
+	  vector short g_vec_f,
+	  vector float h_vec_f,
+	  vector float i_vec_f,
+	  vector unsigned int l_vec_f,
+	  vector int m_vec_f)
 {
   vector int n_vec;
 
@@ -91,16 +91,16 @@ vec_func(a_vec,b_vec,c_vec,d_vec,e_vec,f_vec,g_vec,h_vec,i_vec,l_vec,m_vec)
 #endif
 
   res_vec = vec_func (a_vec,  /* goes in r3 */
-                      b_vec,  /* goes in r4 */
-                      c_vec,  /* goes in r5 */
-                      d_vec,  /* goes in r6 */
-                      e_vec,  /* goes in r7 */
-                      f_vec,  /* goes in r8 */
-                      g_vec,  /* goes in r9 */
-                      h_vec,  /* goes in r10 */
-                      i_vec,  /* goes in stack */
-                      l_vec,  /* goes in stack */
-                      m_vec);  /* goes in stack */
+		      b_vec,  /* goes in r4 */
+		      c_vec,  /* goes in r5 */
+		      d_vec,  /* goes in r6 */
+		      e_vec,  /* goes in r7 */
+		      f_vec,  /* goes in r8 */
+		      g_vec,  /* goes in r9 */
+		      h_vec,  /* goes in r10 */
+		      i_vec,  /* goes in stack */
+		      l_vec,  /* goes in stack */
+		      m_vec);  /* goes in stack */
 
   return 0;
 }

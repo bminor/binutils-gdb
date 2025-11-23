@@ -52,7 +52,7 @@ proc simple_func_break_test { protection } {
     gdb_breakpoint "foo"
 
     if { $protection == "-fstack-protector-all"
-         && [test_compiler_info "gcc-*"] } {
+	 && [test_compiler_info "gcc-*"] } {
 	setup_xfail "gcc/88432" "*-*-linux*"
     }
     gdb_continue_to_breakpoint "foo" ".*break here.*"

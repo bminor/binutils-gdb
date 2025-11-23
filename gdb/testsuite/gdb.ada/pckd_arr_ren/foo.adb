@@ -21,4 +21,3 @@ procedure Foo is
 begin
    Do_Nothing (A2'Address); -- STOP
 end Foo;
-

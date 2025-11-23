@@ -57,4 +57,3 @@ main ()
 
   raise (SIGHUP);		/* third HUP */
 }
-

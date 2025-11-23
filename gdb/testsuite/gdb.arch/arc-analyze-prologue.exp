@@ -200,4 +200,3 @@ gdb_test "info frame 0" ".*Saved registers:$regs" \
 set regs [saved_regs_to_str {fp blink} alloca_inner]
 gdb_test "info frame 1" ".*Saved registers:$regs" \
     "saved registers in alloca_outer"
-

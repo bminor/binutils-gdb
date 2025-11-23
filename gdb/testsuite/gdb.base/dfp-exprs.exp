@@ -126,7 +126,7 @@ proc test_dfp_arithmetic_expressions {} {
     set dsuffix {"dd" "df" "dl"}
 
     foreach l $dsuffix {
-        foreach r $dsuffix {
+	foreach r $dsuffix {
 	    gdb_test "p 1.2${l} == 1.2${r}" " = 1"
 	    gdb_test "p 1.2${l} == 1.3${r}" " = 0"
 

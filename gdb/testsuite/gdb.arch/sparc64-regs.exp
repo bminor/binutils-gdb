@@ -37,8 +37,8 @@ gdb_test "si" "wr .*" "single step to the first %ccr test"
 
 proc test_ccr {exp_value exp_text {exp_insn "wr .*"}} {
     gdb_test "info register ccr" \
-        "ccr            $exp_value	.*$exp_text.*" \
-        "check %ccr register value equal to $exp_text"
+	"ccr            $exp_value	.*$exp_text.*" \
+	"check %ccr register value equal to $exp_text"
 
     gdb_test "si" "$exp_insn" "single step to a next %ccr test after $exp_text"
 }
@@ -85,8 +85,8 @@ gdb_test "continue" "Continuing.*"
 
 proc test_fsr {exp_value exp_text} {
     gdb_test "info register fsr" \
-        "fsr            $exp_value	.*$exp_text.*" \
-        "check %fsr register value equal to $exp_text"
+	"fsr            $exp_value	.*$exp_text.*" \
+	"check %fsr register value equal to $exp_text"
 
     gdb_test "si" "stx .*" "single step to a next %fsr test (I.) after $exp_text"
     gdb_test "si" "ldx .*" "single step to a next %fsr test (II.) after $exp_text"

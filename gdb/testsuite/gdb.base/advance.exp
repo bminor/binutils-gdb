@@ -75,4 +75,3 @@ gdb_test "advance foo" \
 gdb_test "advance" \
 	"Argument required \\(a location\\)."\
 	"advance with no argument"
-

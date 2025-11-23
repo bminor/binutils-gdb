@@ -22,4 +22,3 @@ procedure Foo is
 begin
    Do_Nothing (Full'Address); -- STOP
 end Foo;
-

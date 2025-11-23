@@ -51,19 +51,19 @@ if { ![runto_main] } {
 }
 
 gdb_test "break all_threads_running" \
-         "Breakpoint 2 at .*: file .*${srcfile}, line .*" \
-         "breakpoint on all_threads_running"
+	 "Breakpoint 2 at .*: file .*${srcfile}, line .*" \
+	 "breakpoint on all_threads_running"
 
 gdb_test "break hand_call" \
-         "Breakpoint 3 at .*: file .*${srcfile}, line .*" \
-         "breakpoint on hand_call"
+	 "Breakpoint 3 at .*: file .*${srcfile}, line .*" \
+	 "breakpoint on hand_call"
 
 # Run the program and make sure GDB reports that we stopped after
 # hitting breakpoint 2 in all_threads_running().
 
 gdb_test "continue" \
-         ".*Breakpoint 2, all_threads_running ().*" \
-         "run to all_threads_running"
+	 ".*Breakpoint 2, all_threads_running ().*" \
+	 "run to all_threads_running"
 
 # Before we start making hand function calls, turn on scheduler locking.
 

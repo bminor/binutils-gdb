@@ -37,7 +37,7 @@ tf (void *arg)
     puts (number);
 
     while (unslept > 0)
-        unslept = sleep(unslept);
+	unslept = sleep(unslept);
 
     sprintf(number, "tf(%ld): end", (long)arg);
     puts (number);
@@ -53,10 +53,10 @@ int main (int argc, char *argv[])
     for (n = 0; n < N; ++n)
     if (pthread_create (&th[n], NULL, tf, (void *) (long int) n) != 0)
     {
-        while (unslept > 0)
-           unslept = sleep(2);
-        puts ("create failed");
-        exit (1);
+	while (unslept > 0)
+	   unslept = sleep(2);
+	puts ("create failed");
+	exit (1);
     }
 
     puts("after create");
@@ -64,8 +64,8 @@ int main (int argc, char *argv[])
     for (n = 0; n < N; ++n)
     if (pthread_join (th[n], NULL) != 0)
     {
-        puts ("join failed");
-        exit (1);
+	puts ("join failed");
+	exit (1);
     }
 
     puts("after join");

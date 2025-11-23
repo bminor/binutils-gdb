@@ -49,8 +49,8 @@ if {[is_aarch64_target]} {
 	    # if we have NEON.
 	    pass "info float (VFP)"
 	}
-        -re "No floating.point info available for this processor.*$gdb_prompt $" {
-            pass "info float (without FPU)"
+	-re "No floating.point info available for this processor.*$gdb_prompt $" {
+	    pass "info float (without FPU)"
 	}
     }
 } elseif {[istarget "i?86-*-*"] || [istarget "x86_64-*-*"]} {
@@ -59,11 +59,11 @@ if {[is_aarch64_target]} {
     gdb_test "info float" "f0.*f1.*f127.*"
 } elseif {[istarget "m68k-*-*"]} {
     gdb_test_multiple "info float" "info_float" {
-        -re "fp0.*fp1.*fp7.*$gdb_prompt $" {
-            pass "info float (with FPU)"
+	-re "fp0.*fp1.*fp7.*$gdb_prompt $" {
+	    pass "info float (with FPU)"
 	}
-        -re "No floating.point info available for this processor.*$gdb_prompt $" {
-            pass "info float (without FPU)"
+	-re "No floating.point info available for this processor.*$gdb_prompt $" {
+	    pass "info float (without FPU)"
 	}
     }
 } elseif {[istarget "mips*-*-*"]} {
@@ -77,20 +77,20 @@ if {[is_aarch64_target]} {
     }
 } elseif {[istarget "nds32*-*-*"]} {
     gdb_test_multiple "info float" "info_float" {
-        -re "fd0.*fd3.*$gdb_prompt $" {
-            pass "info float (with FPU)"
+	-re "fd0.*fd3.*$gdb_prompt $" {
+	    pass "info float (with FPU)"
 	}
-        -re "No floating.point info available for this processor.*$gdb_prompt $" {
-            pass "info float (without FPU)"
+	-re "No floating.point info available for this processor.*$gdb_prompt $" {
+	    pass "info float (without FPU)"
 	}
     }
 } elseif {[istarget "powerpc*-*-*"]} {
     gdb_test_multiple "info float" "info_float" {
-        -re "f0.*f1.*f31.*fpscr.*$gdb_prompt $" {
-            pass "info float (with FPU)"
+	-re "f0.*f1.*f31.*fpscr.*$gdb_prompt $" {
+	    pass "info float (with FPU)"
 	}
-        -re "No floating.point info available for this processor.*$gdb_prompt $" {
-            pass "info float (without FPU)"
+	-re "No floating.point info available for this processor.*$gdb_prompt $" {
+	    pass "info float (without FPU)"
 	}
     }
 } elseif {[istarget "s390*-*-*"]} {

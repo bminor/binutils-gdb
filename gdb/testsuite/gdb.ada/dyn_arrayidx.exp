@@ -33,4 +33,4 @@ runto "foo.adb:$bp_location"
 gdb_test_no_output "maintenance set ada ignore-descriptive-types"
 
 gdb_test "ptype array_type" \
-         " = array \\(5 \\.\\. 10\\) of natural" \
+	 " = array \\(5 \\.\\. 10\\) of natural" \

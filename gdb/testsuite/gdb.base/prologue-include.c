@@ -22,4 +22,3 @@ main (void)
 #include "prologue-include.h"
   return 0;
 }
-

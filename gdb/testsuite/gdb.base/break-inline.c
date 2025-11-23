@@ -29,4 +29,3 @@ main (int argc, char *argv[])
   foo ();
   return g;
 }
-

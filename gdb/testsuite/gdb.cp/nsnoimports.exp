@@ -63,4 +63,3 @@ with_test_prefix "A::B::C::second scope" {
     gdb_test "print ab" "= 22"
     gdb_test "print abc" "= 33"
 }
-

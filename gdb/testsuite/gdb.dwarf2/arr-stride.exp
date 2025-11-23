@@ -23,31 +23,31 @@ standard_testfile main.c -dw.S
 set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
     cu {} {
- 	DW_TAG_compile_unit {
+	DW_TAG_compile_unit {
 	    DW_AT_language @DW_LANG_Ada95
 	    DW_AT_name     foo.adb
 	    DW_AT_comp_dir /tmp
-        } {
+	} {
 	    declare_labels integer_label array_elt_label array_label \
-                big_array_label struct_label
+		big_array_label struct_label
 
-            integer_label: DW_TAG_base_type {
+	    integer_label: DW_TAG_base_type {
 		DW_AT_byte_size 4 DW_FORM_sdata
 		DW_AT_encoding	@DW_ATE_signed
 		DW_AT_name	integer
-            }
+	    }
 
-            array_elt_label: DW_TAG_subrange_type {
+	    array_elt_label: DW_TAG_subrange_type {
 		DW_AT_lower_bound 0xe0 DW_FORM_data1
 		DW_AT_upper_bound 0x1f DW_FORM_data1
 		DW_AT_name	  pck__item
 		DW_AT_type	  :$integer_label
-            }
+	    }
 
-            DW_TAG_typedef {
+	    DW_TAG_typedef {
 		DW_AT_name pck__table
 		DW_AT_type :$array_label
-            }
+	    }
 
 	    array_label: DW_TAG_array_type {
 		DW_AT_name pck__table
@@ -61,10 +61,10 @@ Dwarf::assemble $asm_file {
 		}
 	    }
 
-            DW_TAG_typedef {
+	    DW_TAG_typedef {
 		DW_AT_name pck__big_table
 		DW_AT_type :$big_array_label
-            }
+	    }
 
 	    big_array_label: DW_TAG_array_type {
 		DW_AT_name pck__big_table
@@ -117,10 +117,10 @@ if { [prepare_for_testing "failed to prepare" ${testfile} \
 gdb_test_no_output "set language ada"
 
 gdb_test "ptype pck.table" \
-         "type = array \\(0 \\.\\. 4\\) of pck\\.item <packed: 6-bit elements>"
+	 "type = array \\(0 \\.\\. 4\\) of pck\\.item <packed: 6-bit elements>"
 
 gdb_test "ptype pck.big_table" \
-         "type = array \\(0 \\.\\. 4\\) of pck\\.item <packed: 8-bit elements>"
+	 "type = array \\(0 \\.\\. 4\\) of pck\\.item <packed: 8-bit elements>"
 
 gdb_test "print the_struct" \
     "\\(intfield => 1, arrayfield => \\(0 => <optimized out>\\)\\)"

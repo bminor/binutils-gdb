@@ -29,10 +29,10 @@ set bp_location [gdb_get_line_number "STOP" ${testdir}/fixed_points_function.adb
 runto "fixed_points_function.adb:$bp_location"
 
 gdb_test "print call_fp1(1)" \
-         " = 1"
+	 " = 1"
 
 gdb_test "print call_fp1(0.5)" \
-         " = 0.5"
+	 " = 0.5"
 
 gdb_test "print call_fp1(-0.5)" \
-         " = -0.5"
+	 " = -0.5"

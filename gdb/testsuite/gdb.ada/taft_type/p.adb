@@ -20,4 +20,3 @@ procedure P is
 begin
    W := Create;
 end P;  --  START
-

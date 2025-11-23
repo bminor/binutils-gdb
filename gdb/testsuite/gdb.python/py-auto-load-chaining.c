@@ -33,7 +33,7 @@ allocate_page (void)
   void *addr;
   int pgsize = sysconf(_SC_PAGE_SIZE);
   addr = mmap (NULL, pgsize, PROT_EXEC | PROT_READ | PROT_WRITE,
-               MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+	       MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
   if (addr == MAP_FAILED)
     perror ("mmap");
 }

@@ -163,8 +163,8 @@ gdb_test_multiple "continue" "continue until exit" {
 send_gdb "delete\n"
 gdb_expect {
   -re ".*Delete all breakpoints, watchpoints, tracepoints, and catchpoints. \\(y or n\\) \r\n\032\032query.*$" {
-           send_gdb "y\n"
-           gdb_expect {
+	   send_gdb "y\n"
+	   gdb_expect {
 	     -re "\r\n\032\032post-query\r\n${breakpoints_invalid}$gdb_prompt$" { pass "delete bps" }
 	     -re ".*$gdb_prompt$" { fail "delete bps" }
 	     timeout  { fail "delete bps (timeout)" }
@@ -291,4 +291,3 @@ if {![target_info exists gdb,nointerrupts]} {
 # reinstall the old prompt for the rest of the testsuite.
 
 set gdb_prompt $old_gdb_prompt
-

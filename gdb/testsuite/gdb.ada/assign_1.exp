@@ -22,11 +22,11 @@ clean_restart
 # Force the language to Ada, as this will not happen automatically
 # in this case (no test program).
 gdb_test_no_output "set lang ada" \
-         "changing the language to ada"
+	 "changing the language to ada"
 
 gdb_test "print \$xxx := 1" \
-         "= 1" \
-         "set convenience variable \$xxx to 1"
+	 "= 1" \
+	 "set convenience variable \$xxx to 1"
 
 
 gdb_test "print \$xxx := @ + 23 + @" \

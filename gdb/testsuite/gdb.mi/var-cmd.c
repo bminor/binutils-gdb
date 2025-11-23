@@ -65,16 +65,16 @@ typedef struct _struct_decl {
   struct {
     union {
       struct {
-        int d;
-        char e[10];
-        int *(*func) (void);
-        efoo foo;
+	int d;
+	char e[10];
+	int *(*func) (void);
+	efoo foo;
       } u1s1;
 
       long f;
       struct {
-        char array_ptr[2];
-        int (*func) (int, char *);
+	char array_ptr[2];
+	int (*func) (int, char *);
       } u1s2;
     } u2;
 
@@ -217,8 +217,8 @@ do_block_tests ()
       int foo2;
       foo2 = 123;
       {
-        int foo;
-        foo = 321;
+	int foo;
+	foo = 321;
       }
       foo2 = 0;
     }
@@ -529,7 +529,7 @@ struct Data {
 /* Accessing a value of a bitfield whose type is a typed used to
    result in division by zero.  See:
 
-         http://sourceware.org/bugzilla/show_bug.cgi?id=10884
+	 http://sourceware.org/bugzilla/show_bug.cgi?id=10884
 
    This tests for this bug.  */
 
@@ -540,8 +540,8 @@ void do_bitfield_tests ()
   /*:
     mi_create_varobj V d "create varobj for Data"
     mi_list_varobj_children "V" {
-        {"V.alloc" "alloc" "0" "int"}
-        {"V.sharable" "sharable" "0" "uint_for_mi_testing"}
+	{"V.alloc" "alloc" "0" "int"}
+	{"V.sharable" "sharable" "0" "uint_for_mi_testing"}
     } "list children of Data"
     mi_check_varobj_value V.sharable 3 "access bitfield"
     :*/
@@ -662,5 +662,3 @@ main (int argc, char *argv [])
   do_nested_struct_union_tests ();
   exit (0);
 }
-
-

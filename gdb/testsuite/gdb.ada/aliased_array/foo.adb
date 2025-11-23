@@ -19,4 +19,3 @@ procedure Foo is
 begin
    Do_Nothing (BT'Address); -- STOP
 end Foo;
-

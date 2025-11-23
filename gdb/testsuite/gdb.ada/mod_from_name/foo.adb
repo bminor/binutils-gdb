@@ -33,4 +33,3 @@ procedure Foo is
 begin
    Slice (4) := 4;  --  START
 end Foo;
-

@@ -33,7 +33,7 @@ with_complaints 5 {
 	-re -wrap "$re_kfail.*" {
 	    kfail symtab/27388 $gdb_test_name
 	}
-        -re "^$cmd_regexp\r\n$gdb_prompt $" {
+	-re "^$cmd_regexp\r\n$gdb_prompt $" {
 	    pass $gdb_test_name
 	}
     }

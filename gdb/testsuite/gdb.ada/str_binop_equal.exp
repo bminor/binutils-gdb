@@ -29,13 +29,13 @@ set bp_location [gdb_get_line_number "STOP" ${testdir}/foo_p211_061.adb]
 runto "foo_p211_061.adb:$bp_location"
 
 gdb_test "print my_str = my_str" \
-         " = true"
+	 " = true"
 
 gdb_test "print my_str = \"ABCD\"" \
     " = true"
 
 gdb_test "print my_str = \"EFGH\"" \
-         " = false"
+	 " = false"
 
 gdb_test "print my_str = \"AB\"" \
-         " = false"
+	 " = false"

@@ -77,4 +77,3 @@ int main()
   nc.test (N::A::X);
   return 0;
 }
-

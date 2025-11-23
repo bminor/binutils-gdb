@@ -68,4 +68,3 @@ proc do_test { ui_to_run } {
 foreach_with_prefix ui_to_run {first second} {
     do_test $ui_to_run
 }
-

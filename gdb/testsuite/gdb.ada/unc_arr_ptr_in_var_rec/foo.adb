@@ -48,4 +48,3 @@ begin
    Do_Nothing (My_Object'Address);             -- STOP2
    Do_Nothing (My_P_Object'Address);
 end Foo;
-

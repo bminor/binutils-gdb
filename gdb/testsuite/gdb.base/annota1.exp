@@ -434,8 +434,8 @@ set y_or_n [string_to_regexp "(y or n)"]
 send_gdb "run\n"
 gdb_expect {
   -re "pre-query.*already.*$y_or_n.*query\r\n" {
-         send_gdb "y\n"
-         gdb_expect {
+	 send_gdb "y\n"
+	 gdb_expect {
 	     -re ".*post-query.*$gdb_prompt$" \
 		     { pass "re-run" }
 	     -re ".*$gdb_prompt$"  { fail "re-run" }

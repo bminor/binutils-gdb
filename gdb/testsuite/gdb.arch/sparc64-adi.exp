@@ -23,7 +23,7 @@ require {istarget "sparc64*-*-linux*"}
 standard_testfile
 
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
-          [list debug libs=-ladi]] } {
+	  [list debug libs=-ladi]] } {
     return -1
 }
 
@@ -32,8 +32,8 @@ if {![runto_main]} {
 }
 
 gdb_test "break [gdb_get_line_number "line breakpoint here"]" \
-         "Breakpoint .* at .*${srcfile}.*" \
-         "set line breakpoint in main"
+	 "Breakpoint .* at .*${srcfile}.*" \
+	 "set line breakpoint in main"
 gdb_continue_to_breakpoint "continue to line breakpoint in main"
 
 ##########################################
@@ -41,9 +41,9 @@ set newadi "7"
 gdb_test "adi x shmaddr" "${hex}00:\t0" "examine ADI"
 gdb_test_no_output "adi a/100 shmaddr=${newadi}" "assign ADI"
 gdb_test "adi x/100 shmaddr" "${hex}00:\t${newadi} ${newadi}" \
-         "examine new ADI"
+	 "examine new ADI"
 gdb_test_no_output "adi a/100 shmaddr=0x0" "reset ADI"
 gdb_test "continue" \
-         [multi_line "Program received signal SIGSEGV, Segmentation fault.*" \
-                     "ADI precise mismatch while accessing address $hex.*" ] \
+	 [multi_line "Program received signal SIGSEGV, Segmentation fault.*" \
+		     "ADI precise mismatch while accessing address $hex.*" ] \
 	"continue to sigsegv"

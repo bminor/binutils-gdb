@@ -24,4 +24,3 @@
   <reg name="bad_reg2" bitsize="64"  type="bitfield"/>
 </feature>
 </target>
-

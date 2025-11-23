@@ -56,7 +56,7 @@ proc test_one_sig {nextsig} {
 	if { $thissig == "URG" } {
 	    setup_xfail "i*86-pc-linuxoldld-gnu" "i*86-pc-linuxaout-gnu"
 	}
-        # Either Lynx or GDB screws up on SIGPRIO
+	# Either Lynx or GDB screws up on SIGPRIO
 	if { $thissig == "PRIO" } {
 	    setup_xfail "*-*-*lynx*"
 	}
@@ -74,14 +74,14 @@ proc test_one_sig {nextsig} {
     if {$missed_handler == "0"} {
 	gdb_test_multiple "signal 0" "advance to $nextsig" {
 	    -re "Breakpoint.*gen_$nextsig.*\r\n\[0-9\]+\[ \t\]+kill \\(.*\r\n$gdb_prompt $" {
-	        pass "advance to $nextsig"
-	        set sig_supported 1
+		pass "advance to $nextsig"
+		set sig_supported 1
 	    }
 	    -re "Breakpoint.*gen_$nextsig.*\r\n\[0-9\]+\[ \t\]+handle_.*\r\n$gdb_prompt $" {
-	        pass "advance to $nextsig"
-	        set sig_supported 0
+		pass "advance to $nextsig"
+		set sig_supported 0
 	    }
-        }
+	}
     }
     set thissig $nextsig
 }

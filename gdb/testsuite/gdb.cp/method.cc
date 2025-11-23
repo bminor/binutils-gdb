@@ -75,6 +75,3 @@ int main()
   f.getFunky(1, 2);
   return 0;
 }
-
-
-

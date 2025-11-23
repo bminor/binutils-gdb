@@ -34,7 +34,7 @@ set bp_location [gdb_get_line_number "BREAK" ${testdir}/foo.adb]
 runto "foo.adb:$bp_location"
 
 gdb_test "print before" \
-         " = Thu Nov 14 02:22:23 2013 \\(1384395743\\)"
+	 " = Thu Nov 14 02:22:23 2013 \\(1384395743\\)"
 
 gdb_test "print /r before" \
-         " = \\(secs => 1384395743\\)"
+	 " = \\(secs => 1384395743\\)"

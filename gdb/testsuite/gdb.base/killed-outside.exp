@@ -31,7 +31,7 @@ proc get_value {var msg} {
 	-re ".*= ($decimal).*\r\n$gdb_prompt $" {
 	    set value $expect_out(1,string)
 	    pass "$msg"
-        }
+	}
     }
     return ${value}
 }

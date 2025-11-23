@@ -175,10 +175,10 @@ void test_calls()
 	TEST(pBe->vvb(), 411);
 	TEST(pDe->vvb(), 411);
 
-        TEST(pEe->vd(), 282);
-        TEST(pEe->fvb(), 311);
+	TEST(pEe->vd(), 282);
+	TEST(pEe->fvb(), 311);
 
-        TEST(pEe->D::vg(), 102);
+	TEST(pEe->D::vg(), 102);
 	printf("Did %d tests, of which %d failed.\n", all_count, failed_count);
 }
 

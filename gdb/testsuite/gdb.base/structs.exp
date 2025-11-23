@@ -358,10 +358,10 @@ proc test_struct_returns { n } {
     set test "value foo<n> returned; ${tests}"
     gdb_test_multiple "p/c L${n}" "${test}" {
 	-re " = [foo ${n}].*${gdb_prompt} $" {
-            # This answer is okay regardless of whether GDB claims to
-            # have set the return value: if it did, then this is what
-            # we expected; and if it didn't, then any answer is okay.
-            pass "${test}"
+	    # This answer is okay regardless of whether GDB claims to
+	    # have set the return value: if it did, then this is what
+	    # we expected; and if it didn't, then any answer is okay.
+	    pass "${test}"
 	}
 	-re " = [any $n].*${gdb_prompt} $" {
 	    if {$return_value_known} {
@@ -369,8 +369,8 @@ proc test_struct_returns { n } {
 		# the location of the return value.
 		fail "${test}"
 	    } else {
-                # We expected L${n} to be set to garbage, so any
-                # answer is acceptable.
+		# We expected L${n} to be set to garbage, so any
+		# answer is acceptable.
 		pass "${test}"
 	    }
 	}

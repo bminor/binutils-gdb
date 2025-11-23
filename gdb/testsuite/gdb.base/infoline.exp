@@ -24,4 +24,4 @@ if { [prepare_for_testing "failed to prepare" ${testfile}] } {
 # at <twice+N> where N is different from zero.
 set fun_decl_line [gdb_get_line_number "THIS LINE"]
 gdb_test "info line ${srcfile}:${fun_decl_line}" \
-         "Line ${fun_decl_line} of \".*${testfile}\.c\" starts at address 0x\[0-9a-f\]+ <twice> and ends at .*"
+	 "Line ${fun_decl_line} of \".*${testfile}\.c\" starts at address 0x\[0-9a-f\]+ <twice> and ends at .*"

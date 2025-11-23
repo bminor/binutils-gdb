@@ -29,13 +29,12 @@ clean_restart $::testfile
 runto_main
 
 gdb_test "break noreturn" \
-         "Breakpoint 2 at .*: file .*${srcfile}, line .*" \
-         "breakpoint on noreturn"
+	 "Breakpoint 2 at .*: file .*${srcfile}, line .*" \
+	 "breakpoint on noreturn"
 
 # Run the program and make sure GDB reports that we stopped after
 # hitting breakpoint 1 in noreturn().
 
 gdb_test "continue" \
-         ".*Breakpoint 2, noreturn ().*" \
-         "run to noreturn"
-
+	 ".*Breakpoint 2, noreturn ().*" \
+	 "run to noreturn"

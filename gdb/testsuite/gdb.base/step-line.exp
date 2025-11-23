@@ -35,47 +35,47 @@ set remote_linefile [gdb_remote_download host ${srcdir}/${subdir}/${linefile}]
 
 gdb_test "break f1" ".*Breakpoint 2 at .* file .*step-line.c.*"
 gdb_test "continue" \
-         "Continuing.*Breakpoint 2, f1 \\(i=4\\).*dummy \\(1, i\\);" \
+	 "Continuing.*Breakpoint 2, f1 \\(i=4\\).*dummy \\(1, i\\);" \
 	 "continue to f1"
 gdb_test "next" \
-         ".*i = f2 \\(i\\);.*" \
+	 ".*i = f2 \\(i\\);.*" \
 	 "next over dummy 1"
 gdb_test "next" \
-         ".*dummy \\(2, i\\);.*" \
+	 ".*dummy \\(2, i\\);.*" \
 	 "next to dummy 2"
 gdb_test "next" \
-         ".*i = f2 \\(i\\);.*" \
+	 ".*i = f2 \\(i\\);.*" \
 	 "next over dummy 2"
 gdb_test "step" \
-         ".*f2 \\(i=4\\).*dummy \\(4, i\\);.*" \
+	 ".*f2 \\(i=4\\).*dummy \\(4, i\\);.*" \
 	 "step into f2"
 gdb_test "next" \
-         ".*j = i;.*" \
+	 ".*j = i;.*" \
 	 "next over dummy 4"
 gdb_test "next" \
-         ".*dummy \\(5, i\\);.*" \
+	 ".*dummy \\(5, i\\);.*" \
 	 "next to dummy 5"
 gdb_test "next" \
-         ".*dummy \\(6, j\\);.*" \
+	 ".*dummy \\(6, j\\);.*" \
 	 "next to dummy 6"
 gdb_test "next" \
-         ".*j = SUCC \\(j\\);.*" \
+	 ".*j = SUCC \\(j\\);.*" \
 	 "next over dummy 6"
 gdb_test "next" \
-         ".*dummy \\(7, i\\);.*" \
+	 ".*dummy \\(7, i\\);.*" \
 	 "next to dummy 7"
 gdb_test "next" \
-         ".*dummy \\(8, j\\);.*" \
+	 ".*dummy \\(8, j\\);.*" \
 	 "next to dummy 8"
 gdb_test "next" \
-         ".*j = j - i;.*" \
+	 ".*j = j - i;.*" \
 	 "next over dummy 8"
 gdb_test "next" \
-         ".*dummy \\(9, i\\);.*" \
+	 ".*dummy \\(9, i\\);.*" \
 	 "next to dummy 9"
 gdb_test "next" \
-         ".*dummy \\(10, j\\);.*" \
+	 ".*dummy \\(10, j\\);.*" \
 	 "next to dummy 10"
 gdb_test "next" \
-         ".*RETURN \\(j\\);.*" \
+	 ".*RETURN \\(j\\);.*" \
 	 "next over dummy 10"

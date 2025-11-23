@@ -274,5 +274,3 @@ gdb_test "info reg ecx" "ecx *$preinc_ecx\[ \t\]+.*" "ecx after reverse-inc"
 gdb_test "info reg eax" "eax *$predec_eax\[ \t\]+.*" "eax before reverse-inc"
 gdb_test "reverse-step" "inc .eax.*" "reverse-step to inc eax"
 gdb_test "info reg eax" "eax *$preinc_eax\[ \t\]+.*" "eax after reverse-inc"
-
-

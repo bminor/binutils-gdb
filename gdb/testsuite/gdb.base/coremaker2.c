@@ -117,7 +117,7 @@ main (int argc, char **argv)
     }
 
   mbuf_ro = mmap ((void *) addr, pagesize, PROT_READ,
-               MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED, -1, 0);
+	       MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED, -1, 0);
 
   if (mbuf_ro == MAP_FAILED)
     {
@@ -141,7 +141,7 @@ main (int argc, char **argv)
     }
 
   mbuf_rw = mmap ((void *) addr, pagesize, PROT_READ,
-               MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED, -1, 0);
+	       MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED, -1, 0);
 
   if (mbuf_rw == MAP_FAILED)
     {

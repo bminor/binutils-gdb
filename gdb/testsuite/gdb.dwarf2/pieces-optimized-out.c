@@ -44,4 +44,3 @@ main ( void )
   v += foo (v);
   return v + 5 + s.a;
 }
-

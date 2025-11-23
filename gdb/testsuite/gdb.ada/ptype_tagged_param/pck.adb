@@ -27,4 +27,3 @@ package body Pck is
    end Area;
 
 end Pck;
-

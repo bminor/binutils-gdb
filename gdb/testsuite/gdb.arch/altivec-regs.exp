@@ -59,9 +59,9 @@ gdb_test "set print frame-arguments all"
 
 # set all the registers integer portions to 1
 for {set i 0} {$i < 32} {incr i 1} {
-        for {set j 0} {$j < 4} {incr j 1} {
-           gdb_test "set \$vr$i.v4_int32\[$j\] = 1" "" "set reg vr$i.v4si.f\[$j\]"
-        }
+	for {set j 0} {$j < 4} {incr j 1} {
+	   gdb_test "set \$vr$i.v4_int32\[$j\] = 1" "" "set reg vr$i.v4si.f\[$j\]"
+	}
 }
 
 gdb_test "set \$vscr = 1" "" ""
@@ -174,6 +174,3 @@ gdb_test "down" \
 gdb_test "finish" \
   "Run till exit from .0  vector_fun \\(a=.0x2020202, 0x2020202, 0x2020202, 0x2020202., b=.0x3030303, 0x3030303, 0x3030303, 0x3030303.\\) at.*altivec-regs.c.*in main \\(\\) at.*altivec-regs.c.*z = vector_fun \\(x, y\\);.*Value returned is.*= .0x5050505, 0x5050505, 0x5050505, 0x5050505." \
   "finish returned correct value"
-
-
-

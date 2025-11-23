@@ -41,7 +41,7 @@ if {![runto_main]} {
 
 proc make_scope_list { scopes } {
     if { [llength $scopes] == 1 } {
-        return [list "" "${scopes}::"]
+	return [list "" "${scopes}::"]
     }
 
     # Pop the first element, save the first scope.
@@ -55,7 +55,7 @@ proc make_scope_list { scopes } {
 
     # ... and a copy of the child's result with this scope.
     foreach r $child_result {
-        lappend result "${this_scope}::$r"
+	lappend result "${this_scope}::$r"
     }
 
     return $result

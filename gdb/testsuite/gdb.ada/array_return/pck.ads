@@ -25,4 +25,3 @@ package Pck is
    function Create_Small_Float_Vector return Small_Float_Vector;
 
 end Pck;
-

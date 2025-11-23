@@ -34,8 +34,8 @@ rdpkru (void)
   unsigned int pkru;
 
   asm volatile (".byte 0x0f,0x01,0xee\n\t"
-               : "=a" (eax), "=d" (edx)
-               : "c" (ecx));
+	       : "=a" (eax), "=d" (edx)
+	       : "c" (ecx));
   pkru = eax;
   return pkru;
 }
@@ -48,7 +48,7 @@ wrpkru (unsigned int pkru)
   unsigned int edx = 0;
 
   asm volatile (".byte 0x0f,0x01,0xef\n\t"
-               : : "a" (eax), "c" (ecx), "d" (edx));
+	       : : "a" (eax), "c" (ecx), "d" (edx));
 }
 
 unsigned int NOINLINE

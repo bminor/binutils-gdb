@@ -113,11 +113,11 @@ proc generate_member_function { classname signature length state } {
 	explicit {
 	    set declaration "$signature;\n"
 	    set definition "$classname\:\:$signature
-                            {
-                              data\[0\] = $CUSTOM;
-                              data\[[expr {$length - 1}]\] = $CUSTOM;
-                              tracer = $TRACE;
-                            }\n"
+			    {
+			      data\[0\] = $CUSTOM;
+			      data\[[expr {$length - 1}]\] = $CUSTOM;
+			      tracer = $TRACE;
+			    }\n"
 	}
 	defaultedIn {
 	    set declaration "$signature = default;\n"
@@ -168,16 +168,16 @@ proc generate_class { classname length states } {
     /*** C++ class $classname ***/
     class ${classname} {
     public:
-        $classname (void);
-        $declarations
+	$classname (void);
+	$declarations
 
-        int data\[$length\];
+	int data\[$length\];
     };
 
     $classname\:\:$classname (void)
     {
-        data\[0\] = $ORIGINAL;
-        data\[[expr {$length - 1}]\] = $ORIGINAL;
+	data\[0\] = $ORIGINAL;
+	data\[[expr {$length - 1}]\] = $ORIGINAL;
     }
 
     $definitions
@@ -228,7 +228,7 @@ proc generate_container_class { states } {
     /*** Class that contains $contained ***/
     class $classname {
     public:
-        $contained item;
+	$contained item;
     };
 
     $classname ${classname}_var; /* global var */

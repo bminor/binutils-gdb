@@ -66,25 +66,25 @@ gdb_test "cle ending-run.c:$break1_line" \
 
 gdb_test_multiple "info line ending-run.c:$break1_line" "" {
     -re ".*address (0x\[0-9a-fA-F]*).*$gdb_prompt $" {
-        set line_nine $expect_out(1,string)
+	set line_nine $expect_out(1,string)
 	gdb_test "b ending-run.c:$break1_line" ".*Breakpoint 4.*ending-run.c, line $break1_line.*"
 	gdb_test "b *$line_nine" ".*Note.*also.*Breakpoint 5.*" "breakpoint 7 at *ending-run.c:$break1_line"
 	gdb_test "cle" "Deleted breakpoints 4 5 " "clear 2 by default"
     }
     -re ".*$gdb_prompt $" {
-        fail "need to fix test for new compile outcome"
+	fail "need to fix test for new compile outcome"
     }
 }
 
 gdb_test_multiple "i b" "all set to continue" {
     -re ".* breakpoint .* breakpoint .*$gdb_prompt $" {
-        fail "all set to continue (didn't clear bps)"
+	fail "all set to continue (didn't clear bps)"
     }
     -re ".*2.*main.*$break2_line.*$gdb_prompt $" {
-        pass "all set to continue"
+	pass "all set to continue"
     }
     -re ".*$gdb_prompt $" {
-        fail "all set to continue (missing bp at end)"
+	fail "all set to continue (missing bp at end)"
     }
 }
 
@@ -184,13 +184,13 @@ gdb_test_multiple "next" "step out of main" {
 	gdb_test "next" ".*in start_l ().*" "step out of main"
     }
     -re ".*in.*currently asm.*$gdb_prompt $" {
-        pass "step out of main"
+	pass "step out of main"
     }
     -re "_*start\[0-9\]* \\(\[^)\]*\\).*$gdb_prompt $" {
-        pass "step out of main"
+	pass "step out of main"
     }
     -re ".*Program received signal SIGTRAP.*$gdb_prompt $" {
-        pass "step out of main"
+	pass "step out of main"
     }
     -re ".*in.*__uClibc_main.*$gdb_prompt $" {
 	# This is what happens on system using uClibc.
@@ -249,7 +249,7 @@ if {!$use_gdb_stub
 		set program_in_exit 1
 	    }
 	    -re ".*Single.*_int_reset.*$gdb_prompt $" {
-	        pass "step to end of run"
+		pass "step to end of run"
 		if {![istarget "xstormy16-*-*"]} {
 		    set program_exited_normally 1
 		}
@@ -266,7 +266,7 @@ if {!$use_gdb_stub
     }
 
     if {$program_exited_normally} {
-        gdb_test "n" ".*The program is not being run.*" "don't step after run"
+	gdb_test "n" ".*The program is not being run.*" "don't step after run"
     } elseif {$program_not_exited} {
 	unresolved "don't step after run"
     } else {
@@ -290,8 +290,3 @@ if {!$use_gdb_stub
 set timeout $old_timeout
 
 #remote_exec build "rm -f ${binfile}"
-
-
-
-
-

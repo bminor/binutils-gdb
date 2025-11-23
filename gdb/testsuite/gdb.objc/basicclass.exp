@@ -170,5 +170,3 @@ gdb_test "print-object object" \
 gdb_test "po self" \
     "BasicClass gdb test object" \
     "use of the po (print-object) command"
-
-

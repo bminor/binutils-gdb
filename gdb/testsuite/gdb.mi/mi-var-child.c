@@ -65,16 +65,16 @@ typedef struct _struct_decl {
   struct {
     union {
       struct {
-        int d;
-        char e[10];
-        int *(*func) (void);
-        efoo foo;
+	int d;
+	char e[10];
+	int *(*func) (void);
+	efoo foo;
       } u1s1;
 
       long f;
       struct {
-        char array_ptr[2];
-        int (*func) (int, char *);
+	char array_ptr[2];
+	int (*func) (int, char *);
       } u1s2;
     } u2;
 
@@ -194,8 +194,8 @@ do_block_tests ()
       int foo2;
       foo2 = 123;
       {
-        int foo;
-        foo = 321;
+	int foo;
+	foo = 321;
       }
       foo2 = 0;
     }
@@ -359,5 +359,3 @@ main (int argc, char *argv [])
   do_child_deletion ();
   exit (0);
 }
-
-

@@ -29,4 +29,3 @@ set bp_location [gdb_get_line_number "STOP" ${testdir}/foo.adb]
 runto "foo.adb:$bp_location"
 
 gdb_test "print obj" " = \\(x => -?$decimal\\)"
-

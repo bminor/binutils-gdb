@@ -21,7 +21,7 @@ c by Wu Zhou. (woodzltc@cn.ibm.com)
         character *7 str
         integer array(7)
 
-c Initialize character array "str" and integer array "array". 
+c Initialize character array "str" and integer array "array".
         str = 'abcdefg'
         do i = 1, 7
           array(i) = i

@@ -34,4 +34,3 @@ begin
    Do_Nothing (Large_1d_Array'Address);
    Do_Nothing (Large_3d_Array'Address); -- STOP
 end Foo;
-

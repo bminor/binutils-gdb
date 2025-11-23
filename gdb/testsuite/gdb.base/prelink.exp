@@ -69,9 +69,9 @@ foreach i "${coredir}/core ${coredir}/core.coremaker.c ${binfile}.core" {
 if { $found == 0 } {
     set names [glob -nocomplain -directory $coredir core.*]
     if {[llength $names] == 1} {
-        set corefile [file join $coredir [lindex $names 0]]
-        remote_exec build "mv $corefile [standard_output_file prelink.core]"
-        set found 1
+	set corefile [file join $coredir [lindex $names 0]]
+	remote_exec build "mv $corefile [standard_output_file prelink.core]"
+	set found 1
     }
 }
 

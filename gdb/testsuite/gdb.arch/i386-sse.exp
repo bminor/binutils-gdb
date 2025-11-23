@@ -49,23 +49,23 @@ if {![runto_main]} {
 send_gdb "print have_sse ()\r"
 gdb_expect {
     -re ".. = 1\r\n$gdb_prompt " {
-        pass "check whether processor supports SSE"
+	pass "check whether processor supports SSE"
     }
     -re ".. = 0\r\n$gdb_prompt " {
-        verbose "processor does not support SSE; skipping SSE tests"
-        return
+	verbose "processor does not support SSE; skipping SSE tests"
+	return
     }
     -re ".*$gdb_prompt $" {
-        fail "check whether processor supports SSE"
+	fail "check whether processor supports SSE"
     }
     timeout {
-        fail "check whether processor supports SSE (timeout)"
+	fail "check whether processor supports SSE (timeout)"
     }
 }
 
 gdb_test "break [gdb_get_line_number "first breakpoint here"]" \
-         "Breakpoint .* at .*i386-sse.c.*" \
-         "set first breakpoint in main"
+	 "Breakpoint .* at .*i386-sse.c.*" \
+	 "set first breakpoint in main"
 gdb_continue_to_breakpoint "continue to first breakpoint in main"
 
 if {[is_amd64_regs_target]} {
@@ -76,11 +76,11 @@ if {[is_amd64_regs_target]} {
 
 for { set r 0 } { $r < $nr_regs } { incr r } {
     gdb_test "print \$xmm$r.v4_float" \
-        ".. = \\{$r, $r.25, $r.5, $r.75\\}.*" \
-        "check float contents of %xmm$r"
+	".. = \\{$r, $r.25, $r.5, $r.75\\}.*" \
+	"check float contents of %xmm$r"
     gdb_test "print \$xmm$r.v16_int8" \
-        ".. = \\{(-?\[0-9\]+, ){15}-?\[0-9\]+\\}.*" \
-        "check int8 contents of %xmm$r"
+	".. = \\{(-?\[0-9\]+, ){15}-?\[0-9\]+\\}.*" \
+	"check int8 contents of %xmm$r"
 }
 
 for { set r 0 } { $r < $nr_regs } { incr r } {
@@ -88,12 +88,12 @@ for { set r 0 } { $r < $nr_regs } { incr r } {
 }
 
 gdb_test "break [gdb_get_line_number "second breakpoint here"]" \
-         "Breakpoint .* at .*i386-sse.c.*" \
-         "set second breakpoint in main"
+	 "Breakpoint .* at .*i386-sse.c.*" \
+	 "set second breakpoint in main"
 gdb_continue_to_breakpoint "continue to second breakpoint in main"
 
 for { set r 0 } { $r < $nr_regs } { incr r } {
     gdb_test "print data\[$r\]" \
-        ".. = \\{f = \\{[expr {$r + 10}], $r.25, $r.5, $r.75\\}\\}.*" \
-        "check contents of data\[$r\]"
+	".. = \\{f = \\{[expr {$r + 10}], $r.25, $r.5, $r.75\\}\\}.*" \
+	"check contents of data\[$r\]"
 }

@@ -55,4 +55,3 @@ mi_continue_to_line $line_valid_pointer_value "continue to valid pointer value"
 mi_gdb_test "-var-update var1" "\\^done,changelist=\\\[{name=\"var1\",in_scope=\"true\",type_changed=\"false\",has_more=\"0\"},{name=\"var1.inner\",in_scope=\"true\",type_changed=\"false\",has_more=\"0\"}\\\]" "update variable object"
 
 mi_gdb_test "-var-list-children var1" "\\^done,numchild=\"1\",children=\\\[child={name=\"var1.inner\",exp=\"inner\",numchild=\"1\",type=\"struct inner \\*\",thread-id=\"1\"}\\\],has_more=\"0\"" "list children #2"
-

@@ -27,4 +27,3 @@ procedure P is
 begin
    C := A (1) + A (2);  -- STOP
 end P;
-

@@ -53,18 +53,18 @@ gdb_caching_proc allow_opencl_tests {} {
     clean_restart "$executable"
     gdb_run_cmd
     gdb_expect 30 {
-        -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
-            verbose -log "\n$me: OpenCL support detected"
+	-re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+	    verbose -log "\n$me: OpenCL support detected"
 	    set result 1
-        }
-        -re ".*$inferior_exited_re with code.*${gdb_prompt} $" {
-            verbose -log "\n$me: OpenCL support not detected"
+	}
+	-re ".*$inferior_exited_re with code.*${gdb_prompt} $" {
+	    verbose -log "\n$me: OpenCL support not detected"
 	    set result 0
-        }
-        default {
-            verbose -log "\n$me OpenCL support not detected (default case)"
+	}
+	default {
+	    verbose -log "\n$me OpenCL support not detected (default case)"
 	    set result 0
-        }
+	}
     }
     gdb_exit
     remote_file build delete $executable

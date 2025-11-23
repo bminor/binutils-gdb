@@ -31,27 +31,27 @@ runto "pck.adb:$bp_location"
 # Insert a watchpoint on local variable "result"
 
 gdb_test "watch result" \
-         ".*atchpoint \[0-9\]+: result"
+	 ".*atchpoint \[0-9\]+: result"
 
 # Insert a breakpoint we'll reach after returning from the current
 # function.
 
 set bp_location [gdb_get_line_number "Do_Nothing" ${testdir}/foo_p708_025.adb]
 gdb_test "break foo_p708_025.adb:$bp_location" \
-         "Breakpoint \[0-9\]+ at.*: file .*foo_p708_025.adb, line \[0-9\]+."
+	 "Breakpoint \[0-9\]+ at.*: file .*foo_p708_025.adb, line \[0-9\]+."
 
 # This breakpoint will be there to stop us after we test what happens
 # during a continue (see below...)
 
 gdb_test "break pck.increment" \
-         "Breakpoint \[0-9\]+ at.*: file .*pck.adb, line \[0-9\]+."
+	 "Breakpoint \[0-9\]+ at.*: file .*pck.adb, line \[0-9\]+."
 
 # Continue until we reach our watchpoint.  It isn't strictly necessary
 # for our purpose that the watchpoint actually triggers, but this shows
 # that the watchpoint exists and is active.
 gdb_test "cont" \
-         ".*atchpoint \[0-9\]+: result.*Old value = 8.*New value = 64.*" \
-         "continuing to watchpoint hit"
+	 ".*atchpoint \[0-9\]+: result.*Old value = 8.*New value = 64.*" \
+	 "continuing to watchpoint hit"
 
 # Continue again.  We should be stopped at the (internal) breakpoint
 # that we setup to delete the watchpoint as soon as the program leaves
@@ -66,18 +66,18 @@ gdb_test \
 # (on the call to Do_Nothing) we set earlier.
 
 gdb_test "cont" \
-         "Breakpoint \[0-9\]+.*Do_Nothing.*" \
-         "continuing to breakpoint on call to Do_Nothing"
+	 "Breakpoint \[0-9\]+.*Do_Nothing.*" \
+	 "continuing to breakpoint on call to Do_Nothing"
 
 # Do a next, to verify that it works...
 
 gdb_test "next" \
-         ".* Call_Me;" \
-         "next to call to Call_Me"
+	 ".* Call_Me;" \
+	 "next to call to Call_Me"
 
 # And finally, one more continue.
 
 
 gdb_test "cont" \
-         "Breakpoint \[0-9\]+.*pck\\.increment.*" \
-         "continuing to breakpoint in pck.increment"
+	 "Breakpoint \[0-9\]+.*pck\\.increment.*" \
+	 "continuing to breakpoint in pck.increment"

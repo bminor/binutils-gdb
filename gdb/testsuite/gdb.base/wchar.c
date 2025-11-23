@@ -47,4 +47,3 @@ main (void)
   do_nothing (difficile);
   do_nothing (mixed);
 }
-

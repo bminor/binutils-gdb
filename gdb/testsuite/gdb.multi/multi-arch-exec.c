@@ -68,8 +68,8 @@ main (int argc, char ** argv)
   pthread_barrier_wait (&barrier);
 
   execl (prog,
-         prog,
-         (char *) NULL);
+	 prog,
+	 (char *) NULL);
   perror ("execl failed");
   exit (1);
 }

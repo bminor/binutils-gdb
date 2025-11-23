@@ -25,8 +25,8 @@ main (void)
 
      mips-fpregset-core.f: In function 'main':
      mips-fpregset-core.f:66:3: error: more than 30 operands in 'asm'
-        asm (
-        ^~~
+	asm (
+	^~~
 
      and still have complete 32 FGR coverage with FP64 ABIs.  Using
      a complex type breaks o32 GCC though, so use plain `double' with

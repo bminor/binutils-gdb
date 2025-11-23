@@ -44,22 +44,22 @@ proc restore_tests { } {
 
     for {set c 1} {$c <= $limit} {incr c} {
 
-        # Set a breakpoint at the next caller function.
-        gdb_test "tbreak caller$c" "Temporary breakpoint.*\[0-9\]*\\."
+	# Set a breakpoint at the next caller function.
+	gdb_test "tbreak caller$c" "Temporary breakpoint.*\[0-9\]*\\."
 
 	# Continue to the next caller function.
 	gdb_test "continue" " caller$c prologue .*" "run to caller$c"
 
 	# Do each callee function.
-        for {set e 1} {$e <= $limit} {incr e} {
+	for {set e 1} {$e <= $limit} {incr e} {
 
-            gdb_test "tbreak callee$e" "Temporary breakpoint.*\[0-9\]*\\." \
+	    gdb_test "tbreak callee$e" "Temporary breakpoint.*\[0-9\]*\\." \
 		"caller$c calls callee$e; tbreak callee"
 
-  	    gdb_test "continue" " callee$e prologue .*/" \
+	    gdb_test "continue" " callee$e prologue .*/" \
 		"caller$c calls callee$e; continue to callee"
 
-            # Do a forced return from the callee.
+	    # Do a forced return from the callee.
 	    set test "caller$c calls callee$e; return callee now"
 
 	    gdb_test "return 0" \
@@ -68,14 +68,14 @@ proc restore_tests { } {
 		"Make .* return now.*y or n. $" \
 		"y"
 
-            # Check that the values of the local variables are what
+	    # Check that the values of the local variables are what
 	    # they should be.
-            for {set var 1} {$var <= $c} {incr var} {
-                set expected [expr {0x7eeb + $var}]
+	    for {set var 1} {$var <= $c} {incr var} {
+		set expected [expr {0x7eeb + $var}]
 		set test "caller$c calls callee$e; return restored l$var to $expected"
 		set pass_pattern " = $expected"
 		set unsupported_pattern " = <optimized out>"
-	        gdb_test_multiple "print l$var" $test {
+		gdb_test_multiple "print l$var" $test {
 		    -re "\[\r\n\]*(?:$pass_pattern)\[\r\n\]+$gdb_prompt $" {
 			pass $test
 		    }
@@ -83,8 +83,8 @@ proc restore_tests { } {
 			unsupported $test
 		    }
 		}
-            }
-        }
+	    }
+	}
     }
 
     gdb_continue_to_end "" continue 1

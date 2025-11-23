@@ -78,7 +78,7 @@ gdb_test_multiple "if 1" "start if construct" {
 
 gdb_test_multiple "end" "end if construct" {
     -re "^end\r\n\r\n\032\032post-commands\r\n$gdb_prompt$" {
- 	pass "end if construct"
+	pass "end if construct"
     }
 }
 
@@ -264,8 +264,8 @@ if {![is_remote host]} {
 send_gdb "run\n"
 gdb_expect {
   -re "pre-query.*already.*\\(y or n\\).*query\r\n" {
-         send_gdb "y\n"
-         gdb_expect {
+	 send_gdb "y\n"
+	 gdb_expect {
 	     -re ".*post-query.*$gdb_prompt$" \
 		     { pass "re-run" }
 	     -re ".*$gdb_prompt$"  { fail "re-run" }

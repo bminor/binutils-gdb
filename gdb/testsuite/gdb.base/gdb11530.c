@@ -23,7 +23,7 @@ struct a
   {
     union
       {
-        int i;
+	int i;
       };
   } a;
 
@@ -32,4 +32,3 @@ main (void)
 {
   return sizeof (a.i);
 }
-

@@ -19,4 +19,3 @@ void some_other_func (void)
 {
   return;
 }
-

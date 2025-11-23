@@ -53,5 +53,5 @@ gdb_gcore_cmd "$corefile" "save a corefile"
 # Do not run "info threads" before "gcore" as it could workaround the bug
 # by discarding non-current exited threads.
 gdb_test "info threads" \
-         {The current thread <Thread ID 1> has terminated\.  See `help thread'\.} \
+	 {The current thread <Thread ID 1> has terminated\.  See `help thread'\.} \
 	 "exited thread is current due to non-stop"

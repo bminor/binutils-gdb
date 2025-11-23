@@ -166,8 +166,3 @@ gdb_test "print v_int && v_float" " = $true" "print value of v_int&&v_float"
 
 gdb_test "print v_int && v_double" " = $false" \
     "print value of v_int&&v_double"
-
-
-
-
-

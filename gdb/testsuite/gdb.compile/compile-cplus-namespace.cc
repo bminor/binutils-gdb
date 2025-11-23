@@ -21,19 +21,19 @@ namespace N1
     {
       namespace N4
       {
-        static int n4static = 400;
+	static int n4static = 400;
 
-        struct S4
-        {
-          static int s4static;
-          int s4int_;
-          S4 () : s4int_ (4) {};
-          ~S4 () { --s4static; }
+	struct S4
+	{
+	  static int s4static;
+	  int s4int_;
+	  S4 () : s4int_ (4) {};
+	  ~S4 () { --s4static; }
 
-         int get_var () { return s4int_; }
-         static int get_svar () { return s4static; }
-        };
-        int S4::s4static = 40;
+	 int get_var () { return s4int_; }
+	 static int get_svar () { return s4static; }
+	};
+	int S4::s4static = 40;
       }
     }
   }

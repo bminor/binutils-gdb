@@ -36,19 +36,19 @@ set sizeof_vla [expr {10 * $sizeof_int}]
 
 gdb_test "print sizeof (vla1\[i++\])" " = ${sizeof_int}"
 gdb_test "print i" " = 0" \
-         "print i - sizeof no side effects"
+	 "print i - sizeof no side effects"
 
 gdb_test "print sizeof (++vla1\[0\])" " = ${sizeof_int}"
 gdb_test "print vla1\[0\]" " = 10" \
-         "print vla1\[0\] - sizeof no side effects"
+	 "print vla1\[0\] - sizeof no side effects"
 
 gdb_test "ptype ++vla1\[0\]" "type = int"
 gdb_test "print vla1\[0\]" " = 10" \
-         "print vla1\[0\] - ptype no side effects"
+	 "print vla1\[0\] - ptype no side effects"
 
 gdb_test "whatis ++vla1\[0\]" "type = int"
 gdb_test "print vla1\[0\]" " = 10" \
-         "print vla1\[0\] - whatis no side effects"
+	 "print vla1\[0\] - whatis no side effects"
 
 
 gdb_test "print sizeof (vla2\[i++\])" " = ${sizeof_vla}"
@@ -59,7 +59,7 @@ gdb_test "print sizeof (vla2\[i++ + sizeof(j++)\])" " = ${sizeof_vla}"
 gdb_test "print i" " = 2" \
 	 "print i - sizeof with side effects, 2"
 gdb_test "print j" " = 0" \
-         "print j - sizeof with no side effects"
+	 "print j - sizeof with no side effects"
 
 gdb_test "ptype vla2\[i++\]" "type = int \\\[10\\\]"
 gdb_test "print i" " = 2" \
@@ -69,7 +69,7 @@ gdb_test "ptype vla2\[i++ + sizeof(j++)\]" "type = int \\\[10\\\]"
 gdb_test "print i" " = 2" \
 	 "print i - ptype with side effects, 2"
 gdb_test "print j" " = 0" \
-         "print j - ptype with no side effects"
+	 "print j - ptype with no side effects"
 
 gdb_test "whatis vla2\[i++\]" "type = int \\\[10\\\]"
 gdb_test "print i" " = 2" \
@@ -79,4 +79,4 @@ gdb_test "whatis vla2\[i++ + sizeof(j++)\]" "type = int \\\[10\\\]"
 gdb_test "print i" " = 2" \
 	 "print i - whatis with side effects, 2"
 gdb_test "print j" " = 0" \
-         "print j - whatis with no side effects"
+	 "print j - whatis with no side effects"

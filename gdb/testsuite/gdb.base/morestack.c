@@ -68,7 +68,7 @@ down (int i)
   if (i == 500)
     {
       if (munmap (reserved, RESERVED_SIZE) != 0)
-        abort ();
+	abort ();
       reserved = NULL;
     }
 

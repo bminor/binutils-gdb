@@ -50,12 +50,12 @@ gdb_load $binfile1
 with_test_prefix "${testfile1}" {
 
     gdb_test "break *main" \
-        "Breakpoint.*at.* file .*$srcfile1, line .*" \
+	"Breakpoint.*at.* file .*$srcfile1, line .*" \
 
     gdb_run_cmd
     gdb_test "" \
-             "Breakpoint.* main \\(\\) at .*$srcfile1:.*" \
-             "run to breakpoint at *main"
+	     "Breakpoint.* main \\(\\) at .*$srcfile1:.*" \
+	     "run to breakpoint at *main"
 
     # Verify also that we stopped at the start of the function...
     gdb_test "p \$pc == main" " = 1"
@@ -78,8 +78,8 @@ with_test_prefix "${testfile2}" {
 
     gdb_run_cmd
     gdb_test "" \
-             "Breakpoint.* main \\(\\) at .*$srcfile2:.*" \
-             "run to breakpoint at *main"
+	     "Breakpoint.* main \\(\\) at .*$srcfile2:.*" \
+	     "run to breakpoint at *main"
 
     gdb_test "p \$pc == main" " = 1"
 }

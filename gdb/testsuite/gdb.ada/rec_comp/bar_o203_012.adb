@@ -29,4 +29,3 @@ begin
    Do_Nothing (R'Address);
    Do_Nothing (IA'Address);
 end Bar_O203_012;
-

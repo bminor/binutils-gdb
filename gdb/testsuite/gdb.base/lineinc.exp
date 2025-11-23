@@ -94,21 +94,21 @@ gdb_load $binfile
 set test_name "tolerate macro info with multiple #inclusions per line"
 gdb_test_multiple "break -q main" $test_name {
     -re "Breakpoint 1 at 0x.*: file .*lineinc.c.*\\.\r\n${gdb_prompt}" {
-        pass $test_name
+	pass $test_name
     }
     -re ".*internal-error:.*.y or n. " {
-        fail $test_name
-        send_gdb "y\n"
-        gdb_expect {
-            -re ".*.y or n. " {
-                send_gdb "n\n"
-                exp_continue
-            }
-            -re "$gdb_prompt" {
-            }
-            timeout {
-                fail "$test_name (timeout)"
-            }
-        }
+	fail $test_name
+	send_gdb "y\n"
+	gdb_expect {
+	    -re ".*.y or n. " {
+		send_gdb "n\n"
+		exp_continue
+	    }
+	    -re "$gdb_prompt" {
+	    }
+	    timeout {
+		fail "$test_name (timeout)"
+	    }
+	}
     }
 }

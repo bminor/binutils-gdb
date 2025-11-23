@@ -30,9 +30,9 @@ gdb_load $binfile
 runto_main
 
 gdb_test "b [gdb_get_line_number "good, not blocked"]" \
-         ".*Breakpoint .*sigchld.*" "set breakpoint at success exit"
+	 ".*Breakpoint .*sigchld.*" "set breakpoint at success exit"
 
 gdb_test "b [gdb_get_line_number "bad, blocked"]" \
-         ".*Breakpoint .*sigchld.*" "set breakpoint at failure exit"
+	 ".*Breakpoint .*sigchld.*" "set breakpoint at failure exit"
 
 gdb_test "continue" ".*good, not blocked.*" "SIGCHLD blocked in inferior"

@@ -20,4 +20,3 @@ main ()
 {
   return 0;
 }
-

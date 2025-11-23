@@ -39,8 +39,8 @@ if {![runto_main]} {
 }
 
 gdb_test "catch assert if Global_Var = 2" \
-         "Catchpoint $decimal: failed Ada assertions" \
-         "insert catchpoint on failed assertions with condition"
+	 "Catchpoint $decimal: failed Ada assertions" \
+	 "insert catchpoint on failed assertions with condition"
 
 # Check that condition is stored and properly displayed.
 
@@ -53,8 +53,8 @@ set catchpoint_msg \
   "Catchpoint $decimal, failed assertion at $hex in bla \\\(\\\).*at .*bla.adb:$bp_location"
 gdb_test "continue" \
 	 "Continuing\\.$eol$eol$catchpoint_msg$eol.*STOP" \
-         "continuing to expected failed assertion"
+	 "continuing to expected failed assertion"
 
 gdb_test "continue" \
-         "Continuing\\..*$inferior_exited_re.*" \
-         "continuing to program completion"
+	 "Continuing\\..*$inferior_exited_re.*" \
+	 "continuing to program completion"

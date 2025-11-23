@@ -82,4 +82,4 @@ if { [prepare_for_testing "failed to prepare" ${testfile} \
 gdb_test_no_output "set language ada"
 
 gdb_test "ptype pck.table" \
-         "type = array \\(enum_000 \\.\\. enum_128\\) of boolean"
+	 "type = array \\(enum_000 \\.\\. enum_128\\) of boolean"

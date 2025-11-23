@@ -23,4 +23,3 @@ begin
    Length := -1;
    Call_Me (My_String);  -- STOP
 end Foo;
-

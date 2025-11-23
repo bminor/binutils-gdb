@@ -30,12 +30,12 @@ runto "foo.adb:$bp_location"
 
 
 gdb_test "print C" \
-         "= 97 'a'"
+	 "= 97 'a'"
 
 gdb_test "print WC" \
-         "= 98 'b'"
+	 "= 98 'b'"
 
 gdb_test "print WWC" \
-         "= 99 'c'"
+	 "= 99 'c'"
 
 gdb_test "print MC" " = 77 'M'"

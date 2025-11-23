@@ -25,4 +25,3 @@ int main()
   printf ("a.x is %d\n", a.x);
   return 0;
 }
-

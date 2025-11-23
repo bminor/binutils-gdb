@@ -31,4 +31,3 @@ main (void)
   do_something(&toto);
   return 0;
 }
-

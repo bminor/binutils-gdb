@@ -41,4 +41,3 @@ gdb_test_multiple "print operand1" "print operand1" {
     -re "\\\$$decimal = <optimized out>\r\n$gdb_prompt $" { pass "print operand1"}
     -re "$hex\r\n$gdb_prompt $" { gdb_test "print *operand1" "14" "print operand1" }
 }
-

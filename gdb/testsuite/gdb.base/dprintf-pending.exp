@@ -48,7 +48,7 @@ with_test_prefix "without symbols" {
 	"y"
 
     gdb_test "info break" \
-        "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+	"Num     Type\[ \]+Disp Enb Address\[ \]+What.*
 \[0-9\]+\[\t \]+dprintf.*keep y.*PENDING.*pendfunc1.*" \
 	"single pending dprintf info"
 

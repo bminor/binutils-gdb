@@ -7,4 +7,3 @@ int grbx (int x)
   else
     return 0;
 }
-

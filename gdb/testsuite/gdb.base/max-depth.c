@@ -143,8 +143,8 @@ struct s9
       int a;
       struct
       {
-        int b;
-        int c;
+	int b;
+	int c;
       };
     } d1;
   };
@@ -174,8 +174,8 @@ struct s10
       int a;
       struct
       {
-        int b[10];
-        int c;
+	int b[10];
+	int c;
       };
     } d1;
   };

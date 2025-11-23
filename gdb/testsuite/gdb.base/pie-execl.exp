@@ -80,7 +80,7 @@ gdb_test_multiple $test $test {
     }
     -i "$inferior_spawn_id" -re "pie-execl: re-exec" {
 	# output from inferior
-        incr matches_found
+	incr matches_found
 	if { $matches_found == 2 } {
 	    pass $test
 	} else {
@@ -90,7 +90,7 @@ gdb_test_multiple $test $test {
     -i "$gdb_spawn_id"
     -re "executing new program.*\r\nBreakpoint \[0-9\]+,\[^\r\n\]* pie_execl_marker .*\r\n$gdb_prompt $" {
 	# output from gdb
-        incr matches_found
+	incr matches_found
 	if { $matches_found == 2 } {
 	    pass $test
 	} else {

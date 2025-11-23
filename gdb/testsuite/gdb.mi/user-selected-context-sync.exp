@@ -208,7 +208,7 @@ proc make_mi_re { mode thread frame type } {
 #   details.
 
 proc make_cli_in_mi_re { command cli_in_mi_mode mode event inf cli_thread
-		         mi_thread frame  } {
+			 mi_thread frame  } {
     global srcfile
     global thread_loop_line
     global main_break_line

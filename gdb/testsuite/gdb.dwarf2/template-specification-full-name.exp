@@ -36,7 +36,7 @@ Dwarf::assemble $asm_file {
     cu { label cu_start } {
 	DW_TAG_compile_unit {
 	    DW_AT_language @DW_LANG_C_plus_plus
-        } {
+	} {
 	    declare_labels templated_subprogram int
 
 	    int: DW_TAG_base_type {

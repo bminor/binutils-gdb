@@ -17,4 +17,3 @@ package Pck is
    My_Global_Variable : Integer := 11;
    procedure Do_Something (I : in out Integer);
 end Pck;
-

@@ -61,5 +61,5 @@ gdb_test "continue" "Program received signal SIGABRT.*"
 # (gdb)
 
 gdb_test "bt" \
-         ".*\[^a-zA-Z\]pause\[^a-zA-Z\].*" \
-         "pause found in backtrace"
+	 ".*\[^a-zA-Z\]pause\[^a-zA-Z\].*" \
+	 "pause found in backtrace"

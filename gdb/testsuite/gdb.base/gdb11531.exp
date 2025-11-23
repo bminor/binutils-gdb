@@ -65,4 +65,3 @@ gdb_test "next" \
 gdb_test "continue" \
     ".*${nl}.*atchpoint \[0-9\]+: myrec\.x${nl}Old value = 5${nl}New value = 78${nl}.*" \
     "watchpoint variable triggers at continue"
-

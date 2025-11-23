@@ -7,4 +7,3 @@ int main ()
   result ++;
   return 0; /* break here to check result */
 }
-

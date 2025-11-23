@@ -40,8 +40,8 @@ gdb_load $binfile
 # decides later to reformat sep-proc.c.
 
 gdb_test "list sep-proc.c:$location" \
-         "void.*say_hello.*" \
-         "list using location inside included file"
+	 "void.*say_hello.*" \
+	 "list using location inside included file"
 
 # Try the same, but this time with a breakpoint.  We need to exit
 # GDB to make sure that we havn't loaded the full symbols yet when
@@ -52,10 +52,9 @@ gdb_load $binfile
 set test "breakpoint inside included file"
 gdb_test_multiple "break sep-proc.c:$location" "$test" {
     -re "Breakpoint.*at.* file .*sep-proc.c, line .*" {
-        pass "$test"
+	pass "$test"
     }
     -re "No source file named sep-proc.c.*" {
-        fail "$test"
+	fail "$test"
     }
 }
-

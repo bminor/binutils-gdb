@@ -33,7 +33,7 @@ Dwarf::assemble $asm_file {
 	    DW_AT_language @DW_LANG_Ada95
 	    DW_AT_name     $srcfile
 	    DW_AT_comp_dir /tmp
-        } {
+	} {
 	    declare_labels b_l
 
 	    b_l: DW_TAG_base_type {
@@ -42,13 +42,13 @@ Dwarf::assemble $asm_file {
 		DW_AT_name      bool
 	    }
 
-            DW_TAG_subprogram {
+	    DW_TAG_subprogram {
 		DW_AT_name pck__xtra__function.cold
 		MACRO_AT_range {first}
 		DW_AT_type :$b_l
 	    }
 
-            DW_TAG_subprogram {
+	    DW_TAG_subprogram {
 		DW_AT_name pck__xtra__function
 		MACRO_AT_range {second}
 		DW_AT_type :$b_l

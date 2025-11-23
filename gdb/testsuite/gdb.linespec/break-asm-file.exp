@@ -63,4 +63,3 @@ gdb_test "delete 2"
 gdb_test "break $asm_file0:func" \
     "Breakpoint 3 at 0x\[0-9a-fA-F\]+: .*$asm_file0.*(2 locations).*" \
     "set a break-point at function in all instances for a selected ASM file."
-

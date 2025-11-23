@@ -14,4 +14,3 @@ class gnu_obj_4
   // try to ensure test4 is actually allocated
   int dummy;
 };
-

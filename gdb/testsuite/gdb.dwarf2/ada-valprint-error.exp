@@ -39,35 +39,35 @@ Dwarf::assemble $asm_file {
 	    DW_AT_language @DW_LANG_Ada95
 	    DW_AT_name     fd.adb
 	    DW_AT_comp_dir /tmp
-        } {
+	} {
 	    declare_labels array_elt_label integer_label array_label \
-                typedef_label ref_type_label
-            set ptr_size [get_sizeof "void *" 96]
-            set int_size [get_sizeof "int" 4]
+		typedef_label ref_type_label
+	    set ptr_size [get_sizeof "void *" 96]
+	    set int_size [get_sizeof "int" 4]
 
-            # A structure with no size attribute, to mimick structures
-            # in Ada that have a dynamic size...
-            array_elt_label: structure_type {
+	    # A structure with no size attribute, to mimick structures
+	    # in Ada that have a dynamic size...
+	    array_elt_label: structure_type {
 		DW_AT_name fd__Tints_doubledC
 		DW_AT_artificial 1 DW_FORM_flag_present
-            }
+	    }
 
-            # ... and a corresponding XVZ variable, supposed to be there
-            # to provide the actual size.  Except that, in this case,
-            # the variable has no address, to simulate the fact that
-            # it has been optimized out (which the compiler can do,
-            # even if it at the expense of debuggability).
-            DW_TAG_variable {
+	    # ... and a corresponding XVZ variable, supposed to be there
+	    # to provide the actual size.  Except that, in this case,
+	    # the variable has no address, to simulate the fact that
+	    # it has been optimized out (which the compiler can do,
+	    # even if it at the expense of debuggability).
+	    DW_TAG_variable {
 		DW_AT_name fd__Tints_doubledC___XVZ
 		DW_AT_type :$integer_label
 		DW_AT_artificial 1 DW_FORM_flag_present
-            }
+	    }
 
-            integer_label: DW_TAG_base_type {
+	    integer_label: DW_TAG_base_type {
 		DW_AT_byte_size $int_size DW_FORM_sdata
 		DW_AT_encoding	@DW_ATE_signed
 		DW_AT_name	integer
-            }
+	    }
 
 	    array_label: DW_TAG_array_type {
 		DW_AT_name fd__ints_doubled
@@ -79,24 +79,24 @@ Dwarf::assemble $asm_file {
 		}
 	    }
 
-            typedef_label: DW_TAG_typedef {
+	    typedef_label: DW_TAG_typedef {
 		DW_AT_name fd__ints_doubled
 		DW_AT_type :$array_label
-            }
+	    }
 
-            ref_type_label: DW_TAG_reference_type {
+	    ref_type_label: DW_TAG_reference_type {
 		DW_AT_byte_size $ptr_size DW_FORM_sdata
 		DW_AT_type :$typedef_label
-            }
+	    }
 
-            DW_TAG_variable {
+	    DW_TAG_variable {
 		DW_AT_name fd__global
 		DW_AT_type :$ref_type_label
 		DW_AT_location {
 		    DW_OP_addr [gdb_target_symbol fd__global]
 		} SPECIAL_expr
 		DW_AT_external 1 flag
-            }
+	    }
 
 	}
     }
@@ -110,4 +110,4 @@ if { [prepare_for_testing ${testfile}.exp ${testfile} \
 gdb_test_no_output "set language ada"
 
 gdb_test "print fd.global" \
-         " = <error reading variable: unable to read value of fd__Tints_doubledC___XVZ \\(value has been optimized out\\)>"
+	 " = <error reading variable: unable to read value of fd__Tints_doubledC___XVZ \\(value has been optimized out\\)>"

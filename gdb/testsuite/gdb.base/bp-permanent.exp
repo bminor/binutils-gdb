@@ -132,11 +132,11 @@ proc test {always_inserted sw_watchpoint} {
 	set test "permanent breakpoint causes random signal"
 	gdb_test_multiple "continue" $test {
 	    -re "exited normally.*$gdb_prompt $" {
-	        unsupported "failed to stop at permanent breakpoint"
+		unsupported "failed to stop at permanent breakpoint"
 		return
 	    }
 	    -re "received signal SIGTRAP.*$gdb_prompt $" {
-	    	pass $test
+		pass $test
 	    }
 	}
 

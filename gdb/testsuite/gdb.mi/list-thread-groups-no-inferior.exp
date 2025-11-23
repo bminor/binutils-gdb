@@ -32,15 +32,15 @@ if {[mi_clean_restart]} {
 set test "-list-thread-groups --available"
 gdb_test_multiple $test $test {
     -re "\}" {
-        exp_continue
+	exp_continue
     }
     -re "\r\n$gdb_prompt " {
-        pass $test
+	pass $test
     }
 }
 
 # Verify that GDB is still alive.
 
 mi_gdb_test "-data-evaluate-expression 1" \
-            ".*\\^done,value=\"1\"" \
-            "GDB is still alive"
+	    ".*\\^done,value=\"1\"" \
+	    "GDB is still alive"

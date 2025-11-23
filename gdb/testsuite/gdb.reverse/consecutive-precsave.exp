@@ -89,11 +89,11 @@ gdb_test_multiple "step" $testmsg {
        set stop_addr [get_valueof "/x" "\$pc" "" "value of pc"]
        set stop_addr_is_stmt [hex_in_list $stop_addr $is_stmt]
        if { ! $stop_addr_is_stmt } {
-           fail "stopped at bp, 2nd instr (missing hex prefix)"
+	   fail "stopped at bp, 2nd instr (missing hex prefix)"
        } elseif {$foo2_addr == $stop_addr} {
-           pass "stopped at bp, 2nd instr"
+	   pass "stopped at bp, 2nd instr"
        } else {
-           fail "stopped at bp, 2nd instr (wrong address)"
+	   fail "stopped at bp, 2nd instr (wrong address)"
        }
     }
 }

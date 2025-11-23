@@ -45,10 +45,9 @@ if {![runto_main]} {
 }
 
 gdb_test "break call_me if param.e == 1" \
-         "Breakpoint $decimal at $hex: file .*$srcfile, line $decimal\\."
+	 "Breakpoint $decimal at $hex: file .*$srcfile, line $decimal\\."
 
 # Continue.  We should hit our breakpoint...
 gdb_test "continue" \
-         "Breakpoint $decimal, call_me \\(param=\\.\\.\\.\\) at .*" \
-         "continue to conditional breakpoint in call_me"
-
+	 "Breakpoint $decimal, call_me \\(param=\\.\\.\\.\\) at .*" \
+	 "continue to conditional breakpoint in call_me"

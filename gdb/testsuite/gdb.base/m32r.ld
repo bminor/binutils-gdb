@@ -85,7 +85,7 @@ SECTIONS
   {
     *(.data)
     *(.gnu.linkonce.d*)
-    _ovly_table = .; 
+    _ovly_table = .;
       _ovly0_entry = .;
 	LONG(ABSOLUTE(ADDR(.ovly0)));
 	LONG(SIZEOF(.ovly0));

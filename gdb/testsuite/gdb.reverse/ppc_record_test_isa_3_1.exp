@@ -339,5 +339,3 @@ gdb_assert ![string compare $acc_7_3_initial $acc_7_3_final] \
 
 gdb_assert ![string compare $fpscr_initial $fpscr_final] \
     "check fpscr initial versus final"
-
-

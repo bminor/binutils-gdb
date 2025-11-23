@@ -25,13 +25,13 @@ proc do_test { name {opts {}} } {
     # We get this warning even with the nowarnings option ...
     regsub -all "(^|\n)\[^\n\]*using \[^\n\]* extended precision long double" $lines "" lines
     if {$lines != ""} {
-        return
+	return
     }
 
     clean_restart ${::testfile}.${name}
 
     if {![runto_main]} {
-        return
+	return
     }
 
     # Run to the breakpoint at return.
@@ -52,4 +52,3 @@ proc do_test { name {opts {}} } {
 do_test default { -mfloat128 }
 do_test ieee128 { -mfloat128 -mabi=ieeelongdouble }
 do_test ibm128 { -mfloat128 -mabi=ibmlongdouble }
-

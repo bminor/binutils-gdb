@@ -166,4 +166,3 @@ asm(".text\n"
     "    popl  %ebp\n"
     "    leal  -4(%eax), %esp\n"
     "    ret\n");
-

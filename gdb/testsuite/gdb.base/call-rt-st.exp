@@ -98,10 +98,10 @@ proc print_struct_call { expr inf_result gdb_result } {
 		exp_continue
 	    }
 	}
-        -re "Function return value unknown.\[\r\n\]+$gdb_prompt $" {
-            unsupported "$command"
+	-re "Function return value unknown.\[\r\n\]+$gdb_prompt $" {
+	    unsupported "$command"
 	    return
-        }
+	}
     }
 
     verbose -log "inferior_matched=$inferior_matched, gdb_matched=$gdb_matched"
@@ -122,14 +122,14 @@ if {![gdb_skip_stdio_test "print print_one_large_struct(...)"]} {
 }
 
 if {$allow_float_test && \
-        ![gdb_skip_stdio_test "print print_one_double(*d1)"] } {
+	![gdb_skip_stdio_test "print print_one_double(*d1)"] } {
     print_struct_call "print_one_double(*d1)" \
 	".*Contents of one_double_t:\[ \r\n\]+1\\.111110\[ \r\n\]+" \
 	".\[0-9\]+ = \\{double1 = 1\\.111\[0-9\]*\\}"
 }
 
 if {$allow_float_test && \
-        ![gdb_skip_stdio_test "print print_two_floats(*f3)"] } {
+	![gdb_skip_stdio_test "print print_two_floats(*f3)"] } {
     print_struct_call "print_two_floats(*f3)" \
 	".*Contents of two_floats_t:\[ \r\n\]+-2\\.345000\[ \t]+1\\.000000\[ \r\n\]+" \
 	".\[0-9\]+ = \\{float1 = -2\\.34500003, float2 = 1\\}"

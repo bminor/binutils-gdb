@@ -99,4 +99,3 @@ gdb_assert ![string compare $vs0_initial $vs0_final] \
 # Check initial and final are the same.
 gdb_assert ![string compare $vs1_initial $vs1_final] \
     "check vs1 initial versus vs1 final"
-

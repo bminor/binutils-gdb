@@ -24,18 +24,18 @@ if {![runto_main]} {
 }
 
 gdb_test "break $srcfile:[gdb_get_line_number BREAK $srcfile] if n == 3" \
-         "Breakpoint $decimal at $hex: file .*recpar\\.c, line $decimal\\."
+	 "Breakpoint $decimal at $hex: file .*recpar\\.c, line $decimal\\."
 
 gdb_test "continue" \
-         "Breakpoint .* foo \\(n=3\\) at .*$srcfile:$decimal.*"
+	 "Breakpoint .* foo \\(n=3\\) at .*$srcfile:$decimal.*"
 
 gdb_test "backtrace" \
-         "#0 +foo \\(n=3\\).*\r\n#1.* foo \\(n=4\\).*\r\n#2.* foo \\(n=5\\).*#3.* main \\(\\).*"
+	 "#0 +foo \\(n=3\\).*\r\n#1.* foo \\(n=4\\).*\r\n#2.* foo \\(n=5\\).*#3.* main \\(\\).*"
 
 gdb_test "frame 2" \
-         "#2 .* foo \\(n=5\\) .*"
+	 "#2 .* foo \\(n=5\\) .*"
 
 # In the currently selected frame, n=5, and thus foo::val should be 5
 # as well.
 gdb_test "print foo::val" \
-         " = 5"
+	 " = 5"

@@ -20,4 +20,3 @@ procedure Expr_R821_013 is
 begin
    Do_Nothing (Val'Address); -- STOP
 end Expr_R821_013;
-

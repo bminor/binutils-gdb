@@ -37,4 +37,3 @@ begin
   Writeln('integer array, index 5 is ',integer_array[5]);
   Writeln('char array, index 5 is ',char_array[5]);
 end.
-

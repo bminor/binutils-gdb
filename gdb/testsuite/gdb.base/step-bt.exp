@@ -24,25 +24,24 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
 }
 
 gdb_test "break *hello" \
-         "Breakpoint.*at.* file .*$srcfile, line .*" \
-         "breakpoint at first instruction of hello()"
+	 "Breakpoint.*at.* file .*$srcfile, line .*" \
+	 "breakpoint at first instruction of hello()"
 
 gdb_run_cmd
 gdb_test "" "Breakpoint.* hello .* at .*$srcfile:.*" "run to hello()"
 
 gdb_test "stepi" \
-         ".*" \
-         "step first instruction"
+	 ".*" \
+	 "step first instruction"
 
 gdb_test "bt" \
-         "#0 +(0x\[0-9a-z\]+ in )?hello .*#1 +(0x\[0-9a-z\]* in )?main.*" \
-         "backtrace after first instruction step"
+	 "#0 +(0x\[0-9a-z\]+ in )?hello .*#1 +(0x\[0-9a-z\]* in )?main.*" \
+	 "backtrace after first instruction step"
 
 gdb_test "stepi" \
-         ".*" \
-         "step second instruction"
+	 ".*" \
+	 "step second instruction"
 
 gdb_test "bt" \
-         "#0 +(0x\[0-9a-z\]+ in )?hello .*#1 +(0x\[0-9a-z\]* in )?main.*" \
-         "backtrace after second instruction step"
-
+	 "#0 +(0x\[0-9a-z\]+ in )?hello .*#1 +(0x\[0-9a-z\]* in )?main.*" \
+	 "backtrace after second instruction step"

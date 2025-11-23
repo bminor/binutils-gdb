@@ -35,4 +35,3 @@ main ()
   kern<<<1, 1>>> ();
   return hipDeviceSynchronize () != hipSuccess;
 }
-

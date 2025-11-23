@@ -39,4 +39,3 @@ if {[prepare_for_testing_full "failed to prepare" \
 
 set foo_bp [gdb_get_line_number "Break here"]
 gdb_test "break $foo_bp" "Breakpoint.*" "expand psymtabs"
-

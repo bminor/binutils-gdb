@@ -45,9 +45,9 @@ gdb_test "python print (block.start)" "${decimal}" "check start not None"
 gdb_test "python print (block.end)" "${decimal}" "check end not None"
 gdb_test "python print (block\['f'\].name == 'f')" "True" "check variable access"
 gdb_test "python print (block\['nonexistent'\])" ".*KeyError.*: 'nonexistent'.*" \
-         "check nonexistent variable"
+	 "check nonexistent variable"
 gdb_test "python print (block\[42\])" ".*TypeError.*: Expected a string.*" \
-         "check non-string key"
+	 "check non-string key"
 
 # Test global/static blocks
 gdb_py_test_silent_cmd "python frame = gdb.selected_frame()" "Get Frame" 0
@@ -71,7 +71,7 @@ gdb_test_no_output "python block = block.superblock" "get superblock"
 gdb_test "python print (block.function)" "None" "second anonymous block"
 gdb_test_no_output "python block = block.superblock" "get superblock 2"
 gdb_test "python print (block.function)" "block_func" \
-         "Print superblock 2 function"
+	 "Print superblock 2 function"
 
 # Switch frames, then test block for no_locals_func.
 gdb_test "continue" ".*" "continue to no_locals_func breakpoint"
@@ -110,7 +110,7 @@ gdb_test "up" ".*"
 gdb_py_test_silent_cmd "python frame = gdb.selected_frame()" "Get Frame 2" 0
 gdb_py_test_silent_cmd "python block = frame.block()" "Get Frame 2's block" 0
 gdb_test "python print (repr (block))" "<gdb.Block main \{.*\}>" \
-         "Check Frame 2's block not None"
+	 "Check Frame 2's block not None"
 gdb_test "python print (block.function)" "main" "main block"
 
 # Test Block is_valid.  This must always be the last test in this
@@ -120,15 +120,15 @@ gdb_py_test_silent_cmd "python frame = gdb.selected_frame()" "Get Frame" 0
 gdb_py_test_silent_cmd "python block = frame.block()" "Get Frame block" 0
 gdb_py_test_silent_cmd "python block_iter = iter (block)" "Get Frame block" 0
 gdb_test "python print (block.is_valid())" "True" \
-         "Check block validity"
+	 "Check block validity"
 gdb_test "python print (block_iter.is_valid())" "True" \
-         "Check block_iter validity"
+	 "Check block_iter validity"
 gdb_test_no_output "python x = hash(block)" "block is hashable"
 gdb_test "python print (type (x))" "<class 'int'>" "block hash is integer"
 gdb_unload
 gdb_test "python print (block.is_valid())" "False" \
-         "Check block validity after unload"
+	 "Check block validity after unload"
 gdb_test "python print (block_iter.is_valid())" "False" \
-         "Check block_iter validity after unload"
+	 "Check block_iter validity after unload"
 gdb_test "python print (hash (block) == x)" "True" \
     "block hash did not change"

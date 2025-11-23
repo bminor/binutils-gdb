@@ -55,4 +55,3 @@ void *thread_function(void *arg) {
     printf("Bye from %d\n", my_number);
     pthread_exit(NULL);
 }
-

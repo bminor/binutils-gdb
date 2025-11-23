@@ -33,7 +33,7 @@ main (int argc, char *argv[], char *envp[], auxv_t auxv[])
   for (i = 0; auxv[i].a_type != AT_NULL; i++)
     if (auxv[i].a_type == AT_HWCAP2) {
       if (!(auxv[i].a_un.a_val & PPC_FEATURE2_ARCH_2_07))
-        return 1;
+	return 1;
       break;
     }
 

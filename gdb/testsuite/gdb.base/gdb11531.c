@@ -37,4 +37,3 @@ main ()
   myrec.x = 78;
   return myrec.x;
 }
-

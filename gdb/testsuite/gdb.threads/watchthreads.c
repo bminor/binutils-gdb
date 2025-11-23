@@ -76,4 +76,3 @@ thread_function (void *arg)
 
     pthread_exit (NULL);
 }
-

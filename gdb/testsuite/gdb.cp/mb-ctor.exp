@@ -101,6 +101,3 @@ if {$using_clang} {
 gdb_test "continue" \
     ".*exited normally.*" \
     "run to exit"
-
-
-

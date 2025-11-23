@@ -84,9 +84,9 @@ gdb_breakpoint [gdb_get_line_number "Before value assignment"]
 gdb_continue_to_breakpoint "Before value assignment"
 gdb_test "ptype twop" \
     [multi_line "type = PTR TO -> \\( Type two" \
-                "    $int, allocatable :: ivla1\\(:\\)" \
-                "    $int, allocatable :: ivla2\\(:,:\\)" \
-                "End Type two \\)"]
+		"    $int, allocatable :: ivla1\\(:\\)" \
+		"    $int, allocatable :: ivla2\\(:,:\\)" \
+		"End Type two \\)"]
 
 gdb_breakpoint [gdb_get_line_number "After value assignment"]
 gdb_continue_to_breakpoint "After value assignment"
@@ -106,10 +106,10 @@ gdb_test "ptype intp" "type = PTR TO -> \\( $int \\)"
 set test "ptype intap"
 gdb_test_multiple $test $test {
     -re "type = $int \\(10,2\\)\r\n$gdb_prompt $" {
-        pass $test
+	pass $test
     }
     -re "type = PTR TO -> \\( $int \\(10,2\\)\\)\r\n$gdb_prompt $" {
-        pass $test
+	pass $test
     }
 }
 gdb_test "ptype realp" "type = PTR TO -> \\( $real \\)"

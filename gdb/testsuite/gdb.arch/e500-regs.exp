@@ -46,9 +46,9 @@ if {![runto_main]} {
 
 # set all the registers integer portions to 1
 for {set i 0} {$i < 32} {incr i 1} {
-        for {set j 0} {$j < 2} {incr j 1} {
-           gdb_test "set \$ev$i.v2_int32\[$j\] = 1" "" "set reg ev$i.v4si.f\[$j\]"
-        }
+	for {set j 0} {$j < 2} {incr j 1} {
+	   gdb_test "set \$ev$i.v2_int32\[$j\] = 1" "" "set reg ev$i.v4si.f\[$j\]"
+	}
 }
 
 # Now execute some target code, so that GDB's register cache is flushed.
@@ -68,7 +68,7 @@ set vector_register ".uint64 = 0x100000001, v2_float = .0x0, 0x0., v2_int32 = .0
 }
 
 for {set i 0} {$i < 32} {incr i 1} {
-        gdb_test "info reg ev$i" "ev$i.*$vector_register" "info reg ev$i"
+	gdb_test "info reg ev$i" "ev$i.*$vector_register" "info reg ev$i"
 }
 
 # Test whether the GPRs are updated accordingly. (GPRs are just the lower
@@ -77,7 +77,7 @@ for {set i 0} {$i < 32} {incr i 1} {
 set general_register "0x1\[ \t\]+1"
 
 for {set i 0} {$i < 32} {incr i 1} {
-        gdb_test "info reg r$i" "r$i.*$general_register" "info reg r$i"
+	gdb_test "info reg r$i" "r$i.*$general_register" "info reg r$i"
 }
 
 # Now redo the same tests, but using the print command.
@@ -89,12 +89,12 @@ if {$endianness == "big"} {
 }
 
 for {set i 0} {$i < 32} {incr i 1} {
-        gdb_test "print \$ev$i" ".* = $decimal_vector" "print ev$i"
+	gdb_test "print \$ev$i" ".* = $decimal_vector" "print ev$i"
 }
 
 for {set i 0} {$i < 32} {incr i 1} {
-         set pattern$i ".*ev$i.*"
-         append pattern$i $vector_register
+	 set pattern$i ".*ev$i.*"
+	 append pattern$i $vector_register
 }
 
 send_gdb "info vector\n"
@@ -195,6 +195,3 @@ gdb_test "down" \
 gdb_test "finish" \
   "Run till exit from .0  vector_fun \\(a=.2, 2., b=.3, 3.\\) at.*e500-regs.c.*main \\(\\) at.*e500-regs.c.*z = vector_fun \\(x, y\\);.*Value returned is.*= .2, 2." \
   "finish returned correct value"
-
-
-

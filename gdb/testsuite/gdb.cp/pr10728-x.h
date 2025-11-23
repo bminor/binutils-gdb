@@ -6,4 +6,3 @@ struct X
 };
 
 X y();
-

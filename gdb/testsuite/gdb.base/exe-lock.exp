@@ -52,5 +52,3 @@ file delete $binfile
 if { [file exists $binfile] } {
     fail "executable still exists (${binfile})"
     }
-
-

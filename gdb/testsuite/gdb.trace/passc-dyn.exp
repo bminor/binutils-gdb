@@ -132,4 +132,3 @@ gdb_test "tfind" "failed to find.*" "4.5: dynamic passcount test"
 
 # Finished!
 gdb_test "tfind none" ".*"
-

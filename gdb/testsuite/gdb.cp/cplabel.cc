@@ -77,4 +77,3 @@ main (void)
   foo f;
   return f.baz (foo::bar () + 3);
 }
-

@@ -31,8 +31,8 @@ set any_addr "0x\[0-9a-zA-Z\]+"
 # Try breaking on a nested function.
 
 gdb_test "break first" \
-         "Breakpoint $any_nb at $any_addr: file .*hello.adb, line $any_nb." \
-         "break on nested function First"
+	 "Breakpoint $any_nb at $any_addr: file .*hello.adb, line $any_nb." \
+	 "break on nested function First"
 
 gdb_test "break fourth" \
     "Breakpoint $any_nb at $any_addr: file .*hello.adb, line $any_nb." \

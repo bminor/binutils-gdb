@@ -112,7 +112,7 @@ proc strip_debug {dest} {
 	fail $test
 	return 0
     } else {
-    	pass $test
+	pass $test
 	return 1
     }
 }

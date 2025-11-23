@@ -19,4 +19,3 @@ struct B {
   struct C *c;
   int wombat;
 };
-

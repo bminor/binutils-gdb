@@ -16,4 +16,3 @@
 load_lib ../config/monitor.exp
 set timeout 1000
 verbose "Timeout is now $timeout seconds" 2
-

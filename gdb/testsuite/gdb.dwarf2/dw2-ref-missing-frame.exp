@@ -19,10 +19,10 @@ require dwarf2_support
 
 standard_testfile .S -func.c -main.c
 lassign [function_range func_nofb \
-             "${srcdir}/${subdir}/${srcfile2} ${srcdir}/${subdir}/${srcfile3}"] \
+	     "${srcdir}/${subdir}/${srcfile2} ${srcdir}/${subdir}/${srcfile3}"] \
     func_nofb_start func_nofb_len
 lassign [function_range func_loopfb \
-             "${srcdir}/${subdir}/${srcfile2} ${srcdir}/${subdir}/${srcfile3}"] \
+	     "${srcdir}/${subdir}/${srcfile2} ${srcdir}/${subdir}/${srcfile3}"] \
     func_loopfb_start func_loopfb_len
 
 set flags {}

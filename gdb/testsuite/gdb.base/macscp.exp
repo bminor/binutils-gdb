@@ -67,87 +67,87 @@ proc info_macro {macro} {
 
     if {$debug_me} {exp_internal 1}
     gdb_expect {
-        -re "Defined at \[^\r\n\]*(${filepat}):${nonzero}\[\r\n\]" {
-            # `location' and `definition' should be empty when we see
-            # this message.
-            if {[llength $location] == 0 && [llength $definition] == 0} {
-                set location $expect_out(1,string)
-                exp_continue
-            } else {
-                # Exit this expect loop, with a result indicating failure.
-                set definition {}
-            }
-        }
-        -re "The symbol `${macro}' has no definition as a C/C\\+\\+ preprocessor macro\[^\r\n\]*\[\r\n\]" {
-            # `location' and `definition' should be empty when we see
-            # this message.
-            if {[llength $location] == 0 && [llength $definition] == 0} {
-                set definition undefined
-                exp_continue
-            } else {
-                # Exit this expect loop, with a result indicating failure.
-                set definition {}
-            }
-        }
-        -re "^\[\r\n\]*  included at \[^\r\n\]*(${filepat}):${nonzero}\[\r\n\]" {
-            # `location' should *not* be empty when we see this
-            # message.  It should have recorded at least the initial
-            # `Defined at ' message (for definitions) or ` at' message
-            # (for undefined symbols).
-            if {[llength $location] != 0} {
-                lappend location $expect_out(1,string)
-                exp_continue
-            } else {
-                # Exit this expect loop, with a result indicating failure.
-                set definition {}
-            }
-        }
-        -re "^\[\r\n\]*at \[^\r\n\]*(${filepat}):${nonzero}\[\r\n\]" {
-            # This appears after a `has no definition' message.
-            # `location' should be empty when we see it.
-            if {[string compare $definition undefined] == 0 \
-                    && [llength $location] == 0} {
-                set location $expect_out(1,string)
-                exp_continue
-            } else {
-                # Exit this expect loop, with a result indicating failure.
-                set definition {}
-            }
-        }
-        -re "#define ${macro} (\[^\r\n\]*)\[\r\n\]" {
-            # `definition' should be empty when we see this message.
-            if {[string compare $definition ""] == 0} {
-                set definition $expect_out(1,string)
-                exp_continue
-            } else {
-                # Exit this expect loop, with a result indicating failure.
-                set definition {}
-            }
-        }
-        -re "has no preprocessor macro information.*$gdb_prompt $" {
-            set definition no-macro-info
-        }
-        -re "$gdb_prompt $" {
-            # Exit the expect loop; let the existing value of `definition'
-            # indicate failure or success.
-        }
-        timeout {
-            set definition timeout
-        }
+	-re "Defined at \[^\r\n\]*(${filepat}):${nonzero}\[\r\n\]" {
+	    # `location' and `definition' should be empty when we see
+	    # this message.
+	    if {[llength $location] == 0 && [llength $definition] == 0} {
+		set location $expect_out(1,string)
+		exp_continue
+	    } else {
+		# Exit this expect loop, with a result indicating failure.
+		set definition {}
+	    }
+	}
+	-re "The symbol `${macro}' has no definition as a C/C\\+\\+ preprocessor macro\[^\r\n\]*\[\r\n\]" {
+	    # `location' and `definition' should be empty when we see
+	    # this message.
+	    if {[llength $location] == 0 && [llength $definition] == 0} {
+		set definition undefined
+		exp_continue
+	    } else {
+		# Exit this expect loop, with a result indicating failure.
+		set definition {}
+	    }
+	}
+	-re "^\[\r\n\]*  included at \[^\r\n\]*(${filepat}):${nonzero}\[\r\n\]" {
+	    # `location' should *not* be empty when we see this
+	    # message.  It should have recorded at least the initial
+	    # `Defined at ' message (for definitions) or ` at' message
+	    # (for undefined symbols).
+	    if {[llength $location] != 0} {
+		lappend location $expect_out(1,string)
+		exp_continue
+	    } else {
+		# Exit this expect loop, with a result indicating failure.
+		set definition {}
+	    }
+	}
+	-re "^\[\r\n\]*at \[^\r\n\]*(${filepat}):${nonzero}\[\r\n\]" {
+	    # This appears after a `has no definition' message.
+	    # `location' should be empty when we see it.
+	    if {[string compare $definition undefined] == 0 \
+		    && [llength $location] == 0} {
+		set location $expect_out(1,string)
+		exp_continue
+	    } else {
+		# Exit this expect loop, with a result indicating failure.
+		set definition {}
+	    }
+	}
+	-re "#define ${macro} (\[^\r\n\]*)\[\r\n\]" {
+	    # `definition' should be empty when we see this message.
+	    if {[string compare $definition ""] == 0} {
+		set definition $expect_out(1,string)
+		exp_continue
+	    } else {
+		# Exit this expect loop, with a result indicating failure.
+		set definition {}
+	    }
+	}
+	-re "has no preprocessor macro information.*$gdb_prompt $" {
+	    set definition no-macro-info
+	}
+	-re "$gdb_prompt $" {
+	    # Exit the expect loop; let the existing value of `definition'
+	    # indicate failure or success.
+	}
+	timeout {
+	    set definition timeout
+	}
     }
     if {$debug_me} {exp_internal 0}
 
     switch -exact -- $definition {
-        no-macro-info { return no-macro-info }
-        timeout { return timeout }
-        undefined { return undefined }
-        default {
-            if {[llength $location] >= 1} {
-                return [concat $location [list $definition]]
-            } else {
-                return {}
-            }
-        }
+	no-macro-info { return no-macro-info }
+	timeout { return timeout }
+	undefined { return undefined }
+	default {
+	    if {[llength $location] >= 1} {
+		return [concat $location [list $definition]]
+	    } else {
+		return {}
+	    }
+	}
     }
 }
 
@@ -159,24 +159,24 @@ proc info_macro {macro} {
 proc check_macro {macro expected where} {
     set func_def [info_macro $macro]
     if {[string compare $func_def $expected] == 0} {
-        pass "info macro $macro $where"
+	pass "info macro $macro $where"
     } else {
-        switch -exact -- $func_def {
-            no-macro-info {
-                xfail "executable includes no macro debugging information"
-                return 1
-            }
+	switch -exact -- $func_def {
+	    no-macro-info {
+		xfail "executable includes no macro debugging information"
+		return 1
+	    }
 	    undefined {
 		fail "info macro $macro $where (undefined)"
 		return 1
 	    }
-            timeout {
-                fail "info macro $macro $where (timeout)"
-            }
-            default {
-                fail "info macro $macro $where"
-            }
-        }
+	    timeout {
+		fail "info macro $macro $where (timeout)"
+	    }
+	    default {
+		fail "info macro $macro $where"
+	    }
+	}
     }
     return 0
 }
@@ -231,14 +231,14 @@ gdb_test "info macro __LINE__" "#define __LINE__ 26" \
 gdb_test "list macscp4_2_from_macscp2" ".*macscp4_2_, MACSCP4_INCLUSION.*"
 switch -exact -- [info_macro WHERE] {
     {macscp4.h macscp2.h macscp1.c {before macscp4_2_..., from macscp2.h}} {
-        pass "info macro WHERE after `list macscp_4_2_from_macscp2'"
+	pass "info macro WHERE after `list macscp_4_2_from_macscp2'"
     }
     {macscp4.h macscp3.h macscp1.c {before macscp4_2_..., from macscp3.h}} {
-        setup_kfail "gdb/7660" *-*-*
-        fail "info macro WHERE after `list macscp_4_2_from_macscp2' (gdb/7660)"
+	setup_kfail "gdb/7660" *-*-*
+	fail "info macro WHERE after `list macscp_4_2_from_macscp2' (gdb/7660)"
     }
     timeout {
-        fail "info macro WHERE after `list macscp_4_2_from_macscp2' (timeout)"
+	fail "info macro WHERE after `list macscp_4_2_from_macscp2' (timeout)"
     }
     default { fail "info macro WHERE after `list macscp_4_2_from_macscp2'" }
 }
@@ -246,14 +246,14 @@ switch -exact -- [info_macro WHERE] {
 gdb_test "list macscp4_2_from_macscp3" ".*macscp4_2_, MACSCP4_INCLUSION.*"
 switch -exact -- [info_macro WHERE] {
     {macscp4.h macscp3.h macscp1.c {before macscp4_2_..., from macscp3.h}} {
-        pass "info macro WHERE after `list macscp_4_2_from_macscp3'"
+	pass "info macro WHERE after `list macscp_4_2_from_macscp3'"
     }
     {macscp4.h macscp2.h macscp1.c {before macscp4_2_..., from macscp2.h}} {
-        setup_kfail "gdb/7660" *-*-*
-        fail "info macro WHERE after `list macscp_4_2_from_macscp3' (gdb/7660)"
+	setup_kfail "gdb/7660" *-*-*
+	fail "info macro WHERE after `list macscp_4_2_from_macscp3' (gdb/7660)"
     }
     timeout {
-        fail "info macro WHERE after `list macscp_4_2_from_macscp3' (timeout)"
+	fail "info macro WHERE after `list macscp_4_2_from_macscp3' (timeout)"
     }
     default { fail "info macro WHERE after `list macscp_4_2_from_macscp3'" }
 }
@@ -274,52 +274,52 @@ switch -exact -- [info_macro WHERE] {
 
 set funcs {
     {
-        macscp1_1
-        {macscp1.c {before macscp1_1}}
+	macscp1_1
+	{macscp1.c {before macscp1_1}}
     }
     {
-        macscp2_1
-        {macscp2.h macscp1.c {before macscp2_1}}
+	macscp2_1
+	{macscp2.h macscp1.c {before macscp2_1}}
     }
     {
-        macscp4_1_from_macscp2
-        {macscp4.h macscp2.h macscp1.c {before macscp4_1_..., from macscp2.h}}
-        {macscp4.h macscp3.h macscp1.c {before macscp4_1_..., from macscp3.h}}
+	macscp4_1_from_macscp2
+	{macscp4.h macscp2.h macscp1.c {before macscp4_1_..., from macscp2.h}}
+	{macscp4.h macscp3.h macscp1.c {before macscp4_1_..., from macscp3.h}}
     }
     {
-        macscp4_2_from_macscp2
-        {macscp4.h macscp2.h macscp1.c {before macscp4_2_..., from macscp2.h}}
-        {macscp4.h macscp3.h macscp1.c {before macscp4_2_..., from macscp3.h}}
+	macscp4_2_from_macscp2
+	{macscp4.h macscp2.h macscp1.c {before macscp4_2_..., from macscp2.h}}
+	{macscp4.h macscp3.h macscp1.c {before macscp4_2_..., from macscp3.h}}
     }
     {
-        macscp2_2
-        {macscp2.h macscp1.c {before macscp2_2}}
+	macscp2_2
+	{macscp2.h macscp1.c {before macscp2_2}}
     }
     {
-        macscp1_2
-        {macscp1.c {before macscp1_2}}
+	macscp1_2
+	{macscp1.c {before macscp1_2}}
     }
     {
-        macscp3_1
-        {macscp3.h macscp1.c {before macscp3_1}}
+	macscp3_1
+	{macscp3.h macscp1.c {before macscp3_1}}
     }
     {
-        macscp4_1_from_macscp3
-        {macscp4.h macscp3.h macscp1.c {before macscp4_1_..., from macscp3.h}}
-        {macscp4.h macscp2.h macscp1.c {before macscp4_1_..., from macscp2.h}}
+	macscp4_1_from_macscp3
+	{macscp4.h macscp3.h macscp1.c {before macscp4_1_..., from macscp3.h}}
+	{macscp4.h macscp2.h macscp1.c {before macscp4_1_..., from macscp2.h}}
     }
     {
-        macscp4_2_from_macscp3
-        {macscp4.h macscp3.h macscp1.c {before macscp4_2_..., from macscp3.h}}
-        {macscp4.h macscp2.h macscp1.c {before macscp4_2_..., from macscp2.h}}
+	macscp4_2_from_macscp3
+	{macscp4.h macscp3.h macscp1.c {before macscp4_2_..., from macscp3.h}}
+	{macscp4.h macscp2.h macscp1.c {before macscp4_2_..., from macscp2.h}}
     }
     {
-        macscp3_2
-        {macscp3.h macscp1.c {before macscp3_2}}
+	macscp3_2
+	{macscp3.h macscp1.c {before macscp3_2}}
     }
     {
-        macscp1_3
-        {macscp1.c {before macscp1_3}}
+	macscp1_3
+	{macscp1.c {before macscp1_3}}
     }
 }
 
@@ -358,71 +358,71 @@ for {set i 0} {$i < [llength $funcs]} {incr i} {
     # Check the macro WHERE.
     set result [info_macro WHERE]
     if {[string compare $result $expected] == 0} {
-        pass "info macro WHERE stopped in $func"
+	pass "info macro WHERE stopped in $func"
     } elseif {[string compare $result $kfail_expected] == 0} {
-        setup_kfail "gdb/7660" *-*-*
-        fail "info macro WHERE stopped in $func (gdb/7660)"
+	setup_kfail "gdb/7660" *-*-*
+	fail "info macro WHERE stopped in $func (gdb/7660)"
     } elseif {[string compare $result timeout] == 0} {
-        fail "info macro WHERE stopped in $func (timeout)"
+	fail "info macro WHERE stopped in $func (timeout)"
     } else {
-        fail "info macro WHERE stopped in $func"
+	fail "info macro WHERE stopped in $func"
     }
 
     # Check that the BEFORE_<func> macros for all prior functions are
     # #defined, and that those for all subsequent functions are not.
     for {set j 0} {$j < [llength $funcs]} {incr j} {
-        if {$j != $i} {
-            set func_j_entry [lindex $funcs $j]
-            set func_j [lindex $func_j_entry 0]
+	if {$j != $i} {
+	    set func_j_entry [lindex $funcs $j]
+	    set func_j [lindex $func_j_entry 0]
 
-            set before_macro "BEFORE_[string toupper $func_j]"
-            set test_name \
-                    "$before_macro defined/undefined when stopped at $func"
-            set result [info_macro $before_macro]
+	    set before_macro "BEFORE_[string toupper $func_j]"
+	    set test_name \
+		    "$before_macro defined/undefined when stopped at $func"
+	    set result [info_macro $before_macro]
 
-            if {$j < $i} {
-                if {[llength $result] >= 2 && \
-                        [string compare [lindex $result end] {}] == 0} {
-                    pass $test_name
-                } elseif {[string compare $result timeout] == 0} {
-                    fail "$test_name (timeout)"
-                } else {
-                    maybe_kfail $func "$test_name"
-                }
-            } elseif {$j > $i} {
-                switch -- [lindex $result end] {
-                    undefined { pass $test_name }
-                    timeout { fail "$test_name (timeout)" }
-                    default {
-                        maybe_kfail $func "$test_name"
-                    }
-                }
-            }
+	    if {$j < $i} {
+		if {[llength $result] >= 2 && \
+			[string compare [lindex $result end] {}] == 0} {
+		    pass $test_name
+		} elseif {[string compare $result timeout] == 0} {
+		    fail "$test_name (timeout)"
+		} else {
+		    maybe_kfail $func "$test_name"
+		}
+	    } elseif {$j > $i} {
+		switch -- [lindex $result end] {
+		    undefined { pass $test_name }
+		    timeout { fail "$test_name (timeout)" }
+		    default {
+			maybe_kfail $func "$test_name"
+		    }
+		}
+	    }
 
-            set until_macro "UNTIL_[string toupper $func_j]"
-            set test_name \
-                    "$until_macro defined/undefined when stopped at $func"
-            set result [info_macro $until_macro]
+	    set until_macro "UNTIL_[string toupper $func_j]"
+	    set test_name \
+		    "$until_macro defined/undefined when stopped at $func"
+	    set result [info_macro $until_macro]
 
-            if {$j <= $i} {
-                switch -- [lindex $result end] {
-                    undefined { pass $test_name }
-                    timeout { fail "$test_name (timeout)" }
-                    default {
-                        maybe_kfail $func "$test_name"
-                    }
-                }
-            } elseif {$j > $i} {
-                if {[llength $result] >= 2 && \
-                        [string compare [lindex $result end] {}] == 0} {
-                    pass $test_name
-                } elseif {[string compare $result timeout] == 0} {
-                    fail "$test_name (timeout)"
-                } else {
-                    maybe_kfail $func "$test_name"
-                }
-            }
-        }
+	    if {$j <= $i} {
+		switch -- [lindex $result end] {
+		    undefined { pass $test_name }
+		    timeout { fail "$test_name (timeout)" }
+		    default {
+			maybe_kfail $func "$test_name"
+		    }
+		}
+	    } elseif {$j > $i} {
+		if {[llength $result] >= 2 && \
+			[string compare [lindex $result end] {}] == 0} {
+		    pass $test_name
+		} elseif {[string compare $result timeout] == 0} {
+		    fail "$test_name (timeout)"
+		} else {
+		    maybe_kfail $func "$test_name"
+		}
+	    }
+	}
     }
 }
 

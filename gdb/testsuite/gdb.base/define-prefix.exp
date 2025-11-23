@@ -161,4 +161,3 @@ gdb_test "define-prefix something-not-existing something-else" \
 
 gdb_test "define-prefix abc-prefix something-not-existing something-else" \
     "Undefined abc-prefix command: \"something-not-existing\".*"
-

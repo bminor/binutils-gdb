@@ -51,9 +51,9 @@ int main () {
 
     for (i = 0; i < NUM; i++)
       {
-        res = pthread_create (&threads[i],
-                             NULL,
-                             thread_function,
+	res = pthread_create (&threads[i],
+			     NULL,
+			     thread_function,
 			     (void *) i);
       }
 
@@ -96,4 +96,3 @@ void *thread_function (void *arg) {
 
     pthread_exit (NULL);
 }
-

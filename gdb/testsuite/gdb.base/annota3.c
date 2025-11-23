@@ -31,4 +31,3 @@ main (void)
 
   return 0;  /* after loop */
 }
-

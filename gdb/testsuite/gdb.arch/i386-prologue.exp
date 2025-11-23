@@ -216,6 +216,6 @@ gdb_test_multiple "break jump_at_beginning" \
 		"check jump_at_beginning prologue end"
     }
     default {
-        fail "set breakpoint in jump_at_beginning"
+	fail "set breakpoint in jump_at_beginning"
     }
 }

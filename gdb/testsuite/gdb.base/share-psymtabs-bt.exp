@@ -28,7 +28,7 @@
 standard_testfile .c share-psymtabs-bt-2.c
 
 if { [prepare_for_testing "failed to prepare" $testfile "$srcfile $srcfile2" \
-         {debug}] } {
+	 {debug}] } {
     untested "failed to compile"
     return -1
 }

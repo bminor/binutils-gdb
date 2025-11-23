@@ -401,7 +401,7 @@ proc test_lookup_operator_functions {} {
     info_func "operator>>=("	"void foo::operator>>=($dm_type_foo_ref);"
     info_func "operator|=("	"void foo::operator|=($dm_type_foo_ref);"
     info_func "operator$dm_operator_comma\("	\
-    				"void foo::operator$dm_operator_comma\($dm_type_foo_ref);"
+				"void foo::operator$dm_operator_comma\($dm_type_foo_ref);"
     info_func "operator/("	"void foo::operator/($dm_type_foo_ref);"
     info_func "operator+("	"void foo::operator+($dm_type_foo_ref);"
     info_func "operator<<("	"void foo::operator<<($dm_type_foo_ref);"

@@ -52,16 +52,16 @@ gdb_test_multiple "" "Runto to $bp_location" {
 }
 
 gdb_test "print My_Drawable" \
-         "= \\(center => \\(x => 1, y => 2\\), radius => 3\\)"
+	 "= \\(center => \\(x => 1, y => 2\\), radius => 3\\)"
 
 gdb_test "print s_access.all" \
-         "\\(center => \\(x => 1, y => 2\\), radius => 3\\)"
+	 "\\(center => \\(x => 1, y => 2\\), radius => 3\\)"
 
 gdb_test "print sp_access.all" \
-         "\\(center => \\(x => 1, y => 2\\), radius => 3\\)"
+	 "\\(center => \\(x => 1, y => 2\\), radius => 3\\)"
 
 gdb_test "print d_access.all" \
-         "\\(center => \\(x => 1, y => 2\\), radius => 3\\)"
+	 "\\(center => \\(x => 1, y => 2\\), radius => 3\\)"
 
 gdb_test "print dp_access.all" \
-         "\\(center => \\(x => 1, y => 2\\), radius => 3\\)"
+	 "\\(center => \\(x => 1, y => 2\\), radius => 3\\)"

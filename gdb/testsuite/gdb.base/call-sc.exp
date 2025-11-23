@@ -228,18 +228,18 @@ proc test_scalar_returns { } {
     set test "return foo; synchronize pc to main() for '${testfile}'"
     for {set loop_count 0} {$loop_count < 2} {incr loop_count} {
       gdb_test_multiple "backtrace 1" $test {
-        -re "#0.*main \\(\\).*${gdb_prompt} $" {
-          pass $test
-          set loop_count 2
-        }
-        -re "#0.*fun \\(\\).*${gdb_prompt} $" {
-          if {$loop_count < 1} {
-            gdb_test "finish" ".*" ""
-          } else {
-            fail $test
-            set loop_count 2
-          }
-        }
+	-re "#0.*main \\(\\).*${gdb_prompt} $" {
+	  pass $test
+	  set loop_count 2
+	}
+	-re "#0.*fun \\(\\).*${gdb_prompt} $" {
+	  if {$loop_count < 1} {
+	    gdb_test "finish" ".*" ""
+	  } else {
+	    fail $test
+	    set loop_count 2
+	  }
+	}
       }
     }
 

@@ -55,8 +55,8 @@ if {![runto_main]} {
 proc take_gdb_out_of_choice_menu {} {
     global gdb_prompt
     gdb_test_multiple " " " " {
-        -re ".*$gdb_prompt $" {
-        }
+	-re ".*$gdb_prompt $" {
+	}
 	timeout {
 	    perror "could not resynchronize to command prompt (timeout)"
 	    continue
@@ -119,24 +119,24 @@ proc set_bp_overloaded {name expectedmenu mychoice bpnumber linenumbers} {
 		-re "$gdb_prompt $" {
 		    gdb_assert {!$bad_bp && $seen_bps == $expected_bps} \
 			$gdb_test_name
-                }
-                timeout {
-                    fail "$gdb_test_name (timeout)"
-                    take_gdb_out_of_choice_menu
-                }
-            }
-        }
-        -re ".*\r\n> " {
-            fail "$gdb_test_name (bad menu)"
-            take_gdb_out_of_choice_menu
-        }
-        -re ".*$gdb_prompt $" {
-            fail "$gdb_test_name (no menu)"
-        }
-        timeout {
-            fail "$gdb_test_name (timeout)"
-            take_gdb_out_of_choice_menu
-        }
+		}
+		timeout {
+		    fail "$gdb_test_name (timeout)"
+		    take_gdb_out_of_choice_menu
+		}
+	    }
+	}
+	-re ".*\r\n> " {
+	    fail "$gdb_test_name (bad menu)"
+	    take_gdb_out_of_choice_menu
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "$gdb_test_name (no menu)"
+	}
+	timeout {
+	    fail "$gdb_test_name (timeout)"
+	    take_gdb_out_of_choice_menu
+	}
     }
 }
 
@@ -186,18 +186,18 @@ foreach type $all_types {
 
     # Probe for the actual type.
     gdb_test_multiple "print &foo::overload1arg($types($type))" \
-        "probe $types($type)" {
-            -re ".*\<foo::.*\>.*$gdb_prompt $" {
-	        regexp {<.*>} $expect_out(0,string) func
-	        regexp {\(.*\)} $func real_type
+	"probe $types($type)" {
+	    -re ".*\<foo::.*\>.*$gdb_prompt $" {
+		regexp {<.*>} $expect_out(0,string) func
+		regexp {\(.*\)} $func real_type
 
-	        # Store the real type into TYPES.
-	        set types($type) [string trim $real_type {()}]
+		# Store the real type into TYPES.
+		set types($type) [string trim $real_type {()}]
 
-	        # Create an inverse mapping of the actual type to
-	        # the synthetic type.
-	        set type_map("$types($type)") $type
-	        pass "detect $type"
+		# Create an inverse mapping of the actual type to
+		# the synthetic type.
+		set type_map("$types($type)") $type
+		pass "detect $type"
 	    }
     }
 }
@@ -256,35 +256,35 @@ gdb_test "info break" $bptable "breakpoint info, after setting one-by-one"
 send_gdb "break foo::overload1arg\n"
 gdb_expect {
     -re "$menu_overload1arg" {
-        pass "bp menu for foo::overload1arg choice cancel"
-        # Choose cancel.
-        send_gdb "0\n"
-        gdb_expect {
-            -re "canceled\r\n$gdb_prompt $" {
-                pass "set bp on overload1arg canceled"
-            }
+	pass "bp menu for foo::overload1arg choice cancel"
+	# Choose cancel.
+	send_gdb "0\n"
+	gdb_expect {
+	    -re "canceled\r\n$gdb_prompt $" {
+		pass "set bp on overload1arg canceled"
+	    }
 	    -re "cancelled\r\n$gdb_prompt $" {
 		pass "set bp on overload1arg canceled"
 	    }
-            -re ".*$gdb_prompt $" {
-                fail "set bp on overload1arg canceled (bad message)"
-            }
-            timeout {
-                fail "set bp on overload1arg canceled (timeout)"
-                take_gdb_out_of_choice_menu
-            }
-        }
+	    -re ".*$gdb_prompt $" {
+		fail "set bp on overload1arg canceled (bad message)"
+	    }
+	    timeout {
+		fail "set bp on overload1arg canceled (timeout)"
+		take_gdb_out_of_choice_menu
+	    }
+	}
     }
     -re ".*\r\n> " {
-        fail "bp menu for foo::overload1arg choice cancel (bad menu)"
-        take_gdb_out_of_choice_menu
+	fail "bp menu for foo::overload1arg choice cancel (bad menu)"
+	take_gdb_out_of_choice_menu
     }
     -re ".*$gdb_prompt $" {
-        fail "bp menu for foo::overload1arg choice cancel (no menu)"
+	fail "bp menu for foo::overload1arg choice cancel (no menu)"
     }
     timeout {
-        fail "bp menu for foo::overload1arg choice cancel (timeout)"
-        take_gdb_out_of_choice_menu
+	fail "bp menu for foo::overload1arg choice cancel (timeout)"
+	take_gdb_out_of_choice_menu
     }
 }
 
@@ -310,15 +310,15 @@ with_test_prefix "multiple breakpoints" {
 send_gdb "delete breakpoints\n"
 gdb_expect {
     -re "Delete all breakpoints, watchpoints, tracepoints, and catchpoints.* $" {
-        send_gdb "y\n"
-        gdb_expect {
-            -re ".*$gdb_prompt $" {
+	send_gdb "y\n"
+	gdb_expect {
+	    -re ".*$gdb_prompt $" {
 		pass "delete all breakpoints, watchpoints, tracepoints, and catchpoints"
-            }
-            timeout {
+	    }
+	    timeout {
 		fail "delete all breakpoints, watchpoints, tracepoints, and catchpoints (timeout)"
-            }
-        }
+	    }
+	}
     }
     timeout {
 	fail "delete all breakpoints, watchpoints, tracepoints, and catchpoints (timeout)"
@@ -336,32 +336,32 @@ incr bpnum
 send_gdb "break foo::overload1arg\n"
 gdb_expect {
     -re "$menu_overload1arg" {
-        pass "bp menu for foo::overload1arg choice all"
-        # Choose all.
-        send_gdb "1\n"
-        gdb_expect {
+	pass "bp menu for foo::overload1arg choice all"
+	# Choose all.
+	send_gdb "1\n"
+	gdb_expect {
 	    -re "Breakpoint $bpnum at $hex: foo::overload1arg. .12 locations.\r\n.*$gdb_prompt $" {
-                pass "set bp on overload1arg all"
-            }
-            -re ".*$gdb_prompt $" {
-                fail "set bp on overload1arg all (bad message)"
-            }
-            timeout {
-                fail "set bp on overload1arg all (timeout)"
-                take_gdb_out_of_choice_menu
-            }
-        }
+		pass "set bp on overload1arg all"
+	    }
+	    -re ".*$gdb_prompt $" {
+		fail "set bp on overload1arg all (bad message)"
+	    }
+	    timeout {
+		fail "set bp on overload1arg all (timeout)"
+		take_gdb_out_of_choice_menu
+	    }
+	}
     }
     -re ".*\r\n> " {
-        fail "bp menu for foo::overload1arg choice all (bad menu)"
-        take_gdb_out_of_choice_menu
+	fail "bp menu for foo::overload1arg choice all (bad menu)"
+	take_gdb_out_of_choice_menu
     }
     -re ".*$gdb_prompt $" {
-        fail "bp menu for foo::overload1arg choice all (no menu)"
+	fail "bp menu for foo::overload1arg choice all (no menu)"
     }
     timeout {
-        fail "bp menu for foo::overload1arg choice all (timeout)"
-        take_gdb_out_of_choice_menu
+	fail "bp menu for foo::overload1arg choice all (timeout)"
+	take_gdb_out_of_choice_menu
     }
 }
 
@@ -382,32 +382,32 @@ proc continue_to_bp_overloaded {bpnumber might_fail line argtype argument} {
     global gdb_prompt hex decimal srcfile bkptno_num_re
 
     if {$argument == ""} {
-        set actuals ""
+	set actuals ""
     } else {
-        set actuals "arg=$argument"
-        if {[regexp {char} $argtype]} {
+	set actuals "arg=$argument"
+	if {[regexp {char} $argtype]} {
 	    append actuals " \\'\\\\00$argument\\'"
       }
     }
 
     if {[string match $argtype "void"]} {
-        set body "return $decimal;"
+	set body "return $decimal;"
     } else {
-        set body "arg = 0; return $decimal;"
+	set body "arg = 0; return $decimal;"
     }
 
     gdb_test_multiple "continue" "continue to bp overloaded : $argtype" {
-        -re "Continuing.\r\n\r\nBreakpoint $bkptno_num_re, foo::overload1arg \\(this=${hex}(, )?$actuals\\) at .*$srcfile:$line\r\n$decimal\[\t \]+{ $body }.*$gdb_prompt $" {
-            pass "continue to bp overloaded : $argtype"
-        }
+	-re "Continuing.\r\n\r\nBreakpoint $bkptno_num_re, foo::overload1arg \\(this=${hex}(, )?$actuals\\) at .*$srcfile:$line\r\n$decimal\[\t \]+{ $body }.*$gdb_prompt $" {
+	    pass "continue to bp overloaded : $argtype"
+	}
 
-        -re "Continuing.\r\n\r\nBreakpoint $bkptno_num_re, foo::overload1arg \\(this=${hex}, arg=.*\\) at .*$srcfile:$line\r\n$decimal\[\t \]+{ $body }.*$gdb_prompt $" {
-            if {$might_kfail} {
-                kfail "c++/8130" "continue to bp overloaded : $argtype"
-            } else {
-                fail "continue to bp overloaded : $argtype"
-            }
-        }
+	-re "Continuing.\r\n\r\nBreakpoint $bkptno_num_re, foo::overload1arg \\(this=${hex}, arg=.*\\) at .*$srcfile:$line\r\n$decimal\[\t \]+{ $body }.*$gdb_prompt $" {
+	    if {$might_kfail} {
+		kfail "c++/8130" "continue to bp overloaded : $argtype"
+	    } else {
+		fail "continue to bp overloaded : $argtype"
+	    }
+	}
     }
 }
 

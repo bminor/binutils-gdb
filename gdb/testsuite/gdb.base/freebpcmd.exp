@@ -59,39 +59,39 @@ set lines {{if i<0 || i > 100}
 	   {echo Invalid i value\n}
 	   {else}
 	   {if (i%2) == 0}
-           {echo "even "}
-           {print i}
-           {else}
-           {echo "odd "}
-           {print i}
-           {end}
-           {set variable $foo = 0}
-           {set variable $j = 0}
-           {while $j < i}
-           {set variable $foo += $j}
-           {set variable $j++}
-           {end}
-           {print $foo}
-           {if i != 40}
-           {c}
-           {end}
+	   {echo "even "}
+	   {print i}
+	   {else}
+	   {echo "odd "}
+	   {print i}
 	   {end}
-           {end}}
+	   {set variable $foo = 0}
+	   {set variable $j = 0}
+	   {while $j < i}
+	   {set variable $foo += $j}
+	   {set variable $j++}
+	   {end}
+	   {print $foo}
+	   {if i != 40}
+	   {c}
+	   {end}
+	   {end}
+	   {end}}
 
 send_gdb "commands\n"
 for {set i 0} {$i < [llength $lines]} {incr i} {
     gdb_expect {
-        -re ".*>" {
-            send_gdb "[lindex $lines $i]\n"
-        }
-        -re "$gdb_prompt $" {
-            set reason "got top-level prompt early"
-            break
-        }
-        timeout {
-            set reason "timeout"
-            break
-        }
+	-re ".*>" {
+	    send_gdb "[lindex $lines $i]\n"
+	}
+	-re "$gdb_prompt $" {
+	    set reason "got top-level prompt early"
+	    break
+	}
+	timeout {
+	    set reason "timeout"
+	    break
+	}
     }
 }
 if {$i >= [llength $lines]} {

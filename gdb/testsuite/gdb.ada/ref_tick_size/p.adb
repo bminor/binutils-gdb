@@ -26,4 +26,3 @@ begin
    Do_Nothing (D1'Address);  --  START
    Do_Nothing (D2'Address);
 end P;
-

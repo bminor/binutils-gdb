@@ -122,8 +122,8 @@ thread_function (void *arg)
 	{
 	  /* For debugging.  */
 	  printf ("Thread %ld changing watch_thread[%d] data"
-	          " from %d -> %d\n", thread_number, j,
-	          watched_data[j], watched_data[j] + 1);
+		  " from %d -> %d\n", thread_number, j,
+		  watched_data[j], watched_data[j] + 1);
 	  /* Increment the watched data field.  */
 	  watched_data[j]++;
 	}

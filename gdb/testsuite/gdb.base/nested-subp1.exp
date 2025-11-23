@@ -30,9 +30,9 @@ if {![support_nested_function_tests]} {
 }
 
 if { [gdb_compile "${srcdir}/${subdir}/${testcase}.c" \
-                  [standard_output_file "${testcase}"] \
-                  executable \
-                  [list debug "additional_flags=-std=gnu99"]] != "" } {
+		  [standard_output_file "${testcase}"] \
+		  executable \
+		  [list debug "additional_flags=-std=gnu99"]] != "" } {
     return -1
 }
 
@@ -46,11 +46,11 @@ if {![runto_main]} {
 
 set bp_location [gdb_get_line_number "STOP" "${testcase}.c"]
 gdb_test "break ${testcase}.c:${bp_location}" \
-         "Breakpoint \[0-9\]+ at 0x\[0-9a-fA-F\]+: .*" \
-         "breakpoint to the STOP marker"
+	 "Breakpoint \[0-9\]+ at 0x\[0-9a-fA-F\]+: .*" \
+	 "breakpoint to the STOP marker"
 gdb_test "continue" \
-         "Breakpoint \[0-9\]+, nested .*" \
-         "continue to the STOP marker"
+	 "Breakpoint \[0-9\]+, nested .*" \
+	 "continue to the STOP marker"
 
 
 # Check we get correct values for both local and non-local variable references.

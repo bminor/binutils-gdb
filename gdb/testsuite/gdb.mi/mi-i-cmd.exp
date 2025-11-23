@@ -23,23 +23,23 @@ if {[mi_clean_restart]} {
 # First, verify that the debugger correctly advertises support
 # for the -info-gdb-mi-command command.
 mi_gdb_test "-list-features" \
-            "\\^done,features=\\\[.*\"info-gdb-mi-command\".*\\\]" \
-            "-list-features includes \"info-gdb-mi-command\""
+	    "\\^done,features=\\\[.*\"info-gdb-mi-command\".*\\\]" \
+	    "-list-features includes \"info-gdb-mi-command\""
 
 mi_gdb_test "-info-gdb-mi-command unsupported-command" \
-            "\\^done,command=\\\{exists=\"false\"\\\}" \
-            "-info-gdb-mi-command unsupported-command"
+	    "\\^done,command=\\\{exists=\"false\"\\\}" \
+	    "-info-gdb-mi-command unsupported-command"
 
 # Same test as above, but including the leading '-' in the command name.
 mi_gdb_test "-info-gdb-mi-command -unsupported-command" \
-            "\\^done,command=\\\{exists=\"false\"\\\}" \
-            "-info-gdb-mi-command -unsupported-command"
+	    "\\^done,command=\\\{exists=\"false\"\\\}" \
+	    "-info-gdb-mi-command -unsupported-command"
 
 mi_gdb_test "-info-gdb-mi-command symbol-list-lines" \
-            "\\^done,command=\\\{exists=\"true\"\\\}" \
-            "-info-gdb-mi-command symbol-list-lines"
+	    "\\^done,command=\\\{exists=\"true\"\\\}" \
+	    "-info-gdb-mi-command symbol-list-lines"
 
 # Same test as above, but including the leading '-' in the command name.
 mi_gdb_test "-info-gdb-mi-command -symbol-list-lines" \
-            "\\^done,command=\\\{exists=\"true\"\\\}" \
-            "-info-gdb-mi-command -symbol-list-lines"
+	    "\\^done,command=\\\{exists=\"true\"\\\}" \
+	    "-info-gdb-mi-command -symbol-list-lines"

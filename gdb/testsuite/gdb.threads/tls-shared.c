@@ -8,4 +8,3 @@ int foo ()
   pthread_testcancel();
   return i_tls;
 }
-

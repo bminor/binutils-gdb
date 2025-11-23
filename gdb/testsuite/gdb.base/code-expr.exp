@@ -375,4 +375,3 @@ gdb_test "whatis (union t_union @code * @code) &v_union" \
 #
 # Function pointers TODO
 #
-

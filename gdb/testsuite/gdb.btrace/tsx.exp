@@ -59,15 +59,15 @@ set abort_3 \
 set test "speculation indication"
 gdb_test_multiple "record instruction-history" $test {
     -re "$abort_1.*$gdb_prompt $" {
-        pass $test
+	pass $test
     }
     -re "$abort_2.*$gdb_prompt $" {
-        pass $test
+	pass $test
     }
     -re -wrap "$abort_3.*" {
-        pass $gdb_test_name
+	pass $gdb_test_name
     }
     -re  "$begin_to_end.*$gdb_prompt $" {
-        pass $test
+	pass $test
     }
 }

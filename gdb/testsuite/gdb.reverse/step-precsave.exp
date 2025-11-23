@@ -311,4 +311,3 @@ gdb_test "next" ".*NEXT TEST 1.*" "reverse next test 2"
 # FIXME return to this later...
 # gdb_test_no_output "set exec-dir forward" "set forward execution"
 # gdb_continue_to_end "step-reverse.exp"
-

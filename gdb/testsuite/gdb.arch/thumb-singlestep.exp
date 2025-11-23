@@ -33,4 +33,3 @@ if {![runto_main]} {
 # pass instruction "push".
 gdb_test "si" "blx	foo.*" "single step"
 gdb_test "si" "foo \\(\\) at .*${srcfile}.*mov r0,#42.*" "step into foo"
-

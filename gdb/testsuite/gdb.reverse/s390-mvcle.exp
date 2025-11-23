@@ -53,4 +53,3 @@ gdb_test "reverse-continue" ".*$srcfile:$decimal.*" "reverse to marker1"
 gdb_test "print (int)dst\[0]" ".* = 0" "check MVCLE record 1"
 gdb_test "print (int)dst\[0x100000]" ".* = 0" "check MVCLE record 2"
 gdb_test "print (int)dst\[0xffffff]" ".* = 0" "check MVCLE record 3"
-

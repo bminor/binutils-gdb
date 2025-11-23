@@ -31,13 +31,13 @@ if {![runto "bar.adb:$bp_location"]} {
 }
 
 gdb_test "print itable'first" \
-         "= 2"
+	 "= 2"
 
 gdb_test "print itable'last" \
-         "= 5"
+	 "= 5"
 
 gdb_test "print table'first" \
-         "= zero"
+	 "= zero"
 
 gdb_test "print table'last" \
-         "= two"
+	 "= two"

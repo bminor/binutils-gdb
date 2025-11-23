@@ -84,7 +84,7 @@ proc test_truncated_comp_dir {} {
     # All of these pathname and directory manipulations assume
     # host == build, so do not attempt this set of tests on remote host.
     if {[is_remote host]} {
-        return
+	return
     }
 
     set working_dir [build_standard_output_file ""]
@@ -123,7 +123,7 @@ proc test_truncated_comp_dir {} {
     gdb_load $binfile
 
     if { [ishost *-*-mingw*] } {
-        gdb_test_no_output "set directories \$cdir;\$cwd"
+	gdb_test_no_output "set directories \$cdir;\$cwd"
     } else {
 	gdb_test_no_output "set directories \$cdir:\$cwd"
     }

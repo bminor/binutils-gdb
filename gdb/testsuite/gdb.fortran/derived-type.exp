@@ -96,21 +96,21 @@ gdb_test "print this%a" " = 3\\.125"
 set test "print this%b"
 gdb_test_multiple $test $test {
     -re " = 'abcdefg'\r\n$gdb_prompt $" {
-        pass $test
+	pass $test
     }
     -re $result_line_2 {
-        setup_xfail "*-*-*"
-        fail $test
+	setup_xfail "*-*-*"
+	fail $test
     }
 }
 
 set test "print this"
 gdb_test_multiple $test $test {
     -re $result_line {
-        pass $test
+	pass $test
     }
     -re $result_line_2 {
-         setup_xfail "*-*-*"
-         fail $test
+	 setup_xfail "*-*-*"
+	 fail $test
     }
 }

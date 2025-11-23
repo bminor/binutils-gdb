@@ -39,7 +39,7 @@ mi_detect_async
 foreach_with_prefix iteration {1 2} {
     mi_delete_breakpoints
     if { [mi_runto_main] < 0 } {
-        continue
+	continue
     }
 
     mi_send_resuming_command "exec-continue" "continue"

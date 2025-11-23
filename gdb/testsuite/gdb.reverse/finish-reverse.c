@@ -125,4 +125,3 @@ int main (int argc, char **argv)
   main_test = 1;				/* double_checkpoint */
   return 0;					/* end of main */
 }
-

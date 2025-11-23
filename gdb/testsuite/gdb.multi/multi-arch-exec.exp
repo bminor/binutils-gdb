@@ -146,7 +146,7 @@ proc build_executables { first_arch } {
 }
 
 proc do_test { first_arch mode selected_thread } {
-        global bkptno_numopt_re
+	global bkptno_numopt_re
 	set from_exec "$first_arch-multi-arch-exec"
 
 	clean_restart ${from_exec}

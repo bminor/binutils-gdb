@@ -55,4 +55,3 @@ gdb_test_multiple "break someMethod" $name \
     -re "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+.*$gdb_prompt $" { pass $name }
     -re ".*$gdb_prompt $"   { kfail "gdb/1236" $name }
 }
-

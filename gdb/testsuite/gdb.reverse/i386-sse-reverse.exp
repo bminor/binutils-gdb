@@ -666,7 +666,7 @@ gdb_test_multiple "continue" $test {
     }
     -re " Illegal instruction.*\r\n$gdb_prompt $" {
 	untested i386-sse4-reverse
-        return -1
+	return -1
     }
 }
 

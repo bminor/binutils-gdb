@@ -39,7 +39,7 @@ with_test_prefix "run" {
 }
 
 gdb_test "continue" \
-         ".*Breakpoint \[0-9\]+, foo\\.p \\(s=.*\\) at .*foo.adb:\[0-9\]+.*"
+	 ".*Breakpoint \[0-9\]+, foo\\.p \\(s=.*\\) at .*foo.adb:\[0-9\]+.*"
 
 with_test_prefix "cont" {
     gdb_test "print s'first" " = 4"

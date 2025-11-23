@@ -25,15 +25,15 @@ proc test_breakpoint {func result} {
     # Return to the top of the test function every time.
     delete_breakpoints
     if {![gdb_breakpoint test_function]} {
-        fail "set test_function breakpoint for $func"
+	fail "set test_function breakpoint for $func"
     } elseif {[gdb_test "continue" \
 		   "Continuing.\r\n\r\nBreakpoint $DEC+,.*test_function.*" \
 		   "continue to test_function for $func"] != 0} {
     } else {
-        gdb_breakpoint "$func"
-        gdb_test "continue" \
-            "Continuing.\r\n\r\nBreakpoint $DEC+,.*$result.*" \
-            "continue to $func"
+	gdb_breakpoint "$func"
+	gdb_test "continue" \
+	    "Continuing.\r\n\r\nBreakpoint $DEC+,.*$result.*" \
+	    "continue to $func"
     }
 }
 

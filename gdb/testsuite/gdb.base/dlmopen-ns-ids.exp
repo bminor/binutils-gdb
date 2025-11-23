@@ -65,7 +65,7 @@ proc get_info_shared {} {
 	    set ns $expect_out(3,string)
 	    set name $expect_out(4,string)
 
-    	    lappend libs [list $from $to $ns $name]
+	    lappend libs [list $from $to $ns $name]
 	    exp_continue
 	}
 

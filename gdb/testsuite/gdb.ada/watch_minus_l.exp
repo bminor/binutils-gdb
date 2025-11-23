@@ -31,7 +31,7 @@ runto "foo_ra10_006.adb:$bp_location"
 # Insert a watchpoint on argument X
 
 gdb_test "watch -location pck.global_var" \
-         ".*atchpoint \[0-9\]+: -location pck.global_var"
+	 ".*atchpoint \[0-9\]+: -location pck.global_var"
 
 # Continue again.  We should be stopped at the (internal) breakpoint
 # that we setup to delete the watchpoint as soon as the program leaves

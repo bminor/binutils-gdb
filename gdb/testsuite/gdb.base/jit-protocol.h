@@ -17,8 +17,8 @@
 
 #ifdef JIT_H
 #error "We don't include jit.h directly since we'd like the jit-reader unit  \
-        tests to break if we make ABI incompatible changes to the structures \
-        re-declared here."
+	tests to break if we make ABI incompatible changes to the structures \
+	re-declared here."
 #endif
 
 #ifndef JIT_PROTOCOL_H

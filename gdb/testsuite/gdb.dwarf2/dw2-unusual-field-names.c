@@ -29,4 +29,3 @@ main (void)
 {
   return obj.field;
 }
-

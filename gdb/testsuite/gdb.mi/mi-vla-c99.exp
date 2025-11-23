@@ -24,7 +24,7 @@ set MIFLAGS "-i=mi"
 standard_testfile vla.c
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" \
-                  "${binfile}" executable {debug}] != "" } {
+		  "${binfile}" executable {debug}] != "" } {
      untested "failed to compile"
      return -1
 }
@@ -41,8 +41,8 @@ mi_create_breakpoint "-t vla.c:$bp_lineno" \
 
 mi_run_cmd
 mi_expect_stop "breakpoint-hit" "func" "\{name=\"n\",value=\"5\"\}" \
-               ".*vla.c" "$bp_lineno" { "" "disp=\"del\"" } \
-               "run to breakpoint at line $bp_lineno"
+	       ".*vla.c" "$bp_lineno" { "" "disp=\"del\"" } \
+	       "run to breakpoint at line $bp_lineno"
 
 mi_gdb_test "500-data-evaluate-expression vla" \
     "500\\^done,value=\"\\{0, 1, 2, 3, 4\\}\"" "evaluate complete vla"
@@ -57,7 +57,7 @@ mi_gdb_test "503-data-evaluate-expression vla\[4\]" \
     "503\\^done,value=\"4\"" "evaluate vla\[4\]"
 
 mi_create_varobj_checked vla vla "int \\\[5\\\]" \
-                                 "create local variable vla"
+				 "create local variable vla"
 
 mi_gdb_test "504-var-info-type vla" \
     "504\\^done,type=\"int \\\[5\\\]\"" \

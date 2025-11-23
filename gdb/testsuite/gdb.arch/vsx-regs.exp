@@ -105,9 +105,9 @@ for {set i 0} {$i < 32} {incr i 1} {
 
 # 2: Set VS0~VS31 registers and check if it reflects on F0~F31.
 for {set i 0} {$i < 32} {incr i 1} {
-        for {set j 0} {$j < 4} {incr j 1} {
-           gdb_test_no_output "set \$vs$i.v4_int32\[$j\] = 0xdeadbeef"
-        }
+	for {set j 0} {$j < 4} {incr j 1} {
+	   gdb_test_no_output "set \$vs$i.v4_int32\[$j\] = 0xdeadbeef"
+	}
 }
 
 for {set i 0} {$i < 32} {incr i 1} {
@@ -122,9 +122,9 @@ for {set i 0} {$i < 32} {incr i 1} {
 
 # 1: Set VR0~VR31 registers and check if it reflects on VS32~VS63.
 for {set i 0} {$i < 32} {incr i 1} {
-        for {set j 0} {$j < 4} {incr j 1} {
-           gdb_test_no_output "set \$vr$i.v4_int32\[$j\] = 1"
-        }
+	for {set j 0} {$j < 4} {incr j 1} {
+	   gdb_test_no_output "set \$vr$i.v4_int32\[$j\] = 1"
+	}
 }
 
 for {set i 32} {$i < 64} {incr i 1} {
@@ -132,9 +132,9 @@ for {set i 32} {$i < 64} {incr i 1} {
 }
 # 2: Set VS32~VS63 registers and check if it reflects on VR0~VR31.
 for {set i 32} {$i < 64} {incr i 1} {
-        for {set j 0} {$j < 4} {incr j 1} {
-           gdb_test_no_output "set \$vs$i.v4_int32\[$j\] = 1"
-        }
+	for {set j 0} {$j < 4} {incr j 1} {
+	   gdb_test_no_output "set \$vs$i.v4_int32\[$j\] = 1"
+	}
 }
 
 for {set i 0} {$i < 32} {incr i 1} {
@@ -164,9 +164,9 @@ for {set i 0} {$i < 32} {incr i 1} {
 
 # 2: Set VR0~VR31 registers and check if it reflects on F32~F63.
 for {set i 0} {$i < 32} {incr i 1} {
-        for {set j 0} {$j < 4} {incr j 1} {
-           gdb_test_no_output "set \$vr$i.v4_int32\[$j\] = 0xdeadbeef"
-        }
+	for {set j 0} {$j < 4} {incr j 1} {
+	   gdb_test_no_output "set \$vr$i.v4_int32\[$j\] = 0xdeadbeef"
+	}
 }
 
 for {set i 32} {$i < 64} {incr i 1} {

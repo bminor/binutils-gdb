@@ -119,21 +119,21 @@ proc do_exec_tests { execer_lang execee_lang } {
    send_gdb "print global_i\n"
    gdb_expect {
      -re ".* = 100.*$gdb_prompt $"\
-                     {pass "print follow-exec/global_i"}
+		     {pass "print follow-exec/global_i"}
      -re "$gdb_prompt $" {fail "print follow-exec/global_i"}
      timeout         {fail "(timeout) print follow-exec/global_i"}
    }
    send_gdb "print local_j\n"
    gdb_expect {
      -re ".* = 101.*$gdb_prompt $"\
-                     {pass "print follow-exec/local_j"}
+		     {pass "print follow-exec/local_j"}
      -re "$gdb_prompt $" {fail "print follow-exec/local_j"}
      timeout         {fail "(timeout) print follow-exec/local_j"}
    }
    send_gdb "print local_k\n"
    gdb_expect {
      -re ".* = 102.*$gdb_prompt $"\
-                     {pass "print follow-exec/local_k"}
+		     {pass "print follow-exec/local_k"}
      -re "$gdb_prompt $" {fail "print follow-exec/local_k"}
      timeout         {fail "(timeout) print follow-exec/local_k"}
    }
@@ -145,7 +145,7 @@ proc do_exec_tests { execer_lang execee_lang } {
    send_gdb "next\n"
    gdb_expect {
      -re ".*xecuting new program: .*${execee_testfile_re}.*${srcfile2}:${execd_line}.*int  local_j = argc;.*$gdb_prompt $"\
-                     {pass "step through execlp call"}
+		     {pass "step through execlp call"}
      -re "$gdb_prompt $" {fail "step through execlp call"}
      timeout         {fail "(timeout) step through execlp call"}
    }
@@ -156,7 +156,7 @@ proc do_exec_tests { execer_lang execee_lang } {
    send_gdb "next\n"
    gdb_expect {
      -re "printf \\(.Hello .*$gdb_prompt $"\
-                     {pass "step after execlp call"}
+		     {pass "step after execlp call"}
      -re "$gdb_prompt $" {fail "step after execlp call"}
      timeout         {fail "(timeout) step after execlp call"}
    }
@@ -201,7 +201,7 @@ proc do_exec_tests { execer_lang execee_lang } {
    send_gdb "catch exec\n"
    gdb_expect {
      -re "Catchpoint .*(exec).*$gdb_prompt $"\
-                     {pass "set catch exec"}
+		     {pass "set catch exec"}
      -re "$gdb_prompt $" {fail "set catch exec"}
      timeout         {fail "(timeout) set catch exec"}
    }
@@ -212,14 +212,14 @@ proc do_exec_tests { execer_lang execee_lang } {
    set msg "info shows catchpoint without exec pathname"
    gdb_test_multiple "info breakpoints" $msg {
        -re ".*catchpoint.*keep y.*exec\[\n\r\]+$gdb_prompt $" {
-           pass $msg
+	   pass $msg
        }
    }
 
    send_gdb "continue\n"
    gdb_expect {
      -re ".*xecuting new program:.*${execee_testfile_re}.*Catchpoint .*(exec\'d .*${execee_testfile_re}).*$gdb_prompt $"\
-                     {pass "hit catch exec"}
+		     {pass "hit catch exec"}
      -re "$gdb_prompt $" {fail "hit catch exec"}
      timeout         {fail "(timeout) hit catch exec"}
    }
@@ -236,7 +236,7 @@ proc do_exec_tests { execer_lang execee_lang } {
    set msg "info shows catchpoint exec pathname"
    gdb_test_multiple "info breakpoints" $msg {
        -re ".*catchpoint.*keep y.*exec, program \".*${execee_testfile_re}\".*$gdb_prompt $" {
-           pass $msg
+	   pass $msg
        }
    }
 
@@ -246,7 +246,7 @@ proc do_exec_tests { execer_lang execee_lang } {
    send_gdb "continue\n"
    gdb_expect {
      -re ".*${srcfile2}:${execd_line}.*$gdb_prompt $"\
-                     {pass "continue after hit catch exec"}
+		     {pass "continue after hit catch exec"}
      -re "$gdb_prompt $" {fail "continue after hit catch exec"}
      timeout         {fail "(timeout) continue after hit catch exec"}
    }
@@ -276,14 +276,14 @@ proc do_exec_tests { execer_lang execee_lang } {
    send_gdb "tbreak ${tbreak_line}\n"
    gdb_expect {
      -re "Temporary breakpoint .*file .*${srcfile}, line ${tbreak_line}.*$gdb_prompt $"\
-                     {pass "prepare to jump to execl call"}
+		     {pass "prepare to jump to execl call"}
      -re "$gdb_prompt $" {fail "prepare to jump to execl call"}
      timeout         {fail "(timeout) prepare to jump to execl call"}
    }
    send_gdb "jump ${tbreak_line}\n"
    gdb_expect {
      -re "main.* at .*${srcfile}:${tbreak_line}.*$gdb_prompt $"\
-                     {pass "jump to execl call"}
+		     {pass "jump to execl call"}
      -re "$gdb_prompt $" {fail "jump to execl call"}
      timeout         {fail "(timeout) jump to execl call"}
    }
@@ -296,14 +296,14 @@ proc do_exec_tests { execer_lang execee_lang } {
    send_gdb "next 2\n"
    gdb_expect {
      -re ".*xecuting new program: .*${execee_testfile_re}.*${srcfile2}:${execd_line}.*int  local_j = argc;.*$gdb_prompt $"\
-                     {pass "step through execl call"}
+		     {pass "step through execl call"}
      -re "$gdb_prompt $" {fail "step through execl call"}
      timeout         {fail "(timeout) step through execl call"}
    }
    send_gdb "next\n"
    gdb_expect {
      -re "printf \\(.Hello .*$gdb_prompt $"\
-                     {pass "step after execl call"}
+		     {pass "step after execl call"}
      -re "$gdb_prompt $" {fail "step after execl call"}
      timeout         {fail "(timeout) step after execl call"}
    }
@@ -344,28 +344,28 @@ proc do_exec_tests { execer_lang execee_lang } {
    send_gdb "tbreak ${tbreak_line}\n"
    gdb_expect {
      -re "Temporary breakpoint .*file .*${srcfile}, line ${tbreak_line}.*$gdb_prompt $"\
-                     {pass "prepare to jump to execv call"}
+		     {pass "prepare to jump to execv call"}
      -re "$gdb_prompt $" {fail "prepare to jump to execv call"}
      timeout         {fail "(timeout) prepare to jump to execv call"}
    }
    send_gdb "jump ${tbreak_line}\n"
    gdb_expect {
      -re "main.* at .*${srcfile}:${tbreak_line}.*$gdb_prompt $"\
-                     {pass "jump to execv call"}
+		     {pass "jump to execv call"}
      -re "$gdb_prompt $" {fail "jump to execv call"}
      timeout         {fail "(timeout) jump to execv call"}
    }
    send_gdb "next\n"
    gdb_expect {
      -re ".*xecuting new program: .*${execee_testfile_re}.*${srcfile2}:${execd_line}.*int  local_j = argc;.*$gdb_prompt $"\
-                     {pass "step through execv call"}
+		     {pass "step through execv call"}
      -re "$gdb_prompt $" {fail "step through execv call"}
      timeout         {fail "(timeout) step through execv call"}
    }
    send_gdb "next\n"
    gdb_expect {
      -re "printf \\(.Hello .*$gdb_prompt $"\
-                     {pass "step after execv call"}
+		     {pass "step after execv call"}
      -re "$gdb_prompt $" {fail "step after execv call"}
      timeout         {fail "(timeout) step after execv call"}
    }
@@ -399,7 +399,7 @@ proc do_exec_tests { execer_lang execee_lang } {
    send_gdb "continue\n"
    gdb_expect {
      -re ".*xecuting new program: .*${execee_testfile_re}.*${srcfile2}:${execd_line}.*int  local_j = argc;.*$gdb_prompt $"\
-                     {pass "continue through exec"}
+		     {pass "continue through exec"}
      -re "$gdb_prompt $" {fail "continue through exec"}
      timeout         {fail "(timeout) continue through exec"}
    }

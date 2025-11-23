@@ -72,4 +72,3 @@ gdb_test_multiple "step" "stopped at bp, 2nd instr" {
 	}
     }
 }
-

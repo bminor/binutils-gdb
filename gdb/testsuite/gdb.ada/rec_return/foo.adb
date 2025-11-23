@@ -21,4 +21,3 @@ begin
    Q := Bar; -- STOP HERE
    Do_Nothing (Q'Address);
 end Foo;
-

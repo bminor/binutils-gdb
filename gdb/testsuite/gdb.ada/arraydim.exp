@@ -34,7 +34,7 @@ set bp_location [gdb_get_line_number "STOP" ${testdir}/foo.adb]
 runto "foo.adb:$bp_location"
 
 gdb_test "ptype m" \
-         "array \\(1 \\.\\. 1, 2 \\.\\. 3, 4 \\.\\. 6\\) of integer"
+	 "array \\(1 \\.\\. 1, 2 \\.\\. 3, 4 \\.\\. 6\\) of integer"
 
 gdb_test "print m'first" " = 1"
 gdb_test "print m'last" " = 1"
@@ -53,7 +53,7 @@ gdb_test "print m'last(3)" " = 6"
 gdb_test "print m'length(3)" " = 3"
 
 gdb_test "ptype global_3dim_for_gdb_testing" \
-         "array \\(0 \\.\\. 0, 0 \\.\\. 1, 0 \\.\\. 2\\) of int"
+	 "array \\(0 \\.\\. 0, 0 \\.\\. 1, 0 \\.\\. 2\\) of int"
 
 gdb_test "print global_3dim_for_gdb_testing'first" " = 0"
 gdb_test "print global_3dim_for_gdb_testing'last" " = 0"

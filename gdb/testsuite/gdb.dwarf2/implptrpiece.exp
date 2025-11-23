@@ -30,7 +30,7 @@ Dwarf::assemble $asm_file {
     # also check for a sign-extension bug in the
     # DW_OP_GNU_implicit_pointer code.
     cu { addr_size 2 } {
- 	compile_unit {} {
+	compile_unit {} {
 	    declare_labels struct_label short_type_label
 	    declare_labels char_type_label ptr_label
 	    declare_labels var_label

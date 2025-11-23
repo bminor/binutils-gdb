@@ -58,7 +58,7 @@ while {$keep_going} {
 
 	    incr count
 	    if {$count < $expected_traps} {
-	    	set keep_going 1
+		set keep_going 1
 	    }
 	}
     }

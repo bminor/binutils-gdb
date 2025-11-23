@@ -67,14 +67,3 @@ gdb_test "print (x ? y : z)" "\[0-9\]* = 3" \
 
 gdb_test "whatis (0 ? 3 : 4)" "type = int" \
     "print whatis of cond expr"
-
-
-
-
-
-
-
-
-
-
-

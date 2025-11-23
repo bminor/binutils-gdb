@@ -127,141 +127,141 @@ if {![runto_main]} {
 gdb_test_no_output "set lang ada"
 
 gdb_test "print pck.fp1_var" \
-         " = 0.25"
+	 " = 0.25"
 
 gdb_test "print /x pck.fp1_var" \
-         " = 0x0"
+	 " = 0x0"
 
 gdb_test "print pck.fp2_var" \
-         " = -0.01"
+	 " = -0.01"
 
 gdb_test "print /x pck.fp2_var" \
-         " = 0x0"
+	 " = 0x0"
 
 gdb_test "print pck.fp3_var" \
-         " = 0.1"
+	 " = 0.1"
 
 gdb_test "print /x pck.fp3_var" \
-         " = 0x0"
+	 " = 0x0"
 
 gdb_test "print pck.fp1_range_var" \
-         " = 1"
+	 " = 1"
 
 gdb_test "print /x pck.fp1_range_var" \
-         " = 0x1"
+	 " = 0x1"
 
 gdb_test "print pck.fp1_var + 0.25" \
-         " = 0.5"
+	 " = 0.5"
 
 gdb_test "print pck.fp2_var - pck.fp2_var" \
-         " = 0"
+	 " = 0"
 
 gdb_test "print pck.fp3_var * 1" \
-         " = 0.1"
+	 " = 0.1"
 
 gdb_test "print pck.fp3_var / pck.fp3_var" \
-         " = 1"
+	 " = 1"
 
 gdb_test "print pck.fp3_var / 0" \
-         "Division by zero"
+	 "Division by zero"
 
 gdb_test "print pck.fp1_range_var - 0.5" \
-         " = 0.5"
+	 " = 0.5"
 
 gdb_test "print -pck.fp1_var" \
-         " = -0.25"
+	 " = -0.25"
 
 gdb_test "print pck.fp1_var = pck.fp1_var" \
-         " = true"
+	 " = true"
 
 gdb_test "print pck.fp1_var = pck.fp1_var2" \
-         " = false"
+	 " = false"
 
 gdb_test "print pck.fp1_var /= pck.fp1_var" \
-         " = false"
+	 " = false"
 
 gdb_test "print pck.fp1_var /= pck.fp1_var2" \
-         " = true"
+	 " = true"
 
 gdb_test "print pck.fp1_var < pck.fp1_var" \
-         " = false"
+	 " = false"
 
 gdb_test "print pck.fp1_var < pck.fp1_var2" \
-         " = true"
+	 " = true"
 
 gdb_test "print pck.fp1_var <= pck.fp1_var2" \
-         " = true"
+	 " = true"
 
 gdb_test "print pck.fp1_var <= pck.fp1_var" \
-         " = true"
+	 " = true"
 
 gdb_test "print pck.fp1_var > pck.fp1_var2" \
-         " = false"
+	 " = false"
 
 gdb_test "print pck.fp1_var2 > pck.fp1_var" \
-         " = true"
+	 " = true"
 
 gdb_test "print pck.fp1_var >= pck.fp1_var" \
-         " = true"
+	 " = true"
 
 gdb_test "print pck.fp1_var >= pck.fp1_var2" \
-         " = false"
+	 " = false"
 
 # Same as above, but with litterals...
 
 gdb_test "print pck.fp1_var = 0.25" \
-         " = true"
+	 " = true"
 
 gdb_test "print pck.fp1_var = 0.5" \
-         " = false"
+	 " = false"
 
 gdb_test "print pck.fp1_var = 1" \
-         " = false"
+	 " = false"
 
 gdb_test "print pck.fp1_var /= 0.25" \
-         " = false"
+	 " = false"
 
 gdb_test "print pck.fp1_var /= 0.5" \
-         " = true"
+	 " = true"
 
 gdb_test "print pck.fp1_var /= 1" \
-         " = true"
+	 " = true"
 
 gdb_test "print pck.fp1_var < 0.25" \
-         " = false"
+	 " = false"
 
 gdb_test "print pck.fp1_var <  0.5" \
-         " = true"
+	 " = true"
 
 gdb_test "print pck.fp1_var <  1" \
-         " = true"
+	 " = true"
 
 gdb_test "print pck.fp1_var <= 0.25" \
-         " = true"
+	 " = true"
 
 gdb_test "print pck.fp1_var <= 0.5" \
-         " = true"
+	 " = true"
 
 gdb_test "print pck.fp1_var <= 1" \
-         " = true"
+	 " = true"
 
 gdb_test "print pck.fp1_var > 0.25" \
-         " = false"
+	 " = false"
 
 gdb_test "print pck.fp1_var > 0.5" \
-         " = false"
+	 " = false"
 
 gdb_test "print pck.fp1_var > 1" \
-         " = false"
+	 " = false"
 
 gdb_test "print pck.fp1_var >= 0.25" \
-         " = true"
+	 " = true"
 
 gdb_test "print pck.fp1_var >= 0.5" \
-         " = false"
+	 " = false"
 
 gdb_test "print pck.fp1_var >= 1" \
-         " = false"
+	 " = false"
 
 
 # Set the language to LANG and do a ptype test on pck__fp1_var,
@@ -270,48 +270,47 @@ gdb_test "print pck.fp1_var >= 1" \
 
 proc do_ptype_test {lang fp1_re fp2_re fp3_re fp1_range_re} {
     with_test_prefix "lang=$lang" {
-        gdb_test_no_output "set language $lang" \
-            "set language to $lang for ptype test"
+	gdb_test_no_output "set language $lang" \
+	    "set language to $lang for ptype test"
 
-        gdb_test "ptype pck__fp1_var" $fp1_re
+	gdb_test "ptype pck__fp1_var" $fp1_re
 
-        gdb_test "ptype pck__fp2_var" $fp2_re
+	gdb_test "ptype pck__fp2_var" $fp2_re
 
-        gdb_test "ptype pck__fp3_var" $fp3_re
+	gdb_test "ptype pck__fp3_var" $fp3_re
 
-        gdb_test "ptype pck__fp1_range_var" $fp1_range_re
+	gdb_test "ptype pck__fp1_range_var" $fp1_range_re
     }
 }
 
 do_ptype_test "ada" \
-              " = <1-byte fixed point \\(small = 1/16\\)>" \
-              " = <1-byte fixed point \\(small = 1/100\\)>" \
-              " = <1-byte fixed point \\(small = 1/30\\)>" \
-              " = <1-byte fixed point \\(small = 1/16\\)>"
+	      " = <1-byte fixed point \\(small = 1/16\\)>" \
+	      " = <1-byte fixed point \\(small = 1/100\\)>" \
+	      " = <1-byte fixed point \\(small = 1/30\\)>" \
+	      " = <1-byte fixed point \\(small = 1/16\\)>"
 
 foreach lang [list "c" "d" "go" "objective-c" "opencl" ] {
     do_ptype_test $lang \
-                  " = 1-byte fixed point \\(small = 1/16\\)" \
-                  " = 1-byte fixed point \\(small = 1/100\\)" \
-                  " = 1-byte fixed point \\(small = 1/30\\)" \
-                  " = <range type>"
+		  " = 1-byte fixed point \\(small = 1/16\\)" \
+		  " = 1-byte fixed point \\(small = 1/100\\)" \
+		  " = 1-byte fixed point \\(small = 1/30\\)" \
+		  " = <range type>"
 }
 
 do_ptype_test "fortran" \
-          " = pck__fp1_type" \
-          " = pck__fp2_type" \
-          " = pck__fp3_type" \
-          " = <range type>"
+	  " = pck__fp1_type" \
+	  " = pck__fp2_type" \
+	  " = pck__fp3_type" \
+	  " = <range type>"
 
 do_ptype_test "modula-2" \
-          " = pck__fp1_type" \
-          " = pck__fp2_type" \
-          " = pck__fp3_type" \
-          " = \\\[1-byte fixed point \\(small = 1/16\\)\\.\\.1-byte fixed point \\(small = 1/16\\)\\\]"
+	  " = pck__fp1_type" \
+	  " = pck__fp2_type" \
+	  " = pck__fp3_type" \
+	  " = \\\[1-byte fixed point \\(small = 1/16\\)\\.\\.1-byte fixed point \\(small = 1/16\\)\\\]"
 
 do_ptype_test "pascal" \
-          " = pck__fp1_type" \
-          " = pck__fp2_type" \
-          " = pck__fp3_type" \
-          " = 1-byte fixed point \\(small = 1/16\\)\\.\\.1-byte fixed point \\(small = 1/16\\)"
-
+	  " = pck__fp1_type" \
+	  " = pck__fp2_type" \
+	  " = pck__fp3_type" \
+	  " = 1-byte fixed point \\(small = 1/16\\)\\.\\.1-byte fixed point \\(small = 1/16\\)"

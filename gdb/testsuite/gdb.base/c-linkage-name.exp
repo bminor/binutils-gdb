@@ -55,7 +55,7 @@ if { $readnow } {
 # of the founction also provided by the same using.
 
 gdb_test "break do_something_other_cu" \
-         "Breakpoint $decimal at $hex: file .*$srcfile2, line $decimal\\."
+	 "Breakpoint $decimal at $hex: file .*$srcfile2, line $decimal\\."
 
 # Verify that partial symtab expansion has taken place for
 # c-linkage-name-2.c.
@@ -70,5 +70,5 @@ gdb_test "maint flush symbol-cache"
 # symtab expansion.
 
 gdb_test "print symada__cS" \
-         " = {a = 100829103}" \
-         "print symada__cS after partial symtab expansion"
+	 " = {a = 100829103}" \
+	 "print symada__cS after partial symtab expansion"

@@ -31,4 +31,3 @@
 	.macro gdbasm_startup
 	clr	%fp
 	.endm
-

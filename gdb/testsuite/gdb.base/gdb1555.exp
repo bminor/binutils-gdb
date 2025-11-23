@@ -65,4 +65,3 @@ gdb_test_multiple "n" $name \
 	kfail "gdb/1555" $name
     }
 }
-

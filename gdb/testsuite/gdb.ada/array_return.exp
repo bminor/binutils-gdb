@@ -41,34 +41,34 @@ if {![runto_main]} {
 # the "finish" command.
 
 gdb_test "break create_small" \
-         "Breakpoint \[0-9\]+ at.*: file .*pck.adb, line \[0-9\]+." \
-         "insert breakpoint in create_small"
+	 "Breakpoint \[0-9\]+ at.*: file .*pck.adb, line \[0-9\]+." \
+	 "insert breakpoint in create_small"
 
 gdb_test "break create_large" \
-         "Breakpoint \[0-9\]+ at.*: file .*pck.adb, line \[0-9\]+." \
-         "insert breakpoint in create_large"
+	 "Breakpoint \[0-9\]+ at.*: file .*pck.adb, line \[0-9\]+." \
+	 "insert breakpoint in create_large"
 
 gdb_test "break create_small_float_vector" \
-         "Breakpoint \[0-9\]+ at.*: file .*pck.adb, line \[0-9\]+." \
-         "insert breakpoint in create_small_float_vector"
+	 "Breakpoint \[0-9\]+ at.*: file .*pck.adb, line \[0-9\]+." \
+	 "insert breakpoint in create_small_float_vector"
 
 # Then continue until reaching the first breakpoint inside Create_Small,
 # and then do a "finish".
 
 gdb_test "cont" \
-         "Breakpoint \[0-9\]+, pck.create_small \\(\\).*" \
-         "continuing to Create_Small"
+	 "Breakpoint \[0-9\]+, pck.create_small \\(\\).*" \
+	 "continuing to Create_Small"
 
 gdb_test "finish" \
-         "Value returned is \\\$\[0-9\]+ = \\(1, 1\\)" \
-         "value printed by finish of Create_Small"
+	 "Value returned is \\\$\[0-9\]+ = \\(1, 1\\)" \
+	 "value printed by finish of Create_Small"
 
 # Now continue until reaching the second breakpoint inside Create_Large,
 # and then do another "finish".
 
 gdb_test "cont" \
-         "Breakpoint \[0-9\]+, pck.create_large \\(\\).*" \
-         "continuing to Create_Large"
+	 "Breakpoint \[0-9\]+, pck.create_large \\(\\).*" \
+	 "continuing to Create_Large"
 
 # On hppa32, the value returned is too large to be returned via a register.
 # Instead, it is returned using the struct convention, and the debugger
@@ -79,17 +79,16 @@ if {![istarget "hppa*64*-*-*"]} {
 }
 
 gdb_test "finish" \
-         "Value returned is \\\$\[0-9\]+ = \\(2, 2, 2, 2\\)" \
-         "value printed by finish of Create_Large"
+	 "Value returned is \\\$\[0-9\]+ = \\(2, 2, 2, 2\\)" \
+	 "value printed by finish of Create_Large"
 
 # Now continue until reaching the third breakpoint, and then do another
 # "finish" again.
 
 gdb_test "cont" \
-         "Breakpoint \[0-9\]+, pck.create_small_float_vector \\(\\).*" \
-         "continuing to Create_Small_Float_Vector"
+	 "Breakpoint \[0-9\]+, pck.create_small_float_vector \\(\\).*" \
+	 "continuing to Create_Small_Float_Vector"
 
 gdb_test "finish" \
-         "Value returned is \\\$\[0-9\]+ = \\(4.25, 4.25\\)" \
-         "value printed by finish of Create_Small_Float_Vector"
-
+	 "Value returned is \\\$\[0-9\]+ = \\(4.25, 4.25\\)" \
+	 "value printed by finish of Create_Small_Float_Vector"

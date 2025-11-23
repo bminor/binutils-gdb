@@ -176,10 +176,9 @@ gdb_test_multiple "quit" "GDB exits after stopping multithreaded program" {
 	exp_continue
     }
     eof {
-        pass "GDB exits after stopping multithreaded program"
+	pass "GDB exits after stopping multithreaded program"
     }
     timeout {
-        fail "GDB exits after stopping multithreaded program (timeout)"
+	fail "GDB exits after stopping multithreaded program (timeout)"
     }
 }
-

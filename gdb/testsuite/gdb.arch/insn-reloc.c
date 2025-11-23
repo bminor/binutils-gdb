@@ -529,12 +529,12 @@ can_relocate_br (void)
   int ok = 0;
 
   asm goto ("  adr x0, %l0\n"
-            "set_point12:\n"
-            "  br x0\n"
-            :
-            :
-            : "x0"
-            : madejump);
+	    "set_point12:\n"
+	    "  br x0\n"
+	    :
+	    :
+	    : "x0"
+	    : madejump);
 
   fail ();
   return;

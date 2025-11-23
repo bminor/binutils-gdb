@@ -97,4 +97,3 @@ proc default_prompt_gdb_start { } {
 proc prompt_gdb_start { } {
     default_prompt_gdb_start
 }
-

@@ -35,4 +35,3 @@ gdb_continue_to_breakpoint "return"
 
 gdb_test "print a(1)" ".*1 = 1.*" "print the first element of array a"
 gdb_test "print a(2)" ".*2 = 2.*" "print the second element of array a"
-

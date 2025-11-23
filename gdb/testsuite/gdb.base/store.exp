@@ -234,4 +234,3 @@ check_field 4
 
 # WANTED: A fairly portable way of convincing the compiler to split a
 # value across memory and registers.
-

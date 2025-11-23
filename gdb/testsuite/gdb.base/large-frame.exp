@@ -57,4 +57,3 @@ foreach opt { O0 O1 O2 } {
 	run_test $opt
     }
 }
-

@@ -33,8 +33,8 @@ proc compute_expected_value {value} {
     set expected_value 0
     set i 0
     while { $i <= $value} {
-        incr expected_value $i
-        incr i
+	incr expected_value $i
+	incr i
     }
     return $expected_value
 }
@@ -51,7 +51,7 @@ proc get_me_variable {tnum} {
 	-re ".*= ($decimal).*\r\n$gdb_prompt $" {
 	    set value_of_me $expect_out(1,string)
 	    pass "$tnum thread print me"
-        }
+	}
 	-re "$gdb_prompt $" {
 	    fail "$tnum thread print me"
 	}
@@ -92,7 +92,7 @@ proc check_thread_local {number} {
 	    "${number} info address a_thread_local"
 
     gdb_test "info address K::another_thread_local" \
-    	    ".*another_thread_local.*a thread-local variable at offset.*" \
+	    ".*another_thread_local.*a thread-local variable at offset.*" \
 	    "${number} info address another_thread_local"
 }
 
@@ -137,7 +137,7 @@ proc check_thread_stack {number spin_threads spin_threads_level} {
 		fail "backtrace of thread number $number in spin"
 	    } else {
 		pass "backtrace of thread number $number in spin"
-                set level $expect_out(1,string)
+		set level $expect_out(1,string)
 		set tarrl($number) $level
 		set tarr($number) 1
 	    }
@@ -172,37 +172,37 @@ if {![runto_main]} {
 # test the thread local's value.
 #
 gdb_test "b [gdb_get_line_number "here we know tls value"]" \
-         ".*Breakpoint 2.*tls.*"   "set breakpoint at all threads"
+	 ".*Breakpoint 2.*tls.*"   "set breakpoint at all threads"
 
 # Set a bp at a point where we know all threads are alive.
 #
 gdb_test "b [gdb_get_line_number "still alive"]" \
-         ".*Breakpoint 3.*tls.*" "set breakpoint at synch point"
+	 ".*Breakpoint 3.*tls.*" "set breakpoint at synch point"
 
 # Set a bp at the end to see if all threads are finished.
 #
 gdb_test "b [gdb_get_line_number "before exit"]" \
-         ".*Breakpoint 4.*tls.*" "set breakpoint at exit"
+	 ".*Breakpoint 4.*tls.*" "set breakpoint at exit"
 
 send_gdb "continue\n"
 gdb_expect {
     -re ".* received signal SIGSEGV.*a_thread_local = 0;.*$gdb_prompt $" {
-        # This is the first symptom if the gcc and binutils versions
-        # in use support TLS, but the system glibc does not.
-        unsupported "continue to first thread: system does not support TLS"
-        return -1
+	# This is the first symptom if the gcc and binutils versions
+	# in use support TLS, but the system glibc does not.
+	unsupported "continue to first thread: system does not support TLS"
+	return -1
     }
     -re ".*$inferior_exited_re normally.*$gdb_prompt $" {
-        fail "continue to first thread: program runaway"
+	fail "continue to first thread: program runaway"
     }
     -re ".*Pass 0 done.*Pass 1 done.*$gdb_prompt $" {
-        fail "continue to first thread: program runaway 2"
+	fail "continue to first thread: program runaway 2"
     }
     -re ".*Breakpoint 2.*tls value.*$gdb_prompt $" {
-        pass "continue to first thread: get to thread"
+	pass "continue to first thread: get to thread"
     }
     -re ".*$gdb_prompt $" {
-        fail "continue to first thread: no progress?"
+	fail "continue to first thread: no progress?"
     }
     timeout { fail "continue to first thread (timeout)" }
 }
@@ -232,7 +232,7 @@ gdb_expect {
     -re "^info thread\[ \t\r\n\]+ *Id .*Frame\[ \t\r\n\]+.*(\[0-9\]+) *${tdlabel_re}\[^\r\n\]+\r\n$gdb_prompt $" {
 	   set no_of_threads $expect_out(1,string)
 	   pass "get number of threads"
-        }
+	}
 	-re "$gdb_prompt $" {
 	    fail "get number of threads"
 	}
@@ -281,16 +281,16 @@ gdb_test "continue" ".*Breakpoint 4.*before exit.*" "threads exited"
 send_gdb "info thread\n"
 gdb_expect {
     -re ".* 1 *${tdlabel_re}.*2 *${tdlabel_re}.*$gdb_prompt $" {
-        fail "too many threads left at end"
+	fail "too many threads left at end"
     }
     -re ".*\\\* 1 *${tdlabel_re}.*main.*$gdb_prompt $" {
-        pass "expect only base thread at end"
+	pass "expect only base thread at end"
     }
     -re ".*No stack.*$gdb_prompt $" {
-        fail "runaway at end"
+	fail "runaway at end"
     }
     -re ".*$gdb_prompt $" {
-        fail "mess at end"
+	fail "mess at end"
     }
     timeout { fail "at end (timeout)" }
 }

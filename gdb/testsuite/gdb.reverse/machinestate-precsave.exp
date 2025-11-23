@@ -261,4 +261,3 @@ with_test_prefix "module global variable, forward" {
     gdb_test "step"          " module global post-change .*" "step, 2"
     gdb_test "print aglobal" " = 1"  "module global step post-change"
 }
-

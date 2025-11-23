@@ -49,93 +49,93 @@ gdb_test "explore int_ref" "'int_ref' is a scalar value of type 'int'.*int_ref =
 
 gdb_test_multiple "explore int_ptr_ref" "" {
     -re "$int_ptr_ref_desc.*Continue exploring it as a pointer to a single value \\\[y/n\\\]:.*" {
-        pass "explore int_ptr_ref"
-        gdb_test_multiple "y" "explore_int_ptr_ref_as_single_value_pointer" {
-            -re "'\[*\]int_ptr_ref' is a scalar value of type 'int'.*\[*\]int_ptr_ref = 10.*$gdb_prompt" {
-                pass "explore_int_ptr_ref_as_single_value_pointer"
-            }
-        }
+	pass "explore int_ptr_ref"
+	gdb_test_multiple "y" "explore_int_ptr_ref_as_single_value_pointer" {
+	    -re "'\[*\]int_ptr_ref' is a scalar value of type 'int'.*\[*\]int_ptr_ref = 10.*$gdb_prompt" {
+		pass "explore_int_ptr_ref_as_single_value_pointer"
+	    }
+	}
     }
 }
 
 gdb_test_multiple "explore b" "" {
     -re "$b_desc.*Enter the field number of choice:.*" {
-        pass "explore b"
-        gdb_test_multiple "0" "explore_base_class_A" {
-            -re "The value of 'b\.A' is a struct/class of type 'A' with no fields\." {
-                pass "explore_base_class_A, exploring b"
-                gdb_test_multiple "\0" "return_to_b_from_A" {
-                    -re ".*$b_desc.*Enter the field number of choice:.*" {
-                        pass "return_to_b_from_A"
-                        gdb_test_multiple "1" "explore_field_i_of_b" {
-                            -re "'b\.i' is a scalar value of type 'int'.*b\.i = 10.*" {
-                                pass "explore_field_i_of_b"
-                                gdb_test_multiple "\0" "return_to_b_from_i" {
-                                    -re "$b_desc.*Enter the field number of choice:.*" {
-                                        pass "return_to_b_from_i"
-                                    }
-                                }
-                            }
-                        }
-                        gdb_test_multiple "2" "explore_field_c_of_b" {
-                            -re "'b\.c' is a scalar value of type 'char'.*b\.c = .*'a'.*" {
-                                pass "explore_field_c_of_b"
-                                gdb_test_multiple "\0" "return_to_b_from_c" {
-                                    -re "$b_desc.*Enter the field number of choice:.*" {
-                                        pass "return_to_b_from_c"
-                                    }
-                                }
-                            }
-                        }
-                        gdb_test_multiple "\0" "return_to_gdb_prompt" {
-                            -re "$gdb_prompt" {
-                                pass "return_to_gdb_prompt_from_b"
-                            }
-                        }
-                    }
-                }
-            }
-        }
+	pass "explore b"
+	gdb_test_multiple "0" "explore_base_class_A" {
+	    -re "The value of 'b\.A' is a struct/class of type 'A' with no fields\." {
+		pass "explore_base_class_A, exploring b"
+		gdb_test_multiple "\0" "return_to_b_from_A" {
+		    -re ".*$b_desc.*Enter the field number of choice:.*" {
+			pass "return_to_b_from_A"
+			gdb_test_multiple "1" "explore_field_i_of_b" {
+			    -re "'b\.i' is a scalar value of type 'int'.*b\.i = 10.*" {
+				pass "explore_field_i_of_b"
+				gdb_test_multiple "\0" "return_to_b_from_i" {
+				    -re "$b_desc.*Enter the field number of choice:.*" {
+					pass "return_to_b_from_i"
+				    }
+				}
+			    }
+			}
+			gdb_test_multiple "2" "explore_field_c_of_b" {
+			    -re "'b\.c' is a scalar value of type 'char'.*b\.c = .*'a'.*" {
+				pass "explore_field_c_of_b"
+				gdb_test_multiple "\0" "return_to_b_from_c" {
+				    -re "$b_desc.*Enter the field number of choice:.*" {
+					pass "return_to_b_from_c"
+				    }
+				}
+			    }
+			}
+			gdb_test_multiple "\0" "return_to_gdb_prompt" {
+			    -re "$gdb_prompt" {
+				pass "return_to_gdb_prompt_from_b"
+			    }
+			}
+		    }
+		}
+	    }
+	}
     }
 }
 
 gdb_test_multiple "explore B" "" {
     -re "$B_desc.*Enter the field number of choice:.*" {
-        pass "explore B"
-        gdb_test_multiple "0" "explore_base_class_A" {
-            -re "base class 'A' of 'B' is a struct/class of type 'A' with no fields\." {
-                pass "explore_base_class_A, exploring B"
-                gdb_test_multiple "\0" "return_to_B" {
-                    -re "$B_desc.*Enter the field number of choice:.*" {
-                        pass "return_to_B"
-                        gdb_test_multiple "1" "explore_field_i_of_B" {
-                            -re "field 'i' of 'B' is of a scalar type 'int'.*" {
-                                pass "explore_field_i_of_B"
-                                gdb_test_multiple "\0" "return_to_B_from_i" {
-                                    -re "$B_desc.*Enter the field number of choice:.*" {
-                                        pass "return_to_B_from_i, exploring B"
-                                    }
-                                }
-                            }
-                        }
-                        gdb_test_multiple "2" "explore_field_c_of_B" {
-                            -re "field 'c' of 'B' is of a scalar type 'char'.*" {
-                                pass "explore_field_c_of_B"
-                                gdb_test_multiple "\0" "return_to_B_from_c" {
-                                    -re "$B_desc.*Enter the field number of choice:.*" {
-                                        pass "return_to_B_from_c"
-                                    }
-                                }
-                            }
-                        }
-                        gdb_test_multiple "\0" "return_to_gdb_prompt" {
-                            -re "$gdb_prompt" {
-                                pass "return_to_gdb_prompt_from_B"
-                            }
-                        }
-                    }
-                }
-            }
-        }
+	pass "explore B"
+	gdb_test_multiple "0" "explore_base_class_A" {
+	    -re "base class 'A' of 'B' is a struct/class of type 'A' with no fields\." {
+		pass "explore_base_class_A, exploring B"
+		gdb_test_multiple "\0" "return_to_B" {
+		    -re "$B_desc.*Enter the field number of choice:.*" {
+			pass "return_to_B"
+			gdb_test_multiple "1" "explore_field_i_of_B" {
+			    -re "field 'i' of 'B' is of a scalar type 'int'.*" {
+				pass "explore_field_i_of_B"
+				gdb_test_multiple "\0" "return_to_B_from_i" {
+				    -re "$B_desc.*Enter the field number of choice:.*" {
+					pass "return_to_B_from_i, exploring B"
+				    }
+				}
+			    }
+			}
+			gdb_test_multiple "2" "explore_field_c_of_B" {
+			    -re "field 'c' of 'B' is of a scalar type 'char'.*" {
+				pass "explore_field_c_of_B"
+				gdb_test_multiple "\0" "return_to_B_from_c" {
+				    -re "$B_desc.*Enter the field number of choice:.*" {
+					pass "return_to_B_from_c"
+				    }
+				}
+			    }
+			}
+			gdb_test_multiple "\0" "return_to_gdb_prompt" {
+			    -re "$gdb_prompt" {
+				pass "return_to_gdb_prompt_from_B"
+			    }
+			}
+		    }
+		}
+	    }
+	}
     }
 }

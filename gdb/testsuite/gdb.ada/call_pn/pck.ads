@@ -20,4 +20,3 @@ package Pck is
 
    function Pn (N : Node_Id) return Node_Id;
 end Pck;
-

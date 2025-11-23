@@ -25,11 +25,11 @@ proc test_help {} {
     set namespace_help "Deprecated placeholder for removed functionality\\."
 
     test_prefix_command_help {"maintenance cplus"} {
-        "C\\+\\+ maintenance commands\.\[\r\n\]+"
+	"C\\+\\+ maintenance commands\.\[\r\n\]+"
     }
 
     test_prefix_command_help {"maint cp" "maintenance cplus"} {
-        "C\\+\\+ maintenance commands.\r\n\r\n"
+	"C\\+\\+ maintenance commands.\r\n\r\n"
     }
 
     set multiple_help_body "List of \"maintenance cplus\" subcommands:.*Command name abbreviations are allowed if unambiguous."

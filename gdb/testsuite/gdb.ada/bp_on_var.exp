@@ -33,7 +33,7 @@ clean_restart ${testfile}
 gdb_test_no_output "set breakpoint pending off" "disable pending breakpoints"
 
 gdb_test "break pck.my_global_variable" \
-         "Function \"pck\\.my_global_variable\" not defined\\."
+	 "Function \"pck\\.my_global_variable\" not defined\\."
 
 
 # Test inserting breakpoint on pck.my_hidden_variable.
@@ -44,4 +44,4 @@ gdb_test_no_output "set breakpoint pending off" \
     "disable pending breakpoints after restart"
 
 gdb_test "break pck.my_hidden_variable" \
-         "Function \"pck\\.my_hidden_variable\" not defined\\."
+	 "Function \"pck\\.my_hidden_variable\" not defined\\."

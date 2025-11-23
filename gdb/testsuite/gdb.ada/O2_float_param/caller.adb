@@ -23,4 +23,3 @@ package body Caller is
       Increment (Val, "Verbose_Increment");
    end Verbose_Increment;
 end Caller;
-

@@ -1050,7 +1050,7 @@ namespace eval GenPerfTest {
 	}
 	verbose -log "_gen_sha1sum_for_inputs: summing $source_files $header_paths $inputs"
 	set catch_result [catch {exec $CAT_PROGRAM $source_files $header_paths $inputs | $SHA1SUM_PROGRAM} output]
-        return [list $catch_result $output]
+	return [list $catch_result $output]
     }
 
     # Return the contents of TEXT_FILE.

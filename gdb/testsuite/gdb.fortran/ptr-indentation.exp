@@ -35,6 +35,6 @@ gdb_continue_to_breakpoint "BP1"
 # Check the indentation when using ptype on pointers in user-defined types.
 gdb_test "ptype tinsta" \
   [multi_line "type = Type tuserdef" \
-              "    $int :: i" \
-              "    PTR TO -> \\( $real :: ptr \\)" \
-              "End Type tuserdef"]
+	      "    $int :: i" \
+	      "    PTR TO -> \\( $real :: ptr \\)" \
+	      "End Type tuserdef"]

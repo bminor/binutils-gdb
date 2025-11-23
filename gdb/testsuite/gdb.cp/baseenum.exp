@@ -32,4 +32,4 @@ gdb_test "print X" "= A::X" "print enum constant X of class A"
 gdb_breakpoint [gdb_get_line_number "breakpoint 2" $srcfile]
 gdb_continue_to_breakpoint "breakpoint 2"
 gdb_test "print X" "= N::A::X" \
-         "Print enum constant X of class A in namespace N"
+	 "Print enum constant X of class A in namespace N"

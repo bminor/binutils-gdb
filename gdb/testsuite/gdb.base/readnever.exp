@@ -36,16 +36,16 @@ if {![runto_main]} {
 }
 
 gdb_test "break fun_three" \
-         "Breakpoint $decimal at $hex"
+	 "Breakpoint $decimal at $hex"
 
 gdb_test "continue" \
-         "Breakpoint $decimal, $hex in fun_three \\(\\)"
+	 "Breakpoint $decimal, $hex in fun_three \\(\\)"
 
 gdb_test "backtrace" \
-         [multi_line "#0  $hex in fun_three \\(\\)" \
-                     "#1  $hex in fun_two \\(\\)" \
-                     "#2  $hex in fun_one \\(\\)" \
-                     "#3  $hex in main \\(\\)" ]
+	 [multi_line "#0  $hex in fun_three \\(\\)" \
+		     "#1  $hex in fun_two \\(\\)" \
+		     "#2  $hex in fun_one \\(\\)" \
+		     "#3  $hex in main \\(\\)" ]
 
 gdb_test_no_output "maint info symtabs" \
     "maint info symtabs no output for --readnever"

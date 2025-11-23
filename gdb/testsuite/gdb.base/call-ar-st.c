@@ -300,7 +300,7 @@ void compute_with_small_structs (int seed)
      int index;
 
      for (index = 0; index < 4; index++) {
-         array[index].value = index*seed;
+	 array[index].value = index*seed;
 	 array[index].head = (index+1)*seed;
      }
 
@@ -481,10 +481,10 @@ void init_small_structs (
 {
 
      init_bit_flags(flags, (unsigned)1, (unsigned)0, (unsigned)1,
-		           (unsigned)0, (unsigned)1, (unsigned)0 );
+			   (unsigned)0, (unsigned)1, (unsigned)0 );
      init_bit_flags_combo(flags_combo, (unsigned)1, (unsigned)0, 'y',
 				       (unsigned)1, (unsigned)0, 'n',
-                    		       (unsigned)1, (unsigned)0 );
+				       (unsigned)1, (unsigned)0 );
      init_three_chars(three_char, 'a', 'b', 'c');
      init_five_chars(five_char, 'l', 'm', 'n', 'o', 'p');
      init_int_char_combo(int_char_combo, 123, 'z');
@@ -840,9 +840,9 @@ void sum_array_print (
 
      for (index = 0; index < 10; index++) {
 
-         sum = seed + linked_list1.values[index] + linked_list2.values[index] +
+	 sum = seed + linked_list1.values[index] + linked_list2.values[index] +
 	       linked_list3.values[index] + linked_list4.values[index];
-         printf("%10d%10d\n", index, sum);
+	 printf("%10d%10d\n", index, sum);
      }
 }
 
@@ -1058,8 +1058,3 @@ int main ()  {
 
   return 0;
 }
-
-
-
-
-

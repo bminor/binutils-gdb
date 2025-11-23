@@ -17,11 +17,11 @@ int do_loops()
     int *p_i = &i;
 
     for( i = 0; i < LOOP; i++ ) { /* set breakpoint 1 here */
-        for( j = 0; j < LOOP; j++ ) {
-            for( k = 0; k < LOOP; k++ ) {
-                sum++; f++; force_mem (&k);
-            }
-        }
+	for( j = 0; j < LOOP; j++ ) {
+	    for( k = 0; k < LOOP; k++ ) {
+		sum++; f++; force_mem (&k);
+	    }
+	}
     }
     return i; /* set breakpoint 2 here */
 }
@@ -39,12 +39,12 @@ int do_vars()
     /* Need some code here to set breaks on.
      */
     for( j = 0; j < LOOP; j++ ) {
-        if( p_c[j] == c ) { /* set breakpoint 3 here */
-            j++;
-        }
-        else {
-            i++;
-        }
+	if( p_c[j] == c ) { /* set breakpoint 3 here */
+	    j++;
+	}
+	else {
+	    i++;
+	}
     }
 
     return *p_i;

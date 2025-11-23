@@ -56,8 +56,8 @@ foreach op { "*" "/" "mod" "rem" "**" "<" "<=" ">" ">=" "=" "and" "or" "xor" "&"
 foreach op { "+" "-" "*" "/" "mod" "rem" "**" "<" "<=" ">" ">=" "=" "and" "or" "xor" "&" "abs" "not"} {
     set op_re [string_to_regexp $op]
     gdb_test "continue" \
-             "Breakpoint $bkptno_numopt_re, ops\\.\"$op_re\" .*"\
-             "continue to \"$op\""
+	     "Breakpoint $bkptno_numopt_re, ops\\.\"$op_re\" .*"\
+	     "continue to \"$op\""
 }
 
 # Perform the same test, but using the qualified name of the operator,
@@ -72,13 +72,13 @@ runto "ops_test.adb:$bp_location"
 foreach op { "+" "-" } {
     set op_re [string_to_regexp $op]
     gdb_test "break ops.\"$op\"" \
-             "Breakpoint $decimal at $hex: ops\\.\"$op_re\"\\. \\(2 locations\\)"
+	     "Breakpoint $decimal at $hex: ops\\.\"$op_re\"\\. \\(2 locations\\)"
 }
 
 foreach op { "*" "/" "mod" "rem" "**" "<" "<=" ">" ">=" "=" "and" "or" "xor" "&" "abs" "not"} {
     set op_re [string_to_regexp $op]
     gdb_test "break ops.\"$op\"" \
-             "Breakpoint $decimal at $hex: file .*ops.adb, line $decimal."
+	     "Breakpoint $decimal at $hex: file .*ops.adb, line $decimal."
 }
 
 # Make sure we stop correctly in each operator function.
@@ -86,8 +86,6 @@ foreach op { "*" "/" "mod" "rem" "**" "<" "<=" ">" ">=" "=" "and" "or" "xor" "&"
 foreach op { "+" "-" "*" "/" "mod" "rem" "**" "<" "<=" ">" ">=" "=" "and" "or" "xor" "&" "abs" "not"} {
     set op_re [string_to_regexp $op]
     gdb_test "continue" \
-             "Breakpoint $bkptno_numopt_re, ops\\.\"$op_re\" .*"\
-             "continue to ops.\"$op\""
+	     "Breakpoint $bkptno_numopt_re, ops\\.\"$op_re\" .*"\
+	     "continue to ops.\"$op\""
 }
-
-

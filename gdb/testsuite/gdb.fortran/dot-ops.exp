@@ -158,4 +158,3 @@ if {[set_lang_fortran]} {
 } else {
     warning "$test_name tests suppressed." 0
 }
-

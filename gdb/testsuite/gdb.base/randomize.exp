@@ -54,8 +54,8 @@ gdb_test_multiple "${test}" "${test}" {
     }
 }
 gdb_test "show disable-randomization"	      \
-         "Disabling randomization .* is off." \
-         "show disable-randomization off"
+	 "Disabling randomization .* is off." \
+	 "show disable-randomization off"
 
 set addr1 [address_get "randomized first address"]
 set addr2 [address_get "randomized second address"]
@@ -69,8 +69,8 @@ if {[string equal $addr1 $addr2]} {
 
 gdb_test_no_output "set disable-randomization on"
 gdb_test "show disable-randomization"	      \
-         "Disabling randomization .* is on." \
-         "show disable-randomization on"
+	 "Disabling randomization .* is on." \
+	 "show disable-randomization on"
 
 set addr1 [address_get "fixed first address"]
 set addr2 [address_get "fixed second address"]

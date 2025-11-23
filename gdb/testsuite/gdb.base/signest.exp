@@ -41,7 +41,7 @@ if { [is_address_zero_readable] } {
 # Run until we hit the SIGSEGV (or SIGBUS on some platforms).
 gdb_test "continue" \
 	 ".*Program received signal (SIGBUS|SIGSEGV).*bowler.*" \
-         "continue to fault"
+	 "continue to fault"
 
 # Insert conditional breakpoint at faulting instruction
 gdb_test "break if 0" ".*" "set conditional breakpoint"
@@ -52,6 +52,5 @@ gdb_test "handle SIGBUS nostop print pass" ".*" "pass SIGBUS"
 
 # Step off the faulting instruction into the handler, triggering nested faults
 gdb_test "continue" \
-         ".*Program received signal (SIGBUS|SIGSEGV).*Program received signal (SIGBUS|SIGSEGV).*exited normally.*" \
+	 ".*Program received signal (SIGBUS|SIGSEGV).*Program received signal (SIGBUS|SIGSEGV).*exited normally.*" \
 	 "run through nested faults"
-

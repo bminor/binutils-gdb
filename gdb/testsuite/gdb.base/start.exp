@@ -31,5 +31,5 @@ if { [gdb_start_cmd] < 0 } {
 }
 
 gdb_test "" \
-         "main \\(\\) at .*start.c.*" \
-         "start"
+	 "main \\(\\) at .*start.c.*" \
+	 "start"

@@ -46,7 +46,7 @@ Dwarf::assemble $asm_file {
     global pair pair2 negative
 
     cu { addr_size 4 } {
- 	compile_unit {} {
+	compile_unit {} {
 	    declare_labels int_label sint_label
 
 	    int_label: DW_TAG_base_type {

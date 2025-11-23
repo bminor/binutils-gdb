@@ -33,8 +33,8 @@ runto "bar.f"
 # to display, depending on the ABI.  The objective of the test is
 # to verify that we don't crash, so keep the expected output simple...
 gdb_test "finish" \
-         ".*Value returned.*"
+	 ".*Value returned.*"
 
 # Verify that GDB is still alive...
 gdb_test "print 1" \
-         "= 1"
+	 "= 1"

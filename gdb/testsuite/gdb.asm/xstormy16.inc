@@ -31,4 +31,3 @@
 	.macro gdbasm_startup
 	mov r15,#8
 	.endm
-

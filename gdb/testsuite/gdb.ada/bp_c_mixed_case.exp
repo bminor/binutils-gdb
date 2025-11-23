@@ -52,43 +52,43 @@ if {![runto "foo_h731_021"]} {
 
 # Verify that the current language is Ada.
 gdb_test "show lang" \
-         "\"auto; currently ada\"\\."
+	 "\"auto; currently ada\"\\."
 
 # Before running to the C function (and thus switching out of Ada
 # mode), try printing the function using the "<...>" notation.
 gdb_test "p <MixedCaseFunc>" \
-         " = void" \
-         "p <MixedCaseFunc>, in Ada"
+	 " = void" \
+	 "p <MixedCaseFunc>, in Ada"
 
 gdb_test "p <NoDebugMixedCaseFunc>" \
-         " = {<text variable, no debug info>} $hex <NoDebugMixedCaseFunc>" \
-         "p <NoDebugMixedCaseFunc>, in Ada"
+	 " = {<text variable, no debug info>} $hex <NoDebugMixedCaseFunc>" \
+	 "p <NoDebugMixedCaseFunc>, in Ada"
 
 # Try inserting a breakpoint inside a C function. Because the function's
 # name has some uppercase letters, we need to use the "<...>" notation.
 # The purpose of this testcase is to verify that we can in fact do so
 # and that it inserts the breakpoint at the expected location.
 gdb_test "break <MixedCaseFunc>" \
-         "Breakpoint $decimal at $hex: file .*bar.c, line $decimal\\."
+	 "Breakpoint $decimal at $hex: file .*bar.c, line $decimal\\."
 
 # Same, but this time on the function with no debug info.
 gdb_test "break <NoDebugMixedCaseFunc>" \
-         "Breakpoint $decimal at $hex"
+	 "Breakpoint $decimal at $hex"
 
 # Resume the program's execution, verifying that it lands at the expected
 # location.
 gdb_test "continue" \
-         "Breakpoint $decimal, MixedCaseFunc \\(\\) at .*bar\\.c:$decimal.*"
+	 "Breakpoint $decimal, MixedCaseFunc \\(\\) at .*bar\\.c:$decimal.*"
 
 # Try printing again using the "<...>" notation.  This shouldn't work
 # now, since the current frame is a C function.
 gdb_test "p <MixedCaseFunc>" \
-         "A syntax error in expression, near `<MixedCaseFunc>'\\." \
-         "p <MixedCaseFunc>, in C"
+	 "A syntax error in expression, near `<MixedCaseFunc>'\\." \
+	 "p <MixedCaseFunc>, in C"
 
 gdb_test "p <NoDebugMixedCaseFunc>" \
-         "A syntax error in expression, near `<NoDebugMixedCaseFunc>'\\." \
-         "p <NoDebugMixedCaseFunc>, in C"
+	 "A syntax error in expression, near `<NoDebugMixedCaseFunc>'\\." \
+	 "p <NoDebugMixedCaseFunc>, in C"
 
 set test "break <MixedCaseFunc>, in C"
 gdb_test_multiple "break <MixedCaseFunc>" $test {

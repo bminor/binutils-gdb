@@ -72,4 +72,3 @@ gdb_test "p c->foo()"         "= 66"
 gdb_test "p c->inta"          "= 77"
 
 gdb_test "p c2->inta"          "= 77"
-

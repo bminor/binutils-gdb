@@ -287,7 +287,7 @@ proc break_trace_same_addr_6 { trace1 enable1 trace2 enable2 } \
     gdb_trace_setactions "set action for tracepoint 1" "" \
 	"collect \$$pcreg" "^$"
     gdb_test "${trace2} set_point" "\(Fast t|T\)racepoint \[0-9\] at $hex: file.*" \
-    	"${trace2} set_point 2"
+	"${trace2} set_point 2"
     gdb_trace_setactions "set action for tracepoint 2" "" \
 	"collect \$$spreg" "^$"
 

@@ -70,7 +70,7 @@ gdb_test "continue" \
     "continuing and stopping in Storage_Error exception handlers"
 
 gdb_test_no_output "delete 2" \
-                   "delete catchpoint on all Ada exceptions handlers"
+		   "delete catchpoint on all Ada exceptions handlers"
 
 ##################################################
 # 2. Try catching some named exception handlers. #
@@ -79,8 +79,8 @@ gdb_test_no_output "delete 2" \
 # Insert a catchpoint on Program_Error Ada exception handlers.
 
 gdb_test "catch handlers Program_Error" \
-         "Catchpoint $decimal: `Program_Error' Ada exception handlers" \
-         "insert catchpoint on Program_Error Ada exception handlers"
+	 "Catchpoint $decimal: `Program_Error' Ada exception handlers" \
+	 "insert catchpoint on Program_Error Ada exception handlers"
 
 # Continue, we should not stop at ABORT_SIGNAL but at Program_Error one.
 
@@ -95,8 +95,8 @@ gdb_test_no_output \
 # Insert a catchpoint on Storage_Error Ada exception handlers.
 
 gdb_test "catch handlers Storage_Error" \
-         "Catchpoint $decimal: `Storage_Error' Ada exception handlers" \
-         "insert catchpoint on Storage_Error Ada exception handlers"
+	 "Catchpoint $decimal: `Storage_Error' Ada exception handlers" \
+	 "insert catchpoint on Storage_Error Ada exception handlers"
 
 # Continue, we should stop at Storage_Error handlers.
 
@@ -115,13 +115,13 @@ gdb_test_no_output \
 # Insert a catchpoint on all Ada exceptions handlers with condition.
 
 gdb_test "catch handlers if Global_Var = 2" \
-         "Catchpoint $decimal: all Ada exceptions handlers" \
-         "insert catchpoint on all Ada exception handlers with condition"
+	 "Catchpoint $decimal: all Ada exceptions handlers" \
+	 "insert catchpoint on all Ada exception handlers with condition"
 
 # Check that condition is stored and properly displayed.
 
 gdb_test "info breakpoint" "stop only if Global_Var = 2" \
-         "Check catch handlers with condition"
+	 "Check catch handlers with condition"
 
 # Continue, we should not stop at ABORT_SIGNAL but at Program_Error one.
 
@@ -154,5 +154,5 @@ gdb_test "continue" \
 # Continue, the program should exit properly.
 
 gdb_test "continue" \
-         "Continuing\\..*$inferior_exited_re.*" \
-         "continuing to program completion"
+	 "Continuing\\..*$inferior_exited_re.*" \
+	 "continuing to program completion"

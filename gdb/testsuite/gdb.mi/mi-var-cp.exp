@@ -58,32 +58,32 @@ set tree {
   Anonymous a {
     {} public {
       anonymous struct {
-        {} public {
-          int b {}
-        }
+	{} public {
+	  int b {}
+	}
       }
       anonymous struct {
-        {} public {
-          int c {}
-        }
+	{} public {
+	  int c {}
+	}
       }
       anonymous struct {
-        {} public {
-          int d {}
-          anonymous struct {
-            {} public {
-              int e {}
-              anonymous struct {
-                {} public {
-                  int f {}
-                  anonymous union {
-                    {} public {
-                      int g {}
-                      char h {}
-                    }
-                  }
-                }
-              }
+	{} public {
+	  int d {}
+	  anonymous struct {
+	    {} public {
+	      int e {}
+	      anonymous struct {
+		{} public {
+		  int f {}
+		  anonymous union {
+		    {} public {
+		      int g {}
+		      char h {}
+		    }
+		  }
+		}
+	      }
 	      anonymous union {
 		{} public {
 		  int i {}

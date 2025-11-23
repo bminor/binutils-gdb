@@ -33,10 +33,10 @@ runto_main
 set test "continue to exit"
 gdb_test_multiple "continue" "$test" {
     -re "exited with code 01.*$gdb_prompt $" {
-        # For case that the PTRACE_SETREGSET call fails.
-        pass "$test"
+	# For case that the PTRACE_SETREGSET call fails.
+	pass "$test"
     }
     -re "exited normally.*$gdb_prompt $" {
-        pass "$test"
+	pass "$test"
     }
 }

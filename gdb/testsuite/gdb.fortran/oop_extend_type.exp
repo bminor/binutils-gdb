@@ -63,9 +63,9 @@ set output_pass_wp [multi_line "type = Type, extends\\(point\\) :: waypoint" \
 			       "    $real :: angle" \
 			       "End Type waypoint(, allocatable)?"]
 set output_kfail_wp [multi_line "type = Type waypoint" \
-			        "    Type point :: point" \
-			        "    $real :: angle" \
-			        "End Type waypoint(, allocatable)?"]
+				"    Type point :: point" \
+				"    $real :: angle" \
+				"End Type waypoint(, allocatable)?"]
 
 set test "ptype wp"
 gdb_test_multiple "$test" "$test" {

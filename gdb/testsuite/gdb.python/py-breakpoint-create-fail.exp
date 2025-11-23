@@ -46,9 +46,9 @@ gdb_test "break foo"
 set test "continuing to foo"
 gdb_test_multiple "continue" "$test" {
     -re "MyBP\.stop was invoked\!.*$gdb_prompt $" {
-        fail "$test"
+	fail "$test"
     }
     -re "Continuing.*Breakpoint 2, foo.*$gdb_prompt $" {
-        pass "$test"
+	pass "$test"
     }
 }

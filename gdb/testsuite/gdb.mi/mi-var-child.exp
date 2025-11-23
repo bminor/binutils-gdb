@@ -63,9 +63,9 @@ mi_list_varobj_children "struct_declarations" {
     {struct_declarations.long_array long_array 12 "long \\[12\\]"}
     {struct_declarations.func_ptr func_ptr 0 "void \\(\\*\\)\\((void)?\\)"}
     {struct_declarations.func_ptr_struct func_ptr_struct 0 \
-         "struct _struct_decl \\(\\*\\)(\\(int, char \\*, long\\))?"}
+	 "struct _struct_decl \\(\\*\\)(\\(int, char \\*, long\\))?"}
     {struct_declarations.func_ptr_ptr func_ptr_ptr 0 \
-        "struct _struct_decl \\*\\(\\*\\)\\((int, char \\*, long)?\\)"}
+	"struct _struct_decl \\*\\(\\*\\)\\((int, char \\*, long)?\\)"}
     {struct_declarations.u1 u1 4 "union \\{\\.\\.\\.\\}"}
     {struct_declarations.s2 s2 4 "struct \\{\\.\\.\\.\\}"}
 } "get children of struct_declarations"
@@ -451,7 +451,7 @@ mi_gdb_test "-var-info-num-children struct_declarations.s2.u2.u1s2.func" \
 # Desc: children of struct_declarations.int_ptr_ptr.*int_ptr_ptr
 mi_list_varobj_children "struct_declarations.int_ptr_ptr.*int_ptr_ptr" {
     {{struct_declarations.int_ptr_ptr.\*int_ptr_ptr.\*\*int_ptr_ptr} \
-         {\*\*int_ptr_ptr} 0 int}
+	 {\*\*int_ptr_ptr} 0 int}
 } "get children of struct_declarations.int_ptr_ptr.*int_ptr_ptr"
 
 # Test: c_variable-4.80
@@ -481,9 +481,9 @@ mi_list_varobj_children "weird" {
     {weird.long_array long_array 12 "long \\[12\\]"}
     {weird.func_ptr func_ptr 0 "void \\(\\*\\)\\((void)?\\)"}
     {weird.func_ptr_struct func_ptr_struct 0 \
-         "struct _struct_decl \\(\\*\\)(\\(int, char \\*, long\\))?"}
+	 "struct _struct_decl \\(\\*\\)(\\(int, char \\*, long\\))?"}
     {weird.func_ptr_ptr func_ptr_ptr 0 \
-        "struct _struct_decl \\*\\(\\*\\)\\((int, char \\*, long)?\\)"}
+	"struct _struct_decl \\*\\(\\*\\)\\((int, char \\*, long)?\\)"}
     {weird.u1 u1 4 "union \\{\\.\\.\\.\\}"}
     {weird.s2 s2 4 "struct \\{\\.\\.\\.\\}"}
 } "get children of weird"
@@ -560,7 +560,7 @@ mi_gdb_test "-var-info-num-children weird->int_ptr_ptr" \
 # Desc: children of *(weird->int_ptr_ptr)
 mi_list_varobj_children "weird->int_ptr_ptr.*weird->int_ptr_ptr" {
     {{weird->int_ptr_ptr.\*weird->int_ptr_ptr.\*\*weird->int_ptr_ptr} \
-         {\*\*weird->int_ptr_ptr} 0 int}
+	 {\*\*weird->int_ptr_ptr} 0 int}
 } "get children of weird->int_ptr_ptr.*weird->int_ptr_ptr"
 
 # Test: c_variable-4.94
@@ -807,19 +807,19 @@ mi_list_varobj_children {struct_declarations.long_array --all-values} {
 
 mi_list_varobj_children {struct_declarations --simple-values} \
     [list \
-         {struct_declarations.integer integer 0 int 123} \
-         {struct_declarations.character character 0 char {0 '\\\\000'}} \
-         [list struct_declarations.char_ptr char_ptr 1 "char \\*" "$hex \\\\\"hello\\\\\""] \
-         {struct_declarations.long_int long_int 0 "long" 0} \
-         [list struct_declarations.int_ptr_ptr int_ptr_ptr 1 "int \\*\\*" "$hex"] \
-         {struct_declarations.long_array long_array 12 "long \\[12\\]"} \
-         [list struct_declarations.func_ptr func_ptr 0 "void \\(\\*\\)\\((void)?\\)" "(@$hex: |)$hex <nothing>"] \
-         [list struct_declarations.func_ptr_struct func_ptr_struct 0 \
-              "struct _struct_decl \\(\\*\\)(\\(int, char \\*, long\\))?" "$hex <nothing1>"] \
-         [list struct_declarations.func_ptr_ptr func_ptr_ptr 0 \
-              "struct _struct_decl \\*\\(\\*\\)\\((int, char \\*, long)?\\)" "$hex <nothing2>"] \
-         {struct_declarations.u1 u1 4 "union \\{\\.\\.\\.\\}"} \
-         {struct_declarations.s2 s2 4 "struct \\{\\.\\.\\.\\}"} \
+	 {struct_declarations.integer integer 0 int 123} \
+	 {struct_declarations.character character 0 char {0 '\\\\000'}} \
+	 [list struct_declarations.char_ptr char_ptr 1 "char \\*" "$hex \\\\\"hello\\\\\""] \
+	 {struct_declarations.long_int long_int 0 "long" 0} \
+	 [list struct_declarations.int_ptr_ptr int_ptr_ptr 1 "int \\*\\*" "$hex"] \
+	 {struct_declarations.long_array long_array 12 "long \\[12\\]"} \
+	 [list struct_declarations.func_ptr func_ptr 0 "void \\(\\*\\)\\((void)?\\)" "(@$hex: |)$hex <nothing>"] \
+	 [list struct_declarations.func_ptr_struct func_ptr_struct 0 \
+	      "struct _struct_decl \\(\\*\\)(\\(int, char \\*, long\\))?" "$hex <nothing1>"] \
+	 [list struct_declarations.func_ptr_ptr func_ptr_ptr 0 \
+	      "struct _struct_decl \\*\\(\\*\\)\\((int, char \\*, long)?\\)" "$hex <nothing2>"] \
+	 {struct_declarations.u1 u1 4 "union \\{\\.\\.\\.\\}"} \
+	 {struct_declarations.s2 s2 4 "struct \\{\\.\\.\\.\\}"} \
 ] "listing of children, simple types: names, type and values, complex types: names and types"
 
 # Delete all variables
@@ -860,7 +860,7 @@ mi_gdb_test "-var-info-num-children psnp->char_ptr" \
 # Desc: children of *(psnp->char_ptr)
 mi_list_varobj_children "psnp->char_ptr.*psnp->char_ptr" {
     {{psnp->char_ptr.\*psnp->char_ptr.\*\*psnp->char_ptr} \
-         {\*\*psnp->char_ptr} 1 {char \*\*}}
+	 {\*\*psnp->char_ptr} 1 {char \*\*}}
 } "get children of psnp->char_ptr.*psnp->char_ptr"
 
 # Test: c_variable-5.14
@@ -873,14 +873,14 @@ mi_gdb_test "-var-info-num-children psnp->char_ptr.*psnp->char_ptr" \
 # Desc: children of *(*(psnp->char_ptr))
 mi_list_varobj_children "psnp->char_ptr.*psnp->char_ptr.**psnp->char_ptr" {
     {{psnp->char_ptr.\*psnp->char_ptr.\*\*psnp->char_ptr.\*\*\*psnp->char_ptr} \
-         {\*\*\*psnp->char_ptr} 1 {char \*}}
+	 {\*\*\*psnp->char_ptr} 1 {char \*}}
 } "get children of psnp->char_ptr.*psnp->char_ptr.**psnp->char_ptr"
 
 # Test: c_variable-5.15B
 # Desc: children of *(*(*(psnp->char_ptr)))
 mi_list_varobj_children "psnp->char_ptr.*psnp->char_ptr.**psnp->char_ptr.***psnp->char_ptr" {
     {{psnp->char_ptr.\*psnp->char_ptr.\*\*psnp->char_ptr.\*\*\*psnp->char_ptr.\*\*\*\*psnp->char_ptr} \
-         {\*\*\*\*psnp->char_ptr} 0 char}
+	 {\*\*\*\*psnp->char_ptr} 0 char}
 } "get children of psnp->char_ptr.*psnp->char_ptr.**psnp->char_ptr.***psnp->char_ptr"
 
 # Test: c_variable-5.16
@@ -893,7 +893,7 @@ mi_gdb_test "-var-info-num-children psnp->char_ptr.*psnp->char_ptr.**psnp->char_
 # Desc: children of *(*(*(psnp->char_ptr)))
 mi_list_varobj_children "psnp->char_ptr.*psnp->char_ptr.**psnp->char_ptr.***psnp->char_ptr" {
     {{psnp->char_ptr.\*psnp->char_ptr.\*\*psnp->char_ptr.\*\*\*psnp->char_ptr.\*\*\*\*psnp->char_ptr} \
-         {\*\*\*\*psnp->char_ptr} 0 char}
+	 {\*\*\*\*psnp->char_ptr} 0 char}
 } "get children of psnp->char_ptr.*psnp->char_ptr.**psnp->char_ptr.***psnp->char_ptr after counting children"
 
 # Test: c_variable-5.18
@@ -947,7 +947,7 @@ mi_gdb_test "-var-info-num-children psnp->long_ptr.*psnp->long_ptr" \
 # Desc: children of *(*(psnp->long_ptr))
 mi_list_varobj_children "psnp->long_ptr.*psnp->long_ptr.**psnp->long_ptr" {
     {{psnp->long_ptr.\*psnp->long_ptr.\*\*psnp->long_ptr.\*\*\*psnp->long_ptr} \
-         {\*\*\*psnp->long_ptr} 1 {long \*}}
+	 {\*\*\*psnp->long_ptr} 1 {long \*}}
 } "get children of psnp->long_ptr.*psnp->long_ptr.**psnp->long_ptr"
 
 # Test: c_variable-5.25
@@ -960,7 +960,7 @@ mi_gdb_test "-var-info-num-children psnp->long_ptr.*psnp->long_ptr.**psnp->long_
 # Desc: children of *(*(*(psnp->long_ptr)))
 mi_list_varobj_children "psnp->long_ptr.*psnp->long_ptr.**psnp->long_ptr.***psnp->long_ptr" {
     {{psnp->long_ptr.\*psnp->long_ptr.\*\*psnp->long_ptr.\*\*\*psnp->long_ptr.\*\*\*\*psnp->long_ptr}
-        {\*\*\*\*psnp->long_ptr} 0 {long}}
+	{\*\*\*\*psnp->long_ptr} 0 {long}}
 } "get children of psnp->long_ptr.*psnp->long_ptr.**psnp->long_ptr.***psnp->long_ptr"
 
 # Test: c_variable-5.27
@@ -1064,14 +1064,14 @@ mi_gdb_test "-var-info-num-children psnp->ptrs.0.next.char_ptr.*char_ptr" \
 # Desc: children of **psnp->ptrs[0]->next->char_ptr
 mi_list_varobj_children "psnp->ptrs.0.next.char_ptr.*char_ptr.**char_ptr" {
     {{psnp->ptrs.0.next.char_ptr.\*char_ptr.\*\*char_ptr.\*\*\*char_ptr} \
-         {\*\*\*char_ptr} 1 {char \*}}
+	 {\*\*\*char_ptr} 1 {char \*}}
 } "get children of psnp->ptrs.0.next.char_ptr.*char_ptr.**char_ptr"
 
 # Test: c_variable-5.41B
 # Desc: children of ***psnp->ptrs[0]->next->char_ptr
 mi_list_varobj_children "psnp->ptrs.0.next.char_ptr.*char_ptr.**char_ptr.***char_ptr" {
     {{psnp->ptrs.0.next.char_ptr.\*char_ptr.\*\*char_ptr.\*\*\*char_ptr.\*\*\*\*char_ptr} \
-         {\*\*\*\*char_ptr} 0 char}
+	 {\*\*\*\*char_ptr} 0 char}
 } "get children of psnp->ptrs.0.next.char_ptr.*char_ptr.**char_ptr.***char_ptr"
 
 # Test: c_variable-5.42
@@ -1084,7 +1084,7 @@ mi_gdb_test "-var-info-num-children psnp->ptrs.0.next.char_ptr.*char_ptr.**char_
 # Desc: children of ***psnp->ptrs[0]->next->char_ptr
 mi_list_varobj_children "psnp->ptrs.0.next.char_ptr.*char_ptr.**char_ptr.***char_ptr" {
     {{psnp->ptrs.0.next.char_ptr.\*char_ptr.\*\*char_ptr.\*\*\*char_ptr.\*\*\*\*char_ptr} \
-         {\*\*\*\*char_ptr} 0 char}
+	 {\*\*\*\*char_ptr} 0 char}
 } "get children of psnp->ptrs.0.next.char_ptr.*char_ptr.**char_ptr.***char_ptr after counting children"
 
 # Test: c_variable-5.44

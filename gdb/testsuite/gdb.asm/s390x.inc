@@ -8,7 +8,7 @@
         # Reserve space for the standard stack frame:
         # back chain, and space for the callee to save its registers.
         aghi %r15,-168
-        
+
         # Zero this frame's back chain pointer.
         xc 0(8,%r15),0(%r15)
         .endm

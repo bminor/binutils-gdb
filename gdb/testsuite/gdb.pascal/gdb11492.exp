@@ -51,4 +51,3 @@ with_test_prefix "after assignment" {
     gdb_test "print char_array" " = '2345X789'"
 }
 gdb_exit
-

@@ -37,10 +37,10 @@ set vb "\\($rb, $rb, $ra, $ra\\)"
 set a "\\($va, $va, $vb, $vb\\)"
 
 gdb_test "print va" \
-         " = $va"
+	 " = $va"
 
 gdb_test "print vb" \
-         " = $vb"
+	 " = $vb"
 
 gdb_test "print a" \
-         " = $a"
+	 " = $a"

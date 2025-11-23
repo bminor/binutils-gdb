@@ -24,4 +24,3 @@ package body Pck is
       My_Hidden_Variable := My_Hidden_Variable + 1;
    end Do_Something;
 end Pck;
-

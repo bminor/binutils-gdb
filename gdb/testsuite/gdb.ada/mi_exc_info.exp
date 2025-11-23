@@ -51,4 +51,3 @@ mi_gdb_test "-info-ada-exceptions global_gdb" \
 mi_gdb_test "-info-ada-exceptions const.aint" \
   "\\^done,ada-exceptions={nr_rows=\"2\",nr_cols=\"2\",hdr=\\\[{width=\"1\",alignment=\"-1\",col_name=\"name\",colhdr=\"Name\"},{width=\"1\",alignment=\"-1\",col_name=\"address\",colhdr=\"Address\"}\\\],body=\\\[{name=\"constraint_error\",address=\"$hex\"},{name=\"const.aint_global_gdb_e\",address=\"$hex\"}\\\]}" \
   "-info-ada-exceptions const.aint"
-

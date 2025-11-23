@@ -26,5 +26,4 @@ if {![runto_main]} {
 gdb_test_no_output "set variable ldbl_308 = 1.6e+308l"
 
 gdb_test "print ldbl_308" \
-         "= 1\..*e\\+308"
-
+	 "= 1\..*e\\+308"

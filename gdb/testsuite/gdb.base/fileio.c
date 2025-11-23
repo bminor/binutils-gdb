@@ -156,7 +156,7 @@ test_write (void)
       errno = 0;
       ret = write (fd, STRING, strlen (STRING));
       printf ("write 1: ret = %d, errno = %d %s\n", ret, errno,
-              ret == strlen (STRING) ? "OK" : "");
+	      ret == strlen (STRING) ? "OK" : "");
       close (fd);
     }
   else
@@ -200,7 +200,7 @@ test_read (void)
       ret = read (fd, buf, 16);
       buf[15] = '\0'; /* Don't trust anybody... */
       if (ret == strlen (STRING))
-        printf ("read 1: %s %s\n", buf, !strcmp (buf, STRING) ? "OK" : "");
+	printf ("read 1: %s %s\n", buf, !strcmp (buf, STRING) ? "OK" : "");
       else
 	printf ("read 1: ret = %d, errno = %d\n", ret, errno);
       close (fd);
@@ -230,17 +230,17 @@ test_lseek (void)
       errno = 0;
       ret = lseek (fd, 0, SEEK_CUR);
       printf ("lseek 1: ret = %ld, errno = %d, %s\n", (long) ret, errno,
-              ret == 0 ? "OK" : "");
+	      ret == 0 ? "OK" : "");
       stop ();
       errno = 0;
       ret = lseek (fd, 0, SEEK_END);
       printf ("lseek 2: ret = %ld, errno = %d, %s\n", (long) ret, errno,
-              ret == 11 ? "OK" : "");
+	      ret == 11 ? "OK" : "");
       stop ();
       errno = 0;
       ret = lseek (fd, 3, SEEK_SET);
       printf ("lseek 3: ret = %ld, errno = %d, %s\n", (long) ret, errno,
-              ret == 3 ? "OK" : "");
+	      ret == 3 ? "OK" : "");
       close (fd);
     }
   else
@@ -271,7 +271,7 @@ test_close (void)
       errno = 0;
       ret = close (fd);
       printf ("close 1: ret = %d, errno = %d, %s\n", ret, errno,
-              ret == 0 ? "OK" : "");
+	      ret == 0 ? "OK" : "");
     }
   else
     printf ("close 1: errno = %d\n", errno);
@@ -280,7 +280,7 @@ test_close (void)
   errno = 0;
   ret = close (999);
   printf ("close 2: ret = %d, errno = %d, %s\n", ret, errno,
-  	  strerrno (errno));
+	  strerrno (errno));
   stop ();
 }
 
@@ -303,19 +303,19 @@ test_stat (void)
   errno = 0;
   ret = stat (null_str, &st);
   printf ("stat 2: ret = %d, errno = %d %s\n", ret, errno,
-  	  strerrno (errno));
+	  strerrno (errno));
   stop ();
   /* Empty pathname */
   errno = 0;
   ret = stat ("", &st);
   printf ("stat 3: ret = %d, errno = %d %s\n", ret, errno,
-  	  strerrno (errno));
+	  strerrno (errno));
   stop ();
   /* Nonexistant file */
   errno = 0;
   ret = stat (NONEXISTANT, &st);
   printf ("stat 4: ret = %d, errno = %d %s\n", ret, errno,
-  	  strerrno (errno));
+	  strerrno (errno));
   stop ();
 }
 
@@ -346,7 +346,7 @@ test_fstat (void)
   errno = 0;
   ret = fstat (999, &st);
   printf ("fstat 2: ret = %d, errno = %d %s\n", ret, errno,
-  	  strerrno (errno));
+	  strerrno (errno));
   stop ();
 }
 
@@ -426,7 +426,7 @@ test_rename (void)
       errno = 0;
       ret = stat (FILENAME, &st);
       if (ret && errno == ENOENT)
-        {
+	{
 	  errno = 0;
 	  ret = stat (OUTDIR RENAMED, &st);
 	  printf ("rename 1: ret = %d, errno = %d %s\n", ret, errno,
@@ -449,7 +449,7 @@ test_rename (void)
   errno = 0;
   ret = rename (OUTDIR TESTDIR2, OUTDIR TESTDIR1);
   printf ("rename 3: ret = %d, errno = %d %s\n", ret, errno,
-          strerrno (errno));
+	  strerrno (errno));
   stop ();
   /* newpath is a subdirectory of old path */
   errno = 0;
@@ -487,12 +487,12 @@ test_unlink (void)
       sprintf (sys, "chmod -w %s/%s", OUTDIR, TESTDIR2);
       ret = system (sys);
       if (!ret)
-        {
+	{
 	  errno = 0;
 	  ret = unlink (name);
 	  printf ("unlink 2: ret = %d, errno = %d %s\n", ret, errno,
 		  strerrno (errno));
-        }
+	}
       else
 	printf ("unlink 2: ret = %d chmod failed, errno= %d\n", ret, errno);
     }
@@ -503,7 +503,7 @@ test_unlink (void)
   errno = 0;
   ret = unlink (OUTDIR NONEXISTANT);
   printf ("unlink 3: ret = %d, errno = %d %s\n", ret, errno,
-          strerrno (errno));
+	  strerrno (errno));
   stop ();
 }
 

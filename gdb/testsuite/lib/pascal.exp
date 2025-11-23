@@ -60,7 +60,7 @@ proc pascal_init {} {
 	} elseif { [which $gpc_compiler] != 0 } {
 	    set pascal_compiler_is_gpc 1
 	    verbose -log "GNU Pascal compiler found"
-        } elseif { [which $fpc_compiler] != 0 } {
+	} elseif { [which $fpc_compiler] != 0 } {
 	    set pascal_compiler_is_fpc 1
 	    verbose -log "Free Pascal compiler found"
 	}
@@ -158,17 +158,17 @@ proc gdb_compile_pascal {source destfile type options} {
     file delete $destfile
 
     if { $pascal_compiler_is_fpc == 1 } {
-        set result [fpc_compile $source $destfile $type $options]
+	set result [fpc_compile $source $destfile $type $options]
     } elseif { $pascal_compiler_is_gpc == 1 } {
-        set result [gpc_compile $source $destfile $type $options]
+	set result [gpc_compile $source $destfile $type $options]
     } else {
 	unsupported "no pascal compiler found"
 	return "No pascal compiler. Compilation failed."
     }
 
     if {![file exists $destfile]} {
-        unsupported "Pascal compilation failed: $result"
-        return "Pascal compilation failed."
+	unsupported "Pascal compilation failed: $result"
+	return "Pascal compilation failed."
     }
 }
 

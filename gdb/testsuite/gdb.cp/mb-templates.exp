@@ -53,7 +53,7 @@ gdb_test "continue" \
 
 delete_breakpoints
 gdb_test "kill" "" "kill" \
-         {Kill the program being debugged\? \(y or n\) } "y"
+	 {Kill the program being debugged\? \(y or n\) } "y"
 
 gdb_test "break $srcfile:$bp_location" \
     "Breakpoint.*at.*: $srcfile:$bp_location. \\(2 locations\\).*" \

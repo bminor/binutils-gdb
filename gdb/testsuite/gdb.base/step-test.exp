@@ -67,10 +67,10 @@ gdb_test "step" ".*${decimal}.*myglob.*"   "step into"
 set test "step out"
 if { [istarget "ia64-*-*"] || [istarget "mips*-*-*"]} {
     gdb_test_multiple "finish" "$test" {
-        -re ".*${decimal}.*a.*5.*= a.*3.*$gdb_prompt $" {
+	-re ".*${decimal}.*a.*5.*= a.*3.*$gdb_prompt $" {
 	    pass "$test"
 	}
-        -re ".*${decimal}.*callee.*INTO.*$gdb_prompt $" {
+	-re ".*${decimal}.*callee.*INTO.*$gdb_prompt $" {
 	    pass "$test"
 	}
     }
@@ -188,7 +188,7 @@ gdb_test \
   ".*Breakpoint.* at .*" \
   "set breakpoint at call to large_struct_by_value"
 gdb_test "continue" \
-         ".*Breakpoint ${decimal},.*large_struct_by_value.*" \
+	 ".*Breakpoint ${decimal},.*large_struct_by_value.*" \
 	 "run to pass large struct"
 set test "large struct by value"
 gdb_test_multiple "step" "$test" {

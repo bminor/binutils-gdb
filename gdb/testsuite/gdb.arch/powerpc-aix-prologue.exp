@@ -44,12 +44,12 @@ proc insert_breakpoint {function expected_location} {
     # Insert a breakpoint using the given function name, and extract
     # the breakpoint address for the output.
     gdb_test_multiple "break $function" "set breakpoint in $function" {
-        -re "Breakpoint .* at ($hex).*$gdb_prompt $" {
-            set address $expect_out(1,string)
-        }
-        default {
-            fail "set breakpoint in $function"
-        }
+	-re "Breakpoint .* at ($hex).*$gdb_prompt $" {
+	    set address $expect_out(1,string)
+	}
+	default {
+	    fail "set breakpoint in $function"
+	}
     }
 
     # If we managed to get the breakpoing address, then check that
@@ -59,8 +59,8 @@ proc insert_breakpoint {function expected_location} {
     # the instruction).
     if {$address != ""} {
        gdb_test "x /i $address" \
-                ".*<$function\\+$expected_location>.*" \
-                "check $function breakpoint address"
+		".*<$function\\+$expected_location>.*" \
+		"check $function breakpoint address"
     } else {
        fail "unable to compute breakpoint address"
     }
@@ -72,4 +72,3 @@ insert_breakpoint "stack_check_probe_1" 16
 insert_breakpoint "stack_check_probe_2" 40
 insert_breakpoint "stack_check_probe_loop_1" 68
 insert_breakpoint "stack_check_probe_loop_2" 60
-

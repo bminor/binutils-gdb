@@ -77,7 +77,7 @@ set asm_file [standard_output_file ${::srcfile3}]
 # symbols will be present for this compilation, because we want to print some
 # type information.
 if {[gdb_compile_shlib $libsrc $lib_so \
-                       {debug}] != ""} {
+		       {debug}] != ""} {
     untested "failed to compile shared library"
     return
 }
@@ -157,9 +157,9 @@ Dwarf::assemble ${asm_file} {
 	    DW_AT_language @DW_LANG_C_plus_plus
 	    DW_AT_name ${::srcfile}
 	    DW_AT_stmt_list $L DW_FORM_sec_offset
-        } {
+	} {
 	    declare_labels int_label class_A_label class_B_label \
-	                   B_ptr_label
+			   B_ptr_label
 
 	    int_label: DW_TAG_base_type {
 		DW_AT_byte_size ${::long_size} DW_FORM_udata
@@ -325,7 +325,7 @@ Dwarf::assemble ${asm_file} {
 # Any debugging information that we need will be provided by the DWARF info
 # created above.
 if {[gdb_compile_shlib [list $libsrc $asm_file] $lib_so \
-                       {nodebug}] != ""} {
+		       {nodebug}] != ""} {
     untested "failed to compile shared library"
     return
 }

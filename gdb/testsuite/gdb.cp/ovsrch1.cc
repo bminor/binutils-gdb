@@ -38,4 +38,3 @@ main ()
   p->foo ();
   return 0;
 }
-

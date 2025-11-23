@@ -155,4 +155,3 @@ gdb_load $binfile
 # multidictionaries, it will either crash, assert, or throw an
 # internal_error.
 gdb_test "p 1" "= 1" "GDB is alive"
-

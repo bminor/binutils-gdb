@@ -16,7 +16,7 @@ int main ()
   int  local_i = 0;
 
   sleep( 60 ); /* System call causes register fetch to fail */
-               /* This is a known HPUX "feature"            */
+	       /* This is a known HPUX "feature"            */
   while (! should_exit)
     {
       local_i++;

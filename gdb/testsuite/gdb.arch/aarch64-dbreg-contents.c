@@ -71,7 +71,7 @@ set_watchpoint (pid_t pid, volatile void *addr, unsigned len_mask)
 
   iov.iov_base = &dreg_state;
   iov.iov_len = (offsetof (struct user_hwdebug_state, dbg_regs)
-                 + sizeof (dreg_state.dbg_regs[0]));
+		 + sizeof (dreg_state.dbg_regs[0]));
   errno = 0;
   l = ptrace (PTRACE_SETREGSET, pid, NT_ARM_HW_WATCH, &iov);
   if (errno != 0)

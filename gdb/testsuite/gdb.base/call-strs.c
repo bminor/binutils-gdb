@@ -57,4 +57,3 @@ int main()
   str_func1("abcd");
   return 0;
 }
-

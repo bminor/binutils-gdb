@@ -56,14 +56,14 @@ if { $core_loaded == -1 } {
 # First, switch to task 1.
 
 gdb_test "task 1" \
-         "crash\\.request_for_crash \\(\\) at .*crash\\.adb:$decimal.*"
+	 "crash\\.request_for_crash \\(\\) at .*crash\\.adb:$decimal.*"
 
 
 gdb_test "info tasks" \
-         [multi_line "\\s+ID\\s+TID\\s+P-ID\\s+Pri\\s+State\\s+Name" \
-                     "\\*\\s+1\\s+.*main_task" \
-                     "\\s+2.*my_t"] \
-         "info tasks after switching to task 1"
+	 [multi_line "\\s+ID\\s+TID\\s+P-ID\\s+Pri\\s+State\\s+Name" \
+		     "\\*\\s+1\\s+.*main_task" \
+		     "\\s+2.*my_t"] \
+	 "info tasks after switching to task 1"
 
 # Switch to task 2. Unlike in the case where we tested the switch to
 # task 1, don't check the location where the debugger says the program
@@ -73,10 +73,10 @@ gdb_test "info tasks" \
 # we will verify right after with an additional test that the current
 # task is now task 2.
 gdb_test "task 2" \
-         "\\\[Switching to task 2 \"my_t\"\\\].*"
+	 "\\\[Switching to task 2 \"my_t\"\\\].*"
 
 gdb_test "info tasks" \
-         [multi_line "\\s+ID\\s+TID\\s+P-ID\\s+Pri\\s+State\\s+Name" \
-                     "\\s+1\\s+.*main_task" \
-                     "\\*\\s+2.*my_t"] \
-         "info tasks after switching to task 2"
+	 [multi_line "\\s+ID\\s+TID\\s+P-ID\\s+Pri\\s+State\\s+Name" \
+		     "\\s+1\\s+.*main_task" \
+		     "\\*\\s+2.*my_t"] \
+	 "info tasks after switching to task 2"

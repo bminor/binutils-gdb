@@ -52,7 +52,7 @@ proc setup_xfail_on_opaque_pointer {} {
 
 	setup_xfail "vax-*-*" "i*86-sequent-bsd*"
        if {!$gcc_compiled} {
-               setup_xfail "alpha-*-*"
+	       setup_xfail "alpha-*-*"
        }
 }
 

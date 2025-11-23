@@ -55,8 +55,8 @@ if {![runto_main]} {
 
 set bp_location [gdb_get_line_number "STOP" "${testcase}.c"]
 gdb_test "break ${testcase}.c:${bp_location}" \
-         "Breakpoint \[0-9\]+ at 0x\[0-9a-fA-F\]+: .*" \
-         "breakpoint to the STOP marker"
+	 "Breakpoint \[0-9\]+ at 0x\[0-9a-fA-F\]+: .*" \
+	 "breakpoint to the STOP marker"
 
 with_test_prefix "stop at first iteration" {
     gdb_test "continue" \

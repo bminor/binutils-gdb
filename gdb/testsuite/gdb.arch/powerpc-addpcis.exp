@@ -111,4 +111,3 @@ if {$check_r9 - 0x1000000  != $check_r6 + 0xc} {
 gdb_test "info break"
 gdb_test "info register r3 r4 r5 r6 r7 r8 r9"
 gdb_test "disas main"
-

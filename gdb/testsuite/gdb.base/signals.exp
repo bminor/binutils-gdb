@@ -38,8 +38,8 @@ proc test_handle_all_print {} {
     set timeout [expr {$timeout + 60}]
     verbose "Timeout is now $timeout seconds" 2
     if { ![istarget "*-*-linux*"]
-         && ( [istarget "*-*-gnu*"]
-              || [istarget "*-*-mach*"] ) } {
+	 && ( [istarget "*-*-gnu*"]
+	      || [istarget "*-*-mach*"] ) } {
 	gdb_test_sequence "handle all print" "" \
 	    {
 		"Signal\[ 	\]+Stop\[ 	\]+Print\[ 	\]+Pass to program\[ 	\]+Description\r\nSIGHUP\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Hangup"

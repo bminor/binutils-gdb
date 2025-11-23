@@ -38,4 +38,3 @@
 	andi %0, %0, 0
 	addiu %29, %0, 0xffc
 	.endm
-

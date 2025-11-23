@@ -23,7 +23,7 @@ if { [gcc_major_version] >= 8 } {
     append cflags " -fcf-protection=none"
 }
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
-        [list debug "additional_flags=$cflags"]] } {
+	[list debug "additional_flags=$cflags"]] } {
     return -1
 }
 
@@ -48,18 +48,18 @@ proc stepi_until { current target test } {
 
     set count 0
     gdb_test_multiple "stepi" "$test" {
-        -re "$current.*$gdb_prompt $" {
-            incr count
-            if { $count < 100 } {
-                send_gdb "stepi\n"
-                exp_continue
-            } else {
-                fail "$test"
-            }
-        }
-        -re "$target.*$gdb_prompt $" {
-            pass "$test"
-        }
+	-re "$current.*$gdb_prompt $" {
+	    incr count
+	    if { $count < 100 } {
+		send_gdb "stepi\n"
+		exp_continue
+	    } else {
+		fail "$test"
+	    }
+	}
+	-re "$target.*$gdb_prompt $" {
+	    pass "$test"
+	}
     }
 }
 

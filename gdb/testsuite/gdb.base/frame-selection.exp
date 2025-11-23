@@ -173,7 +173,7 @@ with_test_prefix "second frame_2 breakpoint" {
     gdb_continue_to_breakpoint frame_2
     gdb_test "bt" \
 	"#0  frame_2.*#1  $hex in recursive.*#2  $hex in recursive.*#3  $hex in recursive.*#4  $hex in main.*" \
- 	"backtrace at breakpoint with recursive frames"
+	"backtrace at breakpoint with recursive frames"
 
     # Check "frame function" when a function name occurs multiple times in
     # the stack.  The inner most (lowest level) should always be selected.

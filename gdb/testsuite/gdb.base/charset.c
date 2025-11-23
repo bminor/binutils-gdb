@@ -142,30 +142,30 @@ int main ()
 
   /* Initialize ascii_string.  */
   init_string (ascii_string,
-               120,
-               7, 8, 12,
-               10, 13, 9,
-               11, 120, 17);
+	       120,
+	       7, 8, 12,
+	       10, 13, 9,
+	       11, 120, 17);
   fill_run (ascii_string, 7, 26, 65);
   fill_run (ascii_string, 33, 26, 97);
   fill_run (ascii_string, 59, 10, 48);
 
   /* Initialize iso_8859_1_string.  */
   init_string (iso_8859_1_string,
-               120,
-               7, 8, 12,
-               10, 13, 9,
-               11, 162, 17);
+	       120,
+	       7, 8, 12,
+	       10, 13, 9,
+	       11, 162, 17);
   fill_run (iso_8859_1_string, 7, 26, 65);
   fill_run (iso_8859_1_string, 33, 26, 97);
   fill_run (iso_8859_1_string, 59, 10, 48);
 
   /* Initialize ebcdic_us_string.  */
   init_string (ebcdic_us_string,
-               167,
-               47, 22, 12,
-               37, 13, 5,
-               11, 74, 17);
+	       167,
+	       47, 22, 12,
+	       37, 13, 5,
+	       11, 74, 17);
   /* In EBCDIC, the upper-case letters are broken into three separate runs.  */
   fill_run (ebcdic_us_string, 7, 9, 193);
   fill_run (ebcdic_us_string, 16, 9, 209);
@@ -179,10 +179,10 @@ int main ()
 
   /* Initialize ibm1047_string.  */
   init_string (ibm1047_string,
-               167,
-               47, 22, 12,
-               37, 13, 5,
-               11, 74, 17);
+	       167,
+	       47, 22, 12,
+	       37, 13, 5,
+	       11, 74, 17);
   /* In IBM1047, the upper-case letters are broken into three separate runs.  */
   fill_run (ibm1047_string, 7, 9, 193);
   fill_run (ibm1047_string, 16, 9, 209);

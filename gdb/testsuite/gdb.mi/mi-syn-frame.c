@@ -66,4 +66,3 @@ have_a_very_merry_interrupt (void)
   alarm (1);
   sleep (2);  /* We'll receive that signal while sleeping */
 }
-

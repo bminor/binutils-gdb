@@ -139,4 +139,3 @@ if {![gdb_skip_stdio_test "call str_func(s,s,s,s,s,s,s,s)"]} {
 gdb_exit
 
 set timeout $prev_timeout
-

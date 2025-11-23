@@ -106,12 +106,12 @@ proc test_exec_and_symbol_mi_operatons {} {
 #            "file-clear operation"
 
     mi_gdb_test "-file-exec-file ${filename}" \
-             "\\\^done" \
-             "file-exec-file operation"
+	     "\\\^done" \
+	     "file-exec-file operation"
 
     mi_gdb_test "-file-symbol-file ${filename}" \
-             "\\\^done" \
-             "file-symbol-file operation"
+	     "\\\^done" \
+	     "file-symbol-file operation"
 
     # We need to return != 0.
     return 1
@@ -128,12 +128,12 @@ proc test_breakpoints_deletion {} {
 
     # The all parameter is actually no parameter.
     mi_gdb_test "200-break-delete" \
-             "200\\\^done" \
-             "break-delete (all) operation"
+	     "200\\\^done" \
+	     "break-delete (all) operation"
 
     mi_gdb_test "201-break-list" \
-             ".*\\\^done,BreakpointTable=\\\{.*,body=\\\[\\\]\\\}" \
-             "all breakpoints removed"
+	     ".*\\\^done,BreakpointTable=\\\{.*,body=\\\[\\\]\\\}" \
+	     "all breakpoints removed"
 }
 
 proc test_dir_specification {} {
@@ -148,16 +148,16 @@ proc test_dir_specification {} {
     # -environment-directory -r
 
     mi_gdb_test "202-environment-directory ${testsubdir}" \
-             "202\\\^done,source-path=\"${envirodir}.\\\$cdir.\\\$cwd\"" \
-             "environment-directory arg operation"
+	     "202\\\^done,source-path=\"${envirodir}.\\\$cdir.\\\$cwd\"" \
+	     "environment-directory arg operation"
 
     mi_gdb_test "203-environment-directory" \
-             "203\\\^done,source-path=\"${envirodir}.\\\$cdir.\\\$cwd\"" \
-             "environment-directory empty-string operation"
+	     "203\\\^done,source-path=\"${envirodir}.\\\$cdir.\\\$cwd\"" \
+	     "environment-directory empty-string operation"
 
     mi_gdb_test "204-environment-directory -r" \
-             "204\\\^done,source-path=\"\\\$cdir.\\\$cwd\"" \
-             "environment-directory operation"
+	     "204\\\^done,source-path=\"\\\$cdir.\\\$cwd\"" \
+	     "environment-directory operation"
 }
 
 proc test_cwd_specification {} {
@@ -171,15 +171,15 @@ proc test_cwd_specification {} {
     # -environment-pwd
 
     mi_gdb_test "205-environment-cd ${objdir}" \
-             "205\\\^done" \
-             "environment-cd arg operation"
+	     "205\\\^done" \
+	     "environment-cd arg operation"
 
     # The canonical name of the working directory may differ on a
     # remote host from that on the build system.
     if {![is_remote host]} {
 	mi_gdb_test "206-environment-pwd" \
-             "206\\\^done,cwd=\"${escapedobjdir}\"" \
-             "environment-pwd operation"
+	     "206\\\^done,cwd=\"${escapedobjdir}\"" \
+	     "environment-pwd operation"
     }
 }
 
@@ -205,20 +205,20 @@ proc test_path_specification {} {
     set orig_path [string_to_regexp ${orig_path}]
 
     mi_gdb_test "207-environment-path" \
-             "207\\\^done,path=\"$orig_path\"" \
-             "environment-path no-args operation"
+	     "207\\\^done,path=\"$orig_path\"" \
+	     "environment-path no-args operation"
 
     mi_gdb_test "208-environment-path $objdir ${testsubdir}" \
-             "208\\\^done,path=\"$escapedobjdir.${envirodir}.$orig_path\"" \
-             "environment-path dir1 dir2 operation"
+	     "208\\\^done,path=\"$escapedobjdir.${envirodir}.$orig_path\"" \
+	     "environment-path dir1 dir2 operation"
 
     mi_gdb_test "209-environment-path -r $objdir" \
-             "209\\\^done,path=\"$escapedobjdir.$orig_path\"" \
-             "environment-path -r dir operation"
+	     "209\\\^done,path=\"$escapedobjdir.$orig_path\"" \
+	     "environment-path -r dir operation"
 
     mi_gdb_test "210-environment-path -r" \
-             "210\\\^done,path=\"$orig_path\"" \
-             "environment-path -r operation"
+	     "210\\\^done,path=\"$orig_path\"" \
+	     "environment-path -r operation"
 
 }
 

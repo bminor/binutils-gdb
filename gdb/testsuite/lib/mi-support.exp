@@ -2936,16 +2936,16 @@ proc foreach_mi_ui_mode { var_name body } {
 
     foreach var $modes {
        with_test_prefix "$var_name=$var" {
-           set code [catch {uplevel 1 $body} result]
+	   set code [catch {uplevel 1 $body} result]
        }
 
        if {$code == 1} {
-           global errorInfo errorCode
-           return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+	   global errorInfo errorCode
+	   return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
        } elseif {$code == 3} {
-           break
+	   break
        } elseif {$code == 2} {
-           return -code $code $result
+	   return -code $code $result
        }
     }
 }

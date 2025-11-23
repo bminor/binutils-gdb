@@ -36,8 +36,8 @@ gdb_test "print \$gs_base = 3" "= 3" "set gs_base"
 #
 set ws "\[\t \]+"
 set info_reg_out [multi_line "info register fs_base gs_base" \
-          "fs_base${ws}0x2${ws}2"\
-          "gs_base${ws}0x3${ws}3" ]
+	  "fs_base${ws}0x2${ws}2"\
+	  "gs_base${ws}0x3${ws}3" ]
 
 gdb_test "info register fs_base gs_base" $info_reg_out\
    "info registers fs_base and gs_base with value"

@@ -29,4 +29,4 @@ set bp_location [gdb_get_line_number "STOP" ${testdir}/reprod.adb]
 runto "reprod.adb:$bp_location"
 
 gdb_test "print broken" \
-         " = \\(len => 1, data => \\(\\(i => 1\\)\\)\\)"
+	 " = \\(len => 1, data => \\(\\(i => 1\\)\\)\\)"

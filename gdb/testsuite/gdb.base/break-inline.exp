@@ -24,4 +24,3 @@ gdb_test "" "Temporary breakpoint.*foo\\(\\).*"
 
 # Now test 'break' with no arguments.
 gdb_test "break" "Breakpoint.*"
-

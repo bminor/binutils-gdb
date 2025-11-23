@@ -35,11 +35,11 @@ runto_main
 
 gdb_test "break after_mc_barrier" \
     "Breakpoint 2 at .*: file .*${srcfile}, line .*" \
-         "breakpoint on after_mc_barrier"
+	 "breakpoint on after_mc_barrier"
 
 gdb_test "break do_something" \
     "Breakpoint 3 at .*: file .*${srcfile}, line .*" \
-         "breakpoint on do_something"
+	 "breakpoint on do_something"
 
 gdb_test "continue" \
 	"Breakpoint 2, after_mc_barrier .*" \
@@ -90,19 +90,19 @@ gdb_test "python print(gdb.selected_inferior().thread_from_handle(gdb.parse_and_
 # We should see an exception when passing an object of the wrong type.
 
 gdb_test "python print(gdb.selected_inferior().thread_from_handle(gdb.lookup_symbol('main')))" \
-         ".*TypeError.*: Argument 'handle' must be a thread handle object.*" \
+	 ".*TypeError.*: Argument 'handle' must be a thread handle object.*" \
 	 "TypeError when passing a symbol object to thread_from_handle"
 
 # We should see an exception when passing too large of an object.
 
 gdb_test "python print(gdb.selected_inferior().thread_from_handle(gdb.parse_and_eval('thrs')))" \
-         ".*Thread handle size mismatch.*" \
+	 ".*Thread handle size mismatch.*" \
 	 "Pass overly large object to thread_from_handle"
 
 # We should see an exception when passing too small of an object.
 
 gdb_test "python print(gdb.selected_inferior().thread_from_handle(gdb.parse_and_eval('\"S\"')))" \
-         ".*Thread handle size mismatch.*" \
+	 ".*Thread handle size mismatch.*" \
 	 "Pass too small of an object to thread_from_handle"
 
 # Test the thread_handle method
@@ -134,8 +134,8 @@ foreach thrN {0 1 2} {
 	# object into a gdb.value by calling the two argument form of
 	# its constructor.
 
-        gdb_test "python print(gdb.Value(hand_bytes, tp) == hand)" \
-	         "True" \
-	         "verify that handles are the same"
+	gdb_test "python print(gdb.Value(hand_bytes, tp) == hand)" \
+		 "True" \
+		 "verify that handles are the same"
     }
 }

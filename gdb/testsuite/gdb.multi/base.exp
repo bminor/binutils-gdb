@@ -190,4 +190,3 @@ gdb_test_multiple "info inferiors" "check remove-inferiors" {
 	}
     }
 }
-

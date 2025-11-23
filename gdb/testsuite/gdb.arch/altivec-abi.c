@@ -48,18 +48,18 @@ array_of_vector_func (vector signed short *matrix)
 
 vector int
 vec_func (vector short vshort_f,             /* goes in v2 */
-          vector unsigned short vushort_f,   /* goes in v3 */
-          vector int vint_f,                 /* goes in v4 */
-          vector unsigned int vuint_f,       /* goes in v5 */
-          vector char vchar_f,               /* goes in v6 */
-          vector unsigned char vuchar_f,     /* goes in v7 */
-          vector float vfloat_f,             /* goes in v8 */
-          vector short x_f,                  /* goes in v9 */
-          vector int y_f,                    /* goes in v10 */
-          vector char a_f,                   /* goes in v11 */
-          vector float b_f,                  /* goes in v12 */
-          vector float c_f,                  /* goes in v13 */
-          vector int intv_on_stack_f)
+	  vector unsigned short vushort_f,   /* goes in v3 */
+	  vector int vint_f,                 /* goes in v4 */
+	  vector unsigned int vuint_f,       /* goes in v5 */
+	  vector char vchar_f,               /* goes in v6 */
+	  vector unsigned char vuchar_f,     /* goes in v7 */
+	  vector float vfloat_f,             /* goes in v8 */
+	  vector short x_f,                  /* goes in v9 */
+	  vector int y_f,                    /* goes in v10 */
+	  vector char a_f,                   /* goes in v11 */
+	  vector float b_f,                  /* goes in v12 */
+	  vector float c_f,                  /* goes in v13 */
+	  vector int intv_on_stack_f)
 {
 
    vector int vint_res;
@@ -75,12 +75,12 @@ vec_func (vector short vshort_f,             /* goes in v2 */
    vuint_res  = vec_add (vuint_f, ((vector unsigned int) {5,6,7,8}));
    vshort_res  = vec_add (vshort_f, x_f);
    vushort_res  = vec_add (vushort_f,
-                           ((vector unsigned short) {1,2,3,4,5,6,7,8}));
+			   ((vector unsigned short) {1,2,3,4,5,6,7,8}));
    vchar_res  = vec_add (vchar_f, a_f);
    vfloat_res  = vec_add (vfloat_f, b_f);
    vfloat_res  = vec_add (c_f, ((vector float) {1.1,1.1,1.1,1.1}));
    vuchar_res  = vec_add (vuchar_f,
-               ((vector unsigned char) {'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a'}));
+	       ((vector unsigned char) {'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a'}));
 
     return vint_res;
 }
@@ -120,22 +120,21 @@ main (void)
 vec_func(vshort,vushort,vint,vuint,vchar,vuchar,vfloat,x,y,a,b,c,intv_on_stack)
 #endif
   result = vec_func (vshort,    /* goes in v2 */
-                     vushort,   /* goes in v3 */
-                     vint,      /* goes in v4 */
-                     vuint,     /* goes in v5 */
-                     vchar,     /* goes in v6 */
-                     vuchar,    /* goes in v7 */
-                     vfloat,    /* goes in v8 */
-                     x,    /* goes in v9 */
-                     y,    /* goes in v10 */
-                     a,    /* goes in v11 */
-                     b,    /* goes in v12 */
-                     c,    /* goes in v13 */
-                     intv_on_stack);
+		     vushort,   /* goes in v3 */
+		     vint,      /* goes in v4 */
+		     vuint,     /* goes in v5 */
+		     vchar,     /* goes in v6 */
+		     vuchar,    /* goes in v7 */
+		     vfloat,    /* goes in v8 */
+		     x,    /* goes in v9 */
+		     y,    /* goes in v10 */
+		     a,    /* goes in v11 */
+		     b,    /* goes in v12 */
+		     c,    /* goes in v13 */
+		     intv_on_stack);
 
    struct_of_vector_func (vect_struct);
    array_of_vector_func (test4);
 
   return 0;
 }
-

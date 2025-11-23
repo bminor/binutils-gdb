@@ -35,4 +35,3 @@ int main() {
   k.method();
   return k.m2();
 }
-

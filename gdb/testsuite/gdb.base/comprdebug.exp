@@ -41,4 +41,3 @@ if {[gdb_file_cmd $ofile] == 0} {
 } else {
     fail $testname
 }
-

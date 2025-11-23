@@ -28,5 +28,5 @@ if {![runto_main]} {
 }
 
 gdb_test "ptype C::x" \
-         "type = int" \
-         "ptype typedef base struct member"
+	 "type = int" \
+	 "ptype typedef base struct member"

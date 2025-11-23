@@ -42,11 +42,11 @@ set supports_pkru 0
 set test "probe PKRU support"
 gdb_test_multiple "print have_pkru()" $test {
     -re ".. = 1\r\n$gdb_prompt $" {
-        pass $test
-        set supports_pkru 1
+	pass $test
+	set supports_pkru 1
     }
     -re ".. = 0\r\n$gdb_prompt $" {
-        pass $test
+	pass $test
     }
 }
 

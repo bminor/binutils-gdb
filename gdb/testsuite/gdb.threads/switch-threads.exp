@@ -36,4 +36,3 @@ runto_main
 gdb_breakpoint thread_func
 gdb_continue_to_breakpoint "continue to thread_func"
 gdb_test "next" ".*foo \\(\\);"
-

@@ -28,7 +28,7 @@ const A A::INSTANCE = {};
 int main() {
     A a;
     if (a == A::INSTANCE) {
-        return -1;
+	return -1;
     }
     return 0;
 }

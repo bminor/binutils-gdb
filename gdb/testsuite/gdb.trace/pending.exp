@@ -290,7 +290,7 @@ proc pending_tracepoint_installed_during_trace { trace_type } \
 	    }
 	}
 	-re "Continuing.\r\n(Reading .* from remote target...\r\n)?\r\n(Thread .* hit )?Breakpoint.*marker.*at.*$srcfile.*$gdb_prompt $" {
-           pass $test
+	   pass $test
        }
     }
 
@@ -342,10 +342,10 @@ proc pending_tracepoint_disconnect_during_trace { trace_type } \
     set test "disconnect with pending tracepoint"
     gdb_test_multiple "disconnect" $test {
        -re "warning: Pending tracepoints will not be resolved while GDB is disconnected.*Trace is running but will stop on detach; detach anyway\\? \\(y or n\\) $" {
-           pass $test
+	   pass $test
 
-           set test "disconnected"
-           gdb_test_multiple "y" $test {
+	   set test "disconnected"
+	   gdb_test_multiple "y" $test {
 	       -re "$gdb_prompt $" {
 		   pass "$test"
 	       }
@@ -449,16 +449,16 @@ proc pending_tracepoint_with_action_resolved { trace_type } \
     set test "continue to marker 2"
     gdb_test_multiple "continue" $test {
 	    -re "Target returns error code .* too far .*$gdb_prompt $" {
-            if {[string equal $trace_type "ftrace"]} {
+	    if {[string equal $trace_type "ftrace"]} {
 		# Expected if the target was unable to install the
 		# fast tracepoint (e.g., jump pad too far from
 		# tracepoint).
 		pass "$test (too far)"
 		# Skip the rest of the tests.
 		return
-            } else {
+	    } else {
 		fail $test
-            }
+	    }
 	}
 	-re "Continuing.\r\n(Reading .* from remote target...\r\n)?\r\n(Thread .* hit )?Breakpoint.*marker.*at.*$srcfile.*$gdb_prompt $" {
 	    pass "continue to marker 2"

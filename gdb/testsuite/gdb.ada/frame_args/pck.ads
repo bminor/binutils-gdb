@@ -34,4 +34,3 @@ package Pck is
                       Rec : Struct);  -- Non scalar
 
 end Pck;
-

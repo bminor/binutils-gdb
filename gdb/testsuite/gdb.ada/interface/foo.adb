@@ -22,4 +22,3 @@ begin
    Do_Nothing (R);  -- STOP
    Do_Nothing (S);
 end Foo;
-

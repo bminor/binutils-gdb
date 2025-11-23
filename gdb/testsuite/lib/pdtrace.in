@@ -224,7 +224,7 @@ f_collect_probes()
                       offset=$((offset + 3))
                   fi
               fi
-              
+
               # Determine the base address of the probe and its
               # corresponding function name.
               funcs=$($NM -td $objfile | $EGREP "^[0-9]+ T " \
@@ -295,22 +295,22 @@ f_collect_probes_args()
         # described in the d-script file and they don't receive any
         # argument.
         test "$type" = "p" || continue
-        
+
         # Names are mangled in d-script files to make it possible to
         # have underscore characters as part of the provider name and
         # probe name.
         m_provider=$(printf %s $provider | $SED -e 's/_/__/g')
         m_name=$(printf %s $name | $SED -e 's/_/__/g')
-        
+
         # Ignore this probe if the d-script file does not describe its
         # provider.
         $EGREP -q "provider +$m_provider" $dscript || continue
-        
+
         # Look for the line containing the description of the probe.
         # If we can't find it then ignore this probe.
         line=$($EGREP "^ *probe +$m_name *\(.*\);" $dscript)
         test -n "$line" || continue
-        
+
         # Ok, extract the argument types from the probe prototype.
         # This is fragile as hell as it requires the prototype to be
         # in a single line.
@@ -397,9 +397,9 @@ f_gen_dof_sect_header()
 #   probes, base_probes, providers, probes_args, BCOUNT
 
 f_gen_dof_program()
-{   
+{
     ###### Variables used to cache information needed later.
-    
+
     # Number of section headers in the generated DOF program.
     dof_secnum=0
     # Offset of section headers in the generated DOF program, in bytes.
@@ -409,7 +409,7 @@ f_gen_dof_program()
     strtab_size=0
     offtab_size=0
     eofftab_size=0
-    
+
     # Offsets of the STRTAB, OFFTAB EOFFTAB and PROBES sections in the
     # generated DOF program.  In bytes.
     strtab_offset=0
@@ -417,7 +417,7 @@ f_gen_dof_program()
     eofftab_offset=0
     argtab_offset=0
     probes_offset=0
-    
+
     # Indexes of the section headers of the STRTAB, OFFTAB, EOFFTAB and
     # PROBES sections in the sections array.
     strtab_sect_index=0
@@ -430,7 +430,7 @@ f_gen_dof_program()
     # Lines: PROVIDER(S) NAME(S) BASE(D) (DOF_OFFSET(D)|DOF_EOFFSET(D))
     probes_dof_offsets=
     probes_dof_eoffsets=
-    
+
     # Offsets in the STRTAB section for the first type of base probes.
     # Record per line: PROVIDER(S) NAME(S) BASE(D) OFFSET(D)
     probes_dof_types=
@@ -443,13 +443,13 @@ f_gen_dof_program()
     # Offsets of the base-probe names in the provider's STRTAB section.
     # Lines: PROVIDER(S) NAME(S) BASE(D) OFFSET(D)
     probes_dof_names=
-    
+
     # Offsets of the provider sections in the DOF program.
     # Lines: PROVIDER(S) OFFSET(D)
     providers_offsets=
 
     ###### Generation phase.
-    
+
     # The header of the DOF program contains a `struct
     # dtrace_dof_hdr'.  Record its size, but it is written at the end
     # of the function.
@@ -497,7 +497,7 @@ f_gen_dof_program()
                     arg=$(printf %s "$args" | $CUT -d: -f$(($n + 3)))
                     f_gen_asm ".asciz \"${arg}\""
                     off=$(($off + ${#arg} + 1))
-                done                
+                done
             done <<EOF
 $probes_args
 EOF
@@ -569,7 +569,7 @@ EOF
         # base address.
         probes_sect_index=$dof_secnum
         dof_secnum=$((dof_secnum + 1))
-        probes_offset=$BCOUNT        
+        probes_offset=$BCOUNT
         num_base_probes=$(printf %s\\n "$base_probes" | $WC -l)
         while read provider name base base_sym; do
             name_offset=$(printf %s\\n "$probes_dof_names" \
@@ -577,7 +577,7 @@ EOF
 
             num_offsets=$(printf %s\\n "$probes_dof_offsets" \
                           | $EGREP "^$provider $name [0-9]+ " | $WC -l)
-            
+
             first_offset=0
             test "$num_offsets" -gt 0 && \
               first_offset=$(printf %s\\n "$probes_dof_offsets" \
@@ -592,13 +592,13 @@ EOF
 
             num_args=$(printf %s "$probes_args" \
                        | $EGREP "^$provider:$name:" | $CUT -d: -f3 | $HEAD -1)
- 
+
             first_type=$(printf %s "$probes_dof_types" \
                          | $EGREP "^$provider $name $base " | $CUT -d' ' -f4 | $HEAD -1)
 
             reloctype=R_X86_64_GLOB_DAT
             test "$objbits" = "32" && reloctype=R_386_32
-            
+
             f_gen_asm ""
             f_gen_asm "/* dtrace_dof_probe for ${provider}:${name} at ${base_sym}  */"
             f_gen_asm ".balign 8"
@@ -679,7 +679,7 @@ EOF
                           $dof_sect_type_prargs \
                           4 1 $argtab_offset 0
     f_incr_bcount $dof_secsize; f_align_bcount 8
-    
+
     while read provider; do
         provider_offset=$(printf %s "$providers_offsets" \
                           | $EGREP "^$provider " | $CUT -d' ' -f2)
@@ -804,7 +804,7 @@ EOF
 f_patch_objfile()
 {
     objfile=$1
-    
+
     # Several x86_64 instruction opcodes, in octal.
     x86_op_nop=$(printf \\220)
     x86_op_ret=$(printf \\303)
@@ -813,7 +813,7 @@ f_patch_objfile()
     x86_op_rex_rax=$(printf \\110)
     x86_op_xor_eax_0=$(printf \\063)
     x86_op_xor_eax_1=$(printf \\300)
-    
+
     # Figure out the file offset of the text section in the object
     # file.
     text_off=0x$(objdump -j .text -h $objfile \
@@ -876,7 +876,7 @@ f_patch_objfile()
     done <<EOF
 $probes
 EOF
-    
+
     # Finally, we have to remove the __dtrace_* and __dtraceenabled_*
     # symbols from the object file, along with their respective
     # relocations.
@@ -917,7 +917,7 @@ f_gen_header_file()
     test -z "$provider" \
         && f_panic "unable to parse the provider name from $dfile."
     u_provider=$(printf %s "$provider" | $TR a-z A-Z | $TR -s _)
-    
+
     cat $dfile | $EGREP "^ *probe +[a-zA-Z_]+ *\(.*\);" | \
         while read line; do
             # Extract the probe name.
@@ -937,7 +937,7 @@ f_gen_header_file()
 
             echo "#if _DTRACE_VERSION"
             echo ""
-            
+
             # Emit the macros for the probe.
             echo "#define ${u_provider}_${u_name}($args) \\"
             echo "   __dtrace_${provider}___${name}($args)"
@@ -1012,7 +1012,7 @@ if test "$genelf" -gt 0; then
 
     # Collect probe information from the input object file and the
     # d-script.
-    f_collect_probes $objfile    
+    f_collect_probes $objfile
     f_collect_probes_args $dfile
 
     # Generate the assembly code and assemble the DOF program in
@@ -1023,7 +1023,7 @@ fi
 
 if test "$genheader" -gt 0; then
     test -n "$ofile" || { echo "Please specify an output file with -o."; exit 2; }
-    
+
     # In this mode no extra arguments shall be present.
     test "$#" -ne "0" && f_usage
 

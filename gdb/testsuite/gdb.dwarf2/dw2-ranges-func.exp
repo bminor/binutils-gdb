@@ -170,7 +170,7 @@ proc do_test {suffix} {
 		DW_LNE_end_sequence
 
 		DW_LNE_set_address $foo_cold_start
-	        line [gdb_get_line_number "foo_cold prologue"]
+		line [gdb_get_line_number "foo_cold prologue"]
 		DW_LNS_copy
 		DW_LNE_set_address foo_cold_label
 		line [gdb_get_line_number "foo_cold baz call"]
@@ -351,7 +351,7 @@ proc do_test {suffix} {
 	set test "x/2i foo_cold"
 	gdb_test_multiple $test $test {
 	    -re "   (?:$hex) <foo_cold>.*?\n   (?:$hex) <foo\[+-\](\[0-9\]+)>.*${gdb_prompt}" {
-	        set foo_cold_offset $expect_out(1,string)
+		set foo_cold_offset $expect_out(1,string)
 		pass $test
 	    }
 	}

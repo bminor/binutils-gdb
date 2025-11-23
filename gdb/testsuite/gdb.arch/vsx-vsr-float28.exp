@@ -75,6 +75,3 @@ if {$endianness == "big"} {
 gdb_test "p/f \$vs1" "$vector_field"
 
 gdb_exit
-
-
-

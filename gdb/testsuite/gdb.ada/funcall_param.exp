@@ -32,4 +32,4 @@ runto "foo.adb:$bp_location"
 # class-wide.
 
 gdb_test "p ident (ident (my_parameter))" \
-         "= \\(one => 1, two => 2, three => 3\\)" "value of ident"
+	 "= \\(one => 1, two => 2, three => 3\\)" "value of ident"

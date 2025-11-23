@@ -60,4 +60,3 @@ begin
   else
     writeln('check OK');
 end.
-

@@ -711,7 +711,7 @@ proc test_artificial_arrays {} {
 	"({{0, 1}, {2, 3}, {4, 5}}|\[Cc\]annot.*)" \
 	{p int1dim[0]@2@3}
     gdb_test_escape_braces "p int1dim\[0\]${ctrlv}@FE_TWO" " = {0, 1}" \
-        {p int1dim[0]@TWO}
+	{p int1dim[0]@TWO}
     gdb_test_escape_braces "p int1dim\[0\]${ctrlv}@FE_TWO${ctrlv}@three" \
 	"({{0, 1}, {2, 3}, {4, 5}}|\[Cc\]annot.*)" \
 	{p int1dim[0]@TWO@three}

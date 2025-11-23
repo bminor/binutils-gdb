@@ -137,10 +137,10 @@ foreach {arg desc} {"" "standard signals" \
 	"1st line of save breakpoints for '$arg'"
     # Check the second line.
     gdb_assert {[string match "break main" [lindex $data 1]]} \
-        "2nd line of save breakpoints for '$arg'"
+	"2nd line of save breakpoints for '$arg'"
     # Check the trailing newline.
     gdb_assert {[string match "" [lindex $data 2]]} \
-        "Trailing newline of save breakpoints for '$arg'"
+	"Trailing newline of save breakpoints for '$arg'"
 
     incr i
 }

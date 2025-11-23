@@ -23,8 +23,8 @@ proc delete_memory_regions {} {
 
     gdb_test_multiple "delete mem" "delete mem" {
        -re "Delete all memory regions.*y or n.*$" {
-           send_gdb "y\n"
-           exp_continue
+	   send_gdb "y\n"
+	   exp_continue
        }
        -re "$gdb_prompt $" { }
     }

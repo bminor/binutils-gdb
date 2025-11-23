@@ -33,10 +33,10 @@ if {[gnat_version_compare <= {4 4}]} {
     setup_xfail *-*-*
 }
 gdb_test "print my_table" \
-         "= \\(\\)"
+	 "= \\(\\)"
 
 gdb_test "ptype my_table" \
-         "type = array \\(10 \\.\\. 1\\) of integer"
+	 "type = array \\(10 \\.\\. 1\\) of integer"
 
 gdb_test "print my_matrix" \
-         "= \\(m => \\((\"\", ){9}\"\"\\)\\)"
+	 "= \\(m => \\((\"\", ){9}\"\"\\)\\)"

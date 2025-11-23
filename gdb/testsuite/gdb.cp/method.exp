@@ -160,4 +160,3 @@ gdb_test_multiple "cont" "finish program" {
 	pass "finish program (exit wrapper)"
     }
 }
-

@@ -267,7 +267,7 @@ int_param_two_reg_pieces:
 	.quad	.Ltext5b                /* start */
 	.quad	.Ltext7-.Ltext5b        /* length */
         /* Instructions */
- 	.byte	0x4
+	.byte	0x4
 	.long	.Ltext6-.Ltext5b
 	.byte	0xe
 	.uleb128 0x10
@@ -282,7 +282,7 @@ int_param_two_reg_pieces:
 	.quad	.Ltext8                 /* start */
 	.quad	.Ltext10-.Ltext8        /* length */
         /* Instructions */
- 	.byte	0x4
+	.byte	0x4
 	.long	.Ltext9-.Ltext8
 	.byte	0xe
 	.uleb128 0x10
@@ -297,7 +297,7 @@ int_param_two_reg_pieces:
 	.quad	.Ltext11                /* start */
 	.quad	.Ltext13-.Ltext11       /* length */
         /* Instructions */
- 	.byte	0x4
+	.byte	0x4
 	.long	.Ltext12-.Ltext11
 	.byte	0xe
 	.uleb128 0x10
@@ -312,7 +312,7 @@ int_param_two_reg_pieces:
 	.quad	.Ltext14                /* start */
 	.quad	.Ltext16-.Ltext14       /* length */
         /* Instructions */
- 	.byte	0x4
+	.byte	0x4
 	.long	.Ltext15-.Ltext14
 	.byte	0xe
 	.uleb128 0x10
@@ -327,7 +327,7 @@ int_param_two_reg_pieces:
 	.quad	.Ltext1                 /* start */
 	.quad	.Ltext3-.Ltext1         /* length */
         /* Instructions */
- 	.byte	0x4
+	.byte	0x4
 	.long	.Ltext2-.Ltext1
 	.byte	0xe
 	.uleb128 0x10

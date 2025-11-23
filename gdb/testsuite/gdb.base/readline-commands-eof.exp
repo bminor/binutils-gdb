@@ -126,4 +126,3 @@ save_vars { env(TERM) } {
 	}
     }
 }
-

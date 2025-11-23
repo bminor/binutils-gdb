@@ -31,13 +31,13 @@ if {![runto "foo_na07_019.adb:$bp_location"]} {
 }
 
 gdb_test "print something'address + 0" \
-         "\\(system\\.address\\) $hex <pck\\.something>"
+	 "\\(system\\.address\\) $hex <pck\\.something>"
 
 gdb_test "print 0 + something'address" \
-         "\\(system\\.address\\) $hex <pck\\.something>"
+	 "\\(system\\.address\\) $hex <pck\\.something>"
 
 gdb_test "print something'address - 0" \
-         "\\(system\\.address\\) $hex <pck\\.something>"
+	 "\\(system\\.address\\) $hex <pck\\.something>"
 
 gdb_test "print 0 - something'address" \
-         "\\(system\\.address\\) $hex.*"
+	 "\\(system\\.address\\) $hex.*"

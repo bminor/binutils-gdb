@@ -574,9 +574,9 @@ mi_delete_varobj array_ptr "delete array_ptr"
 
 proc set_frozen {varobjs flag} {
     foreach v $varobjs {
-        mi_gdb_test "-var-set-frozen $v $flag" \
-            "\\^done" \
-            "-var-set-frozen $v $flag"
+	mi_gdb_test "-var-set-frozen $v $flag" \
+	    "\\^done" \
+	    "-var-set-frozen $v $flag"
     }
 }
 

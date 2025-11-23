@@ -91,7 +91,7 @@ proc return2_tests { } {
     return_1 "int"
     return_1 "long"
     if {![istarget "m6811-*-*"] && ![istarget "h8300*-*"]} {
-        return_1 "long_long"
+	return_1 "long_long"
     }
     if {$allow_float_test} {
 	return_1 "float"

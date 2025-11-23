@@ -33,4 +33,3 @@ main (void)
   asm ("main_label: .globl main_label");
   frame2 ();
 }
-

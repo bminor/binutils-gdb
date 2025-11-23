@@ -59,4 +59,3 @@ program rectangle_Test
   call aRec%print_area
 
 end program rectangle_Test
-

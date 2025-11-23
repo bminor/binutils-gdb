@@ -210,7 +210,7 @@ gdb_test_multiple "" "$test" {
 	    -re "Default output radix for printing of values is 10\\..*$gdb_prompt $" {
 		pass "$test"
 	    }
-        }
+	}
     }
 }
 
@@ -223,7 +223,7 @@ gdb_test_multiple "" "$test" {
 	    -re "The history is empty\\..*$gdb_prompt $" {
 		pass "$test"
 	    }
-        }
+	}
     }
 }
 
@@ -514,12 +514,12 @@ set test "complete 'p no_var_named_this-arg'"
 send_gdb "p no_var_named_this-arg\t"
 gdb_test_multiple "" "$test" {
     -re "^p no_var_named_this-arg\\\x07$" {
-        send_gdb "\n"
+	send_gdb "\n"
 	gdb_test_multiple "" "$test" {
-            -re "No symbol \"no_var_named_this\" in current context\\..*$gdb_prompt $" {
+	    -re "No symbol \"no_var_named_this\" in current context\\..*$gdb_prompt $" {
 		pass "$test"
-            }
-        }
+	    }
+	}
     }
 }
 
@@ -556,7 +556,7 @@ gdb_test_multiple "" "$test" {
 		    }
 		}
 	    }
-        }
+	}
     }
 }
 
@@ -680,8 +680,8 @@ with_cwd $srcdir {
 # regexp operator. We use string_to_regexp for this purpose.
 
 gdb_test "cd ${fullsrcdir}" \
-         "Working directory [string_to_regexp ${fullsrcdir}].*" \
-         "cd to \${srcdir}"
+	 "Working directory [string_to_regexp ${fullsrcdir}].*" \
+	 "cd to \${srcdir}"
 
 
 # GDB used to fail adding / on directories, on the first try only.

@@ -51,7 +51,7 @@ int main()
        int nil;
        int nil_foo (int i)
        {
-         return i * 27;
+	 return i * 27;
        }
      };
      NestedInnerLocal nest1;

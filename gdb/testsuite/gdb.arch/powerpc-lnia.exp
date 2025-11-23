@@ -107,4 +107,3 @@ gdb_test "disas main"
 
 # Let the inferior store all vector registers in a buffer, then dump
 # the buffer and check it.
-

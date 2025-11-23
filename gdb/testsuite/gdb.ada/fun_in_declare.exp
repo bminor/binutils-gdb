@@ -36,10 +36,9 @@ set any_addr "0x\[0-9a-zA-Z\]+"
 
 set bp_location [gdb_get_line_number "STOP" ${testdir}/foo.adb]
 gdb_test "break foo.adb:$bp_location" \
-         "Breakpoint $any_nb at $any_addr: file .*foo.adb, line $any_nb." \
-         "insert breakpoint inside foo.call_me"
+	 "Breakpoint $any_nb at $any_addr: file .*foo.adb, line $any_nb." \
+	 "insert breakpoint inside foo.call_me"
 
 gdb_test "continue" \
-         ".*Breakpoint $any_nb, foo\\.call_me \\(\\) at .*foo.adb:$any_nb.*" \
-         "decoding of function name"
-
+	 ".*Breakpoint $any_nb, foo\\.call_me \\(\\) at .*foo.adb:$any_nb.*" \
+	 "decoding of function name"

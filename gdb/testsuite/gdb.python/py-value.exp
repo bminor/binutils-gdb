@@ -544,13 +544,13 @@ proc test_float_conversion {} {
 proc prepare_type_and_buffer {} {
   gdb_py_test_silent_cmd "python tp=gdb.lookup_type('int')" "look up int type" 0
   gdb_py_test_silent_cmd "python size_a=gdb.parse_and_eval('sizeof(a)')" \
-                         "find size of a" 0
+			 "find size of a" 0
   gdb_py_test_silent_cmd "python size_a0=gdb.parse_and_eval('sizeof(a\[0\])')" \
-                         "find size of element of a" 0
+			 "find size of element of a" 0
   gdb_py_test_silent_cmd "python addr=gdb.parse_and_eval('&a')" \
-                         "find address of a" 0
+			 "find address of a" 0
   gdb_py_test_silent_cmd "python b=gdb.selected_inferior().read_memory(addr,size_a)" \
-                         "read buffer from memory" 0
+			 "read buffer from memory" 0
 }
 
 proc test_value_from_buffer {} {
@@ -570,23 +570,23 @@ proc test_value_from_buffer {} {
 
   prepare_type_and_buffer
   gdb_test "python v=gdb.Value(b,tp); print(v)" "1" \
-            "construct value from buffer"
+	    "construct value from buffer"
   gdb_test_no_output { python compare_value_bytes_to_mem(v, addr, size_a0) }
   gdb_test "python v=gdb.Value(b\[size_a0:\],tp); print(v)" "2" \
-            "convert 2nd elem of buffer to value"
+	    "convert 2nd elem of buffer to value"
   gdb_test_no_output \
       { python compare_value_bytes_to_mem(v, (int(addr) + size_a0), size_a0) }
   gdb_test "python v=gdb.Value(b\[2*size_a0:\],tp); print(v)" "3" \
-           "convert 3rd elem of buffer to value"
+	   "convert 3rd elem of buffer to value"
   gdb_test_no_output \
       { python compare_value_bytes_to_mem(v, (int(addr) + (2 * size_a0)), size_a0) }
   gdb_test "python v=gdb.Value(b\[2*size_a0+1:\],tp); print(v)" \
-           "ValueError.*: Size of type is larger than that of buffer object\..*" \
+	   "ValueError.*: Size of type is larger than that of buffer object\..*" \
 	   "attempt to convert smaller buffer than size of type"
   gdb_py_test_silent_cmd "python atp=tp.array(2) ; print(atp)" \
-                         "make array type" 0
+			 "make array type" 0
   gdb_py_test_silent_cmd "python va=gdb.Value(b,atp)" \
-                         "construct array value from buffer" 0
+			 "construct array value from buffer" 0
   gdb_test_no_output \
       { python compare_value_bytes_to_mem(va, addr, size_a0 * 3) }
   gdb_test "python print(va)" "\\{1, 2, 3\\}" "print array value"
@@ -594,16 +594,16 @@ proc test_value_from_buffer {} {
   gdb_test "python print(va\[1\])" "2" "print second array element"
   gdb_test "python print(va\[2\])" "3" "print third array element"
   gdb_test "python print(va\[3\])" "gdb\.error.*: no such vector element.*" \
-           "print out of bounds array element"
+	   "print out of bounds array element"
   gdb_py_test_silent_cmd "python atpbig=tp.array(3)" "make bigger array type" 0
   gdb_test "python vabig=gdb.Value(b,atpbig)" \
-           "ValueError.*: Size of type is larger than that of buffer object\..*" \
+	   "ValueError.*: Size of type is larger than that of buffer object\..*" \
 	   "attempt to construct large value with small buffer"
   gdb_test "python v=gdb.Value(2048,tp)" \
-           "TypeError.*: Object must support the python buffer protocol\..*" \
-           "attempt to construct value from buffer with non-buffer object"
+	   "TypeError.*: Object must support the python buffer protocol\..*" \
+	   "attempt to construct value from buffer with non-buffer object"
   gdb_test "python v=gdb.Value(b,'int'); print(v)" \
-           "TypeError.*: type argument must be a gdb\.Type\..*" \
+	   "TypeError.*: type argument must be a gdb\.Type\..*" \
 	   "attempt to construct value with string as type"
 }
 

@@ -38,8 +38,8 @@ if {[mi_clean_restart $::testfile]} {
 # catchpoint that uses both conditions and exception name.
 
 mi_gdb_test "-catch-exception -c \"i = 2\" -e constraint_error" \
-            "\\^done,bkptno=\"$decimal\",bkpt={.*disp=\"keep\",enabled=\"y\",what=\"`constraint_error' Ada exception\",.*,cond=\"i = 2\",.*}" \
-            "catch C_E if i = 2"
+	    "\\^done,bkptno=\"$decimal\",bkpt={.*disp=\"keep\",enabled=\"y\",what=\"`constraint_error' Ada exception\",.*,cond=\"i = 2\",.*}" \
+	    "catch C_E if i = 2"
 
 # It is important that we start the program's execution after having
 # inserted the exception catchpoint above.  We want to verify that

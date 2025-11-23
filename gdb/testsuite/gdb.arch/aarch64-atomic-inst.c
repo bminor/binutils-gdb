@@ -23,24 +23,24 @@ int main(void)
   /* Test that we can step over ldxr/stxr. This sequence should step from
      ldxr to the following __asm __volatile.  */
   __asm __volatile ("1:     ldxr    %0,%2\n"                             \
-                    "       cmp     %0,#1\n"                             \
-                    "       b.eq    out\n"                               \
-                    "       add     %0,%0,1\n"                           \
-                    "       stxr    %w1,%0,%2\n"                         \
-                    "       cbnz    %w1,1b"                              \
-                    : "=&r" (tmp), "=&r" (cond), "+Q" (dword)            \
-                    : : "memory");
+		    "       cmp     %0,#1\n"                             \
+		    "       b.eq    out\n"                               \
+		    "       add     %0,%0,1\n"                           \
+		    "       stxr    %w1,%0,%2\n"                         \
+		    "       cbnz    %w1,1b"                              \
+		    : "=&r" (tmp), "=&r" (cond), "+Q" (dword)            \
+		    : : "memory");
 
   /* This sequence should take the conditional branch and step from ldxr
      to the return dword line.  */
   __asm __volatile ("1:     ldxr    %0,%2\n"                             \
-                    "       cmp     %0,#1\n"                             \
-                    "       b.eq    out\n"                               \
-                    "       add     %0,%0,1\n"                           \
-                    "       stxr    %w1,%0,%2\n"                         \
-                    "       cbnz    %w1,1b\n"                            \
-                    : "=&r" (tmp), "=&r" (cond), "+Q" (dword)            \
-                    : : "memory");
+		    "       cmp     %0,#1\n"                             \
+		    "       b.eq    out\n"                               \
+		    "       add     %0,%0,1\n"                           \
+		    "       stxr    %w1,%0,%2\n"                         \
+		    "       cbnz    %w1,1b\n"                            \
+		    : "=&r" (tmp), "=&r" (cond), "+Q" (dword)            \
+		    : : "memory");
 
   dword = -1;
 __asm __volatile ("out:\n");

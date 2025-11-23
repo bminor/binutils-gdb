@@ -48,7 +48,7 @@ proc test_background {command before_prompt after_prompt {message ""}} {
     global gdb_prompt
 
     if {$message eq ""} {
-        set message $command
+	set message $command
     }
 
     send_gdb "$command\n"

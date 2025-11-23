@@ -23,9 +23,9 @@ if {[mi_clean_restart]} {
 # First, verify that the debugger correctly advertises support
 # for the "undefined-command" error code...
 mi_gdb_test "-list-features" \
-            "\\^done,features=\\\[.*\"undefined-command-error-code\".*\\\]" \
-            "-list-features should include \"undefined-command-error-code\""
+	    "\\^done,features=\\\[.*\"undefined-command-error-code\".*\\\]" \
+	    "-list-features should include \"undefined-command-error-code\""
 
 mi_gdb_test "-undefined-command" \
-            "\\^error,.*,code=\"undefined-command\"" \
-            "error code when executing undefined command"
+	    "\\^error,.*,code=\"undefined-command\"" \
+	    "error code when executing undefined command"

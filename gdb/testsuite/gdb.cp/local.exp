@@ -160,18 +160,18 @@ gdb_test "up" ".*main.*" "up from marker2"
 set eol "\[\t \]*\r\n\[\t \]*"
 gdb_test_multiple "ptype Local" "local out of scope" {
     -re "No symbol \"Local\" in current context.*${gdb_prompt} $" {
-        pass "local out of scope"
+	pass "local out of scope"
     }
     -re "ptype Local${eol}type = class Local {${eol}  public:${eol}    int loc1;${eol}.*${eol}    char loc_foo\\(char\\);${eol}}${eol}${gdb_prompt} " {
-        # GCC emits STABS debugging information in a way that doesn't
-        # properly preserve the scoping of local classes.  I think
-        # we'd need to start using Sun's extensions to stabs to get
-        # this right.
-        kfail gdb/825 "Local out of scope"
+	# GCC emits STABS debugging information in a way that doesn't
+	# properly preserve the scoping of local classes.  I think
+	# we'd need to start using Sun's extensions to stabs to get
+	# this right.
+	kfail gdb/825 "Local out of scope"
     }
     -re "ptype Local${eol}type = class Local {${eol}  public:${eol}    int loc1;${eol}    char loc_foo\\(char\\);${eol}.*${eol}}${eol}${gdb_prompt} " {
 	# gcc 3.X abi-2 -gstabs+
-        kfail gdb/825 "Local out of scope"
+	kfail gdb/825 "Local out of scope"
     }
 }
 

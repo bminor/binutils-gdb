@@ -30,4 +30,3 @@ static integer c__10000 = 10000;
     return cppsub_(&c__10000);
 #line 7 "langs1.f"
 } /* fsub_ */
-

@@ -30,6 +30,4 @@ if {![runto "foo"]} {
 }
 
 gdb_test "print z" \
-         "= (\\(a => .*, b => .*, c => .*\\)|<optimized out>)"
-
-
+	 "= (\\(a => .*, b => .*, c => .*\\)|<optimized out>)"

@@ -22,6 +22,3 @@ begin
    Same (First);  -- STOP
    Next (First);
 end Foo;
-
-
-

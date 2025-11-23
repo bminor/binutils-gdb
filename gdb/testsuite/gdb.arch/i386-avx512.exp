@@ -40,11 +40,11 @@ set supports_avx512 0
 set test "probe AVX512 support"
 gdb_test_multiple "print have_avx512()" $test {
     -re ".. = 1\r\n$gdb_prompt $" {
-        pass $test
-        set supports_avx512 1
+	pass $test
+	set supports_avx512 1
     }
     -re ".. = 0\r\n$gdb_prompt $" {
-        pass $test
+	pass $test
     }
 }
 
@@ -62,8 +62,8 @@ set nr_regs 8
 
 for { set r 1 } { $r < $nr_regs } { incr r } {
     gdb_test "print/x \$k$r" \
-        ".. = 0x[format %x $r]2[format %x $r]1" \
-        "check contents of %k$r"
+	".. = 0x[format %x $r]2[format %x $r]1" \
+	"check contents of %k$r"
 }
 
 for { set r 1 } { $r < $nr_regs } { incr r } {
@@ -80,8 +80,8 @@ set nr_regs 7
 for { set r 0 } { $r < $nr_regs } { incr r } {
     set val [expr {$r + 1}]
     gdb_test "print/x k_data\[$r\]" \
-        ".. = 0x$val$val$val$val" \
-        "check contents of k_data\[$r\]"
+	".. = 0x$val$val$val$val" \
+	"check contents of k_data\[$r\]"
 }
 
 gdb_test "break [gdb_get_line_number "third breakpoint here"]" \
@@ -97,23 +97,23 @@ if {[is_amd64_regs_target]} {
 
 for { set r 0 } { $r < $nr_regs } { incr r } {
     gdb_test "print \$zmm$r.v8_double" \
-        ".. = \\{$r, $r.125, $r.25, $r.375, $r.5, $r.625, $r.75, $r.875\\}.*" \
-        "check double contents of %zmm$r"
+	".. = \\{$r, $r.125, $r.25, $r.375, $r.5, $r.625, $r.75, $r.875\\}.*" \
+	"check double contents of %zmm$r"
     gdb_test "print \$zmm$r.v32_int16" \
-        ".. = \\{(-?\[0-9\]+, ){31}-?\[0-9\]+\\}.*" \
-        "check int16 contents of %zmm$r"
+	".. = \\{(-?\[0-9\]+, ){31}-?\[0-9\]+\\}.*" \
+	"check int16 contents of %zmm$r"
     gdb_test "print \$ymm$r.v4_double" \
-        ".. = \\{$r, $r.125, $r.25, $r.375\\}.*" \
-        "check float contents of %ymm$r"
+	".. = \\{$r, $r.125, $r.25, $r.375\\}.*" \
+	"check float contents of %ymm$r"
     gdb_test "print \$ymm$r.v16_int16" \
-        ".. = \\{(-?\[0-9\]+, ){15}-?\[0-9\]+\\}.*" \
-        "check int16 contents of %ymm$r"
+	".. = \\{(-?\[0-9\]+, ){15}-?\[0-9\]+\\}.*" \
+	"check int16 contents of %ymm$r"
     gdb_test "print \$xmm$r.v2_double" \
-        ".. = \\{$r, $r.125\\}.*" \
-        "check float contents of %xmm$r"
+	".. = \\{$r, $r.125\\}.*" \
+	"check float contents of %xmm$r"
     gdb_test "print \$xmm$r.v8_int16" \
-        ".. = \\{(-?\[0-9\]+, ){7}-?\[0-9\]+\\}.*" \
-        "check int16 contents of %xmm$r"
+	".. = \\{(-?\[0-9\]+, ){7}-?\[0-9\]+\\}.*" \
+	"check int16 contents of %xmm$r"
 }
 
 for { set r 0 } { $r < $nr_regs } { incr r } {
@@ -134,8 +134,8 @@ gdb_continue_to_breakpoint "continue to fourth breakpoint in main"
 
 for { set r 0 } { $r < $nr_regs } { incr r } {
     gdb_test "print zmm_data\[$r\]" \
-        ".. = \\{f = \\{[expr {$r + 10}], [expr {$r + 10.125}], [expr {$r + 10.25}], [expr {$r + 10.375}], [expr {$r + 10.5}], [expr {$r + 10.625}], [expr {$r +10.75}], [expr {$r + 10.875}]\\}\\}.*" \
-        "check contents of zmm_data\[$r\] after writing ZMM regs"
+	".. = \\{f = \\{[expr {$r + 10}], [expr {$r + 10.125}], [expr {$r + 10.25}], [expr {$r + 10.375}], [expr {$r + 10.5}], [expr {$r + 10.625}], [expr {$r +10.75}], [expr {$r + 10.875}]\\}\\}.*" \
+	"check contents of zmm_data\[$r\] after writing ZMM regs"
 }
 
 for { set r 0 } { $r < $nr_regs } { incr r } {
@@ -152,8 +152,8 @@ gdb_continue_to_breakpoint "continue to fifth breakpoint in main"
 
 for { set r 0 } { $r < $nr_regs } { incr r } {
     gdb_test "print zmm_data\[$r\]" \
-        ".. = \\{f = \\{[expr {$r + 20}], [expr {$r + 20.125}], [expr {$r + 20.25}], [expr {$r + 20.375}], [expr {$r + 10.5}], [expr {$r + 10.625}], [expr {$r + 10.75}], [expr {$r + 10.875}]\\}\\}.*" \
-        "check contents of zmm_data\[$r\] after writing YMM regs"
+	".. = \\{f = \\{[expr {$r + 20}], [expr {$r + 20.125}], [expr {$r + 20.25}], [expr {$r + 20.375}], [expr {$r + 10.5}], [expr {$r + 10.625}], [expr {$r + 10.75}], [expr {$r + 10.875}]\\}\\}.*" \
+	"check contents of zmm_data\[$r\] after writing YMM regs"
 }
 
 for { set r 0 } { $r < $nr_regs } { incr r } {
@@ -168,8 +168,8 @@ gdb_continue_to_breakpoint "continue to sixth breakpoint in main"
 
 for { set r 0 } { $r < $nr_regs } { incr r } {
     gdb_test "print zmm_data\[$r\]" \
-        ".. = \\{f = \\{[expr {$r + 30}], [expr {$r + 30.125}], [expr {$r + 20.25}], [expr {$r + 20.375}], [expr {$r + 10.5}], [expr {$r + 10.625}], [expr {$r + 10.75}], [expr {$r + 10.875}]\\}\\}.*" \
-        "check contents of zmm_data\[$r\] after writing XMM regs"
+	".. = \\{f = \\{[expr {$r + 30}], [expr {$r + 30.125}], [expr {$r + 20.25}], [expr {$r + 20.375}], [expr {$r + 10.5}], [expr {$r + 10.625}], [expr {$r + 10.75}], [expr {$r + 10.875}]\\}\\}.*" \
+	"check contents of zmm_data\[$r\] after writing XMM regs"
 }
 
 gdb_test "break [gdb_get_line_number "seventh breakpoint here"]" \

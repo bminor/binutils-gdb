@@ -410,10 +410,10 @@ proc test_ena_dis_br { what } {
     # Now $b1.1 and $b2.1 should be enabled(disabled).
     gdb_test_multiple "info break" "$test1" {
        -re "(${b1})(\[^\n\r\]*)( n.*)(${b2})(\[^\n\r\]*)( n.*)$gdb_prompt $" {
-           $p1 "$test1"
+	   $p1 "$test1"
        }
        -re ".*$gdb_prompt $" {
-           $p2 "$test1"
+	   $p2 "$test1"
        }
     }
 
@@ -448,11 +448,11 @@ proc test_ena_dis_br { what } {
 
     # $b4.1 should be enabled(disabled).
     gdb_test_multiple "info break" "$test1" {
-        -re "(${b4})(\[^\n\r\]*)( n.*)$gdb_prompt $" {
-           $p1 "$test1"
+	-re "(${b4})(\[^\n\r\]*)( n.*)$gdb_prompt $" {
+	   $p1 "$test1"
        }
        -re ".*$gdb_prompt $" {
-           $p2 "$test1"
+	   $p2 "$test1"
        }
     }
 }

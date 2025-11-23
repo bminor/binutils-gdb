@@ -29,5 +29,3 @@ set bp_location [gdb_get_line_number "STOP" ${testdir}/foo.adb]
 runto "foo.adb:$bp_location"
 
 gdb_test "print my_blob.bees(1)" "= \\(access boolean\\) 0x0"
-
-

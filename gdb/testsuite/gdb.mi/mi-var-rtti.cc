@@ -327,7 +327,7 @@ void skip_type_update_when_not_use_rtti_test ()
 	ptr = &d;
 	s.ptr = &d;
   /*:
-        with_test_prefix "ptr points at d" {
+	with_test_prefix "ptr points at d" {
 	  mi_varobj_update PTR {PTR PTR.public.A} \
 		"update ptr to derived type in $testname"
 	  check_derived_without_rtti PTR ptr $testname
@@ -341,7 +341,7 @@ void skip_type_update_when_not_use_rtti_test ()
 	ptr = 0;
 	s.ptr = 0;
   /*:
-        with_test_prefix "ptr is nullptr again" {
+	with_test_prefix "ptr is nullptr again" {
 	  mi_varobj_update PTR {PTR  PTR.public.A} \
 		"update ptr back to base type in $testname"
 	  mi_delete_varobj PTR "delete varobj for ptr in $testname"

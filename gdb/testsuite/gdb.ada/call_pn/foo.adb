@@ -20,4 +20,3 @@ procedure Foo is
 begin
    New_Node := Pn (1234);  -- STOP
 end Foo;
-

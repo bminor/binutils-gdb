@@ -25,7 +25,7 @@ standard_testfile main.c -dw4.S
 set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
     cu {} {
- 	compile_unit {} {
+	compile_unit {} {
 	    declare_labels typedef_label
 
 	    # This signature is intentionally wrong.

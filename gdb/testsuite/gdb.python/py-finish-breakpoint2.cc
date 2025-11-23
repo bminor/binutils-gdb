@@ -42,7 +42,7 @@ main (void)
     }
   catch (const int *e)
     {
-        std::cerr << "Exception #" << *e << std::endl;
+	std::cerr << "Exception #" << *e << std::endl;
     }
   i += 1; /* Break after exception 1.  */
 
@@ -52,7 +52,7 @@ main (void)
     }
   catch (const int *e)
     {
-        std::cerr << "Exception #" << *e << std::endl;
+	std::cerr << "Exception #" << *e << std::endl;
     }
   i += 1; /* Break after exception 2.  */
 

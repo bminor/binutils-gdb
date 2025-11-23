@@ -85,10 +85,10 @@ gdb_test "print as\[3\]" ".\[0-9\]* = 3" "print value of as\[3\]"
 
 gdb_test_multiple "print rs" "print value of rs" {
     -re ".\[0-9\]* = \\(short &\\) @$hex: -1.*$gdb_prompt $" {
-        pass "print value of rs"
+	pass "print value of rs"
     }
     -re ".\[0-9\]* = \\(short int &\\) @$hex: -1.*$gdb_prompt $" {
-        pass "print value of rs"
+	pass "print value of rs"
     }
     eof { fail "print rs ($GDB dumped core) (FIXME)" ; gdb_start_again ; }
 }
@@ -216,19 +216,19 @@ gdb_test "print rUC" \
 
 gdb_test_multiple "print rS" "print value of rS" {
     -re ".\[0-9\]* = \\(short &\\) @$hex: -14.*$gdb_prompt $" {
-        pass "print value of rS"
+	pass "print value of rS"
     }
     -re ".\[0-9\]* = \\(short int &\\) @$hex: -14.*$gdb_prompt $" {
-        pass "print value of rS"
+	pass "print value of rS"
     }
 }
 
 gdb_test_multiple "print rUS" "print value of rUS" {
     -re ".\[0-9\]* = \\(unsigned short &\\) @$hex: 7.*$gdb_prompt $" {
-        pass "print value of rUS"
+	pass "print value of rUS"
     }
     -re ".\[0-9\]* = \\(short unsigned int &\\) @$hex: 7.*$gdb_prompt $" {
-        pass "print value of rUS"
+	pass "print value of rUS"
     }
 }
 
@@ -237,23 +237,23 @@ gdb_test "print rI" ".\[0-9\]* = \\(int &\\) @$hex: 102" \
 
 gdb_test "print rUI" \
     ".\[0-9\]* = \\(unsigned int &\\) @$hex: 1002" \
-        "print value of rUI"
+	"print value of rUI"
 
 gdb_test_multiple "print rL" "print value of rL" {
     -re ".\[0-9\]* = \\(long &\\) @$hex: -234.*$gdb_prompt $" {
-        pass "print value of rL"
+	pass "print value of rL"
     }
     -re ".\[0-9\]* = \\(long int &\\) @$hex: -234.*$gdb_prompt $" {
-        pass "print value of rL"
+	pass "print value of rL"
     }
 }
 
 gdb_test_multiple "print rUL" "print value of rUL" {
     -re ".\[0-9\]* = \\(unsigned long &\\) @$hex: 234.*$gdb_prompt $" {
-        pass "print value of rUL"
+	pass "print value of rUL"
     }
     -re ".\[0-9\]* = \\(long unsigned int &\\) @$hex: 234.*$gdb_prompt $" {
-        pass "print value of rUL"
+	pass "print value of rUL"
     }
 }
 
@@ -264,4 +264,3 @@ gdb_test "print rF" \
 gdb_test "print rD" \
     ".\[0-9\]* = \\(double &\\) @$hex: -1.375e-123.*" \
     "print value of rD"
-

@@ -316,7 +316,7 @@
 
 2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
-	* gdb.python/py-pp-maint.exp: Consider new pretty-print added 
+	* gdb.python/py-pp-maint.exp: Consider new pretty-print added
 	for bnd registers.
 
 2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
@@ -454,9 +454,9 @@
 
 2013-11-11  Phil Muldoon  <pmuldoon@redhat.com>
 
- 	* gdb.python/py-linetable.S: New file.
+	* gdb.python/py-linetable.S: New file.
 	* gdb.python/py-linetable.c: New file.
- 	* gdb.python/py-linetable.exp: New file.
+	* gdb.python/py-linetable.exp: New file.
 
 2013-11-11  Joel Brobecker  <brobecker@adacore.com>
 
@@ -1114,7 +1114,7 @@
 
 	PR gdb/15501
 	* gdb.base/ena-dis-br.exp: Add test to verify
- 	enable/disable commands work correctly with
+	enable/disable commands work correctly with
 	multiple arguments that include multiple locations.
 
 2013-08-22  Samuel Bronson  <naesten@gmail.com>

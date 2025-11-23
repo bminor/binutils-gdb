@@ -37,7 +37,7 @@ clean_restart $executable_outer
 set host_binfile_inner [gdb_remote_download host $binfile_inner]
 
 gdb_test "add-symbol-file $host_binfile_inner outer_inner" \
-         {Reading symbols from .*\.\.\.} "add-symbol-file" \
+	 {Reading symbols from .*\.\.\.} "add-symbol-file" \
 	 "\r\n\t\\.text_addr = 0x\[0-9a-f\]+\r\n\\(y or n\\) \$" "y"
 
 # Expand symtab for ${binfile_outer}.

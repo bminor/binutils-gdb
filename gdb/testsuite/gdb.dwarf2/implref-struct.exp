@@ -117,7 +117,7 @@ Dwarf::assemble ${asm_file} {
 		DW_AT_type :${int_label}
 		DW_AT_external 1 DW_FORM_flag
 	    } {
-	        DW_TAG_variable {
+		DW_TAG_variable {
 		    DW_AT_name "ref"
 		    DW_AT_type :${ref_label}
 		    DW_AT_location {

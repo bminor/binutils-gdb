@@ -776,7 +776,7 @@ proc test_max_string_one { setting unlimited } {
       check_format_string "a_binary_string" $opts
       check_format_string "a_binary_string_array" $opts
       check_format_string "a_big_string" $opts \
-        [get_cut_big_string 1000]
+	[get_cut_big_string 1000]
       if { $setting == "elements"} {
 	check_format_string "an_array" $opts
 	check_format_string "an_array_with_repetition" $opts
@@ -784,8 +784,8 @@ proc test_max_string_one { setting unlimited } {
       check_format_string "a_symbol_pointer" $opts
 
       if { $current_lang == "c++" } {
-        check_format_string "a_point_t_ref" $opts
-        check_format_string "a_base_ref" $opts
+	check_format_string "a_point_t_ref" $opts
+	check_format_string "a_base_ref" $opts
       }
     }
   }
@@ -929,12 +929,12 @@ proc_with_prefix test_repeat_threshold {} {
       check_format_string "a_big_string" $opts
       check_format_string "an_array" $opts
       check_format_string "an_array_with_repetition" $opts \
-        "\\{1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5\\}"
+	"\\{1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5\\}"
       check_format_string "a_symbol_pointer" $opts
 
       if { $current_lang == "c++" } {
-        check_format_string "a_point_t_ref" $opts
-        check_format_string "a_base_ref" $opts
+	check_format_string "a_point_t_ref" $opts
+	check_format_string "a_base_ref" $opts
       }
     }
   }

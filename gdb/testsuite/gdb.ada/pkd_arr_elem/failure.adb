@@ -42,4 +42,3 @@ begin
    Test.Length := 1;
    Do_Nothing (Test'Address); -- START
 end;
-

@@ -43,15 +43,15 @@ if {[mi_runto_main] < 0} {
 }
 
 mi_gdb_test "-catch-assert -c \"Global_Var = 2\"" \
-            "\\^done,bkptno=\"$decimal\",bkpt={.*disp=\"keep\",enabled=\"y\",what=\"failed Ada assertions\",.*,cond=\"Global_Var = 2\",.*}" \
-            "catch assert failures with condition"
+	    "\\^done,bkptno=\"$decimal\",bkpt={.*disp=\"keep\",enabled=\"y\",what=\"failed Ada assertions\",.*,cond=\"Global_Var = 2\",.*}" \
+	    "catch assert failures with condition"
 
 set bp_location [gdb_get_line_number "STOP" ${testdir}/bla.adb]
 mi_execute_to "exec-continue" \
-              "\"breakpoint-hit\",disp=\"keep\",bkptno=\"$decimal\"" \
-              "bla" "" ".*" "$bp_location" \
-              ".*" \
-              "continue to assert failure catchpoint hit"
+	      "\"breakpoint-hit\",disp=\"keep\",bkptno=\"$decimal\"" \
+	      "bla" "" ".*" "$bp_location" \
+	      ".*" \
+	      "continue to assert failure catchpoint hit"
 
 # Exit the inferior.
 mi_send_resuming_command "exec-continue" "continuing to inferior exit"

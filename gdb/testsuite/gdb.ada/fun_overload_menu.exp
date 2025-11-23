@@ -44,17 +44,17 @@ proc test_menu {expr function first second selection output} {
 		   "> $"]
     set test_name "multiple matches for $function {$expr}"
     gdb_test_multiple "print $expr" "$test_name" {
-        -re "$menu1" {
-            pass "$test_name"
-        }
-        -re "$menu2" {
-            pass "$test_name"
+	-re "$menu1" {
+	    pass "$test_name"
+	}
+	-re "$menu2" {
+	    pass "$test_name"
 	    # Make sure we pick the correct one.
 	    set selection [expr {3 - $selection}]
-        }
-        default {
-            fail "$test_name"
-        }
+	}
+	default {
+	    fail "$test_name"
+	}
     }
     gdb_test "$selection" "$output"
 }

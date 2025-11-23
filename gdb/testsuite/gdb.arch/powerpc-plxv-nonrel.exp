@@ -125,4 +125,3 @@ if {$check_vs7 != $vs7_expected} {
 gdb_test "info break"
 gdb_test "info register vs4 vs5 vs6 vs7 "
 gdb_test "disas main #2"
-

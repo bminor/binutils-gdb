@@ -118,7 +118,7 @@ proc test_no_truncation_of_unlimited_history_file { } {
 		gdb_start
 		gdb_test "server show commands" "    .  print 1.*"
 	    }
-        }
+	}
     }
 }
 

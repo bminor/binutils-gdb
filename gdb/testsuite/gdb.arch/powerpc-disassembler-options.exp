@@ -50,4 +50,3 @@ gdb_test "set architecture $arch2" \
 gdb_test "show disassembler-options" \
 	"The current disassembler options are '$option'.*" \
 	"show disassembler-options $option after set arch $arch2"
-

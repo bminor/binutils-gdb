@@ -56,9 +56,9 @@ proc gdb_test_thread_start {messages_enabled command pattern message} {
     }
     -re "\[\r\n\]*($pattern)\[\r\n\]+$gdb_prompt $" {
       if { $events_seen != $events_expected } {
-        fail "$message (saw $events_seen, expected $events_expected)"
+	fail "$message (saw $events_seen, expected $events_expected)"
       } else {
-        pass "$message"
+	pass "$message"
       }
     }
   }]
@@ -81,9 +81,9 @@ proc gdb_test_thread_exit {messages_enabled command pattern message} {
     }
     -re "\[\r\n\]*($pattern)\[\r\n\]+$gdb_prompt $" {
       if { $events_seen != $events_expected } {
-        fail "$message (saw $events_seen, expected $events_expected)"
+	fail "$message (saw $events_seen, expected $events_expected)"
       } else {
-        pass "$message"
+	pass "$message"
       }
     }
   }]

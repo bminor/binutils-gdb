@@ -168,4 +168,3 @@ GDBInfoModuleSymbols::check_entry "${srcfile}" "mod1" "21" \
     "${real4} mod1::mod1_var_1;"
 GDBInfoModuleSymbols::check_no_entry "${srcfile}" ".*"
 GDBInfoModuleSymbols::check_no_entry "${srcfile2}" ".*"
-

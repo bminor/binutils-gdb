@@ -33,8 +33,8 @@ if {![runto_main]} {
 # 4 breakpoints (or possibly 5, including the read_small function itself).
 
 gdb_test "break read_small" \
-         "Breakpoint $decimal at $hex: read_small\\. \\(\[45\] locations\\)" \
-         "set breakpoint at read_small"
+	 "Breakpoint $decimal at $hex: read_small\\. \\(\[45\] locations\\)" \
+	 "set breakpoint at read_small"
 
 # We do not verify each breakpoint info, but use continue commands instead
 # to verify that we properly stop on each expected breakpoint.
@@ -50,5 +50,5 @@ for {set i 0} {$i < 4} {incr i} {
 }
 
 gdb_test "continue" \
-         "Continuing\\..*$inferior_exited_re.*" \
-         "continuing to program completion"
+	 "Continuing\\..*$inferior_exited_re.*" \
+	 "continuing to program completion"

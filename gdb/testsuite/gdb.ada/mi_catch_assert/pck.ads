@@ -16,4 +16,3 @@
 package Pck is
    Global_Var : Integer := 0;
 end Pck;
-

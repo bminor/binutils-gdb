@@ -77,12 +77,12 @@ proc finish_void { } {
 proc finish_abbreviation { abbrev } {
 
     if {![runto "int_func"]} {
-        return -1
+	return -1
     }
 
     gdb_test "$abbrev" \
-             "Value returned is .* = 1" \
-             "Testing the \"$abbrev\" abbreviation for \"finish\""
+	     "Value returned is .* = 1" \
+	     "Testing the \"$abbrev\" abbreviation for \"finish\""
 }
 
 # Test "set print finish off".

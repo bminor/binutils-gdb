@@ -25,7 +25,7 @@ proc do_test {lang} {
     if {[info exists compiler_info]} {
 	# Unsetting compiler_info allows us to switch compilers
 	# used by prepare_for_testing.
-        unset compiler_info
+	unset compiler_info
     }
     set options {debug}
 

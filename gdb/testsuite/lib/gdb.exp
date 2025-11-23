@@ -140,7 +140,7 @@ proc load_lib { file } {
 
     foreach varname [info globals] {
        if { ![info exists known_globals($varname)] } {
-           gdb_persistent_global_no_decl $varname
+	   gdb_persistent_global_no_decl $varname
        }
     }
 
@@ -1447,9 +1447,9 @@ proc gdb_test_multiple { command message args } {
 
     if {$line_by_line} {
        append code {
-           -re "\r\n\[^\r\n\]*(?=\r\n)" {
-               exp_continue
-           }
+	   -re "\r\n\[^\r\n\]*(?=\r\n)" {
+	       exp_continue
+	   }
        }
     }
 
@@ -1921,14 +1921,14 @@ proc test_print_reject { args } {
 	    pass "reject $sendthis"
 	    return 1
 	}
-        -re "Unmatched single quote.*$gdb_prompt $" {
-            pass "reject $sendthis"
-            return 1
-        }
-        -re "A character constant must contain at least one character.*$gdb_prompt $" {
-            pass "reject $sendthis"
-            return 1
-        }
+	-re "Unmatched single quote.*$gdb_prompt $" {
+	    pass "reject $sendthis"
+	    return 1
+	}
+	-re "A character constant must contain at least one character.*$gdb_prompt $" {
+	    pass "reject $sendthis"
+	    return 1
+	}
 	-re "$expectthis.*$gdb_prompt $" {
 	    pass "reject $sendthis"
 	    return 1
@@ -2562,49 +2562,49 @@ proc gdb_file_cmd { arg {kill_flag 1} } {
 	    set gdb_file_cmd_debug_info "nodebug"
 	    return 0
 	}
-        -re "(Reading symbols from.*$gdb_prompt $)" {
-            verbose "\t\tLoaded $arg into $GDB"
+	-re "(Reading symbols from.*$gdb_prompt $)" {
+	    verbose "\t\tLoaded $arg into $GDB"
 	    set gdb_file_cmd_msg $expect_out(1,string)
 	    set gdb_file_cmd_debug_info "debug"
 	    return 0
-        }
-        -re "Load new symbol table from \".*\".*y or n. $" {
+	}
+	-re "Load new symbol table from \".*\".*y or n. $" {
 	    if { $new_symbol_table > 0 } {
 		perror [join [list "Couldn't load $basename,"
 			      "interactive prompt loop detected."]]
 		return -1
 	    }
-            send_gdb "y\n" answer
+	    send_gdb "y\n" answer
 	    incr new_symbol_table
 	    set suffix "-- with new symbol table"
 	    set arg "$arg $suffix"
 	    set basename "$basename $suffix"
 	    exp_continue
 	}
-        -re "No such file or directory.*$gdb_prompt $" {
-            perror "($basename) No such file or directory"
+	-re "No such file or directory.*$gdb_prompt $" {
+	    perror "($basename) No such file or directory"
 	    return -1
-        }
+	}
 	-re "A problem internal to GDB has been detected" {
 	    perror "Couldn't load $basename into GDB (GDB internal error)."
 	    gdb_internal_error_resync
 	    return -1
 	}
-        -re "$gdb_prompt $" {
-            perror "Couldn't load $basename into GDB."
+	-re "$gdb_prompt $" {
+	    perror "Couldn't load $basename into GDB."
 	    return -1
-            }
-        timeout {
-            perror "Couldn't load $basename into GDB (timeout)."
+	    }
+	timeout {
+	    perror "Couldn't load $basename into GDB (timeout)."
 	    return -1
-        }
-        eof {
-            # This is an attempt to detect a core dump, but seems not to
-            # work.  Perhaps we need to match .* followed by eof, in which
-            # gdb_expect does not seem to have a way to do that.
-            perror "Couldn't load $basename into GDB (eof)."
+	}
+	eof {
+	    # This is an attempt to detect a core dump, but seems not to
+	    # work.  Perhaps we need to match .* followed by eof, in which
+	    # gdb_expect does not seem to have a way to do that.
+	    perror "Couldn't load $basename into GDB (eof)."
 	    return -1
-        }
+	}
     }
 }
 
@@ -3061,15 +3061,15 @@ gdb_caching_proc allow_dlmopen_tests {} {
 	    r_debug = 0;
 	    /* Taken from /usr/include/link.h.  */
 	    for (dyn = _DYNAMIC; dyn->d_tag != DT_NULL; ++dyn)
-	        if (dyn->d_tag == DT_DEBUG)
-	            r_debug = (struct r_debug *) dyn->d_un.d_ptr;
+		if (dyn->d_tag == DT_DEBUG)
+		    r_debug = (struct r_debug *) dyn->d_un.d_ptr;
 
 	    if (!r_debug) {
-	        printf ("r_debug not found.\n");
+		printf ("r_debug not found.\n");
 		return 1;
 	    }
 	    if (r_debug->r_version < 2) {
-	        printf ("dlmopen debug not supported.\n");
+		printf ("dlmopen debug not supported.\n");
 		return 1;
 	    }
 	    printf ("dlmopen debug supported.\n");
@@ -3102,16 +3102,16 @@ gdb_caching_proc allow_dlmopen_tests {} {
 	return 0
     }
     gdb_expect {
-        -re "$inferior_exited_re normally.*${gdb_prompt} $" {
+	-re "$inferior_exited_re normally.*${gdb_prompt} $" {
 	    set allow_dlmopen_tests 1
-        }
-        -re "$inferior_exited_re with code.*${gdb_prompt} $" {
+	}
+	-re "$inferior_exited_re with code.*${gdb_prompt} $" {
 	    set allow_dlmopen_tests 0
-        }
-        default {
+	}
+	default {
 	    warning "\n$me: default case taken"
 	    set allow_dlmopen_tests 0
-        }
+	}
     }
     gdb_exit
 
@@ -3902,10 +3902,10 @@ proc supports_process_record {} {
     }
 
     if { [istarget "arm*-*-linux*"] || [istarget "x86_64-*-linux*"]
-         || [istarget "i\[34567\]86-*-linux*"]
-         || [istarget "aarch64*-*-linux*"]
+	 || [istarget "i\[34567\]86-*-linux*"]
+	 || [istarget "aarch64*-*-linux*"]
 	 || [istarget "loongarch*-*-linux*"]
-         || [istarget "powerpc*-*-linux*"]
+	 || [istarget "powerpc*-*-linux*"]
 	 || [istarget "s390*-*-linux*"]
 	 || [istarget "riscv*-*-*"] } {
 	return 1
@@ -3923,10 +3923,10 @@ proc supports_reverse {} {
     }
 
     if { [istarget "arm*-*-linux*"] || [istarget "x86_64-*-linux*"]
-         || [istarget "i\[34567\]86-*-linux*"]
-         || [istarget "aarch64*-*-linux*"]
+	 || [istarget "i\[34567\]86-*-linux*"]
+	 || [istarget "aarch64*-*-linux*"]
 	 || [istarget "loongarch*-*-linux*"]
-         || [istarget "powerpc*-*-linux*"]
+	 || [istarget "powerpc*-*-linux*"]
 	 || [istarget "s390*-*-linux*"]
 	 || [istarget "riscv*-*-*"] } {
 	return 1
@@ -3984,7 +3984,7 @@ gdb_caching_proc is_elf_target {} {
 
     set src { int foo () {return 0;} }
     if {![gdb_simple_compile elf_target $src]} {
-        return 0
+	return 0
     }
 
     set fp_obj [open $obj "r"]
@@ -4218,9 +4218,9 @@ gdb_caching_proc allow_altivec_tests {} {
 
     # Make sure we have a compiler that understands altivec.
     if {[test_compiler_info gcc*]} {
-        set compile_flags "additional_flags=-maltivec"
+	set compile_flags "additional_flags=-maltivec"
     } elseif {[test_compiler_info xlc*]} {
-        set compile_flags "additional_flags=-qaltivec"
+	set compile_flags "additional_flags=-qaltivec"
     } else {
 	verbose "Could not compile with altivec support, returning 0" 2
 	return 0
@@ -4249,18 +4249,18 @@ gdb_caching_proc allow_altivec_tests {} {
     gdb_load "$obj"
     gdb_run_cmd
     gdb_expect {
-        -re ".*Illegal instruction.*${gdb_prompt} $" {
-            verbose -log "\n$me altivec hardware not detected"
+	-re ".*Illegal instruction.*${gdb_prompt} $" {
+	    verbose -log "\n$me altivec hardware not detected"
 	    set allow_vmx_tests 0
-        }
-        -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
-            verbose -log "\n$me: altivec hardware detected"
+	}
+	-re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+	    verbose -log "\n$me: altivec hardware detected"
 	    set allow_vmx_tests 1
-        }
-        default {
-          warning "\n$me: default case taken"
+	}
+	default {
+	  warning "\n$me: default case taken"
 	    set allow_vmx_tests 0
-        }
+	}
     }
     gdb_exit
     remote_file build delete $obj
@@ -4296,18 +4296,18 @@ gdb_caching_proc allow_power_isa_3_1_tests {} {
     gdb_load "$obj"
     gdb_run_cmd
     gdb_expect {
-        -re ".*Illegal instruction.*${gdb_prompt} $" {
-            verbose -log "\n$me Power ISA 3.1 hardware not detected"
+	-re ".*Illegal instruction.*${gdb_prompt} $" {
+	    verbose -log "\n$me Power ISA 3.1 hardware not detected"
 	    set allow_power_isa_3_1_tests 0
-        }
-        -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
-            verbose -log "\n$me: Power ISA 3.1 hardware detected"
+	}
+	-re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+	    verbose -log "\n$me: Power ISA 3.1 hardware detected"
 	    set allow_power_isa_3_1_tests 1
-        }
-        default {
+	}
+	default {
 	    warning "\n$me: default case taken"
 	    set allow_power_isa_3_1_tests 0
-        }
+	}
     }
     gdb_exit
     remote_file build delete $obj
@@ -4333,9 +4333,9 @@ gdb_caching_proc allow_vsx_tests {} {
 
     # Make sure we have a compiler that understands altivec.
     if {[test_compiler_info gcc*]} {
-        set compile_flags "additional_flags=-mvsx"
+	set compile_flags "additional_flags=-mvsx"
     } elseif {[test_compiler_info xlc*]} {
-        set compile_flags "additional_flags=-qasm=gcc"
+	set compile_flags "additional_flags=-qasm=gcc"
     } else {
 	verbose "Could not compile with vsx support, returning 0" 2
 	return 0
@@ -4365,18 +4365,18 @@ gdb_caching_proc allow_vsx_tests {} {
     gdb_load "$obj"
     gdb_run_cmd
     gdb_expect {
-        -re ".*Illegal instruction.*${gdb_prompt} $" {
-            verbose -log "\n$me VSX hardware not detected"
+	-re ".*Illegal instruction.*${gdb_prompt} $" {
+	    verbose -log "\n$me VSX hardware not detected"
 	    set allow_vsx_tests 0
-        }
-        -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
-            verbose -log "\n$me: VSX hardware detected"
+	}
+	-re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+	    verbose -log "\n$me: VSX hardware detected"
 	    set allow_vsx_tests 1
-        }
-        default {
-          warning "\n$me: default case taken"
+	}
+	default {
+	  warning "\n$me: default case taken"
 	    set allow_vsx_tests 0
-        }
+	}
     }
     gdb_exit
     remote_file build delete $obj
@@ -4395,12 +4395,12 @@ gdb_caching_proc allow_tsx_tests {} {
 
     # Compile a test program.
     set src {
-        int main() {
-            asm volatile ("xbegin .L0");
-            asm volatile ("xend");
-            asm volatile (".L0: nop");
-            return 0;
-        }
+	int main() {
+	    asm volatile ("xbegin .L0");
+	    asm volatile ("xend");
+	    asm volatile (".L0: nop");
+	    return 0;
+	}
     }
     if {![gdb_simple_compile $me $src executable]} {
 	return 0
@@ -4414,18 +4414,18 @@ gdb_caching_proc allow_tsx_tests {} {
     gdb_load "$obj"
     gdb_run_cmd
     gdb_expect {
-        -re ".*Illegal instruction.*${gdb_prompt} $" {
-            verbose -log "$me:  TSX hardware not detected."
+	-re ".*Illegal instruction.*${gdb_prompt} $" {
+	    verbose -log "$me:  TSX hardware not detected."
 	    set allow_tsx_tests 0
-        }
-        -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
-            verbose -log "$me:  TSX hardware detected."
+	}
+	-re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+	    verbose -log "$me:  TSX hardware detected."
 	    set allow_tsx_tests 1
-        }
-        default {
-            warning "\n$me:  default case taken."
+	}
+	default {
+	    warning "\n$me:  default case taken."
 	    set allow_tsx_tests 0
-        }
+	}
     }
     gdb_exit
     remote_file build delete $obj
@@ -4518,10 +4518,10 @@ gdb_caching_proc allow_avx512bf16_tests {} {
 
     # Compile a test program.
     set src {
-        int main() {
-            asm volatile ("vcvtne2ps2bf16 %xmm0, %xmm1, %xmm0");
-            return 0;
-        }
+	int main() {
+	    asm volatile ("vcvtne2ps2bf16 %xmm0, %xmm1, %xmm0");
+	    return 0;
+	}
     }
     if {![gdb_simple_compile $me $src executable]} {
 	return 0
@@ -4535,18 +4535,18 @@ gdb_caching_proc allow_avx512bf16_tests {} {
     gdb_load "$obj"
     gdb_run_cmd
     gdb_expect {
-        -re ".*Illegal instruction.*${gdb_prompt} $" {
-            verbose -log "$me:  avx512bf16 hardware not detected."
+	-re ".*Illegal instruction.*${gdb_prompt} $" {
+	    verbose -log "$me:  avx512bf16 hardware not detected."
 	    set allow_avx512bf16_tests 0
-        }
-        -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
-            verbose -log "$me:  avx512bf16 hardware detected."
+	}
+	-re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+	    verbose -log "$me:  avx512bf16 hardware detected."
 	    set allow_avx512bf16_tests 1
-        }
-        default {
-            warning "\n$me:  default case taken."
+	}
+	default {
+	    warning "\n$me:  default case taken."
 	    set allow_avx512bf16_tests 0
-        }
+	}
     }
     gdb_exit
     remote_file build delete $obj
@@ -4569,10 +4569,10 @@ gdb_caching_proc allow_avx512fp16_tests {} {
 
     # Compile a test program.
     set src {
-        int main() {
-            asm volatile ("vcvtps2phx %xmm1, %xmm0");
-            return 0;
-        }
+	int main() {
+	    asm volatile ("vcvtps2phx %xmm1, %xmm0");
+	    return 0;
+	}
     }
     if {![gdb_simple_compile $me $src executable]} {
 	return 0
@@ -4586,18 +4586,18 @@ gdb_caching_proc allow_avx512fp16_tests {} {
     gdb_load "$obj"
     gdb_run_cmd
     gdb_expect {
-        -re ".*Illegal instruction.*${gdb_prompt} $" {
-            verbose -log "$me:  avx512fp16 hardware not detected."
+	-re ".*Illegal instruction.*${gdb_prompt} $" {
+	    verbose -log "$me:  avx512fp16 hardware not detected."
 	    set allow_avx512fp16_tests 0
-        }
-        -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
-            verbose -log "$me:  avx512fp16 hardware detected."
+	}
+	-re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+	    verbose -log "$me:  avx512fp16 hardware detected."
 	    set allow_avx512fp16_tests 1
-        }
-        default {
-            warning "\n$me:  default case taken."
+	}
+	default {
+	    warning "\n$me:  default case taken."
 	    set allow_avx512fp16_tests 0
-        }
+	}
     }
     gdb_exit
     remote_file build delete $obj
@@ -4701,18 +4701,18 @@ gdb_caching_proc allow_btrace_tests {} {
     # In case of an unexpected output, we return 2 as a fail value.
     set allow_btrace_tests 2
     gdb_test_multiple "record btrace" "check btrace support" {
-        -re "You can't do that when your target is.*\r\n$gdb_prompt $" {
+	-re "You can't do that when your target is.*\r\n$gdb_prompt $" {
 	    set allow_btrace_tests 0
-        }
-        -re "Target does not support branch tracing.*\r\n$gdb_prompt $" {
+	}
+	-re "Target does not support branch tracing.*\r\n$gdb_prompt $" {
 	    set allow_btrace_tests 0
-        }
-        -re "Could not enable branch tracing.*\r\n$gdb_prompt $" {
+	}
+	-re "Could not enable branch tracing.*\r\n$gdb_prompt $" {
 	    set allow_btrace_tests 0
-        }
-        -re "^record btrace\r\n$gdb_prompt $" {
+	}
+	-re "^record btrace\r\n$gdb_prompt $" {
 	    set allow_btrace_tests 1
-        }
+	}
     }
     gdb_exit
     remote_file build delete $obj
@@ -4752,21 +4752,21 @@ gdb_caching_proc allow_btrace_pt_tests {} {
     # In case of an unexpected output, we return 2 as a fail value.
     set allow_btrace_pt_tests 2
     gdb_test_multiple "record btrace pt" "check btrace pt support" {
-        -re "You can't do that when your target is.*\r\n$gdb_prompt $" {
+	-re "You can't do that when your target is.*\r\n$gdb_prompt $" {
 	    set allow_btrace_pt_tests 0
-        }
-        -re "Target does not support branch tracing.*\r\n$gdb_prompt $" {
+	}
+	-re "Target does not support branch tracing.*\r\n$gdb_prompt $" {
 	    set allow_btrace_pt_tests 0
-        }
-        -re "Could not enable branch tracing.*\r\n$gdb_prompt $" {
+	}
+	-re "Could not enable branch tracing.*\r\n$gdb_prompt $" {
 	    set allow_btrace_pt_tests 0
-        }
-        -re "support was disabled at compile time.*\r\n$gdb_prompt $" {
+	}
+	-re "support was disabled at compile time.*\r\n$gdb_prompt $" {
 	    set allow_btrace_pt_tests 0
-        }
-        -re "^record btrace pt\r\n$gdb_prompt $" {
+	}
+	-re "^record btrace pt\r\n$gdb_prompt $" {
 	    set allow_btrace_pt_tests 1
-        }
+	}
     }
     gdb_exit
     remote_file build delete $obj
@@ -4926,7 +4926,7 @@ gdb_caching_proc allow_aarch64_sve_tests {} {
 	}
     }
     if {![gdb_simple_compile $me $src executable $compile_flags]} {
-        return 0
+	return 0
     }
 
     # Compilation succeeded so now run it via gdb.
@@ -4934,18 +4934,18 @@ gdb_caching_proc allow_aarch64_sve_tests {} {
     gdb_load $obj
     gdb_run_cmd
     gdb_expect {
-        -re ".*Illegal instruction.*${gdb_prompt} $" {
-            verbose -log "\n$me sve hardware not detected"
-            set allow_sve_tests 0
-        }
-        -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
-            verbose -log "\n$me: sve hardware detected"
-            set allow_sve_tests 1
-        }
-        default {
-          warning "\n$me: default case taken"
-            set allow_sve_tests 0
-        }
+	-re ".*Illegal instruction.*${gdb_prompt} $" {
+	    verbose -log "\n$me sve hardware not detected"
+	    set allow_sve_tests 0
+	}
+	-re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+	    verbose -log "\n$me: sve hardware detected"
+	    set allow_sve_tests 1
+	}
+	default {
+	  warning "\n$me: default case taken"
+	    set allow_sve_tests 0
+	}
     }
     gdb_exit
     remote_file build delete $obj
@@ -5929,9 +5929,9 @@ proc gcc_major_version { {compiler "gcc-*"} {language "c"} } {
 proc current_target_name { } {
     global target_info
     if {[info exists target_info(target,name)]} {
-        set answer $target_info(target,name)
+	set answer $target_info(target,name)
     } else {
-        set answer ""
+	set answer ""
     }
     return $answer
 }
@@ -6036,18 +6036,18 @@ proc gdb_simple_compile {name code {type object} {compile_flags {}} {object obj}
     upvar $object obj
 
     switch -regexp -- $type {
-        "executable" {
-            set postfix "x"
-        }
-        "object" {
-            set postfix "o"
-        }
-        "preprocess" {
-            set postfix "i"
-        }
-        "assembly" {
-            set postfix "s"
-        }
+	"executable" {
+	    set postfix "x"
+	}
+	"object" {
+	    set postfix "o"
+	}
+	"preprocess" {
+	    set postfix "i"
+	}
+	"assembly" {
+	    set postfix "s"
+	}
     }
     set ext "c"
     foreach flag $compile_flags {
@@ -6084,8 +6084,8 @@ proc gdb_simple_compile {name code {type object} {compile_flags {}} {object obj}
     file delete $src
 
     if {![string match "" $lines]} {
-        verbose "$name:  compilation failed, returning 0" 2
-        return 0
+	verbose "$name:  compilation failed, returning 0" 2
+	return 0
     }
     return 1
 }
@@ -6377,9 +6377,9 @@ proc gdb_compile {source dest type options} {
     set shlib_found 0
     set shlib_load 0
     foreach opt $options {
-        if {[regexp {^shlib=(.*)} $opt dummy_var shlib_name]
+	if {[regexp {^shlib=(.*)} $opt dummy_var shlib_name]
 	    && $type == "executable"} {
-            if {[test_compiler_info "xlc-*"]} {
+	    if {[test_compiler_info "xlc-*"]} {
 		# IBM xlc compiler doesn't accept shared library named other
 		# than .so: use "-Wl," to bypass this
 		lappend source "-Wl,$shlib_name"
@@ -6387,11 +6387,11 @@ proc gdb_compile {source dest type options} {
 			|| [istarget *-*-cygwin*]
 			|| [istarget *-*-pe*])} {
 		lappend source "${shlib_name}.a"
-            } else {
-               lappend source $shlib_name
-            }
-            if { $shlib_found == 0 } {
-                set shlib_found 1
+	    } else {
+	       lappend source $shlib_name
+	    }
+	    if { $shlib_found == 0 } {
+		set shlib_found 1
 		if { ([istarget "*-*-mingw*"]
 		      || [istarget *-*-cygwin*]) } {
 		    lappend new_options "ldflags=-Wl,--enable-auto-import"
@@ -6403,26 +6403,26 @@ proc gdb_compile {source dest type options} {
 		    # shlibs!
 		    lappend new_options "early_flags=-Wl,--no-as-needed"
 		}
-            }
+	    }
 	} elseif { $opt == "shlib_load" && $type == "executable" } {
 	    set shlib_load 1
 	} elseif { $opt == "getting_compiler_info" } {
 	    # Ignore this setting here as it has been handled earlier in this
 	    # procedure.  Do not append it to new_options as this will cause
 	    # recursion.
-        } elseif {[regexp "^text_segment=(.*)" $opt dummy_var addr]} {
-            if { [linker_supports_Ttext_segment_flag] } {
-                # For GNU ld.
-                lappend new_options "ldflags=-Wl,-Ttext-segment=$addr"
-            } elseif { [linker_supports_image_base_flag] } {
-                # For LLVM's lld.
-                lappend new_options "ldflags=-Wl,--image-base=$addr"
-            } elseif { [linker_supports_Ttext_flag] } {
-                # For old GNU gold versions.
-                lappend new_options "ldflags=-Wl,-Ttext=$addr"
-            } else {
-                error "Don't know how to handle text_segment option."
-            }
+	} elseif {[regexp "^text_segment=(.*)" $opt dummy_var addr]} {
+	    if { [linker_supports_Ttext_segment_flag] } {
+		# For GNU ld.
+		lappend new_options "ldflags=-Wl,-Ttext-segment=$addr"
+	    } elseif { [linker_supports_image_base_flag] } {
+		# For LLVM's lld.
+		lappend new_options "ldflags=-Wl,--image-base=$addr"
+	    } elseif { [linker_supports_Ttext_flag] } {
+		# For old GNU gold versions.
+		lappend new_options "ldflags=-Wl,-Ttext=$addr"
+	    } else {
+		error "Don't know how to handle text_segment option."
+	    }
 	} elseif { $opt == "column-info" } {
 	    # If GCC or clang does not support column-info, compilation
 	    # will fail and the usupported column-info option will be
@@ -6462,9 +6462,9 @@ proc gdb_compile {source dest type options} {
 	    } else {
 		error "No idea how to force DWARF-5 in this compiler"
 	    }
-        } else {
-            lappend new_options $opt
-        }
+	} else {
+	    lappend new_options $opt
+	}
     }
 
     # Ensure stack protector is disabled for GCC, as this causes problems with
@@ -6476,8 +6476,8 @@ proc gdb_compile {source dest type options} {
 	 && !([test_compiler_info {gcc-[0-3]-*}]
 	      || [test_compiler_info {gcc-4-0-*}])
 	 && [lsearch -exact $options rust] == -1} {
-        # Put it at the front to not override any user-provided value.
-        lappend new_options "early_flags=-fno-stack-protector"
+	# Put it at the front to not override any user-provided value.
+	lappend new_options "early_flags=-fno-stack-protector"
     }
 
     # hipcc defaults to -O2, so add -O0 to early flags for the hip language.
@@ -6705,31 +6705,31 @@ proc gdb_compile_pthreads {source dest type options} {
     set built_binfile 0
     set why_msg "unrecognized error"
     foreach lib {-lpthreads -lpthread -lthread ""} {
-        # This kind of wipes out whatever libs the caller may have
-        # set.  Or maybe theirs will override ours.  How infelicitous.
-        set options_with_lib [concat $options [list libs=$lib quiet]]
-        set ccout [gdb_compile $source $dest $type $options_with_lib]
-        switch -regexp -- $ccout {
-            ".*no posix threads support.*" {
-                set why_msg "missing threads include file"
-                break
-            }
-            ".*cannot open -lpthread.*" {
-                set why_msg "missing runtime threads library"
-            }
-            ".*Can't find library for -lpthread.*" {
-                set why_msg "missing runtime threads library"
-            }
-            {^$} {
-                pass "successfully compiled posix threads test case"
-                set built_binfile 1
-                break
-            }
-        }
+	# This kind of wipes out whatever libs the caller may have
+	# set.  Or maybe theirs will override ours.  How infelicitous.
+	set options_with_lib [concat $options [list libs=$lib quiet]]
+	set ccout [gdb_compile $source $dest $type $options_with_lib]
+	switch -regexp -- $ccout {
+	    ".*no posix threads support.*" {
+		set why_msg "missing threads include file"
+		break
+	    }
+	    ".*cannot open -lpthread.*" {
+		set why_msg "missing runtime threads library"
+	    }
+	    ".*Can't find library for -lpthread.*" {
+		set why_msg "missing runtime threads library"
+	    }
+	    {^$} {
+		pass "successfully compiled posix threads test case"
+		set built_binfile 1
+		break
+	    }
+	}
     }
     if {!$built_binfile} {
 	unsupported "couldn't compile [file tail $source]: ${why_msg}"
-        return -1
+	return -1
     }
 }
 
@@ -6752,9 +6752,9 @@ proc gdb_compile_shlib_1 {sources dest options} {
     }
 
     switch -glob [test_compiler_info "" ${info_options}] {
-        "xlc-*" {
-            lappend obj_options "additional_flags=-qpic"
-        }
+	"xlc-*" {
+	    lappend obj_options "additional_flags=-qpic"
+	}
 	"clang-*" {
 	    if { [istarget "*-*-cygwin*"]
 		 || [istarget "*-*-mingw*"] } {
@@ -6763,24 +6763,24 @@ proc gdb_compile_shlib_1 {sources dest options} {
 		lappend obj_options "additional_flags=-fpic"
 	    }
 	}
-        "gcc-*" {
-            if { [istarget "powerpc*-*-aix*"]
-                   || [istarget "rs6000*-*-aix*"]
-                   || [istarget "*-*-cygwin*"]
-                   || [istarget "*-*-mingw*"]
-                   || [istarget "*-*-pe*"] } {
-                lappend obj_options "additional_flags=-fPIC"
+	"gcc-*" {
+	    if { [istarget "powerpc*-*-aix*"]
+		   || [istarget "rs6000*-*-aix*"]
+		   || [istarget "*-*-cygwin*"]
+		   || [istarget "*-*-mingw*"]
+		   || [istarget "*-*-pe*"] } {
+		lappend obj_options "additional_flags=-fPIC"
 	    } else {
-                lappend obj_options "additional_flags=-fpic"
-            }
-        }
-        "icc-*" {
-                lappend obj_options "additional_flags=-fpic"
-        }
-        default {
+		lappend obj_options "additional_flags=-fpic"
+	    }
+	}
+	"icc-*" {
+		lappend obj_options "additional_flags=-fpic"
+	}
+	default {
 	    # don't know what the compiler is...
 	    lappend obj_options "additional_flags=-fPIC"
-        }
+	}
     }
 
     set outdir [file dirname $dest]
@@ -6917,31 +6917,31 @@ proc gdb_compile_shlib_pthreads {sources dest options} {
     set built_binfile 0
     set why_msg "unrecognized error"
     foreach lib {-lpthreads -lpthread -lthread ""} {
-        # This kind of wipes out whatever libs the caller may have
-        # set.  Or maybe theirs will override ours.  How infelicitous.
-        set options_with_lib [concat $options [list libs=$lib quiet]]
-        set ccout [gdb_compile_shlib $sources $dest $options_with_lib]
-        switch -regexp -- $ccout {
-            ".*no posix threads support.*" {
-                set why_msg "missing threads include file"
-                break
-            }
-            ".*cannot open -lpthread.*" {
-                set why_msg "missing runtime threads library"
-            }
-            ".*Can't find library for -lpthread.*" {
-                set why_msg "missing runtime threads library"
-            }
-            {^$} {
-                pass "successfully compiled posix threads shlib test case"
-                set built_binfile 1
-                break
-            }
-        }
+	# This kind of wipes out whatever libs the caller may have
+	# set.  Or maybe theirs will override ours.  How infelicitous.
+	set options_with_lib [concat $options [list libs=$lib quiet]]
+	set ccout [gdb_compile_shlib $sources $dest $options_with_lib]
+	switch -regexp -- $ccout {
+	    ".*no posix threads support.*" {
+		set why_msg "missing threads include file"
+		break
+	    }
+	    ".*cannot open -lpthread.*" {
+		set why_msg "missing runtime threads library"
+	    }
+	    ".*Can't find library for -lpthread.*" {
+		set why_msg "missing runtime threads library"
+	    }
+	    {^$} {
+		pass "successfully compiled posix threads shlib test case"
+		set built_binfile 1
+		break
+	    }
+	}
     }
     if {!$built_binfile} {
-        unsupported "couldn't compile $sources: ${why_msg}"
-        return -1
+	unsupported "couldn't compile $sources: ${why_msg}"
+	return -1
     }
 }
 
@@ -6951,37 +6951,37 @@ proc gdb_compile_objc {source dest type options} {
     set built_binfile 0
     set why_msg "unrecognized error"
     foreach lib {-lobjc -lpthreads -lpthread -lthread solaris} {
-        # This kind of wipes out whatever libs the caller may have
-        # set.  Or maybe theirs will override ours.  How infelicitous.
-        if { $lib == "solaris" } {
-            set lib "-lpthread -lposix4"
+	# This kind of wipes out whatever libs the caller may have
+	# set.  Or maybe theirs will override ours.  How infelicitous.
+	if { $lib == "solaris" } {
+	    set lib "-lpthread -lposix4"
 	}
-        if { $lib != "-lobjc" } {
+	if { $lib != "-lobjc" } {
 	  set lib "-lobjc $lib"
 	}
-        set options_with_lib [concat $options [list libs=$lib quiet]]
-        set ccout [gdb_compile $source $dest $type $options_with_lib]
-        switch -regexp -- $ccout {
-            ".*no posix threads support.*" {
-                set why_msg "missing threads include file"
-                break
-            }
-            ".*cannot open -lpthread.*" {
-                set why_msg "missing runtime threads library"
-            }
-            ".*Can't find library for -lpthread.*" {
-                set why_msg "missing runtime threads library"
-            }
-            {^$} {
-                pass "successfully compiled objc with posix threads test case"
-                set built_binfile 1
-                break
-            }
-        }
+	set options_with_lib [concat $options [list libs=$lib quiet]]
+	set ccout [gdb_compile $source $dest $type $options_with_lib]
+	switch -regexp -- $ccout {
+	    ".*no posix threads support.*" {
+		set why_msg "missing threads include file"
+		break
+	    }
+	    ".*cannot open -lpthread.*" {
+		set why_msg "missing runtime threads library"
+	    }
+	    ".*Can't find library for -lpthread.*" {
+		set why_msg "missing runtime threads library"
+	    }
+	    {^$} {
+		pass "successfully compiled objc with posix threads test case"
+		set built_binfile 1
+		break
+	    }
+	}
     }
     if {!$built_binfile} {
-        unsupported "couldn't compile [file tail $source]: ${why_msg}"
-        return -1
+	unsupported "couldn't compile [file tail $source]: ${why_msg}"
+	return -1
     }
 }
 
@@ -7037,7 +7037,7 @@ proc gdb_expect { args } {
 	{uplevel remote_expect host $tmt $expcode} string]
 
     if {$code == 1} {
-        global errorInfo errorCode
+	global errorInfo errorCode
 
 	return -code error -errorinfo $errorInfo -errorcode $errorCode $string
     } else {
@@ -7065,7 +7065,7 @@ proc gdb_expect_list {test sentinel list} {
 
     while { ${index} < [llength ${list}] } {
 	set pattern [lindex ${list} ${index}]
-        incr index
+	incr index
 	verbose -log "gdb_expect_list pattern: /$pattern/" 2
 	if { ${index} == [llength ${list}] } {
 	    if { ${ok} } {
@@ -7897,8 +7897,8 @@ proc default_gdb_init { test_file_name } {
     global banned_traced
     if {!$banned_traced} {
 	foreach banned_var $banned_variables {
-            global "$banned_var"
-            trace add variable "$banned_var" write error
+	    global "$banned_var"
+	    trace add variable "$banned_var" write error
 	}
 	foreach banned_proc $banned_procedures {
 	    global "$banned_proc"
@@ -8394,9 +8394,9 @@ proc gdb_finish { } {
     global banned_procedures
     global banned_traced
     if {$banned_traced} {
-    	foreach banned_var $banned_variables {
-            global "$banned_var"
-            trace remove variable "$banned_var" write error
+	foreach banned_var $banned_variables {
+	    global "$banned_var"
+	    trace remove variable "$banned_var" write error
 	}
 	foreach banned_proc $banned_procedures {
 	    global "$banned_proc"
@@ -8573,7 +8573,7 @@ proc gdb_get_line_number { text { file "" } } {
     }
 
     if {$found == -1} {
-        error "undefined tag \"$text\""
+	error "undefined tag \"$text\""
     }
 
     return $found
@@ -9194,13 +9194,13 @@ proc test_class_help { command_class expected_initial_lines {list_of_commands {}
     global help_list_trailer
     if {[llength $list_of_commands]>0} {
 	set l_list_of_commands {"List of commands:[\r\n]+[\r\n]+"}
-        set l_list_of_commands [concat $l_list_of_commands $list_of_commands]
+	set l_list_of_commands [concat $l_list_of_commands $list_of_commands]
 	set l_list_of_commands [concat $l_list_of_commands {"[\r\n]+[\r\n]+"}]
     } else {
-        set l_list_of_commands {"List of commands\:.*[\r\n]+"}
+	set l_list_of_commands {"List of commands\:.*[\r\n]+"}
     }
     set l_stock_body {
-        "Type \"help\" followed by command name for full documentation\.[\r\n]+"
+	"Type \"help\" followed by command name for full documentation\.[\r\n]+"
     }
     set l_entire_body [concat $expected_initial_lines $l_list_of_commands \
 		       $l_stock_body $help_list_trailer]
@@ -9229,20 +9229,20 @@ proc test_prefix_command_help { command_list expected_initial_lines args } {
     global help_list_trailer
     set command [lindex $command_list 0]
     if {[llength $command_list]>1} {
-        set full_command [lindex $command_list 1]
+	set full_command [lindex $command_list 1]
     } else {
-        set full_command $command
+	set full_command $command
     }
     # Use 'list' and not just {} because we want variables to
     # be expanded in this list.
     set l_stock_body [list\
-         "List of \"$full_command\" subcommands\:.*\[\r\n\]+"\
-         "Type \"help $full_command\" followed by subcommand name for full documentation\.\[\r\n\]+"]
+	 "List of \"$full_command\" subcommands\:.*\[\r\n\]+"\
+	 "Type \"help $full_command\" followed by subcommand name for full documentation\.\[\r\n\]+"]
     set l_entire_body [concat $expected_initial_lines $l_stock_body $help_list_trailer]
     if {[llength $args]>0} {
-        help_test_raw "help ${command}" $l_entire_body [lindex $args 0]
+	help_test_raw "help ${command}" $l_entire_body [lindex $args 0]
     } else {
-        help_test_raw "help ${command}" $l_entire_body
+	help_test_raw "help ${command}" $l_entire_body
     }
 }
 
@@ -9309,8 +9309,8 @@ proc build_executable_from_specs {testname executable options args} {
 	set ret [$func $objects "${binfile}" executable $options]
     }
     if  { $ret != "" } {
-        untested $testname
-        return -1
+	untested $testname
+	return -1
     }
 
     return 0
@@ -9322,7 +9322,7 @@ proc build_executable_from_specs {testname executable options args} {
 # to gdb_compile directly.
 proc build_executable { testname executable {sources ""} {options {debug}} } {
     if {[llength $sources]==0} {
-        set sources ${executable}.c
+	set sources ${executable}.c
     }
 
     set arglist [list $testname $executable $options]
@@ -9399,7 +9399,7 @@ proc prepare_for_testing_full {testname args} {
 proc prepare_for_testing { testname executable {sources ""} {options {debug}}} {
 
     if {[build_executable $testname $executable $sources $options] == -1} {
-        return -1
+	return -1
     }
     clean_restart $executable
 
@@ -9615,13 +9615,13 @@ gdb_caching_proc target_endianness {} {
 
     set src { int main() { return 0; } }
     if {![gdb_simple_compile $me $src executable]} {
-        return 0
+	return 0
     }
 
     clean_restart
     gdb_load $obj
     if {![runto_main]} {
-        return 0
+	return 0
     }
     set res [get_endianness]
 
@@ -9835,7 +9835,7 @@ gdb_caching_proc gdb_target_symbol_prefix {} {
     # Compile a simple test program...
     set src { int main() { return 0; } }
     if {![gdb_simple_compile target_symbol_prefix $src executable]} {
-        return 0
+	return 0
     }
 
     set prefix ""
@@ -9863,13 +9863,13 @@ gdb_caching_proc target_supports_scheduler_locking {} {
 
     set src { int main() { return 0; } }
     if {![gdb_simple_compile $me $src executable]} {
-        return 0
+	return 0
     }
 
     clean_restart
     gdb_load $obj
     if {![runto_main]} {
-        return 0
+	return 0
     }
 
     set supports_schedule_locking -1
@@ -9921,7 +9921,7 @@ gdb_caching_proc support_nested_function_tests {} {
     return [gdb_can_simple_compile nested_func {
 	int main () {
 	    int foo () {
-	        return 0;
+		return 0;
 	    }
 	    return foo ();
 	}
@@ -9998,8 +9998,8 @@ proc run_on_host { test program args } {
     set status [lindex $result 0]
     set output [lindex $result 1]
     if {$status == 0} {
- 	pass $test
- 	return 0
+	pass $test
+	return 0
     } else {
 	verbose -log "run_on_host failed: $output"
 	if { $output == "spawn failed" } {
@@ -10410,12 +10410,12 @@ proc gdb_stdin_log_write { message {type standard} } {
 
     # Check message types.
     switch -regexp -- $type {
-        "answer" {
-            return
-        }
-        "optional" {
-            return
-        }
+	"answer" {
+	    return
+	}
+	"optional" {
+	    return
+	}
     }
 
     # Write to the log and make sure the output is there, even in case
@@ -10814,10 +10814,10 @@ proc with_override { name override body } {
 
     # Return as appropriate.
     if { $code == 1 } {
-        global errorInfo errorCode
-        return -code error -errorinfo $errorInfo -errorcode $errorCode $result
+	global errorInfo errorCode
+	return -code error -errorinfo $errorInfo -errorcode $errorCode $result
     } elseif { $code > 1 } {
-        return -code $code $result
+	return -code $code $result
     }
 
     return $result
@@ -10954,8 +10954,8 @@ gdb_caching_proc have_avx {} {
 
     set me "have_avx"
     if { ![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"] } {
-        verbose "$me: target does not support avx, returning 0" 2
-        return 0
+	verbose "$me: target does not support avx, returning 0" 2
+	return 0
     }
 
     # Compile a test program.
@@ -10976,7 +10976,7 @@ gdb_caching_proc have_avx {} {
     }
     set compile_flags "incdir=${srcdir}/.."
     if {![gdb_simple_compile $me $src executable $compile_flags]} {
-        return 0
+	return 0
     }
 
     set target_obj [gdb_remote_download target $obj]
@@ -11127,7 +11127,7 @@ gdb_caching_proc has_hw_wp_support {} {
     }
 
     if {![gdb_simple_compile $me $src executable $compile_flags]} {
-        return 0
+	return 0
     }
 
     gdb_start
@@ -11150,7 +11150,7 @@ gdb_caching_proc has_hw_wp_support {} {
 	-re ".*Hardware watchpoint.*" {
 	    #  HW watchpoint supported by platform
 	    verbose -log "\n$me: Hardware watchpoint detected"
-            set has_hw_wp_support 1
+	    set has_hw_wp_support 1
 	}
 	-re ".*$gdb_prompt $" {
 	    set has_hw_wp_support 0
@@ -11627,7 +11627,7 @@ gdb_caching_proc root_user {} {
     # reason.  Return that we are not root, so problems are easier to
     # spot.
     if { $ret_val != 0 } {
-        return 0
+	return 0
     }
 
     regexp -all ".*uid=(\[0-9\]+).*" $output dummy uid

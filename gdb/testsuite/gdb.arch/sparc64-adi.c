@@ -95,7 +95,7 @@ int main ()
   if (fd < 0)
     exit(1);
   char *maddr = (char *)mmap (NULL, MAPSIZE, PROT_READ|PROT_WRITE,
-                              MAP_PRIVATE, fd, 0);
+			      MAP_PRIVATE, fd, 0);
   if (maddr == (char *)-1)
     exit(1);
   /* Enable ADI. */

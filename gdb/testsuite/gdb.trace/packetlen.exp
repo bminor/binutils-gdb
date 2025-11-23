@@ -64,4 +64,3 @@ gdb_test "continue" \
     "run trace experiment"
 
 gdb_test_no_output "tstop" "confirm: survived the long packet send"
-

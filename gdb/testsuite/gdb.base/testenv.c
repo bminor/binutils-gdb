@@ -41,4 +41,3 @@ int main (int argc, char **argv, char **envp)
     printf ("Program found %d variables starting with TEST_GDB\n", j);
     return 0; /* set breakpoint here.  */
 }
-

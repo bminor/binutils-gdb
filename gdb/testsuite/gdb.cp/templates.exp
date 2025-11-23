@@ -76,18 +76,18 @@ proc test_ptype_of_templates {} {
     }
 
     gdb_test_multiple "ptype/r t5i" "ptype t5i" {
-        -re "type = class T5<int> \\{${ws}public:${ws}static int X;${ws}int x;${ws}int val;\r\n${ws}T5\\(int\\);${ws}T5\\(T5<int> const ?&\\);${ws}~T5\\((void|)\\);${ws}static void \\* operator new\\(unsigned( int| long)?\\);${ws}static void operator delete\\(void ?\\*\\);${ws}int value\\((void|)\\);${ws}\\}\r\n$gdb_prompt $" {
+	-re "type = class T5<int> \\{${ws}public:${ws}static int X;${ws}int x;${ws}int val;\r\n${ws}T5\\(int\\);${ws}T5\\(T5<int> const ?&\\);${ws}~T5\\((void|)\\);${ws}static void \\* operator new\\(unsigned( int| long)?\\);${ws}static void operator delete\\(void ?\\*\\);${ws}int value\\((void|)\\);${ws}\\}\r\n$gdb_prompt $" {
 	    xfail "ptype T5<int> -- with several fixes from 4.17 -- without size_t"
 	}
-        -re "type = class T5<int> \\{${ws}public:${ws}static int X;${ws}int x;${ws}int val;\r\n${ws}T5 \\(int\\);${ws}T5 \\(const class T5<int> &\\);${ws}void ~T5 \\(\\);${ws}static void \\* new \\(unsigned int\\);${ws}static void delete \\(void ?\\*\\);${ws}int value \\((void|)\\);${ws}\\}\r\n$gdb_prompt $" {
+	-re "type = class T5<int> \\{${ws}public:${ws}static int X;${ws}int x;${ws}int val;\r\n${ws}T5 \\(int\\);${ws}T5 \\(const class T5<int> &\\);${ws}void ~T5 \\(\\);${ws}static void \\* new \\(unsigned int\\);${ws}static void delete \\(void ?\\*\\);${ws}int value \\((void|)\\);${ws}\\}\r\n$gdb_prompt $" {
 	    xfail "ptype t5i<int> -- new with unsigned int -- without size_t"
 	}
-        -re "type = class T5<int> \\{${ws}public:${ws}static int X;${ws}int x;${ws}int val;\r\n${ws}T5 \\(int\\);${ws}T5 \\(const class T5<int> &\\);${ws}void ~T5 \\(\\);${ws}static void \\* new \\(unsigned long\\);${ws}static void delete \\(void ?\\*\\);${ws}int value \\((void|)\\);${ws}\\}\r\n$gdb_prompt $" {
+	-re "type = class T5<int> \\{${ws}public:${ws}static int X;${ws}int x;${ws}int val;\r\n${ws}T5 \\(int\\);${ws}T5 \\(const class T5<int> &\\);${ws}void ~T5 \\(\\);${ws}static void \\* new \\(unsigned long\\);${ws}static void delete \\(void ?\\*\\);${ws}int value \\((void|)\\);${ws}\\}\r\n$gdb_prompt $" {
 	    xfail "ptype t5i<int> -- new with unsigned long -- without size_t"
 	}
-        -re "type = class T5<int> \{.*public:.*static int X;.*int x;.*int val;.*.*T5 \\(int\\);.*.*void ~T5 \\(\\).*.*.*int value \\((void|)\\);.*\}.*$gdb_prompt $" {
-            xfail "ptype t5i -- without size_t"
-        }
+	-re "type = class T5<int> \{.*public:.*static int X;.*int x;.*int val;.*.*T5 \\(int\\);.*.*void ~T5 \\(\\).*.*.*int value \\((void|)\\);.*\}.*$gdb_prompt $" {
+	    xfail "ptype t5i -- without size_t"
+	}
 	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}T5<int> & operator=\\(T5<int> const ?&\\);${ws}T5\\(int\\);${ws}T5\\((T5<int> const|const T5<int>) ?&\\);${ws}~T5\\((void|)\\);${ws}static void \\* operator new\\(unsigned( int| long)?\\);${ws}static void operator delete\\(void ?\\*\\);${ws}int value\\((void|)\\);${ws}\}\r\n$gdb_prompt $" {
 	    xfail "ptype t5i -- without size_t"
 	}
@@ -137,7 +137,7 @@ proc test_template_breakpoints {} {
 		"nonsense intended to insure that this test fails" \
 		"constructor breakpoint"
 	}
-        -re ".*\n> $" {
+	-re ".*\n> $" {
 	    gdb_test "0" \
 		    "nonsense intended to insure that this test fails" \
 		    "constructor breakpoint (bad menu choices)"
@@ -160,7 +160,7 @@ proc test_template_breakpoints {} {
 	"value method breakpoint"
 
     set bp_location [gdb_get_line_number \
-                         "set breakpoint on a line with no real code"]
+			 "set breakpoint on a line with no real code"]
 
     gdb_test_multiple "break ${testfile}.cc:${bp_location}" \
 	"breakpoint on a line with no real code" {
@@ -204,9 +204,9 @@ proc test_template_calls {} {
 	-re "Cannot invoke functions on this machine.*$gdb_prompt $" {
 	    fail "print t5i.value()"
 	}
-        -re "Cannot resolve .* to any overloaded instance.*$gdb_prompt $" {
+	-re "Cannot resolve .* to any overloaded instance.*$gdb_prompt $" {
 	    setup_xfail hppa*-*-* CLLbs16899
-            xfail "print t5i.value"
+	    xfail "print t5i.value"
 	}
     }
 }

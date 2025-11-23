@@ -39,4 +39,3 @@ void foo2()
   printf ("foo2 in main\n");
   return;
 }
-

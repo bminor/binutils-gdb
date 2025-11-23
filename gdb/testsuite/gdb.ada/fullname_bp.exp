@@ -31,7 +31,7 @@ clean_restart ${testfile}
 # Break on "pck.hello" rather than just "hello" to make sure we trigger
 # the non-wild symbol lookup.
 gdb_test "break pck.hello" \
-         "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file .*pck.adb, line \[0-9\]+."
+	 "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file .*pck.adb, line \[0-9\]+."
 
 # Do the same, but this time using a linespec where the user also
 # provided a filename.
@@ -39,7 +39,7 @@ gdb_test "break pck.hello" \
 clean_restart ${testfile}
 
 gdb_test "break pck.adb:pck.hello" \
-         "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file .*pck.adb, line \[0-9\]+."
+	 "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file .*pck.adb, line \[0-9\]+."
 
 # Same scenarios as above, but with a function name that is spelled
 # with upper-case letters.
@@ -47,9 +47,9 @@ gdb_test "break pck.adb:pck.hello" \
 clean_restart ${testfile}
 
 gdb_test "break Pck.Hello" \
-         "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file .*pck.adb, line \[0-9\]+."
+	 "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file .*pck.adb, line \[0-9\]+."
 
 clean_restart ${testfile}
 
 gdb_test "break pck.adb:Pck.Hello" \
-         "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file .*pck.adb, line \[0-9\]+."
+	 "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file .*pck.adb, line \[0-9\]+."

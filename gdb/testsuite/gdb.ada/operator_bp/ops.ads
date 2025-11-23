@@ -48,5 +48,3 @@ private
    type Int is new IntRep;
 
 end Ops;
-
-

@@ -50,8 +50,8 @@ set traced {}
 set testname "determine number of recorded instructions"
 gdb_test_multiple "info record" $testname {
     -re "Active record target: record-btrace\r\n.*\r\nRecorded \(\[0-9\]*\) instructions in \(\[0-9\]*\) functions \\\(0 gaps\\\) for thread 1 .*\\.\r\n$gdb_prompt $" {
-        set traced $expect_out(1,string)
-        pass $testname
+	set traced $expect_out(1,string)
+	pass $testname
     }
 }
 
@@ -107,9 +107,9 @@ proc test_lines_output { command message } {
     global gdb_prompt
     set message "test_lines_output: $message"
     gdb_test_multiple $command $message {
-        -re "\n\(.*\)\r\n$gdb_prompt $" {
-            return [split [string trim $expect_out(1,string)] "\n"]
-        }
+	-re "\n\(.*\)\r\n$gdb_prompt $" {
+	    return [split [string trim $expect_out(1,string)] "\n"]
+	}
     }
 }
 

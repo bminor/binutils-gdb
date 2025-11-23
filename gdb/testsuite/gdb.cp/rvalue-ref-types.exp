@@ -95,22 +95,22 @@ gdb_test "print rrUC" \
     "print value of rrUC"
 
 gdb_test "print rrS" "$decimal = \\(short( int)? &&\\) @$hex: -14" \
-                  "print value of rrS"
+		  "print value of rrS"
 
 gdb_test "print rrUS" \
-         "$decimal = \\(unsigned short( int)? &&\\) @$hex: 7" \
-         "print value of rrUS"
+	 "$decimal = \\(unsigned short( int)? &&\\) @$hex: 7" \
+	 "print value of rrUS"
 
 gdb_test "print rrI" "$decimal = \\(int &&\\) @$hex: 102" \
        "print value of rrI"
 
 gdb_test "print rrUI" \
     "$decimal = \\(unsigned int &&\\) @$hex: 1002" \
-        "print value of rrUI"
+	"print value of rrUI"
 
 gdb_test "print rrL" \
        "$decimal = \\(long( int)? &&\\) @$hex: -234" \
-         "print value of rrL"
+	 "print value of rrL"
 
 gdb_test "print rrUL" \
     "$decimal = \\((unsigned long|long unsigned int)? &&\\) @$hex: 234" \

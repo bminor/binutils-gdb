@@ -28,14 +28,14 @@ proc gdb_find_gnatmake {} {
     set GM ""
 
     if {![is_remote host]} {
-        set file [lookfor_file $root gnatmake]
-        if { $file != "" } {
-            set GM "$file -I$root/ada/rts --GCC=$root/xgcc --GNATBIND=$root/gnatbind --GNATLINK=$root/gnatlink -cargs -B$root -largs --GCC=$root/xgcc -margs";
-        }
+	set file [lookfor_file $root gnatmake]
+	if { $file != "" } {
+	    set GM "$file -I$root/ada/rts --GCC=$root/xgcc --GNATBIND=$root/gnatbind --GNATLINK=$root/gnatlink -cargs -B$root -largs --GCC=$root/xgcc -margs";
+	}
     }
 
     if {$GM == ""} {
-        set GM [transform gnatmake]
+	set GM [transform gnatmake]
     }
 
     return $GM

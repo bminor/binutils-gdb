@@ -67,10 +67,10 @@ proc test_ldr_literal {} {
 
     gdb_test_multiple "break *test_ldr_literal" "" {
        -re "Breakpoint.*at.* file .*$srcfile, line.*\r\n$gdb_prompt $" {
-           pass $gdb_test_name
+	   pass $gdb_test_name
        }
        -re "No symbol.*\r\n$gdb_prompt $" {
-           return 0
+	   return 0
        }
     }
 

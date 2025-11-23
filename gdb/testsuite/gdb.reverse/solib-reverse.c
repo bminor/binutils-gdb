@@ -46,4 +46,3 @@ int main ()
   b[0] = 0;			/* end part one */
   return 0; /* end of main */
 }
-

@@ -43,7 +43,7 @@ proc gdb_cont_to_line { line } {
 
 proc check_replay_insn { thread insn } {
     gdb_test "thread apply $thread info record" \
-        "Replay in progress\.  At instruction $insn\."
+	"Replay in progress\.  At instruction $insn\."
 }
 
 proc check_not_replaying { thread } {
@@ -52,12 +52,12 @@ proc check_not_replaying { thread } {
     set test "thread $thread not replaying"
 
     gdb_test_multiple "thread apply $thread info record" $test {
-        -re "Replay in progress" {
-            fail $test
-        }
-        -re "$gdb_prompt $" {
-            pass $test
-        }
+	-re "Replay in progress" {
+	    fail $test
+	}
+	-re "$gdb_prompt $" {
+	    pass $test
+	}
     }
 }
 
@@ -71,116 +71,116 @@ gdb_cont_to_line $srcfile:$bp_2
 
 proc test_navigate {} {
     with_test_prefix "navigate" {
-        gdb_test "thread 1" ".*"
-        with_test_prefix "thread 1" {
-            gdb_test "record goto begin" ".*"
+	gdb_test "thread 1" ".*"
+	with_test_prefix "thread 1" {
+	    gdb_test "record goto begin" ".*"
 
-            check_replay_insn 1 1
-            check_not_replaying 2
-        }
-        gdb_test "thread 2" ".*"
-        with_test_prefix "thread 2" {
-            gdb_test "record goto begin" ".*"
+	    check_replay_insn 1 1
+	    check_not_replaying 2
+	}
+	gdb_test "thread 2" ".*"
+	with_test_prefix "thread 2" {
+	    gdb_test "record goto begin" ".*"
 
-            check_replay_insn 1 1
-            check_replay_insn 2 1
-        }
+	    check_replay_insn 1 1
+	    check_replay_insn 2 1
+	}
     }
 }
 
 proc test_step {} {
     with_test_prefix "step" {
-        gdb_test "thread 1" ".*"
-        with_test_prefix "thread 1" {
-            gdb_test "stepi" ".*"
+	gdb_test "thread 1" ".*"
+	with_test_prefix "thread 1" {
+	    gdb_test "stepi" ".*"
 
-            check_replay_insn 1 2
-            check_replay_insn 2 1
-        }
-        gdb_test "thread 2" ".*"
-        with_test_prefix "thread 2" {
-            gdb_test "stepi" ".*"
+	    check_replay_insn 1 2
+	    check_replay_insn 2 1
+	}
+	gdb_test "thread 2" ".*"
+	with_test_prefix "thread 2" {
+	    gdb_test "stepi" ".*"
 
-            check_replay_insn 1 2
-            check_replay_insn 2 2
-        }
+	    check_replay_insn 1 2
+	    check_replay_insn 2 2
+	}
     }
 }
 
 proc test_cont {} {
     with_test_prefix "cont" {
-        gdb_test "thread 1" ".*"
-        with_test_prefix "thread 1" {
-            gdb_test "continue" "Reached end of recorded history.*"
+	gdb_test "thread 1" ".*"
+	with_test_prefix "thread 1" {
+	    gdb_test "continue" "Reached end of recorded history.*"
 
-            check_not_replaying 1
-            check_replay_insn 2 2
-        }
-        gdb_test "thread 2" ".*"
-        with_test_prefix "thread 2" {
-            gdb_test "continue" "Reached end of recorded history.*"
+	    check_not_replaying 1
+	    check_replay_insn 2 2
+	}
+	gdb_test "thread 2" ".*"
+	with_test_prefix "thread 2" {
+	    gdb_test "continue" "Reached end of recorded history.*"
 
-            check_not_replaying 1
-            check_not_replaying 2
-        }
+	    check_not_replaying 1
+	    check_not_replaying 2
+	}
     }
 }
 
 proc test_cont_all {} {
     with_test_prefix "cont-all" {
-        gdb_test "continue" "Reached end of recorded history.*"
+	gdb_test "continue" "Reached end of recorded history.*"
 
-        # this works because we're lock-stepping threads that executed exactly
-        # the same code starting from the same instruction.
+	# this works because we're lock-stepping threads that executed exactly
+	# the same code starting from the same instruction.
 
-        check_not_replaying 1
-        check_not_replaying 2
+	check_not_replaying 1
+	check_not_replaying 2
     }
 }
 
 proc test_rstep {} {
     with_test_prefix "reverse-step" {
-        gdb_test "thread apply all record goto 3"
+	gdb_test "thread apply all record goto 3"
 
-        gdb_test "thread 1" ".*"
-        with_test_prefix "thread 1" {
-            gdb_test "reverse-stepi" ".*"
+	gdb_test "thread 1" ".*"
+	with_test_prefix "thread 1" {
+	    gdb_test "reverse-stepi" ".*"
 
-            check_replay_insn 1 2
-            check_replay_insn 2 3
-        }
-        gdb_test "thread 2" ".*"
-        with_test_prefix "thread 2" {
-            gdb_test "reverse-stepi" ".*"
+	    check_replay_insn 1 2
+	    check_replay_insn 2 3
+	}
+	gdb_test "thread 2" ".*"
+	with_test_prefix "thread 2" {
+	    gdb_test "reverse-stepi" ".*"
 
-            check_replay_insn 1 2
-            check_replay_insn 2 2
-        }
+	    check_replay_insn 1 2
+	    check_replay_insn 2 2
+	}
     }
 }
 
 proc test_goto_end {} {
     with_test_prefix "goto-end" {
-        gdb_test "thread apply all record goto end"
+	gdb_test "thread apply all record goto end"
 
-        check_not_replaying 1
-        check_not_replaying 2
+	check_not_replaying 1
+	check_not_replaying 2
     }
 }
 
 foreach schedlock { "replay" "on" "step" } {
     with_test_prefix "schedlock-$schedlock" {
-        gdb_test_no_output "set scheduler-locking $schedlock"
+	gdb_test_no_output "set scheduler-locking $schedlock"
 
-        test_navigate
-        test_step
-        if { $schedlock == "step" } {
-            test_cont_all
-        } else {
-            test_cont
-        }
-        test_rstep
-        test_goto_end
+	test_navigate
+	test_step
+	if { $schedlock == "step" } {
+	    test_cont_all
+	} else {
+	    test_cont
+	}
+	test_rstep
+	test_goto_end
     }
 }
 
@@ -194,20 +194,20 @@ with_test_prefix "cont-to-end" {
 
     gdb_test "thread 1" ".*"
     with_test_prefix "thread 1" {
-        gdb_test "record goto begin" ".*"
+	gdb_test "record goto begin" ".*"
 
-        check_replay_insn 1 1
+	check_replay_insn 1 1
     }
     gdb_test "thread 2" ".*"
     with_test_prefix "thread 2" {
-        gdb_test "record goto end" ".*"
+	gdb_test "record goto end" ".*"
 
-        check_not_replaying 2
+	check_not_replaying 2
 
-        # if we reach the breakpoint, thread 2 terminated...
-        gdb_cont_to_line $srcfile:$bp_3
+	# if we reach the breakpoint, thread 2 terminated...
+	gdb_cont_to_line $srcfile:$bp_3
 
-        # and thread 1 stopped replaying
-        check_not_replaying 1
+	# and thread 1 stopped replaying
+	check_not_replaying 1
     }
 }

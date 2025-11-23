@@ -22,4 +22,3 @@ c_function (void)
 {
   callme ();
 }
-

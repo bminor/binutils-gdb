@@ -29,19 +29,19 @@ set bp_location [gdb_get_line_number "STOP" ${testdir}/foo.adb]
 runto "foo.adb:$bp_location"
 
 gdb_test "ptype circle" \
-         [multi_line "type = record" \
-                     "    pos: pck\\.position;" \
-                     "    radius: integer;" \
-                     "end record" ]
+	 [multi_line "type = record" \
+		     "    pos: pck\\.position;" \
+		     "    radius: integer;" \
+		     "end record" ]
 
 gdb_test "ptype circle.pos" \
-         [multi_line "type = record" \
-                     "    x: integer;" \
-                     "    y: integer;" \
-                     "end record" ]
+	 [multi_line "type = record" \
+		     "    x: integer;" \
+		     "    y: integer;" \
+		     "end record" ]
 
 gdb_test "ptype circle.pos.x" \
-         "type = <\[0-9\]+-byte integer>"
+	 "type = <\[0-9\]+-byte integer>"
 
 gdb_test "complete print my_circ" "print my_circle"
 gdb_test "complete print my_circle.r" "print my_circle\\.radius"

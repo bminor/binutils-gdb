@@ -347,10 +347,10 @@ gdb_test "print *pointerval" "= 3"
 # referring to integral/pointer typed variables)."
 
 gdb_test "print structval" \
-         "Type of DW_OP_GNU_variable_value DIE must be an integer or pointer\\."
+	 "Type of DW_OP_GNU_variable_value DIE must be an integer or pointer\\."
 
 gdb_test "print untypedval" \
-         "Type of DW_OP_GNU_variable_value DIE must be an integer or pointer\\."
+	 "Type of DW_OP_GNU_variable_value DIE must be an integer or pointer\\."
 
 if { [setup_exec 1] == -1 } {
     return -1
@@ -364,4 +364,4 @@ gdb_test "print badval" "value has been optimized out"
 gdb_test "print bad_die_val1" \
 	 {DWARF Error: could not find unit containing offset 0xabcdef11 \[in module .*/varval\]}
 gdb_test "print bad_die_val2" \
-         "Bad DW_OP_GNU_variable_value DIE\\."
+	 "Bad DW_OP_GNU_variable_value DIE\\."

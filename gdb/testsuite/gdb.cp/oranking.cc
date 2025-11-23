@@ -113,7 +113,7 @@ int test10 () {
 
 //      - S1 is a subsequence of S2
 int foo101 (volatile const char*) { return 217; } // array-to-pointer conversion
-                                                 // plus qualification conversion
+						 // plus qualification conversion
 int foo101 (         const char*) { return 218; } // array-to-pointer conversion
 
 int test101 () {
@@ -136,7 +136,7 @@ int test11 () {
       Function F1 is better than function F2 if: */
 //    - F1 is a non-template function and F2 is a template function
 template<class T> int foo12(T)   { return 41; }
-                  int foo12(int) { return 42; }
+		  int foo12(int) { return 42; }
 int test12 (){
   return foo12(1); //42
 }

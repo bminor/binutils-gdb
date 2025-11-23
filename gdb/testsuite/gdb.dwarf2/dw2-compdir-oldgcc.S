@@ -151,7 +151,7 @@ gcc43:	.globl gcc43
 	.byte		1			/* Minimum insn length */
 	.byte		1			/* default_is_stmt */
 	.byte		1			/* line_base */
- 	.byte		1			/* line_range */
+	.byte		1			/* line_range */
 	.byte		4			/* opcode_base */
 
 	/* Standard lengths */
@@ -200,7 +200,7 @@ gcc43:	.globl gcc43
 	.byte		1			/* Minimum insn length */
 	.byte		1			/* default_is_stmt */
 	.byte		1			/* line_base */
- 	.byte		1			/* line_range */
+	.byte		1			/* line_range */
 	.byte		4			/* opcode_base */
 
 	/* Standard lengths */

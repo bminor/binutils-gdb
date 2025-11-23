@@ -23,10 +23,10 @@
    using the following source file:
 
 
-  	void *gate (void *(*gate) (void *data), void *data)
-  	{
-  	  return 1 + (*gate) (data);
-  	}
+	void *gate (void *(*gate) (void *data), void *data)
+	{
+	  return 1 + (*gate) (data);
+	}
 
    Changes are marked as `CHANGE' below.  */
 

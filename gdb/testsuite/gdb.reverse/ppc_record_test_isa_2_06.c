@@ -36,4 +36,3 @@ main ()
   __asm__ __volatile__ ("xvsqrtsp 0, 1");
   ra = 0;                               /* stop 2 */
 }
-

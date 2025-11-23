@@ -25,8 +25,8 @@ proc sid_start {} {
 	    if {[target_info exists sim,defaultendian]} {
 		set sidendian [target_info sim,defaultendian]
 	    } else {
-                # rely on endianness settings in sid configuration defaults
-                set sidendian ""
+		# rely on endianness settings in sid configuration defaults
+		set sidendian ""
 	    }
 	}
     }
@@ -92,7 +92,7 @@ proc sid_start {} {
     sleep 4
 
     if ![target_info exists gdb,no_push_conn] {
-        remote_push_conn host
+	remote_push_conn host
     }
 }
 

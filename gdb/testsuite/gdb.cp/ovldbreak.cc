@@ -34,9 +34,9 @@ int overloadargs (int a1, int a2, int a3, int a4, int a5, int a6, int a7);
 int overloadargs (int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8);
 int overloadargs (int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9);
 int overloadargs (int a1, int a2, int a3, int a4, int a5, int a6, int a7,
-                   int a8, int a9, int a10);
+		   int a8, int a9, int a10);
 int overloadargs (int a1, int a2, int a3, int a4, int a5, int a6, int a7,
-                   int a8, int a9, int a10, int a11);
+		   int a8, int a9, int a10, int a11);
 
 
 };
@@ -171,26 +171,26 @@ int foo::overloadargs (int a1, int a2, int a3, int a4, int a5, int a6, int a7)
 return 7;}
 
 int foo::overloadargs (int a1, int a2, int a3, int a4, int a5, int a6, int a7,
-                   int a8)
+		   int a8)
 { a1 = a2 = a3 = a4 = a5 = a6 = a7 = a8 = 0;
 return 8;}
 
 int foo::overloadargs (int a1, int a2, int a3, int a4, int a5, int a6, int a7,
-                   int a8, int a9)
+		   int a8, int a9)
 {
   a1 = a2 = a3 = a4 = a5 = a6 = a7 = a8 = a9 = 0;
   return 9;
 }
 
 int foo::overloadargs (int a1, int a2, int a3, int a4, int a5, int a6, int a7,
-                   int a8, int a9, int a10)
-                        { a1 = a2 = a3 = a4 = a5 = a6 = a7 = a8 = a9 =
-                          a10 = 0; return 10;}
+		   int a8, int a9, int a10)
+			{ a1 = a2 = a3 = a4 = a5 = a6 = a7 = a8 = a9 =
+			  a10 = 0; return 10;}
 
 int foo::overloadargs (int a1, int a2, int a3, int a4, int a5, int a6, int a7,
-                   int a8, int a9, int a10, int a11)
-                        { a1 = a2 = a3 = a4 = a5 = a6 = a7 = a8 = a9 =
-                          a10 = a11 = 0; return 11;}
+		   int a8, int a9, int a10, int a11)
+			{ a1 = a2 = a3 = a4 = a5 = a6 = a7 = a8 = a9 =
+			  a10 = a11 = 0; return 11;}
 
 
 void foo::foofunc (int a)
@@ -200,4 +200,3 @@ void foo::foofunc (int a)
 void foo::foofunc (int b, signed char *c)
 {
 }
-

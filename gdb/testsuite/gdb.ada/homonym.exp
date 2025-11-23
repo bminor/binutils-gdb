@@ -51,24 +51,24 @@ runto "homonym.adb:$bp_location"
 # sure that the debugger doesn't get mixed up.
 
 gdb_test "ptype local_type" \
-         "type = range -100 \\.\\. 100" \
-         "ptype local_type at BREAK_1"
+	 "type = range -100 \\.\\. 100" \
+	 "ptype local_type at BREAK_1"
 
 gdb_test "ptype local_type_subtype" \
-         "type = range -100 \\.\\. 100" \
-         "ptype local_type_subtype at BREAK_1"
+	 "type = range -100 \\.\\. 100" \
+	 "ptype local_type_subtype at BREAK_1"
 
 gdb_test "ptype int_type" \
-         "type = range -100 \\.\\. 100" \
-         "ptype int_type at BREAK_1"
+	 "type = range -100 \\.\\. 100" \
+	 "ptype int_type at BREAK_1"
 
 gdb_test "ptype lcl" \
-         "type = range -100 \\.\\. 100" \
-         "ptype lcl at BREAK_1"
+	 "type = range -100 \\.\\. 100" \
+	 "ptype lcl at BREAK_1"
 
 gdb_test "print lcl" \
-         "= 29" \
-         "print lcl at BREAK_1"
+	 "= 29" \
+	 "print lcl at BREAK_1"
 
 # Now, continue until reaching BREAK_2, and do the same commands
 # as above.  The result should be different since the definitions
@@ -76,25 +76,25 @@ gdb_test "print lcl" \
 
 set bp_location [gdb_get_line_number "BREAK_2" ${testdir}/homonym.adb]
 gdb_test "break homonym.adb:$bp_location" \
-         "Breakpoint \[0-9\]+ at 0x\[0-9a-fA-F\]+: file .*homonym\\.adb, line \[0-9\]+\\." \
-         "break at BREAK_2"
+	 "Breakpoint \[0-9\]+ at 0x\[0-9a-fA-F\]+: file .*homonym\\.adb, line \[0-9\]+\\." \
+	 "break at BREAK_2"
 
 gdb_test "continue" \
-         ".*Breakpoint \[0-9\]+, homonym\\.get_value \\(\\) at .*homonym\\.adb:.*" \
-         "continue until BREAK_2"
+	 ".*Breakpoint \[0-9\]+, homonym\\.get_value \\(\\) at .*homonym\\.adb:.*" \
+	 "continue until BREAK_2"
 
 gdb_test "ptype local_type" \
-         "type = range 1 \\.\\. 19740804" \
-         "ptype local_type at BREAK_2"
+	 "type = range 1 \\.\\. 19740804" \
+	 "ptype local_type at BREAK_2"
 
 gdb_test "ptype local_type_subtype" \
-         "type = range 1 \\.\\. 19740804" \
-         "ptype local_type_subtype at BREAK_2"
+	 "type = range 1 \\.\\. 19740804" \
+	 "ptype local_type_subtype at BREAK_2"
 
 gdb_test "ptype lcl" \
-         "type = range 1 \\.\\. 19740804" \
-         "ptype lcl at BREAK_2"
+	 "type = range 1 \\.\\. 19740804" \
+	 "ptype lcl at BREAK_2"
 
 gdb_test "print lcl" \
-         "= 17" \
-         "print lcl at BREAK_2"
+	 "= 17" \
+	 "print lcl at BREAK_2"

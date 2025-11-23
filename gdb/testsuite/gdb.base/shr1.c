@@ -38,6 +38,3 @@ int pstructarg(struct s *x)
 {
   return x->a;
 }
-
-
-

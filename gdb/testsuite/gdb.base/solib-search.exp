@@ -180,4 +180,3 @@ gdb_test "set solib-search-path [standard_output_file ${right_lib_subdir}]" \
 test_backtrace 0
 gdb_test "p lib1_size" " = 8192"
 gdb_test "p lib2_size" " = 8192"
-

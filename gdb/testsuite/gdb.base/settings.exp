@@ -114,7 +114,7 @@ proc check_type {setting expected} {
 	#   "No type information for GDB functions"
 	# Test 'type int', so as to make it fail if ptype is changed.
 	gdb_test "ptype \$_gdb_maint_setting(\"$setting\")" \
-            "type = int"
+	    "type = int"
     }
 }
 

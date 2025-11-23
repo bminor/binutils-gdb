@@ -33,19 +33,19 @@
    (defun local-sum (n)
      (if (zerop n) (insert "0")
        (let ((j 1))
-         (while (<= j n)
-           (insert (local j))
-           (if (< j n) (insert "+"))
-           (setq j (1+ j))))))
+	 (while (<= j n)
+	   (insert (local j))
+	   (if (< j n) (insert "+"))
+	   (setq j (1+ j))))))
    (defun local-chain (n previous first-end)
      (let ((j 1))
        (while (<= j n)
 	 (insert "  register int " (local j)
-                 " = increment (" previous  ");")
+		 " = increment (" previous  ");")
 	 (if first-end
 	   (progn
-             (insert "  /" "* " first-end " prologue *" "/")
-             (setq first-end nil)))
+	     (insert "  /" "* " first-end " prologue *" "/")
+	     (setq first-end nil)))
 	 (insert "\n")
 	 (setq previous (local j))
 	 (setq j (1+ j))))
@@ -64,8 +64,8 @@
        ;; Generate callee functions.
        (let ((i 0))
 	 (while (<= i limit)
-           (insert (format "/%s Returns n * %d + %d %s/\n"
-                           "*" i (/ (+ i (* i i)) 2) "*"))
+	   (insert (format "/%s Returns n * %d + %d %s/\n"
+			   "*" i (/ (+ i (* i i)) 2) "*"))
 	   (insert "int\n")
 	   (insert (callee i) " (int n)\n")
 	   (insert "{\n")
@@ -86,13 +86,13 @@
 	     (insert "  register int n;\n")
 	     (let ((j 0))
 	       (while (<= j limit)
-	         (insert "  n = " (callee j) " ("
-                         (if (> j 0) "n + " "")
-		         last ");\n")
-	         (setq j (1+ j)))))
+		 (insert "  n = " (callee j) " ("
+			 (if (> j 0) "n + " "")
+			 last ");\n")
+		 (setq j (1+ j)))))
 	   (insert "  return n+")
 	   (local-sum i)
-           (insert ";\n")
+	   (insert ";\n")
 	   (insert "}\n\n")
 	   (setq i (1+ i))))
 

@@ -30,14 +30,12 @@ runto "foo.adb:$bp_location"
 
 gdb_test_no_output "call set_float(2.0)"
 gdb_test "print global_float" \
-         " = 2\\.0"
+	 " = 2\\.0"
 
 gdb_test_no_output "call set_double(1, 3.0)"
 gdb_test "print global_double" \
-         " = 3\\.0"
+	 " = 3\\.0"
 
 gdb_test_no_output "call set_long_double(1, global_small_struct, 4.0)"
 gdb_test "print global_long_double" \
-         " = 4\\.0"
-
-
+	 " = 4\\.0"

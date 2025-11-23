@@ -121,8 +121,8 @@ main ()
 	  CHK (clGetProgramBuildInfo (program, device, CL_PROGRAM_BUILD_LOG,
 				      len, clbuild_log, NULL));
 	  fprintf (stderr, "clBuildProgram failed with:\n%s\n", clbuild_log);
- 	  free (clbuild_log);
-        }
+	  free (clbuild_log);
+	}
       exit (EXIT_FAILURE);
   }
 

@@ -161,7 +161,7 @@ proc bitfield_signedness {} {
 
     set test "most negative signed bitfield values"
     if {$has_signed_bitfields} {
-        gdb_test "print flags" "u1 = 0, u2 = 0, u3 = 0, s1 = -16384, s2 = -4294967296, s3 = -32768.*" $test
+	gdb_test "print flags" "u1 = 0, u2 = 0, u3 = 0, s1 = -16384, s2 = -4294967296, s3 = -32768.*" $test
     } else {
 	unsupported $test
     }
@@ -244,4 +244,3 @@ bitfield_containment
 bitfield_unsignedness
 bitfield_signedness
 bitfield_set
-

@@ -88,15 +88,15 @@ runto break_here
 gdb_test_multiple "show mipsfpu" "check for MIPS floating-point coprocessor" {
     -re "The MIPS floating-point coprocessor\
 	 .*\(absent\|unknown\).*$gdb_prompt $" {
-        unsupported "no MIPS floating-point coprocessor in the processor"
-        return
+	unsupported "no MIPS floating-point coprocessor in the processor"
+	return
     }
     -re "The MIPS floating-point coprocessor .*$gdb_prompt $" {
-        verbose "MIPS floating-point coprocessor check successful."
+	verbose "MIPS floating-point coprocessor check successful."
     }
     default {
-        fail
-        return
+	fail
+	return
     }
 }
 

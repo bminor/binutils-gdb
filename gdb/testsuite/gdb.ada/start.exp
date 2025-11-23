@@ -36,5 +36,5 @@ if { [gdb_start_cmd] < 0 } {
 }
 
 gdb_test "" \
-         "dummy \\(\\) at .*dummy.adb.*" \
-         "start"
+	 "dummy \\(\\) at .*dummy.adb.*" \
+	 "start"

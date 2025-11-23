@@ -125,4 +125,3 @@ runto start_branch_tests
 foreach test $branch_test_list {
     test_branch_insn $test
 }
-

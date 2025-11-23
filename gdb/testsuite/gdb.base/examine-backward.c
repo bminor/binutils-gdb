@@ -117,14 +117,14 @@ main (void)
   for (i = 0; i < len - 1; ++i)
     {
       for (j = i; j < len; ++j)
-        {
-          if (n[j] < n[i])
-            {
-              int tmp = n[i];
-              n[i] = n[j];
-              n[j] = tmp;
-            }
-        }
+	{
+	  if (n[j] < n[i])
+	    {
+	      int tmp = n[i];
+	      n[i] = n[j];
+	      n[j] = tmp;
+	    }
+	}
     }
   return 42;
 }

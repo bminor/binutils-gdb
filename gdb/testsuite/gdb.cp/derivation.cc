@@ -25,7 +25,7 @@ namespace N {
        int i = 3;
 
        while (i > 0)
-         --i;
+	 --i;
      }
   };
 }
@@ -38,8 +38,8 @@ public:
 
     A()
     {
-        a=1;
-        aa=2;
+	a=1;
+	aa=2;
     }
     value_type afoo();
     value_type foo();
@@ -54,8 +54,8 @@ public:
 
     B()
     {
-        b=3;
-        bb=4;
+	b=3;
+	bb=4;
     }
     A::value_type bfoo();
     A::value_type foo();
@@ -71,8 +71,8 @@ public:
 
     C()
     {
-        c=5;
-        cc=6;
+	c=5;
+	cc=6;
     }
     int cfoo();
     int foo();
@@ -88,8 +88,8 @@ public:
 
     D()
     {
-        d =7;
-        dd=8;
+	d =7;
+	dd=8;
     }
     value_type dfoo();
     value_type foo();
@@ -104,8 +104,8 @@ public:
 
     E()
     {
-        e =9;
-        ee=10;
+	e =9;
+	ee=10;
     }
     value_type efoo();
     value_type foo();
@@ -120,8 +120,8 @@ public:
 
     F()
     {
-        f =11;
-        ff=12;
+	f =11;
+	ff=12;
     }
     value_type ffoo();
     value_type foo();
@@ -138,11 +138,11 @@ public:
 
     G()
     {
-        g =13;
-        gg =14;
-        a=15;
-        b=16;
-        c=17;
+	g =13;
+	gg =14;
+	a=15;
+	b=16;
+	c=17;
 
     }
     int gfoo();
