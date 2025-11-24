@@ -118,6 +118,9 @@ bool flag_generate_build_notes = DEFAULT_GENERATE_BUILD_NOTES;
 #if DEFAULT_SFRAME
 enum gen_sframe_option flag_gen_sframe = GEN_SFRAME_CONFIG_ENABLED;
 #endif
+/* Version of SFrame stack trace info to generate.  Default version is
+   SFRAME_VERSION_3.  */
+enum gen_sframe_version flag_gen_sframe_version = GEN_SFRAME_VERSION_3;
 
 segT reg_section;
 segT expr_section;
@@ -318,7 +321,11 @@ Options:\n\
                           generate GNU Build notes if none are present in the input\n"));
   fprintf (stream, _("\
   --gsframe[={no|yes}]    whether to generate SFrame stack trace information\n\
-                          (default: %s)\n"), DEFAULT_SFRAME ? "yes" : "no");
+                          (default: %s)\n\
+			  Default version emitted is V3\n"),
+	   DEFAULT_SFRAME ? "yes" : "no");
+  fprintf (stream, _("\
+  --gsframe-<N>           generate SFrame version <N> information. 3 == <N>\n"));
 # if defined (TARGET_USE_SCFI) && defined (TARGET_USE_GINSN)
   fprintf (stream, _("\
   --scfi=experimental     Synthesize DWARF CFI for hand-written asm\n\
@@ -513,6 +520,7 @@ parse_args (int * pargc, char *** pargv)
       OPTION_NO_PAD_SECTIONS,
       OPTION_MULTIBYTE_HANDLING,  /* = STD_BASE + 40 */
       OPTION_SFRAME,
+      OPTION_SFRAME_3,
       OPTION_SCFI,
       OPTION_INFO,
       OPTION_NOINFO
@@ -547,6 +555,7 @@ parse_args (int * pargc, char *** pargv)
     ,{"sectname-subst", no_argument, NULL, OPTION_SECTNAME_SUBST}
     ,{"generate-missing-build-notes", required_argument, NULL, OPTION_ELF_BUILD_NOTES}
     ,{"gsframe", optional_argument, NULL, OPTION_SFRAME}
+    ,{"gsframe-3", no_argument, NULL, OPTION_SFRAME_3}
 # if defined (TARGET_USE_SCFI) && defined (TARGET_USE_GINSN)
     ,{"scfi", required_argument, NULL, OPTION_SCFI}
 # endif
@@ -1056,6 +1065,10 @@ This program has absolutely no warranty.\n"));
 	    }
 	  else
 	    flag_gen_sframe = GEN_SFRAME_ENABLED;
+	  break;
+
+	case OPTION_SFRAME_3:
+	  flag_gen_sframe_version = GEN_SFRAME_VERSION_3;
 	  break;
 
 #endif /* OBJ_ELF */
