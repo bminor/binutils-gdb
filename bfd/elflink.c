@@ -14649,6 +14649,8 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
       asection *sec;
       struct elf_reloc_cookie cookie;
 
+      if (bfd_get_flavour (sub) != bfd_target_elf_flavour)
+	continue;
       sec = sub->sections;
       if (sec == NULL || sec->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
 	continue;
