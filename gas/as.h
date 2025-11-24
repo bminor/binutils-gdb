@@ -380,6 +380,13 @@ enum gen_sframe_option
 /* State of the setting for SFrame section creation.  */
 COMMON enum gen_sframe_option flag_gen_sframe;
 
+enum gen_sframe_version
+{
+  GEN_SFRAME_VERSION_3 = 3,
+};
+
+COMMON enum gen_sframe_version flag_gen_sframe_version;
+
 /* name of emitted object file */
 COMMON const char *out_file_name;
 

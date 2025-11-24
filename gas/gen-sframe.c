@@ -334,16 +334,17 @@ sframe_v3_set_func_info (unsigned int fde_pc_type, unsigned int fre_type,
 /* SFrame version specific operations setup.  */
 
 static void
-sframe_set_version (uint32_t sframe_version ATTRIBUTE_UNUSED)
+sframe_set_version (enum gen_sframe_version flag_ver)
 {
-  sframe_ver_ops.format_version = SFRAME_VERSION_3;
-
-  /* These operations remain the same for SFRAME_VERSION_3 as fre_info and
-     func_info have not changed from SFRAME_VERSION_2 and SFRAME_VERSION_1.  */
-
-  sframe_ver_ops.set_fre_info = sframe_v1_set_fre_info;
-
-  sframe_ver_ops.set_func_info = sframe_v3_set_func_info;
+  if (flag_ver == GEN_SFRAME_VERSION_3)
+    {
+      sframe_ver_ops.format_version = SFRAME_VERSION_3;
+      /* These operations remain the same for SFRAME_VERSION_3 as fre_info and
+	 func_info layout has not changed from SFRAME_VERSION_2 and
+	 SFRAME_VERSION_1.  */
+      sframe_ver_ops.set_fre_info = sframe_v1_set_fre_info;
+      sframe_ver_ops.set_func_info = sframe_v3_set_func_info;
+    }
 }
 
 /* SFrame set FRE info.  */
@@ -2547,8 +2548,10 @@ output_sframe (segT sframe_seg)
 {
   (void) sframe_seg;
 
+  /* Currently only SFRAME_VERSION_3 can be emitted.  */
+  gas_assert (flag_gen_sframe_version == GEN_SFRAME_VERSION_3);
   /* Setup the version specific access functions.  */
-  sframe_set_version (SFRAME_VERSION_3);
+  sframe_set_version (flag_gen_sframe_version);
 
   /* Process all fdes and create SFrame stack trace information.  */
   create_sframe_all ();

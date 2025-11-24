@@ -241,6 +241,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--gdwarf-cie-version}=@var{VERSION}]
  [@b{--generate-missing-build-notes=[no|yes]}]
  [@b{--gsframe}] [@b{--gsframe=[no|yes]}]
+ [@b{--gsframe-3}]
  [@b{--hash-size}=@var{N}]
  [@b{--help}] [@b{--target-help}]
  [@b{--info}] [@b{--no-info}]
@@ -864,7 +865,11 @@ configure option.
 Create @var{.sframe} section from CFI directives.  The explicit
 @option{--gsframe=yes} option behaves the same as @option{--gsframe}.
 Generation can be suppressed with @option{--gsframe=no}.  The default can be
-controlled by a configure option @option{--enable-default-sframe}.
+controlled by a configure option @option{--enable-default-sframe}.  The current
+version of the emitted SFrame stack trace data is SFRAME_VERSION_3.
+
+@item --gsframe-3
+Generate SFrame stack trace information as per Version 3 of the specification.
 
 @end ifset
 
