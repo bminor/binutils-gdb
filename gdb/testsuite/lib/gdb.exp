@@ -6425,7 +6425,7 @@ proc gdb_compile {source dest type options} {
 	    }
 	} elseif { $opt == "column-info" } {
 	    # If GCC or clang does not support column-info, compilation
-	    # will fail and the usupported column-info option will be
+	    # will fail and the unsupported column-info option will be
 	    # reported as such.
 	    if {[test_compiler_info {gcc-*}]} {
 		lappend new_options "additional_flags=-gcolumn-info"

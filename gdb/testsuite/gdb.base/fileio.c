@@ -65,7 +65,7 @@ static const char *strerrno (int err);
 /* Note that OUTDIR is defined by the test suite.  */
 #define FILENAME    "foo.fileio.test"
 #define RENAMED     "bar.fileio.test"
-#define NONEXISTANT "nofoo.fileio.test"
+#define NONEXISTENT "nofoo.fileio.test"
 #define NOWRITE     "nowrt.fileio.test"
 #define TESTDIR1     "dir1.fileio.test"
 #define TESTDIR2     "dir2.fileio.test"
@@ -115,7 +115,7 @@ test_open (void)
   stop ();
   /* Opening nonexistant file */
   errno = 0;
-  ret = open (NONEXISTANT, O_RDONLY);
+  ret = open (NONEXISTENT, O_RDONLY);
   printf ("open 4: ret = %d, errno = %d %s\n", ret, errno,
 	  strerrno (errno));
   if (ret >= 0)
@@ -311,9 +311,9 @@ test_stat (void)
   printf ("stat 3: ret = %d, errno = %d %s\n", ret, errno,
 	  strerrno (errno));
   stop ();
-  /* Nonexistant file */
+  /* Nonexistent file */
   errno = 0;
-  ret = stat (NONEXISTANT, &st);
+  ret = stat (NONEXISTENT, &st);
   printf ("stat 4: ret = %d, errno = %d %s\n", ret, errno,
 	  strerrno (errno));
   stop ();
@@ -459,7 +459,7 @@ test_rename (void)
   stop ();
   /* oldpath does not exist */
   errno = 0;
-  ret = rename (OUTDIR NONEXISTANT, OUTDIR FILENAME);
+  ret = rename (OUTDIR NONEXISTENT, OUTDIR FILENAME);
   printf ("rename 5: ret = %d, errno = %d %s\n", ret, errno,
 	  strerrno (errno));
   stop ();
@@ -501,7 +501,7 @@ test_unlink (void)
   stop ();
   /* pathname doesn't exist */
   errno = 0;
-  ret = unlink (OUTDIR NONEXISTANT);
+  ret = unlink (OUTDIR NONEXISTENT);
   printf ("unlink 3: ret = %d, errno = %d %s\n", ret, errno,
 	  strerrno (errno));
   stop ();

@@ -45,7 +45,7 @@ Dwarf::assemble $asm_file {
 	    set ptr_size [get_sizeof "void *" 96]
 	    set int_size [get_sizeof "int" 4]
 
-	    # A structure with no size attribute, to mimick structures
+	    # A structure with no size attribute, to mimic structures
 	    # in Ada that have a dynamic size...
 	    array_elt_label: structure_type {
 		DW_AT_name fd__Tints_doubledC

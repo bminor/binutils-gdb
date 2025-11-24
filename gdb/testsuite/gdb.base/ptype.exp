@@ -499,7 +499,7 @@ gdb_test "ptype nested_su.inner_union_instance" "type = union inner_union \{.*\[
 gdb_test "ptype the_highest" \
 	 "type = struct highest \{.*\[\r\n\] *int a;.*\[\r\n\] *struct \{.*\[\r\n\] *int b;.*\[\r\n\] *struct \{\.\.\.\} anonymous_level_2;.*\[\r\n\] *\} anonymous_level_1;.*\[\r\n\]}.*"
 
-# Print the type descrption for one of the fields of variable the_highest.
+# Print the type description for one of the fields of variable the_highest.
 # The purpose is to verify that the type of a field that was printed above
 # as "struct {...}" is now printed in a more descriptive way (because the
 # nesting level is now one level less).

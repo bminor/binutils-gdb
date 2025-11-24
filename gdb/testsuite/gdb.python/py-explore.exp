@@ -263,9 +263,9 @@ gdb_test "explore int" ".*[scalar_type_decsription {int}].*"
 gdb_test_multiple "explore struct SimpleStruct" "" {
     -re ".*[compound_type_description $SS {struct/class}].*$SS_fields_types.*" {
 	pass "explore struct SimpleStruct"
-	gdb_test_multiple "0" "explore type struct SimpleStruct feild 0" {
+	gdb_test_multiple "0" "explore type struct SimpleStruct field 0" {
 	    -re ".*[child_scalar_type_description {field 'a' of 'struct SimpleStruct'} {int}].*" {
-		pass "explore type struct SimpleStruct feild 0"
+		pass "explore type struct SimpleStruct field 0"
 		gdb_test_multiple "\0" "return to struct SimpleStruct from field 0" {
 		    -re ".*[compound_type_description $SS {struct/class}].*$SS_fields_types.*" {
 			pass "return to struct SimpleStruct from field 0"
@@ -273,9 +273,9 @@ gdb_test_multiple "explore struct SimpleStruct" "" {
 		}
 	    }
 	}
-	gdb_test_multiple "1" "explore type struct SimpleStruct feild 1" {
+	gdb_test_multiple "1" "explore type struct SimpleStruct field 1" {
 	    -re ".*[child_scalar_type_description {field 'd' of 'struct SimpleStruct'} {double}].*" {
-		pass "explore type struct SimpleStruct feild 1"
+		pass "explore type struct SimpleStruct field 1"
 		gdb_test_multiple "\0" "return to struct SimpleStruct from field 1" {
 		    -re ".*[compound_type_description $SS {struct/class}].*$SS_fields_types.*" {
 			pass "return to struct SimpleStruct from field 1"
@@ -294,9 +294,9 @@ gdb_test_multiple "explore struct SimpleStruct" "" {
 gdb_test_multiple "explore union SimpleUnion" "" {
   -re ".*[compound_type_description $SU {union}].*$SU_fields_types.*" {
       pass "explore union SimpleUnion"
-	gdb_test_multiple "0" "explore type union SimpleUnion feild 0" {
+	gdb_test_multiple "0" "explore type union SimpleUnion field 0" {
 	    -re ".*[child_scalar_type_description {field 'i' of 'union SimpleUnion'} {int}].*" {
-		pass "explore type union SimpleUnion feild 0"
+		pass "explore type union SimpleUnion field 0"
 		gdb_test_multiple "\0" "return to union SimpleUnion from field 0" {
 		    -re ".*[compound_type_description $SU {union}].*$SU_fields_types.*" {
 			pass "return to union SimpleUnion from field 0"
@@ -304,9 +304,9 @@ gdb_test_multiple "explore union SimpleUnion" "" {
 		}
 	    }
 	}
-	gdb_test_multiple "1" "explore type union SimpleUnion feild 1" {
+	gdb_test_multiple "1" "explore type union SimpleUnion field 1" {
 	    -re ".*[child_scalar_type_description {field 'c' of 'union SimpleUnion'} {char}].*" {
-		pass "explore type union SimpleUnion feild 1"
+		pass "explore type union SimpleUnion field 1"
 		gdb_test_multiple "\0" "return to union SimpleUnion from field 1" {
 		    -re ".*[compound_type_description $SU {union}].*$SU_fields_types.*" {
 			pass "return to union SimpleUnion from field 1"
@@ -314,9 +314,9 @@ gdb_test_multiple "explore union SimpleUnion" "" {
 		}
 	    }
 	}
-	gdb_test_multiple "2" "explore type union SimpleUnion feild 2" {
+	gdb_test_multiple "2" "explore type union SimpleUnion field 2" {
 	    -re ".*[child_scalar_type_description {field 'f' of 'union SimpleUnion'} {float}].*" {
-		pass "explore type union SimpleUnion feild 2"
+		pass "explore type union SimpleUnion field 2"
 		gdb_test_multiple "\0" "return to union SimpleUnion from field 2" {
 		    -re ".*[compound_type_description $SU {union}].*$SU_fields_types.*" {
 			pass "return to union SimpleUnion from field 2"
@@ -324,9 +324,9 @@ gdb_test_multiple "explore union SimpleUnion" "" {
 		}
 	    }
 	}
-	gdb_test_multiple "3" "explore type union SimpleUnion feild 3" {
+	gdb_test_multiple "3" "explore type union SimpleUnion field 3" {
 	    -re ".*[child_scalar_type_description {field 'd' of 'union SimpleUnion'} {double}].*" {
-		pass "explore type union SimpleUnion feild 3"
+		pass "explore type union SimpleUnion field 3"
 		gdb_test_multiple "\0" "return to union SimpleUnion from field 3" {
 		    -re ".*[compound_type_description $SU {union}].*$SU_fields_types.*" {
 			pass "return to union SimpleUnion from field 3"
@@ -345,9 +345,9 @@ gdb_test_multiple "explore union SimpleUnion" "" {
 gdb_test_multiple "explore SS" "" {
     -re ".*[typedef_type_description {SS} $SS].*[compound_type_description {SS} {struct/class}].*$SS_fields_types.*" {
 	pass "explore SS"
-	gdb_test_multiple "0" "explore type SS feild 0" {
+	gdb_test_multiple "0" "explore type SS field 0" {
 	    -re ".*[child_scalar_type_description {field 'a' of 'SS'} {int}].*" {
-		pass "explore type SS feild 0"
+		pass "explore type SS field 0"
 		gdb_test_multiple "\0" "return to SS from field 0" {
 		    -re ".*[compound_type_description {SS} {struct/class}].*$SS_fields_types.*" {
 			pass "return to SS from field 0"
@@ -355,9 +355,9 @@ gdb_test_multiple "explore SS" "" {
 		}
 	    }
 	}
-	gdb_test_multiple "1" "explore type SS feild 1" {
+	gdb_test_multiple "1" "explore type SS field 1" {
 	    -re ".*[child_scalar_type_description {field 'd' of 'SS'} {double}].*" {
-		pass "explore type SS feild 1"
+		pass "explore type SS field 1"
 		gdb_test_multiple "\0" "return to struct SimpleStruct from field 1" {
 		    -re ".*[compound_type_description {SS} {struct/class}].*$SS_fields_types.*" {
 			pass "return to SS field 1"

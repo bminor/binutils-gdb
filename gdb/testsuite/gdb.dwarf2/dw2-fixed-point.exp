@@ -207,7 +207,7 @@ gdb_test "print pck.fp1_var >= pck.fp1_var" \
 gdb_test "print pck.fp1_var >= pck.fp1_var2" \
 	 " = false"
 
-# Same as above, but with litterals...
+# Same as above, but with literals...
 
 gdb_test "print pck.fp1_var = 0.25" \
 	 " = true"
