@@ -790,7 +790,7 @@ process_sht_group_entries (bfd *abfd,
     }
 
   free (contents);
-  return true;
+  return last_elt != NULL;
 }
 
 bool

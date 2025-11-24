@@ -14192,7 +14192,7 @@ _bfd_elf_gc_mark_debug_special_section_group (asection *grp)
   /* First scan to see if group contains any section other than debug
      and special section.  */
   ssec = msec = elf_next_in_group (grp);
-  do
+  while (msec != NULL)
     {
       if ((msec->flags & SEC_DEBUGGING) == 0)
 	is_debug_grp = false;
@@ -14201,19 +14201,22 @@ _bfd_elf_gc_mark_debug_special_section_group (asection *grp)
 	is_special_grp = false;
 
       msec = elf_next_in_group (msec);
+      if (msec == ssec)
+	break;
     }
-  while (msec != ssec);
 
   /* If this is a pure debug section group or pure special section group,
      keep all sections in this group.  */
   if (is_debug_grp || is_special_grp)
     {
-      do
+      msec = ssec;
+      while (msec != NULL)
 	{
 	  msec->gc_mark = 1;
 	  msec = elf_next_in_group (msec);
+	  if (msec == ssec)
+	    break;
 	}
-      while (msec != ssec);
     }
 }
 
