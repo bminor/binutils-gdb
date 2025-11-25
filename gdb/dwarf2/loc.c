@@ -1646,9 +1646,6 @@ dwarf2_evaluate_property (const dynamic_prop *prop,
 			  CORE_ADDR *value,
 			  gdb::array_view<CORE_ADDR> push_values)
 {
-  if (prop == NULL)
-    return false;
-
   /* Evaluating a property should not change the current language.
      Without this here this could happen if the code below selects a
      frame.  */

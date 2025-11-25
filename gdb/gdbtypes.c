@@ -2431,7 +2431,8 @@ resolve_dynamic_array_or_string (struct type *type,
 
   /* Resolve the rank property to get rank value.  */
   struct dynamic_prop *prop = type->dyn_prop (DYN_PROP_RANK);
-  if (dwarf2_evaluate_property (prop, frame, addr_stack, &value))
+  if (prop != nullptr
+      && dwarf2_evaluate_property (prop, frame, addr_stack, &value))
     {
       prop->set_const_val (value);
       rank = value;
