@@ -3678,7 +3678,8 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
       {
 	bfd_vma relocation = value;
 	bfd_vma *local_opd_offsets, *local_dlt_offsets;
-	bfd_vma dlt_off, opd_off;
+	bfd_vma dlt_off;
+	bfd_vma opd_off = (bfd_vma) -1;
 
 	if (eh == NULL)
 	  {
