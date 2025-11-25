@@ -135,6 +135,19 @@ extern "C"
    matching FRE.  */
 #define SFRAME_FDE_TYPE_PCMASK  1
 
+/* SFrame FDE types.  */
+
+/* Default FDE type.  */
+#define SFRAME_FDE_TYPE_DEFAULT	  0
+/* Flexible Frame FDE type.
+   The recovery rule for CFA, RA and FP allow more flexibility.  Examples of
+   patterns supported include:
+     - CFA may be non-SP/FP based.
+     - CFA, FP may encode dereferencing of register after offset adjustment
+     - RA may be in a non-default register.
+   Currently used for SFRAME_ABI_AMD64_ENDIAN_LITTLE.  */
+#define SFRAME_FDE_TYPE_FLEX	  1
+
 typedef struct sframe_preamble
 {
   uint16_t sfp_magic;	/* Magic number (SFRAME_MAGIC).  */
@@ -265,11 +278,13 @@ typedef struct sframe_func_desc_entry_v3
      8        7             6                             5         4              0     */
   uint8_t sfde_func_info;
   /* Additional information for stack tracing from the function:
-     - 8-bits: Unused.
-     -------------------------------------------------------------------------
-     |                            Unused                                     |
-     -------------------------------------------------------------------------
-     8        7         6                  5           4              0     */
+     - 5-bits: FDE type.
+     - 3-bits: Unused.
+     ------------------------------------------------------------
+     |                     Unused                 |  FDE Type   |
+     |                                            |             |
+     ------------------------------------------------------------
+     8        7         6                         5             0     */
   uint8_t sfde_func_info2;
   /* Size of the block of repeating insns.  Used for SFrame FDEs of type
      SFRAME_FDE_TYPE_PCMASK.  */
@@ -279,16 +294,33 @@ typedef struct sframe_func_desc_entry_v3
 #define SFRAME_V3_FDE_FUNC_INFO(fde_pc_type, fre_type) \
   (SFRAME_V2_FUNC_INFO (fde_pc_type, fre_type))
 
+/* Mask for the ABI/arch specific FDE type (lower 5 bits).  */
+#define SFRAME_V3_FDE_TYPE_MASK		      0x01f
+/* Get the FDE type from the info2 byte.  */
+#define SFRAME_V3_FDE_TYPE(info2) \
+  ((info2) & SFRAME_V3_FDE_TYPE_MASK)
 #define SFRAME_V3_FDE_FRE_TYPE(info)          (SFRAME_V2_FUNC_FRE_TYPE (info))
 #define SFRAME_V3_FDE_PC_TYPE(info)           (SFRAME_V2_FUNC_PC_TYPE (info))
 #define SFRAME_V3_AARCH64_FDE_PAUTH_KEY(info) (SFRAME_V2_FUNC_PAUTH_KEY (info))
 #define SFRAME_V3_FDE_SIGNAL_P(info)           (((info) >> 7) & 0x1)
+
+/* Set the FDE type in the info2 byte, preserving upper bits.  */
+#define SFRAME_V3_SET_FDE_TYPE(info2, fde_type) \
+  (((info2) & ~SFRAME_V3_FDE_TYPE_MASK) \
+   | ((fde_type) & SFRAME_V3_FDE_TYPE_MASK))
 
 #define SFRAME_V3_FDE_UPDATE_PAUTH_KEY(pauth_key, info) \
   SFRAME_V2_FUNC_INFO_UPDATE_PAUTH_KEY (pauth_key, info)
 
 #define SFRAME_V3_FDE_UPDATE_SIGNAL_P(signal_p, info)  \
   ((((signal_p) & 0x1) << 7) | ((info) & 0x7f))
+
+#define SFRAME_V3_FLEX_FDE_REG_ENCODE(reg, deref_p, reg_p)  \
+  ((((reg) << 0x3) | (0 << 0x2) | (((deref_p) & 0x1) << 0x1) | ((reg_p) & 0x1)))
+
+#define SFRAME_V3_FLEX_FDE_OFFSET_REG_NUM(data)       ((data) >> 3)
+#define SFRAME_V3_FLEX_FDE_OFFSET_REG_DEREF_P(data)   (((data) >> 1) & 0x1)
+#define SFRAME_V3_FLEX_FDE_OFFSET_REG_P(data)         ((data) & 0x1)
 
 /* Size of stack frame offsets in an SFrame Frame Row Entry.  A single
    SFrame FRE has all offsets of the same size.  Offset size may vary
