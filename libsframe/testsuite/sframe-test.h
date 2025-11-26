@@ -40,13 +40,13 @@ void wait (void);
 #include <dejagnu.h>
 #undef wait
 
-#define TEST(cond, subname, ...)					\
+#define TEST(cond, ...)							\
   do									\
     {									\
       if (cond)								\
-	pass (subname, ##__VA_ARGS__);					\
+	pass (__VA_ARGS__);						\
       else								\
-	fail (subname, ##__VA_ARGS__);					\
+	fail (__VA_ARGS__);						\
     }									\
     while (0)
 
