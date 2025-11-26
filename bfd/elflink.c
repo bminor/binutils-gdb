@@ -12757,6 +12757,16 @@ _bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   for (o = abfd->sections; o != NULL; o = o->next)
     {
       struct bfd_elf_section_data *esdo = elf_section_data (o);
+      bfd_size_type size_align = 1;
+
+      if (o->sec_info_type == SEC_INFO_TYPE_EH_FRAME)
+	{
+	  /* eh_frame editing can extend last FDE to cover padding
+	     between one section and the next.  */
+	  size_align = (((bfd_size_type) 1 << o->alignment_power)
+			* bfd_octets_per_byte (abfd, o));
+	}
+
       o->reloc_count = 0;
 
       for (p = o->map_head.link_order; p != NULL; p = p->next)
@@ -12792,10 +12802,11 @@ _bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		  || sec->rawsize != sec->size)
 #endif
 		{
-		  if (sec->rawsize > max_contents_size)
-		    max_contents_size = sec->rawsize;
-		  if (sec->size > max_contents_size)
-		    max_contents_size = sec->size;
+		  bfd_size_type size = (sec->rawsize > sec->size
+					? sec->rawsize : sec->size);
+		  size = (size + size_align - 1) & -size_align;
+		  if (max_contents_size < size)
+		    max_contents_size = size;
 		}
 
 	      if (bfd_get_flavour (sec->owner) == bfd_target_elf_flavour
