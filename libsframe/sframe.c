@@ -628,7 +628,7 @@ flip_sframe (char *frame_buf, size_t buf_size, uint32_t to_foreign)
       if (fdes >= buf_end)
 	goto bad;
 
-      if (to_foreign && sframe_decode_fde (fdes, fdes - buf_end, ver,
+      if (to_foreign && sframe_decode_fde (fdes, buf_end - fdes, ver,
 					   &num_fres, &fre_type, &fre_offset,
 					   &fsz))
 	goto bad;
@@ -638,7 +638,7 @@ flip_sframe (char *frame_buf, size_t buf_size, uint32_t to_foreign)
 
       fde_bytes_flipped += fsz;
 
-      if (!to_foreign && sframe_decode_fde (fdes, fdes - buf_end, ver,
+      if (!to_foreign && sframe_decode_fde (fdes, buf_end - fdes, ver,
 					    &num_fres, &fre_type, &fre_offset,
 					    &fsz))
 	goto bad;
