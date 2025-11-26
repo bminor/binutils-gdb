@@ -18249,7 +18249,7 @@ ppc64_elf_reloc_type_class (const struct bfd_link_info *info,
 static bool
 ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 				   struct bfd_link_info *info,
-				   bfd_byte *buf ATTRIBUTE_UNUSED)
+				   bfd_byte *buf)
 {
   struct ppc_link_hash_table *htab;
   bfd *dynobj;
@@ -18387,9 +18387,8 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
   if (htab->glink_eh_frame != NULL
       && htab->glink_eh_frame->size != 0
       && htab->glink_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME
-      && !_bfd_elf_write_section_eh_frame (output_bfd, info,
-					   htab->glink_eh_frame,
-					   htab->glink_eh_frame->contents))
+      && !_bfd_elf_write_linker_section_eh_frame (output_bfd, info,
+						  htab->glink_eh_frame, buf))
     return false;
 
   /* We need to handle writing out multiple GOT sections ourselves,

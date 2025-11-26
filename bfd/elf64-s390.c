@@ -3842,7 +3842,7 @@ elf_s390_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
 static bool
 elf_s390_finish_dynamic_sections (bfd *output_bfd,
 				  struct bfd_link_info *info,
-				  bfd_byte *buf ATTRIBUTE_UNUSED)
+				  bfd_byte *buf)
 {
   struct elf_s390_link_hash_table *htab;
   bfd *dynobj;
@@ -4009,13 +4009,10 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
 			     + PLT_FDE_START_OFFSET);
 	}
 
-      if (htab->plt_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME)
-	{
-	  if (! _bfd_elf_write_section_eh_frame (output_bfd, info,
-						 htab->plt_eh_frame,
-						 htab->plt_eh_frame->contents))
-	    return NULL;
-	}
+      if (htab->plt_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME
+	  && !_bfd_elf_write_linker_section_eh_frame (output_bfd, info,
+						      htab->plt_eh_frame, buf))
+	return NULL;
     }
 
   /* Make any adjustment if necessary and merge .sframe section to

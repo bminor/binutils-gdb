@@ -2294,6 +2294,34 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 				   sec->size);
 }
 
+/* A handy wrapper for writing linker generated .eh_frame sections
+   with contents that may need to be extended beyond the initial size
+   allocated.  */
+
+bool
+_bfd_elf_write_linker_section_eh_frame (bfd *obfd, struct bfd_link_info *info,
+					asection *sec, bfd_byte *bigbuf)
+{
+  bfd_size_type initial_size = sec->rawsize != 0 ? sec->rawsize : sec->size;
+  memcpy (bigbuf, sec->contents, initial_size);
+  if (!_bfd_elf_write_section_eh_frame (obfd, info, sec, bigbuf))
+    return false;
+  if (sec->size > initial_size)
+    {
+      if (sec->alloced)
+	sec->contents = bfd_alloc (sec->owner, sec->size);
+      else
+	{
+	  free (sec->contents);
+	  sec->contents = bfd_malloc (sec->size);
+	}
+      if (sec->contents == NULL)
+	return false;
+    }
+  memcpy (sec->contents, bigbuf, sec->size);
+  return true;
+}
+
 /* Helper function used to sort .eh_frame_hdr search table by increasing
    VMA of FDE initial location.  */
 

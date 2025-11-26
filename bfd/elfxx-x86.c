@@ -2763,7 +2763,7 @@ _bfd_x86_elf_late_size_sections (bfd *output_bfd,
 struct elf_x86_link_hash_table *
 _bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
 				      struct bfd_link_info *info,
-				      bfd_byte *buf ATTRIBUTE_UNUSED)
+				      bfd_byte *buf)
 {
   struct elf_x86_link_hash_table *htab;
   const struct elf_backend_data *bed;
@@ -2924,13 +2924,10 @@ _bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
 			     + PLT_FDE_START_OFFSET);
 	}
 
-      if (htab->plt_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME)
-	{
-	  if (! _bfd_elf_write_section_eh_frame (output_bfd, info,
-						 htab->plt_eh_frame,
-						 htab->plt_eh_frame->contents))
-	    return NULL;
-	}
+      if (htab->plt_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME
+	  && !_bfd_elf_write_linker_section_eh_frame (output_bfd, info,
+						      htab->plt_eh_frame, buf))
+	return NULL;
     }
 
   /* Adjust .eh_frame for .plt.got section.  */
@@ -2951,13 +2948,11 @@ _bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
 			     htab->plt_got_eh_frame->contents
 			     + PLT_FDE_START_OFFSET);
 	}
-      if (htab->plt_got_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME)
-	{
-	  if (! _bfd_elf_write_section_eh_frame (output_bfd, info,
-						 htab->plt_got_eh_frame,
-						 htab->plt_got_eh_frame->contents))
-	    return NULL;
-	}
+      if (htab->plt_got_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME
+	  && !_bfd_elf_write_linker_section_eh_frame (output_bfd, info,
+						      htab->plt_got_eh_frame,
+						      buf))
+	return NULL;
     }
 
   /* Adjust .eh_frame for the second PLT section.  */
@@ -2979,14 +2974,11 @@ _bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
 			     htab->plt_second_eh_frame->contents
 			     + PLT_FDE_START_OFFSET);
 	}
-      if (htab->plt_second_eh_frame->sec_info_type
-	  == SEC_INFO_TYPE_EH_FRAME)
-	{
-	  if (! _bfd_elf_write_section_eh_frame (output_bfd, info,
-						 htab->plt_second_eh_frame,
-						 htab->plt_second_eh_frame->contents))
-	    return NULL;
-	}
+      if (htab->plt_second_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME
+	  && !_bfd_elf_write_linker_section_eh_frame (output_bfd, info,
+						      htab->plt_second_eh_frame,
+						      buf))
+	return NULL;
     }
 
   /* Make any adjustment if necessary and merge .sframe section to

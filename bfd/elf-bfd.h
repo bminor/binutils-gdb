@@ -2553,7 +2553,9 @@ extern bfd_vma _bfd_elf_eh_frame_section_offset
   (bfd *, struct bfd_link_info *, asection *, bfd_vma) ATTRIBUTE_HIDDEN;
 extern bool _bfd_elf_write_section_eh_frame
   (bfd *, struct bfd_link_info *, asection *, bfd_byte *) ATTRIBUTE_HIDDEN;
-bool _bfd_elf_write_section_eh_frame_entry
+extern bool _bfd_elf_write_linker_section_eh_frame
+  (bfd *, struct bfd_link_info *, asection *, bfd_byte *) ATTRIBUTE_HIDDEN;
+extern bool _bfd_elf_write_section_eh_frame_entry
   (bfd *, struct bfd_link_info *, asection *, bfd_byte *) ATTRIBUTE_HIDDEN;
 extern bool _bfd_elf_fixup_eh_frame_hdr
   (struct bfd_link_info *) ATTRIBUTE_HIDDEN;
