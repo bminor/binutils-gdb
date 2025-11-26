@@ -1493,11 +1493,12 @@ adjust_eh_frame_local_symbols (const asection *sec,
 }
 
 /* This function is called for each input file before the .eh_frame
-   section is relocated.  It discards duplicate CIEs and FDEs for discarded
-   functions.  The function returns TRUE iff any entries have been
-   deleted.  */
+   section is relocated.  It discards duplicate CIEs and FDEs for
+   discarded functions.  The function returns 0 when no changes are
+   made, 1 when .eh_frame data has been edited and 2 when the editing
+   results in a section size change.  */
 
-bool
+int
 _bfd_elf_discard_section_eh_frame
    (bfd *abfd, struct bfd_link_info *info, asection *sec,
     bool (*reloc_symbol_deleted_p) (bfd_vma, void *),
@@ -1622,10 +1623,11 @@ _bfd_elf_discard_section_eh_frame
 
   eh_alignment = 4;
   offset = (offset + eh_alignment - 1) & -eh_alignment;
-  sec->rawsize = sec->size;
+  if (sec->rawsize == 0)
+    sec->rawsize = sec->size;
+  if (sec->size != offset)
+    changed = 2;
   sec->size = offset;
-  if (sec->size != sec->rawsize)
-    changed = 1;
 
   if (changed)
     {

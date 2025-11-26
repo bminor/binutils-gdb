@@ -15186,6 +15186,8 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 
       for (i = o->map_head.s; i != NULL; i = i->map_head.s)
 	{
+	  int r;
+
 	  if (i->size == 0)
 	    continue;
 
@@ -15197,12 +15199,13 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 	    return -1;
 
 	  _bfd_elf_parse_eh_frame (abfd, info, i, &cookie);
-	  if (_bfd_elf_discard_section_eh_frame (abfd, info, i,
+	  r = _bfd_elf_discard_section_eh_frame (abfd, info, i,
 						 bfd_elf_reloc_symbol_deleted_p,
-						 &cookie))
+						 &cookie);
+	  if (r)
 	    {
 	      eh_changed = 1;
-	      if (i->size != i->rawsize)
+	      if (r >= 2)
 		changed = 1;
 	    }
 

@@ -2542,7 +2542,7 @@ extern void _bfd_elf_parse_eh_frame
 extern bool _bfd_elf_end_eh_frame_parsing
   (struct bfd_link_info *info) ATTRIBUTE_HIDDEN;
 
-extern bool _bfd_elf_discard_section_eh_frame
+extern int _bfd_elf_discard_section_eh_frame
   (bfd *, struct bfd_link_info *, asection *,
    bool (*) (bfd_vma, void *), struct elf_reloc_cookie *) ATTRIBUTE_HIDDEN;
 extern bool _bfd_elf_adjust_eh_frame_global_symbol
