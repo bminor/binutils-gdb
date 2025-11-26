@@ -28,11 +28,22 @@ proc do_typeid_tests {started} {
     set type_re "(std::type_info|gdb_gnu_v3_type_info)"
 
     set var {ca b}
-    if {$started || ![test_compiler_info clang-*-* c++]} {
-	# Clang doesn't place type information for the base types in
-	# the executable, and relies on this being linked in from the
-	# standard library.  As a result, type information for these
-	# variables is only available once the inferior is started.
+    set have_base_types 1
+    if {!$started} {
+       if {[test_compiler_info clang-*-* c++]} {
+	   # Note that we test pointer equality rather than object
+	   # Clang doesn't place type information for the base types in
+	   # the executable, and relies on this being linked in from the
+	   # standard library.  As a result, type information for these
+	   # variables is only available once the inferior is started.
+	   set have_base_types 0
+       } elseif {[istarget "powerpc*-*-*"]} {
+	   # On PowerPC, RTTI typeinfo for base types (i, cp, ccp) may not be
+	   # emitted until the inferior is started.
+	   set have_base_types 0
+       }
+    }
+    if { $have_base_types } {
 	lappend var i cp ccp
     }
 
