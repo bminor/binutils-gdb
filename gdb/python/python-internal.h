@@ -1227,8 +1227,8 @@ struct gdbpy_default_invalidator
 
 /* A "storage" implementation suitable for temporary (on-demand) objects.  */
 template <typename P,
-          typename V,
-          V* P::*val_slot,
+	  typename V,
+	  V* P::*val_slot,
 	  typename Invalidator = gdbpy_default_invalidator<P, V, val_slot>>
 class gdbpy_tracking_registry_storage
 {
@@ -1272,8 +1272,8 @@ protected:
    from storage.
    */
 template <typename P,
-          typename V,
-          V* P::*val_slot,
+	  typename V,
+	  V* P::*val_slot,
 	  typename Invalidator = gdbpy_default_invalidator<P, V, val_slot>>
 class gdbpy_memoizing_registry_storage
 {

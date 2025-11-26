@@ -495,7 +495,7 @@ pending_framepy_read_register (PyObject *self, PyObject *args, PyObject *kw)
 	 get_frame_register_value() was used here, which did not
 	 handle the user register case.  */
       value *val = value_of_register
-        (regnum, get_next_frame_sentinel_okay (pending_frame->frame_info));
+	(regnum, get_next_frame_sentinel_okay (pending_frame->frame_info));
       if (val == NULL)
 	PyErr_Format (PyExc_ValueError,
 		      "Cannot read register %d from frame.",
