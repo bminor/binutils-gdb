@@ -43,7 +43,8 @@ static int elf_vax_relocate_section (bfd *, struct bfd_link_info *,
 static bool elf_vax_finish_dynamic_symbol (bfd *, struct bfd_link_info *,
 					   struct elf_link_hash_entry *,
 					   Elf_Internal_Sym *);
-static bool elf_vax_finish_dynamic_sections (bfd *, struct bfd_link_info *);
+static bool elf_vax_finish_dynamic_sections (bfd *, struct bfd_link_info *,
+					     bfd_byte *);
 static bfd_vma elf_vax_plt_sym_val (bfd_vma, const asection *,
 				    const arelent *);
 
@@ -1733,7 +1734,8 @@ elf_vax_finish_dynamic_symbol (bfd *output_bfd, struct bfd_link_info *info,
 /* Finish up the dynamic sections.  */
 
 static bool
-elf_vax_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
+elf_vax_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info,
+				 bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   bfd *dynobj;
   asection *sgot;

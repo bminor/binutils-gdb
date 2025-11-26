@@ -2580,7 +2580,8 @@ arc_create_forced_local_got_entries_for_tls (struct bfd_hash_entry *bh,
 
 static bool
 elf_arc_finish_dynamic_sections (bfd * output_bfd,
-				 struct bfd_link_info *info)
+				 struct bfd_link_info *info,
+				 bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   struct elf_link_hash_table *htab = elf_hash_table (info);
   bfd *dynobj = (elf_hash_table (info))->dynobj;

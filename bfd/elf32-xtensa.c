@@ -3215,7 +3215,8 @@ elf_xtensa_combine_prop_entries (bfd *output_bfd,
 
 static bool
 elf_xtensa_finish_dynamic_sections (bfd *output_bfd,
-				    struct bfd_link_info *info)
+				    struct bfd_link_info *info,
+				    bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   struct elf_xtensa_link_hash_table *htab;
   bfd *dynobj;

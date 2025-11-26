@@ -11929,7 +11929,8 @@ mips_vxworks_finish_shared_plt (bfd *output_bfd, struct bfd_link_info *info)
 
 bool
 _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
-				       struct bfd_link_info *info)
+				       struct bfd_link_info *info,
+				       bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   bfd *dynobj;
   asection *sdyn;

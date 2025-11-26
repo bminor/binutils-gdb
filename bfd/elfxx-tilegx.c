@@ -3960,7 +3960,8 @@ tilegx_finish_dyn (bfd *output_bfd, struct bfd_link_info *info,
 
 bool
 tilegx_elf_finish_dynamic_sections (bfd *output_bfd,
-				    struct bfd_link_info *info)
+				    struct bfd_link_info *info,
+				    bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   bfd *dynobj;
   asection *sdyn;

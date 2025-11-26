@@ -2310,7 +2310,8 @@ elf_cris_finish_dynamic_symbol (bfd *output_bfd,
 
 static bool
 elf_cris_finish_dynamic_sections (bfd *output_bfd,
-				  struct bfd_link_info *info)
+				  struct bfd_link_info *info,
+				  bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   bfd *dynobj;
   asection *sgot;

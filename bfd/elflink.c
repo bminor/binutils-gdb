@@ -13737,7 +13737,8 @@ _bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   /* If we have created any dynamic sections, then output them.  */
   if (dynobj != NULL)
     {
-      if (! (*bed->elf_backend_finish_dynamic_sections) (abfd, info))
+      if (! (*bed->elf_backend_finish_dynamic_sections) (abfd, info,
+							 flinfo.contents))
 	goto error_return;
 
       /* Check for DT_TEXTREL (late, in case the backend removes it).  */

@@ -4218,7 +4218,8 @@ bfinfdpic_elf_discard_info (bfd *ibfd,
 
 static bool
 elf32_bfinfdpic_finish_dynamic_sections (bfd *output_bfd,
-					struct bfd_link_info *info)
+					 struct bfd_link_info *info,
+					 bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   bfd *dynobj;
   asection *sdyn;
@@ -4861,7 +4862,8 @@ bfin_link_hash_table_create (bfd * abfd)
 
 static bool
 bfin_finish_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
-			      struct bfd_link_info *info)
+			      struct bfd_link_info *info,
+			      bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   bfd *dynobj;
   asection *sdyn;

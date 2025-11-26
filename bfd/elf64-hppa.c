@@ -192,7 +192,7 @@ static bool elf64_hppa_finish_dynamic_symbol
    struct elf_link_hash_entry *, Elf_Internal_Sym *);
 
 static bool elf64_hppa_finish_dynamic_sections
-  (bfd *, struct bfd_link_info *);
+  (bfd *, struct bfd_link_info *, bfd_byte *);
 
 static bool elf64_hppa_check_relocs
   (bfd *, struct bfd_link_info *,
@@ -2424,7 +2424,8 @@ elf64_hppa_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
 
 static bool
 elf64_hppa_finish_dynamic_sections (bfd *output_bfd,
-				    struct bfd_link_info *info)
+				    struct bfd_link_info *info,
+				    bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   bfd *dynobj;
   asection *sdyn;

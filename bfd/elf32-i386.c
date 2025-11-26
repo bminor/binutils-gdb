@@ -4137,11 +4137,12 @@ elf_i386_reloc_type_class (const struct bfd_link_info *info,
 
 static bool
 elf_i386_finish_dynamic_sections (bfd *output_bfd,
-				  struct bfd_link_info *info)
+				  struct bfd_link_info *info,
+				  bfd_byte *buf)
 {
   struct elf_x86_link_hash_table *htab;
 
-  htab = _bfd_x86_elf_finish_dynamic_sections (output_bfd, info);
+  htab = _bfd_x86_elf_finish_dynamic_sections (output_bfd, info, buf);
   if (htab == NULL)
     return false;
 

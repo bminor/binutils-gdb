@@ -10219,7 +10219,8 @@ elfNN_aarch64_init_small_plt0_entry (bfd *output_bfd ATTRIBUTE_UNUSED,
 
 static bool
 elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
-				       struct bfd_link_info *info)
+				       struct bfd_link_info *info,
+				       bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   struct elf_aarch64_link_hash_table *htab;
   bfd *dynobj;

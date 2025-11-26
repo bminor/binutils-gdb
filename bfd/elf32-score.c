@@ -3550,7 +3550,8 @@ s3_bfd_score_elf_finish_dynamic_symbol (bfd *output_bfd,
 /* Finish up the dynamic sections.  */
 static bool
 s3_bfd_score_elf_finish_dynamic_sections (bfd *output_bfd,
-					  struct bfd_link_info *info)
+					  struct bfd_link_info *info,
+					  bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   bfd *dynobj;
   asection *sdyn;
@@ -4216,12 +4217,13 @@ _bfd_score_elf_finish_dynamic_symbol (bfd *output_bfd,
 
 static bool
 _bfd_score_elf_finish_dynamic_sections (bfd *output_bfd,
-					struct bfd_link_info *info)
+					struct bfd_link_info *info,
+					bfd_byte *buf)
 {
   if (bfd_get_mach (output_bfd) == bfd_mach_score3)
-    return s3_bfd_score_elf_finish_dynamic_sections (output_bfd, info);
+    return s3_bfd_score_elf_finish_dynamic_sections (output_bfd, info, buf);
   else
-    return s7_bfd_score_elf_finish_dynamic_sections (output_bfd, info);
+    return s7_bfd_score_elf_finish_dynamic_sections (output_bfd, info, buf);
 }
 
 static bool

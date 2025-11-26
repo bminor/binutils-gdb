@@ -6344,7 +6344,8 @@ nds32_elf_finish_dynamic_symbol (bfd *output_bfd, struct bfd_link_info *info,
 /* Finish up the dynamic sections.  */
 
 static bool
-nds32_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
+nds32_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info,
+				   bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   bfd *dynobj;
   asection *sdyn;

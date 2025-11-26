@@ -18248,7 +18248,8 @@ ppc64_elf_reloc_type_class (const struct bfd_link_info *info,
 
 static bool
 ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
-				   struct bfd_link_info *info)
+				   struct bfd_link_info *info,
+				   bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   struct ppc_link_hash_table *htab;
   bfd *dynobj;

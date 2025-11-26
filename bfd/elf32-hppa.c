@@ -4369,7 +4369,8 @@ elf32_hppa_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
 
 static bool
 elf32_hppa_finish_dynamic_sections (bfd *output_bfd,
-				    struct bfd_link_info *info)
+				    struct bfd_link_info *info,
+				    bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   bfd *dynobj;
   struct elf32_hppa_link_hash_table *htab;

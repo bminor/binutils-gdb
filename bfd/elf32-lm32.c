@@ -1257,7 +1257,8 @@ lm32_elf_check_relocs (bfd *abfd,
 
 static bool
 lm32_elf_finish_dynamic_sections (bfd *output_bfd,
-				  struct bfd_link_info *info)
+				  struct bfd_link_info *info,
+				  bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   struct elf_lm32_link_hash_table *htab;
   bfd *dynobj;

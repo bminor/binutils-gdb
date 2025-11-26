@@ -884,7 +884,7 @@ extern bool _bfd_x86_elf_late_size_sections
   (bfd *, struct bfd_link_info *) ATTRIBUTE_HIDDEN;
 
 extern struct elf_x86_link_hash_table *_bfd_x86_elf_finish_dynamic_sections
-  (bfd *, struct bfd_link_info *) ATTRIBUTE_HIDDEN;
+  (bfd *, struct bfd_link_info *, bfd_byte *) ATTRIBUTE_HIDDEN;
 
 extern bool _bfd_x86_elf_early_size_sections
   (bfd *, struct bfd_link_info *) ATTRIBUTE_HIDDEN;

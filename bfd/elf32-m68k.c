@@ -4270,7 +4270,8 @@ elf_m68k_finish_dynamic_symbol (bfd *output_bfd,
 /* Finish up the dynamic sections.  */
 
 static bool
-elf_m68k_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
+elf_m68k_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info,
+				  bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   bfd *dynobj;
   asection *sgot;

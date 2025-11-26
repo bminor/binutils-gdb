@@ -4054,7 +4054,8 @@ elf64_ia64_finish_dynamic_symbol (bfd *output_bfd,
 
 static bool
 elf64_ia64_finish_dynamic_sections (bfd *abfd,
-				    struct bfd_link_info *info)
+				    struct bfd_link_info *info,
+				    bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   struct elf64_ia64_link_hash_table *ia64_info;
   bfd *dynobj;

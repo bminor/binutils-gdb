@@ -9920,7 +9920,8 @@ ppc_elf_reloc_type_class (const struct bfd_link_info *info,
 
 static bool
 ppc_elf_finish_dynamic_sections (bfd *output_bfd,
-				 struct bfd_link_info *info)
+				 struct bfd_link_info *info,
+				 bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   asection *sdyn;
   struct ppc_elf_link_hash_table *htab;

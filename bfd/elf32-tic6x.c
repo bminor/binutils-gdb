@@ -3362,7 +3362,8 @@ elf32_tic6x_early_size_sections (bfd *output_bfd, struct bfd_link_info *info)
 
 static bool
 elf32_tic6x_finish_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
-				     struct bfd_link_info *info)
+				     struct bfd_link_info *info,
+				     bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   struct elf32_tic6x_link_hash_table *htab;
   bfd *dynobj;

@@ -17217,7 +17217,8 @@ arm_put_trampoline (struct elf32_arm_link_hash_table *htab, bfd *output_bfd,
 /* Finish up the dynamic sections.  */
 
 static bool
-elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info)
+elf32_arm_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info,
+				   bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   bfd * dynobj;
   asection * sgot;

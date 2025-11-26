@@ -3104,7 +3104,8 @@ elf_metag_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
 
 static bool
 elf_metag_finish_dynamic_sections (bfd *output_bfd,
-				   struct bfd_link_info *info)
+				   struct bfd_link_info *info,
+				   bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   bfd *dynobj;
   struct elf_metag_link_hash_table *htab;

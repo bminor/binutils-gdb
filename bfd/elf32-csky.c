@@ -2272,7 +2272,8 @@ csky_elf_finish_dynamic_symbol (bfd *output_bfd,
 
 static bool
 csky_elf_finish_dynamic_sections (bfd *output_bfd,
-				  struct bfd_link_info *info)
+				  struct bfd_link_info *info,
+				  bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   struct csky_elf_link_hash_table *htab;
   bfd *dynobj;

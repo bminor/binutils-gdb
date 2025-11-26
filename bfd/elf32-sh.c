@@ -6245,7 +6245,8 @@ sh_elf_finish_dynamic_symbol (bfd *output_bfd, struct bfd_link_info *info,
 /* Finish up the dynamic sections.  */
 
 static bool
-sh_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
+sh_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info,
+				bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   struct elf_sh_link_hash_table *htab;
   asection *sgotplt;

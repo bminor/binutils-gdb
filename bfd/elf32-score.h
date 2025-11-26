@@ -99,8 +99,8 @@ s7_bfd_score_elf_finish_dynamic_symbol (bfd *,
 					Elf_Internal_Sym *) ATTRIBUTE_HIDDEN;
 
 extern bool
-s7_bfd_score_elf_finish_dynamic_sections (bfd *, struct bfd_link_info *)
-  ATTRIBUTE_HIDDEN;
+s7_bfd_score_elf_finish_dynamic_sections (bfd *, struct bfd_link_info *,
+					  bfd_byte *) ATTRIBUTE_HIDDEN;
 
 extern bool
 s7_bfd_score_elf_fake_sections (bfd *,

@@ -127,7 +127,7 @@ extern bool _bfd_sparc_elf_finish_dynamic_symbol
   (bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
    Elf_Internal_Sym *sym) ATTRIBUTE_HIDDEN;
 extern bool _bfd_sparc_elf_finish_dynamic_sections
-  (bfd *, struct bfd_link_info *) ATTRIBUTE_HIDDEN;
+  (bfd *, struct bfd_link_info *, bfd_byte *) ATTRIBUTE_HIDDEN;
 extern bool _bfd_sparc_elf_fixup_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *) ATTRIBUTE_HIDDEN;
 extern bool _bfd_sparc_elf_object_p

@@ -95,7 +95,7 @@ tilegx_elf_finish_dynamic_symbol (bfd *,
 				  Elf_Internal_Sym *) ATTRIBUTE_HIDDEN;
 
 extern bool
-tilegx_elf_finish_dynamic_sections (bfd *, struct bfd_link_info *)
+tilegx_elf_finish_dynamic_sections (bfd *, struct bfd_link_info *, bfd_byte *)
   ATTRIBUTE_HIDDEN;
 
 extern bool

@@ -5135,7 +5135,8 @@ spu_elf_relocate_section (bfd *output_bfd,
 
 static bool
 spu_elf_finish_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
-				 struct bfd_link_info *info ATTRIBUTE_UNUSED)
+				 struct bfd_link_info *info ATTRIBUTE_UNUSED,
+				 bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   return true;
 }

@@ -1305,7 +1305,7 @@ struct elf_backend_data
      output file.  The FINISH_DYNAMIC_SYMBOL will have been called on
      all dynamic symbols.  */
   bool (*elf_backend_finish_dynamic_sections)
-    (bfd *output_bfd, struct bfd_link_info *info);
+    (bfd *output_bfd, struct bfd_link_info *info, bfd_byte *);
 
   /* A function to do any beginning processing needed for the ELF file
      before building the ELF headers and computing file positions.  */

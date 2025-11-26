@@ -1409,7 +1409,8 @@ rl78_elf_check_relocs
 
 static bool
 rl78_elf_finish_dynamic_sections (bfd *abfd ATTRIBUTE_UNUSED,
-				  struct bfd_link_info *info)
+				  struct bfd_link_info *info,
+				  bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   bfd *dynobj;
   asection *splt;

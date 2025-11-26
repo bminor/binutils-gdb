@@ -751,7 +751,8 @@ m32c_elf_check_relocs
 
 static bool
 m32c_elf_finish_dynamic_sections (bfd *abfd ATTRIBUTE_UNUSED,
-				  struct bfd_link_info *info)
+				  struct bfd_link_info *info,
+				  bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   bfd *dynobj = elf_hash_table (info)->dynobj;
   asection *splt = elf_hash_table (info)->splt;

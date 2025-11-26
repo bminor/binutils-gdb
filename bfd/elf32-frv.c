@@ -5685,7 +5685,8 @@ elf32_frvfdpic_relax_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec,
 
 static bool
 elf32_frv_finish_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
-				   struct bfd_link_info *info ATTRIBUTE_UNUSED)
+				   struct bfd_link_info *info ATTRIBUTE_UNUSED,
+				   bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   /* Nothing to be done for non-FDPIC.  */
   return true;
@@ -5693,7 +5694,8 @@ elf32_frv_finish_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
 static bool
 elf32_frvfdpic_finish_dynamic_sections (bfd *output_bfd,
-					struct bfd_link_info *info)
+					struct bfd_link_info *info,
+					bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   bfd *dynobj;
   asection *sdyn;

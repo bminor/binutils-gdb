@@ -4696,7 +4696,9 @@ pie_finish_undefweak_symbol (struct bfd_hash_entry *bh,
 }
 
 bool
-_bfd_sparc_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
+_bfd_sparc_elf_finish_dynamic_sections (bfd *output_bfd,
+					struct bfd_link_info *info,
+					bfd_byte *buf ATTRIBUTE_UNUSED)
 {
   bfd *dynobj;
   asection *sdyn;
