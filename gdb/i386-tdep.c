@@ -2691,7 +2691,6 @@ i386_thiscall_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   gdb_byte buf[4];
   int i;
   int write_pass;
-  int args_space = 0;
 
   /* Determine the total space required for arguments and struct
      return address in a first pass (allowing for 16-byte-aligned
@@ -2699,7 +2698,7 @@ i386_thiscall_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   for (write_pass = 0; write_pass < 2; write_pass++)
     {
-      int args_space_used = 0;
+      int args_space = 0;
 
       if (return_method == return_method_struct)
 	{
@@ -2708,38 +2707,30 @@ i386_thiscall_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      /* Push value address.  */
 	      store_unsigned_integer (buf, 4, byte_order, struct_addr);
 	      write_memory (sp, buf, 4);
-	      args_space_used += 4;
 	    }
-	  else
-	    args_space += 4;
+
+	  args_space += 4;
 	}
 
       for (i = thiscall ? 1 : 0; i < nargs; i++)
 	{
 	  int len = args[i]->enclosing_type ()->length ();
 
+	  if (i386_16_byte_align_p (args[i]->enclosing_type ()))
+	    args_space = align_up (args_space, 16);
+
 	  if (write_pass)
-	    {
-	      if (i386_16_byte_align_p (args[i]->enclosing_type ()))
-		args_space_used = align_up (args_space_used, 16);
+	    write_memory (sp + args_space,
+			  args[i]->contents_all ().data (), len);
 
-	      write_memory (sp + args_space_used,
-			    args[i]->contents_all ().data (), len);
-	      /* The System V ABI says that:
+	  /* The System V ABI says that:
 
-	      "An argument's size is increased, if necessary, to make it a
-	      multiple of [32-bit] words.  This may require tail padding,
-	      depending on the size of the argument."
+	     "An argument's size is increased, if necessary, to make it a
+	     multiple of [32-bit] words.  This may require tail padding,
+	     depending on the size of the argument."
 
-	      This makes sure the stack stays word-aligned.  */
-	      args_space_used += align_up (len, 4);
-	    }
-	  else
-	    {
-	      if (i386_16_byte_align_p (args[i]->enclosing_type ()))
-		args_space = align_up (args_space, 16);
-	      args_space += align_up (len, 4);
-	    }
+	     This makes sure the stack stays word-aligned.  */
+	  args_space += align_up (len, 4);
 	}
 
       if (!write_pass)
