@@ -31,8 +31,6 @@ amadd_db.b $r1,$r1,$r2
 amadd_db.b $r1,$r2,$r1
 amadd_db.h $r1,$r1,$r2
 amadd_db.h $r1,$r2,$r1
-amswap.w $r1,$r1,$r2
-amswap.w $r1,$r2,$r1
 amswap.d $r1,$r1,$r2
 amswap.d $r1,$r2,$r1
 amadd.w $r1,$r1,$r2

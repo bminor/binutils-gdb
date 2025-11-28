@@ -1096,9 +1096,11 @@ check_this_insn_before_appending (struct loongarch_cl_insn *ip)
       ip->reloc_info[ip->reloc_num].value = const_0;
       ip->reloc_num++;
     }
-  /* check all atomic memory insns */
+  /* check all atomic memory insns except amswap.w.
+     amswap.w $rd,$r1,$rj ($rd==$rj) is used for ud ui5.  */
   else if (ip->insn->mask == LARCH_MK_ATOMIC_MEM
-	   && LARCH_INSN_ATOMIC_MEM (ip->insn_bin))
+	   && LARCH_INSN_ATOMIC_MEM (ip->insn_bin)
+	   && !LARCH_INSN_AMSWAP_W (ip->insn_bin))
     {
       /* For AMO insn amswap.[wd], amadd.[wd], etc.  */
       if (ip->args[0] != 0

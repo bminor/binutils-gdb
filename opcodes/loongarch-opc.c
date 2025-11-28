@@ -448,6 +448,7 @@ static struct loongarch_opcode loongarch_macro_opcodes[] =
   { 0, 0, "la.tls.desc", "r,l",	  INSN_LA_TLS_DESC64_LARGE_ABS,	0 },
   { 0, 0, "la.tls.desc", "r,l",	  INSN_LA_TLS_DESC64,		0 },
   { 0, 0, "la.tls.desc", "r,r,l", INSN_LA_TLS_DESC64_LARGE_PCREL,0 },
+  { 0, 0, "ud",		 "u",	  "amswap.w $r%1,$r1,$r%1",	0, 0, 0 },
   { 0, 0, 0, 0, 0, 0, 0, 0 } /* Terminate the list.  */
 };
 

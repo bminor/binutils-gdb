@@ -101,13 +101,11 @@
 .*:101: Error: atomic memory operations insns require rd != rj && rd != rk when rd isn't r0
 .*:102: Error: atomic memory operations insns require rd != rj && rd != rk when rd isn't r0
 .*:103: Error: atomic memory operations insns require rd != rj && rd != rk when rd isn't r0
-.*:104: Error: atomic memory operations insns require rd != rj && rd != rk when rd isn't r0
-.*:105: Error: atomic memory operations insns require rd != rj && rd != rk when rd isn't r0
+.*:106: Error: bstr\(ins\|pick\)\.\[wd\] require msbd >= lsbd
+.*:107: Error: bstr\(ins\|pick\)\.\[wd\] require msbd >= lsbd
 .*:108: Error: bstr\(ins\|pick\)\.\[wd\] require msbd >= lsbd
 .*:109: Error: bstr\(ins\|pick\)\.\[wd\] require msbd >= lsbd
-.*:110: Error: bstr\(ins\|pick\)\.\[wd\] require msbd >= lsbd
-.*:111: Error: bstr\(ins\|pick\)\.\[wd\] require msbd >= lsbd
+.*:112: Error: g\?csrxchg require rj != r0 && rj != r1
+.*:113: Error: g\?csrxchg require rj != r0 && rj != r1
 .*:114: Error: g\?csrxchg require rj != r0 && rj != r1
 .*:115: Error: g\?csrxchg require rj != r0 && rj != r1
-.*:116: Error: g\?csrxchg require rj != r0 && rj != r1
-.*:117: Error: g\?csrxchg require rj != r0 && rj != r1
