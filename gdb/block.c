@@ -810,12 +810,17 @@ blockvector::append_block (struct block *block)
 const struct block *
 blockvector::lookup (CORE_ADDR addr) const
 {
-  const struct block *b;
-  int bot, top, half;
+  const CORE_ADDR start = global_block ()->start ();
+  const CORE_ADDR end = global_block ()->end ();
+
+  /* Check if the given address falls into the global block.  If not, this
+     blockvector definitely does not contain any block at ADDR.  */
+  if (addr < start || end <= addr)
+    return nullptr;
 
   /* If we have an addrmap mapping code addresses to blocks, then use
      that.  */
-  if (map ())
+  if (map () != nullptr)
     return (const struct block *) map ()->find (addr);
 
   /* Otherwise, use binary search to find the last block that starts
@@ -824,14 +829,15 @@ blockvector::lookup (CORE_ADDR addr) const
      They both have the same START,END values.
      Historically this code would choose STATIC_BLOCK over GLOBAL_BLOCK but the
      fact that this choice was made was subtle, now we make it explicit.  */
-  gdb_assert (blocks ().size () >= 2);
-  bot = STATIC_BLOCK;
-  top = blocks ().size ();
+  gdb_assert (num_blocks () >= 2);
+
+  int bot = STATIC_BLOCK;
+  int top = num_blocks ();
 
   while (top - bot > 1)
     {
-      half = (top - bot + 1) >> 1;
-      b = block (bot + half);
+      auto half = (top - bot + 1) >> 1;
+      auto b = block (bot + half);
       if (b->start () <= addr)
 	bot += half;
       else
@@ -842,15 +848,15 @@ blockvector::lookup (CORE_ADDR addr) const
 
   while (bot >= STATIC_BLOCK)
     {
-      b = block (bot);
-      if (!(b->start () <= addr))
-	return NULL;
+      auto b = block (bot);
+      if (b->start () > addr)
+	return nullptr;
       if (b->end () > addr)
 	return b;
       bot--;
     }
 
-  return NULL;
+  return nullptr;
 }
 
 /* See block.h.  */
