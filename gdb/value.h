@@ -1568,10 +1568,27 @@ extern int val_print_string (struct type *elttype, const char *encoding,
 			     struct ui_file *stream,
 			     const struct value_print_options *options);
 
+/* Print the value in stack frame FRAME of a variable specified by a
+   struct symbol.  STREAM is the ui_file on which to print the value.
+   INDENT specifies the number of indent levels to print before
+   printing the variable name.  LANGUAGE is the language to use for
+   printing.  */
+
+extern void print_variable_value (symbol *var,
+				  const frame_info_ptr &frame,
+				  ui_file *stream, int indent,
+				  const language_defn *language);
+
+/* Print the value in stack frame FRAME of a variable specified by a
+   struct symbol.  NAME is the name to print; if NULL then VAR's print
+   name will be used.  STREAM is the ui_file on which to print the
+   value.  INDENT specifies the number of indent levels to print
+   before printing the variable name.  */
+
 extern void print_variable_and_value (const char *name,
-				      struct symbol *var,
+				      symbol *var,
 				      const frame_info_ptr &frame,
-				      struct ui_file *stream,
+				      ui_file *stream,
 				      int indent);
 
 extern void typedef_print (struct type *type, struct symbol *news,

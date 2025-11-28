@@ -2325,24 +2325,13 @@ clear_dangling_display_expressions (struct objfile *objfile)
 }
 
 
-/* Print the value in stack frame FRAME of a variable specified by a
-   struct symbol.  NAME is the name to print; if NULL then VAR's print
-   name will be used.  STREAM is the ui_file on which to print the
-   value.  INDENT specifies the number of indent levels to print
-   before printing the variable name.  */
+/* See value.h.  */
 
 void
-print_variable_and_value (const char *name, struct symbol *var,
-			  const frame_info_ptr &frame,
-			  struct ui_file *stream, int indent)
+print_variable_value (symbol *var, const frame_info_ptr &frame,
+		      ui_file *stream, int indent,
+		      const language_defn *language)
 {
-
-  if (!name)
-    name = var->print_name ();
-
-  gdb_printf (stream, "%*s%ps = ", 2 * indent, "",
-	      styled_string (variable_name_style.style (), name));
-
   try
     {
       struct value *val;
@@ -2355,14 +2344,30 @@ print_variable_and_value (const char *name, struct symbol *var,
       val = read_var_value (var, NULL, frame);
       get_user_print_options (&opts);
       opts.deref_ref = true;
-      common_val_print_checked (val, stream, indent, &opts, current_language);
+      common_val_print_checked (val, stream, indent, &opts, language);
     }
   catch (const gdb_exception_error &except)
     {
       fprintf_styled (stream, metadata_style.style (),
-		      "<error reading variable %s (%s)>", name,
+		      "<error reading variable: %s>",
 		      except.what ());
     }
+}
+
+/* See value.h.  */
+
+void
+print_variable_and_value (const char *name, symbol *var,
+			  const frame_info_ptr &frame,
+			  ui_file *stream, int indent)
+{
+  if (name == nullptr)
+    name = var->print_name ();
+
+  gdb_printf (stream, "%*s%ps = ", 2 * indent, "",
+	      styled_string (variable_name_style.style (), name));
+
+  print_variable_value (var, frame, stream, indent, current_language);
 
   gdb_printf (stream, "\n");
 }

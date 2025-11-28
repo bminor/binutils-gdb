@@ -88,6 +88,10 @@ gdb_test "print P == &a_global" " = true" "test value of P in base_m"
 if {!$have_pr_41736_fixed} { setup_xfail *-*-* }
 gdb_test "print MP" "&S::f" "test value of MP in base_m"
 
+gdb_test "ptype/m *this" \
+    "type = struct Base.*with T = double, I = 23, P = $hex <a_global>, MP = &S::f.*" \
+    "print type of Base"
+
 #
 # Tests in Inner::inner_m.
 #

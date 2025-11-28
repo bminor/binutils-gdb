@@ -805,36 +805,32 @@ c_type_print_template_args (const struct type_print_options *flags,
 			    struct type *type, struct ui_file *stream,
 			    enum language language)
 {
-  int first = 1, i;
-
-  if (flags->raw)
+  if (flags->raw || TYPE_N_TEMPLATE_ARGUMENTS (type) == 0)
     return;
 
-  for (i = 0; i < TYPE_N_TEMPLATE_ARGUMENTS (type); ++i)
+  stream->wrap_here (4);
+  gdb_printf (stream, _("[with "));
+
+  for (int i = 0; i < TYPE_N_TEMPLATE_ARGUMENTS (type); ++i)
     {
       struct symbol *sym = TYPE_TEMPLATE_ARGUMENT (type, i);
 
-      if (sym->loc_class () != LOC_TYPEDEF)
-	continue;
-
-      if (first)
-	{
-	  stream->wrap_here (4);
-	  gdb_printf (stream, _("[with %s = "), sym->linkage_name ());
-	  first = 0;
-	}
-      else
+      if (i > 0)
 	{
 	  gdb_puts (", ", stream);
 	  stream->wrap_here (9);
-	  gdb_printf (stream, "%s = ", sym->linkage_name ());
 	}
 
-      c_print_type (sym->type (), "", stream, -1, 0, language, flags);
+      gdb_printf (stream, "%ps = ",
+		  styled_string (variable_name_style.style (),
+				 sym->linkage_name ()));
+      if (sym->loc_class () == LOC_TYPEDEF)
+	c_print_type (sym->type (), "", stream, -1, 0, language, flags);
+      else
+	print_variable_value (sym, {}, stream, 0, language_def (language));
     }
 
-  if (!first)
-    gdb_puts (_("] "), stream);
+  gdb_puts (_("] "), stream);
 }
 
 /* Use 'print_spaces', but take into consideration the

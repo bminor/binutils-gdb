@@ -174,7 +174,7 @@ gdb_test "ptype var2" [multi_line \
     "}"]
 
 gdb_test "ptype var3" [multi_line \
-    "type = struct template_var3<0, int, 11, float> \\\[with <unnamed1> = int, <unnamed3> = float\\\] {" \
+    "type = struct template_var3<0, int, 11, float> \\\[with <unnamed0> = 0, <unnamed1> = int, <unnamed2> = 11, <unnamed3> = float\\\] {" \
     "    <unnamed1> me;" \
     "    <unnamed3> me2;" \
     "}"]
