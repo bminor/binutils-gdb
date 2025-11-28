@@ -41,12 +41,12 @@
 
 static off_t arc_write_one_ctf (ctf_dict_t * f, int fd, size_t threshold);
 static off_t arc_write_one (int fd, const void *item, size_t size, int align);
-static int ctf_arc_value_write (int fd, const void *, size_t, uint64_t *start_off);
-static int ctf_arc_flip_modents (ctf_archive_modent_t *modent, uint64_t els,
-		      unsigned char *ents, uint64_t base, size_t arc_len,
-		      ctf_error_t *errp);
-static int ctf_arc_range_check_hdr (struct ctf_archive_internal *arci, size_t,
-				    ctf_error_t *errp);
+static ctf_ret_t ctf_arc_value_write (int fd, const void *, size_t, uint64_t *start_off);
+static ctf_ret_t ctf_arc_flip_modents (ctf_archive_modent_t *modent, uint64_t els,
+				       unsigned char *ents, uint64_t base, size_t arc_len,
+				       ctf_error_t *errp);
+static ctf_ret_t ctf_arc_range_check_hdr (struct ctf_archive_internal *arci, size_t,
+					  ctf_error_t *errp);
 static int ctf_arc_range_check_modents (ctf_archive_modent_t *modent,
 					struct ctf_archive *arc_hdr,
 					unsigned char *arc_bytes,
@@ -464,7 +464,7 @@ arc_write_one (int fd, const void *item, size_t size, int align)
 /* Write out one value in the archive.  Sets errno and returns -1 on
    error.  */
 
-static int
+static ctf_ret_t
 ctf_arc_value_write (int fd, const void *tbl_, size_t tblsz,
 		     uint64_t *start_off)
 {
@@ -523,7 +523,7 @@ search_modent_by_name (const void *key, const void *ent, void *arg)
 /* Byteswap an archive (but not its members) if necessary.  After this,
    the entire archive is in native-endian byte order.  */
 
-static int
+static ctf_ret_t
 ctf_arc_flip_archive (struct ctf_archive_internal *arci, size_t arc_len,
 		      ctf_error_t *errp)
 {
@@ -587,7 +587,7 @@ ctf_arc_flip_archive (struct ctf_archive_internal *arci, size_t arc_len,
 /* Byteswap a modent table with offsets rooted at BASE, including the size
    entries preceding the elements themselves.  */
 
-static int
+static ctf_ret_t
 ctf_arc_flip_modents (ctf_archive_modent_t *modent, uint64_t els,
 		      unsigned char *ents, uint64_t base, size_t arc_len,
 		      ctf_error_t *errp)
@@ -622,7 +622,7 @@ ctf_arc_flip_modents (ctf_archive_modent_t *modent, uint64_t els,
    checkable.  The rest gets checked further down, in
    ctf_arc_range_check.  */
 
-static int
+static ctf_ret_t
 ctf_arc_range_check_hdr (struct ctf_archive_internal *arci, size_t arc_len,
 			 ctf_error_t *errp)
 {
@@ -677,35 +677,35 @@ ctf_arc_range_check_hdr (struct ctf_archive_internal *arci, size_t arc_len,
 
   if (nprop_end > arc_len)
     {
-      err = "props table";
+      err = N_("props table");
       goto err;
     }
 
   if (arci->ctfi_hdr->names > arc_len)
     {
-      err = "name table";
+      err = N_("name table");
       goto err;
     }
 
   if (arci->ctfi_hdr->ctfs > arc_len)
     {
-      err = "member table";
+      err = N_("member table");
       goto err;
     }
 
   return 0;
 
  err:
-  ctf_err_warn (NULL, 0, EOVERFLOW, "CTF archive overflow: overlapping %s in archive",
-	       err);
   ctf_set_open_errno (errp, EOVERFLOW);
-  return -1;
+  return ctf_err (err_locus (NULL), EOVERFLOW,
+		  _("CTF archive overflow: overlapping %s in archive"),
+		  gettext (err));
 }
 
 /* Range check the archive modent tables.  By this stage the tables are all
    in native endianness.  */
 
-static int
+static ctf_ret_t
 ctf_arc_range_check (struct ctf_archive_internal *arci, size_t arc_len,
 		     ctf_error_t *errp)
 {
@@ -768,7 +768,7 @@ ctf_arc_closest_section (struct ctf_archive *arc_hdr, uint64_t base,
 
 /* Range-check a single modent array.  */
 
-static int
+static ctf_ret_t
 ctf_arc_range_check_modents (ctf_archive_modent_t *modent,
 			     struct ctf_archive *arc_hdr,
 			     unsigned char *arc_bytes,

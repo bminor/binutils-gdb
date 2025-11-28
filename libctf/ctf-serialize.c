@@ -78,7 +78,7 @@ typedef struct emit_symtypetab_state
 
    All refs must point within the ctf_serialize.cs_buf.  */
 
-static int
+static ctf_ret_t
 ctf_type_add_ref (ctf_dict_t *fp, uint32_t *ref)
 {
   ctf_dtdef_t *dtd;
@@ -158,7 +158,7 @@ ctf_symtab_skippable (ctf_link_sym_t *sym)
    constructed.  Do not add any refs in this function!  */
 
 _libctf_nonnull_ ((1,3,4,5,6,7,8))
-static int
+static ctf_ret_t
 symtypetab_density (ctf_dict_t *fp, ctf_dict_t *symfp, ctf_dynhash_t *symhash,
 		    size_t *count, size_t *max, size_t *unpadsize,
 		    size_t *padsize, size_t *idxsize, int flags)
@@ -328,7 +328,7 @@ symtypetab_density (ctf_dict_t *fp, ctf_dict_t *symfp, ctf_dynhash_t *symhash,
 
    Note down type ID refs as we go.  */
 
-static int
+static ctf_ret_t
 emit_symtypetab (ctf_dict_t *fp, ctf_dict_t *symfp, uint32_t *dp,
 		 ctf_link_sym_t **idx, const char **nameidx, uint32_t nidx,
 		 uint32_t outmax, int size, int flags)
@@ -427,7 +427,7 @@ emit_symtypetab (ctf_dict_t *fp, ctf_dict_t *symfp, uint32_t *dp,
 /* Emit an objt or func symtypetab index into DP in a paticular order defined by
    an array of symbol names passed in.  Stop at NIDX.  The linker-reported set
    of symbols (if any) is found in SYMFP. */
-static int
+static ctf_ret_t
 emit_symtypetab_index (ctf_dict_t *fp, ctf_dict_t *symfp, uint32_t *dp,
 		       const char **idx, uint32_t nidx, int size, int flags)
 {
@@ -513,7 +513,7 @@ emit_symtypetab_index (ctf_dict_t *fp, ctf_dict_t *symfp, uint32_t *dp,
    This is a sizing function, called before the output buffer is
    constructed.  Do not add any refs in this function!  */
 
-static int
+static ctf_ret_t
 ctf_symtypetab_sect_sizes (ctf_dict_t *fp, emit_symtypetab_state_t *s,
 			   ctf_header_t *hdr, size_t *objt_size,
 			   size_t *func_size, size_t *objtidx_size,
@@ -619,7 +619,7 @@ ctf_symtypetab_sect_sizes (ctf_dict_t *fp, emit_symtypetab_state_t *s,
 
 /* Emit the symtypetab sections.  */
 
-static int
+static ctf_ret_t
 ctf_emit_symtypetab_sects (ctf_dict_t *fp, emit_symtypetab_state_t *s,
 			   unsigned char **tptr, size_t objt_size,
 			   size_t func_size, size_t objtidx_size,
@@ -840,7 +840,7 @@ ctf_prefix_elidable (ctf_dict_t *fp, uint32_t kind, ctf_dtdef_t *dtd,
    have already verified that the CTF-specific sections (typetabs, etc) will be
    empty, and that the input dict was freshly-created or read in from BTF.  */
 
-static int
+static ctf_ret_t
 ctf_type_sect_is_btf (ctf_dict_t *fp, int force_ctf)
 {
   ctf_dtdef_t *dtd;
@@ -990,7 +990,7 @@ ctf_type_sect_size (ctf_dict_t *fp)
    By this stage we no longer need to worry about CTF-versus-BTF, only about
    whether a type has been suppressed or not.  */
 
-static int
+static ctf_ret_t
 ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr,
 		    size_t expected_size)
 {
@@ -1321,7 +1321,7 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr,
    state prohibits it, or a per-dict prohibition is preventing the writeout of a
    type kind that this dict contains.  */
 
-int
+ctf_ret_t
 ctf_serialize_output_format (ctf_dict_t *fp, int force_ctf)
 {
   int ctf_needed = 0;
@@ -1376,7 +1376,7 @@ ctf_serialize_output_format (ctf_dict_t *fp, int force_ctf)
    If FORCE_CTF is enabled, always emit CTF in LIBCTF_BTM_POSSIBLE mode, and
    error in LIBCTF_BTM_BTF mode.  */
 
-int
+ctf_ret_t
 ctf_preserialize (ctf_dict_t *fp, int force_ctf)
 {
   ctf_header_t hdr, *hdrp;

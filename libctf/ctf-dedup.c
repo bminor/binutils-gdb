@@ -403,7 +403,7 @@ make_set_element (ctf_dynhash_t *set, const void *key)
 }
 
 /* Initialize the dedup atoms table.  */
-int
+ctf_ret_t
 ctf_dedup_atoms_init (ctf_dict_t *fp)
 {
   if (fp->ctf_dedup_atoms)
@@ -580,15 +580,15 @@ static const char *
 ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
 		     ctf_dict_t **inputs, int input_num,
 		     ctf_id_t type, int flags, unsigned long depth,
-		     int (*populate_fun) (ctf_dict_t *fp,
-					  ctf_dict_t *input,
-					  ctf_dict_t **inputs,
-					  int input_num,
-					  ctf_id_t type,
-					  int isroot,
-					  void *id,
-					  const char *decorated_name,
-					  const char *hash));
+		     ctf_ret_t (*populate_fun) (ctf_dict_t *fp,
+						ctf_dict_t *input,
+						ctf_dict_t **inputs,
+						int input_num,
+						ctf_id_t type,
+						int isroot,
+						void *id,
+						const char *decorated_name,
+						const char *hash));
 
 /* Determine whether this type is being hashed as a stub (in which case it is
    unsafe to cache it).  */
@@ -649,15 +649,15 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 		      const ctf_type_t *tp, const char *name,
 		      const char *decorated, ctf_kind_t kind, int flags,
 		      unsigned long depth,
-		      int (*populate_fun) (ctf_dict_t *fp,
-					   ctf_dict_t *input,
-					   ctf_dict_t **inputs,
-					   int input_num,
-					   ctf_id_t type,
-					   int isroot,
-					   void *id,
-					   const char *decorated_name,
-					   const char *hash))
+		      ctf_ret_t (*populate_fun) (ctf_dict_t *fp,
+						 ctf_dict_t *input,
+						 ctf_dict_t **inputs,
+						 int input_num,
+						 ctf_id_t type,
+						 int isroot,
+						 void *id,
+						 const char *decorated_name,
+						 const char *hash))
 {
   ctf_dedup_t *d = &fp->ctf_dedup;
   ctf_next_t *i = NULL;
@@ -1368,15 +1368,15 @@ static const char *
 ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
 		     ctf_dict_t **inputs, int input_num, ctf_id_t type,
 		     int flags, unsigned long depth,
-		     int (*populate_fun) (ctf_dict_t *fp,
-					  ctf_dict_t *input,
-					  ctf_dict_t **inputs,
-					  int input_num,
-					  ctf_id_t type,
-					  int isroot,
-					  void *id,
-					  const char *decorated_name,
-					  const char *hash))
+		     ctf_ret_t (*populate_fun) (ctf_dict_t *fp,
+						ctf_dict_t *input,
+						ctf_dict_t **inputs,
+						int input_num,
+						ctf_id_t type,
+						int isroot,
+						void *id,
+						const char *decorated_name,
+						const char *hash))
 {
   ctf_dedup_t *d = &fp->ctf_dedup;
   const ctf_type_t *tp, *suffix;
@@ -1505,7 +1505,7 @@ ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
   return NULL;
 }
 
-static int
+static ctf_ret_t
 ctf_dedup_count_name (ctf_dict_t *fp, const char *name, void *id);
 
 /* Populate a number of useful mappings not directly used by the hashing
@@ -1513,7 +1513,7 @@ ctf_dedup_count_name (ctf_dict_t *fp, const char *name, void *id);
    -> count of hashval deduplication state for a given hashed type; the
    cd_output_first_gid mapping; and the cd_nonroot_consistency mapping.  */
 
-static int
+static ctf_ret_t
 ctf_dedup_populate_mappings (ctf_dict_t *fp, ctf_dict_t *input _libctf_unused_,
 			     ctf_dict_t **inputs _libctf_unused_,
 			     int input_num _libctf_unused_,
@@ -1710,7 +1710,7 @@ ctf_dedup_populate_mappings (ctf_dict_t *fp, ctf_dict_t *input _libctf_unused_,
 }
 
 /* Clean up things no longer needed after hashing is over.  */
-static int
+static ctf_ret_t
 ctf_dedup_hash_type_fini (ctf_dict_t *fp)
 {
   ctf_next_t *i = NULL;
@@ -1736,7 +1736,7 @@ ctf_dedup_hash_type_fini (ctf_dict_t *fp)
     return 0;
 }
 
-static int
+static ctf_ret_t
 ctf_dedup_count_name (ctf_dict_t *fp, const char *name, void *id)
 {
   ctf_dedup_t *d = &fp->ctf_dedup;
@@ -1808,7 +1808,7 @@ ctf_dedup_hash_kind_gid (ctf_dict_t *fp, ctf_dict_t **inputs, const char *hash,
 				 CTF_DEDUP_GID_TO_TYPE (id));
 }
 
-static int
+static ctf_ret_t
 ctf_dedup_mark_conflicting_hash (ctf_dict_t *fp, ctf_dict_t **inputs,
 				 const char *hval);
 
@@ -1816,7 +1816,7 @@ ctf_dedup_mark_conflicting_hash (ctf_dict_t *fp, ctf_dict_t **inputs,
    Internal implementation detail of ctf_dedup_mark_conflicting_hash(),
    which see.  */
 
-static int
+static ctf_ret_t
 ctf_dedup_mark_conflicting_hash_citers (ctf_dict_t *fp, ctf_dict_t **inputs,
 					const char *hval)
 {
@@ -1861,7 +1861,7 @@ ctf_dedup_mark_conflicting_hash_citers (ctf_dict_t *fp, ctf_dict_t **inputs,
    in the citers graph as a *decorated struct/union name* mapping to a set of
    decl tags: we check for these separately, below.  */
 
-static int
+static ctf_ret_t
 ctf_dedup_mark_conflicting_hash (ctf_dict_t *fp, ctf_dict_t **inputs,
 				 const char *hval)
 {
@@ -1963,7 +1963,7 @@ ctf_dedup_count_types (void *key_, void *value _libctf_unused_, void *arg_)
 
 /* Detect name ambiguity and mark ambiguous names as conflicting, other than the
    most common.  */
-static int
+static ctf_ret_t
 ctf_dedup_detect_name_ambiguity (ctf_dict_t *fp, ctf_dict_t **inputs)
 {
   ctf_dedup_t *d = &fp->ctf_dedup;
@@ -2170,7 +2170,7 @@ ctf_dedup_detect_name_ambiguity (ctf_dict_t *fp, ctf_dict_t **inputs)
 
 /* Initialize the deduplication machinery.  */
 
-static int
+static ctf_ret_t
 ctf_dedup_init (ctf_dict_t *fp)
 {
   ctf_dedup_t *d = &fp->ctf_dedup;
@@ -2435,7 +2435,7 @@ ctf_dedup_multiple_input_dicts (ctf_dict_t *output, ctf_dict_t **inputs,
    two inputs where one input is the parent of the other, into conflicting
    types.  Only used if the link mode is CTF_LINK_SHARE_DUPLICATED.  */
 
-static int
+static ctf_ret_t
 ctf_dedup_conflictify_unshared (ctf_dict_t *output, ctf_dict_t **inputs)
 {
   ctf_dedup_t *d = &output->ctf_dedup;
@@ -2505,7 +2505,7 @@ ctf_dedup_conflictify_unshared (ctf_dict_t *output, ctf_dict_t **inputs)
    Only deduplicates: does not emit the types into the output.  Call
    ctf_dedup_emit afterwards to do that.  */
 
-int
+ctf_ret_t
 ctf_dedup (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
 	   int cu_mapping_phase)
 {
@@ -2645,51 +2645,51 @@ ctf_dedup_member_decl_tag (ctf_dict_t *fp, ctf_id_t type)
   return 0;
 }
 
-static int
+static ctf_ret_t
 ctf_dedup_rwalk_output_mapping (ctf_dict_t *output, ctf_dict_t **inputs,
 				uint32_t ninputs, uint32_t *parents,
 				ctf_dynset_t *already_visited,
 				const char *hval,
-				int (*visit_fun) (const char *hval,
-						  ctf_dict_t *output,
-						  ctf_dict_t **inputs,
-						  uint32_t ninputs,
-						  uint32_t *parents,
-						  int already_visited,
-						  ctf_dict_t *input,
-						  ctf_id_t type,
-						  void *id,
-						  int depth,
-						  void *arg),
+				ctf_ret_t (*visit_fun) (const char *hval,
+							ctf_dict_t *output,
+							ctf_dict_t **inputs,
+							uint32_t ninputs,
+							uint32_t *parents,
+							int already_visited,
+							ctf_dict_t *input,
+							ctf_id_t type,
+							void *id,
+							int depth,
+							void *arg),
 				void *arg, unsigned long depth);
 
 /* Like ctf_dedup_rwalk_output_mapping (which see), only takes a single target
    type and visits it.  */
-static int
+static ctf_ret_t
 ctf_dedup_rwalk_one_output_mapping (ctf_dict_t *output,
 				    ctf_dict_t **inputs, uint32_t ninputs,
 				    uint32_t *parents,
 				    ctf_dynset_t *already_visited,
 				    int visited, void *type_id,
 				    const char *hval,
-				    int (*visit_fun) (const char *hval,
-						      ctf_dict_t *output,
-						      ctf_dict_t **inputs,
-						      uint32_t ninputs,
-						      uint32_t *parents,
-						      int already_visited,
-						      ctf_dict_t *input,
-						      ctf_id_t type,
-						      void *id,
-						      int depth,
-						      void *arg),
+				    ctf_ret_t (*visit_fun) (const char *hval,
+							    ctf_dict_t *output,
+							    ctf_dict_t **inputs,
+							    uint32_t ninputs,
+							    uint32_t *parents,
+							    int already_visited,
+							    ctf_dict_t *input,
+							    ctf_id_t type,
+							    void *id,
+							    int depth,
+							    void *arg),
 				    void *arg, unsigned long depth)
 {
   ctf_dedup_t *d = &output->ctf_dedup;
   ctf_dict_t *fp;
   int input_num;
   ctf_id_t type;
-  int ret;
+  ctf_ret_t ret;
   const char *whaterr;
 
   input_num = CTF_DEDUP_GID_TO_INPUT (type_id);
@@ -2860,22 +2860,22 @@ ctf_dedup_rwalk_one_output_mapping (ctf_dict_t *output,
    returns a negative error code or zero.  Type hashes may be visited more than
    once, but are not recursed through repeatedly: ALREADY_VISITED tracks whether
    types have already been visited.  */
-static int
+static ctf_ret_t
 ctf_dedup_rwalk_output_mapping (ctf_dict_t *output, ctf_dict_t **inputs,
 				uint32_t ninputs, uint32_t *parents,
 				ctf_dynset_t *already_visited,
 				const char *hval,
-				int (*visit_fun) (const char *hval,
-						  ctf_dict_t *output,
-						  ctf_dict_t **inputs,
-						  uint32_t ninputs,
-						  uint32_t *parents,
-						  int already_visited,
-						  ctf_dict_t *input,
-						  ctf_id_t type,
-						  void *id,
-						  int depth,
-						  void *arg),
+				ctf_ret_t (*visit_fun) (const char *hval,
+							ctf_dict_t *output,
+							ctf_dict_t **inputs,
+							uint32_t ninputs,
+							uint32_t *parents,
+							int already_visited,
+							ctf_dict_t *input,
+							ctf_id_t type,
+							void *id,
+							int depth,
+							void *arg),
 				void *arg, unsigned long depth)
 {
   ctf_dedup_t *d = &output->ctf_dedup;
@@ -2932,7 +2932,7 @@ ctf_dedup_rwalk_output_mapping (ctf_dict_t *output, ctf_dict_t **inputs,
 
   while ((err = ctf_dynset_next (type_ids, &i, &id)) == 0)
     {
-      int ret;
+      ctf_ret_t ret;
 
       ret = ctf_dedup_rwalk_one_output_mapping (output, inputs, ninputs,
 						parents, already_visited,
@@ -3024,26 +3024,26 @@ sort_output_mapping (const ctf_next_hkv_t *one, const ctf_next_hkv_t *two,
 }
 
 /* The public entry point to ctf_dedup_rwalk_output_mapping, above.  */
-static int
+static ctf_ret_t
 ctf_dedup_walk_output_mapping (ctf_dict_t *output, ctf_dict_t **inputs,
 			       uint32_t ninputs, uint32_t *parents,
-			       int (*visit_fun) (const char *hval,
-						 ctf_dict_t *output,
-						 ctf_dict_t **inputs,
-						 uint32_t ninputs,
-						 uint32_t *parents,
-						 int already_visited,
-						 ctf_dict_t *input,
-						 ctf_id_t type,
-						 void *id,
-						 int depth,
-						 void *arg),
+			       ctf_ret_t (*visit_fun) (const char *hval,
+						       ctf_dict_t *output,
+						       ctf_dict_t **inputs,
+						       uint32_t ninputs,
+						       uint32_t *parents,
+						       int already_visited,
+						       ctf_dict_t *input,
+						       ctf_id_t type,
+						       void *id,
+						       int depth,
+						       void *arg),
 			       void *arg)
 {
   ctf_dynset_t *already_visited;
   ctf_next_t *i = NULL;
   ctf_sort_om_cb_arg_t sort_arg;
-  ctf_error_t err;
+  ctf_error_t err = 0;
   void *k;
 
   if ((already_visited = ctf_dynset_create (htab_hash_string,
@@ -3060,11 +3060,12 @@ ctf_dedup_walk_output_mapping (ctf_dict_t *output, ctf_dict_t **inputs,
 					 &sort_arg)) == 0)
     {
       const char *hval = (const char *) k;
+      ctf_ret_t ret;
 
-      err = ctf_dedup_rwalk_output_mapping (output, inputs, ninputs, parents,
+      ret = ctf_dedup_rwalk_output_mapping (output, inputs, ninputs, parents,
 					    already_visited, hval, visit_fun,
 					    arg, 0);
-      if (err < 0)
+      if (ret < 0)
 	{
 	  ctf_next_destroy (i);
 	  goto err;				/* errno is set for us.  */
@@ -3292,7 +3293,7 @@ ctf_dedup_id_to_target (ctf_dict_t *output, ctf_dict_t *target,
    nor have the type visible via any other route (the function info section,
    data object section, backtrace section etc).  */
 
-static int
+static ctf_ret_t
 ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 		     uint32_t ninputs, uint32_t *parents, int already_visited,
 		     ctf_dict_t *input, ctf_id_t type, void *id, int depth,
@@ -3943,7 +3944,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
    emitted until the members have been (and which are not C types, so cannot be
    referenced by struct members).  */
 
-static int
+static ctf_ret_t
 ctf_dedup_emit_struct_members (ctf_dict_t *output, ctf_dict_t **inputs,
 			       uint32_t ninputs, uint32_t *parents)
 {
@@ -4043,7 +4044,7 @@ ctf_dedup_emit_struct_members (ctf_dict_t *output, ctf_dict_t **inputs,
    mentioned there.  All other types are emitted and complete by this
    point.  */
 
-static int
+static ctf_ret_t
 ctf_dedup_emit_decl_tags (ctf_dict_t *output, ctf_dict_t **inputs)
 {
   ctf_dedup_t *d = &output->ctf_dedup;
@@ -4239,7 +4240,7 @@ ctf_dedup_emit (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
    preserialization.  The child dict ctf_parent_strlen is not updated yet.
    (ctf_arc_write_*() does the right thing.)  */
 
-int
+ctf_ret_t
 ctf_dedup_strings (ctf_dict_t *fp)
 {
   ctf_dynhash_t *str_counts;

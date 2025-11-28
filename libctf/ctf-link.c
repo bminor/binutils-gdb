@@ -585,7 +585,7 @@ ctf_link_deduplicating_count_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
   return count;
 }
 
-static int
+static ctf_ret_t
 ctf_link_deduplicating_close_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
 				     ctf_dict_t **inputs, ssize_t ninputs);
 
@@ -772,7 +772,7 @@ ctf_link_deduplicating_open_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
    that subset of the ctf_link_inputs archives they came from cited by the
    CU_NAMES.  If CU_NAMES is not specified, close all the ctf_link_inputs in one
    go, leaving it empty.  */
-static int
+static ctf_ret_t
 ctf_link_deduplicating_close_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
 				     ctf_dict_t **inputs, ssize_t ninputs)
 {
@@ -839,7 +839,7 @@ check_sym (ctf_dict_t *fp, const char *name, ctf_id_t type, int functions)
 /* Do a deduplicating link of one symtypetab (function info or data object) in
    one input dict.  */
 
-static int
+static ctf_ret_t
 ctf_link_deduplicating_one_symtypetab (ctf_dict_t *fp, ctf_dict_t *input,
 				       int cu_mapped, int functions)
 {
@@ -952,7 +952,7 @@ ctf_link_deduplicating_one_symtypetab (ctf_dict_t *fp, ctf_dict_t *input,
 
 /* Do a deduplicating link of the function info and data objects
    in the inputs.  */
-static int
+static ctf_ret_t
 ctf_link_deduplicating_syms (ctf_dict_t *fp, ctf_dict_t **inputs,
 			     size_t ninputs, int cu_mapped)
 {
@@ -973,7 +973,7 @@ ctf_link_deduplicating_syms (ctf_dict_t *fp, ctf_dict_t **inputs,
 }
 
 /* Do the per-CU part of a deduplicating link.  */
-static int
+static ctf_ret_t
 ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
 {
   ctf_next_t *i = NULL;
@@ -1199,7 +1199,7 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
 }
 
 /* Empty all the ctf_link_outputs.  */
-static int
+static ctf_ret_t
 ctf_link_empty_outputs (ctf_dict_t *fp)
 {
   ctf_next_t *i = NULL;
@@ -1748,7 +1748,7 @@ ctf_elf64_to_link_sym (ctf_dict_t *fp, ctf_link_sym_t *dst, const Elf64_Sym *src
 /* Determine whether the archive that will be built from this linked dict is compatible
    with pure BTF or would require CTF.  (Other things may nonetheless require CTF, in
    particular, compression.)  */
-int
+ctf_ret_t
 ctf_link_output_is_btf (ctf_dict_t *fp)
 {
   /* Can't call when nothing has been linked yet.  */

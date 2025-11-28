@@ -794,13 +794,13 @@ extern int ctf_insert_type_decl_tag (ctf_dict_t *, ctf_id_t, const char *,
 extern ctf_ret_t ctf_track_enumerator (ctf_dict_t *, ctf_id_t, const char *);
 extern ctf_bool_t ctf_enum_unsigned (ctf_dict_t *, ctf_id_t);
 
-extern int ctf_dedup_atoms_init (ctf_dict_t *);
-extern int ctf_dedup (ctf_dict_t *, ctf_dict_t **, uint32_t ninputs,
-		      int cu_mapped_phase);
+extern ctf_ret_t ctf_dedup_atoms_init (ctf_dict_t *);
+extern ctf_ret_t ctf_dedup (ctf_dict_t *, ctf_dict_t **, uint32_t ninputs,
+			    int cu_mapped_phase);
 extern ctf_dict_t **ctf_dedup_emit (ctf_dict_t *, ctf_dict_t **,
 				    uint32_t ninputs, uint32_t *parents,
 				    uint32_t *noutputs, int cu_mapped_phase);
-extern int ctf_dedup_strings (ctf_dict_t *fp);
+extern ctf_ret_t ctf_dedup_strings (ctf_dict_t *fp);
 extern void ctf_dedup_fini (ctf_dict_t *, ctf_dict_t **, uint32_t);
 extern ctf_id_t ctf_dedup_type_mapping (ctf_dict_t *fp, ctf_dict_t *src_fp,
 					ctf_id_t src_type);
@@ -825,8 +825,8 @@ extern void ctf_str_purge_refs (ctf_dict_t *fp);
 extern void ctf_str_rollback (ctf_dict_t *, ctf_snapshot_id_t);
 extern const ctf_strs_writable_t *ctf_str_write_strtab (ctf_dict_t *);
 
-extern int ctf_serialize_output_format (ctf_dict_t *fp, int force_ctf);
-extern int ctf_preserialize (ctf_dict_t *fp, int force_ctf);
+extern ctf_ret_t ctf_serialize_output_format (ctf_dict_t *fp, int force_ctf);
+extern ctf_ret_t ctf_preserialize (ctf_dict_t *fp, int force_ctf);
 extern void ctf_depreserialize (ctf_dict_t *fp);
 
 extern struct ctf_archive_internal *
