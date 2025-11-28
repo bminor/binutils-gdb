@@ -1359,13 +1359,25 @@ There is NO WARRANTY, to the extent permitted by law.",
     }
 }
 
+/* Unicode Block “Box Drawing” chars.  UTF-8 string literals have type:
+   - const char[N]    (until C++20), or
+   - const char8_t[N] (since C++20).
+   Assign them to a variable to stabilize the type.
+*/
+static const char bd_heavy_horizontal[] = u8"\u2501";
+static const char bd_heavy_vertical[] = u8"\u2503";
+static const char bd_heavy_down_and_right[] = u8"\u250f";
+static const char bd_heavy_down_and_left[] = u8"\u2513";
+static const char bd_heavy_up_and_right[] = u8"\u2517";
+static const char bd_heavy_up_and_left[] = u8"\u251b";
+
 /* Print MESSAGE to STREAM in lines of maximum size WIDTH, so that it fits
    in an ascii art box of width WIDTH+4.  Messages may be broken on
    spaces.  */
 static void
 box_one_message (ui_file *stream, std::string message, int width)
 {
-  const char *wall = emojis_ok () ? u8"\u2503" : "|";
+  const char *wall = emojis_ok () ? bd_heavy_vertical : "|";
   while (!message.empty ())
     {
       std::string line;
@@ -1444,10 +1456,10 @@ print_gdb_hints (struct ui_file *stream)
 
       if (emojis_ok ())
 	{
-	  gdb_printf (stream, u8"\u250f");
+	  gdb_printf (stream, "%s", bd_heavy_down_and_right);
 	  for (int i = 0; i < (width - 2); i++)
-	    gdb_printf (stream, u8"\u2501");
-	  gdb_printf (stream, u8"\u2513\n");
+	    gdb_printf (stream, "%s", bd_heavy_horizontal);
+	  gdb_printf (stream, "%s\n", bd_heavy_down_and_left);
 	}
       else
 	gdb_printf (stream, "+%s+\n", sep.c_str ());
@@ -1457,10 +1469,10 @@ print_gdb_hints (struct ui_file *stream)
 
       if (emojis_ok ())
 	{
-	  gdb_printf (stream, u8"\u2517");
+	  gdb_printf (stream, "%s", bd_heavy_up_and_right);
 	  for (int i = 0; i < (width - 2); i++)
-	    gdb_printf (stream, u8"\u2501");
-	  gdb_printf (stream, u8"\u251b\n");
+	    gdb_printf (stream, "%s", bd_heavy_horizontal);
+	  gdb_printf (stream, "%s\n", bd_heavy_up_and_left);
 	}
       else
 	gdb_printf (stream, "+%s+\n", sep.c_str ());
