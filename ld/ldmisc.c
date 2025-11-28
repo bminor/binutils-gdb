@@ -37,6 +37,27 @@
 #include "ldmain.h"
 #include "ldfile.h"
 
+static size_t
+count_modifiers (const char *scan)
+{
+  size_t mods = strspn (scan, "-+ #0");
+
+  while (scan[mods] != '0' && ISDIGIT (scan[mods]))
+    ++mods;
+  if (scan[mods] == '.')
+    ++mods;
+  while (scan[mods] != '0' && ISDIGIT (scan[mods]))
+    ++mods;
+
+  return mods;
+}
+
+static char *
+make_cfmt (const char *fmt, int nr)
+{
+  return xasprintf ("%%%.*s", nr, fmt);
+}
+
 /*
  %% literal %
  %C clever filename:linenumber with function
@@ -118,6 +139,9 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bool is_warning)
 	      arg_no = *scan - '1';
 	      scan += 2;
 	    }
+
+	  /* Skip most modifiers that printf() permits.  */
+	  scan += count_modifiers (scan);
 
 	  arg_type = Bad;
 	  switch (*scan++)
@@ -217,6 +241,8 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bool is_warning)
 
       if (*fmt == '%')
 	{
+	  size_t mods;
+
 	  fmt++;
 
 	  arg_no = arg_count;
@@ -226,8 +252,14 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bool is_warning)
 	      fmt += 2;
 	    }
 
+	  /* Record modifiers that printf() permits and that we support.  */
+	  mods = count_modifiers (fmt);
+	  fmt += mods;
+
 	  switch (*fmt++)
 	    {
+	      char *cfmt;
+
 	    case '\0':
 	      --fmt;
 	      /* Fall through.  */
@@ -514,56 +546,32 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bool is_warning)
 		    }
 		  fprintf (fp, "%s", name);
 		}
-	      else
+	      else /* Native (host) void* pointer, like printf().  */
 		{
-		  /* native (host) void* pointer, like printf */
-		  fprintf (fp, "%p", args[arg_no].p);
+		  /* Fallthru */
+	    case 's': /* Arbitrary string, like printf().  */
+		  cfmt = make_cfmt (fmt - 1 - mods, mods + 1);
+		  fprintf (fp, cfmt, args[arg_no].p);
+		  free (cfmt);
 		  ++arg_count;
 		}
 	      break;
 
-	    case 's':
-	      /* arbitrary string, like printf */
-	      fprintf (fp, "%s", (char *) args[arg_no].p);
+	    case 'd': /* Integer, like printf().  */
+	    case 'u': /* Unsigned integer, like printf().  */
+	    case 'x': /* Unsigned integer, like printf().  */
+	      cfmt = make_cfmt (fmt - 1 - mods, mods + 1);
+	      fprintf (fp, cfmt, args[arg_no].i);
+	      free (cfmt);
 	      ++arg_count;
 	      break;
 
-	    case 'd':
-	      /* integer, like printf */
-	      fprintf (fp, "%d", args[arg_no].i);
-	      ++arg_count;
-	      break;
-
-	    case 'u':
-	      /* unsigned integer, like printf */
-	      fprintf (fp, "%u", args[arg_no].i);
-	      ++arg_count;
-	      break;
-
-	    case 'x':
-	      /* unsigned integer, like printf */
-	      fprintf (fp, "%x", args[arg_no].i);
-	      ++arg_count;
-	      break;
-
-	    case 'l':
-	      if (*fmt == 'd')
+	    case 'l': /* (Unsigned) long integer, like printf().  */
+	      if (*fmt == 'd' || *fmt == 'u' || *fmt == 'x')
 		{
-		  fprintf (fp, "%ld", args[arg_no].l);
-		  ++arg_count;
-		  ++fmt;
-		  break;
-		}
-	      else if (*fmt == 'u')
-		{
-		  fprintf (fp, "%lu", args[arg_no].l);
-		  ++arg_count;
-		  ++fmt;
-		  break;
-		}
-	      else if (*fmt == 'x')
-		{
-		  fprintf (fp, "%lx", args[arg_no].l);
+		  cfmt = make_cfmt (fmt - 1 - mods, mods + 2);
+		  fprintf (fp, cfmt, args[arg_no].l);
+		  free (cfmt);
 		  ++arg_count;
 		  ++fmt;
 		  break;

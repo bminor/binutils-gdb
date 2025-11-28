@@ -4247,7 +4247,7 @@ report_isa_level (struct bfd_link_info *info, bfd *abfd,
 	  info->callbacks->einfo ("x86-64-v4");
 	  break;
 	default:
-	  info->callbacks->einfo (_("<unknown: %x>"), bit);
+	  info->callbacks->einfo (_("<unknown: %#x>"), bit);
 	  break;
 	}
       if (bitmask)
