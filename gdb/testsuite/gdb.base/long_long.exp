@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 # long_long.exp   Test printing of 64-bit things in 32-bit gdb.
-#                 Also test differnet kinds of formats.
+#                 Also test different kinds of formats.
 #
 require {!target_info exists no_long_long}
 
@@ -205,7 +205,7 @@ gdb_test_ptr "p/a *(long long *)ll" "" "" "0x89abcdef" "0x123456789abcdef"
 gdb_test_long_long "p/f *(long long *)ll" "" "" "" "3.5127005640885037e-303"
 gdb_test_long_long "p/c *(long long *)ll" "" "" "" "-17 '.*'"
 
-# Implict Word size (except for a, c, and f)
+# Implicit Word size (except for a, c, and f)
 
 gdb_test "x/w w" ".*" "set examine size to w"
 gdb_test "x/x w" "0x01234567"
@@ -221,7 +221,7 @@ if { $sizeof_double == 8 || $sizeof_long_double == 8 } {
     gdb_test "x/f &val.oct" "-2.42716126e-15"
 }
 
-# Implict Giant size (except for a, c, and f)
+# Implicit Giant size (except for a, c, and f)
 
 gdb_test "x/g g" ".*" "set examine size to g"
 gdb_test "x/2x g" "0x0123456789abcdef.*0xa72ee53977053977"
