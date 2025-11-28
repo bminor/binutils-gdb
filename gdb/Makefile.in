@@ -451,6 +451,7 @@ SUBDIR_PYTHON_LDFLAGS =
 SUBDIR_PYTHON_CFLAGS =
 
 SELFTESTS_SRCS = \
+	block-selftests.c \
 	disasm-selftests.c \
 	gdbarch-selftests.c \
 	selftest-arch.c \
