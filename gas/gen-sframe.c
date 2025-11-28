@@ -748,7 +748,6 @@ output_sframe_funcdesc (symbolS *start_of_fre_section,
   else
     out_one (func_info);
   out_one (0);
-  out_two (0);
 }
 
 static void

@@ -266,7 +266,6 @@ typedef struct sframe_func_desc_entry_v3
   /* Size of the block of repeating insns.  Used for SFrame FDEs of type
      SFRAME_FDE_TYPE_PCMASK.  */
   uint8_t sfde_func_rep_size;
-  uint16_t sfde_func_padding2;
 } ATTRIBUTE_PACKED sframe_func_desc_entry_v3;
 
 #define SFRAME_V3_FDE_FUNC_INFO(fde_pc_type, fre_type) \

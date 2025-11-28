@@ -2134,7 +2134,6 @@ sframe_encoder_write_fde (const sframe_header *sfhp ATTRIBUTE_UNUSED,
   fdep->sfde_func_num_fres = (uint16_t)fde->func_num_fres;
   fdep->sfde_func_info = fde->func_info;
   fdep->sfde_func_rep_size = fde->func_rep_size;
-  fdep->sfde_func_padding2 = 0;
 
   *fde_write_size = sizeof (sframe_func_desc_entry_v3);
 
