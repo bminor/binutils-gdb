@@ -725,8 +725,9 @@ output_sframe_funcdesc (symbolS *start_of_fre_section,
 				      sfde_func_start_fre_off));
     }
 
-  /* Number of FREs.  */
-  out_four (sframe_fde->num_fres);
+  /* Number of FREs must fit uint16_t.  */
+  gas_assert (sframe_fde->num_fres <= UINT16_MAX);
+  out_two (sframe_fde->num_fres);
 
   /* SFrame FDE function info.  */
   unsigned char func_info;
@@ -2038,6 +2039,20 @@ sframe_do_fde (struct sframe_xlate_ctx *xlate_ctx,
     {
       xlate_ctx->last_fre->pc_end
 	= get_dw_fde_end_addrS (xlate_ctx->dw_fde);
+    }
+
+  /* Number of FREs must fit uint16_t.  Check now, and do not emit the SFrame
+     FDE if it doesnt fit (although, it is not expected to happen for
+     real-world, useful programs).  The approach of truncating the FDE and
+     emitting multiple SFrame FDEs instead, is not a clearly preferable
+     handling either.  Its a divergence from the model where an SFrame FDE
+     encodes stack trace data between a .cfi_startproc and .cfi_endproc pair.
+     Further, some components (linkers, stack tracers) want to associate the
+     Start PC of a function to a known symbol in the file?  */
+  if (xlate_ctx->num_xlate_fres > UINT16_MAX)
+    {
+      as_warn (_("no SFrame FDE emitted; Number of FREs exceeds UINT16_MAX"));
+      return SFRAME_XLATE_ERR_NOTREPRESENTED;
     }
 
   /* ABI/arch except s390x cannot represent FP without RA saved.  */
