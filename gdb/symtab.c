@@ -513,6 +513,14 @@ compunit_symtab::symbol_at_address (CORE_ADDR addr) const
 
 /* See symtab.h.  */
 
+bool
+compunit_symtab::contains (CORE_ADDR addr) const
+{
+  return blockvector ()->contains (addr);
+}
+
+/* See symtab.h.  */
+
 compunit_symtab::compunit_symtab (struct objfile *objfile,
 				  const char *name_)
   : m_objfile (objfile),

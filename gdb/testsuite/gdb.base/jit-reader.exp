@@ -234,6 +234,15 @@ proc jit_reader_test {} {
 		gdb_test "python print( \[o for o in gdb.objfiles() if o.filename.startswith('<< JIT compiled code')\]\[0\].build_id )" \
 		    "None" \
 		    "python gdb.Objfile.build_id"
+
+		# Check that Progspace.objfile_for_address () finds "jitted"
+		# objfile
+		gdb_test "frame 0" \
+		    "#0  $hex in jit_function_stack_mangle ()$any" \
+		    "select frame 0"
+		gdb_test "python print( gdb.current_progspace().objfile_for_address(gdb.parse_and_eval('\$pc')) )" \
+		    "<gdb.Objfile filename=<< JIT compiled code at $hex >>>" \
+		    "python gdb.Progspace.objfile_for_address"
 	    }
 	}
     }

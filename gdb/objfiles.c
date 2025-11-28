@@ -1084,14 +1084,28 @@ is_addr_in_objfile (CORE_ADDR addr, const struct objfile *objfile)
   if (objfile == NULL)
     return false;
 
-  for (obj_section &osect : objfile->sections ())
+  if (objfile->sections_start == nullptr)
     {
-      if (section_is_overlay (&osect) && !section_is_mapped (&osect))
-	continue;
-
-      if (osect.contains (addr))
-	return true;
+      /* Objfiles created dynamically by the JIT reader API (and possibly by
+	 other means too) do not have sections.  For such "dynamic" objfiles
+	 walk over all compunits and check if any of them contains given
+	 ADDR.  */
+      for (const compunit_symtab &cu : objfile->compunits ())
+	if (cu.contains (addr))
+	  return true;
     }
+  else
+    {
+      for (obj_section &osect : objfile->sections ())
+	{
+	  if (section_is_overlay (&osect) && !section_is_mapped (&osect))
+	    continue;
+
+	  if (osect.contains (addr))
+	    return true;
+	}
+    }
+
   return false;
 }
 

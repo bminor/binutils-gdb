@@ -476,7 +476,7 @@ public:
   /* A range adapter that makes it possible to iterate over all
      compunits in one objfile.  */
 
-  compunit_symtab_range compunits ()
+  compunit_symtab_range compunits () const
   {
     auto begin = compunit_symtab_iterator (compunit_symtabs.begin ());
     auto end = compunit_symtab_iterator (compunit_symtabs.end ());

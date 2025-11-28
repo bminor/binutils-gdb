@@ -1964,6 +1964,9 @@ struct compunit_symtab : intrusive_list_node<compunit_symtab>
      for ADDR are considered.  */
   struct symbol *symbol_at_address (CORE_ADDR addr) const;
 
+  /* True if ADDR is in this compunit_symtab, false otherwise.  */
+  bool contains (CORE_ADDR addr) const;
+
   /* Object file from which this symtab information was read.  */
   struct objfile *m_objfile;
 
