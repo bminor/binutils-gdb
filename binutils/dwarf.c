@@ -51,6 +51,9 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
+#define DO_LOC     0x1
+#define DO_TYPES   0x2
+
 static const char *regname (unsigned int regno, int row);
 static const char *regname_internal_by_table_only (unsigned int regno);
 
@@ -1725,7 +1728,7 @@ decode_location_expression (unsigned char * data,
    This is used for DWARF package files.  */
 
 static struct cu_tu_set *
-find_cu_tu_set_v2 (uint64_t cu_offset, int do_types)
+find_cu_tu_set_v2 (uint64_t cu_offset, bool do_types)
 {
   struct cu_tu_set *p;
   unsigned int nsets;
@@ -3757,8 +3760,7 @@ static bool
 process_debug_info (struct dwarf_section * section,
 		    void *file,
 		    enum dwarf_section_display_enum abbrev_sec,
-		    bool do_loc,
-		    bool do_types)
+		    unsigned int do_flags)
 {
   unsigned char *start = section->start;
   unsigned char *end = start + section->size;
@@ -3806,9 +3808,9 @@ process_debug_info (struct dwarf_section * section,
       return false;
     }
 
-  if ((do_loc || do_debug_loc || do_debug_ranges || do_debug_info)
+  if (((do_flags & DO_LOC) || do_debug_loc || do_debug_ranges || do_debug_info)
       && alloc_num_debug_info_entries == 0
-      && !do_types)
+      && !(do_flags & DO_TYPES))
     {
       /* Then allocate an array to hold the information.  */
       debug_information = cmalloc (num_units, sizeof (*debug_information));
@@ -3830,7 +3832,7 @@ process_debug_info (struct dwarf_section * section,
       alloc_num_debug_info_entries = num_units;
     }
 
-  if (!do_loc)
+  if (!(do_flags & DO_LOC))
     {
       load_debug_section_with_follow (str, file);
       load_debug_section_with_follow (line_str, file);
@@ -3853,7 +3855,7 @@ process_debug_info (struct dwarf_section * section,
       return false;
     }
 
-  if (!do_loc && dwarf_start_die == 0)
+  if (!(do_flags & DO_LOC) && dwarf_start_die == 0)
     introduce (section, false);
 
   free_all_abbrevs ();
@@ -3889,7 +3891,7 @@ process_debug_info (struct dwarf_section * section,
 
       SAFE_BYTE_GET_AND_INC (compunit.cu_version, hdrptr, 2, end_cu);
 
-      this_set = find_cu_tu_set_v2 (cu_offset, do_types);
+      this_set = find_cu_tu_set_v2 (cu_offset, (do_flags & DO_TYPES));
 
       if (compunit.cu_version < 5)
 	{
@@ -3900,7 +3902,10 @@ process_debug_info (struct dwarf_section * section,
       else
 	{
 	  SAFE_BYTE_GET_AND_INC (compunit.cu_unit_type, hdrptr, 1, end_cu);
-	  do_types = (compunit.cu_unit_type == DW_UT_type);
+	  if (compunit.cu_unit_type == DW_UT_type)
+	    do_flags |= DO_TYPES;
+	  else
+	    do_flags &= ~DO_TYPES;
 
 	  SAFE_BYTE_GET_AND_INC (compunit.cu_pointer_size, hdrptr, 1, end_cu);
 	}
@@ -3971,7 +3976,7 @@ process_debug_info (struct dwarf_section * section,
 
       SAFE_BYTE_GET_AND_INC (compunit.cu_version, hdrptr, 2, end_cu);
 
-      this_set = find_cu_tu_set_v2 (cu_offset, do_types);
+      this_set = find_cu_tu_set_v2 (cu_offset, (do_flags & DO_TYPES));
 
       if (compunit.cu_version < 5)
 	{
@@ -3982,7 +3987,10 @@ process_debug_info (struct dwarf_section * section,
       else
 	{
 	  SAFE_BYTE_GET_AND_INC (compunit.cu_unit_type, hdrptr, 1, end_cu);
-	  do_types = (compunit.cu_unit_type == DW_UT_type);
+	  if (compunit.cu_unit_type == DW_UT_type)
+	    do_flags |= DO_TYPES;
+	  else
+	    do_flags &= ~DO_TYPES;
 
 	  SAFE_BYTE_GET_AND_INC (compunit.cu_pointer_size, hdrptr, 1, end_cu);
 	}
@@ -4020,7 +4028,7 @@ process_debug_info (struct dwarf_section * section,
 	  compunit.cu_pointer_size = offset_size;
 	}
 
-      if (do_types)
+      if (do_flags & DO_TYPES)
 	{
 	  SAFE_BYTE_GET_AND_INC (signature, hdrptr, 8, end_cu);
 	  SAFE_BYTE_GET_AND_INC (type_offset, hdrptr, offset_size, end_cu);
@@ -4032,10 +4040,11 @@ process_debug_info (struct dwarf_section * section,
 	  continue;
 	}
 
-      if ((do_loc || do_debug_loc || do_debug_ranges || do_debug_info)
+      if (((do_flags & DO_LOC) || do_debug_loc
+	  || do_debug_ranges || do_debug_info)
 	  && num_debug_info_entries == 0
 	  && alloc_num_debug_info_entries > unit
-	  && ! do_types)
+	  && ! (do_flags & DO_TYPES))
 	{
 	  free_debug_information (&debug_information[unit]);
 	  memset (&debug_information[unit], 0, sizeof (*debug_information));
@@ -4047,7 +4056,7 @@ process_debug_info (struct dwarf_section * section,
 	  debug_information[unit].ranges_base = DEBUG_INFO_UNAVAILABLE;
 	}
 
-      if (!do_loc && dwarf_start_die == 0)
+      if (!(do_flags & DO_LOC) && dwarf_start_die == 0)
 	{
 	  printf (_("  Compilation Unit @ offset %#" PRIx64 ":\n"),
 		  cu_offset);
@@ -4066,7 +4075,7 @@ process_debug_info (struct dwarf_section * section,
 	  printf (_("   Abbrev Offset: %#" PRIx64 "\n"),
 		  compunit.cu_abbrev_offset);
 	  printf (_("   Pointer Size:  %d\n"), compunit.cu_pointer_size);
-	  if (do_types)
+	  if (do_flags & DO_TYPES)
 	    {
 	      printf (_("   Signature:     %#" PRIx64 "\n"), signature);
 	      printf (_("   Type Offset:   %#" PRIx64 "\n"), type_offset);
@@ -4149,7 +4158,7 @@ process_debug_info (struct dwarf_section * section,
 		    break;
 		}
 
-	      if (!do_loc && die_offset >= dwarf_start_die
+	      if (!(do_flags & DO_LOC) && die_offset >= dwarf_start_die
 		  && (dwarf_cutoff_level == -1
 		      || level < dwarf_cutoff_level))
 		printf (_(" <%d><%lx>: Abbrev Number: 0\n"),
@@ -4178,7 +4187,7 @@ process_debug_info (struct dwarf_section * section,
 	      continue;
 	    }
 
-	  if (!do_loc)
+	  if (!(do_flags & DO_LOC))
 	    {
 	      if (dwarf_start_die != 0 && die_offset < dwarf_start_die)
 		do_printing = 0;
@@ -4208,7 +4217,7 @@ process_debug_info (struct dwarf_section * section,
 
 	  if (entry == NULL)
 	    {
-	      if (!do_loc && do_printing)
+	      if (!(do_flags & DO_LOC) && do_printing)
 		{
 		  printf ("\n");
 		  fflush (stdout);
@@ -4220,7 +4229,7 @@ process_debug_info (struct dwarf_section * section,
 	      return false;
 	    }
 
-	  if (!do_loc && do_printing)
+	  if (!(do_flags & DO_LOC) && do_printing)
 	    printf (" (%s)\n", get_TAG_name (entry->tag));
 
 	  switch (entry->tag)
@@ -4231,7 +4240,7 @@ process_debug_info (struct dwarf_section * section,
 	    case DW_TAG_compile_unit:
 	    case DW_TAG_skeleton_unit:
 	      need_base_address = 1;
-	      need_dwo_info = do_loc;
+	      need_dwo_info = do_flags & DO_LOC;
 	      break;
 	    case DW_TAG_entry_point:
 	      need_base_address = 0;
@@ -4287,7 +4296,7 @@ process_debug_info (struct dwarf_section * section,
 	       attr && attr->attribute;
 	       attr = attr->next)
 	    {
-	      if (! do_loc && do_printing)
+	      if (! (do_flags & DO_LOC) && do_printing)
 		/* Show the offset from where the tag was extracted.  */
 		printf ("    <%tx>", tags - section_begin);
 	      tags = read_and_display_attr (attr->attribute,
@@ -4301,7 +4310,8 @@ process_debug_info (struct dwarf_section * section,
 					    offset_size,
 					    compunit.cu_version,
 					    debug_info_p,
-					    do_loc || ! do_printing,
+					    (do_flags & DO_LOC)
+					    || ! do_printing,
 					    section,
 					    this_set,
 					    level);
@@ -4341,9 +4351,9 @@ process_debug_info (struct dwarf_section * section,
 
   /* Set num_debug_info_entries here so that it can be used to check if
      we need to process .debug_loc and .debug_ranges sections.  */
-  if ((do_loc || do_debug_loc || do_debug_ranges || do_debug_info)
+  if (((do_flags & DO_LOC) || do_debug_loc || do_debug_ranges || do_debug_info)
       && num_debug_info_entries == 0
-      && ! do_types)
+      && ! (do_flags & DO_TYPES))
     {
       if (num_units > alloc_num_debug_info_entries)
 	num_debug_info_entries = alloc_num_debug_info_entries;
@@ -4351,7 +4361,7 @@ process_debug_info (struct dwarf_section * section,
 	num_debug_info_entries = num_units;
     }
 
-  if (!do_loc)
+  if (!(do_flags & DO_LOC))
     printf ("\n");
 
   return true;
@@ -4379,12 +4389,13 @@ load_debug_info (void * file)
   (void) load_cu_tu_indexes (file);
 
   if (load_debug_section_with_follow (info, file)
-      && process_debug_info (&debug_displays [info].section, file, abbrev, true, false))
+      && process_debug_info (&debug_displays [info].section, file,
+			     abbrev, DO_LOC))
     return num_debug_info_entries;
 
   if (load_debug_section_with_follow (info_dwo, file)
       && process_debug_info (&debug_displays [info_dwo].section, file,
-			     abbrev_dwo, true, false))
+			     abbrev_dwo, DO_LOC))
     return num_debug_info_entries;
 
   num_debug_info_entries = DEBUG_INFO_UNAVAILABLE;
@@ -7681,19 +7692,19 @@ display_debug_str (struct dwarf_section *section,
 static int
 display_debug_info (struct dwarf_section *section, void *file)
 {
-  return process_debug_info (section, file, section->abbrev_sec, false, false);
+  return process_debug_info (section, file, section->abbrev_sec, 0);
 }
 
 static int
 display_debug_types (struct dwarf_section *section, void *file)
 {
-  return process_debug_info (section, file, section->abbrev_sec, false, true);
+  return process_debug_info (section, file, section->abbrev_sec, DO_TYPES);
 }
 
 static int
 display_trace_info (struct dwarf_section *section, void *file)
 {
-  return process_debug_info (section, file, section->abbrev_sec, false, true);
+  return process_debug_info (section, file, section->abbrev_sec, DO_TYPES);
 }
 
 static int
@@ -12566,7 +12577,7 @@ load_separate_debug_files (void * file, const char * filename)
       free_dwo_info ();
 
       if (process_debug_info (& debug_displays[info].section, file, abbrev,
-			      true, false))
+			      DO_LOC))
 	{
 	  bool introduced = false;
 	  dwo_info *dwinfo;
