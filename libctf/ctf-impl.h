@@ -95,7 +95,7 @@ extern "C"
 #define ctf_assert(fp, expr) (assert (expr), fp || 1)
 #else
 #define ctf_assert(fp, expr)						\
-  _libctf_unlikely_ (ctf_assert_internal (fp, __FILE__, __LINE__,	\
+  _libctf_unlikely_ (ctf_assert_internal (fp, __FILE__, __LINE__, __func__, \
 					  #expr, !!(expr)))
 #endif
 
@@ -200,6 +200,8 @@ typedef struct ctf_dtdef
   int dtd_flags;		/* Some of the DTD_F_ flags.  */
 } ctf_dtdef_t;
 
+/* A single error or warning in the err/warning stream.  */
+
 typedef struct ctf_err_warning
 {
   ctf_list_t cew_list;		/* List forward/back pointers.  */
@@ -207,6 +209,18 @@ typedef struct ctf_err_warning
   int cew_err;			/* Error code (if any).  */
   char *cew_text;		/* Error/warning text.  */
 } ctf_err_warning_t;
+
+/* An error locus, a transient entity used only in parameter passing in the
+   ctf_err and ctf_warn functions.  */
+
+typedef struct ctf_err_locus
+{
+  ctf_dict_t *err_fp;
+  ctf_dict_t *type_fp;
+  int input_num;
+  ctf_id_t type;
+  const char *func;
+} ctf_err_locus_t;
 
 /* Atoms associate strings with a list of the CTF items that reference that
    string, so that ctf_serialize() can instantiate all the strings using the
@@ -870,13 +884,38 @@ _libctf_printflike_ (1, 2)
 extern void ctf_dprintf (const char *, ...);
 extern void libctf_init_debug (void);
 
-_libctf_printflike_ (4, 5)
-extern void ctf_err_warn (ctf_dict_t *, int is_warning, ctf_error_t err,
-			  const char *, ...);
+/* Error/warning functions relating to particular types.  */
+
+extern ctf_err_locus_t
+ctf_err_locus_internal (ctf_dict_t *err_fp, ctf_dict_t *type_fp, int input_num,
+			ctf_id_t type, const char *func);
+
+/* Locus functions. err_locus and type_err_locus are self-explanatory.
+   link_* takes a second "type" fp, on which the type is presumed to reside and
+   from which the error is derived and copied onto the err_fp.  The type_fp is
+   reported in the error message; the error goes onto the err_fp's error
+   stream.  Also useful for type functions where the type might be on the
+   parent but the error should be reported on the child.  */
+#define err_locus(fp) ctf_err_locus_internal (fp, fp, -1, 0, __func__)
+#define type_err_locus(fp, type) ctf_err_locus_internal (fp, fp, -1, type, __func__)
+#define link_err_locus(err_fp, type_fp, input_num)			\
+  ctf_err_locus_internal (err_fp, type_fp, input_num, 0, __func__)
+#define link_type_err_locus(err_fp, type_fp, input_num, type)		\
+  ctf_err_locus_internal (err_fp, type_fp, input_num, type, __func__)
+
+_libctf_printflike_ (3, 4)
+extern ctf_ret_t ctf_err (ctf_err_locus_t l, ctf_error_t err, const char *format, ...);
+_libctf_printflike_ (3, 4)
+extern ctf_id_t ctf_typed_err (ctf_err_locus_t l, ctf_error_t err, const char *format, ...);
+_libctf_printflike_ (3, 4)
+extern void ctf_warn (ctf_err_locus_t l, ctf_error_t err, const char *format, ...);
+
 extern void ctf_err_warn_to_open (ctf_dict_t *);
 extern void ctf_err_copy (ctf_dict_t *dest, ctf_dict_t *src);
-extern void ctf_assert_fail_internal (ctf_dict_t *, const char *,
-				      size_t, const char *);
+extern void ctf_err_upgrade (ctf_dict_t *fp);
+extern void ctf_assert_fail_internal (ctf_dict_t *, const char *file,
+				      size_t, const char *func, const char *exprstr);
+
 extern const char *ctf_link_input_name (ctf_dict_t *);
 
 extern ctf_link_sym_t *ctf_elf32_to_link_sym (ctf_dict_t *fp, ctf_link_sym_t *dst,

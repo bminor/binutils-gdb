@@ -272,8 +272,7 @@ get_vbytes_old (ctf_dict_t *fp, uint32_t kind, size_t vlen)
     case CTF_V3_K_RESTRICT:
       return 0;
     default:
-      ctf_set_errno (fp, ECTF_CORRUPT);
-      ctf_err_warn (fp, 0, 0, _("detected invalid CTF kind: %x"), kind);
+      ctf_warn (err_locus (fp), ECTF_CORRUPT, _("detected invalid CTF kind: %x"), kind);
       return -1;
     }
 }
@@ -370,12 +369,11 @@ get_vbytes_v4 (ctf_dict_t *fp, const ctf_type_t *tp,
        If this somehow didn't work, fail.  */
     case CTF_K_BIG:
     case CTF_K_CONFLICTING:
-      ctf_set_errno (fp, ECTF_INTERNAL);
-      ctf_err_warn (fp, 0, 0, _("internal error: prefixed kind seen in get_vbytes_v4: %x"), kind);
+      ctf_err (err_locus (fp), ECTF_INTERNAL, _("prefixed kind seen in get_vbytes_v4: %x"), kind);
       return -1;
     default:
       ctf_set_errno (fp, ECTF_CORRUPT);
-      ctf_err_warn (fp, 0, 0, _("detected invalid CTF kind: %x"), kind);
+      ctf_err (err_locus (fp), ECTF_CORRUPT, _("invalid CTF kind: %x"), kind);
       return -1;
     }
 }
@@ -607,7 +605,7 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
       if ((err = upgrade_types (fp, cth)) != 0)
 	return err;				/* Upgrade failed.  */
 #endif
-      ctf_err_warn (NULL, 0, ECTF_INTERNAL, "Implementation of backward-compatible CTF reading still underway\n");
+      ctf_err (err_locus (NULL), ECTF_INTERNAL, _("implementation of backward-compatible CTF reading still underway"));
       return ECTF_INTERNAL;
     }
 
@@ -1098,8 +1096,8 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 	  break;
 
 	default:
-	  ctf_err_warn (fp, 0, ECTF_CORRUPT,
-			_("init_static_types(): unhandled CTF kind: %x"), kind);
+	  ctf_err (type_err_locus (fp, id), ECTF_CORRUPT,
+		   _("unhandled CTF kind: %x"), kind);
 	  return ECTF_CORRUPT;
 	}
       tp = (ctf_type_t *) ((uintptr_t) tp + increment + vbytes);
@@ -1278,12 +1276,12 @@ ctf_flip_header (void *cthp, int is_btf, int ctf_version)
       case CTF_VERSION_1:
       case CTF_VERSION_1_UPGRADED_3:
       case CTF_VERSION_2:
-	ctf_err_warn (NULL, 0, ECTF_INTERNAL, "Implementation of backward-compatible CTF reading still underway\n");
+	ctf_err (err_locus (NULL), ECTF_INTERNAL, _("implementation of backward-compatible CTF reading still underway"));
 	return -1;
 /*	ctf_flip_header_v2 (h2p); */
       break;
       case CTF_VERSION_3:
-	ctf_err_warn (NULL, 0, ECTF_INTERNAL, "Implementation of backward-compatible CTF reading still underway\n");
+	ctf_err (err_locus (NULL), ECTF_INTERNAL, _("implementation of backward-compatible CTF reading still underway"));
 	return -1;
 
 /*	ctf_flip_header_v3 (h3p); */
@@ -1331,6 +1329,7 @@ static ctf_error_t
 flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
 {
   ctf_type_t *t = start;
+  ctf_id_t type = 0;
 
   while ((uintptr_t) t < ((uintptr_t) start) + len)
     {
@@ -1340,6 +1339,7 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
       size_t vbytes;
       ctf_type_t *tprefixed;
 
+      type++;
       if (to_foreign)
 	{
 	  kind = LCTF_KIND (fp, t);
@@ -1545,9 +1545,8 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
 	  }
 
 	default:
-	  ctf_err_warn (fp, 0, ECTF_CORRUPT,
-			_("unhandled CTF kind in endianness conversion: %x"),
-			kind);
+	  ctf_err (type_err_locus (fp, type), ECTF_CORRUPT,
+		   _("unhandled CTF kind in endianness conversion: %x"), kind);
 	  return ECTF_CORRUPT;
 	}
 
@@ -1557,7 +1556,7 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
   return 0;
 
  overflow:
-  ctf_err_warn (fp, 0, ECTF_CORRUPT, _("overflow byteswapping CTF"));
+  ctf_err (err_locus (fp), ECTF_CORRUPT, _("overflow byteswapping CTF"));
   return ECTF_CORRUPT;
 }
 
@@ -1808,9 +1807,9 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   if (ctfsect->cts_size < hdrsz)
     {
-      ctf_err_warn (NULL, 0, ECTF_NOCTFBUF,
-		    _("ctf_bufopen: size %zi too small for expected header size %zi"),
-		    ctfsect->cts_size, hdrsz);
+      ctf_err (err_locus (NULL), ECTF_NOCTFBUF,
+	       _("size %zi too small for expected header size %zi"),
+	       ctfsect->cts_size, hdrsz);
       return (ctf_set_open_errno (errp, ECTF_NOCTFBUF));
     }
 
@@ -1856,8 +1855,8 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   if (format < CTF_VERSION_3)
     {
-      ctf_err_warn (NULL, 0, ECTF_INTERNAL,
-		    "Implementation of backward-compatible CTF reading still underway\n");
+      ctf_err (err_locus (NULL), ECTF_INTERNAL,
+	       _("implementation of backward-compatible CTF reading still underway"));
       return (ctf_set_open_errno (errp, ECTF_INTERNAL));
 #if 0
       upgrade_header_v2 (hp); /* Upgrades to v3 */
@@ -1875,8 +1874,8 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	}
       memcpy (hp, header_v3, sizeof (ctf_header_t));
 
-      ctf_err_warn (NULL, 0, ECTF_INTERNAL,
-		    "Implementation of backward-compatible CTF reading still underway\n");
+      ctf_err (err_locus (NULL), ECTF_INTERNAL,
+	       _("implementation of backward-compatible CTF reading still underway"));
       return (ctf_set_open_errno (errp, ECTF_INTERNAL));
 #if 0
       upgrade_header_v3 (hp);
@@ -1903,10 +1902,10 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 			 && (version != 1 || hp->btf.bth_hdr_len
 			     != sizeof (struct ctf_btf_header))))
     {
-      ctf_err_warn (NULL, 0, ECTF_CTFVERS,
-		    _("BTF version %i or header length %i unknown: expecting 1, %zi\n"),
-		   version, hp->btf.bth_hdr_len,
-		   sizeof (struct ctf_btf_header));
+      ctf_err (err_locus (NULL), ECTF_CTFVERS,
+	       _("BTF version %i or header length %i unknown: expecting 1, %zi"),
+	       version, hp->btf.bth_hdr_len,
+	       sizeof (struct ctf_btf_header));
       ctf_set_open_errno (errp, ECTF_CTFVERS);
       goto validation_fail;
     }
@@ -1918,36 +1917,32 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	 info.  We do not support dynamically upgrading such entries (none
 	 should exist in any case, since dwarf2ctf does not create them).  */
 
-      ctf_err_warn (NULL, 0, ECTF_NOTSUP, _("ctf_bufopen: CTF version %d "
-					    "symsect not supported"),
-		    version);
+      ctf_err (err_locus (NULL),ECTF_NOTSUP,
+	       _("CTF version %d symsect not supported"), version);
       ctf_set_open_errno (errp, ECTF_NOTSUP);
       goto validation_fail;
     }
 
   if (_libctf_unlikely_ (format < IS_BTF && pp->ctp_flags > CTF_F_MAX_3))
     {
-      ctf_err_warn (NULL, 0, ECTF_FLAGS, _("ctf_bufopen: invalid header "
-					   "flags: %x"),
-		    (unsigned int) pp->ctp_flags);
+      ctf_err (err_locus (NULL), ECTF_FLAGS, _("invalid header flags: %x"),
+	       (unsigned int) pp->ctp_flags);
       ctf_set_open_errno (errp, ECTF_FLAGS);
       goto validation_fail;
     }
 
   if (_libctf_unlikely_ (format >= IS_BTF && bp->btf_flags != 0))
     {
-      ctf_err_warn (NULL, 0, ECTF_FLAGS, _("ctf_bufopen: nonzero BTF header "
-					   "flags: %x"),
-		    (unsigned int) bp->btf_flags);
+      ctf_err (err_locus (NULL), ECTF_FLAGS, _("nonzero BTF header flags: %x"),
+	       (unsigned int) bp->btf_flags);
       ctf_set_open_errno (errp, ECTF_FLAGS);
       goto validation_fail;
     }
 
   if (_libctf_unlikely_ (format == IS_CTF && (hp->cth_flags & ~(CTF_F_MAX)) != 0))
     {
-      ctf_err_warn (NULL, 0, ECTF_FLAGS, _("ctf_bufopen: invalid header "
-					   "flags: %llx"),
-		    (unsigned long long) hp->cth_flags);
+      ctf_err (err_locus (NULL), ECTF_FLAGS, _("invalid header flags: %llx"),
+	       (unsigned long long) hp->cth_flags);
       ctf_set_open_errno (errp, ECTF_FLAGS);
       goto validation_fail;
     }
@@ -1973,7 +1968,8 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
        || (hp->btf.bth_type_off < ctf_adjustment && hp->btf.bth_type_len != 0)
        || (hp->btf.bth_str_off < ctf_adjustment && hp->btf.bth_str_len != 0)))
     {
-      ctf_err_warn (NULL, 0, ECTF_CORRUPT, _("overlapping or misordered BTF/CTF sections"));
+      ctf_err (err_locus (NULL), ECTF_CORRUPT,
+	       _("overlapping or misordered BTF/CTF sections"));
       ctf_set_open_errno (errp, ECTF_CORRUPT);
       goto validation_fail;
     }
@@ -1983,8 +1979,8 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
        || (hp->cth_func_off & 2) || (hp->cth_objtidx_off & 2)
        || (hp->cth_funcidx_off & 2) || (hp->btf.bth_type_off & 3)))
     {
-      ctf_err_warn (NULL, 0, ECTF_CORRUPT,
-		    _("CTF sections not properly aligned"));
+      ctf_err (err_locus (NULL), ECTF_CORRUPT,
+	       _("CTF sections not properly aligned"));
       ctf_set_open_errno (errp, ECTF_CORRUPT);
       goto validation_fail;
     }
@@ -1994,10 +1990,10 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   if (_libctf_unlikely_ ((hp->cth_objtidx_len != 0) &&
 			 (hp->cth_objtidx_len != hp->cth_objt_len)))
     {
-      ctf_err_warn (NULL, 0, ECTF_CORRUPT,
-		    _("Object index section is neither empty nor the "
-		      "same length as the object section: %u versus %u "
-		      "bytes"), hp->cth_objt_len, hp->cth_objtidx_len);
+      ctf_err (err_locus (NULL), ECTF_CORRUPT,
+	       _("object index section is neither empty nor the "
+		 "same length as the object section: %u versus %u "
+		 "bytes"), hp->cth_objt_len, hp->cth_objtidx_len);
       ctf_set_open_errno (errp, ECTF_CORRUPT);
       goto validation_fail;
     }
@@ -2009,10 +2005,10 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 			 ((header_v3 && hp->cth_flags & CTF_F_NEWFUNCINFO)
 			  || !header_v3)))
     {
-      ctf_err_warn (NULL, 0, ECTF_CORRUPT,
-		    _("Function index section is neither empty nor the "
-		      "same length as the function section: %u versus %u "
-		      "bytes"), hp->cth_func_len, hp->cth_funcidx_len);
+      ctf_err (err_locus (NULL), ECTF_CORRUPT,
+	       _("function index section is neither empty nor the "
+		 "same length as the function section: %u versus %u "
+		 "bytes"), hp->cth_func_len, hp->cth_funcidx_len);
       ctf_set_open_errno (errp, ECTF_CORRUPT);
       goto validation_fail;
     }
@@ -2022,12 +2018,12 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
        ((hp->cth_parent_name != 0 && hp->cth_parent_name < hp->cth_parent_strlen)
 	|| (hp->cth_cu_name != 0 && hp->cth_cu_name < hp->cth_parent_strlen))))
     {
-      ctf_err_warn (NULL, 0, ECTF_CORRUPT,
-		    _("Parent dict or CU name string offsets "
-		      "(at %x and %x, respectively) are themselves "
-		      "within the parent (upper bound: %x), thus "
-		      "unreachable.\n"), hp->cth_parent_name, hp->cth_cu_name,
-		      hp->cth_parent_strlen);
+      ctf_err (err_locus (NULL), ECTF_CORRUPT,
+	       _("parent dict or CU name string offsets "
+		 "(at %x and %x, respectively) are themselves "
+		 "within the parent (upper bound: %x), thus "
+		 "unreachable"), hp->cth_parent_name, hp->cth_cu_name,
+	       hp->cth_parent_strlen);
       ctf_set_open_errno (errp, ECTF_CORRUPT);
       goto validation_fail;
     }
@@ -2055,7 +2051,8 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 			 || hp->cth_funcidx_off > fp->ctf_size
 			 || hp->btf.bth_type_off > fp->ctf_size))
     {
-      ctf_err_warn (NULL, 0, ECTF_CORRUPT, _("header offset or length exceeds CTF size"));
+      ctf_err (err_locus (NULL), ECTF_CORRUPT,
+	       _("header offset or length exceeds CTF size"));
       err = ECTF_CORRUPT;
       goto bad;
     }
@@ -2099,18 +2096,18 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
       if ((rc = uncompress (fp->ctf_base + ctf_adjustment, &dstlen,
 			    src, srclen)) != Z_OK)
 	{
-	  ctf_err_warn (NULL, 0, ECTF_DECOMPRESS, _("zlib inflate err: %s"),
-			zError (rc));
+	  ctf_err (err_locus (NULL), ECTF_DECOMPRESS,
+		   _("zlib inflate err: %s"), zError (rc));
 	  err = ECTF_DECOMPRESS;
 	  goto bad;
 	}
 
       if ((size_t) dstlen != (fp->ctf_size - ctf_adjustment))
 	{
-	  ctf_err_warn (NULL, 0, ECTF_CORRUPT,
-			_("zlib inflate short: got %lu of %lu bytes"),
-			(unsigned long) dstlen,
-			(unsigned long) (fp->ctf_size - ctf_adjustment));
+	  ctf_err (err_locus (NULL), ECTF_CORRUPT,
+		   _("zlib inflate short: got %lu of %lu bytes"),
+		   (unsigned long) dstlen,
+		   (unsigned long) (fp->ctf_size - ctf_adjustment));
 	  err = ECTF_CORRUPT;
 	  goto bad;
 	}
@@ -2119,10 +2116,10 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
     {
       if (_libctf_unlikely_ (ctfsect->cts_size < fp->ctf_size + hdrsz - ctf_adjustment))
 	{
-	  ctf_err_warn (NULL, 0, ECTF_CORRUPT,
-			_("%lu byte long CTF dictionary overruns %lu byte long CTF section"),
-			(unsigned long) ctfsect->cts_size,
-			(unsigned long) (fp->ctf_size + hdrsz - ctf_adjustment));
+	  ctf_err (err_locus (NULL), ECTF_CORRUPT,
+		   _("%lu byte long CTF dictionary overruns %lu byte long CTF section"),
+		   (unsigned long) ctfsect->cts_size,
+		   (unsigned long) (fp->ctf_size + hdrsz - ctf_adjustment));
 	  err = ECTF_CORRUPT;
 	  goto bad;
 	}
@@ -2638,8 +2635,8 @@ ctf_dict_set_cuname (ctf_dict_t *fp, const char *name)
 static ctf_ret_t
 ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
 {
-  ctf_ret_t err;
-  ctf_error_t ctf_err;
+  ctf_ret_t ret;
+  ctf_error_t err;
   int no_strings = fp->ctf_flags & LCTF_NO_STR;
   int old_flags = fp->ctf_flags;
   ctf_dict_t *old_parent = fp->ctf_parent;
@@ -2660,12 +2657,10 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
 
   if (fp->ctf_header->cth_parent_strlen != 0 &&
       pfp->ctf_header->btf.bth_str_len != fp->ctf_header->cth_parent_strlen)
-    {
-      ctf_err_warn (fp, 0, ECTF_WRONGPARENT,
-		    _("ctf_import: incorrect parent dict: %u bytes of strings expected, %u found"),
-		    fp->ctf_header->cth_parent_strlen, pfp->ctf_header->btf.bth_str_len);
-      return (ctf_set_errno (fp, ECTF_WRONGPARENT));
-    }
+    return ctf_err (err_locus (fp), ECTF_WRONGPARENT,
+		    _("incorrect parent dict: %u bytes of strings expected, %u found"),
+		    fp->ctf_header->cth_parent_strlen,
+		    pfp->ctf_header->btf.bth_str_len);
 
   /* If the child dict expects the parent to have types, make sure it has that
      number of types.  (Provisional types excepted: they go at the top of the
@@ -2674,12 +2669,9 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
   if (pfp->ctf_idmax != fp->ctf_header->cth_parent_ntypes)
     {
       if (fp->ctf_header->cth_parent_ntypes != 0)
-	{
-	  ctf_err_warn (fp, 0, ECTF_WRONGPARENT,
-			_("ctf_import: incorrect parent dict: %u types expected, %u found"),
+	return ctf_err (err_locus (fp), ECTF_WRONGPARENT,
+			_("incorrect parent dict: %u types expected, %u found"),
 			fp->ctf_header->cth_parent_ntypes, pfp->ctf_idmax);
-	  return (ctf_set_errno (fp, ECTF_WRONGPARENT));
-	}
       else if (fp->ctf_opened_btf)
 	{
 	  /* A pure BTF dict does not track the number of types in the parent:
@@ -2697,12 +2689,9 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
 	     in the parent when it was opened.  */
 
 	  if (fp->ctf_typemax != 0)
-	    {
-	      ctf_err_warn (fp, 0, EINVAL,
-			    _("ctf_import: dict already has %u types, cannot turn into a new child"),
+	    return ctf_err (err_locus (fp), ECTF_RANGE,
+			    _("dict already has %u types, cannot turn into a new child"),
 			    fp->ctf_typemax);
-	      return (ctf_set_errno (fp, EINVAL));
-	    }
 	  fp->ctf_header->cth_parent_ntypes = pfp->ctf_typemax;
 	}
     }
@@ -2717,12 +2706,9 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
        && ctf_dynhash_elements (fp->ctf_prov_strtab) != 0)
       || (fp->ctf_void_type != NULL
 	  && ctf_dynhash_elements (fp->ctf_prov_strtab) > 1))
-    {
-      ctf_err_warn (fp, 0, EINVAL,
-		    _("ctf_import: child dict already has %zi strings, cannot import"),
+    return ctf_err (err_locus (fp), ECTF_RANGE,
+		    _("dict already has %zi strings, cannot import"),
 		    ctf_dynhash_elements (fp->ctf_prov_strtab));
-      return (ctf_set_errno (fp, EINVAL));
-    }
 
   fp->ctf_parent = NULL;
   free (fp->ctf_pptrtab);
@@ -2731,8 +2717,8 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
   fp->ctf_pptrtab_typemax = 0;
 
   if (fp->ctf_parent_name == NULL)
-    if ((err = ctf_dict_set_parent_name (fp, "PARENT")) < 0)
-      return err;				/* errno is set for us.  */
+    if ((ret = ctf_dict_set_parent_name (fp, "PARENT")) < 0)
+      return ret;				/* errno is set for us.  */
 
   if (!unreffed)
     pfp->ctf_refcnt++;
@@ -2754,8 +2740,8 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
   fp->ctf_flags |= LCTF_CHILD;
   fp->ctf_flags &= ~LCTF_NO_STR;
 
-  if (no_strings && (ctf_err = init_static_types_names (fp, fp->ctf_header,
-							fp->ctf_opened_btf) != 0))
+  if (no_strings && (err = init_static_types_names (fp, fp->ctf_header,
+						    fp->ctf_opened_btf) != 0))
     {
       /* Undo everything other than cache flushing.  */
 
@@ -2767,7 +2753,7 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
       if (fp->ctf_parent_unreffed)
 	old_parent->ctf_refcnt++;
 
-      return (ctf_set_errno (fp, ctf_err));	/* errno is set for us.  */
+      return (ctf_set_errno (fp, err));		/* errno is set for us.  */
     }
 
   /* Failure can now no longer happen, so we can close the old parent (which may

@@ -193,53 +193,172 @@ void ctf_dprintf (const char *format, ...)
 /* This needs more attention to thread-safety later on.  */
 static ctf_list_t open_errors;
 
-/* Errors and warnings.  Report the warning or error to the list in FP (or the
-   open errors list if NULL): if ERR is nonzero it is the errno to report to the
-   debug stream instead of that recorded on fp.  */
-_libctf_printflike_ (4, 5)
-void
-ctf_err_warn (ctf_dict_t *fp, int is_warning, ctf_error_t err,
-	      const char *format, ...)
+ctf_err_locus_t
+ctf_err_locus_internal (ctf_dict_t *err_fp, ctf_dict_t *type_fp, int input_num,
+			ctf_id_t type, const char *func)
 {
-  va_list alist;
+  ctf_err_locus_t l;
+  l.err_fp = err_fp;
+  l.type_fp = type_fp;
+  l.input_num = input_num;
+  l.type = type;
+  l.func = func;
+  return l;
+}
+
+/* Errors and warnings.  Reports warnings or errors to lists in a particular
+   error fp (or the open errors list if NULL), associated with a given ERR and
+   possibly type fp and type ID.
+
+   Lowest-level function: do not call directly.  */
+_libctf_printflike_ (4, 0)
+static void
+ctf_errwarn_internal (ctf_err_locus_t l, int is_warning, ctf_error_t err,
+		      const char *format, va_list alist)
+{
+  char *text;
+  char *msg = NULL;
+  char *input_str = NULL;
+  const char *cuname = ".ctf", *errmsg = NULL;
   ctf_err_warning_t *cew;
 
+  /* When linking, use ctf_link_input_name() to get the name of the linker
+     input, not a likely-useless name like ".ctf".  */
+  if (l.type_fp != l.err_fp)
+    cuname = ctf_link_input_name (l.type_fp);
+  if (l.type_fp && ctf_dict_cuname (l.type_fp))
+    cuname = ctf_dict_cuname (l.type_fp);
+
+  /* If the link input number is given, turn it into a string.  If this fails,
+     just don't print it: it's a nicety.  */
+  if (l.input_num >= 0)
+    if (asprintf (&input_str, "link input %i:", l.input_num) < 0)
+      input_str = NULL;
+
+  if (!cuname)
+    cuname = "unnamed-CU";
+
+  /* Two fps may be provided, the 'err fp' on which the error message is wanted,
+     and the 'type fp' on which the type was found.  (This is usually used
+     during linking and deduplication, when errors often appear on input fps
+     but the actual error is only going to be seen if it's on the output fp.)
+
+     If this is not a warning, the error passed in or the error on the type fp
+     can be automatically derived from the type fp if it is already set on there,
+     and propagated to the err fp.  Warnings are presumed unlikely to be
+     associated with errors on the fp, and so they are left untouched.  */
+  if (!is_warning)
+    {
+      if (l.type_fp && err == 0 && ctf_errno (l.type_fp) != 0)
+	err = ctf_errno (l.type_fp);
+
+      if (l.err_fp && err != 0
+	  && (l.err_fp != l.type_fp || ctf_errno (l.err_fp) == 0))
+	ctf_set_errno (l.err_fp, err);
+    }
+
+  errmsg = ctf_errmsg (err);
+
+  if (format)
+    if (vasprintf (&msg, format, alist) < 0)
+      return;
+
+  /* Type 0 == "not related to any particular type".  */
+  if (l.type_fp && l.type != 0)
+    {
+      if (asprintf (&text, "%s(%s\"%s\", 0x%lx): %s%s%s",
+		    l.func, input_str ? input_str : "", cuname,
+		    (unsigned long) l.type,
+		    msg ? msg : "", msg && err ? ": " : "",
+		    err ? "" : errmsg) < 0)
+	{
+	  free (msg);
+	  return;
+	}
+    }
+  else if (l.type_fp && l.type == 0)
+    {
+      if (asprintf (&text, "%s(%s\"%s\"): %s%s%s",
+		    l.func, input_str ? input_str : "", cuname,
+		    msg ? msg : "", msg && err ? ": " : "",
+		    err ? "" : errmsg) < 0)
+	{
+	  free (msg);
+	  return;
+	}
+    }
+  else
+    {
+      /* No fp, no type: just decorate with func/error/warning.  */
+
+      if (asprintf (&text, "%s(): %s%s%s",
+		    l.func,
+		    msg ? msg : "", msg && err ? ": " : "",
+		    err ? "" : errmsg) < 0)
+	{
+	  free (msg);
+	  return;
+	}
+    }
+
+  ctf_dprintf ("%s: %s\n", is_warning ? _("warning: "): _("error: "), text);
+
   /* Don't bother reporting errors here: we can't do much about them if they
-     happen.  If we're so short of memory that a tiny malloc doesn't work, a
-     vfprintf isn't going to work either and the caller will have to rely on the
-     ENOMEM return they'll be getting in short order anyway.  */
+     happen.  */
 
   if ((cew = malloc (sizeof (ctf_err_warning_t))) == NULL)
     return;
 
   cew->cew_is_warning = is_warning;
-  cew->cew_err = (err != 0 || !fp) ? err : ctf_errno (fp);
-  va_start (alist, format);
-  if (vasprintf (&cew->cew_text, format, alist) < 0)
-    {
-      free (cew);
-      va_end (alist);
-      return;
-    }
-  va_end (alist);
+  cew->cew_err = err;
+  cew->cew_text = text;
 
-  /* Include the error code only if there is one; if this is a warning,
-     only use the error code if it was explicitly passed and is nonzero.
-     (Warnings may not have a meaningful error code, since the warning may not
-     lead to unwinding up to the user.)  */
-  if ((!is_warning && (err != 0 || (fp && ctf_errno (fp) != 0)))
-      || (is_warning && err != 0))
-    ctf_dprintf ("%s: %s (%s)\n", is_warning ? _("warning") : _("error"),
-		 cew->cew_text, err != 0 ? ctf_errmsg (err)
-		 : ctf_errmsg (ctf_errno (fp)));
-  else
-    ctf_dprintf ("%s: %s\n", is_warning ? _("warning") : _("error"),
-		 cew->cew_text);
-
-  if (fp != NULL)
-    ctf_list_append (&fp->ctf_errs_warnings, cew);
+  if (l.err_fp != NULL)
+    ctf_list_append (&l.err_fp->ctf_errs_warnings, cew);
   else
     ctf_list_append (&open_errors, cew);
+
+  free (msg);
+}
+
+/* Emit a warning or error associated with a particular fp / type / function
+   (see err_locus) into the error stream for that fp (or the global stream if fp
+   is NULL).  */
+
+_libctf_printflike_ (3, 4)
+ctf_ret_t
+ctf_err (ctf_err_locus_t l, ctf_error_t err, const char *format, ...)
+{
+  va_list alist;
+
+  va_start (alist, format);
+  ctf_errwarn_internal (l, 0, err, format, alist);
+  va_end (alist);
+  return -1;
+}
+
+/* Like ctf_err, but returns a ctf_id_t error value.  */
+_libctf_printflike_ (3, 4)
+ctf_id_t
+ctf_typed_err (ctf_err_locus_t l, ctf_error_t err, const char *format, ...)
+{
+  va_list alist;
+
+  va_start (alist, format);
+  ctf_errwarn_internal (l, 0, err, format, alist);
+  va_end (alist);
+  return CTF_ERR;
+}
+
+_libctf_printflike_ (3, 4)
+void
+ctf_warn (ctf_err_locus_t l, ctf_error_t err, const char *format, ...)
+{
+  va_list alist;
+
+  va_start (alist, format);
+  ctf_errwarn_internal (l, 1, err, format, alist);
+  va_end (alist);
 }
 
 /* Move all the errors/warnings from an fp into the open_errors.  */
@@ -276,6 +395,20 @@ ctf_err_copy (ctf_dict_t *dest, ctf_dict_t *src)
   ctf_set_errno (dest, ENOMEM);
 }
 
+/* Upgrade the most recent warning or error to an error.  */
+void
+ctf_err_upgrade (ctf_dict_t *fp)
+{
+  ctf_err_warning_t *cew = ctf_list_prev (&fp->ctf_errs_warnings);
+
+  if (cew && cew->cew_is_warning)
+    {
+      cew->cew_is_warning = 0;
+      if (cew->cew_err != 0)
+	ctf_set_errno (fp, cew->cew_err);
+    }
+}
+
 /* Error-warning reporting: an 'iterator' that returns errors and warnings from
    the error/warning list, in order of emission.  Errors and warnings are popped
    after return: the caller must free the returned error-text pointer.  The
@@ -307,6 +440,7 @@ ctf_errwarning_next (ctf_dict_t *fp, ctf_next_t **it, int *is_warning,
   ctf_list_t *errlist;
   ctf_err_warning_t *cew;
   ctf_error_t err;
+  char *prepended_text;
 
   if (fp)
     errlist = &fp->ctf_errs_warnings;
@@ -353,7 +487,17 @@ ctf_errwarning_next (ctf_dict_t *fp, ctf_next_t **it, int *is_warning,
     *is_warning = cew->cew_is_warning;
   if (errp)
     *errp = cew->cew_err;
-  ret = cew->cew_text;
+
+  /* Augment the string with an error/warning indication, if there is memory.
+     (We do it this late to allow for ctf_err_upgrade().)  */
+  if ((asprintf (&prepended_text, "%s%s\n", is_warning ? _("warning: "): _("error: "),
+		 cew->cew_text)) < 0)
+    ret = cew->cew_text;
+  else
+    {
+      ret = prepended_text;
+      free (cew->cew_text);
+    }
   ctf_list_delete (errlist, cew);
   free (cew);
   return ret;
@@ -397,9 +541,9 @@ ctf_errwarning_remove (ctf_dict_t *fp, int err)
 
 void
 ctf_assert_fail_internal (ctf_dict_t *fp, const char *file, size_t line,
-			  const char *exprstr)
+			  const char *func, const char *exprstr)
 {
-  ctf_set_errno (fp, ECTF_INTERNAL);
-  ctf_err_warn (fp, 0, 0, _("%s: %lu: libctf assertion failed: %s"),
-		file, (long unsigned int) line, exprstr);
+  ctf_err (ctf_err_locus_internal (fp, fp, -1, 0, func), ECTF_INTERNAL,
+	   _("%s: %lu: libctf assertion failed: %s"),
+	   file, (long unsigned int) line, exprstr);
 }

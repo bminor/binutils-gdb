@@ -178,19 +178,19 @@ ctf_arc_write_fd (int fd, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
   ctf_startoffs = headersz;
   if (lseek (fd, ctf_startoffs - 1, SEEK_SET) < 0)
     {
-      errmsg = N_("ctf_arc_write(): cannot extend file while writing");
+      errmsg = N_("cannot seek while extending file");
       goto err;
     }
 
   if (write (fd, &dummy, 1) < 0)
     {
-      errmsg = N_("ctf_arc_write(): cannot extend file while writing");
+      errmsg = N_("cannot extend file");
       goto err;
     }
 
   if ((archdr = arc_mmap_header (fd, headersz)) == NULL)
     {
-      errmsg = N_("ctf_arc_write(): cannot mmap");
+      errmsg = N_("cannot mmap");
       goto err;
     }
 
@@ -231,7 +231,7 @@ ctf_arc_write_fd (int fd, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
   nametbl = malloc (namesz);
   if (nametbl == NULL)
     {
-      errmsg = N_("ctf_arc_write(): error writing named CTF to archive");
+      errmsg = N_("writing named CTF to archive");
       goto err_unmap;
     }
 
@@ -247,7 +247,7 @@ ctf_arc_write_fd (int fd, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
       off = arc_write_one_ctf (ctf_dicts[i], fd, threshold);
       if (off == -1)
 	{
-	  errmsg = N_("ctf_arc_write(): cannot write CTF file to archive");
+	  errmsg = N_("writing named CTF to archive");
 	  goto err_free;
 	}
 
@@ -283,7 +283,7 @@ ctf_arc_write_fd (int fd, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
       if ((new_nametbl = realloc (nametbl, namesz
 				  + strlen ("parent_name") + 1)) == NULL)
 	{
-	  errmsg = N_("ctf_arc_write(): error allocating properties");
+	  errmsg = N_("allocating properties");
 	  goto err_free;
 	}
       nametbl = new_nametbl;
@@ -296,7 +296,7 @@ ctf_arc_write_fd (int fd, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
 
   if (ctf_arc_value_write (fd, nametbl, namesz, &archdr->names) < 0)
     {
-      errmsg = N_("ctf_arc_write(): cannot write name table to archive");
+      errmsg = N_("writing name table to archive");
       goto err_free;
     }
   free (nametbl);
@@ -347,8 +347,8 @@ err:
   /* We report errors into the first file in the archive, if any: if this is a
      zero-file archive, put it in the open-errors stream for lack of anywhere
      else for it to go.  */
-  ctf_err_warn (ctf_dict_cnt > 0 ? ctf_dicts[0] : NULL, 0, errno, "%s",
-		gettext (errmsg));
+  ctf_err (err_locus (ctf_dict_cnt > 0 ? ctf_dicts[0] : NULL), errno, "%s",
+	   gettext (errmsg));
   return errno;
 }
 
@@ -367,8 +367,8 @@ ctf_arc_write (const char *file, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
 
   if ((fd = open (file, O_RDWR | O_CREAT | O_TRUNC | O_CLOEXEC, 0666)) < 0)
     {
-      ctf_err_warn (ctf_dict_cnt > 0 ? ctf_dicts[0] : NULL, 0, errno,
-		    _("ctf_arc_write(): cannot create %s"), file);
+      ctf_err (err_locus (ctf_dict_cnt > 0 ? ctf_dicts[0] : NULL), errno,
+	       _("cannot create %s"), file);
       return errno;
     }
 
@@ -377,8 +377,8 @@ ctf_arc_write (const char *file, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
     goto err_close;
 
   if ((err = close (fd)) < 0)
-    ctf_err_warn (ctf_dict_cnt > 0 ? ctf_dicts[0] : NULL, 0, errno,
-		  _("ctf_arc_write(): cannot close after writing to archive"));
+    ctf_err (err_locus (ctf_dict_cnt > 0 ? ctf_dicts[0] : NULL), errno,
+	     _("cannot close %s after writing"), file);
   goto err;
 
  err_close:
@@ -603,11 +603,10 @@ ctf_arc_flip_modents (ctf_archive_modent_t *modent, uint64_t els,
 
       if (base + modent[i].contents + sizeof (uint64_t) > arc_len)
 	{
-	  ctf_err_warn (NULL, 0, EOVERFLOW,
-			"CTF archive overflow in content offset for member %" PRIu64
-		       " of %zi + %zi", i, base, modent[i].contents);
 	  ctf_set_open_errno (errp, EOVERFLOW);
-	  return -1;
+	  return ctf_err (err_locus (NULL), EOVERFLOW,
+			  "CTF archive overflow in content offset for member %" PRIu64
+			  " of %zi + %zi", i, base, modent[i].contents);
 	}
 
       ctf_size = (uint64_t *) (ents + modent[i].contents);
@@ -634,13 +633,12 @@ ctf_arc_range_check_hdr (struct ctf_archive_internal *arci, size_t arc_len,
 
   if (ndict_end > arc_len)
     {
-      ctf_err_warn (NULL, 0, EOVERFLOW, "CTF archive overflow: archive is %zi bytes, but ctfs end at %zi + (%zi * %zi) = %zi",
-		   arc_len, arci->ctfi_hdr->modents,
-		   sizeof (ctf_archive_modent_t),
-		   arci->ctfi_hdr->ndicts, ndict_end);
-
       ctf_set_open_errno (errp, EOVERFLOW);
-      return -1;
+      return ctf_err (err_locus (NULL), EOVERFLOW,
+		      _("CTF archive overflow: archive is %zi bytes, but ctfs end at %zi + (%zi * %zi) = %zi"),
+		      arc_len, arci->ctfi_hdr->modents,
+		      sizeof (ctf_archive_modent_t),
+		      arci->ctfi_hdr->ndicts, ndict_end);
     }
 
   if ((arci->ctfi_hdr->modents < arci->ctfi_hdr->names
@@ -668,7 +666,7 @@ ctf_arc_range_check_hdr (struct ctf_archive_internal *arci, size_t arc_len,
       || (arci->ctfi_hdr->propents != 0
 	  && arci->ctfi_hdr->modents == arci->ctfi_hdr->propents))
     {
-      err = "ctf table";
+      err = N_("CTF table");
       goto err;
     }
 
@@ -843,10 +841,9 @@ ctf_arc_range_check_modents (ctf_archive_modent_t *modent,
   return 0;
 
 err:
-  ctf_err_warn (NULL, 0, EOVERFLOW, "CTF archive overflow: modent array element %" PRIu64
-		" overflow/overlap", i);
   ctf_set_open_errno (errp, EOVERFLOW);
-  return -1;
+  return ctf_err (err_locus (NULL), EOVERFLOW, _("CTF archive overflow: "
+		  "modent array element %" PRIu64 " overflow/overlap"), i);
 }
 
 /* Make a new struct ctf_archive_internal wrapper for a ctf_archive or a
@@ -882,8 +879,9 @@ ctf_new_archive_internal (int is_archive, int is_v1, int unmap_on_close,
       if (arc_len < arci->ctfi_hdr_len)
 	{
 	  errno = EOVERFLOW;
-	  ctf_err_warn (NULL, 0, EOVERFLOW, "CTF archive underflow: archive is %zi bytes, shorter than the archive header length of %zi bytes\n",
-			arc_len, arci->ctfi_hdr_len);
+	  ctf_err (err_locus (NULL), EOVERFLOW,
+		   _("CTF archive underflow: archive is %zi bytes, shorter than the archive header length of %zi bytes\n"),
+		   arc_len, arci->ctfi_hdr_len);
 	  goto err;
 	}
 
@@ -1018,7 +1016,7 @@ ctf_arc_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
       is_archive = 0;
       if ((fp = ctf_bufopen (ctfsect, symsect, strsect, errp)) == NULL)
 	{
-	  ctf_err_warn (NULL, 0, *errp, _("ctf_arc_bufopen(): cannot open CTF"));
+	  ctf_err (err_locus (NULL), *errp, NULL);
 	  return NULL;
 	}
     }
@@ -1040,12 +1038,12 @@ ctf_arc_open_internal (const char *filename, ctf_error_t *errp)
   libctf_init_debug();
   if ((fd = open (filename, O_RDONLY)) < 0)
     {
-      errmsg = N_("ctf_arc_open(): cannot open %s");
+      errmsg = N_("cannot open %s");
       goto err;
     }
   if (fstat (fd, &s) < 0)
     {
-      errmsg = N_("ctf_arc_open(): cannot stat %s");
+      errmsg = N_("cannot stat %s");
       goto err_close;
     }
 
@@ -1054,14 +1052,14 @@ ctf_arc_open_internal (const char *filename, ctf_error_t *errp)
      elsewhere.  */
   if ((arc = arc_mmap_file (fd, s.st_size)) == NULL)
     {
-      errmsg = N_("ctf_arc_open(): cannot read in %s");
+      errmsg = N_("cannot read in %s");
       goto err_close;
     }
 
   if (arc->magic != CTFA_MAGIC && bswap_64 (arc->magic) != CTFA_MAGIC
       && le64toh (arc->magic) != CTFA_V1_MAGIC)
     {
-      errmsg = N_("ctf_arc_open(): %s: invalid magic number");
+      errmsg = N_("%s: invalid magic number");
       errno = ECTF_FMT;
       goto err_unmap;
     }
@@ -1085,7 +1083,7 @@ err_close:
 err:
   if (errp)
     *errp = errno;
-  ctf_err_warn (NULL, 0, errno, gettext (errmsg), filename);
+  ctf_err (err_locus (NULL), errno, gettext (errmsg), filename);
   return NULL;
 }
 
@@ -1409,9 +1407,7 @@ ctf_arc_import_parent (const struct ctf_archive_internal *arci, ctf_dict_t *fp,
       if (parent)
 	{
 	  if (ctf_import (fp, parent) < 0)
-	    ctf_err_warn (NULL, 1, ctf_errno (fp),
-			  "ctf_arc_import_parent: cannot import: %s",
-			  ctf_errmsg (ctf_errno (fp)));
+	    ctf_warn (err_locus (NULL), ctf_errno (fp), NULL);
 	  ctf_dict_close (parent);
 	}
       else if (err != ECTF_ARNNAME)

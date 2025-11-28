@@ -509,9 +509,9 @@ flip_types_v3 (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
 	    break;
 	  }
 	default:
-	  ctf_err_warn (fp, 0, ECTF_CORRUPT,
-			_("unhandled CTF kind in endianness conversion: %x"),
-			kind);
+	  ctf_err (err_locus (fp), ECTF_CORRUPT,
+		   _("unhandled CTF kind in endianness conversion: %x"),
+		   kind);
 	  return ECTF_CORRUPT;
 	}
 

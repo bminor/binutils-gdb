@@ -40,8 +40,8 @@ ctf_bfdclose (struct ctf_archive_internal *arci)
 {
   if (arci->ctfi_abfd != NULL)
     if (!bfd_close_all_done (arci->ctfi_abfd))
-      ctf_err_warn (NULL, 0, 0, _("cannot close BFD: %s"),
-		    bfd_errmsg (bfd_get_error ()));
+      ctf_err (err_locus (NULL), 0, _("cannot close BFD: %s"),
+	       bfd_errmsg (bfd_get_error ()));
 }
 
 /* Open a CTF file given the specified BFD.  */
@@ -64,9 +64,8 @@ ctf_bfdopen (struct bfd *abfd, ctf_error_t *errp)
 
   if (!bfd_malloc_and_get_section (abfd, ctf_asect, &contents))
     {
-      ctf_err_warn (NULL, 0, 0, _("ctf_bfdopen(): cannot malloc "
-				  "CTF section: %s"),
-		    bfd_errmsg (bfd_get_error ()));
+      ctf_err (err_locus (NULL), 0, _("cannot malloc CTF section: %s"),
+	       bfd_errmsg (bfd_get_error ()));
       return (ctf_set_open_errno (errp, ECTF_FMT));
     }
 
@@ -246,8 +245,8 @@ ctf_bfdopen_ctfsect (struct bfd *abfd _libctf_unused_,
 err: _libctf_unused_;
   if (bfderrstr)
     {
-      ctf_err_warn (NULL, 0, 0, "ctf_bfdopen(): %s: %s", gettext (bfderrstr),
-		   bfd_errmsg (bfd_get_error()));
+      ctf_err (err_locus (NULL), 0, "%s: %s", gettext (bfderrstr),
+	       bfd_errmsg (bfd_get_error()));
       ctf_set_open_errno (errp, ECTF_FMT);
     }
   return NULL;
@@ -331,29 +330,32 @@ ctf_fdopen (int fd, const char *filename, const char *target, ctf_error_t *errp)
 
   if ((abfd = bfd_fdopenr (filename, target, nfd)) == NULL)
     {
-      ctf_err_warn (NULL, 0, 0, _("cannot open BFD from %s: %s"),
-		    filename ? filename : _("(unknown file)"),
-		    bfd_errmsg (bfd_get_error ()));
+      ctf_err (err_locus (NULL), 0, _("cannot open BFD from %s: %s"),
+	       filename ? filename : _("(unknown file)"),
+	       bfd_errmsg (bfd_get_error ()));
       return (ctf_set_open_errno (errp, ECTF_FMT));
     }
   bfd_set_cacheable (abfd, 1);
 
   if (!bfd_check_format (abfd, bfd_object))
     {
-      ctf_err_warn (NULL, 0, 0, _("BFD format problem in %s: %s"),
-		    filename ? filename : _("(unknown file)"),
-		    bfd_errmsg (bfd_get_error ()));
+      ctf_error_t err = ECTF_FMT;
+
       if (bfd_get_error() == bfd_error_file_ambiguously_recognized)
-	return (ctf_set_open_errno (errp, ECTF_BFD_AMBIGUOUS));
-      else
-	return (ctf_set_open_errno (errp, ECTF_FMT));
+	err = ECTF_BFD_AMBIGUOUS;
+
+      ctf_err (err_locus (NULL), 0, _("BFD format problem in %s: %s"),
+	       filename ? filename : _("(unknown file)"),
+	       bfd_errmsg (bfd_get_error ()));
+
+      return (ctf_set_open_errno (errp, err));
     }
 
   if ((arci = ctf_bfdopen (abfd, errp)) == NULL)
     {
       if (!bfd_close_all_done (abfd))
-	ctf_err_warn (NULL, 0, 0, _("cannot close BFD: %s"),
-		      bfd_errmsg (bfd_get_error ()));
+	ctf_err (err_locus (NULL), 0, _("cannot close BFD: %s"),
+		 bfd_errmsg (bfd_get_error ()));
       return NULL;			/* errno is set for us.  */
     }
   arci->ctfi_bfd_close = ctf_bfdclose;

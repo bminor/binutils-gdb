@@ -71,10 +71,7 @@ ctf_strraw (ctf_dict_t *fp, uint32_t name)
   prov_offset = get_prov_offset (fp);
 
   if (prov_offset < fp->ctf_str[CTF_STRTAB_0].cts_len)
-    {
-      ctf_set_errno (fp, ECTF_INTERNAL);
-      ctf_err_warn (fp, 0, 0, _("internal error: overlapping strtabs!"));
-    }
+    ctf_err (err_locus (fp), ECTF_INTERNAL, _("overlapping strtabs!"));
 
   /* Provisional strings may be in the parent as well as the child: check
      both.  (Provisional offsets cannot appear in both.)  */
@@ -104,8 +101,7 @@ ctf_strraw (ctf_dict_t *fp, uint32_t name)
     {
       if (_libctf_unlikely_ (fp->ctf_flags & LCTF_NO_STR))
 	{
-	  ctf_set_errno (fp, ECTF_NOPARENT);
-	  ctf_err_warn (fp, 0, 0, _("internal error: attempt to look up strings in child before parent is imported"));
+	  ctf_err (err_locus (fp), ECTF_NOPARENT, _("internal error: attempt to look up strings in child before parent is imported"));
 	  return NULL;
 	}
 
@@ -114,12 +110,11 @@ ctf_strraw (ctf_dict_t *fp, uint32_t name)
 				&& fp->ctf_header->cth_parent_strlen !=
 				fp->ctf_parent->ctf_str[CTF_STRTAB_0].cts_len))
 	{
-	  ctf_set_errno (fp, ECTF_BADNAME);
-	  ctf_err_warn (fp, 0, 0, _("lookup of string in child with wrongly-associated parent: "
-				    "child dict's parent strtab offset: %x; "
-				    "actual parent strtab offset: %zx"),
-			fp->ctf_header->cth_parent_strlen,
-			fp->ctf_parent->ctf_str[CTF_STRTAB_0].cts_len);
+	  ctf_err (err_locus (fp), ECTF_BADNAME, _("lookup of string in child with wrongly-associated parent: "
+						   "child dict's parent strtab offset: %x; "
+						   "actual parent strtab offset: %zx"),
+		   fp->ctf_header->cth_parent_strlen,
+		   fp->ctf_parent->ctf_str[CTF_STRTAB_0].cts_len);
 	  return NULL;
 	}
 
@@ -148,8 +143,8 @@ ctf_strraw (ctf_dict_t *fp, uint32_t name)
   if (ctsp->cts_strs != NULL && CTF_NAME_OFFSET (name) < ctsp->cts_len)
     return (ctsp->cts_strs + CTF_NAME_OFFSET (name));
 
-  ctf_err_warn (fp, 1, 0, _("offset %x: strtab not found or corrupt offset: cts_len is %zx, parent strlen is %u, cts_strs is %p, prov offset is %x, stid_tab is %u"),
-		CTF_NAME_OFFSET (name), ctsp->cts_len, fp->ctf_header->cth_parent_strlen, ctsp->cts_strs, prov_offset, stid_tab);
+  ctf_warn (err_locus (fp), 0, _("offset %x: strtab not found or corrupt offset: cts_len is %zx, parent strlen is %u, cts_strs is %p, prov offset is %x, stid_tab is %u"),
+	    CTF_NAME_OFFSET (name), ctsp->cts_len, fp->ctf_header->cth_parent_strlen, ctsp->cts_strs, prov_offset, stid_tab);
 
   /* String table not loaded or corrupt offset.  */
   return NULL;
@@ -364,9 +359,8 @@ ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
       && fp->ctf_max_children != 0
       && !(flags & CTF_STR_PROVISIONAL))
     {
-      ctf_set_errno (fp, ECTF_RDONLY);
-      ctf_err_warn (fp, 0, 0, _("attempt to add non-provisional strings to an "
-				"already-serialized parent dict"));
+      ctf_err (err_locus (fp), ECTF_RDONLY, _("attempt to add non-provisional strings to an "
+					      "already-serialized parent dict"));
       return NULL;
     }
 
@@ -375,8 +369,7 @@ ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
       if (get_prov_offset (fp) < fp->ctf_header->cth_parent_strlen
 	  + fp->ctf_str[CTF_STRTAB_0].cts_len)
 	{
-	  ctf_set_errno (fp, ECTF_FULL);
-	  ctf_err_warn (fp, 0, 0, _("strtab is full: cannot add more strings"));
+	  ctf_err (err_locus (fp), ECTF_FULL, _("strtab is full: cannot add more strings"));
 	  return NULL;
 	}
     }
@@ -668,8 +661,8 @@ ctf_str_write_strtab (ctf_dict_t *fp)
     {
       if (fp->ctf_parent->ctf_str_prov_len != 0)
 	{
-	  ctf_set_errno (fp, ECTF_NOTSERIALIZED);
-	  ctf_err_warn (fp, 0, 0, _("attempt to write strtab with unserialized parent"));
+	  ctf_err (err_locus (fp), ECTF_NOTSERIALIZED,
+		   _("attempt to write strtab with unserialized parent"));
 	  return NULL;
 	}
 
@@ -678,11 +671,10 @@ ctf_str_write_strtab (ctf_dict_t *fp)
 
       if (fp->ctf_header->cth_parent_strlen != fp->ctf_parent->ctf_str[CTF_STRTAB_0].cts_len)
 	{
-	  ctf_set_errno (fp, ECTF_WRONGPARENT);
-	  ctf_err_warn (fp, 0, 0, _("cannot serialize child strtab: "
-				    "parent strtab has changed length from %x to %zx\n"),
-			fp->ctf_header->cth_parent_strlen,
-			fp->ctf_parent->ctf_str[CTF_STRTAB_0].cts_len);
+	  ctf_err (err_locus (fp), ECTF_WRONGPARENT, _("cannot serialize child strtab: "
+						       "parent strtab has changed length from %x to %zx\n"),
+		   fp->ctf_header->cth_parent_strlen,
+		   fp->ctf_parent->ctf_str[CTF_STRTAB_0].cts_len);
 	  return NULL;
 	}
     }

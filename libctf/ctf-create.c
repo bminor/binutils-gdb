@@ -853,10 +853,9 @@ ctf_add_array (ctf_dict_t *fp, const ctf_arinfo_t *arp)
 
   if (ctf_type_kind (fp, arp->ctr_index) == CTF_K_FORWARD)
     {
-      ctf_err_warn (fp, 1, ECTF_INCOMPLETE,
-		    _("ctf_add_array: index type %lx is incomplete"),
-		    arp->ctr_contents);
-      return (ctf_set_typed_errno (fp, ECTF_INCOMPLETE));
+      ctf_err (type_err_locus (fp, arp->ctr_contents), ECTF_INCOMPLETE,
+	       _("index type"));
+      return CTF_ERR;
     }
 
   if ((dtd = ctf_add_generic (fp, NULL, CTF_K_ARRAY, 0,
@@ -1195,13 +1194,10 @@ ctf_add_struct (ctf_dict_t *fp, const char *name,
   if (struct_union_unknown != CTF_K_UNKNOWN
       && struct_union_unknown != CTF_K_STRUCT
       && struct_union_unknown != CTF_K_UNION)
-    {
-      ctf_err_warn (fp, 0, ECTF_NOTSOU, "ctf_add_sou_sized: struct %s "
-		    "kind must be one of CTF_K_STRUCT, UNION or UNKNOWN, "
-		    "not %i\n", name ? name : "(unnamed)",
-		    struct_union_unknown);
-      return ctf_set_typed_errno (fp, ECTF_NOTSOU);
-    }
+    return ctf_typed_err (err_locus (fp), ECTF_NOTSOU,
+			  _("struct %s kind must be one of CTF_K_STRUCT, UNION or UNKNOWN, not %i"),
+			  name ? name : "(unnamed)",
+			  struct_union_unknown);
 
   /* For now, "unknown" == "struct".  */
   if (struct_union_unknown == CTF_K_UNKNOWN)
@@ -1209,13 +1205,9 @@ ctf_add_struct (ctf_dict_t *fp, const char *name,
 
   if (bitfield != CTF_STRUCT_NORMAL
       && bitfield != CTF_STRUCT_BITFIELD)
-    {
-      ctf_err_warn (fp, 0, ECTF_NOTSOU, "ctf_add_sou_sized: struct %s "
-		    "bitfieldness must be one of CTF_STRUCT_NORMAL or "
-		    "CTF_STRUCT_BITFIELD, not %i\n",
-		    name ? name : "(unnamed)", bitfield);
-      return ctf_set_typed_errno (fp, ECTF_NOTSOU);
-    }
+    return ctf_typed_err (err_locus (fp), ECTF_NOTSOU,
+			  _("struct %s bitfieldness must be one of CTF_STRUCT_NORMAL or CTF_STRUCT_BITFIELD, not %i"),
+			  name ? name : "(unnamed)", bitfield);
 
   /* Promote root-visible forwards to structs/unions.  */
   if (name != NULL && !fp->ctf_add_conflicting)
@@ -1262,13 +1254,9 @@ ctf_add_enum (ctf_dict_t *fp, const char *name, ctf_kind_t enum_64_unknown,
     kind = CTF_K_ENUM64;
 
   if (kind != CTF_K_ENUM && kind != CTF_K_ENUM64)
-    {
-      ctf_err_warn (fp, 0, ECTF_NOTENUM, "ctf_add_enum: enum %s "
-		    "kind must be one of CTF_K_ENUM, ENUM64 or UNKNOWN, "
-		    "not %i\n", name ? name : "(unnamed)",
-		    enum_64_unknown);
-      return ctf_set_typed_errno (fp, ECTF_NOTENUM);
-    }
+    return ctf_typed_err (err_locus (fp), ECTF_NOTENUM,
+			  _("enum %s kind must be one of CTF_K_ENUM, ENUM64 or UNKNOWN, not %i"),
+			  name ? name : "(unnamed)", enum_64_unknown);
 
   if (ep)
     is_signed = ((ep->cte_format & CTF_INT_SIGNED) != 0);
@@ -1381,13 +1369,9 @@ ctf_add_unknown (ctf_dict_t *fp, const char *name)
       if (ctf_type_kind (fp, type) == CTF_K_UNKNOWN)
 	return type;
       else
-	{
-	  ctf_err_warn (fp, 1, ECTF_CONFLICT,
-			_("ctf_add_unknown: cannot add unknown type "
-			  "named %s: type of this name already defined"),
-			name ? name : _("(unnamed type)"));
-	  return (ctf_set_typed_errno (fp, ECTF_CONFLICT));
-	}
+	return ctf_typed_err (type_err_locus (fp, type), ECTF_CONFLICT,
+			      _("cannot add unknown type named %s: type of this name already defined"),
+			      name ? name : _("(unnamed type)"));
     }
 
   if ((dtd = ctf_add_generic (fp, name, CTF_K_UNKNOWN, 0, 0, 0,
@@ -1429,12 +1413,10 @@ ctf_id_t
 ctf_add_qualifier (ctf_dict_t *fp, ctf_kind_t cvr_qual, ctf_id_t ref)
 {
   if (cvr_qual != CTF_K_CONST && cvr_qual != CTF_K_VOLATILE && cvr_qual != CTF_K_RESTRICT)
-    {
-      ctf_err_warn (fp, 0, ECTF_NOTENUM, _("ctf_add_qualifier: kind %i is "
-					   "not CTF_K_CONST, CTF_K_VOLATILE "
-					   "or CTF_K_RESTRICT.\n"), cvr_qual);
-      return ctf_set_typed_errno (fp, ECTF_NOTQUAL);
-    }
+    return ctf_typed_err (err_locus (fp), ECTF_NOTQUAL,
+			  _("kind %i is not CTF_K_CONST, CTF_K_VOLATILE or CTF_K_RESTRICT"),
+			  cvr_qual);
+
   return (ctf_add_reftype (fp, ref, cvr_qual, NULL));
 }
 
@@ -1696,32 +1678,26 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 	  /* Natural alignment.  */
 
 	  if (is_incomplete)
-	    {
-	      ctf_err_warn (ofp, 1, ECTF_INCOMPLETE,
-			    _("ctf_add_member: cannot add member %s of "
-			      "incomplete type %lx to struct %lx without "
-			      "specifying explicit offset\n"),
-			    name ? name : _("(unnamed member)"), type, souid);
-	      return (ctf_set_errno (ofp, ECTF_INCOMPLETE));
-	    }
+	    return ctf_err (type_err_locus (ofp, souid), ECTF_INCOMPLETE,
+			    _("cannot add member %s of type %lx to struct "
+			      "without specifying explicit offset"),
+			    name ? name : _("(unnamed member)"), type);
 
 	  if ((off = ctf_type_align_natural (fp, memb[vlen - 1].ctm_type,
 					     type, dtd->dtd_last_offset)) < 0)
 	    {
-	      if (ctf_errno (fp) == ECTF_INCOMPLETE)
-		{
-		  const char *lname = ctf_strraw (fp, memb[vlen - 1].ctm_name);
+	      const char *lname = ctf_strraw (fp, memb[vlen - 1].ctm_name);
 
-		  ctf_err_warn (ofp, 1, ECTF_INCOMPLETE,
-				_("ctf_add_member_offset: cannot add member %s "
-				  "of type %lx to struct %lx without "
-				  "specifying explicit offset after member %s"
-				  "of type %x, which is an incomplete type\n"),
-				name ? name : _("(unnamed member)"), type, souid,
-				lname ? lname : _("(unnamed member)"),
-				memb[vlen -1].ctm_type);
-		}
-	      return (ctf_set_errno (ofp, ctf_errno (fp)));
+	      return ctf_err (type_err_locus (ofp, souid), ctf_errno (fp),
+			      _("cannot add member %s of type %lx to struct "
+				"without specifying explicit offset after "
+				"member %s of type %x%s"),
+			      name ? name : _("(unnamed member)"), type,
+			      lname ? lname : _("(unnamed member)"),
+			      memb[vlen -1].ctm_type,
+			      ctf_errno (fp) == ECTF_INCOMPLETE
+			      ? _(", which is an incomplete type")
+			      : _(", but getting its alignment failed"));
 	    }
 
 	  /* Convert the offset to a gap-since-the-last.  */
@@ -2144,34 +2120,36 @@ enumcmp (ctf_dict_t *fp, ctf_id_t type, ctf_bundle_t *ctb, ctf_dict_t *err_fp)
       if (ctf_enum_value (ctb->ctb_dict, ctb->ctb_type, name, &bvalue) < 0)
 	{
 	  ctf_next_destroy (i);
-	  ctf_err_warn (err_fp, 0, ctf_errno (ctb->ctb_dict),
-			_("conflict due to enum %s iteration error"), name);
+	  ctf_err (type_err_locus (err_fp, type), ctf_errno (ctb->ctb_dict),
+		   _("conflict due to enum %s iteration error"), name);
 	  return 1;
 	}
       if (memcmp (&value.encoding, &bvalue.encoding, sizeof (ctf_encoding_t)) != 0)
 	{
 	  ctf_next_destroy (i);
-	  ctf_err_warn (err_fp, 1, ECTF_CONFLICT,
-			_("conflict due to enum encoding change: %s versus %s"),
-			value.encoding.cte_format & CTF_INT_SIGNED
+	  ctf_warn (type_err_locus (err_fp, type), ECTF_CONFLICT,
+			_("conflict due to enum %s encoding change: %s versus %s"),
+			name, value.encoding.cte_format & CTF_INT_SIGNED
 			? "signed" : "unsigned",
 			bvalue.encoding.cte_format & CTF_INT_SIGNED
 			? "signed" : "unsigned");
+	  ctf_set_errno (err_fp, ECTF_CONFLICT);
 	  return 1;
 	}
       if (value.val != bvalue.val)
 	{
 	  ctf_next_destroy (i);
-	  ctf_err_warn (err_fp, 1, ECTF_CONFLICT,
+	  ctf_warn (type_err_locus (err_fp, type), ECTF_CONFLICT,
 			_("conflict due to enum value change: %li versus %li"),
 			value.val, bvalue.uval);
+	  ctf_set_errno (err_fp, ECTF_CONFLICT);
 	  return 1;
 	}
     }
   if (ctf_errno (fp) != ECTF_NEXT_END)
     {
-      ctf_err_warn (err_fp, 0, ctf_errno (fp),
-		    _("conflict due to enum %s iteration error"), name);
+      ctf_err (type_err_locus (err_fp, type), ctf_errno (fp),
+	       _("conflict due to enum %s iteration error"), name);
       return 1;
     }
 
@@ -2189,27 +2167,22 @@ membcmp (const char *name, size_t offset, int bit_width, ctf_bundle_t *ctb)
     return 0;
 
   if (ctf_member_info (ctb->ctb_dict, ctb->ctb_type, name, &ctm) < 0)
-    {
-      ctf_err_warn (ctb->ctb_dict, 0, 0,
+    return ctf_err (type_err_locus (ctb->ctb_dict, ctb->ctb_type), 0,
 		    _("conflict due to struct member %s iteration error"),
 		    name);
-      return -1;
-    }
   if (ctm.ctm_offset != offset)
     {
-      ctf_err_warn (ctb->ctb_dict, 1, ECTF_CONFLICT,
-		    _("conflict due to struct member %s offset change: "
-		      "%zx versus %zx"),
-		    name, ctm.ctm_offset, offset);
-      return -1;
+      ctf_warn (type_err_locus (ctb->ctb_dict, ctb->ctb_type), ECTF_CONFLICT,
+		_("struct member %s offset change: %zx versus %zx"),
+		name, ctm.ctm_offset, offset);
+      return (ctf_set_errno (ctb->ctb_dict, ECTF_CONFLICT));
     }
   if (ctm.ctm_bit_width != bit_width)
     {
-      ctf_err_warn (ctb->ctb_dict, 1, ECTF_CONFLICT,
-		    _("conflict due to struct member %s bit-width change: "
-		      "%i versus %i"),
-		    name, ctm.ctm_bit_width, bit_width);
-      return -1;
+      ctf_warn (type_err_locus (ctb->ctb_dict, ctb->ctb_type), ECTF_CONFLICT,
+		_("struct member %s bit-width change: %i versus %i"),
+		name, ctm.ctm_bit_width, bit_width);
+      return (ctf_set_errno (ctb->ctb_dict, ECTF_CONFLICT));
     }
   return 0;
 }
@@ -2419,10 +2392,9 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 	  || (kind != CTF_K_ENUM && kind != CTF_K_STRUCT
 	      && kind != CTF_K_UNION))
 	{
-	  ctf_err_warn (dst_fp, 1, ECTF_CONFLICT,
-			_("ctf_add_type: conflict for type %s: "
-			  "kinds differ, new: %i; old (ID %lx): %i"),
-			name, kind, dst_type, dst_kind);
+	  ctf_warn (type_err_locus (dst_fp, dst_type), ECTF_CONFLICT,
+			_("type %s: kinds differ, new (ID %lx): %i; old: %i"),
+		    name, src_type, kind, dst_kind);
 	  return (ctf_set_typed_errno (dst_fp, ECTF_CONFLICT));
 	}
     }
@@ -2581,13 +2553,13 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 
 	  if (memcmp (&src_ar, &dst_ar, sizeof (ctf_arinfo_t)))
 	    {
-	      ctf_err_warn (dst_fp, 1, ECTF_CONFLICT,
-			    _("conflict for type %s against ID %lx: array info "
-			      "differs, old %lx/%lx/%zx; new: %lx/%lx/%zx"),
-			    name, dst_type, src_ar.ctr_contents,
-			    src_ar.ctr_index, src_ar.ctr_nelems,
-			    dst_ar.ctr_contents, dst_ar.ctr_index,
-			    dst_ar.ctr_nelems);
+	      ctf_warn (type_err_locus (dst_fp, dst_type), ECTF_CONFLICT,
+			_("type %s (new ID %lx): array info differs, "
+			  "old %lx/%lx/%zx; new: %lx/%lx/%zx"),
+			name, src_type, src_ar.ctr_contents,
+			src_ar.ctr_index, src_ar.ctr_nelems,
+			dst_ar.ctr_contents, dst_ar.ctr_index,
+			dst_ar.ctr_nelems);
 	      return (ctf_set_typed_errno (dst_fp, ECTF_CONFLICT));
 	    }
 	}
@@ -2664,11 +2636,10 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 	    if (ctf_type_size (src_fp, src_type) !=
 		ctf_type_size (dst_fp, dst_type))
 	      {
-		ctf_err_warn (dst_fp, 1, ECTF_CONFLICT,
-			      _("conflict for type %s against ID %lx: union "
-				"size differs, old %li, new %li"), name,
-			      dst_type, (long) ctf_type_size (src_fp, src_type),
-			      (long) ctf_type_size (dst_fp, dst_type));
+		ctf_warn (type_err_locus (dst_fp, dst_type), ECTF_CONFLICT,
+			      _("type %s, new ID %lx: union size differs, old %li, new %li"),
+			  name, src_type, (long) ctf_type_size (src_fp, src_type),
+			  (long) ctf_type_size (dst_fp, dst_type));
 		return (ctf_set_typed_errno (dst_fp, ECTF_CONFLICT));
 	      }
 
@@ -2679,9 +2650,9 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 		if (membcmp (membname, offset, bit_width, &dst) < 0)
 		  {
 		    ctf_next_destroy (i);
-		    ctf_err_warn (dst_fp, 1, ECTF_CONFLICT,
-				  _("conflict for type %s against ID %lx: members "
-				    "differ, see above"), name, dst_type);
+		    ctf_warn (type_err_locus (dst_fp, dst_type), ECTF_CONFLICT,
+			      _("type %s new ID %lx: members differ, see above"),
+			      name, src_type);
 		    return (ctf_set_typed_errno (dst_fp, ECTF_CONFLICT));
 		  }
 	      }
@@ -2742,17 +2713,17 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 	  if (ctf_enum_unsigned (src_fp, src_type)
 	      != ctf_enum_unsigned (dst_fp, dst_type))
 	    {
-	      ctf_err_warn (dst_fp, 1, ECTF_CONFLICT,
-			    _("conflict for enum %s against ID %lx: member "
-			      "signedness differs"), name, dst_type);
+	      ctf_warn (type_err_locus (dst_fp, dst_type), ECTF_CONFLICT,
+			_("enum %s, new ID %lx: member signedness differs"),
+			name, src_type);
 	      return (ctf_set_typed_errno (dst_fp, ECTF_CONFLICT));
 	    }
 	  if (enumcmp (src_fp, src_type, &dst, dst_fp)
 	      || enumcmp (dst_fp, dst_type, &src, dst_fp))
 	    {
-	      ctf_err_warn (dst_fp, 1, ECTF_CONFLICT,
-			    _("conflict for enum %s against ID %lx: members "
-			      "differ, see above"), name, dst_type);
+	      ctf_warn (type_err_locus (dst_fp, dst_type), ECTF_CONFLICT,
+			    _("enum %s, new ID %lx: members differ, see above"),
+			name, src_type);
 	      return (ctf_set_typed_errno (dst_fp, ECTF_CONFLICT));
 	    }
 	}

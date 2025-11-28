@@ -82,10 +82,10 @@ ctf_dynset_cinsert (ctf_dynset_t *h, const void *k)
 
 static inline int
 ctf_assert_internal (ctf_dict_t *fp, const char *file, size_t line,
-		     const char *exprstr, int expr)
+		     const char *func, const char *exprstr, int expr)
 {
   if (_libctf_unlikely_ (!expr))
-    ctf_assert_fail_internal (fp, file, line, exprstr);
+    ctf_assert_fail_internal (fp, file, line, func, exprstr);
 
   return expr;
 }

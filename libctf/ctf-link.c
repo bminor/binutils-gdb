@@ -206,9 +206,8 @@ ctf_link_lazy_open (ctf_dict_t *fp, ctf_link_input_t *input)
 
   /* See ctf_link_add.  */
 #if NOBFD
-  ctf_err_warn (fp, 0, ECTF_NEEDSBFD, _("cannot open %s lazily"),
-		input->clin_filename);
-  return ctf_set_errno (fp, ECTF_NEEDSBFD);
+  ctf_err (err_locus (fp), ECTF_NEEDSBFD, _("cannot open %s lazily"), input->clin_filename);
+  return -1;
 #else
   input->clin_arc = ctf_open (input->clin_filename, NULL, &err);
 #endif
@@ -221,9 +220,8 @@ ctf_link_lazy_open (ctf_dict_t *fp, ctf_link_input_t *input)
       if (err == ECTF_NOCTFDATA)
 	return 0;
 
-      ctf_err_warn (fp, 0, err, _("opening CTF %s failed"),
-		    input->clin_filename);
-      return ctf_set_errno (fp, err);
+      ctf_err (err_locus (fp), err, _("opening CTF %s failed"), input->clin_filename);
+      return -1;
     }
 
   if ((count = ctf_archive_count (input->clin_arc)) == 0)
@@ -297,9 +295,8 @@ ctf_create_per_cu (ctf_dict_t *fp, ctf_dict_t *input, const char *cu_name)
 
       if ((cu_fp = ctf_create (&err)) == NULL)
 	{
-	  ctf_set_errno (fp, err);
-	  ctf_err_warn (fp, 0, 0, _("cannot create per-CU CTF archive for "
-				    "input CU %s"), cu_name);
+	  ctf_err (err_locus (fp), err, _("cannot create per-CU CTF archive for "
+			    "input CU %s"), cu_name);
 	  return NULL;
 	}
 
@@ -566,9 +563,8 @@ ctf_link_deduplicating_count_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
     }
   if (err != ECTF_NEXT_END)
     {
-      ctf_err_warn (fp, 0, err, _("iteration error counting deduplicating "
-				  "CTF link inputs"));
-      return ctf_set_errno (fp, err);
+      ctf_err (err_locus (fp), err, NULL);
+      return -1;
     }
 
   if (!count)
@@ -639,6 +635,7 @@ ctf_link_deduplicating_open_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
 					 ctf_link_sort_inputs, &sort_arg)) == 0)
     {
       const char *one_name = (const char *) name;
+      const char *arc_name;
       ctf_link_input_t *one_input;
       ctf_dict_t *one_fp;
       ctf_next_t *j = NULL;
@@ -674,7 +671,7 @@ ctf_link_deduplicating_open_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
 	 relink with CU-mapping off (i.e. ld -r) in which case the cuname is correctly
 	 set regardless.  */
 
-      while ((one_fp = ctf_archive_next (one_input->clin_arc, &j, NULL,
+      while ((one_fp = ctf_archive_next (one_input->clin_arc, &j, &arc_name,
 					 0, &err)) != NULL)
 	{
 	  /* ctf_archive_next either auto-imports the parent, or this *is* the parent.
@@ -689,8 +686,9 @@ ctf_link_deduplicating_open_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
 	    {
 	      ctf_next_destroy (i);
 	      ctf_next_destroy (j);
-	      ctf_set_errno (fp, ECTF_NOPARENT);
-	      ctf_err_warn (fp, 0, 0, _("cannot open linker inputs"));
+	      ctf_err (err_locus (fp), ECTF_NOPARENT,
+		       _("archive member %s in CU %s is child with no parent"),
+		       arc_name, one_name);
 	      goto reported_err;
 	    }
 
@@ -757,8 +755,8 @@ ctf_link_deduplicating_open_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
   ctf_set_errno (fp, err);
 
  err:
-  ctf_err_warn (fp, 0, 0, _("error in deduplicating CTF link "
-			    "input allocation"));
+  ctf_err (err_locus (fp), 0, NULL);		/* The function name is enough.  */
+
  reported_err:
   ctf_link_deduplicating_close_inputs (fp, cu_names, dedup_inputs, ninputs);
   /* UPTODO XXX fix pre-existing leak of the parents on error.  */
@@ -797,11 +795,7 @@ ctf_link_deduplicating_close_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
 	  ctf_dynhash_remove (fp->ctf_link_inputs, (const char *) name);
 	}
       if (err != ECTF_NEXT_END)
-	{
-	  ctf_set_errno (fp, err);
-	  ctf_err_warn (fp, 0, 0, _("iteration error in deduplicating link "
-				    "input freeing"));
-	}
+	return ctf_err (err_locus (fp), err, NULL);
     }
   else
     ctf_dynhash_empty (fp->ctf_link_inputs);
@@ -903,10 +897,8 @@ ctf_link_deduplicating_one_symtypetab (ctf_dict_t *fp, ctf_dict_t *input,
 
 	  if (dst_type == 0)
 	    {
-	      ctf_err_warn (fp, 1, 0,
-			    _("type %lx for symbol %s in input file %s "
-			      "not found: skipped"), type, name,
-			    ctf_unnamed_cuname (input));
+	      ctf_warn (link_type_err_locus (fp, input, -1, type), 1, 0,
+			_("type for symbol %s not found: skipped"), name);
 	      continue;
 	    }
 	}
@@ -927,20 +919,16 @@ ctf_link_deduplicating_one_symtypetab (ctf_dict_t *fp, ctf_dict_t *input,
 	{
 	  /* Perhaps this should be an assertion failure.  */
 	  ctf_next_destroy (it);
-	  ctf_err_warn (fp, 0, ECTF_DUPLICATE,
-			_("symbol %s in input file %s found conflicting "
-			  "even when trying in per-CU dict."), name,
-			ctf_unnamed_cuname (input));
-	  return (ctf_set_errno (fp, ECTF_DUPLICATE));
+	  return ctf_err (link_type_err_locus (fp, input, -1, type), ECTF_DUPLICATE,
+			  _("symbol %s found conflicting even when trying in per-CU dict."),
+			  name);
 	}
     }
   if (ctf_errno (input) != ECTF_NEXT_END)
     {
-      ctf_set_errno (fp, ctf_errno (input));
-      ctf_err_warn (fp, 0, 0, functions ?
-		    _("iterating over function symbols") :
-		    _("iterating over data symbols"));
-      return -1;
+      return ctf_err (link_err_locus (fp, input, -1), 0, functions ?
+		      _("iterating over function symbols") :
+		      _("iterating over data symbols"));
     }
 
   return 0;
@@ -1013,9 +1001,8 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
 
       if (labs ((long int) ninputs) > 0xfffffffe)
 	{
-	  ctf_set_errno (fp, EFBIG);
-	  ctf_err_warn (fp, 0, 0, _("too many inputs in deduplicating "
-				    "link: %li"), (long int) ninputs);
+	  ctf_err (err_locus (fp), ECTF_RANGE, _("too many inputs: %li"),
+		   (long int) ninputs);
 	  goto err_open_inputs;
 	}
 
@@ -1037,10 +1024,8 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
 						  &ai, NULL, 0, &err);
 	  if (!only_input->clin_fp)
 	    {
-	      ctf_set_errno (fp, err);
-	      ctf_err_warn (fp, 0, 0, _("cannot open archive %s in "
-					"CU-mapped CTF link"),
-			    only_input->clin_filename);
+	      ctf_err (err_locus (fp), err, _("cannot open archive %s"),
+		       only_input->clin_filename);
 	      goto err_open_inputs;
 	    }
 	  ctf_next_destroy (ai);
@@ -1059,8 +1044,7 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
 					 only_input->clin_fp,
 					 out_name) < 0)
 		{
-		  ctf_err_warn (fp, 0, 0, _("cannot add intermediate files "
-					    "to link"));
+		  ctf_err (err_locus (fp), 0, _("cannot add intermediate files to link"));
 		  goto err_open_inputs;
 		}
 	      only_input->clin_arc = NULL;
@@ -1083,10 +1067,8 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
 
       if ((out = ctf_create (&err)) == NULL)
 	{
-	  ctf_err_warn (fp, 0, err, _("cannot create per-CU CTF archive "
-				      "for %s"),
-			out_name);
-	  ctf_set_errno (fp, err);
+	  ctf_err (err_locus (fp), err,
+		   _("cannot create per-CU CTF archive for %s"), out_name);
 	  goto err_inputs;
 	}
 
@@ -1104,18 +1086,17 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
 
       if (ctf_dedup (out, inputs, ninputs, 1) < 0)
 	{
-	  ctf_set_errno (fp, ctf_errno (out));
-	  ctf_err_warn (fp, 0, 0, _("CU-mapped deduplication failed for %s"),
-			out_name);
+	  ctf_err (link_err_locus (fp, out, -1), 0,
+		   _("CU-mapped deduplication failed for %s"), out_name);
 	  goto err_inputs;
 	}
 
       if ((outputs = ctf_dedup_emit (out, inputs, ninputs, parents,
 				     &noutputs, 1)) == NULL)
 	{
-	  ctf_set_errno (fp, ctf_errno (out));
-	  ctf_err_warn (fp, 0, 0, _("CU-mapped deduplicating link type emission "
-				     "failed for %s"), out_name);
+	  ctf_err (link_err_locus (fp, out, -1), 0,
+		   _("CU-mapped deduplicating link type emission failed for %s"),
+		   out_name);
 	  goto err_inputs;
 	}
       if (!ctf_assert (fp, noutputs == 1))
@@ -1160,7 +1141,7 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
       if (ctf_link_add_internal (fp, in_arc, NULL,
 				 ctf_dict_cuname (outputs[0])) < 0)
 	{
-	  ctf_err_warn (fp, 0, 0, _("cannot add intermediate files to link"));
+	  ctf_err (err_locus (fp), 0, _("cannot add intermediate files to link"));
 	  goto err_outputs;
 	}
 
@@ -1190,15 +1171,15 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
     }
   if (err != ECTF_NEXT_END)
     {
-      ctf_err_warn (fp, 0, err, _("iteration error in CU-mapped deduplicating "
-				  "link"));
-      return ctf_set_errno (fp, err);
+      return ctf_err (err_locus (fp), err, _("iteration error"));
     }
 
   return 0;
 }
 
-/* Empty all the ctf_link_outputs.  */
+/* Empty all the ctf_link_outputs.  This is often a nonessential error-path
+   cleanup operation, so problems are reported as warnings: use
+   ctf_err_upgrade() to turn into an error if fatal.  */
 static ctf_ret_t
 ctf_link_empty_outputs (ctf_dict_t *fp)
 {
@@ -1216,8 +1197,8 @@ ctf_link_empty_outputs (ctf_dict_t *fp)
   if (err != ECTF_NEXT_END)
     {
       fp->ctf_flags &= ~LCTF_LINKING;
-      ctf_err_warn (fp, 1, err, _("iteration error removing old outputs"));
-      return ctf_set_errno (fp, err);
+      ctf_warn (err_locus (fp), err, _("iteration error"));
+      return -1;
     }
   return 0;
 }
@@ -1235,7 +1216,7 @@ ctf_link_deduplicating (ctf_dict_t *fp)
 
   if (ctf_dedup_atoms_init (fp) < 0)
     {
-      ctf_err_warn (fp, 0, 0, _("allocating CTF dedup atoms table"));
+      ctf_err (err_locus (fp), 0, _("allocating CTF dedup atoms table"));
       return;					/* Errno is set for us.  */
     }
 
@@ -1266,16 +1247,16 @@ ctf_link_deduplicating (ctf_dict_t *fp)
 
   if (ctf_dedup (fp, inputs, ninputs, cu_phase) < 0)
     {
-      ctf_err_warn (fp, 0, 0, _("deduplication failed for %s"),
-		    ctf_link_input_name (fp));
+      ctf_err (err_locus (fp), 0, _("deduplication failed for %s"),
+	       ctf_link_input_name (fp));
       goto err;
     }
 
   if ((outputs = ctf_dedup_emit (fp, inputs, ninputs, parents, &noutputs,
 				 cu_phase)) == NULL)
     {
-      ctf_err_warn (fp, 0, 0, _("deduplicating link type emission failed "
-				"for %s"), ctf_link_input_name (fp));
+      ctf_err (err_locus (fp), 0, _("deduplicating link type emission failed "
+				    "for %s"), ctf_link_input_name (fp));
       goto err;
     }
 
@@ -1306,8 +1287,7 @@ ctf_link_deduplicating (ctf_dict_t *fp)
       continue;
 
     oom_one_output:
-      ctf_set_errno (fp, ENOMEM);
-      ctf_err_warn (fp, 0, 0, _("out of memory allocating link outputs"));
+      ctf_err (err_locus (fp), ENOMEM, _("allocating link outputs"));
       free (dynname);
 
       for (; i < noutputs; i++)
@@ -1320,8 +1300,8 @@ ctf_link_deduplicating (ctf_dict_t *fp)
 
   if (ctf_link_deduplicating_syms (fp, inputs, ninputs, 0) < 0)
     {
-      ctf_err_warn (fp, 0, 0, _("deduplicating link symbol emission failed for "
-				"%s"), ctf_link_input_name (fp));
+      ctf_err (err_locus (fp), 0, _("deduplicating link symbol emission failed for "
+				    "%s"), ctf_link_input_name (fp));
       goto err_clean_outputs;
     }
 
@@ -1347,7 +1327,6 @@ ctf_link_deduplicating (ctf_dict_t *fp)
 
  err_clean_outputs:
   ctf_link_empty_outputs (fp);
-  goto err;
 }
 
 /* Merge types and variable sections in all dicts added to the link together.
@@ -1364,7 +1343,13 @@ ctf_link (ctf_dict_t *fp, ctf_link_flags_t flags)
     return 0;					/* Nothing to do. */
 
   if (fp->ctf_link_outputs != NULL)
-    ctf_link_empty_outputs (fp);
+    {
+      if (ctf_link_empty_outputs (fp) < 0)
+	{
+	  ctf_err_upgrade (fp);
+	  return -1;				/* errno is set for us.  */
+	}
+    }
   else
     fp->ctf_link_outputs = ctf_dynhash_create (ctf_hash_string,
 					       ctf_hash_eq_string, free,
@@ -1404,7 +1389,7 @@ ctf_link (ctf_dict_t *fp, ctf_link_flags_t flags)
       if (err != ECTF_NEXT_END)
 	{
 	  fp->ctf_flags = oldflags;
-	  ctf_err_warn (fp, 1, err, _("iteration error creating empty CUs"));
+	  ctf_warn (err_locus (fp), err, _("iteration error creating empty CUs"));
 	  return ctf_set_errno (fp, err);
 	}
     }
@@ -1640,7 +1625,7 @@ ctf_link_shuffle_syms (ctf_dict_t *fp)
     }
   if (err != ECTF_NEXT_END)
     {
-      ctf_err_warn (fp, 0, err, _("error iterating over shuffled symbols"));
+      ctf_err (err_locus (fp), err, _("iteration error"));
       goto err;
     }
 
@@ -2032,7 +2017,8 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold, int *is_btf)
       free (arg.dynames);
     }
   if (errloc)
-    ctf_err_warn (fp, 0, 0, _("cannot write archive in link: %s failure"),
-		  errloc);
+    ctf_err (err_locus (fp), 0, _("%s"), errloc);
+  else
+    ctf_err (err_locus (fp), 0, NULL);
   return NULL;
 }

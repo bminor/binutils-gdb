@@ -252,8 +252,7 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
  oom:
   ctf_set_errno (fp, errno);
  err:
-  ctf_err_warn (fp, 1, ctf_errno (fp), _("cannot format name dumping type 0x%lx"),
-		id);
+  ctf_warn (type_err_locus (fp, id), 0, _("cannot dump type name"));
   free (buf);
   free (str);
   free (bit);
@@ -611,7 +610,7 @@ ctf_dump_objts (ctf_dict_t *fp, ctf_dump_state_t *state, ctf_funcobjt_t function
       return -1;
     }
   if (ctf_errno (fp) != ECTF_NEXT_END)
-    ctf_err_warn (fp, 1, ctf_errno (fp), _("cannot iterate over symbols\n"));
+    ctf_warn (err_locus (fp), 0, _("cannot iterate over symbols"));
 
   return 0;
 }
@@ -658,8 +657,7 @@ ctf_dump_var (ctf_dict_t *fp, ctf_id_t type,
 
   if ((type = ctf_type_reference (fp, type)) == CTF_ERR)
     {
-      ctf_err_warn (fp, 1, ctf_errno (fp), _("cannot deref dumping var 0x%lx"),
-		    otype);
+      ctf_warn (type_err_locus (fp, otype), 0, _("cannot deref var"));
       return 0;
     }
 
@@ -676,8 +674,7 @@ ctf_dump_var (ctf_dict_t *fp, ctf_id_t type,
   ctf_dump_append (fp, state, str);
   return 0;
 err:
-  ctf_err_warn (fp, 1, ctf_errno (fp), _("cannot print name dumping var 0x%lx"),
-		type);
+  ctf_warn (type_err_locus (fp, type), 0, _("cannot print name dumping var"));
   return 0;
 }
 
@@ -714,22 +711,22 @@ ctf_dump_datasecs (ctf_dict_t *fp, ctf_dump_state_t *arg)
 	{
 	  if (ctf_dump_var (fp, type, offset, size, state) < 0)
 	    {
-	      ctf_err_warn (fp, 1, 0, _("cannot dump var %s (%lx) in datasec %s (%lx)\n"),
+	      ctf_warn (type_err_locus (fp, type), 0, _("cannot dump var %s (%lx) in datasec %s"),
 			    ctf_type_name_raw (fp, var_type), var_type,
-			    ctf_type_name_raw (fp, type), type);
+			    ctf_type_name_raw (fp, type));
 	      goto err;
 	    }
 	}
       if (ctf_errno (fp) != ECTF_NEXT_END)
 	{
-	  ctf_err_warn (fp, 1, 0, _("cannot iterate over vars in datasec %s (%lx)\n"),
-			ctf_type_name_raw (fp, type), type);
+	  ctf_warn (type_err_locus (fp, type), 0, _("cannot iterate over vars in datasec %s"),
+		    ctf_type_name_raw (fp, type));
 	  goto err;
 	}
     }
   if (ctf_errno (fp) != ECTF_NEXT_END)
     {
-      ctf_err_warn (fp, 1, ctf_errno (fp), _("cannot iterate over datasecs\n"));
+      ctf_warn (type_err_locus (fp, type), 0, _("cannot iterate over datasecs"));
       goto err;
     }
 
@@ -839,8 +836,7 @@ ctf_dump_type (ctf_dict_t *fp, ctf_id_t id, ctf_dump_state_t *state)
 	      ctf_dump_append (fp, state, str);
 	      return 0;
 	    }
-	  ctf_err_warn (fp, 1, ctf_errno (fp),
-			_("cannot visit members dumping type 0x%lx"), id);
+	  ctf_warn (type_err_locus (fp, id), 0, _("cannot visit members"));
 	  goto err;
 	}
     }
@@ -890,8 +886,7 @@ ctf_dump_type (ctf_dict_t *fp, ctf_id_t id, ctf_dump_state_t *state)
 	}
       if (ctf_errno (fp) != ECTF_NEXT_END)
 	{
-	  ctf_err_warn (fp, 1, ctf_errno (fp),
-			_("cannot visit enumerands dumping type 0x%lx"), id);
+	  ctf_warn (type_err_locus (fp, id), 0, _("cannot visit enumerands"));
 	  goto err;
 	}
     }

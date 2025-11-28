@@ -272,83 +272,84 @@ typedef int ctf_func_type_flags_t;
    and _CTF_ITEM to expand as you like, then mention the macro name.
    See the enum after this for an example.  */
 #define _CTF_ERRORS \
-  _CTF_FIRST (ECTF_NEXT_END, "End of iteration.") \
-  _CTF_ITEM (ECTF_FMT, "File is not in CTF or ELF format.") \
-  _CTF_ITEM (ECTF_BFDERR, "BFD error.")				\
-  _CTF_ITEM (ECTF_CTFVERS, "CTF dict version is too new for libctf.") \
-  _CTF_ITEM (ECTF_BFD_AMBIGUOUS, "Ambiguous BFD target.")	\
-  _CTF_ITEM (ECTF_SYMTAB, "Symbol table uses invalid entry size.") \
-  _CTF_ITEM (ECTF_SYMBAD, "Symbol table data buffer is not valid.") \
-  _CTF_ITEM (ECTF_STRBAD, "String table data buffer is not valid.") \
-  _CTF_ITEM (ECTF_CORRUPT, "File data structure corruption detected.") \
-  _CTF_ITEM (ECTF_NOCTFDATA, "File does not contain CTF data.") \
-  _CTF_ITEM (ECTF_NOCTFBUF, "Buffer does not contain CTF data.") \
-  _CTF_ITEM (ECTF_NOSYMTAB, "Symbol table information is not available.") \
-  _CTF_ITEM (ECTF_NOPARENT, "The parent CTF dictionary is needed but unavailable.") \
-  _CTF_ITEM (ECTF_DMODEL, "Data model mismatch.") \
-  _CTF_ITEM (ECTF_LINKADDEDLATE, "File added to link too late.") \
-  _CTF_ITEM (ECTF_ZALLOC, "Failed to allocate (de)compression buffer.") \
-  _CTF_ITEM (ECTF_DECOMPRESS, "Failed to decompress CTF data.") \
-  _CTF_ITEM (ECTF_STRTAB, "External string table is not available.") \
-  _CTF_ITEM (ECTF_BADNAME, "String name offset is corrupt.") \
-  _CTF_ITEM (ECTF_BADID, "Invalid type identifier.") \
-  _CTF_ITEM (ECTF_NOTSOU, "Type is not a struct or union.") \
-  _CTF_ITEM (ECTF_NOTENUM, "Type is not an enum.") \
-  _CTF_ITEM (ECTF_NOTSUE, "Type is not a struct, union, or enum.") \
-  _CTF_ITEM (ECTF_NOTINTFP, "Type is not an integer, float, or enum.") \
-  _CTF_ITEM (ECTF_NOTARRAY, "Type is not an array.") \
-  _CTF_ITEM (ECTF_NOTREF, "Type does not reference another type.") \
-  _CTF_ITEM (ECTF_NOTQUAL, "Type is not a cvr-qual.") \
-  _CTF_ITEM (ECTF_NAMELEN, "Buffer is too small to hold type name.") \
-  _CTF_ITEM (ECTF_NOTYPE, "No type found corresponding to name.") \
-  _CTF_ITEM (ECTF_SYNTAX, "Syntax error in type name.") \
-  _CTF_ITEM (ECTF_NOTFUNC, "Symbol table entry or type is not a function.") \
-  _CTF_ITEM (ECTF_NOFUNCDAT, "No function information available for function.") \
-  _CTF_ITEM (ECTF_NOTDATA, "Symbol table entry does not refer to a data object.") \
-  _CTF_ITEM (ECTF_NOTYPEDAT, "No type information available for symbol.") \
-  _CTF_ITEM (ECTF_NOTSUP, "Feature not supported.") \
-  _CTF_ITEM (ECTF_NOENUMNAM, "Enumerator name not found.") \
-  _CTF_ITEM (ECTF_NOMEMBNAM, "Member name not found.") \
-  _CTF_ITEM (ECTF_RDONLY, "CTF container is read-only.") \
-  _CTF_ITEM (ECTF_DTFULL, "CTF type is full (no more members allowed).") \
-  _CTF_ITEM (ECTF_FULL, "CTF container is full.") \
-  _CTF_ITEM (ECTF_DUPLICATE, "Duplicate member, enumerator, datasec, or variable name.") \
-  _CTF_ITEM (ECTF_CONFLICT, "Conflicting type is already defined.") \
-  _CTF_ITEM (ECTF_COMPRESS, "Failed to compress CTF data.") \
-  _CTF_ITEM (ECTF_ARCREATE, "Error creating CTF archive.") \
-  _CTF_ITEM (ECTF_ARNNAME, "Name not found in CTF archive.") \
-  _CTF_ITEM (ECTF_SLICEOVERFLOW, "Overflow of type bitness or offset in slice.") \
-  _CTF_ITEM (ECTF_DUMPSECTUNKNOWN, "Unknown section number in dump.") \
-  _CTF_ITEM (ECTF_DUMPSECTCHANGED, "Section changed in middle of dump.") \
-  _CTF_ITEM (ECTF_NOTYET, "Feature not yet implemented.") \
-  _CTF_ITEM (ECTF_INTERNAL, "Internal error: assertion failure.") \
-  _CTF_ITEM (ECTF_NONREPRESENTABLE, "Type not representable in CTF.") \
-  _CTF_ITEM (ECTF_NEXT_WRONGFUN, "Wrong iteration function called.") \
-  _CTF_ITEM (ECTF_NEXT_WRONGFP, "Iteration entity changed in mid-iterate.") \
-  _CTF_ITEM (ECTF_FLAGS, "CTF header contains flags unknown to libctf.") \
-  _CTF_ITEM (ECTF_NEEDSBFD, "This feature needs a libctf with BFD support.") \
-  _CTF_ITEM (ECTF_INCOMPLETE, "Type is not a complete type.") \
-  _CTF_ITEM (ECTF_NONAME, "Type name must not be empty.") \
-  _CTF_ITEM (ECTF_BADFLAG, "Invalid CTF dict flag specified.") \
-  _CTF_ITEM (ECTF_CTFVERS_NO_SERIALIZE, "CTFv1 dicts are too old to serialize.") \
-  _CTF_ITEM (ECTF_UNSTABLE, "Attempt to write unstable file format version: set I_KNOW_LIBCTF_IS_UNSTABLE in the environment.") \
-  _CTF_ITEM (ECTF_HASPARENT, "Cannot ctf_import: dict already has a parent.") \
-  _CTF_ITEM (ECTF_WRONGPARENT, "Cannot ctf_import: incorrect parent provided.") \
-  _CTF_ITEM (ECTF_NOTSERIALIZED, "CTF dict must be serialized first.") \
-  _CTF_ITEM (ECTF_BADCOMPONENT, "Declaration tag component_idx is invalid.") \
-  _CTF_ITEM (ECTF_NOTBITSOU, "Type is not a bitfield-capable struct or union.") \
-  _CTF_ITEM (ECTF_DESCENDING, "Structure offsets may not descend.") \
-  _CTF_ITEM (ECTF_LINKAGE, "Invalid linkage.") \
-  _CTF_ITEM (ECTF_LINKKIND, "Only functions and variables have linkage.") \
-  _CTF_ITEM (ECTF_NEVERTAG, "Cannot call this function with a tag kind.") \
-  _CTF_ITEM (ECTF_NOTDATASEC, "This function requires a datasec.") \
-  _CTF_ITEM (ECTF_NOTVAR, "This function requires a variable.") \
-  _CTF_ITEM (ECTF_NODATASEC, "Variable not found in datasec.") \
-  _CTF_ITEM (ECTF_NOTDECLTAG, "This function requires a decl tag.") \
-  _CTF_ITEM (ECTF_NOTTAG, "This function requires a type or decl tag.") \
-  _CTF_ITEM (ECTF_KIND_PROHIBITED, "Writeout of suppressed kind attempted.") \
-  _CTF_ITEM (ECTF_NOTBTF, "Cannot write out this dict as BTF.") \
-  _CTF_ITEM (ECTF_TOOLARGE, "Prefix required for correct representation.")
+  _CTF_FIRST (ECTF_NEXT_END, "end of iteration") \
+  _CTF_ITEM (ECTF_FMT, "file is not in CTF or ELF format") \
+  _CTF_ITEM (ECTF_BFDERR, "BFD error")				\
+  _CTF_ITEM (ECTF_CTFVERS, "CTF dict version is too new for libctf") \
+  _CTF_ITEM (ECTF_BFD_AMBIGUOUS, "ambiguous BFD target")	\
+  _CTF_ITEM (ECTF_SYMTAB, "symbol table uses invalid entry size") \
+  _CTF_ITEM (ECTF_SYMBAD, "symbol table data buffer is not valid") \
+  _CTF_ITEM (ECTF_STRBAD, "string table data buffer is not valid") \
+  _CTF_ITEM (ECTF_CORRUPT, "file data structure corruption detected") \
+  _CTF_ITEM (ECTF_NOCTFDATA, "file does not contain CTF data") \
+  _CTF_ITEM (ECTF_NOCTFBUF, "buffer does not contain CTF data") \
+  _CTF_ITEM (ECTF_NOSYMTAB, "symbol table information is not available") \
+  _CTF_ITEM (ECTF_NOPARENT, "the parent CTF dictionary is needed but unavailable") \
+  _CTF_ITEM (ECTF_DMODEL, "data model mismatch") \
+  _CTF_ITEM (ECTF_LINKADDEDLATE, "file added to link too late") \
+  _CTF_ITEM (ECTF_ZALLOC, "failed to allocate (de)compression buffer") \
+  _CTF_ITEM (ECTF_DECOMPRESS, "failed to decompress CTF data") \
+  _CTF_ITEM (ECTF_STRTAB, "external string table is not available") \
+  _CTF_ITEM (ECTF_RANGE, "allowable range exceeded") \
+  _CTF_ITEM (ECTF_BADNAME, "string name offset is corrupt") \
+  _CTF_ITEM (ECTF_BADID, "invalid type identifier") \
+  _CTF_ITEM (ECTF_NOTSOU, "type is not a struct or union") \
+  _CTF_ITEM (ECTF_NOTENUM, "type is not an enum") \
+  _CTF_ITEM (ECTF_NOTSUE, "type is not a struct, union, or enum") \
+  _CTF_ITEM (ECTF_NOTINTFP, "type is not an integer, float, or enum") \
+  _CTF_ITEM (ECTF_NOTARRAY, "type is not an array") \
+  _CTF_ITEM (ECTF_NOTREF, "type does not reference another type") \
+  _CTF_ITEM (ECTF_NOTQUAL, "type is not a cvr-qual") \
+  _CTF_ITEM (ECTF_NAMELEN, "buffer is too small to hold type name") \
+  _CTF_ITEM (ECTF_NOTYPE, "no type found corresponding to name") \
+  _CTF_ITEM (ECTF_SYNTAX, "syntax error in type name") \
+  _CTF_ITEM (ECTF_NOTFUNC, "symbol table entry or type is not a function") \
+  _CTF_ITEM (ECTF_NOFUNCDAT, "no function information available for function") \
+  _CTF_ITEM (ECTF_NOTDATA, "symbol table entry does not refer to a data object") \
+  _CTF_ITEM (ECTF_NOTYPEDAT, "no type information available for symbol") \
+  _CTF_ITEM (ECTF_NOTSUP, "feature not supported") \
+  _CTF_ITEM (ECTF_NOENUMNAM, "enumerator name not found") \
+  _CTF_ITEM (ECTF_NOMEMBNAM, "member name not found") \
+  _CTF_ITEM (ECTF_RDONLY, "CTF container is read-only") \
+  _CTF_ITEM (ECTF_DTFULL, "CTF type is full (no more members allowed)") \
+  _CTF_ITEM (ECTF_FULL, "CTF container is full") \
+  _CTF_ITEM (ECTF_DUPLICATE, "duplicate member, enumerator, datasec, or variable name") \
+  _CTF_ITEM (ECTF_CONFLICT, "conflicting type is already defined") \
+  _CTF_ITEM (ECTF_COMPRESS, "failed to compress CTF data") \
+  _CTF_ITEM (ECTF_ARCREATE, "error creating CTF archive") \
+  _CTF_ITEM (ECTF_ARNNAME, "name not found in CTF archive") \
+  _CTF_ITEM (ECTF_SLICEOVERFLOW, "overflow of type bitness or offset in slice") \
+  _CTF_ITEM (ECTF_DUMPSECTUNKNOWN, "unknown section number in dump") \
+  _CTF_ITEM (ECTF_DUMPSECTCHANGED, "section changed in middle of dump") \
+  _CTF_ITEM (ECTF_NOTYET, "feature not yet implemented") \
+  _CTF_ITEM (ECTF_INTERNAL, "internal error: assertion failure") \
+  _CTF_ITEM (ECTF_NONREPRESENTABLE, "type not representable in CTF") \
+  _CTF_ITEM (ECTF_NEXT_WRONGFUN, "wrong iteration function called") \
+  _CTF_ITEM (ECTF_NEXT_WRONGFP, "iteration entity changed in mid-iterate") \
+  _CTF_ITEM (ECTF_FLAGS, "CTF header contains flags unknown to libctf") \
+  _CTF_ITEM (ECTF_NEEDSBFD, "this feature needs a libctf with BFD support") \
+  _CTF_ITEM (ECTF_INCOMPLETE, "type is not a complete type") \
+  _CTF_ITEM (ECTF_NONAME, "type name must not be empty") \
+  _CTF_ITEM (ECTF_BADFLAG, "invalid CTF dict flag specified") \
+  _CTF_ITEM (ECTF_CTFVERS_NO_SERIALIZE, "CTFv1 dicts are too old to serialize") \
+  _CTF_ITEM (ECTF_UNSTABLE, "attempt to write unstable file format version: set I_KNOW_LIBCTF_IS_UNSTABLE in the environment") \
+  _CTF_ITEM (ECTF_HASPARENT, "cannot ctf_import: dict already has a parent") \
+  _CTF_ITEM (ECTF_WRONGPARENT, "cannot ctf_import: incorrect parent provided") \
+  _CTF_ITEM (ECTF_NOTSERIALIZED, "CTF dict must be serialized first") \
+  _CTF_ITEM (ECTF_BADCOMPONENT, "declaration tag component_idx is invalid") \
+  _CTF_ITEM (ECTF_NOTBITSOU, "type is not a bitfield-capable struct or union") \
+  _CTF_ITEM (ECTF_DESCENDING, "structure offsets may not descend") \
+  _CTF_ITEM (ECTF_LINKAGE, "invalid linkage") \
+  _CTF_ITEM (ECTF_LINKKIND, "only functions and variables have linkage") \
+  _CTF_ITEM (ECTF_NEVERTAG, "cannot call this function with a tag kind") \
+  _CTF_ITEM (ECTF_NOTDATASEC, "this function requires a datasec") \
+  _CTF_ITEM (ECTF_NOTVAR, "this function requires a variable") \
+  _CTF_ITEM (ECTF_NODATASEC, "variable not found in datasec") \
+  _CTF_ITEM (ECTF_NOTDECLTAG, "this function requires a decl tag") \
+  _CTF_ITEM (ECTF_NOTTAG, "this function requires a type or decl tag") \
+  _CTF_ITEM (ECTF_KIND_PROHIBITED, "writeout of suppressed kind attempted") \
+  _CTF_ITEM (ECTF_NOTBTF, "cannot write out this dict as BTF") \
+  _CTF_ITEM (ECTF_TOOLARGE, "prefix required for correct representation")
 
 #define	ECTF_BASE	1000	/* Base value for libctf errnos.  */
 

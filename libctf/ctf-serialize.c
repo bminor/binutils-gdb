@@ -225,10 +225,9 @@ symtypetab_density (ctf_dict_t *fp, ctf_dict_t *symfp, ctf_dynhash_t *symhash,
 	}
       if (err != ECTF_NEXT_END)
 	{
-	  ctf_err_warn (fp, 0, err, _("iterating over linker-known symbols during "
-				  "serialization"));
 	  ctf_dynhash_destroy (linker_known);
-	  return (ctf_set_errno (fp, err));
+	  return ctf_err (err_locus (fp), err,
+			  _("iterating over linker-known symbols during serialization"));
 	}
     }
 
@@ -254,22 +253,20 @@ symtypetab_density (ctf_dict_t *fp, ctf_dict_t *symfp, ctf_dynhash_t *symhash,
 	  if ((flags & CTF_SYMTYPETAB_EMIT_FUNCTION)
 	      && sym->st_type != STT_FUNC)
 	    {
-	      ctf_err_warn (fp, 1, 0, _("symbol %s (%x) added to CTF as a "
-					"function but is of type %x.  "
-					"The symbol type lookup tables "
-					"are probably corrupted"),
-			    sym->st_name, sym->st_symidx, sym->st_type);
+	      ctf_warn (type_err_locus (fp, sym->st_symidx), 0,
+			_("symbol %s added to CTF as a function but is of type %x.  "
+			  "The symbol type lookup tables are probably corrupted"),
+			sym->st_name, sym->st_type);
 	      ctf_dynhash_remove (symhash, name);
 	      continue;
 	    }
 	  else if (!(flags & CTF_SYMTYPETAB_EMIT_FUNCTION)
 		   && sym->st_type != STT_OBJECT)
 	    {
-	      ctf_err_warn (fp, 1, 0, _("symbol %s (%x) added to CTF as a "
-					"data object but is of type %x.  "
-					"The symbol type lookup tables "
-					"are probably corrupted"),
-			    sym->st_name, sym->st_symidx, sym->st_type);
+	      ctf_warn (type_err_locus (fp, sym->st_symidx), 0,
+			_("symbol %s added to CTF as a data object but is of type %x.  "
+			  "The symbol type lookup tables are probably corrupted"),
+			sym->st_name, sym->st_type);
 	      ctf_dynhash_remove (symhash, name);
 	      continue;
 	    }
@@ -287,10 +284,9 @@ symtypetab_density (ctf_dict_t *fp, ctf_dict_t *symfp, ctf_dynhash_t *symhash,
     }
   if (err != ECTF_NEXT_END)
     {
-      ctf_err_warn (fp, 0, err, _("iterating over CTF symtypetab during "
-				  "serialization"));
       ctf_dynhash_destroy (linker_known);
-      return (ctf_set_errno (fp, err));
+      return ctf_err (err_locus (fp), err, _("iterating over CTF symtypetab during "
+					     "serialization"));
     }
 
   if (!(flags & CTF_SYMTYPETAB_FORCE_INDEXED))
@@ -304,10 +300,9 @@ symtypetab_density (ctf_dict_t *fp, ctf_dict_t *symfp, ctf_dynhash_t *symhash,
 	}
       if (err != ECTF_NEXT_END)
 	{
-	  ctf_err_warn (fp, 0, err, _("iterating over linker-known symbols "
-				      "during CTF serialization"));
 	  ctf_dynhash_destroy (linker_known);
-	  return (ctf_set_errno (fp, err));
+	  return ctf_err (err_locus (fp), err, _("iterating over linker-known symbols "
+						 "during CTF serialization"));
 	}
     }
 
@@ -758,7 +753,7 @@ ctf_emit_symtypetab_sects (ctf_dict_t *fp, emit_symtypetab_state_t *s,
   ctf_set_errno (fp, EAGAIN);
   goto err;
 symerr:
-  ctf_err_warn (fp, 0, err, _("error serializing symtypetabs"));
+  ctf_err (err_locus (fp), err, NULL);
  err:
   free (sym_name_order);
   return -1;
@@ -858,22 +853,21 @@ ctf_type_sect_is_btf (ctf_dict_t *fp, int force_ctf)
 				     &prohibit_i, &pkind)) == 0)
 	{
 	  ctf_kind_t kind = (ctf_kind_t) pkind;
+	  ctf_id_t type;
 
-	  if (ctf_type_kind_next (fp, &i, kind) != CTF_ERR)
+	  if ((type = ctf_type_kind_next (fp, &i, kind)) != CTF_ERR)
 	    {
 	      ctf_next_destroy (i);
 	      ctf_next_destroy (prohibit_i);
-	      ctf_err_warn (fp, 0, ECTF_KIND_PROHIBITED,
-			    _("Attempt to write out kind %i, which is prohibited by ctf_write_suppress_kind"),
-			    kind);
-	      return (ctf_set_errno (fp, ECTF_KIND_PROHIBITED));
+	      return ctf_err (type_err_locus (fp, type), ECTF_KIND_PROHIBITED,
+			    _("kind %i"), kind);
 	    }
 	}
       if (err != ECTF_NEXT_END)
 	{
 	  ctf_next_destroy (prohibit_i);
-	  ctf_err_warn (fp, 0, err, _("ctf_write: iteration error checking prohibited kinds"));
-	  return (ctf_set_errno (fp, err));
+	  return ctf_err (err_locus (fp), err,
+			  _("iteration error checking prohibited kinds"));
 	}
     }
 
@@ -1040,11 +1034,9 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr,
 				    (const void *) (ctf_kind_t) prefix_kind) == NULL)
 	    {
 	      if (_libctf_btf_mode == LIBCTF_BTM_BTF)
-		{
-		  ctf_err_warn (fp, 0, ECTF_NOTBTF, _("type %lx: Attempt to write out CTF-specific kind %i as BTF"),
-				id, prefix_kind);
-		  return (ctf_set_errno (fp, ECTF_NOTBTF));
-		}
+		return ctf_err (type_err_locus (fp, id), ECTF_NOTBTF,
+				_("attempt to write out CTF-specific kind %i"),
+				prefix_kind);
 	    }
 	  else
 	    {
@@ -1164,8 +1156,8 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr,
 	/* These kinds are prefixes, and cannot appear here.  */
 	case CTF_K_BIG:
 	case CTF_K_CONFLICTING:
-	  ctf_err_warn (fp, 1, ECTF_INTERNAL, "type %lx: prefix type found during serialization",
-			id);
+	  ctf_warn (type_err_locus (fp, id), ECTF_INTERNAL,
+		    _("prefix type found during serialization: skipped"));
 	  break;
 
 	case CTF_K_SLICE:
@@ -1341,8 +1333,12 @@ ctf_serialize_output_format (ctf_dict_t *fp, int force_ctf)
 
   /* Relatively expensive, so done after cheap checks.  */
 
-  if (!ctf_type_sect_is_btf (fp, force_ctf))
-    ctf_needed = 1;
+  switch (ctf_type_sect_is_btf (fp, force_ctf))
+    {
+    case -1: return -1;				/* errno is set for us.  */
+    case 0: break;
+    default: ctf_needed = 1;
+    }
 
   if (ctf_needed && _libctf_btf_mode == LIBCTF_BTM_BTF)
     goto err_not_btf;
@@ -1361,10 +1357,9 @@ ctf_serialize_output_format (ctf_dict_t *fp, int force_ctf)
   ctf_set_errno (fp, ECTF_NOTBTF);
   /* TODO: a little more info?  */
   if (force_ctf)
-    ctf_err_warn (fp, 0, 0, _("Cannot write out dict as BTF: compression requested"));
+    return ctf_err (err_locus (fp), 0, _("compression requested"));
   else
-    ctf_err_warn (fp, 0, 0, _("Cannot write out dict as BTF: would lose information"));
-  return -1;
+    return ctf_err (err_locus (fp), 0, _("would lose information"));
 }
 
 /* Do all aspects of serialization up to strtab writeout, including final type
@@ -1411,11 +1406,8 @@ ctf_preserialize (ctf_dict_t *fp, int force_ctf)
 	  dtd = ctf_list_prev (&fp->ctf_parent->ctf_dtdefs);
 
 	  if (dtd && dtd->dtd_final_type == 0)
-	    {
-	      ctf_set_errno (fp, ECTF_NOTSERIALIZED);
-	      ctf_err_warn (fp, 0, 0, _("cannot write out child dict: write out the parent dict first"));
-	      return -1;			/* errno is set for us.  */
-	    }
+	    return ctf_err (err_locus (fp), ECTF_NOTSERIALIZED,
+			    _("cannot write out child dict: write out the parent dict first"));
 	}
 
       /* Prohibit serialization of a dict which has already been serialized and
@@ -1427,12 +1419,9 @@ ctf_preserialize (ctf_dict_t *fp, int force_ctf)
 
       if (fp->ctf_header->btf.bth_str_len > 0 &&
 	  fp->ctf_header->cth_parent_ntypes < fp->ctf_parent->ctf_typemax)
-	{
-	  ctf_set_errno (fp, ECTF_NOTSERIALIZED);
-	  ctf_err_warn (fp, 0, 0, _("cannot write out already-written child dict: parent has had %u types added"),
+	return ctf_err (err_locus (fp), ECTF_NOTSERIALIZED,
+			_("cannot write out already-written child dict: parent has had %u types added"),
 			fp->ctf_parent->ctf_typemax - fp->ctf_header->cth_parent_ntypes);
-	  return -1;				/* errno is set for us.  */
-	}
     }
   else
     {
@@ -1446,11 +1435,8 @@ ctf_preserialize (ctf_dict_t *fp, int force_ctf)
       if (fp->ctf_str[CTF_STRTAB_0].cts_len != 0
 	  && fp->ctf_max_children > 0
 	  && fp->ctf_str_prov_len != 0)
-	{
-	  ctf_set_errno (fp, EINVAL);
-	  ctf_err_warn (fp, 0, 0, _("cannot write out already-written dict with children and newly-added strings"));
-	  return -1;
-	}
+	return ctf_err (err_locus (fp), ECTF_NOTSERIALIZED,
+			_("cannot write out already-written dict with children and newly-added strings"));
     }
 
   /* Fill in an initial CTF header.  The type section begins at a 4-byte aligned
@@ -1772,9 +1758,8 @@ ctf_write_mem (ctf_dict_t *fp, size_t *size, size_t threshold)
 
   if ((buf = malloc (alloc_len)) == NULL)
     {
-      ctf_set_errno (fp, ENOMEM);
-      ctf_err_warn (fp, 0, 0, _("ctf_write_mem: cannot allocate %li bytes"),
-		    (unsigned long) (alloc_len));
+      ctf_err (err_locus (fp), ENOMEM, _("cannot allocate %li bytes"),
+	       (unsigned long) (alloc_len));
       goto err;
     }
 
@@ -1806,8 +1791,8 @@ ctf_write_mem (ctf_dict_t *fp, size_t *size, size_t threshold)
       if ((rc = compress (bp, (uLongf *) &compress_len,
 			  src, rawbufsiz - hdrlen)) != Z_OK)
 	{
-	  ctf_set_errno (fp, ECTF_COMPRESS);
-	  ctf_err_warn (fp, 0, 0, _("zlib deflate err: %s"), zError (rc));
+	  ctf_err (err_locus (fp), ECTF_COMPRESS,
+		   _("zlib deflate err: %s"), zError (rc));
 	  goto err;
 	}
       *size += compress_len;
@@ -1848,8 +1833,7 @@ ctf_write_thresholded (ctf_dict_t *fp, int fd, size_t threshold)
     {
       if ((len = write (fd, bp, buf_len)) < 0)
 	{
-	  err = ctf_set_errno (fp, errno);
-	  ctf_err_warn (fp, 0, 0, _("ctf_compress_write: error writing"));
+	  ctf_err (err_locus (fp), errno, NULL);
 	  goto ret;
 	}
       buf_len -= len;

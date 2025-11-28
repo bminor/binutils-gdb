@@ -305,8 +305,8 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 	    {
 	      if (ctf_errno (fp) != ECTF_NONREPRESENTABLE)
 		{
-		  ctf_err_warn (fp, 0, 0, _("Error resolving type %lx during unnamed member lookup"),
-				(ctf_id_t) memb[i->ctn_n].ctm_type);
+		  ctf_err (link_type_err_locus (ofp, fp, -1, (ctf_id_t) memb[i->ctn_n].ctm_type),
+			   ctf_errno (fp), _("during unnamed member lookup"));
 		  err = ctf_errno (fp);
 		  goto end;
 		}
@@ -771,11 +771,8 @@ ctf_type_resolve_nonrepresentable (ctf_dict_t *fp, ctf_id_t type, int allow_zero
 	case CTF_K_VAR:
 	  if (suffix->ctt_type == type || suffix->ctt_type == otype
 	      || suffix->ctt_type == prev)
-	    {
-	      ctf_err_warn (ofp, 0, ECTF_CORRUPT, _("type %lx cycle detected"),
-			    otype);
-	      return (ctf_set_typed_errno (ofp, ECTF_CORRUPT));
-	    }
+	    return ctf_typed_err (link_type_err_locus (ofp, fp, -1, otype),
+				  ECTF_CORRUPT, _("cycle in type graph detected"));
 	  prev = type;
 	  type = suffix->ctt_type;
 	  break;
@@ -1650,11 +1647,10 @@ ctf_tag (ctf_dict_t *fp, ctf_id_t tag)
       return CTF_ERR;		/* errno is set for us.  */
     }
 
-  ctf_err_warn (fp, 0, ECTF_NOTREF, _("decl tag %lx refers to type %lx, "
-				      "component %" PRIi64 ", which does not exist"),
-		tag, (long) ref, component_idx);
-
-  return (ctf_set_typed_errno (fp, ECTF_NOTREF));
+  return ctf_typed_err (type_err_locus (fp, tag), ECTF_NOTREF,
+			_("decl tag refers to type %lx, component %" PRIi64
+			  ", which does not exist"),
+			(long) ref, component_idx);
 }
 
 /* Find a pointer to type by looking in fp->ctf_ptrtab and fp->ctf_pptrtab.  If
