@@ -1019,22 +1019,24 @@ build_vers_lib_pic "vers31" vers31.c vers31 "" vers31.map vers31.ver vers31.dsym
 build_vers_lib_pic "vers32a" vers32a.c vers32a "" vers32.map vers32a.ver vers32a.dsym ""
 build_vers_lib_pic_flags "vers32b" vers32b.c vers32b "vers32a.so" vers32.map vers32b.ver vers32b.dsym "" "--defsym foo=0"
 
-if [check_compiler_available] {
+proc base_symbol_test { ldflags } {
     run_cc_link_tests [list \
 	[list \
-	    "Build pr33577-unversioned.so" \
-	    "-shared -Wl,-soname,libpr33577.so" \
+	    "Build libpr33577-unversioned.so ($ldflags)" \
+	    "$ldflags -shared -Wl,-soname,libpr33577.so" \
 	    "-fPIC" \
 	    { pr33577-unversioned.c } \
-	    {{readelf {--dyn-syms -W} pr33577-unversioned.rd}} \
+	    {{readelf {--dyn-syms -W} pr33577-unversioned-a.rd} \
+	     {readelf {--dyn-syms -W} pr33577-unversioned-b.rd}} \
 	    "libpr33577-unversioned.so" \
 	] \
 	[list \
-	    "Build pr33577-versioned.so" \
-	    "-shared -Wl,-soname,libpr33577.so,--version-script=pr33577.map" \
+	    "Build libpr33577-versioned.so ($ldflags)" \
+	    "$ldflags -shared -Wl,-soname,libpr33577.so,--version-script=pr33577.map" \
 	    "-fPIC" \
 	    { pr33577-versioned.c } \
-	    {{readelf {--dyn-syms -W} pr33577-versioned.rd}} \
+	    {{readelf {--dyn-syms -W} pr33577-versioned-a.rd} \
+	     {readelf {--dyn-syms -W} pr33577-versioned-b.rd}} \
 	    "libpr33577-versioned.so" \
 	] \
     ]
@@ -1045,7 +1047,7 @@ if [check_compiler_available] {
 
     run_cc_link_tests [list \
 	[list \
-	    "Build pr33577a with tmpdir/libpr33577-unversioned.so" \
+	    "Build pr33577a with tmpdir/libpr33577-unversioned.so ($ldflags)" \
 	    "" \
 	    "" \
 	    { pr33577a.c } \
@@ -1059,7 +1061,7 @@ if [check_compiler_available] {
     if [isnative] {
 	run_ld_link_exec_tests [list \
 	    [list \
-		"Run pr33577a with tmpdir/libpr33577-unversioned.so" \
+		"Run pr33577a with tmpdir/libpr33577-unversioned.so ($ldflags)" \
 		"-Wl,-R,tmpdir" \
 		"" \
 		{ pr33577a.c } \
@@ -1079,7 +1081,7 @@ if [check_compiler_available] {
 
     run_cc_link_tests [list \
 	[list \
-	    "Build pr33577b with tmpdir/libpr33577-versioned.so" \
+	    "Build pr33577b with tmpdir/libpr33577-versioned.so ($ldflags)" \
 	    "-Wl,-R,tmpdir" \
 	    "" \
 	    { pr33577b.c } \
@@ -1091,7 +1093,7 @@ if [check_compiler_available] {
     ]
 
     if [isnative] {
-	set test_name "Run pr33577a with tmpdir/libpr33577-versioned.so"
+	set test_name "Run pr33577a with tmpdir/libpr33577-versioned.so ($ldflags)"
 	set cmd tmpdir/pr33577a
 	send_log "$cmd\n"
 	set got [remote_exec host "$cmd"]
@@ -1102,7 +1104,7 @@ if [check_compiler_available] {
 	    fail "$test_name"
 	}
 
-	set test_name "Run pr33577b with tmpdir/libpr33577-versioned.so"
+	set test_name "Run pr33577b with tmpdir/libpr33577-versioned.so ($ldflags)"
 	set cmd tmpdir/pr33577b
 	send_log "$cmd\n"
 	set got [remote_exec host "$cmd"]
@@ -1114,3 +1116,10 @@ if [check_compiler_available] {
 	}
     }
 }
+
+base_symbol_test "-Wl,--as-needed,--hash-style=sysv"
+base_symbol_test "-Wl,--as-needed,--hash-style=gnu"
+base_symbol_test "-Wl,--as-needed,--hash-style=both"
+base_symbol_test "-Wl,--no-as-needed,--hash-style=sysv"
+base_symbol_test "-Wl,--no-as-needed,--hash-style=gnu"
+base_symbol_test "-Wl,--no-as-needed,--hash-style=both"

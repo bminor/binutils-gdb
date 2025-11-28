@@ -1182,6 +1182,8 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
   bed = get_elf_backend_data (abfd);
 
+  htab = elf_hash_table (info);
+
   /* NEW_VERSION is the symbol version of the new symbol.  */
   if (h->versioned != unversioned)
     {
@@ -1191,6 +1193,12 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	{
 	  if (h->versioned == unknown)
 	    {
+	      /* The base symbol has an empty version.  */
+	      if (new_version[1] == '\0')
+		{
+		  htab->has_base_symbols = true;
+		  h->base_symbol = 1;
+		}
 	      if (new_version > name && new_version[-1] != ELF_VER_CHR)
 		h->versioned = versioned_hidden;
 	      else
@@ -1293,8 +1301,6 @@ _bfd_elf_merge_symbol (bfd *abfd,
      references and not all compilers emit symbol type for undefined
      symbols.  */
   bfd_elf_link_mark_dynamic_symbol (info, h, sym);
-
-  htab = elf_hash_table (info);
 
   /* NEWDYN and OLDDYN indicate whether the new or old symbol,
      respectively, is from a dynamic object.  */
@@ -6525,6 +6531,7 @@ struct collect_gnu_hash_codes
   long int shift1, shift2;
   unsigned long int mask;
   bool error;
+  bool base_symbol;
 };
 
 /* This function will be called though elf_link_hash_traverse to store
@@ -6593,6 +6600,10 @@ elf_gnu_hash_process_symidx (struct elf_link_hash_entry *h, void *data)
 
   /* Ignore indirect symbols.  */
   if (h->dynindx == -1)
+    return true;
+
+  /* Skip if base symbol doesn't match.  */
+  if (s->base_symbol != !!h->base_symbol)
     return true;
 
   /* Ignore also local symbols and undefined symbols.  */
@@ -8148,8 +8159,23 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 	      cinfo.contents = contents;
 
 	      cinfo.xlat = contents + cinfo.nsyms * 4 - s->contents;
-	      /* Renumber dynamic symbols, if populating .gnu.hash section.
-		 If using .MIPS.xhash, populate the translation table.  */
+
+	      if (elf_hash_table (info)->has_base_symbols)
+		{
+		  /* Output base symbols first in DT_GNU_HASH so that
+		     they will be picked before non-base symbols at
+		     run-time.  */
+		  cinfo.base_symbol = true;
+
+		  /* Renumber dynamic symbols, if populating .gnu.hash
+		     section.  If using .MIPS.xhash, populate the
+		     translation table.  */
+		  elf_link_hash_traverse (elf_hash_table (info),
+					  elf_gnu_hash_process_symidx, &cinfo);
+		}
+
+	      /* Output non-base symbols last.  */
+	      cinfo.base_symbol = false;
 	      elf_link_hash_traverse (elf_hash_table (info),
 				      elf_gnu_hash_process_symidx, &cinfo);
 
@@ -9076,6 +9102,7 @@ struct elf_outext_info
   bool failed;
   bool localsyms;
   bool file_sym_done;
+  bool base_symbol;
   struct elf_final_link_info *flinfo;
 };
 
@@ -10722,6 +10749,10 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
   long indx;
   int ret;
   unsigned int type;
+
+  /* Skip if base symbol doesn't match.  */
+  if (eoinfo->base_symbol != !!h->base_symbol)
+    return true;
 
   if (h->root.type == bfd_link_hash_warning)
     {
@@ -13262,6 +13293,8 @@ _bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   eoinfo.flinfo = &flinfo;
   eoinfo.localsyms = true;
   eoinfo.file_sym_done = false;
+  /* Output non-base symbols first.  */
+  eoinfo.base_symbol = false;
   bfd_hash_traverse (&info->hash->table, elf_link_output_extsym, &eoinfo);
   if (eoinfo.failed)
     goto error_return;
@@ -13381,6 +13414,17 @@ _bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   bfd_hash_traverse (&info->hash->table, elf_link_output_extsym, &eoinfo);
   if (eoinfo.failed)
     goto error_return;
+
+  if (htab->has_base_symbols)
+    {
+      /* Output base symbols last in DT_HASH so that they will be picked
+	 before non-base symbols at run-time.  */
+      eoinfo.base_symbol = true;
+      bfd_hash_traverse (&info->hash->table, elf_link_output_extsym,
+			 &eoinfo);
+      if (eoinfo.failed)
+	goto error_return;
+    }
 
   /* If backend needs to output some symbols not present in the hash
      table, do it now.  */
