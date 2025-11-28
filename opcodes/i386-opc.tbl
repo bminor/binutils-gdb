@@ -1485,8 +1485,12 @@ pabsd<SSSE3D>, 0x<SSSE3D:pfx>0f381e, <SSSE3D:cpu>, Modrm|<SSSE3D:attr>|NoSuf, { 
     $sse:SSE4_1::>
 <SSE41DQ:cpu:attr:vvvv, +
     $avx:AVX:Vex128|VexW0|SSE2AVX:Src1VVVV, +
-    $apx:AVX512DQ&AVX512VL:EVex128|VexW0|Disp8MemShift=4|SSE2AVX:Src1VVVV, +
+    $apx:AVX512DQ:EVex128|VexW0|Disp8MemShift|SSE2AVX:Src1VVVV, +
     $sse:SSE4_1::>
+<SSE41DQ64:cpu:attr:vvvv, +
+    $avx:AVX:      Vex128|VexW1|              SSE2AVX:Src1VVVV, +
+    $apx:AVX512DQ:EVex128|VexW1|Disp8MemShift|SSE2AVX:Src1VVVV, +
+    $sse:SSE4_1:Size64:>
 <SSE41D:cpu:attr:scal:vvvv, +
     $avx:AVX|AVX512VL:Vex128|EVex128|VexW0|Disp8MemShift=4|SSE2AVX:VexLIG|EVexLIG|VexW0|Disp8MemShift=2|SSE2AVX:Src1VVVV, +
     $sse:SSE4_1:::>
@@ -1519,17 +1523,13 @@ pblendw<sse41>, 0x660f3a0e, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf, 
 pcmpeqq<sse41>, 0x660f3829, <sse41:cpu>, Modrm|<sse41:attr>|<sse41:vvvv>|NoSuf|Optimize, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pextr<bw><SSE41BW>, 0x660f3a14 | <bw:opc>, <SSE41BW:cpu>, RegMem|<SSE41BW:attr>|NoSuf|IgnoreSize|NoRex64, { Imm8, RegXMM, Reg32|Reg64 }
 pextr<bw><SSE41BW>, 0x660f3a14 | <bw:opc>, <SSE41BW:cpu>, Modrm|<SSE41BW:attr>|Disp8MemShift|NoSuf, { Imm8, RegXMM, <bw:elem>|Unspecified|BaseIndex }
-pextrd<SSE41DQ>, 0x660f3a16, <SSE41DQ:cpu>, Modrm|<SSE41DQ:attr>|Disp8MemShift|NoSuf|IgnoreSize|Optimize, { Imm8, RegXMM, Reg32|Unspecified|BaseIndex }
-pextrq, 0x6616, AVX&x64, Modrm|Vex|Space0F3A|VexW1|NoSuf|SSE2AVX|Optimize, { Imm8, RegXMM, Reg64|Unspecified|BaseIndex }
-pextrq, 0x6616, AVX512DQ&AVX512VL&x64, Modrm|EVex128|Space0F3A|VexW1|Disp8MemShift=3|NoSuf|SSE2AVX|Optimize, { Imm8, RegXMM, Reg64|Unspecified|BaseIndex }
-pextrq, 0x660f3a16, SSE4_1&x64, Modrm|Size64|NoSuf|Optimize, { Imm8, RegXMM, Reg64|Unspecified|BaseIndex }
+pextrd<SSE41DQ>, 0x660f3a16, <SSE41DQ:cpu>, Modrm|<SSE41DQ:attr>|NoSuf|IgnoreSize|Optimize, { Imm8, RegXMM, Reg32|Unspecified|BaseIndex }
+pextrq<SSE41DQ64>, 0x660f3a16, <SSE41DQ64:cpu>&x64, Modrm|<SSE41DQ64:attr>|NoSuf|Optimize, { Imm8, RegXMM, Reg64|Unspecified|BaseIndex }
 phminposuw<sse41>, 0x660f3841, <sse41:cpu>, Modrm|<sse41:attr>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pinsrb<SSE41BW>, 0x660f3a20, <SSE41BW:cpu>, Modrm|<SSE41BW:attr>|<SSE41BW:vvvv>|NoSuf|IgnoreSize|NoRex64, { Imm8, Reg32|Reg64, RegXMM }
 pinsrb<SSE41BW>, 0x660f3a20, <SSE41BW:cpu>, Modrm|<SSE41BW:attr>|<SSE41BW:vvvv>|Disp8MemShift|NoSuf, { Imm8, Byte|Unspecified|BaseIndex, RegXMM }
-pinsrd<SSE41DQ>, 0x660f3a22, <SSE41DQ:cpu>, Modrm|<SSE41DQ:attr>|<SSE41DQ:vvvv>|Disp8MemShift|NoSuf|IgnoreSize, { Imm8, Reg32|Unspecified|BaseIndex, RegXMM }
-pinsrq, 0x6622, AVX&x64, Modrm|Vex|Space0F3A|Src1VVVV|VexW1|NoSuf|SSE2AVX, { Imm8, Reg64|Unspecified|BaseIndex, RegXMM }
-pinsrq, 0x6622, AVX512DQ&AVX512VL&AVX&x64, Modrm|EVex128|Space0F3A|Src1VVVV|VexW1|Disp8MemShift=3|NoSuf|SSE2AVX, { Imm8, Reg64|Unspecified|BaseIndex, RegXMM }
-pinsrq, 0x660f3a22, SSE4_1&x64, Modrm|Size64|NoSuf, { Imm8, Reg64|Unspecified|BaseIndex, RegXMM }
+pinsrd<SSE41DQ>, 0x660f3a22, <SSE41DQ:cpu>, Modrm|<SSE41DQ:attr>|<SSE41DQ:vvvv>|NoSuf|IgnoreSize, { Imm8, Reg32|Unspecified|BaseIndex, RegXMM }
+pinsrq<SSE41DQ64>, 0x660f3a22, <SSE41DQ64:cpu>&x64, Modrm|<SSE41DQ64:attr>|<SSE41DQ64:vvvv>|NoSuf, { Imm8, Reg64|Unspecified|BaseIndex, RegXMM }
 pmaxsb<SSE41BW>, 0x660f383c, <SSE41BW:cpu>, Modrm|<SSE41BW:attr>|<SSE41BW:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pmaxsd<SSE41D>, 0x660f383d, <SSE41D:cpu>, Modrm|<SSE41D:attr>|<SSE41D:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pmaxud<SSE41D>, 0x660f383f, <SSE41D:cpu>, Modrm|<SSE41D:attr>|<SSE41D:vvvv>|NoSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
