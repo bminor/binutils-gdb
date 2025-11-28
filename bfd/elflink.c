@@ -1064,9 +1064,10 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
   if (do_sec)
     *section_sym_count = dynsymcount;
 
-  elf_link_hash_traverse (elf_hash_table (info),
-			  elf_link_renumber_local_hash_table_dynsyms,
-			  &dynsymcount);
+  if (elf_hash_table (info)->has_local_dynsyms)
+    elf_link_hash_traverse (elf_hash_table (info),
+			    elf_link_renumber_local_hash_table_dynsyms,
+			    &dynsymcount);
 
   if (elf_hash_table (info)->dynlocal)
     {
@@ -3269,6 +3270,10 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
   if (! is_elf_hash_table (eif->info->hash))
     return false;
 
+  htab = elf_hash_table (eif->info);
+  if (h->forced_local && h->dynindx != -1)
+    htab->has_local_dynsyms = true;
+
   /* Ignore indirect symbols.  These are added by the versioning code.  */
   if (h->root.type == bfd_link_hash_indirect)
     return true;
@@ -3277,7 +3282,6 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
   if (! _bfd_elf_fix_symbol_flags (h, eif))
     return false;
 
-  htab = elf_hash_table (eif->info);
   bed = get_elf_backend_data (htab->dynobj);
 
   if (h->root.type == bfd_link_hash_undefweak)

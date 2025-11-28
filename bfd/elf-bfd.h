@@ -637,6 +637,9 @@ struct elf_link_hash_table
   /* Whether dynamic relocations are present.  */
   bool dynamic_relocs;
 
+  /* TRUE if there are local dynamic symbols.  */
+  bool has_local_dynsyms;
+
   /* True if this target has relocatable executables, so needs dynamic
      section symbols.  */
   bool is_relocatable_executable;
