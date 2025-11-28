@@ -151,7 +151,7 @@ sframe_fde_tbl_init (sf_fde_tbl *fde_tbl, const char *fde_buf,
 	  fde_tbl->entry[i].func_start_addr = fdep->sfde_func_start_address;
 	  fde_tbl->entry[i].func_size = fdep->sfde_func_size;
 	  fde_tbl->entry[i].func_start_fre_off = fdep->sfde_func_start_fre_off;
-	  fde_tbl->entry[i].func_num_fres = fdep->sfde_func_num_fres;
+	  fde_tbl->entry[i].func_num_fres = (uint16_t)fdep->sfde_func_num_fres;
 	  fde_tbl->entry[i].func_info = fdep->sfde_func_info;
 	  fde_tbl->entry[i].func_rep_size = fdep->sfde_func_rep_size;
 	}
@@ -576,7 +576,7 @@ sframe_decode_fde (const char *buf, size_t buf_size, uint8_t ver,
 	return SFRAME_ERR;
 
       sframe_func_desc_entry_v3 *fdep = (sframe_func_desc_entry_v3 *) buf;
-      *num_fres = fdep->sfde_func_num_fres;
+      *num_fres = (uint16_t)fdep->sfde_func_num_fres;
       *fre_type = SFRAME_V1_FUNC_FRE_TYPE (fdep->sfde_func_info);
       *fre_offset = fdep->sfde_func_start_fre_off;
 
@@ -2131,7 +2131,7 @@ sframe_encoder_write_fde (const sframe_header *sfhp ATTRIBUTE_UNUSED,
   fdep->sfde_func_start_address = (int32_t)fde->func_start_addr;
   fdep->sfde_func_size = fde->func_size;
   fdep->sfde_func_start_fre_off = fde->func_start_fre_off;
-  fdep->sfde_func_num_fres = fde->func_num_fres;
+  fdep->sfde_func_num_fres = (uint16_t)fde->func_num_fres;
   fdep->sfde_func_info = fde->func_info;
   fdep->sfde_func_rep_size = fde->func_rep_size;
   fdep->sfde_func_padding2 = 0;

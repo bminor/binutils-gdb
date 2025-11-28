@@ -251,7 +251,7 @@ typedef struct sframe_func_desc_entry_v3
      beginning of the SFrame Frame Row Entry sub-section.  */
   uint32_t sfde_func_start_fre_off;
   /* Number of frame row entries for the function.  */
-  uint32_t sfde_func_num_fres;
+  uint16_t sfde_func_num_fres;
   /* Additional information for stack tracing from the function:
      - 4-bits: Identify the FRE type used for the function.
      - 1-bit: Identify the FDE type of the function - mask or inc.
