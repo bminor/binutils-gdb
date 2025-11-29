@@ -1439,12 +1439,11 @@ print_gdb_hints (struct ui_file *stream)
 	      styled_string (command_style.style (), "apropos <word>"));
 
   /* If there isn't enough space to display the longest URL in a boxed
-     style, use the simple styling of a singular visual break.  The longest
-     URL is used because the other messages may be broken into multiple
-     lines, but URLs can't.  */
-  if (width - 3 <= docs_url.length ())
+     style or if screen width is unlimited, use the simple styling of a
+     singular visual break.  The longest URL is used because the other
+     messages may be broken into multiple lines, but URLs can't.  */
+  if (width - 3 <= (int) docs_url.length ())
     {
-      std::string sep (width, '-');
       for (string_file &msg : styled_msg)
 	gdb_printf (stream, "%s\n", msg.c_str ());
 
