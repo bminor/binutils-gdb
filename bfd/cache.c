@@ -177,6 +177,7 @@ bfd_cache_delete (bfd *abfd)
   BFD_ASSERT (open_files > 0);
   --open_files;
   abfd->flags |= BFD_CLOSED_BY_CACHE;
+  abfd->last_io = bfd_io_force;
 
   return ret;
 }
