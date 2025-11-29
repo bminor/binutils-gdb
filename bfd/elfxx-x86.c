@@ -613,6 +613,7 @@ _bfd_elf_x86_get_local_sym_hash (struct elf_x86_link_hash_table *htab,
       ret->elf.dynindx = -1;
       ret->plt_got.offset = (bfd_vma) -1;
       *slot = ret;
+      htab->has_loc_hash_table = 1;
     }
   return &ret->elf;
 }
@@ -2425,9 +2426,11 @@ _bfd_x86_elf_late_size_sections (bfd *output_bfd,
   elf_link_hash_traverse (&htab->elf, elf_x86_allocate_dynrelocs,
 			  info);
 
-  /* Allocate .plt and .got entries, and space for local symbols.  */
-  htab_traverse (htab->loc_hash_table, elf_x86_allocate_local_dynreloc,
-		 info);
+  /* Allocate .plt and .got entries, and space for local symbols if
+     needed.  */
+  if (htab->has_loc_hash_table)
+    htab_traverse (htab->loc_hash_table, elf_x86_allocate_local_dynreloc,
+		   info);
 
   /* For every jump slot reserved in the sgotplt, reloc_count is
      incremented.  However, when we reserve space for TLS descriptors,

@@ -4271,10 +4271,12 @@ elf_i386_output_arch_local_syms
   if (htab == NULL)
     return false;
 
-  /* Fill PLT and GOT entries for local STT_GNU_IFUNC symbols.  */
-  htab_traverse (htab->loc_hash_table,
-		 elf_i386_finish_local_dynamic_symbol,
-		 info);
+  /* Fill PLT and GOT entries for local STT_GNU_IFUNC symbols if
+     needed.  */
+  if (htab->has_loc_hash_table)
+    htab_traverse (htab->loc_hash_table,
+		   elf_i386_finish_local_dynamic_symbol,
+		   info);
 
   return true;
 }

@@ -673,9 +673,8 @@ struct elf_x86_link_hash_table
   /* TRUE if inputs call ___tls_get_addr.  This is only used for i386.  */
   unsigned int has_tls_get_addr_call : 1;
 
-   /* Value used to fill the unused bytes of the first PLT entry.  This
-      is only used for i386.  */
-  bfd_byte plt0_pad_byte;
+  /* TRUE if loc_hash_table is used.  */
+  unsigned int has_loc_hash_table : 1;
 
   /* TRUE if GOT is referenced.  */
   unsigned int got_referenced : 1;
@@ -687,6 +686,10 @@ struct elf_x86_link_hash_table
      be used as function address.  PIC PLT in PIE can't be used as
      function address.  */
   unsigned int pcrel_plt : 1;
+
+   /* Value used to fill the unused bytes of the first PLT entry.  This
+      is only used for i386.  */
+  bfd_byte plt0_pad_byte;
 
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);
