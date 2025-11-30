@@ -399,8 +399,8 @@ set lto_link_elf_tests [list \
    {} {-flto} \
    {pr22220main.cc} {} {} {c++}] \
   [list "Build libpr23818.so" \
-   "-shared -flto -g -Wl,-version-script,pr23818.t" \
-   "-g -flto $lto_fat" \
+   "-shared -fPIC -flto -g -Wl,-version-script,pr23818.t" \
+   "-g -fPIC -flto $lto_fat" \
    {pr23818a.c pr23818b.c} \
    {{"readelf" {-s --wide} "pr23818.d"}} \
    "libpr23818.so"] \
