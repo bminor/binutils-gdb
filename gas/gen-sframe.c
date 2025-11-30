@@ -24,6 +24,7 @@
 #include "sframe-internal.h"
 #include "gen-sframe.h"
 #include "dw2gencfi.h"
+#include "leb128.h"
 
 #ifdef support_sframe_p
 
@@ -173,6 +174,19 @@ sframe_fre_stack_offset_bound_p (offsetT offset, bool cfa_reg_p)
     offset = SFRAME_V2_S390X_CFA_OFFSET_ENCODE (offset);
 
   return (offset >= INT32_MIN && offset <= INT32_MAX);
+}
+
+/* Whether the provided (DWARF) reg number REG is encodable in the upper 5 bits
+   available in the offset.  */
+
+/* FIXME - OKay to use DWARF register numbers ?  Should work for AMD64 and
+   s390x IIUC.  */
+
+static bool
+sframe_fre_reg_encodable_p (unsigned int reg)
+{
+  /* A 5-bit field can hold values from 0 up to (2^5 - 1) = 31.  */
+  return (reg <= 31);
 }
 
 static void
@@ -830,6 +844,7 @@ output_sframe_funcdesc (symbolS *start_of_fre_section,
 	  uint8_t fde_type = SFRAME_FDE_TYPE_FLEX_TOPMOST_FRAME;
 	  finfo2 = SFRAME_V3_FUNC_INFO2_SET_FDE_TYPE (finfo2, fde_type);
 	}
+      out_one (finfo2);
     }
   else
     out_one (0);
@@ -1189,29 +1204,45 @@ sframe_xlate_do_def_cfa (struct sframe_xlate_ctx *xlate_ctx,
     sframe_fre_set_begin_addr (cur_fre,
 			       get_dw_fde_start_addrS (xlate_ctx->dw_fde));
   }
-  /* Define the current CFA rule to use the provided register and
-     offset.  However, if the register is not FP/SP, skip creating
-     SFrame stack trace info for the function.  */
-  if (cfi_insn->u.ri.reg != SFRAME_CFA_SP_REG
-      && cfi_insn->u.ri.reg != SFRAME_CFA_FP_REG)
-    {
-      as_warn (_("no SFrame FDE emitted; "
-		 "non-SP/FP register %u in .cfi_def_cfa"),
-	       cfi_insn->u.ri.reg);
-      return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
-    }
-  else if (sframe_fre_stack_offset_bound_p (cfi_insn->u.ri.offset, true))
-    {
-      sframe_fre_set_cfa_base_reg (cur_fre, cfi_insn->u.ri.reg);
-      sframe_fre_set_cfa_offset (cur_fre, cfi_insn->u.ri.offset);
-      cur_fre->merge_candidate = false;
-    }
-  else
+
+  offsetT offset = cfi_insn->u.ri.offset;
+  bool bound_p = sframe_fre_stack_offset_bound_p (offset, true);
+  if (!bound_p)
     {
       as_warn (_("no SFrame FDE emitted; "
 		 ".cfi_def_cfa with unsupported offset value"));
       return SFRAME_XLATE_ERR_NOTREPRESENTED;
     }
+
+  /* Define the current CFA rule to use the provided register and
+     offset.  Typically, the CFA rule uses SP/FP based CFA.  However, with
+     SFrame V3 specification, if the CFA register is not FP/SP, SFrame FDE type
+     SFRAME_FDE_TYPE_FLEX_TOPMOST_FRAME type may be used.
+
+     ATM however, GAS implements non-SP/FP based CFA only for AMD64, where such
+     a CFA pattern may be seen (e.g., DRAP, stack alignment).  On s390x, this
+     may be seen for (GCC) generated code for static stack clash protection.
+     This remains sufficiently rare and is currently unimplemented for s390x.
+     */
+  if (cfi_insn->u.ri.reg != SFRAME_CFA_SP_REG
+      && cfi_insn->u.ri.reg != SFRAME_CFA_FP_REG)
+    {
+      if (sframe_get_abi_arch () != SFRAME_ABI_AMD64_ENDIAN_LITTLE
+	  || !sframe_fre_reg_encodable_p (cfi_insn->u.ri.reg))
+	{
+	  as_warn (_("no SFrame FDE emitted; "
+		     "non-SP/FP register %u in .cfi_def_cfa"),
+		   cfi_insn->u.ri.reg);
+	  return SFRAME_XLATE_ERR_NOTREPRESENTED;
+	}
+      else
+	xlate_ctx->flex_topmost_p = true;
+    }
+
+  sframe_fre_set_cfa_base_reg (cur_fre, cfi_insn->u.ri.reg);
+  sframe_fre_set_cfa_offset (cur_fre, cfi_insn->u.ri.offset);
+  cur_fre->merge_candidate = false;
+  cur_fre->cfa_deref_p = false;
 
   return SFRAME_XLATE_OK;
 }
@@ -1234,14 +1265,23 @@ sframe_xlate_do_def_cfa_register (struct sframe_xlate_ctx *xlate_ctx,
   if (cfi_insn->u.r != SFRAME_CFA_SP_REG
       && cfi_insn->u.r != SFRAME_CFA_FP_REG)
     {
-      as_warn (_("no SFrame FDE emitted; "
-		 "non-SP/FP register %u in .cfi_def_cfa_register"),
-	       cfi_insn->u.r);
-      return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
+      if (sframe_get_abi_arch () != SFRAME_ABI_AMD64_ENDIAN_LITTLE)
+	{
+	  as_warn (_("no SFrame FDE emitted; "
+		     "non-SP/FP register %u in .cfi_def_cfa_register"),
+		   cfi_insn->u.ri.reg);
+	  return SFRAME_XLATE_ERR_NOTREPRESENTED;
+	}
+      else
+	/* Currently, SFRAME_FDE_TYPE_FLEX_TOPMOST_FRAME is generated for AMD64
+	   only.  */
+	xlate_ctx->flex_topmost_p = true;
     }
+
   sframe_fre_set_cfa_base_reg (cur_fre, cfi_insn->u.r);
   if (last_fre)
     sframe_fre_set_cfa_offset (cur_fre, sframe_fre_get_cfa_offset (last_fre));
+  cur_fre->cfa_deref_p = false;
 
   cur_fre->merge_candidate = false;
 
@@ -1574,6 +1614,98 @@ sframe_xlate_do_gnu_window_save (struct sframe_xlate_ctx *xlate_ctx,
   return SFRAME_XLATE_ERR_NOTREPRESENTED;  /* Not represented.  */
 }
 
+/* Handle DW_CFA_def_cfa_expression in .cfi_escape.
+
+   As with sframe_xlate_do_cfi_escape, the intent of this function is to detect
+   only the simple-to-process but common cases.  All other CFA escape
+   expressions continue to be inadmissible (no SFrame FDE emitted).
+
+   Sets CALLER_WARN_P for skipped cases (and returns SFRAME_XLATE_OK) where the
+   caller must warn.  The caller then must also set
+   SFRAME_XLATE_ERR_NOTREPRESENTED for their callers.  */
+
+static int
+sframe_xlate_do_escape_cfa_expr (struct sframe_xlate_ctx *xlate_ctx,
+				 const struct cfi_insn_data *cfi_insn,
+				 bool *caller_warn_p)
+{
+  const struct cfi_escape_data *e = cfi_insn->u.esc;
+  int err = SFRAME_XLATE_OK;
+  unsigned int opcode1, opcode2;
+  offsetT offset;
+  unsigned int reg = SFRAME_FRE_REG_INVALID;
+  unsigned int i = 0;
+  bool x86_cfa_deref_p = false;
+
+  /* Check roughly for an expression
+     DW_CFA_def_cfa_expression (DW_OP_breg6 (rbp): -8; DW_OP_deref).  */
+#define CFI_ESC_NUM_EXP 4
+  offsetT items[CFI_ESC_NUM_EXP] = {0};
+  while (e->next)
+    {
+      e = e->next;
+      if ((i == 1 && (items[0] != 3)) /* Block length of 3 in DWARF expr.  */
+	  /* We do not care for the exact values of items[2], items[3], and
+	     items[4], so an explicit check for O_constant isnt necessary
+	     either.  */
+	  || i >= CFI_ESC_NUM_EXP
+	  || (i < 2
+	      && (e->exp.X_op != O_constant
+		  || e->type != CFI_ESC_byte
+		  || e->reloc != TC_PARSE_CONS_RETURN_NONE)))
+	goto warn_and_exit;
+      items[i] = e->exp.X_add_number;
+      i++;
+    }
+
+  if (i <= CFI_ESC_NUM_EXP - 1)
+    goto warn_and_exit;
+
+  opcode1 = items[1];
+  opcode2 = items[3];
+  /* DW_OP_breg6 is rbp.  FIXME - this stub can be enhanced to handle more
+     regs.  */
+  if (sframe_get_abi_arch () == SFRAME_ABI_AMD64_ENDIAN_LITTLE
+     && opcode1 == DW_OP_breg6 && opcode2 == DW_OP_deref)
+    {
+      x86_cfa_deref_p = true;
+      reg = SFRAME_CFA_FP_REG;
+    }
+
+  /* Read the offset.  */
+  const unsigned char *buf_start = (const unsigned char *)&items[2];
+  const unsigned char *buf_end = buf_start + sizeof (offsetT) - 1;
+  size_t read = read_sleb128_to_int64 (buf_start, buf_end, &offset);
+  gas_assert (read);
+#undef CFI_ESC_NUM_EXP
+
+  struct sframe_row_entry *cur_fre = xlate_ctx->cur_fre;
+  gas_assert (cur_fre);
+
+  /* Handle the specific CFA expression mentioned above.  */
+  if (x86_cfa_deref_p
+      && sframe_fre_stack_offset_bound_p (offset, false)
+      && reg != SFRAME_FRE_REG_INVALID
+      && sframe_fre_reg_encodable_p (reg))
+    {
+      xlate_ctx->flex_topmost_p = true;
+      sframe_fre_set_cfa_base_reg (cur_fre, reg);
+      sframe_fre_set_cfa_offset (cur_fre, offset);
+      cur_fre->cfa_deref_p = true;
+      cur_fre->merge_candidate = false;
+      /* Done handling here.  */
+      caller_warn_p = false;
+
+      return err;
+    }
+  /* Any other CFA expression may not be safe to skip.  Fall through to
+     warn_and_exit.  */
+
+warn_and_exit:
+  *caller_warn_p = true;
+  return err;
+}
+
 /* Handle DW_CFA_expression in .cfi_escape.
 
    As with sframe_xlate_do_cfi_escape, the intent of this function is to detect
@@ -1585,13 +1717,13 @@ sframe_xlate_do_gnu_window_save (struct sframe_xlate_ctx *xlate_ctx,
    SFRAME_XLATE_ERR_NOTREPRESENTED for their callers.  */
 
 static int
-sframe_xlate_do_escape_expr (const struct sframe_xlate_ctx *xlate_ctx,
+sframe_xlate_do_escape_expr (struct sframe_xlate_ctx *xlate_ctx,
 			     const struct cfi_insn_data *cfi_insn,
 			     bool *caller_warn_p)
 {
   const struct cfi_escape_data *e = cfi_insn->u.esc;
   int err = SFRAME_XLATE_OK;
-  unsigned int reg = 0;
+  offsetT offset;
   unsigned int i = 0;
 
   /* Check roughly for an expression
@@ -1621,12 +1753,44 @@ sframe_xlate_do_escape_expr (const struct sframe_xlate_ctx *xlate_ctx,
      however, the register value will be less than 128 (CFI_ESC_NUM_EXP set
      to 4).  See an extended comment in sframe_xlate_do_escape_expr for why
      reading ULEB is okay to skip without sacrificing correctness.  */
-  reg = items[0];
+  unsigned int reg = items[0];
+
+  unsigned opcode = items[2];
+  unsigned int fp_base_reg = SFRAME_FRE_REG_INVALID;
+  bool x86_fp_deref_p = true;
+
+  if (sframe_get_abi_arch () == SFRAME_ABI_AMD64_ENDIAN_LITTLE
+     && opcode == DW_OP_breg6)
+    {
+      x86_fp_deref_p = true;
+      fp_base_reg = SFRAME_CFA_FP_REG;
+    }
+
+  /* Read the sleb128 offset.  */
+  const unsigned char *buf_start = (const unsigned char *)&items[3];
+  const unsigned char *buf_end = buf_start + sizeof (offsetT) - 1;
+  size_t read = read_sleb128_to_int64 (buf_start, buf_end, &offset);
+  gas_assert (read);
 #undef CFI_ESC_NUM_EXP
 
-  if (reg == SFRAME_CFA_SP_REG || reg == SFRAME_CFA_FP_REG
-      || (sframe_ra_tracking_p () && reg == SFRAME_CFA_RA_REG)
-      || reg == sframe_xlate_ctx_get_cur_cfa_reg (xlate_ctx))
+  struct sframe_row_entry *cur_fre = xlate_ctx->cur_fre;
+  gas_assert (cur_fre);
+
+  if (x86_fp_deref_p
+      /* Skip checking sframe_fre_reg_encodable_p (reg) for
+	 SFRAME_CFA_FP_REG.  */
+      && reg == SFRAME_CFA_FP_REG
+      && sframe_fre_stack_offset_bound_p (offset, false))
+    {
+      xlate_ctx->flex_topmost_p = true;
+      sframe_fre_set_fp_track (cur_fre, offset);
+      cur_fre->fp_reg = fp_base_reg;
+      cur_fre->fp_deref_p = true;
+      cur_fre->merge_candidate = false;
+    }
+  else if (reg == SFRAME_CFA_SP_REG || reg == SFRAME_CFA_FP_REG
+	   || (sframe_ra_tracking_p () && reg == SFRAME_CFA_RA_REG)
+	   || reg == sframe_xlate_ctx_get_cur_cfa_reg (xlate_ctx))
     {
       as_warn (_("no SFrame FDE emitted; "
 		 ".cfi_escape DW_CFA_expression with %s reg %u"),
@@ -1791,7 +1955,7 @@ warn_and_exit:
    SFRAME_XLATE_OK if OK to skip.  */
 
 static int
-sframe_xlate_do_cfi_escape (const struct sframe_xlate_ctx *xlate_ctx,
+sframe_xlate_do_cfi_escape (struct sframe_xlate_ctx *xlate_ctx,
 			    const struct cfi_insn_data *cfi_insn)
 {
   const struct cfi_escape_data *e;
@@ -1825,6 +1989,10 @@ sframe_xlate_do_cfi_escape (const struct sframe_xlate_ctx *xlate_ctx,
 	      break;
 	    }
 	}
+      break;
+
+    case DW_CFA_def_cfa_expression:
+      err = sframe_xlate_do_escape_cfa_expr (xlate_ctx, cfi_insn, &warn_p);
       break;
 
     case DW_CFA_expression:
@@ -2186,6 +2354,7 @@ create_sframe_all (void)
       if (err && get_dw_fde_signal_p (dw_fde))
 	{
 	  sframe_xlate_ctx_cleanup (xlate_ctx);
+	  xlate_ctx->flex_topmost_p = false;
 	  err = SFRAME_XLATE_OK;
 	}
 
