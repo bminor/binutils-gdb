@@ -3891,8 +3891,6 @@ process_debug_info (struct dwarf_section * section,
 
       SAFE_BYTE_GET_AND_INC (compunit.cu_version, hdrptr, 2, end_cu);
 
-      this_set = find_cu_tu_set_v2 (cu_offset, (do_flags & DO_TYPES));
-
       if (compunit.cu_version < 5)
 	{
 	  compunit.cu_unit_type = DW_UT_compile;
@@ -3902,11 +3900,6 @@ process_debug_info (struct dwarf_section * section,
       else
 	{
 	  SAFE_BYTE_GET_AND_INC (compunit.cu_unit_type, hdrptr, 1, end_cu);
-	  if (compunit.cu_unit_type == DW_UT_type)
-	    do_flags |= DO_TYPES;
-	  else
-	    do_flags &= ~DO_TYPES;
-
 	  SAFE_BYTE_GET_AND_INC (compunit.cu_pointer_size, hdrptr, 1, end_cu);
 	}
 
@@ -3920,6 +3913,7 @@ process_debug_info (struct dwarf_section * section,
 	  SAFE_BYTE_GET_AND_INC (dwo_id, hdrptr, 8, end_cu);
 	}
 
+      this_set = find_cu_tu_set_v2 (cu_offset, (do_flags & DO_TYPES));
       if (this_set == NULL)
 	{
 	  abbrev_base = 0;
@@ -3976,8 +3970,6 @@ process_debug_info (struct dwarf_section * section,
 
       SAFE_BYTE_GET_AND_INC (compunit.cu_version, hdrptr, 2, end_cu);
 
-      this_set = find_cu_tu_set_v2 (cu_offset, (do_flags & DO_TYPES));
-
       if (compunit.cu_version < 5)
 	{
 	  compunit.cu_unit_type = DW_UT_compile;
@@ -3987,16 +3979,12 @@ process_debug_info (struct dwarf_section * section,
       else
 	{
 	  SAFE_BYTE_GET_AND_INC (compunit.cu_unit_type, hdrptr, 1, end_cu);
-	  if (compunit.cu_unit_type == DW_UT_type)
-	    do_flags |= DO_TYPES;
-	  else
-	    do_flags &= ~DO_TYPES;
-
 	  SAFE_BYTE_GET_AND_INC (compunit.cu_pointer_size, hdrptr, 1, end_cu);
 	}
 
       SAFE_BYTE_GET_AND_INC (compunit.cu_abbrev_offset, hdrptr, offset_size, end_cu);
 
+      this_set = find_cu_tu_set_v2 (cu_offset, (do_flags & DO_TYPES));
       if (this_set == NULL)
 	{
 	  abbrev_base = 0;
@@ -4028,7 +4016,7 @@ process_debug_info (struct dwarf_section * section,
 	  compunit.cu_pointer_size = offset_size;
 	}
 
-      if (do_flags & DO_TYPES)
+      if ((do_flags & DO_TYPES) || compunit.cu_unit_type == DW_UT_type)
 	{
 	  SAFE_BYTE_GET_AND_INC (signature, hdrptr, 8, end_cu);
 	  SAFE_BYTE_GET_AND_INC (type_offset, hdrptr, offset_size, end_cu);
@@ -4044,7 +4032,7 @@ process_debug_info (struct dwarf_section * section,
 	  || do_debug_ranges || do_debug_info)
 	  && num_debug_info_entries == 0
 	  && alloc_num_debug_info_entries > unit
-	  && ! (do_flags & DO_TYPES))
+	  && !(do_flags & DO_TYPES))
 	{
 	  free_debug_information (&debug_information[unit]);
 	  memset (&debug_information[unit], 0, sizeof (*debug_information));
@@ -4075,7 +4063,7 @@ process_debug_info (struct dwarf_section * section,
 	  printf (_("   Abbrev Offset: %#" PRIx64 "\n"),
 		  compunit.cu_abbrev_offset);
 	  printf (_("   Pointer Size:  %d\n"), compunit.cu_pointer_size);
-	  if (do_flags & DO_TYPES)
+	  if ((do_flags & DO_TYPES) || compunit.cu_unit_type == DW_UT_type)
 	    {
 	      printf (_("   Signature:     %#" PRIx64 "\n"), signature);
 	      printf (_("   Type Offset:   %#" PRIx64 "\n"), type_offset);
@@ -4350,7 +4338,7 @@ process_debug_info (struct dwarf_section * section,
      we need to process .debug_loc and .debug_ranges sections.  */
   if (((do_flags & DO_LOC) || do_debug_loc || do_debug_ranges || do_debug_info)
       && num_debug_info_entries == 0
-      && ! (do_flags & DO_TYPES))
+      && !(do_flags & DO_TYPES))
     {
       if (num_units > alloc_num_debug_info_entries)
 	num_debug_info_entries = alloc_num_debug_info_entries;
