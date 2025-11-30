@@ -11138,7 +11138,6 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	{
 	  Elf_Internal_Versym iversym;
 	  Elf_External_Versym *eversym;
-	  bool noversion = false;
 
 	  if (!h->def_regular && !ELF_COMMON_DEF_P (h))
 	    {
@@ -11150,7 +11149,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 		  if (strchr (h->root.root.string, ELF_VER_CHR) == NULL)
 		    /* Referenced symbol without ELF_VER_CHR has no
 		       version.  */
-		    noversion = true;
+		    iversym.vs_vers = 0;
 		}
 	      else
 		iversym.vs_vers = h->verinfo.verdef->vd_exp_refno + 1;
@@ -11163,22 +11162,16 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 		iversym.vs_vers = h->verinfo.vertree->vernum + 1;
 	      if (flinfo->info->create_default_symver)
 		iversym.vs_vers++;
-	    }
 
-	  /* Don't set its DT_VERSYM entry for unversioned symbol.  */
-	  if (!noversion)
-	    {
 	      /* Turn on VERSYM_HIDDEN only if the hidden versioned
 		 symbol is defined locally.  */
 	      if (h->versioned == versioned_hidden && h->def_regular)
 		iversym.vs_vers |= VERSYM_HIDDEN;
-
-	      eversym
-		= (Elf_External_Versym *) flinfo->symver_sec->contents;
-	      eversym += h->dynindx;
-	      _bfd_elf_swap_versym_out (flinfo->output_bfd, &iversym,
-					eversym);
 	    }
+
+	  eversym = (Elf_External_Versym *) flinfo->symver_sec->contents;
+	  eversym += h->dynindx;
+	  _bfd_elf_swap_versym_out (flinfo->output_bfd, &iversym, eversym);
 	}
     }
 
