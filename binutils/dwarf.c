@@ -3747,14 +3747,14 @@ read_bases (abbrev_entry *   entry,
 }
 
 /* Process the contents of a .debug_info section.
-   If do_loc is TRUE then we are scanning for location lists and dwo tags
-   and we do not want to display anything to the user.
-   If do_types is TRUE, we are processing a .debug_types section instead of
-   a .debug_info section.
-   The information displayed is restricted by the values in DWARF_START_DIE
-   and DWARF_CUTOFF_LEVEL.
-   Returns TRUE upon success.  Otherwise an error or warning message is
-   printed and FALSE is returned.  */
+   If do_flags & DO_LOC then we are scanning for location lists and
+   dwo tags and we do not want to display anything to the user.
+   If do_flags & DO_TYPES, we are processing a .debug_types section
+   instead of a .debug_info section.
+   The information displayed is restricted by the values in
+   DWARF_START_DIE and DWARF_CUTOFF_LEVEL.
+   Returns TRUE upon success.  Otherwise an error or warning message
+   is printed and FALSE is returned.  */
 
 static bool
 process_debug_info (struct dwarf_section * section,
@@ -4136,7 +4136,7 @@ process_debug_info (struct dwarf_section * section,
 	  unsigned long die_offset;
 	  abbrev_entry *entry;
 	  abbrev_attr *attr;
-	  int do_printing = 1;
+	  bool do_printing;
 
 	  die_offset = tags - section_begin;
 
@@ -4187,24 +4187,22 @@ process_debug_info (struct dwarf_section * section,
 	      continue;
 	    }
 
-	  if (!(do_flags & DO_LOC))
+	  if ((do_flags & DO_LOC)
+	      || (dwarf_start_die != 0 && die_offset < dwarf_start_die))
+	    do_printing = false;
+	  else
 	    {
-	      if (dwarf_start_die != 0 && die_offset < dwarf_start_die)
-		do_printing = 0;
-	      else
-		{
-		  if (dwarf_start_die != 0 && die_offset == dwarf_start_die)
-		    saved_level = level;
-		  do_printing = (dwarf_cutoff_level == -1
-				 || level < dwarf_cutoff_level);
-		  if (do_printing)
-		    printf (_(" <%d><%lx>: Abbrev Number: %lu"),
-			    level, die_offset, abbrev_number);
-		  else if (dwarf_cutoff_level == -1
-			   || last_level < dwarf_cutoff_level)
-		    printf (_(" <%d><%lx>: ...\n"), level, die_offset);
-		  last_level = level;
-		}
+	      if (dwarf_start_die != 0 && die_offset == dwarf_start_die)
+		saved_level = level;
+	      do_printing = (dwarf_cutoff_level == -1
+			     || level < dwarf_cutoff_level);
+	      if (do_printing)
+		printf (_(" <%d><%lx>: Abbrev Number: %lu"),
+			level, die_offset, abbrev_number);
+	      else if (dwarf_cutoff_level == -1
+		       || last_level < dwarf_cutoff_level)
+		printf (_(" <%d><%lx>: ...\n"), level, die_offset);
+	      last_level = level;
 	    }
 
 	  /* Scan through the abbreviation list until we reach the
@@ -4217,7 +4215,7 @@ process_debug_info (struct dwarf_section * section,
 
 	  if (entry == NULL)
 	    {
-	      if (!(do_flags & DO_LOC) && do_printing)
+	      if (do_printing)
 		{
 		  printf ("\n");
 		  fflush (stdout);
@@ -4229,7 +4227,7 @@ process_debug_info (struct dwarf_section * section,
 	      return false;
 	    }
 
-	  if (!(do_flags & DO_LOC) && do_printing)
+	  if (do_printing)
 	    printf (" (%s)\n", get_TAG_name (entry->tag));
 
 	  switch (entry->tag)
@@ -4296,7 +4294,7 @@ process_debug_info (struct dwarf_section * section,
 	       attr && attr->attribute;
 	       attr = attr->next)
 	    {
-	      if (! (do_flags & DO_LOC) && do_printing)
+	      if (do_printing)
 		/* Show the offset from where the tag was extracted.  */
 		printf ("    <%tx>", tags - section_begin);
 	      tags = read_and_display_attr (attr->attribute,
@@ -4310,8 +4308,7 @@ process_debug_info (struct dwarf_section * section,
 					    offset_size,
 					    compunit.cu_version,
 					    debug_info_p,
-					    (do_flags & DO_LOC)
-					    || ! do_printing,
+					    !do_printing,
 					    section,
 					    this_set,
 					    level);
