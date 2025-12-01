@@ -68,18 +68,6 @@ protected:
 
 static tic6x_target the_tic6x_target;
 
-/* Defined in auto-generated file tic6x-c64xp-linux.c.  */
-void init_registers_tic6x_c64xp_linux (void);
-extern const struct target_desc *tdesc_tic6x_c64xp_linux;
-
-/* Defined in auto-generated file tic6x-c64x-linux.c.  */
-void init_registers_tic6x_c64x_linux (void);
-extern const struct target_desc *tdesc_tic6x_c64x_linux;
-
-/* Defined in auto-generated file tic62x-c6xp-linux.c.  */
-void init_registers_tic6x_c62x_linux (void);
-extern const struct target_desc *tdesc_tic6x_c62x_linux;
-
 union tic6x_register
 {
   unsigned char buf[4];
@@ -418,14 +406,5 @@ linux_process_target *the_linux_target = &the_tic6x_target;
 void
 initialize_low_arch (void)
 {
-#if GDB_SELF_TEST
-  /* Initialize the Linux target descriptions.  */
-  init_registers_tic6x_c64xp_linux ();
-  init_registers_tic6x_c64x_linux ();
-  init_registers_tic6x_c62x_linux ();
-
-  selftests::register_test ("tic6x-tdesc", selftests::tdesc::tic6x_tdesc_test);
-#endif
-
   initialize_regsets_info (&tic6x_regsets_info);
 }
