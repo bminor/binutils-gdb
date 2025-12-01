@@ -1698,6 +1698,7 @@ elf64_hppa_late_size_sections (bfd *output_bfd, struct bfd_link_info *info)
 	      nh->other = STV_DEFAULT;
 	      bfd_elf_link_record_dynamic_symbol (info, nh);
 	      hppa_info->text_hash_entry = nh;
+	      hppa_info->root.has_local_dynsyms = true;
 	    }
 	}
     }
@@ -1728,6 +1729,7 @@ elf64_hppa_late_size_sections (bfd *output_bfd, struct bfd_link_info *info)
 	      nh->other = STV_DEFAULT;
 	      bfd_elf_link_record_dynamic_symbol (info, nh);
 	      hppa_info->data_hash_entry = nh;
+	      hppa_info->root.has_local_dynsyms = true;
 	    }
 	}
     }
