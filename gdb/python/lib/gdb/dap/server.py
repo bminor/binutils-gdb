@@ -312,7 +312,15 @@ class Server:
         }
 
         if "arguments" in params:
-            args = params["arguments"]
+            # Since the "arguments" field is optional, setting it to
+            # null is an odd thing to do when one could simply omit it
+            # entirely. But some clients do just that for some
+            # requests (e.g. Helix for ConfigurationDone), so we
+            # accommodate this case.
+            if params["arguments"] is None:
+                args = {}
+            else:
+                args = params["arguments"]
         else:
             args = {}
 
