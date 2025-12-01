@@ -116,17 +116,20 @@ proc build_executable_and_dwo_files { testname executable options args } {
 	# Currently don't support compiling thread based tests here.
 	# If this is required then look to build_executable_from_specs
 	# for inspiration.
+	untested "option not supported"
 	return -1
     }
     if {[lsearch -exact $options rust] != -1} {
 	# Currently don't support compiling rust tests here.  If this
 	# is required then look to build_executable_from_specs for
 	# inspiration.
+	untested "rust not supported"
 	return -1
     }
 
     # Must be run on local host due to use of objcopy.
     if [is_remote host] {
+	untested "using remote host"
 	return -1
     }
 
