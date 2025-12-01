@@ -136,11 +136,15 @@ struct dwarf2_per_cu
     gdb_assert (section != nullptr);
   }
 
-  /* The start offset and length of this compilation unit.
-     NOTE: Unlike comp_unit_head.length, this length includes
-     initial_length_size.
-     If the DIE refers to a DWO file, this is always of the original die,
-     not the DWO file.  */
+  /* The start offset of this unit.
+
+     If the unit is located in a DWO file, and has a corresponding skeleton
+     unit in the main file, this is the offset of the skeleton unit in its
+     containing section in the main file.
+
+     If the unit is located in a DWO file, but has no corresponding skeleton
+     unit in the main file, this is the offset of the unit in its containing
+     section in the DWO file.  */
   sect_offset sect_off;
 
 private:
@@ -228,9 +232,15 @@ public:
   /* Our index in the unshared "symtabs" vector.  */
   unsigned index = 0;
 
-  /* The section this CU/TU lives in.
-     If the DIE refers to a DWO file, this is always the original die,
-     not the DWO file.  */
+  /* The section this unit lives in.
+
+     If the unit is located in a DWO file, and has a corresponding skeleton unit
+     in the main file, this is the section of the skeleton unit in the main
+     file.
+
+     If the unit is located in a DWO file, but has no corresponding skeleton
+     unit in the main file, this is the section of the unit in the DWO
+     file.  */
   struct dwarf2_section_info *section = nullptr;
 
   /* Backlink to the owner of this.  */
