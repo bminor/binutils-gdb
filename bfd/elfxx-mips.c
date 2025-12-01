@@ -4005,7 +4005,7 @@ mips_elf_sort_hash_table (bfd *abfd, struct bfd_link_info *info)
   htab = mips_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
 
-  if (htab->root.dynsymcount == 0)
+  if (htab->root.dynsymcount <= 1)
     return true;
 
   g = htab->got_info;
