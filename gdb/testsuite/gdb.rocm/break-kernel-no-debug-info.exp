@@ -35,7 +35,7 @@ if {[build_executable "failed to prepare" $testfile $srcfile {hip nodebug}]} {
 clean_restart
 
 with_rocm_gpu_lock {
-    gdb_test "file $::binfile" ".*No debugging symbols.*" "load file"
+    gdb_load $::binfile
 
     if {![runto_main]} {
 	return
