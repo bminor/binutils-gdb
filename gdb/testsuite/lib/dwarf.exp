@@ -574,6 +574,9 @@ namespace eval Dwarf {
     # table.
     variable _abbrev_num
 
+    # The next available abbrev number in the (single) DWO abbrev table.
+    variable _dwo_abbrev_num
+
     # The string table for this assembly.  The key is the string; the
     # value is the label for that string.
     variable _strings
@@ -983,8 +986,17 @@ namespace eval Dwarf {
     # table.
     proc _get_abbrev_num {} {
 	variable _abbrev_num
-	set res $_abbrev_num
-	incr _abbrev_num
+	variable _dwo_abbrev_num
+	variable _cu_is_fission
+
+	if { $_cu_is_fission } {
+	    set res $_dwo_abbrev_num
+	    incr _dwo_abbrev_num
+	} else {
+	    set res $_abbrev_num
+	    incr _abbrev_num
+	}
+
 	return $res
     }
 
@@ -1549,8 +1561,17 @@ namespace eval Dwarf {
 	_section $section
 
 	set cu_num [incr _cu_count]
-	set my_abbrevs [_compute_label "abbrev${cu_num}_begin"]
-	set _abbrev_num 1
+
+	# Since .dwo files are not linked, we can't use a label to point to a
+	# specific place in the .debug_abbrev section.  For .dwo files, we
+	# therefore use a single abbrev table (at offset 0) shared by all units
+	# in that file.
+	if { $_cu_is_fission } {
+	    set my_abbrevs 0
+	} else {
+	    set my_abbrevs [_compute_label "abbrev${cu_num}_begin"]
+	    set _abbrev_num 1
+	}
 
 	set _cu_label [_compute_label "cu${cu_num}_begin"]
 	set start_label [_compute_label "cu${cu_num}_start"]
@@ -1617,9 +1638,11 @@ namespace eval Dwarf {
 
 	uplevel $body
 
-	_defer_output $_abbrev_section {
-	    # Emit the terminator.
-	    _op .byte 0x0 "Abbrev end - Terminator"
+	if { !$_cu_is_fission } {
+	    _defer_output $_abbrev_section {
+		# Emit the terminator.
+		_op .byte 0x0 "Abbrev end - Terminator"
+	    }
 	}
 
 	define_label $end_label
@@ -1691,8 +1714,17 @@ namespace eval Dwarf {
 	_section $section
 
 	set cu_num [incr _cu_count]
-	set my_abbrevs [_compute_label "abbrev${cu_num}_begin"]
-	set _abbrev_num 1
+
+	# Since .dwo files are not linked, we can't use a label to point to a
+	# specific place in the .debug_abbrev section.  For .dwo files, we
+	# therefore use a single abbrev table (at offset 0) shared by all units
+	# in that file.
+	if { $_cu_is_fission } {
+	    set my_abbrevs 0
+	} else {
+	    set my_abbrevs [_compute_label "abbrev${cu_num}_begin"]
+	    set _abbrev_num 1
+	}
 
 	set _cu_label [_compute_label "cu${cu_num}_begin"]
 	set start_label [_compute_label "cu${cu_num}_start"]
@@ -1746,9 +1778,11 @@ namespace eval Dwarf {
 
 	uplevel $body
 
-	_defer_output $_abbrev_section {
-	    # Emit the terminator.
-	    _op .byte 0x0 "Abbrev end - Terminator"
+	if { !$_cu_is_fission } {
+	    _defer_output $_abbrev_section {
+		# Emit the terminator.
+		_op .byte 0x0 "Abbrev end - Terminator"
+	    }
 	}
 
 	define_label $end_label
@@ -3498,6 +3532,7 @@ namespace eval Dwarf {
 	variable _line_header_end_label
 	variable _debug_ranges_64_bit
 	variable _debug_addr_index
+	variable _dwo_abbrev_num
 
 	if { [llength $options] == 1 } {
 	    set options [list filename [lindex $options 0]]
@@ -3528,8 +3563,8 @@ namespace eval Dwarf {
 
 	set _line_count 0
 	set _debug_ranges_64_bit [is_64_target]
-
 	set _debug_addr_index 0
+	set _dwo_abbrev_num 1
 
 	# Dummy CU at the start to ensure that the first CU in $body is not
 	# the first in .debug_info.
@@ -3548,6 +3583,14 @@ namespace eval Dwarf {
 	# the last in .debug_info.
 	if { $add_dummy_cus } {
 	    dummy_cu
+	}
+
+	# If we wrote any abbrev in .debug_abbrev.dwo, write the terminator.
+	if { $_dwo_abbrev_num > 1 } {
+	    _defer_output .debug_abbrev.dwo {
+		# Emit the terminator.
+		_op .byte 0x0 "Abbrev end - Terminator"
+	    }
 	}
 
 	_write_deferred_output
