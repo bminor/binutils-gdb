@@ -1217,23 +1217,51 @@ linux_read_core_file_mappings
   cbfd->build_id = orig_build_id;
   pre_loop_cb (count);
 
+  /* Vector to collect proc mappings.  */
+  struct proc_mapping
+  {
+    int num;
+    ULONGEST start;
+    ULONGEST end;
+    ULONGEST file_ofs;
+    const char *filename;
+    const bfd_build_id *build_id;
+  };
+  std::vector<struct proc_mapping> proc_mappings;
+
+  /* Collect proc mappings.  */
   for (int i = 0; i < count; i++)
     {
-      ULONGEST start = bfd_get (addr_size_bits, cbfd, descdata);
+      struct proc_mapping m = { .num = i };
+      m.start = bfd_get (addr_size_bits, cbfd, descdata);
       descdata += addr_size;
-      ULONGEST end = bfd_get (addr_size_bits, cbfd, descdata);
+      m.end = bfd_get (addr_size_bits, cbfd, descdata);
       descdata += addr_size;
-      ULONGEST file_ofs = bfd_get (addr_size_bits, cbfd, descdata) * page_size;
+      m.file_ofs = bfd_get (addr_size_bits, cbfd, descdata) * page_size;
       descdata += addr_size;
-      char * filename = filenames;
+      m.filename = filenames;
       filenames += strlen ((char *) filenames) + 1;
-      const bfd_build_id *build_id = nullptr;
-      auto vma_map_it = vma_map.find (start);
 
+      m.build_id = nullptr;
+      auto vma_map_it = vma_map.find (m.start);
       if (vma_map_it != vma_map.end ())
-	build_id = vma_map_it->second;
+	m.build_id = vma_map_it->second;
 
-      loop_cb (i, start, end, file_ofs, filename, build_id);
+      proc_mappings.push_back (m);
+    }
+
+  /* Sort proc mappings.  */
+  std::sort (proc_mappings.begin (), proc_mappings.end (),
+	     [] (const proc_mapping &a, const proc_mapping &b)
+	       {
+		 return a.start < b.start;
+	       });
+
+  /* Call loop_cb with sorted proc mappings.  */
+  for (int i = 0; i < count; i++)
+    {
+      const auto &m = proc_mappings[i];
+      loop_cb (m.num, m.start, m.end, m.file_ofs, m.filename, m.build_id);
     }
 }
 
