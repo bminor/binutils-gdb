@@ -5049,7 +5049,7 @@ proc aarch64_supports_sve_vl { length } {
 }
 
 # Run a test on the target to see if it supports Aarch64 SME extensions.
-# Return 0 if so, 1 if it does not.  Note this causes a restart of GDB.
+# Return 1 if so, 0 if it does not.  Note this causes a restart of GDB.
 
 gdb_caching_proc allow_aarch64_sme_tests {} {
     global srcdir subdir gdb_prompt inferior_exited_re
