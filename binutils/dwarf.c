@@ -1825,6 +1825,74 @@ get_AT_name (unsigned long attribute)
   return name;
 }
 
+static const char *
+get_AT_language_name (unsigned long value)
+{
+  /* Libiberty does not (yet) provide a get_DW_AT_language_name()
+     function so we define our own.  */
+
+  switch (value)
+    {
+    case DW_LNAME_Ada: return "Ada";
+    case DW_LNAME_BLISS: return "BLISS";
+    case DW_LNAME_C: return "C";
+    case DW_LNAME_C_plus_plus: return "C_plus_plus";
+    case DW_LNAME_Cobol: return "Cobol";
+    case DW_LNAME_Crystal: return "Crystal";
+    case DW_LNAME_D: return "D";
+    case DW_LNAME_Dylan: return "Dylan";
+    case DW_LNAME_Fortran: return "Fortran";
+    case DW_LNAME_Go: return "Go";
+    case DW_LNAME_Haskell: return "Haskell";
+    case DW_LNAME_Java: return "Java";
+    case DW_LNAME_Julia: return "Julia";
+    case DW_LNAME_Kotlin: return "Kotlin";
+    case DW_LNAME_Modula2: return "Modula2";
+    case DW_LNAME_Modula3: return "Modula3";
+    case DW_LNAME_ObjC: return "ObjC";
+    case DW_LNAME_ObjC_plus_plus: return "ObjC_plus_plus";
+    case DW_LNAME_OCaml: return "OCaml";
+    case DW_LNAME_OpenCL_C: return "OpenCL_C";
+    case DW_LNAME_Pascal: return "Pascal";
+    case DW_LNAME_PLI: return "PLI";
+    case DW_LNAME_Python: return "Python";
+    case DW_LNAME_RenderScript: return "RenderScript";
+    case DW_LNAME_Rust: return "Rust";
+    case DW_LNAME_Swift: return "Swift";
+    case DW_LNAME_UPC: return "UPC";
+    case DW_LNAME_Zig: return "Zig";
+    case DW_LNAME_Assembly: return "Assembly";
+    case DW_LNAME_C_sharp: return "C_sharp";
+    case DW_LNAME_Mojo: return "Mojo";
+    case DW_LNAME_GLSL: return "GLSL";
+    case DW_LNAME_GLSL_ES: return "GLSL_ES";
+    case DW_LNAME_HLSL: return "HLSL";
+    case DW_LNAME_OpenCL_CPP: return "OpenCL_CPP";
+    case DW_LNAME_CPP_for_OpenCL: return "CPP_for_OpenCL";
+    case DW_LNAME_SYCL: return "SYCL";
+    case DW_LNAME_Ruby: return "Ruby";
+    case DW_LNAME_Move: return "Move";
+    case DW_LNAME_Hylo: return "Hylo";
+    case DW_LNAME_HIP: return "HIP";
+    case DW_LNAME_Odin: return "Odin";
+    case DW_LNAME_P4: return "P4";
+    case DW_LNAME_Metal: return "Metal";
+    case DW_LNAME_Algol68: return "Algol68";
+    default: break;
+    }
+
+  static char buffer[100];
+
+  if (value >= DW_LNAME_lo_user && value <= DW_LNAME_hi_user)
+    snprintf (buffer, sizeof (buffer), _("Implementation specific AT_language_name value: %lx"),
+	      value);
+  else
+    snprintf (buffer, sizeof (buffer), _("Unknown AT_language_name value: %lx"),
+	      value);
+
+  return buffer;
+}
+
 static void
 add_dwo_info (const char * value, uint64_t cu_offset, dwo_type type)
 {
@@ -3147,6 +3215,14 @@ read_and_display_attr_value (unsigned long attribute,
   /* For some attributes we can display further information.  */
   switch (attribute)
     {
+    case DW_AT_language_name:
+      printf ("\t(%s)", get_AT_language_name (uvalue));
+      break;
+
+    case DW_AT_language_version:
+      printf ("\t(%lu)", (unsigned long) uvalue);
+      break;
+
     case DW_AT_type:
       if (level >= 0 && level < MAX_CU_NESTING
 	  && uvalue < (size_t) (end - start))
