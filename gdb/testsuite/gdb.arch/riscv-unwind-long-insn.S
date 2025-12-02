@@ -21,7 +21,7 @@
 	.type   bar, @function
 bar:
 	tail       1f
-	.size   bar, .-func
+	.size   bar, .-bar
 
 	.align  1
 	.globl  func
