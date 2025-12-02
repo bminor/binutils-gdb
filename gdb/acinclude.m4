@@ -55,7 +55,7 @@ m4_include(../gdbsupport/ptrace.m4)
 
 m4_include(ax_cxx_compile_stdcxx.m4)
 
-dnl written by Guido Draheim <guidod@gmx.de>, original by Alexandre Oliva 
+dnl written by Guido Draheim <guidod@gmx.de>, original by Alexandre Oliva
 dnl Version 1.3 (2001/03/02)
 dnl source http://www.gnu.org/software/ac-archive/Miscellaneous/ac_define_dir.html
 
@@ -181,7 +181,7 @@ dnl VARIABLE_RELOCATABLE to 1; otherwise it is defined as 0.
 AC_DEFUN([GDB_AC_DEFINE_RELOCATABLE], [
   if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
      if test "x$prefix" = xNONE; then
-     	test_prefix=/usr/local
+	test_prefix=/usr/local
      else
 	test_prefix=$prefix
      fi

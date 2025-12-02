@@ -147,7 +147,7 @@ AC_ARG_WITH(relocated-sources,
 AS_HELP_STRING([--with-relocated-sources=PATH], [automatically relocate this path for source files]),
 [reloc_srcdir="${withval}"
  AC_DEFINE_DIR(RELOC_SRCDIR, reloc_srcdir,
-              [Relocated directory for source files. ])
+	      [Relocated directory for source files. ])
 ])
 
 AC_MSG_CHECKING([for default auto-load directory])
@@ -165,7 +165,7 @@ AC_ARG_WITH(auto-load-safe-path,
 AS_HELP_STRING([--with-auto-load-safe-path=PATH],
   [directories safe to hold auto-loaded files @<:@--with-auto-load-dir@:>@])
 AS_HELP_STRING([--without-auto-load-safe-path],
-               [do not restrict auto-loaded files locations]),
+	       [do not restrict auto-loaded files locations]),
     [if test "$with_auto_load_safe_path" = "no"; then
      with_auto_load_safe_path="/"
      fi],
@@ -182,7 +182,7 @@ AC_ARG_ENABLE(targets,
 AS_HELP_STRING([--enable-targets=TARGETS], [alternative target configurations]),
 [case "${enableval}" in
   yes | "") AC_MSG_ERROR(enable-targets option must specify target names or 'all')
-            ;;
+	    ;;
   no)       enable_targets= ;;
   *)
 	enable_targets=$enableval
@@ -197,7 +197,7 @@ AC_ARG_ENABLE(binary_file_formats,
 			      available formats: coff, elf, macho, mips, xcoff, all]),
 [case "${enableval}" in
  yes | "") AC_MSG_ERROR(enable-binary-file-formats option must specify file formats or 'all')
-            ;;
+	    ;;
   no)       enable_binary_file_formats= ;;
   *)        enable_binary_file_formats=$enableval ;;
 esac], [enable_binary_file_formats=all])
@@ -269,9 +269,9 @@ do
     # Canonicalize the secondary target names.
     result=`$ac_config_sub $targ_alias 2>/dev/null`
     if test -n "$result"; then
-        targ=$result
+	targ=$result
     else
-        targ=$targ_alias
+	targ=$targ_alias
     fi
 
     . ${srcdir}/configure.tgt
@@ -281,12 +281,12 @@ do
 
     # Target-specific object files
     for i in ${gdb_target_obs}; do
-        case " $TARGET_OBS " in
-        *" ${i} "*) ;;
-        *)
-          TARGET_OBS="$TARGET_OBS ${i}"
-          ;;
-        esac
+	case " $TARGET_OBS " in
+	*" ${i} "*) ;;
+	*)
+	  TARGET_OBS="$TARGET_OBS ${i}"
+	  ;;
+	esac
     done
 
     # Check whether this target needs 64-bit CORE_ADDR
@@ -483,7 +483,7 @@ AC_CACHE_CHECK(
 )
 if test "$ac_cv_var__etext" = yes; then
   AC_DEFINE(HAVE__ETEXT, 1,
-            [Define to 1 if your system has the _etext variable. ])
+	    [Define to 1 if your system has the _etext variable. ])
 fi
 AC_CACHE_CHECK(
   [for etext],
@@ -500,7 +500,7 @@ AC_CACHE_CHECK(
 )
 if test "$ac_cv_var_etext" = yes; then
   AC_DEFINE(HAVE_ETEXT, 1,
-            [Define to 1 if your system has the etext variable. ])
+	    [Define to 1 if your system has the etext variable. ])
 fi
 if test "$enable_profiling" = yes ; then
   if test "$ac_cv_func_monstartup" = no || test "$ac_cv_func__mcleanup" = no; then
@@ -530,7 +530,7 @@ fi
 CODESIGN_CERT=
 AC_ARG_ENABLE([codesign],
   AS_HELP_STRING([--enable-codesign=CERT],
-                 [sign gdb with 'codesign -s CERT']),
+		 [sign gdb with 'codesign -s CERT']),
   [CODESIGN_CERT=$enableval])
 AC_SUBST([CODESIGN_CERT])
 
@@ -599,7 +599,7 @@ AC_ARG_WITH(iconv-bin,
 AS_HELP_STRING([--with-iconv-bin=PATH], [specify where to find the iconv program]),
 [iconv_bin="${withval}"
  AC_DEFINE_UNQUOTED([ICONV_BIN], ["${iconv_bin}"],
-                    [Path of directory of iconv program.])
+		    [Path of directory of iconv program.])
  GDB_AC_DEFINE_RELOCATABLE(ICONV_BIN, iconv, ${iconv_bin})
 ])
 
@@ -618,10 +618,10 @@ if test x"$prefer_curses" = xyes; then
   # default installation of ncurses on alpha*-dec-osf* will lead to such
   # a situation.
   AC_SEARCH_LIBS(waddstr, [ncursesw ncurses cursesX curses],
-                 [curses_found=yes
-                  AC_DEFINE([HAVE_LIBCURSES], [1],
-                            [Define to 1 if curses is enabled.])
-                 ])
+		 [curses_found=yes
+		  AC_DEFINE([HAVE_LIBCURSES], [1],
+			    [Define to 1 if curses is enabled.])
+		 ])
 fi
 
 # Check whether we should enable the TUI, but only do so if we really
@@ -665,7 +665,7 @@ fi
 
 AC_ARG_WITH([system-readline],
   [AS_HELP_STRING([--with-system-readline],
-                  [use installed readline library])])
+		  [use installed readline library])])
 
 if test "$with_system_readline" = yes; then
   AC_CHECK_HEADERS(readline/readline.h, [readline_h=yes], [readline_h=no])
@@ -734,8 +734,8 @@ AC_CONFIG_FILES([jit-reader.h:jit-reader.in])
 AC_SEARCH_LIBS(dlopen, dl)
 
 GDB_AC_WITH_DIR([JIT_READER_DIR], [jit-reader-dir],
-                [directory to load the JIT readers from],
-                [${libdir}/gdb])
+		[directory to load the JIT readers from],
+		[${libdir}/gdb])
 
 AC_ARG_WITH(expat,
   AS_HELP_STRING([--with-expat], [include expat support (auto/yes/no)]),
@@ -788,16 +788,16 @@ AC_DEFUN([AC_TRY_LIBPYTHON],
   LIBS="$new_LIBS $LIBS"
   found_usable_python=no
   AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include "Python.h"]],
-                                 [[
+				 [[
 				    #if PY_VERSION_HEX < 0x03040000
 				    # error "Minimum supported Python version is 3.4"
 				    #endif
 				    Py_Initialize ();
 				 ]])],
-                 [have_libpython_var=yes
-                  found_usable_python=yes
-                  PYTHON_CPPFLAGS=$new_CPPFLAGS
-                  PYTHON_LIBS=$new_LIBS])
+		 [have_libpython_var=yes
+		  found_usable_python=yes
+		  PYTHON_CPPFLAGS=$new_CPPFLAGS
+		  PYTHON_LIBS=$new_LIBS])
   CPPFLAGS=$save_CPPFLAGS
   LIBS=$save_LIBS
   AC_MSG_RESULT([${found_usable_python}])
@@ -853,13 +853,13 @@ else
       # ${with_python}.  On Windows/MinGW, this is where the Python
       # executable is.
       if test ! -x "${python_prog}"; then
-        python_prog="${with_python}/python"
-        python_prefix=
+	python_prog="${with_python}/python"
+	python_prefix=
       fi
       if test ! -x "${python_prog}"; then
-        # Fall back to gdb 7.0/7.1 behavior.
-        python_prog=missing
-        python_prefix=${with_python}
+	# Fall back to gdb 7.0/7.1 behavior.
+	python_prog=missing
+	python_prefix=${with_python}
       fi
     elif test -x "${with_python}"; then
       # While we can't run python compiled for $host (unless host == build),
@@ -882,17 +882,17 @@ else
     case "${with_python}" in
     yes | auto)
       if test "${build}" = "${host}"; then
-        # Look first for 'python', then 'python3'.
-        AC_PATH_PROGS(python_prog_path, [python python3], missing)
-        if test "${python_prog_path}" = missing; then
-          python_prog=missing
-        else
-          python_prog=${python_prog_path}
-        fi
+	# Look first for 'python', then 'python3'.
+	AC_PATH_PROGS(python_prog_path, [python python3], missing)
+	if test "${python_prog_path}" = missing; then
+	  python_prog=missing
+	else
+	  python_prog=${python_prog_path}
+	fi
       else
-        # Not much we can do except assume the cross-compiler will find the
-        # right files.
-        python_prog=missing
+	# Not much we can do except assume the cross-compiler will find the
+	# right files.
+	python_prog=missing
       fi
       ;;
     *)
@@ -951,7 +951,7 @@ else
   have_libpython=no
   if test "${have_python_config}" = yes; then
     AC_TRY_LIBPYTHON(have_libpython,
-                     ${python_includes}, ${python_libs})
+		     ${python_includes}, ${python_libs})
   fi
 
   if test "${have_libpython}" = no; then
@@ -969,7 +969,7 @@ else
   else
     if test -n "${python_prefix}"; then
       AC_DEFINE_UNQUOTED(WITH_PYTHON_PATH, "${python_prefix}",
-                         [Define if --with-python provides a path, either directly or via python-config.py --exec-prefix.])
+			 [Define if --with-python provides a path, either directly or via python-config.py --exec-prefix.])
       GDB_AC_DEFINE_RELOCATABLE(PYTHON_PATH, python, ${python_prefix})
     fi
   fi
@@ -1046,10 +1046,10 @@ if test "${have_libpython}" != no; then
 
   case "$gdb_host" in
     mingw64)
-           if test "${GCC}" = yes; then
-             CPPFLAGS="$CPPFLAGS -DMS_WIN64"
-           fi
-           ;;
+	   if test "${GCC}" = yes; then
+	     CPPFLAGS="$CPPFLAGS -DMS_WIN64"
+	   fi
+	   ;;
   esac
 else
   # Even if Python support is not compiled in, we need to have this file
@@ -1139,21 +1139,21 @@ AC_DEFUN([AC_TRY_LIBGUILE],
     CPPFLAGS="$CPPFLAGS $new_CPPFLAGS"
     LIBS="$LIBS $new_LIBS"
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include "libguile.h"]],
-                                   [[scm_init_guile ();]])],
-                   [have_libguile_var=yes
-                    GUILE_CPPFLAGS=$new_CPPFLAGS
-                    GUILE_LIBS=$new_LIBS],
-                   [found_usable_guile=no])
+				   [[scm_init_guile ();]])],
+		   [have_libguile_var=yes
+		    GUILE_CPPFLAGS=$new_CPPFLAGS
+		    GUILE_LIBS=$new_LIBS],
+		   [found_usable_guile=no])
     dnl scm_set_automatic_finalization_enabled added in Guile 2.2.
     AC_CHECK_FUNC(scm_set_automatic_finalization_enabled,
       AC_DEFINE(HAVE_GUILE_MANUAL_FINALIZATION, 1,
-                [Define if Guile supports manual finalization.])
+		[Define if Guile supports manual finalization.])
     )
     CPPFLAGS=$save_CPPFLAGS
     LIBS=$save_LIBS
     if test "${found_usable_guile}" = no; then
       if test "${flag_errors}" = yes; then
-        AC_MSG_FAILURE([linking guile version ${guile_version} test program failed])
+	AC_MSG_FAILURE([linking guile version ${guile_version} test program failed])
       fi
     fi
   fi
@@ -1328,11 +1328,11 @@ if test "${enable_source_highlight}" != "no"; then
   else
     if ${pkg_config_prog_path} --exists source-highlight; then
       case "$LDFLAGS" in
-        *static-libstdc*)
-          AC_MSG_ERROR([source highlight is incompatible with -static-libstdc++; dnl
+	*static-libstdc*)
+	  AC_MSG_ERROR([source highlight is incompatible with -static-libstdc++; dnl
 either use --disable-source-highlight or dnl
 --without-static-standard-libraries])
-          ;;
+	  ;;
       esac
 
       srchigh_pkg_cflags=`${pkg_config_prog_path} --cflags source-highlight`
@@ -1353,34 +1353,34 @@ either use --disable-source-highlight or dnl
       CXXFLAGS="$CXXFLAGS $srchigh_pkg_cflags"
       LIBS="$LIBS $srchigh_pkg_libs"
       AC_LINK_IFELSE(
-        [AC_LANG_PROGRAM(
-          [#include <srchilite/sourcehighlight.h>],
-          [std::string outlang = "esc.outlang";
-           new srchilite::SourceHighlight (outlang);]
-        )],
-        [have_usable_source_highlight=yes],
-        [have_usable_source_highlight=no]
+	[AC_LANG_PROGRAM(
+	  [#include <srchilite/sourcehighlight.h>],
+	  [std::string outlang = "esc.outlang";
+	   new srchilite::SourceHighlight (outlang);]
+	)],
+	[have_usable_source_highlight=yes],
+	[have_usable_source_highlight=no]
       )
       CXXFLAGS="$save_CXXFLAGS"
       LIBS="$save_LIBS"
       AC_LANG_POP(C++)
 
       if test "${have_usable_source_highlight}" = "yes"; then
-        AC_DEFINE([HAVE_SOURCE_HIGHLIGHT], 1,
-                  [Define to 1 if the source-highlight library is available])
-        AC_MSG_RESULT([yes])
-        SRCHIGH_CFLAGS="$srchigh_pkg_cflags"
-        SRCHIGH_LIBS="$srchigh_pkg_libs"
+	AC_DEFINE([HAVE_SOURCE_HIGHLIGHT], 1,
+		  [Define to 1 if the source-highlight library is available])
+	AC_MSG_RESULT([yes])
+	SRCHIGH_CFLAGS="$srchigh_pkg_cflags"
+	SRCHIGH_LIBS="$srchigh_pkg_libs"
       else
-        AC_MSG_RESULT([no])
-        if test "${enable_source_highlight}" = "yes"; then
-          AC_MSG_ERROR([source-highlight in your system could not be used])
-        fi
+	AC_MSG_RESULT([no])
+	if test "${enable_source_highlight}" = "yes"; then
+	  AC_MSG_ERROR([source-highlight in your system could not be used])
+	fi
       fi
     else
       AC_MSG_RESULT([no])
       if test "${enable_source_highlight}" = "yes"; then
-        AC_MSG_ERROR([source-highlight was not found in your system])
+	AC_MSG_ERROR([source-highlight was not found in your system])
       fi
     fi
   fi
@@ -1545,7 +1545,7 @@ AC_CACHE_CHECK(
 )
 if test "$gdb_cv_struct_lwp" = yes; then
   AC_DEFINE(HAVE_STRUCT_LWP, 1,
-            [Define to 1 if your system has struct lwp.])
+	    [Define to 1 if your system has struct lwp.])
 fi
 
 # See if <machine/reg.h> degines `struct reg'.
@@ -1564,13 +1564,13 @@ AC_CACHE_CHECK(
 )
 if test "$gdb_cv_struct_reg" = yes; then
   AC_DEFINE(HAVE_STRUCT_REG, 1,
-            [Define to 1 if your system has struct reg in <machine/reg.h>.])
+	    [Define to 1 if your system has struct reg in <machine/reg.h>.])
 fi
 
 # See if <machine/reg.h> supports the %fs and %gs i386 segment registers.
 # Older i386 BSD's don't have the r_fs and r_gs members of `struct reg'.
 AC_CHECK_MEMBERS([struct reg.r_fs, struct reg.r_gs], [], [],
-                 [#include <sys/types.h>
+		 [#include <sys/types.h>
 #include <machine/reg.h>])
 
 # See if <sys/ptrace.h> provides the PTRACE_GETREGS request.
@@ -1629,22 +1629,22 @@ fi
 # Older FreeBSD versions don't have the pl_tdname member of
 # `struct ptrace_lwpinfo'.
 AC_CHECK_MEMBERS([struct ptrace_lwpinfo.pl_tdname], [], [],
-                 [#include <sys/ptrace.h>])
+		 [#include <sys/ptrace.h>])
 
 # See if <sys/ptrace.h> supports syscall fields on FreeBSD.  The
 # pl_syscall_code member of `struct ptrace_lwpinfo' was added in
 # FreeBSD 10.3.
 AC_CHECK_MEMBERS([struct ptrace_lwpinfo.pl_syscall_code], [], [],
-                 [#include <sys/ptrace.h>])
+		 [#include <sys/ptrace.h>])
 
 # Check if the compiler supports the `long long' type.
 
 AC_CACHE_CHECK([for long long support in compiler], gdb_cv_c_long_long,
-               [AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+	       [AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
 [[extern long long foo;]],
 [[switch (foo & 2) { case 0: return 1; }]])],
-                                  gdb_cv_c_long_long=yes,
-                                  gdb_cv_c_long_long=no)])
+				  gdb_cv_c_long_long=yes,
+				  gdb_cv_c_long_long=no)])
 if test "$gdb_cv_c_long_long" != yes; then
   # libdecnumber requires long long.
   AC_MSG_ERROR([Compiler must support long long for GDB.])
@@ -1653,20 +1653,20 @@ fi
 # Check if the compiler and runtime support printing decfloats.
 
 AC_CACHE_CHECK([for decfloat support in printf],
-               gdb_cv_printf_has_decfloat,
-               [AC_RUN_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
+	       gdb_cv_printf_has_decfloat,
+	       [AC_RUN_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
 [[char buf[64];
   _Decimal32 d32 = 1.2345df;
   _Decimal64 d64 = 1.2345dd;
   _Decimal128 d128 = 1.2345dl;
   sprintf (buf, "Decimal32: %H\nDecimal64: %D\nDecimal128: %DD", d32, d64, d128);
   return (strcmp ("Decimal32: 1.2345\nDecimal64: 1.2345\nDecimal128: 1.2345", buf));]])],
-                              gdb_cv_printf_has_decfloat=yes,
-                              gdb_cv_printf_has_decfloat=no,
-                              gdb_cv_printf_has_decfloat=no)])
+			      gdb_cv_printf_has_decfloat=yes,
+			      gdb_cv_printf_has_decfloat=no,
+			      gdb_cv_printf_has_decfloat=no)])
 if test "$gdb_cv_printf_has_decfloat" = yes; then
   AC_DEFINE(PRINTF_HAS_DECFLOAT, 1,
-            [Define to 1 if the "%H, %D and %DD" formats work to print decfloats.])
+	    [Define to 1 if the "%H, %D and %DD" formats work to print decfloats.])
 fi
 
 # Check if the compiler supports the `long double' type.  We can't use
@@ -1675,47 +1675,47 @@ fi
 # e.g. FreeBSD/i386 4.7 and OpenBSD/i386 3.6.
 
 AC_CACHE_CHECK([for long double support in compiler], gdb_cv_c_long_double,
-               [AC_COMPILE_IFELSE([AC_LANG_SOURCE([[long double foo;]])],
-                                  gdb_cv_c_long_double=yes,
-                                  gdb_cv_c_long_double=no)])
+	       [AC_COMPILE_IFELSE([AC_LANG_SOURCE([[long double foo;]])],
+				  gdb_cv_c_long_double=yes,
+				  gdb_cv_c_long_double=no)])
 if test "$gdb_cv_c_long_double" = yes; then
   AC_DEFINE(HAVE_LONG_DOUBLE, 1,
-           [Define to 1 if the compiler supports long double.])
+	   [Define to 1 if the compiler supports long double.])
 fi
 
 # Check if the compiler and runtime support printing long doubles.
 
 AC_CACHE_CHECK([for long double support in printf],
-               gdb_cv_printf_has_long_double,
-               [AC_RUN_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
+	       gdb_cv_printf_has_long_double,
+	       [AC_RUN_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
 [[char buf[16];
   long double f = 3.141592653;
   sprintf (buf, "%Lg", f);
   return (strncmp ("3.14159", buf, 7));]])],
-                              gdb_cv_printf_has_long_double=yes,
-                              gdb_cv_printf_has_long_double=no,
-                              gdb_cv_printf_has_long_double=no)])
+			      gdb_cv_printf_has_long_double=yes,
+			      gdb_cv_printf_has_long_double=no,
+			      gdb_cv_printf_has_long_double=no)])
 if test "$gdb_cv_printf_has_long_double" = yes; then
   AC_DEFINE(PRINTF_HAS_LONG_DOUBLE, 1,
-            [Define to 1 if the "%Lg" format works to print long doubles.])
+	    [Define to 1 if the "%Lg" format works to print long doubles.])
 fi
 
 # Check if the compiler and runtime support scanning long doubles.
 
 AC_CACHE_CHECK([for long double support in scanf],
-               gdb_cv_scanf_has_long_double,
-               [AC_RUN_IFELSE([AC_LANG_PROGRAM(
+	       gdb_cv_scanf_has_long_double,
+	       [AC_RUN_IFELSE([AC_LANG_PROGRAM(
 [[#include <stdio.h>]],
 [[char *buf = "3.141592653";
   long double f = 0;
   sscanf (buf, "%Lg", &f);
   return !(f > 3.14159 && f < 3.14160);]])],
-                              gdb_cv_scanf_has_long_double=yes,
-                              gdb_cv_scanf_has_long_double=no,
-                              gdb_cv_scanf_has_long_double=no)])
+			      gdb_cv_scanf_has_long_double=yes,
+			      gdb_cv_scanf_has_long_double=no,
+			      gdb_cv_scanf_has_long_double=no)])
 if test "$gdb_cv_scanf_has_long_double" = yes; then
   AC_DEFINE(SCANF_HAS_LONG_DOUBLE, 1,
-            [Define to 1 if the "%Lg" format works to scan long doubles.])
+	    [Define to 1 if the "%Lg" format works to scan long doubles.])
 fi
 
 case ${host_os} in
@@ -1776,19 +1776,19 @@ if test "${gdb_native}" = yes; then
      CPPFLAGS="$CPPFLAGS $PYTHON_CPPFLAGS"
      AC_RUN_IFELSE(
        [AC_LANG_PROGRAM(
-         [#include "Python.h"],
-         [
-          const char *code = "import ctypes\n";
-          Py_Initialize ();
-          PyObject *main_module = PyImport_AddModule ("__main__");
-          PyObject *global_dict = PyModule_GetDict (main_module);
-          PyObject *local_dict = PyDict_New ();
-          PyObject *py_code = Py_CompileString (code, "test", Py_single_input);
-          if (py_code == NULL)
-            return 1;
-          PyObject *res = PyEval_EvalCode (py_code, global_dict, local_dict);
-          Py_Finalize ();
-          return res ? 0 : 1;])],
+	 [#include "Python.h"],
+	 [
+	  const char *code = "import ctypes\n";
+	  Py_Initialize ();
+	  PyObject *main_module = PyImport_AddModule ("__main__");
+	  PyObject *global_dict = PyModule_GetDict (main_module);
+	  PyObject *local_dict = PyDict_New ();
+	  PyObject *py_code = Py_CompileString (code, "test", Py_single_input);
+	  if (py_code == NULL)
+	    return 1;
+	  PyObject *res = PyEval_EvalCode (py_code, global_dict, local_dict);
+	  Py_Finalize ();
+	  return res ? 0 : 1;])],
        [dynamic_list=true], [], [true])
      LIBS="$old_LIBS"
      CFLAGS="$old_CFLAGS"
@@ -1811,20 +1811,20 @@ AC_CACHE_CHECK(
   gdb_cv_execinfo_backtrace,
   [AC_LINK_IFELSE(
      [AC_LANG_PROGRAM(
-        [
-         #include <execinfo.h>
-        ],
-        [
-         int f;
-         void *b[[2]];
-         f = backtrace (b, 2);
-         backtrace_symbols_fd (b, f, 2);
-        ])],
+	[
+	 #include <execinfo.h>
+	],
+	[
+	 int f;
+	 void *b[[2]];
+	 f = backtrace (b, 2);
+	 backtrace_symbols_fd (b, f, 2);
+	])],
    [gdb_cv_execinfo_backtrace=yes],
    [gdb_cv_execinfo_backtrace=no])])
 if test "$gdb_cv_execinfo_backtrace" = yes; then
   AC_DEFINE(HAVE_EXECINFO_BACKTRACE, 1,
-            [Define to 1 if execinfo.h backtrace functions are available.])
+	    [Define to 1 if execinfo.h backtrace functions are available.])
 fi
 
 dnl For certain native configurations, we need to check whether thread
@@ -1852,14 +1852,14 @@ if test "${build}" = "${host}" -a "${host}" = "${target}" ; then
       )
       AC_MSG_RESULT($gdb_cv_have_aix_thread_debug)
       if test "$gdb_cv_have_aix_thread_debug" = yes; then
-         CONFIG_SRCS="${CONFIG_SRCS} aix-thread.c"
-         CONFIG_OBS="${CONFIG_OBS} aix-thread.o"
-         LIBS="$LIBS -lpthdebug"
+	 CONFIG_SRCS="${CONFIG_SRCS} aix-thread.c"
+	 CONFIG_OBS="${CONFIG_OBS} aix-thread.o"
+	 LIBS="$LIBS -lpthdebug"
 
-         # Older versions of AIX do not provide the declaration for
-         # the getthrds function (it appears that it was introduced
-         # with AIX 6.x).
-         AC_CHECK_DECLS(getthrds, [], [], [[#include <procinfo.h>]])
+	 # Older versions of AIX do not provide the declaration for
+	 # the getthrds function (it appears that it was introduced
+	 # with AIX 6.x).
+	 AC_CHECK_DECLS(getthrds, [], [], [[#include <procinfo.h>]])
       fi
       ;;
    esac
@@ -1910,15 +1910,15 @@ if test "x$ac_cv_header_thread_db_h" = "xyes"; then
 fi
 if test "x$gdb_cv_thread_db_h_has_td_notalloc" = "xyes"; then
   AC_DEFINE(THREAD_DB_HAS_TD_NOTALLOC, 1,
-            [Define if <thread_db.h> has the TD_NOTALLOC error code.])
+	    [Define if <thread_db.h> has the TD_NOTALLOC error code.])
 fi
 if test "x$gdb_cv_thread_db_h_has_td_version" = "xyes"; then
   AC_DEFINE(THREAD_DB_HAS_TD_VERSION, 1,
-            [Define if <thread_db.h> has the TD_VERSION error code.])
+	    [Define if <thread_db.h> has the TD_VERSION error code.])
 fi
 if test "x$gdb_cv_thread_db_h_has_td_notls" = "xyes"; then
   AC_DEFINE(THREAD_DB_HAS_TD_NOTLS, 1,
-            [Define if <thread_db.h> has the TD_NOTLS error code.])
+	    [Define if <thread_db.h> has the TD_NOTLS error code.])
 fi
 
 dnl Set the host's .gdbinit filename.
@@ -1945,10 +1945,10 @@ if test "x$with_sysroot" = xyes; then
 fi
 AC_ARG_WITH(sysroot,
   AS_HELP_STRING([--with-sysroot@<:@=DIR@:>@],
-                 [search for usr/lib et al within DIR]),
+		 [search for usr/lib et al within DIR]),
   [TARGET_SYSTEM_ROOT=$withval], [TARGET_SYSTEM_ROOT=])
 AC_DEFINE_DIR(TARGET_SYSTEM_ROOT, TARGET_SYSTEM_ROOT,
-              [search for usr/lib et al within DIR])
+	      [search for usr/lib et al within DIR])
 AC_SUBST(TARGET_SYSTEM_ROOT)
 GDB_AC_DEFINE_RELOCATABLE(TARGET_SYSTEM_ROOT, sysroot, ${ac_define_dir})
 
@@ -2003,7 +2003,7 @@ all_binary_file_srcs="\$(mips_SRCS) \$(coff_SRCS) \$(xcoff_SRCS)"
 bfd_supports_elf=no
 # Add ELF support to GDB, but only if BFD includes ELF support.
 GDB_AC_CHECK_BFD([for ELF support in BFD], gdb_cv_var_bfd_elf,
-                 [bfd_get_elf_phdr_upper_bound (NULL)], elf-bfd.h)
+		 [bfd_get_elf_phdr_upper_bound (NULL)], elf-bfd.h)
 if test "$gdb_cv_var_bfd_elf" = yes; then
   CONFIG_OBS="$CONFIG_OBS gcore-elf.o elf-none-tdep.o"
   AC_DEFINE(HAVE_ELF, 1,
@@ -2019,7 +2019,7 @@ fi
 # Add macho support to GDB, but only if BFD includes it.
 bfd_supports_macho=no
 GDB_AC_CHECK_BFD([for Mach-O support in BFD], gdb_cv_var_bfd_macho,
-                 [bfd_mach_o_lookup_command (NULL, 0, NULL)], mach-o.h)
+		 [bfd_mach_o_lookup_command (NULL, 0, NULL)], mach-o.h)
 if test "$gdb_cv_var_bfd_macho" = yes; then
   bfd_supports_macho=yes
   all_binary_file_srcs="$all_binary_file_srcs \$(macho_SRCS)"
@@ -2089,7 +2089,7 @@ if test "$gdb_cv_var_bfd_elf" = yes; then
 			   lzma_mf_is_supported (LZMA_MF_HC3);])
     if test "$HAVE_LIBLZMA" != yes; then
       if test "$with_lzma" = yes; then
-        AC_MSG_ERROR([missing liblzma for --with-lzma])
+	AC_MSG_ERROR([missing liblzma for --with-lzma])
       fi
     fi
   fi
@@ -2132,60 +2132,60 @@ if test "${enable_gdbtk}" = "yes"; then
     if test -z "${no_tcl}" -a -z "${no_tk}"; then
 	SC_LOAD_TCLCONFIG
 
-        # Check for in-tree tcl
-        here=`pwd`
-        cd ${srcdir}/..
-        topdir=`pwd`
-        cd ${here}
+	# Check for in-tree tcl
+	here=`pwd`
+	cd ${srcdir}/..
+	topdir=`pwd`
+	cd ${here}
 
-        intree="no"
-        if test "${TCL_SRC_DIR}" = "${topdir}/tcl"; then
-          intree="yes"
-        fi
+	intree="no"
+	if test "${TCL_SRC_DIR}" = "${topdir}/tcl"; then
+	  intree="yes"
+	fi
 
-        # Find Tcl private headers
-        if test x"${intree}" = xno; then
-          CY_AC_TCL_PRIVATE_HEADERS
+	# Find Tcl private headers
+	if test x"${intree}" = xno; then
+	  CY_AC_TCL_PRIVATE_HEADERS
 	  TCL_INCLUDE="${TCL_INCLUDE_SPEC} ${TCL_PRIVATE_INCLUDE}"
-          TCL_LIBRARY="${TCL_LIB_SPEC}"
-          TCL_DEPS=""
-        else
-          # If building tcl in the same src tree, private headers
-          # are not needed, but we need to be sure to use the right
-          # headers library
+	  TCL_LIBRARY="${TCL_LIB_SPEC}"
+	  TCL_DEPS=""
+	else
+	  # If building tcl in the same src tree, private headers
+	  # are not needed, but we need to be sure to use the right
+	  # headers library
 	  TCL_INCLUDE="-I${TCL_SRC_DIR}/generic"
-          TCL_LIBRARY="${TCL_BUILD_LIB_SPEC}"
-          TCL_DEPS="../tcl/${configdir}${TCL_LIB_FILE}"
-        fi
+	  TCL_LIBRARY="${TCL_BUILD_LIB_SPEC}"
+	  TCL_DEPS="../tcl/${configdir}${TCL_LIB_FILE}"
+	fi
 	AC_SUBST(TCL_INCLUDE)
 	AC_SUBST(TCL_LIBRARY)
-        AC_SUBST(TCL_DEPS)
+	AC_SUBST(TCL_DEPS)
 
 	SC_LOAD_TKCONFIG
 
-        # Check for in-tree Tk
-        intree="no"
-        if test "${TK_SRC_DIR}" = "${topdir}/tk"; then
-          intree="yes"
-        fi
+	# Check for in-tree Tk
+	intree="no"
+	if test "${TK_SRC_DIR}" = "${topdir}/tk"; then
+	  intree="yes"
+	fi
 
-        # Find Tk private headers
-        if test x"${intree}" = xno; then
-          CY_AC_TK_PRIVATE_HEADERS
+	# Find Tk private headers
+	if test x"${intree}" = xno; then
+	  CY_AC_TK_PRIVATE_HEADERS
 	  TK_INCLUDE="${TK_INCLUDE_SPEC} ${TK_PRIVATE_INCLUDE}"
 	  TK_LIBRARY=${TK_LIB_SPEC}
-          TK_DEPS=""
-        else
-          TK_INCLUDE="-I${TK_SRC_DIR}/generic"
-          TK_LIBRARY="${TK_BUILD_LIB_SPEC}"
-          TK_DEPS="../tk/${configdir}/${TK_LIB_FILE}"
-        fi
+	  TK_DEPS=""
+	else
+	  TK_INCLUDE="-I${TK_SRC_DIR}/generic"
+	  TK_LIBRARY="${TK_BUILD_LIB_SPEC}"
+	  TK_DEPS="../tk/${configdir}/${TK_LIB_FILE}"
+	fi
 	AC_SUBST(TK_INCLUDE)
 	AC_SUBST(TK_LIBRARY)
 	AC_SUBST(TK_DEPS)
 	AC_SUBST(TK_XINCLUDES)
 
-        ENABLE_CFLAGS="${ENABLE_CFLAGS} \$(SUBDIR_GDBTK_CFLAGS)"
+	ENABLE_CFLAGS="${ENABLE_CFLAGS} \$(SUBDIR_GDBTK_CFLAGS)"
 
 	# Include some libraries that Tcl and Tk want.
 	TCL_LIBS='$(LIBGUI) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
@@ -2196,9 +2196,9 @@ if test "${enable_gdbtk}" = "yes"; then
 	# try to include things like `$(LIBGUI)', which wouldn't work.
 	GDBTKLIBS="${TCL_LIBS} ${TK_LIBS}"
 
-        CONFIG_OBS="${CONFIG_OBS} \$(SUBDIR_GDBTK_OBS)"
-        CONFIG_DEPS="${CONFIG_DEPS} \$(SUBDIR_GDBTK_DEPS)"
-        CONFIG_SRCS="${CONFIG_SRCS} \$(SUBDIR_GDBTK_SRCS)"
+	CONFIG_OBS="${CONFIG_OBS} \$(SUBDIR_GDBTK_OBS)"
+	CONFIG_DEPS="${CONFIG_DEPS} \$(SUBDIR_GDBTK_DEPS)"
+	CONFIG_SRCS="${CONFIG_SRCS} \$(SUBDIR_GDBTK_SRCS)"
 	CONFIG_ALL="${CONFIG_ALL} all-gdbtk"
 	CONFIG_CLEAN="${CONFIG_CLEAN} clean-gdbtk"
 	CONFIG_INSTALL="${CONFIG_INSTALL} install-gdbtk"
@@ -2210,7 +2210,7 @@ if test "${enable_gdbtk}" = "yes"; then
 	  CONFIG_OBS="${CONFIG_OBS} gdbres.o"
 	fi
 
-        AC_CONFIG_SUBDIRS(gdbtk)
+	AC_CONFIG_SUBDIRS(gdbtk)
     fi
 fi
 
@@ -2357,8 +2357,8 @@ else
 			pos->type = BT_SEEK_BEGIN;
 			bt_iter_set_pos (bt_ctf_get_iter (NULL), pos);
 			scope = bt_ctf_get_top_level_scope (event,
-			      				   BT_STREAM_EVENT_HEADER);
-		        bt_ctf_get_uint64 (bt_ctf_get_field (event, scope, "id"));
+							   BT_STREAM_EVENT_HEADER);
+			bt_ctf_get_uint64 (bt_ctf_get_field (event, scope, "id"));
 			])
   CFLAGS=$saved_CFLAGS
 
@@ -2394,7 +2394,7 @@ if test "${nativefile}" != ""; then
       * ) GDB_NM_FILE="${nativefile}"
     esac
     AC_CONFIG_LINKS([nm.h:$GDB_NM_FILE], [echo > stamp-nmh],
-                    [GDB_NM_FILE=$GDB_NM_FILE])
+		    [GDB_NM_FILE=$GDB_NM_FILE])
     AC_DEFINE_UNQUOTED(GDB_NM_FILE, "${GDB_NM_FILE}", [nativefile])
     NM_H=nm.h
 fi
@@ -2416,7 +2416,7 @@ AC_EXEEXT
 dnl  Detect the character set used by this host.
 dnl  At the moment, we just assume it's UTF-8.
 AC_DEFINE(GDB_DEFAULT_HOST_CHARSET, "UTF-8",
-          [Define to be a string naming the default host character set.])
+	  [Define to be a string naming the default host character set.])
 
 GDB_AC_SELFTEST([
   CONFIG_OBS="$CONFIG_OBS \$(SELFTESTS_OBS)"

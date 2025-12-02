@@ -5252,10 +5252,10 @@ namespace cxx11
       auto c = [=](){ return a + b; }();
       auto d = [&](){ return c; }();
       auto e = [a, &b](int x) mutable {
-        const auto identity = [](int y){ return y; };
-        for (auto i = 0; i < a; ++i)
-          a += b--;
-        return x + identity(a + b);
+	const auto identity = [](int y){ return y; };
+	for (auto i = 0; i < a; ++i)
+	  a += b--;
+	return x + identity(a + b);
       }(0);
       return a + b + c + d + e;
     }
@@ -5269,7 +5269,7 @@ namespace cxx11
       using unary_t = decltype(unary);
       const auto higher1st = [](nullary_t f){ return f(); };
       const auto higher2nd = [unary](nullary_t f1){
-        return [unary, f1](unary_t f2){ return f2(unary(f1())); };
+	return [unary, f1](unary_t f2){ return f2(unary(f1())); };
       };
       return higher1st(nullary) + higher2nd(nullary)(unary);
     }
@@ -5356,11 +5356,11 @@ namespace cxx14
     test()
     {
       const auto lambda = [](auto&&... args){
-        const auto istiny = [](auto x){
-          return (sizeof(x) == 1UL) ? 1 : 0;
-        };
-        const int aretiny[] = { istiny(args)... };
-        return aretiny[0];
+	const auto istiny = [](auto x){
+	  return (sizeof(x) == 1UL) ? 1 : 0;
+	};
+	const int aretiny[] = { istiny(args)... };
+	return aretiny[0];
       };
       return lambda(1, 1L, 1.0f, '1');
     }
@@ -5384,7 +5384,7 @@ namespace cxx14
     {
       auto length = 0UL;
       for (auto p = s; *p; ++p)
-        ++length;
+	++length;
       return length;
     }
 
@@ -5541,10 +5541,10 @@ namespace cxx17
       switch (f1())
       {
       case 17:
-        f1();
-        [[fallthrough]];
+	f1();
+	[[fallthrough]];
       case 42:
-        f1();
+	f1();
       }
       return f1();
     }
@@ -5562,14 +5562,14 @@ namespace cxx17
     struct base2
     {
       base2() {
-        b3 = 42;
+	b3 = 42;
       }
       int b3;
     };
 
     struct derived : base1, base2
     {
-        int d;
+	int d;
     };
 
     derived d1 {{1, 2}, {}, 4};  // full initialization
@@ -5586,18 +5586,18 @@ namespace cxx17
 
       int& operator* ()
       {
-        return i;
+	return i;
       }
 
       const int& operator* () const
       {
-        return i;
+	return i;
       }
 
       iter& operator++()
       {
-        ++i;
-        return *this;
+	++i;
+	return *this;
       }
     };
 
@@ -5620,12 +5620,12 @@ namespace cxx17
     {
       iter begin() const
       {
-        return {0};
+	return {0};
       }
 
       sentinel end() const
       {
-        return {5};
+	return {5};
       }
     };
 
@@ -5635,7 +5635,7 @@ namespace cxx17
 
       for (auto i : r)
       {
-        [[maybe_unused]] auto v = i;
+	[[maybe_unused]] auto v = i;
       }
     }
 
@@ -5649,10 +5649,10 @@ namespace cxx17
       int i;
       int foo()
       {
-        return [*this]()
-        {
-          return i;
-        }();
+	return [*this]()
+	{
+	  return i;
+	}();
       }
     };
 
@@ -5676,11 +5676,11 @@ namespace cxx17
     {
       if constexpr(cond)
       {
-        return 13;
+	return 13;
       }
       else
       {
-        return 42;
+	return 42;
       }
     }
 
@@ -5698,16 +5698,16 @@ namespace cxx17
     {
       if (auto i = f(); i > 0)
       {
-        return 3;
+	return 3;
       }
 
       switch (auto i = f(); i + 4)
       {
       case 17:
-        return 2;
+	return 2;
 
       default:
-        return 1;
+	return 1;
       }
     }
 
@@ -5720,8 +5720,8 @@ namespace cxx17
     struct pair
     {
       pair (T1 p1, T2 p2)
-        : m1 {p1},
-          m2 {p2}
+	: m1 {p1},
+	  m2 {p2}
       {}
 
       T1 m1;
@@ -5854,8 +5854,8 @@ if eval \${$cachevar+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_save_CXX="$CXX"
-         CXX="$CXX $switch"
-         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+	 CXX="$CXX $switch"
+	 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 
@@ -6069,10 +6069,10 @@ namespace cxx11
       auto c = [=](){ return a + b; }();
       auto d = [&](){ return c; }();
       auto e = [a, &b](int x) mutable {
-        const auto identity = [](int y){ return y; };
-        for (auto i = 0; i < a; ++i)
-          a += b--;
-        return x + identity(a + b);
+	const auto identity = [](int y){ return y; };
+	for (auto i = 0; i < a; ++i)
+	  a += b--;
+	return x + identity(a + b);
       }(0);
       return a + b + c + d + e;
     }
@@ -6086,7 +6086,7 @@ namespace cxx11
       using unary_t = decltype(unary);
       const auto higher1st = [](nullary_t f){ return f(); };
       const auto higher2nd = [unary](nullary_t f1){
-        return [unary, f1](unary_t f2){ return f2(unary(f1())); };
+	return [unary, f1](unary_t f2){ return f2(unary(f1())); };
       };
       return higher1st(nullary) + higher2nd(nullary)(unary);
     }
@@ -6173,11 +6173,11 @@ namespace cxx14
     test()
     {
       const auto lambda = [](auto&&... args){
-        const auto istiny = [](auto x){
-          return (sizeof(x) == 1UL) ? 1 : 0;
-        };
-        const int aretiny[] = { istiny(args)... };
-        return aretiny[0];
+	const auto istiny = [](auto x){
+	  return (sizeof(x) == 1UL) ? 1 : 0;
+	};
+	const int aretiny[] = { istiny(args)... };
+	return aretiny[0];
       };
       return lambda(1, 1L, 1.0f, '1');
     }
@@ -6201,7 +6201,7 @@ namespace cxx14
     {
       auto length = 0UL;
       for (auto p = s; *p; ++p)
-        ++length;
+	++length;
       return length;
     }
 
@@ -6358,10 +6358,10 @@ namespace cxx17
       switch (f1())
       {
       case 17:
-        f1();
-        [[fallthrough]];
+	f1();
+	[[fallthrough]];
       case 42:
-        f1();
+	f1();
       }
       return f1();
     }
@@ -6379,14 +6379,14 @@ namespace cxx17
     struct base2
     {
       base2() {
-        b3 = 42;
+	b3 = 42;
       }
       int b3;
     };
 
     struct derived : base1, base2
     {
-        int d;
+	int d;
     };
 
     derived d1 {{1, 2}, {}, 4};  // full initialization
@@ -6403,18 +6403,18 @@ namespace cxx17
 
       int& operator* ()
       {
-        return i;
+	return i;
       }
 
       const int& operator* () const
       {
-        return i;
+	return i;
       }
 
       iter& operator++()
       {
-        ++i;
-        return *this;
+	++i;
+	return *this;
       }
     };
 
@@ -6437,12 +6437,12 @@ namespace cxx17
     {
       iter begin() const
       {
-        return {0};
+	return {0};
       }
 
       sentinel end() const
       {
-        return {5};
+	return {5};
       }
     };
 
@@ -6452,7 +6452,7 @@ namespace cxx17
 
       for (auto i : r)
       {
-        [[maybe_unused]] auto v = i;
+	[[maybe_unused]] auto v = i;
       }
     }
 
@@ -6466,10 +6466,10 @@ namespace cxx17
       int i;
       int foo()
       {
-        return [*this]()
-        {
-          return i;
-        }();
+	return [*this]()
+	{
+	  return i;
+	}();
       }
     };
 
@@ -6493,11 +6493,11 @@ namespace cxx17
     {
       if constexpr(cond)
       {
-        return 13;
+	return 13;
       }
       else
       {
-        return 42;
+	return 42;
       }
     }
 
@@ -6515,16 +6515,16 @@ namespace cxx17
     {
       if (auto i = f(); i > 0)
       {
-        return 3;
+	return 3;
       }
 
       switch (auto i = f(); i + 4)
       {
       case 17:
-        return 2;
+	return 2;
 
       default:
-        return 1;
+	return 1;
       }
     }
 
@@ -6537,8 +6537,8 @@ namespace cxx17
     struct pair
     {
       pair (T1 p1, T2 p2)
-        : m1 {p1},
-          m2 {p2}
+	: m1 {p1},
+	  m2 {p2}
       {}
 
       T1 m1;
@@ -6654,19 +6654,19 @@ else
   eval $cachevar=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-         CXX="$ac_save_CXX"
+	 CXX="$ac_save_CXX"
 fi
 eval ac_res=\$$cachevar
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
       if eval test x\$$cachevar = xyes; then
-        CXX_DIALECT="$switch"
-        CXX="$CXX $switch"
-        if test -n "$CXXCPP" ; then
-          CXXCPP="$CXXCPP $switch"
-        fi
-        ac_success=yes
-        break
+	CXX_DIALECT="$switch"
+	CXX="$CXX $switch"
+	if test -n "$CXXCPP" ; then
+	  CXXCPP="$CXXCPP $switch"
+	fi
+	ac_success=yes
+	break
       fi
     done
   fi
@@ -6674,20 +6674,20 @@ $as_echo "$ac_res" >&6; }
     if test x$ac_success = xno; then
                     for alternative in ${ax_cxx_compile_alternatives}; do
       for switch in -std=c++${alternative} +std=c++${alternative} "-h std=c++${alternative}" MSVC; do
-        if test x"$switch" = xMSVC; then
-                                        switch=-std:c++${alternative}
-          cachevar=`$as_echo "ax_cv_cxx_compile_cxx17_${switch}_MSVC" | $as_tr_sh`
-        else
-          cachevar=`$as_echo "ax_cv_cxx_compile_cxx17_$switch" | $as_tr_sh`
-        fi
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CXX supports C++17 features with $switch" >&5
+	if test x"$switch" = xMSVC; then
+	  	  	  	  switch=-std:c++${alternative}
+	  cachevar=`$as_echo "ax_cv_cxx_compile_cxx17_${switch}_MSVC" | $as_tr_sh`
+	else
+	  cachevar=`$as_echo "ax_cv_cxx_compile_cxx17_$switch" | $as_tr_sh`
+	fi
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CXX supports C++17 features with $switch" >&5
 $as_echo_n "checking whether $CXX supports C++17 features with $switch... " >&6; }
 if eval \${$cachevar+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_save_CXX="$CXX"
-           CXX="$CXX $switch"
-           cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+	   CXX="$CXX $switch"
+	   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 
@@ -6901,10 +6901,10 @@ namespace cxx11
       auto c = [=](){ return a + b; }();
       auto d = [&](){ return c; }();
       auto e = [a, &b](int x) mutable {
-        const auto identity = [](int y){ return y; };
-        for (auto i = 0; i < a; ++i)
-          a += b--;
-        return x + identity(a + b);
+	const auto identity = [](int y){ return y; };
+	for (auto i = 0; i < a; ++i)
+	  a += b--;
+	return x + identity(a + b);
       }(0);
       return a + b + c + d + e;
     }
@@ -6918,7 +6918,7 @@ namespace cxx11
       using unary_t = decltype(unary);
       const auto higher1st = [](nullary_t f){ return f(); };
       const auto higher2nd = [unary](nullary_t f1){
-        return [unary, f1](unary_t f2){ return f2(unary(f1())); };
+	return [unary, f1](unary_t f2){ return f2(unary(f1())); };
       };
       return higher1st(nullary) + higher2nd(nullary)(unary);
     }
@@ -7005,11 +7005,11 @@ namespace cxx14
     test()
     {
       const auto lambda = [](auto&&... args){
-        const auto istiny = [](auto x){
-          return (sizeof(x) == 1UL) ? 1 : 0;
-        };
-        const int aretiny[] = { istiny(args)... };
-        return aretiny[0];
+	const auto istiny = [](auto x){
+	  return (sizeof(x) == 1UL) ? 1 : 0;
+	};
+	const int aretiny[] = { istiny(args)... };
+	return aretiny[0];
       };
       return lambda(1, 1L, 1.0f, '1');
     }
@@ -7033,7 +7033,7 @@ namespace cxx14
     {
       auto length = 0UL;
       for (auto p = s; *p; ++p)
-        ++length;
+	++length;
       return length;
     }
 
@@ -7190,10 +7190,10 @@ namespace cxx17
       switch (f1())
       {
       case 17:
-        f1();
-        [[fallthrough]];
+	f1();
+	[[fallthrough]];
       case 42:
-        f1();
+	f1();
       }
       return f1();
     }
@@ -7211,14 +7211,14 @@ namespace cxx17
     struct base2
     {
       base2() {
-        b3 = 42;
+	b3 = 42;
       }
       int b3;
     };
 
     struct derived : base1, base2
     {
-        int d;
+	int d;
     };
 
     derived d1 {{1, 2}, {}, 4};  // full initialization
@@ -7235,18 +7235,18 @@ namespace cxx17
 
       int& operator* ()
       {
-        return i;
+	return i;
       }
 
       const int& operator* () const
       {
-        return i;
+	return i;
       }
 
       iter& operator++()
       {
-        ++i;
-        return *this;
+	++i;
+	return *this;
       }
     };
 
@@ -7269,12 +7269,12 @@ namespace cxx17
     {
       iter begin() const
       {
-        return {0};
+	return {0};
       }
 
       sentinel end() const
       {
-        return {5};
+	return {5};
       }
     };
 
@@ -7284,7 +7284,7 @@ namespace cxx17
 
       for (auto i : r)
       {
-        [[maybe_unused]] auto v = i;
+	[[maybe_unused]] auto v = i;
       }
     }
 
@@ -7298,10 +7298,10 @@ namespace cxx17
       int i;
       int foo()
       {
-        return [*this]()
-        {
-          return i;
-        }();
+	return [*this]()
+	{
+	  return i;
+	}();
       }
     };
 
@@ -7325,11 +7325,11 @@ namespace cxx17
     {
       if constexpr(cond)
       {
-        return 13;
+	return 13;
       }
       else
       {
-        return 42;
+	return 42;
       }
     }
 
@@ -7347,16 +7347,16 @@ namespace cxx17
     {
       if (auto i = f(); i > 0)
       {
-        return 3;
+	return 3;
       }
 
       switch (auto i = f(); i + 4)
       {
       case 17:
-        return 2;
+	return 2;
 
       default:
-        return 1;
+	return 1;
       }
     }
 
@@ -7369,8 +7369,8 @@ namespace cxx17
     struct pair
     {
       pair (T1 p1, T2 p2)
-        : m1 {p1},
-          m2 {p2}
+	: m1 {p1},
+	  m2 {p2}
       {}
 
       T1 m1;
@@ -7486,23 +7486,23 @@ else
   eval $cachevar=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-           CXX="$ac_save_CXX"
+	   CXX="$ac_save_CXX"
 fi
 eval ac_res=\$$cachevar
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
-        if eval test x\$$cachevar = xyes; then
-          CXX_DIALECT="$switch"
-          CXX="$CXX $switch"
-          if test -n "$CXXCPP" ; then
-            CXXCPP="$CXXCPP $switch"
-          fi
-          ac_success=yes
-          break
-        fi
+	if eval test x\$$cachevar = xyes; then
+	  CXX_DIALECT="$switch"
+	  CXX="$CXX $switch"
+	  if test -n "$CXXCPP" ; then
+	    CXXCPP="$CXXCPP $switch"
+	  fi
+	  ac_success=yes
+	  break
+	fi
       done
       if test x$ac_success = xyes; then
-        break
+	break
       fi
     done
   fi
@@ -9433,8 +9433,8 @@ int
 main ()
 {
 sigjmp_buf env;
-           while (! sigsetjmp (env, 1))
-             siglongjmp (env, 1);
+	   while (! sigsetjmp (env, 1))
+	     siglongjmp (env, 1);
 
   ;
   return 0;
@@ -13382,9 +13382,9 @@ int
 main ()
 {
 
-                          #if !defined __GNUC__ || defined __clang__
-                          #error not gcc
-                          #endif
+			  #if !defined __GNUC__ || defined __clang__
+			  #error not gcc
+			  #endif
 
   ;
   return 0;
@@ -13404,9 +13404,9 @@ int
 main ()
 {
 
-                          #ifndef __clang__
-                          #error not clang
-                          #endif
+			  #ifndef __clang__
+			  #error not clang
+			  #endif
 
   ;
   return 0;
@@ -13509,9 +13509,9 @@ if test "${enable_build_warnings+set}" = set; then :
   yes)	;;
   no)	build_warnings="-w";;
   ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${build_warnings} ${t}";;
+	build_warnings="${build_warnings} ${t}";;
   *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${t} ${build_warnings}";;
+	build_warnings="${t} ${build_warnings}";;
   *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac
 if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
@@ -13524,9 +13524,9 @@ if test "${enable_gdb_build_warnings+set}" = set; then :
   yes)	;;
   no)	build_warnings="-w";;
   ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${build_warnings} ${t}";;
+	build_warnings="${build_warnings} ${t}";;
   *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${t} ${build_warnings}";;
+	build_warnings="${t} ${build_warnings}";;
   *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac
 if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
@@ -13556,7 +13556,7 @@ $as_echo_n "checking compiler warning flags... " >&6; }
 	case $w in
 	-Wno-*)
 		wtest=`echo $w | sed 's/-Wno-/-W/g'` ;;
-        -Wformat-nonliteral)
+	-Wformat-nonliteral)
 		# gcc requires -Wformat before -Wformat-nonliteral
 		# will work, so stick them together.
 		w="-Wformat $w"
@@ -13971,8 +13971,8 @@ if ${gdb_cv_i386_is_x86_64+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   save_CPPFLAGS="$CPPFLAGS"
-                    CPPFLAGS="$CPPFLAGS $CFLAGS"
-                    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+		    CPPFLAGS="$CPPFLAGS $CFLAGS"
+		    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 #if __x86_64__
@@ -13988,7 +13988,7 @@ else
 fi
 rm -f conftest*
 
-                    CPPFLAGS="$save_CPPFLAGS"
+		    CPPFLAGS="$save_CPPFLAGS"
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_i386_is_x86_64" >&5
 $as_echo "$gdb_cv_i386_is_x86_64" >&6; }
@@ -14031,8 +14031,8 @@ if ${gdb_cv_m68k_is_coldfire+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   save_CPPFLAGS="$CPPFLAGS"
-                    CPPFLAGS="$CPPFLAGS $CFLAGS"
-                    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+		    CPPFLAGS="$CPPFLAGS $CFLAGS"
+		    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 #ifdef __mcoldfire__
@@ -14048,7 +14048,7 @@ else
 fi
 rm -f conftest*
 
-                    CPPFLAGS="$save_CPPFLAGS"
+		    CPPFLAGS="$save_CPPFLAGS"
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_m68k_is_coldfire" >&5
 $as_echo "$gdb_cv_m68k_is_coldfire" >&6; }

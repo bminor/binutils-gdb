@@ -59,18 +59,18 @@ dnl  (serial version number 13).
 
 AC_DEFUN([AX_CXX_COMPILE_STDCXX], [dnl
   m4_if([$1], [11], [ax_cxx_compile_alternatives="11 0x"],
-        [$1], [14], [ax_cxx_compile_alternatives="14 1y"],
-        [$1], [17], [ax_cxx_compile_alternatives="17 1z"],
-        [$1], [20], [ax_cxx_compile_alternatives="20"],
-        [m4_fatal([invalid first argument `$1' to AX_CXX_COMPILE_STDCXX])])dnl
+	[$1], [14], [ax_cxx_compile_alternatives="14 1y"],
+	[$1], [17], [ax_cxx_compile_alternatives="17 1z"],
+	[$1], [20], [ax_cxx_compile_alternatives="20"],
+	[m4_fatal([invalid first argument `$1' to AX_CXX_COMPILE_STDCXX])])dnl
   m4_if([$2], [], [],
-        [$2], [ext], [],
-        [$2], [noext], [],
-        [m4_fatal([invalid second argument `$2' to AX_CXX_COMPILE_STDCXX])])dnl
+	[$2], [ext], [],
+	[$2], [noext], [],
+	[m4_fatal([invalid second argument `$2' to AX_CXX_COMPILE_STDCXX])])dnl
   m4_if([$3], [], [ax_cxx_compile_cxx$1_required=true],
-        [$3], [mandatory], [ax_cxx_compile_cxx$1_required=true],
-        [$3], [optional], [ax_cxx_compile_cxx$1_required=false],
-        [m4_fatal([invalid third argument `$3' to AX_CXX_COMPILE_STDCXX])])
+	[$3], [mandatory], [ax_cxx_compile_cxx$1_required=true],
+	[$3], [optional], [ax_cxx_compile_cxx$1_required=false],
+	[m4_fatal([invalid third argument `$3' to AX_CXX_COMPILE_STDCXX])])
   AC_LANG_PUSH([C++])dnl
   CXX_DIALECT=""
   ac_success=no
@@ -79,8 +79,8 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX], [dnl
     AC_CACHE_CHECK(whether $CXX supports C++$1 features by default,
 		   ax_cv_cxx_compile_cxx$1,
       [AC_COMPILE_IFELSE([AC_LANG_SOURCE([_AX_CXX_COMPILE_STDCXX_testbody_$1])],
-        [ax_cv_cxx_compile_cxx$1=yes],
-        [ax_cv_cxx_compile_cxx$1=no])])
+	[ax_cv_cxx_compile_cxx$1=yes],
+	[ax_cv_cxx_compile_cxx$1=no])])
     if test x$ax_cv_cxx_compile_cxx$1 = xyes; then
       ac_success=yes
     fi])
@@ -91,21 +91,21 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX], [dnl
       switch="-std=gnu++${alternative}"
       cachevar=AS_TR_SH([ax_cv_cxx_compile_cxx$1_$switch])
       AC_CACHE_CHECK(whether $CXX supports C++$1 features with $switch,
-                     $cachevar,
-        [ac_save_CXX="$CXX"
-         CXX="$CXX $switch"
-         AC_COMPILE_IFELSE([AC_LANG_SOURCE([_AX_CXX_COMPILE_STDCXX_testbody_$1])],
-          [eval $cachevar=yes],
-          [eval $cachevar=no])
-         CXX="$ac_save_CXX"])
+		     $cachevar,
+	[ac_save_CXX="$CXX"
+	 CXX="$CXX $switch"
+	 AC_COMPILE_IFELSE([AC_LANG_SOURCE([_AX_CXX_COMPILE_STDCXX_testbody_$1])],
+	  [eval $cachevar=yes],
+	  [eval $cachevar=no])
+	 CXX="$ac_save_CXX"])
       if eval test x\$$cachevar = xyes; then
-        CXX_DIALECT="$switch"
-        CXX="$CXX $switch"
-        if test -n "$CXXCPP" ; then
-          CXXCPP="$CXXCPP $switch"
-        fi
-        ac_success=yes
-        break
+	CXX_DIALECT="$switch"
+	CXX="$CXX $switch"
+	if test -n "$CXXCPP" ; then
+	  CXXCPP="$CXXCPP $switch"
+	fi
+	ac_success=yes
+	break
       fi
     done
   fi])
@@ -118,35 +118,35 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX], [dnl
     dnl MSVC needs -std:c++NN for C++17 and later (default is C++14)
     for alternative in ${ax_cxx_compile_alternatives}; do
       for switch in -std=c++${alternative} +std=c++${alternative} "-h std=c++${alternative}" MSVC; do
-        if test x"$switch" = xMSVC; then
-          dnl AS_TR_SH maps both `:` and `=` to `_` so -std:c++17 would collide
-          dnl with -std=c++17.  We suffix the cache variable name with _MSVC to
-          dnl avoid this.
-          switch=-std:c++${alternative}
-          cachevar=AS_TR_SH([ax_cv_cxx_compile_cxx$1_${switch}_MSVC])
-        else
-          cachevar=AS_TR_SH([ax_cv_cxx_compile_cxx$1_$switch])
-        fi
-        AC_CACHE_CHECK(whether $CXX supports C++$1 features with $switch,
-                       $cachevar,
-          [ac_save_CXX="$CXX"
-           CXX="$CXX $switch"
-           AC_COMPILE_IFELSE([AC_LANG_SOURCE([_AX_CXX_COMPILE_STDCXX_testbody_$1])],
-            [eval $cachevar=yes],
-            [eval $cachevar=no])
-           CXX="$ac_save_CXX"])
-        if eval test x\$$cachevar = xyes; then
-          CXX_DIALECT="$switch"
-          CXX="$CXX $switch"
-          if test -n "$CXXCPP" ; then
-            CXXCPP="$CXXCPP $switch"
-          fi
-          ac_success=yes
-          break
-        fi
+	if test x"$switch" = xMSVC; then
+	  dnl AS_TR_SH maps both `:` and `=` to `_` so -std:c++17 would collide
+	  dnl with -std=c++17.  We suffix the cache variable name with _MSVC to
+	  dnl avoid this.
+	  switch=-std:c++${alternative}
+	  cachevar=AS_TR_SH([ax_cv_cxx_compile_cxx$1_${switch}_MSVC])
+	else
+	  cachevar=AS_TR_SH([ax_cv_cxx_compile_cxx$1_$switch])
+	fi
+	AC_CACHE_CHECK(whether $CXX supports C++$1 features with $switch,
+		       $cachevar,
+	  [ac_save_CXX="$CXX"
+	   CXX="$CXX $switch"
+	   AC_COMPILE_IFELSE([AC_LANG_SOURCE([_AX_CXX_COMPILE_STDCXX_testbody_$1])],
+	    [eval $cachevar=yes],
+	    [eval $cachevar=no])
+	   CXX="$ac_save_CXX"])
+	if eval test x\$$cachevar = xyes; then
+	  CXX_DIALECT="$switch"
+	  CXX="$CXX $switch"
+	  if test -n "$CXXCPP" ; then
+	    CXXCPP="$CXXCPP $switch"
+	  fi
+	  ac_success=yes
+	  break
+	fi
       done
       if test x$ac_success = xyes; then
-        break
+	break
       fi
     done
   fi])
@@ -162,7 +162,7 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX], [dnl
   else
     HAVE_CXX$1=1
     AC_DEFINE(HAVE_CXX$1,1,
-              [define if the compiler supports basic C++$1 syntax])
+	      [define if the compiler supports basic C++$1 syntax])
   fi
   AC_SUBST(HAVE_CXX$1)
   AC_SUBST(CXX_DIALECT)
@@ -414,10 +414,10 @@ namespace cxx11
       auto c = [=](){ return a + b; }();
       auto d = [&](){ return c; }();
       auto e = [a, &b](int x) mutable {
-        const auto identity = [](int y){ return y; };
-        for (auto i = 0; i < a; ++i)
-          a += b--;
-        return x + identity(a + b);
+	const auto identity = [](int y){ return y; };
+	for (auto i = 0; i < a; ++i)
+	  a += b--;
+	return x + identity(a + b);
       }(0);
       return a + b + c + d + e;
     }
@@ -431,7 +431,7 @@ namespace cxx11
       using unary_t = decltype(unary);
       const auto higher1st = [](nullary_t f){ return f(); };
       const auto higher2nd = [unary](nullary_t f1){
-        return [unary, f1](unary_t f2){ return f2(unary(f1())); };
+	return [unary, f1](unary_t f2){ return f2(unary(f1())); };
       };
       return higher1st(nullary) + higher2nd(nullary)(unary);
     }
@@ -522,11 +522,11 @@ namespace cxx14
     test()
     {
       const auto lambda = [](auto&&... args){
-        const auto istiny = [](auto x){
-          return (sizeof(x) == 1UL) ? 1 : 0;
-        };
-        const int aretiny[] = { istiny(args)... };
-        return aretiny[0];
+	const auto istiny = [](auto x){
+	  return (sizeof(x) == 1UL) ? 1 : 0;
+	};
+	const int aretiny[] = { istiny(args)... };
+	return aretiny[0];
       };
       return lambda(1, 1L, 1.0f, '1');
     }
@@ -550,7 +550,7 @@ namespace cxx14
     {
       auto length = 0UL;
       for (auto p = s; *p; ++p)
-        ++length;
+	++length;
       return length;
     }
 
@@ -711,10 +711,10 @@ namespace cxx17
       switch (f1())
       {
       case 17:
-        f1();
-        [[fallthrough]];
+	f1();
+	[[fallthrough]];
       case 42:
-        f1();
+	f1();
       }
       return f1();
     }
@@ -732,14 +732,14 @@ namespace cxx17
     struct base2
     {
       base2() {
-        b3 = 42;
+	b3 = 42;
       }
       int b3;
     };
 
     struct derived : base1, base2
     {
-        int d;
+	int d;
     };
 
     derived d1 {{1, 2}, {}, 4};  // full initialization
@@ -756,18 +756,18 @@ namespace cxx17
 
       int& operator* ()
       {
-        return i;
+	return i;
       }
 
       const int& operator* () const
       {
-        return i;
+	return i;
       }
 
       iter& operator++()
       {
-        ++i;
-        return *this;
+	++i;
+	return *this;
       }
     };
 
@@ -790,12 +790,12 @@ namespace cxx17
     {
       iter begin() const
       {
-        return {0};
+	return {0};
       }
 
       sentinel end() const
       {
-        return {5};
+	return {5};
       }
     };
 
@@ -805,7 +805,7 @@ namespace cxx17
 
       for (auto i : r)
       {
-        [[maybe_unused]] auto v = i;
+	[[maybe_unused]] auto v = i;
       }
     }
 
@@ -819,10 +819,10 @@ namespace cxx17
       int i;
       int foo()
       {
-        return [*this]()
-        {
-          return i;
-        }();
+	return [*this]()
+	{
+	  return i;
+	}();
       }
     };
 
@@ -846,11 +846,11 @@ namespace cxx17
     {
       if constexpr(cond)
       {
-        return 13;
+	return 13;
       }
       else
       {
-        return 42;
+	return 42;
       }
     }
 
@@ -868,16 +868,16 @@ namespace cxx17
     {
       if (auto i = f(); i > 0)
       {
-        return 3;
+	return 3;
       }
 
       switch (auto i = f(); i + 4)
       {
       case 17:
-        return 2;
+	return 2;
 
       default:
-        return 1;
+	return 1;
       }
     }
 
@@ -890,8 +890,8 @@ namespace cxx17
     struct pair
     {
       pair (T1 p1, T2 p2)
-        : m1 {p1},
-          m2 {p2}
+	: m1 {p1},
+	  m2 {p2}
       {}
 
       T1 m1;

@@ -17128,10 +17128,10 @@ namespace cxx11
       auto c = [=](){ return a + b; }();
       auto d = [&](){ return c; }();
       auto e = [a, &b](int x) mutable {
-        const auto identity = [](int y){ return y; };
-        for (auto i = 0; i < a; ++i)
-          a += b--;
-        return x + identity(a + b);
+	const auto identity = [](int y){ return y; };
+	for (auto i = 0; i < a; ++i)
+	  a += b--;
+	return x + identity(a + b);
       }(0);
       return a + b + c + d + e;
     }
@@ -17145,7 +17145,7 @@ namespace cxx11
       using unary_t = decltype(unary);
       const auto higher1st = [](nullary_t f){ return f(); };
       const auto higher2nd = [unary](nullary_t f1){
-        return [unary, f1](unary_t f2){ return f2(unary(f1())); };
+	return [unary, f1](unary_t f2){ return f2(unary(f1())); };
       };
       return higher1st(nullary) + higher2nd(nullary)(unary);
     }
@@ -17232,11 +17232,11 @@ namespace cxx14
     test()
     {
       const auto lambda = [](auto&&... args){
-        const auto istiny = [](auto x){
-          return (sizeof(x) == 1UL) ? 1 : 0;
-        };
-        const int aretiny[] = { istiny(args)... };
-        return aretiny[0];
+	const auto istiny = [](auto x){
+	  return (sizeof(x) == 1UL) ? 1 : 0;
+	};
+	const int aretiny[] = { istiny(args)... };
+	return aretiny[0];
       };
       return lambda(1, 1L, 1.0f, '1');
     }
@@ -17260,7 +17260,7 @@ namespace cxx14
     {
       auto length = 0UL;
       for (auto p = s; *p; ++p)
-        ++length;
+	++length;
       return length;
     }
 
@@ -17417,10 +17417,10 @@ namespace cxx17
       switch (f1())
       {
       case 17:
-        f1();
-        [[fallthrough]];
+	f1();
+	[[fallthrough]];
       case 42:
-        f1();
+	f1();
       }
       return f1();
     }
@@ -17438,14 +17438,14 @@ namespace cxx17
     struct base2
     {
       base2() {
-        b3 = 42;
+	b3 = 42;
       }
       int b3;
     };
 
     struct derived : base1, base2
     {
-        int d;
+	int d;
     };
 
     derived d1 {{1, 2}, {}, 4};  // full initialization
@@ -17462,18 +17462,18 @@ namespace cxx17
 
       int& operator* ()
       {
-        return i;
+	return i;
       }
 
       const int& operator* () const
       {
-        return i;
+	return i;
       }
 
       iter& operator++()
       {
-        ++i;
-        return *this;
+	++i;
+	return *this;
       }
     };
 
@@ -17496,12 +17496,12 @@ namespace cxx17
     {
       iter begin() const
       {
-        return {0};
+	return {0};
       }
 
       sentinel end() const
       {
-        return {5};
+	return {5};
       }
     };
 
@@ -17511,7 +17511,7 @@ namespace cxx17
 
       for (auto i : r)
       {
-        [[maybe_unused]] auto v = i;
+	[[maybe_unused]] auto v = i;
       }
     }
 
@@ -17525,10 +17525,10 @@ namespace cxx17
       int i;
       int foo()
       {
-        return [*this]()
-        {
-          return i;
-        }();
+	return [*this]()
+	{
+	  return i;
+	}();
       }
     };
 
@@ -17552,11 +17552,11 @@ namespace cxx17
     {
       if constexpr(cond)
       {
-        return 13;
+	return 13;
       }
       else
       {
-        return 42;
+	return 42;
       }
     }
 
@@ -17574,16 +17574,16 @@ namespace cxx17
     {
       if (auto i = f(); i > 0)
       {
-        return 3;
+	return 3;
       }
 
       switch (auto i = f(); i + 4)
       {
       case 17:
-        return 2;
+	return 2;
 
       default:
-        return 1;
+	return 1;
       }
     }
 
@@ -17596,8 +17596,8 @@ namespace cxx17
     struct pair
     {
       pair (T1 p1, T2 p2)
-        : m1 {p1},
-          m2 {p2}
+	: m1 {p1},
+	  m2 {p2}
       {}
 
       T1 m1;
@@ -17730,8 +17730,8 @@ if eval \${$cachevar+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_save_CXX="$CXX"
-         CXX="$CXX $switch"
-         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+	 CXX="$CXX $switch"
+	 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 
@@ -17945,10 +17945,10 @@ namespace cxx11
       auto c = [=](){ return a + b; }();
       auto d = [&](){ return c; }();
       auto e = [a, &b](int x) mutable {
-        const auto identity = [](int y){ return y; };
-        for (auto i = 0; i < a; ++i)
-          a += b--;
-        return x + identity(a + b);
+	const auto identity = [](int y){ return y; };
+	for (auto i = 0; i < a; ++i)
+	  a += b--;
+	return x + identity(a + b);
       }(0);
       return a + b + c + d + e;
     }
@@ -17962,7 +17962,7 @@ namespace cxx11
       using unary_t = decltype(unary);
       const auto higher1st = [](nullary_t f){ return f(); };
       const auto higher2nd = [unary](nullary_t f1){
-        return [unary, f1](unary_t f2){ return f2(unary(f1())); };
+	return [unary, f1](unary_t f2){ return f2(unary(f1())); };
       };
       return higher1st(nullary) + higher2nd(nullary)(unary);
     }
@@ -18049,11 +18049,11 @@ namespace cxx14
     test()
     {
       const auto lambda = [](auto&&... args){
-        const auto istiny = [](auto x){
-          return (sizeof(x) == 1UL) ? 1 : 0;
-        };
-        const int aretiny[] = { istiny(args)... };
-        return aretiny[0];
+	const auto istiny = [](auto x){
+	  return (sizeof(x) == 1UL) ? 1 : 0;
+	};
+	const int aretiny[] = { istiny(args)... };
+	return aretiny[0];
       };
       return lambda(1, 1L, 1.0f, '1');
     }
@@ -18077,7 +18077,7 @@ namespace cxx14
     {
       auto length = 0UL;
       for (auto p = s; *p; ++p)
-        ++length;
+	++length;
       return length;
     }
 
@@ -18234,10 +18234,10 @@ namespace cxx17
       switch (f1())
       {
       case 17:
-        f1();
-        [[fallthrough]];
+	f1();
+	[[fallthrough]];
       case 42:
-        f1();
+	f1();
       }
       return f1();
     }
@@ -18255,14 +18255,14 @@ namespace cxx17
     struct base2
     {
       base2() {
-        b3 = 42;
+	b3 = 42;
       }
       int b3;
     };
 
     struct derived : base1, base2
     {
-        int d;
+	int d;
     };
 
     derived d1 {{1, 2}, {}, 4};  // full initialization
@@ -18279,18 +18279,18 @@ namespace cxx17
 
       int& operator* ()
       {
-        return i;
+	return i;
       }
 
       const int& operator* () const
       {
-        return i;
+	return i;
       }
 
       iter& operator++()
       {
-        ++i;
-        return *this;
+	++i;
+	return *this;
       }
     };
 
@@ -18313,12 +18313,12 @@ namespace cxx17
     {
       iter begin() const
       {
-        return {0};
+	return {0};
       }
 
       sentinel end() const
       {
-        return {5};
+	return {5};
       }
     };
 
@@ -18328,7 +18328,7 @@ namespace cxx17
 
       for (auto i : r)
       {
-        [[maybe_unused]] auto v = i;
+	[[maybe_unused]] auto v = i;
       }
     }
 
@@ -18342,10 +18342,10 @@ namespace cxx17
       int i;
       int foo()
       {
-        return [*this]()
-        {
-          return i;
-        }();
+	return [*this]()
+	{
+	  return i;
+	}();
       }
     };
 
@@ -18369,11 +18369,11 @@ namespace cxx17
     {
       if constexpr(cond)
       {
-        return 13;
+	return 13;
       }
       else
       {
-        return 42;
+	return 42;
       }
     }
 
@@ -18391,16 +18391,16 @@ namespace cxx17
     {
       if (auto i = f(); i > 0)
       {
-        return 3;
+	return 3;
       }
 
       switch (auto i = f(); i + 4)
       {
       case 17:
-        return 2;
+	return 2;
 
       default:
-        return 1;
+	return 1;
       }
     }
 
@@ -18413,8 +18413,8 @@ namespace cxx17
     struct pair
     {
       pair (T1 p1, T2 p2)
-        : m1 {p1},
-          m2 {p2}
+	: m1 {p1},
+	  m2 {p2}
       {}
 
       T1 m1;
@@ -18530,19 +18530,19 @@ else
   eval $cachevar=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-         CXX="$ac_save_CXX"
+	 CXX="$ac_save_CXX"
 fi
 eval ac_res=\$$cachevar
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
       if eval test x\$$cachevar = xyes; then
-        CXX_DIALECT="$switch"
-        CXX="$CXX $switch"
-        if test -n "$CXXCPP" ; then
-          CXXCPP="$CXXCPP $switch"
-        fi
-        ac_success=yes
-        break
+	CXX_DIALECT="$switch"
+	CXX="$CXX $switch"
+	if test -n "$CXXCPP" ; then
+	  CXXCPP="$CXXCPP $switch"
+	fi
+	ac_success=yes
+	break
       fi
     done
   fi
@@ -18550,20 +18550,20 @@ $as_echo "$ac_res" >&6; }
     if test x$ac_success = xno; then
                     for alternative in ${ax_cxx_compile_alternatives}; do
       for switch in -std=c++${alternative} +std=c++${alternative} "-h std=c++${alternative}" MSVC; do
-        if test x"$switch" = xMSVC; then
-                                        switch=-std:c++${alternative}
-          cachevar=`$as_echo "ax_cv_cxx_compile_cxx17_${switch}_MSVC" | $as_tr_sh`
-        else
-          cachevar=`$as_echo "ax_cv_cxx_compile_cxx17_$switch" | $as_tr_sh`
-        fi
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CXX supports C++17 features with $switch" >&5
+	if test x"$switch" = xMSVC; then
+	  	  	  	  switch=-std:c++${alternative}
+	  cachevar=`$as_echo "ax_cv_cxx_compile_cxx17_${switch}_MSVC" | $as_tr_sh`
+	else
+	  cachevar=`$as_echo "ax_cv_cxx_compile_cxx17_$switch" | $as_tr_sh`
+	fi
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CXX supports C++17 features with $switch" >&5
 $as_echo_n "checking whether $CXX supports C++17 features with $switch... " >&6; }
 if eval \${$cachevar+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_save_CXX="$CXX"
-           CXX="$CXX $switch"
-           cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+	   CXX="$CXX $switch"
+	   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 
@@ -18777,10 +18777,10 @@ namespace cxx11
       auto c = [=](){ return a + b; }();
       auto d = [&](){ return c; }();
       auto e = [a, &b](int x) mutable {
-        const auto identity = [](int y){ return y; };
-        for (auto i = 0; i < a; ++i)
-          a += b--;
-        return x + identity(a + b);
+	const auto identity = [](int y){ return y; };
+	for (auto i = 0; i < a; ++i)
+	  a += b--;
+	return x + identity(a + b);
       }(0);
       return a + b + c + d + e;
     }
@@ -18794,7 +18794,7 @@ namespace cxx11
       using unary_t = decltype(unary);
       const auto higher1st = [](nullary_t f){ return f(); };
       const auto higher2nd = [unary](nullary_t f1){
-        return [unary, f1](unary_t f2){ return f2(unary(f1())); };
+	return [unary, f1](unary_t f2){ return f2(unary(f1())); };
       };
       return higher1st(nullary) + higher2nd(nullary)(unary);
     }
@@ -18881,11 +18881,11 @@ namespace cxx14
     test()
     {
       const auto lambda = [](auto&&... args){
-        const auto istiny = [](auto x){
-          return (sizeof(x) == 1UL) ? 1 : 0;
-        };
-        const int aretiny[] = { istiny(args)... };
-        return aretiny[0];
+	const auto istiny = [](auto x){
+	  return (sizeof(x) == 1UL) ? 1 : 0;
+	};
+	const int aretiny[] = { istiny(args)... };
+	return aretiny[0];
       };
       return lambda(1, 1L, 1.0f, '1');
     }
@@ -18909,7 +18909,7 @@ namespace cxx14
     {
       auto length = 0UL;
       for (auto p = s; *p; ++p)
-        ++length;
+	++length;
       return length;
     }
 
@@ -19066,10 +19066,10 @@ namespace cxx17
       switch (f1())
       {
       case 17:
-        f1();
-        [[fallthrough]];
+	f1();
+	[[fallthrough]];
       case 42:
-        f1();
+	f1();
       }
       return f1();
     }
@@ -19087,14 +19087,14 @@ namespace cxx17
     struct base2
     {
       base2() {
-        b3 = 42;
+	b3 = 42;
       }
       int b3;
     };
 
     struct derived : base1, base2
     {
-        int d;
+	int d;
     };
 
     derived d1 {{1, 2}, {}, 4};  // full initialization
@@ -19111,18 +19111,18 @@ namespace cxx17
 
       int& operator* ()
       {
-        return i;
+	return i;
       }
 
       const int& operator* () const
       {
-        return i;
+	return i;
       }
 
       iter& operator++()
       {
-        ++i;
-        return *this;
+	++i;
+	return *this;
       }
     };
 
@@ -19145,12 +19145,12 @@ namespace cxx17
     {
       iter begin() const
       {
-        return {0};
+	return {0};
       }
 
       sentinel end() const
       {
-        return {5};
+	return {5};
       }
     };
 
@@ -19160,7 +19160,7 @@ namespace cxx17
 
       for (auto i : r)
       {
-        [[maybe_unused]] auto v = i;
+	[[maybe_unused]] auto v = i;
       }
     }
 
@@ -19174,10 +19174,10 @@ namespace cxx17
       int i;
       int foo()
       {
-        return [*this]()
-        {
-          return i;
-        }();
+	return [*this]()
+	{
+	  return i;
+	}();
       }
     };
 
@@ -19201,11 +19201,11 @@ namespace cxx17
     {
       if constexpr(cond)
       {
-        return 13;
+	return 13;
       }
       else
       {
-        return 42;
+	return 42;
       }
     }
 
@@ -19223,16 +19223,16 @@ namespace cxx17
     {
       if (auto i = f(); i > 0)
       {
-        return 3;
+	return 3;
       }
 
       switch (auto i = f(); i + 4)
       {
       case 17:
-        return 2;
+	return 2;
 
       default:
-        return 1;
+	return 1;
       }
     }
 
@@ -19245,8 +19245,8 @@ namespace cxx17
     struct pair
     {
       pair (T1 p1, T2 p2)
-        : m1 {p1},
-          m2 {p2}
+	: m1 {p1},
+	  m2 {p2}
       {}
 
       T1 m1;
@@ -19362,23 +19362,23 @@ else
   eval $cachevar=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-           CXX="$ac_save_CXX"
+	   CXX="$ac_save_CXX"
 fi
 eval ac_res=\$$cachevar
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
-        if eval test x\$$cachevar = xyes; then
-          CXX_DIALECT="$switch"
-          CXX="$CXX $switch"
-          if test -n "$CXXCPP" ; then
-            CXXCPP="$CXXCPP $switch"
-          fi
-          ac_success=yes
-          break
-        fi
+	if eval test x\$$cachevar = xyes; then
+	  CXX_DIALECT="$switch"
+	  CXX="$CXX $switch"
+	  if test -n "$CXXCPP" ; then
+	    CXXCPP="$CXXCPP $switch"
+	  fi
+	  ac_success=yes
+	  break
+	fi
       done
       if test x$ac_success = xyes; then
-        break
+	break
       fi
     done
   fi
@@ -21240,8 +21240,8 @@ int
 main ()
 {
 sigjmp_buf env;
-           while (! sigsetjmp (env, 1))
-             siglongjmp (env, 1);
+	   while (! sigsetjmp (env, 1))
+	     siglongjmp (env, 1);
 
   ;
   return 0;
@@ -24958,7 +24958,7 @@ _ACEOF
 
   if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
      if test "x$prefix" = xNONE; then
-     	test_prefix=/usr/local
+	test_prefix=/usr/local
      else
 	test_prefix=$prefix
      fi
@@ -25036,7 +25036,7 @@ _ACEOF
 
   if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
      if test "x$prefix" = xNONE; then
-     	test_prefix=/usr/local
+	test_prefix=/usr/local
      else
 	test_prefix=$prefix
      fi
@@ -25139,7 +25139,7 @@ subdirs="$subdirs testsuite"
 if test "${enable_targets+set}" = set; then :
   enableval=$enable_targets; case "${enableval}" in
   yes | "") as_fn_error $? "enable-targets option must specify target names or 'all'" "$LINENO" 5
-            ;;
+	    ;;
   no)       enable_targets= ;;
   *)
 	enable_targets=$enableval
@@ -25157,7 +25157,7 @@ fi
 if test "${enable_binary_file_formats+set}" = set; then :
   enableval=$enable_binary_file_formats; case "${enableval}" in
  yes | "") as_fn_error $? "enable-binary-file-formats option must specify file formats or 'all'" "$LINENO" 5
-            ;;
+	    ;;
   no)       enable_binary_file_formats= ;;
   *)        enable_binary_file_formats=$enableval ;;
 esac
@@ -25288,9 +25288,9 @@ do
     # Canonicalize the secondary target names.
     result=`$ac_config_sub $targ_alias 2>/dev/null`
     if test -n "$result"; then
-        targ=$result
+	targ=$result
     else
-        targ=$targ_alias
+	targ=$targ_alias
     fi
 
     . ${srcdir}/configure.tgt
@@ -25301,12 +25301,12 @@ fi
 
     # Target-specific object files
     for i in ${gdb_target_obs}; do
-        case " $TARGET_OBS " in
-        *" ${i} "*) ;;
-        *)
-          TARGET_OBS="$TARGET_OBS ${i}"
-          ;;
-        esac
+	case " $TARGET_OBS " in
+	*" ${i} "*) ;;
+	*)
+	  TARGET_OBS="$TARGET_OBS ${i}"
+	  ;;
+	esac
     done
 
     # Check whether this target needs 64-bit CORE_ADDR
@@ -27264,7 +27264,7 @@ _ACEOF
 
   if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
      if test "x$prefix" = xNONE; then
-     	test_prefix=/usr/local
+	test_prefix=/usr/local
      else
 	test_prefix=$prefix
      fi
@@ -27738,7 +27738,7 @@ _ACEOF
 
   if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
      if test "x$prefix" = xNONE; then
-     	test_prefix=/usr/local
+	test_prefix=/usr/local
      else
 	test_prefix=$prefix
      fi
@@ -28319,13 +28319,13 @@ else
       # ${with_python}.  On Windows/MinGW, this is where the Python
       # executable is.
       if test ! -x "${python_prog}"; then
-        python_prog="${with_python}/python"
-        python_prefix=
+	python_prog="${with_python}/python"
+	python_prefix=
       fi
       if test ! -x "${python_prog}"; then
-        # Fall back to gdb 7.0/7.1 behavior.
-        python_prog=missing
-        python_prefix=${with_python}
+	# Fall back to gdb 7.0/7.1 behavior.
+	python_prog=missing
+	python_prefix=${with_python}
       fi
     elif test -x "${with_python}"; then
       # While we can't run python compiled for $host (unless host == build),
@@ -28348,8 +28348,8 @@ else
     case "${with_python}" in
     yes | auto)
       if test "${build}" = "${host}"; then
-        # Look first for 'python', then 'python3'.
-        for ac_prog in python python3
+	# Look first for 'python', then 'python3'.
+	for ac_prog in python python3
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -28395,15 +28395,15 @@ fi
 done
 test -n "$python_prog_path" || python_prog_path="missing"
 
-        if test "${python_prog_path}" = missing; then
-          python_prog=missing
-        else
-          python_prog=${python_prog_path}
-        fi
+	if test "${python_prog_path}" = missing; then
+	  python_prog=missing
+	else
+	  python_prog=${python_prog_path}
+	fi
       else
-        # Not much we can do except assume the cross-compiler will find the
-        # right files.
-        python_prog=missing
+	# Not much we can do except assume the cross-compiler will find the
+	# right files.
+	python_prog=missing
       fi
       ;;
     *)
@@ -28530,9 +28530,9 @@ main ()
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   have_libpython=yes
-                  found_usable_python=yes
-                  PYTHON_CPPFLAGS=$new_CPPFLAGS
-                  PYTHON_LIBS=$new_LIBS
+		  found_usable_python=yes
+		  PYTHON_CPPFLAGS=$new_CPPFLAGS
+		  PYTHON_LIBS=$new_LIBS
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
@@ -28566,7 +28566,7 @@ _ACEOF
 
   if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
      if test "x$prefix" = xNONE; then
-     	test_prefix=/usr/local
+	test_prefix=/usr/local
      else
 	test_prefix=$prefix
      fi
@@ -28624,7 +28624,7 @@ _ACEOF
 
   if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
      if test "x$prefix" = xNONE; then
-     	test_prefix=/usr/local
+	test_prefix=/usr/local
      else
 	test_prefix=$prefix
      fi
@@ -28697,10 +28697,10 @@ $as_echo "${PYTHON_CFLAGS}" >&6; }
 
   case "$gdb_host" in
     mingw64)
-           if test "${GCC}" = yes; then
-             CPPFLAGS="$CPPFLAGS -DMS_WIN64"
-           fi
-           ;;
+	   if test "${GCC}" = yes; then
+	     CPPFLAGS="$CPPFLAGS -DMS_WIN64"
+	   fi
+	   ;;
   esac
 else
   # Even if Python support is not compiled in, we need to have this file
@@ -28879,8 +28879,8 @@ scm_init_guile ();
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   have_libguile=yes
-                    GUILE_CPPFLAGS=$new_CPPFLAGS
-                    GUILE_LIBS=$new_LIBS
+		    GUILE_CPPFLAGS=$new_CPPFLAGS
+		    GUILE_LIBS=$new_LIBS
 else
   found_usable_guile=no
 fi
@@ -28898,7 +28898,7 @@ fi
     LIBS=$save_LIBS
     if test "${found_usable_guile}" = no; then
       if test "${flag_errors}" = yes; then
-        { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "linking guile version ${guile_version} test program failed
 See \`config.log' for more details" "$LINENO" 5; }
@@ -28963,8 +28963,8 @@ scm_init_guile ();
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   have_libguile=yes
-                    GUILE_CPPFLAGS=$new_CPPFLAGS
-                    GUILE_LIBS=$new_LIBS
+		    GUILE_CPPFLAGS=$new_CPPFLAGS
+		    GUILE_LIBS=$new_LIBS
 else
   found_usable_guile=no
 fi
@@ -28982,7 +28982,7 @@ fi
     LIBS=$save_LIBS
     if test "${found_usable_guile}" = no; then
       if test "${flag_errors}" = yes; then
-        { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "linking guile version ${guile_version} test program failed
 See \`config.log' for more details" "$LINENO" 5; }
@@ -29044,8 +29044,8 @@ scm_init_guile ();
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   have_libguile=yes
-                    GUILE_CPPFLAGS=$new_CPPFLAGS
-                    GUILE_LIBS=$new_LIBS
+		    GUILE_CPPFLAGS=$new_CPPFLAGS
+		    GUILE_LIBS=$new_LIBS
 else
   found_usable_guile=no
 fi
@@ -29063,7 +29063,7 @@ fi
     LIBS=$save_LIBS
     if test "${found_usable_guile}" = no; then
       if test "${flag_errors}" = yes; then
-        { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "linking guile version ${guile_version} test program failed
 See \`config.log' for more details" "$LINENO" 5; }
@@ -29135,8 +29135,8 @@ scm_init_guile ();
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   have_libguile=yes
-                    GUILE_CPPFLAGS=$new_CPPFLAGS
-                    GUILE_LIBS=$new_LIBS
+		    GUILE_CPPFLAGS=$new_CPPFLAGS
+		    GUILE_LIBS=$new_LIBS
 else
   found_usable_guile=no
 fi
@@ -29154,7 +29154,7 @@ fi
     LIBS=$save_LIBS
     if test "${found_usable_guile}" = no; then
       if test "${flag_errors}" = yes; then
-        { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error $? "linking guile version ${guile_version} test program failed
 See \`config.log' for more details" "$LINENO" 5; }
@@ -29383,9 +29383,9 @@ $as_echo "no - pkg-config not found" >&6; }
   else
     if ${pkg_config_prog_path} --exists source-highlight; then
       case "$LDFLAGS" in
-        *static-libstdc*)
-          as_fn_error $? "source highlight is incompatible with -static-libstdc++; either use --disable-source-highlight or --without-static-standard-libraries" "$LINENO" 5
-          ;;
+	*static-libstdc*)
+	  as_fn_error $? "source highlight is incompatible with -static-libstdc++; either use --disable-source-highlight or --without-static-standard-libraries" "$LINENO" 5
+	  ;;
       esac
 
       srchigh_pkg_cflags=`${pkg_config_prog_path} --cflags source-highlight`
@@ -29417,7 +29417,7 @@ int
 main ()
 {
 std::string outlang = "esc.outlang";
-           new srchilite::SourceHighlight (outlang);
+	   new srchilite::SourceHighlight (outlang);
 
   ;
   return 0;
@@ -29444,22 +29444,22 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 $as_echo "#define HAVE_SOURCE_HIGHLIGHT 1" >>confdefs.h
 
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-        SRCHIGH_CFLAGS="$srchigh_pkg_cflags"
-        SRCHIGH_LIBS="$srchigh_pkg_libs"
+	SRCHIGH_CFLAGS="$srchigh_pkg_cflags"
+	SRCHIGH_LIBS="$srchigh_pkg_libs"
       else
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-        if test "${enable_source_highlight}" = "yes"; then
-          as_fn_error $? "source-highlight in your system could not be used" "$LINENO" 5
-        fi
+	if test "${enable_source_highlight}" = "yes"; then
+	  as_fn_error $? "source-highlight in your system could not be used" "$LINENO" 5
+	fi
       fi
     else
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
       if test "${enable_source_highlight}" = "yes"; then
-        as_fn_error $? "source-highlight was not found in your system" "$LINENO" 5
+	as_fn_error $? "source-highlight was not found in your system" "$LINENO" 5
       fi
     fi
   fi
@@ -31064,17 +31064,17 @@ int
 main ()
 {
 
-          const char *code = "import ctypes\n";
-          Py_Initialize ();
-          PyObject *main_module = PyImport_AddModule ("__main__");
-          PyObject *global_dict = PyModule_GetDict (main_module);
-          PyObject *local_dict = PyDict_New ();
-          PyObject *py_code = Py_CompileString (code, "test", Py_single_input);
-          if (py_code == NULL)
-            return 1;
-          PyObject *res = PyEval_EvalCode (py_code, global_dict, local_dict);
-          Py_Finalize ();
-          return res ? 0 : 1;
+	  const char *code = "import ctypes\n";
+	  Py_Initialize ();
+	  PyObject *main_module = PyImport_AddModule ("__main__");
+	  PyObject *global_dict = PyModule_GetDict (main_module);
+	  PyObject *local_dict = PyDict_New ();
+	  PyObject *py_code = Py_CompileString (code, "test", Py_single_input);
+	  if (py_code == NULL)
+	    return 1;
+	  PyObject *res = PyEval_EvalCode (py_code, global_dict, local_dict);
+	  Py_Finalize ();
+	  return res ? 0 : 1;
   ;
   return 0;
 }
@@ -31111,16 +31111,16 @@ else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-         #include <execinfo.h>
+	 #include <execinfo.h>
 
 int
 main ()
 {
 
-         int f;
-         void *b[2];
-         f = backtrace (b, 2);
-         backtrace_symbols_fd (b, f, 2);
+	 int f;
+	 void *b[2];
+	 f = backtrace (b, 2);
+	 backtrace_symbols_fd (b, f, 2);
 
   ;
   return 0;
@@ -31178,14 +31178,14 @@ fi
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_have_aix_thread_debug" >&5
 $as_echo "$gdb_cv_have_aix_thread_debug" >&6; }
       if test "$gdb_cv_have_aix_thread_debug" = yes; then
-         CONFIG_SRCS="${CONFIG_SRCS} aix-thread.c"
-         CONFIG_OBS="${CONFIG_OBS} aix-thread.o"
-         LIBS="$LIBS -lpthdebug"
+	 CONFIG_SRCS="${CONFIG_SRCS} aix-thread.c"
+	 CONFIG_OBS="${CONFIG_OBS} aix-thread.o"
+	 LIBS="$LIBS -lpthdebug"
 
-         # Older versions of AIX do not provide the declaration for
-         # the getthrds function (it appears that it was introduced
-         # with AIX 6.x).
-         ac_fn_c_check_decl "$LINENO" "getthrds" "ac_cv_have_decl_getthrds" "#include <procinfo.h>
+	 # Older versions of AIX do not provide the declaration for
+	 # the getthrds function (it appears that it was introduced
+	 # with AIX 6.x).
+	 ac_fn_c_check_decl "$LINENO" "getthrds" "ac_cv_have_decl_getthrds" "#include <procinfo.h>
 "
 if test "x$ac_cv_have_decl_getthrds" = xyes; then :
   ac_have_decl=1
@@ -31357,7 +31357,7 @@ _ACEOF
 
   if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
      if test "x$prefix" = xNONE; then
-     	test_prefix=/usr/local
+	test_prefix=/usr/local
      else
 	test_prefix=$prefix
      fi
@@ -31403,7 +31403,7 @@ _ACEOF
 
   if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
      if test "x$prefix" = xNONE; then
-     	test_prefix=/usr/local
+	test_prefix=/usr/local
      else
 	test_prefix=$prefix
      fi
@@ -31449,7 +31449,7 @@ _ACEOF
 
   if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
      if test "x$prefix" = xNONE; then
-     	test_prefix=/usr/local
+	test_prefix=/usr/local
      else
 	test_prefix=$prefix
      fi
@@ -31487,9 +31487,9 @@ int
 main ()
 {
 
-                          #if !defined __GNUC__ || defined __clang__
-                          #error not gcc
-                          #endif
+			  #if !defined __GNUC__ || defined __clang__
+			  #error not gcc
+			  #endif
 
   ;
   return 0;
@@ -31509,9 +31509,9 @@ int
 main ()
 {
 
-                          #ifndef __clang__
-                          #error not clang
-                          #endif
+			  #ifndef __clang__
+			  #error not clang
+			  #endif
 
   ;
   return 0;
@@ -31614,9 +31614,9 @@ if test "${enable_build_warnings+set}" = set; then :
   yes)	;;
   no)	build_warnings="-w";;
   ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${build_warnings} ${t}";;
+	build_warnings="${build_warnings} ${t}";;
   *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${t} ${build_warnings}";;
+	build_warnings="${t} ${build_warnings}";;
   *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac
 if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
@@ -31629,9 +31629,9 @@ if test "${enable_gdb_build_warnings+set}" = set; then :
   yes)	;;
   no)	build_warnings="-w";;
   ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${build_warnings} ${t}";;
+	build_warnings="${build_warnings} ${t}";;
   *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${t} ${build_warnings}";;
+	build_warnings="${t} ${build_warnings}";;
   *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac
 if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
@@ -31661,7 +31661,7 @@ $as_echo_n "checking compiler warning flags... " >&6; }
 	case $w in
 	-Wno-*)
 		wtest=`echo $w | sed 's/-Wno-/-W/g'` ;;
-        -Wformat-nonliteral)
+	-Wformat-nonliteral)
 		# gcc requires -Wformat before -Wformat-nonliteral
 		# will work, so stick them together.
 		w="-Wformat $w"
@@ -32576,7 +32576,7 @@ $as_echo "$LIBLZMA" >&6; }
 
     if test "$HAVE_LIBLZMA" != yes; then
       if test "$with_lzma" = yes; then
-        as_fn_error $? "missing liblzma for --with-lzma" "$LINENO" 5
+	as_fn_error $? "missing liblzma for --with-lzma" "$LINENO" 5
       fi
     fi
   fi
@@ -32918,19 +32918,19 @@ $as_echo "could not find ${TCL_BIN_DIR}/tclConfig.sh" >&6; }
 
 
 
-        # Check for in-tree tcl
-        here=`pwd`
-        cd ${srcdir}/..
-        topdir=`pwd`
-        cd ${here}
+	# Check for in-tree tcl
+	here=`pwd`
+	cd ${srcdir}/..
+	topdir=`pwd`
+	cd ${here}
 
-        intree="no"
-        if test "${TCL_SRC_DIR}" = "${topdir}/tcl"; then
-          intree="yes"
-        fi
+	intree="no"
+	if test "${TCL_SRC_DIR}" = "${topdir}/tcl"; then
+	  intree="yes"
+	fi
 
-        # Find Tcl private headers
-        if test x"${intree}" = xno; then
+	# Find Tcl private headers
+	if test x"${intree}" = xno; then
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Tcl private headers" >&5
 $as_echo_n "checking for Tcl private headers... " >&6; }
@@ -32949,16 +32949,16 @@ $as_echo "${private_dir}" >&6; }
   fi
 
 	  TCL_INCLUDE="${TCL_INCLUDE_SPEC} ${TCL_PRIVATE_INCLUDE}"
-          TCL_LIBRARY="${TCL_LIB_SPEC}"
-          TCL_DEPS=""
-        else
-          # If building tcl in the same src tree, private headers
-          # are not needed, but we need to be sure to use the right
-          # headers library
+	  TCL_LIBRARY="${TCL_LIB_SPEC}"
+	  TCL_DEPS=""
+	else
+	  # If building tcl in the same src tree, private headers
+	  # are not needed, but we need to be sure to use the right
+	  # headers library
 	  TCL_INCLUDE="-I${TCL_SRC_DIR}/generic"
-          TCL_LIBRARY="${TCL_BUILD_LIB_SPEC}"
-          TCL_DEPS="../tcl/${configdir}${TCL_LIB_FILE}"
-        fi
+	  TCL_LIBRARY="${TCL_BUILD_LIB_SPEC}"
+	  TCL_DEPS="../tcl/${configdir}${TCL_LIB_FILE}"
+	fi
 
 
 
@@ -33032,14 +33032,14 @@ $as_echo "could not find ${TK_BIN_DIR}/tkConfig.sh" >&6; }
 
 
 
-        # Check for in-tree Tk
-        intree="no"
-        if test "${TK_SRC_DIR}" = "${topdir}/tk"; then
-          intree="yes"
-        fi
+	# Check for in-tree Tk
+	intree="no"
+	if test "${TK_SRC_DIR}" = "${topdir}/tk"; then
+	  intree="yes"
+	fi
 
-        # Find Tk private headers
-        if test x"${intree}" = xno; then
+	# Find Tk private headers
+	if test x"${intree}" = xno; then
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Tk private headers" >&5
 $as_echo_n "checking for Tk private headers... " >&6; }
@@ -33059,18 +33059,18 @@ $as_echo "${private_dir}" >&6; }
 
 	  TK_INCLUDE="${TK_INCLUDE_SPEC} ${TK_PRIVATE_INCLUDE}"
 	  TK_LIBRARY=${TK_LIB_SPEC}
-          TK_DEPS=""
-        else
-          TK_INCLUDE="-I${TK_SRC_DIR}/generic"
-          TK_LIBRARY="${TK_BUILD_LIB_SPEC}"
-          TK_DEPS="../tk/${configdir}/${TK_LIB_FILE}"
-        fi
+	  TK_DEPS=""
+	else
+	  TK_INCLUDE="-I${TK_SRC_DIR}/generic"
+	  TK_LIBRARY="${TK_BUILD_LIB_SPEC}"
+	  TK_DEPS="../tk/${configdir}/${TK_LIB_FILE}"
+	fi
 
 
 
 
 
-        ENABLE_CFLAGS="${ENABLE_CFLAGS} \$(SUBDIR_GDBTK_CFLAGS)"
+	ENABLE_CFLAGS="${ENABLE_CFLAGS} \$(SUBDIR_GDBTK_CFLAGS)"
 
 	# Include some libraries that Tcl and Tk want.
 	TCL_LIBS='$(LIBGUI) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
@@ -33081,9 +33081,9 @@ $as_echo "${private_dir}" >&6; }
 	# try to include things like `$(LIBGUI)', which wouldn't work.
 	GDBTKLIBS="${TCL_LIBS} ${TK_LIBS}"
 
-        CONFIG_OBS="${CONFIG_OBS} \$(SUBDIR_GDBTK_OBS)"
-        CONFIG_DEPS="${CONFIG_DEPS} \$(SUBDIR_GDBTK_DEPS)"
-        CONFIG_SRCS="${CONFIG_SRCS} \$(SUBDIR_GDBTK_SRCS)"
+	CONFIG_OBS="${CONFIG_OBS} \$(SUBDIR_GDBTK_OBS)"
+	CONFIG_DEPS="${CONFIG_DEPS} \$(SUBDIR_GDBTK_DEPS)"
+	CONFIG_SRCS="${CONFIG_SRCS} \$(SUBDIR_GDBTK_SRCS)"
 	CONFIG_ALL="${CONFIG_ALL} all-gdbtk"
 	CONFIG_CLEAN="${CONFIG_CLEAN} clean-gdbtk"
 	CONFIG_INSTALL="${CONFIG_INSTALL} install-gdbtk"
@@ -33095,7 +33095,7 @@ $as_echo "${private_dir}" >&6; }
 	  CONFIG_OBS="${CONFIG_OBS} gdbres.o"
 	fi
 
-        subdirs="$subdirs gdbtk"
+	subdirs="$subdirs gdbtk"
 
     fi
 fi
@@ -33914,8 +33914,8 @@ struct bt_iter_pos *pos = bt_iter_get_pos (bt_ctf_get_iter (NULL));
 			pos->type = BT_SEEK_BEGIN;
 			bt_iter_set_pos (bt_ctf_get_iter (NULL), pos);
 			scope = bt_ctf_get_top_level_scope (event,
-			      				   BT_STREAM_EVENT_HEADER);
-		        bt_ctf_get_uint64 (bt_ctf_get_field (event, scope, "id"));
+							   BT_STREAM_EVENT_HEADER);
+			bt_ctf_get_uint64 (bt_ctf_get_field (event, scope, "id"));
 
   ;
   return 0;

@@ -161,15 +161,15 @@ changequote(,)dnl
   i[34567]86-*-linux*)
 changequote([,])dnl
     AC_CACHE_CHECK([if building for x86-64], [gdb_cv_i386_is_x86_64],
-      	           [save_CPPFLAGS="$CPPFLAGS"
-                    CPPFLAGS="$CPPFLAGS $CFLAGS"
-                    AC_EGREP_CPP([got it], [
+		   [save_CPPFLAGS="$CPPFLAGS"
+		    CPPFLAGS="$CPPFLAGS $CFLAGS"
+		    AC_EGREP_CPP([got it], [
 #if __x86_64__
 got it
 #endif
-                 ], [gdb_cv_i386_is_x86_64=yes],
-                    [gdb_cv_i386_is_x86_64=no])
-                    CPPFLAGS="$save_CPPFLAGS"])
+		 ], [gdb_cv_i386_is_x86_64=yes],
+		    [gdb_cv_i386_is_x86_64=no])
+		    CPPFLAGS="$save_CPPFLAGS"])
     ;;
 
   x86_64-*-linux*)
@@ -187,15 +187,15 @@ got it
 
   m68k-*-*)
     AC_CACHE_CHECK([if building for Coldfire], [gdb_cv_m68k_is_coldfire],
-      	           [save_CPPFLAGS="$CPPFLAGS"
-                    CPPFLAGS="$CPPFLAGS $CFLAGS"
-                    AC_EGREP_CPP([got it], [
+		   [save_CPPFLAGS="$CPPFLAGS"
+		    CPPFLAGS="$CPPFLAGS $CFLAGS"
+		    AC_EGREP_CPP([got it], [
 #ifdef __mcoldfire__
 got it
 #endif
-                 ], [gdb_cv_m68k_is_coldfire=yes],
-                    [gdb_cv_m68k_is_coldfire=no])
-                    CPPFLAGS="$save_CPPFLAGS"])
+		 ], [gdb_cv_m68k_is_coldfire=yes],
+		    [gdb_cv_m68k_is_coldfire=no])
+		    CPPFLAGS="$save_CPPFLAGS"])
     ;;
 esac
 
@@ -367,8 +367,8 @@ dnl Check for -fvisibility=hidden support in the compiler.
 saved_cflags="$CFLAGS"
 CFLAGS="$CFLAGS -fvisibility=hidden"
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([])],
-		        [gdbsrv_cv_have_visibility_hidden=yes],
-	        	[gdbsrv_cv_have_visibility_hidden=no])
+			[gdbsrv_cv_have_visibility_hidden=yes],
+			[gdbsrv_cv_have_visibility_hidden=no])
 CFLAGS="$saved_cflags"
 
 IPA_DEPFILES=""

@@ -30,28 +30,28 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 AC_DEFUN([AM_GDB_COMPILER_TYPE],[
 
   AC_CACHE_CHECK([the compiler type],
-                 [gdb_cv_compiler_type],
+		 [gdb_cv_compiler_type],
  [gdb_cv_compiler_type=unknown
   if test "$gdb_cv_compiler_type" = unknown; then
      AC_COMPILE_IFELSE(
-        [AC_LANG_PROGRAM([],
-                         [
-                          #if !defined __GNUC__ || defined __clang__
-                          #error not gcc
-                          #endif
-                         ])],
-        [gdb_cv_compiler_type=gcc], [])
+	[AC_LANG_PROGRAM([],
+			 [
+			  #if !defined __GNUC__ || defined __clang__
+			  #error not gcc
+			  #endif
+			 ])],
+	[gdb_cv_compiler_type=gcc], [])
   fi
 
   if test "$gdb_cv_compiler_type" = unknown; then
      AC_COMPILE_IFELSE(
-        [AC_LANG_PROGRAM([],
-                         [
-                          #ifndef __clang__
-                          #error not clang
-                          #endif
-                         ])],
-        [gdb_cv_compiler_type=clang], [])
+	[AC_LANG_PROGRAM([],
+			 [
+			  #ifndef __clang__
+			  #error not clang
+			  #endif
+			 ])],
+	[gdb_cv_compiler_type=clang], [])
   fi
  ])
 

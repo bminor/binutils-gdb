@@ -99,9 +99,9 @@ AS_HELP_STRING([--enable-build-warnings], [enable build-time compiler warnings i
   yes)	;;
   no)	build_warnings="-w";;
   ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${build_warnings} ${t}";;
+	build_warnings="${build_warnings} ${t}";;
   *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${t} ${build_warnings}";;
+	build_warnings="${t} ${build_warnings}";;
   *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac
 if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
@@ -113,9 +113,9 @@ AS_HELP_STRING([--enable-gdb-build-warnings], [enable GDB specific build-time co
   yes)	;;
   no)	build_warnings="-w";;
   ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${build_warnings} ${t}";;
+	build_warnings="${build_warnings} ${t}";;
   *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${t} ${build_warnings}";;
+	build_warnings="${t} ${build_warnings}";;
   *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac
 if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
@@ -138,7 +138,7 @@ then
 	case $w in
 	-Wno-*)
 		wtest=`echo $w | sed 's/-Wno-/-W/g'` ;;
-        -Wformat-nonliteral)
+	-Wformat-nonliteral)
 		# gcc requires -Wformat before -Wformat-nonliteral
 		# will work, so stick them together.
 		w="-Wformat $w"

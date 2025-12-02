@@ -45,7 +45,7 @@ AC_DEFUN(
    AC_CACHE_VAL(
      [gdbserver_cv_have_thread_db_type_$1],
      [AC_COMPILE_IFELSE(
-        [AC_LANG_PROGRAM([#include <thread_db.h>], [$1 avar])],
+	[AC_LANG_PROGRAM([#include <thread_db.h>], [$1 avar])],
 	[gdbserver_cv_have_thread_db_type_$1=yes],
 	[gdbserver_cv_have_thread_db_type_$1=no]
       )]

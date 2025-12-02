@@ -2230,7 +2230,7 @@ else
   case $host_os in
     aix*)
       if test $host_cpu != ia64; then
-        RPATH_ENVVAR=LIBPATH
+	RPATH_ENVVAR=LIBPATH
       fi ;;
     darwin* | rhapsody*)
       RPATH_ENVVAR=DYLD_LIBRARY_PATH ;;

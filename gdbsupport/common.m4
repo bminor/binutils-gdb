@@ -2,7 +2,7 @@ dnl Autoconf configure snippets for common.
 dnl Copyright (C) 1995-2025 Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
-dnl 
+dnl
 dnl This program is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
 dnl the Free Software Foundation; either version 3 of the License, or
@@ -176,11 +176,11 @@ AC_CHECK_HEADERS([ \
     [gdb_cv_func_sigsetjmp],
     [AC_COMPILE_IFELSE(
        [AC_LANG_PROGRAM(
-          [#include <setjmp.h>],
-          [sigjmp_buf env;
-           while (! sigsetjmp (env, 1))
-             siglongjmp (env, 1);]
-        )],
+	  [#include <setjmp.h>],
+	  [sigjmp_buf env;
+	   while (! sigsetjmp (env, 1))
+	     siglongjmp (env, 1);]
+	)],
        [gdb_cv_func_sigsetjmp=yes],
        [gdb_cv_func_sigsetjmp=no]
      )]
