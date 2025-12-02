@@ -2396,7 +2396,7 @@ dwarf2_initialize_objfile (struct objfile *objfile,
   /* Was a GDB index already read when we processed an objfile sharing
      PER_BFD?  */
   else if (per_bfd->index_table != nullptr)
-    dwarf_read_debug_printf ("re-using symbols");
+    dwarf_read_debug_printf ("reusing symbols");
   else if (dwarf2_read_debug_names (per_objfile))
     dwarf_read_debug_printf ("found debug names");
   else if (dwarf2_read_gdb_index (per_objfile,
@@ -2707,7 +2707,7 @@ cutu_reader::init_cu_die_reader (dwarf2_cu *cu, dwarf2_section_info *section,
 				 struct dwo_file *dwo_file,
 				 const struct abbrev_table *abbrev_table)
 {
-  gdb_assert (section->readin && section->buffer != NULL);
+  gdb_assert (section->read_in && section->buffer != NULL);
   m_abfd = section->get_bfd_owner ();
   m_cu = cu;
   m_dwo_file = dwo_file;
@@ -7149,8 +7149,8 @@ create_dwp_v2_or_v5_section (dwarf2_per_bfd *per_bfd,
 
   result.virtual_offset = offset;
   result.size = size;
-  gdb_assert (section->readin);
-  result.readin = true;
+  gdb_assert (section->read_in);
+  result.read_in = true;
   result.buffer = section->buffer + offset;
   return result;
 }
@@ -7733,7 +7733,7 @@ cutu_reader::locate_dwo_sections (objfile *objfile, dwo_file &dwo_file)
 	{
 	  /* Make sure we don't overwrite a section info that has been filled in
 	 already.  */
-	  gdb_assert (!dw_sect->readin);
+	  gdb_assert (!dw_sect->read_in);
 
 	  dw_sect->s.section = sec;
 	  dw_sect->size = bfd_section_size (sec);
@@ -7810,7 +7810,7 @@ dwarf2_locate_common_dwp_sections (struct objfile *objfile, bfd *abfd,
     {
       /* Make sure we don't overwrite a section info that has been filled in
 	 already.  */
-      gdb_assert (!dw_sect->readin);
+      gdb_assert (!dw_sect->read_in);
 
       dw_sect->s.section = sectp;
       dw_sect->size = bfd_section_size (sectp);
@@ -7859,7 +7859,7 @@ dwarf2_locate_v2_dwp_sections (struct objfile *objfile, bfd *abfd,
     {
       /* Make sure we don't overwrite a section info that has been filled in
 	 already.  */
-      gdb_assert (!dw_sect->readin);
+      gdb_assert (!dw_sect->read_in);
 
       dw_sect->s.section = sectp;
       dw_sect->size = bfd_section_size (sectp);
@@ -7906,7 +7906,7 @@ dwarf2_locate_v5_dwp_sections (struct objfile *objfile, bfd *abfd,
     {
       /* Make sure we don't overwrite a section info that has been filled in
 	 already.  */
-      gdb_assert (!dw_sect->readin);
+      gdb_assert (!dw_sect->read_in);
 
       dw_sect->s.section = sectp;
       dw_sect->size = bfd_section_size (sectp);
@@ -11701,11 +11701,11 @@ die_byte_order (die_info *die, dwarf2_cu *cu, enum bfd_endian *byte_order)
   attribute *attr = dwarf2_attr (die, DW_AT_endianity, cu);
   if (attr != nullptr && attr->form_is_constant ())
     {
-      std::optional<ULONGEST> endianity = attr->unsigned_constant ();
+      std::optional<ULONGEST> endianness = attr->unsigned_constant ();
 
-      if (endianity.has_value ())
+      if (endianness.has_value ())
 	{
-	  switch (*endianity)
+	  switch (*endianness)
 	    {
 	    case DW_END_default:
 	      /* Nothing.  */
@@ -11718,7 +11718,7 @@ die_byte_order (die_info *die, dwarf2_cu *cu, enum bfd_endian *byte_order)
 	      break;
 	    default:
 	      complaint (_("DW_AT_endianity has unrecognized value %s"),
-			 pulongest (*endianity));
+			 pulongest (*endianness));
 	      break;
 	    }
 	}

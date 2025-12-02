@@ -293,7 +293,7 @@ cooked_index_shard::finalize (const parent_map_map *parent_maps)
 	    }
 	  else
 	    {
-	      /* An entry with that name was present, re-use its canonical
+	      /* An entry with that name was present, reuse its canonical
 		 name.  */
 	      entry->canonical = (*it)->canonical;
 	    }

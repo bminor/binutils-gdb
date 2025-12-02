@@ -37,7 +37,7 @@ dwz_file::read_string (struct objfile *objfile, LONGEST str_offset)
 {
   /* This must be true because the sections are read in when the
      dwz_file is created.  */
-  gdb_assert (str.readin);
+  gdb_assert (str.read_in);
 
   if (str.buffer == NULL)
     error (_("supplementary DWARF file missing .debug_str "

@@ -30,7 +30,7 @@
 /* A descriptor for dwarf sections.
 
    S.ASECTION, SIZE are typically initialized when the objfile is first
-   scanned.  BUFFER, READIN are filled in later when the section is read.
+   scanned.  BUFFER, READ_IN are filled in later when the section is read.
    If the section contained compressed data then SIZE is updated to record
    the uncompressed size of the section.
 
@@ -100,7 +100,7 @@ struct dwarf2_section_info
        section.  */
     struct dwarf2_section_info *containing_section;
   } s;
-  /* Pointer to section data, only valid if readin.  */
+  /* Pointer to section data, only valid if read_in.  */
   const gdb_byte *buffer;
   /* The size of the section, real or virtual.  */
   bfd_size_type size;
@@ -108,7 +108,7 @@ struct dwarf2_section_info
      Only valid if is_virtual.  */
   bfd_size_type virtual_offset;
   /* True if we have tried to read this section.  */
-  bool readin;
+  bool read_in;
   /* True if this is a virtual section, False otherwise.
      This specifies which of s.section and s.containing_section to use.  */
   bool is_virtual;

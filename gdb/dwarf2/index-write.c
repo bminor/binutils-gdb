@@ -876,7 +876,7 @@ private:
     explicit debug_str_lookup (dwarf2_per_bfd *per_bfd)
       : m_per_bfd (per_bfd)
     {
-      gdb_assert (per_bfd->str.readin);
+      gdb_assert (per_bfd->str.read_in);
       const gdb_byte *data = per_bfd->str.buffer;
       if (data == nullptr)
 	return;

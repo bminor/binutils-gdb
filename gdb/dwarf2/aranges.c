@@ -30,7 +30,7 @@ read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 			   deferred_warnings *warn)
 {
   /* Caller must ensure that the section has already been read.  */
-  gdb_assert (section->readin);
+  gdb_assert (section->read_in);
   if (section->empty ())
     return false;
 

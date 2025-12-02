@@ -122,10 +122,10 @@ dwarf2_section_info::read (struct objfile *objfile)
   bfd *abfd;
   gdb_byte *buf, *retbuf;
 
-  if (readin)
+  if (read_in)
     return;
   buffer = NULL;
-  readin = true;
+  read_in = true;
 
   if (empty ())
     return;

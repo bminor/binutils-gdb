@@ -626,7 +626,7 @@ create_addrmap_from_gdb_index (dwarf2_per_objfile *per_objfile,
       return false;
     };
 
-  /* Cache the section for possible re-use on the next entry.  */
+  /* Cache the section for possible reuse on the next entry.  */
   struct obj_section *prev_sect = nullptr;
 
   const gdb_byte *iter = index->address_table.data ();
