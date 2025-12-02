@@ -19,6 +19,11 @@ load_lib "ada.exp"
 
 require allow_ada_tests
 
+# This test causes at least the 7.5 compiler to crash.  We're not sure
+# when the bug was fixed so we're choosing a version newer than the
+# known crash.
+require {gnat_version_compare >= 8}
+
 standard_ada_testfile prog
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable {debug}] != ""} {
