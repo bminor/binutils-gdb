@@ -2950,12 +2950,10 @@ target_ops::info_proc (const char *args, enum info_proc_what what)
 int
 target_info_proc (const char *args, enum info_proc_what what)
 {
-  struct target_ops *t;
-
   /* If we're already connected to something that can get us OS
      related data, use it.  Otherwise, try using the native
      target.  */
-  t = find_target_at (process_stratum);
+  target_ops *t = current_inferior ()->target_at (process_stratum);
   if (t == NULL)
     t = find_default_run_target (NULL);
 
@@ -3001,12 +2999,10 @@ target_supports_multi_process (void)
 std::optional<gdb::char_vector>
 target_get_osdata (const char *type)
 {
-  struct target_ops *t;
-
   /* If we're already connected to something that can get us OS
      related data, use it.  Otherwise, try using the native
      target.  */
-  t = find_target_at (process_stratum);
+  target_ops *t = current_inferior ()->target_at (process_stratum);
   if (t == NULL)
     t = find_default_run_target ("get OS data");
 
@@ -3079,11 +3075,9 @@ target_can_run ()
 static struct target_ops *
 default_fileio_target (void)
 {
-  struct target_ops *t;
-
   /* If we're already connected to something that can perform
      file I/O, use it. Otherwise, try using the native target.  */
-  t = find_target_at (process_stratum);
+  target_ops *t = current_inferior ()->target_at (process_stratum);
   if (t != NULL)
     return t;
   return find_default_run_target ("file I/O");
@@ -3596,16 +3590,6 @@ target_stack::find_beneath (const target_ops *t) const
 
   return NULL;
 }
-
-/* See target.h.  */
-
-struct target_ops *
-find_target_at (enum strata stratum)
-{
-  return current_inferior ()->target_at (stratum);
-}
-
-
 
 /* See target.h  */
 

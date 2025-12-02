@@ -62,7 +62,7 @@ struct cmd_list_element *info_record_cmdlist = NULL;
 struct target_ops *
 find_record_target (void)
 {
-  return find_target_at (record_stratum);
+  return current_inferior ()->target_at (record_stratum);
 }
 
 /* Check that recording is active.  Throw an error, if it isn't.  */

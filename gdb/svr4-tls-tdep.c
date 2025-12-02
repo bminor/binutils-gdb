@@ -123,7 +123,7 @@ svr4_tls_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
      The idea here is to prefer use of of the target's thread_stratum
      method since it should be more accurate.  */
   if (gdbarch_data->get_tls_dtv_addr == nullptr
-      || (find_target_at (thread_stratum) != nullptr
+      || (current_inferior ()->target_at (thread_stratum) != nullptr
 	  && !force_internal_tls_address_lookup))
     {
       struct target_ops *target = current_inferior ()->top_target ();

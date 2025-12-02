@@ -2569,11 +2569,6 @@ extern void initialize_targets (void);
 
 extern void target_require_runnable (void);
 
-/* Find the target at STRATUM.  If no target is at that stratum,
-   return NULL.  */
-
-struct target_ops *find_target_at (enum strata stratum);
-
 /* Read OS data object of type TYPE from the target, and return it in XML
    format.  The return value follows the same rules as target_read_stralloc.  */
 
