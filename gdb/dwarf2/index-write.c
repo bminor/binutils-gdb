@@ -1252,6 +1252,7 @@ write_cooked_index (cooked_index *table,
 	  || entry->tag == DW_TAG_entry_point)
 	kind = GDB_INDEX_SYMBOL_KIND_FUNCTION;
       else if (entry->tag == DW_TAG_variable
+	       || entry->tag == DW_TAG_member
 	       || entry->tag == DW_TAG_constant
 	       || entry->tag == DW_TAG_enumerator)
 	kind = GDB_INDEX_SYMBOL_KIND_VARIABLE;

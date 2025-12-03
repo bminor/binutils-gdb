@@ -119,6 +119,7 @@ abbrev_table::read (struct dwarf2_section_info *section,
       bool has_name = false;
       bool has_linkage_name = false;
       bool has_external = false;
+      bool has_const_value = false;
 
       /* Now read in declarations.  */
       int num_attrs = 0;
@@ -175,6 +176,10 @@ abbrev_table::read (struct dwarf2_section_info *section,
 	    case DW_AT_sibling:
 	      if (is_csize && cur_attr.form == DW_FORM_ref4)
 		sibling_offset = size;
+	      break;
+
+	    case DW_AT_const_value:
+	      has_const_value = true;
 	      break;
 	    }
 
@@ -240,6 +245,57 @@ abbrev_table::read (struct dwarf2_section_info *section,
 	     DW_AT_declaration is set, so that any subsequent
 	     DW_AT_specification pointing at a child of this will get
 	     the correct scope.  */
+	  cur_abbrev->interesting = true;
+	}
+      else if (cur_abbrev->tag == DW_TAG_member && has_const_value
+	       && has_external)
+	{
+	  /* For a static const member with initializer, gcc (and likewise
+	     clang) generates a DW_TAG_member with a DW_AT_const_value
+	     attribute when using DWARF v4 or earlier.
+
+	       class A {
+		 static const int aaa = 11;
+	       };
+
+	       <2><28>: Abbrev Number: 3 (DW_TAG_member)
+		  <29>	 DW_AT_name	   : aaa
+		  <34>	 DW_AT_external	   : 1
+		  <34>	 DW_AT_declaration : 1
+		  <34>	 DW_AT_const_value : 11
+
+	     That's not the case if we move the initializer out of the class
+	     declaration, we get a DW_TAG_variable representing the value:
+
+	       class A {
+		 static const int aaa;
+	       };
+	       const int A::aaa = 11;
+
+	       <2><28>: Abbrev Number: 3 (DW_TAG_member)
+		  <29>	 DW_AT_name	   : aaa
+		  <34>	 DW_AT_external	   : 1
+		  <34>	 DW_AT_declaration : 1
+	       <1><41>: Abbrev Number: 6 (DW_TAG_variable)
+		  <42>	 DW_AT_specification: <0x28>
+		  <48>	 DW_AT_linkage_name: _ZN1A3aaaE
+		  <4c>	 DW_AT_location	   : 9 byte block: (DW_OP_addr: 0)
+
+	     We could try to cater here for the case that we have a
+	     DW_AT_location instead of a DW_AT_const_value, but that doesn't
+	     seem to be handled by the rest of GDB.
+
+	     I did find an example of a non-external one for std::_Function_base
+	     ::_Base_manager<get_compile_file_tempdir()::<lambda()> >
+	     ::__stored_locally:
+
+	       <4><27bd192>: Abbrev Number: 279 (DW_TAG_member)
+		  <27bd194>   DW_AT_name	: __stored_locally
+		  <27bd19e>   DW_AT_accessibility: 2  (protected)
+		  <27bd19f>   DW_AT_declaration : 1
+		  <27bd19f>   DW_AT_const_value : 1 byte block: 1
+
+	     but again that doesn't seem to be handled by the rest of GDB.  */
 	  cur_abbrev->interesting = true;
 	}
       else if (has_hardcoded_declaration

@@ -1,0 +1,124 @@
+# Copyright 2025 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+load_lib dwarf.exp
+
+# This test can only be run on targets which support DWARF-2 and use gas.
+require dwarf2_support
+
+standard_testfile main.c .S
+
+set asm_file [standard_output_file ${srcfile2}]
+
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
+    return
+}
+
+set int_size [get_sizeof "int" -1]
+
+Dwarf::assemble ${asm_file} {
+    cu {} {
+	DW_TAG_compile_unit {
+	    DW_AT_language @DW_LANG_C_plus_plus
+	} {
+	    declare_labels int_label
+
+	    int_label: DW_TAG_base_type {
+		DW_AT_byte_size $::int_size DW_FORM_udata
+		DW_AT_encoding @DW_ATE_signed
+		DW_AT_name "int"
+	    }
+
+	    DW_TAG_class_type {
+		DW_AT_name "A"
+	    } {
+		DW_TAG_member {
+		    DW_AT_name "aaa"
+		    DW_AT_type :$int_label
+		    DW_AT_external 1 DW_FORM_flag
+		    DW_AT_declaration 1 DW_FORM_flag
+		    DW_AT_accessibility 1 DW_FORM_data1
+		    DW_AT_const_value 10 DW_FORM_data1
+		}
+		DW_TAG_member {
+		    DW_AT_name "bbb"
+		    DW_AT_type :$int_label
+		    DW_AT_external 1 DW_FORM_flag_present
+		    DW_AT_declaration 1 DW_FORM_flag_present
+		    DW_AT_accessibility 1 DW_FORM_data1
+		    DW_AT_const_value 11 DW_FORM_data1
+		}
+		DW_TAG_member {
+		    DW_AT_name "ccc"
+		    DW_AT_type :$int_label
+		    DW_AT_external 1 DW_FORM_flag
+		    DW_AT_declaration 1 DW_FORM_flag
+		    DW_AT_accessibility 1 DW_FORM_data1
+		    DW_AT_location {
+			DW_OP_lit12
+		    } SPECIAL_expr
+		}
+		DW_TAG_member {
+		    DW_AT_name "ddd"
+		    DW_AT_type :$int_label
+		    DW_AT_declaration 1 DW_FORM_flag
+		    DW_AT_accessibility 1 DW_FORM_data1
+		    DW_AT_const_value 13 DW_FORM_data1
+		}
+	    }
+
+	    DW_TAG_subprogram {
+		MACRO_AT_func { "main" }
+		DW_AT_type :${int_label}
+		DW_AT_external 1 DW_FORM_flag
+	    } {
+	    }
+	}
+    }
+}
+
+if { [prepare_for_testing "failed to prepare" $testfile \
+	  [list $asm_file $srcfile] {nodebug}] } {
+    return
+}
+
+# Regression test for PR symtab/33415.  Print the value of A::aaa in:
+#
+#   class A
+#   {
+#     public:
+#      static const int aaa = 10;
+#   };
+#
+# With DWARF 5, we get a DW_TAG_variable, but with DWARF 4, we get a
+# DW_TAG_member instead.
+gdb_test \
+    "print A::aaa" \
+    " = 10"
+
+# Variant with DW_FORM_flag_present instead of DW_FORM_flag.
+gdb_test \
+    "print A::bbb" \
+    " = 11"
+
+# Variant with DW_AT_location instead of DW_AT_const_value.
+gdb_test \
+    "print A::ccc" \
+    " = <optimized out>"
+
+# Variant without external.
+gdb_test \
+    "print A::ddd" \
+    " = <optimized out>"

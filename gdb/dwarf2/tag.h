@@ -76,6 +76,7 @@ tag_matches_domain (dwarf_tag tag, domain_search_flags search, language lang)
   switch (tag)
     {
     case DW_TAG_variable:
+    case DW_TAG_member:
     case DW_TAG_enumerator:
     case DW_TAG_constant:
       flags = SEARCH_VAR_DOMAIN;
