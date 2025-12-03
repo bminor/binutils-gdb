@@ -305,8 +305,8 @@ rewrite_slice_type (struct type *in_type, struct type **new_type,
     }
   else
     {
-    if (!rewrite_slice_type (field_type, &rewritten, bound,
-			     additional_length))
+      if (!rewrite_slice_type (field_type, &rewritten, bound,
+			       additional_length))
 	return false;
       if (additional_length == nullptr)
 	return true;
