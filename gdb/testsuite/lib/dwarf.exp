@@ -2490,14 +2490,14 @@ namespace eval Dwarf {
 	variable _line_header_finalized
 	variable _line_header_end_label
 	variable _line_unit_version
-	variable _line_advertised_unit_version
+	variable _line_unit_advertised_version
 	variable _line_is_64
 	variable _line_string_form
 
 	# Establish the defaults.
 	set _line_is_64 0
 	set _line_unit_version 4
-	set _line_advertised_unit_version default
+	set _line_unit_advertised_version default
 	set _unit_addr_size default
 	set _line_include_dirs {}
 	set _line_file_names {}
