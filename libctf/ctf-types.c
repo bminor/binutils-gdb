@@ -192,7 +192,8 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 
       if (kind != CTF_K_STRUCT && kind != CTF_K_UNION)
 	{
-	  ctf_set_errno (ofp, ECTF_NOTSOU);
+	  ctf_err (type_err_locus (fp, type), ECTF_WRONGKIND,
+		   _("not a struct or union"));
 	  return CTF_MEMBER_ERR;
 	}
 
@@ -397,7 +398,7 @@ ctf_enum_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
       if ((kind != CTF_K_ENUM) && (kind != CTF_K_ENUM64))
 	{
 	  ctf_next_destroy (i);
-	  ctf_set_errno (ofp, ECTF_NOTENUM);
+	  ctf_err (type_err_locus (ofp, type), ECTF_WRONGKIND, NULL);
 	  return NULL;
 	}
 
@@ -630,7 +631,7 @@ ctf_datasec_var_next (ctf_dict_t *fp, ctf_id_t datasec, ctf_next_t **it,
 	return CTF_ERR;			/* errno is set for us.  */
 
       if (ctf_type_kind (fp, datasec) != CTF_K_DATASEC)
-	return (ctf_set_typed_errno (ofp, ECTF_NOTDATASEC));
+	return ctf_err (type_err_locus (fp, datasec), ECTF_WRONGKIND, NULL);
 
       if ((tp = ctf_lookup_by_id (&fp, datasec, NULL)) == NULL)
 	return CTF_ERR;			/* errno is set for us.  */
@@ -1566,7 +1567,7 @@ ctf_decl_tag (ctf_dict_t *fp, ctf_id_t decl_tag, int64_t *component_idx)
     return CTF_ERR;		/* errno is set for us.  */
 
   if (LCTF_KIND (fp, tp) != CTF_K_DECL_TAG)
-    return (ctf_set_typed_errno (ofp, ECTF_NOTDECLTAG));
+    return ctf_typed_err (type_err_locus (ofp, decl_tag), ECTF_WRONGKIND, NULL);
 
   vlen = ctf_vlen (fp, decl_tag, tp, NULL);
   cdt = (ctf_decl_tag_t *) vlen;
@@ -1588,7 +1589,7 @@ ctf_tag (ctf_dict_t *fp, ctf_id_t tag)
   ctf_id_t ref;
 
   if (kind != CTF_K_TYPE_TAG && kind != CTF_K_DECL_TAG)
-    return (ctf_set_typed_errno (fp, ECTF_NOTTAG));
+    return ctf_typed_err (type_err_locus (fp, tag), ECTF_WRONGKIND, NULL);
 
   if ((ref = ctf_type_reference (fp, tag)) == CTF_ERR)
     return CTF_ERR;		/* errno is set for us.  */
@@ -1757,7 +1758,7 @@ ctf_type_encoding (ctf_dict_t *fp, ctf_id_t type, ctf_encoding_t *ep)
 	break;
       }
     default:
-      return (ctf_set_errno (ofp, ECTF_NOTINTFP));
+      return ctf_err (type_err_locus (ofp, type), ECTF_WRONGKIND, NULL);
     }
 
   return 0;
@@ -1919,7 +1920,7 @@ ctf_member_count (ctf_dict_t *fp, ctf_id_t type)
   kind = LCTF_KIND (fp, tp);
 
   if (kind != CTF_K_STRUCT && kind != CTF_K_UNION && kind != CTF_K_ENUM)
-    return (ctf_set_errno (ofp, ECTF_NOTSUE));
+    return ctf_err (type_err_locus (ofp, type), ECTF_WRONGKIND, NULL);
 
   return LCTF_VLEN (fp, tp);
 }
@@ -1951,7 +1952,8 @@ ctf_member_info (ctf_dict_t *fp, ctf_id_t type, const char *name,
   kind = LCTF_KIND (fp, tp);
 
   if (kind != CTF_K_STRUCT && kind != CTF_K_UNION)
-    return (ctf_set_errno (ofp, ECTF_NOTSOU));
+    return ctf_err (type_err_locus (ofp, type), ECTF_WRONGKIND,
+		    _("not a struct or union"));
 
   vlen = ctf_vlen (fp, type, tp, &n);
 
@@ -2013,7 +2015,9 @@ ctf_member_info (ctf_dict_t *fp, ctf_id_t type, const char *name,
 	}
     }
 
-  return (ctf_set_errno (ofp, ECTF_NOMEMBNAM));
+  ctf_warn (type_err_locus (ofp, type), ECTF_NONAME,
+	    _("member name %s not found"), name);
+  return (ctf_set_errno (ofp, ECTF_NONAME));
 }
 
 /* Return the array type, index, and size information for the specified ARRAY.  */
@@ -2030,7 +2034,7 @@ ctf_array_info (ctf_dict_t *fp, ctf_id_t type, ctf_arinfo_t *arp)
     return -1;			/* errno is set for us.  */
 
   if (LCTF_KIND (fp, tp) != CTF_K_ARRAY)
-    return (ctf_set_errno (ofp, ECTF_NOTARRAY));
+    return ctf_err (type_err_locus (ofp, type), ECTF_WRONGKIND, NULL);
 
   vlen = ctf_vlen (fp, type, tp, NULL);
   ap = (const ctf_array_t *) vlen;
@@ -2069,7 +2073,7 @@ ctf_enum_name (ctf_dict_t *fp, ctf_id_t type, ctf_enum_value_t value)
   kind = LCTF_KIND (fp, tp);
   if (kind != CTF_K_ENUM && kind != CTF_K_ENUM64)
     {
-      ctf_set_errno (ofp, ECTF_NOTENUM);
+      ctf_err (type_err_locus (ofp, type), ECTF_WRONGKIND, NULL);
       return NULL;
     }
 
@@ -2108,7 +2112,12 @@ ctf_enum_name (ctf_dict_t *fp, ctf_id_t type, ctf_enum_value_t value)
 	}
     }
 
-  ctf_set_errno (ofp, ECTF_NOENUMNAM);
+  ctf_warn (type_err_locus (ofp, type), ECTF_NONAME,
+	    (value.encoding.cte_format & CTF_INT_SIGNED)
+	    ? _("enumerator value %" PRIi64 " has no corresponding name")
+	    : _("enumerator value %" PRIu64 " has no corresponding name"),
+	    value.val);
+  ctf_set_errno (ofp, ECTF_NONAME);
   return NULL;
 }
 
@@ -2136,7 +2145,7 @@ ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name,
 
   kind = LCTF_KIND (fp, tp);
   if (kind != CTF_K_ENUM && kind != CTF_K_ENUM64)
-    return ctf_set_errno (ofp, ECTF_NOTENUM);
+    return ctf_err (type_err_locus (ofp, type), ECTF_WRONGKIND, NULL);
 
   vlen = ctf_vlen (fp, type, tp, &n);
 
@@ -2173,7 +2182,9 @@ ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name,
 	}
     }
 
-  return ctf_set_errno (ofp, ECTF_NOENUMNAM);
+  ctf_warn (type_err_locus (ofp, type), ECTF_NONAME,
+	    _("enumerator name %s not found"), name);
+  return ctf_set_errno (ofp, ECTF_NONAME);
 }
 
 /* Determine whether an enum's values are signed.  Private interface.  */
@@ -2187,7 +2198,7 @@ ctf_enum_unsigned (ctf_dict_t *fp, ctf_id_t type)
     return -1;			/* errno is set for us.  */
 
   if (kind != CTF_K_ENUM && kind != CTF_K_ENUM64)
-    return (ctf_set_errno (fp, ECTF_NOTENUM));
+    return ctf_err (type_err_locus (fp, type), ECTF_WRONGKIND, NULL);
 
   if (ctf_lookup_by_id (&fp, type, &tp) == NULL)
     return -1;			/* errno is set for us.  */
@@ -2197,7 +2208,7 @@ ctf_enum_unsigned (ctf_dict_t *fp, ctf_id_t type)
 
 /* Return nonzero if this struct or union uses bitfield encoding.  */
 ctf_bool_t
-ctf_struct_bitfield (ctf_dict_t * fp, ctf_id_t type)
+ctf_struct_bitfield (ctf_dict_t *fp, ctf_id_t type)
 {
   ctf_kind_t kind;
   const ctf_type_t *tp;		/* The suffixed kind, if prefixed */
@@ -2206,7 +2217,8 @@ ctf_struct_bitfield (ctf_dict_t * fp, ctf_id_t type)
     return -1;			/* errno is set for us.  */
 
   if (kind != CTF_K_STRUCT && kind != CTF_K_UNION)
-    return (ctf_set_errno (fp, ECTF_NOTSOU));
+    return ctf_err (type_err_locus (fp, type), ECTF_WRONGKIND,
+		    _("not a struct or union"));
 
   if (ctf_lookup_by_id (&fp, type, &tp) == NULL)
     return -1;			/* errno is set for us.  */
@@ -2369,11 +2381,12 @@ search_datasec_by_offset (const void *key_, const void *arr_)
 
 /* Search a datasec for a variable covering a given offset.
 
-   Errors with ECTF_NODATASEC if not found.  */
+   Errors with ECTF_NOTYPE if not found.  */
 
 ctf_id_t
 ctf_datasec_var_offset (ctf_dict_t *fp, ctf_id_t datasec, uint32_t offset)
 {
+  ctf_dict_t *ofp = fp;
   ctf_dtdef_t *dtd;
   const ctf_type_t *tp;
   unsigned char *vlen;
@@ -2386,7 +2399,7 @@ ctf_datasec_var_offset (ctf_dict_t *fp, ctf_id_t datasec, uint32_t offset)
     return -1;			/* errno is set for us.  */
 
   if (ctf_type_kind (fp, datasec) != CTF_K_DATASEC)
-    return ctf_set_typed_errno (fp, ECTF_NOTDATASEC);
+    return ctf_err (type_err_locus (ofp, datasec), ECTF_WRONGKIND, NULL);
 
   if ((dtd = ctf_dynamic_type (fp, datasec)) != NULL)
     {
@@ -2399,7 +2412,8 @@ ctf_datasec_var_offset (ctf_dict_t *fp, ctf_id_t datasec, uint32_t offset)
 
   if ((el = bsearch (&offset, sec, vlen_len, sizeof (ctf_var_secinfo_t),
 		     search_datasec_by_offset)) == NULL)
-    return ctf_set_typed_errno (fp, ECTF_NODATASEC);
+    return ctf_typed_err (type_err_locus (ofp, datasec), ECTF_NOTYPE,
+			  _("searched datasec for offset %x"), offset);
 
   if (el->cvs_offset == offset)
     return el->cvs_type;
@@ -2408,7 +2422,8 @@ ctf_datasec_var_offset (ctf_dict_t *fp, ctf_id_t datasec, uint32_t offset)
     if (el->cvs_offset < offset && el->cvs_offset + size > offset)
       return el->cvs_type;
 
-  return ctf_set_typed_errno (fp, ECTF_NODATASEC);
+  return ctf_typed_err (type_err_locus (ofp, datasec), ECTF_NOTYPE,
+			_("searched datasec for offset %x"), offset);
 }
 
 /* Return the entry corresponding to a given component_idx in a datasec.
@@ -2439,7 +2454,7 @@ ctf_datasec_entry (ctf_dict_t *fp, ctf_id_t datasec, int component_idx)
   return &sec[component_idx];
 }
 
-/* Return the datasec that a given variable appears in, or ECTF_NODATASEC if
+/* Return the datasec that a given variable appears in, or ECTF_NOTYPE if
    none.  */
 
 ctf_id_t ctf_variable_datasec (ctf_dict_t *fp, ctf_id_t var)
@@ -2447,13 +2462,13 @@ ctf_id_t ctf_variable_datasec (ctf_dict_t *fp, ctf_id_t var)
   void *sec;
 
   if (ctf_type_kind (fp, var) != CTF_K_VAR)
-    return (ctf_set_typed_errno (fp, ECTF_NOTVAR));
+    return ctf_typed_err (type_err_locus (fp, var), ECTF_WRONGKIND, NULL);
 
   if (ctf_dynhash_lookup_kv (fp->ctf_var_datasecs, (void *) (ptrdiff_t) var,
 			     NULL, &sec))
     return (ctf_id_t) sec;
 
-  return (ctf_set_typed_errno (fp, ECTF_NODATASEC));
+  return ctf_typed_err (type_err_locus (fp, var), ECTF_NOTYPE, NULL);
 }
 
 /* Recursively visit the members of any type.  This function is used as the

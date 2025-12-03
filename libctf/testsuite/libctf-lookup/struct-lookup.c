@@ -43,7 +43,7 @@ main (int argc, char *argv[])
   free (type_name);
 
   if (ctf_member_info (fp, type, "should_not_appear", &mi) >= 0
-      || ctf_errno (fp) != ECTF_NOMEMBNAM)
+      || ctf_errno (fp) != ECTF_NONAME)
     fprintf (stderr, "should_not_appear appeared.\n");
 
   ctf_dict_close (fp);

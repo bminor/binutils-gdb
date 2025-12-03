@@ -293,26 +293,18 @@ typedef int ctf_func_type_flags_t;
   _CTF_ITEM (ECTF_RANGE, "allowable range exceeded") \
   _CTF_ITEM (ECTF_BADNAME, "string name offset is corrupt") \
   _CTF_ITEM (ECTF_BADID, "invalid type identifier") \
-  _CTF_ITEM (ECTF_NOTSOU, "type is not a struct or union") \
-  _CTF_ITEM (ECTF_NOTENUM, "type is not an enum") \
-  _CTF_ITEM (ECTF_NOTSUE, "type is not a struct, union, or enum") \
-  _CTF_ITEM (ECTF_NOTINTFP, "type is not an integer, float, or enum") \
-  _CTF_ITEM (ECTF_NOTARRAY, "type is not an array") \
+  _CTF_ITEM (ECTF_WRONGKIND, "inappropriate type kind") \
   _CTF_ITEM (ECTF_NOTREF, "type does not reference another type") \
-  _CTF_ITEM (ECTF_NOTQUAL, "type is not a cvr-qual") \
   _CTF_ITEM (ECTF_NAMELEN, "buffer is too small to hold type name") \
-  _CTF_ITEM (ECTF_NOTYPE, "no type found corresponding to name") \
+  _CTF_ITEM (ECTF_NOTYPE, "no type found corresponding to name, type ID, or offset") \
   _CTF_ITEM (ECTF_SYNTAX, "syntax error in type name") \
   _CTF_ITEM (ECTF_NOTFUNC, "symbol table entry or type is not a function") \
   _CTF_ITEM (ECTF_NOFUNCDAT, "no function information available for function") \
   _CTF_ITEM (ECTF_NOTDATA, "symbol table entry does not refer to a data object") \
   _CTF_ITEM (ECTF_NOTYPEDAT, "no type information available for symbol") \
   _CTF_ITEM (ECTF_NOTSUP, "feature not supported") \
-  _CTF_ITEM (ECTF_NOENUMNAM, "enumerator name not found") \
-  _CTF_ITEM (ECTF_NOMEMBNAM, "member name not found") \
-  _CTF_ITEM (ECTF_RDONLY, "CTF container is read-only") \
-  _CTF_ITEM (ECTF_DTFULL, "CTF type is full (no more members allowed)") \
-  _CTF_ITEM (ECTF_FULL, "CTF container is full") \
+  _CTF_ITEM (ECTF_RDONLY, "CTF dict is read-only") \
+  _CTF_ITEM (ECTF_FULL, "implementation limit: CTF dict or type is full") \
   _CTF_ITEM (ECTF_DUPLICATE, "duplicate member, enumerator, datasec, or variable name") \
   _CTF_ITEM (ECTF_CONFLICT, "conflicting type is already defined") \
   _CTF_ITEM (ECTF_COMPRESS, "failed to compress CTF data") \
@@ -329,7 +321,7 @@ typedef int ctf_func_type_flags_t;
   _CTF_ITEM (ECTF_FLAGS, "CTF header contains flags unknown to libctf") \
   _CTF_ITEM (ECTF_NEEDSBFD, "this feature needs a libctf with BFD support") \
   _CTF_ITEM (ECTF_INCOMPLETE, "type is not a complete type") \
-  _CTF_ITEM (ECTF_NONAME, "type name must not be empty") \
+  _CTF_ITEM (ECTF_NONAME, "invalid or nonexistent name") \
   _CTF_ITEM (ECTF_BADFLAG, "invalid CTF dict flag specified") \
   _CTF_ITEM (ECTF_CTFVERS_NO_SERIALIZE, "CTFv1 dicts are too old to serialize") \
   _CTF_ITEM (ECTF_UNSTABLE, "attempt to write unstable file format version: set I_KNOW_LIBCTF_IS_UNSTABLE in the environment") \
@@ -337,16 +329,9 @@ typedef int ctf_func_type_flags_t;
   _CTF_ITEM (ECTF_WRONGPARENT, "cannot ctf_import: incorrect parent provided") \
   _CTF_ITEM (ECTF_NOTSERIALIZED, "CTF dict must be serialized first") \
   _CTF_ITEM (ECTF_BADCOMPONENT, "declaration tag component_idx is invalid") \
-  _CTF_ITEM (ECTF_NOTBITSOU, "type is not a bitfield-capable struct or union") \
   _CTF_ITEM (ECTF_DESCENDING, "structure offsets may not descend") \
   _CTF_ITEM (ECTF_LINKAGE, "invalid linkage") \
   _CTF_ITEM (ECTF_LINKKIND, "only functions and variables have linkage") \
-  _CTF_ITEM (ECTF_NEVERTAG, "cannot call this function with a tag kind") \
-  _CTF_ITEM (ECTF_NOTDATASEC, "this function requires a datasec") \
-  _CTF_ITEM (ECTF_NOTVAR, "this function requires a variable") \
-  _CTF_ITEM (ECTF_NODATASEC, "variable not found in datasec") \
-  _CTF_ITEM (ECTF_NOTDECLTAG, "this function requires a decl tag") \
-  _CTF_ITEM (ECTF_NOTTAG, "this function requires a type or decl tag") \
   _CTF_ITEM (ECTF_KIND_PROHIBITED, "writeout of suppressed kind attempted") \
   _CTF_ITEM (ECTF_NOTBTF, "cannot write out this dict as BTF") \
   _CTF_ITEM (ECTF_TOOLARGE, "prefix required for correct representation")
@@ -810,7 +795,9 @@ extern int ctf_type_visit (ctf_dict_t *, ctf_id_t, ctf_visit_f *, void *);
 extern int ctf_type_cmp (ctf_dict_t *, ctf_id_t, ctf_dict_t *, ctf_id_t);
 
 /* Get the name of an enumerator given its value, or vice versa.  If many
-   enumerators have the same value, the first with that value is returned.  */
+   enumerators have the same value, the first with that value is returned.
+   If no name exists for a given value, or no value for a given name,
+   ECTF_NONAME is raised.  */
 
 extern const char *ctf_enum_name (ctf_dict_t *, ctf_id_t, ctf_enum_value_t);
 extern ctf_ret_t ctf_enum_value (ctf_dict_t *, ctf_id_t, const char *,

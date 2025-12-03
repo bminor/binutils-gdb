@@ -169,17 +169,17 @@ main (int argc, char *argv[])
 		 err, ctf_errmsg (ctf_errno (fp)));
 
       if ((type = ctf_lookup_enumerator (fp, "DYNADD3", &val) != CTF_ERR) ||
-	  ctf_errno (fp) != ECTF_NOENUMNAM)
+	  ctf_errno (fp) != ECTF_NONAME)
 	{
 	  if (type != CTF_ERR)
 	    {
 	      char *foo;
-	      printf ("direct lookup: hidden lookup did not return ECTF_NOENUMNAM but rather %li in %s\n",
+	      printf ("direct lookup: hidden lookup did not return ECTF_NONAME but rather %li in %s\n",
 		      val.val, foo = ctf_type_aname (fp, type));
 	      free (foo);
 	    }
 	  else
-	    printf ("direct lookup: hidden lookup did not return ECTF_NOENUMNAM but rather %s\n",
+	    printf ("direct lookup: hidden lookup did not return ECTF_NONAME but rather %s\n",
 		    ctf_errmsg (ctf_errno (fp)));
 	}
 

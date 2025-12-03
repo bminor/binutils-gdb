@@ -457,7 +457,8 @@ ctf_lookup_by_kind (ctf_dict_t *fp, ctf_kind_t kind, const char *name)
   ctf_id_t type;
 
   if (kind == CTF_K_TYPE_TAG || kind == CTF_K_DECL_TAG)
-    return (ctf_set_typed_errno (fp, ECTF_NEVERTAG));
+    return ctf_typed_err (err_locus (fp), ECTF_WRONGKIND,
+			  _("cannot call this function with a tag kind"));
 
   if ((type = ctf_dynhash_lookup_type (ctf_name_table (fp, kind),
 				       name)) != CTF_ERR)
@@ -468,7 +469,8 @@ ctf_lookup_by_kind (ctf_dict_t *fp, ctf_kind_t kind, const char *name)
 					  name)) != CTF_ERR)
     return type;
 
-  return ctf_set_typed_errno (fp, ECTF_NOTYPE);
+  return ctf_typed_err (err_locus (fp), ECTF_NOTYPE,
+			_("type named %s of type %i"), name, kind);
 }
 
 /* Look up a single enumerator by enumeration constant name.  Returns the ID of
@@ -497,14 +499,16 @@ ctf_lookup_enumerator (ctf_dict_t *fp, const char *name, ctf_enum_value_t *enum_
   if (type == 0 && fp->ctf_parent)
     {
       if ((type = ctf_lookup_enumerator (fp->ctf_parent, name, enum_value)) == 0)
-	return ctf_set_typed_errno (fp, ECTF_NOENUMNAM);
+	return ctf_typed_err (err_locus (fp), ECTF_NONAME, _("enumerator %s"),
+			      name);
       return type;
     }
 
   /* Nothing more to do if this type didn't exist or we don't have to look up
      the enum value.  */
   if (type == 0)
-    return ctf_set_typed_errno (fp, ECTF_NOENUMNAM);
+    return ctf_typed_err (err_locus (fp), ECTF_NONAME, _("enumerator %s"),
+			  name);
 
   if (enum_value == NULL)
     return type;

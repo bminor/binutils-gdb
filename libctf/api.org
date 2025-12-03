@@ -125,18 +125,11 @@ implemented, prototype only)
 *** Additions (so far)
 
   _CTF_ITEM (ECTF_BADCOMPONENT, "Declaration tag component_idx is invalid.") \
-  _CTF_ITEM (ECTF_NOTBITSOU, "Type is not a bitfield-capable struct or union.") \
   _CTF_ITEM (ECTF_DESCENDING, "Structure offsets may not descend.") \
   _CTF_ITEM (ECTF_LINKAGE, "Invalid linkage.") \
   _CTF_ITEM (ECTF_LINKKIND, "Only functions and variables have linkage.") \
-  _CTF_ITEM (ECTF_NEVERTAG, "Cannot call this function with a tag kind.") \
-  _CTF_ITEM (ECTF_NOTDATASEC, "This function requires a datasec.") \
-  _CTF_ITEM (ECTF_NOTVAR, "This function requires a variable.") \
-  _CTF_ITEM (ECTF_NOTDECLTAG, "This function requires a decl tag.") \
-  _CTF_ITEM (ECTF_NOTTAG, "This function requires a type or decl tag.")
   _CTF_ITEM (ECTF_KIND_PROHIBITED, "Writeout of suppressed kind attempted.")
   _CTF_ITEM (ECTF_NOTBTF, "Cannot write out this dict as BTF.") \
-  _CTF_ITEM (ECTF_NODATASEC, "Variable not found in datasec.")
   _CTF_ITEM (ECTF_TOOLARGE, "Prefix required for correct representation.")
 
 A bit of reshuffling of the constants to put ECTF_NEXT_END at the top, for
