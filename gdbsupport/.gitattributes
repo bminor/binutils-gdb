@@ -14,3 +14,8 @@
 
 configure   -whitespace
 aclocal.m4  -whitespace
+Makefile.in -whitespace
+
+# Imported files.
+
+unordered_dense/* -whitespace
