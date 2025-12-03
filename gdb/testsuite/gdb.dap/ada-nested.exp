@@ -24,7 +24,7 @@ standard_ada_testfile prog
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable \
 	 {debug additional_flags=-gnata}] != ""} {
-    return -1
+    return
 }
 
 if {[dap_initialize] == ""} {
