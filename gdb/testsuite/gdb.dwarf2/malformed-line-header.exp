@@ -1,0 +1,57 @@
+# Copyright 2025 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Check handling of v3 .debug_line header advertised as v4, as produced by
+# fpc <= v3.2.4.
+
+load_lib dwarf.exp
+
+# This test can only be run on targets which support the DWARF
+# assembler.
+require dwarf2_support
+
+standard_testfile main.c -dw.S
+
+set asm_file [standard_output_file $srcfile2]
+Dwarf::assemble $asm_file {
+    declare_labels Llines
+
+    cu {} {
+	compile_unit {
+	    DW_AT_language @DW_LANG_C
+	    DW_AT_name $::srcfile
+	    DW_AT_stmt_list $Llines DW_FORM_sec_offset
+	} {
+	}
+    }
+
+    lines {
+	version 3
+	advertised_version 4
+    } Llines {
+	include_dir "$::srcdir/$::subdir"
+	file_name "$::srcfile" 1
+    }
+}
+
+if { [prepare_for_testing "failed to prepare" ${testfile} \
+	  [list $srcfile $asm_file] {nodebug}] } {
+    return -1
+}
+
+gdb_test "info line 1" \
+    [string cat \
+	 "malformed line number program header," \
+	 " advertised length does not match actual length"]

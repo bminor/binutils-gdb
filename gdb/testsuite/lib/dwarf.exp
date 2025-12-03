@@ -2458,8 +2458,11 @@ namespace eval Dwarf {
     # Current options are:
     # is_64 0|1    - boolean indicating if you want to emit 64-bit DWARF
     #                default = 0 (32-bit)
-    # version n    - DWARF version number to emit
+    # version n    - DWARF version to determine .debug_line format
     #                default = 4
+    # advertised_version n
+    #              - DWARF version to emit (used only for invalid DWARF)
+    #                default = value provided by <version n>
     # addr_size n  - the size of addresses in bytes: 4, 8, or default
     #                default = default
     # seg_sel_size n
@@ -2487,12 +2490,14 @@ namespace eval Dwarf {
 	variable _line_header_finalized
 	variable _line_header_end_label
 	variable _line_unit_version
+	variable _line_advertised_unit_version
 	variable _line_is_64
 	variable _line_string_form
 
 	# Establish the defaults.
 	set _line_is_64 0
 	set _line_unit_version 4
+	set _line_advertised_unit_version default
 	set _unit_addr_size default
 	set _line_include_dirs {}
 	set _line_file_names {}
@@ -2506,6 +2511,7 @@ namespace eval Dwarf {
 	    switch -exact -- $name {
 		is_64 { set _line_is_64 $value }
 		version { set _line_unit_version $value }
+		advertised_version { set _line_unit_advertised_version $value }
 		addr_size { set _unit_addr_size $value }
 		seg_sel_size { set _seg_sel_size $value }
 		default_is_stmt { set _default_is_stmt $value }
@@ -2519,6 +2525,9 @@ namespace eval Dwarf {
 	    } else {
 		set _unit_addr_size 4
 	    }
+	}
+	if {$_line_unit_advertised_version == "default"} {
+	    set _line_unit_advertised_version $_line_unit_version
 	}
 
 	set unit_num [incr _line_count]
@@ -2545,7 +2554,7 @@ namespace eval Dwarf {
 
 	define_label $unit_len_label
 
-	_op .2byte $_line_unit_version version
+	_op .2byte $_line_unit_advertised_version version
 
 	if { $_line_unit_version >= 5 } {
 	    _op .byte $_unit_addr_size "address_size"

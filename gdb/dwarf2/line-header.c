@@ -415,5 +415,9 @@ dwarf_decode_line_header (sect_offset sect_off, bool is_dwz,
     complaint (_("line number info header doesn't "
 		 "fit in `.debug_line' section"));
 
+  if (line_ptr != lh->statement_program_start)
+    error (_("malformed line number program header, advertised length does"
+	     " not match actual length"));
+
   return lh;
 }
