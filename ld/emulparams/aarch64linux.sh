@@ -1,3 +1,4 @@
+source_sh ${srcdir}/emulparams/sframe_info.sh
 source_sh ${srcdir}/emulparams/dt-relr.sh
 
 ARCH=aarch64
