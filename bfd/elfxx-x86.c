@@ -4840,7 +4840,7 @@ _bfd_x86_elf_link_setup_gnu_properties
 	}
 
       /* .sframe sections are emitted for AMD64 ABI only.  */
-      if (ABI_64_P (info->output_bfd) && !info->no_ld_generated_unwind_info)
+      if (ABI_64_P (info->output_bfd) && !info->discard_sframe_sections)
 	{
 	  flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
 			    | SEC_HAS_CONTENTS | SEC_IN_MEMORY

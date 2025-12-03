@@ -2364,13 +2364,23 @@ elf_plt_unwind_list_options (FILE *file)
 }
 
 static void
-ld_list_options (FILE *file, bool elf, bool shlib, bool plt_unwind)
+elf_sframe_list_options (FILE *file)
+{
+  fprintf (file, _("\
+  --discard-sframe-sections   Don't generate SFrame stack trace info in output\n"));
+}
+
+static void
+ld_list_options (FILE *file, bool elf, bool shlib, bool plt_unwind,
+		 bool sframe_info)
 {
   if (!elf)
     return;
   printf (_("ELF emulations:\n"));
   if (plt_unwind)
     elf_plt_unwind_list_options (file);
+  if (sframe_info)
+    elf_sframe_list_options (file);
   elf_static_list_options (file);
   if (shlib)
     elf_shlib_list_options (file);
@@ -2495,7 +2505,8 @@ help (void)
   /* xgettext:c-format */
   printf (_("%s: emulation specific options:\n"), program_name);
   ld_list_options (stdout, ELF_LIST_OPTIONS, ELF_SHLIB_LIST_OPTIONS,
-		   ELF_PLT_UNWIND_LIST_OPTIONS);
+		   ELF_PLT_UNWIND_LIST_OPTIONS,
+		   ELF_SFRAME_LIST_OPTIONS);
   ldemul_list_emulation_options (stdout);
   printf ("\n");
 

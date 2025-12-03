@@ -215,6 +215,8 @@ enum option_values
   /* Used by emulparams/plt_unwind.sh.  */
   OPTION_LD_GENERATED_UNWIND_INFO,
   OPTION_NO_LD_GENERATED_UNWIND_INFO,
+  /* Used by emulparams/sframe_info.sh.  */
+  OPTION_DISCARD_SFRAME_SECTIONS,
   /* Used by emultempl/aarch64elf.em.  */
   OPTION_FIX_ERRATUM_835769,
   OPTION_FIX_ERRATUM_843419,

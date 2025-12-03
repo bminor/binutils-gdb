@@ -1,4 +1,5 @@
 source_sh ${srcdir}/emulparams/plt_unwind.sh
+source_sh ${srcdir}/emulparams/sframe-info.sh
 source_sh ${srcdir}/emulparams/extern_protected_data.sh
 source_sh ${srcdir}/emulparams/dynamic_undefined_weak.sh
 source_sh ${srcdir}/emulparams/reloc_overflow.sh

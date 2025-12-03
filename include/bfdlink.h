@@ -475,6 +475,10 @@ struct bfd_link_info
      linker created sections, TRUE if it should be omitted.  */
   unsigned int no_ld_generated_unwind_info: 1;
 
+  /* TRUE if no .sframe stack trace info should be generated for the output.
+     This includes linker generated SFrame info as well.  */
+  unsigned int discard_sframe_sections: 1;
+
   /* TRUE if BFD should generate a "task linked" object file,
      similar to relocatable but also with globals converted to
      statics.  */

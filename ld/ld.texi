@@ -3247,9 +3247,13 @@ section and ELF @code{PT_GNU_EH_FRAME} segment header.
 @item --no-ld-generated-unwind-info
 Request creation of @code{.eh_frame} unwind info for linker
 generated code sections like PLT.  This option is on by default
-if linker generated unwind info is supported.  This option also
-controls the generation of @code{.sframe} stack trace info for linker
-generated code sections like PLT.
+if linker generated unwind info is supported.
+
+@kindex --discard-sframe-sections
+@item --discard-sframe-sections
+Discard @code{.sframe} stack trace info from the output.  This option also
+prohibits the creation of SFrame stack trace data for linker generated code
+sections like PLT.  This option is off by default.
 
 @kindex --enable-new-dtags
 @kindex --disable-new-dtags

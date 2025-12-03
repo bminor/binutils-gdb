@@ -4309,7 +4309,7 @@ elf_s390_create_dynamic_sections (bfd *dynobj,
         }
 
       /* Create .sframe section for .plt section.  */
-      if (!info->no_ld_generated_unwind_info)
+      if (!info->discard_sframe_sections)
 	{
 	  flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
 			    | SEC_HAS_CONTENTS | SEC_IN_MEMORY
