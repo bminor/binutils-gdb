@@ -200,6 +200,9 @@ _bfd_elf_parse_sframe (bfd *abfd,
   bfd_size_type sf_size;
   int decerr = 0;
 
+  if (info->no_ld_sframe_info)
+    sec->flags |= SEC_EXCLUDE;
+
   /* Prior versions of assembler and ld were generating SFrame sections with
      section type SHT_PROGBITS.  Issue an error for lack of support for such
      objects now.  Even if section size is zero, a valid section type is
