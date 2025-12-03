@@ -27,9 +27,9 @@
    grouped logically, see doc/agentexpr.texi.
 
    Each line is of the form:
-   
+
    DEFOP (name, size, data_size, consumed, produced, opcode)
-   
+
    NAME is the name of the operation.
    SIZE is the number of argument bytes that the operation takes from
    the bytecode stream.
