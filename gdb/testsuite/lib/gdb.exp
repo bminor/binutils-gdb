@@ -11677,6 +11677,10 @@ proc section_get {exec section} {
 # Otherwise, return false.
 
 proc expect_build_id_in_core_file { filename } {
+    if {![file exists $filename]} {
+	error "File not found: $filename"
+    }
+
     # I'm not sure if other kernels take care to add the first page of
     # each ELF into the core file.  If they do then this test can be
     # relaxed.

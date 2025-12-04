@@ -34,6 +34,11 @@ if { [build_executable "build exec" $binfile $srcfile $opts] == -1} {
     return
 }
 
+set expect_build_id_in_core_file_binfile \
+    [expect_build_id_in_core_file $binfile]
+set expect_build_id_in_core_file_libfile \
+    [expect_build_id_in_core_file $libfile]
+
 # The cc-with-gnu-debuglink board will split the debug out into the
 # .debug directory.  This test script relies on having GDB lookup the
 # objfile and debug via the build-id, which this test sets up.  Trying
@@ -185,8 +190,8 @@ with_test_prefix "no objfiles available" {
 
 # The following tests assume that the build-ids of binfile and libfile can be
 # found in the core file.
-require {expect_build_id_in_core_file $binfile}
-require {expect_build_id_in_core_file $libfile}
+require {expr $expect_build_id_in_core_file_binfile}
+require {expr $expect_build_id_in_core_file_libfile}
 
 with_test_prefix "all objfiles available" {
     # Another sanity check that GDB can find the files via the
