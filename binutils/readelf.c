@@ -14739,6 +14739,8 @@ print_symbol (Filedata *           filedata,
 	}
     }
 
+  bool is_valid = false;
+
   /* Get the symbol's name.  For section symbols without a
      specific name use the (already computed) section name.  */
   if (ELF_ST_TYPE (psym->st_info) == STT_SECTION
@@ -14749,8 +14751,6 @@ print_symbol (Filedata *           filedata,
     }
   else
     {
-      bool is_valid;
-
       is_valid = valid_symbol_name (strtab, strtab_size, psym->st_name);
       sstr = is_valid  ? strtab + psym->st_name : _("<corrupt>");
     }
@@ -14798,6 +14798,23 @@ print_symbol (Filedata *           filedata,
       && filedata->file_header.e_ident[EI_OSABI] != ELFOSABI_SOLARIS)
     warn (_("local symbol %" PRIu64 " found at index >= %s's sh_info value of %u\n"),
 	  symbol_index, printable_section_name (filedata, section), section->sh_info);
+
+  /* Local symbols whose value is larger than their section's size are suspicious
+     especially if that section is mergeable - and hence might change offsets of
+     the contents inside the section.  */
+  if (ELF_ST_BIND (psym->st_info) == STB_LOCAL
+      && ! is_special
+      && is_valid
+      && psym->st_shndx < filedata->file_header.e_shnum
+      && filedata->section_headers != NULL
+      /* FIXME: Should we warn for non-mergeable sections ? */
+      && (filedata->section_headers[psym->st_shndx].sh_flags & SHF_MERGE)
+      && psym->st_value > filedata->section_headers[psym->st_shndx].sh_size)
+    warn (_("local symbol %s has a value (%#" PRIx64 ") which is larger than mergeable section %s's size (%#" PRIx64 ")\n"),
+	  strtab + psym->st_name,
+	  psym->st_value,
+	  printable_section_name_from_index (filedata, psym->st_shndx, NULL),
+	  filedata->section_headers[psym->st_shndx].sh_size);
 }
 
 static const char *
