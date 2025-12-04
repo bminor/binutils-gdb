@@ -1197,13 +1197,10 @@ captured_main_1 (struct captured_main_args *context)
 
   if (!quiet)
     {
-      /* Print all the junk at the top, with trailing "..." if we are
-	 about to read a symbol file (possibly slowly).  */
+      /* Print the version, copyright information, and hint text.  */
       print_gdb_version (gdb_stdout, true);
       gdb_printf ("\n");
       print_gdb_hints (gdb_stdout);
-      if (symarg)
-	gdb_printf ("..");
       gdb_printf ("\n");
       gdb_flush (gdb_stdout);	/* Force to screen during slow
 				   operations.  */

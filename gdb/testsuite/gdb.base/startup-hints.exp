@@ -1,0 +1,144 @@
+# Copyright 2025 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test the start up hint text.  Check that it is boxed (or not)
+# correctly.
+
+# Test assumes host == build.
+require {!is_remote host}
+
+# Just use a simple empty 'main' function.
+standard_testfile main.c
+
+if { [build_executable "build" $testfile $srcfile] != 0 } {
+    return
+}
+
+# Return a single regexp string for the startup hint text when the
+# terminal width is WIDTH.  For narrow terminals GDB will just print
+# the hint text.  For wider terminals GDB places the hint into a box.
+proc build_hint_re { width } {
+    # GDB imposes a maximum width of 80.
+    if { $width > 80 || $width == 0 } {
+	set width 80
+    }
+
+    if { $width > 50 } {
+
+	# These lines are shorter than 50 characters, and so are never
+	# wrapped.
+	set msg {
+	    {Find the GDB manual online at:}
+	    {http://www.gnu.org/software/gdb/documentation/.}
+	    {For help, type "help".}
+	}
+
+	# The final line is wrapped based on the terminal width.
+	if { $width > 66 } {
+	    lappend msg {Type "apropos <word>" to search for commands related to <word>.}
+	} elseif { $width > 58 } {
+	    lappend msg {Type "apropos <word>" to search for commands related to} {<word>.}
+	} elseif { $width > 55 } {
+	    lappend msg {Type "apropos <word>" to search for commands related} {to <word>.}
+	} elseif { $width > 47 } {
+	    lappend msg {Type "apropos <word>" to search for commands} { related to <word>.}
+	}
+
+	# Place the lines into a box, padding with whitespace so that
+	# the sides are correctly aligned.
+	set top_bottom "+[string repeat "-" [expr $width - 2]]+"
+	set lines [list $top_bottom]
+	foreach m $msg {
+	    set space_count [expr $width - 4 - [string length $m]]
+	    set spaces [string repeat " " $space_count]
+	    lappend lines "| $m$spaces |"
+	}
+	lappend lines $top_bottom
+    } else {
+	# We tell GDB that the terminal width is WIDTH, but in reality
+	# the actual terminal width is unlimited.  As such, GDB drops
+	# the box around the hint, but doesn't inject any additional
+	# newlines (it assumes the terminal will break the lines for
+	# us).  This is why, despite the narrow terminal, we expect
+	# each line without any line breaks.
+	set lines {{Find the GDB manual online at:} \
+		       {http://www.gnu.org/software/gdb/documentation/.} \
+		       {For help, type "help".} \
+		       {Type "apropos <word>" to search for commands related to <word>.}}
+    }
+
+    # Add blank line before and after current lines.
+    set lines [linsert $lines 0 ""]
+    lappend lines ""
+
+    # Convert every line to a regexp.  Also log the expected output
+    # for debugging.
+    set lines_re {}
+    verbose -log -- "Expected message format:"
+    foreach l $lines {
+	verbose -log -- "$l"
+	lappend lines_re [string_to_regexp $l]
+    }
+
+    # Join the regexp together.
+    return [multi_line {*}$lines_re]
+}
+
+# Tell GDB to start with a terminal width of WIDTH, then start GDB.
+# Check that the hint text is formatted correctly.
+proc_with_prefix test_for_hint_with_width { width load_exec } {
+    global GDBFLAGS
+
+    save_vars { GDBFLAGS } {
+	append GDBFLAGS " -eiex \"set width $width\" -eiex \"set height 0\""
+	if { $load_exec } {
+	    append GDBFLAGS " \"$::binfile\""
+	}
+	gdb_exit
+	gdb_spawn
+    }
+
+    set hint_re [build_hint_re $width]
+
+    if { $load_exec } {
+	append hint_re "\r\nReading symbols from [string_to_regexp $::binfile]\\.\\.\\."
+    }
+
+    gdb_test "" $hint_re \
+	"check for hint with width $width"
+}
+
+save_vars { INTERNAL_GDBFLAGS } {
+    set INTERNAL_GDBFLAGS [string map {"-q" ""} $INTERNAL_GDBFLAGS]
+
+    foreach_with_prefix load_exec { false true } {
+
+	# Width 0 actually means unlimited.  The other small sizes
+	# check that GDB doesn't trigger undefined behaviour by trying
+	# to create strings with a negative length.
+	for { set width 0 } { $width <= 5 } { incr width } {
+	    test_for_hint_with_width $width $load_exec
+	}
+
+	# These widths cover the point where we transition from using
+	# an unboxed hint to a boxed hint.
+	for { set width 45 } { $width <= 55 } { incr width } {
+	    test_for_hint_with_width $width $load_exec
+	}
+
+	# Very large widths are treated like a width of 80.
+	test_for_hint_with_width 100 $load_exec
+    }
+}

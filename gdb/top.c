@@ -1420,6 +1420,8 @@ print_gdb_hints (struct ui_file *stream)
   if (80 < width)
     width = 80;
 
+  gdb_assert (width > 0);
+
   std::string docs_url = "http://www.gnu.org/software/gdb/documentation/";
   std::array<string_file, 4> styled_msg {
     string_file (true),
@@ -1434,20 +1436,29 @@ print_gdb_hints (struct ui_file *stream)
   gdb_printf (&styled_msg[2], _("For help, type \"%ps\"."),
 	      styled_string (command_style.style (), "help"));
   gdb_printf (&styled_msg[3],
-	      _("Type \"%ps\" to search for commands related to <word>"),
+	      _("Type \"%ps\" to search for commands related to <word>."),
 	      styled_string (command_style.style (), "apropos <word>"));
 
   /* If there isn't enough space to display the longest URL in a boxed
-     style, use the simple styling of a singular visual break.  The longest
-     URL is used because the other messages may be broken into multiple
-     lines, but URLs can't.  */
-  if (width - 3 <= docs_url.length ())
+     style, then don't use the box, the terminal will break the output
+     where needed.  The longest URL is used because the other messages may
+     be broken into multiple lines, but URLs can't.
+
+     The ' + 1' after the URL accounts for the period that is placed after
+     the URL.
+
+     The '+ 4' accounts for the box and inner white space.  We add the 4 to
+     the string length rather than subtract from the width as the width
+     could be less than 4, and we want to avoid wrap around.  */
+  if (width < docs_url.length () + 1 + 4)
     {
       for (string_file &msg : styled_msg)
 	gdb_printf (stream, "%s\n", msg.c_str ());
     }
   else
     {
+      gdb_assert (width > 4);
+
       std::string sep (width - 2, '-');
 
       if (emojis_ok ())
