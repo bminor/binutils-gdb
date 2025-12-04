@@ -1446,8 +1446,6 @@ print_gdb_hints (struct ui_file *stream)
     {
       for (string_file &msg : styled_msg)
 	gdb_printf (stream, "%s\n", msg.c_str ());
-
-      return;
     }
   else
     {
