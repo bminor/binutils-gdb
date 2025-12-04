@@ -1040,8 +1040,18 @@ ada_print_type (struct type *type0, const char *varstring,
 	    gdb_printf (stream, ">");
 	  }
 	else if (ada_is_modular_type (type))
-	  gdb_printf (stream, "mod %s",
-		      int_string (ada_modulus (type), 10, 0, 0, 1));
+	  {
+	    std::optional<ULONGEST> bound = ada_modular_bound (type);
+	    gdb_mpz modulus;
+	    if (bound.has_value ())
+	      {
+		modulus = *bound;
+		modulus += 1;
+	      }
+	    else
+	      modulus = 0;
+	    gdb_printf (stream, "mod %s", modulus.str ().c_str ());
+	  }
 	else
 	  {
 	    gdb_printf (stream, "range ");

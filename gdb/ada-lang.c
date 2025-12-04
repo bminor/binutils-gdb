@@ -2607,7 +2607,7 @@ decode_constrained_packed_array (struct value *arr)
       int bit_size, bit_pos;
       ULONGEST mod;
 
-      mod = ada_modulus (arr->type ()) - 1;
+      mod = ada_modular_bound (arr->type ()).value_or (0);
       bit_size = 0;
       while (mod > 0)
 	{
@@ -11638,19 +11638,19 @@ ada_is_modular_type (struct type *type)
 	  && subranged_type->is_unsigned ());
 }
 
-/* Assuming ada_is_modular_type (TYPE), the modulus of TYPE.  */
+/* See ada-lang.h.  */
 
-ULONGEST
-ada_modulus (struct type *type)
+std::optional<ULONGEST>
+ada_modular_bound (struct type *type)
 {
   const dynamic_prop &high = type->bounds ()->high;
 
   if (high.is_constant ())
-    return (ULONGEST) high.const_val () + 1;
+    return (ULONGEST) high.const_val ();
 
-  /* If TYPE is unresolved, the high bound might be a location list.  Return
-     0, for lack of a better value to return.  */
-  return 0;
+  /* If TYPE is unresolved, the high bound might be a location
+     list.  */
+  return {};
 }
 
 

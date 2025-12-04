@@ -1,0 +1,36 @@
+# Copyright 2025 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test for a bug when printing a large modular type.
+
+load_lib "ada.exp"
+
+require allow_ada_tests
+
+standard_ada_testfile prog
+
+if {[gdb_compile_ada "${srcfile}" "${binfile}" executable {debug}] != ""} {
+    return
+}
+
+clean_restart ${testfile}
+
+set bp_location [gdb_get_line_number "STOP" ${testdir}/prog.adb]
+runto "prog.adb:$bp_location"
+
+# The bug was that a modular type with a size equal to gdb's ULONGEST
+# was displayed, gdb would say "mod 0".
+gdb_test "ptype mod1_type" "type = mod 4294967296"
+gdb_test "ptype mod2_type" "type = mod 18446744073709551616"

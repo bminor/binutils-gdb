@@ -947,8 +947,11 @@ primary :	primary TICK_ACCESS
 			  struct type *type_arg = check_typedef ($1);
 			  if (!ada_is_modular_type (type_arg))
 			    error (_("'modulus must be applied to modular type"));
-			  write_int (pstate, ada_modulus (type_arg),
-				     type_arg->target_type ());
+			  std::optional<ULONGEST> bound
+			    = ada_modular_bound (type_arg);
+			  if (!bound.has_value ())
+			    error (_("'modulus applied to type with non-constant bound"));
+			  write_int (pstate, *bound, type_arg->target_type ());
 			}
 	;
 
