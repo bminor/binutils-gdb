@@ -298,18 +298,16 @@ cli_ui_out::do_progress_notify (const std::string &msg,
 				const char *unit,
 				double howmuch, double total)
 {
-  int chars_per_line = get_chars_per_line ();
+  unsigned int chars_per_line = get_chars_per_line ();
   struct ui_file *stream = get_unbuffered (m_streams.back ());
   cli_progress_info &info (m_progress_info.back ());
-
-  if (chars_per_line > MAX_CHARS_PER_LINE)
-    chars_per_line = MAX_CHARS_PER_LINE;
 
   if (info.state == progress_update::START)
     {
       if (stream->isatty ()
 	  && current_ui->input_interactive_p ()
-	  && chars_per_line >= MIN_CHARS_PER_LINE)
+	  && chars_per_line >= MIN_CHARS_PER_LINE
+	  && chars_per_line != UINT_MAX)
 	{
 	  gdb_printf (stream, "%s\n", msg.c_str ());
 	  info.state = progress_update::BAR;
@@ -321,9 +319,11 @@ cli_ui_out::do_progress_notify (const std::string &msg,
 	}
     }
 
-  if (info.state != progress_update::BAR
-      || chars_per_line < MIN_CHARS_PER_LINE)
+  if (info.state != progress_update::BAR)
     return;
+
+  if (chars_per_line > MAX_CHARS_PER_LINE)
+    chars_per_line = MAX_CHARS_PER_LINE;
 
   if (total > 0 && howmuch >= 0 && howmuch <= 1.0)
     {
@@ -385,14 +385,15 @@ void
 cli_ui_out::clear_progress_notify ()
 {
   struct ui_file *stream = get_unbuffered (m_streams.back ());
-  int chars_per_line = get_chars_per_line ();
+  unsigned int chars_per_line = get_chars_per_line ();
 
   scoped_restore save_pagination
     = make_scoped_restore (&pagination_enabled, false);
 
   if (!stream->isatty ()
       || !current_ui->input_interactive_p ()
-      || chars_per_line < MIN_CHARS_PER_LINE)
+      || chars_per_line < MIN_CHARS_PER_LINE
+      || chars_per_line == UINT_MAX)
     return;
 
   if (chars_per_line > MAX_CHARS_PER_LINE)

@@ -157,9 +157,10 @@ extern void wrap_here (int);
 
 extern void reinitialize_more_filter (void);
 
-/* Return the number of characters in a line.  */
+/* Return the number of characters in a line.  Will never be zero, but can
+   be UINT_MAX, which indicates unlimited characters per line.  */
 
-extern int get_chars_per_line ();
+extern unsigned int get_chars_per_line ();
 
 extern bool pagination_enabled;
 

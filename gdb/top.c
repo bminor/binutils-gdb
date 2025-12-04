@@ -1413,7 +1413,7 @@ box_one_message (ui_file *stream, std::string message, int width)
 void
 print_gdb_hints (struct ui_file *stream)
 {
-  int width = get_chars_per_line ();
+  unsigned int width = get_chars_per_line ();
 
   /* Arbitrarily setting maximum width to 80 characters, so that
      things are big and visible but not overwhelming.  */
@@ -1438,10 +1438,10 @@ print_gdb_hints (struct ui_file *stream)
 	      styled_string (command_style.style (), "apropos <word>"));
 
   /* If there isn't enough space to display the longest URL in a boxed
-     style or if screen width is unlimited, use the simple styling of a
-     singular visual break.  The longest URL is used because the other
-     messages may be broken into multiple lines, but URLs can't.  */
-  if (width - 3 <= (int) docs_url.length ())
+     style, use the simple styling of a singular visual break.  The longest
+     URL is used because the other messages may be broken into multiple
+     lines, but URLs can't.  */
+  if (width - 3 <= docs_url.length ())
     {
       for (string_file &msg : styled_msg)
 	gdb_printf (stream, "%s\n", msg.c_str ());

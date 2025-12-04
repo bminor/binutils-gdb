@@ -1546,9 +1546,10 @@ gdb_flush (struct ui_file *stream)
 
 /* See utils.h.  */
 
-int
+unsigned int
 get_chars_per_line ()
 {
+  gdb_assert (chars_per_line > 0);
   return chars_per_line;
 }
 
