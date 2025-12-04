@@ -633,9 +633,7 @@ call_initialize_gdb_module (void *data)
      performed within the desired module.  */
   scm_c_define_module (gdbscm_module_name, initialize_gdb_module, NULL);
 
-#if HAVE_GUILE_MANUAL_FINALIZATION
   scm_run_finalizers ();
-#endif
 
   return NULL;
 }
@@ -651,12 +649,10 @@ gdbscm_initialize (const struct extension_language_defn *extlang)
      Python side to define module "gdb" which imports "_gdb".  There is
      evidently no similar convention in Guile so we skip this.  */
 
-#if HAVE_GUILE_MANUAL_FINALIZATION
   /* Our SMOB free functions are not thread-safe, as GDB itself is not
      intended to be thread-safe.  Disable automatic finalization so that
      finalizers aren't run in other threads.  */
   scm_set_automatic_finalization_enabled (0);
-#endif
 
   /* Before we initialize Guile, block signals needed by gdb (especially
      SIGCHLD).  This is done so that all threads created during Guile

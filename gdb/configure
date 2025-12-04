@@ -28818,7 +28818,7 @@ fi
 
 
 
-try_guile_versions="guile-3.0 guile-2.2 guile-2.0"
+try_guile_versions="guile-3.0 guile-2.2"
 have_libguile=no
 case "${with_guile}" in
 no)
@@ -28886,14 +28886,6 @@ else
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-        ac_fn_c_check_func "$LINENO" "scm_set_automatic_finalization_enabled" "ac_cv_func_scm_set_automatic_finalization_enabled"
-if test "x$ac_cv_func_scm_set_automatic_finalization_enabled" = xyes; then :
-
-$as_echo "#define HAVE_GUILE_MANUAL_FINALIZATION 1" >>confdefs.h
-
-
-fi
-
     CPPFLAGS=$save_CPPFLAGS
     LIBS=$save_LIBS
     if test "${found_usable_guile}" = no; then
@@ -28970,14 +28962,6 @@ else
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-        ac_fn_c_check_func "$LINENO" "scm_set_automatic_finalization_enabled" "ac_cv_func_scm_set_automatic_finalization_enabled"
-if test "x$ac_cv_func_scm_set_automatic_finalization_enabled" = xyes; then :
-
-$as_echo "#define HAVE_GUILE_MANUAL_FINALIZATION 1" >>confdefs.h
-
-
-fi
-
     CPPFLAGS=$save_CPPFLAGS
     LIBS=$save_LIBS
     if test "${found_usable_guile}" = no; then
@@ -29051,14 +29035,6 @@ else
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-        ac_fn_c_check_func "$LINENO" "scm_set_automatic_finalization_enabled" "ac_cv_func_scm_set_automatic_finalization_enabled"
-if test "x$ac_cv_func_scm_set_automatic_finalization_enabled" = xyes; then :
-
-$as_echo "#define HAVE_GUILE_MANUAL_FINALIZATION 1" >>confdefs.h
-
-
-fi
-
     CPPFLAGS=$save_CPPFLAGS
     LIBS=$save_LIBS
     if test "${found_usable_guile}" = no; then
@@ -29078,7 +29054,7 @@ $as_echo "${found_usable_guile}" >&6; }
   fi
   ;;
 "" | */*)
-  # Disallow --with=guile="" and --with-guile=foo/bar.
+  # Disallow --with-guile="" and --with-guile=foo/bar.
   as_fn_error $? "invalid value for --with-guile" "$LINENO" 5
   ;;
 *)
@@ -29142,14 +29118,6 @@ else
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-        ac_fn_c_check_func "$LINENO" "scm_set_automatic_finalization_enabled" "ac_cv_func_scm_set_automatic_finalization_enabled"
-if test "x$ac_cv_func_scm_set_automatic_finalization_enabled" = xyes; then :
-
-$as_echo "#define HAVE_GUILE_MANUAL_FINALIZATION 1" >>confdefs.h
-
-
-fi
-
     CPPFLAGS=$save_CPPFLAGS
     LIBS=$save_LIBS
     if test "${found_usable_guile}" = no; then
@@ -29177,16 +29145,6 @@ if ${ac_cv_guild_program_name+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_cv_guild_program_name="`"${with_guile}" --variable guild "${guile_version}"`"
-
-     # In Guile up to 2.0.11 included, guile-2.0.pc would not define
-     # the 'guild' and 'bindir' variables.  In that case, try to guess
-     # what the program name is, at the risk of getting it wrong if
-     # Guile was configured with '--program-suffix' or similar.
-     if test "x$ac_cv_guild_program_name" = "x"; then
-       guile_exec_prefix="`"${with_guile}" --variable exec_prefix "${guile_version}"`"
-       ac_cv_guild_program_name="$guile_exec_prefix/bin/guild"
-     fi
-
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_guild_program_name" >&5
 $as_echo "$ac_cv_guild_program_name" >&6; }
@@ -29207,16 +29165,6 @@ if ${ac_cv_guild_program_name+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_cv_guild_program_name="`"${pkg_config_prog_path}" --variable guild "${guile_version}"`"
-
-     # In Guile up to 2.0.11 included, guile-2.0.pc would not define
-     # the 'guild' and 'bindir' variables.  In that case, try to guess
-     # what the program name is, at the risk of getting it wrong if
-     # Guile was configured with '--program-suffix' or similar.
-     if test "x$ac_cv_guild_program_name" = "x"; then
-       guile_exec_prefix="`"${pkg_config_prog_path}" --variable exec_prefix "${guile_version}"`"
-       ac_cv_guild_program_name="$guile_exec_prefix/bin/guild"
-     fi
-
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_guild_program_name" >&5
 $as_echo "$ac_cv_guild_program_name" >&6; }
@@ -29272,24 +29220,6 @@ $as_echo "#define HAVE_GUILE 1" >>confdefs.h
   CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_GUILE_SRCS)"
   CONFIG_INSTALL="$CONFIG_INSTALL install-guile"
   ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_GUILE_CFLAGS)"
-
-    save_LIBS="$LIBS"
-  save_CPPFLAGS="$CPPFLAGS"
-  LIBS="$GUILE_LIBS"
-  CPPFLAGS="$GUILE_CPPFLAGS"
-  for ac_func in scm_new_smob
-do :
-  ac_fn_c_check_func "$LINENO" "scm_new_smob" "ac_cv_func_scm_new_smob"
-if test "x$ac_cv_func_scm_new_smob" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_SCM_NEW_SMOB 1
-_ACEOF
-
-fi
-done
-
-  LIBS="$save_LIBS"
-  CPPFLAGS="$save_CPPFLAGS"
 else
   # Even if Guile support is not compiled in, we need to have these files
   # included.

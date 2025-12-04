@@ -38,7 +38,7 @@ Guile support in @value{GDBN} follows the Python support in @value{GDBN}
 reasonably closely, so concepts there should carry over.
 However, some things are done differently where it makes sense.
 
-@value{GDBN} requires Guile version 3.0, 2.2, or 2.0.
+@value{GDBN} requires Guile version 3.0, 2.2.
 
 @cindex guile scripts directory
 Guile scripts used by @value{GDBN} should be installed in

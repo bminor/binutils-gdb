@@ -6,6 +6,8 @@
 * Support for .gdb_index sections with version less than 7 has been
   removed.
 
+* Support for Guile 2.0 has been removed.
+
 * GDB now accepts --no-escape-args as an alternative to --args on the
   command line.  GDB will not escape special shell characters within
   arguments after --no-escape-args.

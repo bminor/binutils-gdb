@@ -155,9 +155,7 @@ gdbscm_with_catch (void *data)
 		   d->unwind_handler, d,
 		   d->pre_unwind_handler, d);
 
-#if HAVE_GUILE_MANUAL_FINALIZATION
   scm_run_finalizers ();
-#endif
 
   return NULL;
 }

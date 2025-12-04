@@ -1144,11 +1144,6 @@ AC_DEFUN([AC_TRY_LIBGUILE],
 		    GUILE_CPPFLAGS=$new_CPPFLAGS
 		    GUILE_LIBS=$new_LIBS],
 		   [found_usable_guile=no])
-    dnl scm_set_automatic_finalization_enabled added in Guile 2.2.
-    AC_CHECK_FUNC(scm_set_automatic_finalization_enabled,
-      AC_DEFINE(HAVE_GUILE_MANUAL_FINALIZATION, 1,
-		[Define if Guile supports manual finalization.])
-    )
     CPPFLAGS=$save_CPPFLAGS
     LIBS=$save_LIBS
     if test "${found_usable_guile}" = no; then
@@ -1170,7 +1165,7 @@ dnl        fall back to "no".
 dnl guile-version [guile-version-choice-2 ...] -
 dnl        A space-separated list of guile package versions to try.
 dnl        These are passed to pkg-config as-is.
-dnl        E.g., guile-2.0 or guile-2.2-uninstalled
+dnl        E.g., guile-3.0 or guile-2.2-uninstalled
 dnl        This requires making sure PKG_CONFIG_PATH is set appropriately.
 dnl /path/to/pkg-config -
 dnl        Use this pkg-config program.
@@ -1192,7 +1187,7 @@ AC_MSG_RESULT([$with_guile])
 dnl We check guile with pkg-config.
 AC_PATH_PROG(pkg_config_prog_path, pkg-config, missing)
 
-try_guile_versions="guile-3.0 guile-2.2 guile-2.0"
+try_guile_versions="guile-3.0 guile-2.2"
 have_libguile=no
 case "${with_guile}" in
 no)
@@ -1219,7 +1214,7 @@ yes)
   fi
   ;;
 "" | */*)
-  # Disallow --with=guile="" and --with-guile=foo/bar.
+  # Disallow --with-guile="" and --with-guile=foo/bar.
   AC_MSG_ERROR([invalid value for --with-guile])
   ;;
 *)
@@ -1258,15 +1253,6 @@ if test "${have_libguile}" != no; then
   CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_GUILE_SRCS)"
   CONFIG_INSTALL="$CONFIG_INSTALL install-guile"
   ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_GUILE_CFLAGS)"
-
-  dnl The 'scm_new_smob' function appeared in Guile 2.0.6.
-  save_LIBS="$LIBS"
-  save_CPPFLAGS="$CPPFLAGS"
-  LIBS="$GUILE_LIBS"
-  CPPFLAGS="$GUILE_CPPFLAGS"
-  AC_CHECK_FUNCS([scm_new_smob])
-  LIBS="$save_LIBS"
-  CPPFLAGS="$save_CPPFLAGS"
 else
   # Even if Guile support is not compiled in, we need to have these files
   # included.
