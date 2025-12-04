@@ -322,7 +322,9 @@ extern std::string ada_encode (const char *, bool fold = true);
 
 extern const char *ada_enum_name (const char *);
 
-extern int ada_is_modular_type (struct type *);
+/* True iff TYPE is an Ada modular type.  */
+
+extern bool ada_is_modular_type (struct type *);
 
 extern ULONGEST ada_modulus (struct type *);
 

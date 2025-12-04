@@ -11626,9 +11626,9 @@ ada_is_range_type_name (const char *name)
 
 				/* Modular types */
 
-/* True iff TYPE is an Ada modular type.  */
+/* See ada-lang.h.  */
 
-int
+bool
 ada_is_modular_type (struct type *type)
 {
   struct type *subranged_type = get_base_type (type);
