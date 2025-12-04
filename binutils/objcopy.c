@@ -3320,8 +3320,8 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
   if (convert_debugging)
     dhandle = read_debugging_info (ibfd, isympp, symcount, false);
 
-   if ((obfd->flags & (EXEC_P | DYNAMIC)) != 0
-       && (obfd->flags & HAS_RELOC) == 0)
+  if ((obfd->flags & (EXEC_P | DYNAMIC)) != 0
+      && (obfd->flags & HAS_RELOC) == 0)
     {
       if (bfd_keep_unused_section_symbols (obfd) || keep_section_symbols)
 	{
