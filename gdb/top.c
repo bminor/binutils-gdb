@@ -1449,7 +1449,7 @@ print_gdb_hints (struct ui_file *stream)
     }
   else
     {
-      std::string sep (width-2, '-');
+      std::string sep (width - 2, '-');
 
       if (emojis_ok ())
 	{
