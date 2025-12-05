@@ -305,6 +305,8 @@ static const dependency isa_dependencies[] =
     "APX_F" },
   { "APX_NF",
     "APX_F" },
+  { "APX_NCI_NDD_NF",
+    "APX_NCI|APX_NDD|APX_NF" },
   { "PadLock",
     "FXSR" },
   { "PadLockRNG2",

@@ -1049,6 +1049,12 @@ const relax_typeS md_relax_table[] =
   { STRING_COMMA_LEN (#n), false, PROCESSOR_NONE, vsz_ ## v, \
     CPU_ ## e ## _FLAGS, CPU_ ## d ## _FLAGS }
 
+#define CPU_ANY_APX_NCI_NDD_NF_FLAGS \
+  { .bitfield = \
+    { .cpuapx_nci = true, \
+      .cpuapx_ndd = true, \
+      .cpuapx_nf = true } }
+
 static const arch_entry cpu_arch[] =
 {
   /* Do not replace the first two entries - i386_target_format() and
@@ -1243,6 +1249,7 @@ static const arch_entry cpu_arch[] =
   SUBARCH (apx_nci, APX_NCI, ANY_APX_NCI, false),
   SUBARCH (apx_ndd, APX_NDD, ANY_APX_NDD, false),
   SUBARCH (apx_nf, APX_NF, ANY_APX_NF, false),
+  SUBARCH (apx_nci_ndd_nf, APX_NCI_NDD_NF, ANY_APX_NCI_NDD_NF, false),
   VECARCH (avx10.2, AVX10_2, ANY_AVX10_2, set),
   SUBARCH (gmism2, GMISM2, GMISM2, false),
   SUBARCH (gmiccs, GMICCS, GMICCS, false),
