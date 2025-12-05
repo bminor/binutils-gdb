@@ -1,0 +1,60 @@
+Contents of the SFrame section .sframe:
+  Header :
+
+    Version: SFRAME_VERSION_2
+    Flags: SFRAME_F_FDE_SORTED,
+           SFRAME_F_FDE_FUNC_START_PCREL
+    CFA fixed RA offset: -8
+    Num FDEs: 9
+    Num FREs: 22
+
+  Function Index :
+
+    func idx [0]: pc = 0x401020, size = 16 bytes
+    STARTPC         CFA       FP        RA           
+    0000000000401020  sp+16     u         f            
+    0000000000401026  sp+24     u         f            
+
+    func idx [1]: pc = 0x401030, size = 64 bytes
+    STARTPC[m]      CFA       FP        RA           
+    0000000000000000  sp+8      u         f            
+    000000000000000b  sp+16     u         f            
+
+    func idx [2]: pc = 0x401070, size = 109 bytes
+    STARTPC         CFA       FP        RA           
+    0000000000401070  sp+8      u         f            
+    0000000000401074  sp+32     u         f            
+    00000000004010dc  sp+8      u         f            
+
+    func idx [3]: pc = 0x4011d0, size = 10 bytes
+    STARTPC         CFA       FP        RA           
+    00000000004011d0  sp+8      u         f            
+
+    func idx [4]: pc = 0x4011e0, size = 1 bytes
+    STARTPC         CFA       FP        RA           
+    00000000004011e0  sp+8      u         f            
+
+    func idx [5]: pc = 0x4011f0, size = 64 bytes
+    STARTPC         CFA       FP        RA           
+    00000000004011f0  sp+8      u         f            
+    00000000004011f1  sp+16     c-16      f            
+    00000000004011f2  sp+24     c-16      f            
+    00000000004011f9  sp+544    c-16      f            
+    000000000040122d  sp+24     c-16      f            
+    000000000040122e  sp+16     c-16      f            
+    000000000040122f  sp+8      c-16      f            
+
+    func idx [6]: pc = 0x401230, size = 48 bytes
+    STARTPC         CFA       FP        RA           
+    0000000000401230  sp+8      u         f            
+    0000000000401231  sp+16     c-16      f            
+    0000000000401234  fp+16     c-16      f            
+    000000000040125f  sp+8      c-16      f            
+
+    func idx [7]: pc = 0x401260, size = 9 bytes
+    STARTPC         CFA       FP        RA           
+    0000000000401260  sp+8      u         f            
+
+    func idx [8]: pc = 0x401270, size = 74 bytes
+    STARTPC         CFA       FP        RA           
+    0000000000401270  sp+8      u         f            
