@@ -1664,7 +1664,7 @@ bfd_get_target_info (const char *target_name, bfd *abfd,
 
       if (arches && tname)
 	{
-	  char *hyp = strchr (tname, '-');
+	  const char *hyp = strchr (tname, '-');
 
 	  if (hyp != NULL)
 	    {
@@ -1677,9 +1677,10 @@ bfd_get_target_info (const char *target_name, bfd *abfd,
 		  char new_tname[50];
 
 		  strcpy (new_tname, hyp);
-		  while ((hyp = strrchr (new_tname, '-')) != NULL)
+		  char *new_hyp;
+		  while ((new_hyp = strrchr (new_tname, '-')) != NULL)
 		    {
-		      *hyp = 0;
+		      *new_hyp = 0;
 		      if (_bfd_find_arch_match (new_tname, arches,
 						def_target_arch))
 			break;
