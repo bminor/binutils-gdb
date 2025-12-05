@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for AMD Zen6 processor.
+
 * Emit an SFrame FRE with zero offsets to convey an undefined return address
   in the SFrame stack trace format.
 

@@ -3151,6 +3151,14 @@ vcvtneps2bf16<Vxy>, 0xf372, AVX_NE_CONVERT, Modrm|<Vxy:vex>|Space0F38|VexW0|NoSu
 
 // AVX-NE-CONVERT instructions end.
 
+// AVX512-BMM instructions.
+
+vbmacor16x16x16, 0x80, AVX512_BMM, Modrm|EVexDYN|VexW0|Src1VVVV|Map6|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegYMM|RegZMM|Unspecified|BaseIndex, RegYMM|RegZMM, RegYMM|RegZMM }
+vbmacxor16x16x16, 0x80, AVX512_BMM, Modrm|EVexDYN|VexW1|Src1VVVV|Map6|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegYMM|RegZMM|Unspecified|BaseIndex, RegYMM|RegZMM, RegYMM|RegZMM }
+vbitrevb, 0x81, AVX512_BMM, Modrm|EVexDYN|VexW0|Masking|Map6|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
+
+// AVX512-BMM instructions end.
+
 // ENQCMD instructions.
 
 enqcmd, 0xf20f38f8, ENQCMD, Modrm|AddrPrefixOpReg|NoSuf, { Unspecified|BaseIndex, Reg16|Reg32|Reg64 }

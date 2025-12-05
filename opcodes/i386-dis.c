@@ -1606,6 +1606,8 @@ enum
 
   EVEX_LEN_MAP5_6E,
   EVEX_LEN_MAP5_7E,
+  EVEX_LEN_MAP6_80_W_0,
+  EVEX_LEN_MAP6_80_W_1,
 };
 
 enum
@@ -1859,6 +1861,8 @@ enum
   EVEX_W_MAP5_6E_P_1,
   EVEX_W_MAP5_7A_P_3,
   EVEX_W_MAP5_7E_P_1,
+  EVEX_W_MAP6_80,
+  EVEX_W_MAP6_81,
 };
 
 typedef bool (*op_rtn) (instr_info *ins, int bytemode, int sizeflag);

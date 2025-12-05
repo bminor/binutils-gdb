@@ -126,6 +126,7 @@ processor names are recognized:
 @code{znver3},
 @code{znver4},
 @code{znver5},
+@code{znver6},
 @code{btver1},
 @code{btver2},
 @code{generic32} and
@@ -198,6 +199,7 @@ accept various extension mnemonics.  For example,
 @code{avx512_bf16},
 @code{avx_vnni},
 @code{avx512_fp16},
+@code{avx512_bmm},
 @code{prefetchi},
 @code{avx_ifma},
 @code{avx_vnni_int8},
@@ -1695,9 +1697,9 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{k6} @tab @samp{k6_2} @tab @samp{athlon} @tab @samp{k8}
 @item @samp{amdfam10} @tab @samp{bdver1} @tab @samp{bdver2} @tab @samp{bdver3}
 @item @samp{bdver4} @tab @samp{znver1} @tab @samp{znver2} @tab @samp{znver3}
-@item @samp{znver4} @tab @samp{znver5} @tab @samp{btver1} @tab @samp{btver2}
-@item @samp{generic32}
-@item @samp{generic64} @tab @samp{.cmov} @tab @samp{.fxsr} @tab @samp{.mmx}
+@item @samp{znver4} @tab @samp{znver5} @tab @samp{znver6} @tab @samp{btver1}
+@item @samp{btver2} @tab @samp{generic32} @tab @samp{generic64}
+@item @samp{.cmov} @tab @samp{.fxsr} @tab @samp{.mmx}
 @item @samp{.sse} @tab @samp{.sse2} @tab @samp{.sse3} @tab @samp{.sse4a}
 @item @samp{.ssse3} @tab @samp{.sse4.1} @tab @samp{.sse4.2} @tab @samp{.sse4}
 @item @samp{.avx} @tab @samp{.vmx} @tab @samp{.smx} @tab @samp{.ept}
@@ -1714,9 +1716,9 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.avx512vbmi} @tab @samp{.avx512_4fmaps} @tab @samp{.avx512_4vnniw}
 @item @samp{.avx512_vpopcntdq} @tab @samp{.avx512_vbmi2} @tab @samp{.avx512_vnni}
 @item @samp{.avx512_bitalg} @tab @samp{.avx512_bf16} @tab @samp{.avx512_vp2intersect}
-@item @samp{.tdx} @tab @samp{.avx_vnni} @tab @samp{.avx512_fp16} @tab @samp{.avx10.1}
-@item @samp{.clwb} @tab @samp{.rdpid} @tab @samp{.ptwrite} @tab @samp{.ibt}
-@item @samp{.prefetchi} @tab @samp{.avx_ifma} @tab @samp{.avx_vnni_int8}
+@item @samp{.tdx} @tab @samp{.avx_vnni} @tab @samp{.avx512_fp16} @tab @samp{avx512_bmm}
+@item @samp{.avx10.1} @tab @samp{.clwb} @tab @samp{.rdpid} @tab @samp{.ptwrite}
+@item @samp{.ibt} @tab @samp{.prefetchi} @tab @samp{.avx_ifma} @tab @samp{.avx_vnni_int8}
 @item @samp{.cmpccxadd} @tab @samp{.wrmsrns} @tab @samp{.msrlist}
 @item @samp{.avx_ne_convert} @tab @samp{.rao_int} @tab @samp{.fred} @tab @samp{.lkgs}
 @item @samp{.avx_vnni_int16} @tab @samp{.sha512} @tab @samp{.sm3} @tab @samp{.sm4}
