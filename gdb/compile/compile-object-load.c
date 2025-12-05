@@ -628,7 +628,7 @@ compile_object_load (const compile_file_names &file_names,
     error (_("\"%s\": not in object format."), filename.get ());
 
   struct setup_sections_data setup_sections_data (abfd.get ());
-  for (asection *sect = abfd->sections; sect != nullptr; sect = sect->next)
+  for (asection *sect : gdb_bfd_sections (abfd))
     setup_sections_data.setup_one_section (sect);
   setup_sections_data.setup_one_section (nullptr);
 
@@ -720,15 +720,14 @@ compile_object_load (const compile_file_names &file_names,
 	  asection *toc_fallback = bfd_get_section_by_name(abfd.get(), ".toc");
 	  if (toc_fallback == NULL)
 	    {
-	      for (asection *tsect = abfd->sections; tsect != nullptr;
-		   tsect = tsect->next)
-		 {
-		    if (bfd_section_flags (tsect) & SEC_ALLOC)
-		       {
-			  toc_fallback = tsect;
-			  break;
-		       }
-		 }
+	      for (asection *tsect : gdb_bfd_sections (abfd))
+		{
+		  if (bfd_section_flags (tsect) & SEC_ALLOC)
+		    {
+		      toc_fallback = tsect;
+		      break;
+		    }
+		}
 	    }
 
 	  if (toc_fallback == NULL)
