@@ -371,6 +371,7 @@ with_debuginfod_env $cache {
     clean_restart
     gdb_test_no_output "set debuginfod enabled on" \
 	"enabled debuginfod for initial test"
+    gdb_test_no_output "set progress-bars enabled off"
     gdb_load $binfile
 
     load_core_file "load corefile, download library from debuginfod" \

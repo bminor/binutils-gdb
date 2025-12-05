@@ -218,6 +218,7 @@ proc_with_prefix local_url { } {
     clean_restart
     gdb_test_no_output "set debuginfod enabled on" \
 	"enabled debuginfod for initial test"
+    gdb_test_no_output "set progress-bars enabled off"
     gdb_load $binfile
     gdb_test_no_output "set substitute-path $outputdir /dev/null" \
 	"set substitute-path"
@@ -243,11 +244,13 @@ proc_with_prefix local_url { } {
     set enable_debuginfod_question \
 	"Enable debuginfod for this session. \\(y or \\\[n\\\]\\) "
     clean_restart
+    gdb_test_no_output -nopass "set progress-bars enabled off"
     gdb_test "core $::corefile" ".*return 0.*" "file [file tail $::corefile]" \
 	$enable_debuginfod_question "y"
 
     # GDB should now find the debugaltlink file.
     clean_restart
+    gdb_test_no_output -nopass "set progress-bars enabled off"
     gdb_test "file ${binfile}_alt.o" \
 	".*Downloading.*separate debug info.*" \
 	"file [file tail ${binfile}_alt.o]" \
@@ -269,6 +272,7 @@ proc_with_prefix local_url { } {
 
     # Enable debuginfod and fetch the debuginfo.
     gdb_test_no_output "set debuginfod enabled on"
+    gdb_test_no_output -nopass "set progress-bars enabled off"
     gdb_test "file $binfile" ".*Reading symbols from.*debuginfo.*" \
 	"file [file tail $binfile] cmd on"
 

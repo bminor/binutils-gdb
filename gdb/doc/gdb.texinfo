@@ -51349,6 +51349,21 @@ default.
 @item show debuginfod verbose
 Show the current verbosity setting.
 
+@kindex set progress-bars enabled
+@cindex progress bars, disabling
+@item set progress-bars enabled @r{[}on@r{|}off@r{]}
+Set whether @value{GDBN} can display a progress bar when downloading a
+file from debuginfod.  When @value{off}, @value{GDBN} will not display
+a progress bar.  When @value{on}, @value{GDBN} will display a progress
+bar if @value{GDBN}'s output console supports it.
+
+@kindex show progress-bars enabled
+@item show progress-bars enabled
+Shows whether progress bars are currently enabled or not.  Progress
+bars can be automatically disabled if @value{GDBN}'s output console
+doesn't support them, or if the terminal width is too small
+(@pxref{Screen Size,,@kbd{set width} command}).
+
 @end table
 
 @node Man Pages

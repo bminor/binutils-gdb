@@ -113,6 +113,7 @@ proc_with_prefix local_debuginfod { } {
 
     # Enable debuginfod and fetch the debuginfo.
     gdb_test_no_output "set debuginfod enabled on"
+    gdb_test_no_output "set progress-bars enabled off"
     gdb_test "file $binfile" ".*Reading symbols from.*debuginfo.*" \
 	"file [file tail $binfile] cmd on"
 

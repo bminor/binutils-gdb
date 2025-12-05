@@ -132,6 +132,7 @@ proc_with_prefix local_debuginfod { } {
 
     # Enable debuginfod and fetch the debuginfo.
     gdb_test_no_output "set debuginfod enabled on"
+    gdb_test_no_output "set progress-bars enabled off"
 
     # "separate debug info file has no debug info" warning should not be
     # reported now because the correct debuginfo should be fetched from

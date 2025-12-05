@@ -26,6 +26,7 @@
 #include "readline/readline.h"
 #include "cli/cli-style.h"
 #include "ui.h"
+#include "cli/cli-cmds.h"
 
 /* These are the CLI output functions */
 
@@ -275,6 +276,31 @@ cli_ui_out::do_progress_start ()
 #define MIN_CHARS_PER_LINE 50
 #define MAX_CHARS_PER_LINE 4096
 
+/* When this is false no progress bars will be displayed.  When true,
+   progress bars can be displayed if the output stream supports them.  */
+
+static bool progress_bars_enabled = true;
+
+/* The "show progress-bars enabled" command. */
+
+static void
+show_progress_bars_enabled  (struct ui_file *file, int from_tty,
+			     struct cmd_list_element *c,
+			     const char *value)
+{
+  if (progress_bars_enabled && get_chars_per_line () < MIN_CHARS_PER_LINE)
+    gdb_printf (file, _("Progress bars are currently \"off\".  "
+			"The terminal is too narrow.\n"));
+  else if (progress_bars_enabled && (!gdb_stdout->isatty ()
+				     || !current_ui->input_interactive_p ()))
+    gdb_printf (file, _("Progress bars are currently \"off\".  "
+			"The terminal doesn't support them.\n"));
+  else
+    gdb_printf (file,
+		_("Progress bars are currently \"%s\".\n"),
+		value);
+}
+
 /* Print a progress update.  MSG is a string to be printed on the line above
    the progress bar.  TOTAL is the size of the download whose progress is
    being displayed.  UNIT should be the unit of TOTAL (ex. "K"). If HOWMUCH
@@ -307,7 +333,7 @@ cli_ui_out::do_progress_notify (const std::string &msg,
       if (stream->isatty ()
 	  && current_ui->input_interactive_p ()
 	  && chars_per_line >= MIN_CHARS_PER_LINE
-	  && chars_per_line != UINT_MAX)
+	  && progress_bars_enabled)
 	{
 	  gdb_printf (stream, "%s\n", msg.c_str ());
 	  info.state = progress_update::BAR;
@@ -393,7 +419,7 @@ cli_ui_out::clear_progress_notify ()
   if (!stream->isatty ()
       || !current_ui->input_interactive_p ()
       || chars_per_line < MIN_CHARS_PER_LINE
-      || chars_per_line == UINT_MAX)
+      || !progress_bars_enabled)
     return;
 
   if (chars_per_line > MAX_CHARS_PER_LINE)
@@ -541,4 +567,38 @@ cli_display_match_list (char **matches, int len, int max)
 
   gdb_display_match_list (matches, len, max, &displayer);
   rl_forced_update_display ();
+}
+
+/* Set/show progress-bars commands.  */
+static cmd_list_element *set_progress_bars_prefix_list;
+static cmd_list_element *show_progress_bars_prefix_list;
+
+/* Initialization for this file.  */
+
+INIT_GDB_FILE (cli_out)
+{
+  /* set/show debuginfod */
+  add_setshow_prefix_cmd ("progress-bars", class_obscure,
+			  _("Set progress-bars options."),
+			  _("Show progress-bars options."),
+			  &set_progress_bars_prefix_list,
+			  &show_progress_bars_prefix_list,
+			  &setlist, &showlist);
+
+  /* Adds 'set|show progress-bars enabled'.  */
+  add_setshow_boolean_cmd ("enabled", class_obscure,
+			   &progress_bars_enabled, _("\
+Set whether progress bars should be displayed."), _("\
+Show whether progress bars should be displayed."),_("\
+During some slow operations, for example, fetching debug information\n\
+from debuginfod, GDB will display an animated progress bar when this\n\
+setting is \"on\".  When this setting is \"off\", no progress bars\n\
+will be displayed.\n\
+\n\
+Even when \"on\", progress bars can be disabled if the output terminal\n\
+doesn't support them."),
+			   nullptr,
+			   show_progress_bars_enabled,
+			   &set_progress_bars_prefix_list,
+			   &show_progress_bars_prefix_list);
 }

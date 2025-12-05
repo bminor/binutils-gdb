@@ -281,6 +281,7 @@ with_debuginfod_env $cache {
 
     save_vars { GDBFLAGS } {
 	append GDBFLAGS " -ex \"set debuginfod enabled on\""
+	append GDBFLAGS " -ex \"set progress-bars enabled off\""
 
 	# Reload the executable and core file.  GDB should download
 	# the file libfoo_1.so using debuginfod during the mapped file
