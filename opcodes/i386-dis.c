@@ -1358,6 +1358,10 @@ enum
   X86_64_0F388A,
   X86_64_0F388B,
   X86_64_0F38F8_M_1,
+  X86_64_0FAE_REG_0_MOD_3_PREFIX_1,
+  X86_64_0FAE_REG_1_MOD_3_PREFIX_1,
+  X86_64_0FAE_REG_2_MOD_3_PREFIX_1,
+  X86_64_0FAE_REG_3_MOD_3_PREFIX_1,
   X86_64_0FC7_REG_6_MOD_3_PREFIX_1,
 
   X86_64_VEX_0F3848,
@@ -3595,25 +3599,25 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_0FAE_REG_0_MOD_3 */
   {
     { Bad_Opcode },
-    { "rdfsbase", { Ev }, 0 },
+    { X86_64_TABLE (X86_64_0FAE_REG_0_MOD_3_PREFIX_1) },
   },
 
   /* PREFIX_0FAE_REG_1_MOD_3 */
   {
     { Bad_Opcode },
-    { "rdgsbase", { Ev }, 0 },
+    { X86_64_TABLE (X86_64_0FAE_REG_1_MOD_3_PREFIX_1) },
   },
 
   /* PREFIX_0FAE_REG_2_MOD_3 */
   {
     { Bad_Opcode },
-    { "wrfsbase", { Ev }, 0 },
+    { X86_64_TABLE (X86_64_0FAE_REG_2_MOD_3_PREFIX_1) },
   },
 
   /* PREFIX_0FAE_REG_3_MOD_3 */
   {
     { Bad_Opcode },
-    { "wrgsbase", { Ev }, 0 },
+    { X86_64_TABLE (X86_64_0FAE_REG_3_MOD_3_PREFIX_1) },
   },
 
   /* PREFIX_0FAE_REG_4_MOD_0 */
@@ -4705,6 +4709,30 @@ static const struct dis386 x86_64_table[][2] = {
     /* X86_64_0F38F8_M_1 */
     { Bad_Opcode },
     { PREFIX_TABLE (PREFIX_0F38F8_M_1_X86_64) },
+  },
+
+  /* X86_64_0FAE_REG_0_MOD_3_PREFIX_1 */
+  {
+    { Bad_Opcode },
+    { "rdfsbase", { Edq }, 0 },
+  },
+
+  /* X86_64_0FAE_REG_1_MOD_3_PREFIX_1 */
+  {
+    { Bad_Opcode },
+    { "rdgsbase", { Edq }, 0 },
+  },
+
+  /* X86_64_0FAE_REG_2_MOD_3_PREFIX_1 */
+  {
+    { Bad_Opcode },
+    { "wrfsbase", { Edq }, 0 },
+  },
+
+  /* X86_64_0FAE_REG_3_MOD_3_PREFIX_1 */
+  {
+    { Bad_Opcode },
+    { "wrgsbase", { Edq }, 0 },
   },
 
   /* X86_64_0FC7_REG_6_MOD_3_PREFIX_1 */

@@ -364,8 +364,6 @@ if [gas_32_check] then {
     run_dump_test "tbm-16bit"
     run_dump_test "f16c"
     run_dump_test "f16c-intel"
-    run_dump_test "fsgs"
-    run_dump_test "fsgs-intel"
     run_dump_test "rdrnd"
     run_dump_test "rdrnd-intel"
     run_dump_test "bundle"

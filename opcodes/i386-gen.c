@@ -281,6 +281,8 @@ static const dependency isa_dependencies[] =
     "SSE2" },
   { "WIDEKL",
     "KL" },
+  { "FSGSBase",
+    "64" },
   { "PBNDKB",
     "64" },
   { "UINTR",
