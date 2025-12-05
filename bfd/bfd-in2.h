@@ -3871,7 +3871,6 @@ enum bfd_reloc_code_real
 
   /* x86-64/elf relocations.  */
   BFD_RELOC_X86_64_GOT32,
-  BFD_RELOC_X86_64_PLT32,
   BFD_RELOC_X86_64_COPY,
   BFD_RELOC_X86_64_GLOB_DAT,
   BFD_RELOC_X86_64_JUMP_SLOT,

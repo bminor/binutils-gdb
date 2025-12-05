@@ -1398,7 +1398,7 @@ gotrel[] =
 				       BFD_RELOC_64_PLTOFF },
     { .bitfield = { .imm64 = 1 } }, true },
     { STRING_COMMA_LEN ("PLT"),      { BFD_RELOC_386_PLT32,
-				       BFD_RELOC_X86_64_PLT32    },
+				       BFD_RELOC_32_PLT_PCREL },
     OPERAND_TYPE_IMM32_32S_DISP32, false },
     { STRING_COMMA_LEN ("GOTPLT"),   { _dummy_first_bfd_reloc_code_real,
 				       BFD_RELOC_X86_64_GOTPLT64 },
@@ -4140,7 +4140,7 @@ tc_i386_fix_adjustable (fixS *fixP)
   /* Resolve PLT32 relocation against local symbol to section only for
      PC-relative relocations.  */
   if (fixP->fx_r_type == BFD_RELOC_386_PLT32
-      || fixP->fx_r_type == BFD_RELOC_X86_64_PLT32)
+      || fixP->fx_r_type == BFD_RELOC_32_PLT_PCREL)
     return fixP->fx_pcrel;
   return 1;
 }
@@ -11780,7 +11780,7 @@ output_jump (void)
   if (flag_code == CODE_64BIT && size == 4
       && jump_reloc == NO_RELOC && i.op[0].disps->X_add_number == 0
       && need_plt32_p (i.op[0].disps->X_add_symbol))
-    jump_reloc = BFD_RELOC_X86_64_PLT32;
+    jump_reloc = BFD_RELOC_32_PLT_PCREL;
 #endif
 
   jump_reloc = reloc (size, 1, 1, jump_reloc);
@@ -13426,7 +13426,7 @@ x86_cons (expressionS *exp, int size)
 	      *input_line_pointer = c;
 	    }
 	  else if ((got_reloc == BFD_RELOC_386_PLT32
-		    || got_reloc == BFD_RELOC_X86_64_PLT32)
+		    || got_reloc == BFD_RELOC_32_PLT_PCREL)
 		   && exp->X_op != O_symbol)
 	    {
 	      char c = *input_line_pointer;
@@ -15770,7 +15770,7 @@ elf_symbol_resolved_in_segment_p (symbolS *fr_symbol, offsetT fr_var)
     switch ((enum bfd_reloc_code_real) fr_var)
       {
       case BFD_RELOC_386_PLT32:
-      case BFD_RELOC_X86_64_PLT32:
+      case BFD_RELOC_32_PLT_PCREL:
 	/* Symbol with PLT relocation may be preempted. */
 	return 0;
       default:
@@ -16231,7 +16231,7 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
 	  && fragP->tc_frag_data.code == CODE_64BIT
 	  && fragP->fr_offset == 0
 	  && need_plt32_p (fragP->fr_symbol))
-	reloc_type = BFD_RELOC_X86_64_PLT32;
+	reloc_type = BFD_RELOC_32_PLT_PCREL;
 #endif
 
       old_fr_fix = fragP->fr_fix;
@@ -16635,7 +16635,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     switch (fixP->fx_r_type)
       {
       case BFD_RELOC_386_PLT32:
-      case BFD_RELOC_X86_64_PLT32:
+      case BFD_RELOC_32_PLT_PCREL:
 	/* Make the jump instruction point to the address of the operand.
 	   At runtime we merely add the offset to the actual PLT entry.
 	   NB: Subtract the offset size only for jump instructions.  */
@@ -18352,7 +18352,7 @@ i386_validate_fix (fixS *fixp)
       if (fixp->fx_addsy
 	  && fixp->fx_pcrel
 	  && (fixp->fx_r_type == BFD_RELOC_386_PLT32
-	      || fixp->fx_r_type == BFD_RELOC_X86_64_PLT32)
+	      || fixp->fx_r_type == BFD_RELOC_32_PLT_PCREL)
 	  && symbol_section_p (fixp->fx_addsy))
 	fixp->fx_r_type = BFD_RELOC_32_PCREL;
       if (!object_64bit)
@@ -18428,7 +18428,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 #endif
       /* Fall through.  */
 
-    case BFD_RELOC_X86_64_PLT32:
+    case BFD_RELOC_32_PLT_PCREL:
     case BFD_RELOC_X86_64_GOT32:
     case BFD_RELOC_X86_64_GOTPCREL:
     case BFD_RELOC_X86_64_GOTPCRELX:
@@ -18595,7 +18595,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
       else
 	switch (code)
 	  {
-	  case BFD_RELOC_X86_64_PLT32:
+	  case BFD_RELOC_32_PLT_PCREL:
 	  case BFD_RELOC_X86_64_GOT32:
 	  case BFD_RELOC_X86_64_GOTPCREL:
 	  case BFD_RELOC_X86_64_GOTPCRELX:
