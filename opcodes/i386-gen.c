@@ -299,6 +299,8 @@ static const dependency isa_dependencies[] =
     "64" },
   { "APX_F",
     "XSAVE|64" },
+  { "APX_NCI",
+    "APX_F" },
   { "PadLock",
     "FXSR" },
   { "PadLockRNG2",
@@ -480,6 +482,7 @@ static bitfield cpu_flags[] =
   BITFIELD (SNP),
   BITFIELD (RMPQUERY),
   BITFIELD (RMPREAD),
+  BITFIELD (APX_NCI),
   BITFIELD (64),
   BITFIELD (No64),
 #ifdef CpuUnused

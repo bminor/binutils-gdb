@@ -320,6 +320,8 @@ enum i386_cpu
   CpuRMPQUERY,
   /* RMPREAD instruction required */
   CpuRMPREAD,
+  /* Intel APX New Conditional Instructions support required.  */
+  CpuAPX_NCI,
 
   /* NOTE: These items, which can be combined with other ISA flags above, need
      to remain second to last and in sync with CPU_FLAGS_COMMON. */
@@ -371,7 +373,7 @@ enum i386_cpu
 
 /* If you get a compiler error for zero width of an unused field,
    comment the respective one out.  */
-#define CpuUnused	(CpuMax + 1)
+/* #define CpuUnused	(CpuMax + 1) */
 #define CpuAttrUnused	(CpuIsaBits + CpuMax + 1 - CpuAttrEnums)
 
 #define CPU_FLAGS_COMMON \
@@ -555,6 +557,7 @@ typedef union i386_cpu_flags
       unsigned int cpusnp:1;
       unsigned int cpurmpquery:1;
       unsigned int cpurmpread:1;
+      unsigned int cpuapx_nci:1;
       CPU_FLAGS_COMMON;
 #ifdef CpuUnused
       unsigned int unused:(CpuNumOfBits - CpuUnused);

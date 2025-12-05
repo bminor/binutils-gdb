@@ -346,25 +346,25 @@ cmp, 0x38, 0, D|W|CheckOperandSize|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64, Reg8
 cmp, 0x83/7, 0, Modrm|No_bSuf|No_sSuf, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 cmp, 0x3c, 0, W|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
 cmp, 0x80/7, 0, W|Modrm|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-cmp, 0x380a, APX_F, D|W|CheckOperandSize|EVexMap4|Scc|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-cmp, 0x830a/7, APX_F, Modrm|EVexMap4|Scc|No_bSuf|No_sSuf, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-cmp, 0x800a/7, APX_F, W|Modrm|EVexMap4|Scc|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+cmp, 0x380a, APX_NCI, D|W|CheckOperandSize|EVexMap4|Scc|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+cmp, 0x830a/7, APX_NCI, Modrm|EVexMap4|Scc|No_bSuf|No_sSuf, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+cmp, 0x800a/7, APX_NCI, W|Modrm|EVexMap4|Scc|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 
 <scc:opc, o:0, no:1, b:2, c:2, nae:2, nb:3, nc:3, ae:3, e:4, z:4, ne:5, nz:5, be:6, na:6, nbe:7, a:7, +
          s:8, ns:9, t:a, f:b, l:c, nge:c, nl:d, ge:d, le:e, ng:e, nle:f, g:f>
 
-ccmp<scc>, 0x380<scc:opc>, APX_F, D|W|CheckOperandSize|Modrm|EVexMap4|Scc|No_sSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-ccmp<scc>, 0x830<scc:opc>/7, APX_F, Modrm|EVexMap4|Scc|No_bSuf|No_sSuf, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-ccmp<scc>, 0x800<scc:opc>/7, APX_F, W|Modrm|EVexMap4|Scc|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+ccmp<scc>, 0x380<scc:opc>, APX_NCI, D|W|CheckOperandSize|Modrm|EVexMap4|Scc|No_sSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+ccmp<scc>, 0x830<scc:opc>/7, APX_NCI, Modrm|EVexMap4|Scc|No_bSuf|No_sSuf, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+ccmp<scc>, 0x800<scc:opc>/7, APX_NCI, W|Modrm|EVexMap4|Scc|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 
 test, 0x84, 0, D|W|C|CheckOperandSize|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 test, 0xa8, 0, W|No_sSuf|Optimize, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
 test, 0xf6/0, 0, W|Modrm|No_sSuf|Optimize, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-test, 0x840a, 0, D|W|C|CheckOperandSize|Modrm|EVexMap4|Scc|No_sSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-test, 0xf60a/0, 0, W|Modrm|EVexMap4|Scc|No_sSuf|Optimize, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+test, 0x840a, APX_NCI, D|W|C|CheckOperandSize|Modrm|EVexMap4|Scc|No_sSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+test, 0xf60a/0, APX_NCI, W|Modrm|EVexMap4|Scc|No_sSuf|Optimize, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 
-ctest<scc>, 0x840<scc:opc>, APX_F, D|W|C|CheckOperandSize|Modrm|EVexMap4|Scc|No_sSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-ctest<scc>, 0xf60<scc:opc>/0, APX_F, W|Modrm|EVexMap4|Scc|No_sSuf|Optimize, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+ctest<scc>, 0x840<scc:opc>, APX_NCI, D|W|C|CheckOperandSize|Modrm|EVexMap4|Scc|No_sSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+ctest<scc>, 0xf60<scc:opc>/0, APX_NCI, W|Modrm|EVexMap4|Scc|No_sSuf|Optimize, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 
 <scc>
 
@@ -561,11 +561,11 @@ loopne, 0xe0, x64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64|IntelSuffix, { Disp8
 
 // Set byte on flag instructions.
 set<cc>, 0xf9<cc:opc>/0, i386, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf, { Reg8|Unspecified|BaseIndex }
-set<cc>, 0xf24<cc:opc>/0, APX_F, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|VexWIG|EVexMap4, { Reg8|Unspecified|BaseIndex }
-setzu<cc>, 0xf24<cc:opc>/0, APX_F, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|VexWIG|EVexMap4|ZU, { Reg8 }
+set<cc>, 0xf24<cc:opc>/0, APX_NCI, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|VexWIG|EVexMap4, { Reg8|Unspecified|BaseIndex }
+setzu<cc>, 0xf24<cc:opc>/0, APX_NCI, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|VexWIG|EVexMap4|ZU, { Reg8 }
 // As an extension, allow SETcc without the ZU infix, instead taking the full
 // register as operand.
-set<cc>, 0xf24<cc:opc>/0, APX_F, Modrm|No_bSuf|No_wSuf|No_sSuf|EVexMap4|ZU, { Reg32|Reg64 }
+set<cc>, 0xf24<cc:opc>/0, APX_NCI, Modrm|No_bSuf|No_wSuf|No_sSuf|EVexMap4|ZU, { Reg32|Reg64 }
 salc, 0xd6, No64, No_wSuf|No_lSuf|No_sSuf|No_qSuf, {}
 
 // String manipulation.
@@ -1001,11 +1001,11 @@ udb, 0xd6, x64, NoSuf, {}
 // C (commutative) isn't quite correct here on its own; the condition also
 // needs inverting when source operands are swapped in order to convert to
 // legacy encoding.  The assembler will take care of that.
-cmov<cc>, 0x4<cc:opc>, CMOV&APX_F, C|Modrm|CheckOperandSize|No_bSuf|No_sSuf|DstVVVV|EVexMap4|Optimize, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64 }
+cmov<cc>, 0x4<cc:opc>, APX_NCI, C|Modrm|CheckOperandSize|No_bSuf|No_sSuf|DstVVVV|EVexMap4|Optimize, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64 }
 cmov<cc>, 0xf4<cc:opc>, CMOV, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
-cfcmov<cc>, 0x4<cc:opc>, CMOV&APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|DstVVVV|EVexMap4|EVexNF|Optimize, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64 }
-cfcmov<cc>, 0x4<cc:opc>, CMOV&APX_F, D|Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+cfcmov<cc>, 0x4<cc:opc>, APX_NCI, Modrm|CheckOperandSize|No_bSuf|No_sSuf|DstVVVV|EVexMap4|EVexNF|Optimize, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64 }
+cfcmov<cc>, 0x4<cc:opc>, APX_NCI, D|Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 fcmovb, 0xda/0, i687, Modrm|NoSuf, { FloatReg, FloatAcc }
 fcmovnae, 0xda/0, i687, Modrm|NoSuf, { FloatReg, FloatAcc }

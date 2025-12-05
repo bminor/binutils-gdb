@@ -220,6 +220,7 @@ accept various extension mnemonics.  For example,
 @code{user_msr},
 @code{msr_imm},
 @code{apx_f},
+@code{apx_nci},
 @code{avx10.2},
 @code{avx10.2/512},
 @code{avx10.2/256},
@@ -1732,6 +1733,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.padlock} @tab @samp{.clzero} @tab @samp{.mwaitx} @tab @samp{.rdpru}
 @item @samp{.mcommit} @tab @samp{.sev_es} @tab @samp{.snp} @tab @samp{.invlpgb}
 @item @samp{.tlbsync} @tab @samp{.rmpquery} @tab @samp{.rmpread} @tab @samp{.apx_f}
+@item @samp{.apx_nci}
 @item @samp{.gmism2} @tab @samp{.gmiccs} @tab @samp{.padlockrng2} @tab @samp{.padlockphe2}
 @item @samp{.padlockxmodx}
 
