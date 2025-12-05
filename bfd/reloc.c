@@ -2886,11 +2886,6 @@ ENUMDOC
   PowerPC and PowerPC64 thread-local storage relocations.
 
 ENUM
-  BFD_RELOC_I370_D12
-ENUMDOC
-  IBM 370/390 relocations.
-
-ENUM
   BFD_RELOC_CTOR
 ENUMDOC
   The type of reloc used to build a constructor table - at the moment
