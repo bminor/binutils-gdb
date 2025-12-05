@@ -1242,6 +1242,7 @@ static const arch_entry cpu_arch[] =
   SUBARCH (apx_f, APX_F, ANY_APX_F, false),
   SUBARCH (apx_nci, APX_NCI, ANY_APX_NCI, false),
   SUBARCH (apx_ndd, APX_NDD, ANY_APX_NDD, false),
+  SUBARCH (apx_nf, APX_NF, ANY_APX_NF, false),
   VECARCH (avx10.2, AVX10_2, ANY_AVX10_2, set),
   SUBARCH (gmism2, GMISM2, GMISM2, false),
   SUBARCH (gmiccs, GMICCS, GMICCS, false),

@@ -324,6 +324,8 @@ enum i386_cpu
   CpuAPX_NCI,
   /* Intel APX Non-Destructive Destination support required.  */
   CpuAPX_NDD,
+  /* Intel APX No-Flags-update support required.  */
+  CpuAPX_NF,
 
   /* NOTE: These items, which can be combined with other ISA flags above, need
      to remain second to last and in sync with CPU_FLAGS_COMMON. */
@@ -561,6 +563,7 @@ typedef union i386_cpu_flags
       unsigned int cpurmpread:1;
       unsigned int cpuapx_nci:1;
       unsigned int cpuapx_ndd:1;
+      unsigned int cpuapx_nf:1;
       CPU_FLAGS_COMMON;
 #ifdef CpuUnused
       unsigned int unused:(CpuNumOfBits - CpuUnused);

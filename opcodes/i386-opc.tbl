@@ -950,7 +950,7 @@ rex.wrxb, 0x4f, x64, NoSuf|IsPrefix, {}
 <pseudopfx:ident:cpu, disp8:Disp8:0, disp16:Disp16:No64, disp32:Disp32:i386, +
                       load:Load:0, store:Store:0, +
                       vex:VEX:0, vex2:VEX:0, vex3:VEX3:0, evex:EVEX:0, +
-                      rex:REX:x64, rex2:REX2:APX_F, nf:NF:APX_F, +
+                      rex:REX:x64, rex2:REX2:APX_F, nf:NF:APX_NF, +
                       nooptimize:NoOptimize:0, noimm8s:NoImm8s:0>
 
 {<pseudopfx>}, PSEUDO_PREFIX/Prefix_<pseudopfx:ident>, <pseudopfx:cpu>, NoSuf|IsPrefix, {}
