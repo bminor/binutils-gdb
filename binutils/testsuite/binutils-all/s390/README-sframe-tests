@@ -1,0 +1,8 @@
+The tests in sframe.exp use binary data files:
+  - test-v2-ET_EXEC.sframe.bz2
+  - test-v2-ET_REL.sframe.bz2
+These files are generated using a as/ld supporting SFrame V2 sections (Binutils
+<= 2.45).  The purpose of those tests is to make sure readelf/objdump support
+works for SFrame V2.
+
+The binary files are generated using the steps outlined in x86_64/README-sframe-tests.

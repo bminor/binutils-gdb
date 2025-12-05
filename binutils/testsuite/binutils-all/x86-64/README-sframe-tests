@@ -1,0 +1,53 @@
+The tests in sframe.exp use binary data files:
+  - test-v2-ET_EXEC.sframe.bz2
+  - test-v2-ET_REL.sframe.bz2
+These files are generated using a as/ld supporting SFrame V2 sections (Binutils
+<= 2.45).  The purpose of those tests is to make sure readelf/objdump support
+works for SFrame V2.
+
+The binary files are generated using the following steps.
+
+$ cat fake_sort.c
+/* Keep noinline to ensure a separate FDE is generated */
+void __attribute__ ((noinline))
+swapit (int *a, int *b)
+{
+  *a = *b;
+}
+
+void fake_sort (int *a, int n)
+{
+  if (n > 0)
+    swapit (&a[0], &a[n-1]);
+}
+
+$ cat sort.c
+#include <stdio.h>
+
+#define ARRAY_LEN 128
+
+void fake_sort (int *a, int n);
+
+void sort_array (void)
+{
+  volatile int data[ARRAY_LEN];
+  fake_sort ((int *)data, ARRAY_LEN);
+}
+
+int main (void)
+{
+  sort_array ();
+  /* for plt.  */
+  printf ("done");
+  return 0;
+}
+
+$ gcc -c sort.c -O2 -Wa,--gsframe 
+$ gcc -c fake_sort.c -O2 -Wa,--gsframe 
+$ gcc sort.o fake_sort.o -o sort -O2 -Wa,--gsframe 
+
+$ objcopy --dump-section .sframe=test-v2-ET_EXEC.sframe sort
+$ bzip2 test-v2-ET_EXEC.sframe
+
+$ objcopy --dump-section .sframe=test-v2-ET_REL.sframe sort.o
+$ bzip2 test-v2-ET_REL.sframe
