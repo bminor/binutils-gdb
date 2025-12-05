@@ -5430,12 +5430,6 @@ ENUM
   BFD_RELOC_IP2K_FR_OFFSET
 ENUMDOC
   Scenix IP2K - 7-bit sp or dp offset.
-ENUM
-  BFD_RELOC_VPE4KMATH_DATA
-ENUMX
-  BFD_RELOC_VPE4KMATH_INSN
-ENUMDOC
-  Scenix VPE4K coprocessor - data/insn-space addressing.
 
 ENUM
   BFD_RELOC_VTABLE_INHERIT

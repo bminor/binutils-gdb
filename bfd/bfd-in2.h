@@ -5689,10 +5689,6 @@ enum bfd_reloc_code_real
   /* Scenix IP2K - 7-bit sp or dp offset.  */
   BFD_RELOC_IP2K_FR_OFFSET,
 
-  /* Scenix VPE4K coprocessor - data/insn-space addressing.  */
-  BFD_RELOC_VPE4KMATH_DATA,
-  BFD_RELOC_VPE4KMATH_INSN,
-
   /* These two relocations are used by the linker to determine which of
      the entries in a C++ virtual function table are actually used.  When
      the --gc-sections option is given, the linker will zero out the
