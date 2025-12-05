@@ -716,42 +716,6 @@ gdbscm_memory_port_range (SCM port)
   return scm_list_2 (gdbscm_scm_from_ulongest (iomem->start),
 		     gdbscm_scm_from_ulongest (iomem->end));
 }
-
-/* (memory-port-read-buffer-size port) -> integer */
-
-static SCM
-gdbscm_memory_port_read_buffer_size (SCM port)
-{
-  return scm_from_uint (0);
-}
-
-/* (set-memory-port-read-buffer-size! port size) -> unspecified
-   An exception is thrown if read data is still buffered or if the port
-   is unbuffered.  */
-
-static SCM
-gdbscm_set_memory_port_read_buffer_size_x (SCM port, SCM size)
-{
-  return scm_setvbuf (port, scm_from_utf8_symbol ("block"), size);
-}
-
-/* (memory-port-write-buffer-size port) -> integer */
-
-static SCM
-gdbscm_memory_port_write_buffer_size (SCM port)
-{
-  return scm_from_uint (0);
-}
-
-/* (set-memory-port-write-buffer-size! port size) -> unspecified
-   An exception is thrown if write data is still buffered or if the port
-   is unbuffered.  */
-
-static SCM
-gdbscm_set_memory_port_write_buffer_size_x (SCM port, SCM size)
-{
-  return scm_setvbuf (port, scm_from_utf8_symbol ("block"), size);
-}
 
 /* Initialize gdb ports.  */
 
@@ -787,32 +751,6 @@ Return #t if the object is a memory port." },
   { "memory-port-range", 1, 0, 0, as_a_scm_t_subr (gdbscm_memory_port_range),
     "\
 Return the memory range of the port as (start end)." },
-
-  { "memory-port-read-buffer-size", 1, 0, 0,
-    as_a_scm_t_subr (gdbscm_memory_port_read_buffer_size),
-    "\
-Return the size of the read buffer for the memory port." },
-
-  { "set-memory-port-read-buffer-size!", 2, 0, 0,
-    as_a_scm_t_subr (gdbscm_set_memory_port_read_buffer_size_x),
-    "\
-Set the size of the read buffer for the memory port.\n\
-\n\
-  Arguments: port integer\n\
-  Returns: unspecified." },
-
-  { "memory-port-write-buffer-size", 1, 0, 0,
-    as_a_scm_t_subr (gdbscm_memory_port_write_buffer_size),
-    "\
-Return the size of the write buffer for the memory port." },
-
-  { "set-memory-port-write-buffer-size!", 2, 0, 0,
-    as_a_scm_t_subr (gdbscm_set_memory_port_write_buffer_size_x),
-    "\
-Set the size of the write buffer for the memory port.\n\
-\n\
-  Arguments: port integer\n\
-  Returns: unspecified." },
 
   END_FUNCTIONS
 };

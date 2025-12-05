@@ -307,10 +307,6 @@
  open-memory
  memory-port?
  memory-port-range
- memory-port-read-buffer-size
- set-memory-port-read-buffer-size!
- memory-port-write-buffer-size
- set-memory-port-write-buffer-size!
  ;; with-gdb-output-to-port, with-gdb-error-to-port are in experimental.scm.
 
  ;; scm-pretty-print.c

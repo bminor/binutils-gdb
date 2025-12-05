@@ -137,6 +137,14 @@ qExecAndArgs
      contains the gdb.Corefile object if a core file is loaded into
      the inferior, otherwise, this contains None.
 
+* Guile API
+
+  ** Procedures 'memory-port-read-buffer-size',
+     'set-memory-port-read-buffer-size!', 'memory-port-write-buffer-size',
+     and 'set-memory-port-write-buffer-size!' have been removed.  They were
+     deprecated since GDB 10.  Users who need to control the size of a
+     memory port's internal buffer can use the 'setvbuf' procedure.
+
 *** Changes in GDB 17
 
 * Debugging Linux programs that use x86-64 or x86-64 with 32-bit pointer
