@@ -3071,10 +3071,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 
 	    if (lookup_symbol (copy.c_str (),
 			       pstate->expression_context_block,
-			       SEARCH_VFT,
-			       (par_state->language ()->la_language
-				== language_cplus ? &is_a_field_of_this
-				: NULL)).symbol
+			       SEARCH_VFT, &is_a_field_of_this).symbol
 		!= NULL)
 	      {
 		/* The keyword is shadowed.  */
@@ -3136,8 +3133,7 @@ classify_name (struct parser_state *par_state, const struct block *block,
   std::string copy = copy_name (yylval.sval);
 
   bsym = lookup_symbol (copy.c_str (), block, SEARCH_VFT,
-			par_state->language ()->name_of_this ()
-			? &is_a_field_of_this : NULL);
+			&is_a_field_of_this);
 
   if (bsym.symbol && bsym.symbol->loc_class () == LOC_BLOCK)
     {
