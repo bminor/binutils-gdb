@@ -1,6 +1,6 @@
 check_PROGRAMS =
 if HAVE_COMPAT_DEJAGNU
-  check_PROGRAMS += %D%/be-flipping %D%/frecnt-1 %D%/frecnt-2
+  check_PROGRAMS += %D%/be-flipping %D%/frecnt-1 %D%/frecnt-2 %D%/frecnt-v2
 endif
 
 %C%_be_flipping_SOURCES = %D%/be-flipping.c
@@ -14,3 +14,7 @@ endif
 %C%_frecnt_2_SOURCES = %D%/frecnt-2.c
 %C%_frecnt_2_LDADD = $(testsuite_LDADD)
 %C%_frecnt_2_CPPFLAGS = $(testsuite_CPPFLAGS)
+
+%C%_frecnt_v2_SOURCES = %D%/frecnt-v2.c
+%C%_frecnt_v2_LDADD = $(testsuite_LDADD)
+%C%_frecnt_v2_CPPFLAGS = $(testsuite_CPPFLAGS)
