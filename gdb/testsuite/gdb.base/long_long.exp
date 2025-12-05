@@ -133,25 +133,11 @@ gdb_test_ptr "p/a val.oct" "" "" "0x77053977" "0xa72ee53977053977"
 gdb_test "p/c val.oct" "'w'"
 
 if { $sizeof_double == 8 || $sizeof_long_double == 8 } {
-    # ARM FPA floating point numbers are not strictly little endian or big
-    # endian, but a hybrid.  They are in little endian format with the two
-    # words swapped in big endian format.
-    # EABI targets default to natural-endian VFP format.
-
-    if { ([istarget "arm*-*-*"]) \
-	 && !([istarget "*-*-*eabi*"] || \
-	      [istarget "*-*-mingw32ce*"] || \
-	      [istarget "*-*-openbsd*"]) } then {
-	# assume the long long represents a floating point double in ARM format
-	gdb_test "p/f val.oct" "2.1386676354387559e\\+265"
-    } else {
-	# assume the long long represents a floating point double in little
-	# endian format
-	gdb_test "p/f val.oct" "-5.9822653797615723e-120"
-    }
+    set re_val_oct_f [string_to_regexp "-5.9822653797615723e-120"]
 } else {
-    gdb_test "p/f val.oct" "-2.42716126e-15"
+    set re_val_oct_f [string_to_regexp "-2.42716126e-15"]
 }
+gdb_test "p/f val.oct" $re_val_oct_f
 
 gdb_test_char "p/x *(char *)c" "0x1"
 gdb_test_char "p/d *(char *)c" "1"
@@ -208,11 +194,7 @@ gdb_test "x/o w" "0110642547"
 gdb_test "x/t w" "00000001001000110100010101100111"
 gdb_test_xptr "x/a" { b "" } { h "" } { w "0x1234567" } { g "0x123456789abcdef" }
 gdb_test "x/c b" "1 '.001'"
-if { $sizeof_double == 8 || $sizeof_long_double == 8 } {
-    gdb_test "x/f &val.oct" "-5.9822653797615723e-120"
-} else {
-    gdb_test "x/f &val.oct" "-2.42716126e-15"
-}
+gdb_test "x/f &val.oct" $re_val_oct_f
 
 # Implicit Giant size (except for a, c, and f)
 
@@ -225,9 +207,9 @@ gdb_test "x/2t g" "0000000100100011010001010110011110001001101010111100110111101
 gdb_test_xptr "x/2a" { b "" } { h "" } { w "0x1234567.*0xa72ee539" } { g "0x123456789abcdef.*0xa72ee53977053977" }
 gdb_test "x/2c b" "1 '.001'.*-89 '.\[0-9\]*'"
 if { $sizeof_double == 8 || $sizeof_long_double == 8 } {
-    gdb_test "x/2f &val.oct" "-5.9822653797615723e-120.*-5.9041889495880968e-100"
+    gdb_test "x/2f &val.oct" "$re_val_oct_f.*-5.9041889495880968e-100"
 } else {
-    gdb_test "x/2f &val.oct" "-2.42716126e-15"
+    gdb_test "x/2f &val.oct" "$re_val_oct_f"
 }
 
 # Explicit sizes, and two memory locations ...
@@ -266,7 +248,7 @@ gdb_test "x/2go g" "04432126361152746757.*01234567123456701234567"
 gdb_test "x/2gt g" "0000000100100011010001010110011110001001101010111100110111101111.*1010011100101110111001010011100101110111000001010011100101110111"
 gdb_test_ptr "x/2ga g" "" "" "0x89abcdef.*0x77053977" "0x123456789abcdef.*0xa72ee53977053977"
 gdb_test "x/2gc g" "-17 '.\[0-9\]*'.*119 'w'"
-gdb_test "x/2gf g" "3.5127005640885037e-303.*-5.9822653797615723e-120"
+gdb_test "x/2gf g" "3.5127005640885037e-303.*$re_val_oct_f"
 
 # Repeat behavior.
 gdb_test "x/2bx b" "0x01.*0xa7" "set up for repeat"
