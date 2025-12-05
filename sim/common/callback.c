@@ -990,7 +990,7 @@ cb_host_to_target_stat (host_callback *cb, const struct stat *hs, void *ts)
 
   while (m)
     {
-      char *q = strchr (m, ',');
+      const char *q = strchr (m, ',');
       int size;
 
       /* FIXME: Use sscanf? */
