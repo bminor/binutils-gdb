@@ -1241,6 +1241,7 @@ static const arch_entry cpu_arch[] =
   SUBARCH (user_msr, USER_MSR, USER_MSR, false),
   SUBARCH (apx_f, APX_F, ANY_APX_F, false),
   SUBARCH (apx_nci, APX_NCI, ANY_APX_NCI, false),
+  SUBARCH (apx_ndd, APX_NDD, ANY_APX_NDD, false),
   VECARCH (avx10.2, AVX10_2, ANY_AVX10_2, set),
   SUBARCH (gmism2, GMISM2, GMISM2, false),
   SUBARCH (gmiccs, GMICCS, GMICCS, false),
@@ -1944,6 +1945,10 @@ cpu_flags_all_zero (const union i386_cpu_flags *x)
 {
   switch (ARRAY_SIZE(x->array))
     {
+    case 6:
+      if (x->array[5])
+	return 0;
+      /* Fall through.  */
     case 5:
       if (x->array[4])
 	return 0;
@@ -1973,6 +1978,10 @@ cpu_flags_equal (const union i386_cpu_flags *x,
 {
   switch (ARRAY_SIZE(x->array))
     {
+    case 6:
+      if (x->array[5] != y->array[5])
+	return 0;
+      /* Fall through.  */
     case 5:
       if (x->array[4] != y->array[4])
 	return 0;
@@ -2010,6 +2019,9 @@ cpu_flags_and (i386_cpu_flags x, i386_cpu_flags y)
 {
   switch (ARRAY_SIZE (x.array))
     {
+    case 6:
+      x.array [5] &= y.array [5];
+      /* Fall through.  */
     case 5:
       x.array [4] &= y.array [4];
       /* Fall through.  */
@@ -2036,6 +2048,9 @@ cpu_flags_or (i386_cpu_flags x, i386_cpu_flags y)
 {
   switch (ARRAY_SIZE (x.array))
     {
+    case 6:
+      x.array [5] |= y.array [5];
+      /* Fall through.  */
     case 5:
       x.array [4] |= y.array [4];
       /* Fall through.  */
@@ -2062,6 +2077,9 @@ cpu_flags_and_not (i386_cpu_flags x, i386_cpu_flags y)
 {
   switch (ARRAY_SIZE (x.array))
     {
+    case 6:
+      x.array [5] &= ~y.array [5];
+      /* Fall through.  */
     case 5:
       x.array [4] &= ~y.array [4];
       /* Fall through.  */
@@ -2329,6 +2347,17 @@ cpu_flags_match (const insn_template *t)
 
 	  memset (&any, 0, sizeof (any));
 	}
+    }
+  else if (t->opcode_modifier.evex
+	   /* Implicitly !t->opcode_modifier.vex.  */
+	   && all.bitfield.cpuapx_f
+	   && (t->opcode_modifier.nf
+	       || (all.bitfield.cpuadx && t->opcode_modifier.vexvvvv)))
+    {
+      /* APX_NDD can't be combined with other ISAs in the opcode table.
+	 Respective entries (ADCX, ADOX, LZCNT, POPCNT, and TZCNT) use APX_F
+	 instead, which are amended here.  No need to clear cpuapx_f, though. */
+      all.bitfield.cpuapx_ndd = true;
     }
 
   if (flag_code != CODE_64BIT)
@@ -2670,11 +2699,11 @@ operand_size_match (const insn_template *t)
     {
       unsigned int given = i.operands - j - 1;
 
-      /* For FMA4 and XOP insns VEX.W controls just the first two
-	 register operands. And APX_F insns just swap the two source operands,
+      /* For FMA4 and XOP insns VEX.W controls just the first two register
+	 operands.  And APX_F / APX_NDD insns just swap the two source operands,
 	 with the 3rd one being the destination.  */
       if (is_cpu (t, CpuFMA4) || is_cpu (t, CpuXOP)
-	  || is_cpu (t, CpuAPX_F))
+	  || is_cpu (t, CpuAPX_F)|| is_cpu (t, CpuAPX_NDD))
 	given = j < 2 ? 1 - j : j;
 
       if (i.types[given].bitfield.class == Reg
@@ -9598,12 +9627,13 @@ match_template (char mnem_suffix)
 	      /* Try reversing direction of operands.  */
 	      j = is_cpu (t, CpuFMA4)
 		  || is_cpu (t, CpuXOP)
-		  || is_cpu (t, CpuAPX_F) ? 1 : i.operands - 1;
+		  || is_cpu (t, CpuAPX_F)
+		  || is_cpu (t, CpuAPX_NDD) ? 1 : i.operands - 1;
 	      overlap0 = operand_type_and (i.types[0], operand_types[j]);
 	      overlap1 = operand_type_and (i.types[j], operand_types[0]);
 	      overlap2 = operand_type_and (i.types[1], operand_types[1]);
 	      gas_assert (t->operands != 3 || !check_register
-			  || is_cpu (t, CpuAPX_F));
+			  || is_cpu (t, CpuAPX_F) || is_cpu (t, CpuAPX_NDD));
 	      if (!operand_type_match (overlap0, i.types[0])
 		  || !operand_type_match (overlap1, i.types[j])
 		  || (t->operands == 3

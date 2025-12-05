@@ -202,8 +202,8 @@
 .*:211: Error: no VEX/XOP encoding for `and'
 .*:212: Error: no VEX/XOP encoding for `and'
 .*:213: Error: .* `and'
-.*:214: Error: no VEX/XOP encoding for `and'
-.*:215: Error: no VEX/XOP encoding for `and'
+.*:214: Error: .* `and'
+.*:215: Error: .* `and'
 .*:216: Error: .* `and'
 .*:219: Error: .* `andn'
 #pass
