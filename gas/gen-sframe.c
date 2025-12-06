@@ -190,10 +190,10 @@ sframe_fre_set_ra_track (struct sframe_row_entry *fre, offsetT ra_offset)
 }
 
 static void
-sframe_fre_set_bp_track (struct sframe_row_entry *fre, offsetT bp_offset)
+sframe_fre_set_fp_track (struct sframe_row_entry *fre, offsetT fp_offset)
 {
-  fre->bp_loc = SFRAME_FRE_ELEM_LOC_STACK;
-  fre->bp_offset = bp_offset;
+  fre->fp_loc = SFRAME_FRE_ELEM_LOC_STACK;
+  fre->fp_offset = fp_offset;
   fre->merge_candidate = false;
 }
 
@@ -285,11 +285,11 @@ static struct sframe_version_ops sframe_ver_ops;
 /* SFrame (SFRAME_VERSION_1) set FRE info.  */
 
 static unsigned char
-sframe_v1_set_fre_info (unsigned int base_reg, unsigned int num_offsets,
+sframe_v1_set_fre_info (unsigned int cfa_base_reg, unsigned int num_offsets,
 			unsigned int offset_size, bool mangled_ra_p)
 {
   unsigned char fre_info;
-  fre_info = SFRAME_V1_FRE_INFO (base_reg, num_offsets, offset_size);
+  fre_info = SFRAME_V1_FRE_INFO (cfa_base_reg, num_offsets, offset_size);
   fre_info = SFRAME_V1_FRE_INFO_UPDATE_MANGLED_RA_P (mangled_ra_p, fre_info);
   return fre_info;
 }
@@ -323,10 +323,10 @@ sframe_set_version (uint32_t sframe_version ATTRIBUTE_UNUSED)
 /* SFrame set FRE info.  */
 
 static unsigned char
-sframe_set_fre_info (unsigned int base_reg, unsigned int num_offsets,
+sframe_set_fre_info (unsigned int cfa_base_reg, unsigned int num_offsets,
 		     unsigned int offset_size, bool mangled_ra_p)
 {
-  return sframe_ver_ops.set_fre_info (base_reg, num_offsets,
+  return sframe_ver_ops.set_fre_info (cfa_base_reg, num_offsets,
 				      offset_size, mangled_ra_p);
 }
 
@@ -375,13 +375,13 @@ get_fre_num_offsets (const struct sframe_row_entry *sframe_fre)
   /* Atleast 1 must always be present (to recover CFA).  */
   unsigned int fre_num_offsets = 1;
 
-  if (sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
+  if (sframe_fre->fp_loc == SFRAME_FRE_ELEM_LOC_STACK)
     fre_num_offsets++;
   if (sframe_ra_tracking_p ()
       && (sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK
 	  /* For s390x account padding RA offset, if FP without RA saved.  */
 	  || (sframe_get_abi_arch () == SFRAME_ABI_S390X_ENDIAN_BIG
-	      && sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)))
+	      && sframe_fre->fp_loc == SFRAME_FRE_ELEM_LOC_STACK)))
     fre_num_offsets++;
   return fre_num_offsets;
 }
@@ -394,29 +394,29 @@ sframe_get_fre_offset_size (const struct sframe_row_entry *sframe_fre)
 {
   unsigned int max_offset_size = 0;
   unsigned int cfa_offset_size = 0;
-  unsigned int bp_offset_size = 0;
+  unsigned int fp_offset_size = 0;
   unsigned int ra_offset_size = 0;
 
   unsigned int fre_offset_size = 0;
 
   /* What size of offsets appear in this frame row entry.  */
   cfa_offset_size = get_offset_size_in_bytes (sframe_fre->cfa_offset);
-  if (sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
-    bp_offset_size = get_offset_size_in_bytes (sframe_fre->bp_offset);
+  if (sframe_fre->fp_loc == SFRAME_FRE_ELEM_LOC_STACK)
+    fp_offset_size = get_offset_size_in_bytes (sframe_fre->fp_offset);
   if (sframe_ra_tracking_p ())
     {
       if (sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
 	ra_offset_size = get_offset_size_in_bytes (sframe_fre->ra_offset);
       /* For s390x account padding RA offset, if FP without RA saved.  */
       else if (sframe_get_abi_arch () == SFRAME_ABI_S390X_ENDIAN_BIG
-	       && sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
+	       && sframe_fre->fp_loc == SFRAME_FRE_ELEM_LOC_STACK)
 	ra_offset_size = get_offset_size_in_bytes (SFRAME_FRE_RA_OFFSET_INVALID);
     }
 
   /* Get the maximum size needed to represent the offsets.  */
   max_offset_size = cfa_offset_size;
-  if (bp_offset_size > max_offset_size)
-    max_offset_size = bp_offset_size;
+  if (fp_offset_size > max_offset_size)
+    max_offset_size = fp_offset_size;
   if (ra_offset_size > max_offset_size)
     max_offset_size = ra_offset_size;
 
@@ -582,7 +582,7 @@ output_sframe_row_entry_offsets (const struct sframe_func_entry *sframe_fde ATTR
   unsigned int idx = sframe_fre_offset_func_map_index (fre_offset_size);
   gas_assert (idx < SFRAME_FRE_OFFSET_FUNC_MAP_INDEX_MAX);
 
-  /* Write out the offsets in order - cfa, bp, ra.  */
+  /* Write out the offsets in order - cfa, fp, ra.  */
   fre_offset_func_map[idx].out_func (sframe_fre->cfa_offset);
   fre_write_offsets++;
 
@@ -595,15 +595,15 @@ output_sframe_row_entry_offsets (const struct sframe_func_entry *sframe_fde ATTR
 	}
       /* For s390x write padding RA offset, if FP without RA saved.  */
       else if (sframe_get_abi_arch () == SFRAME_ABI_S390X_ENDIAN_BIG
-	       && sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
+	       && sframe_fre->fp_loc == SFRAME_FRE_ELEM_LOC_STACK)
 	{
 	  fre_offset_func_map[idx].out_func (SFRAME_FRE_RA_OFFSET_INVALID);
 	  fre_write_offsets++;
 	}
     }
-  if (sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
+  if (sframe_fre->fp_loc == SFRAME_FRE_ELEM_LOC_STACK)
     {
-      fre_offset_func_map[idx].out_func (sframe_fre->bp_offset);
+      fre_offset_func_map[idx].out_func (sframe_fre->fp_offset);
       fre_write_offsets++;
     }
 
@@ -675,6 +675,7 @@ output_sframe_row_entry (const struct sframe_func_entry *sframe_fde,
 
   fre_write_offsets = output_sframe_row_entry_offsets (sframe_fde, sframe_fre,
 						       fre_offset_size);
+
   /* Check if the expected number offsets have been written out
      in this FRE.  */
   gas_assert (fre_write_offsets == fre_num_offsets);
@@ -1004,8 +1005,8 @@ sframe_row_entry_initialize (struct sframe_row_entry *cur_fre,
   gas_assert (prev_fre);
   cur_fre->cfa_base_reg = prev_fre->cfa_base_reg;
   cur_fre->cfa_offset = prev_fre->cfa_offset;
-  cur_fre->bp_loc = prev_fre->bp_loc;
-  cur_fre->bp_offset = prev_fre->bp_offset;
+  cur_fre->fp_loc = prev_fre->fp_loc;
+  cur_fre->fp_offset = prev_fre->fp_offset;
   cur_fre->ra_loc = prev_fre->ra_loc;
   cur_fre->ra_offset = prev_fre->ra_offset;
   /* Treat RA mangling as a sticky bit.  It retains its value until another
@@ -1226,8 +1227,8 @@ sframe_xlate_do_offset (struct sframe_xlate_ctx *xlate_ctx,
   /* Ignore SP reg, as it can be recovered from the CFA tracking info.  */
   if (cfi_insn->u.ri.reg == SFRAME_CFA_FP_REG)
     {
-      gas_assert (!cur_fre->base_reg);
-      sframe_fre_set_bp_track (cur_fre, cfi_insn->u.ri.offset);
+      gas_assert (!cur_fre->fp_reg);
+      sframe_fre_set_fp_track (cur_fre, cfi_insn->u.ri.offset);
       cur_fre->merge_candidate = false;
     }
   else if (sframe_ra_tracking_p ()
@@ -1295,7 +1296,7 @@ s390_sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx,
      (LSB).  The LSB can be used to differentiate offsets from register
      numbers, as offsets from CFA are always a multiple of -8 on s390x.  */
   if (cfi_insn->u.rr.reg1 == SFRAME_CFA_FP_REG)
-    sframe_fre_set_bp_track (cur_fre,
+    sframe_fre_set_fp_track (cur_fre,
 			     SFRAME_V2_S390X_OFFSET_ENCODE_REGNUM (cfi_insn->u.rr.reg2));
   else if (sframe_ra_tracking_p ()
 	   && cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG)
@@ -1409,8 +1410,8 @@ sframe_xlate_do_restore (struct sframe_xlate_ctx *xlate_ctx,
   if (cfi_insn->u.r == SFRAME_CFA_FP_REG)
     {
       gas_assert (cur_fre);
-      cur_fre->bp_loc = cie_fre->bp_loc;
-      cur_fre->bp_offset = cie_fre->bp_offset;
+      cur_fre->fp_loc = cie_fre->fp_loc;
+      cur_fre->fp_offset = cie_fre->fp_offset;
       cur_fre->merge_candidate = false;
     }
   else if (sframe_ra_tracking_p ()
@@ -1854,8 +1855,8 @@ sframe_xlate_do_same_value (const struct sframe_xlate_ctx *xlate_ctx,
     }
   else if (cfi_insn->u.r == SFRAME_CFA_FP_REG)
     {
-      cur_fre->bp_loc = SFRAME_FRE_ELEM_LOC_REG;
-      cur_fre->bp_offset = 0;
+      cur_fre->fp_loc = SFRAME_FRE_ELEM_LOC_REG;
+      cur_fre->fp_offset = 0;
       cur_fre->merge_candidate = false;
     }
 
@@ -2042,7 +2043,7 @@ sframe_do_fde (struct sframe_xlate_ctx *xlate_ctx,
 	{
 	  /* SFrame format cannot represent FP on stack without RA on stack.  */
 	  if (fre->ra_loc != SFRAME_FRE_ELEM_LOC_STACK
-	      && fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
+	      && fre->fp_loc == SFRAME_FRE_ELEM_LOC_STACK)
 	    {
 	      as_warn (_("no SFrame FDE emitted; FP without RA on stack"));
 	      return SFRAME_XLATE_ERR_NOTREPRESENTED;
