@@ -1161,6 +1161,7 @@ sframe_row_entry_initialize (struct sframe_row_entry *cur_fre,
   cur_fre->ra_loc = prev_fre->ra_loc;
   cur_fre->ra_reg = prev_fre->ra_reg;
   cur_fre->ra_offset = prev_fre->ra_offset;
+  cur_fre->ra_deref_p = prev_fre->ra_deref_p;
   /* Treat RA mangling as a sticky bit.  It retains its value until another
      .cfi_negate_ra_state is seen.  */
   cur_fre->mangled_ra_p = prev_fre->mangled_ra_p;
@@ -1485,6 +1486,18 @@ s390_sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx,
 }
 
 /* Translate DW_CFA_register into SFrame context.
+
+   This opcode indicates: Previous value of register1 is register2.  This is
+   not representable in SFrame stack trace format.  Detect the use of registers
+   interesting to SFrame (FP, RA for this opcode), and skip FDE generation
+   while warning the user.
+
+   Two exceptions apply though:
+     - for S390X, the stack offsets are used to carry register number in
+       default FDE types.  So invoke S390X specific handling.
+     - for AMD64, the flexible topmost frame encoding
+       SFRAME_FDE_TYPE_FLEX can be used for FP, RA registers.
+
    Return SFRAME_XLATE_OK if success.  */
 
 static int
@@ -1494,15 +1507,33 @@ sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx,
   /* Conditionally invoke S390-specific implementation.  */
   if (sframe_get_abi_arch () == SFRAME_ABI_S390X_ENDIAN_BIG)
     return s390_sframe_xlate_do_register (xlate_ctx, cfi_insn);
+  else if (sframe_support_flex_fde_p ())
+    {
+      struct sframe_row_entry *cur_fre = xlate_ctx->cur_fre;
 
-  /* Previous value of register1 is register2.  However, if the specified
-     register1 is not interesting (FP or RA reg), the current DW_CFA_register
-     instruction can be safely skipped without sacrificing the asynchronicity of
-     stack trace information.  */
-  if (cfi_insn->u.rr.reg1 == SFRAME_CFA_FP_REG
-      || cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG
-      /* Ignore SP reg, as it can be recovered from the CFA tracking info.  */
-      )
+      if (cfi_insn->u.rr.reg1 == SFRAME_CFA_FP_REG)
+	{
+	  sframe_fre_set_fp_track (cur_fre, 0);
+	  cur_fre->fp_loc = SFRAME_FRE_ELEM_LOC_REG;
+	  cur_fre->fp_reg = cfi_insn->u.rr.reg2;
+	  cur_fre->fp_deref_p = false;
+	  cur_fre->merge_candidate = false;
+	  xlate_ctx->flex_p = true;
+	}
+      else if (cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG)
+	{
+	  sframe_fre_set_ra_track (cur_fre, 0);
+	  cur_fre->ra_loc = SFRAME_FRE_ELEM_LOC_REG;
+	  cur_fre->ra_reg = cfi_insn->u.rr.reg2;
+	  cur_fre->ra_deref_p = false;
+	  cur_fre->merge_candidate = false;
+	  xlate_ctx->flex_p = true;
+	}
+    }
+  else if (cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG
+	   /* Ignore SP reg, as it can be recovered from the CFA tracking
+	      info.  */
+	   || cfi_insn->u.rr.reg1 == SFRAME_CFA_FP_REG)
     {
       as_warn (_("no SFrame FDE emitted; %s register %u in .cfi_register"),
 	       sframe_register_name (cfi_insn->u.rr.reg1), cfi_insn->u.rr.reg1);
