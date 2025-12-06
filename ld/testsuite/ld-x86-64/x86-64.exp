@@ -587,6 +587,7 @@ run_dump_test "tls-le-pic-3-x32"
 
 if { ![skip_sframe_tests] } {
     run_dump_test "sframe-simple-1"
+    run_dump_test "sframe-link-1"
     run_dump_test "sframe-command-line-1"
     run_dump_test "sframe-reloc-1"
     run_dump_test "sframe-plt-1"
