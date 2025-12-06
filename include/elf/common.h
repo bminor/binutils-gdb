@@ -575,9 +575,10 @@
 #define SHT_CHECKSUM	             0x6ffffff8	/* Checksum for DSO content.  */
 #define SHT_GNU_OBJECT_ONLY	     0x6ffffff9	/* Object only */
 
-#define SHT_SUNW_symtabnsort         0x6fffffec
-#define SHT_SUNW_ancillary           0x6fffffee
+#define SHT_SUNW_ctf                 0x6fffffeb
+#define SHT_SUNW_symnsort            0x6fffffec
 #define SHT_SUNW_phname              0x6fffffed
+#define SHT_SUNW_ancillary           0x6fffffee
 #define SHT_SUNW_capchain            0x6fffffef
 #define SHT_SUNW_capinfo             0x6ffffff0
 #define SHT_SUNW_symsort             0x6ffffff1

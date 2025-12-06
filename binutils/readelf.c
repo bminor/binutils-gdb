@@ -3082,12 +3082,14 @@ get_solaris_section_type (unsigned long type)
 {
   switch (type)
     {
-    case SHT_SUNW_symtabnsort:
-      return "SUNW_symtabnsort";
-    case SHT_SUNW_ancillary:
-      return "SUNW_ancillary";
+    case SHT_SUNW_ctf:
+      return "SUNW_ctf";
+    case SHT_SUNW_symnsort:
+      return "SUNW_symnsort";
     case SHT_SUNW_phname:
       return "SUNW_phname";
+    case SHT_SUNW_ancillary:
+      return "SUNW_ancillary";
     case SHT_SUNW_capchain:
       return "SUNW_capchain";
     case SHT_SUNW_capinfo:
