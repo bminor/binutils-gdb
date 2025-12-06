@@ -87,9 +87,13 @@ struct sframe_row_entry
   bool fp_deref_p;
 
   /* Track RA location.  Specify whether it is in register or memory.  */
+  unsigned int ra_reg;
   unsigned int ra_loc;
   /* If RA is stashed on stack, note the offset.  */
   offsetT ra_offset;
+ /* Whether RA recovery needs dereferencing.  This is tracked for
+    SFRAME_FDE_TYPE_FLEX_TOPMOST_FRAME SFrame FDE type.  */
+  bool ra_deref_p;
 };
 
 /* SFrame Function Description Entry.  */
