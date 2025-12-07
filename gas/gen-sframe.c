@@ -573,7 +573,12 @@ sframe_fde_alloc (void)
 static void
 sframe_fde_free (struct sframe_func_entry *sframe_fde)
 {
-  sframe_row_entry_free (sframe_fde->sframe_fres);
+  if (sframe_fde == NULL)
+    return;
+
+  if (sframe_fde->sframe_fres)
+    sframe_row_entry_free (sframe_fde->sframe_fres);
+
   XDELETE (sframe_fde);
 }
 
@@ -2100,12 +2105,15 @@ create_sframe_all (void)
       /* Initialize the translation context with information anew.  */
       sframe_xlate_ctx_init (xlate_ctx);
 
-      /* Process and link SFrame FDEs if no error.  Also skip adding an SFrame
-	 FDE if it does not contain any SFrame FREs.  There is little use of an
-	 SFrame FDE if there is no stack tracing information for the
-	 function.  */
+      /* Process and link SFrame FDEs if no error.  */
       int err = sframe_do_fde (xlate_ctx, dw_fde);
-      if (err || xlate_ctx->num_xlate_fres == 0)
+      if (err && get_dw_fde_signal_p (dw_fde))
+	{
+	  sframe_xlate_ctx_cleanup (xlate_ctx);
+	  err = SFRAME_XLATE_OK;
+	}
+
+      if (err)
 	{
 	  sframe_xlate_ctx_cleanup (xlate_ctx);
 	  sframe_fde_free (sframe_fde);
