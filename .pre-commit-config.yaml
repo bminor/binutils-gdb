@@ -100,7 +100,7 @@ repos:
     - id: check-whitespace
       name: check-whitespace
       language: script
-      entry: gdb/contrib/check-whitespace-pre-commit.sh
+      entry: gdb/contrib/check-whitespace-pre-commit.py
       files: '^(gdb(support|server)?)/.*$'
       pass_filenames: true
       stages: [pre-commit]
