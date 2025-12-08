@@ -22,7 +22,8 @@ do
 	  -name '*-stub.c' -prune -o \
 	  -name 'testsuite' -prune -o \
 	  -name 'init.c' -prune -o \
-	  -name '*.[hc]' -o -name '*.cc' -print
+	  -name '*.[hc]' -print -o \
+	  -name '*.cc' -print
   )
 done | ${xgettext} \
     --default-domain=${package} \
