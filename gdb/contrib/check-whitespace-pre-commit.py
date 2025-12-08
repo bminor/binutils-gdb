@@ -18,16 +18,11 @@ import re
 import subprocess
 import sys
 
-re_clean = re.compile("(^|/)gdb/testsuite/")
-re_ignore = re.compile("/configure$")
+re_clean = re.compile("(^(gdb/testsuite/|gdbsupport/|gdbserver/)|[.](m4|ac)$)")
 
 clean = []
 other = []
 for f in sys.argv[1:]:
-    m = re_ignore.search(f)
-    if m:
-        continue
-
     m = re_clean.search(f)
     if m:
         clean.append(f)
