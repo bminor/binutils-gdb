@@ -1794,7 +1794,7 @@ update_all_relocations (size_t nentries)
   if (!all_relocations_root)
     {
       sz = nentries * sizeof (elf_relocation);
-      all_relocations_root = (elf_relocation *) xmalloc (sz);
+      all_relocations_root = xmalloc (sz);
       all_relocations = all_relocations_root;
       all_relocations_count = nentries;
     }
@@ -1802,11 +1802,11 @@ update_all_relocations (size_t nentries)
     {
       size_t orig_count = all_relocations_count;
       sz = (orig_count + nentries) * sizeof (elf_relocation);
-      all_relocations_root = (elf_relocation *)
-	xrealloc (all_relocations_root, sz);
+      all_relocations_root = xrealloc (all_relocations_root, sz);
       all_relocations = all_relocations_root + orig_count;
       all_relocations_count += nentries;
     }
+  memset (all_relocations, 0, nentries * sizeof (elf_relocation));
 }
 
 static uint64_t
