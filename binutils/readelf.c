@@ -14811,17 +14811,17 @@ print_symbol (Filedata *           filedata,
     warn (_("local symbol %" PRIu64 " found at index >= %s's sh_info value of %u\n"),
 	  symbol_index, printable_section_name (filedata, section), section->sh_info);
 
-  /* Local symbols whose value is larger than their section's size are suspicious
-     especially if that section is mergeable - and hence might change offsets of
-     the contents inside the section.
-     Note - for some reason we can get mapping symbols that do not relate to their
+  /* Local symbols (in objec files) whose value is larger than their section's
+     size are suspicious especially if that section is mergeable - and hence
+     might change offsets of the contents inside the section.   Note - for
+     some reason we can get mapping symbols that do not relate to their
      section's contents - so we ignore those type of symbol as well.  */
   if (ELF_ST_BIND (psym->st_info) == STB_LOCAL
+      && filedata->file_header.e_type == ET_REL
       && ! is_special
       && is_valid
       && psym->st_shndx < filedata->file_header.e_shnum
       && filedata->section_headers != NULL
-      /* FIXME: Should we warn for non-mergeable sections ? */
       && (filedata->section_headers[psym->st_shndx].sh_flags & SHF_MERGE)
       && psym->st_value > filedata->section_headers[psym->st_shndx].sh_size
       && ! is_mapping_symbol (strtab + psym->st_name))
