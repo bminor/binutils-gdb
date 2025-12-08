@@ -6467,20 +6467,6 @@ elf_x86_64_special_sections[]=
 #undef  elf_backend_strtab_flags
 #define elf_backend_strtab_flags	SHF_STRINGS
 
-static bool
-elf64_x86_64_copy_solaris_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUSED,
-						  bfd *obfd ATTRIBUTE_UNUSED,
-						  const Elf_Internal_Shdr *isection ATTRIBUTE_UNUSED,
-						  Elf_Internal_Shdr *osection ATTRIBUTE_UNUSED)
-{
-  /* PR 19938: FIXME: Need to add code for setting the sh_info
-     and sh_link fields of Solaris specific section types.  */
-  return false;
-}
-
-#undef  elf_backend_copy_special_section_fields
-#define elf_backend_copy_special_section_fields elf64_x86_64_copy_solaris_special_section_fields
-
 #include "elf64-target.h"
 
 /* Restore defaults.  */
@@ -6489,7 +6475,6 @@ elf64_x86_64_copy_solaris_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUS
 #undef	elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym	0
 #undef  elf_backend_strtab_flags
-#undef  elf_backend_copy_special_section_fields
 
 /* 32bit x86-64 support.  */
 

@@ -4971,6 +4971,17 @@ _bfd_x86_elf_link_fixup_gnu_properties
     }
 }
 
+bool
+_bfd_elf_x86_copy_special_section_fields
+  (const bfd *ibfd, bfd *obfd ATTRIBUTE_UNUSED,
+   const Elf_Internal_Shdr *isection ATTRIBUTE_UNUSED,
+   Elf_Internal_Shdr *osection ATTRIBUTE_UNUSED)
+{
+  /* Return false for Solaris binary to properly set the sh_info and
+     sh_link fields of Solaris specific sections.  */
+  return elf_elfheader (ibfd)->e_ident[EI_OSABI] != ELFOSABI_SOLARIS;
+}
+
 void
 bfd_elf_linker_x86_set_options (struct bfd_link_info *info,
 				struct elf_linker_x86_params *params)
