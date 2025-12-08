@@ -124,7 +124,7 @@ proc run_test { target_non_stop non_stop } {
 	}
     }
 
-    # Allow inferior 2 to reach main.  The confirms that inferior 2 can be
+    # Allow inferior 2 to reach main.  This confirms that inferior 2 can be
     # set running again.
     gdb_test "break main inferior 2" \
 	"Breakpoint $::decimal at .*"
@@ -136,7 +136,7 @@ proc run_test { target_non_stop non_stop } {
     # Switch to inferior 1 and allow it to continue.  This is a
     # critical part of the test.  When the test was added a bug (in
     # all-stop mode) would leave inferior 1 stopped, but GDB code
-    # would think the thread was running.  As such. the thread
+    # would think the thread was running.  As such, the thread
     # couldn't be resumed again.
     gdb_test "inferior 1" "Switching to inferior 1.*"
 
