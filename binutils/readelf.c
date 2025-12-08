@@ -10048,13 +10048,11 @@ process_relocs (Filedata * filedata)
       size_t i;
       bool found = false;
 
-      for (i = 0, section = filedata->section_headers;
-	   i < filedata->file_header.e_shnum;
-	   i++, section++)
-	{
+      section = filedata->section_headers;
+      if (section != NULL)
+	for (i = 0; i < filedata->file_header.e_shnum; i++, section++)
 	  if (display_relocations (section, filedata, do_reloc))
 	    found = true;
-	}
 
       if (do_reloc && ! found)
 	{
