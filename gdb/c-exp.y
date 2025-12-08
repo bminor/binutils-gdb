@@ -51,6 +51,7 @@
 #include "type-stack.h"
 #include "target-float.h"
 #include "c-exp.h"
+#include "macroexp.h"
 
 #define parse_type(ps) builtin_type (ps->gdbarch ())
 
