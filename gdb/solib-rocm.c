@@ -20,7 +20,6 @@
 
 #include "amd-dbgapi-target.h"
 #include "amdgpu-tdep.h"
-#include "arch-utils.h"
 #include "elf-bfd.h"
 #include "elf/amdgpu.h"
 #include "event-top.h"
