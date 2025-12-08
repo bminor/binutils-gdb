@@ -100,13 +100,18 @@ test_blockvector_lookup_contains ()
       SELF_CHECK (bv->contains (0x1500) == true);
 
       /* Test address falling into a "hole".  If BV has an address map,
-	 lookup () returns nullptr. If not, lookup () return static block.
-	 contains() returns false in both cases.  */
+	 lookup () returns nullptr and contains (). returns false.  If not,
+	 lookup () return static block and contains() returns true.  */
       if (with_map)
-	SELF_CHECK (bv->lookup (0x2500) == nullptr);
+	{
+	  SELF_CHECK (bv->lookup (0x2500) == nullptr);
+	  SELF_CHECK (bv->contains (0x2500) == false);
+	}
       else
-	SELF_CHECK (bv->lookup (0x2500) == bv->block (STATIC_BLOCK));
-      SELF_CHECK (bv->contains (0x2500) == false);
+	{
+	  SELF_CHECK (bv->lookup (0x2500) == bv->block (STATIC_BLOCK));
+	  SELF_CHECK (bv->contains (0x2500) == true);
+	}
 
       /* Test address falling into a block above the "hole".  */
       SELF_CHECK (bv->lookup (0x3500) == bv->block (3));
