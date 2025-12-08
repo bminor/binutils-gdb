@@ -14821,6 +14821,7 @@ print_symbol (Filedata *           filedata,
       && ! is_special
       && is_valid
       && psym->st_shndx < filedata->file_header.e_shnum
+      && filedata->file_header.e_type == ET_REL
       && filedata->section_headers != NULL
       && (filedata->section_headers[psym->st_shndx].sh_flags & SHF_MERGE)
       && psym->st_value > filedata->section_headers[psym->st_shndx].sh_size
