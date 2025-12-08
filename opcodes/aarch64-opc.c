@@ -5006,7 +5006,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 
 	    if (!(aarch64_sys_regs[i].value == opnd->sysreg.value)
 		|| aarch64_sys_reg_deprecated_p (aarch64_sys_regs[i].flags)
-		| aarch64_sys_reg_alias_p (aarch64_sys_regs[i].flags))
+		|| aarch64_sys_reg_alias_p (aarch64_sys_regs[i].flags))
 	      continue;
 
 	    int mismatch_score = 0;
