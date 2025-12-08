@@ -858,16 +858,24 @@ do_align (unsigned int n, char *fill, unsigned int len, unsigned int max)
 }
 
 /* Find first <eol><next_char>NO_APP<eol>, if any, in the supplied buffer.
-   Return NULL if there's none, or else the position of <next_char>.  */
+   Return NULL if there's none, or else the position of <next_char>.
+   
+   Note: the S parameter to this function is typed as CHAR* rather than
+   CONST CHAR* because if it is const then the strstr() function will return
+   a const pointer, which in turn means that the END local would need to be
+   const, which would mean that the function itself would have to return a
+   const pointer, which means that input_line_pointer would have to become
+   const, which would break lots of things.  (See PR 33696).  */
+
 static char *
-find_no_app (const char *s, char next_char)
+find_no_app (char *s, char next_char)
 {
   const char *start = s;
   const char srch[] = { next_char, 'N', 'O', '_', 'A', 'P', 'P', '\0' };
 
   for (;;)
     {
-      char *ends = strstr (s, srch);
+      char * ends = strstr (s, srch);
 
       if (ends == NULL)
 	break;
