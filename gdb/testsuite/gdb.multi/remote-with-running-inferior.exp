@@ -126,7 +126,8 @@ proc run_test { target_non_stop non_stop } {
 
     # Allow inferior 2 to reach main.  The confirms that inferior 2 can be
     # set running again.
-    gdb_breakpoint main
+    gdb_test "break main inferior 2" \
+	"Breakpoint $::decimal at .*"
     gdb_continue_to_breakpoint "breakpoint in main"
     gdb_test "bt 1" \
 	"#0\\s+main \\(\\) at\[^\r\n\]+" \
