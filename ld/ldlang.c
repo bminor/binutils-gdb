@@ -2835,6 +2835,7 @@ lang_add_section (lang_statement_list_type *ptr,
 	 section.  Unlike a .bss style section, if a note section is
 	 marked as NOLOAD, also clear SEC_ALLOC.  */
       if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour
+	  && bfd_get_flavour (section->owner) == bfd_target_elf_flavour
 	  && elf_section_type (section) != SHT_NOTE)
 	flags &= ~SEC_HAS_CONTENTS;
       else
