@@ -1525,6 +1525,7 @@ run_ld_link_tests [list \
 
 # The musl C library does not support --gnu-tls-tag nor --gnu2-tls-tag.
 if { ![istarget *-*-musl]
+     && [istarget "i?86-*-linux*"]
      && [check_compiler_available] } {
     run_cc_link_tests [list \
 	[list \
@@ -1558,6 +1559,15 @@ if { ![istarget *-*-musl]
 	    { gnu2-tls-1.s } \
 	    {{readelf {-W --version-info} gnu2-tls-1b.rd}} \
 	    "gnu2-tls-1b.so" \
+	] \
+	[list \
+	    "Build no-tls" \
+	    "-Wl,--gnu-tls-tag,--gnu2-tls-tag" \
+	    "" \
+	    { no-tls.c } \
+	    {{readelf {-W --version-info} gnu-tls-1b.rd} \
+	     {readelf {-W --version-info} gnu2-tls-1b.rd}} \
+	    "no-tls" \
 	] \
     ]
 }
