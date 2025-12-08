@@ -121,8 +121,7 @@ enum record_full_type
 {
   record_full_end = 0,
   record_full_reg,
-  record_full_mem,
-  record_full_ptid,
+  record_full_mem
 };
 
 /* This is the data structure that makes up the execution log.
@@ -162,8 +161,6 @@ struct record_full_entry
     struct record_full_mem_entry mem;
     /* end */
     struct record_full_end_entry end;
-
-    ptid_t ptid;
   } u;
 };
 
@@ -444,20 +441,6 @@ record_full_mem_alloc (CORE_ADDR addr, int len)
   return rec;
 }
 
-/* Allocate a record_full_ptid record entry.  */
-
-static inline struct record_full_entry *
-record_full_ptid_alloc (ptid_t ptid)
-{
-  struct record_full_entry *rec;
-
-  rec = XCNEW (struct record_full_entry);
-  rec->type = record_full_ptid;
-  rec->u.ptid = ptid;
-
-  return rec;
-}
-
 /* Free a record_full_mem record entry.  */
 
 static inline void
@@ -490,12 +473,6 @@ record_full_end_release (struct record_full_entry *rec)
   xfree (rec);
 }
 
-static inline void
-record_full_ptid_release (struct record_full_entry *rec)
-{
-  xfree (rec);
-}
-
 /* Free one record entry, any type.
    Return entry->type, in case caller wants to know.  */
 
@@ -514,11 +491,6 @@ record_full_entry_release (struct record_full_entry *rec)
   case record_full_end:
     record_full_end_release (rec);
     break;
-  case record_full_ptid:
-    record_full_ptid_release (rec);
-    break;
-  default:
-    gdb_assert_not_reached ("unhandled record_full_entry type");
   }
   return type;
 }
@@ -641,7 +613,6 @@ record_full_get_loc (struct record_full_entry *rec)
     else
       return rec->u.reg.u.buf;
   case record_full_end:
-  case record_full_ptid:
   default:
     gdb_assert_not_reached ("unexpected record_full_entry type");
     return NULL;
@@ -701,24 +672,6 @@ record_full_arch_list_add_mem (CORE_ADDR addr, int len)
   return 0;
 }
 
-/* Add a PTID entry to the history, marking that the replay should
-   switch threads.  */
-
-static bool
-record_full_arch_list_add_ptid (ptid_t ptid)
-{
-  struct record_full_entry *rec;
-
-  if (record_debug > 1)
-    gdb_printf (gdb_stdlog,
-		"Process record: add ptid to "
-		"record list.\n");
-
-  rec = record_full_ptid_alloc (ptid);
-  record_full_arch_list_add (rec);
-  return true;
-}
-
 /* Add a record_full_end type struct record_full_entry to
    record_full_arch_list.  */
 
@@ -761,12 +714,10 @@ record_full_check_insn_num (void)
    only can step), GDB will call this function to record the values to
    record_full_list.  This function will call gdbarch_process_record to
    record the running message of inferior and set them to
-   record_full_arch_list, and add it to record_full_list.
-   PTID contains the PID and TID of the instruction being recorded.  */
+   record_full_arch_list, and add it to record_full_list.  */
 
 static void
-record_full_message (struct regcache *regcache, enum gdb_signal signal,
-		     ptid_t ptid)
+record_full_message (struct regcache *regcache, enum gdb_signal signal)
 {
   int ret;
   struct gdbarch *gdbarch = regcache->arch ();
@@ -778,11 +729,6 @@ record_full_message (struct regcache *regcache, enum gdb_signal signal,
 
       /* Check record_full_insn_num.  */
       record_full_check_insn_num ();
-
-      /* If there is more than one thread, the history should know which
-	 thread the current instruction belongs to.  */
-      if (thread_count (nullptr) > 1)
-	record_full_arch_list_add_ptid (ptid);
 
       /* If gdb sends a signal value to target_resume,
 	 save it in the 'end' field of the previous instruction.
@@ -847,11 +793,11 @@ record_full_message (struct regcache *regcache, enum gdb_signal signal,
 
 static bool
 record_full_message_wrapper_safe (struct regcache *regcache,
-				  enum gdb_signal signal, ptid_t ptid)
+				  enum gdb_signal signal)
 {
   try
     {
-      record_full_message (regcache, signal, ptid);
+      record_full_message (regcache, signal);
     }
   catch (const gdb_exception_error &ex)
     {
@@ -1142,7 +1088,7 @@ record_full_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
       struct regcache *regcache = get_thread_regcache (inferior_thread ());
       struct gdbarch *gdbarch = regcache->arch ();
 
-      record_full_message (regcache, signal, ptid);
+      record_full_message (regcache, signal);
 
       if (!step)
 	{
@@ -1245,6 +1191,7 @@ record_full_wait_1 (struct target_ops *ops,
     {
       if (record_full_resume_step)
 	{
+	  /* This is a single step.  */
 	  return ops->beneath ()->wait (ptid, status, options);
 	}
       else
@@ -1312,8 +1259,7 @@ record_full_wait_1 (struct target_ops *ops,
 		      int step = 1;
 
 		      if (!record_full_message_wrapper_safe (regcache,
-							     GDB_SIGNAL_0,
-							     ptid))
+							     GDB_SIGNAL_0))
 			{
 			   status->set_stopped (GDB_SIGNAL_0);
 			   break;
@@ -1358,7 +1304,6 @@ record_full_wait_1 (struct target_ops *ops,
     }
   else
     {
-      bool multi_thread = (thread_count (nullptr) > 1);
       switch_to_thread (current_inferior ()->process_target (),
 			record_full_resume_ptid);
       regcache *regcache = get_thread_regcache (inferior_thread ());
@@ -1419,44 +1364,6 @@ record_full_wait_1 (struct target_ops *ops,
 		  /* Hit end of record log going forward.  */
 		  status->set_no_history ();
 		  break;
-		}
-
-	      if (multi_thread)
-		{
-		  if (execution_direction == EXEC_REVERSE)
-		    {
-		      record_full_entry *pid_entry = record_full_list;
-		      while (pid_entry->type != record_full_end
-			     && pid_entry->type != record_full_ptid
-			     && pid_entry->prev != nullptr)
-			pid_entry = pid_entry->prev;
-		      /* If we couldn't find the ptid,
-			 there's no need to change threads.  */
-		      if (pid_entry->type == record_full_ptid)
-			{
-			  switch_to_thread
-			    (current_inferior ()->process_target (),
-			     pid_entry->u.ptid);
-			  regcache = get_thread_regcache (inferior_thread ());
-			}
-		    }
-		  else
-		    {
-		      record_full_entry *pid_entry = record_full_list;
-		      while (pid_entry->type != record_full_end
-			     && pid_entry->type != record_full_ptid
-			     && pid_entry->next != nullptr)
-			pid_entry = pid_entry->next;
-		      /* If we couldn't find the ptid,
-			 there's no need to change threads.  */
-		      if (pid_entry->type == record_full_ptid)
-			{
-			  switch_to_thread
-			    (current_inferior ()->process_target (),
-			     pid_entry->u.ptid);
-			  regcache = get_thread_regcache (inferior_thread ());
-			}
-		    }
 		}
 
 	      record_full_exec_insn (regcache, gdbarch, record_full_list);
@@ -2957,12 +2864,6 @@ maintenance_print_record_instruction (const char *args, int from_tty)
 	      gdb_printf ("\n");
 	      break;
 	    }
-	  case record_full_ptid:
-	    gdb_printf ("Instruction referencing thread %s\n",
-			to_print->u.ptid.to_string ().c_str ());
-	    break;
-	  default:
-	    gdb_assert_not_reached ("Unhandled record type");
 	}
       to_print = to_print->next;
     }
