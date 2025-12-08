@@ -57,7 +57,8 @@ proc run_test { target_non_stop non_stop } {
     gdb_test_no_output "set non-stop $non_stop"
 
     # Start the first inferior running in the background.
-    gdb_test -no-prompt-anchor "run&" "Starting program: .*" "start background inferior"
+    gdb_test -no-prompt-anchor "run&" "Starting program: .*" \
+	"start background inferior"
 
     # Add a second inferior.
     gdb_test "add-inferior" "Added inferior 2.*"
@@ -87,26 +88,26 @@ proc run_test { target_non_stop non_stop } {
 	    exp_continue
 	}
 
-	-re "^\\s+Id\\s+Target Id\\s+Frame\\s*\r\n" {
+	-re {^\s+Id\s+Target Id\s+Frame\s*\r\n} {
 	    exp_continue
 	}
 
-	-re "^\\s+1\\.1\\s+\[^\r\n\]+\\(running\\)\r\n" {
+	-re {^\s+1\.1\s+[^\r\n]+\(running\)\r\n} {
 	    set state_inferior_1 "running"
 	    exp_continue
 	}
 
-	-re "^\\*\\s+2\\.1\\s+\[^\r\n\]+\\(running\\)\r\n" {
+	-re {^\*\s+2\.1\s+[^\r\n]+\(running\)\r\n} {
 	    set state_inferior_2 "running"
 	    exp_continue
 	}
 
-	-re "^\\s+1\\.1\\s+\[^\r\n\]+\r\n" {
+	-re {^\s+1\.1\s+[^\r\n]+\r\n} {
 	    set state_inferior_1 "stopped"
 	    exp_continue
 	}
 
-	-re "^\\*\\s+2\\.1\\s+\[^\r\n\]+\r\n" {
+	-re {^\*\s+2\.1\s+[^\r\n]+\r\n} {
 	    set state_inferior_2 "stopped"
 	    exp_continue
 	}
@@ -130,7 +131,7 @@ proc run_test { target_non_stop non_stop } {
 	"Breakpoint $::decimal at .*"
     gdb_continue_to_breakpoint "breakpoint in main"
     gdb_test "bt 1" \
-	"#0\\s+main \\(\\) at\[^\r\n\]+" \
+	{#0\s+main \(\) at [^\r\n]+} \
 	"check inferior 2 is in main"
 
     # Switch to inferior 1 and allow it to continue.  This is a
@@ -152,8 +153,8 @@ proc run_test { target_non_stop non_stop } {
     gdb_continue_to_breakpoint "continue to breakpoint in breakpt"
     gdb_test "bt 1" \
 	[multi_line \
-	     "#0\\s+breakpt \\(\\) at\[^\r\n\]+" \
-	     "\\(More stack frames follow\\.\\.\\.\\)"] \
+	     {#0\s+breakpt \(\) at [^\r\n]+} \
+	     [string_to_regexp "(More stack frames follow...)"]] \
 	"check inferior 1 is in breakpt"
 
     # Switch back to inferior 2.  The testing infrastructure will try to
