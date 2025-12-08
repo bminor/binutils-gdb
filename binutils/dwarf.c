@@ -4317,9 +4317,11 @@ process_debug_info (struct dwarf_section * section,
 	      break;
 	    }
 
-	  debug_info *debug_info_p = ((debug_information
-				       && unit < alloc_num_debug_info_entries)
-				      ? debug_information + unit : NULL);
+	  debug_info *debug_info_p = NULL;
+	  if (debug_information
+	      && num_debug_info_entries != DEBUG_INFO_UNAVAILABLE
+	      && unit < alloc_num_debug_info_entries)
+	    debug_info_p = debug_information + unit;
 
 	  assert (!debug_info_p
 		  || (debug_info_p->num_loc_offsets
