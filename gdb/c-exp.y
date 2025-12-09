@@ -1884,7 +1884,7 @@ name_not_typename :	NAME
    the parser can't tell whether NAME_OR_INT is a name_not_typename (=variable,
    =exp) or just an exp.  If name_not_typename was ever used in an lvalue
    context where only a name could occur, this might be useful.
-  	|	NAME_OR_INT
+	|	NAME_OR_INT
  */
 	|	oper
 			{
@@ -3169,7 +3169,7 @@ classify_name (struct parser_state *par_state, const struct block *block,
 	 filename.  However, if the name was quoted, then it is better
 	 to check for a filename or a block, since this is the only
 	 way the user has of requiring the extension to be used.  */
-      if ((is_a_field_of_this.type == NULL && !is_after_structop) 
+      if ((is_a_field_of_this.type == NULL && !is_after_structop)
 	  || is_quoted_name)
 	{
 	  /* See if it's a file name. */

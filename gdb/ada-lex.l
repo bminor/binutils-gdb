@@ -164,11 +164,11 @@ static void rewind_to_char (int);
 		}
 
 {NUM10}"#"{NUM16}"."{NUM16}"#"{EXP} {
-                   error (_("Based real literals not implemented yet."));
+		   error (_("Based real literals not implemented yet."));
 		}
 
 {NUM10}"#"{NUM16}"."{NUM16}"#" {
-                   error (_("Based real literals not implemented yet."));
+		   error (_("Based real literals not implemented yet."));
 		}
 
 <INITIAL>"'"({GRAPHIC}|\")"'" {
@@ -178,9 +178,9 @@ static void rewind_to_char (int);
 		}
 
 <INITIAL>"'[\""{HEXDIG}{2,}"\"]'"   {
-                   ULONGEST v = strtoulst (yytext+3, nullptr, 16);
+		   ULONGEST v = strtoulst (yytext+3, nullptr, 16);
 		   yylval.typed_char.val = v;
-                   yylval.typed_char.type = type_for_char (pstate, v);
+		   yylval.typed_char.type = type_for_char (pstate, v);
 		   return CHARLIT;
 		}
 
@@ -188,29 +188,29 @@ static void rewind_to_char (int);
 	   digits here.  Currently there's no support for wide or
 	   wide-wide strings.  */
 \"({GRAPHIC}|"[\""({HEXDIG}{2,}|\")"\"]")*\"   {
-	           yylval.sval = processString (yytext+1, yyleng-2);
+		   yylval.sval = processString (yytext+1, yyleng-2);
 		   return STRING;
 		}
 
 \"              {
-                   error (_("ill-formed or non-terminated string literal"));
+		   error (_("ill-formed or non-terminated string literal"));
 		}
 
 
 if		{
-                  rewind_to_char ('i');
+		  rewind_to_char ('i');
 		  return 0;
 		}
 
 task            {
-                  rewind_to_char ('t');
+		  rewind_to_char ('t');
 		  return 0;
 		}
 
 thread{WHITE}+{DIG} {
-                  /* This keyword signals the end of the expression and
-                     will be processed separately.  */
-                  rewind_to_char ('t');
+		  /* This keyword signals the end of the expression and
+		     will be processed separately.  */
+		  rewind_to_char ('t');
 		  return 0;
 		}
 
@@ -243,7 +243,7 @@ xor		{ return XOR; }
 true		{ return TRUEKEYWORD; }
 false		{ return FALSEKEYWORD; }
 
-        /* ATTRIBUTES */
+	/* ATTRIBUTES */
 
 {TICK}([a-z][a-z_]*)?{COMPLETE}? { BEGIN INITIAL; return processAttribute (yytext); }
 
@@ -277,17 +277,17 @@ false		{ return FALSEKEYWORD; }
 		      return 0;
 		    }
 		  else
- 		    {
+		    {
 		      ada_parser->paren_depth -= 1;
 		      return ')';
 		    }
 		}
 
 "."{WHITE}*{ID}{COMPLETE}? {
-	 	  yylval.sval = processId (yytext+1, yyleng-1);
+		  yylval.sval = processId (yytext+1, yyleng-1);
 		  if (yytext[yyleng - 1] == COMPLETE_CHAR)
 		    return DOT_COMPLETE;
-	          return DOT_ID;
+		  return DOT_ID;
 		}
 
 "."{WHITE}*{COMPLETE} {
@@ -297,25 +297,25 @@ false		{ return FALSEKEYWORD; }
 		}
 
 {ID}({WHITE}*"."{WHITE}*({ID}|\"{OPER}\"))*(" "*"'"|{COMPLETE})?  {
-                  int all_posn = find_dot_all (yytext);
+		  int all_posn = find_dot_all (yytext);
 
-                  if (all_posn == -1 && yytext[yyleng-1] == '\'')
+		  if (all_posn == -1 && yytext[yyleng-1] == '\'')
 		    {
 		      BEGIN BEFORE_QUAL_QUOTE;
 		      yyless (yyleng-1);
 		    }
-                  else if (all_posn >= 0)
+		  else if (all_posn >= 0)
 		    yyless (all_posn);
 		  bool is_completion = yytext[yyleng - 1] == COMPLETE_CHAR;
-                  yylval.sval = processId (yytext, yyleng);
-                  return is_completion ? NAME_COMPLETE : NAME;
-               }
+		  yylval.sval = processId (yytext, yyleng);
+		  return is_completion ? NAME_COMPLETE : NAME;
+	       }
 
 
 	/* GDB EXPRESSION CONSTRUCTS  */
 
 "'"[^']+"'"{WHITE}*:: {
-                  yyless (yyleng - 2);
+		  yyless (yyleng - 2);
 		  yylval.sval = processId (yytext, yyleng);
 		  return NAME;
 		}
@@ -572,7 +572,7 @@ processId (const char *name0, int len)
 }
 
 /* Return TEXT[0..LEN-1], a string literal without surrounding quotes,
-   with special hex character notations replaced with characters. 
+   with special hex character notations replaced with characters.
    Result valid until the next call to ada_parse.  */
 
 static struct stoken
@@ -589,13 +589,13 @@ processString (const char *text, int len)
   while (p < lim)
     {
       if (p[0] == '[' && p[1] == '"' && p+2 < lim)
-         {
-           if (p[2] == '"')  /* "...["""]... */
-             {
-               *q = '"';
+	 {
+	   if (p[2] == '"')  /* "...["""]... */
+	     {
+	       *q = '"';
 	       p += 4;
 	     }
-           else
+	   else
 	     {
 	       const char *end;
 	       ULONGEST chr = strtoulst (p + 2, &end, 16);
@@ -604,9 +604,9 @@ processString (const char *text, int len)
 	       *q = (char) chr;
 	       p = end + 1;
 	     }
-         }
+	 }
        else
-         *q = *p;
+	 *q = *p;
        q += 1;
        p += 1;
      }
@@ -755,8 +755,8 @@ rewind_to_char (int ch)
 
 /* Dummy definition to suppress warnings about unused static definitions. */
 typedef void (*dummy_function) ();
-dummy_function ada_flex_use[] = 
-{ 
+dummy_function ada_flex_use[] =
+{
   (dummy_function) yyunput
 };
 

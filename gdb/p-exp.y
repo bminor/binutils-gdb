@@ -540,8 +540,8 @@ exp	:	DOLLAR_VARIABLE
 							intvar);
 			      current_type = val->type ();
 			    }
- 			}
- 	;
+			}
+	;
 
 exp	:	SIZEOF '(' type ')'	%prec UNARY
 			{
@@ -782,7 +782,7 @@ name_not_typename :	NAME
    the parser can't tell whether NAME_OR_INT is a name_not_typename (=variable,
    =exp) or just an exp.  If name_not_typename was ever used in an lvalue
    context where only a name could occur, this might be useful.
-  	|	NAME_OR_INT
+	|	NAME_OR_INT
  */
 	;
 
@@ -1408,7 +1408,7 @@ yylex (void)
 	{
 	  yylval.lval = 1;
 	  free (uptokstart);
-  	  return TRUEKEYWORD;
+	  return TRUEKEYWORD;
 	}
       if (strcmp (uptokstart, "SELF") == 0)
 	{
@@ -1637,7 +1637,7 @@ yylex (void)
 	&& ((tokstart[0] >= 'a' && tokstart[0] < 'a' + input_radix - 10)
 	    || (tokstart[0] >= 'A' && tokstart[0] < 'A' + input_radix - 10)))
       {
- 	YYSTYPE newlval;	/* Its value is ignored.  */
+	YYSTYPE newlval;	/* Its value is ignored.  */
 	hextype = parse_number (pstate, tokstart, namelen, 0, &newlval);
 	if (hextype == INT)
 	  {

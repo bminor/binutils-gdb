@@ -1629,4 +1629,3 @@ yyerror (const char *msg)
 {
   pstate->parse_error (msg);
 }
-

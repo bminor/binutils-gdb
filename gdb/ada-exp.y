@@ -483,7 +483,7 @@ make_tick_completer (struct stoken tok)
   }
 
 %type <lval> positional_list component_groups component_associations
-%type <lval> aggregate_component_list 
+%type <lval> aggregate_component_list
 %type <tval> var_or_type type_prefix opt_type_prefix
 
 %token <typed_val> INT NULL_PTR
@@ -509,7 +509,7 @@ make_tick_completer (struct stoken tok)
 %left '*' '/' MOD REM
 %right STARSTAR ABS NOT
 
-/* Artificial token to give NAME => ... and NAME | priority over reducing 
+/* Artificial token to give NAME => ... and NAME | priority over reducing
    NAME to <primary> and to give <primary>' priority over reducing <primary>
    to <simple_exp>. */
 %nonassoc VAR
@@ -620,7 +620,7 @@ primary :
 		primary '(' simple_exp DOTDOT simple_exp ')'
 			{ ada_wrap3<ada_ternop_slice_operation> (); }
 	|	var_or_type '(' simple_exp DOTDOT simple_exp ')'
-			{ if ($1 == NULL) 
+			{ if ($1 == NULL)
 			    ada_wrap3<ada_ternop_slice_operation> ();
 			  else
 			    error (_("Cannot slice a type"));
@@ -632,7 +632,7 @@ primary :	'(' exp1 ')'	{ }
 
 /* The following rule causes a conflict with the type conversion
        var_or_type (exp)
-   To get around it, we give '(' higher priority and add bridge rules for 
+   To get around it, we give '(' higher priority and add bridge rules for
        var_or_type (exp, exp, ...)
        var_or_type (exp .. exp)
    We also have the action for  var_or_type(exp) generate a function call
@@ -653,7 +653,7 @@ primary :     	aggregate
 			  pstate->push_new<ada_aggregate_operation>
 			    (pop_component ());
 			}
-	;        
+	;
 
 primary :	'@'
 			{
@@ -715,7 +715,7 @@ arglist	:	exp
 
 primary :	'{' var_or_type '}' primary  %prec '.'
 		/* GDB extension */
-			{ 
+			{
 			  if ($2 == NULL)
 			    error (_("Type required within braces in coercion"));
 			  operation_up arg = ada_pop ();
@@ -786,8 +786,8 @@ relation :	simple_exp IN simple_exp DOTDOT simple_exp
 			  pstate->push_new<ada_binop_in_bounds_operation>
 			    (std::move (lhs), std::move (rhs), $5);
 			}
- 	|	simple_exp IN var_or_type	%prec TICK_ACCESS
-			{ 
+	|	simple_exp IN var_or_type	%prec TICK_ACCESS
+			{
 			  if ($3 == NULL)
 			    error (_("Right operand of 'in' must be type"));
 			  operation_up arg = ada_pop ();
@@ -805,8 +805,8 @@ relation :	simple_exp IN simple_exp DOTDOT simple_exp
 			    (std::move (lhs), std::move (rhs), $6);
 			  ada_wrap<unary_logical_not_operation> ();
 			}
- 	|	simple_exp NOT IN var_or_type	%prec TICK_ACCESS
-			{ 
+	|	simple_exp NOT IN var_or_type	%prec TICK_ACCESS
+			{
 			  if ($4 == NULL)
 			    error (_("Right operand of 'in' must be type"));
 			  operation_up arg = ada_pop ();
@@ -837,7 +837,7 @@ exp	:	relation
 	;
 
 and_exp :
-		relation _AND_ relation 
+		relation _AND_ relation
 			{ ada_wrap2<bitwise_and_operation>
 			    (BINOP_BITWISE_AND); }
 	|	and_exp _AND_ relation
@@ -855,7 +855,7 @@ and_then_exp :
 	;
 
 or_exp :
-		relation OR relation 
+		relation OR relation
 			{ ada_wrap2<bitwise_ior_operation>
 			    (BINOP_BITWISE_IOR); }
 	|	or_exp OR relation
@@ -878,13 +878,13 @@ xor_exp :       relation XOR relation
 			    (BINOP_BITWISE_XOR); }
 	;
 
-/* Primaries can denote types (OP_TYPE).  In cases such as 
+/* Primaries can denote types (OP_TYPE).  In cases such as
    primary TICK_ADDRESS, where a type would be invalid, it will be
    caught when evaluate_subexp in ada-lang.c tries to evaluate the
    primary, expecting a value.  Precedence rules resolve the ambiguity
    in NAME TICK_ACCESS in favor of shifting to form a var_or_type.  A
    construct such as aType'access'access will again cause an error when
-   aType'access evaluates to a type that evaluate_subexp attempts to 
+   aType'access evaluates to a type that evaluate_subexp attempts to
    evaluate. */
 primary :	primary TICK_ACCESS
 			{ ada_addrof (); }
@@ -963,7 +963,7 @@ tick_arglist :			%prec '('
 
 type_prefix :
 		var_or_type
-			{ 
+			{
 			  if ($1 == NULL)
 			    error (_("Prefix must be type"));
 			  $$ = $1;
@@ -1011,7 +1011,7 @@ primary	:	NULL_PTR
 	;
 
 primary	:	STRING
-			{ 
+			{
 			  pstate->push_new<ada_string_operation>
 			    (copy_name ($1));
 			}
@@ -1049,8 +1049,8 @@ var_or_type:	NAME   	    %prec VAR
 								     $1,
 								     $2);
 				}
-	|       NAME TICK_ACCESS 
-			{ 
+	|       NAME TICK_ACCESS
+			{
 			  $$ = write_var_or_type (pstate, NULL, $1);
 			  if ($$ == NULL)
 			    ada_addrof ();
@@ -1058,7 +1058,7 @@ var_or_type:	NAME   	    %prec VAR
 			    $$ = lookup_pointer_type ($$);
 			}
 	|	block NAME TICK_ACCESS
-			{ 
+			{
 			  $$ = write_var_or_type (pstate, $1, $2);
 			  if ($$ == NULL)
 			    ada_addrof ();
@@ -1112,12 +1112,12 @@ positional_list :
 			  push_component<ada_positional_component>
 			    (0, ada_pop ());
 			  $$ = 1;
-			} 
+			}
 	|	positional_list exp ','
 			{
 			  push_component<ada_positional_component>
 			    ($1, ada_pop ());
-			  $$ = $1 + 1; 
+			  $$ = $1 + 1;
 			}
 	;
 
@@ -1171,8 +1171,8 @@ component_group :
 
 /* We use this somewhat obscure definition in order to handle NAME => and
    NAME | differently from exp => and exp |.  ARROW and '|' have a precedence
-   above that of the reduction of NAME to var_or_type.  By delaying 
-   decisions until after the => or '|', we convert the ambiguity to a 
+   above that of the reduction of NAME to var_or_type.  By delaying
+   decisions until after the => or '|', we convert the ambiguity to a
    resolved shift/reduce conflict. */
 component_associations :
 		NAME ARROW exp
@@ -1308,12 +1308,12 @@ write_int (struct parser_state *par_state, LONGEST arg, struct type *type)
   ada_wrap<ada_wrapped_operation> ();
 }
 
-/* Emit expression corresponding to the renamed object named 
+/* Emit expression corresponding to the renamed object named
    designated by RENAMED_ENTITY[0 .. RENAMED_ENTITY_LEN-1] in the
    context of ORIG_LEFT_CONTEXT, to which is applied the operations
    encoded by RENAMING_EXPR.  MAX_DEPTH is the maximum number of
    cascaded renamings to allow.  If ORIG_LEFT_CONTEXT is null, it
-   defaults to the currently selected block. ORIG_SYMBOL is the 
+   defaults to the currently selected block. ORIG_SYMBOL is the
    symbol that originally encoded the renaming.  It is needed only
    because its prefix also qualifies any index variables used to index
    or slice an array.  It should not be necessary once we go to the
@@ -1510,7 +1510,7 @@ select_possible_type_sym (const std::vector<struct block_symbol> &syms)
   int i;
   int preferred_index;
   struct type *preferred_type;
-	  
+
   preferred_index = -1; preferred_type = NULL;
   for (i = 0; i < syms.size (); i += 1)
     switch (syms[i].symbol->loc_class ())
@@ -1552,7 +1552,7 @@ find_primitive_type (struct parser_state *par_state, const char *name)
       /* Check to see if we have a regular definition of this
 	 type that just didn't happen to have been read yet.  */
       struct symbol *sym;
-      char *expanded_name = 
+      char *expanded_name =
 	(char *) alloca (strlen (name) + sizeof ("standard__"));
       strcpy (expanded_name, "standard__");
       strcat (expanded_name, name);
@@ -1602,7 +1602,7 @@ write_selectors (struct parser_state *par_state, const char *sels)
     {
       const char *p = chop_separator (sels);
       sels = p;
-      while (*sels != '\0' && *sels != '.' 
+      while (*sels != '\0' && *sels != '.'
 	     && (sels[0] != '_' || sels[1] != '_'))
 	sels += 1;
       operation_up arg = ada_pop ();
@@ -1678,7 +1678,7 @@ get_symbol_field_type (struct symbol *sym, const char *encoded_field_name)
 	return type->field (fieldno).type ();
 
       subfield_name = field_name;
-      while (*subfield_name != '\0' && *subfield_name != '.' 
+      while (*subfield_name != '\0' && *subfield_name != '.'
 	     && (subfield_name[0] != '_' || subfield_name[1] != '_'))
 	subfield_name += 1;
 
@@ -1697,14 +1697,14 @@ get_symbol_field_type (struct symbol *sym, const char *encoded_field_name)
   return NULL;
 }
 
-/* Look up NAME0 (an unencoded identifier or dotted name) in BLOCK (or 
+/* Look up NAME0 (an unencoded identifier or dotted name) in BLOCK (or
    expression_block_context if NULL).  If it denotes a type, return
    that type.  Otherwise, write expression code to evaluate it as an
    object and return NULL. In this second case, NAME0 will, in general,
    have the form <name>(.<selector_name>)*, where <name> is an object
    or renaming encoded in the debugging data.  Calls error if no
    prefix <name> matches a name in the debugging data (i.e., matches
-   either a complete name or, as a wild-card match, the final 
+   either a complete name or, as a wild-card match, the final
    identifier).  */
 
 static struct type*
@@ -1738,7 +1738,7 @@ write_var_or_type (struct parser_state *par_state,
   for (depth = 0; depth < MAX_RENAMING_CHAIN_LENGTH; depth += 1)
     {
       int tail_index;
-      
+
       tail_index = name_len;
       while (tail_index > 0)
 	{
@@ -1765,7 +1765,7 @@ write_var_or_type (struct parser_state *par_state,
 	    renaming_sym = type_sym;
 	  else if (syms.size () == 1)
 	    renaming_sym = syms[0].symbol;
-	  else 
+	  else
 	    renaming_sym = NULL;
 
 	  switch (ada_parse_renaming (renaming_sym, &renaming,
@@ -1786,7 +1786,7 @@ write_var_or_type (struct parser_state *par_state,
 		encoded_name = new_name;
 		name_len = renaming_len + name_len - tail_index;
 		goto TryAfterRenaming;
-	      }	
+	      }
 	    case ADA_OBJECT_RENAMING:
 	      write_object_renaming (par_state, block, renaming, renaming_len,
 				     renaming_expr, MAX_RENAMING_CHAIN_LENGTH);
@@ -1799,7 +1799,7 @@ write_var_or_type (struct parser_state *par_state,
 	  if (type_sym != NULL)
 	    {
 	      struct type *field_type;
-	      
+
 	      if (tail_index == name_len)
 		return type_sym->type ();
 
@@ -1810,7 +1810,7 @@ write_var_or_type (struct parser_state *par_state,
 		= get_symbol_field_type (type_sym, encoded_name + tail_index);
 	      if (field_type != NULL)
 		return field_type;
-	      else 
+	      else
 		error (_("Invalid attempt to select from type: \"%s\"."),
 		       name0.ptr);
 	    }
@@ -1846,12 +1846,12 @@ write_var_or_type (struct parser_state *par_state,
 		}
 
 	      if (tail_index == name_len
-		  && strncmp (encoded_name, "standard__", 
+		  && strncmp (encoded_name, "standard__",
 			      sizeof ("standard__") - 1) == 0)
 		error (_("No definition of \"%s\" found."), name0.ptr);
 
 	      tail_index = chop_selector (encoded_name, tail_index);
-	    } 
+	    }
 	  else
 	    {
 	      write_ambiguous_var (par_state, block, encoded_name,
@@ -1869,7 +1869,7 @@ write_var_or_type (struct parser_state *par_state,
 	error (_("No definition of \"%s\" in current context."), name0.ptr);
       else
 	error (_("No definition of \"%s\" in specified context."), name0.ptr);
-      
+
     TryAfterRenaming: ;
     }
 
@@ -1957,7 +1957,7 @@ write_var_or_type_completion (struct parser_state *par_state,
    As a result, in the (one hopes) rare case that one writes an
    aggregate such as (R => 42) where R renames an object or is an
    ambiguous name, one must write instead ((R) => 42). */
-   
+
 static void
 write_name_assoc (struct parser_state *par_state, struct stoken name)
 {
@@ -1998,7 +1998,7 @@ type_for_char (struct parser_state *par_state, ULONGEST value)
 static struct type *
 type_system_address (struct parser_state *par_state)
 {
-  struct type *type 
+  struct type *type
     = language_lookup_primitive_type (par_state->language (),
 				      par_state->gdbarch (),
 				      "system__address");
