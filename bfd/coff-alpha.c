@@ -1154,43 +1154,10 @@ alpha_ecoff_get_relocated_section_contents (bfd *abfd,
 
       if (r != bfd_reloc_ok)
 	{
-	  switch (r)
-	    {
-	    case bfd_reloc_undefined:
-	      (*link_info->callbacks->undefined_symbol)
-		(link_info, bfd_asymbol_name (*rel->sym_ptr_ptr),
-		 input_bfd, input_section, rel->address, true);
-	      break;
-	    case bfd_reloc_dangerous:
-	      (*link_info->callbacks->reloc_dangerous)
-		(link_info, err, input_bfd, input_section, rel->address);
-	      break;
-	    case bfd_reloc_overflow:
-	      (*link_info->callbacks->reloc_overflow)
-		(link_info, NULL, bfd_asymbol_name (*rel->sym_ptr_ptr),
-		 rel->howto->name, rel->addend, input_bfd,
-		 input_section, rel->address);
-	      break;
-	    case bfd_reloc_outofrange:
-	      (*link_info->callbacks->einfo)
-		/* xgettext:c-format */
-		(_("%X%P: %pB(%pA): relocation \"%pR\" goes out of range\n"),
-		 input_bfd, input_section, rel);
-	      goto error_return;
-	    case bfd_reloc_notsupported:
-	      (*link_info->callbacks->einfo)
-		/* xgettext:c-format */
-		(_("%X%P: %pB(%pA): relocation \"%pR\" is not supported\n"),
-		 input_bfd, input_section, rel);
-	      goto error_return;
-	    default:
-	      (*link_info->callbacks->einfo)
-		/* xgettext:c-format */
-		(_("%X%P: %pB(%pA): relocation \"%pR\""
-		   " returns an unrecognized value %x\n"),
-		 input_bfd, input_section, rel, r);
-	      break;
-	    }
+	  _bfd_link_reloc_status_error (abfd, link_info, input_section,
+					rel, err, r);
+	  if (r == bfd_reloc_outofrange || r == bfd_reloc_notsupported)
+	    goto error_return;
 	}
     }
 

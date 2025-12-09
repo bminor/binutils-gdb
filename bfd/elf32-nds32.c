@@ -13162,41 +13162,10 @@ nds32_elf_get_relocated_section_contents (bfd *abfd,
 
 	  if (r != bfd_reloc_ok)
 	    {
-	      switch (r)
-		{
-		case bfd_reloc_undefined:
-		  (*link_info->callbacks->undefined_symbol)
-		    (link_info, bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
-		     input_bfd, input_section, (*parent)->address, true);
-		  break;
-		case bfd_reloc_dangerous:
-		  BFD_ASSERT (error_message != NULL);
-		  (*link_info->callbacks->reloc_dangerous)
-		    (link_info, error_message,
-		     input_bfd, input_section, (*parent)->address);
-		  break;
-		case bfd_reloc_overflow:
-		  (*link_info->callbacks->reloc_overflow)
-		    (link_info, NULL,
-		     bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
-		     (*parent)->howto->name, (*parent)->addend,
-		     input_bfd, input_section, (*parent)->address);
-		  break;
-		case bfd_reloc_outofrange:
-		  /* PR ld/13730:
-		     This error can result when processing some partially
-		     complete binaries.  Do not abort, but issue an error
-		     message instead.  */
-		  link_info->callbacks->einfo
-		    /* xgettext:c-format */
-		    (_("%X%P: %pB(%pA): relocation \"%pR\" goes out of range\n"),
-		     abfd, input_section, * parent);
-		  goto error_return;
-
-		default:
-		  abort ();
-		  break;
-		}
+	      _bfd_link_reloc_status_error (abfd, link_info, input_section,
+					    *parent, error_message, r);
+	      if (r == bfd_reloc_outofrange || r == bfd_reloc_notsupported)
+		goto error_return;
 	    }
 	}
     }

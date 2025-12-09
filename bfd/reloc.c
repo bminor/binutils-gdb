@@ -8555,57 +8555,10 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 
 	  if (r != bfd_reloc_ok)
 	    {
-	      switch (r)
-		{
-		case bfd_reloc_undefined:
-		  (*link_info->callbacks->undefined_symbol)
-		    (link_info, bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
-		     input_bfd, input_section, (*parent)->address, true);
-		  break;
-		case bfd_reloc_dangerous:
-		  BFD_ASSERT (error_message != NULL);
-		  (*link_info->callbacks->reloc_dangerous)
-		    (link_info, error_message,
-		     input_bfd, input_section, (*parent)->address);
-		  break;
-		case bfd_reloc_overflow:
-		  (*link_info->callbacks->reloc_overflow)
-		    (link_info, NULL,
-		     bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
-		     (*parent)->howto->name, (*parent)->addend,
-		     input_bfd, input_section, (*parent)->address);
-		  break;
-		case bfd_reloc_outofrange:
-		  /* PR ld/13730:
-		     This error can result when processing some partially
-		     complete binaries.  Do not abort, but issue an error
-		     message instead.  */
-		  link_info->callbacks->einfo
-		    /* xgettext:c-format */
-		    (_("%X%P: %pB(%pA): relocation \"%pR\" goes out of range\n"),
-		     abfd, input_section, * parent);
-		  goto error_return;
-
-		case bfd_reloc_notsupported:
-		  /* PR ld/17512
-		     This error can result when processing a corrupt binary.
-		     Do not abort.  Issue an error message instead.  */
-		  link_info->callbacks->einfo
-		    /* xgettext:c-format */
-		    (_("%X%P: %pB(%pA): relocation \"%pR\" is not supported\n"),
-		     abfd, input_section, * parent);
-		  goto error_return;
-
-		default:
-		  /* PR 17512; file: 90c2a92e.
-		     Report unexpected results, without aborting.  */
-		  link_info->callbacks->einfo
-		    /* xgettext:c-format */
-		    (_("%X%P: %pB(%pA): relocation \"%pR\" returns an unrecognized value %x\n"),
-		     abfd, input_section, * parent, r);
-		  break;
-		}
-
+	      _bfd_link_reloc_status_error (abfd, link_info, input_section,
+					    *parent, error_message, r);
+	      if (r == bfd_reloc_outofrange || r == bfd_reloc_notsupported)
+		goto error_return;
 	    }
 	}
     }
@@ -8678,6 +8631,85 @@ _bfd_unrecognized_reloc (bfd * abfd, sec_ptr section, unsigned int r_type)
 
   bfd_set_error (bfd_error_bad_value);
   return false;
+}
+
+/*
+INTERNAL_FUNCTION
+	_bfd_link_reloc_status_error
+
+SYNOPSIS
+	void _bfd_link_reloc_status_error
+	   (bfd *abfd,
+	    struct bfd_link_info *link_info,
+	    asection *input_section,
+	    arelent *reloc_entry,
+	    char *error_message,
+	    bfd_reloc_status_type r);
+
+DESCRIPTION
+	Mark a link relocation error according to R, with a suitable
+	message as applicable.
+	Written as a function in order to reduce code duplication.
+*/
+
+void
+_bfd_link_reloc_status_error (bfd *abfd, struct bfd_link_info *link_info,
+			      asection *input_section, arelent *reloc_entry,
+			      char *error_message, bfd_reloc_status_type r)
+{
+  bfd_size_type reloc_address = reloc_entry->address;
+  bfd *input_bfd = input_section->owner;
+
+  switch (r)
+    {
+    case bfd_reloc_ok:
+      break;
+    case bfd_reloc_undefined:
+      (*link_info->callbacks->undefined_symbol)
+	(link_info, bfd_asymbol_name (*reloc_entry->sym_ptr_ptr),
+	 input_bfd, input_section, reloc_address, true);
+      break;
+    case bfd_reloc_dangerous:
+      BFD_ASSERT (error_message != NULL);
+      (*link_info->callbacks->reloc_dangerous)
+	(link_info, error_message,
+	 input_bfd, input_section, reloc_address);
+      break;
+    case bfd_reloc_overflow:
+      (*link_info->callbacks->reloc_overflow)
+	(link_info, NULL,
+	 bfd_asymbol_name (*reloc_entry->sym_ptr_ptr),
+	 reloc_entry->howto->name, reloc_entry->addend,
+	 input_bfd, input_section, reloc_address);
+      break;
+    case bfd_reloc_outofrange:
+      /* PR ld/13730:
+	 This error can result when processing some partially
+	 complete binaries.  Do not abort, but issue an error
+	 message instead.  */
+      link_info->callbacks->einfo
+	/* xgettext:c-format */
+	(_("%X%P: %pB(%pA): relocation \"%pR\" goes out of range\n"),
+	 abfd, input_section, reloc_entry);
+      break;
+    case bfd_reloc_notsupported:
+      /* PR ld/17512
+	 This error can result when processing a corrupt binary.
+	 Do not abort.  Issue an error message instead.  */
+      link_info->callbacks->einfo
+	/* xgettext:c-format */
+	(_("%X%P: %pB(%pA): relocation \"%pR\" is not supported\n"),
+	 abfd, input_section, reloc_entry);
+      break;
+    default:
+      /* PR 17512; file: 90c2a92e.
+	 Report unexpected results, without aborting.  */
+      link_info->callbacks->einfo
+	/* xgettext:c-format */
+	(_("%X%P: %pB(%pA): relocation \"%pR\" returns an unrecognized value %x\n"),
+	 abfd, input_section, reloc_entry, r);
+      break;
+    }
 }
 
 reloc_howto_type *
