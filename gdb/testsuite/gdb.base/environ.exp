@@ -13,7 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-gdb_start
+# Make sure there is at least one environment variable.
+save_vars { env(GDB_TEST_ENV_VAR) } {
+    setenv GDB_TEST_ENV_VAR abc
+    gdb_start
+}
 
 proc test_set_show_env_var { name value test_name } {
     gdb_test_no_output "set environment $name $value" "$test_name"
@@ -29,11 +33,20 @@ proc test_set_show_env_var_equal { name value test_name } {
 
 # Verify that we can show all currently-set environment variables.
 # It's hard to do this verification since we can't really compare each
-# entry with the current environment.  So we just check to see if
-# there is anything that looks like an environment variable being
-# printed.
-gdb_test "show environment" "(\[A-Za-z_\]+=.*)+" \
-    "show environment works"
+# entry with the current environment.  So we just check to see if the
+# environment variable we set at startup is printed.
+set saw_env 0
+gdb_test_multiple "show environment" "show environment works" -lbl {
+    -re "\r\nGDB_TEST_ENV_VAR=abc" {
+	incr saw_env 1
+	exp_continue
+    }
+
+    -re "\r\n$gdb_prompt $" {
+    }
+}
+
+gdb_assert {$saw_env == 1} "show environment displayed variable"
 
 # Verify that we can unset a specific environment variable.
 gdb_test_no_output "unset environment EDITOR" "unset environment variable"
