@@ -18,7 +18,7 @@ import re
 import subprocess
 import sys
 
-re_clean = re.compile("(^(gdb/testsuite/|gdbsupport/|gdbserver/)|[.](m4|ac)$)")
+re_clean = re.compile("(^(gdb/testsuite/|gdbsupport/|gdbserver/)|[.](m4|ac|h)$)")
 
 clean = []
 other = []

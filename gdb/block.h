@@ -496,7 +496,7 @@ struct blockvector
   void set_map (addrmap_fixed *map)
   { m_map = map; }
 
-  /* Block comparison function.  Returns true if B1 must be ordered before 
+  /* Block comparison function.  Returns true if B1 must be ordered before
      B2 in a blockvector, false otherwise.  */
   static bool block_less_than (const struct block *b1, const struct block *b2);
 

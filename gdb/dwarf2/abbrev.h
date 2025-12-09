@@ -145,7 +145,7 @@ private:
 
   /* Hash table of abbrev, identified by their number.  */
   gdb::unordered_set<const abbrev_info *,
-  		     abbrev_info_number_hash,
+		     abbrev_info_number_hash,
 		     abbrev_info_number_eq>
     m_abbrevs;
 

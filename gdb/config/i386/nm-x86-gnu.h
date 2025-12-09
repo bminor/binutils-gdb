@@ -29,9 +29,9 @@
 	((((struct i386_thread_state *) (state))->rfl &= ~0x100), 1)
 #else
 #define THREAD_STATE_SET_TRACED(state) \
-  	((struct i386_thread_state *) (state))->efl |= 0x100
+	((struct i386_thread_state *) (state))->efl |= 0x100
 #define THREAD_STATE_CLEAR_TRACED(state) \
-  	((((struct i386_thread_state *) (state))->efl &= ~0x100), 1)
+	((((struct i386_thread_state *) (state))->efl &= ~0x100), 1)
 #endif /* __x86_64__ */
 
 #endif /* GDB_CONFIG_I386_NM_X86_GNU_H */

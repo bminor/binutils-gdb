@@ -1908,7 +1908,7 @@ struct compunit_symtab : intrusive_list_node<compunit_symtab>
 
   /* Set m_blockvector.  */
   void set_blockvector (std::unique_ptr<struct blockvector> blockvector);
-  
+
   bool locations_valid () const
   {
     return m_locations_valid;
