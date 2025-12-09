@@ -1881,7 +1881,7 @@ GNU/Linux/OpenRISC		or1k*-*-linux*
     the '-force' flag of the CLI's "cond" command.
 
  ** '-file-list-exec-source-files [--group-by-objfile]
- 	                          [--basename | --dirname]
+	                          [--basename | --dirname]
                                   [--] [REGEXP]'
 
     The existing -file-list-exec-source-files command now takes an
