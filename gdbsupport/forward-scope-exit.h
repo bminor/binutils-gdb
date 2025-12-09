@@ -106,11 +106,10 @@ private:
     m_bind_function;
 };
 
-template<typename Function, Function *function,
-	 typename Res, typename... Args>
+template<typename Function, Function *function, typename Signature>
 using forward_scope_exit
-	= scope_exit_base<forward_scope_exit_policy<Function,
-						    function, Res, Args...>>;
+	= scope_exit_base<forward_scope_exit_policy<Function, function,
+						    Signature>>;
 
 } /* namespace detail */
 
