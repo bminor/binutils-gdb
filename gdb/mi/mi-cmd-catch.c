@@ -358,4 +358,3 @@ mi_cmd_catch_catch (const char *cmd, const char *const *argv, int argc)
 {
   mi_cmd_catch_exception_event (EX_EVENT_CATCH, cmd, argv, argc);
 }
-

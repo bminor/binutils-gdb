@@ -291,7 +291,7 @@ linux_get_siginfo_type_with_fields (struct gdbarch *gdbarch,
   type_allocator alloc (gdbarch);
 
   int_type = init_integer_type (alloc, gdbarch_int_bit (gdbarch),
-			 	0, "int");
+				0, "int");
   uint_type = init_integer_type (alloc, gdbarch_int_bit (gdbarch),
 				 1, "unsigned int");
   long_type = init_integer_type (alloc, gdbarch_long_bit (gdbarch),

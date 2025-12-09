@@ -109,8 +109,8 @@ struct md_symloc
 
 #define SC_IS_TEXT(sc) ((sc) == scText \
 		   || (sc) == scRConst \
-	  	   || (sc) == scInit \
-	  	   || (sc) == scFini)
+		   || (sc) == scInit \
+		   || (sc) == scFini)
 #define SC_IS_DATA(sc) ((sc) == scData \
 		   || (sc) == scSData \
 		   || (sc) == scRData \

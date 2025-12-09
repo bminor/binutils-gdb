@@ -1705,7 +1705,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 
 	      ppc64_sysv_abi_push_param (gdbarch, eltype, val, &argpos);
 	      ppc64_sysv_abi_push_param (gdbarch, eltype,
-				 	 val + eltype->length (), &argpos);
+					 val + eltype->length (), &argpos);
 	    }
 	  else if (type->code () == TYPE_CODE_ARRAY && type->is_vector ()
 		   && opencl_abi)

@@ -64,4 +64,3 @@ split_name (const char *name, split_style style)
   result.emplace_back (&name[previous_len]);
   return result;
 }
-

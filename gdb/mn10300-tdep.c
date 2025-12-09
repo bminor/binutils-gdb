@@ -1417,4 +1417,3 @@ INIT_GDB_FILE (mn10300_tdep)
 {
   gdbarch_register (bfd_arch_mn10300, mn10300_gdbarch_init, mn10300_dump_tdep);
 }
-

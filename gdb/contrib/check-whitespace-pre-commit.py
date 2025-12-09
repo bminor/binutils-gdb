@@ -18,12 +18,15 @@ import re
 import subprocess
 import sys
 
-re_clean = re.compile("(^(gdb/testsuite/|gdbsupport/|gdbserver/)|[.](m4|ac|h)$)")
+re_clean = re.compile("(^(gdb/testsuite/|gdbsupport/|gdbserver/)|[.](m4|ac|[ch])$)")
+re_clean_exclude = re.compile("^(gdb/symfile.c|gdb/cli/cli-cmds.c)$")
 
 clean = []
 other = []
 for f in sys.argv[1:]:
     m = re_clean.search(f)
+    if m and re_clean_exclude.search(f):
+        m = None
     if m:
         clean.append(f)
     else:

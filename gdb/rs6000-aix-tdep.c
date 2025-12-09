@@ -1428,4 +1428,3 @@ INIT_GDB_FILE (rs6000_aix_tdep)
   gdbarch_register_osabi (bfd_arch_powerpc, 0, GDB_OSABI_AIX,
 			  rs6000_aix_init_osabi);
 }
-

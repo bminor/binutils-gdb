@@ -74,4 +74,3 @@ aarch64_mte_unpack_tags (gdb::byte_vector &tags, bool skip_first)
   /* Update the original tags vector.  */
   tags = std::move (unpacked_tags);
 }
-

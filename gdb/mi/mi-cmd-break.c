@@ -594,4 +594,3 @@ mi_cmd_break_commands (const char *command, const char *const *argv, int argc)
 
   breakpoint_set_commands (b, std::move (break_command));
 }
-

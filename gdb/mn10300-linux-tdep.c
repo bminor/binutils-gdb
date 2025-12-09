@@ -719,4 +719,3 @@ INIT_GDB_FILE (mn10300_linux_tdep)
   gdbarch_register_osabi (bfd_arch_mn10300, 0,
 			  GDB_OSABI_LINUX, am33_linux_init_osabi);
 }
-

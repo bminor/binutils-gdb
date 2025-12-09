@@ -549,7 +549,7 @@ darwin_debug_regions (task_t task, mach_vm_address_t address, int max)
 	  count = VM_REGION_BASIC_INFO_COUNT_64;
 	  kret =
 	    mach_vm_region (task, &address, &size, VM_REGION_BASIC_INFO_64,
-		 	      (vm_region_info_t) &info, &count, &object_name);
+			      (vm_region_info_t) &info, &count, &object_name);
 	  if (kret != KERN_SUCCESS)
 	    {
 	      size = 0;

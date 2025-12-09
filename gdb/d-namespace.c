@@ -516,4 +516,3 @@ d_lookup_symbol_nonlocal (const struct language_defn *langdef,
 
   return d_lookup_symbol_module (scope, name, block, domain);
 }
-

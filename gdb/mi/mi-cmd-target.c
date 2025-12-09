@@ -91,4 +91,3 @@ mi_cmd_target_file_delete (const char *command, const char *const *argv,
 
   remote_file_delete (remote_file, 0);
 }
-

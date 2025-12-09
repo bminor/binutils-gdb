@@ -553,7 +553,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
     }
 
   auto bv = std::make_unique<blockvector> (actual_nblocks);
-  
+
   /* At the end of this function, (begin, end) will contain the PC range this
      entire blockvector spans.  */
   begin = stab->blocks.front ().begin;

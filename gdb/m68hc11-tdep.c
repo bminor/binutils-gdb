@@ -1532,4 +1532,3 @@ INIT_GDB_FILE (m68hc11_tdep)
   gdbarch_register (bfd_arch_m68hc12, m68hc11_gdbarch_init);
   m68hc11_init_reggroups ();
 }
-

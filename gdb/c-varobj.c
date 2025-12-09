@@ -831,11 +831,11 @@ cplus_describe_child (const struct varobj *parent, int index,
 	    {
 	    case 0:
 	      if (children[v_public] > 0)
-	 	access = "public";
+		access = "public";
 	      else if (children[v_private] > 0)
-	 	access = "private";
+		access = "private";
 	      else
-	 	access = "protected";
+		access = "protected";
 	      break;
 	    case 1:
 	      if (children[v_public] > 0)
@@ -846,7 +846,7 @@ cplus_describe_child (const struct varobj *parent, int index,
 		    access = "protected";
 		}
 	      else if (children[v_private] > 0)
-	 	access = "protected";
+		access = "protected";
 	      break;
 	    case 2:
 	      /* Must be protected.  */

@@ -436,4 +436,3 @@ validate_flags_qcs (const char *which_command, qcs_flags *flags)
   if (flags->cont && flags->silent)
     error (_("%s: -c and -s are mutually exclusive"), which_command);
 }
-
