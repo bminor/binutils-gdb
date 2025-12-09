@@ -204,14 +204,11 @@ enum
   /// Code in file uses the IEEE 754-2008 NaN encoding convention.
   EF_MIPS_NAN2008 = 0x00000400,
   // MIPS dynamic
-  EF_MIPS_DYNAMIC = 0x40
-};
+  EF_MIPS_DYNAMIC = 0x40,
 
 // Machine variant if we know it.  This field was invented at Cygnus,
 // but it is hoped that other vendors will adopt it.  If some standard
 // is developed, this code should be changed to follow it.
-enum
-{
   EF_MIPS_MACH = 0x00FF0000,
 
 // Cygnus is choosing values between 80 and 9F;
@@ -261,11 +258,9 @@ enum
   E_MIPS_MACH_GS464   = EF_MIPS_MACH_GS464,
   E_MIPS_MACH_GS464E  = EF_MIPS_MACH_GS464E,
   E_MIPS_MACH_GS264E  = EF_MIPS_MACH_GS264E,
-};
 
 // MIPS architecture
-enum
-{
+
   // Four bit MIPS architecture field.
   EF_MIPS_ARCH = 0xf0000000,
   // -mips1 code.
@@ -304,7 +299,6 @@ enum
   E_MIPS_ARCH_64R2 = EF_MIPS_ARCH_64R2,
   E_MIPS_ARCH_32R6 = EF_MIPS_ARCH_32R6,
   E_MIPS_ARCH_64R6 = EF_MIPS_ARCH_64R6,
-  
 };
 
 // Values for the xxx_size bytes of an ABI flags structure.
