@@ -47,10 +47,11 @@ void raise_second_exception()
 }
 
 template<typename E>
-void capture_exception_of_type(volatile callback_fn_t f)
+void capture_exception_of_type(callback_fn_t f)
 {
+  volatile callback_fn_t vf = f;
   try {
-    f();
+    vf();
   } catch (E& e) {
     puts("caught expected exception");
   } catch (...) {

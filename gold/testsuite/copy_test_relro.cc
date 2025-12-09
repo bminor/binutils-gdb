@@ -39,7 +39,7 @@ sigjmp_buf jmp;
 
 void segv(int)
 {
-  ++segfaults;
+  segfaults = segfaults + 1;
   siglongjmp(jmp, 1);
 }
 
