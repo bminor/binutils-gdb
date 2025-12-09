@@ -755,6 +755,7 @@ proc prune_warnings_extra { text } {
 
     # Ignore LTO warnings triggered by configuring with --enable-pgo-build=lto.
     regsub -all "(^|\n)(\[^\n\]*lto-wrapper: warning: using serial compilation of \[0-9\]+ LTRANS jobs\[^\n\]*\n?)+" $text "\\1" text
+    regsub -all "(^|\n)(\[^\n\]*lto-wrapper: note: \[^\n\]*\n?)+" $text "\\1" text
 
     return $text
 }
