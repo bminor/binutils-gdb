@@ -8368,14 +8368,12 @@ _bfd_elf_link_hide_symbol (bfd *output_bfd,
 {
   if (is_elf_hash_table (info->hash))
     {
-      const struct elf_backend_data *bed
-	= get_elf_backend_data (output_bfd);
-      struct elf_link_hash_entry *eh
-	= (struct elf_link_hash_entry *) h;
-      bed->elf_backend_hide_symbol (info, eh, true);
+      const struct elf_backend_data *bed = get_elf_backend_data (output_bfd);
+      struct elf_link_hash_entry *eh = (struct elf_link_hash_entry *) h;
       eh->def_dynamic = 0;
       eh->ref_dynamic = 0;
       eh->dynamic_def = 0;
+      bed->elf_backend_hide_symbol (info, eh, true);
     }
 }
 
