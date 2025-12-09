@@ -14,3 +14,7 @@
 
 configure   -whitespace
 aclocal.m4  -whitespace
+
+# Tab-indented files.
+
+*.def	whitespace=space-before-tab,indent-with-non-tab,trailing-space

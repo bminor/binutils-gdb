@@ -19,3 +19,7 @@ Makefile.in -whitespace
 # Imported files.
 
 unordered_dense/* -whitespace
+
+# Tab-indented files.
+
+*.def	whitespace=space-before-tab,indent-with-non-tab,trailing-space

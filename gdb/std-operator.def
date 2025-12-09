@@ -334,8 +334,8 @@ OP (OP_RUST_ARRAY)
 
 /* ================ Ada operators ================ */
 
-/* X IN A'RANGE(N).  N is an immediate operand, surrounded by 
-   BINOP_IN_BOUNDS before and after.  A is an array, X an index 
+/* X IN A'RANGE(N).  N is an immediate operand, surrounded by
+   BINOP_IN_BOUNDS before and after.  A is an array, X an index
    value.  Evaluates to true iff X is within range of the Nth
    dimension (1-based) of A.  (A multi-dimensional array
    type is represented as array of array of ...) */
@@ -353,18 +353,18 @@ OP (OP_ATR_SIZE)
 OP (OP_ATR_TAG)
 OP (OP_ATR_VAL)
 
-/* Ada type qualification.  It is encoded as for UNOP_CAST, above, 
+/* Ada type qualification.  It is encoded as for UNOP_CAST, above,
    and denotes the TYPE'(EXPR) construct. */
 OP (UNOP_QUAL)
 
-/* X IN TYPE.  The `TYPE' argument is immediate, with 
-   UNOP_IN_RANGE before and after it. True iff X is a member of 
+/* X IN TYPE.  The `TYPE' argument is immediate, with
+   UNOP_IN_RANGE before and after it. True iff X is a member of
    type TYPE (typically a subrange). */
 OP (UNOP_IN_RANGE)
 
 /* An aggregate.   A single immediate operand, N>0, gives
    the number of component specifications that follow.  The
-   immediate operand is followed by a second OP_AGGREGATE.  
+   immediate operand is followed by a second OP_AGGREGATE.
    Next come N component specifications.  A component
    specification is either an OP_OTHERS (others=>...), an
    OP_CHOICES (for named associations), or other expression (for

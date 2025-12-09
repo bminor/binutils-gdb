@@ -18,7 +18,7 @@
    Generated using linux v6.13 and command:
 
      $ egrep -v "^#.*" ./arch/x86/entry/syscalls/syscall_32.tbl \
-         | awk '{printf "SYSCALL (%s, %s)\n", $1, $3}'
+	 | awk '{printf "SYSCALL (%s, %s)\n", $1, $3}'
 */
 
 SYSCALL (0, restart_syscall)

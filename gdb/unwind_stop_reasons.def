@@ -17,17 +17,17 @@
 
 /* Reasons why frames could not be further unwound
    SET (name, description)
-  
+
    After this reason name, all reasons should be considered errors;
    i.e.: abnormal stack termination.
-   FIRST_ERROR (name)  
-   
+   FIRST_ERROR (name)
+
    First and Last reason defined
    FIRST_ENTRY (name)
    LAST_ENTRY (name)  */
 
 #ifdef SET
-/* No particular reason; either we haven't tried unwinding yet, 
+/* No particular reason; either we haven't tried unwinding yet,
    or we didn't fail.  */
 SET (UNWIND_NO_REASON, "no reason")
 
