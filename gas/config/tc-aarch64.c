@@ -1389,19 +1389,15 @@ reg_type_mask (aarch64_reg_type reg_type)
 
    It returns PARSE_FAIL if the register list is invalid.
 
-   If HAS_QUALIFIER is true, the registers in the list must have qualifiers
-   or the list is invalid.
-   If HAS_QUALIFIER is false, the registers in the list must not have
-   qualifiers or the list is invalid.
+   If HAS_QUALIFIER is true, the registers must have type suffixes.
+   Otherwise, the registers must not have type suffixes.
 
-   The list contains one to four registers.
-   Each register can be one of:
-   <Vt>.<T>[<index>]
-   <Vt>.<T>
-   All <T> should be identical.
-   All <index> should be identical.
-   There are restrictions on <Vt> numbers which are checked later
-   (by reg_list_valid_p).  */
+   If the register list contains typed SIMD registers without an element count
+   (e.g. "v0.h"), then the register list must be indexed.
+
+   The list must contain one to four registers, and all type suffixes must be
+   identical.  Restrictions on register numbers are checked later (by
+   reg_list_valid_p).  */
 
 static int
 parse_vector_reg_list (char **ccp, aarch64_reg_type type,
