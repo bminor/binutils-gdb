@@ -1458,6 +1458,7 @@ AC_C_BIGENDIAN
 
 AC_CHECK_FUNCS([ \
   btowc \
+  clearenv \
   getgid \
   getpgid \
   getrlimit \

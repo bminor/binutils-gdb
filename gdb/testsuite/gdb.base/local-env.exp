@@ -59,12 +59,26 @@ gdb_test "show local-environment EDITOR" \
     "confirm unset environment variable worked"
 
 # Verify that we can unset all environment variables.
-gdb_test "unset local-environment" "" "unset all environment variables" \
-    "Delete all environment variables. .y or n. $" \
-    "y"
+# Note that on some platforms this is not possible.
+set can_unset_all 0
+# Disable confirmation so we don't have to deal with the question.
+gdb_test_multiple "with confirm off -- unset local-environment" \
+    "unset all environment variables" {
+	-re -wrap "Cannot clear the local environment on this host." {
+	    # Nothing.
+	    pass $gdb_test_name
+	}
 
-gdb_test_no_output "show local-environment" \
-    "all environment variables have been unset"
+	-re -wrap "" {
+	    set can_unset_all 1
+	    pass $gdb_test_name
+	}
+    }
+
+if {$can_unset_all} {
+    gdb_test_no_output "show local-environment" \
+	"all environment variables have been unset"
+}
 
 # Verify that we can set a specific environment variable.
 test_set_show_env_var "EDITOR" "emacs" "set environment variable"

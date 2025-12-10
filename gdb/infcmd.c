@@ -2146,12 +2146,25 @@ unset_var_in_environment (gdb_environ *env, const char *var, int from_tty)
 {
   if (var == 0)
     {
+      /* If there is no clearenv, don't bother asking the question.  */
+#ifndef HAVE_CLEARENV
+      if (env == nullptr)
+	from_tty = 0;
+#endif
+
       /* If there is no argument, delete all environment variables.
 	 Ask for confirmation if reading from the terminal.  */
       if (!from_tty || query (_("Delete all environment variables? ")))
 	{
+	  /* This was handled above.  */
 	  if (env == nullptr)
-	    clearenv ();
+	    {
+#ifdef HAVE_CLEARENV
+	      clearenv ();
+#else
+	      error (_("Cannot clear the local environment on this host."));
+#endif
+	    }
 	  else
 	    env->clear ();
 	}

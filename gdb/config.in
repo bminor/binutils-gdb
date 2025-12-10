@@ -110,6 +110,9 @@
    the CoreFoundation framework. */
 #undef HAVE_CFPREFERENCESCOPYAPPVALUE
 
+/* Define to 1 if you have the `clearenv' function. */
+#undef HAVE_CLEARENV
+
 /* Define if compiling support to gdb compile. */
 #undef HAVE_COMPILE
 

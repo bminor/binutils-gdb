@@ -30123,6 +30123,7 @@ $as_echo "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
 
 for ac_func in  \
   btowc \
+  clearenv \
   getgid \
   getpgid \
   getrlimit \
