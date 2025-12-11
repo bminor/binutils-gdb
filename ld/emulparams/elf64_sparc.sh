@@ -25,18 +25,16 @@ if test `echo "$host" | sed -e 's/64//;s/v[789]//'` \
   esac
 fi
 
-# Linux and Solaris modify the default library search path
+# Linux modifies the default library search path
 # to first include a 64-bit specific directory.  It's put
 # in slightly different places on the two systems.
 # Look for 64 bit target libraries in /lib64, /usr/lib64 etc., first
-# on Linux and /lib/sparcv9, /usr/lib/sparcv9 etc. on Solaris.
+# on Linux.
 case "$EMULATION_NAME" in
   *64*)
     case "$target" in
       sparc*-linux*)
 	LIBPATH_SUFFIX=64 ;;
-      sparc*-solaris*)
-	LIBPATH_SUFFIX=/sparcv9 ;;
     esac
     ;;
 esac

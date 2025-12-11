@@ -807,7 +807,7 @@ if [gas_32_check] then {
 	    run_list_test "code64-inval" "-I${srcdir}/$subdir -al"
 	}
 
-	if {![istarget "*-*-vxworks*"]} then {
+	if {!([istarget "*-*-solaris2*"] || [istarget "*-*-vxworks*"])} then {
 	    run_dump_test "iamcu-1"
 	    run_dump_test "iamcu-2"
 	    run_dump_test "iamcu-3"
