@@ -51,9 +51,7 @@ require {expr {$compilation_succeeded}}
 foreach_with_prefix varname {Arr Packed_Arr} {
     clean_restart ${testfile}
 
-    save_vars { timeout } {
-	set timeout 30
-
+    with_timeout_factor 3 {
 	if {![runto "foo"]} {
 	    return
 	}

@@ -51,9 +51,7 @@ require {expr {$compilation_succeeded}}
 # Start with a fresh gdb.
 clean_restart ${::testfile}
 
-save_vars { timeout } {
-    set timeout 30
-
+with_timeout_factor 3 {
     if {![fortran_runto_main]} {
 	return -1
     }
