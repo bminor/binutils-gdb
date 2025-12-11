@@ -31,6 +31,10 @@ with_cwd $repodir {
 	return
     }
 
+    # Skip the pre-commit-setup check.  It checks the repository setup, not
+    # the sources.
+    setenv SKIP pre-commit-setup
+
     set result [remote_exec build "pre-commit run --all-files -v"]
     set status [lindex $result 0]
     gdb_assert {$status == 0} "pre-commit checks"

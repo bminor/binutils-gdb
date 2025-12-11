@@ -104,6 +104,12 @@ repos:
       files: '^(gdb(support|server)?)/.*$'
       pass_filenames: true
       stages: [pre-commit]
+    - id: pre-commit-setup
+      name: pre-commit-setup
+      language: script
+      entry: gdb/contrib/pre-commit-setup.py
+      always_run: true
+      require_serial: true
   - repo: https://github.com/nmoroze/tclint
     rev: v0.6.2
     hooks:
