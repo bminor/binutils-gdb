@@ -190,8 +190,8 @@ with_test_prefix "no objfiles available" {
 
 # The following tests assume that the build-ids of binfile and libfile can be
 # found in the core file.
-require {expr $expect_build_id_in_core_file_binfile}
-require {expr $expect_build_id_in_core_file_libfile}
+require {expr {$expect_build_id_in_core_file_binfile}}
+require {expr {$expect_build_id_in_core_file_libfile}}
 
 with_test_prefix "all objfiles available" {
     # Another sanity check that GDB can find the files via the

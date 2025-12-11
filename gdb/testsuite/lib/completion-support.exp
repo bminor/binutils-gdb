@@ -18,6 +18,8 @@
 # Any variable or procedure in the namespace whose name starts with
 # "_" is private to the module.  Do not use these.
 
+# tclint-disable redefined-builtin
+
 namespace eval completion {
     variable bell_re "\\\x07"
 

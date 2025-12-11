@@ -15,6 +15,8 @@
 #
 # Support library for testing ROCm (AMD GPU) GDB features.
 
+# tclint-disable redefined-builtin
+
 # ROCM_PATH is used by hipcc as well.
 if {[info exists ::env(ROCM_PATH)]} {
     set rocm_path $::env(ROCM_PATH)

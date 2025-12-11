@@ -19,6 +19,8 @@
 
 load_lib gdb-utils.exp
 
+# tclint-disable redefined-builtin
+
 # The variable mi_gdb_prompt is a regexp which matches the gdb mi prompt.
 # Set it if it is not already set.
 global mi_gdb_prompt

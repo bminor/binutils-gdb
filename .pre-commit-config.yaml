@@ -105,9 +105,9 @@ repos:
       pass_filenames: true
       stages: [pre-commit]
   - repo: https://github.com/nmoroze/tclint
-    rev: v0.6.1
+    rev: v0.6.2
     hooks:
     - id: tclint
-      args: [--config, gdb/tclint.toml]
+      args: [--config, gdb/tclint.toml, --commands, gdb/testsuite/tclint-plugin.py]
       types_or: [file]
       files: '^gdb/testsuite/.*\.(exp|tcl)$'
