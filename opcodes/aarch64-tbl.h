@@ -2917,6 +2917,8 @@ static const aarch64_feature_set aarch64_feature_v8r =
   AARCH64_FEATURE (V8R);
 static const aarch64_feature_set aarch64_feature_ls64 =
   AARCH64_FEATURE (LS64);
+static const aarch64_feature_set aarch64_feature_lscp =
+  AARCH64_FEATURE (LSCP);
 static const aarch64_feature_set aarch64_feature_flagm =
   AARCH64_FEATURE (FLAGM);
 static const aarch64_feature_set aarch64_feature_xs =
@@ -3111,6 +3113,7 @@ static const aarch64_feature_set aarch64_feature_sme_mop4_i16i64 =
 #define I8MM      &aarch64_feature_i8mm
 #define ARMV8R	  &aarch64_feature_v8r
 #define LS64	  &aarch64_feature_ls64
+#define LSCP	  &aarch64_feature_lscp
 #define FLAGM	  &aarch64_feature_flagm
 #define XS	  &aarch64_feature_xs
 #define WFXT	  &aarch64_feature_wfxt
@@ -3363,6 +3366,8 @@ static const aarch64_feature_set aarch64_feature_sme_mop4_i16i64 =
   { NAME, OPCODE, MASK, CLASS, 0, WFXT, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define _LS64_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, LS64, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define _LSCP_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, LSCP, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define FLAGM_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, FLAGM, OPS, QUALS, FLAGS | F_INVALID_IMM_SYMS_1, 0, 0, NULL }
 #define MOPS_INSN(NAME, OPCODE, MASK, CLASS, OPS, QUALS, FLAGS, CONSTRAINTS, VERIFIER) \
@@ -4658,6 +4663,10 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   _LOR_INSN ("stllr",  0x889f7c00, 0xbfe08000, ldstexcl, OP2 (Rt, ADDR_SIMPLE), QL_R1NIL,       F_GPRSIZE_IN_Q),
   _LOR_INSN ("stllrb", 0x089f7c00, 0xffe08000, ldstexcl, OP2 (Rt, ADDR_SIMPLE), QL_W1_LDST_EXC, 0),
   _LOR_INSN ("stllrh", 0x489f7c00, 0xbfe08000, ldstexcl, OP2 (Rt, ADDR_SIMPLE), QL_W1_LDST_EXC, 0),
+  /* Load acquire and store release pair.  */
+  _LSCP_INSN ("ldap", 0xd9405800, 0xffe0fc00, ldstpair_off, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, F_LDST_LOAD),
+  _LSCP_INSN ("ldapp", 0xd9407800, 0xffe0fc00, ldstpair_off, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, F_LDST_LOAD),
+  _LSCP_INSN ("stlp", 0xd9005800, 0xffe0fc00, ldstpair_off, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, F_LDST_STORE),
   /* Load/store no-allocate pair (offset).  */
   CORE_INSN ("stnp", 0x28000000, 0x7fc00000, ldstnapair_offs, 0, OP3 (Rt, Rt2, ADDR_SIMM7), QL_LDST_PAIR_R, F_LDST_STORE | F_SF),
   CORE_INSN ("ldnp", 0x28400000, 0x7fc00000, ldstnapair_offs, 0, OP3 (Rt, Rt2, ADDR_SIMM7), QL_LDST_PAIR_R, F_LDST_LOAD | F_SF),

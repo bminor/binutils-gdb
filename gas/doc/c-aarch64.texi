@@ -239,6 +239,8 @@ automatically cause those extensions to be disabled.
  @tab Enable Limited Ordering Regions extensions.
 @item @code{ls64} @tab
  @tab Enable the 64 Byte Loads/Stores extensions.
+@item @code{lscp} @tab
+ @tab Enable the load acquire and store release pair extension.
 @item @code{lse} @tab
  @tab Enable Large System extensions.
 @item @code{lse128} @tab @code{lse}

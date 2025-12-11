@@ -10627,10 +10627,20 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                         {
                                           if (((word >> 21) & 0x1) == 0)
                                             {
-                                              /* 33222222222211111111110000000000
-                                                 10987654321098765432109876543210
-                                                 xx011001000xxxxxxxxx10xxxxxxxxxx.  */
-                                              return A64_OPID_19000800_stilp_Rt_Rs_RCPC3_ADDR_OPT_PREIND_WB;
+                                              if (((word >> 14) & 0x1) == 0)
+                                                {
+                                                  /* 33222222222211111111110000000000
+                                                     10987654321098765432109876543210
+                                                     xx011001000xxxxxx0xx10xxxxxxxxxx.  */
+                                                  return A64_OPID_19000800_stilp_Rt_Rs_RCPC3_ADDR_OPT_PREIND_WB;
+                                                }
+                                              else
+                                                {
+                                                  /* 33222222222211111111110000000000
+                                                     10987654321098765432109876543210
+                                                     xx011001000xxxxxx1xx10xxxxxxxxxx.  */
+                                                  return A64_OPID_d9005800_stlp_Rt_Rs_ADDR_SIMPLE;
+                                                }
                                             }
                                           else
                                             {
@@ -11084,10 +11094,30 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                         {
                                           if (((word >> 21) & 0x1) == 0)
                                             {
-                                              /* 33222222222211111111110000000000
-                                                 10987654321098765432109876543210
-                                                 xx011001010xxxxxxxxx10xxxxxxxxxx.  */
-                                              return A64_OPID_19400800_ldiapp_Rt_Rs_RCPC3_ADDR_OPT_POSTIND;
+                                              if (((word >> 13) & 0x1) == 0)
+                                                {
+                                                  if (((word >> 14) & 0x1) == 0)
+                                                    {
+                                                      /* 33222222222211111111110000000000
+                                                         10987654321098765432109876543210
+                                                         xx011001010xxxxxx00x10xxxxxxxxxx.  */
+                                                      return A64_OPID_19400800_ldiapp_Rt_Rs_RCPC3_ADDR_OPT_POSTIND;
+                                                    }
+                                                  else
+                                                    {
+                                                      /* 33222222222211111111110000000000
+                                                         10987654321098765432109876543210
+                                                         xx011001010xxxxxx10x10xxxxxxxxxx.  */
+                                                      return A64_OPID_d9405800_ldap_Rt_Rs_ADDR_SIMPLE;
+                                                    }
+                                                }
+                                              else
+                                                {
+                                                  /* 33222222222211111111110000000000
+                                                     10987654321098765432109876543210
+                                                     xx011001010xxxxxxx1x10xxxxxxxxxx.  */
+                                                  return A64_OPID_d9407800_ldapp_Rt_Rs_ADDR_SIMPLE;
+                                                }
                                             }
                                           else
                                             {

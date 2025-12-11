@@ -263,6 +263,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SME_TMOP,
   /* SME MOP4 instructions.  */
   AARCH64_FEATURE_SME_MOP4,
+  /* LSCP instructions.  */
+  AARCH64_FEATURE_LSCP,
 
   /* Virtual features.  These are used to gate instructions that are enabled
      by either of two (or more) sets of command line flags.  */
