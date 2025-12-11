@@ -604,14 +604,6 @@ case "${targ}" in
     # PR 27666: Do not include i386_elf32_vec here.
     targ_defvec=i386_elf32_sol2_vec
     ;;
-#ifdef BFD64
-  x86_64-*-solaris2.1[01]*)
-    # PR 27666: Do not include i386_elf32_vec or x86_64_elf64_vec.
-    targ_defvec=x86_64_elf64_sol2_vec
-    targ_selvecs=i386_elf32_sol2_vec
-    want64=true
-    ;;
-#endif
   i[3-7]86-*-nto*)
     targ_defvec=i386_elf32_vec
     targ_selvecs="iamcu_elf32_vec i386_coff_vec"
@@ -732,6 +724,12 @@ case "${targ}" in
   x86_64-*-redox*)
     targ_defvec=x86_64_elf64_vec
     targ_selvecs=i386_elf32_vec
+    want64=true
+    ;;
+  x86_64-*-solaris2.1[01]*)
+    # PR 27666: Do not include i386_elf32_vec or x86_64_elf64_vec.
+    targ_defvec=x86_64_elf64_sol2_vec
+    targ_selvecs=i386_elf32_sol2_vec
     want64=true
     ;;
   x86_64-*-gnu*)
