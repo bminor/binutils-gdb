@@ -132,10 +132,10 @@ set lto_link_tests [list \
    "$plug_opt" "-flto" \
    {lto-14c.c} {} "liblto-14.a"] \
   [list "Compile 15a" \
-   "" "-flto" \
+   "" "-flto $lto_no_fat" \
    {lto-15a.c} {} ""] \
   [list "Build liblto-15.a" \
-   "$plug_opt" "-flto" \
+   "$plug_opt" "-flto $lto_no_fat" \
    {lto-15b.c} {} "liblto-15.a"] \
   [list "PR ld/12696" \
    "-O2 -flto -fuse-linker-plugin -r -nostdlib" "-O2 -flto" \
