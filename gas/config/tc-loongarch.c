@@ -314,7 +314,8 @@ loongarch_after_parse_args ()
       else if (strcmp (TARGET_OS, "linux-gnu") == 0)
 	LARCH_opts.ase_abi = EF_LOONGARCH_ABI_DOUBLE_FLOAT;
       else
-	as_fatal (_("unsupport TARGET_OS %s"), TARGET_OS);
+	/* To support lonngarch*-elf targets.  */
+	LARCH_opts.ase_abi = EF_LOONGARCH_ABI_DOUBLE_FLOAT;
     }
 
   /* Set eflags ABI version to v1 (ELF object file ABI 2.0).  */

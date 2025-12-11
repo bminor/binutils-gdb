@@ -1,6 +1,7 @@
 #as -mabi=ilp32d:
 #ld: -z norelro --hash-style=both -e0
 #objdump: -dr
+#skip: loongarch*-elf
 
 .*:[    ]+file format .*
 

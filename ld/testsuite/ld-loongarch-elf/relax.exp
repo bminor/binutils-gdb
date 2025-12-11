@@ -51,66 +51,72 @@ if [istarget loongarch64-*-*] {
     run_dump_test "relax-align-ignore-start"
     run_partial_linking_align_test
 
-    run_ld_link_tests \
-      [list \
+    if [check_shared_lib_support] {
+      run_ld_link_tests \
 	[list \
-	"loongarch relax call36 .so build" \
-	"-shared" "" \
-	"" \
-	{relax-call36-so.s} \
-	{} \
-	"relax-call36.so" \
-	] \
-      ]
+	  [list \
+	  "loongarch relax call36 .so build" \
+	  "-shared" "" \
+	  "" \
+	  {relax-call36-so.s} \
+	  {} \
+	  "relax-call36.so" \
+	  ] \
+	]
 
-    if [file exist "tmpdir/relax-call36.so"] {
-      set objdump_output [run_host_cmd "objdump" "-d tmpdir/relax-call36.so"]
-      if { [ regexp "pcaddu18i" $objdump_output] } {
-	fail "loongarch relax call36 so"
-      } {
-	pass "loongarch relax call36 so"
+      if [file exist "tmpdir/relax-call36.so"] {
+	set objdump_output [run_host_cmd "objdump" "-d tmpdir/relax-call36.so"]
+	if { [ regexp "pcaddu18i" $objdump_output] } {
+	  fail "loongarch relax call36 so"
+	} {
+	  pass "loongarch relax call36 so"
+	}
       }
     }
 
-    run_ld_link_tests \
-      [list \
+    if [check_pie_support] {
+      run_ld_link_tests \
 	[list \
-	"loongarch relax call36 dyn exe build" \
-	"-pie -e 0" "" \
-	"" \
-	{relax-call36-exe.s} \
-	{} \
-	"relax-call36-d.exe" \
-	] \
-      ]
+	  [list \
+	  "loongarch relax call36 dyn exe build" \
+	  "-pie -e 0" "" \
+	  "" \
+	  {relax-call36-exe.s} \
+	  {} \
+	  "relax-call36-d.exe" \
+	  ] \
+	]
 
-    if [file exist "tmpdir/relax-call36-d.exe"] {
-      set objdump_output [run_host_cmd "objdump" "-d tmpdir/relax-call36-d.exe"]
-      if { [ regexp "pcaddu18i" $objdump_output] } {
-	fail "loongarch relax call36 dyn exe"
-      } {
-	pass "loongarch relax call36 dyn exe"
+      if [file exist "tmpdir/relax-call36-d.exe"] {
+	set objdump_output [run_host_cmd "objdump" "-d tmpdir/relax-call36-d.exe"]
+	if { [ regexp "pcaddu18i" $objdump_output] } {
+	  fail "loongarch relax call36 dyn exe"
+	} {
+	  pass "loongarch relax call36 dyn exe"
+	}
       }
     }
 
-    run_ld_link_tests \
-      [list \
+    if [check_pie_support] {
+      run_ld_link_tests \
 	[list \
-	"loongarch relax call36 dyn-pie exe build" \
-	"-pie -e 0" "" \
-	"" \
-	{relax-call36-exe.s} \
-	{} \
-	"relax-call36-dp.exe" \
-	] \
-      ]
+	  [list \
+	  "loongarch relax call36 dyn-pie exe build" \
+	  "-pie -e 0" "" \
+	  "" \
+	  {relax-call36-exe.s} \
+	  {} \
+	  "relax-call36-dp.exe" \
+	  ] \
+	]
 
-    if [file exist "tmpdir/relax-call36-dp.exe"] {
-      set objdump_output [run_host_cmd "objdump" "-d tmpdir/relax-call36-dp.exe"]
-      if { [ regexp "pcaddu18i" $objdump_output] } {
-	fail "loongarch relax call36 dyn-pie exe"
-      } {
-	pass "loongarch relax call36 dyn-pie exe"
+      if [file exist "tmpdir/relax-call36-dp.exe"] {
+	set objdump_output [run_host_cmd "objdump" "-d tmpdir/relax-call36-dp.exe"]
+	if { [ regexp "pcaddu18i" $objdump_output] } {
+	  fail "loongarch relax call36 dyn-pie exe"
+	} {
+	  pass "loongarch relax call36 dyn-pie exe"
+	}
       }
     }
 
@@ -135,24 +141,26 @@ if [istarget loongarch64-*-*] {
       }
     }
 
-    run_ld_link_tests \
-      [list \
+    if [check_pie_support] {
+      run_ld_link_tests \
 	[list \
-	"loongarch relax call36 static-pie exe build" \
-	"-static -pie --no-dynamic-linker -e 0" "" \
-	"" \
-	{relax-call36-exe.s} \
-	{} \
-	"relax-call36-sp.exe" \
-	] \
-      ]
+	  [list \
+	  "loongarch relax call36 static-pie exe build" \
+	  "-static -pie --no-dynamic-linker -e 0" "" \
+	  "" \
+	  {relax-call36-exe.s} \
+	  {} \
+	  "relax-call36-sp.exe" \
+	  ] \
+	]
 
-    if [file exist "tmpdir/relax-call36-sp.exe"] {
-      set objdump_output [run_host_cmd "objdump" "-d tmpdir/relax-call36-sp.exe"]
-      if { [ regexp "pcaddu18i" $objdump_output] } {
-	fail "loongarch relax call36 static-pie exe"
-      } {
-	pass "loongarch relax call36 static-pie exe"
+      if [file exist "tmpdir/relax-call36-sp.exe"] {
+	set objdump_output [run_host_cmd "objdump" "-d tmpdir/relax-call36-sp.exe"]
+	if { [ regexp "pcaddu18i" $objdump_output] } {
+	  fail "loongarch relax call36 static-pie exe"
+	} {
+	  pass "loongarch relax call36 static-pie exe"
+	}
       }
     }
 
