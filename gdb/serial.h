@@ -152,7 +152,8 @@ extern void serial_send_break (struct serial *scb);
 extern void serial_raw (struct serial *scb);
 
 /* Return a pointer to a newly malloc'd ttystate containing the state
-   of the tty.  */
+   of the tty.  Can return NULL if the current tty state could not be
+   read, for example, if GDB's stdin is not a terminal.  */
 
 extern serial_ttystate serial_get_tty_state (struct serial *scb);
 

@@ -152,6 +152,7 @@ hardwire_set_tty_state (struct serial *scb, serial_ttystate ttystate)
   struct hardwire_ttystate *state;
 
   state = (struct hardwire_ttystate *) ttystate;
+  gdb_assert (state != nullptr);
 
   return set_tty_state (scb, state);
 }
