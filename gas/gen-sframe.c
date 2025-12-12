@@ -1261,15 +1261,15 @@ sframe_xlate_do_def_cfa (struct sframe_xlate_ctx *xlate_ctx,
      SFrame V3 specification, if the CFA register is not FP/SP, SFrame FDE type
      SFRAME_FDE_TYPE_FLEX_TOPMOST_FRAME type may be used.
 
-     ATM however, GAS implements non-SP/FP based CFA only for AMD64, where such
-     a CFA pattern may be seen (e.g., DRAP, stack alignment).  On s390x, this
-     may be seen for (GCC) generated code for static stack clash protection.
-     This remains sufficiently rare and is currently unimplemented for s390x.
-     */
+     ATM however, GAS implements non-SP/FP based CFA only for:
+     - AMD64, where such a CFA pattern may be seen (e.g., DRAP, stack alignment).
+     - s390x, where this may be seen for (GCC) generated code for static stack
+       clash protection.  */
   if (cfi_insn->u.ri.reg != SFRAME_CFA_SP_REG
       && cfi_insn->u.ri.reg != SFRAME_CFA_FP_REG)
     {
-      if (sframe_get_abi_arch () != SFRAME_ABI_AMD64_ENDIAN_LITTLE
+      if ((sframe_get_abi_arch () != SFRAME_ABI_AMD64_ENDIAN_LITTLE
+	   && sframe_get_abi_arch () != SFRAME_ABI_S390X_ENDIAN_BIG)
 	  || !sframe_fre_reg_encodable_p (cfi_insn->u.ri.reg))
 	{
 	  as_warn (_("no SFrame FDE emitted; "
@@ -1307,7 +1307,8 @@ sframe_xlate_do_def_cfa_register (struct sframe_xlate_ctx *xlate_ctx,
   if (cfi_insn->u.r != SFRAME_CFA_SP_REG
       && cfi_insn->u.r != SFRAME_CFA_FP_REG)
     {
-      if (sframe_get_abi_arch () != SFRAME_ABI_AMD64_ENDIAN_LITTLE)
+      if (sframe_get_abi_arch () != SFRAME_ABI_AMD64_ENDIAN_LITTLE
+	  && sframe_get_abi_arch () != SFRAME_ABI_S390X_ENDIAN_BIG)
 	{
 	  as_warn (_("no SFrame FDE emitted; "
 		     "non-SP/FP register %u in .cfi_def_cfa_register"),
@@ -1316,7 +1317,7 @@ sframe_xlate_do_def_cfa_register (struct sframe_xlate_ctx *xlate_ctx,
 	}
       else
 	/* Currently, SFRAME_FDE_TYPE_FLEX_TOPMOST_FRAME is generated for AMD64
-	   only.  */
+	   and s390x only.  */
 	xlate_ctx->flex_topmost_p = true;
     }
 
