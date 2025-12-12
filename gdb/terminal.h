@@ -59,7 +59,9 @@ public:
   DISABLE_COPY_AND_ASSIGN (scoped_restore_tty_state);
 
 private:
-  serial_ttystate m_ttystate;
+  /* The saved tty state.  This can remain NULL even after the constructor
+     has run if serial_get_tty_state fails to fetch the tty state.  */
+  serial_ttystate m_ttystate = nullptr;
 };
 
 #ifdef USE_WIN32API
