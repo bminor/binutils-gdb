@@ -67,7 +67,7 @@ char *default_target;
 const char *output_filename = "a.out";
 
 /* Name this program was invoked by.  */
-char *program_name;
+const char *program_name;
 
 /* The prefix for system library directories.  */
 const char *ld_sysroot;
@@ -567,6 +567,19 @@ report_phases (FILE * file, time_t * start, char ** argv)
   fflush (file);
 }
 
+static void
+set_program_name (const char *argv0)
+{
+  program_name = argv0;
+
+#if defined (__linux__) && _POSIX_VERSION >= 200112L
+  char name[PATH_MAX];
+  ssize_t len = readlink ("/proc/self/exe", name, ARRAY_SIZE (name));
+  if (len > 0 && (size_t)len < ARRAY_SIZE (name))
+    program_name = xmemdup (name, len, len + 1);
+#endif
+}
+
 int
 main (int argc, char **argv)
 {
@@ -581,7 +594,7 @@ main (int argc, char **argv)
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 
-  program_name = argv[0];
+  set_program_name (argv[0]);
   xmalloc_set_program_name (program_name);
 
   /* Check the LD_STATS environment variable before parsing the command line

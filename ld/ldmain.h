@@ -21,7 +21,7 @@
 #ifndef LDMAIN_H
 #define LDMAIN_H
 
-extern char *program_name;
+extern const char *program_name;
 extern const char *ld_sysroot;
 extern char *ld_canon_sysroot;
 extern int ld_canon_sysroot_len;
