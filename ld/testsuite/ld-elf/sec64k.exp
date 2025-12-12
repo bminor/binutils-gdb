@@ -243,6 +243,6 @@ if { ![istarget "d10v-*-*"]
 }
 
 # Tidy up.
-for { set i 1 } { $i < $max_sec / $secs_per_file } { incr i } {
-    catch "exec rm -f tmpdir/dump$i.o" status
+for { set i 0 } { $i < $max_sec / $secs_per_file } { incr i } {
+    catch "exec rm -f tmpdir/sec64-$i.o" status
 }
