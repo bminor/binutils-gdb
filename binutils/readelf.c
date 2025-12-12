@@ -21411,6 +21411,8 @@ get_note_type (Filedata * filedata, unsigned e_type)
 	return _("NT_386_IOPERM (x86 I/O permissions)");
       case NT_X86_XSTATE:
 	return _("NT_X86_XSTATE (x86 XSAVE extended state)");
+      case NT_X86_XSAVE_LAYOUT:
+	return _("NT_X86_XSAVE_LAYOUT (x86 XSAVE Layout description)");
       case NT_X86_CET:
 	return _("NT_X86_CET (x86 CET state)");
       case NT_X86_SHSTK:

@@ -115,6 +115,7 @@ SECTION
 #define NOTE_PSEUDO_SECTION_X86_SEGBASES 	".reg-x86-segbases"
 #define NOTE_PSEUDO_SECTION_XFP          	".reg-xfp"
 #define NOTE_PSEUDO_SECTION_XSTATE       	".reg-xstate"
+#define NOTE_PSEUDO_SECTION_XSAVE_LAYOUT	".reg-xsave-layout"
 
 static int elf_sort_sections (const void *, const void *);
 static bool assign_file_positions_except_relocs (bfd *, struct bfd_link_info *);
@@ -10482,6 +10483,16 @@ elfcore_grok_sspreg (bfd *abfd, Elf_Internal_Note *note)
   return elfcore_make_note_pseudosection (abfd, NOTE_PSEUDO_SECTION_SSP, note);
 }
 
+/* Linux dumps the XSAVE Layout description in a note named "LINUX"
+   with a note type of NT_X86_XSAVE_LAYOUT. */
+static bool
+elfcore_grok_xsave_layout_desc (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd,
+					  NOTE_PSEUDO_SECTION_XSAVE_LAYOUT,
+					  note);
+}
+
 static bool
 elfcore_grok_ppc_vmx (bfd *abfd, Elf_Internal_Note *note)
 {
@@ -11211,6 +11222,7 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
 	case NT_S390_VXRS_LOW:	return elfcore_grok_s390_vxrs_low (abfd, note);
 	case NT_X86_SHSTK:	return elfcore_grok_sspreg (abfd, note);
 	case NT_X86_XSTATE:	return elfcore_grok_xstatereg (abfd, note);
+	case NT_X86_XSAVE_LAYOUT: return elfcore_grok_xsave_layout_desc (abfd, note);
 	default: break;
 	}
     }
@@ -12390,6 +12402,14 @@ elfcore_write_xstatereg (bfd *abfd, char *buf, int *bufsiz,
 			     note_name, NT_X86_XSTATE, xfpregs, size);
 }
 
+char *
+elfcore_write_xsave_layout (bfd *abfd, char *buf, int *bufsiz,
+			    const void *xsave_layout, int size)
+{
+  return elfcore_write_note (abfd, buf, bufsiz, NOTE_NAME_LINUX,
+			     NT_X86_XSAVE_LAYOUT, xsave_layout, size);
+}
+
 static char *
 elfcore_write_sspreg (bfd *abfd, char *buf, int *bufsiz,
 		      const void *ssp, int size)
@@ -13052,7 +13072,8 @@ elfcore_write_register_note (bfd *abfd,
       { NOTE_PSEUDO_SECTION_TDESC,            elfcore_write_gdb_tdesc},
       { NOTE_PSEUDO_SECTION_X86_SEGBASES,     elfcore_write_x86_segbases},
       { NOTE_PSEUDO_SECTION_XFP,              elfcore_write_prxfpreg},
-      { NOTE_PSEUDO_SECTION_XSTATE,           elfcore_write_xstatereg} /* NB/ No comma.  */
+      { NOTE_PSEUDO_SECTION_XSTATE,           elfcore_write_xstatereg},
+      { NOTE_PSEUDO_SECTION_XSAVE_LAYOUT,     elfcore_write_xsave_layout} /* NB/ No comma.  */
     };
 
   int i;
