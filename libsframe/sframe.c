@@ -1148,6 +1148,7 @@ sframe_fre_get_fp_offset (const sframe_decoder_ctx *dctx,
   int8_t fp_offset = sframe_decoder_get_fixed_fp_offset (dctx);
   /* If the FP offset is not being tracked, return the fixed FP offset
      from the SFrame header.  */
+  /* TODO: RA undefined support for FLEX_TOPMOST_FRAME.  */
   if (!flex_p && fp_offset != SFRAME_CFA_FIXED_FP_INVALID
       && !sframe_get_fre_ra_undefined_p (fre->fre_info))
     {
@@ -1187,6 +1188,7 @@ sframe_fre_get_ra_offset (const sframe_decoder_ctx *dctx,
 
   /* If the RA offset was not being tracked, return the fixed RA offset
      from the SFrame header.  */
+  /* TODO: RA undefined support for FLEX_TOPMOST_FRAME.  */
   if (!flex_p && ra_offset != SFRAME_CFA_FIXED_RA_INVALID
       && !sframe_get_fre_ra_undefined_p (fre->fre_info))
     {
