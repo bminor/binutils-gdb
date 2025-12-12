@@ -3038,10 +3038,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
       && (tokstart[namelen] == ' ' || tokstart[namelen] == '\t')
       && ! scanning_macro_expansion ())
     {
-      const char *p = tokstart + namelen + 1;
-
-      while (*p == ' ' || *p == '\t')
-	p++;
+      const char *p = skip_spaces (tokstart + namelen + 1);
       if (*p >= '0' && *p <= '9')
 	return 0;
     }

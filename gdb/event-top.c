@@ -598,7 +598,6 @@ void
 command_handler (const char *command)
 {
   struct ui *ui = current_ui;
-  const char *c;
 
   if (ui->instream == ui->stdin_stream)
     reinitialize_more_filter ();
@@ -606,8 +605,7 @@ command_handler (const char *command)
   scoped_command_stats stat_reporter (true);
 
   /* Do not execute commented lines.  */
-  for (c = command; *c == ' ' || *c == '\t'; c++)
-    ;
+  const char *c = skip_spaces (command);
   if (c[0] != '#')
     {
       execute_command (command, ui->instream == ui->stdin_stream);
@@ -717,9 +715,7 @@ handle_line_of_input (std::string &cmd_line_buffer,
 
   /* If we just got an empty line, and that is supposed to repeat the
      previous command, return the previously saved command.  */
-  const char *p1;
-  for (p1 = cmd_line_buffer.c_str (); *p1 == ' ' || *p1 == '\t'; p1++)
-    ;
+  const char *p1 = skip_spaces (cmd_line_buffer.c_str ());
   if (repeat && *p1 == '\0')
     return get_saved_command_line ();
 

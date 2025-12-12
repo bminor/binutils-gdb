@@ -569,8 +569,7 @@ info_selectors_command (const char *regexp, int from_tty)
       if (*regexp == '+' || *regexp == '-')
 	{ /* User wants only class methods or only instance methods.  */
 	  plusminus = *regexp++;
-	  while (*regexp == ' ' || *regexp == '\t')
-	    regexp++;
+	  regexp = skip_spaces (regexp);
 	}
       if (*regexp == '\0')
 	strcpy(myregexp, ".*]");

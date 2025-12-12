@@ -1559,15 +1559,13 @@ yylex (void)
 	  while (1)
 	    {
 	      /* Skip whitespace.  */
-	      while (*p == ' ' || *p == '\t' || *p == '\n')
-		++p;
+	      p = skip_spaces (p);
 	      if (*p == ':' && p[1] == ':')
 		{
 		  /* Skip the `::'.  */
 		  p += 2;
 		  /* Skip whitespace.  */
-		  while (*p == ' ' || *p == '\t' || *p == '\n')
-		    ++p;
+		  p = skip_spaces (p);
 		  namestart = p;
 		  while (*p == '_' || *p == '$' || (*p >= '0' && *p <= '9')
 			 || (*p >= 'a' && *p <= 'z')

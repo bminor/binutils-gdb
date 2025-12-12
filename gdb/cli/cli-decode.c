@@ -2267,8 +2267,7 @@ lookup_cmd_1 (const char **text, struct cmd_list_element *clist,
   bool found_alias = false;
   const char *line = *text;
 
-  while (**text == ' ' || **text == '\t')
-    (*text)++;
+  *text = skip_spaces (*text);
 
   /* Identify the name of the command.  */
   len = find_command_name_length (*text);
@@ -2499,8 +2498,7 @@ lookup_cmd (const char **line, struct cmd_list_element *list,
 
       /* We've got something.  It may still not be what the caller
 	 wants (if this command *needs* a subcommand).  */
-      while (**line == ' ' || **line == '\t')
-	(*line)++;
+      *line = skip_spaces (*line);
 
       if (c->is_prefix () && **line && !c->allow_unknown)
 	undef_cmd_error (c->prefixname ().c_str (), *line);

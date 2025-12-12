@@ -4117,8 +4117,7 @@ operator_chars (const char *p, const char **end)
     return *end;
 
   /* Allow some whitespace between `operator' and the operator symbol.  */
-  while (*p == ' ' || *p == '\t')
-    p++;
+  p = skip_spaces (p);
 
   /* Recognize 'operator TYPENAME'.  */
 

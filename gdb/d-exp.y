@@ -1247,10 +1247,7 @@ lex_one_token (struct parser_state *par_state)
 	  || strncmp (tokstart, "task", namelen) == 0)
       && (tokstart[namelen] == ' ' || tokstart[namelen] == '\t'))
     {
-      const char *p = tokstart + namelen + 1;
-
-      while (*p == ' ' || *p == '\t')
-	p++;
+      const char *p = skip_spaces (tokstart + namelen + 1);
       if (*p >= '0' && *p <= '9')
 	return 0;
     }

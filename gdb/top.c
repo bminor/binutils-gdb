@@ -467,8 +467,7 @@ execute_command (const char *p, int from_tty)
 
   target_log_command (p);
 
-  while (*p == ' ' || *p == '\t')
-    p++;
+  p = skip_spaces (p);
   if (*p)
     {
       const char *cmd = p;

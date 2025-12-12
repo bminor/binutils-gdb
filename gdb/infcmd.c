@@ -2097,9 +2097,7 @@ set_var_in_environment (gdb_environ *env, const char *arg)
   else
     {
       /* Not setting variable value to null.  */
-      val = p + 1;
-      while (*val == ' ' || *val == '\t')
-	val++;
+      val = skip_spaces (p + 1);
     }
 
   while (p != arg && (p[-1] == ' ' || p[-1] == '\t'))

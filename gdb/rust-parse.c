@@ -761,10 +761,8 @@ rust_parser::lex_string ()
 static bool
 space_then_number (const char *string)
 {
-  const char *p = string;
+  const char *p = skip_spaces (string);
 
-  while (p[0] == ' ' || p[0] == '\t')
-    ++p;
   if (p == string)
     return false;
 
@@ -1072,11 +1070,7 @@ int
 rust_parser::lex_one_token (bool decimal_only)
 {
   /* Skip all leading whitespace.  */
-  while (pstate->lexptr[0] == ' '
-	 || pstate->lexptr[0] == '\t'
-	 || pstate->lexptr[0] == '\r'
-	 || pstate->lexptr[0] == '\n')
-    ++pstate->lexptr;
+  pstate->lexptr = skip_spaces (pstate->lexptr);
 
   /* If we hit EOF and we're completing, then return COMPLETE -- maybe
      we're completing an empty string at the end of a field_expr.

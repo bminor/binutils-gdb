@@ -776,8 +776,7 @@ user_args::user_args (const char *command_line)
       int bsquote = 0;
 
       /* Strip whitespace.  */
-      while (*p == ' ' || *p == '\t')
-	p++;
+      p = skip_spaces (p);
 
       /* P now points to an argument.  */
       start_arg = p;

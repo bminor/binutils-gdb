@@ -1698,10 +1698,7 @@ complete_line_internal_1 (completion_tracker &tracker,
 		      true);
 
   /* Move p up to the next interesting thing.  */
-  while (*p == ' ' || *p == '\t')
-    {
-      p++;
-    }
+  p = skip_spaces (p);
 
   tracker.advance_custom_word_point_by (p - tmp_command);
 
