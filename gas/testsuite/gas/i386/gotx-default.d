@@ -1,6 +1,6 @@
 #source: gotx.s
 #objdump: -dwr
-#xfail: *-*-solaris*
+#skip: *-*-solaris*
 
 .*: +file format .*
 

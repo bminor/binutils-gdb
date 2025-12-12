@@ -1,7 +1,6 @@
 #source: gotx.s
 #objdump: -dwr
-#xfail: *-*-*
-#noxfail: *-*-solaris*
+#noskip: *-*-solaris*
 
 .*: +file format .*
 
