@@ -509,19 +509,6 @@ typedef struct sframe_frame_row_entry_addr4
 #define SFRAME_V2_S390X_OFFSET_DECODE_REGNUM(offset) \
   ((offset) >> 1)
 
-/* In SFrame V3, change the encoding of register numbers in the SFrame offsets
-   on s390x by keeping the lower 3 bits aside.
-   - LSB=0: Stack offset.  The s390x ELF ABI mandates that stack register
-     slots must be 8-byte aligned.
-   - LSB=1: DWARF register number shifted to the left by three.
-   Bits 1 and 2 are currently unused.  */
-#define SFRAME_V3_S390X_OFFSET_IS_REGNUM(offset) \
-  ((offset) & 1)
-#define SFRAME_V3_S390X_OFFSET_ENCODE_REGNUM(regnum) \
-  (((regnum) << 3) | 1)
-#define SFRAME_V3_S390X_OFFSET_DECODE_REGNUM(offset) \
-  ((offset) >> 3)
-
 #ifdef	__cplusplus
 }
 #endif
