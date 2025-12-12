@@ -259,10 +259,6 @@ do_scrub_begin (int m68k_mri ATTRIBUTE_UNUSED)
 #ifdef DOUBLEBAR_PARALLEL
   lex['|'] = LEX_IS_DOUBLEBAR_1ST;
 #endif
-#ifdef TC_D30V
-  /* Must do this is we want VLIW instruction with "->" or "<-".  */
-  lex['-'] = LEX_IS_SYMBOL_COMPONENT;
-#endif
 
 #ifdef H_TICK_HEX
   if (enable_h_tick_hex)

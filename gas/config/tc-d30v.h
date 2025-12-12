@@ -40,6 +40,9 @@
 /* We don't need to handle .word strangely.  */
 #define WORKING_DOT_WORD
 
+extern const char d30v_symbol_chars[];
+#define tc_symbol_chars d30v_symbol_chars
+
 #define md_number_to_chars           number_to_chars_bigendian
 
 int d30v_cleanup (int);
