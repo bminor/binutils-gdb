@@ -806,9 +806,17 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 	    {
 	      /* We should export symbols which are either global or not
 		 anything at all.  (.bss data is the latter)
-		 We should not export undefined symbols.  */
+		 We should not export undefined symbols.
+		 Compilers may generate template data (initializers) for
+		 thread-local variables in .tls$* sections, but they are only
+		 used by the DLL loader.  Symbols in those sections are used
+		 to access thread-local variables, but only via offsets to the
+		 beginning of the .tls output section.  These offsets can't be
+		 exported.  PE targets not using BSF_THREAD_LOCAL, we need to
+		 go by section name for now.  */
 	      bool would_export
 		= (symbols[j]->section != bfd_und_section_ptr
+		   && !startswith (symbols[j]->section->name, ".tls$")
 		   && ((symbols[j]->flags & BSF_GLOBAL)
 		       || (symbols[j]->flags == 0)));
 	      if (link_info.version_info && would_export)
