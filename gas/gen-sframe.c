@@ -636,13 +636,6 @@ output_sframe_row_entry_offsets (const struct sframe_func_entry *sframe_fde,
       fre_offset_func_map[idx].out_func (offset_data);
       fre_write_offsets += 2;
 
-      /* Not expected.  Flexible Topmost Frame FDEs are not implemented ATM
-	 for ABIs other than SFRAME_ABI_AMD64_ENDIAN_LITTLE.  If need arises,
-	 the implementation may be added later as it will be backwards
-	 compatible to add a new FDE type for those ABIs.  */
-      if (sframe_ra_tracking_p ())
-	gas_assert (false);
-
       /* RA tracking enabled or not, emit two offsets for RA.
 	 Aside, emitting SFRAME_FRE_RA_OFFSET_INVALID is equivalent to emitting
 	 SFRAME_V3_FLEX_FDE_REG_ENCODE (0, 0, 0).  */
