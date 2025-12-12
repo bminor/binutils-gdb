@@ -380,7 +380,9 @@ dump_sframe_func_fre_flex_topmost (const sframe_decoder_ctx *sfd_ctx,
 	}
 
       int err_ra_reg = 0;
-      int err_ra_offset = 0;
+      /* RA is not tracked, unless necessary for the FRE.  Assume no RA offset
+	 by default.  */
+      int err_ra_offset = SFRAME_ERR;
       int32_t ra_reg_data = sframe_get_fre_offset (&fre,
 						   SFRAME_FRE_RA_OFFSET_IDX * 2,
 						   &err_ra_reg);
