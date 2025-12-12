@@ -36,45 +36,6 @@
 
 #include "gdb_curses.h"
 
-/* A subclass of string_file that expands tab characters.  */
-class tab_expansion_file : public string_file
-{
-public:
-
-  tab_expansion_file () = default;
-
-  void write (const char *buf, long length_buf) override;
-
-private:
-
-  int m_column = 0;
-};
-
-void
-tab_expansion_file::write (const char *buf, long length_buf)
-{
-  for (long i = 0; i < length_buf; ++i)
-    {
-      if (buf[i] == '\t')
-	{
-	  do
-	    {
-	      string_file::write (" ", 1);
-	      ++m_column;
-	    }
-	  while ((m_column % 8) != 0);
-	}
-      else
-	{
-	  string_file::write (&buf[i], 1);
-	  if (buf[i] == '\n')
-	    m_column = 0;
-	  else
-	    ++m_column;
-	}
-    }
-}
-
 /* Get the register from the frame and return a printable
    representation of it.  */
 
@@ -84,8 +45,9 @@ tui_register_format (const frame_info_ptr &frame, int regnum)
   struct gdbarch *gdbarch = get_frame_arch (frame);
 
   /* Expand tabs into spaces, since ncurses on MS-Windows doesn't.  */
-  tab_expansion_file stream;
-  gdbarch_print_registers_info (gdbarch, &stream, frame, regnum, 1);
+  string_file stream;
+  tab_expansion_file expander (&stream);
+  gdbarch_print_registers_info (gdbarch, &expander, frame, regnum, 1);
 
   /* Remove the possible \n.  */
   std::string str = stream.release ();

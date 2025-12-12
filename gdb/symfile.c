@@ -3808,7 +3808,7 @@ to execute.\n" READNOW_READNEVER_HELP), &cmdlist);
   c = add_cmd ("add-symbol-file", class_files, add_symbol_file_command, _("\
 Load symbols from FILE, assuming FILE has been dynamically loaded.\n\
 Usage: add-symbol-file FILE [-readnow|-readnever] [-o OFF] [ADDR]\n\
-                       [-s SECT-NAME SECT-ADDR]...\n\
+		       [-s SECT-NAME SECT-ADDR]...\n\
 ADDR is the starting address of the file's text.\n\
 Each '-s' argument provides a section name and address, and\n\
 should be specified if the data and bss segments are not contiguous\n\

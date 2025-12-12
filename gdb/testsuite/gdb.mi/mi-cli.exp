@@ -239,7 +239,7 @@ mi_gdb_test "-interpreter-exec console \"list\"" \
     "-interpreter-exec console \"list\" at basics.c:\$line_main_callme_2"
 
 mi_gdb_test "-interpreter-exec console \"help set args\"" \
-  {\~"Set argument list to give program being debugged when it is started\.\\nFollow this command with any number of args, to be passed to the program\.".*\^done} \
+  {~"Set argument list to give program being debugged when it is started\.\\n".*~"Follow this command with any number of args, to be passed to the program\.\\n".*\^done} \
   "-interpreter-exec console \"help set args\""
 
 # NOTE: cagney/2003-02-03: Not yet.

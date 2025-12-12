@@ -524,3 +524,28 @@ timestamped_file::write (const char *buf, long len)
   else
     m_stream->write (buf, len);
 }
+
+void
+tab_expansion_file::write (const char *buf, long length_buf)
+{
+  for (long i = 0; i < length_buf; ++i)
+    {
+      if (buf[i] == '\t')
+	{
+	  do
+	    {
+	      m_stream->write (" ", 1);
+	      ++m_column;
+	    }
+	  while ((m_column % 8) != 0);
+	}
+      else
+	{
+	  m_stream->write (&buf[i], 1);
+	  if (buf[i] == '\n')
+	    m_column = 0;
+	  else
+	    ++m_column;
+	}
+    }
+}

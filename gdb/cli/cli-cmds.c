@@ -2745,7 +2745,7 @@ Show mode for script filename extension recognition."), _("\
 off  == no filename extension recognition (all sourced files are GDB scripts)\n\
 soft == evaluate script according to filename extension, fallback to GDB script\n\
 strict == evaluate script according to filename extension,\n\
-          error if not supported"
+	  error if not supported"
   ),
 			NULL,
 			show_script_ext_mode,

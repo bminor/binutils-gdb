@@ -484,4 +484,27 @@ private:
   bool m_needs_timestamp = true;
 };
 
+/* A wrapped_file that expands TABs as it prints.  A TAB character is
+   always processed and will expand to the number of spaces required
+   to move to the next tab stop.
+
+   Note that this only really handles ASCII output correctly.  */
+
+class tab_expansion_file : public wrapped_file
+{
+public:
+
+  explicit tab_expansion_file (ui_file *stream)
+    : wrapped_file (stream)
+  {
+  }
+
+  void write (const char *buf, long length_buf) override;
+
+private:
+
+  /* The current column.  */
+  int m_column = 0;
+};
+
 #endif /* GDB_UI_FILE_H */

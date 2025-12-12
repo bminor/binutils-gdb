@@ -1880,7 +1880,10 @@ help_cmd (const char *command, struct ui_file *stream)
 	 the false indicates to not output the (single) command name.  */
       fput_command_names_styled (*c, false, "\n", stream);
       fput_aliases_definition_styled (*c, stream);
-      gdb_puts (c->doc, stream);
+
+      /* Be sure to expand TABs in the documentation.  */
+      tab_expansion_file expander (stream);
+      gdb_puts (c->doc, &expander);
     }
   else
     {
@@ -1897,7 +1900,7 @@ help_cmd (const char *command, struct ui_file *stream)
 
   gdb_printf (stream, "\n");
 
-  /* If this is a prefix command, print it's subcommands.  */
+  /* If this is a prefix command, print its subcommands.  */
   if (c->is_prefix ())
     help_list (*c->subcommands, c->prefixname_no_space ().c_str (),
 	       all_commands, stream);
