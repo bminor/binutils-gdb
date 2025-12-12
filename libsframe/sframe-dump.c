@@ -442,9 +442,15 @@ dump_sframe_func_fre_flex_topmost (const sframe_decoder_ctx *sfd_ctx,
 
       /* Dump RA info.
 	 Even if an ABI does not track RA offset, e.g., AMD64, for flex topmost
-	 frame, it may have RA recovery from register.  Else, display 'f'.  */
+	 frame, it may have RA recovery from register.  */
       if (!ra_reg_data && !ra_offset)
-	strcpy (temp, "f");
+	{
+	  if (sframe_decoder_get_fixed_ra_offset (sfd_ctx)
+	      != SFRAME_CFA_FIXED_RA_INVALID)
+	    strcpy (temp, "f");
+	  else
+	    strcpy (temp, "U");
+	}
       else
 	sframe_format_fre_disp (temp, sizeof (temp), abi_arch, ra_reg,
 				ra_reg_p, ra_offset, ra_deref_p);
