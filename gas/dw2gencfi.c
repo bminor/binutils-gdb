@@ -2622,7 +2622,7 @@ cfi_finish (void)
 #endif
 	/* Avoid erroring with DEFAULT_SFRAME for non-default options, like
 	   -32 on x86_64.  */
-	sframe_as_bad (_(".sframe not supported for target"));
+	sframe_as_bad ("%s", _(".sframe not supported for target"));
     }
 
   if ((all_cfi_sections & CFI_EMIT_debug_frame) != 0)

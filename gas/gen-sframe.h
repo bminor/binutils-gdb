@@ -28,7 +28,7 @@
 #define sframe_as_bad(format, ...) \
   do {					       \
     if (flag_gen_sframe == GEN_SFRAME_ENABLED) \
-      as_bad (format, ##__VA_ARGS__);	       \
+      as_bad (format, __VA_ARGS__);            \
   } while (0)
 
 #define SFRAME_FRE_ELEM_LOC_REG		0
