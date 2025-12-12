@@ -1123,8 +1123,7 @@ sframe_fre_get_cfa_offset (const sframe_decoder_ctx *dctx,
   int32_t offset = sframe_get_fre_offset (fre, idx, &err);
 
   /* For s390x undo adjustment of CFA offset (to enable 8-bit offsets).  */
-  if (!err && !flex_p
-      && sframe_decoder_get_abi_arch (dctx) == SFRAME_ABI_S390X_ENDIAN_BIG)
+  if (!err && sframe_decoder_get_abi_arch (dctx) == SFRAME_ABI_S390X_ENDIAN_BIG)
     offset = SFRAME_V2_S390X_CFA_OFFSET_DECODE (offset);
 
   if (errp)
