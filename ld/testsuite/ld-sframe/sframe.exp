@@ -18,6 +18,54 @@
 # MA 02110-1301, USA.
 #
 
+# Test infrastructure for bug 33401
+# https://sourceware.org/bugzilla/show_bug.cgi?id=33401
+# Sframe section contains R_*_NONE relocations intermingled with other
+# relas in the output relocatable object.
+#
+proc check_pr33401 { } {
+    global CXX_FOR_TARGET
+    global ld
+    global srcdir
+    global subdir
+
+    # Check to see if C++ compiler work
+    if { [which $CXX_FOR_TARGET] == 0 } {
+	unsupported "PR ld/33401"
+	return 0
+    }
+
+    # 1. First step: Create a relocatable object (pr33401.o) from sources.
+    #     Some R_*_NONE are expected for this input.
+    set test_list {
+	{ "PR ld/33401 (Step 1: Create relocatable object and check R_*_NONE)"
+	    "-r"
+	    "-g -O2 -w -Wa,--gsframe"
+	    {StateClient.cpp StatePlaying.cpp}
+	    {{readelf "-r -W" pr33401.rd}}
+	    "pr33401.o"
+	    "c++" }
+    }
+
+    # Run the test
+    if { [run_cc_link_tests $test_list] == 0 } {
+	verbose -log "No R_*_NONE in .rela.sframe"
+	return
+    }
+
+    # 2. Final step: Run ld -r again on the output of step 1.
+    #	 The assertion failure in PR 33401 occurred when processing input BFDs
+    #	 containing R_*_NONE relocations in the .sframe section.
+    set testname "PR ld/33401 (Step 2: Final link)"
+
+    # Attempt to link the object created in step 1
+    if { ![ld_link $ld /dev/null "-L$srcdir/$subdir -r tmpdir/pr33401.o"] } {
+	fail $testname
+    } else {
+	pass $testname
+    }
+}
+
 if [skip_sframe_tests] {
     unsupported "no SFrame format support in the assembler, or SFrame disabled"
     return 0
@@ -39,6 +87,8 @@ foreach sframe_test $sframe_test_list {
     verbose [file rootname $sframe_test]
     run_dump_test [file rootname $sframe_test]
 }
+
+check_pr33401
 
 if {[info exists old_lc_all]} {
     set env(LC_ALL) $old_lc_all
