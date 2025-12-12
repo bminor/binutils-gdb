@@ -1,6 +1,6 @@
 #name: GNU Property (single input, CFI_SS)
 #source: property-zicfiss.s
-#as: -march=rv64g
+#as: -march=rv64g -mlittle-endian
 #ld: -shared -melf64lriscv
 #readelf: -n
 

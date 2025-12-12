@@ -1,6 +1,6 @@
 #source: pcrel-reloc.s
 #source: pcrel-reloc-abs.s
-#as: -march=rv64i -mabi=lp64
+#as: -march=rv64i -mabi=lp64 -mlittle-endian
 #ld: -melf64lriscv --no-pie --no-relax
 #objdump: -d
 

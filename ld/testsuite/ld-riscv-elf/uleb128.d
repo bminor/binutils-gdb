@@ -1,5 +1,5 @@
 #source: uleb128.s
-#as: -march=rv32ic
+#as: -march=rv32ic -mlittle-endian
 #ld: -melf32lriscv
 #objdump: -d
 

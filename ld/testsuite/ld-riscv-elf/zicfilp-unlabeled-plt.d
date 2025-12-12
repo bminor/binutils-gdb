@@ -2,7 +2,7 @@
 #source: zicfilp-unlabeled-plt.s
 #ld: -shared -melf64lriscv
 #objdump: -dr -j .plt
-#as: -march=rv64gc_zicfilp
+#as: -march=rv64gc_zicfilp -mlittle-endian
 
 [^:]*: *file format elf64-.*riscv
 
