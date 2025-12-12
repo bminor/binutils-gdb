@@ -40,7 +40,7 @@ proc check_pr33401 { } {
     set test_list {
 	{ "PR ld/33401 (Step 1: Create relocatable object and check R_*_NONE)"
 	    "-r"
-	    "-g -O2 -w -Wa,--gsframe"
+	    "-g -O2 -finline -w -Wa,--gsframe"
 	    {StateClient.cpp StatePlaying.cpp}
 	    {{readelf "-r -W" pr33401.rd}}
 	    "pr33401.o"
