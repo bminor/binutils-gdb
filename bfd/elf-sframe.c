@@ -121,13 +121,24 @@ sframe_decoder_init_func_bfdinfo (bfd *abfd,
     return true;
 
   rel = cookie->rels;
+  unsigned int reloc_index = 0;
   for (i = 0; i < fde_count; i++)
     {
       /* Bookkeep the relocation offset and relocation index of each function
-	 for later use.  */
-      sframe_decoder_set_func_r_offset (sfd_info, i, rel->r_offset);
-      sframe_decoder_set_func_reloc_index (sfd_info, i, i);
+	 for later use.  There may be some R_*_NONE relocations intermingled
+	 (see PR ld/33401).  Skip over those.  */
+      while (rel->r_info == 0)
+	{
+	  reloc_index++;
+	  rel++;
+	}
 
+      BFD_ASSERT (reloc_index < sec->reloc_count);
+
+      sframe_decoder_set_func_r_offset (sfd_info, i, rel->r_offset);
+      sframe_decoder_set_func_reloc_index (sfd_info, i, reloc_index);
+
+      reloc_index++;
       rel++;
     }
 
