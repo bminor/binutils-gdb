@@ -290,7 +290,7 @@ dump_sframe_func_fre_simple (const sframe_decoder_ctx *sfd_ctx,
       else if (err[2] == 0)
 	{
 	  if (is_sframe_abi_arch_s390x (sfd_ctx)
-	      && SFRAME_V2_S390X_OFFSET_IS_REGNUM (ra_offset))
+	      && sframe_s390x_offset_regnum_p (ra_offset, ver))
 	    sprintf (temp, "r%d",
 		     sframe_s390x_offset_decode_regnum (ra_offset, ver));
 	  else
