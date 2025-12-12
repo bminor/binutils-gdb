@@ -1451,36 +1451,6 @@ sframe_xlate_do_val_offset (const struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_U
   return SFRAME_XLATE_OK;
 }
 
-/* S390-specific translate DW_CFA_register into SFrame context.
-   Return SFRAME_XLATE_OK if success.  */
-
-static int
-s390_sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx,
-			       const struct cfi_insn_data *cfi_insn)
-{
-  /* The scratchpad FRE currently being updated with each cfi_insn
-     being interpreted.  This FRE eventually gets linked in into the
-     list of FREs for the specific function.  */
-  struct sframe_row_entry *cur_fre = xlate_ctx->cur_fre;
-
-  gas_assert (cur_fre);
-
-  /* Change the rule for the register indicated by the register number to
-     be the specified register.  Encode the register number as offset by
-     shifting it to the left by one and setting the least-significant bit
-     (LSB).  The LSB can be used to differentiate offsets from register
-     numbers, as offsets from CFA are always a multiple of -8 on s390x.  */
-  if (cfi_insn->u.rr.reg1 == SFRAME_CFA_FP_REG)
-    sframe_fre_set_fp_track (cur_fre,
-			     SFRAME_V3_S390X_OFFSET_ENCODE_REGNUM (cfi_insn->u.rr.reg2));
-  else if (sframe_ra_tracking_p ()
-	   && cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG)
-    sframe_fre_set_ra_track (cur_fre,
-			     SFRAME_V3_S390X_OFFSET_ENCODE_REGNUM (cfi_insn->u.rr.reg2));
-
-  return SFRAME_XLATE_OK;
-}
-
 /* Translate DW_CFA_register into SFrame context.
 
    This opcode indicates: Previous value of register1 is register2.  This is
@@ -1489,9 +1459,7 @@ s390_sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx,
    while warning the user.
 
    Two exceptions apply though:
-     - for S390X, the stack offsets are used to carry register number in
-       default FDE types.  So invoke S390X specific handling.
-     - for AMD64, the flexible topmost frame encoding
+     - for AMD64 and s390x, the flexible topmost frame encoding
        SFRAME_FDE_TYPE_FLEX_TOPMOST_FRAME can be used for FP, RA registers.
 
    Return SFRAME_XLATE_OK if success.  */
@@ -1500,10 +1468,8 @@ static int
 sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx,
 			  const struct cfi_insn_data *cfi_insn)
 {
-  /* Conditionally invoke S390-specific implementation.  */
-  if (sframe_get_abi_arch () == SFRAME_ABI_S390X_ENDIAN_BIG)
-    return s390_sframe_xlate_do_register (xlate_ctx, cfi_insn);
-  else if (sframe_get_abi_arch () == SFRAME_ABI_AMD64_ENDIAN_LITTLE)
+  if (sframe_get_abi_arch () == SFRAME_ABI_AMD64_ENDIAN_LITTLE
+      || sframe_get_abi_arch () == SFRAME_ABI_S390X_ENDIAN_BIG)
     {
       struct sframe_row_entry *cur_fre = xlate_ctx->cur_fre;
 
