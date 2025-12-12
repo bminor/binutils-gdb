@@ -34,7 +34,7 @@ gdb_test -no-prompt-anchor "run &" "Starting program: \[^\r\n\]*(\r\n$gdbindex_w
 # `sleep 5' here would workaround the bug, do not sleep here.
 # "shell" could eat waitpid event from the asynchronous inferior process.
 
-gdb_test "shell echo foo" "foo"
+gdb_test -no-prompt-anchor "shell echo foo" "foo"
 
 set test "interrupt"
 gdb_test_multiple $test $test {
