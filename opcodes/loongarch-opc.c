@@ -507,6 +507,7 @@ static struct loongarch_opcode loongarch_alias_opcodes[] =
   { 0x60000000,	0xfc0003e0,	"bgtz",		"r0:5,sb10:16<<2",		0,	0, 0, INSN_DIS_ALIAS }, /* blt zero, rd, offset */
   { 0x64000000,	0xfc00001f,	"bgez",		"r5:5,sb10:16<<2",		0,	0, 0, INSN_DIS_ALIAS }, /* bge rj, zero, offset */
   { 0x64000000,	0xfc0003e0,	"blez",		"r0:5,sb10:16<<2",		0,	0, 0, INSN_DIS_ALIAS }, /* bge zero, rd, offset */
+  { 0x38600400,	0xfffffc00,	"ud",		"ru0:5,ru5:5",			0,	0, 0, INSN_DIS_ALIAS }, /* amswap.w rd, $r1, rj, rj==rd */
   { 0, 0, 0, 0, 0, 0, 0, 0 } /* Terminate the list.  */
 };
 

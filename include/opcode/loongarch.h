@@ -116,6 +116,7 @@ extern "C"
   #define LARCH_RD_RJ_A0 0x084
   #define LARCH_GET_RD(insn) (insn & 0x1f)
   #define LARCH_GET_RJ(insn) ((insn >> 5) & 0x1f)
+  #define LARCH_GET_RK(insn) ((insn >> 10) & 0x1f)
 
   typedef uint32_t insn_t;
 
