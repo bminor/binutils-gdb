@@ -49,12 +49,15 @@ extern void set_initial_gdb_ttystate (void);
 extern void restore_initial_gdb_ttystate (void);
 
 /* An RAII-based object that saves the tty state, and then restores it again
-   when this object is destroyed. */
-class scoped_gdb_ttystate
+   when this object is destroyed.  */
+class scoped_restore_tty_state
 {
 public:
-  scoped_gdb_ttystate ();
-  ~scoped_gdb_ttystate ();
+  scoped_restore_tty_state ();
+  ~scoped_restore_tty_state ();
+
+  DISABLE_COPY_AND_ASSIGN (scoped_restore_tty_state);
+
 private:
   serial_ttystate m_ttystate;
 };
