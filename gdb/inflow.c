@@ -57,14 +57,14 @@ static struct serial *stdin_serial;
 
 /* See terminal.h.  */
 
-scoped_gdb_ttystate::scoped_gdb_ttystate ()
+scoped_restore_tty_state::scoped_restore_tty_state ()
 {
   m_ttystate = serial_get_tty_state (stdin_serial);
 }
 
 /* See terminal.h.  */
 
-scoped_gdb_ttystate::~scoped_gdb_ttystate ()
+scoped_restore_tty_state::~scoped_restore_tty_state ()
 {
   serial_set_tty_state (stdin_serial, m_ttystate);
 }
