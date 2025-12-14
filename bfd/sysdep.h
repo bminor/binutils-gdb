@@ -37,6 +37,10 @@
 #include <stddef.h>
 #include <string.h>
 
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -110,6 +114,10 @@ extern int ffs (int);
 
 #if !HAVE_DECL_STPCPY
 extern char *stpcpy (char *__dest, const char *__src);
+#endif
+
+#if !HAVE_DECL_STRTOULL
+extern unsigned long long strtoull(const char *, char **, int);
 #endif
 
 #ifdef HAVE_FTELLO

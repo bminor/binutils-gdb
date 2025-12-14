@@ -222,7 +222,7 @@ AC_CHECK_HEADERS(fcntl.h sys/file.h sys/resource.h sys/stat.h sys/types.h \
 AC_CHECK_FUNCS(fcntl fdopen fileno fls getgid getpagesize getrlimit getuid \
 	       sysconf)
 
-AC_CHECK_DECLS([basename, ffs, stpcpy, asprintf, vasprintf, strnlen])
+AC_CHECK_DECLS([basename, ffs, stpcpy, asprintf, vasprintf, strnlen, strtoull])
 AC_CHECK_DECLS([___lc_codepage_func], [], [], [[#include <locale.h>]])
 
 BFD_BINARY_FOPEN

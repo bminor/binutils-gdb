@@ -451,7 +451,7 @@ AC_CHECK_FUNCS(close getrusage glob lseek mkstemp open realpath waitpid)
 
 BFD_BINARY_FOPEN
 
-AC_CHECK_DECLS([environ, stpcpy])
+AC_CHECK_DECLS([environ, stpcpy, strtoull])
 
 GCC_AC_FUNC_MMAP
 

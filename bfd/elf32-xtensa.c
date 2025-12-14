@@ -22,7 +22,6 @@
 #include "bfd.h"
 
 #include <stdarg.h>
-#include <strings.h>
 
 #include "bfdlink.h"
 #include "libbfd.h"
