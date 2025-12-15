@@ -20,7 +20,8 @@
 
 remote_file host delete \
     "tmpdir/ab.a" "tmpdir/cd.a" "tmpdir/abt.a" "tmpdir/cdt.a" \
-    "tmpdir/abn.a" "tmpdir/abnt.a"
+    "tmpdir/abn.a" "tmpdir/abnt.a" "tmpdir/abc.a" "tmpdir/abct.a" \
+    "tmpdir/abcn.a" "tmpdir/abcnt.a"
 
 run_ld_link_tests {
     {"First regular archive create"     ""   "" "" {a.s b.s x.s} {} "ab.a"   }
@@ -29,6 +30,10 @@ run_ld_link_tests {
     {"Second thin archive create"       "T"  "" "" {c.s d.s y.s} {} "cdt.a"  }
     {"Regular archive w/o index create" "S"  "" "" {a.s b.s x.s} {} "abn.a"  }
     {"Thin archive w/o index create"    "ST" "" "" {a.s b.s x.s} {} "abnt.a" }
+    {"Other regular archive create"           ""   "" "" {abc.s} {} "abc.a"  }
+    {"Other thin archive create"              "T"  "" "" {abc.s} {} "abct.a" }
+    {"Other regular archive w/o index create" "S"  "" "" {abc.s} {} "abcn.a" }
+    {"Other thin archive w/o index create"    "ST" "" "" {abc.s} {} "abcnt.a"}
 }
 
 set old_ldflags $LDFLAGS
@@ -107,6 +112,47 @@ run_ld_link_tests [list \
 				  {nm "" abc.nd} \
 				  {nm "" x.nd}}] \
 	"abwtc" \
+    ] \
+]
+
+# Group archive tests.
+run_ld_link_tests [list \
+    [list "Regular non-group archive link reject" \
+	"-e ff tmpdir/ab.a" "tmpdir/abc.a" \
+	"" {} \
+	{{ld abcn.ed}} \
+	"abcn" \
+    ] \
+    [list "Thin non-group archive link reject" \
+	"-e ff tmpdir/abt.a" "tmpdir/abct.a" \
+	"" {} \
+	{{ld abcn.ed}} \
+	"abtctn" \
+    ] \
+    [list "Regular group archive link accept" \
+	"-e ff -\\( tmpdir/ab.a" "tmpdir/abc.a -\\) --verbose --print-map" \
+	"" {} \
+	[ld_archive_filter_tests {{ld abcg.vd} \
+				  {nm "" abc.nd} \
+				  {nm "" nx.nd}}] \
+	"abcg" \
+    ] \
+]
+setup_xfail "binutils/33484" "alpha*-*-linux*ecoff*" "alpha*-*-osf*"
+setup_xfail "binutils/33485" "cris-*-*aout*" "i\[3-7\]86-*-bsd*" \
+    "i\[3-7\]86-*-msdos*" "ns32k-*-*" "pdp11-*-*"
+setup_xfail "binutils/33600" "alpha*-*-*vms*"
+if { [is_xcoff_format] } {
+    setup_xfail "binutils/33600" "*-*-*"
+}
+run_ld_link_tests [list \
+    [list "Thin group archive link accept" \
+	"-e ff -\\( tmpdir/abt.a" "tmpdir/abct.a -\\) --verbose --print-map" \
+	"" {} \
+	[ld_archive_filter_tests {{ld abtctg.vd} \
+				  {nm "" abc.nd} \
+				  {nm "" nx.nd}}] \
+	"abtctg" \
     ] \
 ]
 
