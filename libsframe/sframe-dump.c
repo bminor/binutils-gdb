@@ -123,7 +123,7 @@ sframe_s390x_offset_regnum_p (int32_t offset, uint8_t ver)
   if (ver == SFRAME_VERSION_2)
     return SFRAME_V2_S390X_OFFSET_IS_REGNUM (offset);
   else if (ver == SFRAME_VERSION_3)
-    return SFRAME_V2_S390X_OFFSET_IS_REGNUM (offset);
+    return SFRAME_V3_S390X_OFFSET_IS_REGNUM (offset);
   else
     /* No other version is supported yet.  */
     sframe_assert (false);
@@ -135,7 +135,7 @@ sframe_s390x_offset_decode_regnum (int32_t offset, uint8_t ver)
   if (ver == SFRAME_VERSION_2)
     return SFRAME_V2_S390X_OFFSET_DECODE_REGNUM (offset);
   else if (ver == SFRAME_VERSION_3)
-    return SFRAME_V2_S390X_OFFSET_DECODE_REGNUM (offset);
+    return SFRAME_V3_S390X_OFFSET_DECODE_REGNUM (offset);
   else
     /* No other version is supported yet.  */
     sframe_assert (false);
