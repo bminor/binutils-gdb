@@ -1858,6 +1858,7 @@ struct aarch64_inst
 /* Defining the HINT #imm values for the aarch64_hint_options.  */
 #define HINT_OPD_CSYNC	0x11
 #define HINT_OPD_DSYNC	0x13
+#define HINT_OPD_R	0x20
 #define HINT_OPD_C	0x22
 #define HINT_OPD_J	0x24
 #define HINT_OPD_JC	0x26

@@ -391,9 +391,6 @@ verify_constraints (const struct aarch64_inst *, const aarch64_insn, bfd_vma,
 #define F_REG_MAX_VALUE(X) ((X) << 15)
 #define F_GET_REG_MAX_VALUE(X) (((X) >> 15) & 0x0f)
 
-/* HINT operand flags.  */
-#define HINT_OPD_F_NOPRINT	(1 << 0)  /* Should not be printed.  */
-
 /* Encode 7-bit HINT #imm in the lower 8 bits.  Use higher bits for flags.  */
 #define HINT_ENCODE(flag, val) ((flag << 8) | val)
 #define HINT_FLAG(val) (val >> 8)

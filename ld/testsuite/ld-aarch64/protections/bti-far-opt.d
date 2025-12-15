@@ -43,7 +43,7 @@ Disassembly of section \.text:
    2000c:	d503201f 	nop
 
 0000000000020010 <baz_bti_>:
-   20010:	d503241f 	bti
+   20010:	d503241f 	bti	r
 
 0000000000020014 <baz_bti_c>:
    20014:	d503245f 	bti	c

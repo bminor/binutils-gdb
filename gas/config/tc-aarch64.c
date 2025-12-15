@@ -4615,7 +4615,7 @@ parse_hint_opt (const char *name, char **str,
 	  && o->value != HINT_OPD_CSYNC)
       || ((strcmp ("bti", name) == 0)
 	  && (o->value != HINT_OPD_C && o->value != HINT_OPD_J
-	      && o->value != HINT_OPD_JC))
+	      && o->value != HINT_OPD_JC && o->value != HINT_OPD_R))
       || ((strcmp ("stshh", name) == 0)
 	  && (o->value != HINT_OPD_KEEP && o->value != HINT_OPD_STRM)))
       return false;

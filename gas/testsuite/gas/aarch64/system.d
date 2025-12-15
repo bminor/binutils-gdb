@@ -50,7 +50,7 @@ Disassembly of section \.text:
 .*:	d50323bf 	(hint	#0x1d|autiasp)
 .*:	d50323df 	(hint	#0x1e|autibz)
 .*:	d50323ff 	(hint	#0x1f|autibsp)
-.*:	d503241f 	(hint	#0x20|bti)
+.*:	d503241f 	(hint	#0x20|bti	r)
 .*:	d503243f 	hint	#0x21
 .*:	d503245f 	(hint	#0x22|bti	c)
 .*:	d503247f 	hint	#0x23

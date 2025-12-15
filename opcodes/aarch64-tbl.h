@@ -7987,7 +7987,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(SYSTEM, none, "BARRIER_GCSB", 0, F (),				\
       "the GCSB option name DSYNC")					\
     Y(SYSTEM, hint, "BTI_TARGET", 0, F (),				\
-      "BTI targets j/c/jc")						\
+      "BTI targets r/j/c/jc")						\
     Y(SYSTEM, hint, "STSHH_POLICY", 0, F(),				\
       "an STSHH policy (keep/strm)")					\
     Y(SYSTEM, imm, "BRBOP", 0, F(FLD_brbop),				\

@@ -597,7 +597,7 @@ const struct aarch64_name_value_pair aarch64_barrier_dsb_nxs_options[4] =
 const struct aarch64_name_value_pair aarch64_hint_options[] =
 {
   /* BTI.  This is also the F_DEFAULT entry for AARCH64_OPND_BTI_TARGET.  */
-  { " ",	HINT_ENCODE (HINT_OPD_F_NOPRINT, 0x20) },
+  { "r",	HINT_OPD_R },		/* BTI R.  */
   { "csync",	HINT_OPD_CSYNC },	/* PSB CSYNC.  */
   { "dsync",	HINT_OPD_DSYNC },	/* GCSB DSYNC.  */
   { "c",	HINT_OPD_C },		/* BTI C.  */
@@ -5154,9 +5154,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       break;
 
     case AARCH64_OPND_BTI_TARGET:
-      if ((HINT_FLAG (opnd->hint_option->value) & HINT_OPD_F_NOPRINT) == 0)
-	snprintf (buf, size, "%s",
-		  style_sub_mnem (styler, opnd->hint_option->name));
+      snprintf (buf, size, "%s",
+		style_sub_mnem (styler, opnd->hint_option->name));
       break;
 
     case AARCH64_OPND_STSHH_POLICY:

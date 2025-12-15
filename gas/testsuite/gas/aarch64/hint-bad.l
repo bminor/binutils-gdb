@@ -5,4 +5,4 @@
 [^ :]+:[0-9]+: Error: operand 1 must be the PSB/TSB option name CSYNC -- `psb dsync'
 [^ :]+:[0-9]+: Error: operand 1 must be the PSB/TSB option name CSYNC -- `tsb'
 [^ :]+:[0-9]+: Error: operand 1 must be the PSB/TSB option name CSYNC -- `tsb dsync'
-[^ :]+:[0-9]+: Error: operand 1 must be BTI targets j/c/jc -- `bti jj'
+[^ :]+:[0-9]+: Error: operand 1 must be BTI targets r/j/c/jc -- `bti jj'
