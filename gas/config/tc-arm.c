@@ -3849,7 +3849,7 @@ s_arm_elf_cons (int nbytes)
 							       reloc);
 	      int size = bfd_get_reloc_size (howto);
 
-	      if (reloc == BFD_RELOC_ARM_PLT32)
+	      if (reloc == BFD_RELOC_32_PLT_PCREL)
 		{
 		  as_bad (_("(plt) is only valid on branch targets"));
 		  reloc = BFD_RELOC_UNUSED;
@@ -9304,11 +9304,11 @@ encode_branch (int default_reloc)
 {
   if (inst.operands[0].hasreloc)
     {
-      constraint (inst.operands[0].imm != BFD_RELOC_ARM_PLT32
+      constraint (inst.operands[0].imm != BFD_RELOC_32_PLT_PCREL
 		  && inst.operands[0].imm != BFD_RELOC_ARM_TLS_CALL,
 		  _("the only valid suffixes here are '(plt)' and '(tlscall)'"));
-      inst.relocs[0].type = inst.operands[0].imm == BFD_RELOC_ARM_PLT32
-	? BFD_RELOC_ARM_PLT32
+      inst.relocs[0].type = inst.operands[0].imm == BFD_RELOC_32_PLT_PCREL
+	? BFD_RELOC_32_PLT_PCREL
 	: thumb_mode ? BFD_RELOC_ARM_THM_TLS_CALL : BFD_RELOC_ARM_TLS_CALL;
     }
   else
@@ -12019,7 +12019,7 @@ do_t_branch23 (void)
      the branch encoding is now needed to deal with TLSCALL relocs.
      So if we see a PLT reloc now, put it back to how it used to be to
      keep the preexisting behaviour.  */
-  if (inst.relocs[0].type == BFD_RELOC_ARM_PLT32)
+  if (inst.relocs[0].type == BFD_RELOC_32_PLT_PCREL)
     inst.relocs[0].type = BFD_RELOC_THUMB_PCREL_BRANCH23;
 
 #if defined(OBJ_COFF)
@@ -23899,7 +23899,7 @@ static struct reloc_entry reloc_names[] =
 {
   { "got",     BFD_RELOC_ARM_GOT32   },	 { "GOT",     BFD_RELOC_ARM_GOT32   },
   { "gotoff",  BFD_RELOC_ARM_GOTOFF  },	 { "GOTOFF",  BFD_RELOC_ARM_GOTOFF  },
-  { "plt",     BFD_RELOC_ARM_PLT32   },	 { "PLT",     BFD_RELOC_ARM_PLT32   },
+  { "plt",     BFD_RELOC_32_PLT_PCREL},	 { "PLT",     BFD_RELOC_32_PLT_PCREL},
   { "target1", BFD_RELOC_ARM_TARGET1 },	 { "TARGET1", BFD_RELOC_ARM_TARGET1 },
   { "target2", BFD_RELOC_ARM_TARGET2 },	 { "TARGET2", BFD_RELOC_ARM_TARGET2 },
   { "sbrel",   BFD_RELOC_ARM_SBREL32 },	 { "SBREL",   BFD_RELOC_ARM_SBREL32 },
@@ -27245,7 +27245,7 @@ md_pcrel_from_section (fixS * fixP, segT seg)
 
     case BFD_RELOC_ARM_PCREL_BRANCH:
     case BFD_RELOC_ARM_PCREL_JUMP:
-    case BFD_RELOC_ARM_PLT32:
+    case BFD_RELOC_32_PLT_PCREL:
 #ifdef TE_WINCE
       /* When handling fixups immediately, because we have already
 	 discovered the value of a symbol, or the address of the frag involved
@@ -28197,7 +28197,7 @@ md_apply_fix (fixS *	fixP,
 	}
       /* Fall through.  */
 
-    case BFD_RELOC_ARM_PLT32:
+    case BFD_RELOC_32_PLT_PCREL:
 #endif
     case BFD_RELOC_ARM_PCREL_BRANCH:
       temp = 3;
@@ -29419,7 +29419,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
     case BFD_RELOC_ARM_GOT32:
     case BFD_RELOC_ARM_GOTOFF:
     case BFD_RELOC_ARM_GOT_PREL:
-    case BFD_RELOC_ARM_PLT32:
+    case BFD_RELOC_32_PLT_PCREL:
     case BFD_RELOC_ARM_TARGET1:
     case BFD_RELOC_ARM_ROSEGREL32:
     case BFD_RELOC_ARM_SBREL32:
@@ -29748,7 +29748,7 @@ arm_fix_adjustable (fixS * fixP)
     return false;
 
   /* Don't allow symbols to be discarded on GOT related relocs.	 */
-  if (fixP->fx_r_type == BFD_RELOC_ARM_PLT32
+  if (fixP->fx_r_type == BFD_RELOC_32_PLT_PCREL
       || fixP->fx_r_type == BFD_RELOC_ARM_GOT32
       || fixP->fx_r_type == BFD_RELOC_ARM_GOTOFF
       || fixP->fx_r_type == BFD_RELOC_ARM_TLS_GD32
@@ -30062,7 +30062,7 @@ md_begin (void)
     {
       struct reloc_entry * entry = reloc_names + i;
 
-      if (arm_is_eabi() && entry->reloc == BFD_RELOC_ARM_PLT32)
+      if (arm_is_eabi() && entry->reloc == BFD_RELOC_32_PLT_PCREL)
 	/* This makes encode_branch() use the EABI versions of this relocation.  */
 	entry->reloc = BFD_RELOC_UNUSED;
 
