@@ -447,7 +447,7 @@ static const struct lm32_reloc_map lm32_reloc_map[] =
   { BFD_RELOC_COPY,		R_LM32_COPY },
   { BFD_RELOC_GLOB_DAT,		R_LM32_GLOB_DAT },
   { BFD_RELOC_JMP_SLOT,		R_LM32_JMP_SLOT },
-  { BFD_RELOC_LM32_RELATIVE,	R_LM32_RELATIVE },
+  { BFD_RELOC_RELATIVE,		R_LM32_RELATIVE },
 };
 
 static reloc_howto_type *

@@ -3326,6 +3326,7 @@ enum bfd_reloc_code_real
   BFD_RELOC_COPY,
   BFD_RELOC_GLOB_DAT,
   BFD_RELOC_JMP_SLOT,
+  BFD_RELOC_RELATIVE,
   BFD_RELOC_IRELATIVE,
 
   /* Size relocations.  */
@@ -3333,7 +3334,6 @@ enum bfd_reloc_code_real
   BFD_RELOC_SIZE64,
 
   /* Relocations used by 68K ELF.  */
-  BFD_RELOC_68K_RELATIVE,
   BFD_RELOC_68K_TLS_GD32,
   BFD_RELOC_68K_TLS_GD16,
   BFD_RELOC_68K_TLS_GD8,
@@ -3396,7 +3396,6 @@ enum bfd_reloc_code_real
   BFD_RELOC_SPARC_PC10,
   BFD_RELOC_SPARC_PC22,
   BFD_RELOC_SPARC_WPLT30,
-  BFD_RELOC_SPARC_RELATIVE,
   BFD_RELOC_SPARC_UA16,
   BFD_RELOC_SPARC_UA32,
   BFD_RELOC_SPARC_UA64,
@@ -3794,9 +3793,6 @@ enum bfd_reloc_code_real
      bytes in the instruction.  */
   BFD_RELOC_MN10300_GOT16,
 
-  /* Adjust by program base.  */
-  BFD_RELOC_MN10300_RELATIVE,
-
   /* Together with another reloc targeted at the same location, allows
      for a value that is the difference of two symbols in the same
      section.  */
@@ -3828,7 +3824,6 @@ enum bfd_reloc_code_real
   /* i386/elf relocations.  */
   BFD_RELOC_386_GOT32,
   BFD_RELOC_386_PLT32,
-  BFD_RELOC_386_RELATIVE,
   BFD_RELOC_386_GOTOFF,
   BFD_RELOC_386_GOTPC,
   BFD_RELOC_386_TLS_TPOFF,
@@ -3850,7 +3845,6 @@ enum bfd_reloc_code_real
 
   /* x86-64/elf relocations.  */
   BFD_RELOC_X86_64_GOT32,
-  BFD_RELOC_X86_64_RELATIVE,
   BFD_RELOC_X86_64_GOTPCREL,
   BFD_RELOC_X86_64_32S,
   BFD_RELOC_X86_64_DTPMOD64,
@@ -3922,7 +3916,6 @@ enum bfd_reloc_code_real
   BFD_RELOC_PPC_BA16,
   BFD_RELOC_PPC_BA16_BRTAKEN,
   BFD_RELOC_PPC_BA16_BRNTAKEN,
-  BFD_RELOC_PPC_RELATIVE,
   BFD_RELOC_PPC_LOCAL24PC,
   BFD_RELOC_PPC_EMB_NADDR32,
   BFD_RELOC_PPC_EMB_NADDR16,
@@ -4179,7 +4172,6 @@ enum bfd_reloc_code_real
 
   /* Relocations for setting up GOTs and PLTs for shared libraries.  */
   BFD_RELOC_ARM_GOT32,
-  BFD_RELOC_ARM_RELATIVE,
   BFD_RELOC_ARM_GOTOFF,
   BFD_RELOC_ARM_GOTPC,
   BFD_RELOC_ARM_GOT_PREL,
@@ -4298,7 +4290,6 @@ enum bfd_reloc_code_real
   BFD_RELOC_SH_LABEL,
   BFD_RELOC_SH_LOOP_START,
   BFD_RELOC_SH_LOOP_END,
-  BFD_RELOC_SH_RELATIVE,
   BFD_RELOC_SH_GOTPC,
   BFD_RELOC_SH_GOT_LOW16,
   BFD_RELOC_SH_GOT_MEDLOW16,
@@ -4406,7 +4397,6 @@ enum bfd_reloc_code_real
   BFD_RELOC_ARC_32_PCREL,
   BFD_RELOC_ARC_GOT32,
   BFD_RELOC_ARC_GOTPC32,
-  BFD_RELOC_ARC_RELATIVE,
   BFD_RELOC_ARC_GOTOFF,
   BFD_RELOC_ARC_GOTPC,
   BFD_RELOC_ARC_S21W_PCREL_PLT,
@@ -4645,7 +4635,6 @@ enum bfd_reloc_code_real
   /* For PIC.  */
   BFD_RELOC_M32R_GOT24,
   BFD_RELOC_M32R_26_PLTREL,
-  BFD_RELOC_M32R_RELATIVE,
   BFD_RELOC_M32R_GOTOFF,
   BFD_RELOC_M32R_GOTOFF_HI_ULO,
   BFD_RELOC_M32R_GOTOFF_HI_SLO,
@@ -4739,7 +4728,6 @@ enum bfd_reloc_code_real
   BFD_RELOC_NDS32_GOT20,
   BFD_RELOC_NDS32_9_PLTREL,
   BFD_RELOC_NDS32_25_PLTREL,
-  BFD_RELOC_NDS32_RELATIVE,
   BFD_RELOC_NDS32_GOTOFF,
   BFD_RELOC_NDS32_GOTOFF_HI20,
   BFD_RELOC_NDS32_GOTOFF_LO12,
@@ -4976,7 +4964,6 @@ enum bfd_reloc_code_real
   BFD_RELOC_V850_32_GOT,
   BFD_RELOC_V850_22_PLT_PCREL,
   BFD_RELOC_V850_32_PLT_PCREL,
-  BFD_RELOC_V850_RELATIVE,
   BFD_RELOC_V850_16_GOTOFF,
   BFD_RELOC_V850_32_GOTOFF,
 
@@ -5125,7 +5112,6 @@ enum bfd_reloc_code_real
   BFD_RELOC_METAG_RELBRANCH_PLT,
   BFD_RELOC_METAG_GOTOFF,
   BFD_RELOC_METAG_PLT,
-  BFD_RELOC_METAG_RELATIVE,
   BFD_RELOC_METAG_TLS_GD,
   BFD_RELOC_METAG_TLS_LDM,
   BFD_RELOC_METAG_TLS_LDO_HI16,
@@ -5448,9 +5434,6 @@ enum bfd_reloc_code_real
 
   /* 12 bit GOT offset.  */
   BFD_RELOC_390_GOT12,
-
-  /* Adjust by program base.  */
-  BFD_RELOC_390_RELATIVE,
 
   /* 32 bit PC relative offset to GOT.  */
   BFD_RELOC_390_GOTPC,
@@ -5907,9 +5890,6 @@ enum bfd_reloc_code_real
   BFD_RELOC_CRIS_LAPCQ_OFFSET,
   BFD_RELOC_CRIS_UNSIGNED_4,
 
-  /* Relocs used in ELF shared libraries for CRIS.  */
-  BFD_RELOC_CRIS_RELATIVE,
-
   /* 32-bit offset to symbol-entry within GOT.  */
   BFD_RELOC_CRIS_32_GOT,
 
@@ -5961,7 +5941,6 @@ enum bfd_reloc_code_real
   BFD_RELOC_OR1K_PLT26,
   BFD_RELOC_OR1K_PLTA26,
   BFD_RELOC_OR1K_GOTOFF_SLO16,
-  BFD_RELOC_OR1K_RELATIVE,
   BFD_RELOC_OR1K_TLS_GD_HI16,
   BFD_RELOC_OR1K_TLS_GD_LO16,
   BFD_RELOC_OR1K_TLS_GD_PG21,
@@ -6001,9 +5980,6 @@ enum bfd_reloc_code_real
 
   /* Self-describing complex relocations.  */
   BFD_RELOC_RELC,
-
-  /* Relocations used by VAX ELF.  */
-  BFD_RELOC_VAX_RELATIVE,
 
   /* Morpho MT - 16 bit immediate relocation.  */
   BFD_RELOC_MT_PC16,
@@ -6093,9 +6069,6 @@ enum bfd_reloc_code_real
      objects to indicate that the runtime linker should set the value
      to one of its own internal functions or data structures.  */
   BFD_RELOC_XTENSA_RTLD,
-
-  /* Xtensa relocations for ELF shared objects.  */
-  BFD_RELOC_XTENSA_RELATIVE,
 
   /* Xtensa relocation used in ELF object files for symbols that may
      require PLT entries.  Otherwise, this is just a generic 32-bit
@@ -6233,7 +6206,6 @@ enum bfd_reloc_code_real
   BFD_RELOC_LM32_16_GOT,
   BFD_RELOC_LM32_GOTOFF_HI16,
   BFD_RELOC_LM32_GOTOFF_LO16,
-  BFD_RELOC_LM32_RELATIVE,
 
   /* Difference between two section addreses.  Must be followed by a
      BFD_RELOC_MACH_O_PAIR.  */
@@ -6927,7 +6899,6 @@ enum bfd_reloc_code_real
   BFD_RELOC_AARCH64_BRANCH9,
 
   /* Tilera TILEPro Relocations.  */
-  BFD_RELOC_TILEPRO_RELATIVE,
   BFD_RELOC_TILEPRO_BROFF_X1,
   BFD_RELOC_TILEPRO_JOFFLONG_X1,
   BFD_RELOC_TILEPRO_JOFFLONG_X1_PLT,
@@ -7012,7 +6983,6 @@ enum bfd_reloc_code_real
   BFD_RELOC_TILEGX_HW0_LAST,
   BFD_RELOC_TILEGX_HW1_LAST,
   BFD_RELOC_TILEGX_HW2_LAST,
-  BFD_RELOC_TILEGX_RELATIVE,
   BFD_RELOC_TILEGX_BROFF_X1,
   BFD_RELOC_TILEGX_JUMPOFF_X1,
   BFD_RELOC_TILEGX_JUMPOFF_X1_PLT,
