@@ -5816,11 +5816,6 @@ enum bfd_reloc_code_real
      follows a matching LO8XG part.  */
   BFD_RELOC_M68HC12_HI8XG,
 
-  /* Freescale S12Z reloc.
-     This is a 15 bit relative address.  If the most significant bits are
-     all zero then it may be truncated to 8 bits.  */
-  BFD_RELOC_S12Z_15_PCREL,
-
   /* NS CR16 Relocations.  */
   BFD_RELOC_CR16_NUM8,
   BFD_RELOC_CR16_NUM16,
@@ -7197,8 +7192,12 @@ enum bfd_reloc_code_real
   BFD_RELOC_CKCORE_PCREL_BLOOP_IMM4BY4,
   BFD_RELOC_CKCORE_PCREL_BLOOP_IMM12BY4,
 
-  /* S12Z relocations.  */
+  /* Freescale S12Z relocations.  */
   BFD_RELOC_S12Z_OPR,
+
+  /* This is a 15 bit relative address.  If the most significant bits are
+     all zero then it may be truncated to 8 bits.  */
+  BFD_RELOC_S12Z_15_PCREL,
 
   /* LARCH relocations.  */
   BFD_RELOC_LARCH_TLS_DTPMOD32,

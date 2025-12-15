@@ -5592,12 +5592,6 @@ ENUMDOC
   Motorola 68HC12/XGATE reloc.
   This is the 8 bit high part of an absolute address and immediately
   follows a matching LO8XG part.
-ENUM
-  BFD_RELOC_S12Z_15_PCREL
-ENUMDOC
-  Freescale S12Z reloc.
-  This is a 15 bit relative address.  If the most significant bits are
-  all zero then it may be truncated to 8 bits.
 
 ENUM
   BFD_RELOC_CR16_NUM8
@@ -7768,7 +7762,12 @@ ENUMDOC
 ENUM
   BFD_RELOC_S12Z_OPR
 ENUMDOC
-  S12Z relocations.
+  Freescale S12Z relocations.
+ENUM
+  BFD_RELOC_S12Z_15_PCREL
+ENUMDOC
+  This is a 15 bit relative address.  If the most significant bits are
+  all zero then it may be truncated to 8 bits.
 
 ENUM
   BFD_RELOC_LARCH_TLS_DTPMOD32
