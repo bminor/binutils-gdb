@@ -3915,8 +3915,8 @@ tc_gen_reloc (asection *section, fixS *fixp)
     case BFD_RELOC_16_PCREL:
     case BFD_RELOC_32_PCREL:
     case BFD_RELOC_64_PCREL:
-    case BFD_RELOC_SPARC_PLT32:
-    case BFD_RELOC_SPARC_PLT64:
+    case BFD_RELOC_32_PLT_PCREL:
+    case BFD_RELOC_64_PLT_PCREL:
     case BFD_RELOC_VTABLE_ENTRY:
     case BFD_RELOC_VTABLE_INHERIT:
     case BFD_RELOC_SPARC_TLS_GD_HI22:
@@ -4904,8 +4904,8 @@ cons_fix_new_sparc (fragS *frag,
       else if (*sparc_cons_special_reloc == 'p')
 	switch (nbytes)
 	  {
-	  case 4: r = BFD_RELOC_SPARC_PLT32; break;
-	  case 8: r = BFD_RELOC_SPARC_PLT64; break;
+	  case 4: r = BFD_RELOC_32_PLT_PCREL; break;
+	  case 8: r = BFD_RELOC_64_PLT_PCREL; break;
 	  }
       else
 	switch (nbytes)

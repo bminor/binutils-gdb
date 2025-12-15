@@ -387,7 +387,7 @@ _bfd_sparc_elf_reloc_type_lookup (bfd *abfd,
     case BFD_RELOC_SPARC_UA32:
       return &_bfd_sparc_elf_howto_table[R_SPARC_UA32];
 
-    case BFD_RELOC_SPARC_PLT32:
+    case BFD_RELOC_32_PLT_PCREL:
       return &_bfd_sparc_elf_howto_table[R_SPARC_PLT32];
 
     case BFD_RELOC_SPARC_10:
@@ -438,7 +438,7 @@ _bfd_sparc_elf_reloc_type_lookup (bfd *abfd,
     case BFD_RELOC_SPARC_DISP64:
       return &_bfd_sparc_elf_howto_table[R_SPARC_DISP64];
 
-    case BFD_RELOC_SPARC_PLT64:
+    case BFD_RELOC_64_PLT_PCREL:
       return &_bfd_sparc_elf_howto_table[R_SPARC_PLT64];
 
     case BFD_RELOC_SPARC_HIX22:
