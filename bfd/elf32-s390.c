@@ -289,7 +289,7 @@ elf_s390_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       return &elf_howto_table[(int) R_390_GOTPLT20];
     case BFD_RELOC_390_TLS_GOTIE20:
       return &elf_howto_table[(int) R_390_TLS_GOTIE20];
-    case BFD_RELOC_390_IRELATIVE:
+    case BFD_RELOC_IRELATIVE:
       return &elf_howto_table[(int) R_390_IRELATIVE];
     case BFD_RELOC_VTABLE_INHERIT:
       return &elf32_s390_vtinherit_howto;

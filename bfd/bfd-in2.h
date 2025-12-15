@@ -3323,6 +3323,7 @@ enum bfd_reloc_code_real
   BFD_RELOC_HI16_PLTOFF,
   BFD_RELOC_HI16_S_PLTOFF,
   BFD_RELOC_8_PLTOFF,
+  BFD_RELOC_IRELATIVE,
 
   /* Size relocations.  */
   BFD_RELOC_SIZE32,
@@ -3407,7 +3408,6 @@ enum bfd_reloc_code_real
   BFD_RELOC_SPARC_GOTDATA_OP_LOX10,
   BFD_RELOC_SPARC_GOTDATA_OP,
   BFD_RELOC_SPARC_JMP_IREL,
-  BFD_RELOC_SPARC_IRELATIVE,
 
   /* I think these are specific to SPARC a.out (e.g., Sun 4).  */
   BFD_RELOC_SPARC_BASE13,
@@ -3864,7 +3864,6 @@ enum bfd_reloc_code_real
   BFD_RELOC_386_TLS_GOTDESC,
   BFD_RELOC_386_TLS_DESC_CALL,
   BFD_RELOC_386_TLS_DESC,
-  BFD_RELOC_386_IRELATIVE,
   BFD_RELOC_386_GOT32X,
 
   /* x86-64/elf relocations.  */
@@ -3892,7 +3891,6 @@ enum bfd_reloc_code_real
   BFD_RELOC_X86_64_GOTPC32_TLSDESC,
   BFD_RELOC_X86_64_TLSDESC_CALL,
   BFD_RELOC_X86_64_TLSDESC,
-  BFD_RELOC_X86_64_IRELATIVE,
   BFD_RELOC_X86_64_PC32_BND,
   BFD_RELOC_X86_64_PLT32_BND,
   BFD_RELOC_X86_64_GOTPCRELX,
@@ -4260,9 +4258,6 @@ enum bfd_reloc_code_real
 
   /* Annotation of BX instructions.  */
   BFD_RELOC_ARM_V4BX,
-
-  /* ARM support for STT_GNU_IFUNC.  */
-  BFD_RELOC_ARM_IRELATIVE,
 
   /* Thumb1 relocations to support execute-only code.  */
   BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC,
@@ -5605,9 +5600,6 @@ enum bfd_reloc_code_real
   BFD_RELOC_390_GOT20,
   BFD_RELOC_390_GOTPLT20,
   BFD_RELOC_390_TLS_GOTIE20,
-
-  /* STT_GNU_IFUNC relocation.  */
-  BFD_RELOC_390_IRELATIVE,
 
   /* Score relocations.
      Low 16 bit for load/store.  */

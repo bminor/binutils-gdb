@@ -322,8 +322,8 @@ elf_i386_reloc_type_lookup (bfd *abfd,
       TRACE ("BFD_RELOC_386_TLS_DESC");
       return &elf_howto_table[R_386_TLS_DESC - R_386_tls_offset];
 
-    case BFD_RELOC_386_IRELATIVE:
-      TRACE ("BFD_RELOC_386_IRELATIVE");
+    case BFD_RELOC_IRELATIVE:
+      TRACE ("BFD_RELOC_IRELATIVE");
       return &elf_howto_table[R_386_IRELATIVE - R_386_tls_offset];
 
     case BFD_RELOC_386_GOT32X:

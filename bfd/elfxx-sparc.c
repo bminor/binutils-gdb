@@ -567,7 +567,7 @@ _bfd_sparc_elf_reloc_type_lookup (bfd *abfd,
     case BFD_RELOC_SPARC_JMP_IREL:
       return &sparc_jmp_irel_howto;
 
-    case BFD_RELOC_SPARC_IRELATIVE:
+    case BFD_RELOC_IRELATIVE:
       return &sparc_irelative_howto;
 
     case BFD_RELOC_VTABLE_INHERIT:
