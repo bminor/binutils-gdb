@@ -31,8 +31,9 @@
       as_bad (format, ##__VA_ARGS__);	       \
   } while (0)
 
-#define SFRAME_FRE_ELEM_LOC_REG		0
+#define SFRAME_FRE_ELEM_LOC_RETAIN	0
 #define SFRAME_FRE_ELEM_LOC_STACK	1
+#define SFRAME_FRE_ELEM_LOC_REG		2
 
 /* An invalid register number.  */
 #define SFRAME_FRE_REG_INVALID		((unsigned int)-1)
@@ -78,8 +79,8 @@ struct sframe_row_entry
   bool cfa_deref_p;
 
   /* Track FP location.  Specify whether it is in register or memory.  */
-  unsigned int fp_reg;
   unsigned int fp_loc;
+  unsigned int fp_reg;
   /* If the FP is stashed on stack, note the offset.  */
   offsetT fp_offset;
   /* Whether FP recovery needs dereferencing.  This is tracked for
@@ -87,8 +88,8 @@ struct sframe_row_entry
   bool fp_deref_p;
 
   /* Track RA location.  Specify whether it is in register or memory.  */
-  unsigned int ra_reg;
   unsigned int ra_loc;
+  unsigned int ra_reg;
   /* If RA is stashed on stack, note the offset.  */
   offsetT ra_offset;
  /* Whether RA recovery needs dereferencing.  This is tracked for

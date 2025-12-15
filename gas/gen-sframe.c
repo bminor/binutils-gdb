@@ -410,14 +410,14 @@ get_fre_num_offsets (const struct sframe_row_entry *sframe_fre,
   if (flex_topmost_p)
     fre_num_offsets += count;
   else if (sframe_ra_tracking_p ()
-	   && (sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK
+	   && (sframe_fre->ra_loc != SFRAME_FRE_ELEM_LOC_RETAIN
 	       /* For s390x account padding RA offset, if FP without RA
 		  saved.  */
 	       || (sframe_get_abi_arch () == SFRAME_ABI_S390X_ENDIAN_BIG
-		   && sframe_fre->fp_loc == SFRAME_FRE_ELEM_LOC_STACK)))
+		   && sframe_fre->fp_loc != SFRAME_FRE_ELEM_LOC_RETAIN)))
     fre_num_offsets++;
 
-  if (sframe_fre->fp_loc == SFRAME_FRE_ELEM_LOC_STACK)
+  if (sframe_fre->fp_loc != SFRAME_FRE_ELEM_LOC_RETAIN)
     fre_num_offsets += count;
 
   return fre_num_offsets;
@@ -643,10 +643,19 @@ output_sframe_row_entry_offsets (const struct sframe_func_entry *sframe_fde,
       if (sframe_ra_tracking_p ())
 	gas_assert (false);
 
-      /* RA tracking enabled or not, emit two offsets for RA.
-	 Aside, emitting SFRAME_FRE_RA_OFFSET_INVALID is equivalent to emitting
-	 SFRAME_V3_FLEX_FDE_REG_ENCODE (0, 0, 0).  */
+      /* RA tracking enabled or not, emit two offsets for RA.  */
       if (sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
+	{
+	  /* Output RA related FRE offsets.  */
+	  reg_data = SFRAME_V3_FLEX_FDE_REG_ENCODE (0, /* reg.  */
+						    sframe_fre->ra_deref_p,
+						    0 /* reg_p.  */);
+	  offset_data = sframe_fre->ra_offset;
+	  fre_offset_func_map[idx].out_func (reg_data);
+	  fre_offset_func_map[idx].out_func (offset_data);
+	  fre_write_offsets += 2;
+	}
+      else if (sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_REG)
 	{
 	  /* Output RA related FRE offsets.  */
 	  reg_data = SFRAME_V3_FLEX_FDE_REG_ENCODE (sframe_fre->ra_reg,
@@ -659,13 +668,29 @@ output_sframe_row_entry_offsets (const struct sframe_func_entry *sframe_fde,
 	}
       else
 	{
-	  fre_offset_func_map[idx].out_func (SFRAME_FRE_RA_OFFSET_INVALID);
-	  /* FIXME Offset 0 for now.  */
-	  fre_offset_func_map[idx].out_func (0);
+	  /* Output RA related FRE offsets.  */
+	  /* TODO: Why?!?  */
+	  reg_data = SFRAME_V3_FLEX_FDE_REG_ENCODE (0, /* reg.  */
+						    0, /* deref_p.  */
+						    0 /* reg_p.  */);
+	  offset_data = SFRAME_FRE_RA_OFFSET_INVALID;
+	  fre_offset_func_map[idx].out_func (reg_data);
+	  fre_offset_func_map[idx].out_func (offset_data);
 	  fre_write_offsets += 2;
 	}
 
       if (sframe_fre->fp_loc == SFRAME_FRE_ELEM_LOC_STACK)
+	{
+	  /* Output FP related FRE offsets.  */
+	  reg_data = SFRAME_V3_FLEX_FDE_REG_ENCODE (0 /* reg.  */,
+						    sframe_fre->fp_deref_p,
+						    0 /* reg_p.  */);
+	  offset_data = sframe_fre->fp_offset;
+	  fre_offset_func_map[idx].out_func (reg_data);
+	  fre_offset_func_map[idx].out_func (offset_data);
+	  fre_write_offsets += 2;
+	}
+      else if (sframe_fre->fp_loc == SFRAME_FRE_ELEM_LOC_REG)
 	{
 	  /* Output FP related FRE offsets.  */
 	  reg_data = SFRAME_V3_FLEX_FDE_REG_ENCODE (sframe_fre->fp_reg,
@@ -1489,6 +1514,7 @@ sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx,
       if (cfi_insn->u.rr.reg1 == SFRAME_CFA_FP_REG)
 	{
 	  sframe_fre_set_fp_track (cur_fre, 0);
+	  cur_fre->fp_loc = SFRAME_FRE_ELEM_LOC_REG;
 	  cur_fre->fp_reg = cfi_insn->u.rr.reg2;
 	  cur_fre->fp_deref_p = false;
 	  cur_fre->merge_candidate = false;
@@ -1497,6 +1523,7 @@ sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx,
       else if (cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG)
 	{
 	  sframe_fre_set_ra_track (cur_fre, 0);
+	  cur_fre->ra_loc = SFRAME_FRE_ELEM_LOC_REG;
 	  cur_fre->ra_reg = cfi_insn->u.rr.reg2;
 	  cur_fre->ra_deref_p = false;
 	  cur_fre->merge_candidate = false;
@@ -1833,6 +1860,7 @@ sframe_xlate_do_escape_expr (struct sframe_xlate_ctx *xlate_ctx,
     {
       xlate_ctx->flex_topmost_p = true;
       sframe_fre_set_fp_track (cur_fre, offset);
+      cur_fre->fp_loc = SFRAME_FRE_ELEM_LOC_REG;
       cur_fre->fp_reg = fp_base_reg;
       cur_fre->fp_deref_p = true;
       cur_fre->merge_candidate = false;
@@ -2158,14 +2186,14 @@ sframe_xlate_do_same_value (const struct sframe_xlate_ctx *xlate_ctx,
 
   if (sframe_ra_tracking_p () && cfi_insn->u.r == SFRAME_CFA_RA_REG)
     {
-      cur_fre->ra_loc = SFRAME_FRE_ELEM_LOC_REG;
+      cur_fre->ra_loc = SFRAME_FRE_ELEM_LOC_RETAIN;
       cur_fre->ra_offset = 0;
       cur_fre->ra_undefined_p = false;
       cur_fre->merge_candidate = false;
     }
   else if (cfi_insn->u.r == SFRAME_CFA_FP_REG)
     {
-      cur_fre->fp_loc = SFRAME_FRE_ELEM_LOC_REG;
+      cur_fre->fp_loc = SFRAME_FRE_ELEM_LOC_RETAIN;
       cur_fre->fp_offset = 0;
       cur_fre->merge_candidate = false;
     }
