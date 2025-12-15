@@ -35,7 +35,7 @@ set old_ldflags $LDFLAGS
 
 # Prevent our otherwise unused data symbols from being GC'd on XCOFF targets.
 if { [is_xcoff_format] } {
-    append LDFLAGS " -bexpall"
+    append LDFLAGS " -unix"
 }
 
 # With Alpha/VMS NM doesn't handle executables and for MS-DOS there's no way
@@ -54,30 +54,70 @@ proc ld_archive_filter_tests { arg } {
     }
 }
 
+# Single archive tests.
 run_ld_link_tests [list \
     [list "Regular archive link" \
-	"-e ff" "tmpdir/ab.a" \
+	"-e ff" "tmpdir/ab.a --verbose --print-map" \
 	"" {abc.s} \
-	[ld_archive_filter_tests {{nm "" abc.nd}}] \
+	[ld_archive_filter_tests {{ld abc.vd} \
+				  {nm "" abc.nd} \
+				  {nm "" nx.nd}}] \
 	"abc" \
     ] \
 ]
 setup_xfail "binutils/33484" "alpha*-*-linux*ecoff*" "alpha*-*-osf*"
 setup_xfail "binutils/33485" "cris-*-*aout*" "i\[3-7\]86-*-bsd*" \
     "i\[3-7\]86-*-msdos*" "ns32k-*-*" "pdp11-*-*"
+setup_xfail "binutils/33600" "alpha*-*-*vms*"
+if { [is_xcoff_format] } {
+    setup_xfail "binutils/33600" "*-*-*"
+}
 run_ld_link_tests [list \
     [list "Thin archive link" \
-	"-e ff" "tmpdir/abt.a" \
+	"-e ff" "tmpdir/abt.a --verbose --print-map" \
 	"" {abc.s} \
-	[ld_archive_filter_tests {{nm "" abc.nd}}] \
+	[ld_archive_filter_tests {{ld abtc.vd} \
+				  {nm "" abc.nd} \
+				  {nm "" nx.nd}}] \
 	"abtc" \
     ] \
 ]
+
+# Single whole archive tests.
+run_ld_link_tests [list \
+    [list "Regular whole archive link" \
+	"-e ff" "--whole-archive tmpdir/ab.a --verbose --print-map" \
+	"" {abc.s} \
+	[ld_archive_filter_tests {{ld abwc.vd} \
+				  {nm "" abc.nd} \
+				  {nm "" x.nd}}] \
+	"abwc" \
+    ] \
+]
+setup_xfail "binutils/33484" "alpha*-*-linux*ecoff*" "alpha*-*-osf*"
+setup_xfail "binutils/33600" "alpha*-*-*vms*"
+if { [is_xcoff_format] } {
+    setup_xfail "binutils/33600" "*-*-*"
+}
+run_ld_link_tests [list \
+    [list "Thin whole archive link" \
+	"-e ff" "--whole-archive tmpdir/abt.a --verbose --print-map" \
+	"" {abc.s} \
+	[ld_archive_filter_tests {{ld abwtc.vd} \
+				  {nm "" abc.nd} \
+				  {nm "" x.nd}}] \
+	"abwtc" \
+    ] \
+]
+
+# Dual archive tests.
 run_ld_link_tests [list \
     [list "Regular archive plus regular link" \
 	"-e ff" "tmpdir/ab.a tmpdir/cd.a" \
 	"" {abcde.s} \
-	[ld_archive_filter_tests {{nm "" abcde.nd}}] \
+	[ld_archive_filter_tests {{nm "" abcde.nd} \
+				  {nm "" nx.nd} \
+				  {nm "" ny.nd}}] \
 	"abcde" \
     ] \
 ]
@@ -88,7 +128,9 @@ run_ld_link_tests [list \
     [list "Regular archive plus thin link" \
 	"-e ff" "tmpdir/ab.a tmpdir/cdt.a" \
 	"" {abcde.s} \
-	[ld_archive_filter_tests {{nm "" abcde.nd}}] \
+	[ld_archive_filter_tests {{nm "" abcde.nd} \
+				  {nm "" nx.nd} \
+				  {nm "" ny.nd}}] \
 	"abcdte" \
     ] \
 ]
@@ -99,7 +141,9 @@ run_ld_link_tests [list \
     [list "Thin archive plus regular link" \
 	"-e ff" "tmpdir/abt.a tmpdir/cd.a" \
 	"" {abcde.s} \
-	[ld_archive_filter_tests {{nm "" abcde.nd}}] \
+	[ld_archive_filter_tests {{nm "" abcde.nd} \
+				  {nm "" nx.nd} \
+				  {nm "" ny.nd}}] \
 	"abtcde" \
     ] \
 ]
@@ -110,8 +154,33 @@ run_ld_link_tests [list \
     [list "Thin archive plus thin link" \
 	"-e ff" "tmpdir/abt.a tmpdir/cdt.a" \
 	"" {abcde.s} \
-	[ld_archive_filter_tests {{nm "" abcde.nd}}] \
+	[ld_archive_filter_tests {{nm "" abcde.nd} \
+				  {nm "" nx.nd} \
+				  {nm "" ny.nd}}] \
 	"abtcdte" \
+    ] \
+]
+
+# Dual whole archive tests.
+run_ld_link_tests [list \
+    [list "Regular archive plus whole regular link" \
+	"-e ff" "tmpdir/ab.a --whole-archive tmpdir/cd.a" \
+	"" {abcde.s} \
+	[ld_archive_filter_tests {{nm "" abcde.nd} \
+				  {nm "" nx.nd} \
+				  {nm "" y.nd}}] \
+	"abcdwe" \
+    ] \
+]
+setup_xfail "binutils/33484" "alpha*-*-linux*ecoff*" "alpha*-*-osf*"
+run_ld_link_tests [list \
+    [list "Regular archive plus whole thin link" \
+	"-e ff" "tmpdir/ab.a --whole-archive tmpdir/cdt.a" \
+	"" {abcde.s} \
+	[ld_archive_filter_tests {{nm "" abcde.nd} \
+				  {nm "" nx.nd} \
+				  {nm "" y.nd}}] \
+	"abcdwte" \
     ] \
 ]
 
@@ -123,6 +192,7 @@ if { [istarget "alpha*-*-*vms*"] || [is_xcoff_format] } {
     return
 }
 
+# Single non-index archive tests.
 run_ld_link_tests [list \
     [list "Regular archive w/o index link" \
 	"-e ff" "tmpdir/abn.a" \
