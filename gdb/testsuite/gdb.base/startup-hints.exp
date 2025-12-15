@@ -58,10 +58,10 @@ proc build_hint_re { width } {
 
 	# Place the lines into a box, padding with whitespace so that
 	# the sides are correctly aligned.
-	set top_bottom "+[string repeat "-" [expr $width - 2]]+"
+	set top_bottom "+[string repeat "-" [expr {$width - 2}]]+"
 	set lines [list $top_bottom]
 	foreach m $msg {
-	    set space_count [expr $width - 4 - [string length $m]]
+	    set space_count [expr {$width - 4 - [string length $m]}]
 	    set spaces [string repeat " " $space_count]
 	    lappend lines "| $m$spaces |"
 	}
