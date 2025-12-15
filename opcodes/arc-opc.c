@@ -2737,7 +2737,7 @@ const struct arc_reloc_equiv_tab arc_reloc_equiv[] =
   { "plt", 0, { F_NULL }, BFD_RELOC_ARC_S21W_PCREL,
     BFD_RELOC_ARC_S21W_PCREL_PLT },
 
-  { "plt", 0, { F_NULL }, BFD_RELOC_ARC_32_ME, BFD_RELOC_ARC_PLT32 }
+  { "plt", 0, { F_NULL }, BFD_RELOC_ARC_32_ME, BFD_RELOC_32_PLT_PCREL }
 };
 
 const unsigned arc_num_equiv_tab = ARRAY_SIZE (arc_reloc_equiv);

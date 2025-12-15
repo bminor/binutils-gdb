@@ -130,7 +130,7 @@ extern const char *arc_target_format;
    make sure that the fixup refers to some sort of label.  */
 #define TC_VALIDATE_FIX(FIXP,SEG,SKIP)				     \
   if ((FIXP->fx_r_type == BFD_RELOC_ARC_GOTPC32			     \
-       || FIXP->fx_r_type == BFD_RELOC_ARC_PLT32		     \
+       || FIXP->fx_r_type == BFD_RELOC_32_PLT_PCREL		     \
        || FIXP->fx_r_type == BFD_RELOC_ARC_S25W_PCREL_PLT	     \
        || FIXP->fx_r_type == BFD_RELOC_ARC_S25H_PCREL_PLT	     \
        || FIXP->fx_r_type == BFD_RELOC_ARC_S21W_PCREL_PLT	     \

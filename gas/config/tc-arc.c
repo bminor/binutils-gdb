@@ -544,9 +544,9 @@ static const struct arc_reloc_op_tag
 {
   DEF (gotoff,  BFD_RELOC_ARC_GOTOFF,		1),
   DEF (gotpc,   BFD_RELOC_ARC_GOTPC32,		0),
-  DEF (plt,	BFD_RELOC_ARC_PLT32,		0),
+  DEF (plt,	BFD_RELOC_32_PLT_PCREL,		0),
   DEF (sda,	DUMMY_RELOC_ARC_ENTRY,		1),
-  DEF (pcl,	BFD_RELOC_ARC_PC32,		1),
+  DEF (pcl,	BFD_RELOC_32_PCREL,		1),
   DEF (tlsgd,   BFD_RELOC_ARC_TLS_GD_GOT,	0),
   DEF (tlsie,   BFD_RELOC_ARC_TLS_IE_GOT,	0),
   DEF (tpoff9,  BFD_RELOC_ARC_TLS_LE_S9,	0),
@@ -1593,7 +1593,7 @@ get_register (symbolS *sym)
 }
 
 /* Return true if a RELOC is generic.  A generic reloc is PC-rel of a
-   simple ME relocation (e.g. RELOC_ARC_32_ME, BFD_RELOC_ARC_PC32.  */
+   simple ME relocation (e.g. RELOC_ARC_32_ME, BFD_RELOC_32_PCREL.  */
 
 static bool
 generic_reloc_p (extended_bfd_reloc_code_real_type reloc)
@@ -2785,7 +2785,7 @@ md_pcrel_from_section (fixS *fixP,
     {
       switch (fixP->fx_r_type)
 	{
-	case BFD_RELOC_ARC_PC32:
+	case BFD_RELOC_32_PCREL:
 	  /* The hardware calculates relative to the start of the
 	     insn, but this relocation is relative to location of the
 	     LIMM, compensate.  The base always needs to be
@@ -2793,7 +2793,7 @@ md_pcrel_from_section (fixS *fixP,
 	     relocation for short instructions.  */
 	  base -= 4;
 	  /* Fall through.  */
-	case BFD_RELOC_ARC_PLT32:
+	case BFD_RELOC_32_PLT_PCREL:
 	case BFD_RELOC_ARC_S25H_PCREL_PLT:
 	case BFD_RELOC_ARC_S21H_PCREL_PLT:
 	case BFD_RELOC_ARC_S25W_PCREL_PLT:
@@ -3001,9 +3001,9 @@ md_apply_fix (fixS *fixP,
 	  fixP->fx_offset += fixP->fx_frag->fr_address;
 	  /* Fall through.  */
 	case BFD_RELOC_32:
-	  fixP->fx_r_type = BFD_RELOC_ARC_PC32;
+	  fixP->fx_r_type = BFD_RELOC_32_PCREL;
 	  /* Fall through.  */
-	case BFD_RELOC_ARC_PC32:
+	case BFD_RELOC_32_PCREL:
 	  /* fixP->fx_offset += fixP->fx_where - fixP->fx_dot_value; */
 	  break;
 	default:
@@ -3101,11 +3101,11 @@ md_apply_fix (fixS *fixP,
 
     case BFD_RELOC_ARC_GOTOFF:
     case BFD_RELOC_ARC_32_ME:
-    case BFD_RELOC_ARC_PC32:
+    case BFD_RELOC_32_PCREL:
       md_number_to_chars_midend (fixpos, value, fixP->fx_size);
       return;
 
-    case BFD_RELOC_ARC_PLT32:
+    case BFD_RELOC_32_PLT_PCREL:
       md_number_to_chars_midend (fixpos, value, fixP->fx_size);
       return;
 
@@ -4216,7 +4216,7 @@ tc_arc_fix_adjustable (fixS *fixP)
   switch (fixP->fx_r_type)
     {
     case BFD_RELOC_ARC_GOTPC32:
-    case BFD_RELOC_ARC_PLT32:
+    case BFD_RELOC_32_PLT_PCREL:
     case BFD_RELOC_ARC_S25H_PCREL_PLT:
     case BFD_RELOC_ARC_S21H_PCREL_PLT:
     case BFD_RELOC_ARC_S25W_PCREL_PLT:

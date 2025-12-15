@@ -377,15 +377,18 @@ arc_elf_link_hash_table_create (bfd *abfd)
 #define ARC_RELOC_HOWTO(TYPE, VALUE, SIZE, BITSIZE, RELOC_FUNCTION, OVERFLOW, FORMULA) \
   { BFD_RELOC_##TYPE, R_##TYPE },
 
+/* Aliases.  */
+#define BFD_RELOC_ARC_NONE	BFD_RELOC_NONE
+#define BFD_RELOC_ARC_8		BFD_RELOC_8
+#define BFD_RELOC_ARC_16	BFD_RELOC_16
+#define BFD_RELOC_ARC_24	BFD_RELOC_24
+#define BFD_RELOC_ARC_32	BFD_RELOC_32
+#define BFD_RELOC_ARC_PC32	BFD_RELOC_32_PCREL
+#define BFD_RELOC_ARC_PLT32	BFD_RELOC_32_PLT_PCREL
+
 static const struct arc_reloc_map arc_reloc_map[] =
 {
 #include "elf/arc-reloc.def"
-
-  {BFD_RELOC_NONE,  R_ARC_NONE},
-  {BFD_RELOC_8,  R_ARC_8},
-  {BFD_RELOC_16, R_ARC_16},
-  {BFD_RELOC_24, R_ARC_24},
-  {BFD_RELOC_32, R_ARC_32},
 };
 
 #undef ARC_RELOC_HOWTO
