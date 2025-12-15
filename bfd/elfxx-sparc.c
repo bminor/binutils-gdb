@@ -375,7 +375,7 @@ _bfd_sparc_elf_reloc_type_lookup (bfd *abfd,
     case BFD_RELOC_COPY:
       return &_bfd_sparc_elf_howto_table[R_SPARC_COPY];
 
-    case BFD_RELOC_SPARC_GLOB_DAT:
+    case BFD_RELOC_GLOB_DAT:
       return &_bfd_sparc_elf_howto_table[R_SPARC_GLOB_DAT];
 
     case BFD_RELOC_SPARC_JMP_SLOT:

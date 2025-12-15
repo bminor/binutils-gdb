@@ -220,8 +220,8 @@ elf_i386_reloc_type_lookup (bfd *abfd,
       TRACE ("BFD_RELOC_COPY");
       return &elf_howto_table[R_386_COPY];
 
-    case BFD_RELOC_386_GLOB_DAT:
-      TRACE ("BFD_RELOC_386_GLOB_DAT");
+    case BFD_RELOC_GLOB_DAT:
+      TRACE ("BFD_RELOC_GLOB_DAT");
       return &elf_howto_table[R_386_GLOB_DAT];
 
     case BFD_RELOC_386_JUMP_SLOT:

@@ -219,7 +219,7 @@ elf_s390_reloc_type_lookup (bfd *abfd,
       return &elf_howto_table[(int) R_390_PLT32];
     case BFD_RELOC_COPY:
       return &elf_howto_table[(int) R_390_COPY];
-    case BFD_RELOC_390_GLOB_DAT:
+    case BFD_RELOC_GLOB_DAT:
       return &elf_howto_table[(int) R_390_GLOB_DAT];
     case BFD_RELOC_390_JMP_SLOT:
       return &elf_howto_table[(int) R_390_JMP_SLOT];

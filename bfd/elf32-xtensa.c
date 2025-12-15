@@ -413,8 +413,8 @@ elf_xtensa_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       TRACE ("BFD_RELOC_XTENSA_RTLD");
       return &elf_howto_table[(unsigned) R_XTENSA_RTLD ];
 
-    case BFD_RELOC_XTENSA_GLOB_DAT:
-      TRACE ("BFD_RELOC_XTENSA_GLOB_DAT");
+    case BFD_RELOC_GLOB_DAT:
+      TRACE ("BFD_RELOC_GLOB_DAT");
       return &elf_howto_table[(unsigned) R_XTENSA_GLOB_DAT ];
 
     case BFD_RELOC_XTENSA_JMP_SLOT:

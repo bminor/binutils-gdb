@@ -386,6 +386,7 @@ arc_elf_link_hash_table_create (bfd *abfd)
 #define BFD_RELOC_ARC_PC32	BFD_RELOC_32_PCREL
 #define BFD_RELOC_ARC_PLT32	BFD_RELOC_32_PLT_PCREL
 #define BFD_RELOC_ARC_COPY	BFD_RELOC_COPY
+#define BFD_RELOC_ARC_GLOB_DAT	BFD_RELOC_GLOB_DAT
 
 static const struct arc_reloc_map arc_reloc_map[] =
 {

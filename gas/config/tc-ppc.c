@@ -2089,7 +2089,7 @@ ppc_elf_suffix (char **str_p, expressionS *exp_p)
     MAP ("plt@h",		BFD_RELOC_HI16_PLTOFF),
     MAP ("plt@ha",		BFD_RELOC_HI16_S_PLTOFF),
     MAP ("copy",		BFD_RELOC_COPY),
-    MAP ("globdat",		BFD_RELOC_PPC_GLOB_DAT),
+    MAP ("globdat",		BFD_RELOC_GLOB_DAT),
     MAP ("sectoff",		BFD_RELOC_16_BASEREL),
     MAP ("sectoff@l",		BFD_RELOC_LO16_BASEREL),
     MAP ("sectoff@h",		BFD_RELOC_HI16_BASEREL),
@@ -3167,7 +3167,7 @@ fixup_size (bfd_reloc_code_real_type reloc, bool *pc_relative)
     case BFD_RELOC_COPY:
     case BFD_RELOC_PPC_DTPMOD:
     case BFD_RELOC_PPC_DTPREL:
-    case BFD_RELOC_PPC_GLOB_DAT:
+    case BFD_RELOC_GLOB_DAT:
     case BFD_RELOC_PPC_TPREL:
       size = ppc_obj64 ? 8 : 4;
       break;
@@ -7313,7 +7313,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	case BFD_RELOC_PPC_TPREL:
 	case BFD_RELOC_PPC_DTPREL:
 	case BFD_RELOC_COPY:
-	case BFD_RELOC_PPC_GLOB_DAT:
+	case BFD_RELOC_GLOB_DAT:
 	case BFD_RELOC_32_PLT_PCREL:
 	case BFD_RELOC_PPC_EMB_NADDR32:
 	case BFD_RELOC_PPC64_TOC:
@@ -7480,7 +7480,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	case BFD_RELOC_HI16_PLTOFF:
 	case BFD_RELOC_HI16_S_PLTOFF:
 	case BFD_RELOC_COPY:
-	case BFD_RELOC_PPC_GLOB_DAT:
+	case BFD_RELOC_GLOB_DAT:
 	case BFD_RELOC_16_BASEREL:
 	case BFD_RELOC_LO16_BASEREL:
 	case BFD_RELOC_HI16_BASEREL:

@@ -109,7 +109,7 @@ static const struct cr16_reloc_map cr16_reloc_map[R_CR16_MAX] =
   {BFD_RELOC_CR16_SWITCH32,  R_CR16_SWITCH32},
   {BFD_RELOC_CR16_GOT_REGREL20, R_CR16_GOT_REGREL20},
   {BFD_RELOC_CR16_GOTC_REGREL20, R_CR16_GOTC_REGREL20},
-  {BFD_RELOC_CR16_GLOB_DAT,  R_CR16_GLOB_DAT}
+  {BFD_RELOC_GLOB_DAT,       R_CR16_GLOB_DAT}
 };
 
 static reloc_howto_type cr16_elf_howto_table[] =

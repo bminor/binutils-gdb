@@ -754,7 +754,7 @@ ppc_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     case BFD_RELOC_HI16_S_GOTOFF:	r = R_PPC_GOT16_HA;		break;
     case BFD_RELOC_24_PLT_PCREL:	r = R_PPC_PLTREL24;		break;
     case BFD_RELOC_COPY:		r = R_PPC_COPY;			break;
-    case BFD_RELOC_PPC_GLOB_DAT:	r = R_PPC_GLOB_DAT;		break;
+    case BFD_RELOC_GLOB_DAT:		r = R_PPC_GLOB_DAT;		break;
     case BFD_RELOC_PPC_LOCAL24PC:	r = R_PPC_LOCAL24PC;		break;
     case BFD_RELOC_32_PCREL:		r = R_PPC_REL32;		break;
     case BFD_RELOC_32_PLTOFF:		r = R_PPC_PLT32;		break;

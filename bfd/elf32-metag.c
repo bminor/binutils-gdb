@@ -723,7 +723,7 @@ static const struct metag_reloc_map metag_reloc_map [] =
     { BFD_RELOC_COPY,		     R_METAG_COPY },
     { BFD_RELOC_METAG_JMP_SLOT,	     R_METAG_JMP_SLOT },
     { BFD_RELOC_METAG_RELATIVE,	     R_METAG_RELATIVE },
-    { BFD_RELOC_METAG_GLOB_DAT,	     R_METAG_GLOB_DAT },
+    { BFD_RELOC_GLOB_DAT,	     R_METAG_GLOB_DAT },
     { BFD_RELOC_METAG_TLS_GD,	     R_METAG_TLS_GD },
     { BFD_RELOC_METAG_TLS_LDM,	     R_METAG_TLS_LDM },
     { BFD_RELOC_METAG_TLS_LDO_HI16,  R_METAG_TLS_LDO_HI16 },

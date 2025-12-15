@@ -1079,7 +1079,7 @@ ppc64_elf_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code)
       break;
     case BFD_RELOC_COPY:			r = R_PPC64_COPY;
       break;
-    case BFD_RELOC_PPC_GLOB_DAT:		r = R_PPC64_GLOB_DAT;
+    case BFD_RELOC_GLOB_DAT:			r = R_PPC64_GLOB_DAT;
       break;
     case BFD_RELOC_32_PCREL:			r = R_PPC64_REL32;
       break;
