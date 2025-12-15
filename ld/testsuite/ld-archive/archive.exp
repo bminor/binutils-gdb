@@ -38,12 +38,27 @@ if { [is_xcoff_format] } {
     append LDFLAGS " -bexpall"
 }
 
-# For MS-DOS there's no way to keep symbols, so just check for success.
+# With Alpha/VMS NM doesn't handle executables and for MS-DOS there's no way
+# to keep symbols, so filter out any NM tests.
+proc ld_archive_filter_tests { arg } {
+    if { ![istarget "*-*-msdos"] && ![istarget "alpha*-*-*vms*"] } {
+	return $arg
+    } else {
+	set tests {}
+	foreach test $arg {
+	    if { [lindex $test 0] != "nm" } {
+		lappend tests $test
+	    }
+	}
+	return $tests
+    }
+}
+
 run_ld_link_tests [list \
     [list "Regular archive link" \
 	"-e ff" "tmpdir/ab.a" \
 	"" {abc.s} \
-	[expr { [istarget "*-*-msdos"] ? {} : {{nm "" abc.nd}} }] \
+	[ld_archive_filter_tests {{nm "" abc.nd}}] \
 	"abc" \
     ] \
 ]
@@ -54,7 +69,7 @@ run_ld_link_tests [list \
     [list "Thin archive link" \
 	"-e ff" "tmpdir/abt.a" \
 	"" {abc.s} \
-	[expr { [istarget "*-*-msdos"] ? {} : {{nm "" abc.nd}} }] \
+	[ld_archive_filter_tests {{nm "" abc.nd}}] \
 	"abtc" \
     ] \
 ]
@@ -62,7 +77,7 @@ run_ld_link_tests [list \
     [list "Regular archive plus regular link" \
 	"-e ff" "tmpdir/ab.a tmpdir/cd.a" \
 	"" {abcde.s} \
-	[expr { [istarget "*-*-msdos"] ? {} : {{nm "" abcde.nd}} }] \
+	[ld_archive_filter_tests {{nm "" abcde.nd}}] \
 	"abcde" \
     ] \
 ]
@@ -73,7 +88,7 @@ run_ld_link_tests [list \
     [list "Regular archive plus thin link" \
 	"-e ff" "tmpdir/ab.a tmpdir/cdt.a" \
 	"" {abcde.s} \
-	[expr { [istarget "*-*-msdos"] ? {} : {{nm "" abcde.nd}} }] \
+	[ld_archive_filter_tests {{nm "" abcde.nd}}] \
 	"abcdte" \
     ] \
 ]
@@ -84,7 +99,7 @@ run_ld_link_tests [list \
     [list "Thin archive plus regular link" \
 	"-e ff" "tmpdir/abt.a tmpdir/cd.a" \
 	"" {abcde.s} \
-	[expr { [istarget "*-*-msdos"] ? {} : {{nm "" abcde.nd}} }] \
+	[ld_archive_filter_tests {{nm "" abcde.nd}}] \
 	"abtcde" \
     ] \
 ]
@@ -95,15 +110,16 @@ run_ld_link_tests [list \
     [list "Thin archive plus thin link" \
 	"-e ff" "tmpdir/abt.a tmpdir/cdt.a" \
 	"" {abcde.s} \
-	[expr { [istarget "*-*-msdos"] ? {} : {{nm "" abcde.nd}} }] \
+	[ld_archive_filter_tests {{nm "" abcde.nd}}] \
 	"abtcdte" \
     ] \
 ]
 
 set LDFLAGS $old_ldflags
 
-# XCOFF targets currently accept archives w/o index.
-if { [is_xcoff_format] } {
+# Alpha/VMS archives always have an index and XCOFF targets currently
+# accept archives without one.
+if { [istarget "alpha*-*-*vms*"] || [is_xcoff_format] } {
     return
 }
 
