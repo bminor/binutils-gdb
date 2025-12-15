@@ -5147,10 +5147,6 @@ ENUM
 ENUMDOC
   12 bit GOT offset.
 ENUM
-  BFD_RELOC_390_PLT32
-ENUMDOC
-  32 bit PC relative PLT address.
-ENUM
   BFD_RELOC_390_COPY
 ENUMDOC
   Copy symbol at runtime.
@@ -5214,10 +5210,6 @@ ENUM
   BFD_RELOC_390_GOT64
 ENUMDOC
   64 bit GOT offset.
-ENUM
-  BFD_RELOC_390_PLT64
-ENUMDOC
-  64 bit PC relative PLT address.
 ENUM
   BFD_RELOC_390_GOTENT
 ENUMDOC

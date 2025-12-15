@@ -5500,9 +5500,6 @@ enum bfd_reloc_code_real
   /* 12 bit GOT offset.  */
   BFD_RELOC_390_GOT12,
 
-  /* 32 bit PC relative PLT address.  */
-  BFD_RELOC_390_PLT32,
-
   /* Copy symbol at runtime.  */
   BFD_RELOC_390_COPY,
 
@@ -5550,9 +5547,6 @@ enum bfd_reloc_code_real
 
   /* 64 bit GOT offset.  */
   BFD_RELOC_390_GOT64,
-
-  /* 64 bit PC relative PLT address.  */
-  BFD_RELOC_390_PLT64,
 
   /* 32 bit rel. offset to GOT entry.  */
   BFD_RELOC_390_GOTENT,

@@ -1114,9 +1114,9 @@ s390_lit_suffix (char **str_p, expressionS *exp_p, elf_suffix_type suffix)
   else if (suffix == ELF_SUFFIX_PLT)
     {
       if (nbytes == 4)
-	reloc = BFD_RELOC_390_PLT32;
+	reloc = BFD_RELOC_32_PLT_PCREL;
       else if (nbytes == 8)
-	reloc = BFD_RELOC_390_PLT64;
+	reloc = BFD_RELOC_64_PLT_PCREL;
     }
 
   if (suffix != ELF_SUFFIX_NONE && reloc == BFD_RELOC_UNUSED)
@@ -1272,7 +1272,7 @@ s390_elf_cons (int nbytes /* 1=.byte, 2=.word, 4=.long */)
 		{
 		  BFD_RELOC_UNUSED, 		/* ELF_SUFFIX_NONE  */
 		  BFD_RELOC_32_GOT_PCREL,	/* ELF_SUFFIX_GOT  */
-		  BFD_RELOC_390_PLT32,		/* ELF_SUFFIX_PLT  */
+		  BFD_RELOC_32_PLT_PCREL,	/* ELF_SUFFIX_PLT  */
 		  BFD_RELOC_UNUSED,		/* ELF_SUFFIX_GOTENT  */
 		  BFD_RELOC_32_GOTOFF,		/* ELF_SUFFIX_GOTOFF  */
 		  BFD_RELOC_390_GOTPLT32,	/* ELF_SUFFIX_GOTPLT  */
@@ -1292,7 +1292,7 @@ s390_elf_cons (int nbytes /* 1=.byte, 2=.word, 4=.long */)
 		{
 		  BFD_RELOC_UNUSED, 		/* ELF_SUFFIX_NONE  */
 		  BFD_RELOC_390_GOT64,		/* ELF_SUFFIX_GOT  */
-		  BFD_RELOC_390_PLT64,		/* ELF_SUFFIX_PLT  */
+		  BFD_RELOC_64_PLT_PCREL,	/* ELF_SUFFIX_PLT  */
 		  BFD_RELOC_UNUSED,		/* ELF_SUFFIX_GOTENT  */
 		  BFD_RELOC_390_GOTOFF64,	/* ELF_SUFFIX_GOTOFF  */
 		  BFD_RELOC_390_GOTPLT64,	/* ELF_SUFFIX_GOTPLT  */
@@ -2390,9 +2390,9 @@ tc_s390_fix_adjustable (fixS *fixP)
       || fixP->fx_r_type == BFD_RELOC_390_PLT12DBL
       || fixP->fx_r_type == BFD_RELOC_390_PLT16DBL
       || fixP->fx_r_type == BFD_RELOC_390_PLT24DBL
-      || fixP->fx_r_type == BFD_RELOC_390_PLT32
+      || fixP->fx_r_type == BFD_RELOC_32_PLT_PCREL
       || fixP->fx_r_type == BFD_RELOC_390_PLT32DBL
-      || fixP->fx_r_type == BFD_RELOC_390_PLT64
+      || fixP->fx_r_type == BFD_RELOC_64_PLT_PCREL
       || fixP->fx_r_type == BFD_RELOC_390_GOT12
       || fixP->fx_r_type == BFD_RELOC_390_GOT20
       || fixP->fx_r_type == BFD_RELOC_390_GOT16
@@ -2454,12 +2454,12 @@ tc_s390_force_relocation (struct fix *fixp)
     case BFD_RELOC_390_GOTPCDBL:
     case BFD_RELOC_390_GOT64:
     case BFD_RELOC_390_GOTENT:
-    case BFD_RELOC_390_PLT32:
+    case BFD_RELOC_32_PLT_PCREL:
     case BFD_RELOC_390_PLT12DBL:
     case BFD_RELOC_390_PLT16DBL:
     case BFD_RELOC_390_PLT24DBL:
     case BFD_RELOC_390_PLT32DBL:
-    case BFD_RELOC_390_PLT64:
+    case BFD_RELOC_64_PLT_PCREL:
     case BFD_RELOC_390_GOTPLT12:
     case BFD_RELOC_390_GOTPLT16:
     case BFD_RELOC_390_GOTPLT20:
@@ -2730,7 +2730,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  break;
 	case BFD_RELOC_32_GOT_PCREL:
 	case BFD_RELOC_390_PLTOFF32:
-	case BFD_RELOC_390_PLT32:
+	case BFD_RELOC_32_PLT_PCREL:
 	case BFD_RELOC_390_GOTPLT32:
 	  if (fixP->fx_done)
 	    md_number_to_chars (where, value, 4);
@@ -2757,7 +2757,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
 	case BFD_RELOC_390_GOT64:
 	case BFD_RELOC_390_PLTOFF64:
-	case BFD_RELOC_390_PLT64:
+	case BFD_RELOC_64_PLT_PCREL:
 	case BFD_RELOC_390_GOTPLT64:
 	  if (fixP->fx_done)
 	    md_number_to_chars (where, value, 8);

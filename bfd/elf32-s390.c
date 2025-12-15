@@ -201,7 +201,7 @@ elf_s390_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       return &elf_howto_table[(int) R_390_GOT12];
     case BFD_RELOC_32_GOT_PCREL:
       return &elf_howto_table[(int) R_390_GOT32];
-    case BFD_RELOC_390_PLT32:
+    case BFD_RELOC_32_PLT_PCREL:
       return &elf_howto_table[(int) R_390_PLT32];
     case BFD_RELOC_390_COPY:
       return &elf_howto_table[(int) R_390_COPY];
