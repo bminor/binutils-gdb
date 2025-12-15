@@ -660,7 +660,7 @@ microblaze_elf_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
     case BFD_RELOC_MICROBLAZE_64_TLSTPREL:
       microblaze_reloc = R_MICROBLAZE_TLSTPREL32;
       break;
-    case BFD_RELOC_MICROBLAZE_COPY:
+    case BFD_RELOC_COPY:
       microblaze_reloc = R_MICROBLAZE_COPY;
       break;
     default:

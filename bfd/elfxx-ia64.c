@@ -295,7 +295,7 @@ ia64_elf_reloc_type_lookup (bfd *abfd,
 
     case BFD_RELOC_IA64_IPLTMSB:	rtype = R_IA64_IPLTMSB; break;
     case BFD_RELOC_IA64_IPLTLSB:	rtype = R_IA64_IPLTLSB; break;
-    case BFD_RELOC_IA64_COPY:		rtype = R_IA64_COPY; break;
+    case BFD_RELOC_COPY:		rtype = R_IA64_COPY; break;
     case BFD_RELOC_IA64_LTOFF22X:	rtype = R_IA64_LTOFF22X; break;
     case BFD_RELOC_IA64_LDXMOV:		rtype = R_IA64_LDXMOV; break;
 

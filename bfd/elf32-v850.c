@@ -1736,7 +1736,7 @@ static const struct v850_elf_reloc_map v850_elf_reloc_map[] =
   { BFD_RELOC_V850_32_GOT,		   R_V850_32_GOT		 },
   { BFD_RELOC_V850_22_PLT_PCREL,	   R_V850_22_PLT		 },
   { BFD_RELOC_V850_32_PLT_PCREL,	   R_V850_32_PLT		 },
-  { BFD_RELOC_V850_COPY,		   R_V850_COPY			 },
+  { BFD_RELOC_COPY,			   R_V850_COPY			 },
   { BFD_RELOC_V850_GLOB_DAT,		   R_V850_GLOB_DAT		 },
   { BFD_RELOC_V850_JMP_SLOT,		   R_V850_JMP_SLOT		 },
   { BFD_RELOC_V850_RELATIVE,		   R_V850_RELATIVE		 },

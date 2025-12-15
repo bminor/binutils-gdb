@@ -3589,7 +3589,7 @@ mips_elf32_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code,
       return &elf_mips_gnu_vtentry_howto;
     case BFD_RELOC_32_PCREL:
       return &elf_mips_gnu_pcrel32;
-    case BFD_RELOC_MIPS_COPY:
+    case BFD_RELOC_COPY:
       return &elf_mips_copy_howto;
     case BFD_RELOC_MIPS_JUMP_SLOT:
       return &elf_mips_jump_slot_howto;

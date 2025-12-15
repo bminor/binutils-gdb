@@ -216,8 +216,8 @@ elf_i386_reloc_type_lookup (bfd *abfd,
       TRACE ("BFD_RELOC_386_PLT32");
       return &elf_howto_table[R_386_PLT32];
 
-    case BFD_RELOC_386_COPY:
-      TRACE ("BFD_RELOC_386_COPY");
+    case BFD_RELOC_COPY:
+      TRACE ("BFD_RELOC_COPY");
       return &elf_howto_table[R_386_COPY];
 
     case BFD_RELOC_386_GLOB_DAT:
