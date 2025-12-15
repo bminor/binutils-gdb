@@ -49,7 +49,7 @@ run_ld_link_tests [list \
 ]
 setup_xfail "binutils/33484" "alpha*-*-linux*ecoff*" "alpha*-*-osf*"
 setup_xfail "binutils/33485" "cris-*-*aout*" "i\[3-7\]86-*-bsd*" \
-    "i\[3-7\]86-*-msdos*" "pdp11-*-*"
+    "i\[3-7\]86-*-msdos*" "ns32k-*-*" "pdp11-*-*"
 run_ld_link_tests [list \
     [list "Thin archive link" \
 	"-e ff" "tmpdir/abt.a" \
@@ -68,7 +68,7 @@ run_ld_link_tests [list \
 ]
 setup_xfail "binutils/33484" "alpha*-*-linux*ecoff*" "alpha*-*-osf*"
 setup_xfail "binutils/33485" "cris-*-*aout*" "i\[3-7\]86-*-bsd*" \
-    "i\[3-7\]86-*-msdos*" "pdp11-*-*"
+    "i\[3-7\]86-*-msdos*" "ns32k-*-*" "pdp11-*-*"
 run_ld_link_tests [list \
     [list "Regular archive plus thin link" \
 	"-e ff" "tmpdir/ab.a tmpdir/cdt.a" \
@@ -79,7 +79,7 @@ run_ld_link_tests [list \
 ]
 setup_xfail "binutils/33484" "alpha*-*-linux*ecoff*" "alpha*-*-osf*"
 setup_xfail "binutils/33485" "cris-*-*aout*" "i\[3-7\]86-*-bsd*" \
-    "i\[3-7\]86-*-msdos*" "pdp11-*-*"
+    "i\[3-7\]86-*-msdos*" "ns32k-*-*" "pdp11-*-*"
 run_ld_link_tests [list \
     [list "Thin archive plus regular link" \
 	"-e ff" "tmpdir/abt.a tmpdir/cd.a" \
@@ -90,7 +90,7 @@ run_ld_link_tests [list \
 ]
 setup_xfail "binutils/33484" "alpha*-*-linux*ecoff*" "alpha*-*-osf*"
 setup_xfail "binutils/33485" "cris-*-*aout*" "i\[3-7\]86-*-bsd*" \
-    "i\[3-7\]86-*-msdos*" "pdp11-*-*"
+    "i\[3-7\]86-*-msdos*" "ns32k-*-*" "pdp11-*-*"
 run_ld_link_tests [list \
     [list "Thin archive plus thin link" \
 	"-e ff" "tmpdir/abt.a tmpdir/cdt.a" \
