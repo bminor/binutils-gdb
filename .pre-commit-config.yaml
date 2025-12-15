@@ -38,7 +38,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 
 minimum_pre_commit_version: 3.2.0
-default_install_hook_types: [pre-commit, commit-msg]
+default_install_hook_types: [pre-commit, post-commit]
 default_stages: [pre-commit]
 repos:
   - repo: https://github.com/psf/black-pre-commit-mirror
@@ -73,6 +73,12 @@ repos:
     - id: codespell
       files: '^(gdbsupport|gdbserver|gdb/(dwarf2|tui|target|data-directory|po|system-gdbinit|mi|syscalls|arch|regformats|compile|python|guile|config|unittests|cli|testsuite/gdb.(ctf|dap|debuginfod|gdb|go|guile|mi|modula2|objc|opencl|opt|pascal|perf|replay|reverse|rocm|server|stabs|testsuite|tui|xml)))/'
       args: [--config, gdb/contrib/setup.cfg]
+    - id: codespell
+      name: codespell-log
+      entry: gdb/contrib/codespell-log.sh
+      args: [--config, gdb/contrib/setup.cfg]
+      always_run: true
+      stages: [post-commit]
   - repo: local
     hooks:
     - id: check-include-guards
@@ -82,13 +88,6 @@ repos:
       # All gdb header files, but not headers in the test suite.
       files: '^(gdb(support|server)?)/.*\.h$'
       exclude: '.*/testsuite/.*'
-    - id: codespell-log
-      name: codespell-log
-      language: script
-      entry: gdb/contrib/codespell-log.sh
-      verbose: true
-      always_run: true
-      stages: [commit-msg]
     - id: check-gnu-style
       name: check-gnu-style
       language: script
