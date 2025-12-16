@@ -41,13 +41,14 @@ gdb_test "print spr.discr" " = 3"
 
 # See PR ada/32880 -- gdb should probably print array (1 .. 3) here,
 # but instead shows array (<>).  However as this isn't totally
-# relevant to this test, we just accept it.
+# relevant to this test, we just accept it.  Also, while gnat-llvm
+# successfully uses the type names, GNAT just emits the ranges here.
 gdb_test "ptype spr" \
     [multi_line \
 	 "type = tagged record" \
-	 "    discr: range 1 .. 8;" \
-	 "    field: range -7 .. -4;" \
-	 "    array_field: array \\(<>\\) of exam.small <packed: 2-bit elements>;" \
+	 "    discr: (range 1 .. 8|range_int);" \
+	 "    field: (range -7 .. -4|small);" \
+	 "    array_field: array \\(<>\\) of (exam.)?small <packed: 2-bit elements>;" \
 	 "end record"]
 
 gdb_test_multiple "print sc" "" {
