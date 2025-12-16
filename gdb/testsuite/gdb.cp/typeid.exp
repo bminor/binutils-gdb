@@ -27,29 +27,37 @@ proc do_typeid_tests {started} {
     # We might see the standard type or gdb's internal type.
     set type_re "(std::type_info|gdb_gnu_v3_type_info)"
 
-    set var {ca b}
-    set have_base_types 1
-    if {!$started} {
-       if {[test_compiler_info clang-*-* c++]} {
-	   # Note that we test pointer equality rather than object
-	   # Clang doesn't place type information for the base types in
-	   # the executable, and relies on this being linked in from the
-	   # standard library.  As a result, type information for these
-	   # variables is only available once the inferior is started.
-	   set have_base_types 0
-       } elseif {[istarget "powerpc*-*-*"]} {
-	   # On PowerPC, RTTI typeinfo for base types (i, cp, ccp) may not be
-	   # emitted until the inferior is started.
-	   set have_base_types 0
-       }
-    }
-    if { $have_base_types } {
-	lappend var i cp ccp
-    }
+    # The typeinfo for some of these variables may or may not be present
+    # before the inferior has started.  Mark these by listing them in
+    # maybe_missing_var.
+    set maybe_missing_var {i cp ccp}
+    set var [concat {ca b} $maybe_missing_var]
 
     foreach simple_var $var {
-	gdb_test "print &typeid($simple_var)" \
-	    " = \\($type_re \\*\\) $hex.*"
+	set maybe_missing \
+	    [expr {!$started \
+		       && ([lsearch -exact $maybe_missing_var $simple_var] \
+			       != -1)}]
+
+	set missing 0
+	set re [subst_vars { = \($type_re \*\) $hex.*}]
+	gdb_test_multiple "print &typeid($simple_var)" "" {
+	    -re -wrap $re {
+		pass $gdb_test_name
+	    }
+	    -re -wrap "could not find typeinfo symbol for '.*'" {
+		if { $maybe_missing } {
+		    unsupported $gdb_test_name
+		} else {
+		    fail $gdb_test_name
+		}
+		set missing 1
+	    }
+	}
+
+	if { $missing } {
+	    continue
+	}
 
 	# Note that we test pointer equality rather than object
 	# equality here.  That is because std::type_info's operator==
