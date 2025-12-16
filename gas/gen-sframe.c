@@ -1481,6 +1481,13 @@ s390_sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx,
 	   && cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG)
     sframe_fre_set_ra_track (cur_fre,
 			     SFRAME_V3_S390X_OFFSET_ENCODE_REGNUM (cfi_insn->u.rr.reg2));
+  /* SFrame does not track SP explicitly.  */
+  else if (cfi_insn->u.rr.reg1 == SFRAME_CFA_SP_REG)
+    {
+      as_warn (_("no SFrame FDE emitted; %s register %u in .cfi_register"),
+	       sframe_register_name (cfi_insn->u.rr.reg1), cfi_insn->u.rr.reg1);
+      return SFRAME_XLATE_ERR_NOTREPRESENTED;  /* Not represented.  */
+    }
 
   return SFRAME_XLATE_OK;
 }
@@ -1519,6 +1526,7 @@ sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx,
 	  cur_fre->fp_deref_p = false;
 	  cur_fre->merge_candidate = false;
 	  xlate_ctx->flex_p = true;
+	  return SFRAME_XLATE_OK;
 	}
       else if (cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG)
 	{
@@ -1528,12 +1536,16 @@ sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx,
 	  cur_fre->ra_deref_p = false;
 	  cur_fre->merge_candidate = false;
 	  xlate_ctx->flex_p = true;
+	  return SFRAME_XLATE_OK;
 	}
+      /* Recovering REG_SP from an alternate register is not represented in
+	 SFrame.  Fallthrough if SFRAME_CFA_SP_REG and error out.  */
     }
-  else if (cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG
-	   /* Ignore SP reg, as it can be recovered from the CFA tracking
-	      info.  */
-	   || cfi_insn->u.rr.reg1 == SFRAME_CFA_FP_REG)
+
+  if (cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG
+      /* SFrame does not track SP explicitly.  */
+      || cfi_insn->u.rr.reg1 == SFRAME_CFA_SP_REG
+      || cfi_insn->u.rr.reg1 == SFRAME_CFA_FP_REG)
     {
       as_warn (_("no SFrame FDE emitted; %s register %u in .cfi_register"),
 	       sframe_register_name (cfi_insn->u.rr.reg1), cfi_insn->u.rr.reg1);
