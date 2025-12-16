@@ -736,7 +736,7 @@ struct minimal_symbol : public general_symbol_info
     return m_value.unrel_addr;
   }
 
-  /* The unrelocated address just after the end of the the minimal
+  /* The unrelocated address just after the end of the minimal
      symbol.  */
   unrelocated_addr unrelocated_end_address () const
   {

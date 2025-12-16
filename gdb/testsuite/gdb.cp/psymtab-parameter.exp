@@ -28,7 +28,7 @@ clean_restart $testfile.x
 gdb_test_no_output "set language c++"
 
 if { ![readnow] } {
-    # Check that the the CU (Compilation Unit) is unexpanded.
+    # Check that the CU (Compilation Unit) is unexpanded.
     gdb_test_no_output "maintenance info symtabs"
 }
 

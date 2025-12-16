@@ -3449,7 +3449,7 @@ arm_m_exception_cache (const frame_info_ptr &this_frame)
      to the exception and if FPU is used (causing extended stack frame).  */
 
   /* In the lockup state PC contains a lockup magic value.
-     The PC value of the the next outer frame is irreversibly
+     The PC value of the next outer frame is irreversibly
      lost.  The other registers are intact so LR likely contains
      PC of some frame next to the outer one, but we cannot analyze
      the next outer frame without knowing its PC

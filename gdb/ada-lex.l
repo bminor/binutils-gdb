@@ -375,7 +375,7 @@ processInt (struct parser_state *par_state, const char *base0,
   long exp;
   int base;
   /* For the based literal with an "f" prefix, we'll return a
-     floating-point number.  This counts the the number of "l"s seen,
+     floating-point number.  This counts the number of "l"s seen,
      to decide the width of the floating-point number to return.  -1
      means no "f".  */
   int floating_point_l_count = -1;

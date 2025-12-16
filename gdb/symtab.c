@@ -4047,7 +4047,7 @@ find_epilogue_using_linetable (CORE_ADDR func_addr)
 	}
       gdb_assert (it->unrelocated_pc () < unrel_end);
 
-      /* We're at the the last linetable entry of the current function.  This
+      /* We're at the last linetable entry of the current function.  This
 	 is probably where the epilogue begins, but since the DWARF 5 spec
 	 doesn't guarantee it, we iterate backwards through the current
 	 function until we either find the epilogue beginning, or are sure

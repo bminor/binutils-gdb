@@ -79,7 +79,7 @@ proc test_default_types {} {
     gdb_test "ptype complex" "type = complex\\*4"
 }
 
-# Test the the primitive Fortran types, those that GDB should always
+# Test the primitive Fortran types, those that GDB should always
 # know, even if the program does not define them, are in fact, known.
 proc test_primitive_types_known {} {
     foreach type {void character \

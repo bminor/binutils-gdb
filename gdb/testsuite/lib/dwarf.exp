@@ -509,7 +509,7 @@ proc get_func_info { name {options {debug}} } {
 # * Otherwise, if the attribute name has a default form (f.i. DW_FORM_addr for
 #   DW_AT_low_pc), then that one is used.
 # * Otherwise, an error is reported.  Either specify a form explicitly, or
-#   add a default for the the attribute name in _default_form.
+#   add a default for the attribute name in _default_form.
 #
 # CHILDREN is just Tcl code that can be used to define child DIEs.  It
 # is evaluated in the caller's context.

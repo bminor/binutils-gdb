@@ -421,7 +421,7 @@ more obscure GDB `configure' options are not listed here.
 `--enable-binary-file-formats=all'
     Configure GDB to only be be able to read selected file formats.
     The special value "all" causes all file formats to be compiled
-    in, and is the the default behavior of the option.  This option
+    in, and is the default behavior of the option.  This option
     is meant for advanced users who are sure of what they expect,
     if you are unsure which options you will need on your debugging
     sessions, we recommend that you not use this feature.  The

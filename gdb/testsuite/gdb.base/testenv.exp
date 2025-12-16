@@ -31,7 +31,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
      return -1
 }
 
-# Test that the the inferior sees EXPECTED env vars starting with
+# Test that the inferior sees EXPECTED env vars starting with
 # "TEST_GDB".
 proc test_num_test_vars {expected message} {
     set num [get_integer_valueof "j" -1 "$message, get num vars"]

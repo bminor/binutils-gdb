@@ -2793,7 +2793,7 @@ ppc_linux_nat_target::low_new_fork (struct lwp_info *parent,
     }
 }
 
-/* Copy the thread debug register state from the PARENT thread to the the
+/* Copy the thread debug register state from the PARENT thread to the
    state for CHILD_LWP, if we're using the HWDEBUG interface.  We assume
    the kernel copies the debug registers from one thread to another after
    a clone event.  The low_prepare_to_resume function is made to work

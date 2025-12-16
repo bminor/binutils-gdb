@@ -8401,7 +8401,7 @@ default, ten instructions are disassembled.  This can be changed using
 the @code{set record instruction-history-size} command.  Instructions
 are printed in execution order.
 
-It can also print mixed source+disassembly if you specify the the
+It can also print mixed source+disassembly if you specify the
 @code{/m} or @code{/s} modifier, and print the raw instructions in hex
 as well as in symbolic form by specifying the @code{/r} or @code{/b}
 modifier.  The behavior of the @code{/m}, @code{/s}, @code{/r}, and

@@ -146,7 +146,7 @@ struct thread_control_state
      any inlined frames).  */
   struct frame_id step_stack_frame_id {};
 
-  /* True if the the thread is presently stepping over a breakpoint or
+  /* True if the thread is presently stepping over a breakpoint or
      a watchpoint, either with an inline step over or a displaced (out
      of line) step, and we're now expecting it to report a trap for
      the finished single step.  */
@@ -1009,7 +1009,7 @@ extern void global_thread_step_over_chain_remove (thread_info *tp);
 
 extern int thread_is_in_step_over_chain (struct thread_info *tp);
 
-/* Return the length of the the step over chain TP is in.
+/* Return the length of the step over chain TP is in.
 
    If TP is non-nullptr, the thread must be in a step over chain.
    TP may be nullptr, in which case it denotes an empty list, so a length of

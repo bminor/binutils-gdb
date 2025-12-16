@@ -767,7 +767,7 @@ aarch64_linux_nat_target::fetch_registers (struct regcache *regcache,
 }
 
 /* The AArch64 version of the "store_registers" target_ops method.  Copy
-   the value of register REGNO from REGCACHE into the the target.  */
+   the value of register REGNO from REGCACHE into the target.  */
 
 static void
 aarch64_store_registers (struct regcache *regcache, int regno)
@@ -844,7 +844,7 @@ aarch64_store_registers (struct regcache *regcache, int regno)
 
 /* A version of the "store_registers" target_ops method used when running
    32-bit ARM code on an AArch64 target.  Copy the value of register REGNO
-   from REGCACHE into the the target.  */
+   from REGCACHE into the target.  */
 
 static void
 aarch32_store_registers (struct regcache *regcache, int regno)

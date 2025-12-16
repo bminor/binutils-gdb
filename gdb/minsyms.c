@@ -1069,7 +1069,7 @@ const struct gnu_ifunc_fns *gnu_ifunc_fns_p = &stub_gnu_ifunc_fns;
 
 
 /* Return the leading symbol character for BFD ABFD.  If ABFD is nullptr,
-   return the leading symbol character from the the main objfile of PSPACE..  */
+   return the leading symbol character from the main objfile of PSPACE..  */
 
 static int
 get_symbol_leading_char (program_space *pspace, bfd *abfd)

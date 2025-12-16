@@ -84,7 +84,7 @@ amdgpu_register_name (struct gdbarch *gdbarch, int regnum)
      However, at most one register with a given name is actually allocated for
      a specific wave.  If INFERIOR_PTID represents a GPU wave, we query
      amd-dbgapi to know whether the requested register actually exists for the
-     current wave, so there won't be duplicates in the the register names we
+     current wave, so there won't be duplicates in the register names we
      report for that wave.
 
      But there are two known cases where INFERIOR_PTID doesn't represent a GPU

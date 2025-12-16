@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Create a core file with some mapped file regions, but ensure that
-# the the kernel should write the regions into the core file (e.g. r/w
+# the kernel should write the regions into the core file (e.g. r/w
 # file backed mapping).
 #
 # We then delete the file that backed the mapping and load the core

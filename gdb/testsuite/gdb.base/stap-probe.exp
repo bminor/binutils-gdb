@@ -97,7 +97,7 @@ proc check_for_usable_xmm0_probe { binfile } {
     verbose -log "APB: Matched on '$ignore'"
     verbose -log "APB: arguments: '$arguments'"
 
-    # Check the the argument string mentions xmm0.
+    # Check the argument string mentions xmm0.
     if {![regexp {@%?xmm0} $arguments]} {
 	verbose -log "APB: Prove doesn't use xmm0 register"
 	return false

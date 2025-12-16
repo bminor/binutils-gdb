@@ -930,7 +930,7 @@ Function(
     comment="""
 Return the address at which the value being returned from
 the current function will be stored.  This routine is only
-called if the current function uses the the "struct return
+called if the current function uses the "struct return
 convention".
 
 May return 0 when unable to determine that address.""",

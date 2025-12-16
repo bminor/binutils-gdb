@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Check the the output of gdb.execute can be styled or not depending
+# Check the output of gdb.execute can be styled or not depending
 # on the value of the third argument passed to gdb.execute.
 
 require allow_python_tests
