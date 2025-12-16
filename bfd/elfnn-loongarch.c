@@ -6317,7 +6317,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 				    + r_symndx;
 
 	  if ((ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
-	       && (r_type != R_LARCH_CALL36 || r_type != R_LARCH_CALL30))
+	       && (r_type != R_LARCH_CALL36 && r_type != R_LARCH_CALL30))
 	      || sym->st_shndx == SHN_ABS)
 	    continue;
 
@@ -6354,7 +6354,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	     is not set yet.  */
 	  if (h != NULL
 	      && ((h->type == STT_GNU_IFUNC
-		   && (r_type != R_LARCH_CALL36 || r_type != R_LARCH_CALL30))
+		   && (r_type != R_LARCH_CALL36 && r_type != R_LARCH_CALL30))
 		  || bfd_is_abs_section (h->root.u.def.section)
 		  || h->start_stop))
 	    continue;
