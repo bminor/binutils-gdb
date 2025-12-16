@@ -378,7 +378,7 @@ i[3-7]86-*-solaris2.1[01]*)
 			targ_extra_emuls="elf_x86_64_sol2 elf_i386 elf_x86_64"
 			targ_extra_libpath=$targ_extra_emuls
 			;;
-i[3-7]86-*-solaris2.[0-9]*)
+i[3-7]86-*-solaris*)
 			targ_emul=elf_i386_sol2
 			targ_extra_emuls=elf_i386
 			targ_extra_libpath=$targ_extra_emuls
@@ -938,7 +938,7 @@ sparc-*-solaris2.[7-9]* | sparc-*-solaris2.1[01]*)
 			targ_extra_emuls="elf64_sparc_sol2 elf32_sparc elf64_sparc"
 			targ_extra_libpath=$targ_extra_emuls
 			;;
-sparc-*-solaris2.[0-6]*)
+sparc*-*-solaris*)
 			targ_emul=elf32_sparc_sol2
 			targ_extra_emuls=elf32_sparc
 			;;

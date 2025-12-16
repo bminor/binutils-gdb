@@ -51,7 +51,7 @@ case $targ in
  *-*-solaris2.1[01]*)
     # Only Solaris 10+ is not obsolete.
     ;;
- *-*-solaris2.[0-9]* | \
+ *-*-solaris* | \
  null)
     if test "x$enable_obsolete" != xyes; then
       echo "*** Configuration $targ is obsolete." >&2
@@ -600,7 +600,7 @@ case "${targ}" in
     targ64_selvecs=x86_64_elf64_sol2_vec
     want64=true
     ;;
-  i[3-7]86-*-solaris2.[0-9]*)
+  i[3-7]86-*-solaris*)
     # PR 27666: Do not include i386_elf32_vec here.
     targ_defvec=i386_elf32_sol2_vec
     ;;
@@ -1341,10 +1341,6 @@ case "${targ}" in
     targ64_selvecs=sparc_elf64_sol2_vec
     want64=true
     ;;
-  sparc-*-solaris2.[0-6]*)
-    # PR 27666: Do not include sparc_elf32_vec here.
-    targ_defvec=sparc_elf32_sol2_vec
-    ;;
 #ifdef BFD64
   sparcv9-*-solaris2.[7-9]* | sparcv9-*-solaris2.1[01]* | \
   sparc64-*-solaris2.[7-9]* | sparc64-*-solaris2.1[01]*)
@@ -1375,6 +1371,10 @@ case "${targ}" in
   sparc-*-vxworks*)
     targ_defvec=sparc_elf32_vxworks_vec
     targ_selvecs="sparc_elf32_vec"
+    ;;
+  sparc*-*-solaris*)
+    # PR 27666: Do not include sparc_elf32_vec here.
+    targ_defvec=sparc_elf32_sol2_vec
     ;;
   sparc*-*-*)
     targ_defvec=sparc_elf32_vec
