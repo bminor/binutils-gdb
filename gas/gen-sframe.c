@@ -1751,6 +1751,11 @@ sframe_xlate_do_escape_cfa_expr (struct sframe_xlate_ctx *xlate_ctx,
     }
 
   /* Read the offset.  */
+#ifdef BFD64
+  items[2] = htole64 (items[2]);
+#else
+  items[2] = htole32 (items[2]);
+#endif
   const unsigned char *buf_start = (const unsigned char *)&items[2];
   const unsigned char *buf_end = buf_start + sizeof (offsetT) - 1;
   size_t read = read_sleb128_to_int64 (buf_start, buf_end, &offset);
