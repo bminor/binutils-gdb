@@ -924,7 +924,9 @@ sframe_xlate_ctx_cleanup (struct sframe_xlate_ctx *xlate_ctx)
 {
   sframe_row_entry_free (xlate_ctx->first_fre);
   XDELETE (xlate_ctx->remember_fre);
+  xlate_ctx->remember_fre = NULL;
   XDELETE (xlate_ctx->cur_fre);
+  xlate_ctx->cur_fre = NULL;
 }
 
 /* Transfer the state from the SFrame translation context to the SFrame FDE.  */
@@ -936,6 +938,10 @@ sframe_xlate_ctx_finalize (struct sframe_xlate_ctx *xlate_ctx,
   sframe_fde->dw_fde = xlate_ctx->dw_fde;
   sframe_fde->sframe_fres = xlate_ctx->first_fre;
   sframe_fde->num_fres = xlate_ctx->num_xlate_fres;
+  /* remember_fre is cloned copy of the applicable fre (where necessary).
+     Since this is not included in the list of sframe_fres, free it.  */
+  XDELETE (xlate_ctx->remember_fre);
+  xlate_ctx->remember_fre = NULL;
 }
 
 /* Add the given FRE in the list of frame row entries in the given FDE
