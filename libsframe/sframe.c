@@ -311,17 +311,17 @@ sframe_header_sanity_check_p (const sframe_header *hp)
 /* Flip the start address pointed to by FP.  */
 
 static void
-flip_fre_start_address (char *addr, uint32_t fre_type)
+flip_fre_start_address (void *addr, uint32_t fre_type)
 {
   if (fre_type == SFRAME_FRE_TYPE_ADDR2)
     {
-      uint16_t *start_addr = (uint16_t *)addr;
-      swap_thing (*start_addr);
+      struct { uint16_t x; } ATTRIBUTE_PACKED *p = addr;
+      swap_thing (p->x);
     }
   else if (fre_type == SFRAME_FRE_TYPE_ADDR4)
     {
-      uint32_t *start_addr = (uint32_t *)addr;
-      swap_thing (*start_addr);
+      struct { uint32_t x; } ATTRIBUTE_PACKED *p = addr;
+      swap_thing (p->x);
     }
 }
 
@@ -938,42 +938,34 @@ sframe_frame_row_entry_copy (sframe_frame_row_entry *dst,
    Returns 0 on success, SFRAME_ERR otherwise.  */
 
 static int
-sframe_decode_fre_start_address (const char *fre_buf,
+sframe_decode_fre_start_address (const void *fre_buf,
 				 uint32_t *fre_start_addr,
 				 uint32_t fre_type)
 {
   uint32_t saddr = 0;
   int err = 0;
-  size_t addr_size = 0;
-
-  addr_size = sframe_fre_start_addr_size (fre_type);
 
   if (fre_type == SFRAME_FRE_TYPE_ADDR1)
     {
-      uint8_t *uc = (uint8_t *)fre_buf;
-      saddr = (uint32_t)*uc;
+      const uint8_t *uc = fre_buf;
+      saddr = *uc;
     }
   else if (fre_type == SFRAME_FRE_TYPE_ADDR2)
     {
-      uint16_t *ust = (uint16_t *)fre_buf;
-      /* SFrame is an unaligned on-disk format.  Using memcpy helps avoid the
-	 use of undesirable unaligned loads.  See PR libsframe/29856.  */
-      uint16_t tmp = 0;
-      memcpy (&tmp, ust, addr_size);
-      saddr = (uint32_t)tmp;
+      /* SFrame is an unaligned on-disk format.  See PR libsframe/29856.  */
+      const struct { uint16_t x; } ATTRIBUTE_PACKED *p = fre_buf;
+      saddr = p->x;
     }
   else if (fre_type == SFRAME_FRE_TYPE_ADDR4)
     {
-      uint32_t *uit = (uint32_t *)fre_buf;
-      uint32_t tmp = 0;
-      memcpy (&tmp, uit, addr_size);
-      saddr = (uint32_t)tmp;
+      const struct { uint32_t x; } ATTRIBUTE_PACKED *p = fre_buf;
+      saddr = p->x;
     }
   else
-    return sframe_set_errno (&err, SFRAME_ERR_INVAL);
+    sframe_set_errno (&err, SFRAME_ERR_INVAL);
 
   *fre_start_addr = saddr;
-  return 0;
+  return err;
 }
 
 /* Decode a frame row entry FRE which starts at location FRE_BUF.  The function
