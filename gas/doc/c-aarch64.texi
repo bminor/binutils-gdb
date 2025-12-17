@@ -353,6 +353,8 @@ automatically cause those extensions to be disabled.
  @tab Enable the SVE2 BITPERM Extension.
 @item @code{sve-b16b16} @tab
 @tab Enable the SVE B16B16 extension.  These instructions also require either @code{+sve2} or @code{+sme2}.
+@item @code{sve-b16mm} @tab @code{sve}
+ @tab Enable the SVE B16MM Extension.
 @item @code{sve-bfscale} @tab
 @tab Enable the SVE BFSCALE extension. These instructions also require either @code{+sve2} or @code{+sme2}.
 @item @code{sve-f16f32mm} @tab @code{sve}

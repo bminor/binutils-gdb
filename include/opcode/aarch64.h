@@ -277,6 +277,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_F16F32MM,
   /* F16MM instructions.  */
   AARCH64_FEATURE_F16MM,
+  /* SVE B16MM instructions.  */
+  AARCH64_FEATURE_SVE_B16MM,
 
   /* Virtual features.  These are used to gate instructions that are enabled
      by either of two (or more) sets of command line flags.  */

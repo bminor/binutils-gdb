@@ -4043,5 +4043,6 @@ enum aarch64_opcode_idx
   A64_OPID_4e40ec00_fmmla_Vd_Vn_Vm,
   A64_OPID_4ec0ec00_fmmla_Vd_Vn_Vm,
   A64_OPID_64a0e000_fmmla_SVE_Zd_SVE_Zn_SVE_Zm_16,
+  A64_OPID_64e0e000_bfmmla_SVE_Zd_SVE_Zn_SVE_Zm_16,
   A64_OPID_MAX,
 };

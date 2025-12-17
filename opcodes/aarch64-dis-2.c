@@ -20326,10 +20326,20 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                 {
                                                   if (((word >> 31) & 0x1) == 0)
                                                     {
-                                                      /* 33222222222211111111110000000000
-                                                         10987654321098765432109876543210
-                                                         011001x0111xxxxx111xxxxxxxxxxxxx.  */
-                                                      return A64_OPID_64e0e400_fmmla_SVE_Zd_SVE_Zn_SVE_Zm_16;
+                                                      if (((word >> 10) & 0x1) == 0)
+                                                        {
+                                                          /* 33222222222211111111110000000000
+                                                             10987654321098765432109876543210
+                                                             011001x0111xxxxx111xx0xxxxxxxxxx.  */
+                                                          return A64_OPID_64e0e000_bfmmla_SVE_Zd_SVE_Zn_SVE_Zm_16;
+                                                        }
+                                                      else
+                                                        {
+                                                          /* 33222222222211111111110000000000
+                                                             10987654321098765432109876543210
+                                                             011001x0111xxxxx111xx1xxxxxxxxxx.  */
+                                                          return A64_OPID_64e0e400_fmmla_SVE_Zd_SVE_Zn_SVE_Zm_16;
+                                                        }
                                                     }
                                                   else
                                                     {
