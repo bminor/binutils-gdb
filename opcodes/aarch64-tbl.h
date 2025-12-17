@@ -3076,6 +3076,8 @@ static const aarch64_feature_set aarch64_feature_sme2p3 =
   AARCH64_FEATURE (SME2p3);
 static const aarch64_feature_set aarch64_feature_sve2p3_sme2p3 =
   AARCH64_FEATURE (SVE2p3_SME2p3);
+static const aarch64_feature_set aarch64_feature_f16f32dot =
+  AARCH64_FEATURE (F16F32DOT);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -3205,6 +3207,7 @@ static const aarch64_feature_set aarch64_feature_sve2p3_sme2p3 =
 #define SVE2p3	&aarch64_feature_sve2p3
 #define SME2p3	&aarch64_feature_sme2p3
 #define SVE2p3_SME2p3	&aarch64_feature_sve2p3_sme2p3
+#define F16F32DOT	&aarch64_feature_f16f32dot
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS | F_INVALID_IMM_SYMS_1, 0, 0, NULL }
@@ -3549,6 +3552,8 @@ static const aarch64_feature_set aarch64_feature_sve2p3_sme2p3 =
   { NAME, OPCODE, MASK, CLASS, OP, SVE2p3_SME2p3, OPS, QUALS, \
     F_STRICT | F_INVALID_IMM_SYMS_3 | FLAGS, CONSTRAINTS, TIED, NULL }
 
+#define F16F32DOT_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, F16F32DOT, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 #define MOPS_CPY_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS) \
   MOPS_INSN (NAME, OPCODE, MASK, 0, \
@@ -7840,6 +7845,10 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SVE2p3_SME2p3_INSN ("sqshrun", 0x45a02000, 0xffe0fc20, sve_shift_tsz_hsd, 0, OP3 (SVE_Zd, SME_Znx2, SVE_SHRIMM_UNPRED_22), OP_SVE_VVU_BH_HS, 0, 0, 0),
   SVE2p3_SME2p3_INSN ("uqrshrn", 0x45a83800, 0xfff8fc20, sve_misc, 0, OP3 (SVE_Zd, SME_Znx2, SME_SHRIMM3), OP_SVE_BHU, 0, 0, 0),
   SVE2p3_SME2p3_INSN ("uqshrn", 0x45a01000, 0xffe0fc20, sve_shift_tsz_hsd, 0, OP3 (SVE_Zd, SME_Znx2, SVE_SHRIMM_UNPRED_22), OP_SVE_VVU_BH_HS, 0, 0, 0),
+
+  /* F16F32DOT instructions.  */
+  F16F32DOT_INSN ("fdot", 0x0f409000, 0xbfc0f400, dotproduct, OP3 (Vd, Vn, Em16), QL_BFDOT64I, F_SIZEQ),
+  F16F32DOT_INSN ("fdot", 0x0e80fc00, 0xbfe0fc00, dotproduct, OP3 (Vd, Vn, Vm), QL_BFDOT64, F_SIZEQ),
 
   {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, 0, NULL},
 };

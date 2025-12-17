@@ -29041,10 +29041,20 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                     {
                                                       if (((word >> 22) & 0x1) == 0)
                                                         {
-                                                          /* 33222222222211111111110000000000
-                                                             10987654321098765432109876543210
-                                                             0x001110x00xxxxxx11111xxxxxxxxxx.  */
-                                                          return A64_OPID_0e00fc00_fdot_Vd_Vn_Vm;
+                                                          if (((word >> 23) & 0x1) == 0)
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 0x001110000xxxxxx11111xxxxxxxxxx.  */
+                                                              return A64_OPID_0e00fc00_fdot_Vd_Vn_Vm;
+                                                            }
+                                                          else
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 0x001110100xxxxxx11111xxxxxxxxxx.  */
+                                                              return A64_OPID_0e80fc00_fdot_Vd_Vn_Vm;
+                                                            }
                                                         }
                                                       else
                                                         {
@@ -34841,19 +34851,29 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                         {
                                           if (((word >> 23) & 0x1) == 0)
                                             {
-                                              if (((word >> 29) & 0x1) == 0)
+                                              if (((word >> 22) & 0x1) == 0)
                                                 {
-                                                  /* 33222222222211111111110000000000
-                                                     10987654321098765432109876543210
-                                                     xx0011110xxxxxxx1001x0xxxxxxxxxx.  */
-                                                  return A64_OPID_0f009000_fmul_Vd_Vn_Em16;
+                                                  if (((word >> 29) & 0x1) == 0)
+                                                    {
+                                                      /* 33222222222211111111110000000000
+                                                         10987654321098765432109876543210
+                                                         xx00111100xxxxxx1001x0xxxxxxxxxx.  */
+                                                      return A64_OPID_0f009000_fmul_Vd_Vn_Em16;
+                                                    }
+                                                  else
+                                                    {
+                                                      /* 33222222222211111111110000000000
+                                                         10987654321098765432109876543210
+                                                         xx10111100xxxxxx1001x0xxxxxxxxxx.  */
+                                                      return A64_OPID_2f009000_fmulx_Vd_Vn_Em16;
+                                                    }
                                                 }
                                               else
                                                 {
                                                   /* 33222222222211111111110000000000
                                                      10987654321098765432109876543210
-                                                     xx1011110xxxxxxx1001x0xxxxxxxxxx.  */
-                                                  return A64_OPID_2f009000_fmulx_Vd_Vn_Em16;
+                                                     xxx0111101xxxxxx1001x0xxxxxxxxxx.  */
+                                                  return A64_OPID_0f409000_fdot_Vd_Vn_Em16;
                                                 }
                                             }
                                           else

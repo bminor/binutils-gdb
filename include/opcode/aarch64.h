@@ -271,6 +271,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SVE2p3,
   /* SME2.3.  */
   AARCH64_FEATURE_SME2p3,
+  /* F16F32DOT instructions.  */
+  AARCH64_FEATURE_F16F32DOT,
 
   /* Virtual features.  These are used to gate instructions that are enabled
      by either of two (or more) sets of command line flags.  */
