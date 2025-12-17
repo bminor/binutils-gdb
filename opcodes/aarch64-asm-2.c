@@ -1140,6 +1140,7 @@ aarch64_insert_operand (const aarch64_operand *self,
       return aarch64_ins_sve_index (self, info, code, inst, errors);
     case AARCH64_OPND_SVE_ZnxN:
     case AARCH64_OPND_SVE_ZtxN:
+    case AARCH64_OPND_SME_Zn7xN_UNTYPED:
     case AARCH64_OPND_SME_PdxN:
       return aarch64_ins_sve_reglist (self, info, code, inst, errors);
     case AARCH64_OPND_SME_Zdnx2:
@@ -1153,6 +1154,8 @@ aarch64_insert_operand (const aarch64_operand *self,
     case AARCH64_OPND_SME_Znx4:
     case AARCH64_OPND_SME_Pdx2:
       return aarch64_ins_sve_aligned_reglist (self, info, code, inst, errors);
+    case AARCH64_OPND_SME_Zmx2_INDEX_22:
+      return aarch64_ins_sve_reglist_index (self, info, code, inst, errors);
     case AARCH64_OPND_SME_Ztx2_STRIDED:
     case AARCH64_OPND_SME_Ztx4_STRIDED:
       return aarch64_ins_sve_strided_reglist (self, info, code, inst, errors);
@@ -1177,6 +1180,7 @@ aarch64_insert_operand (const aarch64_operand *self,
       return aarch64_ins_sme_sm_za (self, info, code, inst, errors);
     case AARCH64_OPND_SME_PnT_Wm_imm:
       return aarch64_ins_sme_pred_reg_with_index (self, info, code, inst, errors);
+    case AARCH64_OPND_SME_SHRIMM3:
     case AARCH64_OPND_SME_SHRIMM4:
       return aarch64_ins_plain_shrimm (self, info, code, inst, errors);
     case AARCH64_OPND_MOPS_ADDR_Rd:

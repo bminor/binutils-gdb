@@ -1392,8 +1392,9 @@ reg_type_mask (aarch64_reg_type reg_type)
    If HAS_QUALIFIER is true, the registers must have type suffixes.
    Otherwise, the registers must not have type suffixes.
 
-   If the register list contains typed SIMD registers without an element count
-   (e.g. "v0.h"), then the register list must be indexed.
+   If EXPECT_INDEX is true, or the register list contains typed SIMD registers
+   without an element count (e.g. "v0.h"), then the register list must be
+   indexed.
 
    The list must contain one to four registers, and all type suffixes must be
    identical.  Restrictions on register numbers are checked later (by
@@ -1402,7 +1403,7 @@ reg_type_mask (aarch64_reg_type reg_type)
 static int
 parse_vector_reg_list (char **ccp, aarch64_reg_type type,
 		       struct vector_type_el *vectype,
-		       bool has_qualifier)
+		       bool has_qualifier, bool expect_index)
 {
   char *str = *ccp;
   int nb_regs;
@@ -1411,7 +1412,6 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
   int in_range;
   int ret_val;
   bool error = false;
-  bool expect_index = false;
   unsigned int ptr_flags = PTR_IN_REGLIST;
 
   if (*str != '{')
@@ -7019,9 +7019,9 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_SME_Znx2_BIT_INDEX:
-	  // A vector register list encoding a bit index.
+	case AARCH64_OPND_SME_Zn7xN_UNTYPED:
 	  reg_type = REG_TYPE_Z;
-	  val = parse_vector_reg_list (&str, reg_type, &vectype, false);
+	  val = parse_vector_reg_list (&str, reg_type, &vectype, false, false);
 	  if (val == PARSE_FAIL)
 	    goto failure;
 
@@ -7031,6 +7031,20 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	      goto failure;
 	    }
 
+	  break;
+
+	case AARCH64_OPND_SME_Zmx2_INDEX_22:
+	  reg_type = REG_TYPE_Z;
+	  val = parse_vector_reg_list (&str, reg_type, &vectype, false, true);
+	  if (val == PARSE_FAIL)
+		  goto failure;
+	  if (! reg_list_valid_p (val, &info->reglist, reg_type))
+		{
+		  set_fatal_syntax_error (_("invalid register list"));
+		  goto failure;
+		}
+	  info->reglist.has_index = 1;
+	  info->reglist.index = vectype.index;
 	  break;
 
 	case AARCH64_OPND_SVE_ZnxN:
@@ -7073,7 +7087,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    }
 	  else
 	    {
-	      val = parse_vector_reg_list (&str, reg_type, &vectype, true);
+	      val = parse_vector_reg_list (&str, reg_type, &vectype, true, false);
 	      if (val == PARSE_FAIL)
 		goto failure;
 
@@ -7171,6 +7185,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_SHLIMM_PRED:
 	case AARCH64_OPND_SVE_SHLIMM_UNPRED:
 	case AARCH64_OPND_SVE_SHLIMM_UNPRED_22:
+	case AARCH64_OPND_SME_SHRIMM3:
 	case AARCH64_OPND_SME_SHRIMM4:
 	case AARCH64_OPND_SME_SHRIMM5:
 	case AARCH64_OPND_SVE_SHRIMM_PRED:
@@ -10904,6 +10919,8 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"sme-mop4",		AARCH64_FEATURE (SME_MOP4), AARCH64_FEATURE (SME2)},
   {"mops-go",		AARCH64_FEATURE (MOPS_GO),
 			AARCH64_FEATURES (2, MOPS, MEMTAG)},
+  {"sve2p3",		AARCH64_FEATURE (SVE2p3), AARCH64_FEATURE (SVE2p2)},
+  {"sme2p3",		AARCH64_FEATURE (SME2p3), AARCH64_FEATURES (2, SME2p2, SME_LUTv2)},
   {NULL,		AARCH64_NO_FEATURES, AARCH64_NO_FEATURES},
 };
 
@@ -10937,6 +10954,8 @@ static const struct aarch64_virtual_dependency_table aarch64_dependencies[] = {
   {AARCH64_FEATURE (SME2p1), AARCH64_FEATURE (SVE2p1_SME2p1)},
   {AARCH64_FEATURE (SVE2p2), AARCH64_FEATURE (SVE2p2_SME2p2)},
   {AARCH64_FEATURE (SME2p2), AARCH64_FEATURES (2, SVE_SME2p2, SVE2p2_SME2p2)},
+  {AARCH64_FEATURE (SVE2p3), AARCH64_FEATURE (SVE2p3_SME2p3)},
+  {AARCH64_FEATURE (SME2p3), AARCH64_FEATURE (SVE2p3_SME2p3)},
 };
 
 static aarch64_feature_set

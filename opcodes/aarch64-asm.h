@@ -98,6 +98,7 @@ AARCH64_DECL_OPD_INSERTER (ins_sve_index);
 AARCH64_DECL_OPD_INSERTER (ins_sve_limm_mov);
 AARCH64_DECL_OPD_INSERTER (ins_sve_quad_index);
 AARCH64_DECL_OPD_INSERTER (ins_sve_reglist);
+AARCH64_DECL_OPD_INSERTER (ins_sve_reglist_index);
 AARCH64_DECL_OPD_INSERTER (ins_sve_strided_reglist);
 AARCH64_DECL_OPD_INSERTER (ins_sve_scale);
 AARCH64_DECL_OPD_INSERTER (ins_sve_shlimm);

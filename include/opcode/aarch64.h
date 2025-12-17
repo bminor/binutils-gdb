@@ -267,6 +267,10 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_LSCP,
   /* +mops-go */
   AARCH64_FEATURE_MOPS_GO,
+  /* SVE2.3.  */
+  AARCH64_FEATURE_SVE2p3,
+  /* SME2.3.  */
+  AARCH64_FEATURE_SME2p3,
 
   /* Virtual features.  These are used to gate instructions that are enabled
      by either of two (or more) sets of command line flags.  */
@@ -294,6 +298,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SVE2p1_SME2p1,
   /* +sve2p2 or +sme2p2 */
   AARCH64_FEATURE_SVE2p2_SME2p2,
+  /* +sve2p3 or +sme2p3 */
+  AARCH64_FEATURE_SVE2p3_SME2p3,
   AARCH64_NUM_FEATURES
 };
 
@@ -883,11 +889,13 @@ enum aarch64_opnd
   AARCH64_OPND_SME_Zm_17_3,	/* SVE vector register in [19:17]*2+16.  */
   AARCH64_OPND_SME_Znx2_6_3,	/* SVE vector register list from [8:6]*2.  */
   AARCH64_OPND_SME_Zmx2_17_3,	/* SVE vector register list from [19:17]*2+16.  */
+  AARCH64_OPND_SME_Zmx2_INDEX_22,	/* SVE vector register list in [20:16].with index in 22  */
   AARCH64_OPND_SME_Zmx2,	/* SVE vector register list from [20:17]*2.  */
   AARCH64_OPND_SME_Zmx4,	/* SVE vector register list from [20:18]*4.  */
   AARCH64_OPND_SME_Znx2,	/* SVE vector register list from [9:6]*2.  */
   AARCH64_OPND_SME_Znx2_BIT_INDEX, /* SVE vector register list encoding a bit index from [9:6]*2.  */
   AARCH64_OPND_SME_Znx4,	/* SVE vector register list from [9:7]*4.  */
+  AARCH64_OPND_SME_Zn7xN_UNTYPED,	/* SVE vector register list from [9:7].  */
   AARCH64_OPND_SME_Ztx2_STRIDED, /* SVE vector register list in [4:0]&23.  */
   AARCH64_OPND_SME_Ztx4_STRIDED, /* SVE vector register list in [4:0]&19.  */
   AARCH64_OPND_SME_ZAda_1b,	/* SME <ZAda>.H, 1-bits.  */
@@ -917,6 +925,7 @@ enum aarch64_opnd
   AARCH64_OPND_SME_ADDR_RI_U4xVL,   /* SME [<Xn|SP>{, #<imm>, MUL VL}].  */
   AARCH64_OPND_SME_SM_ZA,           /* SME {SM | ZA}.  */
   AARCH64_OPND_SME_PnT_Wm_imm,      /* SME <Pn>.<T>[<Wm>, #<imm>].  */
+  AARCH64_OPND_SME_SHRIMM3,	    /* 3-bit right shift, bits [18:16].  */
   AARCH64_OPND_SME_SHRIMM4,	    /* 4-bit right shift, bits [19:16].  */
   AARCH64_OPND_SME_SHRIMM5,	    /* size + 5-bit right shift, bits [23:22,20:16].  */
   AARCH64_OPND_SME_Zk_INDEX,	    /* Zk[index], bits [12:10,5:4].  */

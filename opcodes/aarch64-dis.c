@@ -2353,6 +2353,23 @@ aarch64_ext_sve_reglist_zt (const aarch64_operand *self,
   return true;
 }
 
+/* Decode { <Zm1>-<Zm2> }[<index>].  The fields array specifies which field
+   to use for Zm.  The opcode-dependent value specifies the number
+   of registers in the list.  */
+bool
+aarch64_ext_sve_reglist_index (const aarch64_operand *self,
+			 aarch64_opnd_info *info, aarch64_insn code,
+			 const aarch64_inst *inst ATTRIBUTE_UNUSED,
+			 aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  info->reglist.first_regno = extract_field (self->fields[0], code, 0);
+  info->reglist.num_regs = get_opcode_dependent_value (inst->opcode);
+  info->reglist.stride = 1;
+  info->reglist.has_index = true;
+  info->reglist.index = extract_field (FLD_imm1_22, code, 0);
+  return true;
+}
+
 /* Decode a strided register list.  The first field holds the top bit
    (0 or 16) and the second field holds the lower bits.  The stride is
    16 divided by the list length.  */
@@ -3657,6 +3674,8 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
       break;
 
     case sve_shift_tsz_hsd:
+      /* This is also used for some instructions with hs variants only, in
+      which case FLD_SVE_sz will always be zero.  */
       i = extract_fields (inst->value, 0, 2, FLD_SVE_sz, FLD_SVE_tszl_19);
       if (i == 0)
 	return false;

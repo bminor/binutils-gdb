@@ -1150,9 +1150,7 @@
 .*: Error: invalid addressing mode at operand 3 -- `ld1rqd {z0\.d},p0/z,\[x0,x1,lsl ?#2\]'
 .*: Error: operand mismatch -- `sdot z0\.b,z1\.b,z2\.b'
 .*: Info:    did you mean this\?
-.*: Info:    	sdot z0\.s, z1\.b, z2\.b
-.*: Info:    other valid variant\(s\):
-.*: Info:    	sdot z0\.d, z1\.h, z2\.h
+.*: Info:    	sdot z0\.h, z1\.b, z2\.b
 .*: Error: operand mismatch -- `sdot z0\.h,z1\.h,z2\.h'
 .*: Info:    did you mean this\?
 .*: Info:    	sdot z0\.s, z1\.h, z2\.h
@@ -1178,9 +1176,7 @@
 .*: Info:    	sdot z0\.d, z1\.h, z2\.h\[0\]
 .*: Error: operand mismatch -- `udot z0\.b,z1\.b,z2\.b'
 .*: Info:    did you mean this\?
-.*: Info:    	udot z0\.s, z1\.b, z2\.b
-.*: Info:    other valid variant\(s\):
-.*: Info:    	udot z0\.d, z1\.h, z2\.h
+.*: Info:    	udot z0\.h, z1\.b, z2\.b
 .*: Error: operand mismatch -- `udot z0\.h,z1\.h,z2\.h'
 .*: Info:    did you mean this\?
 .*: Info:    	udot z0\.s, z1\.h, z2\.h

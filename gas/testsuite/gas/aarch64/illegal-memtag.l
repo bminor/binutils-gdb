@@ -26,7 +26,7 @@
 [^:]*:[0-9]+: Error: expected an integer or stack pointer register at operand 2 -- `gmi x1,xzr,x3'
 [^:]*:[0-9]+: Error: expected an integer or stack pointer register at operand 1 -- `addg xzr,x2,#0,#0'
 [^:]*:[0-9]+: Error: expected an integer or stack pointer register at operand 2 -- `subg x1,xzr,#0,#0'
-[^:]*:[0-9]+: Error: expected an integer or zero register at operand 1 -- `subp sp,x1,x2'
+[^:]*:[0-9]+: Error: expected an integer register or SVE vector register at operand 1 -- `subp sp,x1,x2'
 [^:]*:[0-9]+: Error: expected an integer or stack pointer register at operand 2 -- `subp x1,xzr,x2'
 [^:]*:[0-9]+: Error: expected an integer or stack pointer register at operand 3 -- `subp x1,x2,xzr'
 [^:]*:[0-9]+: Error: expected an integer or zero register at operand 1 -- `subps sp,x1,x2'

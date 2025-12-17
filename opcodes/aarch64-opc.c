@@ -361,6 +361,7 @@ const aarch64_field aarch64_fields[] =
     AARCH64_FIELD (14, 1), /* imm1_14: general immediate in bits [14].  */
     AARCH64_FIELD (15, 1), /* imm1_15: general immediate in bits [15].  */
     AARCH64_FIELD (16, 1), /* imm1_16: general immediate in bits [16].  */
+    AARCH64_FIELD (22, 1), /* imm1_22: general immediate in bits [22].  */
     AARCH64_FIELD ( 0, 2), /* imm2_0: general immediate in bits [1:0].  */
     AARCH64_FIELD ( 1, 2), /* imm2_1: general immediate in bits [2:1].  */
     AARCH64_FIELD ( 2, 2), /* imm2_2: general immediate in bits [3:2].  */
@@ -2072,6 +2073,23 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    return false;
 	  break;
 
+	case AARCH64_OPND_SME_Zmx2_INDEX_22:
+	  num = get_operand_specific_data (&aarch64_operands[type]);
+	  if (!check_reglist (opnd, mismatch_detail, idx, num, 1))
+	      return false;
+	  break;
+
+	case AARCH64_OPND_SME_Zn7xN_UNTYPED:
+	  num = get_opcode_dependent_value (opcode);
+	  if (!check_reglist (opnd, mismatch_detail, idx, num, 1))
+	      return false;
+	  if (opnd->reglist.first_regno > 7)
+	  {
+	    set_other_error (mismatch_detail, idx, _("start register out of range"));
+	    return false;
+	  }
+	  break;
+
 	default:
 	  abort ();
 	}
@@ -3257,6 +3275,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    }
 	  break;
 
+	case AARCH64_OPND_SME_SHRIMM3:
 	case AARCH64_OPND_SME_SHRIMM4:
 	  size = 1 << get_operand_fields_width (get_operand_from_code (type));
 	  if (!value_in_range_p (opnd->imm.value, 1, size))
@@ -4410,9 +4429,11 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SME_Zmx2_17_3:
     case AARCH64_OPND_SME_Zmx2:
     case AARCH64_OPND_SME_Zmx4:
+    case AARCH64_OPND_SME_Zmx2_INDEX_22:
     case AARCH64_OPND_SME_Znx2:
     case AARCH64_OPND_SME_Znx2_BIT_INDEX:
     case AARCH64_OPND_SME_Znx4:
+    case AARCH64_OPND_SME_Zn7xN_UNTYPED:
     case AARCH64_OPND_SME_Ztx2_STRIDED:
     case AARCH64_OPND_SME_Ztx4_STRIDED:
       print_register_list (buf, size, opnd, "z", styler);
@@ -4617,6 +4638,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_FBITS:
     case AARCH64_OPND_TME_UIMM16:
     case AARCH64_OPND_SIMM5:
+    case AARCH64_OPND_SME_SHRIMM3:
     case AARCH64_OPND_SME_SHRIMM4:
     case AARCH64_OPND_SME_SHRIMM5:
     case AARCH64_OPND_SVE_SHLIMM_PRED:

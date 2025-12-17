@@ -1351,6 +1351,21 @@ aarch64_ins_sve_strided_reglist (const aarch64_operand *self,
   return true;
 }
 
+/* Encode {Zn - Zm}[index].  The fields array specifies which field
+   to use for Zn.  */
+bool
+aarch64_ins_sve_reglist_index (const aarch64_operand *self ATTRIBUTE_UNUSED,
+			 const aarch64_opnd_info *info ATTRIBUTE_UNUSED, aarch64_insn *code ATTRIBUTE_UNUSED,
+			 const aarch64_inst *inst ATTRIBUTE_UNUSED,
+			 aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  assert (info->reglist.has_index);
+  insert_field (self->fields[0], code, info->reglist.first_regno, 0);
+  insert_field (self->fields[1], code, info->reglane.index, 0);
+
+  return true;
+}
+
 /* Encode <pattern>{, MUL #<amount>}.  The fields array specifies which
    fields to use for <pattern>.  <amount> - 1 is encoded in the SVE_imm4
    field.  */
