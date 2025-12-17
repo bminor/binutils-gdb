@@ -3078,6 +3078,8 @@ static const aarch64_feature_set aarch64_feature_sve2p3_sme2p3 =
   AARCH64_FEATURE (SVE2p3_SME2p3);
 static const aarch64_feature_set aarch64_feature_f16f32dot =
   AARCH64_FEATURE (F16F32DOT);
+static const aarch64_feature_set aarch64_feature_f16f32mm =
+  AARCH64_FEATURE (F16F32MM);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -3208,6 +3210,7 @@ static const aarch64_feature_set aarch64_feature_f16f32dot =
 #define SME2p3	&aarch64_feature_sme2p3
 #define SVE2p3_SME2p3	&aarch64_feature_sve2p3_sme2p3
 #define F16F32DOT	&aarch64_feature_f16f32dot
+#define F16F32MM	&aarch64_feature_f16f32mm
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS | F_INVALID_IMM_SYMS_1, 0, 0, NULL }
@@ -3554,6 +3557,8 @@ static const aarch64_feature_set aarch64_feature_f16f32dot =
 
 #define F16F32DOT_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, F16F32DOT, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define F16F32MM_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, F16F32MM, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 #define MOPS_CPY_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS) \
   MOPS_INSN (NAME, OPCODE, MASK, 0, \
@@ -7849,6 +7854,9 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   /* F16F32DOT instructions.  */
   F16F32DOT_INSN ("fdot", 0x0f409000, 0xbfc0f400, dotproduct, OP3 (Vd, Vn, Em16), QL_BFDOT64I, F_SIZEQ),
   F16F32DOT_INSN ("fdot", 0x0e80fc00, 0xbfe0fc00, dotproduct, OP3 (Vd, Vn, Vm), QL_BFDOT64, F_SIZEQ),
+
+  /* F16F32MM instructions.  */
+  F16F32MM_INSN ("fmmla", 0x4e40ec00, 0xffe0fc00, asimdmisc, OP3 (Vd, Vn, Vm), QL_BFMMLA, F_SIZEQ),
 
   {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, 0, NULL},
 };

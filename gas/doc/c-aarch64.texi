@@ -221,6 +221,8 @@ automatically cause those extensions to be disabled.
  @tab Enable Armv8.2 16-bit floating-point support.
 @item @code{f16f32dot} @tab @code{simd}
  @tab Enable Armv9.7 f16f32dot instructions.
+@item @code{f16f32mm} @tab @code{simd}, @code{fp16}
+ @tab Enable Armv9.7 f16f32mm instructions.
 @item @code{fprcvt} @tab @code{fp}
  @tab Enable Armv9.6 fprcvt instructions.
 @item @code{frintts} @tab @code{fp}

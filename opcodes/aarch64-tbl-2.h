@@ -4040,5 +4040,6 @@ enum aarch64_opcode_idx
   A64_OPID_45a01000_uqshrn_SVE_Zd_SME_Znx2_SVE_SHRIMM_UNPRED_22,
   A64_OPID_0f409000_fdot_Vd_Vn_Em16,
   A64_OPID_0e80fc00_fdot_Vd_Vn_Vm,
+  A64_OPID_4e40ec00_fmmla_Vd_Vn_Vm,
   A64_OPID_MAX,
 };
