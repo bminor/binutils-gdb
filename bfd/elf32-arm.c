@@ -2149,6 +2149,16 @@ elf32_arm_nabi_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
       default:
 	return false;
 
+      case 156:         /* Linux/ARM 32-bit, some pre-v5.9 linux kernels.  */
+	/* There's a linux kernel bug for CONFIG_BINFMT_ELF_FDPIC=y
+	   configurations, fixed by v5.9 linux kernel commit 16aead81018c
+	   ("take fdpic-related parts of elf_prstatus out").
+	   The bug causes the FDPIC-specific unsigned long fields
+	   pr_exec_fdpic_loadmap and pr_interp_fdpic_loadmap to be added to
+	   struct elf_prstatus in case the FDPIC ABI is not used.
+	   The two fields are added after pr_reg, so just ignore them.  */
+
+	/* Fall through.  */
       case 148:		/* Linux/ARM 32-bit.  */
 	/* pr_cursig */
 	elf_tdata (abfd)->core->signal = bfd_get_16 (abfd, note->descdata + 12);
