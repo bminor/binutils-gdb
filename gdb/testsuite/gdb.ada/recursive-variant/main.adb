@@ -13,6 +13,8 @@
 --  You should have received a copy of the GNU General Public License
 --  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+with Pck; use Pck;
+
 procedure Main is
 
    type Rec_Type;
@@ -33,6 +35,6 @@ procedure Main is
 
 begin
 
-   null; -- STOP
+   Do_Nothing (Instance'Address); -- STOP
 
 end Main;

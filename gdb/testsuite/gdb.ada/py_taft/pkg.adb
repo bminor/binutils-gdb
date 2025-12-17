@@ -15,6 +15,11 @@
 
 package body Pkg is
 
+   procedure Do_Nothing (A : System.Address) is
+   begin
+      null;
+   end Do_Nothing;
+
    type Value_Record is record
       I : Integer;
    end record;
