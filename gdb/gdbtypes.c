@@ -32,7 +32,6 @@
 #include "complaints.h"
 #include "cli/cli-cmds.h"
 #include "cp-abi.h"
-#include "hashtab.h"
 #include "cp-support.h"
 #include "bcache.h"
 #include "dwarf2/loc.h"
