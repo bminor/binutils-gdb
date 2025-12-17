@@ -45,9 +45,8 @@ ignore = ["line-length"]
 extensions = ["exp", "tcl"]
 
 [style]
-# Used by tclfmt.  Doesn't support the mixed TAB and spaces style we use. See
-# this tclint issue ( https://github.com/nmoroze/tclint/issues/109 ).
-indent = 4
+# Used by tclfmt.
+indent = "mixed,4,8"
 
 # Used by both tclint and tclfmt.  Current policy is 80.
 line-length = 80
