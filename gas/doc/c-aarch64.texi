@@ -223,6 +223,8 @@ automatically cause those extensions to be disabled.
  @tab Enable Armv9.7 f16f32dot instructions.
 @item @code{f16f32mm} @tab @code{simd}, @code{fp16}
  @tab Enable Armv9.7 f16f32mm instructions.
+@item @code{f16mm} @tab @code{simd}, @code{fp16}
+ @tab Enable support f16mm instructions.
 @item @code{fprcvt} @tab @code{fp}
  @tab Enable Armv9.6 fprcvt instructions.
 @item @code{frintts} @tab @code{fp}

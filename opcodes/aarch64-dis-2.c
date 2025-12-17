@@ -20249,10 +20249,20 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                 {
                                                   if (((word >> 31) & 0x1) == 0)
                                                     {
-                                                      /* 33222222222211111111110000000000
-                                                         10987654321098765432109876543210
-                                                         011001x0101xxxxx111xxxxxxxxxxxxx.  */
-                                                      return A64_OPID_64a0e400_fmmla_SVE_Zd_SVE_Zn_SVE_Zm_16;
+                                                      if (((word >> 10) & 0x1) == 0)
+                                                        {
+                                                          /* 33222222222211111111110000000000
+                                                             10987654321098765432109876543210
+                                                             011001x0101xxxxx111xx0xxxxxxxxxx.  */
+                                                          return A64_OPID_64a0e000_fmmla_SVE_Zd_SVE_Zn_SVE_Zm_16;
+                                                        }
+                                                      else
+                                                        {
+                                                          /* 33222222222211111111110000000000
+                                                             10987654321098765432109876543210
+                                                             011001x0101xxxxx111xx1xxxxxxxxxx.  */
+                                                          return A64_OPID_64a0e400_fmmla_SVE_Zd_SVE_Zn_SVE_Zm_16;
+                                                        }
                                                     }
                                                   else
                                                     {
@@ -28972,10 +28982,20 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                     }
                                                   else
                                                     {
-                                                      /* 33222222222211111111110000000000
-                                                         10987654321098765432109876543210
-                                                         0x001110xx0xxxxxx11011xxxxxxxxxx.  */
-                                                      return A64_OPID_4e40ec00_fmmla_Vd_Vn_Vm;
+                                                      if (((word >> 23) & 0x1) == 0)
+                                                        {
+                                                          /* 33222222222211111111110000000000
+                                                             10987654321098765432109876543210
+                                                             0x0011100x0xxxxxx11011xxxxxxxxxx.  */
+                                                          return A64_OPID_4e40ec00_fmmla_Vd_Vn_Vm;
+                                                        }
+                                                      else
+                                                        {
+                                                          /* 33222222222211111111110000000000
+                                                             10987654321098765432109876543210
+                                                             0x0011101x0xxxxxx11011xxxxxxxxxx.  */
+                                                          return A64_OPID_4ec0ec00_fmmla_Vd_Vn_Vm;
+                                                        }
                                                     }
                                                 }
                                             }

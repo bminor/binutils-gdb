@@ -2817,6 +2817,12 @@
 {		      \
   QLF3(V_4S, V_8H, S_H),	\
 }
+
+/* e.g. FMMLA <Vd>.8s, <Vn>.8h, <Vm>.8h */
+#define QL_V3SAME8H      \
+{		      \
+  QLF3 (V_8H, V_8H, V_8H),	\
+}
 
 /* Opcode table.  */
 
@@ -3080,6 +3086,10 @@ static const aarch64_feature_set aarch64_feature_f16f32dot =
   AARCH64_FEATURE (F16F32DOT);
 static const aarch64_feature_set aarch64_feature_f16f32mm =
   AARCH64_FEATURE (F16F32MM);
+static const aarch64_feature_set aarch64_feature_f16mm =
+  AARCH64_FEATURE (F16MM);
+static const aarch64_feature_set aarch64_feature_f16mm_sve2p2 =
+  AARCH64_FEATURES (2, F16MM, SVE2p2);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -3211,6 +3221,8 @@ static const aarch64_feature_set aarch64_feature_f16f32mm =
 #define SVE2p3_SME2p3	&aarch64_feature_sve2p3_sme2p3
 #define F16F32DOT	&aarch64_feature_f16f32dot
 #define F16F32MM	&aarch64_feature_f16f32mm
+#define F16MM	&aarch64_feature_f16mm
+#define F16MM_SVE2p2	&aarch64_feature_f16mm_sve2p2
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS | F_INVALID_IMM_SYMS_1, 0, 0, NULL }
@@ -3559,6 +3571,10 @@ static const aarch64_feature_set aarch64_feature_f16f32mm =
   { NAME, OPCODE, MASK, CLASS, 0, F16F32DOT, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define F16F32MM_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, F16F32MM, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define F16MM_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, F16MM, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define F16MM_SVE2p2_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, F16MM, OPS, QUALS, FLAGS | F_STRICT, 0, 0, NULL }
 
 #define MOPS_CPY_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS) \
   MOPS_INSN (NAME, OPCODE, MASK, 0, \
@@ -7857,6 +7873,10 @@ const struct aarch64_opcode aarch64_opcode_table[] =
 
   /* F16F32MM instructions.  */
   F16F32MM_INSN ("fmmla", 0x4e40ec00, 0xffe0fc00, asimdmisc, OP3 (Vd, Vn, Vm), QL_BFMMLA, F_SIZEQ),
+
+  /* F16MM instructions.  */
+  F16MM_INSN ("fmmla", 0x4ec0ec00, 0xffe0fc00, asimdmisc, OP3 (Vd, Vn, Vm), QL_V3SAME8H, 0),
+  F16MM_SVE2p2_INSN ("fmmla", 0x64a0e000, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_HHH, 0),
 
   {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, 0, NULL},
 };
