@@ -1393,7 +1393,7 @@ handle_pt_insn_events (struct btrace_thread_info *btinfo,
 	      continue;
 
 	    if (!ptw_string.has_value ())
-	      *ptw_string = hex_string (event.variant.ptwrite.payload);
+	      ptw_string = hex_string (event.variant.ptwrite.payload);
 
 	    handle_pt_aux_insn (btinfo, *ptw_string, pc);
 
