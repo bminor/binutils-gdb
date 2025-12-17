@@ -20,6 +20,8 @@
 #ifndef GDB_MINSYMS_H
 #define GDB_MINSYMS_H
 
+#include <deque>
+
 struct program_space;
 struct type;
 
@@ -78,8 +80,6 @@ struct bound_minimal_symbol
    as opaque and use functions provided by minsyms.c to inspect them.
 */
 
-struct msym_bunch;
-
 /* An RAII-based object that is used to record minimal symbols while
    they are being read.  */
 class minimal_symbol_reader
@@ -91,8 +91,6 @@ class minimal_symbol_reader
      module.  */
 
   explicit minimal_symbol_reader (struct objfile *);
-
-  ~minimal_symbol_reader ();
 
   /* Install the minimal symbols that have been collected into the
      given objfile.  */
@@ -154,19 +152,10 @@ class minimal_symbol_reader
 
   struct objfile *m_objfile;
 
-  /* Bunch currently being filled up.
-     The next field points to chain of filled bunches.  */
-
-  struct msym_bunch *m_msym_bunch;
-
-  /* Number of slots filled in current bunch.  */
-
-  int m_msym_bunch_index;
-
-  /* Total number of minimal symbols recorded so far for the
-     objfile.  */
-
-  int m_msym_count;
+  /* The minimal symbols recorded so far.  This uses a deque instead of e.g. a
+     vector, because references to minimal symbols need to stay valid across
+     calls to record_full.  */
+  std::deque<minimal_symbol> m_msyms;
 };
 
 

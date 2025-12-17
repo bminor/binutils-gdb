@@ -143,17 +143,6 @@ msymbol_is_function (struct objfile *objfile, minimal_symbol *minsym,
     }
 }
 
-/* Accumulate the minimal symbols for each objfile in bunches of BUNCH_SIZE.
-   At the end, copy them all into one newly allocated array.  */
-
-#define BUNCH_SIZE 127
-
-struct msym_bunch
-  {
-    struct msym_bunch *next;
-    struct minimal_symbol contents[BUNCH_SIZE];
-  };
-
 /* See minsyms.h.  */
 
 unsigned int
@@ -1087,30 +1076,8 @@ get_symbol_leading_char (program_space *pspace, bfd *abfd)
 /* See minsyms.h.  */
 
 minimal_symbol_reader::minimal_symbol_reader (struct objfile *obj)
-: m_objfile (obj),
-  m_msym_bunch (NULL),
-  /* Note that presetting m_msym_bunch_index to BUNCH_SIZE causes the
-     first call to save a minimal symbol to allocate the memory for
-     the first bunch.  */
-  m_msym_bunch_index (BUNCH_SIZE),
-  m_msym_count (0)
+  : m_objfile (obj)
 {
-}
-
-/* Discard the currently collected minimal symbols, if any.  If we wish
-   to save them for later use, we must have already copied them somewhere
-   else before calling this function.  */
-
-minimal_symbol_reader::~minimal_symbol_reader ()
-{
-  struct msym_bunch *next;
-
-  while (m_msym_bunch != NULL)
-    {
-      next = m_msym_bunch->next;
-      xfree (m_msym_bunch);
-      m_msym_bunch = next;
-    }
 }
 
 /* See minsyms.h.  */
@@ -1180,9 +1147,6 @@ minimal_symbol_reader::record_full (std::string_view name,
 				    enum minimal_symbol_type ms_type,
 				    int section)
 {
-  struct msym_bunch *newobj;
-  struct minimal_symbol *msymbol;
-
   /* Don't put gcc_compiled, __gnu_compiled_cplus, and friends into
      the minimal symbols, because if there is also another symbol
      at the same address (e.g. the first function of the file),
@@ -1207,14 +1171,7 @@ minimal_symbol_reader::record_full (std::string_view name,
 				hex_string (LONGEST (address)),
 				section, (int) name.size (), name.data ());
 
-  if (m_msym_bunch_index == BUNCH_SIZE)
-    {
-      newobj = XCNEW (struct msym_bunch);
-      m_msym_bunch_index = 0;
-      newobj->next = m_msym_bunch;
-      m_msym_bunch = newobj;
-    }
-  msymbol = &m_msym_bunch->contents[m_msym_bunch_index];
+  minimal_symbol *msymbol = &m_msyms.emplace_back ();
   msymbol->set_language (language_unknown,
 			 &m_objfile->per_bfd->storage_obstack);
 
@@ -1226,17 +1183,13 @@ minimal_symbol_reader::record_full (std::string_view name,
 
   msymbol->set_unrelocated_address (address);
   msymbol->set_section_index (section);
-
   msymbol->set_type (ms_type);
 
   /* If we already read minimal symbols for this objfile, then don't
      ever allocate a new one.  */
   if (!m_objfile->per_bfd->minsyms_read)
-    {
-      m_msym_bunch_index++;
-      m_objfile->per_bfd->n_minsyms++;
-    }
-  m_msym_count++;
+    m_objfile->per_bfd->n_minsyms++;
+
   return msymbol;
 }
 
@@ -1465,59 +1418,41 @@ private:
 void
 minimal_symbol_reader::install ()
 {
-  int mcount;
-  struct msym_bunch *bunch;
-  struct minimal_symbol *msymbols;
-  int alloc_count;
-
   if (m_objfile->per_bfd->minsyms_read)
     return;
 
-  if (m_msym_count > 0)
+  if (!m_msyms.empty ())
     {
-      symtab_create_debug_printf ("installing %d minimal symbols of objfile %s",
-				  m_msym_count, objfile_name (m_objfile));
+      symtab_create_debug_printf ("installing %zu minimal symbols of objfile %s",
+				  m_msyms.size (), objfile_name (m_objfile));
 
       /* Allocate enough space, into which we will gather the bunches
 	 of new and existing minimal symbols, sort them, and then
 	 compact out the duplicate entries.  Once we have a final
 	 table, we will give back the excess space.  */
-
-      alloc_count = m_msym_count + m_objfile->per_bfd->minimal_symbol_count;
+      int alloc_count
+	= m_msyms.size () + m_objfile->per_bfd->minimal_symbol_count;
       gdb::unique_xmalloc_ptr<minimal_symbol>
 	msym_holder (XNEWVEC (minimal_symbol, alloc_count));
-      msymbols = msym_holder.get ();
+      minimal_symbol *msymbols = msym_holder.get ();
 
       /* Copy in the existing minimal symbols, if there are any.  */
-
       if (m_objfile->per_bfd->minimal_symbol_count)
 	memcpy (msymbols, m_objfile->per_bfd->msymbols.get (),
 		m_objfile->per_bfd->minimal_symbol_count
 		* sizeof (struct minimal_symbol));
 
-      /* Walk through the list of minimal symbol bunches, adding each symbol
-	 to the new contiguous array of symbols.  Note that we start with the
-	 current, possibly partially filled bunch (thus we use the current
-	 msym_bunch_index for the first bunch we copy over), and thereafter
-	 each bunch is full.  */
-
-      mcount = m_objfile->per_bfd->minimal_symbol_count;
-
-      for (bunch = m_msym_bunch; bunch != NULL; bunch = bunch->next)
-	{
-	  memcpy (&msymbols[mcount], &bunch->contents[0],
-		  m_msym_bunch_index * sizeof (struct minimal_symbol));
-	  mcount += m_msym_bunch_index;
-	  m_msym_bunch_index = BUNCH_SIZE;
-	}
+      /* Walk through the list of recorded minimal symbol, adding each symbol
+	 to the new contiguous array of symbols.  */
+      int mcount = m_objfile->per_bfd->minimal_symbol_count;
+      std::copy (m_msyms.begin (), m_msyms.end (), &msymbols[mcount]);
+      mcount += m_msyms.size ();
 
       /* Sort the minimal symbols by address.  */
-
       std::sort (msymbols, msymbols + mcount, minimal_symbol_is_less_than);
 
       /* Compact out any duplicates, and free up whatever space we are
 	 no longer using.  */
-
       mcount = compact_minimal_symbols (msymbols, mcount, m_objfile);
       msym_holder.reset (XRESIZEVEC (struct minimal_symbol,
 				     msym_holder.release (),
