@@ -208,8 +208,8 @@ proc do_test { } {
     # is reported.  We might get different line numbers depending on
     # how the architectures skip prologue function works.  This test
     # is all about how frame #1 is reported.
-    set foo_body_1 [expr $::foo_prologue + 1]
-    set foo_body_2 [expr $::foo_prologue + 2]
+    set foo_body_1 [expr {$::foo_prologue + 1}]
+    set foo_body_2 [expr {$::foo_prologue + 2}]
     gdb_test "bt" \
 	[multi_line \
 	     "^#0\\s+foo \\(\\) at \[^\r\n\]+$::srcfile:(?:$::foo_prologue|$foo_body_1|$foo_body_2)" \
