@@ -10902,6 +10902,8 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"ssve-fexpa",	AARCH64_FEATURE (SSVE_FEXPA), AARCH64_FEATURE (SME2)},
   {"sme-tmop",		AARCH64_FEATURE (SME_TMOP), AARCH64_FEATURE (SME2)},
   {"sme-mop4",		AARCH64_FEATURE (SME_MOP4), AARCH64_FEATURE (SME2)},
+  {"mops-go",		AARCH64_FEATURE (MOPS_GO),
+			AARCH64_FEATURES (2, MOPS, MEMTAG)},
   {NULL,		AARCH64_NO_FEATURES, AARCH64_NO_FEATURES},
 };
 

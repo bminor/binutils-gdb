@@ -27928,10 +27928,130 @@ aarch64_opcode_lookup_1 (uint32_t word)
                             {
                               if (((word >> 10) & 0x1) == 0)
                                 {
-                                  /* 33222222222211111111110000000000
-                                     10987654321098765432109876543210
-                                     xx011101x1xxxxxxxxxxx0xxxxxxxxxx.  */
-                                  return A64_OPID_1d400800_ldapur_Ft_RCPC3_ADDR_OFFSET;
+                                  if (((word >> 11) & 0x1) == 0)
+                                    {
+                                      if (((word >> 12) & 0x1) == 0)
+                                        {
+                                          if (((word >> 13) & 0x1) == 0)
+                                            {
+                                              if (((word >> 14) & 0x1) == 0)
+                                                {
+                                                  if (((word >> 15) & 0x1) == 0)
+                                                    {
+                                                      /* 33222222222211111111110000000000
+                                                         10987654321098765432109876543210
+                                                         xx011101x1xxxxxx000000xxxxxxxxxx.  */
+                                                      return A64_OPID_1ddf0000_setgop_MOPS_ADDR_Rd_MOPS_WB_Rn;
+                                                    }
+                                                  else
+                                                    {
+                                                      /* 33222222222211111111110000000000
+                                                         10987654321098765432109876543210
+                                                         xx011101x1xxxxxx100000xxxxxxxxxx.  */
+                                                      return A64_OPID_1ddf8000_setgoe_MOPS_ADDR_Rd_MOPS_WB_Rn;
+                                                    }
+                                                }
+                                              else
+                                                {
+                                                  /* 33222222222211111111110000000000
+                                                     10987654321098765432109876543210
+                                                     xx011101x1xxxxxxx10000xxxxxxxxxx.  */
+                                                  return A64_OPID_1ddf4000_setgom_MOPS_ADDR_Rd_MOPS_WB_Rn;
+                                                }
+                                            }
+                                          else
+                                            {
+                                              if (((word >> 14) & 0x1) == 0)
+                                                {
+                                                  if (((word >> 15) & 0x1) == 0)
+                                                    {
+                                                      /* 33222222222211111111110000000000
+                                                         10987654321098765432109876543210
+                                                         xx011101x1xxxxxx001000xxxxxxxxxx.  */
+                                                      return A64_OPID_1ddf2000_setgopn_MOPS_ADDR_Rd_MOPS_WB_Rn;
+                                                    }
+                                                  else
+                                                    {
+                                                      /* 33222222222211111111110000000000
+                                                         10987654321098765432109876543210
+                                                         xx011101x1xxxxxx101000xxxxxxxxxx.  */
+                                                      return A64_OPID_1ddfa000_setgoen_MOPS_ADDR_Rd_MOPS_WB_Rn;
+                                                    }
+                                                }
+                                              else
+                                                {
+                                                  /* 33222222222211111111110000000000
+                                                     10987654321098765432109876543210
+                                                     xx011101x1xxxxxxx11000xxxxxxxxxx.  */
+                                                  return A64_OPID_1ddf6000_setgomn_MOPS_ADDR_Rd_MOPS_WB_Rn;
+                                                }
+                                            }
+                                        }
+                                      else
+                                        {
+                                          if (((word >> 13) & 0x1) == 0)
+                                            {
+                                              if (((word >> 14) & 0x1) == 0)
+                                                {
+                                                  if (((word >> 15) & 0x1) == 0)
+                                                    {
+                                                      /* 33222222222211111111110000000000
+                                                         10987654321098765432109876543210
+                                                         xx011101x1xxxxxx000100xxxxxxxxxx.  */
+                                                      return A64_OPID_1ddf1000_setgopt_MOPS_ADDR_Rd_MOPS_WB_Rn;
+                                                    }
+                                                  else
+                                                    {
+                                                      /* 33222222222211111111110000000000
+                                                         10987654321098765432109876543210
+                                                         xx011101x1xxxxxx100100xxxxxxxxxx.  */
+                                                      return A64_OPID_1ddf9000_setgoet_MOPS_ADDR_Rd_MOPS_WB_Rn;
+                                                    }
+                                                }
+                                              else
+                                                {
+                                                  /* 33222222222211111111110000000000
+                                                     10987654321098765432109876543210
+                                                     xx011101x1xxxxxxx10100xxxxxxxxxx.  */
+                                                  return A64_OPID_1ddf5000_setgomt_MOPS_ADDR_Rd_MOPS_WB_Rn;
+                                                }
+                                            }
+                                          else
+                                            {
+                                              if (((word >> 14) & 0x1) == 0)
+                                                {
+                                                  if (((word >> 15) & 0x1) == 0)
+                                                    {
+                                                      /* 33222222222211111111110000000000
+                                                         10987654321098765432109876543210
+                                                         xx011101x1xxxxxx001100xxxxxxxxxx.  */
+                                                      return A64_OPID_1ddf3000_setgoptn_MOPS_ADDR_Rd_MOPS_WB_Rn;
+                                                    }
+                                                  else
+                                                    {
+                                                      /* 33222222222211111111110000000000
+                                                         10987654321098765432109876543210
+                                                         xx011101x1xxxxxx101100xxxxxxxxxx.  */
+                                                      return A64_OPID_1ddfb000_setgoetn_MOPS_ADDR_Rd_MOPS_WB_Rn;
+                                                    }
+                                                }
+                                              else
+                                                {
+                                                  /* 33222222222211111111110000000000
+                                                     10987654321098765432109876543210
+                                                     xx011101x1xxxxxxx11100xxxxxxxxxx.  */
+                                                  return A64_OPID_1ddf7000_setgomtn_MOPS_ADDR_Rd_MOPS_WB_Rn;
+                                                }
+                                            }
+                                        }
+                                    }
+                                  else
+                                    {
+                                      /* 33222222222211111111110000000000
+                                         10987654321098765432109876543210
+                                         xx011101x1xxxxxxxxxx10xxxxxxxxxx.  */
+                                      return A64_OPID_1d400800_ldapur_Ft_RCPC3_ADDR_OFFSET;
+                                    }
                                 }
                               else
                                 {

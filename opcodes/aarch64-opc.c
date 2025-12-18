@@ -5624,6 +5624,35 @@ verify_three_different_regs (const struct aarch64_inst *inst,
   return ERR_OK;
 }
 
+/* Check an instruction that takes two register operands and that
+   requires the register numbers to be distinct from each another.  */
+
+static enum err_type
+verify_two_diff_regs (const struct aarch64_inst *inst,
+			     const aarch64_insn insn ATTRIBUTE_UNUSED,
+			     bfd_vma pc ATTRIBUTE_UNUSED,
+			     bool encoding ATTRIBUTE_UNUSED,
+			     aarch64_operand_error *mismatch_detail
+			       ATTRIBUTE_UNUSED,
+			     aarch64_instr_sequence *insn_sequence
+			       ATTRIBUTE_UNUSED)
+{
+  int rd, rn;
+
+  rd = inst->operands[0].reg.regno;
+  rn = inst->operands[1].reg.regno;
+  if (rd == rn)
+    {
+      mismatch_detail->kind = AARCH64_OPDE_SYNTAX_ERROR;
+      mismatch_detail->error
+	= _("the two register operands must be distinct from each other");
+      mismatch_detail->index = -1;
+      return ERR_UND;
+    }
+
+  return ERR_OK;
+}
+
 /* Add INST to the end of INSN_SEQUENCE.  */
 
 static void

@@ -2929,6 +2929,8 @@ static const aarch64_feature_set aarch64_feature_mops =
   AARCH64_FEATURE (MOPS);
 static const aarch64_feature_set aarch64_feature_mops_memtag =
   AARCH64_FEATURES (2, MOPS, MEMTAG);
+static const aarch64_feature_set aarch64_feature_mops_go =
+  AARCH64_FEATURE (MOPS_GO);
 static const aarch64_feature_set aarch64_feature_hbc =
   AARCH64_FEATURE (HBC);
 static const aarch64_feature_set aarch64_feature_cssc =
@@ -3119,6 +3121,7 @@ static const aarch64_feature_set aarch64_feature_sme_mop4_i16i64 =
 #define WFXT	  &aarch64_feature_wfxt
 #define MOPS	  &aarch64_feature_mops
 #define MOPS_MEMTAG &aarch64_feature_mops_memtag
+#define MOPS_GO	  &aarch64_feature_mops_go
 #define HBC	  &aarch64_feature_hbc
 #define CSSC	  &aarch64_feature_cssc
 #define CHK	  &aarch64_feature_chk
@@ -3376,6 +3379,9 @@ static const aarch64_feature_set aarch64_feature_sme_mop4_i16i64 =
 #define MOPS_MEMTAG_INSN(NAME, OPCODE, MASK, CLASS, OPS, QUALS, FLAGS, CONSTRAINTS, VERIFIER) \
   { NAME, OPCODE, MASK, CLASS, 0, MOPS_MEMTAG, OPS, QUALS, FLAGS, \
     CONSTRAINTS, 0, VERIFIER }
+#define MOPS_GO_INSN(NAME, OPCODE, MASK, CLASS, OPS, QUALS, FLAGS, CONSTRAINTS, VERIFIER) \
+  { NAME, OPCODE, MASK, CLASS, 0, MOPS_GO, OPS, QUALS, FLAGS, \
+    CONSTRAINTS, 0, VERIFIER }
 #define HBC_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, HBC, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define CSSC_INSN(NAME,OPCODE,MASK,OPS,QUALS,FLAGS) \
@@ -3548,6 +3554,11 @@ static const aarch64_feature_set aarch64_feature_sme_mop4_i16i64 =
        OP3 (MOPS_ADDR_Rd, MOPS_WB_Rn, Rm), QL_I3SAMEX, FLAGS, \
        CONSTRAINTS, VERIFIER (three_different_regs))
 
+#define MOPS_GO_SET_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS, ISA) \
+  ISA (NAME, OPCODE, MASK, 0, \
+       OP2 (MOPS_ADDR_Rd, MOPS_WB_Rn), QL_I2SAMEX, FLAGS, \
+       CONSTRAINTS, VERIFIER (two_diff_regs))
+
 /* These instructions must remain consecutive, since we rely on the order
    when detecting invalid sequences.  */
 #define MOPS_SET_OP1_OP2_INSN(NAME, SUFFIX, OPCODE, MASK, ISA) \
@@ -3558,11 +3569,27 @@ static const aarch64_feature_set aarch64_feature_sme_mop4_i16i64 =
   MOPS_SET_OP1_OP2_PME_INSN (NAME "e" SUFFIX, OPCODE | 0x8000, MASK, \
 			     0, C_SCAN_MOPS_E, ISA)
 
+/* These instructions must remain consecutive, since we rely on the order
+   when detecting invalid sequences.  */
+#define MOPS_GO_SET_OP1_OP2_INSN(NAME, SUFFIX, OPCODE, MASK, ISA) \
+  MOPS_GO_SET_OP1_OP2_PME_INSN (NAME "p" SUFFIX, OPCODE, MASK, \
+				F_SCAN, C_SCAN_MOPS_P, ISA), \
+  MOPS_GO_SET_OP1_OP2_PME_INSN (NAME "m" SUFFIX, OPCODE | 0x4000, MASK, \
+				0, C_SCAN_MOPS_M, ISA), \
+  MOPS_GO_SET_OP1_OP2_PME_INSN (NAME "e" SUFFIX, OPCODE | 0x8000, MASK, \
+				0, C_SCAN_MOPS_E, ISA)
+
 #define MOPS_SET_INSN(NAME, OPCODE, MASK, ISA) \
   MOPS_SET_OP1_OP2_INSN (NAME, "", OPCODE, MASK, ISA), \
   MOPS_SET_OP1_OP2_INSN (NAME, "t", OPCODE | 0x1000, MASK, ISA), \
   MOPS_SET_OP1_OP2_INSN (NAME, "n", OPCODE | 0x2000, MASK, ISA), \
   MOPS_SET_OP1_OP2_INSN (NAME, "tn", OPCODE | 0x3000, MASK, ISA)
+
+#define MOPS_GO_SET_INSN(NAME, OPCODE, MASK, ISA) \
+  MOPS_GO_SET_OP1_OP2_INSN (NAME, "", OPCODE, MASK, ISA), \
+  MOPS_GO_SET_OP1_OP2_INSN (NAME, "t", OPCODE | 0x1000, MASK, ISA), \
+  MOPS_GO_SET_OP1_OP2_INSN (NAME, "n", OPCODE | 0x2000, MASK, ISA), \
+  MOPS_GO_SET_OP1_OP2_INSN (NAME, "tn", OPCODE | 0x3000, MASK, ISA)
 
 #define PREDRES2_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, PREDRES2, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -7039,6 +7066,11 @@ const struct aarch64_opcode aarch64_opcode_table[] =
      setgm setgmt setgmn setgmtn
      setge setget setgen setgetn  */
   MOPS_SET_INSN ("setg", 0x1dc00400, 0xffe0fc00, MOPS_MEMTAG_INSN),
+
+  /* setgop setgopt setgopn setgoptn
+     setgom setgomt setgomn setgomtn
+     setgoe setgoet setgoen setgoetn  */
+  MOPS_GO_SET_INSN ("setgo", 0x1ddf0000, 0x3ffffc00, MOPS_GO_INSN),
 
   HBC_INSN ("bc.c", 0x54000010, 0xff000010, condbranch, OP1 (ADDR_PCREL19), QL_PCREL_NIL, F_COND),
 
