@@ -1264,7 +1264,7 @@ vms_lib_bstat (struct bfd *abfd ATTRIBUTE_UNUSED,
 	       struct stat *sb ATTRIBUTE_UNUSED)
 {
   /* Not supported.  */
-  return 0;
+  return -1;
 }
 
 static void *

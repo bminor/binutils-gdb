@@ -709,8 +709,8 @@ bfd_get_file_size (bfd *abfd)
 	      && memcmp (((struct ar_hdr *) adata->arch_header)->ar_fmag,
 			 "Z\012", 2) == 0)
 	    compression_p2 = 3;
-	  abfd = abfd->my_archive;
 	}
+      abfd = abfd->my_archive;
     }
 
   file_size = bfd_get_size (abfd) << compression_p2;
