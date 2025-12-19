@@ -122,7 +122,6 @@ _bfd_real_fopen (const char *filename, const char *modes)
   const wchar_t   prefixDOS[] = L"\\\\?\\";
   const wchar_t   prefixUNC[] = L"\\\\?\\UNC\\";
   const wchar_t   prefixNone[] = L"";
-  const size_t    partPathLen = strlen (filename) + 1;
   const wchar_t * prefix;
   size_t          sizeof_prefix;
   bool            strip_network_prefix = false;
@@ -207,10 +206,12 @@ _bfd_real_fopen (const char *filename, const char *modes)
 
   MultiByteToWideChar (cp, 0, filename, -1, partPath, partPathWSize);
 
-  /* Convert any UNIX style path separators into the DOS i.e. backslash separator.  */
-  for (ix = 0; ix < partPathLen; ix++)
-    if (IS_UNIX_DIR_SEPARATOR(filename[ix]))
-      partPath[ix] = '\\';
+  /* Convert any UNIX style path separators into the DOS i.e. backslash
+     separator.  Short of a TOASCII()- or ISASCII()-like helper (taking
+     wchar_t as input) in libiberty, open-code that here for now.  */
+  for (ix = 0; partPath[ix] != L'\0'; ix++)
+    if (partPath[ix] <= L'\x7f' && IS_UNIX_DIR_SEPARATOR ((char)partPath[ix]))
+      partPath[ix] = L'\\';
 
   /* Getting the full path from the provided partial path.
      1) Get the length.
@@ -245,7 +246,7 @@ _bfd_real_fopen (const char *filename, const char *modes)
   /* It is non-standard for modes to exceed 16 characters.  */
   wchar_t  modesW[16];
 
-  MultiByteToWideChar (cp, 0, modes, -1, modesW, sizeof(modesW));
+  MultiByteToWideChar (cp, 0, modes, -1, modesW, ARRAY_SIZE (modesW));
 
   FILE *  file = _wfopen (fullPath, modesW);
   free (fullPath);
