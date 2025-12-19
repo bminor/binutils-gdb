@@ -2399,7 +2399,9 @@ registers_info (const char *addr_exp, int fpregs)
 
       /* A register name?  */
       {
-	int regnum = user_reg_map_name_to_regnum (gdbarch, start, end - start);
+	int regnum
+	  = user_reg_map_name_to_regnum (gdbarch,
+					 { start, size_t (end - start) });
 
 	if (regnum >= 0)
 	  {

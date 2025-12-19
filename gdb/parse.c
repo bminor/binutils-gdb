@@ -200,7 +200,7 @@ parser_state::push_dollar (struct stoken str)
   /* Handle tokens that refer to machine registers:
      $ followed by a register name.  */
   i = user_reg_map_name_to_regnum (gdbarch (),
-				   str.ptr + 1, str.length - 1);
+				   { str.ptr + 1, size_t (str.length - 1) });
   if (i >= 0)
     {
       str.length--;

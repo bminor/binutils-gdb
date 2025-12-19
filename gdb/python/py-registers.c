@@ -350,8 +350,7 @@ register_descriptor_iter_find (PyObject *self, PyObject *args, PyObject *kw)
 
   if (register_name != NULL && *register_name != '\0')
     {
-      int regnum = user_reg_map_name_to_regnum (gdbarch, register_name,
-						strlen (register_name));
+      int regnum = user_reg_map_name_to_regnum (gdbarch, register_name);
       if (regnum >= 0)
 	return gdbpy_get_register_descriptor (gdbarch, regnum).release ();
     }
@@ -374,8 +373,7 @@ gdbpy_parse_register_id (struct gdbarch *gdbarch, PyObject *pyo_reg_id,
 
       if (reg_name != NULL)
 	{
-	  *reg_num = user_reg_map_name_to_regnum (gdbarch, reg_name.get (),
-						  strlen (reg_name.get ()));
+	  *reg_num = user_reg_map_name_to_regnum (gdbarch, reg_name.get ());
 	  if (*reg_num >= 0)
 	    return true;
 	  PyErr_SetString (PyExc_ValueError, "Bad register");

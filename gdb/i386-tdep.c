@@ -3983,7 +3983,7 @@ i386_stap_parse_special_token_triplet (struct gdbarch *gdbarch,
       len = s - start - 1;
       std::string regname (start, len);
 
-      if (user_reg_map_name_to_regnum (gdbarch, regname.c_str (), len) == -1)
+      if (user_reg_map_name_to_regnum (gdbarch, regname) == -1)
 	error (_("Invalid register name `%s' on expression `%s'."),
 	       regname.c_str (), p->saved_arg);
 
@@ -4079,7 +4079,7 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
       len_base = s - start;
       std::string base (start, len_base);
 
-      if (user_reg_map_name_to_regnum (gdbarch, base.c_str (), len_base) == -1)
+      if (user_reg_map_name_to_regnum (gdbarch, base) == -1)
 	error (_("Invalid register name `%s' on expression `%s'."),
 	       base.c_str (), p->saved_arg);
 
@@ -4092,8 +4092,7 @@ i386_stap_parse_special_token_three_arg_disp (struct gdbarch *gdbarch,
       len_index = s - start;
       std::string index (start, len_index);
 
-      if (user_reg_map_name_to_regnum (gdbarch, index.c_str (),
-				       len_index) == -1)
+      if (user_reg_map_name_to_regnum (gdbarch, index) == -1)
 	error (_("Invalid register name `%s' on expression `%s'."),
 	       index.c_str (), p->saved_arg);
 

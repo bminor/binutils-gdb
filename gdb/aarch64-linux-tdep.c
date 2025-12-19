@@ -1842,7 +1842,7 @@ aarch64_stap_parse_special_token (struct gdbarch *gdbarch,
       len = tmp - start;
       std::string regname (start, len);
 
-      if (user_reg_map_name_to_regnum (gdbarch, regname.c_str (), len) == -1)
+      if (user_reg_map_name_to_regnum (gdbarch, regname) == -1)
 	error (_("Invalid register name `%s' on expression `%s'."),
 	       regname.c_str (), p->saved_arg);
 

@@ -2443,8 +2443,7 @@ csky_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int dw_reg)
 
       xsnprintf (name_buf, sizeof (name_buf), "s%d",
 		 dw_reg - FV_PSEUDO_REGNO_FIRST);
-      return user_reg_map_name_to_regnum (gdbarch, name_buf,
-					  strlen (name_buf));
+      return user_reg_map_name_to_regnum (gdbarch, name_buf);
     }
 
   /* Others, unknown.  */

@@ -1650,18 +1650,17 @@ register_operation::do_generate_ax (struct expression *exp,
 				    struct axs_value *value,
 				    struct type *cast_type)
 {
-  const char *name = std::get<0> (m_storage).c_str ();
-  int len = std::get<0> (m_storage).size ();
+  const std::string &name = std::get<0> (m_storage);
   int reg;
 
-  reg = user_reg_map_name_to_regnum (ax->gdbarch, name, len);
+  reg = user_reg_map_name_to_regnum (ax->gdbarch, name);
   if (reg == -1)
-    internal_error (_("Register $%s not available"), name);
+    internal_error (_("Register $%s not available"), name.c_str ());
   /* No support for tracing user registers yet.  */
   if (reg >= gdbarch_num_cooked_regs (ax->gdbarch))
     error (_("'%s' is a user-register; "
 	     "GDB cannot yet trace user-register contents."),
-	   name);
+	   name.c_str ());
   value->kind = axs_lvalue_register;
   value->u.reg = reg;
   value->type = register_type (ax->gdbarch, reg);

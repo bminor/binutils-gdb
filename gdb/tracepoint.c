@@ -1355,8 +1355,7 @@ encode_actions_1 (struct command_line *action,
 			     (exp->op.get ()));
 			const char *name = regop->get_name ();
 
-			i = user_reg_map_name_to_regnum (arch,
-							 name, strlen (name));
+			i = user_reg_map_name_to_regnum (arch, name);
 			if (i == -1)
 			  internal_error (_("Register $%s not available"),
 					  name);

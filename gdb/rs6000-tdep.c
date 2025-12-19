@@ -333,7 +333,7 @@ init_sim_regno_table (struct gdbarch *arch)
     {
       int gdb_regno;
 
-      gdb_regno = user_reg_map_name_to_regnum (arch, segment_regs[i], -1);
+      gdb_regno = user_reg_map_name_to_regnum (arch, segment_regs[i]);
       if (gdb_regno >= 0)
 	set_sim_regno (sim_regno, gdb_regno, sim_ppc_sr0_regnum + i);
     }
@@ -374,7 +374,7 @@ init_sim_regno_table (struct gdbarch *arch)
       int gdb_regno = -1;
 
       if (spr_name != NULL)
-	gdb_regno = user_reg_map_name_to_regnum (arch, spr_name, -1);
+	gdb_regno = user_reg_map_name_to_regnum (arch, spr_name);
 
       if (gdb_regno != -1)
 	set_sim_regno (sim_regno, gdb_regno, sim_ppc_spr0_regnum + i);

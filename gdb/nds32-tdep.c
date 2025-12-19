@@ -2016,7 +2016,7 @@ nds32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Cache the register number of fs0.  */
   if (fpu_freg != -1)
-    tdep->fs0_regnum = user_reg_map_name_to_regnum (gdbarch, "fs0", -1);
+    tdep->fs0_regnum = user_reg_map_name_to_regnum (gdbarch, "fs0");
 
   /* Add NDS32 register aliases.  To avoid search in user register name space,
      user_reg_map_name_to_regnum is not used.  */

@@ -45,7 +45,7 @@ struct gdbarch;
    index.  */
 
 extern int user_reg_map_name_to_regnum (struct gdbarch *gdbarch,
-					const char *str, int len);
+					std::string_view str);
 
 extern const char *user_reg_map_regnum_to_name (struct gdbarch *gdbarch,
 						int regnum);

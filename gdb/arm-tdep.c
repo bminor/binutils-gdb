@@ -4757,8 +4757,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		    {
 		      xsnprintf (name_buf, sizeof (name_buf), "%c%d",
 				 reg_char, reg_scaled + i);
-		      regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
-							    strlen (name_buf));
+		      regnum = user_reg_map_name_to_regnum (gdbarch, name_buf);
 		      regcache->cooked_write (regnum, val + i * unit_length);
 		    }
 		}
@@ -5183,8 +5182,7 @@ arm_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
       char name_buf[4];
 
       xsnprintf (name_buf, sizeof (name_buf), "s%d", reg - 64);
-      return user_reg_map_name_to_regnum (gdbarch, name_buf,
-					  strlen (name_buf));
+      return user_reg_map_name_to_regnum (gdbarch, name_buf);
     }
 
   /* VFP v3 / Neon registers.  This range is also used for VFP v2
@@ -5194,8 +5192,7 @@ arm_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
       char name_buf[4];
 
       xsnprintf (name_buf, sizeof (name_buf), "d%d", reg - 256);
-      return user_reg_map_name_to_regnum (gdbarch, name_buf,
-					  strlen (name_buf));
+      return user_reg_map_name_to_regnum (gdbarch, name_buf);
     }
 
   return -1;
@@ -9272,8 +9269,7 @@ arm_return_value (struct gdbarch *gdbarch, struct value *function,
 	      int regnum;
 
 	      xsnprintf (name_buf, sizeof (name_buf), "%c%d", reg_char, i);
-	      regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
-						    strlen (name_buf));
+	      regnum = user_reg_map_name_to_regnum (gdbarch, name_buf);
 	      if (writebuf)
 		regcache->cooked_write (regnum, writebuf + i * unit_length);
 	      if (readbuf)
@@ -9799,8 +9795,7 @@ arm_neon_quad_read (struct gdbarch *gdbarch, readable_regcache *regcache,
   enum register_status status;
 
   xsnprintf (name_buf, sizeof (name_buf), "d%d", regnum << 1);
-  double_regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
-					       strlen (name_buf));
+  double_regnum = user_reg_map_name_to_regnum (gdbarch, name_buf);
 
   status = regcache->raw_read (double_regnum, reg_buf);
   if (status != REG_VALID)
@@ -9825,8 +9820,7 @@ arm_neon_quad_read_value (gdbarch *gdbarch, const frame_info_ptr &next_frame,
 {
   std::string raw_reg_name = string_printf ("d%d", quad_reg_index << 1);
   int double_regnum
-    = user_reg_map_name_to_regnum (gdbarch, raw_reg_name.c_str (),
-				   raw_reg_name.length ());
+    = user_reg_map_name_to_regnum (gdbarch, raw_reg_name);
 
   return pseudo_from_concat_raw (next_frame, pseudo_reg_num, double_regnum,
 				 double_regnum + 1);
@@ -9877,8 +9871,7 @@ arm_pseudo_read_value (gdbarch *gdbarch, const frame_info_ptr &next_frame,
 
       std::string raw_reg_name = string_printf ("d%d", s_reg_index >> 1);
       int double_regnum
-	= user_reg_map_name_to_regnum (gdbarch, raw_reg_name.c_str (),
-				       raw_reg_name.length ());
+	= user_reg_map_name_to_regnum (gdbarch, raw_reg_name);
 
       return pseudo_from_raw_part (next_frame, pseudo_reg_num, double_regnum,
 				   offset);
@@ -9900,8 +9893,7 @@ arm_neon_quad_write (struct gdbarch *gdbarch, struct regcache *regcache,
   int double_regnum;
 
   xsnprintf (name_buf, sizeof (name_buf), "d%d", regnum << 1);
-  double_regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
-					       strlen (name_buf));
+  double_regnum = user_reg_map_name_to_regnum (gdbarch, name_buf);
 
   regcache->raw_write (double_regnum, buf);
   regcache->raw_write (double_regnum + 1, buf + 8);
@@ -9913,8 +9905,7 @@ arm_neon_quad_write (gdbarch *gdbarch, const frame_info_ptr &next_frame,
 {
   std::string raw_reg_name = string_printf ("d%d", quad_reg_index << 1);
   int double_regnum
-    = user_reg_map_name_to_regnum (gdbarch, raw_reg_name.data (),
-				   raw_reg_name.length ());
+    = user_reg_map_name_to_regnum (gdbarch, raw_reg_name);
 
   pseudo_to_concat_raw (next_frame, buf, double_regnum, double_regnum + 1);
 }
@@ -9964,8 +9955,7 @@ arm_pseudo_write (gdbarch *gdbarch, const frame_info_ptr &next_frame,
 
       std::string raw_reg_name = string_printf ("d%d", s_reg_index >> 1);
       int double_regnum
-	= user_reg_map_name_to_regnum (gdbarch, raw_reg_name.c_str (),
-				       raw_reg_name.length ());
+	= user_reg_map_name_to_regnum (gdbarch, raw_reg_name);
 
       pseudo_to_raw_part (next_frame, buf, double_regnum, offset);
     }

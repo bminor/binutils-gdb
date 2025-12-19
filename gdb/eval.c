@@ -1132,8 +1132,7 @@ eval_op_register (struct type *expect_type, struct expression *exp,
   int regno;
   struct value *val;
 
-  regno = user_reg_map_name_to_regnum (exp->gdbarch,
-				       name, strlen (name));
+  regno = user_reg_map_name_to_regnum (exp->gdbarch, name);
   if (regno == -1)
     error (_("Register $%s not available."), name);
 

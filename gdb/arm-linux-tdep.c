@@ -1193,7 +1193,7 @@ arm_stap_parse_special_token (struct gdbarch *gdbarch,
       /* Used to save the register name.  */
       const char *start;
       char *regname;
-      int len, offset;
+      int offset;
       int got_minus = 0;
       long displacement;
 
@@ -1207,7 +1207,7 @@ arm_stap_parse_special_token (struct gdbarch *gdbarch,
       if (*tmp != ',')
 	return {};
 
-      len = tmp - start;
+      size_t len = tmp - start;
       regname = (char *) alloca (len + 2);
 
       offset = 0;
@@ -1226,7 +1226,8 @@ arm_stap_parse_special_token (struct gdbarch *gdbarch,
       len += offset;
       regname[len] = '\0';
 
-      if (user_reg_map_name_to_regnum (gdbarch, regname, len) == -1)
+      if (user_reg_map_name_to_regnum (gdbarch, { regname, len })
+	  == -1)
 	error (_("Invalid register name `%s' on expression `%s'."),
 	       regname, p->saved_arg);
 

@@ -782,8 +782,7 @@ stap_parse_register_operand (struct stap_parse_info *p)
 	regname += gdb_reg_suffix;
     }
 
-  int regnum = user_reg_map_name_to_regnum (gdbarch, regname.c_str (),
-					    regname.size ());
+  int regnum = user_reg_map_name_to_regnum (gdbarch, regname);
 
   /* Is this a valid register name?  */
   if (regnum == -1)
@@ -802,8 +801,7 @@ stap_parse_register_operand (struct stap_parse_info *p)
 	  /* This is just a check we perform to make sure that the
 	     arch-dependent code has provided us with a valid
 	     register name.  */
-	  regnum = user_reg_map_name_to_regnum (gdbarch, newregname.c_str (),
-						newregname.size ());
+	  regnum = user_reg_map_name_to_regnum (gdbarch, newregname);
 
 	  if (regnum == -1)
 	    internal_error (_("Invalid register name '%s' after replacing it"

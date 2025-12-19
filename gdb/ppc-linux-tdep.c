@@ -1731,7 +1731,6 @@ ppc_stap_parse_special_token (struct gdbarch *gdbarch,
 	  we would not need to do anything.  */
       const char *s = p->arg;
       char *regname;
-      int len;
 
       while (c_isdigit (*s))
 	++s;
@@ -1743,7 +1742,7 @@ ppc_stap_parse_special_token (struct gdbarch *gdbarch,
 	  return {};
 	}
 
-      len = s - p->arg;
+      size_t len = s - p->arg;
       regname = (char *) alloca (len + 2);
       regname[0] = 'r';
 
@@ -1751,7 +1750,7 @@ ppc_stap_parse_special_token (struct gdbarch *gdbarch,
       ++len;
       regname[len] = '\0';
 
-      if (user_reg_map_name_to_regnum (gdbarch, regname, len) == -1)
+      if (user_reg_map_name_to_regnum (gdbarch, { regname, len }) == -1)
 	error (_("Invalid register name `%s' on expression `%s'."),
 	       regname, p->saved_arg);
 

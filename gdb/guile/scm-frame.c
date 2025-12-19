@@ -831,8 +831,7 @@ gdbscm_frame_read_register (SCM self, SCM register_scm)
 	{
 	  found = true;
 	  regnum = user_reg_map_name_to_regnum (get_frame_arch (frame),
-						register_str,
-						strlen (register_str));
+						register_str);
 	  if (regnum >= 0)
 	    value = value_of_register (regnum,
 				       get_next_frame_sentinel_okay (frame));
