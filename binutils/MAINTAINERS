@@ -71,7 +71,6 @@ responsibility among the other maintainers.
   AVR		   Denis Chertykov <chertykov@gmail.com>
   AVR		   Marek Michalkiewicz <marekm@amelek.gda.pl>
   BFIN		   Jie Zhang <jzhang918@gmail.com>
-  BFIN		   Mike Frysinger <vapier@gentoo.org>
   BPF		   Jose E. Marchesi <jose.marchesi@oracle.com>
   CRIS		   Hans-Peter Nilsson <hp@axis.com>
   CTF		   Nick Alcock <nick.alcock@oracle.com>
@@ -95,7 +94,6 @@ responsibility among the other maintainers.
   ix86 COFF	   DJ Delorie <dj@redhat.com>
   ix86 PE/COFF	   Dave Korn <dave.korn.cygwin@gmail.com>
   ix86 INTEL MODE  Jan Beulich <jbeulich@suse.com>
-  KVX		   Paul Iannetta <piannetta@kalrayinc.com>
   libsframe	   Indu Bhagat <indu.bhagat@oracle.com>
   LM32             Jon Beniston <jon@beniston.com>
   LoongArch	   Chenghua Xu <xuchenghua@loongson.cn>
@@ -140,7 +138,6 @@ responsibility among the other maintainers.
   x86_64	   Jan Hubicka <jh@suse.cz>
   x86_64	   Andreas Jaeger <aj@suse.de>
   x86_64	   H.J. Lu <hjl.tools@gmail.com>
-  XCOFF 	   Richard Sandiford <r.sandiford@uk.ibm.com>
   XGATE            Sean Keys <skeys@ipdatasys.com>
   Xtensa	   Max Filippov <jcmvbkbc@gmail.com>
   Xtensa	   Sterling Augustine <augustine.sterling@gmail.com>
@@ -155,19 +152,22 @@ goes with them.
   Paul Brook
   Eric Christopher
   Jason Eckhardt
+  Mike Frysinger
+  Paul Iannetta
   Geoff Keating
   Mark Kettenis
   Walter Lee
   Mei Ligang
   Arnold Metselaar
+  Vladimir Mezentsev
   Mark Mitchell
+  Richard Sandiford
   Bernd Schmidt
   Svein Seldal
-  M R Swami Reddy
   Martin Schwidefsky
+  M R Swami Reddy
   Matt Thomas
   Jim Wilson
-  Vladimir Mezentsev
 
       --------- CGEN Maintainers -------------
 
