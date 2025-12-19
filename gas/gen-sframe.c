@@ -206,6 +206,7 @@ sframe_fre_set_ra_track (struct sframe_row_entry *fre, offsetT ra_offset)
 {
   fre->ra_loc = SFRAME_FRE_ELEM_LOC_STACK;
   fre->ra_offset = ra_offset;
+  fre->ra_deref_p = true;
   fre->ra_undefined_p = false;
   fre->merge_candidate = false;
 }
@@ -215,6 +216,7 @@ sframe_fre_set_fp_track (struct sframe_row_entry *fre, offsetT fp_offset)
 {
   fre->fp_loc = SFRAME_FRE_ELEM_LOC_STACK;
   fre->fp_offset = fp_offset;
+  fre->fp_deref_p = true;
   fre->merge_candidate = false;
 }
 
