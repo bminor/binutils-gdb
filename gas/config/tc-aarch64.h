@@ -339,6 +339,10 @@ extern offsetT aarch64_sframe_cfa_ra_offset (void);
 unsigned char aarch64_sframe_get_abi_arch (void);
 #define sframe_get_abi_arch aarch64_sframe_get_abi_arch
 
+/* Whether SFrame FDE of type SFRAME_FDE_TYPE_FLEX be generated.  */
+extern bool aarch64_support_flex_fde_p (void);
+#define sframe_support_flex_fde_p aarch64_support_flex_fde_p
+
 #endif /* OBJ_ELF  */
 
 #define MD_PCREL_FROM_SECTION(F,S) md_pcrel_from_section(F,S)

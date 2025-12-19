@@ -131,6 +131,10 @@ extern offsetT s390_sframe_cfa_ra_offset (void);
 unsigned char s390_sframe_get_abi_arch (void);
 #define sframe_get_abi_arch s390_sframe_get_abi_arch
 
+/* Whether SFrame FDE of type SFRAME_FDE_TYPE_FLEX be generated.  */
+extern bool s390_support_flex_fde_p (void);
+#define sframe_support_flex_fde_p s390_support_flex_fde_p
+
 /* The target supports Object Attributes.  */
 #define TC_OBJ_ATTR 1
 

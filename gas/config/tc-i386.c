@@ -12079,6 +12079,13 @@ x86_sframe_ra_tracking_p (void)
   return false;
 }
 
+/* Whether SFrame FDE of type SFRAME_FDE_TYPE_FLEX be generated.  */
+bool
+x86_support_flex_fde_p (void)
+{
+  return true;
+}
+
 /* The fixed offset from CFA for SFrame to recover the return address.
    (useful only when SFrame RA tracking is not needed).  */
 offsetT

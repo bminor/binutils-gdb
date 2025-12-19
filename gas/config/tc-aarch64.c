@@ -9247,6 +9247,14 @@ aarch64_sframe_ra_tracking_p (void)
   return true;
 }
 
+/* Whether SFrame FDE of type SFRAME_FDE_TYPE_FLEX be generated.  */
+
+bool
+aarch64_support_flex_fde_p (void)
+{
+  return false;
+}
+
 /* The fixed offset from CFA for SFrame to recover the return address.
    (useful only when SFrame RA tracking is not needed).  */
 
