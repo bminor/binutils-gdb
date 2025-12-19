@@ -161,9 +161,16 @@ parser_state::push_symbol (const char *name, block_symbol sym)
 void
 parser_state::push_dollar (struct stoken str)
 {
+  push_dollar (std::string_view (str.ptr, str.length));
+}
+
+/* See parser-defs.h.  */
+
+void
+parser_state::push_dollar (std::string_view str)
+{
   struct block_symbol sym;
   struct internalvar *isym = NULL;
-  std::string copy;
 
   /* Handle the tokens $digits; also $ (short for $0) and $$ (short for $$1)
      and $$digits (equivalent to $<-digits> if you could type that).  */
@@ -172,12 +179,12 @@ parser_state::push_dollar (struct stoken str)
   int i = 1;
   /* Double dollar means negate the number and add -1 as well.
      Thus $$ alone means -1.  */
-  if (str.length >= 2 && str.ptr[1] == '$')
+  if (str.length () >= 2 && str[1] == '$')
     {
       negate = 1;
       i = 2;
     }
-  if (i == str.length)
+  if (i == str.length ())
     {
       /* Just dollars (one or two).  */
       i = -negate;
@@ -185,12 +192,12 @@ parser_state::push_dollar (struct stoken str)
       return;
     }
   /* Is the rest of the token digits?  */
-  for (; i < str.length; i++)
-    if (!(str.ptr[i] >= '0' && str.ptr[i] <= '9'))
+  for (; i < str.length (); i++)
+    if (!(str[i] >= '0' && str[i] <= '9'))
       break;
-  if (i == str.length)
+  if (i == str.length ())
     {
-      i = atoi (str.ptr + 1 + negate);
+      i = atoi (&str[1 + negate]);
       if (negate)
 	i = -i;
       push_new<expr::last_operation> (i);
@@ -199,13 +206,10 @@ parser_state::push_dollar (struct stoken str)
 
   /* Handle tokens that refer to machine registers:
      $ followed by a register name.  */
-  i = user_reg_map_name_to_regnum (gdbarch (),
-				   { str.ptr + 1, size_t (str.length - 1) });
+  i = user_reg_map_name_to_regnum (gdbarch (), str.substr (1));
   if (i >= 0)
     {
-      str.length--;
-      str.ptr++;
-      push_new<expr::register_operation> (copy_name (str));
+      push_new<expr::register_operation> (std::string (str.substr (1)));
       block_tracker->update (expression_context_block,
 			     INNERMOST_BLOCK_FOR_REGISTERS);
       return;
@@ -213,7 +217,7 @@ parser_state::push_dollar (struct stoken str)
 
   /* Any names starting with $ are probably debugger internal variables.  */
 
-  copy = copy_name (str);
+  std::string copy (str);
   isym = lookup_only_internalvar (copy.c_str () + 1);
   if (isym)
     {

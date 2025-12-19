@@ -332,7 +332,7 @@ struct rust_parser
   /* Return the token's string value as a string.  */
   std::string get_string () const
   {
-    return std::string (current_string_val.ptr, current_string_val.length);
+    return std::string (current_string_val);
   }
 
   /* Storage for use while parsing.  */
@@ -349,7 +349,7 @@ struct rust_parser
   /* The current token's payload, if any.  */
   typed_val_int current_int_val {};
   typed_val_float current_float_val {};
-  struct stoken current_string_val {};
+  std::string_view current_string_val;
   enum exp_opcode current_opcode = OP_NULL;
 
   /* When completing, this may be set to the field operation to
@@ -751,8 +751,8 @@ rust_parser::lex_string ()
 	}
     }
 
-  current_string_val.length = obstack_object_size (&obstack);
-  current_string_val.ptr = (const char *) obstack_finish (&obstack);
+  size_t size = obstack_object_size (&obstack);
+  current_string_val = { (const char *) obstack_finish (&obstack), size };
   return is_byte ? BYTESTRING : STRING;
 }
 
@@ -854,10 +854,7 @@ rust_parser::lex_identifier ()
     }
 
   if (token == NULL || (pstate->parse_completion && pstate->lexptr[0] == '\0'))
-    {
-      current_string_val.length = length;
-      current_string_val.ptr = start;
-    }
+    current_string_val = { start, length };
 
   if (pstate->parse_completion && pstate->lexptr[0] == '\0')
     {
@@ -1082,8 +1079,7 @@ rust_parser::lex_one_token (bool decimal_only)
     {
       if (pstate->parse_completion)
 	{
-	  current_string_val.length =0;
-	  current_string_val.ptr = "";
+	  current_string_val = "";
 	  return COMPLETE;
 	}
       return 0;
@@ -1960,7 +1956,7 @@ rust_parser::parse_string ()
 
   std::vector<std::pair<std::string, operation_up>> field_v;
 
-  size_t len = current_string_val.length;
+  size_t len = current_string_val.length ();
   operation_up str = make_operation<string_operation> (get_string ());
   operation_up addr
     = make_operation<rust_unop_addr_operation> (std::move (str));

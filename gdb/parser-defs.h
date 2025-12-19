@@ -224,6 +224,10 @@ struct parser_state : public expr_builder
 
   /* Push a reference to $mumble.  This may result in a convenience
      variable, a history reference, or a register.  */
+  void push_dollar (std::string_view str);
+
+  /* Push a reference to $mumble.  This may result in a convenience
+     variable, a history reference, or a register.  */
   void push_dollar (struct stoken str);
 
   /* Pop an operation from the stack.  */
