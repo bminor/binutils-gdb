@@ -1429,12 +1429,13 @@ const bfd_target *bfd_default_vector[] = {
 	NULL
 };
 
-/* bfd_associated_vector[] contains the associated target vectors used
-   to reduce the ambiguity in bfd_check_format_matches.  */
+/* bfd_associated_vector[] contains the main target vectors when
+   configuring with --enable-targets=all, to match those
+   preferentially over others that might match.  */
 
 static const bfd_target *const _bfd_associated_vector[] = {
 #ifdef ASSOCIATED_VECS
-	ASSOCIATED_VECS,
+	ASSOCIATED_VECS
 #endif
 	NULL
 };

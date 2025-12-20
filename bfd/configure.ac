@@ -326,11 +326,11 @@ for targ in $target $canon_targets
 do
     if test $targ = all; then
         all_targets=true
-	assocvecs="$assocvecs $targ_defvec $targ_selvecs"
     elif test $targ != plugin; then
 	. $srcdir/config.bfd
 	if test $targ = $target; then
 	    defvec=$targ_defvec
+	    assocvecs="$targ_defvec $targ_selvecs"
 	fi
 	selvecs="$selvecs $targ_defvec $targ_selvecs"
 	selarchs="$selarchs $targ_archs"
@@ -355,18 +355,6 @@ for i in $selvecs ; do
     esac
 done
 selvecs="$f"
-
-
-# uniq the associated vectors in all the configured targets.
-f=""
-for i in $assocvecs ; do
-    case " $f " in
-    *" $i "*) ;;
-    *) f="$f $i" ;;
-    esac
-done
-assocvecs="$f"
-
 
 # uniq the architectures in all the configured targets.
 f=""
@@ -721,8 +709,14 @@ if test x${all_targets} = xtrue ; then
   selvecs=
   havevecs=-DHAVE_all_vecs
   selarchs=
-  test -n "$assocvecs" &&
-    assocvecs=`echo $assocvecs | sed -e 's/^/\&/' -e 's/ \(.\)/,\&\1/g'`
+  f=
+  for i in $assocvecs ; do
+    case "&${f}," in
+      *"&${i},"*) ;;
+      *) f="${f}&${i}," ;;
+    esac
+  done
+  assocvecs=$f
 else	# all_targets is true
   # Only set these if they will be nonempty, for the clever echo.
   havevecs=
