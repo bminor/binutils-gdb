@@ -1975,11 +1975,11 @@ sframe_encoder_write_fre (char *contents, sframe_frame_row_entry *frep,
 }
 
 /* Serialize the core contents of the SFrame section and write out to the
-   output buffer held in the encoder context ECTX.  Return SFRAME_ERR if
-   failure.  */
+   output buffer held in the encoder context ECTX.  Sort the SFrame FDEs on
+   start PC if SORT_FDE_P is true.  Return SFRAME_ERR if failure.  */
 
 static int
-sframe_encoder_write_sframe (sframe_encoder_ctx *ectx)
+sframe_encoder_write_sframe (sframe_encoder_ctx *ectx, bool sort_fde_p)
 {
   char *contents;
   size_t buf_size;
@@ -2059,12 +2059,13 @@ sframe_encoder_write_sframe (sframe_encoder_ctx *ectx)
   sframe_assert ((size_t)(contents - ectx->sfe_data) == buf_size);
 
   /* Sort the FDE table */
-  sframe_sort_funcdesc (ectx);
+  if (sort_fde_p)
+    sframe_sort_funcdesc (ectx);
 
   /* Sanity checks:
      - the FDE section must have been sorted by now on the start address
-     of each function.  */
-  if (!(sframe_encoder_get_flags (ectx) & SFRAME_F_FDE_SORTED)
+     of each function, if sorting was needed.  */
+  if ((sort_fde_p != (sframe_encoder_get_flags (ectx) & SFRAME_F_FDE_SORTED))
       || (fd_info == NULL))
     return sframe_set_errno (&err, SFRAME_ERR_FDE_INVAL);
 
@@ -2082,12 +2083,12 @@ sframe_encoder_write_sframe (sframe_encoder_ctx *ectx)
 }
 
 /* Serialize the contents of the encoder context ECTX and return the buffer.
-   ENCODED_SIZE is updated to the size of the buffer.
-   Sets ERRP if failure.  */
+   Sort the SFrame FDEs on start PC if SORT_FDE_P is true.  ENCODED_SIZE is
+   updated to the size of the buffer.  Sets ERRP if failure.  */
 
 char *
-sframe_encoder_write (sframe_encoder_ctx *ectx,
-		      size_t *encoded_size, int *errp)
+sframe_encoder_write (sframe_encoder_ctx *ectx, size_t *encoded_size,
+		      bool sort_fde_p, int *errp)
 {
   sframe_header *ehp;
   size_t hdrsize, fsz, fresz, bufsize;
@@ -2128,7 +2129,7 @@ sframe_encoder_write (sframe_encoder_ctx *ectx,
   foreign_endian = need_swapping (ehp->sfh_abi_arch);
 
   /* Write out the FDE Index and the FRE table in the sfe_data. */
-  if (sframe_encoder_write_sframe (ectx))
+  if (sframe_encoder_write_sframe (ectx, sort_fde_p))
     return sframe_ret_set_errno (errp, SFRAME_ERR_BUF_INVAL);
 
   /* Endian flip the contents if necessary.  */

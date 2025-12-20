@@ -90,6 +90,22 @@ foreach sframe_test $sframe_test_list {
 
 check_pr33401
 
+# Run other compile and link tests.
+if { [check_compiler_available] } {
+    run_cc_link_tests [list \
+	[list \
+	    "Build pr32789-1a.o pr32789-1b.o" \
+	    "-r" \
+	    "-Wa,--gsframe" \
+	    { pr32789-1a.c pr32789-1b.c } \
+	    {{readelf --sframe pr32789-1.sd}
+	     {readelf -r pr32789-1.rd}} \
+	    "pr32789-1.o" \
+	    "c" \
+	] \
+    ]
+}
+
 if {[info exists old_lc_all]} {
     set env(LC_ALL) $old_lc_all
 } else {

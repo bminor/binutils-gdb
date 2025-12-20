@@ -34,7 +34,6 @@ LIBSFRAME_2.0 {
     sframe_encoder_add_fre;
     sframe_encoder_add_funcdesc;
     sframe_encoder_add_funcdesc_v2;
-    sframe_encoder_write;
     dump_sframe;
     sframe_errmsg;
 
@@ -45,4 +44,5 @@ LIBSFRAME_2.0 {
 LIBSFRAME_2.1 {
   global:
     sframe_fre_get_ra_undefined_p;
+    sframe_encoder_write;
 } LIBSFRAME_2.0;

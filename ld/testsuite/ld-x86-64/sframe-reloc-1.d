@@ -11,8 +11,7 @@ Contents of the SFrame section .sframe:
   Header :
 
     Version: SFRAME_VERSION_2
-    Flags: SFRAME_F_FDE_SORTED,
-           SFRAME_F_FDE_FUNC_START_PCREL
+    Flags: SFRAME_F_FDE_FUNC_START_PCREL
     CFA fixed RA offset: \-8
     Num FDEs: 2
     Num FREs: 8

@@ -309,11 +309,11 @@ sframe_encoder_add_funcdesc_v2 (sframe_encoder_ctx *ectx,
 				uint32_t num_fres);
 
 /* Serialize the contents of the encoder context ECTX and return the buffer.
-   ENCODED_SIZE is updated to the size of the buffer.
-   Sets ERRP if failure.  */
+   Sort the SFrame FDEs on start PC if SORT_FDE_P is true.  ENCODED_SIZE is
+   updated to the size of the buffer.  Sets ERRP if failure.  */
 extern char  *
-sframe_encoder_write (sframe_encoder_ctx *ectx,
-		      size_t *encoded_size, int *errp);
+sframe_encoder_write (sframe_encoder_ctx *ectx, size_t *encoded_size,
+		      bool sort_fde_p, int *errp);
 
 #ifdef	__cplusplus
 }

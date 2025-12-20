@@ -692,7 +692,8 @@ _bfd_elf_write_section_sframe (bfd *abfd, struct bfd_link_info *info)
   if (sec == NULL)
     return true;
 
-  contents = sframe_encoder_write (sfe_ctx, &sec_size, &err);
+  bool sort_p = !bfd_link_relocatable (info);
+  contents = sframe_encoder_write (sfe_ctx, &sec_size, sort_p, &err);
   sec->size = (bfd_size_type) sec_size;
 
   if (!bfd_set_section_contents (abfd, sec->output_section, contents,

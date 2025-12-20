@@ -2016,7 +2016,7 @@ _bfd_x86_elf_write_sframe_plt (bfd *output_bfd,
 
   BFD_ASSERT (ectx);
 
-  void *contents = sframe_encoder_write (ectx, &sec_size, &err);
+  void *contents = sframe_encoder_write (ectx, &sec_size, false, &err);
 
   sec->size = (bfd_size_type) sec_size;
   sec->contents = (unsigned char *) bfd_zalloc (dynobj, sec->size);
