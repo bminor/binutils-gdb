@@ -446,7 +446,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 {
   extern const bfd_target binary_vec;
   const bfd_target * const *target;
-  const bfd_target **matching_vector = NULL;
+  const bfd_target **matching_vector;
   const bfd_target *save_targ, *right_targ, *ar_right_targ, *match_targ;
   const bfd_target *fail_targ;
   int match_count, best_count, best_match;
@@ -471,15 +471,10 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
   if (abfd->format != bfd_unknown)
     return abfd->format == format;
 
-  if (matching != NULL || *bfd_associated_vector != NULL)
-    {
-      size_t amt;
-
-      amt = sizeof (*matching_vector) * 2 * _bfd_target_vector_entries;
-      matching_vector = (const bfd_target **) bfd_malloc (amt);
-      if (!matching_vector)
-	return false;
-    }
+  matching_vector = bfd_malloc (sizeof (*matching_vector)
+				* 2 * _bfd_target_vector_entries);
+  if (!matching_vector)
+    return false;
 
   /* Avoid clashes with bfd_cache_close_all running in another
      thread.  */
@@ -643,8 +638,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 	      if (abfd->xvec == bfd_default_vector[0])
 		goto ok_ret;
 
-	      if (matching_vector)
-		matching_vector[match_count] = abfd->xvec;
+	      matching_vector[match_count] = abfd->xvec;
 	      match_count++;
 
 	      if (match_priority < best_match)
@@ -666,8 +660,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 		 better matches.  */
 	      if (ar_right_targ != bfd_default_vector[0])
 		ar_right_targ = *target;
-	      if (matching_vector)
-		matching_vector[ar_match_index] = *target;
+	      matching_vector[ar_match_index] = *target;
 	      ar_match_index++;
 	    }
 
@@ -697,7 +690,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 	{
 	  match_count = ar_match_index - _bfd_target_vector_entries;
 
-	  if (matching_vector && match_count > 1)
+	  if (match_count > 1)
 	    memcpy (matching_vector,
 		    matching_vector + _bfd_target_vector_entries,
 		    sizeof (*matching_vector) * match_count);
@@ -731,7 +724,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
   /* We still have more than one equally good match, and at least some
      of the targets support match priority.  Choose the first of the
      best matches.  */
-  if (matching_vector && match_count > 1 && best_count != match_count)
+  if (match_count > 1 && best_count != match_count)
     {
       int i;
 
