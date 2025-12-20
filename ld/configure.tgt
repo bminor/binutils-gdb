@@ -373,15 +373,12 @@ i[3-7]86-*-linux-*)	targ_emul=elf_i386
 i[3-7]86-*-redox*)	targ_emul=elf_i386
 			targ_extra_emuls=elf_x86_64
 			;;
-i[3-7]86-*-solaris2.1[01]*)
+i[3-7]86-*-solaris2*)
 			targ_emul=elf_i386_sol2
-			targ_extra_emuls="elf_x86_64_sol2 elf_i386 elf_x86_64"
-			targ_extra_libpath=$targ_extra_emuls
+			targ64_extra_libpath=elf_x86_64_sol2
 			;;
 i[3-7]86-*-solaris*)
 			targ_emul=elf_i386_sol2
-			targ_extra_emuls=elf_i386
-			targ_extra_libpath=$targ_extra_emuls
 			;;
 i[3-7]86-*-netbsd* | \
 i[3-7]86-*-netbsd*-gnu* | \
@@ -918,11 +915,9 @@ sparc64-*-linux-*)	targ_emul=elf64_sparc
 sparc64-*-*bsd*)	targ_emul=elf64_sparc
 			targ_extra_emuls="elf32_sparc"
 			;;
-sparc64-*-solaris2.[7-9]* | sparc64-*-solaris2.1[01]* | \
-sparcv9-*-solaris2.[7-9]* | sparcv9-*-solaris2.1[01]*)
+sparc64-*-solaris2* | sparcv9-*-solaris2*)
 			targ_emul=elf64_sparc_sol2
-			targ_extra_emuls="elf32_sparc_sol2 elf64_sparc elf32_sparc"
-			targ_extra_libpath=$targ_extra_emuls
+			targ_extra_libpath=elf32_sparc_sol2
 			;;
 sparc64-*-haiku*)	targ_emul=elf64_sparc
 			;;
@@ -933,14 +928,12 @@ sparc*-*-linux-*)	targ_emul=elf32_sparc
 			targ_extra_libpath=elf64_sparc
 			tdir_elf64_sparc=`echo ${targ_alias} | sed -e 's/32//'`
 			;;
-sparc-*-solaris2.[7-9]* | sparc-*-solaris2.1[01]*)
+sparc-*-solaris2*)
 			targ_emul=elf32_sparc_sol2
-			targ_extra_emuls="elf64_sparc_sol2 elf32_sparc elf64_sparc"
-			targ_extra_libpath=$targ_extra_emuls
+			targ64_extra_libpath=elf64_sparc_sol2
 			;;
 sparc*-*-solaris*)
 			targ_emul=elf32_sparc_sol2
-			targ_extra_emuls=elf32_sparc
 			;;
 sparc*-*-vxworks*)	targ_emul=elf32_sparc_vxworks
 			;;
@@ -1008,10 +1001,9 @@ x86_64-*-linux-*)	targ_emul=elf_x86_64
 x86_64-*-redox*)	targ_emul=elf_x86_64
 			targ_extra_emuls=elf_i386
 			;;
-x86_64-*-solaris2.1[01]*)
+x86_64-*-solaris2*)
 			targ_emul=elf_x86_64_sol2
-			targ_extra_emuls="elf_i386_sol2 elf_x86_64 elf_i386"
-			targ_extra_libpath=$targ_extra_emuls
+			targ_extra_libpath=elf_i386_sol2
 			;;
 x86_64-*-netbsd* | x86_64-*-openbsd*)
 			targ_emul=elf_x86_64
