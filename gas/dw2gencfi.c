@@ -1006,6 +1006,7 @@ dot_cfi_escape (int ignored ATTRIBUTE_UNUSED)
 	  /* We're still at the opening parenthesis.  Leave it to expression()
 	     to parse it and find the matching closing one.  */
 	  expression (&e->exp);
+	  e->reloc = TC_PARSE_CONS_RETURN_NONE;
 	}
       else
 	{
