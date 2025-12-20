@@ -595,13 +595,13 @@ case "${targ}" in
     targ_selvecs="iamcu_elf32_vec i386_coff_vec"
     ;;
   i[3-7]86-*-solaris2*)
-    # PR 27666: Do not include i386_elf32_vec or x86_64_elf64_vec.
     targ_defvec=i386_elf32_sol2_vec
-    targ64_selvecs=x86_64_elf64_sol2_vec
+    targ_selvecs=i386_elf32_vec
+    targ64_selvecs="x86_64_elf64_sol2_vec x86_64_elf64_vec"
     ;;
   i[3-7]86-*-solaris*)
-    # PR 27666: Do not include i386_elf32_vec here.
     targ_defvec=i386_elf32_sol2_vec
+    targ_selvecs=i386_elf32_vec
     ;;
   i[3-7]86-*-nto*)
     targ_defvec=i386_elf32_vec
@@ -726,9 +726,8 @@ case "${targ}" in
     want64=true
     ;;
   x86_64-*-solaris2*)
-    # PR 27666: Do not include i386_elf32_vec or x86_64_elf64_vec.
     targ_defvec=x86_64_elf64_sol2_vec
-    targ_selvecs=i386_elf32_sol2_vec
+    targ_selvecs="i386_elf32_sol2_vec x86_64_elf64_vec i386_elf32_vec"
     want64=true
     ;;
   x86_64-*-gnu*)
@@ -1335,15 +1334,14 @@ case "${targ}" in
     targ_underscore=yes
     ;;
   sparc-*-solaris2*)
-    # PR 27666: Do not include sparc_elf32_vec or sparc_elf64_vec here.
     targ_defvec=sparc_elf32_sol2_vec
-    targ64_selvecs=sparc_elf64_sol2_vec
+    targ_selvecs=sparc_elf32_vec
+    targ64_selvecs="sparc_elf64_sol2_vec sparc_elf64_vec"
     ;;
 #ifdef BFD64
   sparcv9-*-solaris2* | sparc64-*-solaris2*)
-    # PR 27666: Do not include sparc_elf32_vec or sparc_elf64_vec here.
     targ_defvec=sparc_elf64_sol2_vec
-    targ_selvecs=sparc_elf32_sol2_vec
+    targ_selvecs="sparc_elf32_sol2_vec sparc_elf64_vec sparc_elf32_vec"
     want64=true
     ;;
   sparc64-*-haiku*)
@@ -1370,8 +1368,8 @@ case "${targ}" in
     targ_selvecs="sparc_elf32_vec"
     ;;
   sparc*-*-solaris*)
-    # PR 27666: Do not include sparc_elf32_vec here.
     targ_defvec=sparc_elf32_sol2_vec
+    targ_selvecs=sparc_elf32_vec
     ;;
   sparc*-*-*)
     targ_defvec=sparc_elf32_vec
