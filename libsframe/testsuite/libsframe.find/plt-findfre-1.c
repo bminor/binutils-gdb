@@ -77,7 +77,7 @@ void test_plt_findfre (const char suffix, uint32_t plt_vaddr,
   fde_cnt = sframe_encoder_get_num_fidx (ectx);
   TEST (fde_cnt == 1, "plt-findfre-1%c: Test FDE count", suffix);
 
-  sframe_buf = sframe_encoder_write (ectx, &sf_size, &err);
+  sframe_buf = sframe_encoder_write (ectx, &sf_size, true, &err);
   TEST (err == 0, "plt-findfre-1%c: Encoder write", suffix);
 
   dctx = sframe_decode (sframe_buf, sf_size, &err);

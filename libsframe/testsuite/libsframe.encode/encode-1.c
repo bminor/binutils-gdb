@@ -177,7 +177,7 @@ int main (void)
   fde_cnt = sframe_encoder_get_num_fidx (encode);
   TEST (fde_cnt == 2, "encode-1: Encoder FDE count post addition");
 
-  sframe_buf = sframe_encoder_write (encode, &sf_size, &err);
+  sframe_buf = sframe_encoder_write (encode, &sf_size, true, &err);
   TEST (err == 0, "encode-1: Encoder write");
 
   match_p = data_match (sframe_buf, sf_size);

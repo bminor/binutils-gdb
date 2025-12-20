@@ -173,7 +173,7 @@ void test_text_findfre (const char suffix, uint32_t text_vaddr,
   fde_cnt = sframe_encoder_get_num_fidx (encode);
   TEST (fde_cnt == 3, "findfunc-1%c: Test FDE count", suffix);
 
-  sframe_buf = sframe_encoder_write (encode, &sf_size, &err);
+  sframe_buf = sframe_encoder_write (encode, &sf_size, true, &err);
   TEST (err == 0, "findfunc-1%c: Encoder write", suffix);
 
   dctx = sframe_decode (sframe_buf, sf_size, &err);
