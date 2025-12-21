@@ -329,12 +329,6 @@ struct rust_parser
   }
 #endif /* GDB_SELF_TEST */
 
-  /* Return the token's string value as a string.  */
-  std::string get_string () const
-  {
-    return std::string (current_string_val);
-  }
-
   /* Storage for use while parsing.  */
   auto_obstack obstack;
 
@@ -1265,7 +1259,7 @@ rust_parser::parse_struct_expr (struct type *type)
       if (current_token != IDENT)
 	error (_("'}', '..', or identifier expected"));
 
-      std::string name = get_string ();
+      std::string name (current_string_val);
       lex ();
 
       operation_up expr;
@@ -1550,7 +1544,8 @@ rust_parser::parse_field (operation_up &&lhs)
     case COMPLETE:
       {
 	bool is_complete = current_token == COMPLETE;
-	auto struct_op = new rust_structop (std::move (lhs), get_string ());
+	auto struct_op = new rust_structop (std::move (lhs),
+					    std::string (current_string_val));
 	lex ();
 	if (is_complete)
 	  {
@@ -1684,7 +1679,7 @@ rust_parser::parse_slice_type ()
      the compiler does emit the "&str" type in the DWARF, just "str"
      itself isn't always available -- but it's handy if this works
      seamlessly.  */
-  if (current_token == IDENT && get_string () == "str")
+  if (current_token == IDENT && current_string_val == "str")
     {
       lex ();
       return rust_slice_type ("&str", get_type ("u8"), get_type ("usize"));
@@ -1854,7 +1849,7 @@ rust_parser::parse_path (bool for_expr)
 
   if (current_token != IDENT)
     error (_("identifier expected"));
-  std::string path = get_string ();
+  std::string path (current_string_val);
   bool saw_ident = true;
   lex ();
 
@@ -1869,7 +1864,10 @@ rust_parser::parse_path (bool for_expr)
 
 	  if (current_token == IDENT)
 	    {
-	      path = path + "::" + get_string ();
+	      path += "::";
+	      /* There isn't an appropriate operator+ for string_view
+		 until C++26.  */
+	      path.append (current_string_val);
 	      lex ();
 	      saw_ident = true;
 	    }
@@ -1957,7 +1955,8 @@ rust_parser::parse_string ()
   std::vector<std::pair<std::string, operation_up>> field_v;
 
   size_t len = current_string_val.length ();
-  operation_up str = make_operation<string_operation> (get_string ());
+  operation_up str
+    = make_operation<string_operation> (std::string (current_string_val));
   operation_up addr
     = make_operation<rust_unop_addr_operation> (std::move (str));
   field_v.emplace_back ("data_ptr", std::move (addr));
@@ -2054,7 +2053,8 @@ rust_parser::parse_atom (bool required)
       break;
 
     case BYTESTRING:
-      result = make_operation<string_operation> (get_string ());
+      result
+	= make_operation<string_operation> (std::string (current_string_val));
       lex ();
       break;
 
@@ -2223,7 +2223,7 @@ rust_lex_stringish_test (rust_parser *parser, const char *input,
 			 const char *value, int kind)
 {
   rust_lex_test_one (parser, input, kind);
-  SELF_CHECK (parser->get_string () == value);
+  SELF_CHECK (parser->current_string_val == value);
 }
 
 /* Helper to test that a string parses as a given token sequence.  */
