@@ -996,11 +996,10 @@ dot_cfi_escape (int ignored ATTRIBUTE_UNUSED)
 	  if (is_whitespace (c))
 	    c = *++input_line_pointer;
 	  if (c != '(')
-	    {
-	      input_line_pointer = ilp_save;
-	      e->type = CFI_ESC_byte;
-	    }
+	    e->type = CFI_ESC_byte;
 	}
+      if (e->type == CFI_ESC_byte)
+	input_line_pointer = ilp_save;
 
       if (e->type == CFI_ESC_sleb128 || e->type == CFI_ESC_uleb128)
 	{
@@ -1010,7 +1009,7 @@ dot_cfi_escape (int ignored ATTRIBUTE_UNUSED)
 	}
       else
 	{
-	  /* We may still be at the opening parenthesis.  Leave it to expression()
+	  /* We may still be at an opening parenthesis.  Leave it to expression()
 	     to parse it and find the matching closing one.  */
 	  e->reloc = do_parse_cons_expression (&e->exp, e->type);
 	}
