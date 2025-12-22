@@ -892,7 +892,9 @@ run_inferior_call (std::unique_ptr<call_thread_fsm> sm,
      async_enable_stdin.  */
   if (current_ui->prompt_state == PROMPT_BLOCKED)
     {
-      if (call_thread->thread_fsm ()->finished_p ())
+      /* thread_fsm() can return NULL if the thread has exited.  */
+      if (call_thread->thread_fsm () != nullptr
+	  && call_thread->thread_fsm ()->finished_p ())
 	async_disable_stdin ();
       else
 	async_enable_stdin ();
