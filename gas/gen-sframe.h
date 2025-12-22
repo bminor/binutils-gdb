@@ -31,8 +31,14 @@
       as_bad (format, __VA_ARGS__);            \
   } while (0)
 
-#define SFRAME_FRE_ELEM_LOC_REG		0
-#define SFRAME_FRE_ELEM_LOC_STACK	1
+/* The entity is not tracked.  */
+#define SFRAME_FRE_ELEM_LOC_NONE	0
+/* The location of the tracked entity is based on a register.  May or may not
+   involve dereferencing.  */
+#define SFRAME_FRE_ELEM_LOC_REG		1
+/* The location of the tracked entity is based on the CFA.  In theory, may or
+   may not involve dereferencing.  */
+#define SFRAME_FRE_ELEM_LOC_STACK	2
 
 /* An invalid register number.  */
 #define SFRAME_FRE_REG_INVALID		((unsigned int)-1)
