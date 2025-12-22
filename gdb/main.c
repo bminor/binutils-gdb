@@ -1436,8 +1436,8 @@ This is the GNU debugger.  Usage:\n\n\
   gdb_puts (_("\
 Selection of debuggee and its files:\n\n\
   --args             Arguments after executable-file are passed to inferior.\n\
-  --no-escape-args   Like --args, but arguments are not escaped.\n							\
-  --core=COREFILE    Analyze the core dump COREFILE.\n	\
+  --no-escape-args   Like --args, but arguments are not escaped.\n\
+  --core=COREFILE    Analyze the core dump COREFILE.\n\
   --exec=EXECFILE    Use EXECFILE as the executable.\n\
   --pid=PID          Attach to running process PID.\n\
   --directory=DIR    Search for source files in DIR.\n\
@@ -1544,7 +1544,7 @@ At startup, GDB reads the following init files and executes their commands:\n\
 For more information, type \"%ps\" from within GDB, or consult the\n\
 GDB manual (available as on-line info or a printed manual).\n\
 "),
-	      styled_string (command_style.style (), "stream"));
+	      styled_string (command_style.style (), "help"));
   if (REPORT_BUGS_TO[0] && stream == gdb_stdout)
     gdb_printf (stream, _("\n\
 Report bugs to %ps.\n\
