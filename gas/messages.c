@@ -127,6 +127,45 @@ as_show_where (void)
     }
 }
 
+/* The common portion of as_info, and as_info_where.  */
+
+static void
+as_info_internal (const char *file, unsigned int line, unsigned int indent,
+		  const char *buffer)
+{
+  if (file == NULL)
+    file = as_where_top (&line);
+
+  if (file)
+    {
+      if (line != 0)
+	fprintf (stderr, "%s:%u: %*s%s%s\n",
+		 file, line, (int)indent, "", _("Info: "), buffer);
+      else
+	fprintf (stderr, "%s: %s%s\n", file, _("Info: "), buffer);
+    }
+  else
+    fprintf (stderr, "%s%s\n", _("Info: "), buffer);
+}
+
+/* Send to stderr a string as a information, and locate information
+   in input file(s).  */
+
+void
+as_info (unsigned int indent, const char *format, ...)
+{
+  if (flag_no_information)
+    return;
+
+  va_list args;
+  char buffer[2000];
+
+  va_start (args, format);
+  vsnprintf (buffer, sizeof (buffer), format, args);
+  va_end (args);
+  as_info_internal (NULL, 0, indent, buffer);
+}
+
 /* Send to stderr a string as information, with location data passed in.
    Note that for now this is not intended for general use.  */
 
@@ -143,8 +182,7 @@ as_info_where (const char *file, unsigned int line, unsigned int indent,
   va_start (args, format);
   vsnprintf (buffer, sizeof (buffer), format, args);
   va_end (args);
-  fprintf (stderr, "%s:%u: %*s%s%s\n",
-	   file, line, (int)indent, "", _("Info: "), buffer);
+  as_info_internal (file, line, indent, buffer);
 }
 
 /* The common portion of as_warn, as_warn_where, and as_tsktsk.  */

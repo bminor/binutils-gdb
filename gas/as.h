@@ -471,10 +471,13 @@ typedef struct _pseudo_type pseudo_typeS;
 #define PRINTF_LIKE(FCN) \
   void FCN (const char *format, ...) \
     __attribute__ ((__format__ (__printf__, 1, 2)))
+#define PRINTF_INDENT_LIKE(FCN) \
+  void FCN (unsigned int indent, const char *format, ...) \
+    __attribute__ ((__format__ (__printf__, 2, 3)))
 #define PRINTF_WHERE_LIKE(FCN) \
   void FCN (const char *file, unsigned int line, const char *format, ...) \
     __attribute__ ((__format__ (__printf__, 3, 4)))
-#define PRINTF_INDENT_LIKE(FCN) \
+#define PRINTF_WHERE_INDENT_LIKE(FCN) \
   void FCN (const char *file, unsigned int line, unsigned int indent, \
 	    const char *format, ...) \
     __attribute__ ((__format__ (__printf__, 4, 5)))
@@ -482,13 +485,15 @@ typedef struct _pseudo_type pseudo_typeS;
 #else /* __GNUC__ < 2 || defined(VMS) */
 
 #define PRINTF_LIKE(FCN)	void FCN (const char *format, ...)
+#define PRINTF_INDENT_LIKE(FCN)	void FCN (unsigned int indent, \
+					  const char *format, ...)
 #define PRINTF_WHERE_LIKE(FCN)	void FCN (const char *file, \
 					  unsigned int line, \
 					  const char *format, ...)
-#define PRINTF_INDENT_LIKE(FCN)	void FCN (const char *file, \
-					  unsigned int line, \
-					  unsigned int indent, \
-					  const char *format, ...)
+#define PRINTF_WHERE_INDENT_LIKE(FCN) void FCN (const char *file, \
+						unsigned int line, \
+						unsigned int indent, \
+						const char *format, ...)
 
 #endif /* __GNUC__ < 2 || defined(VMS) */
 
@@ -496,9 +501,10 @@ PRINTF_LIKE (as_bad);
 PRINTF_LIKE (as_fatal) ATTRIBUTE_NORETURN;
 PRINTF_LIKE (as_tsktsk);
 PRINTF_LIKE (as_warn);
+PRINTF_INDENT_LIKE (as_info);
 PRINTF_WHERE_LIKE (as_bad_where);
 PRINTF_WHERE_LIKE (as_warn_where);
-PRINTF_INDENT_LIKE (as_info_where);
+PRINTF_WHERE_INDENT_LIKE (as_info_where);
 
 void   set_identify_name (const char *);
 void   as_abort (const char *, int, const char *) ATTRIBUTE_NORETURN;
