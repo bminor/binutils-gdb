@@ -17280,11 +17280,13 @@ md_parse_option (int c, const char *arg)
 
 	list = bfd_target_list ();
 	for (l = list; *l != NULL; l++)
-	  if (startswith (*l, "elf64-x86-64")
-	      || strcmp (*l, "coff-x86-64") == 0
-	      || strcmp (*l, "pe-x86-64") == 0
-	      || strcmp (*l, "pei-x86-64") == 0
-	      || strcmp (*l, "mach-o-x86-64") == 0)
+#if defined (OBJ_ELF)
+	  if (strcmp (*l, ELF_TARGET_FORMAT64) == 0)
+#elif defined (TE_PE)
+	  if (strcmp (*l, "pe-x86-64") == 0)
+#else
+	  if (strcmp (*l, "mach-o-x86-64") == 0)
+#endif
 	    {
 	      default_arch = "x86_64";
 	      break;
@@ -17303,7 +17305,7 @@ md_parse_option (int c, const char *arg)
 
 	list = bfd_target_list ();
 	for (l = list; *l != NULL; l++)
-	  if (startswith (*l, "elf32-x86-64"))
+	  if (strcmp (*l, ELF_TARGET_FORMAT32) == 0)
 	    {
 	      default_arch = "x86_64:32";
 	      break;
