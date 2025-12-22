@@ -21,6 +21,12 @@
 #include "as.h"
 #include "sframe.h"
 
+/* Much like everything in gen-sframe.c, the functions here aren't supposed
+   to ever be reached when SFrame isn't supported by a target.  */
+#ifndef support_sframe_p
+# define support_sframe_p() false
+#endif
+
 /* The function estimates the size of a rs_sframe variant frag based on
    the current values of the symbols.  It is called before the
    relaxation loop.  We set fr_subtype{0:2} to the expected length.  */
@@ -32,6 +38,8 @@ sframe_estimate_size_before_relax (fragS *frag)
   expressionS *exp;
   symbolS *widthS;
   int ret;
+
+  gas_assert (support_sframe_p ());
 
   /* We are dealing with two different kind of fragments here which need
      to be fixed up:
@@ -75,6 +83,8 @@ sframe_relax_frag (fragS *frag)
 {
   int oldsize, newsize;
 
+  gas_assert (support_sframe_p ());
+
   oldsize = frag->fr_subtype & 7;
   if (oldsize == 7)
     oldsize = -1;
@@ -100,6 +110,8 @@ sframe_convert_frag (fragS *frag)
   expressionS *exp;
   symbolS *dataS;
   symbolS *fsizeS, *diffS;
+
+  gas_assert (support_sframe_p ());
 
   /* We are dealing with two different kind of fragments here which need
      to be fixed up:
