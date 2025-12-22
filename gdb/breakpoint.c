@@ -4947,6 +4947,12 @@ bpstat_do_actions_1 (bpstat **bsp)
 	    cmd = cmd->next;
 	}
 
+      /* If the command tree somehow stopped the process, e.g. if it
+	 contains 'kill', then the bpstat might have been deleted already.
+	 *BSP will have been reset then, so stop in that case.  */
+      if (*bsp == nullptr)
+	break;
+
       if (breakpoint_proceeded)
 	{
 	  if (current_ui->async)
