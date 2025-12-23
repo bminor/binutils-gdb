@@ -212,8 +212,6 @@ typedef struct sframe_func_desc_entry_v2
   uint16_t sfde_func_padding2;
 } ATTRIBUTE_PACKED sframe_func_desc_entry_v2;
 
-typedef sframe_func_desc_entry_v2 sframe_func_desc_entry;
-
 /* Macros to compose and decompose function info in FDE.  */
 
 /* Note: Set PAC auth key to SFRAME_AARCH64_PAUTH_KEY_A by default.  */

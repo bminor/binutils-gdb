@@ -25,6 +25,8 @@
 #include "sframe-api.h"
 #include "sframe-internal.h"
 
+typedef sframe_func_desc_entry_v2 sframe_func_desc_entry;
+
 /* Return TRUE if the function has been marked for deletion during the linking
    process.  */
 

@@ -54,6 +54,9 @@
 # define SFRAME_FRE_TYPE_SELECTION_OPT 1
 #endif
 
+/* gas emits SFrame Version 2 only at this time.  */
+typedef sframe_func_desc_entry_v2 sframe_func_desc_entry;
+
 /* List of SFrame FDE entries.  */
 
 static struct sframe_func_entry *all_sframe_fdes = NULL;
