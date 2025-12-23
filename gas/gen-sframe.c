@@ -1185,8 +1185,19 @@ sframe_xlate_do_offset (struct sframe_xlate_ctx *xlate_ctx,
      being interpreted.  This FRE eventually gets linked in into the
      list of FREs for the specific function.  */
   struct sframe_row_entry *cur_fre = xlate_ctx->cur_fre;
-
   gas_assert (cur_fre);
+
+  /* For ABIs not tracking RA, the return address is expected to be in a
+     specific location.  Explicit manourvering to a different offset (than the
+     default offset) is non-representable in SFrame.  */
+  if (!sframe_ra_tracking_p () && cfi_insn->u.ri.reg == SFRAME_CFA_RA_REG
+      && cfi_insn->u.ri.offset != sframe_cfa_ra_offset ())
+    {
+      as_warn (_("no SFrame FDE emitted; %s register %u in .cfi_offset"),
+	       sframe_register_name (cfi_insn->u.ri.reg), cfi_insn->u.ri.reg);
+      return SFRAME_XLATE_ERR_NOTREPRESENTED;  /* Not represented.  */
+    }
+
   /* Change the rule for the register indicated by the register number to
      be the specified offset.  */
   /* Ignore SP reg, as it can be recovered from the CFA tracking info.  */
