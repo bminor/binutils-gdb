@@ -209,17 +209,17 @@ sframe_get_fre_type (sframe_func_desc_entry_int *fdep)
 {
   uint32_t fre_type = 0;
   if (fdep)
-    fre_type = SFRAME_V1_FUNC_FRE_TYPE (fdep->func_info);
+    fre_type = SFRAME_V2_FUNC_FRE_TYPE (fdep->func_info);
   return fre_type;
 }
 
 static uint32_t
-sframe_get_fde_type (sframe_func_desc_entry_int *fdep)
+sframe_get_fde_pc_type (sframe_func_desc_entry_int *fdep)
 {
-  uint32_t fde_type = 0;
+  uint32_t fde_pc_type = 0;
   if (fdep)
-    fde_type = SFRAME_V1_FUNC_FDE_TYPE (fdep->func_info);
-  return fde_type;
+    fde_pc_type = SFRAME_V2_FUNC_PC_TYPE (fdep->func_info);
+  return fde_pc_type;
 }
 
 /* Check if flipping is needed, based on ENDIAN.  */
@@ -509,15 +509,15 @@ sframe_fre_check_range_p (sframe_decoder_ctx *dctx, uint32_t func_idx,
   sframe_func_desc_entry_int *fdep;
   int32_t func_start_pc_offset;
   uint8_t rep_block_size;
-  uint32_t fde_type;
+  uint32_t pc_type;
   uint32_t pc_offset;
   bool mask_p;
 
   fdep = &dctx->sfd_funcdesc->entry[func_idx];
   func_start_pc_offset = sframe_decoder_get_secrel_func_start_addr (dctx,
 								    func_idx);
-  fde_type = sframe_get_fde_type (fdep);
-  mask_p = (fde_type == SFRAME_FDE_TYPE_PCMASK);
+  pc_type = sframe_get_fde_pc_type (fdep);
+  mask_p = (pc_type == SFRAME_FDE_TYPE_PCMASK);
   rep_block_size = fdep->func_rep_size;
 
   if (func_start_pc_offset > pc)
@@ -807,7 +807,7 @@ sframe_fde_create_func_info (uint32_t fre_type,
 		   || fre_type == SFRAME_FRE_TYPE_ADDR4);
   sframe_assert (fde_type == SFRAME_FDE_TYPE_PCINC
 		    || fde_type == SFRAME_FDE_TYPE_PCMASK);
-  func_info = SFRAME_V1_FUNC_INFO (fde_type, fre_type);
+  func_info = SFRAME_V2_FUNC_INFO (fde_type, fre_type);
   return func_info;
 }
 
