@@ -288,14 +288,12 @@ sframe_encoder_add_fre (sframe_encoder_ctx *ectx,
 			unsigned int func_idx,
 			sframe_frame_row_entry *frep);
 
-/* Add a new SFrame function descriptor entry with START_ADDR, FUNC_SIZE and
-   FUNC_INFO to the encoder context ECTX.  */
+/* Add a new SFrame function descriptor entry with START_ADDR and FUNC_SIZE to
+   the encoder context ECTX.  */
 extern int
 sframe_encoder_add_funcdesc (sframe_encoder_ctx *ectx,
 			     int32_t start_addr,
-			     uint32_t func_size,
-			     unsigned char func_info,
-			     uint32_t num_fres);
+			     uint32_t func_size);
 
 /* Add a new SFrame function descriptor entry with START_ADDR, FUNC_SIZE,
    FUNC_INFO and REP_BLOCK_SIZE to the encoder context ECTX.  This API is valid

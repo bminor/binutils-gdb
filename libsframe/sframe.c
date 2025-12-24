@@ -1777,23 +1777,18 @@ bad:
 }
 
 /* Add a new SFrame function descriptor entry with START_ADDR, FUNC_SIZE and
-   FUNC_INFO to the encoder context ECTX.  */
+   FUNC_INFO to the encoder context ECTX.  Caller must make sure that ECTX
+   exists.  */
 
-int
-sframe_encoder_add_funcdesc (sframe_encoder_ctx *ectx,
-			     int32_t start_addr,
-			     uint32_t func_size,
-			     unsigned char func_info,
-			     uint32_t num_fres ATTRIBUTE_UNUSED)
+static int
+sframe_encoder_add_funcdesc_internal (sframe_encoder_ctx *ectx,
+				      int32_t start_addr,
+				      uint32_t func_size)
 {
   sframe_header *ehp;
   sf_fde_tbl *fd_info;
   size_t fd_tbl_sz;
   int err = 0;
-
-  /* FIXME book-keep num_fres for error checking.  */
-  if (ectx == NULL)
-    return sframe_set_errno (&err, SFRAME_ERR_INVAL);
 
   fd_info = ectx->sfe_funcdesc;
   ehp = sframe_encoder_get_header (ectx);
@@ -1840,7 +1835,6 @@ sframe_encoder_add_funcdesc (sframe_encoder_ctx *ectx,
   fd_info->entry[fd_info->count].sfde_func_info
     = sframe_fde_func_info (fre_type);
 #endif
-  fd_info->entry[fd_info->count].func_info = func_info;
   fd_info->count++;
   ectx->sfe_funcdesc = fd_info;
   ehp->sfh_num_fdes++;
@@ -1851,7 +1845,25 @@ bad:
     free (fd_info);
   ectx->sfe_funcdesc = NULL;
   ehp->sfh_num_fdes = 0;
-  return -1;
+  return err;
+}
+
+/* Add a new SFrame function descriptor entry with START_PC_OFFSET and
+   FUNC_SIZE to the encoder context ECTX.  */
+
+int
+sframe_encoder_add_funcdesc (sframe_encoder_ctx *ectx, int32_t start_pc_offset,
+			     uint32_t func_size)
+{
+  int err = 0;
+  if (ectx == NULL || sframe_encoder_get_version (ectx) == SFRAME_VERSION_1)
+    return sframe_set_errno (&err, SFRAME_ERR_INVAL);
+
+  err = sframe_encoder_add_funcdesc_internal (ectx, start_pc_offset, func_size);
+  if (err)
+    return err;
+
+  return 0;
 }
 
 /* Add a new SFrame function descriptor entry with START_ADDR, FUNC_SIZE,
@@ -1866,18 +1878,16 @@ sframe_encoder_add_funcdesc_v2 (sframe_encoder_ctx *ectx,
 				uint8_t rep_block_size,
 				uint32_t num_fres ATTRIBUTE_UNUSED)
 {
-  sf_fde_tbl *fd_info;
-  int err;
-
+  int err = 0;
   if (ectx == NULL || sframe_encoder_get_version (ectx) == SFRAME_VERSION_1)
     return sframe_set_errno (&err, SFRAME_ERR_INVAL);
 
-  err = sframe_encoder_add_funcdesc (ectx, start_addr, func_size, func_info,
-				     num_fres);
+  err = sframe_encoder_add_funcdesc_internal (ectx, start_addr, func_size);
   if (err)
-    return SFRAME_ERR;
+    return err;
 
-  fd_info = ectx->sfe_funcdesc;
+  sf_fde_tbl *fd_info = ectx->sfe_funcdesc;
+  fd_info->entry[fd_info->count-1].func_info = func_info;
   fd_info->entry[fd_info->count-1].func_rep_size = rep_block_size;
 
   return 0;
