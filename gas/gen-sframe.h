@@ -74,12 +74,11 @@ struct sframe_row_entry
   /* Offset from the CFA base register for recovering CFA.  */
   offsetT cfa_offset;
 
-  /* Track the other register used as base register for CFA.  Specify whether
-     it is in register or memory.  */
-  unsigned int base_reg;
-  unsigned int bp_loc;
-  /* If the other register is stashed on stack, note the offset.  */
-  offsetT bp_offset;
+  /* Track FP location.  Specify whether it is in register or memory.  */
+  unsigned int fp_reg;
+  unsigned int fp_loc;
+  /* If the FP is stashed on stack, note the offset.  */
+  offsetT fp_offset;
 
   /* Track RA location.  Specify whether it is in register or memory.  */
   unsigned int ra_loc;
