@@ -525,9 +525,10 @@ static struct sframe_row_entry*
 sframe_row_entry_new (void)
 {
   struct sframe_row_entry *fre = XCNEW (struct sframe_row_entry);
-  /* Reset cfa_base_reg to SFRAME_FRE_REG_INVALID.  A value of 0 may imply a
+  /* Reset all regs to SFRAME_FRE_REG_INVALID.  A value of 0 may imply a
      valid register for a supported arch.  */
   fre->cfa_base_reg = SFRAME_FRE_REG_INVALID;
+  fre->fp_reg = SFRAME_FRE_REG_INVALID;
   fre->merge_candidate = true;
   /* Reset the mangled RA status bit to zero by default.  We will
      initialize it in sframe_row_entry_initialize () with the sticky
@@ -1012,6 +1013,7 @@ sframe_row_entry_initialize (struct sframe_row_entry *cur_fre,
   cur_fre->cfa_base_reg = prev_fre->cfa_base_reg;
   cur_fre->cfa_offset = prev_fre->cfa_offset;
   cur_fre->fp_loc = prev_fre->fp_loc;
+  cur_fre->fp_reg = prev_fre->fp_reg;
   cur_fre->fp_offset = prev_fre->fp_offset;
   cur_fre->ra_loc = prev_fre->ra_loc;
   cur_fre->ra_offset = prev_fre->ra_offset;
@@ -1233,7 +1235,7 @@ sframe_xlate_do_offset (struct sframe_xlate_ctx *xlate_ctx,
   /* Ignore SP reg, as it can be recovered from the CFA tracking info.  */
   if (cfi_insn->u.ri.reg == SFRAME_CFA_FP_REG)
     {
-      gas_assert (!cur_fre->fp_reg);
+      gas_assert (cur_fre->fp_reg == SFRAME_FRE_REG_INVALID);
       sframe_fre_set_fp_track (cur_fre, cfi_insn->u.ri.offset);
       cur_fre->merge_candidate = false;
     }
