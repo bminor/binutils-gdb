@@ -20,7 +20,7 @@ License''.
 
 @titlepage
 @title The SFrame Format
-@subtitle Version 2 (Errata 1)
+@subtitle Version 3
 @sp 15
 @center @strong{*** DRAFT - NOT FOR DISTRIBUTION ***}
 @center @today{}
@@ -39,9 +39,9 @@ License''.
 @center @strong{*** DRAFT - NOT FOR DISTRIBUTION ***}
 @center @today{}
 
-This manual describes version 2 (errata 1) of the SFrame file format.  SFrame
-stands for Simple Frame.  The SFrame format keeps track of the minimal
-necessary information needed for generating stack traces:
+This manual describes version 3 of the SFrame file format.  SFrame stands for
+Simple Frame.  The SFrame format keeps track of the minimal necessary
+information needed for generating stack traces:
 
 @itemize @minus
 @item
@@ -74,6 +74,7 @@ Appendices
 
 @menu
 * Overview::
+* Changes from Version 2 to Version 3::
 * Changes from Version 1 to Version 2::
 @end menu
 
@@ -102,7 +103,7 @@ identify the endianness of the SFrame section.
 Addresses in this specification are expressed in bytes.
 
 The rest of this specification describes the current version of the format,
-@code{SFRAME_VERSION_2}, in detail.  Additional sections outline the major
+@code{SFRAME_VERSION_3}, in detail.  Additional sections outline the major
 changes made to each previously published version of the SFrame stack trace
 format.
 
@@ -112,6 +113,45 @@ later.
 
 This document is intended to be in sync with the C code in @file{sframe.h}.
 Please report discrepancies between the two, if any.
+
+@node Changes from Version 2 to Version 3
+@section Changes from Version 2 to Version 3
+@cindex Changes from Version 2 to Version 3
+
+The following is a list of the changes made to the SFrame stack trace format
+since Version 2 was published.  Note that SFrame version 2 had up to two
+Errata.
+
+@itemize @bullet
+@item
+An SFrame FDE with no FREs is used to indicate an outermost frame.
+@item
+Split the SFrame function descriptor entry into two components:
+ @itemize @minus
+  @item SFrame function descriptor entry index
+  @item SFrame function descriptor entry attributes
+ @end itemize
+@item
+Increase the size of the @code{sfdi_func_start_offset} to @code{int64_t}.  This
+field is renamed from the @code{sfde_func_start_address} in SFrame version 2
+specification.
+@item
+Addition of a new function info byte in SFrame function descriptor entry
+attributes.  Reserve 5-bits for FDE types.
+@item
+Make a distinction between SFrame FDE Type (e.g., SFRAME_FDE_TYPE_DEFAULT,
+SFRAME_FDE_TYPE_FLEX) vs SFrame FDE PC Type (i.e., SFRAME_FDE_PCTYPE_MASK,
+SFRAME_FDE_PCTYPE_INC).
+@item
+Add a new FDE type SFRAME_FDE_TYPE_FLEX to convey stack trace information for
+specific cases when CFA is non-SP/FP based, or when FP/RA recovery is
+REG-based.
+@item
+Signal frames are marked.
+@item
+Instead of using the term "info word", use a more precise term "info byte" in
+specification for the info bytes in SFrame FDE and SFrame FRE.
+ @end itemize
 
 @node Changes from Version 1 to Version 2
 @section Changes from Version 1 to Version 2
@@ -125,7 +165,7 @@ since Version 1 was published.
 Add an unsigned 8-bit integral field to the SFrame function descriptor entry to
 encode the size of the repetitive code blocks.  Such code blocks, e.g, pltN
 entries, use an SFrame function descriptor entry of type
-SFRAME_FDE_TYPE_PCMASK.
+SFRAME_FDE_PCTYPE_MASK.
 @item
 Add an unsigned 16-bit integral field to the SFrame function descriptor entry
 to serve as padding.  This helps ensure natural alignment for the members of
@@ -138,9 +178,9 @@ of 20 bytes instead of its size of 17 bytes in SFrame format version 1.
 SFrame Version 2, to indicate the encoding of the SFrame FDE function start
 address field:
  @itemize @minus
-  @item if set, @code{sfde_func_start_address} field contains the offset in
+  @item if set, @code{sfde_func_start_offset} field contains the offset in
 bytes to the start PC of the associated function from the field itself.
-  @item if unset, @code{sfde_func_start_address} field contains the offset in
+  @item if unset, @code{sfde_func_start_offset} field contains the offset in
 bytes to the start PC of the associated function from the start of the SFrame
 section.
  @end itemize
@@ -172,10 +212,10 @@ by CFA offset alignment factor and then revert CFA offset adjustment).
 @item
 [Errata 1] An ELF SFrame section has the type SHT_GNU_SFRAME.
 @item
-[Errata 2] An SFrame FRE info word offset count of zero indicates that the
-return address (RA) is undefined for the range of PCs covered by the SFrame FRE.
-A stack tracer may use this as indication that an outermost frame has been
-reached and the stack trace is complete.
+[Errata 2] An offset count of zero in the SFrame FRE info byte indicates that
+the return address (RA) is undefined for the range of PCs covered by the SFrame
+FRE.  A stack tracer may use this as indication that an outermost frame has
+been reached and the stack trace is complete.
 @end itemize
 
 SFrame version 1 is now obsolete and should not be used.
@@ -268,10 +308,12 @@ The version of the SFrame format can be determined by inspecting
 @item @code{SFRAME_VERSION_1}
 @tab 1 @tab First version, obsolete.
 @item @code{SFRAME_VERSION_2}
-@tab 2 @tab Current version, under development.
+@tab 2 @tab Second version.
+@item @code{SFRAME_VERSION_3}
+@tab 2 @tab Third version, under development.
 @end multitable
 
-This document describes @code{SFRAME_VERSION_2}.
+This document describes @code{SFRAME_VERSION_3}.
 
 @node SFrame Flags
 @subsection SFrame Flags
@@ -291,10 +333,10 @@ Entries are sorted on PC.
 @item @code{SFRAME_F_FRAME_POINTER} @tab All @tab 0x2
 @tab All functions in the object file preserve frame pointer.
 @tindex SFRAME_F_FDE_FUNC_START_PCREL
-@item @code{SFRAME_F_FDE_FUNC_START_PCREL} @tab 2 @tab 0x4
-@tab The @code{sfde_func_start_address} field in the SFrame FDE is an offset in
+@item @code{SFRAME_F_FDE_FUNC_START_PCREL} @tab 2-3 @tab 0x4
+@tab The @code{sfdi_func_start_offset} field in the SFrame FDE is an offset in
 bytes to the function's start address, from the field itself.  If unset, the
-@code{sfde_func_start_address} field in the SFrame FDE is an offset in bytes to
+@code{sfdi_func_start_offset} field in the SFrame FDE is an offset in bytes to
 the function's start address, from the start of the SFrame section.
 @end multitable
 
@@ -467,116 +509,164 @@ in the format.
 The presence of an explicit identification of ABI/arch in SFrame may allow
 stack trace generators to make certain ABI/arch-specific decisions.
 
+@menu
+* The SFrame FDE Index::
+* The SFrame FDE Attribute::
+* The SFrame FDE Info Words::
+@end menu
+
 @node SFrame Function Descriptor Entries
 @section SFrame FDE
 @cindex SFrame FDE
 
-The SFrame function descriptor entry sub-section is an array of the
-fixed-length SFrame function descriptor entries (SFrame FDEs).  Each SFrame FDE
-is a packed structure which contains information to describe a function's stack
-trace information at a high-level.
+SFrame function descriptor entry is a conceptual entity which contains the
+function-level metadata necessary for stack tracing through the function.  It
+is composed of two physical entities: the SFrame function descriptor index
+(SFrame FDE index) and the SFrame function descriptor attributes (SFrame FDE
+attr).  Both SFrame FDE index and SFrame FDE attribute are fixed-length
+structures.
 
-The array of SFrame FDEs is sorted on the @code{sfde_func_start_address} if
-the SFrame section header flag @code{sfp_flags} has @code{SFRAME_F_FDE_SORTED}
-set.  Typically (as is the case with GNU ld) a linked object or executable
-will have the @code{SFRAME_F_FDE_SORTED} set.  This makes the job of a stack
-tracer easier as it may then employ binary search schemes to look for the
-pertinent SFrame FDE.
+@cindex The SFrame FDE Index
+@node The SFrame FDE Index
+@subsection The SFrame FDE Index
+
+The SFrame FDE index elements are stored in a sub-section of their own,
+creating an index.  The array of SFrame FDE index items is sorted on the
+@code{sfdi_func_start_offset} if the SFrame section header flag
+@code{sfp_flags} has @code{SFRAME_F_FDE_SORTED} set.  Typically (as is the case
+with GNU ld) a linked object or executable will have the
+@code{SFRAME_F_FDE_SORTED} set.  This makes the job of a stack tracer easier as
+it may then employ binary search schemes to look for the pertinent SFrame FDE.
 
 @example
-typedef struct sframe_func_desc_entry
+typedef struct sframe_func_desc_idx
 @{
-  int32_t sfde_func_start_address;
-  uint32_t sfde_func_size;
-  uint32_t sfde_func_start_fre_off;
-  uint32_t sfde_func_num_fres;
-  uint8_t sfde_func_info;
-  uint8_t sfde_func_rep_size;
-  uint16_t sfde_func_padding2;
-@} ATTRIBUTE_PACKED sframe_func_desc_entry;
+  int64_t sfdi_func_start_offset;
+  uint32_t sfdi_func_size;
+  uint32_t sfdi_func_start_fre_off;
+@} ATTRIBUTE_PACKED sframe_func_desc_idx;
 @end example
 
-Every element of the SFrame function descriptor entry is naturally aligned.
+Every element of the SFrame function descriptor index is naturally aligned.
+Following table describes each component of the SFrame FDE index:
 
-@code{sfde_func_start_fre_off} is the offset to the first SFrame FRE for the
-function.  This offset is relative to the @emph{end of the SFrame FDE}
-sub-section (unlike the sub-section offsets in the SFrame header, which are
-relative to the @emph{end} of the SFrame header).
-
-@code{sfde_func_info} is the SFrame FDE "info word", containing information on
-the FRE type and the FDE type for the function @xref{The SFrame FDE Info Word}.
-
-@cindex Provisions for future ABIs
-Apart from the @code{sfde_func_padding2}, the SFrame FDE has some currently
-unused bits in the SFrame FDE info word, @xref{The SFrame FDE Info Word}, that
-may be used for the purpose of extending the SFrame file format specification
-for future ABIs.
-
-Following table describes each component of the SFrame FDE structure:
-
-@multitable {Offset} {@code{uint32_t}} {@code{sfde_func_start_fre_off}} {Signed 32-bit integral field denoting the}
+@multitable {Offset} {@code{uint32_t}} {@code{sfdi_func_start_fre_off}} {Signed 32-bit integral field denoting the}
 @headitem Offset @tab Type @tab Name @tab Description
 @item 0x00
-@tab @code{int32_t}
-@tab @code{sfde_func_start_address}
-@tab Signed 32-bit integral field denoting the virtual memory address of the
+@tab @code{int64_t}
+@tab @code{sfdi_func_start_offset}
+@tab Signed 64-bit integral field denoting the virtual memory address of the
 described function, for which the SFrame FDE applies.  If the flag
 @code{SFRAME_F_FDE_FUNC_START_PCREL}, @xref{SFrame Flags}, in the SFrame
-header is set, the value encoded in the @code{sfde_func_start_address} field is
+header is set, the value encoded in the @code{sfdi_func_start_offset} field is
 the offset in bytes to the function's start address, from the SFrame
-@code{sfde_func_start_address} field.
+@code{sfdi_func_start_offset} field.
 
 @item 0x04
 @tab @code{uint32_t}
-@tab @code{sfde_func_size}
+@tab @code{sfdi_func_size}
 @tab Unsigned 32-bit integral field specifying the size of the function in
 bytes.
 
 @item 0x08
 @tab @code{uint32_t}
-@tab @code{sfde_func_start_fre_off}
+@tab @code{sfdi_func_start_fre_off}
 @tab Unsigned 32-bit integral field specifying the offset in bytes of the
 function's first SFrame FRE in the SFrame section.
 
+@end multitable
+
+@cindex The SFrame FDE Attribute
+@node The SFrame FDE Attribute
+@subsection The SFrame FDE Attribute
+
+The SFrame FDE attribute specifies a subset of function-level metadata like
+number of SFrame FREs and encoding of information in the SFrame FREs.  The
+SFrame FDE attributes are stored in the SFrame FRE sub-section, and as a
+consequence have no guarantees of its elements being at naturally aligned
+boundaries.
+
+@example
+typedef struct sframe_func_desc_attr
+@{
+  uint16_t sfda_func_num_fres;
+  uint8_t sfda_func_info;
+  uint8_t sfda_func_info2;
+  uint8_t sfda_func_rep_size;
+@} ATTRIBUTE_PACKED sframe_func_desc_attr;
+@end example
+
+@code{sfda_func_start_fre_off} is the offset to the first SFrame FRE for the
+function.  This offset is relative to the @emph{end of the SFrame FDE}
+sub-section (unlike the sub-section offsets in the SFrame header, which are
+relative to the @emph{end} of the SFrame header).
+
+@code{sfda_func_info} and @code{sfda_func_info2} are the SFrame FDE "info
+word", containing information on the FRE type and the FDE type for the function
+@xref{The SFrame FDE Info Words}.
+
+@cindex Provisions for future ABIs
+The SFrame FDE attribute has some currently unused bits in the SFrame FDE info
+words, @xref{The SFrame FDE Info Words}, that may be used for the purpose of
+extending the SFrame file format specification for future ABIs.  See also
+@xref{The SFrame FDE Types} subsection.
+
+Following table describes each component of the SFrame FDE attribute:
+
+@multitable {Offset} {@code{uint32_t}} {@code{sfdi_func_start_fre_off}} {Signed 32-bit integral field denoting the}
+@headitem Offset @tab Type @tab Name @tab Description
 @item 0x0c
-@tab @code{uint32_t}
-@tab @code{sfde_func_num_fres}
-@tab Unsigned 32-bit integral field specifying the total number of SFrame FREs
+@tab @code{uint16_t}
+@tab @code{sfda_func_num_fres}
+@tab Unsigned 16-bit integral field specifying the total number of SFrame FREs
 used for the function.
 
 @item 0x10
 @tab @code{uint8_t}
-@tab @code{sfde_func_info}
-@tab Unsigned 8-bit integral field specifying the SFrame FDE info word.
-@xref{The SFrame FDE Info Word}.
+@tab @code{sfda_func_info}
+@tab Unsigned 8-bit integral field specifying the SFrame FDE info byte.
+@xref{The SFrame FDE Info Words}.
+
+@item 0x10
+@tab @code{uint8_t}
+@tab @code{sfda_func_info2}
+@tab Additional unsigned 8-bit integral field specifying the SFrame FDE info byte.
+@xref{The SFrame FDE Info Words}.
 
 @item 0x11
 @tab @code{uint8_t}
-@tab @code{sfde_func_rep_size}
+@tab @code{sfda_func_rep_size}
 @tab Unsigned 8-bit integral field specifying the size of the repetitive code
-block for which an SFrame FDE of type SFRAME_FDE_TYPE_PCMASK is used.  For
+block for which an SFrame FDE of type SFRAME_FDE_PCTYPE_MASK is used.  For
 example, in AMD64, the size of a pltN entry is 16 bytes.
-
-@item 0x12
-@tab @code{uint16_t}
-@tab @code{sfde_func_padding2}
-@tab Padding of 2 bytes.  Currently unused bytes.
 
 @end multitable
 
 @menu
-* The SFrame FDE Info Word::
+* The SFrame FDE PC Types::
 * The SFrame FDE Types::
 * The SFrame FRE Types::
 @end menu
 
-@cindex The SFrame FDE Info Word
-@node The SFrame FDE Info Word
-@subsection The SFrame FDE Info Word
+@cindex The SFrame FDE Info Words
+@node The SFrame FDE Info Words
+@subsection The SFrame FDE Info Words
 
-The info word is a bitfield split into three parts.  From MSB to LSB:
+The SFrame FDE Attribute contains two distinct bytes, @code{sfda_func_info} and
+@code{sfda_func_info2}.  Together these are referred to as the SFrame FDE info
+words.  These bytes contain vital information necessary to:
 
-@multitable {Bit offset} {@code{pauth_key}} {Specify which key is used for signing the return addresses}
+@itemize @minus
+ @item read and interpret SFrame FREs, e.g., the number and size of each SFrame
+FRE offset,
+ @item PC type for SFrame FDE, and
+ @item type of SFrame FDE,
+ @item size of repeat block, if PC Type is SFRAME_FDE_PCTYPE_MASK.
+@end itemize
+
+The first info word is a bitfield split into three parts.  From MSB to LSB:
+
+@multitable {Bit offset} {@code{fde_pctype}} {Specify which key is used for signing the return addresses}
 @headitem Bit offset @tab Name @tab Description
 @item 7--6
 @tab @code{unused}
@@ -588,48 +678,65 @@ The info word is a bitfield split into three parts.  From MSB to LSB:
 in the SFrame FDE.  Two possible values: @*
 SFRAME_AARCH64_PAUTH_KEY_A (0), or @*
 SFRAME_AARCH64_PAUTH_KEY_B (1). @*
-Ununsed in AMD64.
+Unsed in AMD64.
 
 @item 4
-@tab @code{fdetype}
-@tab Specify the SFrame FDE type.  Two possible values: @*
-SFRAME_FDE_TYPE_PCMASK (1), or @*
-SFRAME_FDE_TYPE_PCINC (0). @*
-@xref{The SFrame FDE Types}.
+@tab @code{fde_pctype}
+@tab Specify the SFrame FDE PC type.  Two possible values: @*
+SFRAME_FDE_PCTYPE_MASK (1), or @*
+SFRAME_FDE_PCTYPE_INC (0). @*
+@xref{The SFrame FDE PC Types}.
 
 @item 0--3
 @tab @code{fretype}
 @tab Choice of three SFrame FRE types. @xref{The SFrame FRE Types}.
 @end multitable
 
-@node The SFrame FDE Types
-@subsection The SFrame FDE Types
-@tindex SFRAME_FDE_TYPE_PCMASK
-@tindex SFRAME_FDE_TYPE_PCINC
+The second info word is a bitfield split into two parts.  From MSB to LSB:
 
-The SFrame format defines two types of FDE entries.  The choice of which SFrame
-FDE type to use is made based on the instruction patterns in the relevant
+@multitable {Bit offset} {@code{fde_type}} {Specify which key is used for signing the return addresses}
+@headitem Bit offset @tab Name @tab Description
+@item 7--5
+@tab @code{unused}
+@tab Unused bits.
+
+@item 4--0
+@tab @code{fde_type}
+@tab Specify the SFrame FDE type.  Two possible values: @*
+SFRAME_FDE_TYPE_DEFAULT (0), or @*
+SFRAME_FDE_TYPE_FLEX (1). @*
+@xref{The SFrame FDE Types}.
+
+@end multitable
+
+@node The SFrame FDE PC Types
+@subsubsection The SFrame FDE PC Types
+@tindex SFRAME_V3_FDE_PCTYPE_MASK
+@tindex SFRAME_V3_FDE_PCTYPE_INC
+
+The SFrame format defines two types of FDE PC types.  The choice of which SFrame
+FDE PC type to use is made based on the instruction patterns in the relevant
 program stub.
 
-An SFrame FDE of type @code{SFRAME_FDE_TYPE_PCINC} is an indication that the PCs in the
-FREs should be treated as increments in bytes.  This is used fo the the bulk of
-the executable code of a program, which contains instructions with no specific
-pattern.
+An SFrame FDE of PC type @code{SFRAME_V3_FDE_PCTYPE_INC} is an indication that
+the PCs in the FREs should be treated as increments in bytes.  This is used fo
+the the bulk of the executable code of a program, which contains instructions
+with no specific pattern.
 
-In contrast, an SFrame FDE of type @code{SFRAME_FDE_TYPE_PCMASK} is an
+In contrast, an SFrame FDE of PC type @code{SFRAME_V3_FDE_PCTYPE_MASK} is an
 indication that the PCs in the FREs should be treated as masks.  This type is
 useful for the cases where a small pattern of instructions in a program stub is
-used repeatedly for a specific functionality.  Typical usecases are pltN
+used repeatedly for a specific functionality.  Typical use cases are pltN
 entries and trampolines.
 
-@multitable {SFRAME_FDE_TYPE_PCMASK} {Value} {Unwinders perform a Unwinders perform a}
-@headitem Name of SFrame FDE type @tab Value @tab Description
+@multitable {SFRAME_V3_FDE_PCTYPE_MASK} {Value} {Unwinders perform a Unwinders perform a}
+@headitem Name of SFrame FDE PC type @tab Value @tab Description
 
-@item SFRAME_FDE_TYPE_PCINC
+@item SFRAME_V3_FDE_PCTYPE_INC
 @tab 0 @tab Stacktracers perform a @*
 (PC >= FRE_START_ADDR) to look up a matching FRE.
 
-@item SFRAME_FDE_TYPE_PCMASK
+@item SFRAME_V3_FDE_PCTYPE_MASK
 @tab 1 @tab  Stacktracers perform a @*
 (PC % REP_BLOCK_SIZE @*
  >= FRE_START_ADDR)
@@ -639,11 +746,37 @@ repeating block of program instructions and is encoded via
 
 @end multitable
 
+@node The SFrame FDE Types
+@subsubsection The SFrame FDE Types
+@cindex The SFrame FDE Types
+
+The SFrame format defines two FDE types - SFRAME_FDE_TYPE_DEFAULT, and
+SFRAME_FDE_TYPE_FLEX.
+
+SFrame FDE type SFRAME_FDE_TYPE_FLEX can be used for functions where specific
+CFA, FP or RA recovery rules are such that:
+
+@itemize @minus
+ @item
+ CFA is non-SP/FP based, e.g., for DRAP pattern on AMD64
+ @item
+ FP/RA is saved in REG instead of at an offset from CFA.
+@end itemize
+
+Each distinct FDE type may define a different layout, encoding, and
+interpretation of the SFrame FRE offsets.
+
+@cindex Provisions for future ABIs
+Currently, five bits are reserved in the @code{sfda_func_info2} for indicating
+SFrame FDE types.  In future, other ABIs/architectures may add even
+arch-specific FDE types.
+
 @node The SFrame FRE Types
-@subsection The SFrame FRE Types
+@subsubsection The SFrame FRE Types
+@cindex The SFrame FRE Types
 
 A real world application can have functions of size big and small.  SFrame
-format defines three types of SFrame FRE entries to effeciently encode the
+format defines three types of SFrame FRE entries to efficiently encode the
 stack trace information for such a variety of function sizes.  These
 representations vary in the number of bits needed to encode the start address
 offset in the SFrame FRE.
@@ -675,7 +808,7 @@ The following constants are defined and used to identify the SFrame FRE types:
 A single function must use the same type of SFrame FRE throughout.  The
 identifier to reflect the chosen SFrame FRE type is stored in the
 @code{fretype} bits in the SFrame FDE info word,
-@xref{The SFrame FDE Info Word}.
+@xref{The SFrame FDE Info Words}.
 
 @node SFrame Frame Row Entries
 @section SFrame FRE
@@ -781,7 +914,7 @@ SFRAME_FRE_OFFSET_4B.
 
 @item 1-4
 @tab @code{fre_offset_count}
-@tab A max value of 15 is allowed.  Typically, a value of upto 3 is sufficient
+@tab A max value of 15 is allowed.  Typically, a value of up to 3 is sufficient
 for most ABIs to track all three of CFA, FP and RA.  A value of zero indicates
 that the return address (RA) is undefined.  A stack tracer may use this as
 indication that an outermost frame has been reached and the stack trace is
