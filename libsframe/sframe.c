@@ -57,6 +57,8 @@ struct sf_fre_tbl
 static void debug_printf (const char *, ...);
 
 static int _sframe_debug;	/* Control for printing out debug info.  */
+
+#define SFRAME_FRE_ALLOC_LEN  64
 static int number_of_entries = 64;
 
 static void
@@ -696,6 +698,58 @@ flip_sframe (char *frame_buf, size_t buf_size, uint32_t to_foreign)
   return 0;
 bad:
   return SFRAME_ERR;
+}
+
+/* Expands the memory allocated for the SFrame Frame Row Entry (FRE) table
+   FRE_TBL.  This function is called when the current FRE buffer is
+   insufficient and more stack trace data in the form of COUNT number of SFrame
+   FREs need to be added to the SFrame section.
+
+   Updates ERRP with 0 on success, or an SFrame error code on failure (e.g.,
+   memory allocation error).  */
+
+static sf_fre_tbl *
+sframe_grow_fre_tbl (sf_fre_tbl *fre_tbl, uint32_t count, int *errp)
+{
+  size_t fre_tbl_sz = 0;
+  /* Ensure buffer for at least COUNT number of elements.  */
+  uint32_t grow_count = SFRAME_FRE_ALLOC_LEN + count;
+  sf_fre_tbl *new_tbl = NULL;
+
+  if (fre_tbl == NULL)
+    {
+      fre_tbl_sz = (sizeof (sf_fre_tbl)
+		    + (grow_count * sizeof (sframe_frame_row_entry)));
+      new_tbl = malloc (fre_tbl_sz);
+      if (new_tbl == NULL)
+	{
+	  sframe_set_errno (errp, SFRAME_ERR_NOMEM);
+	  goto bad;
+	}
+
+      memset (new_tbl, 0, fre_tbl_sz);
+      new_tbl->alloced = grow_count;
+    }
+  else if (fre_tbl->count + count >= fre_tbl->alloced)
+    {
+      uint32_t new_len = fre_tbl->alloced + grow_count;
+      fre_tbl_sz = (sizeof (sf_fre_tbl)
+		    + (new_len * sizeof (sframe_frame_row_entry)));
+      void *tmp = realloc (fre_tbl, fre_tbl_sz);
+      if (tmp == NULL)
+	{
+	  sframe_set_errno (errp, SFRAME_ERR_NOMEM);
+	  goto bad;
+	}
+      new_tbl = tmp;
+
+      memset (&new_tbl->entry[new_tbl->alloced], 0,
+	      grow_count * sizeof (sframe_frame_row_entry));
+      new_tbl->alloced += grow_count;
+    }
+
+bad:
+  return new_tbl;
 }
 
 /* The SFrame Decoder.  */
@@ -1690,7 +1744,6 @@ sframe_encoder_add_fre (sframe_encoder_ctx *ectx,
   sframe_frame_row_entry *ectx_frep;
   size_t offsets_sz, esz;
   uint32_t fre_type;
-  size_t fre_tbl_sz;
   int err = 0;
 
   if (ectx == NULL || frep == NULL)
@@ -1707,36 +1760,15 @@ sframe_encoder_add_fre (sframe_encoder_ctx *ectx,
   fre_type = sframe_get_fre_type (fdep);
   sf_fre_tbl *fre_tbl = ectx->sfe_fres;
 
-  if (fre_tbl == NULL)
+  if (fre_tbl == NULL || fre_tbl->count == fre_tbl->alloced)
     {
-      fre_tbl_sz = (sizeof (sf_fre_tbl)
-		    + (number_of_entries * sizeof (sframe_frame_row_entry)));
-      fre_tbl = malloc (fre_tbl_sz);
-
-      if (fre_tbl == NULL)
+      sf_fre_tbl *tmp = sframe_grow_fre_tbl (fre_tbl, 1, &err);
+      if (err)
 	{
 	  sframe_set_errno (&err, SFRAME_ERR_NOMEM);
-	  goto bad;		/* OOM.  */
-	}
-      memset (fre_tbl, 0, fre_tbl_sz);
-      fre_tbl->alloced = number_of_entries;
-    }
-  else if (fre_tbl->count == fre_tbl->alloced)
-    {
-      fre_tbl_sz = (sizeof (sf_fre_tbl)
-		    + ((fre_tbl->alloced + number_of_entries)
-		       * sizeof (sframe_frame_row_entry)));
-      sf_fre_tbl *tmp = realloc (fre_tbl, fre_tbl_sz);
-      if (tmp == NULL)
-	{
-	  sframe_set_errno (&err, SFRAME_ERR_NOMEM);
-	  goto bad;		/* OOM.  */
+	  goto bad;
 	}
       fre_tbl = tmp;
-
-      memset (&fre_tbl->entry[fre_tbl->alloced], 0,
-	      number_of_entries * sizeof (sframe_frame_row_entry));
-      fre_tbl->alloced += number_of_entries;
     }
 
   ectx_frep = &fre_tbl->entry[fre_tbl->count];
