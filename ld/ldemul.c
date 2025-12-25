@@ -314,7 +314,7 @@ finish_default (void)
       os->data = NULL;
     }
   if (!bfd_link_relocatable (&link_info))
-    _bfd_fix_excluded_sec_syms (link_info.output_bfd, &link_info);
+    bfd_fix_excluded_sec_syms (&link_info);
 }
 
 void

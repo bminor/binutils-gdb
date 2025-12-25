@@ -900,6 +900,11 @@ struct bfd_link_callbacks
     (struct bfd_link_info *, bfd * abfd,
      asection * current_section, asection * previous_section,
      bool new_segment);
+  /* Choose a neighbouring section to the given excluded section, or
+     the absolute section if no suitable neighbours are found that
+     will be output.  */
+  asection *(*nearby_section)
+    (bfd *, asection *, bfd_vma);
   /* This callback provides a chance for callers of the BFD to examine the
      ELF (dynamic) string table once it is complete.  */
   void (*examine_strtab)
@@ -1028,11 +1033,7 @@ extern bool _bfd_handle_already_linked
   (struct bfd_section *, struct bfd_section_already_linked *,
    struct bfd_link_info *);
 
-extern struct bfd_section *_bfd_nearby_section
-  (bfd *, struct bfd_section *, bfd_vma);
-
-extern void _bfd_fix_excluded_sec_syms
-  (bfd *, struct bfd_link_info *);
+extern void bfd_fix_excluded_sec_syms (struct bfd_link_info *);
 
 /* These structures are used to describe version information for the
    ELF linker.  These structures could be manipulated entirely inside

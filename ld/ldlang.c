@@ -1578,14 +1578,6 @@ lang_memory_default (asection *section)
   return lang_memory_region_lookup (DEFAULT_MEMORY_REGION, false);
 }
 
-/* Get the output section statement directly from the userdata.  */
-
-lang_output_section_statement_type *
-lang_output_section_get (const asection *output_section)
-{
-  return bfd_section_userdata (output_section);
-}
-
 /* Find or create an output_section_statement with the given NAME.
    If CONSTRAINT is non-zero match one with that constraint, otherwise
    match any non-negative constraint.  If CREATE is 0 return NULL when
@@ -6980,6 +6972,91 @@ section_for_dot (void)
   if (s != NULL)
     return s;
 
+  return bfd_abs_section_ptr;
+}
+
+/* Choose a neighbouring section to S in OBFD that will be output, or
+   the absolute section if no suitable neighbours are found.  This is
+   used to give symbols in excluded sections another section.  */
+
+asection *
+ldlang_nearby_section (bfd *obfd, asection *s, bfd_vma addr)
+{
+  asection *next, *prev, *best;
+  lang_memory_region_type *region = lang_output_section_get (s)->region;
+  int match;
+
+  /* Try for a neighbour in the same region first.  If there are none,
+     then accept sections in other regions.  */
+  for (match = 1; match >= 0; --match)
+    {
+      /* Find preceding kept section.  */
+      for (prev = s->prev; prev != NULL; prev = prev->prev)
+	if ((prev->flags & SEC_EXCLUDE) == 0
+	    && !bfd_section_removed_from_list (obfd, prev)
+	    && (lang_output_section_get (prev)->region == region || !match))
+	  break;
+
+      /* Find following kept section.  Start at prev->next because
+	 other sections may have been added after S was removed.  */
+      if (s->prev != NULL)
+	next = s->prev->next;
+      else
+	next = s->owner->sections;
+      for (; next != NULL; next = next->next)
+	if ((next->flags & SEC_EXCLUDE) == 0
+	    && !bfd_section_removed_from_list (obfd, next)
+	    && (lang_output_section_get (next)->region == region || !match))
+	  break;
+
+      /* Choose better of two sections, based on flags.  The idea
+	 is to choose a section that will be in the same segment
+	 as S would have been if it was kept.  */
+      best = next;
+      if (prev == NULL)
+	;
+      else if (next == NULL)
+	best = prev;
+      else if (((prev->flags ^ next->flags)
+		& (SEC_ALLOC | SEC_THREAD_LOCAL | SEC_LOAD)) != 0)
+	{
+	  if (((next->flags ^ s->flags)
+	       & (SEC_ALLOC | SEC_THREAD_LOCAL)) != 0
+	      /* We prefer to choose a loaded section.  Section S
+		 doesn't have SEC_LOAD set (it being excluded, that
+		 part of the flag processing didn't happen) so we
+		 can't compare that flag to those of NEXT and PREV.  */
+	      || ((prev->flags & SEC_LOAD) != 0
+		  && (next->flags & SEC_LOAD) == 0))
+	    best = prev;
+	}
+      else if (((prev->flags ^ next->flags) & SEC_READONLY) != 0)
+	{
+	  if (((next->flags ^ s->flags) & SEC_READONLY) != 0)
+	    best = prev;
+	}
+      else if (((prev->flags ^ next->flags) & SEC_CODE) != 0)
+	{
+	  if (((next->flags ^ s->flags) & SEC_CODE) != 0)
+	    best = prev;
+	}
+      else
+	{
+	  /* Flags we care about are the same.  Prefer the following
+	     section if that will result in a positive valued sym.  */
+	  if (addr < next->vma)
+	    best = prev;
+	}
+      if (best != NULL)
+	return best;
+    }
+  /* For those targets that implement absolute symbols "properly" in
+     ld and ld.so, ie. their value is not relocated, it is very likely
+     wrong to transform a symbol in a removed section to an absolute
+     symbol.  In a PIE or shared library a symbol value in an
+     allocated section ought to be relocated by the base address.
+     However, we will only get here if there are no sections at all,
+     so this should not be a concern except in odd testcases.  */
   return bfd_abs_section_ptr;
 }
 

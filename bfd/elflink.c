@@ -12113,8 +12113,8 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 			      if (r_symndx == STN_UNDEF)
 				{
 				  irela->r_addend += osec->vma;
-				  osec = _bfd_nearby_section (output_bfd, osec,
-							      osec->vma);
+				  osec = flinfo->info->callbacks->nearby_section
+				    (output_bfd, osec, osec->vma);
 				  irela->r_addend -= osec->vma;
 				  r_symndx = osec->target_index;
 				}
@@ -12755,7 +12755,7 @@ _bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	}
     }
   if (sections_removed)
-    _bfd_fix_excluded_sec_syms (abfd, info);
+    bfd_fix_excluded_sec_syms (info);
 
   /* Count up the number of relocations we will output for each output
      section, so that we know the sizes of the reloc sections.  We

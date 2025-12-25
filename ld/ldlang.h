@@ -607,6 +607,8 @@ extern void lang_do_assignments
   (lang_phase_type);
 extern asection *section_for_dot
   (void);
+extern asection *ldlang_nearby_section
+  (bfd *, asection *, bfd_vma);
 
 #define LANG_FOR_EACH_INPUT_STATEMENT(statement)			\
   lang_input_statement_type *statement;					\
@@ -631,8 +633,6 @@ extern lang_input_statement_type *lang_add_input_file
   (const char *, lang_input_file_enum_type, const char *);
 extern void lang_add_keepsyms_file
   (const char *);
-extern lang_output_section_statement_type *lang_output_section_get
-  (const asection *);
 extern lang_output_section_statement_type *lang_output_section_statement_lookup
   (const char *, int, int);
 extern lang_output_section_statement_type *next_matching_output_section_statement
@@ -793,5 +793,13 @@ typedef struct cmdline_list
 extern void cmdline_emit_object_only_section (void);
 extern void cmdline_check_object_only_section (bfd *, bool);
 extern void cmdline_remove_object_only_files (void);
+
+/* Get the output section statement from section userdata.  */
+
+static inline lang_output_section_statement_type *
+lang_output_section_get (const asection *output_section)
+{
+  return bfd_section_userdata (output_section);
+}
 
 #endif
