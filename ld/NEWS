@@ -13,6 +13,18 @@
 
 * NaCl target support is removed.
 
+* New command line option `--discard-sframe-sections` which disables the
+  emission of `.sframe` output section in the linked output.  This option also
+  prohibits the creation of SFrame stack trace info for linker-generated
+  sections like PLT.  The existing linker option
+  `--no-ld-generated-unwind-info` no longer controls creation of `.sframe` data
+  for PLT.
+
+* The linker now supports processing and merging SFrame Version 3 sections.
+  The linker does not combine SFrame sections of older versions with SFrame
+  version 3 sections.  SFrame version 2 sections should not be enabled in the
+  wild.
+
 Changes in 2.45:
 
 * On s390 64-bit (s390x), generate SFrame stack trace information (.sframe)

@@ -15,6 +15,15 @@
 * Add support for RISC-V standard extensions:
   sdtrig v1.0, ssstrict v1.0.
 
+* The assembler now supports generating SFrame Version 3 format.  This version
+  supports `.text` > 2 GiB, support for marking outermost frames, support for
+  marking signal trampolines, and support for `flexible` frames which have
+  non-SP/FP based CFA, or save FP/RA in REG among other patterns.
+
+* New command line option `--gsframe-3` causes GAS to emit SFrame section in
+  version 3.  SFrame version 3 is emitted by default with the existing option
+  `--gsframe`.
+
 Changes in 2.45:
 
 * Add support to generate SFrame stack trace information (.sframe)

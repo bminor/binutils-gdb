@@ -17,6 +17,14 @@
 
 * NaCl target support is removed.
 
+* New versioned release of libsframe: libsframe.so.3.  This release introduces
+  versioned symbols with version node name LIBSFRAME_3.0.
+
+* objdump and readelf now support displaying SFrame Version 3 information.
+  The existing `--sframe` option can be used to display sections in the the new
+  V3 format.  Display of SFrame version 2 information continues to be supported
+  (NB: Emission and linking of SFrame version 2 is discontinued).
+
 Changes in 2.45:
 
 * New versioned release of libsframe: libsframe.so.2.  This release introduces
