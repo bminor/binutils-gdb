@@ -864,34 +864,7 @@ blockvector::lookup (CORE_ADDR addr) const
 bool
 blockvector::contains (CORE_ADDR addr) const
 {
-  auto b = lookup (addr);
-  if (b == nullptr)
-    return false;
-
-  /* Handle the case that the blockvector has no address map but still has
-     "holes".  For example, consider the following blockvector:
-
-	B0    0x1000 - 0x4000   (global block)
-	B1    0x1000 - 0x4000   (static block)
-	 B3   0x1000 - 0x2000
-				(hole)
-	 B4   0x3000 - 0x4000
-
-     In this case, the above blockvector does not contain address 0x2500 but
-     lookup (0x2500) would return the blockvector's static block.
-
-     So here we check if the returned block is a static block and if yes, still
-     return false.  However, if the blockvector contains no blocks other than
-     the global and static blocks and ADDR falls into the static block,
-     conservatively return true.
-
-     See comment in find_compunit_symtab_for_pc_sect, symtab.c.
-
-     Also, note that if the blockvector in the above example would contain
-     an address map, then lookup (0x2500) would return NULL instead of
-     the static block.
-   */
-  return b != static_block () || num_blocks () == 2;
+  return lookup (addr) != nullptr;
 }
 
 /* See block.h.  */
