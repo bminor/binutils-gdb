@@ -37,7 +37,7 @@ add_plt0_fde (sframe_encoder_ctx *ectx, int64_t plt_vaddr,
 	SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B) };
 
   unsigned char finfo = sframe_fde_create_func_info (SFRAME_FRE_TYPE_ADDR1,
-						     SFRAME_FDE_TYPE_PCINC);
+						     SFRAME_V3_FDE_PCTYPE_INC);
   uint32_t offsetof_fde_in_sec
     = sframe_encoder_get_offsetof_fde_start_addr (ectx, idx, NULL);
 
@@ -71,7 +71,7 @@ add_pltn_fde (sframe_encoder_ctx *ectx, int64_t plt_vaddr,
 	SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B) };
 
   unsigned char finfo = sframe_fde_create_func_info (SFRAME_FRE_TYPE_ADDR1,
-						     SFRAME_FDE_TYPE_PCMASK);
+						     SFRAME_V3_FDE_PCTYPE_MASK);
   uint32_t offsetof_fde_in_sec
     = sframe_encoder_get_offsetof_fde_start_addr (ectx, idx, NULL);
 

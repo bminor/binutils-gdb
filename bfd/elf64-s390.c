@@ -1604,7 +1604,7 @@ _bfd_s390_elf_create_sframe_plt (struct bfd_link_info *info)
 
   /* FRE type is dependent on the size of the function.  */
   fre_type = sframe_calc_fre_type (dpltsec->size);
-  func_info = sframe_fde_create_func_info (fre_type, SFRAME_FDE_TYPE_PCINC);
+  func_info = sframe_fde_create_func_info (fre_type, SFRAME_V3_FDE_PCTYPE_INC);
 
   /* Add SFrame FDE and the associated FREs for PLT0 if PLT0 has been
      generated.  */
@@ -1631,12 +1631,12 @@ _bfd_s390_elf_create_sframe_plt (struct bfd_link_info *info)
   if (num_pltn_entries)
     {
       /* PLTn entries use an SFrame FDE of type
-	 SFRAME_FDE_TYPE_PCMASK to exploit the repetitive
+	 SFRAME_V3_FDE_PCTYPE_MASK to exploit the repetitive
 	 pattern of the instructions in these entries.  Using this SFrame FDE
 	 type helps in keeping the SFrame stack trace info for PLTn entries
 	 compact.  */
-      func_info	= sframe_fde_create_func_info (fre_type,
-					       SFRAME_FDE_TYPE_PCMASK);
+      func_info = sframe_fde_create_func_info (fre_type,
+					       SFRAME_V3_FDE_PCTYPE_MASK);
       /* Add the SFrame FDE for all PCs starting at the first PLTn entry (hence,
 	 function start address = plt0_entry_size.  As usual, this will be
 	 updated later at _bfd_elf_merge_section_sframe, by when the
@@ -1651,7 +1651,7 @@ _bfd_s390_elf_create_sframe_plt (struct bfd_link_info *info)
 
       sframe_frame_row_entry pltn_fre;
       /* Now add the FREs for PLTn.  Simply adding the FREs suffices due
-	 to the usage of SFRAME_FDE_TYPE_PCMASK above.  */
+	 to the usage of SFRAME_V3_FDE_PCTYPE_MASK above.  */
       for (unsigned int j = 0; j < num_pltn_fres; j++)
 	{
 	  unsigned int func_idx = plt0_entry_size ? 1 : 0;

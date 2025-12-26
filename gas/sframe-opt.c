@@ -132,7 +132,7 @@ sframe_convert_frag (fragS *frag)
       fde_pc_type = SFRAME_V3_FDE_PC_TYPE (rest_of_data);
       pauth_key = SFRAME_V3_AARCH64_FDE_PAUTH_KEY (rest_of_data);
       signal_p = SFRAME_V3_FDE_SIGNAL_P (rest_of_data);
-      gas_assert (fde_pc_type == SFRAME_FDE_TYPE_PCINC);
+      gas_assert (fde_pc_type == SFRAME_V3_FDE_PCTYPE_INC);
 
       /* Calculate the applicable fre_type.  */
       fsizeS = exp->X_op_symbol;

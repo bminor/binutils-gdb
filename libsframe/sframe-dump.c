@@ -214,7 +214,7 @@ dump_sframe_func_with_fres (const sframe_decoder_ctx *sfd_ctx,
   /* Mark FDEs with [m] where the FRE start address is interpreted as a
      mask.  */
   int pc_mask_p
-    = (SFRAME_V2_FUNC_PC_TYPE (func_info) == SFRAME_FDE_TYPE_PCMASK);
+    = (SFRAME_V2_FUNC_PC_TYPE (func_info) == SFRAME_V3_FDE_PCTYPE_MASK);
   const char *pc_mask_marker = (pc_mask_p ? "[m]" : "   ");
   printf ("\n    %-7s%-8s %-10s%-10s%-13s",
 	  "STARTPC", pc_mask_marker, "CFA", "FP", "RA");

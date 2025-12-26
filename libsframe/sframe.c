@@ -548,7 +548,7 @@ sframe_fre_check_range_p (const sframe_decoder_ctx *dctx, uint32_t func_idx,
   func_start_pc_offset = sframe_decoder_get_secrel_func_start_addr (dctx,
 								    func_idx);
   pc_type = sframe_get_fde_pc_type (fdep);
-  mask_p = (pc_type == SFRAME_FDE_TYPE_PCMASK);
+  mask_p = (pc_type == SFRAME_V3_FDE_PCTYPE_MASK);
   rep_block_size = fdep->func_rep_size;
 
   if (func_start_pc_offset > pc)
@@ -900,8 +900,8 @@ sframe_fde_create_func_info (uint32_t fre_type,
   sframe_assert (fre_type == SFRAME_FRE_TYPE_ADDR1
 		   || fre_type == SFRAME_FRE_TYPE_ADDR2
 		   || fre_type == SFRAME_FRE_TYPE_ADDR4);
-  sframe_assert (fde_type == SFRAME_FDE_TYPE_PCINC
-		    || fde_type == SFRAME_FDE_TYPE_PCMASK);
+  sframe_assert (fde_type == SFRAME_V3_FDE_PCTYPE_INC
+		 || fde_type == SFRAME_V3_FDE_PCTYPE_MASK);
   func_info = SFRAME_V2_FUNC_INFO (fde_type, fre_type);
   return func_info;
 }

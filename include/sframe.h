@@ -112,27 +112,20 @@ extern "C"
 #define SFRAME_FRE_TYPE_ADDR2	1
 #define SFRAME_FRE_TYPE_ADDR4	2
 
-/* SFrame Function Descriptor Entry types.
+/* SFrame Function Descriptor Entry PC types.
 
-   The SFrame format has two possible representations for functions.  The
-   choice of which type to use is made according to the instruction patterns
-   in the relevant program stub.
+   The SFrame format has two possible representations for functions' PC Type.
+   The choice of which PC type to use is made according to the instruction
+   patterns in the relevant program stub.
 
-   An SFrame FDE of type SFRAME_FDE_TYPE_PCINC is an indication
-   that the PCs in the FREs should be treated as increments in bytes.  This is
-   used for a bulk of the executable code of a program, which contains
-   instructions with no specific pattern.
+   For more details, see the (renamed to) entries SFRAME_V3_FDE_PCTYPE_INC and
+   SFRAME_V3_FDE_PCTYPE_MASK for SFrame V3.  */
 
-   An SFrame FDE of type SFRAME_FDE_TYPE_PCMASK is an indication
-   that the PCs in the FREs should be treated as masks.  This type is useful
-   for the cases when a small pattern of instructions in a program stub is
-   repeatedly to cover a specific functionality.  Typical usescases are pltN
-   entries, trampolines etc.  */
-
-/* Unwinders perform a (PC >= FRE_START_ADDR) to look up a matching FRE.  */
+/* Unwinders perform a (PC >= FRE_START_ADDR) to look up a matching FRE.
+   NB: Use SFRAME_V3_FDE_PCTYPE_INC in SFrame V3 instead.  */
 #define SFRAME_FDE_TYPE_PCINC   0
 /* Unwinders perform a (PC % REP_BLOCK_SIZE >= FRE_START_ADDR) to look up a
-   matching FRE.  */
+   matching FRE.  NB: Use SFRAME_V3_FDE_PCTYPE_MASK in SFrame V3 instead.  */
 #define SFRAME_FDE_TYPE_PCMASK  1
 
 /* SFrame FDE types.  */
@@ -253,6 +246,32 @@ typedef struct sframe_func_desc_entry_v2
 #define SFRAME_V2_FUNC_INFO_UPDATE_PAUTH_KEY(pauth_key, fde_info) \
   SFRAME_V1_FUNC_INFO_UPDATE_PAUTH_KEY (pauth_key, fde_info)
 
+/* SFrame Function Descriptor Entry PC types.
+
+   The SFrame format has two possible representations for functions' PC Type.
+   The choice of which PC type to use is made according to the instruction
+   patterns in the relevant program stub.
+
+   The PC type SFRAME_V3_FDE_PCTYPE_INC is an indication that the PCs in the
+   FREs should be treated as increments in bytes.  This is used for a bulk of
+   the executable code of a program, which contains instructions with no
+   specific pattern.
+
+   The PC type SFRAME_V3_FDE_PCTYPE_MASK is an indication that the PCs in the
+   FREs should be treated as masks.  This type is useful for the cases when a
+   small pattern of instructions in a program stub is repeatedly to cover a
+   specific functionality.  Typical usescases are pltN entries, trampolines
+   etc.
+
+   NB: In SFrame version 2 or lower, the names SFRAME_FDE_TYPE_PCINC and
+   SFRAME_FDE_TYPE_PCMASK were used.  */
+
+/* Unwinders perform a (PC >= FRE_START_ADDR) to look up a matching FRE.  */
+#define SFRAME_V3_FDE_PCTYPE_INC   SFRAME_FDE_TYPE_PCINC
+/* Unwinders perform a (PC % REP_BLOCK_SIZE >= FRE_START_ADDR) to look up a
+   matching FRE.  */
+#define SFRAME_V3_FDE_PCTYPE_MASK  SFRAME_FDE_TYPE_PCMASK
+
 typedef struct sframe_func_desc_entry_v3
 {
   /* Offset to the function start address.  Encoded as a signed offset,
@@ -287,7 +306,7 @@ typedef struct sframe_func_desc_entry_v3
      8        7         6                         5             0     */
   uint8_t sfde_func_info2;
   /* Size of the block of repeating insns.  Used for SFrame FDEs of type
-     SFRAME_FDE_TYPE_PCMASK.  */
+     SFRAME_V3_FDE_PCTYPE_MASK.  */
   uint8_t sfde_func_rep_size;
 } ATTRIBUTE_PACKED sframe_func_desc_entry_v3;
 

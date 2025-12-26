@@ -750,7 +750,7 @@ output_sframe_funcdesc (symbolS *start_of_fre_section,
   pauth_key = (get_dw_fde_pauth_b_key_p (sframe_fde->dw_fde)
 	       ? SFRAME_AARCH64_PAUTH_KEY_B : SFRAME_AARCH64_PAUTH_KEY_A);
   signal_p = get_dw_fde_signal_p (sframe_fde->dw_fde);
-  func_info = sframe_set_func_info (SFRAME_FDE_TYPE_PCINC,
+  func_info = sframe_set_func_info (SFRAME_V3_FDE_PCTYPE_INC,
 				    SFRAME_FRE_TYPE_ADDR4,
 				    pauth_key, signal_p);
   if (SFRAME_FRE_TYPE_SELECTION_OPT)

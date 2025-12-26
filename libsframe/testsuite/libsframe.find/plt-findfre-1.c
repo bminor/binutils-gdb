@@ -1,4 +1,4 @@
-/* plt-findfre-1.c -- Test for sframe_find_fre for SFRAME_FDE_TYPE_PCMASK.
+/* plt-findfre-1.c -- Test for sframe_find_fre for SFRAME_V3_FDE_PCTYPE_MASK.
 
    Copyright (C) 2023-2025 Free Software Foundation, Inc.
 
@@ -31,7 +31,7 @@ add_plt_fde1 (sframe_encoder_ctx *ectx, int64_t plt_vaddr,
       };
 
   unsigned char finfo = sframe_fde_create_func_info (SFRAME_FRE_TYPE_ADDR1,
-						     SFRAME_FDE_TYPE_PCMASK);
+						     SFRAME_V3_FDE_PCTYPE_MASK);
   uint32_t offsetof_fde_in_sec
     = sframe_encoder_get_offsetof_fde_start_addr (ectx, idx, NULL);
   int64_t func_start_addr = (plt_vaddr
