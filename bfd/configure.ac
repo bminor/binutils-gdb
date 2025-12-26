@@ -711,7 +711,7 @@ if test x${all_targets} = xtrue ; then
   selarchs=
   f=
   for i in $assocvecs ; do
-    case "&${f}," in
+    case "${f}" in
       *"&${i},"*) ;;
       *) f="${f}&${i}," ;;
     esac
