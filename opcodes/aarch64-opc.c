@@ -4507,12 +4507,24 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SME_ZA_HV_idx_dest:
     case AARCH64_OPND_SME_ZA_HV_idx_destxN:
     case AARCH64_OPND_SME_ZA_HV_idx_ldstr:
+    case AARCH64_OPND_SME_ZA_array_vrsb_1:
+    case AARCH64_OPND_SME_ZA_array_vrsh_1:
+    case AARCH64_OPND_SME_ZA_array_vrss_1:
+    case AARCH64_OPND_SME_ZA_array_vrsd_1:
+    case AARCH64_OPND_SME_ZA_array_vrsb_2:
+    case AARCH64_OPND_SME_ZA_array_vrsh_2:
+    case AARCH64_OPND_SME_ZA_array_vrss_2:
+    case AARCH64_OPND_SME_ZA_array_vrsd_2:
+    case AARCH64_OPND_SME_ZA_ARRAY4:
       snprintf (buf, size, "%s%s[%s, %s%s%s%s%s]%s",
 		opnd->type == AARCH64_OPND_SME_ZA_HV_idx_ldstr ? "{" : "",
-		style_reg (styler, "za%d%c.%s",
+		style_reg (styler, "za%d%c%s%s",
 			   opnd->indexed_za.regno,
 			   opnd->indexed_za.v == 1 ? 'v' : 'h',
-			   aarch64_get_qualifier_name (opnd->qualifier)),
+			   opnd->qualifier == AARCH64_OPND_QLF_NIL ? "" : ".",
+			   (opnd->qualifier == AARCH64_OPND_QLF_NIL
+			    ? ""
+			    : aarch64_get_qualifier_name (opnd->qualifier))),
 		style_reg (styler, "w%d", opnd->indexed_za.index.regno),
 		style_imm (styler, "%" PRIi64, opnd->indexed_za.index.imm),
 		opnd->indexed_za.index.countm1 ? ":" : "",
@@ -4559,31 +4571,6 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 		? style_sub_mnem (styler, "vgx2")
 		: opnd->indexed_za.group_size == 4
 		? style_sub_mnem (styler, "vgx4") : "");
-      break;
-
-    case AARCH64_OPND_SME_ZA_array_vrsb_1:
-    case AARCH64_OPND_SME_ZA_array_vrsh_1:
-    case AARCH64_OPND_SME_ZA_array_vrss_1:
-    case AARCH64_OPND_SME_ZA_array_vrsd_1:
-    case AARCH64_OPND_SME_ZA_array_vrsb_2:
-    case AARCH64_OPND_SME_ZA_array_vrsh_2:
-    case AARCH64_OPND_SME_ZA_array_vrss_2:
-    case AARCH64_OPND_SME_ZA_array_vrsd_2:
-    case AARCH64_OPND_SME_ZA_ARRAY4:
-      snprintf (buf, size, "%s [%s, %s%s%s]",
-		style_reg (styler, "za%d%c%s%s",
-			   opnd->indexed_za.regno,
-			   opnd->indexed_za.v ? 'v': 'h',
-			   opnd->qualifier == AARCH64_OPND_QLF_NIL ? "" : ".",
-			   (opnd->qualifier == AARCH64_OPND_QLF_NIL
-			    ? ""
-			    : aarch64_get_qualifier_name (opnd->qualifier))),
-		style_reg (styler, "w%d", opnd->indexed_za.index.regno),
-		style_imm (styler, "%" PRIi64, opnd->indexed_za.index.imm),
-		opnd->indexed_za.index.countm1 ? ":" : "",
-		opnd->indexed_za.index.countm1  ? style_imm (styler, "%d",
-		opnd->indexed_za.index.imm
-		+ opnd->indexed_za.index.countm1):"");
       break;
 
     case AARCH64_OPND_SME_SM_ZA:
