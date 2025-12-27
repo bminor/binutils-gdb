@@ -1389,8 +1389,10 @@ sframe_xlate_do_offset (struct sframe_xlate_ctx *xlate_ctx,
 
   /* For ABIs not tracking RA, the return address is expected to be in a
      specific location.  Explicit manourvering to a different offset (than the
-     default offset) is non-representable in SFrame.  */
-  if (!sframe_ra_tracking_p () && cfi_insn->u.ri.reg == SFRAME_CFA_RA_REG
+     default offset) is non-representable in SFrame, unless flex FDE generation
+     is supported for the ABI.  */
+  if (!sframe_support_flex_fde_p () && !sframe_ra_tracking_p ()
+      && cfi_insn->u.ri.reg == SFRAME_CFA_RA_REG
       && cfi_insn->u.ri.offset != sframe_cfa_ra_offset ())
     {
       as_warn (_("no SFrame FDE emitted; %s register %u in .cfi_offset"),
@@ -1408,13 +1410,42 @@ sframe_xlate_do_offset (struct sframe_xlate_ctx *xlate_ctx,
       cur_fre->fp_deref_p = true;
       cur_fre->merge_candidate = false;
     }
-  else if (sframe_ra_tracking_p ()
-	   && cfi_insn->u.ri.reg == SFRAME_CFA_RA_REG)
+  /* Either the ABI has enabled RA tracking, in which case we must process the
+     DW_CFA_offset opcode for REG_RA like usual.  Or if the ABI has not enabled
+     RA tracking, but flex FDE generation is supported, dintinguish between
+     whether its time to reset the ra tracking state or not.  */
+  else if (cfi_insn->u.ri.reg == SFRAME_CFA_RA_REG)
     {
-      sframe_fre_set_ra_track (cur_fre, cfi_insn->u.ri.offset);
-      cur_fre->ra_reg = SFRAME_FRE_REG_INVALID;
-      cur_fre->ra_deref_p = true;
-      cur_fre->merge_candidate = false;
+      if (!sframe_ra_tracking_p ())
+	{
+	  /* RA is restored to its standard fixed offset.  */
+	  if (cfi_insn->u.ri.offset == sframe_cfa_ra_offset ())
+	    {
+	      cur_fre->ra_reg = SFRAME_FRE_REG_INVALID;
+	      cur_fre->ra_loc = SFRAME_FRE_ELEM_LOC_NONE;
+	      cur_fre->ra_deref_p = false;
+	      cur_fre->merge_candidate = false;
+	    }
+	  /* If flex FDE is supported, update the ra tracking info.  */
+	  else if (sframe_support_flex_fde_p ())
+	    {
+	      sframe_fre_set_ra_track (cur_fre, cfi_insn->u.ri.offset);
+	      cur_fre->ra_reg = SFRAME_FRE_REG_INVALID;
+	      cur_fre->ra_loc = SFRAME_FRE_ELEM_LOC_STACK;
+	      cur_fre->ra_deref_p = true;
+	      cur_fre->merge_candidate = false;
+
+	      xlate_ctx->flex_p = true;
+	    }
+	}
+      else if (sframe_ra_tracking_p ())
+	{
+	  sframe_fre_set_ra_track (cur_fre, cfi_insn->u.ri.offset);
+	  cur_fre->ra_reg = SFRAME_FRE_REG_INVALID;
+	  cur_fre->ra_loc = SFRAME_FRE_ELEM_LOC_STACK;
+	  cur_fre->ra_deref_p = true;
+	  cur_fre->merge_candidate = false;
+	}
     }
   /* This is used to track changes to non-rsp registers, skip all others
      except FP / RA for now.  */
