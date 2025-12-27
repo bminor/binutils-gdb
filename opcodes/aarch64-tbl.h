@@ -7315,15 +7315,15 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME_B16B16_INSN ("bfmops", 0x81a00018, 0xffe0001e, sme_misc, 0, OP5 (SME_ZAda_1b, SVE_Pg3, SME_Pm, SVE_Zn, SVE_Zm_16), OP_SVE_HMMHH, 0, 0),
 
 /* SME2.1 movaz instructions.  */
-  SME2p1_INSN ("movaz", 0xc0060600, 0xffff1f83, sme2_movaz, 0, OP2 (SME_Zdnx4, SME_ZA_array_vrsb_2), OP_SVE_BB, 0, 0),
-  SME2p1_INSN ("movaz", 0xc0460600, 0xffff1f83, sme2_movaz, 0, OP2 (SME_Zdnx4, SME_ZA_array_vrsh_2), OP_SVE_HH, 0, 0),
-  SME2p1_INSN ("movaz", 0xc0860600, 0xffff1f83, sme2_movaz, 0, OP2 (SME_Zdnx4, SME_ZA_array_vrss_2), OP_SVE_SS, 0, 0),
-  SME2p1_INSN ("movaz", 0xc0c60600, 0xffff1f03, sme2_movaz, 0, OP2 (SME_Zdnx4, SME_ZA_array_vrsd_2), OP_SVE_DD, 0, 0),
+  SME2p1_INSN ("movaz", 0xc0060600, 0xffff1f83, sme_misc, 0, OP2 (SME_Zdnx4, SME_ZA_array_vrsb_2), OP_SVE_BB, 0, 0),
+  SME2p1_INSN ("movaz", 0xc0460600, 0xffff1f83, sme_misc, 0, OP2 (SME_Zdnx4, SME_ZA_array_vrsh_2), OP_SVE_HH, 0, 0),
+  SME2p1_INSN ("movaz", 0xc0860600, 0xffff1f83, sme_misc, 0, OP2 (SME_Zdnx4, SME_ZA_array_vrss_2), OP_SVE_SS, 0, 0),
+  SME2p1_INSN ("movaz", 0xc0c60600, 0xffff1f03, sme_misc, 0, OP2 (SME_Zdnx4, SME_ZA_array_vrsd_2), OP_SVE_DD, 0, 0),
 
-  SME2p1_INSN ("movaz", 0xc0060200, 0xffff1f01, sme2_movaz, 0, OP2 (SME_Zdnx2, SME_ZA_array_vrsb_1), OP_SVE_BB, 0, 0),
-  SME2p1_INSN ("movaz", 0xc0460200, 0xffff1f01, sme2_movaz, 0, OP2 (SME_Zdnx2, SME_ZA_array_vrsh_1), OP_SVE_HH, 0, 0),
-  SME2p1_INSN ("movaz", 0xc0860200, 0xffff1f01, sme2_movaz, 0, OP2 (SME_Zdnx2, SME_ZA_array_vrss_1), OP_SVE_SS, 0, 0),
-  SME2p1_INSN ("movaz", 0xc0c60200, 0xffff1f01, sme2_movaz, 0, OP2 (SME_Zdnx2, SME_ZA_array_vrsd_1), OP_SVE_DD, 0, 0),
+  SME2p1_INSN ("movaz", 0xc0060200, 0xffff1f01, sme_misc, 0, OP2 (SME_Zdnx2, SME_ZA_array_vrsb_1), OP_SVE_BB, 0, 0),
+  SME2p1_INSN ("movaz", 0xc0460200, 0xffff1f01, sme_misc, 0, OP2 (SME_Zdnx2, SME_ZA_array_vrsh_1), OP_SVE_HH, 0, 0),
+  SME2p1_INSN ("movaz", 0xc0860200, 0xffff1f01, sme_misc, 0, OP2 (SME_Zdnx2, SME_ZA_array_vrss_1), OP_SVE_SS, 0, 0),
+  SME2p1_INSN ("movaz", 0xc0c60200, 0xffff1f01, sme_misc, 0, OP2 (SME_Zdnx2, SME_ZA_array_vrsd_1), OP_SVE_DD, 0, 0),
 
   SME2p1_INSN ("luti2", 0xc09c4000, 0xfffc6c08, sme_size_12_bh, 0, OP3 (SME_Ztx2_STRIDED, SME_ZT0, SME_Zn_INDEX3_15), OP_SVE_VUU_BH, 0, 0),
   SME2p1_INSN ("luti2", 0xc09c8000, 0xfffcec0c, sme_size_12_bh, 0, OP3 (SME_Ztx4_STRIDED, SME_ZT0, SME_Zn_INDEX2_16), OP_SVE_VUU_BH, 0, 0),
@@ -7337,25 +7337,25 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2p1_INSN ("movaz", 0xc0060e00, 0xffff9f03, sme2_mov, 0, OP2 (SME_Zdnx4, SME_ZA_array_off3_5), OP_SVE_VV_BHSD, F_OD (4), 0),
 
   /* SME2.1 MOVAZ (tile to vector, single).  */
-  SME2p1_INSN ("movaz", 0xc0020200, 0xffff1e00, sme2_movaz, 0, OP2 (SVE_Zd, SME_ZA_ARRAY4), OP_SVE_BB, 0, 0),
-  SME2p1_INSN ("movaz", 0xc0420200, 0xffff1e00, sme2_movaz, 0, OP2 (SVE_Zd, SME_ZA_ARRAY4), OP_SVE_HH, 0, 0),
-  SME2p1_INSN ("movaz", 0xc0820200, 0xffff1e00, sme2_movaz, 0, OP2 (SVE_Zd, SME_ZA_ARRAY4), OP_SVE_SS, 0, 0),
-  SME2p1_INSN ("movaz", 0xc0c20200, 0xffff1e00, sme2_movaz, 0, OP2 (SVE_Zd, SME_ZA_ARRAY4), OP_SVE_DD, 0, 0),
-  SME2p1_INSN ("movaz", 0xc0c30200, 0xffff1e00, sme2_movaz, 0, OP2 (SVE_Zd, SME_ZA_ARRAY4), OP_SVE_QQ, 0, 0),
+  SME2p1_INSN ("movaz", 0xc0020200, 0xffff1e00, sme_misc, 0, OP2 (SVE_Zd, SME_ZA_ARRAY4), OP_SVE_BB, 0, 0),
+  SME2p1_INSN ("movaz", 0xc0420200, 0xffff1e00, sme_misc, 0, OP2 (SVE_Zd, SME_ZA_ARRAY4), OP_SVE_HH, 0, 0),
+  SME2p1_INSN ("movaz", 0xc0820200, 0xffff1e00, sme_misc, 0, OP2 (SVE_Zd, SME_ZA_ARRAY4), OP_SVE_SS, 0, 0),
+  SME2p1_INSN ("movaz", 0xc0c20200, 0xffff1e00, sme_misc, 0, OP2 (SVE_Zd, SME_ZA_ARRAY4), OP_SVE_DD, 0, 0),
+  SME2p1_INSN ("movaz", 0xc0c30200, 0xffff1e00, sme_misc, 0, OP2 (SVE_Zd, SME_ZA_ARRAY4), OP_SVE_QQ, 0, 0),
 
   /* ZERO (single-vector).  */
-  SME2p1_INSN ("zero", 0xc00c0000, 0xffff9ff8, sme2_movaz, 0, OP1 (SME_ZA_array_off3_0), OP_SVE_D, F_OD (2) | F_VG_REQ, 0),
-  SME2p1_INSN ("zero", 0xc00e0000, 0xffff9ff8, sme2_movaz, 0, OP1 (SME_ZA_array_off3_0), OP_SVE_D, F_OD (4) | F_VG_REQ, 0),
+  SME2p1_INSN ("zero", 0xc00c0000, 0xffff9ff8, sme_misc, 0, OP1 (SME_ZA_array_off3_0), OP_SVE_D, F_OD (2) | F_VG_REQ, 0),
+  SME2p1_INSN ("zero", 0xc00e0000, 0xffff9ff8, sme_misc, 0, OP1 (SME_ZA_array_off3_0), OP_SVE_D, F_OD (4) | F_VG_REQ, 0),
 
   /* ZERO (double-vector).  */
-  SME2p1_INSN ("zero", 0xc00c8000, 0xffff9ff8, sme2_movaz, 0, OP1 (SME_ZA_array_off3x2), OP_SVE_D, 0, 0),
-  SME2p1_INSN ("zero", 0xc00d0000, 0xffff9ffc, sme2_movaz, 0, OP1 (SME_ZA_array_off2x2), OP_SVE_D, F_OD (2) | F_VG_REQ, 0),
-  SME2p1_INSN ("zero", 0xc00d8000, 0xffff9ffc, sme2_movaz, 0, OP1 (SME_ZA_array_off2x2), OP_SVE_D, F_OD (4) | F_VG_REQ, 0),
+  SME2p1_INSN ("zero", 0xc00c8000, 0xffff9ff8, sme_misc, 0, OP1 (SME_ZA_array_off3x2), OP_SVE_D, 0, 0),
+  SME2p1_INSN ("zero", 0xc00d0000, 0xffff9ffc, sme_misc, 0, OP1 (SME_ZA_array_off2x2), OP_SVE_D, F_OD (2) | F_VG_REQ, 0),
+  SME2p1_INSN ("zero", 0xc00d8000, 0xffff9ffc, sme_misc, 0, OP1 (SME_ZA_array_off2x2), OP_SVE_D, F_OD (4) | F_VG_REQ, 0),
 
   /* ZERO (quad-vector).  */
-  SME2p1_INSN ("zero", 0xc00e8000, 0xffff9ffc, sme2_movaz, 0, OP1 (SME_ZA_array_off2x4), OP_SVE_D, 0, 0),
-  SME2p1_INSN ("zero", 0xc00f0000, 0xffff9ffe, sme2_movaz, 0, OP1 (SME_ZA_array_off1x4), OP_SVE_D, F_OD (2) | F_VG_REQ, 0),
-  SME2p1_INSN ("zero", 0xc00f8000, 0xffff9ffe, sme2_movaz, 0, OP1 (SME_ZA_array_off1x4), OP_SVE_D, F_OD (4) | F_VG_REQ, 0),
+  SME2p1_INSN ("zero", 0xc00e8000, 0xffff9ffc, sme_misc, 0, OP1 (SME_ZA_array_off2x4), OP_SVE_D, 0, 0),
+  SME2p1_INSN ("zero", 0xc00f0000, 0xffff9ffe, sme_misc, 0, OP1 (SME_ZA_array_off1x4), OP_SVE_D, F_OD (2) | F_VG_REQ, 0),
+  SME2p1_INSN ("zero", 0xc00f8000, 0xffff9ffe, sme_misc, 0, OP1 (SME_ZA_array_off1x4), OP_SVE_D, F_OD (4) | F_VG_REQ, 0),
 
 /* SME2.1 half-precision floating-point instructions.  */
   SME_F16F16_INSN ("fmopa", 0x81800008, 0xffe0001e, sme_misc, 0, OP5 (SME_ZAda_1b, SVE_Pg3, SME_Pm, SVE_Zn, SVE_Zm_16), OP_SVE_HMMHH, 0, 0),

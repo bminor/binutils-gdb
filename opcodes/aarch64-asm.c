@@ -2255,7 +2255,6 @@ aarch64_encode_variant_using_iclass (struct aarch64_inst *inst)
       break;
 
     case sme_misc:
-    case sme2_movaz:
     case sve_misc:
       /* These instructions have only a single variant.  */
       break;

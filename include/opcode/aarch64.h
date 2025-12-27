@@ -1172,7 +1172,6 @@ enum aarch64_insn_class
   sme_start,
   sme_stop,
   sme2_mov,
-  sme2_movaz,
   sve_cpy,
   sve_index,
   sve_limm,
