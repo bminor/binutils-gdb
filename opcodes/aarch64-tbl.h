@@ -7331,10 +7331,10 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2p1_INSN ("luti4", 0xc09a9000, 0xfffefc0c, sme_misc, 0, OP3 (SME_Ztx4_STRIDED, SME_ZT0, SME_Zn_INDEX1_16), OP_SVE_HUU, 0, 0),
 
   /* SME2.1 MOVAZ (array to vector, two registers).  */
-  SME2p1_INSN ("movaz", 0xc0060a00, 0xffff9f01, sme2_movaz, 0, OP2 (SME_Zdnx2, SME_ZA_array_off3_5), OP_SVE_VV_D, F_OD (2), 0),
+  SME2p1_INSN ("movaz", 0xc0060a00, 0xffff9f01, sme2_mov, 0, OP2 (SME_Zdnx2, SME_ZA_array_off3_5), OP_SVE_VV_BHSD, F_OD (2), 0),
 
   /* SME2.1 MOVAZ (array to vector, four registers).  */
-  SME2p1_INSN ("movaz", 0xc0060e00, 0xffff9f03, sme2_movaz, 0, OP2 (SME_Zdnx4, SME_ZA_array_off3_5), OP_SVE_VV_D, F_OD (4), 0),
+  SME2p1_INSN ("movaz", 0xc0060e00, 0xffff9f03, sme2_mov, 0, OP2 (SME_Zdnx4, SME_ZA_array_off3_5), OP_SVE_VV_BHSD, F_OD (4), 0),
 
   /* SME2.1 MOVAZ (tile to vector, single).  */
   SME2p1_INSN ("movaz", 0xc0020200, 0xffff1e00, sme2_movaz, 0, OP2 (SVE_Zd, SME_ZA_ARRAY4), OP_SVE_BB, 0, 0),
