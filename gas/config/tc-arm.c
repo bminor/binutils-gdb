@@ -6412,19 +6412,15 @@ parse_sys_vldr_vstr (char **str)
     {"P0",		0x5, 0x1},
     {"FPCXTNS",		0x6, 0x1},
     {"FPCXT_NS",	0x6, 0x1},
-    {"fpcxtns",		0x6, 0x1},
-    {"fpcxt_ns",	0x6, 0x1},
     {"FPCXTS",		0x7, 0x1},
     {"FPCXT_S",		0x7, 0x1},
-    {"fpcxts",		0x7, 0x1},
-    {"fpcxt_s",		0x7, 0x1}
   };
   char *op_end = strchr (*str, ',');
   size_t op_strlen = op_end - *str;
 
   for (i = 0; i < sizeof (sysregs) / sizeof (sysregs[0]); i++)
     {
-      if (!strncmp (*str, sysregs[i].name, op_strlen))
+      if (!strncasecmp (*str, sysregs[i].name, op_strlen))
 	{
 	  val = sysregs[i].regl | (sysregs[i].regh << 3);
 	  *str = op_end;
