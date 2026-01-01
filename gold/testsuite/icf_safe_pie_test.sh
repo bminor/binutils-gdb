@@ -2,7 +2,7 @@
 
 # icf_safe_pie_test.sh -- test --icf=safe -pie
 
-# Copyright (C) 2009-2025 Free Software Foundation, Inc.
+# Copyright (C) 2009-2026 Free Software Foundation, Inc.
 # Written by Sriraman Tallam <tmsriram@google.com>.
 # Modified by Rahul Chaudhry <rahulchaudhry@google.com>.
 

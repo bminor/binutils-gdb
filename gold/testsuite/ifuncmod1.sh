@@ -2,7 +2,7 @@
 
 # ifuncmod1.sh -- check that local IFUNC symbol is grouped with locals.
 
-# Copyright (C) 2016-2025 Free Software Foundation, Inc.
+# Copyright (C) 2016-2026 Free Software Foundation, Inc.
 # Written by Cary Coutant <ccoutant@gmail.com>.
 
 # This file is part of gold.

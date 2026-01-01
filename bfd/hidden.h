@@ -1,7 +1,7 @@
 /* hidden.h -- "hidden" ELF visibility attribute abstraction.
    (This include file is not for users of the library.)
 
-   Copyright (C) 2025 Free Software Foundation, Inc.
+   Copyright (C) 2025-2026 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 

@@ -1,6 +1,6 @@
 // searched_file_test_lib.cc -- test -l:foo.a for gold
 
-// Copyright (C) 2009-2025 Free Software Foundation, Inc.
+// Copyright (C) 2009-2026 Free Software Foundation, Inc.
 // Written by Chris Demetriou <cgd@google.com>.
 
 // This file is part of gold.

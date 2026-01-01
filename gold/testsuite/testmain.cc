@@ -1,6 +1,6 @@
 // testmain.cc -- main function for simplisitic gold test framework.
 
-// Copyright (C) 2006-2025 Free Software Foundation, Inc.
+// Copyright (C) 2006-2026 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.

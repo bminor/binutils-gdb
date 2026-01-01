@@ -1,6 +1,6 @@
 /* script_test_14.t -- test SORT_BY_INIT_PRIORITY.
 
-   Copyright (C) 2016-2025 Free Software Foundation, Inc.
+   Copyright (C) 2016-2026 Free Software Foundation, Inc.
    Written by Igor Kudrin <ikudrin@accesssoftek.com>.
 
    This file is part of gold.

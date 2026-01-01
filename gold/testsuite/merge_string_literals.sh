@@ -2,7 +2,7 @@
 
 # merge_string_literals.sh -- test
 
-# Copyright (C) 2013-2025 Free Software Foundation, Inc.
+# Copyright (C) 2013-2026 Free Software Foundation, Inc.
 # Written by Alexander Ivchenko <alexander.ivchenko@intel.com>.
 
 # This file is part of gold.

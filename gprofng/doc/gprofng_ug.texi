@@ -46,7 +46,7 @@
 @copying
 This document is the manual for @ProductName{}, last updated @value{UPDATED}.
 
-Copyright @copyright{} 2022-2025 Free Software Foundation, Inc.
+Copyright @copyright{} 2022-2026 Free Software Foundation, Inc.
 
 @c -- @quotation
 Permission is granted to copy, distribute and/or modify this document

@@ -1,6 +1,6 @@
 /* weak_undef_test_4.c -- test non-default weak undefined symbol in DSO.
 
-   Copyright (C) 2024-2025 Free Software Foundation, Inc.
+   Copyright (C) 2024-2026 Free Software Foundation, Inc.
 
    This file is part of gold.
 

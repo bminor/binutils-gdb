@@ -2,7 +2,7 @@
 
 # keep_text_section_prefix.sh -- test
 
-# Copyright (C) 2018-2025 Free Software Foundation, Inc.
+# Copyright (C) 2018-2026 Free Software Foundation, Inc.
 # Written by Sriraman Tallam <tmsriram@google.com>.
 
 # This file is part of gold.

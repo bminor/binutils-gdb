@@ -1,5 +1,5 @@
 /* BFD back-end for AArch64 PE IMAGE COFF files.
-   Copyright (C) 2021-2025 Free Software Foundation, Inc.
+   Copyright (C) 2021-2026 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 

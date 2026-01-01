@@ -1,5 +1,5 @@
 /* gen-sframe.c - Support for generating SFrame section.
-   Copyright (C) 2022-2025 Free Software Foundation, Inc.
+   Copyright (C) 2022-2026 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 

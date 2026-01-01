@@ -2,7 +2,7 @@
 
 # memory_test.sh -- test MEMORY regions.
 
-# Copyright (C) 2010-2025 Free Software Foundation, Inc.
+# Copyright (C) 2010-2026 Free Software Foundation, Inc.
 # Written by Nick Clifton  <nickc@redhat.com>
 
 # This file is part of gold.

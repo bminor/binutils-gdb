@@ -1,6 +1,6 @@
 /* hidden_test_1.c -- test hidden and internal symbols
 
-   Copyright (C) 2009-2025 Free Software Foundation, Inc.
+   Copyright (C) 2009-2026 Free Software Foundation, Inc.
    Written by Cary Coutant <ccoutant@google.com>
 
    This file is part of gold.
