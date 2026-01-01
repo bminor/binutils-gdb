@@ -291,9 +291,6 @@ elf32_sparc_reloc_type_class (const struct bfd_link_info *info,
 #undef	elf_backend_static_tls_alignment
 #define elf_backend_static_tls_alignment	8
 
-#undef	elf_backend_strtab_flags
-#define elf_backend_strtab_flags	SHF_STRINGS
-
 static bool
 elf32_sparc_copy_solaris_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUSED,
 						 bfd *obfd ATTRIBUTE_UNUSED,
@@ -352,7 +349,6 @@ elf32_sparc_vxworks_final_write_processing (bfd *abfd)
 #define elf_backend_final_write_processing \
   elf32_sparc_vxworks_final_write_processing
 #undef  elf_backend_static_tls_alignment
-#undef  elf_backend_strtab_flags
 #undef  elf_backend_copy_special_section_fields
 
 #undef  elf32_bed

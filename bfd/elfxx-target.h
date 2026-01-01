@@ -142,9 +142,6 @@
 #ifndef elf_backend_stack_align
 #define elf_backend_stack_align 16
 #endif
-#ifndef elf_backend_strtab_flags
-#define elf_backend_strtab_flags 0
-#endif
 #ifndef elf_backend_use_mmap
 #define elf_backend_use_mmap false
 #endif
@@ -942,7 +939,6 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_write_secondary_reloc_section,
   elf_backend_static_tls_alignment,
   elf_backend_stack_align,
-  elf_backend_strtab_flags,
   elf_backend_collect,
   elf_backend_type_change_ok,
   elf_backend_may_use_rel_p,

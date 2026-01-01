@@ -6464,9 +6464,6 @@ elf_x86_64_special_sections[]=
 #undef  elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym	    1
 
-#undef  elf_backend_strtab_flags
-#define elf_backend_strtab_flags	SHF_STRINGS
-
 #include "elf64-target.h"
 
 /* Restore defaults.  */
@@ -6474,7 +6471,6 @@ elf_x86_64_special_sections[]=
 #undef	elf_backend_static_tls_alignment
 #undef	elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym	0
-#undef  elf_backend_strtab_flags
 
 /* 32bit x86-64 support.  */
 

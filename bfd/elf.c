@@ -4745,12 +4745,9 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
   shstrtab_hdr = &elf_tdata (abfd)->shstrtab_hdr;
   /* sh_name was set in init_file_header.  */
   shstrtab_hdr->sh_type = SHT_STRTAB;
-  shstrtab_hdr->sh_flags = bed->elf_strtab_flags;
-  shstrtab_hdr->sh_addr = 0;
+  /* sh_flags, sh_addr, sh_entsize, sh_link, sh_info are all zeroed
+     when tdata is allocated.  */
   /* sh_size is set in _bfd_elf_assign_file_positions_for_non_load.  */
-  shstrtab_hdr->sh_entsize = 0;
-  shstrtab_hdr->sh_link = 0;
-  shstrtab_hdr->sh_info = 0;
   /* sh_offset is set in _bfd_elf_assign_file_positions_for_non_load.  */
   shstrtab_hdr->sh_addralign = 1;
 
@@ -9080,11 +9077,6 @@ Unable to handle section index %x in ELF symbol.  Using ABS instead."),
   *sttp = stt;
   symstrtab_hdr->sh_size = _bfd_elf_strtab_size (stt);
   symstrtab_hdr->sh_type = SHT_STRTAB;
-  symstrtab_hdr->sh_flags = bed->elf_strtab_flags;
-  symstrtab_hdr->sh_addr = 0;
-  symstrtab_hdr->sh_entsize = 0;
-  symstrtab_hdr->sh_link = 0;
-  symstrtab_hdr->sh_info = 0;
   symstrtab_hdr->sh_addralign = 1;
 
   return true;
@@ -13491,12 +13483,18 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd,
 bool
 _bfd_elf_final_write_processing (bfd *abfd)
 {
-  Elf_Internal_Ehdr *i_ehdrp;	/* ELF file header, internal form.  */
-
-  i_ehdrp = elf_elfheader (abfd);
+  Elf_Internal_Ehdr *i_ehdrp = elf_elfheader (abfd);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   if (i_ehdrp->e_ident[EI_OSABI] == ELFOSABI_NONE)
-    i_ehdrp->e_ident[EI_OSABI] = get_elf_backend_data (abfd)->elf_osabi;
+    i_ehdrp->e_ident[EI_OSABI] = bed->elf_osabi;
+
+  if (i_ehdrp->e_ident[EI_OSABI] == ELFOSABI_SOLARIS
+      || bed->target_os == is_solaris)
+    {
+      elf_tdata (abfd)->strtab_hdr.sh_flags = SHF_STRINGS;
+      elf_tdata (abfd)->shstrtab_hdr.sh_flags = SHF_STRINGS;
+    }
 
   /* Set the osabi field to ELFOSABI_GNU if the binary contains
      SHF_GNU_MBIND or SHF_GNU_RETAIN sections or symbols of STT_GNU_IFUNC type

@@ -4681,9 +4681,6 @@ elf_i386_fbsd_init_file_header (bfd *abfd, struct bfd_link_info *info)
 #undef  elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym	1
 
-#undef  elf_backend_strtab_flags
-#define elf_backend_strtab_flags	SHF_STRINGS
-
 #include "elf32-target.h"
 
 /* Intel MCU support.  */
@@ -4722,8 +4719,6 @@ elf32_iamcu_elf_object_p (bfd *abfd)
 
 #undef	elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym	0
-
-#undef  elf_backend_strtab_flags
 
 #include "elf32-target.h"
 

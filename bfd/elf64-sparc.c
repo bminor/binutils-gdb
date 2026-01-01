@@ -1022,9 +1022,6 @@ static const struct elf_size_info elf64_sparc_size_info =
 #undef  elf_backend_static_tls_alignment
 #define elf_backend_static_tls_alignment	16
 
-#undef  elf_backend_strtab_flags
-#define elf_backend_strtab_flags       SHF_STRINGS
-
 static bool
 elf64_sparc_copy_solaris_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUSED,
                                   bfd *obfd ATTRIBUTE_UNUSED,
@@ -1041,5 +1038,4 @@ elf64_sparc_copy_solaris_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUSE
 
 #include "elf64-target.h"
 
-#undef  elf_backend_strtab_flags
 #undef  elf_backend_copy_special_section_fields

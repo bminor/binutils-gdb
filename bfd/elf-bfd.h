@@ -1712,9 +1712,6 @@ struct elf_backend_data
   /* Alignment for the PT_GNU_STACK segment.  */
   unsigned stack_align;
 
-  /* Flag bits to assign to a section of type SHT_STRTAB.  */
-  unsigned long elf_strtab_flags;
-
   /* This is TRUE if the linker should act like collect and gather
      global constructors and destructors by name.  This is TRUE for
      MIPS ELF because the Irix 5 tools can not handle the .init
