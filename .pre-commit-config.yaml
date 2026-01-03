@@ -91,7 +91,8 @@ repos:
       exclude: '.*/testsuite/.*'
     - id: check-gnu-style
       name: check-gnu-style
-      language: script
+      language: python
+      additional_dependencies: ['termcolor', 'unidiff']
       entry: gdb/contrib/check-gnu-style-pre-commit.sh
       files: '^(gdb(support|server)?)/.*\.(c|h|cc)$'
       exclude: '.*/testsuite/.*'
