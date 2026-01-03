@@ -45,15 +45,15 @@ proc run_test { args } {
     set start 1
     set limit 2049
 
-    mi_gdb_test "set \$a = \"FIRST COMMAND\"" ".*"
-    mi_gdb_test "set \$b = \"TEST COMPLETE\"" ".*"
+    mi_gdb_test {set $a = "FIRST COMMAND"} ".*"
+    mi_gdb_test {set $b = "TEST COMPLETE"} ".*"
 
     for { set i $start } { $i < $limit } { incr i } {
 
 	set cmd ""
 
 	# Create a command that is at least `i` characters long.
-	set first_cmd "-data-evaluate-expression \$a"
+	set first_cmd {-data-evaluate-expression $a}
 	while { [string length $first_cmd] < $i } {
 	    set first_cmd " $first_cmd"
 	}
@@ -68,7 +68,10 @@ proc run_test { args } {
 	set i [string length $first_cmd]
 	verbose -log "length of first command is $i"
 
-	set cmd "${first_cmd}\n-data-evaluate-expression \$b\n"
+	set cmd \
+	    [multi_line_input \
+		 $first_cmd \
+		 {-data-evaluate-expression $b}]
 
 	# We need to call send_gdb ourselves here as gdb_test_multiple
 	# will try to send each line of the command separately (breaking
@@ -76,44 +79,40 @@ proc run_test { args } {
 	# than likely mean that gdb will see and process the first command
 	# before the second command arrives, this prevents the bug from
 	# triggering.
-	send_gdb "$cmd"
+	send_gdb "$cmd\n"
 
 	# Now check for output from the two commands.  We do this
-	# using two calls to gdb_test_multiple, this is because the
+	# using one call to gdb_test_multiple, this is because the
 	# echoing of the second command can sometime get mixed
-	# unexpectedly with the command output, this is especially
-	# likely when running using the read1 technique.
-	#
-	# When using a single gdb_test_multiple we need to anchor
-	# patterns using a ^, however, this requires us to consume and
-	# discard all lines that are not part of the output that we're
-	# looking for.  However, due to the unpredictable
-	# intermingling, it's much easier if we drop the ^ anchor.
-	# However, with this gone dejagnu would sometimes match the
-	# second command output before the first commands output.
-	#
-	# This approach just looks for the first command output, then,
-	# once that has been found, we start looking for the second
-	# command output, this seems pretty reliable.
+	# unexpectedly with the command output, or the prompt.  This is
+	# especially likely when running using the read1 technique.
+
+	# We may or may not recognize the prompt after the first command.  If
+	# so, accept it to prevent the default clause from triggering, and
+	# continue.
+
+	set re_first_message {\^done.*,value="\\\"FIRST COMMAND\\\""}
+	set re_second_message [string_to_regexp {^done,value="\"TEST COMPLETE\""}]
 	set seen_first_message false
 	set seen_second_message false
-
-	gdb_test_multiple "" "look for first command output, command length $i" -prompt "$mi_gdb_prompt" {
-	    -re "\\^done.*,value=\"\\\\\"FIRST COMMAND\\\\\"\"" {
+	set test "look for command output, command length $i"
+	gdb_test_multiple "" $test -prompt "$mi_gdb_prompt" {
+	    -re $re_first_message {
 		set seen_first_message true
 		exp_continue
 	    }
+	    -re "$re_second_message\r\n$mi_gdb_prompt" {
+		set seen_second_message true
+	    }
 	    -re "$mi_gdb_prompt" {
-		gdb_assert $seen_first_message $gdb_test_name
+		exp_continue
 	    }
 	}
 
-	gdb_test_multiple "" "look for second command output, command length $i" -prompt "$mi_gdb_prompt" {
-	    -re "\\^done,value=\"\\\\\"TEST COMPLETE\\\\\"\"\r\n$mi_gdb_prompt" {
-		pass $gdb_test_name
-		set seen_second_message true
-	    }
-	}
+	gdb_assert $seen_first_message \
+	    "look for first command output, command length $i"
+	gdb_assert $seen_second_message \
+	    "look for second command output, command length $i"
 
 	# If one of the above tests failed then lets no waste our time
 	# checking different command lengths.  The actual bug this
