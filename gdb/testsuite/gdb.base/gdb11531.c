@@ -31,7 +31,7 @@ static struct rec myrec;
 int
 main ()
 {
-  myrec.x = 5;
+  myrec.x = 5; /* Break here.  */
   myrec.y = 3.4;
   myrec.z = 56;
   myrec.x = 78;

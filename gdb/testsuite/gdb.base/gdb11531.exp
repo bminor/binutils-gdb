@@ -38,7 +38,8 @@ if {!$allow_hw_watchpoint_tests_p} {
    gdb_test_no_output "set can-use-hw-watchpoints 0" ""
 }
 
-if {![runto_main]} {
+set line [gdb_get_line_number "Break here"]
+if {![runto "$srcfile:$line"]} {
     return
 }
 
